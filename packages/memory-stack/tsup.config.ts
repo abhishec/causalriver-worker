@@ -10,7 +10,7 @@ export default defineConfig({
     'src/hooks/index.ts',
   ],
   format: ['esm'],
-  dts: false, // TODO: Enable after fixing strict mode type issues in causality modules
+  dts: true,
   sourcemap: true,
   clean: true,
   splitting: true,

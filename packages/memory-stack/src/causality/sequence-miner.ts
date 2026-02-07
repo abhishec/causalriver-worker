@@ -192,10 +192,10 @@ export function createSequenceMiner(
       let result = [...discoveredChains];
 
       if (options?.minSupport) {
-        result = result.filter(c => c.support >= options.minSupport);
+        result = result.filter(c => c.support >= options.minSupport!);
       }
       if (options?.minConfidence) {
-        result = result.filter(c => c.confidence >= options.minConfidence);
+        result = result.filter(c => c.confidence >= options.minConfidence!);
       }
       if (options?.validatedOnly) {
         result = result.filter(c => c.isValidated);
