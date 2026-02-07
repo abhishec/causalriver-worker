@@ -1,0 +1,17 @@
+{
+  "name": "nexus-intelligence",
+  "private": true,
+  "description": "Open-source causal intelligence and domain agent framework for TypeScript",
+  "scripts": {
+    "build": "turbo build",
+    "test": "turbo test",
+    "test:coverage": "turbo test:coverage",
+    "lint": "turbo lint",
+    "clean": "turbo clean"
+  },
+  "devDependencies": {
+    "turbo": "^2.0.0",
+    "typescript": "^5.5.0"
+  },
+  "packageManager": "pnpm@9.0.0"
+}

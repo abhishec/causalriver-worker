@@ -1,0 +1,94 @@
+{
+  "name": "@nexus-ai/memory-stack",
+  "version": "0.1.0",
+  "description": "7-layer causal intelligence engine for TypeScript. Granger causality, PC algorithm, do-calculus, pattern learning, and embeddings — no Python, no GPU.",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./causality": {
+      "import": "./dist/causality/index.js",
+      "types": "./dist/causality/index.d.ts"
+    },
+    "./learning": {
+      "import": "./dist/learning/index.js",
+      "types": "./dist/learning/index.d.ts"
+    },
+    "./embeddings": {
+      "import": "./dist/core/embeddings/index.js",
+      "types": "./dist/core/embeddings/index.d.ts"
+    },
+    "./intelligence": {
+      "import": "./dist/intelligence/index.js",
+      "types": "./dist/intelligence/index.d.ts"
+    },
+    "./hooks": {
+      "import": "./dist/hooks/index.js",
+      "types": "./dist/hooks/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "clean": "rm -rf dist"
+  },
+  "peerDependencies": {
+    "@supabase/supabase-js": "^2.0.0",
+    "react": "^18.0.0 || ^19.0.0",
+    "@tanstack/react-query": "^5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@supabase/supabase-js": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    },
+    "@tanstack/react-query": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.5.0",
+    "vitest": "^1.6.0",
+    "@vitest/coverage-v8": "^1.6.0",
+    "@supabase/supabase-js": "^2.0.0",
+    "@types/react": "^18.0.0"
+  },
+  "keywords": [
+    "causal-inference",
+    "granger-causality",
+    "do-calculus",
+    "pc-algorithm",
+    "causal-discovery",
+    "pattern-detection",
+    "anomaly-detection",
+    "embeddings",
+    "organizational-intelligence",
+    "machine-learning",
+    "typescript",
+    "ai"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/abhishec/nexus-intelligence",
+    "directory": "packages/memory-stack"
+  },
+  "homepage": "https://github.com/abhishec/nexus-intelligence#readme",
+  "bugs": {
+    "url": "https://github.com/abhishec/nexus-intelligence/issues"
+  }
+}

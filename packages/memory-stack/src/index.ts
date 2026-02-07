@@ -1,0 +1,212 @@
+/**
+ * Nexus Memory Stack
+ *
+ * A 7-layer organizational memory architecture for AI-native applications.
+ *
+ * Layers:
+ * - L1: Multi-Modal Ingestion (external)
+ * - L2: Entity Resolution (core/embeddings)
+ * - L3: Semantic Memory (core/search)
+ * - L4: Causal Graph Engine (causality)
+ * - L5: Pattern Memory (learning)
+ * - L6: Domain Agent Orchestration (orchestration)
+ * - L7: Intelligence Interface (intelligence)
+ *
+ * The 10x Innovation: AI-first discovery of organizational patterns.
+ * Instead of predefined rules, the system observes and learns from
+ * cross-domain signals to build causal understanding.
+ *
+ * @packageDocumentation
+ */
+
+// ============================================================================
+// CORE - L2+L3: Entity Resolution & Semantic Memory
+// ============================================================================
+
+export {
+  // Embedding Engine
+  createEmbeddingEngine,
+  generateEmbedding,
+  cosineSimilarity,
+  hashString,
+  hashContent,
+  extractSemanticConcepts,
+  defaultEntityFormatters,
+} from './core/embeddings';
+
+export {
+  // Semantic Search
+  createSemanticSearch,
+  type SemanticSearchConfig,
+} from './core/search';
+
+// ============================================================================
+// CAUSALITY - L4: Causal Graph Engine
+// ============================================================================
+
+export {
+  // Signal Collector
+  createSignalCollector,
+  createSignalBuilder,
+  normalizeSignalValue,
+  getSeverityFromSignal,
+  paymentVelocityCollectorTemplate,
+  usageSignalCollectorTemplate,
+  type CrossDomainSignal,
+  type SignalCollectorConfig,
+  type SignalCollectionResult,
+} from './causality/signal-collector';
+
+export {
+  // Cascade Rules
+  createCascadeRulesEngine,
+  normalizeDomain,
+  extractKeywordsFromText,
+  examplePlatformRules,
+  COMMON_BUSINESS_KEYWORDS,
+  type CascadeRule,
+  type CascadeRelationType,
+  type CascadeSeverity,
+  type GoalConflict,
+  type GoalForConflict,
+  type SuggestedCascadeRule,
+} from './causality/cascade-rules';
+
+// ============================================================================
+// LEARNING - L5: Pattern Memory
+// ============================================================================
+
+export {
+  // Brain Evaluator
+  createBrainEvaluator,
+  evaluateCondition,
+  evaluateConditionGroup,
+  evaluateRule,
+  getNestedValue,
+  applyActions,
+  aggregateResults,
+  type BrainEvaluatorConfig,
+} from './learning/brain-evaluator';
+
+// NEW: Prediction Tracking & Calibration
+export {
+  recordPrediction,
+  recordOutcome,
+  getPendingPredictions,
+  matchPredictionsToOutcomes,
+  type PredictionRecord,
+  type OutcomeRecord,
+  type MatchedPrediction,
+} from './learning/prediction-tracker';
+
+export {
+  computeAUC,
+  computeCalibrationCurve,
+  computeECE,
+  computeBrierScore,
+  getConfidenceInterval,
+  generateReliabilityDiagram,
+  analyzeCalibration,
+  type CalibrationResult,
+  type CalibrationBucket,
+} from './learning/calibration-engine';
+
+export {
+  wilsonScoreInterval,
+  bootstrapCI,
+  bayesianCredibleInterval,
+  quantifyUncertainty,
+  type Interval,
+} from './learning/confidence-intervals';
+
+// NEW: Pattern Discovery
+export {
+  discoverPatterns,
+  mineAssociationRules,
+  clusterEntities,
+  validatePattern,
+  registerPattern,
+  type DiscoveredPattern,
+  type PatternEvidence,
+  type AssociationRule,
+  type EntityCluster,
+} from './learning/pattern-detector';
+
+export {
+  detectAnomalies,
+  zScoreDetection,
+  iqrDetection,
+  madDetection,
+  explainAnomaly,
+  type AnomalyEvent,
+  type DetectionMethod,
+  type AnomalyConfig,
+} from './learning/anomaly-detector';
+
+export {
+  testPatternSignificance,
+  computeEffectSize,
+  applyBonferroniCorrection,
+  computeFDR,
+  generateNaturalLanguageResult,
+  chiSquaredTest,
+  fisherExactTest,
+  tTest,
+  type SignificanceTestResult,
+  type ContingencyTable,
+} from './learning/significance-testing';
+
+// ============================================================================
+// ORCHESTRATION - L6: Domain Agent Layer
+// ============================================================================
+
+export {
+  // Agent Context
+  createAgentContextManager,
+  logAgentActivity,
+  type AgentContext,
+  type AgentRunResult,
+  type AgentRunType,
+  type AgentStatus,
+} from './orchestration/agent-context';
+
+// ============================================================================
+// INTELLIGENCE - L7: Intelligence Interface
+// ============================================================================
+
+export {
+  // Domain Personas
+  createPersonaRegistry,
+  buildPersonaPrompt,
+  buildDomainContext,
+  exampleDomains,
+  type DomainPersona,
+  type DomainContext,
+} from './intelligence/domain-personas';
+
+export {
+  // Reasoning Framework
+  buildReasoningFramework,
+  classifyIntent,
+  formatStructuredResponse,
+  defaultReasoningStages,
+  defaultIntentGuides,
+  type ReasoningStage,
+  type IntentGuide,
+  type StructuredResponse,
+  type UncertaintyLevel,
+} from './intelligence/reasoning-framework';
+
+// ============================================================================
+// TYPES
+// ============================================================================
+
+export * from './types';
+
+// ============================================================================
+// REACT HOOKS (Optional - requires React and React Query)
+// ============================================================================
+
+// Hooks are exported from a separate entry point to avoid
+// React dependency for non-React users:
+// import { useAIMemory } from '@nexus/memory-stack/hooks'
