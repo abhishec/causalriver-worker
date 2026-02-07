@@ -316,6 +316,30 @@ export {
   type ContingencyTable,
 } from './learning/significance-testing';
 
+// NEW: Brain Training Pipeline
+export {
+  createBrainTrainer,
+  type TrainingPack,
+  type CausalChainEntry,
+  type TrainingRule,
+  type TrainingCascade,
+  type TrainingPattern,
+  type TrainingOutcome,
+  type TrainingStats,
+  type PackTrainingResult,
+  type PackValidationResult,
+  type BrainTrainerConfig,
+} from './learning/brain-trainer';
+
+export {
+  TRAINING_LIBRARY,
+  getTrainingPackById,
+  getTrainingPacksByIndustry,
+  getTrainingPacksByDomain,
+  getTrainingPacksByTag,
+  getAllTrainingPacks,
+} from './learning/training-library';
+
 // ============================================================================
 // ORCHESTRATION - L6: Domain Agent Layer
 // ============================================================================

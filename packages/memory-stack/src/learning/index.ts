@@ -138,3 +138,30 @@ export {
   type SignificanceTestResult,
   type ContingencyTable,
 } from './significance-testing';
+
+// ============================================================================
+// BRAIN TRAINING
+// ============================================================================
+
+export {
+  createBrainTrainer,
+  type TrainingPack,
+  type CausalChainEntry,
+  type TrainingRule,
+  type TrainingCascade,
+  type TrainingPattern,
+  type TrainingOutcome,
+  type TrainingStats,
+  type PackTrainingResult,
+  type PackValidationResult,
+  type BrainTrainerConfig,
+} from './brain-trainer';
+
+export {
+  TRAINING_LIBRARY,
+  getTrainingPackById,
+  getTrainingPacksByIndustry,
+  getTrainingPacksByDomain,
+  getTrainingPacksByTag,
+  getAllTrainingPacks,
+} from './training-library';
