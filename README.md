@@ -177,6 +177,8 @@ npm install @nexus-ai/memory-stack      # Intelligence engine
 npm install @nexus-ai/domain-agents     # Agent framework (optional)
 ```
 
+> **Supabase is optional.** The core intelligence engine (causal discovery, anomaly detection, pattern mining, embeddings) has zero external dependencies and runs purely in-memory. Add Supabase when you need persistence, add connector API keys when you need auto-ingestion, add an LLM key when you need natural language copilot. See the [Integration Guide](./INTEGRATION.md) for the full 4-tier breakdown.
+
 ---
 
 ## What's Inside
@@ -308,6 +310,8 @@ pnpm install
 pnpm build
 pnpm test    # 1,039 tests
 ```
+
+**New to Nexus Intelligence?** Read the **[Integration Guide](./INTEGRATION.md)** -- it walks you through 4 tiers of integration, from zero-dependency in-memory usage to full production with Supabase, connectors, and LLM copilot.
 
 Check out the [`examples/`](./examples) directory:
 - [`causal-discovery/`](./examples/causal-discovery) -- Discover causal relationships between business domains
