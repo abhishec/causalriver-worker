@@ -91,6 +91,32 @@ import { ... } from '@nexus-ai/domain-agents/access';     // Access control
 - `buildDisabledModuleResponse()` — User-friendly disable messages
 - `canPartiallyAnswer()` — Graceful degradation logic
 
+## Integration with Memory Stack
+
+When used with `@nexus-ai/memory-stack`, domain agents get access to organizational memory -- causal relationships, learned patterns, and RAG context are injected into agent prompts automatically:
+
+```typescript
+import { createNexusOrchestrator } from '@nexus-ai/memory-stack';
+import { createDomainRouter, buildCompletePrompt, getPersona } from '@nexus-ai/domain-agents';
+
+// The orchestrator enriches queries with causal evidence
+const nexus = createNexusOrchestrator({ organizationId: 'org_123', supabase });
+const context = await nexus.query('Why is churn spiking?');
+
+// Domain agents use that context to give persona-aware, evidence-backed answers
+const router = createDomainRouter();
+const route = router.route(query);
+const persona = getPersona(route.persona);
+const prompt = buildCompletePrompt(persona, {
+  query,
+  organizationName: 'Acme Corp',
+  moduleName: route.primaryModule,
+  additionalContext: context.formattedPrompt, // Causal evidence injected here
+});
+```
+
+The memory stack provides the *intelligence*. Domain agents provide the *interface*.
+
 ## License
 
 MIT
