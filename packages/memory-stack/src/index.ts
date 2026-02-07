@@ -72,6 +72,166 @@ export {
   type SuggestedCascadeRule,
 } from './causality/cascade-rules';
 
+// Event Bus - Real-Time Causal Event Streaming (THE SPINE)
+export {
+  createEventBus,
+  generateEventId,
+  createSignalEvent,
+  createInterventionEvent,
+  createOutcomeEvent,
+  EventBus,
+  type CausalEvent,
+  type CausalEventType,
+  type EventBusConfig,
+  type EventFilter,
+  type EventSubscription,
+  type EventBusStats,
+  type EventHandler,
+} from './causality/event-bus';
+
+// Causal Discovery Runner
+export {
+  runCausalDiscovery,
+  summarizeDiscovery,
+  findNewRelationships,
+  findLostRelationships,
+  type CausalRelationship,
+  type DiscoveryConfig,
+  type DiscoveryResult,
+} from './causality/causal-discovery-runner';
+
+// Signal to Time Series
+export {
+  signalsToTimeSeries,
+  differenceTimeSeries,
+  computeTimeSeriesStats,
+  type RawSignal,
+  type DailyTimeSeries,
+  type TimeSeriesConfig,
+} from './causality/signal-to-timeseries';
+
+// Causal Graph Builder
+export {
+  createCausalGraphBuilder,
+  type CausalGraphConfig,
+} from './causality/causal-graph-builder';
+
+// Continuous Learner - Real-Time Graph Evolution
+export {
+  createContinuousLearner,
+  createEmptyDAG,
+  ContinuousLearner,
+  type GraphUpdate,
+  type LearningConfig,
+  type CausalDAG as LearnerCausalDAG,
+} from './causality/continuous-learner';
+
+// Cascade Tracker - Cross-Domain Cascade Detection
+export {
+  createCascadeTracker,
+  type ActiveCascade,
+  type CascadeImpact,
+  type InterventionOpportunity,
+  type CascadeAlert,
+  type CascadeTrackerConfig,
+  type CascadeStats,
+} from './causality/cascade-tracker';
+
+// Feedback Loop - Prediction Verification & Weight Adjustment
+export {
+  createFeedbackLoop,
+  type PredictionRecord as FeedbackPredictionRecord,
+  type RelationshipAccuracyMetrics,
+  type WeightUpdate,
+  type FeedbackLoopConfig,
+  type VerificationResult,
+} from './causality/feedback-loop';
+
+// Threshold Optimizer - Adaptive Signal Thresholds
+export {
+  createThresholdOptimizer,
+  type ThresholdOptimizationResult,
+  type SignalOutcomePair,
+  type ThresholdOptimizerConfig,
+} from './causality/threshold-optimizer';
+
+// ============================================================================
+// BRIDGES - Cross-Layer Wiring (THE NERVOUS SYSTEM)
+// ============================================================================
+
+export {
+  wireNexusBridges,
+  createSignalBridge,
+  createCausalSubscriber,
+  createLearningBridge,
+  createAgentContextEnricher,
+  createFeedbackBridge,
+  type BridgeConfig,
+  type AgentContextCache,
+} from './bridges';
+
+// ============================================================================
+// ORCHESTRATOR - The Product Layer
+// ============================================================================
+
+export {
+  createNexusOrchestrator,
+  type NexusOrchestratorConfig,
+  type NexusQueryResult,
+} from './orchestrator/nexus-orchestrator';
+
+export {
+  createNexusCopilot,
+  type CopilotConfig,
+  type CopilotResponse,
+} from './orchestrator/llm-adapter';
+
+export {
+  formatCausalForPrompt,
+  formatPatternsForPrompt,
+  formatCascadesForPrompt,
+  formatBrainRulesForPrompt,
+} from './orchestrator/context-formatters';
+
+export {
+  createAnomalyMonitor,
+} from './orchestrator/anomaly-monitor';
+
+export {
+  createCascadeAlertPipeline,
+} from './orchestrator/cascade-alert-pipeline';
+
+export {
+  sendSlackAlert,
+  sendWebhookAlert,
+  type NotificationConfig,
+} from './orchestrator/notification-adapters';
+
+export {
+  createScheduledJobs,
+  type ScheduledJobsConfig,
+} from './orchestrator/scheduled-jobs';
+
+export {
+  createEntityResolver,
+  type EntityResolverConfig,
+  type ResolvedEntity,
+  type UnifiedEntityView,
+} from './core/entity-resolver';
+
+// ============================================================================
+// CONNECTORS - External System Integrations
+// ============================================================================
+
+export {
+  type NexusConnector,
+  type ConnectorSyncResult,
+} from './connectors/connector-framework';
+
+export { createHubSpotConnector } from './connectors/hubspot';
+export { createStripeConnector } from './connectors/stripe';
+export { createSupportConnector } from './connectors/support';
+
 // ============================================================================
 // LEARNING - L5: Pattern Memory
 // ============================================================================

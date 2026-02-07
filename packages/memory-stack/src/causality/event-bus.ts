@@ -104,6 +104,7 @@ export interface EventSubscription {
  */
 export interface EventBusStats {
   totalEventsReceived: number;
+  totalEventsProcessed: number;
   totalEventsFlushed: number;
   totalEventsDropped: number;
   duplicatesFiltered: number;
@@ -196,6 +197,7 @@ export function createEventBus(config: Partial<EventBusConfig> = {}) {
   // Stats
   let stats: EventBusStats = {
     totalEventsReceived: 0,
+    totalEventsProcessed: 0,
     totalEventsFlushed: 0,
     totalEventsDropped: 0,
     duplicatesFiltered: 0,
@@ -323,7 +325,22 @@ export function createEventBus(config: Partial<EventBusConfig> = {}) {
   };
 
   /**
-   * Schedule a debounced flush
+   * Notify subscribers of queued events (in-memory, no DB required).
+   * Called on a debounced schedule so subscribers receive batched events.
+   */
+  const notifyPending = async () => {
+    if (eventQueue.length === 0) return;
+
+    // Snapshot current events for notification (don't remove from queue—
+    // queue is drained only by flush(supabase) for DB persistence)
+    const snapshot = eventQueue.slice();
+    stats.totalEventsProcessed += snapshot.length;
+
+    await notifySubscribers(snapshot);
+  };
+
+  /**
+   * Schedule a debounced notification to subscribers
    */
   const scheduleFlush = () => {
     if (debounceTimer) {
@@ -332,6 +349,9 @@ export function createEventBus(config: Partial<EventBusConfig> = {}) {
 
     debounceTimer = setTimeout(() => {
       debounceTimer = null;
+      notifyPending().catch((err) => {
+        console.error('[EventBus] Subscriber notification error:', err);
+      });
     }, debounceMs);
   };
 

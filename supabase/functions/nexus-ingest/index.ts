@@ -1,0 +1,132 @@
+/**
+ * Nexus Ingest Edge Function
+ *
+ * POST endpoint for signal ingestion. Accepts signals from connectors
+ * and external sources, stores them in cross_domain_signals, and
+ * publishes them to the causal_event_stream.
+ *
+ * Request body:
+ *   { organizationId, signals: Array<{ source_domain, signal_type, signal_value, entity_type?, entity_id?, client_id?, metadata? }> }
+ *
+ * Response:
+ *   { success, signalsIngested, eventsCreated }
+ */
+
+import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+serve(async (req: Request) => {
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders });
+  }
+
+  try {
+    const { organizationId, signals } = await req.json();
+
+    if (!organizationId || !signals || !Array.isArray(signals)) {
+      return new Response(
+        JSON.stringify({ error: 'organizationId and signals array are required' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (signals.length === 0) {
+      return new Response(
+        JSON.stringify({ success: true, signalsIngested: 0, eventsCreated: 0 }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Cap batch size to prevent abuse
+    if (signals.length > 500) {
+      return new Response(
+        JSON.stringify({ error: 'Maximum 500 signals per batch' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    );
+
+    // 1. Store signals in cross_domain_signals
+    const signalRecords = signals.map((s: any) => ({
+      organization_id: organizationId,
+      source_domain: s.source_domain,
+      signal_type: s.signal_type,
+      signal_value: s.signal_value,
+      entity_type: s.entity_type || 'unknown',
+      entity_id: s.entity_id || `auto_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+      client_id: s.client_id || null,
+      feature_vector: s.feature_vector || {},
+      signal_metadata: s.metadata || s.signal_metadata || {},
+      lookback_window_days: s.lookback_window_days || 30,
+    }));
+
+    const { data: insertedSignals, error: signalError } = await supabase
+      .from('cross_domain_signals')
+      .insert(signalRecords)
+      .select('id');
+
+    if (signalError) {
+      throw new Error(`Signal insert failed: ${signalError.message}`);
+    }
+
+    // 2. Publish to causal_event_stream for real-time processing
+    const now = new Date().toISOString();
+    let vectorClock = Date.now();
+
+    const eventRecords = signals.map((s: any, i: number) => {
+      vectorClock++;
+      const eventId = `sig_${Date.now()}_${Math.random().toString(36).slice(2)}_${i}`;
+      return {
+        id: eventId,
+        organization_id: organizationId,
+        event_type: 'signal',
+        domain: s.source_domain,
+        entity_type: s.entity_type || 'unknown',
+        entity_id: s.entity_id || 'unknown',
+        client_id: s.client_id || null,
+        payload: {
+          signal_type: s.signal_type,
+          signal_value: s.signal_value,
+          feature_vector: s.feature_vector || {},
+          ...(s.metadata || {}),
+        },
+        vector_clock: vectorClock,
+        priority: s.signal_value < -0.7 ? 1 : s.signal_value < -0.4 ? 2 : 3,
+        processing_status: 'pending',
+        created_at: now,
+      };
+    });
+
+    const { error: eventError } = await supabase
+      .from('causal_event_stream')
+      .upsert(eventRecords, { onConflict: 'id', ignoreDuplicates: true });
+
+    if (eventError) {
+      console.error('Event stream insert warning:', eventError.message);
+      // Non-fatal: signals were stored, events are supplementary
+    }
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        signalsIngested: insertedSignals?.length || signalRecords.length,
+        eventsCreated: eventError ? 0 : eventRecords.length,
+      }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  } catch (error: any) {
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+});
