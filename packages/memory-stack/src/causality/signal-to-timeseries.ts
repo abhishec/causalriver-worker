@@ -221,10 +221,17 @@ export function signalsToTimeSeries(
     byDomain.get(domain)!.push(signal);
   }
   
-  // Find global date range
+  // Find global date range (avoid spread operator for large arrays — stack overflow risk)
   const allDates = filteredSignals.map(s => normalizeDate(s.signal_timestamp));
-  const minDate = new Date(Math.min(...allDates.map(d => d.getTime())));
-  const maxDate = new Date(Math.max(...allDates.map(d => d.getTime())));
+  let minTime = Infinity;
+  let maxTime = -Infinity;
+  for (const d of allDates) {
+    const t = d.getTime();
+    if (t < minTime) minTime = t;
+    if (t > maxTime) maxTime = t;
+  }
+  const minDate = new Date(minTime);
+  const maxDate = new Date(maxTime);
   const dateRange = generateDateRange(minDate, maxDate);
   
   // Check minimum days
@@ -348,15 +355,23 @@ export function computeTimeSeriesStats(series: DailyTimeSeries): {
     return { mean: 0, std: 0, min: 0, max: 0, variance: 0 };
   }
   
-  const mean = values.reduce((a, b) => a + b, 0) / n;
-  const variance = values.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / n;
+  let sum = 0;
+  let minVal = Infinity;
+  let maxVal = -Infinity;
+  for (const v of values) {
+    sum += v;
+    if (v < minVal) minVal = v;
+    if (v > maxVal) maxVal = v;
+  }
+  const mean = sum / n;
+  const variance = values.reduce((s, v) => s + Math.pow(v - mean, 2), 0) / n;
   const std = Math.sqrt(variance);
-  
+
   return {
     mean,
     std,
-    min: Math.min(...values),
-    max: Math.max(...values),
+    min: minVal,
+    max: maxVal,
     variance,
   };
 }

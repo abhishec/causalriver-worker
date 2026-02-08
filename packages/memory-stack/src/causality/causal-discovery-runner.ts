@@ -186,11 +186,27 @@ export function runCausalDiscovery(
       warnings,
     };
   }
+
+  // Cap domains to prevent combinatorial explosion (n² pairwise tests)
+  // Prioritize domains with more data (non-zero values) for best discovery results
+  const MAX_DOMAINS = 50;
+  let selectedDomains = validDomains;
+  if (validDomains.length > MAX_DOMAINS) {
+    warnings.push(`Limiting from ${validDomains.length} to ${MAX_DOMAINS} domains (sorted by data density)`);
+    selectedDomains = validDomains
+      .map(d => ({
+        domain: d,
+        density: timeSeriesMap.get(d)!.values.filter(v => v !== 0).length,
+      }))
+      .sort((a, b) => b.density - a.density)
+      .slice(0, MAX_DOMAINS)
+      .map(d => d.domain);
+  }
   
   // Step 3: Prepare data for Granger tests
   // Apply first-order differencing for stationarity
   const differenced = new Map<string, DailyTimeSeries>();
-  for (const domain of validDomains) {
+  for (const domain of selectedDomains) {
     const series = timeSeriesMap.get(domain)!;
     differenced.set(domain, differenceTimeSeries(series));
   }
@@ -237,7 +253,7 @@ export function runCausalDiscovery(
   return {
     organization_id: organizationId,
     discovered_relationships: relationships,
-    domains_analyzed: validDomains,
+    domains_analyzed: selectedDomains,
     pairs_tested: grangerResults.length,
     significant_count: relationships.length,
     run_timestamp: runTimestamp,
