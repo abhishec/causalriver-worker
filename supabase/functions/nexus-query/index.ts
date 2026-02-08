@@ -94,9 +94,11 @@ ${memoryContext || 'No memory entries yet.'}
 
 Use these insights to provide data-driven, actionable answers. Reference specific causal relationships and patterns when relevant. Be concise and strategic.`;
 
-    // 5. Call LLM (Anthropic Claude)
+    // 5. Call LLM (Anthropic Claude preferred, OpenAI fallback)
     const anthropicKey = Deno.env.get('ANTHROPIC_API_KEY');
-    if (!anthropicKey) {
+    const openaiKey = Deno.env.get('OPENAI_API_KEY');
+
+    if (!anthropicKey && !openaiKey) {
       return new Response(
         JSON.stringify({
           answer: 'LLM not configured. Context retrieved successfully.',
@@ -111,23 +113,54 @@ Use these insights to provide data-driven, actionable answers. Reference specifi
       );
     }
 
-    const llmResponse = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': anthropicKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1024,
-        system: systemPrompt,
-        messages: [{ role: 'user', content: query }],
-      }),
-    });
+    let answer: string;
+    let tokensUsed: number;
+    let modelUsed: string;
 
-    const llmData = await llmResponse.json();
-    const answer = llmData.content?.[0]?.text || 'Unable to generate response';
+    if (anthropicKey) {
+      // Primary: Anthropic Claude
+      modelUsed = 'claude-sonnet-4-20250514';
+      const llmResponse = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': anthropicKey,
+          'anthropic-version': '2023-06-01',
+        },
+        body: JSON.stringify({
+          model: modelUsed,
+          max_tokens: 1024,
+          system: systemPrompt,
+          messages: [{ role: 'user', content: query }],
+        }),
+      });
+
+      const llmData = await llmResponse.json();
+      answer = llmData.content?.[0]?.text || 'Unable to generate response';
+      tokensUsed = (llmData.usage?.input_tokens || 0) + (llmData.usage?.output_tokens || 0);
+    } else {
+      // Fallback: OpenAI
+      modelUsed = 'gpt-4o';
+      const llmResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${openaiKey}`,
+        },
+        body: JSON.stringify({
+          model: modelUsed,
+          max_tokens: 1024,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: query },
+          ],
+        }),
+      });
+
+      const llmData = await llmResponse.json();
+      answer = llmData.choices?.[0]?.message?.content || 'Unable to generate response';
+      tokensUsed = (llmData.usage?.prompt_tokens || 0) + (llmData.usage?.completion_tokens || 0);
+    }
 
     // 6. Log activity
     await supabase.from('ai_agent_activity').insert({
@@ -136,8 +169,8 @@ Use these insights to provide data-driven, actionable answers. Reference specifi
       action_type: 'query',
       input_summary: query.substring(0, 200),
       output_summary: answer.substring(0, 200),
-      tokens_used: (llmData.usage?.input_tokens || 0) + (llmData.usage?.output_tokens || 0),
-      metadata: { domain, model: 'claude-sonnet-4-20250514' },
+      tokens_used: tokensUsed,
+      metadata: { domain, model: modelUsed },
     });
 
     return new Response(
@@ -149,8 +182,8 @@ Use these insights to provide data-driven, actionable answers. Reference specifi
           memories: memories || [],
         },
         meta: {
-          model: 'claude-sonnet-4-20250514',
-          tokensUsed: (llmData.usage?.input_tokens || 0) + (llmData.usage?.output_tokens || 0),
+          model: modelUsed,
+          tokensUsed,
           causalRelationshipsUsed: (relationships || []).length,
           patternsUsed: (rules || []).length,
         },
