@@ -18,6 +18,8 @@ import { wireNexusBridges, type BridgeConfig } from '../bridges';
 import {
   formatCausalForPrompt,
   formatPatternsForPrompt,
+  formatCascadesForPrompt,
+  formatBrainRulesForPrompt,
   assembleContextPrompt,
 } from './context-formatters';
 import { createFeedbackLoop, type FeedbackLoopConfig } from '../causality/feedback-loop';
@@ -131,10 +133,10 @@ export function createNexusOrchestrator(config: NexusOrchestratorConfig) {
   if (shouldLoadDAG) {
     loadDAGFromDatabase(supabase, organizationId)
       .then((dag) => {
-        // Re-create learner with loaded DAG — the bridge holds a reference
-        // so we update the object in place isn't possible; instead the bridge
-        // was given this learner instance at wire time and will use it.
-        // The in-memory DAG is already empty, real data comes from batch discovery.
+        // Load the database DAG into the existing learner instance.
+        // The bridge holds a reference to this learner, so updating in-place
+        // ensures the entire pipeline sees the loaded graph.
+        continuousLearner.loadGraph(dag);
         dagLoaded = true;
       })
       .catch(() => {

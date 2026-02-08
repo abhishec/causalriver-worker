@@ -28,6 +28,19 @@
 
 import type { NexusQueryResult } from './nexus-orchestrator';
 import type { NexusRepository } from '../persistence/supabase-repository';
+import {
+  type DomainPersona,
+  buildPersonaPrompt,
+  createPersonaRegistry,
+  exampleDomains,
+  buildDomainContext,
+  type DomainContext,
+} from '../intelligence/domain-personas';
+import {
+  buildReasoningFramework,
+  classifyIntent,
+  type IntentGuide,
+} from '../intelligence/reasoning-framework';
 
 // ============================================================================
 // TYPES
@@ -42,10 +55,30 @@ export interface LLMResponseConfig {
   model?: string;
   /** Max tokens (default: 2048) */
   maxTokens?: number;
-  /** System prompt prefix */
+  /** System prompt prefix (used when no domain persona matches) */
   systemPromptPrefix?: string;
   /** Repository for conversation persistence (optional) */
   repository?: NexusRepository;
+  /**
+   * Pre-registered domain personas.
+   * When a domain is specified in query(), the matching persona's prompt
+   * replaces the default system prefix for domain-specific expertise.
+   * Map of domain key -> DomainPersona (e.g., { finance: {...}, cs: {...} })
+   */
+  personas?: Record<string, DomainPersona>;
+  /**
+   * Pre-registered domain contexts.
+   * Injected alongside persona prompts for richer domain understanding.
+   * If not provided, uses the built-in exampleDomains.
+   */
+  domainContexts?: DomainContext[];
+  /**
+   * Enable structured reasoning framework.
+   * When true, the reasoning framework stages are injected into the
+   * system prompt, guiding the LLM through structured analysis.
+   * Default: true
+   */
+  useReasoningFramework?: boolean;
 }
 
 export interface ConversationMessage {
@@ -110,7 +143,29 @@ export function createLLMResponseLayer(config: LLMResponseConfig) {
     maxTokens = 2048,
     systemPromptPrefix = DEFAULT_SYSTEM_PREFIX,
     repository,
+    personas,
+    domainContexts,
+    useReasoningFramework = true,
   } = config;
+
+  // Build persona registry from config
+  const personaRegistry = createPersonaRegistry();
+  if (personas) {
+    for (const [key, persona] of Object.entries(personas)) {
+      personaRegistry.register(key, persona);
+    }
+  }
+
+  // Register domain contexts (use built-in examples as fallback)
+  const allDomainContexts = domainContexts || exampleDomains;
+  for (const domain of allDomainContexts) {
+    personaRegistry.registerDomain(domain);
+  }
+
+  // Build reasoning framework (reusable across queries)
+  const reasoningFramework = useReasoningFramework
+    ? buildReasoningFramework()
+    : null;
 
   // In-memory conversation store
   const conversations = new Map<string, ConversationMessage[]>();
@@ -275,8 +330,32 @@ export function createLLMResponseLayer(config: LLMResponseConfig) {
       const includeHistory = options.includeHistory ?? true;
       const maxHistoryMessages = options.maxHistoryMessages ?? 10;
 
-      // Build system prompt with context
-      const systemPrompt = `${systemPromptPrefix}
+      // Build system prompt with persona + reasoning + context
+      let basePrompt = systemPromptPrefix;
+
+      // Use domain persona if available and domain is specified
+      if (options.domain) {
+        const personaPrompt = personaRegistry.getPromptWithContext(
+          options.domain,
+          [options.domain, ...(personaRegistry.getDomain(options.domain)?.relatedDomains || [])]
+        );
+        if (personaPrompt) {
+          basePrompt = personaPrompt;
+        }
+      }
+
+      // Inject reasoning framework stages
+      let reasoningSection = '';
+      if (reasoningFramework) {
+        // Classify intent for tailored reasoning guidance
+        const intent: IntentGuide | null = classifyIntent(userMessage);
+        const intentContext = intent
+          ? `\nUser intent: ${intent.intent}. Suggested approach: ${intent.suggestedActions.join(', ')}.`
+          : '';
+        reasoningSection = `\n\n${reasoningFramework.buildPrompt(intentContext)}`;
+      }
+
+      const systemPrompt = `${basePrompt}${reasoningSection}
 
 ---
 ${nexusContext.assembledContext}

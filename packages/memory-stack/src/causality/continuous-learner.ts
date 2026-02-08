@@ -242,6 +242,28 @@ export function createContinuousLearner(
     },
 
     /**
+     * Load a DAG into the learner, merging with or replacing the current graph.
+     * Used to bootstrap the learner from a database-loaded DAG after creation.
+     */
+    loadGraph(dag: CausalDAG): void {
+      // Merge nodes
+      for (const node of dag.nodes) {
+        graph.nodes.add(node);
+      }
+
+      // Merge edges (loaded edges take precedence)
+      for (const [source, targets] of dag.edges) {
+        if (!graph.edges.has(source)) {
+          graph.edges.set(source, new Map());
+        }
+        const currentTargets = graph.edges.get(source)!;
+        for (const [target, edge] of targets) {
+          currentTargets.set(target, { ...edge });
+        }
+      }
+    },
+
+    /**
      * Get current graph state
      */
     getGraph(): CausalDAG {

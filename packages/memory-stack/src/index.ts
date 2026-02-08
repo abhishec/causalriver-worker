@@ -243,6 +243,9 @@ export {
   type NexusConnector,
   type ConnectorSyncResult,
   type ConnectorSignal,
+  type ConnectorEntityResolver,
+  storeConnectorSignals,
+  recordSyncResult,
 } from './connectors/connector-framework';
 
 export { createHubSpotConnector } from './connectors/hubspot';
@@ -250,6 +253,13 @@ export { createStripeConnector } from './connectors/stripe';
 export { createSupportConnector } from './connectors/support';
 export { createGitHubConnector, type GitHubConnectorConfig } from './connectors/github';
 export { createDocumentConnector, type DocumentConnectorConfig } from './connectors/document';
+
+// Template Connectors (bidirectional: pull + push)
+export { createSlackConnector, type SlackConnectorConfig, type SlackConnector } from './connectors/slack';
+export { createGoogleChatConnector, type GoogleChatConnectorConfig, type GoogleChatConnector } from './connectors/google-chat';
+export { createGoogleCalendarConnector, type GoogleCalendarConnectorConfig, type GoogleCalendarConnector, type CalendarEvent } from './connectors/google-calendar';
+export { createVoiceConnector, type VoiceConnectorConfig, type VoiceConnector, type CallRecord } from './connectors/voice';
+export { createGenericAppConnector, type GenericAppConnectorConfig, type GenericAppConnector, type PullEndpoint, type PushEndpoint } from './connectors/generic-app';
 
 // Sync Manager
 export {

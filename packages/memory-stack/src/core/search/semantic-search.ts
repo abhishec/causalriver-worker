@@ -6,6 +6,7 @@
  */
 
 import { generateEmbedding } from '../embeddings/embedding-engine';
+import { generateEmbeddingAuto, type NeuralEmbeddingConfig } from '../embeddings/embedding-router';
 import type { SearchResult, RAGContext, MemoryWeightedRAGContext } from '../../types';
 
 // ============================================================================
@@ -24,6 +25,14 @@ export interface SemanticSearchConfig {
   dimensions?: number;
   /** Organization ID for multi-tenant isolation (REQUIRED for production) */
   organizationId?: string;
+  /**
+   * Neural embedding configuration (optional).
+   * When provided, semantic search uses real neural embeddings (OpenAI / Mixedbread)
+   * instead of n-gram hashing. Falls back to n-gram if the neural API is unavailable.
+   *
+   * IMPORTANT: For true semantic understanding, configure this with your edge function URL.
+   */
+  neuralConfig?: NeuralEmbeddingConfig;
 }
 
 /**
@@ -38,14 +47,36 @@ export function createSemanticSearch(config: SemanticSearchConfig = {}) {
     defaultLimit = 10,
     dimensions = 384,
     organizationId,
+    neuralConfig,
   } = config;
+
+  /**
+   * Generate a query embedding using neural (if configured) or n-gram fallback.
+   * Uses generateEmbeddingAuto which tries neural first, falls back to n-gram.
+   */
+  async function generateQueryEmbedding(query: string): Promise<number[]> {
+    if (neuralConfig?.edgeFunctionUrl) {
+      const result = await generateEmbeddingAuto(query, neuralConfig, dimensions);
+      return result.embedding;
+    }
+    // Fallback to n-gram (lightweight, always available)
+    return generateEmbedding(query, dimensions);
+  }
 
   return {
     /**
-     * Generate query embedding
+     * Generate query embedding (sync n-gram only — use embedQueryAsync for neural)
      */
     embedQuery: (query: string): number[] => {
       return generateEmbedding(query, dimensions);
+    },
+
+    /**
+     * Generate query embedding with neural support (async).
+     * Uses neural embeddings when configured, falls back to n-gram.
+     */
+    embedQueryAsync: async (query: string): Promise<number[]> => {
+      return generateQueryEmbedding(query);
     },
 
     /**
@@ -77,7 +108,7 @@ export function createSemanticSearch(config: SemanticSearchConfig = {}) {
 
       const orgId = overrideOrgId || organizationId;
 
-      const queryEmbedding = generateEmbedding(query, dimensions);
+      const queryEmbedding = await generateQueryEmbedding(query);
 
       // Use organization-scoped search if orgId is provided
       const rpcParams: Record<string, any> = {
@@ -123,7 +154,7 @@ export function createSemanticSearch(config: SemanticSearchConfig = {}) {
       const { contextLimit = 8, organizationId: overrideOrgId } = options;
       const orgId = overrideOrgId || organizationId;
 
-      const queryEmbedding = generateEmbedding(query, dimensions);
+      const queryEmbedding = await generateQueryEmbedding(query);
 
       const rpcParams: Record<string, any> = {
         query_embedding: `[${queryEmbedding.join(',')}]`,
@@ -198,7 +229,7 @@ export function createSemanticSearch(config: SemanticSearchConfig = {}) {
       } = options;
 
       const orgId = overrideOrgId || organizationId;
-      const queryEmbedding = generateEmbedding(query, dimensions);
+      const queryEmbedding = await generateQueryEmbedding(query);
 
       const rpcParams: Record<string, any> = {
         query_embedding: `[${queryEmbedding.join(',')}]`,
@@ -281,7 +312,7 @@ export function createSemanticSearch(config: SemanticSearchConfig = {}) {
     ): Promise<SearchResult[]> => {
       const { threshold = 0.4, limit = 5 } = options;
 
-      const queryEmbedding = generateEmbedding(query, dimensions);
+      const queryEmbedding = await generateQueryEmbedding(query);
 
       const { data: results, error } = await supabase.rpc('search_memory_weighted', {
         query_embedding: `[${queryEmbedding.join(',')}]`,

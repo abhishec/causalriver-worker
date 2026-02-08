@@ -263,8 +263,8 @@ describe('Domain Personas', () => {
   // ============================================================================
 
   describe('exampleDomains', () => {
-    it('should export five pre-defined domain contexts', () => {
-      expect(exampleDomains).toHaveLength(5);
+    it('should export pre-defined domain contexts for all business domains', () => {
+      expect(exampleDomains).toHaveLength(9);
 
       const keys = exampleDomains.map((d) => d.key);
       expect(keys).toEqual([
@@ -272,7 +272,11 @@ describe('Domain Personas', () => {
         'customer_success',
         'revenue',
         'product',
+        'engineering',
         'operations',
+        'marketing',
+        'hr',
+        'knowledge',
       ]);
     });
 
