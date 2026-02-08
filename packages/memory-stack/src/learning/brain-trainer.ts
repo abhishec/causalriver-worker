@@ -489,13 +489,11 @@ export function createBrainTrainer(config: BrainTrainerConfig = {}) {
           granger_p_value: chain.pValue ?? 0.01,
           optimal_lag_days: chain.lagDays,
           sample_size: defaultSampleSize,
-          f_statistic: defaultFStatistic,
+          granger_f_statistic: defaultFStatistic,
           is_significant: true,
           confidence_interval_lower: computeCI(chain.effectSize, pack.confidence).lower,
           confidence_interval_upper: computeCI(chain.effectSize, pack.confidence).upper,
           natural_language: `${chain.source} causes ${chain.target} change in ${chain.metric} (effect: ${chain.effectSize}, lag: ${chain.lagDays} days) — from: ${pack.title}`,
-          training_source: 'training_pack',
-          training_pack_id: pack.id,
         },
         { onConflict: 'organization_id,source_domain,target_domain', ignoreDuplicates: false },
       );
@@ -530,12 +528,15 @@ export function createBrainTrainer(config: BrainTrainerConfig = {}) {
       const { error } = await supabase.from('ai_memory').insert({
         organization_id: organizationId,
         memory_type: 'rule' as MemoryType,
-        entity_type: rule.entityType,
-        title: rule.title,
-        content: ruleContent,
-        confidence: pack.confidence,
+        content: JSON.stringify(ruleContent),
+        importance: pack.confidence,
         domain: pack.domains[0] || 'general',
-        is_active: autoActivateRules,
+        metadata: {
+          entity_type: rule.entityType,
+          title: rule.title,
+          source_pack: pack.id,
+          is_active: autoActivateRules,
+        },
       });
       if (!error) loaded++;
     }
@@ -549,28 +550,31 @@ export function createBrainTrainer(config: BrainTrainerConfig = {}) {
   ): Promise<number> {
     let loaded = 0;
     for (const cascade of pack.cascades || []) {
-      const ruleKey = `train_${pack.id}_${cascade.source}_${cascade.type}_${cascade.target}`;
-      const { error } = await supabase.from('org_cascade_rules').upsert(
+      const ruleName = `[${pack.id}] ${cascade.source} ${cascade.type} ${cascade.target}`;
+      const { error } = await supabase.from('org_cascade_rules').insert(
         {
           organization_id: organizationId,
-          rule_key: ruleKey,
-          source_domain: cascade.source,
-          source_goal_keywords: cascade.keywords.source,
-          target_domain: cascade.target,
-          target_goal_keywords: cascade.keywords.target,
-          relationship_type: cascade.type,
-          severity: cascade.severity,
-          reason_template:
-            cascade.reasonTemplate ||
-            `${cascade.source} issue "{source}" ${cascade.type} ${cascade.target} "{target}" — from: ${pack.title}`,
-          ai_suggested: true,
-          ai_confidence: pack.confidence,
+          rule_name: ruleName,
+          trigger_domain: cascade.source,
+          trigger_signal_type: cascade.type,
+          trigger_threshold: pack.confidence,
+          propagation_chain: [
+            {
+              source_domain: cascade.source,
+              target_domain: cascade.target,
+              severity: cascade.severity,
+              keywords: cascade.keywords,
+              reason_template:
+                cascade.reasonTemplate ||
+                `${cascade.source} issue "{source}" ${cascade.type} ${cascade.target} "{target}" — from: ${pack.title}`,
+            },
+          ],
+          actions: [
+            { type: 'alert', severity: cascade.severity },
+          ],
           is_active: autoActivateRules,
           priority: 200,
-          training_source: 'training_pack',
-          training_pack_id: pack.id,
         },
-        { onConflict: 'organization_id,rule_key', ignoreDuplicates: false },
       );
       if (!error) loaded++;
     }
@@ -586,22 +590,18 @@ export function createBrainTrainer(config: BrainTrainerConfig = {}) {
     for (const outcome of pack.outcomes || []) {
       const { error } = await supabase.from('prediction_records').insert({
         organization_id: organizationId,
-        source_domain: outcome.sourceDomain || pack.domains[0] || 'general',
-        target_domain: outcome.targetDomain || pack.domains[1] || pack.domains[0] || 'general',
+        domain: outcome.sourceDomain || pack.domains[0] || 'general',
+        prediction_type: 'training_outcome',
         entity_type: 'training_pack',
         entity_id: pack.id,
-        predicted_at: new Date().toISOString(),
-        target_metric: outcome.predicted,
-        predicted_direction: 'increase',
-        predicted_magnitude: outcome.predictedConfidence,
-        predicted_confidence: outcome.predictedConfidence,
-        actual_direction: outcome.wasCorrect ? 'increase' : 'decrease',
-        actual_magnitude: outcome.wasCorrect ? outcome.predictedConfidence : 0,
+        predicted_value: outcome.predictedConfidence,
+        predicted_outcome: outcome.predicted,
+        confidence: outcome.predictedConfidence,
+        actual_value: outcome.wasCorrect ? outcome.predictedConfidence : 0,
+        actual_outcome: outcome.actual,
         was_correct: outcome.wasCorrect,
-        measured_at: new Date().toISOString(),
-        status: 'verified',
-        training_source: 'training_pack',
-        training_pack_id: pack.id,
+        verified_at: new Date().toISOString(),
+        source_rule_id: `train_${pack.id}`,
       });
       if (!error) loaded++;
     }
@@ -620,17 +620,16 @@ export function createBrainTrainer(config: BrainTrainerConfig = {}) {
     const { error } = await supabase.from('ai_memory').insert({
       organization_id: organizationId,
       memory_type: 'insight' as MemoryType,
-      title: pack.title,
-      content: {
-        narrative: pack.narrative,
+      content: pack.narrative,
+      importance: pack.confidence,
+      domain: pack.domains[0] || 'general',
+      metadata: {
+        title: pack.title,
         source: pack.source,
         industry: pack.industry,
         domains: pack.domains,
-        packId: pack.id,
+        pack_id: pack.id,
       },
-      confidence: pack.confidence,
-      domain: pack.domains[0] || 'general',
-      is_active: true,
     });
 
     return error ? 0 : 1;

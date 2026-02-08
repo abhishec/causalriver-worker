@@ -67,10 +67,14 @@ import {
   fetchGitHubRepoStats,
   fetchWorldBankIndicators,
   fetchHackerNewsTop,
+  fetchBLSSeries,
+  fetchStackOverflowTrends,
   type FredSeriesResult,
   type GitHubRepoStats,
   type WorldBankResult,
   type HackerNewsSnapshot,
+  type BLSSeriesResult,
+  type StackOverflowSnapshot,
 } from './training-data/public-data-fetchers';
 
 import { convertAllFetchedData } from './training-data/training-pack-factory';
@@ -123,6 +127,8 @@ interface FetchedData {
   github: GitHubRepoStats[];
   worldBank: WorldBankResult[];
   hackerNews: HackerNewsSnapshot;
+  bls: BLSSeriesResult[];
+  stackOverflow: StackOverflowSnapshot | null;
 }
 
 async function fetchPublicData(): Promise<FetchedData> {
@@ -145,6 +151,14 @@ async function fetchPublicData(): Promise<FetchedData> {
       log('FETCH', `Hacker News: ${r.stories.length} stories fetched`);
       return r;
     }),
+    fetchBLSSeries().then(r => {
+      log('FETCH', `BLS: ${r.length} series fetched`);
+      return r;
+    }),
+    fetchStackOverflowTrends().then(r => {
+      log('FETCH', `Stack Overflow: ${r.topTags.length} tags fetched`);
+      return r;
+    }),
   ]);
 
   const fred = results[0].status === 'fulfilled' ? results[0].value : [];
@@ -153,16 +167,20 @@ async function fetchPublicData(): Promise<FetchedData> {
   const hackerNews = results[3].status === 'fulfilled'
     ? results[3].value
     : { topStoryIds: [], stories: [], avgScore: 0, avgComments: 0, totalEngagement: 0, fetchedAt: new Date() };
+  const bls = results[4].status === 'fulfilled' ? results[4].value : [];
+  const stackOverflow = results[5].status === 'fulfilled' ? results[5].value : null;
 
   if (results[0].status === 'rejected') logError('FETCH', 'FRED failed', results[0].reason);
   if (results[1].status === 'rejected') logError('FETCH', 'GitHub failed', results[1].reason);
   if (results[2].status === 'rejected') logError('FETCH', 'World Bank failed', results[2].reason);
   if (results[3].status === 'rejected') logError('FETCH', 'Hacker News failed', results[3].reason);
+  if (results[4].status === 'rejected') logError('FETCH', 'BLS failed', results[4].reason);
+  if (results[5].status === 'rejected') logError('FETCH', 'Stack Overflow failed', results[5].reason);
 
-  const totalSources = [fred, github, worldBank, hackerNews.stories].filter(a => a.length > 0).length;
-  log('FETCH', `${totalSources}/4 data sources available`);
+  const totalSources = [fred, github, worldBank, hackerNews.stories, bls, stackOverflow?.topTags || []].filter(a => a.length > 0).length;
+  log('FETCH', `${totalSources}/6 data sources available`);
 
-  return { fred, github, worldBank, hackerNews };
+  return { fred, github, worldBank, hackerNews, bls, stackOverflow };
 }
 
 // ============================================================================
@@ -185,6 +203,8 @@ function convertData(fetched: FetchedData): ConvertedData {
     fetched.github,
     fetched.worldBank,
     fetched.hackerNews,
+    fetched.bls,
+    fetched.stackOverflow,
   );
 
   // Static training packs (always available, even if APIs fail)

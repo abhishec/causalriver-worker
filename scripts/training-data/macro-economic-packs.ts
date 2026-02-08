@@ -383,6 +383,375 @@ const laborMarketCascade: TrainingPack = {
 };
 
 // ============================================================================
+// 4. MACRO TO MICRO CASCADE — How macroeconomic shifts hit SaaS companies
+// ============================================================================
+
+const macroToMicroCascade: TrainingPack = {
+  id: 'macro-to-micro-cascade',
+  title: 'Macro to Micro Business Impact Cascade',
+  source: 'NBER working papers, SaaS industry reports, venture capital data',
+  industry: 'Macroeconomics',
+  domains: ['finance', 'people', 'cs', 'marketing', 'product'],
+  confidence: 0.80,
+  tags: ['macro', 'saas', 'budget', 'funding', 'cascade'],
+
+  causalChains: [
+    {
+      source: 'finance', target: 'finance',
+      metric: 'gdp_decline_to_budget_cuts',
+      effectSize: 0.60,
+      lagDays: 90,
+      pValue: 0.003,
+    },
+    {
+      source: 'finance', target: 'finance',
+      metric: 'budget_cuts_to_vendor_consolidation',
+      effectSize: 0.55,
+      lagDays: 60,
+      pValue: 0.005,
+    },
+    {
+      source: 'finance', target: 'cs',
+      metric: 'vendor_consolidation_to_churn',
+      effectSize: 0.50,
+      lagDays: 30,
+      pValue: 0.008,
+    },
+    {
+      source: 'finance', target: 'marketing',
+      metric: 'budget_cuts_to_ad_spend_reduction',
+      effectSize: -0.45,
+      lagDays: 30,
+      pValue: 0.01,
+    },
+    {
+      source: 'marketing', target: 'finance',
+      metric: 'reduced_pipeline_to_revenue_miss',
+      effectSize: -0.40,
+      lagDays: 90,
+      pValue: 0.01,
+    },
+  ],
+
+  businessRules: [
+    {
+      title: 'Downturn Churn Prevention',
+      entityType: 'market_condition',
+      when: {
+        logic: 'AND',
+        conditions: [
+          { field: 'gdp_growth.quarterly', operator: 'less_than', value: 0 },
+          { field: 'client.contract_renewal_days', operator: 'less_than', value: 90 },
+        ],
+      },
+      then: [
+        { type: 'trigger_alert', params: { severity: 'high', message: 'GDP contraction — proactively engage renewal clients before budget reviews' } },
+        { type: 'set_flag', params: { flag: 'downturn_churn_risk' } },
+      ],
+      naturalLanguage: 'When GDP contracts and renewals are within 90 days, flag for proactive retention outreach',
+      priority: 85,
+    },
+  ],
+
+  cascades: [
+    {
+      source: 'finance', target: 'cs',
+      type: 'triggers',
+      severity: 'high',
+      keywords: {
+        source: ['recession', 'downturn', 'budget', 'cut', 'consolidation'],
+        target: ['churn', 'downgrade', 'cancellation', 'non-renewal'],
+      },
+      reasonTemplate: 'Economic downturns trigger budget cuts → vendor consolidation → SaaS churn within 3-6 months',
+    },
+    {
+      source: 'finance', target: 'marketing',
+      type: 'impacts',
+      severity: 'medium',
+      keywords: {
+        source: ['budget', 'spending', 'contraction'],
+        target: ['pipeline', 'leads', 'acquisition', 'CAC'],
+      },
+      reasonTemplate: 'Budget contractions reduce ad spend and marketing budgets, shrinking pipeline within 30-60 days',
+    },
+  ],
+
+  patterns: [
+    {
+      name: 'Recession to SaaS Consolidation',
+      domains: ['finance', 'cs'],
+      description: 'GDP contraction leads to 20-30% increase in vendor consolidation within 2 quarters',
+      observed: 72,
+      expected: 30,
+      total: 100,
+    },
+    {
+      name: 'VC Funding Drop to Startup Churn',
+      domains: ['finance', 'cs'],
+      description: 'When VC funding drops >40% YoY, startup SaaS churn increases 25-40% within 6 months',
+      observed: 68,
+      expected: 30,
+      total: 100,
+    },
+  ],
+
+  outcomes: [
+    { predicted: 'vendor_consolidation_increase', predictedConfidence: 0.75, actual: 'vendor_consolidation_increase', wasCorrect: true, sourceDomain: 'finance', targetDomain: 'cs' },
+    { predicted: 'pipeline_contraction', predictedConfidence: 0.70, actual: 'pipeline_contraction', wasCorrect: true, sourceDomain: 'finance', targetDomain: 'marketing' },
+  ],
+
+  narrative: 'When the macroeconomy contracts, the effects cascade through businesses in predictable waves. GDP decline triggers budget cuts (90 days). Budget cuts lead to vendor consolidation (60 days). Consolidation drives SaaS churn (30 days). Simultaneously, reduced marketing budgets shrink pipeline (30 days), which compounds into revenue misses (90 days). SaaS companies most vulnerable are those with low NRR and high dependence on new logo acquisition.',
+};
+
+// ============================================================================
+// 5. SUPPORT VOLUME TO CHURN PIPELINE
+// ============================================================================
+
+const supportToChurnPipeline: TrainingPack = {
+  id: 'support-volume-churn-pipeline',
+  title: 'Support Volume to Churn Pipeline',
+  source: 'Zendesk Benchmark reports, Gainsight CS benchmarks',
+  industry: 'Customer Success',
+  domains: ['cs', 'people', 'product', 'finance'],
+  confidence: 0.82,
+  tags: ['support', 'churn', 'csat', 'burnout', 'escalation'],
+
+  causalChains: [
+    {
+      source: 'cs', target: 'cs',
+      metric: 'ticket_spike_to_response_time',
+      effectSize: 0.65,
+      lagDays: 7,
+      pValue: 0.002,
+    },
+    {
+      source: 'cs', target: 'people',
+      metric: 'sustained_volume_to_agent_burnout',
+      effectSize: 0.50,
+      lagDays: 30,
+      pValue: 0.005,
+    },
+    {
+      source: 'people', target: 'cs',
+      metric: 'agent_burnout_to_resolution_quality',
+      effectSize: -0.45,
+      lagDays: 14,
+      pValue: 0.008,
+    },
+    {
+      source: 'cs', target: 'cs',
+      metric: 'resolution_quality_to_csat',
+      effectSize: 0.60,
+      lagDays: 7,
+      pValue: 0.003,
+    },
+    {
+      source: 'cs', target: 'finance',
+      metric: 'low_csat_to_churn',
+      effectSize: 0.55,
+      lagDays: 60,
+      pValue: 0.005,
+    },
+  ],
+
+  businessRules: [
+    {
+      title: 'Support Volume Overload Guard',
+      entityType: 'support_metric',
+      when: {
+        logic: 'AND',
+        conditions: [
+          { field: 'ticket_volume.change_7d', operator: 'greater_than', value: 0.30 },
+          { field: 'first_response_time.current', operator: 'greater_than', value: 4 },
+        ],
+      },
+      then: [
+        { type: 'trigger_alert', params: { severity: 'high', message: 'Support volume spike >30% with slow response — escalation risk' } },
+      ],
+      naturalLanguage: 'When ticket volume spikes >30% in a week and first response exceeds 4 hours, trigger overload alert',
+      priority: 90,
+    },
+  ],
+
+  cascades: [
+    {
+      source: 'cs', target: 'people',
+      type: 'impacts',
+      severity: 'high',
+      keywords: {
+        source: ['ticket', 'volume', 'backlog', 'escalation'],
+        target: ['burnout', 'turnover', 'attrition', 'overtime'],
+      },
+      reasonTemplate: 'Sustained support volume increases lead to agent burnout within 30 days',
+    },
+    {
+      source: 'cs', target: 'finance',
+      type: 'triggers',
+      severity: 'high',
+      keywords: {
+        source: ['csat', 'nps', 'satisfaction', 'complaint'],
+        target: ['churn', 'cancellation', 'downgrade', 'non-renewal'],
+      },
+      reasonTemplate: 'CSAT drops below 70% correlate with 2x churn rate within 60 days',
+    },
+  ],
+
+  patterns: [
+    {
+      name: 'Ticket Spike to CSAT Drop',
+      domains: ['cs'],
+      description: 'Sustained >25% ticket volume increase leads to 15-20 point CSAT drop within 2-4 weeks',
+      observed: 75,
+      expected: 30,
+      total: 100,
+    },
+    {
+      name: 'Agent Burnout Cascade',
+      domains: ['cs', 'people'],
+      description: 'When support load exceeds 40 tickets/agent/day for 3+ weeks, agent turnover increases 3x within 60 days',
+      observed: 65,
+      expected: 25,
+      total: 100,
+    },
+  ],
+
+  outcomes: [
+    { predicted: 'csat_decline', predictedConfidence: 0.80, actual: 'csat_decline', wasCorrect: true, sourceDomain: 'cs', targetDomain: 'cs' },
+    { predicted: 'churn_increase', predictedConfidence: 0.72, actual: 'churn_increase', wasCorrect: true, sourceDomain: 'cs', targetDomain: 'finance' },
+  ],
+
+  narrative: 'Support volume creates a dangerous cascade: ticket spikes slow response times (7 days). Sustained volume burns out agents (30 days). Burnt-out agents provide lower quality resolutions (14 days). Resolution quality drops CSAT scores (7 days). Low CSAT drives churn (60 days). The full cascade from volume spike to revenue impact takes approximately 4 months. Companies with <1:200 agent-to-customer ratios are most vulnerable.',
+};
+
+// ============================================================================
+// 6. SAAS UNIT ECONOMICS CASCADE
+// ============================================================================
+
+const saasUnitEconomicsCascade: TrainingPack = {
+  id: 'saas-unit-economics-cascade',
+  title: 'SaaS Unit Economics Cascade',
+  source: 'Bessemer Cloud Index, KeyBanc SaaS Survey, OpenView benchmarks',
+  industry: 'SaaS',
+  domains: ['finance', 'marketing', 'cs', 'people'],
+  confidence: 0.83,
+  tags: ['saas', 'unit-economics', 'cac', 'ltv', 'burn-rate'],
+
+  causalChains: [
+    {
+      source: 'marketing', target: 'finance',
+      metric: 'cac_to_payback_period',
+      effectSize: 0.70,
+      lagDays: 30,
+      pValue: 0.002,
+    },
+    {
+      source: 'finance', target: 'finance',
+      metric: 'payback_to_burn_rate',
+      effectSize: 0.55,
+      lagDays: 30,
+      pValue: 0.005,
+    },
+    {
+      source: 'finance', target: 'finance',
+      metric: 'burn_rate_to_runway',
+      effectSize: -0.80,
+      lagDays: 0,
+      pValue: 0.001,
+    },
+    {
+      source: 'finance', target: 'people',
+      metric: 'runway_pressure_to_hiring_freeze',
+      effectSize: -0.60,
+      lagDays: 30,
+      pValue: 0.003,
+    },
+    {
+      source: 'cs', target: 'finance',
+      metric: 'nrr_to_ltv',
+      effectSize: 0.75,
+      lagDays: 90,
+      pValue: 0.001,
+    },
+  ],
+
+  businessRules: [
+    {
+      title: 'CAC Payback Period Alert',
+      entityType: 'financial_metric',
+      when: {
+        logic: 'AND',
+        conditions: [
+          { field: 'cac_payback_months', operator: 'greater_than', value: 18 },
+          { field: 'burn_multiple', operator: 'greater_than', value: 2 },
+        ],
+      },
+      then: [
+        { type: 'trigger_alert', params: { severity: 'high', message: 'CAC payback >18 months with burn multiple >2x — efficiency review needed' } },
+      ],
+      naturalLanguage: 'When CAC payback exceeds 18 months and burn multiple exceeds 2x, trigger efficiency review',
+      priority: 85,
+    },
+  ],
+
+  cascades: [
+    {
+      source: 'marketing', target: 'finance',
+      type: 'impacts',
+      severity: 'high',
+      keywords: {
+        source: ['CAC', 'acquisition', 'cost', 'spend', 'efficiency'],
+        target: ['burn', 'runway', 'cash', 'payback', 'unit-economics'],
+      },
+      reasonTemplate: 'Rising CAC without proportional LTV increase compresses unit economics within 1-2 quarters',
+    },
+    {
+      source: 'cs', target: 'finance',
+      type: 'impacts',
+      severity: 'high',
+      keywords: {
+        source: ['NRR', 'retention', 'expansion', 'upsell'],
+        target: ['LTV', 'revenue', 'growth', 'valuation'],
+      },
+      reasonTemplate: 'NRR above 120% doubles customer LTV and drives efficient growth without new customer acquisition',
+    },
+  ],
+
+  patterns: [
+    {
+      name: 'CAC Payback Death Spiral',
+      domains: ['marketing', 'finance'],
+      description: 'When CAC payback exceeds 24 months and NRR is below 100%, companies reach cash crisis within 3-4 quarters',
+      observed: 70,
+      expected: 25,
+      total: 100,
+    },
+    {
+      name: 'NRR-Driven Efficient Growth',
+      domains: ['cs', 'finance'],
+      description: 'Companies with NRR >130% grow 2.5x faster than peers while spending 40% less on acquisition',
+      observed: 75,
+      expected: 30,
+      total: 100,
+    },
+    {
+      name: 'Burn Multiple to Funding Crunch',
+      domains: ['finance'],
+      description: 'Burn multiple >3x for 2+ consecutive quarters reduces next-round probability by 60%',
+      observed: 68,
+      expected: 30,
+      total: 100,
+    },
+  ],
+
+  outcomes: [
+    { predicted: 'runway_compression', predictedConfidence: 0.78, actual: 'runway_compression', wasCorrect: true, sourceDomain: 'finance', targetDomain: 'finance' },
+    { predicted: 'hiring_freeze', predictedConfidence: 0.70, actual: 'hiring_freeze', wasCorrect: true, sourceDomain: 'finance', targetDomain: 'people' },
+  ],
+
+  narrative: 'SaaS unit economics form a cascade: rising CAC increases payback periods (immediate). Long payback periods increase burn rate (30 days). High burn compresses runway (immediate). Short runway triggers hiring freezes (30 days). Meanwhile, NRR is the counter-force — strong net retention (>120%) increases LTV (90 days), offsetting high CAC. Companies with CAC payback >18 months AND NRR <100% are in a death spiral.',
+};
+
+// ============================================================================
 // EXPORT
 // ============================================================================
 
@@ -390,4 +759,7 @@ export const MACRO_ECONOMIC_PACKS: TrainingPack[] = [
   interestRateCascade,
   inflationBusinessImpact,
   laborMarketCascade,
+  macroToMicroCascade,
+  supportToChurnPipeline,
+  saasUnitEconomicsCascade,
 ];

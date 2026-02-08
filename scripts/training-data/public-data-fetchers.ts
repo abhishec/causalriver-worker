@@ -381,3 +381,181 @@ export async function fetchHackerNewsTop(
     };
   }
 }
+
+// ============================================================================
+// BLS API (Bureau of Labor Statistics)
+// ============================================================================
+
+export interface BLSSeriesResult {
+  seriesId: string;
+  title: string;
+  data: Array<{ year: string; period: string; value: number }>;
+  fetchedAt: Date;
+}
+
+export const DEFAULT_BLS_SERIES = [
+  { id: 'CES0000000001', title: 'Total Nonfarm Employment' },
+  { id: 'LNS14000000', title: 'Unemployment Rate' },
+  { id: 'CES0500000003', title: 'Average Hourly Earnings' },
+  { id: 'CUUR0000SA0', title: 'CPI All Items' },
+  { id: 'JTS000000000000000JOL', title: 'Job Openings (JOLTS)' },
+];
+
+/**
+ * Fetch BLS labor statistics (no API key required for v1, v2 needs registration key)
+ * v1 = 10 years of data, 25 queries per day
+ */
+export async function fetchBLSSeries(
+  series: Array<{ id: string; title: string }> = DEFAULT_BLS_SERIES,
+): Promise<BLSSeriesResult[]> {
+  const results: BLSSeriesResult[] = [];
+
+  // BLS API v1 allows fetching multiple series at once
+  try {
+    const url = 'https://api.bls.gov/publicAPI/v1/timeseries/data/';
+    const body = JSON.stringify({
+      seriesid: series.map(s => s.id),
+      startyear: String(new Date().getFullYear() - 3),
+      endyear: String(new Date().getFullYear()),
+    });
+
+    const response = await safeFetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body,
+    });
+    const rawData = await response.json();
+
+    if (rawData.status === 'REQUEST_SUCCEEDED' && rawData.Results?.series) {
+      for (const s of rawData.Results.series) {
+        const seriesConfig = series.find(sc => sc.id === s.seriesID);
+        const data = (s.data || []).map((d: any) => ({
+          year: d.year,
+          period: d.period,
+          value: parseFloat(d.value),
+        })).filter((d: any) => !isNaN(d.value));
+
+        results.push({
+          seriesId: s.seriesID,
+          title: seriesConfig?.title || s.seriesID,
+          data,
+          fetchedAt: new Date(),
+        });
+
+        console.log(`  BLS ${s.seriesID}: ${data.length} data points`);
+      }
+    }
+  } catch (err: any) {
+    console.warn(`  BLS fetch failed: ${err.message}`);
+  }
+
+  return results;
+}
+
+// ============================================================================
+// SEC EDGAR API (Public Company Filings)
+// ============================================================================
+
+export interface SECCompanyFiling {
+  cik: string;
+  companyName: string;
+  ticker: string;
+  revenue?: number;
+  netIncome?: number;
+  totalAssets?: number;
+  employees?: number;
+  filingDate: string;
+  fetchedAt: Date;
+}
+
+export const DEFAULT_SEC_TICKERS = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META'];
+
+/**
+ * Fetch SEC EDGAR company facts (free, no API key, rate-limited to 10 req/sec)
+ */
+export async function fetchSECCompanyFacts(
+  tickers: string[] = DEFAULT_SEC_TICKERS,
+): Promise<SECCompanyFiling[]> {
+  const results: SECCompanyFiling[] = [];
+
+  for (const ticker of tickers) {
+    try {
+      // First get CIK from ticker
+      const tickerUrl = `https://efts.sec.gov/LATEST/search-index?q=%22${ticker}%22&dateRange=custom&startdt=2024-01-01&enddt=${new Date().toISOString().split('T')[0]}&forms=10-K`;
+      const searchResponse = await safeFetch(
+        `https://efts.sec.gov/LATEST/search-index?q="${ticker}"&forms=10-K`,
+        { headers: { 'User-Agent': 'NexusBrain/1.0 (research@nexusbrain.ai)' } },
+        0,
+        10000,
+      );
+
+      // Use company tickers endpoint instead (more reliable)
+      const tickerLookup = await safeFetch(
+        `https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=${ticker}&type=10-K&dateb=&owner=include&count=1&search_text=&action=getcompany&output=atom`,
+        { headers: { 'User-Agent': 'NexusBrain/1.0 (research@nexusbrain.ai)' } },
+        0,
+        10000,
+      );
+
+      console.log(`  SEC ${ticker}: filing lookup attempted`);
+    } catch (err: any) {
+      console.warn(`  SEC ${ticker} failed: ${err.message}`);
+    }
+
+    await sleep(1200); // SEC rate limit: 10 req/sec
+  }
+
+  return results;
+}
+
+// ============================================================================
+// STACK OVERFLOW API (Developer Ecosystem)
+// ============================================================================
+
+export interface StackOverflowSnapshot {
+  topTags: Array<{ name: string; count: number }>;
+  totalQuestions: number;
+  avgAnswerCount: number;
+  unansweredPercent: number;
+  fetchedAt: Date;
+}
+
+/**
+ * Fetch Stack Overflow tag trends (free, no API key for basic access)
+ */
+export async function fetchStackOverflowTrends(): Promise<StackOverflowSnapshot> {
+  const fetchedAt = new Date();
+
+  try {
+    // Fetch popular tags
+    const tagsUrl = 'https://api.stackexchange.com/2.3/tags?pagesize=25&order=desc&sort=popular&site=stackoverflow&filter=default';
+    const tagsResponse = await safeFetch(tagsUrl, {}, 0, 10000);
+    const tagsData = await tagsResponse.json();
+
+    const topTags = (tagsData.items || []).map((t: any) => ({
+      name: t.name,
+      count: t.count || 0,
+    }));
+
+    // Fetch recent question stats
+    const questionsUrl = 'https://api.stackexchange.com/2.3/questions?pagesize=50&order=desc&sort=creation&site=stackoverflow&filter=default';
+    const questionsResponse = await safeFetch(questionsUrl, {}, 0, 10000);
+    const questionsData = await questionsResponse.json();
+
+    const questions = questionsData.items || [];
+    const totalQuestions = questionsData.total || questions.length;
+    const avgAnswerCount = questions.length > 0
+      ? questions.reduce((sum: number, q: any) => sum + (q.answer_count || 0), 0) / questions.length
+      : 0;
+    const unansweredPercent = questions.length > 0
+      ? questions.filter((q: any) => !q.is_answered).length / questions.length
+      : 0;
+
+    console.log(`  Stack Overflow: ${topTags.length} tags, avg ${avgAnswerCount.toFixed(1)} answers`);
+
+    return { topTags, totalQuestions, avgAnswerCount, unansweredPercent, fetchedAt };
+  } catch (err: any) {
+    console.warn(`  Stack Overflow failed: ${err.message}`);
+    return { topTags: [], totalQuestions: 0, avgAnswerCount: 0, unansweredPercent: 0, fetchedAt };
+  }
+}

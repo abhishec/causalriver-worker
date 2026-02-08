@@ -21,6 +21,8 @@ import type {
   GitHubRepoStats,
   WorldBankResult,
   HackerNewsSnapshot,
+  BLSSeriesResult,
+  StackOverflowSnapshot,
 } from './public-data-fetchers';
 
 // ============================================================================
@@ -255,6 +257,95 @@ export function hackerNewsToSignals(
   return signals;
 }
 
+/**
+ * Convert BLS labor data to people/finance domain signals
+ */
+export function blsToSignals(
+  organizationId: string,
+  blsData: BLSSeriesResult[]
+): ConnectorSignal[] {
+  const signals: ConnectorSignal[] = [];
+
+  const BLS_SIGNAL_MAP: Record<string, { signalType: string; domain: string; normalize: (v: number) => number }> = {
+    CES0000000001: { signalType: 'total_nonfarm_employment', domain: 'people', normalize: (v) => Math.min(v / 160000, 1) },
+    LNS14000000: { signalType: 'unemployment_rate_bls', domain: 'people', normalize: (v) => v / 15 },
+    CES0500000003: { signalType: 'avg_hourly_earnings', domain: 'people', normalize: (v) => Math.min(v / 40, 1) },
+    'CUUR0000SA0': { signalType: 'cpi_bls', domain: 'finance', normalize: (v) => Math.min(v / 350, 1) },
+    JTS000000000000000JOL: { signalType: 'job_openings_jolts', domain: 'people', normalize: (v) => Math.min(v / 12000, 1) },
+  };
+
+  for (const series of blsData) {
+    const mapping = BLS_SIGNAL_MAP[series.seriesId];
+    if (!mapping) continue;
+
+    for (const d of series.data) {
+      signals.push({
+        organization_id: organizationId,
+        source_domain: mapping.domain,
+        signal_type: mapping.signalType,
+        signal_value: mapping.normalize(d.value),
+        entity_type: 'bls_indicator',
+        entity_id: `${series.seriesId}_${d.year}_${d.period}`,
+        metadata: {
+          source: 'bls',
+          series_id: series.seriesId,
+          title: series.title,
+          year: d.year,
+          period: d.period,
+          raw_value: d.value,
+        },
+      });
+    }
+  }
+
+  return signals;
+}
+
+/**
+ * Convert Stack Overflow data to engineering domain signals
+ */
+export function stackOverflowToSignals(
+  organizationId: string,
+  soData: StackOverflowSnapshot
+): ConnectorSignal[] {
+  const signals: ConnectorSignal[] = [];
+  const dateId = soData.fetchedAt.toISOString().split('T')[0];
+
+  // Developer community health signal
+  signals.push({
+    organization_id: organizationId,
+    source_domain: 'engineering',
+    signal_type: 'so_answer_rate',
+    signal_value: 1 - soData.unansweredPercent, // Higher = healthier
+    entity_type: 'dev_community',
+    entity_id: `so_health_${dateId}`,
+    metadata: {
+      source: 'stack_overflow',
+      avg_answers: soData.avgAnswerCount,
+      unanswered_pct: soData.unansweredPercent,
+    },
+  });
+
+  // Top tag signals (tech adoption trends)
+  for (const tag of soData.topTags.slice(0, 10)) {
+    signals.push({
+      organization_id: organizationId,
+      source_domain: 'engineering',
+      signal_type: 'so_tag_popularity',
+      signal_value: Math.min(tag.count / 3000000, 1), // Normalize by max (~2.5M for javascript)
+      entity_type: 'tech_tag',
+      entity_id: `so_tag_${tag.name}`,
+      metadata: {
+        source: 'stack_overflow',
+        tag: tag.name,
+        question_count: tag.count,
+      },
+    });
+  }
+
+  return signals;
+}
+
 // ============================================================================
 // DYNAMIC TRAINING PACK BUILDERS
 // ============================================================================
@@ -422,7 +513,9 @@ export function convertAllFetchedData(
   fred: FredSeriesResult[],
   github: GitHubRepoStats[],
   worldBank: WorldBankResult[],
-  hackerNews: HackerNewsSnapshot
+  hackerNews: HackerNewsSnapshot,
+  bls: BLSSeriesResult[] = [],
+  stackOverflow: StackOverflowSnapshot | null = null,
 ): {
   signals: ConnectorSignal[];
   trainingPacks: TrainingPack[];
@@ -432,13 +525,15 @@ export function convertAllFetchedData(
   const githubSignals = githubToSignals(organizationId, github);
   const wbSignals = worldBankToSignals(organizationId, worldBank);
   const hnSignals = hackerNewsToSignals(organizationId, hackerNews);
+  const blsSignals = blsToSignals(organizationId, bls);
+  const soSignals = stackOverflow ? stackOverflowToSignals(organizationId, stackOverflow) : [];
 
-  const signals = [...fredSignals, ...githubSignals, ...wbSignals, ...hnSignals];
+  const signals = [...fredSignals, ...githubSignals, ...wbSignals, ...hnSignals, ...blsSignals, ...soSignals];
 
   // Build dynamic training packs from live data
   const trainingPacks: TrainingPack[] = [];
 
-  if (fred.length > 0 || worldBank.length > 0) {
+  if (fred.length > 0 || worldBank.length > 0 || bls.length > 0) {
     trainingPacks.push(buildMacroDataTrainingPack(fred, worldBank));
   }
 

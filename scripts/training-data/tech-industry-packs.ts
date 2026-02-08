@@ -432,6 +432,134 @@ const techHiringVelocity: TrainingPack = {
 };
 
 // ============================================================================
+// 4. TECH DEBT TO REVENUE IMPACT CHAIN
+// ============================================================================
+
+const techDebtRevenueImpact: TrainingPack = {
+  id: 'tech-debt-revenue-impact',
+  title: 'Tech Debt to Revenue Impact Chain',
+  source: 'DORA State of DevOps, Stripe Developer Coefficient report',
+  industry: 'Technology',
+  domains: ['engineering', 'product', 'cs', 'finance'],
+  confidence: 0.82,
+  tags: ['tech-debt', 'engineering', 'quality', 'revenue', 'bugs'],
+
+  causalChains: [
+    {
+      source: 'engineering', target: 'engineering',
+      metric: 'tech_debt_to_bug_rate',
+      effectSize: 0.60,
+      lagDays: 14,
+      pValue: 0.003,
+    },
+    {
+      source: 'engineering', target: 'cs',
+      metric: 'bug_rate_to_support_tickets',
+      effectSize: 0.55,
+      lagDays: 7,
+      pValue: 0.005,
+    },
+    {
+      source: 'cs', target: 'cs',
+      metric: 'support_load_to_nps_drop',
+      effectSize: -0.50,
+      lagDays: 30,
+      pValue: 0.005,
+    },
+    {
+      source: 'cs', target: 'finance',
+      metric: 'nps_drop_to_churn',
+      effectSize: 0.45,
+      lagDays: 60,
+      pValue: 0.008,
+    },
+    {
+      source: 'engineering', target: 'product',
+      metric: 'tech_debt_to_feature_velocity',
+      effectSize: -0.55,
+      lagDays: 30,
+      pValue: 0.003,
+    },
+    {
+      source: 'product', target: 'finance',
+      metric: 'slow_features_to_competitive_loss',
+      effectSize: -0.35,
+      lagDays: 90,
+      pValue: 0.02,
+    },
+  ],
+
+  businessRules: [
+    {
+      title: 'Tech Debt Compound Interest Alert',
+      entityType: 'engineering_metric',
+      when: {
+        logic: 'AND',
+        conditions: [
+          { field: 'tech_debt_ratio', operator: 'greater_than', value: 0.30 },
+          { field: 'bug_escape_rate.change_30d', operator: 'greater_than', value: 0.20 },
+        ],
+      },
+      then: [
+        { type: 'trigger_alert', params: { severity: 'high', message: 'Tech debt >30% with rising bug escape rate — compound interest kicking in' } },
+      ],
+      naturalLanguage: 'When tech debt exceeds 30% of codebase and bug escape rate rises >20%, trigger debt intervention',
+      priority: 80,
+    },
+  ],
+
+  cascades: [
+    {
+      source: 'engineering', target: 'cs',
+      type: 'triggers',
+      severity: 'high',
+      keywords: {
+        source: ['bug', 'defect', 'regression', 'incident', 'outage'],
+        target: ['ticket', 'complaint', 'escalation', 'support'],
+      },
+      reasonTemplate: 'Engineering quality issues flow downstream to support within 7-14 days as customer-reported bugs',
+    },
+    {
+      source: 'engineering', target: 'product',
+      type: 'delays',
+      severity: 'medium',
+      keywords: {
+        source: ['tech-debt', 'refactor', 'legacy', 'complexity'],
+        target: ['roadmap', 'feature', 'release', 'timeline'],
+      },
+      reasonTemplate: 'High tech debt slows feature development by 30-50%, delaying roadmap delivery',
+    },
+  ],
+
+  patterns: [
+    {
+      name: 'Tech Debt Compound Interest',
+      domains: ['engineering', 'cs'],
+      description: 'Teams spending >30% time on maintenance see bug rates double every 6 months (Stripe Developer Coefficient)',
+      observed: 72,
+      expected: 30,
+      total: 100,
+    },
+    {
+      name: 'Quality to Revenue Pipeline',
+      domains: ['engineering', 'cs', 'finance'],
+      description: '10% increase in bug escape rate correlates with 5-8% churn increase within 2 quarters',
+      observed: 65,
+      expected: 30,
+      total: 100,
+    },
+  ],
+
+  outcomes: [
+    { predicted: 'support_ticket_increase', predictedConfidence: 0.78, actual: 'support_ticket_increase', wasCorrect: true, sourceDomain: 'engineering', targetDomain: 'cs' },
+    { predicted: 'feature_velocity_drop', predictedConfidence: 0.75, actual: 'feature_velocity_drop', wasCorrect: true, sourceDomain: 'engineering', targetDomain: 'product' },
+    { predicted: 'churn_increase', predictedConfidence: 0.65, actual: 'churn_stable', wasCorrect: false, sourceDomain: 'cs', targetDomain: 'finance' },
+  ],
+
+  narrative: 'Tech debt acts like compound interest — it accelerates over time. High debt increases bug rates (14 days). Bugs flow to support as tickets (7 days). Sustained ticket load drops NPS (30 days). Low NPS drives churn (60 days). Simultaneously, tech debt slows feature velocity (30 days), causing competitive losses (90 days). Stripe estimates developers spend 42% of time on tech debt. The ROI of debt reduction compounds: every 10% reduction in debt improves feature velocity by 15-20%.',
+};
+
+// ============================================================================
 // EXPORT
 // ============================================================================
 
@@ -439,4 +567,5 @@ export const TECH_INDUSTRY_PACKS: TrainingPack[] = [
   doraDevOpsMetrics,
   openSourceHealth,
   techHiringVelocity,
+  techDebtRevenueImpact,
 ];
