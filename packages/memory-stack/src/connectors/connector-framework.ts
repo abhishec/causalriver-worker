@@ -167,7 +167,7 @@ export async function storeConnectorSignals(
     entity_type: s.entity_type || null,
     entity_id: s.entity_id || null,
     client_id: s.client_id || null,
-    metadata: s.metadata || {},
+    signal_metadata: s.metadata || {},
     created_at: new Date().toISOString(),
   }));
 
