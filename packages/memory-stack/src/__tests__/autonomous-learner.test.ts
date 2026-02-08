@@ -3,15 +3,25 @@ import { createAutonomousLearner } from '../learning/autonomous-learner';
 
 // Mock Supabase client
 function createMockSupabase(signals: any[] = []) {
-  const orderFn = vi.fn().mockResolvedValue({
-    data: signals,
-    error: null,
+  // Source code chains: .from().select().eq().order().range() with pagination
+  let callCount = 0;
+  const rangeFn = vi.fn().mockImplementation(() => {
+    callCount++;
+    if (callCount === 1) {
+      return Promise.resolve({ data: signals, error: null });
+    }
+    return Promise.resolve({ data: [], error: null });
+  });
+
+  const orderFn = vi.fn().mockReturnValue({
+    range: rangeFn,
   });
 
   return {
     from: vi.fn().mockReturnValue({
       select: vi.fn().mockReturnValue({
         eq: vi.fn().mockReturnValue({
+          order: orderFn,
           gte: vi.fn().mockReturnValue({
             order: orderFn,
           }),

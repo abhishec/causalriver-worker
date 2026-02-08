@@ -1,0 +1,26 @@
+{
+  "timestamp": "2026-02-09T06:35:42.724557",
+  "config": {
+    "max_lag": 5,
+    "auto_lag": true,
+    "lag_criterion": "aic",
+    "scoring": "neg_log_pvalue",
+    "difference": false,
+    "method": "bootstrap_var",
+    "var_absolute_values": false
+  },
+  "results": {
+    "confounder_3": {
+      "auroc": 0.6493055555555556,
+      "auroc_joint": 0.6730250881194277,
+      "f1_max": 0.7223214285265408,
+      "max_accuracy": 0.7847222222222222
+    },
+    "random_3": {
+      "auroc": 0.8113154960981048,
+      "auroc_joint": 0.8078097377598402,
+      "f1_max": 0.820164436964835,
+      "max_accuracy": 0.8616220735785953
+    }
+  }
+}

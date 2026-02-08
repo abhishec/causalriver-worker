@@ -102,8 +102,8 @@ describe('DEFAULT_DISCOVERY_CONFIG', () => {
     expect(DEFAULT_DISCOVERY_CONFIG.alpha).toBe(0.05);
   });
 
-  it('should have minObservations = 30', () => {
-    expect(DEFAULT_DISCOVERY_CONFIG.minObservations).toBe(30);
+  it('should have minObservations = 5', () => {
+    expect(DEFAULT_DISCOVERY_CONFIG.minObservations).toBe(5);
   });
 
   it('should have lookbackDays = 90', () => {
@@ -172,8 +172,8 @@ describe('runCausalDiscovery', () => {
   });
 
   it('should warn when domains have insufficient observations', () => {
-    // Generate signals for 10 days, but minObservations is 30 by default
-    const signals = generateSignals(['alpha', 'beta'], 10);
+    // Generate signals for 2 days — minObservations is 5, so this is too few
+    const signals = generateSignals(['alpha', 'beta'], 2);
     const result = runCausalDiscovery(signals, 'org-sparse');
 
     // Should warn about insufficient observations or insufficient valid domains
