@@ -242,11 +242,22 @@ export {
 export {
   type NexusConnector,
   type ConnectorSyncResult,
+  type ConnectorSignal,
 } from './connectors/connector-framework';
 
 export { createHubSpotConnector } from './connectors/hubspot';
 export { createStripeConnector } from './connectors/stripe';
 export { createSupportConnector } from './connectors/support';
+export { createGitHubConnector, type GitHubConnectorConfig } from './connectors/github';
+export { createDocumentConnector, type DocumentConnectorConfig } from './connectors/document';
+
+// Sync Manager
+export {
+  createSyncManager,
+  type SyncManagerConfig,
+  type SyncCursor,
+  type SyncStatus,
+} from './connectors/sync-manager';
 
 // ============================================================================
 // LEARNING - L5: Pattern Memory
@@ -356,6 +367,13 @@ export {
   getAllTrainingPacks,
 } from './learning/training-library';
 
+// Autonomous Learner - Living Brain Self-Training Loop
+export {
+  createAutonomousLearner,
+  type AutonomousLearnerConfig,
+  type LearningCycleResult,
+} from './learning/autonomous-learner';
+
 // ============================================================================
 // ORCHESTRATION - L6: Domain Agent Layer
 // ============================================================================
@@ -433,6 +451,39 @@ export {
   type ActivityLogEntry,
   type ConversationEntry,
 } from './persistence/supabase-repository';
+
+// ============================================================================
+// CODE INDEXING - Regex-Based Code Intelligence
+// ============================================================================
+
+export {
+  createCodeParser,
+  type CodeSymbol,
+  type FileIndex,
+  type CodeParserConfig,
+} from './code-indexing/code-parser';
+
+export {
+  createCodeEmbedder,
+  type EmbedResult,
+  type BatchEmbedResult,
+} from './code-indexing/code-embedder';
+
+export {
+  createCodeSearch,
+  type CodeSearchResult,
+  type CodeSearchOptions,
+} from './code-indexing/code-search';
+
+// ============================================================================
+// ENTITY EXTRACTION - Regex + AI Entity Recognition
+// ============================================================================
+
+export {
+  createEntityExtractor,
+  type ExtractedEntity,
+  type EntityExtractionConfig,
+} from './core/entity-extraction';
 
 // ============================================================================
 // TYPES

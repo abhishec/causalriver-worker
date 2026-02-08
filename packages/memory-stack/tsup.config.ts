@@ -10,6 +10,7 @@ export default defineConfig({
     'src/hooks/index.ts',
     'src/benchmarks/index.ts',
     'src/persistence/index.ts',
+    'src/code-indexing/index.ts',
   ],
   format: ['esm'],
   dts: true,
