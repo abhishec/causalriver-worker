@@ -17,3 +17,11 @@ export {
   type ActivityLogEntry,
   type ConversationEntry,
 } from './supabase-repository';
+
+export {
+  createSchemaValidator,
+  REQUIRED_TABLES,
+  REQUIRED_RPCS,
+  REQUIRED_EXTENSIONS,
+  type SchemaValidationResult,
+} from './schema-validator';

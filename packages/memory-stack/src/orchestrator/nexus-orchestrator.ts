@@ -40,6 +40,10 @@ import {
   type FeedbackLearningResult,
 } from './response-feedback';
 import type { NexusRepository } from '../persistence/supabase-repository';
+import {
+  createSchemaValidator,
+  type SchemaValidationResult,
+} from '../persistence/schema-validator';
 
 // ============================================================================
 // TYPES
@@ -216,13 +220,30 @@ export function createNexusOrchestrator(config: NexusOrchestratorConfig) {
       queryText: string,
       domain?: string
     ): Promise<NexusQueryResult> {
-      // 1. Semantic search
-      const searchResults = await semanticSearch.search(supabase, queryText, {
-        organizationId,
-        limit: 5,
-      });
+      // 1. Semantic search — with graceful degradation
+      let searchResults: any[] = [];
+      try {
+        searchResults = await semanticSearch.search(supabase, queryText, {
+          organizationId,
+          limit: 5,
+        });
+      } catch (searchError: any) {
+        // Graceful degradation: if search fails (missing table/RPC), continue without it
+        // The brain can still answer from causal context and patterns
+        const message = searchError?.message || '';
+        if (message.includes('does not exist') || message.includes('42P01') || message.includes('42883')) {
+          // Missing table or RPC — this is a setup issue, not a crash
+          console.warn(
+            `[NexusBrain] Semantic search unavailable: ${message}. ` +
+            `Run migrations with 'supabase db push' to enable search.`
+          );
+        } else {
+          // Re-throw unexpected errors
+          throw searchError;
+        }
+      }
 
-      // 2. Get causal context from bridge cache
+      // 2. Get causal context from bridge cache (in-memory, never fails)
       const agentContext = contextEnricher.getContextForAgent(
         organizationId,
         domain
@@ -587,11 +608,15 @@ export function createNexusOrchestrator(config: NexusOrchestratorConfig) {
      * Run a health check to validate all critical subsystems.
      * Call this on startup to catch configuration issues early.
      *
+     * @param options.validateSchema - Also check that all required tables/RPCs exist (slower but thorough)
      * @returns Health status with details per subsystem
      */
-    async healthCheck(): Promise<{
+    async healthCheck(options?: {
+      validateSchema?: boolean;
+    }): Promise<{
       healthy: boolean;
       subsystems: Record<string, { ok: boolean; message: string }>;
+      schema?: SchemaValidationResult;
     }> {
       const subsystems: Record<string, { ok: boolean; message: string }> = {};
 
@@ -608,7 +633,7 @@ export function createNexusOrchestrator(config: NexusOrchestratorConfig) {
         subsystems.supabase = { ok: false, message: `Supabase unreachable: ${e.message}` };
       }
 
-      // Check search RPC exists
+      // Check search RPC exists with correct parameter names
       try {
         const { error } = await supabase.rpc('search_embeddings', {
           query_embedding: `[${new Array(384).fill(0).join(',')}]`,
@@ -618,7 +643,7 @@ export function createNexusOrchestrator(config: NexusOrchestratorConfig) {
           filter_organization_id: organizationId,
         });
         subsystems.searchRpc = error
-          ? { ok: false, message: `search_embeddings RPC failed: ${error.message}` }
+          ? { ok: false, message: `search_embeddings RPC failed: ${error.message}. Run migration 20250209000001_fix_rpc_parameter_names.sql` }
           : { ok: true, message: 'Available' };
       } catch (e: any) {
         subsystems.searchRpc = { ok: false, message: `search_embeddings RPC error: ${e.message}` };
@@ -637,9 +662,33 @@ export function createNexusOrchestrator(config: NexusOrchestratorConfig) {
         ? { ok: true, message: `Configured (${config.llm?.provider || 'unknown'} provider)` }
         : { ok: false, message: 'Not configured — ask() will fail' };
 
+      // Optional: full schema validation (checks all 26 tables + 6 RPCs)
+      let schema: SchemaValidationResult | undefined;
+      if (options?.validateSchema) {
+        const validator = createSchemaValidator(supabase);
+        schema = await validator.validateAll();
+        subsystems.schema = schema.valid
+          ? { ok: true, message: `All ${schema.existingTables.length} tables and ${schema.existingRpcs.length} RPCs present` }
+          : {
+              ok: false,
+              message: `Missing: ${Object.values(schema.missingTables).flat().length} tables, ${schema.missingRpcs.length} RPCs. Run: supabase db push`,
+            };
+      }
+
       const healthy = Object.values(subsystems).every((s) => s.ok);
 
-      return { healthy, subsystems };
+      return { healthy, subsystems, schema };
+    },
+
+    /**
+     * Run full schema validation and return detailed results.
+     * Use this during deployment/setup to verify database is properly configured.
+     *
+     * @returns Full schema validation report with setup instructions if anything is missing
+     */
+    async validateSchema(): Promise<SchemaValidationResult> {
+      const validator = createSchemaValidator(supabase);
+      return validator.validateAll();
     },
   };
 }

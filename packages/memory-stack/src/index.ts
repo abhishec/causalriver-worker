@@ -462,6 +462,14 @@ export {
   type ConversationEntry,
 } from './persistence/supabase-repository';
 
+export {
+  createSchemaValidator,
+  REQUIRED_TABLES,
+  REQUIRED_RPCS,
+  REQUIRED_EXTENSIONS,
+  type SchemaValidationResult,
+} from './persistence/schema-validator';
+
 // ============================================================================
 // CODE INDEXING - Regex-Based Code Intelligence
 // ============================================================================
