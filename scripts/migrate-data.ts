@@ -1,14 +1,16 @@
 /**
  * NexusBrain Data Migration Script
  *
- * Copies NexusBrain-related data from the shared NexusOS database
- * to the new dedicated NexusBrain Supabase project.
+ * Generic data migration tool for importing data into NexusBrain
+ * from any compatible Supabase source database.
  *
- * Handles column differences between NexusOS (source) and NexusBrain (target)
+ * Handles column differences between source and target schemas
  * by selecting only the columns that exist in the target schema.
  *
  * Usage:
- *   SOURCE_SUPABASE_KEY=xxx TARGET_SUPABASE_KEY=xxx pnpm exec tsx scripts/migrate-data.ts
+ *   SOURCE_SUPABASE_URL=https://xxx.supabase.co SOURCE_SUPABASE_KEY=xxx \
+ *   TARGET_SUPABASE_URL=https://xxx.supabase.co TARGET_SUPABASE_KEY=xxx \
+ *   pnpm exec tsx scripts/migrate-data.ts
  */
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
@@ -17,41 +19,41 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 // CONFIGURATION
 // ============================================================================
 
-const SOURCE_URL = process.env.SOURCE_SUPABASE_URL || 'https://lkdbjwyvjfyjjflpubdd.supabase.co';
+const SOURCE_URL = process.env.SOURCE_SUPABASE_URL || '';
 const SOURCE_KEY = process.env.SOURCE_SUPABASE_KEY || '';
 
-const TARGET_URL = process.env.TARGET_SUPABASE_URL || 'https://zmlqvuzoodcgmkgkivfw.supabase.co';
+const TARGET_URL = process.env.TARGET_SUPABASE_URL || '';
 const TARGET_KEY = process.env.TARGET_SUPABASE_KEY || '';
 
 const BATCH_SIZE = 500;
 
 // ============================================================================
 // COLUMN RENAMES — source column name → target column name
-// When the NexusOS table uses a different column name than the NexusBrain schema.
+// When the source table uses a different column name than the NexusBrain schema.
 // ============================================================================
 
 const COLUMN_RENAMES: Record<string, Record<string, string>> = {
   entity_embeddings: {
-    content_text: 'content',     // NexusOS uses content_text, NexusBrain uses content
+    content_text: 'content',     // source uses content_text, NexusBrain uses content
   },
   ai_memory: {
-    title: 'memory_type',        // NexusOS uses title → memory_type
-    memory_text: 'content',      // NexusOS may use memory_text → content
+    title: 'memory_type',        // source uses title → memory_type
+    memory_text: 'content',      // source may use memory_text → content
   },
   agent_registry: {
-    agent_name: 'display_name',  // NexusOS uses agent_name → display_name
+    agent_name: 'display_name',  // source uses agent_name → display_name
   },
   ai_agent_activity: {
-    activity_type: 'action_type', // NexusOS uses activity_type → action_type
+    activity_type: 'action_type', // source uses activity_type → action_type
   },
   org_cascade_rules: {
-    name: 'rule_name',            // NexusOS uses name → rule_name
+    name: 'rule_name',            // source uses name → rule_name
     source_domain: 'trigger_domain',
     source_signal_type: 'trigger_signal_type',
     threshold: 'trigger_threshold',
   },
   platform_cascade_rules: {
-    name: 'rule_name',            // NexusOS uses name → rule_name
+    name: 'rule_name',            // source uses name → rule_name
     source_domain: 'trigger_domain',
     source_signal_type: 'trigger_signal_type',
     threshold: 'trigger_threshold',
@@ -591,17 +593,19 @@ async function main() {
   console.log('');
   console.log('='.repeat(70));
   console.log('  NexusBrain Data Migration');
-  console.log('  Source: NexusOS   (lkdbjwyvjfyjjflpubdd)');
-  console.log('  Target: NexusBrain (zmlqvuzoodcgmkgkivfw)');
+  console.log(`  Source: ${SOURCE_URL || '(not set)'}`);
+  console.log(`  Target: ${TARGET_URL || '(not set)'}`);
   console.log('='.repeat(70));
   console.log('');
 
-  if (!SOURCE_KEY) {
-    console.error('ERROR: SOURCE_SUPABASE_KEY not set.');
+  if (!SOURCE_URL || !SOURCE_KEY) {
+    console.error('ERROR: SOURCE_SUPABASE_URL and SOURCE_SUPABASE_KEY must be set.');
+    console.error('  Example: SOURCE_SUPABASE_URL=https://xxx.supabase.co SOURCE_SUPABASE_KEY=eyJ...');
     process.exit(1);
   }
-  if (!TARGET_KEY) {
-    console.error('ERROR: TARGET_SUPABASE_KEY not set.');
+  if (!TARGET_URL || !TARGET_KEY) {
+    console.error('ERROR: TARGET_SUPABASE_URL and TARGET_SUPABASE_KEY must be set.');
+    console.error('  Example: TARGET_SUPABASE_URL=https://xxx.supabase.co TARGET_SUPABASE_KEY=eyJ...');
     process.exit(1);
   }
 
@@ -615,14 +619,14 @@ async function main() {
     console.error('  Source FAILED:', srcErr.message);
     process.exit(1);
   }
-  console.log('  Source (NexusOS):    Connected');
+  console.log('  Source:    Connected');
 
   const { error: tgtErr } = await target.from('cross_domain_signals').select('id').limit(0);
   if (tgtErr) {
     console.error('  Target FAILED:', tgtErr.message);
     process.exit(1);
   }
-  console.log('  Target (NexusBrain): Connected');
+  console.log('  Target:    Connected');
   console.log('');
 
   // Migrate

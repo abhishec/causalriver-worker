@@ -8,7 +8,7 @@
  * This is the "catch-all" connector — when there isn't a dedicated connector
  * for an app, use GenericApp to map any REST API into NexusBrain signals.
  *
- * Currently used for NexusOS app data — the primary knowledge source.
+ * Can connect to any application's REST API as a knowledge source.
  *
  * Signals generated: Configurable via signalMapping
  *

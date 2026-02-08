@@ -388,10 +388,10 @@ describe('Template Connectors', () => {
       } as any;
 
       const connector = createGenericAppConnector({
-        id: 'nexusapp',
-        name: 'NexusOS App',
+        id: 'testapp',
+        name: 'Test App',
         domain: 'knowledge',
-        baseUrl: 'https://app.nexusos.com/api',
+        baseUrl: 'https://app.example.com/api',
       });
 
       const result = await connector.ingestRecords(supabase, 'org_123', [

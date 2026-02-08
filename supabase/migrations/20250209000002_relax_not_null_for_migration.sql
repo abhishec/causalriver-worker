@@ -1,12 +1,11 @@
 -- =============================================================================
--- Relax NOT NULL constraints for data migration from NexusOS
+-- Relax NOT NULL constraints for data flexibility
 --
--- NexusOS tables have some columns as NULL that NexusBrain schema declared
--- as NOT NULL. We relax these constraints to allow the data to be migrated,
--- since the source data legitimately has NULL values.
+-- Some columns were originally declared NOT NULL but legitimately accept
+-- NULL values in practice. Relaxing these for operational flexibility.
 -- =============================================================================
 
--- ai_memory: domain can be NULL (NexusOS stores memories without domain tag)
+-- ai_memory: domain can be NULL (memories may not have a domain tag)
 ALTER TABLE ai_memory ALTER COLUMN domain DROP NOT NULL;
 
 -- prediction_records: these fields may be NULL in source
