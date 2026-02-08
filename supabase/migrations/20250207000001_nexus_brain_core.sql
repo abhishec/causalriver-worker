@@ -17,8 +17,15 @@
 -- =============================================================================
 
 -- Enable required extensions
-CREATE EXTENSION IF NOT EXISTS "pgvector" WITH SCHEMA extensions;
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "vector" WITH SCHEMA extensions;
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA extensions;
+
+-- Make uuid_generate_v4() available without schema qualification
+-- (Supabase installs extensions in the 'extensions' schema)
+CREATE OR REPLACE FUNCTION public.uuid_generate_v4()
+RETURNS uuid
+LANGUAGE sql
+AS $$ SELECT extensions.uuid_generate_v4(); $$;
 
 -- =============================================================================
 -- L1: SIGNAL INGESTION
