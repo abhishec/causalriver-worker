@@ -186,6 +186,22 @@ export {
   type CopilotResponse,
 } from './orchestrator/llm-adapter';
 
+// LLM Response Layer (enhanced copilot with conversation memory)
+export {
+  createLLMResponseLayer,
+  type LLMResponseConfig,
+  type LLMResponseResult,
+  type ConversationMessage,
+  type QueryOptions,
+} from './orchestrator/llm-response-layer';
+
+// Response Feedback Loop (query → correction → memory)
+export {
+  createResponseFeedbackLoop,
+  type ResponseFeedback,
+  type FeedbackLearningResult,
+} from './orchestrator/response-feedback';
+
 export {
   formatCausalForPrompt,
   formatPatternsForPrompt,
@@ -403,6 +419,20 @@ export {
   type PredictionBenchmarkResult,
   type BenchmarkRunnerConfig,
 } from './benchmarks';
+
+// ============================================================================
+// PERSISTENCE - Centralized Supabase Repository
+// ============================================================================
+
+export {
+  createSupabaseRepository,
+  type NexusRepository,
+  type EmbeddingUpsertParams,
+  type MemoryUpsertParams,
+  type RelationshipUpsertParams,
+  type ActivityLogEntry,
+  type ConversationEntry,
+} from './persistence/supabase-repository';
 
 // ============================================================================
 // TYPES

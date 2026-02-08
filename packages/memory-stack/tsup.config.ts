@@ -9,6 +9,7 @@ export default defineConfig({
     'src/intelligence/index.ts',
     'src/hooks/index.ts',
     'src/benchmarks/index.ts',
+    'src/persistence/index.ts',
   ],
   format: ['esm'],
   dts: true,

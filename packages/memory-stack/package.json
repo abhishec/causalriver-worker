@@ -30,6 +30,10 @@
     "./hooks": {
       "import": "./dist/hooks/index.js",
       "types": "./dist/hooks/index.d.ts"
+    },
+    "./persistence": {
+      "import": "./dist/persistence/index.js",
+      "types": "./dist/persistence/index.d.ts"
     }
   },
   "files": [

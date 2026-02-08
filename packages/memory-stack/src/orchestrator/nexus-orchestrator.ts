@@ -27,6 +27,17 @@ import {
   createEmptyDAG,
 } from '../causality/continuous-learner';
 import { createThresholdOptimizer, type ThresholdOptimizerConfig } from '../causality/threshold-optimizer';
+import {
+  createLLMResponseLayer,
+  type LLMResponseConfig,
+  type LLMResponseResult,
+} from './llm-response-layer';
+import {
+  createResponseFeedbackLoop,
+  type ResponseFeedback,
+  type FeedbackLearningResult,
+} from './response-feedback';
+import type { NexusRepository } from '../persistence/supabase-repository';
 
 // ============================================================================
 // TYPES
@@ -47,6 +58,10 @@ export interface NexusOrchestratorConfig {
   thresholdOptimizer?: Partial<ThresholdOptimizerConfig>;
   /** Load existing causal DAG from database on startup (default: true) */
   loadExistingDAG?: boolean;
+  /** LLM configuration for the ask() method (optional) */
+  llm?: LLMResponseConfig;
+  /** NexusRepository for centralized persistence (optional) */
+  repository?: NexusRepository;
 }
 
 export interface NexusQueryResult {
@@ -150,6 +165,19 @@ export function createNexusOrchestrator(config: NexusOrchestratorConfig) {
 
   // Initialize threshold optimizer
   const thresholdOptimizer = createThresholdOptimizer(config.thresholdOptimizer);
+
+  // Initialize LLM response layer (optional — only if LLM config is provided)
+  const llmLayer = config.llm
+    ? createLLMResponseLayer({
+        ...config.llm,
+        repository: config.llm.repository || config.repository,
+      })
+    : null;
+
+  // Initialize response feedback loop (optional — only if repository is provided)
+  const responseFeedback = config.repository
+    ? createResponseFeedbackLoop(config.repository)
+    : null;
 
   return {
     /**
@@ -348,6 +376,111 @@ export function createNexusOrchestrator(config: NexusOrchestratorConfig) {
           graphStats: continuousLearner.getGraph(),
         },
       };
+    },
+
+    // ── LLM Response Layer (ask + feedback) ───────────────────────
+
+    /**
+     * Ask the brain a question and get an LLM-generated answer
+     * enriched with causal context, patterns, and organizational memory.
+     *
+     * This is the highest-level API — combines query() + LLM response.
+     * Requires `llm` config to be set in the orchestrator config.
+     *
+     * @example
+     * ```typescript
+     * const answer = await nexus.ask('Why is churn increasing?', 'cs');
+     * console.log(answer.text);
+     * console.log(`Used ${answer.contextUsed.causalRelationships} causal relationships`);
+     * ```
+     */
+    async ask(
+      question: string,
+      domain?: string,
+      options?: {
+        conversationId?: string;
+        includeHistory?: boolean;
+        maxHistoryMessages?: number;
+      }
+    ): Promise<LLMResponseResult> {
+      if (!llmLayer) {
+        throw new Error(
+          'LLM layer not configured. Provide `llm` config when creating the orchestrator.'
+        );
+      }
+
+      // 1. Query the brain for context
+      const nexusContext = await this.query(question, domain);
+
+      // 2. Pass to LLM layer with context
+      return llmLayer.query(question, nexusContext, {
+        domain,
+        ...options,
+      });
+    },
+
+    /**
+     * Continue a multi-turn conversation with the brain.
+     * Requires `llm` config to be set.
+     */
+    async continueConversation(
+      conversationId: string,
+      question: string,
+      domain?: string
+    ): Promise<LLMResponseResult> {
+      if (!llmLayer) {
+        throw new Error(
+          'LLM layer not configured. Provide `llm` config when creating the orchestrator.'
+        );
+      }
+
+      const nexusContext = await this.query(question, domain);
+      return llmLayer.continueConversation(conversationId, question, nexusContext);
+    },
+
+    /**
+     * Record feedback about an LLM response.
+     * When feedback includes a correction, it becomes organizational memory.
+     * Requires `repository` to be set.
+     */
+    async recordResponseFeedback(feedback: ResponseFeedback): Promise<void> {
+      if (!responseFeedback) {
+        throw new Error(
+          'Repository not configured. Provide `repository` config when creating the orchestrator.'
+        );
+      }
+      await responseFeedback.recordFeedback(feedback);
+    },
+
+    /**
+     * Process pending response feedback and create organizational memories.
+     * Incorrect answers with corrections become new ai_memory entries.
+     * Requires `repository` to be set.
+     */
+    async learnFromResponseFeedback(): Promise<FeedbackLearningResult> {
+      if (!responseFeedback) {
+        throw new Error(
+          'Repository not configured. Provide `repository` config when creating the orchestrator.'
+        );
+      }
+      return responseFeedback.learnFromFeedback();
+    },
+
+    // ── Layer Access ──────────────────────────────────────────────
+
+    /** Get the LLM response layer for direct access (null if not configured) */
+    getLLMLayer() {
+      return llmLayer;
+    },
+
+    /** Get the NexusRepository for direct access (null if not configured) */
+    getRepository() {
+      return config.repository || null;
+    },
+
+    /** Get the response feedback loop for direct access (null if not configured) */
+    getResponseFeedback() {
+      return responseFeedback;
     },
   };
 }
