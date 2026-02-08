@@ -1,11 +1,17 @@
 /**
  * Public Data Fetchers — Free API Sources for Brain Training
  *
- * Fetches data from 4 free public APIs:
+ * Fetches data from 10 free public APIs:
  * - FRED (Federal Reserve Economic Data)
  * - GitHub API (public repo stats)
  * - World Bank Open Data
  * - Hacker News (tech sentiment proxy)
+ * - BLS (Bureau of Labor Statistics)
+ * - SEC EDGAR (public company filings)
+ * - Stack Overflow (developer ecosystem)
+ * - Wikipedia Pageviews (brand/topic interest signals)
+ * - IMF World Economic Outlook (global macro)
+ * - USPTO PatentsView (innovation signals)
  *
  * Zero project dependencies — uses only built-in fetch().
  */
@@ -558,4 +564,243 @@ export async function fetchStackOverflowTrends(): Promise<StackOverflowSnapshot>
     console.warn(`  Stack Overflow failed: ${err.message}`);
     return { topTags: [], totalQuestions: 0, avgAnswerCount: 0, unansweredPercent: 0, fetchedAt };
   }
+}
+
+// ============================================================================
+// WIKIPEDIA PAGEVIEWS API (Brand/Topic Interest Signals)
+// ============================================================================
+
+export interface WikiPageviewResult {
+  article: string;
+  dailyViews: Array<{ date: string; views: number }>;
+  totalViews: number;
+  avgDailyViews: number;
+  fetchedAt: Date;
+}
+
+/**
+ * Fetch Wikipedia pageview data for articles (free, no auth, 200 req limit)
+ * Useful as a proxy for public interest/brand awareness signals
+ */
+export async function fetchWikipediaPageviews(
+  articles: string[] = [
+    // ── AI & Machine Learning ──
+    'Artificial_intelligence', 'Machine_learning', 'Deep_learning',
+    'Large_language_model', 'Generative_artificial_intelligence', 'ChatGPT',
+    'OpenAI', 'Anthropic', 'Natural_language_processing',
+    // ── Cloud & SaaS ──
+    'Cloud_computing', 'Software_as_a_service', 'Platform_as_a_service',
+    'Amazon_Web_Services', 'Microsoft_Azure', 'Google_Cloud_Platform',
+    'Salesforce', 'Snowflake_Inc.', 'Datadog',
+    // ── Business & Finance ──
+    'Venture_capital', 'Startup_company', 'Initial_public_offering',
+    'Mergers_and_acquisitions', 'Private_equity', 'Angel_investor',
+    'Series_A_round', 'Unicorn_(finance)', 'SPAC',
+    // ── Economics ──
+    'Economic_recession', 'Inflation', 'Interest_rate',
+    'Federal_Reserve', 'Gross_domestic_product', 'Unemployment',
+    'Consumer_Price_Index', 'Quantitative_easing', 'Yield_curve',
+    // ── Tech Companies (brand signals) ──
+    'Apple_Inc.', 'Microsoft', 'Alphabet_Inc.', 'Amazon_(company)',
+    'Meta_Platforms', 'Nvidia', 'Tesla,_Inc.',
+    // ── Work & HR ──
+    'Remote_work', 'Quiet_quitting', 'Layoff',
+    'Employee_engagement', 'Organizational_culture',
+    // ── Security & Risk ──
+    'Cybersecurity', 'Ransomware', 'Data_breach',
+    'Cryptocurrency', 'Bitcoin', 'Blockchain',
+    // ── Product & Growth ──
+    'Product-market_fit', 'Product-led_growth', 'Customer_success',
+    'Net_promoter_score', 'Customer_lifetime_value', 'Churn_rate',
+    // ── Strategy & Innovation ──
+    'Disruptive_innovation', 'Blue_Ocean_Strategy', 'Lean_startup',
+    'Agile_software_development', 'DevOps', 'Scrum_(software_development)',
+    // ── Industry Verticals ──
+    'Fintech', 'Health_technology', 'E-commerce', 'Edtech',
+    'Proptech', 'Insurtech', 'Regtech',
+  ],
+  days: number = 90, // 90 days for richer time series
+): Promise<WikiPageviewResult[]> {
+  const results: WikiPageviewResult[] = [];
+  const fetchedAt = new Date();
+
+  // Calculate date range
+  const end = new Date();
+  const start = new Date();
+  start.setDate(start.getDate() - days);
+  const startStr = start.toISOString().split('T')[0].replace(/-/g, '');
+  const endStr = end.toISOString().split('T')[0].replace(/-/g, '');
+
+  for (const article of articles) {
+    try {
+      const url = `https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia.org/all-access/user/${encodeURIComponent(article)}/daily/${startStr}00/${endStr}00`;
+      const response = await safeFetch(url, {
+        headers: { 'User-Agent': 'NexusBrain/1.0 (research@nexusbrain.ai)' },
+      }, 0, 10000);
+      const data = await response.json();
+
+      const dailyViews = (data.items || []).map((item: any) => ({
+        date: item.timestamp?.substring(0, 8) || '',
+        views: item.views || 0,
+      }));
+
+      const totalViews = dailyViews.reduce((sum: number, d: any) => sum + d.views, 0);
+      const avgDailyViews = dailyViews.length > 0 ? totalViews / dailyViews.length : 0;
+
+      results.push({ article, dailyViews, totalViews, avgDailyViews, fetchedAt });
+      console.log(`  Wikipedia "${article}": ${avgDailyViews.toFixed(0)} avg daily views`);
+    } catch (err: any) {
+      console.warn(`  Wikipedia "${article}" failed: ${err.message}`);
+    }
+
+    await sleep(200); // Wikipedia allows ~200 req/period, keep it reasonable
+  }
+
+  return results;
+}
+
+// ============================================================================
+// IMF WORLD ECONOMIC OUTLOOK (Global Macro Indicators)
+// ============================================================================
+
+export interface IMFIndicatorResult {
+  indicator: string;
+  indicatorLabel: string;
+  country: string;
+  values: Array<{ year: string; value: number | null }>;
+  fetchedAt: Date;
+}
+
+/**
+ * Fetch IMF WEO data via official DataMapper API (free, no auth, JSON)
+ * Provides GDP growth, inflation, unemployment for all countries
+ * URL: https://www.imf.org/external/datamapper/api/v1/{indicator}
+ */
+export async function fetchIMFWorldEconomicOutlook(
+  indicators: string[] = [
+    'NGDP_RPCH',    // Real GDP growth (%)
+    'PCPIPCH',      // Inflation rate, avg consumer prices (%)
+    'LUR',          // Unemployment rate (%)
+    'BCA_NGDPD',    // Current account balance (% GDP)
+    'GGXWDG_NGDP',  // Government gross debt (% GDP)
+  ],
+  countries: string[] = ['USA', 'CHN', 'DEU', 'JPN', 'GBR', 'IND', 'FRA', 'CAN', 'AUS', 'KOR'],
+): Promise<IMFIndicatorResult[]> {
+  const results: IMFIndicatorResult[] = [];
+  const fetchedAt = new Date();
+  const currentYear = new Date().getFullYear();
+  const yearRange = Array.from({ length: 11 }, (_, i) => currentYear - 10 + i).join(',');
+
+  const indicatorLabels: Record<string, string> = {
+    'NGDP_RPCH': 'Real GDP Growth (%)',
+    'PCPIPCH': 'Inflation Rate (%)',
+    'LUR': 'Unemployment Rate (%)',
+    'BCA_NGDPD': 'Current Account Balance (% GDP)',
+    'GGXWDG_NGDP': 'Government Debt (% GDP)',
+  };
+
+  for (const indicator of indicators) {
+    try {
+      const url = `https://www.imf.org/external/datamapper/api/v1/${indicator}?periods=${yearRange}`;
+      const response = await safeFetch(url, {
+        headers: { 'User-Agent': 'NexusBrain/1.0 (research@nexusbrain.ai)' },
+      }, 0, 20000);
+      const data = await response.json();
+
+      const indicatorData = data?.values?.[indicator];
+      if (!indicatorData) {
+        console.warn(`  IMF ${indicator}: no data in response`);
+        continue;
+      }
+
+      // Extract data for target countries
+      for (const country of countries) {
+        const countryData = indicatorData[country];
+        if (!countryData) continue;
+
+        const values: Array<{ year: string; value: number | null }> = [];
+        for (const [year, value] of Object.entries(countryData)) {
+          if (typeof value === 'number') {
+            values.push({ year, value });
+          }
+        }
+
+        if (values.length > 0) {
+          results.push({
+            indicator,
+            indicatorLabel: indicatorLabels[indicator] || indicator,
+            country,
+            values,
+            fetchedAt,
+          });
+        }
+      }
+
+      const totalPoints = results.filter(r => r.indicator === indicator).reduce((sum, r) => sum + r.values.length, 0);
+      console.log(`  IMF ${indicator}: ${totalPoints} data points across ${countries.length} countries`);
+    } catch (err: any) {
+      console.warn(`  IMF ${indicator} failed: ${err.message}`);
+    }
+
+    await sleep(500); // Be respectful to IMF servers
+  }
+
+  return results;
+}
+
+// ============================================================================
+// USPTO PATENTSVIEW API (Innovation Signals)
+// ============================================================================
+
+export interface PatentTrendResult {
+  year: number;
+  totalPatents: number;
+  topCategories: Array<{ name: string; count: number }>;
+  avgCitationCount: number;
+  fetchedAt: Date;
+}
+
+/**
+ * Fetch USPTO PatentsView data (free, no auth required)
+ * Patent trends as innovation velocity and R&D investment signals
+ */
+export async function fetchUSPTOPatentTrends(
+  years: number = 5,
+): Promise<PatentTrendResult[]> {
+  const results: PatentTrendResult[] = [];
+  const fetchedAt = new Date();
+  const currentYear = new Date().getFullYear();
+
+  for (let year = currentYear - years; year < currentYear; year++) {
+    try {
+      // Fetch patent counts by year and technology area
+      const url = `https://api.patentsview.org/patents/query?q={"_and":[{"_gte":{"patent_date":"${year}-01-01"}},{"_lt":{"patent_date":"${year + 1}-01-01"}}]}&f=["patent_number","patent_date","patent_num_cited_by_us_patents"]&o={"page":1,"per_page":100}&s=[{"patent_date":"desc"}]`;
+      const response = await safeFetch(url, {
+        headers: { 'User-Agent': 'NexusBrain/1.0 (research@nexusbrain.ai)' },
+      }, 0, 15000);
+      const data = await response.json();
+
+      const patents = data.patents || [];
+      const totalPatents = data.total_patent_count || patents.length;
+      const avgCitationCount = patents.length > 0
+        ? patents.reduce((sum: number, p: any) => sum + (parseInt(p.patent_num_cited_by_us_patents) || 0), 0) / patents.length
+        : 0;
+
+      results.push({
+        year,
+        totalPatents,
+        topCategories: [], // Would need CPC class endpoint for this
+        avgCitationCount,
+        fetchedAt,
+      });
+
+      console.log(`  USPTO ${year}: ${totalPatents} patents, avg ${avgCitationCount.toFixed(1)} citations`);
+    } catch (err: any) {
+      console.warn(`  USPTO ${year} failed: ${err.message}`);
+    }
+
+    await sleep(1000); // PatentsView is rate-limited
+  }
+
+  return results;
 }

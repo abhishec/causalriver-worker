@@ -22,6 +22,7 @@ export interface ConnectorSignal {
   source_domain: string;
   signal_type: string;
   signal_value: number;
+  signal_timestamp?: string | Date; // When the data actually occurred (not DB insertion time)
   entity_type?: string;
   entity_id?: string;
   client_id?: string;
@@ -159,16 +160,24 @@ export async function storeConnectorSignals(
     );
   }
 
+  const now = new Date().toISOString();
   const rows = resolvedSignals.map((s) => ({
     organization_id: s.organization_id,
     source_domain: s.source_domain,
     signal_type: s.signal_type,
     signal_value: s.signal_value,
+    signal_timestamp: s.signal_timestamp
+      ? (s.signal_timestamp instanceof Date
+          ? s.signal_timestamp.toISOString()
+          : new Date(s.signal_timestamp).toISOString())
+      : (s.metadata as any)?.date
+        ? new Date((s.metadata as any).date).toISOString()
+        : now,
     entity_type: s.entity_type || null,
     entity_id: s.entity_id || null,
     client_id: s.client_id || null,
     signal_metadata: s.metadata || {},
-    created_at: new Date().toISOString(),
+    created_at: now,
   }));
 
   const { error } = await supabase.from('cross_domain_signals').insert(rows);

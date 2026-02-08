@@ -41,7 +41,7 @@ export interface ScheduledJobsConfig {
 
 const DEFAULT_CONFIG: ScheduledJobsConfig = {
   lookbackDays: 90,
-  minObservations: 30,
+  minObservations: 5, // Lowered: activate when data is sufficient, not after arbitrary count
 };
 
 // ============================================================================
@@ -67,18 +67,31 @@ export function createScheduledJobs(
       lostRelationships: CausalRelationship[];
       totalDiscovered: number;
     }> {
-      // Fetch recent signals
-      const lookbackDate = new Date();
-      lookbackDate.setDate(lookbackDate.getDate() - fullConfig.lookbackDays);
+      // Fetch ALL signals with pagination — Supabase default limit is 1000 rows
+      const allSignals: any[] = [];
+      const PAGE_SIZE = 1000; // Supabase default max per request
+      let offset = 0;
+      let hasMore = true;
 
-      const { data: signals, error } = await supabase
-        .from('cross_domain_signals')
-        .select('source_domain, signal_type, signal_value, created_at')
-        .eq('organization_id', organizationId)
-        .gte('created_at', lookbackDate.toISOString())
-        .order('created_at', { ascending: true });
+      while (hasMore) {
+        const { data, error: fetchError } = await supabase
+          .from('cross_domain_signals')
+          .select('source_domain, signal_type, signal_value, signal_timestamp, created_at')
+          .eq('organization_id', organizationId)
+          .order('signal_timestamp', { ascending: true })
+          .range(offset, offset + PAGE_SIZE - 1);
 
-      if (error || !signals || signals.length === 0) {
+        if (fetchError || !data || data.length === 0) {
+          hasMore = false;
+        } else {
+          allSignals.push(...data);
+          offset += data.length;
+          if (data.length < PAGE_SIZE) hasMore = false;
+        }
+      }
+
+      const signals = allSignals;
+      if (signals.length === 0) {
         return {
           newRelationships: [],
           lostRelationships: [],
@@ -92,7 +105,7 @@ export function createScheduledJobs(
           source_domain: s.source_domain,
           signal_type: s.signal_type,
           signal_value: s.signal_value,
-          signal_timestamp: s.created_at,
+          signal_timestamp: s.signal_timestamp || s.created_at,
         })),
         organizationId,
         {

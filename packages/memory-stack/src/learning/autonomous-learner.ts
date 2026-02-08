@@ -118,20 +118,43 @@ export function createAutonomousLearner(config: AutonomousLearnerConfig) {
   }
 
   /**
-   * Fetch recent signals from the database
+   * Fetch ALL signals from the database for learning.
+   * Uses signal_timestamp (the real data date) not created_at (DB insertion time).
+   * The brain should learn from ALL stored data, not just recently-inserted rows.
+   * Paginates to overcome Supabase's default 1000-row limit.
    */
   async function fetchRecentSignals(): Promise<any[]> {
-    const lookbackDate = new Date();
-    lookbackDate.setDate(lookbackDate.getDate() - lookbackDays);
+    const allSignals: any[] = [];
+    const PAGE_SIZE = 1000; // Supabase default max per request
+    let offset = 0;
+    let hasMore = true;
 
-    const { data } = await supabase
-      .from('cross_domain_signals')
-      .select('source_domain, signal_type, signal_value, created_at, entity_type, entity_id')
-      .eq('organization_id', organizationId)
-      .gte('created_at', lookbackDate.toISOString())
-      .order('created_at', { ascending: true });
+    while (hasMore) {
+      const { data, error } = await supabase
+        .from('cross_domain_signals')
+        .select('source_domain, signal_type, signal_value, signal_timestamp, created_at, entity_type, entity_id')
+        .eq('organization_id', organizationId)
+        .order('signal_timestamp', { ascending: true })
+        .range(offset, offset + PAGE_SIZE - 1);
 
-    return data || [];
+      if (error) {
+        log(`Error fetching signals at offset ${offset}: ${error.message}`);
+        break;
+      }
+
+      if (!data || data.length === 0) {
+        hasMore = false;
+      } else {
+        allSignals.push(...data);
+        offset += data.length;
+        if (data.length < PAGE_SIZE) {
+          hasMore = false; // Last page
+        }
+      }
+    }
+    log(`Fetched ${allSignals.length} total signals across ${Math.ceil(offset / PAGE_SIZE)} pages`);
+
+    return allSignals;
   }
 
   /**
@@ -327,7 +350,7 @@ export function createAutonomousLearner(config: AutonomousLearnerConfig) {
 
       // 1. Fetch recent signals
       const signals = await fetchRecentSignals();
-      log(`Fetched ${signals.length} signals from last ${lookbackDays} days`);
+      log(`Fetched ${signals.length} signals (all stored data, ordered by signal_timestamp)`);
 
       if (signals.length === 0) {
         return {
@@ -350,10 +373,10 @@ export function createAutonomousLearner(config: AutonomousLearnerConfig) {
             source_domain: s.source_domain,
             signal_type: s.signal_type,
             signal_value: s.signal_value,
-            signal_timestamp: s.created_at,
+            signal_timestamp: s.signal_timestamp || s.created_at,
           })),
           organizationId,
-          { lookbackDays, minObservations: 30 }
+          { lookbackDays, minObservations: 5 }
         );
         relationships = discovery.discovered_relationships;
         log(`Discovered ${relationships.length} causal relationships`);

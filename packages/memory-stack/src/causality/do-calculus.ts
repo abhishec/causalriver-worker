@@ -129,7 +129,7 @@ export function createDoCalculusEstimator(
   const {
     alpha = 0.05,
     bootstrapIterations = 1000,
-    minObservations = 30
+    minObservations = 5
   } = config;
 
   // Build DAG structure

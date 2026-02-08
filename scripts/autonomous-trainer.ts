@@ -75,11 +75,34 @@ import {
   type HackerNewsSnapshot,
   type BLSSeriesResult,
   type StackOverflowSnapshot,
+  fetchWikipediaPageviews,
+  fetchIMFWorldEconomicOutlook,
+  fetchUSPTOPatentTrends,
+  type WikiPageviewResult,
+  type IMFIndicatorResult,
+  type PatentTrendResult,
 } from './training-data/public-data-fetchers';
 
 import { convertAllFetchedData } from './training-data/training-pack-factory';
 import { MACRO_ECONOMIC_PACKS } from './training-data/macro-economic-packs';
 import { TECH_INDUSTRY_PACKS } from './training-data/tech-industry-packs';
+import { BUSINESS_CASE_STUDY_PACKS } from './training-data/business-case-study-packs';
+import { SALES_AND_REVENUE_PACKS } from './training-data/sales-and-revenue-packs';
+import { PEOPLE_AND_CULTURE_PACKS } from './training-data/people-and-culture-packs';
+import { STRATEGY_AND_SCALING_PACKS } from './training-data/strategy-and-scaling-packs';
+import { INDUSTRY_VERTICAL_PACKS } from './training-data/industry-vertical-packs';
+import { OPERATIONS_DEEP_DIVE_PACKS } from './training-data/operations-deep-dive-packs';
+import { ADVANCED_CAUSAL_PACKS } from './training-data/advanced-causal-packs';
+import { VC_METRICS_PACKS } from './training-data/vc-metrics-packs';
+// ── Wikipedia Content Extraction (real article content, not just pageviews) ──
+import {
+  fetchWikipediaContent,
+  type WikiArticleContent,
+} from './training-data/wikipedia-content-fetcher';
+import {
+  wikiContentToSignals,
+  buildWikiTrainingPacks,
+} from './training-data/wikipedia-knowledge-packs';
 
 // ============================================================================
 // CONFIGURATION
@@ -129,6 +152,11 @@ interface FetchedData {
   hackerNews: HackerNewsSnapshot;
   bls: BLSSeriesResult[];
   stackOverflow: StackOverflowSnapshot | null;
+  wikipedia: WikiPageviewResult[];
+  imf: IMFIndicatorResult[];
+  patents: PatentTrendResult[];
+  // Real Wikipedia article content (actual knowledge, not just pageviews)
+  wikiContent: WikiArticleContent[];
 }
 
 async function fetchPublicData(): Promise<FetchedData> {
@@ -159,6 +187,23 @@ async function fetchPublicData(): Promise<FetchedData> {
       log('FETCH', `Stack Overflow: ${r.topTags.length} tags fetched`);
       return r;
     }),
+    fetchWikipediaPageviews().then(r => {
+      log('FETCH', `Wikipedia: ${r.length} articles fetched`);
+      return r;
+    }),
+    fetchIMFWorldEconomicOutlook().then(r => {
+      log('FETCH', `IMF WEO: ${r.length} indicator/country pairs fetched`);
+      return r;
+    }),
+    fetchUSPTOPatentTrends().then(r => {
+      log('FETCH', `USPTO: ${r.length} years of patent data fetched`);
+      return r;
+    }),
+    // Wikipedia CONTENT extraction (actual article knowledge, 270+ articles)
+    fetchWikipediaContent().then(r => {
+      log('FETCH', `Wikipedia Content: ${r.length} articles with full content extracted`);
+      return r;
+    }),
   ]);
 
   const fred = results[0].status === 'fulfilled' ? results[0].value : [];
@@ -169,6 +214,10 @@ async function fetchPublicData(): Promise<FetchedData> {
     : { topStoryIds: [], stories: [], avgScore: 0, avgComments: 0, totalEngagement: 0, fetchedAt: new Date() };
   const bls = results[4].status === 'fulfilled' ? results[4].value : [];
   const stackOverflow = results[5].status === 'fulfilled' ? results[5].value : null;
+  const wikipedia = results[6].status === 'fulfilled' ? results[6].value : [];
+  const imf = results[7].status === 'fulfilled' ? results[7].value : [];
+  const patents = results[8].status === 'fulfilled' ? results[8].value : [];
+  const wikiContent = results[9].status === 'fulfilled' ? results[9].value : [];
 
   if (results[0].status === 'rejected') logError('FETCH', 'FRED failed', results[0].reason);
   if (results[1].status === 'rejected') logError('FETCH', 'GitHub failed', results[1].reason);
@@ -176,11 +225,15 @@ async function fetchPublicData(): Promise<FetchedData> {
   if (results[3].status === 'rejected') logError('FETCH', 'Hacker News failed', results[3].reason);
   if (results[4].status === 'rejected') logError('FETCH', 'BLS failed', results[4].reason);
   if (results[5].status === 'rejected') logError('FETCH', 'Stack Overflow failed', results[5].reason);
+  if (results[6].status === 'rejected') logError('FETCH', 'Wikipedia pageviews failed', results[6].reason);
+  if (results[7].status === 'rejected') logError('FETCH', 'IMF WEO failed', results[7].reason);
+  if (results[8].status === 'rejected') logError('FETCH', 'USPTO failed', results[8].reason);
+  if (results[9].status === 'rejected') logError('FETCH', 'Wikipedia Content failed', results[9].reason);
 
-  const totalSources = [fred, github, worldBank, hackerNews.stories, bls, stackOverflow?.topTags || []].filter(a => a.length > 0).length;
-  log('FETCH', `${totalSources}/6 data sources available`);
+  const totalSources = [fred, github, worldBank, hackerNews.stories, bls, stackOverflow?.topTags || [], wikipedia, imf, patents, wikiContent].filter(a => a.length > 0).length;
+  log('FETCH', `${totalSources}/10 data sources available`);
 
-  return { fred, github, worldBank, hackerNews, bls, stackOverflow };
+  return { fred, github, worldBank, hackerNews, bls, stackOverflow, wikipedia, imf, patents, wikiContent };
 }
 
 // ============================================================================
@@ -207,10 +260,88 @@ function convertData(fetched: FetchedData): ConvertedData {
     fetched.stackOverflow,
   );
 
+  // Convert new data sources into additional signals
+  // Wikipedia pageviews → marketing/brand interest signals
+  for (const wiki of fetched.wikipedia) {
+    for (const day of wiki.dailyViews) {
+      signals.push({
+        organization_id: ORGANIZATION_ID,
+        source: 'wikipedia',
+        connector_type: 'wikipedia_pageviews',
+        signal_type: `pageviews_${wiki.article.toLowerCase().replace(/[^a-z0-9]/g, '_')}`,
+        signal_value: day.views,
+        signal_timestamp: new Date(`${day.date.substring(0, 4)}-${day.date.substring(4, 6)}-${day.date.substring(6, 8)}`),
+        source_domain: 'marketing',
+        entity_type: 'topic',
+        entity_id: wiki.article,
+        metadata: { source: 'wikipedia', article: wiki.article },
+      });
+    }
+  }
+  log('CONVERT', `Wikipedia: ${fetched.wikipedia.reduce((sum, w) => sum + w.dailyViews.length, 0)} signals generated`);
+
+  // IMF WEO → global macro finance signals
+  for (const indicator of fetched.imf) {
+    for (const val of indicator.values) {
+      if (val.value !== null) {
+        signals.push({
+          organization_id: ORGANIZATION_ID,
+          source: 'imf',
+          connector_type: 'imf_weo',
+          signal_type: `imf_${indicator.indicator.toLowerCase()}_${indicator.country.toLowerCase()}`,
+          signal_value: val.value,
+          signal_timestamp: new Date(`${val.year}-06-15`), // Mid-year for annual data
+          source_domain: 'finance',
+          entity_type: 'country',
+          entity_id: indicator.country,
+          metadata: { source: 'imf_weo', indicator: indicator.indicatorLabel, country: indicator.country },
+        });
+      }
+    }
+  }
+  log('CONVERT', `IMF WEO: ${fetched.imf.reduce((sum, i) => sum + i.values.filter(v => v.value !== null).length, 0)} signals generated`);
+
+  // USPTO Patents → innovation/engineering signals
+  for (const year of fetched.patents) {
+    signals.push({
+      organization_id: ORGANIZATION_ID,
+      source: 'uspto',
+      connector_type: 'patent_trends',
+      signal_type: 'annual_patent_count',
+      signal_value: year.totalPatents,
+      signal_timestamp: new Date(`${year.year}-12-31`),
+      source_domain: 'engineering',
+      entity_type: 'innovation',
+      entity_id: `patents_${year.year}`,
+      metadata: { source: 'uspto', year: year.year, avgCitations: year.avgCitationCount },
+    });
+  }
+  log('CONVERT', `USPTO: ${fetched.patents.length} signals generated`);
+
+  // Wikipedia CONTENT → real knowledge signals (concepts, infobox data, sections, relationships)
+  if (fetched.wikiContent.length > 0) {
+    const wikiKnowledgeSignals = wikiContentToSignals(ORGANIZATION_ID, fetched.wikiContent);
+    signals.push(...wikiKnowledgeSignals);
+    log('CONVERT', `Wikipedia Content: ${wikiKnowledgeSignals.length} knowledge signals from ${fetched.wikiContent.length} articles`);
+
+    // Build domain-specific training packs from Wikipedia knowledge
+    const wikiPacks = buildWikiTrainingPacks(fetched.wikiContent);
+    dynamicPacks.push(...wikiPacks);
+    log('CONVERT', `Wikipedia Content: ${wikiPacks.length} domain training packs built`);
+  }
+
   // Static training packs (always available, even if APIs fail)
   const staticPacks: TrainingPack[] = [
     ...MACRO_ECONOMIC_PACKS,
     ...TECH_INDUSTRY_PACKS,
+    ...BUSINESS_CASE_STUDY_PACKS,
+    ...SALES_AND_REVENUE_PACKS,
+    ...PEOPLE_AND_CULTURE_PACKS,
+    ...STRATEGY_AND_SCALING_PACKS,
+    ...INDUSTRY_VERTICAL_PACKS,
+    ...OPERATIONS_DEEP_DIVE_PACKS,
+    ...ADVANCED_CAUSAL_PACKS,
+    ...VC_METRICS_PACKS,
   ];
 
   log('CONVERT', `${signals.length} signals generated`);
@@ -347,7 +478,7 @@ async function learnAndMaintain(
       repository,
       autoPromoteConfidence: 0.7,
       minPatternObservations: 3, // Lower threshold for initial training
-      verbose: false,
+      verbose: true,
     });
 
     log('LEARN', 'Running autonomous learning cycle...');

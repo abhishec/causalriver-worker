@@ -82,7 +82,7 @@ export const DEFAULT_DISCOVERY_CONFIG: DiscoveryConfig = {
     maxLag: 14,
     alpha: 0.05,
   },
-  minObservations: 30,
+  minObservations: 5, // Lowered: activate with sufficient data density, not arbitrary count
   lookbackDays: 90,
   alpha: 0.05,
 };

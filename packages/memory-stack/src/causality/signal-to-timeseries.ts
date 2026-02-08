@@ -63,7 +63,7 @@ export interface TimeSeriesConfig {
 export const DEFAULT_TIMESERIES_CONFIG: TimeSeriesConfig = {
   aggregation: 'sum',
   fillMethod: 'zero',
-  minDays: 30,
+  minDays: 1, // Use ALL stored data — learn from signal_timestamp spread, not calendar days
   signalTypes: null,
 };
 

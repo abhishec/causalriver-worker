@@ -82,6 +82,7 @@ export function fredToSignals(
         source_domain: 'finance',
         signal_type: mapping.signalType,
         signal_value: mapping.normalize(value),
+        signal_timestamp: new Date(obs.date).toISOString(),
         entity_type: 'economic_indicator',
         entity_id: series.seriesId,
         metadata: {
@@ -183,6 +184,7 @@ export function worldBankToSignals(
         source_domain: 'finance',
         signal_type: mapping.signalType,
         signal_value: mapping.normalize(entry.value),
+        signal_timestamp: new Date(`${entry.date}-07-01`).toISOString(), // Mid-year for annual data
         entity_type: 'world_bank_indicator',
         entity_id: `${result.country}_${result.indicatorId}_${entry.date}`,
         metadata: {
@@ -279,11 +281,16 @@ export function blsToSignals(
     if (!mapping) continue;
 
     for (const d of series.data) {
+      // Convert BLS period (M01-M12) to month for timestamp
+      const month = d.period.startsWith('M') ? parseInt(d.period.slice(1)) : 1;
+      const blsDate = new Date(parseInt(d.year), month - 1, 15); // Mid-month
+
       signals.push({
         organization_id: organizationId,
         source_domain: mapping.domain,
         signal_type: mapping.signalType,
         signal_value: mapping.normalize(d.value),
+        signal_timestamp: blsDate.toISOString(),
         entity_type: 'bls_indicator',
         entity_id: `${series.seriesId}_${d.year}_${d.period}`,
         metadata: {
