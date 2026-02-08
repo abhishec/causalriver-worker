@@ -122,6 +122,97 @@ export interface QueryOptions {
   maxHistoryMessages?: number;
 }
 
+// ============================================================================
+// RETRY + TIMEOUT CONSTANTS
+// ============================================================================
+
+const MAX_RETRIES = 3;
+const INITIAL_RETRY_DELAY_MS = 1_000; // 1 second
+const MAX_RETRY_DELAY_MS = 10_000; // 10 seconds
+const LLM_CALL_TIMEOUT_MS = 30_000; // 30 seconds per call
+
+/**
+ * Retry a function with exponential backoff.
+ * Retries on network errors and 429/5xx status codes.
+ */
+async function withRetry<T>(
+  fn: () => Promise<T>,
+  maxRetries: number = MAX_RETRIES
+): Promise<T> {
+  let lastError: Error | null = null;
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error: any) {
+      lastError = error;
+
+      // Don't retry on auth errors (401/403) or client errors (400)
+      const message = error?.message || '';
+      if (message.includes('401') || message.includes('403') || message.includes('400')) {
+        throw error;
+      }
+
+      // Retry on network errors, 429, and 5xx
+      if (attempt < maxRetries) {
+        const delay = Math.min(
+          INITIAL_RETRY_DELAY_MS * Math.pow(2, attempt) + Math.random() * 500,
+          MAX_RETRY_DELAY_MS
+        );
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    }
+  }
+
+  throw lastError || new Error('LLM call failed after retries');
+}
+
+/**
+ * Wrap a fetch call with a timeout.
+ * Uses AbortController when available, falls back to race with setTimeout.
+ */
+async function fetchWithTimeout(
+  url: string,
+  init: RequestInit,
+  timeoutMs: number = LLM_CALL_TIMEOUT_MS
+): Promise<Response> {
+  // Use AbortController if available (Node 18+ / browser)
+  if (typeof AbortController !== 'undefined') {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+      const response = await fetch(url, {
+        ...init,
+        signal: controller.signal,
+      });
+      return response;
+    } catch (error: any) {
+      if (error?.name === 'AbortError') {
+        throw new Error(`LLM call timed out after ${timeoutMs}ms`);
+      }
+      throw error;
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  }
+
+  // Fallback: race fetch against a timeout
+  const timeoutPromise = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error(`LLM call timed out after ${timeoutMs}ms`)), timeoutMs)
+  );
+  return Promise.race([fetch(url, init), timeoutPromise]);
+}
+
+// ============================================================================
+// CONVERSATION MEMORY CONSTANTS
+// ============================================================================
+
+/** Maximum number of conversations to keep in memory (LRU eviction) */
+const MAX_CONVERSATIONS_IN_MEMORY = 100;
+/** Maximum messages per conversation before trimming */
+const MAX_MESSAGES_PER_CONVERSATION = 100;
+
 const DEFAULT_SYSTEM_PREFIX = `You are Nexus AI, an organizational intelligence copilot.
 You have access to real-time causal intelligence about how different business domains affect each other.
 Use the provided context to give evidence-based answers.
@@ -167,8 +258,58 @@ export function createLLMResponseLayer(config: LLMResponseConfig) {
     ? buildReasoningFramework()
     : null;
 
-  // In-memory conversation store
+  // In-memory conversation store with LRU eviction.
+  // Uses a Map which maintains insertion order — oldest entries are first.
   const conversations = new Map<string, ConversationMessage[]>();
+
+  /**
+   * Track conversation access for LRU ordering.
+   * When a conversation is accessed, move it to the end of the Map (most recently used).
+   */
+  function touchConversation(conversationId: string): void {
+    const history = conversations.get(conversationId);
+    if (history) {
+      // Delete and re-insert to move to end (most recently used)
+      conversations.delete(conversationId);
+      conversations.set(conversationId, history);
+    }
+  }
+
+  /**
+   * Evict least-recently-used conversations when over capacity.
+   */
+  function evictIfNeeded(): void {
+    while (conversations.size > MAX_CONVERSATIONS_IN_MEMORY) {
+      // Map.keys() returns in insertion order — first key is the oldest (LRU)
+      const oldestKey = conversations.keys().next().value;
+      if (oldestKey !== undefined) {
+        // Persist to DB before eviction if repository is available
+        if (repository) {
+          const evicted = conversations.get(oldestKey);
+          if (evicted && evicted.length > 0) {
+            // Fire-and-forget persistence — don't block eviction
+            for (const msg of evicted) {
+              persistMessage(oldestKey, msg.role, msg.content, msg.metadata?.tokensUsed || 0).catch(() => {});
+            }
+          }
+        }
+        conversations.delete(oldestKey);
+      }
+    }
+  }
+
+  /**
+   * Trim conversation messages if they exceed the per-conversation cap.
+   * Keeps the most recent messages and removes the oldest.
+   */
+  function trimConversation(conversationId: string): void {
+    const history = conversations.get(conversationId);
+    if (history && history.length > MAX_MESSAGES_PER_CONVERSATION) {
+      // Keep only the last MAX_MESSAGES_PER_CONVERSATION messages
+      const trimmed = history.slice(-MAX_MESSAGES_PER_CONVERSATION);
+      conversations.set(conversationId, trimmed);
+    }
+  }
 
   /**
    * Generate a unique conversation ID
@@ -235,60 +376,88 @@ export function createLLMResponseLayer(config: LLMResponseConfig) {
     systemPrompt: string,
     messages: Array<{ role: string; content: string }>
   ): Promise<{ text: string; inputTokens: number; outputTokens: number }> {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: model || 'claude-sonnet-4-20250514',
-        max_tokens: maxTokens,
-        system: systemPrompt,
-        messages: messages.map((m) => ({
-          role: m.role === 'assistant' ? 'assistant' : 'user',
-          content: m.content,
-        })),
-      }),
+    return withRetry(async () => {
+      const response = await fetchWithTimeout('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+        },
+        body: JSON.stringify({
+          model: model || 'claude-sonnet-4-20250514',
+          max_tokens: maxTokens,
+          system: systemPrompt,
+          messages: messages.map((m) => ({
+            role: m.role === 'assistant' ? 'assistant' : 'user',
+            content: m.content,
+          })),
+        }),
+      });
+
+      // Check for HTTP errors (response.ok may be undefined in test mocks)
+      if (response.ok === false) {
+        const errorText = typeof response.text === 'function'
+          ? await response.text().catch(() => 'Unknown error')
+          : `HTTP ${response.status || 'unknown'}`;
+        throw new Error(`Anthropic API ${response.status}: ${errorText}`);
+      }
+
+      const data = (await response.json()) as any;
+
+      if (data.error) {
+        throw new Error(`Anthropic API error: ${data.error.message || JSON.stringify(data.error)}`);
+      }
+
+      return {
+        text: data.content?.[0]?.text || '',
+        inputTokens: data.usage?.input_tokens || 0,
+        outputTokens: data.usage?.output_tokens || 0,
+      };
     });
-
-    const data = (await response.json()) as any;
-
-    return {
-      text: data.content?.[0]?.text || '',
-      inputTokens: data.usage?.input_tokens || 0,
-      outputTokens: data.usage?.output_tokens || 0,
-    };
   }
 
   async function callOpenAI(
     systemPrompt: string,
     messages: Array<{ role: string; content: string }>
   ): Promise<{ text: string; inputTokens: number; outputTokens: number }> {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: model || 'gpt-4o',
-        max_tokens: maxTokens,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          ...messages,
-        ],
-      }),
+    return withRetry(async () => {
+      const response = await fetchWithTimeout('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: model || 'gpt-4o',
+          max_tokens: maxTokens,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            ...messages,
+          ],
+        }),
+      });
+
+      // Check for HTTP errors (response.ok may be undefined in test mocks)
+      if (response.ok === false) {
+        const errorText = typeof response.text === 'function'
+          ? await response.text().catch(() => 'Unknown error')
+          : `HTTP ${response.status || 'unknown'}`;
+        throw new Error(`OpenAI API ${response.status}: ${errorText}`);
+      }
+
+      const data = (await response.json()) as any;
+
+      if (data.error) {
+        throw new Error(`OpenAI API error: ${data.error.message || JSON.stringify(data.error)}`);
+      }
+
+      return {
+        text: data.choices?.[0]?.message?.content || '',
+        inputTokens: data.usage?.prompt_tokens || 0,
+        outputTokens: data.usage?.completion_tokens || 0,
+      };
     });
-
-    const data = (await response.json()) as any;
-
-    return {
-      text: data.choices?.[0]?.message?.content || '',
-      inputTokens: data.usage?.prompt_tokens || 0,
-      outputTokens: data.usage?.completion_tokens || 0,
-    };
   }
 
   /**
@@ -382,11 +551,13 @@ ${nexusContext.assembledContext}
       // Track context usage
       const contextUsed = countContextSections(nexusContext.assembledContext);
 
-      // Store in conversation history
+      // Store in conversation history (with LRU management)
       const now = new Date();
       if (!conversations.has(conversationId)) {
         conversations.set(conversationId, []);
+        evictIfNeeded(); // Evict LRU conversations if over capacity
       }
+      touchConversation(conversationId); // Move to most recently used
       const history = conversations.get(conversationId)!;
 
       history.push({
@@ -407,6 +578,9 @@ ${nexusContext.assembledContext}
           model: model || (provider === 'anthropic' ? 'claude-sonnet-4-20250514' : 'gpt-4o'),
         },
       });
+
+      // Trim if conversation exceeds per-conversation cap
+      trimConversation(conversationId);
 
       // Persist to DB (non-blocking)
       persistMessage(conversationId, 'user', userMessage);
@@ -489,8 +663,9 @@ ${nexusContext.assembledContext}
         },
       }));
 
-      // Store in memory for subsequent calls
+      // Store in memory for subsequent calls (with LRU management)
       conversations.set(conversationId, messages);
+      evictIfNeeded();
 
       return messages;
     },

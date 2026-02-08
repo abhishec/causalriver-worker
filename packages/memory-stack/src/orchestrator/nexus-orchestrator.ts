@@ -129,6 +129,27 @@ export function createNexusOrchestrator(config: NexusOrchestratorConfig) {
   const continuousLearner = createContinuousLearner(createEmptyDAG([]));
   let dagLoaded = false;
 
+  // DAG readiness gate: resolves when DAG is loaded (or fails gracefully).
+  // Used by ask() to wait for the brain to be ready before answering.
+  let resolveDagReady: () => void;
+  const dagReadyPromise = new Promise<void>((resolve) => {
+    resolveDagReady = resolve;
+  });
+
+  // DAG readiness timeout — don't block ask() forever (max 10 seconds)
+  const DAG_READY_TIMEOUT_MS = 10_000;
+  const dagReadyWithTimeout = Promise.race([
+    dagReadyPromise,
+    new Promise<void>((resolve) =>
+      setTimeout(() => {
+        if (!dagLoaded) {
+          dagLoaded = true; // Mark as loaded to unblock — empty DAG is better than hanging
+        }
+        resolve();
+      }, DAG_READY_TIMEOUT_MS)
+    ),
+  ]);
+
   // Bootstrap DAG from existing relationships in background
   if (shouldLoadDAG) {
     loadDAGFromDatabase(supabase, organizationId)
@@ -138,11 +159,17 @@ export function createNexusOrchestrator(config: NexusOrchestratorConfig) {
         // ensures the entire pipeline sees the loaded graph.
         continuousLearner.loadGraph(dag);
         dagLoaded = true;
+        resolveDagReady!();
       })
       .catch(() => {
         // No existing DAG — that's fine, start from scratch
         dagLoaded = true;
+        resolveDagReady!();
       });
+  } else {
+    // DAG loading disabled — mark as ready immediately
+    dagLoaded = true;
+    resolveDagReady!();
   }
 
   // Wire all bridges WITH continuous learner
@@ -411,14 +438,67 @@ export function createNexusOrchestrator(config: NexusOrchestratorConfig) {
         );
       }
 
-      // 1. Query the brain for context
-      const nexusContext = await this.query(question, domain);
+      // DAG readiness gate: wait for causal graph to load before answering.
+      // This prevents early queries from getting zero causal context.
+      // Times out after DAG_READY_TIMEOUT_MS to avoid hanging indefinitely.
+      if (!dagLoaded) {
+        await dagReadyWithTimeout;
+      }
 
-      // 2. Pass to LLM layer with context
-      return llmLayer.query(question, nexusContext, {
-        domain,
-        ...options,
-      });
+      try {
+        // 1. Query the brain for context
+        const nexusContext = await this.query(question, domain);
+
+        // 2. Cold-start detection: if no context found at all, inject indicator
+        const hasContext =
+          nexusContext.searchResults.length > 0 ||
+          nexusContext.causalContext.length > 0 ||
+          nexusContext.patternContext.length > 0;
+
+        if (!hasContext) {
+          // Inject cold-start hint into assembled context so LLM knows it's working with limited data
+          nexusContext.assembledContext =
+            `⚠️ COLD START: The organizational brain has limited data for this query. ` +
+            `Answers may be less specific until more signals are ingested and patterns are discovered.\n\n` +
+            nexusContext.assembledContext;
+        }
+
+        // 3. Pass to LLM layer with context
+        return await llmLayer.query(question, nexusContext, {
+          domain,
+          ...options,
+        });
+      } catch (error: any) {
+        // Structured error handling for the ask() path
+        const errorMessage = error?.message || 'Unknown error';
+
+        // Differentiate LLM errors from context/search errors
+        if (errorMessage.includes('fetch') || errorMessage.includes('network') ||
+            errorMessage.includes('ECONNREFUSED') || errorMessage.includes('timeout')) {
+          throw new Error(
+            `Brain LLM call failed (network): ${errorMessage}. ` +
+            `Check your LLM API key and network connectivity.`
+          );
+        }
+
+        if (errorMessage.includes('401') || errorMessage.includes('403') ||
+            errorMessage.includes('api_key') || errorMessage.includes('authentication')) {
+          throw new Error(
+            `Brain LLM authentication failed: ${errorMessage}. ` +
+            `Verify your API key is valid and has sufficient permissions.`
+          );
+        }
+
+        if (errorMessage.includes('429') || errorMessage.includes('rate_limit')) {
+          throw new Error(
+            `Brain LLM rate limited: ${errorMessage}. ` +
+            `Reduce query frequency or upgrade your API plan.`
+          );
+        }
+
+        // Re-throw with brain context
+        throw new Error(`Brain ask() failed: ${errorMessage}`);
+      }
     },
 
     /**
@@ -483,6 +563,83 @@ export function createNexusOrchestrator(config: NexusOrchestratorConfig) {
     /** Get the response feedback loop for direct access (null if not configured) */
     getResponseFeedback() {
       return responseFeedback;
+    },
+
+    // ── Readiness & Health ────────────────────────────────────────────
+
+    /**
+     * Check if the brain is ready to answer questions.
+     * Returns true when the DAG has been loaded (or timed out).
+     */
+    isReady(): boolean {
+      return dagLoaded;
+    },
+
+    /**
+     * Wait for the brain to be fully ready.
+     * Resolves when DAG is loaded or timeout is reached.
+     */
+    async waitForReady(): Promise<void> {
+      await dagReadyWithTimeout;
+    },
+
+    /**
+     * Run a health check to validate all critical subsystems.
+     * Call this on startup to catch configuration issues early.
+     *
+     * @returns Health status with details per subsystem
+     */
+    async healthCheck(): Promise<{
+      healthy: boolean;
+      subsystems: Record<string, { ok: boolean; message: string }>;
+    }> {
+      const subsystems: Record<string, { ok: boolean; message: string }> = {};
+
+      // Check Supabase connectivity
+      try {
+        const { error } = await supabase
+          .from('cross_domain_signals')
+          .select('id')
+          .limit(1);
+        subsystems.supabase = error
+          ? { ok: false, message: `Supabase query failed: ${error.message}` }
+          : { ok: true, message: 'Connected' };
+      } catch (e: any) {
+        subsystems.supabase = { ok: false, message: `Supabase unreachable: ${e.message}` };
+      }
+
+      // Check search RPC exists
+      try {
+        const { error } = await supabase.rpc('search_embeddings', {
+          query_embedding: `[${new Array(384).fill(0).join(',')}]`,
+          match_threshold: 0.99,
+          match_count: 1,
+          filter_entity_types: null,
+          filter_organization_id: organizationId,
+        });
+        subsystems.searchRpc = error
+          ? { ok: false, message: `search_embeddings RPC failed: ${error.message}` }
+          : { ok: true, message: 'Available' };
+      } catch (e: any) {
+        subsystems.searchRpc = { ok: false, message: `search_embeddings RPC error: ${e.message}` };
+      }
+
+      // Check DAG loaded
+      subsystems.dag = dagLoaded
+        ? { ok: true, message: 'Loaded' }
+        : { ok: false, message: 'Still loading — queries may have limited causal context' };
+
+      // Check event bus
+      subsystems.eventBus = { ok: true, message: `Active with ${eventBus.getStats().totalEventsProcessed} events processed` };
+
+      // Check LLM layer
+      subsystems.llm = llmLayer
+        ? { ok: true, message: `Configured (${config.llm?.provider || 'unknown'} provider)` }
+        : { ok: false, message: 'Not configured — ask() will fail' };
+
+      const healthy = Object.values(subsystems).every((s) => s.ok);
+
+      return { healthy, subsystems };
     },
   };
 }

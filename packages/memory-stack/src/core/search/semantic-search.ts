@@ -301,6 +301,8 @@ export function createSemanticSearch(config: SemanticSearchConfig = {}) {
 
     /**
      * Search memory specifically (patterns, insights, predictions)
+     *
+     * MULTI-TENANT: Results are automatically scoped to organizationId if provided in config.
      */
     searchMemory: async (
       supabase: any,
@@ -308,17 +310,27 @@ export function createSemanticSearch(config: SemanticSearchConfig = {}) {
       options: {
         threshold?: number;
         limit?: number;
+        /** Override organization ID for this search */
+        organizationId?: string;
       } = {}
     ): Promise<SearchResult[]> => {
-      const { threshold = 0.4, limit = 5 } = options;
+      const { threshold = 0.4, limit = 5, organizationId: overrideOrgId } = options;
+      const orgId = overrideOrgId || organizationId;
 
       const queryEmbedding = await generateQueryEmbedding(query);
 
-      const { data: results, error } = await supabase.rpc('search_memory_weighted', {
+      const rpcParams: Record<string, any> = {
         query_embedding: `[${queryEmbedding.join(',')}]`,
         match_threshold: threshold,
         match_count: limit,
-      });
+      };
+
+      // Add organization_id filter for multi-tenant isolation
+      if (orgId) {
+        rpcParams.filter_organization_id = orgId;
+      }
+
+      const { data: results, error } = await supabase.rpc('search_memory_weighted', rpcParams);
 
       if (error) throw error;
 
@@ -337,6 +349,8 @@ export function createSemanticSearch(config: SemanticSearchConfig = {}) {
 
     /**
      * Find entities related to a given entity
+     *
+     * MULTI-TENANT: Results are automatically scoped to organizationId if provided in config.
      */
     findRelated: async (
       supabase: any,
@@ -345,17 +359,26 @@ export function createSemanticSearch(config: SemanticSearchConfig = {}) {
       options: {
         limit?: number;
         threshold?: number;
+        /** Override organization ID for this search */
+        organizationId?: string;
       } = {}
     ): Promise<SearchResult[]> => {
-      const { limit = 5, threshold = 0.3 } = options;
+      const { limit = 5, threshold = 0.3, organizationId: overrideOrgId } = options;
+      const orgId = overrideOrgId || organizationId;
 
-      // Get the entity's embedding
-      const { data: entity, error: fetchError } = await supabase
+      // Get the entity's embedding — scoped to organization
+      let query = supabase
         .from('entity_embeddings')
         .select('embedding, content_text')
         .eq('entity_type', entityType)
-        .eq('entity_id', entityId)
-        .maybeSingle();
+        .eq('entity_id', entityId);
+
+      // Apply org filter for multi-tenant isolation
+      if (orgId) {
+        query = query.eq('organization_id', orgId);
+      }
+
+      const { data: entity, error: fetchError } = await query.maybeSingle();
 
       if (fetchError) throw fetchError;
       if (!entity) {
@@ -363,12 +386,19 @@ export function createSemanticSearch(config: SemanticSearchConfig = {}) {
       }
 
       // Find similar entities (excluding itself)
-      const { data: results, error } = await supabase.rpc('search_embeddings', {
+      const rpcParams: Record<string, any> = {
         query_embedding: entity.embedding,
         match_threshold: threshold,
         match_count: limit + 1,
         filter_entity_types: null,
-      });
+      };
+
+      // Add organization_id filter for multi-tenant isolation
+      if (orgId) {
+        rpcParams.filter_organization_id = orgId;
+      }
+
+      const { data: results, error } = await supabase.rpc('search_embeddings', rpcParams);
 
       if (error) throw error;
 
