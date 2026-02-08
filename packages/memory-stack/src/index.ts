@@ -382,6 +382,29 @@ export {
 } from './intelligence/reasoning-framework';
 
 // ============================================================================
+// BENCHMARKS - Automated Brain Training & Evaluation
+// ============================================================================
+
+export {
+  generateSachsNetwork,
+  generateALARMNetwork,
+  generateSaaSMetrics,
+  generateCascadeScenarios,
+  generateAnomalyTimeSeries,
+  createBenchmarkRunner,
+  createMaturityEvaluator,
+  type BenchmarkDataset,
+  type FullBenchmarkReport,
+  type MaturityReport,
+  type MaturityLevel,
+  type CausalBenchmarkResult,
+  type AnomalyBenchmarkResult,
+  type CascadeBenchmarkResult,
+  type PredictionBenchmarkResult,
+  type BenchmarkRunnerConfig,
+} from './benchmarks';
+
+// ============================================================================
 // TYPES
 // ============================================================================
 

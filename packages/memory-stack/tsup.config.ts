@@ -8,6 +8,7 @@ export default defineConfig({
     'src/core/embeddings/index.ts',
     'src/intelligence/index.ts',
     'src/hooks/index.ts',
+    'src/benchmarks/index.ts',
   ],
   format: ['esm'],
   dts: true,
