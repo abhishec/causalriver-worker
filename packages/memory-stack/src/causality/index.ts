@@ -70,3 +70,7 @@ export * from './cascade-tracker';
 // Phase 4: Adaptive System (Thresholds, Feedback Loop)
 export * from './threshold-optimizer';
 export * from './feedback-loop';
+
+// Phase 5: Advanced Causal Discovery (CausalRivers-proven techniques)
+export * from './multivariate-var';
+export * from './advanced-discovery';

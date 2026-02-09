@@ -165,7 +165,7 @@ export function computeGrangerCausality(
 /**
  * Select optimal lag using information criterion
  */
-function selectOptimalLag(
+export function selectOptimalLag(
   signalA: number[],
   signalB: number[],
   maxLag: number,
@@ -204,7 +204,7 @@ function selectOptimalLag(
 /**
  * Fit restricted VAR model (Y on its own lags only)
  */
-function fitRestrictedVAR(
+export function fitRestrictedVAR(
   signalY: number[],
   lag: number
 ): { rss: number; coefficients: number[]; intercept: number } {
@@ -236,7 +236,7 @@ function fitRestrictedVAR(
 /**
  * Fit unrestricted VAR model (Y on lags of both X and Y)
  */
-function fitUnrestrictedVAR(
+export function fitUnrestrictedVAR(
   signalX: number[],
   signalY: number[],
   lag: number
@@ -281,7 +281,7 @@ function fitUnrestrictedVAR(
 /**
  * Ordinary Least Squares estimation
  */
-function ordinaryLeastSquares(
+export function ordinaryLeastSquares(
   X: number[][],
   y: number[]
 ): { coefficients: number[]; rss: number; residuals: number[] } {
@@ -329,7 +329,7 @@ function ordinaryLeastSquares(
 /**
  * Solve linear system using Gaussian elimination with partial pivoting
  */
-function solveLinearSystem(A: number[][], b: number[]): number[] {
+export function solveLinearSystem(A: number[][], b: number[]): number[] {
   const n = A.length;
   
   // Create augmented matrix
@@ -563,14 +563,203 @@ export function interpretResult(result: GrangerResult): string {
 }
 
 // ============================================================================
+// CONDITIONAL MULTIVARIATE GRANGER
+// ============================================================================
+
+/**
+ * Compute conditional Granger causality: test X→Y controlling for ALL other variables.
+ *
+ * Restricted:   Y_t = c + Σ_k≠j [lags of Z_k] + [lags of Y]
+ * Unrestricted: Y_t = c + Σ_k≠j [lags of Z_k] + [lags of Y] + [lags of X]
+ *
+ * This is the most powerful single method — conditioning on other variables
+ * filters out spurious confounded edges. Matches multivariate VAR F-test.
+ */
+export function computeConditionalGranger(
+  sourceIndex: number,
+  targetIndex: number,
+  allSeries: number[][],
+  lag: number,
+  config: GrangerTestConfig = {}
+): GrangerResult {
+  const { alpha = 0.05 } = config;
+  const nVars = allSeries.length;
+  const T = allSeries[0].length;
+
+  const y = allSeries[targetIndex];
+  const x = allSeries[sourceIndex];
+
+  // Conditioning set: all variables except source and target
+  const otherIndices = [];
+  for (let k = 0; k < nVars; k++) {
+    if (k !== targetIndex && k !== sourceIndex) otherIndices.push(k);
+  }
+
+  // Check for constant/NaN series
+  const xStd = standardDeviation(x);
+  const yStd = standardDeviation(y);
+  if (xStd < 1e-10 || yStd < 1e-10) {
+    return makeEmptyResult(alpha, lag, T - lag);
+  }
+
+  // Number of parameters
+  const nRestrictedParams = 1 + (otherIndices.length + 1) * lag; // intercept + (others + y) * lag
+  const nUnrestrictedParams = nRestrictedParams + lag; // + x lags
+  const nObs = T - lag;
+
+  // Fall back to pairwise if insufficient observations
+  if (nObs <= nUnrestrictedParams + 5) {
+    return computeGrangerCausality(x, y, lag, config);
+  }
+
+  // Build restricted design matrix: intercept + Y lags + other variable lags (no X)
+  const Xr: number[][] = [];
+  for (let t = lag; t < T; t++) {
+    const row: number[] = [1]; // intercept
+    // Y lags
+    for (let l = 1; l <= lag; l++) {
+      row.push(y[t - l]);
+    }
+    // Other variable lags
+    for (const k of otherIndices) {
+      for (let l = 1; l <= lag; l++) {
+        row.push(allSeries[k][t - l]);
+      }
+    }
+    Xr.push(row);
+  }
+
+  // Build unrestricted: restricted + X lags
+  const Xu: number[][] = [];
+  for (let t = 0; t < nObs; t++) {
+    const row = [...Xr[t]];
+    for (let l = 1; l <= lag; l++) {
+      row.push(x[lag + t - l]);
+    }
+    Xu.push(row);
+  }
+
+  const yVec = y.slice(lag);
+
+  // Fit both models
+  const rssR = computeRSS(Xr, yVec);
+  const rssU = computeRSS(Xu, yVec);
+
+  const dfNum = lag;
+  const dfDen = nObs - nUnrestrictedParams;
+
+  if (dfDen <= 0 || rssU <= 0 || rssR <= 0) {
+    return makeEmptyResult(alpha, lag, nObs);
+  }
+
+  const fStatistic = Math.max(0, ((rssR - rssU) / dfNum) / (rssU / dfDen));
+  const pValue = fTestPValue(fStatistic, dfNum, dfDen);
+  const effectSize = Math.max(0, Math.min(1, (rssR - rssU) / rssR));
+
+  const confidenceInterval = computeEffectSizeCI(effectSize, nObs, lag, alpha);
+
+  return {
+    sourceDomain: 'source',
+    targetDomain: 'target',
+    fStatistic,
+    pValue,
+    optimalLag: lag,
+    isSignificant: pValue < alpha,
+    effectSize,
+    confidenceInterval,
+    sampleSize: nObs,
+    naturalLanguage: generateNaturalLanguage(fStatistic, pValue, effectSize, lag, nObs),
+  };
+}
+
+/**
+ * Test all pairwise conditional Granger causality across all domains.
+ * Controls for confounders by including all other variables in the regression.
+ */
+export function testAllPairsConditional(
+  data: Record<string, number[]>,
+  config: GrangerTestConfig = {}
+): GrangerResult[] {
+  const domains = Object.keys(data);
+  const allSeries = domains.map(d => data[d]);
+  const results: GrangerResult[] = [];
+  const { maxLag = 14, lagSelectionCriterion = 'AIC' } = config;
+
+  if (domains.length < 2) return results;
+
+  for (let i = 0; i < domains.length; i++) {
+    for (let j = 0; j < domains.length; j++) {
+      if (i === j) continue;
+
+      try {
+        const optLag = selectOptimalLag(allSeries[j], allSeries[i], maxLag, lagSelectionCriterion);
+        const result = computeConditionalGranger(j, i, allSeries, optLag, config);
+        results.push({
+          ...result,
+          sourceDomain: domains[j],
+          targetDomain: domains[i],
+        });
+      } catch {
+        // Skip pairs with insufficient data
+      }
+    }
+  }
+
+  return results.sort((a, b) => {
+    if (a.isSignificant !== b.isSignificant) return a.isSignificant ? -1 : 1;
+    return b.effectSize - a.effectSize;
+  });
+}
+
+/** Compute RSS from design matrix and response vector */
+function computeRSS(X: number[][], y: number[]): number {
+  const result = ordinaryLeastSquares(X, y);
+  return result.rss;
+}
+
+/** Compute standard deviation */
+function standardDeviation(values: number[]): number {
+  const n = values.length;
+  if (n === 0) return 0;
+  let sum = 0;
+  for (const v of values) sum += v;
+  const mean = sum / n;
+  let variance = 0;
+  for (const v of values) variance += (v - mean) * (v - mean);
+  return Math.sqrt(variance / n);
+}
+
+/** Create an empty/zero GrangerResult for edge cases */
+function makeEmptyResult(alpha: number, lag: number, sampleSize: number): GrangerResult {
+  return {
+    sourceDomain: 'source',
+    targetDomain: 'target',
+    fStatistic: 0,
+    pValue: 1,
+    optimalLag: lag,
+    isSignificant: false,
+    effectSize: 0,
+    confidenceInterval: { lower: 0, upper: 0, level: 1 - alpha },
+    sampleSize,
+    naturalLanguage: 'No significant Granger-causal relationship detected (insufficient data or constant series)',
+  };
+}
+
+// ============================================================================
 // EXPORTS
 // ============================================================================
 
 export const GrangerCausality = {
   computeGrangerCausality,
+  computeConditionalGranger,
+  testAllPairsConditional,
   buildImpulseResponse,
   testAllDomainPairs,
   testAllPairs,
   interpretResult,
-  selectOptimalLag
+  selectOptimalLag,
+  ordinaryLeastSquares,
+  solveLinearSystem,
+  fitRestrictedVAR,
+  fitUnrestrictedVAR,
 };

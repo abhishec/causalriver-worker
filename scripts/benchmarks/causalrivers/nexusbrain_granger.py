@@ -3790,6 +3790,225 @@ def nexusbrain_titan(
 
 
 # =============================================================================
+# METHOD 36: NexusBrain Omega — Confounder-killing ensemble
+# =============================================================================
+
+def _lag0_confound_penalty(data: pd.DataFrame, max_lag: int = 5) -> np.ndarray:
+    """
+    Detect confounded pairs by comparing lag-0 correlation with lagged correlation.
+
+    Key insight: If two variables are confounded by a hidden common cause,
+    their correlation peaks at lag 0 (simultaneous). True causal pairs
+    peak at lag > 0 (cause leads effect).
+
+    Returns a penalty matrix in [0, 1] where:
+    - Low values = likely confounded (penalize)
+    - High values = likely causal (keep)
+    """
+    values = data.values
+    n_vars = data.shape[1]
+    n = len(values)
+    penalty = np.ones((n_vars, n_vars))
+
+    for i in range(n_vars):
+        for j in range(n_vars):
+            if i == j:
+                continue
+
+            x_j = values[:, j] - values[:, j].mean()
+            x_i = values[:, i] - values[:, i].mean()
+
+            norm_j = np.sqrt(np.sum(x_j**2))
+            norm_i = np.sqrt(np.sum(x_i**2))
+            if norm_j < 1e-10 or norm_i < 1e-10:
+                continue
+
+            # Lag-0 correlation (instantaneous)
+            corr_0 = abs(np.sum(x_j * x_i)) / (norm_j * norm_i)
+
+            # Best lagged correlation (lags 1..max_lag)
+            # If j causes i, correlation of j[:-lag] with i[lag:] should be high
+            best_lagged = 0
+            for lag_k in range(1, max_lag + 1):
+                n_overlap = n - lag_k
+                if n_overlap < 30:
+                    break
+                corr_k = abs(np.sum(x_j[:n_overlap] * x_i[lag_k:lag_k + n_overlap])) / (norm_j * norm_i) * n / n_overlap
+                best_lagged = max(best_lagged, corr_k)
+
+            # If lag-0 dominates strongly over lagged correlation, likely confounded
+            if corr_0 > 0.01:
+                lag_ratio = best_lagged / (corr_0 + 1e-10)
+                if lag_ratio < 0.8:
+                    # Lag-0 dominates → likely confounded, penalize
+                    penalty[i, j] = 0.5 + 0.5 * lag_ratio
+                elif lag_ratio > 1.2:
+                    # Lagged dominates → likely causal, small boost
+                    penalty[i, j] = min(1.0 + 0.1 * (lag_ratio - 1.0), 1.2)
+
+    return penalty
+
+
+def _residual_confound_detector(data: pd.DataFrame, max_lag: int = 5) -> np.ndarray:
+    """
+    Detect hidden confounders by checking residual correlation after VAR fit.
+
+    After fitting a multivariate VAR model, if the residuals of two variables
+    are highly correlated, this indicates a hidden common cause that the VAR
+    model cannot account for. Edges between such pairs should be penalized.
+
+    Returns a penalty matrix in [0, 1] where:
+    - Low values = high residual correlation (likely confounded)
+    - High values = low residual correlation (likely causal)
+    """
+    from statsmodels.tsa.api import VAR
+
+    n_vars = data.shape[1]
+    values = data.values
+    penalty = np.ones((n_vars, n_vars))
+
+    lag = min(max_lag, len(values) // (3 * n_vars))
+    if lag < 1:
+        lag = 1
+
+    try:
+        model = VAR(values)
+        result = model.fit(maxlags=lag, verbose=False)
+        residuals = result.resid  # shape: (T-lag, n_vars)
+
+        # Compute pairwise correlation of residuals
+        for i in range(n_vars):
+            for j in range(n_vars):
+                if i == j:
+                    continue
+                res_corr = abs(np.corrcoef(residuals[:, i], residuals[:, j])[0, 1])
+
+                # High residual correlation = hidden confounder
+                if res_corr > 0.5:
+                    # Strong residual correlation → likely confounded
+                    penalty[i, j] = 0.5 + 0.3 * (1.0 - res_corr)
+                elif res_corr > 0.3:
+                    # Moderate residual correlation → slight penalty
+                    penalty[i, j] = 0.8 + 0.2 * (1.0 - res_corr)
+                # else: low residual correlation → no penalty
+
+    except Exception:
+        pass
+
+    return penalty
+
+
+def nexusbrain_omega(
+    data: pd.DataFrame,
+    max_lag: int = 5,
+    criterion: str = "aic",
+    verbose: bool = False,
+) -> np.ndarray:
+    """
+    NexusBrain Omega: Confounder-killing ensemble designed to beat VAR
+    baseline on ALL datasets including confounder datasets.
+
+    Key innovations over nexusbrain_final and nexusbrain_titan:
+    1. Lag-0 correlation penalty — detects confounded pairs (peak at lag 0)
+    2. Residual correlation filter — hidden confounders leave traces in VAR residuals
+    3. Asymmetric cross-correlation — true causes lead, confounded pairs are simultaneous
+    4. VarLiNGAM component — non-Gaussian structure helps identify true causal direction
+    5. Rank fusion with confounder-aware weighting
+
+    The critical weakness in previous methods was that confounded variable pairs
+    (driven by a hidden common cause) get scored highly by VAR coefficients
+    because they ARE correlated — just not causally. This method specifically
+    detects and penalizes these spurious edges.
+    """
+    n_vars = data.shape[1]
+    if n_vars < 2:
+        return np.zeros((n_vars, n_vars))
+
+    if verbose:
+        print("  Running NexusBrain Omega method...")
+
+    values = data.values
+
+    # ===== Component 1: VAR coefficients (signed — rivers have positive effects) =====
+    s_var = statsmodels_var_scoring(data, max_lag=max_lag, absolute_values=False, verbose=False)
+
+    # ===== Component 2: VarLiNGAM (non-Gaussian causal discovery) =====
+    s_lingam = varlingam_scoring(data, max_lag=min(max_lag, 3), verbose=False)
+
+    # ===== Component 3: Physics-informed scoring =====
+    s_physics = physics_informed_scoring(data, max_lag=max_lag, verbose=False)
+
+    # ===== Confounder Detection Penalties =====
+    lag0_penalty = _lag0_confound_penalty(data, max_lag=max_lag)
+    residual_penalty = _residual_confound_detector(data, max_lag=max_lag)
+
+    # Combined confounder penalty
+    confound_penalty = lag0_penalty * residual_penalty
+
+    if verbose:
+        print(f"    Confound penalty range: [{confound_penalty.min():.3f}, {confound_penalty.max():.3f}]")
+
+    # ===== Normalize components =====
+    components = {
+        "var": _normalize_scores(s_var),
+        "lingam": _normalize_scores(s_lingam),
+        "physics": _normalize_scores(s_physics),
+    }
+
+    # ===== Rank-based fusion =====
+    def _to_ranks(scores):
+        off_diag = []
+        indices = []
+        for i in range(n_vars):
+            for j in range(n_vars):
+                if i != j:
+                    off_diag.append(scores[i, j])
+                    indices.append((i, j))
+        if not off_diag:
+            return scores.copy()
+        ranks = np.argsort(np.argsort(off_diag)).astype(float)
+        ranks /= max(len(ranks) - 1, 1)
+        rank_matrix = np.zeros_like(scores)
+        for (i, j), r in zip(indices, ranks):
+            rank_matrix[i, j] = r
+        return rank_matrix
+
+    ranks = {name: _to_ranks(s) for name, s in components.items()}
+
+    # Weights: VarLiNGAM gets extra weight because it handles confounders natively
+    weights = {
+        "var": 3.0,       # Strong base signal
+        "lingam": 4.0,    # Best for confounders — exploits non-Gaussianity
+        "physics": 3.0,   # Cross-correlation lag helps distinguish causal from confounded
+    }
+
+    total_w = sum(weights.values())
+    fused = np.zeros((n_vars, n_vars))
+    for name in weights:
+        fused += (weights[name] / total_w) * ranks[name]
+
+    # ===== Apply confounder penalties =====
+    fused = fused * confound_penalty
+
+    # ===== Agreement voting =====
+    for i in range(n_vars):
+        for j in range(n_vars):
+            if i == j:
+                continue
+
+            # Count methods ranking this edge in top half (>0.5)
+            high_count = sum(1 for name in ranks if ranks[name][i, j] > 0.5)
+
+            if high_count == 3:
+                fused[i, j] *= 1.15  # All agree
+            elif high_count <= 1 and fused[i, j] > 0.3:
+                fused[i, j] *= 0.8   # Low agreement
+
+    np.fill_diagonal(fused, 0)
+    return fused
+
+
+# =============================================================================
 # STANDALONE TESTS
 # =============================================================================
 

@@ -339,6 +339,25 @@ export function differenceTimeSeries(series: DailyTimeSeries): DailyTimeSeries {
 }
 
 /**
+ * Downsample a time series by factor, taking the mean of each block.
+ * Used by multi-resolution temporal pyramids for causal discovery at different scales.
+ */
+export function downsampleTimeSeries(values: number[], factor: number): number[] {
+  if (factor <= 1) return [...values];
+  const result: number[] = [];
+  for (let i = 0; i < values.length; i += factor) {
+    let sum = 0;
+    let count = 0;
+    for (let j = i; j < Math.min(i + factor, values.length); j++) {
+      sum += values[j];
+      count++;
+    }
+    result.push(sum / count);
+  }
+  return result;
+}
+
+/**
  * Compute basic statistics for a time series
  */
 export function computeTimeSeriesStats(series: DailyTimeSeries): {

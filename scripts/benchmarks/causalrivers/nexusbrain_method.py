@@ -60,6 +60,7 @@ from nexusbrain_granger import (
     multi_scale_var_scoring,
     bootstrap_var_scoring,
     nexusbrain_titan,
+    nexusbrain_omega,
 )
 
 # Available method variants
@@ -101,6 +102,7 @@ METHOD_VARIANTS = [
     "multi_scale_var",       # Multi-Scale VAR: multiple time resolutions
     "bootstrap_var",         # Bootstrap VAR: stability-weighted scoring
     "nexusbrain_titan",      # Titan: ultimate physics-informed ensemble
+    "nexusbrain_omega",      # Omega: confounder-killing ensemble (lag-0 + residual penalty)
 ]
 
 
@@ -314,6 +316,10 @@ def nexusbrain_granger(d: pd.DataFrame, cfg: Any) -> np.ndarray:
         )
     elif method == "nexusbrain_titan":
         scores_valid = nexusbrain_titan(
+            data_valid, max_lag=max_lag, criterion=criterion, verbose=False
+        )
+    elif method == "nexusbrain_omega":
+        scores_valid = nexusbrain_omega(
             data_valid, max_lag=max_lag, criterion=criterion, verbose=False
         )
     else:

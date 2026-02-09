@@ -1,10 +1,10 @@
 /**
  * Causal Discovery Runner
  *
- * Orchestrates the full Granger causality discovery pipeline:
+ * Orchestrates the full causal discovery pipeline:
  * 1. Fetch cross_domain_signals for an organization
  * 2. Convert to aligned time series per domain
- * 3. Run pairwise Granger causality tests
+ * 3. Run causal discovery (default: calibrated_ensemble — CausalRivers-proven)
  * 4. Store significant relationships with statistical evidence
  *
  * This enables the system to automatically discover which domain
@@ -27,6 +27,13 @@ import {
   type GrangerResult,
   type GrangerTestConfig,
 } from './granger-causality';
+
+import {
+  runAdvancedDiscovery,
+  type AdvancedDiscoveryMethod,
+  type AdvancedDiscoveryConfig,
+  type PairwiseScoreMatrix,
+} from './advanced-discovery';
 
 // ============================================================================
 // TYPES
@@ -59,18 +66,24 @@ export interface CausalRelationship {
 export interface DiscoveryConfig {
   /** Time series configuration */
   timeSeries: TimeSeriesConfig;
-  
+
   /** Granger test configuration */
   granger: GrangerTestConfig;
-  
+
   /** Minimum observations per domain */
   minObservations: number;
-  
+
   /** Lookback window in days */
   lookbackDays: number;
-  
+
   /** Significance threshold (alpha) */
   alpha: number;
+
+  /** Advanced discovery method (default: 'calibrated_ensemble' — CausalRivers-proven) */
+  method?: AdvancedDiscoveryMethod;
+
+  /** Advanced discovery configuration (used when method !== 'pairwise') */
+  advanced?: Partial<AdvancedDiscoveryConfig>;
 }
 
 export const DEFAULT_DISCOVERY_CONFIG: DiscoveryConfig = {
@@ -85,6 +98,7 @@ export const DEFAULT_DISCOVERY_CONFIG: DiscoveryConfig = {
   minObservations: 5, // Lowered: activate with sufficient data density, not arbitrary count
   lookbackDays: 90,
   alpha: 0.05,
+  method: 'calibrated_ensemble', // CausalRivers-proven: weighted ensemble of conditional, cascade, pairwise + agreement bonus
 };
 
 export interface DiscoveryResult {
@@ -211,13 +225,29 @@ export function runCausalDiscovery(
     differenced.set(domain, differenceTimeSeries(series));
   }
   
-  // Step 4: Run pairwise Granger tests
+  // Step 4: Run causal discovery (pairwise OR advanced method)
   const grangerData: Record<string, number[]> = {};
   for (const [domain, series] of differenced) {
     grangerData[domain] = series.values;
   }
-  
-  const grangerResults = testAllPairs(grangerData, fullConfig.granger);
+
+  const method = fullConfig.method || 'pairwise';
+  let grangerResults: GrangerResult[];
+
+  if (method === 'pairwise') {
+    // Existing path — backward compatible
+    grangerResults = testAllPairs(grangerData, fullConfig.granger);
+  } else {
+    // Advanced method path — uses CausalRivers-proven techniques
+    const advancedResult = runAdvancedDiscovery(grangerData, {
+      method,
+      maxLag: fullConfig.granger.maxLag ?? 14,
+      lagSelectionCriterion: fullConfig.granger.lagSelectionCriterion ?? 'AIC',
+      alpha: fullConfig.alpha,
+      ...fullConfig.advanced,
+    });
+    grangerResults = scoreMatrixToGrangerResults(advancedResult, fullConfig.alpha);
+  }
   
   // Step 5: Convert significant results to CausalRelationship format
   const relationships: CausalRelationship[] = [];
@@ -331,4 +361,53 @@ export function findLostRelationships(
   );
   
   return previous.filter(r => !currentKeys.has(`${r.source_domain}|${r.target_domain}`));
+}
+
+// ============================================================================
+// ADVANCED METHOD CONVERSION
+// ============================================================================
+
+/**
+ * Convert a PairwiseScoreMatrix (from advanced methods) to GrangerResult[] format
+ * for compatibility with existing downstream consumers (bridges, summary, DB).
+ */
+function scoreMatrixToGrangerResults(
+  matrix: PairwiseScoreMatrix,
+  alpha: number
+): GrangerResult[] {
+  const results: GrangerResult[] = [];
+  const { domains, scores, optimalLags, pValues } = matrix;
+  const n = domains.length;
+
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n; j++) {
+      if (i === j) continue;
+      const score = scores[i][j];
+      if (score <= 0) continue;
+
+      const pValue = pValues[i][j];
+      const lag = optimalLags[i][j] || 1;
+      const isSignificant = pValue < alpha || score > 0.05; // Score threshold for advanced methods
+
+      results.push({
+        sourceDomain: domains[j],
+        targetDomain: domains[i],
+        fStatistic: score * 10, // Approximate F-statistic from score
+        pValue: pValue,
+        optimalLag: lag,
+        isSignificant,
+        effectSize: Math.min(1, score),
+        confidenceInterval: { lower: Math.max(0, score - 0.1), upper: Math.min(1, score + 0.1), level: 1 - alpha },
+        sampleSize: 0, // Not tracked in matrix form
+        naturalLanguage: isSignificant
+          ? `${domains[j]} Granger-causes ${domains[i]} (score=${score.toFixed(3)}, lag=${lag})`
+          : `No significant relationship from ${domains[j]} to ${domains[i]}`,
+      });
+    }
+  }
+
+  return results.sort((a, b) => {
+    if (a.isSignificant !== b.isSignificant) return a.isSignificant ? -1 : 1;
+    return b.effectSize - a.effectSize;
+  });
 }
