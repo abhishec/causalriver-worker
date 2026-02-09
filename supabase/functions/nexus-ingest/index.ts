@@ -61,6 +61,7 @@ serve(async (req: Request) => {
       source_domain: s.source_domain,
       signal_type: s.signal_type,
       signal_value: s.signal_value,
+      signal_timestamp: s.signal_timestamp || new Date().toISOString(),
       entity_type: s.entity_type || 'unknown',
       entity_id: s.entity_id || `auto_${Date.now()}_${Math.random().toString(36).slice(2)}`,
       client_id: s.client_id || null,

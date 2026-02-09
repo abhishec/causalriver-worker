@@ -1,0 +1,45 @@
+{
+  "name": "@nexus-ai/client",
+  "version": "0.1.0",
+  "description": "Lightweight HTTP client for NexusBrain — query, ingest signals, and receive causal intelligence from any app or agent.",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.5.0",
+    "vitest": "^1.6.0"
+  },
+  "keywords": [
+    "nexusbrain",
+    "causal-intelligence",
+    "ai-memory",
+    "sdk",
+    "client",
+    "agent-integration"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/abhishec/nexus-intelligence",
+    "directory": "packages/client"
+  },
+  "homepage": "https://github.com/abhishec/nexus-intelligence#readme"
+}
