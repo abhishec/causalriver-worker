@@ -26,6 +26,16 @@
  */
 
 // ============================================================================
+// CONSTANTS
+// ============================================================================
+
+/**
+ * The core brain — trained on Wikipedia, FRED, IMF, GitHub, World Bank, etc.
+ * All organizations inherit this knowledge as a baseline via query-time federation.
+ */
+export const CORE_BRAIN_ORG_ID = '00000000-0000-4000-a000-000000000001';
+
+// ============================================================================
 // TYPES
 // ============================================================================
 
@@ -74,6 +84,9 @@ export interface QueryResult {
     causalRelationshipsUsed?: number;
     patternsUsed?: number;
     llmConfigured?: boolean;
+    federated?: boolean;
+    orgSpecificRelationships?: number;
+    coreBrainRelationships?: number;
   };
 }
 
@@ -132,6 +145,10 @@ export interface CronResult {
 export interface RelationshipsResult {
   relationships: CausalRelationship[];
   count: number;
+  /** Number of relationships from this org specifically */
+  orgCount?: number;
+  /** Number of relationships from the core brain (universal knowledge) */
+  coreCount?: number;
 }
 
 export interface NexusClient {
@@ -150,8 +167,13 @@ export interface NexusClient {
    */
   cron(tasks?: string[]): Promise<CronResult>;
 
-  /** Fetch discovered causal relationships for this org */
-  getRelationships(options?: { limit?: number; minEffectSize?: number }): Promise<RelationshipsResult>;
+  /** Fetch discovered causal relationships — includes core brain knowledge by default */
+  getRelationships(options?: {
+    limit?: number;
+    minEffectSize?: number;
+    /** Include universal knowledge from the core brain (default: true) */
+    includeCoreKnowledge?: boolean;
+  }): Promise<RelationshipsResult>;
 
   /** Get the organization ID this client is scoped to */
   readonly organizationId: string;
@@ -320,30 +342,64 @@ export function createNexusClient(config: NexusClientConfig): NexusClient {
       // Direct Supabase REST API query for causal relationships
       const limit = options?.limit ?? 20;
       const minEffect = options?.minEffectSize ?? 0;
+      const includeCoreKnowledge = options?.includeCoreKnowledge ?? true;
 
-      let url = `${baseUrl}/rest/v1/causal_relationships_statistical?organization_id=eq.${organizationId}&is_significant=eq.true&order=effect_size.desc&limit=${limit}`;
+      const headers = {
+        'Authorization': `Bearer ${supabaseAnonKey}`,
+        'apikey': supabaseAnonKey,
+        'Accept': 'application/json',
+      };
+
+      let orgUrl = `${baseUrl}/rest/v1/causal_relationships_statistical?organization_id=eq.${organizationId}&is_significant=eq.true&order=effect_size.desc&limit=${limit}`;
       if (minEffect > 0) {
-        url += `&effect_size=gte.${minEffect}`;
+        orgUrl += `&effect_size=gte.${minEffect}`;
       }
 
-      const response = await fetchFn(url, {
-        headers: {
-          'Authorization': `Bearer ${supabaseAnonKey}`,
-          'apikey': supabaseAnonKey,
-          'Accept': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
+      // Fetch org relationships
+      const orgResponse = await fetchFn(orgUrl, { headers });
+      if (!orgResponse.ok) {
         throw new NexusError(
-          `getRelationships failed (${response.status})`,
-          response.status,
+          `getRelationships failed (${orgResponse.status})`,
+          orgResponse.status,
           'getRelationships',
         );
       }
+      const orgRelationships = await orgResponse.json() as CausalRelationship[];
 
-      const relationships = await response.json() as CausalRelationship[];
-      return { relationships, count: relationships.length };
+      // Optionally fetch core brain relationships and merge
+      if (includeCoreKnowledge && organizationId !== CORE_BRAIN_ORG_ID) {
+        let coreUrl = `${baseUrl}/rest/v1/causal_relationships_statistical?organization_id=eq.${CORE_BRAIN_ORG_ID}&is_significant=eq.true&order=effect_size.desc&limit=${limit}`;
+        if (minEffect > 0) {
+          coreUrl += `&effect_size=gte.${minEffect}`;
+        }
+
+        const coreResponse = await fetchFn(coreUrl, { headers });
+        if (coreResponse.ok) {
+          const coreRelationships = await coreResponse.json() as CausalRelationship[];
+          // Dedup: org edges take priority over core brain edges
+          const orgKeys = new Set(orgRelationships.map(
+            r => `${r.source_domain}::${r.target_domain}`,
+          ));
+          const uniqueCore = coreRelationships.filter(
+            r => !orgKeys.has(`${r.source_domain}::${r.target_domain}`),
+          );
+          const merged = [...orgRelationships, ...uniqueCore];
+          return {
+            relationships: merged,
+            count: merged.length,
+            orgCount: orgRelationships.length,
+            coreCount: uniqueCore.length,
+          };
+        }
+        // If core fetch fails, fall through to org-only result
+      }
+
+      return {
+        relationships: orgRelationships,
+        count: orgRelationships.length,
+        orgCount: orgRelationships.length,
+        coreCount: 0,
+      };
     },
   };
 }

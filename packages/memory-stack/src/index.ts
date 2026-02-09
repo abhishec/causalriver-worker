@@ -20,6 +20,16 @@
  */
 
 // ============================================================================
+// CONSTANTS
+// ============================================================================
+
+/**
+ * The core brain — trained on Wikipedia, FRED, IMF, GitHub, World Bank, etc.
+ * All organizations inherit this knowledge as a baseline via query-time federation.
+ */
+export const CORE_BRAIN_ORG_ID = '00000000-0000-4000-a000-000000000001';
+
+// ============================================================================
 // CORE - L2+L3: Entity Resolution & Semantic Memory
 // ============================================================================
 

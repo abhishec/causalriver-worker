@@ -10,6 +10,7 @@ import {
   createAgentTool,
   createSignalReporter,
   NexusError,
+  CORE_BRAIN_ORG_ID,
   type NexusClient,
   type QueryResult,
   type IngestResult,
@@ -472,5 +473,136 @@ describe('createSignalReporter()', () => {
 
     expect(reporter.bufferSize).toBe(0);
     expect(mockFetch).toHaveBeenCalled();
+  });
+});
+
+// ============================================================================
+// KNOWLEDGE FEDERATION TESTS
+// ============================================================================
+
+describe('knowledge federation (getRelationships)', () => {
+  const ORG_RELATIONSHIPS = [
+    { source_domain: 'finance', target_domain: 'cs', effect_size: 0.45, is_significant: true },
+    { source_domain: 'engineering', target_domain: 'revenue', effect_size: 0.32, is_significant: true },
+  ];
+
+  const CORE_RELATIONSHIPS = [
+    { source_domain: 'finance', target_domain: 'cs', effect_size: 0.38, is_significant: true }, // overlaps with org
+    { source_domain: 'marketing', target_domain: 'revenue', effect_size: 0.51, is_significant: true }, // unique to core
+    { source_domain: 'product', target_domain: 'retention', effect_size: 0.29, is_significant: true }, // unique to core
+  ];
+
+  it('merges org + core relationships by default', async () => {
+    const mockFetch = vi.fn(async (url: string | URL | Request) => {
+      const urlStr = typeof url === 'string' ? url : url instanceof URL ? url.toString() : url.url;
+      if (urlStr.includes(CORE_BRAIN_ORG_ID)) {
+        return {
+          ok: true, status: 200,
+          json: async () => CORE_RELATIONSHIPS,
+          text: async () => JSON.stringify(CORE_RELATIONSHIPS),
+        } as Response;
+      }
+      if (urlStr.includes('causal_relationships_statistical')) {
+        return {
+          ok: true, status: 200,
+          json: async () => ORG_RELATIONSHIPS,
+          text: async () => JSON.stringify(ORG_RELATIONSHIPS),
+        } as Response;
+      }
+      return { ok: false, status: 404, json: async () => ({}), text: async () => '{}' } as Response;
+    }) as unknown as typeof globalThis.fetch;
+
+    const client = createNexusClient({
+      supabaseUrl: 'https://test.supabase.co',
+      supabaseAnonKey: 'test-key',
+      organizationId: 'org-123',
+      fetch: mockFetch,
+    });
+
+    const result = await client.getRelationships();
+
+    // Org has 2, core has 3 but 1 overlaps (finance→cs) → 2 + 2 = 4
+    expect(result.orgCount).toBe(2);
+    expect(result.coreCount).toBe(2); // finance→cs deduped
+    expect(result.count).toBe(4);
+
+    // Verify the overlapping edge uses org version (effect_size 0.45, not 0.38)
+    const financeToCs = result.relationships.find(
+      r => r.source_domain === 'finance' && r.target_domain === 'cs'
+    );
+    expect(financeToCs?.effect_size).toBe(0.45); // org wins
+
+    // Core-only edges should be present
+    const marketingToRevenue = result.relationships.find(
+      r => r.source_domain === 'marketing' && r.target_domain === 'revenue'
+    );
+    expect(marketingToRevenue).toBeDefined();
+    expect(marketingToRevenue?.effect_size).toBe(0.51);
+  });
+
+  it('skips core fetch when includeCoreKnowledge=false', async () => {
+    const mockFetch = vi.fn(async (url: string | URL | Request) => {
+      const urlStr = typeof url === 'string' ? url : url instanceof URL ? url.toString() : url.url;
+      if (urlStr.includes('causal_relationships_statistical')) {
+        return {
+          ok: true, status: 200,
+          json: async () => ORG_RELATIONSHIPS,
+          text: async () => JSON.stringify(ORG_RELATIONSHIPS),
+        } as Response;
+      }
+      return { ok: false, status: 404, json: async () => ({}), text: async () => '{}' } as Response;
+    }) as unknown as typeof globalThis.fetch;
+
+    const client = createNexusClient({
+      supabaseUrl: 'https://test.supabase.co',
+      supabaseAnonKey: 'test-key',
+      organizationId: 'org-123',
+      fetch: mockFetch,
+    });
+
+    const result = await client.getRelationships({ includeCoreKnowledge: false });
+
+    expect(result.count).toBe(2); // Only org relationships
+    expect(result.orgCount).toBe(2);
+    expect(result.coreCount).toBe(0);
+
+    // Should have only made 1 fetch call (no core brain call)
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('skips core fetch when client IS the core brain', async () => {
+    const mockFetch = vi.fn(async (url: string | URL | Request) => {
+      const urlStr = typeof url === 'string' ? url : url instanceof URL ? url.toString() : url.url;
+      if (urlStr.includes('causal_relationships_statistical')) {
+        return {
+          ok: true, status: 200,
+          json: async () => CORE_RELATIONSHIPS,
+          text: async () => JSON.stringify(CORE_RELATIONSHIPS),
+        } as Response;
+      }
+      return { ok: false, status: 404, json: async () => ({}), text: async () => '{}' } as Response;
+    }) as unknown as typeof globalThis.fetch;
+
+    const client = createNexusClient({
+      supabaseUrl: 'https://test.supabase.co',
+      supabaseAnonKey: 'test-key',
+      organizationId: CORE_BRAIN_ORG_ID, // IS the core brain
+      fetch: mockFetch,
+    });
+
+    const result = await client.getRelationships();
+
+    expect(result.count).toBe(3); // All core relationships, no double-fetch
+    expect(result.orgCount).toBe(3);
+    expect(result.coreCount).toBe(0);
+
+    // Should have only made 1 fetch call
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('CORE_BRAIN_ORG_ID', () => {
+  it('exports the well-known core brain org ID', () => {
+    expect(CORE_BRAIN_ORG_ID).toBe('00000000-0000-4000-a000-000000000001');
   });
 });

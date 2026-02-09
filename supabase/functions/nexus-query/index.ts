@@ -5,6 +5,9 @@
  * enriches it with organizational memory (causal relationships, patterns,
  * RAG context), and returns an AI-generated response.
  *
+ * KNOWLEDGE FEDERATION: Merges org-specific knowledge with the core trained
+ * brain (universal cross-industry intelligence). Org data always takes priority.
+ *
  * Request body:
  *   { organizationId, query, domain?, agentType? }
  *
@@ -19,6 +22,48 @@ const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+/**
+ * The core brain — trained on Wikipedia, FRED, IMF, GitHub, World Bank, etc.
+ * All organizations inherit this knowledge as a baseline.
+ */
+const CORE_BRAIN_ORG_ID = '00000000-0000-4000-a000-000000000001';
+
+/**
+ * Dedup core brain data against org data.
+ * Org-specific edges take priority when the same source→target pair exists in both.
+ */
+function dedup(orgData: any[], coreData: any[], keyFn: (r: any) => string): any[] {
+  const orgKeys = new Set(orgData.map(keyFn));
+  return coreData.filter((r: any) => !orgKeys.has(keyFn(r)));
+}
+
+/**
+ * Format relationships as prompt lines.
+ */
+function formatRelationships(rels: any[]): string {
+  return rels
+    .map((r: any) => `- ${r.source_domain} → ${r.target_domain}: ${r.natural_language || `effect size ${r.effect_size}`} (p=${r.granger_p_value})`)
+    .join('\n');
+}
+
+/**
+ * Format rules/patterns as prompt lines.
+ */
+function formatRules(rules: any[]): string {
+  return rules
+    .map((r: any) => `- [${Math.round((r.confidence || 0) * 100)}%] ${r.natural_language || r.rule_type}`)
+    .join('\n');
+}
+
+/**
+ * Format memories as prompt lines.
+ */
+function formatMemories(memories: any[]): string {
+  return memories
+    .map((m: any) => `- ${m.content}`)
+    .join('\n');
+}
 
 serve(async (req: Request) => {
   // Handle CORS preflight
@@ -42,57 +87,149 @@ serve(async (req: Request) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
 
-    // 1. Fetch causal relationships for this org
-    const { data: relationships } = await supabase
-      .from('causal_relationships_statistical')
-      .select('*')
-      .eq('organization_id', organizationId)
-      .eq('is_significant', true)
-      .order('effect_size', { ascending: false })
-      .limit(10);
+    // Skip core brain fetch if the caller IS the core brain (avoid double-fetch)
+    const isCoreBrain = organizationId === CORE_BRAIN_ORG_ID;
 
-    // 2. Fetch recent patterns/rules
-    const { data: rules } = await supabase
-      .from('brain_grammar_rules')
-      .select('*')
-      .eq('organization_id', organizationId)
-      .eq('is_active', true)
-      .order('confidence', { ascending: false })
-      .limit(10);
+    // ── KNOWLEDGE FEDERATION: Fetch org + core brain data in parallel ──
+    const [
+      { data: orgRelationships },
+      { data: coreRelationships },
+      { data: orgRules },
+      { data: coreRules },
+      { data: orgMemories },
+      { data: coreMemories },
+    ] = await Promise.all([
+      // 1. Org causal relationships
+      supabase
+        .from('causal_relationships_statistical')
+        .select('*')
+        .eq('organization_id', organizationId)
+        .eq('is_significant', true)
+        .order('effect_size', { ascending: false })
+        .limit(10),
 
-    // 3. Fetch relevant memories
-    const { data: memories } = await supabase
-      .from('ai_memory')
-      .select('*')
-      .eq('organization_id', organizationId)
-      .order('importance', { ascending: false })
-      .limit(5);
+      // 2. Core brain causal relationships (baseline knowledge)
+      isCoreBrain
+        ? Promise.resolve({ data: [] })
+        : supabase
+            .from('causal_relationships_statistical')
+            .select('*')
+            .eq('organization_id', CORE_BRAIN_ORG_ID)
+            .eq('is_significant', true)
+            .order('effect_size', { ascending: false })
+            .limit(15),
 
-    // 4. Build context prompt
-    const causalContext = (relationships || [])
-      .map((r: any) => `- ${r.source_domain} → ${r.target_domain}: ${r.natural_language || `effect size ${r.effect_size}`} (p=${r.granger_p_value})`)
-      .join('\n');
+      // 3. Org patterns/rules
+      supabase
+        .from('brain_grammar_rules')
+        .select('*')
+        .eq('organization_id', organizationId)
+        .eq('is_active', true)
+        .order('confidence', { ascending: false })
+        .limit(10),
 
-    const patternContext = (rules || [])
-      .map((r: any) => `- [${Math.round((r.confidence || 0) * 100)}%] ${r.natural_language || r.rule_type}`)
-      .join('\n');
+      // 4. Core brain patterns/rules
+      isCoreBrain
+        ? Promise.resolve({ data: [] })
+        : supabase
+            .from('brain_grammar_rules')
+            .select('*')
+            .eq('organization_id', CORE_BRAIN_ORG_ID)
+            .eq('is_active', true)
+            .order('confidence', { ascending: false })
+            .limit(10),
 
-    const memoryContext = (memories || [])
-      .map((m: any) => `- ${m.content}`)
-      .join('\n');
+      // 5. Org memories
+      supabase
+        .from('ai_memory')
+        .select('*')
+        .eq('organization_id', organizationId)
+        .order('importance', { ascending: false })
+        .limit(5),
 
-    const systemPrompt = `You are a strategic intelligence assistant with access to organizational memory.
+      // 6. Core brain memories (general intelligence)
+      isCoreBrain
+        ? Promise.resolve({ data: [] })
+        : supabase
+            .from('ai_memory')
+            .select('*')
+            .eq('organization_id', CORE_BRAIN_ORG_ID)
+            .order('importance', { ascending: false })
+            .limit(5),
+    ]);
 
-## Discovered Causal Relationships
-${causalContext || 'No causal relationships discovered yet.'}
+    // ── MERGE: Org takes priority, core fills gaps ──
+    const orgRels = orgRelationships || [];
+    const uniqueCoreRels = dedup(
+      orgRels,
+      coreRelationships || [],
+      (r) => `${r.source_domain}::${r.target_domain}`,
+    );
 
-## Learned Patterns
-${patternContext || 'No patterns learned yet.'}
+    const orgRulesList = orgRules || [];
+    const uniqueCoreRules = dedup(
+      orgRulesList,
+      coreRules || [],
+      (r) => `${r.domain}::${r.rule_type}::${(r.natural_language || '').substring(0, 50)}`,
+    );
 
-## Organizational Memory
-${memoryContext || 'No memory entries yet.'}
+    const orgMems = orgMemories || [];
+    const uniqueCoreMems = dedup(
+      orgMems,
+      coreMemories || [],
+      (m) => `${m.domain}::${(m.content || '').substring(0, 80)}`,
+    );
 
-Use these insights to provide data-driven, actionable answers. Reference specific causal relationships and patterns when relevant. Be concise and strategic.`;
+    // ── BUILD LLM SYSTEM PROMPT with labeled sections ──
+    const orgCausalText = formatRelationships(orgRels);
+    const coreCausalText = formatRelationships(uniqueCoreRels);
+    const orgPatternText = formatRules(orgRulesList);
+    const corePatternText = formatRules(uniqueCoreRules);
+    const orgMemoryText = formatMemories(orgMems);
+    const coreMemoryText = formatMemories(uniqueCoreMems);
+
+    // Assemble sections — only include non-empty sections
+    const promptSections: string[] = [];
+    promptSections.push('You are a strategic intelligence assistant with access to organizational memory and cross-industry knowledge.');
+
+    if (orgCausalText) {
+      promptSections.push(`## Your Organization's Discovered Causal Relationships\n${orgCausalText}`);
+    }
+    if (coreCausalText) {
+      promptSections.push(`## Universal Knowledge Base (Cross-Industry Intelligence)\n${coreCausalText}`);
+    }
+    if (!orgCausalText && !coreCausalText) {
+      promptSections.push('## Causal Relationships\nNo causal relationships discovered yet.');
+    }
+
+    if (orgPatternText) {
+      promptSections.push(`## Your Organization's Learned Patterns\n${orgPatternText}`);
+    }
+    if (corePatternText) {
+      promptSections.push(`## Universal Patterns\n${corePatternText}`);
+    }
+    if (!orgPatternText && !corePatternText) {
+      promptSections.push('## Learned Patterns\nNo patterns learned yet.');
+    }
+
+    if (orgMemoryText) {
+      promptSections.push(`## Organizational Memory\n${orgMemoryText}`);
+    }
+    if (coreMemoryText) {
+      promptSections.push(`## General Intelligence\n${coreMemoryText}`);
+    }
+    if (!orgMemoryText && !coreMemoryText) {
+      promptSections.push('## Memory\nNo memory entries yet.');
+    }
+
+    promptSections.push('Use these insights to provide data-driven, actionable answers. When referencing causal relationships, distinguish between your organization\'s specific discoveries and universal cross-industry patterns. Be concise and strategic.');
+
+    const systemPrompt = promptSections.join('\n\n');
+
+    // Combined data for response context
+    const allRelationships = [...orgRels, ...uniqueCoreRels];
+    const allRules = [...orgRulesList, ...uniqueCoreRules];
+    const allMemories = [...orgMems, ...uniqueCoreMems];
 
     // 5. Call LLM (Anthropic Claude preferred, OpenAI fallback)
     const anthropicKey = Deno.env.get('ANTHROPIC_API_KEY');
@@ -103,11 +240,16 @@ Use these insights to provide data-driven, actionable answers. Reference specifi
         JSON.stringify({
           answer: 'LLM not configured. Context retrieved successfully.',
           context: {
-            causal: relationships || [],
-            patterns: rules || [],
-            memories: memories || [],
+            causal: allRelationships,
+            patterns: allRules,
+            memories: allMemories,
           },
-          meta: { llmConfigured: false },
+          meta: {
+            llmConfigured: false,
+            federated: !isCoreBrain,
+            orgSpecificRelationships: orgRels.length,
+            coreBrainRelationships: uniqueCoreRels.length,
+          },
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
@@ -170,22 +312,31 @@ Use these insights to provide data-driven, actionable answers. Reference specifi
       input_summary: query.substring(0, 200),
       output_summary: answer.substring(0, 200),
       tokens_used: tokensUsed,
-      metadata: { domain, model: modelUsed },
+      metadata: {
+        domain,
+        model: modelUsed,
+        federated: !isCoreBrain,
+        orgRelationships: orgRels.length,
+        coreRelationships: uniqueCoreRels.length,
+      },
     });
 
     return new Response(
       JSON.stringify({
         answer,
         context: {
-          causal: relationships || [],
-          patterns: rules || [],
-          memories: memories || [],
+          causal: allRelationships,
+          patterns: allRules,
+          memories: allMemories,
         },
         meta: {
           model: modelUsed,
           tokensUsed,
-          causalRelationshipsUsed: (relationships || []).length,
-          patternsUsed: (rules || []).length,
+          causalRelationshipsUsed: allRelationships.length,
+          patternsUsed: allRules.length,
+          federated: !isCoreBrain,
+          orgSpecificRelationships: orgRels.length,
+          coreBrainRelationships: uniqueCoreRels.length,
         },
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
