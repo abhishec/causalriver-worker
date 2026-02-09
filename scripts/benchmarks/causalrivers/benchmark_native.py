@@ -44,6 +44,7 @@ from nexusbrain_granger import (
     nexusbrain_apex,
     nexusbrain_apex_v2,
     nexusbrain_apex_v3,
+    nexusbrain_apex_final,
 )
 
 
@@ -294,6 +295,12 @@ def main():
     if "nexusbrain_apex_v3" in args.methods:
         methods["NB Apex v3"] = (
             nexusbrain_method_wrapper(nexusbrain_apex_v3, max_lag=args.max_lag),
+            var_cfg,
+        )
+
+    if "nexusbrain_apex_final" in args.methods:
+        methods["NB Apex Final"] = (
+            nexusbrain_method_wrapper(nexusbrain_apex_final, max_lag=args.max_lag),
             var_cfg,
         )
 
