@@ -15,3 +15,4 @@ export {
 export { createHubSpotConnector } from './hubspot';
 export { createStripeConnector } from './stripe';
 export { createSupportConnector } from './support';
+export { createBrainOSConnector, brainOSConnector } from './brain-os';
