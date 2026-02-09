@@ -104,11 +104,17 @@ export {
   validatePattern,
   registerPattern,
   discoverPatterns,
+  mineSequentialPatterns,
+  sequentialPatternsToDiscovered,
+  mineTemporalAssociationRules,
   type DiscoveredPattern,
   type PatternEvidence,
   type AssociationRule,
   type EntityCluster,
   type EntityFeatures,
+  type SequentialPattern,
+  type TemporalEvent,
+  type TemporalAssociationRule,
 } from './pattern-detector';
 
 export {

@@ -1,11 +1,19 @@
 /**
  * Nexus Memory Stack - Embedding Engine
  *
- * Core embedding generation using n-gram hashing.
- * This is a lightweight approach that doesn't require neural networks
- * and can run on edge functions without GPU.
+ * Core embedding generation with automatic model routing.
  *
- * Algorithm:
+ * When a neural embedding API key is provided (OpenAI, Mixedbread),
+ * the engine uses real transformer-based embeddings for true semantic
+ * understanding. Otherwise, falls back to n-gram hashing for zero-config
+ * edge function deployment.
+ *
+ * Model priority:
+ * 1. OpenAI text-embedding-3-small (1536 dims → reduced to target)
+ * 2. Mixedbread mxbai-embed-large-v1 (1024 dims → reduced to target)
+ * 3. N-gram hashing fallback (384 dims, no API required)
+ *
+ * Algorithm (fallback):
  * 1. Character trigram hashing (weight: 1x)
  * 2. Word unigram hashing (weight: 2x)
  * 3. Word bigram hashing (weight: 1.5x)
@@ -13,6 +21,11 @@
  */
 
 import type { EmbeddingConfig, EntityFormatter, SyncResult, EmbeddingMetadata } from '../../types';
+import {
+  generateNeuralEmbedding as generateNeural,
+  type NeuralEmbeddingConfig,
+  type EmbeddingModel,
+} from './neural-embedding-engine';
 
 // ============================================================================
 // CORE HASHING FUNCTIONS
@@ -182,14 +195,55 @@ export function createEmbeddingEngine(config: EmbeddingConfig) {
     useAIEnhancement = false,
     aiApiKey,
     aiModel = 'claude-3-haiku-20240307',
+    embeddingModel,
+    embeddingApiKey,
+    embeddingApiEndpoint,
   } = config;
+
+  // Build neural config if an embedding model + API key are provided
+  const neuralConfig: NeuralEmbeddingConfig | null =
+    embeddingModel && embeddingApiKey
+      ? {
+          model: embeddingModel as EmbeddingModel,
+          apiKey: embeddingApiKey,
+          apiEndpoint: embeddingApiEndpoint,
+          targetDimension: dimensions,
+          enableCache: true,
+          cacheTTL: 3600,
+        }
+      : null;
+
+  /**
+   * Generate embedding — routes through neural model when configured,
+   * falls back to n-gram hashing otherwise.
+   */
+  async function generateSmartEmbedding(text: string): Promise<number[]> {
+    if (neuralConfig) {
+      try {
+        const result = await generateNeural(text, neuralConfig);
+        return result.embedding;
+      } catch {
+        // Neural failed — fall back to n-gram
+      }
+    }
+    return generateEmbedding(text, dimensions);
+  }
 
   return {
     /**
-     * Generate embedding for text
+     * Generate embedding for text (sync — n-gram only for backward compat)
      */
     generateEmbedding: (text: string): number[] => {
       return generateEmbedding(text, dimensions);
+    },
+
+    /**
+     * Generate embedding with neural model routing.
+     * Uses transformer-based model when configured, n-gram fallback otherwise.
+     * This is the RECOMMENDED method for production use.
+     */
+    generateEmbeddingAsync: async (text: string): Promise<number[]> => {
+      return generateSmartEmbedding(text);
     },
 
     /**
@@ -202,8 +256,23 @@ export function createEmbeddingEngine(config: EmbeddingConfig) {
         contentText = await extractSemanticConcepts(text, aiApiKey, aiModel);
       }
 
+      // Route through neural model if configured
+      if (neuralConfig) {
+        try {
+          const result = await generateNeural(contentText, neuralConfig);
+          return result.embedding;
+        } catch {
+          // Fall back to n-gram
+        }
+      }
+
       return generateEmbedding(contentText, dimensions);
     },
+
+    /**
+     * Check if neural embeddings are configured and available
+     */
+    isNeuralEnabled: (): boolean => neuralConfig !== null,
 
     /**
      * Format an entity to embeddable text
@@ -266,8 +335,8 @@ export function createEmbeddingEngine(config: EmbeddingConfig) {
           return { synced: false, skipped: true };
         }
 
-        // Generate embedding
-        const embedding = generateEmbedding(contentText, dimensions);
+        // Generate embedding — use neural when available
+        const embedding = await generateSmartEmbedding(contentText);
 
         // Build metadata
         const metadata: EmbeddingMetadata = {

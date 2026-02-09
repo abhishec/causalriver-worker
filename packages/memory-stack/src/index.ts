@@ -110,6 +110,14 @@ export {
   type DiscoveryResult,
 } from './causality/causal-discovery-runner';
 
+// Async Discovery Worker (non-blocking causal analysis for production)
+export {
+  createDiscoveryWorkerPool,
+  type AsyncDiscoveryJob,
+  type AsyncDiscoveryConfig,
+  type DiscoveryWorkerPool,
+} from './causality/async-discovery-worker';
+
 // Signal to Time Series
 export {
   signalsToTimeSeries,
@@ -326,17 +334,23 @@ export {
   type Interval,
 } from './learning/confidence-intervals';
 
-// NEW: Pattern Discovery
+// NEW: Pattern Discovery (association rules, sequential patterns, temporal rules)
 export {
   discoverPatterns,
   mineAssociationRules,
   clusterEntities,
   validatePattern,
   registerPattern,
+  mineSequentialPatterns,
+  sequentialPatternsToDiscovered,
+  mineTemporalAssociationRules,
   type DiscoveredPattern,
   type PatternEvidence,
   type AssociationRule,
   type EntityCluster,
+  type SequentialPattern,
+  type TemporalEvent,
+  type TemporalAssociationRule,
 } from './learning/pattern-detector';
 
 export {
@@ -512,6 +526,23 @@ export {
   type ExtractedEntity,
   type EntityExtractionConfig,
 } from './core/entity-extraction';
+
+// ============================================================================
+// OBSERVABILITY - Structured Logging & Metrics
+// ============================================================================
+
+export {
+  createLogger,
+  getDefaultLogger,
+  createMetrics,
+  getDefaultMetrics,
+  type NexusLogger,
+  type LoggerConfig,
+  type LogLevel,
+  type NexusMetrics,
+  type MetricsSnapshot,
+  type MetricLabels,
+} from './observability';
 
 // ============================================================================
 // TYPES

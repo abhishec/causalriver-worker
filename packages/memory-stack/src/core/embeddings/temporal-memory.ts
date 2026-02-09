@@ -421,11 +421,227 @@ function cosineSimilarity(a: number[], b: number[]): number {
 }
 
 // ============================================================================
+// SLEEP-LIKE CONSOLIDATION
+// ============================================================================
+
+/**
+ * Consolidation scheduling result
+ */
+export interface ConsolidationResult {
+  /** Memories promoted from short-term to long-term */
+  promoted: TemporalMemory[];
+  /** Memories pruned (actively forgotten) */
+  pruned: TemporalMemory[];
+  /** Memories merged (duplicates consolidated) */
+  merged: TemporalMemory[];
+  /** Memories with reinforcement adjustment */
+  adjusted: TemporalMemory[];
+  /** Total memories after consolidation */
+  remainingCount: number;
+  /** Duration of consolidation cycle in ms */
+  durationMs: number;
+}
+
+/**
+ * Run a "sleep-like" consolidation cycle.
+ *
+ * Inspired by human memory consolidation during sleep:
+ * 1. REPLAY: Re-evaluate importance of recent memories
+ * 2. PROMOTE: Move high-importance short-term → long-term (reduce decay rate)
+ * 3. PRUNE: Actively forget low-value, low-access memories
+ * 4. CONSOLIDATE: Merge near-duplicate memories
+ * 5. REWEIGHT: Adjust reinforcement scores based on accuracy
+ *
+ * This should be called periodically (e.g., daily via cron) to
+ * keep the memory store healthy and relevant.
+ *
+ * @example
+ * ```typescript
+ * const result = runConsolidation(allMemories, {
+ *   promotionThreshold: 0.7,
+ *   pruningThreshold: 0.15,
+ *   mergeThreshold: 0.92,
+ * });
+ * console.log(`Promoted: ${result.promoted.length}, Pruned: ${result.pruned.length}`);
+ * ```
+ */
+export function runConsolidation(
+  memories: TemporalMemory[],
+  options: {
+    /** Minimum importance score to promote (default: 0.7) */
+    promotionThreshold?: number;
+    /** Below this importance score AND low access, prune (default: 0.15) */
+    pruningThreshold?: number;
+    /** Embedding similarity threshold for merging (default: 0.92) */
+    mergeThreshold?: number;
+    /** Config for decay calculations */
+    config?: TemporalMemoryConfig;
+  } = {}
+): ConsolidationResult {
+  const startTime = performance.now();
+  const {
+    promotionThreshold = 0.7,
+    pruningThreshold = 0.15,
+    mergeThreshold = 0.92,
+    config = DEFAULT_TEMPORAL_CONFIG,
+  } = options;
+
+  const promoted: TemporalMemory[] = [];
+  const pruned: TemporalMemory[] = [];
+  const adjusted: TemporalMemory[] = [];
+  const surviving: TemporalMemory[] = [];
+
+  // Phase 1: REPLAY — re-evaluate each memory
+  for (const memory of memories) {
+    const decay = applyTemporalDecay(memory, config);
+    const accuracy = computeAccuracy(memory);
+    const importanceScore = computeImportanceScore(memory, decay, accuracy);
+
+    // Phase 2: PROMOTE — high-importance short-term memories become long-term
+    if (importanceScore >= promotionThreshold && memory.type !== 'fact' && memory.type !== 'rule') {
+      // Reduce decay rate to make it last longer (simulate LTP)
+      const promotedMemory: TemporalMemory = {
+        ...memory,
+        decayRate: memory.decayRate * 0.5, // Halve decay rate
+        baseRelevance: Math.min(1.0, memory.baseRelevance * 1.2),
+        currentRelevance: decay.newRelevance,
+      };
+      promoted.push(promotedMemory);
+      surviving.push(promotedMemory);
+      continue;
+    }
+
+    // Phase 3: PRUNE — actively forget low-value memories
+    if (decay.shouldPrune || (importanceScore < pruningThreshold && memory.accessCount < 2)) {
+      pruned.push(memory);
+      continue;
+    }
+
+    // Phase 5: REWEIGHT — adjust reinforcement based on accuracy trend
+    if (memory.accuracyHistory.length >= 3) {
+      const recentAccuracy = memory.accuracyHistory.slice(-3).reduce((a, b) => a + b, 0) / 3;
+      const overallAccuracy = accuracy;
+
+      if (recentAccuracy > overallAccuracy + 0.1) {
+        // Getting more accurate — boost
+        const adj: TemporalMemory = {
+          ...memory,
+          reinforcementScore: Math.min(2, memory.reinforcementScore + 0.1),
+          currentRelevance: decay.newRelevance,
+        };
+        adjusted.push(adj);
+        surviving.push(adj);
+      } else if (recentAccuracy < overallAccuracy - 0.2) {
+        // Getting less accurate — penalize
+        const adj: TemporalMemory = {
+          ...memory,
+          reinforcementScore: Math.max(0, memory.reinforcementScore - 0.15),
+          currentRelevance: decay.newRelevance,
+        };
+        adjusted.push(adj);
+        surviving.push(adj);
+      } else {
+        surviving.push({ ...memory, currentRelevance: decay.newRelevance });
+      }
+    } else {
+      surviving.push({ ...memory, currentRelevance: decay.newRelevance });
+    }
+  }
+
+  // Phase 4: CONSOLIDATE — merge near-duplicates
+  const merged: TemporalMemory[] = [];
+  const consolidated = consolidateMemories(surviving, mergeThreshold);
+  if (consolidated.length < surviving.length) {
+    const survivingIds = new Set(consolidated.map(m => m.id));
+    for (const m of surviving) {
+      if (!survivingIds.has(m.id)) {
+        merged.push(m);
+      }
+    }
+  }
+
+  return {
+    promoted,
+    pruned,
+    merged,
+    adjusted,
+    remainingCount: consolidated.length,
+    durationMs: performance.now() - startTime,
+  };
+}
+
+/**
+ * Compute an importance score for consolidation decisions.
+ *
+ * Factors:
+ * - Current relevance (post-decay)
+ * - Access frequency (how often it's been used)
+ * - Accuracy (how reliable it's been)
+ * - Reinforcement history
+ */
+function computeImportanceScore(
+  memory: TemporalMemory,
+  decay: DecayResult,
+  accuracy: number
+): number {
+  const relevanceWeight = 0.35;
+  const accessWeight = 0.20;
+  const accuracyWeight = 0.25;
+  const reinforcementWeight = 0.20;
+
+  const normalizedAccess = Math.min(1, Math.log(1 + memory.accessCount) / Math.log(20));
+  const normalizedReinforcement = Math.min(1, memory.reinforcementScore / 2);
+
+  return (
+    decay.newRelevance * relevanceWeight +
+    normalizedAccess * accessWeight +
+    accuracy * accuracyWeight +
+    normalizedReinforcement * reinforcementWeight
+  );
+}
+
+/**
+ * Importance-weighted decay: memories that are more important
+ * decay slower, while trivial memories fade faster.
+ *
+ * This is a more nuanced version of applyTemporalDecay that
+ * uses the importance score to modulate the decay rate.
+ */
+export function applyImportanceWeightedDecay(
+  memory: TemporalMemory,
+  importanceFactor: number = 1.0,
+  config: TemporalMemoryConfig = DEFAULT_TEMPORAL_CONFIG
+): DecayResult {
+  const now = new Date();
+  const daysSinceAccess =
+    (now.getTime() - memory.lastAccessedAt.getTime()) / (1000 * 60 * 60 * 24);
+
+  const halfLife = config.halfLifeDays[memory.type];
+  // Scale half-life by importance: higher importance = slower decay
+  const adjustedHalfLife = halfLife * (0.5 + importanceFactor);
+  const lambda = Math.log(2) / adjustedHalfLife;
+
+  const decayFactor = Math.exp(-lambda * daysSinceAccess);
+  const decayedRelevance = memory.baseRelevance * decayFactor;
+  const reinforcedRelevance = decayedRelevance * (1 + memory.reinforcementScore);
+  const newRelevance = Math.max(reinforcedRelevance, config.minRelevance);
+
+  return {
+    previousRelevance: memory.currentRelevance,
+    newRelevance,
+    decayFactor,
+    daysSinceAccess,
+    shouldPrune: newRelevance <= config.minRelevance && memory.accessCount < 3,
+  };
+}
+
+// ============================================================================
 // EXPORTS
 // ============================================================================
 
 export const TemporalMemoryManager = {
   applyTemporalDecay,
+  applyImportanceWeightedDecay,
   recordAccess,
   batchApplyDecay,
   reinforceMemory,
@@ -434,5 +650,6 @@ export const TemporalMemoryManager = {
   rankByRelevance,
   createTemporalMemory,
   identifyPrunable,
-  consolidateMemories
+  consolidateMemories,
+  runConsolidation,
 };

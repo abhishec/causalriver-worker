@@ -27,6 +27,18 @@ export interface EmbeddingConfig {
   aiApiKey?: string;
   /** AI model for semantic extraction (e.g., 'claude-3-haiku-20240307') */
   aiModel?: string;
+  /**
+   * Neural embedding provider to use for real semantic embeddings.
+   * When set with a valid apiKey, the engine uses transformer-based models
+   * instead of n-gram hashing. Falls back to n-gram on API failure.
+   *
+   * Options: 'openai-text-embedding-3-small' | 'openai-text-embedding-ada-002' | 'mxbai-embed-large-v1'
+   */
+  embeddingModel?: string;
+  /** API key for embedding model provider (OpenAI or Mixedbread) */
+  embeddingApiKey?: string;
+  /** Custom API endpoint (for self-hosted models) */
+  embeddingApiEndpoint?: string;
 }
 
 /**

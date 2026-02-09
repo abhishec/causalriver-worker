@@ -579,13 +579,397 @@ export function registerPattern(
 }
 
 // ============================================================================
+// SEQUENTIAL PATTERN MINING
+// ============================================================================
+
+/**
+ * A sequential pattern — ordered sequence of events with temporal gaps.
+ *
+ * Unlike association rules (unordered co-occurrence), sequential patterns
+ * capture ORDER: "A happens, then B, then C".
+ */
+export interface SequentialPattern {
+  /** Ordered sequence of events */
+  sequence: string[];
+  /** How often this sequence appears */
+  support: number;
+  /** Average time gaps between steps (in same units as input) */
+  avgGaps: number[];
+  /** Minimum and maximum observed gaps between steps */
+  gapRanges: Array<{ min: number; max: number }>;
+  /** How many entities/sessions exhibited this sequence */
+  instanceCount: number;
+}
+
+/**
+ * A temporal event — an event with a timestamp.
+ */
+export interface TemporalEvent {
+  /** Event type / label */
+  event: string;
+  /** Timestamp (numeric — could be epoch ms, day index, etc.) */
+  timestamp: number;
+  /** Entity or session this event belongs to */
+  entityId: string;
+}
+
+/**
+ * Mine sequential patterns from time-ordered events.
+ *
+ * Groups events by entity/session, sorts by time, then finds
+ * frequent ordered subsequences using a PrefixSpan-inspired approach.
+ *
+ * @example
+ * ```ts
+ * const events: TemporalEvent[] = [
+ *   { event: 'deployment', timestamp: 1, entityId: 'sprint_1' },
+ *   { event: 'bug_report', timestamp: 3, entityId: 'sprint_1' },
+ *   { event: 'support_escalation', timestamp: 5, entityId: 'sprint_1' },
+ *   { event: 'deployment', timestamp: 10, entityId: 'sprint_2' },
+ *   { event: 'bug_report', timestamp: 12, entityId: 'sprint_2' },
+ *   { event: 'support_escalation', timestamp: 15, entityId: 'sprint_2' },
+ * ];
+ *
+ * const patterns = mineSequentialPatterns(events, {
+ *   minSupport: 0.3,
+ *   maxGap: 10,
+ *   maxLength: 4,
+ * });
+ * // => [{ sequence: ['deployment', 'bug_report', 'support_escalation'], support: 1.0, ... }]
+ * ```
+ */
+export function mineSequentialPatterns(
+  events: TemporalEvent[],
+  config: {
+    /** Minimum support (0-1) */
+    minSupport?: number;
+    /** Maximum time gap between consecutive events in a pattern */
+    maxGap?: number;
+    /** Maximum sequence length */
+    maxLength?: number;
+  } = {}
+): SequentialPattern[] {
+  const { minSupport = 0.1, maxGap = Infinity, maxLength = 5 } = config;
+
+  // Group events by entity, sort by time
+  const entitySequences = new Map<string, TemporalEvent[]>();
+  for (const e of events) {
+    const seq = entitySequences.get(e.entityId) || [];
+    seq.push(e);
+    entitySequences.set(e.entityId, seq);
+  }
+  for (const seq of entitySequences.values()) {
+    seq.sort((a, b) => a.timestamp - b.timestamp);
+  }
+
+  const totalEntities = entitySequences.size;
+  if (totalEntities === 0) return [];
+  const minCount = Math.max(1, Math.ceil(totalEntities * minSupport));
+
+  // Count frequent 1-sequences
+  const eventCounts = new Map<string, number>();
+  for (const seq of entitySequences.values()) {
+    const seen = new Set<string>();
+    for (const e of seq) {
+      if (!seen.has(e.event)) {
+        eventCounts.set(e.event, (eventCounts.get(e.event) || 0) + 1);
+        seen.add(e.event);
+      }
+    }
+  }
+
+  const frequentItems = Array.from(eventCounts.entries())
+    .filter(([_, count]) => count >= minCount)
+    .map(([event]) => event);
+
+  // Build patterns using depth-first search (PrefixSpan-style)
+  const patterns: SequentialPattern[] = [];
+  const seqArrays = Array.from(entitySequences.values());
+
+  function extend(
+    prefix: string[],
+    prefixInstances: Array<{ entityIdx: number; lastPos: number; timestamps: number[] }>
+  ): void {
+    if (prefix.length >= maxLength) return;
+
+    // For each possible next event
+    const nextCandidates = new Map<string, Array<{ entityIdx: number; lastPos: number; timestamps: number[] }>>();
+
+    for (const inst of prefixInstances) {
+      const seq = seqArrays[inst.entityIdx];
+      const seenEvents = new Set<string>(); // One match per entity per extension
+
+      for (let j = inst.lastPos + 1; j < seq.length; j++) {
+        const e = seq[j];
+        // Check gap constraint
+        if (maxGap < Infinity && e.timestamp - seq[inst.lastPos].timestamp > maxGap) break;
+
+        if (frequentItems.includes(e.event) && !seenEvents.has(e.event)) {
+          seenEvents.add(e.event);
+          const instances = nextCandidates.get(e.event) || [];
+          instances.push({
+            entityIdx: inst.entityIdx,
+            lastPos: j,
+            timestamps: [...inst.timestamps, e.timestamp],
+          });
+          nextCandidates.set(e.event, instances);
+        }
+      }
+    }
+
+    // Check which extensions are frequent
+    for (const [event, instances] of nextCandidates) {
+      // Count distinct entities
+      const entitySet = new Set(instances.map(i => i.entityIdx));
+      if (entitySet.size < minCount) continue;
+
+      const newPrefix = [...prefix, event];
+      const support = entitySet.size / totalEntities;
+
+      // Compute gap statistics
+      const avgGaps: number[] = [];
+      const gapRanges: Array<{ min: number; max: number }> = [];
+
+      for (let g = 0; g < newPrefix.length - 1; g++) {
+        const gaps: number[] = [];
+        for (const inst of instances) {
+          if (inst.timestamps.length > g + 1) {
+            gaps.push(inst.timestamps[g + 1] - inst.timestamps[g]);
+          }
+        }
+        if (gaps.length > 0) {
+          avgGaps.push(gaps.reduce((a, b) => a + b, 0) / gaps.length);
+          gapRanges.push({ min: Math.min(...gaps), max: Math.max(...gaps) });
+        }
+      }
+
+      patterns.push({
+        sequence: newPrefix,
+        support,
+        avgGaps,
+        gapRanges,
+        instanceCount: entitySet.size,
+      });
+
+      // Recurse
+      extend(newPrefix, instances);
+    }
+  }
+
+  // Start with each frequent item as a prefix
+  for (const item of frequentItems) {
+    const instances: Array<{ entityIdx: number; lastPos: number; timestamps: number[] }> = [];
+
+    for (let si = 0; si < seqArrays.length; si++) {
+      const seq = seqArrays[si];
+      for (let j = 0; j < seq.length; j++) {
+        if (seq[j].event === item) {
+          instances.push({ entityIdx: si, lastPos: j, timestamps: [seq[j].timestamp] });
+          break; // First occurrence per entity
+        }
+      }
+    }
+
+    if (instances.length >= minCount) {
+      patterns.push({
+        sequence: [item],
+        support: instances.length / totalEntities,
+        avgGaps: [],
+        gapRanges: [],
+        instanceCount: instances.length,
+      });
+      extend([item], instances);
+    }
+  }
+
+  // Sort by support and length (prefer longer, more specific patterns)
+  return patterns
+    .filter(p => p.sequence.length >= 2) // Only multi-step patterns
+    .sort((a, b) => {
+      if (b.sequence.length !== a.sequence.length) return b.sequence.length - a.sequence.length;
+      return b.support - a.support;
+    });
+}
+
+/**
+ * Convert sequential patterns to DiscoveredPattern format for integration
+ * with the rest of the learning pipeline.
+ */
+export function sequentialPatternsToDiscovered(
+  seqPatterns: SequentialPattern[],
+  totalObservations: number
+): DiscoveredPattern[] {
+  return seqPatterns.map(sp => {
+    const observedCount = sp.instanceCount;
+    // Expected by chance: product of individual probabilities × total
+    const expectedCount = Math.max(1, Math.round(totalObservations * Math.pow(sp.support, sp.sequence.length)));
+
+    const evidence = validatePattern(
+      observedCount,
+      expectedCount,
+      totalObservations,
+      seqPatterns.length
+    );
+
+    const gapDesc = sp.avgGaps.length > 0
+      ? ` (avg gaps: ${sp.avgGaps.map(g => g.toFixed(1)).join(' → ')})`
+      : '';
+
+    return registerPattern(
+      sp.sequence.join(' → '),
+      `Sequential pattern: ${sp.sequence.join(' then ')} observed in ${(sp.support * 100).toFixed(0)}% of entities${gapDesc}`,
+      [...new Set(sp.sequence)],
+      evidence
+    );
+  });
+}
+
+// ============================================================================
+// TEMPORAL ASSOCIATION RULES
+// ============================================================================
+
+/**
+ * A temporal association rule — like association rules but with time ordering.
+ * "When A occurs, B follows within N time units"
+ */
+export interface TemporalAssociationRule extends AssociationRule {
+  /** Average time lag from antecedent to consequent */
+  avgLag: number;
+  /** Standard deviation of time lag */
+  lagStdDev: number;
+  /** Temporal direction: 'forward' (A before B) or 'bidirectional' */
+  direction: 'forward' | 'bidirectional';
+}
+
+/**
+ * Mine temporal association rules from timestamped events.
+ *
+ * Unlike regular association rules, these capture temporal ordering:
+ * "A → B within T time units" vs "A and B co-occur"
+ *
+ * This bridges the gap between plain association rules and full
+ * causal discovery — useful for moderate-confidence "tends to precede".
+ */
+export function mineTemporalAssociationRules(
+  events: TemporalEvent[],
+  config: {
+    /** Maximum time window to consider events as related */
+    maxWindow?: number;
+    /** Minimum support */
+    minSupport?: number;
+    /** Minimum confidence */
+    minConfidence?: number;
+    /** Minimum lift */
+    minLift?: number;
+  } = {}
+): TemporalAssociationRule[] {
+  const {
+    maxWindow = Infinity,
+    minSupport = 0.1,
+    minConfidence = 0.5,
+    minLift = 1.2,
+  } = config;
+
+  // Group by entity
+  const entitySequences = new Map<string, TemporalEvent[]>();
+  for (const e of events) {
+    const seq = entitySequences.get(e.entityId) || [];
+    seq.push(e);
+    entitySequences.set(e.entityId, seq);
+  }
+  for (const seq of entitySequences.values()) {
+    seq.sort((a, b) => a.timestamp - b.timestamp);
+  }
+
+  const totalEntities = entitySequences.size;
+  if (totalEntities < 2) return [];
+
+  // Count all ordered pairs (A before B within window)
+  const pairCounts = new Map<string, { count: number; lags: number[] }>();
+  const eventEntityCounts = new Map<string, number>();
+
+  for (const seq of entitySequences.values()) {
+    const seen = new Set<string>();
+    for (const e of seq) {
+      if (!seen.has(e.event)) {
+        eventEntityCounts.set(e.event, (eventEntityCounts.get(e.event) || 0) + 1);
+        seen.add(e.event);
+      }
+    }
+
+    // Check ordered pairs
+    const pairsSeen = new Set<string>();
+    for (let i = 0; i < seq.length; i++) {
+      for (let j = i + 1; j < seq.length; j++) {
+        if (seq[j].event === seq[i].event) continue;
+        const lag = seq[j].timestamp - seq[i].timestamp;
+        if (lag > maxWindow) break; // Events are sorted, so all subsequent are further
+
+        const key = `${seq[i].event}|||${seq[j].event}`;
+        if (pairsSeen.has(key)) continue;
+        pairsSeen.add(key);
+
+        const entry = pairCounts.get(key) || { count: 0, lags: [] };
+        entry.count++;
+        entry.lags.push(lag);
+        pairCounts.set(key, entry);
+      }
+    }
+  }
+
+  // Generate temporal rules
+  const rules: TemporalAssociationRule[] = [];
+
+  for (const [key, { count, lags }] of pairCounts) {
+    const [antecedentEvent, consequentEvent] = key.split('|||');
+    const support = count / totalEntities;
+    if (support < minSupport) continue;
+
+    const antecedentCount = eventEntityCounts.get(antecedentEvent) || 0;
+    const consequentCount = eventEntityCounts.get(consequentEvent) || 0;
+    if (antecedentCount === 0) continue;
+
+    const confidence = count / antecedentCount;
+    if (confidence < minConfidence) continue;
+
+    const consequentSupport = consequentCount / totalEntities;
+    const lift = consequentSupport > 0 ? confidence / consequentSupport : 0;
+    if (lift < minLift) continue;
+
+    // Compute lag statistics
+    const avgLag = lags.reduce((a, b) => a + b, 0) / lags.length;
+    const lagVariance = lags.reduce((sum, l) => sum + Math.pow(l - avgLag, 2), 0) / lags.length;
+    const lagStdDev = Math.sqrt(lagVariance);
+
+    // Check if reverse direction also exists (bidirectional)
+    const reverseKey = `${consequentEvent}|||${antecedentEvent}`;
+    const reverseCount = pairCounts.get(reverseKey)?.count || 0;
+    const direction = reverseCount > count * 0.5 ? 'bidirectional' as const : 'forward' as const;
+
+    rules.push({
+      antecedent: [antecedentEvent],
+      consequent: [consequentEvent],
+      support,
+      confidence,
+      lift,
+      avgLag,
+      lagStdDev,
+      direction,
+    });
+  }
+
+  return rules.sort((a, b) => b.lift - a.lift);
+}
+
+// ============================================================================
 // MAIN DISCOVERY ENTRY POINT
 // ============================================================================
 
 /**
  * Main pattern discovery function
- * 
- * Combines association mining, clustering, and significance testing.
+ *
+ * Combines association mining, sequential patterns, temporal rules,
+ * clustering, and significance testing.
  */
 export function discoverPatterns(
   transactions: string[][],
@@ -596,11 +980,17 @@ export function discoverPatterns(
     minLift?: number;
     numClusters?: number;
     significanceLevel?: number;
+    /** Temporal events for sequential pattern mining */
+    temporalEvents?: TemporalEvent[];
+    /** Max time gap for sequential patterns */
+    maxGap?: number;
   } = {}
 ): {
   rules: AssociationRule[];
   clusters: EntityCluster[];
   patterns: DiscoveredPattern[];
+  sequentialPatterns: SequentialPattern[];
+  temporalRules: TemporalAssociationRule[];
 } {
   const {
     minSupport = 0.1,
@@ -608,34 +998,36 @@ export function discoverPatterns(
     minLift = 1.5,
     numClusters = 5,
     significanceLevel = 0.05,
+    temporalEvents,
+    maxGap,
   } = config;
-  
+
   // Mine association rules
   const rules = mineAssociationRules(transactions, {
     minSupport,
     minConfidence,
     minLift,
   });
-  
+
   // Cluster entities
   const k = Math.min(numClusters, Math.floor(entities.length / 3));
   const clusters = k > 1 ? clusterEntities(entities, k) : [];
-  
+
   // Convert top rules to patterns with statistical validation
   const patterns: DiscoveredPattern[] = [];
   const numTests = rules.length;
-  
+
   for (const rule of rules.slice(0, 20)) {
     const expectedCount = rule.support / rule.lift * transactions.length;
     const observedCount = rule.support * transactions.length;
-    
+
     const evidence = validatePattern(
       observedCount,
       expectedCount,
       transactions.length,
       numTests
     );
-    
+
     if (evidence.pValue < significanceLevel) {
       patterns.push(registerPattern(
         `${rule.antecedent.join(' + ')} → ${rule.consequent.join(' + ')}`,
@@ -645,6 +1037,33 @@ export function discoverPatterns(
       ));
     }
   }
-  
-  return { rules, clusters, patterns };
+
+  // Mine sequential patterns (if temporal events provided)
+  let sequentialPatterns: SequentialPattern[] = [];
+  let temporalRules: TemporalAssociationRule[] = [];
+
+  if (temporalEvents && temporalEvents.length > 0) {
+    sequentialPatterns = mineSequentialPatterns(temporalEvents, {
+      minSupport,
+      maxGap,
+      maxLength: 5,
+    });
+
+    // Convert sequential patterns to DiscoveredPattern
+    const seqDiscovered = sequentialPatternsToDiscovered(
+      sequentialPatterns,
+      transactions.length
+    );
+    patterns.push(...seqDiscovered.filter(p => p.evidence.pValue < significanceLevel));
+
+    // Mine temporal association rules
+    temporalRules = mineTemporalAssociationRules(temporalEvents, {
+      maxWindow: maxGap,
+      minSupport,
+      minConfidence,
+      minLift,
+    });
+  }
+
+  return { rules, clusters, patterns, sequentialPatterns, temporalRules };
 }

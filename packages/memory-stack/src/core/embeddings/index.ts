@@ -28,20 +28,23 @@ export {
   type EmbeddingResult,
 } from './neural-embedding-engine';
 
-// Temporal memory with decay and reinforcement
+// Temporal memory with decay, reinforcement, and consolidation
 export {
   applyTemporalDecay,
+  applyImportanceWeightedDecay,
   recordAccess,
   reinforceMemory,
   computeFinalRelevance,
   rankByRelevance,
   createTemporalMemory,
+  runConsolidation,
   TemporalMemoryManager,
   DEFAULT_TEMPORAL_CONFIG,
   type TemporalMemory,
   type TemporalMemoryConfig,
   type MemoryType,
   type MemoryFeedback,
+  type ConsolidationResult,
 } from './temporal-memory';
 
 // Embedding cache

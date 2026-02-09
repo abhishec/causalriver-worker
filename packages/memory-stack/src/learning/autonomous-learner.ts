@@ -242,7 +242,9 @@ export function createAutonomousLearner(config: AutonomousLearnerConfig) {
     for (const pattern of patterns) {
       // Check promotion criteria using confirmationCount
       if (pattern.confirmationCount < minPatternObservations) continue;
-      if (pattern.evidence.pValue >= autoPromoteConfidence) continue;
+      // Gate on statistical significance: only promote patterns with p < 0.05
+      // (autoPromoteConfidence is the minimum confidence = 1 - alpha)
+      if (pattern.evidence.pValue >= 0.05) continue;
 
       candidates++;
 

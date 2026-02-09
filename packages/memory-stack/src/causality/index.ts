@@ -74,3 +74,6 @@ export * from './feedback-loop';
 // Phase 5: Advanced Causal Discovery (CausalRivers-proven techniques)
 export * from './multivariate-var';
 export * from './advanced-discovery';
+
+// Phase 6: Async Workers (non-blocking causal discovery for production)
+export * from './async-discovery-worker';
