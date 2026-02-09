@@ -423,30 +423,85 @@ export class NexusError extends Error {
 // CONVENIENCE: Agent Integration Helpers
 // ============================================================================
 
+// ── Tool schema shared across all formats ──
+
+const QUERY_TOOL_SCHEMA = {
+  name: 'nexus_brain_query',
+  description: 'Query organizational intelligence. Returns AI-powered answers enriched with discovered causal relationships, learned patterns, and organizational memory.',
+  inputSchema: {
+    type: 'object' as const,
+    properties: {
+      question: {
+        type: 'string' as const,
+        description: 'The question to ask the organizational brain',
+      },
+      domain: {
+        type: 'string' as const,
+        description: 'Optional domain filter',
+        enum: ['finance', 'engineering', 'cs', 'marketing', 'people', 'revenue'],
+      },
+    },
+    required: ['question'] as const,
+  },
+};
+
+const INGEST_TOOL_SCHEMA = {
+  name: 'nexus_brain_ingest',
+  description: 'Send business signals to NexusBrain for causal analysis. Signals are cross-domain data points (revenue, support tickets, deployments, etc.) that the brain analyzes for causal relationships.',
+  inputSchema: {
+    type: 'object' as const,
+    properties: {
+      signals: {
+        type: 'array' as const,
+        description: 'Array of signals to ingest',
+        items: {
+          type: 'object' as const,
+          properties: {
+            source_domain: { type: 'string' as const, description: 'Business domain (finance, engineering, cs, marketing, people, revenue)' },
+            signal_type: { type: 'string' as const, description: 'Signal name (e.g. mrr, tickets, deploys)' },
+            signal_value: { type: 'number' as const, description: 'Numeric value of the signal' },
+          },
+          required: ['source_domain', 'signal_type', 'signal_value'] as const,
+        },
+      },
+    },
+    required: ['signals'] as const,
+  },
+};
+
+const RELATIONSHIPS_TOOL_SCHEMA = {
+  name: 'nexus_brain_relationships',
+  description: 'Retrieve discovered causal relationships between business domains. Returns statistically significant causal edges with effect sizes, confidence intervals, and lag information.',
+  inputSchema: {
+    type: 'object' as const,
+    properties: {
+      limit: { type: 'number' as const, description: 'Maximum relationships to return (default: 20)' },
+      min_effect_size: { type: 'number' as const, description: 'Minimum effect size filter (default: 0)' },
+    },
+    required: [] as const,
+  },
+};
+
 /**
- * Create a tool definition for AI agents (OpenAI function calling format).
+ * Create tool definitions for AI agents — OpenAI function calling format.
  *
  * Returns a tool spec that any LLM agent framework can use to query NexusBrain.
- * Works with LangChain, CrewAI, AutoGen, Vercel AI SDK, and raw OpenAI tool_use.
+ * Works with LangChain, CrewAI, AutoGen, and raw OpenAI tool_use.
+ *
+ * @example
+ * ```ts
+ * const tool = createAgentTool(brain)
+ * const result = await tool.execute({ question: 'Why is churn rising?' })
+ * ```
  */
 export function createAgentTool(client: NexusClient) {
   return {
-    name: 'nexus_brain_query',
-    description: 'Query organizational intelligence. Returns AI-powered answers enriched with discovered causal relationships, learned patterns, and organizational memory. Use this when you need to understand cross-domain business dynamics, predict cascading effects, or get data-driven strategic insights.',
+    name: QUERY_TOOL_SCHEMA.name,
+    description: QUERY_TOOL_SCHEMA.description,
     parameters: {
-      type: 'object' as const,
-      properties: {
-        question: {
-          type: 'string' as const,
-          description: 'The question to ask the organizational brain',
-        },
-        domain: {
-          type: 'string' as const,
-          description: 'Optional domain filter (finance, engineering, cs, marketing, people, revenue)',
-          enum: ['finance', 'engineering', 'cs', 'marketing', 'people', 'revenue'],
-        },
-      },
-      required: ['question'] as const,
+      type: QUERY_TOOL_SCHEMA.inputSchema.type,
+      properties: QUERY_TOOL_SCHEMA.inputSchema.properties,
+      required: QUERY_TOOL_SCHEMA.inputSchema.required,
     },
     execute: async (args: { question: string; domain?: string }) => {
       const result = await client.query(args.question, { domain: args.domain });
@@ -455,6 +510,145 @@ export function createAgentTool(client: NexusClient) {
         causalRelationships: result.context.causal.length,
         patternsUsed: result.context.patterns.length,
       };
+    },
+  };
+}
+
+/**
+ * Create a full toolkit with query, ingest, and relationships tools.
+ *
+ * Returns all 3 tools in OpenAI function-calling format.
+ * Use this when you want your agent to have full read/write access to the brain.
+ *
+ * @example
+ * ```ts
+ * const tools = createAgentToolkit(brain)
+ * // tools.query   — ask the brain questions
+ * // tools.ingest  — feed signals into the brain
+ * // tools.relationships — read discovered causal edges
+ * ```
+ */
+export function createAgentToolkit(client: NexusClient) {
+  return {
+    query: createAgentTool(client),
+
+    ingest: {
+      name: INGEST_TOOL_SCHEMA.name,
+      description: INGEST_TOOL_SCHEMA.description,
+      parameters: {
+        type: INGEST_TOOL_SCHEMA.inputSchema.type,
+        properties: INGEST_TOOL_SCHEMA.inputSchema.properties,
+        required: INGEST_TOOL_SCHEMA.inputSchema.required,
+      },
+      execute: async (args: { signals: Signal[] }) => {
+        const result = await client.ingest(args.signals);
+        return { success: result.success, signalsIngested: result.signalsIngested };
+      },
+    },
+
+    relationships: {
+      name: RELATIONSHIPS_TOOL_SCHEMA.name,
+      description: RELATIONSHIPS_TOOL_SCHEMA.description,
+      parameters: {
+        type: RELATIONSHIPS_TOOL_SCHEMA.inputSchema.type,
+        properties: RELATIONSHIPS_TOOL_SCHEMA.inputSchema.properties,
+        required: RELATIONSHIPS_TOOL_SCHEMA.inputSchema.required,
+      },
+      execute: async (args: { limit?: number; min_effect_size?: number }) => {
+        const result = await client.getRelationships({
+          limit: args.limit,
+          minEffectSize: args.min_effect_size,
+        });
+        return {
+          relationships: result.relationships.map(r => ({
+            cause: r.source_domain,
+            effect: r.target_domain,
+            strength: r.effect_size,
+            lagDays: r.optimal_lag_days,
+            description: r.natural_language,
+          })),
+          count: result.count,
+        };
+      },
+    },
+  };
+}
+
+/**
+ * Create tool definitions in Anthropic Claude tool_use format.
+ *
+ * Returns an array of tool definitions ready for the Anthropic Messages API.
+ *
+ * @example
+ * ```ts
+ * const tools = createAnthropicTools(brain)
+ * const response = await anthropic.messages.create({
+ *   model: 'claude-sonnet-4-20250514',
+ *   tools,
+ *   messages: [{ role: 'user', content: 'Why is revenue dropping?' }],
+ * })
+ * ```
+ */
+export function createAnthropicTools(client: NexusClient) {
+  const toolkit = createAgentToolkit(client);
+
+  return {
+    tools: [
+      { name: QUERY_TOOL_SCHEMA.name, description: QUERY_TOOL_SCHEMA.description, input_schema: QUERY_TOOL_SCHEMA.inputSchema },
+      { name: INGEST_TOOL_SCHEMA.name, description: INGEST_TOOL_SCHEMA.description, input_schema: INGEST_TOOL_SCHEMA.inputSchema },
+      { name: RELATIONSHIPS_TOOL_SCHEMA.name, description: RELATIONSHIPS_TOOL_SCHEMA.description, input_schema: RELATIONSHIPS_TOOL_SCHEMA.inputSchema },
+    ],
+
+    /** Handle a tool_use block from Claude's response */
+    async handleToolCall(toolName: string, toolInput: Record<string, unknown>) {
+      switch (toolName) {
+        case 'nexus_brain_query':
+          return toolkit.query.execute(toolInput as { question: string; domain?: string });
+        case 'nexus_brain_ingest':
+          return toolkit.ingest.execute(toolInput as { signals: Signal[] });
+        case 'nexus_brain_relationships':
+          return toolkit.relationships.execute(toolInput as { limit?: number; min_effect_size?: number });
+        default:
+          throw new NexusError(`Unknown tool: ${toolName}`, 400, 'handleToolCall');
+      }
+    },
+  };
+}
+
+/**
+ * Create tools for the Vercel AI SDK (ai package).
+ *
+ * Returns an object of tool definitions compatible with `generateText()` and `streamText()`.
+ *
+ * @example
+ * ```ts
+ * import { generateText } from 'ai'
+ * const tools = createVercelAITools(brain)
+ * const { text } = await generateText({
+ *   model: yourModel,
+ *   tools,
+ *   prompt: 'What causal relationships exist in our data?',
+ * })
+ * ```
+ */
+export function createVercelAITools(client: NexusClient) {
+  const toolkit = createAgentToolkit(client);
+
+  return {
+    nexus_brain_query: {
+      description: QUERY_TOOL_SCHEMA.description,
+      parameters: QUERY_TOOL_SCHEMA.inputSchema,
+      execute: toolkit.query.execute,
+    },
+    nexus_brain_ingest: {
+      description: INGEST_TOOL_SCHEMA.description,
+      parameters: INGEST_TOOL_SCHEMA.inputSchema,
+      execute: toolkit.ingest.execute,
+    },
+    nexus_brain_relationships: {
+      description: RELATIONSHIPS_TOOL_SCHEMA.description,
+      parameters: RELATIONSHIPS_TOOL_SCHEMA.inputSchema,
+      execute: toolkit.relationships.execute,
     },
   };
 }
