@@ -246,7 +246,7 @@ export function runCausalDiscovery(
       alpha: fullConfig.alpha,
       ...fullConfig.advanced,
     });
-    grangerResults = scoreMatrixToGrangerResults(advancedResult, fullConfig.alpha);
+    grangerResults = scoreMatrixToGrangerResults(advancedResult, fullConfig.alpha, grangerData);
   }
   
   // Step 5: Convert significant results to CausalRelationship format
@@ -370,10 +370,13 @@ export function findLostRelationships(
 /**
  * Convert a PairwiseScoreMatrix (from advanced methods) to GrangerResult[] format
  * for compatibility with existing downstream consumers (bridges, summary, DB).
+ *
+ * scores[i][j] = evidence that j causes i (source=j, target=i)
  */
 function scoreMatrixToGrangerResults(
   matrix: PairwiseScoreMatrix,
-  alpha: number
+  alpha: number,
+  data?: Record<string, number[]>
 ): GrangerResult[] {
   const results: GrangerResult[] = [];
   const { domains, scores, optimalLags, pValues } = matrix;
@@ -387,20 +390,41 @@ function scoreMatrixToGrangerResults(
 
       const pValue = pValues[i][j];
       const lag = optimalLags[i][j] || 1;
-      const isSignificant = pValue < alpha || score > 0.05; // Score threshold for advanced methods
+
+      // Significance requires BOTH a meaningful effect size AND statistical evidence
+      const isSignificant = pValue < alpha && score > 0.1;
+
+      // Derive sample size from the input data when available
+      const sourceSeries = data?.[domains[j]];
+      const sampleSize = sourceSeries ? sourceSeries.length - lag : 0;
+
+      // Approximate F-statistic from effect size and sample size
+      // F ≈ (R²/q) / ((1-R²)/(n-k)), simplified for score as partial R²
+      const k = 2 * lag + 1; // approximate unrestricted params
+      const dfDen = Math.max(1, sampleSize - k);
+      const fStatistic = sampleSize > 0
+        ? Math.max(0, (score / lag) / (Math.max(0.001, 1 - score) / dfDen))
+        : score * 10;
+
+      // Confidence interval scales with sample size
+      const se = sampleSize > 10 ? 1.96 / Math.sqrt(sampleSize) : 0.2;
 
       results.push({
         sourceDomain: domains[j],
         targetDomain: domains[i],
-        fStatistic: score * 10, // Approximate F-statistic from score
-        pValue: pValue,
+        fStatistic,
+        pValue,
         optimalLag: lag,
         isSignificant,
         effectSize: Math.min(1, score),
-        confidenceInterval: { lower: Math.max(0, score - 0.1), upper: Math.min(1, score + 0.1), level: 1 - alpha },
-        sampleSize: 0, // Not tracked in matrix form
+        confidenceInterval: {
+          lower: Math.max(0, score - se),
+          upper: Math.min(1, score + se),
+          level: 1 - alpha,
+        },
+        sampleSize,
         naturalLanguage: isSignificant
-          ? `${domains[j]} Granger-causes ${domains[i]} (score=${score.toFixed(3)}, lag=${lag})`
+          ? `${domains[j]} Granger-causes ${domains[i]} (score=${score.toFixed(3)}, p=${pValue.toFixed(4)}, lag=${lag})`
           : `No significant relationship from ${domains[j]} to ${domains[i]}`,
       });
     }

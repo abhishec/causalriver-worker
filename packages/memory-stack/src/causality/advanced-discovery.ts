@@ -727,7 +727,35 @@ export function regimeConditionalScoring(
     return { domains, scores: scoresFull, optimalLags: lags, pValues: pvals };
   }
 
-  // Extract regime data
+  // Count contiguous runs in each regime to assess temporal integrity.
+  // Non-contiguous regime data breaks the lag structure assumption in Granger.
+  // We measure the largest contiguous block to decide how much to trust regime estimates.
+  let maxNormalRun = 0;
+  let maxAnomalyRun = 0;
+  let curNormal = 0;
+  let curAnomaly = 0;
+  for (let t = 0; t < T; t++) {
+    if (anomalyMask[t]) {
+      curAnomaly++;
+      curNormal = 0;
+      if (curAnomaly > maxAnomalyRun) maxAnomalyRun = curAnomaly;
+    } else {
+      curNormal++;
+      curAnomaly = 0;
+      if (curNormal > maxNormalRun) maxNormalRun = curNormal;
+    }
+  }
+
+  // If anomaly/normal periods are highly fragmented, regime estimates are unreliable.
+  // Fall back to full-data estimates when the largest contiguous block is too short.
+  const minContiguousBlock = 3 * n + 10;
+  if (maxNormalRun < minContiguousBlock || maxAnomalyRun < minContiguousBlock) {
+    return { domains, scores: scoresFull, optimalLags: lags, pValues: pvals };
+  }
+
+  // Extract regime data (note: non-contiguous timepoints are packed together,
+  // which approximates the lag structure; contiguity check above ensures most
+  // data comes from long runs where this approximation is reasonable)
   const normalData: Record<string, number[]> = {};
   const anomalyData: Record<string, number[]> = {};
   for (let d = 0; d < n; d++) {
@@ -905,9 +933,9 @@ function varCoefficientScoring(
         X.push(row);
       }
       const rss = computeOlsRSS(X, y.slice(lag));
-      if (rss <= 0) continue;
+      if (rss <= 0 || !isFinite(rss)) continue;
 
-      const ic = nObs * Math.log(rss / nObs) + 2 * nParams;
+      const ic = nObs * Math.log(Math.max(rss, 1e-300) / nObs) + 2 * nParams;
       if (ic < bestIC) {
         bestIC = ic;
         bestLag = lag;

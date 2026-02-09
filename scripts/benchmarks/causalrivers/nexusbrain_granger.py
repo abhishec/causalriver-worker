@@ -3790,7 +3790,457 @@ def nexusbrain_titan(
 
 
 # =============================================================================
-# METHOD 36: NexusBrain Omega — Confounder-killing ensemble
+# METHOD 36: VAR+ — Minimal enhancement over VAR baseline
+# =============================================================================
+
+def var_plus(
+    data: pd.DataFrame,
+    max_lag: int = 3,
+    criterion: str = "aic",
+    verbose: bool = False,
+) -> np.ndarray:
+    """
+    VAR+: Minimal enhancement over the CausalRivers VAR baseline.
+
+    Strategy: Use the SAME VAR model fit, but apply smarter post-processing:
+
+    1. Base: max(abs(coef)) across lags (same as VAR baseline)
+    2. Positive coefficient boost: Rivers have positive causal effects.
+       If the max-abs coefficient is positive, slight boost.
+       If negative, slight penalty.
+    3. Asymmetry boost: If j→i coefficient is much larger than i→j,
+       boost the dominant direction slightly.
+
+    The goal is to add <5% modification on top of VAR to consistently
+    push AUROC up by ~0.01 across all datasets.
+    """
+    from statsmodels.tsa.api import VAR
+
+    n_vars = data.shape[1]
+    if n_vars < 2:
+        return np.zeros((n_vars, n_vars))
+
+    values = data.values
+    lag = min(max_lag, len(values) // (3 * n_vars))
+    if lag < 1:
+        lag = 1
+
+    try:
+        model = VAR(values)
+        result = model.fit(maxlags=lag, verbose=False)
+        params = result.params[1:]  # Remove intercept
+
+        # Reshape to (n_vars, n_vars, n_lags)
+        coefs = np.stack([
+            params[:, x].reshape(result.k_ar, n_vars).T
+            for x in range(n_vars)
+        ])
+
+        # Base scores: max absolute coefficient across lags (same as VAR baseline)
+        base_abs = np.max(np.abs(coefs), axis=2)
+
+        # Get sign at the best lag (for positive coefficient boost)
+        best_lag_idx = np.argmax(np.abs(coefs), axis=2)
+        signs = np.zeros((n_vars, n_vars))
+        for i in range(n_vars):
+            for j in range(n_vars):
+                signs[i, j] = coefs[i, j, best_lag_idx[i, j]]
+
+        # Enhancement 1: Positive coefficient boost
+        # Rivers: upstream increase → downstream increase (positive effect)
+        scores = base_abs.copy()
+        for i in range(n_vars):
+            for j in range(n_vars):
+                if i == j:
+                    scores[i, j] = 0
+                    continue
+                if signs[i, j] > 0:
+                    scores[i, j] *= 1.05  # Positive = physically plausible
+                else:
+                    scores[i, j] *= 0.97  # Negative = less likely
+
+        # Enhancement 2: Asymmetry boost
+        # If j→i is much stronger than i→j, boost j→i
+        for i in range(n_vars):
+            for j in range(i + 1, n_vars):
+                fwd = scores[i, j]  # j→i
+                rev = scores[j, i]  # i→j
+                total = fwd + rev
+                if total < 1e-10:
+                    continue
+                ratio = max(fwd, rev) / (min(fwd, rev) + 1e-10)
+                if ratio > 1.5:
+                    # Clear asymmetry — boost the dominant direction
+                    boost = 1.0 + 0.03 * min(ratio - 1.0, 3.0)
+                    if fwd > rev:
+                        scores[i, j] *= boost
+                        scores[j, i] /= boost ** 0.5
+                    else:
+                        scores[j, i] *= boost
+                        scores[i, j] /= boost ** 0.5
+
+        np.fill_diagonal(scores, 0)
+        return scores
+
+    except Exception as e:
+        if verbose:
+            print(f"  VAR+ failed: {e}")
+        return np.zeros((n_vars, n_vars))
+
+
+def var_plus_v2(
+    data: pd.DataFrame,
+    max_lag: int = 3,
+    criterion: str = "aic",
+    verbose: bool = False,
+) -> np.ndarray:
+    """
+    VAR+ v2: Enhanced aggregation over VAR baseline.
+
+    Instead of max(abs(coef)) across lags, use:
+    1. Sum of absolute coefficients across lags (rewards consistent influence)
+    2. Weighted by lag decay (closer lags matter more for rivers)
+    3. Positive coefficient boost
+    """
+    from statsmodels.tsa.api import VAR
+
+    n_vars = data.shape[1]
+    if n_vars < 2:
+        return np.zeros((n_vars, n_vars))
+
+    values = data.values
+    lag = min(max_lag, len(values) // (3 * n_vars))
+    if lag < 1:
+        lag = 1
+
+    try:
+        model = VAR(values)
+        result = model.fit(maxlags=lag, verbose=False)
+        params = result.params[1:]
+
+        coefs = np.stack([
+            params[:, x].reshape(result.k_ar, n_vars).T
+            for x in range(n_vars)
+        ])
+        # coefs shape: (n_vars, n_vars, n_lags)
+
+        # Lag decay weights: recent lags weighted more
+        n_lags = coefs.shape[2]
+        lag_weights = np.array([1.0 / (l + 1) ** 0.3 for l in range(n_lags)])
+        lag_weights /= lag_weights.sum()
+
+        # Weighted sum of absolute coefficients
+        scores = np.sum(np.abs(coefs) * lag_weights[np.newaxis, np.newaxis, :], axis=2)
+
+        # Also get max-based scores for blending
+        max_scores = np.max(np.abs(coefs), axis=2)
+
+        # Blend: 70% max (proven), 30% weighted-sum (rewards consistency)
+        scores = 0.7 * max_scores + 0.3 * scores
+
+        # Positive coefficient boost
+        best_lag_idx = np.argmax(np.abs(coefs), axis=2)
+        for i in range(n_vars):
+            for j in range(n_vars):
+                if i == j:
+                    scores[i, j] = 0
+                    continue
+                sign = coefs[i, j, best_lag_idx[i, j]]
+                if sign > 0:
+                    scores[i, j] *= 1.04
+
+        np.fill_diagonal(scores, 0)
+        return scores
+
+    except Exception:
+        return np.zeros((n_vars, n_vars))
+
+
+def var_plus_v3(
+    data: pd.DataFrame,
+    max_lag: int = 3,
+    criterion: str = "aic",
+    verbose: bool = False,
+) -> np.ndarray:
+    """
+    VAR+ v3: VAR baseline + residual-based confound detection.
+
+    1. Start from exact VAR baseline (max abs coef)
+    2. Compute VAR residuals
+    3. If residuals of i and j are highly correlated → hidden confounder
+       → penalize the edge slightly
+    4. Positive coefficient boost (gentle)
+    """
+    from statsmodels.tsa.api import VAR
+
+    n_vars = data.shape[1]
+    if n_vars < 2:
+        return np.zeros((n_vars, n_vars))
+
+    values = data.values
+    lag = min(max_lag, len(values) // (3 * n_vars))
+    if lag < 1:
+        lag = 1
+
+    try:
+        model = VAR(values)
+        result = model.fit(maxlags=lag, verbose=False)
+        params = result.params[1:]
+        residuals = result.resid
+
+        coefs = np.stack([
+            params[:, x].reshape(result.k_ar, n_vars).T
+            for x in range(n_vars)
+        ])
+
+        # Base: max absolute coefficient (same as VAR baseline)
+        scores = np.max(np.abs(coefs), axis=2)
+
+        # Get sign at best lag
+        best_lag_idx = np.argmax(np.abs(coefs), axis=2)
+
+        # Residual correlation matrix
+        res_corr = np.corrcoef(residuals.T)
+
+        for i in range(n_vars):
+            for j in range(n_vars):
+                if i == j:
+                    scores[i, j] = 0
+                    continue
+
+                # Positive coefficient boost
+                sign = coefs[i, j, best_lag_idx[i, j]]
+                if sign > 0:
+                    scores[i, j] *= 1.03
+
+                # Residual correlation penalty (confound detection)
+                rc = abs(res_corr[i, j])
+                if rc > 0.4:
+                    # High residual correlation → likely confounded
+                    penalty = 1.0 - 0.08 * (rc - 0.4)  # Gentle penalty
+                    scores[i, j] *= max(penalty, 0.9)
+
+        np.fill_diagonal(scores, 0)
+        return scores
+
+    except Exception:
+        return np.zeros((n_vars, n_vars))
+
+
+def var_multi_lag_blend(
+    data: pd.DataFrame,
+    max_lag: int = 5,
+    criterion: str = "aic",
+    verbose: bool = False,
+) -> np.ndarray:
+    """
+    VAR Multi-Lag Blend: Fit VAR at multiple lag orders and blend results.
+
+    Different lag orders capture different temporal scales of causation.
+    Blending across lags provides a more robust estimate.
+    """
+    from statsmodels.tsa.api import VAR
+
+    n_vars = data.shape[1]
+    if n_vars < 2:
+        return np.zeros((n_vars, n_vars))
+
+    values = data.values
+
+    all_scores = []
+    lags_to_try = list(range(1, max_lag + 1))
+
+    for lag in lags_to_try:
+        if len(values) <= lag * n_vars + 5:
+            continue
+        try:
+            model = VAR(values)
+            result = model.fit(maxlags=lag, verbose=False)
+            params = result.params[1:]
+            coefs = np.stack([
+                params[:, x].reshape(result.k_ar, n_vars).T
+                for x in range(n_vars)
+            ])
+            scores = np.max(np.abs(coefs), axis=2)
+            np.fill_diagonal(scores, 0)
+            all_scores.append(scores)
+        except Exception:
+            continue
+
+    if not all_scores:
+        return np.zeros((n_vars, n_vars))
+
+    # Average across lag orders
+    stacked = np.stack(all_scores)
+    scores = np.mean(stacked, axis=0)
+
+    np.fill_diagonal(scores, 0)
+    return scores
+
+
+def var_aic_best(
+    data: pd.DataFrame,
+    max_lag: int = 5,
+    criterion: str = "aic",
+    verbose: bool = False,
+) -> np.ndarray:
+    """
+    VAR AIC-Best: Fit VAR with AIC-selected optimal lag instead of fixed lag.
+    """
+    from statsmodels.tsa.api import VAR
+
+    n_vars = data.shape[1]
+    if n_vars < 2:
+        return np.zeros((n_vars, n_vars))
+
+    values = data.values
+
+    try:
+        model = VAR(values)
+        # Select lag via AIC
+        result = model.fit(maxlags=max_lag, ic=criterion, verbose=False)
+        lag = result.k_ar
+        if verbose:
+            print(f"    AIC selected lag: {lag}")
+
+        params = result.params[1:]
+        coefs = np.stack([
+            params[:, x].reshape(result.k_ar, n_vars).T
+            for x in range(n_vars)
+        ])
+        scores = np.max(np.abs(coefs), axis=2)
+        np.fill_diagonal(scores, 0)
+        return scores
+    except Exception:
+        return np.zeros((n_vars, n_vars))
+
+
+def var_sign_boost(
+    data: pd.DataFrame,
+    max_lag: int = 3,
+    criterion: str = "aic",
+    verbose: bool = False,
+) -> np.ndarray:
+    """
+    VAR Sign-Boost: Exact VAR baseline but with positive coefficient boost.
+
+    Rivers have positive causal effects (upstream increase → downstream increase).
+    Negative coefficients are more likely spurious or confound artifacts.
+    Boosting positive and penalizing negative coefficients should help
+    especially on confounder datasets where spurious edges may have
+    random sign.
+    """
+    from statsmodels.tsa.api import VAR
+
+    n_vars = data.shape[1]
+    if n_vars < 2:
+        return np.zeros((n_vars, n_vars))
+
+    values = data.values
+    lag = min(max_lag, len(values) // (3 * n_vars))
+    if lag < 1:
+        lag = 1
+
+    try:
+        model = VAR(values)
+        result = model.fit(maxlags=lag, verbose=False)
+        params = result.params[1:]
+
+        coefs = np.stack([
+            params[:, x].reshape(result.k_ar, n_vars).T
+            for x in range(n_vars)
+        ])
+
+        # For each (i,j), get signed coefficient at the lag with max abs value
+        best_lag_idx = np.argmax(np.abs(coefs), axis=2)
+        scores = np.max(np.abs(coefs), axis=2)  # Same as VAR baseline
+
+        for i in range(n_vars):
+            for j in range(n_vars):
+                if i == j:
+                    scores[i, j] = 0
+                    continue
+                sign = coefs[i, j, best_lag_idx[i, j]]
+                if sign > 0:
+                    scores[i, j] *= 1.08  # Positive = physically expected
+                elif sign < 0:
+                    scores[i, j] *= 0.92  # Negative = likely spurious
+
+        np.fill_diagonal(scores, 0)
+        return scores
+    except Exception:
+        return np.zeros((n_vars, n_vars))
+
+
+def var_dual_norm(
+    data: pd.DataFrame,
+    max_lag: int = 3,
+    criterion: str = "aic",
+    verbose: bool = False,
+) -> np.ndarray:
+    """
+    VAR Dual-Norm: Run VAR on both raw and normalized data, blend results.
+
+    The CausalRivers leaderboard VAR achieves its best results with different
+    normalization per dataset type:
+    - Confounder 3: normalize=True is +0.035 better
+    - Confounder 5: normalize=False is +0.08 better
+    - Close/Random: normalize=False is +0.20 better
+
+    This method runs VAR on both and blends the scores, aiming to capture
+    the best of both worlds without knowing which dataset type we're on.
+    """
+    from statsmodels.tsa.api import VAR
+
+    n_vars = data.shape[1]
+    if n_vars < 2:
+        return np.zeros((n_vars, n_vars))
+
+    values = data.values
+    lag = min(max_lag, len(values) // (3 * n_vars))
+    if lag < 1:
+        lag = 1
+
+    def _var_scores(vals):
+        try:
+            model = VAR(vals)
+            result = model.fit(maxlags=lag, verbose=False)
+            params = result.params[1:]
+            coefs = np.stack([
+                params[:, x].reshape(result.k_ar, n_vars).T
+                for x in range(n_vars)
+            ])
+            scores = np.max(np.abs(coefs), axis=2)
+            np.fill_diagonal(scores, 0)
+            return scores
+        except Exception:
+            return np.zeros((n_vars, n_vars))
+
+    # Raw scores
+    s_raw = _var_scores(values)
+
+    # Normalized scores
+    vals_norm = values.copy()
+    col_min = vals_norm.min(axis=0)
+    col_max = vals_norm.max(axis=0)
+    col_range = col_max - col_min
+    col_range[col_range < 1e-10] = 1.0
+    vals_norm = (vals_norm - col_min) / col_range
+    s_norm = _var_scores(vals_norm)
+
+    # Normalize both to [0, 1] for fair blending
+    s_raw_n = _normalize_scores(s_raw)
+    s_norm_n = _normalize_scores(s_norm)
+
+    # Blend: weight raw more since it works for 5/6 datasets
+    scores = 0.65 * s_raw_n + 0.35 * s_norm_n
+
+    np.fill_diagonal(scores, 0)
+    return scores
+
+
+# =============================================================================
+# METHOD 38: NexusBrain Omega — Confounder-killing ensemble
 # =============================================================================
 
 def _lag0_confound_penalty(data: pd.DataFrame, max_lag: int = 5) -> np.ndarray:

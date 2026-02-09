@@ -86,17 +86,20 @@ export function normalizeScores(scores: number[][]): number[][] {
   let sMax = -Infinity;
   for (let i = 0; i < n; i++) {
     for (let j = 0; j < scores[i].length; j++) {
-      if (scores[i][j] < sMin) sMin = scores[i][j];
-      if (scores[i][j] > sMax) sMax = scores[i][j];
+      const v = scores[i][j];
+      if (!isFinite(v)) continue; // Skip NaN/Infinity
+      if (v < sMin) sMin = v;
+      if (v > sMax) sMax = v;
     }
   }
 
-  if (sMax - sMin < 1e-15) {
+  // Guard: all values were NaN/Infinity or matrix was constant
+  if (!isFinite(sMin) || !isFinite(sMax) || sMax - sMin < 1e-15) {
     return scores.map(row => row.map(() => 0));
   }
 
   const range = sMax - sMin;
-  return scores.map(row => row.map(v => (v - sMin) / range));
+  return scores.map(row => row.map(v => isFinite(v) ? (v - sMin) / range : 0));
 }
 
 // ============================================================================

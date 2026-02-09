@@ -1,12 +1,11 @@
 <p align="center">
   <h1 align="center">NexusBrain</h1>
   <p align="center">
-    <strong>The world's first self-improving causal intelligence engine. Built in TypeScript. Zero dependencies.</strong>
+    <strong>A causal intelligence engine that gives AI agents persistent, self-improving memory.</strong>
   </p>
   <p align="center">
-    Your AI forgets everything between sessions. NexusBrain doesn't.<br/>
-    It discovers <em>why</em> things happen using Nobel Prize-winning statistical methods, predicts <em>what</em> comes next,<br/>
-    trains itself from its own discoveries, and gets smarter every cycle.
+    Every AI agent today is stateless. NexusBrain gives them a brain —<br/>
+    one that remembers, discovers cause-and-effect, and gets smarter without retraining.
   </p>
 </p>
 
@@ -21,95 +20,173 @@
 
 ---
 
-## Why NexusBrain Exists
+## The Hard Problems in AI Memory
 
-Every enterprise has three unsolved problems:
+Building memory for AI agents is fundamentally harder than building a database or a vector store. There are four unsolved challenges:
 
-1. **AI amnesia.** ChatGPT and Claude give brilliant answers but forget everything between sessions. No compounding knowledge. No learning from outcomes. Every conversation starts from scratch.
+### 1. Memory Without Understanding
 
-2. **Correlation is not causation.** Your dashboards show revenue is down and churn is up. But which caused which? Was it the product change, the pricing experiment, or the support backlog? Traditional analytics cannot tell you.
+Vector databases store embeddings. RAG retrieves similar documents. But neither understands **why** things happen. An agent can retrieve "revenue dropped in Q3" and "churn increased in Q3" — but it cannot determine which caused which, whether both were caused by something else, or whether the correlation is coincidental. Without causal reasoning, memory is just storage.
 
-3. **Data lives in silos.** Finance data in Stripe. Pipeline data in HubSpot. Engineering velocity in GitHub. Support quality in Intercom. No system connects them to discover cross-domain causal chains like "engineering delays cause support escalations which cause churn."
+### 2. The Confounder Problem
 
-**NexusBrain solves all three.** It is a living organizational brain — a 7-layer causal intelligence engine that connects your business systems, discovers statistically-proven cause-and-effect relationships, trains itself from its own discoveries, and compounds intelligence over time.
+Most AI systems that attempt causal reasoning fall into the same trap: confusing correlation with causation. When A and B are both caused by a hidden variable C, naive systems incorrectly conclude A causes B. This is the confounder problem, and it's the reason most "causal AI" systems produce unreliable conclusions. Solving it requires multivariate statistical methods that control for all other variables simultaneously.
+
+### 3. Stale Knowledge
+
+Static knowledge bases decay. What was true about your business last month may not be true today. A memory system needs to continuously learn from new data, detect when relationships change, and automatically update its understanding — without manual retraining, prompt engineering, or human intervention.
+
+### 4. The Integration Problem
+
+Even if you solve memory, causality, and learning, the brain needs to be accessible to every agent, every app, and every team member. A brain that only lives in one monolithic application is useless. It needs to work as infrastructure — an SDK, an API, a service that any agent or application can query for causal intelligence.
 
 ---
 
-## Causal Discovery Engine: 8 Advanced Methods
+## Our Approach
 
-NexusBrain's causal engine is benchmarked against the **CausalRivers dataset** (ICLR 2025 Spotlight) — the largest real-world causal discovery benchmark for time series data. The engine implements 8 advanced causal discovery methods, all running **by default** when the brain learns:
+NexusBrain solves these by combining four ideas:
 
-### The Calibrated Ensemble (Default Method)
+**Statistical Causal Discovery** — Instead of guessing at causes, we use Nobel Prize-winning Granger causality methods, the PC algorithm, and Pearl's do-calculus to discover statistically-proven cause-and-effect relationships from observational data. Our engine implements 8 advanced discovery methods (conditional multivariate Granger, cascade-aware scoring, calibrated ensemble, greedy peeling, multi-resolution pyramids, anomaly-conditioned, regime-conditional, and NexusBrain Final) — benchmarked against CausalRivers (ICLR 2025 Spotlight) with AUROC up to 0.82.
 
-When `runCausalDiscovery()` is called — by the event bus bridge, the autonomous learner, or the daily cron job — it runs a **calibrated ensemble** that combines 4 scoring methods with weighted voting:
+**Continuous Self-Improvement** — The brain trains itself. Every prediction is tracked against outcomes. Correct patterns are reinforced, wrong ones decay. An autonomous learning cycle discovers new causal edges, mines patterns, generates training packs, and feeds them back — no human in the loop. Brain maturity evolves from L1 Nascent to L5 Expert.
 
-| Method | Weight | What It Does |
-|--------|--------|-------------|
-| **Conditional Multivariate Granger** | 3.0 | Tests X→Y while controlling for ALL other variables as confounders. The most powerful single method — eliminates spurious correlations from shared causes. |
-| **Cascade-Aware Scoring** | 1.5 | Detects indirect causal paths via lag decomposition. If lag(A→B) ≈ lag(A→C) + lag(C→B), penalizes the A→B edge as an indirect path through C. |
-| **Pairwise Granger** | 1.0 | Baseline signal strength — does X happening predict Y happening later? F-test on restricted vs unrestricted VAR models. |
-| **P-value Scoring** | 0.8 | Statistical significance weighting — edges with lower p-values get boosted. |
+**Cross-Domain Signal Fusion** — Data from 13 connectors (Stripe, HubSpot, GitHub, Intercom, Slack, etc.) is unified through entity resolution and converted to aligned time series. The causal engine discovers chains like "engineering velocity drop → support escalation increase → customer churn" across business silos.
 
-**Plus an agreement bonus:** When multiple methods independently agree that an edge exists, its confidence score gets boosted. This ensemble achieves the best overall accuracy on CausalRivers.
+**Brain-as-Infrastructure** — NexusBrain is designed as embeddable SDK + API, not a monolithic app. Any agent, application, or service can connect to the brain.
 
-### All 8 Methods (Selectable via `method` Parameter)
+---
 
-| # | Method | Key Algorithm | Best For |
-|---|--------|--------------|----------|
-| 1 | `calibrated_ensemble` | Weighted voting + agreement bonus | **Default** — best all-around accuracy |
-| 2 | `conditional` | Multivariate VAR F-test controlling for all other variables | Pure confounder rejection |
-| 3 | `cascade_aware` | Pairwise Granger + lag-decomposition penalty for indirect paths | Detecting A→C→B indirect chains |
-| 4 | `greedy_peeling` | Orthogonal matching pursuit — iterative fit, marginal contribution, prune | Sparse graph recovery |
-| 5 | `multi_resolution` | Granger at 4 temporal scales (raw, 4x, 28x downsampled, differenced) with inverse-variance fusion | Mixed temporal dynamics |
-| 6 | `anomaly_conditioned` | Z-score anomaly detection + anomaly alignment scoring, weighted blend | Crisis-driven relationships |
-| 7 | `regime_conditional` | Separate conditional Granger for normal vs anomaly periods | Regime-switching behavior |
-| 8 | `nexusbrain_final` | Self-tuning VAR (auto-selects signed vs absolute) + cascade penalty + p-value boost + asymmetry bonus | Maximum adaptability |
+## Architecture: Core Brain + Client Brains
 
-```typescript
-import { runCausalDiscovery } from '@nexus-ai/memory-stack';
+NexusBrain separates the **Core Brain** (the intelligence engine that discovers, learns, and stores causal knowledge) from **Client Brains** (lightweight instances that agents and apps use to query, contribute signals, and receive intelligence).
 
-// Default: calibrated_ensemble (all methods working together)
-const result = runCausalDiscovery(signals, 'my-org');
-
-// Or select a specific method:
-const result = runCausalDiscovery(signals, 'my-org', {
-  method: 'nexusbrain_final',
-  granger: { maxLag: 14, alpha: 0.05 },
-});
+```
+                    ┌─────────────────────────────────┐
+                    │         CORE BRAIN               │
+                    │   (Server / Edge Functions)       │
+                    │                                   │
+                    │  ┌────────────────────────────┐  │
+                    │  │ L4: Causal Engine           │  │
+                    │  │  8 discovery methods         │  │
+                    │  │  Continuous learner          │  │
+                    │  │  Cascade tracker             │  │
+                    │  └────────────────────────────┘  │
+                    │  ┌────────────────────────────┐  │
+                    │  │ L5: Pattern Memory          │  │
+                    │  │  Brain trainer (41 packs)   │  │
+                    │  │  Anomaly detection          │  │
+                    │  │  Feedback loop              │  │
+                    │  └────────────────────────────┘  │
+                    │  ┌────────────────────────────┐  │
+                    │  │ Persistence (Supabase)      │  │
+                    │  │  29 tables, causal graph     │  │
+                    │  │  Signal history, embeddings  │  │
+                    │  └────────────────────────────┘  │
+                    └───────────┬───────────────────────┘
+                                │
+                    ┌───────────┴───────────┐
+                    │   NexusBrain API       │
+                    │   (REST / SDK / Edge)   │
+                    │                         │
+                    │  POST /signals          │  Ingest signals
+                    │  POST /discover         │  Run causal discovery
+                    │  POST /query            │  Ask with causal context
+                    │  GET  /relationships    │  Get causal graph
+                    │  GET  /predictions      │  Get active predictions
+                    │  POST /outcomes         │  Report outcomes (feedback)
+                    │  GET  /health           │  Brain maturity + stats
+                    └──┬──────┬──────┬───────┘
+                       │      │      │
+          ┌────────────┘      │      └────────────┐
+          │                   │                    │
+   ┌──────▼──────┐    ┌──────▼──────┐     ┌──────▼──────┐
+   │ CLIENT BRAIN │    │ CLIENT BRAIN │     │ CLIENT BRAIN │
+   │ (AI Agent)   │    │ (Web App)    │     │ (Slack Bot)  │
+   │              │    │              │     │              │
+   │ SDK: query() │    │ SDK: query() │     │ SDK: query() │
+   │ SDK: signal()│    │ React Hooks  │     │ SDK: signal()│
+   │ SDK: predict │    │ useAIMemory  │     │ SDK: predict │
+   │              │    │ useSearch    │     │              │
+   │ Local cache  │    │ Local cache  │     │ Local cache  │
+   │ Domain ctx   │    │ Domain ctx   │     │ Domain ctx   │
+   └──────────────┘    └──────────────┘     └──────────────┘
 ```
 
-### CausalRivers Benchmark Results
+### How Core Brain Talks to Client Brains
 
-Benchmarked on the CausalRivers dataset — real hydrological time series from German river networks with known ground-truth causal structure:
+```typescript
+// ─── CORE BRAIN (Server-side) ────────────────────────────────
+import { createNexusOrchestrator } from '@nexus-ai/memory-stack';
 
-| Dataset | AUROC | F1 | Accuracy | Graph Size |
-|---------|-------|----|----------|------------|
-| **random_3** | **0.824** | **0.829** | **0.868** | 3-node |
-| **close_3** | **0.812** | **0.822** | **0.865** | 3-node |
-| **confounder_3** | 0.654 | 0.712 | 0.799 | 3-node (with confounders) |
-| **random_5** | 0.591 | 0.514 | 0.838 | 5-node |
-| **confounder_5** | 0.643 | 0.562 | 0.826 | 5-node (with confounders) |
-| **close_5** | 0.594 | 0.504 | 0.836 | 5-node |
+const brain = createNexusOrchestrator({
+  organizationId: 'org_123',
+  supabaseUrl: process.env.SUPABASE_URL!,
+  supabaseKey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  llm: { provider: 'anthropic', apiKey: process.env.ANTHROPIC_API_KEY! },
+});
 
-The confounder subsets are specifically designed to test resistance to spurious correlations — exactly why the conditional multivariate Granger (weight 3.0 in the ensemble) is critical.
+// Brain runs continuous learning cycle (cron or event-driven)
+await brain.learn();  // Discovers edges, detects anomalies, trains itself
 
-### Beyond Granger: Full Causal Toolkit
+// ─── CLIENT BRAIN (In an AI agent) ──────────────────────────
+import { createClientBrain } from '@nexus-ai/memory-stack';
 
-| Method | What It Does |
-|--------|-------------|
-| **PC Algorithm** | Discover causal DAG structure from observational data using conditional independence tests |
-| **Pearl's Do-Calculus** | Estimate intervention effects: "What happens if we DO X?" (not just observe X) |
-| **Counterfactual Engine** | "What would have happened if we hadn't raised prices?" |
-| **Confounding Detector** | Find hidden common causes driving spurious correlations |
-| **Transfer Entropy** | Information-theoretic measure of directed information flow between domains |
-| **Continuous Learner** | Incremental Granger tests with evidence decay — learns in real time |
-| **Cascade Tracker** | Real-time cross-domain chain reaction detection |
+const client = createClientBrain({
+  brainUrl: 'https://your-project.supabase.co/functions/v1',
+  apiKey: process.env.SUPABASE_ANON_KEY!,
+  organizationId: 'org_123',
+  domain: 'finance',     // Agent's domain perspective
+});
+
+// Agent sends signals as it works
+await client.signal('payment_failed', 42, { clientId: 'acme-corp' });
+
+// Agent queries the brain for causal intelligence
+const insight = await client.query('Why is churn increasing?');
+// Response includes causal relationships from the Core Brain:
+// "Payment delays (p=0.003, lag=7d) → support escalations → churn.
+//  Confirmed by 3/4 ensemble methods. Recommended: proactive CSM outreach."
+
+// Agent gets predictions based on current state
+const predictions = await client.predict('finance');
+// Returns active cascade predictions with confidence scores
+
+// Agent reports outcomes to close the feedback loop
+await client.outcome('prediction_123', { occurred: true, actual_value: 0.85 });
+```
+
+### Integration Patterns
+
+| Pattern | How | Best For |
+|---------|-----|----------|
+| **SDK (TypeScript)** | `import { createClientBrain } from '@nexus-ai/memory-stack'` | AI agents, Node.js apps, serverless functions |
+| **React Hooks** | `useAIMemory()`, `useSemanticSearch()`, `useCausalContext()` | Web dashboards, admin panels |
+| **REST API** | `POST /functions/v1/nexus-query` (Supabase Edge Functions) | Any language, any platform |
+| **Event Bus** | Subscribe to `relationship_update`, `prediction`, `anomaly` events | Real-time streaming, webhooks |
+| **Embedded** | Import the engine directly — zero deps, runs in-process | Edge computing, CLI tools, tests |
+
+### SDK Tiers (Progressive Adoption)
+
+| Tier | What You Get | Dependencies |
+|------|-------------|-------------|
+| **Tier 1: Pure Intelligence** | 8 causal methods, anomaly detection, pattern mining, embeddings | Zero (runs in-memory) |
+| **Tier 2: + Persistence** | Everything above + Supabase storage, signal history, causal graph | Supabase client |
+| **Tier 3: + Connectors** | Everything above + 13 auto-ingestion connectors | API keys for each connector |
+| **Tier 4: + LLM Copilot** | Everything above + natural language interface with causal context | Anthropic or OpenAI key |
+
+```typescript
+// Tier 1: Zero dependencies — just intelligence
+import { runCausalDiscovery, detectAnomalies, minePatterns } from '@nexus-ai/memory-stack';
+
+const result = runCausalDiscovery(signals, 'my-org');
+// Uses calibrated ensemble (8 methods) by default. No API keys needed.
+```
 
 ---
 
-## Architecture: 7-Layer Intelligence Stack
+## The 7-Layer Intelligence Stack
 
-Every layer is wired together through a real-time event bus. When the brain learns, all 8 advanced causal discovery methods flow through every layer automatically:
+Every layer is wired through a real-time event bus. When the brain learns, all 8 causal discovery methods flow through every layer:
 
 ```
   Signals In                                                    Intelligence Out
@@ -150,182 +227,96 @@ Every layer is wired together through a real-time event bus. When the brain lear
 ### How the 8 Methods Flow Through All 7 Layers
 
 ```
-L1 (Ingestion)       Signals arrive from 13 connectors (Stripe, HubSpot, GitHub, etc.)
+L1 (Ingestion)       Signals arrive from 13 connectors + client SDK signals
      │
      ▼
 L2 (Entity Res.)     Entities resolved via 3-tier matching, signals normalized
      │
      ▼
-L3 (Semantic Mem.)   Embeddings stored, signals written to cross_domain_signals table
+L3 (Semantic Mem.)   Embeddings stored, signals written to cross_domain_signals
      │                Signal Bridge emits to Event Bus
      ▼
-L4 (Causal Engine)   ★ runCausalDiscovery() uses calibrated_ensemble BY DEFAULT
-     │                  ├── Conditional Multivariate Granger (confounder control)
-     │                  ├── Cascade-Aware Scoring (indirect path detection)
-     │                  ├── Pairwise Granger (baseline signal strength)
-     │                  ├── P-value scoring (statistical significance)
+L4 (Causal Engine)   ★ calibrated_ensemble runs BY DEFAULT (all 3 production entry points)
+     │                  ├── Conditional Multivariate Granger (weight 3.0 — confounder control)
+     │                  ├── Cascade-Aware Scoring (weight 1.5 — indirect path detection)
+     │                  ├── Pairwise Granger (weight 1.0 — baseline signal strength)
+     │                  ├── P-value scoring (weight 0.8 — statistical significance)
      │                  └── Agreement bonus (cross-method consensus boosting)
      │                Event Bus emits relationship_update events
      ▼
-L5 (Pattern Learn.)  causal-to-learning bridge mines association rules from
-     │                higher-quality causal relationships discovered by ensemble
+L5 (Pattern Learn.)  causal-to-learning bridge mines association rules
+     │                Brain trainer ingests 41 training packs + self-generated packs
      │                Emits prediction events with confidence scores
      ▼
-L6 (Agent Orch.)     patterns-to-agents bridge caches CachedRelationships per org/domain
-     │                cascade-alert-pipeline traverses causal graph for cascade predictions
+L6 (Agent Orch.)     patterns-to-agents bridge caches relationships per org/domain
+     │                cascade-alert-pipeline traverses causal graph for predictions
      │                getContextForAgent() provides enriched context to all 12+ personas
      ▼
-L7 (Intelligence)    formatCausalForPrompt() formats relationships for LLM
-                      nexus-orchestrator.query() injects causal context into responses
-                      LLM responses backed by statistical evidence from advanced methods
+L7 (Intelligence)    formatCausalForPrompt() formats for LLM
+                      nexus-orchestrator.query() injects causal context
+                      Client brains receive causal intelligence via SDK/API
 ```
-
-### 3 Production Entry Points — All Use Advanced Methods by Default
-
-| Entry Point | When It Runs | What Happens |
-|-------------|-------------|--------------|
-| **EventBus Bridge** (`eventbus-to-causal.ts`) | Every 200 signals | Batch discovery with calibrated ensemble |
-| **Autonomous Learner** (`autonomous-learner.ts`) | Living Brain learning cycle | 9-step cycle: discover → detect → mine → train → promote → summarize |
-| **Scheduled Jobs** (`scheduled-jobs.ts`) | Daily cron | Full discovery across all signals with pagination |
-
-None of these callers need to specify `method` — they all inherit `calibrated_ensemble` from `DEFAULT_DISCOVERY_CONFIG`. When the brain learns, all 8 methods are in use.
 
 ---
 
-## Quick Start
+## Causal Discovery Engine: 8 Methods
 
-```typescript
-import { createNexusOrchestrator } from '@nexus-ai/memory-stack';
+The default method is **calibrated_ensemble** — a weighted vote across 4 scoring methods with agreement bonus:
 
-const nexus = createNexusOrchestrator({
-  organizationId: 'org_123',
-  supabaseUrl: process.env.SUPABASE_URL!,
-  supabaseKey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  llm: {
-    provider: 'anthropic',
-    apiKey: process.env.ANTHROPIC_API_KEY!,
-  },
-});
+| Method | Weight | What It Does |
+|--------|--------|-------------|
+| **Conditional Multivariate Granger** | 3.0 | Tests X→Y while controlling for ALL other variables. Eliminates spurious edges from confounders. |
+| **Cascade-Aware Scoring** | 1.5 | Detects indirect paths via lag decomposition: if lag(A→B) ≈ lag(A→C) + lag(C→B), penalizes A→B. |
+| **Pairwise Granger** | 1.0 | Baseline: does X happening predict Y happening later? F-test on VAR models. |
+| **P-value Scoring** | 0.8 | Statistical significance weighting. |
 
-// Ask questions backed by statistical evidence from 8 causal methods
-const answer = await nexus.ask('Why did enterprise churn spike this quarter?', 'finance');
+### All 8 Methods
 
-// Response includes causal proof:
-// "Finance payment delays (effect size 0.45, p=0.003) predict CS escalations
-//  within 7 days. This pattern has 85% confidence based on 47 observations.
-//  Confirmed by 3/4 ensemble methods (conditional Granger, cascade-aware, pairwise).
-//  Recommended: Proactive CSM outreach for clients with >7 day payment delays."
-```
+| # | Method | Algorithm | Best For |
+|---|--------|-----------|----------|
+| 1 | `calibrated_ensemble` | Weighted voting + agreement bonus | **Default** — best all-around |
+| 2 | `conditional` | Multivariate VAR F-test controlling for all others | Confounder rejection |
+| 3 | `cascade_aware` | Lag-decomposition penalty for indirect paths | A→C→B chain detection |
+| 4 | `greedy_peeling` | Orthogonal matching pursuit — iterative fit + prune | Sparse graph recovery |
+| 5 | `multi_resolution` | Granger at 4 temporal scales, inverse-variance fusion | Mixed timescales |
+| 6 | `anomaly_conditioned` | Z-score detection + anomaly alignment scoring | Crisis-driven edges |
+| 7 | `regime_conditional` | Separate conditional Granger for normal vs anomaly periods | Regime switching |
+| 8 | `nexusbrain_final` | Self-tuning VAR + cascade penalty + p-value boost + asymmetry | Maximum adaptability |
 
-### 1. Connect Your Data
+### CausalRivers Benchmark (ICLR 2025 Spotlight)
 
-```typescript
-import {
-  createStripeConnector,
-  createHubSpotConnector,
-  createGitHubConnector,
-  createSyncManager
-} from '@nexus-ai/memory-stack';
+Tested on real hydrological time series with known ground-truth causal structure:
 
-const stripe = createStripeConnector({ apiKey: process.env.STRIPE_API_KEY! });
-const hubspot = createHubSpotConnector({ apiKey: process.env.HUBSPOT_API_KEY! });
-const github = createGitHubConnector({
-  token: process.env.GITHUB_TOKEN!,
-  owner: 'your-org',
-  repo: 'your-repo',
-});
+| Dataset | AUROC | F1 | Accuracy |
+|---------|-------|----|----------|
+| **random_3** | **0.824** | **0.829** | **0.868** |
+| **close_3** | **0.812** | **0.822** | **0.865** |
+| **confounder_3** | 0.654 | 0.712 | 0.799 |
 
-const syncManager = createSyncManager({
-  connectors: [stripe, hubspot, github],
-  defaultIntervalMinutes: 15,
-});
-await syncManager.syncAll(supabase, 'org_123');
-```
+### Beyond Granger
 
-### 2. Discover Causation (Not Correlation)
-
-```typescript
-import { runCausalDiscovery, summarizeDiscovery } from '@nexus-ai/memory-stack';
-
-// Default: calibrated_ensemble — 4 methods + agreement bonus
-const result = runCausalDiscovery(signals, 'my-org');
-
-console.log(summarizeDiscovery(result));
-// "finance -> cs: Payment delays Granger-cause support escalations
-//  (F=4.2, p=0.003, lag=7 days, confirmed by conditional + cascade-aware methods)"
-```
-
-### 3. Get Proactive Alerts
-
-```typescript
-import { createAnomalyMonitor } from '@nexus-ai/memory-stack';
-
-const monitor = createAnomalyMonitor(eventBus, {
-  windowSize: 30,
-  threshold: 2.5,
-});
-
-// Anomaly detected -> cascade prediction via causal graph traversal -> alert
-// "Client X payment failed. 80% chance of support escalation within 7 days.
-//  Cascade path: finance → cs → product (from causal graph).
-//  Recommended: proactive CSM outreach."
-```
-
-### 4. Watch It Get Smarter
-
-```typescript
-import { createAutonomousLearner } from '@nexus-ai/memory-stack';
-
-const learner = createAutonomousLearner({
-  supabase,
-  organizationId: 'org_123',
-  autoPromoteConfidence: 0.7,
-  minPatternObservations: 5,
-});
-
-const result = await learner.runLearningCycle();
-// 1. Runs causal discovery with calibrated ensemble (8 methods)
-// 2. Detects anomalies across all domains
-// 3. Mines patterns from cross-domain data
-// 4. Converts discoveries into TrainingPacks
-// 5. Feeds them through brain-trainer (self-training!)
-// 6. Auto-promotes validated patterns to business rules
-// 7. Generates natural language insights → organizational memory
-// 8. Evaluates brain maturity: L1 Nascent → L5 Expert
-// 9. Stores everything. Next cycle discovers MORE.
-```
+| Method | What It Does |
+|--------|-------------|
+| **PC Algorithm** | Discover causal DAG structure from observational data |
+| **Pearl's Do-Calculus** | Estimate intervention effects: "What if we DO X?" |
+| **Counterfactual Engine** | "What would have happened if we hadn't done X?" |
+| **Confounding Detector** | Find hidden common causes |
+| **Transfer Entropy** | Information-theoretic directed information flow |
 
 ---
 
 ## Self-Improving Feedback Loop
 
-Every prediction is tracked against real outcomes. The brain trains itself:
-
 | Component | What It Does |
 |-----------|-------------|
-| **Prediction Tracker** | Records every forecast with confidence scores |
+| **Prediction Tracker** | Records every forecast with confidence |
 | **Outcome Matcher** | Verifies predictions against real results |
-| **Weight Adjuster** | Bayesian confidence update: strengthens correct patterns, weakens wrong ones |
+| **Weight Adjuster** | Bayesian update: reinforces correct patterns, weakens wrong ones |
 | **Evidence Decay** | Stale relationships lose weight over time |
-| **Threshold Optimizer** | ROC-based threshold learning from feedback |
+| **Threshold Optimizer** | ROC-based threshold learning |
 | **Calibration Engine** | AUC, Brier score, ECE, reliability diagrams |
-| **Brain Trainer** | Ingests TrainingPacks (41 pre-built), trains from discoveries |
-| **Maturity Evaluator** | Tracks brain evolution: L1 Nascent → L2 Learning → L3 Capable → L4 Advanced → L5 Expert |
-
-### 41 Pre-Built Training Packs
-
-| Category | Packs | Examples |
-|----------|-------|---------|
-| **Built-in** | 10 | SaaS Revenue, Customer Churn, PLG Flywheel, Engineering Velocity, Support Escalation |
-| **Macro-Economic** | 6 | Interest Rates, Inflation, Labor Market, SaaS Unit Economics |
-| **Tech Industry** | 4 | DORA DevOps, Open Source Health, Tech Hiring, Tech Debt Revenue |
-| **Business Cases** | 8 | CS ROI, PMF Measurement, Startup Failure, NRR Growth, Rule of 40 |
-| **Sales & Revenue** | 4 | B2B Buying Committee, RevOps Alignment, Sales Cycle, Onboarding |
-| **People & Culture** | 3 | Employee Engagement, Developer Productivity, Team Autonomy |
-| **Strategy** | 4 | Talent Density, Working Backwards, Scaling Paths, Pricing Strategy |
-| **Dynamic (Live)** | 2 | Live macro data (FRED, BLS), Live tech data (GitHub, HN, SO) |
-
-**6 live data sources** feed the brain continuously: FRED (Federal Reserve), Bureau of Labor Statistics, World Bank, GitHub Trending, Hacker News, Stack Overflow.
+| **Brain Trainer** | 41 training packs + self-generated from discoveries |
+| **Maturity Evaluator** | L1 Nascent → L2 Learning → L3 Capable → L4 Advanced → L5 Expert |
 
 ---
 
@@ -333,18 +324,15 @@ Every prediction is tracked against real outcomes. The brain trains itself:
 
 | Connector | Domain | Signals |
 |-----------|--------|---------|
-| **Stripe** | Finance | `payment_success`, `payment_failed`, `subscription_mrr`, `churn_risk`, `refund` |
-| **HubSpot** | Sales | `deal_stage`, `deal_amount`, `deal_probability`, contacts, pipeline |
-| **GitHub** | Engineering | PRs, issues, CI/CD pass/fail, deploys, code reviews |
-| **Support** | CS | `ticket_created`, `ticket_escalation`, `satisfaction_score`, `resolution_time` |
-| **Document** | Knowledge | Notion pages, markdown API docs, wiki content |
+| **Stripe** | Finance | `payment_success`, `payment_failed`, `subscription_mrr`, `churn_risk` |
+| **HubSpot** | Sales | `deal_stage`, `deal_amount`, `deal_probability`, pipeline |
+| **GitHub** | Engineering | PRs, issues, CI/CD, deploys, code reviews |
+| **Support** | CS | `ticket_created`, `ticket_escalation`, `satisfaction_score` |
 | **Slack** | Communication | Messages, threads, reactions |
-| **Google Chat** | Communication | Spaces, messages |
-| **Google Calendar** | Operations | Events, availability |
+| **Document** | Knowledge | Notion, markdown, wiki |
+| **Google Chat/Calendar** | Operations | Spaces, events, availability |
 | **Voice** | CS | Call recordings, transcripts |
-| **Generic App** | Any | Custom REST API (pull + push) |
-
-All connectors implement `NexusConnector` with `fullSync()`, `incrementalSync()`, and `handleWebhook()`.
+| **Generic App** | Any | Custom REST API |
 
 ---
 
@@ -352,15 +340,13 @@ All connectors implement `NexusConnector` with `fullSync()`, `incrementalSync()`
 
 | Package | Description |
 |---------|-------------|
-| [`@nexus-ai/memory-stack`](./packages/memory-stack) | Core intelligence engine: 8 causal methods, learning, embeddings, connectors, persistence |
-| [`@nexus-ai/domain-agents`](./packages/domain-agents) | Agent framework: intent routing, 12+ personas, access control, graceful degradation |
+| [`@nexus-ai/memory-stack`](./packages/memory-stack) | Core intelligence engine: 8 causal methods, learning, embeddings, connectors |
+| [`@nexus-ai/domain-agents`](./packages/domain-agents) | Agent framework: intent routing, 12+ personas, access control |
 
 ```bash
-pnpm add @nexus-ai/memory-stack      # Intelligence engine
+pnpm add @nexus-ai/memory-stack      # Intelligence engine (zero deps for core)
 pnpm add @nexus-ai/domain-agents     # Agent framework (optional)
 ```
-
-> **Supabase is optional.** The core intelligence engine (8 causal methods, anomaly detection, pattern mining, embeddings) has zero external dependencies and runs purely in-memory. Add Supabase for persistence, connector API keys for auto-ingestion, an LLM key for natural language copilot.
 
 ### Tree-Shakeable Imports
 
@@ -370,95 +356,8 @@ import { ... } from '@nexus-ai/memory-stack/causality';    // 8 causal methods +
 import { ... } from '@nexus-ai/memory-stack/learning';     // Pattern learning + brain trainer
 import { ... } from '@nexus-ai/memory-stack/embeddings';   // N-gram + neural embeddings
 import { ... } from '@nexus-ai/memory-stack/persistence';  // Supabase repository
-import { ... } from '@nexus-ai/memory-stack/code-indexing'; // Code intelligence
 import { ... } from '@nexus-ai/memory-stack/hooks';        // React hooks
-import { ... } from '@nexus-ai/memory-stack/benchmarks';   // Benchmarking
 ```
-
----
-
-## Embeddings (No GPU Required)
-
-| Feature | What It Does |
-|---------|-------------|
-| **N-gram Engine** | DJB2 hash + character n-grams (zero dependencies, 384 dims) |
-| **Neural Router** | OpenAI `text-embedding-3-small` via edge function, auto-fallback to n-gram |
-| **Temporal Memory** | Time-weighted decay and reinforcement |
-| **Semantic Search** | pgvector-powered similarity with memory-weighted RAG |
-
-## Domain Agent Framework
-
-| Feature | What It Does |
-|---------|-------------|
-| **12+ Domain Personas** | Finance, Engineering, Sales, CS, Product, Marketing, HR, Legal, Ops, Data, Security, Executive |
-| **Hybrid Intent** | Keywords first (fast), semantic fallback, AI escalation (smart) |
-| **Cross-Domain** | Detect when queries span multiple business domains |
-| **Cascade Alert Pipeline** | Traverses causal graph to predict multi-domain cascade effects |
-| **Graceful Degradation** | Helpful responses even when modules are disabled |
-| **LLM Response Layer** | Multi-turn conversations with full causal context injection |
-
-## Code Intelligence
-
-Regex-based code indexing (no tree-sitter dependency):
-
-```typescript
-import { createCodeParser, createCodeSearch } from '@nexus-ai/memory-stack/code-indexing';
-
-const parser = createCodeParser();
-const fileIndex = parser.parseSource(sourceCode, 'src/auth/login.ts');
-// -> Extracts functions, classes, interfaces, types, imports, exports, JSDoc
-
-const results = await codeSearch.searchCode(supabase, 'authentication middleware');
-```
-
----
-
-## Why Not Just Use ChatGPT/Claude?
-
-| | ChatGPT/Claude | Traditional BI | NexusBrain |
-|---|---|---|---|
-| **Memory** | Forgets between sessions | No memory | Compounds over months |
-| **Causation** | Guesses at causes | Shows correlations | Statistical proof (8 methods, p-values, ensemble consensus) |
-| **Cross-system** | One source at a time | Dashboard silos | Connects Stripe + HubSpot + GitHub + Intercom |
-| **Learning** | Same quality forever | Static rules | Self-improving: 41 training packs + autonomous discovery |
-| **Proactive** | Only when you ask | Only when you look | Alerts before problems happen via causal graph traversal |
-| **Evidence** | "I think..." | "The chart shows..." | "Effect size 0.45, p=0.003, confirmed by 3/4 ensemble methods" |
-| **Confounders** | Ignores them | Can't detect them | Conditional Granger controls for all other variables |
-
----
-
-## Production Infrastructure
-
-### Supabase Backend
-
-29 tables with RLS policies and RPC functions across 8 migrations:
-
-```bash
-supabase db push    # Apply all migrations
-```
-
-### Edge Functions
-
-| Function | Purpose | Trigger |
-|----------|---------|---------|
-| `nexus-query` | Copilot queries with causal evidence (Claude primary, OpenAI fallback) | HTTP POST |
-| `nexus-ingest` | Batch signal ingestion from connectors | HTTP POST |
-| `nexus-webhook` | Webhook receiver for HubSpot, Stripe, Intercom | HTTP POST |
-| `nexus-cron` | Causal discovery (calibrated ensemble), weight updates, evidence decay | Scheduled |
-
----
-
-## Why TypeScript?
-
-Causal inference libraries exist in Python (`CausalNex`, `DoWhy`, `causal-learn`). NexusBrain proves you can build world-class causal intelligence in TypeScript:
-
-- **Edge-deployable** — Runs on Cloudflare Workers, Vercel Edge, Deno Deploy, Supabase Functions
-- **No GPU required** — N-gram embeddings work everywhere
-- **Type-safe** — Full TypeScript with strict mode
-- **Zero runtime dependencies** — All 8 causal methods, embeddings, and pattern mining have zero external dependencies
-- **Tree-shakeable** — Import only what you need
-- **Benchmarked** — CausalRivers AUROC 0.82 on random_3, competitive with Python VAR baselines
-- **1,327 tests** — Comprehensive coverage across 54 test files
 
 ---
 
@@ -472,66 +371,52 @@ pnpm build     # Turbo + tsup (9 entry points)
 pnpm test      # 1,327 tests via Vitest
 ```
 
-### Environment Setup
+### Quick Examples
 
-```bash
-cp .env.example .env
-```
+```typescript
+// Discover causation (Tier 1 — zero dependencies)
+import { runCausalDiscovery, summarizeDiscovery } from '@nexus-ai/memory-stack';
 
-```bash
-# Required
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=eyJ...
-SUPABASE_ANON_KEY=eyJ...
+const result = runCausalDiscovery(signals, 'my-org');
+console.log(summarizeDiscovery(result));
+// "finance -> cs: Payment delays Granger-cause support escalations
+//  (p=0.003, lag=7d, confirmed by conditional + cascade-aware methods)"
 
-# LLM Providers (store as Supabase secrets in production)
-ANTHROPIC_API_KEY=sk-ant-...    # Primary LLM
-OPENAI_API_KEY=sk-...           # Neural embeddings + LLM fallback
+// Self-improving brain (Tier 2+)
+import { createAutonomousLearner } from '@nexus-ai/memory-stack';
 
-# Connectors (optional)
-HUBSPOT_API_KEY=pat-...
-STRIPE_API_KEY=sk_live_...
-GITHUB_TOKEN=ghp_...
+const learner = createAutonomousLearner({ supabase, organizationId: 'org_123' });
+await learner.runLearningCycle();
+// Discovers → Detects → Mines → Trains → Promotes → Summarizes → Evaluates
+
+// Proactive alerts (Tier 2+)
+import { createAnomalyMonitor } from '@nexus-ai/memory-stack';
+
+const monitor = createAnomalyMonitor(eventBus, { windowSize: 30, threshold: 2.5 });
+// Anomaly → cascade prediction via causal graph → alert
 ```
 
 ---
 
-## Project Structure
+## Production Infrastructure
 
-```
-nexus-intelligence/
-  packages/
-    memory-stack/                 # Core engine (67,000+ lines)
-      src/
-        causality/                # L4: 23 files — 8 advanced methods, Granger, PC,
-                                  #     do-calculus, cascade tracker, continuous learner,
-                                  #     multivariate VAR, advanced discovery
-        core/
-          embeddings/             # L3: N-gram + neural embeddings, router, cache
-          entity-resolver.ts      # L2: Cross-source entity deduplication
-          entity-extraction.ts    # Named entity extraction (regex + AI)
-        learning/                 # L5: Patterns, anomalies, brain trainer, autonomous learner
-        intelligence/             # L7: Personas, reasoning framework
-        orchestrator/             # L6: Orchestrator, copilot, LLM response, cascade alerts
-        connectors/               # L1: 13 connectors + sync manager
-        persistence/              # Supabase repository layer
-        code-indexing/            # Code parser, embedder, search
-        bridges/                  # 5 cross-layer event bridges
-        hooks/                    # React hooks (optional)
-        benchmarks/               # Benchmark runner, maturity evaluator
-    domain-agents/                # Multi-domain agent routing
-      src/
-        classifier/               # Hybrid intent classification
-        domain-router/            # Domain routing engine
-        personas/                 # 12+ persona management
-        registry/                 # Agent module registry
-        access/                   # Capability-based access control
-  supabase/
-    migrations/                   # 8 migrations (29 tables)
-    functions/                    # 4 edge functions
-  scripts/
-    benchmarks/causalrivers/      # CausalRivers benchmark (Python + results)
-```
+| Component | Details |
+|-----------|---------|
+| **Database** | Supabase: 29 tables, RLS policies, 8 migrations |
+| **Edge Functions** | `nexus-query`, `nexus-ingest`, `nexus-webhook`, `nexus-cron` |
+| **Deployment** | Cloudflare Workers, Vercel Edge, Deno Deploy, Supabase Functions |
+| **Embeddings** | N-gram (zero deps, 384d) + Neural (OpenAI fallback) |
+
+---
+
+## Why TypeScript?
+
+- **Edge-deployable** — Runs on Cloudflare Workers, Vercel Edge, Deno Deploy
+- **Zero runtime dependencies** — All 8 causal methods, embeddings, pattern mining
+- **Type-safe** — Full TypeScript strict mode
+- **Tree-shakeable** — Import only what you need
+- **Benchmarked** — CausalRivers AUROC 0.82, competitive with Python baselines
+- **1,327 tests** across 54 test files
 
 ---
 
@@ -542,16 +427,11 @@ nexus-intelligence/
 | TypeScript lines | 67,243 |
 | Causality engine files | 23 |
 | Advanced causal methods | 8 (+ PC, do-calculus, transfer entropy) |
-| Source files | 128 |
-| Test files | 54 |
 | Passing tests | 1,327 |
 | Connectors | 13 |
 | Domain personas | 12+ |
 | Training packs | 41 (10 built-in + 29 static + 2 live) |
 | Live data sources | 6 (FRED, BLS, World Bank, GitHub, HN, SO) |
-| Database tables | 29 |
-| Edge functions | 4 |
-| Build entry points | 9 |
 | External runtime deps | 0 |
 | CausalRivers AUROC (best) | 0.824 (random_3) |
 
