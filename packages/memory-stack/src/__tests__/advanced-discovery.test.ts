@@ -29,7 +29,7 @@ import {
   computeOlsRSS,
 } from '../causality/multivariate-var';
 import { downsampleTimeSeries } from '../causality/signal-to-timeseries';
-import { runCausalDiscovery } from '../causality/causal-discovery-runner';
+import { runCausalDiscovery, DEFAULT_DISCOVERY_CONFIG } from '../causality/causal-discovery-runner';
 
 // ============================================================================
 // SEEDED PRNG (Mulberry32) — deterministic random for reproducibility
@@ -617,5 +617,17 @@ describe('Integration: runCausalDiscovery with advanced methods', () => {
       advanced: { maxLag: 5 },
     });
     expect(result.pairs_tested).toBeGreaterThan(0);
+  });
+
+  it('DEFAULT_DISCOVERY_CONFIG.method should be calibrated_ensemble', () => {
+    expect(DEFAULT_DISCOVERY_CONFIG.method).toBe('calibrated_ensemble');
+  });
+
+  it('default method should use calibrated_ensemble when no method specified', () => {
+    const signals = generateSignals(['Marketing', 'Revenue'], 120);
+    // No method specified — should use calibrated_ensemble (the default)
+    const result = runCausalDiscovery(signals, 'org-default');
+    expect(result.organization_id).toBe('org-default');
+    expect(result.domains_analyzed.length).toBeGreaterThanOrEqual(2);
   });
 });

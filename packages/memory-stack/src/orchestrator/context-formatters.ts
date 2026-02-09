@@ -22,9 +22,14 @@ export function formatCausalForPrompt(
     const direction = r.effectSize > 0 ? '\u2192' : '\u2190';
     const strength =
       r.effectSize > 0.3 ? 'strong' : r.effectSize > 0.1 ? 'moderate' : 'weak';
-    const pStr = r.pValue.toFixed(3);
-    const effStr = r.effectSize.toFixed(2);
-    return `- ${r.sourceDomain} ${direction} ${r.targetDomain}: ${strength} causal link (effect: ${effStr}, lag: ${r.lagDays}d, p=${pStr})${r.naturalLanguage ? ' \u2014 ' + r.naturalLanguage : ''}`;
+    const pStr = r.pValue.toFixed(4);
+    const effStr = r.effectSize.toFixed(3);
+    const fStr = r.fStatistic > 0 ? `, F=${r.fStatistic.toFixed(2)}` : '';
+    const ciStr = r.confidenceIntervalLower != null && r.confidenceIntervalUpper != null
+      ? `, CI=[${r.confidenceIntervalLower.toFixed(3)}, ${r.confidenceIntervalUpper.toFixed(3)}]`
+      : '';
+    const nStr = r.sampleSize ? `, n=${r.sampleSize}` : '';
+    return `- ${r.sourceDomain} ${direction} ${r.targetDomain}: ${strength} causal link (effect: ${effStr}, lag: ${r.lagDays}d, p=${pStr}${fStr}${ciStr}${nStr})${r.naturalLanguage ? ' \u2014 ' + r.naturalLanguage : ''}`;
   });
 
   return `## Discovered Causal Relationships\n${lines.join('\n')}`;

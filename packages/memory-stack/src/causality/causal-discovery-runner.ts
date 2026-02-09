@@ -231,7 +231,7 @@ export function runCausalDiscovery(
     grangerData[domain] = series.values;
   }
 
-  const method = fullConfig.method || 'pairwise';
+  const method = fullConfig.method ?? DEFAULT_DISCOVERY_CONFIG.method ?? 'calibrated_ensemble';
   let grangerResults: GrangerResult[];
 
   if (method === 'pairwise') {

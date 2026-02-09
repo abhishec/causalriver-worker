@@ -32,8 +32,12 @@ export interface CachedRelationship {
   targetDomain: string;
   effectSize: number;
   pValue: number;
+  fStatistic: number;
   lagDays: number;
   naturalLanguage: string;
+  confidenceIntervalLower?: number;
+  confidenceIntervalUpper?: number;
+  sampleSize?: number;
   discoveredAt: Date;
 }
 
@@ -104,8 +108,12 @@ export function createAgentContextEnricher(eventBus: EventBusInstance) {
           targetDomain: payload.target_domain || payload.target || '',
           effectSize: payload.effect_size || payload.weight || 0,
           pValue: payload.granger_p_value || payload.pValue || 0,
+          fStatistic: payload.granger_f_statistic || payload.fStatistic || 0,
           lagDays: payload.optimal_lag_days || payload.lagDays || 0,
           naturalLanguage: payload.natural_language || payload.evidence || '',
+          confidenceIntervalLower: payload.confidence_interval_lower ?? undefined,
+          confidenceIntervalUpper: payload.confidence_interval_upper ?? undefined,
+          sampleSize: payload.sample_size ?? undefined,
           discoveredAt: event.timestamp,
         };
 
