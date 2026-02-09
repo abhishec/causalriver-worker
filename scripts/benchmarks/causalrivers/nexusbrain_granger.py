@@ -4683,6 +4683,104 @@ def nexusbrain_apex(
     return scores
 
 
+def nexusbrain_apex_v2(
+    data: pd.DataFrame,
+    max_lag: int = 3,
+    criterion: str = "aic",
+    verbose: bool = False,
+) -> np.ndarray:
+    """
+    NexusBrain Apex v2: Stronger counterfactual integration.
+
+    v1 used CF as a modifier on VAR scores. v2 blends VAR and CF scores
+    directly, with positive coefficient prior, and uses residual correlation
+    to detect when to lean more on CF (high residual corr = confounders).
+    """
+    from statsmodels.tsa.api import VAR
+
+    n_vars = data.shape[1]
+    if n_vars < 2:
+        return np.zeros((n_vars, n_vars))
+
+    values = data.values
+    lag = min(max_lag, len(values) // (3 * n_vars))
+    if lag < 1:
+        lag = 1
+
+    # Component 1: VAR coefficients
+    try:
+        model = VAR(values)
+        result = model.fit(maxlags=lag, verbose=False)
+        params = result.params[1:]
+        residuals = result.resid
+        coefs = np.stack([
+            params[:, x].reshape(result.k_ar, n_vars).T
+            for x in range(n_vars)
+        ])
+        s_var = np.max(np.abs(coefs), axis=2)
+        best_lag_idx = np.argmax(np.abs(coefs), axis=2)
+        signs = np.zeros((n_vars, n_vars))
+        for i in range(n_vars):
+            for j in range(n_vars):
+                signs[i, j] = coefs[i, j, best_lag_idx[i, j]]
+        np.fill_diagonal(s_var, 0)
+
+        # Residual correlation (confound detector)
+        res_corr = np.abs(np.corrcoef(residuals.T))
+        mean_res_corr = np.mean(res_corr[np.triu_indices(n_vars, k=1)])
+    except Exception:
+        s_var = np.zeros((n_vars, n_vars))
+        signs = np.zeros((n_vars, n_vars))
+        res_corr = np.zeros((n_vars, n_vars))
+        mean_res_corr = 0
+
+    # Component 2: Counterfactual knockout
+    s_cf = counterfactual_knockout(data, max_lag=lag, n_shuffles=5, verbose=False)
+
+    # Determine CF weight based on residual correlation
+    # High residual correlation → likely confounders → trust CF more
+    cf_weight = 0.15 + 0.25 * min(mean_res_corr, 1.0)  # Range: 0.15–0.40
+    var_weight = 1.0 - cf_weight
+
+    if verbose:
+        print(f"    Mean residual corr: {mean_res_corr:.3f}, CF weight: {cf_weight:.2f}")
+
+    # Normalize for blending
+    s_var_n = _normalize_scores(s_var)
+    s_cf_n = _normalize_scores(s_cf)
+
+    # Blend
+    blend = var_weight * s_var_n + cf_weight * s_cf_n
+
+    # Map back to VAR scale (use blend as ranking, apply to VAR scores)
+    scores = np.zeros((n_vars, n_vars))
+    for i in range(n_vars):
+        for j in range(n_vars):
+            if i == j:
+                continue
+
+            # Start from blended rank
+            score = s_var[i, j] * (0.5 + 0.5 * blend[i, j] / max(blend.max(), 1e-10))
+
+            # Positive coefficient boost
+            if signs[i, j] > 0:
+                score *= 1.04
+            elif signs[i, j] < 0:
+                score *= 0.96
+
+            # Per-edge residual correction
+            if res_corr[i, j] > 0.4:
+                # This pair has high residual correlation → likely confounded
+                # Trust CF more for this specific edge
+                if s_cf_n[i, j] < 0.3:
+                    score *= 0.85  # CF says not causal + high residual corr → penalize
+
+            scores[i, j] = score
+
+    np.fill_diagonal(scores, 0)
+    return scores
+
+
 # =============================================================================
 # STANDALONE TESTS
 # =============================================================================

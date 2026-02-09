@@ -42,6 +42,7 @@ from nexusbrain_granger import (
     var_sign_boost,
     counterfactual_knockout,
     nexusbrain_apex,
+    nexusbrain_apex_v2,
 )
 
 
@@ -280,6 +281,12 @@ def main():
     if "nexusbrain_apex" in args.methods:
         methods["NB Apex"] = (
             nexusbrain_method_wrapper(nexusbrain_apex, max_lag=args.max_lag),
+            var_cfg,
+        )
+
+    if "nexusbrain_apex_v2" in args.methods:
+        methods["NB Apex v2"] = (
+            nexusbrain_method_wrapper(nexusbrain_apex_v2, max_lag=args.max_lag),
             var_cfg,
         )
 
