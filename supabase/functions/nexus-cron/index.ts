@@ -1,11 +1,20 @@
 /**
  * Nexus Cron Edge Function
  *
- * Scheduled function for periodic intelligence tasks:
- *   1. Daily causal discovery — runs Granger analysis on accumulated signals
- *   2. Prediction verification — checks pending predictions against outcomes
- *   3. Threshold optimization — adjusts signal thresholds based on feedback
- *   4. Evidence decay — reduces confidence in stale causal relationships
+ * Scheduled function for periodic maintenance tasks.
+ * Handles lightweight SQL-based operations that run well in a Deno edge function.
+ *
+ * Available tasks:
+ *   1. prediction_verification — checks pending predictions against outcomes
+ *   2. threshold_optimization — adjusts signal thresholds based on feedback
+ *   3. evidence_decay — reduces confidence in stale causal relationships
+ *
+ * IMPORTANT: Causal discovery is NOT handled here. It runs via the autonomous
+ * trainer (scripts/autonomous-trainer.ts) which uses the full calibrated_ensemble
+ * engine with 8 CausalRivers-proven techniques. The trainer runs on a launchd
+ * schedule (every 6 hours) and calls createScheduledJobs().runDailyCausalDiscovery()
+ * from the core @nexus-ai/memory-stack engine. This ensures ONE causal discovery
+ * implementation across the entire system — no code duplication.
  *
  * Trigger: Supabase pg_cron or external cron (recommended: daily at 2 AM UTC)
  *
@@ -45,7 +54,6 @@ serve(async (req: Request) => {
     }
 
     const requestedTasks = body.tasks || [
-      'causal_discovery',
       'prediction_verification',
       'threshold_optimization',
       'evidence_decay',
@@ -83,191 +91,26 @@ serve(async (req: Request) => {
 
     for (const orgId of orgIds) {
       // -----------------------------------------------------------------
-      // Task 1: Causal Discovery — Find cross-domain causal relationships
+      // Causal Discovery — handled by autonomous trainer, not this function.
+      // The trainer uses the full calibrated_ensemble engine with conditional
+      // Granger, cascade-aware scoring, and agreement voting. Running it here
+      // would mean duplicating ~2000 lines of statistical code in Deno.
+      // See: scripts/autonomous-trainer.ts → Stage 4 → createScheduledJobs()
       // -----------------------------------------------------------------
       if (requestedTasks.includes('causal_discovery')) {
-        const start = Date.now();
-        try {
-          // Fetch recent signals (paginated to avoid 1000-row Supabase limit)
-          const allSignals: any[] = [];
-          let page = 0;
-          const PAGE_SIZE = 1000;
-          while (true) {
-            const { data: batch } = await supabase
-              .from('cross_domain_signals')
-              .select('source_domain, signal_type, signal_value, signal_timestamp, created_at')
-              .eq('organization_id', orgId)
-              .gte('created_at', new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString())
-              .order('created_at', { ascending: true })
-              .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
-            if (!batch || batch.length === 0) break;
-            allSignals.push(...batch);
-            if (batch.length < PAGE_SIZE) break;
-            page++;
-            if (page > 10) break; // Safety cap: 10K signals max
-          }
-
-          if (allSignals.length < 30) {
-            results.push({
-              task: 'causal_discovery',
-              organizationId: orgId,
-              status: 'skipped',
-              details: { reason: 'Insufficient data', signalCount: allSignals.length },
-              durationMs: Date.now() - start,
-            });
-          } else {
-            // Aggregate signals into daily time series per domain
-            const domainDailyMap = new Map<string, Map<string, number[]>>();
-            for (const s of allSignals) {
-              const ts = s.signal_timestamp || s.created_at;
-              const day = typeof ts === 'string' ? ts.substring(0, 10) : new Date(ts).toISOString().substring(0, 10);
-              if (!domainDailyMap.has(s.source_domain)) {
-                domainDailyMap.set(s.source_domain, new Map());
-              }
-              const dayMap = domainDailyMap.get(s.source_domain)!;
-              if (!dayMap.has(day)) dayMap.set(day, []);
-              dayMap.get(day)!.push(s.signal_value);
-            }
-
-            // Build aligned daily arrays for all domains
-            const allDays = new Set<string>();
-            for (const dayMap of domainDailyMap.values()) {
-              for (const day of dayMap.keys()) allDays.add(day);
-            }
-            const sortedDays = [...allDays].sort();
-            const domains = [...domainDailyMap.keys()];
-
-            // Only keep domains with sufficient data density
-            const validDomains = domains.filter(d => {
-              const dayMap = domainDailyMap.get(d)!;
-              return dayMap.size >= 10;
-            });
-
-            if (validDomains.length < 2) {
-              results.push({
-                task: 'causal_discovery',
-                organizationId: orgId,
-                status: 'skipped',
-                details: { reason: 'Insufficient domain coverage', domainCount: validDomains.length },
-                durationMs: Date.now() - start,
-              });
-            } else {
-              // Build daily mean arrays and apply first-order differencing
-              const domainSeries = new Map<string, number[]>();
-              for (const domain of validDomains) {
-                const dayMap = domainDailyMap.get(domain)!;
-                const raw = sortedDays.map(day => {
-                  const vals = dayMap.get(day);
-                  return vals ? vals.reduce((a, b) => a + b, 0) / vals.length : 0;
-                });
-                // First-order differencing for stationarity
-                const diff = [];
-                for (let t = 1; t < raw.length; t++) diff.push(raw[t] - raw[t - 1]);
-                domainSeries.set(domain, diff);
-              }
-
-              // Test all directed pairs with lagged cross-correlation
-              let relationshipsFound = 0;
-              const MAX_LAG = Math.min(14, Math.floor(sortedDays.length / 4));
-
-              for (const source of validDomains) {
-                for (const target of validDomains) {
-                  if (source === target) continue;
-                  const x = domainSeries.get(source)!;
-                  const y = domainSeries.get(target)!;
-                  const T = Math.min(x.length, y.length);
-                  if (T < 20) continue;
-
-                  // Find lag with highest absolute cross-correlation
-                  let bestLag = 1;
-                  let bestCorr = 0;
-                  for (let lag = 1; lag <= MAX_LAG; lag++) {
-                    const n = T - lag;
-                    if (n < 10) break;
-                    let sumXY = 0, sumX2 = 0, sumY2 = 0;
-                    let meanX = 0, meanY = 0;
-                    for (let t = 0; t < n; t++) { meanX += x[t]; meanY += y[t + lag]; }
-                    meanX /= n; meanY /= n;
-                    for (let t = 0; t < n; t++) {
-                      const dx = x[t] - meanX;
-                      const dy = y[t + lag] - meanY;
-                      sumXY += dx * dy;
-                      sumX2 += dx * dx;
-                      sumY2 += dy * dy;
-                    }
-                    const denom = Math.sqrt(sumX2 * sumY2);
-                    const r = denom > 1e-10 ? sumXY / denom : 0;
-                    if (Math.abs(r) > Math.abs(bestCorr)) {
-                      bestCorr = r;
-                      bestLag = lag;
-                    }
-                  }
-
-                  // Approximate p-value from t-distribution of correlation
-                  const n = T - bestLag;
-                  const tStat = Math.abs(bestCorr) * Math.sqrt((n - 2) / Math.max(1e-10, 1 - bestCorr * bestCorr));
-                  // Approximate 2-tailed p-value (good enough for edge function)
-                  const pValue = n > 30
-                    ? 2 * Math.exp(-0.717 * tStat - 0.416 * tStat * tStat) // Gaussian approx
-                    : Math.min(1, 2 / (1 + Math.pow(tStat, 2) / Math.max(1, n - 2)));
-                  const effectSize = bestCorr * bestCorr; // R² as effect size
-                  const isSignificant = pValue < 0.05 && effectSize > 0.05;
-
-                  // Upsert relationship
-                  await supabase
-                    .from('causal_relationships_statistical')
-                    .upsert(
-                      {
-                        organization_id: orgId,
-                        source_domain: source,
-                        target_domain: target,
-                        granger_f_statistic: tStat,
-                        granger_p_value: Math.max(0, Math.min(1, pValue)),
-                        optimal_lag_days: bestLag,
-                        effect_size: effectSize,
-                        confidence_interval_lower: Math.max(0, effectSize - 1.96 / Math.sqrt(n)),
-                        confidence_interval_upper: Math.min(1, effectSize + 1.96 / Math.sqrt(n)),
-                        sample_size: n,
-                        observation_window_days: sortedDays.length,
-                        is_significant: isSignificant,
-                        natural_language: isSignificant
-                          ? `${source} changes predict ${target} changes with ${bestLag}-day lag (r²=${effectSize.toFixed(3)}, p=${pValue.toFixed(4)})`
-                          : `No significant relationship from ${source} to ${target}`,
-                        updated_at: new Date().toISOString(),
-                      },
-                      { onConflict: 'organization_id,source_domain,target_domain' }
-                    );
-                  relationshipsFound++;
-                }
-              }
-
-              results.push({
-                task: 'causal_discovery',
-                organizationId: orgId,
-                status: 'success',
-                details: {
-                  signalsAnalyzed: allSignals.length,
-                  domainsFound: validDomains.length,
-                  daysSpanned: sortedDays.length,
-                  relationshipsUpdated: relationshipsFound,
-                },
-                durationMs: Date.now() - start,
-              });
-            }
-          }
-        } catch (err: any) {
-          results.push({
-            task: 'causal_discovery',
-            organizationId: orgId,
-            status: 'error',
-            details: { error: err.message },
-            durationMs: Date.now() - start,
-          });
-        }
+        results.push({
+          task: 'causal_discovery',
+          organizationId: orgId,
+          status: 'skipped',
+          details: {
+            reason: 'Causal discovery runs via the autonomous trainer (calibrated_ensemble engine). Use: pnpm exec tsx scripts/autonomous-trainer.ts',
+          },
+          durationMs: 0,
+        });
       }
 
       // -----------------------------------------------------------------
-      // Task 2: Prediction Verification — Check unverified predictions
+      // Task 1: Prediction Verification — Check unverified predictions
       // -----------------------------------------------------------------
       if (requestedTasks.includes('prediction_verification')) {
         const start = Date.now();
@@ -340,7 +183,7 @@ serve(async (req: Request) => {
       }
 
       // -----------------------------------------------------------------
-      // Task 3: Threshold Optimization — Adjust signal thresholds
+      // Task 2: Threshold Optimization — Adjust signal thresholds
       // -----------------------------------------------------------------
       if (requestedTasks.includes('threshold_optimization')) {
         const start = Date.now();
@@ -416,7 +259,7 @@ serve(async (req: Request) => {
       }
 
       // -----------------------------------------------------------------
-      // Task 4: Evidence Decay — Reduce confidence in stale relationships
+      // Task 3: Evidence Decay — Reduce confidence in stale relationships
       // -----------------------------------------------------------------
       if (requestedTasks.includes('evidence_decay')) {
         const start = Date.now();

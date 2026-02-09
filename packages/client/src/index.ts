@@ -144,7 +144,10 @@ export interface NexusClient {
   /** Forward a webhook payload (Stripe, HubSpot, Intercom) — auto-transforms to signals */
   webhook(source: 'stripe' | 'hubspot' | 'intercom' | 'zendesk' | 'support', payload: unknown): Promise<WebhookResult>;
 
-  /** Trigger scheduled tasks (causal_discovery, prediction_verification, etc.) */
+  /**
+   * Trigger scheduled maintenance tasks (prediction_verification, threshold_optimization, evidence_decay).
+   * Note: causal_discovery runs via the autonomous trainer using the full calibrated_ensemble engine.
+   */
   cron(tasks?: string[]): Promise<CronResult>;
 
   /** Fetch discovered causal relationships for this org */
