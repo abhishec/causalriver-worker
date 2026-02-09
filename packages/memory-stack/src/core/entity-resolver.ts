@@ -125,9 +125,9 @@ export function createEntityResolver(config: EntityResolverConfig) {
 
     if (exactMatch) {
       const resolved: ResolvedEntity = {
-        canonicalId: exactMatch.canonical_id,
+        canonicalId: exactMatch.id,
         entityType: exactMatch.entity_type,
-        displayName: exactMatch.display_name,
+        displayName: exactMatch.canonical_name,
         externalIds: exactMatch.external_ids,
         confidence: 1.0,
         matchMethod: 'exact',
@@ -136,20 +136,22 @@ export function createEntityResolver(config: EntityResolverConfig) {
       return resolved;
     }
 
-    // Tier 2: Exact match by email or domain
+    // Tier 2: Exact match by email or domain (stored in email_domains JSONB array)
     if (input.email || input.domain) {
-      const query = supabase
-        .from('resolved_entities')
-        .select('*')
-        .eq('organization_id', organizationId);
+      // email_domains is a JSONB array like ["acme.com", "acme.co.uk"]
+      // Use contains to check if the domain exists in the array
+      const matchDomain = input.email
+        ? input.email.split('@')[1]
+        : input.domain;
 
-      if (input.email) {
-        query.eq('primary_email', input.email);
-      } else if (input.domain) {
-        query.eq('primary_domain', input.domain);
-      }
-
-      const { data: emailMatch } = await query.single();
+      const { data: emailMatch } = matchDomain
+        ? await supabase
+            .from('resolved_entities')
+            .select('*')
+            .eq('organization_id', organizationId)
+            .contains('email_domains', [matchDomain])
+            .single()
+        : { data: null };
 
       if (emailMatch) {
         const updatedExternalIds = {
@@ -160,12 +162,12 @@ export function createEntityResolver(config: EntityResolverConfig) {
         await supabase
           .from('resolved_entities')
           .update({ external_ids: updatedExternalIds })
-          .eq('canonical_id', emailMatch.canonical_id);
+          .eq('id', emailMatch.id);
 
         const resolved: ResolvedEntity = {
-          canonicalId: emailMatch.canonical_id,
+          canonicalId: emailMatch.id,
           entityType: emailMatch.entity_type,
-          displayName: emailMatch.display_name,
+          displayName: emailMatch.canonical_name,
           externalIds: updatedExternalIds,
           confidence: 0.95,
           matchMethod: 'exact',
@@ -190,7 +192,7 @@ export function createEntityResolver(config: EntityResolverConfig) {
         for (const candidate of candidates) {
           const score = levenshteinSimilarity(
             input.name.toLowerCase(),
-            candidate.display_name.toLowerCase()
+            candidate.canonical_name.toLowerCase()
           );
           if (score > bestScore && score >= fuzzyThreshold) {
             bestScore = score;
@@ -207,12 +209,12 @@ export function createEntityResolver(config: EntityResolverConfig) {
           await supabase
             .from('resolved_entities')
             .update({ external_ids: updatedExternalIds })
-            .eq('canonical_id', bestMatch.canonical_id);
+            .eq('id', bestMatch.id);
 
           const resolved: ResolvedEntity = {
-            canonicalId: bestMatch.canonical_id,
+            canonicalId: bestMatch.id,
             entityType: bestMatch.entity_type,
-            displayName: bestMatch.display_name,
+            displayName: bestMatch.canonical_name,
             externalIds: updatedExternalIds,
             confidence: bestScore,
             matchMethod: 'fuzzy',
@@ -224,18 +226,28 @@ export function createEntityResolver(config: EntityResolverConfig) {
     }
 
     // No match found - create new entity
-    const canonicalId = `ent_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    // Build email_domains array from email and/or domain input
+    const emailDomains: string[] = [];
+    if (input.email) {
+      const emailDomain = input.email.split('@')[1];
+      if (emailDomain) emailDomains.push(emailDomain);
+    }
+    if (input.domain && !emailDomains.includes(input.domain)) {
+      emailDomains.push(input.domain);
+    }
 
-    await supabase.from('resolved_entities').insert({
-      canonical_id: canonicalId,
+    const { data: inserted } = await supabase.from('resolved_entities').insert({
       organization_id: organizationId,
       entity_type: input.entityType || 'company',
-      display_name: input.name || input.externalId,
-      primary_email: input.email || null,
-      primary_domain: input.domain || null,
+      canonical_name: input.name || input.externalId,
+      email_domains: emailDomains.length > 0 ? emailDomains : [],
       external_ids: { [input.source]: input.externalId },
+      aliases: [],
       metadata: input.metadata || {},
-    });
+      confidence: 1.0,
+    }).select('id').single();
+
+    const canonicalId = inserted?.id ?? `ent_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 
     const resolved: ResolvedEntity = {
       canonicalId,
@@ -258,7 +270,7 @@ export function createEntityResolver(config: EntityResolverConfig) {
     const { data: entity } = await supabase
       .from('resolved_entities')
       .select('*')
-      .eq('canonical_id', canonicalId)
+      .eq('id', canonicalId)
       .single();
 
     if (!entity) return null;
@@ -273,11 +285,11 @@ export function createEntityResolver(config: EntityResolverConfig) {
 
     return {
       entity: {
-        canonicalId: entity.canonical_id,
+        canonicalId: entity.id,
         entityType: entity.entity_type,
-        displayName: entity.display_name,
+        displayName: entity.canonical_name,
         externalIds: entity.external_ids,
-        confidence: 1.0,
+        confidence: entity.confidence ?? 1.0,
         matchMethod: 'exact',
       },
       signals: (signals || []).map((s: any) => ({
