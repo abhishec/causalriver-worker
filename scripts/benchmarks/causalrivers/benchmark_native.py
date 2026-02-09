@@ -40,6 +40,8 @@ from nexusbrain_granger import (
     var_multi_lag_blend,
     var_aic_best,
     var_sign_boost,
+    counterfactual_knockout,
+    nexusbrain_apex,
 )
 
 
@@ -266,6 +268,18 @@ def main():
     if "var_sign_boost" in args.methods:
         methods["VAR Sign"] = (
             nexusbrain_method_wrapper(var_sign_boost, max_lag=args.max_lag),
+            var_cfg,
+        )
+
+    if "counterfactual" in args.methods:
+        methods["CF Knockout"] = (
+            nexusbrain_method_wrapper(counterfactual_knockout, max_lag=args.max_lag, n_shuffles=5),
+            var_cfg,
+        )
+
+    if "nexusbrain_apex" in args.methods:
+        methods["NB Apex"] = (
+            nexusbrain_method_wrapper(nexusbrain_apex, max_lag=args.max_lag),
             var_cfg,
         )
 

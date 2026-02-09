@@ -4459,6 +4459,231 @@ def nexusbrain_omega(
 
 
 # =============================================================================
+# METHOD 39: Counterfactual Knockout — "Would Y still happen without X?"
+# =============================================================================
+
+def counterfactual_knockout(
+    data: pd.DataFrame,
+    max_lag: int = 3,
+    criterion: str = "aic",
+    n_shuffles: int = 5,
+    verbose: bool = False,
+) -> np.ndarray:
+    """
+    Counterfactual Knockout: Measures causal effect by asking
+    "If source X hadn't happened, would target Y still be predictable?"
+
+    Unlike VAR/Granger which ask "does X add predictive power for Y?",
+    this method:
+    1. Fits a full VAR model using ALL variables → get baseline MSE for target
+    2. Creates a counterfactual by block-shuffling source's time series
+       (preserves marginal distribution but breaks temporal dependencies)
+    3. Refits the model → get counterfactual MSE
+    4. Causal effect = (cf_MSE - full_MSE) / full_MSE
+
+    Key advantage for confounders:
+    - If A and B are confounded by hidden C, shuffling A won't hurt B's
+      prediction much because B's dynamics are driven by C (still intact)
+    - If A truly causes B, shuffling A WILL hurt B's prediction significantly
+
+    This is related to permutation importance / Shapley values but applied
+    to causal graph discovery.
+    """
+    from statsmodels.tsa.api import VAR
+
+    n_vars = data.shape[1]
+    if n_vars < 2:
+        return np.zeros((n_vars, n_vars))
+
+    if verbose:
+        print("  Running Counterfactual Knockout method...")
+
+    values = data.values
+    n = len(values)
+    lag = min(max_lag, len(values) // (3 * n_vars))
+    if lag < 1:
+        lag = 1
+
+    # Step 1: Fit full VAR model and get baseline residuals
+    try:
+        model = VAR(values)
+        result = model.fit(maxlags=lag, verbose=False)
+        full_resid = result.resid  # shape: (T-lag, n_vars)
+        full_mse = np.mean(full_resid ** 2, axis=0)  # per-variable MSE
+    except Exception:
+        if verbose:
+            print("  Full VAR fit failed")
+        return np.zeros((n_vars, n_vars))
+
+    # Step 2: For each source variable, create counterfactual and measure effect
+    scores = np.zeros((n_vars, n_vars))
+
+    for source in range(n_vars):
+        cf_mse_deltas = np.zeros(n_vars)
+
+        for shuffle_idx in range(n_shuffles):
+            # Block shuffle the source variable
+            cf_values = values.copy()
+            block_size = max(lag * 3, 50)
+            n_blocks = max(n // block_size, 2)
+
+            # Create block indices
+            blocks = []
+            for i in range(0, n, block_size):
+                blocks.append(cf_values[i:i + block_size, source].copy())
+
+            # Shuffle blocks deterministically but differently each iteration
+            np.random.seed(42 + source * 100 + shuffle_idx)
+            perm = np.random.permutation(len(blocks))
+            shuffled = np.concatenate([blocks[p] for p in perm])[:n]
+            cf_values[:len(shuffled), source] = shuffled
+
+            # Refit VAR on counterfactual data
+            try:
+                cf_model = VAR(cf_values)
+                cf_result = cf_model.fit(maxlags=lag, verbose=False)
+
+                # Predict on ORIGINAL data using counterfactual model
+                # This measures: with cf_model coefficients, how well can we predict
+                # the original target values?
+                cf_params = cf_result.params
+                T = n - lag
+                # Build lagged matrix from ORIGINAL data
+                X_orig = np.ones((T, n_vars * lag + 1))
+                for l in range(1, lag + 1):
+                    X_orig[:, 1 + (l - 1) * n_vars:1 + l * n_vars] = values[lag - l:n - l, :]
+                # Predict
+                y_orig = values[lag:, :]
+                y_pred = X_orig @ cf_params
+                cf_resid = y_orig - y_pred
+                cf_mse = np.mean(cf_resid ** 2, axis=0)
+
+                # Delta: how much worse is prediction for each target
+                for target in range(n_vars):
+                    if target == source:
+                        continue
+                    if full_mse[target] > 1e-15:
+                        delta = (cf_mse[target] - full_mse[target]) / full_mse[target]
+                        cf_mse_deltas[target] += max(0, delta)
+
+            except Exception:
+                continue
+
+        # Average across shuffles
+        for target in range(n_vars):
+            if target == source:
+                continue
+            scores[target, source] = cf_mse_deltas[target] / max(n_shuffles, 1)
+
+    np.fill_diagonal(scores, 0)
+    return scores
+
+
+def nexusbrain_apex(
+    data: pd.DataFrame,
+    max_lag: int = 3,
+    criterion: str = "aic",
+    verbose: bool = False,
+) -> np.ndarray:
+    """
+    NexusBrain Apex: Our submission method combining:
+    1. VAR coefficients (proven strong base signal)
+    2. Counterfactual knockout (handles hidden confounders)
+    3. Positive coefficient prior (rivers have positive causal effects)
+
+    The key insight: VAR is strong on most datasets but vulnerable to
+    confounders. Counterfactual knockout specifically addresses confounders
+    because shuffling a non-causal (confounded) variable doesn't hurt
+    prediction — the confounder's effect is still captured by other variables.
+
+    Blending VAR with counterfactual knockout gives us the best of both:
+    - VAR's strong baseline on close/random datasets
+    - Counterfactual's confounder resistance on confounder datasets
+    """
+    from statsmodels.tsa.api import VAR
+
+    n_vars = data.shape[1]
+    if n_vars < 2:
+        return np.zeros((n_vars, n_vars))
+
+    if verbose:
+        print("  Running NexusBrain Apex method...")
+
+    values = data.values
+    lag = min(max_lag, len(values) // (3 * n_vars))
+    if lag < 1:
+        lag = 1
+
+    # Component 1: VAR coefficients (abs, max across lags — same as baseline)
+    try:
+        model = VAR(values)
+        result = model.fit(maxlags=lag, verbose=False)
+        params = result.params[1:]
+        coefs = np.stack([
+            params[:, x].reshape(result.k_ar, n_vars).T
+            for x in range(n_vars)
+        ])
+        s_var = np.max(np.abs(coefs), axis=2)
+
+        # Get sign info
+        best_lag_idx = np.argmax(np.abs(coefs), axis=2)
+        signs = np.zeros((n_vars, n_vars))
+        for i in range(n_vars):
+            for j in range(n_vars):
+                signs[i, j] = coefs[i, j, best_lag_idx[i, j]]
+
+        np.fill_diagonal(s_var, 0)
+    except Exception:
+        s_var = np.zeros((n_vars, n_vars))
+        signs = np.zeros((n_vars, n_vars))
+
+    # Component 2: Counterfactual knockout
+    s_cf = counterfactual_knockout(data, max_lag=lag, n_shuffles=5, verbose=False)
+
+    # Normalize both to [0, 1]
+    s_var_n = _normalize_scores(s_var)
+    s_cf_n = _normalize_scores(s_cf)
+
+    # Combine: VAR is the primary signal, counterfactual is the confounder filter
+    # If VAR says strong but counterfactual says weak → likely confounded → reduce
+    # If both agree → boost
+    scores = np.zeros((n_vars, n_vars))
+    for i in range(n_vars):
+        for j in range(n_vars):
+            if i == j:
+                continue
+
+            var_score = s_var[i, j]
+            var_rank = s_var_n[i, j]
+            cf_rank = s_cf_n[i, j]
+
+            # Start from VAR coefficient (proven signal)
+            score = var_score
+
+            # Counterfactual agreement modifier
+            if var_rank > 0.5 and cf_rank < 0.3:
+                # VAR says causal but counterfactual disagrees → likely confounded
+                score *= 0.85
+            elif var_rank > 0.5 and cf_rank > 0.5:
+                # Both agree this is causal → boost
+                score *= 1.08
+            elif var_rank < 0.3 and cf_rank > 0.5:
+                # Counterfactual sees something VAR misses → small boost
+                score *= 1.05
+
+            # Positive coefficient prior
+            if signs[i, j] > 0:
+                score *= 1.04
+            elif signs[i, j] < 0:
+                score *= 0.96
+
+            scores[i, j] = score
+
+    np.fill_diagonal(scores, 0)
+    return scores
+
+
+# =============================================================================
 # STANDALONE TESTS
 # =============================================================================
 
