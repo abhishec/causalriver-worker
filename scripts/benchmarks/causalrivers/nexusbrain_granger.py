@@ -4781,6 +4781,107 @@ def nexusbrain_apex_v2(
     return scores
 
 
+def nexusbrain_apex_v3(
+    data: pd.DataFrame,
+    max_lag: int = 3,
+    criterion: str = "aic",
+    verbose: bool = False,
+) -> np.ndarray:
+    """
+    NexusBrain Apex v3: Smooth counterfactual integration.
+
+    Key improvements over v1/v2:
+    1. Continuous CF agreement scoring (no rigid thresholds)
+    2. Geometric mean of VAR and CF signals for robust blending
+    3. Stronger positive coefficient prior (rivers always flow downstream)
+    4. Lag-1 dominance prior (river causal effects are strongest at lag 1)
+    """
+    from statsmodels.tsa.api import VAR
+
+    n_vars = data.shape[1]
+    if n_vars < 2:
+        return np.zeros((n_vars, n_vars))
+
+    values = data.values
+    lag = min(max_lag, len(values) // (3 * n_vars))
+    if lag < 1:
+        lag = 1
+
+    # Component 1: VAR coefficients
+    try:
+        model = VAR(values)
+        result = model.fit(maxlags=lag, verbose=False)
+        params = result.params[1:]
+        coefs = np.stack([
+            params[:, x].reshape(result.k_ar, n_vars).T
+            for x in range(n_vars)
+        ])
+        s_var = np.max(np.abs(coefs), axis=2)
+
+        # Sign info from the best lag
+        best_lag_idx = np.argmax(np.abs(coefs), axis=2)
+        signs = np.zeros((n_vars, n_vars))
+        for i in range(n_vars):
+            for j in range(n_vars):
+                signs[i, j] = coefs[i, j, best_lag_idx[i, j]]
+
+        # Lag-1 coefficient magnitude
+        lag1_coefs = np.abs(coefs[:, :, 0])  # lag-1 slice
+
+        np.fill_diagonal(s_var, 0)
+        np.fill_diagonal(lag1_coefs, 0)
+    except Exception:
+        s_var = np.zeros((n_vars, n_vars))
+        signs = np.zeros((n_vars, n_vars))
+        lag1_coefs = np.zeros((n_vars, n_vars))
+
+    # Component 2: Counterfactual knockout
+    s_cf = counterfactual_knockout(data, max_lag=lag, n_shuffles=7, verbose=False)
+
+    # Normalize both to [0, 1]
+    s_var_n = _normalize_scores(s_var)
+    s_cf_n = _normalize_scores(s_cf)
+
+    # Build final scores using smooth multiplicative blending
+    scores = np.zeros((n_vars, n_vars))
+    for i in range(n_vars):
+        for j in range(n_vars):
+            if i == j:
+                continue
+
+            v = s_var[i, j]
+            vn = s_var_n[i, j]
+            cn = s_cf_n[i, j]
+
+            # Start from VAR coefficient
+            score = v
+
+            # Smooth CF agreement multiplier:
+            # When CF strongly agrees (cn high), boost slightly
+            # When CF strongly disagrees (cn low but vn high), penalize
+            # The multiplier ranges from ~0.88 to ~1.10
+            agreement = cn - (1.0 - cn) * vn  # Range: roughly [-1, 1]
+            cf_mult = 1.0 + 0.10 * np.tanh(2.0 * agreement)
+            score *= cf_mult
+
+            # Positive coefficient prior (stronger than v1)
+            if signs[i, j] > 0:
+                score *= 1.06
+            elif signs[i, j] < 0:
+                score *= 0.94
+
+            # Lag-1 dominance: if lag-1 is close to the max, slight boost
+            if s_var[i, j] > 0:
+                lag1_ratio = lag1_coefs[i, j] / (s_var[i, j] + 1e-12)
+                if lag1_ratio > 0.8:
+                    score *= 1.02  # Lag-1 dominated → more likely real causation
+
+            scores[i, j] = score
+
+    np.fill_diagonal(scores, 0)
+    return scores
+
+
 # =============================================================================
 # STANDALONE TESTS
 # =============================================================================
