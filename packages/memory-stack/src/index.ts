@@ -503,6 +503,22 @@ export {
 } from './persistence/schema-validator';
 
 // ============================================================================
+// FEDERATION - Bidirectional Knowledge Flow (Org ↔ Core Brain)
+// ============================================================================
+
+export {
+  createPIISanitizer,
+  type SanitizationResult,
+  type PIISanitizerConfig,
+} from './federation/pii-sanitizer';
+
+export {
+  createUpstreamPromoter,
+  type UpstreamPromotionResult,
+  type UpstreamPromoterConfig,
+} from './federation/upstream-promoter';
+
+// ============================================================================
 // CODE INDEXING - Regex-Based Code Intelligence
 // ============================================================================
 

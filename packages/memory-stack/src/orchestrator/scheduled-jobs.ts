@@ -23,6 +23,7 @@ import { createFeedbackLoop, type FeedbackLoopConfig } from '../causality/feedba
 import { createContinuousLearner, createEmptyDAG, loadDAGFromDatabase } from '../causality/continuous-learner';
 import { createThresholdOptimizer, type ThresholdOptimizerConfig, type ThresholdOptimizationResult } from '../causality/threshold-optimizer';
 import type { WeightUpdate, RelationshipAccuracyMetrics } from '../causality/feedback-loop';
+import { createUpstreamPromoter, type UpstreamPromotionResult } from '../federation/upstream-promoter';
 
 // ============================================================================
 // TYPES
@@ -266,11 +267,24 @@ export function createScheduledJobs(
       };
     },
 
+    // ── Upstream Federation Job ─────────────────────────────────────
+
+    /**
+     * Promote anonymized org knowledge upstream to the core brain.
+     * Respects per-org federation settings (default: ON).
+     * All data is PII-sanitized before promotion.
+     * Recommended: daily via cron (after discovery).
+     */
+    async runUpstreamFederation(organizationId: string): Promise<UpstreamPromotionResult> {
+      const promoter = createUpstreamPromoter(supabase, organizationId);
+      return promoter.promoteKnowledge();
+    },
+
     // ── Combined Daily Job ───────────────────────────────────────────
 
     /**
      * Run all daily maintenance jobs in sequence.
-     * A single entry point for cron: verifications → weights → decay → discovery.
+     * A single entry point for cron: verifications → weights → decay → discovery → federation.
      * Recommended: once daily via cron.
      */
     async runAllDailyJobs(organizationId: string): Promise<{
@@ -278,6 +292,7 @@ export function createScheduledJobs(
       weights: { weightsUpdated: WeightUpdate[]; degradingRelationships: RelationshipAccuracyMetrics[] };
       decay: { edgesDecayed: number; edgesRemoved: number };
       discovery: { newRelationships: CausalRelationship[]; lostRelationships: CausalRelationship[]; totalDiscovered: number };
+      federation: UpstreamPromotionResult;
     }> {
       // 1. Process pending verifications first
       const verifications = await this.runPendingVerifications(organizationId);
@@ -291,7 +306,10 @@ export function createScheduledJobs(
       // 4. Run causal discovery (benefits from fresh weights)
       const discovery = await this.runDailyCausalDiscovery(organizationId);
 
-      return { verifications, weights, decay, discovery };
+      // 5. Promote anonymized knowledge upstream (after discovery finds new relationships)
+      const federation = await this.runUpstreamFederation(organizationId);
+
+      return { verifications, weights, decay, discovery, federation };
     },
   };
 }

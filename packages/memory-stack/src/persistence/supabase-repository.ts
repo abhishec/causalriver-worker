@@ -154,6 +154,12 @@ export interface NexusRepository {
   /** Get brain grammar rules merged with core brain rules */
   getFederatedRules(limit?: number): Promise<any[]>;
 
+  // ── Federation Settings ─────────────────────────────────────────
+  /** Get federation settings for this org (defaults: contribute=true, excluded=[]) */
+  getFederationSettings(): Promise<{ contribute_to_core_brain: boolean; excluded_domains: string[] }>;
+  /** Create or update federation settings */
+  upsertFederationSettings(settings: { contribute_to_core_brain?: boolean; excluded_domains?: string[] }): Promise<void>;
+
   // ── Organization Info ────────────────────────────────────────────
   /** Get the organization ID this repository is scoped to */
   getOrganizationId(): string;
@@ -569,6 +575,44 @@ export function createSupabaseRepository(
         .map((r: any) => ({ ...r, _source: 'core' }));
 
       return [...orgRows, ...uniqueCore];
+    },
+
+    // ── Federation Settings ────────────────────────────────────────
+
+    async getFederationSettings(): Promise<{ contribute_to_core_brain: boolean; excluded_domains: string[] }> {
+      const { data } = await supabase
+        .from('organization_federation_settings')
+        .select('contribute_to_core_brain, excluded_domains')
+        .eq('organization_id', organizationId)
+        .single();
+
+      if (!data) {
+        // Default: federation ON, no excluded domains
+        return { contribute_to_core_brain: true, excluded_domains: [] };
+      }
+
+      return {
+        contribute_to_core_brain: data.contribute_to_core_brain ?? true,
+        excluded_domains: data.excluded_domains || [],
+      };
+    },
+
+    async upsertFederationSettings(settings: {
+      contribute_to_core_brain?: boolean;
+      excluded_domains?: string[];
+    }): Promise<void> {
+      const { error } = await supabase
+        .from('organization_federation_settings')
+        .upsert(
+          {
+            organization_id: organizationId,
+            ...settings,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'organization_id' }
+        );
+
+      if (error) throw new Error(`Failed to upsert federation settings: ${error.message}`);
     },
 
     // ── Organization Info ──────────────────────────────────────────
