@@ -746,12 +746,237 @@ function makeEmptyResult(alpha: number, lag: number, sampleSize: number): Grange
 }
 
 // ============================================================================
+// RIDGE-REGULARIZED CONDITIONAL GRANGER
+// ============================================================================
+
+/**
+ * Ridge-regularized conditional Granger causality: NEVER falls back to bivariate.
+ *
+ * Unlike computeConditionalGranger which falls back to pairwise when
+ * n_obs <= n_params + 5, this uses Ridge regression which handles any N/T ratio.
+ *
+ * Ridge penalty: minimize ||y - Xβ||² + α||β||²
+ * This shrinks coefficients toward zero instead of failing when overfitting risk is high.
+ *
+ * Ported from Python: nexusbrain_granger.py ridge_conditional_granger_scoring()
+ * Used by the nexusbrain_world_class method for benchmark-grade causal discovery.
+ */
+export function computeRidgeConditionalGranger(
+  sourceIndex: number,
+  targetIndex: number,
+  allSeries: number[][],
+  lag: number,
+  config: GrangerTestConfig & { ridgeAlpha?: number } = {}
+): GrangerResult {
+  const { alpha = 0.05, ridgeAlpha = 1.0 } = config;
+  const nVars = allSeries.length;
+  const T = allSeries[0].length;
+
+  const y = allSeries[targetIndex];
+  const x = allSeries[sourceIndex];
+
+  const otherIndices: number[] = [];
+  for (let k = 0; k < nVars; k++) {
+    if (k !== targetIndex && k !== sourceIndex) otherIndices.push(k);
+  }
+
+  const xStd = standardDeviation(x);
+  const yStd = standardDeviation(y);
+  if (xStd < 1e-10 || yStd < 1e-10) {
+    return makeEmptyResult(alpha, lag, T - lag);
+  }
+
+  const nObs = T - lag;
+  if (nObs < 10) {
+    return makeEmptyResult(alpha, lag, nObs);
+  }
+
+  // Build restricted design matrix: Y lags + other variable lags (no X)
+  const nRCols = (otherIndices.length + 1) * lag;
+  const Xr: number[][] = [];
+  for (let t = lag; t < T; t++) {
+    const row: number[] = [];
+    for (let l = 1; l <= lag; l++) row.push(y[t - l]);
+    for (const k of otherIndices) {
+      for (let l = 1; l <= lag; l++) row.push(allSeries[k][t - l]);
+    }
+    Xr.push(row);
+  }
+
+  // Build unrestricted: restricted + X lags
+  const Xu: number[][] = [];
+  for (let t = 0; t < nObs; t++) {
+    const row = [...Xr[t]];
+    for (let l = 1; l <= lag; l++) row.push(x[lag + t - l]);
+    Xu.push(row);
+  }
+
+  const yVec = y.slice(lag);
+
+  // Ridge regression: β = (X'X + αI)^{-1} X'y
+  const rssR = computeRidgeRSS(Xr, yVec, ridgeAlpha);
+  const rssU = computeRidgeRSS(Xu, yVec, ridgeAlpha);
+
+  const dfNum = lag;
+  const dfDen = Math.max(1, nObs - nRCols - lag - 1);
+
+  if (rssU <= 0 || rssR <= 0) {
+    return makeEmptyResult(alpha, lag, nObs);
+  }
+
+  const fStatistic = Math.max(0, ((rssR - rssU) / dfNum) / (rssU / dfDen));
+  const pValue = fTestPValue(fStatistic, dfNum, dfDen);
+  const effectSize = Math.max(0, Math.min(1, (rssR - rssU) / rssR));
+
+  const confidenceInterval = computeEffectSizeCI(effectSize, nObs, lag, alpha);
+
+  return {
+    sourceDomain: 'source',
+    targetDomain: 'target',
+    fStatistic,
+    pValue,
+    optimalLag: lag,
+    isSignificant: pValue < alpha,
+    effectSize,
+    confidenceInterval,
+    sampleSize: nObs,
+    naturalLanguage: generateNaturalLanguage(fStatistic, pValue, effectSize, lag, nObs),
+  };
+}
+
+/**
+ * Compute Ridge regression RSS: ||y - Xβ_ridge||²
+ * where β_ridge = (X'X + αI)^{-1} X'y
+ */
+function computeRidgeRSS(X: number[][], y: number[], ridgeAlpha: number): number {
+  const n = X.length;
+  const p = X[0]?.length ?? 0;
+  if (n === 0 || p === 0) return 0;
+
+  // X'X (p x p)
+  const XtX: number[][] = Array.from({ length: p }, () => new Array(p).fill(0));
+  for (let i = 0; i < p; i++) {
+    for (let j = i; j < p; j++) {
+      let sum = 0;
+      for (let t = 0; t < n; t++) sum += X[t][i] * X[t][j];
+      XtX[i][j] = sum;
+      XtX[j][i] = sum;
+    }
+  }
+
+  // Add ridge penalty: XtX + α*I
+  for (let i = 0; i < p; i++) {
+    XtX[i][i] += ridgeAlpha;
+  }
+
+  // X'y (p x 1)
+  const Xty: number[] = new Array(p).fill(0);
+  for (let i = 0; i < p; i++) {
+    let sum = 0;
+    for (let t = 0; t < n; t++) sum += X[t][i] * y[t];
+    Xty[i] = sum;
+  }
+
+  // Solve (X'X + αI) β = X'y using Cholesky-like approach
+  // For simplicity, use Gaussian elimination
+  const beta = solveLinearSystem(XtX, Xty);
+  if (!beta) return Infinity;
+
+  // RSS = Σ(y_t - X_t β)²
+  let rss = 0;
+  for (let t = 0; t < n; t++) {
+    let pred = 0;
+    for (let j = 0; j < p; j++) pred += X[t][j] * beta[j];
+    rss += (y[t] - pred) ** 2;
+  }
+
+  return rss;
+}
+
+/**
+ * Detect nonlinearity in multivariate time series.
+ *
+ * Fits a linear VAR(1), then tests residuals for non-Gaussianity using
+ * a simplified Jarque-Bera test (skewness² + kurtosis²).
+ * If >50% of variables have non-Gaussian residuals, returns true.
+ *
+ * Ported from Python: nexusbrain_granger.py _detect_nonlinearity()
+ */
+export function detectNonlinearity(
+  allSeries: number[][],
+  threshold: number = 3.0
+): boolean {
+  const nVars = allSeries.length;
+  const T = allSeries[0]?.length ?? 0;
+  if (T < 20 || nVars < 2) return false;
+
+  try {
+    const lag = 1;
+    let nonGaussianCount = 0;
+
+    for (let target = 0; target < nVars; target++) {
+      // Simple OLS: y_t = a + b*y_{t-1} → compute residuals
+      const y = allSeries[target];
+      let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+      const n = T - lag;
+      for (let t = lag; t < T; t++) {
+        const xt = y[t - 1];
+        const yt = y[t];
+        sumX += xt;
+        sumY += yt;
+        sumXY += xt * yt;
+        sumX2 += xt * xt;
+      }
+      const denom = n * sumX2 - sumX * sumX;
+      if (Math.abs(denom) < 1e-15) continue;
+
+      const b = (n * sumXY - sumX * sumY) / denom;
+      const a = (sumY - b * sumX) / n;
+
+      // Compute residuals and test for non-Gaussianity
+      const residuals: number[] = [];
+      for (let t = lag; t < T; t++) {
+        residuals.push(y[t] - a - b * y[t - 1]);
+      }
+
+      const mean = residuals.reduce((s, v) => s + v, 0) / residuals.length;
+      const std = Math.sqrt(residuals.reduce((s, v) => s + (v - mean) ** 2, 0) / residuals.length);
+      if (std < 1e-10) continue;
+
+      // Simplified Jarque-Bera: compute skewness and excess kurtosis
+      let m3 = 0, m4 = 0;
+      for (const r of residuals) {
+        const z = (r - mean) / std;
+        m3 += z ** 3;
+        m4 += z ** 4;
+      }
+      const skewness = m3 / residuals.length;
+      const kurtosis = m4 / residuals.length - 3; // excess kurtosis
+
+      // JB ≈ n/6 * (S² + K²/4)
+      const jb = (residuals.length / 6) * (skewness ** 2 + kurtosis ** 2 / 4);
+
+      // Chi-squared critical value for df=2 at α=0.05 is ~5.99
+      if (jb > threshold * 5.99) {
+        nonGaussianCount++;
+      }
+    }
+
+    return nonGaussianCount > nVars / 2;
+  } catch {
+    return false;
+  }
+}
+
+// ============================================================================
 // EXPORTS
 // ============================================================================
 
 export const GrangerCausality = {
   computeGrangerCausality,
   computeConditionalGranger,
+  computeRidgeConditionalGranger,
+  detectNonlinearity,
   testAllPairsConditional,
   buildImpulseResponse,
   testAllDomainPairs,

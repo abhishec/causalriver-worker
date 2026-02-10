@@ -59,6 +59,12 @@ export interface CausalChainEntry {
   lagDays: number;
   /** Statistical significance (lower = stronger evidence, default 0.01) */
   pValue?: number;
+  /** Counterfactual knockout score (0-1, higher = stronger causal evidence) */
+  knockoutScore?: number;
+  /** Whether this edge is likely confounded (high VAR correlation but low knockout) */
+  isLikelyConfounded?: boolean;
+  /** Sign of the causal coefficient (+1 / -1) */
+  coefficientSign?: number;
 }
 
 /**
@@ -480,21 +486,27 @@ export function createBrainTrainer(config: BrainTrainerConfig = {}) {
   ): Promise<number> {
     let loaded = 0;
     for (const chain of pack.causalChains || []) {
+      const row: Record<string, unknown> = {
+        organization_id: organizationId,
+        source_domain: chain.source,
+        target_domain: chain.target,
+        effect_size: Math.abs(chain.effectSize),
+        granger_p_value: chain.pValue ?? 0.01,
+        optimal_lag_days: chain.lagDays,
+        sample_size: defaultSampleSize,
+        granger_f_statistic: defaultFStatistic,
+        is_significant: true,
+        confidence_interval_lower: computeCI(chain.effectSize, pack.confidence).lower,
+        confidence_interval_upper: computeCI(chain.effectSize, pack.confidence).upper,
+        natural_language: `${chain.source} causes ${chain.target} change in ${chain.metric} (effect: ${chain.effectSize}, lag: ${chain.lagDays} days) — from: ${pack.title}`,
+      };
+      // Confounder metadata from apex discovery (CausalRivers-proven)
+      if (chain.knockoutScore !== undefined) row.knockout_score = chain.knockoutScore;
+      if (chain.isLikelyConfounded !== undefined) row.is_likely_confounded = chain.isLikelyConfounded;
+      if (chain.coefficientSign !== undefined) row.coefficient_sign = chain.coefficientSign;
+
       const { error } = await supabase.from('causal_relationships_statistical').upsert(
-        {
-          organization_id: organizationId,
-          source_domain: chain.source,
-          target_domain: chain.target,
-          effect_size: Math.abs(chain.effectSize),
-          granger_p_value: chain.pValue ?? 0.01,
-          optimal_lag_days: chain.lagDays,
-          sample_size: defaultSampleSize,
-          granger_f_statistic: defaultFStatistic,
-          is_significant: true,
-          confidence_interval_lower: computeCI(chain.effectSize, pack.confidence).lower,
-          confidence_interval_upper: computeCI(chain.effectSize, pack.confidence).upper,
-          natural_language: `${chain.source} causes ${chain.target} change in ${chain.metric} (effect: ${chain.effectSize}, lag: ${chain.lagDays} days) — from: ${pack.title}`,
-        },
+        row,
         { onConflict: 'organization_id,source_domain,target_domain', ignoreDuplicates: false },
       );
       if (!error) loaded++;

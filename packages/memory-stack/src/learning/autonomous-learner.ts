@@ -179,7 +179,7 @@ export function createAutonomousLearner(config: AutonomousLearnerConfig) {
     patterns: DiscoveredPattern[],
     anomalies: AnomalyEvent[]
   ): TrainingPack {
-    // Build causal chains from discovered relationships
+    // Build causal chains from discovered relationships (including confounder metadata)
     const causalChains = relationships.map((r) => ({
       source: r.source_domain,
       target: r.target_domain,
@@ -187,6 +187,9 @@ export function createAutonomousLearner(config: AutonomousLearnerConfig) {
       effectSize: r.effect_size,
       lagDays: r.optimal_lag_days,
       pValue: r.granger_p_value,
+      knockoutScore: r.knockout_score,
+      isLikelyConfounded: r.is_likely_confounded,
+      coefficientSign: r.coefficient_sign,
     }));
 
     // Build training patterns from discovered patterns
@@ -418,9 +421,23 @@ export function createAutonomousLearner(config: AutonomousLearnerConfig) {
         domainGroups.set(sig.source_domain, entries);
       }
 
+      // Build causalEdges config from discovered relationships for confounder-aware detection
+      const causalEdgesForDetection = relationships
+        .filter(r => r.is_significant)
+        .map(r => ({
+          sourceDomain: r.source_domain,
+          targetDomain: r.target_domain,
+          effectSize: r.effect_size,
+          lagDays: r.optimal_lag_days,
+          isLikelyConfounded: r.is_likely_confounded,
+        }));
+
       for (const [_domain, observations] of domainGroups) {
         try {
-          const detected = detectAnomalies(observations);
+          const detected = detectAnomalies(observations, {
+            method: 'auto',
+            causalEdges: causalEdgesForDetection.length > 0 ? causalEdgesForDetection : undefined,
+          });
           for (const a of detected) {
             anomalies.push(a);
           }

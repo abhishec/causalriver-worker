@@ -21,6 +21,8 @@ import {
   testAllPairs,
   selectOptimalLag,
   computeConditionalGranger,
+  computeRidgeConditionalGranger,
+  detectNonlinearity,
   testAllPairsConditional,
   ordinaryLeastSquares,
   type GrangerResult,
@@ -53,7 +55,8 @@ export type AdvancedDiscoveryMethod =
   | 'anomaly_conditioned'
   | 'regime_conditional'
   | 'nexusbrain_final'
-  | 'apex';
+  | 'apex'
+  | 'world_class';
 
 export interface AdvancedDiscoveryConfig {
   method: AdvancedDiscoveryMethod;
@@ -1228,7 +1231,149 @@ export function apexScoring(
 }
 
 // ============================================================================
-// METHOD 10: UNIFIED DISPATCHER
+// METHOD 10: WORLD-CLASS ADAPTIVE ENSEMBLE
+// ============================================================================
+
+/**
+ * World-Class adaptive ensemble — TypeScript port of nexusbrain_world_class.
+ *
+ * Automatically detects linear vs nonlinear dynamics via Jarque-Bera test
+ * on VAR residuals, then runs an adaptive ensemble of methods:
+ *
+ * LINEAR path:
+ *   1. Ridge conditional Granger (never falls back to bivariate) — weight 3.0
+ *   2. Calibrated ensemble (conditional + cascade + pairwise) — weight 2.5
+ *   3. Apex (VAR + F-test + counterfactual knockout) — weight 2.0
+ *
+ * NONLINEAR path:
+ *   1. Ridge conditional Granger — weight 2.5
+ *   2. Apex (counterfactual knockout detects nonlinear effects) — weight 3.0
+ *   3. Calibrated ensemble — weight 2.0
+ *
+ * Note: PCMCI+, VarLiNGAM, and KSG Transfer Entropy require Python-only
+ * libraries (tigramite, lingam) and are available in the Python benchmark
+ * engine but not in this TypeScript production layer.
+ */
+function worldClassScoring(
+  data: Record<string, number[]>,
+  overrides: Partial<AdvancedDiscoveryConfig> = {}
+): PairwiseScoreMatrix {
+  const cfg = { ...DEFAULT_ADVANCED_CONFIG, ...overrides };
+  const { domains, values: series } = toArrays(data);
+  const n = domains.length;
+
+  if (n < 2) {
+    return {
+      domains,
+      scores: zeroMatrix(n),
+      optimalLags: zeroMatrix(n),
+      pValues: zeroMatrix(n),
+    };
+  }
+
+  // Phase 1: Detect nonlinearity
+  const isNonlinear = detectNonlinearity(series);
+
+  // Phase 2: Run component methods
+  // Ridge conditional Granger (never falls back)
+  const ridgeScores = ridgeConditionalScoresMatrix(data, cfg);
+  const ridgeNorm = normalizeScores(ridgeScores);
+
+  // Calibrated ensemble
+  const ensembleResult = calibratedEnsembleScoring(data, overrides);
+  const ensembleNorm = normalizeScores(ensembleResult.scores);
+
+  // Apex (includes counterfactual knockout)
+  const apexResult = apexScoring(data, overrides);
+  const apexNorm = normalizeScores(apexResult.scores);
+
+  // Phase 3: Weighted fusion
+  let w1: number, w2: number, w3: number;
+  if (isNonlinear) {
+    // Nonlinear: apex strongest (CF knockout captures nonlinear effects)
+    w1 = 2.5; // ridge
+    w2 = 2.0; // ensemble
+    w3 = 3.0; // apex
+  } else {
+    // Linear: ridge CG strongest
+    w1 = 3.0; // ridge
+    w2 = 2.5; // ensemble
+    w3 = 2.0; // apex
+  }
+  const totalW = w1 + w2 + w3;
+
+  const fused = zeroMatrix(n);
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n; j++) {
+      if (i === j) continue;
+      fused[i][j] = (w1 * ridgeNorm[i][j] + w2 * ensembleNorm[i][j] + w3 * apexNorm[i][j]) / totalW;
+    }
+  }
+
+  // Agreement voting: edges ranked top-25% by all 3 methods get 35% boost
+  const nEdges = n * (n - 1);
+  if (nEdges > 0) {
+    const topK = Math.max(1, Math.floor(nEdges / 4));
+    const agreement = zeroMatrix(n);
+
+    for (const scoreMatrix of [ridgeNorm, ensembleNorm, apexNorm]) {
+      const flat: { i: number; j: number; v: number }[] = [];
+      for (let i = 0; i < n; i++)
+        for (let j = 0; j < n; j++)
+          if (i !== j) flat.push({ i, j, v: scoreMatrix[i][j] });
+      flat.sort((a, b) => b.v - a.v);
+      const threshold = flat[Math.min(topK - 1, flat.length - 1)]?.v ?? 0;
+      for (let i = 0; i < n; i++)
+        for (let j = 0; j < n; j++)
+          if (i !== j && scoreMatrix[i][j] >= threshold) agreement[i][j] += 1;
+    }
+
+    for (let i = 0; i < n; i++)
+      for (let j = 0; j < n; j++)
+        if (agreement[i][j] >= 3) fused[i][j] *= 1.35;
+  }
+
+  return {
+    domains,
+    scores: fused,
+    optimalLags: apexResult.optimalLags,
+    pValues: apexResult.pValues,
+    knockoutScores: apexResult.knockoutScores,
+    confounderFlags: apexResult.confounderFlags,
+    signMatrix: apexResult.signMatrix,
+  };
+}
+
+/**
+ * Compute Ridge conditional Granger scores for all pairs.
+ */
+function ridgeConditionalScoresMatrix(
+  data: Record<string, number[]>,
+  cfg: AdvancedDiscoveryConfig
+): number[][] {
+  const { domains, values: series } = toArrays(data);
+  const n = domains.length;
+  const scores = zeroMatrix(n);
+
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n; j++) {
+      if (i === j) continue;
+      const optLag = selectOptimalLag(
+        series[j],
+        series[i],
+        cfg.maxLag,
+        cfg.lagSelectionCriterion
+      );
+      const result = computeRidgeConditionalGranger(j, i, series, optLag);
+      scores[i][j] = -Math.log10(Math.max(result.pValue, 1e-30));
+    }
+  }
+
+  return scores;
+}
+
+// ============================================================================
+// METHOD 11: UNIFIED DISPATCHER
 // ============================================================================
 
 /**
@@ -1270,6 +1415,8 @@ export function runAdvancedDiscovery(
       return nexusBrainFinalMethod(data, config);
     case 'apex':
       return apexScoring(data, config);
+    case 'world_class':
+      return worldClassScoring(data, config);
     default: {
       // Unknown method: fall back to calibrated ensemble
       return calibratedEnsembleScoring(data, config);
@@ -1291,4 +1438,5 @@ export const AdvancedDiscovery = {
   regimeConditionalScoring,
   nexusBrainFinalMethod,
   apexScoring,
+  worldClassScoring,
 };
