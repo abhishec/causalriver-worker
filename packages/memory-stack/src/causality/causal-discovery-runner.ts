@@ -104,7 +104,7 @@ export const DEFAULT_DISCOVERY_CONFIG: DiscoveryConfig = {
   minObservations: 5, // Lowered: activate with sufficient data density, not arbitrary count
   lookbackDays: 90,
   alpha: 0.05,
-  method: 'apex', // CausalRivers-proven: VAR + F-test + CF knockout + sign prior — beat VAR baseline on ALL 6 datasets
+  method: 'world_class', // Best of both worlds: Ridge Granger (CauseME) + Apex/CF knockout (CausalRivers) + Calibrated Ensemble, auto linear/nonlinear detection
 };
 
 export interface DiscoveryResult {

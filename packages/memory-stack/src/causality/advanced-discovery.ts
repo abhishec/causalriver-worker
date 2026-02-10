@@ -111,7 +111,7 @@ export interface PairwiseScoreMatrix {
 }
 
 export const DEFAULT_ADVANCED_CONFIG: AdvancedDiscoveryConfig = {
-  method: 'apex',
+  method: 'world_class',
   maxLag: 14,
   lagSelectionCriterion: 'AIC',
   alpha: 0.05,
@@ -1467,7 +1467,7 @@ function pcStructuralScoring(
 /**
  * Run advanced causal discovery using the specified method.
  *
- * Default method: 'apex' (beat VAR baseline on ALL 6 CausalRivers benchmark datasets).
+ * Default method: 'world_class' — best of CauseME (Ridge Granger) + CausalRivers (Apex/CF knockout) + NexusBrain (calibrated ensemble), with auto linear/nonlinear detection.
  */
 export function runAdvancedDiscovery(
   data: Record<string, number[]>,
