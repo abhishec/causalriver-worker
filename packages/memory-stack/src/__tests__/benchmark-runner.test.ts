@@ -180,7 +180,10 @@ describe('Maturity Evaluator', () => {
 
   it('should return L5_EXPERT for perfect scores', () => {
     const scores: BenchmarkScores = {
+      signal: [{ datasetId: 'test', domainCoverage: 1.0, temporalConsistency: 1.0, signalDiversity: 1.0 }],
       causal: [{ datasetId: 'test', shd: 0, f1: 1.0, auroc: 1.0 }],
+      pattern: [{ datasetId: 'test', patternCount: 100, avgSignificance: 0.95, domainCoverage: 1.0 }],
+      rule: [{ datasetId: 'test', ruleCount: 100, rulePrecision: 0.95, domainCoverage: 1.0 }],
       anomaly: [{ datasetId: 'test', f1: 1.0, nabScore: 100 }],
       prediction: [{ datasetId: 'test', mape: 0.01, ece: 0.01 }],
       cascade: [{ datasetId: 'test', detectionRate: 1.0, avgLagError: 0 }],
@@ -199,12 +202,15 @@ describe('Maturity Evaluator', () => {
     };
     const report = evaluator.evaluateMaturity(scores);
     expect(report.humanReadable).toContain('NexusBrain Maturity:');
-    expect(report.humanReadable).toContain('Pillar Breakdown:');
+    expect(report.humanReadable).toContain('7-Layer Pillar Breakdown:');
   });
 
   it('should generate recommendations for weak pillars', () => {
     const scores: BenchmarkScores = {
+      signal: [{ datasetId: 'test', domainCoverage: 0.9, temporalConsistency: 0.9, signalDiversity: 0.9 }],
       causal: [{ datasetId: 'test', shd: 25, f1: 0.1, auroc: 0.5 }],
+      pattern: [{ datasetId: 'test', patternCount: 60, avgSignificance: 0.9, domainCoverage: 0.9 }],
+      rule: [{ datasetId: 'test', ruleCount: 60, rulePrecision: 0.9, domainCoverage: 0.9 }],
       anomaly: [{ datasetId: 'test', f1: 0.9, nabScore: 90 }],
       prediction: [{ datasetId: 'test', mape: 0.03, ece: 0.02 }],
       cascade: [{ datasetId: 'test', detectionRate: 0.95, avgLagError: 1 }],
@@ -224,7 +230,10 @@ describe('Maturity Evaluator', () => {
 
   it('should correctly level mid-range scores', () => {
     const scores: BenchmarkScores = {
+      signal: [{ datasetId: 'test', domainCoverage: 0.5, temporalConsistency: 0.5, signalDiversity: 0.5 }],
       causal: [{ datasetId: 'test', shd: 7, f1: 0.55, auroc: 0.7 }],
+      pattern: [{ datasetId: 'test', patternCount: 20, avgSignificance: 0.6, domainCoverage: 0.5 }],
+      rule: [{ datasetId: 'test', ruleCount: 20, rulePrecision: 0.6, domainCoverage: 0.5 }],
       anomaly: [{ datasetId: 'test', f1: 0.6, nabScore: 60 }],
       prediction: [{ datasetId: 'test', mape: 0.12, ece: 0.08 }],
       cascade: [{ datasetId: 'test', detectionRate: 0.7, avgLagError: 2 }],

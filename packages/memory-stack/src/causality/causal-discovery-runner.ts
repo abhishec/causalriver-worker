@@ -391,8 +391,9 @@ function scoreMatrixToGrangerResults(
       const pValue = pValues[i][j];
       const lag = optimalLags[i][j] || 1;
 
-      // Significance requires BOTH a meaningful effect size AND statistical evidence
-      const isSignificant = pValue < alpha && score > 0.1;
+      // Significance requires strong statistical evidence + meaningful effect
+      // High threshold maximizes precision for clean graph recovery
+      const isSignificant = pValue < alpha && score > 0.40;
 
       // Derive sample size from the input data when available
       const sourceSeries = data?.[domains[j]];

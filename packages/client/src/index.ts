@@ -101,6 +101,8 @@ export interface CausalRelationship {
   natural_language?: string;
   is_significant?: boolean;
   evidence_weight?: number;
+  /** Source: 'org' (organization-specific) or 'core' (universal knowledge base) */
+  _source?: 'org' | 'core';
 }
 
 export interface BrainRule {
@@ -109,6 +111,8 @@ export interface BrainRule {
   natural_language?: string;
   confidence?: number;
   is_active?: boolean;
+  /** Source: 'org' (organization-specific) or 'core' (universal knowledge base) */
+  _source?: 'org' | 'core';
 }
 
 export interface Memory {
@@ -116,6 +120,8 @@ export interface Memory {
   content?: string;
   importance?: number;
   memory_type?: string;
+  /** Source: 'org' (organization-specific) or 'core' (universal knowledge base) */
+  _source?: 'org' | 'core';
 }
 
 export interface IngestResult {
@@ -380,24 +386,26 @@ export function createNexusClient(config: NexusClientConfig): NexusClient {
           const orgKeys = new Set(orgRelationships.map(
             r => `${r.source_domain}::${r.target_domain}`,
           ));
-          const uniqueCore = coreRelationships.filter(
-            r => !orgKeys.has(`${r.source_domain}::${r.target_domain}`),
-          );
-          const merged = [...orgRelationships, ...uniqueCore];
+          const taggedOrg = orgRelationships.map(r => ({ ...r, _source: 'org' as const }));
+          const uniqueCore = coreRelationships
+            .filter(r => !orgKeys.has(`${r.source_domain}::${r.target_domain}`))
+            .map(r => ({ ...r, _source: 'core' as const }));
+          const merged = [...taggedOrg, ...uniqueCore];
           return {
             relationships: merged,
             count: merged.length,
-            orgCount: orgRelationships.length,
+            orgCount: taggedOrg.length,
             coreCount: uniqueCore.length,
           };
         }
         // If core fetch fails, fall through to org-only result
       }
 
+      const taggedOrgOnly = orgRelationships.map(r => ({ ...r, _source: 'org' as const }));
       return {
-        relationships: orgRelationships,
-        count: orgRelationships.length,
-        orgCount: orgRelationships.length,
+        relationships: taggedOrgOnly,
+        count: taggedOrgOnly.length,
+        orgCount: taggedOrgOnly.length,
         coreCount: 0,
       };
     },

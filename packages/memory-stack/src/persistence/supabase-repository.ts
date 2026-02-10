@@ -26,6 +26,12 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { ConnectorSignal } from '../connectors/connector-framework';
 
+/**
+ * The core brain org ID — duplicated here to avoid circular import
+ * from ../index.ts (which re-exports supabase-repository).
+ */
+const CORE_BRAIN_ORG_ID = '00000000-0000-4000-a000-000000000001';
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -139,6 +145,14 @@ export interface NexusRepository {
   // ── Activity Logging ─────────────────────────────────────────────
   /** Log an activity (agent action, LLM call, etc.) */
   logActivity(entry: ActivityLogEntry): Promise<void>;
+
+  // ── Federated Queries (org + core brain) ───────────────────────
+  /** Get significant relationships merged with core brain knowledge */
+  getFederatedRelationships(minConfidence?: number): Promise<any[]>;
+  /** Get memories merged with core brain knowledge */
+  getFederatedMemories(domain?: string, limit?: number): Promise<any[]>;
+  /** Get brain grammar rules merged with core brain rules */
+  getFederatedRules(limit?: number): Promise<any[]>;
 
   // ── Organization Info ────────────────────────────────────────────
   /** Get the organization ID this repository is scoped to */
@@ -437,6 +451,124 @@ export function createSupabaseRepository(
       });
 
       if (error) throw new Error(`Failed to log activity: ${error.message}`);
+    },
+
+    // ── Federated Queries (org + core brain) ───────────────────────
+
+    async getFederatedRelationships(minConfidence: number = 0.5): Promise<any[]> {
+      const isCoreBrain = organizationId === CORE_BRAIN_ORG_ID;
+
+      // Fetch org relationships
+      const { data: orgData, error: orgError } = await supabase
+        .from('causal_relationships_statistical')
+        .select('*')
+        .eq('organization_id', organizationId)
+        .eq('is_significant', true)
+        .gte('effect_size', minConfidence * 0.1)
+        .order('effect_size', { ascending: false })
+        .limit(15);
+
+      if (orgError) throw new Error(`Failed to get relationships: ${orgError.message}`);
+      const orgRows = (orgData || []).map((r: any) => ({ ...r, _source: 'org' }));
+
+      if (isCoreBrain) return orgRows;
+
+      // Fetch core brain relationships
+      const { data: coreData } = await supabase
+        .from('causal_relationships_statistical')
+        .select('*')
+        .eq('organization_id', CORE_BRAIN_ORG_ID)
+        .eq('is_significant', true)
+        .order('effect_size', { ascending: false })
+        .limit(15);
+
+      if (!coreData || coreData.length === 0) return orgRows;
+
+      // Dedup: org takes priority
+      const orgKeys = new Set(orgRows.map((r: any) => `${r.source_domain}::${r.target_domain}`));
+      const uniqueCore = coreData
+        .filter((r: any) => !orgKeys.has(`${r.source_domain}::${r.target_domain}`))
+        .map((r: any) => ({ ...r, _source: 'core' }));
+
+      return [...orgRows, ...uniqueCore];
+    },
+
+    async getFederatedMemories(domain?: string, limit: number = 20): Promise<any[]> {
+      const isCoreBrain = organizationId === CORE_BRAIN_ORG_ID;
+
+      // Fetch org memories
+      let orgQuery = supabase
+        .from('ai_memory')
+        .select('*')
+        .eq('organization_id', organizationId)
+        .order('importance', { ascending: false })
+        .limit(limit);
+      if (domain) orgQuery = orgQuery.eq('domain', domain);
+
+      const { data: orgData, error: orgError } = await orgQuery;
+      if (orgError) throw new Error(`Failed to get memories: ${orgError.message}`);
+      const orgRows = (orgData || []).map((m: any) => ({ ...m, _source: 'org' }));
+
+      if (isCoreBrain) return orgRows;
+
+      // Fetch core brain memories
+      let coreQuery = supabase
+        .from('ai_memory')
+        .select('*')
+        .eq('organization_id', CORE_BRAIN_ORG_ID)
+        .order('importance', { ascending: false })
+        .limit(limit);
+      if (domain) coreQuery = coreQuery.eq('domain', domain);
+
+      const { data: coreData } = await coreQuery;
+      if (!coreData || coreData.length === 0) return orgRows;
+
+      // Dedup by domain + content prefix
+      const orgKeys = new Set(orgRows.map((m: any) => `${m.domain}::${(m.content || '').substring(0, 80)}`));
+      const uniqueCore = coreData
+        .filter((m: any) => !orgKeys.has(`${m.domain}::${(m.content || '').substring(0, 80)}`))
+        .map((m: any) => ({ ...m, _source: 'core' }));
+
+      return [...orgRows, ...uniqueCore];
+    },
+
+    async getFederatedRules(limit: number = 20): Promise<any[]> {
+      const isCoreBrain = organizationId === CORE_BRAIN_ORG_ID;
+
+      // Fetch org rules
+      const { data: orgData, error: orgError } = await supabase
+        .from('brain_grammar_rules')
+        .select('*')
+        .eq('organization_id', organizationId)
+        .eq('is_active', true)
+        .order('confidence', { ascending: false })
+        .limit(limit);
+
+      if (orgError) throw new Error(`Failed to get rules: ${orgError.message}`);
+      const orgRows = (orgData || []).map((r: any) => ({ ...r, _source: 'org' }));
+
+      if (isCoreBrain) return orgRows;
+
+      // Fetch core brain rules
+      const { data: coreData } = await supabase
+        .from('brain_grammar_rules')
+        .select('*')
+        .eq('organization_id', CORE_BRAIN_ORG_ID)
+        .eq('is_active', true)
+        .order('confidence', { ascending: false })
+        .limit(limit);
+
+      if (!coreData || coreData.length === 0) return orgRows;
+
+      // Dedup by domain + rule_type + natural_language prefix
+      const orgKeys = new Set(orgRows.map(
+        (r: any) => `${r.domain}::${r.rule_type}::${(r.natural_language || '').substring(0, 50)}`
+      ));
+      const uniqueCore = coreData
+        .filter((r: any) => !orgKeys.has(`${r.domain}::${r.rule_type}::${(r.natural_language || '').substring(0, 50)}`))
+        .map((r: any) => ({ ...r, _source: 'core' }));
+
+      return [...orgRows, ...uniqueCore];
     },
 
     // ── Organization Info ──────────────────────────────────────────

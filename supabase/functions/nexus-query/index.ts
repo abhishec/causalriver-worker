@@ -180,6 +180,14 @@ serve(async (req: Request) => {
       (m) => `${m.domain}::${(m.content || '').substring(0, 80)}`,
     );
 
+    // ── TAG: Mark each item with its source for client-side disambiguation ──
+    const taggedOrgRels = orgRels.map((r: any) => ({ ...r, _source: 'org' }));
+    const taggedCoreRels = uniqueCoreRels.map((r: any) => ({ ...r, _source: 'core' }));
+    const taggedOrgRules = orgRulesList.map((r: any) => ({ ...r, _source: 'org' }));
+    const taggedCoreRules = uniqueCoreRules.map((r: any) => ({ ...r, _source: 'core' }));
+    const taggedOrgMems = orgMems.map((m: any) => ({ ...m, _source: 'org' }));
+    const taggedCoreMems = uniqueCoreMems.map((m: any) => ({ ...m, _source: 'core' }));
+
     // ── BUILD LLM SYSTEM PROMPT with labeled sections ──
     const orgCausalText = formatRelationships(orgRels);
     const coreCausalText = formatRelationships(uniqueCoreRels);
@@ -226,10 +234,10 @@ serve(async (req: Request) => {
 
     const systemPrompt = promptSections.join('\n\n');
 
-    // Combined data for response context
-    const allRelationships = [...orgRels, ...uniqueCoreRels];
-    const allRules = [...orgRulesList, ...uniqueCoreRules];
-    const allMemories = [...orgMems, ...uniqueCoreMems];
+    // Combined data for response context (tagged with _source)
+    const allRelationships = [...taggedOrgRels, ...taggedCoreRels];
+    const allRules = [...taggedOrgRules, ...taggedCoreRules];
+    const allMemories = [...taggedOrgMems, ...taggedCoreMems];
 
     // 5. Call LLM (Anthropic Claude preferred, OpenAI fallback)
     const anthropicKey = Deno.env.get('ANTHROPIC_API_KEY');

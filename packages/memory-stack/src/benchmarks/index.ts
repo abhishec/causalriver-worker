@@ -2,11 +2,14 @@
  * NexusBrain Benchmarks
  *
  * Automated benchmark training pipeline for measuring and
- * improving NexusBrain's intelligence across four pillars:
- *   1. Causal Discovery
- *   2. Anomaly Detection
- *   3. Business Prediction
- *   4. Cascade Detection
+ * improving NexusBrain's intelligence across seven pillars:
+ *   1. Signal Quality
+ *   2. Causal Discovery
+ *   3. Pattern Discovery
+ *   4. Rule Generation
+ *   5. Cascade Detection
+ *   6. Business Prediction
+ *   7. Anomaly Detection
  *
  * Usage:
  *   import { createBenchmarkRunner } from '@nexus-ai/memory-stack/benchmarks';
@@ -34,7 +37,10 @@ export {
 export {
   createBenchmarkRunner,
   type BenchmarkRunnerConfig,
+  type SignalQualityBenchmarkResult,
   type CausalBenchmarkResult,
+  type PatternBenchmarkResult,
+  type RuleBenchmarkResult,
   type AnomalyBenchmarkResult,
   type CascadeBenchmarkResult,
   type PredictionBenchmarkResult,

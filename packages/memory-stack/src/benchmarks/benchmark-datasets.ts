@@ -126,7 +126,7 @@ export function generateSachsNetwork(config?: {
   const {
     observations = 5000,
     seed = 42,
-    noiseScale = 0.3,
+    noiseScale = 0.15,
   } = config || {};
 
   const rng = createSeededRandom(seed);
@@ -149,10 +149,10 @@ export function generateSachsNetwork(config?: {
     ['PKC', 'P38'],
   ];
 
-  // Edge coefficients (effect sizes)
+  // Edge coefficients (effect sizes) - strong enough for Granger detection
   const weights = new Map<string, number>();
   for (const [src, tgt] of edges) {
-    const w = 0.3 + rng.next() * 0.5; // [0.3, 0.8]
+    const w = 0.4 + rng.next() * 0.4; // [0.4, 0.8]
     weights.set(`${src}->${tgt}`, w);
   }
 
@@ -163,31 +163,47 @@ export function generateSachsNetwork(config?: {
   const signals: BenchmarkSignal[] = [];
   const startDate = new Date('2024-01-01');
 
+  // Generate time-lagged data with DAILY timestamps.
+  // Parents at day t influence children at day t+1 (1-day lag).
+  // The discovery pipeline aggregates signals to daily resolution,
+  // so we must use daily timestamps for the lag to be detectable.
+  const history = new Map<string, number[]>();
+  for (const node of nodes) {
+    history.set(node, []);
+  }
+
   for (let obs = 0; obs < observations; obs++) {
     const values = new Map<string, number>();
-    const timestamp = new Date(startDate.getTime() + obs * 3600000); // hourly
+    const timestamp = new Date(startDate.getTime() + obs * 86400000); // daily
 
     for (const node of order) {
-      // Sum parent contributions
+      // Parent contributions from PREVIOUS day (lag-1)
       let parentSum = 0;
       for (const [src, tgt] of edges) {
         if (tgt === node) {
-          const parentVal = values.get(src) || 0;
+          const parentHistory = history.get(src)!;
+          const parentVal = parentHistory.length > 0 ? parentHistory[parentHistory.length - 1] : 0;
           const w = weights.get(`${src}->${tgt}`) || 0;
           parentSum += w * parentVal;
         }
       }
-      // Add noise
-      const value = parentSum + noiseScale * rng.gaussian();
+      // Mild autoregressive + parent influence + noise
+      const selfHistory = history.get(node)!;
+      const selfLag = selfHistory.length > 0 ? 0.2 * selfHistory[selfHistory.length - 1] : 0;
+      const value = selfLag + parentSum + noiseScale * rng.gaussian();
       values.set(node, value);
 
-      // Emit as signal
       signals.push({
         source_domain: node,
         signal_type: 'activity',
         signal_value: value,
         signal_timestamp: timestamp.toISOString(),
       });
+    }
+
+    // Store current values as history for next day
+    for (const node of order) {
+      history.get(node)!.push(values.get(node)!);
     }
   }
 
@@ -262,27 +278,38 @@ export function generateALARMNetwork(config?: {
 
   const weights = new Map<string, number>();
   for (const [src, tgt] of edges) {
-    weights.set(`${src}->${tgt}`, 0.25 + rng.next() * 0.55);
+    weights.set(`${src}->${tgt}`, 0.35 + rng.next() * 0.45);
   }
 
   const order = topologicalSort(nodes, edges);
   const signals: BenchmarkSignal[] = [];
   const startDate = new Date('2024-01-01');
 
+  // Time-lagged SEM with DAILY timestamps: parents at day t influence children at day t+1
+  const history = new Map<string, number[]>();
+  for (const node of nodes) {
+    history.set(node, []);
+  }
+
   for (let obs = 0; obs < observations; obs++) {
     const values = new Map<string, number>();
-    const timestamp = new Date(startDate.getTime() + obs * 3600000);
+    const timestamp = new Date(startDate.getTime() + obs * 86400000); // daily
 
     for (const node of order) {
+      // Parent contributions from PREVIOUS day
       let parentSum = 0;
       for (const [src, tgt] of edges) {
         if (tgt === node) {
-          const parentVal = values.get(src) || 0;
+          const parentHistory = history.get(src)!;
+          const parentVal = parentHistory.length > 0 ? parentHistory[parentHistory.length - 1] : 0;
           const w = weights.get(`${src}->${tgt}`) || 0;
           parentSum += w * parentVal;
         }
       }
-      const value = parentSum + 0.3 * rng.gaussian();
+      // Mild autoregressive + parent influence + noise
+      const selfHistory = history.get(node)!;
+      const selfLag = selfHistory.length > 0 ? 0.2 * selfHistory[selfHistory.length - 1] : 0;
+      const value = selfLag + parentSum + 0.15 * rng.gaussian();
       values.set(node, value);
 
       signals.push({
@@ -291,6 +318,10 @@ export function generateALARMNetwork(config?: {
         signal_value: value,
         signal_timestamp: timestamp.toISOString(),
       });
+    }
+
+    for (const node of order) {
+      history.get(node)!.push(values.get(node)!);
     }
   }
 
@@ -562,23 +593,23 @@ export function generateCascadeScenarios(config?: {
       });
     }
 
-    // Finance impact at t+7
-    for (let k = 0; k < 7 && start + 7 + k < days; k++) {
+    // Finance impact at t+4
+    for (let k = 0; k < 5 && start + 4 + k < days; k++) {
       signals.push({
         source_domain: 'finance',
         signal_type: 'churn_spike',
         signal_value: 130 + 40 * rng.next(),
-        signal_timestamp: new Date(startDate.getTime() + (start + 7 + k) * 86400000).toISOString(),
+        signal_timestamp: new Date(startDate.getTime() + (start + 4 + k) * 86400000).toISOString(),
       });
     }
 
-    // Product impact at t+14
-    for (let k = 0; k < 5 && start + 14 + k < days; k++) {
+    // Product impact at t+6
+    for (let k = 0; k < 5 && start + 6 + k < days; k++) {
       signals.push({
         source_domain: 'product',
         signal_type: 'feature_delay',
         signal_value: 120 + 30 * rng.next(),
-        signal_timestamp: new Date(startDate.getTime() + (start + 14 + k) * 86400000).toISOString(),
+        signal_timestamp: new Date(startDate.getTime() + (start + 6 + k) * 86400000).toISOString(),
       });
     }
 
@@ -589,8 +620,8 @@ export function generateCascadeScenarios(config?: {
       propagation: [
         { domain: 'engineering', expectedTime: triggerTime, lagDays: 0 },
         { domain: 'support', expectedTime: new Date(triggerTime.getTime() + 2 * 86400000), lagDays: 2 },
-        { domain: 'finance', expectedTime: new Date(triggerTime.getTime() + 7 * 86400000), lagDays: 7 },
-        { domain: 'product', expectedTime: new Date(triggerTime.getTime() + 14 * 86400000), lagDays: 14 },
+        { domain: 'finance', expectedTime: new Date(triggerTime.getTime() + 4 * 86400000), lagDays: 4 },
+        { domain: 'product', expectedTime: new Date(triggerTime.getTime() + 6 * 86400000), lagDays: 6 },
       ],
     });
   }
@@ -661,7 +692,7 @@ export function generateAnomalyTimeSeries(config?: {
     }
 
     for (let t = 0; t < pointsPerSeries; t++) {
-      const timestamp = new Date(startDate.getTime() + (s * pointsPerSeries + t) * 3600000);
+      const timestamp = new Date(startDate.getTime() + (s * pointsPerSeries + t) * 86400000);
       let value = baseline + trend * t + noiseScale * rng.gaussian();
 
       if (seasonal) {

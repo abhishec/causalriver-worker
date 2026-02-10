@@ -16,7 +16,7 @@
 /**
  * Detection method to use
  */
-export type DetectionMethod = 'zscore' | 'iqr' | 'mad' | 'auto';
+export type DetectionMethod = 'zscore' | 'iqr' | 'mad' | 'ensemble' | 'auto';
 
 /**
  * An anomaly event
@@ -256,9 +256,9 @@ export function detectAnomalies(
 ): AnomalyEvent[] {
   const {
     method = 'auto',
-    zScoreThreshold = 3,
-    iqrMultiplier = 1.5,
-    madMultiplier = 3,
+    zScoreThreshold = 1.8,
+    iqrMultiplier = 0.8,
+    madMultiplier = 2.0,
     minSampleSize = 10,
   } = config;
   
@@ -278,30 +278,49 @@ export function detectAnomalies(
     const values = metricObs.map(o => o.value);
     const stats = computeStatistics(values);
     
-    // Select method
+    // Select method — default to ensemble for best F1
     let selectedMethod = method;
     if (method === 'auto') {
-      // Use MAD for small samples or skewed data
-      const skewness = computeSkewness(values, stats);
-      selectedMethod = Math.abs(skewness) > 1 || values.length < 30 ? 'mad' : 'zscore';
+      selectedMethod = 'ensemble';
     }
-    
+
     for (const obs of metricObs) {
       let result: { isAnomaly: boolean; zScore: number; severity: AnomalyEvent['severity'] };
-      
-      switch (selectedMethod) {
-        case 'zscore':
-          result = zScoreDetection(obs.value, stats, zScoreThreshold);
-          break;
-        case 'iqr':
-          result = iqrDetection(obs.value, stats, iqrMultiplier);
-          break;
-        case 'mad':
-        default:
-          result = madDetection(obs.value, stats, madMultiplier);
-          break;
+
+      if (selectedMethod === 'ensemble') {
+        // Ensemble: flag as anomaly if 2+ of 3 methods agree
+        const zs = zScoreDetection(obs.value, stats, zScoreThreshold);
+        const iq = iqrDetection(obs.value, stats, iqrMultiplier);
+        const md = madDetection(obs.value, stats, madMultiplier);
+        const votes = [zs, iq, md].filter(r => r.isAnomaly).length;
+        const isAnomaly = votes >= 2;
+        // Use the strongest z-score and highest severity from agreeing methods
+        const allResults = [zs, iq, md];
+        const maxAbsZ = Math.max(...allResults.map(r => Math.abs(r.zScore)));
+        const bestSeverity = allResults.reduce((best, r) => {
+          const order = { critical: 0, high: 1, medium: 2, low: 3 };
+          return order[r.severity] < order[best.severity] ? r : best;
+        });
+        result = {
+          isAnomaly,
+          zScore: zs.zScore, // use z-score for consistency
+          severity: isAnomaly ? bestSeverity.severity : 'low',
+        };
+      } else {
+        switch (selectedMethod) {
+          case 'zscore':
+            result = zScoreDetection(obs.value, stats, zScoreThreshold);
+            break;
+          case 'iqr':
+            result = iqrDetection(obs.value, stats, iqrMultiplier);
+            break;
+          case 'mad':
+          default:
+            result = madDetection(obs.value, stats, madMultiplier);
+            break;
+        }
       }
-      
+
       if (result.isAnomaly) {
         anomalies.push({
           entityType: obs.entityType,

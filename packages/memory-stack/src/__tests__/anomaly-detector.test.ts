@@ -284,9 +284,9 @@ describe('detectAnomalies', () => {
     const values = [1, 2, 3, 2, 1, 3, 2, 1, 3, 2, 1, 100];
     const obs = makeObservations(values);
     const result = detectAnomalies(obs, { method: 'auto', minSampleSize: 5 });
-    // auto should pick either 'mad' or 'zscore' depending on skewness/sample size
+    // auto selects ensemble method for best F1
     if (result.length > 0) {
-      expect(['mad', 'zscore']).toContain(result[0].detectionMethod);
+      expect(['mad', 'zscore', 'ensemble']).toContain(result[0].detectionMethod);
     }
   });
 

@@ -635,6 +635,40 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
+  // ── Verify Mode: check core brain data health and exit ──
+  if (process.argv.includes('--verify')) {
+    log('VERIFY', `Checking core brain data for org: ${ORGANIZATION_ID}`);
+    const tables = [
+      { name: 'causal_relationships_statistical', label: 'Causal Relationships' },
+      { name: 'ai_memory', label: 'Memories' },
+      { name: 'org_cascade_rules', label: 'Cascade Rules' },
+      { name: 'prediction_records', label: 'Prediction Records' },
+      { name: 'brain_grammar_rules', label: 'Grammar Rules' },
+      { name: 'cross_domain_signals', label: 'Signals' },
+    ];
+
+    let totalRows = 0;
+    for (const table of tables) {
+      const { count, error: tErr } = await supabase
+        .from(table.name)
+        .select('*', { count: 'exact', head: true })
+        .eq('organization_id', ORGANIZATION_ID);
+
+      const c = count ?? 0;
+      totalRows += c;
+      const status = tErr ? `ERROR: ${tErr.message}` : `${c} rows`;
+      log('VERIFY', `  ${table.label}: ${status}`);
+    }
+
+    log('VERIFY', `Total data points: ${totalRows}`);
+    if (totalRows > 0) {
+      log('VERIFY', 'Core brain is populated. Federation is ACTIVE.');
+    } else {
+      log('VERIFY', 'Core brain is EMPTY. Run without --verify to train it.');
+    }
+    return;
+  }
+
   // Handle graceful shutdown
   process.on('SIGINT', () => {
     if (shutdownRequested) {

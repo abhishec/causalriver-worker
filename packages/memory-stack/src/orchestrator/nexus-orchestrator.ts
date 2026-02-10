@@ -249,10 +249,40 @@ export function createNexusOrchestrator(config: NexusOrchestratorConfig) {
         domain
       );
 
+      // 2b. Supplement with federated DB data (org + core brain)
+      let federatedRelationships = [...agentContext.causalRelationships];
+      if (config.repository?.getFederatedRelationships) {
+        try {
+          const dbRels = await config.repository.getFederatedRelationships();
+          const cacheKeys = new Set(federatedRelationships.map(
+            r => `${r.sourceDomain}::${r.targetDomain}`
+          ));
+          for (const dbRel of dbRels) {
+            const key = `${dbRel.source_domain}::${dbRel.target_domain}`;
+            if (!cacheKeys.has(key)) {
+              federatedRelationships.push({
+                sourceDomain: dbRel.source_domain,
+                targetDomain: dbRel.target_domain,
+                effectSize: dbRel.effect_size ?? 0,
+                pValue: dbRel.granger_p_value ?? 0.05,
+                fStatistic: dbRel.granger_f_statistic ?? 0,
+                lagDays: dbRel.optimal_lag_days ?? 0,
+                naturalLanguage: dbRel.natural_language || '',
+                confidenceIntervalLower: dbRel.confidence_interval_lower,
+                confidenceIntervalUpper: dbRel.confidence_interval_upper,
+                sampleSize: dbRel.sample_size,
+                discoveredAt: new Date(dbRel.last_computed_at || Date.now()),
+              });
+              cacheKeys.add(key);
+            }
+          }
+        } catch {
+          // Non-critical: fall back to cache-only
+        }
+      }
+
       // 3. Format for LLM
-      const causalContext = formatCausalForPrompt(
-        agentContext.causalRelationships
-      );
+      const causalContext = formatCausalForPrompt(federatedRelationships);
       const patternContext = formatPatternsForPrompt(agentContext.patterns);
 
       const ragText = searchResults
