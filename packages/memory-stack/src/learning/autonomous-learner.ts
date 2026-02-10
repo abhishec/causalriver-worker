@@ -40,7 +40,12 @@ import {
   discoverPatterns,
   validatePattern,
   registerPattern,
+  mineSequentialPatterns,
+  mineTemporalAssociationRules,
   type DiscoveredPattern,
+  type SequentialPattern,
+  type TemporalAssociationRule,
+  type TemporalEvent,
 } from './pattern-detector';
 import { testPatternSignificance } from './significance-testing';
 import { createBrainTrainer, type TrainingPack, type TrainingStats } from './brain-trainer';
@@ -83,6 +88,10 @@ export interface LearningCycleResult {
   anomaliesDetected: number;
   /** Patterns validated and registered */
   patternsRegistered: number;
+  /** Sequential patterns discovered (ordered event sequences) */
+  sequentialPatternsFound: number;
+  /** Temporal association rules discovered (time-lagged rules) */
+  temporalRulesFound: number;
   /** Brain maturity report (if evaluateMaturity=true) */
   maturity?: MaturityReport;
   /** Training stats from this cycle */
@@ -362,6 +371,8 @@ export function createAutonomousLearner(config: AutonomousLearnerConfig) {
           causalEdgesUpdated: 0,
           anomaliesDetected: 0,
           patternsRegistered: 0,
+          sequentialPatternsFound: 0,
+          temporalRulesFound: 0,
           trainingStats: trainer.getTrainingStats(),
           duration: Date.now() - startTime,
         };
@@ -438,10 +449,75 @@ export function createAutonomousLearner(config: AutonomousLearnerConfig) {
         log(`Pattern detection error: ${err.message}`);
       }
 
+      // 4b. SEQUENTIAL PATTERN MINING: Discover ordered event sequences
+      let seqPatterns: SequentialPattern[] = [];
+      let temporalRules: TemporalAssociationRule[] = [];
+      try {
+        // Convert signals to temporal events for sequential mining
+        const temporalEvents: TemporalEvent[] = signals.map((s: any) => ({
+          event: `${s.source_domain}:${s.signal_type}`,
+          timestamp: new Date(s.signal_timestamp || s.created_at).getTime(),
+          entityId: s.entity_id || s.source_domain,
+        }));
+
+        if (temporalEvents.length >= 10) {
+          // Mine sequential patterns (e.g., deploy → bug → support ticket)
+          seqPatterns = mineSequentialPatterns(temporalEvents, {
+            minSupport: 0.3,
+            maxLength: 4,
+            maxGap: lookbackDays * 24 * 60 * 60 * 1000, // Convert days to ms
+          });
+          log(`Mined ${seqPatterns.length} sequential patterns`);
+
+          // Mine temporal association rules (e.g., A causes B after X days)
+          temporalRules = mineTemporalAssociationRules(temporalEvents, {
+            minSupport: 0.2,
+            minConfidence: 0.4,
+            minLift: 1.0,
+            maxWindow: lookbackDays * 24 * 60 * 60 * 1000,
+          });
+          log(`Mined ${temporalRules.length} temporal association rules`);
+
+          // Store high-confidence temporal rules as memories
+          if (repository) {
+            for (const rule of temporalRules.slice(0, 10)) {
+              if (rule.confidence >= 0.6 && rule.lift >= 1.5) {
+                const lagDays = Math.round(rule.avgLag / (24 * 60 * 60 * 1000));
+                await repository.upsertMemory({
+                  memoryType: 'temporal_rule',
+                  domain: rule.antecedent[0]?.split(':')[0] || 'general',
+                  content: `Temporal rule: ${rule.antecedent.join(' + ')} → ${rule.consequent.join(' + ')} ` +
+                    `(confidence: ${(rule.confidence * 100).toFixed(0)}%, lag: ~${lagDays}d, direction: ${rule.direction})`,
+                  importance: Math.min(0.9, rule.confidence * rule.lift / 3),
+                  metadata: {
+                    source: 'autonomous_learner',
+                    ruleType: 'temporal_association',
+                    antecedent: rule.antecedent,
+                    consequent: rule.consequent,
+                    confidence: rule.confidence,
+                    lift: rule.lift,
+                    avgLagMs: rule.avgLag,
+                    direction: rule.direction,
+                  },
+                }).catch(() => {});
+              }
+            }
+          }
+        }
+      } catch (err: any) {
+        log(`Sequential pattern mining error: ${err.message}`);
+      }
+
       // 5. CONVERT: Turn discoveries into a TrainingPack
       let packsGenerated = 0;
-      if (relationships.length > 0 || patterns.length > 0) {
+      if (relationships.length > 0 || patterns.length > 0 || seqPatterns.length > 0) {
         const pack = discoveriesToTrainingPack(relationships, patterns, anomalies);
+
+        // Enrich pack with sequential pattern info
+        if (seqPatterns.length > 0) {
+          if (pack.tags) pack.tags.push('sequential-patterns');
+          pack.source += `, ${seqPatterns.length} sequential, ${temporalRules.length} temporal`;
+        }
 
         // 6. TRAIN: Feed through brain-trainer
         trainer.trainInMemory(pack);
@@ -516,11 +592,13 @@ export function createAutonomousLearner(config: AutonomousLearnerConfig) {
         await repository.logActivity({
           agentType: 'autonomous_learner',
           actionType: 'learning_cycle',
-          outputSummary: `Cycle complete: ${relationships.length} causal, ${anomalies.length} anomalies, ${patterns.length} patterns, ${rulesPromoted} promoted, ${memoriesCreated} insights`,
+          outputSummary: `Cycle complete: ${relationships.length} causal, ${anomalies.length} anomalies, ${patterns.length} patterns, ${seqPatterns.length} sequential, ${temporalRules.length} temporal rules, ${rulesPromoted} promoted, ${memoriesCreated} insights`,
           metadata: {
             causalEdgesUpdated,
             anomaliesDetected: anomalies.length,
             patternsRegistered: patterns.length,
+            sequentialPatternsFound: seqPatterns.length,
+            temporalRulesFound: temporalRules.length,
             packsGenerated,
             rulesPromoted,
             memoriesCreated,
@@ -536,6 +614,8 @@ export function createAutonomousLearner(config: AutonomousLearnerConfig) {
         causalEdgesUpdated,
         anomaliesDetected: anomalies.length,
         patternsRegistered: patterns.length,
+        sequentialPatternsFound: seqPatterns.length,
+        temporalRulesFound: temporalRules.length,
         maturity,
         trainingStats: trainer.getTrainingStats(),
         duration: Date.now() - startTime,

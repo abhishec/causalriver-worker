@@ -262,7 +262,11 @@ export function createEntityResolver(config: EntityResolverConfig) {
   }
 
   /**
-   * Get unified view of an entity across all systems
+   * Get unified view of an entity across all systems.
+   *
+   * Now enriched with CAUSAL INTELLIGENCE: relationships are populated
+   * from the causal graph, showing how this entity's domains causally
+   * interact with others. This turns every entity view into a causal map.
    */
   async function getUnifiedView(
     canonicalId: string
@@ -275,6 +279,7 @@ export function createEntityResolver(config: EntityResolverConfig) {
 
     if (!entity) return null;
 
+    // Fetch signals for this entity
     const { data: signals } = await supabase
       .from('cross_domain_signals')
       .select('source_domain, signal_type, signal_value, created_at')
@@ -282,6 +287,44 @@ export function createEntityResolver(config: EntityResolverConfig) {
       .eq('entity_id', canonicalId)
       .order('created_at', { ascending: false })
       .limit(50);
+
+    // CAUSAL ENRICHMENT: Discover which domains this entity touches
+    const entityDomains = new Set<string>();
+    for (const s of signals || []) {
+      entityDomains.add((s as any).source_domain);
+    }
+
+    // Fetch causal graph edges involving this entity's domains
+    const relationships: UnifiedEntityView['relationships'] = [];
+    if (entityDomains.size > 0) {
+      const domainList = Array.from(entityDomains);
+
+      // Query causal_graph_edges for relationships where this entity's
+      // domains appear as source OR target
+      const { data: edges } = await supabase
+        .from('causal_graph_edges')
+        .select('source_domain, target_domain, effect_size, natural_language, is_significant')
+        .eq('organization_id', organizationId)
+        .eq('is_significant', true);
+
+      if (edges) {
+        for (const edge of edges) {
+          const src = edge.source_domain as string;
+          const tgt = edge.target_domain as string;
+          // Include edge if it touches any domain this entity participates in
+          if (domainList.includes(src) || domainList.includes(tgt)) {
+            relationships.push({
+              sourceDomain: src,
+              targetDomain: tgt,
+              effectSize: (edge.effect_size as number) || 0,
+              naturalLanguage:
+                (edge.natural_language as string) ||
+                `${src} causally affects ${tgt} (effect: ${((edge.effect_size as number) || 0).toFixed(2)})`,
+            });
+          }
+        }
+      }
+    }
 
     return {
       entity: {
@@ -298,7 +341,7 @@ export function createEntityResolver(config: EntityResolverConfig) {
         signalValue: s.signal_value,
         timestamp: new Date(s.created_at),
       })),
-      relationships: [],
+      relationships,
     };
   }
 

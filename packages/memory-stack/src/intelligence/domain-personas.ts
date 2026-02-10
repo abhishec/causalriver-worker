@@ -56,23 +56,35 @@ export interface DomainContext {
 // ============================================================================
 
 /**
- * Build a Claude system prompt from a domain persona
+ * A causal relationship for persona enrichment.
+ */
+export interface PersonaCausalEdge {
+  sourceDomain: string;
+  targetDomain: string;
+  effectSize: number;
+  lagDays: number;
+  naturalLanguage: string;
+}
+
+/**
+ * Build a Claude system prompt from a domain persona.
+ *
+ * When causalEdges are provided, the persona prompt is dynamically enriched
+ * with the org's discovered causal relationships, making the AI aware of
+ * real cross-domain cause-and-effect chains.
  *
  * @example
  * ```typescript
- * const financePersona: DomainPersona = {
- *   name: 'Finance Agent',
- *   role: 'CFO Advisory',
- *   expertise: ['AR Management', 'Cash Flow', 'Collections'],
- *   responseStyle: 'Direct, data-driven, action-oriented',
- *   priorityMetrics: ['DSO', 'AR Aging', 'Cash Position'],
- *   ownedDomains: ['finance'],
- * };
- *
- * const systemPrompt = buildPersonaPrompt(financePersona);
+ * const systemPrompt = buildPersonaPrompt(financePersona, [
+ *   { sourceDomain: 'engineering', targetDomain: 'finance', effectSize: 0.6,
+ *     lagDays: 14, naturalLanguage: 'Deploy failures increase AR aging by 2 days' },
+ * ]);
  * ```
  */
-export function buildPersonaPrompt(persona: DomainPersona): string {
+export function buildPersonaPrompt(
+  persona: DomainPersona,
+  causalEdges?: PersonaCausalEdge[]
+): string {
   const sections: string[] = [];
 
   // Identity
@@ -98,6 +110,42 @@ export function buildPersonaPrompt(persona: DomainPersona): string {
     sections.push(
       `\n## Domain Ownership\nYou own these domains: ${persona.ownedDomains.join(', ')}.`
     );
+  }
+
+  // CAUSAL INTELLIGENCE: Inject discovered causal relationships
+  if (causalEdges && causalEdges.length > 0) {
+    const ownedDomains = new Set(persona.ownedDomains.map(d => d.toLowerCase()));
+
+    const upstream = causalEdges.filter(e =>
+      ownedDomains.has(e.targetDomain.toLowerCase())
+    );
+    const downstream = causalEdges.filter(e =>
+      ownedDomains.has(e.sourceDomain.toLowerCase())
+    );
+
+    if (upstream.length > 0 || downstream.length > 0) {
+      sections.push(`\n## Causal Intelligence (Discovered by Brain)`);
+      sections.push(`The organization's causal graph reveals these cross-domain relationships affecting your domain:\n`);
+
+      if (upstream.length > 0) {
+        sections.push(`**What drives your metrics (upstream causes):**`);
+        for (const edge of upstream.sort((a, b) => Math.abs(b.effectSize) - Math.abs(a.effectSize)).slice(0, 5)) {
+          sections.push(`- ${edge.naturalLanguage} (effect: ${edge.effectSize.toFixed(2)}, lag: ${edge.lagDays}d)`);
+        }
+      }
+
+      if (downstream.length > 0) {
+        sections.push(`\n**What your domain affects (downstream effects):**`);
+        for (const edge of downstream.sort((a, b) => Math.abs(b.effectSize) - Math.abs(a.effectSize)).slice(0, 5)) {
+          sections.push(`- ${edge.naturalLanguage} (effect: ${edge.effectSize.toFixed(2)}, lag: ${edge.lagDays}d)`);
+        }
+      }
+
+      sections.push(`\nUse these causal relationships to:`);
+      sections.push(`- Trace root causes when metrics change`);
+      sections.push(`- Predict downstream impacts of actions`);
+      sections.push(`- Identify intervention points for cascading problems`);
+    }
   }
 
   // Escalation path
@@ -187,25 +235,28 @@ export function createPersonaRegistry() {
     },
 
     /**
-     * Build prompt for a specific persona
+     * Build prompt for a specific persona.
+     * When causalEdges are provided, the prompt is dynamically enriched
+     * with the org's discovered causal relationships.
      */
-    getPrompt: (key: string): string | undefined => {
+    getPrompt: (key: string, causalEdges?: PersonaCausalEdge[]): string | undefined => {
       const persona = personas.get(key);
       if (!persona) return undefined;
-      return buildPersonaPrompt(persona);
+      return buildPersonaPrompt(persona, causalEdges);
     },
 
     /**
-     * Build prompt with domain context
+     * Build prompt with domain context and optional causal intelligence.
      */
     getPromptWithContext: (
       personaKey: string,
-      domainKeys?: string[]
+      domainKeys?: string[],
+      causalEdges?: PersonaCausalEdge[]
     ): string | undefined => {
       const persona = personas.get(personaKey);
       if (!persona) return undefined;
 
-      const prompt = buildPersonaPrompt(persona);
+      const prompt = buildPersonaPrompt(persona, causalEdges);
 
       if (domainKeys && domainKeys.length > 0) {
         const relevantDomains = domainKeys

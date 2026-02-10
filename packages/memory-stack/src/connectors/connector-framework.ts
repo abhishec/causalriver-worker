@@ -81,6 +81,109 @@ export interface ConnectorEntityResolver {
 }
 
 // ============================================================================
+// CAUSAL SIGNAL WEIGHTING
+// ============================================================================
+
+/**
+ * Causal prior for signal weighting.
+ * When the causal graph knows that domain X has a strong effect on domain Y,
+ * signals from domain X get a causal importance weight.
+ */
+export interface CausalSignalWeight {
+  /** Domain name (e.g., "engineering") */
+  domain: string;
+  /** Causal importance weight (0-2, default: 1.0). Higher = stronger causal role */
+  weight: number;
+}
+
+/**
+ * Apply causal graph priors to weight incoming signals.
+ *
+ * Domains that are strong causal drivers (many outgoing edges, high effect sizes)
+ * get their signals amplified. This makes the brain pay more attention to
+ * signals from domains that drive cross-domain effects.
+ *
+ * The weight is stored in signal_metadata.causal_weight for downstream
+ * processing (anomaly detection, pattern mining, etc.)
+ *
+ * @param signals - Incoming connector signals
+ * @param causalWeights - Causal weights per domain (from causal graph analysis)
+ * @returns Signals with causal_weight in metadata
+ */
+export function applyCausalSignalWeights(
+  signals: ConnectorSignal[],
+  causalWeights: CausalSignalWeight[]
+): ConnectorSignal[] {
+  if (causalWeights.length === 0) return signals;
+
+  const weightMap = new Map(causalWeights.map(w => [w.domain.toLowerCase(), w.weight]));
+
+  return signals.map(signal => {
+    const domain = signal.source_domain.toLowerCase();
+    const causalWeight = weightMap.get(domain);
+
+    if (causalWeight !== undefined && causalWeight !== 1.0) {
+      return {
+        ...signal,
+        metadata: {
+          ...signal.metadata,
+          causal_weight: causalWeight,
+          original_value: signal.signal_value,
+        },
+      };
+    }
+
+    return signal;
+  });
+}
+
+/**
+ * Compute causal weights from a set of causal graph edges.
+ *
+ * For each domain, the weight is based on:
+ * - Number of outgoing edges (how many things it causes)
+ * - Average effect size of outgoing edges
+ * - Normalized to 0.5-2.0 range
+ *
+ * Domains with no causal role get weight 1.0 (neutral).
+ */
+export function computeCausalWeightsFromEdges(
+  edges: Array<{ sourceDomain: string; targetDomain: string; effectSize: number }>
+): CausalSignalWeight[] {
+  const domainStats = new Map<string, { outCount: number; totalEffect: number }>();
+
+  for (const edge of edges) {
+    const src = edge.sourceDomain.toLowerCase();
+    const existing = domainStats.get(src) || { outCount: 0, totalEffect: 0 };
+    existing.outCount++;
+    existing.totalEffect += Math.abs(edge.effectSize);
+    domainStats.set(src, existing);
+  }
+
+  if (domainStats.size === 0) return [];
+
+  // Find max score for normalization
+  const scores = new Map<string, number>();
+  let maxScore = 0;
+  for (const [domain, stats] of domainStats) {
+    const score = stats.outCount * (stats.totalEffect / stats.outCount);
+    scores.set(domain, score);
+    maxScore = Math.max(maxScore, score);
+  }
+
+  // Normalize to 0.5 - 2.0 range
+  const weights: CausalSignalWeight[] = [];
+  for (const [domain, score] of scores) {
+    const normalized = maxScore > 0
+      ? 0.5 + (score / maxScore) * 1.5
+      : 1.0;
+    weights.push({ domain, weight: Math.round(normalized * 100) / 100 });
+  }
+
+  return weights;
+}
+
+// ============================================================================
 // HELPERS
 // ============================================================================
 

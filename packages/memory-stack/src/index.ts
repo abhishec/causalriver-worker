@@ -48,6 +48,8 @@ export {
   // Semantic Search
   createSemanticSearch,
   type SemanticSearchConfig,
+  type CausalEdge,
+  type CausalEdgeFetcher,
 } from './core/search';
 
 // ============================================================================
@@ -262,8 +264,11 @@ export {
   type ConnectorSyncResult,
   type ConnectorSignal,
   type ConnectorEntityResolver,
+  type CausalSignalWeight,
   storeConnectorSignals,
   recordSyncResult,
+  applyCausalSignalWeights,
+  computeCausalWeightsFromEdges,
 } from './connectors/connector-framework';
 
 export { createHubSpotConnector } from './connectors/hubspot';
@@ -417,6 +422,7 @@ export {
   createAgentContextManager,
   logAgentActivity,
   type AgentContext,
+  type AgentCausalEdge,
   type AgentRunResult,
   type AgentRunType,
   type AgentStatus,
@@ -434,6 +440,7 @@ export {
   exampleDomains,
   type DomainPersona,
   type DomainContext,
+  type PersonaCausalEdge,
 } from './intelligence/domain-personas';
 
 export {
@@ -444,6 +451,7 @@ export {
   defaultReasoningStages,
   defaultIntentGuides,
   type ReasoningStage,
+  type ReasoningCausalEdge,
   type IntentGuide,
   type StructuredResponse,
   type UncertaintyLevel,

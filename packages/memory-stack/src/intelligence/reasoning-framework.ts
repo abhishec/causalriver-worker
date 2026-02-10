@@ -58,7 +58,20 @@ export interface StructuredResponse {
 // ============================================================================
 
 /**
- * Default reasoning stages for structured analysis
+ * A causal edge for reasoning context injection.
+ */
+export interface ReasoningCausalEdge {
+  sourceDomain: string;
+  targetDomain: string;
+  effectSize: number;
+  lagDays: number;
+  naturalLanguage: string;
+}
+
+/**
+ * Default reasoning stages for structured analysis.
+ * Now includes a dedicated Causal Reasoning stage between
+ * Pattern Analysis and Cross-Domain Connection.
  */
 export const defaultReasoningStages: ReasoningStage[] = [
   {
@@ -89,12 +102,24 @@ export const defaultReasoningStages: ReasoningStage[] = [
     ],
   },
   {
+    name: 'Causal Reasoning',
+    description: 'Apply causal intelligence to trace root causes and predict effects',
+    prompts: [
+      'What causal relationships from the brain graph are relevant here?',
+      'Can we trace a causal chain from root cause to observed effect?',
+      'What lag times should we expect between cause and effect?',
+      'Is this a correlation or a verified causal relationship?',
+      'What interventions would break or strengthen this causal chain?',
+    ],
+  },
+  {
     name: 'Cross-Domain Connection',
-    description: 'Connect insights across domains',
+    description: 'Connect insights across domains using causal graph',
     prompts: [
       'How do different domains interact here?',
-      'What cascade effects might occur?',
-      'Who else should be involved?',
+      'What cascade effects might occur based on causal edges?',
+      'Who else should be involved based on downstream effects?',
+      'Are there second-order effects that cross domain boundaries?',
     ],
   },
   {
@@ -104,6 +129,7 @@ export const defaultReasoningStages: ReasoningStage[] = [
       'What specific actions should be taken?',
       'Who should own each action?',
       'What is the priority order?',
+      'What is the expected time-to-effect based on causal lag?',
     ],
   },
 ];
@@ -130,20 +156,27 @@ export function buildReasoningFramework(options: {
   requireExplicitUncertainty?: boolean;
   maxRecommendations?: number;
   includeDataGaps?: boolean;
+  /** When provided, causal graph data is injected into the reasoning prompt */
+  causalEdges?: ReasoningCausalEdge[];
 } = {}) {
   const {
     stages = defaultReasoningStages,
     requireExplicitUncertainty = true,
     maxRecommendations = 5,
     includeDataGaps = true,
+    causalEdges,
   } = options;
 
   return {
     /**
-     * Build the reasoning framework prompt
+     * Build the reasoning framework prompt.
+     * When causal edges are provided (via config or parameter),
+     * a live causal graph section is injected to ground reasoning
+     * in empirically-discovered cause-and-effect relationships.
      */
-    buildPrompt: (additionalContext?: string): string => {
+    buildPrompt: (additionalContext?: string, runtimeCausalEdges?: ReasoningCausalEdge[]): string => {
       const sections: string[] = [];
+      const edges = runtimeCausalEdges || causalEdges;
 
       // Introduction
       sections.push('## Reasoning Framework\n');
@@ -160,6 +193,27 @@ export function buildReasoningFramework(options: {
         for (const prompt of stage.prompts) {
           sections.push(`- ${prompt}`);
         }
+        sections.push('');
+      }
+
+      // CAUSAL GRAPH INJECTION: Ground reasoning in discovered relationships
+      if (edges && edges.length > 0) {
+        sections.push('### Live Causal Graph (Discovered by Brain)');
+        sections.push('The following causal relationships have been empirically discovered from organizational data:');
+        sections.push('');
+        const sorted = [...edges].sort((a, b) => Math.abs(b.effectSize) - Math.abs(a.effectSize));
+        for (const edge of sorted.slice(0, 15)) {
+          const direction = edge.effectSize > 0 ? '+' : '-';
+          sections.push(
+            `- **${edge.sourceDomain} → ${edge.targetDomain}** (${direction}${Math.abs(edge.effectSize).toFixed(2)}, ${edge.lagDays}d lag): ${edge.naturalLanguage}`
+          );
+        }
+        sections.push('');
+        sections.push('Use these verified relationships to:');
+        sections.push('- Ground your causal reasoning in empirical evidence');
+        sections.push('- Trace multi-hop causal chains (A → B → C)');
+        sections.push('- Estimate time-to-impact using lag days');
+        sections.push('- Distinguish correlation from causation');
         sections.push('');
       }
 
@@ -181,6 +235,9 @@ export function buildReasoningFramework(options: {
       sections.push('- Explain the rationale');
       sections.push('- Assign priority (high/medium/low)');
       sections.push('- Suggest an owner if possible');
+      if (edges && edges.length > 0) {
+        sections.push('- Cite the causal relationship that supports this recommendation');
+      }
       sections.push('');
 
       // Data gaps

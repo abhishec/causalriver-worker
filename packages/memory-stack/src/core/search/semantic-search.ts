@@ -16,6 +16,21 @@ import type { SearchResult, RAGContext, MemoryWeightedRAGContext } from '../../t
 /**
  * Configuration for semantic search
  */
+/**
+ * A causal edge used for causal reranking of search results.
+ */
+export interface CausalEdge {
+  sourceDomain: string;
+  targetDomain: string;
+  effectSize: number;
+}
+
+/**
+ * Callback to fetch causal edges for the org at query time.
+ * This keeps semantic search decoupled from the DB — the caller wires it.
+ */
+export type CausalEdgeFetcher = () => Promise<CausalEdge[]>;
+
 export interface SemanticSearchConfig {
   /** Default similarity threshold (0-1) */
   defaultThreshold?: number;
@@ -33,6 +48,19 @@ export interface SemanticSearchConfig {
    * IMPORTANT: For true semantic understanding, configure this with your edge function URL.
    */
   neuralConfig?: NeuralEmbeddingConfig;
+  /**
+   * Causal edge fetcher for causal reranking (optional).
+   * When provided, RAG results are boosted by causal proximity
+   * to the query's domain. Results causally upstream/downstream
+   * of the query domain get a relevance boost.
+   */
+  causalEdgeFetcher?: CausalEdgeFetcher;
+  /**
+   * How much causal proximity boosts relevance (0-1, default: 0.15).
+   * A boost of 0.15 means a maximally-causal result gets up to 15%
+   * added to its similarity score.
+   */
+  causalBoostWeight?: number;
 }
 
 /**
@@ -48,7 +76,144 @@ export function createSemanticSearch(config: SemanticSearchConfig = {}) {
     dimensions = 384,
     organizationId,
     neuralConfig,
+    causalEdgeFetcher,
+    causalBoostWeight = 0.15,
   } = config;
+
+  // ---------------------------------------------------------------
+  // Causal Reranking Engine
+  // ---------------------------------------------------------------
+
+  /**
+   * Extract query domain from query text using keyword matching.
+   * Returns the most likely domain the user is asking about.
+   */
+  function detectQueryDomain(query: string): string | null {
+    const q = query.toLowerCase();
+    const domainKeywords: Record<string, string[]> = {
+      finance: ['revenue', 'mrr', 'arr', 'cash', 'payment', 'invoice', 'financial', 'finance', 'billing', 'ar ', 'dso'],
+      engineering: ['deploy', 'code', 'bug', 'sprint', 'pr ', 'pull request', 'ci', 'build', 'engineering', 'technical', 'mttr'],
+      customer_success: ['churn', 'nps', 'csat', 'retention', 'customer', 'onboard', 'health score', 'support', 'ticket'],
+      revenue: ['pipeline', 'deal', 'sales', 'lead', 'win rate', 'quota', 'forecast', 'opportunity'],
+      product: ['feature', 'roadmap', 'adoption', 'usage', 'product', 'release', 'user experience'],
+      marketing: ['campaign', 'traffic', 'conversion', 'seo', 'mql', 'sql', 'cac', 'brand', 'marketing'],
+      hr: ['hiring', 'attrition', 'headcount', 'employee', 'talent', 'retention rate', 'hr '],
+      operations: ['ops', 'operations', 'sla', 'efficiency', 'vendor', 'cost'],
+    };
+
+    let bestDomain: string | null = null;
+    let bestCount = 0;
+    for (const [domain, keywords] of Object.entries(domainKeywords)) {
+      let count = 0;
+      for (const kw of keywords) {
+        if (q.includes(kw)) count++;
+      }
+      if (count > bestCount) {
+        bestCount = count;
+        bestDomain = domain;
+      }
+    }
+    return bestDomain;
+  }
+
+  /**
+   * Build a causal proximity map: domain → boost factor (0-1).
+   * Domains causally connected to queryDomain get higher boosts.
+   * Direct connections get max boost, 2-hop get half.
+   */
+  function buildCausalProximityMap(
+    edges: CausalEdge[],
+    queryDomain: string
+  ): Map<string, number> {
+    const proximity = new Map<string, number>();
+    proximity.set(queryDomain, 1.0); // Query domain itself gets max
+
+    // Direct neighbors (1-hop): domains causally connected
+    const directNeighbors = new Set<string>();
+    for (const edge of edges) {
+      if (edge.sourceDomain === queryDomain) {
+        const boost = Math.min(1.0, Math.abs(edge.effectSize));
+        const existing = proximity.get(edge.targetDomain) || 0;
+        proximity.set(edge.targetDomain, Math.max(existing, boost));
+        directNeighbors.add(edge.targetDomain);
+      }
+      if (edge.targetDomain === queryDomain) {
+        const boost = Math.min(1.0, Math.abs(edge.effectSize));
+        const existing = proximity.get(edge.sourceDomain) || 0;
+        proximity.set(edge.sourceDomain, Math.max(existing, boost));
+        directNeighbors.add(edge.sourceDomain);
+      }
+    }
+
+    // 2-hop neighbors: domains connected to direct neighbors (half weight)
+    for (const neighbor of directNeighbors) {
+      for (const edge of edges) {
+        if (edge.sourceDomain === neighbor && !proximity.has(edge.targetDomain)) {
+          const boost = Math.min(0.5, Math.abs(edge.effectSize) * 0.5);
+          proximity.set(edge.targetDomain, boost);
+        }
+        if (edge.targetDomain === neighbor && !proximity.has(edge.sourceDomain)) {
+          const boost = Math.min(0.5, Math.abs(edge.effectSize) * 0.5);
+          proximity.set(edge.sourceDomain, boost);
+        }
+      }
+    }
+
+    return proximity;
+  }
+
+  /**
+   * Apply causal reranking boost to search results.
+   * Results from domains causally connected to the query domain
+   * get a similarity boost proportional to causal proximity.
+   */
+  async function applyCausalReranking(
+    results: SearchResult[],
+    query: string
+  ): Promise<SearchResult[]> {
+    if (!causalEdgeFetcher || results.length === 0) return results;
+
+    const queryDomain = detectQueryDomain(query);
+    if (!queryDomain) return results; // Can't determine query domain
+
+    try {
+      const edges = await causalEdgeFetcher();
+      if (edges.length === 0) return results;
+
+      const proximityMap = buildCausalProximityMap(edges, queryDomain);
+
+      // Boost results by causal proximity
+      return results
+        .map((r): SearchResult => {
+          // Try to determine the result's domain from entity_type or metadata
+          const resultDomain =
+            r.metadata?.domain ||
+            r.metadata?.source_domain ||
+            r.entity_type ||
+            '';
+          const normalizedDomain = String(resultDomain).toLowerCase().replace(/[^a-z_]/g, '');
+
+          const causalProximity = proximityMap.get(normalizedDomain) || 0;
+          const boost = causalProximity * causalBoostWeight;
+
+          return {
+            entity_type: r.entity_type,
+            entity_id: r.entity_id,
+            content_text: r.content_text,
+            similarity: Math.min(1.0, r.similarity + boost),
+            metadata: {
+              ...(r.metadata || { synced_at: new Date().toISOString() }),
+              _causalBoost: boost > 0 ? boost : undefined,
+              _causalProximity: causalProximity > 0 ? causalProximity : undefined,
+            },
+          };
+        })
+        .sort((a, b) => b.similarity - a.similarity); // Re-sort by boosted similarity
+    } catch {
+      // Causal reranking failure is non-fatal
+      return results;
+    }
+  }
 
   /**
    * Generate a query embedding using neural (if configured) or n-gram fallback.
@@ -289,13 +454,46 @@ export function createSemanticSearch(config: SemanticSearchConfig = {}) {
         metadata: r.metadata,
       });
 
+      // CAUSAL RERANKING: Boost results by causal proximity to query domain
+      const rerankedEntity = await applyCausalReranking(entityResults.map(mapResult), query);
+      const rerankedMemory = await applyCausalReranking(memoryResults.map(mapResult), query);
+
+      // Rebuild context string with causal-reranked order
+      let causalContextString = '';
+      if (rerankedMemory.length > 0) {
+        causalContextString += '\n## 🧠 Learned Patterns & Memory\n';
+        for (const item of rerankedMemory) {
+          const confidence = item.metadata?.confidence
+            ? Math.round((item.metadata.confidence as number) * 100)
+            : 80;
+          const causalTag = item.metadata?._causalBoost ? ' ⚡' : '';
+          causalContextString += `- 🧠 ${item.content_text} (Confidence: ${confidence}%)${causalTag}\n`;
+        }
+      }
+      if (rerankedEntity.length > 0) {
+        const grouped: Record<string, SearchResult[]> = {};
+        for (const item of rerankedEntity) {
+          const type = item.entity_type;
+          if (!grouped[type]) grouped[type] = [];
+          grouped[type].push(item);
+        }
+        for (const [type, items] of Object.entries(grouped)) {
+          causalContextString += `\n## ${type.charAt(0).toUpperCase() + type.slice(1)}s\n`;
+          for (const item of items) {
+            const relevance = Math.round(item.similarity * 100);
+            const causalTag = item.metadata?._causalBoost ? ' ⚡' : '';
+            causalContextString += `- ${item.content_text} (Relevance: ${relevance}%)${causalTag}\n`;
+          }
+        }
+      }
+
       return {
         query,
-        memory_results: memoryResults.map(mapResult),
-        entity_results: entityResults.map(mapResult),
-        context_string: contextString.trim(),
-        memory_count: memoryResults.length,
-        entity_count: entityResults.length,
+        memory_results: rerankedMemory,
+        entity_results: rerankedEntity,
+        context_string: causalContextString.trim() || contextString.trim(),
+        memory_count: rerankedMemory.length,
+        entity_count: rerankedEntity.length,
       };
     },
 

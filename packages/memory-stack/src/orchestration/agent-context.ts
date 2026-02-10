@@ -18,7 +18,18 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 // ============================================================================
 
 /**
- * Context for an agent run
+ * A causal edge injected into agent context for causal reasoning.
+ */
+export interface AgentCausalEdge {
+  sourceDomain: string;
+  targetDomain: string;
+  effectSize: number;
+  lagDays: number;
+  naturalLanguage: string;
+}
+
+/**
+ * Context for an agent run — now enriched with causal intelligence.
  */
 export interface AgentContext {
   agentId: string;
@@ -27,6 +38,21 @@ export interface AgentContext {
   runId: string;
   startedAt: Date;
   config: Record<string, unknown>;
+  /**
+   * Causal relationships relevant to this agent's domain.
+   * Auto-injected at run initialization when causal data is available.
+   * Agents use this to reason about cross-domain cascade effects.
+   */
+  causalContext?: {
+    /** Edges where this agent's domain is the SOURCE (downstream effects) */
+    downstreamEffects: AgentCausalEdge[];
+    /** Edges where this agent's domain is the TARGET (upstream causes) */
+    upstreamCauses: AgentCausalEdge[];
+    /** Strongest causal chain through this domain */
+    dominantChain?: string;
+    /** Total causal edges involving this domain */
+    totalEdges: number;
+  };
 }
 
 /**
@@ -148,6 +174,78 @@ export function createAgentContextManager(options: {
 
         console.log(`[Agent] Initialized ${agentType} run ${run.id} for org ${organizationId}`);
 
+        // CAUSAL ENRICHMENT: Auto-inject causal context for this agent's domain
+        let causalContext: AgentContext['causalContext'] | undefined;
+        try {
+          // Derive agent domain from agentType (e.g., "signal_discovery" → all domains,
+          // "finance_agent" → "finance", "cs_agent" → "customer_success")
+          const agentDomain = extractDomainFromAgentType(agentType);
+
+          const { data: edges } = await supabase
+            .from('causal_graph_edges')
+            .select('source_domain, target_domain, effect_size, optimal_lag_days, natural_language, is_significant')
+            .eq('organization_id', organizationId)
+            .eq('is_significant', true);
+
+          if (edges && edges.length > 0) {
+            const downstreamEffects: AgentCausalEdge[] = [];
+            const upstreamCauses: AgentCausalEdge[] = [];
+
+            for (const e of edges) {
+              const edge: AgentCausalEdge = {
+                sourceDomain: e.source_domain as string,
+                targetDomain: e.target_domain as string,
+                effectSize: (e.effect_size as number) || 0,
+                lagDays: (e.optimal_lag_days as number) || 0,
+                naturalLanguage: (e.natural_language as string) ||
+                  `${e.source_domain} → ${e.target_domain}`,
+              };
+
+              // If agent owns a specific domain, filter relevant edges
+              if (agentDomain) {
+                if (edge.sourceDomain === agentDomain) {
+                  downstreamEffects.push(edge);
+                }
+                if (edge.targetDomain === agentDomain) {
+                  upstreamCauses.push(edge);
+                }
+              } else {
+                // General agent — gets all edges
+                downstreamEffects.push(edge);
+              }
+            }
+
+            // Find dominant chain: the path with highest combined effect size
+            let dominantChain: string | undefined;
+            if (upstreamCauses.length > 0 && downstreamEffects.length > 0) {
+              const strongest_upstream = upstreamCauses.reduce((a, b) =>
+                Math.abs(a.effectSize) > Math.abs(b.effectSize) ? a : b
+              );
+              const strongest_downstream = downstreamEffects.reduce((a, b) =>
+                Math.abs(a.effectSize) > Math.abs(b.effectSize) ? a : b
+              );
+              dominantChain =
+                `${strongest_upstream.sourceDomain} → ${agentDomain || '?'} → ${strongest_downstream.targetDomain}`;
+            }
+
+            const totalEdges = downstreamEffects.length + upstreamCauses.length;
+            if (totalEdges > 0) {
+              causalContext = {
+                downstreamEffects: downstreamEffects
+                  .sort((a, b) => Math.abs(b.effectSize) - Math.abs(a.effectSize))
+                  .slice(0, 10),
+                upstreamCauses: upstreamCauses
+                  .sort((a, b) => Math.abs(b.effectSize) - Math.abs(a.effectSize))
+                  .slice(0, 10),
+                dominantChain,
+                totalEdges,
+              };
+            }
+          }
+        } catch {
+          // Causal enrichment failure is non-fatal
+        }
+
         return {
           agentId: agent.id as string,
           agentType,
@@ -155,6 +253,7 @@ export function createAgentContextManager(options: {
           runId: run.id as string,
           startedAt: new Date(),
           config: (agent.config || {}) as Record<string, unknown>,
+          causalContext,
         };
       } catch (error) {
         console.error(`[Agent] Error initializing agent run:`, error);
@@ -374,6 +473,40 @@ export function createAgentContextManager(options: {
       return data || [];
     },
   };
+}
+
+// ============================================================================
+// DOMAIN EXTRACTION
+// ============================================================================
+
+/**
+ * Map agent type strings to domain names.
+ * Returns null for general-purpose agents that span all domains.
+ */
+function extractDomainFromAgentType(agentType: string): string | null {
+  const at = agentType.toLowerCase();
+  const domainMap: Record<string, string> = {
+    finance: 'finance',
+    revenue: 'revenue',
+    sales: 'revenue',
+    cs: 'customer_success',
+    customer_success: 'customer_success',
+    support: 'customer_success',
+    engineering: 'engineering',
+    product: 'product',
+    marketing: 'marketing',
+    hr: 'hr',
+    people: 'hr',
+    operations: 'operations',
+    ops: 'operations',
+    knowledge: 'knowledge',
+  };
+
+  for (const [keyword, domain] of Object.entries(domainMap)) {
+    if (at.includes(keyword)) return domain;
+  }
+
+  return null; // General agent
 }
 
 // ============================================================================

@@ -21,8 +21,8 @@ describe('Reasoning Framework', () => {
   // ============================================================================
 
   describe('defaultReasoningStages', () => {
-    it('should contain exactly 5 default stages', () => {
-      expect(defaultReasoningStages).toHaveLength(5);
+    it('should contain exactly 6 default stages (including Causal Reasoning)', () => {
+      expect(defaultReasoningStages).toHaveLength(6);
     });
 
     it('should have the correct stage names in order', () => {
@@ -31,6 +31,7 @@ describe('Reasoning Framework', () => {
         'Understanding',
         'Data Assessment',
         'Pattern Analysis',
+        'Causal Reasoning',
         'Cross-Domain Connection',
         'Recommendation',
       ]);
@@ -145,7 +146,8 @@ describe('Reasoning Framework', () => {
         const prompt = framework.buildPrompt();
         expect(prompt).toContain('### 1. Understanding');
         expect(prompt).toContain('### 2. Data Assessment');
-        expect(prompt).toContain('### 5. Recommendation');
+        expect(prompt).toContain('### 4. Causal Reasoning');
+        expect(prompt).toContain('### 6. Recommendation');
       });
     });
 
