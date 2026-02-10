@@ -326,12 +326,24 @@ export function createEmptyDAG(nodes: string[]): CausalDAG {
 }
 
 /**
- * Create DAG from database relationships
+ * Core brain org ID — duplicated here to avoid circular import.
+ */
+const CORE_BRAIN_ORG_ID = '00000000-0000-4000-a000-000000000001';
+
+/**
+ * Create DAG from database relationships.
+ * When `includeCoreDAG` is true, merges core brain relationships into the DAG.
+ * Org edges take priority over core brain edges for the same source→target pair.
  */
 export async function loadDAGFromDatabase(
   supabase: SupabaseClient,
-  organizationId: string
+  organizationId: string,
+  options?: { includeCoreDAG?: boolean }
 ): Promise<CausalDAG> {
+  const isCoreBrain = organizationId === CORE_BRAIN_ORG_ID;
+  const includeCoreDAG = options?.includeCoreDAG ?? false;
+
+  // Fetch org relationships
   const { data: relationships, error } = await supabase
     .from('causal_relationships_statistical')
     .select('*')
@@ -340,6 +352,17 @@ export async function loadDAGFromDatabase(
 
   if (error) {
     throw new Error(`Failed to load DAG: ${error.message}`);
+  }
+
+  // Optionally fetch core brain relationships
+  let coreRelationships: any[] = [];
+  if (includeCoreDAG && !isCoreBrain) {
+    const { data: coreData } = await supabase
+      .from('causal_relationships_statistical')
+      .select('*')
+      .eq('organization_id', CORE_BRAIN_ORG_ID)
+      .eq('is_significant', true);
+    coreRelationships = coreData || [];
   }
 
   const nodes = new Set<string>();
@@ -351,7 +374,8 @@ export async function loadDAGFromDatabase(
     sampleSize: number;
   }>>();
 
-  for (const rel of relationships || []) {
+  // Helper to add a relationship to the DAG
+  function addEdge(rel: any) {
     nodes.add(rel.source_domain);
     nodes.add(rel.target_domain);
 
@@ -366,6 +390,16 @@ export async function loadDAGFromDatabase(
       lastUpdated: new Date(rel.last_computed_at || rel.created_at),
       sampleSize: rel.sample_size || 100
     });
+  }
+
+  // Load core brain edges first (lower priority)
+  for (const rel of coreRelationships) {
+    addEdge(rel);
+  }
+
+  // Load org edges second (overwrite core brain edges for same pair — org takes priority)
+  for (const rel of relationships || []) {
+    addEdge(rel);
   }
 
   return { nodes, edges };

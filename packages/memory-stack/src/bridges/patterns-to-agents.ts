@@ -39,6 +39,8 @@ export interface CachedRelationship {
   confidenceIntervalUpper?: number;
   sampleSize?: number;
   discoveredAt: Date;
+  /** Source of this relationship: org-specific or universal core brain */
+  _source?: 'org' | 'core';
 }
 
 export interface AgentContextCache {
@@ -181,6 +183,47 @@ export function createAgentContextEnricher(eventBus: EventBusInstance) {
         patternCache.clear();
         causalCache.clear();
       }
+    },
+
+    /**
+     * Inject federated context (core brain data) into the cache for an org.
+     * Merges without duplicating existing org-specific entries.
+     */
+    injectFederatedContext(
+      organizationId: string,
+      relationships: CachedRelationship[],
+      patterns: CachedPattern[]
+    ): void {
+      // Merge relationships (org entries take priority)
+      const existingRels = causalCache.get(organizationId) || [];
+      const relKeys = new Set(
+        existingRels.map((r) => `${r.sourceDomain}::${r.targetDomain}`)
+      );
+      for (const rel of relationships) {
+        const key = `${rel.sourceDomain}::${rel.targetDomain}`;
+        if (!relKeys.has(key)) {
+          existingRels.push({ ...rel, _source: rel._source || 'core' });
+          relKeys.add(key);
+        }
+      }
+      causalCache.set(organizationId, existingRels);
+
+      // Merge patterns (org entries take priority)
+      const existingPats = patternCache.get(organizationId) || [];
+      const patKeys = new Set(
+        existingPats.map(
+          (p) =>
+            `${p.domain}::${p.type}::${((p.payload.naturalLanguage as string) || '').substring(0, 50)}`
+        )
+      );
+      for (const pat of patterns) {
+        const key = `${pat.domain}::${pat.type}::${((pat.payload.naturalLanguage as string) || '').substring(0, 50)}`;
+        if (!patKeys.has(key)) {
+          existingPats.push(pat);
+          patKeys.add(key);
+        }
+      }
+      patternCache.set(organizationId, existingPats);
     },
 
     getStats() {

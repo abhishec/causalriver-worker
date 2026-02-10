@@ -156,7 +156,7 @@ export function createNexusOrchestrator(config: NexusOrchestratorConfig) {
 
   // Bootstrap DAG from existing relationships in background
   if (shouldLoadDAG) {
-    loadDAGFromDatabase(supabase, organizationId)
+    loadDAGFromDatabase(supabase, organizationId, { includeCoreDAG: true })
       .then((dag) => {
         // Load the database DAG into the existing learner instance.
         // The bridge holds a reference to this learner, so updating in-place
@@ -187,10 +187,22 @@ export function createNexusOrchestrator(config: NexusOrchestratorConfig) {
     continuousLearner,
   });
 
-  // Initialize semantic search
+  // Initialize semantic search with federated causal edge fetcher for reranking
   const semanticSearch = createSemanticSearch({
     ...config.search,
     organizationId,
+    causalEdgeFetcher: config.repository?.getFederatedRelationships
+      ? async () => {
+          const rels = await config.repository!.getFederatedRelationships!();
+          return rels.map((r: any) => ({
+            sourceDomain: r.source_domain,
+            targetDomain: r.target_domain,
+            effectSize: r.effect_size ?? 0,
+            isSignificant: r.is_significant ?? true,
+            naturalLanguage: r.natural_language || '',
+          }));
+        }
+      : config.search?.causalEdgeFetcher,
   });
 
   // Initialize feedback loop (Supabase-backed prediction tracking)
@@ -281,9 +293,59 @@ export function createNexusOrchestrator(config: NexusOrchestratorConfig) {
         }
       }
 
+      // 2c. Supplement with federated patterns (org + core brain)
+      let federatedPatterns = [...agentContext.patterns];
+      if (config.repository?.getFederatedRules) {
+        try {
+          const dbRules = await config.repository.getFederatedRules();
+          const patternKeys = new Set(federatedPatterns.map(
+            p => `${p.domain}::${p.type}::${(p.payload.naturalLanguage || '').toString().substring(0, 50)}`
+          ));
+          for (const dbRule of dbRules) {
+            const key = `${dbRule.domain}::${dbRule.rule_type}::${(dbRule.natural_language || '').substring(0, 50)}`;
+            if (!patternKeys.has(key)) {
+              federatedPatterns.push({
+                id: dbRule.id || '',
+                domain: dbRule.domain || '',
+                type: dbRule.rule_type || 'learned',
+                payload: {
+                  naturalLanguage: dbRule.natural_language || '',
+                  conditions: dbRule.conditions,
+                  actions: dbRule.actions,
+                },
+                confidence: dbRule.confidence || 0,
+                discoveredAt: new Date(dbRule.created_at || Date.now()),
+              });
+              patternKeys.add(key);
+            }
+          }
+        } catch {
+          // Non-critical: fall back to cache-only patterns
+        }
+      }
+
+      // 2d. Supplement RAG with federated memories
+      if (config.repository?.getFederatedMemories) {
+        try {
+          const dbMems = await config.repository.getFederatedMemories(domain, 5);
+          const existingContent = new Set(searchResults.map((r: any) => (r.content || r.text || '').substring(0, 80)));
+          for (const mem of dbMems) {
+            if (!existingContent.has((mem.content || '').substring(0, 80))) {
+              searchResults.push({
+                content: mem.content,
+                similarity: 0.5,
+                metadata: { _source: mem._source, domain: mem.domain },
+              });
+            }
+          }
+        } catch {
+          // Non-critical: fall back to search-only results
+        }
+      }
+
       // 3. Format for LLM
       const causalContext = formatCausalForPrompt(federatedRelationships);
-      const patternContext = formatPatternsForPrompt(agentContext.patterns);
+      const patternContext = formatPatternsForPrompt(federatedPatterns);
 
       const ragText = searchResults
         .map((r: any) => r.content || r.text || '')

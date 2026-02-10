@@ -217,7 +217,7 @@ export function createScheduledJobs(
       edgesDecayed: number;
       edgesRemoved: number;
     }> {
-      const dag = await loadDAGFromDatabase(supabase, organizationId);
+      const dag = await loadDAGFromDatabase(supabase, organizationId, { includeCoreDAG: true });
       const learner = createContinuousLearner(dag);
       const updates = learner.applyEvidenceDecay();
 

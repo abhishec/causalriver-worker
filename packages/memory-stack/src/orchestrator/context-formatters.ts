@@ -29,7 +29,8 @@ export function formatCausalForPrompt(
       ? `, CI=[${r.confidenceIntervalLower.toFixed(3)}, ${r.confidenceIntervalUpper.toFixed(3)}]`
       : '';
     const nStr = r.sampleSize ? `, n=${r.sampleSize}` : '';
-    return `- ${r.sourceDomain} ${direction} ${r.targetDomain}: ${strength} causal link (effect: ${effStr}, lag: ${r.lagDays}d, p=${pStr}${fStr}${ciStr}${nStr})${r.naturalLanguage ? ' \u2014 ' + r.naturalLanguage : ''}`;
+    const sourceLabel = r._source === 'core' ? ' [Universal]' : '';
+    return `- ${r.sourceDomain} ${direction} ${r.targetDomain}: ${strength} causal link (effect: ${effStr}, lag: ${r.lagDays}d, p=${pStr}${fStr}${ciStr}${nStr})${r.naturalLanguage ? ' \u2014 ' + r.naturalLanguage : ''}${sourceLabel}`;
   });
 
   return `## Discovered Causal Relationships\n${lines.join('\n')}`;

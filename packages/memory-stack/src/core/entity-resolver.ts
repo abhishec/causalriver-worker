@@ -15,6 +15,9 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 
+/** Core brain org ID for federated entity resolution */
+const CORE_BRAIN_ORG_ID = '00000000-0000-4000-a000-000000000001';
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -42,7 +45,7 @@ export interface ResolvedEntity {
   /** Confidence in the resolution (0-1) */
   confidence: number;
   /** How the match was made */
-  matchMethod: 'exact' | 'fuzzy' | 'semantic' | 'manual';
+  matchMethod: 'exact' | 'fuzzy' | 'semantic' | 'manual' | 'federated';
 }
 
 export interface UnifiedEntityView {
@@ -225,6 +228,68 @@ export function createEntityResolver(config: EntityResolverConfig) {
       }
     }
 
+    // Tier 4: Core brain canonical entity lookup (federation)
+    if (organizationId !== CORE_BRAIN_ORG_ID && input.name) {
+      try {
+        const { data: coreCandidates } = await supabase
+          .from('resolved_entities')
+          .select('*')
+          .eq('organization_id', CORE_BRAIN_ORG_ID)
+          .eq('entity_type', input.entityType || 'company')
+          .limit(50);
+
+        if (coreCandidates && coreCandidates.length > 0) {
+          let bestCoreMatch: any = null;
+          let bestCoreScore = 0;
+
+          for (const candidate of coreCandidates) {
+            const score = levenshteinSimilarity(
+              input.name.toLowerCase(),
+              candidate.canonical_name.toLowerCase()
+            );
+            if (score > bestCoreScore && score >= fuzzyThreshold) {
+              bestCoreScore = score;
+              bestCoreMatch = candidate;
+            }
+          }
+
+          if (bestCoreMatch) {
+            // Create local entity linked to core brain canonical name
+            const { data: inserted } = await supabase
+              .from('resolved_entities')
+              .insert({
+                organization_id: organizationId,
+                entity_type: bestCoreMatch.entity_type,
+                canonical_name: bestCoreMatch.canonical_name,
+                email_domains: bestCoreMatch.email_domains || [],
+                external_ids: { [input.source]: input.externalId },
+                aliases: [],
+                metadata: {
+                  ...input.metadata,
+                  _federated_from_core: bestCoreMatch.id,
+                },
+                confidence: bestCoreScore * 0.9,
+              })
+              .select('id')
+              .single();
+
+            const resolved: ResolvedEntity = {
+              canonicalId: inserted?.id ?? bestCoreMatch.id,
+              entityType: bestCoreMatch.entity_type,
+              displayName: bestCoreMatch.canonical_name,
+              externalIds: { [input.source]: input.externalId },
+              confidence: bestCoreScore * 0.9,
+              matchMethod: 'federated',
+            };
+            cache.set(cacheKey, resolved);
+            return resolved;
+          }
+        }
+      } catch {
+        // Core brain lookup failure is non-fatal
+      }
+    }
+
     // No match found - create new entity
     // Build email_domains array from email and/or domain input
     const emailDomains: string[] = [];
@@ -300,11 +365,11 @@ export function createEntityResolver(config: EntityResolverConfig) {
       const domainList = Array.from(entityDomains);
 
       // Query causal_graph_edges for relationships where this entity's
-      // domains appear as source OR target
+      // domains appear as source OR target (org + core brain)
       const { data: edges } = await supabase
         .from('causal_graph_edges')
         .select('source_domain, target_domain, effect_size, natural_language, is_significant')
-        .eq('organization_id', organizationId)
+        .in('organization_id', [organizationId, CORE_BRAIN_ORG_ID])
         .eq('is_significant', true);
 
       if (edges) {
