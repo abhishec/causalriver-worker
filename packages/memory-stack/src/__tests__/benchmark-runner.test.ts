@@ -187,10 +187,13 @@ describe('Maturity Evaluator', () => {
       anomaly: [{ datasetId: 'test', f1: 1.0, nabScore: 100 }],
       prediction: [{ datasetId: 'test', mape: 0.01, ece: 0.01 }],
       cascade: [{ datasetId: 'test', detectionRate: 1.0, avgLagError: 0 }],
+      discoveryMethod: 'federated',
     };
     const report = evaluator.evaluateMaturity(scores);
     expect(report.overallLevel).toBe('L5_EXPERT');
     expect(report.overallScore).toBeGreaterThanOrEqual(85);
+    expect(report.allLayersExpert).toBe(true);
+    expect(report.discoveryMethod).toBe('federated');
   });
 
   it('should produce human-readable output', () => {
@@ -203,6 +206,7 @@ describe('Maturity Evaluator', () => {
     const report = evaluator.evaluateMaturity(scores);
     expect(report.humanReadable).toContain('NexusBrain Maturity:');
     expect(report.humanReadable).toContain('7-Layer Pillar Breakdown:');
+    expect(report.humanReadable).toContain('Discovery Method:');
   });
 
   it('should generate recommendations for weak pillars', () => {
@@ -216,6 +220,7 @@ describe('Maturity Evaluator', () => {
       cascade: [{ datasetId: 'test', detectionRate: 0.95, avgLagError: 1 }],
     };
     const report = evaluator.evaluateMaturity(scores);
+    expect(report.allLayersExpert).toBe(false); // causal is weak
     expect(report.recommendations.length).toBeGreaterThan(0);
     expect(report.recommendations.some((r) => r.toLowerCase().includes('causal'))).toBe(true);
   });

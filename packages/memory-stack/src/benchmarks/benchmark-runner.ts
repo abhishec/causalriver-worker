@@ -1084,6 +1084,7 @@ export function createBenchmarkRunner(config: Partial<BenchmarkRunnerConfig> = {
           detectionRate: r.detectionRate,
           avgLagError: r.avgLagError,
         })),
+        discoveryMethod: discoveryConfig.method || 'federated',
       };
 
       const maturity = evaluator.evaluateMaturity(benchmarkScores);

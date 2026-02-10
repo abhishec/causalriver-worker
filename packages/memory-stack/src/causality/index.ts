@@ -7,7 +7,11 @@
  *
  * The 10x Innovation: AI-first discovery of causal relationships
  * using Nobel Prize-winning Granger causality methods, PC Algorithm
- * for structural discovery, and Do-Calculus for intervention effects.
+ * for structural discovery, Do-Calculus for intervention effects,
+ * and federated discovery fusing CauseME + CausalRiver algorithms:
+ *   - CauseME: Ridge Granger, PC structural, Transfer Entropy, VarLiNGAM
+ *   - CausalRiver: APEX (VAR + CF knockout), calibrated ensemble, cascade-aware
+ *   - Federated: 5-channel adaptive fusion with agreement voting (L1-L7)
  */
 
 export * from './signal-collector';

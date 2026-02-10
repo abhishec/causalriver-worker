@@ -619,13 +619,13 @@ describe('Integration: runCausalDiscovery with advanced methods', () => {
     expect(result.pairs_tested).toBeGreaterThan(0);
   });
 
-  it('DEFAULT_DISCOVERY_CONFIG.method should be world_class', () => {
-    expect(DEFAULT_DISCOVERY_CONFIG.method).toBe('world_class');
+  it('DEFAULT_DISCOVERY_CONFIG.method should be federated', () => {
+    expect(DEFAULT_DISCOVERY_CONFIG.method).toBe('federated');
   });
 
-  it('default method should use world_class when no method specified', () => {
+  it('default method should use federated when no method specified', () => {
     const signals = generateSignals(['Marketing', 'Revenue'], 120);
-    // No method specified — should use world_class (best of CauseME + CausalRivers)
+    // No method specified — should use federated (best of CauseME + CausalRivers + NexusBrain)
     const result = runCausalDiscovery(signals, 'org-default');
     expect(result.organization_id).toBe('org-default');
     expect(result.domains_analyzed.length).toBeGreaterThanOrEqual(2);

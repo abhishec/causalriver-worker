@@ -4,7 +4,7 @@
  * Orchestrates the full causal discovery pipeline:
  * 1. Fetch cross_domain_signals for an organization
  * 2. Convert to aligned time series per domain
- * 3. Run causal discovery (default: calibrated_ensemble — CausalRivers-proven)
+ * 3. Run causal discovery (default: federated — best of CauseME + CausalRivers)
  * 4. Store significant relationships with statistical evidence
  *
  * This enables the system to automatically discover which domain
@@ -85,7 +85,7 @@ export interface DiscoveryConfig {
   /** Significance threshold (alpha) */
   alpha: number;
 
-  /** Advanced discovery method (default: 'calibrated_ensemble' — CausalRivers-proven) */
+  /** Advanced discovery method (default: 'federated' — best of CauseME + CausalRivers) */
   method?: AdvancedDiscoveryMethod;
 
   /** Advanced discovery configuration (used when method !== 'pairwise') */
@@ -104,7 +104,7 @@ export const DEFAULT_DISCOVERY_CONFIG: DiscoveryConfig = {
   minObservations: 5, // Lowered: activate with sufficient data density, not arbitrary count
   lookbackDays: 90,
   alpha: 0.05,
-  method: 'world_class', // Best of both worlds: Ridge Granger (CauseME) + Apex/CF knockout (CausalRivers) + Calibrated Ensemble, auto linear/nonlinear detection
+  method: 'federated', // Best of ALL worlds: CauseME (Ridge Granger + PC + TE) + CausalRivers (APEX + CF knockout) + NexusBrain (VarLiNGAM + calibrated ensemble), fully federated L1-L7
 };
 
 export interface DiscoveryResult {
@@ -237,7 +237,7 @@ export function runCausalDiscovery(
     grangerData[domain] = series.values;
   }
 
-  const method = fullConfig.method ?? DEFAULT_DISCOVERY_CONFIG.method ?? 'apex';
+  const method = fullConfig.method ?? DEFAULT_DISCOVERY_CONFIG.method ?? 'federated';
   let grangerResults: GrangerResult[];
   let advancedResult: PairwiseScoreMatrix | null = null;
 
