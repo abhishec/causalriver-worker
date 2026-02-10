@@ -369,10 +369,10 @@ export function createEntityResolver(config: EntityResolverConfig) {
     if (entityDomains.size > 0) {
       const domainList = Array.from(entityDomains);
 
-      // Query causal_graph_edges for relationships where this entity's
-      // domains appear as source OR target (org + core brain)
+      // Query causal_relationships_statistical for relationships where this entity's
+      // domains appear as source OR target (org + core brain federated)
       const { data: edges } = await supabase
-        .from('causal_graph_edges')
+        .from('causal_relationships_statistical')
         .select('source_domain, target_domain, effect_size, optimal_lag_days, natural_language, is_significant, knockout_score, is_likely_confounded, coefficient_sign')
         .in('organization_id', [organizationId, CORE_BRAIN_ORG_ID])
         .eq('is_significant', true);

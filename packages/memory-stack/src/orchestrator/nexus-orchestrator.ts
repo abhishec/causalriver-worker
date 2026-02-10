@@ -164,6 +164,29 @@ export function createNexusOrchestrator(config: NexusOrchestratorConfig) {
         continuousLearner.loadGraph(dag);
         dagLoaded = true;
         resolveDagReady!();
+
+        // Inject federated context (core brain relationships) into bridge cache
+        // so domain agents see universal knowledge alongside org-specific data.
+        if (config.repository?.getFederatedRelationships) {
+          config.repository.getFederatedRelationships().then((rels) => {
+            const coreRels = rels
+              .filter((r: any) => r._source === 'core')
+              .map((r: any) => ({
+                sourceDomain: r.source_domain,
+                targetDomain: r.target_domain,
+                effectSize: r.effect_size ?? 0,
+                pValue: r.granger_p_value ?? 0.05,
+                fStatistic: r.granger_f_statistic ?? 0,
+                lagDays: r.optimal_lag_days ?? 0,
+                naturalLanguage: r.natural_language || '',
+                discoveredAt: new Date(r.last_computed_at || Date.now()),
+                _source: 'core' as const,
+              }));
+            if (coreRels.length > 0) {
+              contextEnricher.injectFederatedContext(organizationId, coreRels, []);
+            }
+          }).catch(() => { /* Non-critical */ });
+        }
       })
       .catch(() => {
         // No existing DAG — that's fine, start from scratch
@@ -284,6 +307,7 @@ export function createNexusOrchestrator(config: NexusOrchestratorConfig) {
                 confidenceIntervalUpper: dbRel.confidence_interval_upper,
                 sampleSize: dbRel.sample_size,
                 discoveredAt: new Date(dbRel.last_computed_at || Date.now()),
+                _source: dbRel._source === 'core' ? 'core' : undefined,
               });
               cacheKeys.add(key);
             }

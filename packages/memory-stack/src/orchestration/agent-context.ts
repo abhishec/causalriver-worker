@@ -13,6 +13,9 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 
+/** Core brain org ID for federated agent context */
+const CORE_BRAIN_ORG_ID = '00000000-0000-4000-a000-000000000001';
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -188,10 +191,11 @@ export function createAgentContextManager(options: {
           // "finance_agent" → "finance", "cs_agent" → "customer_success")
           const agentDomain = extractDomainFromAgentType(agentType);
 
+          // Federated query: org + core brain edges from the canonical table
           const { data: edges } = await supabase
-            .from('causal_graph_edges')
+            .from('causal_relationships_statistical')
             .select('source_domain, target_domain, effect_size, optimal_lag_days, natural_language, is_significant, knockout_score, is_likely_confounded, coefficient_sign')
-            .eq('organization_id', organizationId)
+            .in('organization_id', [organizationId, CORE_BRAIN_ORG_ID])
             .eq('is_significant', true);
 
           if (edges && edges.length > 0) {
