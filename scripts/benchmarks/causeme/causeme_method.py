@@ -48,6 +48,7 @@ from nexusbrain_granger import (
     nexusbrain_titan,
     lasso_var_scoring,
     bootstrap_var_scoring,
+    nexusbrain_world_class,
 )
 
 
@@ -82,6 +83,47 @@ def nexusbrain_ensemble(data: np.ndarray, **kwargs) -> Tuple[np.ndarray, np.ndar
 
     # Run calibrated ensemble (NexusBrain convention: [i,j] = j causes i)
     scores_nb = calibrated_ensemble_scoring(
+        df, max_lag=max_lag, criterion=criterion, verbose=False
+    )
+
+    # Also compute pairwise results for p-values and lags
+    pvalues_nb, lags_nb = _compute_pvalues_and_lags(df, max_lag, criterion)
+
+    # TRANSPOSE to CauseMe convention: [i,j] = i causes j
+    scores = scores_nb.T
+    pvalues = pvalues_nb.T
+    lags = lags_nb.T
+
+    return scores, pvalues, lags
+
+
+def nexusbrain_world_class_method(data: np.ndarray, **kwargs) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """
+    NexusBrain World-Class — adaptive ensemble with PCMCI+, Ridge Granger,
+    VarLiNGAM, KSG Transfer Entropy, and automatic linear/nonlinear detection.
+
+    This is the flagship method that combines the best available techniques:
+    - PCMCI+ (constraint-based, gold standard)
+    - Ridge conditional Granger (never falls back to bivariate)
+    - VarLiNGAM (non-Gaussian structural model)
+    - KSG Transfer Entropy (nonlinear information flow)
+    - statsmodels VAR (proven linear baseline)
+
+    Automatically selects linear vs nonlinear path based on Jarque-Bera test
+    on VAR residuals.
+    """
+    max_lag = kwargs.get("max_lag", 5)
+    criterion = kwargs.get("criterion", "aic")
+
+    df = _to_dataframe(data)
+    n_vars = df.shape[1]
+
+    if n_vars < 2:
+        z = np.zeros((n_vars, n_vars))
+        return z, np.ones((n_vars, n_vars)), z.astype(int)
+
+    # Run world-class method (NexusBrain convention: [i,j] = j causes i)
+    scores_nb = nexusbrain_world_class(
         df, max_lag=max_lag, criterion=criterion, verbose=False
     )
 
@@ -286,7 +328,7 @@ def pcmci_plus_method(data: np.ndarray, **kwargs) -> Tuple[np.ndarray, np.ndarra
                 # Use -log10(p_value) as score for better discrimination
                 # (absolute partial correlation values are often too close)
                 if best_pval > 0 and best_pval < 1:
-                    score = -np.log10(max(best_pval, 1e-300))
+                    score = -np.log10(max(best_pval, 1e-30))
                 else:
                     score = best_score
 
@@ -405,6 +447,7 @@ def _compute_pvalues_and_lags(
 
 METHOD_REGISTRY = {
     "nexusbrain_ensemble": nexusbrain_ensemble,
+    "nexusbrain_world_class": nexusbrain_world_class_method,
     "nexusbrain_hydra": nexusbrain_hydra_method,
     "nexusbrain_omega": nexusbrain_omega_method,
     "nexusbrain_final": nexusbrain_final_method,

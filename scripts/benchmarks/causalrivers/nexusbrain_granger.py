@@ -313,14 +313,14 @@ def test_all_pairs(
 
                 # Compute score
                 if scoring == "neg_log_pvalue":
-                    p = max(result["p_value"], 1e-300)
+                    p = max(result["p_value"], 1e-30)
                     scores[i, j] = -np.log10(p)
                 elif scoring == "effect_size":
                     scores[i, j] = result["effect_size"]
                 elif scoring == "f_statistic":
                     scores[i, j] = result["f_statistic"]
                 else:
-                    scores[i, j] = -np.log10(max(result["p_value"], 1e-300))
+                    scores[i, j] = -np.log10(max(result["p_value"], 1e-30))
 
                 pairs_tested += 1
 
@@ -857,7 +857,7 @@ def conditional_granger_scoring(
                 effect_size = max(0.0, min(1.0, (rss_r - rss_u) / rss_r))
 
                 if scoring == "neg_log_pvalue":
-                    scores[i, j] = -np.log10(max(p_value, 1e-300))
+                    scores[i, j] = -np.log10(max(p_value, 1e-30))
                 elif scoring == "f_statistic":
                     scores[i, j] = f_stat
                 else:
