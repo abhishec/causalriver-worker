@@ -106,7 +106,7 @@ export interface PairwiseScoreMatrix {
 }
 
 export const DEFAULT_ADVANCED_CONFIG: AdvancedDiscoveryConfig = {
-  method: 'calibrated_ensemble',
+  method: 'apex',
   maxLag: 14,
   lagSelectionCriterion: 'AIC',
   alpha: 0.05,

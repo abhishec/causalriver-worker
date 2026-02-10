@@ -270,7 +270,19 @@ export function detectAnomalies(
     iqrMultiplier = 0.8,
     madMultiplier = 2.0,
     minSampleSize = 10,
+    causalEdges,
   } = config;
+
+  // Build a set of confounded domains from causal edges for quick lookup
+  const confoundedDomains = new Set<string>();
+  if (causalEdges) {
+    for (const edge of causalEdges) {
+      if (edge.isLikelyConfounded) {
+        confoundedDomains.add(edge.sourceDomain);
+        confoundedDomains.add(edge.targetDomain);
+      }
+    }
+  }
   
   // Group by metric
   const byMetric = new Map<string, typeof observations>();
@@ -332,6 +344,9 @@ export function detectAnomalies(
       }
 
       if (result.isAnomaly) {
+        // Check if this anomaly involves a confounded causal domain
+        const isConfounded = confoundedDomains.has(obs.entityType) || confoundedDomains.has(obs.metricName);
+
         anomalies.push({
           entityType: obs.entityType,
           entityId: obs.entityId,
@@ -340,10 +355,12 @@ export function detectAnomalies(
           expectedValue: selectedMethod === 'zscore' ? stats.mean : stats.median,
           zScore: result.zScore,
           detectionMethod: selectedMethod as DetectionMethod,
-          explanation: explainAnomaly(obs.value, stats, result.zScore, selectedMethod as DetectionMethod),
-          severity: result.severity,
+          explanation: explainAnomaly(obs.value, stats, result.zScore, selectedMethod as DetectionMethod)
+            + (isConfounded ? ' [Caution: upstream causal edges may be confounded — verify before acting]' : ''),
+          severity: isConfounded && result.severity !== 'critical' ? demoteSeverity(result.severity) : result.severity,
           detectedAt: new Date(),
           percentile: computePercentile(obs.value, values),
+          possiblyConfounded: isConfounded || undefined,
         });
       }
     }
@@ -358,6 +375,19 @@ export function detectAnomalies(
   });
   
   return anomalies;
+}
+
+/**
+ * Demote severity by one level for confounded anomalies.
+ * Confounded anomalies should not trigger high-priority alerts
+ * since the underlying causal relationship may be spurious.
+ */
+function demoteSeverity(severity: AnomalyEvent['severity']): AnomalyEvent['severity'] {
+  switch (severity) {
+    case 'high': return 'medium';
+    case 'medium': return 'low';
+    default: return severity;
+  }
 }
 
 /**

@@ -53,6 +53,12 @@ export interface CausalDAG {
     lagDays: number;
     lastUpdated: Date;
     sampleSize: number;
+    /** Counterfactual knockout score from apex discovery (0-1, higher = stronger causal evidence) */
+    knockoutScore?: number;
+    /** Whether this edge is likely confounded (high VAR + low knockout) */
+    isLikelyConfounded?: boolean;
+    /** Sign of the causal coefficient (+1 / -1) */
+    coefficientSign?: number;
   }>>;
 }
 
@@ -366,13 +372,7 @@ export async function loadDAGFromDatabase(
   }
 
   const nodes = new Set<string>();
-  const edges = new Map<string, Map<string, {
-    weight: number;
-    pValue: number;
-    lagDays: number;
-    lastUpdated: Date;
-    sampleSize: number;
-  }>>();
+  const edges: CausalDAG['edges'] = new Map();
 
   // Helper to add a relationship to the DAG
   function addEdge(rel: any) {
@@ -388,7 +388,10 @@ export async function loadDAGFromDatabase(
       pValue: rel.granger_p_value || 0.05,
       lagDays: rel.optimal_lag_days || 7,
       lastUpdated: new Date(rel.last_computed_at || rel.created_at),
-      sampleSize: rel.sample_size || 100
+      sampleSize: rel.sample_size || 100,
+      knockoutScore: rel.knockout_score ?? undefined,
+      isLikelyConfounded: rel.is_likely_confounded ?? undefined,
+      coefficientSign: rel.coefficient_sign ?? undefined,
     });
   }
 
