@@ -106,6 +106,11 @@ import { LEGAL_COMPLIANCE_PACKS } from './training-data/legal-compliance-packs';
 import { BEHAVIORAL_ECONOMICS_PACKS } from './training-data/behavioral-economics-packs';
 import { DATA_SCIENCE_ANALYTICS_PACKS } from './training-data/data-science-analytics-packs';
 import { VERTICAL_DEEP_DIVE_PACKS } from './training-data/vertical-deep-dive-packs';
+import { FINANCIAL_STATEMENTS_DEEP_DIVE_PACKS } from './training-data/financial-statements-deep-dive-packs';
+import { VC_METRICS_LOGIC_DEEP_PACKS } from './training-data/vc-metrics-logic-deep-packs';
+import { ENGINEERING_OPS_PACKS } from './training-data/engineering-ops-packs';
+import { CYBERSECURITY_PACKS } from './training-data/cybersecurity-packs';
+import { SUSTAINABILITY_ESG_PACKS } from './training-data/sustainability-esg-packs';
 
 // ============================================================================
 // CONFIGURATION
@@ -261,8 +266,13 @@ function loadAllTrainingPacks(): LoadedPacks {
     ...BEHAVIORAL_ECONOMICS_PACKS,
     ...DATA_SCIENCE_ANALYTICS_PACKS,
     ...VERTICAL_DEEP_DIVE_PACKS,
+    ...FINANCIAL_STATEMENTS_DEEP_DIVE_PACKS,
+    ...VC_METRICS_LOGIC_DEEP_PACKS,
+    ...ENGINEERING_OPS_PACKS,
+    ...CYBERSECURITY_PACKS,
+    ...SUSTAINABILITY_ESG_PACKS,
   ];
-  log('LOAD', `Static modules: ${staticPacks.length} packs across 16 domains`);
+  log('LOAD', `Static modules: ${staticPacks.length} packs across 21 domains`);
 
   // Deduplicate by ID (library takes priority)
   const seenIds = new Set(libraryPacks.map(p => p.id));
