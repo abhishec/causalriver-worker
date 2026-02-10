@@ -1617,6 +1617,586 @@ def nexusbrain_world_class(
 
 
 # =============================================================================
+# NONLINEAR-KILLER: Purpose-built to beat BMS4CG on nonlinear-VAR
+# =============================================================================
+
+def _rf_granger_scoring(
+    data: pd.DataFrame,
+    max_lag: int = 5,
+    n_estimators: int = 100,
+    verbose: bool = False,
+) -> np.ndarray:
+    """
+    Random Forest Granger causality — nonlinear conditional F-test analog.
+
+    Compares prediction quality of Y ~ own_lags + other_lags (restricted)
+    vs Y ~ own_lags + other_lags + X_lags (unrestricted) using RF.
+    The delta in OOB R² captures nonlinear causal influence.
+
+    Key advantages over linear Granger:
+    - Captures arbitrary nonlinear interactions (sin, threshold, multiplicative)
+    - Handles non-Gaussian noise naturally
+    - No distributional assumptions
+
+    Returns NexusBrain convention: scores[i,j] = j causes i.
+    """
+    from sklearn.ensemble import RandomForestRegressor
+
+    values = data.values
+    n_vars = values.shape[1]
+    T = values.shape[0]
+
+    if n_vars < 2:
+        return np.zeros((n_vars, n_vars))
+
+    scores = np.zeros((n_vars, n_vars))
+
+    for tgt in range(n_vars):
+        for src in range(n_vars):
+            if src == tgt:
+                continue
+
+            y_col = values[:, tgt]
+            x_col = values[:, src]
+
+            if np.std(x_col) < 1e-10 or np.std(y_col) < 1e-10:
+                continue
+
+            try:
+                opt_lag = select_optimal_lag(x_col, y_col, max_lag, "aic")
+                n_obs = T - opt_lag
+
+                if n_obs < 30:
+                    continue
+
+                y_vec = y_col[opt_lag:]
+
+                # Build restricted features: target lags + all other variable lags (no source)
+                other_indices = [k for k in range(n_vars) if k != tgt and k != src]
+                restricted_cols = []
+                for l in range(1, opt_lag + 1):
+                    restricted_cols.append(y_col[opt_lag - l : T - l])
+                for k in other_indices:
+                    for l in range(1, opt_lag + 1):
+                        restricted_cols.append(values[opt_lag - l : T - l, k])
+
+                X_r = np.column_stack(restricted_cols) if restricted_cols else np.zeros((n_obs, 1))
+
+                # Add source lags for unrestricted
+                source_cols = [x_col[opt_lag - l : T - l] for l in range(1, opt_lag + 1)]
+                X_u = np.column_stack([X_r] + source_cols)
+
+                # Fit both with OOB scoring
+                rf_r = RandomForestRegressor(
+                    n_estimators=n_estimators, max_depth=6,
+                    min_samples_leaf=5, oob_score=True, random_state=42, n_jobs=1
+                )
+                rf_u = RandomForestRegressor(
+                    n_estimators=n_estimators, max_depth=6,
+                    min_samples_leaf=5, oob_score=True, random_state=42, n_jobs=1
+                )
+
+                rf_r.fit(X_r, y_vec)
+                rf_u.fit(X_u, y_vec)
+
+                # Delta OOB R² is the causal signal
+                delta_r2 = max(0.0, rf_u.oob_score_ - rf_r.oob_score_)
+
+                # Also compute in-sample RSS ratio for additional signal
+                rss_r = np.sum((y_vec - rf_r.predict(X_r)) ** 2)
+                rss_u = np.sum((y_vec - rf_u.predict(X_u)) ** 2)
+                rss_ratio = max(0.0, (rss_r - rss_u) / rss_r) if rss_r > 0 else 0.0
+
+                # Combine: emphasize OOB (generalizes better) + RSS ratio
+                scores[tgt, src] = 0.7 * delta_r2 + 0.3 * rss_ratio
+
+            except Exception as e:
+                if verbose:
+                    print(f"  RF Granger error {src}->{tgt}: {e}")
+                scores[tgt, src] = 0.0
+
+    np.fill_diagonal(scores, 0)
+    if verbose:
+        print("  RF Granger scoring complete")
+    return scores
+
+
+def _pcmci_cmiknn_scoring(
+    data: pd.DataFrame,
+    max_lag: int = 5,
+    knn: int = 10,
+    verbose: bool = False,
+) -> np.ndarray:
+    """
+    PCMCI+ with CMIknn — fully nonparametric conditional independence test.
+
+    CMIknn (Conditional Mutual Information via k-Nearest Neighbors) is the
+    gold standard for detecting arbitrary nonlinear causal dependencies.
+    Unlike RobustParCorr (which only handles monotonic nonlinearities),
+    CMIknn captures any form of statistical dependency.
+
+    This is what separates top-performing nonlinear methods from the rest.
+
+    Returns NexusBrain convention: scores[i,j] = j causes i.
+    """
+    try:
+        from tigramite import data_processing as pp
+        from tigramite.pcmci import PCMCI
+        from tigramite.independence_tests.cmiknn import CMIknn
+    except ImportError:
+        if verbose:
+            print("  CMIknn not available, falling back to RobustParCorr PCMCI+")
+        return pcmci_plus_scoring(data, max_lag=max_lag, nonlinear=True, verbose=verbose)
+
+    values = data.values
+    n_vars = values.shape[1]
+    T = values.shape[0]
+
+    if n_vars < 2 or T < 3 * max_lag + 10:
+        return np.zeros((n_vars, n_vars))
+
+    try:
+        # CMIknn — fully nonparametric conditional independence
+        # Use fixed_thres for speed (shuffle_test is 50x slower on 200 datasets)
+        # The test statistic itself (CMI value) is the score — no p-values needed
+        ci_test = CMIknn(
+            significance="fixed_thres",
+            knn=knn,
+            fixed_thres=0.01,
+        )
+
+        var_names = [f"V{i}" for i in range(n_vars)]
+        dataframe = pp.DataFrame(values, var_names=var_names)
+        pcmci = PCMCI(dataframe=dataframe, cond_ind_test=ci_test, verbosity=0)
+
+        # Run PCMCI (lagged) — more powerful for VAR-type data
+        results_lag = pcmci.run_pcmci(tau_min=1, tau_max=max_lag, pc_alpha=0.2)
+
+        # Also run PCMCI+ for contemporaneous (broader alpha for CMIknn)
+        results_plus = pcmci.run_pcmciplus(tau_min=0, tau_max=max_lag, pc_alpha=0.2)
+
+        val_lag = results_lag["val_matrix"]
+        val_plus = results_plus["val_matrix"]
+
+        # Tigramite: val_matrix[target, source, tau] = source(t-tau)->target(t)
+        # This IS NexusBrain convention — use raw CMI values as scores
+        scores = np.zeros((n_vars, n_vars))
+
+        for tgt in range(n_vars):
+            for src in range(n_vars):
+                if src == tgt:
+                    continue
+
+                best_score = 0.0
+
+                # From PCMCI (lagged) — take max CMI across lags
+                for tau in range(val_lag.shape[2]):
+                    val = np.abs(val_lag[tgt, src, tau])
+                    if val > best_score:
+                        best_score = val
+
+                # From PCMCI+ (includes tau=0)
+                for tau in range(val_plus.shape[2]):
+                    val = np.abs(val_plus[tgt, src, tau])
+                    if val > best_score:
+                        best_score = val
+
+                scores[tgt, src] = best_score
+
+        np.fill_diagonal(scores, 0)
+        if verbose:
+            print("  PCMCI+ CMIknn scoring complete")
+        return scores
+
+    except Exception as e:
+        if verbose:
+            print(f"  PCMCI+ CMIknn failed: {e}, falling back to RobustParCorr")
+        return pcmci_plus_scoring(data, max_lag=max_lag, nonlinear=True, verbose=verbose)
+
+
+def _multi_k_ksg_te_scoring(
+    data: pd.DataFrame,
+    max_lag: int = 5,
+    verbose: bool = False,
+) -> np.ndarray:
+    """
+    Multi-k KSG Transfer Entropy — averages over multiple k values for
+    more robust nonlinear transfer entropy estimation.
+
+    Standard KSG TE with a single k is sensitive to k choice. Averaging
+    over k=3,5,7,10 gives much more stable estimates (analogous to
+    BMS4CG's Bayesian model averaging).
+
+    Also uses multi-lag fusion: combines TE across all lags rather than
+    taking max, which is more robust for nonlinear-VAR where effects
+    can appear across multiple lags.
+
+    Returns NexusBrain convention: scores[i,j] = j causes i.
+    """
+    from scipy.spatial import cKDTree
+    from scipy.special import digamma
+
+    values = data.values
+    n_vars = values.shape[1]
+    T = values.shape[0]
+
+    k_values = [3, 5, 7, 10]
+
+    if n_vars < 2 or T < 2 * max_lag + max(k_values) + 10:
+        return np.zeros((n_vars, n_vars))
+
+    scores = np.zeros((n_vars, n_vars))
+
+    for tgt in range(n_vars):
+        for src in range(n_vars):
+            if src == tgt:
+                continue
+
+            try:
+                # Average TE across k values and lags
+                te_sum = 0.0
+                n_valid = 0
+
+                for k in k_values:
+                    for tau in range(1, max_lag + 1):
+                        if T - tau < k + 5:
+                            continue
+
+                        n_pts = T - tau
+                        y_now = values[tau:, tgt].copy().reshape(-1, 1)
+                        y_past = values[tau - 1 : T - 1, tgt].copy().reshape(-1, 1)
+                        x_past = values[:n_pts, src].copy().reshape(-1, 1)
+
+                        # Standardize
+                        for arr in [y_now, y_past, x_past]:
+                            s = np.std(arr)
+                            if s > 1e-10:
+                                arr -= np.mean(arr)
+                                arr /= s
+
+                        joint = np.hstack([y_now, y_past, x_past])
+                        marg_yy = np.hstack([y_now, y_past])
+                        marg_yx = np.hstack([y_past, x_past])
+                        marg_y = y_past
+
+                        kk = min(k, n_pts - 1)
+                        if kk < 1:
+                            continue
+
+                        tree_joint = cKDTree(joint)
+                        dists, _ = tree_joint.query(joint, k=kk + 1, p=np.inf)
+                        eps = dists[:, -1]
+
+                        # Add small noise to prevent zero distances
+                        eps = np.maximum(eps, 1e-12)
+
+                        tree_yy = cKDTree(marg_yy)
+                        tree_yx = cKDTree(marg_yx)
+                        tree_y = cKDTree(marg_y)
+
+                        n_yy = np.array([len(tree_yy.query_ball_point(marg_yy[i], eps[i], p=np.inf)) - 1 for i in range(n_pts)])
+                        n_yx = np.array([len(tree_yx.query_ball_point(marg_yx[i], eps[i], p=np.inf)) - 1 for i in range(n_pts)])
+                        n_y = np.array([len(tree_y.query_ball_point(marg_y[i], eps[i], p=np.inf)) - 1 for i in range(n_pts)])
+
+                        n_yy = np.maximum(n_yy, 1)
+                        n_yx = np.maximum(n_yx, 1)
+                        n_y = np.maximum(n_y, 1)
+
+                        te = digamma(kk) - np.mean(digamma(n_yy) + digamma(n_yx) - digamma(n_y))
+
+                        if te > 0:
+                            te_sum += te
+                            n_valid += 1
+
+                if n_valid > 0:
+                    scores[tgt, src] = te_sum / n_valid
+                else:
+                    scores[tgt, src] = 0.0
+
+            except Exception as e:
+                if verbose:
+                    print(f"  Multi-k KSG TE error {src}->{tgt}: {e}")
+                scores[tgt, src] = 0.0
+
+    np.fill_diagonal(scores, 0)
+    if verbose:
+        print("  Multi-k KSG Transfer Entropy scoring complete")
+    return scores
+
+
+def _gradient_boosting_granger_scoring(
+    data: pd.DataFrame,
+    max_lag: int = 5,
+    verbose: bool = False,
+) -> np.ndarray:
+    """
+    Gradient Boosting Granger — complementary to RF Granger.
+
+    Uses GradientBoostingRegressor instead of RF. GBM captures different
+    nonlinear patterns (sequential fitting vs. parallel forest), providing
+    diversity for the ensemble.
+
+    Returns NexusBrain convention: scores[i,j] = j causes i.
+    """
+    from sklearn.ensemble import GradientBoostingRegressor
+
+    values = data.values
+    n_vars = values.shape[1]
+    T = values.shape[0]
+
+    if n_vars < 2:
+        return np.zeros((n_vars, n_vars))
+
+    scores = np.zeros((n_vars, n_vars))
+
+    for tgt in range(n_vars):
+        for src in range(n_vars):
+            if src == tgt:
+                continue
+
+            y_col = values[:, tgt]
+            x_col = values[:, src]
+
+            if np.std(x_col) < 1e-10 or np.std(y_col) < 1e-10:
+                continue
+
+            try:
+                opt_lag = select_optimal_lag(x_col, y_col, max_lag, "aic")
+                n_obs = T - opt_lag
+
+                if n_obs < 30:
+                    continue
+
+                y_vec = y_col[opt_lag:]
+
+                # Build restricted features
+                other_indices = [k for k in range(n_vars) if k != tgt and k != src]
+                restricted_cols = []
+                for l in range(1, opt_lag + 1):
+                    restricted_cols.append(y_col[opt_lag - l : T - l])
+                for k in other_indices:
+                    for l in range(1, opt_lag + 1):
+                        restricted_cols.append(values[opt_lag - l : T - l, k])
+
+                X_r = np.column_stack(restricted_cols) if restricted_cols else np.zeros((n_obs, 1))
+
+                source_cols = [x_col[opt_lag - l : T - l] for l in range(1, opt_lag + 1)]
+                X_u = np.column_stack([X_r] + source_cols)
+
+                # Fit with GBM
+                gbm_r = GradientBoostingRegressor(
+                    n_estimators=100, max_depth=4, learning_rate=0.1,
+                    subsample=0.8, random_state=42
+                )
+                gbm_u = GradientBoostingRegressor(
+                    n_estimators=100, max_depth=4, learning_rate=0.1,
+                    subsample=0.8, random_state=42
+                )
+
+                gbm_r.fit(X_r, y_vec)
+                gbm_u.fit(X_u, y_vec)
+
+                rss_r = np.sum((y_vec - gbm_r.predict(X_r)) ** 2)
+                rss_u = np.sum((y_vec - gbm_u.predict(X_u)) ** 2)
+                rss_ratio = max(0.0, (rss_r - rss_u) / rss_r) if rss_r > 0 else 0.0
+
+                scores[tgt, src] = rss_ratio
+
+            except Exception as e:
+                if verbose:
+                    print(f"  GBM Granger error {src}->{tgt}: {e}")
+                scores[tgt, src] = 0.0
+
+    np.fill_diagonal(scores, 0)
+    if verbose:
+        print("  GBM Granger scoring complete")
+    return scores
+
+
+def nexusbrain_nonlinear_killer(
+    data: pd.DataFrame,
+    max_lag: int = 5,
+    criterion: str = "aic",
+    verbose: bool = False,
+) -> np.ndarray:
+    """
+    NexusBrain Nonlinear Killer — purpose-built to beat BMS4CG (AUC-PR 0.91).
+
+    This method is specifically designed for nonlinear-VAR causal discovery.
+    Every component is optimized for detecting nonlinear causal dependencies.
+
+    Architecture (6 components, all nonlinear-specialized):
+      1. PCMCI+ with CMIknn (weight 5.0) — fully nonparametric CI test,
+         captures any form of statistical dependence
+      2. Random Forest Granger (weight 4.5) — tree-based nonlinear F-test,
+         detects threshold/interaction effects
+      3. Multi-k KSG Transfer Entropy (weight 4.0) — averaged over k=3,5,7,10
+         for robust nonlinear information flow estimation
+      4. VarLiNGAM (weight 3.0) — exploits non-Gaussianity in structural model
+      5. Gradient Boosting Granger (weight 2.5) — complementary to RF, captures
+         different nonlinear patterns via sequential boosting
+      6. PCMCI+ with RobustParCorr (weight 2.0) — rank-based monotonic
+         nonlinear, fast and reliable fallback
+
+    Fusion strategy:
+      - Robust percentile normalization per method
+      - Weighted average
+      - Aggressive agreement voting: edges in top-30% by 4+ methods get 60% boost
+      - Edge sharpening: top-10% edges get additional 20% boost to improve precision
+      - Zero diagonal
+
+    Returns NexusBrain convention: scores[i,j] = j causes i.
+    """
+    n_vars = data.shape[1]
+    if n_vars < 2:
+        return np.zeros((n_vars, n_vars))
+
+    if verbose:
+        print("  Running NexusBrain Nonlinear Killer...")
+
+    component_scores = {}
+    component_weights = {}
+
+    # 1. PCMCI+ with CMIknn — the crown jewel
+    if verbose:
+        print("    [1/6] PCMCI+ CMIknn (fully nonparametric)...")
+    try:
+        s = _pcmci_cmiknn_scoring(data, max_lag=max_lag, knn=10, verbose=verbose)
+        if s.max() > 0:
+            component_scores["cmiknn"] = s
+            component_weights["cmiknn"] = 5.0
+        elif verbose:
+            print("    CMIknn returned all zeros, skipping")
+    except Exception as e:
+        if verbose:
+            print(f"    CMIknn failed: {e}")
+
+    # 2. Random Forest Granger
+    if verbose:
+        print("    [2/6] Random Forest Granger...")
+    try:
+        s = _rf_granger_scoring(data, max_lag=max_lag, n_estimators=100, verbose=verbose)
+        if s.max() > 0:
+            component_scores["rf_granger"] = s
+            component_weights["rf_granger"] = 4.5
+    except Exception as e:
+        if verbose:
+            print(f"    RF Granger failed: {e}")
+
+    # 3. Multi-k KSG Transfer Entropy
+    if verbose:
+        print("    [3/6] Multi-k KSG Transfer Entropy...")
+    try:
+        s = _multi_k_ksg_te_scoring(data, max_lag=max_lag, verbose=verbose)
+        if s.max() > 0:
+            component_scores["multi_ksg_te"] = s
+            component_weights["multi_ksg_te"] = 4.0
+    except Exception as e:
+        if verbose:
+            print(f"    Multi-k KSG TE failed: {e}")
+
+    # 4. VarLiNGAM
+    if verbose:
+        print("    [4/6] VarLiNGAM...")
+    try:
+        s = varlingam_scoring(data, max_lag=max_lag, verbose=verbose)
+        if s.max() > 0:
+            component_scores["varlingam"] = s
+            component_weights["varlingam"] = 3.0
+    except Exception as e:
+        if verbose:
+            print(f"    VarLiNGAM failed: {e}")
+
+    # 5. Gradient Boosting Granger
+    if verbose:
+        print("    [5/6] Gradient Boosting Granger...")
+    try:
+        s = _gradient_boosting_granger_scoring(data, max_lag=max_lag, verbose=verbose)
+        if s.max() > 0:
+            component_scores["gbm_granger"] = s
+            component_weights["gbm_granger"] = 2.5
+    except Exception as e:
+        if verbose:
+            print(f"    GBM Granger failed: {e}")
+
+    # 6. PCMCI+ with RobustParCorr (fast, reliable fallback)
+    if verbose:
+        print("    [6/6] PCMCI+ RobustParCorr...")
+    try:
+        s = pcmci_plus_scoring(data, max_lag=max_lag, nonlinear=True, verbose=verbose)
+        if s.max() > 0:
+            component_scores["robust_parcorr"] = s
+            component_weights["robust_parcorr"] = 2.0
+    except Exception as e:
+        if verbose:
+            print(f"    RobustParCorr failed: {e}")
+
+    # Fallback if nothing worked
+    if not component_scores:
+        if verbose:
+            print("  WARNING: No components succeeded, using world_class")
+        return nexusbrain_world_class(data, max_lag=max_lag, criterion=criterion, verbose=verbose)
+
+    # Robust normalization per component
+    normalized = {}
+    for name, scores in component_scores.items():
+        normalized[name] = _robust_normalize_scores(scores)
+
+    # Weighted combination
+    total_weight = sum(component_weights[n] for n in normalized)
+    fused = np.zeros((n_vars, n_vars))
+    for name, norm_scores in normalized.items():
+        fused += component_weights[name] * norm_scores
+    fused /= total_weight
+
+    # Aggressive agreement voting
+    n_edges = n_vars * (n_vars - 1)
+    if n_edges > 0 and len(normalized) >= 3:
+        # Top 30% (broader than world_class's 25%) — cast a wider net for nonlinear
+        top_k = max(1, int(n_edges * 0.3))
+        agreement = np.zeros((n_vars, n_vars))
+
+        for name, norm_scores in normalized.items():
+            flat = norm_scores.flatten()
+            if len(flat) > top_k:
+                threshold = np.partition(flat, -top_k)[-top_k]
+            else:
+                threshold = 0
+            agreement += (norm_scores >= threshold).astype(float)
+
+        # Edges agreed upon by 4+ methods get a 60% boost (more aggressive than world_class's 40%)
+        min_agree = min(4, len(normalized))
+        agreement_bonus_strong = (agreement >= min_agree).astype(float) * 0.6
+
+        # Edges agreed upon by 3+ methods get a 25% boost
+        min_agree_weak = min(3, len(normalized))
+        agreement_bonus_weak = (agreement >= min_agree_weak).astype(float) * 0.25
+
+        # Apply strongest applicable boost
+        agreement_bonus = np.maximum(agreement_bonus_strong, agreement_bonus_weak)
+        fused *= (1.0 + agreement_bonus)
+
+    # Edge sharpening: top-10% edges get additional precision boost
+    if n_edges > 0:
+        flat = fused[~np.eye(n_vars, dtype=bool)]
+        if len(flat) > 0:
+            top_10_threshold = np.percentile(flat, 90)
+            if top_10_threshold > 0:
+                sharpening = (fused >= top_10_threshold).astype(float) * 0.2
+                fused *= (1.0 + sharpening)
+
+    # Zero diagonal
+    np.fill_diagonal(fused, 0)
+
+    if verbose:
+        print(f"  Nonlinear Killer fusion complete: {len(normalized)} components")
+        for name in normalized:
+            print(f"    - {name} (weight {component_weights[name]:.1f})")
+
+    return fused
+
+
+# =============================================================================
 # METHOD 8: REGIME-SPECIFIC MULTIVARIATE VAR (the moonshot)
 # =============================================================================
 

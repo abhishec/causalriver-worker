@@ -49,6 +49,7 @@ from nexusbrain_granger import (
     lasso_var_scoring,
     bootstrap_var_scoring,
     nexusbrain_world_class,
+    nexusbrain_nonlinear_killer,
 )
 
 
@@ -128,6 +129,46 @@ def nexusbrain_world_class_method(data: np.ndarray, **kwargs) -> Tuple[np.ndarra
     )
 
     # Also compute pairwise results for p-values and lags
+    pvalues_nb, lags_nb = _compute_pvalues_and_lags(df, max_lag, criterion)
+
+    # TRANSPOSE to CauseMe convention: [i,j] = i causes j
+    scores = scores_nb.T
+    pvalues = pvalues_nb.T
+    lags = lags_nb.T
+
+    return scores, pvalues, lags
+
+
+def nexusbrain_nonlinear_killer_method(data: np.ndarray, **kwargs) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """
+    NexusBrain Nonlinear Killer — purpose-built to beat BMS4CG on nonlinear-VAR.
+
+    6-component fully nonlinear ensemble:
+    - PCMCI+ with CMIknn (fully nonparametric)
+    - Random Forest Granger (tree-based nonlinear F-test)
+    - Multi-k KSG Transfer Entropy (averaged k=3,5,7,10)
+    - VarLiNGAM (non-Gaussian structural model)
+    - Gradient Boosting Granger (complementary to RF)
+    - PCMCI+ with RobustParCorr (monotonic nonlinear fallback)
+
+    Aggressive agreement voting + edge sharpening for high precision.
+    """
+    max_lag = kwargs.get("max_lag", 5)
+    criterion = kwargs.get("criterion", "aic")
+
+    df = _to_dataframe(data)
+    n_vars = df.shape[1]
+
+    if n_vars < 2:
+        z = np.zeros((n_vars, n_vars))
+        return z, np.ones((n_vars, n_vars)), z.astype(int)
+
+    # Run nonlinear killer (NexusBrain convention: [i,j] = j causes i)
+    scores_nb = nexusbrain_nonlinear_killer(
+        df, max_lag=max_lag, criterion=criterion, verbose=False
+    )
+
+    # Compute pairwise results for p-values and lags
     pvalues_nb, lags_nb = _compute_pvalues_and_lags(df, max_lag, criterion)
 
     # TRANSPOSE to CauseMe convention: [i,j] = i causes j
@@ -448,6 +489,7 @@ def _compute_pvalues_and_lags(
 METHOD_REGISTRY = {
     "nexusbrain_ensemble": nexusbrain_ensemble,
     "nexusbrain_world_class": nexusbrain_world_class_method,
+    "nexusbrain_nonlinear_killer": nexusbrain_nonlinear_killer_method,
     "nexusbrain_hydra": nexusbrain_hydra_method,
     "nexusbrain_omega": nexusbrain_omega_method,
     "nexusbrain_final": nexusbrain_final_method,

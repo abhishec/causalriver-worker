@@ -1,0 +1,29 @@
+# LongMemEval Benchmark Requirements for NexusBrain
+# Install: pip install -r requirements.txt
+
+# Core
+numpy>=1.26.0
+scipy>=1.11.0
+tqdm>=4.66.0
+requests>=2.31.0
+
+# Retrieval
+rank_bm25>=0.2.2
+
+# Dense retrieval (optional but recommended)
+sentence-transformers>=2.2.2
+torch>=2.0.0
+
+# LLM generation
+openai>=1.35.0
+
+# LLM generation (optional, for Claude)
+anthropic>=0.34.0
+
+# Evaluation (LongMemEval requires these)
+backoff>=2.2.1
+
+# NEN (NexusBrain Engram Network) — Deep RL architecture
+torch-geometric>=2.5.0
+torch-scatter>=2.1.2
+tensorboard>=2.15.0

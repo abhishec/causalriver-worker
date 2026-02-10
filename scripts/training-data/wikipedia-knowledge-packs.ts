@@ -482,6 +482,95 @@ function buildDomainCausalChains(
         { source: 'hr', target: 'engineering', metric: 'talent_magnet_ceo_to_eng_quality', effectSize: 0.45, lagDays: 90, pValue: 0.005 },
       );
       break;
+
+    case 'accounting':
+      chains.push(
+        { source: 'finance', target: 'finance', metric: 'ar_aging_to_cash_flow_pressure', effectSize: -0.55, lagDays: 30, pValue: 0.002 },
+        { source: 'finance', target: 'finance', metric: 'depreciation_to_tax_liability', effectSize: -0.40, lagDays: 90, pValue: 0.005 },
+        { source: 'finance', target: 'strategy', metric: 'working_capital_cycle_to_strategic_flexibility', effectSize: 0.45, lagDays: 60, pValue: 0.005 },
+        { source: 'finance', target: 'finance', metric: 'deferred_revenue_to_cash_flow_stability', effectSize: 0.50, lagDays: 30, pValue: 0.003 },
+        { source: 'finance', target: 'finance', metric: 'goodwill_impairment_to_shareholder_value', effectSize: -0.50, lagDays: 0, pValue: 0.003 },
+        { source: 'finance', target: 'finance', metric: 'dupont_roe_decomposition_to_profitability_levers', effectSize: 0.45, lagDays: 90, pValue: 0.005 },
+      );
+      break;
+
+    case 'fpa':
+      chains.push(
+        { source: 'finance', target: 'strategy', metric: 'npv_analysis_to_investment_quality', effectSize: 0.55, lagDays: 0, pValue: 0.002 },
+        { source: 'finance', target: 'finance', metric: 'wacc_accuracy_to_capital_allocation', effectSize: 0.50, lagDays: 0, pValue: 0.003 },
+        { source: 'finance', target: 'strategy', metric: 'rolling_forecast_to_agility', effectSize: 0.50, lagDays: 30, pValue: 0.003 },
+        { source: 'finance', target: 'finance', metric: 'dcf_valuation_to_deal_pricing', effectSize: 0.45, lagDays: 0, pValue: 0.005 },
+        { source: 'strategy', target: 'finance', metric: 'scenario_planning_to_risk_mitigation', effectSize: 0.40, lagDays: 60, pValue: 0.005 },
+      );
+      break;
+
+    case 'supply-chain':
+      chains.push(
+        { source: 'strategy', target: 'finance', metric: 'bullwhip_to_inventory_amplification', effectSize: 0.60, lagDays: 14, pValue: 0.001 },
+        { source: 'strategy', target: 'finance', metric: 'jit_to_cost_reduction', effectSize: -0.50, lagDays: 60, pValue: 0.003 },
+        { source: 'strategy', target: 'finance', metric: 'supply_disruption_to_revenue_loss', effectSize: -0.55, lagDays: 7, pValue: 0.002 },
+        { source: 'engineering', target: 'strategy', metric: 'erp_to_visibility', effectSize: 0.45, lagDays: 30, pValue: 0.005 },
+        { source: 'strategy', target: 'strategy', metric: 'kanban_to_flow_optimization', effectSize: 0.45, lagDays: 14, pValue: 0.005 },
+        { source: 'strategy', target: 'finance', metric: 'procurement_to_cost_savings', effectSize: -0.40, lagDays: 90, pValue: 0.005 },
+      );
+      break;
+
+    case 'legal':
+      chains.push(
+        { source: 'finance', target: 'finance', metric: 'compliance_breach_to_regulatory_fine', effectSize: -0.65, lagDays: 90, pValue: 0.001 },
+        { source: 'finance', target: 'marketing', metric: 'regulatory_action_to_brand_damage', effectSize: -0.55, lagDays: 7, pValue: 0.002 },
+        { source: 'engineering', target: 'strategy', metric: 'patent_portfolio_to_competitive_moat', effectSize: 0.50, lagDays: 365, pValue: 0.003 },
+        { source: 'strategy', target: 'finance', metric: 'ip_licensing_to_revenue', effectSize: 0.40, lagDays: 180, pValue: 0.005 },
+        { source: 'cs', target: 'finance', metric: 'sla_breach_to_credit_obligation', effectSize: -0.45, lagDays: 30, pValue: 0.005 },
+      );
+      break;
+
+    case 'behavioral-econ':
+      chains.push(
+        { source: 'marketing', target: 'finance', metric: 'loss_aversion_framing_to_conversion', effectSize: 0.50, lagDays: 0, pValue: 0.003 },
+        { source: 'marketing', target: 'finance', metric: 'anchoring_to_willingness_to_pay', effectSize: 0.45, lagDays: 0, pValue: 0.005 },
+        { source: 'product', target: 'marketing', metric: 'default_option_to_selection_rate', effectSize: 0.55, lagDays: 0, pValue: 0.002 },
+        { source: 'marketing', target: 'marketing', metric: 'social_proof_to_trust', effectSize: 0.50, lagDays: 7, pValue: 0.003 },
+        { source: 'product', target: 'finance', metric: 'gamification_to_retention', effectSize: 0.45, lagDays: 14, pValue: 0.005 },
+      );
+      break;
+
+    case 'analytics':
+      chains.push(
+        { source: 'engineering', target: 'strategy', metric: 'analytics_maturity_to_decision_quality', effectSize: 0.55, lagDays: 30, pValue: 0.002 },
+        { source: 'engineering', target: 'finance', metric: 'data_warehouse_to_reporting_efficiency', effectSize: 0.50, lagDays: 30, pValue: 0.003 },
+        { source: 'product', target: 'finance', metric: 'ab_testing_to_conversion_optimization', effectSize: 0.45, lagDays: 14, pValue: 0.005 },
+        { source: 'engineering', target: 'engineering', metric: 'data_quality_to_trust', effectSize: 0.50, lagDays: 14, pValue: 0.003 },
+        { source: 'engineering', target: 'product', metric: 'ml_ops_to_model_reliability', effectSize: 0.45, lagDays: 30, pValue: 0.005 },
+      );
+      break;
+
+    case 'healthcare':
+      chains.push(
+        { source: 'engineering', target: 'finance', metric: 'ehr_adoption_to_efficiency', effectSize: 0.45, lagDays: 180, pValue: 0.005 },
+        { source: 'product', target: 'finance', metric: 'telemedicine_to_cost_reduction', effectSize: -0.40, lagDays: 30, pValue: 0.005 },
+        { source: 'engineering', target: 'product', metric: 'interoperability_to_care_coordination', effectSize: 0.45, lagDays: 90, pValue: 0.005 },
+        { source: 'finance', target: 'product', metric: 'hipaa_compliance_to_market_access', effectSize: 0.40, lagDays: 180, pValue: 0.005 },
+      );
+      break;
+
+    case 'fintech':
+      chains.push(
+        { source: 'engineering', target: 'finance', metric: 'api_banking_to_cac_reduction', effectSize: -0.50, lagDays: 90, pValue: 0.003 },
+        { source: 'strategy', target: 'finance', metric: 'embedded_finance_to_revenue_per_user', effectSize: 0.45, lagDays: 90, pValue: 0.005 },
+        { source: 'product', target: 'marketing', metric: 'ux_simplification_to_conversion', effectSize: 0.50, lagDays: 0, pValue: 0.003 },
+        { source: 'finance', target: 'product', metric: 'regulatory_sandbox_to_innovation_speed', effectSize: 0.40, lagDays: 180, pValue: 0.005 },
+      );
+      break;
+
+    case 'manufacturing':
+      chains.push(
+        { source: 'engineering', target: 'finance', metric: 'predictive_maintenance_to_downtime_reduction', effectSize: -0.50, lagDays: 90, pValue: 0.003 },
+        { source: 'engineering', target: 'strategy', metric: 'digital_twin_to_optimization', effectSize: 0.45, lagDays: 60, pValue: 0.005 },
+        { source: 'engineering', target: 'finance', metric: 'iot_sensor_to_quality_improvement', effectSize: 0.40, lagDays: 30, pValue: 0.005 },
+        { source: 'strategy', target: 'finance', metric: 'smart_factory_to_oee_improvement', effectSize: 0.45, lagDays: 180, pValue: 0.005 },
+      );
+      break;
   }
 
   return chains;
@@ -687,6 +776,15 @@ function formatSubDomain(subDomain: string): string {
     'public-companies': 'Publicly Listed Companies (Financials & Strategy)',
     'vc-firms': 'VC Firms & Investment Strategies',
     'leaders': 'Business Leaders & Founder Strategies',
+    'accounting': 'Accounting & Financial Reporting',
+    'fpa': 'FP&A & Capital Budgeting',
+    'supply-chain': 'Supply Chain & Operations',
+    'legal': 'Legal & Compliance',
+    'behavioral-econ': 'Behavioral Economics & Decision Science',
+    'analytics': 'Data Science & Analytics',
+    'healthcare': 'Healthcare Digital Transformation',
+    'fintech': 'Fintech & Open Banking',
+    'manufacturing': 'Manufacturing IoT & Industry 4.0',
   };
   return map[subDomain] || subDomain;
 }
@@ -717,6 +815,15 @@ function mapSubDomainToIndustry(subDomain: string): string {
     'public-companies': 'Cross-Industry',
     'vc-firms': 'Finance',
     'leaders': 'Strategy',
+    'accounting': 'Finance',
+    'fpa': 'Finance',
+    'supply-chain': 'Operations',
+    'legal': 'Legal',
+    'behavioral-econ': 'Marketing',
+    'analytics': 'Technology',
+    'healthcare': 'Healthcare',
+    'fintech': 'Finance',
+    'manufacturing': 'Manufacturing',
   };
   return map[subDomain] || 'General';
 }
