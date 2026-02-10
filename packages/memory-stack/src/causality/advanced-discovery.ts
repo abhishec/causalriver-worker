@@ -31,6 +31,7 @@ import {
 
 import { fTestPValue } from './statistical-tests';
 import { counterfactualKnockout } from './counterfactual-knockout';
+import { runPCAlgorithm } from './pc-algorithm';
 
 import {
   normalizeScores,
@@ -56,7 +57,8 @@ export type AdvancedDiscoveryMethod =
   | 'regime_conditional'
   | 'nexusbrain_final'
   | 'apex'
-  | 'world_class';
+  | 'world_class'
+  | 'pc_structural';
 
 export interface AdvancedDiscoveryConfig {
   method: AdvancedDiscoveryMethod;
@@ -1373,7 +1375,93 @@ function ridgeConditionalScoresMatrix(
 }
 
 // ============================================================================
-// METHOD 11: UNIFIED DISPATCHER
+// METHOD 12: PC STRUCTURAL (Constraint-Based + VAR Scoring)
+// ============================================================================
+
+/**
+ * PC-Algorithm structural discovery combined with VAR effect sizing.
+ *
+ * Phase 1: Run PC Algorithm for structural discovery (which edges exist)
+ * Phase 2: Score discovered edges using calibrated ensemble (how strong)
+ * Phase 3: Zero out edges that PC removes (structural constraint)
+ *
+ * This integrates the constraint-based approach (PC algorithm,
+ * the TypeScript port of CauseMe PCMCI+ logic) with effect sizing
+ * from CausalRivers-proven VAR methods.
+ */
+function pcStructuralScoring(
+  data: Record<string, number[]>,
+  config: Partial<AdvancedDiscoveryConfig>
+): PairwiseScoreMatrix {
+  const domains = Object.keys(data);
+  const n = domains.length;
+
+  // Phase 1: Run PC Algorithm for structural discovery
+  const pcData = new Map<string, number[]>();
+  for (const [k, v] of Object.entries(data)) {
+    pcData.set(k, v);
+  }
+  const pcResult = runPCAlgorithm(pcData, config.alpha);
+
+  // Build adjacency from PC result (both skeleton and oriented edges)
+  const pcAdjacency: boolean[][] = Array.from({ length: n }, () => Array(n).fill(false));
+  const domainIndex = new Map<string, number>();
+  domains.forEach((d, i) => domainIndex.set(d, i));
+
+  // Skeleton edges (undirected — both directions)
+  for (const edge of pcResult.skeleton) {
+    const si = domainIndex.get(edge.source);
+    const ti = domainIndex.get(edge.target);
+    if (si !== undefined && ti !== undefined) {
+      pcAdjacency[si][ti] = true;
+      pcAdjacency[ti][si] = true;
+    }
+  }
+
+  // Oriented edges override — use direction
+  for (const edge of pcResult.orientedEdges) {
+    const si = domainIndex.get(edge.source);
+    const ti = domainIndex.get(edge.target);
+    if (si !== undefined && ti !== undefined) {
+      if (edge.direction === 'forward') {
+        pcAdjacency[ti][si] = true; // NexusBrain convention: [i][j] = j causes i
+        // Don't remove reverse since it may have separate evidence
+      } else if (edge.direction === 'backward') {
+        pcAdjacency[si][ti] = true;
+      }
+      // 'undirected' keeps both
+    }
+  }
+
+  // Phase 2: Run calibrated ensemble for effect sizing
+  const ensembleResult = calibratedEnsembleScoring(data, config);
+
+  // Phase 3: Apply PC structural constraint — zero out edges PC removed
+  const scores = ensembleResult.scores.map(row => [...row]);
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n; j++) {
+      if (i === j) continue;
+      // If PC didn't find this edge, heavily penalize (but don't fully zero —
+      // PC can miss edges in small samples, and our ensemble may catch them)
+      if (!pcAdjacency[i][j]) {
+        scores[i][j] *= 0.15; // 85% penalty for structurally unsupported edges
+      }
+    }
+  }
+
+  return {
+    domains,
+    scores,
+    optimalLags: ensembleResult.optimalLags,
+    pValues: ensembleResult.pValues,
+    knockoutScores: ensembleResult.knockoutScores,
+    confounderFlags: ensembleResult.confounderFlags,
+    signMatrix: ensembleResult.signMatrix,
+  };
+}
+
+// ============================================================================
+// METHOD DISPATCHER
 // ============================================================================
 
 /**
@@ -1417,6 +1505,8 @@ export function runAdvancedDiscovery(
       return apexScoring(data, config);
     case 'world_class':
       return worldClassScoring(data, config);
+    case 'pc_structural':
+      return pcStructuralScoring(data, config);
     default: {
       // Unknown method: fall back to calibrated ensemble
       return calibratedEnsembleScoring(data, config);
@@ -1439,4 +1529,5 @@ export const AdvancedDiscovery = {
   nexusBrainFinalMethod,
   apexScoring,
   worldClassScoring,
+  pcStructuralScoring,
 };

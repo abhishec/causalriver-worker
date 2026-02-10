@@ -67,6 +67,8 @@ export interface UnifiedEntityView {
     knockoutScore?: number;
     isLikelyConfounded?: boolean;
     coefficientSign?: number;
+    /** Temporal lag in days between cause and effect */
+    lagDays?: number;
   }>;
 }
 
@@ -371,7 +373,7 @@ export function createEntityResolver(config: EntityResolverConfig) {
       // domains appear as source OR target (org + core brain)
       const { data: edges } = await supabase
         .from('causal_graph_edges')
-        .select('source_domain, target_domain, effect_size, natural_language, is_significant, knockout_score, is_likely_confounded, coefficient_sign')
+        .select('source_domain, target_domain, effect_size, optimal_lag_days, natural_language, is_significant, knockout_score, is_likely_confounded, coefficient_sign')
         .in('organization_id', [organizationId, CORE_BRAIN_ORG_ID])
         .eq('is_significant', true);
 
@@ -391,6 +393,7 @@ export function createEntityResolver(config: EntityResolverConfig) {
               knockoutScore: (edge.knockout_score as number) ?? undefined,
               isLikelyConfounded: (edge.is_likely_confounded as boolean) ?? undefined,
               coefficientSign: (edge.coefficient_sign as number) ?? undefined,
+              lagDays: (edge.optimal_lag_days as number) ?? undefined,
             });
           }
         }

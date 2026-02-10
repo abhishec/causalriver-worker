@@ -25,6 +25,10 @@ export interface CausalEdge {
   effectSize: number;
   knockoutScore?: number;
   isLikelyConfounded?: boolean;
+  /** Direction of causal effect: +1 positive, -1 negative */
+  coefficientSign?: number;
+  /** Temporal lag in days between cause and effect */
+  lagDays?: number;
 }
 
 /**
@@ -139,6 +143,8 @@ export function createSemanticSearch(config: SemanticSearchConfig = {}) {
         if (edge.isLikelyConfounded) boost *= 0.3;
         // Slight bonus for knockout-validated edges
         if (edge.knockoutScore !== undefined && edge.knockoutScore > 0.5) boost *= 1.1;
+        // Negative causal effects get reduced boost (inverse relationship less relevant)
+        if (edge.coefficientSign !== undefined && edge.coefficientSign < 0) boost *= 0.7;
         const existing = proximity.get(edge.targetDomain) || 0;
         proximity.set(edge.targetDomain, Math.max(existing, boost));
         directNeighbors.add(edge.targetDomain);
@@ -147,6 +153,8 @@ export function createSemanticSearch(config: SemanticSearchConfig = {}) {
         let boost = Math.min(1.0, Math.abs(edge.effectSize));
         if (edge.isLikelyConfounded) boost *= 0.3;
         if (edge.knockoutScore !== undefined && edge.knockoutScore > 0.5) boost *= 1.1;
+        // Negative causal effects get reduced boost (inverse relationship less relevant)
+        if (edge.coefficientSign !== undefined && edge.coefficientSign < 0) boost *= 0.7;
         const existing = proximity.get(edge.sourceDomain) || 0;
         proximity.set(edge.sourceDomain, Math.max(existing, boost));
         directNeighbors.add(edge.sourceDomain);

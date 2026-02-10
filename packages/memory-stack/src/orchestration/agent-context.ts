@@ -526,6 +526,82 @@ function extractDomainFromAgentType(agentType: string): string | null {
 }
 
 // ============================================================================
+// CAUSAL CONTEXT → PROMPT TEXT
+// ============================================================================
+
+/**
+ * Format an agent's causal context into a prompt-ready text block.
+ *
+ * This bridges the gap between the structured causalContext data and
+ * the LLM system prompt — agents can inject this into their prompt
+ * to enable causal reasoning grounded in empirical discoveries.
+ *
+ * @example
+ * ```typescript
+ * const ctx = await agentManager.initializeRun(supabase, 'finance_agent', orgId);
+ * const causalPrompt = formatCausalContextForPrompt(ctx);
+ * const systemPrompt = `${basePrompt}\n\n${causalPrompt}`;
+ * ```
+ */
+export function formatCausalContextForPrompt(context: AgentContext): string {
+  if (!context.causalContext || context.causalContext.totalEdges === 0) {
+    return '';
+  }
+
+  const { downstreamEffects, upstreamCauses, dominantChain, totalEdges, confoundedEdgeCount, validatedEdgeCount } = context.causalContext;
+  const sections: string[] = [];
+
+  sections.push('## Causal Intelligence (Discovered by Brain)');
+  sections.push(`${totalEdges} causal relationships detected for your domain.`);
+
+  if (validatedEdgeCount && validatedEdgeCount > 0) {
+    sections.push(`${validatedEdgeCount} knockout-validated (true causal), ${confoundedEdgeCount || 0} possibly confounded.`);
+  }
+  sections.push('');
+
+  if (dominantChain) {
+    sections.push(`**Dominant causal chain:** ${dominantChain}`);
+    sections.push('');
+  }
+
+  if (upstreamCauses.length > 0) {
+    sections.push('**What CAUSES changes in your domain (upstream):**');
+    for (const edge of upstreamCauses.slice(0, 5)) {
+      const sign = (edge.coefficientSign ?? 1) > 0 ? '+' : '-';
+      const validation = edge.isLikelyConfounded
+        ? ' [POSSIBLY CONFOUNDED]'
+        : (edge.knockoutScore !== undefined && edge.knockoutScore > 0.3)
+        ? ' [VALIDATED]'
+        : '';
+      sections.push(`- ${edge.sourceDomain} → ${edge.targetDomain} (${sign}${Math.abs(edge.effectSize).toFixed(2)}, ${edge.lagDays}d lag)${validation}: ${edge.naturalLanguage}`);
+    }
+    sections.push('');
+  }
+
+  if (downstreamEffects.length > 0) {
+    sections.push('**What your domain AFFECTS (downstream):**');
+    for (const edge of downstreamEffects.slice(0, 5)) {
+      const sign = (edge.coefficientSign ?? 1) > 0 ? '+' : '-';
+      const validation = edge.isLikelyConfounded
+        ? ' [POSSIBLY CONFOUNDED]'
+        : (edge.knockoutScore !== undefined && edge.knockoutScore > 0.3)
+        ? ' [VALIDATED]'
+        : '';
+      sections.push(`- ${edge.sourceDomain} → ${edge.targetDomain} (${sign}${Math.abs(edge.effectSize).toFixed(2)}, ${edge.lagDays}d lag)${validation}: ${edge.naturalLanguage}`);
+    }
+    sections.push('');
+  }
+
+  sections.push('Use this intelligence to:');
+  sections.push('- Trace root causes when metrics change (follow upstream edges)');
+  sections.push('- Predict downstream impact of actions (follow downstream edges)');
+  sections.push('- Distinguish correlation from causation (only VALIDATED edges are true causes)');
+  sections.push('- Estimate time-to-effect using lag days');
+
+  return sections.join('\n');
+}
+
+// ============================================================================
 // ACTIVITY LOGGING
 // ============================================================================
 

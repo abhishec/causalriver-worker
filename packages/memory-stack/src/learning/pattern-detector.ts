@@ -966,10 +966,25 @@ export function mineTemporalAssociationRules(
 // ============================================================================
 
 /**
+ * A causal edge for enriching pattern discovery with causal intelligence.
+ * When provided, patterns that align with known causal edges get boosted
+ * confidence, and causally-grounded patterns are tagged.
+ */
+export interface PatternCausalEdge {
+  sourceDomain: string;
+  targetDomain: string;
+  effectSize: number;
+  knockoutScore?: number;
+  isLikelyConfounded?: boolean;
+  coefficientSign?: number;
+  lagDays?: number;
+}
+
+/**
  * Main pattern discovery function
  *
  * Combines association mining, sequential patterns, temporal rules,
- * clustering, and significance testing.
+ * clustering, significance testing, and causal enrichment.
  */
 export function discoverPatterns(
   transactions: string[][],
@@ -984,6 +999,8 @@ export function discoverPatterns(
     temporalEvents?: TemporalEvent[];
     /** Max time gap for sequential patterns */
     maxGap?: number;
+    /** Causal edges from L4 discovery — enriches patterns with causal grounding */
+    causalEdges?: PatternCausalEdge[];
   } = {}
 ): {
   rules: AssociationRule[];
@@ -1000,6 +1017,7 @@ export function discoverPatterns(
     significanceLevel = 0.05,
     temporalEvents,
     maxGap,
+    causalEdges,
   } = config;
 
   // Mine association rules
@@ -1063,6 +1081,45 @@ export function discoverPatterns(
       minConfidence,
       minLift,
     });
+  }
+
+  // CAUSAL ENRICHMENT: Boost patterns that align with known causal edges
+  if (causalEdges && causalEdges.length > 0) {
+    // Build a set of known causal domain pairs for fast lookup
+    const causalPairs = new Map<string, PatternCausalEdge>();
+    for (const edge of causalEdges) {
+      causalPairs.set(`${edge.sourceDomain}→${edge.targetDomain}`, edge);
+    }
+
+    for (const pattern of patterns) {
+      // Check if pattern domains align with any causal edge
+      const domains = pattern.domainsInvolved;
+      let causallyGrounded = false;
+      let bestKnockoutScore = 0;
+
+      for (let i = 0; i < domains.length; i++) {
+        for (let j = 0; j < domains.length; j++) {
+          if (i === j) continue;
+          const key = `${domains[i]}→${domains[j]}`;
+          const edge = causalPairs.get(key);
+          if (edge) {
+            causallyGrounded = true;
+            if (edge.knockoutScore !== undefined && edge.knockoutScore > bestKnockoutScore) {
+              bestKnockoutScore = edge.knockoutScore;
+            }
+            // Confounded edges don't count for grounding
+            if (edge.isLikelyConfounded) causallyGrounded = false;
+          }
+        }
+      }
+
+      // Tag and boost causally-grounded patterns
+      if (causallyGrounded && bestKnockoutScore > 0.3) {
+        pattern.description += ' [CAUSALLY GROUNDED — knockout-validated]';
+        // Boost confidence: validated causal patterns are more trustworthy
+        pattern.confirmationCount = Math.max(pattern.confirmationCount, 2);
+      }
+    }
   }
 
   return { rules, clusters, patterns, sequentialPatterns, temporalRules };
