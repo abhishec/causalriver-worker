@@ -171,7 +171,7 @@ async function runDiscoveryAsync(
 
   for (let i = 0; i < sortedDomains.length; i += domainChunkSize) {
     // Check for cancellation
-    if (job.status === 'cancelled') {
+    if ((job.status as string) === 'cancelled') {
       throw new Error('Job cancelled');
     }
 

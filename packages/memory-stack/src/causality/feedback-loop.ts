@@ -331,18 +331,32 @@ export function createFeedbackLoop(config: Partial<FeedbackLoopConfig> = {}) {
         ? correctPredictionBoost
         : incorrectPredictionPenalty;
 
-      // Fetch current relationship weight
+      // Fetch current relationship weight + confounder metadata
       const { data: relationship, error: relError } = await supabase
         .from('causal_relationships_statistical')
-        .select('effect_size')
+        .select('effect_size, is_likely_confounded, knockout_score')
         .eq('organization_id', prediction.organization_id)
         .eq('source_domain', prediction.source_domain)
         .eq('target_domain', prediction.target_domain)
         .single();
 
       const currentWeight = relError || !relationship ? 0.5 : relationship.effect_size;
+      const isConfounded = relationship?.is_likely_confounded === true;
+
+      // Confounder-aware weight adjustment:
+      // - Confounded edges getting lucky predictions is NOT validation → skip boost
+      // - Confounded edges failing confirms confounding → stronger penalty
+      let effectiveAdjustment: number;
+      if (isConfounded) {
+        effectiveAdjustment = wasCorrect
+          ? 1.0                                       // No boost: lucky prediction ≠ causation
+          : incorrectPredictionPenalty * 0.95;        // Stronger penalty: confirms confounding
+      } else {
+        effectiveAdjustment = weightAdjustment;       // Normal boost/penalty for causal edges
+      }
+
       const newWeight = Math.max(minWeight, Math.min(maxWeight,
-        currentWeight * weightAdjustment
+        currentWeight * effectiveAdjustment
       ));
 
       // Update relationship weight
@@ -366,7 +380,9 @@ export function createFeedbackLoop(config: Partial<FeedbackLoopConfig> = {}) {
           target_domain: prediction.target_domain,
           old_weight: currentWeight,
           new_weight: newWeight,
-          reason: wasCorrect ? 'correct_prediction' : 'incorrect_prediction',
+          reason: isConfounded
+            ? (wasCorrect ? 'correct_prediction_confounded_no_boost' : 'incorrect_prediction_confounded_stronger_penalty')
+            : (wasCorrect ? 'correct_prediction' : 'incorrect_prediction'),
           prediction_id: predictionId,
           applied_at: now.toISOString()
         });
@@ -472,10 +488,10 @@ export function createFeedbackLoop(config: Partial<FeedbackLoopConfig> = {}) {
     ): Promise<WeightUpdate[]> {
       const updates: WeightUpdate[] = [];
 
-      // Get all relationships
+      // Get all relationships (including confounder metadata for weight adjustment)
       const { data: relationships, error: relError } = await supabase
         .from('causal_relationships_statistical')
-        .select('source_domain, target_domain, effect_size')
+        .select('source_domain, target_domain, effect_size, is_likely_confounded, knockout_score')
         .eq('organization_id', organizationId)
         .eq('is_significant', true);
 
@@ -501,8 +517,19 @@ export function createFeedbackLoop(config: Partial<FeedbackLoopConfig> = {}) {
         let newWeight = currentWeight;
         let reason = '';
 
-        if (accuracy.accuracy >= 0.7) {
-          // Good accuracy, boost weight
+        const isConfounded = rel.is_likely_confounded === true;
+
+        if (isConfounded) {
+          // Confounded relationships: never boost, penalize more aggressively
+          if (accuracy.accuracy < degradationThreshold) {
+            newWeight = Math.max(minWeight, currentWeight * 0.7);
+            reason = `Low accuracy + confounded (${(accuracy.accuracy * 100).toFixed(1)}%)`;
+          } else {
+            // Even with good accuracy, don't boost confounded edges — could be spurious
+            reason = `Confounded edge — weight held (accuracy: ${(accuracy.accuracy * 100).toFixed(1)}%)`;
+          }
+        } else if (accuracy.accuracy >= 0.7) {
+          // Good accuracy, boost weight (causal edges only)
           newWeight = Math.min(maxWeight, currentWeight * 1.1);
           reason = `High accuracy (${(accuracy.accuracy * 100).toFixed(1)}%)`;
         } else if (accuracy.accuracy < degradationThreshold) {
