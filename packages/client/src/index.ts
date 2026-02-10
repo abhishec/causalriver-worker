@@ -157,9 +157,111 @@ export interface RelationshipsResult {
   coreCount?: number;
 }
 
+// ============================================================================
+// COPILOT v2 TYPES (Agentic)
+// ============================================================================
+
+export interface CopilotToolCall {
+  tool: string;
+  input: Record<string, unknown>;
+  result_summary: string;
+}
+
+export interface CopilotComplexity {
+  level: 'simple' | 'moderate' | 'complex';
+  score: number;
+  reasons: string[];
+}
+
+export interface CopilotResult {
+  answer: string;
+  /** Which execution path was used */
+  path: 'fast' | 'agentic';
+  /** Complexity assessment from the router */
+  complexity?: CopilotComplexity;
+  /** All tool calls made during the agentic loop */
+  toolCalls: CopilotToolCall[];
+  /** Self-correction result (if applicable) */
+  selfCorrection?: {
+    corrected: boolean;
+    correction?: string;
+    status?: string;
+  };
+  context?: {
+    causal: CausalRelationship[];
+    patterns: BrainRule[];
+    memories: Memory[];
+  };
+  meta: {
+    model?: string;
+    tokensUsed?: number;
+    toolCallsCount?: number;
+    toolsUsed?: string[];
+    agenticRounds?: number;
+    federated?: boolean;
+    /** Which brain layers (L1-L7) were queried */
+    layersAccessed?: string[];
+    complexity?: string;
+  };
+}
+
+/** SSE event types emitted by the copilot stream */
+export type CopilotStreamEvent =
+  | { event: 'complexity'; data: CopilotComplexity & { suggestedTools: string[] } }
+  | { event: 'thinking'; data: { round: number | string; status: string } }
+  | { event: 'thinking_text'; data: { text: string } }
+  | { event: 'tool_call'; data: { tool: string; input: Record<string, unknown>; round: number } }
+  | { event: 'tool_result'; data: { tool: string; result_summary: string } }
+  | { event: 'answer_chunk'; data: { text: string } }
+  | { event: 'self_correction'; data: { correction?: string; status?: string; message?: string } }
+  | { event: 'done'; data: { answer: string; toolCallsCount: number; tokensUsed: number; complexity: string; federated: boolean } }
+  | { event: 'error'; data: { message: string } };
+
+export interface CopilotStreamOptions {
+  /** Called for each SSE event */
+  onEvent?: (event: CopilotStreamEvent) => void;
+  /** Called when a tool is called */
+  onToolCall?: (tool: string, input: Record<string, unknown>) => void;
+  /** Called when an answer chunk arrives (for progressive rendering) */
+  onAnswerChunk?: (text: string) => void;
+  /** Called when thinking text arrives */
+  onThinking?: (text: string) => void;
+  /** Called when self-correction happens */
+  onSelfCorrection?: (correction: string) => void;
+  /** Called on completion */
+  onDone?: (result: { answer: string; toolCallsCount: number; tokensUsed: number }) => void;
+  /** Called on error */
+  onError?: (error: Error) => void;
+  /** AbortSignal to cancel the stream */
+  signal?: AbortSignal;
+}
+
 export interface NexusClient {
   /** Query the brain with natural language — returns AI answer enriched with causal context */
   query(question: string, options?: { domain?: string; agentType?: string }): Promise<QueryResult>;
+
+  /**
+   * Copilot v2 — Agentic query with 7-layer tool access.
+   * Claude autonomously queries the brain's layers, traces cascades,
+   * and self-corrects against causal evidence.
+   *
+   * Simple queries → fast path (context + single LLM call)
+   * Complex queries → agentic path (Claude + tools + multi-turn loop)
+   */
+  copilot(question: string, options?: {
+    domain?: string;
+    conversationId?: string;
+  }): Promise<CopilotResult>;
+
+  /**
+   * Copilot v2 with SSE streaming — progressive answer delivery.
+   * Returns an async iterator of events (thinking, tool_calls, answer_chunks).
+   * Use callbacks for real-time UI updates.
+   */
+  copilotStream(question: string, options?: {
+    domain?: string;
+    conversationId?: string;
+  }, streamOptions?: CopilotStreamOptions): Promise<CopilotResult>;
 
   /** Ingest signals into the brain — triggers causal discovery on next learning cycle */
   ingest(signals: Signal[]): Promise<IngestResult>;
@@ -305,6 +407,155 @@ export function createNexusClient(config: NexusClientConfig): NexusClient {
         domain: options?.domain,
         agentType: options?.agentType,
       });
+    },
+
+    async copilot(question, options) {
+      return request<CopilotResult>('nexus-copilot', {
+        organizationId,
+        query: question,
+        domain: options?.domain,
+        conversationId: options?.conversationId,
+        stream: false,
+      });
+    },
+
+    async copilotStream(question, options, streamOptions) {
+      const url = `${baseUrl}/functions/v1/nexus-copilot`;
+      const controller = new AbortController();
+      const combinedSignal = streamOptions?.signal;
+
+      if (combinedSignal) {
+        combinedSignal.addEventListener('abort', () => controller.abort());
+      }
+
+      const timer = setTimeout(() => controller.abort(), timeout * 3); // 3x timeout for streaming
+
+      let fullAnswer = '';
+      let totalTokens = 0;
+      let toolCallsCount = 0;
+
+      try {
+        const response = await fetchFn(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${supabaseAnonKey}`,
+            'apikey': supabaseAnonKey,
+          },
+          body: JSON.stringify({
+            organizationId,
+            query: question,
+            domain: options?.domain,
+            conversationId: options?.conversationId,
+            stream: true,
+          }),
+          signal: controller.signal,
+        });
+
+        clearTimeout(timer);
+
+        if (!response.ok) {
+          const errorBody = await response.text();
+          throw new NexusError(`nexus-copilot stream failed (${response.status}): ${errorBody}`, response.status, 'copilotStream');
+        }
+
+        // If the response is JSON (fast path returned JSON instead of SSE)
+        const contentType = response.headers.get('content-type') || '';
+        if (contentType.includes('application/json')) {
+          const result = await response.json() as CopilotResult;
+          streamOptions?.onDone?.({ answer: result.answer, toolCallsCount: result.toolCalls.length, tokensUsed: result.meta.tokensUsed || 0 });
+          return result;
+        }
+
+        // Parse SSE stream
+        const reader = response.body?.getReader();
+        if (!reader) throw new NexusError('No response body for stream', 500, 'copilotStream');
+
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+
+          // Parse SSE events from buffer
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || ''; // Keep incomplete line in buffer
+
+          let currentEvent = '';
+          let currentData = '';
+
+          for (const line of lines) {
+            if (line.startsWith('event: ')) {
+              currentEvent = line.slice(7).trim();
+            } else if (line.startsWith('data: ')) {
+              currentData = line.slice(6);
+
+              if (currentEvent && currentData) {
+                try {
+                  const parsed = JSON.parse(currentData);
+                  const sseEvent = { event: currentEvent, data: parsed } as CopilotStreamEvent;
+                  streamOptions?.onEvent?.(sseEvent);
+
+                  // Route to specific callbacks
+                  switch (currentEvent) {
+                    case 'answer_chunk':
+                      fullAnswer += parsed.text;
+                      streamOptions?.onAnswerChunk?.(parsed.text);
+                      break;
+                    case 'thinking_text':
+                      streamOptions?.onThinking?.(parsed.text);
+                      break;
+                    case 'tool_call':
+                      streamOptions?.onToolCall?.(parsed.tool, parsed.input);
+                      break;
+                    case 'self_correction':
+                      if (parsed.correction) {
+                        streamOptions?.onSelfCorrection?.(parsed.correction);
+                      }
+                      break;
+                    case 'done':
+                      fullAnswer = parsed.answer || fullAnswer;
+                      totalTokens = parsed.tokensUsed || 0;
+                      toolCallsCount = parsed.toolCallsCount || 0;
+                      streamOptions?.onDone?.({
+                        answer: fullAnswer,
+                        toolCallsCount,
+                        tokensUsed: totalTokens,
+                      });
+                      break;
+                    case 'error':
+                      streamOptions?.onError?.(new Error(parsed.message));
+                      break;
+                  }
+                } catch {
+                  // Skip unparseable events
+                }
+                currentEvent = '';
+                currentData = '';
+              }
+            } else if (line === '') {
+              currentEvent = '';
+              currentData = '';
+            }
+          }
+        }
+      } catch (err) {
+        clearTimeout(timer);
+        const error = err instanceof Error ? err : new Error(String(err));
+        streamOptions?.onError?.(error);
+        if (err instanceof NexusError) throw err;
+        throw new NexusError(error.message, 500, 'copilotStream');
+      }
+
+      return {
+        answer: fullAnswer,
+        path: 'agentic' as const,
+        toolCalls: [],
+        meta: { tokensUsed: totalTokens, toolCallsCount },
+      };
     },
 
     async ingest(signals) {
@@ -657,6 +908,64 @@ export function createVercelAITools(client: NexusClient) {
       description: RELATIONSHIPS_TOOL_SCHEMA.description,
       parameters: RELATIONSHIPS_TOOL_SCHEMA.inputSchema,
       execute: toolkit.relationships.execute,
+    },
+  };
+}
+
+/**
+ * Create Copilot v2 tools for the Anthropic Claude tool_use format.
+ *
+ * Returns the 7-layer tool definitions that the copilot edge function uses,
+ * along with a handler that proxies tool calls through the client.
+ * Useful when you want to run the agentic loop yourself instead of
+ * relying on the edge function.
+ *
+ * @example
+ * ```ts
+ * const { tools, handleToolCall } = createCopilotTools(brain)
+ * const response = await anthropic.messages.create({
+ *   model: 'claude-sonnet-4-20250514',
+ *   tools,
+ *   messages: [{ role: 'user', content: 'Why is churn rising?' }],
+ * })
+ * // Handle tool_use blocks...
+ * ```
+ */
+export function createCopilotTools(client: NexusClient) {
+  const toolkit = createAgentToolkit(client);
+
+  return {
+    tools: [
+      ...createAnthropicTools(client).tools,
+      {
+        name: 'nexus_copilot_query',
+        description: 'Agentic query to the organizational brain. Claude autonomously queries all 7 layers (semantic memory, causal engine, pattern memory, domain agents, intelligence) and self-corrects against causal evidence. Use this for complex cross-domain questions.',
+        input_schema: {
+          type: 'object' as const,
+          properties: {
+            question: { type: 'string' as const, description: 'The question to ask the organizational brain' },
+            domain: { type: 'string' as const, description: 'Optional domain filter', enum: ['finance', 'engineering', 'cs', 'marketing', 'people', 'revenue'] },
+          },
+          required: ['question'] as const,
+        },
+      },
+    ],
+
+    async handleToolCall(toolName: string, toolInput: Record<string, unknown>) {
+      if (toolName === 'nexus_copilot_query') {
+        const result = await client.copilot(
+          toolInput.question as string,
+          { domain: toolInput.domain as string | undefined },
+        );
+        return {
+          answer: result.answer,
+          complexity: result.complexity,
+          toolsUsed: result.meta.toolsUsed,
+          layersAccessed: result.meta.layersAccessed,
+          selfCorrected: result.selfCorrection?.corrected || false,
+        };
+      }
+      return createAnthropicTools(client).handleToolCall(toolName, toolInput);
     },
   };
 }
