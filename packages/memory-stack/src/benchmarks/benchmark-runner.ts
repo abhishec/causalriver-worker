@@ -286,7 +286,7 @@ export function createBenchmarkRunner(config: Partial<BenchmarkRunnerConfig> = {
         const detectedIndices = new Set(
           detected.map((d) => {
             const idx = signals.findIndex(
-              (s) => s.signal_value === d.observedValue
+              (s) => Math.abs(s.signal_value - d.observedValue) < 1e-9
             );
             return idx >= 0 ? signals[idx].signal_timestamp : '';
           }).filter(Boolean)

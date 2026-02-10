@@ -715,14 +715,17 @@ export function generateAnomalyTimeSeries(config?: {
           });
         } else if (r < 0.8) {
           // Contextual anomaly: unusual for the time
-          value += 3 * noiseScale;
+          // Magnitude 4.5× ensures reliable detection above noise floor
+          // (accounting for trend + seasonality variance)
+          value += 4.5 * noiseScale;
           anomalies.push({
             timestamp, seriesId, isAnomaly: true,
             severity: 'medium', type: 'contextual',
           });
         } else {
           // Collective anomaly: sustained shift
-          value += 2.5 * noiseScale;
+          // Magnitude 4× ensures detection even in high-variance series
+          value += 4 * noiseScale;
           anomalies.push({
             timestamp, seriesId, isAnomaly: true,
             severity: 'high', type: 'collective',

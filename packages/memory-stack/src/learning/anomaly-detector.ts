@@ -310,15 +310,18 @@ export function detectAnomalies(
       let result: { isAnomaly: boolean; zScore: number; severity: AnomalyEvent['severity'] };
 
       if (selectedMethod === 'ensemble') {
-        // Ensemble: flag as anomaly if 2+ of 3 methods agree
+        // Ensemble: flag as anomaly using adaptive voting
+        // - 2+ of 3 methods agree → always anomaly (majority vote)
+        // - 1 of 3 methods flags with very strong signal (|z| > 3.5) → also anomaly
+        //   This catches contextual anomalies that only one method detects
         const zs = zScoreDetection(obs.value, stats, zScoreThreshold);
         const iq = iqrDetection(obs.value, stats, iqrMultiplier);
         const md = madDetection(obs.value, stats, madMultiplier);
-        const votes = [zs, iq, md].filter(r => r.isAnomaly).length;
-        const isAnomaly = votes >= 2;
-        // Use the strongest z-score and highest severity from agreeing methods
         const allResults = [zs, iq, md];
+        const votes = allResults.filter(r => r.isAnomaly).length;
         const maxAbsZ = Math.max(...allResults.map(r => Math.abs(r.zScore)));
+        // Adaptive: majority vote OR single-method with strong z-score
+        const isAnomaly = votes >= 2 || (votes >= 1 && maxAbsZ > 3.5);
         const bestSeverity = allResults.reduce((best, r) => {
           const order = { critical: 0, high: 1, medium: 2, low: 3 };
           return order[r.severity] < order[best.severity] ? r : best;
