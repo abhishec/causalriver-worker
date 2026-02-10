@@ -6,13 +6,14 @@
  * then trains the federated causal intelligence brain through all 7 layers
  * and verifies Expert-level performance.
  *
- * 6-Stage Pipeline:
- *   STAGE 1: FETCH     — Wikipedia Content + 10 Public APIs (FRED, GitHub, etc.)
- *   STAGE 2: LOAD      — 41+ Static Packs + 10 Built-in Library Packs
- *   STAGE 3: CONVERT   — All data → ConnectorSignals + TrainingPacks
- *   STAGE 4: TRAIN     — Feed everything through brain-trainer (in-memory)
- *   STAGE 5: BENCHMARK — Run full 7-layer suite with federated discovery
- *   STAGE 6: REPORT    — Display per-layer Expert status
+ * 7-Stage Pipeline:
+ *   STAGE 1:   FETCH     — Wikipedia Content + 10 Public APIs (FRED, GitHub, etc.)
+ *   STAGE 2:   LOAD      — 80+ Static Packs + 10 Built-in Library Packs
+ *   STAGE 3:   CONVERT   — All data → ConnectorSignals + TrainingPacks
+ *   STAGE 3.5: NLP       — Raw Wikipedia text → NLP Pipeline → additional TrainingPacks
+ *   STAGE 4:   TRAIN     — Feed everything through brain-trainer (in-memory)
+ *   STAGE 5:   BENCHMARK — Run full 7-layer suite with federated discovery
+ *   STAGE 6:   REPORT    — Display per-layer Expert status
  *
  * No Supabase required — runs entirely in-memory (Tier 1).
  * Optionally persists to Supabase if credentials are available.
@@ -84,6 +85,9 @@ import { convertAllFetchedData } from './training-data/training-pack-factory';
 // ── Training Data: Wikipedia Content ──
 import { fetchWikipediaContent, type WikiArticleContent } from './training-data/wikipedia-content-fetcher';
 import { wikiContentToSignals, buildWikiTrainingPacks } from './training-data/wikipedia-knowledge-packs';
+
+// ── NLP Pipeline ──
+import { processDocuments } from '../packages/memory-stack/src/core/nlp';
 
 // ── Training Data: Static Packs (10 domain modules, 41+ packs) ──
 import { MACRO_ECONOMIC_PACKS } from './training-data/macro-economic-packs';
@@ -372,6 +376,49 @@ function convertToNexusBrainFormat(fetched: FetchedData): ConvertedData {
 }
 
 // ============================================================================
+// STAGE 3.5: NLP DEEP PROCESSING
+// ============================================================================
+
+function runNLPPipeline(fetched: FetchedData, converted: ConvertedData): TrainingPack[] {
+  if (IS_OFFLINE || fetched.wikiContent.length === 0) {
+    logVerbose('NLP', 'Skipping NLP pipeline (no wiki content available)');
+    return [];
+  }
+
+  divider('STAGE 3.5: NLP DEEP PROCESSING');
+  log('NLP', `Processing ${fetched.wikiContent.length} Wikipedia articles through NLP pipeline...`);
+
+  // Build document inputs from wiki content
+  const documents = fetched.wikiContent.map(article => {
+    const fullText = [
+      article.extract || '',
+      ...article.sections.map(s => `${s.title}. ${s.content}`),
+    ].join('\n\n');
+
+    return {
+      text: fullText,
+      id: `wiki-${article.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
+      title: article.title,
+      domain: article.domain || 'strategy',
+    };
+  });
+
+  const nlpPacks = processDocuments(documents, {
+    chunkSize: 512,
+    chunkOverlap: 64,
+    maxCausalStatements: 30,
+    maxRelationships: 50,
+  });
+
+  log('NLP', `NLP pipeline produced ${nlpPacks.length} training packs from ${documents.length} articles`);
+
+  // Add NLP packs to the dynamic packs
+  converted.dynamicPacks.push(...nlpPacks);
+
+  return nlpPacks;
+}
+
+// ============================================================================
 // STAGE 4: TRAIN BRAIN IN-MEMORY
 // ============================================================================
 
@@ -479,6 +526,7 @@ function displayReport(
   fetched: FetchedData,
   loaded: LoadedPacks,
   converted: ConvertedData,
+  nlpPacks: TrainingPack[],
   training: TrainingResult,
   benchmark: ReturnType<typeof runBenchmarkSuite>,
 ): void {
@@ -492,6 +540,9 @@ function displayReport(
     console.log(`    Public APIs:         ${apiCount}/9 sources (FRED, GitHub, World Bank, HN, BLS, SO, IMF, USPTO, Wiki)`);
     console.log(`    Dynamic Signals:     ${converted.signals.length}`);
     console.log(`    Dynamic Packs:       ${converted.dynamicPacks.length}`);
+    if (nlpPacks.length > 0) {
+      console.log(`    NLP Packs:           ${nlpPacks.length} (raw text → causal knowledge)`);
+    }
   } else {
     console.log('    (Offline mode — no API data fetched)');
   }
@@ -548,6 +599,9 @@ async function main(): Promise<void> {
   // Stage 3: Convert to NexusBrain format
   const converted = convertToNexusBrainFormat(fetched);
 
+  // Stage 3.5: NLP Deep Processing (raw text → additional TrainingPacks)
+  const nlpPacks = runNLPPipeline(fetched, converted);
+
   // Stage 4: Train brain in-memory
   const training = trainBrainInMemory(loaded, converted);
 
@@ -555,7 +609,7 @@ async function main(): Promise<void> {
   const benchmark = runBenchmarkSuite();
 
   // Stage 6: Display results
-  displayReport(fetched, loaded, converted, training, benchmark);
+  displayReport(fetched, loaded, converted, nlpPacks, training, benchmark);
 
   // Final
   const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);

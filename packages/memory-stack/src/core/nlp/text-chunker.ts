@@ -45,6 +45,9 @@ const DEFAULT_CONFIG: Required<ChunkerConfig> = {
  */
 export function stripMarkup(text: string): string {
   return text
+    // Remove reference tags (must come before generic HTML tag removal)
+    .replace(/<ref[^>]*>[\s\S]*?<\/ref>/g, '')
+    .replace(/<ref[^/]*\/>/g, '')
     // Remove HTML tags
     .replace(/<[^>]+>/g, '')
     // Remove wiki templates {{...}}
@@ -57,9 +60,6 @@ export function stripMarkup(text: string): string {
     .replace(/'{2,3}/g, '')
     // Remove wiki tables
     .replace(/\{\|[\s\S]*?\|\}/g, '')
-    // Remove reference tags
-    .replace(/<ref[^>]*>[\s\S]*?<\/ref>/g, '')
-    .replace(/<ref[^/]*\/>/g, '')
     // Normalize whitespace
     .replace(/\n{3,}/g, '\n\n')
     .replace(/[ \t]+/g, ' ')

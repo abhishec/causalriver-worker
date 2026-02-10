@@ -76,6 +76,8 @@ const CAUSAL_PATTERNS: CausalPattern[] = [
     type: 'consequence', causeGroup: 1, effectGroup: 2, confidence: 0.80 },
   { regex: /(?:because|since|due to)\s+(.{10,80}?),\s*(.{10,80}?)(?:\.|$)/gi,
     type: 'consequence', causeGroup: 1, effectGroup: 2, confidence: 0.80 },
+  { regex: /(.{10,80}?)\s+(?:because|since|due to)\s+(.{10,80}?)(?:\.|$)/gi,
+    type: 'consequence', causeGroup: 2, effectGroup: 1, confidence: 0.75 },
 
   // Family 6: Inhibition
   { regex: /(.{10,80}?)\s+(?:prevents?|inhibits?|blocks?)\s+(.{10,80}?)(?:\.|,|$)/gi,
