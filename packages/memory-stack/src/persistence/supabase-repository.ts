@@ -64,6 +64,10 @@ export interface RelationshipUpsertParams {
   naturalLanguage?: string;
   sampleSize?: number;
   isSignificant?: boolean;
+  knockoutScore?: number;
+  isLikelyConfounded?: boolean;
+  coefficientSign?: number;
+  discoveryMethod?: string;
 }
 
 export interface ActivityLogEntry {
@@ -307,7 +311,7 @@ export function createSupabaseRepository(
     // ── Causal Relationships ───────────────────────────────────────
 
     async upsertRelationship(rel: RelationshipUpsertParams): Promise<void> {
-      const row = {
+      const row: Record<string, unknown> = {
         organization_id: organizationId,
         source_domain: rel.sourceDomain,
         target_domain: rel.targetDomain,
@@ -321,6 +325,11 @@ export function createSupabaseRepository(
         is_significant: rel.isSignificant ?? (rel.pValue < 0.05),
         last_computed_at: new Date().toISOString(),
       };
+      // Confounder metadata from apex discovery (CausalRivers-proven)
+      if (rel.knockoutScore !== undefined) row.knockout_score = rel.knockoutScore;
+      if (rel.isLikelyConfounded !== undefined) row.is_likely_confounded = rel.isLikelyConfounded;
+      if (rel.coefficientSign !== undefined) row.coefficient_sign = rel.coefficientSign;
+      if (rel.discoveryMethod !== undefined) row.discovery_method = rel.discoveryMethod;
 
       const { error } = await supabase
         .from('causal_relationships_statistical')

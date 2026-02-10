@@ -138,21 +138,29 @@ export function createScheduledJobs(
       // Store new results
       if (result.discovered_relationships.length > 0) {
         await supabase.from('causal_relationships_statistical').upsert(
-          result.discovered_relationships.map((r) => ({
-            organization_id: r.organization_id,
-            source_domain: r.source_domain,
-            target_domain: r.target_domain,
-            granger_f_statistic: r.granger_f_statistic,
-            granger_p_value: r.granger_p_value,
-            optimal_lag_days: r.optimal_lag_days,
-            effect_size: r.effect_size,
-            confidence_interval_lower: r.confidence_interval_lower,
-            confidence_interval_upper: r.confidence_interval_upper,
-            natural_language: r.natural_language,
-            sample_size: r.sample_size,
-            is_significant: r.is_significant,
-            last_computed_at: new Date().toISOString(),
-          })),
+          result.discovered_relationships.map((r) => {
+            const row: Record<string, unknown> = {
+              organization_id: r.organization_id,
+              source_domain: r.source_domain,
+              target_domain: r.target_domain,
+              granger_f_statistic: r.granger_f_statistic,
+              granger_p_value: r.granger_p_value,
+              optimal_lag_days: r.optimal_lag_days,
+              effect_size: r.effect_size,
+              confidence_interval_lower: r.confidence_interval_lower,
+              confidence_interval_upper: r.confidence_interval_upper,
+              natural_language: r.natural_language,
+              sample_size: r.sample_size,
+              is_significant: r.is_significant,
+              last_computed_at: new Date().toISOString(),
+            };
+            // Confounder metadata from apex discovery
+            if (r.knockout_score !== undefined) row.knockout_score = r.knockout_score;
+            if (r.is_likely_confounded !== undefined) row.is_likely_confounded = r.is_likely_confounded;
+            if (r.coefficient_sign !== undefined) row.coefficient_sign = r.coefficient_sign;
+            if (r.discovery_method !== undefined) row.discovery_method = r.discovery_method;
+            return row;
+          }),
           { onConflict: 'organization_id,source_domain,target_domain' }
         );
       }

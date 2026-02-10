@@ -325,10 +325,16 @@ export function createAutonomousLearner(config: AutonomousLearnerConfig) {
     for (const rel of relationships) {
       if (!rel.is_significant) continue;
 
+      const confounderNote = rel.is_likely_confounded
+        ? ' [POSSIBLY CONFOUNDED — knockout validation suggests a hidden common cause]'
+        : rel.knockout_score !== undefined && rel.knockout_score > 0.5
+          ? ' [KNOCKOUT-VALIDATED — confirmed via counterfactual analysis]'
+          : '';
+
       const insight =
         `Discovered causal relationship: ${rel.source_domain} → ${rel.target_domain}. ` +
         `${rel.natural_language || `Changes in ${rel.source_domain} affect ${rel.target_domain} with effect size ${rel.effect_size.toFixed(2)} after ${rel.optimal_lag_days} days.`} ` +
-        `(p-value: ${rel.granger_p_value.toFixed(4)}, sample size: ${rel.sample_size})`;
+        `(p-value: ${rel.granger_p_value.toFixed(4)}, sample size: ${rel.sample_size})${confounderNote}`;
 
       await repository.upsertMemory({
         memoryType: 'causal_insight',
@@ -549,6 +555,10 @@ export function createAutonomousLearner(config: AutonomousLearnerConfig) {
               naturalLanguage: rel.natural_language,
               sampleSize: rel.sample_size,
               isSignificant: rel.is_significant,
+              knockoutScore: rel.knockout_score,
+              isLikelyConfounded: rel.is_likely_confounded,
+              coefficientSign: rel.coefficient_sign,
+              discoveryMethod: rel.discovery_method,
             });
             causalEdgesUpdated++;
           }

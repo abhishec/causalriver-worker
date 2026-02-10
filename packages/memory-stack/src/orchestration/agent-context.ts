@@ -26,6 +26,9 @@ export interface AgentCausalEdge {
   effectSize: number;
   lagDays: number;
   naturalLanguage: string;
+  knockoutScore?: number;
+  isLikelyConfounded?: boolean;
+  coefficientSign?: number;
 }
 
 /**
@@ -52,6 +55,10 @@ export interface AgentContext {
     dominantChain?: string;
     /** Total causal edges involving this domain */
     totalEdges: number;
+    /** Count of edges flagged as possibly confounded */
+    confoundedEdgeCount?: number;
+    /** Count of knockout-validated edges */
+    validatedEdgeCount?: number;
   };
 }
 
@@ -183,7 +190,7 @@ export function createAgentContextManager(options: {
 
           const { data: edges } = await supabase
             .from('causal_graph_edges')
-            .select('source_domain, target_domain, effect_size, optimal_lag_days, natural_language, is_significant')
+            .select('source_domain, target_domain, effect_size, optimal_lag_days, natural_language, is_significant, knockout_score, is_likely_confounded, coefficient_sign')
             .eq('organization_id', organizationId)
             .eq('is_significant', true);
 
@@ -199,6 +206,9 @@ export function createAgentContextManager(options: {
                 lagDays: (e.optimal_lag_days as number) || 0,
                 naturalLanguage: (e.natural_language as string) ||
                   `${e.source_domain} → ${e.target_domain}`,
+                knockoutScore: (e.knockout_score as number) ?? undefined,
+                isLikelyConfounded: (e.is_likely_confounded as boolean) ?? undefined,
+                coefficientSign: (e.coefficient_sign as number) ?? undefined,
               };
 
               // If agent owns a specific domain, filter relevant edges
@@ -228,8 +238,12 @@ export function createAgentContextManager(options: {
                 `${strongest_upstream.sourceDomain} → ${agentDomain || '?'} → ${strongest_downstream.targetDomain}`;
             }
 
-            const totalEdges = downstreamEffects.length + upstreamCauses.length;
+            const allContextEdges = [...downstreamEffects, ...upstreamCauses];
+            const totalEdges = allContextEdges.length;
             if (totalEdges > 0) {
+              const confoundedEdgeCount = allContextEdges.filter(e => e.isLikelyConfounded).length;
+              const validatedEdgeCount = allContextEdges.filter(e => e.knockoutScore !== undefined && e.knockoutScore > 0.5 && !e.isLikelyConfounded).length;
+
               causalContext = {
                 downstreamEffects: downstreamEffects
                   .sort((a, b) => Math.abs(b.effectSize) - Math.abs(a.effectSize))
@@ -239,6 +253,8 @@ export function createAgentContextManager(options: {
                   .slice(0, 10),
                 dominantChain,
                 totalEdges,
+                confoundedEdgeCount,
+                validatedEdgeCount,
               };
             }
           }

@@ -44,6 +44,8 @@ export interface AnomalyEvent {
   detectedAt: Date;
   /** Percentile of this observation */
   percentile: number;
+  /** Whether upstream causal edges are confounded (may be a false alarm) */
+  possiblyConfounded?: boolean;
 }
 
 /**
@@ -60,6 +62,14 @@ export interface AnomalyConfig {
   madMultiplier?: number;
   /** Minimum sample size for detection (default 10) */
   minSampleSize?: number;
+  /** Optional causal edges for confounder-aware anomaly detection */
+  causalEdges?: Array<{
+    sourceDomain: string;
+    targetDomain: string;
+    effectSize: number;
+    lagDays: number;
+    isLikelyConfounded?: boolean;
+  }>;
 }
 
 /**

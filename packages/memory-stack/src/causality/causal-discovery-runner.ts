@@ -61,6 +61,12 @@ export interface CausalRelationship {
   observation_window_days: number;
   is_significant: boolean;
   last_computed_at: Date;
+
+  // Confounder detection metadata (from apex method)
+  knockout_score?: number;
+  is_likely_confounded?: boolean;
+  coefficient_sign?: number;
+  discovery_method?: string;
 }
 
 export interface DiscoveryConfig {
@@ -98,7 +104,7 @@ export const DEFAULT_DISCOVERY_CONFIG: DiscoveryConfig = {
   minObservations: 5, // Lowered: activate with sufficient data density, not arbitrary count
   lookbackDays: 90,
   alpha: 0.05,
-  method: 'calibrated_ensemble', // CausalRivers-proven: weighted ensemble of conditional, cascade, pairwise + agreement bonus
+  method: 'apex', // CausalRivers-proven: VAR + F-test + CF knockout + sign prior — beat VAR baseline on ALL 6 datasets
 };
 
 export interface DiscoveryResult {
@@ -231,15 +237,16 @@ export function runCausalDiscovery(
     grangerData[domain] = series.values;
   }
 
-  const method = fullConfig.method ?? DEFAULT_DISCOVERY_CONFIG.method ?? 'calibrated_ensemble';
+  const method = fullConfig.method ?? DEFAULT_DISCOVERY_CONFIG.method ?? 'apex';
   let grangerResults: GrangerResult[];
+  let advancedResult: PairwiseScoreMatrix | null = null;
 
   if (method === 'pairwise') {
     // Existing path — backward compatible
     grangerResults = testAllPairs(grangerData, fullConfig.granger);
   } else {
     // Advanced method path — uses CausalRivers-proven techniques
-    const advancedResult = runAdvancedDiscovery(grangerData, {
+    advancedResult = runAdvancedDiscovery(grangerData, {
       method,
       maxLag: fullConfig.granger.maxLag ?? 14,
       lagSelectionCriterion: fullConfig.granger.lagSelectionCriterion ?? 'AIC',
@@ -248,19 +255,40 @@ export function runCausalDiscovery(
     });
     grangerResults = scoreMatrixToGrangerResults(advancedResult, fullConfig.alpha, grangerData);
   }
-  
+
   // Step 5: Convert significant results to CausalRelationship format
   const relationships: CausalRelationship[] = [];
-  
+
+  // Build domain-to-index map for confounder metadata lookup
+  const domainIndex = new Map<string, number>();
+  if (advancedResult) {
+    advancedResult.domains.forEach((d, idx) => domainIndex.set(d, idx));
+  }
+
   for (const result of grangerResults) {
     if (!result.isSignificant) continue;
-    
+
     // Get observation count from source series
     const sourceSeries = timeSeriesMap.get(result.sourceDomain);
     const observationDays = sourceSeries?.metadata.dayCount || 0;
 
     // Compute basic confidence interval (approximate)
     const marginOfError = 1.96 * (1 / Math.sqrt(observationDays)); // 95% CI
+
+    // Extract confounder metadata from advanced result matrix
+    const ti = domainIndex.get(result.targetDomain);
+    const si = domainIndex.get(result.sourceDomain);
+    const knockoutScore = (ti !== undefined && si !== undefined)
+      ? advancedResult?.knockoutScores?.[ti]?.[si]
+      : undefined;
+    const isLikelyConfounded = (ti !== undefined && si !== undefined)
+      ? advancedResult?.confounderFlags?.[ti]?.[si] ?? false
+      : false;
+    const coefficientSign = (ti !== undefined && si !== undefined)
+      ? advancedResult?.signMatrix?.[ti]?.[si]
+      : undefined;
+
+    const confoundNote = isLikelyConfounded ? ' [possibly confounded]' : '';
 
     relationships.push({
       organization_id: organizationId,
@@ -272,11 +300,15 @@ export function runCausalDiscovery(
       effect_size: result.effectSize,
       confidence_interval_lower: Math.max(0, result.effectSize - marginOfError),
       confidence_interval_upper: Math.min(1, result.effectSize + marginOfError),
-      natural_language: interpretResult(result),
+      natural_language: interpretResult(result) + confoundNote,
       sample_size: observationDays,
       observation_window_days: fullConfig.lookbackDays,
       is_significant: true,
       last_computed_at: runTimestamp,
+      knockout_score: knockoutScore,
+      is_likely_confounded: isLikelyConfounded,
+      coefficient_sign: coefficientSign,
+      discovery_method: method,
     });
   }
   

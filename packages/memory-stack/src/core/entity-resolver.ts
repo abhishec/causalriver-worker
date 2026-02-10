@@ -64,6 +64,9 @@ export interface UnifiedEntityView {
     targetDomain: string;
     effectSize: number;
     naturalLanguage: string;
+    knockoutScore?: number;
+    isLikelyConfounded?: boolean;
+    coefficientSign?: number;
   }>;
 }
 
@@ -368,7 +371,7 @@ export function createEntityResolver(config: EntityResolverConfig) {
       // domains appear as source OR target (org + core brain)
       const { data: edges } = await supabase
         .from('causal_graph_edges')
-        .select('source_domain, target_domain, effect_size, natural_language, is_significant')
+        .select('source_domain, target_domain, effect_size, natural_language, is_significant, knockout_score, is_likely_confounded, coefficient_sign')
         .in('organization_id', [organizationId, CORE_BRAIN_ORG_ID])
         .eq('is_significant', true);
 
@@ -385,6 +388,9 @@ export function createEntityResolver(config: EntityResolverConfig) {
               naturalLanguage:
                 (edge.natural_language as string) ||
                 `${src} causally affects ${tgt} (effect: ${((edge.effect_size as number) || 0).toFixed(2)})`,
+              knockoutScore: (edge.knockout_score as number) ?? undefined,
+              isLikelyConfounded: (edge.is_likely_confounded as boolean) ?? undefined,
+              coefficientSign: (edge.coefficient_sign as number) ?? undefined,
             });
           }
         }

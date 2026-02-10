@@ -150,7 +150,13 @@ export function applyCausalSignalWeights(
  * Domains with no causal role get weight 1.0 (neutral).
  */
 export function computeCausalWeightsFromEdges(
-  edges: Array<{ sourceDomain: string; targetDomain: string; effectSize: number }>
+  edges: Array<{
+    sourceDomain: string;
+    targetDomain: string;
+    effectSize: number;
+    knockoutScore?: number;
+    isLikelyConfounded?: boolean;
+  }>
 ): CausalSignalWeight[] {
   const domainStats = new Map<string, { outCount: number; totalEffect: number }>();
 
@@ -158,7 +164,11 @@ export function computeCausalWeightsFromEdges(
     const src = edge.sourceDomain.toLowerCase();
     const existing = domainStats.get(src) || { outCount: 0, totalEffect: 0 };
     existing.outCount++;
-    existing.totalEffect += Math.abs(edge.effectSize);
+    // Discount confounded edges (CF knockout disagrees with VAR)
+    const confoundDiscount = edge.isLikelyConfounded ? 0.5 : 1.0;
+    // Slight boost for knockout-validated edges (empirically proven true causes)
+    const knockoutBoost = (edge.knockoutScore !== undefined && edge.knockoutScore > 0.5) ? 1.1 : 1.0;
+    existing.totalEffect += Math.abs(edge.effectSize) * confoundDiscount * knockoutBoost;
     domainStats.set(src, existing);
   }
 

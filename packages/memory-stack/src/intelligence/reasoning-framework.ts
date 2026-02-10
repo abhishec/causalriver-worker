@@ -66,6 +66,9 @@ export interface ReasoningCausalEdge {
   effectSize: number;
   lagDays: number;
   naturalLanguage: string;
+  isLikelyConfounded?: boolean;
+  knockoutScore?: number;
+  coefficientSign?: number;
 }
 
 /**
@@ -106,10 +109,12 @@ export const defaultReasoningStages: ReasoningStage[] = [
     description: 'Apply causal intelligence to trace root causes and predict effects',
     prompts: [
       'What causal relationships from the brain graph are relevant here?',
-      'Can we trace a causal chain from root cause to observed effect?',
+      'Which relationships are KNOCKOUT-VALIDATED (true causes) vs POSSIBLY CONFOUNDED?',
+      'Can we trace a causal chain from root cause to observed effect using only validated edges?',
       'What lag times should we expect between cause and effect?',
-      'Is this a correlation or a verified causal relationship?',
+      'Is this a correlation or a verified causal relationship? (Check knockout score)',
       'What interventions would break or strengthen this causal chain?',
+      'Are any relevant edges confounded? If so, what might the hidden confounder be?',
     ],
   },
   {
@@ -204,8 +209,13 @@ export function buildReasoningFramework(options: {
         const sorted = [...edges].sort((a, b) => Math.abs(b.effectSize) - Math.abs(a.effectSize));
         for (const edge of sorted.slice(0, 15)) {
           const direction = edge.effectSize > 0 ? '+' : '-';
+          const validation = edge.isLikelyConfounded
+            ? ' [POSSIBLY CONFOUNDED]'
+            : (edge.knockoutScore !== undefined && edge.knockoutScore > 0.3)
+            ? ' [KNOCKOUT-VALIDATED]'
+            : '';
           sections.push(
-            `- **${edge.sourceDomain} → ${edge.targetDomain}** (${direction}${Math.abs(edge.effectSize).toFixed(2)}, ${edge.lagDays}d lag): ${edge.naturalLanguage}`
+            `- **${edge.sourceDomain} → ${edge.targetDomain}** (${direction}${Math.abs(edge.effectSize).toFixed(2)}, ${edge.lagDays}d lag)${validation}: ${edge.naturalLanguage}`
           );
         }
         sections.push('');

@@ -64,6 +64,8 @@ export interface PersonaCausalEdge {
   effectSize: number;
   lagDays: number;
   naturalLanguage: string;
+  isLikelyConfounded?: boolean;
+  knockoutScore?: number;
 }
 
 /**
@@ -128,16 +130,38 @@ export function buildPersonaPrompt(
       sections.push(`The organization's causal graph reveals these cross-domain relationships affecting your domain:\n`);
 
       if (upstream.length > 0) {
-        sections.push(`**What drives your metrics (upstream causes):**`);
-        for (const edge of upstream.sort((a, b) => Math.abs(b.effectSize) - Math.abs(a.effectSize)).slice(0, 5)) {
-          sections.push(`- ${edge.naturalLanguage} (effect: ${edge.effectSize.toFixed(2)}, lag: ${edge.lagDays}d)`);
+        const verifiedUp = upstream.filter(e => !e.isLikelyConfounded);
+        const possibleUp = upstream.filter(e => e.isLikelyConfounded);
+
+        if (verifiedUp.length > 0) {
+          sections.push(`**Verified upstream causes (knockout-validated):**`);
+          for (const edge of verifiedUp.sort((a, b) => Math.abs(b.effectSize) - Math.abs(a.effectSize)).slice(0, 5)) {
+            sections.push(`- ${edge.naturalLanguage} (effect: ${edge.effectSize.toFixed(2)}, lag: ${edge.lagDays}d)`);
+          }
+        }
+        if (possibleUp.length > 0) {
+          sections.push(`\n**Possible correlations (may be confounded):**`);
+          for (const edge of possibleUp.sort((a, b) => Math.abs(b.effectSize) - Math.abs(a.effectSize)).slice(0, 3)) {
+            sections.push(`- ${edge.naturalLanguage} (effect: ${edge.effectSize.toFixed(2)}, lag: ${edge.lagDays}d) [POSSIBLY CONFOUNDED]`);
+          }
         }
       }
 
       if (downstream.length > 0) {
-        sections.push(`\n**What your domain affects (downstream effects):**`);
-        for (const edge of downstream.sort((a, b) => Math.abs(b.effectSize) - Math.abs(a.effectSize)).slice(0, 5)) {
-          sections.push(`- ${edge.naturalLanguage} (effect: ${edge.effectSize.toFixed(2)}, lag: ${edge.lagDays}d)`);
+        const verifiedDown = downstream.filter(e => !e.isLikelyConfounded);
+        const possibleDown = downstream.filter(e => e.isLikelyConfounded);
+
+        if (verifiedDown.length > 0) {
+          sections.push(`\n**Verified downstream effects (knockout-validated):**`);
+          for (const edge of verifiedDown.sort((a, b) => Math.abs(b.effectSize) - Math.abs(a.effectSize)).slice(0, 5)) {
+            sections.push(`- ${edge.naturalLanguage} (effect: ${edge.effectSize.toFixed(2)}, lag: ${edge.lagDays}d)`);
+          }
+        }
+        if (possibleDown.length > 0) {
+          sections.push(`\n**Possible downstream effects (may be confounded):**`);
+          for (const edge of possibleDown.sort((a, b) => Math.abs(b.effectSize) - Math.abs(a.effectSize)).slice(0, 3)) {
+            sections.push(`- ${edge.naturalLanguage} (effect: ${edge.effectSize.toFixed(2)}, lag: ${edge.lagDays}d) [POSSIBLY CONFOUNDED]`);
+          }
         }
       }
 

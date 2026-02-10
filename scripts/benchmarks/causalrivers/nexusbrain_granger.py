@@ -985,6 +985,638 @@ def _normalize_scores(scores: np.ndarray) -> np.ndarray:
 
 
 # =============================================================================
+# WORLD-CLASS HELPERS AND METHODS
+# =============================================================================
+
+def _robust_normalize_scores(scores: np.ndarray) -> np.ndarray:
+    """
+    Robust normalization using 5th/95th percentiles instead of fragile min/max.
+    This prevents a single outlier from compressing all other scores to near-zero.
+    """
+    mask = np.eye(scores.shape[0], dtype=bool) if scores.ndim == 2 else None
+    if mask is not None:
+        flat = scores[~mask]
+    else:
+        flat = scores.flatten()
+
+    if len(flat) < 2 or flat.max() - flat.min() < 1e-15:
+        return np.zeros_like(scores)
+
+    p5 = np.percentile(flat, 5)
+    p95 = np.percentile(flat, 95)
+    if p95 - p5 < 1e-15:
+        # Fallback to min-max
+        p5 = flat.min()
+        p95 = flat.max()
+        if p95 - p5 < 1e-15:
+            return np.zeros_like(scores)
+
+    normed = (scores - p5) / (p95 - p5)
+    return np.clip(normed, 0.0, 1.0)
+
+
+def _detect_nonlinearity(
+    data: pd.DataFrame,
+    max_lag: int = 5,
+    threshold: float = 0.05,
+    verbose: bool = False,
+) -> bool:
+    """
+    Detect whether data has significant nonlinear dynamics.
+
+    Strategy: Fit a linear VAR(1), then test residuals for non-Gaussianity
+    using the Jarque-Bera test. If >50% of variables show non-Gaussian
+    residuals (p < threshold), the data likely has nonlinear dynamics.
+    """
+    from scipy.stats import jarque_bera
+
+    values = data.values
+    n_vars = values.shape[1]
+    T = values.shape[0]
+
+    if T < 20 or n_vars < 2:
+        return False
+
+    try:
+        # Fit simple VAR(1) via OLS
+        lag = min(max_lag, max(1, T // (5 * n_vars)))
+        Y = values[lag:]  # (T-lag, N)
+        X = np.ones((T - lag, 1 + n_vars * lag))  # intercept + lagged vars
+        for l in range(1, lag + 1):
+            X[:, 1 + (l - 1) * n_vars : 1 + l * n_vars] = values[lag - l : T - l]
+
+        # OLS: beta = (X'X)^-1 X'Y
+        beta, _, _, _ = np.linalg.lstsq(X, Y, rcond=None)
+        residuals = Y - X @ beta
+
+        # Test each variable's residuals for non-Gaussianity
+        n_nongaussian = 0
+        for col in range(n_vars):
+            res = residuals[:, col]
+            if np.std(res) < 1e-10:
+                continue
+            _, p_val = jarque_bera(res)
+            if p_val < threshold:
+                n_nongaussian += 1
+
+        is_nonlinear = n_nongaussian > n_vars / 2
+
+        if verbose:
+            print(f"  Nonlinearity test: {n_nongaussian}/{n_vars} vars non-Gaussian → {'NONLINEAR' if is_nonlinear else 'LINEAR'}")
+
+        return is_nonlinear
+
+    except Exception:
+        return False
+
+
+def pcmci_plus_scoring(
+    data: pd.DataFrame,
+    max_lag: int = 5,
+    alpha: float = 0.05,
+    nonlinear: bool = False,
+    verbose: bool = False,
+) -> np.ndarray:
+    """
+    PCMCI+ scoring via Tigramite — gold standard for time series causal discovery.
+
+    Runs both PCMCI+ (handles contemporaneous + lagged) and standard PCMCI
+    (often more powerful for purely lagged links), takes the stronger evidence.
+
+    Returns NexusBrain convention: scores[i,j] = j causes i.
+
+    Args:
+        nonlinear: If True, uses RobustParCorr (rank-based, handles nonlinear monotonic)
+                   If False, uses ParCorr (standard partial correlation)
+    """
+    try:
+        from tigramite import data_processing as pp
+        from tigramite.pcmci import PCMCI
+        from tigramite.independence_tests.parcorr import ParCorr
+    except ImportError:
+        if verbose:
+            print("  tigramite not available, falling back to conditional Granger")
+        return conditional_granger_scoring(data, max_lag=max_lag, verbose=verbose)
+
+    values = data.values
+    n_vars = values.shape[1]
+    T = values.shape[0]
+
+    if n_vars < 2 or T < 3 * max_lag + 2:
+        return np.zeros((n_vars, n_vars))
+
+    try:
+        # Choose independence test based on linearity
+        if nonlinear:
+            try:
+                from tigramite.independence_tests.robust_parcorr import RobustParCorr
+                ci_test = RobustParCorr(significance="analytic")
+            except ImportError:
+                ci_test = ParCorr(significance="analytic")
+        else:
+            ci_test = ParCorr(significance="analytic")
+
+        # Setup Tigramite dataframe
+        var_names = [f"V{i}" for i in range(n_vars)]
+        dataframe = pp.DataFrame(values, var_names=var_names)
+
+        pcmci = PCMCI(dataframe=dataframe, cond_ind_test=ci_test, verbosity=0)
+
+        # Run PCMCI+ (includes contemporaneous tau=0)
+        results_plus = pcmci.run_pcmciplus(tau_min=0, tau_max=max_lag, pc_alpha=alpha)
+
+        # Also run standard PCMCI (lagged only, often more powerful)
+        results_lag = pcmci.run_pcmci(tau_min=1, tau_max=max_lag, pc_alpha=alpha)
+
+        val_plus = results_plus["val_matrix"]  # (N, N, tau_max+1)
+        p_plus = results_plus["p_matrix"]
+        val_lag = results_lag["val_matrix"]
+        p_lag = results_lag["p_matrix"]
+
+        # Tigramite convention: val_matrix[target, source, tau] = test stat for source(t-tau)->target(t)
+        # This IS NexusBrain convention: scores[target, source] = source causes target
+        scores = np.zeros((n_vars, n_vars))
+
+        for tgt in range(n_vars):
+            for src in range(n_vars):
+                if src == tgt:
+                    continue
+
+                best_score = 0.0
+                best_pval = 1.0
+
+                # From PCMCI+ (includes tau=0)
+                for tau in range(val_plus.shape[2]):
+                    val = np.abs(val_plus[tgt, src, tau])
+                    pval = p_plus[tgt, src, tau]
+                    if val > best_score:
+                        best_score = val
+                        best_pval = pval
+
+                # From standard PCMCI (often more powerful for lagged)
+                for tau in range(val_lag.shape[2]):
+                    val = np.abs(val_lag[tgt, src, tau])
+                    pval = p_lag[tgt, src, tau]
+                    if val > best_score:
+                        best_score = val
+                        best_pval = pval
+
+                # Use -log10(p) for better discrimination
+                if 0 < best_pval < 1:
+                    score = -np.log10(max(best_pval, 1e-30))
+                else:
+                    score = best_score
+
+                scores[tgt, src] = score
+
+        np.fill_diagonal(scores, 0)
+
+        if verbose:
+            print(f"  PCMCI+ scoring complete ({'RobustParCorr' if nonlinear else 'ParCorr'})")
+
+        return scores
+
+    except Exception as e:
+        if verbose:
+            print(f"  PCMCI+ failed: {e}, falling back to conditional Granger")
+        return conditional_granger_scoring(data, max_lag=max_lag, verbose=verbose)
+
+
+def ridge_conditional_granger_scoring(
+    data: pd.DataFrame,
+    max_lag: int = 5,
+    criterion: str = "aic",
+    verbose: bool = False,
+) -> np.ndarray:
+    """
+    Ridge-regularized conditional Granger causality.
+
+    Unlike standard conditional Granger (which falls back to bivariate when
+    n_obs <= n_params + 5), this NEVER falls back. Ridge regression handles
+    any N/T ratio gracefully, including high-dimensional cases.
+
+    F-test: compare restricted (Y on own lags + other lags) vs unrestricted (+ X lags)
+    using Ridge-regularized RSS.
+
+    Returns NexusBrain convention: scores[i,j] = j causes i.
+    """
+    from sklearn.linear_model import RidgeCV
+
+    values = data.values
+    n_vars = values.shape[1]
+    T = values.shape[0]
+
+    if n_vars < 2:
+        return np.zeros((n_vars, n_vars))
+
+    scores = np.zeros((n_vars, n_vars))
+
+    for i in range(n_vars):
+        for j in range(n_vars):
+            if i == j:
+                continue
+
+            y = values[:, i]  # target
+            x = values[:, j]  # source
+            other_indices = [k for k in range(n_vars) if k != i and k != j]
+
+            if np.std(x) < 1e-10 or np.std(y) < 1e-10:
+                continue
+            if np.any(np.isnan(x)) or np.any(np.isnan(y)):
+                continue
+
+            try:
+                # Select optimal lag
+                opt_lag = select_optimal_lag(x, y, max_lag, criterion)
+                n_obs = T - opt_lag
+
+                if n_obs < 10:
+                    continue
+
+                # Build restricted design matrix: Y lags + other variable lags (no X)
+                # Intercept handled by RidgeCV (fit_intercept=True)
+                n_r_cols = (len(other_indices) + 1) * opt_lag
+                X_r = np.zeros((n_obs, n_r_cols))
+                col_idx = 0
+                # Y lags
+                for l in range(1, opt_lag + 1):
+                    X_r[:, col_idx] = y[opt_lag - l : T - l]
+                    col_idx += 1
+                # Other variable lags
+                for k in other_indices:
+                    for l in range(1, opt_lag + 1):
+                        X_r[:, col_idx] = values[opt_lag - l : T - l, k]
+                        col_idx += 1
+
+                # Build unrestricted: restricted + X lags
+                n_u_cols = n_r_cols + opt_lag
+                X_u = np.zeros((n_obs, n_u_cols))
+                X_u[:, :n_r_cols] = X_r
+                col_idx = n_r_cols
+                for l in range(1, opt_lag + 1):
+                    X_u[:, col_idx] = x[opt_lag - l : T - l]
+                    col_idx += 1
+
+                y_vec = y[opt_lag:]
+
+                # Fit restricted model with Ridge
+                alphas = np.logspace(-3, 3, 10)
+                ridge_r = RidgeCV(alphas=alphas, fit_intercept=True)
+                ridge_r.fit(X_r, y_vec)
+                rss_r = np.sum((y_vec - ridge_r.predict(X_r)) ** 2)
+
+                # Fit unrestricted model with Ridge
+                ridge_u = RidgeCV(alphas=alphas, fit_intercept=True)
+                ridge_u.fit(X_u, y_vec)
+                rss_u = np.sum((y_vec - ridge_u.predict(X_u)) ** 2)
+
+                # Compute effect size (proportional RSS reduction)
+                if rss_r > 0:
+                    effect_size = max(0.0, (rss_r - rss_u) / rss_r)
+                else:
+                    effect_size = 0.0
+
+                # Also compute approximate F-statistic
+                df_num = opt_lag
+                df_den = max(1, n_obs - n_u_cols - 1)
+                if rss_u > 0 and df_den > 0:
+                    f_stat = max(0.0, ((rss_r - rss_u) / df_num) / (rss_u / df_den))
+                    p_value = 1.0 - stats.f.cdf(f_stat, df_num, df_den)
+                    score = -np.log10(max(p_value, 1e-30))
+                else:
+                    score = effect_size * 10.0  # Scale effect size
+
+                scores[i, j] = score
+
+            except Exception as e:
+                if verbose:
+                    print(f"  Ridge CG error {j}->{i}: {e}")
+                scores[i, j] = 0.0
+
+    np.fill_diagonal(scores, 0)
+
+    if verbose:
+        print("  Ridge conditional Granger scoring complete")
+
+    return scores
+
+
+def ksg_transfer_entropy_scoring(
+    data: pd.DataFrame,
+    max_lag: int = 5,
+    k_neighbors: int = 7,
+    verbose: bool = False,
+) -> np.ndarray:
+    """
+    KSG (Kraskov-Stoegbauer-Grassberger) transfer entropy estimation.
+
+    Uses k-nearest-neighbor distances for continuous mutual information estimation.
+    No binning/discretization needed — works directly on continuous data.
+
+    TE(X→Y at lag τ) ≈ I(Y_t ; X_{t-τ} | Y_{t-1})
+                     = H(Y_t | Y_{t-1}) - H(Y_t | Y_{t-1}, X_{t-τ})
+
+    Uses the KSG estimator: MI(X;Y) = ψ(k) - <ψ(n_x + 1) + ψ(n_y + 1)> + ψ(N)
+    where ψ is the digamma function.
+
+    Returns NexusBrain convention: scores[i,j] = j causes i.
+    """
+    from scipy.spatial import cKDTree
+    from scipy.special import digamma
+
+    values = data.values
+    n_vars = values.shape[1]
+    T = values.shape[0]
+
+    if n_vars < 2 or T < 2 * max_lag + k_neighbors + 5:
+        return np.zeros((n_vars, n_vars))
+
+    scores = np.zeros((n_vars, n_vars))
+
+    for tgt in range(n_vars):
+        for src in range(n_vars):
+            if src == tgt:
+                continue
+
+            try:
+                best_te = 0.0
+
+                for tau in range(1, max_lag + 1):
+                    if T - tau < k_neighbors + 5:
+                        continue
+
+                    # Construct embedding vectors
+                    # Y_t (target present), Y_{t-1} (target past), X_{t-τ} (source past)
+                    n_pts = T - tau
+                    y_now = values[tau:, tgt].reshape(-1, 1)       # Y_t
+                    y_past = values[tau - 1 : T - 1, tgt].reshape(-1, 1)  # Y_{t-1}
+                    x_past = values[:n_pts, src].reshape(-1, 1)    # X_{t-τ}
+
+                    # Standardize for numerical stability
+                    for arr in [y_now, y_past, x_past]:
+                        s = np.std(arr)
+                        if s > 1e-10:
+                            arr -= np.mean(arr)
+                            arr /= s
+
+                    # Joint space: (Y_t, Y_{t-1}, X_{t-τ})
+                    joint = np.hstack([y_now, y_past, x_past])
+
+                    # Marginal spaces
+                    marg_yy = np.hstack([y_now, y_past])    # (Y_t, Y_{t-1})
+                    marg_yx = np.hstack([y_past, x_past])   # (Y_{t-1}, X_{t-τ})
+                    marg_y = y_past                          # Y_{t-1}
+
+                    k = min(k_neighbors, n_pts - 1)
+                    if k < 1:
+                        continue
+
+                    # KSG estimator: MI(Y_t; X_{t-τ} | Y_{t-1})
+                    # = ψ(k) - <ψ(n_yy + 1) + ψ(n_yx + 1) - ψ(n_y + 1)>
+                    # where n_yy, n_yx, n_y are neighbor counts within Chebyshev radius
+
+                    # Find k-th neighbor distance in joint space (Chebyshev norm)
+                    tree_joint = cKDTree(joint)
+                    dists, _ = tree_joint.query(joint, k=k + 1, p=np.inf)
+                    eps = dists[:, -1]  # k-th neighbor distance (excluding self)
+
+                    # Count neighbors within eps in each marginal
+                    tree_yy = cKDTree(marg_yy)
+                    tree_yx = cKDTree(marg_yx)
+                    tree_y = cKDTree(marg_y)
+
+                    n_yy = np.array([len(tree_yy.query_ball_point(marg_yy[i], eps[i], p=np.inf)) - 1 for i in range(n_pts)])
+                    n_yx = np.array([len(tree_yx.query_ball_point(marg_yx[i], eps[i], p=np.inf)) - 1 for i in range(n_pts)])
+                    n_y = np.array([len(tree_y.query_ball_point(marg_y[i], eps[i], p=np.inf)) - 1 for i in range(n_pts)])
+
+                    # Avoid digamma(0) — ensure counts are at least 1
+                    n_yy = np.maximum(n_yy, 1)
+                    n_yx = np.maximum(n_yx, 1)
+                    n_y = np.maximum(n_y, 1)
+
+                    # CMI = ψ(k) - mean(ψ(n_yy) + ψ(n_yx) - ψ(n_y))
+                    te = digamma(k) - np.mean(digamma(n_yy) + digamma(n_yx) - digamma(n_y))
+
+                    if te > best_te:
+                        best_te = te
+
+                scores[tgt, src] = max(0.0, best_te)
+
+            except Exception as e:
+                if verbose:
+                    print(f"  KSG TE error {src}->{tgt}: {e}")
+                scores[tgt, src] = 0.0
+
+    np.fill_diagonal(scores, 0)
+
+    if verbose:
+        print("  KSG Transfer Entropy scoring complete")
+
+    return scores
+
+
+def nexusbrain_world_class(
+    data: pd.DataFrame,
+    max_lag: int = 5,
+    criterion: str = "aic",
+    verbose: bool = False,
+) -> np.ndarray:
+    """
+    NexusBrain World-Class Causal Discovery — the flagship method.
+
+    Adaptive ensemble that selects between linear and nonlinear paths
+    based on data characteristics, combining the best available methods:
+
+    LINEAR path:
+      1. PCMCI+ with ParCorr (weight 4.0) — gold standard constraint-based
+      2. statsmodels VAR coefficients (weight 3.0) — proven strong on linear
+      3. Ridge conditional Granger (weight 2.5) — never falls back to bivariate
+      4. VarLiNGAM (weight 1.5) — structural non-Gaussian model
+      5. Multivariate VAR F-test (weight 1.0) — tie-breaker
+
+    NONLINEAR path:
+      1. PCMCI+ with RobustParCorr (weight 4.0) — rank-based nonlinear
+      2. VarLiNGAM (weight 3.5) — strong for non-Gaussian
+      3. KSG Transfer Entropy (weight 3.0) — captures nonlinear flow
+      4. Ridge conditional Granger (weight 2.0) — baseline
+      5. statsmodels VAR coefficients (weight 1.5) — linear reference
+
+    Returns NexusBrain convention: scores[i,j] = j causes i.
+    """
+    n_vars = data.shape[1]
+    if n_vars < 2:
+        return np.zeros((n_vars, n_vars))
+
+    if verbose:
+        print("  Running NexusBrain World-Class...")
+
+    # Phase 1: Detect linearity
+    is_nonlinear = _detect_nonlinearity(data, max_lag=max_lag, verbose=verbose)
+
+    # Phase 2: Run component methods
+    component_scores = {}
+    component_weights = {}
+
+    if is_nonlinear:
+        if verbose:
+            print("  NONLINEAR path selected")
+
+        # 1. PCMCI+ with RobustParCorr
+        if verbose:
+            print("    [1/5] PCMCI+ RobustParCorr...")
+        component_scores["pcmci_robust"] = pcmci_plus_scoring(
+            data, max_lag=max_lag, nonlinear=True, verbose=verbose
+        )
+        component_weights["pcmci_robust"] = 4.0
+
+        # 2. VarLiNGAM (strong for non-Gaussian)
+        if verbose:
+            print("    [2/5] VarLiNGAM...")
+        try:
+            s_lingam = varlingam_scoring(data, max_lag=max_lag, verbose=verbose)
+            component_scores["varlingam"] = s_lingam
+            component_weights["varlingam"] = 3.5
+        except Exception:
+            if verbose:
+                print("    VarLiNGAM failed, skipping")
+
+        # 3. KSG Transfer Entropy
+        if verbose:
+            print("    [3/5] KSG Transfer Entropy...")
+        try:
+            s_ksg = ksg_transfer_entropy_scoring(
+                data, max_lag=max_lag, verbose=verbose
+            )
+            if s_ksg.max() > 0:
+                component_scores["ksg_te"] = s_ksg
+                component_weights["ksg_te"] = 3.0
+        except Exception:
+            if verbose:
+                print("    KSG TE failed, skipping")
+
+        # 4. Ridge conditional Granger
+        if verbose:
+            print("    [4/5] Ridge Conditional Granger...")
+        component_scores["ridge_cg"] = ridge_conditional_granger_scoring(
+            data, max_lag=max_lag, criterion=criterion, verbose=verbose
+        )
+        component_weights["ridge_cg"] = 2.0
+
+        # 5. statsmodels VAR coefficients
+        if verbose:
+            print("    [5/5] VAR coefficients...")
+        try:
+            s_var = statsmodels_var_scoring(
+                data, max_lag=max_lag, scoring="signed", verbose=verbose
+            )
+            component_scores["var_signed"] = s_var
+            component_weights["var_signed"] = 1.5
+        except Exception:
+            pass
+
+    else:
+        if verbose:
+            print("  LINEAR path selected")
+
+        # 1. PCMCI+ with ParCorr
+        if verbose:
+            print("    [1/5] PCMCI+ ParCorr...")
+        component_scores["pcmci_parcorr"] = pcmci_plus_scoring(
+            data, max_lag=max_lag, nonlinear=False, verbose=verbose
+        )
+        component_weights["pcmci_parcorr"] = 4.0
+
+        # 2. statsmodels VAR coefficients (signed — best for linear)
+        if verbose:
+            print("    [2/5] VAR coefficients (signed)...")
+        try:
+            s_var = statsmodels_var_scoring(
+                data, max_lag=max_lag, scoring="signed", verbose=verbose
+            )
+            component_scores["var_signed"] = s_var
+            component_weights["var_signed"] = 3.0
+        except Exception:
+            pass
+
+        # 3. Ridge conditional Granger
+        if verbose:
+            print("    [3/5] Ridge Conditional Granger...")
+        component_scores["ridge_cg"] = ridge_conditional_granger_scoring(
+            data, max_lag=max_lag, criterion=criterion, verbose=verbose
+        )
+        component_weights["ridge_cg"] = 2.5
+
+        # 4. VarLiNGAM
+        if verbose:
+            print("    [4/5] VarLiNGAM...")
+        try:
+            s_lingam = varlingam_scoring(data, max_lag=max_lag, verbose=verbose)
+            component_scores["varlingam"] = s_lingam
+            component_weights["varlingam"] = 1.5
+        except Exception:
+            if verbose:
+                print("    VarLiNGAM failed, skipping")
+
+        # 5. Multivariate VAR F-test
+        if verbose:
+            print("    [5/5] Multivariate VAR F-test...")
+        try:
+            s_ftest = multivariate_var_granger(
+                data, max_lag=max_lag, scoring="combined", verbose=verbose
+            )
+            component_scores["var_ftest"] = s_ftest
+            component_weights["var_ftest"] = 1.0
+        except Exception:
+            pass
+
+    # Phase 3: Robust fusion
+    if not component_scores:
+        if verbose:
+            print("  WARNING: No components succeeded, using conditional Granger")
+        return conditional_granger_scoring(data, max_lag=max_lag, criterion=criterion)
+
+    # Normalize each component using robust normalization
+    normalized = {}
+    for name, scores in component_scores.items():
+        normalized[name] = _robust_normalize_scores(scores)
+
+    # Weighted combination
+    total_weight = sum(component_weights[n] for n in normalized)
+    fused = np.zeros((n_vars, n_vars))
+    for name, norm_scores in normalized.items():
+        fused += component_weights[name] * norm_scores
+    fused /= total_weight
+
+    # Agreement voting: edges ranked top-25% by 3+ methods get 40% boost
+    n_edges = n_vars * (n_vars - 1)
+    if n_edges > 0 and len(normalized) >= 3:
+        top_k = max(1, n_edges // 4)
+        agreement = np.zeros((n_vars, n_vars))
+
+        for name, norm_scores in normalized.items():
+            flat = norm_scores.flatten()
+            if len(flat) > top_k:
+                threshold = np.partition(flat, -top_k)[-top_k]
+            else:
+                threshold = 0
+            agreement += (norm_scores >= threshold).astype(float)
+
+        # Edges agreed upon by 3+ methods get a 40% boost
+        min_agreement = min(3, len(normalized))
+        agreement_bonus = (agreement >= min_agreement).astype(float) * 0.4
+        fused *= (1.0 + agreement_bonus)
+
+    # Zero diagonal
+    np.fill_diagonal(fused, 0)
+
+    if verbose:
+        print(f"  World-Class fusion complete: {len(normalized)} components, "
+              f"{'NONLINEAR' if is_nonlinear else 'LINEAR'} path")
+
+    return fused
+
+
+# =============================================================================
 # METHOD 8: REGIME-SPECIFIC MULTIVARIATE VAR (the moonshot)
 # =============================================================================
 
