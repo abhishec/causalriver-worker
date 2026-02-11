@@ -324,6 +324,16 @@ export {
   type SimulationWithPredictions,
 } from './orchestrator/brain-pipeline';
 
+// Context Manager — Working Memory (Prefrontal Cortex)
+export {
+  createContextManager,
+  type ContextManagerConfig,
+  type UserContext,
+  type DomainContext,
+  type OrgContext,
+  type EnrichedQuery,
+} from './orchestrator/context-manager';
+
 export {
   createEntityResolver,
   type EntityResolverConfig,
