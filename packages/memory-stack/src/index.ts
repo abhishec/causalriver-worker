@@ -334,6 +334,13 @@ export {
   type EnrichedQuery,
 } from './orchestrator/context-manager';
 
+// Strategic Priorities API — Amygdala Configuration
+export {
+  createPrioritiesAPI,
+  type PrioritiesAPIConfig,
+  type PriorityInput,
+} from './orchestrator/priorities-api';
+
 export {
   createEntityResolver,
   type EntityResolverConfig,
