@@ -69,6 +69,15 @@ import {
   type ProactiveInsight,
 } from '../packages/memory-stack/src/orchestrator/background-insight-engine';
 
+import {
+  createImpactScorer,
+  type ScorableEvent,
+} from '../packages/memory-stack/src/orchestrator/impact-scorer';
+
+import {
+  createActiveExplorer,
+} from '../packages/memory-stack/src/orchestrator/active-explorer';
+
 // ============================================================================
 // CONFIGURATION
 // ============================================================================
@@ -183,10 +192,31 @@ async function scanOrg(
 
   const result = await engine.scan();
 
-  // Print results
+  // ── Phase 3 WIRING: Score insights through impact scorer ──
   if (result.insights.length > 0) {
-    console.log(`\n  ${label} — ${result.insights.length} insight${result.insights.length !== 1 ? 's' : ''}:`);
-    for (const insight of result.insights) {
+    const scorer = createImpactScorer({
+      supabase,
+      organizationId: orgId,
+      verbose: VERBOSE,
+    });
+
+    const scorableEvents: ScorableEvent[] = result.insights.map(insight => ({
+      id: insight.id,
+      type: 'insight' as const,
+      domains: insight.domains,
+      title: insight.title,
+      description: insight.explanation,
+      rawSeverity: insight.importance,
+      source: 'dmn_engine',
+      timestamp: insight.discoveredAt,
+    }));
+
+    const impactResult = await scorer.scoreBatch(scorableEvents);
+
+    console.log(`\n  ${label} — ${result.insights.length} insight${result.insights.length !== 1 ? 's' : ''} (${impactResult.alerts.length} actionable):`);
+    for (let i = 0; i < result.insights.length; i++) {
+      const insight = result.insights[i];
+      const score = impactResult.scores.find(s => s.eventId === insight.id);
       const emoji = {
         unexpected_correlation: '🔗',
         emerging_cascade: '⚡',
@@ -194,11 +224,34 @@ async function scanOrg(
         knowledge_gap: '🔍',
         prediction_opportunity: '🎯',
       }[insight.type] || '💡';
-      const pct = (insight.importance * 100).toFixed(0);
-      console.log(`    ${emoji} [${pct}%] ${insight.title}`);
+      const impactPct = score ? `${score.compositeScore}/100` : '?';
+      const tier = score?.alertTier ? ` [${score.alertTier.toUpperCase()}]` : '';
+      console.log(`    ${emoji} [impact: ${impactPct}]${tier} ${insight.title}`);
     }
   } else {
     console.log(`  ${label} — No new insights (brain is up to date)`);
+  }
+
+  // ── Phase 5 WIRING: Active exploration — ask for food ──
+  try {
+    const explorer = createActiveExplorer({
+      supabase,
+      organizationId: orgId,
+      maxRequests: 5,
+      verbose: VERBOSE,
+    });
+
+    const exploration = await explorer.explore();
+    if (exploration.requests.length > 0) {
+      console.log(`  ${label} — Graph health: ${(exploration.graphHealth * 100).toFixed(0)}% | ${exploration.requests.length} data request${exploration.requests.length !== 1 ? 's' : ''}:`);
+      for (const req of exploration.requests.slice(0, 3)) {
+        console.log(`    🍽️ [${(req.priority * 100).toFixed(0)}%] ${req.description}`);
+      }
+    } else {
+      console.log(`  ${label} — Graph health: ${(exploration.graphHealth * 100).toFixed(0)}% (no data gaps)`);
+    }
+  } catch (err: any) {
+    log('DMN', `Active exploration failed: ${err.message}`);
   }
 
   return result;

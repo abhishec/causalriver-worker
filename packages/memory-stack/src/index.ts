@@ -286,6 +286,33 @@ export {
   type DigestSummary,
 } from './orchestrator/attention-manager';
 
+// Fast-Path Compiler ("Cerebellum")
+export {
+  createFastPathCompiler,
+  type FastPathConfig,
+  type FastPathLookup,
+  type CompiledFastPath,
+  type QueryFingerprint,
+} from './orchestrator/fast-path-compiler';
+
+// Active Information Seeker ("Active Inference")
+export {
+  createActiveExplorer,
+  type ActiveExplorerConfig,
+  type ExplorationResult,
+  type DataRequest,
+} from './orchestrator/active-explorer';
+
+// What-If Simulator ("Prefrontal Cortex")
+export {
+  createWhatIfSimulator,
+  type WhatIfConfig,
+  type WhatIfScenario,
+  type SimulationResult,
+  type CascadeStep,
+  type SimulationIntervention,
+} from './orchestrator/whatif-simulator';
+
 export {
   createEntityResolver,
   type EntityResolverConfig,
