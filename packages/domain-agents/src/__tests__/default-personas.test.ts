@@ -146,10 +146,10 @@ describe('Default Personas - promptTemplate', () => {
     },
   );
 
-  it('exactly 7 personas have promptTemplate defined', () => {
+  it('exactly 8 personas have promptTemplate defined', () => {
     const allPersonas = getAllPersonas();
     const withTemplate = allPersonas.filter((p) => p.promptTemplate !== undefined);
-    expect(withTemplate).toHaveLength(7);
+    expect(withTemplate).toHaveLength(8);
   });
 });
 
@@ -158,9 +158,9 @@ describe('Default Personas - promptTemplate', () => {
 // ============================================================================
 
 describe('Default Personas - DEFAULT_PERSONAS Registry', () => {
-  it('contains exactly 14 entries', () => {
+  it('contains exactly 15 entries', () => {
     const keys = Object.keys(DEFAULT_PERSONAS);
-    expect(keys).toHaveLength(14);
+    expect(keys).toHaveLength(15);
   });
 
   it('contains all expected persona IDs as keys', () => {
@@ -173,6 +173,7 @@ describe('Default Personas - DEFAULT_PERSONAS Registry', () => {
       'vp-product',
       'vp-marketing',
       'vp-people',
+      'vp-engineering-ops',
       'ceo', 'coo', 'nexus-ai',
     ];
     expect(Object.keys(DEFAULT_PERSONAS).sort()).toEqual(expectedKeys.sort());
@@ -302,16 +303,16 @@ describe('Default Personas - getPersona', () => {
 // ============================================================================
 
 describe('Default Personas - getAllPersonas', () => {
-  it('returns an array of exactly 14 personas', () => {
+  it('returns an array of exactly 15 personas', () => {
     const personas = getAllPersonas();
-    expect(personas).toHaveLength(14);
+    expect(personas).toHaveLength(15);
   });
 
   it('returns all persona IDs without duplicates', () => {
     const personas = getAllPersonas();
     const ids = personas.map((p) => p.id);
     const uniqueIds = [...new Set(ids)];
-    expect(uniqueIds).toHaveLength(14);
+    expect(uniqueIds).toHaveLength(15);
   });
 
   it('includes every expected persona by ID', () => {
@@ -326,6 +327,7 @@ describe('Default Personas - getAllPersonas', () => {
       'vp-product',
       'vp-marketing',
       'vp-people',
+      'vp-engineering-ops',
       'ceo', 'coo', 'nexus-ai',
     ].sort();
     expect(ids).toEqual(expected);

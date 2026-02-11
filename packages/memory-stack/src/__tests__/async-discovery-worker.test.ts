@@ -70,7 +70,7 @@ describe('Async Discovery Worker', () => {
 
     it('should complete a small job', async () => {
       const pool = createDiscoveryWorkerPool();
-      const signals = generateTestSignals(3, 30);
+      const signals = generateTestSignals(3, 31);
 
       const job = pool.submit(signals, 'org_test');
 
