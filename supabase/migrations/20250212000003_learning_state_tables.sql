@@ -19,7 +19,7 @@
 -- ──────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS bayesian_posteriors (
   id              UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  organization_id UUID NOT NULL REFERENCES organizations(id),
+  organization_id UUID NOT NULL,
   source_domain   TEXT NOT NULL,
   target_domain   TEXT NOT NULL,
   alpha           DOUBLE PRECISION NOT NULL DEFAULT 1.0,
@@ -49,7 +49,7 @@ CREATE INDEX IF NOT EXISTS idx_bayesian_posteriors_uncertainty
 -- ──────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS embedding_transforms (
   id              UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  organization_id UUID NOT NULL REFERENCES organizations(id),
+  organization_id UUID NOT NULL,
   dimension       INTEGER NOT NULL DEFAULT 384,
   weights         JSONB NOT NULL,
   loss_history    JSONB DEFAULT '[]'::jsonb,
@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS embedding_transforms (
 -- ──────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS causal_model_state (
   id              UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  organization_id UUID NOT NULL REFERENCES organizations(id),
+  organization_id UUID NOT NULL,
   model_type      TEXT NOT NULL DEFAULT 'contrastive_sigmoid',
   input_dimension INTEGER NOT NULL DEFAULT 768,
   weights         JSONB NOT NULL,
@@ -88,7 +88,7 @@ CREATE TABLE IF NOT EXISTS causal_model_state (
 -- ──────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS attention_policy_state (
   id              UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  organization_id UUID NOT NULL REFERENCES organizations(id),
+  organization_id UUID NOT NULL,
   weights         JSONB NOT NULL DEFAULT '[0.25, 0.35, 0.25, 0.15]'::jsonb,
   alert_threshold DOUBLE PRECISION NOT NULL DEFAULT 40.0,
   feedback_count  INTEGER NOT NULL DEFAULT 0,
@@ -106,7 +106,7 @@ CREATE TABLE IF NOT EXISTS attention_policy_state (
 -- ──────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS learning_runs (
   id              UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  organization_id UUID NOT NULL REFERENCES organizations(id),
+  organization_id UUID NOT NULL,
   run_type        TEXT NOT NULL, -- 'trainer', 'consolidation', 'dmn', 'bayesian', 'embedding', 'contrastive', 'policy', 'public_data'
   status          TEXT NOT NULL DEFAULT 'running', -- 'running', 'completed', 'failed'
   started_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
