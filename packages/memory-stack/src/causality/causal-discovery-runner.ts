@@ -39,12 +39,25 @@ import {
 // TYPES
 // ============================================================================
 
+/**
+ * Per-method vote for a causal edge — Thousand Brains Theory.
+ * Brain Analog: Each cortical column (method) independently builds its own
+ * model of whether A causes B. The brain takes a "vote" across all columns.
+ * Disagreement = uncertainty.
+ */
+export interface MethodVote {
+  method: string;
+  vote: 'causal' | 'not_causal' | 'insufficient_data';
+  confidence: number;
+  pValue?: number;
+}
+
 export interface CausalRelationship {
   id?: string;
   organization_id: string;
   source_domain: string;
   target_domain: string;
-  
+
   // Statistical evidence
   granger_f_statistic: number;
   granger_p_value: number;
@@ -52,10 +65,10 @@ export interface CausalRelationship {
   effect_size: number;
   confidence_interval_lower: number;
   confidence_interval_upper: number;
-  
+
   // Interpretable output
   natural_language: string;
-  
+
   // Metadata
   sample_size: number;
   observation_window_days: number;
@@ -67,6 +80,11 @@ export interface CausalRelationship {
   is_likely_confounded?: boolean;
   coefficient_sign?: number;
   discovery_method?: string;
+
+  // Thousand Brains: per-method voting (added for ensemble transparency)
+  methodVotes?: MethodVote[];
+  agreementRatio?: number;    // methodsAgreeing / totalMethods (0-1)
+  isContentious?: boolean;    // true if agreementRatio < 0.6
 }
 
 export interface DiscoveryConfig {
@@ -290,6 +308,12 @@ export function runCausalDiscovery(
 
     const confoundNote = isLikelyConfounded ? ' [possibly confounded]' : '';
 
+    // Thousand Brains: generate per-method votes for this edge
+    const votes = generateMethodVotes(result, method, knockoutScore, isLikelyConfounded);
+    const causalVotes = votes.filter(v => v.vote === 'causal').length;
+    const totalVotes = votes.filter(v => v.vote !== 'insufficient_data').length;
+    const agreement = totalVotes > 0 ? causalVotes / totalVotes : 0;
+
     relationships.push({
       organization_id: organizationId,
       source_domain: result.sourceDomain,
@@ -309,6 +333,9 @@ export function runCausalDiscovery(
       is_likely_confounded: isLikelyConfounded,
       coefficient_sign: coefficientSign,
       discovery_method: method,
+      methodVotes: votes,
+      agreementRatio: agreement,
+      isContentious: agreement < 0.6 && totalVotes > 1,
     });
   }
   
@@ -398,6 +425,80 @@ export function findLostRelationships(
 // ============================================================================
 // ADVANCED METHOD CONVERSION
 // ============================================================================
+
+/**
+ * Generate per-method votes for a causal edge — Thousand Brains Theory.
+ *
+ * Brain Analog: Each cortical column independently assesses whether the edge
+ * is causal. We simulate this by decomposing the ensemble result into
+ * per-method assessments based on the statistical evidence available.
+ *
+ * Methods assessed:
+ * - Granger: F-statistic significance
+ * - Effect Size: magnitude of the causal effect
+ * - Confidence Interval: whether CI excludes zero
+ * - Confounder Check: whether the edge survives knockout testing
+ * - P-Value: raw statistical significance
+ */
+function generateMethodVotes(
+  result: GrangerResult,
+  method: string,
+  knockoutScore?: number,
+  isLikelyConfounded?: boolean,
+): MethodVote[] {
+  const votes: MethodVote[] = [];
+
+  // Method 1: Granger F-test (statistical causality)
+  votes.push({
+    method: 'granger_f_test',
+    vote: result.fStatistic > 3.84 ? 'causal' : result.fStatistic > 0 ? 'not_causal' : 'insufficient_data',
+    confidence: Math.min(1, result.fStatistic / 10),
+    pValue: result.pValue,
+  });
+
+  // Method 2: Effect size (practical significance)
+  votes.push({
+    method: 'effect_size',
+    vote: result.effectSize > 0.3 ? 'causal' : 'not_causal',
+    confidence: result.effectSize,
+  });
+
+  // Method 3: Confidence interval (excludes zero → causal)
+  const ciLower = result.confidenceInterval?.lower ?? 0;
+  votes.push({
+    method: 'confidence_interval',
+    vote: ciLower > 0.05 ? 'causal' : 'not_causal',
+    confidence: ciLower > 0 ? Math.min(1, ciLower * 5) : 0,
+  });
+
+  // Method 4: P-value (Bayesian interpretation)
+  votes.push({
+    method: 'p_value',
+    vote: result.pValue < 0.05 ? 'causal' : result.pValue < 0.1 ? 'not_causal' : 'insufficient_data',
+    confidence: Math.max(0, 1 - result.pValue * 10),
+    pValue: result.pValue,
+  });
+
+  // Method 5: Confounder knockout (robustness check) — only if available
+  if (knockoutScore !== undefined) {
+    votes.push({
+      method: 'confounder_knockout',
+      vote: !isLikelyConfounded ? 'causal' : 'not_causal',
+      confidence: knockoutScore,
+    });
+  }
+
+  // Method 6: Sample size adequacy
+  if (result.sampleSize > 0) {
+    votes.push({
+      method: 'sample_adequacy',
+      vote: result.sampleSize >= 30 ? 'causal' : result.sampleSize >= 10 ? 'not_causal' : 'insufficient_data',
+      confidence: Math.min(1, result.sampleSize / 100),
+    });
+  }
+
+  return votes;
+}
 
 /**
  * Convert a PairwiseScoreMatrix (from advanced methods) to GrangerResult[] format

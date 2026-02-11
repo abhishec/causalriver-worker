@@ -108,6 +108,7 @@ export {
   findNewRelationships,
   findLostRelationships,
   type CausalRelationship,
+  type MethodVote,
   type DiscoveryConfig,
   type DiscoveryResult,
 } from './causality/causal-discovery-runner';
