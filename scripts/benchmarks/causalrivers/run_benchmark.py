@@ -42,18 +42,9 @@ from nexusbrain_method import nexusbrain_granger, METHOD_VARIANTS
 # DATASET DEFINITIONS
 # =============================================================================
 
-# All available CausalRivers benchmark datasets
+# All available CausalRivers benchmark datasets (10 of 11 leaderboard datasets)
+# Disjoint 10 requires special generation not included in the default CausalRivers release
 DATASETS = {
-    "confounder_3": {
-        "label": "datasets/confounder_3/east.p",
-        "data": "product/rivers_ts_east_germany.csv",
-        "display": "Confounder 3",
-    },
-    "confounder_5": {
-        "label": "datasets/confounder_5/east.p",
-        "data": "product/rivers_ts_east_germany.csv",
-        "display": "Confounder 5",
-    },
     "close_3": {
         "label": "datasets/close_3/east.p",
         "data": "product/rivers_ts_east_germany.csv",
@@ -63,6 +54,36 @@ DATASETS = {
         "label": "datasets/close_5/east.p",
         "data": "product/rivers_ts_east_germany.csv",
         "display": "Close 5",
+    },
+    "root_cause_3": {
+        "label": "datasets/root_cause_3/east.p",
+        "data": "product/rivers_ts_east_germany.csv",
+        "display": "Root cause 3",
+    },
+    "root_cause_5": {
+        "label": "datasets/root_cause_5/east.p",
+        "data": "product/rivers_ts_east_germany.csv",
+        "display": "Root cause 5",
+    },
+    "1_random_3": {
+        "label": "datasets/1_random_3/east.p",
+        "data": "product/rivers_ts_east_germany.csv",
+        "display": "Random+1 3",
+    },
+    "1_random_5": {
+        "label": "datasets/1_random_5/east.p",
+        "data": "product/rivers_ts_east_germany.csv",
+        "display": "Random+1 5",
+    },
+    "confounder_3": {
+        "label": "datasets/confounder_3/east.p",
+        "data": "product/rivers_ts_east_germany.csv",
+        "display": "Confounder 3",
+    },
+    "confounder_5": {
+        "label": "datasets/confounder_5/east.p",
+        "data": "product/rivers_ts_east_germany.csv",
+        "display": "Confounder 5",
     },
     "random_3": {
         "label": "datasets/random_3/east.p",
@@ -76,14 +97,18 @@ DATASETS = {
     },
 }
 
-# VAR baseline scores for comparison (from actual CausalRivers leaderboard CSV)
+# VAR baseline scores for comparison (from actual CausalRivers leaderboard)
 VAR_BASELINE_AUROC = {
-    "confounder_3": 0.7089,
-    "confounder_5": 0.7222,
-    "close_3": 0.8094,
-    "close_5": 0.8062,
-    "random_3": 0.8232,
-    "random_5": 0.8015,
+    "close_3": 0.809,
+    "close_5": 0.806,
+    "root_cause_3": 0.788,
+    "root_cause_5": 0.751,
+    "1_random_3": 0.800,
+    "1_random_5": 0.793,
+    "confounder_3": 0.709,
+    "confounder_5": 0.722,
+    "random_3": 0.823,
+    "random_5": 0.801,
 }
 
 

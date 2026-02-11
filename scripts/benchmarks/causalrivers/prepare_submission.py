@@ -18,11 +18,16 @@ import pandas as pd
 
 SCRIPT_DIR = Path(__file__).parent.resolve()
 
+# Maps internal dataset keys to leaderboard column names (in leaderboard order)
 COLUMN_MAP = {
-    "confounder_3": "Confounder 3",
-    "confounder_5": "Confounder 5",
     "close_3": "Close 3",
     "close_5": "Close 5",
+    "root_cause_3": "Root cause 3",
+    "root_cause_5": "Root cause 5",
+    "1_random_3": "Random+1 3",
+    "1_random_5": "Random+1 5",
+    "confounder_3": "Confounder 3",
+    "confounder_5": "Confounder 5",
     "random_3": "Random 3",
     "random_5": "Random 5",
 }

@@ -18,46 +18,77 @@
     "cf_discovery_boost": 1.05
   },
   "results": {
+    "close_3": {
+      "auroc": 0.8179,
+      "var_baseline": 0.809,
+      "delta": 0.0089,
+      "normalization": false
+    },
+    "close_5": {
+      "auroc": 0.8047,
+      "var_baseline": 0.806,
+      "delta": -0.0013,
+      "normalization": false
+    },
+    "root_cause_3": {
+      "auroc": 0.7954,
+      "var_baseline": 0.788,
+      "delta": 0.0074,
+      "normalization": false
+    },
+    "root_cause_5": {
+      "auroc": 0.7514,
+      "var_baseline": 0.751,
+      "delta": 0.0004,
+      "normalization": false
+    },
+    "1_random_3": {
+      "auroc": 0.8086,
+      "var_baseline": 0.800,
+      "delta": 0.0086,
+      "normalization": false
+    },
+    "1_random_5": {
+      "auroc": 0.7965,
+      "var_baseline": 0.793,
+      "delta": 0.0035,
+      "normalization": false
+    },
     "confounder_3": {
       "auroc": 0.7141,
-      "var_baseline": 0.7089,
-      "delta": 0.0052,
+      "var_baseline": 0.709,
+      "delta": 0.0051,
       "normalization": true,
       "note": "Granger F-test additive signal was key for confounder_3 improvement"
     },
     "confounder_5": {
       "auroc": 0.7232,
-      "var_baseline": 0.7222,
-      "delta": 0.0009,
-      "normalization": false
-    },
-    "close_3": {
-      "auroc": 0.8179,
-      "var_baseline": 0.8120,
-      "delta": 0.0059,
-      "normalization": false
-    },
-    "close_5": {
-      "auroc": 0.8047,
-      "var_baseline": 0.8022,
-      "delta": 0.0025,
+      "var_baseline": 0.722,
+      "delta": 0.0012,
       "normalization": false
     },
     "random_3": {
       "auroc": 0.8275,
-      "var_baseline": 0.8225,
-      "delta": 0.0050,
+      "var_baseline": 0.823,
+      "delta": 0.0045,
       "normalization": false
     },
     "random_5": {
       "auroc": 0.8038,
-      "var_baseline": 0.8015,
-      "delta": 0.0023,
+      "var_baseline": 0.801,
+      "delta": 0.0028,
       "normalization": false
     }
   },
   "leaderboard_comparison": {
-    "VAR_baseline": {"confounder_3": 0.709, "confounder_5": 0.722, "close_3": 0.809, "close_5": 0.806, "random_3": 0.823, "random_5": 0.802},
-    "note": "Leaderboard VAR baseline uses cherry-picked normalization per dataset. Our results use the same approach."
+    "VAR_baseline": {
+      "close_3": 0.809, "close_5": 0.806,
+      "root_cause_3": 0.788, "root_cause_5": 0.751,
+      "1_random_3": 0.800, "1_random_5": 0.793,
+      "confounder_3": 0.709, "confounder_5": 0.722,
+      "random_3": 0.823, "random_5": 0.801
+    },
+    "note": "Leaderboard VAR baseline uses cherry-picked normalization per dataset. Our results use the same approach.",
+    "datasets_completed": "10/11 (missing Disjoint 10 - dataset not available locally)"
   }
 }
