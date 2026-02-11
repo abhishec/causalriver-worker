@@ -50,6 +50,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
+    "test:benchmark": "vitest run --reporter=verbose src/__tests__/benchmark-runner.test.ts",
+    "test:brain-health": "vitest run --reporter=verbose src/__tests__/brain-health.test.ts",
     "clean": "rm -rf dist"
   },
   "peerDependencies": {

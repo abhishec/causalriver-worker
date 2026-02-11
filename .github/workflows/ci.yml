@@ -29,6 +29,14 @@ jobs:
       - name: Run tests
         run: pnpm test
 
+      - name: Brain Health Checkup (Neurological Exam)
+        run: cd packages/memory-stack && pnpm test:brain-health
+        if: matrix.node-version == 20
+
+      - name: Brain Benchmarks (Regression Testing)
+        run: cd packages/memory-stack && pnpm test:benchmark
+        if: matrix.node-version == 20
+
       - name: Check coverage
         run: pnpm test:coverage
         if: matrix.node-version == 20
