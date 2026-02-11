@@ -60,6 +60,145 @@ const MAX_TOKENS_AGENTIC = 4096;
 /** Maximum tokens for fast-path responses */
 const MAX_TOKENS_FAST = 1024;
 
+/** Fast-path cache TTL (24 hours) */
+const FAST_PATH_CACHE_TTL_HOURS = 24;
+
+// ============================================================================
+// CEREBELLUM — Fast-Path Cache (pre-compiled query responses)
+// Brain Analog: The Cerebellum stores learned motor programs. Once a query
+// pattern has been seen enough times, the Cerebellum fires the pre-compiled
+// context without conscious reasoning (no LLM context building needed).
+// ============================================================================
+
+interface QueryFingerprint {
+  hash: string;
+  intent: string;
+  domains: string[];
+  metric?: string;
+  direction?: string;
+  timeContext?: string;
+}
+
+/**
+ * Fingerprint a query by extracting its "shape" — intent + domains + metric.
+ * Two queries with the same shape get the same fingerprint, allowing cache reuse.
+ */
+function fingerprintQuery(query: string): QueryFingerprint {
+  const q = query.toLowerCase();
+
+  // Extract intent
+  let intent = 'general';
+  if (/\b(why|cause|caused|because|root cause|driving|reason)\b/.test(q)) intent = 'why';
+  else if (/\b(what|status|current|now|today|latest)\b/.test(q)) intent = 'what';
+  else if (/\b(how|way|method|approach|strategy)\b/.test(q)) intent = 'how';
+  else if (/\b(predict|forecast|will|would|expect|project)\b/.test(q)) intent = 'predict';
+  else if (/\b(compare|versus|vs|difference|between)\b/.test(q)) intent = 'compare';
+
+  // Extract domain keywords
+  const domainKeywords = [
+    'revenue', 'churn', 'marketing', 'sales', 'engineering', 'support',
+    'product', 'finance', 'hr', 'ops', 'customer', 'retention', 'growth',
+    'nrr', 'mrr', 'arr', 'cac', 'ltv', 'nps', 'csat',
+  ];
+  const domains = domainKeywords.filter(d => q.includes(d)).sort();
+
+  // Extract metric direction
+  let direction: string | undefined;
+  if (/\b(increas|grow|up|ris|improv|higher|more|spike)\b/.test(q)) direction = 'increase';
+  else if (/\b(decreas|drop|down|fall|declin|lower|less|dip)\b/.test(q)) direction = 'decrease';
+
+  // Extract time context
+  let timeContext: string | undefined;
+  if (/\b(today|now|current|real.?time)\b/.test(q)) timeContext = 'current';
+  else if (/\b(week|weekly|7.?day)\b/.test(q)) timeContext = 'weekly';
+  else if (/\b(month|monthly|30.?day)\b/.test(q)) timeContext = 'monthly';
+  else if (/\b(quarter|quarterly|q[1-4]|90.?day)\b/.test(q)) timeContext = 'quarterly';
+  else if (/\b(year|annual|yearly|12.?month)\b/.test(q)) timeContext = 'yearly';
+
+  // Create deterministic hash from shape
+  const shapeStr = `${intent}:${domains.join(',')}:${direction || ''}:${timeContext || ''}`;
+  let hash = 0;
+  for (let i = 0; i < shapeStr.length; i++) {
+    const chr = shapeStr.charCodeAt(i);
+    hash = ((hash << 5) - hash) + chr;
+    hash |= 0;
+  }
+  const hashStr = `fp_${Math.abs(hash).toString(36)}`;
+
+  return { hash: hashStr, intent, domains, metric: domains[0], direction, timeContext };
+}
+
+/**
+ * Check the Cerebellum cache for a pre-compiled response context.
+ * Returns the compiled context if found and not expired, null otherwise.
+ */
+async function cerebellumLookup(
+  supabase: SupabaseClient,
+  organizationId: string,
+  fingerprint: QueryFingerprint,
+): Promise<{ compiledContext: string; relevantEdges: any[] } | null> {
+  try {
+    const { data, error } = await supabase
+      .from('fast_path_cache')
+      .select('compiled_context, relevant_edges, hit_count')
+      .eq('fingerprint_hash', fingerprint.hash)
+      .eq('organization_id', organizationId)
+      .gt('expires_at', new Date().toISOString())
+      .maybeSingle();
+
+    if (error || !data) return null;
+
+    // Increment hit count (fire-and-forget)
+    supabase
+      .from('fast_path_cache')
+      .update({ hit_count: (data.hit_count || 0) + 1 })
+      .eq('fingerprint_hash', fingerprint.hash)
+      .eq('organization_id', organizationId)
+      .then(() => {});
+
+    return {
+      compiledContext: data.compiled_context,
+      relevantEdges: data.relevant_edges || [],
+    };
+  } catch {
+    // Cerebellum cache miss is non-fatal — fall through to conscious processing
+    return null;
+  }
+}
+
+/**
+ * Record a query fingerprint in the Cerebellum cache for future fast-path use.
+ * Only caches if the response was successful and context was built.
+ */
+async function cerebellumRecord(
+  supabase: SupabaseClient,
+  organizationId: string,
+  fingerprint: QueryFingerprint,
+  compiledContext: string,
+  relevantEdges: any[] = [],
+): Promise<void> {
+  try {
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getHours() + FAST_PATH_CACHE_TTL_HOURS);
+
+    await supabase
+      .from('fast_path_cache')
+      .upsert({
+        fingerprint_hash: fingerprint.hash,
+        organization_id: organizationId,
+        fingerprint,
+        compiled_context: compiledContext,
+        relevant_edges: relevantEdges,
+        hit_count: 0,
+        compiled_at: new Date().toISOString(),
+        graph_version_at: new Date().toISOString(),
+        expires_at: expiresAt.toISOString(),
+      }, { onConflict: 'fingerprint_hash' });
+  } catch {
+    // Recording failure is non-fatal
+  }
+}
+
 // ============================================================================
 // COMPLEXITY ROUTER
 // ============================================================================
@@ -1410,13 +1549,72 @@ serve(async (req: Request) => {
       );
     }
 
+    // ── CEREBELLUM CHECK (pre-compiled fast-path cache) ──
+    // Brain Analog: Before conscious thought, check if the Cerebellum has
+    // a pre-compiled motor program for this query shape.
+    const fingerprint = fingerprintQuery(query);
+    const cached = await cerebellumLookup(supabase, organizationId, fingerprint);
+
+    if (cached) {
+      // Cerebellum HIT — use pre-compiled context, skip complexity assessment
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': anthropicKey,
+          'anthropic-version': '2023-06-01',
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: MAX_TOKENS_FAST,
+          system: cached.compiledContext,
+          messages: [{ role: 'user', content: query }],
+        }),
+      });
+
+      const llmData = await response.json();
+      const answer = llmData.content?.[0]?.text || 'Unable to generate response';
+      const tokensUsed = (llmData.usage?.input_tokens || 0) + (llmData.usage?.output_tokens || 0);
+
+      return new Response(
+        JSON.stringify({
+          answer,
+          path: 'cerebellum',
+          toolCalls: [],
+          context: { cachedEdges: cached.relevantEdges },
+          meta: {
+            model: 'claude-sonnet-4-20250514',
+            tokensUsed,
+            complexity: 'cached',
+            fingerprint: fingerprint.hash,
+          },
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     // ── COMPLEXITY ROUTER ──
     const complexity = assessComplexity(query, domain);
 
     // Simple queries → fast path (context + single LLM call)
     // Moderate/Complex queries → agentic path (Claude + tools + loop)
     if (complexity.level === 'simple') {
-      return handleFastPath(query, domain, supabase, organizationId, anthropicKey);
+      // After fast-path response, record the compiled context for future Cerebellum use
+      const resp = await handleFastPath(query, domain, supabase, organizationId, anthropicKey);
+
+      // Clone response to read body, then re-serve
+      const body = await resp.clone().json();
+      if (body.answer && body.context?.causal) {
+        // Build compiled context from the sections that were used
+        const sections: string[] = ['You are Nexus AI, an organizational intelligence copilot with access to real-time causal intelligence.'];
+        if (body.context.causal?.length) {
+          sections.push('## Causal Relationships\n' + body.context.causal.map((r: any) => `- ${r.source_domain} → ${r.target_domain}: effect ${r.effect_size}`).join('\n'));
+        }
+        sections.push('Be concise and strategic. Cite causal evidence when relevant.');
+        cerebellumRecord(supabase, organizationId, fingerprint, sections.join('\n\n'), body.context.causal || []);
+      }
+
+      return resp;
     } else {
       return handleAgenticPath(query, domain, complexity, supabase, organizationId, anthropicKey, stream);
     }
