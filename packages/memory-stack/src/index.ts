@@ -248,6 +248,15 @@ export {
   type ScheduledJobsConfig,
 } from './orchestrator/scheduled-jobs';
 
+// Consolidation Engine ("Brain Sleep")
+export {
+  createConsolidationEngine,
+  type ConsolidationConfig,
+  type ConsolidationResult,
+  type ConsolidationReport,
+  type ConsolidationStepResult,
+} from './orchestrator/consolidation-engine';
+
 export {
   createEntityResolver,
   type EntityResolverConfig,

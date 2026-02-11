@@ -4,11 +4,12 @@
  * A standalone agent that runs on your laptop and continuously trains
  * the NexusBrain causal intelligence engine using free public data.
  *
- * 4-Stage Pipeline:
- *   FETCH  → FRED, GitHub, World Bank, Hacker News
- *   CONVERT → ConnectorSignal[] + TrainingPack[]
- *   TRAIN  → Brain trainer persists to Supabase
- *   LEARN  → Autonomous learner + scheduled jobs
+ * 5-Stage Pipeline:
+ *   FETCH       → FRED, GitHub, World Bank, Hacker News, +6 more sources
+ *   CONVERT     → ConnectorSignal[] + TrainingPack[]
+ *   TRAIN       → Brain trainer persists to Supabase
+ *   LEARN       → Autonomous learner + scheduled jobs
+ *   CONSOLIDATE → 10-step "brain sleep" (causal discovery, pruning, strengthening, report)
  *
  * Usage:
  *   # One-time training run
@@ -60,6 +61,7 @@ import { createSupabaseRepository } from '../packages/memory-stack/src/persisten
 import { storeConnectorSignals } from '../packages/memory-stack/src/connectors/connector-framework';
 import type { TrainingPack } from '../packages/memory-stack/src/learning/brain-trainer';
 import type { ConnectorSignal } from '../packages/memory-stack/src/connectors/connector-framework';
+import { createConsolidationEngine, type ConsolidationResult } from '../packages/memory-stack/src/orchestrator/consolidation-engine';
 
 // ── Training Data Modules ──
 import {
@@ -524,6 +526,68 @@ async function learnAndMaintain(
 }
 
 // ============================================================================
+// STAGE 5: BRAIN CONSOLIDATION ("Sleep")
+// ============================================================================
+
+interface ConsolidationRunResult {
+  completed: boolean;
+  report?: string;
+  discoveries: string[];
+  errors: string[];
+}
+
+async function consolidateBrain(
+  supabase: ReturnType<typeof createClient>,
+): Promise<ConsolidationRunResult> {
+  divider('STAGE 5: BRAIN CONSOLIDATION ("Sleep")');
+
+  const result: ConsolidationRunResult = {
+    completed: false,
+    discoveries: [],
+    errors: [],
+  };
+
+  try {
+    const engine = createConsolidationEngine({
+      supabase,
+      organizationId: ORGANIZATION_ID,
+      lookbackHours: 48,
+      pruneAfterDays: 30,
+      runFederation: ORGANIZATION_ID !== '00000000-0000-4000-a000-000000000001',
+      verbose: true,
+    });
+
+    log('CONSOLIDATE', 'Running brain consolidation (10-step cycle)...');
+    const consolidation = await engine.runConsolidation();
+    result.completed = true;
+    result.report = consolidation.report.narrative;
+    result.discoveries = consolidation.report.discoveries;
+
+    log('CONSOLIDATE', `Consolidation ${consolidation.status} (${(consolidation.totalDurationMs / 1000).toFixed(1)}s):`);
+    log('CONSOLIDATE', `  Signals processed: ${consolidation.report.stats.signalsProcessed}`);
+    log('CONSOLIDATE', `  Causal edges: ${consolidation.report.stats.causalEdgesDiscovered}`);
+    log('CONSOLIDATE', `  New relationships: ${consolidation.report.stats.newRelationships}`);
+    log('CONSOLIDATE', `  Anomalies: ${consolidation.report.stats.anomaliesDetected}`);
+    log('CONSOLIDATE', `  Patterns: ${consolidation.report.stats.patternsFound}`);
+    log('CONSOLIDATE', `  Temporal rules: ${consolidation.report.stats.temporalRulesFound}`);
+    log('CONSOLIDATE', `  Edges pruned: ${consolidation.report.stats.edgesPruned}`);
+    log('CONSOLIDATE', `  Edges strengthened: ${consolidation.report.stats.edgesStrengthened}`);
+
+    if (consolidation.report.discoveries.length > 0) {
+      log('CONSOLIDATE', '  What the brain learned:');
+      for (const d of consolidation.report.discoveries) {
+        log('CONSOLIDATE', `    + ${d}`);
+      }
+    }
+  } catch (err) {
+    logError('CONSOLIDATE', 'Brain consolidation failed', err);
+    result.errors.push('Brain consolidation failed');
+  }
+
+  return result;
+}
+
+// ============================================================================
 // FIRST-RUN DETECTION
 // ============================================================================
 
@@ -578,6 +642,9 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
   // Stage 4: Learn
   const learningResult = await learnAndMaintain(supabase);
 
+  // Stage 5: Consolidate ("Brain Sleep")
+  const consolidationResult = await consolidateBrain(supabase);
+
   // Final Summary
   const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
 
@@ -587,15 +654,20 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
   log('DONE', `Packs trained: ${trainingResult.packsTrainedCount}`);
   log('DONE', `Learning cycle: ${learningResult.cycleCompleted ? '✓' : '✗'}`);
   log('DONE', `Daily jobs: ${learningResult.dailyJobsCompleted ? '✓' : '✗'}`);
+  log('DONE', `Consolidation: ${consolidationResult.completed ? '✓' : '✗'}`);
 
-  const totalErrors = trainingResult.errors.length + learningResult.errors.length;
+  if (consolidationResult.discoveries.length > 0) {
+    log('DONE', `Brain discoveries: ${consolidationResult.discoveries.length}`);
+  }
+
+  const totalErrors = trainingResult.errors.length + learningResult.errors.length + consolidationResult.errors.length;
   if (totalErrors > 0) {
     log('DONE', `Errors: ${totalErrors}`);
-    for (const err of [...trainingResult.errors, ...learningResult.errors]) {
+    for (const err of [...trainingResult.errors, ...learningResult.errors, ...consolidationResult.errors]) {
       log('DONE', `  - ${err}`);
     }
   } else {
-    log('DONE', 'All stages completed successfully ✓');
+    log('DONE', 'All 5 stages completed successfully ✓');
   }
 
   console.log('');
