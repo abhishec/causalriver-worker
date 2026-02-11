@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- NexusBrain Autonomous Trainer -->
+    <!-- Runs daily at 1 AM — full 5-stage training pipeline -->
+    <key>Label</key>
+    <string>com.nexusbrain.trainer</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>/Users/abhishek/Library/CloudStorage/GoogleDrive-abhishek@monetiz3.com/My Drive/Workspace - Monetize Organisation/02 - Product/NexusBrain/scripts/run-brain-agents.sh</string>
+        <string>trainer</string>
+    </array>
+
+    <!-- Run at 1:00 AM every day (before consolidation at 2 AM) -->
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>1</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+    </dict>
+
+    <!-- Log output -->
+    <key>StandardOutPath</key>
+    <string>/Users/abhishek/Library/Logs/nexusbrain-trainer.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/abhishek/Library/Logs/nexusbrain-trainer-error.log</string>
+
+    <!-- Keep alive only on schedule -->
+    <key>KeepAlive</key>
+    <false/>
+
+    <!-- Environment -->
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+    </dict>
+</dict>
+</plist>

@@ -257,6 +257,35 @@ export {
   type ConsolidationStepResult,
 } from './orchestrator/consolidation-engine';
 
+// Background Insight Engine ("Default Mode Network")
+export {
+  createBackgroundInsightEngine,
+  type DMNConfig,
+  type DMNScanResult,
+  type ProactiveInsight,
+  type InsightEvidence,
+} from './orchestrator/background-insight-engine';
+
+// Business Impact Scorer ("Amygdala")
+export {
+  createImpactScorer,
+  type ImpactScorerConfig,
+  type ImpactScore,
+  type BatchImpactResult,
+  type ScorableEvent,
+  type StrategicPriority,
+} from './orchestrator/impact-scorer';
+
+// Attention Manager ("Thalamus")
+export {
+  createAttentionManager,
+  type AttentionManagerConfig,
+  type AttentionDecision,
+  type AttentionRoute,
+  type DeliveryMethod,
+  type DigestSummary,
+} from './orchestrator/attention-manager';
+
 export {
   createEntityResolver,
   type EntityResolverConfig,

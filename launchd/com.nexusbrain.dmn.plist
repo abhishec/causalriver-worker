@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- NexusBrain DMN Engine ("Default Mode Network") -->
+    <!-- Runs every 4 hours — background insight scanning -->
+    <key>Label</key>
+    <string>com.nexusbrain.dmn</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>/Users/abhishek/Library/CloudStorage/GoogleDrive-abhishek@monetiz3.com/My Drive/Workspace - Monetize Organisation/02 - Product/NexusBrain/scripts/run-brain-agents.sh</string>
+        <string>dmn</string>
+    </array>
+
+    <!-- Run every 4 hours (14400 seconds) -->
+    <key>StartInterval</key>
+    <integer>14400</integer>
+
+    <!-- Log output -->
+    <key>StandardOutPath</key>
+    <string>/Users/abhishek/Library/Logs/nexusbrain-dmn.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/abhishek/Library/Logs/nexusbrain-dmn-error.log</string>
+
+    <!-- Keep alive only on schedule -->
+    <key>KeepAlive</key>
+    <false/>
+
+    <!-- Environment -->
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+    </dict>
+</dict>
+</plist>
