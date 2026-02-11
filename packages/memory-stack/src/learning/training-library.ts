@@ -21,6 +21,7 @@
  */
 
 import type { TrainingPack } from './brain-trainer';
+import { CORE_METRICS_LIBRARY } from './core-metrics-library';
 
 // ============================================================================
 // 1. SAAS PRICING CHANGE CASCADE
@@ -522,6 +523,7 @@ const marketDownturnTriage: TrainingPack = {
  * Load them all: `TRAINING_LIBRARY.forEach(p => trainer.trainInMemory(p))`
  */
 export const TRAINING_LIBRARY: TrainingPack[] = [
+  // Original business pattern training packs
   saasPricingCascade,
   paymentDelinquencySpiral,
   growthCollapse,
@@ -532,6 +534,8 @@ export const TRAINING_LIBRARY: TrainingPack[] = [
   csCompoundEffect,
   technicalDebtCascade,
   marketDownturnTriage,
+  // Core Metrics Library — VC/PE-grade financial intelligence
+  ...CORE_METRICS_LIBRARY,
 ];
 
 /** Get a training pack by ID */
