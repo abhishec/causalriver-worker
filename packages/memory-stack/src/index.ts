@@ -322,6 +322,7 @@ export {
   type BrainHealthReport,
   type BrainRegionStatus,
   type SimulationWithPredictions,
+  type LearningCycleResult,
 } from './orchestrator/brain-pipeline';
 
 // Context Manager — Working Memory (Prefrontal Cortex)
@@ -549,7 +550,7 @@ export {
 export {
   createAutonomousLearner,
   type AutonomousLearnerConfig,
-  type LearningCycleResult,
+  type LearningCycleResult as AutonomousLearningCycleResult,
 } from './learning/autonomous-learner';
 
 // ============================================================================

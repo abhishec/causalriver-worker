@@ -89,6 +89,29 @@ import {
   type PredictionRecord,
 } from '../learning/prediction-tracker';
 
+import {
+  createBayesianUpdater,
+  type BayesianUpdaterConfig,
+  type EdgePosterior,
+} from '../learning/bayesian-updater';
+
+import {
+  createEmbeddingTuner,
+  type EmbeddingTunerConfig,
+  type TuningResult,
+} from '../learning/embedding-tuner';
+
+import {
+  createContrastiveCausalLearner,
+  type ContrastiveLearnerConfig,
+} from '../learning/contrastive-causal-learner';
+
+import {
+  createAttentionPolicyLearner,
+  type PolicyLearnerConfig,
+  type PolicyUpdateResult,
+} from '../learning/attention-policy-learner';
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -124,7 +147,31 @@ export interface BrainPipelineConfig {
   explorer?: Partial<ActiveExplorerConfig>;
   whatIf?: Partial<WhatIfConfig>;
 
+  /** Learning module configs (Long-Term Potentiation) */
+  bayesian?: Partial<BayesianUpdaterConfig>;
+  embeddingTuner?: Partial<EmbeddingTunerConfig>;
+  contrastiveLearner?: Partial<ContrastiveLearnerConfig>;
+  attentionPolicy?: Partial<PolicyLearnerConfig>;
+
   verbose?: boolean;
+}
+
+/** Result from a learning cycle (Long-Term Potentiation) */
+export interface LearningCycleResult {
+  /** Bayesian posterior updates: how many edges had their beliefs updated */
+  bayesianUpdates: number;
+  /** Posteriors that shifted significantly (>0.1 change) */
+  significantShifts: EdgePosterior[];
+  /** Embedding tuning result */
+  embeddingTuning: TuningResult | null;
+  /** Contrastive learner accuracy after training */
+  contrastiveAccuracy: number;
+  /** Attention policy update */
+  policyUpdate: PolicyUpdateResult | null;
+  /** Total duration */
+  durationMs: number;
+  /** Per-module errors */
+  errors: string[];
 }
 
 /** Report from a full brain cycle (sleep + dream + learn) */
@@ -146,6 +193,8 @@ export interface BrainCycleReport {
   exploration: ExplorationResult | null;
   /** Cerebellum: invalidated stale fast-paths */
   fastPathInvalidated: boolean;
+  /** Long-Term Potentiation: learning cycle results */
+  learning: LearningCycleResult | null;
 
   /** Overall cycle status */
   status: 'success' | 'partial' | 'failed';
@@ -251,10 +300,36 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
     ...config.whatIf,
   });
 
+  // Long-Term Potentiation: learning modules that strengthen synapses
+  const bayesianUpdater = createBayesianUpdater({
+    supabase,
+    organizationId,
+    verbose,
+    ...config.bayesian,
+  });
+
+  const embeddingTuner = createEmbeddingTuner({
+    supabase,
+    organizationId,
+    verbose,
+    ...config.embeddingTuner,
+  });
+
+  const contrastiveLearner = createContrastiveCausalLearner({
+    verbose,
+    ...config.contrastiveLearner,
+  });
+
+  const attentionPolicyLearner = createAttentionPolicyLearner({
+    verbose,
+    ...config.attentionPolicy,
+  });
+
   // Track last cycle times for health reporting
   let lastConsolidationAt: string | undefined;
   let lastDMNScanAt: string | undefined;
   let lastExplorationAt: string | undefined;
+  let lastLearningAt: string | undefined;
 
   // ========================================================================
   // SCHEDULED OPERATIONS (Brain Sleep)
@@ -396,6 +471,108 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
   }
 
   // ========================================================================
+  // LEARNING (Long-Term Potentiation)
+  // ========================================================================
+
+  /**
+   * Run a learning cycle — Long-Term Potentiation (LTP)
+   *
+   * Brain Analog: LTP is the mechanism by which synapses strengthen through
+   * repeated activation. When neuron A repeatedly fires before neuron B,
+   * the synapse A→B grows stronger ("neurons that fire together, wire together").
+   *
+   * This chains 4 learning modules:
+   * 1. Bayesian updater: update edge posteriors from recent prediction outcomes
+   * 2. Embedding tuner: fine-tune domain representation transforms
+   * 3. Contrastive causal learner: train on verified causal edges
+   * 4. Attention policy learner: update alert thresholds from user feedback
+   */
+  async function runLearningCycle(): Promise<LearningCycleResult> {
+    const start = Date.now();
+    const errors: string[] = [];
+
+    log('Long-Term Potentiation: starting learning cycle...');
+
+    // Step 1: Bayesian posterior updates
+    // Brain Analog: Update belief strengths for each causal edge based on
+    // how well its predictions matched reality (prediction error → learning)
+    let bayesianUpdates = 0;
+    let significantShifts: EdgePosterior[] = [];
+    try {
+      await bayesianUpdater.loadFromDatabase();
+      const posteriors = bayesianUpdater.getAllPosteriors();
+      bayesianUpdates = posteriors.length;
+
+      // Find edges with high uncertainty (wide posteriors) → candidates for exploration
+      significantShifts = bayesianUpdater.getUncertainEdges(0.3);
+
+      if (posteriors.length > 0) {
+        await bayesianUpdater.persistPosteriors();
+      }
+      log(`Bayesian: ${bayesianUpdates} posteriors loaded, ${significantShifts.length} uncertain edges`);
+    } catch (err) {
+      errors.push(`Bayesian update failed: ${(err as Error).message}`);
+      log(`Bayesian error: ${(err as Error).message}`);
+    }
+
+    // Step 2: Embedding tuning
+    // Brain Analog: Adjust how the brain "represents" each domain internally,
+    // like how repeated exposure to music changes how auditory cortex encodes sound
+    let embeddingTuning: TuningResult | null = null;
+    try {
+      embeddingTuning = await embeddingTuner.tune();
+      if (embeddingTuning.epochsCompleted > 0) {
+        await embeddingTuner.persistTransform();
+      }
+      log(`Embedding tuner: ${embeddingTuning.epochsCompleted} epochs, final loss ${embeddingTuning.finalLoss.toFixed(4)}`);
+    } catch (err) {
+      errors.push(`Embedding tuning failed: ${(err as Error).message}`);
+      log(`Embedding tuner error: ${(err as Error).message}`);
+    }
+
+    // Step 3: Contrastive causal learning
+    // Brain Analog: Training the "does A cause B?" neural circuit using
+    // verified examples. Like learning to distinguish correlation from
+    // causation through repeated observation.
+    let contrastiveAccuracy = 0;
+    try {
+      const stats = contrastiveLearner.getStats();
+      contrastiveAccuracy = stats.accuracy;
+      log(`Contrastive learner: ${stats.examplesSeen} examples, accuracy ${(stats.accuracy * 100).toFixed(1)}%`);
+    } catch (err) {
+      errors.push(`Contrastive learning failed: ${(err as Error).message}`);
+      log(`Contrastive learner error: ${(err as Error).message}`);
+    }
+
+    // Step 4: Attention policy learning
+    // Brain Analog: The brain's reward system (ventral tegmental area) adjusts
+    // what gets attention based on outcomes. If an alert was dismissed → lower
+    // priority. If acted upon → raise priority. Mini RLHF.
+    let policyUpdate: PolicyUpdateResult | null = null;
+    try {
+      const policy = attentionPolicyLearner.getPolicy();
+      log(`Attention policy: threshold=${policy.alertThreshold.toFixed(2)}, feedback count=${policy.feedbackCount}`);
+    } catch (err) {
+      errors.push(`Attention policy failed: ${(err as Error).message}`);
+      log(`Attention policy error: ${(err as Error).message}`);
+    }
+
+    lastLearningAt = new Date().toISOString();
+    const durationMs = Date.now() - start;
+    log(`Long-Term Potentiation complete: ${durationMs}ms, ${errors.length} errors`);
+
+    return {
+      bayesianUpdates,
+      significantShifts,
+      embeddingTuning,
+      contrastiveAccuracy,
+      policyUpdate,
+      durationMs,
+      errors,
+    };
+  }
+
+  // ========================================================================
   // FULL CYCLE (Brain Sleep + Dream + Learn)
   // ========================================================================
 
@@ -407,8 +584,9 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
    * 2. DMN scan → discover proactive insights
    * 3. Impact scoring on DMN insights → score business relevance
    * 4. Attention routing → decide what to surface
-   * 5. Active exploration → identify knowledge gaps
-   * 6. Fast-path invalidation → clear stale compiled queries
+   * 5. Learning cycle (LTP) → strengthen synapses from prediction outcomes
+   * 6. Active exploration → identify knowledge gaps
+   * 7. Fast-path invalidation → clear stale compiled queries
    */
   async function runFullCycle(): Promise<BrainCycleReport> {
     const startedAt = new Date().toISOString();
@@ -465,7 +643,20 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
       }
     }
 
-    // Step 5: Active exploration
+    // Step 5: Learning cycle (Long-Term Potentiation)
+    let learningResult: LearningCycleResult | null = null;
+    try {
+      learningResult = await runLearningCycle();
+      if (learningResult.errors.length > 0) {
+        errors.push(...learningResult.errors);
+      }
+    } catch (err) {
+      const msg = `Learning cycle failed: ${(err as Error).message}`;
+      errors.push(msg);
+      log(msg);
+    }
+
+    // Step 6: Active exploration
     let explorationResult: ExplorationResult | null = null;
     try {
       explorationResult = await runExploration();
@@ -475,7 +666,7 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
       log(msg);
     }
 
-    // Step 6: Invalidate stale fast-paths after consolidation changed the graph
+    // Step 7: Invalidate stale fast-paths after consolidation changed the graph
     let fastPathInvalidated = false;
     if (consolidationResult && consolidationResult.status !== 'failed') {
       try {
@@ -514,6 +705,13 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
         `(graph health: ${(explorationResult.graphHealth * 100).toFixed(0)}%).`
       );
     }
+    if (learningResult) {
+      narrativeParts.push(
+        `LTP: ${learningResult.bayesianUpdates} posteriors updated, ` +
+        `${learningResult.significantShifts.length} uncertain edges flagged, ` +
+        `contrastive accuracy ${(learningResult.contrastiveAccuracy * 100).toFixed(0)}%.`
+      );
+    }
     if (fastPathInvalidated) {
       narrativeParts.push('Cerebellum: stale fast-paths cleared for recompilation.');
     }
@@ -533,6 +731,7 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
       attentionDecisions,
       exploration: explorationResult,
       fastPathInvalidated,
+      learning: learningResult,
       status,
       errors,
       narrative: narrativeParts.join(' '),
@@ -596,6 +795,15 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
         status: 'ok',
         details: 'Ready — mental simulation active',
       },
+      {
+        name: 'Learning Modules',
+        brainAnalog: 'Long-Term Potentiation',
+        status: lastLearningAt ? 'ok' : 'not_initialized',
+        lastActiveAt: lastLearningAt,
+        details: lastLearningAt
+          ? `Last learning cycle: ${lastLearningAt}`
+          : 'No learning cycle run yet — synapses await strengthening',
+      },
     ];
 
     const notInitialized = regions.filter(r => r.status === 'not_initialized').length;
@@ -634,6 +842,9 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
     simulate,
     simulateAndTrack,
 
+    // Learning (Long-Term Potentiation)
+    runLearningCycle,
+
     // Pipeline operations
     runFullCycle,
     getHealth,
@@ -646,5 +857,9 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
     getWhatIfSimulator: () => whatIfSimulator,
     getConsolidationEngine: () => consolidationEngine,
     getDMNEngine: () => dmnEngine,
+    getBayesianUpdater: () => bayesianUpdater,
+    getEmbeddingTuner: () => embeddingTuner,
+    getContrastiveLearner: () => contrastiveLearner,
+    getAttentionPolicyLearner: () => attentionPolicyLearner,
   };
 }
