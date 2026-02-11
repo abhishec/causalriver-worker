@@ -21,7 +21,7 @@
  * Part of v11.6.0: Knowledge Federation
  */
 
-import { getClientForTableInEdge } from './get-brain-client.ts';
+import { getClientForTableInEdge } from './get-brain-client';
 
 // ============================================================================
 // CONSTANTS

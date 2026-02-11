@@ -13,7 +13,7 @@
  * Pure TypeScript, zero dependencies.
  */
 
-import type { TrainingPack, CausalChainEntry, TrainingPattern } from '../../../learning/brain-trainer';
+import type { TrainingPack, CausalChainEntry, TrainingPattern } from '../../learning/brain-trainer';
 import type { CausalStatement } from './causal-language-miner';
 import type { EntityRelationship } from './relationship-extractor';
 import type { HierarchyRelation } from './concept-hierarchy-miner';

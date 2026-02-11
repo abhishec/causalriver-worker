@@ -381,8 +381,5 @@ function shuffle<T>(array: T[]): T[] {
   return array;
 }
 
-// ============================================================================
-// EXPORT TYPES FOR HOOKS
-// ============================================================================
-
-export type { TransferEntropyConfig, PairwiseDiscoveryResult };
+// Types TransferEntropyConfig and PairwiseDiscoveryResult are exported
+// at their declaration sites (lines 44 and 51).

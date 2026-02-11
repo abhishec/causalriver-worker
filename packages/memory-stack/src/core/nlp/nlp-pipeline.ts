@@ -17,7 +17,7 @@ import { mineCausalStatements, type CausalStatement } from './causal-language-mi
 import { mineHierarchies, type HierarchyRelation } from './concept-hierarchy-miner';
 import { KnowledgeGraphBuilder, type CausalEdge } from './knowledge-graph-builder';
 import { convertToTrainingPack, type NLPExtractionResult } from './nlp-pack-converter';
-import type { TrainingPack } from '../../../learning/brain-trainer';
+import type { TrainingPack } from '../../learning/brain-trainer';
 
 // ============================================================================
 // TYPES
