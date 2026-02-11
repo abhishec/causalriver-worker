@@ -58,7 +58,7 @@ MAX_TOTAL_CONTEXT = 60000       # Leave room for prompt + answer
 # OBSERVER AGENT — Session → Structured Observations
 # ============================================================================
 
-OBSERVER_PROMPT = """You are a meticulous memory observer. Analyze this conversation and create a structured observation log capturing EVERYTHING the user reveals about themselves.
+OBSERVER_PROMPT = """You are a meticulous memory observer. Analyze this conversation and create a structured observation log capturing EVERYTHING said by both the user AND the assistant.
 
 Session Date: {session_date}
 Session ID: {session_id}
@@ -76,14 +76,16 @@ Categories:
 - [CHANGE] Updates to previously known information (moved, changed job, etc.)
 - [TEMPORAL] Time-specific information (dates, schedules, "last week", "next month")
 - [RELATIONSHIP] People mentioned and their relation to user
-- [ASSISTANT] Specific advice/info the assistant provided that user might ask about later
+- [ASSISTANT_SAID] Specific information, recommendations, suggestions, creative content, or advice the ASSISTANT provided — include exact details (names, numbers, descriptions, colors, etc.)
+- [ASSISTANT_CREATED] Any content the assistant created (stories, lists, plans, schedules, rotations, code, recipes, etc.) — include the key details of what was created
 
 Rules:
-- Extract from BOTH user AND assistant messages
+- Extract from BOTH user AND assistant messages — assistant responses are EQUALLY important
 - Include ALL details, no matter how small
-- Preserve exact dates, numbers, names mentioned
+- Preserve exact dates, numbers, names, colors, descriptions mentioned
 - Note the session date for temporal context
-- If the assistant recommended something specific, log it
+- Pay special attention to creative content the assistant generated (stories, characters, descriptions)
+- Capture specific details the assistant provided (restaurant names, schedule assignments, product recommendations)
 - Be thorough — missed details = wrong answers
 
 Observation Log:"""
@@ -351,6 +353,47 @@ Instructions:
 Answer:"""
 
 
+ANSWER_PROMPT_ASSISTANT_RECALL = """You are a helpful AI assistant with perfect recall of all previous conversations with the user. Below are structured observation logs from your past interactions, arranged chronologically.
+
+## Observation Memory
+{context}
+
+## Current Date: {question_date}
+
+## User's Question
+{question}
+
+Instructions:
+- This question asks about something YOU (the assistant) specifically said, recommended, created, or provided in a previous conversation
+- Look carefully for [ASSISTANT_SAID] and [ASSISTANT_CREATED] tags in the observations
+- Also look for any specific details, names, numbers, descriptions, or content you generated
+- The answer is about what the ASSISTANT said/did, not what the user said
+- Recall the exact details — names, colors, numbers, descriptions, assignments, etc.
+- If you find relevant assistant-provided information, answer with the specific details
+- Only if you truly cannot find any relevant assistant responses, respond with: "I don't have enough information from our previous conversations to answer that question."
+
+Answer:"""
+
+ANSWER_PROMPT_USER_RECALL = """You are a helpful AI assistant with perfect recall of all previous conversations with the user. Below are structured observation logs from your past interactions, arranged chronologically.
+
+## Observation Memory
+{context}
+
+## Current Date: {question_date}
+
+## User's Question
+{question}
+
+Instructions:
+- This question asks about something the USER told you in a previous conversation
+- Look carefully for [FACT], [EVENT], [PREFERENCE], and [RELATIONSHIP] tags
+- The answer is about what the USER said or revealed about themselves
+- Be specific — include exact names, dates, details the user mentioned
+- If the information is not available in any observation, respond EXACTLY with: "I don't have enough information from our previous conversations to answer that question."
+
+Answer:"""
+
+
 def _select_prompt(question_type: str) -> str:
     """Select the best prompt template for the question type."""
     prompts = {
@@ -358,6 +401,8 @@ def _select_prompt(question_type: str) -> str:
         "multi-session": ANSWER_PROMPT_MULTISESSION,
         "single-session-preference": ANSWER_PROMPT_PREFERENCE,
         "knowledge-update": ANSWER_PROMPT_KNOWLEDGE_UPDATE,
+        "single-session-assistant": ANSWER_PROMPT_ASSISTANT_RECALL,
+        "single-session-user": ANSWER_PROMPT_USER_RECALL,
     }
     return prompts.get(question_type, ANSWER_PROMPT_GENERIC)
 
