@@ -320,6 +320,7 @@ export {
   type BrainCycleReport,
   type BrainHealthReport,
   type BrainRegionStatus,
+  type SimulationWithPredictions,
 } from './orchestrator/brain-pipeline';
 
 export {

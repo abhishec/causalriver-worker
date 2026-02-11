@@ -81,11 +81,23 @@ import {
   type WhatIfConfig,
   type WhatIfScenario,
   type SimulationResult,
+  type CascadeStep,
 } from './whatif-simulator';
+
+import {
+  recordPrediction,
+  type PredictionRecord,
+} from '../learning/prediction-tracker';
 
 // ============================================================================
 // TYPES
 // ============================================================================
+
+/** Result from simulateAndTrack: simulation + recorded predictions */
+export interface SimulationWithPredictions {
+  simulation: SimulationResult;
+  predictions: PredictionRecord[];
+}
 
 export interface BrainPipelineConfig {
   supabase: SupabaseClient;
@@ -341,6 +353,48 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
     return result;
   }
 
+  /**
+   * Simulate and track — PFC → Dopamine pipeline
+   * Brain Analog: The Prefrontal Cortex simulates futures. Each prediction
+   * from the simulation is recorded so the Dopamine System can later measure
+   * prediction errors and drive learning. "I predicted X will happen in 90 days —
+   * let's see if I was right."
+   */
+  async function simulateAndTrack(scenario: WhatIfScenario): Promise<SimulationWithPredictions> {
+    const result = await simulate(scenario);
+
+    // Convert each cascade step into a trackable prediction
+    const predictions: PredictionRecord[] = result.timeline.map((step: CascadeStep) => {
+      // Predicted probability: derived from confidence band midpoint
+      const changeMagnitude = Math.abs(step.predictedChangePercent) / 100;
+      const probability = Math.min(1, result.overallConfidence * (1 - changeMagnitude * 0.1));
+
+      return recordPrediction({
+        organizationId,
+        predictionType: `whatif_cascade_${scenario.direction}`,
+        entityType: 'domain',
+        entityId: step.toDomain,
+        predictedProbability: probability,
+        predictionWindowDays: step.cumulativeDays || scenario.timeHorizonDays || 90,
+        confidenceLower: step.confidenceBand?.lower,
+        confidenceUpper: step.confidenceBand?.upper,
+        modelVersion: 'whatif-simulator-v1',
+        featureSnapshot: {
+          scenario,
+          fromDomain: step.fromDomain,
+          toDomain: step.toDomain,
+          predictedChangePercent: step.predictedChangePercent,
+          edgeEffectSize: step.edgeEffectSize,
+          lagDays: step.lagDays,
+        },
+      });
+    });
+
+    log(`PFC → Dopamine: ${predictions.length} predictions recorded for future verification`);
+
+    return { simulation: result, predictions };
+  }
+
   // ========================================================================
   // FULL CYCLE (Brain Sleep + Dream + Learn)
   // ========================================================================
@@ -578,6 +632,7 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
     scoreAndRoute,
     lookupFastPath,
     simulate,
+    simulateAndTrack,
 
     // Pipeline operations
     runFullCycle,
