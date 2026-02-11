@@ -423,12 +423,34 @@ export function createEmbeddingTuner(config: EmbeddingTunerConfig) {
     },
 
     /**
-     * Persist the transform to Supabase memory.
+     * Persist the transform to Supabase — stores FULL weights.
+     * Uses dedicated embedding_transforms table for the actual matrix,
+     * and ai_memory for human-readable metadata.
      */
     async persistTransform(): Promise<void> {
       const state = this.getTransform();
-      // Store as a memory — the weights are the learned representation
-      const { error } = await supabase
+
+      // 1. Store full weights in dedicated table (the actual learned parameters)
+      const { error: weightsError } = await supabase
+        .from('embedding_transforms')
+        .upsert({
+          organization_id: organizationId,
+          dimension: state.dimension,
+          weights: state.weights,
+          loss_history: state.lossHistory.slice(-50),
+          pairs_processed: state.pairsProcessed,
+          epochs_completed: state.lossHistory.length,
+          final_loss: state.lossHistory.length > 0 ? state.lossHistory[state.lossHistory.length - 1] : null,
+        }, { onConflict: 'organization_id' });
+
+      if (!weightsError) {
+        log(`Transform weights persisted (${state.weights.length} floats, ${state.pairsProcessed} pairs)`);
+      } else {
+        log(`Warning: Could not persist transform weights: ${weightsError.message}`);
+      }
+
+      // 2. Also store human-readable summary in ai_memory
+      await supabase
         .from('ai_memory')
         .upsert({
           organization_id: organizationId,
@@ -439,16 +461,30 @@ export function createEmbeddingTuner(config: EmbeddingTunerConfig) {
           metadata: {
             dimension: state.dimension,
             pairsProcessed: state.pairsProcessed,
-            lossHistory: state.lossHistory.slice(-20), // Last 20 losses
+            lossHistory: state.lossHistory.slice(-20),
             trainedAt: state.trainedAt,
-            // Note: weights are NOT stored here (too large for JSONB)
-            // In production, store to a blob/file store
           },
         }, { onConflict: 'organization_id,memory_type,domain' });
+    },
 
-      if (!error) {
-        log('Transform metadata persisted');
+    /**
+     * Load a previously saved transform from database.
+     */
+    async loadFromDatabase(): Promise<boolean> {
+      const { data } = await supabase
+        .from('embedding_transforms')
+        .select('weights, dimension, loss_history, pairs_processed')
+        .eq('organization_id', organizationId)
+        .single();
+
+      if (data && data.dimension === embeddingDimension && Array.isArray(data.weights)) {
+        transform = [...data.weights];
+        lossHistory = Array.isArray(data.loss_history) ? [...data.loss_history] : [];
+        totalPairsProcessed = data.pairs_processed || 0;
+        log(`Loaded transform from DB: ${totalPairsProcessed} pairs, ${lossHistory.length} epochs`);
+        return true;
       }
+      return false;
     },
   };
 }

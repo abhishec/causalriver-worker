@@ -323,12 +323,33 @@ export function createBayesianUpdater(config: BayesianUpdaterConfig) {
 
     /**
      * Persist posteriors to database (call during consolidation).
+     * Saves full Beta(α,β) to bayesian_posteriors table AND updates
+     * causal_relationships_statistical with derived weight.
      */
     async persistPosteriors(): Promise<number> {
       let persisted = 0;
 
       for (const [key, posterior] of posteriors) {
         try {
+          // 1. Save full posterior to dedicated table (preserves α,β)
+          await supabase
+            .from('bayesian_posteriors')
+            .upsert({
+              organization_id: organizationId,
+              source_domain: posterior.sourceDomain,
+              target_domain: posterior.targetDomain,
+              alpha: posterior.alpha,
+              beta: posterior.beta,
+              mean: posterior.mean,
+              variance: posterior.variance,
+              entropy: posterior.entropy,
+              ci_lower: posterior.credibleInterval[0],
+              ci_upper: posterior.credibleInterval[1],
+              evidence_count: Math.round(posterior.evidenceCount),
+              last_update_source: 'consolidation',
+            }, { onConflict: 'organization_id,source_domain,target_domain' });
+
+          // 2. Also update the causal edge weight (for backward compatibility)
           await supabase
             .from('causal_relationships_statistical')
             .update({
@@ -342,18 +363,47 @@ export function createBayesianUpdater(config: BayesianUpdaterConfig) {
 
           persisted++;
         } catch {
-          // Non-critical
+          // Non-critical — continue with next edge
         }
       }
 
-      log(`Persisted ${persisted}/${posteriors.size} posteriors to database`);
+      log(`Persisted ${persisted}/${posteriors.size} posteriors to bayesian_posteriors + causal_relationships_statistical`);
       return persisted;
     },
 
     /**
      * Load existing evidence from database to warm up posteriors.
+     * Prefers bayesian_posteriors (exact α,β) → falls back to
+     * causal_relationships_statistical (approximate reconstruction).
      */
     async loadFromDatabase(): Promise<number> {
+      // First try: load from dedicated posteriors table (exact parameters)
+      const { data: savedPosteriors } = await supabase
+        .from('bayesian_posteriors')
+        .select('source_domain, target_domain, alpha, beta, mean, variance, entropy, ci_lower, ci_upper, evidence_count')
+        .eq('organization_id', organizationId);
+
+      if (savedPosteriors && savedPosteriors.length > 0) {
+        for (const row of savedPosteriors) {
+          const key = edgeKey(row.source_domain, row.target_domain);
+          posteriors.set(key, {
+            sourceDomain: row.source_domain,
+            targetDomain: row.target_domain,
+            alpha: row.alpha,
+            beta: row.beta,
+            mean: row.mean,
+            variance: row.variance,
+            credibleInterval: [row.ci_lower ?? betaCredibleInterval(row.alpha, row.beta)[0], row.ci_upper ?? betaCredibleInterval(row.alpha, row.beta)[1]],
+            evidenceCount: row.evidence_count,
+            entropy: row.entropy ?? betaEntropy(row.alpha, row.beta),
+            updatedAt: new Date().toISOString(),
+          });
+        }
+        log(`Loaded ${savedPosteriors.length} EXACT posteriors from bayesian_posteriors table`);
+        return savedPosteriors.length;
+      }
+
+      // Fallback: reconstruct from causal_relationships_statistical
       const { data: edges } = await supabase
         .from('causal_relationships_statistical')
         .select('source_domain, target_domain, evidence_weight, sample_size, confidence_interval_lower, confidence_interval_upper')
@@ -367,7 +417,6 @@ export function createBayesianUpdater(config: BayesianUpdaterConfig) {
         const samples = edge.sample_size || 10;
 
         // Reconstruct approximate Beta parameters from weight and sample size
-        // If weight=0.7 and samples=20, then roughly alpha=14, beta=6
         const alpha = Math.max(priorAlpha, weight * samples);
         const beta = Math.max(priorBeta, (1 - weight) * samples);
 
@@ -389,7 +438,7 @@ export function createBayesianUpdater(config: BayesianUpdaterConfig) {
         });
       }
 
-      log(`Loaded ${edges.length} edges into Bayesian posteriors`);
+      log(`Loaded ${edges.length} edges (approximate posteriors from causal_relationships_statistical)`);
       return edges.length;
     },
 

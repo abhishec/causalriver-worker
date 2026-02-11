@@ -76,6 +76,7 @@ import {
 import { createBayesianUpdater } from '../packages/memory-stack/src/learning/bayesian-updater';
 import { createEmbeddingTuner } from '../packages/memory-stack/src/learning/embedding-tuner';
 import { createContrastiveCausalLearner } from '../packages/memory-stack/src/learning/contrastive-causal-learner';
+import { createAttentionPolicyLearner } from '../packages/memory-stack/src/learning/attention-policy-learner';
 import { createPublicDataLearner } from '../packages/memory-stack/src/learning/public-data-learner';
 
 // ============================================================================
@@ -329,6 +330,12 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
       epochs: 3, // Keep it light for nightly runs
     });
 
+    // Load previous transform (so we continue learning, not restart)
+    const loadedTransform = await tuner.loadFromDatabase();
+    if (loadedTransform) {
+      log('LEARN', 'Embedding tuner: loaded saved transform from DB');
+    }
+
     const tuneResult = await tuner.tune();
     if (tuneResult.pairsUsed > 0) {
       log('LEARN', `Embedding tuner: loss ${tuneResult.initialLoss.toFixed(4)} → ${tuneResult.finalLoss.toFixed(4)} (${tuneResult.improvement.toFixed(1)}% improvement, ${tuneResult.pairsUsed} pairs)`);
@@ -343,6 +350,12 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
   // Contrastive causal learner — train "does A cause B?" predictor
   try {
     const learner = createContrastiveCausalLearner({ verbose: VERBOSE });
+
+    // Load previous model state (continue learning, not restart)
+    const loadedModel = await learner.loadFromDatabase(supabase, ORGANIZATION_ID);
+    if (loadedModel) {
+      log('LEARN', 'Contrastive: loaded saved model from DB');
+    }
 
     // Build training examples from verified causal edges
     const { data: edges } = await supabase
@@ -379,11 +392,58 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
       const result = learner.trainBatch(examples);
       const stats = learner.getStats();
       log('LEARN', `Contrastive: ${stats.examplesSeen} examples, loss=${result.avgLoss.toFixed(4)}, accuracy=${(result.accuracy * 100).toFixed(1)}%`);
+
+      // Persist trained model
+      await learner.persistToDatabase(supabase, ORGANIZATION_ID);
     } else {
       log('LEARN', 'Contrastive: not enough edges — skipping');
     }
   } catch (err) {
     logError('LEARN', 'Contrastive learning failed (non-fatal)', err);
+  }
+
+  // Attention Policy Learner — learn from user feedback on alerts
+  try {
+    const policyLearner = createAttentionPolicyLearner({ verbose: VERBOSE });
+
+    // Load saved policy
+    const loadedPolicy = await policyLearner.loadFromDatabase(supabase, ORGANIZATION_ID);
+    if (loadedPolicy) {
+      log('LEARN', 'Attention Policy: loaded saved policy from DB');
+    }
+
+    // Get recent attention feedback from user interactions
+    const { data: feedback } = await supabase
+      .from('attention_decisions')
+      .select('event_id, action, components')
+      .eq('organization_id', ORGANIZATION_ID)
+      .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
+      .limit(200);
+
+    if (feedback && feedback.length > 0) {
+      const feedbackBatch = feedback
+        .filter((f: any) => f.components && f.action)
+        .map((f: any) => ({
+          eventId: f.event_id,
+          action: f.action as 'acted_on' | 'acknowledged' | 'ignored' | 'dismissed' | 'misfire',
+          components: f.components,
+        }));
+
+      if (feedbackBatch.length > 0) {
+        const result = policyLearner.processFeedbackBatch(feedbackBatch);
+        const policy = policyLearner.getPolicy();
+        log('LEARN', `Attention Policy: processed ${result.updatesApplied} feedback, avgReward=${result.avgReward.toFixed(3)}, shift=${result.policyShift.toFixed(4)}`);
+        log('LEARN', `Attention Policy: weights=[cascade=${policy.weightCascadeReach.toFixed(3)}, dollar=${policy.weightDollarEffect.toFixed(3)}, strategic=${policy.weightStrategicAlignment.toFixed(3)}, novelty=${policy.weightNovelty.toFixed(3)}]`);
+
+        await policyLearner.persistToDatabase(supabase, ORGANIZATION_ID);
+      }
+    } else {
+      log('LEARN', 'Attention Policy: no recent feedback — using default weights');
+      // Still persist initial state so we have a baseline
+      await policyLearner.persistToDatabase(supabase, ORGANIZATION_ID);
+    }
+  } catch (err) {
+    logError('LEARN', 'Attention policy learning failed (non-fatal)', err);
   }
 
   // Final Summary
@@ -418,6 +478,30 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
     for (const d of allDiscoveries) {
       console.log(`    + ${d}`);
     }
+  }
+
+  // Log the learning run for observability
+  try {
+    await supabase.from('learning_runs').insert({
+      organization_id: ORGANIZATION_ID,
+      run_type: 'consolidation',
+      status: failed === 0 ? 'completed' : 'partial',
+      started_at: new Date(overallStart).toISOString(),
+      completed_at: new Date().toISOString(),
+      duration_ms: Date.now() - overallStart,
+      signals_processed: totalSignals,
+      edges_updated: totalEdges,
+      metrics: {
+        newDiscoveries: totalNew,
+        anomaliesDetected: totalAnomalies,
+        edgesPruned: totalPruned,
+        edgesStrengthened: totalStrengthened,
+        orgsConsolidated: results.length,
+        discoveries: allDiscoveries.slice(0, 10),
+      },
+    });
+  } catch {
+    // Non-critical
   }
 
   console.log('');

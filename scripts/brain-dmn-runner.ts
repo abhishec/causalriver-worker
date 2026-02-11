@@ -336,6 +336,48 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
       console.log(`    [${pct}%] ${insight.title}`);
       console.log(`           ${insight.explanation.substring(0, 120)}...`);
     }
+
+    // Log insights to attention_decisions so the policy learner can learn from user feedback
+    try {
+      const decisions = allInsights.map(insight => ({
+        organization_id: ORGANIZATION_ID,
+        event_id: insight.id,
+        action: 'surfaced',  // Initial state — updated when user acts/dismisses
+        components: {
+          cascadeReach: insight.importance * 0.7,
+          dollarEffect: 0,
+          strategicAlignment: insight.importance * 0.5,
+          novelty: insight.importance,
+        },
+        insight_type: insight.type,
+        title: insight.title,
+        domains: insight.domains,
+      }));
+      await supabase.from('attention_decisions').insert(decisions);
+    } catch {
+      // Non-critical — attention_decisions table may not exist yet
+    }
+  }
+
+  // Log the DMN run for observability
+  try {
+    await supabase.from('learning_runs').insert({
+      organization_id: ORGANIZATION_ID,
+      run_type: 'dmn',
+      status: 'completed',
+      started_at: new Date(overallStart).toISOString(),
+      completed_at: new Date().toISOString(),
+      duration_ms: Date.now() - overallStart,
+      signals_processed: 0,
+      edges_updated: 0,
+      metrics: {
+        orgsScanned: allResults.length,
+        totalInsights,
+        topInsight: allInsights[0]?.title || null,
+      },
+    });
+  } catch {
+    // Non-critical
   }
 
   console.log('');

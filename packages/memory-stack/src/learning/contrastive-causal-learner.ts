@@ -28,6 +28,7 @@
  */
 
 import { generateEmbedding, cosineSimilarity } from '../core/embeddings';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 // ============================================================================
 // TYPES
@@ -309,6 +310,53 @@ export function createContrastiveCausalLearner(config: ContrastiveLearnerConfig 
         avgLoss: runningLoss,
         accuracy: totalPredictions > 0 ? correctPredictions / totalPredictions : 0,
       };
+    },
+
+    /**
+     * Persist model state to database (call during consolidation).
+     */
+    async persistToDatabase(supabase: SupabaseClient, orgId: string): Promise<void> {
+      const state = this.getState();
+      const { error } = await supabase
+        .from('causal_model_state')
+        .upsert({
+          organization_id: orgId,
+          model_type: 'contrastive_sigmoid',
+          input_dimension: state.inputDimension,
+          weights: state.weights,
+          bias: state.bias,
+          examples_seen: state.examplesSeen,
+          avg_loss: state.avgLoss,
+          accuracy: state.accuracy,
+        }, { onConflict: 'organization_id,model_type' });
+
+      if (!error) {
+        log(`Model persisted: ${state.examplesSeen} examples, loss: ${state.avgLoss.toFixed(4)}, accuracy: ${(state.accuracy * 100).toFixed(1)}%`);
+      } else {
+        log(`Warning: Could not persist model: ${error.message}`);
+      }
+    },
+
+    /**
+     * Load model state from database.
+     */
+    async loadFromDatabase(supabase: SupabaseClient, orgId: string): Promise<boolean> {
+      const { data } = await supabase
+        .from('causal_model_state')
+        .select('weights, bias, input_dimension, examples_seen, avg_loss')
+        .eq('organization_id', orgId)
+        .eq('model_type', 'contrastive_sigmoid')
+        .single();
+
+      if (data && data.input_dimension === inputDim && Array.isArray(data.weights)) {
+        weights = [...data.weights];
+        bias = data.bias;
+        examplesSeen = data.examples_seen;
+        runningLoss = data.avg_loss ?? 0;
+        log(`Loaded model from DB: ${examplesSeen} examples, loss: ${runningLoss.toFixed(4)}`);
+        return true;
+      }
+      return false;
     },
   };
 }

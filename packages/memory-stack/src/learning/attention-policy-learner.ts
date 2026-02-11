@@ -329,5 +329,49 @@ export function createAttentionPolicyLearner(config: PolicyLearnerConfig = {}) {
         log(`Loaded policy: weights=[${weights.map(w => w.toFixed(3)).join(', ')}], feedback=${feedbackCount}`);
       }
     },
+
+    /**
+     * Persist policy to database.
+     */
+    async persistToDatabase(supabase: { from: (table: string) => any }, orgId: string): Promise<void> {
+      const policy = getPolicy();
+      const state = this.getState();
+      const { error } = await supabase
+        .from('attention_policy_state')
+        .upsert({
+          organization_id: orgId,
+          weights: state.weights,
+          alert_threshold: policy.alertThreshold,
+          feedback_count: policy.feedbackCount,
+          avg_reward: policy.avgReward,
+          entropy: policy.entropy,
+          reward_history: state.rewardHistory.slice(-100),
+        }, { onConflict: 'organization_id' });
+
+      if (!error) {
+        log(`Policy persisted: weights=[${state.weights.map((w: number) => w.toFixed(3)).join(', ')}], feedback=${policy.feedbackCount}`);
+      }
+    },
+
+    /**
+     * Load policy from database.
+     */
+    async loadFromDatabase(supabase: { from: (table: string) => any }, orgId: string): Promise<boolean> {
+      const { data } = await supabase
+        .from('attention_policy_state')
+        .select('weights, alert_threshold, feedback_count, avg_reward')
+        .eq('organization_id', orgId)
+        .single();
+
+      if (data && Array.isArray(data.weights) && data.weights.length === 4) {
+        weights = [...data.weights];
+        alertThreshold = data.alert_threshold;
+        feedbackCount = data.feedback_count;
+        avgReward = data.avg_reward;
+        log(`Loaded policy from DB: weights=[${weights.map(w => w.toFixed(3)).join(', ')}], feedback=${feedbackCount}`);
+        return true;
+      }
+      return false;
+    },
   };
 }
