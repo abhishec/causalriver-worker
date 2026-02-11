@@ -499,6 +499,28 @@ export {
 } from './learning/public-data-learner';
 
 export {
+  createLLMKnowledgeDistiller,
+  type KnowledgeDistillerConfig,
+  type RawContent,
+  type DistillationResult,
+  type DistillationSessionResult,
+  type DistilledTrainingPack,
+  type ExtractedCausalPattern,
+} from './learning/llm-knowledge-distiller';
+
+export {
+  createPublicContentFetcher,
+  type ContentFetcherConfig,
+  type ContentFetchResult,
+} from './learning/public-content-fetcher';
+
+export {
+  createLLMTrainingPipeline,
+  type LLMTrainingPipelineConfig,
+  type LLMTrainingResult,
+} from './learning/llm-training-pipeline';
+
+export {
   detectAnomalies,
   zScoreDetection,
   iqrDetection,

@@ -25,6 +25,10 @@
  *   │    Bayesian Updater → Embedding Tuner →                  │
  *   │    Contrastive Learner → Attention Policy                │
  *   │                                                          │
+ *   │  PERCEPTION (Sensory Cortex):                            │
+ *   │    Public Content Fetcher → LLM Knowledge Distiller →    │
+ *   │    Public Data Learner (numeric signals)                 │
+ *   │                                                          │
  *   └──────────────────────────────────────────────────────────┘
  *
  * Usage:
@@ -112,6 +116,12 @@ import {
   type PolicyUpdateResult,
 } from '../learning/attention-policy-learner';
 
+import {
+  createLLMTrainingPipeline,
+  type LLMTrainingPipelineConfig,
+  type LLMTrainingResult,
+} from '../learning/llm-training-pipeline';
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -152,6 +162,17 @@ export interface BrainPipelineConfig {
   embeddingTuner?: Partial<EmbeddingTunerConfig>;
   contrastiveLearner?: Partial<ContrastiveLearnerConfig>;
   attentionPolicy?: Partial<PolicyLearnerConfig>;
+
+  /** LLM Training Pipeline config (Sensory Cortex) */
+  llmTraining?: {
+    provider: 'anthropic' | 'openai';
+    apiKey: string;
+    model?: string;
+    contentSources?: string[];
+    dataSources?: string[];
+    maxContentPerSource?: number;
+    fredApiKey?: string;
+  };
 
   verbose?: boolean;
 }
@@ -195,6 +216,8 @@ export interface BrainCycleReport {
   fastPathInvalidated: boolean;
   /** Long-Term Potentiation: learning cycle results */
   learning: LearningCycleResult | null;
+  /** Sensory Cortex: LLM-based public data training results */
+  publicDataTraining: LLMTrainingResult | null;
 
   /** Overall cycle status */
   status: 'success' | 'partial' | 'failed';
@@ -325,11 +348,28 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
     ...config.attentionPolicy,
   });
 
+  // Sensory Cortex: LLM-based public data training pipeline (optional — requires API key)
+  const llmTrainingPipeline = config.llmTraining
+    ? createLLMTrainingPipeline({
+        supabase,
+        organizationId,
+        llmProvider: config.llmTraining.provider,
+        llmApiKey: config.llmTraining.apiKey,
+        llmModel: config.llmTraining.model,
+        contentSources: config.llmTraining.contentSources,
+        dataSources: config.llmTraining.dataSources,
+        maxContentPerSource: config.llmTraining.maxContentPerSource,
+        fredApiKey: config.llmTraining.fredApiKey,
+        verbose,
+      })
+    : null;
+
   // Track last cycle times for health reporting
   let lastConsolidationAt: string | undefined;
   let lastDMNScanAt: string | undefined;
   let lastExplorationAt: string | undefined;
   let lastLearningAt: string | undefined;
+  let lastPublicDataTrainingAt: string | undefined;
 
   // ========================================================================
   // SCHEDULED OPERATIONS (Brain Sleep)
@@ -573,6 +613,41 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
   }
 
   // ========================================================================
+  // PERCEPTION (Sensory Cortex — Public Data Training)
+  // ========================================================================
+
+  /**
+   * Run LLM-based public data training — Sensory Cortex processing
+   *
+   * Brain Analog: The sensory cortex reads the environment and extracts
+   * structured knowledge. This fetches public text content (Wikipedia,
+   * news, economic reports), runs it through an LLM to extract causal
+   * patterns, and stores them as training data. Also ingests numeric
+   * signals from public data APIs.
+   *
+   * Requires llmTraining config to be set with API key.
+   */
+  async function runPublicDataTraining(): Promise<LLMTrainingResult> {
+    if (!llmTrainingPipeline) {
+      return {
+        contentFetch: { contents: [], sources: [], totalDurationMs: 0 },
+        distillation: null,
+        signalIngestion: null,
+        trainingPack: null,
+        narrative: 'LLM training not configured — set llmTraining config with API key to enable.',
+        totalDurationMs: 0,
+        errors: ['LLM training pipeline not configured'],
+      };
+    }
+
+    log('Sensory Cortex: starting public data training...');
+    const result = await llmTrainingPipeline.runTrainingCycle();
+    lastPublicDataTrainingAt = new Date().toISOString();
+    log(`Sensory Cortex complete: ${result.narrative}`);
+    return result;
+  }
+
+  // ========================================================================
   // FULL CYCLE (Brain Sleep + Dream + Learn)
   // ========================================================================
 
@@ -580,6 +655,7 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
    * Run a full brain cycle — the equivalent of a full night's sleep.
    *
    * Sequence:
+   * 0. Public data training (SENSE) → fetch & distill knowledge from public sources
    * 1. Consolidation (SLEEP) → prune/strengthen edges
    * 2. DMN scan → discover proactive insights
    * 3. Impact scoring on DMN insights → score business relevance
@@ -594,6 +670,21 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
     const errors: string[] = [];
 
     log('=== BRAIN CYCLE START (Full Sleep Cycle) ===');
+
+    // Step 0: Public data training (Sensory Cortex — feed the brain first)
+    let publicDataResult: LLMTrainingResult | null = null;
+    if (llmTrainingPipeline) {
+      try {
+        publicDataResult = await runPublicDataTraining();
+        if (publicDataResult.errors.length > 0) {
+          errors.push(...publicDataResult.errors);
+        }
+      } catch (err) {
+        const msg = `Public data training failed: ${(err as Error).message}`;
+        errors.push(msg);
+        log(msg);
+      }
+    }
 
     // Step 1: Consolidation (Hippocampus → Neocortex)
     let consolidationResult: ConsolidationResult | null = null;
@@ -712,6 +803,19 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
         `contrastive accuracy ${(learningResult.contrastiveAccuracy * 100).toFixed(0)}%.`
       );
     }
+    if (publicDataResult) {
+      const pc = publicDataResult.distillation;
+      if (pc) {
+        narrativeParts.push(
+          `Sensory Cortex: distilled ${pc.totalCausalPatterns} causal patterns from ${pc.itemsProcessed} public articles.`
+        );
+      }
+      if (publicDataResult.signalIngestion) {
+        narrativeParts.push(
+          `Ingested ${publicDataResult.signalIngestion.totalSignals} numeric signals.`
+        );
+      }
+    }
     if (fastPathInvalidated) {
       narrativeParts.push('Cerebellum: stale fast-paths cleared for recompilation.');
     }
@@ -732,6 +836,7 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
       exploration: explorationResult,
       fastPathInvalidated,
       learning: learningResult,
+      publicDataTraining: publicDataResult,
       status,
       errors,
       narrative: narrativeParts.join(' '),
@@ -804,6 +909,19 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
           ? `Last learning cycle: ${lastLearningAt}`
           : 'No learning cycle run yet — synapses await strengthening',
       },
+      {
+        name: 'Public Data Training',
+        brainAnalog: 'Sensory Cortex',
+        status: llmTrainingPipeline
+          ? (lastPublicDataTrainingAt ? 'ok' : 'not_initialized')
+          : 'not_initialized',
+        lastActiveAt: lastPublicDataTrainingAt,
+        details: llmTrainingPipeline
+          ? (lastPublicDataTrainingAt
+            ? `Last training: ${lastPublicDataTrainingAt}`
+            : 'Pipeline configured but not yet run')
+          : 'Not configured — set llmTraining config to enable',
+      },
     ];
 
     const notInitialized = regions.filter(r => r.status === 'not_initialized').length;
@@ -845,6 +963,9 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
     // Learning (Long-Term Potentiation)
     runLearningCycle,
 
+    // Perception (Sensory Cortex)
+    runPublicDataTraining,
+
     // Pipeline operations
     runFullCycle,
     getHealth,
@@ -861,5 +982,6 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
     getEmbeddingTuner: () => embeddingTuner,
     getContrastiveLearner: () => contrastiveLearner,
     getAttentionPolicyLearner: () => attentionPolicyLearner,
+    getLLMTrainingPipeline: () => llmTrainingPipeline,
   };
 }
