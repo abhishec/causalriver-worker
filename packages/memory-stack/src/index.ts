@@ -579,7 +579,7 @@ export {
   buildDomainContext,
   exampleDomains,
   type DomainPersona,
-  type DomainContext,
+  type DomainContext as PersonaDomainContext,
   type PersonaCausalEdge,
 } from './intelligence/domain-personas';
 

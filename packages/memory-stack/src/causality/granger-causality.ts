@@ -385,7 +385,8 @@ function computeEffectSizeCI(
   alpha: number
 ): ConfidenceInterval {
   // Use Fisher's z transformation for CI
-  const r = Math.sqrt(effectSize);
+  // Clamp r to avoid singularity at r=1 where atanh(r) → Infinity → NaN
+  const r = Math.min(Math.sqrt(effectSize), 0.9999);
   const z = 0.5 * Math.log((1 + r) / (1 - r));
   const se = 1 / Math.sqrt(n - 3);
   const zCrit = normalQuantile(1 - alpha / 2);
