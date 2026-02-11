@@ -131,8 +131,9 @@ export function computeGrangerCausality(
   
   const pValue = fTestPValue(fStatistic, optimalLag, dfUnrestricted);
   
-  // Compute effect size (partial R² or eta²)
-  const effectSize = (rssRestricted - rssUnrestricted) / rssRestricted;
+  // Compute effect size (partial R² or eta²), clamped to [0, 1]
+  const rawEffect = rssRestricted > 0 ? (rssRestricted - rssUnrestricted) / rssRestricted : 0;
+  const effectSize = Math.max(0, Math.min(1, rawEffect));
   
   // Confidence interval for effect size
   const confidenceInterval = computeEffectSizeCI(
@@ -384,19 +385,28 @@ function computeEffectSizeCI(
   lag: number,
   alpha: number
 ): ConfidenceInterval {
+  // Guard against NaN, negative, or degenerate effect sizes
+  const safeEffect = (!Number.isFinite(effectSize) || effectSize <= 0)
+    ? 0
+    : Math.min(effectSize, 1);
+
+  if (safeEffect === 0 || n <= 3) {
+    return { lower: 0, upper: 0, level: 1 - alpha };
+  }
+
   // Use Fisher's z transformation for CI
-  // Clamp r to avoid singularity at r=1 where atanh(r) → Infinity → NaN
-  const r = Math.min(Math.sqrt(effectSize), 0.9999);
+  // Clamp r to (0, 0.9999) to avoid singularity at r=1 where atanh(r) → Infinity
+  const r = Math.min(Math.sqrt(safeEffect), 0.9999);
   const z = 0.5 * Math.log((1 + r) / (1 - r));
   const se = 1 / Math.sqrt(n - 3);
   const zCrit = normalQuantile(1 - alpha / 2);
-  
+
   const zLower = z - zCrit * se;
   const zUpper = z + zCrit * se;
-  
+
   const rLower = (Math.exp(2 * zLower) - 1) / (Math.exp(2 * zLower) + 1);
   const rUpper = (Math.exp(2 * zUpper) - 1) / (Math.exp(2 * zUpper) + 1);
-  
+
   return {
     lower: Math.max(0, rLower * rLower),
     upper: Math.min(1, rUpper * rUpper),
