@@ -59,9 +59,16 @@ import { createAutonomousLearner } from '../packages/memory-stack/src/learning/a
 import { createScheduledJobs } from '../packages/memory-stack/src/orchestrator/scheduled-jobs';
 import { createSupabaseRepository } from '../packages/memory-stack/src/persistence/supabase-repository';
 import { storeConnectorSignals } from '../packages/memory-stack/src/connectors/connector-framework';
+import { createSyncManager } from '../packages/memory-stack/src/connectors/sync-manager';
 import type { TrainingPack } from '../packages/memory-stack/src/learning/brain-trainer';
 import type { ConnectorSignal } from '../packages/memory-stack/src/connectors/connector-framework';
 import { createConsolidationEngine, type ConsolidationResult } from '../packages/memory-stack/src/orchestrator/consolidation-engine';
+
+// ── Connector Imports ──
+// Slack connector is imported dynamically in syncConnectors() to avoid
+// ERR_PACKAGE_PATH_NOT_EXPORTED when the slack-connector's internal
+// @nexus-ai/memory-stack dependency resolves through pnpm symlinks.
+// Dynamic import lets us gracefully handle missing/broken resolution.
 
 // ── Training Data Modules ──
 import {
@@ -236,6 +243,80 @@ async function fetchPublicData(): Promise<FetchedData> {
   log('FETCH', `${totalSources}/10 data sources available`);
 
   return { fred, github, worldBank, hackerNews, bls, stackOverflow, wikipedia, imf, patents, wikiContent };
+}
+
+// ============================================================================
+// STAGE 1.5: SYNC CONNECTORS
+// ============================================================================
+
+interface ConnectorSyncResult {
+  connectorsSynced: string[];
+  totalSignals: number;
+  errors: string[];
+}
+
+async function syncConnectors(
+  supabase: ReturnType<typeof createClient>,
+): Promise<ConnectorSyncResult> {
+  divider('STAGE 1.5: SYNC CONNECTORS');
+
+  const result: ConnectorSyncResult = {
+    connectorsSynced: [],
+    totalSignals: 0,
+    errors: [],
+  };
+
+  const connectors = [];
+
+  // Register Slack connector if token is available
+  if (process.env.SLACK_BOT_TOKEN) {
+    try {
+      // Dynamic import to avoid ERR_PACKAGE_PATH_NOT_EXPORTED with pnpm symlinks
+      const { createNexusSlackConnector } = await import('../packages/slack-connector/src/index');
+      const slack = createNexusSlackConnector({
+        token: process.env.SLACK_BOT_TOKEN,
+        organizationId: ORGANIZATION_ID,
+        domain: 'communication',
+        lookbackDays: 90,
+      });
+      connectors.push(slack);
+      log('SYNC', 'Slack connector registered (SLACK_BOT_TOKEN found)');
+    } catch (err) {
+      logError('SYNC', 'Failed to create Slack connector', err);
+      result.errors.push('Slack connector creation failed');
+    }
+  } else {
+    log('SYNC', 'Slack connector skipped (no SLACK_BOT_TOKEN)');
+  }
+
+  // Add more connectors here as they become available:
+  // if (process.env.GITHUB_TOKEN) { connectors.push(createGitHubConnector(...)); }
+
+  if (connectors.length === 0) {
+    log('SYNC', 'No connector tokens configured — skipping sync stage');
+    return result;
+  }
+
+  // Create SyncManager and sync all registered connectors
+  const syncManager = createSyncManager({ connectors });
+  const syncResults = await syncManager.syncAll(supabase, ORGANIZATION_ID);
+
+  for (const sr of syncResults) {
+    if (sr.success) {
+      result.totalSignals += sr.signalsGenerated;
+    } else {
+      result.errors.push(...sr.errors);
+    }
+  }
+
+  result.connectorsSynced = connectors.map(c => c.id);
+  log('SYNC', `Synced ${result.connectorsSynced.length} connector(s): ${result.connectorsSynced.join(', ')}`);
+  log('SYNC', `Total signals generated: ${result.totalSignals}`);
+  if (result.errors.length > 0) {
+    log('SYNC', `Errors: ${result.errors.length}`);
+  }
+
+  return result;
 }
 
 // ============================================================================
@@ -633,6 +714,9 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
   // Stage 1: Fetch
   const fetchedData = await fetchPublicData();
 
+  // Stage 1.5: Sync Connectors (Slack, etc.)
+  const connectorResult = await syncConnectors(supabase);
+
   // Stage 2: Convert
   const convertedData = convertData(fetchedData);
 
@@ -650,6 +734,8 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
 
   divider('RUN COMPLETE');
   log('DONE', `Total time: ${elapsed}s`);
+  log('DONE', `Connectors synced: ${connectorResult.connectorsSynced.length > 0 ? connectorResult.connectorsSynced.join(', ') : 'none'}`);
+  log('DONE', `Connector signals: ${connectorResult.totalSignals}`);
   log('DONE', `Signals stored: ${trainingResult.signalsStored}`);
   log('DONE', `Packs trained: ${trainingResult.packsTrainedCount}`);
   log('DONE', `Learning cycle: ${learningResult.cycleCompleted ? '✓' : '✗'}`);
@@ -660,14 +746,14 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
     log('DONE', `Brain discoveries: ${consolidationResult.discoveries.length}`);
   }
 
-  const totalErrors = trainingResult.errors.length + learningResult.errors.length + consolidationResult.errors.length;
+  const totalErrors = trainingResult.errors.length + learningResult.errors.length + consolidationResult.errors.length + connectorResult.errors.length;
   if (totalErrors > 0) {
     log('DONE', `Errors: ${totalErrors}`);
-    for (const err of [...trainingResult.errors, ...learningResult.errors, ...consolidationResult.errors]) {
+    for (const err of [...connectorResult.errors, ...trainingResult.errors, ...learningResult.errors, ...consolidationResult.errors]) {
       log('DONE', `  - ${err}`);
     }
   } else {
-    log('DONE', 'All 5 stages completed successfully ✓');
+    log('DONE', 'All stages completed successfully ✓');
   }
 
   console.log('');

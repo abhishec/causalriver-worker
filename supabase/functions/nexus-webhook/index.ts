@@ -1,7 +1,7 @@
 /**
  * Nexus Webhook Edge Function
  *
- * Webhook receiver for HubSpot, Stripe, and Intercom events.
+ * Webhook receiver for HubSpot, Stripe, Intercom, and Slack events.
  * Routes incoming webhooks to the appropriate connector's signal transformer
  * and stores the resulting signals.
  *
@@ -9,6 +9,7 @@
  *   POST /nexus-webhook?source=hubspot&org=<orgId>
  *   POST /nexus-webhook?source=stripe&org=<orgId>
  *   POST /nexus-webhook?source=intercom&org=<orgId>
+ *   POST /nexus-webhook?source=slack&org=<orgId>
  */
 
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
@@ -157,6 +158,79 @@ function transformHubSpotEvent(payload: any, organizationId: string): WebhookSig
 }
 
 /**
+ * Transform Slack Events API webhook events into signals.
+ *
+ * Handles:
+ *   - message (new message or thread reply)
+ *   - reaction_added (emoji reaction)
+ *   - app_mention (@mention of the bot)
+ *
+ * Slack Events API payload shape:
+ *   { type: "event_callback", event: { type, channel, user, text, ts, ... } }
+ */
+function transformSlackEvent(payload: any, organizationId: string): WebhookSignal[] {
+  const signals: WebhookSignal[] = [];
+  const event = payload?.event;
+  if (!event) return signals;
+
+  switch (event.type) {
+    case 'message':
+      // Skip subtypes (bot messages, edits, deletes, etc.)
+      if (!event.subtype) {
+        signals.push({
+          organization_id: organizationId,
+          source_domain: 'communication',
+          signal_type: event.thread_ts ? 'thread_reply' : 'message_sent',
+          signal_value: 1,
+          entity_type: 'slack_message',
+          entity_id: `${event.channel}_${event.ts}`,
+          metadata: {
+            channel: event.channel,
+            user: event.user,
+            text: (event.text || '').substring(0, 500),
+            thread_ts: event.thread_ts,
+          },
+        });
+      }
+      break;
+
+    case 'reaction_added':
+      signals.push({
+        organization_id: organizationId,
+        source_domain: 'communication',
+        signal_type: 'reaction_added',
+        signal_value: 1,
+        entity_type: 'slack_reaction',
+        entity_id: `${event.item?.channel}_${event.item?.ts}_${event.reaction}`,
+        metadata: {
+          user: event.user,
+          reaction: event.reaction,
+          channel: event.item?.channel,
+        },
+      });
+      break;
+
+    case 'app_mention':
+      signals.push({
+        organization_id: organizationId,
+        source_domain: 'communication',
+        signal_type: 'mention_received',
+        signal_value: 1,
+        entity_type: 'slack_mention',
+        entity_id: `${event.channel}_${event.ts}`,
+        metadata: {
+          channel: event.channel,
+          user: event.user,
+          text: (event.text || '').substring(0, 500),
+        },
+      });
+      break;
+  }
+
+  return signals;
+}
+
+/**
  * Transform Intercom/support webhook events into signals
  */
 function transformSupportEvent(payload: any, organizationId: string): WebhookSignal[] {
@@ -231,6 +305,15 @@ serve(async (req: Request) => {
 
     const payload = await req.json();
 
+    // Slack URL verification challenge — respond immediately
+    // Slack sends this when you first configure the Events API webhook URL.
+    if (source === 'slack' && payload?.type === 'url_verification') {
+      return new Response(
+        JSON.stringify({ challenge: payload.challenge }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Transform webhook payload to signals based on source
     let signals: WebhookSignal[] = [];
 
@@ -245,6 +328,9 @@ serve(async (req: Request) => {
       case 'zendesk':
       case 'support':
         signals = transformSupportEvent(payload, organizationId);
+        break;
+      case 'slack':
+        signals = transformSlackEvent(payload, organizationId);
         break;
       default:
         return new Response(
