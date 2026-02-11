@@ -13,3 +13,7 @@ export {
   analyzeSentiment,
   analyzeSentimentBatch,
 } from './sentiment-analyzer';
+export {
+  crossDomainToConnectorSignals,
+  messagesToConnectorSignals,
+} from './signal-bridge';

@@ -100,6 +100,35 @@ export interface SlackConnectorConfig {
 
   /** Delay between API requests in ms (default: 100) */
   requestDelayMs?: number;
+
+  /** Organization ID for Brain persistence (required for Brain-native mode) */
+  organizationId?: string;
+
+  /** Domain tag for signals (default: 'communication') */
+  domain?: string;
+}
+
+// ============================================================================
+// PUSH TYPES
+// ============================================================================
+
+/**
+ * Options for sending a Slack message
+ */
+export interface SlackPushMessage {
+  channel: string;
+  text: string;
+  threadTs?: string;
+  unfurlLinks?: boolean;
+}
+
+/**
+ * Result from a Slack API push operation
+ */
+export interface SlackApiResult {
+  ok: boolean;
+  ts?: string;
+  error?: string;
 }
 
 // ============================================================================

@@ -148,4 +148,63 @@ export class SlackClient {
       'members'
     );
   }
+
+  // ========================================================================
+  // PUSH METHODS
+  // ========================================================================
+
+  /**
+   * Send a message to a channel (or reply to a thread)
+   */
+  async postMessage(
+    channel: string,
+    text: string,
+    threadTs?: string
+  ): Promise<{ ok: boolean; ts?: string; error?: string }> {
+    const response = await this.execute(() =>
+      this.client.chat.postMessage({
+        channel,
+        text,
+        thread_ts: threadTs,
+        unfurl_links: true,
+      })
+    );
+    return { ok: response.ok ?? false, ts: response.ts, error: response.error };
+  }
+
+  /**
+   * Add a reaction to a message
+   */
+  async addReaction(
+    channel: string,
+    timestamp: string,
+    emoji: string
+  ): Promise<{ ok: boolean; error?: string }> {
+    const response = await this.execute(() =>
+      this.client.reactions.add({
+        channel,
+        timestamp,
+        name: emoji,
+      })
+    );
+    return { ok: response.ok ?? false, error: response.error };
+  }
+
+  /**
+   * Upload a snippet or file to a channel
+   */
+  async uploadSnippet(
+    channel: string,
+    content: string,
+    title?: string
+  ): Promise<{ ok: boolean; error?: string }> {
+    const response = await this.execute(() =>
+      this.client.files.uploadV2({
+        channel_id: channel,
+        content,
+        title: title ?? 'Snippet from NexusBrain',
+      })
+    );
+    return { ok: response.ok ?? false, error: response.error };
+  }
 }

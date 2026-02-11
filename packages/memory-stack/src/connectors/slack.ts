@@ -73,6 +73,7 @@ export interface SlackConnector extends NexusConnector {
 // FACTORY
 // ============================================================================
 
+/** @deprecated Use `createNexusSlackConnector` from `@nexus-ai/slack-connector` instead. */
 export function createSlackConnector(config: SlackConnectorConfig): SlackConnector {
   const baseUrl = config.baseUrl ?? 'https://slack.com/api';
   const domain = config.domain ?? 'communication';

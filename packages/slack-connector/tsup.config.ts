@@ -7,6 +7,7 @@ export default defineConfig({
     'src/fetcher/index.ts',
     'src/transform/index.ts',
     'src/analyzer/index.ts',
+    'src/webhook/index.ts',
   ],
   format: ['esm'],
   dts: true,
@@ -17,5 +18,6 @@ export default defineConfig({
   external: [
     '@slack/web-api',
     '@nexus-ai/memory-stack',
+    '@supabase/supabase-js',
   ],
 });

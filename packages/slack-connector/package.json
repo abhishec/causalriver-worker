@@ -26,6 +26,10 @@
     "./analyzer": {
       "import": "./dist/analyzer/index.js",
       "types": "./dist/analyzer/index.d.ts"
+    },
+    "./webhook": {
+      "import": "./dist/webhook/index.js",
+      "types": "./dist/webhook/index.d.ts"
     }
   },
   "files": [
@@ -44,10 +48,17 @@
     "@slack/web-api": "^7.0.0"
   },
   "peerDependencies": {
-    "@nexus-ai/memory-stack": "workspace:*"
+    "@nexus-ai/memory-stack": "workspace:*",
+    "@supabase/supabase-js": "^2.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@supabase/supabase-js": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@nexus-ai/memory-stack": "workspace:*",
+    "@supabase/supabase-js": "^2.0.0",
     "@vitest/coverage-v8": "^1.6.0",
     "tsup": "^8.0.0",
     "typescript": "^5.5.0",

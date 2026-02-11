@@ -16,7 +16,7 @@
  *   - reactions:read
  */
 
-import { createSlackConnector } from '@nexus-ai/slack-connector';
+import { createNexusSlackConnector } from '@nexus-ai/slack-connector';
 
 const token = process.env.SLACK_BOT_TOKEN;
 
@@ -30,10 +30,12 @@ async function main() {
   console.log('=== Nexus Intelligence — Slack Workspace Insights ===\n');
 
   // 1. Create connector
-  const connector = createSlackConnector({
+  const connector = createNexusSlackConnector({
     token,
     lookbackDays: 90,
     includeThreads: true,
+    // Organization ID for Brain-native persistence:
+    // organizationId: 'org_123',
     // Optionally filter channels:
     // channels: { include: ['engineering*', 'product*'], exclude: ['random'] },
   });
