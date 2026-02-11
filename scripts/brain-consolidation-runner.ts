@@ -73,6 +73,11 @@ import {
   type ConsolidationResult,
 } from '../packages/memory-stack/src/orchestrator/consolidation-engine';
 
+import { createBayesianUpdater } from '../packages/memory-stack/src/learning/bayesian-updater';
+import { createEmbeddingTuner } from '../packages/memory-stack/src/learning/embedding-tuner';
+import { createContrastiveCausalLearner } from '../packages/memory-stack/src/learning/contrastive-causal-learner';
+import { createPublicDataLearner } from '../packages/memory-stack/src/learning/public-data-learner';
+
 // ============================================================================
 // CONFIGURATION
 // ============================================================================
@@ -197,6 +202,27 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
   log('INIT', `Lookback: ${LOOKBACK_HOURS} hours`);
   log('INIT', `Prune threshold: ${PRUNE_AFTER_DAYS} days`);
 
+  // ── STEP 0: FEED THE BRAIN — Pull fresh public data ──
+  divider('STEP 0: FEEDING THE BRAIN (Public Data Ingestion)');
+  try {
+    const dataLearner = createPublicDataLearner({
+      supabase,
+      organizationId: CORE_BRAIN_ORG_ID,
+      fredApiKey: process.env.FRED_API_KEY,
+      verbose: VERBOSE,
+    });
+
+    const ingestion = await dataLearner.ingest();
+    log('FEED', ingestion.summary);
+
+    for (const src of ingestion.sources) {
+      const status = src.success ? '✓' : '✗';
+      log('FEED', `  ${status} ${src.source}: ${src.signalCount} signals (${(src.durationMs / 1000).toFixed(1)}s)`);
+    }
+  } catch (err) {
+    logError('FEED', 'Public data ingestion failed (non-fatal)', err);
+  }
+
   if (CONSOLIDATE_ALL_ORGS) {
     // Phase 1: Consolidate all active org brains
     log('INIT', 'Scanning for active organizations...');
@@ -243,6 +269,121 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
     } catch (err) {
       logError('CORE', 'Failed to consolidate core brain', err);
     }
+  }
+
+  // ── POST-CONSOLIDATION: Real Learning Steps ──
+  divider('REAL LEARNING (Bayesian + Embeddings + Contrastive)');
+
+  // Bayesian weight updates — replace naive ×1.05 with proper posteriors
+  try {
+    const bayesian = createBayesianUpdater({
+      supabase,
+      organizationId: ORGANIZATION_ID,
+      verbose: VERBOSE,
+    });
+
+    const loaded = await bayesian.loadFromDatabase();
+    log('LEARN', `Bayesian: loaded ${loaded} edge posteriors`);
+
+    // Get prediction history and update posteriors
+    const { data: predictions } = await supabase
+      .from('ai_memory')
+      .select('metadata')
+      .eq('organization_id', ORGANIZATION_ID)
+      .eq('memory_type', 'prediction_verification')
+      .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
+      .limit(200);
+
+    if (predictions && predictions.length > 0) {
+      for (const p of predictions) {
+        const meta = p.metadata as any;
+        if (meta?.sourceDomain && meta?.targetDomain) {
+          bayesian.update({
+            sourceDomain: meta.sourceDomain,
+            targetDomain: meta.targetDomain,
+            wasCorrect: meta.wasCorrect || false,
+            predictionConfidence: meta.confidence || 0.5,
+          });
+        }
+      }
+      const persisted = await bayesian.persistPosteriors();
+      log('LEARN', `Bayesian: updated ${predictions.length} predictions, persisted ${persisted} posteriors`);
+
+      const uncertain = bayesian.getUncertainEdges(0.25);
+      if (uncertain.length > 0) {
+        log('LEARN', `Bayesian: ${uncertain.length} edges need more evidence (high uncertainty)`);
+      }
+    } else {
+      log('LEARN', 'Bayesian: no recent prediction data — skipping update');
+    }
+  } catch (err) {
+    logError('LEARN', 'Bayesian update failed (non-fatal)', err);
+  }
+
+  // Embedding fine-tuning — learn domain transforms from causal graph
+  try {
+    const tuner = createEmbeddingTuner({
+      supabase,
+      organizationId: ORGANIZATION_ID,
+      verbose: VERBOSE,
+      epochs: 3, // Keep it light for nightly runs
+    });
+
+    const tuneResult = await tuner.tune();
+    if (tuneResult.pairsUsed > 0) {
+      log('LEARN', `Embedding tuner: loss ${tuneResult.initialLoss.toFixed(4)} → ${tuneResult.finalLoss.toFixed(4)} (${tuneResult.improvement.toFixed(1)}% improvement, ${tuneResult.pairsUsed} pairs)`);
+      await tuner.persistTransform();
+    } else {
+      log('LEARN', 'Embedding tuner: not enough causal pairs — skipping');
+    }
+  } catch (err) {
+    logError('LEARN', 'Embedding tuning failed (non-fatal)', err);
+  }
+
+  // Contrastive causal learner — train "does A cause B?" predictor
+  try {
+    const learner = createContrastiveCausalLearner({ verbose: VERBOSE });
+
+    // Build training examples from verified causal edges
+    const { data: edges } = await supabase
+      .from('causal_relationships_statistical')
+      .select('source_domain, target_domain, is_significant, evidence_weight')
+      .eq('organization_id', ORGANIZATION_ID)
+      .limit(100);
+
+    if (edges && edges.length >= 5) {
+      const examples = [];
+      const allDomains = [...new Set(edges.map(e => e.source_domain).concat(edges.map(e => e.target_domain)))];
+
+      for (const edge of edges) {
+        // Positive example (causal edge exists)
+        examples.push({
+          sourceDomain: edge.source_domain,
+          targetDomain: edge.target_domain,
+          label: edge.is_significant ? 1 : 0,
+          labelConfidence: edge.evidence_weight || 0.5,
+        });
+
+        // Negative example (random non-causal pair)
+        const randomDomain = allDomains[Math.floor(Math.random() * allDomains.length)];
+        if (randomDomain !== edge.source_domain) {
+          examples.push({
+            sourceDomain: edge.source_domain,
+            targetDomain: randomDomain,
+            label: 0,
+            labelConfidence: 0.3,
+          });
+        }
+      }
+
+      const result = learner.trainBatch(examples);
+      const stats = learner.getStats();
+      log('LEARN', `Contrastive: ${stats.examplesSeen} examples, loss=${result.avgLoss.toFixed(4)}, accuracy=${(result.accuracy * 100).toFixed(1)}%`);
+    } else {
+      log('LEARN', 'Contrastive: not enough edges — skipping');
+    }
+  } catch (err) {
+    logError('LEARN', 'Contrastive learning failed (non-fatal)', err);
   }
 
   // Final Summary

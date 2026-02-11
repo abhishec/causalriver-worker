@@ -423,6 +423,51 @@ export {
   type TemporalAssociationRule,
 } from './learning/pattern-detector';
 
+// Bayesian Weight Updater (proper posterior updates)
+export {
+  createBayesianUpdater,
+  type BayesianUpdaterConfig,
+  type EdgePosterior,
+  type PredictionEvidence,
+  type ThompsonSample,
+} from './learning/bayesian-updater';
+
+// Embedding Fine-Tuner (domain-adaptive representation learning)
+export {
+  createEmbeddingTuner,
+  type EmbeddingTunerConfig,
+  type EmbeddingTrainingPair,
+  type DomainTransform,
+  type TuningResult,
+} from './learning/embedding-tuner';
+
+// Contrastive Causal Learner (neural "does A cause B?" predictor)
+export {
+  createContrastiveCausalLearner,
+  type ContrastiveLearnerConfig,
+  type CausalTrainingExample,
+  type CausalPrediction,
+  type CausalModelState,
+} from './learning/contrastive-causal-learner';
+
+// Attention Policy Learner (mini RLHF for impact scoring)
+export {
+  createAttentionPolicyLearner,
+  type PolicyLearnerConfig,
+  type AttentionFeedback,
+  type AttentionPolicy,
+  type PolicyUpdateResult,
+} from './learning/attention-policy-learner';
+
+// Public Data Learner (scalable training from free open sources)
+export {
+  createPublicDataLearner,
+  type PublicDataLearnerConfig,
+  type IngestionResult,
+  type DataFetchResult,
+  type NormalizedSignal,
+} from './learning/public-data-learner';
+
 export {
   detectAnomalies,
   zScoreDetection,
