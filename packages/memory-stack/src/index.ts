@@ -313,6 +313,15 @@ export {
   type SimulationIntervention,
 } from './orchestrator/whatif-simulator';
 
+// Brain Pipeline — Corpus Callosum connecting all brain regions
+export {
+  createBrainPipeline,
+  type BrainPipelineConfig,
+  type BrainCycleReport,
+  type BrainHealthReport,
+  type BrainRegionStatus,
+} from './orchestrator/brain-pipeline';
+
 export {
   createEntityResolver,
   type EntityResolverConfig,
@@ -343,6 +352,7 @@ export { createGitHubConnector, type GitHubConnectorConfig } from './connectors/
 export { createDocumentConnector, type DocumentConnectorConfig } from './connectors/document';
 
 // Template Connectors (bidirectional: pull + push)
+/** @deprecated Use `createNexusSlackConnector` from `@nexus-ai/slack-connector` instead */
 export { createSlackConnector, type SlackConnectorConfig, type SlackConnector } from './connectors/slack';
 export { createGoogleChatConnector, type GoogleChatConnectorConfig, type GoogleChatConnector } from './connectors/google-chat';
 export { createGoogleCalendarConnector, type GoogleCalendarConnectorConfig, type GoogleCalendarConnector, type CalendarEvent } from './connectors/google-calendar';

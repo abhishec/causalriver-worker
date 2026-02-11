@@ -1,0 +1,70 @@
+{
+  "name": "@nexus-ai/slack-connector",
+  "version": "0.1.0",
+  "description": "Slack workspace intelligence connector for Nexus Intelligence. Fetch Slack data and transform it into causal insights using Granger causality, anomaly detection, and pattern discovery.",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./client": {
+      "import": "./dist/client/index.js",
+      "types": "./dist/client/index.d.ts"
+    },
+    "./fetcher": {
+      "import": "./dist/fetcher/index.js",
+      "types": "./dist/fetcher/index.d.ts"
+    },
+    "./transform": {
+      "import": "./dist/transform/index.js",
+      "types": "./dist/transform/index.d.ts"
+    },
+    "./analyzer": {
+      "import": "./dist/analyzer/index.js",
+      "types": "./dist/analyzer/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@slack/web-api": "^7.0.0"
+  },
+  "peerDependencies": {
+    "@nexus-ai/memory-stack": "workspace:*"
+  },
+  "devDependencies": {
+    "@nexus-ai/memory-stack": "workspace:*",
+    "@vitest/coverage-v8": "^1.6.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.5.0",
+    "vitest": "^1.6.0"
+  },
+  "keywords": [
+    "slack",
+    "workspace-analytics",
+    "causal-intelligence",
+    "anomaly-detection",
+    "pattern-discovery",
+    "granger-causality",
+    "typescript"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/abhishec/nexus-intelligence",
+    "directory": "packages/slack-connector"
+  }
+}
