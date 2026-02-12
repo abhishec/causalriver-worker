@@ -1,11 +1,14 @@
 /**
  * NexusBrain Monthly Runner
  *
- * Runs on the 1st of each month — full historical analysis:
- *   1. Full causal discovery on ALL historical data (not just last 48h)
- *   2. Auto-generate training packs from monthly discoveries
- *   3. Federation sync: promote validated org discoveries to core brain
- *   4. Monthly progress report (compare with last month)
+ * Runs on the 1st of each month — full historical deep analysis:
+ *   1. Hippocampus: Full causal discovery on ALL historical data (not just 48h)
+ *   2. LTP: Auto-generate training packs from monthly discoveries
+ *   3. Monthly brain growth report (compare with last month)
+ *
+ * This is the brain's equivalent of a deep sleep cycle —
+ * processing ALL accumulated memories to find hidden patterns
+ * that the nightly 48h window would miss.
  *
  * Schedule: 1st of each month at 3:00 AM
  */
@@ -72,14 +75,14 @@ async function main() {
   }
   log('INIT', 'Supabase connection verified');
 
-  divider('NEXUSBRAIN MONTHLY DEEP ANALYSIS');
+  divider('NEXUSBRAIN MONTHLY DEEP SLEEP CYCLE');
   log('INIT', `Organization: ${ORGANIZATION_ID}`);
   log('INIT', `Month: ${new Date().toISOString().substring(0, 7)}`);
 
   // ═══════════════════════════════════════════════════════
   // STAGE 1: FULL HISTORICAL CAUSAL DISCOVERY
   // ═══════════════════════════════════════════════════════
-  divider('STAGE 1: FULL HISTORICAL CAUSAL DISCOVERY');
+  divider('STAGE 1: HIPPOCAMPUS — Full Historical Causal Discovery');
 
   let discoveryResults: any = null;
   try {
@@ -140,7 +143,7 @@ async function main() {
   // ═══════════════════════════════════════════════════════
   // STAGE 2: AUTO-GENERATE TRAINING PACKS FROM DISCOVERIES
   // ═══════════════════════════════════════════════════════
-  divider('STAGE 2: AUTO-GENERATE TRAINING PACKS');
+  divider('STAGE 2: LTP — Auto-Generate Training Packs');
 
   try {
     if (discoveryResults?.relationships && discoveryResults.relationships.length > 0) {
@@ -178,7 +181,7 @@ async function main() {
   // ═══════════════════════════════════════════════════════
   // STAGE 3: MONTHLY PROGRESS REPORT
   // ═══════════════════════════════════════════════════════
-  divider('STAGE 3: MONTHLY PROGRESS REPORT');
+  divider('STAGE 3: MONTHLY BRAIN GROWTH REPORT');
 
   try {
     // Count growth over the month
@@ -225,10 +228,10 @@ async function main() {
       .eq('organization_id', ORGANIZATION_ID);
 
     log('REPORT', '=== Monthly Brain Growth ===');
-    log('REPORT', `Signals: ${newSignals ?? 0} new (${totalSignals ?? 0} total)`);
-    log('REPORT', `Causal edges: ${newEdges ?? 0} new (${totalEdges ?? 0} total)`);
-    log('REPORT', `Learning runs: ${learningRuns ?? 0} this month`);
-    log('REPORT', `Memories: ${totalMemories ?? 0} total`);
+    log('REPORT', `Sensory Cortex signals: ${newSignals ?? 0} new (${totalSignals ?? 0} total)`);
+    log('REPORT', `Hippocampus synapses: ${newEdges ?? 0} new (${totalEdges ?? 0} total)`);
+    log('REPORT', `LTP learning runs: ${learningRuns ?? 0} this month`);
+    log('REPORT', `Long-term memories: ${totalMemories ?? 0} total`);
 
     // Store as memory for the brain to reason about
     await supabase.from('ai_memory').insert({
@@ -279,7 +282,7 @@ async function main() {
     log('PERSIST', `Failed: ${err instanceof Error ? err.message : String(err)}`);
   }
 
-  divider('MONTHLY DEEP ANALYSIS COMPLETE');
+  divider('MONTHLY DEEP SLEEP CYCLE COMPLETE');
   log('DONE', `Total time: ${(duration / 1000).toFixed(1)}s`);
 }
 

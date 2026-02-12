@@ -1,7 +1,7 @@
 /**
  * Nexus Memory Stack
  *
- * A 7-layer organizational memory architecture for AI-native applications.
+ * An 11-region brain-inspired organizational memory architecture for AI-native applications.
  *
  * Layers:
  * - L1: Multi-Modal Ingestion (external)
@@ -638,6 +638,9 @@ export {
   type FullBenchmarkReport,
   type MaturityReport,
   type MaturityLevel,
+  type RegionScore,
+  type PillarScore, // deprecated alias for RegionScore
+  type BenchmarkScores,
   type CausalBenchmarkResult,
   type AnomalyBenchmarkResult,
   type CascadeBenchmarkResult,

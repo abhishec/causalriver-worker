@@ -3,8 +3,8 @@
  *
  * A standalone training pipeline that fetches real-world knowledge from
  * Wikipedia (270+ articles), 10 public APIs, and 51+ curated training packs,
- * then trains the federated causal intelligence brain through all 7 layers
- * and verifies Expert-level performance.
+ * then trains the federated causal intelligence brain through all 11 brain
+ * regions and verifies Expert-level performance.
  *
  * 7-Stage Pipeline:
  *   STAGE 1:   FETCH     — Wikipedia Content + 10 Public APIs (FRED, GitHub, etc.)
@@ -12,8 +12,8 @@
  *   STAGE 3:   CONVERT   — All data → ConnectorSignals + TrainingPacks
  *   STAGE 3.5: NLP       — Raw Wikipedia text → NLP Pipeline → additional TrainingPacks
  *   STAGE 4:   TRAIN     — Feed everything through brain-trainer (in-memory)
- *   STAGE 5:   BENCHMARK — Run full 7-layer suite with federated discovery
- *   STAGE 6:   REPORT    — Display per-layer Expert status
+ *   STAGE 5:   BENCHMARK — Run full 11-region brain scan with federated discovery
+ *   STAGE 6:   REPORT    — Display per-region Expert status
  *
  * No Supabase required — runs entirely in-memory (Tier 1).
  * Optionally persists to Supabase if credentials are available.
@@ -154,7 +154,7 @@ function banner(): void {
   console.log('');
   console.log('╔══════════════════════════════════════════════════════════╗');
   console.log('║     NexusBrain Federated Brain Trainer                  ║');
-  console.log('║     CauseME + CausalRiver + 7-Layer Intelligence       ║');
+  console.log('║     CauseME + CausalRiver + 11-Region Brain             ║');
   console.log('╚══════════════════════════════════════════════════════════╝');
   console.log(`  Mode: ${IS_OFFLINE ? 'OFFLINE (static packs only)' : 'FULL (Wikipedia + 10 APIs + static packs)'}`);
   console.log(`  Verbose: ${IS_VERBOSE ? 'ON' : 'OFF'}`);
@@ -504,11 +504,11 @@ function trainBrainInMemory(
 }
 
 // ============================================================================
-// STAGE 5: BENCHMARK 7-LAYER SUITE
+// STAGE 5: BENCHMARK 11-REGION BRAIN SCAN
 // ============================================================================
 
 function runBenchmarkSuite() {
-  divider('STAGE 5: BENCHMARK (7-LAYER FEDERATED SUITE)');
+  divider('STAGE 5: BENCHMARK (11-REGION BRAIN SCAN)');
 
   log('BENCH', 'Running full benchmark suite with federated discovery method...');
   log('BENCH', '  Datasets: Sachs, SaaS, Cascade, Anomaly');
@@ -579,14 +579,14 @@ function displayReport(
   console.log('');
 
   // ── Benchmark Results (THE KEY OUTPUT) ──
-  console.log('  7-LAYER BENCHMARK:');
+  console.log('  11-REGION BRAIN SCAN:');
   console.log(`    Discovery Method:    ${benchmark.maturity.discoveryMethod}`);
   console.log(`    Overall Score:       ${benchmark.maturity.overallScore}/100`);
   console.log(`    Overall Level:       ${benchmark.maturity.overallLevel}`);
-  console.log(`    All Layers Expert:   ${benchmark.maturity.allLayersExpert ? 'YES ✓' : 'NO'}`);
+  console.log(`    All Regions Expert:  ${benchmark.maturity.allRegionsExpert ?? benchmark.maturity.allLayersExpert ? 'YES ✓' : 'NO'}`);
   console.log('');
 
-  // The full human-readable 7-layer report
+  // The full human-readable 11-region report
   console.log(benchmark.maturity.humanReadable);
   console.log('');
 
@@ -623,7 +623,7 @@ async function main(): Promise<void> {
   // Stage 4: Train brain in-memory
   const training = trainBrainInMemory(loaded, converted);
 
-  // Stage 5: Run 7-layer benchmark suite
+  // Stage 5: Run 11-region brain scan
   const benchmark = runBenchmarkSuite();
 
   // Stage 6: Display results

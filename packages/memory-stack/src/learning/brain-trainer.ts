@@ -6,7 +6,7 @@
  * or community-contributed training packs.
  *
  * Pre-loads causal relationships, brain rules, cascade predictions,
- * patterns, and prediction/outcome pairs into all 7 layers.
+ * patterns, and prediction/outcome pairs across all brain regions.
  *
  * Open source: Anyone can create and share TrainingPack data to make
  * the brain smarter. See the built-in TRAINING_LIBRARY for examples.

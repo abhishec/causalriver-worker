@@ -2,14 +2,13 @@
  * NexusBrain Benchmarks
  *
  * Automated benchmark training pipeline for measuring and
- * improving NexusBrain's intelligence across seven pillars:
- *   1. Signal Quality
- *   2. Causal Discovery
- *   3. Pattern Discovery
- *   4. Rule Generation
- *   5. Cascade Detection
- *   6. Business Prediction
- *   7. Anomaly Detection
+ * improving NexusBrain's intelligence across 11 brain regions:
+ *
+ *   PERCEPTION:           Sensory Cortex (signal quality)
+ *   MEMORY & LEARNING:    Hippocampus (causal), Basal Ganglia (patterns), LTP (ML learners)
+ *   REASONING:            Prefrontal Cortex (rules), DMN (predictions)
+ *   DETECTION:            Thalamus (cascades), Insula (anomalies), Amygdala (impact)
+ *   COORDINATION:         Cerebellum (fast-path), Corpus Callosum (federation)
  *
  * Usage:
  *   import { createBenchmarkRunner } from '@nexus-ai/memory-stack/benchmarks';
@@ -47,11 +46,12 @@ export {
   type FullBenchmarkReport,
 } from './benchmark-runner';
 
-// Maturity Evaluator
+// Maturity Evaluator (Brain Region-based)
 export {
   createMaturityEvaluator,
   type MaturityLevel,
   type MaturityReport,
-  type PillarScore,
+  type RegionScore,
+  type PillarScore, // deprecated alias for RegionScore
   type BenchmarkScores,
 } from './maturity-evaluator';

@@ -3,8 +3,21 @@
  *
  * Automated benchmark execution, scoring, and brain training.
  * Runs NexusBrain's algorithms against synthetic datasets with
- * known ground truths, scores performance, converts discoveries
- * into TrainingPacks, and evaluates maturity level.
+ * known ground truths, scores performance per brain region,
+ * converts discoveries into TrainingPacks, and evaluates maturity.
+ *
+ * Brain Region → Benchmark Mapping:
+ *   Sensory Cortex    → Signal Quality benchmark
+ *   Hippocampus       → Causal Discovery benchmark (Sachs, ALARM, SaaS)
+ *   Basal Ganglia     → Pattern Discovery benchmark
+ *   Prefrontal Cortex → Rule Generation benchmark
+ *   Thalamus          → Cascade Detection benchmark
+ *   DMN               → Prediction benchmark
+ *   Insula            → Anomaly Detection benchmark
+ *   Cerebellum        → Fast-path cache metrics (runtime)
+ *   Amygdala          → Impact scoring metrics (runtime)
+ *   Corpus Callosum   → Federation health metrics (runtime)
+ *   LTP (Synaptic)    → Learning module metrics (runtime)
  *
  * Usage:
  *   const runner = createBenchmarkRunner();
@@ -1010,12 +1023,12 @@ export function createBenchmarkRunner(config: Partial<BenchmarkRunnerConfig> = {
         predictionResults.push(this.runPredictionBenchmark(saas));
         cascadeResults.push(this.runCascadeBenchmark(saas));
 
-        // Layer 1: Signal Quality
-        log('\n=== SIGNAL QUALITY ===');
+        // Sensory Cortex: Signal Quality
+        log('\n=== SENSORY CORTEX (Signal Quality) ===');
         signalResults.push(this.runSignalQualityBenchmark(saas));
 
-        // Layer 3: Pattern Discovery
-        log('\n=== PATTERN DISCOVERY ===');
+        // Basal Ganglia: Pattern Discovery
+        log('\n=== BASAL GANGLIA (Pattern Discovery) ===');
         patternResults.push(this.runPatternBenchmark(saas));
       }
 
@@ -1066,13 +1079,13 @@ export function createBenchmarkRunner(config: Partial<BenchmarkRunnerConfig> = {
       trainingStats = trainer.getTrainingStats();
       log(`\nTotal training: ${trainingStats.casesLoaded} packs, ${trainingStats.causalEdgesLoaded} edges, ${trainingStats.rulesLoaded} rules`);
 
-      // Layer 4: Rule Generation
-      log('\n=== RULE GENERATION ===');
+      // Prefrontal Cortex: Rule Generation
+      log('\n=== PREFRONTAL CORTEX (Rule Generation) ===');
       ruleResults.push(this.runRuleBenchmark(causalResults, trainFromLibrary, trainerConfig));
 
-      // ── Step 3: Evaluate Maturity (all 7 pillars) ──────────────
+      // ── Step 3: Evaluate Maturity (11 Brain Regions) ───────────
 
-      log('\n=== MATURITY EVALUATION (7 PILLARS) ===');
+      log('\n=== BRAIN MATURITY EVALUATION (11 REGIONS) ===');
       const evaluator = createMaturityEvaluator();
       const benchmarkScores: BenchmarkScores = {
         signal: signalResults.map((r) => ({

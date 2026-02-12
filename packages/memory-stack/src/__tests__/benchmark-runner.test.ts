@@ -166,7 +166,7 @@ describe('Benchmark Datasets', () => {
 describe('Maturity Evaluator', () => {
   const evaluator = createMaturityEvaluator();
 
-  it('should return L1_NASCENT for empty scores', () => {
+  it('should return low maturity for empty benchmark scores', () => {
     const scores: BenchmarkScores = {
       causal: [],
       anomaly: [],
@@ -174,11 +174,17 @@ describe('Maturity Evaluator', () => {
       cascade: [],
     };
     const report = evaluator.evaluateMaturity(scores);
-    expect(report.overallLevel).toBe('L1_NASCENT');
-    expect(report.overallScore).toBe(0);
+    // Core 7 regions score 0, but extended 4 regions have healthy defaults
+    // So overall won't be exactly 0, but should be very low (L1 or L2)
+    expect(['L1_NASCENT', 'L2_EMERGING']).toContain(report.overallLevel);
+    expect(report.overallScore).toBeLessThan(30);
+    // Core regions should all be nascent
+    expect(report.regionScores.hippocampus.level).toBe('L1_NASCENT');
+    expect(report.regionScores.dmn.level).toBe('L1_NASCENT');
+    expect(report.regionScores.insula.level).toBe('L1_NASCENT');
   });
 
-  it('should return L5_EXPERT for perfect scores', () => {
+  it('should return L5_EXPERT for perfect scores with all regions expert', () => {
     const scores: BenchmarkScores = {
       signal: [{ datasetId: 'test', domainCoverage: 1.0, temporalConsistency: 1.0, signalDiversity: 1.0 }],
       causal: [{ datasetId: 'test', shd: 0, f1: 1.0, auroc: 1.0 }],
@@ -187,16 +193,24 @@ describe('Maturity Evaluator', () => {
       anomaly: [{ datasetId: 'test', f1: 1.0, nabScore: 100 }],
       prediction: [{ datasetId: 'test', mape: 0.01, ece: 0.01 }],
       cascade: [{ datasetId: 'test', detectionRate: 1.0, avgLagError: 0 }],
+      cerebellum: { cacheHitRate: 1.0, precompiledPaths: 10 },
+      amygdala: { scoringAccuracy: 1.0, priorityAlignment: 1.0 },
+      corpusCallosum: { federationHealth: 1.0, regionSyncRate: 1.0 },
+      ltp: { bayesianConvergence: 1.0, embeddingLoss: 0.0, contrastiveAccuracy: 1.0 },
       discoveryMethod: 'federated',
     };
     const report = evaluator.evaluateMaturity(scores);
     expect(report.overallLevel).toBe('L5_EXPERT');
     expect(report.overallScore).toBeGreaterThanOrEqual(85);
-    expect(report.allLayersExpert).toBe(true);
+    expect(report.allRegionsExpert).toBe(true);
+    expect(report.allLayersExpert).toBe(true); // backward compat
+    expect(report.regionScores.sensoryCortex.level).toBe('L5_EXPERT');
+    expect(report.regionScores.hippocampus.level).toBe('L5_EXPERT');
+    expect(report.regionScores.cerebellum.level).toBe('L5_EXPERT');
     expect(report.discoveryMethod).toBe('federated');
   });
 
-  it('should produce human-readable output', () => {
+  it('should produce human-readable output with brain region scan', () => {
     const scores: BenchmarkScores = {
       causal: [{ datasetId: 'sachs', shd: 8, f1: 0.6, auroc: 0.7 }],
       anomaly: [{ datasetId: 'nab', f1: 0.55, nabScore: 55 }],
@@ -205,7 +219,7 @@ describe('Maturity Evaluator', () => {
     };
     const report = evaluator.evaluateMaturity(scores);
     expect(report.humanReadable).toContain('NexusBrain Maturity:');
-    expect(report.humanReadable).toContain('7-Layer Pillar Breakdown:');
+    expect(report.humanReadable).toContain('11-Region Brain Scan:');
     expect(report.humanReadable).toContain('Discovery Method:');
   });
 
@@ -220,9 +234,9 @@ describe('Maturity Evaluator', () => {
       cascade: [{ datasetId: 'test', detectionRate: 0.95, avgLagError: 1 }],
     };
     const report = evaluator.evaluateMaturity(scores);
-    expect(report.allLayersExpert).toBe(false); // causal is weak
+    expect(report.allRegionsExpert).toBe(false); // Hippocampus (causal) is weak
     expect(report.recommendations.length).toBeGreaterThan(0);
-    expect(report.recommendations.some((r) => r.toLowerCase().includes('causal'))).toBe(true);
+    expect(report.recommendations.some((r) => r.toLowerCase().includes('hippocampus'))).toBe(true);
   });
 
   it('should return threshold table', () => {

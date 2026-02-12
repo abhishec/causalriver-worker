@@ -1,7 +1,7 @@
 /**
  * Nexus Memory Stack - Core Types
  *
- * Type definitions for the 7-layer organizational memory architecture.
+ * Type definitions for NexusBrain's 11-region brain-inspired memory architecture.
  */
 
 // ============================================================================
