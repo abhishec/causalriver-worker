@@ -330,6 +330,18 @@ export {
   type QueryOptions,
 } from './orchestrator/llm-response-layer';
 
+// LLM Brain Amplifier — Claude as the brain's semantic judgment layer
+export {
+  createBrainAmplifier,
+  type BrainAmplifierConfig,
+  type BrainAmplifier,
+  type AmplifiedInsight,
+  type InterpretedAnomaly,
+  type LLMPredictionVerdict,
+  type CausalHypothesis,
+  type ConsolidationBriefing,
+} from './orchestrator/llm-brain-amplifier';
+
 // Response Feedback Loop (query → correction → memory)
 export {
   createResponseFeedbackLoop,
