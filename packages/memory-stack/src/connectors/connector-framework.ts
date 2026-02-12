@@ -27,8 +27,6 @@ export interface ConnectorSignal {
   entity_id?: string;
   client_id?: string;
   metadata?: Record<string, unknown>;
-  /** Source of this signal: org-specific connector or universal core brain */
-  _federationSource?: 'org' | 'core';
 }
 
 export interface ConnectorSyncResult {

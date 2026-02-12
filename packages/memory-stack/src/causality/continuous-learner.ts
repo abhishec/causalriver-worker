@@ -43,6 +43,10 @@ export interface LearningConfig {
   edgeAdditionThreshold: number;
   /** Window for incremental Granger updates (days) */
   incrementalWindowDays: number;
+  /** Minimum prediction accuracy to slow decay (default: 0.6) */
+  accuracyDecayThreshold: number;
+  /** Decay reduction factor for accurate edges: 0-1, lower = slower decay (default: 0.5) */
+  accuracyDecayReduction: number;
 }
 
 export interface CausalDAG {
@@ -59,6 +63,10 @@ export interface CausalDAG {
     isLikelyConfounded?: boolean;
     /** Sign of the causal coefficient (+1 / -1) */
     coefficientSign?: number;
+    /** Prediction accuracy from feedback loop (0-1) — used for accuracy-weighted decay */
+    predictionAccuracy?: number;
+    /** Number of predictions made using this edge — needs ≥3 for accuracy-weighted decay */
+    predictionCount?: number;
   }>>;
 }
 
@@ -78,7 +86,9 @@ export function createContinuousLearner(
     evidenceDecayFactor = 0.95,
     edgeRemovalThreshold = 0.1,
     edgeAdditionThreshold = 0.05,
-    incrementalWindowDays = 14
+    incrementalWindowDays = 14,
+    accuracyDecayThreshold = 0.6,
+    accuracyDecayReduction = 0.5,
   } = config;
 
   // Clone the initial graph
@@ -199,7 +209,11 @@ export function createContinuousLearner(
     },
 
     /**
-     * Apply evidence decay to all edges
+     * Apply accuracy-weighted evidence decay to all edges.
+     *
+     * Accurate edges (≥60% accuracy, 3+ predictions) decay at half rate.
+     * Inaccurate edges (<30% accuracy) decay at squared rate (faster removal).
+     * Unknown accuracy (no predictions yet) decays at normal rate.
      */
     applyEvidenceDecay(): GraphUpdate[] {
       const updates: GraphUpdate[] = [];
@@ -210,7 +224,24 @@ export function createContinuousLearner(
           const daysSinceUpdate = (now.getTime() - edge.lastUpdated.getTime()) / (1000 * 60 * 60 * 24);
 
           if (daysSinceUpdate > incrementalWindowDays) {
-            const decayedWeight = edge.weight * Math.pow(evidenceDecayFactor, daysSinceUpdate / incrementalWindowDays);
+            // Accuracy-weighted decay: accurate edges decay slower
+            let effectiveDecayFactor = evidenceDecayFactor;
+
+            if (
+              edge.predictionAccuracy !== undefined &&
+              edge.predictionCount !== undefined &&
+              edge.predictionCount >= 3
+            ) {
+              if (edge.predictionAccuracy >= accuracyDecayThreshold) {
+                // Accurate edge: slow down decay (e.g., 0.95 → 0.975)
+                effectiveDecayFactor = 1 - (1 - evidenceDecayFactor) * accuracyDecayReduction;
+              } else if (edge.predictionAccuracy < 0.3) {
+                // Inaccurate edge: speed up decay (squared factor)
+                effectiveDecayFactor = evidenceDecayFactor * evidenceDecayFactor;
+              }
+            }
+
+            const decayedWeight = edge.weight * Math.pow(effectiveDecayFactor, daysSinceUpdate / incrementalWindowDays);
 
             if (decayedWeight < 0.01) {
               // Remove edge
@@ -227,14 +258,15 @@ export function createContinuousLearner(
               });
             } else {
               // Weaken edge
+              const oldWeight = edge.weight;
               edge.weight = decayedWeight;
               updates.push({
                 updateType: 'edge_weaken',
                 source,
                 target,
-                oldWeight: edge.weight,
+                oldWeight,
                 newWeight: decayedWeight,
-                evidence: `Evidence decay after ${daysSinceUpdate.toFixed(0)} days`,
+                evidence: `Evidence decay after ${daysSinceUpdate.toFixed(0)} days (accuracy-weighted)`,
                 timestamp: now,
                 confidence: decayedWeight
               });
@@ -245,6 +277,18 @@ export function createContinuousLearner(
 
       updateHistory.push(...updates);
       return updates;
+    },
+
+    /**
+     * Update prediction accuracy for an edge (called by feedback loop).
+     * This data is used to weight evidence decay — accurate edges decay slower.
+     */
+    updateEdgeAccuracy(source: string, target: string, accuracy: number, predictionCount: number): void {
+      const edge = graph.edges.get(source)?.get(target);
+      if (edge) {
+        edge.predictionAccuracy = accuracy;
+        edge.predictionCount = predictionCount;
+      }
     },
 
     /**

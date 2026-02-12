@@ -247,6 +247,8 @@ export {
 export {
   createScheduledJobs,
   type ScheduledJobsConfig,
+  type JobResult,
+  type DataRetentionResult,
 } from './orchestrator/scheduled-jobs';
 
 // Consolidation Engine ("Brain Sleep")
@@ -746,6 +748,31 @@ export {
   type MetricsSnapshot,
   type MetricLabels,
 } from './observability';
+
+// ============================================================================
+// INFRASTRUCTURE - Retry, Circuit Breaker, Health, Lifecycle
+// ============================================================================
+
+export {
+  createRetry,
+  createCircuitBreaker,
+  CircuitOpenError,
+  createHealthCheck,
+  createLifecycleManager,
+  type RetryConfig,
+  type RetryStats,
+  type CircuitBreakerConfig,
+  type CircuitBreakerStats,
+  type CircuitState,
+  type HealthCheckConfig,
+  type HealthStatus,
+  type CheckResult,
+  type CheckStatus,
+  type OverallStatus,
+  type HealthCheckFn,
+  type LifecycleConfig,
+  type LifecycleManager,
+} from './infra';
 
 // ============================================================================
 // TYPES

@@ -9,7 +9,7 @@
  *
  * 10-Step Consolidation Cycle:
  *   1. FETCH     — Collect signals from the last cycle window (default 48h)
- *   2. DISCOVER  — Run full causal discovery (15-method federated ensemble)
+ *   2. DISCOVER  — Run full causal discovery (3-paradigm ensemble + Bayesian Judge)
  *   3. ANOMALIES — Cross-domain anomaly detection with causal context
  *   4. PATTERNS  — Mine patterns (Apriori + PrefixSpan + temporal rules)
  *   5. GENERATE  — Auto-generate training packs from discoveries
@@ -55,6 +55,7 @@ import {
 } from '../learning/pattern-detector';
 import { createBrainTrainer, type TrainingPack } from '../learning/brain-trainer';
 import { createSupabaseRepository } from '../persistence/supabase-repository';
+import { getDefaultLogger, type NexusLogger } from '../observability';
 
 // ============================================================================
 // TYPES
@@ -89,6 +90,8 @@ export interface ConsolidationConfig {
   runThresholdOptimization?: boolean;
   /** Verbose logging (default: false) */
   verbose?: boolean;
+  /** Structured logger (defaults to global logger) */
+  logger?: NexusLogger;
 }
 
 export interface ConsolidationStepResult {
@@ -176,18 +179,16 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
   const isCoreBrain = organizationId === CORE_BRAIN_ORG_ID;
   const repository = createSupabaseRepository(supabase, organizationId);
   const trainer = createBrainTrainer();
+  const logger = config.logger ?? getDefaultLogger().child({ module: 'consolidation', orgId: organizationId.substring(0, 8) });
 
   function log(step: string, msg: string): void {
     if (verbose) {
-      const time = new Date().toISOString().substring(11, 19);
-      console.log(`[${time}] [CONSOLIDATION:${step}] ${msg}`);
+      logger.info(msg, { step });
     }
   }
 
   function logError(step: string, msg: string, err?: unknown): void {
-    const time = new Date().toISOString().substring(11, 19);
-    console.error(`[${time}] [CONSOLIDATION:${step}] ERROR: ${msg}`);
-    if (err instanceof Error) console.error(`  ${err.message}`);
+    logger.error(msg, { step, error: err instanceof Error ? err.message : String(err) });
   }
 
   // ── Step 1: FETCH ──────────────────────────────────────────────────
@@ -302,7 +303,7 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
         };
       }
 
-      // Run the full 15-method federated ensemble
+      // Run the 3-paradigm ensemble (Parametric + Structural + Info-theoretic + Judge)
       const result = runCausalDiscovery(
         signals.map((s: any) => ({
           source_domain: s.source_domain,
@@ -995,7 +996,7 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
     parts.push(`Brain consolidation processed ${stats.signalsProcessed.toLocaleString()} signals.`);
 
     if (stats.causalEdgesDiscovered > 0) {
-      parts.push(`The 15-method federated ensemble identified ${stats.causalEdgesDiscovered} causal relationships.`);
+      parts.push(`The 3-paradigm causal ensemble (Parametric + Structural + Info-theoretic) identified ${stats.causalEdgesDiscovered} causal relationships.`);
     }
     if (stats.newRelationships > 0) {
       parts.push(`${stats.newRelationships} are newly discovered connections the brain didn't know about before.`);
@@ -1198,10 +1199,70 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
   // MAIN: Run the 10-step consolidation cycle
   // ══════════════════════════════════════════════════════════════════
 
+  // ── Consolidation Race Lock ──────────────────────────────────────
+  // Prevents concurrent consolidation runs on the same org.
+  // Uses the consolidation_runs table as an advisory lock.
+
+  async function acquireConsolidationLock(runId: string): Promise<boolean> {
+    try {
+      // Check for active consolidation in the last 30 minutes
+      const lockWindow = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+      const { data: activeRuns } = await supabase
+        .from('consolidation_runs')
+        .select('id, started_at')
+        .eq('organization_id', organizationId)
+        .eq('status', 'running')
+        .gte('started_at', lockWindow)
+        .limit(1);
+
+      if (activeRuns && activeRuns.length > 0) {
+        log('LOCK', `Consolidation already running (run: ${activeRuns[0].id}). Skipping.`);
+        return false;
+      }
+
+      // Insert our run as 'running' — acts as a lock
+      const { error: insertError } = await supabase.from('consolidation_runs').insert({
+        id: runId,
+        organization_id: organizationId,
+        is_core_brain: isCoreBrain,
+        started_at: new Date().toISOString(),
+        status: 'running',
+      });
+
+      if (insertError) {
+        log('LOCK', `Failed to acquire lock: ${insertError.message}`);
+        return false;
+      }
+
+      return true;
+    } catch {
+      // If consolidation_runs table doesn't exist, skip locking (non-fatal)
+      return true;
+    }
+  }
+
+  async function releaseConsolidationLock(runId: string, finalStatus: string): Promise<void> {
+    try {
+      await supabase
+        .from('consolidation_runs')
+        .update({
+          status: finalStatus,
+          completed_at: new Date().toISOString(),
+        })
+        .eq('id', runId);
+    } catch {
+      // Non-fatal — lock will expire naturally
+    }
+  }
+
   return {
     /**
      * Run the full 10-step brain consolidation ("brain sleep").
      * This is the master function that orchestrates everything.
+     *
+     * Production hardening:
+     * - Advisory lock prevents concurrent runs on same org
+     * - Returns 'skipped' status if another consolidation is already running
      */
     async runConsolidation(): Promise<ConsolidationResult> {
       const runId = `consolidation-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
@@ -1210,6 +1271,33 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
       const steps: ConsolidationStepResult[] = [];
       const errors: string[] = [];
 
+      // Acquire advisory lock — skip if another consolidation is running
+      const lockAcquired = await acquireConsolidationLock(runId);
+      if (!lockAcquired) {
+        return {
+          runId,
+          organizationId,
+          isCoreBrain,
+          startedAt,
+          completedAt: new Date().toISOString(),
+          totalDurationMs: Date.now() - startTime,
+          steps: [],
+          report: {
+            narrative: 'Consolidation skipped — concurrent run detected.',
+            discoveries: [],
+            warnings: ['Another consolidation is already running for this organization'],
+            stats: {
+              signalsProcessed: 0, causalEdgesDiscovered: 0, newRelationships: 0,
+              lostRelationships: 0, anomaliesDetected: 0, patternsFound: 0,
+              sequentialPatternsFound: 0, temporalRulesFound: 0, packsGenerated: 0,
+              edgesPruned: 0, edgesStrengthened: 0, edgesDecayed: 0, memoriesCreated: 0,
+            },
+          },
+          status: 'success', // Not an error — intentionally skipped
+          errors: ['Skipped: concurrent consolidation run detected'],
+        };
+      }
+
       if (verbose) {
         console.log(`\n${'='.repeat(70)}`);
         console.log(`  BRAIN CONSOLIDATION ("Sleep") — ${isCoreBrain ? 'Core Brain' : 'Org: ' + organizationId.substring(0, 8)}`);
@@ -1217,6 +1305,7 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
         console.log(`${'='.repeat(70)}\n`);
       }
 
+      try {
       // Step 1: FETCH
       log('1/10', 'Fetching signals...');
       const { signals, step: fetchStep } = await fetchSignals();
@@ -1252,7 +1341,7 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
       }
 
       // Step 2: DISCOVER
-      log('2/10', 'Running causal discovery (15-method federated ensemble)...');
+      log('2/10', 'Running causal discovery (3-paradigm ensemble + Bayesian Judge)...');
       const { relationships, newRels, lostRels, step: discoverStep } = await discoverCausalRelationships(signals);
       steps.push(discoverStep);
       if (discoverStep.status === 'error') errors.push('Causal discovery failed');
@@ -1342,7 +1431,14 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
         console.log('');
       }
 
+      // Release advisory lock
+      await releaseConsolidationLock(runId, result.status);
       return result;
+      } catch (err: any) {
+        // Release lock on unexpected failure
+        await releaseConsolidationLock(runId, 'failed');
+        throw err;
+      }
     },
 
     /**
