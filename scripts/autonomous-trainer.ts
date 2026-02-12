@@ -690,8 +690,8 @@ async function learnAndMaintain(
       supabase,
       organizationId: ORGANIZATION_ID,
       repository,
-      autoPromoteConfidence: 0.7,
-      minPatternObservations: 3, // Lower threshold for initial training
+      autoPromoteConfidence: 0.75, // Tightened from 0.7: require 75% confidence to auto-promote
+      minPatternObservations: 10, // Tightened from 3: require 10+ observations to confirm a pattern
       verbose: true,
     });
 
@@ -715,7 +715,7 @@ async function learnAndMaintain(
   try {
     const jobs = createScheduledJobs(supabase, {
       lookbackDays: 90,
-      minObservations: 10,
+      minObservations: 30, // Tightened from 10: require 30+ observations for scheduled jobs
     });
 
     log('LEARN', 'Running daily maintenance jobs...');

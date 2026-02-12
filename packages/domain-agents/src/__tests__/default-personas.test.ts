@@ -191,8 +191,7 @@ describe('Default Personas - DEFAULT_PERSONAS Registry', () => {
       'vp-product',
       'vp-marketing',
       'vp-people',
-      'cto', 'vp-engineering', 'engineering-manager', 'tech-lead', 'sre-lead',
-      'vp-engineering-ops',
+      'cto', 'vp-engineering', 'engineering-manager', 'tech-lead', 'sre-lead', 'vp-engineering-ops',
       'ceo', 'coo', 'nexus-ai',
     ];
     expect(Object.keys(DEFAULT_PERSONAS).sort()).toEqual(expectedKeys.sort());
@@ -322,6 +321,7 @@ describe('Default Personas - getPersona', () => {
   it('returns the same reference as the exported constant', () => {
     expect(getPersona('cfo')).toBe(cfoPersona);
     expect(getPersona('nexus-ai')).toBe(nexusAIPersona);
+    expect(getPersona('cto')).toBe(ctoPersona);
   });
 });
 
@@ -354,8 +354,7 @@ describe('Default Personas - getAllPersonas', () => {
       'vp-product',
       'vp-marketing',
       'vp-people',
-      'cto', 'vp-engineering', 'engineering-manager', 'tech-lead', 'sre-lead',
-      'vp-engineering-ops',
+      'cto', 'vp-engineering', 'engineering-manager', 'tech-lead', 'sre-lead', 'vp-engineering-ops',
       'ceo', 'coo', 'nexus-ai',
     ].sort();
     expect(ids).toEqual(expected);

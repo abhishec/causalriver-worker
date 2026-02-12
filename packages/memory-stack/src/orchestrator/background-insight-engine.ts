@@ -113,8 +113,8 @@ export function createBackgroundInsightEngine(config: DMNConfig) {
   const {
     supabase,
     organizationId,
-    minSurpriseScore = 0.5,
-    maxInsightsPerScan = 10,
+    minSurpriseScore = 0.65, // Tightened from 0.5: require higher surprise to surface
+    maxInsightsPerScan = 5, // Tightened from 10: only surface the top 5 most important
     onInsight,
     verbose = false,
   } = config;
@@ -187,7 +187,8 @@ export function createBackgroundInsightEngine(config: DMNConfig) {
           );
 
           // If strongly correlated but NOT in causal graph → surprising
-          if (Math.abs(correlation) > 0.6) {
+          // Tightened from 0.6 to 0.75: only flag truly strong correlations to reduce noise
+          if (Math.abs(correlation) > 0.75) {
             const surprise = Math.abs(correlation); // Higher correlation = more surprising since it's unknown
             if (surprise >= minSurpriseScore) {
               insights.push({
@@ -276,7 +277,7 @@ export function createBackgroundInsightEngine(config: DMNConfig) {
         if (!historical) continue;
 
         const deviation = Math.abs(avg - historical.mean) / (historical.std || 1);
-        if (deviation < 1.5) continue; // Not anomalous enough
+        if (deviation < 2.5) continue; // Tightened from 1.5σ to 2.5σ: require truly anomalous signals
 
         const totalLag = path.reduce((sum, step) => sum + step.lagDays, 0);
         const totalEffect = path.reduce((prod, step) => prod * Math.abs(step.effectSize), 1);
@@ -579,6 +580,57 @@ export function createBackgroundInsightEngine(config: DMNConfig) {
       let allInsights = [...correlations, ...cascades, ...changes, ...gaps];
       allInsights.sort((a, b) => b.importance - a.importance);
       allInsights = allInsights.slice(0, maxInsightsPerScan);
+
+      // ── Deduplication: Check against recent insights (last 48h) ────
+      // Prevents the same insight from surfacing repeatedly across scans
+      try {
+        const { data: recentMemories } = await supabase
+          .from('ai_memory')
+          .select('content')
+          .eq('organization_id', organizationId)
+          .eq('memory_type', 'proactive_insight')
+          .gte('created_at', new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString())
+          .order('created_at', { ascending: false })
+          .limit(50);
+
+        if (recentMemories && recentMemories.length > 0) {
+          const recentTitles = new Set(
+            recentMemories.map((m: any) => {
+              // Extract the title portion from "[type] title: explanation"
+              const match = (m.content || '').match(/\] (.+?):/);
+              return match ? match[1].toLowerCase().trim() : '';
+            }).filter(Boolean)
+          );
+
+          // Also extract domain pairs from recent insights for semantic dedup
+          const recentDomainPairs = new Set(
+            recentMemories.map((m: any) => {
+              const domains = (m.content || '').match(/(\w+)\s*[↔→]\s*(\w+)/);
+              return domains ? `${domains[1].toLowerCase()}|${domains[2].toLowerCase()}` : '';
+            }).filter(Boolean)
+          );
+
+          const beforeCount = allInsights.length;
+          allInsights = allInsights.filter(insight => {
+            const titleKey = insight.title.toLowerCase().trim();
+            // Check exact title match
+            if (recentTitles.has(titleKey)) return false;
+            // Check same domain pair already surfaced
+            if (insight.domains.length >= 2) {
+              const pairKey = `${insight.domains[0].toLowerCase()}|${insight.domains[1].toLowerCase()}`;
+              const reversePairKey = `${insight.domains[1].toLowerCase()}|${insight.domains[0].toLowerCase()}`;
+              if (recentDomainPairs.has(pairKey) || recentDomainPairs.has(reversePairKey)) return false;
+            }
+            return true;
+          });
+
+          if (beforeCount > allInsights.length) {
+            log(`Dedup: filtered ${beforeCount - allInsights.length} duplicate insights (${allInsights.length} remaining)`);
+          }
+        }
+      } catch {
+        // Dedup is non-critical — continue with all insights
+      }
 
       // Persist insights as memories
       for (const insight of allInsights) {
