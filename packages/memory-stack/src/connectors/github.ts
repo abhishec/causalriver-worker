@@ -3,14 +3,21 @@
  *
  * Syncs engineering signals from GitHub repositories:
  *   - Pull requests (opened, merged, changes_requested)
+ *   - PR reviews (approved, changes_requested, commented) with sentiment
+ *   - PR file changes (file paths, directories changed)
  *   - Issues (opened, closed, labeled as bug)
- *   - CI/CD workflow runs (passed, failed)
- *   - Deployments (success, failure)
+ *   - CI/CD workflow runs (passed, failed) + per-job signals
+ *   - Deployments (success, failure, rollback detection)
  *   - Commits (volume, frequency)
  *
  * These signals feed into the causal graph engine to discover
  * relationships like: deploy_failures → support_ticket_spikes,
  * or pr_review_time → shipping_velocity.
+ *
+ * Enhanced signals also feed the Contributor Expertise Graph:
+ *   - PR file paths → code_change expertise
+ *   - PR reviews → review expertise
+ *   - CI job failures → infrastructure expertise
  *
  * @example
  * ```typescript
@@ -26,6 +33,8 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { ConnectorSignal, NexusConnector, ConnectorSyncResult } from './connector-framework';
 import { storeConnectorSignals, recordSyncResult } from './connector-framework';
+import { analyzeSentiment } from '../core/nlp/sentiment-analyzer';
+import { extractTopics } from '../core/nlp/topic-extractor';
 
 // ============================================================================
 // TYPES
@@ -46,6 +55,12 @@ export interface GitHubConnectorConfig {
     issues?: boolean;
     commits?: boolean;
     workflows?: boolean;
+    /** Fetch PR reviews — approved, changes_requested, commented (default: true) */
+    reviews?: boolean;
+    /** Fetch per-PR file change lists (default: true) */
+    fileChanges?: boolean;
+    /** Fetch per-workflow job details for failures (default: true) */
+    jobDetails?: boolean;
   };
 }
 
@@ -97,6 +112,49 @@ interface GitHubCommit {
   stats?: { additions: number; deletions: number; total: number };
 }
 
+interface GitHubPRReview {
+  id: number;
+  user: { login: string };
+  state: string; // 'APPROVED' | 'CHANGES_REQUESTED' | 'COMMENTED' | 'DISMISSED'
+  body: string;
+  submitted_at: string;
+}
+
+interface GitHubPRFile {
+  filename: string;
+  status: string; // 'added' | 'removed' | 'modified' | 'renamed'
+  additions: number;
+  deletions: number;
+}
+
+interface GitHubWorkflowJob {
+  id: number;
+  name: string;
+  conclusion: string | null;
+  started_at: string;
+  completed_at: string;
+  steps: Array<{ name: string; conclusion: string | null }>;
+}
+
+// ============================================================================
+// HELPERS
+// ============================================================================
+
+/** Extract unique parent directories from file paths */
+function extractDirectories(files: GitHubPRFile[]): string[] {
+  const dirs = new Set<string>();
+  for (const f of files) {
+    const parts = f.filename.split('/');
+    if (parts.length > 1) {
+      // Add all ancestor directories: src/auth/oauth.ts → "src", "src/auth"
+      for (let i = 1; i < parts.length; i++) {
+        dirs.add(parts.slice(0, i).join('/'));
+      }
+    }
+  }
+  return [...dirs];
+}
+
 // ============================================================================
 // FACTORY
 // ============================================================================
@@ -110,7 +168,10 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
     owner,
     repo,
     baseUrl = 'https://api.github.com',
-    syncScope = { pulls: true, issues: true, commits: true, workflows: true },
+    syncScope = {
+      pulls: true, issues: true, commits: true, workflows: true,
+      reviews: true, fileChanges: true, jobDetails: true,
+    },
   } = config;
 
   const headers = {
@@ -118,6 +179,9 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
     Accept: 'application/vnd.github+json',
     'X-GitHub-Api-Version': '2022-11-28',
   };
+
+  // Track recent deploy failures per branch for rollback detection
+  const recentDeployFailures = new Map<string, number>(); // branch → timestamp
 
   // ── Fetch helpers ────────────────────────────────────────────────
 
@@ -204,14 +268,76 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
     return fetchJSON<GitHubCommit[]>(`/repos/${owner}/${repo}/commits`, params);
   }
 
+  async function fetchPRReviews(prNumber: number): Promise<GitHubPRReview[]> {
+    try {
+      return await fetchJSON<GitHubPRReview[]>(
+        `/repos/${owner}/${repo}/pulls/${prNumber}/reviews`
+      );
+    } catch {
+      return []; // Non-fatal: reviews are enrichment
+    }
+  }
+
+  async function fetchPRFiles(prNumber: number): Promise<GitHubPRFile[]> {
+    try {
+      return await fetchJSON<GitHubPRFile[]>(
+        `/repos/${owner}/${repo}/pulls/${prNumber}/files`
+      );
+    } catch {
+      return []; // Non-fatal: file list is enrichment
+    }
+  }
+
+  async function fetchWorkflowJobs(runId: number): Promise<GitHubWorkflowJob[]> {
+    try {
+      const data = await fetchJSON<{ jobs: GitHubWorkflowJob[] }>(
+        `/repos/${owner}/${repo}/actions/runs/${runId}/jobs`
+      );
+      return data.jobs || [];
+    } catch {
+      return []; // Non-fatal: job details are enrichment
+    }
+  }
+
   // ── Signal transformers ──────────────────────────────────────────
 
-  function prsToSignals(prs: GitHubPR[], orgId: string): ConnectorSignal[] {
+  async function prsToSignals(prs: GitHubPR[], orgId: string): Promise<ConnectorSignal[]> {
     const signals: ConnectorSignal[] = [];
 
     for (const pr of prs) {
       const linesChanged = (pr.additions || 0) + (pr.deletions || 0);
       const isBug = pr.labels?.some((l) => l.name.toLowerCase().includes('bug'));
+
+      // Fetch file changes for this PR
+      let filePaths: string[] = [];
+      let directoriesChanged: string[] = [];
+      if (syncScope.fileChanges !== false) {
+        const files = await fetchPRFiles(pr.number);
+        filePaths = files.map((f) => f.filename);
+        directoriesChanged = extractDirectories(files);
+
+        // Emit pr_files_changed signal
+        if (files.length > 0) {
+          signals.push({
+            organization_id: orgId,
+            source_domain: 'engineering',
+            signal_type: 'pr_files_changed',
+            signal_value: Math.min(files.length / 20, 1), // Normalized by 20 files
+            entity_type: 'pull_request',
+            entity_id: `pr_${pr.number}`,
+            signal_timestamp: pr.updated_at,
+            metadata: {
+              pr_number: pr.number,
+              author: pr.user?.login,
+              file_count: files.length,
+              file_paths: filePaths,
+              directories_changed: directoriesChanged,
+              additions: files.reduce((sum, f) => sum + f.additions, 0),
+              deletions: files.reduce((sum, f) => sum + f.deletions, 0),
+            },
+          });
+        }
+      }
 
       // PR opened
       signals.push({
@@ -221,6 +347,7 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
         signal_value: 1,
         entity_type: 'pull_request',
         entity_id: `pr_${pr.number}`,
+        signal_timestamp: pr.created_at,
         metadata: {
           title: pr.title,
           author: pr.user?.login,
@@ -228,8 +355,52 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
           files_changed: pr.changed_files,
           is_bug_fix: isBug,
           created_at: pr.created_at,
+          file_paths: filePaths,
+          directories_changed: directoriesChanged,
+          reviewers_requested: pr.requested_reviewers?.map((r) => r.login) || [],
         },
       });
+
+      // Fetch reviews for this PR
+      let reviewersWhoApproved: string[] = [];
+      if (syncScope.reviews !== false) {
+        const reviews = await fetchPRReviews(pr.number);
+        reviewersWhoApproved = reviews
+          .filter((r) => r.state === 'APPROVED')
+          .map((r) => r.user.login);
+
+        // Emit per-review signals
+        for (const review of reviews) {
+          const reviewValue =
+            review.state === 'APPROVED' ? 1 :
+            review.state === 'CHANGES_REQUESTED' ? -0.3 :
+            0.5; // COMMENTED
+
+          const sentiment = review.body ? analyzeSentiment(review.body) : null;
+          const topics = review.body ? extractTopics(review.body) : null;
+
+          signals.push({
+            organization_id: orgId,
+            source_domain: 'engineering',
+            signal_type: 'pr_review_submitted',
+            signal_value: reviewValue,
+            entity_type: 'pull_request',
+            entity_id: `pr_${pr.number}`,
+            signal_timestamp: review.submitted_at,
+            metadata: {
+              pr_number: pr.number,
+              reviewer: review.user.login,
+              state: review.state,
+              review_body_length: review.body?.length || 0,
+              sentiment_score: sentiment?.score ?? 0,
+              sentiment_label: sentiment?.label ?? 'neutral',
+              topics: topics?.keywords.map((k) => k.word) || [],
+              file_paths: filePaths,
+              directories_changed: directoriesChanged,
+            },
+          });
+        }
+      }
 
       // PR merged
       if (pr.merged_at) {
@@ -244,12 +415,17 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
           signal_value: Math.min(linesChanged / 500, 1), // Normalized by 500 lines
           entity_type: 'pull_request',
           entity_id: `pr_${pr.number}`,
+          signal_timestamp: pr.merged_at,
           metadata: {
             title: pr.title,
             author: pr.user?.login,
             lines_changed: linesChanged,
             review_time_days: Math.round(reviewDays * 10) / 10,
             is_bug_fix: isBug,
+            file_paths: filePaths,
+            directories_changed: directoriesChanged,
+            reviewers_who_approved: reviewersWhoApproved,
+            review_rounds: reviewersWhoApproved.length,
           },
         });
       }
@@ -292,6 +468,7 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
         signal_value: isBug ? -0.5 : 0.5,
         entity_type: 'issue',
         entity_id: `issue_${issue.number}`,
+        signal_timestamp: issue.created_at,
         metadata: {
           title: issue.title,
           author: issue.user?.login,
@@ -314,8 +491,11 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
           signal_value: 1,
           entity_type: 'issue',
           entity_id: `issue_${issue.number}`,
+          signal_timestamp: issue.closed_at,
           metadata: {
             title: issue.title,
+            assignee: issue.user?.login,
+            labels: issue.labels?.map((l) => l.name),
             resolution_time_days: Math.round(resolutionDays * 10) / 10,
             is_bug: isBug,
           },
@@ -326,7 +506,7 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
     return signals;
   }
 
-  function workflowsToSignals(runs: GitHubWorkflowRun[], orgId: string): ConnectorSignal[] {
+  async function workflowsToSignals(runs: GitHubWorkflowRun[], orgId: string): Promise<ConnectorSignal[]> {
     const signals: ConnectorSignal[] = [];
 
     for (const run of runs) {
@@ -339,7 +519,38 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
                         run.event === 'release';
 
       if (isDeploy) {
-        // Deployment signals
+        if (isFailure) {
+          // Track deploy failure for rollback detection
+          recentDeployFailures.set(run.head_branch, new Date(run.created_at).getTime());
+        }
+
+        // Rollback detection: deploy_success after recent deploy_failure on same branch
+        if (isSuccess) {
+          const lastFailureTs = recentDeployFailures.get(run.head_branch);
+          const runTs = new Date(run.created_at).getTime();
+          const fourHoursMs = 4 * 60 * 60 * 1000;
+
+          if (lastFailureTs && (runTs - lastFailureTs) < fourHoursMs) {
+            signals.push({
+              organization_id: orgId,
+              source_domain: 'engineering',
+              signal_type: 'deploy_rollback',
+              signal_value: -1,
+              entity_type: 'deployment',
+              entity_id: `rollback_${run.id}`,
+              signal_timestamp: run.created_at,
+              metadata: {
+                workflow: run.name,
+                branch: run.head_branch,
+                event: run.event,
+                time_since_failure_minutes: Math.round((runTs - lastFailureTs) / 60000),
+              },
+            });
+            recentDeployFailures.delete(run.head_branch);
+          }
+        }
+
+        // Standard deployment signal
         signals.push({
           organization_id: orgId,
           source_domain: 'engineering',
@@ -347,6 +558,7 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
           signal_value: isSuccess ? 1 : -1,
           entity_type: 'deployment',
           entity_id: `deploy_${run.id}`,
+          signal_timestamp: run.created_at,
           metadata: {
             workflow: run.name,
             branch: run.head_branch,
@@ -356,7 +568,47 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
           },
         });
       } else {
-        // CI signals
+        // Fetch per-job details for failed CI runs
+        let failedJobNames: string[] = [];
+        let stepThatFailed: string | undefined;
+
+        if (isFailure && syncScope.jobDetails !== false) {
+          const jobs = await fetchWorkflowJobs(run.id);
+
+          for (const job of jobs) {
+            const jobSignalValue = job.conclusion === 'success' ? 1 : -1;
+            const jobSignalType = job.conclusion === 'success' ? 'ci_job_passed' : 'ci_job_failed';
+
+            if (job.conclusion === 'failure') {
+              failedJobNames.push(job.name);
+              const failedStep = job.steps?.find((s) => s.conclusion === 'failure');
+              if (failedStep && !stepThatFailed) {
+                stepThatFailed = failedStep.name;
+              }
+            }
+
+            signals.push({
+              organization_id: orgId,
+              source_domain: 'engineering',
+              signal_type: jobSignalType,
+              signal_value: jobSignalValue,
+              entity_type: 'ci_job',
+              entity_id: `job_${job.id}`,
+              signal_timestamp: job.completed_at || run.created_at,
+              metadata: {
+                workflow: run.name,
+                job_name: job.name,
+                branch: run.head_branch,
+                conclusion: job.conclusion,
+                duration_seconds: job.started_at && job.completed_at
+                  ? Math.round((new Date(job.completed_at).getTime() - new Date(job.started_at).getTime()) / 1000)
+                  : undefined,
+              },
+            });
+          }
+        }
+
+        // Overall CI run signal
         signals.push({
           organization_id: orgId,
           source_domain: 'engineering',
@@ -364,11 +616,14 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
           signal_value: isFailure ? -1 : 1,
           entity_type: 'ci_run',
           entity_id: `ci_${run.id}`,
+          signal_timestamp: run.created_at,
           metadata: {
             workflow: run.name,
             branch: run.head_branch,
             conclusion: run.conclusion,
             event: run.event,
+            ...(failedJobNames.length > 0 && { failed_job_names: failedJobNames }),
+            ...(stepThatFailed && { step_that_failed: stepThatFailed }),
           },
         });
       }
@@ -424,7 +679,8 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
       try {
         if (syncScope.pulls) {
           const prs = await fetchPullRequests();
-          allSignals.push(...prsToSignals(prs, organizationId));
+          const prSignals = await prsToSignals(prs, organizationId);
+          allSignals.push(...prSignals);
           recordsProcessed += prs.length;
         }
 
@@ -436,7 +692,8 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
 
         if (syncScope.workflows) {
           const runs = await fetchWorkflowRuns();
-          allSignals.push(...workflowsToSignals(runs, organizationId));
+          const wfSignals = await workflowsToSignals(runs, organizationId);
+          allSignals.push(...wfSignals);
           recordsProcessed += runs.length;
         }
 
@@ -484,7 +741,8 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
       try {
         if (syncScope.pulls) {
           const prs = await fetchPullRequests(since);
-          allSignals.push(...prsToSignals(prs, organizationId));
+          const prSignals = await prsToSignals(prs, organizationId);
+          allSignals.push(...prSignals);
           recordsProcessed += prs.length;
         }
 
@@ -496,7 +754,8 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
 
         if (syncScope.workflows) {
           const runs = await fetchWorkflowRuns(since);
-          allSignals.push(...workflowsToSignals(runs, organizationId));
+          const wfSignals = await workflowsToSignals(runs, organizationId);
+          allSignals.push(...wfSignals);
           recordsProcessed += runs.length;
         }
 
@@ -539,7 +798,7 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
       const orgId = event.organization?.id?.toString() || '';
 
       // Pull request events
-      if (event.pull_request) {
+      if (event.pull_request && event.action !== 'review_requested') {
         const pr = event.pull_request;
         const action = event.action;
 
@@ -551,7 +810,12 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
             signal_value: 1,
             entity_type: 'pull_request',
             entity_id: `pr_${pr.number}`,
-            metadata: { title: pr.title, author: pr.user?.login, action },
+            metadata: {
+              title: pr.title,
+              author: pr.user?.login,
+              action,
+              reviewers_requested: pr.requested_reviewers?.map((r: any) => r.login) || [],
+            },
           });
         }
 
@@ -566,6 +830,37 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
             metadata: { title: pr.title, author: pr.user?.login },
           });
         }
+      }
+
+      // Pull request review events (new)
+      if (event.review && event.pull_request) {
+        const review = event.review;
+        const pr = event.pull_request;
+        const reviewValue =
+          review.state === 'approved' ? 1 :
+          review.state === 'changes_requested' ? -0.3 :
+          0.5;
+
+        const sentiment = review.body ? analyzeSentiment(review.body) : null;
+        const topics = review.body ? extractTopics(review.body) : null;
+
+        signals.push({
+          organization_id: orgId,
+          source_domain: 'engineering',
+          signal_type: 'pr_review_submitted',
+          signal_value: reviewValue,
+          entity_type: 'pull_request',
+          entity_id: `pr_${pr.number}`,
+          metadata: {
+            pr_number: pr.number,
+            reviewer: review.user?.login,
+            state: review.state,
+            review_body_length: review.body?.length || 0,
+            sentiment_score: sentiment?.score ?? 0,
+            sentiment_label: sentiment?.label ?? 'neutral',
+            topics: topics?.keywords.map((k: any) => k.word) || [],
+          },
+        });
       }
 
       // Issue events
@@ -596,7 +891,11 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
             signal_value: 1,
             entity_type: 'issue',
             entity_id: `issue_${issue.number}`,
-            metadata: { title: issue.title },
+            metadata: {
+              title: issue.title,
+              assignee: issue.assignee?.login,
+              labels: issue.labels?.map((l: any) => l.name),
+            },
           });
         }
       }
@@ -613,6 +912,28 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
             entity_type: 'ci_run',
             entity_id: `ci_${suite.id}`,
             metadata: { conclusion: suite.conclusion, branch: suite.head_branch },
+          });
+        }
+      }
+
+      // Workflow job events (new — individual job completion)
+      if (event.workflow_job) {
+        const job = event.workflow_job;
+        if (job.conclusion) {
+          const isJobSuccess = job.conclusion === 'success';
+          signals.push({
+            organization_id: orgId,
+            source_domain: 'engineering',
+            signal_type: isJobSuccess ? 'ci_job_passed' : 'ci_job_failed',
+            signal_value: isJobSuccess ? 1 : -1,
+            entity_type: 'ci_job',
+            entity_id: `job_${job.id}`,
+            metadata: {
+              job_name: job.name,
+              conclusion: job.conclusion,
+              workflow_name: job.workflow_name,
+              branch: job.head_branch,
+            },
           });
         }
       }

@@ -451,6 +451,54 @@ const COPILOT_TOOLS = [
       required: ['signals'] as const,
     },
   },
+
+  // ── EXPERTISE: Contributor expertise graph queries ──
+  {
+    name: 'query_expertise',
+    description: 'Find contributors with expertise in a specific code area, topic, or technology. Returns ranked experts with strength scores. Use when asked "who knows about X?", "who should review this?", "who is the expert on Y?"',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        topic: {
+          type: 'string' as const,
+          description: 'Code path, technology, or domain area (e.g., "src/auth/", "react", "payment-service", "incident-response")',
+        },
+        limit: {
+          type: 'number' as const,
+          description: 'Maximum number of experts to return (default: 5)',
+        },
+        min_strength: {
+          type: 'number' as const,
+          description: 'Minimum expertise strength 0-1 (default: 0.1)',
+        },
+      },
+      required: ['topic'] as const,
+    },
+  },
+
+  // ── CODE CONTEXT: Search indexed code symbols ──
+  {
+    name: 'query_code_context',
+    description: 'Search indexed code knowledge: functions, classes, components, services, and technical concepts stored in brain memory. Returns relevant code context, documentation, and technical knowledge. Use for "how does X work?", "where is Y implemented?", "explain the auth system"',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        query: {
+          type: 'string' as const,
+          description: 'What to search for in code knowledge (e.g., "authentication flow", "payment processing", "API rate limiting")',
+        },
+        domain: {
+          type: 'string' as const,
+          description: 'Optional domain filter (e.g., "engineering")',
+        },
+        limit: {
+          type: 'number' as const,
+          description: 'Maximum number of results (default: 10)',
+        },
+      },
+      required: ['query'] as const,
+    },
+  },
 ];
 
 // ============================================================================
@@ -918,6 +966,120 @@ async function executeTool(
 
       if (error) return { success: false, error: error.message };
       return { success: true, signalsIngested: data?.length || 0 };
+    }
+
+    // ── EXPERTISE: Query contributor expertise graph ──
+    case 'query_expertise': {
+      const topic = toolInput.topic;
+      const limit = toolInput.limit || 5;
+      const minStrength = toolInput.min_strength || 0.1;
+
+      // Query expertise from the contributor_expertise table
+      // Use fuzzy topic matching: ILIKE with wildcards
+      const topicPattern = `%${topic.toLowerCase()}%`;
+
+      const { data: expertise, error: expError } = await supabase
+        .from('contributor_expertise')
+        .select('contributor_id, contributor_name, topic, evidence_type, strength, evidence_count, last_activity_at')
+        .eq('organization_id', organizationId)
+        .ilike('topic', topicPattern)
+        .gte('strength', minStrength)
+        .order('strength', { ascending: false })
+        .limit(limit * 3); // Fetch more to aggregate across evidence types
+
+      if (expError) return { error: expError.message };
+
+      // Aggregate expertise by contributor (combine across evidence types)
+      const contributorMap = new Map<string, {
+        contributorId: string;
+        contributorName: string;
+        topics: string[];
+        totalStrength: number;
+        evidenceTypes: string[];
+        totalEvidence: number;
+        lastActivity: string;
+      }>();
+
+      for (const row of expertise || []) {
+        const existing = contributorMap.get(row.contributor_id);
+        if (existing) {
+          existing.totalStrength = Math.max(existing.totalStrength, row.strength);
+          if (!existing.topics.includes(row.topic)) existing.topics.push(row.topic);
+          if (!existing.evidenceTypes.includes(row.evidence_type)) existing.evidenceTypes.push(row.evidence_type);
+          existing.totalEvidence += row.evidence_count;
+          if (row.last_activity_at > existing.lastActivity) existing.lastActivity = row.last_activity_at;
+        } else {
+          contributorMap.set(row.contributor_id, {
+            contributorId: row.contributor_id,
+            contributorName: row.contributor_name || row.contributor_id,
+            topics: [row.topic],
+            totalStrength: row.strength,
+            evidenceTypes: [row.evidence_type],
+            totalEvidence: row.evidence_count,
+            lastActivity: row.last_activity_at,
+          });
+        }
+      }
+
+      // Sort by strength and return top N
+      const experts = Array.from(contributorMap.values())
+        .sort((a, b) => b.totalStrength - a.totalStrength)
+        .slice(0, limit);
+
+      return {
+        topic,
+        experts: experts.map(e => ({
+          contributor: e.contributorName,
+          contributorId: e.contributorId,
+          strength: Math.round(e.totalStrength * 100) / 100,
+          matchedTopics: e.topics,
+          evidenceTypes: e.evidenceTypes,
+          totalEvidence: e.totalEvidence,
+          lastActive: e.lastActivity,
+        })),
+        totalMatches: contributorMap.size,
+      };
+    }
+
+    // ── CODE CONTEXT: Search code knowledge in brain memory ──
+    case 'query_code_context': {
+      const query = toolInput.query;
+      const domain = toolInput.domain || 'engineering';
+      const limit = toolInput.limit || 10;
+
+      // Search entity_embeddings for code-related entities
+      const { data: entities, error: entError } = await supabase
+        .from('entity_embeddings')
+        .select('entity_type, entity_id, display_name, metadata')
+        .eq('organization_id', organizationId)
+        .or(`entity_type.eq.code_symbol,entity_type.eq.service,entity_type.eq.component`)
+        .ilike('display_name', `%${query}%`)
+        .limit(limit);
+
+      // Also search ai_memory for technical knowledge
+      const { data: memories, error: memError } = await supabase
+        .from('ai_memory')
+        .select('content, memory_type, importance, metadata')
+        .eq('organization_id', organizationId)
+        .or(`memory_type.eq.discovered_pattern,memory_type.eq.temporal_rule,memory_type.eq.brain_discovery,memory_type.eq.consolidation_report`)
+        .ilike('content', `%${query}%`)
+        .order('importance', { ascending: false })
+        .limit(limit);
+
+      return {
+        query,
+        codeEntities: (entities || []).map(e => ({
+          type: e.entity_type,
+          name: e.display_name || e.entity_id,
+          metadata: e.metadata,
+        })),
+        knowledgeMatches: (memories || []).map(m => ({
+          content: m.content,
+          type: m.memory_type,
+          importance: m.importance,
+        })),
+        totalResults: (entities?.length || 0) + (memories?.length || 0),
+      };
     }
 
     default:

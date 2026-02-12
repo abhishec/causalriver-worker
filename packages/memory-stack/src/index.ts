@@ -30,6 +30,38 @@
 export const CORE_BRAIN_ORG_ID = '00000000-0000-4000-a000-000000000001';
 
 // ============================================================================
+// CORE NLP - Sentiment & Topic Analysis
+// ============================================================================
+
+export {
+  analyzeSentiment,
+  type SentimentResult,
+} from './core/nlp/sentiment-analyzer';
+
+export {
+  extractTopics,
+  updateCorpusStats,
+  createCorpusStats,
+  type ExtractedTopics,
+  type CorpusStats,
+  type TopicExtractorConfig,
+} from './core/nlp/topic-extractor';
+
+// ============================================================================
+// CORE - Contributor Expertise Graph
+// ============================================================================
+
+export {
+  createExpertiseGraph,
+  type ExpertiseEdge,
+  type ExpertiseInput,
+  type ExpertiseQuery,
+  type ExpertiseGraphConfig,
+  type ExpertiseGraphInstance,
+  type EvidenceType,
+} from './core/expertise-graph';
+
+// ============================================================================
 // CORE - L2+L3: Entity Resolution & Semantic Memory
 // ============================================================================
 
@@ -238,6 +270,17 @@ export {
   createCascadeAlertPipeline,
 } from './orchestrator/cascade-alert-pipeline';
 
+// Alert Router with Expertise-Based Routing
+export {
+  createAlertRouter,
+  type AlertRoutingRule,
+  type AlertChannel,
+  type CascadeAlertPayload,
+  type AlertDelivery,
+  type AlertRouterConfig,
+  type AlertRouter,
+} from './orchestrator/alert-router';
+
 export {
   sendSlackAlert,
   sendWebhookAlert,
@@ -372,6 +415,9 @@ export { createStripeConnector } from './connectors/stripe';
 export { createSupportConnector } from './connectors/support';
 export { createGitHubConnector, type GitHubConnectorConfig } from './connectors/github';
 export { createDocumentConnector, type DocumentConnectorConfig } from './connectors/document';
+export { createJiraConnector, type JiraConnectorConfig } from './connectors/jira';
+export { createPagerDutyConnector, type PagerDutyConnectorConfig } from './connectors/pagerduty';
+export { createCICDIngestor, type CICDEvent, type CICDIngestor, type CICDProvider } from './connectors/cicd-ingestor';
 
 // Template Connectors (bidirectional: pull + push)
 /** @deprecated Use `createNexusSlackConnector` from `@nexus-ai/slack-connector` instead */
@@ -572,6 +618,13 @@ export {
   getTrainingPacksByTag,
   getAllTrainingPacks,
 } from './learning/training-library';
+
+// Runbook Auto-Indexer
+export {
+  createRunbookIndexer,
+  type RunbookDocument,
+  type RunbookIndexer,
+} from './learning/runbook-indexer';
 
 // Autonomous Learner - Living Brain Self-Training Loop
 export {
