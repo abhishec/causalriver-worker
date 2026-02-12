@@ -16,6 +16,7 @@
  */
 
 import { type SupabaseClient } from '@supabase/supabase-js';
+import { type BrainAmplifier } from '../orchestrator/llm-brain-amplifier';
 
 // ============================================================================
 // TYPES
@@ -130,6 +131,8 @@ export interface FeedbackLoopConfig {
   degradationThreshold: number;
   /** How often to run weight updates (hours) */
   updateIntervalHours: number;
+  /** Optional LLM Brain Amplifier for nuanced prediction verification (Gap 3) */
+  amplifier?: BrainAmplifier;
 }
 
 export interface VerificationResult {
@@ -139,6 +142,10 @@ export interface VerificationResult {
   magnitudeError: number;
   weightAdjustment: number;
   newRelationshipWeight: number;
+  /** LLM verdict when Brain Amplifier is configured (Gap 3) */
+  llmVerdict?: string;
+  /** LLM reasoning for the verdict */
+  llmReasoning?: string;
 }
 
 // ============================================================================
@@ -204,7 +211,8 @@ export function createFeedbackLoop(config: Partial<FeedbackLoopConfig> = {}) {
     maxWeight,
     minPredictionsForUpdate,
     accuracyWindowDays,
-    degradationThreshold
+    degradationThreshold,
+    amplifier
   } = mergedConfig;
 
   return {
@@ -312,7 +320,36 @@ export function createFeedbackLoop(config: Partial<FeedbackLoopConfig> = {}) {
       // Prediction is "correct" if direction matches and magnitude is within 50%
       const wasCorrect = directionCorrect && magnitudeError < Math.abs(prediction.predicted_magnitude) * 0.5;
 
-      // Update prediction record
+      // ── LLM Brain Amplifier: Nuanced Prediction Verification (Gap 3) ──
+      // If amplifier is configured, get Claude's judgment. This runs alongside
+      // the statistical check and can provide a more nuanced verdict.
+      let llmVerdict: string | undefined;
+      let llmReasoning: string | undefined;
+      let llmConfidenceAdjustment: number = 0;
+
+      if (amplifier) {
+        try {
+          const llmResult = await amplifier.verifyPredictionWithLLM(
+            {
+              sourceDomain: prediction.source_domain,
+              targetDomain: prediction.target_domain,
+              targetMetric: prediction.target_metric,
+              predictedDirection: prediction.predicted_direction,
+              predictedMagnitude: prediction.predicted_magnitude,
+              timeframeHours: prediction.timeframe_hours,
+              confidence: prediction.confidence,
+            },
+            actualOutcome
+          );
+          llmVerdict = llmResult.verdict;
+          llmReasoning = llmResult.reasoning;
+          llmConfidenceAdjustment = llmResult.confidenceAdjustment;
+        } catch (err: any) {
+          console.warn('[FeedbackLoop] LLM verification failed (using statistical only):', err?.message);
+        }
+      }
+
+      // Update prediction record (including LLM verdict if available)
       await supabase
         .from('prediction_records')
         .update({
@@ -322,14 +359,32 @@ export function createFeedbackLoop(config: Partial<FeedbackLoopConfig> = {}) {
           was_correct: wasCorrect,
           direction_correct: directionCorrect,
           magnitude_error: magnitudeError,
-          status: 'verified'
+          status: 'verified',
+          ...(llmVerdict && {
+            llm_verdict: llmVerdict,
+            llm_reasoning: llmReasoning,
+            llm_confidence_adjustment: llmConfidenceAdjustment,
+          }),
         })
         .eq('id', predictionId);
 
       // Calculate weight adjustment
-      const weightAdjustment = wasCorrect
+      // LLM can soften the penalty for partially correct or inconclusive predictions
+      let effectiveWasCorrect = wasCorrect;
+      if (llmVerdict === 'partially_correct' && !wasCorrect) {
+        // LLM says partially correct but stats said wrong — reduce penalty
+        effectiveWasCorrect = false; // Still "incorrect" but with softer penalty below
+      }
+
+      const baseWeightAdjustment = effectiveWasCorrect
         ? correctPredictionBoost
         : incorrectPredictionPenalty;
+
+      // Apply LLM confidence adjustment: shifts the multiplier toward 1.0 (neutral)
+      // e.g., if penalty is 0.90 and LLM says +0.05, effective penalty becomes 0.95
+      const weightAdjustment = llmVerdict === 'partially_correct' || llmVerdict === 'inconclusive'
+        ? baseWeightAdjustment + (1.0 - baseWeightAdjustment) * 0.5 // Halve the penalty for partial/inconclusive
+        : baseWeightAdjustment + llmConfidenceAdjustment;
 
       // Fetch current relationship weight + confounder metadata
       const { data: relationship, error: relError } = await supabase
@@ -393,7 +448,8 @@ export function createFeedbackLoop(config: Partial<FeedbackLoopConfig> = {}) {
         directionCorrect,
         magnitudeError,
         weightAdjustment,
-        newRelationshipWeight: newWeight
+        newRelationshipWeight: newWeight,
+        ...(llmVerdict && { llmVerdict, llmReasoning }),
       };
     },
 

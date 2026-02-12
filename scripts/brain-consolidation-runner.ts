@@ -93,6 +93,8 @@ import {
 import type { CachedRelationship } from '../packages/memory-stack/src/bridges/patterns-to-agents';
 // Region #11: Working Memory (Context Manager) — record consolidation discoveries
 import { createContextManager } from '../packages/memory-stack/src/orchestrator/context-manager';
+// LLM Brain Amplifier — Claude as semantic judgment layer
+import { createBrainAmplifier } from '../packages/memory-stack/src/orchestrator/llm-brain-amplifier';
 
 // ============================================================================
 // CONFIGURATION
@@ -116,6 +118,12 @@ const CONSOLIDATION_INTERVAL_HOURS = parseInt(process.env.CONSOLIDATION_INTERVAL
 const LOOKBACK_HOURS = parseInt(process.env.LOOKBACK_HOURS || '48', 10);
 const PRUNE_AFTER_DAYS = parseInt(process.env.PRUNE_AFTER_DAYS || '30', 10);
 const VERBOSE = process.env.VERBOSE === 'true';
+
+// LLM Brain Amplifier config (optional — graceful degradation if no key)
+const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY || '';
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY || '';
+const LLM_PROVIDER = (process.env.LLM_PROVIDER || (ANTHROPIC_API_KEY ? 'anthropic' : 'openai')) as 'anthropic' | 'openai';
+const LLM_API_KEY = LLM_PROVIDER === 'anthropic' ? ANTHROPIC_API_KEY : OPENAI_API_KEY;
 
 // ============================================================================
 // LOGGING
@@ -890,6 +898,70 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
     });
 
     log('SNAPSHOT', 'Daily brain snapshot written for website dashboard');
+
+    // ── GAP 5: LLM Consolidation Briefing ─────────────────────────────
+    // Generate a CTO-grade executive briefing from tonight's consolidation
+    if (LLM_API_KEY) {
+      try {
+        const amplifier = createBrainAmplifier({
+          provider: LLM_PROVIDER,
+          apiKey: LLM_API_KEY,
+          verbose: VERBOSE,
+        });
+
+        log('LLM', 'Generating executive consolidation briefing...');
+        const briefing = await amplifier.generateConsolidationBriefing(
+          {
+            narrative: results[0]?.report?.narrative || undefined,
+            discoveries: allDiscoveries.slice(0, 10),
+            warnings: results[0]?.report?.warnings || [],
+            stats: results[0]?.report?.stats || {},
+          },
+          {
+            signalsProcessed: totalSignals,
+            edgesDiscovered: totalEdges,
+            edgesStrengthed: totalStrengthened,
+            edgesPruned: totalPruned,
+            edgesDecayed: totalDecayed,
+            anomaliesDetected: totalAnomalies,
+            patternsFound: totalPatterns,
+            memoriesCreated: totalMemories,
+            runDurationMs: Date.now() - overallStart,
+          }
+        );
+
+        // Update the snapshot with the executive briefing
+        if (briefing.executiveSummary) {
+          await supabase.from('brain_daily_snapshots').update({
+            executive_summary: briefing.executiveSummary,
+            key_findings: briefing.keyFindings,
+            strategic_implications: briefing.strategicImplications,
+          }).eq('organization_id', ORGANIZATION_ID)
+            .eq('snapshot_date', new Date().toISOString().split('T')[0]);
+
+          divider('EXECUTIVE BRIEFING (Claude)');
+          console.log(briefing.executiveSummary);
+          console.log('');
+          if (briefing.keyFindings.length > 0) {
+            console.log('Key Findings:');
+            for (const f of briefing.keyFindings) console.log(`  • ${f}`);
+          }
+          if (briefing.risks.length > 0) {
+            console.log('Risks:');
+            for (const r of briefing.risks) console.log(`  ⚠ ${r}`);
+          }
+          if (briefing.strategicImplications.length > 0) {
+            console.log('Strategic Implications:');
+            for (const s of briefing.strategicImplications) console.log(`  → ${s}`);
+          }
+          console.log('');
+        }
+
+        log('LLM', 'Executive briefing generated and stored');
+      } catch (err) {
+        logError('LLM', 'Failed to generate executive briefing (non-critical)', err);
+      }
+    }
   } catch (err) {
     logError('SNAPSHOT', 'Failed to write daily snapshot (non-critical)', err);
   }

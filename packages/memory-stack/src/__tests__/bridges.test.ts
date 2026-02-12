@@ -12,6 +12,7 @@ import {
   createLearningBridge,
   createAgentContextEnricher,
   createFeedbackBridge,
+  createObservationBridge,
   wireNexusBridges,
 } from '../bridges';
 
@@ -391,5 +392,142 @@ describe('wireNexusBridges', () => {
     ]);
 
     expect(bus.emit).toHaveBeenCalled();
+  });
+
+  it('includes observation bridge with stats', () => {
+    const bus = createMockEventBus();
+    const result = wireNexusBridges(bus);
+
+    expect(result.observationBridge).toBeTruthy();
+
+    const stats = result.getStats();
+    expect(stats.observations).toBeTruthy();
+    expect(stats.observations.totalObservations).toBe(0);
+  });
+});
+
+// ============================================================================
+// BRIDGE 6: OBSERVATION MEMORY
+// ============================================================================
+
+describe('Bridge 6: Observation Memory', () => {
+  it('generates observations from signal events', async () => {
+    const bus = createMockEventBus();
+    const bridge = createObservationBridge(bus);
+
+    // Emit a signal event
+    bus.emit({
+      eventId: 'test_signal_1',
+      organizationId: 'org_1',
+      domain: 'finance',
+      entityType: 'client',
+      entityId: 'client_123',
+      eventType: 'signal',
+      payload: { signal_type: 'payment_delay', signal_value: 0.85 },
+      timestamp: new Date(),
+      vectorClock: 1,
+    });
+
+    // Wait for async handler
+    await new Promise(resolve => setTimeout(resolve, 10));
+
+    const store = bridge.getStore('org_1');
+    expect(store).toBeTruthy();
+    expect(store!.observations.length).toBeGreaterThan(0);
+
+    // Should have [FACT] and [CHANGE] (extreme signal > 0.7)
+    const tags = store!.observations.map(o => o.tag);
+    expect(tags).toContain('FACT');
+    expect(tags).toContain('CHANGE');
+  });
+
+  it('generates relationship observations from relationship_update events', async () => {
+    const bus = createMockEventBus();
+    const bridge = createObservationBridge(bus);
+
+    bus.emit({
+      eventId: 'test_rel_1',
+      organizationId: 'org_1',
+      domain: 'finance',
+      entityType: 'relationship',
+      entityId: 'finance_cs',
+      eventType: 'relationship_update',
+      payload: {
+        source_domain: 'finance',
+        target_domain: 'customer_success',
+        effect_size: 0.65,
+        optimal_lag_days: 14,
+        natural_language: 'Finance delays cause CS escalations',
+        granger_p_value: 0.001,
+      },
+      timestamp: new Date(),
+      vectorClock: 2,
+    });
+
+    await new Promise(resolve => setTimeout(resolve, 10));
+
+    const store = bridge.getStore('org_1');
+    expect(store).toBeTruthy();
+    const tags = store!.observations.map(o => o.tag);
+    expect(tags).toContain('RELATIONSHIP');
+    expect(tags).toContain('FACT');
+  });
+
+  it('returns formatted context for agents', async () => {
+    const bus = createMockEventBus();
+    const bridge = createObservationBridge(bus);
+
+    // Emit multiple events to build up store
+    for (let i = 0; i < 15; i++) {
+      bus.emit({
+        eventId: `test_sig_${i}`,
+        organizationId: 'org_1',
+        domain: 'finance',
+        entityType: 'metric',
+        entityId: `metric_${i}`,
+        eventType: 'signal',
+        payload: { signal_type: 'test', signal_value: 0.5 + i * 0.05 },
+        timestamp: new Date(),
+        vectorClock: i,
+      });
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 20));
+
+    const context = bridge.getContextForAgent('org_1', 'finance');
+    expect(context).toContain('Observational Memory');
+    expect(context.length).toBeGreaterThan(0);
+  });
+
+  it('checks anomaly for unknown domains', () => {
+    const bus = createMockEventBus();
+    const bridge = createObservationBridge(bus);
+
+    const result = bridge.checkAnomaly('org_1', 'unknown_domain');
+    expect(result.shouldAbstain).toBe(true);
+    expect(result.signals).toContain('no_store');
+  });
+
+  it('tracks stats correctly', async () => {
+    const bus = createMockEventBus();
+    const bridge = createObservationBridge(bus);
+
+    bus.emit({
+      eventId: 'test_stat_1',
+      organizationId: 'org_1',
+      domain: 'finance',
+      entityType: 'client',
+      entityId: 'c_1',
+      eventType: 'signal',
+      payload: { signal_value: 0.5 },
+      timestamp: new Date(),
+      vectorClock: 1,
+    });
+
+    await new Promise(resolve => setTimeout(resolve, 10));
+
+    const stats = bridge.getStats();
+    expect(stats.organizationsTracked).toBe(1);
+    expect(stats.totalObservations).toBeGreaterThan(0);
   });
 });

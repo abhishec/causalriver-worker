@@ -60,6 +60,7 @@ import { getDefaultLogger, type NexusLogger } from '../observability';
 import { createMultiHopReasoner } from '../causality/multi-hop-reasoner';
 import { createExplanationGenerator } from '../causality/explanation-generator';
 import { createUncertaintyQuantifier } from '../causality/uncertainty-quantifier';
+import { type BrainAmplifier } from './llm-brain-amplifier';
 
 // ============================================================================
 // TYPES
@@ -96,6 +97,8 @@ export interface ConsolidationConfig {
   verbose?: boolean;
   /** Structured logger (defaults to global logger) */
   logger?: NexusLogger;
+  /** Optional LLM Brain Amplifier for causal hypothesis generation (Gap 4) */
+  amplifier?: BrainAmplifier;
 }
 
 export interface ConsolidationStepResult {
@@ -180,6 +183,7 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
     verbose = false,
   } = config;
 
+  const amplifier = config.amplifier;
   const isCoreBrain = organizationId === CORE_BRAIN_ORG_ID;
   const repository = createSupabaseRepository(supabase, organizationId);
   const trainer = createBrainTrainer();
@@ -400,6 +404,54 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
           }),
           { onConflict: 'organization_id,source_domain,target_domain' }
         );
+      }
+
+      // ── GAP 4: LLM Causal Hypothesis Generation ─────────────────────
+      // For each NEW relationship, ask Claude "Why does A cause B?"
+      // Only for genuinely new edges to control costs.
+      if (amplifier && newRels.length > 0) {
+        try {
+          const edgesToAmplify = newRels.slice(0, 5); // Max 5 per run
+          log('DISCOVER', `Generating causal hypotheses for ${edgesToAmplify.length} new edges...`);
+
+          const hypothesisResults = await Promise.allSettled(
+            edgesToAmplify.map(edge =>
+              amplifier.generateCausalHypothesis({
+                sourceDomain: edge.source_domain,
+                targetDomain: edge.target_domain,
+                effectSize: edge.effect_size || 0,
+                lagHours: edge.optimal_lag_days ? edge.optimal_lag_days * 24 : undefined,
+                method: edge.discovery_method,
+                naturalLanguage: edge.natural_language,
+              })
+            )
+          );
+
+          // Persist hypotheses to the causal_relationships_statistical table
+          for (let i = 0; i < edgesToAmplify.length; i++) {
+            const result_i = hypothesisResults[i];
+            if (result_i.status === 'fulfilled' && result_i.value.mechanismHypothesis) {
+              const hypothesis = result_i.value;
+              const edge = edgesToAmplify[i];
+              await supabase
+                .from('causal_relationships_statistical')
+                .update({
+                  mechanism_hypothesis: hypothesis.mechanismHypothesis,
+                  llm_confounders: hypothesis.confounders,
+                  testable_implications: hypothesis.testableImplications,
+                })
+                .eq('organization_id', organizationId)
+                .eq('source_domain', edge.source_domain)
+                .eq('target_domain', edge.target_domain);
+            }
+          }
+
+          const succeeded = hypothesisResults.filter(r => r.status === 'fulfilled').length;
+          log('DISCOVER', `Generated ${succeeded}/${edgesToAmplify.length} causal hypotheses`);
+        } catch (err: any) {
+          // Non-critical: statistical edge still stands without hypothesis
+          log('DISCOVER', `Causal hypothesis generation failed (non-critical): ${err?.message}`);
+        }
       }
 
       log('DISCOVER', `${result.discovered_relationships.length} relationships found (${newRels.length} new, ${lostRels.length} lost)`);
