@@ -37,13 +37,14 @@ import {
   type EntityFeatures,
 } from '../learning/pattern-detector';
 
-// ── Import ALL 6 hard-topic training packs ──────────────────────────────
+// ── Import ALL 7 hard-topic training packs ──────────────────────────────
 import { DERIVATIVES_OPTIONS_PRICING_PACKS } from '../../../../scripts/training-data/derivatives-options-pricing-packs';
 import { NETWORK_EFFECTS_PLATFORM_PACKS } from '../../../../scripts/training-data/network-effects-platform-packs';
 import { SYSTEM_DYNAMICS_SIMULATION_PACKS } from '../../../../scripts/training-data/system-dynamics-simulation-packs';
 import { ADVANCED_CAUSAL_INFERENCE_PACKS } from '../../../../scripts/training-data/advanced-causal-inference-packs';
 import { GAME_THEORY_MECHANISM_DESIGN_PACKS } from '../../../../scripts/training-data/game-theory-mechanism-design-packs';
 import { OPTIMIZATION_OPERATIONS_RESEARCH_PACKS } from '../../../../scripts/training-data/optimization-operations-research-packs';
+import { CODE_ANALYSIS_OPEN_SOURCE_PACKS } from '../../../../scripts/training-data/code-analysis-open-source-packs';
 
 // ============================================================================
 // PURPOSE-BUILT FINANCIAL MODELING PACKS (created here for testing)
@@ -252,6 +253,7 @@ const ALL_HARD_PACKS: TrainingPack[] = [
   ...ADVANCED_CAUSAL_INFERENCE_PACKS,
   ...GAME_THEORY_MECHANISM_DESIGN_PACKS,
   ...OPTIMIZATION_OPERATIONS_RESEARCH_PACKS,
+  ...CODE_ANALYSIS_OPEN_SOURCE_PACKS,
   startupCashflowModeling,
   valuationFrameworks,
   balanceSheetAnalysis,
@@ -277,7 +279,7 @@ describe('Hard Topic Training — CTO Proof', () => {
   // SECTION 1: VALIDATION — Every pack must pass structural validation
   // ════════════════════════════════════════════════════════════════════
 
-  describe('1. Pack Validation — All 22 hard-topic packs pass validation', () => {
+  describe('1. Pack Validation — All 26 hard-topic packs pass validation', () => {
     for (const pack of ALL_HARD_PACKS) {
       it(`validates: ${pack.id}`, () => {
         const result = trainer.validatePack(pack);
@@ -600,10 +602,97 @@ describe('Hard Topic Training — CTO Proof', () => {
   });
 
   // ════════════════════════════════════════════════════════════════════
-  // SECTION 10: PATTERN SIGNIFICANCE — All patterns pass statistics
+  // SECTION 10: CODE ANALYSIS & OPEN SOURCE UNDERSTANDING
   // ════════════════════════════════════════════════════════════════════
 
-  describe('10. Pattern Statistical Significance', () => {
+  describe('10. Code Analysis & Open Source Understanding Proof', () => {
+    it('learns dependency vulnerability propagation chains', () => {
+      const pack = CODE_ANALYSIS_OPEN_SOURCE_PACKS[0]; // dependencyVulnerabilityPropagation
+      const result = trainer.trainInMemory(pack);
+
+      expect(result.success).toBe(true);
+      expect(result.causalEdges).toBe(7);
+      expect(result.rules).toBe(2); // critical CVE + freshness threshold
+
+      const graph = trainer.getTrainedGraph();
+      // Engineering → risk edges (dep depth, outdated deps)
+      const engToRisk = graph.edges.filter(
+        (e: any) => e.source === 'engineering' && e.target === 'risk'
+      );
+      expect(engToRisk.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('learns code complexity → defect density relationships', () => {
+      const pack = CODE_ANALYSIS_OPEN_SOURCE_PACKS[1]; // codeComplexityDefectDensity
+      const result = trainer.trainInMemory(pack);
+
+      expect(result.success).toBe(true);
+      expect(result.causalEdges).toBe(8);
+      expect(result.rules).toBe(2); // complexity hotspot + coverage regression
+
+      const graph = trainer.getTrainedGraph();
+      // Engineering → product edges (churn → regression, coverage → escape)
+      const engToProduct = graph.edges.filter(
+        (e: any) => e.source === 'engineering' && e.target === 'product'
+      );
+      expect(engToProduct.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('learns open source project health indicators', () => {
+      const pack = CODE_ANALYSIS_OPEN_SOURCE_PACKS[2]; // openSourceProjectHealth
+      const result = trainer.trainInMemory(pack);
+
+      expect(result.success).toBe(true);
+      expect(result.causalEdges).toBe(7);
+      expect(result.rules).toBe(1); // critical OSS health warning
+    });
+
+    it('learns architecture pattern evolution & anti-patterns', () => {
+      const pack = CODE_ANALYSIS_OPEN_SOURCE_PACKS[3]; // architecturePatternEvolution
+      const result = trainer.trainInMemory(pack);
+
+      expect(result.success).toBe(true);
+      expect(result.causalEdges).toBe(7);
+      expect(result.rules).toBe(2); // distributed monolith + premature decomposition
+
+      // Verify strategy ↔ engineering bidirectional edges
+      const graph = trainer.getTrainedGraph();
+      const stratToEng = graph.edges.filter(
+        (e: any) => e.source === 'strategy' && e.target === 'engineering'
+      );
+      expect(stratToEng.length).toBeGreaterThanOrEqual(1);
+
+      const engToStrat = graph.edges.filter(
+        (e: any) => e.source === 'engineering' && e.target === 'strategy'
+      );
+      expect(engToStrat.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('code analysis packs cover full software lifecycle domains', () => {
+      for (const pack of CODE_ANALYSIS_OPEN_SOURCE_PACKS) {
+        trainer.trainInMemory(pack);
+      }
+
+      const graph = trainer.getTrainedGraph();
+      const allDomains = new Set<string>();
+      for (const edge of graph.edges) {
+        allDomains.add((edge as any).source);
+        allDomains.add((edge as any).target);
+      }
+
+      // Should cover: engineering, product, strategy, risk
+      expect(allDomains.has('engineering')).toBe(true);
+      expect(allDomains.has('product')).toBe(true);
+      expect(allDomains.has('strategy')).toBe(true);
+      expect(allDomains.has('risk')).toBe(true);
+    });
+  });
+
+  // ════════════════════════════════════════════════════════════════════
+  // SECTION 11: PATTERN SIGNIFICANCE — All patterns pass statistics
+  // ════════════════════════════════════════════════════════════════════
+
+  describe('11. Pattern Statistical Significance', () => {
     it('all training pack patterns produce significant statistical evidence', () => {
       let totalPatterns = 0;
       let significantPatterns = 0;
@@ -680,10 +769,10 @@ describe('Hard Topic Training — CTO Proof', () => {
   });
 
   // ════════════════════════════════════════════════════════════════════
-  // SECTION 11: CROSS-DOMAIN REASONING — Graph traversal works
+  // SECTION 12: CROSS-DOMAIN REASONING — Graph traversal works
   // ════════════════════════════════════════════════════════════════════
 
-  describe('11. Cross-Domain Graph Traversal', () => {
+  describe('12. Cross-Domain Graph Traversal', () => {
     it('full graph has correct edge count after loading all packs', () => {
       for (const pack of ALL_HARD_PACKS) {
         trainer.trainInMemory(pack);
@@ -691,9 +780,10 @@ describe('Hard Topic Training — CTO Proof', () => {
 
       const graph = trainer.getTrainedGraph();
       // Graph deduplicates edges by (source, target) pair — keeps strongest evidence
-      // 157 raw chains collapse to ~34 unique domain-pair edges
+      // ~186 raw chains collapse to unique domain-pair edges
+      const totalRawEdges = ALL_HARD_PACKS.reduce((sum, p) => sum + p.causalChains.length, 0);
       expect(graph.edges.length).toBeGreaterThan(25);
-      expect(graph.edges.length).toBeLessThanOrEqual(157); // Cannot exceed raw count
+      expect(graph.edges.length).toBeLessThanOrEqual(totalRawEdges); // Cannot exceed raw count
     });
 
     it('multi-domain knowledge spans 10+ domains', () => {
@@ -729,10 +819,10 @@ describe('Hard Topic Training — CTO Proof', () => {
   });
 
   // ════════════════════════════════════════════════════════════════════
-  // SECTION 12: AGGREGATE STATS — Production-readiness check
+  // SECTION 13: AGGREGATE STATS — Production-readiness check
   // ════════════════════════════════════════════════════════════════════
 
-  describe('12. Aggregate Training Stats', () => {
+  describe('13. Aggregate Training Stats', () => {
     it('full training produces correct aggregate statistics', () => {
       for (const pack of ALL_HARD_PACKS) {
         trainer.trainInMemory(pack);
@@ -742,8 +832,8 @@ describe('Hard Topic Training — CTO Proof', () => {
 
       // Total packs: 4 derivatives + 3 platform + 3 system dynamics +
       //              3 causal inference + 3 game theory + 3 optimization +
-      //              3 financial modeling = 22
-      expect(stats.casesLoaded).toBe(22);
+      //              4 code analysis + 3 financial modeling = 26
+      expect(stats.casesLoaded).toBe(26);
 
       // Total causal edges loaded (raw count before graph deduplication)
       const expectedEdges = ALL_HARD_PACKS.reduce((sum, p) => sum + p.causalChains.length, 0);
@@ -781,10 +871,10 @@ describe('Hard Topic Training — CTO Proof', () => {
   });
 
   // ════════════════════════════════════════════════════════════════════
-  // SECTION 13: PATTERN DISCOVERY — Run discoverPatterns on hard data
+  // SECTION 14: PATTERN DISCOVERY — Run discoverPatterns on hard data
   // ════════════════════════════════════════════════════════════════════
 
-  describe('13. Pattern Discovery on Hard Financial Data', () => {
+  describe('14. Pattern Discovery on Hard Financial Data', () => {
     it('discovers association rules from financial transactions', () => {
       // Simulate financial event co-occurrences
       const transactions: string[][] = [

@@ -571,6 +571,7 @@ function convertData(fetched: FetchedData): ConvertedData {
     ...ADVANCED_CAUSAL_INFERENCE_PACKS,
     ...GAME_THEORY_MECHANISM_DESIGN_PACKS,
     ...OPTIMIZATION_OPERATIONS_RESEARCH_PACKS,
+    ...CODE_ANALYSIS_OPEN_SOURCE_PACKS,
   ];
 
   log('CONVERT', `${signals.length} signals generated`);
