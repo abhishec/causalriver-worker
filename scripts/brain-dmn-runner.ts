@@ -99,6 +99,8 @@ import type { CachedRelationship } from '../packages/memory-stack/src/bridges/pa
 import { recordPrediction } from '../packages/memory-stack/src/learning/prediction-tracker';
 // Region #11: Working Memory (Context Manager) — enriches insights with org context
 import { createContextManager } from '../packages/memory-stack/src/orchestrator/context-manager';
+// LLM Brain Amplifier — Claude as semantic judgment layer
+import { createBrainAmplifier } from '../packages/memory-stack/src/orchestrator/llm-brain-amplifier';
 
 // ============================================================================
 // CONFIGURATION
@@ -125,6 +127,12 @@ const SLACK_WEBHOOK_URL = process.env.SLACK_WEBHOOK_URL || '';
 
 // Verbose
 const VERBOSE = process.env.VERBOSE === 'true';
+
+// LLM Brain Amplifier config (optional — graceful degradation if no key)
+const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY || '';
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY || '';
+const LLM_PROVIDER = (process.env.LLM_PROVIDER || (ANTHROPIC_API_KEY ? 'anthropic' : 'openai')) as 'anthropic' | 'openai';
+const LLM_API_KEY = LLM_PROVIDER === 'anthropic' ? ANTHROPIC_API_KEY : OPENAI_API_KEY;
 
 // ============================================================================
 // LOGGING
@@ -390,6 +398,31 @@ async function scanOrg(
             recommended_interventions: alert.recommendedInterventions,
           });
         } catch { /* non-critical */ }
+        // ── GAP 2: LLM Anomaly Interpretation ──
+        // For high-severity anomalies, ask Claude to explain in business context
+        if (LLM_API_KEY && (alert.severity === 'critical' || alert.severity === 'high')) {
+          try {
+            const amplifier = createBrainAmplifier({
+              provider: LLM_PROVIDER, apiKey: LLM_API_KEY, verbose: VERBOSE,
+            });
+            const interpretation = await amplifier.interpretAnomaly({
+              domain: alert.triggerDomain,
+              signalType: alert.triggerSignalType,
+              anomalyScore: alert.anomalyScore,
+              signalValue: alert.anomalyScore,
+              historicalMean: 0,
+              historicalStd: 1,
+              windowSize: 90,
+            });
+            if (interpretation.interpretation) {
+              await supabase.from('cascade_alerts').update({
+                llm_interpretation: interpretation.interpretation,
+                llm_likely_causes: interpretation.likelyCauses,
+                llm_suggested_actions: interpretation.suggestedActions,
+              }).eq('alert_id', alert.alertId);
+            }
+          } catch { /* non-critical */ }
+        }
         // Record as prediction for Bayesian loop
         try {
           const { data: predRow } = await supabase.from('prediction_records').insert({
@@ -522,6 +555,60 @@ async function scanOrg(
     }
   } catch (err: any) {
     log('DMN', `Prediction recording failed: ${err.message}`);
+  }
+
+  // ── GAP 1: LLM Insight Amplification ──────────────────────────────────
+  // For top 3 insights, ask Claude to generate business narratives
+  if (LLM_API_KEY && result.insights.length > 0) {
+    try {
+      const amplifier = createBrainAmplifier({
+        provider: LLM_PROVIDER, apiKey: LLM_API_KEY, verbose: VERBOSE,
+      });
+
+      const topInsights = result.insights
+        .sort((a, b) => b.importance - a.importance)
+        .slice(0, 3);
+
+      log('LLM', `Amplifying top ${topInsights.length} insight(s) with Claude...`);
+
+      for (const insight of topInsights) {
+        try {
+          const amplified = await amplifier.amplifyInsight({
+            type: insight.type,
+            title: insight.title,
+            explanation: insight.explanation,
+            domains: insight.domains,
+            importance: insight.importance,
+            surpriseScore: insight.surpriseScore,
+            evidence: insight.evidence,
+          });
+
+          // Persist amplified insight to ai_memory
+          if (amplified.explanation && amplified.confidence > 0) {
+            await supabase.from('ai_memory')
+              .update({
+                llm_explanation: amplified.explanation,
+                llm_business_impact: amplified.businessImpact,
+                llm_recommended_actions: amplified.recommendedActions,
+              })
+              .eq('organization_id', orgId)
+              .ilike('content', `%${insight.title.substring(0, 50)}%`)
+              .order('created_at', { ascending: false })
+              .limit(1);
+
+            console.log(`    🧠 ${insight.title}`);
+            console.log(`       Impact: ${amplified.businessImpact.substring(0, 100)}`);
+            if (amplified.recommendedActions.length > 0) {
+              console.log(`       Action: ${amplified.recommendedActions[0]}`);
+            }
+          }
+        } catch { /* individual insight amplification failure is non-critical */ }
+      }
+
+      log('LLM', 'Insight amplification complete');
+    } catch (err: any) {
+      log('LLM', `Insight amplification failed (non-critical): ${err?.message}`);
+    }
   }
 
   return result;

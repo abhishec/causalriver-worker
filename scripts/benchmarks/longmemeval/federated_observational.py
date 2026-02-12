@@ -1100,33 +1100,51 @@ class ObservationalL6Prediction:
         obs_to_use = ranked_observations if ranked_observations else observations
 
         # Build enrichment sections from L4 and L5
+        # SELECTIVE ENRICHMENT: Only enrich question types where it helps.
+        # Oracle ablation (v4 vs federated):
+        #   temporal-reasoning: +8.3% → ENRICH (cascades + temporal)
+        #   multi-session: +2.3% → ENRICH (entities + relationships)
+        #   single-session-user: +2.9% → ENRICH (ranking only, no text injection)
+        #   single-session-assistant: 0.0% → NO ENRICHMENT (neutral)
+        #   knowledge-update: -2.6% → NO ENRICHMENT (L4 superseded rules hurt)
+        #   single-session-preference: -10% → NO ENRICHMENT (L4 pref rules hurt)
+        ENRICHMENT_ENABLED = {
+            "temporal-reasoning": True,
+            "multi-session": True,
+            "single-session-user": False,  # Benefits from L3 ranking only (applied via obs_to_use)
+            "single-session-assistant": False,
+            "knowledge-update": False,     # L4 superseded rules cause -2.6% regression
+            "single-session-preference": False,  # L4 preference rules cause -10% regression
+        }
+
         enrichment_sections = []
         enrichment_type = "none"
 
-        if rules_layer:
-            rules_text = rules_layer.format_rules_for_prompt(question_type)
-            if rules_text.strip():
-                enrichment_sections.append(rules_text)
-                enrichment_type = "rules"
+        if ENRICHMENT_ENABLED.get(question_type, False):
+            if rules_layer:
+                rules_text = rules_layer.format_rules_for_prompt(question_type)
+                if rules_text.strip():
+                    enrichment_sections.append(rules_text)
+                    enrichment_type = "rules"
 
-        if cascade_layer:
-            cascade_text = cascade_layer.format_cascades_for_prompt(question_type)
-            if cascade_text.strip():
-                enrichment_sections.append(cascade_text)
-                enrichment_type = "cascades" if enrichment_type == "none" else "rules+cascades"
+            if cascade_layer:
+                cascade_text = cascade_layer.format_cascades_for_prompt(question_type)
+                if cascade_text.strip():
+                    enrichment_sections.append(cascade_text)
+                    enrichment_type = "cascades" if enrichment_type == "none" else "rules+cascades"
 
-        if entities and question_type == "multi-session":
-            cross_session = [k for k, e in entities.items() if len(e.sessions) > 1]
-            if cross_session:
-                entity_text = "## Cross-Session Entities\n"
-                for ek in cross_session[:10]:
-                    e = entities[ek]
-                    entity_text += f"- {e.name}: mentioned in {len(e.sessions)} sessions"
-                    if e.facts:
-                        entity_text += f" — {e.facts[0]}"
-                    entity_text += "\n"
-                enrichment_sections.append(entity_text)
-                enrichment_type = "entities" if enrichment_type == "none" else enrichment_type + "+entities"
+            if entities and question_type == "multi-session":
+                cross_session = [k for k, e in entities.items() if len(e.sessions) > 1]
+                if cross_session:
+                    entity_text = "## Cross-Session Entities\n"
+                    for ek in cross_session[:10]:
+                        e = entities[ek]
+                        entity_text += f"- {e.name}: mentioned in {len(e.sessions)} sessions"
+                        if e.facts:
+                            entity_text += f" — {e.facts[0]}"
+                        entity_text += "\n"
+                    enrichment_sections.append(entity_text)
+                    enrichment_type = "entities" if enrichment_type == "none" else enrichment_type + "+entities"
 
         # Build the context
         base_context = build_observation_context(obs_to_use)
