@@ -85,6 +85,12 @@ import { createBrainPipeline } from '../packages/memory-stack/src/orchestrator/b
 // Region #10: Insula (Anomaly Monitor) — post-consolidation anomaly sweep
 import { createAnomalyMonitor } from '../packages/memory-stack/src/orchestrator/anomaly-monitor';
 import { createEventBus, generateEventId } from '../packages/memory-stack/src/causality/event-bus';
+// Region #10b: Thalamus (Cascade Alert Pipeline) — predict cascade propagation
+import {
+  createCascadeAlertPipeline,
+  type CascadeAlertPayload,
+} from '../packages/memory-stack/src/orchestrator/cascade-alert-pipeline';
+import type { CachedRelationship } from '../packages/memory-stack/src/bridges/patterns-to-agents';
 // Region #11: Working Memory (Context Manager) — record consolidation discoveries
 import { createContextManager } from '../packages/memory-stack/src/orchestrator/context-manager';
 
@@ -295,36 +301,61 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
     const loaded = await bayesian.loadFromDatabase();
     log('LEARN', `Bayesian: loaded ${loaded} edge posteriors`);
 
-    // Get prediction history and update posteriors
-    const { data: predictions } = await supabase
-      .from('ai_memory')
-      .select('metadata')
+    // Get VERIFIED prediction history from prediction_records table (not ai_memory)
+    const { data: verifiedPredictions } = await supabase
+      .from('prediction_records')
+      .select('domain, entity_id, prediction_type, predicted_value, confidence, was_correct')
       .eq('organization_id', ORGANIZATION_ID)
-      .eq('memory_type', 'prediction_verification')
-      .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
+      .not('was_correct', 'is', null)
+      .gte('verified_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
       .limit(200);
 
-    if (predictions && predictions.length > 0) {
-      for (const p of predictions) {
-        const meta = p.metadata as any;
-        if (meta?.sourceDomain && meta?.targetDomain) {
-          bayesian.update({
-            sourceDomain: meta.sourceDomain,
-            targetDomain: meta.targetDomain,
-            wasCorrect: meta.wasCorrect || false,
-            predictionConfidence: meta.confidence || 0.5,
-          });
+    // Also check verified cascade alerts for domain-pair evidence
+    const { data: verifiedCascades } = await supabase
+      .from('cascade_alerts')
+      .select('trigger_domain, predicted_path, severity, anomaly_score, verified_at, prediction_accuracy')
+      .eq('organization_id', ORGANIZATION_ID)
+      .not('verified_at', 'is', null)
+      .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
+      .limit(100);
+
+    let bayesianUpdates = 0;
+
+    if (verifiedPredictions && verifiedPredictions.length > 0) {
+      for (const p of verifiedPredictions) {
+        if (p.prediction_type === 'cascade_propagation' && p.entity_id?.includes('→')) {
+          const domains = p.entity_id.split('→');
+          for (let i = 0; i < domains.length - 1; i++) {
+            bayesian.update({ sourceDomain: domains[i], targetDomain: domains[i + 1], wasCorrect: p.was_correct || false, predictionConfidence: p.confidence || 0.5 });
+            bayesianUpdates++;
+          }
+        } else {
+          bayesian.update({ sourceDomain: p.domain || 'unknown', targetDomain: p.entity_id || p.domain || 'unknown', wasCorrect: p.was_correct || false, predictionConfidence: p.confidence || 0.5 });
+          bayesianUpdates++;
         }
       }
-      const persisted = await bayesian.persistPosteriors();
-      log('LEARN', `Bayesian: updated ${predictions.length} predictions, persisted ${persisted} posteriors`);
+    }
 
+    if (verifiedCascades && verifiedCascades.length > 0) {
+      for (const alert of verifiedCascades) {
+        const path = alert.predicted_path || [];
+        const wasAccurate = (alert.prediction_accuracy || 0) > 0.5;
+        for (let i = 0; i < path.length - 1; i++) {
+          bayesian.update({ sourceDomain: path[i], targetDomain: path[i + 1], wasCorrect: wasAccurate, predictionConfidence: alert.anomaly_score > 3 ? 0.8 : 0.5 });
+          bayesianUpdates++;
+        }
+      }
+    }
+
+    if (bayesianUpdates > 0) {
+      const persisted = await bayesian.persistPosteriors();
+      log('LEARN', `Bayesian: ${bayesianUpdates} evidence updates from ${(verifiedPredictions?.length || 0)} predictions + ${(verifiedCascades?.length || 0)} cascade alerts, persisted ${persisted} posteriors`);
       const uncertain = bayesian.getUncertainEdges(0.25);
       if (uncertain.length > 0) {
         log('LEARN', `Bayesian: ${uncertain.length} edges need more evidence (high uncertainty)`);
       }
     } else {
-      log('LEARN', 'Bayesian: no recent prediction data — skipping update');
+      log('LEARN', 'Bayesian: no verified prediction data yet — posteriors unchanged (waiting for verification cron)');
     }
   } catch (err) {
     logError('LEARN', 'Bayesian update failed (non-fatal)', err);
@@ -511,16 +542,56 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
     logError('CEREBELLUM', 'Fast-path invalidation/pre-warming failed (non-fatal)', err);
   }
 
-  // ── POST-LEARNING: Anomaly Sweep (Insula) ──
-  // After consolidation changes the graph, sweep recent signals for anomalies
-  // that the new causal structure might reveal
-  divider('INSULA: POST-CONSOLIDATION ANOMALY SWEEP');
+  // ── POST-LEARNING: Anomaly Sweep (Insula) + Cascade Alert Pipeline (Thalamus) ──
+  divider('INSULA + THALAMUS: POST-CONSOLIDATION ANOMALY & CASCADE SWEEP');
   let postConsolidationAnomalies = 0;
+  let postConsolidationCascadeAlerts = 0;
   try {
-    const eventBus = createEventBus();
+    const eventBus = createEventBus({ debounceMs: 0 });
     const anomalyMonitor = createAnomalyMonitor(eventBus, {
-      threshold: 2.0, // Slightly more sensitive after consolidation
+      threshold: 2.0,
       windowSize: 30,
+    });
+
+    // Build context enricher from freshly-consolidated causal graph
+    const { data: causalEdgesForCascade } = await supabase
+      .from('causal_relationships_statistical')
+      .select('source_domain, target_domain, effect_size, granger_p_value, granger_f_statistic, optimal_lag_days, natural_language')
+      .eq('organization_id', ORGANIZATION_ID)
+      .eq('is_significant', true)
+      .order('effect_size', { ascending: false })
+      .limit(100);
+
+    const cachedRels: CachedRelationship[] = (causalEdgesForCascade || []).map((e: any) => ({
+      sourceDomain: e.source_domain, targetDomain: e.target_domain,
+      effectSize: e.effect_size || 0, pValue: e.granger_p_value || 0,
+      fStatistic: e.granger_f_statistic || 0, lagDays: e.optimal_lag_days || 0,
+      naturalLanguage: e.natural_language || '', discoveredAt: new Date(),
+    }));
+
+    const contextEnricher = {
+      getContextForAgent: (_orgId: string, domain?: string) => ({
+        causalRelationships: domain ? cachedRels.filter(r => r.sourceDomain === domain || r.targetDomain === domain) : cachedRels,
+        patterns: [],
+      }),
+    };
+
+    const cascadeAlerts: CascadeAlertPayload[] = [];
+    createCascadeAlertPipeline(eventBus, contextEnricher, {
+      minSeverity: 30,
+      onAlert: async (alert) => {
+        cascadeAlerts.push(alert);
+        postConsolidationCascadeAlerts++;
+        try {
+          await supabase.from('cascade_alerts').insert({
+            organization_id: alert.organizationId, alert_id: alert.alertId,
+            severity: alert.severity, trigger_domain: alert.triggerDomain,
+            trigger_signal_type: alert.triggerSignalType, anomaly_score: alert.anomalyScore,
+            predicted_path: alert.predictedPath, expected_impacts: alert.expectedImpacts,
+            recommended_interventions: alert.recommendedInterventions,
+          });
+        } catch { /* non-critical */ }
+      },
     });
 
     const { data: recentSignals } = await supabase
@@ -536,24 +607,29 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
         eventBus.emit({
           eventId: generateEventId(),
           organizationId: ORGANIZATION_ID,
-          domain: signal.source_domain,
+          domain: signal.source_domain || 'unknown',
           entityType: 'signal',
-          entityId: signal.signal_type,
-          eventType: 'signal',
+          entityId: signal.signal_type || 'unknown',
+          eventType: 'signal' as any,
           payload: { signal_type: signal.signal_type, signal_value: signal.signal_value },
-          timestamp: new Date(signal.signal_timestamp),
+          timestamp: new Date(signal.signal_timestamp || Date.now()),
         });
       }
-      // Allow debounced event processing
       await new Promise(resolve => setTimeout(resolve, 100));
       const stats = anomalyMonitor.getStats();
       postConsolidationAnomalies = stats.totalAnomaliesDetected;
       log('INSULA', `Swept ${recentSignals.length} signals → ${postConsolidationAnomalies} anomalies across ${stats.windowsTracked} windows`);
+      if (postConsolidationCascadeAlerts > 0) {
+        log('THALAMUS', `${postConsolidationCascadeAlerts} cascade alert${postConsolidationCascadeAlerts !== 1 ? 's' : ''} generated`);
+        for (const a of cascadeAlerts.slice(0, 3)) {
+          log('THALAMUS', `  ⚡ [${a.severity}] ${a.triggerDomain} → ${a.predictedPath.join(' → ')}`);
+        }
+      }
     } else {
       log('INSULA', 'No recent signals to sweep');
     }
   } catch (err) {
-    logError('INSULA', 'Post-consolidation anomaly sweep failed (non-fatal)', err);
+    logError('INSULA', 'Post-consolidation anomaly/cascade sweep failed (non-fatal)', err);
   }
 
   // ── POST-LEARNING: Context Recording (Working Memory) ──

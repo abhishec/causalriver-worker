@@ -276,7 +276,7 @@ export function createFeedbackLoop(config: Partial<FeedbackLoopConfig> = {}) {
         .from('scheduled_verifications')
         .insert({
           prediction_id: predictionId,
-          scheduled_at: verifyAt.toISOString(),
+          scheduled_for: verifyAt.toISOString(),
           status: 'pending'
         });
     },
@@ -638,7 +638,7 @@ export function createFeedbackLoop(config: Partial<FeedbackLoopConfig> = {}) {
         .from('scheduled_verifications')
         .select('prediction_id')
         .eq('status', 'pending')
-        .lte('scheduled_at', now.toISOString());
+        .lte('scheduled_for', now.toISOString());
 
       if (pendingError || !pending) {
         return 0;

@@ -89,6 +89,14 @@ import {
 // Region #10: Insula (Anomaly Monitor) — detects anomalies during DMN scans
 import { createAnomalyMonitor } from '../packages/memory-stack/src/orchestrator/anomaly-monitor';
 import { createEventBus, generateEventId } from '../packages/memory-stack/src/causality/event-bus';
+// Region #10b: Thalamus (Cascade Alert Pipeline) — predicts cascade propagation paths
+import {
+  createCascadeAlertPipeline,
+  type CascadeAlertPayload,
+} from '../packages/memory-stack/src/orchestrator/cascade-alert-pipeline';
+import type { CachedRelationship } from '../packages/memory-stack/src/bridges/patterns-to-agents';
+// Prediction Recording — closes the learning feedback loop
+import { recordPrediction } from '../packages/memory-stack/src/learning/prediction-tracker';
 // Region #11: Working Memory (Context Manager) — enriches insights with org context
 import { createContextManager } from '../packages/memory-stack/src/orchestrator/context-manager';
 
@@ -326,19 +334,100 @@ async function scanOrg(
     }
   }
 
-  // ── Phase 7 WIRING: Anomaly Monitor (Insula) — detect anomalies in recent signals ──
+  // ── Phase 7 WIRING: Anomaly Monitor (Insula) + Cascade Alert Pipeline (Thalamus) ──
+  let cascadeAlertsGenerated = 0;
   try {
-    const eventBus = createEventBus();
+    const eventBus = createEventBus({ debounceMs: 0 });
     const anomalyMonitor = createAnomalyMonitor(eventBus, {
       threshold: 2.5,
       windowSize: 20,
+      minWindowSize: 5,
     });
 
+    // Build lightweight context enricher from causal graph
+    const { data: causalEdges } = await supabase
+      .from('causal_relationships_statistical')
+      .select('source_domain, target_domain, effect_size, granger_p_value, granger_f_statistic, optimal_lag_days, natural_language')
+      .eq('organization_id', orgId)
+      .eq('is_significant', true)
+      .order('effect_size', { ascending: false })
+      .limit(100);
+
+    const cachedRels: CachedRelationship[] = (causalEdges || []).map((e: any) => ({
+      sourceDomain: e.source_domain,
+      targetDomain: e.target_domain,
+      effectSize: e.effect_size || 0,
+      pValue: e.granger_p_value || 0,
+      fStatistic: e.granger_f_statistic || 0,
+      lagDays: e.optimal_lag_days || 0,
+      naturalLanguage: e.natural_language || '',
+      discoveredAt: new Date(),
+    }));
+
+    const contextEnricher = {
+      getContextForAgent: (_orgId: string, domain?: string) => ({
+        causalRelationships: domain
+          ? cachedRels.filter(r => r.sourceDomain === domain || r.targetDomain === domain)
+          : cachedRels,
+        patterns: [],
+      }),
+    };
+
+    // Create cascade alert pipeline — subscribes to cascade_trigger from anomaly monitor
+    const cascadeAlerts: CascadeAlertPayload[] = [];
+    createCascadeAlertPipeline(eventBus, contextEnricher, {
+      minSeverity: 30,
+      onAlert: async (alert) => {
+        cascadeAlerts.push(alert);
+        cascadeAlertsGenerated++;
+        // Persist to DB
+        try {
+          await supabase.from('cascade_alerts').insert({
+            organization_id: alert.organizationId, alert_id: alert.alertId,
+            severity: alert.severity, trigger_domain: alert.triggerDomain,
+            trigger_signal_type: alert.triggerSignalType, anomaly_score: alert.anomalyScore,
+            predicted_path: alert.predictedPath, expected_impacts: alert.expectedImpacts,
+            recommended_interventions: alert.recommendedInterventions,
+          });
+        } catch { /* non-critical */ }
+        // Record as prediction for Bayesian loop
+        try {
+          const { data: predRow } = await supabase.from('prediction_records').insert({
+            organization_id: alert.organizationId, domain: alert.triggerDomain,
+            entity_type: 'cascade', entity_id: alert.predictedPath.join('→'),
+            prediction_type: 'cascade_propagation', predicted_value: alert.anomalyScore,
+            predicted_outcome: `Cascade: ${alert.predictedPath.join(' → ')} [${alert.severity}]`,
+            confidence: alert.severity === 'critical' ? 0.9 : alert.severity === 'high' ? 0.7 : 0.5,
+          }).select('id').single();
+          if (predRow?.id) {
+            const vDate = new Date(); vDate.setDate(vDate.getDate() + (alert.expectedImpacts[0]?.expectedLagDays || 14));
+            await supabase.from('scheduled_verifications').insert({
+              organization_id: alert.organizationId, prediction_id: predRow.id,
+              verification_type: 'cascade_alert', scheduled_for: vDate.toISOString(), status: 'pending',
+            });
+          }
+        } catch { /* non-critical */ }
+        // Slack notification
+        if (SLACK_WEBHOOK_URL) {
+          const emoji = { critical: '🔴', high: '🟠', medium: '🟡', low: '🟢' }[alert.severity];
+          try {
+            await fetch(SLACK_WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ blocks: [
+                { type: 'header', text: { type: 'plain_text', text: `${emoji} Cascade Alert: ${alert.severity.toUpperCase()}`, emoji: true } },
+                { type: 'section', text: { type: 'mrkdwn', text: `*Trigger:* ${alert.triggerDomain} (${alert.triggerSignalType})\n*Predicted Path:* ${alert.predictedPath.join(' → ')}\n*Anomaly Score:* ${alert.anomalyScore.toFixed(1)}σ` } },
+              ] }),
+            });
+          } catch { /* non-critical */ }
+        }
+      },
+    });
+
+    // Feed recent signals as CausalEvent objects
     const { data: recentSignals } = await supabase
       .from('cross_domain_signals')
-      .select('signal_type, signal_value, source_domain, signal_timestamp')
+      .select('signal_type, signal_value, source_domain, signal_timestamp, entity_type, entity_id')
       .eq('organization_id', orgId)
-      .gte('signal_timestamp', new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString()) // Last 4h (DMN interval)
+      .gte('signal_timestamp', new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString())
       .order('signal_timestamp', { ascending: true })
       .limit(200);
 
@@ -347,21 +436,28 @@ async function scanOrg(
         eventBus.emit({
           eventId: generateEventId(),
           organizationId: orgId,
-          domain: signal.source_domain,
-          entityType: 'signal',
-          entityId: signal.signal_type,
-          eventType: 'signal',
+          domain: signal.source_domain || 'unknown',
+          entityType: signal.entity_type || 'metric',
+          entityId: signal.entity_id || signal.signal_type || 'unknown',
+          eventType: 'signal' as any,
           payload: { signal_type: signal.signal_type, signal_value: signal.signal_value },
-          timestamp: new Date(signal.signal_timestamp),
+          timestamp: new Date(signal.signal_timestamp || Date.now()),
         });
       }
+      await new Promise(resolve => setTimeout(resolve, 100));
       const stats = anomalyMonitor.getStats();
       if (stats.totalAnomaliesDetected > 0) {
         console.log(`    Insula: ${stats.totalAnomaliesDetected} anomalies detected in ${recentSignals.length} signals`);
       }
+      if (cascadeAlerts.length > 0) {
+        console.log(`    Thalamus: ${cascadeAlerts.length} cascade alert${cascadeAlerts.length !== 1 ? 's' : ''} generated`);
+        for (const a of cascadeAlerts.slice(0, 3)) {
+          console.log(`      ⚡ [${a.severity}] ${a.triggerDomain} → ${a.predictedPath.join(' → ')}`);
+        }
+      }
     }
   } catch (err: any) {
-    log('DMN', `Anomaly monitor failed: ${err.message}`);
+    log('DMN', `Anomaly/cascade detection failed: ${err.message}`);
   }
 
   // ── Phase 8 WIRING: Context Manager (Working Memory) — record insights for context ──
@@ -385,6 +481,47 @@ async function scanOrg(
     }
   } catch (err: any) {
     log('DMN', `Context manager failed: ${err.message}`);
+  }
+
+  // ── Phase 9 WIRING: Prediction Recording — close the learning feedback loop ──
+  try {
+    const predictableInsights = result.insights.filter(
+      i => i.importance >= 0.4 && (i.type === 'emerging_cascade' || i.type === 'prediction_opportunity' || i.type === 'unexpected_correlation')
+    );
+    if (predictableInsights.length > 0) {
+      const predictions = predictableInsights.map(insight => {
+        const score = impactResult.scores.find((s: any) => s.eventId === insight.id);
+        return recordPrediction({
+          organizationId: orgId, predictionType: insight.type,
+          entityType: 'domain', entityId: insight.domains[0] || 'cross-domain',
+          predictedProbability: insight.importance,
+          predictionWindowDays: insight.type === 'emerging_cascade' ? 14 : 30,
+          confidenceLower: Math.max(0, insight.importance - 0.2),
+          confidenceUpper: Math.min(1, insight.importance + 0.2),
+          modelVersion: 'dmn-v1',
+          featureSnapshot: { title: insight.title, domains: insight.domains, impactScore: score?.compositeScore, cascadeAlerts: cascadeAlertsGenerated },
+        });
+      });
+      const predRows = predictions.map(p => ({
+        organization_id: p.organizationId, domain: p.entityId, entity_type: p.entityType,
+        entity_id: p.entityId, prediction_type: p.predictionType,
+        predicted_value: p.predictedProbability, predicted_outcome: `DMN insight: ${(p.featureSnapshot?.title as string) || 'unknown'}`,
+        confidence: p.predictedProbability,
+      }));
+      const { data: insertedPreds, error: predError } = await supabase.from('prediction_records').insert(predRows).select('id');
+      if (!predError && insertedPreds && insertedPreds.length > 0) {
+        console.log(`    Predictions: ${insertedPreds.length} insight${insertedPreds.length !== 1 ? 's' : ''} recorded for future verification`);
+        const verificationRows = insertedPreds.map((pred, idx) => {
+          const p = predictions[idx];
+          const vDate = new Date(); vDate.setDate(vDate.getDate() + (p?.predictionWindowDays || 30));
+          return { organization_id: orgId, prediction_id: pred.id, verification_type: 'dmn_insight', scheduled_for: vDate.toISOString(), status: 'pending' };
+        });
+        const { error: verifError } = await supabase.from('scheduled_verifications').insert(verificationRows);
+        if (!verifError) console.log(`    Verifications: ${verificationRows.length} scheduled (${predictions[0]?.predictionWindowDays || 30}d window)`);
+      }
+    }
+  } catch (err: any) {
+    log('DMN', `Prediction recording failed: ${err.message}`);
   }
 
   return result;
