@@ -70,7 +70,7 @@ import { createImpactScorer, type ScorableEvent } from '../packages/memory-stack
 import { createAttentionManager, type AttentionDecision } from '../packages/memory-stack/src/orchestrator/attention-manager';
 // Region #10: Insula (Anomaly Monitor) — detects statistical anomalies in real-time signals
 import { createAnomalyMonitor } from '../packages/memory-stack/src/orchestrator/anomaly-monitor';
-import { createEventBus } from '../packages/memory-stack/src/orchestrator/event-bus';
+import { createEventBus } from '../packages/memory-stack/src/causality/event-bus';
 // Region #11: Working Memory (Context Manager) — tracks what the org is actively thinking about
 import { createContextManager } from '../packages/memory-stack/src/orchestrator/context-manager';
 
@@ -987,7 +987,7 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
     divider('STAGE 4.6: ANOMALY MONITOR (Insula)');
     const eventBus = createEventBus();
     const anomalyMonitor = createAnomalyMonitor(eventBus, {
-      zScoreThreshold: 2.5,
+      threshold: 2.5,
       windowSize: 20,
     });
 
@@ -1002,13 +1002,22 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
 
     if (recentSignals && recentSignals.length > 0) {
       for (const signal of recentSignals) {
-        eventBus.emit('signal:ingested', {
-          signalType: signal.signal_type,
-          value: signal.signal_value,
-          domain: signal.source_domain,
-          timestamp: signal.signal_timestamp,
+        eventBus.emit({
+          eventId: `trainer_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+          organizationId: ORGANIZATION_ID,
+          domain: signal.source_domain || 'unknown',
+          entityType: 'metric',
+          entityId: signal.signal_type || 'unknown',
+          eventType: 'signal' as any,
+          payload: {
+            signal_type: signal.signal_type,
+            signal_value: signal.signal_value,
+          },
+          timestamp: new Date(signal.signal_timestamp || Date.now()),
         });
       }
+      // Allow debounced event processing
+      await new Promise(resolve => setTimeout(resolve, 100));
       anomalyStats = anomalyMonitor.getStats();
       log('INSULA', `Fed ${recentSignals.length} signals → ${anomalyStats.totalAnomaliesDetected} anomalies detected across ${anomalyStats.windowsTracked} windows`);
     } else {

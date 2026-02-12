@@ -83,7 +83,7 @@ import { createUpstreamPromoter } from '../packages/memory-stack/src/federation/
 import { createBrainPipeline } from '../packages/memory-stack/src/orchestrator/brain-pipeline';
 // Region #10: Insula (Anomaly Monitor) — post-consolidation anomaly sweep
 import { createAnomalyMonitor } from '../packages/memory-stack/src/orchestrator/anomaly-monitor';
-import { createEventBus } from '../packages/memory-stack/src/orchestrator/event-bus';
+import { createEventBus } from '../packages/memory-stack/src/causality/event-bus';
 // Region #11: Working Memory (Context Manager) — record consolidation discoveries
 import { createContextManager } from '../packages/memory-stack/src/orchestrator/context-manager';
 
@@ -478,7 +478,7 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
   try {
     const eventBus = createEventBus();
     const anomalyMonitor = createAnomalyMonitor(eventBus, {
-      zScoreThreshold: 2.0, // Slightly more sensitive after consolidation
+      threshold: 2.0, // Slightly more sensitive after consolidation
       windowSize: 30,
     });
 
@@ -492,13 +492,22 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
 
     if (recentSignals && recentSignals.length > 0) {
       for (const signal of recentSignals) {
-        eventBus.emit('signal:ingested', {
-          signalType: signal.signal_type,
-          value: signal.signal_value,
-          domain: signal.source_domain,
-          timestamp: signal.signal_timestamp,
+        eventBus.emit({
+          eventId: `consol_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+          organizationId: ORGANIZATION_ID,
+          domain: signal.source_domain || 'unknown',
+          entityType: 'metric',
+          entityId: signal.signal_type || 'unknown',
+          eventType: 'signal' as any,
+          payload: {
+            signal_type: signal.signal_type,
+            signal_value: signal.signal_value,
+          },
+          timestamp: new Date(signal.signal_timestamp || Date.now()),
         });
       }
+      // Allow debounced event processing
+      await new Promise(resolve => setTimeout(resolve, 100));
       const stats = anomalyMonitor.getStats();
       postConsolidationAnomalies = stats.totalAnomaliesDetected;
       log('INSULA', `Swept ${recentSignals.length} signals → ${postConsolidationAnomalies} anomalies across ${stats.windowsTracked} windows`);
