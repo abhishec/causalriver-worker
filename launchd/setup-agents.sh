@@ -4,9 +4,11 @@
 # Installs (or uninstalls) the brain agents as macOS launchd services.
 # These agents run autonomously on your laptop:
 #
-#   1. Trainer (1 AM daily) — 5-stage autonomous training pipeline
-#   2. Consolidation (2 AM daily) — Brain sleep / deep consolidation
-#   3. DMN (every 4 hours) — Background insight scanning
+#   1. Trainer        (1 AM daily)          — 5-stage autonomous training pipeline
+#   2. Consolidation  (2 AM daily)          — Brain sleep / deep consolidation + ML learning
+#   3. DMN            (every 4 hours)       — Background insight scanning + anomaly detection
+#   4. Weekly         (Sunday 4 AM)         — Benchmark suite + brain health + edge pruning
+#   5. Monthly        (1st of month 3 AM)   — Full historical causal discovery + growth report
 #
 # Usage:
 #   ./launchd/setup-agents.sh install     # Install all agents
@@ -22,6 +24,8 @@ AGENTS=(
   "com.nexusbrain.trainer"
   "com.nexusbrain.consolidation"
   "com.nexusbrain.dmn"
+  "com.nexusbrain.weekly"
+  "com.nexusbrain.monthly"
 )
 
 install_agents() {
@@ -53,6 +57,8 @@ install_agents() {
   echo "  • Trainer:        Daily at 1:00 AM"
   echo "  • Consolidation:  Daily at 2:00 AM"
   echo "  • DMN:            Every 4 hours"
+  echo "  • Weekly:         Sunday at 4:00 AM"
+  echo "  • Monthly:        1st of month at 3:00 AM"
   echo ""
   echo "Logs: ~/Library/Logs/nexusbrain-*.log"
   echo ""

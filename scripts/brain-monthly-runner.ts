@@ -113,18 +113,15 @@ async function main() {
       try {
         const { runCausalDiscovery } = await import('../packages/memory-stack/src/causality/causal-discovery-runner');
 
-        // Convert to discovery format
+        // Convert to discovery format (runCausalDiscovery expects signal_timestamp, not timestamp)
         const signals = allSignals.map(s => ({
           source_domain: s.source_domain,
-          target_domain: s.source_domain,
           signal_type: s.signal_type,
-          signal_value: s.signal_value,
-          timestamp: s.signal_timestamp || s.created_at,
-          entity_type: s.entity_type,
-          entity_id: s.entity_id,
+          signal_value: typeof s.signal_value === 'number' ? s.signal_value : parseFloat(s.signal_value) || 0,
+          signal_timestamp: s.signal_timestamp ? new Date(s.signal_timestamp) : new Date(s.created_at),
         }));
 
-        discoveryResults = await runCausalDiscovery(signals, {
+        discoveryResults = await runCausalDiscovery(signals, ORGANIZATION_ID, {
           minSampleSize: 20,
           maxLagDays: 90, // Full 90-day lag for monthly (vs 30 for nightly)
           pValueThreshold: 0.05,

@@ -165,13 +165,14 @@ async function main() {
     const sixtyDaysAgo = new Date();
     sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
 
-    // Find edges that haven't been validated in 60 days AND have low confidence
+    // Find edges that haven't been validated in 60 days AND have low evidence weight
+    // Note: table uses 'evidence_weight' (default 1.0), not 'confidence'
     const { data: staleEdges, error: staleError } = await supabase
       .from('causal_relationships_statistical')
-      .select('id, source_domain, target_domain, confidence, updated_at')
+      .select('id, source_domain, target_domain, evidence_weight, updated_at')
       .eq('organization_id', ORGANIZATION_ID)
       .lt('updated_at', sixtyDaysAgo.toISOString())
-      .lt('confidence', 0.3);
+      .lt('evidence_weight', 0.3);
 
     if (staleError) {
       log('PRUNE', `Query failed: ${staleError.message}`);
@@ -190,7 +191,7 @@ async function main() {
       } else {
         log('PRUNE', `Pruned ${staleEdges.length} stale synapses from Hippocampus`);
         for (const edge of staleEdges.slice(0, 5)) {
-          log('PRUNE', `  - ${edge.source_domain} → ${edge.target_domain} (confidence: ${edge.confidence})`);
+          log('PRUNE', `  - ${edge.source_domain} → ${edge.target_domain} (evidence_weight: ${edge.evidence_weight})`);
         }
         if (staleEdges.length > 5) {
           log('PRUNE', `  ... and ${staleEdges.length - 5} more`);
