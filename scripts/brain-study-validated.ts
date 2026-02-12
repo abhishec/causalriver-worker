@@ -578,6 +578,7 @@ async function main(): Promise<void> {
     bayesianUpdater: modules.bayesianUpdater,
     contrastiveLearner: modules.contrastiveLearner,
     brainTrainer: modules.brainTrainer,
+    embeddingTuner: modules.embeddingTuner,
   });
   log(`  Before: ${beforeSnapshot.posteriors.size} posteriors, ${beforeSnapshot.contrastiveExamples} examples, ${beforeSnapshot.graphEdgeCount} graph edges`);
 
@@ -647,6 +648,7 @@ async function main(): Promise<void> {
     bayesianUpdater: modules.bayesianUpdater,
     contrastiveLearner: modules.contrastiveLearner,
     brainTrainer: modules.brainTrainer,
+    embeddingTuner: modules.embeddingTuner,
   });
   log(`  After: ${afterSnapshot.posteriors.size} posteriors, ${afterSnapshot.contrastiveExamples} examples, ${afterSnapshot.graphEdgeCount} graph edges`);
 

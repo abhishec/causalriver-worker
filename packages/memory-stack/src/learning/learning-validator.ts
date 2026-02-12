@@ -169,7 +169,10 @@ export function takeBrainSnapshot(modules: {
     credibleInterval: [number, number];
   }> };
   contrastiveLearner?: { getStats: () => { accuracy: number; examplesSeen: number } };
-  embeddingTuner?: { getStats?: () => { currentLoss: number } };
+  embeddingTuner?: {
+    getStats?: () => { currentLoss: number };
+    getTransform?: () => { lossHistory: number[] };
+  };
   brainTrainer?: { getTrainedGraph: () => { edges: unknown[] | undefined } | undefined };
 }): BrainSnapshot {
   const posteriors = new Map<string, PosteriorSnapshot>();
@@ -197,8 +200,16 @@ export function takeBrainSnapshot(modules: {
   // Capture contrastive learner state
   const contrastiveStats = modules.contrastiveLearner?.getStats() || { accuracy: 0, examplesSeen: 0 };
 
-  // Capture embedding tuner state
-  const embeddingLoss = modules.embeddingTuner?.getStats?.()?.currentLoss ?? 1.0;
+  // Capture embedding tuner state — try getStats() first, fall back to getTransform()
+  let embeddingLoss = 1.0;
+  if (modules.embeddingTuner?.getStats) {
+    embeddingLoss = modules.embeddingTuner.getStats()?.currentLoss ?? 1.0;
+  } else if (modules.embeddingTuner?.getTransform) {
+    const transform = modules.embeddingTuner.getTransform();
+    if (transform.lossHistory.length > 0) {
+      embeddingLoss = transform.lossHistory[transform.lossHistory.length - 1];
+    }
+  }
 
   // Capture graph state
   let graphEdgeCount = 0;
