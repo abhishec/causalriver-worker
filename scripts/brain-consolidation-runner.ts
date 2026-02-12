@@ -80,6 +80,11 @@ import { createAttentionPolicyLearner } from '../packages/memory-stack/src/learn
 import { createPublicDataLearner } from '../packages/memory-stack/src/learning/public-data-learner';
 import { createFastPathCompiler } from '../packages/memory-stack/src/orchestrator/fast-path-compiler';
 import { createBrainPipeline } from '../packages/memory-stack/src/orchestrator/brain-pipeline';
+// Region #10: Insula (Anomaly Monitor) — post-consolidation anomaly sweep
+import { createAnomalyMonitor } from '../packages/memory-stack/src/orchestrator/anomaly-monitor';
+import { createEventBus } from '../packages/memory-stack/src/orchestrator/event-bus';
+// Region #11: Working Memory (Context Manager) — record consolidation discoveries
+import { createContextManager } from '../packages/memory-stack/src/orchestrator/context-manager';
 
 // ============================================================================
 // CONFIGURATION
@@ -462,6 +467,72 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
     log('CEREBELLUM', 'All fast-paths invalidated — copilot will recompile on next query');
   } catch (err) {
     logError('CEREBELLUM', 'Fast-path invalidation failed (non-fatal)', err);
+  }
+
+  // ── POST-LEARNING: Anomaly Sweep (Insula) ──
+  // After consolidation changes the graph, sweep recent signals for anomalies
+  // that the new causal structure might reveal
+  divider('INSULA: POST-CONSOLIDATION ANOMALY SWEEP');
+  let postConsolidationAnomalies = 0;
+  try {
+    const eventBus = createEventBus();
+    const anomalyMonitor = createAnomalyMonitor(eventBus, {
+      zScoreThreshold: 2.0, // Slightly more sensitive after consolidation
+      windowSize: 30,
+    });
+
+    const { data: recentSignals } = await supabase
+      .from('cross_domain_signals')
+      .select('signal_type, signal_value, source_domain, signal_timestamp')
+      .eq('organization_id', ORGANIZATION_ID)
+      .gte('signal_timestamp', new Date(Date.now() - LOOKBACK_HOURS * 60 * 60 * 1000).toISOString())
+      .order('signal_timestamp', { ascending: true })
+      .limit(1000);
+
+    if (recentSignals && recentSignals.length > 0) {
+      for (const signal of recentSignals) {
+        eventBus.emit('signal:ingested', {
+          signalType: signal.signal_type,
+          value: signal.signal_value,
+          domain: signal.source_domain,
+          timestamp: signal.signal_timestamp,
+        });
+      }
+      const stats = anomalyMonitor.getStats();
+      postConsolidationAnomalies = stats.totalAnomaliesDetected;
+      log('INSULA', `Swept ${recentSignals.length} signals → ${postConsolidationAnomalies} anomalies across ${stats.windowsTracked} windows`);
+    } else {
+      log('INSULA', 'No recent signals to sweep');
+    }
+  } catch (err) {
+    logError('INSULA', 'Post-consolidation anomaly sweep failed (non-fatal)', err);
+  }
+
+  // ── POST-LEARNING: Context Recording (Working Memory) ──
+  // Record consolidation discoveries into Working Memory so subsequent
+  // copilot queries and DMN scans have awareness of what was just learned
+  divider('WORKING MEMORY: RECORDING CONSOLIDATION DISCOVERIES');
+  try {
+    const contextManager = createContextManager({
+      supabase,
+      organizationId: ORGANIZATION_ID,
+    });
+
+    const allDiscoveriesForContext = results.flatMap(r => r.report.discoveries);
+    for (const discovery of allDiscoveriesForContext) {
+      contextManager.recordInsight({
+        id: `consolidation-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        type: 'what_changed',
+        domains: [], // Discoveries are cross-domain
+        title: discovery.substring(0, 80),
+        explanation: discovery,
+        importance: 0.7,
+        discoveredAt: new Date().toISOString(),
+      });
+    }
+    log('MEMORY', `Recorded ${allDiscoveriesForContext.length} consolidation discoveries into Working Memory`);
+  } catch (err) {
+    logError('MEMORY', 'Context recording failed (non-fatal)', err);
   }
 
   // ── POST-LEARNING: Brain Health Check (Neurological Exam) ──

@@ -86,6 +86,12 @@ import {
   createAttentionManager,
 } from '../packages/memory-stack/src/orchestrator/attention-manager';
 
+// Region #10: Insula (Anomaly Monitor) — detects anomalies during DMN scans
+import { createAnomalyMonitor } from '../packages/memory-stack/src/orchestrator/anomaly-monitor';
+import { createEventBus } from '../packages/memory-stack/src/orchestrator/event-bus';
+// Region #11: Working Memory (Context Manager) — enriches insights with org context
+import { createContextManager } from '../packages/memory-stack/src/orchestrator/context-manager';
+
 // ============================================================================
 // CONFIGURATION
 // ============================================================================
@@ -318,6 +324,71 @@ async function scanOrg(
     } catch (err: any) {
       log('DMN', `What-If simulation failed: ${err.message}`);
     }
+  }
+
+  // ── Phase 7 WIRING: Anomaly Monitor (Insula) — detect anomalies in recent signals ──
+  try {
+    const eventBus = createEventBus();
+    const anomalyMonitor = createAnomalyMonitor(eventBus, {
+      zScoreThreshold: 2.5,
+      windowSize: 20,
+    });
+
+    const { data: recentSignals } = await supabase
+      .from('cross_domain_signals')
+      .select('signal_type, signal_value, source_domain, signal_timestamp')
+      .eq('organization_id', orgId)
+      .gte('signal_timestamp', new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString()) // Last 4h (DMN interval)
+      .order('signal_timestamp', { ascending: true })
+      .limit(200);
+
+    if (recentSignals && recentSignals.length > 0) {
+      for (const signal of recentSignals) {
+        eventBus.emit('signal:ingested', {
+          signalType: signal.signal_type,
+          value: signal.signal_value,
+          domain: signal.source_domain,
+          timestamp: signal.signal_timestamp,
+        });
+      }
+      const stats = anomalyMonitor.getStats();
+      if (stats.totalAnomaliesDetected > 0) {
+        console.log(`    Insula: ${stats.totalAnomaliesDetected} anomalies detected in ${recentSignals.length} signals`);
+      }
+    }
+  } catch (err: any) {
+    log('DMN', `Anomaly monitor failed: ${err.message}`);
+  }
+
+  // ── Phase 8 WIRING: Context Manager (Working Memory) — record insights for context ──
+  try {
+    const contextManager = createContextManager({
+      supabase,
+      organizationId: orgId,
+    });
+
+    // Record DMN insights into working memory so subsequent queries are context-aware
+    for (const insight of result.insights) {
+      contextManager.recordInsight({
+        id: insight.id,
+        type: insight.type as any,
+        domains: insight.domains,
+        title: insight.title,
+        explanation: insight.explanation,
+        importance: insight.importance,
+        discoveredAt: insight.discoveredAt,
+      });
+    }
+
+    if (result.insights.length > 0) {
+      const orgContext = contextManager.getOrgContext();
+      const hotDomains = orgContext.hotDomains || [];
+      if (hotDomains.length > 0) {
+        console.log(`    Working Memory: ${result.insights.length} insights stored, hot domains: ${hotDomains.map((d: any) => d.domain || d).join(', ')}`);
+      }
+    }
+  } catch (err: any) {
+    log('DMN', `Context manager failed: ${err.message}`);
   }
 
   return result;

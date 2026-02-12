@@ -68,6 +68,11 @@ import { createConsolidationEngine, type ConsolidationResult } from '../packages
 import { createLLMTrainingPipeline, type LLMTrainingResult } from '../packages/memory-stack/src/learning/llm-training-pipeline';
 import { createImpactScorer, type ScorableEvent } from '../packages/memory-stack/src/orchestrator/impact-scorer';
 import { createAttentionManager, type AttentionDecision } from '../packages/memory-stack/src/orchestrator/attention-manager';
+// Region #10: Insula (Anomaly Monitor) — detects statistical anomalies in real-time signals
+import { createAnomalyMonitor } from '../packages/memory-stack/src/orchestrator/anomaly-monitor';
+import { createEventBus } from '../packages/memory-stack/src/orchestrator/event-bus';
+// Region #11: Working Memory (Context Manager) — tracks what the org is actively thinking about
+import { createContextManager } from '../packages/memory-stack/src/orchestrator/context-manager';
 
 // ── Connector Imports ──
 // Slack connector is imported dynamically in syncConnectors() to avoid
@@ -976,6 +981,88 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
   // Stage 4.5: Impact Scoring + Attention Routing (Amygdala + Thalamus)
   const scoringResult = await scoreAndRouteInsights(supabase);
 
+  // Stage 4.6: Anomaly Monitoring (Insula) — detect statistical anomalies
+  let anomalyStats = { totalAnomaliesDetected: 0, windowsTracked: 0 };
+  try {
+    divider('STAGE 4.6: ANOMALY MONITOR (Insula)');
+    const eventBus = createEventBus();
+    const anomalyMonitor = createAnomalyMonitor(eventBus, {
+      zScoreThreshold: 2.5,
+      windowSize: 20,
+    });
+
+    // Feed recent signals into the anomaly monitor via the event bus
+    const { data: recentSignals } = await supabase
+      .from('cross_domain_signals')
+      .select('signal_type, signal_value, source_domain, signal_timestamp')
+      .eq('organization_id', ORGANIZATION_ID)
+      .gte('signal_timestamp', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+      .order('signal_timestamp', { ascending: true })
+      .limit(500);
+
+    if (recentSignals && recentSignals.length > 0) {
+      for (const signal of recentSignals) {
+        eventBus.emit('signal:ingested', {
+          signalType: signal.signal_type,
+          value: signal.signal_value,
+          domain: signal.source_domain,
+          timestamp: signal.signal_timestamp,
+        });
+      }
+      anomalyStats = anomalyMonitor.getStats();
+      log('INSULA', `Fed ${recentSignals.length} signals → ${anomalyStats.totalAnomaliesDetected} anomalies detected across ${anomalyStats.windowsTracked} windows`);
+    } else {
+      log('INSULA', 'No recent signals to monitor');
+    }
+  } catch (err) {
+    logError('INSULA', 'Anomaly monitoring failed (non-fatal)', err);
+  }
+
+  // Stage 4.7: Context Tracking (Working Memory) — record what domains are hot
+  let contextRecorded = 0;
+  try {
+    divider('STAGE 4.7: CONTEXT TRACKING (Working Memory)');
+    const contextManager = createContextManager({
+      supabase,
+      organizationId: ORGANIZATION_ID,
+    });
+
+    // Record insights from scoring as "hot" domains for working memory
+    const { data: recentInsights } = await supabase
+      .from('ai_memory')
+      .select('domain, memory_type, content, created_at')
+      .eq('organization_id', ORGANIZATION_ID)
+      .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+      .in('memory_type', ['anomaly', 'pattern_discovery', 'new_relationship'])
+      .limit(30);
+
+    if (recentInsights && recentInsights.length > 0) {
+      for (const insight of recentInsights) {
+        contextManager.recordInsight({
+          id: `trainer-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+          type: insight.memory_type as any,
+          domains: [insight.domain],
+          title: insight.content.substring(0, 80),
+          explanation: insight.content,
+          importance: 0.6,
+          discoveredAt: insight.created_at,
+        });
+        contextRecorded++;
+      }
+      log('MEMORY', `Recorded ${contextRecorded} recent insights into Working Memory`);
+
+      // Log hot domains
+      const orgContext = contextManager.getOrgContext();
+      if (orgContext.hotDomains && orgContext.hotDomains.length > 0) {
+        log('MEMORY', `Hot domains: ${orgContext.hotDomains.map((d: any) => d.domain || d).join(', ')}`);
+      }
+    } else {
+      log('MEMORY', 'No recent insights for context tracking');
+    }
+  } catch (err) {
+    logError('MEMORY', 'Context tracking failed (non-fatal)', err);
+  }
+
   // Stage 5: Consolidate ("Brain Sleep")
   const consolidationResult = await consolidateBrain(supabase);
 
@@ -992,6 +1079,8 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
   log('DONE', `Learning cycle: ${learningResult.cycleCompleted ? '✓' : '✗'}`);
   log('DONE', `Daily jobs: ${learningResult.dailyJobsCompleted ? '✓' : '✗'}`);
   log('DONE', `Impact scoring: ${scoringResult.insightsScored} scored, ${scoringResult.immediateAlerts} immediate alerts`);
+  log('DONE', `Anomaly monitor (Insula): ${anomalyStats.totalAnomaliesDetected} anomalies across ${anomalyStats.windowsTracked} windows`);
+  log('DONE', `Context tracking (Working Memory): ${contextRecorded} insights recorded`);
   log('DONE', `Consolidation: ${consolidationResult.completed ? '✓' : '✗'}`);
 
   if (consolidationResult.discoveries.length > 0) {
