@@ -6,12 +6,12 @@ applications:
         preBuild:
           commands:
             - npm install -g pnpm@9
-            - pnpm install --frozen-lockfile
+            - pnpm install
         build:
           commands:
             - pnpm run build
       artifacts:
-        baseDirectory: .next
+        baseDirectory: out
         files:
           - "**/*"
       cache:
