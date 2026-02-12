@@ -55,3 +55,11 @@ export {
   type PillarScore, // deprecated alias for RegionScore
   type BenchmarkScores,
 } from './maturity-evaluator';
+
+// Runtime Metrics Collector (4 runtime brain regions)
+export {
+  collectRuntimeMetrics,
+  runtimeMetricsToBenchmarkScores,
+  type RuntimeMetrics,
+  type RuntimeMetricsConfig,
+} from './runtime-metrics-collector';

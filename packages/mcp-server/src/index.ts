@@ -33,6 +33,8 @@ import {
   handleAnalyzePR,
   handleTeamActivity,
   handleSearchCIFailures,
+  handleCollaborationNetwork,
+  handleIngestADR,
 } from './handlers.js';
 
 // ============================================================================
@@ -215,6 +217,35 @@ async function main(): Promise<void> {
       days_lookback: z.number().optional().describe('Days to look back (default: 30)'),
     },
     async (args) => handleSearchCIFailures(client, args),
+  );
+
+  // ── TOOL: nexus_collaboration_network ──────────────────────────────────
+
+  server.tool(
+    'nexus_collaboration_network',
+    'Get cross-team collaboration patterns: who works with whom, bridge contributors connecting teams, and interaction frequency. Powers UC6 (Cross-Team Visibility).',
+    {
+      contributor: z.string().optional().describe('Focus on a specific contributor\'s network'),
+      team: z.string().optional().describe('Focus on a specific team\'s collaborations'),
+      days: z.number().optional().describe('Lookback period in days (default: 30)'),
+    },
+    async (args) => handleCollaborationNetwork(client, args),
+  );
+
+  // ── TOOL: nexus_ingest_adr ──────────────────────────────────────────────
+
+  server.tool(
+    'nexus_ingest_adr',
+    'Index an Architectural Decision Record (ADR) into brain memory. ADRs capture "why" decisions were made — the most valuable knowledge for onboarding and future decisions. Powers UC4 (Knowledge Retention).',
+    {
+      title: z.string().describe('ADR title (e.g., "ADR-001: Use PostgreSQL for primary datastore")'),
+      content: z.string().describe('Full ADR content including context, decision, consequences'),
+      status: z.enum(['proposed', 'accepted', 'deprecated', 'superseded']).optional().describe('ADR status (default: accepted)'),
+      tags: z.string().optional().describe('Comma-separated tags (e.g., "database,infrastructure")'),
+      author: z.string().optional().describe('Author of the ADR'),
+      date: z.string().optional().describe('Date of the decision (ISO format)'),
+    },
+    async (args) => handleIngestADR(client, args),
   );
 
   // ── RESOURCE: nexusbrain://relationships ───────────────────────────────

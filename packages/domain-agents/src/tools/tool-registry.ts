@@ -348,6 +348,34 @@ export const ENGINEERING_TOOLS: Tool[] = [
       },
       required: ['query']
     }
+  },
+  {
+    name: 'get_collaboration_network',
+    description: 'Get cross-team collaboration patterns: who works with whom, bridge contributors connecting teams, team interaction frequency, and collaboration bottlenecks. Use for org health, onboarding ("who should I work with?"), and leadership visibility.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        contributor: { type: 'string', description: 'Optional: focus on a specific contributor\'s network' },
+        team: { type: 'string', description: 'Optional: focus on a specific team\'s collaborations' },
+        days: { type: 'string', description: 'Lookback period in days (default: 30)' }
+      }
+    }
+  },
+  {
+    name: 'ingest_adr',
+    description: 'Index an Architectural Decision Record (ADR) into brain memory. ADRs capture "why" decisions were made — the most valuable knowledge for onboarding and future decision-making. Stores as searchable memory with topic extraction.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        title: { type: 'string', description: 'ADR title (e.g., "ADR-001: Use PostgreSQL for primary datastore")' },
+        content: { type: 'string', description: 'Full ADR content including context, decision, consequences' },
+        status: { type: 'string', description: 'ADR status: proposed, accepted, deprecated, superseded (default: accepted)' },
+        tags: { type: 'string', description: 'Comma-separated tags (e.g., "database,infrastructure,performance")' },
+        author: { type: 'string', description: 'Author of the ADR' },
+        date: { type: 'string', description: 'Date of the decision (ISO format)' }
+      },
+      required: ['title', 'content']
+    }
   }
 ];
 
@@ -606,6 +634,12 @@ export async function executeAgentTool(
 
     case 'search_ci_failures':
       return await searchCIFailures(supabase, organizationId, toolInput);
+
+    case 'get_collaboration_network':
+      return await getCollaborationNetwork(supabase, organizationId, toolInput);
+
+    case 'ingest_adr':
+      return await ingestADR(supabase, organizationId, toolInput);
 
     default:
       throw new Error(`Unknown tool: ${toolName}`);
@@ -1316,8 +1350,17 @@ async function queryExpertise(
 }
 
 /**
- * UC1/UC2: Semantic search across code symbols and documentation.
+ * UC1/UC2: Enhanced semantic search across code symbols and documentation.
  * Powers: "how does auth work?", "where is payment processing?"
+ *
+ * Scoring model (TF-IDF-inspired, multi-field):
+ *  - Exact entity_id match: +10 (e.g., query = "AuthService" matches entity_id)
+ *  - Title/function name match: +5 per term
+ *  - File path match: +3 per path segment hit
+ *  - Content body match: +1 per term (reduced weight for verbose bodies)
+ *  - Language filter bonus: +2 if language matches
+ *  - Inverse frequency boost: rare terms across corpus score higher
+ *  - importance_score baseline from indexer
  */
 async function searchCodeContext(
   supabase: ReturnType<typeof createClient>,
@@ -1326,6 +1369,7 @@ async function searchCodeContext(
 ) {
   const query = input.query;
   const limit = parseInt(input.limit || '10', 10);
+  const languageFilter = input.language?.toLowerCase();
 
   // Search entity_embeddings for code_symbol entities
   const { data, error } = await supabase
@@ -1334,56 +1378,188 @@ async function searchCodeContext(
     .eq('organization_id', organizationId)
     .eq('entity_type', 'code_symbol')
     .order('importance_score', { ascending: false })
-    .limit(200); // Fetch pool for text matching
+    .limit(300); // Larger pool for better recall
 
   if (error) throw error;
 
-  // Simple keyword matching (semantic vector search requires embedding generation)
-  const queryTerms = query.toLowerCase().split(/\s+/);
-  const scored = (data || []).map((item: any) => {
-    const content = (item.content || '').toLowerCase();
-    const meta = JSON.stringify(item.metadata || {}).toLowerCase();
-    const combined = content + ' ' + meta;
+  // Also search training_pack entities (runbooks, ADRs, documentation)
+  const { data: docData } = await supabase
+    .from('entity_embeddings')
+    .select('entity_id, content, metadata, importance_score')
+    .eq('organization_id', organizationId)
+    .in('entity_type', ['training_pack', 'documentation', 'adr'])
+    .order('importance_score', { ascending: false })
+    .limit(100);
 
-    let score = item.importance_score || 0;
+  // Also search ai_memory for learned architectural patterns
+  const { data: memoryData } = await supabase
+    .from('ai_memory')
+    .select('id, memory_type, title, content, metadata, confidence')
+    .eq('organization_id', organizationId)
+    .in('memory_type', ['pattern', 'fact', 'runbook', 'adr'])
+    .order('confidence', { ascending: false })
+    .limit(50);
+
+  // Build term frequency map for IDF-like scoring
+  const allItems = [...(data || []), ...(docData || [])];
+  const termDocFreq = new Map<string, number>();
+  const queryTerms = query.toLowerCase().split(/\s+/).filter((t: string) => t.length >= 2);
+
+  for (const item of allItems) {
+    const combined = ((item.content || '') + ' ' + JSON.stringify(item.metadata || {})).toLowerCase();
     for (const term of queryTerms) {
-      if (combined.includes(term)) score += 1.0;
+      if (combined.includes(term)) {
+        termDocFreq.set(term, (termDocFreq.get(term) || 0) + 1);
+      }
     }
-    return { ...item, relevance_score: score };
+  }
+
+  const totalDocs = Math.max(allItems.length, 1);
+
+  // Score function with multi-field weighting
+  function scoreItem(item: any, isDoc = false): number {
+    const entityId = (item.entity_id || '').toLowerCase();
+    const content = (item.content || '').toLowerCase();
+    const meta = item.metadata || {};
+    const metaStr = JSON.stringify(meta).toLowerCase();
+    const filePath = (meta.file_path || meta.filePath || '').toLowerCase();
+    const funcName = (meta.function_name || meta.name || meta.symbol || '').toLowerCase();
+    const lang = (meta.language || '').toLowerCase();
+    const title = (meta.title || item.title || '').toLowerCase();
+
+    let score = (item.importance_score || item.confidence || 0) * 0.5; // Baseline
+
+    for (const term of queryTerms) {
+      // IDF weight: rare terms score higher
+      const df = termDocFreq.get(term) || 1;
+      const idf = Math.log(totalDocs / df + 1);
+
+      // Entity ID / function name exact match (highest signal)
+      if (entityId.includes(term) || funcName.includes(term)) {
+        score += 5 * idf;
+      }
+
+      // Title match (ADRs, runbooks)
+      if (title.includes(term)) {
+        score += 4 * idf;
+      }
+
+      // File path match
+      if (filePath.includes(term)) {
+        score += 3 * idf;
+      }
+
+      // Content body match (lower weight — content is verbose)
+      if (content.includes(term)) {
+        score += 1.0 * idf;
+      }
+
+      // Metadata fields match (tags, labels, etc.)
+      if (metaStr.includes(term) && !content.includes(term) && !entityId.includes(term)) {
+        score += 1.5 * idf;
+      }
+    }
+
+    // Exact phrase match bonus
+    if (content.includes(query.toLowerCase()) || entityId.includes(query.toLowerCase())) {
+      score += 8;
+    }
+
+    // Language filter bonus
+    if (languageFilter && lang === languageFilter) {
+      score += 2;
+    } else if (languageFilter && lang && lang !== languageFilter) {
+      score *= 0.3; // Penalize wrong language
+    }
+
+    // Documentation type bonus (ADRs, runbooks are high-value for onboarding)
+    if (isDoc) {
+      score *= 1.2;
+    }
+
+    return score;
+  }
+
+  const scoredCode = (data || []).map((item: any) => ({
+    ...item,
+    relevance_score: scoreItem(item),
+    source_type: 'code',
+  }));
+
+  const scoredDocs = (docData || []).map((item: any) => ({
+    ...item,
+    relevance_score: scoreItem(item, true),
+    source_type: 'documentation',
+  }));
+
+  // Score memory items similarly
+  const scoredMemory = (memoryData || []).map((item: any) => {
+    const combined = ((item.title || '') + ' ' + (item.content || '') + ' ' + JSON.stringify(item.metadata || {})).toLowerCase();
+    let score = (item.confidence || 0.5) * 0.5;
+    for (const term of queryTerms) {
+      if (combined.includes(term)) score += 2.0;
+      if ((item.title || '').toLowerCase().includes(term)) score += 3.0;
+    }
+    return {
+      entity_id: item.id,
+      content: item.content,
+      metadata: { ...item.metadata, memory_type: item.memory_type, title: item.title },
+      relevance_score: score,
+      source_type: item.memory_type === 'adr' ? 'adr' : 'memory',
+    };
   });
 
-  const results = scored
-    .filter((s: any) => s.relevance_score > 0)
+  // Merge all sources and rank
+  const allScored = [...scoredCode, ...scoredDocs, ...scoredMemory]
+    .filter((s: any) => s.relevance_score > 0.1)
     .sort((a: any, b: any) => b.relevance_score - a.relevance_score)
     .slice(0, limit);
 
-  // Also search for related signals from engineering domain
+  // Also search for related engineering signals
   const { data: signals } = await supabase
     .from('cross_domain_signals')
     .select('signal_type, signal_value, metadata, created_at')
     .eq('organization_id', organizationId)
     .eq('source_domain', 'engineering')
     .order('created_at', { ascending: false })
-    .limit(20);
+    .limit(30);
 
   const relatedSignals = (signals || []).filter((s: any) => {
     const meta = JSON.stringify(s.metadata || '').toLowerCase();
     return queryTerms.some((term: string) => meta.includes(term));
   }).slice(0, 5);
 
+  // Find experts who know about this topic
+  const { data: experts } = await supabase
+    .from('contributor_expertise')
+    .select('contributor_id, contributor_name, topic, strength, evidence_type')
+    .eq('organization_id', organizationId)
+    .ilike('topic', `%${queryTerms[0] || query}%`)
+    .order('strength', { ascending: false })
+    .limit(3);
+
   return {
-    code_results: results.map((r: any) => ({
+    code_results: allScored.map((r: any) => ({
       entity_id: r.entity_id,
       content: r.content?.substring(0, 500),
       metadata: r.metadata,
-      relevance: r.relevance_score
+      relevance: parseFloat(r.relevance_score.toFixed(2)),
+      source_type: r.source_type,
     })),
     related_signals: relatedSignals,
-    total_code_results: results.length,
+    related_experts: (experts || []).map((e: any) => ({
+      name: e.contributor_name || e.contributor_id,
+      topic: e.topic,
+      strength: e.strength,
+      evidence: e.evidence_type,
+    })),
+    total_code_results: allScored.filter((r: any) => r.source_type === 'code').length,
+    total_doc_results: allScored.filter((r: any) => r.source_type !== 'code').length,
     total_related_signals: relatedSignals.length,
-    message: results.length > 0
-      ? `Found ${results.length} code symbol(s) matching "${query}".`
-      : `No indexed code found for "${query}". Code indexing may need to run first.`
+    total_related_experts: (experts || []).length,
+    message: allScored.length > 0
+      ? `Found ${allScored.length} result(s) for "${query}" (${allScored.filter((r: any) => r.source_type === 'code').length} code, ${allScored.filter((r: any) => r.source_type !== 'code').length} docs/ADRs/memory).${(experts || []).length > 0 ? ` Top expert: ${(experts || [])[0]?.contributor_name || (experts || [])[0]?.contributor_id}` : ''}`
+      : `No indexed content found for "${query}". Code indexing or documentation ingestion may need to run first.`
   };
 }
 
@@ -1921,5 +2097,296 @@ async function searchCIFailures(
     message: matched.length > 0
       ? `Found ${matched.length} similar failure(s) in the last ${daysLookback} days.${resolvingPRs.length > 0 ? ` ${resolvingPRs.length} PR(s) may have fixed similar issues.` : ''}${(chains || []).length > 0 ? ` ${(chains || []).length} causal chain(s) detected.` : ''}`
       : `No matching failures found for "${query}" in the last ${daysLookback} days. Total CI failures in period: ${results.length}.`
+  };
+}
+
+/**
+ * UC6: Collaboration network — cross-team visibility, bridge contributors.
+ * Powers: "Who works with the frontend team?", "Show me collaboration patterns"
+ */
+async function getCollaborationNetwork(
+  supabase: ReturnType<typeof createClient>,
+  organizationId: string,
+  input: Record<string, any>
+) {
+  const contributor = input.contributor;
+  const team = input.team;
+  const days = parseInt(input.days || '30', 10);
+  const cutoffDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+
+  // 1. Get collaboration edges from cross_domain_signals (persisted by collaboration graph)
+  const { data: collabEdges } = await supabase
+    .from('cross_domain_signals')
+    .select('signal_value, metadata, created_at')
+    .eq('organization_id', organizationId)
+    .eq('signal_type', 'collaboration_edge')
+    .eq('entity_type', 'collaboration')
+    .gte('created_at', cutoffDate)
+    .order('signal_value', { ascending: false })
+    .limit(200);
+
+  let edges = (collabEdges || []).map((e: any) => ({
+    contributor_a: e.metadata?.contributor_a,
+    contributor_b: e.metadata?.contributor_b,
+    interaction_type: e.metadata?.interaction_type,
+    weight: e.signal_value,
+    count: e.metadata?.count || 1,
+    team_a: e.metadata?.team_a,
+    team_b: e.metadata?.team_b,
+    contexts: e.metadata?.contexts || [],
+    last_interaction_at: e.metadata?.last_interaction_at,
+  }));
+
+  // 2. Dynamically build collaboration from recent engineering signals if no persisted edges
+  if (edges.length === 0) {
+    const { data: engSignals } = await supabase
+      .from('cross_domain_signals')
+      .select('signal_type, metadata, created_at')
+      .eq('organization_id', organizationId)
+      .eq('source_domain', 'engineering')
+      .in('signal_type', ['pr_merged', 'pr_review_submitted', 'pr_opened'])
+      .gte('created_at', cutoffDate)
+      .limit(200);
+
+    // Derive collaboration from PR signals (author ↔ reviewer)
+    const dynamicEdges = new Map<string, any>();
+    for (const s of (engSignals || [])) {
+      const meta = s.metadata || {};
+      const author = meta.author;
+      const reviewer = meta.reviewer;
+      if (author && reviewer && author !== reviewer) {
+        const [a, b] = author < reviewer ? [author, reviewer] : [reviewer, author];
+        const key = `${a}::${b}`;
+        const existing = dynamicEdges.get(key);
+        if (existing) {
+          existing.count++;
+        } else {
+          dynamicEdges.set(key, {
+            contributor_a: a,
+            contributor_b: b,
+            interaction_type: 'code_review',
+            weight: 0.5,
+            count: 1,
+            team_a: null,
+            team_b: null,
+            contexts: [],
+            last_interaction_at: s.created_at,
+          });
+        }
+      }
+    }
+    edges = Array.from(dynamicEdges.values());
+  }
+
+  // 3. Filter by contributor or team
+  if (contributor) {
+    edges = edges.filter((e: any) =>
+      e.contributor_a === contributor || e.contributor_b === contributor
+    );
+  }
+  if (team) {
+    edges = edges.filter((e: any) =>
+      e.team_a === team || e.team_b === team
+    );
+  }
+
+  // 4. Compute network stats
+  const contributors = new Set<string>();
+  const teams = new Set<string>();
+  let crossTeam = 0;
+  for (const e of edges) {
+    if (e.contributor_a) contributors.add(e.contributor_a);
+    if (e.contributor_b) contributors.add(e.contributor_b);
+    if (e.team_a) teams.add(e.team_a);
+    if (e.team_b) teams.add(e.team_b);
+    if (e.team_a && e.team_b && e.team_a !== e.team_b) crossTeam++;
+  }
+
+  // 5. Find bridge contributors
+  const bridgeMap = new Map<string, Set<string>>();
+  for (const e of edges) {
+    if (!e.team_a || !e.team_b || e.team_a === e.team_b) continue;
+    for (const c of [e.contributor_a, e.contributor_b]) {
+      if (!c) continue;
+      if (!bridgeMap.has(c)) bridgeMap.set(c, new Set());
+      if (e.team_a) bridgeMap.get(c)!.add(e.team_a);
+      if (e.team_b) bridgeMap.get(c)!.add(e.team_b);
+    }
+  }
+  const bridges = Array.from(bridgeMap.entries())
+    .filter(([, t]) => t.size >= 2)
+    .map(([c, t]) => ({ contributor: c, teams: Array.from(t), teamCount: t.size }))
+    .sort((a, b) => b.teamCount - a.teamCount)
+    .slice(0, 5);
+
+  // 6. Team pair summary
+  const teamPairs = new Map<string, { count: number; interactions: number }>();
+  for (const e of edges) {
+    if (!e.team_a || !e.team_b) continue;
+    const [tA, tB] = e.team_a < e.team_b ? [e.team_a, e.team_b] : [e.team_b, e.team_a];
+    const key = `${tA} ↔ ${tB}`;
+    const existing = teamPairs.get(key);
+    if (existing) {
+      existing.count++;
+      existing.interactions += e.count;
+    } else {
+      teamPairs.set(key, { count: 1, interactions: e.count });
+    }
+  }
+  const teamSummary = Array.from(teamPairs.entries())
+    .map(([pair, data]) => ({ teams: pair, unique_pairs: data.count, total_interactions: data.interactions }))
+    .sort((a, b) => b.total_interactions - a.total_interactions);
+
+  return {
+    edges: edges.slice(0, 50).map((e: any) => ({
+      contributor_a: e.contributor_a,
+      contributor_b: e.contributor_b,
+      type: e.interaction_type,
+      weight: e.weight,
+      count: e.count,
+      team_a: e.team_a,
+      team_b: e.team_b,
+    })),
+    network_stats: {
+      total_edges: edges.length,
+      unique_contributors: contributors.size,
+      unique_teams: teams.size,
+      cross_team_edges: crossTeam,
+    },
+    bridge_contributors: bridges,
+    team_collaboration: teamSummary,
+    message: edges.length > 0
+      ? `Collaboration network: ${edges.length} edges, ${contributors.size} contributors, ${teams.size} teams.${crossTeam > 0 ? ` ${crossTeam} cross-team interactions found.` : ''}${bridges.length > 0 ? ` Bridge connectors: ${bridges.map(b => b.contributor).join(', ')}` : ''}`
+      : 'No collaboration data found for this period. Collaboration is tracked from PR reviews, Slack threads, and incident responses.',
+  };
+}
+
+/**
+ * UC4: Ingest an Architectural Decision Record into brain memory.
+ * Powers: "Why did we choose PostgreSQL?", "What's our authentication strategy?"
+ * ADRs are the HIGHEST VALUE knowledge for onboarding and future decision-making.
+ */
+async function ingestADR(
+  supabase: ReturnType<typeof createClient>,
+  organizationId: string,
+  input: Record<string, any>
+) {
+  const title = input.title;
+  const content = input.content;
+  const status = input.status || 'accepted';
+  const tags = input.tags ? input.tags.split(',').map((t: string) => t.trim()) : [];
+  const author = input.author;
+  const date = input.date || new Date().toISOString();
+
+  // 1. Extract topics from ADR content for searchability
+  const words = content.toLowerCase().split(/\s+/);
+  const stopWords = new Set(['the', 'a', 'an', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'shall', 'can', 'to', 'of', 'in', 'for', 'on', 'with', 'at', 'by', 'from', 'as', 'into', 'through', 'during', 'before', 'after', 'above', 'below', 'that', 'this', 'these', 'those', 'and', 'but', 'or', 'not', 'no', 'we', 'our', 'it', 'its', 'they', 'their']);
+  const wordCounts = new Map<string, number>();
+  for (const w of words) {
+    const clean = w.replace(/[^a-z0-9-_]/g, '');
+    if (clean.length >= 3 && !stopWords.has(clean)) {
+      wordCounts.set(clean, (wordCounts.get(clean) || 0) + 1);
+    }
+  }
+  const extractedTopics = Array.from(wordCounts.entries())
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 10)
+    .map(([w]) => w);
+
+  // 2. Store in ai_memory (long-term brain memory, searchable)
+  const memoryId = `adr-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+  const { error: memError } = await supabase
+    .from('ai_memory')
+    .upsert({
+      id: memoryId,
+      organization_id: organizationId,
+      memory_type: 'adr',
+      title,
+      content: content.substring(0, 10000), // Cap at 10K chars
+      metadata: {
+        status,
+        tags,
+        author,
+        decision_date: date,
+        extracted_topics: extractedTopics,
+        source: 'manual_ingestion',
+      },
+      confidence: status === 'accepted' ? 0.95 : status === 'proposed' ? 0.6 : 0.3,
+      severity: 'info',
+    });
+
+  if (memError) throw memError;
+
+  // 3. Also store as entity_embedding for code search discoverability
+  const { error: embedError } = await supabase
+    .from('entity_embeddings')
+    .upsert({
+      organization_id: organizationId,
+      entity_type: 'adr',
+      entity_id: memoryId,
+      content: `${title}\n\n${content.substring(0, 5000)}`,
+      metadata: {
+        title,
+        status,
+        tags,
+        author,
+        decision_date: date,
+        topics: extractedTopics,
+      },
+      importance_score: status === 'accepted' ? 0.9 : 0.5,
+    }, {
+      onConflict: 'organization_id,entity_type,entity_id',
+    });
+
+  if (embedError) throw embedError;
+
+  // 4. Emit a signal so causal discovery knows about ADR ingestion
+  await supabase
+    .from('cross_domain_signals')
+    .insert({
+      organization_id: organizationId,
+      source_domain: 'engineering',
+      signal_type: 'adr_ingested',
+      signal_value: 1,
+      entity_type: 'adr',
+      entity_id: memoryId,
+      metadata: {
+        title,
+        status,
+        tags,
+        author,
+        topics: extractedTopics,
+      },
+    });
+
+  // 5. If author is provided, record expertise
+  if (author) {
+    for (const topic of extractedTopics.slice(0, 5)) {
+      await supabase
+        .from('contributor_expertise')
+        .upsert({
+          organization_id: organizationId,
+          contributor_id: author,
+          contributor_name: author,
+          topic,
+          evidence_type: 'documentation',
+          strength: 0.15,
+          evidence_count: 1,
+          last_activity_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        }, {
+          onConflict: 'organization_id,contributor_id,topic,evidence_type',
+        });
+    }
+  }
+
+  return {
+    success: true,
+    adr_id: memoryId,
+    title,
+    status,
+    extracted_topics: extractedTopics,
+    tags,
+    message: `Indexed ADR "${title}" (${status}). Extracted ${extractedTopics.length} topics: ${extractedTopics.slice(0, 5).join(', ')}. This ADR is now searchable via search_code_context and will enhance onboarding queries.${author ? ` ${author} credited with documentation expertise.` : ''}`,
   };
 }

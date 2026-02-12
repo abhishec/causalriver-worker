@@ -505,6 +505,94 @@ export async function handleSearchCIFailures(
   }
 }
 
+/**
+ * Handle nexus_collaboration_network — cross-team collaboration patterns.
+ * Powers UC6 (Cross-Team Visibility).
+ */
+export async function handleCollaborationNetwork(
+  client: NexusClient,
+  args: { contributor?: string; team?: string; days?: number },
+): Promise<McpTextResult> {
+  try {
+    const days = args.days || 30;
+    const focus = args.contributor
+      ? `for contributor "${args.contributor}"`
+      : args.team
+        ? `for team "${args.team}"`
+        : 'across the entire organization';
+
+    const result = await client.query(
+      `Show collaboration patterns ${focus} over the last ${days} days. Who works together most? Which teams interact? Who are the bridge connectors between teams?`,
+      { domain: 'engineering' },
+    );
+
+    const parts: string[] = [];
+    parts.push(`🤝 Collaboration Network ${focus} (last ${days} days)\n`);
+    parts.push(result.answer);
+
+    if (result.context.memories.length > 0) {
+      parts.push('\n--- Supporting Evidence ---');
+      result.context.memories.forEach(m => {
+        parts.push(`  ${m.content || 'collaboration data'}`);
+      });
+    }
+
+    return { content: [{ type: 'text', text: parts.join('\n') }] };
+  } catch (err) {
+    return handleError(err);
+  }
+}
+
+/**
+ * Handle nexus_ingest_adr — index an architectural decision record.
+ * Powers UC4 (Knowledge Retention).
+ */
+export async function handleIngestADR(
+  client: NexusClient,
+  args: { title: string; content: string; status?: string; tags?: string; author?: string; date?: string },
+): Promise<McpTextResult> {
+  try {
+    // Ingest the ADR as signals to the brain
+    const tags = args.tags ? args.tags.split(',').map(t => t.trim()) : [];
+    const signals = [
+      {
+        source_domain: 'engineering',
+        signal_type: 'adr_ingested',
+        signal_value: 1,
+        entity_type: 'adr',
+        entity_id: `adr-${Date.now()}`,
+        metadata: {
+          title: args.title,
+          content: args.content.substring(0, 5000),
+          status: args.status || 'accepted',
+          tags,
+          author: args.author,
+          decision_date: args.date || new Date().toISOString(),
+        },
+      },
+    ];
+
+    await client.ingest(signals);
+
+    // Also query brain to acknowledge and contextualize
+    const result = await client.query(
+      `An architectural decision record has been ingested: "${args.title}". Status: ${args.status || 'accepted'}. Tags: ${tags.join(', ') || 'none'}. This knowledge should be available for future onboarding and decision-making queries.`,
+      { domain: 'engineering' },
+    );
+
+    const parts: string[] = [];
+    parts.push(`📋 ADR Indexed: "${args.title}"\n`);
+    parts.push(`Status: ${args.status || 'accepted'}`);
+    if (tags.length) parts.push(`Tags: ${tags.join(', ')}`);
+    if (args.author) parts.push(`Author: ${args.author}`);
+    parts.push('\n' + result.answer);
+
+    return { content: [{ type: 'text', text: parts.join('\n') }] };
+  } catch (err) {
+    return handleError(err);
+  }
+}
+
 // ============================================================================
 // PROMPT HANDLER
 // ============================================================================

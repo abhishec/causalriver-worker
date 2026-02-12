@@ -73,6 +73,13 @@ export interface BenchmarkRunnerConfig {
     anomalyPointsPerSeries?: number;
     anomalyAnomaliesPerSeries?: number;
   };
+  /** Runtime metrics from the 4 runtime brain regions (Cerebellum, Amygdala, Corpus Callosum, LTP) */
+  runtimeMetrics?: {
+    cerebellum?: { cacheHitRate: number; precompiledPaths: number };
+    amygdala?: { scoringAccuracy: number; priorityAlignment: number };
+    corpusCallosum?: { federationHealth: number; regionSyncRate: number };
+    ltp?: { bayesianConvergence: number; embeddingLoss: number; contrastiveAccuracy: number };
+  };
 }
 
 export interface CausalBenchmarkResult {
@@ -1128,6 +1135,11 @@ export function createBenchmarkRunner(config: Partial<BenchmarkRunnerConfig> = {
           avgLagError: r.avgLagError,
         })),
         discoveryMethod: discoveryConfig.method || 'federated',
+        // Runtime brain region metrics (Cerebellum, Amygdala, Corpus Callosum, LTP)
+        ...(config.runtimeMetrics?.cerebellum && { cerebellum: config.runtimeMetrics.cerebellum }),
+        ...(config.runtimeMetrics?.amygdala && { amygdala: config.runtimeMetrics.amygdala }),
+        ...(config.runtimeMetrics?.corpusCallosum && { corpusCallosum: config.runtimeMetrics.corpusCallosum }),
+        ...(config.runtimeMetrics?.ltp && { ltp: config.runtimeMetrics.ltp }),
       };
 
       const maturity = evaluator.evaluateMaturity(benchmarkScores);
