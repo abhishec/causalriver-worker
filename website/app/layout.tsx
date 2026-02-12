@@ -16,35 +16,36 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "NexusBrain - Causal Intelligence Engine for AI Agents",
+    default: "NexusBrain - A Living Brain for Your Apps | usebrainos.com",
     template: "%s | NexusBrain",
   },
   description:
-    "A causal intelligence engine that gives AI agents persistent, self-improving memory. 8 statistical methods, zero runtime dependencies, TypeScript. Benchmarked against ICLR 2025 datasets.",
+    "A self-improving causal intelligence engine with 11 brain regions. It perceives, reasons, dreams, and gets smarter every day. Connect your app — it inherits a brain.",
   keywords: [
     "causal intelligence",
     "AI memory",
-    "Granger causality",
-    "TypeScript SDK",
+    "living brain",
+    "self-improving AI",
     "AI agents",
     "causal discovery",
-    "organizational intelligence",
+    "brain infrastructure",
     "NexusBrain",
+    "usebrainos",
   ],
   authors: [{ name: "Monetize Organisation" }],
   openGraph: {
-    title: "NexusBrain - Causal Intelligence Engine for AI Agents",
+    title: "NexusBrain - A Living Brain for Your Apps",
     description:
-      "Give your AI agents a brain that remembers, discovers cause-and-effect, and gets smarter without retraining.",
+      "A self-improving causal intelligence engine. It perceives, reasons, dreams, and gets smarter every day. Connect your app — it inherits a brain.",
     url: "https://usebrainos.com",
     siteName: "NexusBrain",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "NexusBrain - Causal Intelligence Engine for AI Agents",
+    title: "NexusBrain - A Living Brain for Your Apps",
     description:
-      "Give your AI agents a brain that remembers, discovers cause-and-effect, and gets smarter without retraining.",
+      "A self-improving causal intelligence engine. It perceives, reasons, dreams, and gets smarter every day. Connect your app — it inherits a brain.",
   },
   robots: {
     index: true,

@@ -10,6 +10,11 @@
   --surface-light: #27272a;
   --border: #3f3f46;
   --muted: #a1a1aa;
+  --neural-green: #10b981;
+  --neural-cyan: #06b6d4;
+  --neural-violet: #8b5cf6;
+  --neural-amber: #f59e0b;
+  --neural-rose: #f43f5e;
 }
 
 @theme inline {
@@ -52,12 +57,21 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Glow effect for hero */
+/* Hero brain glow — organic, breathing */
 .glow {
   background: radial-gradient(
     ellipse 600px 400px at 50% 0%,
     rgba(139, 92, 246, 0.15),
     transparent
+  );
+}
+
+.glow-brain {
+  background: radial-gradient(
+    ellipse 800px 600px at 50% 40%,
+    rgba(16, 185, 129, 0.08),
+    rgba(139, 92, 246, 0.05) 40%,
+    transparent 70%
   );
 }
 
@@ -68,7 +82,7 @@ html {
   border: 1px solid transparent;
 }
 
-/* Pulse animation for stats */
+/* Neural pulse — the brain is alive */
 @keyframes pulse-glow {
   0%, 100% { opacity: 0.4; }
   50% { opacity: 1; }
@@ -77,3 +91,101 @@ html {
 .animate-pulse-glow {
   animation: pulse-glow 3s ease-in-out infinite;
 }
+
+/* Neural fire — synapse flash */
+@keyframes neural-fire {
+  0% { opacity: 0; transform: scale(0.8); }
+  20% { opacity: 1; transform: scale(1.2); }
+  100% { opacity: 0; transform: scale(0.8); }
+}
+
+.animate-neural-fire {
+  animation: neural-fire 2s ease-in-out infinite;
+}
+
+/* Flowing connection between brain regions */
+@keyframes connection-flow {
+  0% { stroke-dashoffset: 20; }
+  100% { stroke-dashoffset: 0; }
+}
+
+.animate-connection-flow {
+  stroke-dasharray: 4 4;
+  animation: connection-flow 1.5s linear infinite;
+}
+
+/* Breathing ring around active brain regions */
+@keyframes breathe {
+  0%, 100% { transform: scale(1); opacity: 0.3; }
+  50% { transform: scale(1.15); opacity: 0.8; }
+}
+
+.animate-breathe {
+  animation: breathe 4s ease-in-out infinite;
+}
+
+/* Counter tick up animation */
+@keyframes count-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-count-up {
+  animation: count-up 0.4s ease-out;
+}
+
+/* Soft ripple for new discoveries */
+@keyframes ripple {
+  0% { transform: scale(0.5); opacity: 0.8; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+
+.animate-ripple {
+  animation: ripple 2s ease-out;
+}
+
+/* Graph line draw */
+@keyframes draw-line {
+  from { stroke-dashoffset: 1000; }
+  to { stroke-dashoffset: 0; }
+}
+
+.animate-draw-line {
+  stroke-dasharray: 1000;
+  animation: draw-line 3s ease-out forwards;
+}
+
+/* Shimmer for loading states */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(139, 92, 246, 0.05) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+/* Typewriter effect for live brain feed */
+@keyframes typewriter-cursor {
+  0%, 100% { border-color: var(--neural-green); }
+  50% { border-color: transparent; }
+}
+
+.animate-typewriter-cursor {
+  border-right: 2px solid var(--neural-green);
+  animation: typewriter-cursor 1s step-end infinite;
+}
+
+/* Region glow — for active brain areas */
+.region-glow-green { box-shadow: 0 0 20px rgba(16, 185, 129, 0.3), 0 0 40px rgba(16, 185, 129, 0.1); }
+.region-glow-cyan { box-shadow: 0 0 20px rgba(6, 182, 212, 0.3), 0 0 40px rgba(6, 182, 212, 0.1); }
+.region-glow-violet { box-shadow: 0 0 20px rgba(139, 92, 246, 0.3), 0 0 40px rgba(139, 92, 246, 0.1); }
+.region-glow-amber { box-shadow: 0 0 20px rgba(245, 158, 11, 0.3), 0 0 40px rgba(245, 158, 11, 0.1); }
+.region-glow-rose { box-shadow: 0 0 20px rgba(244, 63, 94, 0.3), 0 0 40px rgba(244, 63, 94, 0.1); }

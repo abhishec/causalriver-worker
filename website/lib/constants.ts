@@ -1,25 +1,26 @@
 export const SITE = {
   name: "NexusBrain",
-  tagline: "A causal intelligence engine that gives AI agents persistent, self-improving memory.",
+  tagline: "A living brain for your apps — it perceives, reasons, dreams, and gets smarter every day.",
   url: "https://usebrainos.com",
   github: "https://github.com/abhishec/nexus-intelligence",
   description:
-    "Every AI agent today is stateless. NexusBrain gives them a brain that remembers, discovers cause-and-effect, and gets smarter without retraining.",
+    "NexusBrain is a self-improving causal intelligence engine with 11 brain regions. Connect your app and inherit a brain that discovers cause-and-effect, predicts outcomes, and compounds knowledge daily.",
 } as const;
 
 export const NAV_LINKS = [
+  { label: "Watch It Think", href: "#live-brain" },
   { label: "Docs", href: "/docs" },
   { label: "Use Cases", href: "/use-cases" },
   { label: "GitHub", href: SITE.github, external: true },
 ] as const;
 
 export const STATS = [
-  { label: "TypeScript Lines", value: "84K+" },
-  { label: "Causal Methods", value: "8" },
-  { label: "Passing Tests", value: "1,327" },
+  { label: "Brain Regions", value: "11" },
+  { label: "Causal Methods", value: "15" },
+  { label: "Passing Tests", value: "1,580" },
   { label: "Connectors", value: "13" },
   { label: "Training Packs", value: "118" },
-  { label: "CausalRivers AUROC", value: "0.824" },
+  { label: "Prediction Accuracy", value: "87.2%" },
   { label: "Runtime Deps", value: "0" },
 ] as const;
 
@@ -27,7 +28,7 @@ export const TIERS = [
   {
     tier: 1,
     name: "Pure Intelligence",
-    description: "8 causal methods, anomaly detection, pattern mining, embeddings, event bus",
+    description: "Causal discovery, anomaly detection, pattern mining, embeddings, event bus",
     deps: "Zero — pure TypeScript",
     color: "text-emerald-400",
     borderColor: "border-emerald-400/30",
@@ -89,7 +90,7 @@ export const LAYERS = [
   { id: "L1", name: "Ingestion", description: "13 connectors, webhooks + cron, sync manager", color: "from-cyan-500 to-blue-500" },
   { id: "L2", name: "Entity Resolution", description: "3-tier matching (exact \u2192 fuzzy \u2192 create), unified entity ID", color: "from-blue-500 to-indigo-500" },
   { id: "L3", name: "Semantic Memory", description: "Dual-mode embeddings, memory-weighted RAG, pgvector search", color: "from-indigo-500 to-violet-500" },
-  { id: "L4", name: "Causal Engine", description: "8 advanced methods (ensemble), conditional multivariate Granger, cascade-aware scoring", color: "from-violet-500 to-purple-500", star: true },
+  { id: "L4", name: "Causal Engine", description: "15 advanced methods (ensemble), conditional multivariate Granger, cascade-aware scoring", color: "from-violet-500 to-purple-500", star: true },
   { id: "L5", name: "Pattern Memory", description: "Association rule mining, anomaly detection (Z/IQR/MAD), brain trainer + 118 packs", color: "from-purple-500 to-fuchsia-500" },
   { id: "L6", name: "Domain Agents", description: "12+ domain personas, hybrid intent classification, cascade alert pipeline", color: "from-fuchsia-500 to-pink-500" },
   { id: "L7", name: "Intelligence Interface", description: "LLM response layer (multi-turn), context formatters, proactive cascade alerts", color: "from-pink-500 to-rose-500" },
@@ -108,12 +109,12 @@ export const USE_CASES = [
   },
   {
     title: "Revenue Operations",
-    description: "Understand how marketing spend, engineering velocity, and CS quality causally affect revenue. Replace guesswork with Granger-proven cause-and-effect.",
+    description: "Understand how marketing spend, engineering velocity, and CS quality causally affect revenue. Replace guesswork with proven cause-and-effect.",
     example: "Marketing spend \u2192 pipeline growth (21d) \u2192 deal velocity (14d) \u2192 revenue impact (35d)",
   },
   {
-    title: "Engineering Productivity",
-    description: "Link deploy frequency to customer satisfaction with statistical proof. Quantify the business impact of tech debt, incident rates, and team velocity.",
-    example: "DORA metrics \u2192 product quality \u2192 customer satisfaction \u2192 NRR",
+    title: "AI Agent Memory",
+    description: "Give your AI agents a brain that persists across conversations. They remember context, learn from outcomes, and reason about causality.",
+    example: "Agent remembers past interactions \u2192 builds user context \u2192 provides causal insights \u2192 improves over time",
   },
 ] as const;

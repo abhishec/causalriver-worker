@@ -13,11 +13,20 @@ export function CTA() {
           viewport={{ once: true }}
           className="gradient-border mx-auto max-w-3xl rounded-2xl p-12 text-center"
         >
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5">
+            <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse-glow" />
+            <span className="text-sm text-emerald-400">The brain is waiting for you</span>
+          </div>
+
           <h2 className="mb-4 text-3xl font-bold md:text-4xl">
-            Ready to give your agents a brain?
+            Give Your App a{" "}
+            <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+              Living Brain
+            </span>
           </h2>
           <p className="mb-8 text-lg text-muted">
-            Start with zero dependencies. Add persistence, connectors, and LLM copilot when you need them.
+            Start with zero dependencies. The brain learns from your data automatically.
+            Every day it gets smarter. Every cycle compounds intelligence.
           </p>
 
           {/* Install command */}
@@ -31,9 +40,9 @@ export function CTA() {
           <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
             <a
               href="/docs/quickstart"
-              className="inline-flex h-12 items-center justify-center rounded-lg bg-accent px-8 text-sm font-medium text-white transition-colors hover:bg-accent-dark"
+              className="inline-flex h-12 items-center justify-center rounded-lg bg-gradient-to-r from-emerald-500 to-cyan-500 px-8 text-sm font-medium text-white transition-all hover:from-emerald-600 hover:to-cyan-600 hover:shadow-lg hover:shadow-emerald-500/20"
             >
-              Quickstart Guide
+              Start Building
             </a>
             <a
               href={SITE.github}
