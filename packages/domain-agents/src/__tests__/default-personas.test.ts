@@ -2,9 +2,9 @@
  * Nexus Domain Agents - Default Personas Tests
  *
  * Comprehensive tests for the default persona definitions including:
- * - All 14 persona constants and their required fields
+ * - All 20 persona constants and their required fields
  * - DEFAULT_PERSONAS registry completeness
- * - Personas with promptTemplate (cfo, cro, vpCS, vpAM, vpServices, ceo, nexusAI)
+ * - Personas with promptTemplate (cfo, cro, vpCS, vpAM, vpServices, ceo, nexusAI, cto, vpEngineering, sreLead, vpEngineeringOps)
  * - Non-empty focusMetrics for all personas
  * - Lookup functions: getPersona, getAllPersonas
  * - Domain functions: getPrimaryPersonaForDomain, getPersonasForDomain
@@ -25,6 +25,12 @@ import {
   vpProductPersona,
   vpMarketingPersona,
   vpPeoplePersona,
+  ctoPersona,
+  vpEngineeringPersona,
+  engineeringManagerPersona,
+  techLeadPersona,
+  sreLeadPersona,
+  vpEngineeringOpsPersona,
   ceoPersona,
   cooPersona,
   nexusAIPersona,
@@ -36,7 +42,7 @@ import {
 } from '../personas/default-personas';
 
 // ============================================================================
-// ALL 14 PERSONA CONSTANTS
+// ALL 20 PERSONA CONSTANTS
 // ============================================================================
 
 const allPersonaExports = [
@@ -51,6 +57,12 @@ const allPersonaExports = [
   { ref: vpProductPersona, expectedId: 'vp-product', expectedDomain: 'product' },
   { ref: vpMarketingPersona, expectedId: 'vp-marketing', expectedDomain: 'marketing' },
   { ref: vpPeoplePersona, expectedId: 'vp-people', expectedDomain: 'people' },
+  { ref: ctoPersona, expectedId: 'cto', expectedDomain: 'engineering' },
+  { ref: vpEngineeringPersona, expectedId: 'vp-engineering', expectedDomain: 'engineering' },
+  { ref: engineeringManagerPersona, expectedId: 'engineering-manager', expectedDomain: 'engineering' },
+  { ref: techLeadPersona, expectedId: 'tech-lead', expectedDomain: 'engineering' },
+  { ref: sreLeadPersona, expectedId: 'sre-lead', expectedDomain: 'engineering' },
+  { ref: vpEngineeringOpsPersona, expectedId: 'vp-engineering-ops', expectedDomain: 'engineering' },
   { ref: ceoPersona, expectedId: 'ceo', expectedDomain: 'executive' },
   { ref: cooPersona, expectedId: 'coo', expectedDomain: 'executive' },
   { ref: nexusAIPersona, expectedId: 'nexus-ai', expectedDomain: 'executive' },
@@ -116,6 +128,10 @@ describe('Default Personas - promptTemplate', () => {
     { ref: vpCSPersona, expectedId: 'vp-cs' },
     { ref: vpAMPersona, expectedId: 'vp-am' },
     { ref: vpServicesPersona, expectedId: 'vp-services' },
+    { ref: ctoPersona, expectedId: 'cto' },
+    { ref: vpEngineeringPersona, expectedId: 'vp-engineering' },
+    { ref: sreLeadPersona, expectedId: 'sre-lead' },
+    { ref: vpEngineeringOpsPersona, expectedId: 'vp-engineering-ops' },
     { ref: ceoPersona, expectedId: 'ceo' },
     { ref: nexusAIPersona, expectedId: 'nexus-ai' },
   ];
@@ -127,6 +143,8 @@ describe('Default Personas - promptTemplate', () => {
     { ref: vpProductPersona, expectedId: 'vp-product' },
     { ref: vpMarketingPersona, expectedId: 'vp-marketing' },
     { ref: vpPeoplePersona, expectedId: 'vp-people' },
+    { ref: engineeringManagerPersona, expectedId: 'engineering-manager' },
+    { ref: techLeadPersona, expectedId: 'tech-lead' },
     { ref: cooPersona, expectedId: 'coo' },
   ];
 
@@ -146,10 +164,10 @@ describe('Default Personas - promptTemplate', () => {
     },
   );
 
-  it('exactly 8 personas have promptTemplate defined', () => {
+  it('exactly 11 personas have promptTemplate defined', () => {
     const allPersonas = getAllPersonas();
     const withTemplate = allPersonas.filter((p) => p.promptTemplate !== undefined);
-    expect(withTemplate).toHaveLength(8);
+    expect(withTemplate).toHaveLength(11);
   });
 });
 
@@ -158,9 +176,9 @@ describe('Default Personas - promptTemplate', () => {
 // ============================================================================
 
 describe('Default Personas - DEFAULT_PERSONAS Registry', () => {
-  it('contains exactly 15 entries', () => {
+  it('contains exactly 20 entries', () => {
     const keys = Object.keys(DEFAULT_PERSONAS);
-    expect(keys).toHaveLength(15);
+    expect(keys).toHaveLength(20);
   });
 
   it('contains all expected persona IDs as keys', () => {
@@ -173,6 +191,7 @@ describe('Default Personas - DEFAULT_PERSONAS Registry', () => {
       'vp-product',
       'vp-marketing',
       'vp-people',
+      'cto', 'vp-engineering', 'engineering-manager', 'tech-lead', 'sre-lead',
       'vp-engineering-ops',
       'ceo', 'coo', 'nexus-ai',
     ];
@@ -191,6 +210,12 @@ describe('Default Personas - DEFAULT_PERSONAS Registry', () => {
     expect(DEFAULT_PERSONAS['vp-product']).toBe(vpProductPersona);
     expect(DEFAULT_PERSONAS['vp-marketing']).toBe(vpMarketingPersona);
     expect(DEFAULT_PERSONAS['vp-people']).toBe(vpPeoplePersona);
+    expect(DEFAULT_PERSONAS['cto']).toBe(ctoPersona);
+    expect(DEFAULT_PERSONAS['vp-engineering']).toBe(vpEngineeringPersona);
+    expect(DEFAULT_PERSONAS['engineering-manager']).toBe(engineeringManagerPersona);
+    expect(DEFAULT_PERSONAS['tech-lead']).toBe(techLeadPersona);
+    expect(DEFAULT_PERSONAS['sre-lead']).toBe(sreLeadPersona);
+    expect(DEFAULT_PERSONAS['vp-engineering-ops']).toBe(vpEngineeringOpsPersona);
     expect(DEFAULT_PERSONAS['ceo']).toBe(ceoPersona);
     expect(DEFAULT_PERSONAS['coo']).toBe(cooPersona);
     expect(DEFAULT_PERSONAS['nexus-ai']).toBe(nexusAIPersona);
@@ -211,6 +236,7 @@ describe('Default Personas - getPrimaryPersonaForDomain', () => {
     { domain: 'product', expectedId: 'vp-product' },
     { domain: 'marketing', expectedId: 'vp-marketing' },
     { domain: 'people', expectedId: 'vp-people' },
+    { domain: 'engineering', expectedId: 'cto' },
     { domain: 'executive', expectedId: 'nexus-ai' },
   ])(
     'returns $expectedId for domain "$domain"',
@@ -244,6 +270,7 @@ describe('Default Personas - getPersonasForDomain', () => {
     { domain: 'product', expectedCount: 1, expectedIds: ['vp-product'] },
     { domain: 'marketing', expectedCount: 1, expectedIds: ['vp-marketing'] },
     { domain: 'people', expectedCount: 1, expectedIds: ['vp-people'] },
+    { domain: 'engineering', expectedCount: 6, expectedIds: ['cto', 'vp-engineering', 'engineering-manager', 'tech-lead', 'sre-lead', 'vp-engineering-ops'] },
     { domain: 'executive', expectedCount: 3, expectedIds: ['ceo', 'coo', 'nexus-ai'] },
   ])(
     'returns $expectedCount persona(s) for domain "$domain"',
@@ -261,7 +288,7 @@ describe('Default Personas - getPersonasForDomain', () => {
   });
 
   it('all returned personas have the requested domain', () => {
-    const domains = ['finance', 'revenue', 'cs', 'am', 'services', 'product', 'marketing', 'people', 'executive'];
+    const domains = ['finance', 'revenue', 'cs', 'am', 'services', 'product', 'marketing', 'people', 'engineering', 'executive'];
     for (const domain of domains) {
       const personas = getPersonasForDomain(domain);
       personas.forEach((p) => {
@@ -303,16 +330,16 @@ describe('Default Personas - getPersona', () => {
 // ============================================================================
 
 describe('Default Personas - getAllPersonas', () => {
-  it('returns an array of exactly 15 personas', () => {
+  it('returns an array of exactly 20 personas', () => {
     const personas = getAllPersonas();
-    expect(personas).toHaveLength(15);
+    expect(personas).toHaveLength(20);
   });
 
   it('returns all persona IDs without duplicates', () => {
     const personas = getAllPersonas();
     const ids = personas.map((p) => p.id);
     const uniqueIds = [...new Set(ids)];
-    expect(uniqueIds).toHaveLength(15);
+    expect(uniqueIds).toHaveLength(20);
   });
 
   it('includes every expected persona by ID', () => {
@@ -327,6 +354,7 @@ describe('Default Personas - getAllPersonas', () => {
       'vp-product',
       'vp-marketing',
       'vp-people',
+      'cto', 'vp-engineering', 'engineering-manager', 'tech-lead', 'sre-lead',
       'vp-engineering-ops',
       'ceo', 'coo', 'nexus-ai',
     ].sort();
@@ -354,17 +382,17 @@ describe('Default Personas - Cross-cutting Consistency', () => {
   });
 
   it('every domain has at least one persona', () => {
-    const expectedDomains = ['finance', 'revenue', 'cs', 'am', 'services', 'product', 'marketing', 'people', 'executive'];
+    const expectedDomains = ['finance', 'revenue', 'cs', 'am', 'services', 'product', 'marketing', 'people', 'engineering', 'executive'];
     for (const domain of expectedDomains) {
       const personas = getPersonasForDomain(domain);
       expect(personas.length).toBeGreaterThanOrEqual(1);
     }
   });
 
-  it('domain persona counts sum to 14', () => {
-    const domains = ['finance', 'revenue', 'cs', 'am', 'services', 'product', 'marketing', 'people', 'executive'];
+  it('domain persona counts sum to 20', () => {
+    const domains = ['finance', 'revenue', 'cs', 'am', 'services', 'product', 'marketing', 'people', 'engineering', 'executive'];
     const total = domains.reduce((sum, domain) => sum + getPersonasForDomain(domain).length, 0);
-    expect(total).toBe(14);
+    expect(total).toBe(20);
   });
 
   it('every persona in DEFAULT_PERSONAS is accessible via getPersona', () => {
@@ -375,7 +403,7 @@ describe('Default Personas - Cross-cutting Consistency', () => {
   });
 
   it('primary persona for each domain is included in getPersonasForDomain results', () => {
-    const domains = ['finance', 'revenue', 'cs', 'am', 'services', 'product', 'marketing', 'people', 'executive'];
+    const domains = ['finance', 'revenue', 'cs', 'am', 'services', 'product', 'marketing', 'people', 'engineering', 'executive'];
     for (const domain of domains) {
       const primary = getPrimaryPersonaForDomain(domain);
       const allForDomain = getPersonasForDomain(domain);

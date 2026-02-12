@@ -2,7 +2,7 @@
  * Nexus Domain Agents - Default Modules Tests
  *
  * Comprehensive tests for the default module definitions including:
- * - All 9 module constants and their required fields
+ * - All 10 module constants and their required fields
  * - DEFAULT_MODULES registry completeness
  * - MODULE_IDS array correctness
  * - Lookup functions: getModule, getAllModules
@@ -22,6 +22,7 @@ import {
   marketingModule,
   peopleModule,
   executiveModule,
+  engineeringModule,
   DEFAULT_MODULES,
   MODULE_IDS,
   getModule,
@@ -33,7 +34,7 @@ import {
 } from '../registry/default-modules';
 
 // ============================================================================
-// ALL 9 MODULE CONSTANTS
+// ALL 10 MODULE CONSTANTS
 // ============================================================================
 
 const allModuleExports = [
@@ -45,6 +46,7 @@ const allModuleExports = [
   { ref: productModule, expectedId: 'product', expectedCategory: 'operational' },
   { ref: marketingModule, expectedId: 'marketing', expectedCategory: 'operational' },
   { ref: peopleModule, expectedId: 'people', expectedCategory: 'operational' },
+  { ref: engineeringModule, expectedId: 'engineering', expectedCategory: 'operational' },
   { ref: executiveModule, expectedId: 'executive', expectedCategory: 'strategic' },
 ];
 
@@ -114,15 +116,15 @@ describe('Default Modules - Module Structure', () => {
 // ============================================================================
 
 describe('Default Modules - DEFAULT_MODULES Registry', () => {
-  it('contains exactly 9 modules', () => {
+  it('contains exactly 10 modules', () => {
     const keys = Object.keys(DEFAULT_MODULES);
-    expect(keys).toHaveLength(9);
+    expect(keys).toHaveLength(10);
   });
 
   it('contains all expected module IDs as keys', () => {
     const expectedKeys = [
       'finance', 'revenue', 'cs', 'am', 'services',
-      'product', 'marketing', 'people', 'executive',
+      'product', 'marketing', 'people', 'engineering', 'executive',
     ];
     expect(Object.keys(DEFAULT_MODULES).sort()).toEqual(expectedKeys.sort());
   });
@@ -136,6 +138,7 @@ describe('Default Modules - DEFAULT_MODULES Registry', () => {
     expect(DEFAULT_MODULES['product']).toBe(productModule);
     expect(DEFAULT_MODULES['marketing']).toBe(marketingModule);
     expect(DEFAULT_MODULES['people']).toBe(peopleModule);
+    expect(DEFAULT_MODULES['engineering']).toBe(engineeringModule);
     expect(DEFAULT_MODULES['executive']).toBe(executiveModule);
   });
 });
@@ -145,14 +148,14 @@ describe('Default Modules - DEFAULT_MODULES Registry', () => {
 // ============================================================================
 
 describe('Default Modules - MODULE_IDS', () => {
-  it('contains exactly 9 entries', () => {
-    expect(MODULE_IDS).toHaveLength(9);
+  it('contains exactly 10 entries', () => {
+    expect(MODULE_IDS).toHaveLength(10);
   });
 
   it('contains all expected IDs', () => {
     const expected = [
       'finance', 'revenue', 'cs', 'am', 'services',
-      'product', 'marketing', 'people', 'executive',
+      'product', 'marketing', 'people', 'engineering', 'executive',
     ];
     expect([...MODULE_IDS].sort()).toEqual(expected.sort());
   });
@@ -197,16 +200,16 @@ describe('Default Modules - getModule', () => {
 // ============================================================================
 
 describe('Default Modules - getAllModules', () => {
-  it('returns an array of 9 modules', () => {
+  it('returns an array of 10 modules', () => {
     const modules = getAllModules();
-    expect(modules).toHaveLength(9);
+    expect(modules).toHaveLength(10);
   });
 
   it('returns all module IDs without duplicates', () => {
     const modules = getAllModules();
     const ids = modules.map((m) => m.id);
     const uniqueIds = [...new Set(ids)];
-    expect(uniqueIds).toHaveLength(9);
+    expect(uniqueIds).toHaveLength(10);
   });
 
   it('includes every expected module by ID', () => {
@@ -214,7 +217,7 @@ describe('Default Modules - getAllModules', () => {
     const ids = modules.map((m) => m.id).sort();
     const expected = [
       'finance', 'revenue', 'cs', 'am', 'services',
-      'product', 'marketing', 'people', 'executive',
+      'product', 'marketing', 'people', 'engineering', 'executive',
     ].sort();
     expect(ids).toEqual(expected);
   });
@@ -231,11 +234,11 @@ describe('Default Modules - getModulesByCategory', () => {
     expect(ids).toEqual(['finance', 'revenue']);
   });
 
-  it('returns 6 operational modules for category "operational"', () => {
+  it('returns 7 operational modules for category "operational"', () => {
     const operationalModules = getModulesByCategory('operational');
-    expect(operationalModules).toHaveLength(6);
+    expect(operationalModules).toHaveLength(7);
     const ids = operationalModules.map((m) => m.id).sort();
-    expect(ids).toEqual(['am', 'cs', 'marketing', 'people', 'product', 'services']);
+    expect(ids).toEqual(['am', 'cs', 'engineering', 'marketing', 'people', 'product', 'services']);
   });
 
   it('returns executive for category "strategic"', () => {
@@ -280,11 +283,11 @@ describe('Default Modules - getOperationalModules', () => {
     expect(fromShortcut).toEqual(fromCategory);
   });
 
-  it('returns exactly 6 modules', () => {
+  it('returns exactly 7 modules', () => {
     const operational = getOperationalModules();
-    expect(operational).toHaveLength(6);
+    expect(operational).toHaveLength(7);
     const ids = operational.map((m) => m.id).sort();
-    expect(ids).toEqual(['am', 'cs', 'marketing', 'people', 'product', 'services']);
+    expect(ids).toEqual(['am', 'cs', 'engineering', 'marketing', 'people', 'product', 'services']);
   });
 });
 
@@ -351,11 +354,11 @@ describe('Default Modules - Cross-cutting Consistency', () => {
     expect(uniqueNames).toHaveLength(names.length);
   });
 
-  it('category counts sum to 9 (2 core + 6 operational + 1 strategic)', () => {
+  it('category counts sum to 10 (2 core + 7 operational + 1 strategic)', () => {
     const core = getCoreModules().length;
     const operational = getOperationalModules().length;
     const strategic = getStrategicModules().length;
-    expect(core + operational + strategic).toBe(9);
+    expect(core + operational + strategic).toBe(10);
   });
 
   it('every module in DEFAULT_MODULES has a matching entry in MODULE_IDS', () => {

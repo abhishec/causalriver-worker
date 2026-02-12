@@ -98,12 +98,12 @@ function makeRelationship(
 // ============================================================================
 
 describe('DEFAULT_DISCOVERY_CONFIG', () => {
-  it('should have alpha = 0.05', () => {
-    expect(DEFAULT_DISCOVERY_CONFIG.alpha).toBe(0.05);
+  it('should have alpha = 0.01 (tightened for production precision)', () => {
+    expect(DEFAULT_DISCOVERY_CONFIG.alpha).toBe(0.01);
   });
 
-  it('should have minObservations = 5', () => {
-    expect(DEFAULT_DISCOVERY_CONFIG.minObservations).toBe(5);
+  it('should have minObservations = 30 (tightened to avoid spurious correlations)', () => {
+    expect(DEFAULT_DISCOVERY_CONFIG.minObservations).toBe(30);
   });
 
   it('should have lookbackDays = 90', () => {
@@ -115,7 +115,7 @@ describe('DEFAULT_DISCOVERY_CONFIG', () => {
     expect(DEFAULT_DISCOVERY_CONFIG.granger).toBeDefined();
     expect(DEFAULT_DISCOVERY_CONFIG.timeSeries.fillMethod).toBe('interpolate');
     expect(DEFAULT_DISCOVERY_CONFIG.granger.maxLag).toBe(14);
-    expect(DEFAULT_DISCOVERY_CONFIG.granger.alpha).toBe(0.05);
+    expect(DEFAULT_DISCOVERY_CONFIG.granger.alpha).toBe(0.01);
   });
 });
 
@@ -254,8 +254,8 @@ describe('runCausalDiscovery', () => {
     });
 
     expect(result.config_used.granger.maxLag).toBe(7);
-    // alpha should still be inherited from defaults
-    expect(result.config_used.granger.alpha).toBe(0.05);
+    // alpha should still be inherited from defaults (tightened to 0.01)
+    expect(result.config_used.granger.alpha).toBe(0.01);
   });
 
   it('should set run_timestamp as a Date instance', () => {

@@ -55,13 +55,13 @@ function createTestModule(overrides: Partial<ModuleDefinition> = {}): ModuleDefi
 // =============================================================================
 
 describe('Module Registry - createModuleRegistry', () => {
-  it('returns all 9 default modules when called with no options', () => {
+  it('returns all 10 default modules when called with no options', () => {
     const registry = createModuleRegistry();
     const keys = Object.keys(registry);
-    expect(keys).toHaveLength(9);
+    expect(keys).toHaveLength(10);
     const expectedIds = [
       'finance', 'revenue', 'cs', 'am', 'services',
-      'product', 'marketing', 'people', 'executive',
+      'product', 'marketing', 'people', 'engineering', 'executive',
     ];
     expect(keys.sort()).toEqual(expectedIds.sort());
   });
@@ -70,7 +70,7 @@ describe('Module Registry - createModuleRegistry', () => {
     const custom = createTestModule({ id: 'legal', name: 'Legal', keywords: ['contract', 'compliance'] });
     const registry = createModuleRegistry({ modules: [custom] });
 
-    expect(Object.keys(registry)).toHaveLength(10);
+    expect(Object.keys(registry)).toHaveLength(11);
     expect(registry['legal']).toBeDefined();
     expect(registry['legal'].name).toBe('Legal');
     // defaults are still present
@@ -80,7 +80,7 @@ describe('Module Registry - createModuleRegistry', () => {
   it('excludes specified modules from defaults', () => {
     const registry = createModuleRegistry({ excludeModules: ['marketing', 'people'] });
 
-    expect(Object.keys(registry)).toHaveLength(7);
+    expect(Object.keys(registry)).toHaveLength(8);
     expect(registry['marketing']).toBeUndefined();
     expect(registry['people']).toBeUndefined();
     // remaining modules are still present

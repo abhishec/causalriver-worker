@@ -125,11 +125,11 @@ export const DEFAULT_DISCOVERY_CONFIG: DiscoveryConfig = {
   },
   granger: {
     maxLag: 14,
-    alpha: 0.05,
+    alpha: 0.01, // Tightened from 0.05: require stronger statistical significance for Granger causality
   },
-  minObservations: 5, // Lowered: activate with sufficient data density, not arbitrary count
+  minObservations: 30, // Tightened from 5: require 30+ data points to avoid spurious correlations from sparse data
   lookbackDays: 90,
-  alpha: 0.05,
+  alpha: 0.01, // Tightened from 0.05: reduce false-positive causal edges (Bonferroni-friendly)
   method: 'three_paradigm', // 3 independent paradigms (Parametric APEX + Structural PC/LiNGAM + Info-theoretic KSG) with diagnostic Judge resolution
 };
 
@@ -174,10 +174,10 @@ export function runCausalDiscovery(
   const warnings: string[] = [];
   const runTimestamp = new Date();
   
-  // Convert signals to standardized format
+  // Convert signals to standardized format (normalize domain names to lowercase)
   const normalizedSignals = signals.map(s => ({
     organization_id: organizationId,
-    source_domain: s.source_domain,
+    source_domain: s.source_domain.toLowerCase(),
     signal_type: s.signal_type,
     signal_value: s.signal_value,
     signal_timestamp: s.signal_timestamp,
@@ -359,12 +359,26 @@ export function runCausalDiscovery(
     });
   }
   
+  // Filter out contentious edges where paradigms disagree (agreement < 0.5)
+  // These are likely spurious correlations that one paradigm detected but others didn't confirm
+  const confirmedRelationships = relationships.filter(r => {
+    if (r.isContentious && (r.agreementRatio || 0) < 0.5) {
+      warnings.push(`Filtered contentious edge: ${r.source_domain} → ${r.target_domain} (agreement: ${((r.agreementRatio || 0) * 100).toFixed(0)}%)`);
+      return false;
+    }
+    return true;
+  });
+
+  if (confirmedRelationships.length < relationships.length) {
+    warnings.push(`Filtered ${relationships.length - confirmedRelationships.length} contentious edges with low paradigm agreement`);
+  }
+
   return {
     organization_id: organizationId,
-    discovered_relationships: relationships,
+    discovered_relationships: confirmedRelationships,
     domains_analyzed: selectedDomains,
     pairs_tested: grangerResults.length,
-    significant_count: relationships.length,
+    significant_count: confirmedRelationships.length,
     run_timestamp: runTimestamp,
     config_used: fullConfig,
     warnings,

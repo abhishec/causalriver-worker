@@ -313,8 +313,8 @@ export function createSupabaseRepository(
     async upsertRelationship(rel: RelationshipUpsertParams): Promise<void> {
       const row: Record<string, unknown> = {
         organization_id: organizationId,
-        source_domain: rel.sourceDomain,
-        target_domain: rel.targetDomain,
+        source_domain: rel.sourceDomain.toLowerCase(),
+        target_domain: rel.targetDomain.toLowerCase(),
         effect_size: rel.effectSize,
         granger_p_value: rel.pValue,
         optimal_lag_days: rel.lagDays,

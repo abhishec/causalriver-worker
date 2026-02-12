@@ -1,9 +1,9 @@
 /**
  * Default Module Definitions
  *
- * 9 pre-defined modules for organizational intelligence:
+ * 10 pre-defined modules for organizational intelligence:
  * - Finance, Revenue, CS, AM, Services (Core Operations)
- * - Product, Marketing, People (Extended Operations)
+ * - Product, Marketing, People, Engineering (Extended Operations)
  * - Executive (Strategic/Cross-domain)
  */
 
@@ -412,11 +412,63 @@ export const executiveModule: ModuleDefinition = {
 };
 
 // =============================================================================
+// ENGINEERING MODULE
+// =============================================================================
+export const engineeringModule: ModuleDefinition = {
+  id: 'engineering',
+  name: 'Engineering',
+  description: 'Track engineering velocity, CI/CD health, incidents, code quality, and contributor expertise',
+  icon: '⚙️',
+  category: 'operational',
+  keywords: [
+    // Core engineering
+    'engineering', 'code', 'codebase', 'software', 'development', 'dev',
+    // Version control
+    'PR', 'pull request', 'merge', 'commit', 'branch', 'git', 'GitHub', 'repository', 'repo',
+    // CI/CD
+    'CI', 'CD', 'CI/CD', 'pipeline', 'build', 'deploy', 'deployment', 'release', 'rollback',
+    // Incidents
+    'incident', 'outage', 'downtime', 'MTTR', 'MTTA', 'uptime', 'SLA', 'SLO', 'reliability',
+    'on-call', 'oncall', 'pager', 'alert', 'PagerDuty',
+    // Quality
+    'bug', 'bugs', 'defect', 'regression', 'test', 'testing', 'tests', 'coverage',
+    'code review', 'review', 'linting', 'static analysis',
+    // Velocity
+    'velocity', 'sprint', 'throughput', 'cycle time', 'lead time',
+    'DORA', 'change failure rate', 'deployment frequency', 'mean time to recovery',
+    // Tech debt
+    'tech debt', 'technical debt', 'refactor', 'refactoring', 'migration',
+    // Expertise
+    'who knows', 'expert', 'expertise', 'code owner', 'reviewer', 'maintainer',
+    // Architecture
+    'architecture', 'system design', 'infrastructure', 'DevOps', 'SRE', 'platform',
+    // Issue tracking
+    'Jira', 'Linear', 'issue', 'ticket', 'story', 'epic', 'backlog', 'blocked',
+    // Roles
+    'CTO', 'VP Engineering', 'engineer', 'developer', 'tech lead', 'staff engineer'
+  ],
+  capabilities: [
+    'Engineering velocity tracking (DORA metrics)',
+    'CI/CD pipeline health monitoring',
+    'Incident tracking & MTTR analysis',
+    'Code review quality metrics',
+    'Contributor expertise mapping',
+    'Deployment frequency & change failure rate',
+    'Code ownership & reviewer recommendations',
+    'Tech debt assessment & tracking',
+    'Sprint velocity & throughput analysis',
+    'Cross-team dependency detection'
+  ],
+  tables: ['cross_domain_signals', 'contributor_expertise', 'entity_embeddings'],
+  personas: ['CTO', 'VP Engineering', 'Engineering Manager', 'Tech Lead', 'SRE Lead']
+};
+
+// =============================================================================
 // DEFAULT MODULE REGISTRY
 // =============================================================================
 
 /**
- * Default registry containing all 9 modules
+ * Default registry containing all 10 modules
  */
 export const DEFAULT_MODULES: ModuleRegistry = {
   finance: financeModule,
@@ -427,6 +479,7 @@ export const DEFAULT_MODULES: ModuleRegistry = {
   product: productModule,
   marketing: marketingModule,
   people: peopleModule,
+  engineering: engineeringModule,
   executive: executiveModule
 };
 
@@ -442,6 +495,7 @@ export const MODULE_IDS = [
   'product',
   'marketing',
   'people',
+  'engineering',
   'executive'
 ] as const;
 

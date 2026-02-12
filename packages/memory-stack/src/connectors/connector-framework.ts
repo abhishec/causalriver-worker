@@ -277,7 +277,7 @@ export async function storeConnectorSignals(
   const now = new Date().toISOString();
   const rows = resolvedSignals.map((s) => ({
     organization_id: s.organization_id,
-    source_domain: s.source_domain,
+    source_domain: s.source_domain.toLowerCase(),
     signal_type: s.signal_type,
     signal_value: s.signal_value,
     signal_timestamp: s.signal_timestamp
