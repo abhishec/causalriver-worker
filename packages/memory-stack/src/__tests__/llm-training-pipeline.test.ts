@@ -699,7 +699,7 @@ describe('Brain Pipeline Sensory Cortex Integration', () => {
     supabase = createMockSupabase();
   });
 
-  it('should include Sensory Cortex in health report (11 regions)', () => {
+  it('should include Sensory Cortex in health report (12 regions)', () => {
     const brain = createBrainPipeline({
       supabase,
       organizationId: 'org-test',
@@ -707,8 +707,8 @@ describe('Brain Pipeline Sensory Cortex Integration', () => {
 
     const health = brain.getHealth();
 
-    // Brain Analog: Neurological exam now tests 11 regions including Sensory Cortex
-    expect(health.regions).toHaveLength(11);
+    // Brain Analog: Neurological exam now tests 12 regions including Sensory Cortex
+    expect(health.regions).toHaveLength(12);
 
     const sensoryRegion = health.regions.find(r => r.name === 'Public Data Training');
     expect(sensoryRegion).toBeDefined();
@@ -802,9 +802,12 @@ describe('Brain Pipeline Sensory Cortex Integration', () => {
     const report = await brain.runFullCycle();
 
     expect(report.publicDataTraining).toBeNull();
+
+    // bookIngestion should be present in the cycle report
+    expect('bookIngestion' in report).toBe(true);
   });
 
-  it('should have all 11 brain regions with correct analogs', () => {
+  it('should have all 12 brain regions with correct analogs', () => {
     const brain = createBrainPipeline({
       supabase,
       organizationId: 'org-test',
@@ -824,6 +827,7 @@ describe('Brain Pipeline Sensory Cortex Integration', () => {
     expect(analogs).toContain('Sensory Cortex');
     expect(analogs).toContain('Insula');
     expect(analogs).toContain('Working Memory (dlPFC)');
+    expect(analogs).toContain('Brain Library (Hippocampus Study Mode)');
   });
 });
 

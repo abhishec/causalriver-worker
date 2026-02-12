@@ -412,6 +412,9 @@ describe('Brain Pipeline Learning Integration', () => {
       expect(typeof report.learning.bayesianUpdates).toBe('number');
       expect(typeof report.learning.durationMs).toBe('number');
     }
+
+    // bookIngestion should be present in the cycle report
+    expect('bookIngestion' in report).toBe(true);
   });
 
   it('should report learning modules in health check', () => {

@@ -187,3 +187,4 @@ export * from './llm-training-pipeline';
 export * from './autonomous-learner';
 export * from './runbook-indexer';
 export * from './core-metrics-library';
+export * from './knowledge-book-ingestor';

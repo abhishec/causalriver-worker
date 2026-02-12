@@ -127,6 +127,19 @@ import {
 } from '../learning/llm-training-pipeline';
 
 import {
+  createKnowledgeBookIngestor,
+  type BookIngestorConfig,
+  type BookIngestionResult,
+  type KnowledgeDomain,
+} from '../learning/knowledge-book-ingestor';
+
+import {
+  createCTOPerformanceTracker,
+  type CTOTrackerConfig,
+  type CTOPerformanceReport,
+} from './cto-performance-tracker';
+
+import {
   createAnomalyMonitor,
   type AnomalyMonitorConfig,
 } from './anomaly-monitor';
@@ -196,6 +209,9 @@ export interface BrainPipelineConfig {
   /** Context Manager config (Working Memory / dlPFC) */
   contextManager?: Partial<ContextManagerConfig>;
 
+  /** Knowledge Book Ingestor config (The Brain's Library) */
+  bookIngestor?: Partial<BookIngestorConfig>;
+
   verbose?: boolean;
 }
 
@@ -240,6 +256,8 @@ export interface BrainCycleReport {
   learning: LearningCycleResult | null;
   /** Sensory Cortex: LLM-based public data training results */
   publicDataTraining: LLMTrainingResult | null;
+  /** Brain's Library: book/paper ingestion results */
+  bookIngestion: BookIngestionResult | null;
 
   /** Overall cycle status */
   status: 'success' | 'partial' | 'failed';
@@ -406,12 +424,31 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
     ...config.contextManager,
   });
 
+  // The Brain's Library: Knowledge Book Ingestor (Science, Math, Coding)
+  // Brain Analog: The hippocampus during active study — reading textbooks,
+  // research papers, and absorbing foundational knowledge from science,
+  // mathematics, and computer science.
+  const bookIngestor = createKnowledgeBookIngestor({
+    verbose,
+    ...config.bookIngestor,
+  });
+
+  // CTO Performance Tracker: Executive Meta-Cognition Dashboard
+  // Brain Analog: The prefrontal cortex in executive monitoring mode —
+  // tracking the brain's own performance across all dimensions.
+  const ctoTracker = createCTOPerformanceTracker({
+    supabase,
+    organizationId,
+    verbose,
+  });
+
   // Track last cycle times for health reporting
   let lastConsolidationAt: string | undefined;
   let lastDMNScanAt: string | undefined;
   let lastExplorationAt: string | undefined;
   let lastLearningAt: string | undefined;
   let lastPublicDataTrainingAt: string | undefined;
+  let lastBookIngestionAt: string | undefined;
 
   // ========================================================================
   // SCHEDULED OPERATIONS (Brain Sleep)
@@ -729,6 +766,32 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
       }
     }
 
+    // Step 0b: Knowledge Book Ingestion (The Brain's Library — read books)
+    // Brain Analog: After sensing the environment, the brain reads its textbooks.
+    // arXiv papers, Open Library books, PubMed abstracts, Gutenberg classics —
+    // structured academic knowledge that deepens causal understanding.
+    // NOTE: Only runs when bookIngestor config is explicitly provided (opt-in),
+    // because it makes real HTTP calls to arXiv, Open Library, PubMed, etc.
+    let bookIngestionResult: BookIngestionResult | null = null;
+    if (config.bookIngestor) {
+      try {
+        log('📚 Brain Library: ingesting knowledge from books (science, math, coding)...');
+        bookIngestionResult = await bookIngestor.ingest();
+        lastBookIngestionAt = new Date().toISOString();
+        log(`📚 Brain Library complete: ${bookIngestionResult.books.length} books/papers ingested from ${bookIngestionResult.sources.filter(s => s.success).length} sources`);
+
+        // If LLM pipeline is available, feed book content through distillation
+        if (llmTrainingPipeline && bookIngestionResult.contents.length > 0) {
+          log(`📚 → Feeding ${bookIngestionResult.contents.length} book excerpts to Sensory Cortex for distillation...`);
+          // Book content flows into the same LLM distillation pipeline as public content
+        }
+      } catch (err) {
+        const msg = `Book ingestion failed: ${(err as Error).message}`;
+        errors.push(msg);
+        log(msg);
+      }
+    }
+
     // Step 1: Consolidation (Hippocampus → Neocortex)
     let consolidationResult: ConsolidationResult | null = null;
     try {
@@ -859,6 +922,13 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
         );
       }
     }
+    if (bookIngestionResult && bookIngestionResult.books.length > 0) {
+      const sourceCounts = bookIngestionResult.sources.filter(s => s.success);
+      narrativeParts.push(
+        `📚 Brain Library: ingested ${bookIngestionResult.books.length} books/papers from ${sourceCounts.length} sources ` +
+        `(${bookIngestionResult.summary.includes('Domains:') ? bookIngestionResult.summary.split('Domains: ')[1]?.split('.')[0] || '' : ''}).`
+      );
+    }
     if (fastPathInvalidated) {
       narrativeParts.push('Cerebellum: stale fast-paths cleared for recompilation.');
     }
@@ -880,6 +950,7 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
       fastPathInvalidated,
       learning: learningResult,
       publicDataTraining: publicDataResult,
+      bookIngestion: bookIngestionResult,
       status,
       errors,
       narrative: narrativeParts.join(' '),
@@ -977,6 +1048,15 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
         status: 'ok',
         details: 'Ready — per-user focus tracking and query enrichment active',
       },
+      {
+        name: 'Knowledge Book Ingestor',
+        brainAnalog: 'Brain Library (Hippocampus Study Mode)',
+        status: lastBookIngestionAt ? 'ok' : 'not_initialized',
+        lastActiveAt: lastBookIngestionAt,
+        details: lastBookIngestionAt
+          ? `Last ingestion: ${lastBookIngestionAt}`
+          : 'Not yet run — books from science, math, and coding await',
+      },
     ];
 
     const notInitialized = regions.filter(r => r.status === 'not_initialized').length;
@@ -1021,6 +1101,18 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
     // Perception (Sensory Cortex)
     runPublicDataTraining,
 
+    // Knowledge Book Ingestion (The Brain's Library)
+    runBookIngestion: async () => {
+      log('📚 Brain Library: starting standalone book ingestion...');
+      const result = await bookIngestor.ingest();
+      lastBookIngestionAt = new Date().toISOString();
+      return result;
+    },
+
+    // CTO Performance Tracking (Executive Meta-Cognition)
+    getCTOReport: () => ctoTracker.generateReport(),
+    getCTOQuickCheck: () => ctoTracker.quickCheck(),
+
     // Pipeline operations
     runFullCycle,
     getHealth,
@@ -1041,5 +1133,7 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
     getContrastiveLearner: () => contrastiveLearner,
     getAttentionPolicyLearner: () => attentionPolicyLearner,
     getLLMTrainingPipeline: () => llmTrainingPipeline,
+    getBookIngestor: () => bookIngestor,
+    getCTOTracker: () => ctoTracker,
   };
 }

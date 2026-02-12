@@ -133,12 +133,12 @@ describe('Brain Pipeline (Corpus Callosum)', () => {
   });
 
   describe('Health Reporting (Neurological Exam)', () => {
-    it('should report health of all 11 brain regions', () => {
+    it('should report health of all 12 brain regions', () => {
       const brain = createBrainPipeline(config);
       const health = brain.getHealth();
 
       expect(health.organizationId).toBe('org-test-123');
-      expect(health.regions).toHaveLength(11);
+      expect(health.regions).toHaveLength(12);
       expect(health.checkedAt).toBeDefined();
 
       // Check all brain regions are present
@@ -150,6 +150,7 @@ describe('Brain Pipeline (Corpus Callosum)', () => {
       expect(regionNames).toContain('Cerebellum');
       expect(regionNames).toContain('Active Inference');
       expect(regionNames).toContain('Prefrontal Cortex');
+      expect(regionNames).toContain('Brain Library (Hippocampus Study Mode)');
     });
 
     it('should report regions that havent run yet as not_initialized', () => {
@@ -283,6 +284,9 @@ describe('Brain Pipeline (Corpus Callosum)', () => {
       expect(report.totalDurationMs).toBeGreaterThanOrEqual(0);
       expect(['success', 'partial', 'failed']).toContain(report.status);
       expect(report.narrative).toBeDefined();
+
+      // bookIngestion should be present in the cycle report (null when not configured)
+      expect('bookIngestion' in report).toBe(true);
     });
 
     it('should handle individual step failures gracefully', async () => {

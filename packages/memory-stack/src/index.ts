@@ -62,6 +62,22 @@ export {
 } from './core/expertise-graph';
 
 // ============================================================================
+// CORE - Collaboration Graph (Cross-Team Visibility)
+// ============================================================================
+
+export {
+  createCollaborationGraph,
+  type CollaborationEdge,
+  type CollaborationInput,
+  type CollaborationQuery,
+  type CollaborationGraphConfig,
+  type CollaborationGraphInstance,
+  type CollaborationNetworkStats,
+  type TeamCollaborationSummary,
+  type InteractionType,
+} from './core/collaboration-graph';
+
+// ============================================================================
 // CORE - L2+L3: Entity Resolution & Semantic Memory
 // ============================================================================
 
@@ -499,6 +515,19 @@ export {
   type PriorityInput,
 } from './orchestrator/priorities-api';
 
+// CTO Performance Tracker — Executive Meta-Cognition Dashboard
+export {
+  createCTOPerformanceTracker,
+  type CTOTrackerConfig,
+  type CTOPerformanceReport,
+  type BrainMaturityScore,
+  type DailyBrainMetrics,
+  type DomainCoverage,
+  type LearningVelocity,
+  type EvolutionTrajectory,
+  type KnowledgeSourceMetrics,
+} from './orchestrator/cto-performance-tracker';
+
 export {
   createEntityResolver,
   type EntityResolverConfig,
@@ -746,6 +775,16 @@ export {
   type LearningCycleResult as AutonomousLearningCycleResult,
 } from './learning/autonomous-learner';
 
+// Knowledge Book Ingestor — The Brain's Library (Science, Math, Coding)
+export {
+  createKnowledgeBookIngestor,
+  type BookIngestorConfig,
+  type BookIngestionResult,
+  type BookRecord,
+  type BookSource,
+  type KnowledgeDomain,
+} from './learning/knowledge-book-ingestor';
+
 // ============================================================================
 // ORCHESTRATION - L6: Domain Agent Layer
 // ============================================================================
@@ -804,6 +843,8 @@ export {
   generateAnomalyTimeSeries,
   createBenchmarkRunner,
   createMaturityEvaluator,
+  collectRuntimeMetrics,
+  runtimeMetricsToBenchmarkScores,
   type BenchmarkDataset,
   type FullBenchmarkReport,
   type MaturityReport,
@@ -816,6 +857,8 @@ export {
   type CascadeBenchmarkResult,
   type PredictionBenchmarkResult,
   type BenchmarkRunnerConfig,
+  type RuntimeMetrics,
+  type RuntimeMetricsConfig,
 } from './benchmarks';
 
 // ============================================================================

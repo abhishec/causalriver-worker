@@ -160,7 +160,7 @@ describe('Brain Health Checkup (Neurological Exam)', () => {
 
       // Brain Analog: Neurological exam baseline
       expect(health.organizationId).toBe('org-health-check');
-      expect(health.regions.length).toBe(11);
+      expect(health.regions.length).toBe(12);
       expect(health.checkedAt).toBeDefined();
 
       // Before any cycles, some regions are not initialized
@@ -183,6 +183,9 @@ describe('Brain Health Checkup (Neurological Exam)', () => {
       expect(report.totalDurationMs).toBeGreaterThanOrEqual(0);
       expect(report.narrative.length).toBeGreaterThan(0);
       expect(['success', 'partial', 'failed']).toContain(report.status);
+
+      // bookIngestion should be present in the cycle report
+      expect('bookIngestion' in report).toBe(true);
     });
 
     it('should have healthier regions after a full cycle', async () => {
@@ -205,7 +208,7 @@ describe('Brain Health Checkup (Neurological Exam)', () => {
   });
 
   describe('All Brain Regions Present', () => {
-    it('should include all 11 brain regions in health report', () => {
+    it('should include all 12 brain regions in health report', () => {
       const brain = createBrainPipeline({
         supabase,
         organizationId: 'org-1',
@@ -226,6 +229,7 @@ describe('Brain Health Checkup (Neurological Exam)', () => {
       expect(analogs).toContain('Sensory Cortex');              // LLM Training
       expect(analogs).toContain('Insula');                      // Anomaly Monitor
       expect(analogs).toContain('Working Memory (dlPFC)');      // Context Manager
+      expect(analogs).toContain('Brain Library (Hippocampus Study Mode)');  // Book Ingestion
     });
   });
 
@@ -318,7 +322,7 @@ describe('Brain Health Checkup (Neurological Exam)', () => {
       const health = brain.getHealth();
 
       // Exam results should be comprehensive
-      expect(health.regions.length).toBe(11);
+      expect(health.regions.length).toBe(12);
       expect(report.narrative.length).toBeGreaterThan(0);
 
       // Overall health assessment
