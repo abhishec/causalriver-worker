@@ -711,6 +711,92 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
     // Non-critical
   }
 
+  // ── Write daily brain snapshot for website dashboard ──────────
+  // Powers the live brain dashboard at usebrainos.com
+  // One row per org per day — upserts so re-runs overwrite gracefully
+  try {
+    const totalPatterns = results.reduce((sum, r) => sum + r.report.stats.patternsFound, 0);
+    const totalMemories = results.reduce((sum, r) => sum + r.report.stats.memoriesCreated, 0);
+    const totalDecayed = results.reduce((sum, r) => sum + r.report.stats.edgesDecayed, 0);
+
+    // Determine which brain regions were active based on what the consolidation did
+    const regionsActive: string[] = [];
+    if (totalSignals > 0) regionsActive.push('perception');    // Sensory Cortex — ingested data
+    if (totalNew > 0) regionsActive.push('memory');            // Hippocampus — formed memories
+    if (totalEdges > 0) regionsActive.push('reasoning');       // Neocortex — causal discovery
+    if (totalAnomalies > 0) regionsActive.push('instinct');    // Insula — anomaly detection
+    if (totalPatterns > 0) regionsActive.push('subconscious'); // DMN — pattern discovery
+    if (totalPruned > 0 || totalStrengthened > 0) regionsActive.push('reflexes');  // Cerebellum — pruning/strengthening
+    if (totalMemories > 0) regionsActive.push('emotional');    // Amygdala — impact scoring
+    regionsActive.push('simulation');                          // PFC — always active during consolidation
+
+    // Get total causal connections count from DB for cumulative tracking
+    let totalConnectionsInDB = totalEdges;
+    try {
+      const { count } = await supabase
+        .from('causal_relationships_statistical')
+        .select('id', { count: 'exact', head: true });
+      if (count !== null) totalConnectionsInDB = count;
+    } catch {
+      // Fall back to session count
+    }
+
+    // Get prediction accuracy from recent validated predictions
+    let predictionAccuracy: number | null = null;
+    try {
+      const { data: outcomes } = await supabase
+        .from('prediction_outcomes')
+        .select('was_correct')
+        .gte('validated_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
+        .limit(200);
+      if (outcomes && outcomes.length >= 5) {
+        const correct = outcomes.filter((o: { was_correct: boolean }) => o.was_correct).length;
+        predictionAccuracy = Math.round((correct / outcomes.length) * 1000) / 10; // e.g. 87.2
+      }
+    } catch {
+      // prediction_outcomes table may not exist yet
+    }
+
+    await supabase.from('brain_daily_snapshots').upsert({
+      organization_id: ORGANIZATION_ID,
+      snapshot_date: new Date().toISOString().split('T')[0], // YYYY-MM-DD
+      total_connections: totalConnectionsInDB,
+      new_connections: totalNew,
+      total_signals: totalSignals,
+      signals_processed: totalSignals,
+      prediction_accuracy: predictionAccuracy,
+      edges_strengthened: totalStrengthened,
+      edges_pruned: totalPruned,
+      edges_decayed: totalDecayed,
+      anomalies_detected: totalAnomalies,
+      patterns_found: totalPatterns,
+      memories_created: totalMemories,
+      regions_active: regionsActive,
+      top_discoveries: allDiscoveries.slice(0, 10),
+      consolidation_stats: {
+        signalsProcessed: totalSignals,
+        causalEdgesDiscovered: totalEdges,
+        newRelationships: totalNew,
+        anomaliesDetected: totalAnomalies,
+        patternsFound: totalPatterns,
+        edgesPruned: totalPruned,
+        edgesStrengthened: totalStrengthened,
+        edgesDecayed: totalDecayed,
+        memoriesCreated: totalMemories,
+        orgsConsolidated: results.length,
+      },
+      narrative: results[0]?.report?.narrative || null,
+      run_duration_ms: Date.now() - overallStart,
+      run_status: failed === 0 ? 'completed' : 'partial',
+    }, {
+      onConflict: 'organization_id,snapshot_date',
+    });
+
+    log('SNAPSHOT', 'Daily brain snapshot written for website dashboard');
+  } catch (err) {
+    logError('SNAPSHOT', 'Failed to write daily snapshot (non-critical)', err);
+  }
+
   console.log('');
 }
 
@@ -767,6 +853,7 @@ async function main(): Promise<void> {
   switch (CONSOLIDATION_MODE) {
     case 'once':
       await runOnce(supabase);
+      process.exit(0);
       break;
 
     case 'interval': {

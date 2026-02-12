@@ -70,7 +70,7 @@ import { createImpactScorer, type ScorableEvent } from '../packages/memory-stack
 import { createAttentionManager, type AttentionDecision } from '../packages/memory-stack/src/orchestrator/attention-manager';
 // Region #10: Insula (Anomaly Monitor) — detects statistical anomalies in real-time signals
 import { createAnomalyMonitor } from '../packages/memory-stack/src/orchestrator/anomaly-monitor';
-import { createEventBus } from '../packages/memory-stack/src/causality/event-bus';
+import { createEventBus, generateEventId } from '../packages/memory-stack/src/causality/event-bus';
 // Region #11: Working Memory (Context Manager) — tracks what the org is actively thinking about
 import { createContextManager } from '../packages/memory-stack/src/orchestrator/context-manager';
 
@@ -1003,21 +1003,16 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
     if (recentSignals && recentSignals.length > 0) {
       for (const signal of recentSignals) {
         eventBus.emit({
-          eventId: `trainer_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+          eventId: generateEventId(),
           organizationId: ORGANIZATION_ID,
-          domain: signal.source_domain || 'unknown',
-          entityType: 'metric',
-          entityId: signal.signal_type || 'unknown',
-          eventType: 'signal' as any,
-          payload: {
-            signal_type: signal.signal_type,
-            signal_value: signal.signal_value,
-          },
-          timestamp: new Date(signal.signal_timestamp || Date.now()),
+          domain: signal.source_domain,
+          entityType: 'signal',
+          entityId: signal.signal_type,
+          eventType: 'signal',
+          payload: { signal_type: signal.signal_type, signal_value: signal.signal_value },
+          timestamp: new Date(signal.signal_timestamp),
         });
       }
-      // Allow debounced event processing
-      await new Promise(resolve => setTimeout(resolve, 100));
       anomalyStats = anomalyMonitor.getStats();
       log('INSULA', `Fed ${recentSignals.length} signals → ${anomalyStats.totalAnomaliesDetected} anomalies detected across ${anomalyStats.windowsTracked} windows`);
     } else {
@@ -1047,15 +1042,7 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
 
     if (recentInsights && recentInsights.length > 0) {
       for (const insight of recentInsights) {
-        contextManager.recordInsight({
-          id: `trainer-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-          type: insight.memory_type as any,
-          domains: [insight.domain],
-          title: insight.content.substring(0, 80),
-          explanation: insight.content,
-          importance: 0.6,
-          discoveredAt: insight.created_at,
-        });
+        contextManager.recordInsight(`[${insight.memory_type}] ${insight.domain}: ${insight.content.substring(0, 120)}`);
         contextRecorded++;
       }
       log('MEMORY', `Recorded ${contextRecorded} recent insights into Working Memory`);
@@ -1063,7 +1050,7 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
       // Log hot domains
       const orgContext = contextManager.getOrgContext();
       if (orgContext.hotDomains && orgContext.hotDomains.length > 0) {
-        log('MEMORY', `Hot domains: ${orgContext.hotDomains.map((d: any) => d.domain || d).join(', ')}`);
+        log('MEMORY', `Hot domains: ${orgContext.hotDomains.join(', ')}`);
       }
     } else {
       log('MEMORY', 'No recent insights for context tracking');
@@ -1196,6 +1183,7 @@ async function main(): Promise<void> {
   switch (TRAINER_MODE) {
     case 'once':
       await runOnce(supabase);
+      process.exit(0);
       break;
 
     case 'interval':
