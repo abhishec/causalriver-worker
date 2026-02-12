@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- NexusBrain Monthly Deep Analysis -->
+    <!-- Runs on the 1st of each month at 3 AM — full historical discovery -->
+    <key>Label</key>
+    <string>com.nexusbrain.monthly</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>/Users/abhishek/bin/nexusbrain-runner.sh</string>
+        <string>monthly</string>
+    </array>
+
+    <!-- Run on 1st of each month at 3:00 AM -->
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Day</key>
+        <integer>1</integer>
+        <key>Hour</key>
+        <integer>3</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+    </dict>
+
+    <!-- Logging handled by nexusbrain-runner.sh (appends to ~/Library/Logs/) -->
+    <!-- No StandardOutPath/StandardErrorPath — launchd truncates on each run -->
+
+    <!-- Don't restart on crash — wait for next scheduled run -->
+    <key>KeepAlive</key>
+    <false/>
+
+    <!-- Environment -->
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/bin:/bin</string>
+        <key>HOME</key>
+        <string>/Users/abhishek</string>
+    </dict>
+</dict>
+</plist>

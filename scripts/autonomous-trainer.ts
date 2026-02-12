@@ -294,8 +294,54 @@ async function syncConnectors(
     log('SYNC', 'Slack connector skipped (no SLACK_BOT_TOKEN)');
   }
 
-  // Add more connectors here as they become available:
-  // if (process.env.GITHUB_TOKEN) { connectors.push(createGitHubConnector(...)); }
+  // Register HubSpot connector if API key is available
+  if (process.env.HUBSPOT_API_KEY) {
+    try {
+      const { createHubSpotConnector } = await import('../packages/memory-stack/src/connectors/hubspot');
+      const hubspot = createHubSpotConnector(process.env.HUBSPOT_API_KEY);
+      connectors.push(hubspot);
+      log('SYNC', 'HubSpot connector registered (HUBSPOT_API_KEY found)');
+    } catch (err) {
+      logError('SYNC', 'Failed to create HubSpot connector', err);
+      result.errors.push('HubSpot connector creation failed');
+    }
+  } else {
+    log('SYNC', 'HubSpot connector skipped (no HUBSPOT_API_KEY)');
+  }
+
+  // Register Stripe connector if API key is available
+  if (process.env.STRIPE_API_KEY) {
+    try {
+      const { createStripeConnector } = await import('../packages/memory-stack/src/connectors/stripe');
+      const stripe = createStripeConnector(process.env.STRIPE_API_KEY);
+      connectors.push(stripe);
+      log('SYNC', 'Stripe connector registered (STRIPE_API_KEY found)');
+    } catch (err) {
+      logError('SYNC', 'Failed to create Stripe connector', err);
+      result.errors.push('Stripe connector creation failed');
+    }
+  } else {
+    log('SYNC', 'Stripe connector skipped (no STRIPE_API_KEY)');
+  }
+
+  // Register GitHub connector if token + repo are available
+  if (process.env.GITHUB_TOKEN && process.env.GITHUB_OWNER && process.env.GITHUB_REPO) {
+    try {
+      const { createGitHubConnector } = await import('../packages/memory-stack/src/connectors/github');
+      const github = createGitHubConnector({
+        token: process.env.GITHUB_TOKEN,
+        owner: process.env.GITHUB_OWNER,
+        repo: process.env.GITHUB_REPO,
+      });
+      connectors.push(github);
+      log('SYNC', `GitHub connector registered (${process.env.GITHUB_OWNER}/${process.env.GITHUB_REPO})`);
+    } catch (err) {
+      logError('SYNC', 'Failed to create GitHub connector', err);
+      result.errors.push('GitHub connector creation failed');
+    }
+  } else {
+    log('SYNC', 'GitHub connector skipped (no GITHUB_TOKEN/OWNER/REPO)');
+  }
 
   if (connectors.length === 0) {
     log('SYNC', 'No connector tokens configured — skipping sync stage');

@@ -117,6 +117,40 @@ run_trainer() {
   fi
 }
 
+run_weekly() {
+  local LOG_FILE="$LOG_DIR/nexusbrain-weekly.log"
+  log "Starting Weekly Health Check (Benchmarks + Maturity)..."
+  log_to_file "$LOG_FILE" "════════════════════ NEW RUN ════════════════════"
+
+  run_tsx brain-weekly-runner.ts >> "$LOG_FILE" 2>&1
+
+  local exit_code=$?
+  if [ $exit_code -eq 0 ]; then
+    log "Weekly health check complete."
+    log_to_file "$LOG_FILE" "Weekly health check completed successfully"
+  else
+    log "Weekly health check failed with exit code $exit_code"
+    log_to_file "$LOG_FILE" "Weekly health check FAILED with exit code $exit_code"
+  fi
+}
+
+run_monthly() {
+  local LOG_FILE="$LOG_DIR/nexusbrain-monthly.log"
+  log "Starting Monthly Deep Analysis..."
+  log_to_file "$LOG_FILE" "════════════════════ NEW RUN ════════════════════"
+
+  run_tsx brain-monthly-runner.ts >> "$LOG_FILE" 2>&1
+
+  local exit_code=$?
+  if [ $exit_code -eq 0 ]; then
+    log "Monthly deep analysis complete."
+    log_to_file "$LOG_FILE" "Monthly deep analysis completed successfully"
+  else
+    log "Monthly deep analysis failed with exit code $exit_code"
+    log_to_file "$LOG_FILE" "Monthly deep analysis FAILED with exit code $exit_code"
+  fi
+}
+
 case "$AGENT" in
   consolidation|sleep)
     run_consolidation
@@ -127,6 +161,12 @@ case "$AGENT" in
   trainer|train)
     run_trainer
     ;;
+  weekly|benchmark)
+    run_weekly
+    ;;
+  monthly|deep)
+    run_monthly
+    ;;
   all|full)
     log "Running full brain cycle: Trainer → Consolidation → DMN"
     run_trainer
@@ -135,13 +175,15 @@ case "$AGENT" in
     log "Full brain cycle complete."
     ;;
   *)
-    echo "Usage: $0 {consolidation|dmn|trainer|all}"
+    echo "Usage: $0 {consolidation|dmn|trainer|weekly|monthly|all}"
     echo ""
     echo "Agents:"
     echo "  consolidation  Brain Sleep — nightly deep consolidation"
     echo "  dmn            Default Mode Network — background insight scanning"
     echo "  trainer        Autonomous Trainer — 5-stage training pipeline"
-    echo "  all            Run all agents in sequence"
+    echo "  weekly         Weekly Health Check — benchmarks + maturity evaluation"
+    echo "  monthly        Monthly Deep Analysis — full historical discovery"
+    echo "  all            Run daily agents in sequence (trainer → consolidation → dmn)"
     exit 1
     ;;
 esac
