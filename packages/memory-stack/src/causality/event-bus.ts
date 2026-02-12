@@ -393,7 +393,10 @@ export function createEventBus(config: Partial<EventBusConfig> = {}) {
       // Check queue capacity (backpressure)
       if (eventQueue.length >= maxQueueSize) {
         stats.totalEventsDropped++;
-        logger.warn('Queue full, dropping event', { eventId: event.eventId, queueSize: maxQueueSize });
+        // Use debug level — queue saturation is expected during batch consolidation/anomaly sweeps
+        if (stats.totalEventsDropped % 100 === 1) {
+          logger.warn('Queue full, dropping events', { totalDropped: stats.totalEventsDropped, queueSize: maxQueueSize });
+        }
         return false;
       }
 

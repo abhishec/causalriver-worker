@@ -290,20 +290,24 @@ export function createAutonomousLearner(config: AutonomousLearnerConfig) {
           );
           promoted++;
 
-          // Store as organizational memory
+          // Store as organizational memory (non-critical — don't crash on transient failures)
           if (repository) {
-            await repository.upsertMemory({
-              memoryType: 'promoted_pattern',
-              domain: pattern.domainsInvolved[0] || 'general',
-              content: `Auto-promoted pattern: ${pattern.name}. ${pattern.description}`,
-              importance: 1 - pattern.evidence.pValue,
-              metadata: {
-                source: 'autonomous_learner',
-                patternName: pattern.name,
-                confirmationCount: pattern.confirmationCount,
-                pValue: significance.pValue,
-              },
-            });
+            try {
+              await repository.upsertMemory({
+                memoryType: 'promoted_pattern',
+                domain: pattern.domainsInvolved[0] || 'general',
+                content: `Auto-promoted pattern: ${pattern.name}. ${pattern.description}`,
+                importance: 1 - pattern.evidence.pValue,
+                metadata: {
+                  source: 'autonomous_learner',
+                  patternName: pattern.name,
+                  confirmationCount: pattern.confirmationCount,
+                  pValue: significance.pValue,
+                },
+              });
+            } catch {
+              // Non-critical: network failure during memory upsert
+            }
           }
 
           log(`Promoted pattern: ${pattern.name} (p=${significance.pValue.toFixed(4)})`);
@@ -338,22 +342,26 @@ export function createAutonomousLearner(config: AutonomousLearnerConfig) {
         `${rel.natural_language || `Changes in ${rel.source_domain} affect ${rel.target_domain} with effect size ${rel.effect_size.toFixed(2)} after ${rel.optimal_lag_days} days.`} ` +
         `(p-value: ${rel.granger_p_value.toFixed(4)}, sample size: ${rel.sample_size})${confounderNote}`;
 
-      await repository.upsertMemory({
-        memoryType: 'causal_insight',
-        domain: rel.target_domain,
-        content: insight,
-        importance: Math.min(0.9, 1 - rel.granger_p_value),
-        metadata: {
-          source: 'autonomous_learner',
-          sourceDomain: rel.source_domain,
-          targetDomain: rel.target_domain,
-          effectSize: rel.effect_size,
-          lagDays: rel.optimal_lag_days,
-          pValue: rel.granger_p_value,
-        },
-      });
-
-      insightsCreated++;
+      try {
+        await repository.upsertMemory({
+          memoryType: 'causal_insight',
+          domain: rel.target_domain,
+          content: insight,
+          importance: Math.min(0.9, 1 - rel.granger_p_value),
+          metadata: {
+            source: 'autonomous_learner',
+            sourceDomain: rel.source_domain,
+            targetDomain: rel.target_domain,
+            effectSize: rel.effect_size,
+            lagDays: rel.optimal_lag_days,
+            pValue: rel.granger_p_value,
+          },
+        });
+        insightsCreated++;
+      } catch (err) {
+        // Non-critical: transient network failure shouldn't kill the learning cycle
+        log(`Warning: Failed to store insight for ${rel.source_domain} → ${rel.target_domain}: ${err}`);
+      }
     }
 
     return insightsCreated;
