@@ -5,11 +5,18 @@
  * Designed to be called from Supabase cron or pg_cron.
  *
  * Jobs:
- * - Daily causal discovery (batch Granger causality)
+ * - Daily causal discovery (delegates to consolidation engine — single source of truth)
  * - Feedback loop: pending verification processing
  * - Feedback loop: relationship weight updates
  * - Continuous learner: evidence decay
  * - Threshold optimizer: adaptive signal threshold tuning
+ * - Data retention: cleanup stale signals, predictions, weight history
+ * - Upstream federation: promote anonymized knowledge to core brain
+ *
+ * Production hardening:
+ * - Per-job timeout with configurable limit
+ * - Promise.allSettled for independent jobs (one failure never kills others)
+ * - Structured error results per job
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
@@ -29,6 +36,9 @@ import { createUpstreamPromoter, type UpstreamPromotionResult } from '../federat
 // TYPES
 // ============================================================================
 
+/** Result wrapper: every job returns data OR an error string — never throws from runAllDailyJobs */
+export type JobResult<T> = T | { error: string };
+
 export interface ScheduledJobsConfig {
   /** Lookback window for causal discovery (default: 90 days) */
   lookbackDays: number;
@@ -38,6 +48,17 @@ export interface ScheduledJobsConfig {
   feedbackLoop?: Partial<FeedbackLoopConfig>;
   /** Threshold optimizer configuration */
   thresholdOptimizer?: Partial<ThresholdOptimizerConfig>;
+  /** Per-job timeout in milliseconds (default: 300000 = 5 minutes) */
+  jobTimeoutMs?: number;
+}
+
+/** Result of data retention cleanup */
+export interface DataRetentionResult {
+  signalsDeleted: number;
+  predictionsDeleted: number;
+  weightsDeleted: number;
+  memoriesDeleted: number;
+  eventsDeleted: number;
 }
 
 const DEFAULT_CONFIG: ScheduledJobsConfig = {
@@ -50,6 +71,32 @@ const DEFAULT_CONFIG: ScheduledJobsConfig = {
 // ============================================================================
 
 /**
+ * Wrap a promise with a timeout. Rejects with descriptive error if exceeded.
+ */
+function withTimeout<T>(promise: Promise<T>, label: string, timeoutMs: number): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => {
+      reject(new Error(`Job "${label}" timed out after ${timeoutMs}ms`));
+    }, timeoutMs);
+    promise.then(
+      (val) => { clearTimeout(timer); resolve(val); },
+      (err) => { clearTimeout(timer); reject(err); }
+    );
+  });
+}
+
+/**
+ * Safely run a job: wraps in timeout + try/catch → returns data or { error }.
+ */
+async function safeRun<T>(fn: () => Promise<T>, label: string, timeoutMs: number): Promise<JobResult<T>> {
+  try {
+    return await withTimeout(fn(), label, timeoutMs);
+  } catch (err: any) {
+    return { error: `[${label}] ${err.message || String(err)}` };
+  }
+}
+
+/**
  * Create a scheduled jobs runner
  */
 export function createScheduledJobs(
@@ -57,6 +104,7 @@ export function createScheduledJobs(
   config: Partial<ScheduledJobsConfig> = {}
 ) {
   const fullConfig = { ...DEFAULT_CONFIG, ...config };
+  const jobTimeout = fullConfig.jobTimeoutMs ?? 300_000; // 5 min default
 
   return {
     /**
@@ -288,36 +336,139 @@ export function createScheduledJobs(
       return promoter.promoteKnowledge();
     },
 
+    // ── Data Retention Job ────────────────────────────────────────────
+
+    /**
+     * Clean up stale data based on retention policies.
+     * Prevents unbounded table growth in production.
+     * Recommended: daily via cron.
+     */
+    async runDataRetention(_organizationId: string): Promise<DataRetentionResult> {
+      const retentionDays = {
+        signals: 180,
+        predictions: 365,
+        weightHistory: 90,
+        memory: 365,
+        events: 30,
+      };
+
+      let signalsDeleted = 0;
+      let predictionsDeleted = 0;
+      let weightsDeleted = 0;
+      let memoriesDeleted = 0;
+      let eventsDeleted = 0;
+
+      // cross_domain_signals: keep 180 days
+      const signalsCutoff = new Date(Date.now() - retentionDays.signals * 24 * 60 * 60 * 1000).toISOString();
+      const { count: sigCount } = await supabase
+        .from('cross_domain_signals')
+        .delete({ count: 'exact' })
+        .lt('created_at', signalsCutoff);
+      signalsDeleted = sigCount ?? 0;
+
+      // prediction_records: keep 365 days
+      try {
+        const predCutoff = new Date(Date.now() - retentionDays.predictions * 24 * 60 * 60 * 1000).toISOString();
+        const { count: predCount } = await supabase
+          .from('prediction_records')
+          .delete({ count: 'exact' })
+          .lt('created_at', predCutoff);
+        predictionsDeleted = predCount ?? 0;
+      } catch { /* table may not exist yet */ }
+
+      // weight_update_history: keep 90 days
+      try {
+        const weightCutoff = new Date(Date.now() - retentionDays.weightHistory * 24 * 60 * 60 * 1000).toISOString();
+        const { count: weightCount } = await supabase
+          .from('weight_update_history')
+          .delete({ count: 'exact' })
+          .lt('created_at', weightCutoff);
+        weightsDeleted = weightCount ?? 0;
+      } catch { /* table may not exist yet */ }
+
+      // ai_memory: archive low-importance memories older than 365 days
+      try {
+        const memCutoff = new Date(Date.now() - retentionDays.memory * 24 * 60 * 60 * 1000).toISOString();
+        const { count: memCount } = await supabase
+          .from('ai_memory')
+          .delete({ count: 'exact' })
+          .lt('created_at', memCutoff)
+          .lt('importance', 0.3);
+        memoriesDeleted = memCount ?? 0;
+      } catch { /* table may not exist yet */ }
+
+      // causal_event_stream: keep 30 days
+      try {
+        const eventCutoff = new Date(Date.now() - retentionDays.events * 24 * 60 * 60 * 1000).toISOString();
+        const { count: eventCount } = await supabase
+          .from('causal_event_stream')
+          .delete({ count: 'exact' })
+          .lt('created_at', eventCutoff);
+        eventsDeleted = eventCount ?? 0;
+      } catch { /* table may not exist yet */ }
+
+      return { signalsDeleted, predictionsDeleted, weightsDeleted, memoriesDeleted, eventsDeleted };
+    },
+
     // ── Combined Daily Job ───────────────────────────────────────────
 
     /**
-     * Run all daily maintenance jobs in sequence.
-     * A single entry point for cron: verifications → weights → decay → discovery → federation.
-     * Recommended: once daily via cron.
+     * Run all daily maintenance jobs with fault isolation.
+     *
+     * Production hardening:
+     * - Each job is wrapped in timeout + try/catch
+     * - Independent jobs run in parallel via Promise.allSettled
+     * - One job failure NEVER kills other jobs
+     * - Returns structured result with success data or error string per job
+     *
+     * Execution order:
+     * Phase A (sequential — dependency chain):   verifications → weights
+     * Phase B (parallel — independent):          decay + discovery
+     * Phase C (parallel — post-discovery):       federation + data retention
      */
     async runAllDailyJobs(organizationId: string): Promise<{
-      verifications: { verificationsProcessed: number };
-      weights: { weightsUpdated: WeightUpdate[]; degradingRelationships: RelationshipAccuracyMetrics[] };
-      decay: { edgesDecayed: number; edgesRemoved: number };
-      discovery: { newRelationships: CausalRelationship[]; lostRelationships: CausalRelationship[]; totalDiscovered: number };
-      federation: UpstreamPromotionResult;
+      verifications: JobResult<{ verificationsProcessed: number }>;
+      weights: JobResult<{ weightsUpdated: WeightUpdate[]; degradingRelationships: RelationshipAccuracyMetrics[] }>;
+      decay: JobResult<{ edgesDecayed: number; edgesRemoved: number }>;
+      discovery: JobResult<{ newRelationships: CausalRelationship[]; lostRelationships: CausalRelationship[]; totalDiscovered: number }>;
+      federation: JobResult<UpstreamPromotionResult>;
+      retention: JobResult<DataRetentionResult>;
     }> {
-      // 1. Process pending verifications first
-      const verifications = await this.runPendingVerifications(organizationId);
+      // Phase A: Sequential dependency chain (verifications → weights)
+      const verifications = await safeRun(
+        () => this.runPendingVerifications(organizationId),
+        'verifications', jobTimeout
+      );
+      const weights = await safeRun(
+        () => this.runWeightUpdates(organizationId),
+        'weights', jobTimeout
+      );
 
-      // 2. Update weights (needs verifications to be current)
-      const weights = await this.runWeightUpdates(organizationId);
+      // Phase B: Independent jobs (decay + discovery in parallel)
+      const [decaySettled, discoverySettled] = await Promise.allSettled([
+        safeRun(() => this.runEvidenceDecay(organizationId), 'decay', jobTimeout),
+        safeRun(() => this.runDailyCausalDiscovery(organizationId), 'discovery', jobTimeout),
+      ]);
+      const decay = decaySettled.status === 'fulfilled'
+        ? decaySettled.value
+        : { error: `[decay] ${(decaySettled as PromiseRejectedResult).reason?.message || 'unknown'}` };
+      const discovery = discoverySettled.status === 'fulfilled'
+        ? discoverySettled.value
+        : { error: `[discovery] ${(discoverySettled as PromiseRejectedResult).reason?.message || 'unknown'}` };
 
-      // 3. Apply evidence decay
-      const decay = await this.runEvidenceDecay(organizationId);
+      // Phase C: Post-discovery jobs (federation + retention in parallel)
+      const [fedSettled, retentionSettled] = await Promise.allSettled([
+        safeRun(() => this.runUpstreamFederation(organizationId), 'federation', jobTimeout),
+        safeRun(() => this.runDataRetention(organizationId), 'retention', jobTimeout),
+      ]);
+      const federation = fedSettled.status === 'fulfilled'
+        ? fedSettled.value
+        : { error: `[federation] ${(fedSettled as PromiseRejectedResult).reason?.message || 'unknown'}` };
+      const retention = retentionSettled.status === 'fulfilled'
+        ? retentionSettled.value
+        : { error: `[retention] ${(retentionSettled as PromiseRejectedResult).reason?.message || 'unknown'}` };
 
-      // 4. Run causal discovery (benefits from fresh weights)
-      const discovery = await this.runDailyCausalDiscovery(organizationId);
-
-      // 5. Promote anonymized knowledge upstream (after discovery finds new relationships)
-      const federation = await this.runUpstreamFederation(organizationId);
-
-      return { verifications, weights, decay, discovery, federation };
+      return { verifications, weights, decay, discovery, federation, retention };
     },
   };
 }

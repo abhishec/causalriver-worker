@@ -32,7 +32,6 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import {
-  runCausalDiscovery,
   type CausalRelationship,
 } from '../causality/causal-discovery-runner';
 import { detectAnomalies, type AnomalyEvent } from './anomaly-detector';
@@ -387,23 +386,38 @@ export function createAutonomousLearner(config: AutonomousLearnerConfig) {
         };
       }
 
-      // 2. DISCOVER: Run causal discovery
+      // 2. READ existing causal relationships from DB (discovery is delegated to consolidation engine)
+      // The autonomous learner focuses on pattern mining, anomaly detection, and promotion
+      // — NOT redundant full causal discovery (which runs via consolidation engine / scheduled jobs).
       let relationships: CausalRelationship[] = [];
       try {
-        const discovery = runCausalDiscovery(
-          signals.map((s: any) => ({
-            source_domain: s.source_domain,
-            signal_type: s.signal_type,
-            signal_value: s.signal_value,
-            signal_timestamp: s.signal_timestamp || s.created_at,
-          })),
-          organizationId,
-          { lookbackDays, minObservations: 5 }
-        );
-        relationships = discovery.discovered_relationships;
-        log(`Discovered ${relationships.length} causal relationships`);
+        const { data: dbRels } = await supabase
+          .from('causal_relationships_statistical')
+          .select('*')
+          .eq('organization_id', organizationId)
+          .eq('is_significant', true);
+
+        relationships = (dbRels || []).map((r: any) => ({
+          organization_id: organizationId,
+          source_domain: r.source_domain,
+          target_domain: r.target_domain,
+          granger_f_statistic: r.granger_f_statistic ?? 0,
+          granger_p_value: r.granger_p_value ?? 0.05,
+          optimal_lag_days: r.optimal_lag_days ?? 7,
+          effect_size: r.effect_size ?? 0,
+          confidence_interval_lower: r.confidence_interval_lower ?? 0,
+          confidence_interval_upper: r.confidence_interval_upper ?? 1,
+          natural_language: r.natural_language || '',
+          sample_size: r.sample_size ?? 0,
+          is_significant: r.is_significant ?? true,
+          knockout_score: r.knockout_score,
+          is_likely_confounded: r.is_likely_confounded,
+          coefficient_sign: r.coefficient_sign,
+          discovery_method: r.discovery_method,
+        }));
+        log(`Read ${relationships.length} existing causal relationships from DB (discovery delegated to consolidation engine)`);
       } catch (err: any) {
-        log(`Causal discovery error: ${err.message}`);
+        log(`Relationship read error: ${err.message}`);
       }
 
       // 3. DETECT: Run anomaly detection on signal values by domain
