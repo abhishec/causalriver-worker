@@ -1,20 +1,18 @@
 version: 1
-applications:
-  - appRoot: website
-    frontend:
-      phases:
-        preBuild:
-          commands:
-            - npm install -g pnpm@9
-            - pnpm install
-        build:
-          commands:
-            - pnpm run build
-      artifacts:
-        baseDirectory: out
-        files:
-          - "**/*"
-      cache:
-        paths:
-          - node_modules/**/*
-          - .next/cache/**/*
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - npm install -g pnpm@9
+        - cd website && pnpm install
+    build:
+      commands:
+        - cd website && npx next build
+  artifacts:
+    baseDirectory: website/out
+    files:
+      - "**/*"
+  cache:
+    paths:
+      - website/node_modules/**/*
+      - website/.next/cache/**/*
