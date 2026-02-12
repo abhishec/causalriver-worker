@@ -9,7 +9,7 @@
  *
  * Architecture:
  *
- *   ┌─────────────────── BRAIN PIPELINE ──────────────────────┐
+ *   ┌─────────────────── BRAIN PIPELINE (11 Regions) ─────────┐
  *   │                                                          │
  *   │  SCHEDULED (Brain Sleep):                                │
  *   │    Consolidation Engine (Hippocampus → Neocortex)        │
@@ -20,6 +20,10 @@
  *   │    Impact Scorer (Amygdala) → Attention Manager (Thalamus)│
  *   │    Fast-Path Compiler (Cerebellum)                       │
  *   │    What-If Simulator (Prefrontal Cortex)                 │
+ *   │                                                          │
+ *   │  MONITORING (Interoception):                             │
+ *   │    Anomaly Monitor (Insula) — detects unusual signals    │
+ *   │    Context Manager (Working Memory / dlPFC)              │
  *   │                                                          │
  *   │  LEARNING (Long-Term Potentiation):                      │
  *   │    Bayesian Updater → Embedding Tuner →                  │
@@ -122,6 +126,18 @@ import {
   type LLMTrainingResult,
 } from '../learning/llm-training-pipeline';
 
+import {
+  createAnomalyMonitor,
+  type AnomalyMonitorConfig,
+} from './anomaly-monitor';
+
+import {
+  createContextManager,
+  type ContextManagerConfig,
+} from './context-manager';
+
+import { createEventBus } from '../causality/event-bus';
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -173,6 +189,12 @@ export interface BrainPipelineConfig {
     maxContentPerSource?: number;
     fredApiKey?: string;
   };
+
+  /** Anomaly Monitor config (Insula) */
+  anomalyMonitor?: Partial<AnomalyMonitorConfig>;
+
+  /** Context Manager config (Working Memory / dlPFC) */
+  contextManager?: Partial<ContextManagerConfig>;
 
   verbose?: boolean;
 }
@@ -363,6 +385,26 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
         verbose,
       })
     : null;
+
+  // Insula: anomaly detection on incoming signals
+  // Brain Analog: The insula monitors internal body state (interoception).
+  // It detects when something feels "off" BEFORE you can articulate why.
+  // NexusBrain: detects statistical anomalies in signal streams before they cascade.
+  const eventBus = createEventBus();
+  const anomalyMonitor = createAnomalyMonitor(eventBus, {
+    ...config.anomalyMonitor,
+  });
+
+  // Working Memory (dlPFC): contextual state that shapes interpretation
+  // Brain Analog: The dorsolateral prefrontal cortex maintains working memory —
+  // what you're actively thinking about determines how you interpret new input.
+  // NexusBrain: tracks per-user queries, hot domains, and org focus to enrich queries.
+  const contextManager = createContextManager({
+    supabase,
+    organizationId,
+    verbose,
+    ...config.contextManager,
+  });
 
   // Track last cycle times for health reporting
   let lastConsolidationAt: string | undefined;
@@ -923,6 +965,18 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
             : 'Pipeline configured but not yet run')
           : 'Not configured — set llmTraining config to enable',
       },
+      {
+        name: 'Anomaly Monitor',
+        brainAnalog: 'Insula',
+        status: anomalyMonitor.getStats().totalAnomaliesDetected > 0 ? 'ok' : 'not_initialized',
+        details: `${anomalyMonitor.getStats().windowsTracked} signal windows tracked, ${anomalyMonitor.getStats().totalAnomaliesDetected} anomalies detected`,
+      },
+      {
+        name: 'Context Manager',
+        brainAnalog: 'Working Memory (dlPFC)',
+        status: 'ok',
+        details: 'Ready — per-user focus tracking and query enrichment active',
+      },
     ];
 
     const notInitialized = regions.filter(r => r.status === 'not_initialized').length;
@@ -978,6 +1032,9 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
     getActiveExplorer: () => activeExplorer,
     getWhatIfSimulator: () => whatIfSimulator,
     getConsolidationEngine: () => consolidationEngine,
+    getAnomalyMonitor: () => anomalyMonitor,
+    getContextManager: () => contextManager,
+    getEventBus: () => eventBus,
     getDMNEngine: () => dmnEngine,
     getBayesianUpdater: () => bayesianUpdater,
     getEmbeddingTuner: () => embeddingTuner,

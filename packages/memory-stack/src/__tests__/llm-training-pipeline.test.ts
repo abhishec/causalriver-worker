@@ -699,7 +699,7 @@ describe('Brain Pipeline Sensory Cortex Integration', () => {
     supabase = createMockSupabase();
   });
 
-  it('should include Sensory Cortex in health report (9 regions)', () => {
+  it('should include Sensory Cortex in health report (11 regions)', () => {
     const brain = createBrainPipeline({
       supabase,
       organizationId: 'org-test',
@@ -707,8 +707,8 @@ describe('Brain Pipeline Sensory Cortex Integration', () => {
 
     const health = brain.getHealth();
 
-    // Brain Analog: Neurological exam now tests 9 regions including Sensory Cortex
-    expect(health.regions).toHaveLength(9);
+    // Brain Analog: Neurological exam now tests 11 regions including Sensory Cortex
+    expect(health.regions).toHaveLength(11);
 
     const sensoryRegion = health.regions.find(r => r.name === 'Public Data Training');
     expect(sensoryRegion).toBeDefined();
@@ -804,7 +804,7 @@ describe('Brain Pipeline Sensory Cortex Integration', () => {
     expect(report.publicDataTraining).toBeNull();
   });
 
-  it('should have all 9 brain regions with correct analogs', () => {
+  it('should have all 11 brain regions with correct analogs', () => {
     const brain = createBrainPipeline({
       supabase,
       organizationId: 'org-test',
@@ -822,6 +822,8 @@ describe('Brain Pipeline Sensory Cortex Integration', () => {
     expect(analogs).toContain('Prefrontal Cortex');
     expect(analogs).toContain('Long-Term Potentiation');
     expect(analogs).toContain('Sensory Cortex');
+    expect(analogs).toContain('Insula');
+    expect(analogs).toContain('Working Memory (dlPFC)');
   });
 });
 
