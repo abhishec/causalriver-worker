@@ -390,6 +390,8 @@ export function createPublicDataLearner(config: PublicDataLearnerConfig) {
         signal_type: s.metricName,
         signal_value: s.value,
         signal_timestamp: s.timestamp,
+        entity_type: 'metric',
+        entity_id: `${s.source}:${s.metricName}`,
         signal_metadata: { source: s.source },
       }));
 
