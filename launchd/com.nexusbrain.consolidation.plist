@@ -10,7 +10,7 @@
     <key>ProgramArguments</key>
     <array>
         <string>/bin/bash</string>
-        <string>/Users/abhishek/Library/CloudStorage/GoogleDrive-abhishek@monetiz3.com/My Drive/Workspace - Monetize Organisation/02 - Product/NexusBrain/scripts/run-brain-agents.sh</string>
+        <string>/Users/abhishek/bin/nexusbrain-runner.sh</string>
         <string>consolidation</string>
     </array>
 
@@ -23,13 +23,10 @@
         <integer>0</integer>
     </dict>
 
-    <!-- Log output -->
-    <key>StandardOutPath</key>
-    <string>/Users/abhishek/Library/Logs/nexusbrain-consolidation.log</string>
-    <key>StandardErrorPath</key>
-    <string>/Users/abhishek/Library/Logs/nexusbrain-consolidation-error.log</string>
+    <!-- Logging handled by nexusbrain-runner.sh (appends to ~/Library/Logs/) -->
+    <!-- No StandardOutPath/StandardErrorPath — launchd truncates on each run -->
 
-    <!-- Keep alive only on schedule (don't restart on crash) -->
+    <!-- Don't restart on crash — wait for next scheduled run -->
     <key>KeepAlive</key>
     <false/>
 
@@ -37,7 +34,9 @@
     <key>EnvironmentVariables</key>
     <dict>
         <key>PATH</key>
-        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+        <string>/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/bin:/bin</string>
+        <key>HOME</key>
+        <string>/Users/abhishek</string>
     </dict>
 </dict>
 </plist>
