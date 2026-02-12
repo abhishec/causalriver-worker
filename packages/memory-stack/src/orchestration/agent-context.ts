@@ -36,7 +36,7 @@ export interface AgentCausalEdge {
 }
 
 /**
- * Context for an agent run — now enriched with causal intelligence.
+ * Context for an agent run — enriched with causal + observational intelligence.
  */
 export interface AgentContext {
   agentId: string;
@@ -63,6 +63,29 @@ export interface AgentContext {
     confoundedEdgeCount?: number;
     /** Count of knockout-validated edges */
     validatedEdgeCount?: number;
+  };
+  /**
+   * Observational memory context from the federated observation bridge.
+   * Provides accumulated intelligence from tagged observations:
+   * [FACT], [PREFERENCE], [EVENT], [CHANGE], [TEMPORAL], [RELATIONSHIP],
+   * [ASSISTANT_SAID], [ASSISTANT_CREATED].
+   *
+   * Proven at 79.6% accuracy on LongMemEval benchmark.
+   * Auto-injected at run initialization when observation bridge is available.
+   */
+  observationalContext?: {
+    /** Formatted observation context ready for prompt injection */
+    promptText: string;
+    /** Total observations in store for this org */
+    totalObservations: number;
+    /** Active rules (current facts/preferences) */
+    activeRules: number;
+    /** Detected cascades (entity change timelines) */
+    activeCascades: number;
+    /** Whether anomaly detection recommends abstention */
+    anomalyDetected: boolean;
+    /** Anomaly reason if detected */
+    anomalyReason?: string;
   };
 }
 
@@ -602,6 +625,39 @@ export function formatCausalContextForPrompt(context: AgentContext): string {
   sections.push('- Predict downstream impact of actions (follow downstream edges)');
   sections.push('- Distinguish correlation from causation (only VALIDATED edges are true causes)');
   sections.push('- Estimate time-to-effect using lag days');
+
+  // Append observational context if available
+  if (context.observationalContext?.promptText) {
+    sections.push('');
+    sections.push(context.observationalContext.promptText);
+    if (context.observationalContext.anomalyDetected) {
+      sections.push('');
+      sections.push(`⚠️ Anomaly detected: ${context.observationalContext.anomalyReason}`);
+      sections.push('Exercise extra caution — observations suggest low confidence for this domain.');
+    }
+  }
+
+  return sections.join('\n');
+}
+
+/**
+ * Format ONLY the observational context for agents that don't have causal context.
+ * Useful as a standalone enrichment when causal discovery hasn't run yet
+ * but observational memory has accumulated.
+ */
+export function formatObservationalContextForPrompt(context: AgentContext): string {
+  if (!context.observationalContext?.promptText) {
+    return '';
+  }
+
+  const sections: string[] = [];
+  sections.push(context.observationalContext.promptText);
+
+  if (context.observationalContext.anomalyDetected) {
+    sections.push('');
+    sections.push(`⚠️ Anomaly detected: ${context.observationalContext.anomalyReason}`);
+    sections.push('Exercise extra caution — observations suggest low confidence for this domain.');
+  }
 
   return sections.join('\n');
 }

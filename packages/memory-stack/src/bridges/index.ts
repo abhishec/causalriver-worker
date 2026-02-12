@@ -18,6 +18,14 @@ import {
   type CachedRelationship,
 } from './patterns-to-agents';
 import { createFeedbackBridge } from './outcome-to-feedback';
+import {
+  createObservationBridge,
+  type StructuredObservation,
+  type ObservationRule,
+  type ObservationCascade,
+  type ObservationStore,
+  type ObservationTag,
+} from './observation-bridge';
 
 // Re-export everything
 export { createSignalBridge };
@@ -25,6 +33,7 @@ export { createCausalSubscriber, type CausalSubscriberConfig };
 export { createLearningBridge, type LearningBridgeConfig };
 export { createAgentContextEnricher, type AgentContextCache, type CachedPattern, type CachedRelationship };
 export { createFeedbackBridge };
+export { createObservationBridge, type StructuredObservation, type ObservationRule, type ObservationCascade, type ObservationStore, type ObservationTag };
 
 // Re-export event bus types for convenience
 export type { CausalEvent, EventBusConfig } from '../causality/event-bus';
@@ -88,12 +97,21 @@ export function wireNexusBridges(
   // Bridge 5: Outcomes → Feedback Loop
   const feedbackBridge = createFeedbackBridge(eventBus);
 
+  // Bridge 6: Observation Memory (federated observational pipeline)
+  // Subscribes to all events, generates structured observations with
+  // [FACT], [PREFERENCE], [EVENT], [CHANGE], [TEMPORAL], [RELATIONSHIP],
+  // [ASSISTANT_SAID], [ASSISTANT_CREATED] tags.
+  // Maintains per-org observation stores with rules (L4), cascades (L5),
+  // entity graphs (L2), and relevance scoring (L3).
+  const observationBridge = createObservationBridge(eventBus);
+
   return {
     signalBridge,
     causalSubscriber,
     learningBridge,
     contextEnricher,
     feedbackBridge,
+    observationBridge,
 
     /** Get stats from all bridges */
     getStats() {
@@ -103,6 +121,7 @@ export function wireNexusBridges(
         learning: learningBridge.getStats(),
         context: contextEnricher.getStats(),
         feedback: feedbackBridge.getStats(),
+        observations: observationBridge.getStats(),
       };
     },
   };

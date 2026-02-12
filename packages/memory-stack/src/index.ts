@@ -267,8 +267,14 @@ export {
   createLearningBridge,
   createAgentContextEnricher,
   createFeedbackBridge,
+  createObservationBridge,
   type BridgeConfig,
   type AgentContextCache,
+  type StructuredObservation,
+  type ObservationRule,
+  type ObservationCascade,
+  type ObservationStore,
+  type ObservationTag,
 } from './bridges';
 
 // ============================================================================
@@ -689,6 +695,8 @@ export {
   // Agent Context
   createAgentContextManager,
   logAgentActivity,
+  formatCausalContextForPrompt,
+  formatObservationalContextForPrompt,
   type AgentContext,
   type AgentCausalEdge,
   type AgentRunResult,

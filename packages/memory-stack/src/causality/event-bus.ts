@@ -58,7 +58,12 @@ export type CausalEventType =
   | 'cascade_trigger'
   | 'cascade_propagation'
   | 'prediction'
-  | 'feedback';
+  | 'feedback'
+  // Observational memory event types (federated observational pipeline)
+  | 'observation'
+  | 'observation_rules_extracted'
+  | 'observation_cascades_analyzed'
+  | 'observation_ranked';
 
 /**
  * Configuration for the event bus
