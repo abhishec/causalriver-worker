@@ -35,6 +35,8 @@ import {
   handleSearchCIFailures,
   handleCollaborationNetwork,
   handleIngestADR,
+  handleDependencyGraph,
+  handleImpactAnalysis,
 } from './handlers.js';
 
 // ============================================================================
@@ -246,6 +248,34 @@ async function main(): Promise<void> {
       date: z.string().optional().describe('Date of the decision (ISO format)'),
     },
     async (args) => handleIngestADR(client, args),
+  );
+
+  // ── TOOL: nexus_dependency_graph ──────────────────────────────────────
+
+  server.tool(
+    'nexus_dependency_graph',
+    'Query the knowledge dependency graph for any entity — code files, financial line items, documents, or business processes. Returns upstream/downstream dependencies with filtering by domain and type.',
+    {
+      entity_id: z.string().describe('Entity to query (file path, financial term, document ID, etc.)'),
+      direction: z.enum(['upstream', 'downstream', 'both']).optional().describe('Dependency direction (default: both)'),
+      domain: z.string().optional().describe('Filter by knowledge domain (code, finance, research, documentation, legal, process)'),
+      transitive: z.boolean().optional().describe('Include transitive (indirect) dependencies (default: false)'),
+      max_depth: z.number().optional().describe('Max depth for transitive queries (default: 5)'),
+      limit: z.number().optional().describe('Max results to return (default: 20)'),
+    },
+    async (args) => handleDependencyGraph(client, args),
+  );
+
+  // ── TOOL: nexus_impact_analysis ─────────────────────────────────────
+
+  server.tool(
+    'nexus_impact_analysis',
+    'Analyze the blast radius of changes to any entity. Returns impact radius, risk score (0-1), affected business domains, critical dependency paths, and complexity metrics.',
+    {
+      entity_id: z.string().describe('Entity to analyze (e.g., "src/auth/session.ts", "MRR", "paper_attention")'),
+      domain: z.string().optional().describe('Filter analysis to a specific knowledge domain'),
+    },
+    async (args) => handleImpactAnalysis(client, args),
   );
 
   // ── RESOURCE: nexusbrain://relationships ───────────────────────────────

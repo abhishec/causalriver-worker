@@ -22,6 +22,7 @@
 
 import type { TrainingPack } from './brain-trainer';
 import { CORE_METRICS_LIBRARY } from './core-metrics-library';
+import { KNOWLEDGE_INTELLIGENCE_TRAINING_PACKS } from './knowledge-intelligence-training';
 
 // ============================================================================
 // 1. SAAS PRICING CHANGE CASCADE
@@ -903,6 +904,8 @@ export const TRAINING_LIBRARY: TrainingPack[] = [
   productMarketingBridge,
   // Core Metrics Library — VC/PE-grade financial intelligence
   ...CORE_METRICS_LIBRARY,
+  // Knowledge Intelligence — Dependency graph patterns
+  ...KNOWLEDGE_INTELLIGENCE_TRAINING_PACKS,
 ];
 
 /** Get a training pack by ID */

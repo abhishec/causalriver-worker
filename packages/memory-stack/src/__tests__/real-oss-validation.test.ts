@@ -798,7 +798,7 @@ describe('Real OSS Validation — vercel/next.js', () => {
   // ═════════════════════════════════════════════════════════════════════
 
   describe('6. Brain Training with Cross-Domain Packs', () => {
-    it('all 26 training packs load successfully including cross-domain bridges', () => {
+    it('all 29 training packs load successfully including cross-domain bridges', () => {
       const trainer = createBrainTrainer({
         verbose: false,
         defaultSampleSize: 200,

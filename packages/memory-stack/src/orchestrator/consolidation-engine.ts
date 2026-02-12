@@ -56,6 +56,7 @@ import {
 import { createBrainTrainer, type TrainingPack } from '../learning/brain-trainer';
 import { createExpertiseGraph } from '../core/expertise-graph';
 import { createCollaborationGraph } from '../core/collaboration-graph';
+import { createKnowledgeDependencyGraph, type DependencyType, type KnowledgeDomain } from '../core/knowledge-dependency-graph';
 import { createSupabaseRepository } from '../persistence/supabase-repository';
 import { getDefaultLogger, type NexusLogger } from '../observability';
 import { createMultiHopReasoner } from '../causality/multi-hop-reasoner';
@@ -1025,6 +1026,127 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
     }
   }
 
+  // ── Step 5.7: KNOWLEDGE DEPENDENCY — Build/update structural dependency graph ──
+
+  /**
+   * Data-driven mapping: signal_type → dependency recording.
+   * Co-change signals (files changed together) build dependency edges.
+   * Financial signals build feeds/rolls_up edges.
+   * Document signals build references edges.
+   */
+  const DEPENDENCY_SIGNAL_MAP: Record<string, {
+    entityIdField: string;
+    relatedEntitiesField: string;
+    dependencyType: DependencyType;
+    knowledgeDomain: KnowledgeDomain;
+  }> = {
+    // Code signals — files changed in same PR are co-dependent
+    'pr_merged':          { entityIdField: 'file_paths', relatedEntitiesField: 'file_paths', dependencyType: 'depends_on', knowledgeDomain: 'code' },
+    'pr_files_changed':   { entityIdField: 'file_paths', relatedEntitiesField: 'file_paths', dependencyType: 'depends_on', knowledgeDomain: 'code' },
+    // Financial signals
+    'revenue_recorded':   { entityIdField: 'line_item', relatedEntitiesField: 'related_accounts', dependencyType: 'feeds', knowledgeDomain: 'finance' },
+    'deal_closed':        { entityIdField: 'deal_id', relatedEntitiesField: 'products', dependencyType: 'depends_on', knowledgeDomain: 'finance' },
+    // Document/knowledge signals
+    'document_indexed':   { entityIdField: 'document_id', relatedEntitiesField: 'references', dependencyType: 'references', knowledgeDomain: 'documentation' },
+    'runbook_indexed':    { entityIdField: 'runbook_id', relatedEntitiesField: 'related_services', dependencyType: 'references', knowledgeDomain: 'documentation' },
+  };
+
+  async function updateKnowledgeDependencyGraph(signals: any[]): Promise<ConsolidationStepResult> {
+    const start = Date.now();
+    try {
+      const depGraph = createKnowledgeDependencyGraph();
+
+      // Load existing dependency graph from database
+      await depGraph.load(supabase, organizationId);
+
+      let edgesRecorded = 0;
+
+      for (const signal of signals) {
+        const mapping = DEPENDENCY_SIGNAL_MAP[signal.signal_type];
+        if (!mapping) continue;
+
+        const metadata = signal.signal_metadata || signal.metadata || {};
+
+        // Extract entity IDs
+        const entityIdRaw = metadata[mapping.entityIdField];
+        const entityIds: string[] = Array.isArray(entityIdRaw)
+          ? entityIdRaw.filter((v: unknown) => typeof v === 'string')
+          : (typeof entityIdRaw === 'string' ? [entityIdRaw] : []);
+
+        const relatedRaw = metadata[mapping.relatedEntitiesField];
+        const relatedIds: string[] = Array.isArray(relatedRaw)
+          ? relatedRaw.filter((v: unknown) => typeof v === 'string')
+          : (typeof relatedRaw === 'string' ? [relatedRaw] : []);
+
+        // For co-change signals (same field for both), build pairwise edges
+        if (mapping.entityIdField === mapping.relatedEntitiesField && entityIds.length > 1) {
+          for (let i = 0; i < entityIds.length; i++) {
+            for (let j = i + 1; j < entityIds.length; j++) {
+              depGraph.recordDependency({
+                sourceId: entityIds[i],
+                targetId: entityIds[j],
+                dependencyType: mapping.dependencyType,
+                knowledgeDomain: mapping.knowledgeDomain,
+                timestamp: signal.signal_timestamp ? new Date(signal.signal_timestamp) : new Date(),
+              });
+              edgesRecorded++;
+            }
+          }
+        } else {
+          // For directional signals (entity → related entities)
+          for (const entityId of entityIds) {
+            for (const relatedId of relatedIds) {
+              if (entityId === relatedId) continue;
+              depGraph.recordDependency({
+                sourceId: entityId,
+                targetId: relatedId,
+                dependencyType: mapping.dependencyType,
+                knowledgeDomain: mapping.knowledgeDomain,
+                timestamp: signal.signal_timestamp ? new Date(signal.signal_timestamp) : new Date(),
+              });
+              edgesRecorded++;
+            }
+          }
+        }
+      }
+
+      // Apply time-based decay
+      depGraph.applyDecay(new Date());
+
+      // Persist to database
+      if (edgesRecorded > 0) {
+        await depGraph.persist(supabase, organizationId);
+      }
+
+      const stats = depGraph.getStats();
+      const cycles = depGraph.detectCycles();
+
+      log('KNOWLEDGE_DEPENDENCY', `${edgesRecorded} edges → ${stats.totalEdges} total, ${stats.uniqueEntities} entities, ${cycles.count} cycles`);
+
+      return {
+        step: 'knowledge_dependency_update',
+        status: 'success',
+        durationMs: Date.now() - start,
+        details: {
+          edgesRecorded,
+          totalEdges: stats.totalEdges,
+          uniqueEntities: stats.uniqueEntities,
+          byDomain: stats.byDomain,
+          cycleCount: cycles.count,
+          avgDepsPerEntity: stats.avgDepsPerEntity,
+        },
+      };
+    } catch (err: any) {
+      logError('KNOWLEDGE_DEPENDENCY', 'Knowledge dependency graph update failed', err);
+      return {
+        step: 'knowledge_dependency_update',
+        status: 'error',
+        durationMs: Date.now() - start,
+        details: { error: err.message },
+      };
+    }
+  }
+
   // ── Step 5.6: COGNITIVE — Attention-aware multi-hop + uncertainty + forecasting ──
 
   async function runCognitiveAnalysis(
@@ -1509,6 +1631,24 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
             discoveries.push(`Validated and strengthened ${stats.edgesStrengthened} causal edge${stats.edgesStrengthened > 1 ? 's' : ''} through prediction accuracy verification`);
           }
           break;
+        case 'knowledge_dependency_update': {
+          const depEdges = (step.details.totalEdges as number) || 0;
+          const depEntities = (step.details.uniqueEntities as number) || 0;
+          const depCycles = (step.details.cycleCount as number) || 0;
+          const depByDomain = step.details.byDomain as Record<string, number> || {};
+          if (depEdges > 0) {
+            const domainSummary = Object.entries(depByDomain)
+              .map(([d, c]) => `${d}: ${c}`)
+              .join(', ');
+            discoveries.push(
+              `Knowledge dependency graph: ${depEdges} edges across ${depEntities} entities (${domainSummary})`
+            );
+          }
+          if (depCycles > 0) {
+            warnings.push(`${depCycles} circular dependency cycle${depCycles > 1 ? 's' : ''} detected in the knowledge graph`);
+          }
+          break;
+        }
         case 'cognitive_analysis': {
           const multiHopCount = (step.details.multiHopPathsFound as number) || 0;
           const dagQ = step.details.dagQuality as string || 'unknown';
@@ -2099,6 +2239,12 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
       const collabStep = await updateCollaborationGraph(signals);
       steps.push(collabStep);
       if (collabStep.status === 'error') errors.push('Collaboration graph update failed');
+
+      // Step 5.7: KNOWLEDGE DEPENDENCY — Build/update structural dependency graph
+      log('5.7/10', 'Updating knowledge dependency graph (code, finance, docs)...');
+      const depGraphStep = await updateKnowledgeDependencyGraph(signals);
+      steps.push(depGraphStep);
+      if (depGraphStep.status === 'error') errors.push('Knowledge dependency graph update failed');
 
       // Step 5.6: COGNITIVE — Multi-hop reasoning + uncertainty + intelligence briefing
       log('5.6/10', 'Running cognitive analysis (multi-hop reasoning, uncertainty, briefing)...');

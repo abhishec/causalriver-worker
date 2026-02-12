@@ -115,6 +115,9 @@ export function createEmbeddingTuner(config: EmbeddingTunerConfig) {
   let lossHistory: number[] = [];
   let totalPairsProcessed = 0;
 
+  // In-memory training pairs injected directly (Fix #4: no DB needed)
+  let injectedPairs: EmbeddingTrainingPair[] = [];
+
   function log(msg: string): void {
     if (verbose) {
       const time = new Date().toISOString().substring(11, 19);
@@ -303,8 +306,17 @@ export function createEmbeddingTuner(config: EmbeddingTunerConfig) {
     async tune(): Promise<TuningResult> {
       const start = Date.now();
 
-      // Generate training pairs from causal discoveries
-      const pairs = await generateTrainingPairs();
+      // Generate training pairs from causal discoveries (DB first, then in-memory fallback)
+      let pairs = await generateTrainingPairs();
+
+      // Fix #4: If DB returned nothing, use injected in-memory pairs
+      // Brain Analog: When the hippocampus can't access long-term cortical
+      // memory (DB), it uses working memory (in-memory edges) instead.
+      if (pairs.length < 3 && injectedPairs.length >= 3) {
+        pairs = [...injectedPairs];
+        log(`Using ${pairs.length} injected in-memory pairs (DB had < 3)`);
+      }
+
       if (pairs.length < 3) {
         log('Not enough training pairs — skipping fine-tuning');
         return {
@@ -497,6 +509,29 @@ export function createEmbeddingTuner(config: EmbeddingTunerConfig) {
         return true;
       }
       return false;
+    },
+
+    /**
+     * Inject training pairs from in-memory causal edges.
+     *
+     * Fix #4: The embedding tuner previously ONLY worked with a live DB
+     * (it queried `causal_relationships_statistical` to generate triplet pairs).
+     * This method allows training from in-memory causal discoveries —
+     * making the embedding tuner work standalone.
+     *
+     * Brain Analog: Working memory feeding the visual cortex directly,
+     * bypassing the long-term memory recall pathway.
+     */
+    injectTrainingPairs(pairs: EmbeddingTrainingPair[]): void {
+      injectedPairs = [...pairs];
+      log(`Injected ${pairs.length} training pairs from in-memory causal edges`);
+    },
+
+    /**
+     * Get the number of injected training pairs (for diagnostics).
+     */
+    getInjectedPairCount(): number {
+      return injectedPairs.length;
     },
   };
 }

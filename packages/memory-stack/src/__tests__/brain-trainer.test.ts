@@ -317,8 +317,8 @@ describe('Brain Trainer', () => {
 // ============================================================================
 
 describe('Training Library', () => {
-  it('should have 26 pre-built training packs', () => {
-    expect(TRAINING_LIBRARY.length).toBe(26);
+  it('should have 29 pre-built training packs', () => {
+    expect(TRAINING_LIBRARY.length).toBe(29);
   });
 
   it('should have unique IDs for all packs', () => {
@@ -360,7 +360,7 @@ describe('Training Library', () => {
       expect(result.success).toBe(true);
     }
     const stats = trainer.getTrainingStats();
-    expect(stats.casesLoaded).toBe(26);
+    expect(stats.casesLoaded).toBe(29);
     expect(stats.causalEdgesLoaded).toBeGreaterThan(20);
     expect(stats.patternsLoaded).toBeGreaterThan(10);
     expect(stats.rulesLoaded).toBeGreaterThan(10);

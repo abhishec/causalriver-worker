@@ -656,3 +656,95 @@ export async function buildAnalyzeMetricsPrompt(
     }],
   };
 }
+
+// ============================================================================
+// KNOWLEDGE DEPENDENCY GRAPH HANDLERS
+// ============================================================================
+
+/**
+ * Query the knowledge dependency graph for any entity (code file, financial line, document).
+ * Returns upstream/downstream dependencies, filtered by domain and type.
+ */
+export async function handleDependencyGraph(
+  client: NexusClient,
+  args: {
+    entity_id: string;
+    direction?: 'upstream' | 'downstream' | 'both';
+    domain?: string;
+    transitive?: boolean;
+    max_depth?: number;
+    limit?: number;
+  },
+): Promise<McpTextResult> {
+  try {
+    // Use the client's query method to ask the brain about dependencies
+    const query = [
+      `What are the ${args.direction || 'both'} dependencies of "${args.entity_id}"?`,
+      args.domain ? `Filter to the ${args.domain} domain.` : '',
+      args.transitive ? `Include transitive (indirect) dependencies up to depth ${args.max_depth || 5}.` : 'Show direct dependencies only.',
+      `Limit to ${args.limit || 20} results.`,
+    ].filter(Boolean).join(' ');
+
+    const result = await client.query({
+      question: query,
+      context: `dependency_graph_query:${args.entity_id}:${args.direction || 'both'}:${args.domain || 'all'}`,
+    });
+
+    const output = [
+      `## Dependencies for: ${args.entity_id}`,
+      `Direction: ${args.direction || 'both'}`,
+      args.domain ? `Domain: ${args.domain}` : 'Domain: all',
+      `Transitive: ${args.transitive ? 'yes' : 'no'}`,
+      '',
+      result.answer || 'No dependency data found. The knowledge dependency graph may not have data for this entity yet.',
+      '',
+      'Use nexus_impact_analysis to see the full blast radius of changes to this entity.',
+    ].join('\n');
+
+    return {
+      content: [{ type: 'text', text: output }],
+    };
+  } catch (err) {
+    return handleError(err);
+  }
+}
+
+/**
+ * Analyze the blast radius of changes to any entity.
+ * Returns impact radius, risk score, affected domains, and critical paths.
+ */
+export async function handleImpactAnalysis(
+  client: NexusClient,
+  args: {
+    entity_id: string;
+    domain?: string;
+  },
+): Promise<McpTextResult> {
+  try {
+    const query = [
+      `What is the impact analysis for "${args.entity_id}"?`,
+      'Include blast radius, risk score, affected business domains, and critical dependency paths.',
+      args.domain ? `Filter to the ${args.domain} domain.` : '',
+    ].filter(Boolean).join(' ');
+
+    const result = await client.query({
+      question: query,
+      context: `impact_analysis:${args.entity_id}:${args.domain || 'all'}`,
+    });
+
+    const output = [
+      `## Impact Analysis: ${args.entity_id}`,
+      args.domain ? `Domain: ${args.domain}` : 'Domain: all',
+      '',
+      result.answer || 'No impact data found. The knowledge dependency graph may not have data for this entity yet.',
+      '',
+      'Tip: Use nexus_dependency_graph to explore specific upstream/downstream dependencies.',
+    ].join('\n');
+
+    return {
+      content: [{ type: 'text', text: output }],
+    };
+  } catch (err) {
+    return handleError(err);
+  }
+}

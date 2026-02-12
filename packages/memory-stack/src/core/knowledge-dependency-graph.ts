@@ -164,14 +164,14 @@ const DOMAIN_MAP: Array<{ pattern: RegExp; domain: string }> = [
   // ── PRIORITY 1: Specific knowledge domains (must match before generic patterns) ──
 
   // Research (paper_X, study_X, methodology_X → research)
-  { pattern: /\bpaper\b|study|abstract|methodology|hypothesis|citation|thesis|dissertation/i, domain: 'research' },
+  { pattern: /paper_|paper\b|study|abstract|methodology|hypothesis|citation|thesis|dissertation/i, domain: 'research' },
 
   // Documentation (chapter_X, runbook_X, section_X → documentation)
   { pattern: /chapter|appendix|glossary|runbook|playbook|sop|procedure|textbook|handbook/i, domain: 'documentation' },
 
-  // Financial terms (MRR, ARR, revenue, balance sheet → finance)
-  { pattern: /revenue|mrr|arr|cltv|cac|arpu/i, domain: 'finance' },
-  { pattern: /cost|expense|opex|capex|margin/i, domain: 'finance' },
+  // Financial terms (MRR, ARR, revenue, balance sheet, EBITDA → finance)
+  { pattern: /revenue|mrr|arr|cltv|cac|arpu|ltv|ebitda/i, domain: 'finance' },
+  { pattern: /cost|expense|opex|capex|margin|investor|pnl/i, domain: 'finance' },
   { pattern: /balance.?sheet|p&?l|income.?statement|cash.?flow/i, domain: 'finance' },
 
   // Legal (GDPR, privacy, compliance → legal)

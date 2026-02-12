@@ -246,3 +246,11 @@ export function enrichSignalsWithNLP<T extends EnrichableSignal>(
   }
   return signals;
 }
+
+// Re-export knowledge-aware signal enricher for unified import
+export {
+  enrichSignalWithKnowledgeGraph,
+  enrichSignalsWithKnowledgeGraph,
+  type KnowledgeEnrichment,
+  type KnowledgeEnrichmentConfig,
+} from './knowledge-signal-enricher';
