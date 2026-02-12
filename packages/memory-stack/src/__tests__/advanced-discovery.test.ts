@@ -619,13 +619,13 @@ describe('Integration: runCausalDiscovery with advanced methods', () => {
     expect(result.pairs_tested).toBeGreaterThan(0);
   });
 
-  it('DEFAULT_DISCOVERY_CONFIG.method should be federated', () => {
-    expect(DEFAULT_DISCOVERY_CONFIG.method).toBe('federated');
+  it('DEFAULT_DISCOVERY_CONFIG.method should be three_paradigm', () => {
+    expect(DEFAULT_DISCOVERY_CONFIG.method).toBe('three_paradigm');
   });
 
-  it('default method should use federated when no method specified', () => {
+  it('default method should use three_paradigm when no method specified', () => {
     const signals = generateSignals(['Marketing', 'Revenue'], 120);
-    // No method specified — should use federated (best of CauseME + CausalRivers + NexusBrain)
+    // No method specified — should use three_paradigm (3 independent paradigms + Judge)
     const result = runCausalDiscovery(signals, 'org-default');
     expect(result.organization_id).toBe('org-default');
     expect(result.domains_analyzed.length).toBeGreaterThanOrEqual(2);

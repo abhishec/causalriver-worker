@@ -1,19 +1,19 @@
 /**
- * Ensemble Voting Tests — Thousand Brains Theory
+ * Ensemble Voting Tests — Three Paradigm Theory
  * ================================================
  *
- * Brain Analog: Jeff Hawkins' Thousand Brains Theory — every cortical column
- * builds its own model of the world. The brain takes a "vote" across thousands
- * of models. When models AGREE, confidence is high. When they DISAGREE,
- * the brain flags uncertainty and seeks more data.
+ * Brain Analog: Three genuinely independent paradigms each build their own
+ * causal model. A Bayesian Judge resolves disagreements diagnostically.
+ * When paradigms AGREE, confidence is high. When they DISAGREE,
+ * the Judge classifies WHY (confounded, nonlinear, contested).
  *
- * In NexusBrain, each causal discovery method is a "cortical column":
- * - Granger F-test
- * - Effect size assessment
- * - Confidence interval check
- * - P-value significance
- * - Confounder knockout
- * - Sample size adequacy
+ * Three Paradigms (genuinely independent):
+ * - Paradigm A: Parametric (APEX — Multivariate VAR + Counterfactual Knockout)
+ * - Paradigm B: Structural (PC Algorithm + VarLiNGAM)
+ * - Paradigm C: Information-theoretic (KSG Transfer Entropy)
+ *
+ * Statistical votes (derived, not independent):
+ * - Granger F-test, Effect size, P-value, Sample adequacy, Confounder knockout
  *
  * Tests:
  * 1. Method votes are recorded per edge
@@ -107,7 +107,7 @@ function generateCausalSignals(
 // TESTS
 // ============================================================================
 
-describe('Ensemble Voting (Thousand Brains Theory)', () => {
+describe('Ensemble Voting (Three Paradigm Theory)', () => {
   describe('Method Votes Per Edge', () => {
     it('should include methodVotes on discovered relationships', () => {
       const signals = generateCausalSignals(90, 0.8, 3);
@@ -138,7 +138,7 @@ describe('Ensemble Voting (Thousand Brains Theory)', () => {
         const rel = result.discovered_relationships[0];
         const methods = new Set(rel.methodVotes!.map(v => v.method));
 
-        // Brain Analog: at least 4 cortical columns voting
+        // Brain Analog: at least 4 assessments (3 paradigm + statistical votes)
         expect(methods.size).toBeGreaterThanOrEqual(4);
 
         // Should include these core methods
@@ -174,7 +174,7 @@ describe('Ensemble Voting (Thousand Brains Theory)', () => {
 
       if (abEdge) {
         // Strong signal → high agreement
-        // Brain Analog: "5/6 cortical columns agree A→B is causal (83% agreement)"
+        // Brain Analog: "5/7 assessments agree A→B is causal (71% agreement)"
         expect(abEdge.agreementRatio).toBeGreaterThan(0.5);
       }
     });
@@ -205,14 +205,15 @@ describe('Ensemble Voting (Thousand Brains Theory)', () => {
   });
 
   describe('Brain Analogy Validation', () => {
-    it('should model Thousand Brains: independent models vote, disagreement = uncertainty', () => {
+    it('should model Three Paradigms: independent paradigms vote, disagreement = diagnostic', () => {
       // Brain Analog:
-      // Each cortical column (method) builds its OWN model of causality.
-      // They don't share information during assessment — they vote independently.
-      // The brain then counts votes:
-      //   - High agreement → high confidence → strong synaptic weight
-      //   - Low agreement → flagged contentious → seek more data
-      //   - Insufficient data → abstain from vote
+      // Each paradigm (Parametric, Structural, Info-theoretic) assesses causality
+      // from different mathematical foundations. They vote independently.
+      // The Bayesian Judge then resolves disagreements:
+      //   - All 3 agree → confident (high confidence, strong synaptic weight)
+      //   - Parametric + Structural agree, TE disagrees → confounded
+      //   - Only TE agrees → nonlinear relationship
+      //   - Mixed → contested (seek more data)
 
       const signals = generateCausalSignals(90, 0.8, 3);
       const result = runCausalDiscovery(signals, 'org-test');

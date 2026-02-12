@@ -6,7 +6,7 @@
  *
  * This agent orchestrates the 10-step consolidation cycle:
  *   1. Fetch signals from last 48 hours
- *   2. Run full causal discovery (15-method federated ensemble)
+ *   2. Run full causal discovery (3-paradigm ensemble + Bayesian Judge)
  *   3. Detect cross-domain anomalies
  *   4. Mine patterns (Apriori + PrefixSpan + temporal rules)
  *   5. Auto-generate training packs from discoveries

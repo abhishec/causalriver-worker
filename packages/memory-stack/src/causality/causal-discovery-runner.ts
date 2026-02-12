@@ -40,16 +40,24 @@ import {
 // ============================================================================
 
 /**
- * Per-method vote for a causal edge — Thousand Brains Theory.
- * Brain Analog: Each cortical column (method) independently builds its own
- * model of whether A causes B. The brain takes a "vote" across all columns.
- * Disagreement = uncertainty.
+ * Per-paradigm vote for a causal edge — Three Paradigm Theory.
+ *
+ * Brain Analog: Instead of 15 correlated "cortical columns", we have 3
+ * genuinely independent paradigms that process causal evidence differently:
+ *   - Parametric (APEX/VAR): regression-based, captures linear effects
+ *   - Structural (PC/LiNGAM): constraint-based, catches confounders
+ *   - Info-theoretic (KSG TE): nonparametric, captures nonlinear effects
+ *
+ * Disagreement between paradigms is DIAGNOSTIC — it tells you WHY the
+ * evidence is uncertain (confounding, nonlinearity, or noise).
  */
 export interface MethodVote {
   method: string;
   vote: 'causal' | 'not_causal' | 'insufficient_data';
   confidence: number;
   pValue?: number;
+  /** Which paradigm this vote belongs to (if applicable) */
+  paradigm?: 'parametric' | 'structural' | 'info_theoretic' | 'statistical';
 }
 
 export interface CausalRelationship {
@@ -81,7 +89,7 @@ export interface CausalRelationship {
   coefficient_sign?: number;
   discovery_method?: string;
 
-  // Thousand Brains: per-method voting (added for ensemble transparency)
+  // Three Paradigm voting: per-method transparency (paradigm + statistical votes)
   methodVotes?: MethodVote[];
   agreementRatio?: number;    // methodsAgreeing / totalMethods (0-1)
   isContentious?: boolean;    // true if agreementRatio < 0.6
@@ -122,7 +130,7 @@ export const DEFAULT_DISCOVERY_CONFIG: DiscoveryConfig = {
   minObservations: 5, // Lowered: activate with sufficient data density, not arbitrary count
   lookbackDays: 90,
   alpha: 0.05,
-  method: 'federated', // Best of ALL worlds: CauseME (Ridge Granger + PC + TE) + CausalRivers (APEX + CF knockout) + NexusBrain (VarLiNGAM + calibrated ensemble), fully federated L1-L7
+  method: 'three_paradigm', // 3 independent paradigms (Parametric APEX + Structural PC/LiNGAM + Info-theoretic KSG) with diagnostic Judge resolution
 };
 
 export interface DiscoveryResult {
@@ -308,8 +316,20 @@ export function runCausalDiscovery(
 
     const confoundNote = isLikelyConfounded ? ' [possibly confounded]' : '';
 
-    // Thousand Brains: generate per-method votes for this edge
-    const votes = generateMethodVotes(result, method, knockoutScore, isLikelyConfounded);
+    // Extract paradigm-level scores (from three_paradigm method)
+    const paradigmScores = (ti !== undefined && si !== undefined && advancedResult?.paradigmScores)
+      ? {
+          parametric: advancedResult.paradigmScores.parametric[ti]?.[si],
+          structural: advancedResult.paradigmScores.structural[ti]?.[si],
+          infoTheoretic: advancedResult.paradigmScores.infoTheoretic[ti]?.[si],
+        }
+      : undefined;
+    const judgeVerdictVal = (ti !== undefined && si !== undefined)
+      ? advancedResult?.judgeVerdict?.[ti]?.[si]
+      : undefined;
+
+    // Three Paradigm voting: generate paradigm + statistical votes for this edge
+    const votes = generateMethodVotes(result, method, knockoutScore, isLikelyConfounded, paradigmScores, judgeVerdictVal);
     const causalVotes = votes.filter(v => v.vote === 'causal').length;
     const totalVotes = votes.filter(v => v.vote !== 'insufficient_data').length;
     const agreement = totalVotes > 0 ? causalVotes / totalVotes : 0;
@@ -427,16 +447,19 @@ export function findLostRelationships(
 // ============================================================================
 
 /**
- * Generate per-method votes for a causal edge — Thousand Brains Theory.
+ * Generate per-method votes for a causal edge — Three Paradigm Theory.
  *
- * Brain Analog: Each cortical column independently assesses whether the edge
- * is causal. We simulate this by decomposing the ensemble result into
- * per-method assessments based on the statistical evidence available.
+ * Brain Analog: 3 genuinely independent paradigms each assess causality
+ * from different mathematical foundations. A Bayesian Judge resolves
+ * disagreements diagnostically (confounded / nonlinear / contested).
  *
- * Methods assessed:
- * - Granger: F-statistic significance
- * - Effect Size: magnitude of the causal effect
- * - Confidence Interval: whether CI excludes zero
+ * Paradigm votes (genuinely independent):
+ * - Paradigm A: Parametric (APEX/VAR) — regression-based evidence
+ * - Paradigm B: Structural (PC/LiNGAM) — constraint-based evidence
+ * - Paradigm C: Info-theoretic (KSG TE) — nonlinear information flow
+ *
+ * Statistical votes (derived, for fine-grained transparency):
+ * - Granger F-test, Effect size, P-value, Sample adequacy, Confounder knockout
  * - Confounder Check: whether the edge survives knockout testing
  * - P-Value: raw statistical significance
  */
@@ -445,53 +468,92 @@ function generateMethodVotes(
   method: string,
   knockoutScore?: number,
   isLikelyConfounded?: boolean,
+  paradigmScores?: { parametric?: number; structural?: number; infoTheoretic?: number },
+  judgeVerdict?: string,
 ): MethodVote[] {
   const votes: MethodVote[] = [];
 
-  // Method 1: Granger F-test (statistical causality)
+  // ── PARADIGM-LEVEL VOTES (genuinely independent assessments) ──
+  // These are the 3 paradigms that actually matter for confidence.
+
+  if (paradigmScores) {
+    // Paradigm A: Parametric (APEX/VAR) — regression-based evidence
+    if (paradigmScores.parametric !== undefined) {
+      votes.push({
+        method: 'paradigm_parametric',
+        paradigm: 'parametric',
+        vote: paradigmScores.parametric > 0.25 ? 'causal' : 'not_causal',
+        confidence: Math.min(1, paradigmScores.parametric * 2),
+      });
+    }
+
+    // Paradigm B: Structural (PC + VarLiNGAM) — constraint-based evidence
+    if (paradigmScores.structural !== undefined) {
+      votes.push({
+        method: 'paradigm_structural',
+        paradigm: 'structural',
+        vote: paradigmScores.structural > 0.25 ? 'causal' : 'not_causal',
+        confidence: Math.min(1, paradigmScores.structural * 2),
+      });
+    }
+
+    // Paradigm C: Information-theoretic (KSG TE) — nonlinear information flow
+    if (paradigmScores.infoTheoretic !== undefined) {
+      votes.push({
+        method: 'paradigm_info_theoretic',
+        paradigm: 'info_theoretic',
+        vote: paradigmScores.infoTheoretic > 0.25 ? 'causal' : 'not_causal',
+        confidence: Math.min(1, paradigmScores.infoTheoretic * 2),
+      });
+    }
+  }
+
+  // ── STATISTICAL VOTES (derived from the same parametric output) ──
+  // These provide finer-grained statistical evidence but are NOT independent.
+
+  // Granger F-test
   votes.push({
     method: 'granger_f_test',
+    paradigm: 'statistical',
     vote: result.fStatistic > 3.84 ? 'causal' : result.fStatistic > 0 ? 'not_causal' : 'insufficient_data',
     confidence: Math.min(1, result.fStatistic / 10),
     pValue: result.pValue,
   });
 
-  // Method 2: Effect size (practical significance)
-  votes.push({
-    method: 'effect_size',
-    vote: result.effectSize > 0.3 ? 'causal' : 'not_causal',
-    confidence: result.effectSize,
-  });
-
-  // Method 3: Confidence interval (excludes zero → causal)
-  const ciLower = result.confidenceInterval?.lower ?? 0;
-  votes.push({
-    method: 'confidence_interval',
-    vote: ciLower > 0.05 ? 'causal' : 'not_causal',
-    confidence: ciLower > 0 ? Math.min(1, ciLower * 5) : 0,
-  });
-
-  // Method 4: P-value (Bayesian interpretation)
+  // P-value
   votes.push({
     method: 'p_value',
+    paradigm: 'statistical',
     vote: result.pValue < 0.05 ? 'causal' : result.pValue < 0.1 ? 'not_causal' : 'insufficient_data',
     confidence: Math.max(0, 1 - result.pValue * 10),
     pValue: result.pValue,
   });
 
-  // Method 5: Confounder knockout (robustness check) — only if available
+  // Confounder knockout — only if available
   if (knockoutScore !== undefined) {
     votes.push({
       method: 'confounder_knockout',
+      paradigm: 'parametric',
       vote: !isLikelyConfounded ? 'causal' : 'not_causal',
       confidence: knockoutScore,
     });
   }
 
-  // Method 6: Sample size adequacy
+  // Effect size (R² improvement) — how much variance the source explains
+  if (result.effectSize > 0) {
+    votes.push({
+      method: 'effect_size',
+      paradigm: 'statistical',
+      vote: result.effectSize > 0.1 ? 'causal' : result.effectSize > 0.02 ? 'not_causal' : 'insufficient_data',
+      confidence: Math.min(1, result.effectSize * 3),
+    });
+  }
+
+  // Sample size adequacy
   if (result.sampleSize > 0) {
     votes.push({
       method: 'sample_adequacy',
+      paradigm: 'statistical',
       vote: result.sampleSize >= 30 ? 'causal' : result.sampleSize >= 10 ? 'not_causal' : 'insufficient_data',
       confidence: Math.min(1, result.sampleSize / 100),
     });

@@ -245,7 +245,7 @@ describe('Brain Health Checkup (Neurological Exam)', () => {
       const result = runCausalDiscovery(signals, 'org-health');
 
       for (const rel of result.discovered_relationships) {
-        // Thousand Brains: each edge has method votes
+        // Three Paradigm voting: each edge has paradigm + statistical votes
         expect(rel.methodVotes).toBeDefined();
         expect(rel.agreementRatio).toBeDefined();
         expect(typeof rel.isContentious).toBe('boolean');

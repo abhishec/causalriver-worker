@@ -1,24 +1,36 @@
 /**
  * Advanced Causal Discovery Methods
  *
- * Best-of-both-worlds fusion: CauseME benchmark algorithms + CausalRiver streaming methods.
- * Ported from CausalRivers benchmark (scripts/benchmarks/causalrivers/nexusbrain_granger.py)
- * and CauseME benchmark (scripts/benchmarks/causeme/causeme_method.py).
+ * Architecture: 3 Independent Paradigms + Bayesian Judge
+ * =====================================================
  *
- * Methods included:
- * 1. Cascade-Aware Scoring — penalizes indirect/mediated paths
- * 2. Calibrated Ensemble — weighted voting across multiple methods
- * 3. Greedy Causal Peeling — iterative graph refinement via OMP
- * 4. Multi-Resolution Temporal Pyramids — multi-scale Granger fusion
- * 5. Anomaly-Conditioned Scoring — causal effects strongest during extremes
- * 6. Regime-Conditional Scoring — separate VAR for normal vs anomaly periods
- * 7. NexusBrain Final — self-tuning VAR + cascade + p-value + asymmetry
- * 8. APEX — CausalRivers-proven VAR + F-test + CF knockout + sign prior
- * 9. World-Class — adaptive linear/nonlinear ensemble
- * 10. PC Structural — constraint-based + VAR scoring (CauseME PCMCI+ port)
- * 11. Transfer Entropy — nonlinear information flow (CauseME KSG port)
- * 12. VarLiNGAM — non-Gaussian structural model (CauseME port)
- * 13. Federated — ultimate fusion of ALL methods across all layers (L1-L7)
+ * Instead of 15 correlated methods voting, NexusBrain uses 3 fundamentally
+ * independent causal inference paradigms that cover each other's blind spots:
+ *
+ *   Paradigm A — PARAMETRIC (Multivariate VAR + Counterfactual Knockout)
+ *     Primary scorer. APEX method: VAR coefficients + Granger F-test +
+ *     counterfactual knockout for confounder detection + sign prior.
+ *     Proven on CausalRivers (beats VAR baseline on 9/10 datasets).
+ *
+ *   Paradigm B — STRUCTURAL (PC Algorithm + VarLiNGAM)
+ *     Constraint-based DAG discovery. PC identifies conditional independence
+ *     structures + v-structures. VarLiNGAM exploits non-Gaussianity to
+ *     orient edges. Catches confounders that parametric methods miss.
+ *
+ *   Paradigm C — INFORMATION-THEORETIC (KSG Transfer Entropy)
+ *     Nonparametric, nonlinear. KSG estimator measures information flow
+ *     without discretization. Captures nonlinear dependencies invisible
+ *     to VAR. k-nearest neighbor based — no binning artifacts.
+ *
+ *   The Judge resolves paradigm disagreements:
+ *     - All 3 agree → high confidence (1.35× boost)
+ *     - VAR + Structural agree, TE disagrees → linear effect, high confidence
+ *     - VAR says edge but Structural says no → likely confounded (0.85× penalty)
+ *     - TE says edge but others don't → likely nonlinear or spurious
+ *     - Structural says edge but VAR says no → likely nonlinear effect
+ *
+ * Legacy methods (cascade_aware, calibrated_ensemble, etc.) are preserved
+ * for backward compatibility and benchmark reproducibility.
  *
  * All methods return PairwiseScoreMatrix with scores[i][j] = evidence that j causes i.
  */
@@ -68,7 +80,8 @@ export type AdvancedDiscoveryMethod =
   | 'pc_structural'
   | 'transfer_entropy'
   | 'var_lingam'
-  | 'federated';
+  | 'federated'        // Legacy alias → routes to three_paradigm
+  | 'three_paradigm';  // DEFAULT: 3 independent paradigms + Judge
 
 export interface AdvancedDiscoveryConfig {
   method: AdvancedDiscoveryMethod;
@@ -114,14 +127,22 @@ export interface PairwiseScoreMatrix {
   scores: number[][];
   optimalLags: number[][];
   pValues: number[][];
-  // Confounder detection metadata (populated by apex method)
+  // Confounder detection metadata (populated by apex/three_paradigm method)
   knockoutScores?: number[][];
   confounderFlags?: boolean[][];
   signMatrix?: number[][];
+  // Paradigm disagreement metadata (populated by three_paradigm method)
+  paradigmScores?: {
+    parametric: number[][];   // Paradigm A: APEX (VAR + CF knockout)
+    structural: number[][];   // Paradigm B: PC + VarLiNGAM
+    infoTheoretic: number[][]; // Paradigm C: KSG Transfer Entropy
+  };
+  paradigmAgreement?: number[][]; // 0-3: how many paradigms agree edge is top-25%
+  judgeVerdict?: ('confident' | 'confounded' | 'nonlinear' | 'contested' | 'absent')[][];
 }
 
 export const DEFAULT_ADVANCED_CONFIG: AdvancedDiscoveryConfig = {
-  method: 'federated',
+  method: 'three_paradigm',
   maxLag: 14,
   lagSelectionCriterion: 'AIC',
   alpha: 0.05,
@@ -1481,8 +1502,8 @@ function pcStructuralScoring(
  * Unlike Granger (linear), TE captures nonlinear causal effects by measuring
  * information flow: TE(X→Y) = H(Y_future|Y_past) - H(Y_future|Y_past,X_past).
  *
- * Uses quantile-binned discretization (4 bins) with bootstrap significance.
- * Integrated into the federated ensemble as the nonlinear information channel.
+ * Uses KSG continuous estimator (k-nearest neighbor) with bootstrap significance.
+ * Paradigm C in the 3-paradigm architecture — the nonlinear information channel.
  */
 function transferEntropyScoring(
   data: Record<string, number[]>,
@@ -1720,36 +1741,47 @@ function varLiNGAMScoring(
 }
 
 // ============================================================================
-// METHOD 15: FEDERATED DISCOVERY (Best of CauseME + CausalRiver + All Layers)
+// METHOD 15: THREE-PARADIGM DISCOVERY + JUDGE
+// (Formerly "federated" — renamed to avoid confusion with Federation system)
 // ============================================================================
 
 /**
- * Federated causal discovery — the ultimate fusion of ALL methods.
+ * Three-Paradigm Causal Discovery with Judge Resolution
  *
- * Combines the best of:
- * - CauseME: Ridge Granger, PC structural constraints, Transfer Entropy (nonlinear)
- * - CausalRiver: APEX (VAR + CF knockout), calibrated ensemble, cascade-aware
- * - NexusBrain: VarLiNGAM structural ID, multi-resolution, regime-conditional
+ * 3 fundamentally independent paradigms that cover each other's blind spots,
+ * resolved by a Judge that interprets disagreements diagnostically:
  *
- * Architecture:
- * 1. LINEAR CHANNEL: Ridge conditional Granger (CauseME-proven)
- * 2. STRUCTURAL CHANNEL: PC algorithm + VarLiNGAM (CauseME structural ID)
- * 3. NONLINEAR CHANNEL: Transfer Entropy (CauseME KSG port)
- * 4. CAUSAL RIVER CHANNEL: APEX + counterfactual knockout
- * 5. AGREEMENT VOTING: Top-25% edges agreed by ≥4 channels get 40% boost
+ * ┌─────────────────────────────────────────────────────────────┐
+ * │  PARADIGM A: PARAMETRIC                                     │
+ * │  APEX (VAR coefficients + Granger F-test + CF knockout)     │
+ * │  Best for: linear, stationary causal relationships          │
+ * │  CausalRivers: beats VAR baseline on 9/10 datasets          │
+ * ├─────────────────────────────────────────────────────────────┤
+ * │  PARADIGM B: STRUCTURAL                                     │
+ * │  PC Algorithm (DAG skeleton + v-structures) + VarLiNGAM     │
+ * │  Best for: confounder detection, edge orientation            │
+ * │  Catches confounders that parametric methods miss            │
+ * ├─────────────────────────────────────────────────────────────┤
+ * │  PARADIGM C: INFORMATION-THEORETIC                          │
+ * │  KSG Transfer Entropy (k-nearest neighbor, no binning)      │
+ * │  Best for: nonlinear dependencies invisible to VAR           │
+ * │  Upgraded from 4-bin histogram to continuous KSG estimator   │
+ * └─────────────────────────────────────────────────────────────┘
+ *                          ↓
+ * ┌─────────────────────────────────────────────────────────────┐
+ * │  THE JUDGE                                                   │
+ * │  Resolves disagreements diagnostically:                      │
+ * │  • All 3 agree → "confident" (1.35× boost)                  │
+ * │  • A+B agree, C disagrees → "confident" (1.20× boost)       │
+ * │  • A says edge, B says no → "confounded" (0.85× penalty)    │
+ * │  • C says edge, A+B say no → "nonlinear" (1.10× boost)      │
+ * │  • B says edge, A says no → "nonlinear" (1.10× boost)       │
+ * │  • Mixed signals → "contested" (no modifier)                 │
+ * └─────────────────────────────────────────────────────────────┘
  *
- * This method integrates fully across all 7 intelligence layers:
- * - L1 Signal: Processes raw cross-domain signals
- * - L2 Causal: Runs ALL discovery methods in parallel
- * - L3 Pattern: Structural constraints from PC algorithm
- * - L4 Rule: VarLiNGAM structural ordering for rule generation
- * - L5 Cascade: Cascade-aware scoring penalizes indirect paths
- * - L6 Prediction: Multi-resolution temporal pyramids for forecasting
- * - L7 Anomaly: Regime-conditional + anomaly-conditioned scoring
- *
- * Returns confounder metadata, sign matrix, and knockout scores from APEX.
+ * Returns paradigm-level scores + Judge verdicts for transparency.
  */
-function federatedScoring(
+function threeParadigmScoring(
   data: Record<string, number[]>,
   overrides: Partial<AdvancedDiscoveryConfig> = {}
 ): PairwiseScoreMatrix {
@@ -1766,97 +1798,147 @@ function federatedScoring(
     };
   }
 
-  // ── Channel 1: LINEAR (CauseME Ridge Granger) ──
-  const ridgeScores = ridgeConditionalScoresMatrix(data, cfg);
-  const ridgeNorm = normalizeScores(ridgeScores);
+  // ══════════════════════════════════════════════════════════════
+  // PARADIGM A: PARAMETRIC — APEX (VAR + CF knockout)
+  // The proven primary scorer. Multivariate VAR with counterfactual
+  // validation. This is NOT pairwise — it conditions on all variables.
+  // ══════════════════════════════════════════════════════════════
+  const apexResult = apexScoring(data, overrides);
+  const paradigmA = normalizeScores(apexResult.scores);
 
-  // ── Channel 2: STRUCTURAL (PC + VarLiNGAM) ──
+  // ══════════════════════════════════════════════════════════════
+  // PARADIGM B: STRUCTURAL — PC Algorithm + VarLiNGAM
+  // Genuinely independent: uses conditional independence tests (PC)
+  // and non-Gaussianity (LiNGAM), NOT VAR coefficients.
+  // ══════════════════════════════════════════════════════════════
   const pcResult = pcStructuralScoring(data, overrides);
   const pcNorm = normalizeScores(pcResult.scores);
 
   const lingamResult = varLiNGAMScoring(data, overrides);
   const lingamNorm = normalizeScores(lingamResult.scores);
 
-  // Fuse structural: PC (structural constraint) + LiNGAM (direction ID)
-  const structuralNorm = zeroMatrix(n);
+  // Fuse: PC for constraint structure, LiNGAM for direction identification
+  const paradigmB = zeroMatrix(n);
   for (let i = 0; i < n; i++) {
     for (let j = 0; j < n; j++) {
       if (i === j) continue;
-      structuralNorm[i][j] = 0.5 * pcNorm[i][j] + 0.5 * lingamNorm[i][j];
+      paradigmB[i][j] = 0.5 * pcNorm[i][j] + 0.5 * lingamNorm[i][j];
     }
   }
 
-  // ── Channel 3: NONLINEAR (Transfer Entropy) ──
+  // ══════════════════════════════════════════════════════════════
+  // PARADIGM C: INFORMATION-THEORETIC — KSG Transfer Entropy
+  // Genuinely independent: uses k-nearest neighbor information
+  // flow estimation, NOT regression coefficients. Captures nonlinear
+  // dependencies invisible to both VAR and conditional independence.
+  // ══════════════════════════════════════════════════════════════
   const teResult = transferEntropyScoring(data, overrides);
-  const teNorm = normalizeScores(teResult.scores);
+  const paradigmC = normalizeScores(teResult.scores);
 
-  // ── Channel 4: CAUSAL RIVER (APEX + CF knockout) ──
-  const apexResult = apexScoring(data, overrides);
-  const apexNorm = normalizeScores(apexResult.scores);
+  // ══════════════════════════════════════════════════════════════
+  // THE JUDGE — Diagnostic Disagreement Resolution
+  // Unlike naive voting, the Judge interprets WHY paradigms disagree
+  // and assigns a verdict that informs downstream consumers.
+  // ══════════════════════════════════════════════════════════════
 
-  // ── Channel 5: ENSEMBLE (calibrated ensemble for stability) ──
-  const ensembleResult = calibratedEnsembleScoring(data, overrides);
-  const ensembleNorm = normalizeScores(ensembleResult.scores);
-
-  // ── Adaptive weighting: detect nonlinearity to adjust channel weights ──
+  // Detect nonlinearity to adjust base weights
   const isNonlinear = detectNonlinearity(series);
 
-  let wRidge: number, wStructural: number, wTE: number, wApex: number, wEnsemble: number;
+  // Base weights: Parametric is primary, others contribute independently
+  let wA: number, wB: number, wC: number;
   if (isNonlinear) {
-    // Nonlinear: boost TE and APEX (CF knockout captures nonlinear effects)
-    wRidge = 2.0;
-    wStructural = 2.0;
-    wTE = 3.0;       // Transfer Entropy shines on nonlinear data
-    wApex = 3.0;
-    wEnsemble = 1.5;
+    wA = 2.5;  // VAR still useful even in nonlinear regime
+    wB = 2.0;  // Structural constraints still valid
+    wC = 3.0;  // TE shines on nonlinear data
   } else {
-    // Linear: boost Ridge and structural
-    wRidge = 3.0;
-    wStructural = 2.5;
-    wTE = 1.5;
-    wApex = 2.0;
-    wEnsemble = 2.0;
+    wA = 3.5;  // VAR is king for linear systems
+    wB = 2.0;  // Structural adds confounder protection
+    wC = 1.5;  // TE less useful when relationships are linear
   }
-  const totalW = wRidge + wStructural + wTE + wApex + wEnsemble;
+  const totalW = wA + wB + wC;
 
-  // ── Weighted fusion ──
+  // Weighted base fusion
   const fused = zeroMatrix(n);
   for (let i = 0; i < n; i++) {
     for (let j = 0; j < n; j++) {
       if (i === j) continue;
       fused[i][j] = (
-        wRidge * ridgeNorm[i][j] +
-        wStructural * structuralNorm[i][j] +
-        wTE * teNorm[i][j] +
-        wApex * apexNorm[i][j] +
-        wEnsemble * ensembleNorm[i][j]
+        wA * paradigmA[i][j] +
+        wB * paradigmB[i][j] +
+        wC * paradigmC[i][j]
       ) / totalW;
     }
   }
 
-  // ── Agreement voting: edges ranked top-25% by ≥4/5 channels get 40% boost ──
+  // Paradigm agreement assessment — classify each edge by paradigm consensus
   const nEdges = n * (n - 1);
-  if (nEdges > 0) {
-    const topK = Math.max(1, Math.floor(nEdges / 4));
-    const agreement = zeroMatrix(n);
+  const paradigmAgreement = zeroMatrix(n);
+  const judgeVerdict: ('confident' | 'confounded' | 'nonlinear' | 'contested' | 'absent')[][] =
+    Array.from({ length: n }, () => Array(n).fill('absent'));
 
-    for (const scoreMatrix of [ridgeNorm, structuralNorm, teNorm, apexNorm, ensembleNorm]) {
+  if (nEdges > 0) {
+    // Determine top-25% threshold for each paradigm
+    const topK = Math.max(1, Math.floor(nEdges / 4));
+
+    // Precompute top-25% sets for each paradigm
+    function getTopSet(scores: number[][]): boolean[][] {
       const flat: { i: number; j: number; v: number }[] = [];
       for (let i = 0; i < n; i++)
         for (let j = 0; j < n; j++)
-          if (i !== j) flat.push({ i, j, v: scoreMatrix[i][j] });
+          if (i !== j) flat.push({ i, j, v: scores[i][j] });
       flat.sort((a, b) => b.v - a.v);
       const threshold = flat[Math.min(topK - 1, flat.length - 1)]?.v ?? 0;
+      const isTop: boolean[][] = Array.from({ length: n }, () => Array(n).fill(false));
       for (let i = 0; i < n; i++)
         for (let j = 0; j < n; j++)
-          if (i !== j && scoreMatrix[i][j] >= threshold) agreement[i][j] += 1;
+          if (i !== j && scores[i][j] >= threshold) isTop[i][j] = true;
+      return isTop;
     }
 
-    for (let i = 0; i < n; i++)
+    const topA = getTopSet(paradigmA);
+    const topB = getTopSet(paradigmB);
+    const topC = getTopSet(paradigmC);
+
+    for (let i = 0; i < n; i++) {
       for (let j = 0; j < n; j++) {
-        if (agreement[i][j] >= 4) fused[i][j] *= 1.40; // Strong consensus: 40% boost
-        else if (agreement[i][j] >= 3) fused[i][j] *= 1.20; // Moderate consensus: 20% boost
+        if (i === j) continue;
+
+        const inA = topA[i][j];
+        const inB = topB[i][j];
+        const inC = topC[i][j];
+        const count = (inA ? 1 : 0) + (inB ? 1 : 0) + (inC ? 1 : 0);
+
+        paradigmAgreement[i][j] = count;
+
+        // ── Judge logic: diagnostic resolution ──
+        if (count === 3) {
+          // All 3 paradigms agree → very high confidence
+          judgeVerdict[i][j] = 'confident';
+          fused[i][j] *= 1.35;
+        } else if (inA && inB && !inC) {
+          // VAR + Structural agree, TE doesn't → linear causal, high confidence
+          judgeVerdict[i][j] = 'confident';
+          fused[i][j] *= 1.20;
+        } else if (inA && !inB) {
+          // VAR says edge but Structural disagrees → likely confounded
+          // Structural uses conditional independence — if it rejects, confounding is likely
+          judgeVerdict[i][j] = 'confounded';
+          fused[i][j] *= 0.85;
+        } else if (!inA && inC) {
+          // TE sees something VAR misses → nonlinear effect
+          judgeVerdict[i][j] = 'nonlinear';
+          fused[i][j] *= 1.10;
+        } else if (!inA && inB) {
+          // Structural sees something VAR misses → nonlinear or weak effect
+          judgeVerdict[i][j] = 'nonlinear';
+          fused[i][j] *= 1.10;
+        } else if (count >= 1) {
+          // Mixed signals — keep base score, flag for review
+          judgeVerdict[i][j] = 'contested';
+        }
+        // count === 0 → 'absent' (already default)
       }
+    }
   }
 
   return {
@@ -1867,7 +1949,22 @@ function federatedScoring(
     knockoutScores: apexResult.knockoutScores,
     confounderFlags: apexResult.confounderFlags,
     signMatrix: apexResult.signMatrix,
+    paradigmScores: {
+      parametric: paradigmA,
+      structural: paradigmB,
+      infoTheoretic: paradigmC,
+    },
+    paradigmAgreement,
+    judgeVerdict,
   };
+}
+
+/** @deprecated Use threeParadigmScoring. Kept as alias for backward compatibility. */
+function federatedScoring(
+  data: Record<string, number[]>,
+  overrides: Partial<AdvancedDiscoveryConfig> = {}
+): PairwiseScoreMatrix {
+  return threeParadigmScoring(data, overrides);
 }
 
 // ============================================================================
@@ -1877,8 +1974,9 @@ function federatedScoring(
 /**
  * Run advanced causal discovery using the specified method.
  *
- * Default method: 'federated' — ultimate fusion of CauseME + CausalRivers + NexusBrain methods,
- * fully integrated across all 7 intelligence layers with adaptive linear/nonlinear weighting.
+ * Default method: 'three_paradigm' — 3 independent paradigms (Parametric APEX,
+ * Structural PC+LiNGAM, Information-theoretic KSG) with diagnostic Judge resolution.
+ * 'federated' is a legacy alias that routes to three_paradigm.
  */
 export function runAdvancedDiscovery(
   data: Record<string, number[]>,
@@ -1922,11 +2020,14 @@ export function runAdvancedDiscovery(
       return transferEntropyScoring(data, config);
     case 'var_lingam':
       return varLiNGAMScoring(data, config);
+    case 'three_paradigm':
+      return threeParadigmScoring(data, config);
     case 'federated':
-      return federatedScoring(data, config);
+      // Legacy alias → routes to three_paradigm
+      return threeParadigmScoring(data, config);
     default: {
-      // Unknown method: fall back to federated (best-of-all-worlds)
-      return federatedScoring(data, config);
+      // Unknown method: fall back to three_paradigm (3 independent paradigms + Judge)
+      return threeParadigmScoring(data, config);
     }
   }
 }
@@ -1949,5 +2050,6 @@ export const AdvancedDiscovery = {
   pcStructuralScoring,
   transferEntropyScoring,
   varLiNGAMScoring,
-  federatedScoring,
+  threeParadigmScoring,
+  federatedScoring, // Legacy alias → threeParadigmScoring
 };

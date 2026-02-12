@@ -54,6 +54,7 @@ import {
   type TemporalEvent,
 } from '../learning/pattern-detector';
 import { createBrainTrainer, type TrainingPack } from '../learning/brain-trainer';
+import { createExpertiseGraph } from '../core/expertise-graph';
 import { createSupabaseRepository } from '../persistence/supabase-repository';
 import { getDefaultLogger, type NexusLogger } from '../observability';
 
@@ -714,6 +715,102 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
     }
   }
 
+  // ── Step 5.5: EXPERTISE — Update contributor expertise graph ────────
+
+  /**
+   * Data-driven mapping: signal_type → expertise evidence.
+   * Adding a new connector that emits these signal types automatically
+   * feeds the expertise graph — no code changes needed.
+   */
+  const EXPERTISE_SIGNAL_MAP: Record<string, {
+    contributorField: string;
+    topicFields: string[];
+    evidenceType: 'code_change' | 'review' | 'issue_resolution' | 'discussion' | 'documentation' | 'incident_response';
+  }> = {
+    'pr_merged': { contributorField: 'author', topicFields: ['directories_changed'], evidenceType: 'code_change' },
+    'pr_review_submitted': { contributorField: 'reviewer', topicFields: ['directories_changed'], evidenceType: 'review' },
+    'issue_resolved': { contributorField: 'assignee', topicFields: ['labels'], evidenceType: 'issue_resolution' },
+    'incident_resolved': { contributorField: 'responder', topicFields: ['service_name'], evidenceType: 'incident_response' },
+    'message_sent': { contributorField: 'user', topicFields: ['topics'], evidenceType: 'discussion' },
+    'pr_files_changed': { contributorField: 'author', topicFields: ['directories_changed'], evidenceType: 'code_change' },
+    'bug_closed': { contributorField: 'assignee', topicFields: ['labels'], evidenceType: 'issue_resolution' },
+  };
+
+  async function updateExpertiseGraph(signals: any[]): Promise<ConsolidationStepResult> {
+    const start = Date.now();
+    try {
+      const graph = createExpertiseGraph({ minEvidence: 1 });
+
+      // Load existing expertise from database
+      await graph.load(supabase, organizationId);
+
+      let edgesRecorded = 0;
+
+      for (const signal of signals) {
+        const mapping = EXPERTISE_SIGNAL_MAP[signal.signal_type];
+        if (!mapping) continue;
+
+        const metadata = signal.signal_metadata || signal.metadata || {};
+        const contributorId = metadata[mapping.contributorField];
+        if (!contributorId || typeof contributorId !== 'string') continue;
+
+        // Extract topics from the configured fields
+        const topics: string[] = [];
+        for (const field of mapping.topicFields) {
+          const value = metadata[field];
+          if (Array.isArray(value)) {
+            topics.push(...value.filter((v: unknown) => typeof v === 'string'));
+          } else if (typeof value === 'string') {
+            topics.push(value);
+          }
+        }
+
+        // Record expertise for each topic
+        for (const topic of topics) {
+          graph.recordExpertise({
+            contributorId,
+            contributorName: metadata.display_name || metadata.contributor_name || contributorId,
+            topic,
+            evidenceType: mapping.evidenceType,
+            timestamp: signal.signal_timestamp ? new Date(signal.signal_timestamp) : undefined,
+          });
+          edgesRecorded++;
+        }
+      }
+
+      // Apply time-based decay
+      graph.applyDecay(new Date());
+
+      // Persist to database
+      if (edgesRecorded > 0) {
+        await graph.persist(supabase, organizationId);
+      }
+
+      const stats = graph.getStats();
+      log('EXPERTISE', `${edgesRecorded} expertise signals → ${stats.totalEdges} edges, ${stats.uniqueContributors} contributors, ${stats.uniqueTopics} topics`);
+
+      return {
+        step: 'expertise_update',
+        status: 'success',
+        durationMs: Date.now() - start,
+        details: {
+          edgesRecorded,
+          totalEdges: stats.totalEdges,
+          uniqueContributors: stats.uniqueContributors,
+          uniqueTopics: stats.uniqueTopics,
+        },
+      };
+    } catch (err: any) {
+      logError('EXPERTISE', 'Expertise graph update failed', err);
+      return {
+        step: 'expertise_update',
+        status: 'error',
+        durationMs: Date.now() - start,
+        details: { error: err.message },
+      };
+    }
+  }
+
   // ── Step 6: TRAIN ──────────────────────────────────────────────────
 
   async function trainPacks(packs: TrainingPack[]): Promise<ConsolidationStepResult> {
@@ -1299,10 +1396,10 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
       }
 
       if (verbose) {
-        console.log(`\n${'='.repeat(70)}`);
-        console.log(`  BRAIN CONSOLIDATION ("Sleep") — ${isCoreBrain ? 'Core Brain' : 'Org: ' + organizationId.substring(0, 8)}`);
-        console.log(`  Run: ${runId}`);
-        console.log(`${'='.repeat(70)}\n`);
+        logger.info('BRAIN CONSOLIDATION ("Sleep") started', {
+          target: isCoreBrain ? 'Core Brain' : `Org: ${organizationId.substring(0, 8)}`,
+          runId,
+        });
       }
 
       try {
@@ -1363,6 +1460,12 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
       const { packs, step: genStep } = generateTrainingPacks(relationships, anomalies, patterns, temporalRules);
       steps.push(genStep);
 
+      // Step 5.5: EXPERTISE
+      log('5.5/10', 'Updating contributor expertise graph...');
+      const expertiseStep = await updateExpertiseGraph(signals);
+      steps.push(expertiseStep);
+      if (expertiseStep.status === 'error') errors.push('Expertise graph update failed');
+
       // Step 6: TRAIN
       log('6/10', 'Training brain with discovered knowledge...');
       const trainStep = await trainPacks(packs);
@@ -1415,20 +1518,13 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
       steps.push(persistStep);
 
       if (verbose) {
-        console.log(`\n${'='.repeat(70)}`);
-        console.log(`  CONSOLIDATION COMPLETE — ${result.status.toUpperCase()}`);
-        console.log(`  Duration: ${(result.totalDurationMs / 1000).toFixed(1)}s`);
-        console.log(`${'='.repeat(70)}`);
-        console.log(`\n${report.narrative}\n`);
-        if (report.discoveries.length > 0) {
-          console.log('Discoveries:');
-          for (const d of report.discoveries) console.log(`  + ${d}`);
-        }
-        if (report.warnings.length > 0) {
-          console.log('Warnings:');
-          for (const w of report.warnings) console.log(`  ! ${w}`);
-        }
-        console.log('');
+        logger.info('CONSOLIDATION COMPLETE', {
+          status: result.status,
+          durationMs: result.totalDurationMs,
+          narrative: report.narrative,
+          discoveries: report.discoveries,
+          warnings: report.warnings,
+        });
       }
 
       // Release advisory lock
