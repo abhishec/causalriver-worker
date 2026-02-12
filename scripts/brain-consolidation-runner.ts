@@ -806,13 +806,16 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
     if (totalMemories > 0) regionsActive.push('emotional');    // Amygdala — impact scoring
     regionsActive.push('simulation');                          // PFC — always active during consolidation
 
-    // Get total causal connections count from DB for cumulative tracking
+    // Get total brain knowledge connections (edges + memories) for cumulative tracking
     let totalConnectionsInDB = totalEdges;
     try {
-      const { count } = await supabase
+      const { count: edgeCount } = await supabase
         .from('causal_relationships_statistical')
         .select('id', { count: 'exact', head: true });
-      if (count !== null) totalConnectionsInDB = count;
+      const { count: memoryCount } = await supabase
+        .from('ai_memory')
+        .select('id', { count: 'exact', head: true });
+      totalConnectionsInDB = (edgeCount || 0) + (memoryCount || 0);
     } catch {
       // Fall back to session count
     }
@@ -831,6 +834,24 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
       }
     } catch {
       // prediction_outcomes table may not exist yet
+    }
+
+    // If no validated predictions yet, carry forward yesterday's accuracy
+    if (predictionAccuracy === null) {
+      try {
+        const { data: lastSnapshot } = await supabase
+          .from('brain_daily_snapshots')
+          .select('prediction_accuracy')
+          .eq('organization_id', ORGANIZATION_ID)
+          .not('prediction_accuracy', 'is', null)
+          .order('snapshot_date', { ascending: false })
+          .limit(1);
+        if (lastSnapshot && lastSnapshot.length > 0 && lastSnapshot[0].prediction_accuracy !== null) {
+          predictionAccuracy = lastSnapshot[0].prediction_accuracy;
+        }
+      } catch {
+        // Non-critical
+      }
     }
 
     await supabase.from('brain_daily_snapshots').upsert({
