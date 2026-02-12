@@ -135,6 +135,121 @@ export function createTemporalForecaster(config: Partial<TemporalForecasterConfi
     statisticalWeight = 0.6,
   } = config;
 
+  // ── Pre-processing: Outlier clipping + Regime detection + Seasonality ──
+
+  /**
+   * Clip outliers using 1.5× IQR fencing.
+   * Replaces outliers with fence values to prevent model corruption.
+   */
+  function outlierClip(values: number[]): number[] {
+    if (values.length < 4) return [...values];
+    const sorted = [...values].sort((a, b) => a - b);
+    const q1 = sorted[Math.floor(sorted.length * 0.25)];
+    const q3 = sorted[Math.floor(sorted.length * 0.75)];
+    const iqr = q3 - q1;
+    const lowerFence = q1 - 1.5 * iqr;
+    const upperFence = q3 + 1.5 * iqr;
+    return values.map(v => Math.max(lowerFence, Math.min(upperFence, v)));
+  }
+
+  /**
+   * Detect regime changes using CUSUM (Cumulative Sum Control Chart).
+   * Returns indices where regime shifts occurred.
+   */
+  function detectRegimeChange(values: number[]): { changePoints: number[]; regimeLabels: number[] } {
+    if (values.length < 10) return { changePoints: [], regimeLabels: Array(values.length).fill(0) };
+
+    const mean = values.reduce((s, v) => s + v, 0) / values.length;
+    const std = Math.sqrt(values.reduce((s, v) => s + (v - mean) ** 2, 0) / values.length);
+    if (std < 1e-10) return { changePoints: [], regimeLabels: Array(values.length).fill(0) };
+
+    const threshold = std * 2.5; // Sensitivity threshold
+    const drift = std * 0.5;    // Allowable drift
+    let cusumPos = 0;
+    let cusumNeg = 0;
+    const changePoints: number[] = [];
+
+    for (let i = 1; i < values.length; i++) {
+      const z = (values[i] - mean);
+      cusumPos = Math.max(0, cusumPos + z - drift);
+      cusumNeg = Math.max(0, cusumNeg - z - drift);
+
+      if (cusumPos > threshold || cusumNeg > threshold) {
+        changePoints.push(i);
+        cusumPos = 0;
+        cusumNeg = 0;
+      }
+    }
+
+    // Assign regime labels
+    const regimeLabels = Array(values.length).fill(0);
+    let regime = 0;
+    let cpIdx = 0;
+    for (let i = 0; i < values.length; i++) {
+      if (cpIdx < changePoints.length && i >= changePoints[cpIdx]) {
+        regime++;
+        cpIdx++;
+      }
+      regimeLabels[i] = regime;
+    }
+
+    return { changePoints, regimeLabels };
+  }
+
+  /**
+   * Classical seasonal decomposition (additive).
+   * Extracts trend + seasonal + residual components.
+   */
+  function seasonalDecompose(
+    values: number[],
+    period: number = 7, // Default: weekly seasonality
+  ): { trend: number[]; seasonal: number[]; residual: number[] } {
+    if (values.length < period * 2) {
+      return {
+        trend: [...values],
+        seasonal: Array(values.length).fill(0),
+        residual: Array(values.length).fill(0),
+      };
+    }
+
+    // 1. Moving average for trend
+    const trend = Array(values.length).fill(0);
+    const halfWindow = Math.floor(period / 2);
+    for (let i = halfWindow; i < values.length - halfWindow; i++) {
+      let sum = 0;
+      for (let j = -halfWindow; j <= halfWindow; j++) {
+        sum += values[i + j];
+      }
+      trend[i] = sum / (2 * halfWindow + 1);
+    }
+    // Extend edges
+    for (let i = 0; i < halfWindow; i++) trend[i] = trend[halfWindow];
+    for (let i = values.length - halfWindow; i < values.length; i++) trend[i] = trend[values.length - halfWindow - 1];
+
+    // 2. Detrended values
+    const detrended = values.map((v, i) => v - trend[i]);
+
+    // 3. Average seasonal component per position
+    const seasonalAvg = Array(period).fill(0);
+    const seasonalCount = Array(period).fill(0);
+    for (let i = 0; i < detrended.length; i++) {
+      seasonalAvg[i % period] += detrended[i];
+      seasonalCount[i % period]++;
+    }
+    for (let i = 0; i < period; i++) {
+      seasonalAvg[i] /= Math.max(1, seasonalCount[i]);
+    }
+
+    // 4. Normalize seasonal to zero-mean
+    const seasonalMean = seasonalAvg.reduce((s, v) => s + v, 0) / period;
+    const seasonal = values.map((_, i) => seasonalAvg[i % period] - seasonalMean);
+
+    // 5. Residual
+    const residual = values.map((v, i) => v - trend[i] - seasonal[i]);
+
+    return { trend, seasonal, residual };
+  }
+
   // ── Exponential Smoothing (Holt's linear trend) ──────────────────
 
   /**
@@ -501,11 +616,34 @@ export function createTemporalForecaster(config: Partial<TemporalForecasterConfi
         };
       }
 
-      // 1. Exponential smoothing
-      const es = exponentialSmoothing(values, horizonDays);
+      // Pre-processing: clip outliers, detect regime changes, decompose seasonality
+      const clippedValues = outlierClip(values);
+      const regime = detectRegimeChange(clippedValues);
+      const lastChangePoint = regime.changePoints.length > 0
+        ? regime.changePoints[regime.changePoints.length - 1]
+        : 0;
+      // Use only post-regime-change data for fitting (minimum 14 points)
+      const fitValues = lastChangePoint > 0 && clippedValues.length - lastChangePoint >= minDataPoints
+        ? clippedValues.slice(lastChangePoint)
+        : clippedValues;
 
-      // 2. Autoregressive model
-      const ar = autoregressive(values, horizonDays);
+      // Seasonal decomposition (7-day weekly cycle)
+      const decomp = seasonalDecompose(fitValues, 7);
+      const deseasonalizedValues = fitValues.map((_, i) => decomp.trend[i] + decomp.residual[i]);
+
+      // 1. Exponential smoothing on deseasonalized data
+      const es = exponentialSmoothing(deseasonalizedValues, horizonDays);
+
+      // 2. Autoregressive model on deseasonalized data
+      const ar = autoregressive(deseasonalizedValues, horizonDays);
+
+      // Re-add seasonal component to forecasts
+      for (let h = 0; h < horizonDays; h++) {
+        const seasonalIdx = (fitValues.length + h) % 7;
+        const seasonalAdj = decomp.seasonal.length > seasonalIdx ? decomp.seasonal[seasonalIdx] : 0;
+        es.forecasts[h] += seasonalAdj;
+        ar.forecasts[h] += seasonalAdj;
+      }
 
       // 3. DAG-informed forecast
       const dagFc = dagInformedForecast(targetDomain, allSeries, dag, horizonDays);
@@ -627,6 +765,27 @@ export function createTemporalForecaster(config: Partial<TemporalForecasterConfi
         }
       }
       return Math.min(90, maxLag); // Cap at 90 days
+    },
+
+    /**
+     * Detect regime changes in a time series using CUSUM.
+     */
+    detectRegimeChange(values: number[]): { changePoints: number[]; regimeLabels: number[] } {
+      return detectRegimeChange(values);
+    },
+
+    /**
+     * Decompose a time series into trend + seasonal + residual.
+     */
+    seasonalDecompose(values: number[], period?: number) {
+      return seasonalDecompose(values, period);
+    },
+
+    /**
+     * Clip outliers using IQR fencing.
+     */
+    outlierClip(values: number[]): number[] {
+      return outlierClip(values);
     },
 
     /**

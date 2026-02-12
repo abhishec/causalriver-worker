@@ -133,6 +133,8 @@ export interface ImpactScorerConfig {
   weightNovelty?: number;
   /** Verbose logging */
   verbose?: boolean;
+  /** Optional LLM amplifier for enriched impact summaries */
+  amplifier?: import('./llm-brain-amplifier').BrainAmplifier;
 }
 
 /** Batch scoring result */
@@ -163,6 +165,7 @@ export function createImpactScorer(config: ImpactScorerConfig) {
     weightStrategicAlignment = 0.25,
     weightNovelty = 0.15,
     verbose = false,
+    amplifier,
   } = config;
 
   const repository = createSupabaseRepository(supabase, organizationId);
@@ -562,6 +565,44 @@ export function createImpactScorer(config: ImpactScorerConfig) {
       };
 
       score.summary = generateSummary(event, score);
+
+      // LLM enhancement: generate rich impact summary for high-impact events
+      if (amplifier && compositeScore >= 40) {
+        try {
+          const enhanced = await amplifier.generateEnhancedImpactSummary(
+            {
+              type: event.type,
+              title: event.title,
+              description: event.description,
+              domains: event.domains,
+              rawSeverity: event.rawSeverity,
+            },
+            {
+              compositeScore,
+              cascadeReach: cascadeResult.reach,
+              dollarEffect,
+              strategicAlignment: alignment,
+              novelty,
+              alertTier: score.alertTier,
+              affectedDomains: cascadeResult.affectedDomains,
+              alignedPriorities: matchedPriorities,
+              templateSummary: score.summary,
+            },
+          );
+
+          if (enhanced.summary && enhanced.summary.length > 10) {
+            score.summary = enhanced.summary;
+            if (enhanced.businessContext) {
+              score.summary += ' ' + enhanced.businessContext;
+            }
+          }
+        } catch (err: any) {
+          // Graceful degradation — template summary stands
+          if (verbose) {
+            console.warn('[AMYGDALA] LLM summary enhancement failed (using template):', err?.message);
+          }
+        }
+      }
 
       log(`Scored ${event.id}: ${compositeScore}/100 (cascade=${(cascadeResult.reach * 100).toFixed(0)}%, dollar=${(dollarEffect * 100).toFixed(0)}%, strategic=${(alignment * 100).toFixed(0)}%, novelty=${(novelty * 100).toFixed(0)}%) → ${shouldAlert ? score.alertTier!.toUpperCase() : 'no alert'}`);
 

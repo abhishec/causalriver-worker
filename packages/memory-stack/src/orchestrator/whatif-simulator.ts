@@ -118,6 +118,8 @@ export interface WhatIfConfig {
   confidenceDecayPerHop?: number;
   /** Verbose logging */
   verbose?: boolean;
+  /** Optional LLM amplifier for enriched scenario narratives */
+  amplifier?: import('./llm-brain-amplifier').BrainAmplifier;
 }
 
 // ============================================================================
@@ -132,6 +134,7 @@ export function createWhatIfSimulator(config: WhatIfConfig) {
     minEffectSize = 0.05,
     confidenceDecayPerHop = 0.85,
     verbose = false,
+    amplifier,
   } = config;
 
   const repository = createSupabaseRepository(supabase, organizationId);
@@ -439,8 +442,53 @@ export function createWhatIfSimulator(config: WhatIfConfig) {
       // Generate interventions
       const interventions = generateInterventions(timeline);
 
-      // Generate narrative
-      const narrative = generateNarrative(scenario, paths, timeline, interventions, overallConfidence);
+      // Generate template narrative
+      let narrative = generateNarrative(scenario, paths, timeline, interventions, overallConfidence);
+
+      // LLM enhancement: generate rich scenario narrative if amplifier is available
+      if (amplifier && timeline.length > 0) {
+        try {
+          const llmNarrative = await amplifier.generateScenarioNarrative({
+            sourceDomain: scenario.sourceDomain,
+            direction: scenario.direction,
+            magnitudePercent: scenario.magnitudePercent,
+            affectedDomains,
+            totalImpactPercent,
+            overallConfidence,
+            templateNarrative: narrative,
+            interventions: interventions.slice(0, 5).map(iv => ({
+              domain: iv.domain,
+              suggestedAction: iv.suggestedAction,
+              effectiveness: iv.effectiveness,
+            })),
+            cascadeSteps: timeline.slice(0, 10).map(s => ({
+              fromDomain: s.fromDomain,
+              toDomain: s.toDomain,
+              predictedChangePercent: s.predictedChangePercent,
+              cumulativeDays: s.cumulativeDays,
+            })),
+          });
+
+          if (llmNarrative.narrative && llmNarrative.narrative.length > 10) {
+            narrative = llmNarrative.narrative;
+
+            if (llmNarrative.scenarioRisks.length > 0) {
+              narrative += '\n\nScenario Risks:\n' + llmNarrative.scenarioRisks.map(r => `  ⚠ ${r}`).join('\n');
+            }
+            if (llmNarrative.interventionRecommendations.length > 0) {
+              narrative += '\n\nRecommended Interventions:\n' + llmNarrative.interventionRecommendations.map(r => `  → ${r}`).join('\n');
+            }
+            if (llmNarrative.confidenceAssessment) {
+              narrative += `\n\nConfidence: ${llmNarrative.confidenceAssessment}`;
+            }
+          }
+        } catch (err: any) {
+          // Graceful degradation — template narrative stands
+          if (verbose) {
+            console.warn('[WHATIF] LLM narrative enhancement failed (using template):', err?.message);
+          }
+        }
+      }
 
       // Persist simulation result
       try {

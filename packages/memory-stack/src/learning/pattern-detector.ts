@@ -1124,3 +1124,72 @@ export function discoverPatterns(
 
   return { rules, clusters, patterns, sequentialPatterns, temporalRules };
 }
+
+/**
+ * Enhance discovered patterns with LLM-generated explanations.
+ * Call this after discoverPatterns() with the results + an amplifier.
+ * Never throws — returns original patterns on LLM failure.
+ *
+ * Brain Analog: Basal ganglia → Wernicke's area — pattern recognition meets comprehension
+ */
+export async function enhancePatternsWithLLM(
+  patterns: DiscoveredPattern[],
+  amplifier: { enhancePatternExplanation: (pattern: {
+    name: string;
+    description: string;
+    domainsInvolved: string[];
+    evidence: { testType: string; pValue: number; effectSize: number; sampleSize: number };
+    currentNaturalLanguage: string;
+  }) => Promise<{ name: string; description: string; naturalLanguage: string; actionability: string; caveats: string[] }> },
+  options: { maxPatterns?: number; onlySignificant?: boolean } = {},
+): Promise<DiscoveredPattern[]> {
+  const { maxPatterns = 5, onlySignificant = true } = options;
+
+  const eligiblePatterns = onlySignificant
+    ? patterns.filter(p => p.isSignificant)
+    : patterns;
+
+  // Enhance top N patterns (sorted by evidence strength)
+  const toEnhance = eligiblePatterns
+    .sort((a, b) => a.evidence.pValue - b.evidence.pValue)
+    .slice(0, maxPatterns);
+
+  const results = await Promise.allSettled(
+    toEnhance.map(async (pattern) => {
+      try {
+        const enhanced = await amplifier.enhancePatternExplanation({
+          name: pattern.name,
+          description: pattern.description,
+          domainsInvolved: pattern.domainsInvolved,
+          evidence: {
+            testType: pattern.evidence.testType,
+            pValue: pattern.evidence.pValue,
+            effectSize: pattern.evidence.effectSize,
+            sampleSize: pattern.evidence.sampleSize,
+          },
+          currentNaturalLanguage: pattern.naturalLanguage,
+        });
+
+        if (enhanced.name && enhanced.name.length > 0) {
+          pattern.name = enhanced.name;
+        }
+        if (enhanced.description && enhanced.description.length > 10) {
+          pattern.description = enhanced.description;
+        }
+        if (enhanced.naturalLanguage && enhanced.naturalLanguage.length > 10) {
+          pattern.naturalLanguage = enhanced.naturalLanguage;
+        }
+      } catch {
+        // Graceful degradation — original pattern name/description stands
+      }
+    })
+  );
+
+  // Log enhancement stats
+  const succeeded = results.filter(r => r.status === 'fulfilled').length;
+  if (succeeded > 0) {
+    console.log(`[PatternDetector] LLM enhanced ${succeeded}/${toEnhance.length} patterns`);
+  }
+
+  return patterns;
+}

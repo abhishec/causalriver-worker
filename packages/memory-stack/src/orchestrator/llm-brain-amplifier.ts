@@ -99,6 +99,44 @@ export interface ConsolidationBriefing {
   strategicImplications: string[];
 }
 
+/** Gap 6: Enhanced scenario narrative (What-If Simulator / Prefrontal Cortex) */
+export interface ScenarioNarrative {
+  /** Rich narrative explaining the cascade in business terms */
+  narrative: string;
+  /** Key risks identified in this scenario */
+  scenarioRisks: string[];
+  /** Recommended interventions with reasoning */
+  interventionRecommendations: string[];
+  /** Confidence assessment in the simulation's assumptions */
+  confidenceAssessment: string;
+}
+
+/** Gap 7: Enhanced impact summary (Impact Scorer / Amygdala) */
+export interface EnhancedImpactSummary {
+  /** Rich human-readable impact summary */
+  summary: string;
+  /** Why this event matters beyond the numbers */
+  businessContext: string;
+  /** Specific recommended actions */
+  recommendedActions: string[];
+  /** Whether the statistical severity seems right */
+  severityAssessment: string;
+}
+
+/** Gap 8: Enhanced pattern explanation (Pattern Detector / Basal Ganglia) */
+export interface EnhancedPatternExplanation {
+  /** Business-readable pattern name */
+  name: string;
+  /** Rich description of what this pattern means */
+  description: string;
+  /** Natural language explanation for stakeholders */
+  naturalLanguage: string;
+  /** Why this pattern is actionable */
+  actionability: string;
+  /** Potential blind spots or caveats */
+  caveats: string[];
+}
+
 // ============================================================================
 // CONSTANTS
 // ============================================================================
@@ -170,6 +208,49 @@ Respond in JSON format:
   "confounders": ["Alternative explanation 1", "Alternative explanation 2"],
   "testableImplications": ["If this is real, we should also see X", "We could test by doing Y"],
   "confidence": 0.0-1.0
+}`;
+
+const SCENARIO_NARRATIVE_SYSTEM_PROMPT = `You are the scenario interpretation layer of NexusBrain's What-If Simulator (Prefrontal Cortex).
+
+The brain simulated a "what if" scenario through the causal graph — tracing cascade effects through domains with statistical effect sizes and lag times. The statistical simulation is complete.
+
+Your role: Transform the dry cascade trace into a compelling scenario narrative that a CTO can act on. Identify the real risks, recommend the best intervention points, and assess whether the simulation's assumptions are reasonable.
+
+Respond in JSON format:
+{
+  "narrative": "A rich 3-5 sentence narrative explaining what would happen and why it matters",
+  "scenarioRisks": ["Risk 1 specific to this scenario", "Risk 2"],
+  "interventionRecommendations": ["Where and how to intervene, with reasoning"],
+  "confidenceAssessment": "1-2 sentences on how trustworthy this simulation is"
+}`;
+
+const IMPACT_SUMMARY_SYSTEM_PROMPT = `You are the impact assessment layer of NexusBrain's Impact Scorer (Amygdala).
+
+The brain scored a business event using 4 quantitative components: Cascade Reach, Dollar Effect, Strategic Alignment, and Novelty. The composite score is computed.
+
+Your role: Add the qualitative judgment that numbers can't capture. Is this event more or less important than its score suggests? What's the business context? What should leadership actually DO about it?
+
+Respond in JSON format:
+{
+  "summary": "A crisp 2-3 sentence impact summary for a dashboard",
+  "businessContext": "Why this matters beyond the numbers (market context, timing, strategic significance)",
+  "recommendedActions": ["Specific action 1", "Specific action 2"],
+  "severityAssessment": "Does the statistical severity feel right? Over/under-rated?"
+}`;
+
+const PATTERN_EXPLANATION_SYSTEM_PROMPT = `You are the pattern interpretation layer of NexusBrain's Pattern Detector (Basal Ganglia).
+
+The brain discovered a statistically significant pattern using association rule mining, clustering, or sequential pattern mining. The statistical evidence (p-value, effect size, support, confidence) is established.
+
+Your role: Give this pattern a memorable business name, explain what it means for stakeholders in plain language, assess whether it's actionable, and note any caveats.
+
+Respond in JSON format:
+{
+  "name": "A memorable 3-6 word business name for this pattern",
+  "description": "What this pattern means in business terms (2-3 sentences)",
+  "naturalLanguage": "Full stakeholder-ready explanation with implications",
+  "actionability": "Is this actionable? What can the team do with this knowledge?",
+  "caveats": ["Caveat 1 — potential limitation", "Caveat 2"]
 }`;
 
 const CONSOLIDATION_SYSTEM_PROMPT = `You are the CTO briefing layer of NexusBrain. You receive the full output of the brain's nightly consolidation cycle — what was discovered, what was learned, what predictions were verified, and how the brain changed.
@@ -716,6 +797,184 @@ Generate a concise executive briefing for CTO-level leadership. Focus on what ma
   }
 
   // ──────────────────────────────────────────────
+  // GAP 6: Scenario Narrative (What-If Simulator)
+  // ──────────────────────────────────────────────
+
+  /**
+   * Generate a rich scenario narrative from a What-If simulation result.
+   * Uses Sonnet (deep model) for strategic scenario analysis.
+   *
+   * Brain Analog: Prefrontal cortex — planning and consequence anticipation
+   */
+  async function generateScenarioNarrative(scenario: {
+    sourceDomain: string;
+    direction: string;
+    magnitudePercent: number;
+    affectedDomains: string[];
+    totalImpactPercent: number;
+    overallConfidence: number;
+    templateNarrative: string;
+    interventions: Array<{ domain: string; suggestedAction: string; effectiveness: number }>;
+    cascadeSteps: Array<{ fromDomain: string; toDomain: string; predictedChangePercent: number; cumulativeDays: number }>;
+  }): Promise<ScenarioNarrative> {
+    const fallback: ScenarioNarrative = {
+      narrative: scenario.templateNarrative,
+      scenarioRisks: [],
+      interventionRecommendations: [],
+      confidenceAssessment: `Simulation confidence: ${(scenario.overallConfidence * 100).toFixed(0)}%`,
+    };
+
+    const userMessage = `What-If simulation result:
+
+SCENARIO: "${scenario.sourceDomain}" ${scenario.direction} by ${scenario.magnitudePercent}%
+
+CASCADE EFFECTS:
+${scenario.cascadeSteps.map(s => `  Day ${s.cumulativeDays}: ${s.fromDomain} → ${s.toDomain}: ${s.predictedChangePercent > 0 ? '+' : ''}${s.predictedChangePercent.toFixed(1)}%`).join('\n')}
+
+SUMMARY:
+  Affected Domains: ${scenario.affectedDomains.join(', ')}
+  Total Impact: ${scenario.totalImpactPercent.toFixed(1)}%
+  Overall Confidence: ${(scenario.overallConfidence * 100).toFixed(0)}%
+
+TEMPLATE NARRATIVE:
+${scenario.templateNarrative}
+
+AVAILABLE INTERVENTIONS:
+${scenario.interventions.map(iv => `  ${iv.domain}: ${iv.suggestedAction} (effectiveness: ${(iv.effectiveness * 100).toFixed(0)}%)`).join('\n')}
+
+Transform this simulation into a strategic scenario brief. What are the real risks? Where should leadership intervene? How reliable is this prediction?`;
+
+    return callWithFallback<ScenarioNarrative>(
+      'generateScenarioNarrative',
+      SCENARIO_NARRATIVE_SYSTEM_PROMPT,
+      userMessage,
+      deepModel,
+      fallback,
+      1024
+    );
+  }
+
+  // ──────────────────────────────────────────────
+  // GAP 7: Enhanced Impact Summary (Impact Scorer)
+  // ──────────────────────────────────────────────
+
+  /**
+   * Generate a rich impact summary with business context.
+   * Uses Haiku (fast model) for high-volume scoring.
+   *
+   * Brain Analog: Amygdala — emotional significance and threat assessment
+   */
+  async function generateEnhancedImpactSummary(event: {
+    type: string;
+    title: string;
+    description: string;
+    domains: string[];
+    rawSeverity: number;
+  }, score: {
+    compositeScore: number;
+    cascadeReach: number;
+    dollarEffect: number;
+    strategicAlignment: number;
+    novelty: number;
+    alertTier?: string;
+    affectedDomains: string[];
+    alignedPriorities: string[];
+    templateSummary: string;
+  }): Promise<EnhancedImpactSummary> {
+    const fallback: EnhancedImpactSummary = {
+      summary: score.templateSummary,
+      businessContext: '',
+      recommendedActions: [],
+      severityAssessment: `Composite score: ${score.compositeScore}/100`,
+    };
+
+    const userMessage = `Business event to assess:
+
+EVENT:
+  Type: ${event.type}
+  Title: ${event.title}
+  Description: ${event.description}
+  Domains: ${event.domains.join(', ')}
+  Raw Severity: ${(event.rawSeverity * 100).toFixed(0)}%
+
+QUANTITATIVE SCORE:
+  Composite: ${score.compositeScore}/100 (${score.alertTier || 'no alert'})
+  Cascade Reach: ${(score.cascadeReach * 100).toFixed(0)}% | Dollar Effect: ${(score.dollarEffect * 100).toFixed(0)}%
+  Strategic Alignment: ${(score.strategicAlignment * 100).toFixed(0)}% | Novelty: ${(score.novelty * 100).toFixed(0)}%
+  Affected Domains: ${score.affectedDomains.join(', ')}
+  Aligned Priorities: ${score.alignedPriorities.join(', ') || 'none'}
+
+Provide a dashboard-ready impact summary. Is this more or less important than the numbers suggest? What should leadership do?`;
+
+    return callWithFallback<EnhancedImpactSummary>(
+      'generateEnhancedImpactSummary',
+      IMPACT_SUMMARY_SYSTEM_PROMPT,
+      userMessage,
+      fastModel,
+      fallback,
+      512
+    );
+  }
+
+  // ──────────────────────────────────────────────
+  // GAP 8: Enhanced Pattern Explanation
+  // ──────────────────────────────────────────────
+
+  /**
+   * Generate rich pattern explanations from statistical discoveries.
+   * Uses Haiku (fast model) for pattern processing.
+   *
+   * Brain Analog: Basal ganglia — habit/pattern recognition and naming
+   */
+  async function enhancePatternExplanation(pattern: {
+    name: string;
+    description: string;
+    domainsInvolved: string[];
+    evidence: {
+      testType: string;
+      pValue: number;
+      effectSize: number;
+      sampleSize: number;
+    };
+    currentNaturalLanguage: string;
+  }): Promise<EnhancedPatternExplanation> {
+    const fallback: EnhancedPatternExplanation = {
+      name: pattern.name,
+      description: pattern.description,
+      naturalLanguage: pattern.currentNaturalLanguage,
+      actionability: '',
+      caveats: [],
+    };
+
+    const userMessage = `Pattern discovered by statistical analysis:
+
+PATTERN:
+  Current Name: ${pattern.name}
+  Current Description: ${pattern.description}
+  Domains: ${pattern.domainsInvolved.join(', ')}
+
+STATISTICAL EVIDENCE:
+  Test: ${pattern.evidence.testType}
+  p-value: ${pattern.evidence.pValue.toFixed(6)}
+  Effect Size: ${pattern.evidence.effectSize.toFixed(3)}
+  Sample Size: ${pattern.evidence.sampleSize}
+
+CURRENT EXPLANATION:
+  ${pattern.currentNaturalLanguage}
+
+Give this pattern a memorable business name, explain it clearly for stakeholders, assess its actionability, and note any caveats (sample size concerns, confounders, etc.).`;
+
+    return callWithFallback<EnhancedPatternExplanation>(
+      'enhancePatternExplanation',
+      PATTERN_EXPLANATION_SYSTEM_PROMPT,
+      userMessage,
+      fastModel,
+      fallback,
+      512
+    );
+  }
+
+  // ──────────────────────────────────────────────
   // Return public API
   // ──────────────────────────────────────────────
 
@@ -725,6 +984,9 @@ Generate a concise executive briefing for CTO-level leadership. Focus on what ma
     verifyPredictionWithLLM,
     generateCausalHypothesis,
     generateConsolidationBriefing,
+    generateScenarioNarrative,
+    generateEnhancedImpactSummary,
+    enhancePatternExplanation,
   };
 }
 

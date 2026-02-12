@@ -109,6 +109,49 @@ export interface BootstrapResult {
 }
 
 /**
+ * Transfer accuracy tracking for negative transfer protection
+ */
+export interface TransferAccuracyRecord {
+  /** The prior that was applied */
+  sourceDomain: string;
+  targetDomain: string;
+  /** Weight at time of transfer */
+  transferredWeight: number;
+  /** Weight the org eventually learned independently */
+  observedWeight: number | null;
+  /** Did the direction match? */
+  directionCorrect: boolean | null;
+  /** Did the lag estimate hold? (within 50%) */
+  lagAccurate: boolean | null;
+  /** Overall transfer score: +1 helpful, 0 neutral, -1 harmful */
+  transferScore: number;
+  /** Timestamp of evaluation */
+  evaluatedAt: Date;
+}
+
+/**
+ * Transfer validation result — did priors help or hurt?
+ */
+export interface TransferValidation {
+  /** Total priors evaluated */
+  priorsEvaluated: number;
+  /** Priors where transfer was helpful */
+  helpfulCount: number;
+  /** Priors where transfer was harmful (negative transfer) */
+  harmfulCount: number;
+  /** Priors where transfer was neutral */
+  neutralCount: number;
+  /** Overall transfer effectiveness score (0-1) */
+  effectivenessScore: number;
+  /** Domains where negative transfer was detected */
+  negativeTransferDomains: Array<{ source: string; target: string; harm: string }>;
+  /** Recommendation */
+  recommendation: 'continue' | 'reduce_priors' | 'stop_transfer';
+  /** Narrative */
+  narrative: string;
+}
+
+/**
  * Configuration for the domain transfer learner
  */
 export interface DomainTransferConfig {
@@ -120,6 +163,12 @@ export interface DomainTransferConfig {
   priorDecay: number;
   /** Similarity threshold for semantic domain matching (default: 0.7) */
   semanticMatchThreshold: number;
+  /** N-gram size for embedding-based matching (default: 3) */
+  ngramSize: number;
+  /** Minimum embedding similarity to consider a match (default: 0.4) */
+  embeddingSimilarityThreshold: number;
+  /** Negative transfer threshold — if score drops below, reduce priors (default: 0.3) */
+  negativeTransferThreshold: number;
 }
 
 // ============================================================================
@@ -147,6 +196,60 @@ const DOMAIN_ALIASES: Record<string, string[]> = {
 };
 
 // ============================================================================
+// EMBEDDING UTILITIES (character n-gram based, zero external deps)
+// ============================================================================
+
+/**
+ * Extract character n-grams from a string.
+ * E.g., "eng" with n=2 → ["en", "ng"]
+ */
+function extractNgrams(text: string, n: number): string[] {
+  const padded = `$${text.toLowerCase().replace(/[-_\s]+/g, '')}$`;
+  const ngrams: string[] = [];
+  for (let i = 0; i <= padded.length - n; i++) {
+    ngrams.push(padded.substring(i, i + n));
+  }
+  return ngrams;
+}
+
+/**
+ * Build a sparse frequency vector from n-grams.
+ * Returns a Map<ngram, frequency>.
+ */
+function buildNgramVector(text: string, ngramSize: number): Map<string, number> {
+  const ngrams = extractNgrams(text, ngramSize);
+  const vec = new Map<string, number>();
+  for (const ng of ngrams) {
+    vec.set(ng, (vec.get(ng) || 0) + 1);
+  }
+  return vec;
+}
+
+/**
+ * Cosine similarity between two sparse n-gram vectors.
+ * Returns 0-1 (1 = identical).
+ */
+function cosineSimilarity(a: Map<string, number>, b: Map<string, number>): number {
+  let dotProduct = 0;
+  let normA = 0;
+  let normB = 0;
+
+  for (const [key, valA] of a) {
+    normA += valA * valA;
+    const valB = b.get(key);
+    if (valB !== undefined) {
+      dotProduct += valA * valB;
+    }
+  }
+  for (const [, valB] of b) {
+    normB += valB * valB;
+  }
+
+  if (normA === 0 || normB === 0) return 0;
+  return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+}
+
+// ============================================================================
 // FACTORY
 // ============================================================================
 
@@ -159,7 +262,13 @@ export function createDomainTransferLearner(config: Partial<DomainTransferConfig
     maxPriorWeight = 0.5,
     priorDecay = 0.7,
     semanticMatchThreshold = 0.7,
+    ngramSize = 3,
+    embeddingSimilarityThreshold = 0.4,
+    negativeTransferThreshold = 0.3,
   } = config;
+
+  // Transfer accuracy tracking
+  const transferHistory = new Map<string, TransferAccuracyRecord[]>();
 
   // Registered org DAGs (in-memory for cross-org learning)
   const orgDAGs = new Map<string, { dag: CausalDAG; mappings: DomainMapping[]; industry?: string }>();
@@ -225,11 +334,32 @@ export function createDomainTransferLearner(config: Partial<DomainTransferConfig
       };
     }
 
-    // 4. Passthrough — unknown domain, use as-is
+    // 4. Embedding-based matching (character n-gram cosine similarity)
+    const inputVec = buildNgramVector(normalized, ngramSize);
+    let bestEmbeddingMatch = '';
+    let bestSimilarity = 0;
+    for (const [alias, canonical] of aliasToCanonical) {
+      const aliasVec = buildNgramVector(alias, ngramSize);
+      const sim = cosineSimilarity(inputVec, aliasVec);
+      if (sim > bestSimilarity) {
+        bestSimilarity = sim;
+        bestEmbeddingMatch = canonical;
+      }
+    }
+    if (bestSimilarity >= embeddingSimilarityThreshold) {
+      return {
+        orgDomain: domain,
+        canonicalDomain: bestEmbeddingMatch,
+        confidence: Math.round(Math.min(0.7, bestSimilarity) * 100) / 100,
+        method: 'semantic',
+      };
+    }
+
+    // 5. Passthrough — unknown domain, use as-is
     return {
       orgDomain: domain,
       canonicalDomain: normalized,
-      confidence: 0.4,
+      confidence: 0.3,
       method: 'semantic',
     };
   }
@@ -389,6 +519,154 @@ export function createDomainTransferLearner(config: Partial<DomainTransferConfig
     return { edgesAdded, edgesStrengthened, appliedPriors, summary };
   }
 
+  // ── Negative transfer protection ──────────────────────────────────
+
+  /**
+   * Validate whether transferred priors actually helped or hurt the org's DAG.
+   * Compares prior predictions against what the org independently learned.
+   */
+  function validateTransferAccuracy(
+    dag: CausalDAG,
+    appliedPriors: BootstrapResult['appliedPriors'],
+  ): TransferValidation {
+    const records: TransferAccuracyRecord[] = [];
+
+    for (const prior of appliedPriors) {
+      const currentEdge = dag.edges.get(prior.source)?.get(prior.target);
+
+      let directionCorrect: boolean | null = null;
+      let lagAccurate: boolean | null = null;
+      let observedWeight: number | null = null;
+      let transferScore = 0;
+
+      if (currentEdge && currentEdge.sampleSize > 5) {
+        // Org has now gathered enough direct evidence to compare
+        observedWeight = currentEdge.weight;
+
+        // Direction check: did prior predict the same direction?
+        directionCorrect = (prior.priorWeight > 0) === (currentEdge.weight > 0);
+
+        // Lag accuracy: within 50% of predicted lag?
+        if (currentEdge.lagDays !== undefined && prior.priorLag > 0) {
+          const lagRatio = Math.abs(currentEdge.lagDays - prior.priorLag) / prior.priorLag;
+          lagAccurate = lagRatio <= 0.5;
+        }
+
+        // Scoring:
+        // +1 if direction correct AND weight within 50%
+        // -1 if direction wrong (negative transfer — prior was misleading)
+        // 0.5 if direction correct but weight significantly off
+        // 0 if not enough data
+        if (!directionCorrect) {
+          transferScore = -1; // Negative transfer!
+        } else {
+          const weightError = Math.abs(currentEdge.weight - prior.priorWeight) / Math.max(0.01, prior.priorWeight);
+          transferScore = weightError < 0.5 ? 1.0 : weightError < 1.0 ? 0.5 : 0.25;
+          if (lagAccurate) transferScore = Math.min(1, transferScore + 0.1);
+        }
+      } else if (currentEdge && currentEdge.sampleSize <= 5) {
+        // Not enough evidence yet — neutral
+        transferScore = 0;
+      } else {
+        // Edge was removed by the org (pruned) — prior was likely wrong
+        transferScore = -0.5;
+      }
+
+      const record: TransferAccuracyRecord = {
+        sourceDomain: prior.source,
+        targetDomain: prior.target,
+        transferredWeight: prior.priorWeight,
+        observedWeight,
+        directionCorrect,
+        lagAccurate,
+        transferScore,
+        evaluatedAt: new Date(),
+      };
+      records.push(record);
+
+      // Track history
+      const key = `${prior.source}→${prior.target}`;
+      if (!transferHistory.has(key)) transferHistory.set(key, []);
+      transferHistory.get(key)!.push(record);
+    }
+
+    const evaluated = records.filter(r => r.transferScore !== 0);
+    const helpful = evaluated.filter(r => r.transferScore > 0);
+    const harmful = evaluated.filter(r => r.transferScore < 0);
+    const neutral = records.filter(r => r.transferScore === 0);
+
+    const totalScore = evaluated.length > 0
+      ? evaluated.reduce((s, r) => s + r.transferScore, 0) / evaluated.length
+      : 0.5; // No data → assume neutral
+
+    const effectivenessScore = Math.max(0, Math.min(1, (totalScore + 1) / 2)); // Map -1..+1 to 0..1
+
+    const negativeTransferDomains = harmful.map(r => ({
+      source: r.sourceDomain,
+      target: r.targetDomain,
+      harm: r.directionCorrect === false
+        ? `Prior predicted ${r.transferredWeight > 0 ? 'positive' : 'negative'} effect, but org evidence shows ${(r.observedWeight ?? 0) > 0 ? 'positive' : 'negative'}`
+        : `Prior weight ${r.transferredWeight.toFixed(3)} significantly differs from observed ${(r.observedWeight ?? 0).toFixed(3)}`,
+    }));
+
+    let recommendation: TransferValidation['recommendation'] = 'continue';
+    if (effectivenessScore < negativeTransferThreshold) {
+      recommendation = 'stop_transfer';
+    } else if (effectivenessScore < 0.5) {
+      recommendation = 'reduce_priors';
+    }
+
+    const narrative = evaluated.length === 0
+      ? 'Insufficient org evidence to evaluate transfer effectiveness. Priors are still bootstrapping.'
+      : `Transfer effectiveness: ${(effectivenessScore * 100).toFixed(0)}%. ` +
+        `${helpful.length}/${evaluated.length} priors were helpful, ${harmful.length} harmful. ` +
+        (recommendation === 'stop_transfer'
+          ? 'ALERT: Negative transfer detected — prior transfer should be stopped for this org.'
+          : recommendation === 'reduce_priors'
+            ? 'Warning: Mixed transfer results — reduce prior weight to avoid harm.'
+            : 'Transfer learning is benefiting this org.');
+
+    return {
+      priorsEvaluated: evaluated.length,
+      helpfulCount: helpful.length,
+      harmfulCount: harmful.length,
+      neutralCount: neutral.length,
+      effectivenessScore: Math.round(effectivenessScore * 1000) / 1000,
+      negativeTransferDomains,
+      recommendation,
+      narrative,
+    };
+  }
+
+  /**
+   * Compute embedding similarity between two domain names.
+   * Uses character n-gram cosine similarity.
+   */
+  function computeDomainSimilarity(domainA: string, domainB: string): number {
+    const vecA = buildNgramVector(domainA.toLowerCase().replace(/[-\s]+/g, '_'), ngramSize);
+    const vecB = buildNgramVector(domainB.toLowerCase().replace(/[-\s]+/g, '_'), ngramSize);
+    return cosineSimilarity(vecA, vecB);
+  }
+
+  /**
+   * Find the best domain match across all registered orgs using embedding similarity.
+   * Useful for mapping unknown domain names to known ones.
+   */
+  function findBestDomainMatch(unknownDomain: string): { match: string; similarity: number; orgId: string } | null {
+    let best: { match: string; similarity: number; orgId: string } | null = null;
+
+    for (const [orgId, { dag }] of orgDAGs) {
+      for (const domain of dag.nodes) {
+        const sim = computeDomainSimilarity(unknownDomain, domain);
+        if (sim > (best?.similarity ?? 0) && sim >= embeddingSimilarityThreshold) {
+          best = { match: domain, similarity: sim, orgId };
+        }
+      }
+    }
+
+    return best;
+  }
+
   // ── Public API ─────────────────────────────────────────────────────
 
   return {
@@ -458,6 +736,36 @@ export function createDomainTransferLearner(config: Partial<DomainTransferConfig
     },
 
     /**
+     * Validate whether transferred priors helped or hurt an org's learning.
+     * Call after the org has gathered enough direct evidence (sampleSize > 5 on edges).
+     */
+    validateTransferAccuracy(
+      dag: CausalDAG,
+      appliedPriors: BootstrapResult['appliedPriors'],
+    ): TransferValidation {
+      return validateTransferAccuracy(dag, appliedPriors);
+    },
+
+    /**
+     * Compute embedding-based similarity between two domain names.
+     * Uses character n-gram cosine similarity (0-1).
+     */
+    computeDomainSimilarity,
+
+    /**
+     * Find the best matching domain across all registered orgs for an unknown domain.
+     * Returns null if no match exceeds the similarity threshold.
+     */
+    findBestDomainMatch,
+
+    /**
+     * Get transfer accuracy history for a specific edge.
+     */
+    getTransferHistory(source: string, target: string): TransferAccuracyRecord[] {
+      return transferHistory.get(`${source}→${target}`) ?? [];
+    },
+
+    /**
      * Get domain alias map (for debugging/display).
      */
     getDomainAliases(): Record<string, string[]> {
@@ -468,7 +776,7 @@ export function createDomainTransferLearner(config: Partial<DomainTransferConfig
      * Get the configuration.
      */
     getConfig(): DomainTransferConfig {
-      return { minOrgsForPrior, maxPriorWeight, priorDecay, semanticMatchThreshold };
+      return { minOrgsForPrior, maxPriorWeight, priorDecay, semanticMatchThreshold, ngramSize, embeddingSimilarityThreshold, negativeTransferThreshold };
     },
   };
 }

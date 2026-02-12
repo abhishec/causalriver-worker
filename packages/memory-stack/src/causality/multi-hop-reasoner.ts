@@ -467,6 +467,114 @@ export function createMultiHopReasoner(config: Partial<MultiHopConfig> = {}) {
     },
 
     /**
+     * Backward reasoning: given an EFFECT domain, find all upstream causes.
+     * Traverses the DAG in reverse (incoming edges) to trace what caused this effect.
+     * Essential for "what caused this revenue drop?" type queries.
+     */
+    reasonBackward(
+      dag: CausalDAG,
+      effect: string,
+    ): Array<{
+      cause: string;
+      path: ReasoningPath;
+      diagnosisConfidence: number;
+    }> {
+      if (!dag.nodes.has(effect)) return [];
+
+      // Build reverse adjacency (target → sources)
+      const reverseEdges = new Map<string, Map<string, {
+        weight: number; pValue: number; lagDays: number;
+        knockoutScore?: number; isLikelyConfounded?: boolean;
+        coefficientSign?: number; predictionAccuracy?: number; predictionCount?: number;
+        lastUpdated: Date; sampleSize: number;
+      }>>();
+
+      for (const [src, neighbors] of dag.edges) {
+        for (const [tgt, edge] of neighbors) {
+          if (!reverseEdges.has(tgt)) reverseEdges.set(tgt, new Map());
+          reverseEdges.get(tgt)!.set(src, edge);
+        }
+      }
+
+      // Build a reverse DAG for path finding
+      const reverseDAG: CausalDAG = {
+        nodes: new Set(dag.nodes),
+        edges: reverseEdges,
+      };
+
+      // Find all backward paths from effect to each potential cause
+      const results: Array<{ cause: string; path: ReasoningPath; diagnosisConfidence: number }> = [];
+
+      for (const node of dag.nodes) {
+        if (node === effect) continue;
+        const paths = findAllPaths(reverseDAG, effect, node);
+        if (paths.length > 0) {
+          const bestPath = paths[0];
+          // Reverse the path nodes so it reads cause → ... → effect
+          const forwardPath: ReasoningPath = {
+            ...bestPath,
+            nodes: [...bestPath.nodes].reverse(),
+            hopWeights: [...bestPath.hopWeights].reverse(),
+            hopLagDays: [...bestPath.hopLagDays].reverse(),
+            hopPValues: [...bestPath.hopPValues].reverse(),
+            hopValidated: [...bestPath.hopValidated].reverse(),
+            hopConfounded: [...bestPath.hopConfounded].reverse(),
+          };
+          // Regenerate explanation in forward direction
+          const parts: string[] = [];
+          for (let i = 0; i < forwardPath.nodes.length - 1; i++) {
+            parts.push(
+              `${forwardPath.nodes[i]} → ${forwardPath.nodes[i + 1]} (w:${forwardPath.hopWeights[i].toFixed(2)}, ${forwardPath.hopLagDays[i]}d)`
+            );
+          }
+          forwardPath.explanation = parts.join(' → ');
+
+          results.push({
+            cause: node,
+            path: forwardPath,
+            diagnosisConfidence: bestPath.pathConfidence,
+          });
+        }
+      }
+
+      return results.sort((a, b) => b.diagnosisConfidence - a.diagnosisConfidence);
+    },
+
+    /**
+     * Diagnose an anomaly: given an effect and its severity,
+     * rank upstream causes by likelihood of having caused it.
+     */
+    diagnose(
+      dag: CausalDAG,
+      effect: string,
+      anomalyMagnitude: number = 1.0,
+    ): {
+      topCauses: Array<{ cause: string; likelihood: number; lagDays: number; path: string[]; explanation: string }>;
+      isExplainable: boolean;
+      narrative: string;
+    } {
+      const backward = this.reasonBackward(dag, effect);
+
+      const topCauses = backward.slice(0, 10).map(b => ({
+        cause: b.cause,
+        likelihood: Math.min(1, b.diagnosisConfidence * Math.abs(anomalyMagnitude)),
+        lagDays: b.path.totalLagDays,
+        path: b.path.nodes,
+        explanation: `${b.cause} → ${effect} via ${b.path.hopCount} hop(s): ${b.path.explanation}`,
+      }));
+
+      const narrative = topCauses.length > 0
+        ? `Most likely cause of anomaly in ${effect}: ${topCauses[0].cause} (${(topCauses[0].likelihood * 100).toFixed(0)}% likelihood, ${topCauses[0].lagDays}-day lag). ${topCauses.length > 1 ? `${topCauses.length - 1} alternative cause(s) also identified.` : ''}`
+        : `No upstream causes found for anomaly in ${effect} — it may be exogenous.`;
+
+      return {
+        topCauses,
+        isExplainable: topCauses.length > 0,
+        narrative,
+      };
+    },
+
+    /**
      * Get the configuration used by this reasoner.
      */
     getConfig(): MultiHopConfig {

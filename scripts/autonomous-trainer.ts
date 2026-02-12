@@ -113,6 +113,13 @@ import { INDUSTRY_VERTICAL_PACKS } from './training-data/industry-vertical-packs
 import { OPERATIONS_DEEP_DIVE_PACKS } from './training-data/operations-deep-dive-packs';
 import { ADVANCED_CAUSAL_PACKS } from './training-data/advanced-causal-packs';
 import { VC_METRICS_PACKS } from './training-data/vc-metrics-packs';
+// ── Hard-Topic Training Packs (advanced quantitative domains) ──
+import { DERIVATIVES_OPTIONS_PRICING_PACKS } from './training-data/derivatives-options-pricing-packs';
+import { NETWORK_EFFECTS_PLATFORM_PACKS } from './training-data/network-effects-platform-packs';
+import { SYSTEM_DYNAMICS_SIMULATION_PACKS } from './training-data/system-dynamics-simulation-packs';
+import { ADVANCED_CAUSAL_INFERENCE_PACKS } from './training-data/advanced-causal-inference-packs';
+import { GAME_THEORY_MECHANISM_DESIGN_PACKS } from './training-data/game-theory-mechanism-design-packs';
+import { OPTIMIZATION_OPERATIONS_RESEARCH_PACKS } from './training-data/optimization-operations-research-packs';
 // ── Wikipedia Content Extraction (real article content, not just pageviews) ──
 import {
   fetchWikipediaContent,
@@ -556,6 +563,13 @@ function convertData(fetched: FetchedData): ConvertedData {
     ...OPERATIONS_DEEP_DIVE_PACKS,
     ...ADVANCED_CAUSAL_PACKS,
     ...VC_METRICS_PACKS,
+    // Hard-topic packs (advanced quantitative domains)
+    ...DERIVATIVES_OPTIONS_PRICING_PACKS,
+    ...NETWORK_EFFECTS_PLATFORM_PACKS,
+    ...SYSTEM_DYNAMICS_SIMULATION_PACKS,
+    ...ADVANCED_CAUSAL_INFERENCE_PACKS,
+    ...GAME_THEORY_MECHANISM_DESIGN_PACKS,
+    ...OPTIMIZATION_OPERATIONS_RESEARCH_PACKS,
   ];
 
   log('CONVERT', `${signals.length} signals generated`);

@@ -82,3 +82,21 @@ export * from './counterfactual-knockout';
 
 // Phase 6: Async Workers (non-blocking causal discovery for production)
 export * from './async-discovery-worker';
+
+// Phase 7: LLM-Level Cognitive Modules
+export * from './transfer-entropy';
+export * from './multi-hop-reasoner';
+export {
+  createCounterfactualSimulator,
+  type CounterfactualIntervention,
+  type PredictionDelta,
+  type CounterfactualResult as SimulatorCounterfactualResult,
+  type LeveragePoint,
+  type CounterfactualConfig as SimulatorCounterfactualConfig,
+} from './counterfactual-simulator';
+export * from './attention-mechanism';
+export * from './uncertainty-quantifier';
+export * from './explanation-generator';
+export * from './temporal-forecaster';
+export * from './domain-transfer-learner';
+export * from './context-aware-reasoner';

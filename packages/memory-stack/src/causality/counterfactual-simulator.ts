@@ -487,6 +487,172 @@ export function createCounterfactualSimulator(config: Partial<CounterfactualConf
     },
 
     /**
+     * Simulate compound interventions: apply MULTIPLE interventions to a single DAG.
+     * Unlike compareInterventions() which tests each independently, this captures
+     * interaction effects between simultaneous changes.
+     */
+    simulateCompound(
+      dag: CausalDAG,
+      interventions: CounterfactualIntervention[],
+      schedule?: { durationDays: number; decayRate: number },
+    ): CounterfactualResult {
+      // Apply all interventions to a single cloned DAG
+      let cfDAG = cloneDAG(dag);
+      for (const intervention of interventions) {
+        cfDAG = applyIntervention(cfDAG, intervention);
+      }
+
+      // If temporal schedule provided, apply time-decay to the interventions
+      // (simulates interventions that fade over time)
+      if (schedule && schedule.decayRate > 0) {
+        for (const intervention of interventions) {
+          if (intervention.type === 'weaken_edge' || intervention.type === 'strengthen_edge') {
+            const neighbors = cfDAG.edges.get(intervention.source!);
+            if (neighbors) {
+              const edge = neighbors.get(intervention.target!);
+              if (edge) {
+                // Original weight from the base DAG
+                const originalEdge = dag.edges.get(intervention.source!)?.get(intervention.target!);
+                if (originalEdge) {
+                  // Decay intervention effect: weight moves back toward original over durationDays
+                  const decayFactor = Math.exp(-schedule.decayRate * schedule.durationDays / 30);
+                  edge.weight = edge.weight * decayFactor + originalEdge.weight * (1 - decayFactor);
+                }
+              }
+            }
+          }
+        }
+      }
+
+      // Run baseline predictions
+      const pairs = getAllDomainPairs(dag);
+      const baselinePredictions: MultiHopPrediction[] = [];
+      for (const { source, target } of pairs) {
+        const pred = reasoner.reason(dag, source, target);
+        if (pred.totalPaths > 0) baselinePredictions.push(pred);
+      }
+
+      // Run counterfactual predictions
+      const counterfactualPredictions: MultiHopPrediction[] = [];
+      for (const { source, target } of pairs) {
+        const pred = reasoner.reason(cfDAG, source, target);
+        if (pred.totalPaths > 0) counterfactualPredictions.push(pred);
+      }
+
+      const impactDeltas = comparePredictions(baselinePredictions, counterfactualPredictions);
+
+      // Disconnected domains
+      const baseConnected = new Set<string>();
+      for (const p of baselinePredictions) { baseConnected.add(p.source); baseConnected.add(p.target); }
+      const cfConnected = new Set<string>();
+      for (const p of counterfactualPredictions) { cfConnected.add(p.source); cfConnected.add(p.target); }
+      const disconnectedDomains = Array.from(baseConnected).filter(d => !cfConnected.has(d));
+
+      // Overall impact
+      const totalBaseConf = baselinePredictions.reduce((s, p) => s + p.reasoning.confidence, 0);
+      const totalCfConf = counterfactualPredictions.reduce((s, p) => s + p.reasoning.confidence, 0);
+      const impactScore = totalBaseConf > 0
+        ? Math.min(1, Math.abs(totalBaseConf - totalCfConf) / totalBaseConf)
+        : 0;
+
+      // Compound narrative
+      const interventionDescs = interventions.map(i => {
+        switch (i.type) {
+          case 'remove_edge': return `remove ${i.source}→${i.target}`;
+          case 'weaken_edge': return `weaken ${i.source}→${i.target} to ${i.newWeight?.toFixed(2)}`;
+          case 'strengthen_edge': return `strengthen ${i.source}→${i.target} to ${i.newWeight?.toFixed(2)}`;
+          case 'inject_signal': return `inject signal into ${i.source}`;
+          case 'remove_node': return `remove ${i.node}`;
+          default: return i.description ?? 'unknown';
+        }
+      });
+      const narrative = `Compound intervention (${interventions.length} actions: ${interventionDescs.join(', ')}): ${impactDeltas.length} path(s) affected, impact score ${impactScore.toFixed(2)}.${schedule ? ` Temporal decay over ${schedule.durationDays} days (rate: ${schedule.decayRate}).` : ''}`;
+
+      return {
+        intervention: interventions[0], // Primary intervention
+        baselinePredictions,
+        counterfactualPredictions,
+        impactDeltas,
+        disconnectedDomains,
+        impactScore,
+        narrative,
+      };
+    },
+
+    /**
+     * Test causal sufficiency: are the observed variables sufficient to
+     * explain the target, or are there likely unobserved confounders?
+     */
+    testCausalSufficiency(
+      dag: CausalDAG,
+      target: string,
+    ): {
+      isSufficient: boolean;
+      sufficiencyScore: number;
+      missingConfounders: Array<{ edge: string; reason: string }>;
+      narrative: string;
+    } {
+      const confounders: Array<{ edge: string; reason: string }> = [];
+      let totalEdges = 0;
+      let confoundedEdges = 0;
+      let unvalidatedEdges = 0;
+
+      // Check all edges pointing TO the target
+      for (const [src, neighbors] of dag.edges) {
+        const edge = neighbors.get(target);
+        if (!edge) continue;
+        totalEdges++;
+
+        if (edge.isLikelyConfounded) {
+          confoundedEdges++;
+          confounders.push({
+            edge: `${src}→${target}`,
+            reason: `Likely confounded — the ${src}→${target} correlation may be driven by an unobserved common cause`,
+          });
+        }
+
+        if ((edge.knockoutScore ?? 0) < 0.3) {
+          unvalidatedEdges++;
+          if (!edge.isLikelyConfounded) {
+            confounders.push({
+              edge: `${src}→${target}`,
+              reason: `Not knockout-validated (score: ${(edge.knockoutScore ?? 0).toFixed(2)}) — causal direction unconfirmed`,
+            });
+          }
+        }
+      }
+
+      // Also check 2-hop upstream for confounding
+      for (const [src1, neighbors1] of dag.edges) {
+        for (const [src2, edge2] of neighbors1) {
+          if (src2 !== target) continue;
+          // Check parents of src1
+          for (const [grandparent, gpNeighbors] of dag.edges) {
+            const gpEdge = gpNeighbors.get(src1);
+            if (gpEdge && gpEdge.isLikelyConfounded) {
+              confounders.push({
+                edge: `${grandparent}→${src1}→${target}`,
+                reason: `Upstream edge ${grandparent}→${src1} is confounded — may distort predictions through ${src1}`,
+              });
+            }
+          }
+        }
+      }
+
+      const sufficiencyScore = totalEdges > 0
+        ? Math.max(0, 1 - (confoundedEdges + unvalidatedEdges * 0.5) / totalEdges)
+        : 0;
+
+      const isSufficient = sufficiencyScore > 0.6 && confoundedEdges === 0;
+
+      const narrative = isSufficient
+        ? `Causal sufficiency for ${target}: SUFFICIENT (score: ${(sufficiencyScore * 100).toFixed(0)}%). All incoming edges are validated and unconfounded.`
+        : `Causal sufficiency for ${target}: INSUFFICIENT (score: ${(sufficiencyScore * 100).toFixed(0)}%). ${confounders.length} potential confounder(s) detected — counterfactual predictions may be unreliable.`;
+
+      return { isSufficient, sufficiencyScore, missingConfounders: confounders, narrative };
+    },
+
+    /**
      * Get the configuration.
      */
     getConfig(): CounterfactualConfig {

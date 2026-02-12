@@ -273,6 +273,8 @@ export {
   type OrgDAGSummary,
   type BootstrapResult,
   type DomainTransferConfig,
+  type TransferAccuracyRecord,
+  type TransferValidation,
 } from './causality/domain-transfer-learner';
 
 // Context-Aware Reasoner - Integrated Cognitive Pipeline ("Frontal Cortex")
@@ -340,6 +342,9 @@ export {
   type LLMPredictionVerdict,
   type CausalHypothesis,
   type ConsolidationBriefing,
+  type ScenarioNarrative,
+  type EnhancedImpactSummary,
+  type EnhancedPatternExplanation,
 } from './orchestrator/llm-brain-amplifier';
 
 // Response Feedback Loop (query → correction → memory)
@@ -596,6 +601,7 @@ export {
   type SequentialPattern,
   type TemporalEvent,
   type TemporalAssociationRule,
+  enhancePatternsWithLLM,
 } from './learning/pattern-detector';
 
 // Bayesian Weight Updater (proper posterior updates)

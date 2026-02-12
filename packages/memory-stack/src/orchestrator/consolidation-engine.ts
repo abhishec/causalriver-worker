@@ -60,6 +60,9 @@ import { getDefaultLogger, type NexusLogger } from '../observability';
 import { createMultiHopReasoner } from '../causality/multi-hop-reasoner';
 import { createExplanationGenerator } from '../causality/explanation-generator';
 import { createUncertaintyQuantifier } from '../causality/uncertainty-quantifier';
+import { createAttentionMechanism, type AttentionContext } from '../causality/attention-mechanism';
+import { createTemporalForecaster } from '../causality/temporal-forecaster';
+import { signalsToTimeSeries } from '../causality/signal-to-timeseries';
 import { type BrainAmplifier } from './llm-brain-amplifier';
 
 // ============================================================================
@@ -926,9 +929,10 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
     }
   }
 
-  // ── Step 5.6: COGNITIVE — Multi-hop reasoning + uncertainty + briefing ──
+  // ── Step 5.6: COGNITIVE — Attention-aware multi-hop + uncertainty + forecasting ──
 
   async function runCognitiveAnalysis(
+    signals: any[],
     relationships: CausalRelationship[],
     anomalies: AnomalyEvent[],
   ): Promise<ConsolidationStepResult> {
@@ -948,15 +952,33 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
       const multiHopReasoner = createMultiHopReasoner({ maxHops: 4 });
       const uncertaintyQ = createUncertaintyQuantifier();
       const explanationGen = createExplanationGenerator();
+      const attentionMech = createAttentionMechanism();
+      const forecaster = createTemporalForecaster();
 
-      // 1. Run multi-hop reasoning to discover indirect causal paths
+      // ── NEW: Build attention context from anomalies + patterns ──
+      const attentionContext: AttentionContext = {
+        recentAnomalies: anomalies.map(a => ({
+          domain: a.entityType || 'unknown',
+          severity: a.zScore !== undefined ? Math.min(1, Math.abs(a.zScore) / 3) : 0.5,
+          detectedAt: new Date(),
+        })),
+        focusDomains: anomalies.length > 0
+          ? [...new Set(anomalies.map(a => a.entityType || '').filter(Boolean))].slice(0, 5)
+          : undefined,
+        recencyHalfLifeDays: 21, // Consolidation emphasizes recent evidence
+      };
+
+      // ── NEW: Apply attention weighting to DAG ──
+      const weightedDAG = attentionMech.applyAttention(dag, attentionContext);
+
+      // 1. Multi-hop reasoning on ATTENTION-WEIGHTED DAG
       const domains = Array.from(dag.nodes);
       const discoveredPaths: Array<{ source: string; target: string; hops: number; confidence: number; explanation: string }> = [];
 
       for (let i = 0; i < Math.min(domains.length, 15); i++) {
         for (let j = 0; j < Math.min(domains.length, 15); j++) {
           if (i === j) continue;
-          const prediction = multiHopReasoner.reason(dag, domains[i], domains[j]);
+          const prediction = multiHopReasoner.reason(weightedDAG, domains[i], domains[j]);
           if (prediction.bestPath && prediction.bestPath.hopCount > 1 && prediction.bestPath.pathConfidence > 0.05) {
             discoveredPaths.push({
               source: domains[i],
@@ -969,11 +991,55 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
         }
       }
 
-      // 2. Compute DAG confidence quality
+      // ── NEW: Backward reasoning — diagnose anomalous domains ──
+      const diagnoses: Array<{ effect: string; topCause: string; likelihood: number }> = [];
+      for (const anomaly of anomalies.slice(0, 5)) {
+        const domain = anomaly.entityType || '';
+        if (!domain || !dag.nodes.has(domain)) continue;
+        const diagnosis = multiHopReasoner.diagnose(dag, domain, anomaly.zScore ?? 1.0);
+        if (diagnosis.topCauses.length > 0) {
+          diagnoses.push({
+            effect: domain,
+            topCause: diagnosis.topCauses[0].cause,
+            likelihood: diagnosis.topCauses[0].likelihood,
+          });
+        }
+      }
+
+      // 2. Compute DAG confidence quality (on original DAG, not weighted)
       const dagQuality = uncertaintyQ.computeDAGConfidenceQuality(dag);
 
-      // 3. Find highest-uncertainty edges (target for data collection)
+      // 3. Find highest-uncertainty edges
       const highUncertainty = uncertaintyQ.findHighestUncertaintyEdges(dag, 5);
+
+      // ── NEW: Build time series and run forecasts ──
+      let forecastCount = 0;
+      try {
+        const rawSignals = signals.map((s: any) => ({
+          organization_id: organizationId,
+          source_domain: s.source_domain,
+          signal_type: s.signal_type,
+          signal_value: s.signal_value,
+          signal_timestamp: s.signal_timestamp || s.created_at,
+        }));
+        const timeSeries = signalsToTimeSeries(rawSignals);
+        for (const domain of domains.slice(0, 10)) {
+          const forecast = forecaster.forecast(timeSeries, dag, domain, 14);
+          if (forecast.predictions.length > 0) {
+            forecastCount++;
+            // Store forecast as memory
+            const trendDir = forecast.predictions[forecast.predictions.length - 1]?.value > forecast.predictions[0]?.value ? 'upward' : 'downward';
+            await repository.upsertMemory({
+              memoryType: 'domain_forecast',
+              content: `${domain}: ${trendDir} trend forecast over 14 days (confidence: ${(forecast.confidence * 100).toFixed(0)}%). ${forecast.summary}`,
+              importance: forecast.confidence * 0.7,
+              metadata: { domain, horizonDays: 14, confidence: forecast.confidence, forecastedAt: new Date().toISOString() },
+            }).catch(() => {}); // Non-fatal
+          }
+        }
+      } catch {
+        // Forecasting is non-critical
+      }
 
       // 4. Generate intelligence briefing
       const recentChanges = relationships
@@ -985,7 +1051,6 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
           weight: Math.abs(r.effect_size || 0),
           timestamp: new Date(),
         }));
-
       const briefing = explanationGen.generateBriefing(dag, recentChanges);
 
       // 5. Store top multi-hop discoveries as memories
@@ -1010,27 +1075,29 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
         }
       }
 
-      log('COGNITIVE', `${discoveredPaths.length} multi-hop paths, DAG quality: ${dagQuality.category} (${(dagQuality.quality * 100).toFixed(0)}%), ${memoriesCreated} memories created`);
+      const attentionSummary = attentionMech.summarizeAttention(dag, attentionContext);
+
+      log('COGNITIVE', `${discoveredPaths.length} multi-hop paths, ${diagnoses.length} diagnoses, ${forecastCount} forecasts, DAG quality: ${dagQuality.category} (${(dagQuality.quality * 100).toFixed(0)}%), ${memoriesCreated} memories`);
 
       return {
         step: 'cognitive_analysis',
         status: 'success',
         durationMs: Date.now() - start,
         details: {
+          attentionApplied: true,
+          attentionBoostedEdges: attentionSummary.boosted.length,
+          attentionDampenedEdges: attentionSummary.dampened.length,
           multiHopPathsFound: discoveredPaths.length,
           topPaths: discoveredPaths.slice(0, 5).map(p => ({
             chain: `${p.source} → ... → ${p.target}`,
             hops: p.hops,
             confidence: `${(p.confidence * 100).toFixed(1)}%`,
           })),
+          backwardDiagnoses: diagnoses.slice(0, 3),
+          forecastsGenerated: forecastCount,
           dagQuality: dagQuality.category,
           dagQualityScore: dagQuality.quality,
           highUncertaintyEdges: highUncertainty.length,
-          topUncertainties: highUncertainty.slice(0, 3).map(u => ({
-            edge: `${u.source} → ${u.target}`,
-            uncertainty: u.category,
-            topSource: u.sources[0]?.description,
-          })),
           briefingRisk: briefing.riskAssessment.overallRisk,
           memoriesCreated,
         },
@@ -1924,7 +1991,7 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
 
       // Step 5.6: COGNITIVE — Multi-hop reasoning + uncertainty + intelligence briefing
       log('5.6/10', 'Running cognitive analysis (multi-hop reasoning, uncertainty, briefing)...');
-      const cognitiveStep = await runCognitiveAnalysis(relationships, anomalies);
+      const cognitiveStep = await runCognitiveAnalysis(signals, relationships, anomalies);
       steps.push(cognitiveStep);
 
       // Step 6: TRAIN
