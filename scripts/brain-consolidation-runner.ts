@@ -78,6 +78,8 @@ import { createEmbeddingTuner } from '../packages/memory-stack/src/learning/embe
 import { createContrastiveCausalLearner } from '../packages/memory-stack/src/learning/contrastive-causal-learner';
 import { createAttentionPolicyLearner } from '../packages/memory-stack/src/learning/attention-policy-learner';
 import { createPublicDataLearner } from '../packages/memory-stack/src/learning/public-data-learner';
+import { createFastPathCompiler } from '../packages/memory-stack/src/orchestrator/fast-path-compiler';
+import { createBrainPipeline } from '../packages/memory-stack/src/orchestrator/brain-pipeline';
 
 // ============================================================================
 // CONFIGURATION
@@ -444,6 +446,40 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
     }
   } catch (err) {
     logError('LEARN', 'Attention policy learning failed (non-fatal)', err);
+  }
+
+  // ── POST-LEARNING: Fast-Path Invalidation (Cerebellum) ──
+  // After consolidation changes the causal graph, stale fast-path caches
+  // must be invalidated so the copilot gets fresh answers.
+  divider('CEREBELLUM: FAST-PATH INVALIDATION');
+  try {
+    const fastPath = createFastPathCompiler({
+      supabase,
+      organizationId: ORGANIZATION_ID,
+      verbose: VERBOSE,
+    });
+    await fastPath.invalidateAll();
+    log('CEREBELLUM', 'All fast-paths invalidated — copilot will recompile on next query');
+  } catch (err) {
+    logError('CEREBELLUM', 'Fast-path invalidation failed (non-fatal)', err);
+  }
+
+  // ── POST-LEARNING: Brain Health Check (Neurological Exam) ──
+  divider('NEUROLOGICAL EXAM: BRAIN HEALTH');
+  try {
+    const brain = createBrainPipeline({
+      supabase,
+      organizationId: ORGANIZATION_ID,
+      verbose: VERBOSE,
+    });
+    const health = brain.getHealth();
+    log('HEALTH', `Overall: ${health.overallHealth.toUpperCase()}`);
+    for (const region of health.regions) {
+      const statusEmoji = region.status === 'ok' ? '✓' : region.status === 'not_initialized' ? '○' : '✗';
+      log('HEALTH', `  ${statusEmoji} ${region.name} (${region.brainAnalog}): ${region.status} — ${region.details || ''}`);
+    }
+  } catch (err) {
+    logError('HEALTH', 'Brain health check failed (non-fatal)', err);
   }
 
   // Final Summary

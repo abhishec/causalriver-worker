@@ -379,6 +379,9 @@ export { createGoogleCalendarConnector, type GoogleCalendarConnectorConfig, type
 export { createVoiceConnector, type VoiceConnectorConfig, type VoiceConnector, type CallRecord } from './connectors/voice';
 export { createGenericAppConnector, type GenericAppConnectorConfig, type GenericAppConnector, type PullEndpoint, type PushEndpoint } from './connectors/generic-app';
 
+// Brain-OS Platform Connector
+export { createBrainOSConnector, brainOSConnector } from './connectors/brain-os';
+
 // Sync Manager
 export {
   createSyncManager,

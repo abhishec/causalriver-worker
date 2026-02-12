@@ -634,6 +634,7 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
         distillation: null,
         signalIngestion: null,
         trainingPack: null,
+        ltpTraining: null,
         narrative: 'LLM training not configured — set llmTraining config with API key to enable.',
         totalDurationMs: 0,
         errors: ['LLM training pipeline not configured'],

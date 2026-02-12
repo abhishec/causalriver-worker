@@ -64,6 +64,11 @@ import type { TrainingPack } from '../packages/memory-stack/src/learning/brain-t
 import type { ConnectorSignal } from '../packages/memory-stack/src/connectors/connector-framework';
 import { createConsolidationEngine, type ConsolidationResult } from '../packages/memory-stack/src/orchestrator/consolidation-engine';
 
+// ── Brain Region Imports (wiring dormant regions into production) ──
+import { createLLMTrainingPipeline, type LLMTrainingResult } from '../packages/memory-stack/src/learning/llm-training-pipeline';
+import { createImpactScorer, type ScorableEvent } from '../packages/memory-stack/src/orchestrator/impact-scorer';
+import { createAttentionManager, type AttentionDecision } from '../packages/memory-stack/src/orchestrator/attention-manager';
+
 // ── Connector Imports ──
 // Slack connector is imported dynamically in syncConnectors() to avoid
 // ERR_PACKAGE_PATH_NOT_EXPORTED when the slack-connector's internal
@@ -314,6 +319,81 @@ async function syncConnectors(
   log('SYNC', `Total signals generated: ${result.totalSignals}`);
   if (result.errors.length > 0) {
     log('SYNC', `Errors: ${result.errors.length}`);
+  }
+
+  return result;
+}
+
+// ============================================================================
+// STAGE 1.6: LLM TRAINING PIPELINE (Sensory Cortex)
+// ============================================================================
+
+interface LLMTrainingRunResult {
+  completed: boolean;
+  narrative: string;
+  errors: string[];
+}
+
+async function runLLMTrainingPipeline(
+  supabase: ReturnType<typeof createClient>,
+): Promise<LLMTrainingRunResult> {
+  divider('STAGE 1.6: LLM TRAINING PIPELINE (Sensory Cortex)');
+
+  const result: LLMTrainingRunResult = {
+    completed: false,
+    narrative: '',
+    errors: [],
+  };
+
+  // Determine LLM provider — prefer Anthropic, fallback to OpenAI
+  const llmApiKey = process.env.ANTHROPIC_API_KEY || process.env.OPENAI_API_KEY || '';
+  const llmProvider: 'anthropic' | 'openai' = process.env.ANTHROPIC_API_KEY ? 'anthropic' : 'openai';
+
+  if (!llmApiKey) {
+    log('LLM', 'No LLM API key found (ANTHROPIC_API_KEY or OPENAI_API_KEY) — skipping LLM training');
+    return result;
+  }
+
+  try {
+    const pipeline = createLLMTrainingPipeline({
+      supabase,
+      organizationId: ORGANIZATION_ID,
+      llmProvider,
+      llmApiKey,
+      llmModel: process.env.LLM_MODEL,
+      fredApiKey: FRED_API_KEY !== 'DEMO_KEY' ? FRED_API_KEY : undefined,
+      maxContentPerSource: 3, // Keep it light for nightly runs
+      verbose: true,
+    });
+
+    log('LLM', `Running LLM training cycle (${llmProvider})...`);
+    const llmResult = await pipeline.runTrainingCycle();
+    result.completed = true;
+    result.narrative = llmResult.narrative;
+
+    log('LLM', `Training cycle complete (${(llmResult.totalDurationMs / 1000).toFixed(1)}s)`);
+    if (llmResult.contentFetch.contents.length > 0) {
+      log('LLM', `  Content fetched: ${llmResult.contentFetch.contents.length} articles`);
+    }
+    if (llmResult.distillation) {
+      log('LLM', `  Causal patterns: ${llmResult.distillation.totalCausalPatterns}`);
+      log('LLM', `  Business rules: ${llmResult.distillation.totalRules}`);
+      log('LLM', `  Cascades: ${llmResult.distillation.totalCascades}`);
+    }
+    if (llmResult.ltpTraining) {
+      log('LLM', `  LTP: Bayesian=${llmResult.ltpTraining.bayesianUpdates}, Embedding=${llmResult.ltpTraining.embeddingEpochs} epochs, Contrastive=${llmResult.ltpTraining.contrastiveExamples} examples`);
+    }
+    if (llmResult.signalIngestion) {
+      log('LLM', `  Numeric signals: ${llmResult.signalIngestion.totalSignals}`);
+    }
+
+    if (llmResult.errors.length > 0) {
+      result.errors = llmResult.errors;
+      log('LLM', `  Errors: ${llmResult.errors.length}`);
+    }
+  } catch (err) {
+    logError('LLM', 'LLM training pipeline failed (non-fatal)', err);
+    result.errors.push('LLM training pipeline failed');
   }
 
   return result;
@@ -607,6 +687,124 @@ async function learnAndMaintain(
 }
 
 // ============================================================================
+// STAGE 4.5: IMPACT SCORING + ATTENTION ROUTING (Amygdala + Thalamus)
+// ============================================================================
+
+interface ScoringResult {
+  insightsScored: number;
+  alertsGenerated: number;
+  immediateAlerts: number;
+  errors: string[];
+}
+
+async function scoreAndRouteInsights(
+  supabase: ReturnType<typeof createClient>,
+): Promise<ScoringResult> {
+  divider('STAGE 4.5: IMPACT SCORING + ATTENTION ROUTING (Amygdala + Thalamus)');
+
+  const result: ScoringResult = {
+    insightsScored: 0,
+    alertsGenerated: 0,
+    immediateAlerts: 0,
+    errors: [],
+  };
+
+  try {
+    // Get recent anomalies and discoveries to score
+    const { data: recentMemories } = await supabase
+      .from('ai_memory')
+      .select('id, memory_type, domain, content, importance, metadata, created_at')
+      .eq('organization_id', ORGANIZATION_ID)
+      .in('memory_type', ['anomaly', 'pattern_discovery', 'new_relationship', 'llm_distillation'])
+      .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+      .limit(50);
+
+    if (!recentMemories || recentMemories.length === 0) {
+      log('SCORE', 'No recent discoveries to score — brain is quiet');
+      return result;
+    }
+
+    // Create Impact Scorer (Amygdala)
+    const scorer = createImpactScorer({
+      supabase,
+      organizationId: ORGANIZATION_ID,
+      verbose: true,
+    });
+
+    // Create Attention Manager (Thalamus)
+    const attention = createAttentionManager({
+      supabase,
+      organizationId: ORGANIZATION_ID,
+      maxAlertsPerDay: 20,
+      verbose: true,
+    });
+
+    // Score each discovery
+    const scorableEvents: ScorableEvent[] = recentMemories.map((m: any) => ({
+      id: m.id,
+      type: m.memory_type as 'anomaly' | 'insight' | 'signal' | 'prediction',
+      domains: [m.domain],
+      title: m.content.substring(0, 100),
+      description: m.content,
+      rawSeverity: m.importance || 0.5,
+      source: 'autonomous_trainer',
+      timestamp: m.created_at,
+    }));
+
+    const batchResult = await scorer.scoreBatch(scorableEvents);
+    result.insightsScored = batchResult.scores.length;
+    result.alertsGenerated = batchResult.alerts.length;
+
+    // Route each scored event through the Attention Manager
+    for (let i = 0; i < scorableEvents.length; i++) {
+      const event = scorableEvents[i];
+      const score = batchResult.scores.find(s => s.eventId === event.id);
+      if (score) {
+        const decision = await attention.process(event, score);
+        if (decision.delivery === 'immediate') {
+          result.immediateAlerts++;
+        }
+      }
+    }
+
+    log('SCORE', `Scored ${result.insightsScored} discoveries`);
+    log('SCORE', `  Alerts: ${result.alertsGenerated} (${result.immediateAlerts} immediate)`);
+
+    if (batchResult.alerts.length > 0) {
+      log('SCORE', '  Top alerts:');
+      for (const alert of batchResult.alerts.slice(0, 5)) {
+        log('SCORE', `    [${alert.compositeScore}/100] ${alert.alertTier?.toUpperCase() || 'NONE'}: ${scorableEvents.find(e => e.id === alert.eventId)?.title || 'unknown'}`);
+      }
+    }
+
+    // Store scoring decisions for policy learner feedback
+    try {
+      const decisions = batchResult.scores.map(score => ({
+        organization_id: ORGANIZATION_ID,
+        event_id: score.eventId,
+        action: 'scored',
+        components: {
+          cascadeReach: score.cascadeReach,
+          dollarEffect: score.dollarEffect,
+          strategicAlignment: score.strategicAlignment,
+          novelty: score.novelty,
+        },
+        composite_score: score.compositeScore,
+        alert_tier: score.alertTier,
+      }));
+      await supabase.from('attention_decisions').insert(decisions);
+    } catch {
+      // Non-critical — table may not exist yet
+    }
+  } catch (err) {
+    logError('SCORE', 'Impact scoring failed (non-fatal)', err);
+    result.errors.push('Impact scoring failed');
+  }
+
+  return result;
+}
+
+// ============================================================================
 // STAGE 5: BRAIN CONSOLIDATION ("Sleep")
 // ============================================================================
 
@@ -717,6 +915,9 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
   // Stage 1.5: Sync Connectors (Slack, etc.)
   const connectorResult = await syncConnectors(supabase);
 
+  // Stage 1.6: LLM Training Pipeline (Sensory Cortex)
+  const llmResult = await runLLMTrainingPipeline(supabase);
+
   // Stage 2: Convert
   const convertedData = convertData(fetchedData);
 
@@ -725,6 +926,9 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
 
   // Stage 4: Learn
   const learningResult = await learnAndMaintain(supabase);
+
+  // Stage 4.5: Impact Scoring + Attention Routing (Amygdala + Thalamus)
+  const scoringResult = await scoreAndRouteInsights(supabase);
 
   // Stage 5: Consolidate ("Brain Sleep")
   const consolidationResult = await consolidateBrain(supabase);
@@ -736,20 +940,22 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
   log('DONE', `Total time: ${elapsed}s`);
   log('DONE', `Connectors synced: ${connectorResult.connectorsSynced.length > 0 ? connectorResult.connectorsSynced.join(', ') : 'none'}`);
   log('DONE', `Connector signals: ${connectorResult.totalSignals}`);
+  log('DONE', `LLM training: ${llmResult.completed ? '✓' : '✗ (no API key or skipped)'}`);
   log('DONE', `Signals stored: ${trainingResult.signalsStored}`);
   log('DONE', `Packs trained: ${trainingResult.packsTrainedCount}`);
   log('DONE', `Learning cycle: ${learningResult.cycleCompleted ? '✓' : '✗'}`);
   log('DONE', `Daily jobs: ${learningResult.dailyJobsCompleted ? '✓' : '✗'}`);
+  log('DONE', `Impact scoring: ${scoringResult.insightsScored} scored, ${scoringResult.immediateAlerts} immediate alerts`);
   log('DONE', `Consolidation: ${consolidationResult.completed ? '✓' : '✗'}`);
 
   if (consolidationResult.discoveries.length > 0) {
     log('DONE', `Brain discoveries: ${consolidationResult.discoveries.length}`);
   }
 
-  const totalErrors = trainingResult.errors.length + learningResult.errors.length + consolidationResult.errors.length + connectorResult.errors.length;
+  const totalErrors = trainingResult.errors.length + learningResult.errors.length + consolidationResult.errors.length + connectorResult.errors.length + llmResult.errors.length + scoringResult.errors.length;
   if (totalErrors > 0) {
     log('DONE', `Errors: ${totalErrors}`);
-    for (const err of [...connectorResult.errors, ...trainingResult.errors, ...learningResult.errors, ...consolidationResult.errors]) {
+    for (const err of [...connectorResult.errors, ...llmResult.errors, ...trainingResult.errors, ...learningResult.errors, ...scoringResult.errors, ...consolidationResult.errors]) {
       log('DONE', `  - ${err}`);
     }
   } else {

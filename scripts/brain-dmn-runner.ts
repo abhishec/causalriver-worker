@@ -78,6 +78,14 @@ import {
   createActiveExplorer,
 } from '../packages/memory-stack/src/orchestrator/active-explorer';
 
+import {
+  createWhatIfSimulator,
+} from '../packages/memory-stack/src/orchestrator/whatif-simulator';
+
+import {
+  createAttentionManager,
+} from '../packages/memory-stack/src/orchestrator/attention-manager';
+
 // ============================================================================
 // CONFIGURATION
 // ============================================================================
@@ -192,7 +200,11 @@ async function scanOrg(
 
   const result = await engine.scan();
 
-  // ── Phase 3 WIRING: Score insights through impact scorer ──
+  // Lift scoring variables to function scope so Phase 4 (Thalamus) can use them
+  let scorableEvents: ScorableEvent[] = [];
+  let impactResult: { scores: any[]; alerts: any[] } = { scores: [], alerts: [] };
+
+  // ── Phase 3 WIRING: Score insights through impact scorer (Amygdala) ──
   if (result.insights.length > 0) {
     const scorer = createImpactScorer({
       supabase,
@@ -200,7 +212,7 @@ async function scanOrg(
       verbose: VERBOSE,
     });
 
-    const scorableEvents: ScorableEvent[] = result.insights.map(insight => ({
+    scorableEvents = result.insights.map(insight => ({
       id: insight.id,
       type: 'insight' as const,
       domains: insight.domains,
@@ -211,12 +223,12 @@ async function scanOrg(
       timestamp: insight.discoveredAt,
     }));
 
-    const impactResult = await scorer.scoreBatch(scorableEvents);
+    impactResult = await scorer.scoreBatch(scorableEvents);
 
     console.log(`\n  ${label} — ${result.insights.length} insight${result.insights.length !== 1 ? 's' : ''} (${impactResult.alerts.length} actionable):`);
     for (let i = 0; i < result.insights.length; i++) {
       const insight = result.insights[i];
-      const score = impactResult.scores.find(s => s.eventId === insight.id);
+      const score = impactResult.scores.find((s: any) => s.eventId === insight.id);
       const emoji = {
         unexpected_correlation: '🔗',
         emerging_cascade: '⚡',
@@ -230,6 +242,35 @@ async function scanOrg(
     }
   } else {
     console.log(`  ${label} — No new insights (brain is up to date)`);
+  }
+
+  // ── Phase 4 WIRING: Attention Manager (Thalamus) — route scored insights ──
+  if (result.insights.length > 0 && impactResult.scores.length > 0) {
+    try {
+      const attention = createAttentionManager({
+        supabase,
+        organizationId: orgId,
+        maxAlertsPerDay: 20,
+        verbose: VERBOSE,
+      });
+
+      let immediateCount = 0;
+      let batchedCount = 0;
+      for (let i = 0; i < result.insights.length; i++) {
+        const insight = result.insights[i];
+        const score = impactResult.scores.find((s: any) => s.eventId === insight.id);
+        if (score) {
+          const decision = await attention.process(scorableEvents[i], score);
+          if (decision.delivery === 'immediate') immediateCount++;
+          if (decision.delivery === 'batch') batchedCount++;
+        }
+      }
+      if (immediateCount > 0 || batchedCount > 0) {
+        console.log(`    Thalamus: ${immediateCount} immediate, ${batchedCount} batched for digest`);
+      }
+    } catch (err: any) {
+      log('DMN', `Attention routing failed: ${err.message}`);
+    }
   }
 
   // ── Phase 5 WIRING: Active exploration — ask for food ──
@@ -252,6 +293,31 @@ async function scanOrg(
     }
   } catch (err: any) {
     log('DMN', `Active exploration failed: ${err.message}`);
+  }
+
+  // ── Phase 6 WIRING: What-If Simulator (Prefrontal Cortex) — simulate top insights ──
+  if (result.insights.length > 0) {
+    try {
+      const simulator = createWhatIfSimulator({
+        supabase,
+        organizationId: orgId,
+        maxCascadeDepth: 3, // Keep it light for background runs
+        verbose: VERBOSE,
+      });
+
+      // Pick the most important insight that has domain data to simulate
+      const topInsight = result.insights[0];
+      if (topInsight.domains.length > 0) {
+        const narrative = await simulator.whatIf(
+          topInsight.domains[0],
+          topInsight.importance > 0.5 ? 'increase' : 'decrease',
+          Math.round(topInsight.importance * 30), // Scale importance to a magnitude %
+        );
+        console.log(`    PFC Simulation (${topInsight.domains[0]}): ${narrative.substring(0, 200)}...`);
+      }
+    } catch (err: any) {
+      log('DMN', `What-If simulation failed: ${err.message}`);
+    }
   }
 
   return result;
