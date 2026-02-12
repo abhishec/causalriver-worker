@@ -604,12 +604,33 @@ async function trainBrain(
     errors: [],
   };
 
-  // 3a. Store connector signals
+  // 3a. Store connector signals — with Wikipedia/public data cap
   if (converted.signals.length > 0) {
     try {
-      await storeConnectorSignals(supabase, converted.signals);
-      result.signalsStored = converted.signals.length;
-      log('TRAIN', `Stored ${converted.signals.length} signals to cross_domain_signals`);
+      // Cap Wikipedia & public data signals at 20% of total to prevent noise dominance
+      const PUBLIC_PREFIXES = ['pageviews_', 'wiki_', 'wikipedia_', 'fred_', 'imf_', 'bls_', 'world_bank_', 'patent_'];
+      const orgSignals = converted.signals.filter(
+        s => !PUBLIC_PREFIXES.some(p => s.signal_type.startsWith(p))
+      );
+      const publicSignals = converted.signals.filter(
+        s => PUBLIC_PREFIXES.some(p => s.signal_type.startsWith(p))
+      );
+
+      // Allow at most 20% public signals (minimum 50 for baseline learning)
+      const maxPublicCount = Math.max(50, Math.floor(orgSignals.length * 0.2));
+      const cappedPublicSignals = publicSignals.length > maxPublicCount
+        ? publicSignals.slice(0, maxPublicCount)
+        : publicSignals;
+
+      const signalsToStore = [...orgSignals, ...cappedPublicSignals];
+
+      if (publicSignals.length > maxPublicCount) {
+        log('TRAIN', `Public signal cap: ${publicSignals.length} → ${cappedPublicSignals.length} (20% of ${orgSignals.length} org signals)`);
+      }
+
+      await storeConnectorSignals(supabase, signalsToStore);
+      result.signalsStored = signalsToStore.length;
+      log('TRAIN', `Stored ${signalsToStore.length} signals (${orgSignals.length} org + ${cappedPublicSignals.length} public)`);
     } catch (err) {
       logError('TRAIN', 'Failed to store signals', err);
       result.errors.push('Signal storage failed');
@@ -725,11 +746,26 @@ async function learnAndMaintain(
     result.errors.push('Learning cycle failed');
   }
 
-  // 4b. Run scheduled maintenance jobs
+  // 4b. Run scheduled maintenance jobs (with LLM amplifier for prediction verification)
   try {
+    // Wire LLM Brain Amplifier into feedback loop for supercharged prediction verification
+    const llmApiKey = process.env.ANTHROPIC_API_KEY || process.env.OPENAI_API_KEY || '';
+    const llmProvider: 'anthropic' | 'openai' = process.env.ANTHROPIC_API_KEY ? 'anthropic' : 'openai';
+
+    let amplifierConfig: Record<string, unknown> | undefined;
+    if (llmApiKey) {
+      const { createBrainAmplifier: createAmplifier } = await import('../packages/memory-stack/src/orchestrator/llm-brain-amplifier');
+      const amp = createAmplifier({ provider: llmProvider, apiKey: llmApiKey, verbose: true });
+      amplifierConfig = { amplifier: amp } as any;
+      log('LEARN', `LLM Brain Amplifier wired into feedback loop (${llmProvider}) — predictions will be LLM-verified`);
+    } else {
+      log('LEARN', 'No LLM API key — running feedback loop without LLM verification');
+    }
+
     const jobs = createScheduledJobs(supabase, {
       lookbackDays: 90,
-      minObservations: 30, // Tightened from 10: require 30+ observations for scheduled jobs
+      minObservations: 30,
+      feedbackLoop: amplifierConfig as any,
     });
 
     log('LEARN', 'Running daily maintenance jobs...');

@@ -108,9 +108,13 @@ export function BrainMetrics() {
   if (!latestDay || !firstDay) return null;
 
   const connectionsGrowth = ((latestDay.total_connections - firstDay.total_connections) / Math.max(firstDay.total_connections, 1) * 100).toFixed(0);
-  const accuracyFirst = firstDay.prediction_accuracy ?? 70;
-  const accuracyLatest = latestDay.prediction_accuracy ?? 70;
-  const accuracyGrowth = (accuracyLatest - accuracyFirst).toFixed(1);
+  // Never fabricate accuracy — show null as null, let the UI handle "No data yet"
+  const hasAccuracy = latestDay.prediction_accuracy !== null && latestDay.prediction_accuracy !== undefined;
+  const accuracyFirst = firstDay.prediction_accuracy ?? null;
+  const accuracyLatest = latestDay.prediction_accuracy ?? null;
+  const accuracyGrowth = (accuracyFirst !== null && accuracyLatest !== null)
+    ? (accuracyLatest - accuracyFirst).toFixed(1)
+    : null;
 
   const totalInsightsToday = latestDay.patterns_found + latestDay.anomalies_detected + latestDay.new_connections;
   const avgInsights7d = daysData.slice(-7).reduce(
@@ -131,13 +135,13 @@ export function BrainMetrics() {
     },
     {
       label: "Prediction Accuracy",
-      value: accuracyLatest,
-      suffix: "%",
-      change: `+${accuracyGrowth}%`,
-      changePositive: Number(accuracyGrowth) >= 0,
-      data: daysData.map((d) => d.prediction_accuracy ?? 70),
+      value: hasAccuracy ? accuracyLatest! : null,
+      suffix: hasAccuracy ? "%" : "",
+      change: accuracyGrowth !== null ? `+${accuracyGrowth}%` : "Collecting data",
+      changePositive: accuracyGrowth !== null ? Number(accuracyGrowth) >= 0 : true,
+      data: daysData.map((d) => d.prediction_accuracy ?? 0),
       color: "#8b5cf6",
-      description: "How accurately the brain predicts outcomes",
+      description: hasAccuracy ? "How accurately the brain predicts outcomes" : "Accuracy tracking begins after verified predictions",
     },
     {
       label: "Daily Insights",
@@ -202,7 +206,11 @@ export function BrainMetrics() {
                 <p className="text-xs text-muted mb-1">{metric.label}</p>
                 <div className="flex items-baseline gap-2">
                   <span className="text-2xl font-bold" style={{ color: metric.color }}>
-                    <AnimatedCounter target={Math.floor(metric.value)} suffix={metric.suffix || ""} />
+                    {metric.value !== null ? (
+                      <AnimatedCounter target={Math.floor(metric.value)} suffix={metric.suffix || ""} />
+                    ) : (
+                      <span className="text-lg text-muted/60">No data yet</span>
+                    )}
                   </span>
                   <span className={`text-xs ${metric.changePositive ? "text-emerald-400" : "text-rose-400"}`}>
                     {metric.change}
@@ -278,11 +286,11 @@ export function BrainMetrics() {
               <polyline
                 points={daysData.map((d, i) => {
                   const x = (i / Math.max(dayCount - 1, 1)) * 600;
-                  const vals = daysData.map((dd) => dd.prediction_accuracy ?? 70);
+                  const vals = daysData.map((dd) => dd.prediction_accuracy ?? 0);
                   const minA = Math.min(...vals);
                   const maxA = Math.max(...vals);
                   const range = maxA - minA || 1;
-                  const y = 170 - (((d.prediction_accuracy ?? 70) - minA) / range) * 160;
+                  const y = 170 - (((d.prediction_accuracy ?? 0) - minA) / range) * 160;
                   return `${x},${y}`;
                 }).join(" ")}
                 fill="none"
@@ -319,12 +327,12 @@ export function BrainMetrics() {
             </div>
           </div>
 
-          {/* Bottom insight */}
+          {/* Bottom insight — honest metric */}
           <div className="mt-4 flex items-center justify-center gap-2 text-sm text-muted">
             <span className="text-emerald-400">
-              The brain is <strong className="text-emerald-300">{connectionsGrowth}%</strong> smarter
+              <strong className="text-emerald-300">{latestDay.new_connections}</strong> new discoveries today
             </span>
-            <span>than when it started {ageDays} days ago</span>
+            <span>&middot; {latestDay.total_connections.toLocaleString()} total connections over {ageDays} days</span>
           </div>
         </motion.div>
       </div>

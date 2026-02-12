@@ -76,7 +76,7 @@ export function LiveBrainPulse() {
   const messageIndexRef = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Build activity messages from real data or fallback
+  // Build activity messages from real data — use fallback only when truly no data
   const activityMessages: ActivityMessage[] = (() => {
     if (!isLive || !latest) return FALLBACK_MESSAGES;
 
@@ -86,7 +86,8 @@ export function LiveBrainPulse() {
       .flatMap((s) => s.top_discoveries || [])
       .filter(Boolean);
 
-    if (recentDiscoveries.length < 5) return FALLBACK_MESSAGES;
+    // Lower threshold: show real data even with just 1 discovery
+    if (recentDiscoveries.length === 0) return FALLBACK_MESSAGES;
 
     return recentDiscoveries.map(discoveryToMessage);
   })();
@@ -154,7 +155,7 @@ export function LiveBrainPulse() {
           <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5">
             <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse-glow" />
             <span className="text-sm text-emerald-400">
-              {isLive ? "Brain Active \u2014 Live Data" : "Brain Active \u2014 Learning Right Now"}
+              {isLive ? "Brain Active \u2014 Live Data" : "Demo Mode \u2014 Simulated Activity"}
             </span>
           </div>
           <h2 className="mb-4 text-3xl font-bold md:text-4xl">

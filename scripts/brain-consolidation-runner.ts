@@ -828,20 +828,64 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
       // Fall back to session count
     }
 
-    // Get prediction accuracy from recent validated predictions
+    // Get prediction accuracy from ALL verified sources (prediction_records + prediction_outcomes + bayesian posteriors)
     let predictionAccuracy: number | null = null;
     try {
+      // Source 1: prediction_records (training packs + real predictions) — most populated
+      const { data: verifiedPredictions } = await supabase
+        .from('prediction_records')
+        .select('was_correct')
+        .eq('organization_id', ORGANIZATION_ID)
+        .not('was_correct', 'is', null)
+        .not('verified_at', 'is', null)
+        .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
+        .limit(500);
+
+      // Source 2: prediction_outcomes (feedback loop verified)
       const { data: outcomes } = await supabase
         .from('prediction_outcomes')
-        .select('was_correct')
-        .gte('validated_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
+        .select('outcome_occurred')
+        .eq('organization_id', ORGANIZATION_ID)
+        .not('outcome_occurred', 'is', null)
+        .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
         .limit(200);
-      if (outcomes && outcomes.length >= 5) {
-        const correct = outcomes.filter((o: { was_correct: boolean }) => o.was_correct).length;
-        predictionAccuracy = Math.round((correct / outcomes.length) * 1000) / 10; // e.g. 87.2
+
+      // Source 3: Bayesian posteriors — the most honest accuracy measure
+      const { data: posteriors } = await supabase
+        .from('bayesian_posteriors')
+        .select('mean, evidence_count')
+        .eq('organization_id', ORGANIZATION_ID)
+        .gt('evidence_count', 0);
+
+      // Combine all sources for accuracy calculation
+      let correctCount = 0;
+      let totalCount = 0;
+
+      if (verifiedPredictions && verifiedPredictions.length > 0) {
+        correctCount += verifiedPredictions.filter((p: { was_correct: boolean }) => p.was_correct).length;
+        totalCount += verifiedPredictions.length;
+      }
+      if (outcomes && outcomes.length > 0) {
+        correctCount += outcomes.filter((o: { outcome_occurred: boolean }) => o.outcome_occurred).length;
+        totalCount += outcomes.length;
+      }
+
+      if (totalCount >= 5) {
+        predictionAccuracy = Math.round((correctCount / totalCount) * 1000) / 10;
+      }
+
+      // If still no accuracy from direct predictions, use Bayesian posterior means
+      if (predictionAccuracy === null && posteriors && posteriors.length > 0) {
+        const weightedSum = posteriors.reduce((sum: number, p: { mean: number; evidence_count: number }) =>
+          sum + p.mean * p.evidence_count, 0);
+        const totalEvidence = posteriors.reduce((sum: number, p: { evidence_count: number }) =>
+          sum + p.evidence_count, 0);
+        if (totalEvidence > 0) {
+          predictionAccuracy = Math.round((weightedSum / totalEvidence) * 1000) / 10;
+        }
       }
     } catch {
-      // prediction_outcomes table may not exist yet
+      // Tables may not exist yet — non-critical
     }
 
     // If no validated predictions yet, carry forward yesterday's accuracy

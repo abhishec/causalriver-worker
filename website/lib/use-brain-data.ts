@@ -125,49 +125,68 @@ function generateActiveRegions(dayNum: number): string[] {
 
 export function useBrainData(): BrainHealth {
   const [health, setHealth] = useState<BrainHealth>(() => {
-    const simulated = generateSimulatedSnapshots();
+    // Start with empty state — never show fabricated data before checking Supabase
     return {
-      latest: simulated[simulated.length - 1],
-      history: simulated,
-      ageDays: 30,
-      growthRate: 15,
+      latest: null,
+      history: [],
+      ageDays: 0,
+      growthRate: 0,
       isLive: false,
     };
   });
 
   useEffect(() => {
-    if (!supabase) return; // No Supabase configured — stay on simulated data
-
     let cancelled = false;
 
     async function fetchSnapshots() {
+      // If no Supabase configured, fall back to demo data with clear labeling
+      if (!supabase) {
+        if (!cancelled) {
+          const simulated = generateSimulatedSnapshots();
+          setHealth({
+            latest: simulated[simulated.length - 1],
+            history: simulated,
+            ageDays: 30,
+            growthRate: 15,
+            isLive: false, // Clearly marked as NOT live
+          });
+        }
+        return;
+      }
+
       try {
-        const { data, error } = await supabase!
+        const { data, error } = await supabase
           .from("brain_daily_snapshots")
           .select("*")
           .eq("organization_id", CORE_BRAIN_ORG_ID)
           .order("snapshot_date", { ascending: true })
-          .limit(90); // Last 90 days max
-
-        if (error || !data || data.length === 0) {
-          // No data yet — keep simulated
-          return;
-        }
+          .limit(90);
 
         if (cancelled) return;
+
+        if (error || !data || data.length === 0) {
+          // No snapshots yet — show demo data with clear "not live" indicator
+          const simulated = generateSimulatedSnapshots();
+          setHealth({
+            latest: simulated[simulated.length - 1],
+            history: simulated,
+            ageDays: 30,
+            growthRate: 15,
+            isLive: false,
+          });
+          return;
+        }
 
         const snapshots = data as BrainDailySnapshot[];
         const latest = snapshots[snapshots.length - 1];
         const oldest = snapshots[0];
 
-        // Calculate age in days
         const ageDays = Math.ceil(
           (new Date(latest.snapshot_date).getTime() -
             new Date(oldest.snapshot_date).getTime()) /
             (1000 * 60 * 60 * 24)
         ) + 1;
 
-        // Calculate growth rate (avg new connections over last 7 days)
         const last7 = snapshots.slice(-7);
         const growthRate =
           last7.length > 0
@@ -185,7 +204,17 @@ export function useBrainData(): BrainHealth {
           isLive: true,
         });
       } catch {
-        // Network error — stay on simulated
+        // Network error — fall back to demo data
+        if (!cancelled) {
+          const simulated = generateSimulatedSnapshots();
+          setHealth({
+            latest: simulated[simulated.length - 1],
+            history: simulated,
+            ageDays: 30,
+            growthRate: 15,
+            isLive: false,
+          });
+        }
       }
     }
 
