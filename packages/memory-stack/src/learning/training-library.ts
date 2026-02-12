@@ -515,6 +515,166 @@ const marketDownturnTriage: TrainingPack = {
 };
 
 // ============================================================================
+// ENGINEERING TRAINING PACKS
+// ============================================================================
+
+const engineeringVelocityCascade: TrainingPack = {
+  id: 'engineering-velocity-cascade',
+  title: 'Engineering Velocity Cascade',
+  source: 'DORA research + industry patterns',
+  industry: 'Technology',
+  domains: ['engineering', 'product', 'cs', 'finance'],
+  confidence: 0.85,
+  tags: ['engineering', 'velocity', 'cicd', 'dora', 'deployment', 'productivity'],
+  causalChains: [
+    { source: 'engineering', target: 'product', metric: 'feature_delivery_rate', effectSize: 0.65, lagDays: 14, pValue: 0.005 },
+    { source: 'engineering', target: 'cs', metric: 'bug_report_volume', effectSize: -0.50, lagDays: 7, pValue: 0.01 },
+    { source: 'engineering', target: 'engineering', metric: 'developer_productivity', effectSize: 0.40, lagDays: 30, pValue: 0.02 },
+    { source: 'engineering', target: 'finance', metric: 'cost_per_feature', effectSize: -0.35, lagDays: 30, pValue: 0.03 },
+  ],
+  businessRules: [
+    {
+      title: 'Deploy Frequency Drop Alert',
+      entityType: 'team',
+      when: { logic: 'AND', conditions: [{ field: 'engineering.deploy_frequency_drop_pct', operator: 'greater_than', value: 30 }] },
+      then: [{ type: 'trigger_alert', params: { severity: 'high', message: 'Deployment frequency drop >30% signals velocity degradation' } }],
+      naturalLanguage: 'Deployment frequency drop signals velocity degradation',
+    },
+    {
+      title: 'CI Failure Rate Alert',
+      entityType: 'team',
+      when: { logic: 'AND', conditions: [{ field: 'engineering.ci_failure_rate_pct', operator: 'greater_than', value: 25 }] },
+      then: [{ type: 'trigger_alert', params: { severity: 'high', message: 'CI failure rate above 25% blocks shipping' } }],
+      naturalLanguage: 'CI failure rate above 25% blocks shipping',
+    },
+    {
+      title: 'PR Review Time Alert',
+      entityType: 'team',
+      when: { logic: 'AND', conditions: [{ field: 'engineering.pr_review_time_days', operator: 'greater_than', value: 3 }] },
+      then: [{ type: 'trigger_alert', params: { severity: 'medium', message: 'Slow PR reviews bottleneck delivery' } }],
+      naturalLanguage: 'Slow PR reviews bottleneck delivery',
+    },
+  ],
+  cascades: [
+    { source: 'engineering', target: 'product', type: 'triggers', severity: 'high', keywords: { source: ['velocity', 'deploy', 'sprint'], target: ['roadmap', 'delivery', 'feature'] } },
+    { source: 'engineering', target: 'cs', type: 'blocks', severity: 'medium', keywords: { source: ['quality', 'testing', 'ci'], target: ['bug', 'ticket', 'regression'] } },
+  ],
+  patterns: [
+    { name: 'DORA-Elite-Cascade', domains: ['engineering', 'product', 'cs'], description: 'Elite DORA metrics correlate with faster feature delivery and fewer customer issues', observed: 75, expected: 30, total: 100 },
+    { name: 'CI-Health-Leading-Indicator', domains: ['engineering', 'product'], description: 'CI pass rate is a 7-day leading indicator of shipping velocity', observed: 68, expected: 35, total: 100 },
+  ],
+  outcomes: [
+    { predicted: 'feature_delay', predictedConfidence: 0.8, actual: 'feature_delay', wasCorrect: true },
+    { predicted: 'bug_volume_increase', predictedConfidence: 0.7, actual: 'bug_volume_increase', wasCorrect: true },
+  ],
+  narrative: 'Engineering velocity cascades predictably: deployment frequency drops signal upcoming feature delays (14 days). CI failure rates above 25% correlate with 50% more support tickets within 7 days. Code review turnaround above 3 days bottlenecks the entire pipeline.',
+};
+
+const incidentResponseCascade: TrainingPack = {
+  id: 'incident-response-cascade',
+  title: 'Incident Response Cascade',
+  source: 'SRE operations pattern',
+  industry: 'Technology',
+  domains: ['engineering', 'cs', 'finance', 'people'],
+  confidence: 0.85,
+  tags: ['engineering', 'incidents', 'mttr', 'sre', 'oncall', 'burnout'],
+  causalChains: [
+    { source: 'engineering', target: 'cs', metric: 'ticket_volume', effectSize: 0.70, lagDays: 1, pValue: 0.001 },
+    { source: 'cs', target: 'finance', metric: 'churn_rate', effectSize: 0.35, lagDays: 30, pValue: 0.02 },
+    { source: 'engineering', target: 'people', metric: 'team_burnout', effectSize: 0.45, lagDays: 60, pValue: 0.015 },
+    { source: 'engineering', target: 'engineering', metric: 'mttr_degradation', effectSize: 0.55, lagDays: 14, pValue: 0.008 },
+  ],
+  businessRules: [
+    {
+      title: 'High Incident Frequency Alert',
+      entityType: 'team',
+      when: { logic: 'AND', conditions: [{ field: 'engineering.incident_frequency_per_week', operator: 'greater_than', value: 5 }] },
+      then: [{ type: 'trigger_alert', params: { severity: 'critical', message: 'High incident frequency indicates systemic reliability issues' } }],
+      naturalLanguage: 'High incident frequency indicates systemic reliability issues',
+    },
+    {
+      title: 'MTTR Degradation Alert',
+      entityType: 'team',
+      when: { logic: 'AND', conditions: [{ field: 'engineering.mttr_minutes', operator: 'greater_than', value: 120 }] },
+      then: [{ type: 'trigger_alert', params: { severity: 'high', message: 'MTTR above 2 hours indicates on-call process issues' } }],
+      naturalLanguage: 'MTTR above 2 hours indicates on-call process issues',
+    },
+    {
+      title: 'Escalation Rate Alert',
+      entityType: 'team',
+      when: { logic: 'AND', conditions: [{ field: 'engineering.escalation_rate_pct', operator: 'greater_than', value: 30 }] },
+      then: [{ type: 'trigger_alert', params: { severity: 'high', message: 'High escalation rate signals knowledge gaps' } }],
+      naturalLanguage: 'High escalation rate signals knowledge gaps',
+    },
+  ],
+  cascades: [
+    { source: 'engineering', target: 'cs', type: 'triggers', severity: 'critical', keywords: { source: ['incident', 'outage', 'degradation'], target: ['ticket', 'complaint', 'escalation'] } },
+    { source: 'engineering', target: 'people', type: 'triggers', severity: 'high', keywords: { source: ['oncall', 'page', 'incident'], target: ['burnout', 'attrition', 'morale'] } },
+  ],
+  patterns: [
+    { name: 'Incident-Ticket-Cascade', domains: ['engineering', 'cs'], description: 'Production incidents drive a 70% increase in support tickets within 24 hours', observed: 82, expected: 30, total: 100 },
+    { name: 'Oncall-Burnout-Spiral', domains: ['engineering', 'people'], description: 'Frequent paging leads to burnout and MTTR degradation within 60 days', observed: 65, expected: 25, total: 100 },
+  ],
+  outcomes: [
+    { predicted: 'support_spike', predictedConfidence: 0.85, actual: 'support_spike', wasCorrect: true },
+    { predicted: 'oncall_burnout', predictedConfidence: 0.65, actual: 'oncall_burnout', wasCorrect: true },
+  ],
+  narrative: 'Incident cascades flow rapidly: production outages trigger 70% more support tickets within 24 hours. Sustained high incident frequency (>5/week) leads to team burnout within 60 days, which degrades MTTR by 55% — creating a vicious cycle. Escalation rate above 30% indicates knowledge silos.',
+};
+
+const codeReviewQualityCascade: TrainingPack = {
+  id: 'code-review-quality-cascade',
+  title: 'Code Review Quality Impact',
+  source: 'Engineering best practices research',
+  industry: 'Technology',
+  domains: ['engineering', 'product', 'cs'],
+  confidence: 0.80,
+  tags: ['engineering', 'code-review', 'quality', 'bugs', 'technical-debt'],
+  causalChains: [
+    { source: 'engineering', target: 'engineering', metric: 'bug_density', effectSize: -0.55, lagDays: 14, pValue: 0.008 },
+    { source: 'engineering', target: 'cs', metric: 'customer_reported_bugs', effectSize: -0.40, lagDays: 21, pValue: 0.015 },
+    { source: 'engineering', target: 'product', metric: 'feature_stability', effectSize: 0.50, lagDays: 7, pValue: 0.01 },
+    { source: 'engineering', target: 'engineering', metric: 'tech_debt_ratio', effectSize: -0.30, lagDays: 30, pValue: 0.04 },
+  ],
+  businessRules: [
+    {
+      title: 'Low Review Quality Alert',
+      entityType: 'team',
+      when: { logic: 'AND', conditions: [{ field: 'engineering.review_thoroughness_score', operator: 'less_than', value: 0.4 }] },
+      then: [{ type: 'trigger_alert', params: { severity: 'medium', message: 'Low review quality increases bug escape rate' } }],
+      naturalLanguage: 'Low review quality increases bug escape rate',
+    },
+    {
+      title: 'Rubber-Stamp Review Alert',
+      entityType: 'team',
+      when: { logic: 'AND', conditions: [{ field: 'engineering.avg_review_comments', operator: 'less_than', value: 1 }] },
+      then: [{ type: 'trigger_alert', params: { severity: 'medium', message: 'Rubber-stamp reviews correlate with higher defect rates' } }],
+      naturalLanguage: 'Rubber-stamp reviews correlate with higher defect rates',
+    },
+    {
+      title: 'Single Reviewer Alert',
+      entityType: 'team',
+      when: { logic: 'AND', conditions: [{ field: 'engineering.single_reviewer_prs_pct', operator: 'greater_than', value: 50 }] },
+      then: [{ type: 'trigger_alert', params: { severity: 'medium', message: 'Single-reviewer PRs miss 40% more issues than multi-reviewer' } }],
+      naturalLanguage: 'Single-reviewer PRs miss 40% more issues than multi-reviewer',
+    },
+  ],
+  cascades: [
+    { source: 'engineering', target: 'cs', type: 'blocks', severity: 'medium', keywords: { source: ['review', 'quality', 'testing'], target: ['bug', 'regression', 'complaint'] } },
+    { source: 'engineering', target: 'product', type: 'enables', severity: 'medium', keywords: { source: ['review', 'architecture', 'refactor'], target: ['stability', 'reliability', 'uptime'] } },
+  ],
+  patterns: [
+    { name: 'Review-Quality-Bug-Correlation', domains: ['engineering', 'cs'], description: 'Thorough code reviews reduce customer-reported bugs by 40% within 3 weeks', observed: 70, expected: 30, total: 100 },
+    { name: 'Rubber-Stamp-Debt-Accumulation', domains: ['engineering'], description: 'Low-effort reviews correlate with 30% more tech debt accumulation', observed: 60, expected: 30, total: 100 },
+  ],
+  outcomes: [
+    { predicted: 'bug_reduction', predictedConfidence: 0.75, actual: 'bug_reduction', wasCorrect: true },
+    { predicted: 'tech_debt_increase', predictedConfidence: 0.7, actual: 'tech_debt_increase', wasCorrect: true },
+  ],
+  narrative: 'Code review quality has outsized downstream impact: thorough reviews reduce bug density by 55% within 14 days and customer-reported bugs by 40% within 3 weeks. Rubber-stamp reviews (single reviewer, <1 comment average) correlate with 30% higher tech debt accumulation. Multi-reviewer PRs catch 40% more issues.',
+};
+
+// ============================================================================
 // LIBRARY EXPORTS
 // ============================================================================
 
@@ -534,6 +694,10 @@ export const TRAINING_LIBRARY: TrainingPack[] = [
   csCompoundEffect,
   technicalDebtCascade,
   marketDownturnTriage,
+  // Engineering training packs
+  engineeringVelocityCascade,
+  incidentResponseCascade,
+  codeReviewQualityCascade,
   // Core Metrics Library — VC/PE-grade financial intelligence
   ...CORE_METRICS_LIBRARY,
 ];
