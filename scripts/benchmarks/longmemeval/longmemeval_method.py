@@ -162,6 +162,20 @@ METHOD_REGISTRY: Dict[str, Dict[str, Any]] = {
         "granularity": "session",
         "observational_mode": True,
     },
+
+    # ---- Federated Observational: 7-layer architecture ----
+    "federated_observational": {
+        "description": "Federated observational: 7-layer architecture with LLM compression + event bus",
+        "retriever": "observational",
+        "expansion": "federated_observer",
+        "generation": "type_specific_enriched",
+        "temporal_rerank": False,
+        "abstention": True,
+        "consolidation": False,
+        "top_k": 0,
+        "granularity": "session",
+        "federated_observational_mode": True,
+    },
 }
 
 
@@ -240,6 +254,17 @@ def run_method(
         )
 
     config = METHOD_REGISTRY[method_name]
+
+    # Federated observational dispatch (7-layer architecture)
+    if config.get("federated_observational_mode"):
+        from federated_observational import run_federated_observational
+        return run_federated_observational(
+            dataset=dataset,
+            llm_name=llm_name,
+            verbose=verbose,
+            max_questions=max_questions,
+            variant=variant,
+        )
 
     # Observational memory dispatch
     if config.get("observational_mode"):
