@@ -247,6 +247,168 @@ export function createMultiHopReasoner(config: Partial<MultiHopConfig> = {}) {
     return parts.join(' → ');
   }
 
+  // ── Noisy-OR Multi-Path Aggregation ──────────────────────────────
+
+  /**
+   * Aggregate evidence from ALL paths between source and target using noisy-OR.
+   * P(effect|source) = 1 - ∏(1 - path_confidence) across all paths.
+   * This captures redundant causal routes: if any path connects the nodes,
+   * the combined confidence reflects the total evidence.
+   */
+  function aggregateMultiPathConfidence(paths: ReasoningPath[]): number {
+    if (paths.length === 0) return 0;
+    if (paths.length === 1) return paths[0].pathConfidence;
+
+    // Noisy-OR: probability that at least one path transmits the causal signal
+    const noTransmission = paths.reduce(
+      (prod, path) => prod * (1 - path.pathConfidence),
+      1.0,
+    );
+    return Math.min(1, 1 - noTransmission);
+  }
+
+  // ── Active Learning Suggestions ─────────────────────────────────
+
+  /**
+   * Suggest which data to collect to most reduce DAG uncertainty.
+   * Ranks edges by (uncertainty × downstream criticality).
+   * Returns a prioritized "data acquisition strategy."
+   */
+  function suggestDataAcquisition(
+    dag: CausalDAG,
+    targetDomains?: string[],
+    budget: number = 10,
+  ): Array<{
+    source: string;
+    target: string;
+    priority: number;
+    reason: string;
+    actionType: 'collect_data' | 'validate_knockout' | 'increase_sample_size';
+  }> {
+    const suggestions: Array<{
+      source: string;
+      target: string;
+      priority: number;
+      reason: string;
+      actionType: 'collect_data' | 'validate_knockout' | 'increase_sample_size';
+    }> = [];
+
+    const targets = targetDomains ?? Array.from(dag.nodes);
+
+    for (const [src, neighbors] of dag.edges) {
+      for (const [tgt, edge] of neighbors) {
+        // Compute uncertainty score
+        let uncertainty = 0;
+        let reason = '';
+        let actionType: 'collect_data' | 'validate_knockout' | 'increase_sample_size' = 'collect_data';
+
+        const sampleSize = edge.sampleSize ?? 0;
+        const isValidated = (edge.knockoutScore ?? 0) > 0.5 && !edge.isLikelyConfounded;
+
+        if (sampleSize < 10) {
+          uncertainty = 0.9 - sampleSize * 0.05;
+          reason = `Low sample size (${sampleSize}) — insufficient evidence for edge ${src}→${tgt}`;
+          actionType = 'increase_sample_size';
+        } else if (!isValidated && (edge.knockoutScore ?? 0) < 0.3) {
+          uncertainty = 0.7;
+          reason = `Unvalidated edge ${src}→${tgt} — needs knockout/counterfactual validation`;
+          actionType = 'validate_knockout';
+        } else if (edge.isLikelyConfounded) {
+          uncertainty = 0.6;
+          reason = `Confounded edge ${src}→${tgt} — need instrumental variable or natural experiment`;
+          actionType = 'collect_data';
+        } else if (edge.pValue > 0.05) {
+          uncertainty = 0.5;
+          reason = `Marginal significance (p=${edge.pValue.toFixed(3)}) for ${src}→${tgt}`;
+          actionType = 'increase_sample_size';
+        } else {
+          continue; // Edge is well-established, skip
+        }
+
+        // Compute downstream criticality: how many target domains does this edge influence?
+        let criticalityBoost = 1.0;
+        for (const targetDomain of targets) {
+          const paths = findAllPaths(dag, tgt, targetDomain);
+          if (paths.length > 0) {
+            criticalityBoost += 0.2; // Each downstream target adds criticality
+          }
+        }
+        criticalityBoost = Math.min(3.0, criticalityBoost);
+
+        const priority = Math.round(uncertainty * criticalityBoost * 100) / 100;
+        suggestions.push({ source: src, target: tgt, priority, reason, actionType });
+      }
+    }
+
+    return suggestions
+      .sort((a, b) => b.priority - a.priority)
+      .slice(0, budget);
+  }
+
+  // ── Concept Drift Detection (Page-Hinkley) ───────────────────────
+
+  /**
+   * Page-Hinkley test for concept drift detection on edge weights.
+   * Detects when an edge's causal strength is systematically shifting.
+   *
+   * @param edgeWeightHistory - Sequential edge weight observations
+   * @param delta - Minimum detectable magnitude of change (default: 0.05)
+   * @param threshold - Detection threshold (default: 10)
+   * @returns { isDrifting, driftMagnitude, driftDirection }
+   */
+  function detectConceptDrift(
+    edgeWeightHistory: number[],
+    delta: number = 0.05,
+    threshold: number = 10,
+  ): { isDrifting: boolean; driftMagnitude: number; driftDirection: 'strengthening' | 'weakening' | 'stable' } {
+    if (edgeWeightHistory.length < 5) {
+      return { isDrifting: false, driftMagnitude: 0, driftDirection: 'stable' };
+    }
+
+    const n = edgeWeightHistory.length;
+    const mean = edgeWeightHistory.reduce((s, v) => s + v, 0) / n;
+
+    // Cumulative sum of deviations from the mean, minus the allowance delta
+    let sumUp = 0;
+    let minSumUp = 0;
+    let sumDown = 0;
+    let maxSumDown = 0;
+    let phUp = 0; // Page-Hinkley statistic for upward drift
+    let phDown = 0; // Page-Hinkley statistic for downward drift
+
+    for (let i = 0; i < n; i++) {
+      const x = edgeWeightHistory[i];
+      sumUp += (x - mean - delta);
+      sumDown += (x - mean + delta);
+
+      minSumUp = Math.min(minSumUp, sumUp);
+      maxSumDown = Math.max(maxSumDown, sumDown);
+
+      phUp = sumUp - minSumUp;
+      phDown = maxSumDown - sumDown;
+    }
+
+    const isDriftingUp = phUp > threshold;
+    const isDriftingDown = phDown > threshold;
+
+    // Drift magnitude: compare first third vs last third
+    const firstThird = edgeWeightHistory.slice(0, Math.floor(n / 3));
+    const lastThird = edgeWeightHistory.slice(Math.floor(n * 2 / 3));
+    const firstMean = firstThird.reduce((s, v) => s + v, 0) / (firstThird.length || 1);
+    const lastMean = lastThird.reduce((s, v) => s + v, 0) / (lastThird.length || 1);
+    const driftMagnitude = Math.abs(lastMean - firstMean);
+
+    let driftDirection: 'strengthening' | 'weakening' | 'stable' = 'stable';
+    if (isDriftingUp) driftDirection = 'strengthening';
+    else if (isDriftingDown) driftDirection = 'weakening';
+
+    return {
+      isDrifting: isDriftingUp || isDriftingDown,
+      driftMagnitude: Math.round(driftMagnitude * 1000) / 1000,
+      driftDirection,
+    };
+  }
+
   // ── Public API ─────────────────────────────────────────────────────
 
   return {
@@ -572,6 +734,40 @@ export function createMultiHopReasoner(config: Partial<MultiHopConfig> = {}) {
         isExplainable: topCauses.length > 0,
         narrative,
       };
+    },
+
+    /**
+     * Aggregate evidence from ALL paths using noisy-OR.
+     * Combined confidence = 1 - ∏(1 - path_confidence).
+     * More paths → higher combined confidence (evidence accumulates).
+     */
+    aggregateMultiPathConfidence(paths: ReasoningPath[]): number {
+      return aggregateMultiPathConfidence(paths);
+    },
+
+    /**
+     * Suggest which data to collect to most reduce DAG uncertainty.
+     * Returns a prioritized list of "data acquisition requests" ranked by
+     * (uncertainty × downstream criticality).
+     */
+    suggestDataAcquisition(
+      dag: CausalDAG,
+      targetDomains?: string[],
+      budget?: number,
+    ) {
+      return suggestDataAcquisition(dag, targetDomains, budget);
+    },
+
+    /**
+     * Detect concept drift on an edge's weight history using Page-Hinkley test.
+     * Returns whether the edge relationship is systematically changing.
+     */
+    detectConceptDrift(
+      edgeWeightHistory: number[],
+      delta?: number,
+      threshold?: number,
+    ) {
+      return detectConceptDrift(edgeWeightHistory, delta, threshold);
     },
 
     /**

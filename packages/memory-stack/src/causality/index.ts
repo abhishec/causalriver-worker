@@ -100,3 +100,6 @@ export * from './explanation-generator';
 export * from './temporal-forecaster';
 export * from './domain-transfer-learner';
 export * from './context-aware-reasoner';
+
+// Phase 8: Meta-Cognition (Brain Self-Awareness)
+export * from './brain-health-monitor';

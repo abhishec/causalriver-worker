@@ -583,6 +583,182 @@ export function createExplanationGenerator(config: Partial<ExplanationConfig> = 
     };
   }
 
+  // ── Contrastive Explanations ─────────────────────────────────────
+
+  /**
+   * Generate a contrastive explanation: "Why fact and not foil?"
+   * E.g., "Why does engineering affect revenue (fact) instead of
+   * marketing affecting revenue (foil)?"
+   *
+   * Compares the two paths' evidence strength, validation, and timing.
+   */
+  function explainContrastive(
+    dag: CausalDAG,
+    fact: { source: string; target: string; path?: ReasoningPath },
+    foil: { source: string; target: string; path?: ReasoningPath },
+  ): {
+    question: string;
+    answer: string;
+    factStrength: number;
+    foilStrength: number;
+    keyDifferences: Array<{ dimension: string; factValue: string; foilValue: string }>;
+  } {
+    const question = `Why does ${fact.source} affect ${fact.target} rather than ${foil.source} affecting ${foil.target}?`;
+
+    // Analyze fact path
+    const factEdge = dag.edges.get(fact.source)?.get(fact.target);
+    const foilEdge = dag.edges.get(foil.source)?.get(foil.target);
+
+    const factWeight = factEdge?.weight ?? (fact.path?.pathConfidence ?? 0);
+    const foilWeight = foilEdge?.weight ?? (foil.path?.pathConfidence ?? 0);
+
+    const factValidated = factEdge ? ((factEdge.knockoutScore ?? 0) > 0.5 && !factEdge.isLikelyConfounded) : false;
+    const foilValidated = foilEdge ? ((foilEdge.knockoutScore ?? 0) > 0.5 && !foilEdge.isLikelyConfounded) : false;
+
+    const factSampleSize = factEdge?.sampleSize ?? 0;
+    const foilSampleSize = foilEdge?.sampleSize ?? 0;
+
+    const factPValue = factEdge?.pValue ?? 1;
+    const foilPValue = foilEdge?.pValue ?? 1;
+
+    const keyDifferences: Array<{ dimension: string; factValue: string; foilValue: string }> = [];
+
+    // 1. Evidence strength
+    if (Math.abs(factWeight - foilWeight) > 0.05) {
+      keyDifferences.push({
+        dimension: 'Causal strength',
+        factValue: `weight ${factWeight.toFixed(3)}`,
+        foilValue: `weight ${foilWeight.toFixed(3)}`,
+      });
+    }
+
+    // 2. Validation status
+    if (factValidated !== foilValidated) {
+      keyDifferences.push({
+        dimension: 'Validation',
+        factValue: factValidated ? 'knockout-validated' : 'unvalidated',
+        foilValue: foilValidated ? 'knockout-validated' : 'unvalidated',
+      });
+    }
+
+    // 3. Statistical significance
+    if (Math.abs(factPValue - foilPValue) > 0.01) {
+      keyDifferences.push({
+        dimension: 'Statistical significance',
+        factValue: `p=${factPValue.toFixed(4)}`,
+        foilValue: `p=${foilPValue.toFixed(4)}`,
+      });
+    }
+
+    // 4. Sample size
+    if (Math.abs(factSampleSize - foilSampleSize) > 5) {
+      keyDifferences.push({
+        dimension: 'Evidence volume',
+        factValue: `${factSampleSize} observations`,
+        foilValue: `${foilSampleSize} observations`,
+      });
+    }
+
+    // 5. Confounding
+    if (factEdge?.isLikelyConfounded !== foilEdge?.isLikelyConfounded) {
+      keyDifferences.push({
+        dimension: 'Confounding',
+        factValue: factEdge?.isLikelyConfounded ? 'likely confounded' : 'not confounded',
+        foilValue: foilEdge?.isLikelyConfounded ? 'likely confounded' : 'not confounded',
+      });
+    }
+
+    // Build answer
+    const answerParts: string[] = [];
+    if (factWeight > foilWeight) {
+      answerParts.push(`The ${fact.source}→${fact.target} link is ${((factWeight / Math.max(0.001, foilWeight)) * 100 - 100).toFixed(0)}% stronger in causal weight.`);
+    }
+    if (factValidated && !foilValidated) {
+      answerParts.push(`Critically, the ${fact.source}→${fact.target} edge has been knockout-validated, while ${foil.source}→${foil.target} has not.`);
+    }
+    if (factPValue < foilPValue) {
+      answerParts.push(`The ${fact.source}→${fact.target} edge is more statistically significant (p=${factPValue.toFixed(4)} vs p=${foilPValue.toFixed(4)}).`);
+    }
+    if (!factEdge && foilEdge) {
+      answerParts.push(`Note: There is no direct edge from ${fact.source} to ${fact.target} in the DAG; the connection may be indirect (multi-hop).`);
+    }
+    if (!foilEdge) {
+      answerParts.push(`The brain has no evidence for a direct ${foil.source}→${foil.target} connection.`);
+    }
+
+    const answer = answerParts.length > 0
+      ? answerParts.join(' ')
+      : `Both paths have similar evidence strength. The difference may be due to temporal patterns or indirect effects not captured in this comparison.`;
+
+    return {
+      question,
+      answer,
+      factStrength: factWeight,
+      foilStrength: foilWeight,
+      keyDifferences,
+    };
+  }
+
+  // ── Audience-Adaptive Verbosity ────────────────────────────────────
+
+  type VerbosityLevel = 'executive' | 'manager' | 'analyst';
+
+  /**
+   * Adapt an explanation chain's verbosity for different audiences.
+   * - executive: 2-3 sentences, no technical details
+   * - manager: Key findings with confidence levels
+   * - analyst: Full hop-by-hop breakdown with p-values and sample sizes
+   */
+  function adaptVerbosity(chain: ExplanationChain, level: VerbosityLevel): string {
+    if (level === 'executive') {
+      // 2-3 sentences max
+      const conf = (chain.confidence * 100).toFixed(0);
+      const mainAction = chain.suggestedActions[0] ?? 'Monitor the situation.';
+      return `${chain.answer} (${conf}% confidence). Recommended action: ${mainAction}`;
+    }
+
+    if (level === 'manager') {
+      // Key findings with confidence
+      const parts = [chain.answer];
+      if (chain.uncertainties.length > 0) {
+        const highImpact = chain.uncertainties.filter(u => u.impact === 'high');
+        if (highImpact.length > 0) {
+          parts.push(`Key risk: ${highImpact[0].description}.`);
+        }
+      }
+      if (chain.suggestedActions.length > 0) {
+        parts.push(`Actions: ${chain.suggestedActions.slice(0, 3).join('; ')}.`);
+      }
+      return parts.join(' ');
+    }
+
+    // analyst: full breakdown
+    const parts = [`Question: ${chain.question}`, `Answer: ${chain.answer}`, ''];
+    parts.push('Reasoning chain:');
+    for (const step of chain.steps) {
+      let stepStr = `  Step ${step.stepNum}: ${step.inference} [${step.evidenceType}] (confidence: ${(step.confidence * 100).toFixed(1)}%)`;
+      if (step.edgeCited) {
+        stepStr += ` — edge: ${step.edgeCited.source}→${step.edgeCited.target} w=${step.edgeCited.weight.toFixed(3)}, lag=${step.edgeCited.lagDays}d`;
+      }
+      parts.push(stepStr);
+    }
+    if (chain.uncertainties.length > 0) {
+      parts.push('');
+      parts.push('Uncertainties:');
+      for (const u of chain.uncertainties) {
+        parts.push(`  [${u.impact.toUpperCase()}] ${u.description}`);
+      }
+    }
+    if (chain.suggestedActions.length > 0) {
+      parts.push('');
+      parts.push('Suggested actions:');
+      for (const a of chain.suggestedActions) {
+        parts.push(`  • ${a}`);
+      }
+    }
+    return parts.join('\n');
+  }
+
   // ── Public API ─────────────────────────────────────────────────────
 
   return {
@@ -654,6 +830,26 @@ export function createExplanationGenerator(config: Partial<ExplanationConfig> = 
       }
 
       return parts.join(' ');
+    },
+
+    /**
+     * Generate a contrastive explanation: "Why fact and not foil?"
+     * Compares two causal hypotheses by evidence strength, validation, and timing.
+     */
+    explainContrastive(
+      dag: CausalDAG,
+      fact: { source: string; target: string; path?: ReasoningPath },
+      foil: { source: string; target: string; path?: ReasoningPath },
+    ) {
+      return explainContrastive(dag, fact, foil);
+    },
+
+    /**
+     * Adapt an explanation chain for a specific audience.
+     * 'executive' → 2-3 sentences, 'manager' → key findings, 'analyst' → full breakdown.
+     */
+    adaptVerbosity(chain: ExplanationChain, level: 'executive' | 'manager' | 'analyst'): string {
+      return adaptVerbosity(chain, level);
     },
 
     /**

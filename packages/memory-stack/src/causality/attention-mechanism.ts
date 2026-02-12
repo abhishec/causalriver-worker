@@ -262,6 +262,133 @@ export function createAttentionMechanism(config: Partial<AttentionConfig> = {}) 
     return weights;
   }
 
+  // ── Learned Attention ────────────────────────────────────────────
+
+  /**
+   * Query-type-specific attention profiles.
+   * Different query types should weight attention layers differently.
+   */
+  type QueryType = 'anomaly_investigation' | 'forecasting' | 'what_if' | 'general';
+
+  const queryProfiles: Record<QueryType, { focus: number; cascade: number; anomaly: number; validated: number; recency: number }> = {
+    anomaly_investigation: { focus: 1.3, cascade: 1.1, anomaly: 1.8, validated: 1.1, recency: 1.5 },
+    forecasting:           { focus: 1.2, cascade: 1.0, anomaly: 1.0, validated: 1.5, recency: 1.0 },
+    what_if:               { focus: 1.5, cascade: 1.5, anomaly: 1.2, validated: 1.3, recency: 1.1 },
+    general:               { focus: 1.5, cascade: 1.3, anomaly: 1.4, validated: 1.2, recency: 1.0 },
+  };
+
+  /**
+   * Learned multiplier offsets — trained from feedback.
+   * Initialized to 0 (no offset from defaults).
+   */
+  const learnedOffsets = { focus: 0, cascade: 0, anomaly: 0, validated: 0, recency: 0 };
+
+  /**
+   * Training history for attention weight learning.
+   */
+  const trainingHistory: Array<{
+    queryType: QueryType;
+    multipliers: { focus: number; cascade: number; anomaly: number; validated: number };
+    outcome: number; // 0 = bad prediction, 1 = good prediction
+  }> = [];
+
+  /**
+   * Record a prediction outcome to learn better attention weights.
+   * Over time, this adjusts the attention multipliers to favor configurations
+   * that led to correct predictions.
+   *
+   * Uses simple gradient-free update: shift multipliers toward values
+   * used in successful predictions, away from failed ones.
+   */
+  function recordAttentionOutcome(
+    queryType: QueryType,
+    multipliers: { focus: number; cascade: number; anomaly: number; validated: number },
+    wasAccurate: boolean,
+    learningRate: number = 0.05,
+  ): void {
+    trainingHistory.push({
+      queryType,
+      multipliers,
+      outcome: wasAccurate ? 1 : 0,
+    });
+
+    // Online stochastic update: nudge offsets toward successful multipliers
+    const direction = wasAccurate ? 1 : -1;
+    const profile = queryProfiles[queryType];
+
+    learnedOffsets.focus += learningRate * direction * (multipliers.focus - (profile.focus + learnedOffsets.focus));
+    learnedOffsets.cascade += learningRate * direction * (multipliers.cascade - (profile.cascade + learnedOffsets.cascade));
+    learnedOffsets.anomaly += learningRate * direction * (multipliers.anomaly - (profile.anomaly + learnedOffsets.anomaly));
+    learnedOffsets.validated += learningRate * direction * (multipliers.validated - (profile.validated + learnedOffsets.validated));
+
+    // Clamp offsets to prevent drift beyond ±0.5
+    for (const key of ['focus', 'cascade', 'anomaly', 'validated', 'recency'] as const) {
+      learnedOffsets[key] = Math.max(-0.5, Math.min(0.5, learnedOffsets[key]));
+    }
+  }
+
+  /**
+   * Get the effective attention multipliers for a query type,
+   * combining the base profile with learned offsets.
+   */
+  function getEffectiveMultipliers(queryType: QueryType = 'general'): {
+    focus: number; cascade: number; anomaly: number; validated: number; recency: number;
+  } {
+    const profile = queryProfiles[queryType];
+    return {
+      focus: Math.max(1.0, profile.focus + learnedOffsets.focus),
+      cascade: Math.max(1.0, profile.cascade + learnedOffsets.cascade),
+      anomaly: Math.max(1.0, profile.anomaly + learnedOffsets.anomaly),
+      validated: Math.max(1.0, profile.validated + learnedOffsets.validated),
+      recency: Math.max(0.5, profile.recency + learnedOffsets.recency),
+    };
+  }
+
+  /**
+   * Apply attention with a query-type-specific profile + learned offsets.
+   * This overrides context-level multipliers with the learned ones.
+   */
+  function applyLearnedAttention(
+    dag: CausalDAG,
+    context: AttentionContext,
+    queryType: QueryType = 'general',
+  ): CausalDAG {
+    const effective = getEffectiveMultipliers(queryType);
+    const enhancedContext: AttentionContext = {
+      ...context,
+      domainFocusMultiplier: effective.focus,
+      cascadePathMultiplier: effective.cascade,
+      anomalyMultiplier: effective.anomaly,
+      recencyHalfLifeDays: context.recencyHalfLifeDays
+        ? context.recencyHalfLifeDays / effective.recency  // Higher recency = shorter effective half-life
+        : defaultRecencyHalfLifeDays / effective.recency,
+    };
+
+    const attentionWeights = computeAttentionWeights(dag, enhancedContext);
+
+    const weightedDAG: CausalDAG = {
+      nodes: new Set(dag.nodes),
+      edges: new Map(),
+    };
+
+    for (const [src, neighbors] of dag.edges) {
+      const attentionNeighbors = attentionWeights.get(src);
+      const weightedNeighbors = new Map<string, typeof neighbors extends Map<string, infer V> ? V : never>();
+
+      for (const [tgt, edge] of neighbors) {
+        const attention = attentionNeighbors?.get(tgt);
+        weightedNeighbors.set(tgt, {
+          ...edge,
+          weight: attention?.adjustedWeight ?? edge.weight,
+        });
+      }
+
+      weightedDAG.edges.set(src, weightedNeighbors);
+    }
+
+    return weightedDAG;
+  }
+
   // ── Public API ─────────────────────────────────────────────────────
 
   return {
@@ -358,6 +485,52 @@ export function createAttentionMechanism(config: Partial<AttentionConfig> = {}) 
         }));
 
       return { boosted, dampened };
+    },
+
+    /**
+     * Apply attention with query-type-specific learned profiles.
+     * Uses learned attention multipliers trained from prediction outcomes.
+     */
+    applyLearnedAttention(
+      dag: CausalDAG,
+      context: AttentionContext,
+      queryType: 'anomaly_investigation' | 'forecasting' | 'what_if' | 'general' = 'general',
+    ): CausalDAG {
+      return applyLearnedAttention(dag, context, queryType);
+    },
+
+    /**
+     * Record whether a prediction using the current attention was accurate.
+     * This trains the attention multipliers over time via gradient-free optimization.
+     */
+    recordAttentionOutcome(
+      queryType: 'anomaly_investigation' | 'forecasting' | 'what_if' | 'general',
+      multipliers: { focus: number; cascade: number; anomaly: number; validated: number },
+      wasAccurate: boolean,
+      learningRate?: number,
+    ): void {
+      recordAttentionOutcome(queryType, multipliers, wasAccurate, learningRate);
+    },
+
+    /**
+     * Get the effective (learned) attention multipliers for a query type.
+     */
+    getEffectiveMultipliers(queryType?: 'anomaly_investigation' | 'forecasting' | 'what_if' | 'general') {
+      return getEffectiveMultipliers(queryType);
+    },
+
+    /**
+     * Get the current learned offsets (for serialization/debugging).
+     */
+    getLearnedOffsets() {
+      return { ...learnedOffsets };
+    },
+
+    /**
+     * Get training history size.
+     */
+    getTrainingHistorySize(): number {
+      return trainingHistory.length;
     },
 
     /**

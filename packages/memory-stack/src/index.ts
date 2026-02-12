@@ -286,6 +286,19 @@ export {
   type ContextAwareReasonerConfig,
 } from './causality/context-aware-reasoner';
 
+// Brain Health Monitor - Meta-Cognition ("Introspective Cortex")
+export {
+  createBrainHealthMonitor,
+  type CalibrationSnapshot,
+  type CognitiveLoadAssessment,
+  type DomainForecastPerformance,
+  type HealthReport as BrainCognitiveHealthReport,
+  type BrainHealthConfig as BrainCognitiveHealthConfig,
+  type HealthPredictionRecord,
+  type ActiveAnomaly,
+  type BrainHealthMonitor,
+} from './causality/brain-health-monitor';
+
 // ============================================================================
 // BRIDGES - Cross-Layer Wiring (THE NERVOUS SYSTEM)
 // ============================================================================

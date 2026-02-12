@@ -590,6 +590,169 @@ export function createTemporalForecaster(config: Partial<TemporalForecasterConfi
     };
   }
 
+  // ── Adaptive Ensemble Weighting ────────────────────────────────────
+
+  /**
+   * Softmax function for converting scores to weights.
+   * Temperature controls sharpness: lower = more peaked on best method.
+   */
+  function softmax(scores: number[], temperature: number = 1.0): number[] {
+    const maxScore = Math.max(...scores);
+    const exps = scores.map(s => Math.exp((s - maxScore) / temperature));
+    const sumExp = exps.reduce((a, b) => a + b, 0);
+    return exps.map(e => e / (sumExp || 1));
+  }
+
+  /**
+   * K-Nearest Neighbors forecaster — simple nonlinear model.
+   * Uses lag features to find similar historical patterns and average their outcomes.
+   */
+  function knnForecast(
+    values: number[],
+    horizonDays: number,
+    k: number = 5,
+    patternLength: number = 7,
+  ): number[] {
+    if (values.length < patternLength + horizonDays + k) {
+      // Fallback: return last value repeated
+      const lastVal = values[values.length - 1] ?? 0;
+      return Array(horizonDays).fill(lastVal);
+    }
+
+    // Build the query pattern (most recent patternLength values)
+    const query = values.slice(-patternLength);
+    const queryMean = query.reduce((s, v) => s + v, 0) / query.length;
+    const queryNorm = query.map(v => v - queryMean);
+
+    // Find k nearest historical patterns using normalized euclidean distance
+    const candidates: Array<{ startIdx: number; distance: number }> = [];
+    const maxStart = values.length - patternLength - horizonDays;
+
+    for (let i = 0; i < maxStart; i++) {
+      const pattern = values.slice(i, i + patternLength);
+      const patternMean = pattern.reduce((s, v) => s + v, 0) / pattern.length;
+      const patternNorm = pattern.map(v => v - patternMean);
+
+      let dist = 0;
+      for (let j = 0; j < patternLength; j++) {
+        dist += (queryNorm[j] - patternNorm[j]) ** 2;
+      }
+      candidates.push({ startIdx: i, distance: Math.sqrt(dist) });
+    }
+
+    // Select top-k nearest neighbors
+    candidates.sort((a, b) => a.distance - b.distance);
+    const neighbors = candidates.slice(0, Math.min(k, candidates.length));
+
+    if (neighbors.length === 0) {
+      const lastVal = values[values.length - 1] ?? 0;
+      return Array(horizonDays).fill(lastVal);
+    }
+
+    // Average the outcomes of nearest neighbors (adjusted for level shift)
+    const forecasts: number[] = [];
+    for (let h = 0; h < horizonDays; h++) {
+      let sum = 0;
+      let wSum = 0;
+      for (const { startIdx, distance } of neighbors) {
+        const futureIdx = startIdx + patternLength + h;
+        if (futureIdx < values.length) {
+          // Inverse distance weighting
+          const w = 1 / (distance + 0.001);
+          // Level-adjust: shift the neighbor's future by the level difference
+          const neighborPattern = values.slice(startIdx, startIdx + patternLength);
+          const neighborMean = neighborPattern.reduce((s, v) => s + v, 0) / neighborPattern.length;
+          const levelShift = queryMean - neighborMean;
+          sum += (values[futureIdx] + levelShift) * w;
+          wSum += w;
+        }
+      }
+      forecasts.push(wSum > 0 ? sum / wSum : (values[values.length - 1] ?? 0));
+    }
+
+    return forecasts;
+  }
+
+  /**
+   * Compute adaptive ensemble weights from per-method backtesting.
+   * Returns weights that sum to 1.0, favoring methods with lower RMSE.
+   */
+  function computeAdaptiveWeights(
+    values: number[],
+    horizonDays: number,
+  ): { esWeight: number; arWeight: number; knnWeight: number; dagWeight: number } {
+    const btHorizon = Math.min(horizonDays, Math.floor(values.length * backtestFraction));
+
+    if (values.length < minDataPoints + btHorizon) {
+      // Not enough data to backtest — use defaults
+      return { esWeight: 0.25, arWeight: 0.25, knnWeight: 0.1, dagWeight: 0.4 };
+    }
+
+    // Backtest each method
+    const esRmse = backtest(values, (v, h) => exponentialSmoothing(v, h).forecasts, btHorizon).rmse;
+    const arRmse = backtest(values, (v, h) => autoregressive(v, h).forecasts, btHorizon).rmse;
+    const knnRmse = backtest(values, (v, h) => knnForecast(v, h), btHorizon).rmse;
+
+    // Convert RMSE to weights via softmax of inverse RMSE
+    // (lower RMSE = higher inverse = higher weight)
+    const inverseRmses = [
+      1 / (esRmse + 0.001),
+      1 / (arRmse + 0.001),
+      1 / (knnRmse + 0.001),
+    ];
+
+    const statWeights = softmax(inverseRmses, 1.0);
+
+    // DAG weight is separate — it's structural, not statistical.
+    // Scale statistical weights to leave room for DAG.
+    const dagW = dagWeight; // from config
+    const statScale = 1 - dagW;
+
+    return {
+      esWeight: statWeights[0] * statScale,
+      arWeight: statWeights[1] * statScale,
+      knnWeight: statWeights[2] * statScale,
+      dagWeight: dagW,
+    };
+  }
+
+  /**
+   * Quantile regression via weighted residual sorting.
+   * Estimates prediction intervals without assuming Gaussian residuals.
+   */
+  function quantileIntervals(
+    forecasts: number[],
+    residuals: number[],
+    horizonDays: number,
+  ): Array<{ lower95: number; upper95: number; lower68: number; upper68: number }> {
+    if (residuals.length < 5) {
+      return forecasts.map(v => ({
+        lower95: v * 0.5, upper95: v * 1.5,
+        lower68: v * 0.75, upper68: v * 1.25,
+      }));
+    }
+
+    const sortedRes = [...residuals].sort((a, b) => a - b);
+    const n = sortedRes.length;
+
+    // Empirical quantiles of residuals
+    const q025 = sortedRes[Math.floor(n * 0.025)];
+    const q975 = sortedRes[Math.floor(n * 0.975)];
+    const q16 = sortedRes[Math.floor(n * 0.16)];
+    const q84 = sortedRes[Math.floor(n * 0.84)];
+
+    return forecasts.map((val, i) => {
+      // Widen intervals with horizon (uncertainty grows with forecast distance)
+      const horizonMult = 1 + 0.05 * Math.min(i, 30);
+      return {
+        lower95: Math.round((val + q025 * horizonMult) * 1000) / 1000,
+        upper95: Math.round((val + q975 * horizonMult) * 1000) / 1000,
+        lower68: Math.round((val + q16 * horizonMult) * 1000) / 1000,
+        upper68: Math.round((val + q84 * horizonMult) * 1000) / 1000,
+      };
+    });
+  }
+
   // ── Public API ─────────────────────────────────────────────────────
 
   return {
@@ -645,26 +808,43 @@ export function createTemporalForecaster(config: Partial<TemporalForecasterConfi
         ar.forecasts[h] += seasonalAdj;
       }
 
-      // 3. DAG-informed forecast
+      // 3. KNN nonlinear forecast on deseasonalized data
+      const knnRaw = knnForecast(deseasonalizedValues, horizonDays);
+      // Re-add seasonal component to KNN forecasts
+      for (let h = 0; h < horizonDays; h++) {
+        const seasonalIdx = (fitValues.length + h) % 7;
+        const seasonalAdj = decomp.seasonal.length > seasonalIdx ? decomp.seasonal[seasonalIdx] : 0;
+        knnRaw[h] += seasonalAdj;
+      }
+
+      // 4. DAG-informed forecast
       const dagFc = dagInformedForecast(targetDomain, allSeries, dag, horizonDays);
 
-      // 4. Combine into statistical ensemble (ES + AR average)
-      const statForecasts = es.forecasts.map((esVal, i) => {
-        const arVal = ar.forecasts[i] ?? esVal;
-        return (esVal + arVal) / 2;
-      });
-
-      // 5. Full ensemble: blend statistical + DAG-informed
+      // 5. Adaptive ensemble weighting — weights learned from per-method backtesting
+      const adaptiveWeights = computeAdaptiveWeights(fitValues, horizonDays);
       const hasDagForecasts = dagFc.drivers.length > 0;
-      const ensembleForecasts = statForecasts.map((statVal, i) => {
-        if (!hasDagForecasts) return statVal;
-        const dagVal = dagFc.forecasts[i] ?? statVal;
-        return statVal * statisticalWeight + dagVal * dagWeight;
+
+      const ensembleForecasts = es.forecasts.map((esVal, i) => {
+        const arVal = ar.forecasts[i] ?? esVal;
+        const knnVal = knnRaw[i] ?? esVal;
+
+        if (!hasDagForecasts) {
+          // No DAG data — redistribute DAG weight proportionally to statistical methods
+          const totalStatW = adaptiveWeights.esWeight + adaptiveWeights.arWeight + adaptiveWeights.knnWeight + adaptiveWeights.dagWeight;
+          return (esVal * adaptiveWeights.esWeight + arVal * adaptiveWeights.arWeight + knnVal * adaptiveWeights.knnWeight +
+                  ((esVal + arVal + knnVal) / 3) * adaptiveWeights.dagWeight) / totalStatW;
+        }
+
+        const dagVal = dagFc.forecasts[i] ?? esVal;
+        return esVal * adaptiveWeights.esWeight +
+               arVal * adaptiveWeights.arWeight +
+               knnVal * adaptiveWeights.knnWeight +
+               dagVal * adaptiveWeights.dagWeight;
       });
 
-      // 6. Compute prediction intervals from combined residuals
+      // 6. Compute prediction intervals using quantile regression (distribution-free)
       const allResiduals = [...es.residuals, ...ar.residuals];
-      const intervals = computeIntervals(ensembleForecasts, allResiduals, horizonDays);
+      const intervals = quantileIntervals(ensembleForecasts, allResiduals, horizonDays);
 
       // 7. Build date sequence
       const lastDate = series?.dates?.[series.dates.length - 1];
@@ -786,6 +966,21 @@ export function createTemporalForecaster(config: Partial<TemporalForecasterConfi
      */
     outlierClip(values: number[]): number[] {
       return outlierClip(values);
+    },
+
+    /**
+     * Compute adaptive ensemble weights for a time series.
+     * Uses per-method backtesting with softmax weighting.
+     */
+    computeAdaptiveWeights(values: number[], horizonDays?: number) {
+      return computeAdaptiveWeights(values, horizonDays ?? defaultHorizonDays);
+    },
+
+    /**
+     * KNN nonlinear forecast — pattern-matching based prediction.
+     */
+    knnForecast(values: number[], horizonDays: number, k?: number) {
+      return knnForecast(values, horizonDays, k);
     },
 
     /**
