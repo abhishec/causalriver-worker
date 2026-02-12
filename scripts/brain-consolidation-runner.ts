@@ -454,10 +454,11 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
     logError('LEARN', 'Attention policy learning failed (non-fatal)', err);
   }
 
-  // ── POST-LEARNING: Fast-Path Invalidation (Cerebellum) ──
+  // ── POST-LEARNING: Fast-Path Invalidation + Pre-Warming (Cerebellum) ──
   // After consolidation changes the causal graph, stale fast-path caches
   // must be invalidated so the copilot gets fresh answers.
-  divider('CEREBELLUM: FAST-PATH INVALIDATION');
+  // Then pre-warm common query shapes so first queries after sleep are fast.
+  divider('CEREBELLUM: FAST-PATH INVALIDATION + PRE-WARMING');
   try {
     const fastPath = createFastPathCompiler({
       supabase,
@@ -465,9 +466,39 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
       verbose: VERBOSE,
     });
     await fastPath.invalidateAll();
-    log('CEREBELLUM', 'All fast-paths invalidated — copilot will recompile on next query');
+    log('CEREBELLUM', 'All fast-paths invalidated');
+
+    // Pre-warm common business query shapes so first queries after
+    // consolidation hit compiled paths instead of cold misses.
+    // These cover the top query fingerprints across business domains.
+    const warmupQueries = [
+      'Why did revenue change this quarter?',
+      'What caused churn to increase?',
+      'How is customer acquisition trending?',
+      'What is driving cost increases?',
+      'Compare sales performance across regions',
+      'What patterns emerged in marketing spend?',
+      'How did engineering velocity change?',
+      'What risks should we watch for?',
+      'Show me cross-domain correlations',
+      'What changed since last consolidation?',
+    ];
+
+    let warmed = 0;
+    for (const query of warmupQueries) {
+      try {
+        await fastPath.precompile(query);
+        warmed++;
+      } catch {
+        // Some queries may not have enough graph data — skip silently
+      }
+    }
+    log('CEREBELLUM', `Pre-warmed ${warmed}/${warmupQueries.length} common query shapes`);
+
+    const stats = fastPath.getStats();
+    log('CEREBELLUM', `Cache: ${stats.compiledPaths} compiled paths ready`);
   } catch (err) {
-    logError('CEREBELLUM', 'Fast-path invalidation failed (non-fatal)', err);
+    logError('CEREBELLUM', 'Fast-path invalidation/pre-warming failed (non-fatal)', err);
   }
 
   // ── POST-LEARNING: Anomaly Sweep (Insula) ──
