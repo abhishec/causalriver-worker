@@ -195,7 +195,7 @@ importers:
   website:
     dependencies:
       '@supabase/supabase-js':
-        specifier: ^2.49.4
+        specifier: ^2.95.3
         version: 2.95.3
       framer-motion:
         specifier: ^12.34.0
