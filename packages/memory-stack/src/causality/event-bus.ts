@@ -290,6 +290,8 @@ export function createEventBus(config: Partial<EventBusConfig> = {}) {
 
     // Take events from queue
     const eventsToFlush = eventQueue.splice(0, batchSize);
+    // Adjust notifiedUpTo since splice shifted array indices
+    notifiedUpTo = Math.max(0, notifiedUpTo - eventsToFlush.length);
 
     // Sort by priority then vector clock
     eventsToFlush.sort((a, b) => {
@@ -352,18 +354,24 @@ export function createEventBus(config: Partial<EventBusConfig> = {}) {
   };
 
   /**
+   * Track how many events in the queue have already been notified.
+   * This prevents re-notifying subscribers about events they already received.
+   */
+  let notifiedUpTo = 0;
+
+  /**
    * Notify subscribers of queued events (in-memory, no DB required).
    * Called on a debounced schedule so subscribers receive batched events.
    */
   const notifyPending = async () => {
-    if (eventQueue.length === 0) return;
+    if (eventQueue.length <= notifiedUpTo) return;
 
-    // Snapshot current events for notification (don't remove from queue—
-    // queue is drained only by flush(supabase) for DB persistence)
-    const snapshot = eventQueue.slice();
-    stats.totalEventsProcessed += snapshot.length;
+    // Only notify about NEW events since last notification
+    const newEvents = eventQueue.slice(notifiedUpTo);
+    notifiedUpTo = eventQueue.length;
+    stats.totalEventsProcessed += newEvents.length;
 
-    await notifySubscribers(snapshot);
+    await notifySubscribers(newEvents);
   };
 
   /**
