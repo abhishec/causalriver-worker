@@ -182,27 +182,68 @@ def observe_all_sessions(
     model: str = OBSERVATION_MODEL,
     use_cache: bool = True,
     verbose: bool = False,
+    max_workers: int = 10,
 ) -> List[Dict[str, str]]:
     """Observe all sessions for a question.
 
     Returns list of {session_id, date, observations} dicts, chronologically ordered.
+    Uses parallel execution for uncached sessions (up to max_workers concurrent calls).
     """
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
     results = []
 
+    # First, check cache for all sessions
+    cached_results = {}
+    uncached = []
     for session, sid, sdate in zip(sessions, session_ids, session_dates):
-        obs = observe_session(
-            session=session,
-            session_id=sid,
-            session_date=sdate,
-            model=model,
-            use_cache=use_cache,
-            verbose=verbose,
-        )
-        results.append({
-            "session_id": sid,
-            "date": sdate,
-            "observations": obs,
-        })
+        ck = _observation_cache_key(sid, sdate)
+        cached = _load_cached_observation(ck) if use_cache else None
+        if cached is not None:
+            cached_results[sid] = {
+                "session_id": sid,
+                "date": sdate,
+                "observations": cached,
+            }
+        else:
+            uncached.append((session, sid, sdate))
+
+    # Process uncached sessions in parallel
+    if uncached:
+        def _observe_one(args):
+            session, sid, sdate = args
+            obs = observe_session(
+                session=session,
+                session_id=sid,
+                session_date=sdate,
+                model=model,
+                use_cache=use_cache,
+                verbose=False,
+            )
+            return {"session_id": sid, "date": sdate, "observations": obs}
+
+        workers = min(max_workers, len(uncached))
+        with ThreadPoolExecutor(max_workers=workers) as executor:
+            futures = {executor.submit(_observe_one, args): args[1] for args in uncached}
+            for future in as_completed(futures):
+                try:
+                    result = future.result()
+                    cached_results[result["session_id"]] = result
+                except Exception as e:
+                    sid = futures[future]
+                    if verbose:
+                        print(f"    [Error] {sid}: {e}")
+
+    # Build ordered results
+    for session, sid, sdate in zip(sessions, session_ids, session_dates):
+        if sid in cached_results:
+            results.append(cached_results[sid])
+        else:
+            results.append({
+                "session_id": sid,
+                "date": sdate,
+                "observations": f"[ERROR] Could not observe session {sid}",
+            })
 
     # Sort chronologically
     results.sort(key=lambda x: x["date"])
