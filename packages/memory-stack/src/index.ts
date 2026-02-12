@@ -89,6 +89,37 @@ export {
 } from './core/collaboration-graph';
 
 // ============================================================================
+// CORE - Knowledge Dependency Graph (Universal Structural Intelligence)
+// ============================================================================
+
+export {
+  createKnowledgeDependencyGraph,
+  type DependencyEdge,
+  type DependencyInput,
+  type DependencyQuery,
+  type DependencyType,
+  type KnowledgeDomain,
+  type ImpactAnalysis,
+  type CycleDetection,
+  type KnowledgeDependencyGraphConfig,
+  type KnowledgeDependencyGraphInstance,
+  type KnowledgeDependencyGraphStats,
+} from './core/knowledge-dependency-graph';
+
+// ============================================================================
+// CORE NLP - Knowledge-Aware Signal Enrichment
+// ============================================================================
+
+export {
+  enrichSignalWithKnowledgeGraph,
+  enrichSignalsWithKnowledgeGraph,
+  extractEntityIds,
+  matchBusinessRules,
+  type KnowledgeEnrichment,
+  type KnowledgeEnrichmentConfig,
+} from './core/nlp/knowledge-signal-enricher';
+
+// ============================================================================
 // CORE - L2+L3: Entity Resolution & Semantic Memory
 // ============================================================================
 
@@ -782,6 +813,10 @@ export {
   getTrainingPacksByTag,
   getAllTrainingPacks,
 } from './learning/training-library';
+
+export {
+  KNOWLEDGE_INTELLIGENCE_TRAINING_PACKS,
+} from './learning/knowledge-intelligence-training';
 
 // Runbook Auto-Indexer
 export {
