@@ -549,7 +549,7 @@ function generateMethodVotes(
       method: 'confounder_knockout',
       paradigm: 'parametric',
       vote: !isLikelyConfounded ? 'causal' : 'not_causal',
-      confidence: knockoutScore,
+      confidence: Math.max(0, Math.min(1, knockoutScore)),
     });
   }
 
@@ -571,6 +571,11 @@ function generateMethodVotes(
       vote: result.sampleSize >= 30 ? 'causal' : result.sampleSize >= 10 ? 'not_causal' : 'insufficient_data',
       confidence: Math.min(1, result.sampleSize / 100),
     });
+  }
+
+  // Safety clamp: ensure all confidences are in [0, 1]
+  for (const vote of votes) {
+    vote.confidence = Math.max(0, Math.min(1, vote.confidence));
   }
 
   return votes;
