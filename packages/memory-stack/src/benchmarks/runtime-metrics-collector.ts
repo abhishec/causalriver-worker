@@ -97,15 +97,15 @@ async function collectCerebellumMetrics(
 
       // Track each query twice to build pattern recognition
       for (const q of canonicalQueries) {
-        await compiler.trackQuery(q);
+        await compiler.lookup(q);
       }
       // Second pass — should start seeing compiled paths
       for (const q of canonicalQueries.slice(0, 5)) {
-        await compiler.trackQuery(q);
+        await compiler.lookup(q);
       }
       // Third pass — triggers compilation threshold (3+ hits)
       for (const q of canonicalQueries.slice(0, 5)) {
-        await compiler.trackQuery(q);
+        await compiler.lookup(q);
       }
 
       const stats = compiler.getStats();
@@ -339,7 +339,7 @@ async function collectLTPMetrics(
 
       if (posteriors.length > 0) {
         // Convergence = average posterior mean (higher = more confident edges)
-        const avgMean = posteriors.reduce((s, p) => s + p.posteriorMean, 0) / posteriors.length;
+        const avgMean = posteriors.reduce((s, p) => s + p.mean, 0) / posteriors.length;
         bayesianConvergence = avgMean;
         log(verbose, 'LTP', `Bayesian: convergence=${bayesianConvergence.toFixed(3)} (${posteriors.length} posteriors)`);
       }

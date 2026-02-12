@@ -26,6 +26,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { ConnectorSignal, NexusConnector, ConnectorSyncResult } from './connector-framework';
 import { storeConnectorSignals, recordSyncResult } from './connector-framework';
+import { enrichSignalWithNLP } from '../core/nlp/signal-enricher';
 
 // ============================================================================
 // TYPES
@@ -212,8 +213,8 @@ export function createJiraConnector(config: JiraConnectorConfig): NexusConnector
         components: fields.components?.map((c) => c.name),
       };
 
-      // Issue created signal
-      signals.push({
+      // Issue created signal — enriched with NLP from summary
+      const createdSignal: ConnectorSignal = {
         organization_id: orgId,
         source_domain: 'engineering',
         signal_type: 'issue_created',
@@ -225,7 +226,9 @@ export function createJiraConnector(config: JiraConnectorConfig): NexusConnector
           ...baseMetadata,
           is_bug: isBug,
         },
-      });
+      };
+      enrichSignalWithNLP(createdSignal, ['summary']);
+      signals.push(createdSignal);
 
       // Issue resolved / closed
       if (statusCategory === 'done' && fields.resolutiondate) {
@@ -250,9 +253,9 @@ export function createJiraConnector(config: JiraConnectorConfig): NexusConnector
         });
       }
 
-      // Blocked signal
+      // Blocked signal — enriched with NLP
       if (isBlocked) {
-        signals.push({
+        const blockedSignal: ConnectorSignal = {
           organization_id: orgId,
           source_domain: 'engineering',
           signal_type: 'issue_blocked',
@@ -261,7 +264,9 @@ export function createJiraConnector(config: JiraConnectorConfig): NexusConnector
           entity_id: `jira_${issue.key}`,
           signal_timestamp: fields.updated,
           metadata: baseMetadata,
-        });
+        };
+        enrichSignalWithNLP(blockedSignal, ['summary']);
+        signals.push(blockedSignal);
       }
     }
 
@@ -279,8 +284,8 @@ export function createJiraConnector(config: JiraConnectorConfig): NexusConnector
 
     const velocity = committedCount > 0 ? completedCount / committedCount : 0;
 
-    // Sprint completed signal
-    signals.push({
+    // Sprint completed signal — enriched with NLP from sprint goal
+    const sprintSignal: ConnectorSignal = {
       organization_id: orgId,
       source_domain: 'engineering',
       signal_type: 'sprint_completed',
@@ -295,7 +300,9 @@ export function createJiraConnector(config: JiraConnectorConfig): NexusConnector
         completed_issues: completedCount,
         velocity_ratio: Math.round(velocity * 100) / 100,
       },
-    });
+    };
+    enrichSignalWithNLP(sprintSignal, ['sprint_goal']);
+    signals.push(sprintSignal);
 
     // Scope change (punted issues = scope reduction)
     if (puntedCount > 0) {

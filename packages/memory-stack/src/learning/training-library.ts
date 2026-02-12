@@ -675,6 +675,205 @@ const codeReviewQualityCascade: TrainingPack = {
 };
 
 // ============================================================================
+// 14. ENGINEERING ↔ CUSTOMER SUCCESS BRIDGE
+// ============================================================================
+
+const engineeringCSBridge: TrainingPack = {
+  id: 'engineering-cs-bridge',
+  title: 'Engineering ↔ Customer Success Bridge — Deploy Impact on Retention',
+  source: 'Cross-domain causal pattern: engineering decisions impact customer outcomes',
+  industry: 'SaaS',
+  domains: ['engineering', 'cs', 'product'],
+  confidence: 0.82,
+  tags: ['cross-domain', 'deploy', 'uptime', 'churn', 'reliability', 'customer-impact'],
+
+  causalChains: [
+    // Deploy failures → customer-facing incidents → churn risk
+    { source: 'engineering', target: 'cs', metric: 'deploy_failure_to_customer_incident', effectSize: 0.60, lagDays: 1, pValue: 0.003 },
+    // Uptime degradation → NPS drop → churn acceleration
+    { source: 'engineering', target: 'cs', metric: 'uptime_degradation_to_nps_drop', effectSize: -0.55, lagDays: 7, pValue: 0.005 },
+    // Slow incident MTTR → customer satisfaction decline → support ticket surge
+    { source: 'engineering', target: 'cs', metric: 'slow_mttr_to_satisfaction_decline', effectSize: -0.45, lagDays: 3, pValue: 0.008 },
+    // Feature velocity → product value perception → expansion revenue
+    { source: 'engineering', target: 'product', metric: 'feature_velocity_to_product_value', effectSize: 0.40, lagDays: 30, pValue: 0.01 },
+    // Bug density → support ticket volume → CS capacity strain
+    { source: 'engineering', target: 'cs', metric: 'bug_density_to_support_volume', effectSize: 0.50, lagDays: 14, pValue: 0.005 },
+    // CS escalation patterns → engineering priority signals
+    { source: 'cs', target: 'engineering', metric: 'escalation_to_engineering_priority', effectSize: 0.35, lagDays: 3, pValue: 0.02 },
+  ],
+
+  businessRules: [
+    {
+      title: 'Deploy Failure Customer Impact',
+      entityType: 'service',
+      when: { logic: 'AND', conditions: [
+        { field: 'engineering.deploy_failure_count_7d', operator: 'greater_than', value: 3 },
+        { field: 'cs.customer_incidents_7d', operator: 'greater_than', value: 0 },
+      ]},
+      then: [
+        { type: 'trigger_alert', params: { severity: 'high', message: 'Deploy instability causing customer incidents — coordinate with CS on customer communication' } },
+      ],
+      naturalLanguage: 'Multiple deploy failures in a week that coincide with customer incidents require immediate cross-team response.',
+    },
+    {
+      title: 'Reliability-Churn Correlation',
+      entityType: 'service',
+      when: { logic: 'AND', conditions: [
+        { field: 'engineering.uptime_pct_30d', operator: 'less_than', value: 99.5 },
+        { field: 'cs.churn_rate', operator: 'greater_than', value: 5 },
+      ]},
+      then: [
+        { type: 'trigger_alert', params: { severity: 'critical', message: 'Uptime below 99.5% correlating with elevated churn — reliability is a retention lever' } },
+      ],
+      naturalLanguage: 'When uptime drops below 99.5% and churn exceeds 5%, reliability becomes the #1 retention lever.',
+    },
+  ],
+
+  cascades: [
+    { source: 'engineering', target: 'cs', type: 'triggers', severity: 'high',
+      keywords: { source: ['deploy-failure', 'outage', 'incident', 'regression'], target: ['customer-impact', 'escalation', 'churn-risk', 'nps-drop'] },
+      reasonTemplate: 'Engineering instability cascades into customer success metrics' },
+  ],
+
+  patterns: [
+    { name: 'Deploy-Stability-Retention-Correlation', domains: ['engineering', 'cs'], description: 'Teams with >99.9% deploy success rate see 40% lower customer churn', observed: 75, expected: 30, total: 100 },
+    { name: 'MTTR-NPS-Inverse-Correlation', domains: ['engineering', 'cs'], description: 'Each 10-minute MTTR improvement correlates with 2-point NPS increase', observed: 68, expected: 30, total: 100 },
+  ],
+
+  outcomes: [
+    { predicted: 'deploy_failures → customer_churn_increase', predictedConfidence: 0.78, actual: 'Churn spiked 15% after 3 production outages in one week', wasCorrect: true, sourceDomain: 'engineering', targetDomain: 'cs' },
+  ],
+
+  narrative: 'Engineering reliability is the hidden driver of customer success. Deploy failures create customer-facing incidents within hours. Uptime degradation below 99.5% correlates with NPS drops within a week and measurable churn acceleration within 30 days. Teams that invest in deploy stability, incident response speed, and bug prevention see compound benefits in customer retention and expansion revenue.',
+};
+
+// ============================================================================
+// 15. PEOPLE ↔ ENGINEERING BRIDGE
+// ============================================================================
+
+const peopleEngineeringBridge: TrainingPack = {
+  id: 'people-engineering-bridge',
+  title: 'People ↔ Engineering Bridge — Attrition Impact on Engineering Metrics',
+  source: 'Cross-domain causal pattern: people decisions impact engineering velocity',
+  industry: 'SaaS',
+  domains: ['people', 'engineering', 'cs'],
+  confidence: 0.80,
+  tags: ['cross-domain', 'attrition', 'hiring', 'velocity', 'knowledge-loss', 'team-health'],
+
+  causalChains: [
+    // Senior engineer departure → knowledge loss → velocity drop
+    { source: 'people', target: 'engineering', metric: 'senior_departure_to_velocity_drop', effectSize: -0.55, lagDays: 14, pValue: 0.005 },
+    // Team attrition → code review bottleneck → deployment delays
+    { source: 'people', target: 'engineering', metric: 'attrition_to_review_bottleneck', effectSize: -0.40, lagDays: 21, pValue: 0.01 },
+    // Hiring pipeline slowdown → understaffing → incident MTTR increase
+    { source: 'people', target: 'engineering', metric: 'understaffing_to_mttr_increase', effectSize: 0.45, lagDays: 60, pValue: 0.008 },
+    // Engineering burnout → voluntary attrition → knowledge drain
+    { source: 'engineering', target: 'people', metric: 'burnout_to_voluntary_attrition', effectSize: 0.50, lagDays: 90, pValue: 0.005 },
+    // On-call overload → team satisfaction decline → departure intent
+    { source: 'engineering', target: 'people', metric: 'oncall_overload_to_satisfaction_decline', effectSize: -0.35, lagDays: 30, pValue: 0.015 },
+  ],
+
+  businessRules: [
+    {
+      title: 'Knowledge Loss Risk',
+      entityType: 'team',
+      when: { logic: 'AND', conditions: [
+        { field: 'people.senior_engineers_departed_90d', operator: 'greater_than', value: 1 },
+        { field: 'engineering.velocity_change_pct', operator: 'less_than', value: -20 },
+      ]},
+      then: [
+        { type: 'trigger_alert', params: { severity: 'high', message: 'Knowledge loss detected: senior departures correlating with velocity decline — prioritize knowledge transfer and documentation' } },
+      ],
+      naturalLanguage: 'When senior engineers leave and velocity drops >20%, the team is experiencing knowledge drain that requires active intervention.',
+    },
+  ],
+
+  cascades: [
+    { source: 'people', target: 'engineering', type: 'triggers', severity: 'medium',
+      keywords: { source: ['attrition', 'departure', 'understaffing', 'hiring-freeze'], target: ['velocity-drop', 'review-bottleneck', 'incident-mttr', 'tech-debt'] },
+      reasonTemplate: 'People changes cascade into engineering capacity and quality metrics' },
+    { source: 'engineering', target: 'people', type: 'triggers', severity: 'medium',
+      keywords: { source: ['burnout', 'oncall-overload', 'tech-debt', 'incident-fatigue'], target: ['voluntary-attrition', 'satisfaction-decline', 'departure-intent'] },
+      reasonTemplate: 'Engineering overload creates attrition pressure that amplifies capacity problems' },
+  ],
+
+  patterns: [
+    { name: 'Senior-Departure-Velocity-Impact', domains: ['people', 'engineering'], description: 'Each senior engineer departure causes 15-25% velocity drop for 6-8 weeks in their domain', observed: 72, expected: 30, total: 100 },
+    { name: 'Burnout-Attrition-Feedback-Loop', domains: ['engineering', 'people'], description: 'Teams with >2 incidents/week per person see 3x higher voluntary attrition within 90 days', observed: 65, expected: 25, total: 100 },
+  ],
+
+  outcomes: [
+    { predicted: 'senior_departure → velocity_decline', predictedConfidence: 0.75, actual: 'Team velocity dropped 22% after lead architect left', wasCorrect: true, sourceDomain: 'people', targetDomain: 'engineering' },
+  ],
+
+  narrative: 'People and engineering form a bidirectional feedback loop: attrition degrades engineering capacity, while engineering overload drives attrition. Senior engineer departures cause 15-25% velocity drops lasting 6-8 weeks. On-call overload (>2 incidents/week/person) is the strongest predictor of voluntary attrition. Proactive knowledge transfer, documentation, and workload balancing are the key interventions.',
+};
+
+// ============================================================================
+// 16. PRODUCT ↔ MARKETING BRIDGE
+// ============================================================================
+
+const productMarketingBridge: TrainingPack = {
+  id: 'product-marketing-bridge',
+  title: 'Product ↔ Marketing Bridge — Feature Adoption to Revenue Attribution',
+  source: 'Cross-domain causal pattern: product decisions impact marketing effectiveness',
+  industry: 'SaaS',
+  domains: ['product', 'marketing', 'finance', 'cs'],
+  confidence: 0.78,
+  tags: ['cross-domain', 'adoption', 'attribution', 'feature-launch', 'campaign', 'conversion'],
+
+  causalChains: [
+    // Feature adoption → usage data → marketing testimonials → conversion
+    { source: 'product', target: 'marketing', metric: 'feature_adoption_to_marketing_content', effectSize: 0.45, lagDays: 30, pValue: 0.01 },
+    // Product stickiness → organic word-of-mouth → lower CAC
+    { source: 'product', target: 'marketing', metric: 'stickiness_to_organic_growth', effectSize: 0.40, lagDays: 60, pValue: 0.012 },
+    // Marketing campaign → MQL → product trial → revenue
+    { source: 'marketing', target: 'product', metric: 'campaign_to_trial_activation', effectSize: 0.50, lagDays: 14, pValue: 0.005 },
+    // Feature gap → lost deals → marketing message mismatch
+    { source: 'product', target: 'marketing', metric: 'feature_gap_to_deal_loss', effectSize: -0.35, lagDays: 45, pValue: 0.02 },
+    // Product NPS → referral rate → marketing attribution
+    { source: 'product', target: 'finance', metric: 'nps_to_referral_revenue', effectSize: 0.55, lagDays: 90, pValue: 0.003 },
+    // Marketing feature positioning → customer expectation → satisfaction gap
+    { source: 'marketing', target: 'cs', metric: 'overpromise_to_satisfaction_gap', effectSize: -0.30, lagDays: 30, pValue: 0.025 },
+  ],
+
+  businessRules: [
+    {
+      title: 'Feature Launch Marketing Alignment',
+      entityType: 'feature',
+      when: { logic: 'AND', conditions: [
+        { field: 'product.feature_launch_date_set', operator: 'equals', value: true },
+        { field: 'marketing.launch_campaign_ready', operator: 'equals', value: false },
+      ]},
+      then: [
+        { type: 'trigger_alert', params: { severity: 'medium', message: 'Feature launching without coordinated marketing campaign — missed adoption opportunity' } },
+      ],
+      naturalLanguage: 'Features launched without marketing coordination see 60% lower adoption in the first 30 days.',
+    },
+  ],
+
+  cascades: [
+    { source: 'product', target: 'marketing', type: 'enables', severity: 'medium',
+      keywords: { source: ['feature-launch', 'adoption', 'stickiness', 'nps'], target: ['campaign-content', 'testimonials', 'conversion-rate', 'cac-reduction'] },
+      reasonTemplate: 'Product success creates marketing assets and organic growth signals' },
+    { source: 'marketing', target: 'product', type: 'triggers', severity: 'low',
+      keywords: { source: ['campaign', 'positioning', 'messaging'], target: ['trial-activation', 'feature-expectation', 'onboarding-friction'] },
+      reasonTemplate: 'Marketing campaigns shape user expectations that affect product experience' },
+  ],
+
+  patterns: [
+    { name: 'Feature-Adoption-Marketing-Loop', domains: ['product', 'marketing'], description: 'Features with >40% 30-day adoption generate 3x more organic referrals than those below 20%', observed: 70, expected: 30, total: 100 },
+    { name: 'Campaign-Trial-Conversion-Chain', domains: ['marketing', 'product', 'finance'], description: 'Coordinated feature-launch campaigns see 60% higher trial-to-paid conversion', observed: 65, expected: 30, total: 100 },
+  ],
+
+  outcomes: [
+    { predicted: 'feature_adoption → organic_growth', predictedConfidence: 0.72, actual: 'High-adoption features drove 35% of new signups via referrals', wasCorrect: true, sourceDomain: 'product', targetDomain: 'marketing' },
+  ],
+
+  narrative: 'Product and marketing form a virtuous cycle when aligned: high feature adoption creates marketing assets (testimonials, case studies, usage stats) that drive acquisition; targeted marketing drives qualified trials that improve feature adoption. The key metric is the adoption-to-referral ratio. Products with >40% 30-day feature adoption generate 3x more organic referrals. Misalignment (overpromising features, launching without marketing) creates satisfaction gaps that cascade into churn.',
+};
+
+// ============================================================================
 // LIBRARY EXPORTS
 // ============================================================================
 
@@ -698,6 +897,10 @@ export const TRAINING_LIBRARY: TrainingPack[] = [
   engineeringVelocityCascade,
   incidentResponseCascade,
   codeReviewQualityCascade,
+  // Cross-domain bridge training packs
+  engineeringCSBridge,
+  peopleEngineeringBridge,
+  productMarketingBridge,
   // Core Metrics Library — VC/PE-grade financial intelligence
   ...CORE_METRICS_LIBRARY,
 ];

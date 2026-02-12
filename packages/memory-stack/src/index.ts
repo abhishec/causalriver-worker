@@ -47,6 +47,17 @@ export {
   type TopicExtractorConfig,
 } from './core/nlp/topic-extractor';
 
+export {
+  analyzeText,
+  enrichSignalWithNLP,
+  enrichSignalsWithNLP,
+  extractTextFromSignal,
+  detectUrgency,
+  type NLPEnrichment,
+  type EnrichableSignal,
+  type EnrichmentConfig,
+} from './core/nlp/signal-enricher';
+
 // ============================================================================
 // CORE - Contributor Expertise Graph
 // ============================================================================

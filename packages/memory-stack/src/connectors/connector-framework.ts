@@ -28,6 +28,8 @@ export interface ConnectorSignal {
   entity_id?: string;
   client_id?: string;
   metadata?: Record<string, unknown>;
+  /** Index signature for NLP enrichment compatibility */
+  [key: string]: unknown;
 }
 
 export interface ConnectorSyncResult {

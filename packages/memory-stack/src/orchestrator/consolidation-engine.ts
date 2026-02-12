@@ -55,6 +55,7 @@ import {
 } from '../learning/pattern-detector';
 import { createBrainTrainer, type TrainingPack } from '../learning/brain-trainer';
 import { createExpertiseGraph } from '../core/expertise-graph';
+import { createCollaborationGraph } from '../core/collaboration-graph';
 import { createSupabaseRepository } from '../persistence/supabase-repository';
 import { getDefaultLogger, type NexusLogger } from '../observability';
 import { createMultiHopReasoner } from '../causality/multi-hop-reasoner';
@@ -922,6 +923,101 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
       logError('EXPERTISE', 'Expertise graph update failed', err);
       return {
         step: 'expertise_update',
+        status: 'error',
+        durationMs: Date.now() - start,
+        details: { error: err.message },
+      };
+    }
+  }
+
+  // ── Step 5.55: COLLABORATION — Update cross-team collaboration graph ──────
+
+  /**
+   * Data-driven mapping: signal_type → collaboration interaction.
+   * PR reviews, thread replies, incident responses, and mentions
+   * automatically build the team collaboration graph.
+   */
+  const COLLABORATION_SIGNAL_MAP: Record<string, {
+    contributorAField: string;
+    contributorBField: string;
+    interactionType: 'code_review' | 'pr_co_author' | 'thread_reply' | 'incident_collab' | 'mention' | 'approval';
+    teamField?: string;
+  }> = {
+    'pr_review_submitted': { contributorAField: 'reviewer', contributorBField: 'author', interactionType: 'code_review', teamField: 'directories_changed' },
+    'pr_merged': { contributorAField: 'author', contributorBField: 'reviewers_who_approved', interactionType: 'approval' },
+    'incident_resolved': { contributorAField: 'responder', contributorBField: 'escalated_to', interactionType: 'incident_collab' },
+    'thread_reply': { contributorAField: 'user', contributorBField: 'thread_starter', interactionType: 'thread_reply' },
+  };
+
+  async function updateCollaborationGraph(signals: any[]): Promise<ConsolidationStepResult> {
+    const start = Date.now();
+    try {
+      const collabGraph = createCollaborationGraph();
+
+      // Load existing collaboration edges from database
+      await collabGraph.load(supabase, organizationId);
+
+      let interactionsRecorded = 0;
+
+      for (const signal of signals) {
+        const mapping = COLLABORATION_SIGNAL_MAP[signal.signal_type];
+        if (!mapping) continue;
+
+        const metadata = signal.signal_metadata || signal.metadata || {};
+        const contributorA = metadata[mapping.contributorAField];
+        if (!contributorA || typeof contributorA !== 'string') continue;
+
+        // Handle both single contributor and array (e.g., reviewers_who_approved)
+        const bValue = metadata[mapping.contributorBField];
+        const contributorBs: string[] = [];
+
+        if (Array.isArray(bValue)) {
+          contributorBs.push(...bValue.filter((v: unknown) => typeof v === 'string'));
+        } else if (typeof bValue === 'string') {
+          contributorBs.push(bValue);
+        }
+
+        for (const contributorB of contributorBs) {
+          if (contributorA === contributorB) continue; // Skip self-interaction
+
+          collabGraph.recordInteraction({
+            contributorA,
+            contributorB,
+            interactionType: mapping.interactionType,
+            timestamp: signal.signal_timestamp ? new Date(signal.signal_timestamp) : new Date(),
+            context: signal.entity_id,
+          });
+          interactionsRecorded++;
+        }
+      }
+
+      // Apply time-based decay
+      collabGraph.applyDecay(new Date());
+
+      // Persist to database
+      if (interactionsRecorded > 0) {
+        await collabGraph.persist(supabase, organizationId);
+      }
+
+      const stats = collabGraph.getNetworkStats();
+      log('COLLABORATION', `${interactionsRecorded} interactions → ${stats.totalEdges} edges, ${stats.uniqueContributors} contributors, ${stats.crossTeamEdges} cross-team`);
+
+      return {
+        step: 'collaboration_update',
+        status: 'success',
+        durationMs: Date.now() - start,
+        details: {
+          interactionsRecorded,
+          totalEdges: stats.totalEdges,
+          totalContributors: stats.uniqueContributors,
+          crossTeamEdges: stats.crossTeamEdges,
+          networkDensity: stats.density,
+        },
+      };
+    } catch (err: any) {
+      logError('COLLABORATION', 'Collaboration graph update failed', err);
+      return {
+        step: 'collaboration_update',
         status: 'error',
         durationMs: Date.now() - start,
         details: { error: err.message },
@@ -1997,6 +2093,12 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
       const expertiseStep = await updateExpertiseGraph(signals);
       steps.push(expertiseStep);
       if (expertiseStep.status === 'error') errors.push('Expertise graph update failed');
+
+      // Step 5.55: COLLABORATION — Update cross-team collaboration graph
+      log('5.55/10', 'Updating cross-team collaboration graph...');
+      const collabStep = await updateCollaborationGraph(signals);
+      steps.push(collabStep);
+      if (collabStep.status === 'error') errors.push('Collaboration graph update failed');
 
       // Step 5.6: COGNITIVE — Multi-hop reasoning + uncertainty + intelligence briefing
       log('5.6/10', 'Running cognitive analysis (multi-hop reasoning, uncertainty, briefing)...');

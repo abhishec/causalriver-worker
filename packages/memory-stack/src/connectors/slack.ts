@@ -27,6 +27,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { ConnectorSignal, NexusConnector, ConnectorSyncResult } from './connector-framework';
 import { storeConnectorSignals, recordSyncResult } from './connector-framework';
+import { enrichSignalWithNLP } from '../core/nlp/signal-enricher';
 
 // ============================================================================
 // TYPES
@@ -124,7 +125,7 @@ export function createSlackConnector(config: SlackConnectorConfig): SlackConnect
           }
 
           for (const msg of data.messages || []) {
-            signals.push({
+            const signal: ConnectorSignal = {
               organization_id: organizationId,
               source_domain: domain,
               signal_type: msg.thread_ts && msg.thread_ts !== msg.ts ? 'thread_reply' : 'message_sent',
@@ -134,12 +135,17 @@ export function createSlackConnector(config: SlackConnectorConfig): SlackConnect
               metadata: {
                 channel,
                 user: msg.user,
-                text: (msg.text || '').substring(0, 500),
+                text: (msg.text || '').substring(0, 2000),
                 timestamp: msg.ts,
                 hasThread: !!msg.thread_ts,
                 replyCount: msg.reply_count || 0,
               },
-            });
+            };
+
+            // NLP enrichment: sentiment + topics + urgency from message text
+            enrichSignalWithNLP(signal, ['text']);
+
+            signals.push(signal);
           }
         } catch (err) {
           errors.push(`Channel ${channel}: ${err instanceof Error ? err.message : String(err)}`);
@@ -201,7 +207,7 @@ export function createSlackConnector(config: SlackConnectorConfig): SlackConnect
           }
 
           for (const msg of data.messages || []) {
-            signals.push({
+            const signal: ConnectorSignal = {
               organization_id: organizationId,
               source_domain: domain,
               signal_type: msg.thread_ts && msg.thread_ts !== msg.ts ? 'thread_reply' : 'message_sent',
@@ -211,10 +217,15 @@ export function createSlackConnector(config: SlackConnectorConfig): SlackConnect
               metadata: {
                 channel,
                 user: msg.user,
-                text: (msg.text || '').substring(0, 500),
+                text: (msg.text || '').substring(0, 2000),
                 timestamp: msg.ts,
               },
-            });
+            };
+
+            // NLP enrichment: sentiment + topics + urgency
+            enrichSignalWithNLP(signal, ['text']);
+
+            signals.push(signal);
           }
         } catch (err) {
           errors.push(`Channel ${channel}: ${err instanceof Error ? err.message : String(err)}`);

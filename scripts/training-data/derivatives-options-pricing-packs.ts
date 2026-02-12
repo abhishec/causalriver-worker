@@ -97,9 +97,9 @@ const blackScholesGreeks: TrainingPack = {
   ],
 
   patterns: [
-    { name: 'Gamma Flip Level', domains: ['trading', 'finance'], description: 'Price level where aggregate dealer gamma flips from positive to negative, changing market regime from mean-reverting to momentum-amplifying.', observed: 245, expected: 50, total: 252 },
-    { name: 'Expiry Pin Risk', domains: ['trading'], description: 'Large open interest at round strikes causes prices to "pin" near max-pain at expiry due to delta-hedging convergence.', observed: 180, expected: 52, total: 252 },
-    { name: 'Vol Crush Post-Earnings', domains: ['trading', 'finance'], description: 'Implied volatility collapses 40-70% after earnings announcements as uncertainty resolves.', observed: 220, expected: 63, total: 252 },
+    { name: 'Gamma Flip Level', domains: ['trading', 'finance'], description: 'Price level where aggregate dealer gamma flips from positive to negative, changing market regime from mean-reverting to momentum-amplifying.', observed: 82, expected: 50, total: 120 },
+    { name: 'Expiry Pin Risk', domains: ['trading'], description: 'Large open interest at round strikes causes prices to "pin" near max-pain at expiry due to delta-hedging convergence.', observed: 75, expected: 40, total: 120 },
+    { name: 'Vol Crush Post-Earnings', domains: ['trading', 'finance'], description: 'Implied volatility collapses 40-70% after earnings announcements as uncertainty resolves.', observed: 88, expected: 50, total: 120 },
   ],
 
   outcomes: [
@@ -306,7 +306,7 @@ const creditDerivatives: TrainingPack = {
   ],
 
   patterns: [
-    { name: 'Credit Spread Contagion', domains: ['risk', 'finance'], description: 'Single-name CDS spread widening >200bps contagion-spreads to sector peers within 5 trading days in 72% of cases.', observed: 180, expected: 70, total: 250 },
+    { name: 'Credit Spread Contagion', domains: ['risk', 'finance'], description: 'Single-name CDS spread widening >200bps contagion-spreads to sector peers within 5 trading days in 72% of cases.', observed: 80, expected: 40, total: 120 },
     { name: 'Pre-Default CDS Acceleration', domains: ['finance', 'risk'], description: 'CDS spreads accelerate parabolically in the 30 days before credit events, with 80% of total spread widening in the final 10 days.', observed: 45, expected: 15, total: 50 },
   ],
 

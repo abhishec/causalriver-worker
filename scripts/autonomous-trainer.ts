@@ -120,6 +120,7 @@ import { SYSTEM_DYNAMICS_SIMULATION_PACKS } from './training-data/system-dynamic
 import { ADVANCED_CAUSAL_INFERENCE_PACKS } from './training-data/advanced-causal-inference-packs';
 import { GAME_THEORY_MECHANISM_DESIGN_PACKS } from './training-data/game-theory-mechanism-design-packs';
 import { OPTIMIZATION_OPERATIONS_RESEARCH_PACKS } from './training-data/optimization-operations-research-packs';
+import { CODE_ANALYSIS_OPEN_SOURCE_PACKS } from './training-data/code-analysis-open-source-packs';
 // ── Wikipedia Content Extraction (real article content, not just pageviews) ──
 import {
   fetchWikipediaContent,

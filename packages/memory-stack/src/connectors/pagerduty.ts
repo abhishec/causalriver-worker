@@ -25,6 +25,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { ConnectorSignal, NexusConnector, ConnectorSyncResult } from './connector-framework';
 import { storeConnectorSignals, recordSyncResult } from './connector-framework';
+import { enrichSignalWithNLP } from '../core/nlp/signal-enricher';
 
 // ============================================================================
 // TYPES
@@ -161,8 +162,8 @@ export function createPagerDutyConnector(config: PagerDutyConnectorConfig): Nexu
         teams: incident.teams?.map((t) => t.summary),
       };
 
-      // Incident triggered signal
-      signals.push({
+      // Incident triggered signal — enriched with NLP from title
+      const triggeredSignal: ConnectorSignal = {
         organization_id: orgId,
         source_domain: 'engineering',
         signal_type: 'incident_triggered',
@@ -175,7 +176,9 @@ export function createPagerDutyConnector(config: PagerDutyConnectorConfig): Nexu
           responder: incident.assignments[0]?.assignee.summary,
           responder_id: incident.assignments[0]?.assignee.id,
         },
-      });
+      };
+      enrichSignalWithNLP(triggeredSignal, ['title']);
+      signals.push(triggeredSignal);
 
       // Incident acknowledged signal
       if (incident.acknowledgements.length > 0) {
