@@ -14,7 +14,8 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { createPIISanitizer, type PIISanitizerConfig } from './pii-sanitizer';
+import { createPIISanitizer, type PIISanitizerConfig, type SanitizationResult } from './pii-sanitizer';
+import { createFederationApprovalManager } from './federation-approval-manager';
 
 const CORE_BRAIN_ORG_ID = '00000000-0000-4000-a000-000000000001';
 
@@ -29,6 +30,10 @@ export interface UpstreamPromotionResult {
   itemsSkippedPII: number;
   itemsSkippedDuplicate: number;
   itemsSkippedExcluded: number;
+  /** Items queued for manual approval (when require_approval=true) */
+  itemsQueued: number;
+  /** Items auto-approved by threshold (when require_approval=true) */
+  itemsAutoApproved: number;
 }
 
 export interface UpstreamPromoterConfig {
@@ -75,13 +80,14 @@ export function createUpstreamPromoter(
     // 1. Check federation settings
     const { data: settingsRow } = await supabase
       .from('organization_federation_settings')
-      .select('contribute_to_core_brain, excluded_domains')
+      .select('contribute_to_core_brain, excluded_domains, require_approval')
       .eq('organization_id', organizationId)
       .single();
 
     // Default is ON if no settings row exists
     const contributeEnabled = settingsRow?.contribute_to_core_brain ?? true;
     const excludedDomains = new Set<string>(settingsRow?.excluded_domains || []);
+    const requireApproval = settingsRow?.require_approval ?? false;
 
     if (!contributeEnabled) {
       return emptyResult();
@@ -94,21 +100,28 @@ export function createUpstreamPromoter(
       itemsSkippedPII: 0,
       itemsSkippedDuplicate: 0,
       itemsSkippedExcluded: 0,
+      itemsQueued: 0,
+      itemsAutoApproved: 0,
     };
 
     let totalPromoted = 0;
 
+    // If approval is required, route through approval manager instead of direct promotion
+    const approvalManager = requireApproval
+      ? createFederationApprovalManager(supabase, organizationId)
+      : null;
+
     // 2. Promote relationships
-    totalPromoted += await promoteRelationships(excludedDomains, result);
+    totalPromoted += await promoteRelationships(excludedDomains, result, approvalManager);
 
     // 3. Promote memories (if under limit)
     if (totalPromoted < cfg.maxItemsPerRun) {
-      totalPromoted += await promoteMemories(excludedDomains, result, cfg.maxItemsPerRun - totalPromoted);
+      totalPromoted += await promoteMemories(excludedDomains, result, cfg.maxItemsPerRun - totalPromoted, approvalManager);
     }
 
     // 4. Promote rules (if under limit)
     if (totalPromoted < cfg.maxItemsPerRun) {
-      await promoteRules(excludedDomains, result, cfg.maxItemsPerRun - totalPromoted);
+      await promoteRules(excludedDomains, result, cfg.maxItemsPerRun - totalPromoted, approvalManager);
     }
 
     // 5. Update federation settings with promotion timestamp
@@ -136,6 +149,7 @@ export function createUpstreamPromoter(
   async function promoteRelationships(
     excludedDomains: Set<string>,
     result: UpstreamPromotionResult,
+    approvalManager?: ReturnType<typeof createFederationApprovalManager> | null,
   ): Promise<number> {
     const { data: orgRels } = await supabase
       .from('causal_relationships_statistical')
@@ -182,25 +196,47 @@ export function createUpstreamPromoter(
         continue;
       }
 
-      // Insert into core brain
-      const { error } = await supabase
-        .from('causal_relationships_statistical')
-        .upsert(
-          {
-            ...sanitized,
-            organization_id: CORE_BRAIN_ORG_ID,
-            last_computed_at: new Date().toISOString(),
-          },
-          { onConflict: 'organization_id,source_domain,target_domain' }
-        );
+      // Route through approval queue or promote directly
+      if (approvalManager) {
+        const queueResult = await approvalManager.queueForApproval([{
+          dataType: 'relationship',
+          originalRecordId: rel.id,
+          originalData: rel,
+          sanitizedData: sanitized,
+          sanitizationReport: report,
+          sourceDomains: [rel.source_domain, rel.target_domain],
+          effectSize: rel.effect_size,
+          confidence: rel.evidence_weight,
+          sampleSize: rel.sample_size,
+          naturalLanguage: sanitized.natural_language,
+        }]);
+        result.itemsQueued += queueResult.queued;
+        result.itemsAutoApproved += queueResult.autoApproved;
+        if (queueResult.autoApproved > 0) {
+          result.relationshipsPromoted++;
+          promoted++;
+        }
+      } else {
+        // Direct promotion (no approval required)
+        const { error } = await supabase
+          .from('causal_relationships_statistical')
+          .upsert(
+            {
+              ...sanitized,
+              organization_id: CORE_BRAIN_ORG_ID,
+              last_computed_at: new Date().toISOString(),
+            },
+            { onConflict: 'organization_id,source_domain,target_domain' }
+          );
 
-      if (!error) {
-        result.relationshipsPromoted++;
-        promoted++;
-        coreKeys.add(key);
+        if (!error) {
+          result.relationshipsPromoted++;
+          promoted++;
+          coreKeys.add(key);
 
-        // Audit log
-        await logPromotion('relationship', rel.id, report);
+          // Audit log
+          await logPromotion('relationship', rel.id, report);
+        }
       }
     }
 
@@ -214,6 +250,7 @@ export function createUpstreamPromoter(
     excludedDomains: Set<string>,
     result: UpstreamPromotionResult,
     limit: number,
+    approvalManager?: ReturnType<typeof createFederationApprovalManager> | null,
   ): Promise<number> {
     const { data: orgMems } = await supabase
       .from('ai_memory')
@@ -258,21 +295,40 @@ export function createUpstreamPromoter(
         continue;
       }
 
-      // Insert into core brain
-      const { error } = await supabase
-        .from('ai_memory')
-        .insert({
-          ...sanitized,
-          organization_id: CORE_BRAIN_ORG_ID,
-          created_at: new Date().toISOString(),
-        });
+      if (approvalManager) {
+        const queueResult = await approvalManager.queueForApproval([{
+          dataType: 'memory',
+          originalRecordId: mem.id,
+          originalData: mem,
+          sanitizedData: sanitized,
+          sanitizationReport: report,
+          sourceDomains: mem.domain ? [mem.domain] : [],
+          confidence: mem.importance,
+          naturalLanguage: sanitized.content,
+        }]);
+        result.itemsQueued += queueResult.queued;
+        result.itemsAutoApproved += queueResult.autoApproved;
+        if (queueResult.autoApproved > 0) {
+          result.memoriesPromoted++;
+          promoted++;
+        }
+      } else {
+        // Direct promotion
+        const { error } = await supabase
+          .from('ai_memory')
+          .insert({
+            ...sanitized,
+            organization_id: CORE_BRAIN_ORG_ID,
+            created_at: new Date().toISOString(),
+          });
 
-      if (!error) {
-        result.memoriesPromoted++;
-        promoted++;
-        coreKeys.add(key);
+        if (!error) {
+          result.memoriesPromoted++;
+          promoted++;
+          coreKeys.add(key);
 
-        await logPromotion('memory', mem.id, report);
+          await logPromotion('memory', mem.id, report);
+        }
       }
     }
 
@@ -286,6 +342,7 @@ export function createUpstreamPromoter(
     excludedDomains: Set<string>,
     result: UpstreamPromotionResult,
     limit: number,
+    approvalManager?: ReturnType<typeof createFederationApprovalManager> | null,
   ): Promise<number> {
     const { data: orgRules } = await supabase
       .from('brain_grammar_rules')
@@ -333,21 +390,40 @@ export function createUpstreamPromoter(
         continue;
       }
 
-      // Insert into core brain
-      const { error } = await supabase
-        .from('brain_grammar_rules')
-        .insert({
-          ...sanitized,
-          organization_id: CORE_BRAIN_ORG_ID,
-          created_at: new Date().toISOString(),
-        });
+      if (approvalManager) {
+        const queueResult = await approvalManager.queueForApproval([{
+          dataType: 'rule',
+          originalRecordId: rule.id,
+          originalData: rule,
+          sanitizedData: sanitized,
+          sanitizationReport: report,
+          sourceDomains: rule.domain ? [rule.domain] : [],
+          confidence: rule.confidence,
+          naturalLanguage: sanitized.natural_language,
+        }]);
+        result.itemsQueued += queueResult.queued;
+        result.itemsAutoApproved += queueResult.autoApproved;
+        if (queueResult.autoApproved > 0) {
+          result.rulesPromoted++;
+          promoted++;
+        }
+      } else {
+        // Direct promotion
+        const { error } = await supabase
+          .from('brain_grammar_rules')
+          .insert({
+            ...sanitized,
+            organization_id: CORE_BRAIN_ORG_ID,
+            created_at: new Date().toISOString(),
+          });
 
-      if (!error) {
-        result.rulesPromoted++;
-        promoted++;
-        coreKeys.add(key);
+        if (!error) {
+          result.rulesPromoted++;
+          promoted++;
+          coreKeys.add(key);
 
-        await logPromotion('rule', rule.id, report);
+          await logPromotion('rule', rule.id, report);
+        }
       }
     }
 
@@ -383,5 +459,7 @@ function emptyResult(): UpstreamPromotionResult {
     itemsSkippedPII: 0,
     itemsSkippedDuplicate: 0,
     itemsSkippedExcluded: 0,
+    itemsQueued: 0,
+    itemsAutoApproved: 0,
   };
 }

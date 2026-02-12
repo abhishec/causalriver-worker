@@ -80,10 +80,11 @@ import { createAttentionPolicyLearner } from '../packages/memory-stack/src/learn
 import { createPublicDataLearner } from '../packages/memory-stack/src/learning/public-data-learner';
 import { createFastPathCompiler } from '../packages/memory-stack/src/orchestrator/fast-path-compiler';
 import { createUpstreamPromoter } from '../packages/memory-stack/src/federation/upstream-promoter';
+import { createFederationApprovalManager } from '../packages/memory-stack/src/federation/federation-approval-manager';
 import { createBrainPipeline } from '../packages/memory-stack/src/orchestrator/brain-pipeline';
 // Region #10: Insula (Anomaly Monitor) — post-consolidation anomaly sweep
 import { createAnomalyMonitor } from '../packages/memory-stack/src/orchestrator/anomaly-monitor';
-import { createEventBus } from '../packages/memory-stack/src/causality/event-bus';
+import { createEventBus, generateEventId } from '../packages/memory-stack/src/causality/event-bus';
 // Region #11: Working Memory (Context Manager) — record consolidation discoveries
 import { createContextManager } from '../packages/memory-stack/src/orchestrator/context-manager';
 
@@ -466,7 +467,16 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
       verbose: VERBOSE,
     });
     await fastPath.invalidateAll();
-    log('CEREBELLUM', 'All fast-paths invalidated');
+
+    // Also clear DB-backed fast-path cache (expired + stale entries)
+    const { count: cacheCleared } = await supabase
+      .from('fast_path_cache')
+      .delete()
+      .eq('organization_id', ORGANIZATION_ID)
+      .lt('expires_at', new Date().toISOString())
+      .select('*', { count: 'exact', head: true });
+
+    log('CEREBELLUM', `All fast-paths invalidated, ${cacheCleared ?? 0} expired DB cache entries cleared`);
 
     // Pre-warm common business query shapes so first queries after
     // consolidation hit compiled paths instead of cold misses.
@@ -524,17 +534,14 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
     if (recentSignals && recentSignals.length > 0) {
       for (const signal of recentSignals) {
         eventBus.emit({
-          eventId: `consol_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+          eventId: generateEventId(),
           organizationId: ORGANIZATION_ID,
-          domain: signal.source_domain || 'unknown',
-          entityType: 'metric',
-          entityId: signal.signal_type || 'unknown',
-          eventType: 'signal' as any,
-          payload: {
-            signal_type: signal.signal_type,
-            signal_value: signal.signal_value,
-          },
-          timestamp: new Date(signal.signal_timestamp || Date.now()),
+          domain: signal.source_domain,
+          entityType: 'signal',
+          entityId: signal.signal_type,
+          eventType: 'signal',
+          payload: { signal_type: signal.signal_type, signal_value: signal.signal_value },
+          timestamp: new Date(signal.signal_timestamp),
         });
       }
       // Allow debounced event processing
@@ -561,15 +568,7 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
 
     const allDiscoveriesForContext = results.flatMap(r => r.report.discoveries);
     for (const discovery of allDiscoveriesForContext) {
-      contextManager.recordInsight({
-        id: `consolidation-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-        type: 'what_changed',
-        domains: [], // Discoveries are cross-domain
-        title: discovery.substring(0, 80),
-        explanation: discovery,
-        importance: 0.7,
-        discoveredAt: new Date().toISOString(),
-      });
+      contextManager.recordInsight(`[consolidation] ${discovery.substring(0, 150)}`);
     }
     log('MEMORY', `Recorded ${allDiscoveriesForContext.length} consolidation discoveries into Working Memory`);
   } catch (err) {
@@ -601,70 +600,26 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
   const failed = results.filter(r => r.status === 'failed').length;
 
   // ═══════════════════════════════════════════════════════
-  // CEREBELLUM: Invalidate stale fast-path caches in DB
-  // ═══════════════════════════════════════════════════════
-  try {
-    // Clear the DB-backed fast-path cache since the graph just changed
-    const { count: cacheCleared } = await supabase
-      .from('fast_path_cache')
-      .delete()
-      .eq('organization_id', ORGANIZATION_ID)
-      .lt('expires_at', new Date().toISOString())
-      .select('*', { count: 'exact', head: true });
-
-    // Also invalidate any cached paths that touch domains with new discoveries
-    const changedDomains = results
-      .flatMap(r => r.report.discoveries)
-      .filter(d => d.includes('→'))
-      .flatMap(d => d.match(/\b\w+\b/g) || []);
-
-    if (changedDomains.length > 0) {
-      const { count: domainCleared } = await supabase
-        .from('fast_path_cache')
-        .delete()
-        .eq('organization_id', ORGANIZATION_ID)
-        .select('*', { count: 'exact', head: true });
-
-      log('CEREBELLUM', `Cleared ${(cacheCleared ?? 0) + (domainCleared ?? 0)} stale fast-path cache entries`);
-    } else {
-      log('CEREBELLUM', `Cleared ${cacheCleared ?? 0} expired fast-path cache entries`);
-    }
-
-    // Pre-warm common query patterns
-    const compiler = createFastPathCompiler({
-      supabase,
-      organizationId: ORGANIZATION_ID,
-      verbose: false,
-    });
-
-    const commonQueries = [
-      'Why did churn increase?',
-      'What is driving revenue growth?',
-      'How does engineering velocity affect product quality?',
-      'What are the biggest risks right now?',
-      'What changed in the last week?',
-    ];
-
-    let prewarmed = 0;
-    for (const query of commonQueries) {
-      try {
-        await compiler.precompile(query);
-        prewarmed++;
-      } catch {
-        // Non-critical — skip failed precompiles
-      }
-    }
-    log('CEREBELLUM', `Pre-warmed ${prewarmed} common fast-path patterns`);
-  } catch (err) {
-    logError('CEREBELLUM', 'Fast-path cache management failed', err);
-  }
-
-  // ═══════════════════════════════════════════════════════
   // CORPUS CALLOSUM: Federation — Promote discoveries to core brain
+  // Includes approval governance: expire stale items, log stats
   // ═══════════════════════════════════════════════════════
   try {
     // Only promote if we consolidated an org brain (not the core brain itself)
     if (ORGANIZATION_ID !== CORE_BRAIN_ORG_ID) {
+      // 1. Expire stale pending items (>7 days old)
+      const approvalMgr = createFederationApprovalManager(supabase, ORGANIZATION_ID);
+      const expiredCount = await approvalMgr.expirePending();
+      if (expiredCount > 0) {
+        log('FEDERATION', `Expired ${expiredCount} stale pending approval items`);
+      }
+
+      // 2. Log approval queue stats
+      const approvalStats = await approvalMgr.getStats();
+      if (approvalStats.pendingCount > 0) {
+        log('FEDERATION', `Approval queue: ${approvalStats.pendingCount} pending, ${approvalStats.approvedToday} approved today, ${approvalStats.rejectedToday} rejected today`);
+      }
+
+      // 3. Promote knowledge (routes through approval when require_approval=true)
       const promoter = createUpstreamPromoter(supabase, ORGANIZATION_ID, {
         minEffectSize: 0.15,
         minConfidence: 0.7,
@@ -677,13 +632,22 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
         promotionResult.memoriesPromoted +
         promotionResult.rulesPromoted;
 
-      if (totalPromoted > 0) {
+      if (totalPromoted > 0 || promotionResult.itemsQueued > 0) {
         log('FEDERATION', `Promoted ${totalPromoted} items to core brain:`);
         log('FEDERATION', `  Relationships: ${promotionResult.relationshipsPromoted}`);
         log('FEDERATION', `  Memories: ${promotionResult.memoriesPromoted}`);
         log('FEDERATION', `  Rules: ${promotionResult.rulesPromoted}`);
+        if (promotionResult.itemsQueued > 0) {
+          log('FEDERATION', `  Queued for approval: ${promotionResult.itemsQueued}`);
+        }
+        if (promotionResult.itemsAutoApproved > 0) {
+          log('FEDERATION', `  Auto-approved: ${promotionResult.itemsAutoApproved}`);
+        }
         if (promotionResult.itemsSkippedPII > 0) {
           log('FEDERATION', `  Skipped (PII): ${promotionResult.itemsSkippedPII}`);
+        }
+        if (promotionResult.itemsSkippedExcluded > 0) {
+          log('FEDERATION', `  Skipped (excluded domain): ${promotionResult.itemsSkippedExcluded}`);
         }
       } else {
         log('FEDERATION', 'No items above promotion threshold (or already promoted)');

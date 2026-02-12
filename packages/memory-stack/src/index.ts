@@ -686,6 +686,17 @@ export {
   type UpstreamPromoterConfig,
 } from './federation/upstream-promoter';
 
+export {
+  createFederationApprovalManager,
+  type PendingItem,
+  type ApprovalDecision,
+  type ApprovalResult,
+  type QueueResult,
+  type FederationSettings,
+  type FederationHistory,
+  type FederationApprovalManagerConfig,
+} from './federation/federation-approval-manager';
+
 // ============================================================================
 // CODE INDEXING - Regex-Based Code Intelligence
 // ============================================================================
