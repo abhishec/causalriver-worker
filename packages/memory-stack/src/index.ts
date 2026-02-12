@@ -657,6 +657,17 @@ export {
   enhancePatternsWithLLM,
 } from './learning/pattern-detector';
 
+// Trained Knowledge Querier (proves brain learned by querying trained knowledge)
+export {
+  createTrainedKnowledgeQuerier,
+  type KnowledgeQuery,
+  type CausalQueryResult,
+  type CascadePathResult,
+  type KnowledgeSummary,
+  type ImpactEstimate,
+  type TrainedKnowledgeQuerier,
+} from './learning/trained-knowledge-querier';
+
 // Bayesian Weight Updater (proper posterior updates)
 export {
   createBayesianUpdater,
@@ -885,6 +896,14 @@ export {
   type ActivityLogEntry,
   type ConversationEntry,
 } from './persistence/supabase-repository';
+
+export {
+  createCostTracker,
+  type CostTracker,
+  type LLMCallLogParams,
+  type CostStatus,
+  type CostReport,
+} from './persistence/cost-tracker';
 
 export {
   createSchemaValidator,

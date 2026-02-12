@@ -39,6 +39,20 @@ export interface BrainAmplifierConfig {
   maxTokens?: number;
   /** Verbose logging */
   verbose?: boolean;
+  /** Cost tracker instance for centralized cost logging */
+  costTracker?: {
+    logLLMCall(params: {
+      component: string;
+      functionName: string;
+      provider: 'anthropic' | 'openai';
+      model: string;
+      inputTokens: number;
+      outputTokens: number;
+      durationMs?: number;
+      contentTitle?: string;
+      success?: boolean;
+    }): Promise<void>;
+  };
 }
 
 /** Gap 1: Amplified DMN insight */
@@ -404,6 +418,7 @@ export function createBrainAmplifier(config: BrainAmplifierConfig) {
     deepModel = DEFAULT_DEEP_MODEL,
     maxTokens = DEFAULT_MAX_TOKENS,
     verbose = false,
+    costTracker,
   } = config;
 
   // ──────────────────────────────────────────────
@@ -508,11 +523,41 @@ export function createBrainAmplifier(config: BrainAmplifierConfig) {
         );
       }
 
+      // Log cost to centralized tracker
+      if (costTracker) {
+        costTracker.logLLMCall({
+          component: 'brain-amplifier',
+          functionName: label,
+          provider,
+          model,
+          inputTokens: result.tokensUsed.input,
+          outputTokens: result.tokensUsed.output,
+          durationMs,
+          contentTitle: label,
+          success: true,
+        }).catch(() => {});
+      }
+
       return parseJSONResponse<T>(result.response, fallback);
     } catch (error: any) {
       console.warn(
         `[BrainAmplifier] ${label} failed (graceful degradation): ${error?.message || error}`
       );
+
+      // Log failed call cost
+      if (costTracker) {
+        costTracker.logLLMCall({
+          component: 'brain-amplifier',
+          functionName: label,
+          provider,
+          model,
+          inputTokens: 0,
+          outputTokens: 0,
+          contentTitle: label,
+          success: false,
+        }).catch(() => {});
+      }
+
       return fallback;
     }
   }

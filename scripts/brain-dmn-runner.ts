@@ -101,6 +101,8 @@ import { recordPrediction } from '../packages/memory-stack/src/learning/predicti
 import { createContextManager } from '../packages/memory-stack/src/orchestrator/context-manager';
 // LLM Brain Amplifier — Claude as semantic judgment layer
 import { createBrainAmplifier } from '../packages/memory-stack/src/orchestrator/llm-brain-amplifier';
+// Cost Tracker — centralized LLM cost logging
+import { createCostTracker } from '../packages/memory-stack/src/persistence/cost-tracker';
 
 // ============================================================================
 // CONFIGURATION
@@ -403,7 +405,7 @@ async function scanOrg(
         if (LLM_API_KEY && (alert.severity === 'critical' || alert.severity === 'high')) {
           try {
             const amplifier = createBrainAmplifier({
-              provider: LLM_PROVIDER, apiKey: LLM_API_KEY, verbose: VERBOSE,
+              provider: LLM_PROVIDER, apiKey: LLM_API_KEY, verbose: VERBOSE, costTracker,
             });
             const interpretation = await amplifier.interpretAnomaly({
               domain: alert.triggerDomain,
@@ -757,6 +759,7 @@ async function main(): Promise<void> {
   }
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+  const costTracker = createCostTracker(supabase, true);
 
   // Verify connection
   try {

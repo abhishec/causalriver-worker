@@ -95,6 +95,8 @@ import type { CachedRelationship } from '../packages/memory-stack/src/bridges/pa
 import { createContextManager } from '../packages/memory-stack/src/orchestrator/context-manager';
 // LLM Brain Amplifier — Claude as semantic judgment layer
 import { createBrainAmplifier } from '../packages/memory-stack/src/orchestrator/llm-brain-amplifier';
+// Cost Tracker — centralized LLM cost logging
+import { createCostTracker } from '../packages/memory-stack/src/persistence/cost-tracker';
 
 // ============================================================================
 // CONFIGURATION
@@ -951,6 +953,7 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
           provider: LLM_PROVIDER,
           apiKey: LLM_API_KEY,
           verbose: VERBOSE,
+          costTracker,
         });
 
         log('LLM', 'Generating executive consolidation briefing...');
@@ -1030,6 +1033,7 @@ async function main(): Promise<void> {
   }
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+  const costTracker = createCostTracker(supabase, true);
 
   // Verify connection
   try {

@@ -65,6 +65,7 @@ import type { ConnectorSignal } from '../packages/memory-stack/src/connectors/co
 import { createConsolidationEngine, type ConsolidationResult } from '../packages/memory-stack/src/orchestrator/consolidation-engine';
 
 // ── Brain Region Imports (wiring dormant regions into production) ──
+import { createCostTracker } from '../packages/memory-stack/src/persistence/cost-tracker';
 import { createLLMTrainingPipeline, type LLMTrainingResult } from '../packages/memory-stack/src/learning/llm-training-pipeline';
 import { createImpactScorer, type ScorableEvent } from '../packages/memory-stack/src/orchestrator/impact-scorer';
 import { createAttentionManager, type AttentionDecision } from '../packages/memory-stack/src/orchestrator/attention-manager';
@@ -137,6 +138,9 @@ import {
 
 const SUPABASE_URL = process.env.SUPABASE_URL || '';
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+
+// Module-level cost tracker — initialized in main(), used by all stages
+let costTracker: ReturnType<typeof createCostTracker> | undefined;
 // Organization ID — Training is NOT client-specific, it matures the brain globally.
 // The DB schema requires a UUID for organization_id, so we use a well-known
 // "global trainer" UUID. All clients benefit from this shared knowledge.
@@ -423,6 +427,7 @@ async function runLLMTrainingPipeline(
       fredApiKey: FRED_API_KEY !== 'DEMO_KEY' ? FRED_API_KEY : undefined,
       maxContentPerSource: 3, // Keep it light for nightly runs
       verbose: true,
+      costTracker,
     });
 
     log('LLM', `Running LLM training cycle (${llmProvider})...`);
@@ -757,7 +762,7 @@ async function learnAndMaintain(
     let amplifierConfig: Record<string, unknown> | undefined;
     if (llmApiKey) {
       const { createBrainAmplifier: createAmplifier } = await import('../packages/memory-stack/src/orchestrator/llm-brain-amplifier');
-      const amp = createAmplifier({ provider: llmProvider, apiKey: llmApiKey, verbose: true });
+      const amp = createAmplifier({ provider: llmProvider, apiKey: llmApiKey, verbose: true, costTracker });
       amplifierConfig = { amplifier: amp } as any;
       log('LEARN', `LLM Brain Amplifier wired into feedback loop (${llmProvider}) — predictions will be LLM-verified`);
     } else {
@@ -1167,6 +1172,9 @@ async function main(): Promise<void> {
 
   // Create Supabase client
   const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  // Create centralized cost tracker
+  const costTracker = createCostTracker(supabase, true);
 
   // Test connection
   try {

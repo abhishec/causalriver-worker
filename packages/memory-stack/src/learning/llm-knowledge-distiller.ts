@@ -41,6 +41,21 @@ export interface KnowledgeDistillerConfig {
   maxTokens?: number;
   /** Verbose logging */
   verbose?: boolean;
+  /** Cost tracker instance for centralized cost logging */
+  costTracker?: {
+    logLLMCall(params: {
+      component: string;
+      functionName: string;
+      provider: 'anthropic' | 'openai';
+      model: string;
+      inputTokens: number;
+      outputTokens: number;
+      durationMs?: number;
+      contentTitle?: string;
+      success?: boolean;
+    }): Promise<void>;
+    shouldThrottle(): Promise<boolean>;
+  };
 }
 
 /** A piece of raw content to distill knowledge from */
@@ -229,6 +244,7 @@ export function createLLMKnowledgeDistiller(config: KnowledgeDistillerConfig) {
     model,
     maxTokens = 4096,
     verbose = false,
+    costTracker,
   } = config;
 
   // ── Cost Control: Daily Token Budget ──────────────────────────────
@@ -258,6 +274,19 @@ export function createLLMKnowledgeDistiller(config: KnowledgeDistillerConfig) {
       return { response: '{}', tokensUsed: { input: 0, output: 0 } };
     }
 
+    // Cost guard: check daily budget via cost tracker
+    if (costTracker) {
+      try {
+        const throttled = await costTracker.shouldThrottle();
+        if (throttled) {
+          log(`⚠️ Daily budget exceeded — skipping "${title}"`);
+          return { response: '{}', tokensUsed: { input: 0, output: 0 } };
+        }
+      } catch { /* non-critical */ }
+    }
+
+    const callStart = Date.now();
+
     const userMessage = `Extract causal knowledge from this content:
 
 Title: ${title}
@@ -282,10 +311,28 @@ ${text.slice(0, 12000)}`;
       });
 
       const data = (await response.json()) as any;
+      const usedModel = model || 'claude-3-5-haiku-20241022';
       const tokens = { input: data.usage?.input_tokens || 0, output: data.usage?.output_tokens || 0 };
       sessionTokensUsed += tokens.input + tokens.output;
+
+      // Log cost
+      if (costTracker) {
+        costTracker.logLLMCall({
+          component: 'knowledge-distiller',
+          functionName: 'distill',
+          provider: 'anthropic',
+          model: usedModel,
+          inputTokens: tokens.input,
+          outputTokens: tokens.output,
+          durationMs: Date.now() - callStart,
+          contentTitle: title,
+          success: !!data.content?.[0]?.text,
+        }).catch(() => {});
+      }
+
       return { response: data.content?.[0]?.text || '{}', tokensUsed: tokens };
     } else {
+      const usedModel = model || 'gpt-4o-mini';
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -293,7 +340,7 @@ ${text.slice(0, 12000)}`;
           Authorization: `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          model: model || 'gpt-4o-mini', // Cost control: gpt-4o-mini is 15x cheaper than gpt-4o for extraction
+          model: usedModel, // Cost control: gpt-4o-mini is 15x cheaper than gpt-4o for extraction
           max_tokens: maxTokens,
           messages: [
             { role: 'system', content: EXTRACTION_SYSTEM_PROMPT },
@@ -305,6 +352,22 @@ ${text.slice(0, 12000)}`;
       const data = (await response.json()) as any;
       const tokens = { input: data.usage?.prompt_tokens || 0, output: data.usage?.completion_tokens || 0 };
       sessionTokensUsed += tokens.input + tokens.output;
+
+      // Log cost
+      if (costTracker) {
+        costTracker.logLLMCall({
+          component: 'knowledge-distiller',
+          functionName: 'distill',
+          provider: 'openai',
+          model: usedModel,
+          inputTokens: tokens.input,
+          outputTokens: tokens.output,
+          durationMs: Date.now() - callStart,
+          contentTitle: title,
+          success: !!data.choices?.[0]?.message?.content,
+        }).catch(() => {});
+      }
+
       return { response: data.choices?.[0]?.message?.content || '{}', tokensUsed: tokens };
     }
   }

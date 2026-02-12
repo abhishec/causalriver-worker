@@ -65,6 +65,21 @@ export interface LLMTrainingPipelineConfig {
   sequential?: boolean;
   /** Verbose logging */
   verbose?: boolean;
+  /** Cost tracker for centralized cost logging */
+  costTracker?: {
+    logLLMCall(params: {
+      component: string;
+      functionName: string;
+      provider: 'anthropic' | 'openai';
+      model: string;
+      inputTokens: number;
+      outputTokens: number;
+      durationMs?: number;
+      contentTitle?: string;
+      success?: boolean;
+    }): Promise<void>;
+    shouldThrottle(): Promise<boolean>;
+  };
 }
 
 /** Results from running distilled knowledge through real ML modules */
@@ -133,6 +148,7 @@ export function createLLMTrainingPipeline(config: LLMTrainingPipelineConfig) {
     maxContentPerSource = 5,
     sequential = true,
     verbose = false,
+    costTracker,
   } = config;
 
   function log(msg: string): void {
@@ -154,6 +170,7 @@ export function createLLMTrainingPipeline(config: LLMTrainingPipelineConfig) {
     apiKey: llmApiKey,
     model: llmModel,
     verbose,
+    costTracker,
   });
 
   const dataLearner = createPublicDataLearner({
