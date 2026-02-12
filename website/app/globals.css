@@ -1,0 +1,79 @@
+@import "tailwindcss";
+
+:root {
+  --background: #09090b;
+  --foreground: #fafafa;
+  --accent: #8b5cf6;
+  --accent-light: #a78bfa;
+  --accent-dark: #7c3aed;
+  --surface: #18181b;
+  --surface-light: #27272a;
+  --border: #3f3f46;
+  --muted: #a1a1aa;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-accent: var(--accent);
+  --color-accent-light: var(--accent-light);
+  --color-accent-dark: var(--accent-dark);
+  --color-surface: var(--surface);
+  --color-surface-light: var(--surface-light);
+  --color-border: var(--border);
+  --color-muted: var(--muted);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+::selection {
+  background: var(--accent);
+  color: white;
+}
+
+/* Code block styling */
+pre {
+  border-radius: 0.75rem;
+  overflow-x: auto;
+}
+
+pre code {
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Glow effect for hero */
+.glow {
+  background: radial-gradient(
+    ellipse 600px 400px at 50% 0%,
+    rgba(139, 92, 246, 0.15),
+    transparent
+  );
+}
+
+/* Animated gradient border */
+.gradient-border {
+  background: linear-gradient(var(--surface), var(--surface)) padding-box,
+    linear-gradient(135deg, var(--accent), #06b6d4, var(--accent)) border-box;
+  border: 1px solid transparent;
+}
+
+/* Pulse animation for stats */
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
