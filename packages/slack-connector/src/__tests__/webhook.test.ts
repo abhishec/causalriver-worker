@@ -152,8 +152,8 @@ describe('handleSlackWebhook', () => {
     expect(signals[0].source_domain).toBe('communication');
   });
 
-  it('truncates text to 500 chars', () => {
-    const longText = 'A'.repeat(1000);
+  it('truncates text to 2000 chars', () => {
+    const longText = 'A'.repeat(3000);
     const payload = {
       event: {
         type: 'message',
@@ -165,6 +165,6 @@ describe('handleSlackWebhook', () => {
     };
 
     const signals = handleSlackWebhook(payload, 'org_123', 'communication');
-    expect((signals[0].metadata as any).text).toHaveLength(500);
+    expect((signals[0].metadata as any).text).toHaveLength(2000);
   });
 });

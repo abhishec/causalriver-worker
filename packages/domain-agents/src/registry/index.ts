@@ -13,6 +13,7 @@ export {
   productModule,
   marketingModule,
   peopleModule,
+  engineeringModule,
   executiveModule,
   getModule,
   getAllModules,

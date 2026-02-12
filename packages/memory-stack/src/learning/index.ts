@@ -171,3 +171,19 @@ export {
   getTrainingPacksByTag,
   getAllTrainingPacks,
 } from './training-library';
+
+// ============================================================================
+// ADVANCED LEARNING MODULES
+// ============================================================================
+
+export * from './bayesian-updater';
+export * from './embedding-tuner';
+export * from './contrastive-causal-learner';
+export * from './attention-policy-learner';
+export * from './public-data-learner';
+export * from './llm-knowledge-distiller';
+export * from './public-content-fetcher';
+export * from './llm-training-pipeline';
+export * from './autonomous-learner';
+export * from './runbook-indexer';
+export * from './core-metrics-library';

@@ -27,6 +27,12 @@ import {
   handleCron,
   handleRelationshipsResource,
   buildAnalyzeMetricsPrompt,
+  handleQueryExperts,
+  handleSearchCode,
+  handleIncidentContext,
+  handleAnalyzePR,
+  handleTeamActivity,
+  handleSearchCIFailures,
 } from './handlers.js';
 
 // ============================================================================
@@ -140,6 +146,75 @@ async function main(): Promise<void> {
         .describe('Specific tasks to run. Omit to run all: prediction_verification, threshold_optimization, evidence_decay'),
     },
     async ({ tasks }) => handleCron(client, { tasks }),
+  );
+
+  // ── ENGINEERING TOOLS ──────────────────────────────────────────────────
+  // These tools power the 6 Developer Use Cases (Yuan's requirements):
+  //   UC1: Onboarding Memory   UC2: Debugging Assistant
+  //   UC3: Incident Response   UC4: Knowledge Retention
+  //   UC5: Code Review Intel   UC6: Cross-Team Visibility
+
+  server.tool(
+    'nexus_query_experts',
+    'Find who has expertise on a specific topic, code area, or system. Returns ranked contributors by evidence strength. Use when someone asks "who knows about X?" or "who should review this?" (UC1/UC3/UC5)',
+    {
+      topic: z.string().describe('Topic, code path, or system (e.g., "authentication", "src/payment-service")'),
+      evidence_types: z.string().optional()
+        .describe('Comma-separated filter: code_change,review,discussion,documentation,incident_response'),
+      limit: z.number().optional().describe('Max experts to return (default: 5)'),
+    },
+    async (args) => handleQueryExperts(client, args),
+  );
+
+  server.tool(
+    'nexus_search_code',
+    'Semantic search across indexed code symbols, files, and documentation. Returns relevant code files, functions, and descriptions. Use for onboarding "how does auth work?" or debugging "where is payment processing handled?" (UC1/UC2)',
+    {
+      query: z.string().describe('Natural language query about code (e.g., "authentication flow", "database migrations")'),
+      language: z.string().optional().describe('Filter by language: typescript, python, go, etc.'),
+      limit: z.number().optional().describe('Max results (default: 10)'),
+    },
+    async (args) => handleSearchCode(client, args),
+  );
+
+  server.tool(
+    'nexus_incident_context',
+    'Get full incident context: recent deployments that may have caused it, relevant runbooks, on-call experts, and causal chains. Use when an incident fires or for production issue analysis. (UC3)',
+    {
+      service: z.string().describe('Affected service or component (e.g., "payment-service", "auth", "api-gateway")'),
+      hours_lookback: z.number().optional().describe('Hours to look back for related deployments (default: 12)'),
+    },
+    async (args) => handleIncidentContext(client, args),
+  );
+
+  server.tool(
+    'nexus_analyze_pr',
+    'Analyze a PR for risk: find past incidents in touched file paths, suggest reviewers, and flag causal patterns. Use for code review intelligence. (UC5)',
+    {
+      file_paths: z.string().describe('Comma-separated file paths or directories touched by the PR'),
+      pr_title: z.string().optional().describe('PR title for context'),
+    },
+    async (args) => handleAnalyzePR(client, args),
+  );
+
+  server.tool(
+    'nexus_team_activity',
+    'Get engineering team activity summary: recent signals, top topics, sentiment trends, active contributors, and cross-team collaboration. Use when PMs or leaders ask "what is engineering working on?" (UC6)',
+    {
+      days: z.number().optional().describe('Number of days to summarize (default: 7)'),
+    },
+    async (args) => handleTeamActivity(client, args),
+  );
+
+  server.tool(
+    'nexus_search_ci_failures',
+    'Search for past CI/CD failures similar to a current one. Returns matching failures with resolution PRs, causal analysis, and timeline. Use for debugging CI issues. (UC2)',
+    {
+      query: z.string().describe('Description of the failure (e.g., "test timeout in payment module")'),
+      provider: z.string().optional().describe('CI provider filter: github_actions, jenkins, circleci, gitlab_ci'),
+      days_lookback: z.number().optional().describe('Days to look back (default: 30)'),
+    },
+    async (args) => handleSearchCIFailures(client, args),
   );
 
   // ── RESOURCE: nexusbrain://relationships ───────────────────────────────

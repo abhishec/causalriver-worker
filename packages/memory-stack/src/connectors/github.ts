@@ -100,6 +100,7 @@ interface GitHubWorkflowRun {
   created_at: string;
   updated_at: string;
   head_branch: string;
+  head_sha?: string;
   event: string;
 }
 
@@ -562,6 +563,7 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
           metadata: {
             workflow: run.name,
             branch: run.head_branch,
+            ...(run.head_sha && { head_sha: run.head_sha }),
             conclusion: run.conclusion,
             event: run.event,
             created_at: run.created_at,
@@ -599,6 +601,7 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
                 workflow: run.name,
                 job_name: job.name,
                 branch: run.head_branch,
+                ...(run.head_sha && { head_sha: run.head_sha }),
                 conclusion: job.conclusion,
                 duration_seconds: job.started_at && job.completed_at
                   ? Math.round((new Date(job.completed_at).getTime() - new Date(job.started_at).getTime()) / 1000)
@@ -620,6 +623,7 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
           metadata: {
             workflow: run.name,
             branch: run.head_branch,
+            ...(run.head_sha && { head_sha: run.head_sha }),
             conclusion: run.conclusion,
             event: run.event,
             ...(failedJobNames.length > 0 && { failed_job_names: failedJobNames }),

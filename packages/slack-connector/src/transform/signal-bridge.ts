@@ -60,9 +60,10 @@ export function messagesToConnectorSignals(
       metadata: {
         channel: msg.channel,
         user: msg.user,
-        text: (msg.text || '').substring(0, 500),
+        text: (msg.text || '').substring(0, 2000),
         hasThread: !!msg.thread_ts,
         replyCount: msg.reply_count || 0,
+        threadTs: msg.thread_ts || undefined,
       },
     });
   }

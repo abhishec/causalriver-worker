@@ -35,6 +35,21 @@ export type CICDEventType = 'build_started' | 'build_completed' | 'deploy_starte
 
 export type CICDStatus = 'success' | 'failure' | 'cancelled' | 'running';
 
+export interface CICDFailureDetails {
+  /** Primary error message from the build/test output */
+  errorMessage?: string;
+  /** Stack trace or build log excerpt */
+  stackTrace?: string;
+  /** List of failed test names/paths */
+  failedTests?: string[];
+  /** Assertion error messages (extracted from test output) */
+  assertionErrors?: string[];
+  /** Exit code of the failed process */
+  exitCode?: number;
+  /** The build step/stage that failed */
+  failedStep?: string;
+}
+
 export interface CICDEvent {
   provider: CICDProvider;
   eventType: CICDEventType;
@@ -47,6 +62,8 @@ export interface CICDEvent {
   environment?: string;
   triggeredBy?: string;
   providerMetadata?: Record<string, unknown>;
+  /** Detailed failure information for CI_failed/test_failed events (UC2: Debugging Assistant) */
+  failureDetails?: CICDFailureDetails;
 }
 
 export interface CICDIngestorConfig {
@@ -77,6 +94,7 @@ export function createCICDIngestor(config?: CICDIngestorConfig): CICDIngestor {
       ...(event.environment && { environment: event.environment }),
       ...(event.triggeredBy && { triggered_by: event.triggeredBy }),
       ...(event.providerMetadata && { provider_metadata: event.providerMetadata }),
+      ...(event.failureDetails && { failure_details: event.failureDetails }),
     };
 
     const isDeploy = event.eventType === 'deploy_started' || event.eventType === 'deploy_completed';

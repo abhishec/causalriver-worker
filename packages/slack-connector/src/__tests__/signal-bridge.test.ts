@@ -81,12 +81,12 @@ describe('messagesToConnectorSignals', () => {
     expect(result[1].signal_type).toBe('thread_reply');
   });
 
-  it('truncates text to 500 chars in metadata', () => {
-    const longText = 'A'.repeat(1000);
+  it('truncates text to 2000 chars in metadata', () => {
+    const longText = 'A'.repeat(3000);
     const messages = [mockMessage({ text: longText })];
 
     const result = messagesToConnectorSignals(messages, 'org_123', 'communication');
-    expect((result[0].metadata as any).text).toHaveLength(500);
+    expect((result[0].metadata as any).text).toHaveLength(2000);
   });
 
   it('handles empty message list', () => {

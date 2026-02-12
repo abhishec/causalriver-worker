@@ -68,6 +68,7 @@ export {
   productModule,
   marketingModule,
   peopleModule,
+  engineeringModule,
   executiveModule,
 
   // Module getters
@@ -108,6 +109,12 @@ export {
   vpProductPersona,
   vpMarketingPersona,
   vpPeoplePersona,
+  ctoPersona,
+  vpEngineeringPersona,
+  engineeringManagerPersona,
+  techLeadPersona,
+  sreLeadPersona,
+  vpEngineeringOpsPersona,
   ceoPersona,
   cooPersona,
   nexusAIPersona,

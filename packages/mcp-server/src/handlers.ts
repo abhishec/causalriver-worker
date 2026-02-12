@@ -268,6 +268,247 @@ export async function handleRelationshipsResource(
 // PROMPT HANDLER
 // ============================================================================
 
+// ============================================================================
+// ENGINEERING TOOL HANDLERS
+// ============================================================================
+
+/**
+ * Handle nexus_query_experts — find who knows about a topic.
+ * Powers UC1 (Onboarding), UC3 (Incident Response), UC5 (Code Review).
+ * Routes through brain's query layer which accesses the expertise graph.
+ */
+export async function handleQueryExperts(
+  client: NexusClient,
+  args: { topic: string; evidence_types?: string; limit?: number },
+): Promise<McpTextResult> {
+  try {
+    const evidenceClause = args.evidence_types
+      ? ` Focus on evidence from: ${args.evidence_types}.`
+      : '';
+    const limitClause = args.limit ? ` Return top ${args.limit} experts.` : '';
+
+    const result = await client.query(
+      `Who are the experts on "${args.topic}"? List contributors ranked by expertise strength, including what evidence supports their knowledge (code changes, reviews, discussions, incident response).${evidenceClause}${limitClause}`,
+      { domain: 'engineering' },
+    );
+
+    const parts: string[] = [];
+    parts.push(`🧑‍💻 Expertise Search: "${args.topic}"\n`);
+    parts.push(result.answer);
+
+    if (result.context.memories.length > 0) {
+      parts.push('\n--- Supporting Evidence ---');
+      result.context.memories.forEach(m => {
+        parts.push(`  ${m.content || 'evidence'}`);
+      });
+    }
+
+    return { content: [{ type: 'text', text: parts.join('\n') }] };
+  } catch (err) {
+    return handleError(err);
+  }
+}
+
+/**
+ * Handle nexus_search_code — semantic search across indexed code.
+ * Powers UC1 (Onboarding) and UC2 (Debugging).
+ * Routes through brain's query layer which accesses entity embeddings + code search.
+ */
+export async function handleSearchCode(
+  client: NexusClient,
+  args: { query: string; language?: string; limit?: number },
+): Promise<McpTextResult> {
+  try {
+    const langClause = args.language ? ` Focus on ${args.language} code.` : '';
+
+    const result = await client.query(
+      `Search code for: "${args.query}". Find relevant code symbols, functions, files, and documentation that match.${langClause} Include related engineering signals if any.`,
+      { domain: 'engineering' },
+    );
+
+    const parts: string[] = [];
+    parts.push(`🔍 Code Search: "${args.query}"\n`);
+    parts.push(result.answer);
+
+    if (result.context.memories.length > 0) {
+      parts.push('\n--- Related Code Context ---');
+      result.context.memories.forEach(m => {
+        parts.push(`  ${m.content || 'code context'}`);
+      });
+    }
+
+    if (result.context.causal.length > 0) {
+      parts.push('\n--- Related Causal Patterns ---');
+      result.context.causal.forEach(r => {
+        parts.push(`  ${formatRelationship(r)}`);
+      });
+    }
+
+    return { content: [{ type: 'text', text: parts.join('\n') }] };
+  } catch (err) {
+    return handleError(err);
+  }
+}
+
+/**
+ * Handle nexus_incident_context — full incident context with deployments, experts, runbooks.
+ * Powers UC3 (Incident Response).
+ */
+export async function handleIncidentContext(
+  client: NexusClient,
+  args: { service: string; hours_lookback?: number },
+): Promise<McpTextResult> {
+  try {
+    const hours = args.hours_lookback || 12;
+
+    // Query for recent deployments via the brain
+    const questionParts = [
+      `What recent deployments or CI failures happened for ${args.service}?`,
+      `Who are the experts for ${args.service}?`,
+      `Are there relevant runbooks or past incidents?`,
+    ];
+
+    const result = await client.query(
+      `Incident analysis for ${args.service}: ${questionParts.join(' ')}`,
+      { domain: 'engineering' },
+    );
+
+    const parts: string[] = [];
+    parts.push(`🚨 Incident Context for "${args.service}" (last ${hours}h)\n`);
+    parts.push(result.answer);
+
+    if (result.context.causal.length > 0) {
+      parts.push('\n--- Related Causal Chains ---');
+      result.context.causal.forEach(r => {
+        parts.push(`  ${formatRelationship(r)}`);
+      });
+    }
+
+    if (result.context.memories.length > 0) {
+      parts.push('\n--- Relevant Organizational Memory ---');
+      result.context.memories.forEach(m => {
+        parts.push(`  ${m.content || 'memory'}`);
+      });
+    }
+
+    return { content: [{ type: 'text', text: parts.join('\n') }] };
+  } catch (err) {
+    return handleError(err);
+  }
+}
+
+/**
+ * Handle nexus_analyze_pr — PR risk analysis with incident history and reviewer suggestions.
+ * Powers UC5 (Code Review Intelligence).
+ */
+export async function handleAnalyzePR(
+  client: NexusClient,
+  args: { file_paths: string; pr_title?: string },
+): Promise<McpTextResult> {
+  try {
+    const filePaths = args.file_paths.split(',').map(s => s.trim());
+
+    const question = [
+      `Analyze risk for a PR${args.pr_title ? ` titled "${args.pr_title}"` : ''} touching these paths: ${filePaths.join(', ')}.`,
+      'Are there past incidents, CI failures, or known issues in these areas?',
+      'Who should review this code?',
+    ].join(' ');
+
+    const result = await client.query(question, { domain: 'engineering' });
+
+    const parts: string[] = [];
+    parts.push(`📋 PR Risk Analysis${args.pr_title ? `: "${args.pr_title}"` : ''}\n`);
+    parts.push(`Files: ${filePaths.join(', ')}\n`);
+    parts.push(result.answer);
+
+    if (result.context.causal.length > 0) {
+      parts.push('\n--- Causal Patterns ---');
+      result.context.causal.forEach(r => {
+        parts.push(`  ${formatRelationship(r)}`);
+      });
+    }
+
+    return { content: [{ type: 'text', text: parts.join('\n') }] };
+  } catch (err) {
+    return handleError(err);
+  }
+}
+
+/**
+ * Handle nexus_team_activity — engineering team activity summary.
+ * Powers UC6 (Cross-Team Visibility).
+ */
+export async function handleTeamActivity(
+  client: NexusClient,
+  args: { days?: number },
+): Promise<McpTextResult> {
+  try {
+    const days = args.days || 7;
+
+    const result = await client.query(
+      `Summarize engineering team activity over the last ${days} days: deployments, incidents, PRs merged, CI health, active contributors, and main focus areas.`,
+      { domain: 'engineering' },
+    );
+
+    const parts: string[] = [];
+    parts.push(`📊 Engineering Team Activity (last ${days} days)\n`);
+    parts.push(result.answer);
+
+    if (result.context.patterns.length > 0) {
+      parts.push('\n--- Detected Patterns ---');
+      result.context.patterns.forEach(p => {
+        const conf = p.confidence ? ` (${Math.round(p.confidence * 100)}%)` : '';
+        parts.push(`  ${p.natural_language || p.rule_type || 'pattern'}${conf}`);
+      });
+    }
+
+    return { content: [{ type: 'text', text: parts.join('\n') }] };
+  } catch (err) {
+    return handleError(err);
+  }
+}
+
+/**
+ * Handle nexus_search_ci_failures — search past CI/CD failures.
+ * Powers UC2 (Debugging Assistant).
+ */
+export async function handleSearchCIFailures(
+  client: NexusClient,
+  args: { query: string; provider?: string; days_lookback?: number },
+): Promise<McpTextResult> {
+  try {
+    const days = args.days_lookback || 30;
+
+    const question = [
+      `Find past CI/CD failures similar to: "${args.query}"`,
+      args.provider ? `in ${args.provider}` : '',
+      `within the last ${days} days.`,
+      'What resolved them? Any causal patterns?',
+    ].filter(Boolean).join(' ');
+
+    const result = await client.query(question, { domain: 'engineering' });
+
+    const parts: string[] = [];
+    parts.push(`🔍 CI Failure Search: "${args.query}"\n`);
+    parts.push(result.answer);
+
+    if (result.context.causal.length > 0) {
+      parts.push('\n--- Related Causal Chains ---');
+      result.context.causal.forEach(r => {
+        parts.push(`  ${formatRelationship(r)}`);
+      });
+    }
+
+    return { content: [{ type: 'text', text: parts.join('\n') }] };
+  } catch (err) {
+    return handleError(err);
+  }
+}
+
+// ============================================================================
+// PROMPT HANDLER
+// ============================================================================
+
 /**
  * Build the analyze-metrics prompt — fetches live causal graph and injects as context.
  */

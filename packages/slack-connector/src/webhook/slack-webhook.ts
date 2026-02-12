@@ -47,7 +47,8 @@ export function handleSlackWebhook(
           metadata: {
             channel: event.channel,
             user: event.user,
-            text: (event.text || '').substring(0, 500),
+            text: (event.text || '').substring(0, 2000),
+            threadTs: event.thread_ts || undefined,
           },
         });
       }
@@ -83,7 +84,7 @@ export function handleSlackWebhook(
         metadata: {
           channel: event.channel,
           user: event.user,
-          text: (event.text || '').substring(0, 500),
+          text: (event.text || '').substring(0, 2000),
         },
       });
       break;
