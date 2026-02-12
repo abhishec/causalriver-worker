@@ -523,10 +523,10 @@ async function main(): Promise<void> {
   console.log('');
   const cStats = modules.contrastiveLearner.getStats();
   console.log(`  Contrastive Neural Network (Hard Evidence of Weight Updates):`);
-  console.log(`    Total examples trained: ${cStats.totalExamples}`);
+  console.log(`    Total examples trained: ${cStats.examplesSeen}`);
   console.log(`    Current accuracy: ${(cStats.accuracy * 100).toFixed(1)}%`);
   console.log(`    This is a real single-layer neural net with BCE loss + SGD backprop.`);
-  console.log(`    Weights were updated ${cStats.totalExamples} times during this session.`);
+  console.log(`    Weights were updated ${cStats.examplesSeen} times during this session.`);
 
   const totalDuration = Date.now() - startTime;
   console.log('');
