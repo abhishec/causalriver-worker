@@ -79,6 +79,7 @@ import { createContrastiveCausalLearner } from '../packages/memory-stack/src/lea
 import { createAttentionPolicyLearner } from '../packages/memory-stack/src/learning/attention-policy-learner';
 import { createPublicDataLearner } from '../packages/memory-stack/src/learning/public-data-learner';
 import { createFastPathCompiler } from '../packages/memory-stack/src/orchestrator/fast-path-compiler';
+import { createUpstreamPromoter } from '../packages/memory-stack/src/federation/upstream-promoter';
 import { createBrainPipeline } from '../packages/memory-stack/src/orchestrator/brain-pipeline';
 // Region #10: Insula (Anomaly Monitor) — post-consolidation anomaly sweep
 import { createAnomalyMonitor } from '../packages/memory-stack/src/orchestrator/anomaly-monitor';
@@ -558,6 +559,101 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
   const successful = results.filter(r => r.status === 'success').length;
   const partial = results.filter(r => r.status === 'partial').length;
   const failed = results.filter(r => r.status === 'failed').length;
+
+  // ═══════════════════════════════════════════════════════
+  // CEREBELLUM: Invalidate stale fast-path caches in DB
+  // ═══════════════════════════════════════════════════════
+  try {
+    // Clear the DB-backed fast-path cache since the graph just changed
+    const { count: cacheCleared } = await supabase
+      .from('fast_path_cache')
+      .delete()
+      .eq('organization_id', ORGANIZATION_ID)
+      .lt('expires_at', new Date().toISOString())
+      .select('*', { count: 'exact', head: true });
+
+    // Also invalidate any cached paths that touch domains with new discoveries
+    const changedDomains = results
+      .flatMap(r => r.report.discoveries)
+      .filter(d => d.includes('→'))
+      .flatMap(d => d.match(/\b\w+\b/g) || []);
+
+    if (changedDomains.length > 0) {
+      const { count: domainCleared } = await supabase
+        .from('fast_path_cache')
+        .delete()
+        .eq('organization_id', ORGANIZATION_ID)
+        .select('*', { count: 'exact', head: true });
+
+      log('CEREBELLUM', `Cleared ${(cacheCleared ?? 0) + (domainCleared ?? 0)} stale fast-path cache entries`);
+    } else {
+      log('CEREBELLUM', `Cleared ${cacheCleared ?? 0} expired fast-path cache entries`);
+    }
+
+    // Pre-warm common query patterns
+    const compiler = createFastPathCompiler({
+      supabase,
+      organizationId: ORGANIZATION_ID,
+      verbose: false,
+    });
+
+    const commonQueries = [
+      'Why did churn increase?',
+      'What is driving revenue growth?',
+      'How does engineering velocity affect product quality?',
+      'What are the biggest risks right now?',
+      'What changed in the last week?',
+    ];
+
+    let prewarmed = 0;
+    for (const query of commonQueries) {
+      try {
+        await compiler.precompile(query);
+        prewarmed++;
+      } catch {
+        // Non-critical — skip failed precompiles
+      }
+    }
+    log('CEREBELLUM', `Pre-warmed ${prewarmed} common fast-path patterns`);
+  } catch (err) {
+    logError('CEREBELLUM', 'Fast-path cache management failed', err);
+  }
+
+  // ═══════════════════════════════════════════════════════
+  // CORPUS CALLOSUM: Federation — Promote discoveries to core brain
+  // ═══════════════════════════════════════════════════════
+  try {
+    // Only promote if we consolidated an org brain (not the core brain itself)
+    if (ORGANIZATION_ID !== CORE_BRAIN_ORG_ID) {
+      const promoter = createUpstreamPromoter(supabase, ORGANIZATION_ID, {
+        minEffectSize: 0.15,
+        minConfidence: 0.7,
+        minSampleSize: 30,
+        maxItemsPerRun: 20,
+      });
+
+      const promotionResult = await promoter.promoteKnowledge();
+      const totalPromoted = promotionResult.relationshipsPromoted +
+        promotionResult.memoriesPromoted +
+        promotionResult.rulesPromoted;
+
+      if (totalPromoted > 0) {
+        log('FEDERATION', `Promoted ${totalPromoted} items to core brain:`);
+        log('FEDERATION', `  Relationships: ${promotionResult.relationshipsPromoted}`);
+        log('FEDERATION', `  Memories: ${promotionResult.memoriesPromoted}`);
+        log('FEDERATION', `  Rules: ${promotionResult.rulesPromoted}`);
+        if (promotionResult.itemsSkippedPII > 0) {
+          log('FEDERATION', `  Skipped (PII): ${promotionResult.itemsSkippedPII}`);
+        }
+      } else {
+        log('FEDERATION', 'No items above promotion threshold (or already promoted)');
+      }
+    } else {
+      log('FEDERATION', 'Core brain consolidation — no upstream promotion needed');
+    }
+  } catch (err) {
+    logError('FEDERATION', 'Upstream promotion failed', err);
+  }
 
   divider('CONSOLIDATION COMPLETE');
   log('DONE', `Total time: ${totalDuration}s`);
