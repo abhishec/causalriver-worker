@@ -92,18 +92,37 @@ export interface SuggestedCascadeRule {
  * Extend this for your organization's domain naming conventions
  */
 const DEFAULT_DOMAIN_ALIASES: Record<string, string> = {
-  cs: 'customer-success',
-  'customer success': 'customer-success',
+  // Customer Success
+  cs: 'cs',
+  'customer-success': 'cs',
+  'customer success': 'cs',
+  // Account Management
   am: 'account-management',
   'account management': 'account-management',
+  'account-management': 'account-management',
+  // People / HR — normalize 'hr' to 'people' (brain module ID)
   hr: 'people',
   'human resources': 'people',
+  people: 'people',
+  // Revenue / Sales
   sales: 'revenue',
+  revenue: 'revenue',
+  // Engineering
   eng: 'engineering',
+  engineering: 'engineering',
+  // Services / Operations
   ops: 'services',
   operations: 'services',
   'professional services': 'services',
   ps: 'services',
+  services: 'services',
+  // Strategy — maps to executive module
+  strategy: 'strategy',
+  executive: 'executive',
+  // Core domains
+  finance: 'finance',
+  product: 'product',
+  marketing: 'marketing',
 };
 
 /**

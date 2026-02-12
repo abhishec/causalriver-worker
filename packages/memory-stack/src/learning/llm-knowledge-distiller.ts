@@ -231,6 +231,12 @@ export function createLLMKnowledgeDistiller(config: KnowledgeDistillerConfig) {
     verbose = false,
   } = config;
 
+  // ── Cost Control: Daily Token Budget ──────────────────────────────
+  // Hard cap on total tokens consumed per session to prevent runaway costs.
+  // 500K tokens ≈ $0.04 with Haiku, $0.50 with Sonnet. Resets each ECS run.
+  const MAX_SESSION_TOKENS = 500_000;
+  let sessionTokensUsed = 0;
+
   function log(msg: string): void {
     if (verbose) {
       const time = new Date().toISOString().substring(11, 19);
@@ -246,6 +252,12 @@ export function createLLMKnowledgeDistiller(config: KnowledgeDistillerConfig) {
     response: string;
     tokensUsed: { input: number; output: number };
   }> {
+    // Cost guard: stop making LLM calls if we've exceeded the session budget
+    if (sessionTokensUsed >= MAX_SESSION_TOKENS) {
+      log(`⚠️ Session token budget exhausted (${sessionTokensUsed.toLocaleString()}/${MAX_SESSION_TOKENS.toLocaleString()}) — skipping "${title}"`);
+      return { response: '{}', tokensUsed: { input: 0, output: 0 } };
+    }
+
     const userMessage = `Extract causal knowledge from this content:
 
 Title: ${title}
@@ -262,7 +274,7 @@ ${text.slice(0, 12000)}`;
           'anthropic-version': '2023-06-01',
         },
         body: JSON.stringify({
-          model: model || 'claude-sonnet-4-5-20250929',
+          model: model || 'claude-3-5-haiku-20241022', // Cost control: Haiku is 10x cheaper than Sonnet for structured extraction
           max_tokens: maxTokens,
           system: EXTRACTION_SYSTEM_PROMPT,
           messages: [{ role: 'user', content: userMessage }],
@@ -270,13 +282,9 @@ ${text.slice(0, 12000)}`;
       });
 
       const data = (await response.json()) as any;
-      return {
-        response: data.content?.[0]?.text || '{}',
-        tokensUsed: {
-          input: data.usage?.input_tokens || 0,
-          output: data.usage?.output_tokens || 0,
-        },
-      };
+      const tokens = { input: data.usage?.input_tokens || 0, output: data.usage?.output_tokens || 0 };
+      sessionTokensUsed += tokens.input + tokens.output;
+      return { response: data.content?.[0]?.text || '{}', tokensUsed: tokens };
     } else {
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
@@ -285,7 +293,7 @@ ${text.slice(0, 12000)}`;
           Authorization: `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          model: model || 'gpt-4o',
+          model: model || 'gpt-4o-mini', // Cost control: gpt-4o-mini is 15x cheaper than gpt-4o for extraction
           max_tokens: maxTokens,
           messages: [
             { role: 'system', content: EXTRACTION_SYSTEM_PROMPT },
@@ -295,13 +303,9 @@ ${text.slice(0, 12000)}`;
       });
 
       const data = (await response.json()) as any;
-      return {
-        response: data.choices?.[0]?.message?.content || '{}',
-        tokensUsed: {
-          input: data.usage?.prompt_tokens || 0,
-          output: data.usage?.completion_tokens || 0,
-        },
-      };
+      const tokens = { input: data.usage?.prompt_tokens || 0, output: data.usage?.completion_tokens || 0 };
+      sessionTokensUsed += tokens.input + tokens.output;
+      return { response: data.choices?.[0]?.message?.content || '{}', tokensUsed: tokens };
     }
   }
 

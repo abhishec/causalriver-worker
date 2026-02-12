@@ -109,7 +109,7 @@ const MAX_RETRY_DELAY_MS = 10_000;
 const LLM_CALL_TIMEOUT_MS = 30_000;
 
 const DEFAULT_FAST_MODEL = 'claude-3-5-haiku-20241022';
-const DEFAULT_DEEP_MODEL = 'claude-sonnet-4-5-20250929';
+const DEFAULT_DEEP_MODEL = 'claude-sonnet-4-20250514'; // Cost control: regular Sonnet (3x cheaper than 4.5) for deep analysis
 const DEFAULT_MAX_TOKENS = 1024;
 
 // ============================================================================

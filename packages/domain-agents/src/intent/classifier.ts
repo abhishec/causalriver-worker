@@ -229,6 +229,7 @@ function getPrimaryPersonaId(moduleId: string): string {
     product: 'vp-product',
     marketing: 'vp-marketing',
     people: 'vp-people',
+    engineering: 'cto',
     executive: 'nexus-ai'
   };
   return mapping[moduleId] || 'nexus-ai';
