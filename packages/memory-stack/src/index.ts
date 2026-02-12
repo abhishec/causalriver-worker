@@ -208,6 +208,54 @@ export {
   type ThresholdOptimizerConfig,
 } from './causality/threshold-optimizer';
 
+// Multi-Hop Reasoner - Chain Reasoning Across Causal Graph ("Prefrontal Cortex")
+export {
+  createMultiHopReasoner,
+  type ReasoningPath,
+  type MultiHopPrediction,
+  type CriticalEdge,
+  type MultiHopConfig,
+} from './causality/multi-hop-reasoner';
+
+// Counterfactual Simulator - What-If Analysis ("Mental Simulation")
+export {
+  createCounterfactualSimulator,
+  type CounterfactualIntervention,
+  type CounterfactualResult,
+  type PredictionDelta,
+  type LeveragePoint,
+  type CounterfactualConfig,
+} from './causality/counterfactual-simulator';
+
+// Attention Mechanism - Context-Aware DAG Reweighting ("Thalamic Attention")
+export {
+  createAttentionMechanism,
+  type AttentionContext,
+  type EdgeAttentionWeight,
+  type AttentionWeights,
+  type AttentionConfig as CausalAttentionConfig,
+} from './causality/attention-mechanism';
+
+// Uncertainty Quantifier - Bayesian Uncertainty Propagation ("Confidence Calibration")
+export {
+  createUncertaintyQuantifier,
+  type EdgeUncertainty,
+  type UncertaintyBounds,
+  type CalibrationResult as UncertaintyCalibrationResult,
+  type AccuracyRecord,
+  type UncertaintyConfig,
+} from './causality/uncertainty-quantifier';
+
+// Explanation Generator - Natural Language Reasoning Chains ("Broca's Area")
+export {
+  createExplanationGenerator,
+  type ExplanationChain,
+  type ExplanationStep,
+  type AnomalyExplanation,
+  type IntelligenceBriefing,
+  type ExplanationConfig,
+} from './causality/explanation-generator';
+
 // ============================================================================
 // BRIDGES - Cross-Layer Wiring (THE NERVOUS SYSTEM)
 // ============================================================================
