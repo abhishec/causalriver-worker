@@ -79,7 +79,7 @@ function snapshotToDay(snapshot: BrainDailySnapshot, dayNumber: number) {
     (r) => regionNameMap[r] || r
   );
 
-  const insights = snapshot.patterns_found + snapshot.anomalies_detected + snapshot.new_connections;
+  const insights = snapshot.patterns_found + snapshot.new_connections;
 
   return {
     date: formatRelativeDate(snapshot.snapshot_date),
@@ -112,10 +112,12 @@ export function BrainTimeline() {
   const last7 = history.slice(-7);
   const weeklyNewConnections = last7.reduce((s, d) => s + d.new_connections, 0);
   const weeklyInsights = last7.reduce(
-    (s, d) => s + d.patterns_found + d.anomalies_detected + d.new_connections, 0
+    (s, d) => s + d.patterns_found + d.new_connections, 0
   );
+  // Use first known accuracy as fallback instead of 0 (avoids false drops in display)
+  const firstKnownAccuracy = last7.find((d) => d.prediction_accuracy != null)?.prediction_accuracy ?? 0;
   const weeklyAccuracyChange = last7.length >= 2
-    ? ((last7[last7.length - 1].prediction_accuracy ?? 0) - (last7[0].prediction_accuracy ?? 0)).toFixed(1)
+    ? ((last7[last7.length - 1].prediction_accuracy ?? firstKnownAccuracy) - (last7[0].prediction_accuracy ?? firstKnownAccuracy)).toFixed(1)
     : "0.0";
 
   return (

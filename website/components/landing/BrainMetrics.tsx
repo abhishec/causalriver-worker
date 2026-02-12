@@ -107,8 +107,13 @@ export function BrainMetrics() {
 
   if (!latestDay || !firstDay) return null;
 
-  const connectionsGrowth = ((latestDay.total_connections - firstDay.total_connections) / Math.max(firstDay.total_connections, 1) * 100).toFixed(0);
-  // Never fabricate accuracy — show null as null, let the UI handle "No data yet"
+  // ── Connections: show absolute growth, not misleading percentage from tiny base
+  const connectionsAbsGrowth = latestDay.total_connections - firstDay.total_connections;
+  const connectionsGrowthLabel = connectionsAbsGrowth > 0
+    ? `+${connectionsAbsGrowth.toLocaleString()} new`
+    : "stable";
+
+  // ── Accuracy: honest, never fabricated
   const hasAccuracy = latestDay.prediction_accuracy !== null && latestDay.prediction_accuracy !== undefined;
   const accuracyFirst = firstDay.prediction_accuracy ?? null;
   const accuracyLatest = latestDay.prediction_accuracy ?? null;
@@ -116,18 +121,25 @@ export function BrainMetrics() {
     ? (accuracyLatest - accuracyFirst).toFixed(1)
     : null;
 
-  const totalInsightsToday = latestDay.patterns_found + latestDay.anomalies_detected + latestDay.new_connections;
+  // ── Insights: patterns + new_connections only (anomalies are noise detections, not "insights")
+  const insightsToday = latestDay.patterns_found + latestDay.new_connections;
   const avgInsights7d = daysData.slice(-7).reduce(
-    (s, d) => s + d.patterns_found + d.anomalies_detected + d.new_connections, 0
+    (s, d) => s + d.patterns_found + d.new_connections, 0
   ) / Math.min(7, daysData.slice(-7).length);
 
-  const totalSignalsAll = daysData.reduce((s, d) => s + d.signals_processed, 0);
+  // ── Signals: show latest cumulative total (not sum of cumulative values!)
+  // signals_processed in each snapshot is already the running total
+  const latestSignals = latestDay.signals_processed || latestDay.total_signals || 0;
+  // Daily delta = diff between last two days
+  const prevDay = daysData.length >= 2 ? daysData[daysData.length - 2] : null;
+  const prevSignals = prevDay ? (prevDay.signals_processed || prevDay.total_signals || 0) : 0;
+  const signalsToday = prevDay ? Math.max(0, latestSignals - prevSignals) : latestSignals;
 
   const metrics = [
     {
       label: "Causal Connections",
       value: latestDay.total_connections,
-      change: `+${connectionsGrowth}%`,
+      change: connectionsGrowthLabel,
       changePositive: true,
       data: daysData.map((d) => d.total_connections),
       color: "#10b981",
@@ -139,25 +151,27 @@ export function BrainMetrics() {
       suffix: hasAccuracy ? "%" : "",
       change: accuracyGrowth !== null ? `+${accuracyGrowth}%` : "Collecting data",
       changePositive: accuracyGrowth !== null ? Number(accuracyGrowth) >= 0 : true,
-      data: daysData.map((d) => d.prediction_accuracy ?? 0),
+      data: daysData.map((d) => d.prediction_accuracy).filter((v): v is number => v !== null && v !== undefined).length === daysData.length
+        ? daysData.map((d) => d.prediction_accuracy!)
+        : daysData.map((d) => d.prediction_accuracy ?? (accuracyFirst ?? 80)),
       color: "#8b5cf6",
       description: hasAccuracy ? "How accurately the brain predicts outcomes" : "Accuracy tracking begins after verified predictions",
     },
     {
       label: "Daily Insights",
-      value: totalInsightsToday,
+      value: insightsToday,
       change: `${Math.floor(avgInsights7d)}/day avg`,
       changePositive: true,
-      data: daysData.map((d) => d.patterns_found + d.anomalies_detected + d.new_connections),
+      data: daysData.map((d) => d.patterns_found + d.new_connections),
       color: "#06b6d4",
       description: "Proactive discoveries surfaced without asking",
     },
     {
       label: "Signals Processed",
-      value: totalSignalsAll,
-      change: `${latestDay.signals_processed.toLocaleString()} today`,
+      value: latestSignals,
+      change: `+${signalsToday.toLocaleString()} today`,
       changePositive: true,
-      data: daysData.map((d) => d.signals_processed),
+      data: daysData.map((d) => d.signals_processed || d.total_signals || 0),
       color: "#f59e0b",
       description: "Data points ingested from all connected sources",
     },
@@ -282,15 +296,16 @@ export function BrainMetrics() {
                 className="animate-draw-line"
               />
 
-              {/* Accuracy line */}
+              {/* Accuracy line — use first known value as fallback instead of 0 */}
               <polyline
                 points={daysData.map((d, i) => {
                   const x = (i / Math.max(dayCount - 1, 1)) * 600;
-                  const vals = daysData.map((dd) => dd.prediction_accuracy ?? 0);
+                  const fallbackAcc = accuracyFirst ?? 80;
+                  const vals = daysData.map((dd) => dd.prediction_accuracy ?? fallbackAcc);
                   const minA = Math.min(...vals);
                   const maxA = Math.max(...vals);
                   const range = maxA - minA || 1;
-                  const y = 170 - (((d.prediction_accuracy ?? 0) - minA) / range) * 160;
+                  const y = 170 - (((d.prediction_accuracy ?? fallbackAcc) - minA) / range) * 160;
                   return `${x},${y}`;
                 }).join(" ")}
                 fill="none"
@@ -300,11 +315,11 @@ export function BrainMetrics() {
                 className="animate-draw-line"
               />
 
-              {/* Insight dots */}
+              {/* Insight dots — patterns + new connections (anomalies are noise, not insights) */}
               {daysData.map((d, i) => {
                 const x = (i / Math.max(dayCount - 1, 1)) * 600;
-                const insights = d.patterns_found + d.anomalies_detected + d.new_connections;
-                const maxI = Math.max(...daysData.map((dd) => dd.patterns_found + dd.anomalies_detected + dd.new_connections));
+                const insights = d.patterns_found + d.new_connections;
+                const maxI = Math.max(...daysData.map((dd) => dd.patterns_found + dd.new_connections));
                 const y = 170 - (insights / Math.max(maxI, 1)) * 160;
                 return (
                   <circle

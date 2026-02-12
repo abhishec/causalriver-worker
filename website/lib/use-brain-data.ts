@@ -177,7 +177,16 @@ export function useBrainData(): BrainHealth {
           return;
         }
 
-        const snapshots = data as BrainDailySnapshot[];
+        let snapshots = data as BrainDailySnapshot[];
+
+        // Filter out broken snapshots (concurrent run failures, zero-data entries)
+        // A snapshot is broken if it has 0 signals_processed AND 0 new_connections
+        // (indicates consolidation was skipped or failed)
+        const validSnapshots = snapshots.filter(
+          (s) => s.signals_processed > 0 || s.new_connections > 0 || s.total_connections > 0
+        );
+        snapshots = validSnapshots.length > 0 ? validSnapshots : snapshots;
+
         const latest = snapshots[snapshots.length - 1];
         const oldest = snapshots[0];
 
