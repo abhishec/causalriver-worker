@@ -390,7 +390,7 @@ export function createPublicDataLearner(config: PublicDataLearnerConfig) {
         signal_type: s.metricName,
         signal_value: s.value,
         signal_timestamp: s.timestamp,
-        metadata: { source: s.source },
+        signal_metadata: { source: s.source },
       }));
 
       const { error } = await supabase
@@ -399,6 +399,8 @@ export function createPublicDataLearner(config: PublicDataLearnerConfig) {
 
       if (!error) {
         stored += rows.length;
+      } else {
+        log(`Batch insert failed (${batch.length} signals): ${error.message}`);
       }
     }
 

@@ -71,7 +71,7 @@ export interface EmbeddingTunerConfig {
   learningRate?: number;
   /** Contrastive margin (default: 0.3) */
   margin?: number;
-  /** Number of epochs per training round (default: 5) */
+  /** Number of epochs per training round (default: 3) */
   epochs?: number;
   /** Embedding dimension (default: 384) */
   embeddingDimension?: number;
@@ -105,7 +105,7 @@ export function createEmbeddingTuner(config: EmbeddingTunerConfig) {
     organizationId,
     learningRate = 0.01,
     margin = 0.3,
-    epochs = 5,
+    epochs = 3,
     embeddingDimension = 384,
     verbose = false,
   } = config;
@@ -211,7 +211,9 @@ export function createEmbeddingTuner(config: EmbeddingTunerConfig) {
     // Update only diagonal + near-diagonal elements for efficiency
     // Full matrix gradient is O(dim²) which is too slow for 384-dim
     // We approximate with a band matrix update
-    const bandWidth = Math.min(10, dim);
+    // bandWidth=2 gives 5 elements per row (384×5=1920 perturbations per step)
+    // vs bandWidth=10 which gives 21 elements (384×21=8064 — too slow for ECS)
+    const bandWidth = Math.min(2, dim);
 
     for (let i = 0; i < dim; i++) {
       for (let dj = -bandWidth; dj <= bandWidth; dj++) {
@@ -337,8 +339,10 @@ export function createEmbeddingTuner(config: EmbeddingTunerConfig) {
       }
       initialLoss /= pairs.length;
 
-      // Train for N epochs
+      // Train for N epochs with early stopping
       let finalLoss = initialLoss;
+      let prevEpochLoss = initialLoss;
+      let epochsActuallyCompleted = 0;
       for (let epoch = 0; epoch < epochs; epoch++) {
         let epochLoss = 0;
 
@@ -366,11 +370,19 @@ export function createEmbeddingTuner(config: EmbeddingTunerConfig) {
         epochLoss /= pairs.length;
         lossHistory.push(epochLoss);
         finalLoss = epochLoss;
+        epochsActuallyCompleted++;
 
         log(`Epoch ${epoch + 1}/${epochs}: loss=${epochLoss.toFixed(4)}`);
+
+        // Early stopping: if loss didn't improve by at least 0.1%, stop
+        if (epoch > 0 && prevEpochLoss - epochLoss < prevEpochLoss * 0.001) {
+          log(`Early stopping at epoch ${epoch + 1}: loss not improving (delta=${(prevEpochLoss - epochLoss).toFixed(6)})`);
+          break;
+        }
+        prevEpochLoss = epochLoss;
       }
 
-      totalPairsProcessed += pairs.length * epochs;
+      totalPairsProcessed += pairs.length * epochsActuallyCompleted;
 
       const improvement = initialLoss > 0
         ? ((initialLoss - finalLoss) / initialLoss) * 100
@@ -383,7 +395,7 @@ export function createEmbeddingTuner(config: EmbeddingTunerConfig) {
         initialLoss,
         improvement,
         pairsUsed: pairs.length,
-        epochsCompleted: epochs,
+        epochsCompleted: epochsActuallyCompleted,
         durationMs: Date.now() - start,
       };
     },

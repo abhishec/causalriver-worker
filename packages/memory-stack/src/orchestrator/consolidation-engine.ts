@@ -1825,8 +1825,17 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
 
   async function acquireConsolidationLock(runId: string): Promise<boolean> {
     try {
-      // Check for active consolidation in the last 30 minutes
-      const lockWindow = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+      // First, clean up stale locks — any "running" entry older than 2 hours is considered crashed
+      const staleThreshold = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+      await supabase
+        .from('consolidation_runs')
+        .update({ status: 'stale_timeout', completed_at: new Date().toISOString() })
+        .eq('organization_id', organizationId)
+        .eq('status', 'running')
+        .lt('started_at', staleThreshold);
+
+      // Check for active consolidation in the last 60 minutes (increased from 30 to avoid overlap)
+      const lockWindow = new Date(Date.now() - 60 * 60 * 1000).toISOString();
       const { data: activeRuns } = await supabase
         .from('consolidation_runs')
         .select('id, started_at')
