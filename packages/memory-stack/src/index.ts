@@ -256,6 +256,34 @@ export {
   type ExplanationConfig,
 } from './causality/explanation-generator';
 
+// Temporal Forecaster - DAG-Informed Time-Series Forecasting ("Predictive Cortex")
+export {
+  createTemporalForecaster,
+  type ForecastPoint,
+  type ForecastResult,
+  type BacktestMetrics,
+  type TemporalForecasterConfig,
+} from './causality/temporal-forecaster';
+
+// Domain Transfer Learner - Cross-Org Knowledge Transfer ("Corpus Callosum II")
+export {
+  createDomainTransferLearner,
+  type DomainMapping,
+  type CausalPrior,
+  type OrgDAGSummary,
+  type BootstrapResult,
+  type DomainTransferConfig,
+} from './causality/domain-transfer-learner';
+
+// Context-Aware Reasoner - Integrated Cognitive Pipeline ("Frontal Cortex")
+export {
+  createContextAwareReasoner,
+  type ConnectionAnalysis,
+  type WhatIfAnalysis,
+  type IntelligenceReport,
+  type ContextAwareReasonerConfig,
+} from './causality/context-aware-reasoner';
+
 // ============================================================================
 // BRIDGES - Cross-Layer Wiring (THE NERVOUS SYSTEM)
 // ============================================================================
