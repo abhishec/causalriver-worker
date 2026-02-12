@@ -1,0 +1,45 @@
+# Dependencies (reinstalled in container)
+node_modules
+**/node_modules
+
+# Website (not needed for training)
+website/
+
+# Git
+.git
+.gitignore
+
+# IDE
+.vscode
+.idea
+
+# Build artifacts
+**/dist
+**/.next
+**/out
+**/.turbo
+
+# Supabase (edge functions run on Supabase, not in container)
+supabase/
+
+# Documentation
+docs/
+*.md
+!packages/**/README.md
+
+# Examples
+examples/
+
+# macOS launchd (replaced by EventBridge)
+launchd/
+
+# Test data and benchmarks
+scripts/benchmarks/
+scripts/tests/
+
+# Environment files (secrets come from SSM)
+.env
+.env.*
+
+# Logs
+*.log
