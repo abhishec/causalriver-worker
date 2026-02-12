@@ -7,6 +7,7 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { createRetry } from '../infra/retry';
 
 // ============================================================================
 // TYPES
@@ -293,10 +294,14 @@ export async function storeConnectorSignals(
     created_at: now,
   }));
 
-  const { error } = await supabase.from('cross_domain_signals').insert(rows);
-  if (error) {
-    throw new Error(`Failed to store connector signals: ${error.message}`);
-  }
+  // Retry transient Supabase failures (timeouts, connection resets)
+  const retry = createRetry({ maxRetries: 3, baseDelayMs: 500, maxDelayMs: 5000 });
+  await retry.execute(async () => {
+    const { error } = await supabase.from('cross_domain_signals').insert(rows);
+    if (error) {
+      throw new Error(`Failed to store connector signals: ${error.message}`);
+    }
+  }, 'store-connector-signals');
 }
 
 /**
@@ -308,17 +313,20 @@ export async function recordSyncResult(
   organizationId: string,
   result: ConnectorSyncResult
 ): Promise<void> {
-  const { error } = await supabase.from('connector_sync_log').insert({
-    connector_id: connectorId,
-    organization_id: organizationId,
-    success: result.success,
-    signals_generated: result.signalsGenerated,
-    records_processed: result.recordsProcessed,
-    errors: result.errors,
-    duration_ms: result.duration_ms,
-    synced_at: result.lastSyncedAt.toISOString(),
-  });
-  if (error) {
-    throw new Error(`Failed to record sync result: ${error.message}`);
-  }
+  const retry = createRetry({ maxRetries: 2, baseDelayMs: 500, maxDelayMs: 3000 });
+  await retry.execute(async () => {
+    const { error } = await supabase.from('connector_sync_log').insert({
+      connector_id: connectorId,
+      organization_id: organizationId,
+      success: result.success,
+      signals_generated: result.signalsGenerated,
+      records_processed: result.recordsProcessed,
+      errors: result.errors,
+      duration_ms: result.duration_ms,
+      synced_at: result.lastSyncedAt.toISOString(),
+    });
+    if (error) {
+      throw new Error(`Failed to record sync result: ${error.message}`);
+    }
+  }, 'record-sync-result');
 }

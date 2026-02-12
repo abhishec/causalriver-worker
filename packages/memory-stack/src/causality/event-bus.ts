@@ -14,6 +14,9 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { createRetry } from '../infra/retry';
+import { createCircuitBreaker, CircuitOpenError } from '../infra/circuit-breaker';
+import { getDefaultLogger, type NexusLogger } from '../observability';
 
 // ============================================================================
 // TYPES
@@ -73,6 +76,8 @@ export interface EventBusConfig {
   deduplicationWindowMs: number;
   /** Maximum queue size before backpressure (default: 1000) */
   maxQueueSize: number;
+  /** Structured logger (defaults to global logger) */
+  logger?: NexusLogger;
 }
 
 /**
@@ -185,8 +190,16 @@ export function createEventBus(config: Partial<EventBusConfig> = {}) {
     flushIntervalMs = 5000,
     enableDeduplication = true,
     deduplicationWindowMs = 60000,
-    maxQueueSize = 1000
+    maxQueueSize = 1000,
   } = config;
+
+  const logger = config.logger ?? getDefaultLogger().child({ module: 'event-bus' });
+
+  // Resilience: retry transient Supabase failures during flush
+  const flushRetry = createRetry({ maxRetries: 3, baseDelayMs: 500, maxDelayMs: 5000 });
+
+  // Resilience: circuit breaker protects Supabase from cascading failures
+  const flushBreaker = createCircuitBreaker({ failureThreshold: 5, resetTimeoutMs: 60_000, label: 'event-bus-flush' });
 
   // Internal state
   const clock = new LamportClock();
@@ -255,7 +268,7 @@ export function createEventBus(config: Partial<EventBusConfig> = {}) {
       if (matchingEvents.length > 0) {
         promises.push(
           subscription.handler(matchingEvents).catch(error => {
-            console.error(`[EventBus] Subscriber ${subscription.id} error:`, error);
+            logger.error('Subscriber error', { subscriberId: subscription.id, error: error instanceof Error ? error.message : String(error) });
           })
         );
       }
@@ -296,19 +309,28 @@ export function createEventBus(config: Partial<EventBusConfig> = {}) {
       processing_status: 'pending'
     }));
 
-    // Insert to database
-    const { error } = await supabase
-      .from('causal_event_stream')
-      .upsert(dbRecords, {
-        onConflict: 'id',
-        ignoreDuplicates: true
-      });
-
-    if (error) {
-      console.error('[EventBus] Database flush error:', error);
+    // Insert to database — wrapped in circuit breaker + retry for resilience
+    try {
+      await flushBreaker.execute(() =>
+        flushRetry.execute(async () => {
+          const { error } = await supabase
+            .from('causal_event_stream')
+            .upsert(dbRecords, {
+              onConflict: 'id',
+              ignoreDuplicates: true,
+            });
+          if (error) throw error;
+        }, 'event-bus-flush')
+      );
+    } catch (err) {
+      if (err instanceof CircuitOpenError) {
+        logger.warn('Flush blocked — circuit breaker open', { queueSize: eventsToFlush.length });
+      } else {
+        logger.error('Database flush failed after retries', { error: err instanceof Error ? err.message : String(err) });
+      }
       // Put events back in queue on failure
       eventQueue.unshift(...eventsToFlush);
-      throw error;
+      throw err;
     }
 
     // Update stats
@@ -350,7 +372,7 @@ export function createEventBus(config: Partial<EventBusConfig> = {}) {
     debounceTimer = setTimeout(() => {
       debounceTimer = null;
       notifyPending().catch((err) => {
-        console.error('[EventBus] Subscriber notification error:', err);
+        logger.error('Subscriber notification error', { error: err instanceof Error ? err.message : String(err) });
       });
     }, debounceMs);
   };
@@ -371,7 +393,7 @@ export function createEventBus(config: Partial<EventBusConfig> = {}) {
       // Check queue capacity (backpressure)
       if (eventQueue.length >= maxQueueSize) {
         stats.totalEventsDropped++;
-        console.warn('[EventBus] Queue full, dropping event:', event.eventId);
+        logger.warn('Queue full, dropping event', { eventId: event.eventId, queueSize: maxQueueSize });
         return false;
       }
 
@@ -468,7 +490,7 @@ export function createEventBus(config: Partial<EventBusConfig> = {}) {
           try {
             await this.flush(supabase);
           } catch (error) {
-            console.error('[EventBus] Auto-flush error:', error);
+            logger.error('Auto-flush error', { error: error instanceof Error ? (error as Error).message : String(error) });
           }
         }
       }, flushIntervalMs);
@@ -503,6 +525,16 @@ export function createEventBus(config: Partial<EventBusConfig> = {}) {
      */
     getVectorClock(): number {
       return clock.getValue();
+    },
+
+    /**
+     * Get retry and circuit breaker stats for health checks
+     */
+    getResilienceStats(): { retry: import('../infra/retry').RetryStats; circuitBreaker: import('../infra/circuit-breaker').CircuitBreakerStats } {
+      return {
+        retry: flushRetry.getStats(),
+        circuitBreaker: flushBreaker.getStats(),
+      };
     },
 
     /**

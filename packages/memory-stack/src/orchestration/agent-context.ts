@@ -12,6 +12,7 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { getDefaultLogger } from '../observability';
 
 /** Core brain org ID for federated agent context */
 const CORE_BRAIN_ORG_ID = '00000000-0000-4000-a000-000000000001';
@@ -124,6 +125,8 @@ export function createAgentContextManager(options: {
     queueTable = 'agent_queue',
   } = options;
 
+  const logger = getDefaultLogger().child({ module: 'agent-context' });
+
   return {
     /**
      * Initialize an agent run with context
@@ -146,12 +149,12 @@ export function createAgentContextManager(options: {
           .single();
 
         if (agentError || !agent) {
-          console.error(`[Agent] Agent ${agentType} not found for org ${organizationId}`);
+          logger.error('Agent not found', { agentType, organizationId });
           return null;
         }
 
         if (!agent.is_enabled) {
-          console.log(`[Agent] Agent ${agentType} is disabled for org ${organizationId}`);
+          logger.info('Agent disabled', { agentType, organizationId });
           return null;
         }
 
@@ -172,7 +175,7 @@ export function createAgentContextManager(options: {
           .single();
 
         if (runError) {
-          console.error(`[Agent] Failed to create run record:`, runError);
+          logger.error('Failed to create run record', { error: runError.message });
           return null;
         }
 
@@ -182,7 +185,7 @@ export function createAgentContextManager(options: {
           .update({ status: 'running', last_run_at: new Date().toISOString() })
           .eq('id', agent.id);
 
-        console.log(`[Agent] Initialized ${agentType} run ${run.id} for org ${organizationId}`);
+        logger.info('Initialized agent run', { agentType, runId: run.id, organizationId });
 
         // CAUSAL ENRICHMENT: Auto-inject causal context for this agent's domain
         let causalContext: AgentContext['causalContext'] | undefined;
@@ -276,7 +279,7 @@ export function createAgentContextManager(options: {
           causalContext,
         };
       } catch (error) {
-        console.error(`[Agent] Error initializing agent run:`, error);
+        logger.error('Error initializing agent run', { error: error instanceof Error ? error.message : String(error) });
         return null;
       }
     },
@@ -301,7 +304,7 @@ export function createAgentContextManager(options: {
           })
           .eq('id', runId);
       } catch (error) {
-        console.error(`[Agent] Error updating progress:`, error);
+        logger.error('Error updating progress', { runId, error: error instanceof Error ? error.message : String(error) });
       }
     },
 
@@ -367,11 +370,9 @@ export function createAgentContextManager(options: {
             .eq('id', context.agentId);
         }
 
-        console.log(
-          `[Agent] Completed ${context.agentType} run ${context.runId} - ${result.success ? 'SUCCESS' : 'FAILED'}`
-        );
+        logger.info('Completed agent run', { agentType: context.agentType, runId: context.runId, success: result.success, durationMs });
       } catch (error) {
-        console.error(`[Agent] Error completing run:`, error);
+        logger.error('Error completing run', { runId: context.runId, error: error instanceof Error ? error.message : String(error) });
       }
     },
 
@@ -433,7 +434,7 @@ export function createAgentContextManager(options: {
           .single();
 
         if (!agent) {
-          console.error(`[Agent] Agent ${agentType} not found for org ${organizationId}`);
+          logger.error('Agent not found', { agentType, organizationId });
           return null;
         }
 
@@ -451,13 +452,13 @@ export function createAgentContextManager(options: {
           .single();
 
         if (error) {
-          console.error(`[Agent] Failed to queue job:`, error);
+          logger.error('Failed to queue job', { agentType, jobType, error: error.message });
           return null;
         }
 
         return data.id as string;
       } catch (error) {
-        console.error(`[Agent] Error queuing job:`, error);
+        logger.error('Error queuing job', { agentType, error: error instanceof Error ? error.message : String(error) });
         return null;
       }
     },
@@ -636,6 +637,6 @@ export async function logAgentActivity(
       created_at: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('[Agent] Failed to log activity:', error);
+    getDefaultLogger().child({ module: 'agent-context' }).error('Failed to log activity', { error: error instanceof Error ? error.message : String(error) });
   }
 }

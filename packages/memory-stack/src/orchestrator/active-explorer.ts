@@ -26,6 +26,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { createSupabaseRepository } from '../persistence/supabase-repository';
+import { getDefaultLogger } from '../observability';
 
 // ============================================================================
 // TYPES
@@ -106,11 +107,11 @@ export function createActiveExplorer(config: ActiveExplorerConfig) {
   } = config;
 
   const repository = createSupabaseRepository(supabase, organizationId);
+  const logger = getDefaultLogger().child({ module: 'active-explorer', orgId: organizationId.substring(0, 8) });
 
   function log(msg: string): void {
     if (verbose) {
-      const time = new Date().toISOString().substring(11, 19);
-      console.log(`[${time}] [EXPLORER] ${msg}`);
+      logger.info(msg);
     }
   }
 
@@ -467,15 +468,10 @@ export function createActiveExplorer(config: ActiveExplorerConfig) {
       };
 
       if (verbose) {
-        console.log(`\n[EXPLORER] Scan complete in ${(result.durationMs / 1000).toFixed(1)}s`);
-        console.log(`  ${result.summary}`);
-        if (allRequests.length > 0) {
-          console.log(`\n  Top data requests:`);
-          for (const req of allRequests.slice(0, 5)) {
-            console.log(`    [${(req.priority * 100).toFixed(0)}%] ${req.description}`);
-          }
-        }
-        console.log('');
+        logger.info(`Scan complete in ${(result.durationMs / 1000).toFixed(1)}s`, {
+          summary: result.summary,
+          topRequests: allRequests.slice(0, 5).map(r => ({ priority: r.priority, description: r.description })),
+        });
       }
 
       return result;
