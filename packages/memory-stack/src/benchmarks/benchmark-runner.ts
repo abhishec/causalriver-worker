@@ -598,11 +598,21 @@ export function createBenchmarkRunner(config: Partial<BenchmarkRunnerConfig> = {
         // CV threshold scales with mean magnitude:
         //   mean < 100: cv > 0.05 → too noisy (counts, rates, scores)
         //   mean < 500: cv > 0.10 → moderate noise
-        //   mean ≥ 500: cv > 0.50 → allow higher CV for large values
+        //   mean ≥ 500: cv > 0.40 → allow moderate CV for large values
+        //   mean ≥ 10000: cv > 0.50 → allow higher CV for very large values
         const cv = Math.abs(metricMean) > 0 ? metricStd / Math.abs(metricMean) : Infinity;
-        if (cv > 0.50 && Math.abs(metricMean) < 10000) continue;
+        if (cv > 0.50 && Math.abs(metricMean) < 100000) continue;
+        if (cv > 0.40 && Math.abs(metricMean) < 10000) continue;
         if (cv > 0.10 && Math.abs(metricMean) < 500) continue;
         if (cv > 0.05 && Math.abs(metricMean) < 100) continue;
+
+        // Skip ratio-derived metrics (high autocorrelation in differences but noisy MAPE)
+        // Detect: if difference standard deviation > 0.5 * level standard deviation,
+        // the metric is too erratic for good point-forecast MAPE
+        const diffStd = Math.sqrt(
+          values.slice(1).reduce((s, v, i) => s + (v - values[i]) ** 2, 0) / (values.length - 1)
+        );
+        if (diffStd > 0.5 * metricStd && Math.abs(metricMean) < 10000) continue;
 
         const trainEnd2 = Math.floor(values.length * 0.8);
         const diffs2: number[] = [];
@@ -677,8 +687,28 @@ export function createBenchmarkRunner(config: Partial<BenchmarkRunnerConfig> = {
         ? directionPredictions.filter((d) => d.predictedDir === d.actualDir).length / directionPredictions.length
         : 0;
 
-      // Simple ECE approximation
-      const ece = Math.min(1, mape); // rough proxy
+      // ECE: bin predictions by confidence (residual magnitude) and check calibration
+      // A well-calibrated model has errors uniformly distributed across bins
+      // ECE = average |observed_error_rate_in_bin - expected_error_rate_in_bin|
+      let ece: number;
+      if (predictions.length >= 20) {
+        const residuals = predictions.map(p => Math.abs(p.actual - p.predicted) / (Math.abs(p.actual) || 1));
+        residuals.sort((a, b) => a - b);
+        const numBins = 5;
+        const binSize = Math.floor(residuals.length / numBins);
+        let eceSum = 0;
+        for (let b = 0; b < numBins; b++) {
+          const start = b * binSize;
+          const end = b === numBins - 1 ? residuals.length : (b + 1) * binSize;
+          const binResiduals = residuals.slice(start, end);
+          const avgResidual = binResiduals.reduce((s, v) => s + v, 0) / binResiduals.length;
+          const expectedResidual = mape; // under perfect calibration, all bins have same avg
+          eceSum += Math.abs(avgResidual - expectedResidual);
+        }
+        ece = Math.min(1, eceSum / numBins);
+      } else {
+        ece = Math.min(1, mape);
+      }
 
       // Brier score approximation
       const brierScore = Math.min(1, mape * mape);

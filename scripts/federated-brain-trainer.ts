@@ -111,6 +111,10 @@ import { VC_METRICS_LOGIC_DEEP_PACKS } from './training-data/vc-metrics-logic-de
 import { ENGINEERING_OPS_PACKS } from './training-data/engineering-ops-packs';
 import { CYBERSECURITY_PACKS } from './training-data/cybersecurity-packs';
 import { SUSTAINABILITY_ESG_PACKS } from './training-data/sustainability-esg-packs';
+import { AI_ML_STARTUPS_PACKS } from './training-data/ai-ml-startups-packs';
+import { REAL_ESTATE_PACKS } from './training-data/real-estate-packs';
+import { PHARMA_HEALTHCARE_PACKS } from './training-data/pharma-healthcare-packs';
+import { MEDIA_ENTERTAINMENT_PACKS } from './training-data/media-entertainment-packs';
 
 // ============================================================================
 // CONFIGURATION
@@ -271,8 +275,12 @@ function loadAllTrainingPacks(): LoadedPacks {
     ...ENGINEERING_OPS_PACKS,
     ...CYBERSECURITY_PACKS,
     ...SUSTAINABILITY_ESG_PACKS,
+    ...AI_ML_STARTUPS_PACKS,
+    ...REAL_ESTATE_PACKS,
+    ...PHARMA_HEALTHCARE_PACKS,
+    ...MEDIA_ENTERTAINMENT_PACKS,
   ];
-  log('LOAD', `Static modules: ${staticPacks.length} packs across 21 domains`);
+  log('LOAD', `Static modules: ${staticPacks.length} packs across 28 domains`);
 
   // Deduplicate by ID (library takes priority)
   const seenIds = new Set(libraryPacks.map(p => p.id));

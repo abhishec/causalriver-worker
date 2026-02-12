@@ -320,8 +320,8 @@ export function detectAnomalies(
         const allResults = [zs, iq, md];
         const votes = allResults.filter(r => r.isAnomaly).length;
         const maxAbsZ = Math.max(...allResults.map(r => Math.abs(r.zScore)));
-        // Adaptive: majority vote OR single-method with strong z-score
-        const isAnomaly = votes >= 2 || (votes >= 1 && maxAbsZ > 3.5);
+        // Adaptive: majority vote OR single-method with strong z-score (≥3.0 = 99.7th percentile)
+        const isAnomaly = votes >= 2 || (votes >= 1 && maxAbsZ > 3.0);
         const bestSeverity = allResults.reduce((best, r) => {
           const order = { critical: 0, high: 1, medium: 2, low: 3 };
           return order[r.severity] < order[best.severity] ? r : best;

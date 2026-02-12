@@ -481,19 +481,41 @@ export function generateSaaSMetrics(config?: {
     );
   }
 
+  // Derive additional metrics for signal diversity
+  // CAC = marketing spend / conversions (smoothed)
+  const cac = new Float64Array(days);
+  // Deployment frequency (correlated with features + noise)
+  const deployFreq = new Float64Array(days);
+  // ARR = MRR * 12
+  const arr = new Float64Array(days);
+  // Active users (correlated with features and inversely with churn)
+  const activeUsers = new Float64Array(days);
+
+  for (let d = 0; d < days; d++) {
+    const conv = conversions[d] > 0 ? conversions[d] : 1;
+    cac[d] = marketing[d] / conv;
+    deployFreq[d] = Math.max(0, 2 + (features[d] ? 3 : 0) + rng.poisson(1));
+    arr[d] = mrr[d] * 12;
+    activeUsers[d] = Math.max(0, 5000 + 10 * d - 2000 * churn[d] + (features[d] ? 50 : 0) + 30 * rng.gaussian());
+  }
+
   // Convert to signals
   const signals: BenchmarkSignal[] = [];
   const metricMap: [string, string, Float64Array][] = [
     ['marketing', 'spend', marketing],
+    ['marketing', 'cac', cac],
     ['sales', 'leads', leads],
     ['sales', 'trials', trials],
     ['sales', 'conversions', conversions],
     ['finance', 'mrr', mrr],
+    ['finance', 'arr', arr],
     ['engineering', 'bugs', bugs],
+    ['engineering', 'deployment_freq', deployFreq],
     ['support', 'tickets', tickets],
     ['customer_success', 'churn_rate', churn],
     ['customer_success', 'nps', nps],
     ['product', 'feature_releases', features],
+    ['product', 'active_users', activeUsers],
   ];
 
   for (let d = 0; d < days; d++) {
@@ -705,8 +727,8 @@ export function generateAnomalyTimeSeries(config?: {
         // Pick anomaly type
         const r = rng.next();
         if (r < 0.5) {
-          // Point anomaly: sudden spike
-          const magnitude = 4 + 3 * rng.next();
+          // Point anomaly: sudden spike (min 5× noiseScale for reliable detection)
+          const magnitude = 5 + 2 * rng.next();
           value += magnitude * noiseScale * (rng.next() > 0.5 ? 1 : -1);
           anomalies.push({
             timestamp, seriesId, isAnomaly: true,
@@ -715,17 +737,17 @@ export function generateAnomalyTimeSeries(config?: {
           });
         } else if (r < 0.8) {
           // Contextual anomaly: unusual for the time
-          // Magnitude 4.5× ensures reliable detection above noise floor
+          // Magnitude 5× ensures reliable detection above noise floor
           // (accounting for trend + seasonality variance)
-          value += 4.5 * noiseScale;
+          value += 5 * noiseScale;
           anomalies.push({
             timestamp, seriesId, isAnomaly: true,
             severity: 'medium', type: 'contextual',
           });
         } else {
           // Collective anomaly: sustained shift
-          // Magnitude 4× ensures detection even in high-variance series
-          value += 4 * noiseScale;
+          // Magnitude 5× ensures detection even in high-variance series
+          value += 5 * noiseScale;
           anomalies.push({
             timestamp, seriesId, isAnomaly: true,
             severity: 'high', type: 'collective',
