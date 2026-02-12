@@ -11,6 +11,7 @@ export default function UseCasesPage() {
       <h1 className="mb-4 text-3xl font-bold">Use Cases</h1>
       <p className="mb-12 text-lg text-muted">
         NexusBrain discovers cause-and-effect chains that span departments, tools, and time.
+        Tested against CausalRivers (ICLR 2025), CauseME, and LongMemEval benchmarks.
         Here are the most common patterns organizations deploy.
       </p>
 
@@ -44,7 +45,7 @@ export default function UseCasesPage() {
               <p className="text-sm text-zinc-300">
                 Ask the copilot: &quot;Why did revenue drop this quarter?&quot; In 30 seconds, get an evidence-based answer with the root cause
                 (engineering velocity drop 3 months ago), the causal chain (support tickets &rarr; churn &rarr; revenue), the timeline,
-                and a prediction of when things will improve &mdash; all with statistical confidence levels.
+                and a prediction of when things will improve &mdash; all with statistical confidence levels and p-values.
               </p>
             </div>
           </div>
@@ -53,11 +54,12 @@ export default function UseCasesPage() {
         <div className="rounded-xl border border-border bg-surface p-6">
           <h2 className="mb-2 text-xl font-semibold">Who Is It For?</h2>
           <ul className="space-y-2 text-sm text-muted">
-            <li><span className="font-medium text-foreground">CEOs/Founders</span> &mdash; See how every department affects the bottom line. Decisions based on evidence, not intuition.</li>
-            <li><span className="font-medium text-foreground">COOs</span> &mdash; Understand operational ripple effects before they cascade. Intervene early.</li>
-            <li><span className="font-medium text-foreground">VPs/Department Heads</span> &mdash; See how your team&apos;s actions affect other departments, and vice versa.</li>
-            <li><span className="font-medium text-foreground">Strategy Teams</span> &mdash; Model &quot;what if&quot; scenarios with data-backed predictions.</li>
-            <li><span className="font-medium text-foreground">Developers</span> &mdash; Embed causal intelligence into any application via SDK, API, or MCP.</li>
+            <li><span className="font-medium text-foreground">CTOs / Engineering Leaders</span> &mdash; See how engineering velocity, CI health, and deploy frequency causally affect customer satisfaction and revenue.</li>
+            <li><span className="font-medium text-foreground">CEOs / Founders</span> &mdash; See how every department affects the bottom line. Decisions based on evidence, not intuition.</li>
+            <li><span className="font-medium text-foreground">COOs</span> &mdash; Understand operational ripple effects before they cascade. Intervene early with data-backed interventions.</li>
+            <li><span className="font-medium text-foreground">VPs / Department Heads</span> &mdash; See how your team&apos;s actions affect other departments, and vice versa.</li>
+            <li><span className="font-medium text-foreground">Strategy Teams</span> &mdash; Model &quot;what if&quot; scenarios with data-backed predictions through the full causal graph.</li>
+            <li><span className="font-medium text-foreground">Developers</span> &mdash; Embed causal intelligence into any application via SDK, API, or MCP server.</li>
           </ul>
         </div>
       </div>

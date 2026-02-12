@@ -3,6 +3,7 @@ import { LiveBrainPulse } from "@/components/landing/LiveBrainPulse";
 import { BrainMetrics } from "@/components/landing/BrainMetrics";
 import { BrainTimeline } from "@/components/landing/BrainTimeline";
 import { BrainArchitecture } from "@/components/landing/BrainArchitecture";
+import { Benchmarks } from "@/components/landing/Benchmarks";
 import { PlatformIntegration } from "@/components/landing/PlatformIntegration";
 import { Problem } from "@/components/landing/Problem";
 import { CodeExamples } from "@/components/landing/CodeExamples";
@@ -30,25 +31,28 @@ export default function Home() {
       {/* 5. THE PROBLEM IT SOLVES — Why you need this */}
       <Problem />
 
-      {/* 6. HOW IT WORKS — Brain regions (aspirational, not technical) */}
+      {/* 6. HOW IT WORKS — 11 Brain regions with category filters */}
       <BrainArchitecture />
 
-      {/* 7. PLATFORM — Anyone can connect */}
+      {/* 7. COMPETITIVE BENCHMARKING — CausalRivers, CauseME, LongMemEval results */}
+      <Benchmarks />
+
+      {/* 8. PLATFORM — Anyone can connect */}
       <PlatformIntegration />
 
-      {/* 8. DEVELOPER EXPERIENCE — Code examples */}
+      {/* 9. DEVELOPER EXPERIENCE — Code examples */}
       <CodeExamples />
 
-      {/* 9. CONNECTORS — What it plugs into */}
+      {/* 10. CONNECTORS — What it plugs into */}
       <Connectors />
 
-      {/* 10. USE CASES — Who it's for */}
+      {/* 11. USE CASES — Who it's for */}
       <UseCases />
 
-      {/* 11. VS ALTERNATIVES — Why this is different */}
+      {/* 12. VS ALTERNATIVES — Why this is different */}
       <Comparison />
 
-      {/* 12. CTA — Start building */}
+      {/* 13. CTA — Start building */}
       <CTA />
     </LandingPageWrapper>
   );

@@ -4,11 +4,12 @@ export const SITE = {
   url: "https://usebrainos.com",
   github: "https://github.com/abhishec/nexus-intelligence",
   description:
-    "NexusBrain is a self-improving causal intelligence engine with 11 brain regions. Connect your app and inherit a brain that discovers cause-and-effect, predicts outcomes, and compounds knowledge daily.",
+    "NexusBrain is a self-improving causal intelligence engine with 11 brain regions, tested against peer-reviewed benchmarks (CausalRivers ICLR 2025, CauseME, LongMemEval). It discovers cause-and-effect with 8 ensemble methods, predicts outcomes, and compounds knowledge autonomously.",
 } as const;
 
 export const NAV_LINKS = [
   { label: "Watch It Think", href: "#live-brain" },
+  { label: "Benchmarks", href: "#benchmarks" },
   { label: "Docs", href: "/docs" },
   { label: "Use Cases", href: "/use-cases" },
   { label: "GitHub", href: SITE.github, external: true },
@@ -17,10 +18,11 @@ export const NAV_LINKS = [
 export const STATS = [
   { label: "Brain Regions", value: "11" },
   { label: "Causal Methods", value: "15" },
-  { label: "Passing Tests", value: "1,580" },
+  { label: "Passing Tests", value: "1,737" },
   { label: "Connectors", value: "13" },
   { label: "Training Packs", value: "118" },
-  { label: "Prediction Accuracy", value: "87.2%" },
+  { label: "Benchmark AUROC", value: "0.824" },
+  { label: "Memory Accuracy", value: "79.6%" },
   { label: "Runtime Deps", value: "0" },
 ] as const;
 
@@ -98,23 +100,33 @@ export const LAYERS = [
 
 export const USE_CASES = [
   {
+    title: "Engineering Intelligence",
+    description: "Trace how deploy frequency, CI failures, PR velocity, and incident response causally cascade into customer satisfaction and revenue. The brain connects engineering signals to business outcomes with statistical proof.",
+    example: "CI failure rate spikes \u2192 deploy frequency drops (7d) \u2192 support tickets rise (14d) \u2192 churn increases (30d) \u2192 revenue impact (p=0.003)",
+  },
+  {
     title: "SaaS Intelligence",
-    description: "Discover why churn is happening and predict revenue impact before it materializes. Trace causal chains across engineering, support, and finance.",
+    description: "Discover why churn is happening and predict revenue impact before it materializes. Trace causal chains across engineering, support, and finance with Granger-proven evidence.",
     example: "Engineering deploys drop \u2192 support tickets spike (14d) \u2192 churn increases (30d) \u2192 revenue drops (45d)",
   },
   {
     title: "Customer Success Prediction",
-    description: "Predict which clients will churn 60-90 days before it happens, with statistical proof of the leading indicators and recommended interventions.",
+    description: "Predict which clients will churn 60-90 days before it happens, with statistical proof of leading indicators and recommended interventions. Multi-hop reasoning traces root causes across departments.",
     example: "Payment delays (p=0.003, lag=7d) \u2192 support escalations \u2192 churn. Proactive CSM outreach recommended.",
   },
   {
     title: "Revenue Operations",
-    description: "Understand how marketing spend, engineering velocity, and CS quality causally affect revenue. Replace guesswork with proven cause-and-effect.",
+    description: "Understand how marketing spend, engineering velocity, and CS quality causally affect revenue. Counterfactual simulation answers 'what if we invest more in X?' with data-backed predictions.",
     example: "Marketing spend \u2192 pipeline growth (21d) \u2192 deal velocity (14d) \u2192 revenue impact (35d)",
   },
   {
     title: "AI Agent Memory",
-    description: "Give your AI agents a brain that persists across conversations. They remember context, learn from outcomes, and reason about causality.",
+    description: "Give your AI agents a brain that persists across conversations. Agents inherit causal reasoning, temporal memory, and federation — they don't just remember, they understand cause-and-effect.",
     example: "Agent remembers past interactions \u2192 builds user context \u2192 provides causal insights \u2192 improves over time",
+  },
+  {
+    title: "Cross-Department Cascade Detection",
+    description: "Departments operate in silos but their actions cascade invisibly. The brain sees connections across HR, engineering, product, support, and finance before the damage materializes.",
+    example: "HR hiring slows \u2192 engineering velocity drops (21d) \u2192 product releases slow (14d) \u2192 competitors gain ground (45d)",
   },
 ] as const;

@@ -4,12 +4,15 @@ import { motion } from "framer-motion";
 
 const rows = [
   { feature: "Shows what happened", bi: true, chatbot: false, nexus: true },
-  { feature: "Explains why it happened", bi: false, chatbot: "Guesses", nexus: "Statistical proof" },
+  { feature: "Explains why it happened", bi: false, chatbot: "Guesses", nexus: "Statistical proof (p-values)" },
   { feature: "Predicts what happens next", bi: "Basic forecasting", chatbot: "Guesses", nexus: "Causal prediction + timelines" },
   { feature: "Cross-department visibility", bi: "Separate dashboards", chatbot: false, nexus: "Unified causal graph" },
-  { feature: "Gets smarter over time", bi: false, chatbot: false, nexus: true },
-  { feature: "Shows confidence levels", bi: false, chatbot: false, nexus: "p-values + effect sizes" },
-  { feature: "Causation vs correlation", bi: false, chatbot: false, nexus: "Knockout validation" },
+  { feature: "Gets smarter over time", bi: false, chatbot: false, nexus: "Continuous learning loops" },
+  { feature: "Shows confidence levels", bi: false, chatbot: false, nexus: "p-values + effect sizes + ECE" },
+  { feature: "Causation vs correlation", bi: false, chatbot: false, nexus: "8 methods + knockout validation" },
+  { feature: "Tested against benchmarks", bi: false, chatbot: false, nexus: "CausalRivers, CauseME, LongMemEval" },
+  { feature: "Self-monitoring (meta-cognition)", bi: false, chatbot: false, nexus: "Knows what it doesn\u2019t know" },
+  { feature: "Zero runtime dependencies", bi: "Heavy infra required", chatbot: "API dependency", nexus: "Pure TypeScript core" },
 ];
 
 function Cell({ value }: { value: boolean | string }) {
@@ -31,6 +34,10 @@ export function Comparison() {
           <h2 className="mb-4 text-3xl font-bold md:text-4xl">
             How NexusBrain Compares
           </h2>
+          <p className="text-lg text-muted">
+            Not another dashboard. Not another chatbot. A benchmark-tested causal intelligence engine
+            that proves causation with statistical rigor.
+          </p>
         </motion.div>
 
         <motion.div

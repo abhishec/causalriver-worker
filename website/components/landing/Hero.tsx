@@ -71,8 +71,8 @@ export function Hero() {
           </p>
 
           <p className="mx-auto mb-8 max-w-xl text-sm text-muted/70">
-            11 brain regions. Self-improving causal reasoning engine.
-            Open infrastructure anyone can integrate.
+            11 brain regions. 8 causal discovery methods. Tested against CausalRivers, CauseME, and LongMemEval benchmarks.
+            1,737 passing tests. Zero runtime dependencies.
           </p>
 
           <div className="mb-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
