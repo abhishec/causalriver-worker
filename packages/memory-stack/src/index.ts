@@ -839,7 +839,7 @@ export {
   type BookIngestionResult,
   type BookRecord,
   type BookSource,
-  type KnowledgeDomain,
+  type KnowledgeDomain as BookKnowledgeDomain,
 } from './learning/knowledge-book-ingestor';
 
 // ============================================================================

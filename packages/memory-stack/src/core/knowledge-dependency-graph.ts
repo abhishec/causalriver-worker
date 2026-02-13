@@ -336,6 +336,55 @@ export function createKnowledgeDependencyGraph(
     return true;
   }
 
+  /**
+   * Transitive dependency query via BFS with adjacency index.
+   * O(V + E_reachable) instead of O(V * E_total).
+   * @internal — extracted from the return object so TS can resolve it
+   */
+  function _queryTransitiveImpl(
+    entityId: string,
+    direction: 'upstream' | 'downstream' | 'both',
+    maxDepth: number,
+    query: DependencyQuery
+  ): DependencyEdge[] {
+    const visited = new Set<string>();
+    const result: DependencyEdge[] = [];
+    const queue: Array<{ id: string; depth: number }> = [{ id: entityId, depth: 0 }];
+    const minWeight = query.minWeight ?? 0.05;
+    const limit = query.limit ?? 100;
+
+    visited.add(entityId);
+
+    while (queue.length > 0 && result.length < limit) {
+      const { id, depth } = queue.shift()!;
+      if (depth >= maxDepth) continue;
+
+      // Upstream: follow outbound edges (source → target)
+      if (direction === 'upstream' || direction === 'both') {
+        for (const edge of _getOutbound(id)) {
+          if (!_matchesFilters(edge, query.knowledgeDomain, query.dependencyTypes, minWeight)) continue;
+          if (visited.has(edge.targetId)) continue;
+          visited.add(edge.targetId);
+          result.push(edge);
+          queue.push({ id: edge.targetId, depth: depth + 1 });
+        }
+      }
+
+      // Downstream: follow inbound edges (target ← source)
+      if (direction === 'downstream' || direction === 'both') {
+        for (const edge of _getInbound(id)) {
+          if (!_matchesFilters(edge, query.knowledgeDomain, query.dependencyTypes, minWeight)) continue;
+          if (visited.has(edge.sourceId)) continue;
+          visited.add(edge.sourceId);
+          result.push(edge);
+          queue.push({ id: edge.sourceId, depth: depth + 1 });
+        }
+      }
+    }
+
+    return result.sort((a, b) => b.weight - a.weight).slice(0, limit);
+  }
+
   return {
     // ── Recording ─────────────────────────────────────────────────────
 
@@ -433,7 +482,7 @@ export function createKnowledgeDependencyGraph(
       const normEntityId = query.entityId ? normalizeId(query.entityId) : undefined;
 
       if (query.transitive && normEntityId) {
-        return this._queryTransitive(normEntityId, direction, query.maxDepth ?? config.maxTransitiveDepth, query);
+        return _queryTransitiveImpl(normEntityId, direction, query.maxDepth ?? config.maxTransitiveDepth, query);
       }
 
       let candidates: DependencyEdge[];
@@ -462,55 +511,6 @@ export function createKnowledgeDependencyGraph(
       );
 
       return results.sort((a, b) => b.weight - a.weight).slice(0, limit);
-    },
-
-    /**
-     * Transitive dependency query via BFS with adjacency index.
-     * O(V + E_reachable) instead of O(V * E_total).
-     * @internal
-     */
-    _queryTransitive(
-      entityId: string,
-      direction: 'upstream' | 'downstream' | 'both',
-      maxDepth: number,
-      query: DependencyQuery
-    ): DependencyEdge[] {
-      const visited = new Set<string>();
-      const result: DependencyEdge[] = [];
-      const queue: Array<{ id: string; depth: number }> = [{ id: entityId, depth: 0 }];
-      const minWeight = query.minWeight ?? 0.05;
-      const limit = query.limit ?? 100;
-
-      visited.add(entityId);
-
-      while (queue.length > 0 && result.length < limit) {
-        const { id, depth } = queue.shift()!;
-        if (depth >= maxDepth) continue;
-
-        // Upstream: follow outbound edges (source → target)
-        if (direction === 'upstream' || direction === 'both') {
-          for (const edge of _getOutbound(id)) {
-            if (!_matchesFilters(edge, query.knowledgeDomain, query.dependencyTypes, minWeight)) continue;
-            if (visited.has(edge.targetId)) continue;
-            visited.add(edge.targetId);
-            result.push(edge);
-            queue.push({ id: edge.targetId, depth: depth + 1 });
-          }
-        }
-
-        // Downstream: follow inbound edges (target ← source)
-        if (direction === 'downstream' || direction === 'both') {
-          for (const edge of _getInbound(id)) {
-            if (!_matchesFilters(edge, query.knowledgeDomain, query.dependencyTypes, minWeight)) continue;
-            if (visited.has(edge.sourceId)) continue;
-            visited.add(edge.sourceId);
-            result.push(edge);
-            queue.push({ id: edge.sourceId, depth: depth + 1 });
-          }
-        }
-      }
-
-      return result.sort((a, b) => b.weight - a.weight).slice(0, limit);
     },
 
     // ── Impact Analysis (bidirectional BFS with adjacency index) ──────

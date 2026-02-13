@@ -262,17 +262,17 @@ export function createLLMTrainingPipeline(config: LLMTrainingPipelineConfig) {
    */
   function verifyPrediction(
     chain: { source: string; target: string; effectSize: number; pValue?: number; metric: string },
-    allChains: typeof pack.causalChains extends (infer U)[] ? U[] : never[],
+    allChains: Array<{ source: string; target: string; effectSize: number; pValue?: number; metric: string }>,
   ): { wasCorrect: boolean; verificationMethod: string; verificationScore: number } {
     let score = 0;
     let checks = 0;
     const methods: string[] = [];
 
     // Check 1: Consistency — do other chains reference the same edge direction?
-    const sameEdge = allChains.filter(c =>
+    const sameEdge = allChains.filter((c: { source: string; target: string }) =>
       c.source === chain.source && c.target === chain.target && c !== chain
     );
-    const reverseEdge = allChains.filter(c =>
+    const reverseEdge = allChains.filter((c: { source: string; target: string }) =>
       c.source === chain.target && c.target === chain.source
     );
     if (sameEdge.length > 0) {
