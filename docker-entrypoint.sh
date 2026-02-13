@@ -34,9 +34,15 @@ case "${BRAIN_PROCESS}" in
     echo "  GitHub Token: ${GITHUB_TOKEN:+YES}${GITHUB_TOKEN:-NO}"
     exec pnpm exec tsx scripts/git-code-trainer-runner.ts
     ;;
+  cost-agent)
+    echo "Starting Cost Agent..."
+    echo "  Mode: ${COST_AGENT_MODE:-once}"
+    echo "  Lookback: ${COST_LOOKBACK_DAYS:-30} days"
+    exec pnpm exec tsx scripts/cost-agent-runner.ts
+    ;;
   *)
     echo "ERROR: Unknown BRAIN_PROCESS '${BRAIN_PROCESS}'"
-    echo "Valid values: trainer, consolidation, dmn, benchmark, git-trainer"
+    echo "Valid values: trainer, consolidation, dmn, benchmark, git-trainer, cost-agent"
     exit 1
     ;;
 esac

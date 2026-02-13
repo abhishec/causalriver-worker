@@ -1,11 +1,12 @@
 /**
- * Domain Action Engine V4 — Motor Cortex + Decision Intelligence (CTO-Grade)
- * ==========================================================================
+ * Domain Action Engine V5 — Motor Cortex + Decision Intelligence + Hands + Workforce + Calibration
+ * ================================================================================================
  *
  * Brain Analog: The Motor Cortex translates frontal lobe intentions into
  * coordinated muscle movements. V4 adds the Anterior Cingulate Cortex (ACC)
  * — the brain region that monitors its OWN reasoning, detects errors, and
- * decides "should I trust myself?"
+ * decides "should I trust myself?" V5 adds the Cerebellum (error correction),
+ * Basal Ganglia (action selection), and Primary Motor Cortex (actual execution).
  *
  * V2 (6 gaps): +LLM narratives, +horizon detection, +multi-domain forecast,
  *              +confidence gates, +composite actions, +rich explain/diagnose
@@ -14,12 +15,17 @@
  * V4 (4 gaps): +meta-cognitive self-assessment, +counterfactual analysis,
  *              +adaptive playbooks, +decision journals
  *              ("The Brain That Thinks About Thinking")
+ * V5 (3 pillars): +motor command engine (brain can ACT through connectors),
+ *                 +agent registry (Manus-style composable agent workforce),
+ *                 +calibration feedback loop (prediction→outcome→recalibration)
+ *                 ("The Brain That Thinks, Plans, Acts, and Learns From Mistakes")
  *
- * Architecture (V4):
+ * Architecture (V5):
  *   User Intent → Smart Router → [Horizon Parser] → [Composite Detector]
- *     → Execution Module(s) → [Confidence Gate] → [LLM Narrator]
- *     → [V3: Playbook + Contract] → [V4: Meta-Cognition + Counterfactuals
- *     + Adaptive Layer + Decision Journal + LLM Decision Intelligence]
+ *     → Execution Module(s) → [Confidence Gate] → [Calibration Recalibration]
+ *     → [LLM Narrator] → [V3: Playbook + Contract]
+ *     → [V4: Meta-Cognition + Counterfactuals + Adaptive Layer + Decision Journal]
+ *     → [V5: Motor Commands + Calibration Tracking]
  *     → ActionArtifact
  *
  * @packageDocumentation
@@ -40,6 +46,8 @@ import { createTemporalForecaster } from '../causality/temporal-forecaster';
 import { createWhatIfSimulator } from './whatif-simulator';
 import { createExplanationGenerator } from '../causality/explanation-generator';
 import { createBrainAmplifier } from './llm-brain-amplifier';
+import { createMotorCommandEngine, type MotorCommandEngine, type InterventionToCommandMapping, type BatchExecutionResult } from './motor-command-engine';
+import { createCalibrationFeedbackLoop, type CalibrationFeedbackLoop } from './calibration-feedback-loop';
 
 // ============================================================================
 // TYPES
@@ -97,6 +105,19 @@ export interface ActionArtifact {
   adaptiveLayer: AdaptiveLayer | null;
   /** V4: Decision journal entry — logged for future calibration and learning */
   decisionJournal: DecisionJournalEntry | null;
+  /** V5: Motor commands — structured executable actions derived from playbook */
+  motorCommands: InterventionToCommandMapping[] | null;
+  /** V5: Calibration status — brain's historical accuracy for this domain/action type */
+  calibrationStatus: {
+    /** Was the confidence recalibrated based on historical accuracy? */
+    recalibrated: boolean;
+    /** Original raw confidence before recalibration */
+    rawConfidence: number;
+    /** Adjustment factor applied (1.0 = no adjustment) */
+    adjustmentFactor: number;
+    /** Reason for adjustment (or "no adjustment") */
+    reason: string;
+  } | null;
 }
 
 export interface ForecastArtifact {
@@ -521,6 +542,10 @@ export interface DomainActionEngineConfig {
   maxRelatedForecasts?: number;
   /** V2: LLM amplifier config (optional — enables Claude narrative layer) */
   amplifierConfig?: BrainAmplifierConfig;
+  /** V5: Enable motor command generation from playbook interventions */
+  enableMotorCommands?: boolean;
+  /** V5: Enable calibration feedback loop for confidence recalibration */
+  enableCalibration?: boolean;
   verbose?: boolean;
 }
 
@@ -616,6 +641,8 @@ export function createDomainActionEngine(config: DomainActionEngineConfig) {
     confidenceThreshold = DEFAULT_CONFIDENCE_THRESHOLD,
     maxRelatedForecasts = DEFAULT_MAX_RELATED_FORECASTS,
     amplifierConfig,
+    enableMotorCommands = true,
+    enableCalibration = true,
     verbose = false,
   } = config;
 
@@ -647,6 +674,18 @@ export function createDomainActionEngine(config: DomainActionEngineConfig) {
 
   const amplifier = amplifierConfig
     ? createBrainAmplifier(amplifierConfig)
+    : null;
+
+  // ── V5: Motor Command Engine (converts playbook → executable commands) ──
+
+  const motorCommandEngine: MotorCommandEngine | null = enableMotorCommands
+    ? createMotorCommandEngine({ verbose })
+    : null;
+
+  // ── V5: Calibration Feedback Loop (prediction → outcome → recalibration) ──
+
+  const calibrationLoop: CalibrationFeedbackLoop | null = enableCalibration
+    ? createCalibrationFeedbackLoop({ verbose })
     : null;
 
   // ── Execution Context Loader (lazy, cached per request) ──────────────
@@ -975,6 +1014,8 @@ export function createDomainActionEngine(config: DomainActionEngineConfig) {
       counterfactuals: null,
       adaptiveLayer: null,
       decisionJournal: null,
+      motorCommands: null,
+      calibrationStatus: null,
       metadata: {
         modulesUsed: ['temporal-forecaster', 'context-aware-reasoner'],
         dagNodeCount: dag.nodes.size,
@@ -1030,6 +1071,8 @@ export function createDomainActionEngine(config: DomainActionEngineConfig) {
       counterfactuals: null,
       adaptiveLayer: null,
       decisionJournal: null,
+      motorCommands: null,
+      calibrationStatus: null,
       metadata: {
         modulesUsed: ['whatif-simulator'],
         dagNodeCount: dag.nodes.size,
@@ -1136,6 +1179,8 @@ export function createDomainActionEngine(config: DomainActionEngineConfig) {
       counterfactuals: null,
       adaptiveLayer: null,
       decisionJournal: null,
+      motorCommands: null,
+      calibrationStatus: null,
       metadata: {
         modulesUsed: ['context-aware-reasoner', 'explanation-generator'],
         dagNodeCount: dag.nodes.size,
@@ -1208,6 +1253,8 @@ export function createDomainActionEngine(config: DomainActionEngineConfig) {
       counterfactuals: null,
       adaptiveLayer: null,
       decisionJournal: null,
+      motorCommands: null,
+      calibrationStatus: null,
       metadata: {
         modulesUsed: ['context-aware-reasoner', 'explanation-generator'],
         dagNodeCount: dag.nodes.size,
@@ -1302,6 +1349,8 @@ export function createDomainActionEngine(config: DomainActionEngineConfig) {
       counterfactuals: null,
       adaptiveLayer: null,
       decisionJournal: null,
+      motorCommands: null,
+      calibrationStatus: null,
       metadata: {
         modulesUsed: Array.from(modulesUsed),
         dagNodeCount: dag.nodes.size,
@@ -2546,7 +2595,53 @@ export function createDomainActionEngine(config: DomainActionEngineConfig) {
       // V4: Build Decision Journal Entry
       const decisionJournal = buildDecisionJournalEntry(question, artifact, playbook, metaCognition);
 
-      // V3 + V4: Attach everything to artifact
+      // V5: Generate Motor Commands from Playbook
+      let motorCommands: InterventionToCommandMapping[] | null = null;
+      if (motorCommandEngine && playbook && playbook.interventions.length > 0) {
+        try {
+          motorCommands = motorCommandEngine.playbookToCommands(playbook, artifact.actionType);
+          log(`V5 Motor Commands: ${motorCommands.length} commands generated from ${playbook.interventions.length} interventions`);
+        } catch (err) {
+          log('V5 Motor command generation failed (graceful degradation):', err);
+        }
+      }
+
+      // V5: Calibration — recalibrate confidence based on historical accuracy
+      let calibrationStatus: ActionArtifact['calibrationStatus'] = null;
+      if (calibrationLoop) {
+        try {
+          const recal = calibrationLoop.recalibrateConfidence(
+            artifact.confidence, domain, actionType,
+          );
+          calibrationStatus = {
+            recalibrated: recal.adjustmentApplied,
+            rawConfidence: artifact.confidence,
+            adjustmentFactor: recal.adjustmentApplied ? recal.calibratedConfidence / artifact.confidence : 1,
+            reason: recal.reason,
+          };
+          // If recalibrated, update the artifact's confidence
+          if (recal.adjustmentApplied) {
+            artifact = {
+              ...artifact,
+              confidence: recal.calibratedConfidence,
+            };
+            log(`V5 Calibration: ${domain}/${actionType} confidence ${(calibrationStatus.rawConfidence * 100).toFixed(0)}% → ${(recal.calibratedConfidence * 100).toFixed(0)}%`);
+          }
+        } catch (err) {
+          log('V5 Calibration recalibration failed (using raw confidence):', err);
+        }
+
+        // Record this prediction for future calibration
+        if (decisionJournal) {
+          try {
+            calibrationLoop.recordPrediction(decisionJournal);
+          } catch (err) {
+            log('V5 Calibration prediction recording failed:', err);
+          }
+        }
+      }
+
+      // V3 + V4 + V5: Attach everything to artifact
       artifact = {
         ...artifact,
         playbook,
@@ -2555,6 +2650,8 @@ export function createDomainActionEngine(config: DomainActionEngineConfig) {
         counterfactuals,
         adaptiveLayer,
         decisionJournal,
+        motorCommands,
+        calibrationStatus,
       };
 
       return artifact;
@@ -2594,6 +2691,8 @@ export function createDomainActionEngine(config: DomainActionEngineConfig) {
         counterfactuals: null,
         adaptiveLayer: null,
         decisionJournal: null,
+        motorCommands: null,
+        calibrationStatus: null,
       };
     }
   }
@@ -2783,6 +2882,10 @@ export function createDomainActionEngine(config: DomainActionEngineConfig) {
     parseHorizonFromQuestion: (q: string) => parseHorizonFromQuestion(q),
     /** Clear DAG + time series cache (called after consolidation) */
     invalidateCache,
+    /** V5: Motor Command Engine instance (for connector registration) */
+    motorCommandEngine,
+    /** V5: Calibration Feedback Loop instance (for outcome recording) */
+    calibrationLoop,
   };
 }
 
@@ -2861,6 +2964,16 @@ export function formatArtifactForPrompt(artifact: ActionArtifact): string {
   // V4: Include adaptive layer in prompt
   if (artifact.adaptiveLayer) {
     formatAdaptiveLayerForPrompt(artifact.adaptiveLayer, parts);
+  }
+
+  // V5: Include motor commands summary in prompt
+  if (artifact.motorCommands && artifact.motorCommands.length > 0) {
+    formatMotorCommandsForPrompt(artifact.motorCommands, parts);
+  }
+
+  // V5: Include calibration status in prompt
+  if (artifact.calibrationStatus) {
+    formatCalibrationStatusForPrompt(artifact.calibrationStatus, parts);
   }
 
   return parts.join('\n');
@@ -3205,5 +3318,49 @@ function formatAdaptiveLayerForPrompt(al: AdaptiveLayer, parts: string[]): void 
       parts.push(`  Phase ${lq.phase}: ${lq.question}`);
       parts.push(`    Current assumption: ${lq.currentAssumption}`);
     }
+  }
+}
+
+// ── V5: Motor Commands Prompt Formatting ────────────────────────────────
+
+function formatMotorCommandsForPrompt(commands: InterventionToCommandMapping[], parts: string[]): void {
+  parts.push('');
+  parts.push(`## ⚡ MOTOR COMMANDS (Executable Actions)`);
+
+  const mapped = commands.filter(c => c.command && c.command.actionType !== 'custom');
+  const unmapped = commands.filter(c => !c.command || c.command.actionType === 'custom');
+  const connectorReady = commands.filter(c => c.connectorAvailable);
+
+  parts.push(`Total: ${commands.length} | Mapped: ${mapped.length} | Connector-Ready: ${connectorReady.length} | Unmapped: ${unmapped.length}`);
+  parts.push('');
+
+  for (const cmd of commands.slice(0, 6)) {
+    if (cmd.command) {
+      const status = cmd.connectorAvailable ? '✅' : '⏳';
+      parts.push(`  ${status} ${cmd.command.actionType} → ${cmd.command.target} [${cmd.command.approvalMode}] (confidence: ${(cmd.command.confidence * 100).toFixed(0)}%)`);
+      parts.push(`    From: "${cmd.interventionAction.slice(0, 80)}"`);
+    } else {
+      parts.push(`  ❌ Unmapped: "${cmd.interventionAction.slice(0, 80)}"`);
+      parts.push(`    Reason: ${cmd.mappingReason}`);
+    }
+  }
+  if (commands.length > 6) {
+    parts.push(`  ... and ${commands.length - 6} more commands`);
+  }
+}
+
+// ── V5: Calibration Status Prompt Formatting ────────────────────────────
+
+function formatCalibrationStatusForPrompt(
+  status: NonNullable<ActionArtifact['calibrationStatus']>,
+  parts: string[],
+): void {
+  parts.push('');
+  parts.push(`## 📊 CONFIDENCE CALIBRATION`);
+  if (status.recalibrated) {
+    parts.push(`Recalibrated: ${(status.rawConfidence * 100).toFixed(0)}% → ${(status.rawConfidence * status.adjustmentFactor * 100).toFixed(0)}% (factor: ${status.adjustmentFactor.toFixed(2)})`);
+    parts.push(`Reason: ${status.reason}`);
+  } else {
+    parts.push(`Status: Using raw confidence (${status.reason})`);
   }
 }

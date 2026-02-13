@@ -547,10 +547,11 @@ export {
   type SimulationIntervention,
 } from './orchestrator/whatif-simulator';
 
-// Domain Action Engine V4 ("Motor Cortex") — intent-to-execution routing
+// Domain Action Engine V5 ("Motor Cortex") — intent-to-execution routing
 // V2: +LLM narratives, +smart horizon, +multi-domain, +confidence gates, +composite
 // V3: +execution playbooks, +outcome contracts, +Monday morning actions, +strategic interventions
 // V4: +meta-cognition, +counterfactual analysis, +adaptive playbooks, +decision journals
+// V5: +motor commands, +agent registry, +calibration feedback loop
 export {
   createDomainActionEngine,
   formatArtifactForPrompt,
@@ -584,6 +585,54 @@ export {
   type LearningQuestion,
   type DecisionGate,
 } from './orchestrator/domain-action-engine';
+
+// Motor Command Engine V1 ("Primary Motor Cortex") — brain can ACT through connectors
+// Converts playbook interventions into structured executable commands (Slack, Jira, GitHub, API)
+export {
+  createMotorCommandEngine,
+  createConnectorRegistry,
+  type MotorCommand,
+  type MotorActionType,
+  type MotorCommandResult,
+  type ConnectorCapability,
+  type ConnectorRegistry,
+  type MotorCommandEngineConfig,
+  type BatchExecutionResult,
+  type InterventionToCommandMapping,
+  type MotorCommandEngine,
+} from './orchestrator/motor-command-engine';
+
+// Agent Registry V1 ("Basal Ganglia") — Manus-style open agent architecture
+// 5-line agent creation, composable agents, self-registering, 3-level hierarchy
+export {
+  defineAgent,
+  createAgentRegistry,
+  type AgentLevel,
+  type AgentRunStatus,
+  type AgentTrigger,
+  type AgentDefinition,
+  type AgentExecutionContext,
+  type AgentRunResult as AgentRegistryRunResult,
+  type RegisteredAgent,
+  type AgentRegistryConfig,
+  type AgentRegistry as AgentRegistryInstance,
+} from './orchestrator/agent-registry';
+
+// Calibration Feedback Loop V1 ("Cerebellum") — prediction→outcome→recalibration
+// Tracks brain predictions, compares to outcomes, computes calibration metrics
+export {
+  createCalibrationFeedbackLoop,
+  type CalibrationPrediction,
+  type CalibrationOutcome,
+  type CalibrationMetrics,
+  type CalibrationBucket as CalibrationFeedbackBucket,
+  type DomainCalibration,
+  type ActionTypeCalibration,
+  type RecalibrationAdjustment,
+  type LearningVelocity as CalibrationLearningVelocity,
+  type CalibrationFeedbackLoopConfig,
+  type CalibrationFeedbackLoop,
+} from './orchestrator/calibration-feedback-loop';
 
 // Brain Context Builder — Universal Prefrontal Cortex ("Working Memory Assembly")
 // Assembles context from ALL brain regions + trained knowledge into LLM-ready prompts.

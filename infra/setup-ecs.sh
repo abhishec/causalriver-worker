@@ -417,6 +417,50 @@ TASKDEF
 aws ecs register-task-definition --cli-input-json file:///tmp/task-git-trainer.json --region "${REGION}" > /dev/null
 echo "    Registered: nexusbrain-git-trainer (2 vCPU, 8GB)"
 
+# --- Cost Agent Task Definition ---
+# Autonomous cost monitoring: LLM costs, AWS costs, budget enforcement, anomaly detection
+# 0.5 vCPU, 1GB RAM (lightweight — mostly Supabase queries + optional AWS Cost Explorer call)
+# Daily schedule (3 AM UTC) — also supports manual trigger via: ./infra/run-task.sh cost-agent
+cat > /tmp/task-cost-agent.json << TASKDEF
+{
+  "family": "nexusbrain-cost-agent",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "512",
+  "memory": "1024",
+  "executionRoleArn": "${EXEC_ROLE_ARN}",
+  "taskRoleArn": "${EXEC_ROLE_ARN}",
+  "containerDefinitions": [
+    {
+      "name": "brain-cost-agent",
+      "image": "${ECR_IMAGE}",
+      "essential": true,
+      "environment": [
+        { "name": "BRAIN_PROCESS", "value": "cost-agent" },
+        { "name": "COST_AGENT_MODE", "value": "once" },
+        { "name": "COST_LOOKBACK_DAYS", "value": "30" }
+      ],
+      "secrets": [
+        { "name": "SUPABASE_URL", "valueFrom": "arn:aws:ssm:${REGION}:${ACCOUNT_ID}:parameter/nexusbrain/SUPABASE_URL" },
+        { "name": "SUPABASE_SERVICE_ROLE_KEY", "valueFrom": "arn:aws:ssm:${REGION}:${ACCOUNT_ID}:parameter/nexusbrain/SUPABASE_SERVICE_ROLE_KEY" }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "${LOG_GROUP}",
+          "awslogs-region": "${REGION}",
+          "awslogs-stream-prefix": "cost-agent"
+        }
+      },
+      "stopTimeout": 60
+    }
+  ]
+}
+TASKDEF
+
+aws ecs register-task-definition --cli-input-json file:///tmp/task-cost-agent.json --region "${REGION}" > /dev/null
+echo "    Registered: nexusbrain-cost-agent (0.5 vCPU, 1GB)"
+
 # ─── Step 8: Create EventBridge Scheduled Rules ──────────────────
 echo ""
 echo ">>> Step 8: Creating EventBridge Scheduled Rules..."
@@ -575,6 +619,43 @@ aws events put-targets \
   --region "${REGION}" > /dev/null
 echo "    Git Trainer: Weekly Sunday at 2:00 AM UTC"
 
+# --- Cost Agent: Daily at 3 AM UTC (after consolidation at 2 AM) ---
+aws events put-rule \
+  --name "nexusbrain-cost-agent-schedule" \
+  --schedule-expression "cron(0 3 * * ? *)" \
+  --state ENABLED \
+  --description "Run NexusBrain cost agent daily at 3 AM UTC" \
+  --region "${REGION}" > /dev/null
+
+cat > /tmp/target-cost-agent.json << TARGET
+[
+  {
+    "Id": "nexusbrain-cost-agent-target",
+    "Arn": "arn:aws:ecs:${REGION}:${ACCOUNT_ID}:cluster/${CLUSTER_NAME}",
+    "RoleArn": "${EVENTS_ROLE_ARN}",
+    "EcsParameters": {
+      "TaskDefinitionArn": "arn:aws:ecs:${REGION}:${ACCOUNT_ID}:task-definition/nexusbrain-cost-agent",
+      "TaskCount": 1,
+      "LaunchType": "FARGATE",
+      "NetworkConfiguration": {
+        "awsvpcConfiguration": {
+          "Subnets": ["${SUBNET1}", "${SUBNET2}"],
+          "SecurityGroups": ["${SG_ID}"],
+          "AssignPublicIp": "ENABLED"
+        }
+      },
+      "PlatformVersion": "LATEST"
+    }
+  }
+]
+TARGET
+
+aws events put-targets \
+  --rule "nexusbrain-cost-agent-schedule" \
+  --targets file:///tmp/target-cost-agent.json \
+  --region "${REGION}" > /dev/null
+echo "    Cost Agent: Daily at 3:00 AM UTC"
+
 # ─── Done ─────────────────────────────────────────────────────────
 echo ""
 echo "============================================"
@@ -589,6 +670,7 @@ echo "  4. Test consolidation: ./infra/run-task.sh consolidation"
 echo "  5. Test DMN scan:    ./infra/run-task.sh dmn"
 echo "  6. Run benchmark:    ./infra/run-task.sh benchmark"
 echo "  7. Run git trainer:  ./infra/run-task.sh git-trainer"
+echo "  8. Run cost agent:   ./infra/run-task.sh cost-agent"
 echo ""
 echo "View logs:"
 echo "  aws logs tail ${LOG_GROUP} --follow --region ${REGION}"
