@@ -1127,6 +1127,9 @@ export async function POST(request: NextRequest) {
         const engine = createDomainActionEngine({
           supabase,
           organizationId: orgId,
+          amplifierConfig: process.env.ANTHROPIC_API_KEY
+            ? { provider: "anthropic" as const, apiKey: process.env.ANTHROPIC_API_KEY }
+            : undefined,
         });
 
         // Build lightweight ActionKnowledgeContext from already-fetched DB data
@@ -1220,12 +1223,19 @@ export async function POST(request: NextRequest) {
         if (actionArtifact) {
           const { __promptText, ...cleanArtifact } = actionArtifact;
           send(JSON.stringify({ artifact: cleanArtifact }));
+          // V3: Send playbook and outcome contract as separate events
+          if (cleanArtifact.playbook) {
+            send(JSON.stringify({ playbook: cleanArtifact.playbook }));
+          }
+          if (cleanArtifact.outcomeContract) {
+            send(JSON.stringify({ outcomeContract: cleanArtifact.outcomeContract }));
+          }
         }
 
         // Augment system prompt with REAL computed data from brain modules
         const effectiveSystemPrompt = actionArtifact?.__promptText
           ? systemPrompt +
-            "\n\n## COMPUTED DATA (use these REAL numbers in your response — do NOT invent data)\n" +
+            "\n\n## COMPUTED DATA + EXECUTION PLAYBOOK (use these REAL numbers and recommended actions — do NOT invent data)\n" +
             String(actionArtifact.__promptText)
           : systemPrompt;
 

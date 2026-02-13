@@ -94,6 +94,10 @@ export interface ActionArtifact {
     /** V2: Horizon source */
     horizonSource: 'parsed' | 'default' | 'override';
   };
+  /** V3: Execution playbook — what to actually DO about the findings */
+  playbook: ExecutionPlaybook | null;
+  /** V3: Outcome contract — what this artifact guarantees */
+  outcomeContract: OutcomeContract;
 }
 
 export interface ForecastArtifact {
@@ -183,6 +187,124 @@ export interface CompositeArtifact {
     simulation: number;
     explanation: number;
   };
+}
+
+// ============================================================================
+// V3: EXECUTION PLAYBOOK + OUTCOME CONTRACT ("Closed Fist")
+// ============================================================================
+
+/** V3: The execution playbook — what to actually DO about the brain's findings.
+ *  Converts statistical insights into phased, actionable plans with owners,
+ *  KPIs, milestones, and risk mitigations. */
+export interface ExecutionPlaybook {
+  /** Executive summary: 1-2 sentence "here's what to do" */
+  executiveSummary: string;
+  /** The single most important action to take RIGHT NOW */
+  mondayMorningAction: string;
+  /** Strategic interventions ranked by expected impact */
+  interventions: StrategicIntervention[];
+  /** Phased execution plan with milestones */
+  phases: PlaybookPhase[];
+  /** Risks and mitigations */
+  risks: PlaybookRisk[];
+  /** How to know if the plan is working */
+  successMetrics: PlaybookKPI[];
+  /** Confidence in the playbook (0-1) */
+  confidence: number;
+  /** Whether this playbook was LLM-generated (true) or template-generated (false) */
+  isLLMGenerated: boolean;
+}
+
+/** A specific, actionable intervention derived from brain computation */
+export interface StrategicIntervention {
+  /** What to do (1-2 sentences, specific) */
+  action: string;
+  /** Which domain(s) this targets */
+  targetDomains: string[];
+  /** Expected impact (e.g., "+18% revenue", "-25% churn") */
+  expectedImpact: string;
+  /** Time to see results */
+  timeToImpactDays: number;
+  /** Which team/role owns this */
+  owner: string;
+  /** Estimated effort/cost */
+  effort: 'low' | 'medium' | 'high';
+  /** Confidence in this intervention (0-1) */
+  confidence: number;
+  /** What brain evidence supports this */
+  evidence: string;
+}
+
+/** A phase in the execution plan */
+export interface PlaybookPhase {
+  /** Phase name (e.g., "Immediate (Week 1)") */
+  name: string;
+  /** Phase number (1-based) */
+  phase: number;
+  /** Relative timeline */
+  timeframe: string;
+  /** What to accomplish in this phase */
+  activities: string[];
+  /** Milestones that gate moving to next phase */
+  milestones: PlaybookMilestone[];
+  /** Dependencies on other phases or external factors */
+  dependencies: string[];
+}
+
+/** A checkpoint within a phase */
+export interface PlaybookMilestone {
+  /** What to check */
+  milestone: string;
+  /** How to measure success */
+  criteria: string;
+  /** Who verifies */
+  owner: string;
+}
+
+/** An identified risk with mitigation strategy */
+export interface PlaybookRisk {
+  /** What could go wrong */
+  risk: string;
+  /** How bad (impact × probability) */
+  severity: 'critical' | 'high' | 'medium' | 'low';
+  /** What to do about it */
+  mitigation: string;
+  /** Fallback if mitigation fails */
+  contingency: string;
+}
+
+/** A KPI to track whether the plan is working */
+export interface PlaybookKPI {
+  /** Metric name */
+  metric: string;
+  /** Current value (from brain data) */
+  currentValue: string;
+  /** Target value */
+  targetValue: string;
+  /** When to measure */
+  measureBy: string;
+  /** Which domain this tracks */
+  domain: string;
+}
+
+/** V3: Outcome Contract — what this artifact guarantees to deliver */
+export interface OutcomeContract {
+  /** What was asked */
+  question: string;
+  /** What was delivered */
+  deliveredOutcome: string;
+  /** What type of deliverable this is */
+  deliverableType: 'forecast_model' | 'scenario_analysis' | 'causal_explanation' | 'root_cause_diagnosis' | 'comprehensive_model' | 'execution_playbook';
+  /** Whether we delivered fully, partially, or couldn't */
+  fulfillment: 'full' | 'partial' | 'insufficient_data';
+  /** If partial/insufficient, why */
+  gaps?: string[];
+  /** What data would be needed to improve */
+  dataNeeded?: string[];
+  /** Brain modules that contributed */
+  modulesUsed: string[];
+  /** Was this from real brain data or fallback? */
+  computedFromRealData: boolean;
 }
 
 // ── Lightweight Knowledge Context ──────────────────────────────────────
@@ -662,6 +784,8 @@ export function createDomainActionEngine(config: DomainActionEngineConfig) {
       confidenceGated: false,
       durationMs: Date.now() - start,
       horizonDays,
+      playbook: null,
+      outcomeContract: null as unknown as OutcomeContract, // Set by execute()
       metadata: {
         modulesUsed: ['temporal-forecaster', 'context-aware-reasoner'],
         dagNodeCount: dag.nodes.size,
@@ -711,6 +835,8 @@ export function createDomainActionEngine(config: DomainActionEngineConfig) {
       confidenceGated: false,
       durationMs: Date.now() - start,
       horizonDays,
+      playbook: null,
+      outcomeContract: null as unknown as OutcomeContract, // Set by execute()
       metadata: {
         modulesUsed: ['whatif-simulator'],
         dagNodeCount: dag.nodes.size,
@@ -811,6 +937,8 @@ export function createDomainActionEngine(config: DomainActionEngineConfig) {
       confidenceGated: false,
       durationMs: Date.now() - start,
       horizonDays,
+      playbook: null,
+      outcomeContract: null as unknown as OutcomeContract, // Set by execute()
       metadata: {
         modulesUsed: ['context-aware-reasoner', 'explanation-generator'],
         dagNodeCount: dag.nodes.size,
@@ -877,6 +1005,8 @@ export function createDomainActionEngine(config: DomainActionEngineConfig) {
       confidenceGated: false,
       durationMs: Date.now() - start,
       horizonDays,
+      playbook: null,
+      outcomeContract: null as unknown as OutcomeContract, // Set by execute()
       metadata: {
         modulesUsed: ['context-aware-reasoner', 'explanation-generator'],
         dagNodeCount: dag.nodes.size,
@@ -965,6 +1095,8 @@ export function createDomainActionEngine(config: DomainActionEngineConfig) {
       confidenceGated: false,
       durationMs: Date.now() - start,
       horizonDays,
+      playbook: null,
+      outcomeContract: null as unknown as OutcomeContract, // Set by execute()
       metadata: {
         modulesUsed: Array.from(modulesUsed),
         dagNodeCount: dag.nodes.size,
@@ -978,6 +1110,520 @@ export function createDomainActionEngine(config: DomainActionEngineConfig) {
         horizonSource,
       },
     };
+  }
+
+  // ── V3: Outcome Contract Builder ──────────────────────────────────────
+
+  function buildOutcomeContract(
+    question: string,
+    artifact: { actionType: ActionType; domain: string; confidence: number; confidenceGated: boolean; metadata: ActionArtifact['metadata'] },
+  ): OutcomeContract {
+    const deliverableTypeMap: Record<ActionType, OutcomeContract['deliverableType']> = {
+      forecast: 'forecast_model',
+      simulate: 'scenario_analysis',
+      explain: 'causal_explanation',
+      diagnose: 'root_cause_diagnosis',
+      composite: 'comprehensive_model',
+    };
+
+    let fulfillment: OutcomeContract['fulfillment'];
+    const gaps: string[] = [];
+    const dataNeeded: string[] = [];
+
+    if (artifact.confidence >= 0.5) {
+      fulfillment = 'full';
+    } else if (artifact.confidence >= confidenceThreshold) {
+      fulfillment = 'partial';
+      if (artifact.confidence < 0.35) {
+        gaps.push(`Confidence is ${(artifact.confidence * 100).toFixed(0)}% — moderate but could improve with more signal data`);
+      }
+      if (artifact.metadata.dagEdgeCount < 10) {
+        gaps.push(`Causal graph has only ${artifact.metadata.dagEdgeCount} edges — more domain training would strengthen results`);
+        dataNeeded.push('Additional cross-domain signal data to strengthen the causal graph');
+      }
+      if (artifact.metadata.timeSeriesDomainsLoaded < 5) {
+        gaps.push(`Only ${artifact.metadata.timeSeriesDomainsLoaded} time series domains available — broader coverage would improve forecasts`);
+        dataNeeded.push('Time series data from more business domains');
+      }
+    } else {
+      fulfillment = 'insufficient_data';
+      gaps.push(`Confidence is ${(artifact.confidence * 100).toFixed(0)}% — below ${(confidenceThreshold * 100).toFixed(0)}% threshold`);
+      if (artifact.metadata.dagEdgeCount === 0) {
+        gaps.push('No causal edges found — the brain has no learned relationships for this domain');
+        dataNeeded.push('Train the brain with domain-specific data packs');
+      }
+      if (artifact.metadata.timeSeriesDomainsLoaded === 0) {
+        gaps.push('No time series data available for forecasting');
+        dataNeeded.push('Ingest cross-domain signals (connect data sources or upload CSV)');
+      }
+      dataNeeded.push(`More signal data for the "${artifact.domain}" domain`);
+    }
+
+    return {
+      question,
+      deliveredOutcome: fulfillment === 'full'
+        ? `Complete ${artifact.actionType} analysis of ${artifact.domain} with ${(artifact.confidence * 100).toFixed(0)}% confidence`
+        : fulfillment === 'partial'
+          ? `Partial ${artifact.actionType} analysis of ${artifact.domain} — results available but confidence is limited`
+          : `Unable to produce reliable ${artifact.actionType} for ${artifact.domain} — insufficient signal data`,
+      deliverableType: deliverableTypeMap[artifact.actionType],
+      fulfillment,
+      ...(gaps.length > 0 ? { gaps } : {}),
+      ...(dataNeeded.length > 0 ? { dataNeeded } : {}),
+      modulesUsed: artifact.metadata.modulesUsed,
+      computedFromRealData: artifact.metadata.dagNodeCount > 0 && artifact.metadata.timeSeriesDomainsLoaded > 0,
+    };
+  }
+
+  // ── V3: Template Playbook Builder ──────────────────────────────────────
+
+  function buildTemplatePlaybook(
+    artifact: ActionArtifact,
+    question: string,
+  ): ExecutionPlaybook {
+    const { domain, actionType, confidence, horizonDays } = artifact;
+    const confidencePct = (confidence * 100).toFixed(0);
+
+    // ── Build interventions from artifact data ──
+    const interventions: StrategicIntervention[] = [];
+
+    if (artifact.data.type === 'forecast') {
+      const fd = artifact.data as ForecastArtifact;
+      for (const driver of fd.drivers.slice(0, 3)) {
+        interventions.push({
+          action: `Optimize ${driver.domain} to improve ${domain} — the brain found a ${(driver.weight * 100).toFixed(0)}% causal influence with ${driver.lagDays}-day lag`,
+          targetDomains: [driver.domain, domain],
+          expectedImpact: `${(driver.contribution * 100).toFixed(0)}% contribution to ${domain} trajectory`,
+          timeToImpactDays: driver.lagDays,
+          owner: mapDomainToOwner(driver.domain),
+          effort: driver.weight > 0.5 ? 'high' : driver.weight > 0.2 ? 'medium' : 'low',
+          confidence: confidence * driver.weight,
+          evidence: `Causal edge: ${driver.domain}→${domain}, weight=${driver.weight.toFixed(2)}, lag=${driver.lagDays}d`,
+        });
+      }
+    }
+
+    if (artifact.data.type === 'simulation') {
+      const sd = artifact.data as SimulationArtifact;
+      for (const iv of sd.interventions.slice(0, 3)) {
+        interventions.push({
+          action: iv.suggestedAction,
+          targetDomains: [iv.domain],
+          expectedImpact: `${(iv.effectiveness * 100).toFixed(0)}% effectiveness if executed within ${iv.windowDays}-day window`,
+          timeToImpactDays: iv.windowDays,
+          owner: mapDomainToOwner(iv.domain),
+          effort: iv.effectiveness > 0.6 ? 'high' : 'medium',
+          confidence: confidence * iv.effectiveness,
+          evidence: `Simulation intervention: window=${iv.windowDays}d, effectiveness=${(iv.effectiveness * 100).toFixed(0)}%`,
+        });
+      }
+    }
+
+    if (artifact.data.type === 'diagnosis') {
+      const dd = artifact.data as DiagnosisArtifact;
+      if (dd.anomalyExplanation?.prescriptiveActions) {
+        for (const pa of dd.anomalyExplanation.prescriptiveActions.slice(0, 3)) {
+          interventions.push({
+            action: pa.action,
+            targetDomains: [pa.targetEdge.source, pa.targetEdge.target],
+            expectedImpact: pa.expectedImpact,
+            timeToImpactDays: 14,
+            owner: mapDomainToOwner(pa.targetEdge.source),
+            effort: 'medium',
+            confidence: pa.confidence,
+            evidence: `Root cause: ${pa.targetEdge.source}→${pa.targetEdge.target}`,
+          });
+        }
+      }
+      for (const rule of dd.triggeredRules.slice(0, 2)) {
+        interventions.push({
+          action: `Address triggered rule: ${rule.title} — ${rule.naturalLanguage}`,
+          targetDomains: [domain],
+          expectedImpact: 'Rule-driven risk mitigation',
+          timeToImpactDays: 7,
+          owner: mapDomainToOwner(domain),
+          effort: 'low',
+          confidence: 0.7,
+          evidence: `Rule fired: ${rule.matchedConditions.join(', ')}`,
+        });
+      }
+    }
+
+    if (artifact.data.type === 'composite') {
+      const cd = artifact.data as CompositeArtifact;
+      // Pull interventions from sub-artifacts
+      if (cd.forecast) {
+        for (const driver of cd.forecast.drivers.slice(0, 2)) {
+          interventions.push({
+            action: `Optimize ${driver.domain} lever — ${(driver.weight * 100).toFixed(0)}% causal influence on ${domain}`,
+            targetDomains: [driver.domain, domain],
+            expectedImpact: `${(driver.contribution * 100).toFixed(0)}% contribution (from forecast)`,
+            timeToImpactDays: driver.lagDays,
+            owner: mapDomainToOwner(driver.domain),
+            effort: 'medium',
+            confidence: cd.confidences.forecast * driver.weight,
+            evidence: `Forecast driver: ${driver.domain}, weight=${driver.weight.toFixed(2)}`,
+          });
+        }
+      }
+      if (cd.simulation) {
+        for (const iv of cd.simulation.interventions.slice(0, 2)) {
+          interventions.push({
+            action: iv.suggestedAction,
+            targetDomains: [iv.domain],
+            expectedImpact: `${(iv.effectiveness * 100).toFixed(0)}% effectiveness (from simulation)`,
+            timeToImpactDays: iv.windowDays,
+            owner: mapDomainToOwner(iv.domain),
+            effort: 'medium',
+            confidence: cd.confidences.simulation * iv.effectiveness,
+            evidence: `Simulation intervention: window=${iv.windowDays}d`,
+          });
+        }
+      }
+    }
+
+    // If explain type and we have no interventions yet, derive from connections
+    if (artifact.data.type === 'explanation' && interventions.length === 0) {
+      const ed = artifact.data as ExplanationArtifact;
+      for (const ua of ed.allUpstreamAnalyses.slice(0, 2)) {
+        if (ua.confidence > 0) {
+          interventions.push({
+            action: `Investigate the ${ua.source}→${ua.target} causal connection — ${ua.executiveSummary.slice(0, 100)}`,
+            targetDomains: [ua.source, ua.target],
+            expectedImpact: `${(ua.confidence * 100).toFixed(0)}% confidence causal path`,
+            timeToImpactDays: 14,
+            owner: mapDomainToOwner(ua.source),
+            effort: 'low',
+            confidence: ua.confidence,
+            evidence: `Connection analysis: ${ua.source}→${ua.target}`,
+          });
+        }
+      }
+      if (ed.explanationChain?.suggestedActions) {
+        for (const sa of ed.explanationChain.suggestedActions.slice(0, 2)) {
+          interventions.push({
+            action: sa,
+            targetDomains: [domain],
+            expectedImpact: 'Causal validation',
+            timeToImpactDays: 7,
+            owner: mapDomainToOwner(domain),
+            effort: 'low',
+            confidence: ed.explanationChain.confidence || 0.5,
+            evidence: 'From explanation chain suggested actions',
+          });
+        }
+      }
+    }
+
+    // ── Build phases ──
+    const phases: PlaybookPhase[] = buildPhasesForActionType(actionType, domain, interventions, horizonDays);
+
+    // ── Build Monday Morning Action ──
+    const mondayMorningAction = buildMondayMorningAction(artifact, interventions);
+
+    // ── Build KPIs ──
+    const successMetrics: PlaybookKPI[] = [{
+      metric: `${domain} confidence score`,
+      currentValue: `${confidencePct}%`,
+      targetValue: confidence < 0.5 ? '50%+' : '75%+',
+      measureBy: `${Math.min(horizonDays, 30)} days`,
+      domain,
+    }];
+
+    if (artifact.data.type === 'forecast') {
+      const fd = artifact.data as ForecastArtifact;
+      if (fd.table.length > 0) {
+        const first = fd.table[0];
+        const last = fd.table[fd.table.length - 1];
+        successMetrics.push({
+          metric: `${domain} forecast trajectory`,
+          currentValue: first.predicted.toFixed(3),
+          targetValue: last.predicted.toFixed(3),
+          measureBy: last.date,
+          domain,
+        });
+      }
+    }
+
+    if (artifact.data.type === 'simulation') {
+      const sd = artifact.data as SimulationArtifact;
+      successMetrics.push({
+        metric: 'Total cascade impact',
+        currentValue: '0%',
+        targetValue: `< ${Math.abs(sd.simulation.totalImpactPercent).toFixed(1)}% (mitigated)`,
+        measureBy: `${horizonDays} days`,
+        domain,
+      });
+    }
+
+    // ── Build risks ──
+    const risks: PlaybookRisk[] = [];
+    if (confidence < 0.5) {
+      risks.push({
+        risk: `Artifact confidence is ${confidencePct}% — results may shift with more data`,
+        severity: confidence < 0.25 ? 'high' : 'medium',
+        mitigation: 'Ingest more signal data and re-run analysis after next consolidation cycle',
+        contingency: 'Use qualitative judgment alongside brain data until confidence improves',
+      });
+    }
+    if (artifact.metadata.dagEdgeCount < 20) {
+      risks.push({
+        risk: `Causal graph has ${artifact.metadata.dagEdgeCount} edges — may miss important relationships`,
+        severity: 'medium',
+        mitigation: 'Train brain with additional domain packs to strengthen the causal graph',
+        contingency: 'Supplement brain analysis with team expertise for uncovered domains',
+      });
+    }
+
+    return {
+      executiveSummary: `${actionType.charAt(0).toUpperCase() + actionType.slice(1)} analysis of ${domain} completed at ${confidencePct}% confidence over ${horizonDays}-day horizon. ${interventions.length > 0 ? `${interventions.length} actionable interventions identified.` : 'Review the analysis to determine next steps.'}`,
+      mondayMorningAction,
+      interventions,
+      phases,
+      risks,
+      successMetrics,
+      confidence: confidence * 0.7, // Template playbooks are less confident than LLM-enriched
+      isLLMGenerated: false,
+    };
+  }
+
+  function mapDomainToOwner(domain: string): string {
+    const ownerMap: Record<string, string> = {
+      finance: 'CFO / Finance Lead',
+      engineering: 'VP Engineering / Tech Lead',
+      marketing: 'VP Marketing / Growth Lead',
+      cs: 'VP Customer Success',
+      product: 'VP Product / PM Lead',
+      people: 'VP People / HR Lead',
+      revenue: 'VP Sales / Revenue Lead',
+      strategy: 'CEO / COO',
+      growth: 'Growth Lead / CEO',
+      macro: 'CFO / Strategy Lead',
+      capex: 'CFO / Finance Lead',
+      risk: 'CFO / Risk Lead',
+      profitability: 'CFO / Finance Lead',
+    };
+    return ownerMap[domain] || `${domain.charAt(0).toUpperCase() + domain.slice(1)} Lead`;
+  }
+
+  function buildPhasesForActionType(
+    actionType: ActionType,
+    domain: string,
+    interventions: StrategicIntervention[],
+    horizonDays: number,
+  ): PlaybookPhase[] {
+    const phases: PlaybookPhase[] = [];
+
+    // Phase 1: Always immediate (Week 1)
+    const phase1Activities: string[] = [];
+    const phase1Milestones: PlaybookMilestone[] = [];
+
+    switch (actionType) {
+      case 'forecast':
+        phase1Activities.push(
+          `Review ${domain} forecast results with the leadership team`,
+          `Validate key driver assumptions with domain owners`,
+          `Identify the top 1-2 levers to optimize based on driver analysis`,
+        );
+        phase1Milestones.push({
+          milestone: 'Driver validation complete',
+          criteria: 'Each driver assumption reviewed and confirmed or flagged',
+          owner: mapDomainToOwner(domain),
+        });
+        break;
+      case 'simulate':
+        phase1Activities.push(
+          `Brief leadership on the scenario analysis and cascade paths`,
+          `Identify which intervention windows are still open`,
+          `Assign intervention owners for each affected domain`,
+        );
+        phase1Milestones.push({
+          milestone: 'Intervention owners assigned',
+          criteria: 'Each intervention has a named owner and timeline',
+          owner: mapDomainToOwner(domain),
+        });
+        break;
+      case 'explain':
+        phase1Activities.push(
+          `Review the causal chain analysis with domain experts`,
+          `Validate whether upstream drivers match team observations`,
+          `Identify any connections that seem surprising or need investigation`,
+        );
+        phase1Milestones.push({
+          milestone: 'Causal paths validated',
+          criteria: 'Team confirms or disputes the top 3 causal connections',
+          owner: mapDomainToOwner(domain),
+        });
+        break;
+      case 'diagnose':
+        phase1Activities.push(
+          `Schedule root cause review with affected teams`,
+          `Verify triggered rules against current operational reality`,
+          `Confirm root cause hypothesis with recent data`,
+        );
+        phase1Milestones.push({
+          milestone: 'Root cause confirmed or disputed',
+          criteria: 'Team agrees on primary root cause with evidence',
+          owner: mapDomainToOwner(domain),
+        });
+        break;
+      case 'composite':
+        phase1Activities.push(
+          `Review the full model: forecast + scenario + causal analysis`,
+          `Identify which component has highest confidence for decision-making`,
+          `Prioritize interventions by expected impact × confidence`,
+        );
+        phase1Milestones.push({
+          milestone: 'Prioritized action list created',
+          criteria: 'Top 3 interventions agreed upon with owners',
+          owner: 'CEO / COO',
+        });
+        break;
+    }
+
+    phases.push({
+      name: 'Immediate (Week 1)',
+      phase: 1,
+      timeframe: 'Days 1-7',
+      activities: phase1Activities,
+      milestones: phase1Milestones,
+      dependencies: [],
+    });
+
+    // Phase 2: Short-term execution
+    const phase2Activities: string[] = interventions.slice(0, 3).map(
+      iv => `Execute: ${iv.action} [Owner: ${iv.owner}]`
+    );
+    if (phase2Activities.length === 0) {
+      phase2Activities.push(`Implement findings from Phase 1 analysis of ${domain}`);
+    }
+
+    phases.push({
+      name: 'Execute (Weeks 2-4)',
+      phase: 2,
+      timeframe: 'Days 8-28',
+      activities: phase2Activities,
+      milestones: [{
+        milestone: 'Interventions launched',
+        criteria: 'All Phase 2 activities initiated with tracking in place',
+        owner: mapDomainToOwner(domain),
+      }],
+      dependencies: ['Phase 1 milestones met'],
+    });
+
+    // Phase 3: Monitor and adjust
+    const monitorTimeframe = horizonDays <= 30 ? 'Days 29-60' : `Days 29-${Math.min(horizonDays, 90)}`;
+    phases.push({
+      name: 'Monitor & Adjust',
+      phase: 3,
+      timeframe: monitorTimeframe,
+      activities: [
+        `Track KPIs against targets (re-run brain analysis to compare)`,
+        `Adjust interventions based on early results`,
+        `Feed outcomes back into the brain for learning cycle improvement`,
+      ],
+      milestones: [{
+        milestone: 'Impact validated',
+        criteria: 'KPIs show measurable movement toward targets',
+        owner: mapDomainToOwner(domain),
+      }],
+      dependencies: ['Phase 2 interventions launched'],
+    });
+
+    return phases;
+  }
+
+  function buildMondayMorningAction(
+    artifact: ActionArtifact,
+    interventions: StrategicIntervention[],
+  ): string {
+    const { domain, actionType, confidence } = artifact;
+    const confidencePct = (confidence * 100).toFixed(0);
+
+    switch (actionType) {
+      case 'forecast': {
+        const fd = artifact.data as ForecastArtifact;
+        const topDriver = fd.drivers[0];
+        const trend = fd.table.length > 1
+          ? (fd.table[fd.table.length - 1].predicted > fd.table[0].predicted ? 'upward' : 'downward')
+          : 'stable';
+        return topDriver
+          ? `Review the ${domain} forecast with ${mapDomainToOwner(domain)} — the brain predicts ${trend} trajectory at ${confidencePct}% confidence. Focus on the ${topDriver.domain} lever (${(topDriver.weight * 100).toFixed(0)}% influence, ${topDriver.lagDays}d lag).`
+          : `Review the ${domain} ${artifact.horizonDays}-day forecast with your team — ${confidencePct}% confidence, ${trend} trend.`;
+      }
+      case 'simulate': {
+        const sd = artifact.data as SimulationArtifact;
+        const topDomain = sd.timeline[0]?.domain || domain;
+        const topChange = sd.timeline[0]?.predictedChangePercent?.toFixed(1) || '?';
+        const topDay = sd.timeline[0]?.dayFromNow || '?';
+        return `Brief your team: if the ${sd.simulation.scenario.sourceDomain} scenario plays out, ${topDomain} will see ${topChange}% change by day ${topDay}. Your first intervention window${sd.interventions[0] ? ` is ${sd.interventions[0].windowDays} days in ${sd.interventions[0].domain}` : ' needs identification'}.`;
+      }
+      case 'explain': {
+        const ed = artifact.data as ExplanationArtifact;
+        const topUpstream = ed.allUpstreamAnalyses[0];
+        return topUpstream
+          ? `Discuss the ${topUpstream.source}→${domain} causal link with ${mapDomainToOwner(topUpstream.source)} — the brain found a ${(topUpstream.confidence * 100).toFixed(0)}% confidence connection. Validate whether this matches your team's observations.`
+          : `Review the ${domain} causal analysis with your team — ${ed.allUpstreamAnalyses.length} upstream and ${ed.allDownstreamAnalyses.length} downstream connections discovered.`;
+      }
+      case 'diagnose': {
+        const dd = artifact.data as DiagnosisArtifact;
+        if (dd.anomalyExplanation?.mostLikelyCause) {
+          const cause = dd.anomalyExplanation.mostLikelyCause;
+          return `Schedule a root cause review: ${cause.domain} is likely driving ${domain} issues (${(cause.confidence * 100).toFixed(0)}% confidence, ${cause.lagDays}d lag). ${dd.anomalyExplanation.prescriptiveActions[0]?.action || 'Investigate the connection.'}`;
+        }
+        return `Schedule a ${domain} diagnostic review with ${mapDomainToOwner(domain)} — ${dd.triggeredRules.length} rules fired, ${dd.upstreamAnalyses.length} upstream causes analyzed.`;
+      }
+      case 'composite':
+        return `Start with the ${domain} forecast review, then scenario-plan the top risk, then align your team on the ${interventions.length > 0 ? interventions.length + ' identified interventions' : 'causal drivers'}. Block 90 minutes with leadership.`;
+    }
+  }
+
+  // ── V3: LLM Playbook Upgrade ──────────────────────────────────────────
+
+  async function upgradePlaybookWithLLM(
+    templatePlaybook: ExecutionPlaybook,
+    artifact: ActionArtifact,
+    question: string,
+  ): Promise<ExecutionPlaybook> {
+    if (!amplifier) return templatePlaybook;
+
+    try {
+      // Format the artifact data for the LLM
+      const formattedData = formatArtifactForPrompt(artifact);
+
+      const llmPlaybook = await amplifier.generateExecutionPlaybook({
+        actionType: artifact.actionType,
+        domain: artifact.domain,
+        question,
+        confidence: artifact.confidence,
+        horizonDays: artifact.horizonDays,
+        narrative: artifact.narrative,
+        formattedData,
+      });
+
+      // Merge: LLM playbook takes priority, but template fills any gaps
+      return {
+        executiveSummary: llmPlaybook.executiveSummary || templatePlaybook.executiveSummary,
+        mondayMorningAction: llmPlaybook.mondayMorningAction || templatePlaybook.mondayMorningAction,
+        interventions: llmPlaybook.interventions.length > 0
+          ? llmPlaybook.interventions
+          : templatePlaybook.interventions,
+        phases: llmPlaybook.phases.length > 0
+          ? llmPlaybook.phases
+          : templatePlaybook.phases,
+        risks: llmPlaybook.risks.length > 0
+          ? llmPlaybook.risks
+          : templatePlaybook.risks,
+        successMetrics: llmPlaybook.successMetrics.length > 0
+          ? llmPlaybook.successMetrics
+          : templatePlaybook.successMetrics,
+        confidence: llmPlaybook.confidence || templatePlaybook.confidence,
+        isLLMGenerated: true,
+      };
+    } catch (err) {
+      log('LLM playbook upgrade failed (using template):', err);
+      return templatePlaybook;
+    }
   }
 
   // ── Main Dispatch ───────────────────────────────────────────────────
@@ -1046,6 +1692,23 @@ export function createDomainActionEngine(config: DomainActionEngineConfig) {
         }
       }
 
+      // V3: Build Outcome Contract
+      const outcomeContract = buildOutcomeContract(question, artifact);
+
+      // V3: Generate Execution Playbook (template first, LLM upgrade if available)
+      let playbook: ExecutionPlaybook | null = null;
+      if (!artifact.confidenceGated) {
+        const templatePlaybook = buildTemplatePlaybook(artifact, question);
+        playbook = await upgradePlaybookWithLLM(templatePlaybook, artifact, question);
+      }
+
+      // V3: Attach to artifact
+      artifact = {
+        ...artifact,
+        playbook,
+        outcomeContract,
+      };
+
       return artifact;
     } catch (err) {
       // Graceful degradation: return a minimal artifact on failure
@@ -1067,6 +1730,17 @@ export function createDomainActionEngine(config: DomainActionEngineConfig) {
           executedAt: new Date().toISOString(),
           llmNarrativeUsed: false,
           horizonSource,
+        },
+        playbook: null,
+        outcomeContract: {
+          question,
+          deliveredOutcome: `${actionType} execution failed — see error details`,
+          deliverableType: 'forecast_model',
+          fulfillment: 'insufficient_data',
+          gaps: ['Execution failed due to internal error'],
+          dataNeeded: ['Verify data sources and retry'],
+          modulesUsed: [],
+          computedFromRealData: false,
         },
       };
     }
@@ -1303,6 +1977,25 @@ export function formatArtifactForPrompt(artifact: ActionArtifact): string {
     formatCompositeForPrompt(artifact.data as CompositeArtifact, artifact, parts);
   }
 
+  // V3: Include execution playbook in prompt
+  if (artifact.playbook) {
+    formatPlaybookForPrompt(artifact.playbook, parts);
+  }
+
+  // V3: Include outcome contract in prompt
+  if (artifact.outcomeContract) {
+    parts.push('');
+    parts.push(`## Outcome Contract`);
+    parts.push(`Fulfillment: ${artifact.outcomeContract.fulfillment} | Deliverable: ${artifact.outcomeContract.deliverableType}`);
+    parts.push(`Delivered: ${artifact.outcomeContract.deliveredOutcome}`);
+    if (artifact.outcomeContract.gaps && artifact.outcomeContract.gaps.length > 0) {
+      parts.push(`Gaps: ${artifact.outcomeContract.gaps.join('; ')}`);
+    }
+    if (artifact.outcomeContract.dataNeeded && artifact.outcomeContract.dataNeeded.length > 0) {
+      parts.push(`Data needed: ${artifact.outcomeContract.dataNeeded.join('; ')}`);
+    }
+  }
+
   return parts.join('\n');
 }
 
@@ -1490,5 +2183,60 @@ function formatCompositeForPrompt(cd: CompositeArtifact, artifact: ActionArtifac
   if (cd.explanation) {
     parts.push('### Explanation Component');
     formatExplanationForPrompt(cd.explanation, parts);
+  }
+}
+
+// ── V3: Playbook Prompt Formatting ──────────────────────────────────────
+
+function formatPlaybookForPrompt(playbook: ExecutionPlaybook, parts: string[]): void {
+  parts.push('');
+  parts.push(`## EXECUTION PLAYBOOK ${playbook.isLLMGenerated ? '(AI-Enhanced)' : '(Template)'}`);
+  parts.push(`Confidence: ${(playbook.confidence * 100).toFixed(0)}%`);
+  parts.push('');
+  parts.push(`### 🎯 Monday Morning Action`);
+  parts.push(playbook.mondayMorningAction);
+  parts.push('');
+  parts.push(`### Executive Summary`);
+  parts.push(playbook.executiveSummary);
+
+  if (playbook.interventions.length > 0) {
+    parts.push('');
+    parts.push(`### Strategic Interventions (${playbook.interventions.length})`);
+    for (const iv of playbook.interventions.slice(0, 5)) {
+      parts.push(`  - [${iv.owner}] ${iv.action}`);
+      parts.push(`    Impact: ${iv.expectedImpact} | Time: ${iv.timeToImpactDays}d | Effort: ${iv.effort} | Confidence: ${(iv.confidence * 100).toFixed(0)}%`);
+      parts.push(`    Evidence: ${iv.evidence}`);
+    }
+  }
+
+  if (playbook.phases.length > 0) {
+    parts.push('');
+    parts.push(`### Execution Phases`);
+    for (const phase of playbook.phases) {
+      parts.push(`  Phase ${phase.phase}: ${phase.name} (${phase.timeframe})`);
+      for (const act of phase.activities) {
+        parts.push(`    - ${act}`);
+      }
+      for (const ms of phase.milestones) {
+        parts.push(`    ✓ Milestone: ${ms.milestone} — ${ms.criteria} [${ms.owner}]`);
+      }
+    }
+  }
+
+  if (playbook.successMetrics.length > 0) {
+    parts.push('');
+    parts.push(`### Success Metrics`);
+    for (const kpi of playbook.successMetrics) {
+      parts.push(`  - ${kpi.metric}: ${kpi.currentValue} → ${kpi.targetValue} (by ${kpi.measureBy})`);
+    }
+  }
+
+  if (playbook.risks.length > 0) {
+    parts.push('');
+    parts.push(`### Risks`);
+    for (const risk of playbook.risks) {
+      parts.push(`  - [${risk.severity.toUpperCase()}] ${risk.risk}`);
+      parts.push(`    Mitigation: ${risk.mitigation}`);
+    }
   }
 }

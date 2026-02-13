@@ -429,6 +429,7 @@ export {
   type ScenarioNarrative,
   type EnhancedImpactSummary,
   type EnhancedPatternExplanation,
+  type GeneratedPlaybook,
 } from './orchestrator/llm-brain-amplifier';
 
 // Response Feedback Loop (query → correction → memory)
@@ -542,8 +543,9 @@ export {
   type SimulationIntervention,
 } from './orchestrator/whatif-simulator';
 
-// Domain Action Engine V2 ("Motor Cortex") — intent-to-execution routing
+// Domain Action Engine V3 ("Motor Cortex") — intent-to-execution routing
 // V2: +LLM narratives, +smart horizon, +multi-domain, +confidence gates, +composite
+// V3: +execution playbooks, +outcome contracts, +Monday morning actions, +strategic interventions
 export {
   createDomainActionEngine,
   formatArtifactForPrompt,
@@ -557,6 +559,14 @@ export {
   type CompositeArtifact,
   type ActionType,
   type ActionKnowledgeContext,
+  // V3: Execution Playbook types ("Closed Fist")
+  type ExecutionPlaybook,
+  type StrategicIntervention,
+  type PlaybookPhase,
+  type PlaybookMilestone,
+  type PlaybookRisk,
+  type PlaybookKPI,
+  type OutcomeContract,
 } from './orchestrator/domain-action-engine';
 
 // Brain Pipeline — Corpus Callosum connecting all brain regions

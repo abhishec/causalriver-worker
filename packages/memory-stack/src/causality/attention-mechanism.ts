@@ -320,6 +320,7 @@ export function createAttentionMechanism(config: Partial<AttentionConfig> = {}) 
     learnedOffsets.cascade += learningRate * direction * (multipliers.cascade - (profile.cascade + learnedOffsets.cascade));
     learnedOffsets.anomaly += learningRate * direction * (multipliers.anomaly - (profile.anomaly + learnedOffsets.anomaly));
     learnedOffsets.validated += learningRate * direction * (multipliers.validated - (profile.validated + learnedOffsets.validated));
+    learnedOffsets.recency += learningRate * direction * (multipliers.recency - (profile.recency + learnedOffsets.recency));
 
     // Clamp offsets to prevent drift beyond ±0.5
     for (const key of ['focus', 'cascade', 'anomaly', 'validated', 'recency'] as const) {

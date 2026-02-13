@@ -1045,6 +1045,95 @@ export function createBrainHealthMonitor(config: Partial<BrainHealthConfig> = {}
       return [...healthHistory];
     },
 
+    /**
+     * Self-healing loop: automatically diagnose and remediate brain health issues.
+     *
+     * Given a health report + a continuous learner reference, this method:
+     * 1. Checks if overall health is below threshold
+     * 2. Triggers autoConsolidate if cognitive load is high (stale/bloated graph)
+     * 3. Suggests data acquisition for high-uncertainty edges
+     * 4. Records the remediation actions taken
+     *
+     * This is the brain's autonomous immune system — observe, diagnose, heal.
+     *
+     * @param report - Latest health report from generateHealthReport
+     * @param learner - ContinuousLearner instance with graph management methods
+     * @param healthThreshold - Below this, trigger remediation (default 0.6)
+     * @returns Summary of remediation actions taken
+     */
+    selfHeal(
+      report: HealthReport,
+      learner: {
+        autoConsolidate: (maxEdges?: number, maxStaleRatio?: number) => {
+          triggered: boolean;
+          pruneResult?: { edgesRemoved: number; nodesRemoved: number };
+          compactResult?: { pathsCompacted: number; edgesCreated: number; edgesStrengthened: number };
+        };
+        getGraphStats: () => { edgeCount: number; staleEdgeCount: number; weakEdgeCount: number };
+      },
+      healthThreshold: number = 0.6,
+    ): {
+      healed: boolean;
+      actions: string[];
+      consolidationTriggered: boolean;
+      edgesRemoved: number;
+      pathsCompacted: number;
+    } {
+      const actions: string[] = [];
+      let consolidationTriggered = false;
+      let edgesRemoved = 0;
+      let pathsCompacted = 0;
+
+      // Only heal if health is below threshold
+      if (report.overallHealth >= healthThreshold) {
+        return { healed: false, actions: ['Health is acceptable — no remediation needed'], consolidationTriggered: false, edgesRemoved: 0, pathsCompacted: 0 };
+      }
+
+      actions.push(`Health ${(report.overallHealth * 100).toFixed(0)}% is below ${(healthThreshold * 100).toFixed(0)}% threshold — initiating self-healing`);
+
+      // 1. High cognitive load → trigger auto-consolidation
+      if (report.cognitiveLoad.load > resolvedConfig.cognitiveLoadThreshold) {
+        actions.push(`Cognitive load ${(report.cognitiveLoad.load * 100).toFixed(0)}% exceeds threshold — triggering consolidation`);
+        const result = learner.autoConsolidate();
+        consolidationTriggered = result.triggered;
+        if (result.triggered) {
+          edgesRemoved = result.pruneResult?.edgesRemoved ?? 0;
+          pathsCompacted = result.compactResult?.pathsCompacted ?? 0;
+          actions.push(`Consolidated: ${edgesRemoved} edges pruned, ${pathsCompacted} paths compacted`);
+        }
+      }
+
+      // 2. Poor calibration → log remediation suggestion
+      if (report.calibration.expectedCalibrationError > resolvedConfig.eceDegradationThreshold) {
+        actions.push(`ECE ${report.calibration.expectedCalibrationError.toFixed(3)} exceeds threshold — recommend recalibrating prediction confidences`);
+        if (report.calibration.overconfidenceBias > 0.1) {
+          actions.push(`Overconfidence bias detected (${report.calibration.overconfidenceBias.toFixed(2)}) — reduce prediction confidence by ~${(report.calibration.overconfidenceBias * 100).toFixed(0)}%`);
+        }
+      }
+
+      // 3. Degrading domains → suggest focused data collection
+      if (report.degradingDomains.length > 0) {
+        actions.push(`${report.degradingDomains.length} degrading domains detected: ${report.degradingDomains.join(', ')} — prioritize data collection`);
+      }
+
+      // 4. High-uncertainty edges → suggest validation
+      const uncertainEdges = report.introspection.mostUncertainEdges.filter(e => e.uncertainty > 0.6);
+      if (uncertainEdges.length > 0) {
+        actions.push(`${uncertainEdges.length} high-uncertainty edges need validation: ${uncertainEdges.slice(0, 3).map(e => `${e.source}→${e.target}`).join(', ')}`);
+      }
+
+      // Record health snapshot for trend tracking
+      recordHealthSnapshot(report);
+
+      return {
+        healed: true,
+        actions,
+        consolidationTriggered,
+        edgesRemoved,
+        pathsCompacted,
+      };
+    },
+
     /** Reset all internal state (useful for testing) */
     reset(): void {
       forecastHistory.clear();
