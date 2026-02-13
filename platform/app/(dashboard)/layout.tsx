@@ -1,5 +1,6 @@
 import { Sidebar } from "@/components/layout/Sidebar";
 import { TopBar } from "@/components/layout/TopBar";
+import { CopilotOverlay } from "@/components/copilot/CopilotOverlay";
 import { OrgProvider } from "@/lib/org-context";
 
 export default function DashboardLayout({
@@ -17,6 +18,7 @@ export default function DashboardLayout({
             {children}
           </main>
         </div>
+        <CopilotOverlay />
       </div>
     </OrgProvider>
   );

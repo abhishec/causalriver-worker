@@ -253,7 +253,7 @@ export async function POST(request: NextRequest) {
     const orgFilter = orgIds.map((id) => `organization_id.eq.${id}`).join(",");
 
     // ── Gather brain knowledge from DB in parallel ─────────────────────
-    const [causalResult, rulesResult, cascadeResult, patternsResult] = await Promise.all([
+    const [causalResult, rulesResult, cascadeResult, patternsResult, insightsResult] = await Promise.all([
       // Full causal graph
       supabase
         .from("causal_relationships_statistical")
@@ -292,12 +292,34 @@ export async function POST(request: NextRequest) {
         .eq("memory_type", "pattern")
         .order("importance", { ascending: false })
         .limit(100),
+
+      // Insights (finance insights, anomalies, alerts from connectors like Xero/Volopay)
+      supabase
+        .from("ai_memory")
+        .select("content, importance, domain, metadata")
+        .or(orgFilter)
+        .eq("memory_type", "insight")
+        .order("importance", { ascending: false })
+        .limit(100),
     ]);
 
     const causalEdges: TrainedCausalEdge[] = (causalResult.data || []) as TrainedCausalEdge[];
     const rules: TrainedRule[] = (rulesResult.data || []) as TrainedRule[];
     const cascadeRules: TrainedCascadeRule[] = (cascadeResult.data || []) as TrainedCascadeRule[];
-    const patterns: TrainedPattern[] = (patternsResult.data || []) as TrainedPattern[];
+
+    // Merge insights into patterns — insights are org-level findings from connectors
+    // (Xero, Volopay, etc.) that have the same shape as patterns. By including them
+    // in the patterns array, the brain context builder naturally surfaces them to the LLM.
+    const dbPatterns: TrainedPattern[] = (patternsResult.data || []) as TrainedPattern[];
+    const dbInsights = (insightsResult.data || []).map((row: { content: string; importance?: number; domain?: string; metadata?: Record<string, unknown> | null }) => ({
+      content: row.content,
+      domain: row.domain || "general",
+      importance: row.importance,
+      llm_pattern_name: (row.metadata as Record<string, unknown>)?.category as string || "insight",
+      llm_pattern_description: (row.metadata as Record<string, unknown>)?.severity as string || "Connector-sourced insight",
+      metadata: row.metadata,
+    } as TrainedPattern));
+    const patterns: TrainedPattern[] = [...dbPatterns, ...dbInsights];
 
     // ══════════════════════════════════════════════════════════════════════
     // V3 FRAMEWORK PATH — uses the generic CopilotFramework from memory-stack
@@ -651,8 +673,8 @@ export async function POST(request: NextRequest) {
         }
 
         const anthropicStream = anthropic.messages.stream({
-          model: "claude-3-5-haiku-20241022",
-          max_tokens: 4096,
+          model: "claude-sonnet-4-5-20250929",
+          max_tokens: 8192,
           system: effectiveSystemPrompt,
           messages,
         });

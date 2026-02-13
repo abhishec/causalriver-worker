@@ -47,7 +47,8 @@ export function TopBar() {
         <button
           className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface hover:bg-surface-hover border border-border/50 text-xs text-muted transition-colors"
           onClick={() => {
-            // TODO: Open copilot overlay
+            // Dispatch Cmd+K to open the CopilotOverlay
+            document.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true }));
           }}
         >
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>

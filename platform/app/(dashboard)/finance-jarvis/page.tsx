@@ -94,8 +94,8 @@ export default function FinanceJarvisPage() {
           <Link href="/finance-jarvis/reports" className="px-3 py-1.5 text-xs rounded-lg bg-card border border-border/50 hover:border-accent/30 transition-colors">
             Reports
           </Link>
-          <Link href="/finance-jarvis/copilot" className="px-3 py-1.5 text-xs rounded-lg bg-accent text-white hover:bg-accent-dark transition-colors">
-            Ask Jarvis
+          <Link href="/copilot" className="px-3 py-1.5 text-xs rounded-lg bg-accent text-white hover:bg-accent-dark transition-colors">
+            Ask Copilot
           </Link>
         </div>
       </div>

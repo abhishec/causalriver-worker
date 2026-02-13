@@ -11,6 +11,7 @@ import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useOrg } from "@/lib/org-context";
+import { consumeSSEStream } from "@/components/copilot/CopilotChat";
 
 const QUICK_PROMPTS = [
   "Why is churn increasing?",
@@ -28,6 +29,7 @@ export function CopilotOverlay() {
   const [mounted, setMounted] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
   const router = useRouter();
 
   // Portal mount
@@ -55,7 +57,6 @@ export function CopilotOverlay() {
   // Focus input when overlay opens
   useEffect(() => {
     if (isOpen) {
-      // Small delay to ensure the portal has rendered
       const timer = setTimeout(() => {
         inputRef.current?.focus();
       }, 50);
@@ -64,6 +65,7 @@ export function CopilotOverlay() {
   }, [isOpen]);
 
   const handleClose = useCallback(() => {
+    abortRef.current?.abort();
     setIsOpen(false);
     setInput("");
     setResponse("");
@@ -85,6 +87,10 @@ export function CopilotOverlay() {
     const trimmed = input.trim();
     if (!trimmed || isLoading) return;
 
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     setIsLoading(true);
     setResponse("");
 
@@ -92,44 +98,33 @@ export function CopilotOverlay() {
       const res = await fetch("/api/copilot/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: trimmed, organizationId: currentOrg?.id }),
+        body: JSON.stringify({
+          message: trimmed,
+          organizationId: currentOrg?.id,
+        }),
+        signal: controller.signal,
       });
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-      const reader = res.body?.getReader();
-      if (!reader) throw new Error("No stream");
-
-      const decoder = new TextDecoder();
-      let accumulated = "";
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split("\n");
-
-        for (const line of lines) {
-          if (line.startsWith("data: ")) {
-            const data = line.slice(6);
-            if (data === "[DONE]") break;
-            try {
-              const parsed = JSON.parse(data);
-              if (parsed.text) {
-                accumulated += parsed.text;
-                setResponse(accumulated);
-              }
-              if (parsed.error) {
-                setResponse(parsed.error);
-              }
-            } catch {
-              // Non-JSON line, skip
-            }
-          }
-        }
-      }
+      await consumeSSEStream(
+        res,
+        {
+          onText: (_text, accumulated) => {
+            setResponse(accumulated);
+          },
+          onError: (error) => {
+            setResponse(error);
+          },
+          onBrainMeta: () => {
+            // Overlay doesn't display brain meta
+          },
+          onDone: () => {},
+        },
+        controller.signal
+      );
     } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") return;
       setResponse(
         err instanceof Error
           ? `Error: ${err.message}`
@@ -137,6 +132,7 @@ export function CopilotOverlay() {
       );
     } finally {
       setIsLoading(false);
+      abortRef.current = null;
     }
   };
 
