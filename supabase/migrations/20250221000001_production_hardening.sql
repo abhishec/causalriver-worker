@@ -469,8 +469,8 @@ BEGIN
   -- Build health response
   v_health := jsonb_build_object(
     'status', CASE
-      WHEN v_db_size_bytes > 180 * 1024 * 1024 * 1024 THEN 'critical'
-      WHEN v_db_size_bytes > 100 * 1024 * 1024 * 1024 THEN 'warning'
+      WHEN v_db_size_bytes > 180::BIGINT * 1024 * 1024 * 1024 THEN 'critical'
+      WHEN v_db_size_bytes > 100::BIGINT * 1024 * 1024 * 1024 THEN 'warning'
       ELSE 'healthy'
     END,
     'database', jsonb_build_object(
