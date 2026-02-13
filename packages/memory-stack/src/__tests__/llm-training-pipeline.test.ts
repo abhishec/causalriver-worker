@@ -707,8 +707,8 @@ describe('Brain Pipeline Sensory Cortex Integration', () => {
 
     const health = brain.getHealth();
 
-    // Brain Analog: Neurological exam now tests 15 regions including Structural Intelligence
-    expect(health.regions).toHaveLength(15);
+    // Brain Analog: Neurological exam now tests 16 regions including Motor Cortex
+    expect(health.regions).toHaveLength(16);
 
     const sensoryRegion = health.regions.find(r => r.name === 'Public Data Training');
     expect(sensoryRegion).toBeDefined();

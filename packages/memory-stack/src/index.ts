@@ -542,6 +542,20 @@ export {
   type SimulationIntervention,
 } from './orchestrator/whatif-simulator';
 
+// Domain Action Engine ("Motor Cortex") — intent-to-execution routing
+export {
+  createDomainActionEngine,
+  formatArtifactForPrompt,
+  type DomainActionEngineConfig,
+  type ActionArtifact,
+  type ForecastArtifact,
+  type SimulationArtifact,
+  type ExplanationArtifact,
+  type DiagnosisArtifact,
+  type ActionType,
+  type ActionKnowledgeContext,
+} from './orchestrator/domain-action-engine';
+
 // Brain Pipeline — Corpus Callosum connecting all brain regions
 export {
   createBrainPipeline,

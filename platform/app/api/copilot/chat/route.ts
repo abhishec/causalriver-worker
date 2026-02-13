@@ -205,7 +205,7 @@ function createSSEStream() {
     controller?.close();
   };
 
-  return { stream, sendText, sendError, close };
+  return { stream, send, sendText, sendError, close };
 }
 
 // ============================================================================
@@ -914,6 +914,96 @@ function generateBrainFallbackResponse(
 }
 
 // ============================================================================
+// ACTION KNOWLEDGE BUILDER — converts route DB data to ActionKnowledgeContext
+// ============================================================================
+
+function buildActionKnowledge(
+  question: string,
+  intent: UserIntent,
+  domains: string[],
+  causalEdges: DBCausalEdge[],
+  rules: DBRule[],
+  entityState?: Record<string, unknown>
+): {
+  question: string;
+  intent: UserIntent;
+  extractedDomains: string[];
+  primaryDomain: string;
+  directCauses: Record<string, Array<{ source: string; target: string; effectSize: number; lagDays: number }>>;
+  directEffects: Record<string, Array<{ source: string; target: string; effectSize: number; lagDays: number }>>;
+  matchedRules: Array<{ title: string; naturalLanguage: string; conditions: string[]; triggered: boolean }>;
+} {
+  // Build directCauses and directEffects from causal edges
+  const directCauses: Record<string, Array<{ source: string; target: string; effectSize: number; lagDays: number }>> = {};
+  const directEffects: Record<string, Array<{ source: string; target: string; effectSize: number; lagDays: number }>> = {};
+
+  for (const edge of causalEdges) {
+    const entry = {
+      source: edge.source_domain,
+      target: edge.target_domain,
+      effectSize: edge.effect_size,
+      lagDays: edge.optimal_lag_days,
+    };
+
+    // Target's causes
+    if (!directCauses[edge.target_domain]) directCauses[edge.target_domain] = [];
+    directCauses[edge.target_domain].push(entry);
+
+    // Source's effects
+    if (!directEffects[edge.source_domain]) directEffects[edge.source_domain] = [];
+    directEffects[edge.source_domain].push(entry);
+  }
+
+  // Sort by effect size (strongest first)
+  for (const domain of Object.keys(directCauses)) {
+    directCauses[domain].sort((a, b) => Math.abs(b.effectSize) - Math.abs(a.effectSize));
+  }
+  for (const domain of Object.keys(directEffects)) {
+    directEffects[domain].sort((a, b) => Math.abs(b.effectSize) - Math.abs(a.effectSize));
+  }
+
+  // Parse and evaluate rules (reuses existing parseDBRules + evaluateCondition)
+  const normalizedState = entityState ? normalizeEntityState(entityState) : {};
+  const parsedRules = parseDBRules(rules);
+  const matchedRules: Array<{ title: string; naturalLanguage: string; conditions: string[]; triggered: boolean }> = [];
+
+  for (const parsed of parsedRules) {
+    const conditionStrs = parsed.when.conditions.map(
+      (c: { field: string; operator: string; value: unknown }) =>
+        `${c.field} ${c.operator} ${c.value}`
+    );
+
+    let triggered = false;
+    if (entityState && parsed.when.conditions.length > 0) {
+      const results = parsed.when.conditions.map(
+        (c: { field: string; operator: string; value: unknown }) =>
+          evaluateCondition(c, normalizedState)
+      );
+      triggered = parsed.when.logic === "AND"
+        ? results.every(Boolean)
+        : results.some(Boolean);
+    }
+
+    matchedRules.push({
+      title: parsed.title,
+      naturalLanguage: parsed.naturalLanguage,
+      conditions: conditionStrs,
+      triggered,
+    });
+  }
+
+  return {
+    question,
+    intent,
+    extractedDomains: domains,
+    primaryDomain: domains[0] || "finance",
+    directCauses,
+    directEffects,
+    matchedRules,
+  };
+}
+
+// ============================================================================
 // MAIN ROUTE HANDLER
 // ============================================================================
 
@@ -1020,6 +1110,49 @@ export async function POST(request: NextRequest) {
       conversationSummary
     );
 
+    // ── Domain Action Engine — give brain HANDS (Motor Cortex) ─────────
+    // Routes intent to the RIGHT execution module (forecaster, simulator,
+    // explainer) and produces structured artifacts with REAL computed data.
+    let actionArtifact: Record<string, unknown> | null = null;
+    const actionIntents = new Set<UserIntent>(["build", "predict", "diagnose"]);
+    const forceAction = /what\s+if|forecast|simulate|predict\s+\d+|project\s+\d+/.test(
+      message.toLowerCase()
+    );
+
+    if (actionIntents.has(intent) || forceAction) {
+      try {
+        const { createDomainActionEngine, formatArtifactForPrompt } = await import(
+          "@nexus-ai/memory-stack"
+        );
+        const engine = createDomainActionEngine({
+          supabase,
+          organizationId: orgId,
+        });
+
+        // Build lightweight ActionKnowledgeContext from already-fetched DB data
+        const knowledgeCtx = buildActionKnowledge(
+          message,
+          intent,
+          domains,
+          causalEdges,
+          rules,
+          entityState
+        );
+
+        const artifact = await engine.execute(message, knowledgeCtx);
+        actionArtifact = artifact as unknown as Record<string, unknown>;
+
+        // Store formatted prompt text for system prompt augmentation
+        (actionArtifact as Record<string, unknown>).__promptText =
+          formatArtifactForPrompt(artifact);
+      } catch (err) {
+        console.warn(
+          "[ActionEngine] Non-fatal failure, falling back to LLM-only:",
+          err
+        );
+      }
+    }
+
     // ── Check for Anthropic API key ───────────────────────────────────
     const anthropicKey = process.env.ANTHROPIC_API_KEY;
 
@@ -1078,14 +1211,28 @@ export async function POST(request: NextRequest) {
     const { default: Anthropic } = await import("@anthropic-ai/sdk");
     const anthropic = new Anthropic({ apiKey: anthropicKey });
 
-    const { stream, sendText, sendError, close } = createSSEStream();
+    const { stream, send, sendText, sendError, close } = createSSEStream();
 
     (async () => {
       try {
+        // Send structured artifact BEFORE LLM text stream
+        // Frontend can render tables/charts from this while LLM narrates
+        if (actionArtifact) {
+          const { __promptText, ...cleanArtifact } = actionArtifact;
+          send(JSON.stringify({ artifact: cleanArtifact }));
+        }
+
+        // Augment system prompt with REAL computed data from brain modules
+        const effectiveSystemPrompt = actionArtifact?.__promptText
+          ? systemPrompt +
+            "\n\n## COMPUTED DATA (use these REAL numbers in your response — do NOT invent data)\n" +
+            String(actionArtifact.__promptText)
+          : systemPrompt;
+
         const anthropicStream = anthropic.messages.stream({
           model: "claude-3-5-haiku-20241022",
           max_tokens: 4096,
-          system: systemPrompt,
+          system: effectiveSystemPrompt,
           messages,
         });
 

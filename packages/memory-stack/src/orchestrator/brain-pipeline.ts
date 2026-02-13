@@ -25,6 +25,7 @@
  *   │    Impact Scorer (Amygdala) → Attention Manager (Thalamus)│
  *   │    Fast-Path Compiler (Cerebellum)                       │
  *   │    What-If Simulator (Prefrontal Cortex)                 │
+ *   │    Domain Action Engine (Motor Cortex)                   │
  *   │                                                          │
  *   │  MONITORING (Interoception):                             │
  *   │    Anomaly Monitor (Insula) — detects unusual signals    │
@@ -96,6 +97,10 @@ import {
   type SimulationResult,
   type CascadeStep,
 } from './whatif-simulator';
+
+import {
+  createDomainActionEngine,
+} from './domain-action-engine';
 
 import {
   recordPrediction,
@@ -406,6 +411,16 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
     organizationId,
     verbose,
     ...config.whatIf,
+  });
+
+  // Motor Cortex: intent-to-execution routing
+  // Brain Analog: The Motor Cortex translates frontal lobe intentions into
+  // coordinated muscle movements that produce observable output. Without it,
+  // the brain can THINK but cannot ACT.
+  const actionEngine = createDomainActionEngine({
+    supabase,
+    organizationId,
+    verbose,
   });
 
   // Long-Term Potentiation: learning modules that strengthen synapses
@@ -939,8 +954,10 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
     if (consolidationResult && consolidationResult.status !== 'failed') {
       try {
         await fastPathCompiler.invalidateAll();
+        actionEngine.invalidateCache();
         fastPathInvalidated = true;
         log('Cerebellum: all fast-paths invalidated after consolidation');
+        log('Motor Cortex: execution context cache invalidated after consolidation');
       } catch (err) {
         errors.push(`Fast-path invalidation failed: ${(err as Error).message}`);
       }
@@ -1114,6 +1131,12 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
         details: 'Ready — mental simulation active',
       },
       {
+        name: 'Domain Action Engine',
+        brainAnalog: 'Motor Cortex',
+        status: 'ok',
+        details: 'Ready — intent-to-execution routing active (forecast, simulate, explain, diagnose)',
+      },
+      {
         name: 'Learning Modules',
         brainAnalog: 'Long-Term Potentiation',
         status: lastLearningAt ? 'ok' : 'not_initialized',
@@ -1227,6 +1250,7 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
     getFastPathCompiler: () => fastPathCompiler,
     getActiveExplorer: () => activeExplorer,
     getWhatIfSimulator: () => whatIfSimulator,
+    getActionEngine: () => actionEngine,
     getConsolidationEngine: () => consolidationEngine,
     getAnomalyMonitor: () => anomalyMonitor,
     getContextManager: () => contextManager,

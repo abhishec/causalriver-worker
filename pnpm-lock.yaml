@@ -197,6 +197,9 @@ importers:
       '@anthropic-ai/sdk':
         specifier: ^0.74.0
         version: 0.74.0(zod@3.25.76)
+      '@nexus-ai/memory-stack':
+        specifier: workspace:*
+        version: link:../packages/memory-stack
       '@supabase/ssr':
         specifier: ^0.6.1
         version: 0.6.1(@supabase/supabase-js@2.95.3)

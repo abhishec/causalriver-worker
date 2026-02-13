@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@nexus-ai/memory-stack": "workspace:*",
     "@anthropic-ai/sdk": "^0.74.0",
     "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.95.3",

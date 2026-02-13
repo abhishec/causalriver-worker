@@ -138,7 +138,7 @@ describe('Brain Pipeline (Corpus Callosum)', () => {
       const health = brain.getHealth();
 
       expect(health.organizationId).toBe('org-test-123');
-      expect(health.regions).toHaveLength(15);
+      expect(health.regions).toHaveLength(16);
       expect(health.checkedAt).toBeDefined();
 
       // Check all brain regions are present
