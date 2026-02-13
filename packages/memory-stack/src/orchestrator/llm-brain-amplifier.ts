@@ -182,6 +182,39 @@ export interface GeneratedPlaybook {
   confidence: number;
 }
 
+/** V4: Decision Intelligence — LLM-enhanced meta-cognition and counterfactual reasoning */
+export interface EnhancedDecisionIntelligence {
+  /** Enriched devil's advocate argument (more nuanced than template) */
+  devilsAdvocate: string;
+  /** Enriched blind spots — what the LLM thinks the brain is missing */
+  blindSpots: string[];
+  /** Enriched alternative hypotheses */
+  alternativeHypotheses: Array<{
+    hypothesis: string;
+    whyRankedLower: string;
+    evidenceNeeded: string;
+    probability: number;
+  }>;
+  /** LLM-generated counterfactual scenarios */
+  counterfactualScenarios: Array<{
+    label: string;
+    assumption: string;
+    expectedOutcome: string;
+    probability: number;
+    playbookImpact: 'unchanged' | 'minor_adjustment' | 'major_revision' | 'abandon';
+  }>;
+  /** Critical assumption the LLM identifies */
+  criticalAssumption: string;
+  /** The single most valuable question to answer next */
+  highestValueQuestion: string;
+  /** Regret analysis: should we proceed? */
+  regretRecommendation: 'proceed' | 'proceed_with_caution' | 'gather_more_data' | 'reconsider';
+  /** 2-3 sentence reasoning for regret recommendation */
+  regretReasoning: string;
+  /** Confidence in the meta-assessment itself (0-1) */
+  confidence: number;
+}
+
 /** Gap 8: Enhanced pattern explanation (Pattern Detector / Basal Ganglia) */
 export interface EnhancedPatternExplanation {
   /** Business-readable pattern name */
@@ -372,6 +405,49 @@ Respond in JSON format:
     }
   ],
   "confidence": 0.75
+}`;
+
+const DECISION_INTELLIGENCE_SYSTEM_PROMPT = `You are the Meta-Cognitive layer of NexusBrain — the brain's "Anterior Cingulate Cortex."
+
+The brain has already computed statistical results AND generated an execution playbook. Your job is DIFFERENT from all other amplifiers — you are the brain's SELF-CRITIC. You think about the brain's own thinking.
+
+Your role: Stress-test the brain's recommendations. Be the devil's advocate. Find the blind spots. Imagine alternative realities. Determine whether the brain's advice is actually worth following.
+
+CRITICAL RULES:
+- Be HONEST — if the brain's confidence is 45%, don't pretend the analysis is strong
+- Devil's advocate must be a STEEL MAN argument — the strongest possible case against the brain's recommendation
+- Alternative hypotheses must be genuinely plausible, not strawmen
+- Counterfactual scenarios must change ONE assumption each (not everything at once)
+- The highest value question must be ANSWERABLE within 2 weeks with data the org can actually collect
+- Regret analysis: think like a decision theorist. What's the expected value of acting vs waiting?
+- If you think the brain is wrong, SAY SO. You serve the human, not the brain's ego.
+
+Respond in JSON format:
+{
+  "devilsAdvocate": "The strongest 3-5 sentence argument AGAINST the brain's recommendation",
+  "blindSpots": ["What the brain can't see 1", "What the brain can't see 2"],
+  "alternativeHypotheses": [
+    {
+      "hypothesis": "An alternative explanation for what the brain found",
+      "whyRankedLower": "Why the brain ranked this lower",
+      "evidenceNeeded": "What would confirm this alternative",
+      "probability": 0.25
+    }
+  ],
+  "counterfactualScenarios": [
+    {
+      "label": "Scenario name",
+      "assumption": "What's different from the brain's assumption",
+      "expectedOutcome": "What happens under this scenario",
+      "probability": 0.2,
+      "playbookImpact": "minor_adjustment|major_revision|abandon"
+    }
+  ],
+  "criticalAssumption": "The ONE assumption that, if wrong, changes everything",
+  "highestValueQuestion": "The single most valuable question to answer next",
+  "regretRecommendation": "proceed|proceed_with_caution|gather_more_data|reconsider",
+  "regretReasoning": "2-3 sentences on why this recommendation, considering expected value of acting vs waiting",
+  "confidence": 0.7
 }`;
 
 const CONSOLIDATION_SYSTEM_PROMPT = `You are the CTO briefing layer of NexusBrain. You receive the full output of the brain's nightly consolidation cycle — what was discovered, what was learned, what predictions were verified, and how the brain changed.
@@ -1189,6 +1265,88 @@ Generate a specific, actionable execution playbook. Phase 1 must be achievable T
   }
 
   // ──────────────────────────────────────────────
+  // V4: Decision Intelligence Generator (Anterior Cingulate Cortex)
+  // ──────────────────────────────────────────────
+
+  /**
+   * Generate LLM-enhanced meta-cognition: devil's advocate, counterfactuals,
+   * blind spots, and regret analysis. The brain's self-critic.
+   * Uses Sonnet (deep model) — this is high-value strategic reasoning.
+   *
+   * Brain Analog: Anterior cingulate cortex — error detection, conflict monitoring,
+   * and self-regulation of cognitive processes.
+   */
+  async function generateDecisionIntelligence(context: {
+    /** Which action type produced this artifact */
+    actionType: string;
+    /** Primary domain */
+    domain: string;
+    /** The original user question */
+    question: string;
+    /** Overall artifact confidence */
+    confidence: number;
+    /** Horizon in days */
+    horizonDays: number;
+    /** The narrative already generated */
+    narrative: string;
+    /** The playbook's Monday Morning Action */
+    mondayMorningAction: string;
+    /** Executive summary of the playbook */
+    executiveSummary: string;
+    /** Formatted artifact data (from formatArtifactForPrompt) */
+    formattedData: string;
+    /** Template-generated meta-cognition (the brain's own assessment) */
+    templateMetaCognition: {
+      confidenceAnchors: string[];
+      blindSpots: string[];
+      devilsAdvocate: string;
+    };
+  }): Promise<EnhancedDecisionIntelligence> {
+    const fallback: EnhancedDecisionIntelligence = {
+      devilsAdvocate: context.templateMetaCognition.devilsAdvocate,
+      blindSpots: context.templateMetaCognition.blindSpots,
+      alternativeHypotheses: [],
+      counterfactualScenarios: [],
+      criticalAssumption: `The brain's causal model for ${context.domain} is accurate.`,
+      highestValueQuestion: `What external factors affect ${context.domain} that the brain doesn't track?`,
+      regretRecommendation: context.confidence >= 0.5 ? 'proceed' : context.confidence >= 0.25 ? 'proceed_with_caution' : 'gather_more_data',
+      regretReasoning: `At ${(context.confidence * 100).toFixed(0)}% confidence, the brain's recommendations should be treated as ${context.confidence >= 0.5 ? 'actionable' : 'directional guidance'}.`,
+      confidence: context.confidence * 0.6,
+    };
+
+    const userMessage = `The brain computed a ${context.actionType} analysis for ${context.domain}. STRESS-TEST this recommendation.
+
+QUESTION ASKED: "${context.question}"
+CONFIDENCE: ${(context.confidence * 100).toFixed(0)}%
+HORIZON: ${context.horizonDays} days
+
+PLAYBOOK SUMMARY:
+${context.executiveSummary}
+
+MONDAY MORNING ACTION:
+${context.mondayMorningAction}
+
+BRAIN'S OWN SELF-ASSESSMENT:
+- Confident about: ${context.templateMetaCognition.confidenceAnchors.join('; ')}
+- Blind spots: ${context.templateMetaCognition.blindSpots.join('; ')}
+- Devil's advocate: ${context.templateMetaCognition.devilsAdvocate}
+
+COMPUTED DATA:
+${context.formattedData.slice(0, 3000)}
+
+Be the brain's harshest critic. What's it missing? Where could it be wrong? Should the user actually follow this advice, or should they get more data first?`;
+
+    return callWithFallback<EnhancedDecisionIntelligence>(
+      'generateDecisionIntelligence',
+      DECISION_INTELLIGENCE_SYSTEM_PROMPT,
+      userMessage,
+      deepModel,
+      fallback,
+      2048  // Long output for thorough meta-analysis
+    );
+  }
+
+  // ──────────────────────────────────────────────
   // Return public API
   // ──────────────────────────────────────────────
 
@@ -1202,6 +1360,7 @@ Generate a specific, actionable execution playbook. Phase 1 must be achievable T
     generateEnhancedImpactSummary,
     enhancePatternExplanation,
     generateExecutionPlaybook,
+    generateDecisionIntelligence,
   };
 }
 

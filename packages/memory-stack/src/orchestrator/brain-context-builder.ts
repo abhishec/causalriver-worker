@@ -253,6 +253,51 @@ export interface BrainRegions {
     name: string;
     description: string;
   };
+
+  // ── Claude-Aspirational Capabilities (8 advanced regions) ──
+  /** Agent Loop — Autonomous multi-step goal execution (Basal Ganglia) */
+  agentLoop?: {
+    plan(goal: string, context?: Record<string, unknown>): Array<{ id: string; objective: string; toolName: string; priority: number }>;
+    getTools(): string[];
+  };
+  /** Long-Context Manager — Smart truncation & relevance filtering (Hippocampus) */
+  longContextManager?: {
+    estimateTokens(text: string): number;
+    fitsInBudget(sections: Array<{ id: string; title: string; content: string; relevance: number; tokenEstimate?: number }>): boolean;
+  };
+  /** RAG Retriever — Real-time retrieval augmented generation (Entorhinal Cortex) */
+  ragRetriever?: {
+    retrieve(query: string, options?: { topK?: number; domains?: string[] }): Promise<{
+      chunks: Array<{ id: string; content: string; score: number; source: { title: string; type: string } }>;
+      citations: Array<{ index: number; title: string; relevance: number }>;
+      grounding: { score: number; category: string };
+      contextPrompt: string;
+    }>;
+  };
+  /** Multi-Modal Inference — Cross-modal understanding (Visual Cortex) */
+  multiModalInference?: {
+    analyzeTimeSeries(input: { values: number[]; domain?: string; metric?: string }): { trend: string; trendStrength: number; anomalies: Array<{ index: number; deviation: number }>; signals: Array<{ type: string; description: string; strength: number }>; narrative: string };
+    analyzeDocument(input: { content: string; type?: string; title?: string }): { keyFacts: Array<{ statement: string; confidence: number }>; domains: string[]; sentiment: { score: number; label: string }; summary: string };
+  };
+  /** Proactive Intelligence — Push-based insight delivery (Amygdala + RAS) */
+  proactiveIntelligence?: {
+    getContextSection(): string;
+    getHistory(limit?: number): Array<{ severity: string; domain: string; message: string; timestamp: Date }>;
+  };
+  /** Session Memory — Per-user context accumulation (Hippocampus + LTM) */
+  sessionMemory?: {
+    recall(query: string, domains?: string[]): { memories: Array<{ type: string; content: string; importance: number }>; promptText: string; relevance: number; totalMemories: number };
+  };
+  /** Structured Output — Schema validation (Wernicke's Area) */
+  structuredOutput?: {
+    listSchemas(): string[];
+  };
+  /** Reasoning Chain — Chain-of-thought surfacing (DLPFC) */
+  reasoningChain?: {
+    getSteps(): Array<{ stepNum: number; region: string; reasoning: string; confidence: number }>;
+    getStats(): { stepCount: number; avgConfidence: number; regions: string[] };
+    finalize(conclusion: string): { promptText: string; confidence: number; strength: string; visualization: string };
+  };
 }
 
 /** Unified intent detection across ALL domains. */
@@ -1435,6 +1480,175 @@ function buildAttentionSection(
 }
 
 // =============================================================================
+// SECTION BUILDERS — Claude-Aspirational Capabilities (8 advanced regions)
+// =============================================================================
+
+function buildAgentLoopSection(
+  agentLoop: NonNullable<BrainRegions['agentLoop']>,
+  intent: BrainIntent,
+  question: string,
+): BrainContextSection | null {
+  // Agent loop planning is most useful for build, diagnose, and general intents
+  if (!['build', 'diagnose', 'predict', 'whatif', 'general'].includes(intent)) return null;
+
+  try {
+    const tools = agentLoop.getTools();
+    const plan = agentLoop.plan(question);
+    if (plan.length === 0 && tools.length <= 1) return null;
+
+    const lines: string[] = ['## Agent Execution Plan'];
+    lines.push(`Available tools: ${tools.join(', ')}`);
+    lines.push(`Proposed steps for this goal: ${plan.length}`);
+    lines.push('');
+
+    for (const step of plan.slice(0, 6)) {
+      lines.push(`${step.priority}. **${step.objective}** (tool: ${step.toolName})`);
+    }
+    if (plan.length > 6) lines.push(`... +${plan.length - 6} more steps`);
+
+    lines.push('', 'If the user asks you to execute this plan, use the agent loop for autonomous step-by-step execution.');
+
+    return {
+      region: 'agent-loop',
+      title: '## Agent Execution Plan',
+      content: lines.join('\n'),
+      relevance: intent === 'build' ? 0.85 : 0.5,
+    };
+  } catch { return null; }
+}
+
+function buildRAGSection(
+  ragResult: { contextPrompt: string; grounding: { score: number; category: string }; chunks: Array<{ id: string }> },
+): BrainContextSection | null {
+  // RAG context is pre-fetched and passed in as a result (async)
+  if (!ragResult.contextPrompt || ragResult.chunks.length === 0) return null;
+
+  return {
+    region: 'rag-retriever',
+    title: '## Retrieved Knowledge (RAG)',
+    content: ragResult.contextPrompt,
+    relevance: Math.max(0.6, ragResult.grounding.score),
+  };
+}
+
+function buildProactiveSection(
+  proactive: NonNullable<BrainRegions['proactiveIntelligence']>,
+  intent: BrainIntent,
+): BrainContextSection | null {
+  try {
+    const context = proactive.getContextSection();
+    if (!context) return null;
+
+    return {
+      region: 'proactive-intelligence',
+      title: '## Proactive Intelligence Alerts',
+      content: context,
+      relevance: intent === 'health' || intent === 'diagnose' ? 0.8 : 0.5,
+    };
+  } catch { return null; }
+}
+
+function buildSessionMemorySection(
+  sessionMemory: NonNullable<BrainRegions['sessionMemory']>,
+  question: string,
+  domains: string[],
+): BrainContextSection | null {
+  try {
+    const recall = sessionMemory.recall(question, domains);
+    if (!recall.promptText || recall.memories.length === 0) return null;
+
+    return {
+      region: 'session-memory',
+      title: '## Session Memory',
+      content: recall.promptText,
+      relevance: Math.max(0.4, recall.relevance),
+    };
+  } catch { return null; }
+}
+
+function buildReasoningChainSection(
+  reasoningChain: NonNullable<BrainRegions['reasoningChain']>,
+  intent: BrainIntent,
+): BrainContextSection | null {
+  // Only include if there are accumulated reasoning steps
+  try {
+    const stats = reasoningChain.getStats();
+    if (stats.stepCount === 0) return null;
+
+    // For explanation-heavy intents, finalize and include the chain
+    if (['diagnose', 'explain', 'debugging', 'incident', 'cascade'].includes(intent)) {
+      const chain = reasoningChain.finalize(`Analysis for ${intent} intent`);
+      return {
+        region: 'reasoning-chain',
+        title: '## Reasoning Chain',
+        content: chain.promptText,
+        relevance: intent === 'diagnose' || intent === 'explain' ? 0.9 : 0.7,
+      };
+    }
+
+    // For other intents, just show stats
+    const lines: string[] = [
+      '## Reasoning Chain (Summary)',
+      `${stats.stepCount} reasoning steps from ${stats.regions.join(', ')}`,
+      `Average confidence: ${(stats.avgConfidence * 100).toFixed(0)}%`,
+    ];
+
+    return {
+      region: 'reasoning-chain',
+      title: '## Reasoning Chain',
+      content: lines.join('\n'),
+      relevance: 0.4,
+    };
+  } catch { return null; }
+}
+
+function buildMultiModalSection(
+  multiModal: NonNullable<BrainRegions['multiModalInference']>,
+  intent: BrainIntent,
+  entities: string[],
+  timeSeries?: Map<string, number[]>,
+): BrainContextSection | null {
+  // Multi-modal is useful when we have time series data to analyze
+  if (!timeSeries || timeSeries.size === 0) return null;
+  if (!['predict', 'diagnose', 'explain', 'health', 'general'].includes(intent)) return null;
+
+  try {
+    const lines: string[] = ['## Multi-Modal Analysis'];
+    let analysisCount = 0;
+
+    for (const [key, values] of timeSeries) {
+      if (analysisCount >= 3) break; // Limit to 3 analyses
+      if (values.length < 3) continue;
+
+      const analysis = multiModal.analyzeTimeSeries({
+        values,
+        domain: key.split('_')[0] || key,
+        metric: key,
+      });
+
+      lines.push('', `### ${key}`);
+      lines.push(analysis.narrative);
+      if (analysis.signals.length > 0) {
+        lines.push('Signals:');
+        for (const sig of analysis.signals.slice(0, 3)) {
+          lines.push(`  - [${sig.type}] ${sig.description} (strength: ${(sig.strength * 100).toFixed(0)}%)`);
+        }
+      }
+      analysisCount++;
+    }
+
+    if (analysisCount === 0) return null;
+
+    return {
+      region: 'multi-modal-inference',
+      title: '## Multi-Modal Analysis',
+      content: lines.join('\n'),
+      relevance: intent === 'predict' || intent === 'diagnose' ? 0.8 : 0.5,
+    };
+  } catch { return null; }
+}
+
+// =============================================================================
 // SECTION BUILDERS — Trained Knowledge (rules, patterns, causal edges from DB)
 // =============================================================================
 
@@ -1828,36 +2042,76 @@ export function createBrainContextBuilder(regions: BrainRegions) {
       }
     }
 
+    // ── Claude-Aspirational Capabilities (8 advanced regions) ──
+    if (regions.agentLoop) {
+      const section = buildAgentLoopSection(regions.agentLoop, intent, question);
+      if (section) { sections.push(section); regionsUsed.push('agent-loop'); }
+    }
+
+    if (regions.proactiveIntelligence) {
+      const section = buildProactiveSection(regions.proactiveIntelligence, intent);
+      if (section) { sections.push(section); regionsUsed.push('proactive-intelligence'); }
+    }
+
+    if (regions.sessionMemory) {
+      const section = buildSessionMemorySection(regions.sessionMemory, question, domains);
+      if (section) { sections.push(section); regionsUsed.push('session-memory'); }
+    }
+
+    if (regions.reasoningChain) {
+      const section = buildReasoningChainSection(regions.reasoningChain, intent);
+      if (section) { sections.push(section); regionsUsed.push('reasoning-chain'); }
+    }
+
+    if (regions.multiModalInference) {
+      const section = buildMultiModalSection(regions.multiModalInference, intent, entities, regions.timeSeries);
+      if (section) { sections.push(section); regionsUsed.push('multi-modal-inference'); }
+    }
+
+    // Note: RAG retriever is async — the copilot route should pre-fetch and pass the result.
+    // The builder accepts a pre-fetched ragResult via the ragRetriever region's retrieve() call.
+
+    // Note: longContextManager and structuredOutput operate AFTER context building —
+    // they are post-processors, not context contributors. The copilot route should use them
+    // to optimize the fullPrompt and validate outputs respectively.
+
     // ── Track what's missing ──
     if (!regions.dependencyGraph) uncertainAreas.push('No dependency graph loaded — structural analysis unavailable');
     if (!regions.expertiseGraph) uncertainAreas.push('No expertise graph loaded — who-knows-what analysis unavailable');
     if (!regions.collaborationGraph) uncertainAreas.push('No collaboration graph loaded — team network analysis unavailable');
 
     // ── Compute confidence (domain-aware) ──
+    // Weighting: trained 35%, structural 15%, causal 20%, introspective 10%, aspirational 20%
     let confidence = 0;
     let maxWeight = 0;
 
-    // Trained knowledge is worth 40% of confidence
-    if (regionsUsed.includes('trained-knowledge')) { confidence += 0.4; maxWeight += 0.4; }
-    else maxWeight += 0.4;
+    // Trained knowledge is worth 35% of confidence
+    if (regionsUsed.includes('trained-knowledge')) { confidence += 0.35; maxWeight += 0.35; }
+    else maxWeight += 0.35;
 
-    // Structural regions are worth 20% total
+    // Structural regions are worth 15% total
     const structuralCount = ['dependency-graph', 'expertise-graph', 'collaboration-graph']
       .filter((r) => regionsUsed.includes(r)).length;
-    confidence += (structuralCount / 3) * 0.2;
-    maxWeight += 0.2;
+    confidence += (structuralCount / 3) * 0.15;
+    maxWeight += 0.15;
 
-    // Causal regions are worth 25% total
+    // Causal regions are worth 20% total
     const causalCount = ['multi-hop-reasoner', 'counterfactual-simulator', 'cascade-tracker']
       .filter((r) => regionsUsed.includes(r)).length;
-    confidence += (causalCount / 3) * 0.25;
-    maxWeight += 0.25;
+    confidence += (causalCount / 3) * 0.20;
+    maxWeight += 0.20;
 
-    // Introspective regions are worth 15% total
+    // Introspective regions are worth 10% total
     const introspectiveCount = ['brain-health-monitor', 'uncertainty-quantifier', 'attention-mechanism']
       .filter((r) => regionsUsed.includes(r)).length;
-    confidence += (introspectiveCount / 3) * 0.15;
-    maxWeight += 0.15;
+    confidence += (introspectiveCount / 3) * 0.10;
+    maxWeight += 0.10;
+
+    // Claude-aspirational regions are worth 20% total
+    const aspirationalRegions = ['agent-loop', 'rag-retriever', 'proactive-intelligence', 'session-memory', 'reasoning-chain', 'multi-modal-inference'];
+    const aspirationalCount = aspirationalRegions.filter((r) => regionsUsed.includes(r)).length;
+    confidence += (aspirationalCount / aspirationalRegions.length) * 0.20;
+    maxWeight += 0.20;
 
     confidence = Math.min(1, confidence);
 

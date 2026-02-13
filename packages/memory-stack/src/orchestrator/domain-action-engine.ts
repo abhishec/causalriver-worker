@@ -98,6 +98,14 @@ export interface ActionArtifact {
   playbook: ExecutionPlaybook | null;
   /** V3: Outcome contract — what this artifact guarantees */
   outcomeContract: OutcomeContract;
+  /** V4: Meta-cognitive self-assessment — the brain's honest evaluation of its own reasoning */
+  metaCognition: MetaCognitiveAssessment | null;
+  /** V4: Counterfactual analysis — stress-testing recommendations against alternative scenarios */
+  counterfactuals: CounterfactualAnalysis | null;
+  /** V4: Adaptive layer — pre-planned pivots and learning agenda for the playbook */
+  adaptiveLayer: AdaptiveLayer | null;
+  /** V4: Decision journal entry — logged for future calibration and learning */
+  decisionJournal: DecisionJournalEntry | null;
 }
 
 export interface ForecastArtifact {
@@ -305,6 +313,192 @@ export interface OutcomeContract {
   modulesUsed: string[];
   /** Was this from real brain data or fallback? */
   computedFromRealData: boolean;
+}
+
+// ============================================================================
+// V4: DECISION INTELLIGENCE — "The Brain That Thinks About Thinking"
+// ============================================================================
+
+/** V4: Meta-cognitive assessment — the brain's honest self-evaluation of its own reasoning.
+ *  Neuroscience analog: Anterior cingulate cortex (ACC) + dorsolateral prefrontal cortex (dlPFC)
+ *  — the regions that detect errors, monitor conflicts, and regulate confidence. */
+export interface MetaCognitiveAssessment {
+  /** How well does the brain understand this domain? (0-1) */
+  domainMastery: number;
+  /** What reasoning approach did the brain use? */
+  reasoningStrategy: 'data_driven' | 'model_driven' | 'analogy_driven' | 'rule_driven' | 'hybrid';
+  /** What the brain is confident about */
+  confidenceAnchors: string[];
+  /** What the brain is uncertain about (honest blindspots) */
+  blindSpots: string[];
+  /** How the brain's reasoning could be wrong (steel-man the counter-argument) */
+  devilsAdvocate: string;
+  /** What would change the brain's mind (falsification criteria) */
+  falsificationCriteria: string[];
+  /** Alternative interpretations the brain considered but ranked lower */
+  alternativeHypotheses: AlternativeHypothesis[];
+  /** Information value: what single piece of data would most improve this analysis? */
+  highestValueQuestion: string;
+  /** Reasoning chain transparency: the actual computational path taken */
+  reasoningTrace: ReasoningTraceStep[];
+}
+
+/** An alternative interpretation the brain considered */
+export interface AlternativeHypothesis {
+  /** The alternative explanation */
+  hypothesis: string;
+  /** Why the brain ranked it lower */
+  whyRankedLower: string;
+  /** What evidence would elevate this hypothesis */
+  evidenceNeeded: string;
+  /** Probability assigned (0-1) */
+  probability: number;
+}
+
+/** A step in the brain's actual reasoning process */
+export interface ReasoningTraceStep {
+  /** Step number */
+  step: number;
+  /** What the brain did */
+  action: string;
+  /** What module performed this step */
+  module: string;
+  /** What input went in */
+  input: string;
+  /** What came out */
+  output: string;
+  /** How long this step took (ms) */
+  durationMs: number;
+}
+
+/** V4: Counterfactual analysis — "what if we had done X differently?" or "what if the world were different?"
+ *  Neuroscience analog: Hippocampus (episodic memory) + prefrontal cortex (simulation)
+ *  — the brain imagines alternative pasts and futures to stress-test its recommendations. */
+export interface CounterfactualAnalysis {
+  /** The baseline scenario (what the brain actually computed) */
+  baseline: CounterfactualScenario;
+  /** Alternative scenarios: what if key assumptions changed? */
+  alternatives: CounterfactualScenario[];
+  /** The single most important assumption that, if wrong, changes everything */
+  criticalAssumption: string;
+  /** Sensitivity: which input variable has the highest leverage on the outcome? */
+  highestLeverageVariable: {
+    variable: string;
+    domain: string;
+    /** How much does a 10% change in this variable affect the outcome? */
+    sensitivityPercent: number;
+    /** Direction of influence */
+    direction: 'positive' | 'negative' | 'nonlinear';
+  };
+  /** Regret analysis: what's the cost of being wrong? */
+  regretAnalysis: {
+    /** Best case if we follow the playbook and it's right */
+    bestCase: string;
+    /** Worst case if we follow the playbook and it's wrong */
+    worstCase: string;
+    /** Cost of inaction (doing nothing) */
+    inactionCost: string;
+    /** Whether the playbook is still worth following given uncertainty */
+    recommendation: 'proceed' | 'proceed_with_caution' | 'gather_more_data' | 'reconsider';
+  };
+}
+
+/** A scenario in counterfactual analysis */
+export interface CounterfactualScenario {
+  /** Scenario label */
+  label: string;
+  /** What's different from baseline */
+  assumption: string;
+  /** Expected outcome under this scenario */
+  expectedOutcome: string;
+  /** Probability of this scenario (0-1) */
+  probability: number;
+  /** Impact on the playbook's recommended actions */
+  playbookImpact: 'unchanged' | 'minor_adjustment' | 'major_revision' | 'abandon';
+}
+
+/** V4: Decision Journal Entry — records the decision context for future learning.
+ *  The brain logs every major recommendation so it can later compare predictions
+ *  to outcomes and calibrate its reasoning. */
+export interface DecisionJournalEntry {
+  /** When this decision was made */
+  timestamp: string;
+  /** The question that triggered this analysis */
+  question: string;
+  /** What the brain recommended */
+  recommendation: string;
+  /** The Monday Morning Action */
+  mondayMorningAction: string;
+  /** Key assumptions behind the recommendation */
+  assumptions: string[];
+  /** What the brain predicted would happen */
+  predictedOutcome: string;
+  /** When to check if the prediction came true */
+  reviewDate: string;
+  /** The confidence at time of decision */
+  confidenceAtDecision: number;
+  /** What would prove the brain wrong */
+  falsificationCriteria: string[];
+  /** Domain and action type for categorization */
+  domain: string;
+  actionType: ActionType;
+  /** Artifact confidence breakdown */
+  confidenceBreakdown: {
+    dataQuality: number;
+    modelFit: number;
+    domainCoverage: number;
+    overall: number;
+  };
+}
+
+/** V4: Adaptive Playbook — a playbook that includes pre-planned adaptations
+ *  based on what Phase 1 might reveal. Real brains don't just plan — they
+ *  plan what to do when the plan fails. */
+export interface AdaptiveLayer {
+  /** Pre-planned pivots: if X happens in Phase 1, do Y instead of Z in Phase 2 */
+  contingencyTriggers: ContingencyTrigger[];
+  /** Signals that should trigger a full re-analysis */
+  reanalysisSignals: string[];
+  /** The learning agenda: what questions should each phase answer? */
+  learningAgenda: LearningQuestion[];
+  /** Decision gates: what must be true to proceed to the next phase? */
+  decisionGates: DecisionGate[];
+}
+
+/** A pre-planned contingency: if X, then Y */
+export interface ContingencyTrigger {
+  /** What to watch for */
+  trigger: string;
+  /** Which phase this applies to */
+  phase: number;
+  /** What to do if triggered */
+  action: string;
+  /** How this changes the overall playbook */
+  playbookRevision: string;
+}
+
+/** A question that a phase should answer for the brain to learn */
+export interface LearningQuestion {
+  /** The question */
+  question: string;
+  /** Which phase should answer it */
+  phase: number;
+  /** How to measure the answer */
+  measurement: string;
+  /** What the brain currently assumes the answer is */
+  currentAssumption: string;
+}
+
+/** A go/no-go decision point between phases */
+export interface DecisionGate {
+  /** Gate name */
+  name: string;
+  /** Between which phases */
+  betweenPhases: [number, number];
+  /** Criteria to proceed */
+  proceedCriteria: string[];
+  /** What to do if criteria not met */
+  fallbackAction: string;
 }
 
 // ── Lightweight Knowledge Context ──────────────────────────────────────
@@ -786,6 +980,10 @@ export function createDomainActionEngine(config: DomainActionEngineConfig) {
       horizonDays,
       playbook: null,
       outcomeContract: null as unknown as OutcomeContract, // Set by execute()
+      metaCognition: null,
+      counterfactuals: null,
+      adaptiveLayer: null,
+      decisionJournal: null,
       metadata: {
         modulesUsed: ['temporal-forecaster', 'context-aware-reasoner'],
         dagNodeCount: dag.nodes.size,
@@ -837,6 +1035,10 @@ export function createDomainActionEngine(config: DomainActionEngineConfig) {
       horizonDays,
       playbook: null,
       outcomeContract: null as unknown as OutcomeContract, // Set by execute()
+      metaCognition: null,
+      counterfactuals: null,
+      adaptiveLayer: null,
+      decisionJournal: null,
       metadata: {
         modulesUsed: ['whatif-simulator'],
         dagNodeCount: dag.nodes.size,
@@ -939,6 +1141,10 @@ export function createDomainActionEngine(config: DomainActionEngineConfig) {
       horizonDays,
       playbook: null,
       outcomeContract: null as unknown as OutcomeContract, // Set by execute()
+      metaCognition: null,
+      counterfactuals: null,
+      adaptiveLayer: null,
+      decisionJournal: null,
       metadata: {
         modulesUsed: ['context-aware-reasoner', 'explanation-generator'],
         dagNodeCount: dag.nodes.size,
@@ -1007,6 +1213,10 @@ export function createDomainActionEngine(config: DomainActionEngineConfig) {
       horizonDays,
       playbook: null,
       outcomeContract: null as unknown as OutcomeContract, // Set by execute()
+      metaCognition: null,
+      counterfactuals: null,
+      adaptiveLayer: null,
+      decisionJournal: null,
       metadata: {
         modulesUsed: ['context-aware-reasoner', 'explanation-generator'],
         dagNodeCount: dag.nodes.size,
@@ -1097,6 +1307,10 @@ export function createDomainActionEngine(config: DomainActionEngineConfig) {
       horizonDays,
       playbook: null,
       outcomeContract: null as unknown as OutcomeContract, // Set by execute()
+      metaCognition: null,
+      counterfactuals: null,
+      adaptiveLayer: null,
+      decisionJournal: null,
       metadata: {
         modulesUsed: Array.from(modulesUsed),
         dagNodeCount: dag.nodes.size,
@@ -1626,6 +1840,547 @@ export function createDomainActionEngine(config: DomainActionEngineConfig) {
     }
   }
 
+  // ── V4: Meta-Cognitive Assessment Builder ───────────────────────────
+
+  function buildMetaCognitiveAssessment(
+    artifact: ActionArtifact,
+    executionTimings: Array<{ step: string; module: string; input: string; output: string; durationMs: number }>,
+  ): MetaCognitiveAssessment {
+    const { domain, actionType, confidence, metadata } = artifact;
+
+    // ── Domain Mastery: how well does the brain know this domain? ──
+    const domainMastery = Math.min(1, (
+      (metadata.dagEdgeCount > 0 ? 0.3 : 0) +
+      (metadata.timeSeriesDomainsLoaded > 3 ? 0.2 : metadata.timeSeriesDomainsLoaded * 0.07) +
+      (metadata.dagNodeCount > 10 ? 0.2 : metadata.dagNodeCount * 0.02) +
+      (confidence > 0.5 ? 0.3 : confidence * 0.6)
+    ));
+
+    // ── Reasoning Strategy: classify what approach the brain took ──
+    let reasoningStrategy: MetaCognitiveAssessment['reasoningStrategy'] = 'data_driven';
+    if (actionType === 'explain') reasoningStrategy = 'model_driven';
+    else if (actionType === 'diagnose') reasoningStrategy = 'rule_driven';
+    else if (actionType === 'composite') reasoningStrategy = 'hybrid';
+    else if (metadata.dagEdgeCount < 5 && metadata.timeSeriesDomainsLoaded > 3) reasoningStrategy = 'data_driven';
+    else if (metadata.dagEdgeCount >= 5) reasoningStrategy = 'model_driven';
+
+    // ── Confidence Anchors: what makes the brain confident ──
+    const confidenceAnchors: string[] = [];
+    if (metadata.dagEdgeCount > 15) confidenceAnchors.push(`Strong causal graph: ${metadata.dagEdgeCount} learned relationships`);
+    if (metadata.timeSeriesDomainsLoaded > 5) confidenceAnchors.push(`Rich signal data: ${metadata.timeSeriesDomainsLoaded} time series loaded`);
+    if (confidence > 0.6) confidenceAnchors.push(`Model confidence above 60% (${(confidence * 100).toFixed(0)}%)`);
+    if (metadata.modulesUsed.length > 3) confidenceAnchors.push(`Multiple brain modules cross-validated: ${metadata.modulesUsed.join(', ')}`);
+    if (artifact.data.type === 'forecast') {
+      const fd = artifact.data as ForecastArtifact;
+      if (fd.drivers.length > 2) confidenceAnchors.push(`${fd.drivers.length} upstream drivers discovered — multi-factor model`);
+    }
+    if (confidenceAnchors.length === 0) confidenceAnchors.push('Limited anchors — treat results as directional guidance, not firm predictions');
+
+    // ── Blind Spots: what the brain doesn't know ──
+    const blindSpots: string[] = [];
+    if (metadata.dagEdgeCount < 10) blindSpots.push(`Sparse causal graph (${metadata.dagEdgeCount} edges) — may miss important relationships`);
+    if (metadata.timeSeriesDomainsLoaded < 5) blindSpots.push(`Limited time series coverage (${metadata.timeSeriesDomainsLoaded} domains) — forecasts may lack context`);
+    if (!metadata.llmNarrativeUsed) blindSpots.push('No LLM narrative enrichment — results lack semantic reasoning layer');
+    if (actionType === 'forecast' && (artifact.data as ForecastArtifact).drivers.length === 0) {
+      blindSpots.push('No upstream drivers found — forecast is based on autoregression only, not causal modeling');
+    }
+    blindSpots.push('External factors (regulation, competition, macroeconomic shifts) are not modeled');
+    blindSpots.push('Human/organizational dynamics (morale, politics, culture) are outside the brain\'s sensor range');
+
+    // ── Devil's Advocate: how could this analysis be wrong? ──
+    const devilsAdvocate = buildDevilsAdvocate(artifact);
+
+    // ── Falsification Criteria: what would change the brain's mind ──
+    const falsificationCriteria: string[] = [];
+    if (artifact.data.type === 'forecast') {
+      const fd = artifact.data as ForecastArtifact;
+      if (fd.table.length > 0) {
+        const lastPredicted = fd.table[fd.table.length - 1].predicted;
+        const firstPredicted = fd.table[0].predicted;
+        const opposite = lastPredicted > firstPredicted ? 'decreases' : 'increases';
+        falsificationCriteria.push(`If ${domain} ${opposite} by >15% within ${Math.ceil(artifact.horizonDays / 3)} days, this forecast is likely wrong`);
+      }
+      if (fd.drivers.length > 0) {
+        falsificationCriteria.push(`If ${fd.drivers[0].domain} decouples from ${domain} (correlation drops below 0.1), the causal model needs revision`);
+      }
+    }
+    if (artifact.data.type === 'simulation') {
+      falsificationCriteria.push(`If the cascade doesn't begin within 2× the predicted timeline, the simulation overestimated propagation speed`);
+    }
+    if (artifact.data.type === 'diagnosis') {
+      const dd = artifact.data as DiagnosisArtifact;
+      if (dd.anomalyExplanation?.mostLikelyCause) {
+        falsificationCriteria.push(`If fixing ${dd.anomalyExplanation.mostLikelyCause.domain} doesn't improve ${domain} within ${dd.anomalyExplanation.mostLikelyCause.lagDays * 2} days, the root cause is elsewhere`);
+      }
+    }
+    falsificationCriteria.push(`If new data reduces confidence below ${(confidenceThreshold * 100).toFixed(0)}%, abandon this analysis and re-run`);
+
+    // ── Alternative Hypotheses ──
+    const alternativeHypotheses: AlternativeHypothesis[] = buildAlternativeHypotheses(artifact);
+
+    // ── Highest Value Question ──
+    const highestValueQuestion = buildHighestValueQuestion(artifact);
+
+    // ── Reasoning Trace ──
+    const reasoningTrace: ReasoningTraceStep[] = executionTimings.map((t, i) => ({
+      step: i + 1,
+      action: t.step,
+      module: t.module,
+      input: t.input,
+      output: t.output,
+      durationMs: t.durationMs,
+    }));
+
+    return {
+      domainMastery,
+      reasoningStrategy,
+      confidenceAnchors,
+      blindSpots,
+      devilsAdvocate,
+      falsificationCriteria,
+      alternativeHypotheses,
+      highestValueQuestion,
+      reasoningTrace,
+    };
+  }
+
+  function buildDevilsAdvocate(artifact: ActionArtifact): string {
+    const { domain, actionType, confidence } = artifact;
+    const confPct = (confidence * 100).toFixed(0);
+
+    switch (actionType) {
+      case 'forecast': {
+        const fd = artifact.data as ForecastArtifact;
+        const topDriver = fd.drivers[0];
+        if (topDriver) {
+          return `This forecast assumes ${topDriver.domain} continues to drive ${domain} (${(topDriver.weight * 100).toFixed(0)}% weight). But correlation is not causation — the ${topDriver.domain}→${domain} link could be confounded by a third variable the brain hasn't observed. At ${confPct}% confidence, there's a ${(100 - confidence * 100).toFixed(0)}% chance the trajectory looks completely different. If you're making a major investment based on this, validate the ${topDriver.domain} connection with domain experts first.`;
+        }
+        return `This forecast at ${confPct}% confidence is based on limited causal evidence. The brain is essentially extrapolating from past patterns, which is notoriously unreliable for startup metrics that can shift abruptly due to product launches, competitive moves, or market shifts.`;
+      }
+      case 'simulate': {
+        const sd = artifact.data as SimulationArtifact;
+        return `This simulation assumes cascades propagate linearly through the DAG, but real business impact is often nonlinear — small shocks can be absorbed, while threshold effects can amplify them unpredictably. The ${sd.simulation.scenario.sourceDomain} scenario uses fixed propagation weights, but in reality organizations adapt (or overreact). The ${(sd.simulation.totalImpactPercent).toFixed(1)}% total impact is a point estimate — the true range could be 2-5× wider.`;
+      }
+      case 'explain': {
+        return `Causal explanations are the brain's most dangerous output — they feel true because they tell a coherent story, but the causal graph is trained on observational data, not experiments. Every ${domain} "cause" the brain identified could be a symptom of a deeper cause it hasn't observed. The reasoning chain should be treated as a hypothesis to test, not a conclusion to act on.`;
+      }
+      case 'diagnose': {
+        const dd = artifact.data as DiagnosisArtifact;
+        const cause = dd.anomalyExplanation?.mostLikelyCause;
+        if (cause) {
+          return `The brain identified ${cause.domain} as the root cause of ${domain} issues, but root cause analysis on observational data is notoriously unreliable. The true cause could be upstream of ${cause.domain} itself, or the correlation could be coincidental timing. Before investing in fixing ${cause.domain}, verify with a small experiment or natural variation.`;
+        }
+        return `The diagnosis is based on statistical patterns, not domain expertise. The brain may have identified symptoms rather than true root causes.`;
+      }
+      case 'composite':
+        return `The composite model averages across forecast + simulation + explanation, which can create false confidence — if all three share the same blind spot (e.g., an unobserved confounding variable), averaging doesn't help. The composite appears more robust, but only if the sub-models are truly independent. Treat the highest-confidence component as the anchor and use the others to probe its weaknesses.`;
+    }
+  }
+
+  function buildAlternativeHypotheses(artifact: ActionArtifact): AlternativeHypothesis[] {
+    const alternatives: AlternativeHypothesis[] = [];
+    const { domain, confidence } = artifact;
+
+    if (artifact.data.type === 'forecast') {
+      const fd = artifact.data as ForecastArtifact;
+      if (fd.drivers.length > 1) {
+        alternatives.push({
+          hypothesis: `${fd.drivers[1]?.domain || 'secondary driver'} is actually the primary driver, not ${fd.drivers[0]?.domain}`,
+          whyRankedLower: `Weight analysis ranked it ${((fd.drivers[1]?.weight || 0) * 100).toFixed(0)}% vs ${((fd.drivers[0]?.weight || 0) * 100).toFixed(0)}%`,
+          evidenceNeeded: `Run a controlled experiment: change ${fd.drivers[1]?.domain} while holding ${fd.drivers[0]?.domain} constant`,
+          probability: Math.min(0.35, (1 - confidence) * 0.5),
+        });
+      }
+      alternatives.push({
+        hypothesis: `${domain} trajectory is driven by external factors (market, regulation, competition) not captured in the brain's signals`,
+        whyRankedLower: 'Brain only models internal signals — external factors are unobserved',
+        evidenceNeeded: 'Compare brain forecast to industry benchmarks and analyst predictions',
+        probability: Math.min(0.3, (1 - confidence) * 0.7),
+      });
+    }
+
+    if (artifact.data.type === 'diagnosis') {
+      const dd = artifact.data as DiagnosisArtifact;
+      if (dd.anomalyExplanation?.alternativeCauses) {
+        for (const alt of dd.anomalyExplanation.alternativeCauses.slice(0, 2)) {
+          alternatives.push({
+            hypothesis: `${alt.domain} is the true root cause, not ${dd.anomalyExplanation.mostLikelyCause?.domain || domain}`,
+            whyRankedLower: `Lower confidence: ${(alt.confidence * 100).toFixed(0)}% vs ${((dd.anomalyExplanation.mostLikelyCause?.confidence || 0) * 100).toFixed(0)}%`,
+            evidenceNeeded: `Isolate ${alt.domain} changes and observe ${domain} response`,
+            probability: alt.confidence * 0.5,
+          });
+        }
+      }
+    }
+
+    if (alternatives.length === 0) {
+      alternatives.push({
+        hypothesis: 'The brain\'s model is fundamentally missing a critical variable',
+        whyRankedLower: 'Cannot detect what it cannot observe',
+        evidenceNeeded: 'Compare brain predictions to actual outcomes over 2-3 cycles',
+        probability: Math.max(0.1, 1 - confidence),
+      });
+    }
+
+    return alternatives;
+  }
+
+  function buildHighestValueQuestion(artifact: ActionArtifact): string {
+    const { domain, metadata } = artifact;
+
+    if (metadata.dagEdgeCount < 5) {
+      return `What other business metrics directly influence ${domain}? The brain only has ${metadata.dagEdgeCount} causal edges — training with more cross-domain signals would dramatically improve analysis quality.`;
+    }
+
+    if (artifact.data.type === 'forecast') {
+      const fd = artifact.data as ForecastArtifact;
+      if (fd.drivers.length > 0) {
+        return `Is the ${fd.drivers[0].domain}→${domain} relationship truly causal, or is there a confounding variable? A small experiment (vary ${fd.drivers[0].domain} intentionally) would be worth more than 100x more observational data.`;
+      }
+    }
+
+    if (artifact.data.type === 'diagnosis') {
+      const dd = artifact.data as DiagnosisArtifact;
+      if (dd.anomalyExplanation?.mostLikelyCause) {
+        return `Can you isolate the ${dd.anomalyExplanation.mostLikelyCause.domain} fix and measure ${domain} response in a controlled way? Observational root cause analysis needs experimental validation.`;
+      }
+    }
+
+    return `What external factors (competition, regulation, market shifts) are affecting ${domain} that the brain's signal network doesn't cover?`;
+  }
+
+  // ── V4: Counterfactual Analysis Builder ──────────────────────────────
+
+  function buildCounterfactualAnalysis(
+    artifact: ActionArtifact,
+    playbook: ExecutionPlaybook | null,
+  ): CounterfactualAnalysis {
+    const { domain, actionType, confidence, horizonDays } = artifact;
+
+    // ── Baseline scenario ──
+    const baseline: CounterfactualScenario = {
+      label: 'Brain\'s Primary Recommendation',
+      assumption: `Current causal model is correct (${(confidence * 100).toFixed(0)}% confidence)`,
+      expectedOutcome: playbook?.executiveSummary || `${actionType} of ${domain} executed as planned`,
+      probability: confidence,
+      playbookImpact: 'unchanged',
+    };
+
+    // ── Build alternative scenarios ──
+    const alternatives: CounterfactualScenario[] = [];
+
+    // Scenario: External shock
+    alternatives.push({
+      label: 'External Disruption',
+      assumption: 'A significant external factor (competition, regulation, market shift) overrides internal dynamics',
+      expectedOutcome: `${domain} trajectory is primarily driven by external forces, making internal interventions less effective. Brain recommendations still directionally correct but magnitude is uncertain.`,
+      probability: Math.min(0.25, (1 - confidence) * 0.4),
+      playbookImpact: 'minor_adjustment',
+    });
+
+    // Scenario: Brain model is fundamentally wrong
+    alternatives.push({
+      label: 'Model Mismatch',
+      assumption: `The brain's causal model has a critical missing variable that invalidates the ${domain} analysis`,
+      expectedOutcome: `Interventions target wrong levers. Need to re-analyze with additional data sources before committing significant resources.`,
+      probability: Math.min(0.2, (1 - confidence) * 0.5),
+      playbookImpact: confidence < 0.4 ? 'major_revision' : 'minor_adjustment',
+    });
+
+    // Scenario: Faster/slower than expected
+    if (artifact.data.type === 'forecast' || artifact.data.type === 'simulation') {
+      alternatives.push({
+        label: 'Velocity Surprise',
+        assumption: `Changes happen 2-3× faster (or slower) than the brain predicts — lag times and propagation speeds are miscalibrated`,
+        expectedOutcome: `Intervention timing is off. Phase 1 review must specifically validate the speed of change, not just direction.`,
+        probability: 0.15,
+        playbookImpact: 'minor_adjustment',
+      });
+    }
+
+    // Action-specific scenarios
+    if (artifact.data.type === 'forecast') {
+      const fd = artifact.data as ForecastArtifact;
+      if (fd.drivers.length > 0) {
+        alternatives.push({
+          label: 'Driver Decoupling',
+          assumption: `${fd.drivers[0].domain} stops influencing ${domain} (relationship breaks down due to regime change)`,
+          expectedOutcome: `Forecast trajectory is unreliable. The ${fd.drivers[0].domain}-focused interventions become irrelevant. Need to identify new drivers.`,
+          probability: Math.min(0.15, (1 - fd.drivers[0].weight) * 0.3),
+          playbookImpact: 'major_revision',
+        });
+      }
+    }
+
+    if (artifact.data.type === 'diagnosis') {
+      const dd = artifact.data as DiagnosisArtifact;
+      if (dd.anomalyExplanation?.alternativeCauses?.[0]) {
+        const alt = dd.anomalyExplanation.alternativeCauses[0];
+        alternatives.push({
+          label: 'Wrong Root Cause',
+          assumption: `${alt.domain} is the real root cause, not ${dd.anomalyExplanation.mostLikelyCause?.domain || 'the identified cause'}`,
+          expectedOutcome: `Fixing the identified root cause has no effect. Need to redirect to ${alt.domain} with a ${alt.lagDays || 14}-day response window.`,
+          probability: alt.confidence * 0.5,
+          playbookImpact: 'major_revision',
+        });
+      }
+    }
+
+    // ── Critical assumption ──
+    const criticalAssumption = buildCriticalAssumption(artifact);
+
+    // ── Highest leverage variable ──
+    const highestLeverageVariable = buildHighestLeverage(artifact);
+
+    // ── Regret analysis ──
+    const regretAnalysis = buildRegretAnalysis(artifact, playbook, alternatives);
+
+    return {
+      baseline,
+      alternatives,
+      criticalAssumption,
+      highestLeverageVariable,
+      regretAnalysis,
+    };
+  }
+
+  function buildCriticalAssumption(artifact: ActionArtifact): string {
+    if (artifact.data.type === 'forecast') {
+      const fd = artifact.data as ForecastArtifact;
+      if (fd.drivers.length > 0) {
+        return `The ${fd.drivers[0].domain}→${artifact.domain} causal relationship (${(fd.drivers[0].weight * 100).toFixed(0)}% weight) remains stable over the ${artifact.horizonDays}-day horizon. If this link breaks, the entire forecast collapses.`;
+      }
+      return `Past ${artifact.domain} patterns continue into the future — no regime change or structural break occurs.`;
+    }
+    if (artifact.data.type === 'simulation') {
+      const sd = artifact.data as SimulationArtifact;
+      return `The cascade from ${sd.simulation.scenario.sourceDomain} propagates through the causal graph as modeled — no dampening, no amplification, no feedback loops the brain hasn't learned.`;
+    }
+    if (artifact.data.type === 'diagnosis') {
+      return `The identified root cause is correct and addressing it will have the predicted downstream effect on ${artifact.domain}.`;
+    }
+    return `The brain's causal graph accurately represents the real relationships in the ${artifact.domain} ecosystem.`;
+  }
+
+  function buildHighestLeverage(artifact: ActionArtifact): CounterfactualAnalysis['highestLeverageVariable'] {
+    if (artifact.data.type === 'forecast') {
+      const fd = artifact.data as ForecastArtifact;
+      if (fd.drivers.length > 0) {
+        const d = fd.drivers[0];
+        return {
+          variable: `${d.domain} signal strength`,
+          domain: d.domain,
+          sensitivityPercent: Math.round(d.contribution * 100 * 1.1), // 10% change × contribution
+          direction: d.weight > 0 ? 'positive' : 'negative',
+        };
+      }
+    }
+    if (artifact.data.type === 'simulation') {
+      const sd = artifact.data as SimulationArtifact;
+      return {
+        variable: `${sd.simulation.scenario.sourceDomain} ${sd.simulation.scenario.direction} magnitude`,
+        domain: sd.simulation.scenario.sourceDomain,
+        sensitivityPercent: Math.round(Math.abs(sd.simulation.totalImpactPercent) * 0.1),
+        direction: sd.simulation.scenario.direction === 'increase' ? 'positive' : 'negative',
+      };
+    }
+    return {
+      variable: `${artifact.domain} data quality`,
+      domain: artifact.domain,
+      sensitivityPercent: Math.round((1 - artifact.confidence) * 50),
+      direction: 'positive',
+    };
+  }
+
+  function buildRegretAnalysis(
+    artifact: ActionArtifact,
+    playbook: ExecutionPlaybook | null,
+    alternatives: CounterfactualScenario[],
+  ): CounterfactualAnalysis['regretAnalysis'] {
+    const confidence = artifact.confidence;
+    const hasHighImpactAlternative = alternatives.some(a => a.playbookImpact === 'major_revision' && a.probability > 0.15);
+
+    const bestCase = playbook && playbook.interventions.length > 0
+      ? `Interventions succeed: ${playbook.interventions[0].expectedImpact}. Confidence improves as predictions validate.`
+      : `Analysis informs good decisions. Brain learns from outcomes and improves.`;
+
+    const worstCase = hasHighImpactAlternative
+      ? `${alternatives.find(a => a.playbookImpact === 'major_revision')?.label}: ${alternatives.find(a => a.playbookImpact === 'major_revision')?.expectedOutcome}`
+      : `Recommendations are directionally off — resources are misallocated for ${Math.ceil(artifact.horizonDays / 4)} days before correction.`;
+
+    const inactionCost = playbook && playbook.interventions.length > 0
+      ? `Missed window: the brain identified ${playbook.interventions.length} time-sensitive interventions. Delay of ${playbook.interventions[0]?.timeToImpactDays || 14} days could reduce effectiveness.`
+      : `Low: the analysis is informational, not time-critical. Gathering more data before acting is reasonable.`;
+
+    let recommendation: CounterfactualAnalysis['regretAnalysis']['recommendation'];
+    if (confidence >= 0.6 && !hasHighImpactAlternative) {
+      recommendation = 'proceed';
+    } else if (confidence >= 0.35) {
+      recommendation = 'proceed_with_caution';
+    } else if (confidence >= 0.15) {
+      recommendation = 'gather_more_data';
+    } else {
+      recommendation = 'reconsider';
+    }
+
+    return { bestCase, worstCase, inactionCost, recommendation };
+  }
+
+  // ── V4: Adaptive Layer Builder ─────────────────────────────────────
+
+  function buildAdaptiveLayer(
+    artifact: ActionArtifact,
+    playbook: ExecutionPlaybook | null,
+  ): AdaptiveLayer {
+    const { domain, actionType, confidence } = artifact;
+
+    // ── Contingency triggers ──
+    const contingencyTriggers: ContingencyTrigger[] = [];
+
+    // Phase 1 contingencies (what if validation fails?)
+    contingencyTriggers.push({
+      trigger: `Phase 1 review reveals the team disputes the brain's top causal driver for ${domain}`,
+      phase: 1,
+      action: `Run an "explain" action targeting the disputed connection. Also run a broader composite model.`,
+      playbookRevision: 'Replace Phase 2 interventions with newly identified drivers from the explain analysis.',
+    });
+
+    if (actionType === 'forecast') {
+      const fd = artifact.data as ForecastArtifact;
+      if (fd.drivers.length > 0) {
+        contingencyTriggers.push({
+          trigger: `${fd.drivers[0].domain} metric moves in the opposite direction from what the brain assumed`,
+          phase: 2,
+          action: `Pause ${fd.drivers[0].domain}-related interventions. Re-run forecast with updated data.`,
+          playbookRevision: `Shift focus to the next strongest driver (${fd.drivers[1]?.domain || 'alternative lever'}) while re-analyzing.`,
+        });
+      }
+    }
+
+    if (actionType === 'simulate') {
+      contingencyTriggers.push({
+        trigger: 'Cascade propagation is faster than predicted (impact seen 2× earlier)',
+        phase: 2,
+        action: 'Accelerate all Phase 2 interventions. Move Phase 3 monitoring to run concurrently.',
+        playbookRevision: 'Compress timeline. What was a 28-day execution becomes 14-day sprint.',
+      });
+    }
+
+    if (actionType === 'diagnose') {
+      contingencyTriggers.push({
+        trigger: `Fixing the identified root cause shows no improvement in ${domain} within expected lag time`,
+        phase: 2,
+        action: 'Investigate alternative causes. Run a fresh diagnosis with the failed fix as new evidence.',
+        playbookRevision: 'Abandon current root cause hypothesis. Pivot to the next-ranked alternative cause.',
+      });
+    }
+
+    // Low confidence trigger
+    if (confidence < 0.5) {
+      contingencyTriggers.push({
+        trigger: `Re-analysis after Phase 1 data collection still shows <50% confidence for ${domain}`,
+        phase: 1,
+        action: `Escalate to manual expert analysis. The brain needs more signal data before its recommendations are reliable.`,
+        playbookRevision: 'Pause automated playbook. Switch to expert-driven approach supplemented by brain data.',
+      });
+    }
+
+    // ── Re-analysis signals ──
+    const reanalysisSignals: string[] = [
+      `Any ${domain} metric moves >2 standard deviations from the brain's prediction`,
+      'A new data source is connected that covers a previously blind domain',
+      `Confidence drops below ${(confidenceThreshold * 100).toFixed(0)}% on re-evaluation`,
+      'An external event (market, regulatory, competitive) invalidates core assumptions',
+      `More than 50% of Phase 1 milestones are disputed by domain experts`,
+    ];
+
+    // ── Learning agenda ──
+    const learningAgenda: LearningQuestion[] = [];
+
+    learningAgenda.push({
+      question: `Is the brain's confidence calibrated? Does ${(confidence * 100).toFixed(0)}% confidence mean the brain is right ~${(confidence * 100).toFixed(0)}% of the time?`,
+      phase: 3,
+      measurement: 'Compare brain predictions to actual outcomes across last 10 analyses',
+      currentAssumption: `Brain confidence is reasonably calibrated (but untested for ${domain})`,
+    });
+
+    if (artifact.data.type === 'forecast') {
+      const fd = artifact.data as ForecastArtifact;
+      if (fd.drivers.length > 0) {
+        learningAgenda.push({
+          question: `Does changing ${fd.drivers[0].domain} actually cause ${domain} to move? (causal vs correlational)`,
+          phase: 2,
+          measurement: `Track ${domain} response after ${fd.drivers[0].domain} interventions with ${fd.drivers[0].lagDays}-day delay`,
+          currentAssumption: `${fd.drivers[0].domain} causally drives ${domain} with ${(fd.drivers[0].weight * 100).toFixed(0)}% weight`,
+        });
+      }
+    }
+
+    learningAgenda.push({
+      question: `What domains affect ${domain} that the brain hasn't discovered yet?`,
+      phase: 1,
+      measurement: 'Ask domain experts: what factors do you believe drive this metric?',
+      currentAssumption: `The brain's ${artifact.metadata.dagEdgeCount}-edge causal graph captures the key relationships`,
+    });
+
+    // ── Decision gates ──
+    const decisionGates: DecisionGate[] = [
+      {
+        name: 'Validation Gate',
+        betweenPhases: [1, 2],
+        proceedCriteria: [
+          'Domain experts confirm (or don\'t dispute) the top 2 brain findings',
+          `Re-run confidence is still ≥${(confidenceThreshold * 100).toFixed(0)}%`,
+          'No critical contingency triggers fired during Phase 1',
+        ],
+        fallbackAction: 'Re-run the brain analysis with Phase 1 learnings as new evidence. Generate revised playbook before proceeding.',
+      },
+      {
+        name: 'Effectiveness Gate',
+        betweenPhases: [2, 3],
+        proceedCriteria: [
+          'At least 1 intervention shows measurable directional impact',
+          'No catastrophic unexpected outcomes from Phase 2 actions',
+          'Team confidence in the approach is ≥ "cautiously optimistic"',
+        ],
+        fallbackAction: 'Pause Phase 3. Conduct retrospective. Either revise interventions or switch to alternative hypothesis.',
+      },
+    ];
+
+    return { contingencyTriggers, reanalysisSignals, learningAgenda, decisionGates };
+  }
+
+  // ── V4: Decision Journal Entry Builder ─────────────────────────────
+
+  function buildDecisionJournalEntry(
+    question: string,
+    artifact: ActionArtifact,
+    playbook: ExecutionPlaybook | null,
+    metaCognition: MetaCognitiveAssessment | null,
+  ): DecisionJournalEntry {
+    const { domain, actionType, confidence, metadata } = artifact;
+
+    return {
+      timestamp: new Date().toISOString(),
+      question,
+      recommendation: playbook?.executiveSummary || artifact.narrative.slice(0, 200),
+      mondayMorningAction: playbook?.mondayMorningAction || 'Review the analysis with your team.',
+      assumptions: metaCognition?.confidenceAnchors || ['Brain data is sufficient for this domain'],
+      predictedOutcome: playbook?.interventions[0]?.expectedImpact || `${actionType} analysis informs decision-making for ${domain}`,
+      reviewDate: new Date(Date.now() + artifact.horizonDays * 24 * 60 * 60 * 1000 * 0.5).toISOString().split('T')[0],
+      confidenceAtDecision: confidence,
+      falsificationCriteria: metaCognition?.falsificationCriteria || [`Confidence drops below ${(confidenceThreshold * 100).toFixed(0)}%`],
+      domain,
+      actionType,
+      confidenceBreakdown: {
+        dataQuality: Math.min(1, metadata.timeSeriesDomainsLoaded / 10),
+        modelFit: confidence,
+        domainCoverage: Math.min(1, metadata.dagNodeCount / 20),
+        overall: confidence,
+      },
+    };
+  }
+
   // ── Main Dispatch ───────────────────────────────────────────────────
 
   async function execute(
@@ -1702,11 +2457,113 @@ export function createDomainActionEngine(config: DomainActionEngineConfig) {
         playbook = await upgradePlaybookWithLLM(templatePlaybook, artifact, question);
       }
 
-      // V3: Attach to artifact
+      // V4: Build Meta-Cognitive Assessment
+      const executionTimings: Array<{ step: string; module: string; input: string; output: string; durationMs: number }> = [
+        {
+          step: `Route intent "${knowledge.intent}" to action "${actionType}"`,
+          module: 'smart-router',
+          input: `question="${question}", intent="${knowledge.intent}"`,
+          output: `actionType="${actionType}", domain="${domain}"`,
+          durationMs: 1,
+        },
+        {
+          step: `Execute ${actionType} for ${domain}`,
+          module: `${actionType}-executor`,
+          input: `domain="${domain}", horizon=${horizonDays}d`,
+          output: `confidence=${(artifact.confidence * 100).toFixed(0)}%, modules=${artifact.metadata.modulesUsed.join(',')}`,
+          durationMs: artifact.durationMs,
+        },
+      ];
+      if (artifact.metadata.llmNarrativeUsed) {
+        executionTimings.push({
+          step: 'LLM narrative enrichment',
+          module: 'brain-amplifier',
+          input: 'template narrative + artifact data',
+          output: 'enriched narrative',
+          durationMs: Date.now() - executeStart - artifact.durationMs,
+        });
+      }
+
+      const metaCognition = buildMetaCognitiveAssessment(
+        { ...artifact, playbook: playbook, outcomeContract },
+        executionTimings,
+      );
+
+      // V4: Build Counterfactual Analysis
+      const counterfactuals = buildCounterfactualAnalysis(
+        { ...artifact, playbook, outcomeContract, metaCognition: null, counterfactuals: null, adaptiveLayer: null, decisionJournal: null },
+        playbook,
+      );
+
+      // V4: Build Adaptive Layer
+      const adaptiveLayer = buildAdaptiveLayer(
+        { ...artifact, playbook, outcomeContract, metaCognition: null, counterfactuals: null, adaptiveLayer: null, decisionJournal: null },
+        playbook,
+      );
+
+      // V4: LLM Decision Intelligence upgrade (enriches meta-cognition + counterfactuals)
+      if (amplifier && !artifact.confidenceGated && playbook) {
+        try {
+          const formattedData = formatArtifactForPrompt({
+            ...artifact, playbook, outcomeContract,
+            metaCognition: null, counterfactuals: null, adaptiveLayer: null, decisionJournal: null,
+          });
+          const llmDecisionIntel = await amplifier.generateDecisionIntelligence({
+            actionType: artifact.actionType,
+            domain: artifact.domain,
+            question,
+            confidence: artifact.confidence,
+            horizonDays: artifact.horizonDays,
+            narrative: artifact.narrative,
+            mondayMorningAction: playbook.mondayMorningAction,
+            executiveSummary: playbook.executiveSummary,
+            formattedData,
+            templateMetaCognition: {
+              confidenceAnchors: metaCognition.confidenceAnchors,
+              blindSpots: metaCognition.blindSpots,
+              devilsAdvocate: metaCognition.devilsAdvocate,
+            },
+          });
+
+          // Merge LLM intelligence into template outputs
+          if (llmDecisionIntel.devilsAdvocate) {
+            metaCognition.devilsAdvocate = llmDecisionIntel.devilsAdvocate;
+          }
+          if (llmDecisionIntel.blindSpots.length > 0) {
+            metaCognition.blindSpots = llmDecisionIntel.blindSpots;
+          }
+          if (llmDecisionIntel.alternativeHypotheses.length > 0) {
+            metaCognition.alternativeHypotheses = llmDecisionIntel.alternativeHypotheses;
+          }
+          if (llmDecisionIntel.highestValueQuestion) {
+            metaCognition.highestValueQuestion = llmDecisionIntel.highestValueQuestion;
+          }
+          if (llmDecisionIntel.counterfactualScenarios.length > 0) {
+            counterfactuals.alternatives = llmDecisionIntel.counterfactualScenarios;
+          }
+          if (llmDecisionIntel.criticalAssumption) {
+            counterfactuals.criticalAssumption = llmDecisionIntel.criticalAssumption;
+          }
+          if (llmDecisionIntel.regretRecommendation) {
+            counterfactuals.regretAnalysis.recommendation = llmDecisionIntel.regretRecommendation;
+          }
+        } catch (err) {
+          log('V4 LLM decision intelligence upgrade failed (using templates):', err);
+        }
+      }
+
+      // V4: Build Decision Journal Entry
+      const decisionJournal = buildDecisionJournalEntry(question, artifact, playbook, metaCognition);
+
+      // V3 + V4: Attach everything to artifact
       artifact = {
         ...artifact,
         playbook,
         outcomeContract,
+        metaCognition,
+        counterfactuals,
+        adaptiveLayer,
+        decisionJournal,
       };
 
       return artifact;
@@ -1742,6 +2599,10 @@ export function createDomainActionEngine(config: DomainActionEngineConfig) {
           modulesUsed: [],
           computedFromRealData: false,
         },
+        metaCognition: null,
+        counterfactuals: null,
+        adaptiveLayer: null,
+        decisionJournal: null,
       };
     }
   }
@@ -1996,6 +2857,21 @@ export function formatArtifactForPrompt(artifact: ActionArtifact): string {
     }
   }
 
+  // V4: Include meta-cognitive assessment in prompt
+  if (artifact.metaCognition) {
+    formatMetaCognitionForPrompt(artifact.metaCognition, parts);
+  }
+
+  // V4: Include counterfactual analysis in prompt
+  if (artifact.counterfactuals) {
+    formatCounterfactualsForPrompt(artifact.counterfactuals, parts);
+  }
+
+  // V4: Include adaptive layer in prompt
+  if (artifact.adaptiveLayer) {
+    formatAdaptiveLayerForPrompt(artifact.adaptiveLayer, parts);
+  }
+
   return parts.join('\n');
 }
 
@@ -2237,6 +3113,106 @@ function formatPlaybookForPrompt(playbook: ExecutionPlaybook, parts: string[]): 
     for (const risk of playbook.risks) {
       parts.push(`  - [${risk.severity.toUpperCase()}] ${risk.risk}`);
       parts.push(`    Mitigation: ${risk.mitigation}`);
+    }
+  }
+}
+
+// ── V4: Meta-Cognition Prompt Formatting ────────────────────────────────
+
+function formatMetaCognitionForPrompt(mc: MetaCognitiveAssessment, parts: string[]): void {
+  parts.push('');
+  parts.push(`## 🧠 META-COGNITION (Brain Self-Assessment)`);
+  parts.push(`Domain Mastery: ${(mc.domainMastery * 100).toFixed(0)}% | Strategy: ${mc.reasoningStrategy}`);
+  parts.push('');
+
+  parts.push(`### Devil's Advocate`);
+  parts.push(mc.devilsAdvocate);
+
+  if (mc.blindSpots.length > 0) {
+    parts.push('');
+    parts.push(`### Blind Spots`);
+    for (const bs of mc.blindSpots) {
+      parts.push(`  ⚠️ ${bs}`);
+    }
+  }
+
+  if (mc.falsificationCriteria.length > 0) {
+    parts.push('');
+    parts.push(`### What Would Prove This Wrong`);
+    for (const fc of mc.falsificationCriteria) {
+      parts.push(`  ❌ ${fc}`);
+    }
+  }
+
+  if (mc.alternativeHypotheses.length > 0) {
+    parts.push('');
+    parts.push(`### Alternative Hypotheses`);
+    for (const ah of mc.alternativeHypotheses) {
+      parts.push(`  - [${(ah.probability * 100).toFixed(0)}%] ${ah.hypothesis}`);
+      parts.push(`    Evidence needed: ${ah.evidenceNeeded}`);
+    }
+  }
+
+  parts.push('');
+  parts.push(`### Highest Value Question`);
+  parts.push(`  💎 ${mc.highestValueQuestion}`);
+}
+
+function formatCounterfactualsForPrompt(cf: CounterfactualAnalysis, parts: string[]): void {
+  parts.push('');
+  parts.push(`## 🔮 COUNTERFACTUAL ANALYSIS`);
+  parts.push(`Critical Assumption: ${cf.criticalAssumption}`);
+  parts.push('');
+
+  parts.push(`### Scenarios`);
+  parts.push(`  📊 Baseline: ${cf.baseline.label} (${(cf.baseline.probability * 100).toFixed(0)}% likely)`);
+  for (const alt of cf.alternatives.slice(0, 4)) {
+    const impactEmoji = alt.playbookImpact === 'unchanged' ? '✅' : alt.playbookImpact === 'minor_adjustment' ? '🟡' : alt.playbookImpact === 'major_revision' ? '🟠' : '🔴';
+    parts.push(`  ${impactEmoji} ${alt.label} (${(alt.probability * 100).toFixed(0)}%): ${alt.assumption}`);
+    parts.push(`     Impact: ${alt.playbookImpact.replace(/_/g, ' ')} — ${alt.expectedOutcome.slice(0, 120)}`);
+  }
+
+  parts.push('');
+  parts.push(`### Highest Leverage Variable`);
+  parts.push(`  📈 ${cf.highestLeverageVariable.variable}: ±10% change → ${cf.highestLeverageVariable.sensitivityPercent}% outcome impact (${cf.highestLeverageVariable.direction})`);
+
+  parts.push('');
+  parts.push(`### Regret Analysis`);
+  parts.push(`  Best case: ${cf.regretAnalysis.bestCase}`);
+  parts.push(`  Worst case: ${cf.regretAnalysis.worstCase}`);
+  parts.push(`  Cost of inaction: ${cf.regretAnalysis.inactionCost}`);
+  parts.push(`  🎯 Recommendation: **${cf.regretAnalysis.recommendation.replace(/_/g, ' ').toUpperCase()}**`);
+}
+
+function formatAdaptiveLayerForPrompt(al: AdaptiveLayer, parts: string[]): void {
+  parts.push('');
+  parts.push(`## 🔄 ADAPTIVE PLAYBOOK`);
+
+  if (al.contingencyTriggers.length > 0) {
+    parts.push('');
+    parts.push(`### Contingency Triggers (If-Then Plans)`);
+    for (const ct of al.contingencyTriggers.slice(0, 4)) {
+      parts.push(`  Phase ${ct.phase}: IF ${ct.trigger}`);
+      parts.push(`    THEN: ${ct.action}`);
+    }
+  }
+
+  if (al.decisionGates.length > 0) {
+    parts.push('');
+    parts.push(`### Decision Gates (Go/No-Go)`);
+    for (const dg of al.decisionGates) {
+      parts.push(`  ${dg.name} (Phase ${dg.betweenPhases[0]}→${dg.betweenPhases[1]})`);
+      parts.push(`    Proceed if: ${dg.proceedCriteria.join(' AND ')}`);
+      parts.push(`    Fallback: ${dg.fallbackAction}`);
+    }
+  }
+
+  if (al.learningAgenda.length > 0) {
+    parts.push('');
+    parts.push(`### Learning Agenda`);
+    for (const lq of al.learningAgenda.slice(0, 3)) {
+      parts.push(`  Phase ${lq.phase}: ${lq.question}`);
+      parts.push(`    Current assumption: ${lq.currentAssumption}`);
     }
   }
 }

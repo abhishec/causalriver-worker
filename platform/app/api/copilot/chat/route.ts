@@ -450,6 +450,39 @@ export async function POST(request: NextRequest) {
         brainRegions.persona = persona;
       }
 
+      // ── Claude-Aspirational Capabilities ──────────────────────────────
+      // These are lightweight, stateless factories — safe to instantiate per request.
+      const {
+        createAgentLoop,
+        createProactiveIntelligence,
+        createSessionMemory,
+        createReasoningChain,
+        createMultiModalInference,
+      } = await import("@nexus-ai/memory-stack");
+
+      // Agent Loop — autonomous multi-step execution planning
+      brainRegions.agentLoop = createAgentLoop({ maxSteps: 10 });
+
+      // Proactive Intelligence — surfaces recent alerts
+      brainRegions.proactiveIntelligence = createProactiveIntelligence();
+
+      // Session Memory — per-user context accumulation
+      brainRegions.sessionMemory = createSessionMemory({
+        userId: user.id,
+        organizationId: orgId,
+      });
+
+      // Reasoning Chain — chain-of-thought surfacing
+      brainRegions.reasoningChain = createReasoningChain({ depth: 'moderate' });
+
+      // Multi-Modal Inference — time series / document analysis
+      brainRegions.multiModalInference = createMultiModalInference();
+
+      // Note: RAG retriever and Long-Context Manager are async/post-processing tools.
+      // RAG should be pre-fetched before buildContext if vector search is available.
+      // Long-Context Manager optimizes the fullPrompt AFTER buildContext.
+      // Structured Output validates responses AFTER LLM generation.
+
       // ── Build unified context from ALL available brain regions ───────
       const builder = createBrainContextBuilder(brainRegions as BrainRegions);
       brainContext = builder.buildContext(message);
