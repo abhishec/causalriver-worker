@@ -4,15 +4,24 @@ frontend:
     preBuild:
       commands:
         - npm install -g pnpm@9
-        - cd website && pnpm install
+        - pnpm install
     build:
       commands:
-        - cd website && npx next build
+        - npx next build
   artifacts:
-    baseDirectory: website/out
+    baseDirectory: out
     files:
       - "**/*"
   cache:
     paths:
-      - website/node_modules/**/*
-      - website/.next/cache/**/*
+      - node_modules/**/*
+      - .next/cache/**/*
+  customHeaders:
+    - pattern: "**/*"
+      headers:
+        - key: Cache-Control
+          value: public, max-age=3600, s-maxage=86400
+    - pattern: "/_next/static/**"
+      headers:
+        - key: Cache-Control
+          value: public, max-age=31536000, immutable

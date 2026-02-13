@@ -64,7 +64,7 @@ const SUMMARY_STATS = [
   { value: "79.6%", label: "Memory Accuracy", detail: "LongMemEval" },
   { value: "0.493", label: "F1 Score", detail: "Nonlinear Causal" },
   { value: "85.0%", label: "Temporal Reasoning", detail: "Best Category" },
-  { value: "1,737", label: "Passing Tests", detail: "54 Test Files" },
+  { value: "2,480", label: "Passing Tests", detail: "92 Test Files" },
   { value: "3", label: "Benchmarks", detail: "Peer-Reviewed" },
 ];
 

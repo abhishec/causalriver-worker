@@ -147,15 +147,67 @@ const BRAIN_REGIONS = [
     analogy: "Like curiosity — the drive to explore what you don't know. The brain actively seeks out missing information to strengthen its understanding.",
     category: "learning",
   },
+  {
+    id: "structural",
+    name: "Knowledge Graph",
+    brainRegion: "Structural Cortex",
+    shortDesc: "Maps dependencies",
+    description: "Builds and maintains a dependency graph of organizational knowledge — who owns what, how components relate, and where expertise lives. Enables blast-radius analysis and dependency-aware impact scoring across the entire system.",
+    color: "from-teal-400 to-cyan-400",
+    textColor: "text-teal-400",
+    borderColor: "border-teal-400/30",
+    bgColor: "bg-teal-400/10",
+    analogy: "Like the brain's structural wiring — the white matter tracts that physically connect regions. This maps how knowledge and systems depend on each other.",
+    category: "perception",
+  },
+  {
+    id: "expertise",
+    name: "Expertise Memory",
+    brainRegion: "Temporal Lobe",
+    shortDesc: "Who knows what",
+    description: "Tracks contributor expertise across topics, languages, and code areas. Builds expertise graphs from commit history, PR reviews, and document authorship. Enables instant expert routing — find the right person for any question.",
+    color: "from-orange-400 to-yellow-400",
+    textColor: "text-orange-400",
+    borderColor: "border-orange-400/30",
+    bgColor: "bg-orange-400/10",
+    analogy: "Like the temporal lobe's role in semantic memory — knowing facts, concepts, and who the experts are in each domain of knowledge.",
+    category: "perception",
+  },
+  {
+    id: "social",
+    name: "Team Dynamics",
+    brainRegion: "Social Cortex",
+    shortDesc: "Maps collaboration",
+    description: "Models collaboration patterns between teams and individuals. Identifies communication bridges, silos, and cross-functional dependencies. Detects when teams that should collaborate aren't, and when knowledge transfer is needed.",
+    color: "from-pink-400 to-rose-400",
+    textColor: "text-pink-400",
+    borderColor: "border-pink-400/30",
+    bgColor: "bg-pink-400/10",
+    analogy: "Like the social cognition areas of the brain — understanding relationships, group dynamics, and how people work together.",
+    category: "monitoring",
+  },
+  {
+    id: "working-memory",
+    name: "Working Memory",
+    brainRegion: "dlPFC",
+    shortDesc: "Holds active context",
+    description: "Maintains the active context for every query — user role, organizational focus, recent interactions, and domain priorities. Enriches every brain response with the right contextual framing. Manages attention span and conversation state.",
+    color: "from-blue-400 to-indigo-400",
+    textColor: "text-blue-400",
+    borderColor: "border-blue-400/30",
+    bgColor: "bg-blue-400/10",
+    analogy: "Like the dorsolateral prefrontal cortex — holding information in mind while you work with it. The brain's scratchpad for active thinking.",
+    category: "realtime",
+  },
 ];
 
 const CATEGORIES = [
-  { key: "all", label: "All Regions", count: 11 },
-  { key: "realtime", label: "Real-Time", count: 4 },
+  { key: "all", label: "All Regions", count: 15 },
+  { key: "realtime", label: "Real-Time", count: 5 },
   { key: "scheduled", label: "Sleep Cycle", count: 2 },
-  { key: "monitoring", label: "Self-Monitoring", count: 2 },
+  { key: "monitoring", label: "Self-Monitoring", count: 3 },
   { key: "learning", label: "Active Learning", count: 2 },
-  { key: "perception", label: "Perception", count: 1 },
+  { key: "perception", label: "Perception", count: 3 },
 ];
 
 export function BrainArchitecture() {
@@ -177,7 +229,7 @@ export function BrainArchitecture() {
           className="mx-auto mb-8 max-w-3xl text-center"
         >
           <h2 className="mb-4 text-3xl font-bold md:text-4xl">
-            11 Brain Regions.{" "}
+            15 Brain Regions.{" "}
             <span className="bg-gradient-to-r from-emerald-400 to-violet-400 bg-clip-text text-transparent">
               One Living System.
             </span>
