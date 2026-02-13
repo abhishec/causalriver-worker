@@ -9,10 +9,9 @@ export const SITE = {
 } as const;
 
 export const NAV_LINKS = [
-  { label: "Watch It Think", href: "#live-brain" },
-  { label: "Benchmarks", href: "#benchmarks" },
-  { label: "Competition", href: "#competition" },
-  { label: "Use Cases", href: "#use-cases" },
+  { label: "Watch It Think", href: "/#live-brain" },
+  { label: "Benchmarks", href: "/#benchmarks" },
+  { label: "Use Cases", href: "/use-cases" },
   { label: "Docs", href: "/docs" },
   { label: "GitHub", href: SITE.github, external: true },
 ] as const;

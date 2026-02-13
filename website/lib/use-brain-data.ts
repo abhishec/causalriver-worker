@@ -180,10 +180,10 @@ export function useBrainData(): BrainHealth {
         let snapshots = data as BrainDailySnapshot[];
 
         // Filter out broken snapshots (concurrent run failures, zero-data entries)
-        // A snapshot is broken if it has 0 signals_processed AND 0 new_connections AND 0 total_connections
-        // OR if total_connections dropped significantly from the previous day (broken consolidation overwrote good data)
+        // A snapshot is broken if signals_processed === 0 AND new_connections === 0
+        // (total_connections can still be >0 from stale data, so don't use it as a validity check)
         const validSnapshots = snapshots.filter(
-          (s) => s.signals_processed > 0 || s.new_connections > 0 || s.total_connections > 0
+          (s) => s.signals_processed > 0 && s.new_connections > 0
         );
         snapshots = validSnapshots.length > 0 ? validSnapshots : snapshots;
 
