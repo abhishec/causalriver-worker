@@ -212,14 +212,19 @@ export class GitCodeTrainerAgent extends BaseTrainingAgent {
   async validate(result: TrainResult): Promise<ValidationResult> {
     const issues: string[] = [];
 
-    if (result.signalsStored === 0) {
-      issues.push('No signals were stored — check GitHub API access');
-    }
-    if (result.packsProcessed === 0) {
-      issues.push('No training packs were processed');
-    }
-    if (this.fetchedData.length < this.repos.length * 0.5) {
-      issues.push(`Only ${this.fetchedData.length}/${this.repos.length} repos were fetched — possible API rate limiting`);
+    // In dry-run mode, relax validation (we intentionally only fetch 1 repo)
+    if (!this.config.dryRun) {
+      if (result.signalsStored === 0) {
+        issues.push('No signals were stored — check GitHub API access');
+      }
+      if (result.packsProcessed === 0) {
+        issues.push('No training packs were processed');
+      }
+      if (this.fetchedData.length < this.repos.length * 0.5) {
+        issues.push(`Only ${this.fetchedData.length}/${this.repos.length} repos were fetched — possible API rate limiting`);
+      }
+    } else {
+      this.log('VALIDATE', `[DRY RUN] Relaxed validation: ${this.fetchedData.length} repos fetched, ${result.signalsStored} signals`);
     }
 
     const score = Math.min(1, (result.signalsStored / 500) * 0.5 + (result.packsProcessed / 8) * 0.5);
