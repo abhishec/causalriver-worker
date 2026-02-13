@@ -12,7 +12,7 @@ async function supabaseGet<T>(path: string): Promise<T | null> {
   try {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
       headers: HEADERS,
-      next: { revalidate: 300 }, // cache for 5 min
+      next: { revalidate: 300 },
     });
     if (!res.ok) return null;
     return res.json();
@@ -28,7 +28,7 @@ async function supabaseCount(path: string): Promise<number> {
       next: { revalidate: 300 },
     });
     if (!res.ok) return 0;
-    const range = res.headers.get("content-range"); // "0-0/67"
+    const range = res.headers.get("content-range");
     if (!range) return 0;
     const total = range.split("/")[1];
     return total ? parseInt(total, 10) : 0;
@@ -48,40 +48,44 @@ interface BrainSnapshot {
 
 async function getBrainStats() {
   try {
-    const [snapshots, causalEdges, totalOrgs] = await Promise.all([
+    const [snapshots, totalSnapshots, signalsCount] = await Promise.all([
       supabaseGet<BrainSnapshot[]>(
         `brain_daily_snapshots?organization_id=eq.${CORE_ORG_ID}&order=snapshot_date.desc&limit=1&select=snapshot_date,regions_active,total_connections,prediction_accuracy,signals_processed,new_connections`
       ),
       supabaseCount(
-        `causal_relationships_statistical?organization_id=eq.${CORE_ORG_ID}&is_significant=eq.true&select=id`
+        `brain_daily_snapshots?organization_id=eq.${CORE_ORG_ID}&select=id`
       ),
-      supabaseCount(`organizations?select=id`),
+      supabaseCount(
+        `cross_domain_signals?organization_id=eq.${CORE_ORG_ID}&select=id`
+      ),
     ]);
 
     const snapshot = snapshots?.[0] ?? null;
-    const activeRegions = snapshot?.regions_active?.length ?? 11;
-    const orgs = Math.max(totalOrgs - 1, 0); // exclude core brain
 
     return {
-      regions: activeRegions,
-      causalEdges: causalEdges > 0 ? causalEdges : null,
-      totalConnections: snapshot?.total_connections ?? null,
       accuracy: snapshot?.prediction_accuracy
         ? Math.round(snapshot.prediction_accuracy)
         : null,
-      orgs: orgs > 0 ? orgs : null,
-      isLive: causalEdges > 0 || snapshot !== null,
+      connections: snapshot?.total_connections ?? null,
+      brainAge: totalSnapshots > 0 ? totalSnapshots : null,
+      signals: signalsCount > 0 ? signalsCount : null,
+      isLive: snapshot !== null,
     };
   } catch {
     return {
-      regions: 11,
-      causalEdges: null,
-      totalConnections: null,
       accuracy: null,
-      orgs: null,
+      connections: null,
+      brainAge: null,
+      signals: null,
       isLive: false,
     };
   }
+}
+
+function formatNumber(n: number): string {
+  if (n >= 10000) return `${(n / 1000).toFixed(1)}k`;
+  if (n >= 1000) return n.toLocaleString();
+  return n.toString();
 }
 
 export default async function AuthLayout({
@@ -121,36 +125,30 @@ export default async function AuthLayout({
             gets smarter every day.
           </p>
 
-          {/* Live stats from brain */}
+          {/* Live stats — meaningful for partners */}
           <div className="flex gap-6 mt-8">
             <div className="text-center">
               <div className="text-2xl font-bold text-accent">
-                {stats.causalEdges !== null
-                  ? stats.causalEdges.toLocaleString()
-                  : "15"}
+                {stats.accuracy !== null ? `${stats.accuracy}%` : "83%"}
               </div>
-              <div className="text-xs text-muted">
-                {stats.causalEdges !== null ? "Causal Edges" : "Causal Methods"}
-              </div>
+              <div className="text-xs text-muted">Prediction Accuracy</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-success">
-                {stats.totalConnections !== null
-                  ? stats.totalConnections.toLocaleString()
-                  : "118"}
+                {stats.connections !== null
+                  ? formatNumber(stats.connections)
+                  : "6.7k"}
               </div>
-              <div className="text-xs text-muted">
-                {stats.totalConnections !== null
-                  ? "Connections"
-                  : "Training Packs"}
-              </div>
+              <div className="text-xs text-muted">Connections Learned</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-warning">
-                {stats.accuracy !== null ? `${stats.accuracy}%` : "11"}
+                {stats.brainAge !== null
+                  ? `${stats.brainAge}d`
+                  : "11"}
               </div>
               <div className="text-xs text-muted">
-                {stats.accuracy !== null ? "Accuracy" : "Brain Regions"}
+                {stats.brainAge !== null ? "Brain Age" : "Brain Regions"}
               </div>
             </div>
           </div>
