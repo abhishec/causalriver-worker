@@ -447,6 +447,75 @@ export function createDomainTransferLearner(config: Partial<DomainTransferConfig
     return priors.sort((a, b) => b.confidence - a.confidence);
   }
 
+  // ── Structural motif extraction ──────────────────────────────────
+
+  /**
+   * Extract common structural motifs (2-3 node subgraphs) from all registered orgs.
+   * Motifs like "engineering → cs_tickets → revenue" that appear across multiple orgs
+   * are strong candidates for structural transfer — entire causal chains transfer as units.
+   *
+   * @param minOrgCount - Minimum number of orgs a motif must appear in (default: 2)
+   * @returns Motifs sorted by confidence descending
+   */
+  function extractStructuralMotifs(minOrgCount: number = 2): Array<{
+    motif: string[];
+    orgCount: number;
+    avgWeights: number[];
+    avgLags: number[];
+    confidence: number;
+  }> {
+    const motifCounts = new Map<string, Array<{ weights: number[]; lags: number[]; orgId: string }>>();
+
+    for (const [orgId, { dag, mappings }] of orgDAGs) {
+      const domainMap = new Map(mappings.map(m => [m.orgDomain.toLowerCase(), m.canonicalDomain]));
+
+      // Extract 2-hop motifs: A → B → C
+      for (const [src, neighbors] of dag.edges) {
+        for (const [mid, edge1] of neighbors) {
+          const midNeighbors = dag.edges.get(mid);
+          if (!midNeighbors) continue;
+          for (const [tgt, edge2] of midNeighbors) {
+            if (tgt === src) continue;
+            const canonSrc = domainMap.get(src.toLowerCase()) ?? src;
+            const canonMid = domainMap.get(mid.toLowerCase()) ?? mid;
+            const canonTgt = domainMap.get(tgt.toLowerCase()) ?? tgt;
+            const key = `${canonSrc}|${canonMid}|${canonTgt}`;
+            if (!motifCounts.has(key)) motifCounts.set(key, []);
+            motifCounts.get(key)!.push({
+              weights: [edge1.weight, edge2.weight],
+              lags: [edge1.lagDays, edge2.lagDays],
+              orgId,
+            });
+          }
+        }
+      }
+    }
+
+    const motifs: Array<{
+      motif: string[]; orgCount: number; avgWeights: number[]; avgLags: number[]; confidence: number;
+    }> = [];
+
+    for (const [key, entries] of motifCounts) {
+      const uniqueOrgs = new Set(entries.map(e => e.orgId)).size;
+      if (uniqueOrgs < minOrgCount) continue;
+
+      const avgW0 = entries.reduce((s, e) => s + e.weights[0], 0) / entries.length;
+      const avgW1 = entries.reduce((s, e) => s + e.weights[1], 0) / entries.length;
+      const avgL0 = Math.round(entries.reduce((s, e) => s + e.lags[0], 0) / entries.length);
+      const avgL1 = Math.round(entries.reduce((s, e) => s + e.lags[1], 0) / entries.length);
+
+      motifs.push({
+        motif: key.split('|'),
+        orgCount: uniqueOrgs,
+        avgWeights: [avgW0, avgW1],
+        avgLags: [avgL0, avgL1],
+        confidence: Math.min(1, uniqueOrgs / (minOrgsForPrior * 3)),
+      });
+    }
+
+    return motifs.sort((a, b) => b.confidence - a.confidence);
+  }
+
   // ── New org bootstrapping ────────────────────────────────────────
 
   /**
@@ -862,13 +931,27 @@ export function createDomainTransferLearner(config: Partial<DomainTransferConfig
 
     /**
      * Bootstrap a new org's DAG with cross-org priors.
+     * If targetIndustry is provided, automatically applies industry-aware discounting.
      */
     bootstrapNewOrg(
       dag: CausalDAG,
       priors?: CausalPrior[],
+      targetIndustry?: string,
     ): BootstrapResult {
-      const resolvedPriors = priors ?? extractUniversalPriors();
+      let resolvedPriors = priors ?? extractUniversalPriors();
+      // Auto-apply industry discounting when target industry is known
+      if (targetIndustry) {
+        resolvedPriors = discountPriorsByIndustry(resolvedPriors, targetIndustry);
+      }
       return bootstrapNewOrg(dag, resolvedPriors);
+    },
+
+    /**
+     * Extract common structural motifs (2-3 node subgraphs) across orgs.
+     * Returns recurring causal chains that transfer as connected units.
+     */
+    extractStructuralMotifs(minOrgCount?: number) {
+      return extractStructuralMotifs(minOrgCount);
     },
 
     /**

@@ -105,7 +105,7 @@ export function createContinuousLearner(
   const eventBuffer: Map<string, number[]> = new Map();
   const updateHistory: GraphUpdate[] = [];
 
-  return {
+  const api = {
     /**
      * Process a new causal event and potentially update the graph
      */
@@ -546,6 +546,53 @@ export function createContinuousLearner(
         }
       }
 
+      // 3-hop compaction: A → X → Y → B
+      // Captures longer indirect chains (e.g., engineering → cs → revenue → churn)
+      for (const [src, srcTargets] of graph.edges) {
+        for (const [mid1, srcToMid1] of srcTargets) {
+          if (Math.abs(srcToMid1.weight) < minIntermediaryWeight) continue;
+          const mid1Targets = graph.edges.get(mid1);
+          if (!mid1Targets) continue;
+
+          for (const [mid2, mid1ToMid2] of mid1Targets) {
+            if (mid2 === src) continue;
+            if (Math.abs(mid1ToMid2.weight) < minIntermediaryWeight) continue;
+            const mid2Targets = graph.edges.get(mid2);
+            if (!mid2Targets) continue;
+
+            for (const [tgt, mid2ToTgt] of mid2Targets) {
+              if (tgt === src || tgt === mid1) continue;
+              if (Math.abs(mid2ToTgt.weight) < minIntermediaryWeight) continue;
+
+              // Compound weight with extra penalty for longer chain (0.85)
+              const compound3 = srcToMid1.weight * mid1ToMid2.weight * mid2ToTgt.weight * 0.85;
+              if (Math.abs(compound3) < 0.05) continue;
+
+              const directEdge = srcTargets.get(tgt);
+              if (!directEdge) {
+                srcTargets.set(tgt, {
+                  weight: compound3,
+                  pValue: Math.max(srcToMid1.pValue, mid1ToMid2.pValue, mid2ToTgt.pValue),
+                  lagDays: srcToMid1.lagDays + mid1ToMid2.lagDays + mid2ToTgt.lagDays,
+                  lastUpdated: new Date(),
+                  sampleSize: Math.min(srcToMid1.sampleSize ?? 0, mid1ToMid2.sampleSize ?? 0, mid2ToTgt.sampleSize ?? 0),
+                  knockoutScore: Math.min(srcToMid1.knockoutScore ?? 0, mid1ToMid2.knockoutScore ?? 0, mid2ToTgt.knockoutScore ?? 0) * 0.7,
+                  isLikelyConfounded: srcToMid1.isLikelyConfounded || mid1ToMid2.isLikelyConfounded || mid2ToTgt.isLikelyConfounded,
+                  coefficientSign: (srcToMid1.coefficientSign ?? 1) * (mid1ToMid2.coefficientSign ?? 1) * (mid2ToTgt.coefficientSign ?? 1),
+                });
+                edgesCreated++;
+              } else if ((compound3 > 0) === (directEdge.weight > 0)) {
+                directEdge.weight = Math.min(1, Math.max(-1, directEdge.weight * 0.75 + compound3 * 0.25));
+                directEdge.lastUpdated = new Date();
+                edgesStrengthened++;
+              }
+              pathsCompacted++;
+              details.push({ from: src, via: `${mid1}→${mid2}`, to: tgt, newWeight: compound3 });
+            }
+          }
+        }
+      }
+
       return { pathsCompacted, edgesCreated, edgesStrengthened, details };
     },
 
@@ -595,6 +642,46 @@ export function createContinuousLearner(
     },
 
     /**
+     * Auto-consolidation: run pruning + compaction if graph exceeds size/staleness thresholds.
+     * Analogous to sleep-driven hippocampal replay — runs when the graph is "bloated" or "stale."
+     *
+     * @param maxEdges - Trigger pruning if edge count exceeds this (default: 200)
+     * @param maxStaleRatio - Trigger if stale edges exceed this fraction (default: 0.4)
+     * @returns Consolidation summary, or null if no action needed
+     */
+    autoConsolidate(
+      maxEdges: number = 200,
+      maxStaleRatio: number = 0.4,
+    ): {
+      triggered: boolean;
+      pruneResult?: { edgesRemoved: number; nodesRemoved: number; reasons: Array<{ source: string; target: string; reason: string }> };
+      compactResult?: { pathsCompacted: number; edgesCreated: number; edgesStrengthened: number };
+    } {
+      // Inline stats check to avoid circular reference to self
+      const now = new Date();
+      let edgeCount = 0;
+      let staleCount = 0;
+      for (const [, targets] of graph.edges) {
+        for (const [, edge] of targets) {
+          edgeCount++;
+          if (edge.lastUpdated) {
+            const ageDays = (now.getTime() - edge.lastUpdated.getTime()) / 86400000;
+            if (ageDays > 60) staleCount++;
+          }
+        }
+      }
+      const staleRatio = edgeCount > 0 ? staleCount / edgeCount : 0;
+      const shouldConsolidate = edgeCount > maxEdges || staleRatio > maxStaleRatio;
+
+      if (!shouldConsolidate) return { triggered: false };
+
+      const pruneResult = api.pruneStaleSubgraph();
+      const compactResult = api.compactParallelPaths();
+
+      return { triggered: true, pruneResult, compactResult };
+    },
+
+    /**
      * Export graph for visualization
      */
     exportForVisualization(): {
@@ -618,6 +705,8 @@ export function createContinuousLearner(
       return { nodes, edges };
     }
   };
+
+  return api;
 }
 
 // ============================================================================

@@ -452,15 +452,15 @@ export function createTemporalForecaster(config: Partial<TemporalForecasterConfi
       const parentSeries = allSeries.get(parent.domain);
       if (!parentSeries || parentSeries.values.length < 3) continue;
 
-      // Use recent parent values to predict target
-      // Parent values at time (now - lag) predict target at time (now)
-      // So parent values at time (now) predict target at time (now + lag)
+      // Use coefficient sign: positive edges mean "parent up → target up",
+      // negative edges mean "parent up → target down" (e.g., deploy_velocity ↑ → churn ↓)
+      const edge = dag.edges.get(parent.domain)?.get(targetDomain);
+      const sign = edge?.coefficientSign ?? 1;
+
       const parentRecent = parentSeries.values.slice(-horizonDays);
-      const contribution = parent.weight;
+      const contribution = parent.weight * sign;
 
       for (let h = 0; h < horizonDays; h++) {
-        // Parent value at h predicts target at h + lag
-        // For forecasting next `horizonDays`, use available parent data
         const parentIdx = Math.min(h, parentRecent.length - 1);
         const parentVal = parentRecent[parentIdx] ?? 0;
 
@@ -469,12 +469,12 @@ export function createTemporalForecaster(config: Partial<TemporalForecasterConfi
         forecasts[h] += parentVal * contribution * lagFit;
       }
 
-      totalWeight += contribution;
+      totalWeight += Math.abs(contribution);
       drivers.push({
         domain: parent.domain,
         weight: parent.weight,
         lagDays: parent.lagDays,
-        contribution,
+        contribution: Math.abs(contribution),
       });
     }
 
@@ -485,11 +485,16 @@ export function createTemporalForecaster(config: Partial<TemporalForecasterConfi
       }
     }
 
-    // Blend with target's own mean (DAG alone may not capture baseline)
+    // Adaptive anchoring: use recent mean (last 14 days) instead of all-time mean,
+    // with anchor strength inversely proportional to DAG confidence
     if (targetSeries && targetSeries.values.length > 0) {
-      const targetMean = targetSeries.values.reduce((s, v) => s + v, 0) / targetSeries.values.length;
+      const recentWindow = targetSeries.values.slice(-Math.min(14, targetSeries.values.length));
+      const recentMean = recentWindow.reduce((s, v) => s + v, 0) / recentWindow.length;
+      // Stronger anchor (higher weight) when DAG evidence is weak
+      const dagConfidence = parents.length > 0 ? Math.min(1, totalWeight / parents.length) : 0;
+      const anchorWeight = 0.3 + 0.3 * (1 - dagConfidence); // 0.3 to 0.6
       for (let h = 0; h < horizonDays; h++) {
-        forecasts[h] = forecasts[h] * 0.6 + targetMean * 0.4; // Anchor to historical mean
+        forecasts[h] = forecasts[h] * (1 - anchorWeight) + recentMean * anchorWeight;
       }
     }
 
