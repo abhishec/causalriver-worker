@@ -936,6 +936,108 @@ export function createBrainHealthMonitor(config: Partial<BrainHealthConfig> = {}
   }
 
   // -----------------------------------------------------------------------
+  // HISTORICAL HEALTH TREND TRACKING
+  // -----------------------------------------------------------------------
+
+  /** Rolling history of health reports for longitudinal trend analysis */
+  const healthHistory: Array<{ timestamp: Date; overallHealth: number; calibrationECE: number; cognitiveLoad: number; degradingDomainCount: number }> = [];
+
+  /**
+   * Record a health snapshot for trend analysis.
+   * Call this after each generateHealthReport to build longitudinal data.
+   */
+  function recordHealthSnapshot(report: HealthReport): void {
+    healthHistory.push({
+      timestamp: report.timestamp,
+      overallHealth: report.overallHealth,
+      calibrationECE: report.calibration.expectedCalibrationError,
+      cognitiveLoad: report.cognitiveLoad.load,
+      degradingDomainCount: report.degradingDomains.length,
+    });
+
+    // Keep max 365 snapshots (1 year of daily snapshots)
+    while (healthHistory.length > 365) {
+      healthHistory.shift();
+    }
+  }
+
+  /**
+   * Analyze health trends over time.
+   * Returns trend direction and magnitude for each health dimension.
+   */
+  function analyzeHealthTrends(windowSize: number = 14): {
+    overallTrend: 'improving' | 'stable' | 'degrading';
+    calibrationTrend: 'improving' | 'stable' | 'degrading';
+    cognitiveLoadTrend: 'improving' | 'stable' | 'degrading';
+    trendMagnitude: number;
+    recentAvgHealth: number;
+    historicalAvgHealth: number;
+    narrative: string;
+  } {
+    if (healthHistory.length < 4) {
+      return {
+        overallTrend: 'stable',
+        calibrationTrend: 'stable',
+        cognitiveLoadTrend: 'stable',
+        trendMagnitude: 0,
+        recentAvgHealth: healthHistory.length > 0 ? healthHistory[healthHistory.length - 1].overallHealth : 0.5,
+        historicalAvgHealth: 0.5,
+        narrative: 'Insufficient history for trend analysis (need at least 4 snapshots).',
+      };
+    }
+
+    const n = healthHistory.length;
+    const splitIdx = Math.max(1, n - windowSize);
+
+    // Split into historical and recent
+    const historical = healthHistory.slice(0, splitIdx);
+    const recent = healthHistory.slice(splitIdx);
+
+    const avg = (arr: number[]) => arr.reduce((s, v) => s + v, 0) / (arr.length || 1);
+
+    const histAvgHealth = avg(historical.map(h => h.overallHealth));
+    const recentAvgHealth = avg(recent.map(h => h.overallHealth));
+    const histAvgECE = avg(historical.map(h => h.calibrationECE));
+    const recentAvgECE = avg(recent.map(h => h.calibrationECE));
+    const histAvgLoad = avg(historical.map(h => h.cognitiveLoad));
+    const recentAvgLoad = avg(recent.map(h => h.cognitiveLoad));
+
+    const threshold = 0.05; // 5% change to count as meaningful trend
+
+    const classify = (recent: number, historical: number, higherIsBetter: boolean): 'improving' | 'stable' | 'degrading' => {
+      const delta = recent - historical;
+      if (Math.abs(delta) < threshold) return 'stable';
+      if (higherIsBetter) return delta > 0 ? 'improving' : 'degrading';
+      return delta < 0 ? 'improving' : 'degrading';
+    };
+
+    const overallTrend = classify(recentAvgHealth, histAvgHealth, true);
+    const calibrationTrend = classify(recentAvgECE, histAvgECE, false); // Lower ECE is better
+    const cognitiveLoadTrend = classify(recentAvgLoad, histAvgLoad, false); // Lower load is better
+
+    const trendMagnitude = Math.abs(recentAvgHealth - histAvgHealth);
+
+    const narrativeParts: string[] = [];
+    narrativeParts.push(`Health trend over last ${recent.length} reports: ${overallTrend} (${(recentAvgHealth * 100).toFixed(0)}% recent vs ${(histAvgHealth * 100).toFixed(0)}% historical).`);
+    if (calibrationTrend !== 'stable') {
+      narrativeParts.push(`Calibration is ${calibrationTrend} (ECE: ${recentAvgECE.toFixed(3)} → ${histAvgECE.toFixed(3)}).`);
+    }
+    if (cognitiveLoadTrend !== 'stable') {
+      narrativeParts.push(`Cognitive load is ${cognitiveLoadTrend} (${(recentAvgLoad * 100).toFixed(0)}% → ${(histAvgLoad * 100).toFixed(0)}%).`);
+    }
+
+    return {
+      overallTrend,
+      calibrationTrend,
+      cognitiveLoadTrend,
+      trendMagnitude: Math.round(trendMagnitude * 1000) / 1000,
+      recentAvgHealth: Math.round(recentAvgHealth * 1000) / 1000,
+      historicalAvgHealth: Math.round(histAvgHealth * 1000) / 1000,
+      narrative: narrativeParts.join(' '),
+    };
+  }
+
+  // -----------------------------------------------------------------------
   // PUBLIC API
   // -----------------------------------------------------------------------
 
@@ -968,10 +1070,22 @@ export function createBrainHealthMonitor(config: Partial<BrainHealthConfig> = {}
       return [...(forecastHistory.get(domain) ?? [])];
     },
 
+    /** Record a health snapshot for longitudinal trend analysis */
+    recordHealthSnapshot,
+
+    /** Analyze health trends over a rolling window */
+    analyzeHealthTrends,
+
+    /** Get the full health history */
+    getHealthHistory(): ReadonlyArray<{ timestamp: Date; overallHealth: number; calibrationECE: number; cognitiveLoad: number; degradingDomainCount: number }> {
+      return [...healthHistory];
+    },
+
     /** Reset all internal state (useful for testing) */
     reset(): void {
       forecastHistory.clear();
       calibrationHistory.length = 0;
+      healthHistory.length = 0;
     },
   };
 }

@@ -653,6 +653,121 @@ export function createCounterfactualSimulator(config: Partial<CounterfactualConf
     },
 
     /**
+     * Simulate a temporal counterfactual: "What if this edge had been different
+     * N days ago? What cascade would have propagated by now?"
+     *
+     * Models cascade propagation through the DAG using lag structure:
+     * - Intervention at time T on edge A→B
+     * - B's downstream effects propagate with lag delays
+     * - At time T + sum(lags), the final target is impacted
+     *
+     * Returns a timeline of when each domain would have been affected.
+     */
+    simulateTemporal(
+      dag: CausalDAG,
+      intervention: CounterfactualIntervention,
+      daysAgo: number,
+    ): {
+      timeline: Array<{ day: number; domain: string; estimatedImpact: number; cumulativeDecay: number }>;
+      totalPropagationDays: number;
+      domainsAffected: number;
+      narrative: string;
+    } {
+      const modifiedDAG = cloneDAG(dag);
+      applyIntervention(modifiedDAG, intervention);
+
+      // BFS through the DAG starting from intervention target, tracking cumulative lag
+      const visited = new Map<string, { day: number; impact: number; decay: number }>();
+      const queue: Array<{ domain: string; cumulativeDays: number; cumulativeWeight: number }> = [];
+
+      // Find the starting domain(s) of the intervention
+      let startDomains: string[] = [];
+      if (intervention.type === 'inject_signal' && intervention.target) {
+        startDomains = [intervention.target];
+      } else if (intervention.source && intervention.target) {
+        startDomains = [intervention.target];
+      } else if (intervention.type === 'remove_node' && intervention.node) {
+        // All neighbors of removed node
+        for (const [src, targets] of dag.edges) {
+          if (targets.has(intervention.node)) {
+            startDomains.push(src);
+          }
+        }
+      }
+
+      for (const domain of startDomains) {
+        queue.push({ domain, cumulativeDays: 0, cumulativeWeight: 1.0 });
+        visited.set(domain, { day: 0, impact: 1.0, decay: 1.0 });
+      }
+
+      while (queue.length > 0) {
+        const { domain, cumulativeDays, cumulativeWeight } = queue.shift()!;
+        const neighbors = modifiedDAG.edges.get(domain);
+        if (!neighbors) continue;
+
+        for (const [tgt, edge] of neighbors) {
+          const arrivalDay = cumulativeDays + edge.lagDays;
+          const propagatedWeight = cumulativeWeight * Math.abs(edge.weight);
+
+          // Temporal decay: signal weakens with time (half-life = 30 days)
+          const temporalDecay = Math.pow(0.5, arrivalDay / 30);
+          const effectiveImpact = propagatedWeight * temporalDecay;
+
+          if (effectiveImpact < 0.01) continue; // Too weak to matter
+          if (arrivalDay > daysAgo) continue; // Hasn't propagated yet
+
+          const existing = visited.get(tgt);
+          if (!existing || effectiveImpact > existing.impact) {
+            visited.set(tgt, { day: arrivalDay, impact: effectiveImpact, decay: temporalDecay });
+            queue.push({ domain: tgt, cumulativeDays: arrivalDay, cumulativeWeight: propagatedWeight });
+          }
+        }
+      }
+
+      // Build timeline sorted by day
+      const timeline: Array<{ day: number; domain: string; estimatedImpact: number; cumulativeDecay: number }> = [];
+      let maxDay = 0;
+
+      for (const [domain, { day, impact, decay }] of visited) {
+        timeline.push({
+          day,
+          domain,
+          estimatedImpact: Math.round(impact * 1000) / 1000,
+          cumulativeDecay: Math.round(decay * 1000) / 1000,
+        });
+        maxDay = Math.max(maxDay, day);
+      }
+
+      timeline.sort((a, b) => a.day - b.day);
+
+      // Narrative
+      const affected = timeline.filter(t => t.day > 0);
+      const narrativeParts = [
+        `Temporal counterfactual: if the ${intervention.type} intervention had occurred ${daysAgo} days ago,`,
+      ];
+      if (affected.length === 0) {
+        narrativeParts.push('no downstream domains would have been affected yet.');
+      } else {
+        narrativeParts.push(
+          `${affected.length} domain(s) would be affected over ${maxDay} days.`,
+        );
+        const strongest = affected.sort((a, b) => b.estimatedImpact - a.estimatedImpact)[0];
+        if (strongest) {
+          narrativeParts.push(
+            `Strongest impact: ${strongest.domain} at day ${strongest.day} (${(strongest.estimatedImpact * 100).toFixed(0)}% of original signal).`,
+          );
+        }
+      }
+
+      return {
+        timeline,
+        totalPropagationDays: maxDay,
+        domainsAffected: affected.length,
+        narrative: narrativeParts.join(' '),
+      };
+    },
+
+    /**
      * Get the configuration.
      */
     getConfig(): CounterfactualConfig {

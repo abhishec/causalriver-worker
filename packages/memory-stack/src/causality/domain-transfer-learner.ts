@@ -667,6 +667,149 @@ export function createDomainTransferLearner(config: Partial<DomainTransferConfig
     return best;
   }
 
+  // ── Auto-Refresh Domain Mappings ──────────────────────────────────
+
+  /**
+   * Refresh domain mappings for an org when its DAG has new nodes.
+   * Re-runs the full canonicalization pipeline including n-gram matching.
+   * Should be called whenever new domains appear in an org's DAG.
+   */
+  function refreshDomainMappings(orgId: string): DomainMapping[] | null {
+    const entry = orgDAGs.get(orgId);
+    if (!entry) return null;
+
+    const newMappings = mapDAGDomains(entry.dag);
+    entry.mappings = newMappings;
+    return newMappings;
+  }
+
+  // ── Per-Industry Transferability Tracking ────────────────────────
+
+  /**
+   * Industry-pair transferability scores.
+   * Tracks whether priors from industry A transfer well to industry B
+   * at a per-edge-type granularity.
+   */
+  const industryTransferability = new Map<string, {
+    successCount: number;
+    failureCount: number;
+    score: number; // 0-1
+  }>();
+
+  /**
+   * Record a transfer outcome for a specific industry pair + edge type.
+   * Over time, this builds a matrix of which cross-industry transfers are safe.
+   */
+  function recordIndustryTransfer(
+    sourceIndustry: string,
+    targetIndustry: string,
+    sourceDomain: string,
+    targetDomain: string,
+    wasHelpful: boolean,
+  ): void {
+    // Track at two granularities: industry-pair and industry-pair+edge
+    const pairKey = `${sourceIndustry}→${targetIndustry}`;
+    const edgeKey = `${pairKey}:${sourceDomain}→${targetDomain}`;
+
+    for (const key of [pairKey, edgeKey]) {
+      if (!industryTransferability.has(key)) {
+        industryTransferability.set(key, { successCount: 0, failureCount: 0, score: 0.5 });
+      }
+      const record = industryTransferability.get(key)!;
+      if (wasHelpful) {
+        record.successCount++;
+      } else {
+        record.failureCount++;
+      }
+      const total = record.successCount + record.failureCount;
+      record.score = total > 0 ? record.successCount / total : 0.5;
+    }
+  }
+
+  /**
+   * Get the transferability score for priors from one industry to another.
+   * Optionally specify edge type for more granular assessment.
+   * Returns 0-1 (1 = always transfers well, 0 = never transfers well).
+   */
+  function getIndustryTransferability(
+    sourceIndustry: string,
+    targetIndustry: string,
+    sourceDomain?: string,
+    targetDomain?: string,
+  ): { score: number; confidence: number; sampleSize: number } {
+    // First check edge-level granularity
+    if (sourceDomain && targetDomain) {
+      const edgeKey = `${sourceIndustry}→${targetIndustry}:${sourceDomain}→${targetDomain}`;
+      const edgeRecord = industryTransferability.get(edgeKey);
+      if (edgeRecord && (edgeRecord.successCount + edgeRecord.failureCount) >= 3) {
+        const total = edgeRecord.successCount + edgeRecord.failureCount;
+        return {
+          score: edgeRecord.score,
+          confidence: Math.min(1, total / 10), // Confidence grows with sample size
+          sampleSize: total,
+        };
+      }
+    }
+
+    // Fall back to industry-pair level
+    const pairKey = `${sourceIndustry}→${targetIndustry}`;
+    const pairRecord = industryTransferability.get(pairKey);
+    if (pairRecord) {
+      const total = pairRecord.successCount + pairRecord.failureCount;
+      return {
+        score: pairRecord.score,
+        confidence: Math.min(1, total / 20), // Need more samples at coarse level
+        sampleSize: total,
+      };
+    }
+
+    // No data — neutral prior
+    return { score: 0.5, confidence: 0, sampleSize: 0 };
+  }
+
+  /**
+   * Apply industry transferability discounting to priors.
+   * Reduces prior weight when cross-industry transfer is known to be unreliable.
+   */
+  function discountPriorsByIndustry(
+    priors: CausalPrior[],
+    targetIndustry: string,
+  ): CausalPrior[] {
+    return priors.map(prior => {
+      if (!prior.industry || prior.industry === targetIndustry) {
+        return prior; // Same industry or universal — no discount
+      }
+
+      const transferability = getIndustryTransferability(
+        prior.industry,
+        targetIndustry,
+        prior.sourceDomain,
+        prior.targetDomain,
+      );
+
+      if (transferability.confidence < 0.2) {
+        return prior; // Not enough data to discount
+      }
+
+      // Discount confidence by transferability score
+      return {
+        ...prior,
+        confidence: Math.round(prior.confidence * transferability.score * 1000) / 1000,
+      };
+    });
+  }
+
+  // ── Progressive Prior Decay ──────────────────────────────────────
+
+  /**
+   * Compute progressive prior decay factor based on org's own evidence.
+   * As the org accumulates its own data, priors should fade naturally.
+   * Factor approaches 0 as orgSampleSize → ∞.
+   */
+  function computePriorDecayFactor(orgSampleSize: number, minSampleForFullDecay: number = 50): number {
+    return minSampleForFullDecay / (minSampleForFullDecay + orgSampleSize);
+  }
+
   // ── Public API ─────────────────────────────────────────────────────
 
   return {
@@ -763,6 +906,55 @@ export function createDomainTransferLearner(config: Partial<DomainTransferConfig
      */
     getTransferHistory(source: string, target: string): TransferAccuracyRecord[] {
       return transferHistory.get(`${source}→${target}`) ?? [];
+    },
+
+    /**
+     * Refresh domain mappings for an org when its DAG has changed.
+     * Re-runs canonicalization including n-gram embedding matching.
+     */
+    refreshDomainMappings(orgId: string): DomainMapping[] | null {
+      return refreshDomainMappings(orgId);
+    },
+
+    /**
+     * Record a cross-industry transfer outcome for transferability learning.
+     */
+    recordIndustryTransfer(
+      sourceIndustry: string,
+      targetIndustry: string,
+      sourceDomain: string,
+      targetDomain: string,
+      wasHelpful: boolean,
+    ): void {
+      recordIndustryTransfer(sourceIndustry, targetIndustry, sourceDomain, targetDomain, wasHelpful);
+    },
+
+    /**
+     * Get transferability score for a specific industry pair (+optional edge type).
+     */
+    getIndustryTransferability(
+      sourceIndustry: string,
+      targetIndustry: string,
+      sourceDomain?: string,
+      targetDomain?: string,
+    ) {
+      return getIndustryTransferability(sourceIndustry, targetIndustry, sourceDomain, targetDomain);
+    },
+
+    /**
+     * Discount priors by cross-industry transferability.
+     * Use this before bootstrapNewOrg to apply industry-aware weighting.
+     */
+    discountPriorsByIndustry(priors: CausalPrior[], targetIndustry: string): CausalPrior[] {
+      return discountPriorsByIndustry(priors, targetIndustry);
+    },
+
+    /**
+     * Compute progressive prior decay factor.
+     * Returns 0-1: high when org has little data, approaches 0 as org evidence grows.
+     */
+    computePriorDecayFactor(orgSampleSize: number, minSampleForFullDecay?: number): number {
+      return computePriorDecayFactor(orgSampleSize, minSampleForFullDecay);
     },
 
     /**

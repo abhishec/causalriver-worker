@@ -336,6 +336,246 @@ export function createContinuousLearner(
     },
 
     /**
+     * Prune stale subgraphs — remove edges below weight/freshness threshold
+     * and disconnected nodes. Mimics memory consolidation where the brain
+     * forgets irrelevant connections to reduce cognitive load.
+     *
+     * @param maxAgeDays - Remove edges not updated within this many days (default: 90)
+     * @param minWeight - Remove edges below this weight (default: 0.02)
+     * @param removeOrphanNodes - Remove nodes with no edges (default: true)
+     * @returns Summary of what was pruned
+     */
+    pruneStaleSubgraph(
+      maxAgeDays: number = 90,
+      minWeight: number = 0.02,
+      removeOrphanNodes: boolean = true,
+    ): { edgesRemoved: number; nodesRemoved: number; reasons: Array<{ source: string; target: string; reason: string }> } {
+      const now = new Date();
+      const reasons: Array<{ source: string; target: string; reason: string }> = [];
+      let edgesRemoved = 0;
+
+      for (const [src, targets] of graph.edges) {
+        const toRemove: string[] = [];
+
+        for (const [tgt, edge] of targets) {
+          let shouldPrune = false;
+          let reason = '';
+
+          // 1. Weight below threshold
+          if (Math.abs(edge.weight) < minWeight) {
+            shouldPrune = true;
+            reason = `Weight ${edge.weight.toFixed(4)} below threshold ${minWeight}`;
+          }
+
+          // 2. Stale — not updated within maxAgeDays
+          if (!shouldPrune && edge.lastUpdated) {
+            const ageDays = (now.getTime() - edge.lastUpdated.getTime()) / (1000 * 60 * 60 * 24);
+            if (ageDays > maxAgeDays) {
+              // BUT: don't prune validated edges that are still strong
+              const isValidated = (edge.knockoutScore ?? 0) > 0.5 && !edge.isLikelyConfounded;
+              if (!isValidated || Math.abs(edge.weight) < 0.1) {
+                shouldPrune = true;
+                reason = `Stale: ${Math.round(ageDays)}d since last update (max: ${maxAgeDays}d)`;
+              }
+            }
+          }
+
+          // 3. Confounded + weak — unreliable evidence
+          if (!shouldPrune && edge.isLikelyConfounded && Math.abs(edge.weight) < 0.15 && (edge.sampleSize ?? 0) < 20) {
+            shouldPrune = true;
+            reason = 'Confounded + weak (weight < 0.15, sampleSize < 20)';
+          }
+
+          // 4. Consistently inaccurate predictions
+          if (!shouldPrune && (edge.predictionCount ?? 0) >= 5 && (edge.predictionAccuracy ?? 1) < 0.2) {
+            shouldPrune = true;
+            reason = `Consistently inaccurate: ${((edge.predictionAccuracy ?? 0) * 100).toFixed(0)}% accuracy over ${edge.predictionCount} predictions`;
+          }
+
+          if (shouldPrune) {
+            toRemove.push(tgt);
+            reasons.push({ source: src, target: tgt, reason });
+          }
+        }
+
+        for (const tgt of toRemove) {
+          targets.delete(tgt);
+          edgesRemoved++;
+        }
+
+        // Clean up empty target maps
+        if (targets.size === 0) {
+          graph.edges.delete(src);
+        }
+      }
+
+      // Remove orphan nodes (no incoming or outgoing edges)
+      let nodesRemoved = 0;
+      if (removeOrphanNodes && edgesRemoved > 0) {
+        const connectedNodes = new Set<string>();
+        for (const [src, targets] of graph.edges) {
+          connectedNodes.add(src);
+          for (const tgt of targets.keys()) {
+            connectedNodes.add(tgt);
+          }
+        }
+
+        const orphans: string[] = [];
+        for (const node of graph.nodes) {
+          if (!connectedNodes.has(node)) {
+            orphans.push(node);
+          }
+        }
+
+        for (const orphan of orphans) {
+          graph.nodes.delete(orphan);
+          nodesRemoved++;
+        }
+      }
+
+      if (edgesRemoved > 0) {
+        updateHistory.push({
+          type: 'edge_weakened',
+          source: 'system',
+          target: 'pruning',
+          timestamp: now,
+          details: { edgesRemoved, nodesRemoved, reason: 'stale_subgraph_pruning' },
+        } as any);
+      }
+
+      return { edgesRemoved, nodesRemoved, reasons };
+    },
+
+    /**
+     * Compact the graph by merging parallel weak-but-consistent paths.
+     * If A→X→B and A→Y→B both exist and are consistently validated,
+     * strengthen the direct A→B edge (creating it if needed) and optionally
+     * archive the intermediaries.
+     *
+     * This is analogous to hippocampal replay where repeated activations
+     * consolidate indirect memories into direct associations.
+     *
+     * @param minIntermediaryWeight - Minimum weight for intermediary edges to be considered (default: 0.1)
+     * @param minValidation - Minimum knockout score for intermediary edges (default: 0.3)
+     * @returns Summary of compaction results
+     */
+    compactParallelPaths(
+      minIntermediaryWeight: number = 0.1,
+      minValidation: number = 0.3,
+    ): { pathsCompacted: number; edgesCreated: number; edgesStrengthened: number; details: Array<{ from: string; via: string; to: string; newWeight: number }> } {
+      let pathsCompacted = 0;
+      let edgesCreated = 0;
+      let edgesStrengthened = 0;
+      const details: Array<{ from: string; via: string; to: string; newWeight: number }> = [];
+
+      // Find all 2-hop paths A→X→B
+      for (const [src, srcTargets] of graph.edges) {
+        for (const [mid, srcToMid] of srcTargets) {
+          // Skip weak/unvalidated intermediary edges
+          if (Math.abs(srcToMid.weight) < minIntermediaryWeight) continue;
+          if ((srcToMid.knockoutScore ?? 0) < minValidation && !srcToMid.isLikelyConfounded) continue;
+
+          const midTargets = graph.edges.get(mid);
+          if (!midTargets) continue;
+
+          for (const [tgt, midToTgt] of midTargets) {
+            if (tgt === src) continue; // Skip cycles
+
+            // Skip weak/unvalidated second hop
+            if (Math.abs(midToTgt.weight) < minIntermediaryWeight) continue;
+            if ((midToTgt.knockoutScore ?? 0) < minValidation && !midToTgt.isLikelyConfounded) continue;
+
+            // Compute compound weight (product with length penalty)
+            const compoundWeight = srcToMid.weight * midToTgt.weight * 0.9; // 0.9 = 2-hop penalty
+            if (Math.abs(compoundWeight) < 0.05) continue; // Too weak to consolidate
+
+            // Check existing direct edge
+            const directEdge = srcTargets.get(tgt);
+
+            if (!directEdge) {
+              // Create new summary edge
+              srcTargets.set(tgt, {
+                weight: compoundWeight,
+                pValue: Math.max(srcToMid.pValue, midToTgt.pValue), // Worst p-value
+                lagDays: srcToMid.lagDays + midToTgt.lagDays,
+                lastUpdated: new Date(),
+                sampleSize: Math.min(srcToMid.sampleSize ?? 0, midToTgt.sampleSize ?? 0),
+                knockoutScore: Math.min(srcToMid.knockoutScore ?? 0, midToTgt.knockoutScore ?? 0) * 0.8,
+                isLikelyConfounded: srcToMid.isLikelyConfounded || midToTgt.isLikelyConfounded,
+                coefficientSign: (srcToMid.coefficientSign ?? 1) * (midToTgt.coefficientSign ?? 1),
+              });
+              edgesCreated++;
+            } else {
+              // Strengthen existing direct edge with indirect evidence
+              // Only if compound evidence agrees with direct edge
+              if ((compoundWeight > 0) === (directEdge.weight > 0)) {
+                const blended = directEdge.weight * 0.7 + compoundWeight * 0.3;
+                directEdge.weight = Math.min(1, Math.max(-1, blended));
+                directEdge.lastUpdated = new Date();
+                edgesStrengthened++;
+              }
+            }
+
+            pathsCompacted++;
+            details.push({
+              from: src,
+              via: mid,
+              to: tgt,
+              newWeight: directEdge ? directEdge.weight : compoundWeight,
+            });
+          }
+        }
+      }
+
+      return { pathsCompacted, edgesCreated, edgesStrengthened, details };
+    },
+
+    /**
+     * Get graph health statistics for memory management.
+     */
+    getGraphStats(): {
+      nodeCount: number;
+      edgeCount: number;
+      avgWeight: number;
+      staleEdgeCount: number;
+      weakEdgeCount: number;
+      confoundedEdgeCount: number;
+      validatedEdgeCount: number;
+    } {
+      const now = new Date();
+      let edgeCount = 0;
+      let weightSum = 0;
+      let stale = 0;
+      let weak = 0;
+      let confounded = 0;
+      let validated = 0;
+
+      for (const [, targets] of graph.edges) {
+        for (const [, edge] of targets) {
+          edgeCount++;
+          weightSum += Math.abs(edge.weight);
+          if (edge.lastUpdated) {
+            const ageDays = (now.getTime() - edge.lastUpdated.getTime()) / 86400000;
+            if (ageDays > 60) stale++;
+          }
+          if (Math.abs(edge.weight) < 0.05) weak++;
+          if (edge.isLikelyConfounded) confounded++;
+          if ((edge.knockoutScore ?? 0) > 0.5 && !edge.isLikelyConfounded) validated++;
+        }
+      }
+
+      return {
+        nodeCount: graph.nodes.size,
+        edgeCount,
+        avgWeight: edgeCount > 0 ? weightSum / edgeCount : 0,
+        staleEdgeCount: stale,
+        weakEdgeCount: weak,
+        confoundedEdgeCount: confounded,
+        validatedEdgeCount: validated,
+      };
+    },
+
+    /**
      * Export graph for visualization
      */
     exportForVisualization(): {
