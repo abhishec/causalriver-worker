@@ -427,7 +427,7 @@ export function createCollaborationGraph(
         signal_value: edge.weight,
         entity_type: 'collaboration',
         entity_id: `${edge.contributorA}::${edge.contributorB}::${edge.interactionType}`,
-        metadata: {
+        signal_metadata: {
           contributor_a: edge.contributorA,
           contributor_b: edge.contributorB,
           interaction_type: edge.interactionType,
@@ -441,14 +441,20 @@ export function createCollaborationGraph(
 
       if (rows.length === 0) return;
 
+      // Delete existing collaboration edges for this org before inserting
+      await supabase
+        .from('cross_domain_signals')
+        .delete()
+        .eq('organization_id', organizationId)
+        .eq('signal_type', 'collaboration_edge')
+        .eq('entity_type', 'collaboration');
+
       const chunkSize = 100;
       for (let i = 0; i < rows.length; i += chunkSize) {
         const chunk = rows.slice(i, i + chunkSize);
         const { error } = await supabase
           .from('cross_domain_signals')
-          .upsert(chunk, {
-            onConflict: 'organization_id,entity_type,entity_id',
-          });
+          .insert(chunk);
         if (error) {
           throw new Error(`Failed to persist collaboration graph: ${error.message}`);
         }
@@ -463,7 +469,7 @@ export function createCollaborationGraph(
 
       const { data, error } = await supabase
         .from('cross_domain_signals')
-        .select('signal_value, metadata, entity_id')
+        .select('signal_value, signal_metadata, entity_id')
         .eq('organization_id', organizationId)
         .eq('signal_type', 'collaboration_edge')
         .eq('entity_type', 'collaboration');
@@ -474,7 +480,7 @@ export function createCollaborationGraph(
 
       if (data) {
         for (const row of data) {
-          const meta = row.metadata || {};
+          const meta = row.signal_metadata || {};
           const key = edgeKey(
             meta.contributor_a,
             meta.contributor_b,

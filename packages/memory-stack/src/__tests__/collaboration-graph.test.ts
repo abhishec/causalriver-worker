@@ -274,7 +274,17 @@ describe('CollaborationGraph', () => {
       const upsertedRows: any[] = [];
       const mockSupabase = {
         from: () => ({
-          upsert: (rows: any[]) => {
+          delete: () => ({
+            eq: () => ({
+              eq: () => ({
+                eq: () => {
+                  upsertedRows.length = 0;
+                  return { error: null };
+                },
+              }),
+            }),
+          }),
+          insert: (rows: any[]) => {
             upsertedRows.push(...rows);
             return { error: null };
           },
@@ -284,7 +294,7 @@ describe('CollaborationGraph', () => {
                 eq: () => ({
                   data: upsertedRows.map(r => ({
                     signal_value: r.signal_value,
-                    metadata: r.metadata,
+                    signal_metadata: r.signal_metadata,
                     entity_id: r.entity_id,
                   })),
                   error: null,

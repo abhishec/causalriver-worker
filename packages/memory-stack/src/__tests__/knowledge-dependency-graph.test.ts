@@ -647,7 +647,17 @@ describe('Knowledge Dependency Graph', () => {
       const stored: any[] = [];
       const mockSupabase = {
         from: (table: string) => ({
-          upsert: (data: any[]) => {
+          delete: () => ({
+            eq: (_field: string, _val: string) => ({
+              eq: (_f2: string, _v2: string) => ({
+                eq: (_f3: string, _v3: string) => {
+                  stored.length = 0; // Clear stored data
+                  return { error: null };
+                },
+              }),
+            }),
+          }),
+          insert: (data: any[]) => {
             stored.push(...data);
             return { error: null };
           },
@@ -657,7 +667,6 @@ describe('Knowledge Dependency Graph', () => {
                 eq: (_f3: string, _v3: string) => ({
                   data: stored.map(row => ({
                     ...row,
-                    signal_metadata: row.metadata,
                   })),
                   error: null,
                 }),

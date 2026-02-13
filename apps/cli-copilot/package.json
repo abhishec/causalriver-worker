@@ -8,6 +8,8 @@
   },
   "scripts": {
     "start": "npx tsx src/index.ts",
+    "connect": "npx tsx src/connect-repo.ts",
+    "ingest-local": "npx tsx src/ingest-local.ts",
     "dev": "npx tsx --watch src/index.ts",
     "build": "tsup src/index.ts --format esm --dts"
   },

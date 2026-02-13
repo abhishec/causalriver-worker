@@ -327,7 +327,7 @@ export async function POST(request: Request) {
       signal_value: (fi.symbols?.length || 0) / 100, // normalized
       entity_type: "code_file",
       entity_id: fi.filePath,
-      metadata: {
+      signal_metadata: {
         language: fi.language,
         symbolCount: fi.symbols?.length || 0,
         importCount: fi.imports?.length || 0,

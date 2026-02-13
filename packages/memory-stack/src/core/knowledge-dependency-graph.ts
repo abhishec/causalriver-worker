@@ -910,7 +910,7 @@ export function createKnowledgeDependencyGraph(
         entity_type: 'dependency_edge',
         entity_id: edgeKey(edge.sourceId, edge.targetId, edge.dependencyType),
         signal_timestamp: edge.lastSeenAt.toISOString(),
-        metadata: {
+        signal_metadata: {
           source_id: edge.sourceId,
           target_id: edge.targetId,
           dependency_type: edge.dependencyType,
@@ -923,15 +923,21 @@ export function createKnowledgeDependencyGraph(
 
       if (rows.length === 0) return;
 
-      // Chunked upsert for large graphs (100 rows per batch)
+      // Delete existing dependency edges for this org before inserting
+      await supabase
+        .from('cross_domain_signals')
+        .delete()
+        .eq('organization_id', organizationId)
+        .eq('signal_type', 'knowledge_dependency')
+        .eq('entity_type', 'dependency_edge');
+
+      // Chunked insert for large graphs (100 rows per batch)
       const chunkSize = 100;
       for (let i = 0; i < rows.length; i += chunkSize) {
         const chunk = rows.slice(i, i + chunkSize);
         const { error } = await supabase
           .from('cross_domain_signals')
-          .upsert(chunk, {
-            onConflict: 'organization_id,entity_type,entity_id',
-          });
+          .insert(chunk);
         if (error) {
           throw new Error(`Failed to persist knowledge dependency graph: ${error.message}`);
         }
