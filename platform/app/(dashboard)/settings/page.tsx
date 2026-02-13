@@ -10,10 +10,29 @@ export const metadata = { title: "Settings" };
 export default async function SettingsPage() {
   const supabase = await createClient();
 
+  // Fetch the user's org from org_members
+  const { data: { user } } = await supabase.auth.getUser();
+  const { data: membership } = await supabase
+    .from("org_members")
+    .select("organization_id, role")
+    .eq("user_id", user?.id || "")
+    .order("joined_at", { ascending: true })
+    .limit(1)
+    .single();
+
+  const orgId = membership?.organization_id || CORE_ORG_ID;
+
+  // Fetch the org details
+  const { data: org } = await supabase
+    .from("organizations")
+    .select("id, name, slug, plan")
+    .eq("id", orgId)
+    .single();
+
   const budgetResult = await supabase
     .from("cost_budget_config")
     .select("*")
-    .eq("organization_id", CORE_ORG_ID)
+    .eq("organization_id", orgId)
     .single();
 
   const budget = budgetResult.data;
@@ -39,7 +58,7 @@ export default async function SettingsPage() {
             </label>
             <input
               type="text"
-              defaultValue="NexusBrain Core"
+              defaultValue={org?.name || "Your Organization"}
               readOnly
               className="w-full rounded-lg bg-input border border-input-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-input-focus"
             />
@@ -50,7 +69,7 @@ export default async function SettingsPage() {
             </label>
             <input
               type="text"
-              defaultValue="nexusbrain-core"
+              defaultValue={org?.slug || "your-org"}
               readOnly
               className="w-full rounded-lg bg-input border border-input-border px-3 py-2 text-sm text-muted-foreground focus:outline-none focus:ring-2 focus:ring-input-focus"
             />
