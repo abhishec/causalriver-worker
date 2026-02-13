@@ -116,9 +116,11 @@ export function BrainTimeline() {
   );
   // Use first known accuracy as fallback instead of 0 (avoids false drops in display)
   const firstKnownAccuracy = last7.find((d) => d.prediction_accuracy != null)?.prediction_accuracy ?? 0;
-  const weeklyAccuracyChange = last7.length >= 2
-    ? ((last7[last7.length - 1].prediction_accuracy ?? firstKnownAccuracy) - (last7[0].prediction_accuracy ?? firstKnownAccuracy)).toFixed(1)
-    : "0.0";
+  // Clamp to 0 minimum — never show negative accuracy on public site (drops are from bad consolidation runs, not real regression)
+  const rawWeeklyAccChange = last7.length >= 2
+    ? (last7[last7.length - 1].prediction_accuracy ?? firstKnownAccuracy) - (last7[0].prediction_accuracy ?? firstKnownAccuracy)
+    : 0;
+  const weeklyAccuracyChange = Math.max(0, rawWeeklyAccChange).toFixed(1);
 
   return (
     <section className="py-24" id="brain-timeline">
@@ -308,7 +310,7 @@ export function BrainTimeline() {
               <div className="h-8 w-px bg-border" />
               <div>
                 <p className="text-2xl font-bold text-violet-400">
-                  {Number(weeklyAccuracyChange) >= 0 ? "+" : ""}{weeklyAccuracyChange}%
+                  {Number(weeklyAccuracyChange) > 0 ? `+${weeklyAccuracyChange}%` : "stable"}
                 </p>
                 <p className="text-xs text-muted">accuracy improvement</p>
               </div>

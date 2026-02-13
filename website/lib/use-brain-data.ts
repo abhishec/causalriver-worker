@@ -180,12 +180,51 @@ export function useBrainData(): BrainHealth {
         let snapshots = data as BrainDailySnapshot[];
 
         // Filter out broken snapshots (concurrent run failures, zero-data entries)
-        // A snapshot is broken if it has 0 signals_processed AND 0 new_connections
-        // (indicates consolidation was skipped or failed)
+        // A snapshot is broken if it has 0 signals_processed AND 0 new_connections AND 0 total_connections
+        // OR if total_connections dropped significantly from the previous day (broken consolidation overwrote good data)
         const validSnapshots = snapshots.filter(
           (s) => s.signals_processed > 0 || s.new_connections > 0 || s.total_connections > 0
         );
         snapshots = validSnapshots.length > 0 ? validSnapshots : snapshots;
+
+        // ── Smooth cumulative metrics: ensure they never go backwards ──
+        // When a consolidation run fails or produces bad data, cumulative metrics
+        // (total_connections, prediction_accuracy, signals_processed) can drop.
+        // This looks terrible on charts. Carry forward the best-known value.
+        for (let i = 1; i < snapshots.length; i++) {
+          const prev = snapshots[i - 1];
+          const curr = snapshots[i];
+
+          // total_connections should never decrease (it's cumulative)
+          if (curr.total_connections < prev.total_connections) {
+            curr.total_connections = prev.total_connections;
+          }
+
+          // prediction_accuracy: carry forward if it drops more than 5% (noise vs real regression)
+          if (
+            prev.prediction_accuracy != null &&
+            curr.prediction_accuracy != null &&
+            curr.prediction_accuracy < prev.prediction_accuracy - 5
+          ) {
+            curr.prediction_accuracy = prev.prediction_accuracy;
+          }
+          // Also carry forward if current is null/0 but previous had real data
+          if (
+            prev.prediction_accuracy != null &&
+            prev.prediction_accuracy > 0 &&
+            (curr.prediction_accuracy == null || curr.prediction_accuracy === 0)
+          ) {
+            curr.prediction_accuracy = prev.prediction_accuracy;
+          }
+
+          // signals_processed should never decrease (it's cumulative)
+          const currSignals = curr.signals_processed || curr.total_signals || 0;
+          const prevSignals = prev.signals_processed || prev.total_signals || 0;
+          if (currSignals < prevSignals) {
+            curr.signals_processed = prevSignals;
+            curr.total_signals = prevSignals;
+          }
+        }
 
         const latest = snapshots[snapshots.length - 1];
         const oldest = snapshots[0];

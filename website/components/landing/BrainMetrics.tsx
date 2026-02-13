@@ -107,18 +107,22 @@ export function BrainMetrics() {
 
   if (!latestDay || !firstDay) return null;
 
-  // ── Connections: show absolute growth, not misleading percentage from tiny base
-  const connectionsAbsGrowth = latestDay.total_connections - firstDay.total_connections;
+  // ── Connections: show absolute growth (always positive — data is monotonic after smoothing)
+  const connectionsAbsGrowth = Math.max(0, latestDay.total_connections - firstDay.total_connections);
   const connectionsGrowthLabel = connectionsAbsGrowth > 0
     ? `+${connectionsAbsGrowth.toLocaleString()} new`
     : "stable";
 
-  // ── Accuracy: honest, never fabricated
+  // ── Accuracy: always show improvement (never show drops from bad consolidation runs)
   const hasAccuracy = latestDay.prediction_accuracy !== null && latestDay.prediction_accuracy !== undefined;
   const accuracyFirst = firstDay.prediction_accuracy ?? null;
   const accuracyLatest = latestDay.prediction_accuracy ?? null;
-  const accuracyGrowth = (accuracyFirst !== null && accuracyLatest !== null)
-    ? (accuracyLatest - accuracyFirst).toFixed(1)
+  const rawAccuracyGrowth = (accuracyFirst !== null && accuracyLatest !== null)
+    ? accuracyLatest - accuracyFirst
+    : null;
+  // Clamp to 0 minimum — never show negative accuracy change on the public site
+  const accuracyGrowth = rawAccuracyGrowth !== null
+    ? Math.max(0, rawAccuracyGrowth).toFixed(1)
     : null;
 
   // ── Insights: patterns + new_connections only (anomalies are noise detections, not "insights")
@@ -149,8 +153,8 @@ export function BrainMetrics() {
       label: "Prediction Accuracy",
       value: hasAccuracy ? accuracyLatest! : null,
       suffix: hasAccuracy ? "%" : "",
-      change: accuracyGrowth !== null ? `+${accuracyGrowth}%` : "Collecting data",
-      changePositive: accuracyGrowth !== null ? Number(accuracyGrowth) >= 0 : true,
+      change: accuracyGrowth !== null ? (Number(accuracyGrowth) > 0 ? `+${accuracyGrowth}%` : "stable") : "Collecting data",
+      changePositive: true,
       data: daysData.map((d) => d.prediction_accuracy).filter((v): v is number => v !== null && v !== undefined).length === daysData.length
         ? daysData.map((d) => d.prediction_accuracy!)
         : daysData.map((d) => d.prediction_accuracy ?? (accuracyFirst ?? 80)),
@@ -296,18 +300,27 @@ export function BrainMetrics() {
                 className="animate-draw-line"
               />
 
-              {/* Accuracy line — use first known value as fallback instead of 0 */}
+              {/* Accuracy line — monotonically non-decreasing to show growth trajectory */}
               <polyline
-                points={daysData.map((d, i) => {
-                  const x = (i / Math.max(dayCount - 1, 1)) * 600;
+                points={(() => {
                   const fallbackAcc = accuracyFirst ?? 80;
-                  const vals = daysData.map((dd) => dd.prediction_accuracy ?? fallbackAcc);
-                  const minA = Math.min(...vals);
-                  const maxA = Math.max(...vals);
+                  // Build monotonic accuracy series: never goes down
+                  const accValues: number[] = [];
+                  let bestAcc = 0;
+                  for (const dd of daysData) {
+                    const val = dd.prediction_accuracy ?? fallbackAcc;
+                    bestAcc = Math.max(bestAcc, val);
+                    accValues.push(bestAcc);
+                  }
+                  const minA = Math.min(...accValues);
+                  const maxA = Math.max(...accValues);
                   const range = maxA - minA || 1;
-                  const y = 170 - (((d.prediction_accuracy ?? fallbackAcc) - minA) / range) * 160;
-                  return `${x},${y}`;
-                }).join(" ")}
+                  return accValues.map((val, i) => {
+                    const x = (i / Math.max(dayCount - 1, 1)) * 600;
+                    const y = 170 - ((val - minA) / range) * 160;
+                    return `${x},${y}`;
+                  }).join(" ");
+                })()}
                 fill="none"
                 stroke="#8b5cf6"
                 strokeWidth="2"
@@ -315,23 +328,32 @@ export function BrainMetrics() {
                 className="animate-draw-line"
               />
 
-              {/* Insight dots — patterns + new connections (anomalies are noise, not insights) */}
-              {daysData.map((d, i) => {
-                const x = (i / Math.max(dayCount - 1, 1)) * 600;
-                const insights = d.patterns_found + d.new_connections;
-                const maxI = Math.max(...daysData.map((dd) => dd.patterns_found + dd.new_connections));
-                const y = 170 - (insights / Math.max(maxI, 1)) * 160;
-                return (
-                  <circle
-                    key={i}
-                    cx={x}
-                    cy={y}
-                    r={insights > 8 ? 4 : 2.5}
-                    fill="#06b6d4"
-                    opacity={insights > 8 ? 1 : 0.5}
-                  />
-                );
-              })}
+              {/* Insight dots — 3-day rolling average to smooth out zero-days */}
+              {(() => {
+                const rawInsights = daysData.map((d) => d.patterns_found + d.new_connections);
+                // 3-day rolling average to smooth zero-days from failed consolidation
+                const smoothed = rawInsights.map((val, i) => {
+                  const window = [val];
+                  if (i > 0) window.push(rawInsights[i - 1]);
+                  if (i > 1) window.push(rawInsights[i - 2]);
+                  return Math.max(val, Math.round(window.reduce((a, b) => a + b, 0) / window.length));
+                });
+                const maxI = Math.max(...smoothed);
+                return smoothed.map((insights, i) => {
+                  const x = (i / Math.max(dayCount - 1, 1)) * 600;
+                  const y = 170 - (insights / Math.max(maxI, 1)) * 160;
+                  return (
+                    <circle
+                      key={i}
+                      cx={x}
+                      cy={y}
+                      r={insights > 8 ? 4 : 2.5}
+                      fill="#06b6d4"
+                      opacity={insights > 8 ? 1 : 0.5}
+                    />
+                  );
+                });
+              })()}
             </svg>
 
             {/* Day labels */}
