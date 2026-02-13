@@ -160,7 +160,7 @@ describe('Brain Health Checkup (Neurological Exam)', () => {
 
       // Brain Analog: Neurological exam baseline
       expect(health.organizationId).toBe('org-health-check');
-      expect(health.regions.length).toBe(12);
+      expect(health.regions.length).toBe(15);
       expect(health.checkedAt).toBeDefined();
 
       // Before any cycles, some regions are not initialized
@@ -208,7 +208,7 @@ describe('Brain Health Checkup (Neurological Exam)', () => {
   });
 
   describe('All Brain Regions Present', () => {
-    it('should include all 12 brain regions in health report', () => {
+    it('should include all 15 brain regions in health report', () => {
       const brain = createBrainPipeline({
         supabase,
         organizationId: 'org-1',
@@ -218,18 +218,21 @@ describe('Brain Health Checkup (Neurological Exam)', () => {
       const analogs = health.regions.map(r => r.brainAnalog);
 
       // Neurological exam checks ALL regions:
-      expect(analogs).toContain('Hippocampus → Neocortex');  // Consolidation
-      expect(analogs).toContain('Default Mode Network');      // DMN
-      expect(analogs).toContain('Amygdala');                  // Impact Scorer
-      expect(analogs).toContain('Thalamus');                  // Attention Manager
-      expect(analogs).toContain('Cerebellum');                // Fast-Path
-      expect(analogs).toContain('Active Inference');           // Explorer
-      expect(analogs).toContain('Prefrontal Cortex');          // What-If
-      expect(analogs).toContain('Long-Term Potentiation');     // Learning Modules
-      expect(analogs).toContain('Sensory Cortex');              // LLM Training
-      expect(analogs).toContain('Insula');                      // Anomaly Monitor
-      expect(analogs).toContain('Working Memory (dlPFC)');      // Context Manager
-      expect(analogs).toContain('Brain Library (Hippocampus Study Mode)');  // Book Ingestion
+      expect(analogs).toContain('Structural Cortex');                        // Knowledge Dependency Graph
+      expect(analogs).toContain('Temporal Lobe (Who-Knows-What)');           // Expertise Graph
+      expect(analogs).toContain('Social Cortex (Team Dynamics)');            // Collaboration Graph
+      expect(analogs).toContain('Hippocampus → Neocortex');                  // Consolidation
+      expect(analogs).toContain('Default Mode Network');                     // DMN
+      expect(analogs).toContain('Amygdala');                                 // Impact Scorer
+      expect(analogs).toContain('Thalamus');                                 // Attention Manager
+      expect(analogs).toContain('Cerebellum');                               // Fast-Path
+      expect(analogs).toContain('Active Inference');                         // Explorer
+      expect(analogs).toContain('Prefrontal Cortex');                        // What-If
+      expect(analogs).toContain('Long-Term Potentiation');                   // Learning Modules
+      expect(analogs).toContain('Sensory Cortex');                           // LLM Training
+      expect(analogs).toContain('Insula');                                   // Anomaly Monitor
+      expect(analogs).toContain('Working Memory (dlPFC)');                   // Context Manager
+      expect(analogs).toContain('Brain Library (Hippocampus Study Mode)');   // Book Ingestion
     });
   });
 
@@ -322,7 +325,7 @@ describe('Brain Health Checkup (Neurological Exam)', () => {
       const health = brain.getHealth();
 
       // Exam results should be comprehensive
-      expect(health.regions.length).toBe(12);
+      expect(health.regions.length).toBe(15);
       expect(report.narrative.length).toBeGreaterThan(0);
 
       // Overall health assessment

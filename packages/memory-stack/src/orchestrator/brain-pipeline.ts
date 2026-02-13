@@ -9,7 +9,12 @@
  *
  * Architecture:
  *
- *   ┌─────────────────── BRAIN PIPELINE (11 Regions) ─────────┐
+ *   ┌─────────────────── BRAIN PIPELINE (14 Regions) ─────────┐
+ *   │                                                          │
+ *   │  STRUCTURAL INTELLIGENCE (Knowledge Graphs):             │
+ *   │    Knowledge Dependency Graph (Structural Cortex)        │
+ *   │    Expertise Graph (Temporal Lobe — Who-Knows-What)      │
+ *   │    Collaboration Graph (Social Cortex — Team Dynamics)   │
  *   │                                                          │
  *   │  SCHEDULED (Brain Sleep):                                │
  *   │    Consolidation Engine (Hippocampus → Neocortex)        │
@@ -150,6 +155,30 @@ import {
 } from './context-manager';
 
 import { createEventBus } from '../causality/event-bus';
+
+import {
+  createKnowledgeDependencyGraph,
+  type KnowledgeDependencyGraphInstance,
+} from '../core/knowledge-dependency-graph';
+
+import {
+  createExpertiseGraph,
+  type ExpertiseGraphInstance,
+} from '../core/expertise-graph';
+
+import {
+  createCollaborationGraph,
+  type CollaborationGraphInstance,
+} from '../core/collaboration-graph';
+
+import {
+  enrichSignalWithKnowledgeGraph,
+} from '../core/nlp/knowledge-signal-enricher';
+
+import {
+  enrichSignalWithNLP,
+  type EnrichableSignal,
+} from '../core/nlp/signal-enricher';
 
 // ============================================================================
 // TYPES
@@ -303,6 +332,22 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
     : () => {};
 
   // -- Instantiate all brain regions --
+
+  // Structural Intelligence: Knowledge Dependency Graph (Structural Cortex)
+  // Brain Analog: The structural cortex maps spatial relationships — how things
+  // connect to each other. This graph maps code dependencies, financial flows,
+  // and cross-domain relationships. Used for impact analysis, blast radius, cycles.
+  const knowledgeDependencyGraph = createKnowledgeDependencyGraph({ weightPerEdge: 0.08 });
+
+  // Temporal Lobe: Expertise Graph (Who-Knows-What)
+  // Brain Analog: The temporal lobe stores semantic memory — "who is an expert on
+  // what?". This graph tracks contributor expertise across code, docs, and incidents.
+  const expertiseGraph = createExpertiseGraph({ minEvidence: 1 });
+
+  // Social Cortex: Collaboration Graph (Team Dynamics)
+  // Brain Analog: The social brain network (temporo-parietal junction) tracks
+  // relationships between people — who collaborates with whom, team bridges, silos.
+  const collaborationGraph = createCollaborationGraph();
 
   // Hippocampus → Neocortex: consolidation during "sleep"
   const consolidationEngine = createConsolidationEngine({
@@ -505,6 +550,32 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
    */
   async function scoreAndRoute(event: ScorableEvent): Promise<AttentionDecision> {
     log(`Amygdala scoring event: ${event.title} (${event.type})`);
+
+    // Knowledge Enrichment: auto-enrich event with dependency graph intelligence
+    // Brain Analog: Before the Amygdala can assess importance, the Structural Cortex
+    // needs to annotate the signal with what it knows — blast radius, risk, cycles.
+    try {
+      const signal: EnrichableSignal = {
+        metadata: {
+          ...event.metadata,
+          title: event.title,
+          file_paths: event.metadata?.file_paths || event.metadata?.files || [],
+        },
+      };
+      enrichSignalWithNLP(signal, ['title']);
+      enrichSignalWithKnowledgeGraph(signal, {
+        dependencyGraph: knowledgeDependencyGraph,
+        entityIdFields: ['file_paths'],
+      });
+      // Merge enrichment data back into event metadata
+      if (signal.metadata) {
+        event.metadata = { ...event.metadata, ...signal.metadata };
+      }
+      log(`Knowledge enrichment: risk=${signal.metadata?.knowledge_risk_score || 0}, radius=${signal.metadata?.knowledge_impact_radius || 0}`);
+    } catch (err) {
+      // Don't block scoring if enrichment fails — graceful degradation
+      log(`Knowledge enrichment warning: ${(err as Error).message}`);
+    }
 
     // Amygdala: tag importance
     const score = await impactScorer.scoreEvent(event);
@@ -962,7 +1033,35 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
   // ========================================================================
 
   function getHealth(): BrainHealthReport {
+    const depStats = knowledgeDependencyGraph.getStats();
+    const expStats = expertiseGraph.getStats();
+    const collabEdges = collaborationGraph.getEdges();
+
     const regions: BrainRegionStatus[] = [
+      {
+        name: 'Knowledge Dependency Graph',
+        brainAnalog: 'Structural Cortex',
+        status: depStats.totalEdges > 0 ? 'ok' : 'not_initialized',
+        details: depStats.totalEdges > 0
+          ? `${depStats.totalEdges} edges, ${depStats.uniqueEntities} entities, avg ${depStats.avgDepsPerEntity.toFixed(1)} deps/entity`
+          : 'No dependency edges recorded yet — awaiting code indexing or consolidation',
+      },
+      {
+        name: 'Expertise Graph',
+        brainAnalog: 'Temporal Lobe (Who-Knows-What)',
+        status: expStats.totalEdges > 0 ? 'ok' : 'not_initialized',
+        details: expStats.totalEdges > 0
+          ? `${expStats.totalEdges} edges, ${expStats.uniqueContributors} contributors, ${expStats.uniqueTopics} topics`
+          : 'No expertise data yet — awaiting PR/review signals',
+      },
+      {
+        name: 'Collaboration Graph',
+        brainAnalog: 'Social Cortex (Team Dynamics)',
+        status: collabEdges.length > 0 ? 'ok' : 'not_initialized',
+        details: collabEdges.length > 0
+          ? `${collabEdges.length} collaboration edges`
+          : 'No collaboration data yet — awaiting team interaction signals',
+      },
       {
         name: 'Consolidation Engine',
         brainAnalog: 'Hippocampus → Neocortex',
@@ -1116,6 +1215,11 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
     // Pipeline operations
     runFullCycle,
     getHealth,
+
+    // Structural Intelligence (Knowledge Graphs) — direct copilot access
+    getKnowledgeDependencyGraph: () => knowledgeDependencyGraph,
+    getExpertiseGraph: () => expertiseGraph,
+    getCollaborationGraph: () => collaborationGraph,
 
     // Component access (for advanced wiring)
     getImpactScorer: () => impactScorer,
