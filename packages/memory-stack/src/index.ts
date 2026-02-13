@@ -586,6 +586,42 @@ export {
   type DecisionGate,
 } from './orchestrator/domain-action-engine';
 
+// Copilot Framework — Claude-Grade Generic Copilot Architecture ("Broca-Wernicke Language Network")
+// The universal copilot that ANY domain app plugs into.
+// Provides: 3-layer prompt system, structured output templates, conversation memory, quality gates.
+export {
+  // Factory
+  createCopilotInstance,
+  createConversationManager,
+  createCopilotSSEStream,
+  // Prompt building
+  buildCopilotPrompt,
+  detectCopilotIntent,
+  formatDataPoint,
+  // Core types — The 5 Contracts
+  type DomainAdapter,
+  type CopilotPersona,
+  type CopilotDataSnapshot,
+  type CopilotInsightBundle,
+  type CopilotConfig as CopilotFrameworkConfig,
+  type CopilotInstance,
+  // Data types
+  type DataPoint,
+  type BrainInsight,
+  type CopilotCausalEdge,
+  type CopilotAction,
+  type CopilotRisk,
+  type CopilotScenario,
+  type CopilotSeverity,
+  type CopilotIntent,
+  // Output types
+  type OutputSection,
+  type OutputTable,
+  type ScorecardDimension,
+  // Conversation types
+  type ConversationState,
+} from './orchestrator/copilot-framework';
+
 // Brain Pipeline — Corpus Callosum connecting all brain regions
 export {
   createBrainPipeline,

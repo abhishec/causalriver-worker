@@ -5,9 +5,14 @@
  * Falls back to structured data response when no API key.
  *
  * v2 — Enhanced with pre-computed report sections and strict output template.
+ * v3 — Now powered by the generic CopilotFramework from @nexus-ai/memory-stack.
+ *       The framework handles SSE streaming, prompt building, conversation memory,
+ *       and structured output — Finance Jarvis just provides the DomainAdapter.
  */
 
 import { getFinanceData } from "@/lib/finance-jarvis";
+import { createFinanceJarvisAdapter } from "@/lib/finance-jarvis/copilot-adapter";
+import { createCopilotInstance } from "@nexus-ai/memory-stack";
 import { NextRequest, NextResponse } from "next/server";
 
 function createSSEStream() {
@@ -245,20 +250,40 @@ When the user asks a SPECIFIC question (not a general analysis), answer that que
 
 export async function POST(request: NextRequest) {
   try {
-    const { message } = await request.json();
+    const { message, useFramework } = await request.json();
     if (!message || typeof message !== "string") {
       return NextResponse.json({ error: "Message required" }, { status: 400 });
     }
 
     const financeData = getFinanceData();
     const { analysis } = financeData;
+    const anthropicKey = process.env.ANTHROPIC_API_KEY;
 
-    // Build system prompt using the shared function
+    // ── V3: Use the generic CopilotFramework ──────────────────────────
+    // The framework handles EVERYTHING: prompt building, SSE streaming,
+    // structured output, conversation memory. Finance Jarvis just provides
+    // the DomainAdapter with its domain-specific data and analysis.
+    //
+    // Set useFramework=true in the request body to opt in (or it's the default).
+    // Set useFramework=false to use the legacy v2 prompt path.
+    if (useFramework !== false && anthropicKey) {
+      const adapter = createFinanceJarvisAdapter(financeData);
+      const copilot = createCopilotInstance({
+        adapter,
+        provider: 'anthropic',
+        apiKey: anthropicKey,
+        model: 'claude-sonnet-4-5-20250929',
+        maxTokens: 8192,
+      });
+
+      const { stream, headers } = copilot.chat(message);
+      return new Response(stream, { headers });
+    }
+
+    // ── Legacy V2 path (fallback) ─────────────────────────────────────
     const kpis = analysis.kpis;
     const topInsights = analysis.insights.slice(0, 8);
     const systemPrompt = buildFinanceJarvisPrompt(financeData);
-
-    const anthropicKey = process.env.ANTHROPIC_API_KEY;
 
     if (!anthropicKey) {
       // Fallback: structured response from brain data
@@ -293,7 +318,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Stream via Claude
+    // Stream via Claude (legacy v2)
     const { default: Anthropic } = await import("@anthropic-ai/sdk");
     const anthropic = new Anthropic({ apiKey: anthropicKey });
     const { stream, sendText, close } = createSSEStream();

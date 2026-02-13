@@ -1,7 +1,14 @@
 /**
- * Brain-Powered Copilot Chat Route — V2 (CTO Audit Fixes)
+ * Brain-Powered Copilot Chat Route — V3 (Generic CopilotFramework Integration)
  *
  * This route uses the FULL NexusBrain knowledge graph to answer questions.
+ *
+ * V3 UPGRADE:
+ *   - Can now optionally use the generic CopilotFramework (from memory-stack)
+ *   - The framework provides 3-layer prompt architecture, structured output sections,
+ *     and unified SSE streaming — same architecture as Finance Jarvis
+ *   - Activated via `useFramework: true` in the request body (opt-in)
+ *   - All V2 functionality preserved as default path
  *
  * FIXED GAPS (from CTO audit):
  *   GAP 1 ✅ — Shared DOMAIN_KEYWORDS + logic matches brain-knowledge-context.ts
@@ -1019,11 +1026,13 @@ export async function POST(request: NextRequest) {
       organizationId,
       entityState,
       conversationHistory,
+      useFramework,
     } = body as {
       message: string;
       organizationId?: string;
       entityState?: Record<string, unknown>;
       conversationHistory?: ConversationMessage[];
+      useFramework?: boolean;
     };
 
     if (!message || typeof message !== "string") {
@@ -1123,6 +1132,75 @@ export async function POST(request: NextRequest) {
     const rules: DBRule[] = rulesResult.data || [];
     const cascadeRules: DBCascadeRule[] = cascadeResult.data || [];
     const patterns: DBPattern[] = (patternsResult.data || []) as DBPattern[];
+
+    // ══════════════════════════════════════════════════════════════════════
+    // V3 FRAMEWORK PATH — uses the generic CopilotFramework from memory-stack
+    // Activated when `useFramework: true` is passed in the request body.
+    // Provides: 3-layer prompt, structured output sections, unified streaming.
+    // ══════════════════════════════════════════════════════════════════════
+    const anthropicKey = process.env.ANTHROPIC_API_KEY;
+
+    if (useFramework && anthropicKey) {
+      try {
+        const { createCopilotInstance } = await import("@nexus-ai/memory-stack");
+        const { createNexusBrainAdapter } = await import("@/lib/nexus-copilot-adapter");
+
+        // Detect domains for the adapter
+        const detectedDomains = extractDomains(message);
+
+        // Evaluate rules if entity state is present (for adapter)
+        let triggeredRules: Array<{
+          title: string;
+          naturalLanguage: string;
+          triggered: boolean;
+          matchedConditions: string[];
+          failedConditions: string[];
+        }> | undefined;
+
+        if (entityState && Object.keys(entityState).length > 0) {
+          const normalizedState = normalizeEntityState(entityState);
+          const parsedRules = parseDBRules(rules);
+          triggeredRules = evaluateRules(parsedRules, normalizedState);
+        }
+
+        // Build the adapter from DB data
+        const adapter = createNexusBrainAdapter({
+          causalEdges,
+          rules,
+          cascadeRules,
+          patterns,
+          entityState,
+          detectedDomains,
+          triggeredRules,
+        });
+
+        // Create the copilot instance
+        const copilot = createCopilotInstance({
+          adapter,
+          provider: "anthropic",
+          apiKey: anthropicKey,
+          model: "claude-sonnet-4-5-20250929",
+          maxTokens: 8192,
+        });
+
+        // Handle the chat and return stream
+        const { stream, headers } = copilot.chat(message, {
+          conversationHistory: conversationHistory?.map((m) => ({
+            role: m.role,
+            content: m.content,
+          })),
+          entityState,
+        });
+
+        return new Response(stream, { headers });
+      } catch (frameworkErr) {
+        console.warn(
+          "[CopilotFramework] Non-fatal: framework path failed, falling back to V2:",
+          frameworkErr
+        );
+        // Fall through to V2 path below
+      }
+    }
 
     // ── Load Code Intelligence graphs (if available) ────────────────────
     let codeIntelContext: CodeIntelligenceContext | null = null;
@@ -1230,9 +1308,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // ── Check for Anthropic API key ───────────────────────────────────
-    const anthropicKey = process.env.ANTHROPIC_API_KEY;
-
+    // ── Check for Anthropic API key (uses anthropicKey from above) ─────
     if (!anthropicKey) {
       const { stream, sendText, close } = createSSEStream();
 
