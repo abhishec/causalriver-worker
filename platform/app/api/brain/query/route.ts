@@ -32,6 +32,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { validateApiKey } from "@/lib/api-key-auth";
+import { checkRateLimit, hashKey, setRateLimitHeaders } from "@/lib/rate-limiter";
 import { NextRequest, NextResponse } from "next/server";
 
 const CORE_ORG_ID = "00000000-0000-4000-a000-000000000001";
@@ -88,6 +89,21 @@ export async function POST(request: NextRequest) {
         orgId = apiKeyResult.organizationId;
         if (!apiKeyResult.permissions.includes("read")) {
           return NextResponse.json({ error: "API key lacks read permission" }, { status: 403 });
+        }
+
+        // ── BLOCKER 4: Enforce rate limit ───────────────────────────
+        const rawKey = authHeader!.replace("Bearer ", "");
+        const rateLimitResult = await checkRateLimit(
+          hashKey(rawKey),
+          apiKeyResult.rateLimitPerMinute
+        );
+        if (!rateLimitResult.allowed) {
+          const res = NextResponse.json(
+            { error: rateLimitResult.error, retryAfter: rateLimitResult.resetAt.toISOString() },
+            { status: 429 }
+          );
+          setRateLimitHeaders(res.headers, rateLimitResult, apiKeyResult.rateLimitPerMinute);
+          return res;
         }
       } else {
         return NextResponse.json({ error: "Unauthorized. Provide session cookie or API key (Bearer nxb_...)" }, { status: 401 });

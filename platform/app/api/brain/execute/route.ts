@@ -24,6 +24,7 @@
 
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { validateApiKey } from "@/lib/api-key-auth";
+import { checkRateLimit, hashKey, setRateLimitHeaders } from "@/lib/rate-limiter";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
@@ -45,6 +46,21 @@ export async function POST(request: NextRequest) {
           return NextResponse.json({ error: "API key lacks execute permission" }, { status: 403 });
         }
         orgId = apiKeyResult.organizationId;
+
+        // ── Enforce rate limit ──────────────────────────────────────
+        const rawKey = authHeader!.replace("Bearer ", "");
+        const rateLimitResult = await checkRateLimit(
+          hashKey(rawKey),
+          apiKeyResult.rateLimitPerMinute
+        );
+        if (!rateLimitResult.allowed) {
+          const res = NextResponse.json(
+            { error: rateLimitResult.error, retryAfter: rateLimitResult.resetAt.toISOString() },
+            { status: 429 }
+          );
+          setRateLimitHeaders(res.headers, rateLimitResult, apiKeyResult.rateLimitPerMinute);
+          return res;
+        }
       } else {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
       }
