@@ -15,7 +15,7 @@ CLUSTER_NAME="nexusbrain-training"
 PROCESS="${1:-}"
 
 if [ -z "${PROCESS}" ]; then
-  echo "Usage: ./infra/run-task.sh <trainer|consolidation|dmn>"
+  echo "Usage: ./infra/run-task.sh <trainer|consolidation|dmn|benchmark>"
   exit 1
 fi
 
@@ -23,8 +23,9 @@ case "${PROCESS}" in
   trainer)       TASK_DEF="nexusbrain-trainer" ;;
   consolidation) TASK_DEF="nexusbrain-consolidation" ;;
   dmn)           TASK_DEF="nexusbrain-dmn" ;;
+  benchmark)     TASK_DEF="nexusbrain-benchmark" ;;
   *)
-    echo "ERROR: Unknown process '${PROCESS}'. Use: trainer, consolidation, or dmn"
+    echo "ERROR: Unknown process '${PROCESS}'. Use: trainer, consolidation, dmn, or benchmark"
     exit 1
     ;;
 esac

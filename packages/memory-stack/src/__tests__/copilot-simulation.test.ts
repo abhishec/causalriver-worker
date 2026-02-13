@@ -140,6 +140,7 @@ let enrichedPRs: EnrichableSignal[];
 let allFiles: string[];
 let rootDir: string;
 let loadTimeMs: number;
+let shortPath: (p: string) => string;
 
 // Copilot scoring
 let totalQueries = 0;
@@ -218,6 +219,12 @@ describe('COPILOT SIMULATION — DeveloperJarvis Brain', () => {
     });
 
     loadTimeMs = Date.now() - start;
+
+    // Helper: shorten path to last 2 segments for disambiguation (e.g. "connectors/connector-framework.ts")
+    shortPath = (p: string) => {
+      const parts = p.split('/');
+      return parts.length >= 2 ? parts.slice(-2).join('/') : parts[parts.length - 1] || p;
+    };
     console.log(`\n  ╔══════════════════════════════════════════════════════════╗`);
     console.log(`  ║  COPILOT SIMULATION — DeveloperJarvis Brain             ║`);
     console.log(`  ║  Brain loaded in ${String(loadTimeMs).padStart(4)}ms                               ║`);
@@ -303,7 +310,7 @@ describe('COPILOT SIMULATION — DeveloperJarvis Brain', () => {
       expect(metrics.length).toBeGreaterThan(0);
       console.log(`  🤖 Copilot: "Top 5 files with most dependencies (God objects risk):"`);
       for (const m of metrics.slice(0, 5)) {
-        console.log(`    📌 ${m.file.split('/').pop()?.padEnd(40)} fan-out=${m.fanOut}`);
+        console.log(`    📌 ${shortPath(m.file).padEnd(45)} fan-out=${m.fanOut}`);
       }
     });
 
@@ -320,7 +327,7 @@ describe('COPILOT SIMULATION — DeveloperJarvis Brain', () => {
       expect(metrics.length).toBeGreaterThan(0);
       console.log(`  🤖 Copilot: "Most unstable files (instability → 1.0 = all outgoing deps):"`);
       for (const m of metrics.slice(0, 5)) {
-        console.log(`    ⚠️  ${m.file.split('/').pop()?.padEnd(40)} instability=${m.instability.toFixed(2)} (in=${m.fanIn} out=${m.fanOut})`);
+        console.log(`    ⚠️  ${shortPath(m.file).padEnd(45)} instability=${m.instability.toFixed(2)} (in=${m.fanIn} out=${m.fanOut})`);
       }
     });
 
@@ -374,7 +381,7 @@ describe('COPILOT SIMULATION — DeveloperJarvis Brain', () => {
       expect(hubs.length).toBeGreaterThan(0);
       console.log(`  🤖 Copilot: "Top 5 dependency hub files:"`);
       for (const h of hubs.slice(0, 5)) {
-        console.log(`    🔗 ${h.file.split('/').pop()?.padEnd(40)} ${h.totalConnections} total connections (in=${h.fanIn}, out=${h.fanOut})`);
+        console.log(`    🔗 ${shortPath(h.file).padEnd(45)} ${h.totalConnections} total connections (in=${h.fanIn}, out=${h.fanOut})`);
       }
     });
 
@@ -716,8 +723,10 @@ describe('COPILOT SIMULATION — DeveloperJarvis Brain', () => {
       expect(impact.totalImpactRadius).toBeGreaterThan(5);
       console.log(`  🤖 Copilot: "MRR drop impact analysis:"`);
       console.log(`    💰 Impact radius: ${impact.totalImpactRadius} downstream metrics`);
-      console.log(`    📉 Direct downstream: ${impact.directDependents.join(', ')}`);
-      console.log(`    📉 Transitive cascade: ${impact.transitiveDependents.join(', ')}`);
+      const directNames = impact.directDependents.map(d => typeof d === 'string' ? d : d.sourceId || d.targetId);
+      const transitiveNames = impact.transitiveDependents.map(d => typeof d === 'string' ? d : d.sourceId || d.targetId);
+      console.log(`    📉 Direct downstream: ${directNames.join(', ')}`);
+      console.log(`    📉 Transitive cascade: ${transitiveNames.join(', ')}`);
       console.log(`    ⚠️  Risk: ${impact.riskScore.toFixed(2)}/1.0`);
     });
 

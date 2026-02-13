@@ -33,8 +33,13 @@ examples/
 # macOS launchd (replaced by EventBridge)
 launchd/
 
-# Test data and benchmarks
-scripts/benchmarks/
+# Test data and benchmarks (exclude data/cache, keep Python scripts)
+scripts/benchmarks/causeme/
+scripts/benchmarks/longmemeval/cache/
+scripts/benchmarks/longmemeval/data/
+scripts/benchmarks/longmemeval/results/
+scripts/benchmarks/longmemeval/nen/cache/
+scripts/benchmarks/longmemeval/nen/checkpoints/
 scripts/tests/
 
 # Environment files (secrets come from SSM)

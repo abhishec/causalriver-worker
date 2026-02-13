@@ -328,6 +328,51 @@ TASKDEF
 aws ecs register-task-definition --cli-input-json file:///tmp/task-dmn.json --region "${REGION}" > /dev/null
 echo "    Registered: nexusbrain-dmn (0.5 vCPU, 2GB)"
 
+# --- Benchmark Task Definition ---
+# LongMemEval benchmark runner: 2 vCPU, 8GB for parallel observer workers
+# Manual trigger only (no schedule) — run via: ./infra/run-task.sh benchmark
+cat > /tmp/task-benchmark.json << TASKDEF
+{
+  "family": "nexusbrain-benchmark",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "2048",
+  "memory": "8192",
+  "executionRoleArn": "${EXEC_ROLE_ARN}",
+  "taskRoleArn": "${EXEC_ROLE_ARN}",
+  "containerDefinitions": [
+    {
+      "name": "brain-benchmark",
+      "image": "${ECR_IMAGE}",
+      "essential": true,
+      "environment": [
+        { "name": "BRAIN_PROCESS", "value": "benchmark" },
+        { "name": "BENCHMARK_METHOD", "value": "observational" },
+        { "name": "BENCHMARK_VARIANT", "value": "s" },
+        { "name": "BENCHMARK_MAX_WORKERS", "value": "10" }
+      ],
+      "secrets": [
+        { "name": "OPENAI_API_KEY", "valueFrom": "arn:aws:ssm:${REGION}:${ACCOUNT_ID}:parameter/nexusbrain/OPENAI_API_KEY" },
+        { "name": "SUPABASE_URL", "valueFrom": "arn:aws:ssm:${REGION}:${ACCOUNT_ID}:parameter/nexusbrain/SUPABASE_URL" },
+        { "name": "SUPABASE_SERVICE_ROLE_KEY", "valueFrom": "arn:aws:ssm:${REGION}:${ACCOUNT_ID}:parameter/nexusbrain/SUPABASE_SERVICE_ROLE_KEY" }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "${LOG_GROUP}",
+          "awslogs-region": "${REGION}",
+          "awslogs-stream-prefix": "benchmark"
+        }
+      },
+      "stopTimeout": 300
+    }
+  ]
+}
+TASKDEF
+
+aws ecs register-task-definition --cli-input-json file:///tmp/task-benchmark.json --region "${REGION}" > /dev/null
+echo "    Registered: nexusbrain-benchmark (2 vCPU, 8GB)"
+
 # ─── Step 8: Create EventBridge Scheduled Rules ──────────────────
 echo ""
 echo ">>> Step 8: Creating EventBridge Scheduled Rules..."
@@ -461,6 +506,7 @@ echo "  2. Build & push:     ./infra/push-image.sh"
 echo "  3. Test trainer:     ./infra/run-task.sh trainer"
 echo "  4. Test consolidation: ./infra/run-task.sh consolidation"
 echo "  5. Test DMN scan:    ./infra/run-task.sh dmn"
+echo "  6. Run benchmark:    ./infra/run-task.sh benchmark"
 echo ""
 echo "View logs:"
 echo "  aws logs tail ${LOG_GROUP} --follow --region ${REGION}"

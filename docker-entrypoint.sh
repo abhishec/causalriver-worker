@@ -21,9 +21,16 @@ case "${BRAIN_PROCESS}" in
     export DMN_MODE=once
     exec pnpm exec tsx scripts/brain-dmn-runner.ts
     ;;
+  benchmark)
+    echo "Starting LongMemEval Benchmark..."
+    echo "  Method: ${BENCHMARK_METHOD:-observational}"
+    echo "  Variant: ${BENCHMARK_VARIANT:-s}"
+    echo "  Max Workers: ${BENCHMARK_MAX_WORKERS:-10}"
+    exec pnpm exec tsx scripts/brain-benchmark-runner.ts
+    ;;
   *)
     echo "ERROR: Unknown BRAIN_PROCESS '${BRAIN_PROCESS}'"
-    echo "Valid values: trainer, consolidation, dmn"
+    echo "Valid values: trainer, consolidation, dmn, benchmark"
     exit 1
     ;;
 esac

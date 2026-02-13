@@ -57,6 +57,10 @@ read -rsp "ANTHROPIC_API_KEY (for LLM training): " ANTHROPIC_API_KEY
 echo ""
 store_secret "ANTHROPIC_API_KEY" "${ANTHROPIC_API_KEY}" "Anthropic API key for LLM distillation"
 
+read -rsp "OPENAI_API_KEY (for benchmarks/LongMemEval): " OPENAI_API_KEY
+echo ""
+store_secret "OPENAI_API_KEY" "${OPENAI_API_KEY}" "OpenAI API key for benchmark LLM calls"
+
 read -rp "FRED_API_KEY (economic data, default: DEMO_KEY): " FRED_API_KEY
 FRED_API_KEY="${FRED_API_KEY:-DEMO_KEY}"
 store_secret "FRED_API_KEY" "${FRED_API_KEY}" "FRED API key for economic data"

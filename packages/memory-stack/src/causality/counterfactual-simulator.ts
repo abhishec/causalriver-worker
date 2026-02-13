@@ -96,6 +96,8 @@ export interface CounterfactualResult {
   disconnectedDomains: string[];
   /** Overall impact score (0-1): higher = more impact from the intervention */
   impactScore: number;
+  /** Monte Carlo confidence interval on impact score (from edge weight perturbation) */
+  impactCI?: { mean: number; lower95: number; upper95: number; std: number };
   /** Natural language narrative of consequences */
   narrative: string;
 }
@@ -335,6 +337,66 @@ export function createCounterfactualSimulator(config: Partial<CounterfactualConf
     return parts.join(' ');
   }
 
+  // ── Monte Carlo sensitivity analysis ──────────────────────────────
+
+  /**
+   * Monte Carlo sensitivity analysis for counterfactual impact score.
+   * Perturbs edge weights by ±10% (sampling from uniform noise) to produce
+   * a distribution of impact scores, yielding confidence interval bounds.
+   *
+   * @param dag - The original DAG
+   * @param intervention - The counterfactual intervention to test
+   * @param nSamples - Number of Monte Carlo samples (default 50)
+   * @returns CI on the impact score: { mean, lower95, upper95, std }
+   */
+  function monteCarloImpactCI(
+    dag: CausalDAG,
+    intervention: CounterfactualIntervention,
+    nSamples: number = 50,
+  ): { mean: number; lower95: number; upper95: number; std: number } {
+    const scores: number[] = [];
+
+    for (let i = 0; i < nSamples; i++) {
+      // Clone and perturb all edge weights by ±10%
+      const perturbedDAG = cloneDAG(dag);
+      for (const [, neighbors] of perturbedDAG.edges) {
+        for (const [tgt, edge] of neighbors) {
+          const noise = (Math.random() - 0.5) * 0.2 * edge.weight;
+          neighbors.set(tgt, { ...edge, weight: Math.max(0.01, Math.min(1, edge.weight + noise)) });
+        }
+      }
+
+      // Run simulation on perturbed DAG
+      const pairs = getAllDomainPairs(perturbedDAG);
+      let totalBase = 0;
+      let totalCf = 0;
+
+      for (const { source, target } of pairs) {
+        const basePred = reasoner.reason(perturbedDAG, source, target);
+        if (basePred.totalPaths > 0) totalBase += basePred.reasoning.confidence;
+      }
+
+      const cfDAG = applyIntervention(cloneDAG(perturbedDAG), intervention);
+      for (const { source, target } of pairs) {
+        const cfPred = reasoner.reason(cfDAG, source, target);
+        if (cfPred.totalPaths > 0) totalCf += cfPred.reasoning.confidence;
+      }
+
+      scores.push(totalBase > 0 ? Math.min(1, Math.abs(totalBase - totalCf) / totalBase) : 0);
+    }
+
+    scores.sort((a, b) => a - b);
+    const mean = scores.reduce((s, v) => s + v, 0) / scores.length;
+    const std = Math.sqrt(scores.reduce((s, v) => s + (v - mean) ** 2, 0) / scores.length);
+
+    return {
+      mean: Math.round(mean * 1000) / 1000,
+      lower95: Math.round((scores[Math.floor(scores.length * 0.025)] ?? 0) * 1000) / 1000,
+      upper95: Math.round((scores[Math.floor(scores.length * 0.975)] ?? 0) * 1000) / 1000,
+      std: Math.round(std * 1000) / 1000,
+    };
+  }
+
   // ── Public API ─────────────────────────────────────────────────────
 
   return {
@@ -388,7 +450,10 @@ export function createCounterfactualSimulator(config: Partial<CounterfactualConf
         ? Math.min(1, Math.abs(totalBaseConf - totalCfConf) / totalBaseConf)
         : 0;
 
-      // 7. Generate narrative
+      // 7. Monte Carlo confidence interval on impact score
+      const impactCI = monteCarloImpactCI(dag, intervention);
+
+      // 8. Generate narrative
       const narrative = generateNarrative(intervention, impactDeltas, disconnectedDomains);
 
       return {
@@ -398,6 +463,7 @@ export function createCounterfactualSimulator(config: Partial<CounterfactualConf
         impactDeltas,
         disconnectedDomains,
         impactScore,
+        impactCI,
         narrative,
       };
     },

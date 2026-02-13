@@ -534,6 +534,37 @@ export function createAttentionMechanism(config: Partial<AttentionConfig> = {}) 
     },
 
     /**
+     * Serialize learned attention state for persistence.
+     * Call periodically or on shutdown to save learned offsets.
+     * Without this, the learned attention profile resets on each restart.
+     */
+    serializeLearnedState(): {
+      offsets: { focus: number; cascade: number; anomaly: number; validated: number; recency: number };
+      trainingSize: number;
+    } {
+      return {
+        offsets: { ...learnedOffsets },
+        trainingSize: trainingHistory.length,
+      };
+    },
+
+    /**
+     * Restore learned attention state from a previously serialized snapshot.
+     * Call on startup to resume learning from where the last session left off.
+     */
+    restoreLearnedState(state: {
+      offsets: { focus: number; cascade: number; anomaly: number; validated: number; recency: number };
+    }): void {
+      if (state.offsets) {
+        learnedOffsets.focus = state.offsets.focus ?? 0;
+        learnedOffsets.cascade = state.offsets.cascade ?? 0;
+        learnedOffsets.anomaly = state.offsets.anomaly ?? 0;
+        learnedOffsets.validated = state.offsets.validated ?? 0;
+        learnedOffsets.recency = state.offsets.recency ?? 0;
+      }
+    },
+
+    /**
      * Get the configuration.
      */
     getConfig(): AttentionConfig {

@@ -168,15 +168,34 @@ export function createContinuousLearner(
           graph.edges.set(source, new Map());
         }
 
-        const newWeight = result.effectSize;
+        // Bayesian weight blending: blend new evidence with prior (existing) weight
+        // to prevent oscillation and smooth updates. New orgs get raw weight; existing edges
+        // use 60% prior + 40% new evidence for stability.
+        const rawWeight = result.effectSize;
+        const newWeight = currentEdge
+          ? currentEdge.weight * 0.6 + rawWeight * 0.4
+          : rawWeight;
         const oldWeight = currentEdge?.weight;
+
+        // Edge lifecycle: candidate → confirmed → validated (based on knockout evidence)
+        const lifecycleState: 'candidate' | 'confirmed' | 'validated' = currentEdge
+          ? ((currentEdge.knockoutScore ?? 0) > 0.5 && !currentEdge.isLikelyConfounded
+              ? 'validated'
+              : 'confirmed')
+          : 'candidate';
 
         graph.edges.get(source)!.set(target, {
           weight: newWeight,
           pValue: result.pValue,
           lagDays: result.optimalLag,
           lastUpdated: new Date(),
-          sampleSize: result.sampleSize
+          sampleSize: result.sampleSize,
+          // Preserve knockout and confounding metadata from prior edge
+          knockoutScore: currentEdge?.knockoutScore,
+          isLikelyConfounded: currentEdge?.isLikelyConfounded,
+          coefficientSign: currentEdge?.coefficientSign,
+          predictionAccuracy: currentEdge?.predictionAccuracy,
+          predictionCount: currentEdge?.predictionCount,
         });
 
         return {

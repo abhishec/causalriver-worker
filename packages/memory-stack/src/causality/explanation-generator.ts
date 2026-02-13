@@ -100,6 +100,13 @@ export interface AnomalyExplanation {
   }>;
   /** Whether the anomaly is explainable from the causal graph */
   isExplainable: boolean;
+  /** Prescriptive actions — what changes would prevent this anomaly */
+  prescriptiveActions: Array<{
+    action: string;
+    targetEdge: { source: string; target: string };
+    expectedImpact: string;
+    confidence: number;
+  }>;
   /** Full narrative */
   narrative: string;
 }
@@ -462,6 +469,31 @@ export function createExplanationGenerator(config: Partial<ExplanationConfig> = 
         explanation: `${a.domain} change propagated to ${anomaly.domain} via ${a.path.join(' → ')}`,
       })),
       isExplainable: mostLikely !== null,
+      prescriptiveActions: (() => {
+        // Weakest-link analysis: find the most interventionable edge in each cause path
+        const actions: AnomalyExplanation['prescriptiveActions'] = [];
+        for (const candidate of candidates.slice(0, 3)) {
+          if (candidate.path.length < 2) continue;
+          let weakest: { source: string; target: string; weight: number } | null = null;
+          for (let pi = 0; pi < candidate.path.length - 1; pi++) {
+            const ed = dag.edges.get(candidate.path[pi])?.get(candidate.path[pi + 1]);
+            if (!ed) continue;
+            if (!weakest || Math.abs(ed.weight) < Math.abs(weakest.weight)) {
+              weakest = { source: candidate.path[pi], target: candidate.path[pi + 1], weight: ed.weight };
+            }
+          }
+          if (weakest) {
+            const info = dag.edges.get(weakest.source)?.get(weakest.target);
+            actions.push({
+              action: `Monitor ${weakest.source} → ${weakest.target} (weakest link, weight: ${Math.abs(weakest.weight).toFixed(2)})`,
+              targetEdge: { source: weakest.source, target: weakest.target },
+              expectedImpact: `Reducing this edge by 50% would attenuate cascade by ~${(candidate.confidence * 50).toFixed(0)}%`,
+              confidence: info?.isLikelyConfounded ? 0.3 : (info?.knockoutScore ?? 0.5),
+            });
+          }
+        }
+        return actions;
+      })(),
       narrative: narrativeParts.join(' '),
     };
   }

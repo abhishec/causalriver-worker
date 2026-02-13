@@ -6,6 +6,10 @@ FROM node:20-alpine AS base
 # Install pnpm globally
 RUN npm install -g pnpm@9
 
+# Install Python 3 + pip for benchmark scripts (LongMemEval)
+RUN apk add --no-cache python3 py3-pip && \
+    pip3 install --break-system-packages openai tqdm requests
+
 WORKDIR /app
 
 # Copy workspace config files first (for layer caching)
