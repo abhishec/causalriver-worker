@@ -408,7 +408,7 @@ cat > /tmp/task-git-trainer.json << TASKDEF
           "awslogs-stream-prefix": "git-trainer"
         }
       },
-      "stopTimeout": 300
+      "stopTimeout": 120
     }
   ]
 }

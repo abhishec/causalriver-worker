@@ -36,41 +36,44 @@ import type { TrainingPack } from '../../packages/memory-stack/src/learning/brai
 // TARGET REPOSITORIES
 // ============================================================================
 
-/** 20 major open-source repos covering diverse languages and engineering patterns */
+/** 27 most active 100k+ star repos — the gold standard for code intelligence training */
 export const TARGET_REPOS = [
-  // ── Web Frameworks ──
-  'vercel/next.js',           // TypeScript — 8000+ PRs, rich CI, Vercel ecosystem
-  'facebook/react',           // JavaScript — 15000+ PRs, industry-defining
-  'vuejs/core',               // TypeScript — 3000+ PRs, community-driven
-  'sveltejs/svelte',          // TypeScript — 3500+ PRs, compiler-based framework
+  // ── Tier 1: Mega repos (400k+ stars) ──
+  'freeCodeCamp/freeCodeCamp', // 437k★ TypeScript — massive TS codebase, 536MB
+  'facebook/react',            // 243k★ JavaScript — the gold standard, 1112 issues
+  'torvalds/linux',            // 217k★ C — largest codebase (5.9GB!)
+  'tensorflow/tensorflow',     // 194k★ C++ — ML infra, 3500 issues
+  'microsoft/vscode',          // 182k★ TypeScript — 1.1GB, 13846 open issues
+  'n8n-io/n8n',                // 174k★ TypeScript — workflow automation, very active
+  'ollama/ollama',             // 163k★ Go — AI infra, compact codebase
+  'vercel/next.js',            // 138k★ JavaScript — 2.4GB, React framework
+  'golang/go',                 // 132k★ Go — the Go language itself
+  'langchain-ai/langchain',   // 127k★ Python — AI/LLM framework
 
-  // ── Backend / Runtime ──
-  'nodejs/node',              // C++/JS — 20000+ PRs, foundation of server JS
-  'denoland/deno',            // Rust/TS — 5000+ PRs, security-first runtime
-  'kubernetes/kubernetes',    // Go — 100000+ PRs, container orchestration king
-  'docker/compose',           // Go — 5000+ PRs, multi-container orchestration
+  // ── Tier 2: Major projects (100k-200k stars) ──
+  'nodejs/node',               // C++/JS — foundation of server JS
+  'kubernetes/kubernetes',     // Go — container orchestration king
+  'rust-lang/rust',            // Rust — language compiler
+  'python/cpython',            // C/Python — Python language
 
-  // ── Databases / Data ──
-  'supabase/supabase',        // TypeScript — 7000+ PRs, open-source Firebase
-  'prisma/prisma',            // TypeScript/Rust — 10000+ PRs, ORM
+  // ── Tier 3: Critical ecosystem repos ──
+  'supabase/supabase',         // TypeScript — open-source Firebase
+  'prisma/prisma',             // TypeScript/Rust — ORM
+  'huggingface/transformers',  // Python — ML model hub
+  'sveltejs/svelte',           // TypeScript — compiler-based framework
+  'vuejs/core',                // TypeScript — community-driven
+  'denoland/deno',             // Rust/TS — security-first runtime
+  'docker/compose',            // Go — multi-container orchestration
 
-  // ── ML / AI ──
-  'huggingface/transformers', // Python — 20000+ PRs, ML model hub
-  'langchain-ai/langchain',  // Python — 10000+ PRs, LLM orchestration
+  // ── Tier 4: Enterprise / Infrastructure ──
+  'hashicorp/terraform',       // Go — infrastructure as code
+  'grafana/grafana',           // Go/TS — observability
+  'elastic/elasticsearch',     // Java — search engine
+  'apache/kafka',              // Java/Scala — event streaming
 
-  // ── Dev Tools ──
-  'microsoft/vscode',         // TypeScript — 15000+ PRs, dominant editor
-  'rust-lang/rust',           // Rust — 80000+ PRs, language compiler
-  'golang/go',                // Go — 50000+ PRs, language & toolchain
-
-  // ── Cloud / Infra ──
-  'hashicorp/terraform',      // Go — 20000+ PRs, infrastructure as code
-  'grafana/grafana',          // Go/TS — 40000+ PRs, observability
-
-  // ── Enterprise / Platforms ──
-  'elastic/elasticsearch',    // Java — 50000+ PRs, search engine
-  'apache/kafka',             // Java/Scala — 10000+ PRs, event streaming
-  'python/cpython',           // C/Python — 30000+ PRs, Python language
+  // ── Tier 5: Data & DevOps ──
+  'apache/spark',              // Scala/Java — big data processing
+  'ansible/ansible',           // Python — IT automation
 ];
 
 // ============================================================================
@@ -80,7 +83,7 @@ export const TARGET_REPOS = [
 export class GitCodeTrainerAgent extends BaseTrainingAgent {
   readonly name = 'git-code-trainer';
   readonly version = '1.0.0';
-  readonly description = 'Trains the core brain on engineering patterns from 20 major open-source GitHub repos';
+  readonly description = 'Trains the core brain on engineering patterns from 27 major open-source GitHub repos (100k+ stars)';
 
   private repos: string[];
   private fetchedData: RepoData[] = [];
