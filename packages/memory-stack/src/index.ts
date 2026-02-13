@@ -586,6 +586,20 @@ export {
   type DecisionGate,
 } from './orchestrator/domain-action-engine';
 
+// Brain Context Builder — Universal Prefrontal Cortex ("Working Memory Assembly")
+// Assembles context from ALL brain regions into LLM-ready prompts.
+// Works for any domain: code, finance, research, legal, operations.
+export {
+  createBrainContextBuilder,
+  detectIntent,
+  extractEntities,
+  type BrainRegions,
+  type BrainContext,
+  type BrainContextSection,
+  type BrainIntent,
+  type BrainContextBuilder,
+} from './orchestrator/brain-context-builder';
+
 // Copilot Framework V2 — Claude-Grade Generic Copilot Architecture ("Broca-Wernicke Language Network")
 // The universal copilot that ANY domain app plugs into.
 // Provides: 3-layer prompt system, structured output templates, conversation memory, quality gates.

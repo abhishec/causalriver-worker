@@ -1128,13 +1128,20 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // ── Load Code Intelligence graphs (if available) ────────────────────
+    // ── Load Brain Intelligence (ALL available regions) ─────────────────
     let codeIntelContext: CodeIntelligenceContext | null = null;
     try {
       const {
         createKnowledgeDependencyGraph,
         createExpertiseGraph,
         createCollaborationGraph,
+        createBrainContextBuilder,
+        createMultiHopReasoner,
+        createExplanationGenerator,
+        createCounterfactualSimulator,
+        createUncertaintyQuantifier,
+        createBrainHealthMonitor,
+        createEmptyDAG,
       } = await import("@nexus-ai/memory-stack");
 
       const service = await createServiceClient();
@@ -1150,6 +1157,10 @@ export async function POST(request: NextRequest) {
 
       const ingestionStats = (ghConnector?.config as Record<string, any>)?.ingestion_progress?.stats;
 
+      // Build BrainRegions with whatever is available
+      const brainRegions: Record<string, unknown> = {};
+
+      // Structural Intelligence: load if code has been ingested
       if (ingestionStats?.filesProcessed > 0) {
         const depGraph = createKnowledgeDependencyGraph();
         const expertiseGraph = createExpertiseGraph();
@@ -1161,15 +1172,39 @@ export async function POST(request: NextRequest) {
           collabGraph.load(service, orgId),
         ]);
 
-        codeIntelContext = buildCodeIntelligencePrompt(
-          depGraph,
-          expertiseGraph,
-          collabGraph,
-          message,
-        );
+        brainRegions.dependencyGraph = depGraph;
+        brainRegions.expertiseGraph = expertiseGraph;
+        brainRegions.collaborationGraph = collabGraph;
       }
+
+      // Causal Intelligence: build DAG from already-fetched causal edges
+      if (causalEdges.length > 0) {
+        const dag = createEmptyDAG();
+        for (const edge of causalEdges) {
+          dag.nodes.add(edge.source_domain);
+          dag.nodes.add(edge.target_domain);
+          if (!dag.edges.has(edge.source_domain)) dag.edges.set(edge.source_domain, new Map());
+          dag.edges.get(edge.source_domain)!.set(edge.target_domain, {
+            weight: edge.effect_size,
+            pValue: edge.granger_p_value,
+            lagDays: edge.optimal_lag_days,
+            lastUpdated: new Date(),
+            sampleSize: edge.sample_size || 30,
+          });
+        }
+        brainRegions.causalDAG = dag;
+        brainRegions.multiHopReasoner = createMultiHopReasoner();
+        brainRegions.explanationGenerator = createExplanationGenerator();
+        brainRegions.counterfactualSimulator = createCounterfactualSimulator();
+        brainRegions.uncertaintyQuantifier = createUncertaintyQuantifier();
+        brainRegions.brainHealthMonitor = createBrainHealthMonitor();
+      }
+
+      // Build unified context from ALL available brain regions
+      const builder = createBrainContextBuilder(brainRegions as any);
+      codeIntelContext = builder.buildContext(message);
     } catch (codeIntelErr) {
-      console.warn("[CodeIntel] Non-fatal: could not load code intelligence:", codeIntelErr);
+      console.warn("[BrainContext] Non-fatal: could not load brain intelligence:", codeIntelErr);
     }
 
     // ── Build conversation summary (GAP 7 FIX) ─────────────────────────
