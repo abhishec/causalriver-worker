@@ -11,6 +11,14 @@ interface Message {
   content: string;
 }
 
+interface BrainMeta {
+  intent: string;
+  domains: string[];
+  confidence: number;
+  regionsUsed: string[];
+  uncertainAreas: string[];
+}
+
 // ─── Finance-specific example prompts ───────────────────────────────────────
 
 const EXAMPLE_PROMPTS = [
@@ -190,6 +198,7 @@ export default function FinanceJarvisCopilotPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [brainMeta, setBrainMeta] = useState<BrainMeta | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -222,15 +231,22 @@ export default function FinanceJarvisCopilotPage() {
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsLoading(true);
+    setBrainMeta(null);
 
     const assistantMessage: Message = { role: "assistant", content: "" };
     setMessages((prev) => [...prev, assistantMessage]);
+
+    // Build conversation history from existing messages for multi-turn context
+    const history = messages.map((m) => ({ role: m.role, content: m.content }));
 
     try {
       const response = await fetch("/api/finance-jarvis/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: trimmed }),
+        body: JSON.stringify({
+          message: trimmed,
+          conversationHistory: history.length > 0 ? history : undefined,
+        }),
         signal: controller.signal,
       });
 
@@ -257,6 +273,10 @@ export default function FinanceJarvisCopilotPage() {
             if (data === "[DONE]") break;
             try {
               const parsed = JSON.parse(data);
+              // V4: Brain context metadata event
+              if (parsed.brainMeta) {
+                setBrainMeta(parsed.brainMeta);
+              }
               if (parsed.text) {
                 accumulated += parsed.text;
                 setMessages((prev) => {
@@ -364,6 +384,30 @@ export default function FinanceJarvisCopilotPage() {
           </Link>
         </div>
       </div>
+
+      {/* V4 Brain Meta — shows detected intent, domains, confidence */}
+      {brainMeta && (
+        <div className="flex items-center gap-3 px-3 py-2 mt-2 rounded-lg bg-emerald-500/5 border border-emerald-500/15 text-xs">
+          <div className="flex items-center gap-1.5">
+            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-emerald-400 font-medium">Brain Active</span>
+          </div>
+          <span className="text-muted/50">|</span>
+          <span className="text-muted">Intent: <strong className="text-foreground">{brainMeta.intent}</strong></span>
+          <span className="text-muted/50">|</span>
+          <span className="text-muted">Domains: {brainMeta.domains.join(", ")}</span>
+          <span className="text-muted/50">|</span>
+          <span className="text-muted">Confidence: <strong className={cn(
+            brainMeta.confidence >= 0.7 ? "text-emerald-400" : brainMeta.confidence >= 0.4 ? "text-amber-400" : "text-red-400"
+          )}>{Math.round(brainMeta.confidence * 100)}%</strong></span>
+          {brainMeta.regionsUsed.length > 0 && (
+            <>
+              <span className="text-muted/50">|</span>
+              <span className="text-muted">{brainMeta.regionsUsed.length} regions</span>
+            </>
+          )}
+        </div>
+      )}
 
       {/* Messages area */}
       <div className="flex-1 overflow-y-auto py-6 space-y-4">
@@ -531,7 +575,7 @@ export default function FinanceJarvisCopilotPage() {
           </div>
         </form>
         <p className="text-center text-[10px] text-muted/50 mt-2">
-          Finance Jarvis — Xero + Volopay data analyzed through NexusBrain&apos;s CopilotFramework v2
+          Finance Jarvis V4 — Xero + Volopay data analyzed through NexusBrain&apos;s Universal Brain Context Builder
         </p>
       </div>
     </div>

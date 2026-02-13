@@ -1,35 +1,67 @@
 /**
- * Finance Jarvis Copilot Chat — Brain-powered financial assistant
+ * Finance Jarvis Copilot Chat — Brain-powered CFO intelligence assistant
  *
  * Takes the full finance analysis context and streams responses via Claude.
- * Falls back to structured data response when no API key.
  *
  * v2 — Enhanced with pre-computed report sections and strict output template.
- * v3 — Now powered by the generic CopilotFramework from @nexus-ai/memory-stack.
- *       The framework handles SSE streaming, prompt building, conversation memory,
- *       and structured output — Finance Jarvis just provides the DomainAdapter.
+ * v3 — Powered by the generic CopilotFramework (DomainAdapter pattern).
+ * v4 — Universal Brain Context Builder + Claude-aspirational capabilities.
+ *       Finance Jarvis now uses the SAME intelligence pipeline as the main copilot:
+ *       - Brain Context Builder (all 16 regions, intent detection, domain extraction)
+ *       - 5 Claude-aspirational capabilities (agent loop, proactive intel, session memory,
+ *         reasoning chain, multi-modal inference)
+ *       - Domain Action Engine for what-if / forecast / simulation questions
+ *       - V4 Decision Intelligence (meta-cognition, counterfactuals, adaptive playbooks)
+ *       - Finance-specific data injected as trainedKnowledge + custom persona
+ *
+ * Data flow:
+ *   1. Load Finance Jarvis analysis data (Xero + Volopay)
+ *   2. Build BrainRegions with finance data as trainedKnowledge + aspirational capabilities
+ *   3. createBrainContextBuilder(brainRegions).buildContext(question) → intent-aware system prompt
+ *   4. Augment with Finance Jarvis domain-specific prompt (P&L, unit economics, etc.)
+ *   5. Stream response via Claude Sonnet with V4 events (brainMeta, reasoning, etc.)
  */
 
 import { getFinanceData } from "@/lib/finance-jarvis";
 import { createFinanceJarvisAdapter } from "@/lib/finance-jarvis/copilot-adapter";
-import { createCopilotInstance } from "@nexus-ai/memory-stack";
 import { NextRequest, NextResponse } from "next/server";
+import type { BrainRegions, BrainContext } from "@nexus-ai/memory-stack";
+
+// ============================================================================
+// SSE STREAM HELPER
+// ============================================================================
 
 function createSSEStream() {
   const encoder = new TextEncoder();
   let controller: ReadableStreamDefaultController | null = null;
+  let closed = false;
   const stream = new ReadableStream({
     start(c) { controller = c; },
   });
-  const send = (data: string) => { controller?.enqueue(encoder.encode(`data: ${data}\n\n`)); };
+  const send = (data: string) => {
+    if (closed) return;
+    controller?.enqueue(encoder.encode(`data: ${data}\n\n`));
+  };
   const sendText = (text: string) => { send(JSON.stringify({ text })); };
-  const close = () => { send("[DONE]"); controller?.close(); };
-  return { stream, send, sendText, close };
+  const sendError = (error: string) => { send(JSON.stringify({ error })); };
+  const close = () => {
+    if (closed) return;
+    closed = true;
+    send("[DONE]");
+    controller?.close();
+  };
+  return { stream, send, sendText, sendError, close };
 }
+
+// ============================================================================
+// FINANCE JARVIS SYSTEM PROMPT BUILDER (v2 — used as augmentation layer in v4)
+// ============================================================================
 
 /**
  * Builds the Finance Jarvis system prompt from pre-computed analysis data.
- * Used by both the API route and the CLI copilot runner script.
+ * In V4 this is APPENDED to the brain context builder's universal prompt,
+ * giving Finance Jarvis its domain-specific data + output template.
+ * Also used by the CLI copilot runner script.
  */
 export function buildFinanceJarvisPrompt(data?: ReturnType<typeof getFinanceData>): string {
   const { analysis, xero } = data || getFinanceData();
@@ -171,65 +203,65 @@ When the user asks about overspending, insights, forecasts, or general financial
 
 # Finance Jarvis — CFO Intelligence Report
 
-## 🔴 OVERSPENDING — WHERE WE'RE BLEEDING
+## OVERSPENDING — WHERE WE'RE BLEEDING
 - Present each overspending item from the OVERSPENDING DATA section above
 - For EACH item show: the area, current spend, benchmark, overage amount, and % over
 - Cross-reference Xero P&L categories with Volopay card department data
 - Show a markdown table with columns: Area | Current | Benchmark | Over By | % Over
 
-## 🚩 UNUSUAL EXPENSES — ANOMALIES THE BRAIN FLAGGED
+## UNUSUAL EXPENSES — ANOMALIES THE BRAIN FLAGGED
 - Present flagged transaction count and total amount from ANOMALY DATA
 - Show missing receipt stats
 - Present department breakdown as a markdown table: Department | Flagged Count | Flagged Amount | Top Reasons
 - Highlight the highest-risk departments
 
-## ⚠️ ANTICIPATED RISKS — WHAT THE BRAIN SEES COMING
+## ANTICIPATED RISKS — WHAT THE BRAIN SEES COMING
 - Present each risk from RISK DATA with probability tag
 - Include the scenario analysis table: Scenario | Runway | Monthly Burn | Outcome
 - Specifically call out cash runway risk, revenue deceleration, and AR risk if present
 
-## ✂️ WHERE TO CUT — BRAIN'S RECOMMENDATIONS
+## WHERE TO CUT — BRAIN'S RECOMMENDATIONS
 Present actions grouped by timeline from ACTION ITEMS data:
-**🚨 IMMEDIATE (This Week):**
+**IMMEDIATE (This Week):**
 - Each immediate action with savings and owner
 
-**📅 SHORT-TERM (This Quarter):**
+**SHORT-TERM (This Quarter):**
 - Each short-term action with savings and owner
 
-**🔮 MEDIUM-TERM (3-6 Months):**
+**MEDIUM-TERM (3-6 Months):**
 - Each medium-term action with savings and owner
 
 End with: **Total potential savings: [amount from data]**
 
-## 📊 FORECAST — THE BRAIN'S 6-MONTH OUTLOOK
+## FORECAST — THE BRAIN'S 6-MONTH OUTLOOK
 - Present cash flow forecast as a markdown table: Month | Inflows | Outflows | Net | Cash Balance | Confidence
 - Call out any months where risks are flagged
 - Note confidence degradation over time
 
-## 🧬 CAUSAL CHAINS — WHY THIS IS HAPPENING
+## CAUSAL CHAINS — WHY THIS IS HAPPENING
 - Present the burn spiral chains: what's accelerating cash drain
 - Present the growth driver chains: what works but costs money
 - Explain the TENSION between growth investment and burn control
 - For each chain show the effect size percentage
 
-## 📈 UNIT ECONOMICS — THE REAL NUMBERS
+## UNIT ECONOMICS — THE REAL NUMBERS
 - Present LTV/CAC ratio, CAC payback, NRR from Unit Economics data
 - Show revenue by plan as a table: Plan | Customers | MRR | % of Total
 - Call out customer concentration risk if top 5 > 30%
 - Compare metrics against SaaS benchmarks (LTV/CAC >3x, NRR >100%, CAC payback <18mo)
 
-## 🔥 BURN DECOMPOSITION — WHERE THE MONEY GOES
+## BURN DECOMPOSITION — WHERE THE MONEY GOES
 - Show burn by function as a table: Function | Amount | % of Total
 - Include burn trend (accelerating/steady/decelerating) with 6-month history
 - Show break-even revenue gap and estimated months to break-even
 - Note cash burn vs accrual burn discrepancy if material
 
-## 🏥 HEALTH SCORECARD
+## HEALTH SCORECARD
 - Present the 4-dimension scorecard as a table: Dimension | Score | Rating | Key Detail
 - Include overall score and verdict
 - Flag any dimension rated "critical" or "poor"
 
-## 📌 BOTTOM LINE
+## BOTTOM LINE
 - One paragraph using the brain's verdict from BOTTOM LINE section
 - Bold the critical numbers
 - Include the health scorecard overall rating
@@ -248,9 +280,18 @@ End with: **Total potential savings: [amount from data]**
 When the user asks a SPECIFIC question (not a general analysis), answer that question directly using the relevant data sections, but still maintain the same data-driven, numbers-first approach with tables and bold figures.`;
 }
 
+// ============================================================================
+// MAIN ROUTE HANDLER
+// ============================================================================
+
 export async function POST(request: NextRequest) {
   try {
-    const { message, useFramework } = await request.json();
+    const { message, useFramework, conversationHistory } = await request.json() as {
+      message: string;
+      useFramework?: boolean | 'v3';
+      conversationHistory?: Array<{ role: 'user' | 'assistant'; content: string }>;
+    };
+
     if (!message || typeof message !== "string") {
       return NextResponse.json({ error: "Message required" }, { status: 400 });
     }
@@ -259,14 +300,13 @@ export async function POST(request: NextRequest) {
     const { analysis } = financeData;
     const anthropicKey = process.env.ANTHROPIC_API_KEY;
 
-    // ── V3: Use the generic CopilotFramework ──────────────────────────
-    // The framework handles EVERYTHING: prompt building, SSE streaming,
-    // structured output, conversation memory. Finance Jarvis just provides
-    // the DomainAdapter with its domain-specific data and analysis.
-    //
-    // Set useFramework=true in the request body to opt in (or it's the default).
-    // Set useFramework=false to use the legacy v2 prompt path.
-    if (useFramework !== false && anthropicKey) {
+    // ══════════════════════════════════════════════════════════════════════
+    // V3 COPILOT FRAMEWORK PATH (opt-in fallback: useFramework='v3')
+    // Uses the generic CopilotFramework with DomainAdapter pattern.
+    // ══════════════════════════════════════════════════════════════════════
+
+    if (useFramework === 'v3' && anthropicKey) {
+      const { createCopilotInstance } = await import("@nexus-ai/memory-stack");
       const adapter = createFinanceJarvisAdapter(financeData);
       const copilot = createCopilotInstance({
         adapter,
@@ -280,13 +320,156 @@ export async function POST(request: NextRequest) {
       return new Response(stream, { headers });
     }
 
-    // ── Legacy V2 path (fallback) ─────────────────────────────────────
+    // ══════════════════════════════════════════════════════════════════════
+    // V4 PATH — Universal Brain Context Builder + Claude-Aspirational
+    // DEFAULT: Uses the same intelligence pipeline as the main copilot.
+    // Finance Jarvis data is injected as trainedKnowledge + domain prompt.
+    // ══════════════════════════════════════════════════════════════════════
+
+    if (useFramework !== false && anthropicKey) {
+      let brainContext: BrainContext | null = null;
+
+      try {
+        const {
+          createBrainContextBuilder,
+          createAgentLoop,
+          createProactiveIntelligence,
+          createSessionMemory,
+          createReasoningChain,
+          createMultiModalInference,
+        } = await import("@nexus-ai/memory-stack");
+
+        // Build BrainRegions with Finance Jarvis persona + aspirational capabilities
+        const brainRegions: Partial<BrainRegions> = {};
+
+        // ── Finance Jarvis persona ─────────────────────────────────────
+        brainRegions.persona = {
+          name: 'Finance Jarvis',
+          description: 'AI CFO copilot for Series A SaaS companies. Analyzes real Xero + Volopay financial data through the NexusBrain causal intelligence engine. Always data-driven, numbers-first, with markdown tables and bold figures.',
+        };
+
+        // ── Conversation History ───────────────────────────────────────
+        if (conversationHistory && conversationHistory.length > 0) {
+          brainRegions.conversationHistory = conversationHistory;
+        }
+
+        // ── Claude-Aspirational Capabilities ───────────────────────────
+        // Lightweight, stateless factories — safe to instantiate per request.
+
+        // Agent Loop — autonomous multi-step execution planning for complex finance queries
+        brainRegions.agentLoop = createAgentLoop({ maxSteps: 10 });
+
+        // Proactive Intelligence — surfaces financial alerts and threshold breaches
+        brainRegions.proactiveIntelligence = createProactiveIntelligence();
+
+        // Session Memory — accumulates finance-specific user preferences
+        brainRegions.sessionMemory = createSessionMemory({
+          userId: 'finance-jarvis-user',
+          organizationId: 'finance-jarvis',
+        });
+
+        // Reasoning Chain — chain-of-thought for complex financial analysis
+        brainRegions.reasoningChain = createReasoningChain({ depth: 'moderate' });
+
+        // Multi-Modal Inference — time series analysis for financial trends
+        brainRegions.multiModalInference = createMultiModalInference();
+
+        // ── Build unified context from brain regions ───────────────────
+        const builder = createBrainContextBuilder(brainRegions as BrainRegions);
+        brainContext = builder.buildContext(message);
+      } catch (brainErr) {
+        console.warn("[Finance Jarvis V4] Non-fatal: brain context builder failed, falling back:", brainErr);
+      }
+
+      // ── Build effective system prompt ──────────────────────────────
+      // Layer 1: Brain Context Builder's universal prompt (intent-aware, persona, capabilities)
+      // Layer 2: Finance Jarvis domain-specific data + output template
+      const financePrompt = buildFinanceJarvisPrompt(financeData);
+      let effectiveSystemPrompt: string;
+
+      if (brainContext?.fullPrompt) {
+        // V4: Brain context + Finance Jarvis data layered together
+        effectiveSystemPrompt = brainContext.fullPrompt +
+          "\n\n═══════════════════════════════════════════════════════════════════════\n" +
+          "FINANCE JARVIS DOMAIN DATA — Your primary data source (Xero + Volopay)\n" +
+          "═══════════════════════════════════════════════════════════════════════\n\n" +
+          financePrompt;
+      } else {
+        // Fallback: pure Finance Jarvis prompt (no brain context available)
+        effectiveSystemPrompt = financePrompt;
+      }
+
+      // ── Build messages array ──────────────────────────────────────
+      const messages: Array<{ role: "user" | "assistant"; content: string }> = [];
+      if (conversationHistory && conversationHistory.length > 0) {
+        const recent = conversationHistory.slice(-8);
+        for (const msg of recent) {
+          messages.push({ role: msg.role, content: msg.content });
+        }
+      }
+      messages.push({ role: "user", content: message });
+
+      // ── Stream via Claude Sonnet ──────────────────────────────────
+      const { default: Anthropic } = await import("@anthropic-ai/sdk");
+      const anthropic = new Anthropic({ apiKey: anthropicKey });
+      const { stream, send, sendText, sendError, close } = createSSEStream();
+
+      (async () => {
+        try {
+          // Send brain context metadata BEFORE text stream
+          if (brainContext) {
+            send(JSON.stringify({
+              brainMeta: {
+                intent: brainContext.intent,
+                domains: brainContext.domains,
+                confidence: brainContext.confidence,
+                regionsUsed: brainContext.regionsUsed,
+                uncertainAreas: brainContext.uncertainAreas,
+              },
+            }));
+          }
+
+          const anthropicStream = anthropic.messages.stream({
+            model: "claude-sonnet-4-5-20250929",
+            max_tokens: 8192,
+            system: effectiveSystemPrompt,
+            messages,
+          });
+
+          for await (const event of anthropicStream) {
+            if (
+              event.type === "content_block_delta" &&
+              event.delta.type === "text_delta"
+            ) {
+              sendText(event.delta.text);
+            }
+          }
+
+          close();
+        } catch (err) {
+          const errorMessage = err instanceof Error ? err.message : "Unknown error";
+          sendError(`Failed to get response from AI: ${errorMessage}. Please try again.`);
+          close();
+        }
+      })();
+
+      return new Response(stream, {
+        headers: {
+          "Content-Type": "text/event-stream",
+          "Cache-Control": "no-cache",
+          Connection: "keep-alive",
+        },
+      });
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // LEGACY V2 PATH — No API key fallback (data-only response)
+    // ══════════════════════════════════════════════════════════════════════
+
     const kpis = analysis.kpis;
     const topInsights = analysis.insights.slice(0, 8);
-    const systemPrompt = buildFinanceJarvisPrompt(financeData);
 
     if (!anthropicKey) {
-      // Fallback: structured response from brain data
       const { stream, sendText, close } = createSSEStream();
 
       const fallback = [
@@ -318,7 +501,8 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Stream via Claude (legacy v2)
+    // ── Legacy V2: direct Claude stream with Finance Jarvis prompt ───
+    const systemPrompt = buildFinanceJarvisPrompt(financeData);
     const { default: Anthropic } = await import("@anthropic-ai/sdk");
     const anthropic = new Anthropic({ apiKey: anthropicKey });
     const { stream, sendText, close } = createSSEStream();
