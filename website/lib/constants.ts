@@ -3,6 +3,7 @@ export const SITE = {
   tagline: "A living brain for your apps — it perceives, reasons, dreams, and gets smarter every day.",
   url: "https://usebrainos.com",
   github: "https://github.com/abhishec/nexus-intelligence",
+  platform: "https://platform.usebrainos.com",
   description:
     "NexusBrain is a self-improving causal intelligence engine with 11 brain regions, tested against peer-reviewed benchmarks (CausalRivers ICLR 2025, CauseME, LongMemEval). It discovers cause-and-effect with 8 ensemble methods, predicts outcomes, and compounds knowledge autonomously.",
 } as const;
@@ -10,8 +11,9 @@ export const SITE = {
 export const NAV_LINKS = [
   { label: "Watch It Think", href: "#live-brain" },
   { label: "Benchmarks", href: "#benchmarks" },
+  { label: "Competition", href: "#competition" },
+  { label: "Use Cases", href: "#use-cases" },
   { label: "Docs", href: "/docs" },
-  { label: "Use Cases", href: "/use-cases" },
   { label: "GitHub", href: SITE.github, external: true },
 ] as const;
 

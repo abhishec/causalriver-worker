@@ -39,10 +39,10 @@ export function CTA() {
 
           <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
             <a
-              href="/docs/quickstart"
+              href={SITE.platform}
               className="inline-flex h-12 items-center justify-center rounded-lg bg-gradient-to-r from-emerald-500 to-cyan-500 px-8 text-sm font-medium text-white transition-all hover:from-emerald-600 hover:to-cyan-600 hover:shadow-lg hover:shadow-emerald-500/20"
             >
-              Start Building
+              Platform Login
             </a>
             <a
               href={SITE.github}

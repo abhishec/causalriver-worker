@@ -21,21 +21,21 @@ const CONNECTIONS = [
   [0, 6], [4, 6], [5, 6], [2, 3], [7, 2], [8, 3],
 ];
 
-// Fallback activity messages when no real data
+// Fallback activity messages — core brain operations, no client details
 const FALLBACK_MESSAGES = [
-  { region: "Memory", action: "Consolidated 847 signals into 12 new edges", icon: "\ud83e\udde0" },
-  { region: "Reasoning", action: "Discovered: marketing spend causes pipeline growth (14d lag)", icon: "\ud83d\udd17" },
-  { region: "Scoring", action: "Scored insight: revenue correlation \u2014 impact 87/100", icon: "\u26a1" },
-  { region: "Routing", action: "Routed high-priority alert to VP Sales", icon: "\ud83d\udce1" },
-  { region: "Fast Recall", action: "Pre-compiled 10 common queries for instant retrieval", icon: "\ud83d\udca8" },
-  { region: "Anomaly Sense", action: "Detected anomaly: support ticket volume +340%", icon: "\ud83d\udea8" },
-  { region: "Simulation", action: "Simulated: \"What if churn increases 20%?\" \u2014 3 cascade paths", icon: "\ud83d\udd2e" },
-  { region: "Dreaming", action: "Background scan found unexpected correlation: hiring \u2192 NPS", icon: "\ud83d\udca4" },
-  { region: "Perception", action: "Ingested 2,340 signals from Stripe, HubSpot, GitHub", icon: "\ud83d\udc41" },
+  { region: "Memory", action: "Consolidated 847 signals into 12 verified causal edges", icon: "\ud83e\udde0" },
+  { region: "Reasoning", action: "Discovered new causal edge: A \u2192 B (14d lag, p<0.01)", icon: "\ud83d\udd17" },
+  { region: "Scoring", action: "Scored insight: cross-domain correlation \u2014 impact 87/100", icon: "\u26a1" },
+  { region: "Routing", action: "Routed high-priority cascade alert to attention manager", icon: "\ud83d\udce1" },
+  { region: "Fast Recall", action: "Pre-compiled 10 common query patterns for instant retrieval", icon: "\ud83d\udca8" },
+  { region: "Anomaly Sense", action: "Detected statistical anomaly: signal volume +340% (Z-score 4.2)", icon: "\ud83d\udea8" },
+  { region: "Simulation", action: "Counterfactual simulation complete \u2014 modeled 3 cascade paths", icon: "\ud83d\udd2e" },
+  { region: "Dreaming", action: "Background scan found unexpected cross-domain correlation", icon: "\ud83d\udca4" },
+  { region: "Perception", action: "Ingested 2,340 signals from 13 connected data sources", icon: "\ud83d\udc41" },
   { region: "Memory", action: "Strengthened 23 causal edges after prediction validation", icon: "\ud83d\udcaa" },
-  { region: "Reasoning", action: "15 algorithms voted: deploy frequency causes satisfaction (p<0.01)", icon: "\ud83d\uddf3\ufe0f" },
-  { region: "Dreaming", action: "Found knowledge gap: no data on competitor pricing impact", icon: "\ud83d\udd0d" },
-  { region: "Scoring", action: "New cascade alert: engineering delays will impact revenue in 30d", icon: "\u23f0" },
+  { region: "Reasoning", action: "8 algorithms voted: causal edge confirmed (ensemble p<0.01)", icon: "\ud83d\uddf3\ufe0f" },
+  { region: "Dreaming", action: "Identified knowledge gap: missing data in 2 causal subgraphs", icon: "\ud83d\udd0d" },
+  { region: "Scoring", action: "New cascade alert: 4-hop chain detected, impact score 92", icon: "\u23f0" },
   { region: "Perception", action: "LLM distilled 48 articles into structured causal knowledge", icon: "\ud83d\udcda" },
 ];
 

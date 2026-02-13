@@ -23,7 +23,7 @@ function Cell({ value }: { value: boolean | string }) {
 
 export function Comparison() {
   return (
-    <section className="py-24 bg-surface/50">
+    <section className="py-24 bg-surface/50" id="competition">
       <div className="mx-auto max-w-7xl px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

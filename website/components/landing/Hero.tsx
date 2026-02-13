@@ -5,12 +5,12 @@ import { motion } from "framer-motion";
 import { SITE } from "@/lib/constants";
 
 const BRAIN_THOUGHTS = [
-  "Discovered: deploy frequency causes customer satisfaction (14d lag, p<0.01)",
-  "Anomaly detected: support tickets +340% — traced to v3.2 release",
-  "Prediction: revenue will increase 12% next quarter at current velocity",
-  "New connection: marketing timing \u2192 3x pipeline conversion",
+  "Discovered new causal edge: deploy frequency \u2192 satisfaction (14d lag, p<0.01)",
+  "Anomaly detected: signal volume spike +340% \u2014 tracing root cause across 3 domains",
+  "Prediction validated: forecast was within 3% of actual outcome \u2014 confidence 0.89",
+  "New causal chain: 4-hop cascade detected across engineering \u2192 operations \u2192 outcomes",
   "Consolidated 847 signals into 12 verified causal edges overnight",
-  "Simulated: 'What if churn increases 20%?' — mapped 3 cascade paths",
+  "Simulation complete: modeled 3 counterfactual cascade paths with p-value evidence",
 ];
 
 export function Hero() {
@@ -77,10 +77,10 @@ export function Hero() {
 
           <div className="mb-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <a
-              href="/docs/quickstart"
+              href={SITE.platform}
               className="inline-flex h-12 items-center justify-center rounded-lg bg-gradient-to-r from-emerald-500 to-cyan-500 px-8 text-sm font-medium text-white transition-all hover:from-emerald-600 hover:to-cyan-600 hover:shadow-lg hover:shadow-emerald-500/20"
             >
-              Start Building
+              Platform Login
             </a>
             <a
               href="#live-brain"

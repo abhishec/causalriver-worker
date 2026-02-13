@@ -41,12 +41,10 @@ export function Navbar() {
             )
           )}
           <a
-            href={SITE.github}
-            target="_blank"
-            rel="noopener noreferrer"
+            href={SITE.platform}
             className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent-dark"
           >
-            Get Started
+            Platform Login
           </a>
         </div>
 
