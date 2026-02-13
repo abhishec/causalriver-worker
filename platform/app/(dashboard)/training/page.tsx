@@ -1,9 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentOrgId } from "@/lib/org-helpers";
 import { formatNumber } from "@/lib/utils";
 
 export const dynamic = 'force-dynamic';
-
-const CORE_ORG_ID = "00000000-0000-4000-a000-000000000001";
 
 export const metadata = { title: "Training" };
 
@@ -33,6 +32,7 @@ const SCHEDULE = [
 
 export default async function TrainingPage() {
   const supabase = await createClient();
+  const CORE_ORG_ID = await getCurrentOrgId();
 
   const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString().split("T")[0];
 

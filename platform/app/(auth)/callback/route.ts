@@ -10,7 +10,10 @@ export async function GET(request: Request) {
     const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
-      return NextResponse.redirect(`${origin}${next}`);
+      // If redirecting to an invite page, go there directly
+      // The invite page will handle acceptance
+      const redirectTo = next.startsWith("/invite/") ? next : next;
+      return NextResponse.redirect(`${origin}${redirectTo}`);
     }
   }
 

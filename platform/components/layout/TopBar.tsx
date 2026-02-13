@@ -2,12 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { useOrg } from "@/lib/org-context";
 import type { User } from "@supabase/supabase-js";
 
 export function TopBar() {
   const [user, setUser] = useState<User | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const supabase = createClient();
+  const { currentOrg, isPlatformAdmin } = useOrg();
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUser(data.user));
@@ -23,12 +25,20 @@ export function TopBar() {
 
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border/50 bg-background/80 backdrop-blur-xl px-6">
-      {/* Left — Breadcrumb / Page title (filled by each page) */}
+      {/* Left — Org name + status */}
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-1.5">
           <div className="w-1.5 h-1.5 rounded-full bg-success brain-pulse" />
-          <span className="text-xs text-muted">Core Brain</span>
+          <span className="text-xs text-muted">{currentOrg?.name ?? "Brain"}</span>
         </div>
+        {isPlatformAdmin && (
+          <a
+            href="/admin"
+            className="px-2 py-0.5 rounded bg-warning/10 text-[10px] font-medium text-warning hover:bg-warning/20 transition-colors"
+          >
+            Admin
+          </a>
+        )}
       </div>
 
       {/* Right — User menu */}

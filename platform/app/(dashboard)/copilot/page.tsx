@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback, FormEvent } from "react";
 import { cn } from "@/lib/utils";
+import { useOrg } from "@/lib/org-context";
 
 interface Message {
   role: "user" | "assistant";
@@ -15,9 +16,8 @@ const EXAMPLE_PROMPTS = [
   "Predict next month's revenue",
 ];
 
-const ORG_ID = "00000000-0000-4000-a000-000000000001";
-
 export default function CopilotPage() {
+  const { currentOrg } = useOrg();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -53,7 +53,7 @@ export default function CopilotPage() {
       const response = await fetch("/api/copilot/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: trimmed, organizationId: ORG_ID }),
+        body: JSON.stringify({ message: trimmed, organizationId: currentOrg?.id }),
       });
 
       if (!response.ok) {

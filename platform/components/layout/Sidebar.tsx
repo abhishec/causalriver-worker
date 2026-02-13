@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { OrgSwitcher } from "./OrgSwitcher";
 
 const NAV_ITEMS = [
   {
@@ -55,6 +56,9 @@ export function Sidebar() {
           </div>
         </div>
       </div>
+
+      {/* Org Switcher */}
+      <OrgSwitcher />
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-6">

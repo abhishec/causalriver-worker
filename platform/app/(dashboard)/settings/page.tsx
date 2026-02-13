@@ -1,26 +1,24 @@
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentOrgId } from "@/lib/org-helpers";
 import { formatUSD } from "@/lib/utils";
+import { SettingsMembers } from "./settings-members";
 
 export const dynamic = 'force-dynamic';
-
-const CORE_ORG_ID = "00000000-0000-4000-a000-000000000001";
 
 export const metadata = { title: "Settings" };
 
 export default async function SettingsPage() {
   const supabase = await createClient();
+  const orgId = await getCurrentOrgId();
 
-  // Fetch the user's org from org_members
+  // Get user info + role
   const { data: { user } } = await supabase.auth.getUser();
   const { data: membership } = await supabase
     .from("org_members")
     .select("organization_id, role")
     .eq("user_id", user?.id || "")
-    .order("joined_at", { ascending: true })
-    .limit(1)
+    .eq("organization_id", orgId)
     .single();
-
-  const orgId = membership?.organization_id || CORE_ORG_ID;
 
   // Fetch the org details
   const { data: org } = await supabase
@@ -80,7 +78,7 @@ export default async function SettingsPage() {
             </label>
             <input
               type="text"
-              defaultValue={CORE_ORG_ID}
+              defaultValue={orgId}
               readOnly
               className="w-full rounded-lg bg-input border border-input-border px-3 py-2 text-sm font-mono text-xs text-muted focus:outline-none"
             />
@@ -93,23 +91,7 @@ export default async function SettingsPage() {
         <h2 className="text-sm font-medium mb-1">Members</h2>
         <p className="text-xs text-muted mb-5">Manage who has access to this organization</p>
 
-        <div className="rounded-lg bg-surface border border-border/30 p-8 text-center">
-          <svg
-            className="w-8 h-8 text-muted mx-auto mb-3"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={1.5}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"
-            />
-          </svg>
-          <p className="text-sm text-muted-foreground">Team management coming soon</p>
-          <p className="text-xs text-muted mt-1">Invite members, assign roles, manage permissions</p>
-        </div>
+        <SettingsMembers orgId={orgId} />
       </section>
 
       {/* Notifications */}

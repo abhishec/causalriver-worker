@@ -1,14 +1,14 @@
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentOrgId } from "@/lib/org-helpers";
 import { CostsClient } from "./costs-client";
 
 export const dynamic = 'force-dynamic';
-
-const CORE_ORG_ID = "00000000-0000-4000-a000-000000000001";
 
 export const metadata = { title: "Costs" };
 
 export default async function CostsPage() {
   const supabase = await createClient();
+  const CORE_ORG_ID = await getCurrentOrgId();
 
   const [costLogResult, awsResult, budgetResult] = await Promise.all([
     // LLM cost log (last 30 days)

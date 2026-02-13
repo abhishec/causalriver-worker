@@ -1,10 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
-export default function LoginPage() {
+function LoginForm() {
+  const searchParams = useSearchParams();
+  const nextUrl = searchParams.get("next");
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -12,6 +16,9 @@ export default function LoginPage() {
   const [magicLinkSent, setMagicLinkSent] = useState(false);
 
   const supabase = createClient();
+
+  // Where to redirect after login
+  const redirectTo = nextUrl || "/overview";
 
   async function handleEmailLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -27,7 +34,7 @@ export default function LoginPage() {
       setError(error.message);
       setLoading(false);
     } else {
-      window.location.href = "/overview";
+      window.location.href = redirectTo;
     }
   }
 
@@ -39,9 +46,13 @@ export default function LoginPage() {
     setLoading(true);
     setError(null);
 
+    const callbackUrl = nextUrl
+      ? `${window.location.origin}/callback?next=${encodeURIComponent(nextUrl)}`
+      : `${window.location.origin}/callback`;
+
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: `${window.location.origin}/callback` },
+      options: { emailRedirectTo: callbackUrl },
     });
 
     if (error) {
@@ -85,7 +96,11 @@ export default function LoginPage() {
       </div>
 
       <h2 className="text-2xl font-bold mb-1">Welcome back</h2>
-      <p className="text-muted mb-8">Sign in to your brain&apos;s control center</p>
+      <p className="text-muted mb-8">
+        {nextUrl?.startsWith("/invite/")
+          ? "Sign in to accept your invitation"
+          : "Sign in to your brain's control center"}
+      </p>
 
       {error && (
         <div className="mb-4 p-3 rounded-lg bg-danger/10 border border-danger/20 text-danger text-sm">
@@ -145,5 +160,19 @@ export default function LoginPage() {
         </Link>
       </p>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center py-12">
+          <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+        </div>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   );
 }

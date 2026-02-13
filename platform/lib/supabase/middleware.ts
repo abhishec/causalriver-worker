@@ -31,16 +31,21 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  const pathname = request.nextUrl.pathname;
+
   // Public routes that don't require auth
   const publicRoutes = ["/login", "/signup", "/callback"];
   const isPublicRoute = publicRoutes.some((route) =>
-    request.nextUrl.pathname.startsWith(route)
+    pathname.startsWith(route)
   );
 
-  // Auth-required but not dashboard routes (e.g. onboarding)
-  const isOnboarding = request.nextUrl.pathname.startsWith("/onboarding");
+  // Invite pages are semi-public (show info without auth, but accept requires auth)
+  const isInvitePage = pathname.startsWith("/invite/");
 
-  if (!user && !isPublicRoute && !isOnboarding) {
+  // Auth-required but not dashboard routes (e.g. onboarding)
+  const isOnboarding = pathname.startsWith("/onboarding");
+
+  if (!user && !isPublicRoute && !isInvitePage && !isOnboarding) {
     // No user and trying to access protected route → redirect to login
     const url = request.nextUrl.clone();
     url.pathname = "/login";
@@ -56,9 +61,29 @@ export async function updateSession(request: NextRequest) {
 
   if (user && isPublicRoute) {
     // User is logged in but on login/signup page → redirect to dashboard
+    // Exception: if there's a `next` param (e.g. from invite flow), honor it
+    const nextParam = request.nextUrl.searchParams.get("next");
+    if (nextParam && nextParam.startsWith("/invite/")) {
+      const url = request.nextUrl.clone();
+      url.pathname = nextParam;
+      url.search = "";
+      return NextResponse.redirect(url);
+    }
+
     const url = request.nextUrl.clone();
     url.pathname = "/overview";
     return NextResponse.redirect(url);
+  }
+
+  // Onboarding check: if user is logged in, check if they've completed onboarding
+  // Skip for invite pages (they should be able to accept invites without onboarding)
+  if (user && !isPublicRoute && !isOnboarding && !isInvitePage) {
+    const meta = user.user_metadata;
+    if (meta && meta.onboarding_complete === false) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/onboarding";
+      return NextResponse.redirect(url);
+    }
   }
 
   return supabaseResponse;

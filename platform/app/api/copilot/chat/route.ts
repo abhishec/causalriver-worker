@@ -1041,9 +1041,35 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // ── Org filter: query across user org + core + jarvis (GAP 6 FIX) ───
+    // ── Validate user is a member of the requested org ─────────────────
+    const { data: membership } = await supabase
+      .from("org_members")
+      .select("organization_id, is_platform_admin")
+      .eq("user_id", user.id)
+      .eq("organization_id", orgId)
+      .single();
+
+    // Platform admins can access any org
+    const { data: adminCheck } = !membership
+      ? await supabase
+          .from("org_members")
+          .select("is_platform_admin")
+          .eq("user_id", user.id)
+          .eq("is_platform_admin", true)
+          .limit(1)
+          .single()
+      : { data: null };
+
+    if (!membership && !adminCheck) {
+      return NextResponse.json(
+        { error: "You are not a member of this organization" },
+        { status: 403 }
+      );
+    }
+
+    // ── Org filter: query across user org + core (shared brain data) ───
     const orgIds = [
-      ...new Set([orgId, CORE_ORG_ID, JARVIS_ORG_ID]),
+      ...new Set([orgId, CORE_ORG_ID]),
     ];
     const orgFilter = orgIds.map((id) => `organization_id.eq.${id}`).join(",");
 
@@ -1230,12 +1256,25 @@ export async function POST(request: NextRequest) {
           if (cleanArtifact.outcomeContract) {
             send(JSON.stringify({ outcomeContract: cleanArtifact.outcomeContract }));
           }
+          // V4: Send decision intelligence events
+          if (cleanArtifact.metaCognition) {
+            send(JSON.stringify({ metaCognition: cleanArtifact.metaCognition }));
+          }
+          if (cleanArtifact.counterfactuals) {
+            send(JSON.stringify({ counterfactuals: cleanArtifact.counterfactuals }));
+          }
+          if (cleanArtifact.adaptiveLayer) {
+            send(JSON.stringify({ adaptiveLayer: cleanArtifact.adaptiveLayer }));
+          }
+          if (cleanArtifact.decisionJournal) {
+            send(JSON.stringify({ decisionJournal: cleanArtifact.decisionJournal }));
+          }
         }
 
         // Augment system prompt with REAL computed data from brain modules
         const effectiveSystemPrompt = actionArtifact?.__promptText
           ? systemPrompt +
-            "\n\n## COMPUTED DATA + EXECUTION PLAYBOOK (use these REAL numbers and recommended actions — do NOT invent data)\n" +
+            "\n\n## COMPUTED DATA + EXECUTION PLAYBOOK + DECISION INTELLIGENCE (use these REAL numbers, recommended actions, meta-cognition, and counterfactuals — do NOT invent data)\n" +
             String(actionArtifact.__promptText)
           : systemPrompt;
 

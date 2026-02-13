@@ -10,8 +10,7 @@ import {
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-
-const ORG_ID = "00000000-0000-4000-a000-000000000001";
+import { useOrg } from "@/lib/org-context";
 
 const QUICK_PROMPTS = [
   "Why is churn increasing?",
@@ -21,6 +20,7 @@ const QUICK_PROMPTS = [
 ];
 
 export function CopilotOverlay() {
+  const { currentOrg } = useOrg();
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState("");
   const [response, setResponse] = useState("");
@@ -92,7 +92,7 @@ export function CopilotOverlay() {
       const res = await fetch("/api/copilot/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: trimmed, organizationId: ORG_ID }),
+        body: JSON.stringify({ message: trimmed, organizationId: currentOrg?.id }),
       });
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`);

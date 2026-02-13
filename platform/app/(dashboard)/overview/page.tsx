@@ -1,9 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentOrgId } from "@/lib/org-helpers";
 import { OverviewClient } from "./overview-client";
 
 export const dynamic = 'force-dynamic';
-
-const CORE_ORG_ID = "00000000-0000-4000-a000-000000000001";
 
 export const metadata = {
   title: "Overview",
@@ -11,6 +10,7 @@ export const metadata = {
 
 export default async function OverviewPage() {
   const supabase = await createClient();
+  const CORE_ORG_ID = await getCurrentOrgId();
 
   // Fetch brain metrics in parallel
   const [

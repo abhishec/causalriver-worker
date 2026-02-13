@@ -1,11 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
-export default function SignupPage() {
-  const [email, setEmail] = useState("");
+function SignupForm() {
+  const searchParams = useSearchParams();
+  const inviteToken = searchParams.get("invite");
+  const inviteEmail = searchParams.get("email") || "";
+
+  const [email, setEmail] = useState(inviteEmail);
   const [password, setPassword] = useState("");
   const [orgName, setOrgName] = useState("");
   const [loading, setLoading] = useState(false);
@@ -14,19 +19,28 @@ export default function SignupPage() {
 
   const supabase = createClient();
 
+  const isInviteFlow = !!inviteToken;
+
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError(null);
+
+    // Build redirect URL — if invite flow, redirect to invite page after email confirmation
+    const redirectTo = isInviteFlow
+      ? `${window.location.origin}/callback?next=/invite/${inviteToken}`
+      : `${window.location.origin}/callback`;
 
     // Create user account with org name in metadata
     const { data, error: signupError } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/callback`,
+        emailRedirectTo: redirectTo,
         data: {
-          org_name: orgName,
+          // Only set org_name if NOT in invite flow (invite users join existing org)
+          ...(isInviteFlow ? {} : { org_name: orgName }),
+          ...(isInviteFlow ? { invite_token: inviteToken } : {}),
         },
       },
     });
@@ -56,7 +70,9 @@ export default function SignupPage() {
           We sent a confirmation link to <span className="text-foreground font-medium">{email}</span>
         </p>
         <p className="text-sm text-muted">
-          Click the link to activate your account and access your brain.
+          {isInviteFlow
+            ? "Click the link to activate your account and join the organization."
+            : "Click the link to activate your account and access your brain."}
         </p>
       </div>
     );
@@ -72,8 +88,14 @@ export default function SignupPage() {
         <span className="text-lg font-semibold">NexusBrain</span>
       </div>
 
-      <h2 className="text-2xl font-bold mb-1">Create your brain</h2>
-      <p className="text-muted mb-8">Set up your organization and start learning</p>
+      <h2 className="text-2xl font-bold mb-1">
+        {isInviteFlow ? "Create your account" : "Create your brain"}
+      </h2>
+      <p className="text-muted mb-8">
+        {isInviteFlow
+          ? "Sign up to accept your invitation"
+          : "Set up your organization and start learning"}
+      </p>
 
       {error && (
         <div className="mb-4 p-3 rounded-lg bg-danger/10 border border-danger/20 text-danger text-sm">
@@ -82,18 +104,21 @@ export default function SignupPage() {
       )}
 
       <form onSubmit={handleSignup} className="space-y-4">
-        <div>
-          <label htmlFor="org" className="block text-sm font-medium mb-1.5">Organization name</label>
-          <input
-            id="org"
-            type="text"
-            value={orgName}
-            onChange={(e) => setOrgName(e.target.value)}
-            placeholder="Acme Inc."
-            className="w-full px-4 py-2.5 rounded-lg bg-input border border-input-border text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-input-focus focus:border-transparent transition-colors"
-            required
-          />
-        </div>
+        {/* Only show org name field if NOT in invite flow */}
+        {!isInviteFlow && (
+          <div>
+            <label htmlFor="org" className="block text-sm font-medium mb-1.5">Organization name</label>
+            <input
+              id="org"
+              type="text"
+              value={orgName}
+              onChange={(e) => setOrgName(e.target.value)}
+              placeholder="Acme Inc."
+              className="w-full px-4 py-2.5 rounded-lg bg-input border border-input-border text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-input-focus focus:border-transparent transition-colors"
+              required
+            />
+          </div>
+        )}
         <div>
           <label htmlFor="email" className="block text-sm font-medium mb-1.5">Work email</label>
           <input
@@ -104,7 +129,13 @@ export default function SignupPage() {
             placeholder="you@company.com"
             className="w-full px-4 py-2.5 rounded-lg bg-input border border-input-border text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-input-focus focus:border-transparent transition-colors"
             required
+            readOnly={isInviteFlow && !!inviteEmail}
           />
+          {isInviteFlow && inviteEmail && (
+            <p className="text-xs text-muted mt-1">
+              This email matches your invitation. Use this to accept.
+            </p>
+          )}
         </div>
         <div>
           <label htmlFor="password" className="block text-sm font-medium mb-1.5">Password</label>
@@ -125,16 +156,39 @@ export default function SignupPage() {
           disabled={loading}
           className="w-full py-2.5 rounded-lg bg-accent hover:bg-accent-dark text-accent-foreground font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {loading ? "Creating your brain..." : "Create Account"}
+          {loading
+            ? isInviteFlow
+              ? "Creating account..."
+              : "Creating your brain..."
+            : isInviteFlow
+              ? "Create Account & Accept Invite"
+              : "Create Account"}
         </button>
       </form>
 
       <p className="mt-6 text-center text-sm text-muted">
         Already have an account?{" "}
-        <Link href="/login" className="text-accent hover:text-accent-light font-medium">
+        <Link
+          href={isInviteFlow ? `/login?next=/invite/${inviteToken}` : "/login"}
+          className="text-accent hover:text-accent-light font-medium"
+        >
           Sign in
         </Link>
       </p>
     </div>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center py-12">
+          <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+        </div>
+      }
+    >
+      <SignupForm />
+    </Suspense>
   );
 }
