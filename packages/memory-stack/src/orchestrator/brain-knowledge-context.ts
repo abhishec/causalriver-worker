@@ -355,6 +355,103 @@ export function createBrainKnowledgeContext(config: BrainKnowledgeContextConfig)
     return 'general';
   }
 
+  // ── Entity State Normalizer ─────────────────────────────────────────────
+  // Rules use canonical paths like metrics.arr, engineering.deploy_frequency...
+  // Users pass domain-specific keys like finance.arr. This normalizer creates
+  // a combined state object that satisfies BOTH naming conventions.
+
+  function normalizeEntityState(raw: Record<string, unknown>): Record<string, unknown> {
+    const normalized: Record<string, unknown> = { ...raw };
+
+    // Map finance.* → metrics.* (company-type rules expect metrics.*)
+    const finance = raw.finance as Record<string, unknown> | undefined;
+    if (finance && typeof finance === 'object') {
+      const metrics: Record<string, unknown> = {
+        ...(raw.metrics as Record<string, unknown> || {}),
+      };
+      // Map common finance fields to metrics equivalents
+      if (finance.arr !== undefined) metrics.arr = finance.arr;
+      if (finance.arr_growth_rate !== undefined) {
+        metrics.arr_growth_rate = finance.arr_growth_rate;
+        metrics.arr_growth_pct = typeof finance.arr_growth_rate === 'number'
+          ? finance.arr_growth_rate * 100
+          : finance.arr_growth_rate;
+      }
+      if (finance.burn_multiple !== undefined) metrics.burn_multiple = finance.burn_multiple;
+      if (finance.gross_margin !== undefined) {
+        metrics.gross_margin = finance.gross_margin;
+        metrics.gross_margin_pct = typeof finance.gross_margin === 'number'
+          ? finance.gross_margin * 100
+          : finance.gross_margin;
+      }
+      if (finance.cac_payback_months !== undefined) metrics.cac_payback_months = finance.cac_payback_months;
+      if (finance.ltv_cac_ratio !== undefined) metrics.ltv_cac_ratio = finance.ltv_cac_ratio;
+      if (finance.cash_runway_months !== undefined) {
+        metrics.cash_runway_months = finance.cash_runway_months;
+        metrics.runway_months = finance.cash_runway_months;
+      }
+      if (finance.rule_of_40_score !== undefined) metrics.rule_of_40_score = finance.rule_of_40_score;
+      if (finance.revenue_per_employee !== undefined) metrics.revenue_per_employee = finance.revenue_per_employee;
+      if (finance.ebitda_margin !== undefined) metrics.ebitda_margin = finance.ebitda_margin;
+      if (finance.working_capital_ratio !== undefined) metrics.working_capital_ratio = finance.working_capital_ratio;
+      if (finance.quick_ratio !== undefined) metrics.quick_ratio = finance.quick_ratio;
+      normalized.metrics = metrics;
+    }
+
+    // Map cs.nrr → metrics.nrr (some rules use metrics.nrr)
+    const cs = raw.cs as Record<string, unknown> | undefined;
+    if (cs && typeof cs === 'object') {
+      const metrics = normalized.metrics as Record<string, unknown> || {};
+      if (cs.nrr !== undefined) metrics.nrr = cs.nrr;
+      if (cs.logo_churn_rate_annual !== undefined) {
+        metrics.logo_churn_rate_annual = cs.logo_churn_rate_annual;
+        metrics.churn_rate = cs.logo_churn_rate_annual;
+      }
+      normalized.metrics = metrics;
+    }
+
+    // Map marketing.magic_number → metrics.magic_number
+    const marketing = raw.marketing as Record<string, unknown> | undefined;
+    if (marketing && typeof marketing === 'object') {
+      const metrics = normalized.metrics as Record<string, unknown> || {};
+      if (marketing.magic_number !== undefined) metrics.magic_number = marketing.magic_number;
+      if (marketing.plg_revenue_pct !== undefined) metrics.plg_revenue_pct = marketing.plg_revenue_pct;
+      if (marketing.cac !== undefined) metrics.cac = marketing.cac;
+      normalized.metrics = metrics;
+    }
+
+    // Flatten top-level domain aliases (runway_months → metrics.runway_months)
+    if (raw.runway_months !== undefined) {
+      const metrics = normalized.metrics as Record<string, unknown> || {};
+      metrics.runway_months = raw.runway_months;
+      metrics.cash_runway_months = raw.runway_months;
+      normalized.metrics = metrics;
+    }
+
+    // Map nrr.trailing_12m → metrics.nrr
+    const nrr = raw.nrr as Record<string, unknown> | undefined;
+    if (nrr && typeof nrr === 'object' && nrr.trailing_12m !== undefined) {
+      const metrics = normalized.metrics as Record<string, unknown> || {};
+      metrics.nrr = nrr.trailing_12m;
+      normalized.metrics = metrics;
+    }
+
+    // Map grr.trailing_12m → metrics.grr
+    const grr = raw.grr as Record<string, unknown> | undefined;
+    if (grr && typeof grr === 'object' && grr.trailing_12m !== undefined) {
+      const metrics = normalized.metrics as Record<string, unknown> || {};
+      metrics.grr = grr.trailing_12m;
+      normalized.metrics = metrics;
+    }
+
+    // Ensure company.* aliases for company-type rules
+    if (!normalized.company) {
+      normalized.company = { ...(finance || {}) };
+    }
+
+    return normalized;
+  }
+
   // ── Main Query Function ────────────────────────────────────────────────
 
   function queryBrainKnowledge(
@@ -405,8 +502,9 @@ export function createBrainKnowledgeContext(config: BrainKnowledgeContextConfig)
       return true;
     });
 
-    // Match rules if entityState provided
-    const matchedRules = entityState ? querier.matchRules(entityState) : [];
+    // Match rules if entityState provided (normalize first to map domain keys → rule paths)
+    const normalizedState = entityState ? normalizeEntityState(entityState) : undefined;
+    const matchedRules = normalizedState ? querier.matchRules(normalizedState) : [];
 
     // Full brain summary
     const summary = querier.summarize();
@@ -576,6 +674,7 @@ ${brainContextText}`;
     buildBrainSystemPrompt,
     extractDomains,
     detectIntent,
+    normalizeEntityState,
     getQuerier: () => querier,
   };
 }
