@@ -1,6 +1,6 @@
 /**
- * CopilotFramework — Claude-Grade Generic Copilot Architecture
- * =============================================================
+ * CopilotFramework — Claude-Grade Generic Copilot Architecture (V2 — CTO Audit)
+ * ================================================================================
  *
  * Brain Analog: The Broca-Wernicke Language Network — takes raw brain activity
  * (data, analysis, reasoning) and produces coherent, structured, high-quality
@@ -8,13 +8,20 @@
  * Wernicke's handles comprehension, this framework handles both understanding
  * user queries AND producing structured, grounded responses.
  *
- * WHY THIS EXISTS:
- * Every NexusBrain app (Finance Jarvis, Code Intelligence, etc.) was building
- * its own copilot from scratch — duplicating SSE streaming, prompt building,
- * context threading, output structuring. This framework provides a SINGLE
- * high-quality copilot that any domain app plugs into.
+ * V2 CHANGES (CTO Audit — 40 gaps fixed):
+ *   - CRITICAL: Real QualityGate with post-generation number validation
+ *   - CRITICAL: Conversation state LRU eviction (maxEntries + TTL)
+ *   - CRITICAL: SSE write-after-close guards + AbortController integration
+ *   - CRITICAL: Provider validation — error on unsupported provider
+ *   - HIGH: Scored intent detection with disambiguation (not first-match)
+ *   - HIGH: DomainAdapter supports async contracts (Promise<T>)
+ *   - HIGH: Currency symbol configurable via DataPoint
+ *   - HIGH: Insight truncation limit configurable
+ *   - HIGH: Custom data from CopilotInsightBundle injected into prompt
+ *   - MEDIUM: groupActions no longer silently drops unknown timelines
+ *   - MEDIUM: Framework version field for adapter compatibility
  *
- * ARCHITECTURE (inspired by Claude's own architecture):
+ * ARCHITECTURE:
  *
  *   ┌─────────────────────────────────────────────────────────┐
  *   │                    CopilotFramework                     │
@@ -26,166 +33,107 @@
  *   │         │                  │                  │         │
  *   │  ┌──────▼──────────────────▼──────────────────▼───────┐ │
  *   │  │              ConversationIntelligence               │ │
- *   │  │  (context threading, follow-up, state management)  │ │
+ *   │  │  (LRU eviction, TTL, topic extraction)             │ │
  *   │  └──────────────────────┬─────────────────────────────┘ │
  *   │                         │                               │
  *   │  ┌──────────────────────▼─────────────────────────────┐ │
  *   │  │                  QualityGate                        │ │
- *   │  │  (confidence, citations, hallucination prevention)  │ │
+ *   │  │  (number registry + post-gen validation)            │ │
  *   │  └──────────────────────┬─────────────────────────────┘ │
  *   │                         │                               │
  *   │  ┌──────────────────────▼─────────────────────────────┐ │
  *   │  │              ResponseStream                         │ │
- *   │  │  (SSE streaming, artifacts, structured events)      │ │
+ *   │  │  (SSE + abort + write-after-close guard)            │ │
  *   │  └────────────────────────────────────────────────────┘ │
  *   └─────────────────────────────────────────────────────────┘
  *
- * THE 5 CONTRACTS EVERY DOMAIN APP IMPLEMENTS:
- *
- *   1. DataProvider    — "Here's my raw data" (Xero data, GitHub data, etc.)
- *   2. AnalysisEngine  — "Here's what the brain computed" (insights, risks, etc.)
- *   3. OutputSections  — "Here's how to present my data" (tables, scorecards)
- *   4. PersonaConfig   — "Here's who the copilot should be" (CFO, CTO, etc.)
- *   5. QualityRules    — "Here's what correctness means" (never fabricate $, etc.)
- *
  * @packageDocumentation
  */
+
+/** Framework version — adapters can check compatibility */
+export const COPILOT_FRAMEWORK_VERSION = '2.0.0';
 
 // ============================================================================
 // CORE TYPES — The Contracts
 // ============================================================================
 
-/**
- * Severity levels for insights and alerts.
- * Ordered from least to most severe.
- */
 export type CopilotSeverity = 'info' | 'low' | 'medium' | 'high' | 'critical';
 
-/**
- * User intent classification — what the user wants to DO.
- */
 export type CopilotIntent =
-  | 'analyze'     // "Show me insights on..."
-  | 'diagnose'    // "Why is X happening?"
-  | 'predict'     // "What will happen if..."
-  | 'compare'     // "How does X compare to Y?"
-  | 'recommend'   // "What should I do about..."
-  | 'summarize'   // "Give me an overview of..."
-  | 'deep_dive'   // "Tell me everything about..."
-  | 'general';    // Default catch-all
+  | 'analyze'
+  | 'diagnose'
+  | 'predict'
+  | 'compare'
+  | 'recommend'
+  | 'summarize'
+  | 'deep_dive'
+  | 'general';
 
 /**
  * A single data point that the domain provides.
- * This is the atomic unit — everything builds from these.
+ * Value is `string | number | boolean` — not `unknown` — for type safety.
  */
 export interface DataPoint {
-  /** Unique key (e.g., "revenue.arr", "engineering.deploy_frequency") */
   key: string;
-  /** Human-readable label */
   label: string;
-  /** The value (number, string, boolean, etc.) */
-  value: unknown;
-  /** Unit for display (e.g., "$", "%", "months", "days") */
+  value: string | number | boolean | null;
   unit?: string;
-  /** How to format for display (e.g., "currency", "percentage", "integer") */
+  /** Currency symbol for 'currency' format (default: '$') */
+  currencySymbol?: string;
   format?: 'currency' | 'percentage' | 'integer' | 'decimal' | 'duration' | 'raw';
-  /** Trend direction if applicable */
   trend?: 'up' | 'down' | 'flat';
-  /** Trend magnitude (e.g., "+12.5%") */
   trendLabel?: string;
-  /** Domain this belongs to (e.g., "finance", "engineering") */
   domain?: string;
-  /** Confidence in this data point (0-1) */
   confidence?: number;
-  /** Time period (e.g., "2024-01", "Q3 2024") */
   period?: string;
 }
 
-/**
- * A pre-computed insight from the brain's analysis engine.
- * These are the brain's "thoughts" — the copilot PRESENTS them, never invents them.
- */
 export interface BrainInsight {
-  /** Unique identifier */
   id: string;
-  /** Severity level */
   severity: CopilotSeverity;
-  /** Category (domain-specific) */
   category: string;
-  /** Short title */
   title: string;
-  /** Detailed description with specific numbers */
   description: string;
-  /** Actionable recommendation */
   recommendation?: string;
-  /** Supporting data points */
+  /** Supporting evidence — adapters SHOULD populate this for quality gate validation */
   evidence: DataPoint[];
-  /** Confidence in this insight (0-1) */
   confidence: number;
-  /** Impact magnitude (arbitrary scale, for sorting) */
   impact?: number;
 }
 
-/**
- * A causal relationship discovered by the brain.
- */
 export interface CopilotCausalEdge {
   source: string;
   target: string;
   effectSize: number;
   lagDays: number;
+  /** p-value. Use NaN if not available (never fake 0.05) */
   pValue: number;
   naturalLanguage?: string;
   isConfounded?: boolean;
 }
 
-/**
- * An action item the brain recommends.
- */
 export interface CopilotAction {
-  /** What to do */
   action: string;
-  /** Why it matters */
   rationale: string;
-  /** Timeline: immediate | short_term | medium_term | long_term */
   timeline: 'immediate' | 'short_term' | 'medium_term' | 'long_term';
-  /** Expected savings or impact */
   expectedImpact?: string;
-  /** Who should own this */
   owner?: string;
-  /** Priority */
   priority: 'critical' | 'high' | 'medium' | 'low';
-  /** Additional detail */
   detail?: string;
 }
 
-/**
- * A risk the brain has identified.
- */
 export interface CopilotRisk {
-  /** Risk type (e.g., "cash_runway", "churn_spike", "deploy_failure") */
   type: string;
-  /** Description */
   description: string;
-  /** Probability: low | medium | high */
   probability: 'low' | 'medium' | 'high';
-  /** Impact description */
   impact: string;
-  /** Mitigation strategy */
   mitigation: string;
 }
 
-/**
- * A scenario analysis from the brain.
- */
 export interface CopilotScenario {
-  /** Scenario name (e.g., "Best Case", "Worst Case") */
   name: string;
-  /** Key assumptions */
   assumptions: string[];
-  /** Outcome description */
   outcome: string;
-  /** Key metrics in this scenario */
   metrics: DataPoint[];
 }
 
@@ -193,65 +141,38 @@ export interface CopilotScenario {
 // OUTPUT SECTION SYSTEM — Reusable Structured Templates
 // ============================================================================
 
-/**
- * A table for structured data presentation.
- */
 export interface OutputTable {
-  /** Table title */
   title?: string;
-  /** Column headers */
   columns: string[];
-  /** Row data (each row is an array of strings) */
   rows: string[][];
-  /** Optional highlight rows (indices that should be bold/highlighted) */
   highlightRows?: number[];
 }
 
-/**
- * A health scorecard dimension.
- */
 export interface ScorecardDimension {
-  /** Dimension name (e.g., "Growth", "Profitability") */
   dimension: string;
-  /** Score (0-100) */
   score: number;
-  /** Rating label */
   rating: 'excellent' | 'good' | 'fair' | 'poor' | 'critical';
-  /** Key detail explaining the score */
   detail: string;
 }
 
-/**
- * A section of the copilot's output.
- * Each section is a self-contained unit that can be rendered independently.
- */
 export interface OutputSection {
-  /** Section identifier (unique within a response) */
   id: string;
-  /** Display title with optional emoji prefix */
   title: string;
-  /** Section type determines rendering */
   type: 'narrative' | 'table' | 'scorecard' | 'actions' | 'forecast' | 'causal' | 'kpi_grid' | 'custom';
-  /** Priority for ordering (lower = higher priority) */
   priority: number;
-  /** Whether this section is required (shown even if empty) */
   required: boolean;
-  /** Rendering instructions for the LLM */
+  /** Which intents this section is relevant for. If omitted, shown for all intents. */
+  relevantIntents?: CopilotIntent[];
   instructions: string;
-  /** Pre-computed data for this section */
   data: {
-    /** Narrative text (for 'narrative' type) */
     narrative?: string;
-    /** Table data (for 'table' type) */
     table?: OutputTable;
-    /** Scorecard dimensions (for 'scorecard' type) */
     scorecard?: {
       dimensions: ScorecardDimension[];
       overallScore: number;
       overallRating: string;
       verdict: string;
     };
-    /** Action items (for 'actions' type) */
     actions?: {
       immediate: CopilotAction[];
       shortTerm: CopilotAction[];
@@ -259,13 +180,11 @@ export interface OutputSection {
       longTerm: CopilotAction[];
       totalSavings?: string;
     };
-    /** Forecast data (for 'forecast' type) */
     forecast?: {
       table: OutputTable;
       risks: string[];
       confidence: string;
     };
-    /** Causal chains (for 'causal' type) */
     causal?: {
       chains: Array<{
         group: string;
@@ -276,160 +195,242 @@ export interface OutputSection {
         }>;
       }>;
     };
-    /** KPI grid (for 'kpi_grid' type) */
     kpis?: DataPoint[];
-    /** Custom data (for 'custom' type) */
     custom?: Record<string, unknown>;
   };
 }
 
 // ============================================================================
-// DOMAIN ADAPTER — The Plugin Interface
+// DOMAIN ADAPTER — The Plugin Interface (supports sync AND async)
 // ============================================================================
 
-/**
- * The DomainAdapter is what EVERY app implements to plug into the copilot.
- * It's the contract between the domain and the generic framework.
- *
- * @example Finance Jarvis adapter:
- * ```typescript
- * const financeAdapter: DomainAdapter = {
- *   domain: 'finance',
- *   persona: { name: 'Finance Jarvis', role: 'AI CFO Copilot', ... },
- *   getDataSnapshot: () => ({ kpis: [...], trends: [...] }),
- *   getInsights: () => analysis.insights,
- *   getOutputSections: () => [overspendingSection, anomalySection, ...],
- *   getQualityRules: () => ['Never fabricate dollar amounts', ...],
- * };
- * ```
- */
 export interface DomainAdapter {
-  /** Domain identifier (e.g., "finance", "engineering", "cs") */
+  /** Domain identifier */
   domain: string;
-
-  /** Display name for this copilot (e.g., "Finance Jarvis", "Code Intelligence") */
+  /** Display name */
   displayName: string;
-
   /** Persona configuration */
   persona: CopilotPersona;
+  /** Framework version this adapter targets */
+  frameworkVersion?: string;
 
-  /**
-   * CONTRACT 1: Provide raw data snapshot.
-   * Returns all KPIs, metrics, and data points the brain has access to.
-   * These form the DATA LAYER of the 3-layer prompt.
-   */
-  getDataSnapshot(): CopilotDataSnapshot;
-
-  /**
-   * CONTRACT 2: Provide pre-computed insights.
-   * Returns brain-analyzed insights, risks, actions.
-   * These form the ANALYSIS LAYER of the 3-layer prompt.
-   */
-  getInsights(): CopilotInsightBundle;
-
-  /**
-   * CONTRACT 3: Provide output section templates.
-   * Returns the structured sections the response should contain.
-   * These form the OUTPUT TEMPLATE LAYER of the 3-layer prompt.
-   */
-  getOutputSections(intent: CopilotIntent): OutputSection[];
-
-  /**
-   * CONTRACT 4: Provide quality rules.
-   * Rules the LLM must follow to maintain correctness.
-   */
+  /** CONTRACT 1: Data snapshot (sync or async) */
+  getDataSnapshot(): CopilotDataSnapshot | Promise<CopilotDataSnapshot>;
+  /** CONTRACT 2: Pre-computed insights (sync or async) */
+  getInsights(): CopilotInsightBundle | Promise<CopilotInsightBundle>;
+  /** CONTRACT 3: Output section templates (sync or async) */
+  getOutputSections(intent: CopilotIntent): OutputSection[] | Promise<OutputSection[]>;
+  /** CONTRACT 4: Quality rules */
   getQualityRules(): string[];
-
-  /**
-   * CONTRACT 5 (optional): Custom intent detection.
-   * If the domain has specialized intent understanding.
-   */
+  /** CONTRACT 5 (optional): Custom intent detection */
   detectIntent?(message: string): CopilotIntent;
-
-  /**
-   * Optional: Provide causal edges relevant to this domain.
-   */
+  /** Optional: Causal edges */
   getCausalEdges?(): CopilotCausalEdge[];
-
-  /**
-   * Optional: Provide scenario analyses.
-   */
+  /** Optional: Scenario analyses */
   getScenarios?(): CopilotScenario[];
 }
 
-/**
- * The copilot persona — who the AI should be.
- */
 export interface CopilotPersona {
-  /** Persona name (e.g., "Finance Jarvis") */
   name: string;
-  /** Role (e.g., "AI CFO Copilot for a Series A SaaS Company") */
   role: string;
-  /** Areas of expertise */
   expertise: string[];
-  /** Response style instructions */
   responseStyle: string;
-  /** Data sources the persona has access to */
   dataSources: string[];
-  /** Key behavioral rules */
   rules: string[];
 }
 
-/**
- * A snapshot of all data the domain provides.
- */
 export interface CopilotDataSnapshot {
-  /** Key performance indicators */
   kpis: DataPoint[];
-  /** Time series trends */
-  trends?: Array<{
-    period: string;
-    metrics: DataPoint[];
-  }>;
-  /** Any additional structured data */
+  trends?: Array<{ period: string; metrics: DataPoint[] }>;
   sections?: Record<string, DataPoint[]>;
 }
 
-/**
- * Bundle of pre-computed insights from the brain.
- */
 export interface CopilotInsightBundle {
-  /** Ranked insights */
   insights: BrainInsight[];
-  /** Identified risks */
   risks: CopilotRisk[];
-  /** Recommended actions */
   actions: CopilotAction[];
-  /** Bottom line summary */
   bottomLine: string;
-  /** Any additional analysis sections */
+  /** Domain-specific analysis sections — will be serialized into the prompt */
   custom?: Record<string, unknown>;
+}
+
+// ============================================================================
+// QUALITY GATE — Real Number Registry + Post-Generation Validation
+// ============================================================================
+
+/**
+ * Result of quality gate validation on a generated response.
+ */
+export interface QualityGateResult {
+  passed: boolean;
+  /** Numbers found in the response that are NOT in the data registry */
+  ungroundedNumbers: string[];
+  /** Sections that were required but missing from the response */
+  missingSections: string[];
+  /** Total numbers found in response */
+  totalNumbers: number;
+  /** Numbers that matched the data registry */
+  groundedNumbers: number;
+  /** Grounding ratio (0-1) */
+  groundingRatio: number;
+}
+
+/**
+ * Build a registry of all numbers present in the data layers.
+ * Used by the quality gate to validate LLM output.
+ */
+export function buildNumberRegistry(data: CopilotDataSnapshot, insights: CopilotInsightBundle): Set<string> {
+  const registry = new Set<string>();
+
+  function addNumber(val: string | number | boolean | null | undefined): void {
+    if (val == null || typeof val === 'boolean') return;
+    if (typeof val === 'number') {
+      // Add multiple representations: raw, formatted, rounded
+      registry.add(String(val));
+      registry.add(val.toFixed(0));
+      registry.add(val.toFixed(1));
+      registry.add(val.toFixed(2));
+      if (Math.abs(val) >= 1_000_000) {
+        registry.add((val / 1_000_000).toFixed(2));
+        registry.add((val / 1_000_000).toFixed(1));
+      }
+      if (Math.abs(val) >= 1_000) {
+        registry.add((val / 1_000).toFixed(0));
+        registry.add((val / 1_000).toFixed(1));
+      }
+      // Also add as percentage representation
+      registry.add((val * 100).toFixed(0));
+      registry.add((val * 100).toFixed(1));
+    }
+    if (typeof val === 'string' && /[\d.]+/.test(val)) {
+      const nums = val.match(/[\d.]+/g);
+      if (nums) nums.forEach(n => registry.add(n));
+    }
+  }
+
+  // Register all KPIs
+  for (const kpi of data.kpis) {
+    addNumber(kpi.value);
+  }
+
+  // Register section data
+  if (data.sections) {
+    for (const points of Object.values(data.sections)) {
+      for (const dp of points) {
+        addNumber(dp.value);
+      }
+    }
+  }
+
+  // Register trend data
+  if (data.trends) {
+    for (const period of data.trends) {
+      for (const m of period.metrics) {
+        addNumber(m.value);
+      }
+    }
+  }
+
+  // Register insight numbers
+  for (const insight of insights.insights) {
+    for (const ev of insight.evidence) {
+      addNumber(ev.value);
+    }
+    // Extract numbers from description text
+    const descNums = insight.description.match(/[\d.]+/g);
+    if (descNums) descNums.forEach(n => registry.add(n));
+  }
+
+  return registry;
+}
+
+/**
+ * Validate a generated response against the data registry.
+ * This is the REAL quality gate — not just prompt instructions.
+ */
+export function validateResponse(
+  response: string,
+  numberRegistry: Set<string>,
+  requiredSections: string[]
+): QualityGateResult {
+  // Extract all numbers from the response (skip common non-data numbers like list indices)
+  const responseNumbers = response.match(/\d+\.?\d*/g) || [];
+  // Filter out very small numbers (1-9) that are likely list indices, not data
+  const significantNumbers = responseNumbers.filter(n => {
+    const num = parseFloat(n);
+    return num >= 10 || n.includes('.');
+  });
+
+  let groundedCount = 0;
+  const ungrounded: string[] = [];
+
+  for (const num of significantNumbers) {
+    if (numberRegistry.has(num)) {
+      groundedCount++;
+    } else {
+      ungrounded.push(num);
+    }
+  }
+
+  // Check for required sections in the response
+  const missingSections: string[] = [];
+  for (const section of requiredSections) {
+    // Check if the section title (without emoji) appears in the response
+    const cleanTitle = section.replace(/[\u{1F600}-\u{1FFFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '').trim();
+    if (!response.includes(cleanTitle) && !response.toLowerCase().includes(cleanTitle.toLowerCase())) {
+      missingSections.push(section);
+    }
+  }
+
+  const total = significantNumbers.length;
+  const ratio = total > 0 ? groundedCount / total : 1;
+
+  return {
+    passed: ratio >= 0.7 && missingSections.length === 0,
+    ungroundedNumbers: ungrounded.slice(0, 20), // Cap for readability
+    missingSections,
+    totalNumbers: total,
+    groundedNumbers: groundedCount,
+    groundingRatio: ratio,
+  };
 }
 
 // ============================================================================
 // PROMPT ARCHITECT — 3-Layer Prompt System
 // ============================================================================
 
-/**
- * Build a complete system prompt from a domain adapter.
- *
- * The prompt has 3 layers:
- * 1. DATA LAYER — Raw numbers from the domain
- * 2. ANALYSIS LAYER — Pre-computed insights from the brain
- * 3. OUTPUT TEMPLATE — Strict structure for the response
- *
- * This is the key innovation: the brain does the THINKING,
- * the LLM does the PRESENTING. No hallucination possible because
- * every number in the response comes from pre-computed data.
- */
-export function buildCopilotPrompt(adapter: DomainAdapter, intent: CopilotIntent): string {
+/** Configuration for prompt building */
+export interface PromptConfig {
+  /** Max insights to include in prompt (default: 12) */
+  maxInsights?: number;
+  /** Max causal edges to include (default: 30) */
+  maxCausalEdges?: number;
+  /** Currency symbol (default: '$') */
+  currencySymbol?: string;
+}
+
+export function buildCopilotPrompt(
+  adapter: DomainAdapter,
+  intent: CopilotIntent,
+  resolvedData?: { data: CopilotDataSnapshot; insights: CopilotInsightBundle; sections: OutputSection[] },
+  promptConfig?: PromptConfig,
+): string {
   const persona = adapter.persona;
-  const data = adapter.getDataSnapshot();
-  const insights = adapter.getInsights();
-  const sections = adapter.getOutputSections(intent);
+  const data = resolvedData?.data ?? (adapter.getDataSnapshot() as CopilotDataSnapshot);
+  const insights = resolvedData?.insights ?? (adapter.getInsights() as CopilotInsightBundle);
+  const allSections = resolvedData?.sections ?? (adapter.getOutputSections(intent) as OutputSection[]);
   const qualityRules = adapter.getQualityRules();
   const causalEdges = adapter.getCausalEdges?.() || [];
   const scenarios = adapter.getScenarios?.() || [];
+
+  const maxInsights = promptConfig?.maxInsights ?? 12;
+  const maxEdges = promptConfig?.maxCausalEdges ?? 30;
+
+  // Filter sections by intent relevance
+  const sections = allSections.filter(s => {
+    if (!s.relevantIntents || s.relevantIntents.length === 0) return true;
+    return s.relevantIntents.includes(intent) || intent === 'deep_dive' || intent === 'general';
+  });
 
   const parts: string[] = [];
 
@@ -446,7 +447,6 @@ export function buildCopilotPrompt(adapter: DomainAdapter, intent: CopilotIntent
   parts.push('═'.repeat(70));
   parts.push('');
 
-  // KPIs
   if (data.kpis.length > 0) {
     parts.push('## Key Performance Indicators');
     for (const kpi of data.kpis) {
@@ -457,9 +457,9 @@ export function buildCopilotPrompt(adapter: DomainAdapter, intent: CopilotIntent
     parts.push('');
   }
 
-  // Additional data sections
   if (data.sections) {
     for (const [sectionName, points] of Object.entries(data.sections)) {
+      if (points.length === 0) continue;
       parts.push(`## ${sectionName}`);
       for (const dp of points) {
         parts.push(`- ${dp.label}: ${formatDataPoint(dp)}`);
@@ -468,7 +468,6 @@ export function buildCopilotPrompt(adapter: DomainAdapter, intent: CopilotIntent
     }
   }
 
-  // Trends
   if (data.trends && data.trends.length > 0) {
     parts.push('## Historical Trends');
     for (const period of data.trends) {
@@ -478,12 +477,15 @@ export function buildCopilotPrompt(adapter: DomainAdapter, intent: CopilotIntent
     parts.push('');
   }
 
-  // Causal edges
   if (causalEdges.length > 0) {
     parts.push('## Causal Relationships (Brain-Discovered)');
-    for (const edge of causalEdges) {
+    for (const edge of causalEdges.slice(0, maxEdges)) {
       const confounded = edge.isConfounded ? ' [POSSIBLY CONFOUNDED]' : '';
-      parts.push(`- ${edge.source} → ${edge.target}: ${(edge.effectSize * 100).toFixed(0)}% effect, ${edge.lagDays}d lag${edge.naturalLanguage ? ' — ' + edge.naturalLanguage : ''}${confounded}`);
+      const pValueStr = Number.isNaN(edge.pValue) ? '' : `, p=${edge.pValue.toFixed(4)}`;
+      parts.push(`- ${edge.source} → ${edge.target}: ${(edge.effectSize * 100).toFixed(0)}% effect, ${edge.lagDays}d lag${pValueStr}${edge.naturalLanguage ? ' — ' + edge.naturalLanguage : ''}${confounded}`);
+    }
+    if (causalEdges.length > maxEdges) {
+      parts.push(`  ... and ${causalEdges.length - maxEdges} more edges`);
     }
     parts.push('');
   }
@@ -494,16 +496,18 @@ export function buildCopilotPrompt(adapter: DomainAdapter, intent: CopilotIntent
   parts.push('═'.repeat(70));
   parts.push('');
 
-  // Insights
   if (insights.insights.length > 0) {
     parts.push('## Brain-Detected Insights (severity-ranked)');
-    for (const insight of insights.insights.slice(0, 12)) {
+    const shown = insights.insights.slice(0, maxInsights);
+    for (const insight of shown) {
       parts.push(`[${insight.severity.toUpperCase()}] ${insight.title}: ${insight.description}${insight.recommendation ? ' → Recommendation: ' + insight.recommendation : ''}`);
+    }
+    if (insights.insights.length > maxInsights) {
+      parts.push(`(${insights.insights.length - maxInsights} additional insights omitted)`);
     }
     parts.push('');
   }
 
-  // Risks
   if (insights.risks.length > 0) {
     parts.push('## Risk Assessment');
     for (const risk of insights.risks) {
@@ -512,13 +516,12 @@ export function buildCopilotPrompt(adapter: DomainAdapter, intent: CopilotIntent
     parts.push('');
   }
 
-  // Actions
   if (insights.actions.length > 0) {
     parts.push('## Recommended Actions (Brain-Prioritized)');
     const grouped = groupActions(insights.actions);
     for (const [timeline, actions] of Object.entries(grouped)) {
       if (actions.length > 0) {
-        parts.push(`\n${timeline.toUpperCase()}:`);
+        parts.push(`\n${timeline.toUpperCase().replace('_', ' ')}:`);
         for (const a of actions) {
           parts.push(`- ${a.action}${a.expectedImpact ? ' | Impact: ' + a.expectedImpact : ''}${a.owner ? ' | Owner: ' + a.owner : ''}`);
         }
@@ -527,7 +530,6 @@ export function buildCopilotPrompt(adapter: DomainAdapter, intent: CopilotIntent
     parts.push('');
   }
 
-  // Scenarios
   if (scenarios.length > 0) {
     parts.push('## Scenario Analysis');
     for (const s of scenarios) {
@@ -536,7 +538,20 @@ export function buildCopilotPrompt(adapter: DomainAdapter, intent: CopilotIntent
     parts.push('');
   }
 
-  // Bottom line
+  // Include custom analysis sections if present
+  if (insights.custom && Object.keys(insights.custom).length > 0) {
+    parts.push('## Additional Domain Analysis');
+    for (const [key, val] of Object.entries(insights.custom)) {
+      if (typeof val === 'object' && val !== null) {
+        parts.push(`### ${key}`);
+        parts.push(JSON.stringify(val, null, 0).substring(0, 2000));
+      } else {
+        parts.push(`- ${key}: ${String(val)}`);
+      }
+    }
+    parts.push('');
+  }
+
   if (insights.bottomLine) {
     parts.push('## Bottom Line (Brain\'s Verdict)');
     parts.push(insights.bottomLine);
@@ -549,16 +564,13 @@ export function buildCopilotPrompt(adapter: DomainAdapter, intent: CopilotIntent
   parts.push('═'.repeat(70));
   parts.push('');
 
-  // Generate output template from sections
   const orderedSections = [...sections].sort((a, b) => a.priority - b.priority);
-
   parts.push(`When answering, structure your response using these sections IN ORDER:\n`);
 
   for (const section of orderedSections) {
     parts.push(`## ${section.title}`);
     parts.push(section.instructions);
 
-    // Inject section-specific data directly
     if (section.data.table) {
       parts.push(`\nDATA FOR THIS SECTION:`);
       parts.push(formatTableForPrompt(section.data.table));
@@ -611,7 +623,6 @@ export function buildCopilotPrompt(adapter: DomainAdapter, intent: CopilotIntent
 
   // ── QUALITY RULES ────────────────────────────────────────────────────
   parts.push('**CRITICAL QUALITY RULES:**');
-  // Universal rules that apply to ALL copilots
   const universalRules = [
     'EVERY number in your response MUST come from the data above — never fabricate',
     'Use the pre-computed analysis as your PRIMARY data source',
@@ -632,43 +643,73 @@ export function buildCopilotPrompt(adapter: DomainAdapter, intent: CopilotIntent
 }
 
 // ============================================================================
-// CONVERSATION INTELLIGENCE — Multi-turn Context Management
+// CONVERSATION INTELLIGENCE — LRU Eviction + TTL
 // ============================================================================
 
-/**
- * Manages conversation state for multi-turn interactions.
- */
 export interface ConversationState {
-  /** Conversation ID */
   id: string;
-  /** Message history */
   messages: Array<{
     role: 'user' | 'assistant';
     content: string;
     timestamp: Date;
     intent?: CopilotIntent;
   }>;
-  /** Accumulated context (what the user has asked about) */
+  /** Actual topics discussed (extracted from messages, not just intent labels) */
   topicsDiscussed: string[];
-  /** Any entity state provided by the user */
   entityState?: Record<string, unknown>;
+  /** Last access time for LRU eviction */
+  lastAccessed: number;
 }
 
-/**
- * Create a conversation state manager.
- */
-export function createConversationManager() {
+export interface ConversationManagerConfig {
+  /** Max conversations to keep in memory (default: 500) */
+  maxEntries?: number;
+  /** TTL for conversation entries in ms (default: 30 minutes) */
+  ttlMs?: number;
+  /** Max messages per conversation (default: 50) */
+  maxMessagesPerConversation?: number;
+}
+
+export function createConversationManager(config?: ConversationManagerConfig) {
+  const maxEntries = config?.maxEntries ?? 500;
+  const ttlMs = config?.ttlMs ?? 30 * 60 * 1000; // 30 min
+  const maxMsgsPerConv = config?.maxMessagesPerConversation ?? 50;
   const conversations = new Map<string, ConversationState>();
+
+  /** Evict expired entries, then LRU if over capacity */
+  function evict(): void {
+    const now = Date.now();
+
+    // Phase 1: TTL eviction
+    for (const [id, conv] of conversations) {
+      if (now - conv.lastAccessed > ttlMs) {
+        conversations.delete(id);
+      }
+    }
+
+    // Phase 2: LRU eviction if still over capacity
+    if (conversations.size > maxEntries) {
+      const sorted = [...conversations.entries()].sort((a, b) => a[1].lastAccessed - b[1].lastAccessed);
+      const toRemove = conversations.size - maxEntries;
+      for (let i = 0; i < toRemove; i++) {
+        conversations.delete(sorted[i][0]);
+      }
+    }
+  }
 
   function getOrCreate(id: string): ConversationState {
     if (!conversations.has(id)) {
+      evict(); // Evict before creating new
       conversations.set(id, {
         id,
         messages: [],
         topicsDiscussed: [],
+        lastAccessed: Date.now(),
       });
     }
-    return conversations.get(id)!;
+    const conv = conversations.get(id)!;
+    conv.lastAccessed = Date.now();
+    return conv;
   }
 
   function addMessage(
@@ -685,10 +726,23 @@ export function createConversationManager() {
       intent,
     });
 
-    // Track topics
-    if (role === 'user' && intent) {
-      if (!conv.topicsDiscussed.includes(intent)) {
-        conv.topicsDiscussed.push(intent);
+    // Cap messages per conversation
+    if (conv.messages.length > maxMsgsPerConv) {
+      conv.messages = conv.messages.slice(-maxMsgsPerConv);
+    }
+
+    // Extract topic entities from user messages (not just intent labels)
+    if (role === 'user') {
+      const words = content.toLowerCase().split(/\s+/);
+      const topicKeywords = words.filter(w => w.length > 4 && !/^(about|would|could|should|their|these|those|which|where|there|please|thanks|hello)$/.test(w));
+      for (const kw of topicKeywords.slice(0, 3)) {
+        if (!conv.topicsDiscussed.includes(kw)) {
+          conv.topicsDiscussed.push(kw);
+        }
+      }
+      // Cap topics
+      if (conv.topicsDiscussed.length > 20) {
+        conv.topicsDiscussed = conv.topicsDiscussed.slice(-20);
       }
     }
   }
@@ -713,10 +767,20 @@ export function createConversationManager() {
 
     for (const msg of recentMessages) {
       const prefix = msg.role === 'user' ? 'User' : 'Copilot';
-      const truncated = msg.content.length > 200
-        ? msg.content.substring(0, 200) + '...'
-        : msg.content;
+      // For assistant messages, take the first and last 100 chars to capture intro + conclusion
+      let truncated: string;
+      if (msg.content.length > 300 && msg.role === 'assistant') {
+        truncated = msg.content.substring(0, 150) + ' [...] ' + msg.content.substring(msg.content.length - 100);
+      } else if (msg.content.length > 200) {
+        truncated = msg.content.substring(0, 200) + '...';
+      } else {
+        truncated = msg.content;
+      }
       summary.push(`- ${prefix}: ${truncated}`);
+    }
+
+    if (conv.topicsDiscussed.length > 0) {
+      summary.push(`Topics discussed so far: ${conv.topicsDiscussed.join(', ')}`);
     }
 
     return summary.join('\n');
@@ -726,191 +790,213 @@ export function createConversationManager() {
     conversations.delete(conversationId);
   }
 
+  /** Get current stats for observability */
+  function getStats() {
+    return {
+      activeConversations: conversations.size,
+      maxEntries,
+      ttlMs,
+    };
+  }
+
   return {
     getOrCreate,
     addMessage,
     getRecentHistory,
     buildConversationSummary,
     clear,
+    getStats,
   };
 }
 
 // ============================================================================
-// INTENT DETECTION — Universal Intent Classification
+// INTENT DETECTION — Scored with Disambiguation
 // ============================================================================
 
-const INTENT_PATTERNS: Array<{ intent: CopilotIntent; keywords: string[] }> = [
+const INTENT_PATTERNS: Array<{ intent: CopilotIntent; keywords: string[]; weight: number }> = [
   {
     intent: 'diagnose',
-    keywords: ['why', 'root cause', 'problem', 'issue', 'declining', 'dropping',
+    weight: 2,
+    keywords: ['root cause', 'problem', 'issue', 'declining', 'dropping',
                'wrong', 'debug', 'investigate', 'diagnose'],
   },
   {
+    intent: 'diagnose',
+    weight: 1,
+    keywords: ['why'],
+  },
+  {
     intent: 'predict',
+    weight: 2,
     keywords: ['predict', 'forecast', 'what would', 'what if', 'scenario',
                'project', 'estimate', 'simulate', 'happen if', 'next quarter'],
   },
   {
     intent: 'compare',
+    weight: 2,
     keywords: ['compare', 'versus', 'vs', 'difference', 'better', 'worse',
                'benchmark', 'relative to'],
   },
   {
     intent: 'recommend',
+    weight: 2,
     keywords: ['should', 'recommend', 'suggest', 'what to do', 'advice',
                'improve', 'optimize', 'reduce', 'cut'],
   },
   {
     intent: 'summarize',
+    weight: 2,
     keywords: ['summary', 'overview', 'brief', 'quick', 'high-level',
                'tldr', 'dashboard'],
   },
   {
     intent: 'deep_dive',
+    weight: 2,
     keywords: ['everything', 'comprehensive', 'full analysis', 'deep dive',
                'detailed', 'all insights', 'complete', 'thorough'],
   },
   {
     intent: 'analyze',
+    weight: 1,
     keywords: ['analyze', 'analysis', 'insight', 'show me', 'tell me about',
                'break down', 'explain', 'understand'],
   },
 ];
 
 /**
- * Detect user intent from a message.
- * Domain adapters can override this with their own detection.
+ * Detect user intent using scored keyword matching.
+ * Each matched keyword adds its weight to the intent's score.
+ * Highest scoring intent wins (with 'general' as fallback).
  */
 export function detectCopilotIntent(message: string): CopilotIntent {
   const lower = message.toLowerCase();
+  const scores = new Map<CopilotIntent, number>();
 
-  for (const { intent, keywords } of INTENT_PATTERNS) {
+  for (const { intent, keywords, weight } of INTENT_PATTERNS) {
     for (const kw of keywords) {
-      if (lower.includes(kw)) return intent;
+      if (lower.includes(kw)) {
+        scores.set(intent, (scores.get(intent) || 0) + weight);
+      }
     }
   }
 
-  return 'general';
+  if (scores.size === 0) return 'general';
+
+  // Find highest scoring intent
+  let bestIntent: CopilotIntent = 'general';
+  let bestScore = 0;
+  for (const [intent, score] of scores) {
+    if (score > bestScore) {
+      bestScore = score;
+      bestIntent = intent;
+    }
+  }
+
+  return bestIntent;
 }
 
 // ============================================================================
-// SSE STREAM — Unified Streaming
+// SSE STREAM — With Write-After-Close Guard + Abort Support
 // ============================================================================
 
-/**
- * Create an SSE stream for copilot responses.
- * This is the unified streaming layer all copilots use.
- */
 export function createCopilotSSEStream() {
   const encoder = new TextEncoder();
   let controller: ReadableStreamDefaultController | null = null;
+  let closed = false;
 
   const stream = new ReadableStream({
     start(c) {
       controller = c;
     },
+    cancel() {
+      // Client disconnected
+      closed = true;
+      controller = null;
+    },
   });
 
-  const send = (data: string) => {
-    controller?.enqueue(encoder.encode(`data: ${data}\n\n`));
+  const safeSend = (data: string) => {
+    if (closed || !controller) return;
+    try {
+      controller.enqueue(encoder.encode(`data: ${data}\n\n`));
+    } catch {
+      // Controller already closed — mark as closed to prevent further writes
+      closed = true;
+    }
   };
 
-  const sendText = (text: string) => {
-    send(JSON.stringify({ text }));
-  };
-
-  const sendArtifact = (artifact: Record<string, unknown>) => {
-    send(JSON.stringify({ artifact }));
-  };
-
-  const sendSection = (section: OutputSection) => {
-    send(JSON.stringify({ section }));
-  };
-
-  const sendError = (error: string) => {
-    send(JSON.stringify({ error }));
-  };
-
-  const sendMetadata = (metadata: Record<string, unknown>) => {
-    send(JSON.stringify({ metadata }));
-  };
+  const sendText = (text: string) => safeSend(JSON.stringify({ text }));
+  const sendArtifact = (artifact: Record<string, unknown>) => safeSend(JSON.stringify({ artifact }));
+  const sendSection = (section: OutputSection) => safeSend(JSON.stringify({ section }));
+  const sendError = (error: string) => safeSend(JSON.stringify({ error }));
+  const sendMetadata = (metadata: Record<string, unknown>) => safeSend(JSON.stringify({ metadata }));
+  const sendQualityGate = (result: QualityGateResult) => safeSend(JSON.stringify({ qualityGate: result }));
 
   const close = () => {
-    send('[DONE]');
-    controller?.close();
+    if (closed) return;
+    closed = true;
+    try {
+      controller?.enqueue(encoder.encode(`data: [DONE]\n\n`));
+      controller?.close();
+    } catch {
+      // Already closed
+    }
+    controller = null;
   };
 
-  return { stream, send, sendText, sendArtifact, sendSection, sendError, sendMetadata, close };
+  /** Check if the stream is still open */
+  const isOpen = () => !closed;
+
+  return {
+    stream,
+    send: safeSend,
+    sendText,
+    sendArtifact,
+    sendSection,
+    sendError,
+    sendMetadata,
+    sendQualityGate,
+    close,
+    isOpen,
+  };
 }
 
 // ============================================================================
 // COPILOT FACTORY — The Main Entry Point
 // ============================================================================
 
-/**
- * Configuration for creating a copilot instance.
- */
 export interface CopilotConfig {
-  /** The domain adapter (required) */
   adapter: DomainAdapter;
-  /** LLM provider */
-  provider: 'anthropic' | 'openai';
-  /** API key */
+  /** LLM provider — only 'anthropic' is supported. Other values throw. */
+  provider: 'anthropic';
   apiKey: string;
-  /** Model to use (default: claude-sonnet-4-5-20250929) */
   model?: string;
-  /** Max tokens (default: 8192) */
   maxTokens?: number;
-  /** Enable conversation memory (default: true) */
   enableMemory?: boolean;
-  /** Additional brain context (from causal graph DB) */
   brainContext?: string;
-  /** Stream response (default: true) */
-  streaming?: boolean;
+  /** Enable post-generation quality gate validation (default: true) */
+  enableQualityGate?: boolean;
+  /** Prompt configuration */
+  promptConfig?: PromptConfig;
+  /** Conversation manager configuration */
+  conversationConfig?: ConversationManagerConfig;
 }
 
-/**
- * A copilot instance — the main thing domain apps use.
- */
 export interface CopilotInstance {
-  /**
-   * Handle a user message and return an SSE stream.
-   */
   chat(message: string, options?: {
     conversationId?: string;
     conversationHistory?: Array<{ role: 'user' | 'assistant'; content: string }>;
     entityState?: Record<string, unknown>;
+    /** AbortSignal for cancellation (e.g., from client disconnect) */
+    signal?: AbortSignal;
   }): {
     stream: ReadableStream;
     headers: Record<string, string>;
   };
-
-  /**
-   * Get the full system prompt (for debugging/testing).
-   */
   getSystemPrompt(intent?: CopilotIntent): string;
-
-  /**
-   * Get the adapter for direct access.
-   */
   getAdapter(): DomainAdapter;
 }
 
-/**
- * Create a copilot instance.
- *
- * @example
- * ```typescript
- * const copilot = createCopilotInstance({
- *   adapter: financeJarvisAdapter,
- *   provider: 'anthropic',
- *   apiKey: process.env.ANTHROPIC_API_KEY!,
- * });
- *
- * const { stream, headers } = copilot.chat('Show me overspending insights');
- * return new Response(stream, { headers });
- * ```
- */
 export function createCopilotInstance(config: CopilotConfig): CopilotInstance {
   const {
     adapter,
@@ -920,18 +1006,23 @@ export function createCopilotInstance(config: CopilotConfig): CopilotInstance {
     maxTokens = 8192,
     enableMemory = true,
     brainContext,
+    enableQualityGate = true,
+    promptConfig,
+    conversationConfig,
   } = config;
 
-  const conversationManager = enableMemory ? createConversationManager() : null;
+  // Validate provider
+  if (provider !== 'anthropic') {
+    throw new Error(`Unsupported LLM provider: "${provider}". Only "anthropic" is currently supported.`);
+  }
+
+  const conversationManager = enableMemory ? createConversationManager(conversationConfig) : null;
 
   function getSystemPrompt(intent: CopilotIntent = 'general'): string {
-    let prompt = buildCopilotPrompt(adapter, intent);
-
-    // Augment with brain context if available
+    let prompt = buildCopilotPrompt(adapter, intent, undefined, promptConfig);
     if (brainContext) {
       prompt += '\n\n' + brainContext;
     }
-
     return prompt;
   }
 
@@ -941,13 +1032,12 @@ export function createCopilotInstance(config: CopilotConfig): CopilotInstance {
       conversationId?: string;
       conversationHistory?: Array<{ role: 'user' | 'assistant'; content: string }>;
       entityState?: Record<string, unknown>;
+      signal?: AbortSignal;
     }
   ) {
     const intent = adapter.detectIntent?.(message) || detectCopilotIntent(message);
-    const systemPrompt = getSystemPrompt(intent);
     const conversationId = options?.conversationId || `conv_${Date.now()}`;
 
-    // Track in memory
     if (conversationManager) {
       conversationManager.addMessage(conversationId, 'user', message, intent);
     }
@@ -955,7 +1045,6 @@ export function createCopilotInstance(config: CopilotConfig): CopilotInstance {
     // Build messages array
     const messages: Array<{ role: 'user' | 'assistant'; content: string }> = [];
 
-    // Add conversation history
     if (options?.conversationHistory) {
       const recent = options.conversationHistory.slice(-8);
       for (const msg of recent) {
@@ -963,60 +1052,103 @@ export function createCopilotInstance(config: CopilotConfig): CopilotInstance {
       }
     } else if (conversationManager) {
       const history = conversationManager.getRecentHistory(conversationId, 8);
-      // Don't include the current message (already added above)
       for (const msg of history.slice(0, -1)) {
         messages.push(msg);
       }
     }
 
-    // Add current message
     messages.push({ role: 'user', content: message });
 
-    // Create SSE stream
-    const { stream, sendText, sendMetadata, sendError, close } = createCopilotSSEStream();
+    const sseStream = createCopilotSSEStream();
 
-    // Send metadata first
     (async () => {
       try {
-        sendMetadata({
+        // Check if already aborted
+        if (options?.signal?.aborted) {
+          sseStream.close();
+          return;
+        }
+
+        // Resolve adapter data (supports async adapters)
+        const [data, insights, sections] = await Promise.all([
+          Promise.resolve(adapter.getDataSnapshot()),
+          Promise.resolve(adapter.getInsights()),
+          Promise.resolve(adapter.getOutputSections(intent)),
+        ]);
+
+        const systemPrompt = (() => {
+          let prompt = buildCopilotPrompt(adapter, intent, { data, insights, sections }, promptConfig);
+          if (brainContext) prompt += '\n\n' + brainContext;
+          return prompt;
+        })();
+
+        sseStream.sendMetadata({
           intent,
           domain: adapter.domain,
           persona: adapter.persona.name,
           conversationId,
+          frameworkVersion: COPILOT_FRAMEWORK_VERSION,
         });
 
-        if (provider === 'anthropic') {
-          const { default: Anthropic } = await import('@anthropic-ai/sdk');
-          const anthropic = new Anthropic({ apiKey });
+        if (options?.signal?.aborted) {
+          sseStream.close();
+          return;
+        }
 
-          const anthropicStream = anthropic.messages.stream({
-            model,
-            max_tokens: maxTokens,
-            system: systemPrompt,
-            messages,
-          });
+        // Stream from Anthropic
+        const { default: Anthropic } = await import('@anthropic-ai/sdk');
+        const anthropic = new Anthropic({ apiKey });
 
-          for await (const event of anthropicStream) {
-            if (
-              event.type === 'content_block_delta' &&
-              event.delta.type === 'text_delta'
-            ) {
-              sendText(event.delta.text);
-            }
+        const anthropicStream = anthropic.messages.stream({
+          model,
+          max_tokens: maxTokens,
+          system: systemPrompt,
+          messages,
+        });
+
+        // Wire abort signal to kill the stream
+        const abortHandler = () => {
+          anthropicStream.abort();
+          sseStream.close();
+        };
+        options?.signal?.addEventListener('abort', abortHandler, { once: true });
+
+        let fullResponse = '';
+        for await (const event of anthropicStream) {
+          if (!sseStream.isOpen()) break;
+          if (
+            event.type === 'content_block_delta' &&
+            event.delta.type === 'text_delta'
+          ) {
+            fullResponse += event.delta.text;
+            sseStream.sendText(event.delta.text);
           }
         }
-        // OpenAI support can be added here
 
-        close();
+        // Cleanup abort listener
+        options?.signal?.removeEventListener('abort', abortHandler);
+
+        // Run quality gate on the complete response
+        if (enableQualityGate && fullResponse.length > 0 && sseStream.isOpen()) {
+          const numberRegistry = buildNumberRegistry(data, insights);
+          const requiredSectionTitles = sections
+            .filter(s => s.required)
+            .map(s => s.title.replace(/[\u{1F600}-\u{1FFFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '').trim());
+          const qgResult = validateResponse(fullResponse, numberRegistry, requiredSectionTitles);
+          sseStream.sendQualityGate(qgResult);
+        }
+
+        sseStream.close();
       } catch (err) {
+        if (!sseStream.isOpen()) return; // Client already disconnected
         const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-        sendError(`Failed to get response: ${errorMessage}`);
-        close();
+        sseStream.sendError(`Failed to get response: ${errorMessage}`);
+        sseStream.close();
       }
     })();
 
     return {
-      stream,
+      stream: sseStream.stream,
       headers: {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
@@ -1036,21 +1168,20 @@ export function createCopilotInstance(config: CopilotConfig): CopilotInstance {
 // HELPER FUNCTIONS
 // ============================================================================
 
-/**
- * Format a DataPoint for display in prompts.
- */
 export function formatDataPoint(dp: DataPoint): string {
   const val = dp.value;
   if (val == null) return 'N/A';
 
+  const curr = dp.currencySymbol || '$';
+
   switch (dp.format) {
     case 'currency':
       if (typeof val === 'number') {
-        if (Math.abs(val) >= 1_000_000) return `$${(val / 1_000_000).toFixed(2)}M`;
-        if (Math.abs(val) >= 1_000) return `$${(val / 1_000).toFixed(0)}K`;
-        return `$${val.toFixed(0)}`;
+        if (Math.abs(val) >= 1_000_000) return `${curr}${(val / 1_000_000).toFixed(2)}M`;
+        if (Math.abs(val) >= 1_000) return `${curr}${(val / 1_000).toFixed(0)}K`;
+        return `${curr}${val.toFixed(0)}`;
       }
-      return `$${val}`;
+      return `${curr}${val}`;
     case 'percentage':
       return typeof val === 'number' ? `${val.toFixed(1)}%` : `${val}%`;
     case 'integer':
@@ -1064,20 +1195,15 @@ export function formatDataPoint(dp: DataPoint): string {
   }
 }
 
-/**
- * Format a table for prompt injection.
- */
 function formatTableForPrompt(table: OutputTable): string {
   if (table.rows.length === 0) return '(No data)';
 
   const lines: string[] = [];
   if (table.title) lines.push(table.title);
 
-  // Header
   lines.push('| ' + table.columns.join(' | ') + ' |');
   lines.push('| ' + table.columns.map(() => '---').join(' | ') + ' |');
 
-  // Rows
   for (const row of table.rows) {
     lines.push('| ' + row.join(' | ') + ' |');
   }
@@ -1086,7 +1212,7 @@ function formatTableForPrompt(table: OutputTable): string {
 }
 
 /**
- * Group actions by timeline.
+ * Group actions by timeline. Unknown timelines go into 'other' (not dropped).
  */
 function groupActions(actions: CopilotAction[]): Record<string, CopilotAction[]> {
   const groups: Record<string, CopilotAction[]> = {
@@ -1099,6 +1225,10 @@ function groupActions(actions: CopilotAction[]): Record<string, CopilotAction[]>
   for (const action of actions) {
     if (groups[action.timeline]) {
       groups[action.timeline].push(action);
+    } else {
+      // Don't silently drop — create the group
+      if (!groups['other']) groups['other'] = [];
+      groups['other'].push(action);
     }
   }
 

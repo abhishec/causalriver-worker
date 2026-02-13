@@ -467,7 +467,7 @@ export function createFinanceJarvisAdapter(data: {
         target: c.target,
         effectSize: c.effectSize,
         lagDays: c.lagDays,
-        pValue: 0.05, // Synthetic data doesn't have p-values
+        pValue: NaN, // Synthetic data doesn't have p-values — use NaN, never fake
         naturalLanguage: c.description,
       }));
     },
@@ -494,7 +494,7 @@ export function createFinanceJarvisAdapter(data: {
 function dp(
   key: string,
   label: string,
-  value: unknown,
+  value: string | number | boolean | null,
   format?: DataPoint['format'],
   trend?: DataPoint['trend'],
   trendLabel?: string,

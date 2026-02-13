@@ -546,7 +546,7 @@ export function createNexusBrainAdapter(data: NexusBrainDBData): DomainAdapter {
 function mkDp(
   key: string,
   label: string,
-  value: unknown,
+  value: string | number | boolean | null,
   format?: DataPoint['format'],
   trend?: DataPoint['trend'],
   trendLabel?: string,

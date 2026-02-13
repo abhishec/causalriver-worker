@@ -586,10 +586,13 @@ export {
   type DecisionGate,
 } from './orchestrator/domain-action-engine';
 
-// Copilot Framework — Claude-Grade Generic Copilot Architecture ("Broca-Wernicke Language Network")
+// Copilot Framework V2 — Claude-Grade Generic Copilot Architecture ("Broca-Wernicke Language Network")
 // The universal copilot that ANY domain app plugs into.
 // Provides: 3-layer prompt system, structured output templates, conversation memory, quality gates.
+// V2: +real QualityGate, +LRU eviction, +SSE safety, +scored intents, +async adapters.
 export {
+  // Version
+  COPILOT_FRAMEWORK_VERSION,
   // Factory
   createCopilotInstance,
   createConversationManager,
@@ -598,6 +601,9 @@ export {
   buildCopilotPrompt,
   detectCopilotIntent,
   formatDataPoint,
+  // Quality Gate — post-generation validation
+  buildNumberRegistry,
+  validateResponse,
   // Core types — The 5 Contracts
   type DomainAdapter,
   type CopilotPersona,
@@ -618,8 +624,13 @@ export {
   type OutputSection,
   type OutputTable,
   type ScorecardDimension,
+  // Quality Gate types
+  type QualityGateResult,
+  // Prompt config types
+  type PromptConfig,
   // Conversation types
   type ConversationState,
+  type ConversationManagerConfig,
 } from './orchestrator/copilot-framework';
 
 // Brain Pipeline — Corpus Callosum connecting all brain regions
