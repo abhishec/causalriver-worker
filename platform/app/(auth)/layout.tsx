@@ -1,47 +1,75 @@
-import { createServiceClient } from "@/lib/supabase/server";
-
 const CORE_ORG_ID = "00000000-0000-4000-a000-000000000001";
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+
+const HEADERS = {
+  apikey: SERVICE_KEY,
+  Authorization: `Bearer ${SERVICE_KEY}`,
+  "Content-Type": "application/json",
+};
+
+async function supabaseGet<T>(path: string): Promise<T | null> {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+      headers: HEADERS,
+      next: { revalidate: 300 }, // cache for 5 min
+    });
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
+}
+
+async function supabaseCount(path: string): Promise<number> {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+      headers: { ...HEADERS, Prefer: "count=exact", Range: "0-0" },
+      next: { revalidate: 300 },
+    });
+    if (!res.ok) return 0;
+    const range = res.headers.get("content-range"); // "0-0/67"
+    if (!range) return 0;
+    const total = range.split("/")[1];
+    return total ? parseInt(total, 10) : 0;
+  } catch {
+    return 0;
+  }
+}
+
+interface BrainSnapshot {
+  snapshot_date: string;
+  regions_active: string[];
+  total_connections: number;
+  prediction_accuracy: number;
+  signals_processed: number;
+  new_connections: number;
+}
 
 async function getBrainStats() {
   try {
-    const supabase = await createServiceClient();
-
-    const [snapshotRes, edgesRes, orgsRes] = await Promise.all([
-      // Latest brain snapshot
-      supabase
-        .from("brain_daily_snapshots")
-        .select(
-          "regions_active, total_connections, prediction_accuracy, signals_processed, new_connections"
-        )
-        .eq("organization_id", CORE_ORG_ID)
-        .order("snapshot_date", { ascending: false })
-        .limit(1)
-        .single(),
-      // Count significant causal edges
-      supabase
-        .from("causal_relationships_statistical")
-        .select("id", { count: "exact", head: true })
-        .eq("organization_id", CORE_ORG_ID)
-        .eq("is_significant", true),
-      // Count organizations (excl. core brain)
-      supabase
-        .from("organizations")
-        .select("id", { count: "exact", head: true }),
+    const [snapshots, causalEdges, totalOrgs] = await Promise.all([
+      supabaseGet<BrainSnapshot[]>(
+        `brain_daily_snapshots?organization_id=eq.${CORE_ORG_ID}&order=snapshot_date.desc&limit=1&select=snapshot_date,regions_active,total_connections,prediction_accuracy,signals_processed,new_connections`
+      ),
+      supabaseCount(
+        `causal_relationships_statistical?organization_id=eq.${CORE_ORG_ID}&is_significant=eq.true&select=id`
+      ),
+      supabaseCount(`organizations?select=id`),
     ]);
 
-    const snapshot = snapshotRes.data;
+    const snapshot = snapshots?.[0] ?? null;
     const activeRegions = snapshot?.regions_active?.length ?? 11;
-    const causalEdges = edgesRes.count ?? 0;
-    const totalOrgs = Math.max((orgsRes.count ?? 1) - 1, 0);
+    const orgs = Math.max(totalOrgs - 1, 0); // exclude core brain
 
     return {
       regions: activeRegions,
       causalEdges: causalEdges > 0 ? causalEdges : null,
       totalConnections: snapshot?.total_connections ?? null,
       accuracy: snapshot?.prediction_accuracy
-        ? Math.round(snapshot.prediction_accuracy * 100)
+        ? Math.round(snapshot.prediction_accuracy)
         : null,
-      orgs: totalOrgs > 0 ? totalOrgs : null,
+      orgs: orgs > 0 ? orgs : null,
       isLive: causalEdges > 0 || snapshot !== null,
     };
   } catch {
@@ -97,12 +125,6 @@ export default async function AuthLayout({
           <div className="flex gap-6 mt-8">
             <div className="text-center">
               <div className="text-2xl font-bold text-accent">
-                {stats.regions}
-              </div>
-              <div className="text-xs text-muted">Brain Regions</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-success">
                 {stats.causalEdges !== null
                   ? stats.causalEdges.toLocaleString()
                   : "15"}
@@ -112,19 +134,23 @@ export default async function AuthLayout({
               </div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-warning">
-                {stats.accuracy !== null
-                  ? `${stats.accuracy}%`
-                  : stats.totalConnections !== null
-                    ? stats.totalConnections.toLocaleString()
-                    : "118"}
+              <div className="text-2xl font-bold text-success">
+                {stats.totalConnections !== null
+                  ? stats.totalConnections.toLocaleString()
+                  : "118"}
               </div>
               <div className="text-xs text-muted">
-                {stats.accuracy !== null
-                  ? "Accuracy"
-                  : stats.totalConnections !== null
-                    ? "Connections"
-                    : "Training Packs"}
+                {stats.totalConnections !== null
+                  ? "Connections"
+                  : "Training Packs"}
+              </div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-warning">
+                {stats.accuracy !== null ? `${stats.accuracy}%` : "11"}
+              </div>
+              <div className="text-xs text-muted">
+                {stats.accuracy !== null ? "Accuracy" : "Brain Regions"}
               </div>
             </div>
           </div>
