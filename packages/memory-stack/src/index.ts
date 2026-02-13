@@ -631,6 +631,8 @@ export {
   // Conversation types
   type ConversationState,
   type ConversationManagerConfig,
+  // Observability types
+  type CopilotLogger,
 } from './orchestrator/copilot-framework';
 
 // Brain Pipeline — Corpus Callosum connecting all brain regions

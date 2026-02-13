@@ -562,8 +562,13 @@ interface ParsedRule {
   importance: number;
 }
 
+/** Parse count for observability — tracks how many rules failed parsing */
+let _parseRuleFailCount = 0;
+export function getParseRuleFailCount(): number { return _parseRuleFailCount; }
+
 function parseRules(rules: NexusBrainDBData['rules']): ParsedRule[] {
   const parsed: ParsedRule[] = [];
+  _parseRuleFailCount = 0;
   for (const r of rules) {
     try {
       const p = JSON.parse(r.content);
@@ -576,14 +581,17 @@ function parseRules(rules: NexusBrainDBData['rules']): ParsedRule[] {
           importance: r.importance,
         });
       }
-    } catch {
-      // Skip malformed rules
+    } catch (err) {
+      // Log but don't throw — malformed rules shouldn't crash the adapter
+      _parseRuleFailCount++;
+      console.warn(`[nexus-copilot-adapter] Failed to parse rule in domain "${r.domain}":`, err instanceof Error ? err.message : 'Invalid JSON');
     }
   }
   return parsed;
 }
 
-interface ImpactEstimate {
+export interface ImpactEstimate {
+  domain: string;
   riskLevel: 'low' | 'medium' | 'high' | 'critical';
   affectedDomains: string[];
   maxCascadeDepth: number;
@@ -591,7 +599,11 @@ interface ImpactEstimate {
   timeToFullCascade: number;
 }
 
-function estimateImpact(
+/**
+ * Estimate cascade impact from a domain through the causal graph.
+ * Exported so the copilot/chat route can reuse instead of duplicating.
+ */
+export function estimateImpact(
   domain: string,
   edges: NexusBrainDBData['causalEdges']
 ): ImpactEstimate {
@@ -650,6 +662,7 @@ function estimateImpact(
           : 'low';
 
   return {
+    domain,
     riskLevel,
     affectedDomains,
     maxCascadeDepth: maxDepth,

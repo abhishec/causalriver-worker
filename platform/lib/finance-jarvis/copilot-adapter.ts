@@ -149,18 +149,30 @@ export function createFinanceJarvisAdapter(data: {
 
     // ── CONTRACT 2: Brain Insights ─────────────────────────────────────
     getInsights(): CopilotInsightBundle {
-      // Map analysis insights to generic format
-      const insights: BrainInsight[] = analysis.insights.slice(0, 12).map((i, idx) => ({
-        id: i.id,
-        severity: mapSeverity(i.severity),
-        category: i.category,
-        title: i.title,
-        description: i.description,
-        recommendation: i.recommendation,
-        evidence: [],
-        confidence: i.confidence,
-        impact: i.impact === 'high' ? 3 : i.impact === 'medium' ? 2 : 1,
-      }));
+      // Map analysis insights to generic format — populate evidence from insight fields
+      const insights: BrainInsight[] = analysis.insights.slice(0, 12).map((i, idx) => {
+        const evidence: DataPoint[] = [];
+        if (i.currentValue != null) {
+          evidence.push(dp(`${i.id}_current`, `${i.metric || i.category} (Current)`, i.currentValue, 'currency'));
+        }
+        if (i.previousValue != null) {
+          evidence.push(dp(`${i.id}_previous`, `${i.metric || i.category} (Previous)`, i.previousValue, 'currency'));
+        }
+        if (i.changePercent != null) {
+          evidence.push(dp(`${i.id}_change`, `${i.metric || i.category} Change`, i.changePercent, 'percentage'));
+        }
+        return {
+          id: i.id,
+          severity: mapSeverity(i.severity),
+          category: i.category,
+          title: i.title,
+          description: i.description,
+          recommendation: i.recommendation,
+          evidence,
+          confidence: i.confidence,
+          impact: i.impact === 'high' ? 3 : i.impact === 'medium' ? 2 : 1,
+        };
+      });
 
       // Map risks
       const risks: CopilotRisk[] = rs.risks.items.map(r => ({

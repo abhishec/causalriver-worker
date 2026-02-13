@@ -54,6 +54,43 @@
 export const COPILOT_FRAMEWORK_VERSION = '2.0.0';
 
 // ============================================================================
+// OBSERVABILITY — Structured Logging Hook
+// ============================================================================
+
+/**
+ * Optional logger interface. If provided, the framework logs key events.
+ * Compatible with NexusLogger from @nexus-ai/memory-stack observability.
+ */
+export interface CopilotLogger {
+  debug(message: string, meta?: Record<string, unknown>): void;
+  info(message: string, meta?: Record<string, unknown>): void;
+  warn(message: string, meta?: Record<string, unknown>): void;
+  error(message: string, meta?: Record<string, unknown>): void;
+}
+
+/** No-op logger used when no logger is provided */
+const NULL_LOGGER: CopilotLogger = {
+  debug() {},
+  info() {},
+  warn() {},
+  error() {},
+};
+
+// ============================================================================
+// SINGLETON SDK CACHE — Import once, reuse across calls
+// ============================================================================
+
+let _anthropicModule: typeof import('@anthropic-ai/sdk') | null = null;
+
+/** Cached dynamic import — resolves once, returns cached module thereafter */
+async function getAnthropicSDK(): Promise<typeof import('@anthropic-ai/sdk')> {
+  if (!_anthropicModule) {
+    _anthropicModule = await import('@anthropic-ai/sdk');
+  }
+  return _anthropicModule;
+}
+
+// ============================================================================
 // CORE TYPES — The Contracts
 // ============================================================================
 
@@ -980,6 +1017,8 @@ export interface CopilotConfig {
   promptConfig?: PromptConfig;
   /** Conversation manager configuration */
   conversationConfig?: ConversationManagerConfig;
+  /** Optional structured logger (compatible with NexusLogger) */
+  logger?: CopilotLogger;
 }
 
 export interface CopilotInstance {
@@ -1009,12 +1048,24 @@ export function createCopilotInstance(config: CopilotConfig): CopilotInstance {
     enableQualityGate = true,
     promptConfig,
     conversationConfig,
+    logger: userLogger,
   } = config;
+
+  const log = userLogger || NULL_LOGGER;
 
   // Validate provider
   if (provider !== 'anthropic') {
     throw new Error(`Unsupported LLM provider: "${provider}". Only "anthropic" is currently supported.`);
   }
+
+  log.info('CopilotInstance created', {
+    domain: adapter.domain,
+    model,
+    maxTokens,
+    enableMemory,
+    enableQualityGate,
+    frameworkVersion: COPILOT_FRAMEWORK_VERSION,
+  });
 
   const conversationManager = enableMemory ? createConversationManager(conversationConfig) : null;
 
@@ -1060,21 +1111,33 @@ export function createCopilotInstance(config: CopilotConfig): CopilotInstance {
     messages.push({ role: 'user', content: message });
 
     const sseStream = createCopilotSSEStream();
+    const chatStartTime = Date.now();
+
+    log.debug('chat() called', { conversationId, intent, messageLength: message.length });
 
     (async () => {
       try {
         // Check if already aborted
         if (options?.signal?.aborted) {
+          log.warn('chat() aborted before start', { conversationId });
           sseStream.close();
           return;
         }
 
         // Resolve adapter data (supports async adapters)
+        const adapterStartTime = Date.now();
         const [data, insights, sections] = await Promise.all([
           Promise.resolve(adapter.getDataSnapshot()),
           Promise.resolve(adapter.getInsights()),
           Promise.resolve(adapter.getOutputSections(intent)),
         ]);
+        log.debug('Adapter data resolved', {
+          conversationId,
+          durationMs: Date.now() - adapterStartTime,
+          kpiCount: data.kpis.length,
+          insightCount: insights.insights.length,
+          sectionCount: sections.length,
+        });
 
         const systemPrompt = (() => {
           let prompt = buildCopilotPrompt(adapter, intent, { data, insights, sections }, promptConfig);
@@ -1091,13 +1154,16 @@ export function createCopilotInstance(config: CopilotConfig): CopilotInstance {
         });
 
         if (options?.signal?.aborted) {
+          log.warn('chat() aborted after adapter resolve', { conversationId });
           sseStream.close();
           return;
         }
 
-        // Stream from Anthropic
-        const { default: Anthropic } = await import('@anthropic-ai/sdk');
-        const anthropic = new Anthropic({ apiKey });
+        // Stream from Anthropic (using cached SDK import)
+        const sdk = await getAnthropicSDK();
+        const anthropic = new sdk.default({ apiKey });
+
+        log.info('Streaming from Anthropic', { conversationId, model, maxTokens, promptLength: systemPrompt.length });
 
         const anthropicStream = anthropic.messages.stream({
           model,
@@ -1108,6 +1174,7 @@ export function createCopilotInstance(config: CopilotConfig): CopilotInstance {
 
         // Wire abort signal to kill the stream
         const abortHandler = () => {
+          log.info('Stream aborted by client', { conversationId });
           anthropicStream.abort();
           sseStream.close();
         };
@@ -1136,12 +1203,28 @@ export function createCopilotInstance(config: CopilotConfig): CopilotInstance {
             .map(s => s.title.replace(/[\u{1F600}-\u{1FFFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '').trim());
           const qgResult = validateResponse(fullResponse, numberRegistry, requiredSectionTitles);
           sseStream.sendQualityGate(qgResult);
+          log.info('Quality gate result', {
+            conversationId,
+            passed: qgResult.passed,
+            groundingRatio: qgResult.groundingRatio,
+            totalNumbers: qgResult.totalNumbers,
+            ungroundedCount: qgResult.ungroundedNumbers.length,
+            missingSections: qgResult.missingSections,
+          });
         }
+
+        log.info('chat() completed', {
+          conversationId,
+          durationMs: Date.now() - chatStartTime,
+          responseLength: fullResponse.length,
+          intent,
+        });
 
         sseStream.close();
       } catch (err) {
         if (!sseStream.isOpen()) return; // Client already disconnected
         const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+        log.error('chat() failed', { conversationId, error: errorMessage });
         sseStream.sendError(`Failed to get response: ${errorMessage}`);
         sseStream.close();
       }

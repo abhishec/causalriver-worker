@@ -35,6 +35,10 @@ import {
   buildCodeIntelligencePrompt,
   type CodeIntelligenceContext,
 } from "@/lib/code-intelligence-context";
+import {
+  estimateImpact,
+  type ImpactEstimate,
+} from "@/lib/nexus-copilot-adapter";
 
 const CORE_ORG_ID = "00000000-0000-4000-a000-000000000001";
 const JARVIS_ORG_ID = "11111111-1111-4000-a000-111111111111";
@@ -169,14 +173,7 @@ interface TriggeredRule {
   failedConditions: string[];
 }
 
-interface ImpactEstimate {
-  domain: string;
-  riskLevel: "low" | "medium" | "high" | "critical";
-  affectedDomains: string[];
-  maxCascadeDepth: number;
-  totalEffectMagnitude: number;
-  timeToFullCascade: number;
-}
+// ImpactEstimate type imported from @/lib/nexus-copilot-adapter
 
 interface ConversationMessage {
   role: "user" | "assistant";
@@ -457,78 +454,7 @@ function parseDBRules(rules: DBRule[]): ParsedRule[] {
   return parsed;
 }
 
-// ============================================================================
-// IMPACT ESTIMATOR (GAP 4 FIX — computes risk from causal graph)
-// ============================================================================
-
-function estimateImpact(
-  domain: string,
-  edges: DBCausalEdge[]
-): ImpactEstimate {
-  const activeEdges = edges.filter((e) => e.is_significant !== false);
-
-  // BFS from domain to find all affected domains
-  const adjacency: Record<string, Array<{ target: string; effect: number; lag: number }>> = {};
-  for (const e of activeEdges) {
-    if (!adjacency[e.source_domain]) adjacency[e.source_domain] = [];
-    adjacency[e.source_domain].push({
-      target: e.target_domain,
-      effect: e.effect_size,
-      lag: e.optimal_lag_days,
-    });
-  }
-
-  const visited = new Set<string>();
-  const queue: Array<{ node: string; depth: number; effectSoFar: number; lagSoFar: number }> = [
-    { node: domain, depth: 0, effectSoFar: 1, lagSoFar: 0 },
-  ];
-
-  let maxDepth = 0;
-  let totalEffect = 0;
-  let maxLag = 0;
-
-  while (queue.length > 0) {
-    const { node, depth, effectSoFar, lagSoFar } = queue.shift()!;
-    if (visited.has(node) || depth > 4) continue;
-    visited.add(node);
-
-    if (depth > 0) {
-      totalEffect += effectSoFar;
-      maxDepth = Math.max(maxDepth, depth);
-      maxLag = Math.max(maxLag, lagSoFar);
-    }
-
-    for (const neighbor of adjacency[node] || []) {
-      if (!visited.has(neighbor.target)) {
-        queue.push({
-          node: neighbor.target,
-          depth: depth + 1,
-          effectSoFar: effectSoFar * neighbor.effect,
-          lagSoFar: lagSoFar + neighbor.lag,
-        });
-      }
-    }
-  }
-
-  const affectedDomains = [...visited].filter((d) => d !== domain);
-  const riskLevel: ImpactEstimate["riskLevel"] =
-    affectedDomains.length >= 15 || totalEffect >= 10
-      ? "critical"
-      : affectedDomains.length >= 8 || totalEffect >= 5
-        ? "high"
-        : affectedDomains.length >= 4 || totalEffect >= 2
-          ? "medium"
-          : "low";
-
-  return {
-    domain,
-    riskLevel,
-    affectedDomains,
-    maxCascadeDepth: maxDepth,
-    totalEffectMagnitude: totalEffect,
-    timeToFullCascade: maxLag,
-  };
-}
+// estimateImpact imported from @/lib/nexus-copilot-adapter (deduplication)
 
 // ============================================================================
 // BRAIN CONTEXT BUILDER (V2 — with patterns, rule eval, impact estimation)
