@@ -1,0 +1,89 @@
+@import "tailwindcss";
+
+/* ── NexusBrain Platform — Dark Theme ─────────────────────────────────────── */
+
+@theme {
+  --color-background: #0a0a0f;
+  --color-foreground: #e8e8ed;
+  --color-muted: #6b7280;
+  --color-muted-foreground: #9ca3af;
+  --color-border: #1f2937;
+  --color-border-subtle: #111827;
+  --color-card: #0f1019;
+  --color-card-hover: #141520;
+  --color-card-foreground: #e8e8ed;
+  --color-accent: #6366f1;
+  --color-accent-dark: #4f46e5;
+  --color-accent-light: #818cf8;
+  --color-accent-foreground: #ffffff;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-info: #3b82f6;
+  --color-surface: #111118;
+  --color-surface-hover: #1a1a24;
+  --color-sidebar: #08080d;
+  --color-sidebar-hover: #0f0f17;
+  --color-input: #1a1a24;
+  --color-input-border: #2a2a38;
+  --color-input-focus: #6366f1;
+
+  --font-sans: "Geist", system-ui, -apple-system, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, monospace;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Scrollbar ────────────────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #2a2a38;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3a3a48;
+}
+
+/* ── Brain Pulse Animation ────────────────────────────────────────────────── */
+@keyframes brain-pulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+.brain-pulse {
+  animation: brain-pulse 3s ease-in-out infinite;
+}
+
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 5px rgba(99, 102, 241, 0.3); }
+  50% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.6); }
+}
+
+.glow-accent {
+  animation: glow 2s ease-in-out infinite;
+}
+
+/* ── Gradient backgrounds ─────────────────────────────────────────────────── */
+.bg-gradient-brain {
+  background: radial-gradient(ellipse at 50% 0%, rgba(99, 102, 241, 0.08) 0%, transparent 60%);
+}
+
+.bg-gradient-sidebar {
+  background: linear-gradient(180deg, #08080d 0%, #0a0a12 100%);
+}

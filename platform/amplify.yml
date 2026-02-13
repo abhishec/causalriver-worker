@@ -1,0 +1,22 @@
+version: 1
+applications:
+  - appRoot: platform
+    frontend:
+      phases:
+        preBuild:
+          commands:
+            - cd ..
+            - npm install -g pnpm@9
+            - pnpm install --filter platform...
+        build:
+          commands:
+            - cd platform
+            - pnpm build
+      artifacts:
+        baseDirectory: .next
+        files:
+          - '**/*'
+      cache:
+        paths:
+          - .next/cache/**/*
+          - node_modules/**/*
