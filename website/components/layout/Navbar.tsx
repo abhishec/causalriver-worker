@@ -1,15 +1,38 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { usePathname } from "next/navigation";
+import { useState, useCallback } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { SITE, NAV_LINKS } from "@/lib/constants";
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
 
-  // Determine if a link should use <a> (for hash links on homepage) or <Link>
+  // Handle hash link clicks: scroll to section on homepage, navigate then scroll from other pages
+  const handleHashClick = useCallback(
+    (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+      const hashIndex = href.indexOf("#");
+      if (hashIndex === -1) return; // not a hash link, let default behavior handle it
+
+      const hash = href.substring(hashIndex + 1);
+
+      if (pathname === "/") {
+        // Already on homepage — just scroll to the section
+        e.preventDefault();
+        const el = document.getElementById(hash);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth" });
+        }
+      } else {
+        // On a different page — navigate to homepage, browser will handle the hash scroll
+        // Let the default <a> behavior handle this (full navigation to /#section)
+      }
+    },
+    [pathname]
+  );
+
   function renderNavLink(
     link: (typeof NAV_LINKS)[number],
     className: string,
@@ -39,7 +62,24 @@ export function Navbar() {
       );
     }
 
-    // Hash links and internal routes both use Link for proper SPA navigation
+    // Hash links use <a> tags for proper scroll behavior
+    if (isHashLink) {
+      return (
+        <a
+          key={link.label}
+          href={link.href}
+          className={`${className} ${activeClass}`}
+          onClick={(e) => {
+            handleHashClick(e, link.href);
+            onClick?.();
+          }}
+        >
+          {link.label}
+        </a>
+      );
+    }
+
+    // Internal routes use Next.js Link for SPA navigation
     return (
       <Link
         key={link.label}
