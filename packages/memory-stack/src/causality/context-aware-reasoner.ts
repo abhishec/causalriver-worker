@@ -37,6 +37,8 @@ import { createAttentionMechanism, type AttentionContext, type AttentionWeights 
 import { createUncertaintyQuantifier, type UncertaintyBounds } from './uncertainty-quantifier';
 import { createExplanationGenerator, type ExplanationChain, type AnomalyExplanation, type IntelligenceBriefing } from './explanation-generator';
 import { createTemporalForecaster, type ForecastResult } from './temporal-forecaster';
+import { createDoCalculusEstimator, type CausalDAG as DoCalcDAG } from './do-calculus';
+import type { PCAlgorithmResult } from './pc-algorithm';
 
 // ============================================================================
 // TYPES
@@ -99,6 +101,36 @@ export interface IntelligenceReport {
   }>;
   /** Domain forecasts */
   forecasts: Map<string, ForecastResult>;
+  /** Executive summary */
+  executiveSummary: string;
+}
+
+/**
+ * A strategic intervention plan produced by the full cognitive stack
+ */
+export interface StrategicInterventionPlan {
+  /** Target domain we're trying to influence */
+  targetDomain: string;
+  /** Direction of desired change */
+  direction: 'increase' | 'decrease';
+  /** Ranked interventions from counterfactual planner */
+  interventions: Array<{
+    rank: number;
+    intervention: CounterfactualIntervention;
+    impactScore: number;
+    impactCI: { mean: number; lower95: number; upper95: number; std: number };
+    affectedDomains: number;
+    costEfficiency: number;
+    narrative: string;
+    /** Do-calculus identifiability (if PC structure available) */
+    doCalcIdentifiable?: boolean;
+    /** Do-calculus estimated ATE (if estimable) */
+    doCalcATE?: number;
+  }>;
+  /** Multi-hop reasoning about the target domain's upstream connections */
+  upstreamAnalysis: ConnectionAnalysis[];
+  /** DAG quality assessment */
+  dagQuality: ReturnType<ReturnType<typeof createUncertaintyQuantifier>['computeDAGConfidenceQuality']>;
   /** Executive summary */
   executiveSummary: string;
 }
@@ -378,6 +410,144 @@ export function createContextAwareReasoner(config: Partial<ContextAwareReasonerC
         forecasts,
         executiveSummary: summaryParts.join(' '),
       };
+    },
+
+    /**
+     * Strategic Intervention Planner — the brain's highest-level reasoning.
+     *
+     * Combines: attention-weighted DAG → counterfactual intervention planner →
+     * multi-hop upstream analysis → do-calculus identifiability check →
+     * uncertainty quantification → executive narrative.
+     *
+     * This is what separates an LLM-grade brain from a statistical engine:
+     * it doesn't just predict, it recommends actions with causal justification.
+     *
+     * @param dag - The causal DAG
+     * @param targetDomain - Domain to improve
+     * @param direction - 'increase' or 'decrease'
+     * @param context - Attention context for reweighting
+     * @param pcResult - Optional PC algorithm result for do-calculus ATE estimates
+     * @param timeSeries - Optional time series for forecasting
+     */
+    planStrategy(
+      dag: CausalDAG,
+      targetDomain: string,
+      direction: 'increase' | 'decrease' = 'increase',
+      context?: AttentionContext,
+      pcResult?: PCAlgorithmResult,
+      timeSeries?: Map<string, DailyTimeSeries>,
+    ): StrategicInterventionPlan {
+      // 1. Apply attention weighting
+      const effectiveDAG = context
+        ? attention.applyAttention(dag, context)
+        : dag;
+
+      // 2. Get counterfactual intervention plan
+      const rawInterventions = cfSimulator.planInterventions(
+        effectiveDAG, targetDomain, direction, 7
+      );
+
+      // 3. Optionally enhance with do-calculus identifiability
+      let doCalcEstimator: ReturnType<typeof createDoCalculusEstimator> | null = null;
+      if (pcResult) {
+        try {
+          doCalcEstimator = createDoCalculusEstimator(pcResult);
+        } catch {
+          // PC result may not be compatible; continue without do-calculus
+        }
+      }
+
+      const enrichedInterventions = rawInterventions.map(item => {
+        const enriched: StrategicInterventionPlan['interventions'][0] = { ...item };
+
+        if (doCalcEstimator && item.intervention.source && item.intervention.target) {
+          const identifiable = doCalcEstimator.isIdentifiable({
+            treatment: item.intervention.source,
+            treatmentValue: item.intervention.newWeight ?? item.intervention.signalValue ?? 1,
+            outcome: targetDomain,
+          });
+          enriched.doCalcIdentifiable = identifiable;
+        }
+
+        return enriched;
+      });
+
+      // 4. Analyze upstream connections to the target
+      const domains = Array.from(dag.nodes);
+      const upstreamAnalysis: ConnectionAnalysis[] = [];
+      for (const domain of domains) {
+        if (domain === targetDomain) continue;
+        const analysis = this.analyzeConnection(dag, domain, targetDomain, context, timeSeries);
+        if (analysis.prediction.bestPath) {
+          upstreamAnalysis.push(analysis);
+        }
+      }
+      upstreamAnalysis.sort((a, b) => b.confidence - a.confidence);
+
+      // 5. DAG quality assessment
+      const dagQuality = uncertainty.computeDAGConfidenceQuality(dag);
+
+      // 6. Executive summary
+      const summaryParts: string[] = [];
+      summaryParts.push(
+        `Strategic plan to ${direction} ${targetDomain}: ${enrichedInterventions.length} interventions identified.`
+      );
+
+      if (enrichedInterventions.length > 0) {
+        const best = enrichedInterventions[0];
+        const bestLabel = best.intervention.type === 'inject_signal'
+          ? `inject signal into ${best.intervention.source}`
+          : `${best.intervention.type.replace('_', ' ')} ${best.intervention.source} → ${best.intervention.target}`;
+        summaryParts.push(
+          `Top strategy: ${bestLabel} (impact: ${best.impactScore.toFixed(2)}, CI: [${best.impactCI.lower95.toFixed(2)}, ${best.impactCI.upper95.toFixed(2)}]).`
+        );
+        if (best.doCalcIdentifiable !== undefined) {
+          summaryParts.push(
+            best.doCalcIdentifiable
+              ? 'Do-calculus confirms this effect is causally identifiable from data.'
+              : 'Warning: do-calculus cannot confirm identifiability — potential confounders.'
+          );
+        }
+      }
+
+      if (upstreamAnalysis.length > 0) {
+        summaryParts.push(
+          `${upstreamAnalysis.length} upstream domains influence ${targetDomain}; strongest: ${upstreamAnalysis[0].source} (${(upstreamAnalysis[0].confidence * 100).toFixed(0)}% confidence).`
+        );
+      }
+
+      return {
+        targetDomain,
+        direction,
+        interventions: enrichedInterventions,
+        upstreamAnalysis: upstreamAnalysis.slice(0, 5),
+        dagQuality,
+        executiveSummary: summaryParts.join(' '),
+      };
+    },
+
+    /**
+     * Convert the continuous-learner's CausalDAG to do-calculus format.
+     * Utility for modules that need Pearl's do-operator.
+     */
+    convertToDoCalcDAG(dag: CausalDAG): DoCalcDAG {
+      const nodes = Array.from(dag.nodes);
+      const children = new Map<string, string[]>();
+      const parents = new Map<string, string[]>();
+
+      for (const node of nodes) {
+        children.set(node, []);
+        parents.set(node, []);
+      }
+
+      for (const [src, neighbors] of dag.edges) {
+        for (const [tgt] of neighbors) {
+          children.get(src)?.push(tgt);
+          parents.get(tgt)?.push(src);
+        }
+      }
+
+      return { nodes, children, parents };
     },
 
     /**
