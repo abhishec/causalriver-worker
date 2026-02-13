@@ -434,6 +434,11 @@ export function createBrainTrainer(config: BrainTrainerConfig = {}) {
     try {
       causalEdges = trainCausalEdgesInMemory(pack);
       stats.causalEdgesLoaded += causalEdges;
+      // Recompute graph properties (PageRank, in/out degree, betweenness)
+      // after loading all edges. addEdge() alone doesn't compute these.
+      if (causalEdges > 0) {
+        graphBuilder.recomputeGraphProperties();
+      }
     } catch (err) {
       errors.push(`Causal edges: ${err instanceof Error ? err.message : String(err)}`);
     }
