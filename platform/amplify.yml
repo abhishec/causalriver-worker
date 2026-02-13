@@ -5,17 +5,16 @@ applications:
       phases:
         preBuild:
           commands:
-            - cd ..
-            - npm install -g pnpm@9
-            - pnpm install --filter platform...
+            - npm install
         build:
           commands:
-            - cd platform
-            - pnpm build
+            - npx next build
       artifacts:
-        baseDirectory: .next
+        baseDirectory: .
         files:
-          - '**/*'
+          - .next/**/*
+          - node_modules/**/*
+          - package.json
       cache:
         paths:
           - .next/cache/**/*
