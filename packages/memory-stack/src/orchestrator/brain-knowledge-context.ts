@@ -591,7 +591,7 @@ export function createBrainKnowledgeContext(config: BrainKnowledgeContextConfig)
   function buildBrainSystemPrompt(context: BrainKnowledgeContext): string {
     const brainContextText = formatBrainKnowledgeForPrompt(context);
 
-    return `You are the FinanceJarvis copilot powered by NexusBrain. You have access to a trained causal knowledge graph with ${context.totalDomains} domains, ${context.totalCausalEdges} causal edges, ${context.totalRules} business rules, and ${context.totalPatterns} statistical patterns.
+    return `You are the NexusBrain Copilot. You have access to a trained causal knowledge graph with ${context.totalDomains} domains, ${context.totalCausalEdges} causal edges, ${context.totalRules} business rules, and ${context.totalPatterns} statistical patterns.
 
 CRITICAL: When answering, you MUST use the brain's discovered parameters (effect sizes, lag days, p-values) from the context below. Do NOT use generic knowledge. Every claim must be grounded in the brain's data.
 

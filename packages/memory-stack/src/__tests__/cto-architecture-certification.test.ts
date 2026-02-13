@@ -818,7 +818,7 @@ describe('CTO Architecture Certification', () => {
       const prompt = ctx.buildBrainSystemPrompt(knowledge);
 
       expect(prompt).toBeDefined();
-      expect(prompt).toContain('FinanceJarvis');
+      expect(prompt).toContain('NexusBrain Copilot');
       expect(prompt).toContain('CRITICAL');
       expect(prompt).toContain('Brain Knowledge Context');
     });

@@ -311,8 +311,8 @@ describe('Brain Copilot Integration — Full E2E', () => {
       );
       const systemPrompt = brainCtx.buildBrainSystemPrompt(result);
 
-      // Should contain the FinanceJarvis identity
-      expect(systemPrompt).toContain('FinanceJarvis copilot');
+      // Should contain the NexusBrain Copilot identity
+      expect(systemPrompt).toContain('NexusBrain Copilot');
       expect(systemPrompt).toContain('NexusBrain');
 
       // Should contain brain statistics
