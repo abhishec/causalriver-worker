@@ -27,6 +27,7 @@ const NAV_ITEMS = [
     section: "Intelligence",
     items: [
       { label: "Copilot", href: "/copilot", icon: "M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" },
+      { label: "Code Intelligence", href: "/code-intelligence", icon: "M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" },
       { label: "Integrate", href: "/integrate", icon: "M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" },
     ],
   },

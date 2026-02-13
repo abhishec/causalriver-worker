@@ -124,6 +124,29 @@ export interface KnowledgeDependencyGraphStats {
   avgDepsPerEntity: number;
 }
 
+/** Result of a fuzzy entity search against the graph */
+export interface FuzzyEntityMatch {
+  entityId: string;
+  matches: number;
+  domain: string | null;
+}
+
+/** Hub entity with fan-in/fan-out metrics */
+export interface EntityHub {
+  entityId: string;
+  fanIn: number;
+  fanOut: number;
+  total: number;
+  domain: string | null;
+}
+
+/** Domain breakdown entry */
+export interface DomainBreakdown {
+  domain: string;
+  entityCount: number;
+  topEntities: string[];
+}
+
 export interface KnowledgeDependencyGraphInstance {
   recordDependency(input: DependencyInput): void;
   recordBatch(inputs: DependencyInput[]): void;
@@ -134,6 +157,12 @@ export interface KnowledgeDependencyGraphInstance {
   detectCycles(domain?: KnowledgeDomain): CycleDetection;
   getComplexityMetrics(entityId: string): { fanIn: number; fanOut: number; instability: number };
   mapEntityToDomain(entityId: string): string | null;
+  /** Fuzzy search: find entity IDs containing any of the given keywords (substring match). */
+  fuzzySearchEntities(keywords: string[], limit?: number): FuzzyEntityMatch[];
+  /** Get top hub entities ranked by total connections (fan-in + fan-out). */
+  getTopHubs(limit?: number): EntityHub[];
+  /** Get entity count per business domain. */
+  getDomainBreakdown(): DomainBreakdown[];
   applyDecay(referenceDate?: Date): void;
   getEdges(): DependencyEdge[];
   getStats(): KnowledgeDependencyGraphStats;
@@ -786,6 +815,64 @@ export function createKnowledgeDependencyGraph(
           edges.delete(key);
         }
       }
+    },
+
+    // ── Fuzzy Search & Hub Analysis (generic graph intelligence) ────────
+
+    fuzzySearchEntities(keywords: string[], limit = 15): FuzzyEntityMatch[] {
+      if (keywords.length === 0) return [];
+      const scored: FuzzyEntityMatch[] = [];
+      const lowerKeywords = keywords.map(k => k.toLowerCase());
+
+      for (const eid of entitySet) {
+        const lower = eid.toLowerCase();
+        let matchCount = 0;
+        for (const kw of lowerKeywords) {
+          if (lower.includes(kw)) matchCount++;
+        }
+        if (matchCount > 0) {
+          scored.push({ entityId: eid, matches: matchCount, domain: this.mapEntityToDomain(eid) });
+        }
+      }
+
+      return scored.sort((a, b) => b.matches - a.matches).slice(0, limit);
+    },
+
+    getTopHubs(limit = 10): EntityHub[] {
+      const fanInMap = new Map<string, number>();
+      const fanOutMap = new Map<string, number>();
+
+      for (const edge of edges.values()) {
+        fanOutMap.set(edge.sourceId, (fanOutMap.get(edge.sourceId) || 0) + 1);
+        fanInMap.set(edge.targetId, (fanInMap.get(edge.targetId) || 0) + 1);
+      }
+
+      const scored: EntityHub[] = [];
+      for (const eid of entitySet) {
+        const fi = fanInMap.get(eid) || 0;
+        const fo = fanOutMap.get(eid) || 0;
+        scored.push({ entityId: eid, fanIn: fi, fanOut: fo, total: fi + fo, domain: this.mapEntityToDomain(eid) });
+      }
+
+      return scored.sort((a, b) => b.total - a.total).slice(0, limit);
+    },
+
+    getDomainBreakdown(): DomainBreakdown[] {
+      const domainEntities = new Map<string, string[]>();
+
+      for (const eid of entitySet) {
+        const domain = this.mapEntityToDomain(eid) || 'other';
+        if (!domainEntities.has(domain)) domainEntities.set(domain, []);
+        domainEntities.get(domain)!.push(eid);
+      }
+
+      return Array.from(domainEntities.entries())
+        .map(([domain, entities]) => ({
+          domain,
+          entityCount: entities.length,
+          topEntities: entities.slice(0, 5),
+        }))
+        .sort((a, b) => b.entityCount - a.entityCount);
     },
 
     getEdges(): DependencyEdge[] {

@@ -1,0 +1,78 @@
+import { NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+import { getCurrentOrgId } from "@/lib/org-helpers";
+
+/**
+ * GET /api/connectors/github/status
+ *
+ * Returns the current GitHub connector status, ingestion progress,
+ * and graph statistics.
+ */
+export async function GET() {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const orgId = await getCurrentOrgId();
+
+    // Fetch connector + signal counts in parallel
+    const [connectorResult, signalCountResult, codeFileCountResult] =
+      await Promise.all([
+        supabase
+          .from("org_connectors")
+          .select("id, status, config, last_sync_at, signals_count, error_message")
+          .eq("organization_id", orgId)
+          .eq("connector_type", "github")
+          .maybeSingle(),
+        supabase
+          .from("cross_domain_signals")
+          .select("signal_type", { count: "exact" })
+          .eq("organization_id", orgId)
+          .eq("source_domain", "engineering"),
+        supabase
+          .from("cross_domain_signals")
+          .select("id", { count: "exact" })
+          .eq("organization_id", orgId)
+          .eq("signal_type", "code_file_indexed"),
+      ]);
+
+    const connector = connectorResult.data;
+    if (!connector) {
+      return NextResponse.json({
+        connected: false,
+        status: "not_configured",
+      });
+    }
+
+    const config = connector.config as Record<string, any>;
+    const progress = config?.ingestion_progress || null;
+
+    return NextResponse.json({
+      connected: true,
+      status: connector.status,
+      repo: {
+        fullName: config?.repoFullName,
+        language: config?.repoLanguage,
+        stars: config?.repoStars,
+        owner: config?.owner,
+        repo: config?.repo,
+      },
+      lastSyncAt: connector.last_sync_at,
+      signalsCount: signalCountResult.count || 0,
+      codeFilesIndexed: codeFileCountResult.count || 0,
+      errorMessage: connector.error_message,
+      ingestionProgress: progress,
+    });
+  } catch (err: any) {
+    console.error("GitHub status error:", err);
+    return NextResponse.json(
+      { error: err.message || "Failed to get status" },
+      { status: 500 }
+    );
+  }
+}

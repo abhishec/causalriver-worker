@@ -104,6 +104,10 @@ export {
   type KnowledgeDependencyGraphConfig,
   type KnowledgeDependencyGraphInstance,
   type KnowledgeDependencyGraphStats,
+  // v2: Fuzzy search, hub analysis, domain breakdown
+  type FuzzyEntityMatch,
+  type EntityHub,
+  type DomainBreakdown,
 } from './core/knowledge-dependency-graph';
 
 // ============================================================================
@@ -430,6 +434,7 @@ export {
   type EnhancedImpactSummary,
   type EnhancedPatternExplanation,
   type GeneratedPlaybook,
+  type EnhancedDecisionIntelligence,
 } from './orchestrator/llm-brain-amplifier';
 
 // Response Feedback Loop (query → correction → memory)
@@ -543,9 +548,10 @@ export {
   type SimulationIntervention,
 } from './orchestrator/whatif-simulator';
 
-// Domain Action Engine V3 ("Motor Cortex") — intent-to-execution routing
+// Domain Action Engine V4 ("Motor Cortex") — intent-to-execution routing
 // V2: +LLM narratives, +smart horizon, +multi-domain, +confidence gates, +composite
 // V3: +execution playbooks, +outcome contracts, +Monday morning actions, +strategic interventions
+// V4: +meta-cognition, +counterfactual analysis, +adaptive playbooks, +decision journals
 export {
   createDomainActionEngine,
   formatArtifactForPrompt,
@@ -567,6 +573,17 @@ export {
   type PlaybookRisk,
   type PlaybookKPI,
   type OutcomeContract,
+  // V4: Decision Intelligence types ("The Brain That Thinks About Thinking")
+  type MetaCognitiveAssessment,
+  type AlternativeHypothesis,
+  type ReasoningTraceStep,
+  type CounterfactualAnalysis,
+  type CounterfactualScenario,
+  type DecisionJournalEntry,
+  type AdaptiveLayer,
+  type ContingencyTrigger,
+  type LearningQuestion,
+  type DecisionGate,
 } from './orchestrator/domain-action-engine';
 
 // Brain Pipeline — Corpus Callosum connecting all brain regions

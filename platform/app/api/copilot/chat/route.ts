@@ -22,8 +22,12 @@
  *   7. Stream response via Anthropic (or fallback to brain-only)
  */
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
+import {
+  buildCodeIntelligencePrompt,
+  type CodeIntelligenceContext,
+} from "@/lib/code-intelligence-context";
 
 const CORE_ORG_ID = "00000000-0000-4000-a000-000000000001";
 const JARVIS_ORG_ID = "11111111-1111-4000-a000-111111111111";
@@ -1120,6 +1124,50 @@ export async function POST(request: NextRequest) {
     const cascadeRules: DBCascadeRule[] = cascadeResult.data || [];
     const patterns: DBPattern[] = (patternsResult.data || []) as DBPattern[];
 
+    // ── Load Code Intelligence graphs (if available) ────────────────────
+    let codeIntelContext: CodeIntelligenceContext | null = null;
+    try {
+      const {
+        createKnowledgeDependencyGraph,
+        createExpertiseGraph,
+        createCollaborationGraph,
+      } = await import("@nexus-ai/memory-stack");
+
+      const service = await createServiceClient();
+
+      // Check if GitHub connector is active with ingested data
+      const { data: ghConnector } = await service
+        .from("org_connectors")
+        .select("config")
+        .eq("organization_id", orgId)
+        .eq("connector_type", "github")
+        .eq("status", "active")
+        .maybeSingle();
+
+      const ingestionStats = (ghConnector?.config as Record<string, any>)?.ingestion_progress?.stats;
+
+      if (ingestionStats?.filesProcessed > 0) {
+        const depGraph = createKnowledgeDependencyGraph();
+        const expertiseGraph = createExpertiseGraph();
+        const collabGraph = createCollaborationGraph();
+
+        await Promise.all([
+          depGraph.load(service, orgId),
+          expertiseGraph.load(service, orgId),
+          collabGraph.load(service, orgId),
+        ]);
+
+        codeIntelContext = buildCodeIntelligencePrompt(
+          depGraph,
+          expertiseGraph,
+          collabGraph,
+          message,
+        );
+      }
+    } catch (codeIntelErr) {
+      console.warn("[CodeIntel] Non-fatal: could not load code intelligence:", codeIntelErr);
+    }
+
     // ── Build conversation summary (GAP 7 FIX) ─────────────────────────
     const conversationSummary = buildConversationSummary(
       conversationHistory || []
@@ -1272,11 +1320,18 @@ export async function POST(request: NextRequest) {
         }
 
         // Augment system prompt with REAL computed data from brain modules
-        const effectiveSystemPrompt = actionArtifact?.__promptText
+        let effectiveSystemPrompt = actionArtifact?.__promptText
           ? systemPrompt +
             "\n\n## COMPUTED DATA + EXECUTION PLAYBOOK + DECISION INTELLIGENCE (use these REAL numbers, recommended actions, meta-cognition, and counterfactuals — do NOT invent data)\n" +
             String(actionArtifact.__promptText)
           : systemPrompt;
+
+        // Augment with Code Intelligence context (if available)
+        if (codeIntelContext?.fullPrompt) {
+          effectiveSystemPrompt +=
+            "\n\n" + codeIntelContext.fullPrompt +
+            "\n\nUse the above code intelligence data to ground your answers. Reference specific files, experts, and dependency paths when relevant.";
+        }
 
         const anthropicStream = anthropic.messages.stream({
           model: "claude-3-5-haiku-20241022",

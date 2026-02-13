@@ -53,6 +53,7 @@
     "test:benchmark": "vitest run --reporter=verbose src/__tests__/benchmark-runner.test.ts",
     "test:brain-health": "vitest run --reporter=verbose src/__tests__/brain-health.test.ts",
     "query:jarvis": "tsx src/demo/jarvis-query.ts",
+    "jarvis": "tsx src/demo/developer-jarvis.ts",
     "clean": "rm -rf dist"
   },
   "peerDependencies": {

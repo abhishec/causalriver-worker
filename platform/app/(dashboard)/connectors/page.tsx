@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentOrgId } from "@/lib/org-helpers";
 import { formatNumber } from "@/lib/utils";
+import { ConnectorsClient } from "./connectors-client";
 
 export const dynamic = 'force-dynamic';
 
@@ -24,14 +25,24 @@ const CONNECTORS = [
 
 export default async function ConnectorsPage() {
   const supabase = await createClient();
-  const CORE_ORG_ID = await getCurrentOrgId();
+  const orgId = await getCurrentOrgId();
 
-  const signalsResult = await supabase
-    .from("cross_domain_signals")
-    .select("source_domain")
-    .eq("organization_id", CORE_ORG_ID);
+  // Fetch signal counts and GitHub connector status in parallel
+  const [signalsResult, githubConnectorResult] = await Promise.all([
+    supabase
+      .from("cross_domain_signals")
+      .select("source_domain")
+      .eq("organization_id", orgId),
+    supabase
+      .from("org_connectors")
+      .select("id, status, config, last_sync_at, signals_count")
+      .eq("organization_id", orgId)
+      .eq("connector_type", "github")
+      .maybeSingle(),
+  ]);
 
   const signals = signalsResult.data || [];
+  const githubConnector = githubConnectorResult.data;
 
   // Count signals by domain
   const domainCounts: Record<string, number> = {};
@@ -42,6 +53,16 @@ export default async function ConnectorsPage() {
 
   // Determine which connectors are "active" (have signals)
   const activeDomains = new Set(Object.keys(domainCounts));
+
+  // Serialize GitHub connector for client component
+  const githubStatus = githubConnector
+    ? {
+        status: githubConnector.status as string,
+        config: githubConnector.config as Record<string, any>,
+        lastSyncAt: githubConnector.last_sync_at,
+        signalsCount: githubConnector.signals_count,
+      }
+    : null;
 
   return (
     <div className="space-y-6">
@@ -77,59 +98,18 @@ export default async function ConnectorsPage() {
         </div>
       </div>
 
-      {/* Connector grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {CONNECTORS.map((connector) => {
-          const signalCount = domainCounts[connector.domain] || 0;
-          const isActive = activeDomains.has(connector.domain);
-
-          return (
-            <div
-              key={connector.name}
-              className={`rounded-xl bg-card border p-5 transition-all hover:bg-card-hover hover:border-accent/30 cursor-pointer ${
-                isActive ? "border-border/50" : "border-border/30 opacity-70"
-              }`}
-            >
-              <div className="flex items-start justify-between mb-3">
-                <span className="text-3xl">{connector.icon}</span>
-                <span
-                  className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider ${
-                    isActive
-                      ? "bg-success/10 text-success"
-                      : "bg-muted/10 text-muted"
-                  }`}
-                >
-                  {isActive && (
-                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-success" />
-                  )}
-                  {isActive ? "Active" : "Not Connected"}
-                </span>
-              </div>
-
-              <h3 className="font-medium text-sm mb-1">{connector.name}</h3>
-              <div className="text-[10px] text-accent uppercase tracking-wider font-medium mb-2">
-                {connector.domain}
-              </div>
-              <p className="text-xs text-muted-foreground leading-relaxed mb-3">
-                {connector.description}
-              </p>
-
-              {isActive ? (
-                <div className="flex items-center justify-between pt-3 border-t border-border/30">
-                  <span className="text-xs text-muted">Signals</span>
-                  <span className="text-sm font-medium text-accent">
-                    {formatNumber(signalCount)}
-                  </span>
-                </div>
-              ) : (
-                <div className="pt-3 border-t border-border/30">
-                  <span className="text-xs text-muted">No signals yet</span>
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
+      {/* Connector grid — client component handles GitHub setup modal */}
+      <ConnectorsClient
+        connectors={CONNECTORS.map((c) => ({
+          name: c.name,
+          domain: c.domain,
+          icon: c.icon,
+          description: c.description,
+        }))}
+        domainCounts={domainCounts}
+        activeDomains={Array.from(activeDomains)}
+        githubStatus={githubStatus}
+      />
     </div>
   );
 }
