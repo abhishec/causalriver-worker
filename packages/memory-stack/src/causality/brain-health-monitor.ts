@@ -26,6 +26,7 @@
  */
 
 import type { CausalDAG } from './continuous-learner';
+import { createUncertaintyQuantifier } from './uncertainty-quantifier';
 
 // ============================================================================
 // TYPES
@@ -199,47 +200,7 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
 
-/**
- * Compute edge uncertainty score from available edge metadata.
- * Higher = more uncertain.
- */
-function computeEdgeUncertainty(edge: {
-  weight: number;
-  pValue: number;
-  knockoutScore?: number;
-  sampleSize?: number;
-  lastUpdated?: Date;
-  isLikelyConfounded?: boolean;
-}): number {
-  let uncertainty = 0;
-  let factors = 0;
-
-  // p-value contribution (higher p = more uncertain)
-  uncertainty += edge.pValue;
-  factors++;
-
-  // Knockout score contribution (lower knockout = more uncertain)
-  if (edge.knockoutScore !== undefined) {
-    uncertainty += 1 - edge.knockoutScore;
-    factors++;
-  }
-
-  // Sample size contribution (fewer samples = more uncertain)
-  if (edge.sampleSize !== undefined) {
-    // Sigmoid-like: 0 samples = 1.0 uncertainty, 100+ samples = ~0
-    const sampleUncertainty = Math.exp(-edge.sampleSize / 30);
-    uncertainty += sampleUncertainty;
-    factors++;
-  }
-
-  // Confounding penalty
-  if (edge.isLikelyConfounded) {
-    uncertainty += 0.5;
-    factors++;
-  }
-
-  return factors > 0 ? clamp(uncertainty / factors, 0, 1) : 0.5;
-}
+// Edge uncertainty now delegated to shared UncertaintyQuantifier (single source of truth)
 
 /**
  * Collect all edges from a DAG as a flat array with source/target info
@@ -302,6 +263,9 @@ export function createBrainHealthMonitor(config: Partial<BrainHealthConfig> = {}
     forecastTrackingWindowDays: config.forecastTrackingWindowDays ?? 30,
     stalenessHalfLifeDays: config.stalenessHalfLifeDays ?? 30,
   };
+
+  // Shared uncertainty quantifier — single source of truth for edge uncertainty
+  const sharedQuantifier = createUncertaintyQuantifier();
 
   // Rolling forecast tracking per domain
   const forecastHistory: Map<string, ForecastTrackingEntry[]> = new Map();
@@ -709,7 +673,7 @@ export function createBrainHealthMonitor(config: Partial<BrainHealthConfig> = {}
     const scored = edges.map(edge => ({
       source: edge.source,
       target: edge.target,
-      uncertainty: computeEdgeUncertainty(edge),
+      uncertainty: sharedQuantifier.computeEdgeUncertainty(edge.source, edge.target, dag)?.uncertainty ?? 0.5,
     }));
 
     scored.sort((a, b) => b.uncertainty - a.uncertainty);
@@ -785,7 +749,7 @@ export function createBrainHealthMonitor(config: Partial<BrainHealthConfig> = {}
     const edges = collectEdges(dag);
     for (const edge of edges) {
       if (anomalyDomains.has(edge.source) || anomalyDomains.has(edge.target)) {
-        const uncertainty = computeEdgeUncertainty(edge);
+        const uncertainty = sharedQuantifier.computeEdgeUncertainty(edge.source, edge.target, dag)?.uncertainty ?? 0.5;
         if (uncertainty > 0.4) {
           priorities.push({
             priority: `Review anomaly-linked edge ${edge.source} -> ${edge.target} (anomaly in ${anomalyDomains.has(edge.source) ? edge.source : edge.target})`,

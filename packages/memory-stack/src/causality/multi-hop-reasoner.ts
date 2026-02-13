@@ -156,15 +156,16 @@ export function createMultiHopReasoner(config: Partial<MultiHopConfig> = {}) {
     const paths: ReasoningPath[] = [];
     const visited = new Set<string>();
 
-    function dfs(
-      current: string,
-      pathNodes: string[],
-      hopWeights: number[],
-      hopLagDays: number[],
-      hopPValues: number[],
-      hopValidated: boolean[],
-      hopConfounded: boolean[],
-    ): void {
+    // Mutable arrays — push/pop instead of spread to avoid O(N * path_length)
+    // allocation per DFS call. Snapshots are taken only when a valid path is found.
+    const pathNodes: string[] = [source];
+    const hopWeights: number[] = [];
+    const hopLagDays: number[] = [];
+    const hopPValues: number[] = [];
+    const hopValidated: boolean[] = [];
+    const hopConfounded: boolean[] = [];
+
+    function dfs(current: string): void {
       // Found target
       if (current === target && pathNodes.length > 1) {
         const rawConfidence = hopWeights.reduce((a, b) => a * b, 1);
@@ -175,6 +176,7 @@ export function createMultiHopReasoner(config: Partial<MultiHopConfig> = {}) {
           const totalLagDays = hopLagDays.reduce((a, b) => a + b, 0);
           const expectedImpact = defaultTriggerMagnitude * rawConfidence;
 
+          // Snapshot mutable arrays into immutable path record
           paths.push({
             nodes: [...pathNodes],
             hopWeights: [...hopWeights],
@@ -206,21 +208,27 @@ export function createMultiHopReasoner(config: Partial<MultiHopConfig> = {}) {
         if (visited.has(neighbor)) continue; // Cycle prevention
 
         visited.add(neighbor);
-        dfs(
-          neighbor,
-          [...pathNodes, neighbor],
-          [...hopWeights, edge.weight],
-          [...hopLagDays, edge.lagDays],
-          [...hopPValues, edge.pValue],
-          [...hopValidated, (edge.knockoutScore ?? 0) > 0.5 && !edge.isLikelyConfounded],
-          [...hopConfounded, edge.isLikelyConfounded ?? false],
-        );
+        pathNodes.push(neighbor);
+        hopWeights.push(edge.weight);
+        hopLagDays.push(edge.lagDays);
+        hopPValues.push(edge.pValue);
+        hopValidated.push((edge.knockoutScore ?? 0) > 0.5 && !edge.isLikelyConfounded);
+        hopConfounded.push(edge.isLikelyConfounded ?? false);
+
+        dfs(neighbor);
+
+        pathNodes.pop();
+        hopWeights.pop();
+        hopLagDays.pop();
+        hopPValues.pop();
+        hopValidated.pop();
+        hopConfounded.pop();
         visited.delete(neighbor);
       }
     }
 
     visited.add(source);
-    dfs(source, [source], [], [], [], [], []);
+    dfs(source);
     visited.delete(source);
 
     // Sort by confidence descending, cap at maxPaths

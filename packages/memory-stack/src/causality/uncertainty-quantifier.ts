@@ -324,10 +324,13 @@ export function createUncertaintyQuantifier(config: Partial<UncertaintyConfig> =
     const pathUncertainty = Math.min(1, 1 - combinedCertainty);
 
     // Compute confidence bounds
-    // Width scales with uncertainty and number of hops
+    // Width scales with uncertainty only — decoupled from prediction magnitude
+    // so small predictions don't collapse intervals and large ones don't blow up
     const prediction = path.pathConfidence;
-    const halfWidth95 = prediction * pathUncertainty * 1.96; // ~95% z-score
-    const halfWidth68 = prediction * pathUncertainty * 1.0;  // ~68% z-score
+    const baseWidth = 0.15; // minimum interval half-width even for low-uncertainty paths
+    const effectiveSpread = Math.max(baseWidth, pathUncertainty);
+    const halfWidth95 = effectiveSpread * 1.96; // ~95% z-score
+    const halfWidth68 = effectiveSpread * 1.0;  // ~68% z-score
 
     const lower95 = Math.max(0, prediction - halfWidth95);
     const upper95 = Math.min(1, prediction + halfWidth95);
