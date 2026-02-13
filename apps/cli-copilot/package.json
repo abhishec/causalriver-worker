@@ -1,0 +1,25 @@
+{
+  "name": "@nexus-ai/cli-copilot",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "bin": {
+    "nexus-copilot": "./dist/index.js"
+  },
+  "scripts": {
+    "start": "npx tsx src/index.ts",
+    "dev": "npx tsx --watch src/index.ts",
+    "build": "tsup src/index.ts --format esm --dts"
+  },
+  "dependencies": {
+    "@nexus-ai/memory-stack": "workspace:*",
+    "@supabase/supabase-js": "^2.0.0",
+    "@anthropic-ai/sdk": "^0.39.0",
+    "dotenv": "^16.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.5.0"
+  }
+}
