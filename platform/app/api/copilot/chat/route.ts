@@ -336,12 +336,12 @@ export async function POST(request: NextRequest) {
         // Detect domains for the adapter
         const detectedDomains = extractDomains(message);
 
-        // Build the adapter from DB data
+        // Build the adapter from DB data — cast trained types to adapter's narrower interface
         const adapter = createNexusBrainAdapter({
-          causalEdges,
-          rules,
+          causalEdges: causalEdges as any,
+          rules: rules as any,
           cascadeRules,
-          patterns,
+          patterns: patterns as any,
           entityState,
           detectedDomains,
         });
@@ -430,7 +430,7 @@ export async function POST(request: NextRequest) {
 
       // ── Causal Intelligence: build DAG from already-fetched edges ───
       if (causalEdges.length > 0) {
-        const dag = createEmptyDAG();
+        const dag = createEmptyDAG([]);
         for (const edge of causalEdges) {
           dag.nodes.add(edge.source_domain);
           dag.nodes.add(edge.target_domain);
@@ -444,22 +444,26 @@ export async function POST(request: NextRequest) {
           });
         }
         brainRegions.causalDAG = dag;
-        brainRegions.multiHopReasoner = createMultiHopReasoner();
-        brainRegions.explanationGenerator = createExplanationGenerator();
-        brainRegions.counterfactualSimulator = createCounterfactualSimulator();
-        brainRegions.uncertaintyQuantifier = createUncertaintyQuantifier();
+        // Cast factory returns to BrainRegions interface — implementations have
+        // additional methods and slightly wider return types than the interface.
+        brainRegions.multiHopReasoner = createMultiHopReasoner() as any;
+        brainRegions.explanationGenerator = createExplanationGenerator() as any;
+        brainRegions.counterfactualSimulator = createCounterfactualSimulator() as any;
+        brainRegions.uncertaintyQuantifier = createUncertaintyQuantifier() as any;
         brainRegions.brainHealthMonitor = createBrainHealthMonitor();
       }
 
       // ── Trained Knowledge: pass ALL DB data to the builder ──────────
+      // Cast trained types — TrainedXxx has optional fields (e.g. importance?: number)
+      // but BrainRegions expects required fields. Runtime values are always present.
       brainRegions.trainedKnowledge = {
-        causalEdges,
-        rules,
-        patterns,
+        causalEdges: causalEdges as any,
+        rules: rules as any,
+        patterns: patterns as any,
         cascadeRules,
         entityState,
         estimateImpact: (domain: string, edges: TrainedCausalEdge[]) =>
-          estimateImpact(domain, edges),
+          estimateImpact(domain, edges as any),
       };
 
       // ── Conversation History ─────────────────────────────────────────
@@ -645,7 +649,7 @@ DO NOT invent any data. Instead:
     // Augment with action engine computed data if available
     if (actionArtifact?.__promptText) {
       effectiveSystemPrompt +=
-        "\n\n## COMPUTED DATA + EXECUTION PLAYBOOK + DECISION INTELLIGENCE (use these REAL numbers, recommended actions, meta-cognition, and counterfactuals — do NOT invent data)\n" +
+        "\n\n## COMPUTED DATA + EXECUTION PLAYBOOK + DECISION INTELLIGENCE + MOTOR COMMANDS + CALIBRATION (use these REAL numbers, recommended actions, meta-cognition, counterfactuals, motor commands, and calibration status — do NOT invent data)\n" +
         String(actionArtifact.__promptText);
     }
 
@@ -681,6 +685,13 @@ DO NOT invent any data. Instead:
           }
           if (cleanArtifact.decisionJournal) {
             send(JSON.stringify({ decisionJournal: cleanArtifact.decisionJournal }));
+          }
+          // V5: Send motor commands and calibration status
+          if (cleanArtifact.motorCommands) {
+            send(JSON.stringify({ motorCommands: cleanArtifact.motorCommands }));
+          }
+          if (cleanArtifact.calibrationStatus) {
+            send(JSON.stringify({ calibrationStatus: cleanArtifact.calibrationStatus }));
           }
         }
 

@@ -343,7 +343,7 @@ export async function POST(request: Request) {
 
     // ── Final: Update progress to complete ───────────────────────────
     const expertiseStats = expertiseGraph.getStats();
-    const collabStats = collabGraph.getStats();
+    const collabStats = collabGraph.getNetworkStats();
 
     await updateProgress({
       step: "complete",

@@ -175,10 +175,15 @@ export async function GET() {
           busFactorWarnings,
         },
         collaboration: {
-          stats: { ...networkStats, ...collabGraph.getStats() },
+          stats: networkStats,
           crossTeamEdges: crossTeamEdges.slice(0, 20),
           bridgeContributors,
-          teamSummary: Object.fromEntries(teamSummary),
+          teamSummary: teamSummary.map((ts) => ({
+            teamA: ts.teamA,
+            teamB: ts.teamB,
+            totalInteractions: ts.totalInteractions,
+            uniqueContributorPairs: ts.uniqueContributorPairs,
+          })),
         },
       },
       engineeringCascade: cascadeEdges || [],
