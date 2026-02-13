@@ -1180,6 +1180,116 @@ export {
 } from './infra';
 
 // ============================================================================
+// CLAUDE-ASPIRATIONAL CAPABILITIES (8 Advanced Brain Regions)
+// ============================================================================
+
+// Agent Loop — Autonomous multi-step goal execution (Basal Ganglia)
+// Decomposes goals → dispatches to tools/regions → verifies → loops.
+export {
+  createAgentLoop,
+  type AgentLoopConfig,
+  type AgentLoopResult,
+  type AgentGoal,
+  type AgentStep,
+  type AgentSubTask,
+  type AgentTool,
+  type AgentToolResult,
+} from './orchestrator/agent-loop';
+
+// Long-Context Manager — Smart truncation & relevance filtering (Hippocampus)
+// Manages the brain's working memory window within LLM token limits.
+export {
+  createLongContextManager,
+  type LongContextConfig,
+  type ContextSection,
+  type ContextMessage,
+  type ContextOptimizeInput,
+  type ContextOptimizeResult,
+} from './orchestrator/long-context-manager';
+
+// RAG Retriever — Real-time retrieval augmented generation (Entorhinal Cortex)
+// Multi-source retrieval, rank fusion, citations, grounding verification.
+export {
+  createRAGRetriever,
+  type RAGRetrieverConfig,
+  type RAGRetrievalResult,
+  type RetrievalSource,
+  type RetrievalOptions,
+  type RetrievedChunk,
+  type ChunkSource,
+  type Citation,
+  type GroundingVerification,
+} from './orchestrator/rag-retriever';
+
+// Multi-Modal Inference — Cross-modal understanding (Visual Cortex)
+// Time series, documents, charts → structured signals for brain routing.
+export {
+  createMultiModalInference,
+  type MultiModalConfig,
+  type TimeSeriesInput,
+  type TimeSeriesAnalysis,
+  type TimeSeriesAnomaly,
+  type DocumentInput,
+  type DocumentAnalysis,
+  type ChartInput,
+  type ChartAnalysis,
+  type ExtractedSignal,
+  type ExtractedFact,
+  type ExtractedEntity as MultiModalEntity,
+  type ExtractedMetric as MultiModalMetric,
+  type ExtractedRelationship,
+} from './core/multi-modal-inference';
+
+// Proactive Intelligence — Push-based insight delivery (Amygdala + RAS)
+// Threshold alerting, trend warnings, cascade early warning, opportunities.
+export {
+  createProactiveIntelligence,
+  type ProactiveIntelligenceConfig,
+  type ProactiveMonitor,
+  type ProactiveAlert,
+  type ProactiveScanResult,
+  type MonitorTemplate,
+} from './orchestrator/proactive-intelligence';
+
+// Session Memory — Per-user context accumulation (Hippocampus + LTM)
+// Preferences, facts, decisions, conversation distillation, memory decay.
+export {
+  createSessionMemory,
+  type SessionMemoryConfig,
+  type MemoryEntry,
+  type MemoryInput,
+  type ConversationInput,
+  type DistillationResult as SessionDistillationResult,
+  type MemoryRecallResult,
+} from './orchestrator/session-memory';
+
+// Structured Output — Schema validation & typed responses (Wernicke's Area)
+// Schema definition, validation, response envelopes, multiple output formats.
+export {
+  createStructuredOutput,
+  type StructuredOutputConfig,
+  type OutputSchema,
+  type FieldDef,
+  type FieldType,
+  type ValidationError,
+  type StructuredResult,
+  type ResponseEnvelope,
+  type OutputFormat,
+  type FormattedOutput,
+} from './orchestrator/structured-output';
+
+// Reasoning Chain — Explicit chain-of-thought surfacing (DLPFC)
+// Multi-region reasoning assembly, evidence linking, confidence propagation.
+export {
+  createReasoningChain,
+  type ReasoningChainConfig,
+  type ReasoningStep,
+  type AlternativePath,
+  type FinalizedChain,
+  type StepInput,
+} from './orchestrator/reasoning-chain';
+
+// ============================================================================
 // TYPES
 // ============================================================================
 
