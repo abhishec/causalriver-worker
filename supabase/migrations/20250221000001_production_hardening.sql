@@ -510,32 +510,32 @@ $$;
 -- Ensure batch DELETEs use indexes not seq scans
 -- ═══════════════════════════════════════════════════════════════════════════
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_signals_created_at
+CREATE INDEX IF NOT EXISTS idx_signals_created_at
   ON cross_domain_signals (created_at);
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_events_created_at
+CREATE INDEX IF NOT EXISTS idx_events_created_at
   ON causal_event_stream (created_at);
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_execlog_created_at
+CREATE INDEX IF NOT EXISTS idx_execlog_created_at
   ON brain_execution_log (created_at);
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_feedback_created_at
+CREATE INDEX IF NOT EXISTS idx_feedback_created_at
   ON pattern_feedback_log (created_at);
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_conversation_created_at
+CREATE INDEX IF NOT EXISTS idx_conversation_created_at
   ON conversation_log (created_at);
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_cost_log_created_at
+CREATE INDEX IF NOT EXISTS idx_cost_log_created_at
   ON llm_cost_log (created_at);
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_agent_activity_created_at
+CREATE INDEX IF NOT EXISTS idx_agent_activity_created_at
   ON ai_agent_activity (created_at);
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_connector_sync_created_at
+CREATE INDEX IF NOT EXISTS idx_connector_sync_created_at
   ON connector_sync_log (created_at);
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_cascade_alerts_created_verified
+CREATE INDEX IF NOT EXISTS idx_cascade_alerts_created_verified
   ON cascade_alerts (created_at) WHERE verified_at IS NOT NULL;
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_predictions_status_created
+CREATE INDEX IF NOT EXISTS idx_predictions_status_created
   ON prediction_records (created_at) WHERE status = 'expired';
