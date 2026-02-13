@@ -266,7 +266,17 @@ describe('COPILOT SIMULATION — DeveloperJarvis Brain', () => {
       const engStats = expertiseGraph.getStats();
       expect(engStats.uniqueContributors).toBeGreaterThanOrEqual(7);
       const teams = collabGraph.getNetworkStats().uniqueTeams;
+      // Check for team members with no PR activity
+      const activeIds = new Set<string>();
+      const heatmap = expertiseGraph.getHeatmap();
+      for (const [, edges] of heatmap) {
+        for (const e of edges) activeIds.add(e.contributorId);
+      }
+      const inactive = TEAM.filter(t => !activeIds.has(t.id));
       console.log(`  🤖 Copilot: "${engStats.uniqueContributors} active contributors across ${teams} teams, covering ${engStats.uniqueTopics} distinct code areas"`);
+      if (inactive.length > 0) {
+        console.log(`    ⚠️  ${inactive.length} team member(s) with no code activity: ${inactive.map(t => t.name).join(', ')}`);
+      }
     });
 
     it('Q5: "What training has the brain received?"', () => {
@@ -389,13 +399,18 @@ describe('COPILOT SIMULATION — DeveloperJarvis Brain', () => {
       const impact = depGraph.analyzeImpact('src/causality/event-bus.ts');
       expect(impact.totalImpactRadius).toBeGreaterThan(0);
       expect(impact.riskScore).toBeGreaterThan(0);
+      const pct = ((impact.totalImpactRadius / allFiles.length) * 100).toFixed(0);
       console.log(`  🤖 Copilot: "Changing event-bus.ts affects:"`);
-      console.log(`    💥 Blast radius: ${impact.totalImpactRadius} files`);
+      console.log(`    💥 Blast radius: ${impact.totalImpactRadius} files (${pct}% of codebase)`);
       console.log(`    ⚠️  Risk score: ${impact.riskScore.toFixed(2)}/1.0`);
       console.log(`    🔀 Direct dependents: ${impact.directDependents.length}`);
       console.log(`    🌐 Transitive dependents: ${impact.transitiveDependents.length}`);
       console.log(`    📁 Affected domains: ${impact.affectedDomains.join(', ')}`);
       console.log(`    🛤️  Critical paths: ${impact.criticalPaths.length}`);
+      if (Number(pct) >= 90) {
+        console.log(`    ℹ️  NOTE: ${pct}% blast radius is due to barrel-file re-exports propagating transitively.`);
+        console.log(`         Direct dependents (${impact.directDependents.length}) are the true immediate risk surface.`);
+      }
     });
 
     it('Q13: "What does consolidation-engine.ts depend on?"', () => {
@@ -411,12 +426,14 @@ describe('COPILOT SIMULATION — DeveloperJarvis Brain', () => {
     it('Q14: "What files would break if connector-framework.ts is deleted?"', () => {
       const impact = depGraph.analyzeImpact('src/connectors/connector-framework.ts');
       expect(impact.totalImpactRadius).toBeGreaterThan(5);
-      console.log(`  🤖 Copilot: "Deleting connector-framework.ts would break ${impact.totalImpactRadius} files:"`);
+      const pct = ((impact.totalImpactRadius / allFiles.length) * 100).toFixed(0);
+      console.log(`  🤖 Copilot: "Deleting connector-framework.ts would break ${impact.totalImpactRadius} files (${pct}% of codebase):"`);
+      console.log(`    🔀 ${impact.directDependents.length} DIRECT dependents (immediate breakage):`);
       for (const d of impact.directDependents.slice(0, 8)) {
         const depFile = typeof d === 'string' ? d : d.sourceId;
-        console.log(`    💔 ${shortPath(depFile)}`);
+        console.log(`      💔 ${shortPath(depFile)}`);
       }
-      if (impact.directDependents.length > 8) console.log(`    ... and ${impact.directDependents.length - 8} more direct dependents`);
+      if (impact.directDependents.length > 8) console.log(`      ... and ${impact.directDependents.length - 8} more`);
     });
 
     it('Q15: "Show me the full transitive dependency tree of brain-trainer.ts"', () => {
@@ -473,8 +490,9 @@ describe('COPILOT SIMULATION — DeveloperJarvis Brain', () => {
       }
       spofs.sort((a, b) => b.risk - a.risk);
       expect(spofs.length).toBeGreaterThan(0);
-      console.log(`  🤖 Copilot: "${spofs.length} single points of failure detected:"`);
-      for (const s of spofs.slice(0, 5)) {
+      const shown = Math.min(spofs.length, 8);
+      console.log(`  🤖 Copilot: "${spofs.length} single points of failure detected${spofs.length > shown ? ` (showing top ${shown})` : ''}:"`);
+      for (const s of spofs.slice(0, shown)) {
         console.log(`    🚨 ${shortPath(s.file).padEnd(40)} fan-in=${s.fanIn} risk=${s.risk.toFixed(2)}`);
       }
     });
@@ -590,6 +608,7 @@ describe('COPILOT SIMULATION — DeveloperJarvis Brain', () => {
 
     it('Q23: "What is the bus factor for event-bus.ts?"', () => {
       const experts = expertiseGraph.queryExperts({ topic: 'src/causality/event-bus.ts', minStrength: 0.01 });
+      experts.sort((a, b) => b.strength - a.strength);
       const busFactor = experts.length;
       const impact = depGraph.analyzeImpact('src/causality/event-bus.ts');
       expect(experts.length).toBeGreaterThan(0);
@@ -932,10 +951,11 @@ describe('COPILOT SIMULATION — DeveloperJarvis Brain', () => {
     it('Q41: "Event bus is failing — what is the blast radius?"', () => {
       const impact = depGraph.analyzeImpact('src/causality/event-bus.ts');
       expect(impact.totalImpactRadius).toBeGreaterThan(0);
+      const pct = ((impact.totalImpactRadius / allFiles.length) * 100).toFixed(0);
       console.log(`  🤖 Copilot: "🚨 INCIDENT: Event bus failure blast radius:"`);
-      console.log(`    💥 ${impact.totalImpactRadius} files affected`);
+      console.log(`    💥 ${impact.totalImpactRadius} files affected (${pct}% of codebase)`);
       console.log(`    🔴 Risk: ${impact.riskScore.toFixed(2)}/1.0`);
-      console.log(`    📁 Direct dependents: ${impact.directDependents.slice(0, 5).map(d => { const id = typeof d === 'string' ? d : d.sourceId; return shortPath(id); }).join(', ')}`);
+      console.log(`    🔀 Direct dependents (${impact.directDependents.length}): ${impact.directDependents.slice(0, 5).map(d => { const id = typeof d === 'string' ? d : d.sourceId; return shortPath(id); }).join(', ')}`);
       console.log(`    🌐 Affected domains: ${impact.affectedDomains.join(', ')}`);
     });
 
