@@ -373,6 +373,50 @@ TASKDEF
 aws ecs register-task-definition --cli-input-json file:///tmp/task-benchmark.json --region "${REGION}" > /dev/null
 echo "    Registered: nexusbrain-benchmark (2 vCPU, 8GB)"
 
+# --- Git Code Trainer Task Definition ---
+# Pulls data from 20 major GitHub repos and trains the core brain on engineering patterns
+# 2 vCPU, 8GB RAM (I/O heavy: paginated GitHub API calls + large dataset processing)
+# Weekly schedule (Sunday 2 AM UTC) — also supports manual trigger via: ./infra/run-task.sh git-trainer
+cat > /tmp/task-git-trainer.json << TASKDEF
+{
+  "family": "nexusbrain-git-trainer",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "2048",
+  "memory": "8192",
+  "executionRoleArn": "${EXEC_ROLE_ARN}",
+  "taskRoleArn": "${EXEC_ROLE_ARN}",
+  "containerDefinitions": [
+    {
+      "name": "brain-git-trainer",
+      "image": "${ECR_IMAGE}",
+      "essential": true,
+      "environment": [
+        { "name": "BRAIN_PROCESS", "value": "git-trainer" },
+        { "name": "GIT_TRAINER_DRY_RUN", "value": "false" }
+      ],
+      "secrets": [
+        { "name": "SUPABASE_URL", "valueFrom": "arn:aws:ssm:${REGION}:${ACCOUNT_ID}:parameter/nexusbrain/SUPABASE_URL" },
+        { "name": "SUPABASE_SERVICE_ROLE_KEY", "valueFrom": "arn:aws:ssm:${REGION}:${ACCOUNT_ID}:parameter/nexusbrain/SUPABASE_SERVICE_ROLE_KEY" },
+        { "name": "GITHUB_TOKEN", "valueFrom": "arn:aws:ssm:${REGION}:${ACCOUNT_ID}:parameter/nexusbrain/GITHUB_TOKEN" }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "${LOG_GROUP}",
+          "awslogs-region": "${REGION}",
+          "awslogs-stream-prefix": "git-trainer"
+        }
+      },
+      "stopTimeout": 300
+    }
+  ]
+}
+TASKDEF
+
+aws ecs register-task-definition --cli-input-json file:///tmp/task-git-trainer.json --region "${REGION}" > /dev/null
+echo "    Registered: nexusbrain-git-trainer (2 vCPU, 8GB)"
+
 # ─── Step 8: Create EventBridge Scheduled Rules ──────────────────
 echo ""
 echo ">>> Step 8: Creating EventBridge Scheduled Rules..."
@@ -494,6 +538,43 @@ aws events put-targets \
   --region "${REGION}" > /dev/null
 echo "    DMN Scan: Every 4 hours (00:00, 04:00, 08:00, 12:00, 16:00, 20:00 UTC)"
 
+# --- Git Code Trainer: Weekly Sunday 2 AM UTC ---
+aws events put-rule \
+  --name "nexusbrain-git-trainer-schedule" \
+  --schedule-expression "cron(0 2 ? * SUN *)" \
+  --state ENABLED \
+  --description "Run NexusBrain Git Code Trainer weekly on Sunday at 2 AM UTC" \
+  --region "${REGION}" > /dev/null
+
+cat > /tmp/target-git-trainer.json << TARGET
+[
+  {
+    "Id": "nexusbrain-git-trainer-target",
+    "Arn": "arn:aws:ecs:${REGION}:${ACCOUNT_ID}:cluster/${CLUSTER_NAME}",
+    "RoleArn": "${EVENTS_ROLE_ARN}",
+    "EcsParameters": {
+      "TaskDefinitionArn": "arn:aws:ecs:${REGION}:${ACCOUNT_ID}:task-definition/nexusbrain-git-trainer",
+      "TaskCount": 1,
+      "LaunchType": "FARGATE",
+      "NetworkConfiguration": {
+        "awsvpcConfiguration": {
+          "Subnets": ["${SUBNET1}", "${SUBNET2}"],
+          "SecurityGroups": ["${SG_ID}"],
+          "AssignPublicIp": "ENABLED"
+        }
+      },
+      "PlatformVersion": "LATEST"
+    }
+  }
+]
+TARGET
+
+aws events put-targets \
+  --rule "nexusbrain-git-trainer-schedule" \
+  --targets file:///tmp/target-git-trainer.json \
+  --region "${REGION}" > /dev/null
+echo "    Git Trainer: Weekly Sunday at 2:00 AM UTC"
+
 # ─── Done ─────────────────────────────────────────────────────────
 echo ""
 echo "============================================"
@@ -507,6 +588,7 @@ echo "  3. Test trainer:     ./infra/run-task.sh trainer"
 echo "  4. Test consolidation: ./infra/run-task.sh consolidation"
 echo "  5. Test DMN scan:    ./infra/run-task.sh dmn"
 echo "  6. Run benchmark:    ./infra/run-task.sh benchmark"
+echo "  7. Run git trainer:  ./infra/run-task.sh git-trainer"
 echo ""
 echo "View logs:"
 echo "  aws logs tail ${LOG_GROUP} --follow --region ${REGION}"

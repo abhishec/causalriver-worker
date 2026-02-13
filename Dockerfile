@@ -7,7 +7,8 @@ FROM node:20-alpine AS base
 RUN npm install -g pnpm@9
 
 # Install Python 3 + pip for benchmark scripts (LongMemEval)
-RUN apk add --no-cache python3 py3-pip && \
+# Install github-cli for Git Code Trainer Agent
+RUN apk add --no-cache python3 py3-pip github-cli && \
     pip3 install --break-system-packages openai tqdm requests
 
 WORKDIR /app

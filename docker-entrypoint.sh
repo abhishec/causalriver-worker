@@ -28,9 +28,15 @@ case "${BRAIN_PROCESS}" in
     echo "  Max Workers: ${BENCHMARK_MAX_WORKERS:-10}"
     exec pnpm exec tsx scripts/brain-benchmark-runner.ts
     ;;
+  git-trainer)
+    echo "Starting Git Code Trainer Agent..."
+    echo "  Dry Run: ${GIT_TRAINER_DRY_RUN:-false}"
+    echo "  GitHub Token: ${GITHUB_TOKEN:+YES}${GITHUB_TOKEN:-NO}"
+    exec pnpm exec tsx scripts/git-code-trainer-runner.ts
+    ;;
   *)
     echo "ERROR: Unknown BRAIN_PROCESS '${BRAIN_PROCESS}'"
-    echo "Valid values: trainer, consolidation, dmn, benchmark"
+    echo "Valid values: trainer, consolidation, dmn, benchmark, git-trainer"
     exit 1
     ;;
 esac
