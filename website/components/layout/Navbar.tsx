@@ -2,13 +2,12 @@
 
 import Link from "next/link";
 import { useState, useCallback } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { SITE, NAV_LINKS } from "@/lib/constants";
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
-  const router = useRouter();
 
   // Handle hash link clicks: scroll to section on homepage, navigate then scroll from other pages
   const handleHashClick = useCallback(
