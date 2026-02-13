@@ -1115,7 +1115,7 @@ export async function POST(request: NextRequest) {
     // explainer) and produces structured artifacts with REAL computed data.
     let actionArtifact: Record<string, unknown> | null = null;
     const actionIntents = new Set<UserIntent>(["build", "predict", "diagnose"]);
-    const forceAction = /what\s+if|forecast|simulate|predict\s+\d+|project\s+\d+/.test(
+    const forceAction = /what\s+if|forecast|simulate|predict\s+\d+|project\s+\d+|build\s+.*model|comprehensive|full\s+analysis/.test(
       message.toLowerCase()
     );
 

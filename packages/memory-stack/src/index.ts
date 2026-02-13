@@ -542,16 +542,19 @@ export {
   type SimulationIntervention,
 } from './orchestrator/whatif-simulator';
 
-// Domain Action Engine ("Motor Cortex") — intent-to-execution routing
+// Domain Action Engine V2 ("Motor Cortex") — intent-to-execution routing
+// V2: +LLM narratives, +smart horizon, +multi-domain, +confidence gates, +composite
 export {
   createDomainActionEngine,
   formatArtifactForPrompt,
+  parseHorizonFromQuestion,
   type DomainActionEngineConfig,
   type ActionArtifact,
   type ForecastArtifact,
   type SimulationArtifact,
   type ExplanationArtifact,
   type DiagnosisArtifact,
+  type CompositeArtifact,
   type ActionType,
   type ActionKnowledgeContext,
 } from './orchestrator/domain-action-engine';
