@@ -37,8 +37,18 @@ export async function updateSession(request: NextRequest) {
     request.nextUrl.pathname.startsWith(route)
   );
 
-  if (!user && !isPublicRoute) {
+  // Auth-required but not dashboard routes (e.g. onboarding)
+  const isOnboarding = request.nextUrl.pathname.startsWith("/onboarding");
+
+  if (!user && !isPublicRoute && !isOnboarding) {
     // No user and trying to access protected route → redirect to login
+    const url = request.nextUrl.clone();
+    url.pathname = "/login";
+    return NextResponse.redirect(url);
+  }
+
+  if (!user && isOnboarding) {
+    // Not logged in but trying to access onboarding → redirect to login
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
