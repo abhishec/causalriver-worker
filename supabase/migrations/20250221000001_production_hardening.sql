@@ -291,7 +291,7 @@ BEGIN
 
   -- 7i. Clean old connector sync logs (90 days)
   DELETE FROM connector_sync_log
-    WHERE created_at < NOW() - (signal_retention_days || ' days')::INTERVAL;
+    WHERE started_at < NOW() - (signal_retention_days || ' days')::INTERVAL;
 
   RETURN jsonb_build_object(
     'signals_deleted', v_signals_deleted,
@@ -531,8 +531,8 @@ CREATE INDEX IF NOT EXISTS idx_cost_log_created_at
 CREATE INDEX IF NOT EXISTS idx_agent_activity_created_at
   ON ai_agent_activity (created_at);
 
-CREATE INDEX IF NOT EXISTS idx_connector_sync_created_at
-  ON connector_sync_log (created_at);
+CREATE INDEX IF NOT EXISTS idx_connector_sync_started_at
+  ON connector_sync_log (started_at);
 
 CREATE INDEX IF NOT EXISTS idx_cascade_alerts_created_verified
   ON cascade_alerts (created_at) WHERE verified_at IS NOT NULL;
