@@ -340,23 +340,34 @@ export function createCounterfactualSimulator(config: Partial<CounterfactualConf
   // ── Monte Carlo sensitivity analysis ──────────────────────────────
 
   /**
-   * Monte Carlo sensitivity analysis for counterfactual impact score.
-   * Perturbs edge weights by ±10% (sampling from uniform noise) to produce
-   * a distribution of impact scores, yielding confidence interval bounds.
+   * Streaming Monte Carlo sensitivity analysis with early convergence.
+   *
+   * Perturbs edge weights by ±10% to produce a distribution of impact scores.
+   * Uses adaptive stopping: terminates early when the standard error of the mean
+   * falls below a precision threshold, avoiding wasted computation on trivial or
+   * highly stable interventions.
    *
    * @param dag - The original DAG
    * @param intervention - The counterfactual intervention to test
-   * @param nSamples - Number of Monte Carlo samples (default 50)
-   * @returns CI on the impact score: { mean, lower95, upper95, std }
+   * @param maxSamples - Maximum Monte Carlo samples (default 50)
+   * @param precisionThreshold - Stop early when SE(mean) < this (default 0.02)
+   * @param minSamples - Minimum samples before convergence check (default 10)
+   * @returns CI on the impact score: { mean, lower95, upper95, std, samplesUsed }
    */
   function monteCarloImpactCI(
     dag: CausalDAG,
     intervention: CounterfactualIntervention,
-    nSamples: number = 50,
-  ): { mean: number; lower95: number; upper95: number; std: number } {
+    maxSamples: number = 50,
+    precisionThreshold: number = 0.02,
+    minSamples: number = 10,
+  ): { mean: number; lower95: number; upper95: number; std: number; samplesUsed?: number } {
     const scores: number[] = [];
 
-    for (let i = 0; i < nSamples; i++) {
+    // Streaming statistics: running mean and variance (Welford's algorithm)
+    let runningMean = 0;
+    let runningM2 = 0;
+
+    for (let i = 0; i < maxSamples; i++) {
       // Clone and perturb all edge weights by ±10%
       const perturbedDAG = cloneDAG(dag);
       for (const [, neighbors] of perturbedDAG.edges) {
@@ -382,18 +393,37 @@ export function createCounterfactualSimulator(config: Partial<CounterfactualConf
         if (cfPred.totalPaths > 0) totalCf += cfPred.reasoning.confidence;
       }
 
-      scores.push(totalBase > 0 ? Math.min(1, Math.abs(totalBase - totalCf) / totalBase) : 0);
+      const score = totalBase > 0 ? Math.min(1, Math.abs(totalBase - totalCf) / totalBase) : 0;
+      scores.push(score);
+
+      // Welford's online variance algorithm
+      const n = scores.length;
+      const delta = score - runningMean;
+      runningMean += delta / n;
+      const delta2 = score - runningMean;
+      runningM2 += delta * delta2;
+
+      // Early convergence check: stop if standard error is below precision threshold
+      if (n >= minSamples) {
+        const variance = runningM2 / (n - 1);
+        const standardError = Math.sqrt(variance / n);
+        if (standardError < precisionThreshold) {
+          break; // Converged early — CI is precise enough
+        }
+      }
     }
 
     scores.sort((a, b) => a - b);
-    const mean = scores.reduce((s, v) => s + v, 0) / scores.length;
-    const std = Math.sqrt(scores.reduce((s, v) => s + (v - mean) ** 2, 0) / scores.length);
+    const n = scores.length;
+    const mean = scores.reduce((s, v) => s + v, 0) / n;
+    const std = Math.sqrt(scores.reduce((s, v) => s + (v - mean) ** 2, 0) / n);
 
     return {
       mean: Math.round(mean * 1000) / 1000,
-      lower95: Math.round((scores[Math.floor(scores.length * 0.025)] ?? 0) * 1000) / 1000,
-      upper95: Math.round((scores[Math.floor(scores.length * 0.975)] ?? 0) * 1000) / 1000,
+      lower95: Math.round((scores[Math.floor(n * 0.025)] ?? 0) * 1000) / 1000,
+      upper95: Math.round((scores[Math.floor(n * 0.975)] ?? 0) * 1000) / 1000,
       std: Math.round(std * 1000) / 1000,
+      samplesUsed: n,
     };
   }
 
@@ -836,6 +866,135 @@ export function createCounterfactualSimulator(config: Partial<CounterfactualConf
     /**
      * Get the configuration.
      */
+    /**
+     * Causal Intervention Planner: given a target outcome (e.g., "increase revenue"),
+     * automatically enumerate, simulate, and rank intervention strategies.
+     *
+     * This is the brain's strategic planning capability — it:
+     * 1. Identifies all upstream edges that influence the target domain
+     * 2. Generates candidate interventions (strengthen, weaken, inject) for each
+     * 3. Simulates each with Monte Carlo CIs
+     * 4. Ranks by expected impact and cost-efficiency
+     * 5. Returns a prioritized action plan
+     *
+     * @param dag - The causal DAG
+     * @param targetDomain - Domain to improve (e.g., 'revenue', 'customer_satisfaction')
+     * @param direction - 'increase' or 'decrease' the target
+     * @param maxStrategies - Max strategies to return (default 5)
+     */
+    planInterventions(
+      dag: CausalDAG,
+      targetDomain: string,
+      direction: 'increase' | 'decrease' = 'increase',
+      maxStrategies: number = 5,
+    ): Array<{
+      rank: number;
+      intervention: CounterfactualIntervention;
+      impactScore: number;
+      impactCI: { mean: number; lower95: number; upper95: number; std: number };
+      affectedDomains: number;
+      costEfficiency: number;
+      narrative: string;
+    }> {
+      // 1. Find all upstream edges that influence the target domain
+      const upstreamEdges: Array<{ source: string; target: string; weight: number }> = [];
+      for (const [src, neighbors] of dag.edges) {
+        const edge = neighbors.get(targetDomain);
+        if (edge) {
+          upstreamEdges.push({ source: src, target: targetDomain, weight: edge.weight });
+        }
+        // Also check 2-hop upstream: A → X → target
+        for (const [mid, midEdge] of neighbors) {
+          const toTarget = dag.edges.get(mid)?.get(targetDomain);
+          if (toTarget && mid !== targetDomain) {
+            upstreamEdges.push({ source: src, target: mid, weight: midEdge.weight * toTarget.weight });
+          }
+        }
+      }
+
+      if (upstreamEdges.length === 0) {
+        return [];
+      }
+
+      // 2. Generate candidate interventions for each upstream edge
+      const candidates: CounterfactualIntervention[] = [];
+      for (const edge of upstreamEdges) {
+        const currentWeight = dag.edges.get(edge.source)?.get(edge.target)?.weight ?? edge.weight;
+        const delta = direction === 'increase' ? sensitivityDelta : -sensitivityDelta;
+
+        // Strategy: strengthen the positive-influence edge
+        if ((direction === 'increase' && currentWeight > 0) || (direction === 'decrease' && currentWeight < 0)) {
+          candidates.push({
+            type: 'strengthen_edge',
+            source: edge.source,
+            target: edge.target,
+            newWeight: Math.min(1, Math.abs(currentWeight) + delta),
+          });
+        }
+
+        // Strategy: inject a positive signal into the source domain
+        candidates.push({
+          type: 'inject_signal',
+          source: edge.source,
+          target: edge.source,
+          signalValue: direction === 'increase' ? 1.5 : 0.5,
+        });
+      }
+
+      // Deduplicate by intervention key
+      const seen = new Set<string>();
+      const uniqueCandidates = candidates.filter(c => {
+        const key = `${c.type}:${c.source}:${c.target}:${c.newWeight ?? c.signalValue ?? ''}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+
+      // 3. Simulate each candidate (limit to avoid performance issues)
+      const limitedCandidates = uniqueCandidates.slice(0, maxStrategies * 3);
+      const results: Array<{
+        intervention: CounterfactualIntervention;
+        result: CounterfactualResult;
+      }> = [];
+
+      for (const intervention of limitedCandidates) {
+        const result = this.simulate(dag, intervention);
+        results.push({ intervention, result });
+      }
+
+      // 4. Rank by impact on target domain specifically
+      const ranked = results
+        .map(({ intervention, result }) => {
+          const targetDelta = result.impactDeltas.find(
+            d => d.target === targetDomain || d.source === targetDomain
+          );
+          const targetImpact = targetDelta
+            ? Math.abs(targetDelta.confidenceDelta)
+            : result.impactScore;
+          // Cost efficiency: impact per unit of intervention magnitude
+          const interventionMagnitude = intervention.newWeight
+            ? Math.abs(intervention.newWeight - (dag.edges.get(intervention.source!)?.get(intervention.target!)?.weight ?? 0))
+            : intervention.signalValue ? Math.abs(intervention.signalValue - 1) : sensitivityDelta;
+          const costEfficiency = interventionMagnitude > 0
+            ? targetImpact / interventionMagnitude
+            : 0;
+
+          return {
+            intervention,
+            impactScore: Math.round(targetImpact * 1000) / 1000,
+            impactCI: result.impactCI ?? { mean: targetImpact, lower95: 0, upper95: targetImpact, std: 0 },
+            affectedDomains: result.impactDeltas.length,
+            costEfficiency: Math.round(costEfficiency * 1000) / 1000,
+            narrative: result.narrative,
+          };
+        })
+        .sort((a, b) => b.impactScore - a.impactScore)
+        .slice(0, maxStrategies)
+        .map((item, idx) => ({ ...item, rank: idx + 1 }));
+
+      return ranked;
+    },
+
     getConfig(): CounterfactualConfig {
       return { maxHops, minPathConfidence, sensitivityDelta, maxPairsToAnalyze };
     },

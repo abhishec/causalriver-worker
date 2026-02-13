@@ -588,6 +588,103 @@ export function createDomainTransferLearner(config: Partial<DomainTransferConfig
     return { edgesAdded, edgesStrengthened, appliedPriors, summary };
   }
 
+  // ── Motif-based bootstrapping ────────────────────────────────────
+
+  /**
+   * Bootstrap a new org's DAG using structural motifs (multi-hop chain priors).
+   *
+   * Unlike per-edge bootstrapping, this injects entire causal chains as units,
+   * capturing interaction effects that single-edge priors miss.
+   * E.g., if "engineering → cs_tickets → revenue" appears across 5 orgs,
+   * both edges are injected together with compound confidence.
+   *
+   * @param dag - The new org's DAG to bootstrap
+   * @param minOrgCount - Minimum orgs a motif must appear in (default 2)
+   * @returns Bootstrap result with motif injection details
+   */
+  function bootstrapFromMotifs(
+    dag: CausalDAG,
+    minOrgCount: number = 2,
+  ): {
+    motifsInjected: number;
+    edgesAdded: number;
+    edgesStrengthened: number;
+    motifDetails: Array<{ motif: string[]; confidence: number; edgesCreated: number }>;
+    summary: string;
+  } {
+    const motifs = extractStructuralMotifs(minOrgCount);
+    if (motifs.length === 0) {
+      return { motifsInjected: 0, edgesAdded: 0, edgesStrengthened: 0, motifDetails: [], summary: 'No structural motifs available.' };
+    }
+
+    // Map org domains to canonical for matching
+    const orgDomains = new Set(dag.nodes);
+    const mappings = mapDAGDomains(dag);
+    const canonToOrg = new Map<string, string>();
+    for (const m of mappings) {
+      canonToOrg.set(m.canonicalDomain, m.orgDomain);
+    }
+
+    let totalEdgesAdded = 0;
+    let totalEdgesStrengthened = 0;
+    let motifsInjected = 0;
+    const motifDetails: Array<{ motif: string[]; confidence: number; edgesCreated: number }> = [];
+
+    for (const motif of motifs) {
+      // Check if org has domains matching all motif nodes
+      const orgNodes = motif.motif.map(canon => canonToOrg.get(canon));
+      if (orgNodes.some(n => !n)) continue; // Skip if any node not found in org
+
+      let edgesCreated = 0;
+
+      // Inject each edge in the motif chain
+      for (let i = 0; i < motif.motif.length - 1; i++) {
+        const orgSrc = orgNodes[i]!;
+        const orgTgt = orgNodes[i + 1]!;
+        const motifWeight = Math.min(maxPriorWeight, motif.avgWeights[i] * priorDecay * motif.confidence);
+        const motifLag = motif.avgLags[i];
+
+        const existing = dag.edges.get(orgSrc)?.get(orgTgt);
+
+        if (!existing) {
+          if (!dag.edges.has(orgSrc)) dag.edges.set(orgSrc, new Map());
+          dag.edges.get(orgSrc)!.set(orgTgt, {
+            weight: motifWeight,
+            pValue: 0.08, // Slightly better than single-edge prior (motif evidence)
+            lagDays: motifLag,
+            lastUpdated: new Date(),
+            sampleSize: 0,
+          });
+          totalEdgesAdded++;
+          edgesCreated++;
+        } else {
+          // Strengthen existing edge with motif evidence
+          if (motifWeight > existing.weight * 0.7) {
+            existing.weight = Math.min(1, existing.weight * 0.6 + motifWeight * 0.4);
+            existing.lastUpdated = new Date();
+            totalEdgesStrengthened++;
+            edgesCreated++;
+          }
+        }
+      }
+
+      if (edgesCreated > 0) {
+        motifsInjected++;
+        motifDetails.push({
+          motif: orgNodes as string[],
+          confidence: motif.confidence,
+          edgesCreated,
+        });
+      }
+    }
+
+    const summary = motifsInjected > 0
+      ? `Injected ${motifsInjected} structural motif(s): ${totalEdgesAdded} new edges, ${totalEdgesStrengthened} strengthened. Motifs: ${motifDetails.map(d => d.motif.join('→')).join('; ')}.`
+      : 'No applicable structural motifs found for this org\'s domain structure.';
+
+    return { motifsInjected, edgesAdded: totalEdgesAdded, edgesStrengthened: totalEdgesStrengthened, motifDetails, summary };
+  }
+
   // ── Negative transfer protection ──────────────────────────────────
 
   /**
@@ -952,6 +1049,14 @@ export function createDomainTransferLearner(config: Partial<DomainTransferConfig
      */
     extractStructuralMotifs(minOrgCount?: number) {
       return extractStructuralMotifs(minOrgCount);
+    },
+
+    /**
+     * Bootstrap a new org's DAG using structural motifs (multi-hop chain priors).
+     * Injects entire causal chains as connected units, not just individual edges.
+     */
+    bootstrapFromMotifs(dag: CausalDAG, minOrgCount?: number) {
+      return bootstrapFromMotifs(dag, minOrgCount);
     },
 
     /**

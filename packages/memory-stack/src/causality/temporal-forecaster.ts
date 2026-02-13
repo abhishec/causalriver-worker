@@ -48,7 +48,7 @@ export interface ForecastPoint {
   /** Upper bound of 68% prediction interval */
   upper68: number;
   /** Which method produced this forecast */
-  method: 'exponential_smoothing' | 'dag_informed' | 'autoregressive' | 'ensemble';
+  method: 'exponential_smoothing' | 'dag_informed' | 'autoregressive' | 'ensemble' | 'ensemble+exogenous';
 }
 
 /**
@@ -986,6 +986,105 @@ export function createTemporalForecaster(config: Partial<TemporalForecasterConfi
      */
     knnForecast(values: number[], horizonDays: number, k?: number) {
       return knnForecast(values, horizonDays, k);
+    },
+
+    /**
+     * Forecast with exogenous variables (external regressors).
+     *
+     * Accepts external covariates like holidays, product launches, or market indices.
+     * These are added as adjustment terms on top of the standard ensemble forecast:
+     *   adjusted[h] = ensemble[h] + Σ(exog_effect[h] * exog_weight)
+     *
+     * @param allSeries - All available time series
+     * @param dag - The causal DAG
+     * @param targetDomain - Domain to forecast
+     * @param horizonDays - Forecast horizon
+     * @param exogenousVars - External variables with future known values
+     * @returns Standard ForecastResult with exogenous adjustments applied
+     */
+    forecastWithExogenous(
+      allSeries: Map<string, DailyTimeSeries>,
+      dag: CausalDAG,
+      targetDomain: string,
+      horizonDays: number,
+      exogenousVars: Array<{
+        name: string;
+        /** Historical values aligned with target series (same length) */
+        historicalValues: number[];
+        /** Future known values for the forecast horizon */
+        futureValues: number[];
+        /** Optional weight override (default: learned from correlation) */
+        weight?: number;
+      }>,
+    ): ForecastResult {
+      // 1. Get baseline forecast
+      const baseResult = this.forecast(allSeries, dag, targetDomain, horizonDays);
+      if (baseResult.predictions.length === 0) return baseResult;
+
+      // 2. Estimate exogenous effect for each variable
+      const targetValues = allSeries.get(targetDomain)?.values ?? [];
+      const adjustments = Array(horizonDays).fill(0);
+      const exogSummary: string[] = [];
+
+      for (const exog of exogenousVars) {
+        // Learn weight from historical correlation if not provided
+        let weight = exog.weight;
+        if (weight === undefined && targetValues.length > 0 && exog.historicalValues.length > 0) {
+          // Simple correlation-based weight: cov(target, exog) / var(exog)
+          const n = Math.min(targetValues.length, exog.historicalValues.length);
+          const tSlice = targetValues.slice(-n);
+          const eSlice = exog.historicalValues.slice(-n);
+          const tMean = tSlice.reduce((s, v) => s + v, 0) / n;
+          const eMean = eSlice.reduce((s, v) => s + v, 0) / n;
+          let cov = 0;
+          let varE = 0;
+          for (let i = 0; i < n; i++) {
+            cov += (tSlice[i] - tMean) * (eSlice[i] - eMean);
+            varE += (eSlice[i] - eMean) ** 2;
+          }
+          weight = varE > 0 ? (cov / n) / (varE / n) : 0;
+          // Cap weight to prevent extreme adjustments
+          weight = Math.max(-0.5, Math.min(0.5, weight));
+        }
+
+        const effectiveWeight = weight ?? 0;
+
+        // Apply future exogenous values as adjustments
+        for (let h = 0; h < horizonDays; h++) {
+          const futureVal = exog.futureValues[h] ?? 0;
+          // Effect = deviation from historical mean * learned weight
+          const histMean = exog.historicalValues.length > 0
+            ? exog.historicalValues.reduce((s, v) => s + v, 0) / exog.historicalValues.length
+            : 0;
+          adjustments[h] += (futureVal - histMean) * effectiveWeight;
+        }
+
+        if (Math.abs(effectiveWeight) > 0.01) {
+          exogSummary.push(`${exog.name} (weight: ${effectiveWeight.toFixed(3)})`);
+        }
+      }
+
+      // 3. Apply adjustments to predictions
+      const adjustedPredictions = baseResult.predictions.map((pred, i) => ({
+        ...pred,
+        value: Math.round((pred.value + (adjustments[i] ?? 0)) * 1000) / 1000,
+        lower95: Math.round((pred.lower95 + (adjustments[i] ?? 0)) * 1000) / 1000,
+        upper95: Math.round((pred.upper95 + (adjustments[i] ?? 0)) * 1000) / 1000,
+        lower68: Math.round(((pred.lower68 ?? pred.lower95) + (adjustments[i] ?? 0)) * 1000) / 1000,
+        upper68: Math.round(((pred.upper68 ?? pred.upper95) + (adjustments[i] ?? 0)) * 1000) / 1000,
+        method: 'ensemble+exogenous' as const,
+      }));
+
+      // 4. Enhanced summary
+      const summaryAddendum = exogSummary.length > 0
+        ? ` Adjusted by ${exogSummary.length} exogenous variable(s): ${exogSummary.join(', ')}.`
+        : '';
+
+      return {
+        ...baseResult,
+        predictions: adjustedPredictions,
+        summary: baseResult.summary + summaryAddendum,
+      };
     },
 
     /**
