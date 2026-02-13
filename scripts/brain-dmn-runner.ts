@@ -130,6 +130,9 @@ const SLACK_WEBHOOK_URL = process.env.SLACK_WEBHOOK_URL || '';
 // Verbose
 const VERBOSE = process.env.VERBOSE === 'true';
 
+// Module-level cost tracker — initialized in main(), used by scanOrg()
+let costTracker: ReturnType<typeof createCostTracker> | undefined;
+
 // LLM Brain Amplifier config (optional — graceful degradation if no key)
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY || '';
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || '';
@@ -759,7 +762,7 @@ async function main(): Promise<void> {
   }
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-  const costTracker = createCostTracker(supabase, true);
+  costTracker = createCostTracker(supabase, true);
 
   // Verify connection
   try {
