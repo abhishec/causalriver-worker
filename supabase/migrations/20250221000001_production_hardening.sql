@@ -178,7 +178,7 @@ BEGIN
   -- ── 4. Clean expired prediction records ──────────────────────────
   DELETE FROM prediction_records
     WHERE created_at < NOW() - (event_retention_days || ' days')::INTERVAL
-      AND status = 'expired';
+      AND verified_at IS NOT NULL;
   GET DIAGNOSTICS v_predictions_deleted = ROW_COUNT;
 
   -- ── 5. Archive low-importance memories beyond per-org threshold ──
@@ -335,7 +335,7 @@ SELECT cron.schedule(
   '0 4 * * *',
   $$
     DELETE FROM fast_path_cache WHERE expires_at IS NOT NULL AND expires_at < NOW();
-    DELETE FROM prediction_records WHERE status = 'expired' AND created_at < NOW() - INTERVAL '30 days';
+    DELETE FROM prediction_records WHERE verified_at IS NOT NULL AND created_at < NOW() - INTERVAL '30 days';
   $$
 );
 
@@ -537,5 +537,5 @@ CREATE INDEX IF NOT EXISTS idx_connector_sync_started_at
 CREATE INDEX IF NOT EXISTS idx_cascade_alerts_created_verified
   ON cascade_alerts (created_at) WHERE verified_at IS NOT NULL;
 
-CREATE INDEX IF NOT EXISTS idx_predictions_status_created
-  ON prediction_records (created_at) WHERE status = 'expired';
+CREATE INDEX IF NOT EXISTS idx_predictions_verified_created
+  ON prediction_records (created_at) WHERE verified_at IS NOT NULL;
