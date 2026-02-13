@@ -102,9 +102,13 @@ async function main() {
   rl.on('line', async (line) => {
     const input = line.trim();
     if (!input) {
+      rl.resume();
       rl.prompt();
       return;
     }
+
+    // Pause readline to prevent processing next line before async work completes
+    rl.pause();
 
     // ── Slash commands ───────────────────────────────────────────
     if (input.startsWith('/')) {
@@ -162,6 +166,7 @@ async function main() {
       }
 
       logWarn(`Unknown command: ${input}. Type /help for available commands.`);
+      rl.resume();
       rl.prompt();
       return;
     }
@@ -211,6 +216,7 @@ async function main() {
       log(`\n  ${C.red}Error building brain context: ${msg}${C.reset}\n`);
     }
 
+    rl.resume();
     rl.prompt();
   });
 

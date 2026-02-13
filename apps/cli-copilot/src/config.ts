@@ -4,7 +4,21 @@
  * Loads from .env, validates required vars, exports typed config.
  */
 
-import 'dotenv/config';
+import dotenv from 'dotenv';
+import { resolve } from 'path';
+import { existsSync } from 'fs';
+
+// Load .env — try CWD first, then walk up to find apps/cli-copilot/.env
+const candidates = [
+  resolve(process.cwd(), '.env'),
+  resolve(process.cwd(), 'apps/cli-copilot/.env'),
+];
+for (const envPath of candidates) {
+  if (existsSync(envPath)) {
+    dotenv.config({ path: envPath, override: true });
+    break;
+  }
+}
 
 export interface CliConfig {
   supabaseUrl: string;
