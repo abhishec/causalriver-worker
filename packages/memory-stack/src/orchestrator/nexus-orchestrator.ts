@@ -68,6 +68,11 @@ export interface NexusOrchestratorConfig {
   llm?: LLMResponseConfig;
   /** NexusRepository for centralized persistence (optional) */
   repository?: NexusRepository;
+  /** Optional brain knowledge context provider for copilot queries */
+  brainKnowledgeProvider?: {
+    queryBrainKnowledge: (question: string, entityState?: Record<string, unknown>) => import('./brain-knowledge-context').BrainKnowledgeContext;
+    formatBrainKnowledgeForPrompt: (context: import('./brain-knowledge-context').BrainKnowledgeContext) => string;
+  };
 }
 
 export interface NexusQueryResult {
@@ -83,6 +88,8 @@ export interface NexusQueryResult {
   patternContext: string;
   /** Full assembled prompt context */
   assembledContext: string;
+  /** Brain knowledge context (if brain knowledge provider is configured) */
+  brainKnowledge?: import('./brain-knowledge-context').BrainKnowledgeContext;
 }
 
 // ============================================================================
@@ -376,10 +383,23 @@ export function createNexusOrchestrator(config: NexusOrchestratorConfig) {
         .filter(Boolean)
         .join('\n---\n');
 
+      // 3b. Brain knowledge context (if provider is configured)
+      let brainKnowledge: import('./brain-knowledge-context').BrainKnowledgeContext | undefined;
+      let brainKnowledgeText = '';
+      if (config.brainKnowledgeProvider) {
+        try {
+          brainKnowledge = config.brainKnowledgeProvider.queryBrainKnowledge(queryText);
+          brainKnowledgeText = config.brainKnowledgeProvider.formatBrainKnowledgeForPrompt(brainKnowledge);
+        } catch {
+          // Non-critical: fall back to standard context
+        }
+      }
+
       const assembledContext = assembleContextPrompt({
         rag: ragText || undefined,
         causal: causalContext || undefined,
         patterns: patternContext || undefined,
+        cascades: brainKnowledgeText || undefined,
       });
 
       return {
@@ -391,6 +411,7 @@ export function createNexusOrchestrator(config: NexusOrchestratorConfig) {
         causalContext,
         patternContext,
         assembledContext,
+        brainKnowledge,
       };
     },
 

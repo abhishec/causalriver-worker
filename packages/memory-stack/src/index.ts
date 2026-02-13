@@ -388,6 +388,19 @@ export {
   type NexusQueryResult,
 } from './orchestrator/nexus-orchestrator';
 
+// Brain Knowledge Context — Runtime Brain Loader + Multi-Domain Query Router
+export {
+  createBrainKnowledgeContext,
+  DOMAIN_KEYWORDS,
+  type BrainKnowledgeContext,
+  type BrainKnowledgeContextConfig,
+  type BrainKnowledgeContextInstance,
+  type UserIntent,
+  type DBCausalEdge,
+  type DBRule,
+  type DBPattern,
+} from './orchestrator/brain-knowledge-context';
+
 export {
   createNexusCopilot,
   type CopilotConfig,

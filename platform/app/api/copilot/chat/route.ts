@@ -1,15 +1,119 @@
+/**
+ * Brain-Powered Copilot Chat Route
+ *
+ * This route uses the FULL NexusBrain knowledge graph to answer questions.
+ * Instead of dumping flat SQL results to Claude, it:
+ *
+ *   1. Queries causal_relationships_statistical for the full causal graph
+ *   2. Queries ai_memory for business rules
+ *   3. Queries org_cascade_rules for cascade definitions
+ *   4. Reconstructs the brain's knowledge context in-memory
+ *   5. Extracts relevant domains from the user's question
+ *   6. Builds an intent-aware system prompt with grounded brain data
+ *   7. Streams the response via Anthropic
+ *
+ * The brain's causal edges, effect sizes, lag days, p-values, cascade paths,
+ * and matched rules are all included in the system prompt so Claude can
+ * ground every answer in the brain's discovered parameters.
+ */
+
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
 const CORE_ORG_ID = "00000000-0000-4000-a000-000000000001";
 
-const SYSTEM_PROMPT = `You are NexusBrain's intelligence copilot. You have access to causal evidence, brain metrics, and organizational data. Always cite specific causal edges and statistical evidence when answering. Be concise and data-driven.
+// ============================================================================
+// DOMAIN KEYWORD MAP (mirrors brain-knowledge-context.ts)
+// ============================================================================
 
-When referencing causal relationships, cite them as: "source_entity -> target_entity (strength: X, p-value: Y)".
-When referencing anomalies, mention the signal domain, severity, and detection time.
-When discussing brain health, reference the daily snapshot metrics.
+const DOMAIN_KEYWORDS: Record<string, string[]> = {
+  finance: [
+    "cash", "cash flow", "financial", "revenue", "burn", "runway", "arr",
+    "mrr", "gross margin", "ltv", "payback", "unit economics", "profit",
+    "loss", "budget", "forecast", "ebitda", "margin", "cost", "pricing",
+    "funding", "valuation", "roi",
+  ],
+  growth: [
+    "startup", "growth", "scaling", "scale", "expand", "hypergrowth",
+    "series", "fundraise", "traction", "virality", "pmf", "go-to-market",
+  ],
+  cs: [
+    "customer", "churn", "retention", "nrr", "grr", "customer success",
+    "renewal", "upsell", "health score", "nps", "csat", "onboarding",
+  ],
+  marketing: [
+    "marketing", "cac", "acquisition", "magic number", "plg", "funnel",
+    "conversion", "leads", "pipeline", "brand", "demand gen", "campaign",
+  ],
+  product: [
+    "product", "feature", "self-serve", "adoption", "usage", "engagement",
+    "dau", "mau", "stickiness", "activation", "roadmap",
+  ],
+  strategy: [
+    "strategy", "model", "forecasting", "scenario", "plan", "competitive",
+    "moat", "positioning", "market",
+  ],
+  engineering: [
+    "engineering", "code", "deploy", "technical debt", "architecture",
+    "infrastructure", "devops", "reliability", "incidents", "velocity",
+  ],
+  people: [
+    "hiring", "talent", "culture", "team", "attrition", "compensation",
+    "headcount", "leadership", "performance",
+  ],
+  revenue: [
+    "revenue", "sales", "bookings", "deal", "pipeline", "quota",
+    "close rate", "win rate",
+  ],
+  macro: [
+    "macro", "economy", "gdp", "inflation", "interest rate", "fed",
+    "recession", "unemployment",
+  ],
+};
 
-Format your answers clearly with short paragraphs. Use bullet points for lists.`;
+// ============================================================================
+// TYPES
+// ============================================================================
+
+interface DBCausalEdge {
+  source_domain: string;
+  target_domain: string;
+  effect_size: number;
+  granger_p_value: number;
+  optimal_lag_days: number;
+  granger_f_statistic: number | null;
+  sample_size: number | null;
+  confidence_interval_lower: number | null;
+  confidence_interval_upper: number | null;
+  natural_language: string | null;
+  is_significant: boolean | null;
+}
+
+interface DBRule {
+  content: string;
+  importance: number;
+  domain: string;
+  metadata: Record<string, unknown> | null;
+}
+
+interface DBCascadeRule {
+  rule_name: string;
+  trigger_domain: string;
+  trigger_signal_type: string;
+  propagation_chain: Array<{
+    source_domain: string;
+    target_domain: string;
+    severity: string;
+    reason_template?: string;
+  }>;
+  is_active: boolean;
+}
+
+type UserIntent = "build" | "explain" | "diagnose" | "predict" | "general";
+
+// ============================================================================
+// SSE STREAM HELPER
+// ============================================================================
 
 function createSSEStream() {
   const encoder = new TextEncoder();
@@ -41,6 +145,328 @@ function createSSEStream() {
   return { stream, sendText, sendError, close };
 }
 
+// ============================================================================
+// DOMAIN EXTRACTION + INTENT DETECTION
+// ============================================================================
+
+function extractDomains(question: string): string[] {
+  const lower = question.toLowerCase();
+  const domains: string[] = [];
+
+  for (const [domain, keywords] of Object.entries(DOMAIN_KEYWORDS)) {
+    for (const kw of keywords) {
+      if (lower.includes(kw)) {
+        if (!domains.includes(domain)) domains.push(domain);
+        break;
+      }
+    }
+  }
+
+  if (domains.length === 0) {
+    domains.push("finance", "strategy");
+  }
+
+  return domains;
+}
+
+function detectIntent(question: string): UserIntent {
+  const lower = question.toLowerCase();
+
+  const buildKw = ["build", "create", "design", "model", "template", "generate", "formula", "code", "spreadsheet", "dashboard"];
+  const diagnoseKw = ["diagnose", "debug", "wrong", "problem", "issue", "declining", "dropping", "increasing", "why is", "root cause"];
+  const predictKw = ["predict", "forecast", "what would", "what if", "scenario", "project", "estimate", "simulate", "happen if"];
+  const explainKw = ["explain", "why", "how does", "what is", "what are", "describe", "tell me about"];
+
+  if (buildKw.some((kw) => lower.includes(kw))) return "build";
+  if (diagnoseKw.some((kw) => lower.includes(kw))) return "diagnose";
+  if (predictKw.some((kw) => lower.includes(kw))) return "predict";
+  if (explainKw.some((kw) => lower.includes(kw))) return "explain";
+
+  return "general";
+}
+
+// ============================================================================
+// BRAIN CONTEXT BUILDER (reconstructs knowledge graph from DB rows)
+// ============================================================================
+
+function buildBrainContext(
+  message: string,
+  causalEdges: DBCausalEdge[],
+  rules: DBRule[],
+  cascadeRules: DBCascadeRule[]
+): { systemPrompt: string; intent: UserIntent; domains: string[] } {
+  const domains = extractDomains(message);
+  const intent = detectIntent(message);
+  const primaryDomain = domains[0] || "finance";
+
+  const sections: string[] = [];
+
+  // ── Header ──────────────────────────────────────────────────────────
+  const activeEdges = causalEdges.filter((e) => e.is_significant !== false);
+  sections.push(
+    `## Brain Knowledge Context`,
+    `Domains detected: ${domains.join(", ")} | ` +
+      `Causal Edges: ${activeEdges.length} | ` +
+      `Business Rules: ${rules.length} | ` +
+      `Cascade Rules: ${cascadeRules.length} | ` +
+      `Intent: ${intent}`
+  );
+
+  // ── Direct Causes per domain ────────────────────────────────────────
+  for (const domain of domains) {
+    const causes = activeEdges
+      .filter((e) => e.target_domain === domain)
+      .sort((a, b) => Math.abs(b.effect_size) - Math.abs(a.effect_size));
+    if (causes.length > 0) {
+      sections.push(`\n### What DRIVES ${domain}? (Direct Causes)`);
+      for (const c of causes.slice(0, 10)) {
+        sections.push(
+          `- ${c.source_domain} -> ${domain}: effect=${(c.effect_size * 100).toFixed(1)}%, lag=${c.optimal_lag_days}d, p=${c.granger_p_value.toFixed(4)}${c.natural_language ? " -- " + c.natural_language : ""}`
+        );
+      }
+    }
+  }
+
+  // ── Direct Effects per domain ───────────────────────────────────────
+  for (const domain of domains) {
+    const effects = activeEdges
+      .filter((e) => e.source_domain === domain)
+      .sort((a, b) => Math.abs(b.effect_size) - Math.abs(a.effect_size));
+    if (effects.length > 0) {
+      sections.push(`\n### What does ${domain} AFFECT? (Direct Effects)`);
+      for (const e of effects.slice(0, 10)) {
+        sections.push(
+          `- ${domain} -> ${e.target_domain}: effect=${(e.effect_size * 100).toFixed(1)}%, lag=${e.optimal_lag_days}d, p=${e.granger_p_value.toFixed(4)}${e.natural_language ? " -- " + e.natural_language : ""}`
+        );
+      }
+    }
+  }
+
+  // ── Cascade Paths (multi-hop via BFS) ───────────────────────────────
+  const cascadePaths = findCascadePathsBFS(activeEdges, domains, primaryDomain);
+  if (cascadePaths.length > 0) {
+    sections.push(`\n### Cross-Domain Cascade Paths`);
+    for (const p of cascadePaths.slice(0, 15)) {
+      sections.push(`- ${p}`);
+    }
+  }
+
+  // ── Cascade Rules from org_cascade_rules ────────────────────────────
+  const activeCascades = cascadeRules.filter((r) => r.is_active);
+  if (activeCascades.length > 0) {
+    sections.push(`\n### Active Cascade Alert Rules`);
+    for (const r of activeCascades.slice(0, 10)) {
+      const chain = r.propagation_chain
+        .map((c) => `${c.source_domain} -> ${c.target_domain} [${c.severity}]`)
+        .join(", ");
+      sections.push(`- ${r.rule_name}: ${chain}`);
+    }
+  }
+
+  // ── Business Rules ──────────────────────────────────────────────────
+  if (rules.length > 0) {
+    sections.push(`\n### Trained Business Rules`);
+    for (const r of rules.slice(0, 15)) {
+      try {
+        const parsed = JSON.parse(r.content);
+        const title = parsed.title || "Untitled Rule";
+        const nl = parsed.natural_language || parsed.naturalLanguage || parsed.description || "";
+        sections.push(`- [${r.domain}] ${title}: ${nl}`);
+      } catch {
+        sections.push(`- [${r.domain}] ${r.content.substring(0, 100)}`);
+      }
+    }
+  }
+
+  // ── Strongest Relationships (top 10) ────────────────────────────────
+  const strongest = [...activeEdges]
+    .sort((a, b) => Math.abs(b.effect_size) - Math.abs(a.effect_size))
+    .slice(0, 10);
+  if (strongest.length > 0) {
+    sections.push(`\n### Strongest Relationships in Brain`);
+    for (const r of strongest) {
+      sections.push(
+        `- ${r.source_domain} -> ${r.target_domain}: effect=${(r.effect_size * 100).toFixed(1)}%, lag=${r.optimal_lag_days}d, p=${r.granger_p_value.toFixed(4)}`
+      );
+    }
+  }
+
+  const brainContextText = sections.join("\n");
+
+  // ── Build intent-aware system prompt ────────────────────────────────
+  const systemPrompt = `You are the FinanceJarvis copilot powered by NexusBrain. You have access to a trained causal knowledge graph with ${new Set([...activeEdges.map((e) => e.source_domain), ...activeEdges.map((e) => e.target_domain)]).size} domains, ${activeEdges.length} causal edges, ${rules.length} business rules, and ${cascadeRules.length} cascade rules.
+
+CRITICAL: When answering, you MUST use the brain's discovered parameters (effect sizes, lag days, p-values) from the context below. Do NOT use generic knowledge. Every claim must be grounded in the brain's data.
+
+When the user asks to BUILD something (model, forecast, template):
+- Use the brain's causal edges to define the model structure
+- Use the brain's effect sizes as actual coefficients
+- Use the brain's lag days as time delays
+- Generate actual formulas or code using these numbers
+
+When the user asks to EXPLAIN something:
+- Cite specific causal edges with their statistics
+- Reference matched rules and their conditions
+- Quote the brain's discovered relationships, not generic advice
+
+When the user asks to DIAGNOSE something:
+- Walk the causal cascade paths step by step
+- Show which rules are relevant and why
+- Reference the impact analysis (affected domains, cascade depth)
+
+When the user asks to PREDICT something:
+- Use the brain's cascade paths to trace forward effects
+- Use specific effect sizes and lag days as parameters
+- Quantify uncertainty using p-values and sample sizes
+
+Format your answers clearly with short paragraphs. Use bullet points for lists. When citing brain data, use the exact numbers from the context.
+
+${brainContextText}`;
+
+  return { systemPrompt, intent, domains };
+}
+
+// ============================================================================
+// BFS CASCADE PATH FINDER (lightweight, no external dependency)
+// ============================================================================
+
+function findCascadePathsBFS(
+  edges: DBCausalEdge[],
+  queryDomains: string[],
+  primaryDomain: string
+): string[] {
+  const results: string[] = [];
+  const adjacency: Record<string, Array<{ target: string; effect: number; lag: number }>> = {};
+
+  for (const e of edges) {
+    if (!adjacency[e.source_domain]) adjacency[e.source_domain] = [];
+    adjacency[e.source_domain].push({
+      target: e.target_domain,
+      effect: e.effect_size,
+      lag: e.optimal_lag_days,
+    });
+  }
+
+  // Find paths FROM feeder domains TO primary domain
+  const feederDomains = ["marketing", "cs", "product", "engineering", "people", "revenue", "macro"];
+  const sources = [...new Set([...feederDomains, ...queryDomains])];
+
+  for (const source of sources) {
+    if (source === primaryDomain) continue;
+    const paths = bfsPathsTo(adjacency, source, primaryDomain, 4);
+    for (const path of paths.slice(0, 3)) {
+      results.push(path);
+    }
+  }
+
+  // Also find paths between query domains
+  for (let i = 0; i < queryDomains.length; i++) {
+    for (let j = 0; j < queryDomains.length; j++) {
+      if (i === j) continue;
+      const paths = bfsPathsTo(adjacency, queryDomains[i], queryDomains[j], 4);
+      for (const path of paths.slice(0, 2)) {
+        if (!results.includes(path)) results.push(path);
+      }
+    }
+  }
+
+  return results;
+}
+
+function bfsPathsTo(
+  adjacency: Record<string, Array<{ target: string; effect: number; lag: number }>>,
+  source: string,
+  target: string,
+  maxDepth: number
+): string[] {
+  const results: string[] = [];
+  const queue: Array<{ node: string; path: string[]; totalEffect: number; totalLag: number }> = [
+    { node: source, path: [source], totalEffect: 1, totalLag: 0 },
+  ];
+
+  while (queue.length > 0) {
+    const { node, path, totalEffect, totalLag } = queue.shift()!;
+    if (path.length > maxDepth + 1) continue;
+
+    if (node === target && path.length > 1) {
+      results.push(
+        `${path.join(" -> ")} (effect: ${(totalEffect * 100).toFixed(1)}%, lag: ${totalLag}d)`
+      );
+      continue;
+    }
+
+    const neighbors = adjacency[node] || [];
+    for (const n of neighbors) {
+      if (path.includes(n.target)) continue;
+      queue.push({
+        node: n.target,
+        path: [...path, n.target],
+        totalEffect: totalEffect * n.effect,
+        totalLag: totalLag + n.lag,
+      });
+    }
+  }
+
+  return results.sort((a, b) => {
+    const effectA = parseFloat(a.match(/effect: ([\d.-]+)%/)?.[1] || "0");
+    const effectB = parseFloat(b.match(/effect: ([\d.-]+)%/)?.[1] || "0");
+    return Math.abs(effectB) - Math.abs(effectA);
+  });
+}
+
+// ============================================================================
+// FALLBACK RESPONSE (when no API key)
+// ============================================================================
+
+function generateBrainFallbackResponse(
+  message: string,
+  causalEdges: DBCausalEdge[],
+  rules: DBRule[],
+  cascadeRules: DBCascadeRule[]
+): string {
+  const domains = extractDomains(message);
+  const intent = detectIntent(message);
+  const activeEdges = causalEdges.filter((e) => e.is_significant !== false);
+  const allDomains = new Set([
+    ...activeEdges.map((e) => e.source_domain),
+    ...activeEdges.map((e) => e.target_domain),
+  ]);
+
+  const parts: string[] = [];
+
+  parts.push(
+    `Brain Status: ${allDomains.size} domains, ${activeEdges.length} causal edges, ${rules.length} rules, ${cascadeRules.length} cascade rules.`
+  );
+  parts.push(`Detected intent: ${intent} | Relevant domains: ${domains.join(", ")}\n`);
+
+  // Show relevant edges
+  const relevantEdges = activeEdges.filter(
+    (e) => domains.includes(e.source_domain) || domains.includes(e.target_domain)
+  );
+  if (relevantEdges.length > 0) {
+    parts.push("Relevant causal relationships:");
+    for (const e of relevantEdges.slice(0, 8)) {
+      parts.push(
+        `- ${e.source_domain} -> ${e.target_domain}: ${(e.effect_size * 100).toFixed(1)}% effect, ${e.optimal_lag_days}d lag${e.natural_language ? " -- " + e.natural_language : ""}`
+      );
+    }
+  } else {
+    parts.push(
+      "No causal edges found for these domains yet. The brain needs more training data."
+    );
+  }
+
+  parts.push(
+    "\nNote: ANTHROPIC_API_KEY is not configured. This is a brain-data-only response. Configure the API key for full AI-powered answers."
+  );
+
+  return parts.join("\n");
+}
+
+// ============================================================================
+// MAIN ROUTE HANDLER
+// ============================================================================
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -65,74 +491,65 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Gather brain context in parallel
-    const [snapshotResult, causalResult, anomalyResult, costResult] =
-      await Promise.all([
-        // Latest brain daily snapshot
-        supabase
-          .from("brain_daily_snapshots")
-          .select("*")
-          .eq("organization_id", orgId)
-          .order("snapshot_date", { ascending: false })
-          .limit(1),
+    // ── Gather brain knowledge from DB in parallel ────────────────────
+    const [causalResult, rulesResult, cascadeResult] = await Promise.all([
+      // Full causal graph (all significant edges for this org + core brain)
+      supabase
+        .from("causal_relationships_statistical")
+        .select(
+          "source_domain, target_domain, effect_size, granger_p_value, optimal_lag_days, granger_f_statistic, sample_size, confidence_interval_lower, confidence_interval_upper, natural_language, is_significant"
+        )
+        .or(`organization_id.eq.${orgId},organization_id.eq.${CORE_ORG_ID}`)
+        .eq("is_significant", true)
+        .order("effect_size", { ascending: false })
+        .limit(200),
 
-        // Top 10 strongest causal relationships
-        supabase
-          .from("causal_relationships_statistical")
-          .select(
-            "source_entity, target_entity, strength, p_value, lag_periods, method, domain"
-          )
-          .eq("organization_id", orgId)
-          .order("strength", { ascending: false })
-          .limit(10),
+      // Business rules from ai_memory
+      supabase
+        .from("ai_memory")
+        .select("content, importance, domain, metadata")
+        .or(`organization_id.eq.${orgId},organization_id.eq.${CORE_ORG_ID}`)
+        .eq("memory_type", "rule")
+        .order("importance", { ascending: false })
+        .limit(50),
 
-        // Last 5 anomalies from cross_domain_signals
-        supabase
-          .from("cross_domain_signals")
-          .select(
-            "signal_type, domain, value, metadata, created_at, confidence"
-          )
-          .eq("organization_id", orgId)
-          .not("metadata->anomaly_score", "is", null)
-          .order("created_at", { ascending: false })
-          .limit(5),
+      // Cascade rules
+      supabase
+        .from("org_cascade_rules")
+        .select(
+          "rule_name, trigger_domain, trigger_signal_type, propagation_chain, is_active"
+        )
+        .or(`organization_id.eq.${orgId},organization_id.eq.${CORE_ORG_ID}`)
+        .eq("is_active", true)
+        .limit(30),
+    ]);
 
-        // Latest cost status
-        supabase
-          .from("llm_cost_log")
-          .select("estimated_cost_usd, model, component, created_at")
-          .order("created_at", { ascending: false })
-          .limit(5),
-      ]);
+    const causalEdges: DBCausalEdge[] = causalResult.data || [];
+    const rules: DBRule[] = rulesResult.data || [];
+    const cascadeRules: DBCascadeRule[] = cascadeResult.data || [];
 
-    const snapshot = snapshotResult.data?.[0] || null;
-    const causalEdges = causalResult.data || [];
-    const anomalies = anomalyResult.data || [];
-    const recentCosts = costResult.data || [];
-
-    // Build context block for the LLM
-    const contextBlock = buildContextBlock(
-      snapshot,
+    // ── Build brain-powered context ───────────────────────────────────
+    const { systemPrompt, intent, domains } = buildBrainContext(
+      message,
       causalEdges,
-      anomalies,
-      recentCosts
+      rules,
+      cascadeRules
     );
 
-    // Check for Anthropic API key
+    // ── Check for Anthropic API key ───────────────────────────────────
     const anthropicKey = process.env.ANTHROPIC_API_KEY;
 
     if (!anthropicKey) {
-      // Fallback: return a mock response when no API key
+      // Fallback: brain-data-only response
       const { stream, sendText, close } = createSSEStream();
 
-      const fallbackResponse = generateFallbackResponse(
+      const fallbackResponse = generateBrainFallbackResponse(
         message,
-        snapshot,
         causalEdges,
-        anomalies
+        rules,
+        cascadeRules
       );
 
-      // Simulate streaming with chunks
       setTimeout(() => {
         const words = fallbackResponse.split(" ");
         let i = 0;
@@ -156,19 +573,18 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Use Anthropic SDK to stream response
+    // ── Stream via Anthropic ──────────────────────────────────────────
     const { default: Anthropic } = await import("@anthropic-ai/sdk");
     const anthropic = new Anthropic({ apiKey: anthropicKey });
 
     const { stream, sendText, sendError, close } = createSSEStream();
 
-    // Start streaming in the background
     (async () => {
       try {
         const anthropicStream = anthropic.messages.stream({
           model: "claude-3-5-haiku-20241022",
-          max_tokens: 2048,
-          system: SYSTEM_PROMPT + "\n\n" + contextBlock,
+          max_tokens: 4096,
+          system: systemPrompt,
           messages: [{ role: "user", content: message }],
         });
 
@@ -204,154 +620,4 @@ export async function POST(request: NextRequest) {
       err instanceof Error ? err.message : "Internal server error";
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
-}
-
-/* -------------------------------------------------------------------------- */
-/*  Helpers                                                                    */
-/* -------------------------------------------------------------------------- */
-
-interface CausalEdge {
-  source_entity: string;
-  target_entity: string;
-  strength: number;
-  p_value: number;
-  lag_periods: number;
-  method: string;
-  domain: string;
-}
-
-interface Anomaly {
-  signal_type: string;
-  domain: string;
-  value: number;
-  metadata: Record<string, unknown>;
-  created_at: string;
-  confidence: number;
-}
-
-interface CostEntry {
-  estimated_cost_usd: number;
-  model: string;
-  component: string;
-  created_at: string;
-}
-
-interface Snapshot {
-  snapshot_date: string;
-  total_signals: number;
-  total_causal_edges: number;
-  prediction_accuracy: number;
-  regions_active: string[];
-  top_discoveries: string[];
-  brain_health_score: number;
-}
-
-function buildContextBlock(
-  snapshot: Snapshot | null,
-  causalEdges: CausalEdge[],
-  anomalies: Anomaly[],
-  recentCosts: CostEntry[]
-): string {
-  const sections: string[] = [];
-
-  sections.push("=== BRAIN CONTEXT (live data from the knowledge graph) ===");
-
-  // Brain health
-  if (snapshot) {
-    sections.push(`
-BRAIN DAILY SNAPSHOT (${snapshot.snapshot_date}):
-- Total signals processed: ${snapshot.total_signals ?? "N/A"}
-- Total causal edges: ${snapshot.total_causal_edges ?? "N/A"}
-- Prediction accuracy: ${snapshot.prediction_accuracy ?? "N/A"}%
-- Active regions: ${snapshot.regions_active?.join(", ") || "None"}
-- Brain health score: ${snapshot.brain_health_score ?? "N/A"}
-- Top discoveries: ${snapshot.top_discoveries?.join("; ") || "None yet"}`);
-  } else {
-    sections.push("\nBRAIN SNAPSHOT: No snapshot data available yet.");
-  }
-
-  // Causal edges
-  if (causalEdges.length > 0) {
-    sections.push("\nTOP CAUSAL RELATIONSHIPS (by strength):");
-    causalEdges.forEach((edge, i) => {
-      sections.push(
-        `${i + 1}. ${edge.source_entity} -> ${edge.target_entity} | strength: ${edge.strength?.toFixed(3)} | p-value: ${edge.p_value?.toFixed(4)} | lag: ${edge.lag_periods} periods | method: ${edge.method} | domain: ${edge.domain}`
-      );
-    });
-  } else {
-    sections.push(
-      "\nCAUSAL RELATIONSHIPS: No causal edges discovered yet. The brain is still learning."
-    );
-  }
-
-  // Anomalies
-  if (anomalies.length > 0) {
-    sections.push("\nRECENT ANOMALIES:");
-    anomalies.forEach((a, i) => {
-      sections.push(
-        `${i + 1}. [${a.domain}] ${a.signal_type} | value: ${a.value} | confidence: ${a.confidence?.toFixed(2)} | detected: ${a.created_at}`
-      );
-    });
-  } else {
-    sections.push(
-      "\nANOMALIES: No anomalies detected in recent signals."
-    );
-  }
-
-  // Cost status
-  if (recentCosts.length > 0) {
-    const totalRecent = recentCosts.reduce(
-      (sum, c) => sum + (c.estimated_cost_usd || 0),
-      0
-    );
-    sections.push(
-      `\nRECENT LLM COSTS: ${recentCosts.length} recent calls, total: $${totalRecent.toFixed(6)}`
-    );
-  }
-
-  return sections.join("\n");
-}
-
-function generateFallbackResponse(
-  message: string,
-  snapshot: Snapshot | null,
-  causalEdges: CausalEdge[],
-  anomalies: Anomaly[]
-): string {
-  const lowerMsg = message.toLowerCase();
-
-  if (lowerMsg.includes("churn")) {
-    if (causalEdges.length > 0) {
-      const relevant = causalEdges.filter(
-        (e) =>
-          e.source_entity?.toLowerCase().includes("churn") ||
-          e.target_entity?.toLowerCase().includes("churn")
-      );
-      if (relevant.length > 0) {
-        return `Based on the brain's causal analysis, I found ${relevant.length} causal relationship(s) involving churn:\n\n${relevant.map((e) => `- ${e.source_entity} -> ${e.target_entity} (strength: ${e.strength?.toFixed(3)}, p-value: ${e.p_value?.toFixed(4)})`).join("\n")}\n\nThese edges suggest statistically significant drivers of churn. I recommend investigating the strongest connections first.`;
-      }
-    }
-    return "I don't have enough causal data about churn yet. The brain needs more training cycles to establish statistically significant relationships. Try asking again after the next training run.";
-  }
-
-  if (lowerMsg.includes("causal") || lowerMsg.includes("relationship")) {
-    if (causalEdges.length > 0) {
-      return `Here are the strongest causal relationships in the knowledge graph:\n\n${causalEdges.slice(0, 5).map((e, i) => `${i + 1}. ${e.source_entity} -> ${e.target_entity}\n   Strength: ${e.strength?.toFixed(3)} | p-value: ${e.p_value?.toFixed(4)} | Method: ${e.method}`).join("\n\n")}\n\nAll relationships passed statistical significance thresholds. The brain currently tracks ${snapshot?.total_causal_edges ?? "N/A"} total causal edges.`;
-    }
-    return "No causal relationships have been discovered yet. The brain is still in its initial learning phase. Once enough signals are processed, causal discovery algorithms will identify statistically significant edges.";
-  }
-
-  if (lowerMsg.includes("anomal")) {
-    if (anomalies.length > 0) {
-      return `Recent anomalies detected:\n\n${anomalies.map((a, i) => `${i + 1}. [${a.domain}] ${a.signal_type} - confidence: ${a.confidence?.toFixed(2)}\n   Detected: ${a.created_at}`).join("\n\n")}\n\nThese anomalies were flagged by the brain's cross-domain signal analysis pipeline.`;
-    }
-    return "No anomalies have been detected in recent signals. This typically means metrics are within expected ranges, or the brain needs more historical data to establish baseline patterns.";
-  }
-
-  if (lowerMsg.includes("predict") || lowerMsg.includes("revenue")) {
-    return `Current prediction accuracy: ${snapshot?.prediction_accuracy?.toFixed(1) ?? "N/A"}%.\n\nTo generate reliable revenue predictions, the brain needs:\n- Sufficient historical data (minimum 30 days)\n- Active financial data connectors\n- Established causal relationships between revenue drivers\n\nBrain health score: ${snapshot?.brain_health_score ?? "N/A"}. ${snapshot?.regions_active?.length ?? 0} of 11 brain regions are currently active.`;
-  }
-
-  // Default response
-  return `I have access to your brain's current state:\n\n- Brain health: ${snapshot?.brain_health_score ?? "N/A"}\n- Prediction accuracy: ${snapshot?.prediction_accuracy?.toFixed(1) ?? "N/A"}%\n- Causal edges: ${snapshot?.total_causal_edges ?? 0}\n- Active regions: ${snapshot?.regions_active?.length ?? 0}/11\n\nNote: The Anthropic API key is not configured. This is a fallback response based on your brain's data. Configure the ANTHROPIC_API_KEY environment variable for full AI-powered responses.\n\nAsk me about causal relationships, anomalies, predictions, or specific metrics for more detailed answers.`;
 }
