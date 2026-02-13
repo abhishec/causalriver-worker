@@ -51,63 +51,14 @@ import type { ConfidenceInterval } from '../causality/statistical-tests';
 import { validatePattern, registerPattern } from '../learning/pattern-detector';
 import type { DiscoveredPattern } from '../learning/pattern-detector';
 
+// Import DOMAIN_KEYWORDS from the canonical source (brain-context-builder)
+// and re-export for backward compatibility.
+import { DOMAIN_KEYWORDS } from './brain-context-builder';
+export { DOMAIN_KEYWORDS };
+
 // ============================================================================
 // TYPES
 // ============================================================================
-
-/** Domain keyword map: maps domain names to keywords that trigger them */
-export const DOMAIN_KEYWORDS: Record<string, string[]> = {
-  finance: [
-    'cash', 'cash flow', 'financial', 'revenue', 'burn', 'runway', 'arr',
-    'mrr', 'gross margin', 'ltv', 'payback', 'unit economics', 'p&l',
-    'profit', 'loss', 'budget', 'forecast', 'ebitda', 'margin', 'cogs',
-    'opex', 'capex', 'working capital', 'balance sheet', 'income statement',
-    'money', 'cost', 'pricing', 'revenue model', 'funding', 'raise',
-    'valuation', 'roi', 'irr', 'npv', 'dcf',
-  ],
-  growth: [
-    'startup', 'growth', 'scaling', 'scale', 'expand', 'expansion',
-    'hypergrowth', 'series', 'fundraise', 'traction', 'virality', 'pmf',
-    'product-market fit', 'go-to-market', 'gtm',
-  ],
-  cs: [
-    'customer', 'churn', 'retention', 'nrr', 'grr', 'customer success',
-    'logo churn', 'renewal', 'upsell', 'expansion revenue', 'health score',
-    'satisfaction', 'nps', 'csat', 'support ticket', 'onboarding',
-  ],
-  marketing: [
-    'marketing', 'cac', 'acquisition', 'magic number', 'plg', 'funnel',
-    'conversion', 'leads', 'pipeline', 'brand', 'demand gen', 'seo',
-    'content', 'paid', 'organic', 'channel', 'campaign',
-  ],
-  product: [
-    'product', 'feature', 'pmf', 'self-serve', 'adoption', 'usage',
-    'engagement', 'dau', 'mau', 'stickiness', 'activation', 'onboarding',
-    'ux', 'ui', 'roadmap', 'backlog', 'sprint',
-  ],
-  strategy: [
-    'strategy', 'model', 'forecasting', 'scenario', 'plan', 'competitive',
-    'moat', 'positioning', 'market', 'tam', 'sam', 'som',
-  ],
-  engineering: [
-    'engineering', 'code', 'deploy', 'ci/cd', 'technical debt', 'architecture',
-    'infrastructure', 'devops', 'reliability', 'sla', 'uptime', 'latency',
-    'incidents', 'bugs', 'velocity',
-  ],
-  people: [
-    'hiring', 'talent', 'culture', 'team', 'retention', 'attrition',
-    'compensation', 'equity', 'headcount', 'org design', 'leadership',
-    'manager', 'performance review',
-  ],
-  revenue: [
-    'revenue', 'sales', 'bookings', 'arr', 'mrr', 'deal', 'pipeline',
-    'quota', 'commission', 'close rate', 'win rate', 'ase', 'ae',
-  ],
-  macro: [
-    'macro', 'economy', 'gdp', 'inflation', 'interest rate', 'fed',
-    'recession', 'unemployment', 'labor', 'tariff', 'trade',
-  ],
-};
 
 /** User intent classification */
 export type UserIntent = 'build' | 'explain' | 'diagnose' | 'predict' | 'general';

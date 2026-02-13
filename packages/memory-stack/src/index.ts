@@ -395,7 +395,6 @@ export {
 // Brain Knowledge Context — Runtime Brain Loader + Multi-Domain Query Router
 export {
   createBrainKnowledgeContext,
-  DOMAIN_KEYWORDS,
   type BrainKnowledgeContext,
   type BrainKnowledgeContextConfig,
   type BrainKnowledgeContextInstance,
@@ -587,17 +586,27 @@ export {
 } from './orchestrator/domain-action-engine';
 
 // Brain Context Builder — Universal Prefrontal Cortex ("Working Memory Assembly")
-// Assembles context from ALL brain regions into LLM-ready prompts.
+// Assembles context from ALL brain regions + trained knowledge into LLM-ready prompts.
 // Works for any domain: code, finance, research, legal, operations.
+// V2: +trainedKnowledge (rules, patterns, causal edges, cascade rules), +persona,
+//     +conversationHistory, +extractDomains, +normalizeEntityState, +DOMAIN_KEYWORDS
 export {
   createBrainContextBuilder,
   detectIntent,
   extractEntities,
+  extractDomains,
+  normalizeEntityState,
+  DOMAIN_KEYWORDS,
   type BrainRegions,
   type BrainContext,
   type BrainContextSection,
   type BrainIntent,
   type BrainContextBuilder,
+  // Trained Knowledge types (match DB row structures)
+  type TrainedCausalEdge,
+  type TrainedRule,
+  type TrainedPattern,
+  type TrainedCascadeRule,
 } from './orchestrator/brain-context-builder';
 
 // Copilot Framework V2 — Claude-Grade Generic Copilot Architecture ("Broca-Wernicke Language Network")
