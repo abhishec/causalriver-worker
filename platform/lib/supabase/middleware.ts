@@ -33,6 +33,12 @@ export async function updateSession(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname;
 
+  // API routes handle their own auth (API keys, session cookies) — skip middleware redirect
+  const isApiRoute = pathname.startsWith("/api/");
+  if (isApiRoute) {
+    return supabaseResponse;
+  }
+
   // Public routes that don't require auth
   const publicRoutes = ["/login", "/signup", "/callback"];
   const isPublicRoute = publicRoutes.some((route) =>
