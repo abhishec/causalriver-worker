@@ -424,7 +424,7 @@ function buildCopilotContext(
 // ═══════════════════════════════════════════════════════════════════════
 
 async function main() {
-  const token = process.argv[2] || 'process.env.GITHUB_TOKEN';
+  const token = process.argv[2] || process.env.GITHUB_TOKEN || '';
   const owner = 'calcom', repo = 'cal.com';
 
   console.log('═══════════════════════════════════════════════════════════');
