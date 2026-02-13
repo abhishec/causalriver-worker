@@ -15,14 +15,18 @@ export default async function AdminLayout({
     redirect("/login");
   }
 
-  // For now, allow access (in production, check org_members.is_platform_admin)
-  // const { data: member } = await supabase
-  //   .from("org_members")
-  //   .select("is_platform_admin")
-  //   .eq("user_id", user.id)
-  //   .eq("is_platform_admin", true)
-  //   .single();
-  // if (!member) redirect("/overview");
+  // Check if user is a platform admin
+  const { data: member } = await supabase
+    .from("org_members")
+    .select("is_platform_admin")
+    .eq("user_id", user.id)
+    .eq("is_platform_admin", true)
+    .single();
+
+  // If not a platform admin, redirect to org dashboard
+  if (!member) {
+    redirect("/overview");
+  }
 
   return (
     <div className="flex min-h-screen">
