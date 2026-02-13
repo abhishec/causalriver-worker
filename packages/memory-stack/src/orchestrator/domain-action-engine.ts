@@ -1,35 +1,26 @@
 /**
- * Domain Action Engine V2 — Motor Cortex (CTO-Grade)
- * ====================================================
+ * Domain Action Engine V4 — Motor Cortex + Decision Intelligence (CTO-Grade)
+ * ==========================================================================
  *
  * Brain Analog: The Motor Cortex translates frontal lobe intentions into
- * coordinated muscle movements that produce observable output. Without it,
- * the brain can THINK but cannot ACT.
+ * coordinated muscle movements. V4 adds the Anterior Cingulate Cortex (ACC)
+ * — the brain region that monitors its OWN reasoning, detects errors, and
+ * decides "should I trust myself?"
  *
- * V2 CTO Enhancements (6 gaps closed):
- *   1. LLM Narrative Layer — Claude interprets and narrates every artifact
- *      via the Brain Amplifier (Sonnet for narratives, Haiku for summaries)
- *   2. Smart Horizon Detection — parses "12-month", "quarterly", "next year"
- *      from natural language questions
- *   3. Multi-Domain Forecasting — forecasts ALL causally-connected domains,
- *      not just the primary one
- *   4. Confidence-Gated Actions — skips low-confidence results, explains why
- *      the brain needs more data
- *   5. Composite Actions — "build model" triggers forecast + simulate + explain
- *      together in one orchestrated execution
- *   6. Rich Explain/Diagnose — analyzes ALL upstream+downstream connections,
- *      not just the strongest one
+ * V2 (6 gaps): +LLM narratives, +horizon detection, +multi-domain forecast,
+ *              +confidence gates, +composite actions, +rich explain/diagnose
+ * V3 (4 gaps): +execution playbooks, +outcome contracts, +Monday morning
+ *              actions, +strategic interventions ("Open Claw → Closed Fist")
+ * V4 (4 gaps): +meta-cognitive self-assessment, +counterfactual analysis,
+ *              +adaptive playbooks, +decision journals
+ *              ("The Brain That Thinks About Thinking")
  *
- * Architecture:
+ * Architecture (V4):
  *   User Intent → Smart Router → [Horizon Parser] → [Composite Detector]
- *     → Execution Module(s) → [Confidence Gate] → [LLM Narrator] → Artifact
- *
- * 5 Action Types (V2):
- *   "forecast"   → temporal-forecaster + multi-domain + drivers  → ForecastArtifact
- *   "simulate"   → whatif-simulator + scenario parser            → SimulationArtifact
- *   "explain"    → context-aware-reasoner + ALL connections      → ExplanationArtifact
- *   "diagnose"   → anomaly tracing + rules + upstream analysis   → DiagnosisArtifact
- *   "composite"  → forecast + simulate + explain together        → CompositeArtifact
+ *     → Execution Module(s) → [Confidence Gate] → [LLM Narrator]
+ *     → [V3: Playbook + Contract] → [V4: Meta-Cognition + Counterfactuals
+ *     + Adaptive Layer + Decision Journal + LLM Decision Intelligence]
+ *     → ActionArtifact
  *
  * @packageDocumentation
  */

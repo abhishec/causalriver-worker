@@ -615,7 +615,32 @@ export async function POST(request: NextRequest) {
     // ── Build effective system prompt ──────────────────────────────────
     // V4: brainContext.fullPrompt is the COMPLETE system prompt from the SDK.
     // It already includes persona, intent-aware instructions, and ALL brain data.
-    let effectiveSystemPrompt = brainContext?.fullPrompt || "You are a helpful assistant powered by NexusBrain.";
+    const NO_HALLUCINATION_FALLBACK = `You are the NexusBrain Copilot — an intelligence co-pilot for this organization.
+
+CRITICAL RULES:
+1. You MUST ONLY answer using data that exists in the brain context below. Do NOT invent, fabricate, or hallucinate any numbers, metrics, KPIs, trends, or statistics.
+2. If no brain data is available for the user's question, say clearly: "I don't have data on that yet. This org hasn't connected a data source for [topic] — once connected, I'll be able to answer with real numbers."
+3. NEVER make up financial figures, causal relationships, revenue numbers, churn rates, burn rates, or any quantitative claims unless they appear in the brain context.
+4. If the user asks about something outside the brain's knowledge, acknowledge the gap honestly. Offer to help with what IS available.
+5. When you DO have data, cite it precisely — use the exact numbers from the brain context, not approximations or "typical" values.
+
+You currently have: ${causalEdges.length} causal edges, ${rules.length} business rules, ${patterns.length} patterns/insights, ${cascadeRules.length} cascade rules loaded for this organization.`;
+
+    let effectiveSystemPrompt = brainContext?.fullPrompt || NO_HALLUCINATION_FALLBACK;
+
+    // ── Zero-data guard: even when brainContext exists, if the org has NO data,
+    // inject an explicit "don't hallucinate" instruction so the LLM doesn't invent metrics.
+    const totalDataPoints = causalEdges.length + rules.length + patterns.length + cascadeRules.length;
+    if (totalDataPoints === 0) {
+      effectiveSystemPrompt += `\n\n## ⚠️ EMPTY BRAIN — NO DATA LOADED FOR THIS ORGANIZATION
+This organization has not connected any data sources yet (no Xero, Volopay, GitHub, or other connectors).
+You have ZERO causal edges, ZERO business rules, ZERO patterns, and ZERO cascade rules.
+DO NOT invent any data. Instead:
+- Tell the user that no data sources have been connected yet
+- Suggest they connect their data sources (Xero, Volopay, GitHub, etc.) from the Settings page
+- You can still answer general questions about NexusBrain's capabilities
+- NEVER fabricate numbers, metrics, or analysis — you have nothing to analyze`;
+    }
 
     // Augment with action engine computed data if available
     if (actionArtifact?.__promptText) {
