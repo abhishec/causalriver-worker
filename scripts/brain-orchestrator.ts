@@ -238,23 +238,11 @@ class BrainOrchestrator {
       log('DISCOVERY', `  ✓ ${agent.name} v${agent.version} [${schedule}] (${cpu} CPU, ${memory} MB)`);
     }
 
-    // Register agents in brain's AgentRegistry
-    for (const agent of agents) {
-      await this.agentRegistry.registerAgent({
-        agentId: agent.name,
-        agentType: 'training_agent',
-        capabilities: agent.tags || [],
-        status: 'active',
-        metadata: {
-          version: agent.version,
-          description: agent.description,
-          schedule: agent.schedule,
-          resourceRequirements: agent.resourceRequirements,
-        },
-      });
-    }
+    // NOTE: Agents are self-registered via globalRegistry.register() at the bottom of each agent file
+    // No need to re-register them here. The Manus AgentRegistry (this.agentRegistry) is for
+    // Manus-style agents, not training agents.
 
-    log('DISCOVERY', 'All agents registered in AgentRegistry ✓');
+    log('DISCOVERY', 'All agents discovered from globalRegistry ✓');
   }
 
   /**

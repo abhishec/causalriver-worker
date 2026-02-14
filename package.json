@@ -27,6 +27,8 @@
     "verify:wiring": "tsx scripts/verify-brain-wiring.ts"
   },
   "devDependencies": {
+    "@types/cron": "^2.4.3",
+    "cron": "^4.4.0",
     "tsx": "^4.0.0",
     "turbo": "^2.0.0",
     "typescript": "^5.5.0"
