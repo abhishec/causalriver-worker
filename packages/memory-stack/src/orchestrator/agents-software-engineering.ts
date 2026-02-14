@@ -683,16 +683,57 @@ export const brainGitIntelligenceAgent: AgentDefinition<
       ? ((recommendResult.result as Record<string, unknown>).data as { recommendations: unknown[] }).recommendations || []
       : [];
 
-    // Build engineering health score from brain knowledge
-    const dimensions = [
-      { name: 'PR Velocity', score: Math.random() * 0.3 + 0.5, trend: 'stable' as const },
-      { name: 'Review Quality', score: Math.random() * 0.3 + 0.6, trend: 'improving' as const },
-      { name: 'CI Reliability', score: Math.random() * 0.3 + 0.5, trend: 'stable' as const },
-      { name: 'Issue Resolution', score: Math.random() * 0.3 + 0.4, trend: 'declining' as const },
-      { name: 'Code Churn', score: Math.random() * 0.3 + 0.4, trend: 'stable' as const },
-      { name: 'Bus Factor', score: Math.random() * 0.3 + 0.3, trend: 'improving' as const },
-      { name: 'Release Cadence', score: Math.random() * 0.3 + 0.5, trend: 'stable' as const },
-    ].filter(_d => focusArea === 'all' || true); // Show all for now
+    // Build engineering health score from brain's causal edges (real data!)
+    // Each dimension is scored by the strength of its causal edges in the brain
+    const edgesByMetric = new Map<string, { totalEffect: number; count: number; trend: 'improving' | 'declining' | 'stable' }>();
+
+    // Map causal edges to engineering health dimensions
+    const metricMapping: Record<string, string[]> = {
+      'PR Velocity': ['pr_merge_velocity', 'release_cadence'],
+      'Review Quality': ['pr_review_depth', 'review_depth'],
+      'CI Reliability': ['ci_pass_rate', 'ci_failure_streak'],
+      'Issue Resolution': ['issue_resolution_speed', 'bug_to_feature_ratio'],
+      'Code Churn': ['code_churn_rate'],
+      'Bus Factor': ['contributor_concentration'],
+      'Release Cadence': ['release_cadence', 'deploy_frequency'],
+    };
+
+    for (const [dimName, keywords] of Object.entries(metricMapping)) {
+      const matchingEdges = engineeringEdges.filter(edge =>
+        keywords.some(kw =>
+          edge.source.includes(kw) || edge.target.includes(kw) ||
+          (edge as any).metric?.includes(kw)
+        )
+      );
+
+      const avgEffect = matchingEdges.length > 0
+        ? matchingEdges.reduce((sum, e) => sum + Math.abs(e.effectSize), 0) / matchingEdges.length
+        : 0;
+
+      edgesByMetric.set(dimName, {
+        totalEffect: avgEffect,
+        count: matchingEdges.length,
+        // Trend derived from coefficient signs: positive = improving, negative = declining
+        trend: matchingEdges.length === 0
+          ? 'stable'
+          : matchingEdges.filter(e => (e as any).coefficientSign > 0).length > matchingEdges.length / 2
+            ? 'improving'
+            : matchingEdges.filter(e => (e as any).coefficientSign < 0).length > matchingEdges.length / 2
+              ? 'declining'
+              : 'stable',
+      });
+    }
+
+    const dimensions = Object.entries(metricMapping).map(([name]) => {
+      const data = edgesByMetric.get(name);
+      // Score: 0.5 baseline + causal evidence boost (up to 0.5 from edge strength)
+      const causalScore = data ? Math.min(1, 0.5 + data.totalEffect * 0.5) : 0.5;
+      return {
+        name,
+        score: causalScore,
+        trend: (data?.trend ?? 'stable') as 'improving' | 'declining' | 'stable',
+      };
+    }).filter(_d => focusArea === 'all' || true);
 
     const overallScore = dimensions.reduce((sum, d) => sum + d.score, 0) / dimensions.length;
 

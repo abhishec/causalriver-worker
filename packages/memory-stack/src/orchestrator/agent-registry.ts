@@ -126,7 +126,10 @@ export interface AgentExecutionContext {
   callAgent: <T = unknown>(agentName: string, input: unknown) => Promise<AgentRunResult<T>>;
   /** Access to the brain's knowledge (causal edges, patterns, rules) */
   brainContext: {
-    causalEdges: Array<{ source: string; target: string; effectSize: number; lagDays: number }>;
+    causalEdges: Array<{
+      source: string; target: string; effectSize: number; lagDays: number;
+      metric?: string; pValue?: number; coefficientSign?: number;
+    }>;
     rules: Array<{ content: string; domain: string; importance: number }>;
     patterns: Array<{ content: string; domain: string }>;
     domains: string[];
@@ -197,12 +200,147 @@ export interface AgentRegistryConfig {
   defaultBrainContext?: AgentExecutionContext['brainContext'];
   /** Default connectors available to agents */
   defaultConnectors?: Record<string, unknown>;
+  /** Supabase client for loading brain context from database */
+  supabase?: unknown;
+  /** Organization ID for loading brain context */
+  organizationId?: string;
   /** Callback when any agent completes */
   onAgentCompleted?: (result: AgentRunResult) => void;
   /** Callback when any agent fails */
   onAgentFailed?: (result: AgentRunResult) => void;
   /** Verbose logging */
   verbose?: boolean;
+}
+
+// ============================================================================
+// EVENT BUS — Cross-Agent Communication
+// ============================================================================
+
+/** Event types for inter-agent communication */
+export type AgentEvent =
+  | { type: 'agent_completed'; agentName: string; runId: string; result: unknown }
+  | { type: 'agent_failed'; agentName: string; runId: string; error: string }
+  | { type: 'signal_ingested'; domain: string; count: number }
+  | { type: 'anomaly_detected'; domain: string; metric: string; severity: string }
+  | { type: 'training_completed'; agentName: string; signalsStored: number; packsProcessed: number };
+
+type EventListener = (event: AgentEvent) => void;
+
+/** Simple in-memory event bus for agent triggers */
+export function createEventBus() {
+  const listeners = new Map<string, Set<EventListener>>();
+
+  function on(eventType: string, listener: EventListener): () => void {
+    if (!listeners.has(eventType)) listeners.set(eventType, new Set());
+    listeners.get(eventType)!.add(listener);
+    return () => listeners.get(eventType)?.delete(listener);
+  }
+
+  function emit(event: AgentEvent): void {
+    const typeListeners = listeners.get(event.type);
+    if (typeListeners) {
+      for (const listener of typeListeners) {
+        try { listener(event); } catch { /* swallow listener errors */ }
+      }
+    }
+    // Also emit to wildcard listeners
+    const wildcardListeners = listeners.get('*');
+    if (wildcardListeners) {
+      for (const listener of wildcardListeners) {
+        try { listener(event); } catch { /* swallow */ }
+      }
+    }
+  }
+
+  return { on, emit };
+}
+
+export type AgentEventBus = ReturnType<typeof createEventBus>;
+
+// ============================================================================
+// SIGNAL LOADER — Loads brain context from database
+// ============================================================================
+
+/**
+ * Load causal edges from the database into brainContext format.
+ * This bridges the gap between git-trained data in Supabase and agent runtime.
+ */
+export async function loadBrainContextFromDatabase(
+  supabase: any,
+  organizationId: string,
+): Promise<AgentExecutionContext['brainContext']> {
+  const context: AgentExecutionContext['brainContext'] = {
+    causalEdges: [],
+    rules: [],
+    patterns: [],
+    domains: [],
+  };
+
+  try {
+    // 1. Load causal edges from causal_edges table
+    const { data: edges } = await supabase
+      .from('causal_edges')
+      .select('source_domain, target_domain, effect_size, lag_days, p_value, coefficient_sign, metric')
+      .eq('organization_id', organizationId)
+      .order('effect_size', { ascending: false })
+      .limit(200);
+
+    if (edges && edges.length > 0) {
+      context.causalEdges = edges.map((e: any) => ({
+        source: e.source_domain,
+        target: e.target_domain,
+        metric: e.metric,
+        effectSize: e.effect_size ?? 0,
+        lagDays: e.lag_days ?? 0,
+        pValue: e.p_value,
+        coefficientSign: e.coefficient_sign,
+      }));
+
+      // Extract unique domains from edges
+      const domainSet = new Set<string>();
+      for (const e of edges) {
+        if (e.source_domain) domainSet.add(e.source_domain);
+        if (e.target_domain) domainSet.add(e.target_domain);
+      }
+      context.domains = Array.from(domainSet);
+    }
+
+    // 2. Load active rules from brain_rules table
+    const { data: rules } = await supabase
+      .from('brain_rules')
+      .select('content, domain, importance, title')
+      .eq('organization_id', organizationId)
+      .eq('is_active', true)
+      .order('importance', { ascending: false })
+      .limit(100);
+
+    if (rules && rules.length > 0) {
+      context.rules = rules.map((r: any) => ({
+        content: r.content || r.title || '',
+        domain: r.domain || 'general',
+        importance: r.importance ?? 0.5,
+      }));
+    }
+
+    // 3. Load patterns from brain_patterns table
+    const { data: patterns } = await supabase
+      .from('brain_patterns')
+      .select('content, domain, name')
+      .eq('organization_id', organizationId)
+      .order('created_at', { ascending: false })
+      .limit(100);
+
+    if (patterns && patterns.length > 0) {
+      context.patterns = patterns.map((p: any) => ({
+        content: p.content || p.name || '',
+        domain: p.domain || 'general',
+      }));
+    }
+  } catch {
+    // Graceful degradation — return empty context if DB fails
+  }
+
+  return context;
 }
 
 // ============================================================================
@@ -233,6 +371,8 @@ export function createAgentRegistry(config: AgentRegistryConfig = {}) {
     maxCallDepth = 5,
     defaultBrainContext = { causalEdges: [], rules: [], patterns: [], domains: [] },
     defaultConnectors = {},
+    supabase: supabaseClient,
+    organizationId: configOrgId,
     onAgentCompleted,
     onAgentFailed,
     verbose = false,
@@ -241,8 +381,74 @@ export function createAgentRegistry(config: AgentRegistryConfig = {}) {
   const agents = new Map<string, RegisteredAgent>();
   const runHistory: AgentRunResult[] = [];
   let runCounter = 0;
+  let cachedBrainContext: AgentExecutionContext['brainContext'] | null = null;
+  let brainContextLoadedAt = 0;
+  const BRAIN_CONTEXT_TTL = 5 * 60 * 1000; // Cache for 5 minutes
+
+  const eventBus = createEventBus();
 
   const log = verbose ? (...args: unknown[]) => console.log('[AgentRegistry]', ...args) : () => {};
+
+  // ── Load Brain Context (with caching) ──
+
+  async function getBrainContext(): Promise<AgentExecutionContext['brainContext']> {
+    const now = Date.now();
+    if (cachedBrainContext && (now - brainContextLoadedAt) < BRAIN_CONTEXT_TTL) {
+      return cachedBrainContext;
+    }
+
+    if (supabaseClient && configOrgId) {
+      try {
+        cachedBrainContext = await loadBrainContextFromDatabase(supabaseClient, configOrgId);
+        brainContextLoadedAt = now;
+        log(`Brain context loaded: ${cachedBrainContext.causalEdges.length} edges, ${cachedBrainContext.rules.length} rules, ${cachedBrainContext.patterns.length} patterns`);
+        return cachedBrainContext;
+      } catch {
+        log('Failed to load brain context from DB, using default');
+      }
+    }
+    return defaultBrainContext;
+  }
+
+  /** Invalidate brain context cache (e.g., after training) */
+  function invalidateBrainContext(): void {
+    cachedBrainContext = null;
+    brainContextLoadedAt = 0;
+    log('Brain context cache invalidated');
+  }
+
+  // ── Trigger Evaluation ──
+
+  function evaluateTrigger(trigger: AgentTrigger, event: AgentEvent): boolean {
+    if (trigger === 'manual') return false; // Manual-only agents never auto-trigger
+
+    // Agent completion triggers: 'agent:git-code-trainer:completed'
+    if (trigger.startsWith('agent:') && event.type === 'agent_completed') {
+      const parts = trigger.slice(6).split(':'); // ['git-code-trainer', 'completed']
+      return parts[0] === event.agentName && (parts[1] === undefined || parts[1] === 'completed');
+    }
+
+    // Event triggers: 'event:anomaly_detected'
+    if (trigger.startsWith('event:') && event.type === trigger.slice(6)) {
+      return true;
+    }
+
+    // Training completed triggers
+    if (trigger.startsWith('agent:') && event.type === 'training_completed') {
+      const agentName = trigger.slice(6).split(':')[0];
+      return agentName === event.agentName;
+    }
+
+    return false;
+  }
+
+  /** Find agents that should trigger for a given event */
+  function getTriggeredAgents(event: AgentEvent): RegisteredAgent[] {
+    return Array.from(agents.values()).filter(agent => {
+      if (!agent.enabled) return false;
+      return agent.definition.triggers?.some(t => evaluateTrigger(t, event)) ?? false;
+    });
+  }
 
   // ── Register Agent ──
 
@@ -336,11 +542,14 @@ export function createAgentRegistry(config: AgentRegistryConfig = {}) {
     const progressLog: Array<{ progress: number; message?: string; timestamp: string }> = [];
     const subAgentCalls: Array<{ agentName: string; runId: string; success: boolean; durationMs: number }> = [];
 
+    // Load brain context (from DB if available, otherwise use provided or default)
+    const activeBrainContext = options.brainContext || await getBrainContext();
+
     // Build execution context
     const context: AgentExecutionContext = {
       callAgent: async <TChild = unknown>(childName: string, childInput: unknown): Promise<AgentRunResult<TChild>> => {
         const childResult = await runAgent<TChild>(childName, childInput, {
-          brainContext: options.brainContext || defaultBrainContext,
+          brainContext: activeBrainContext,
           connectors: options.connectors || defaultConnectors,
           parentRunId: runId,
           depth: depth + 1,
@@ -353,7 +562,7 @@ export function createAgentRegistry(config: AgentRegistryConfig = {}) {
         });
         return childResult;
       },
-      brainContext: options.brainContext || defaultBrainContext,
+      brainContext: activeBrainContext,
       connectors: options.connectors || defaultConnectors,
       log: (...args: unknown[]) => log(`[${name}]`, ...args),
       reportProgress: (progress: number, message?: string) => {
@@ -400,6 +609,26 @@ export function createAgentRegistry(config: AgentRegistryConfig = {}) {
       runHistory.push(runResult as AgentRunResult);
       if (onAgentCompleted) onAgentCompleted(runResult as AgentRunResult);
 
+      // Emit event for inter-agent communication
+      const completionEvent: AgentEvent = {
+        type: 'agent_completed',
+        agentName: name,
+        runId,
+        result: result,
+      };
+      eventBus.emit(completionEvent);
+
+      // Auto-trigger dependent agents (non-blocking)
+      const triggeredAgents = getTriggeredAgents(completionEvent);
+      if (triggeredAgents.length > 0) {
+        log(`Triggering ${triggeredAgents.length} dependent agents after ${name} completed`);
+        for (const triggered of triggeredAgents) {
+          // Fire-and-forget — don't block the current agent
+          runAgent(triggered.definition.name, { triggeredBy: name, triggerEvent: completionEvent })
+            .catch(err => log(`Triggered agent ${triggered.definition.name} failed: ${err}`));
+        }
+      }
+
       log(`Completed: ${name} (${runResult.durationMs}ms)`);
       return runResult;
 
@@ -423,6 +652,14 @@ export function createAgentRegistry(config: AgentRegistryConfig = {}) {
 
       runHistory.push(runResult as AgentRunResult);
       if (onAgentFailed) onAgentFailed(runResult as AgentRunResult);
+
+      // Emit failure event
+      eventBus.emit({
+        type: 'agent_failed',
+        agentName: name,
+        runId,
+        error: runResult.error || 'Unknown error',
+      });
 
       log(`Failed: ${name} — ${runResult.error}`);
       return runResult;
@@ -512,6 +749,22 @@ export function createAgentRegistry(config: AgentRegistryConfig = {}) {
     hasAgent: (name: string) => agents.has(name),
     /** Get all agent names */
     getAgentNames: () => Array.from(agents.keys()),
+    /** Event bus for inter-agent communication */
+    eventBus,
+    /** Emit an event to trigger dependent agents */
+    emitEvent: (event: AgentEvent) => {
+      eventBus.emit(event);
+      // Also evaluate triggers
+      const triggered = getTriggeredAgents(event);
+      for (const agent of triggered) {
+        runAgent(agent.definition.name, { triggeredBy: event.type, triggerEvent: event })
+          .catch(err => log(`Event-triggered agent ${agent.definition.name} failed: ${err}`));
+      }
+    },
+    /** Invalidate brain context cache (call after training) */
+    invalidateBrainContext,
+    /** Get current brain context (loads from DB if configured) */
+    getBrainContext,
   };
 }
 

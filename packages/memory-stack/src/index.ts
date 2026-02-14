@@ -619,9 +619,13 @@ export {
 export {
   defineAgent,
   createAgentRegistry,
+  createEventBus,
+  loadBrainContextFromDatabase,
   type AgentLevel,
   type AgentRunStatus,
   type AgentTrigger,
+  type AgentEvent,
+  type AgentEventBus,
   type AgentDefinition,
   type AgentExecutionContext,
   type AgentRunResult as AgentRegistryRunResult,
@@ -998,6 +1002,20 @@ export {
   type SimulationWithPredictions,
   type LearningCycleResult,
 } from './orchestrator/brain-pipeline';
+
+// Cognitive Stack Orchestrator — Wires ALL 13 layers (L3-L15) into a real pipeline
+export {
+  createCognitiveStack,
+  type CognitiveStackConfig,
+  type CognitiveStackInstance,
+  type CognitiveCycleInput,
+  type CognitiveCycleResult,
+  type CognitiveSignal,
+  type CognitiveCausalEdge,
+  type CognitivePrediction,
+  type CognitiveMetric,
+  type CognitiveHealthReport,
+} from './orchestrator/cognitive-stack';
 
 // Context Manager — Working Memory (Prefrontal Cortex)
 export {

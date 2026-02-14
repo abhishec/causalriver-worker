@@ -24,7 +24,10 @@
     "job:federation": "tsx scripts/run-scheduled-job.ts federation",
     "job:consolidation": "tsx scripts/run-scheduled-job.ts consolidation",
     "job:all-daily": "tsx scripts/run-scheduled-job.ts all_daily",
-    "verify:wiring": "tsx scripts/verify-brain-wiring.ts"
+    "verify:wiring": "tsx scripts/verify-brain-wiring.ts",
+    "verify:db": "tsx scripts/validate-database-schema.ts",
+    "verify:all": "tsx scripts/comprehensive-validation.ts",
+    "test:jobs": "tsx scripts/test-manual-job.ts"
   },
   "devDependencies": {
     "@types/cron": "^2.4.3",

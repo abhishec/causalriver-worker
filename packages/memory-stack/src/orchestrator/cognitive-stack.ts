@@ -398,11 +398,12 @@ export function createCognitiveStack(config: CognitiveStackConfig): CognitiveSta
         confidence: e.confidence,
       }));
 
-      const dreamPatterns: DreamPattern[] = input.patterns.map(p => ({
-        id: p,
-        description: p,
-        domains: [],
+      const dreamPatterns: DreamPattern[] = input.patterns.map((p, i) => ({
+        id: `pattern_${i}`,
+        domain: 'general',
+        entities: [p],
         confidence: 0.5,
+        support: 1,
       }));
 
       const dreamResult = dreaming.dream(dreamSignals, dreamEdges, dreamPatterns);
@@ -507,7 +508,7 @@ export function createCognitiveStack(config: CognitiveStackConfig): CognitiveSta
         mesh.contribute({
           orgId: organizationId,
           domain: hyp.domain,
-          pattern: hyp.hypothesis,
+          pattern: hyp.question || hyp.prediction || 'unknown',
           confidence: hyp.noveltyScore,
           evidenceCount: 1,
           timestamp: Date.now(),
@@ -731,7 +732,7 @@ export function createCognitiveStack(config: CognitiveStackConfig): CognitiveSta
         },
         dreaming: {
           associationsFound: dreamResult.newAssociations.length,
-          surfacedInsights: dreamResult.surfacedCount,
+          surfacedInsights: dreamResult.surfacedInsights.length,
           crossDomainConnections: dreamResult.newAssociations.filter(a => a.type === 'cross_domain').length,
         },
         memory: {
@@ -742,12 +743,12 @@ export function createCognitiveStack(config: CognitiveStackConfig): CognitiveSta
         curiosity: {
           hypothesesGenerated: hypotheses.length,
           knowledgeGaps: knowledgeGaps.length,
-          explorationBudgetUsed: curiosity.getReport().budgetUsedPercent,
+          explorationBudgetUsed: 100 - curiosity.getReport().budgetRemaining,
         },
         selfModel: {
-          calibrationScore: assessment.calibrationScore,
+          calibrationScore: assessment.overallHealth,
           weaknesses: assessment.selfModel.weaknesses,
-          suggestedModifications: assessment.suggestedModifications.length,
+          suggestedModifications: assessment.recommendations.length,
         },
         mesh: {
           patternsContributed: meshContributions,
@@ -798,16 +799,16 @@ export function createCognitiveStack(config: CognitiveStackConfig): CognitiveSta
         {
           id: 3, name: 'Deep Dreaming', type: 'brain' as const,
           status: 'healthy' as const,
-          stats: { associations: dreaming.getStats().totalAssociations, surfaced: dreaming.getStats().totalSurfaced },
+          stats: { associations: dreaming.getStats().totalAssociationsGenerated, surfaced: dreaming.getStats().totalSurfacedInsights },
         },
         {
           id: 4, name: 'Hierarchical Memory', type: 'brain' as const,
           status: 'healthy' as const,
-          stats: { workingMemory: memStats.workingMemoryUsage, totalEncoded: memStats.totalEncoded },
+          stats: { workingMemory: memStats.workingMemoryUsage, episodes: memStats.totalEpisodes },
         },
         {
           id: 5, name: 'Curiosity Engine', type: 'brain' as const,
-          status: curiosityReport.budgetUsedPercent > 90 ? 'degraded' as const : 'healthy' as const,
+          status: curiosityReport.budgetRemaining < 10 ? 'degraded' as const : 'healthy' as const,
           stats: { hypotheses: curiosityReport.totalHypotheses, gaps: curiosityReport.totalKnowledgeGaps },
         },
         {

@@ -162,6 +162,13 @@ import {
 import { createEventBus } from '../causality/event-bus';
 
 import {
+  createCognitiveStack,
+  type CognitiveStackConfig,
+  type CognitiveStackInstance,
+  type CognitiveCycleResult,
+} from './cognitive-stack';
+
+import {
   createKnowledgeDependencyGraph,
   type KnowledgeDependencyGraphInstance,
 } from '../core/knowledge-dependency-graph';
@@ -245,6 +252,9 @@ export interface BrainPipelineConfig {
 
   /** Knowledge Book Ingestor config (The Brain's Library) */
   bookIngestor?: Partial<BookIngestorConfig>;
+
+  /** Cognitive Stack config (Layers 3-15: Deep Dreaming → Narrative Intelligence) */
+  cognitiveStack?: Partial<Omit<CognitiveStackConfig, 'organizationId'>>;
 
   verbose?: boolean;
 }

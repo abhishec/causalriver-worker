@@ -529,7 +529,7 @@ export function createHierarchicalMemory(config?: HierarchicalMemoryConfig): Hie
   function getStats(): HierarchicalMemoryStats {
     const allEpisodes = [...episodes.values()];
     const avgLength = allEpisodes.length > 0
-      ? allEpisodes.reduce((sum, ep) => sum + ep.events.length, 0) / allEpisodes.length
+      ? allEpisodes.reduce((sum, ep) => sum + (ep.events?.length || 0), 0) / allEpisodes.length
       : 0;
 
     const factsByKnowledge = [...semanticFacts.values()]
