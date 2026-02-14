@@ -847,6 +847,41 @@ export {
   type GenerationResult,
 } from './generators/claude-code-generator';
 
+// SE-aaS Production Service (Phase 2) — Production-ready API service layer
+export {
+  SEaaSService,
+  createSEaaSService,
+  type SEaaSConfig,
+  type CodeReviewRequest,
+  type FeatureBuildRequest,
+  type CodebaseAnalysisRequest,
+  type TechDebtAuditRequest,
+  type JobRequest,
+  type JobResult,
+  type JobStatus,
+  type AuthContext,
+  type RateLimitInfo,
+  type SEaaSMetrics,
+} from './orchestrator/se-aas-service';
+
+// SE-aaS Security & Secret Management (Phase 2) — Comprehensive security controls
+export {
+  SecretManager,
+  InputValidator,
+  RBACManager,
+  AuditLogger,
+  createSecretManager,
+  createInputValidator,
+  createRBACManager,
+  createAuditLogger,
+  type SecretManagerConfig,
+  type Secret,
+  type InputValidationRule,
+  type RBACPermission,
+  type Role,
+  type AuditLog,
+} from './orchestrator/se-aas-security';
+
 // Brain Context Builder — Universal Prefrontal Cortex ("Working Memory Assembly")
 // Assembles context from ALL brain regions + trained knowledge into LLM-ready prompts.
 // Works for any domain: code, finance, research, legal, operations.

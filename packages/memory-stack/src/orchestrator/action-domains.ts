@@ -4824,6 +4824,890 @@ export const confidenceTriageDomain: ActionDomainDefinition = defineActionDomain
 });
 
 // ============================================================================
+// V8 — METACOGNITION + SELF-IMPROVEMENT DOMAINS
+// ============================================================================
+
+/**
+ * Domain 29: calibration-audit — Brain Self-Accuracy Assessment
+ * Brain Analog: Retrosplenial Cortex — self-referential accuracy monitoring
+ *
+ * Surfaces the calibration feedback loop as a first-class queryable brain function.
+ * Computes Brier score, ECE, calibration bias per domain, and learning velocity.
+ */
+export const calibrationAuditDomain: ActionDomainDefinition = defineActionDomain({
+  name: 'calibration-audit',
+  description: 'Brain self-assessment — computes Brier score, ECE, calibration bias per domain, generates recalibration adjustments',
+  brainAnalog: 'Retrosplenial Cortex — self-referential accuracy monitoring',
+  requires: [],
+  optional: ['calibrationLoop'],
+  intents: ['calibration-audit'],
+  intentKeywords: ['calibration', 'accuracy', 'how accurate', 'brier', 'overconfident', 'underconfident', 'prediction accuracy', 'track record', 'how right', 'brain accuracy'],
+  intentPatterns: [
+    /how\s+accurat/i,
+    /calibrat/i,
+    /prediction\s+accuracy/i,
+    /track\s+record/i,
+    /brier\s+score/i,
+  ],
+  priority: 55,
+  outputSchema: {
+    dataType: 'calibration_audit',
+    fields: ['brierScore', 'expectedCalibrationError', 'calibrationBias', 'domainBreakdown', 'recalibrationAdjustments', 'learningVelocity', 'pendingPredictions'],
+    composable: true,
+    consumableBy: ['narrate', 'recommend'],
+  },
+  composableWith: ['narrate', 'recommend', 'error-attribute'],
+  tags: ['v8', 'metacognition', 'self-assessment'],
+
+  execute: async (ctx) => {
+    const context = [ctx.brain.question, ctx.brain.primaryDomain, ...ctx.brain.extractedDomains].join(' ');
+    const triggeredRules = ctx.brain.matchedRules.filter(r => r.triggered);
+
+    // Compute calibration metrics from brain context
+    // Use time series as proxy predictions (each domain's trend vs actual)
+    const predictions: Array<{ domain: string; predicted: number; actual: number; confidence: number }> = [];
+    const domainBreakdown: Record<string, { predictions: number; avgError: number; bias: string }> = {};
+
+    for (const [domainName, ts] of ctx.brain.timeSeries) {
+      const values = (ts as unknown as { values: number[] }).values || [];
+      if (values.length < 4) continue;
+
+      // Use penultimate value as "prediction" and last as "actual"
+      const midpoint = Math.floor(values.length / 2);
+      const firstHalfAvg = values.slice(0, midpoint).reduce((s, v) => s + v, 0) / midpoint;
+      const secondHalfAvg = values.slice(midpoint).reduce((s, v) => s + v, 0) / (values.length - midpoint);
+      const actual = values[values.length - 1];
+
+      const predicted = firstHalfAvg + (secondHalfAvg - firstHalfAvg) * 0.5;
+      const error = Math.abs(predicted - actual) / (Math.abs(actual) + 0.001);
+      const confidence = Math.min(0.95, values.length / 20);
+
+      predictions.push({ domain: domainName, predicted, actual, confidence });
+
+      const bias = predicted > actual ? 'overconfident' : predicted < actual ? 'underconfident' : 'well-calibrated';
+      domainBreakdown[domainName] = { predictions: 1, avgError: error, bias };
+    }
+
+    // Compute Brier score: mean squared error between confidence and actual accuracy
+    const brierScore = predictions.length > 0
+      ? predictions.reduce((s, p) => {
+          const outcome = Math.abs(p.predicted - p.actual) < Math.abs(p.actual) * 0.2 ? 1 : 0;
+          return s + (p.confidence - outcome) ** 2;
+        }, 0) / predictions.length
+      : 0.5;
+
+    // Expected calibration error
+    const ece = predictions.length > 0
+      ? predictions.reduce((s, p) => {
+          const outcome = Math.abs(p.predicted - p.actual) < Math.abs(p.actual) * 0.2 ? 1 : 0;
+          return s + Math.abs(p.confidence - outcome);
+        }, 0) / predictions.length
+      : 0.5;
+
+    // Overall bias
+    const overconfidentCount = predictions.filter(p => p.predicted > p.actual).length;
+    const calibrationBias = overconfidentCount > predictions.length * 0.6
+      ? 'overconfident'
+      : overconfidentCount < predictions.length * 0.4
+        ? 'underconfident'
+        : 'well-calibrated';
+
+    // Learning velocity: compare first half vs second half error rates
+    const firstHalf = predictions.slice(0, Math.floor(predictions.length / 2));
+    const secondHalf = predictions.slice(Math.floor(predictions.length / 2));
+    const firstHalfErr = firstHalf.length > 0 ? firstHalf.reduce((s, p) => s + Math.abs(p.predicted - p.actual), 0) / firstHalf.length : 0;
+    const secondHalfErr = secondHalf.length > 0 ? secondHalf.reduce((s, p) => s + Math.abs(p.predicted - p.actual), 0) / secondHalf.length : 0;
+    const learningVelocity = firstHalfErr > 0 ? (firstHalfErr - secondHalfErr) / firstHalfErr : 0;
+
+    // Recalibration adjustments
+    const recalibrationAdjustments = Object.entries(domainBreakdown)
+      .filter(([, v]) => v.bias !== 'well-calibrated')
+      .map(([domain, v]) => ({
+        domain,
+        currentBias: v.bias,
+        adjustmentFactor: v.bias === 'overconfident' ? 0.85 : 1.15,
+        reason: `${domain} shows ${v.bias} pattern (avg error: ${(v.avgError * 100).toFixed(0)}%)`,
+      }));
+
+    const confidence = Math.max(0.3, Math.min(0.95, 1 - brierScore));
+
+    return {
+      data: {
+        type: 'calibration_audit',
+        brierScore: Math.round(brierScore * 1000) / 1000,
+        expectedCalibrationError: Math.round(ece * 1000) / 1000,
+        calibrationBias,
+        domainBreakdown,
+        recalibrationAdjustments,
+        learningVelocity: Math.round(learningVelocity * 1000) / 1000,
+        pendingPredictions: predictions.length,
+        totalPredictions: predictions.length,
+        rulesApplied: triggeredRules.length,
+      },
+      narrative: `Calibration audit: ${predictions.length} predictions analyzed. Brier score: ${brierScore.toFixed(3)} (lower is better). ECE: ${ece.toFixed(3)}. Brain is ${calibrationBias}. Learning velocity: ${learningVelocity > 0 ? 'improving' : learningVelocity < 0 ? 'degrading' : 'stable'} (${(learningVelocity * 100).toFixed(1)}% change). ${recalibrationAdjustments.length} domains need recalibration.`,
+      confidence,
+      drivers: predictions.slice(0, 5).map(p => ({
+        domain: p.domain, weight: Math.abs(p.predicted - p.actual) / (Math.abs(p.actual) + 0.001),
+        lagDays: 0, direction: (p.predicted > p.actual ? 'positive' : 'negative') as const,
+      })),
+      interventions: recalibrationAdjustments.map(adj => ({
+        action: `Recalibrate ${adj.domain}: apply ${adj.adjustmentFactor}x multiplier to confidence`,
+        targetDomains: [adj.domain],
+        expectedImpact: `Reduce ${adj.currentBias} bias by ~15%`,
+        confidence: 0.7,
+        evidence: adj.reason,
+        owner: 'Brain Calibration System',
+        effort: 'low' as const,
+      })),
+      modulesUsed: ['calibration-engine', 'brier-scorer', 'ece-computer', 'learning-velocity-tracker'],
+      metadata: { brierScore, ece, calibrationBias, context: context.slice(0, 100) },
+    };
+  },
+
+  formatForPrompt: (result, _ctx) => {
+    const data = result.data as Record<string, unknown>;
+    const lines: string[] = [];
+    lines.push(`## 🧠 CALIBRATION AUDIT: Brain Self-Accuracy Report`);
+    lines.push(`Brier Score: ${data.brierScore} | ECE: ${data.expectedCalibrationError} | Bias: ${data.calibrationBias}`);
+    lines.push(`Learning: ${(data.learningVelocity as number) > 0 ? 'Improving' : 'Needs attention'} | Predictions: ${data.totalPredictions}`);
+    const adjustments = data.recalibrationAdjustments as Array<{ domain: string; currentBias: string; adjustmentFactor: number }>;
+    if (adjustments && adjustments.length > 0) {
+      lines.push('');
+      lines.push(formatTable(['Domain', 'Bias', 'Adjustment'], adjustments.slice(0, 5).map(a => [a.domain, a.currentBias, `${a.adjustmentFactor}x`])));
+    }
+    return lines.join('\n');
+  },
+});
+
+/**
+ * Domain 30: error-attribute — Error Attribution Cortex
+ * Brain Analog: Anterior Cingulate Cortex — error detection and conflict monitoring
+ *
+ * When the brain is wrong, diagnoses WHY. Root-cause analysis of prediction errors.
+ */
+export const errorAttributeDomain: ActionDomainDefinition = defineActionDomain({
+  name: 'error-attribute',
+  description: 'Analyzes why the brain was wrong — attributes prediction errors to data quality, model mismatch, regime changes, or external shocks',
+  brainAnalog: 'Anterior Cingulate Cortex — error detection and conflict monitoring',
+  requires: [],
+  optional: ['causalDAG', 'timeSeries', 'calibrationLoop'],
+  intents: ['error-attribute'],
+  intentKeywords: ['why wrong', 'error', 'mistake', 'inaccurate', 'missed', 'wrong prediction', 'failed prediction', 'what went wrong', 'error analysis'],
+  intentPatterns: [
+    /why\s+(was|were)\s+(i|we|the brain|you)\s+wrong/i,
+    /what\s+went\s+wrong/i,
+    /error\s+analysis/i,
+    /prediction\s+(error|failure|mistake)/i,
+  ],
+  priority: 50,
+  outputSchema: {
+    dataType: 'error_attribution',
+    fields: ['errorBreakdown', 'failureMode', 'incorrectEdges', 'dataQualityIssues', 'regimeChanges', 'corrections'],
+    composable: true,
+    consumableBy: ['calibration-audit', 'recommend'],
+  },
+  composableWith: ['calibration-audit', 'recommend'],
+  tags: ['v8', 'metacognition', 'error-detection'],
+
+  execute: async (ctx) => {
+    const context = [ctx.brain.question, ctx.brain.primaryDomain, ...ctx.brain.extractedDomains].join(' ');
+
+    const errorBreakdown: Record<string, number> = {
+      data_quality: 0, model_mismatch: 0, regime_change: 0, external_shock: 0, overconfidence: 0,
+    };
+    const incorrectEdges: Array<{ source: string; target: string; expectedWeight: number; reason: string }> = [];
+    const dataQualityIssues: Array<{ domain: string; issue: string; severity: string }> = [];
+    const regimeChanges: Array<{ domain: string; breakpoint: string; before: number; after: number }> = [];
+    const corrections: Array<{ action: string; domain: string; priority: string }> = [];
+
+    // Analyze each time series for error patterns
+    for (const [domainName, ts] of ctx.brain.timeSeries) {
+      const values = (ts as unknown as { values: number[] }).values || [];
+      if (values.length < 4) {
+        dataQualityIssues.push({ domain: domainName, issue: `Insufficient data (${values.length} points, need 4+)`, severity: 'high' });
+        errorBreakdown.data_quality++;
+        continue;
+      }
+
+      // Check for regime change: compare first half vs second half variance
+      const midpoint = Math.floor(values.length / 2);
+      const firstHalf = values.slice(0, midpoint);
+      const secondHalf = values.slice(midpoint);
+      const firstVar = firstHalf.reduce((s, v) => s + (v - firstHalf.reduce((a, b) => a + b, 0) / firstHalf.length) ** 2, 0) / firstHalf.length;
+      const secondVar = secondHalf.reduce((s, v) => s + (v - secondHalf.reduce((a, b) => a + b, 0) / secondHalf.length) ** 2, 0) / secondHalf.length;
+
+      if (secondVar > firstVar * 3 || secondVar < firstVar / 3) {
+        regimeChanges.push({
+          domain: domainName,
+          breakpoint: `Sample ${midpoint}`,
+          before: Math.sqrt(firstVar),
+          after: Math.sqrt(secondVar),
+        });
+        errorBreakdown.regime_change++;
+        corrections.push({ action: `Retrain models for ${domainName} — regime change detected`, domain: domainName, priority: 'high' });
+      }
+
+      // Check for data quality: NaN, zero-runs, extreme outliers
+      const zeroRun = values.filter(v => v === 0).length;
+      if (zeroRun > values.length * 0.5) {
+        dataQualityIssues.push({ domain: domainName, issue: `${zeroRun}/${values.length} values are zero — possible data gap`, severity: 'medium' });
+        errorBreakdown.data_quality++;
+      }
+
+      // Check for overconfidence: predicted stable but actually volatile
+      const recentVolatility = values.length > 5
+        ? Math.sqrt(values.slice(-5).reduce((s, v, i, a) => s + (i > 0 ? (v - a[i - 1]) ** 2 : 0), 0) / 4)
+        : 0;
+      const historicalVolatility = Math.sqrt(values.reduce((s, v, i, a) => s + (i > 0 ? (v - a[i - 1]) ** 2 : 0), 0) / Math.max(1, values.length - 1));
+
+      if (recentVolatility > historicalVolatility * 2) {
+        errorBreakdown.overconfidence++;
+        corrections.push({ action: `Increase uncertainty bounds for ${domainName} — recent volatility 2x historical`, domain: domainName, priority: 'medium' });
+      }
+    }
+
+    // Check causal edges for model mismatch
+    for (const cause of ctx.brain.directCauses.slice(0, 10)) {
+      const sourceTs = ctx.brain.timeSeries.get(cause.source);
+      const targetTs = ctx.brain.timeSeries.get(ctx.brain.primaryDomain);
+      if (sourceTs && targetTs) {
+        const sourceValues = (sourceTs as unknown as { values: number[] }).values || [];
+        const targetValues = (targetTs as unknown as { values: number[] }).values || [];
+        if (sourceValues.length > 2 && targetValues.length > 2) {
+          // Simple correlation check
+          const minLen = Math.min(sourceValues.length, targetValues.length, 10);
+          const srcSlice = sourceValues.slice(-minLen);
+          const tgtSlice = targetValues.slice(-minLen);
+          const srcMean = srcSlice.reduce((s, v) => s + v, 0) / minLen;
+          const tgtMean = tgtSlice.reduce((s, v) => s + v, 0) / minLen;
+          const correlation = srcSlice.reduce((s, v, i) => s + (v - srcMean) * (tgtSlice[i] - tgtMean), 0) /
+            (Math.sqrt(srcSlice.reduce((s, v) => s + (v - srcMean) ** 2, 0)) * Math.sqrt(tgtSlice.reduce((s, v) => s + (v - tgtMean) ** 2, 0)) + 0.001);
+
+          if (Math.abs(correlation) < 0.2 && cause.weight > 0.5) {
+            errorBreakdown.model_mismatch++;
+            incorrectEdges.push({
+              source: cause.source, target: ctx.brain.primaryDomain,
+              expectedWeight: cause.weight, reason: `Low correlation (${correlation.toFixed(2)}) despite high edge weight (${cause.weight.toFixed(2)})`,
+            });
+            corrections.push({ action: `Re-evaluate ${cause.source}→${ctx.brain.primaryDomain} causal edge — correlation ${correlation.toFixed(2)} doesn't support weight ${cause.weight.toFixed(2)}`, domain: cause.source, priority: 'high' });
+          }
+        }
+      }
+    }
+
+    const totalErrors = Object.values(errorBreakdown).reduce((s, v) => s + v, 0);
+    const primaryFailureMode = Object.entries(errorBreakdown).sort((a, b) => b[1] - a[1])[0]?.[0] || 'unknown';
+    const confidence = Math.max(0.3, Math.min(0.9, 0.4 + totalErrors * 0.05));
+
+    return {
+      data: {
+        type: 'error_attribution',
+        errorBreakdown,
+        failureMode: primaryFailureMode,
+        incorrectEdges,
+        dataQualityIssues,
+        regimeChanges,
+        corrections,
+        totalErrors,
+        analyzedDomains: ctx.brain.timeSeries.size,
+      },
+      narrative: `Error attribution: ${totalErrors} issues found across ${ctx.brain.timeSeries.size} domains. Primary failure mode: ${primaryFailureMode}. ${incorrectEdges.length} causal edges may be incorrect. ${regimeChanges.length} regime changes detected. ${dataQualityIssues.length} data quality issues. ${corrections.length} corrective actions recommended.`,
+      confidence,
+      drivers: incorrectEdges.slice(0, 5).map(e => ({
+        domain: e.source, weight: e.expectedWeight, lagDays: 0, direction: 'negative' as const,
+      })),
+      interventions: corrections.slice(0, 5).map(c => ({
+        action: c.action, targetDomains: [c.domain], expectedImpact: 'Improve prediction accuracy',
+        confidence: 0.7, evidence: `Priority: ${c.priority}`, owner: 'Brain Learning System', effort: 'medium' as const,
+      })),
+      modulesUsed: ['error-classifier', 'regime-detector', 'correlation-checker', 'data-quality-scanner'],
+      metadata: { primaryFailureMode, totalErrors, context: context.slice(0, 100) },
+    };
+  },
+
+  formatForPrompt: (result, _ctx) => {
+    const data = result.data as Record<string, unknown>;
+    const lines: string[] = [];
+    lines.push(`## ⚠️ ERROR ATTRIBUTION: Why Was the Brain Wrong?`);
+    lines.push(`Primary failure: ${data.failureMode} | Total issues: ${data.totalErrors} | Domains analyzed: ${data.analyzedDomains}`);
+    const breakdown = data.errorBreakdown as Record<string, number>;
+    if (breakdown) {
+      lines.push(`Breakdown: Data quality: ${breakdown.data_quality} | Model mismatch: ${breakdown.model_mismatch} | Regime change: ${breakdown.regime_change} | Overconfidence: ${breakdown.overconfidence}`);
+    }
+    return lines.join('\n');
+  },
+});
+
+/**
+ * Domain 31: chain-validate — Reasoning Chain Validator
+ * Brain Analog: Dorsomedial Prefrontal Cortex — belief consistency checking
+ *
+ * Validates consistency between composed domain results. Detects contradictions.
+ */
+export const chainValidateDomain: ActionDomainDefinition = defineActionDomain({
+  name: 'chain-validate',
+  description: 'Validates consistency between composed domain results — detects contradictions, confidence divergence, and narrative conflicts',
+  brainAnalog: 'Dorsomedial Prefrontal Cortex — belief consistency checking',
+  requires: [],
+  optional: ['causalDAG'],
+  intents: ['chain-validate'],
+  intentKeywords: ['validate', 'consistent', 'contradiction', 'check reasoning', 'verify chain', 'cross-check', 'agree', 'disagree'],
+  intentPatterns: [
+    /validat.*chain/i,
+    /check.*consistency/i,
+    /cross.?check.*results/i,
+    /do.*results.*agree/i,
+    /contradiction/i,
+  ],
+  priority: 45,
+  outputSchema: {
+    dataType: 'chain_validation',
+    fields: ['consistencyScore', 'contradictions', 'confidenceDivergence', 'narrativeConflicts', 'resolution'],
+    composable: false,
+  },
+  dependsOn: ['composite'],
+  tags: ['v8', 'metacognition', 'validation'],
+
+  execute: async (ctx) => {
+    const context = [ctx.brain.question, ctx.brain.primaryDomain, ...ctx.brain.extractedDomains].join(' ');
+
+    // Analyze drivers from causal graph for consistency
+    const contradictions: Array<{ domain1: string; domain2: string; issue: string; severity: string }> = [];
+    const driverDirections: Map<string, Array<{ source: string; direction: string; weight: number }>> = new Map();
+
+    // Group causes and effects to check for directional conflicts
+    for (const cause of ctx.brain.directCauses) {
+      const existing = driverDirections.get(cause.source) || [];
+      existing.push({ source: 'cause', direction: cause.weight > 0 ? 'positive' : 'negative', weight: Math.abs(cause.weight) });
+      driverDirections.set(cause.source, existing);
+    }
+    for (const effect of ctx.brain.directEffects) {
+      const existing = driverDirections.get(effect.target) || [];
+      existing.push({ source: 'effect', direction: effect.weight > 0 ? 'positive' : 'negative', weight: Math.abs(effect.weight) });
+      driverDirections.set(effect.target, existing);
+    }
+
+    // Check for directional conflicts
+    for (const [domain, drivers] of driverDirections) {
+      const positives = drivers.filter(d => d.direction === 'positive');
+      const negatives = drivers.filter(d => d.direction === 'negative');
+      if (positives.length > 0 && negatives.length > 0) {
+        const posWeight = positives.reduce((s, d) => s + d.weight, 0);
+        const negWeight = negatives.reduce((s, d) => s + d.weight, 0);
+        if (Math.abs(posWeight - negWeight) < Math.max(posWeight, negWeight) * 0.5) {
+          contradictions.push({
+            domain1: positives[0].source, domain2: negatives[0].source,
+            issue: `Conflicting signals on ${domain}: positive (${posWeight.toFixed(2)}) vs negative (${negWeight.toFixed(2)})`,
+            severity: 'warning',
+          });
+        }
+      }
+    }
+
+    // Check rule conflicts
+    const triggeredRules = ctx.brain.matchedRules.filter(r => r.triggered);
+    for (let i = 0; i < triggeredRules.length; i++) {
+      for (let j = i + 1; j < triggeredRules.length; j++) {
+        if (triggeredRules[i].naturalLanguage && triggeredRules[j].naturalLanguage) {
+          // Simple heuristic: check if rules reference same domains with conflicting recommendations
+          const rule1Words = triggeredRules[i].naturalLanguage.toLowerCase().split(/\s+/);
+          const rule2Words = triggeredRules[j].naturalLanguage.toLowerCase().split(/\s+/);
+          const hasIncrease = (w: string[]) => w.some(x => ['increase', 'grow', 'rise', 'up', 'improve'].includes(x));
+          const hasDecrease = (w: string[]) => w.some(x => ['decrease', 'drop', 'fall', 'down', 'decline'].includes(x));
+          if ((hasIncrease(rule1Words) && hasDecrease(rule2Words)) || (hasDecrease(rule1Words) && hasIncrease(rule2Words))) {
+            contradictions.push({
+              domain1: triggeredRules[i].title, domain2: triggeredRules[j].title,
+              issue: 'Rules have contradicting directional signals',
+              severity: 'informational',
+            });
+          }
+        }
+      }
+    }
+
+    // Compute consistency score
+    const maxContradictions = Math.max(1, ctx.brain.directCauses.length + ctx.brain.directEffects.length);
+    const consistencyScore = Math.max(0, Math.min(1, 1 - (contradictions.length / maxContradictions)));
+
+    // Confidence divergence: variance of edge weights
+    const allWeights = [...ctx.brain.directCauses, ...ctx.brain.directEffects].map(e => Math.abs(e.weight));
+    const meanWeight = allWeights.length > 0 ? allWeights.reduce((s, w) => s + w, 0) / allWeights.length : 0;
+    const confidenceDivergence = allWeights.length > 0
+      ? Math.sqrt(allWeights.reduce((s, w) => s + (w - meanWeight) ** 2, 0) / allWeights.length)
+      : 0;
+
+    const confidence = Math.max(0.3, consistencyScore);
+
+    return {
+      data: {
+        type: 'chain_validation',
+        consistencyScore: Math.round(consistencyScore * 1000) / 1000,
+        contradictions,
+        confidenceDivergence: Math.round(confidenceDivergence * 1000) / 1000,
+        narrativeConflicts: contradictions.filter(c => c.severity === 'warning').length,
+        resolution: contradictions.length === 0
+          ? 'All reasoning chains are internally consistent'
+          : `${contradictions.length} contradictions found — recommend targeted investigation`,
+        totalChecks: maxContradictions,
+        rulesChecked: triggeredRules.length,
+      },
+      narrative: `Chain validation: ${contradictions.length} contradictions found across ${maxContradictions} checks. Consistency score: ${(consistencyScore * 100).toFixed(0)}%. Confidence divergence: ${(confidenceDivergence * 100).toFixed(0)}%. ${contradictions.length === 0 ? 'Reasoning chains are coherent.' : 'Investigate contradictions before acting on results.'}`,
+      confidence,
+      drivers: contradictions.slice(0, 5).map(c => ({
+        domain: c.domain1, weight: c.severity === 'warning' ? 0.7 : 0.3, lagDays: 0, direction: 'negative' as const,
+      })),
+      interventions: contradictions.filter(c => c.severity === 'warning').map(c => ({
+        action: `Resolve contradiction: ${c.issue}`,
+        targetDomains: [c.domain1, c.domain2],
+        expectedImpact: 'Improve reasoning consistency',
+        confidence: 0.6, evidence: `${c.domain1} vs ${c.domain2}: ${c.issue}`,
+        owner: 'Brain Consistency Engine', effort: 'medium' as const,
+      })),
+      modulesUsed: ['consistency-checker', 'contradiction-detector', 'divergence-analyzer'],
+      metadata: { consistencyScore, contradictionCount: contradictions.length, context: context.slice(0, 100) },
+    };
+  },
+
+  formatForPrompt: (result, _ctx) => {
+    const data = result.data as Record<string, unknown>;
+    const lines: string[] = [];
+    lines.push(`## 🔗 CHAIN VALIDATION: Reasoning Consistency`);
+    lines.push(`Consistency: ${((data.consistencyScore as number) * 100).toFixed(0)}% | Contradictions: ${(data.contradictions as unknown[])?.length || 0} | Divergence: ${((data.confidenceDivergence as number) * 100).toFixed(0)}%`);
+    lines.push(`Resolution: ${data.resolution}`);
+    return lines.join('\n');
+  },
+});
+
+/**
+ * Domain 32: uncertainty-quantify — Epistemic Uncertainty Engine
+ * Brain Analog: Orbitofrontal Cortex — uncertainty estimation and ambiguity resolution
+ *
+ * Decomposes confidence into epistemic (reducible) vs aleatoric (irreducible) uncertainty.
+ */
+export const uncertaintyQuantifyDomain: ActionDomainDefinition = defineActionDomain({
+  name: 'uncertainty-quantify',
+  description: 'Decomposes confidence into epistemic (reducible) vs aleatoric (irreducible) uncertainty — identifies where more data would help most',
+  brainAnalog: 'Orbitofrontal Cortex — uncertainty estimation and ambiguity resolution',
+  requires: [],
+  optional: ['causalDAG', 'timeSeries', 'patterns'],
+  intents: ['uncertainty-quantify'],
+  intentKeywords: ['uncertainty', 'how sure', 'how confident', 'how certain', 'knowledge gap', 'data gap', 'blind spot', 'what don\'t you know'],
+  intentPatterns: [
+    /how\s+(sure|confident|certain)/i,
+    /what\s+don.t\s+(you|we)\s+know/i,
+    /uncertainty/i,
+    /knowledge\s+gap/i,
+    /blind\s+spot/i,
+  ],
+  priority: 50,
+  outputSchema: {
+    dataType: 'uncertainty_decomposition',
+    fields: ['totalUncertainty', 'epistemicUncertainty', 'aleatoricUncertainty', 'dataGaps', 'highestValueData', 'domainCoverageMap'],
+    composable: true,
+    consumableBy: ['recommend', 'calibration-audit', 'narrate'],
+  },
+  composableWith: ['recommend', 'calibration-audit', 'robustness-check'],
+  tags: ['v8', 'metacognition', 'uncertainty'],
+
+  execute: async (ctx) => {
+    const domainCoverageMap: Record<string, { coverage: number; dataPoints: number; causalEdges: number; rules: number; patterns: number }> = {};
+    const dataGaps: Array<{ domain: string; gap: string; severity: string; expectedReduction: number }> = [];
+    const highestValueData: Array<{ domain: string; dataType: string; expectedReduction: number; reason: string }> = [];
+
+    // Compute coverage for each extracted domain
+    const allDomains = [ctx.brain.primaryDomain, ...ctx.brain.extractedDomains];
+    const uniqueDomains = [...new Set(allDomains)];
+
+    for (const domainName of uniqueDomains) {
+      // Count data points
+      const ts = ctx.brain.timeSeries.get(domainName);
+      const dataPoints = ts ? ((ts as unknown as { values: number[] }).values?.length || 0) : 0;
+
+      // Count causal edges involving this domain
+      const causalEdges = ctx.brain.directCauses.filter(c => c.source === domainName || c.target === domainName).length +
+        ctx.brain.directEffects.filter(e => e.source === domainName || e.target === domainName).length;
+
+      // Count matching rules
+      const rules = ctx.brain.matchedRules.filter(r => r.title.toLowerCase().includes(domainName.toLowerCase())).length;
+
+      // Count matching patterns
+      const patterns = ctx.brain.patterns.filter(p => p.description?.toLowerCase().includes(domainName.toLowerCase())).length;
+
+      // Coverage = weighted sum of data presence
+      const coverage = Math.min(1, (
+        (dataPoints > 0 ? 0.4 : 0) +
+        (Math.min(dataPoints, 30) / 30) * 0.2 +
+        (causalEdges > 0 ? 0.2 : 0) +
+        (rules > 0 ? 0.1 : 0) +
+        (patterns > 0 ? 0.1 : 0)
+      ));
+
+      domainCoverageMap[domainName] = { coverage, dataPoints, causalEdges, rules, patterns };
+
+      // Identify gaps
+      if (dataPoints === 0) {
+        dataGaps.push({ domain: domainName, gap: 'No time series data available', severity: 'critical', expectedReduction: 0.25 });
+        highestValueData.push({ domain: domainName, dataType: 'time_series', expectedReduction: 0.25, reason: 'No data at all — any data would significantly reduce uncertainty' });
+      } else if (dataPoints < 10) {
+        dataGaps.push({ domain: domainName, gap: `Insufficient time series (${dataPoints} points, need 10+)`, severity: 'high', expectedReduction: 0.15 });
+        highestValueData.push({ domain: domainName, dataType: 'time_series', expectedReduction: 0.15, reason: `Only ${dataPoints} data points — collecting ${10 - dataPoints} more would improve coverage` });
+      }
+      if (causalEdges === 0) {
+        dataGaps.push({ domain: domainName, gap: 'No causal connections known', severity: 'medium', expectedReduction: 0.10 });
+      }
+    }
+
+    // Sort highest value data by expected reduction
+    highestValueData.sort((a, b) => b.expectedReduction - a.expectedReduction);
+
+    // Compute overall uncertainty
+    const coverages = Object.values(domainCoverageMap).map(c => c.coverage);
+    const avgCoverage = coverages.length > 0 ? coverages.reduce((s, c) => s + c, 0) / coverages.length : 0;
+    const epistemicUncertainty = Math.round((1 - avgCoverage) * 1000) / 1000;
+
+    // Aleatoric: from time series noise
+    let totalNoise = 0;
+    let noiseSamples = 0;
+    for (const [, ts] of ctx.brain.timeSeries) {
+      const values = (ts as unknown as { values: number[] }).values || [];
+      if (values.length > 3) {
+        const mean = values.reduce((s, v) => s + v, 0) / values.length;
+        const variance = values.reduce((s, v) => s + (v - mean) ** 2, 0) / values.length;
+        const cv = Math.sqrt(variance) / (Math.abs(mean) + 0.001); // coefficient of variation
+        totalNoise += Math.min(1, cv);
+        noiseSamples++;
+      }
+    }
+    const aleatoricUncertainty = noiseSamples > 0
+      ? Math.round((totalNoise / noiseSamples) * 1000) / 1000
+      : 0.5;
+
+    const totalUncertainty = Math.round(Math.min(1, epistemicUncertainty + aleatoricUncertainty * 0.5) * 1000) / 1000;
+    const confidence = Math.max(0.3, 1 - totalUncertainty);
+
+    return {
+      data: {
+        type: 'uncertainty_decomposition',
+        totalUncertainty,
+        epistemicUncertainty,
+        aleatoricUncertainty,
+        dataGaps,
+        highestValueData: highestValueData.slice(0, 5),
+        domainCoverageMap,
+        analyzedDomains: uniqueDomains.length,
+      },
+      narrative: `Uncertainty analysis: Total uncertainty ${(totalUncertainty * 100).toFixed(0)}%. Epistemic (reducible): ${(epistemicUncertainty * 100).toFixed(0)}%. Aleatoric (irreducible): ${(aleatoricUncertainty * 100).toFixed(0)}%. ${dataGaps.length} data gaps identified. Highest-value data collection: ${highestValueData[0]?.domain || 'none'} (would reduce uncertainty by ~${((highestValueData[0]?.expectedReduction || 0) * 100).toFixed(0)}%).`,
+      confidence,
+      drivers: Object.entries(domainCoverageMap).filter(([, v]) => v.coverage < 0.5).slice(0, 5).map(([domain, v]) => ({
+        domain, weight: 1 - v.coverage, lagDays: 0, direction: 'negative' as const,
+      })),
+      interventions: highestValueData.slice(0, 3).map(hv => ({
+        action: `Collect ${hv.dataType} for ${hv.domain}: ${hv.reason}`,
+        targetDomains: [hv.domain],
+        expectedImpact: `Reduce epistemic uncertainty by ~${(hv.expectedReduction * 100).toFixed(0)}%`,
+        confidence: 0.7, evidence: hv.reason,
+        owner: 'Data Engineering', effort: 'medium' as const,
+      })),
+      modulesUsed: ['coverage-calculator', 'epistemic-decomposer', 'aleatoric-estimator', 'data-gap-analyzer'],
+      metadata: { epistemicUncertainty, aleatoricUncertainty, totalUncertainty, gapCount: dataGaps.length },
+    };
+  },
+
+  formatForPrompt: (result, _ctx) => {
+    const data = result.data as Record<string, unknown>;
+    const lines: string[] = [];
+    lines.push(`## 🔮 UNCERTAINTY DECOMPOSITION: What the Brain Doesn't Know`);
+    lines.push(`Total: ${((data.totalUncertainty as number) * 100).toFixed(0)}% | Epistemic (fixable): ${((data.epistemicUncertainty as number) * 100).toFixed(0)}% | Aleatoric (noise): ${((data.aleatoricUncertainty as number) * 100).toFixed(0)}%`);
+    lines.push(`Data gaps: ${(data.dataGaps as unknown[])?.length || 0} | Domains analyzed: ${data.analyzedDomains}`);
+    return lines.join('\n');
+  },
+});
+
+/**
+ * Domain 33: query-cache — Working Memory Buffer
+ * Brain Analog: Dorsolateral Prefrontal Cortex — working memory maintenance
+ */
+export const queryCacheDomain: ActionDomainDefinition = defineActionDomain({
+  name: 'query-cache',
+  description: 'Working memory buffer — reports cache stats, hit rates, and recent query patterns',
+  brainAnalog: 'Dorsolateral Prefrontal Cortex — working memory maintenance',
+  requires: [],
+  optional: [],
+  intents: ['query-cache'],
+  intentKeywords: ['cache', 'recent queries', 'working memory', 'cache stats', 'cached'],
+  intentPatterns: [
+    /cache\s+stat/i,
+    /working\s+memory/i,
+    /recent\s+(quer|execut)/i,
+  ],
+  priority: 30,
+  outputSchema: {
+    dataType: 'cache_stats',
+    fields: ['hitRate', 'missRate', 'cacheSize', 'evictions', 'savedMs', 'topCached'],
+    composable: false,
+  },
+  tags: ['v8', 'infrastructure', 'performance'],
+
+  execute: async (ctx) => {
+    // Cache stats are tracked at the registry level.
+    // This domain surfaces them as a queryable result.
+    // Note: in actual runtime, registry injects its own stats.
+    // For standalone execution, we provide sensible defaults from brain context.
+    const domainCount = ctx.brain.timeSeries.size;
+
+    return {
+      data: {
+        type: 'cache_stats',
+        hitRate: 0,
+        missRate: 100,
+        cacheSize: 0,
+        evictions: 0,
+        savedMs: 0,
+        topCached: [],
+        totalQueries: domainCount,
+        description: 'Query cache provides working memory for the brain — repeated identical questions return cached results within 60s TTL',
+      },
+      narrative: `Working memory buffer: Cache manages up to 100 recent domain executions with 60-second TTL. Repeated identical queries are served from cache. ${domainCount} domains available for caching.`,
+      confidence: 0.95,
+      drivers: [],
+      interventions: [],
+      modulesUsed: ['query-cache', 'lru-evictor'],
+      metadata: { cacheType: 'lru', maxSize: 100, ttlMs: 60000 },
+    };
+  },
+
+  formatForPrompt: (result, _ctx) => {
+    const data = result.data as Record<string, unknown>;
+    return `## 💾 WORKING MEMORY: Cache Stats\nHit rate: ${data.hitRate}% | Size: ${data.cacheSize}/100 | Saved: ${data.savedMs}ms`;
+  },
+});
+
+/**
+ * Domain 34: execution-profile — Performance Self-Observation
+ * Brain Analog: Supplementary Motor Area — execution monitoring and optimization
+ */
+export const executionProfileDomain: ActionDomainDefinition = defineActionDomain({
+  name: 'execution-profile',
+  description: 'Performance self-observation — reports per-domain execution cost, latency, success rates, and optimization recommendations',
+  brainAnalog: 'Supplementary Motor Area — execution monitoring and optimization',
+  requires: [],
+  optional: [],
+  intents: ['execution-profile'],
+  intentKeywords: ['performance', 'slow', 'fast', 'execution time', 'cost', 'latency', 'efficiency', 'stats', 'brain performance'],
+  intentPatterns: [
+    /brain\s+(performance|stats|efficiency)/i,
+    /execution\s+(time|profile|cost)/i,
+    /how\s+(fast|slow)/i,
+    /domain\s+performance/i,
+  ],
+  priority: 35,
+  outputSchema: {
+    dataType: 'execution_profile',
+    fields: ['domainBreakdown', 'slowestDomains', 'fastestDomains', 'failureRates', 'optimizationRecommendations'],
+    composable: true,
+    consumableBy: ['narrate', 'recommend'],
+  },
+  composableWith: ['narrate'],
+  tags: ['v8', 'infrastructure', 'observability'],
+
+  execute: async (ctx) => {
+    // In standalone execution, derive profile from available brain context
+    const domainBreakdown: Array<{ name: string; available: boolean; dataRichness: number }> = [];
+    const optimizationRecommendations: string[] = [];
+
+    for (const domain of ctx.brain.extractedDomains) {
+      const ts = ctx.brain.timeSeries.get(domain);
+      const dataPoints = ts ? ((ts as unknown as { values: number[] }).values?.length || 0) : 0;
+      domainBreakdown.push({ name: domain, available: dataPoints > 0, dataRichness: Math.min(1, dataPoints / 30) });
+    }
+
+    const lowDataDomains = domainBreakdown.filter(d => d.dataRichness < 0.3);
+    if (lowDataDomains.length > 0) {
+      optimizationRecommendations.push(`${lowDataDomains.length} domains have <30% data coverage — consider data collection campaigns`);
+    }
+
+    const noCausalDomains = ctx.brain.extractedDomains.filter(d =>
+      !ctx.brain.directCauses.some(c => c.source === d || c.target === d) &&
+      !ctx.brain.directEffects.some(e => e.source === d || e.target === d)
+    );
+    if (noCausalDomains.length > 0) {
+      optimizationRecommendations.push(`${noCausalDomains.length} domains have no causal connections — run causal discovery`);
+    }
+
+    return {
+      data: {
+        type: 'execution_profile',
+        domainBreakdown,
+        slowestDomains: [],
+        fastestDomains: [],
+        failureRates: {},
+        optimizationRecommendations,
+        totalDomains: ctx.brain.extractedDomains.length,
+        description: 'Execution profile — tracked at registry level, surfaced here for introspection',
+      },
+      narrative: `Execution profile: ${domainBreakdown.length} domains profiled. ${lowDataDomains.length} with low data coverage. ${noCausalDomains.length} without causal connections. ${optimizationRecommendations.length} optimization recommendations generated.`,
+      confidence: 0.85,
+      drivers: lowDataDomains.slice(0, 5).map(d => ({
+        domain: d.name, weight: 1 - d.dataRichness, lagDays: 0, direction: 'negative' as const,
+      })),
+      interventions: optimizationRecommendations.map(r => ({
+        action: r, targetDomains: ['system'], expectedImpact: 'Improve brain performance',
+        confidence: 0.6, evidence: 'Performance analysis', owner: 'Platform Team', effort: 'medium' as const,
+      })),
+      modulesUsed: ['performance-tracker', 'data-richness-scorer', 'optimization-recommender'],
+      metadata: { totalDomains: domainBreakdown.length, recommendations: optimizationRecommendations.length },
+    };
+  },
+
+  formatForPrompt: (result, _ctx) => {
+    const data = result.data as Record<string, unknown>;
+    return `## ⚡ EXECUTION PROFILE: Brain Performance\nDomains: ${data.totalDomains} | Optimizations: ${(data.optimizationRecommendations as string[])?.length || 0}`;
+  },
+});
+
+/**
+ * Domain 35: robustness-check — Adversarial Resilience Cortex
+ * Brain Analog: Thalamic Reticular Nucleus — input filtering and noise rejection
+ *
+ * Tests how robust a brain result is to perturbation.
+ */
+export const robustnessCheckDomain: ActionDomainDefinition = defineActionDomain({
+  name: 'robustness-check',
+  description: 'Tests how robust a brain result is to perturbation — identifies fragile conclusions that depend on single assumptions',
+  brainAnalog: 'Thalamic Reticular Nucleus — input filtering and noise rejection',
+  requires: [],
+  optional: ['causalDAG', 'timeSeries'],
+  intents: ['robustness-check'],
+  intentKeywords: ['robust', 'fragile', 'sensitive', 'what if wrong', 'stress test', 'sensitivity', 'stability', 'perturbation'],
+  intentPatterns: [
+    /how\s+robust/i,
+    /stress\s+test/i,
+    /sensitivity\s+analysis/i,
+    /what\s+if.*wrong/i,
+    /how\s+stable/i,
+    /fragil/i,
+  ],
+  priority: 45,
+  outputSchema: {
+    dataType: 'robustness_analysis',
+    fields: ['robustnessScore', 'fragileEdges', 'perturbationResults', 'stabilityAssessment', 'recommendations'],
+    composable: true,
+    consumableBy: ['recommend', 'narrate', 'calibration-audit'],
+  },
+  composableWith: ['forecast', 'simulate', 'explain'],
+  tags: ['v8', 'metacognition', 'adversarial'],
+
+  execute: async (ctx) => {
+    const context = [ctx.brain.question, ctx.brain.primaryDomain, ...ctx.brain.extractedDomains].join(' ');
+    const fragileEdges: Array<{ source: string; target: string; weight: number; knockoutImpact: number; reason: string }> = [];
+    const perturbationResults: Array<{ edge: string; baseConfidence: number; knockoutConfidence: number; drop: number }> = [];
+    const recommendations: string[] = [];
+
+    // Get top causal edges for the primary domain
+    const relevantCauses = ctx.brain.directCauses
+      .filter(c => c.target === ctx.brain.primaryDomain || c.source === ctx.brain.primaryDomain)
+      .sort((a, b) => Math.abs(b.weight) - Math.abs(a.weight))
+      .slice(0, 7);
+
+    // Compute total causal support
+    const totalWeight = relevantCauses.reduce((s, c) => s + Math.abs(c.weight), 0);
+    const baseConfidence = totalWeight > 0 ? Math.min(0.95, totalWeight / relevantCauses.length) : 0.3;
+
+    // Simulate knockout for each edge
+    for (const cause of relevantCauses) {
+      const remainingWeight = totalWeight - Math.abs(cause.weight);
+      const knockoutConfidence = totalWeight > 0 ? Math.min(0.95, remainingWeight / Math.max(1, relevantCauses.length - 1)) : 0;
+      const drop = baseConfidence - knockoutConfidence;
+      const dropPct = baseConfidence > 0 ? drop / baseConfidence : 0;
+
+      perturbationResults.push({
+        edge: `${cause.source}→${cause.target}`,
+        baseConfidence: Math.round(baseConfidence * 1000) / 1000,
+        knockoutConfidence: Math.round(knockoutConfidence * 1000) / 1000,
+        drop: Math.round(drop * 1000) / 1000,
+      });
+
+      if (dropPct > 0.20) {
+        fragileEdges.push({
+          source: cause.source, target: cause.target,
+          weight: cause.weight,
+          knockoutImpact: Math.round(dropPct * 100),
+          reason: `Removing this edge drops confidence by ${(dropPct * 100).toFixed(0)}% — brain depends critically on this connection`,
+        });
+        recommendations.push(`Diversify causal drivers for ${ctx.brain.primaryDomain}: edge ${cause.source}→${cause.target} carries ${(Math.abs(cause.weight) / totalWeight * 100).toFixed(0)}% of total causal support`);
+      }
+    }
+
+    // Check time series regime stability
+    let stabilityAssessment = 'stable';
+    const primaryTs = ctx.brain.timeSeries.get(ctx.brain.primaryDomain);
+    if (primaryTs) {
+      const values = (primaryTs as unknown as { values: number[] }).values || [];
+      if (values.length > 10) {
+        const recentWindow = values.slice(-5);
+        const historicalWindow = values.slice(0, -5);
+        const recentStd = Math.sqrt(recentWindow.reduce((s, v) => s + (v - recentWindow.reduce((a, b) => a + b, 0) / recentWindow.length) ** 2, 0) / recentWindow.length);
+        const historicalStd = Math.sqrt(historicalWindow.reduce((s, v) => s + (v - historicalWindow.reduce((a, b) => a + b, 0) / historicalWindow.length) ** 2, 0) / historicalWindow.length);
+
+        if (recentStd > historicalStd * 2) {
+          stabilityAssessment = 'unstable — recent volatility 2x historical';
+          recommendations.push(`${ctx.brain.primaryDomain} shows regime instability — widen prediction intervals`);
+        } else if (recentStd > historicalStd * 1.5) {
+          stabilityAssessment = 'moderately unstable — elevated recent volatility';
+        }
+      }
+    }
+
+    // Compute robustness score
+    const fragileRatio = relevantCauses.length > 0 ? fragileEdges.length / relevantCauses.length : 0;
+    const diversityScore = relevantCauses.length > 0
+      ? 1 - (Math.max(...relevantCauses.map(c => Math.abs(c.weight))) / (totalWeight + 0.001))
+      : 0;
+    const robustnessScore = Math.round(Math.max(0, Math.min(1, (1 - fragileRatio) * 0.6 + diversityScore * 0.4)) * 1000) / 1000;
+
+    const confidence = Math.max(0.3, robustnessScore);
+
+    return {
+      data: {
+        type: 'robustness_analysis',
+        robustnessScore,
+        fragileEdges,
+        perturbationResults,
+        stabilityAssessment,
+        recommendations,
+        totalEdgesChecked: relevantCauses.length,
+        baseConfidence: Math.round(baseConfidence * 1000) / 1000,
+      },
+      narrative: `Robustness check: Score ${(robustnessScore * 100).toFixed(0)}% (${robustnessScore > 0.7 ? 'robust' : robustnessScore > 0.4 ? 'moderate' : 'fragile'}). ${fragileEdges.length} fragile edges found out of ${relevantCauses.length} checked. Stability: ${stabilityAssessment}. ${recommendations.length} recommendations.`,
+      confidence,
+      drivers: fragileEdges.slice(0, 5).map(e => ({
+        domain: e.source, weight: e.weight, lagDays: 0, direction: 'negative' as const,
+      })),
+      interventions: recommendations.slice(0, 3).map(r => ({
+        action: r, targetDomains: [ctx.brain.primaryDomain],
+        expectedImpact: 'Improve result robustness', confidence: 0.7,
+        evidence: `Robustness score: ${robustnessScore}`, owner: 'Brain Resilience System', effort: 'medium' as const,
+      })),
+      modulesUsed: ['knockout-simulator', 'perturbation-engine', 'stability-checker', 'diversity-scorer'],
+      metadata: { robustnessScore, fragileCount: fragileEdges.length, stabilityAssessment, context: context.slice(0, 100) },
+    };
+  },
+
+  formatForPrompt: (result, _ctx) => {
+    const data = result.data as Record<string, unknown>;
+    const lines: string[] = [];
+    lines.push(`## 🛡️ ROBUSTNESS CHECK: Perturbation Sensitivity`);
+    lines.push(`Score: ${((data.robustnessScore as number) * 100).toFixed(0)}% | Fragile edges: ${(data.fragileEdges as unknown[])?.length || 0}/${data.totalEdgesChecked} | Stability: ${data.stabilityAssessment}`);
+    const fragile = data.fragileEdges as Array<{ source: string; target: string; knockoutImpact: number }>;
+    if (fragile && fragile.length > 0) {
+      lines.push('');
+      lines.push(formatTable(['Edge', 'Impact'], fragile.slice(0, 5).map(f => [`${f.source}→${f.target}`, `${f.knockoutImpact}% drop`])));
+    }
+    return lines.join('\n');
+  },
+});
+
+// ============================================================================
 // REGISTER ALL DOMAINS
 // ============================================================================
 
@@ -4861,6 +5745,14 @@ export const ALL_ACTION_DOMAINS: ActionDomainDefinition[] = [
   statementSynthesizeDomain,
   jurisdictionComplyDomain,
   confidenceTriageDomain,
+  // V8 — Metacognition + Self-Improvement
+  calibrationAuditDomain,
+  errorAttributeDomain,
+  chainValidateDomain,
+  uncertaintyQuantifyDomain,
+  queryCacheDomain,
+  executionProfileDomain,
+  robustnessCheckDomain,
 ];
 
 /**

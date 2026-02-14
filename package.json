@@ -14,7 +14,17 @@
     "security:daily": "bash scripts/daily-security-scan.sh",
     "security:setup:cron": "bash scripts/setup-daily-cron.sh",
     "security:deps:check": "tsx scripts/audit-all-packages.ts",
-    "security:deps:fix": "cd packages/memory-stack && npm audit fix && cd ../.. && cd platform && npm audit fix && cd .."
+    "security:deps:fix": "cd packages/memory-stack && npm audit fix && cd ../.. && cd platform && npm audit fix && cd ..",
+    "job:run": "tsx scripts/run-scheduled-job.ts",
+    "job:verification": "tsx scripts/run-scheduled-job.ts verification",
+    "job:weights": "tsx scripts/run-scheduled-job.ts weights",
+    "job:decay": "tsx scripts/run-scheduled-job.ts decay",
+    "job:threshold": "tsx scripts/run-scheduled-job.ts threshold",
+    "job:retention": "tsx scripts/run-scheduled-job.ts retention",
+    "job:federation": "tsx scripts/run-scheduled-job.ts federation",
+    "job:consolidation": "tsx scripts/run-scheduled-job.ts consolidation",
+    "job:all-daily": "tsx scripts/run-scheduled-job.ts all_daily",
+    "verify:wiring": "tsx scripts/verify-brain-wiring.ts"
   },
   "devDependencies": {
     "tsx": "^4.0.0",

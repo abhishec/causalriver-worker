@@ -93,7 +93,15 @@ export type SemanticIntent =
   | 'consistency-verify'
   | 'code-generate'
   | 'review-triage'
-  | 'interrogate'; // Added for requirement-clarify (reuses Broca's questioning)
+  | 'interrogate' // Added for requirement-clarify (reuses Broca's questioning)
+  // V8 — Metacognition + Self-Improvement
+  | 'calibration-audit'    // Brain self-accuracy assessment
+  | 'error-attribute'      // Why-was-I-wrong diagnosis
+  | 'chain-validate'       // Composed result consistency check
+  | 'uncertainty-quantify' // Epistemic vs aleatoric decomposition
+  | 'query-cache'          // Working memory buffer stats
+  | 'execution-profile'    // Performance self-observation
+  | 'robustness-check';    // Perturbation sensitivity analysis
 
 /** Output schema declaration — what a domain produces */
 export interface DomainOutputSchema {
@@ -485,6 +493,18 @@ export function createActionDomainRegistry(config: ActionDomainRegistryConfig = 
     ? (...args: unknown[]) => console.log('[ActionDomainRegistry]', ...args)
     : () => {};
 
+  // ── Query Cache (V8 — Working Memory Buffer) ─────────────────────────
+  const queryCache = new Map<string, { result: ActionDomainResult; cachedAt: number; brainHash: string }>();
+  const CACHE_TTL_MS = 60_000; // 1 minute
+  const MAX_CACHE_SIZE = 100;
+  let cacheHits = 0;
+  let cacheMisses = 0;
+  let cacheSavedMs = 0;
+
+  function computeBrainHash(domainName: string, brain: ActionDomainBrainContext): string {
+    return `${domainName}:${brain.primaryDomain}:${brain.extractedDomains.join(',')}:${brain.horizonDays}:${brain.question.slice(0, 100)}`;
+  }
+
   // ── Registration ────────────────────────────────────────────────────
 
   function register(definition: ActionDomainDefinition): void {
@@ -772,6 +792,15 @@ export function createActionDomainRegistry(config: ActionDomainRegistryConfig = 
       };
     }
 
+    // V8: Query cache check (working memory buffer)
+    const cacheKey = computeBrainHash(domainName, brain);
+    const cached = queryCache.get(cacheKey);
+    if (cached && Date.now() - cached.cachedAt < CACHE_TTL_MS) {
+      cacheHits++;
+      return { ...cached.result, metadata: { ...cached.result.metadata, cached: true, cacheAge: Date.now() - cached.cachedAt } };
+    }
+    cacheMisses++;
+
     const executionId = `exec_${Date.now()}_${++executionCounter}`;
     const startedAt = new Date().toISOString();
     const startTime = performance.now();
@@ -823,6 +852,27 @@ export function createActionDomainRegistry(config: ActionDomainRegistryConfig = 
       // Execute the domain
       const result = await def.execute(ctx);
 
+      // V8: Runtime type validation
+      if (typeof result.confidence !== 'number' || result.confidence < 0 || result.confidence > 1) {
+        log(`Domain ${domainName} returned invalid confidence: ${result.confidence}, clamping to [0,1]`);
+        result.confidence = Math.max(0, Math.min(1, result.confidence || 0));
+      }
+      if (!result.narrative || typeof result.narrative !== 'string') {
+        result.narrative = `${domainName} analysis completed.`;
+      }
+      if (!Array.isArray(result.drivers)) {
+        result.drivers = [];
+      }
+
+      // V8: Confidence gating — mark very low confidence results
+      if (result.confidence < 0.15) {
+        result.metadata = { ...result.metadata, confidenceGated: true };
+        result.interventions = (result.interventions || []).map(i => ({
+          ...i,
+          action: `[GATED — ${(result.confidence * 100).toFixed(0)}% confidence] ${i.action}`,
+        }));
+      }
+
       // Record success
       const durationMs = performance.now() - startTime;
       registered.totalExecutions++;
@@ -857,6 +907,14 @@ export function createActionDomainRegistry(config: ActionDomainRegistryConfig = 
       executionHistory.push(record);
       if (executionHistory.length > 500) executionHistory.shift();
       if (onDomainCompleted) onDomainCompleted(record);
+
+      // V8: Cache write (working memory buffer)
+      if (queryCache.size >= MAX_CACHE_SIZE) {
+        const oldestKey = queryCache.keys().next().value;
+        if (oldestKey) queryCache.delete(oldestKey);
+      }
+      queryCache.set(cacheKey, { result, cachedAt: Date.now(), brainHash: cacheKey });
+      cacheSavedMs += durationMs; // Each future cache hit saves this much
 
       return result;
 
@@ -1052,6 +1110,13 @@ export function createActionDomainRegistry(config: ActionDomainRegistryConfig = 
         enabled: d.enabled,
       })),
       recentHistory: executionHistory.slice(-20),
+      // V8: Query cache stats
+      cacheHitRate: (cacheHits + cacheMisses) > 0 ? Math.round((cacheHits / (cacheHits + cacheMisses)) * 100) : 0,
+      cacheMissRate: (cacheHits + cacheMisses) > 0 ? Math.round((cacheMisses / (cacheHits + cacheMisses)) * 100) : 100,
+      cacheSize: queryCache.size,
+      cacheHits,
+      cacheMisses,
+      cacheSavedMs: Math.round(cacheSavedMs),
     };
   }
 
