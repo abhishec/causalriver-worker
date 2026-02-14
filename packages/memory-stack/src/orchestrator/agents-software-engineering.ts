@@ -82,7 +82,7 @@ export const brainCodebaseMapperAgent: AgentDefinition<
       throw new Error(`Codebase comprehension failed: ${comprehendResult.error}`);
     }
 
-    const comprehendData = comprehendResult.result.data as {
+    const comprehendData = (comprehendResult.result as Record<string, unknown>).data as {
       architecture: unknown;
       dependencies: { upstream: unknown[]; downstream: unknown[] };
       techDebt: unknown[];
@@ -110,7 +110,7 @@ export const brainCodebaseMapperAgent: AgentDefinition<
     });
 
     const correlations = correlateResult.status === 'completed'
-      ? correlateResult.result.data
+      ? (correlateResult.result as Record<string, unknown>).data
       : { correlations: [] };
 
     ctx.log(`[brain-codebase-mapper] Found ${(correlations as { correlations: unknown[] }).correlations.length} architectural correlations`);
@@ -200,7 +200,7 @@ export const brainFeatureBuilderAgent: AgentDefinition<
       throw new Error(`Spec completeness check failed: ${completenessResult.error}`);
     }
 
-    const completenessData = completenessResult.result.data as {
+    const completenessData = (completenessResult.result as Record<string, unknown>).data as {
       completenessScore: number;
       missingRequirements: unknown[];
       edgeCases: unknown[];
@@ -217,7 +217,7 @@ export const brainFeatureBuilderAgent: AgentDefinition<
         question: input.specification,
       });
 
-      questions = (clarifyResult.result.data as { questions: unknown[] }).questions;
+      questions = ((clarifyResult.result as Record<string, unknown>).data as { questions: unknown[] }).questions;
       ctx.log(`[brain-feature-builder] Generated ${questions.length} clarifying questions`);
 
       // If spec is too incomplete, return early with questions
@@ -239,7 +239,7 @@ export const brainFeatureBuilderAgent: AgentDefinition<
       question: `Apply best practices for: ${input.specification}`,
     });
 
-    const patternData = patternResult.result.data as {
+    const patternData = (patternResult.result as Record<string, unknown>).data as {
       violations: unknown[];
       qualityScore: number;
     };
@@ -253,7 +253,7 @@ export const brainFeatureBuilderAgent: AgentDefinition<
       question: `Implement: ${input.specification}`,
     });
 
-    const generateData = generateResult.result.data as {
+    const generateData = (generateResult.result as Record<string, unknown>).data as {
       codeArtifacts: Array<{ name: string; type: string }>;
       completeness: number;
     };
@@ -337,7 +337,7 @@ export const brainCodeReviewerAgent: AgentDefinition<
       question: `Verify consistency for: ${input.description}`,
     });
 
-    const consistencyData = consistencyResult.result.data as {
+    const consistencyData = (consistencyResult.result as Record<string, unknown>).data as {
       inconsistencies: unknown[];
       alignmentScore: number;
     };
@@ -355,7 +355,7 @@ export const brainCodeReviewerAgent: AgentDefinition<
       question: `Check patterns for: ${input.description}`,
     });
 
-    const patternData = patternResult.result.data as {
+    const patternData = (patternResult.result as Record<string, unknown>).data as {
       violations: unknown[];
       qualityScore: number;
     };
@@ -373,7 +373,7 @@ export const brainCodeReviewerAgent: AgentDefinition<
       question: `Triage PR: ${input.description}`,
     });
 
-    const triageData = triageResult.result.data as {
+    const triageData = (triageResult.result as Record<string, unknown>).data as {
       triageResults: Array<{ category: 'auto-approve' | 'quick-review' | 'detailed-review' | 'critical'; confidence: number; risks: string[] }>;
       confidenceScore: number;
     };
@@ -391,7 +391,7 @@ export const brainCodeReviewerAgent: AgentDefinition<
       question: `Recommend improvements for: ${input.description}`,
     });
 
-    const recommendations = (recommendResult.result.data as { recommendations: unknown[] }).recommendations || [];
+    const recommendations = ((recommendResult.result as Record<string, unknown>).data as { recommendations: unknown[] }).recommendations || [];
 
     // Build final review comment
     if (triageDecision === 'auto-approve') {
@@ -468,7 +468,7 @@ export const brainTechDebtOptimizerAgent: AgentDefinition<
       question: 'Identify all tech debt, high coupling, and circular dependencies',
     });
 
-    const techDebtItems = (comprehendResult.result.data as { techDebt: unknown[] }).techDebt;
+    const techDebtItems = ((comprehendResult.result as Record<string, unknown>).data as { techDebt: unknown[] }).techDebt;
     ctx.log(`[brain-tech-debt-optimizer] Found ${techDebtItems.length} tech debt items`);
 
     // Step 2: Check pattern memory for similar past issues
@@ -479,7 +479,7 @@ export const brainTechDebtOptimizerAgent: AgentDefinition<
       question: 'What patterns have caused issues before?',
     });
 
-    const historicalPatterns = (patternResult.result.data as { matches: unknown[] }).matches || [];
+    const historicalPatterns = ((patternResult.result as Record<string, unknown>).data as { matches: unknown[] }).matches || [];
     ctx.log(`[brain-tech-debt-optimizer] Found ${historicalPatterns.length} historical patterns`);
 
     // Step 3: Analyze risk cascades (what breaks if this tech debt causes failure?)
@@ -489,7 +489,7 @@ export const brainTechDebtOptimizerAgent: AgentDefinition<
       question: 'What are the cascading failure risks from tech debt?',
     });
 
-    const riskCascades = (riskResult.result.data as { cascades: unknown[] }).cascades || [];
+    const riskCascades = ((riskResult.result as Record<string, unknown>).data as { cascades: unknown[] }).cascades || [];
     ctx.log(`[brain-tech-debt-optimizer] Found ${riskCascades.length} risk cascades`);
 
     // Step 4: Prioritize refactoring work
@@ -499,7 +499,7 @@ export const brainTechDebtOptimizerAgent: AgentDefinition<
       question: 'Prioritize tech debt refactoring based on risk and effort',
     });
 
-    const prioritizedBacklog = (recommendResult.result.data as { recommendations: unknown[] }).recommendations || [];
+    const prioritizedBacklog = ((recommendResult.result as Record<string, unknown>).data as { recommendations: unknown[] }).recommendations || [];
     ctx.log(`[brain-tech-debt-optimizer] Generated ${prioritizedBacklog.length} prioritized recommendations`);
 
     // Estimate total effort
@@ -522,11 +522,11 @@ export const brainTechDebtOptimizerAgent: AgentDefinition<
 // EXPORT ALL SOFTWARE ENGINEERING AGENTS
 // ============================================================================
 
-export const ALL_SOFTWARE_ENGINEERING_AGENTS = [
-  brainCodebaseMapperAgent,
-  brainFeatureBuilderAgent,
-  brainCodeReviewerAgent,
-  brainTechDebtOptimizerAgent,
+export const ALL_SOFTWARE_ENGINEERING_AGENTS: AgentDefinition[] = [
+  brainCodebaseMapperAgent as AgentDefinition,
+  brainFeatureBuilderAgent as AgentDefinition,
+  brainCodeReviewerAgent as AgentDefinition,
+  brainTechDebtOptimizerAgent as AgentDefinition,
 ];
 
 /**

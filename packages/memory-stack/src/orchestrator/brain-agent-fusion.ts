@@ -22,6 +22,30 @@
  */
 
 import { defineAgent, type AgentDefinition } from './agent-registry';
+import {
+  jarvisOrchestratorAgent,
+  jarvisAnalystAgent,
+  jarvisMonitorAgent,
+  ALL_JARVIS_AGENTS,
+  registerJarvisAgents,
+} from './agents-jarvis';
+
+// Re-export Jarvis for convenience
+export {
+  jarvisOrchestratorAgent,
+  jarvisAnalystAgent,
+  jarvisMonitorAgent,
+  ALL_JARVIS_AGENTS,
+  registerJarvisAgents,
+} from './agents-jarvis';
+
+export type {
+  JarvisGoal,
+  JarvisResult,
+  JarvisFinding,
+  JarvisAction,
+  JarvisMonitorResult,
+} from './agents-jarvis';
 
 // ============================================================================
 // TYPES
@@ -472,10 +496,297 @@ export const interventionTrackerAgent: AgentDefinition = defineAgent({
 });
 
 // ============================================================================
+// V7 — ACCOUNTING INTELLIGENCE AGENTS
+// ============================================================================
+
+/**
+ * Balance Sheet Builder Agent — orchestrates full BS generation
+ * Level: task | Triggers: event:period_close, command:build_balance_sheet
+ */
+export const balanceSheetBuilderAgent: AgentDefinition = defineAgent({
+  name: 'brain-balance-sheet-builder',
+  description: 'Orchestrates end-to-end balance sheet generation — comprehends documents, checks completeness, applies rules, cross-validates, synthesizes the statement, and triages confidence',
+  level: 'task',
+  triggers: ['event:period_close', 'command:build_balance_sheet'],
+  tags: ['brain-native', 'accounting', 'balance-sheet', 'v7'],
+
+  execute: async (input: unknown, ctx) => {
+    const brainExec = (ctx as unknown as { brainExecution: BrainExecutionInterface }).brainExecution;
+    if (!brainExec) {
+      return { status: 'skipped', reason: 'Brain execution interface not available' };
+    }
+
+    ctx.reportProgress(0.1, 'Comprehending financial documents...');
+    const documents = await brainExec.executeDomain('document-comprehend');
+
+    ctx.reportProgress(0.25, 'Checking data completeness...');
+    const completeness = await brainExec.executeDomain('completeness-check');
+
+    ctx.reportProgress(0.4, 'Applying accounting rules...');
+    const rules = await brainExec.executeDomain('rule-apply');
+
+    ctx.reportProgress(0.6, 'Cross-validating balances...');
+    const validation = await brainExec.executeDomain('cross-validate');
+
+    ctx.reportProgress(0.8, 'Synthesizing balance sheet...');
+    const statement = await brainExec.executeDomain('statement-synthesize');
+
+    ctx.reportProgress(0.95, 'Triaging confidence...');
+    const triage = await brainExec.executeDomain('confidence-triage');
+
+    ctx.reportProgress(1.0, 'Balance sheet complete');
+
+    return {
+      status: 'completed',
+      statementType: 'balance_sheet',
+      documents,
+      completeness,
+      rules,
+      validation,
+      statement,
+      triage,
+      generatedAt: new Date().toISOString(),
+    };
+  },
+});
+
+/**
+ * P&L Builder Agent — orchestrates full Income Statement generation
+ * Level: task | Triggers: event:period_close, command:build_pnl
+ */
+export const pnlBuilderAgent: AgentDefinition = defineAgent({
+  name: 'brain-pnl-builder',
+  description: 'Orchestrates end-to-end P&L (Income Statement) generation — comprehends documents, checks completeness, applies revenue recognition rules, synthesizes the statement, cross-validates, and triages',
+  level: 'task',
+  triggers: ['event:period_close', 'command:build_pnl'],
+  tags: ['brain-native', 'accounting', 'pnl', 'income-statement', 'v7'],
+
+  execute: async (input: unknown, ctx) => {
+    const brainExec = (ctx as unknown as { brainExecution: BrainExecutionInterface }).brainExecution;
+    if (!brainExec) {
+      return { status: 'skipped', reason: 'Brain execution interface not available' };
+    }
+
+    ctx.reportProgress(0.1, 'Comprehending revenue & expense documents...');
+    const documents = await brainExec.executeDomain('document-comprehend');
+
+    ctx.reportProgress(0.25, 'Checking P&L data completeness...');
+    const completeness = await brainExec.executeDomain('completeness-check');
+
+    ctx.reportProgress(0.4, 'Applying revenue recognition & expense rules...');
+    const rules = await brainExec.executeDomain('rule-apply');
+
+    ctx.reportProgress(0.6, 'Synthesizing income statement...');
+    const statement = await brainExec.executeDomain('statement-synthesize');
+
+    ctx.reportProgress(0.8, 'Cross-validating P&L figures...');
+    const validation = await brainExec.executeDomain('cross-validate');
+
+    ctx.reportProgress(0.95, 'Triaging confidence levels...');
+    const triage = await brainExec.executeDomain('confidence-triage');
+
+    ctx.reportProgress(1.0, 'P&L complete');
+
+    return {
+      status: 'completed',
+      statementType: 'income_statement',
+      documents,
+      completeness,
+      rules,
+      statement,
+      validation,
+      triage,
+      generatedAt: new Date().toISOString(),
+    };
+  },
+});
+
+/**
+ * Cash Flow Builder Agent — orchestrates Cash Flow Statement generation
+ * Level: task | Triggers: event:period_close, command:build_cashflow
+ */
+export const cashflowBuilderAgent: AgentDefinition = defineAgent({
+  name: 'brain-cashflow-builder',
+  description: 'Orchestrates cash flow statement generation — comprehends cash movements, checks completeness, applies classification rules, synthesizes operating/investing/financing activities',
+  level: 'task',
+  triggers: ['event:period_close', 'command:build_cashflow'],
+  tags: ['brain-native', 'accounting', 'cashflow', 'v7'],
+
+  execute: async (input: unknown, ctx) => {
+    const brainExec = (ctx as unknown as { brainExecution: BrainExecutionInterface }).brainExecution;
+    if (!brainExec) {
+      return { status: 'skipped', reason: 'Brain execution interface not available' };
+    }
+
+    ctx.reportProgress(0.15, 'Comprehending cash movement documents...');
+    const documents = await brainExec.executeDomain('document-comprehend');
+
+    ctx.reportProgress(0.3, 'Checking cash flow data completeness...');
+    const completeness = await brainExec.executeDomain('completeness-check');
+
+    ctx.reportProgress(0.5, 'Applying cash classification rules...');
+    const rules = await brainExec.executeDomain('rule-apply');
+
+    ctx.reportProgress(0.7, 'Synthesizing cash flow statement...');
+    const statement = await brainExec.executeDomain('statement-synthesize');
+
+    ctx.reportProgress(0.85, 'Cross-validating cash movements...');
+    const validation = await brainExec.executeDomain('cross-validate');
+
+    ctx.reportProgress(1.0, 'Cash flow statement complete');
+
+    return {
+      status: 'completed',
+      statementType: 'cash_flow',
+      documents,
+      completeness,
+      rules,
+      statement,
+      validation,
+      generatedAt: new Date().toISOString(),
+    };
+  },
+});
+
+/**
+ * Tax Preparer Agent — multi-jurisdiction tax preparation
+ * Level: task | Triggers: event:tax_deadline_approaching, command:prepare_tax
+ */
+export const taxPreparerAgent: AgentDefinition = defineAgent({
+  name: 'brain-tax-preparer',
+  description: 'Multi-jurisdiction tax preparation — applies tax rules per jurisdiction, checks compliance, cross-validates tax computations, verifies completeness of required forms',
+  level: 'task',
+  triggers: ['event:tax_deadline_approaching', 'command:prepare_tax'],
+  tags: ['brain-native', 'accounting', 'tax', 'multi-jurisdiction', 'v7'],
+
+  execute: async (input: unknown, ctx) => {
+    const brainExec = (ctx as unknown as { brainExecution: BrainExecutionInterface }).brainExecution;
+    if (!brainExec) {
+      return { status: 'skipped', reason: 'Brain execution interface not available' };
+    }
+
+    ctx.reportProgress(0.15, 'Applying jurisdiction-specific tax rules...');
+    const rules = await brainExec.executeDomain('rule-apply');
+
+    ctx.reportProgress(0.35, 'Running multi-jurisdiction compliance check...');
+    const compliance = await brainExec.executeDomain('jurisdiction-comply');
+
+    ctx.reportProgress(0.55, 'Cross-validating tax computations...');
+    const validation = await brainExec.executeDomain('cross-validate');
+
+    ctx.reportProgress(0.75, 'Checking filing completeness...');
+    const completeness = await brainExec.executeDomain('completeness-check');
+
+    ctx.reportProgress(0.9, 'Triaging tax positions...');
+    const triage = await brainExec.executeDomain('confidence-triage');
+
+    ctx.reportProgress(1.0, 'Tax preparation complete');
+
+    return {
+      status: 'completed',
+      prepType: 'multi_jurisdiction_tax',
+      rules,
+      compliance,
+      validation,
+      completeness,
+      triage,
+      preparedAt: new Date().toISOString(),
+    };
+  },
+});
+
+/**
+ * Multi-Jurisdiction Monitor Agent — autonomous daily compliance dashboard
+ * Level: autonomous | Triggers: schedule:24h, event:regulation_change
+ */
+export const multiJurisdictionMonitorAgent: AgentDefinition = defineAgent({
+  name: 'brain-multi-jurisdiction-monitor',
+  description: 'Autonomous multi-jurisdiction compliance monitor — daily scan of all active jurisdictions for compliance gaps, filing deadlines, and regulatory changes',
+  level: 'autonomous',
+  triggers: ['schedule:24h', 'event:regulation_change', 'event:new_jurisdiction_added'],
+  tags: ['brain-native', 'accounting', 'compliance', 'monitor', 'autonomous', 'v7'],
+
+  execute: async (input: unknown, ctx) => {
+    const brainExec = (ctx as unknown as { brainExecution: BrainExecutionInterface }).brainExecution;
+    if (!brainExec) {
+      return { status: 'skipped', reason: 'Brain execution interface not available' };
+    }
+
+    ctx.reportProgress(0.3, 'Scanning all jurisdictions for compliance...');
+    const compliance = await brainExec.executeDomain('jurisdiction-comply');
+
+    ctx.reportProgress(0.6, 'Checking filing completeness across jurisdictions...');
+    const completeness = await brainExec.executeDomain('completeness-check');
+
+    ctx.reportProgress(0.9, 'Triaging compliance priorities...');
+    const triage = await brainExec.executeDomain('confidence-triage');
+
+    ctx.reportProgress(1.0, 'Multi-jurisdiction scan complete');
+
+    return {
+      status: 'completed',
+      monitorType: 'multi_jurisdiction_compliance',
+      compliance,
+      completeness,
+      triage,
+      scannedAt: new Date().toISOString(),
+      nextScan: '24h',
+    };
+  },
+});
+
+/**
+ * Financial Auditor Agent — comprehensive audit execution
+ * Level: task | Triggers: command:run_audit, event:period_close
+ */
+export const financialAuditorAgent: AgentDefinition = defineAgent({
+  name: 'brain-financial-auditor',
+  description: 'Runs comprehensive financial audit — checks completeness, cross-validates all accounts, applies rules, verifies jurisdiction compliance, and triages findings by materiality',
+  level: 'task',
+  triggers: ['command:run_audit', 'event:period_close'],
+  tags: ['brain-native', 'accounting', 'audit', 'compliance', 'v7'],
+
+  execute: async (input: unknown, ctx) => {
+    const brainExec = (ctx as unknown as { brainExecution: BrainExecutionInterface }).brainExecution;
+    if (!brainExec) {
+      return { status: 'skipped', reason: 'Brain execution interface not available' };
+    }
+
+    ctx.reportProgress(0.1, 'Checking data completeness...');
+    const completeness = await brainExec.executeDomain('completeness-check');
+
+    ctx.reportProgress(0.3, 'Cross-validating all accounts...');
+    const validation = await brainExec.executeDomain('cross-validate');
+
+    ctx.reportProgress(0.5, 'Applying accounting & tax rules...');
+    const rules = await brainExec.executeDomain('rule-apply');
+
+    ctx.reportProgress(0.7, 'Verifying jurisdiction compliance...');
+    const compliance = await brainExec.executeDomain('jurisdiction-comply');
+
+    ctx.reportProgress(0.9, 'Triaging audit findings by materiality...');
+    const triage = await brainExec.executeDomain('confidence-triage');
+
+    ctx.reportProgress(1.0, 'Financial audit complete');
+
+    return {
+      status: 'completed',
+      auditType: 'comprehensive_financial',
+      completeness,
+      validation,
+      rules,
+      compliance,
+      triage,
+      auditedAt: new Date().toISOString(),
+    };
+  },
+});
+
+// ============================================================================
 // ALL PRE-BUILT AGENTS
 // ============================================================================
 
-/** All 10 pre-built brain-native agents */
+/** All 19 pre-built brain-native agents (V6 + V6.1 + V7 + V8 Jarvis) */
 export const ALL_BRAIN_AGENTS: AgentDefinition[] = [
   // V6 — Core Brain Agents
   revenueWatcherAgent,
@@ -489,16 +800,26 @@ export const ALL_BRAIN_AGENTS: AgentDefinition[] = [
   patternReconAgent,
   orgHealthAgent,
   interventionTrackerAgent,
+  // V7 — Accounting Intelligence Agents
+  balanceSheetBuilderAgent,
+  pnlBuilderAgent,
+  cashflowBuilderAgent,
+  taxPreparerAgent,
+  multiJurisdictionMonitorAgent,
+  financialAuditorAgent,
+  // V8 — Jarvis Executive Intelligence
+  ...ALL_JARVIS_AGENTS,
 ];
 
 /**
- * Register all 10 brain-native agents into an agent registry.
+ * Register all 19 brain-native agents into an agent registry.
+ * Includes V6 core (5), V6.1 advanced (5), V7 accounting (6), V8 Jarvis executive (3).
  *
  * @example
  * ```typescript
  * const agentRegistry = createAgentRegistry({ verbose: true });
  * registerBrainAgents(agentRegistry);
- * // 10 brain-native agents now registered
+ * // 19 brain-native agents now registered (including Jarvis executive layer)
  * ```
  */
 export function registerBrainAgents(

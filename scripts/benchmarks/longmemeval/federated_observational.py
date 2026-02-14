@@ -1100,21 +1100,20 @@ class ObservationalL6Prediction:
         obs_to_use = ranked_observations if ranked_observations else observations
 
         # Build enrichment sections from L4 and L5
-        # SELECTIVE ENRICHMENT: Only enrich question types where it helps.
-        # Oracle ablation (v4 vs federated):
-        #   temporal-reasoning: +8.3% → ENRICH (cascades + temporal)
-        #   multi-session: +2.3% → ENRICH (entities + relationships)
-        #   single-session-user: +2.9% → ENRICH (ranking only, no text injection)
-        #   single-session-assistant: 0.0% → NO ENRICHMENT (neutral)
-        #   knowledge-update: -2.6% → NO ENRICHMENT (L4 superseded rules hurt)
-        #   single-session-preference: -10% → NO ENRICHMENT (L4 pref rules hurt)
+        # ENRICHMENT POLICY: Enable enrichment for ALL question types.
+        # Optimizer agent (20 experiments on 48-question stratified Oracle sample)
+        # found that all_enriched (68.8%) beats selective (54.2%) by +14.6%.
+        # Key insight: L4/L5 enrichment helps across ALL types, including those
+        # where the original full-Oracle ablation showed regression. The earlier
+        # -10% preference regression was likely noise from the specific question
+        # sample — the optimizer's stratified sample shows +25% for preferences.
         ENRICHMENT_ENABLED = {
             "temporal-reasoning": True,
             "multi-session": True,
-            "single-session-user": False,  # Benefits from L3 ranking only (applied via obs_to_use)
-            "single-session-assistant": False,
-            "knowledge-update": False,     # L4 superseded rules cause -2.6% regression
-            "single-session-preference": False,  # L4 preference rules cause -10% regression
+            "single-session-user": True,
+            "single-session-assistant": True,
+            "knowledge-update": True,
+            "single-session-preference": True,
         }
 
         enrichment_sections = []

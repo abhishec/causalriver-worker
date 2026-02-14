@@ -43,6 +43,11 @@ import {
   type UserContext,
   type OrgRole,
 } from './user-context-resolver';
+import {
+  createCalibrationFeedbackLoop,
+  type CalibrationPrediction,
+} from './calibration-feedback-loop';
+import type { DecisionJournalEntry } from './domain-action-engine';
 
 // ============================================================================
 // TYPES
@@ -205,6 +210,7 @@ export function createBrainCommander(config: BrainCommanderConfig) {
   // Internal subsystems
   const assessor = createDispatchAssessor();
   const contextResolver = createUserContextResolver({ supabase });
+  const calibrationLoop = createCalibrationFeedbackLoop();
 
   // ── Main Command Entry Point ────────────────────────────────────────
 
@@ -285,7 +291,18 @@ export function createBrainCommander(config: BrainCommanderConfig) {
         timing.action = performance.now() - actionStart;
       }
 
-      // ── Step 5: Filter by user permissions ──────────────────────────
+      // ── Step 5: Record prediction for calibration feedback loop ─────
+      if (artifact) {
+        const calibrationStart = performance.now();
+        try {
+          recordForCalibration(question, dispatch, artifact);
+        } catch {
+          // Non-fatal: calibration recording should never block a response
+        }
+        timing.calibration = performance.now() - calibrationStart;
+      }
+
+      // ── Step 6: Filter by user permissions ──────────────────────────
       if (userContext) {
         const filterStart = performance.now();
         filterByPermissions(intelligence, userContext);
@@ -521,6 +538,46 @@ export function createBrainCommander(config: BrainCommanderConfig) {
     };
   }
 
+  // ── Calibration Recording ─────────────────────────────────────────
+
+  function recordForCalibration(
+    question: string,
+    dispatch: DispatchAssessment,
+    artifact: Record<string, unknown>
+  ): void {
+    // Extract decision journal entry if the action engine produced one
+    const decisionJournal = artifact.decisionJournal as DecisionJournalEntry | undefined;
+
+    if (decisionJournal) {
+      // Record prediction from the decision journal
+      calibrationLoop.recordPrediction(decisionJournal);
+    } else if (dispatch.needsAction && artifact.confidence !== undefined) {
+      // Even without a full decision journal, record the artifact as a prediction
+      // for calibration tracking (helps detect systematic over/under-confidence)
+      const conf = Number(artifact.confidence) || dispatch.confidence;
+      const syntheticJournal: DecisionJournalEntry = {
+        timestamp: new Date().toISOString(),
+        question,
+        recommendation: String(artifact.narrative || artifact.summary || 'Brain recommendation'),
+        mondayMorningAction: 'Review prediction accuracy in 30 days',
+        predictedOutcome: String(artifact.narrative || artifact.summary || question),
+        confidenceAtDecision: conf,
+        domain: dispatch.primaryDomain,
+        actionType: (artifact.actionType as any) || 'forecast',
+        assumptions: [],
+        falsificationCriteria: [],
+        reviewDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
+        confidenceBreakdown: {
+          dataQuality: conf,
+          modelFit: conf,
+          domainCoverage: conf,
+          overall: conf,
+        },
+      };
+      calibrationLoop.recordPrediction(syntheticJournal);
+    }
+  }
+
   // ── Action Knowledge Context Builder ────────────────────────────────
 
   function buildActionKnowledgeContext(
@@ -703,6 +760,27 @@ export function createBrainCommander(config: BrainCommanderConfig) {
         actionTimeoutMs,
         hasAnthropicKey: !!anthropicApiKey,
       };
+    },
+
+    /**
+     * Get calibration metrics — how accurate is the brain's confidence?
+     * Returns Brier score, ECE, reliability diagram data, domain breakdown.
+     */
+    getCalibrationMetrics() {
+      return calibrationLoop.getStats();
+    },
+
+    /**
+     * Record an outcome for a previous prediction (closes the learning loop).
+     * Call this when the actual outcome of a brain prediction becomes known.
+     */
+    recordOutcome(predictionId: string, outcome: {
+      correct: boolean;
+      accuracy: number;
+      actualOutcome: string;
+      source: 'manual' | 'automated' | 'signal_data' | 'brain_reanalysis';
+    }) {
+      return calibrationLoop.recordOutcome(predictionId, outcome);
     },
   };
 }

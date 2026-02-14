@@ -770,11 +770,32 @@ export {
   taxPreparerAgent,
   multiJurisdictionMonitorAgent,
   financialAuditorAgent,
+  // V8 — Jarvis Executive Intelligence Agents
+  jarvisOrchestratorAgent,
+  jarvisAnalystAgent,
+  jarvisMonitorAgent,
+  ALL_JARVIS_AGENTS,
+  registerJarvisAgents,
   ALL_BRAIN_AGENTS,
   registerBrainAgents,
   type BrainExecutionInterface,
   type BrainAgentConfig,
+  type JarvisGoal,
+  type JarvisResult,
+  type JarvisFinding,
+  type JarvisAction,
+  type JarvisMonitorResult,
 } from './orchestrator/brain-agent-fusion';
+
+// Software Engineering Agents ("SE-aaS Workforce") — 4 agents orchestrating 7 SE domains
+export {
+  brainCodebaseMapperAgent,
+  brainFeatureBuilderAgent,
+  brainCodeReviewerAgent,
+  brainTechDebtOptimizerAgent,
+  ALL_SOFTWARE_ENGINEERING_AGENTS,
+  registerSoftwareEngineeringAgents,
+} from './orchestrator/agents-software-engineering';
 
 // Brain Context Builder — Universal Prefrontal Cortex ("Working Memory Assembly")
 // Assembles context from ALL brain regions + trained knowledge into LLM-ready prompts.
