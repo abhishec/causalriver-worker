@@ -1,29 +1,39 @@
 /**
- * Action Domains V1 — 13 Self-Registering Brain Functions
+ * Action Domains V2 — 20 Self-Registering Brain Functions
  * ========================================================
  *
  * Each action domain is a specialized neural pathway in the brain.
  * Instead of a 3,366-line monolith with 27 switch cases, each domain
  * is ~50-100 lines, self-describing, composable, and learnable.
  *
- * The 13 Domains:
+ * The 20 Domains:
  *
- *   CORE (existing V2-V5, refactored):
- *   1. forecast   — Temporal prediction (Temporal Cortex)
- *   2. simulate   — What-if scenario analysis (Imagination Network)
- *   3. explain    — Causal explanation (Wernicke's Area)
- *   4. diagnose   — Root cause diagnosis (Diagnostic Cortex)
- *   5. composite  — Multi-domain synthesis (Association Cortex)
+ *   CORE (V2-V5 refactored):
+ *   1. forecast         — Temporal prediction (Temporal Cortex)
+ *   2. simulate         — What-if scenario analysis (Imagination Network)
+ *   3. explain          — Causal explanation (Wernicke's Area)
+ *   4. diagnose         — Root cause diagnosis (Diagnostic Cortex)
+ *   5. composite        — Multi-domain synthesis (Association Cortex)
  *
- *   NEW (V6 additions):
- *   6. compare    — Side-by-side domain analysis (Lateral Thinking)
- *   7. monitor    — Persistent brain watchers (Vigilance System)
- *   8. optimize   — Goal-directed intervention planning (Prefrontal Planning)
- *   9. recommend  — Priority-ranked action stack (Executive Function)
- *  10. audit      — Assumption verification (Integrity Checker)
- *  11. correlate  — Cross-domain co-movement discovery (Pattern Recognition)
- *  12. benchmark  — External reference comparison (Comparative Cortex)
- *  13. narrate    — Investor-grade communication (Broca's Area)
+ *   V6 — Brain Function Expansion:
+ *   6. compare          — Side-by-side domain analysis (Lateral Thinking)
+ *   7. monitor          — Persistent brain watchers (Vigilance System)
+ *   8. optimize         — Goal-directed intervention planning (Prefrontal Planning)
+ *   9. recommend        — Priority-ranked action stack (Executive Function)
+ *  10. audit            — Assumption verification (Integrity Checker)
+ *  11. correlate        — Cross-domain co-movement discovery (Pattern Recognition)
+ *  12. benchmark        — External reference comparison (Comparative Cortex)
+ *  13. narrate          — Investor-grade communication (Broca's Area)
+ *
+ *   V6.1 — Advanced Brain Cognition:
+ *  14. sentiment        — Organizational mood & signal tone (Amygdala)
+ *  15. scenario-tree    — Branching futures with probabilities (Hippocampal Prospection)
+ *  16. risk-cascade     — Cascading failure path analysis (Insular Cortex)
+ *  17. resource-allocate — Optimal budget/headcount distribution (Dorsolateral PFC)
+ *  18. anomaly-predict  — Predict anomalies BEFORE they happen (Anterior Cingulate)
+ *  19. goal-decompose   — Strategic goal → executable steps (Prefrontal Executive)
+ *  20. causal-intervene — Precision intervention targeting (Basal Ganglia)
+ *  21. pattern-memory   — Temporal pattern library & match (Entorhinal Cortex)
  *
  * @packageDocumentation
  */
@@ -2021,10 +2031,1423 @@ export const narrateDomain: ActionDomainDefinition = defineActionDomain({
 });
 
 // ============================================================================
+// DOMAIN 14: SENTIMENT — Organizational Mood & Signal Tone Analysis (V6.1)
+// ============================================================================
+
+export const sentimentDomain: ActionDomainDefinition = defineActionDomain({
+  name: 'sentiment',
+  description: 'Analyzes the emotional tone and momentum direction of business signals — detects fear, optimism, panic, complacency across domains',
+  brainAnalog: 'Amygdala — emotional signal processing, threat/opportunity detection',
+  requires: ['causalDAG', 'timeSeries'],
+  optional: ['contextAwareReasoner', 'llmAmplifier'],
+  intents: ['sentiment'],
+  intentKeywords: ['sentiment', 'mood', 'tone', 'feeling', 'morale', 'confidence level', 'team health', 'optimism', 'pessimism', 'fear', 'panic', 'complacency', 'momentum'],
+  intentPatterns: [
+    /\bsentiment\b/i,
+    /\bmood\b/i,
+    /how\s+(is|are)\s+(the\s+)?(team|org|company)\s+(feeling|doing)/i,
+    /\bmorale\b/i,
+    /\bmomentum\b/i,
+    /\btone\b.*\b(signals?|data|metrics)\b/i,
+  ],
+  priority: 45,
+  outputSchema: {
+    dataType: 'sentiment_analysis',
+    fields: ['domainSentiments', 'overallMood', 'moodShifts', 'divergences', 'alerts'],
+    composable: true,
+    consumableBy: ['recommend', 'narrate', 'monitor'],
+  },
+  composableWith: ['recommend', 'narrate', 'monitor', 'diagnose'],
+  tags: ['advanced', 'emotional-intelligence', 'signal-tone'],
+
+  execute: async (ctx) => {
+    const { brain, log } = ctx;
+    log('Analyzing organizational sentiment');
+
+    // Analyze momentum for each domain with time series data
+    const domainSentiments: Array<{
+      domain: string;
+      momentum: 'accelerating' | 'decelerating' | 'stable' | 'volatile';
+      trend: 'improving' | 'declining' | 'flat';
+      signalStrength: number;
+      riskTone: 'fear' | 'caution' | 'neutral' | 'optimism' | 'euphoria';
+    }> = [];
+
+    for (const [domainName, ts] of brain.timeSeries) {
+      const values = (ts as unknown as { values: number[] }).values || [];
+      if (values.length < 3) continue;
+
+      // Calculate momentum (rate of change)
+      const recent = values.slice(-7);
+      const earlier = values.slice(-14, -7);
+      const recentAvg = recent.reduce((s, v) => s + v, 0) / recent.length;
+      const earlierAvg = earlier.length > 0 ? earlier.reduce((s, v) => s + v, 0) / earlier.length : recentAvg;
+      const momentumRate = earlierAvg !== 0 ? (recentAvg - earlierAvg) / Math.abs(earlierAvg) : 0;
+
+      // Calculate volatility
+      const mean = values.slice(-14).reduce((s, v) => s + v, 0) / Math.min(14, values.length);
+      const variance = values.slice(-14).reduce((s, v) => s + Math.pow(v - mean, 2), 0) / Math.min(14, values.length);
+      const volatility = Math.sqrt(variance) / Math.max(0.01, Math.abs(mean));
+
+      // Determine momentum category
+      let momentum: typeof domainSentiments[0]['momentum'];
+      if (volatility > 0.3) momentum = 'volatile';
+      else if (momentumRate > 0.05) momentum = 'accelerating';
+      else if (momentumRate < -0.05) momentum = 'decelerating';
+      else momentum = 'stable';
+
+      // Determine trend
+      const trend = momentumRate > 0.02 ? 'improving' : momentumRate < -0.02 ? 'declining' : 'flat';
+
+      // Determine risk tone based on trend + volatility
+      let riskTone: typeof domainSentiments[0]['riskTone'];
+      if (momentum === 'volatile' && trend === 'declining') riskTone = 'fear';
+      else if (trend === 'declining') riskTone = 'caution';
+      else if (momentum === 'accelerating' && volatility < 0.1) riskTone = 'euphoria';
+      else if (trend === 'improving') riskTone = 'optimism';
+      else riskTone = 'neutral';
+
+      domainSentiments.push({
+        domain: domainName,
+        momentum,
+        trend,
+        signalStrength: Math.min(1, 1 - volatility),
+        riskTone,
+      });
+    }
+
+    // Detect mood divergences (one domain fearful while another euphoric)
+    const divergences: Array<{ domain1: string; domain2: string; mood1: string; mood2: string; concern: string }> = [];
+    for (let i = 0; i < domainSentiments.length; i++) {
+      for (let j = i + 1; j < domainSentiments.length; j++) {
+        const a = domainSentiments[i];
+        const b = domainSentiments[j];
+        if ((a.riskTone === 'fear' && b.riskTone === 'euphoria') ||
+            (a.riskTone === 'euphoria' && b.riskTone === 'fear')) {
+          divergences.push({
+            domain1: a.domain, domain2: b.domain,
+            mood1: a.riskTone, mood2: b.riskTone,
+            concern: `${a.domain} shows ${a.riskTone} while ${b.domain} shows ${b.riskTone} — investigate disconnect`,
+          });
+        }
+      }
+    }
+
+    // Calculate overall organizational mood
+    const moodScores = { fear: 0, caution: 0, neutral: 0, optimism: 0, euphoria: 0 };
+    for (const ds of domainSentiments) moodScores[ds.riskTone]++;
+    const overallMood = (Object.entries(moodScores) as [string, number][])
+      .sort((a, b) => b[1] - a[1])[0]?.[0] || 'neutral';
+
+    // Alerts
+    const alerts: string[] = [];
+    const fearDomains = domainSentiments.filter(d => d.riskTone === 'fear');
+    if (fearDomains.length > 0) alerts.push(`Fear detected in: ${fearDomains.map(d => d.domain).join(', ')}`);
+    const euphoriaDomains = domainSentiments.filter(d => d.riskTone === 'euphoria');
+    if (euphoriaDomains.length > 0) alerts.push(`Euphoria risk in: ${euphoriaDomains.map(d => d.domain).join(', ')} — watch for complacency`);
+    if (divergences.length > 0) alerts.push(`${divergences.length} mood divergences detected — organizational alignment needed`);
+
+    const confidence = domainSentiments.length > 3 ? 0.75 : domainSentiments.length > 0 ? 0.5 : 0.2;
+
+    return {
+      data: {
+        type: 'sentiment_analysis',
+        domainSentiments,
+        overallMood,
+        divergences,
+        alerts,
+        moodDistribution: moodScores,
+        domainsAnalyzed: domainSentiments.length,
+      },
+      narrative: `Organizational sentiment: ${overallMood}. ${domainSentiments.length} domains analyzed. ${fearDomains.length} in fear, ${euphoriaDomains.length} euphoric. ${divergences.length} mood divergences. ${alerts.length} alerts generated.`,
+      confidence,
+      drivers: domainSentiments.slice(0, 5).map(d => ({
+        domain: d.domain, weight: d.signalStrength, lagDays: 0,
+        direction: d.trend === 'improving' ? 'positive' as const : d.trend === 'declining' ? 'negative' as const : 'positive' as const,
+      })),
+      interventions: fearDomains.slice(0, 3).map(d => ({
+        action: `Investigate fear signals in ${d.domain} — momentum is ${d.momentum}, trend is ${d.trend}`,
+        targetDomains: [d.domain],
+        expectedImpact: 'Prevent panic-driven decisions',
+        confidence: 0.6,
+        evidence: `${d.domain} shows ${d.riskTone} with ${d.momentum} momentum`,
+        owner: `${d.domain} team lead`,
+        effort: 'low' as const,
+      })),
+      modulesUsed: ['time-series-momentum', 'sentiment-engine'],
+      metadata: { domainsAnalyzed: domainSentiments.length, alerts: alerts.length, divergences: divergences.length },
+    };
+  },
+
+  formatForPrompt: (result, ctx) => {
+    const lines: string[] = [];
+    const data = result.data as Record<string, unknown>;
+    const sentiments = data.domainSentiments as Array<{ domain: string; riskTone: string; momentum: string; trend: string }>;
+
+    lines.push(`## 🎭 SENTIMENT: Organizational Mood Analysis`);
+    lines.push(`Overall Mood: ${data.overallMood} | Domains: ${(data.domainsAnalyzed as number) || 0} | Alerts: ${(data.alerts as string[])?.length || 0}`);
+    lines.push('');
+
+    if (sentiments && sentiments.length > 0) {
+      lines.push('### Domain Sentiment Map');
+      lines.push(formatTable(
+        ['Domain', 'Tone', 'Momentum', 'Trend'],
+        sentiments.slice(0, 8).map(s => [s.domain, s.riskTone, s.momentum, s.trend])
+      ));
+    }
+
+    const alerts = data.alerts as string[];
+    if (alerts && alerts.length > 0) {
+      lines.push('');
+      lines.push('### ⚠️ Alerts');
+      for (const a of alerts) lines.push(`- ${a}`);
+    }
+
+    return lines.join('\n');
+  },
+});
+
+// ============================================================================
+// DOMAIN 15: SCENARIO-TREE — Branching Future Analysis (V6.1)
+// ============================================================================
+
+export const scenarioTreeDomain: ActionDomainDefinition = defineActionDomain({
+  name: 'scenario-tree',
+  description: 'Builds a branching tree of possible futures with probability-weighted paths — best case, worst case, and every fork in between',
+  brainAnalog: 'Hippocampal Prospection — mental time travel, branching future simulation',
+  requires: ['causalDAG', 'timeSeries'],
+  optional: ['whatIfSimulator', 'temporalForecaster', 'llmAmplifier'],
+  intents: ['scenario-tree'],
+  intentKeywords: ['scenario tree', 'branching', 'possible futures', 'best case', 'worst case', 'probability', 'what could happen', 'range of outcomes', 'scenario planning', 'contingency', 'decision tree'],
+  intentPatterns: [
+    /\bscenario\s+tree\b/i,
+    /\bbranch(ing)?\s+(future|scenario|analys)/i,
+    /\bbest\s+case.*worst\s+case/i,
+    /\brange\s+of\s+outcomes?\b/i,
+    /\bpossible\s+futures?\b/i,
+    /\bcontingency\s+plan/i,
+    /\bdecision\s+tree\b/i,
+  ],
+  priority: 55,
+  outputSchema: {
+    dataType: 'scenario_tree',
+    fields: ['branches', 'probabilities', 'expectedValue', 'worstCase', 'bestCase'],
+    composable: true,
+    consumableBy: ['recommend', 'narrate', 'optimize'],
+  },
+  composableWith: ['forecast', 'simulate', 'recommend', 'narrate', 'risk-cascade'],
+  tags: ['advanced', 'strategic', 'branching-futures'],
+
+  execute: async (ctx) => {
+    const { brain, log } = ctx;
+    const domain = brain.primaryDomain;
+    log(`Building scenario tree for ${domain}`);
+
+    const upstreamEdges = getTopEdges(brain.dag, domain, 'upstream', 5);
+    const downstreamEdges = getTopEdges(brain.dag, domain, 'downstream', 3);
+
+    // Build scenario branches based on each major driver's possible states
+    const branches: Array<{
+      name: string;
+      probability: number;
+      drivers: Array<{ domain: string; assumption: string; direction: 'up' | 'down' | 'flat' }>;
+      impactOnTarget: number;
+      timeline: string;
+      keyRisks: string[];
+    }> = [];
+
+    // Branch 1: Base case (current trajectory continues)
+    branches.push({
+      name: 'Base Case — Current Trajectory',
+      probability: 0.45,
+      drivers: upstreamEdges.slice(0, 3).map(e => ({
+        domain: e.source, assumption: `${e.source} continues current trend`, direction: 'flat' as const,
+      })),
+      impactOnTarget: 0,
+      timeline: `${brain.horizonDays} days`,
+      keyRisks: ['Assumes no external shocks', 'Historical patterns may not repeat'],
+    });
+
+    // Branch 2: Upside case (top drivers improve)
+    const upsideImpact = upstreamEdges.slice(0, 3).reduce((sum, e) => sum + e.weight * 15, 0);
+    branches.push({
+      name: 'Upside — Key Drivers Strengthen',
+      probability: 0.25,
+      drivers: upstreamEdges.slice(0, 3).map(e => ({
+        domain: e.source, assumption: `${e.source} improves 15-25%`, direction: 'up' as const,
+      })),
+      impactOnTarget: upsideImpact,
+      timeline: `${Math.max(...upstreamEdges.slice(0, 3).map(e => e.lagDays), 30)}d to materialize`,
+      keyRisks: ['Requires sustained improvement across multiple domains', 'Capacity constraints may limit upside'],
+    });
+
+    // Branch 3: Downside case (top drivers deteriorate)
+    branches.push({
+      name: 'Downside — Key Drivers Weaken',
+      probability: 0.20,
+      drivers: upstreamEdges.slice(0, 3).map(e => ({
+        domain: e.source, assumption: `${e.source} declines 10-20%`, direction: 'down' as const,
+      })),
+      impactOnTarget: -upsideImpact * 0.8,
+      timeline: `${Math.min(...upstreamEdges.slice(0, 3).map(e => e.lagDays), 14)}d to show impact`,
+      keyRisks: ['Cascade effects may amplify downside', 'Recovery may take 2-3x the impact timeline'],
+    });
+
+    // Branch 4: Black swan (cascading failure)
+    branches.push({
+      name: 'Black Swan — Cascading Disruption',
+      probability: 0.10,
+      drivers: [
+        { domain: 'external', assumption: 'Major market or operational disruption', direction: 'down' as const },
+        ...upstreamEdges.slice(0, 2).map(e => ({
+          domain: e.source, assumption: `${e.source} collapses unexpectedly`, direction: 'down' as const,
+        })),
+      ],
+      impactOnTarget: -upsideImpact * 2,
+      timeline: 'Immediate to 30d',
+      keyRisks: ['Low probability but extreme impact', 'Standard playbooks insufficient — need crisis response'],
+    });
+
+    // Expected value calculation
+    const expectedValue = branches.reduce((sum, b) => sum + b.probability * b.impactOnTarget, 0);
+
+    // Decision gates — what triggers moving from base to upside/downside
+    const decisionGates = upstreamEdges.slice(0, 3).map(e => ({
+      driver: e.source,
+      upsideTrigger: `${e.source} improves >10% sustained for 2+ weeks`,
+      downsideTrigger: `${e.source} declines >8% for 1+ week`,
+      monitorFrequency: 'weekly',
+    }));
+
+    const confidence = upstreamEdges.length > 2 ? 0.7 : upstreamEdges.length > 0 ? 0.45 : 0.2;
+
+    return {
+      data: {
+        type: 'scenario_tree',
+        branches,
+        expectedValue,
+        bestCase: branches.find(b => b.name.includes('Upside')),
+        worstCase: branches.find(b => b.name.includes('Black Swan')),
+        decisionGates,
+        branchCount: branches.length,
+      },
+      narrative: `Scenario tree for ${domain}: ${branches.length} branches. Expected value: ${expectedValue > 0 ? '+' : ''}${expectedValue.toFixed(1)}%. Base case (${(branches[0].probability * 100).toFixed(0)}% likely): status quo. Upside: +${upsideImpact.toFixed(0)}%. Downside: -${(upsideImpact * 0.8).toFixed(0)}%. Black swan: -${(upsideImpact * 2).toFixed(0)}%. ${decisionGates.length} decision gates identified.`,
+      confidence,
+      drivers: upstreamEdges.slice(0, 5).map(e => ({
+        domain: e.source, weight: e.weight, lagDays: e.lagDays,
+        direction: e.weight > 0 ? 'positive' as const : 'negative' as const,
+      })),
+      interventions: [
+        {
+          action: `Prepare contingency plans for the ${branches.length} identified scenarios — focus on early warning triggers`,
+          targetDomains: [domain, ...upstreamEdges.slice(0, 2).map(e => e.source)],
+          expectedImpact: 'Reduce downside exposure by 30-40% through early action',
+          confidence: 0.65,
+          evidence: `${decisionGates.length} decision gates with specific trigger criteria`,
+          owner: `${domain} strategy team`,
+          effort: 'medium' as const,
+        },
+      ],
+      modulesUsed: ['causal-dag-analysis', 'scenario-branching-engine'],
+      metadata: { branches: branches.length, decisionGates: decisionGates.length, expectedValue },
+    };
+  },
+
+  formatForPrompt: (result, ctx) => {
+    const lines: string[] = [];
+    const data = result.data as Record<string, unknown>;
+    const branches = data.branches as Array<{ name: string; probability: number; impactOnTarget: number; timeline: string }>;
+
+    lines.push(`## 🌳 SCENARIO TREE: ${ctx.primaryDomain}`);
+    lines.push(`Expected Value: ${((data.expectedValue as number) || 0) > 0 ? '+' : ''}${((data.expectedValue as number) || 0).toFixed(1)}% | Branches: ${branches?.length || 0}`);
+    lines.push('');
+
+    if (branches) {
+      lines.push(formatTable(
+        ['Scenario', 'Probability', 'Impact', 'Timeline'],
+        branches.map(b => [
+          b.name, `${(b.probability * 100).toFixed(0)}%`,
+          `${b.impactOnTarget > 0 ? '+' : ''}${b.impactOnTarget.toFixed(0)}%`, b.timeline,
+        ])
+      ));
+    }
+
+    return lines.join('\n');
+  },
+});
+
+// ============================================================================
+// DOMAIN 16: RISK-CASCADE — Cascading Risk Propagation Analysis (V6.1)
+// ============================================================================
+
+export const riskCascadeDomain: ActionDomainDefinition = defineActionDomain({
+  name: 'risk-cascade',
+  description: 'Maps how risks propagate through the causal graph — finds the fastest and most destructive failure paths, identifies systemic risks and single points of failure',
+  brainAnalog: 'Insular Cortex — risk perception, interoception of organizational health threats',
+  requires: ['causalDAG'],
+  optional: ['timeSeries', 'whatIfSimulator'],
+  intents: ['risk-cascade'],
+  intentKeywords: ['risk', 'cascade', 'propagate', 'domino effect', 'contagion', 'systemic', 'single point of failure', 'vulnerability', 'fragility', 'exposure', 'what could go wrong', 'failure mode'],
+  intentPatterns: [
+    /\brisk\s+cascade\b/i,
+    /\bdomino\s+effect\b/i,
+    /\bsingle\s+point\s+of\s+failure\b/i,
+    /what\s+could\s+go\s+wrong/i,
+    /\bfailure\s+mode/i,
+    /\bsystemic\s+risk/i,
+    /\bvulnerab(le|ility)\b/i,
+    /\bfragil(e|ity)\b/i,
+  ],
+  priority: 55,
+  outputSchema: {
+    dataType: 'risk_cascade',
+    fields: ['cascadePaths', 'singlePointsOfFailure', 'systemicRisk', 'vulnerabilityMap', 'mitigations'],
+    composable: true,
+    consumableBy: ['recommend', 'monitor', 'scenario-tree', 'narrate'],
+  },
+  composableWith: ['monitor', 'scenario-tree', 'recommend', 'narrate', 'diagnose'],
+  tags: ['advanced', 'risk', 'systemic'],
+
+  execute: async (ctx) => {
+    const { brain, log } = ctx;
+    log('Analyzing risk cascade paths');
+
+    // Build full adjacency for path traversal
+    const adjacency = new Map<string, Array<{ target: string; weight: number; lagDays: number }>>();
+    for (const [source, targets] of brain.dag.edges) {
+      const edges: Array<{ target: string; weight: number; lagDays: number }> = [];
+      for (const [target, edge] of targets) {
+        edges.push({ target, weight: edge.weight, lagDays: edge.lagDays });
+      }
+      adjacency.set(source, edges);
+    }
+
+    // Find single points of failure — nodes where many paths converge
+    const inDegree = new Map<string, number>();
+    const outDegree = new Map<string, number>();
+    for (const node of brain.dag.nodes) {
+      inDegree.set(node, 0);
+      outDegree.set(node, 0);
+    }
+    for (const [source, targets] of brain.dag.edges) {
+      for (const [target] of targets) {
+        outDegree.set(source, (outDegree.get(source) || 0) + 1);
+        inDegree.set(target, (inDegree.get(target) || 0) + 1);
+      }
+    }
+
+    // Betweenness centrality approximation — nodes that bridge many paths
+    const centrality = new Map<string, number>();
+    for (const node of brain.dag.nodes) {
+      const inD = inDegree.get(node) || 0;
+      const outD = outDegree.get(node) || 0;
+      centrality.set(node, inD * outD); // Bridge score
+    }
+
+    const singlePointsOfFailure = [...centrality.entries()]
+      .filter(([_, score]) => score > 0)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([node, score]) => ({
+        domain: node,
+        bridgeScore: score,
+        inDegree: inDegree.get(node) || 0,
+        outDegree: outDegree.get(node) || 0,
+        risk: score > 4 ? 'critical' : score > 2 ? 'high' : 'medium',
+        description: `${node} connects ${inDegree.get(node)} inputs to ${outDegree.get(node)} outputs — failure here cascades widely`,
+      }));
+
+    // Find fastest cascade paths (BFS from each node)
+    const cascadePaths: Array<{
+      source: string;
+      path: string[];
+      totalLagDays: number;
+      cumulativeImpact: number;
+      domainsAffected: number;
+    }> = [];
+
+    for (const startNode of brain.dag.nodes) {
+      const visited = new Set<string>();
+      const queue: Array<{ node: string; path: string[]; totalLag: number; cumulativeWeight: number }> = [
+        { node: startNode, path: [startNode], totalLag: 0, cumulativeWeight: 1 }
+      ];
+
+      while (queue.length > 0) {
+        const current = queue.shift()!;
+        if (visited.has(current.node)) continue;
+        visited.add(current.node);
+
+        const neighbors = adjacency.get(current.node) || [];
+        for (const neighbor of neighbors) {
+          if (!visited.has(neighbor.target)) {
+            const newPath = [...current.path, neighbor.target];
+            const newLag = current.totalLag + neighbor.lagDays;
+            const newWeight = current.cumulativeWeight * neighbor.weight;
+
+            if (newPath.length <= 5) { // Max depth 5
+              queue.push({ node: neighbor.target, path: newPath, totalLag: newLag, cumulativeWeight: newWeight });
+            }
+
+            if (newPath.length >= 3) {
+              cascadePaths.push({
+                source: startNode,
+                path: newPath,
+                totalLagDays: newLag,
+                cumulativeImpact: newWeight * 100,
+                domainsAffected: newPath.length - 1,
+              });
+            }
+          }
+        }
+      }
+    }
+
+    // Sort by destructiveness (most domains affected × highest impact)
+    cascadePaths.sort((a, b) => (b.domainsAffected * b.cumulativeImpact) - (a.domainsAffected * a.cumulativeImpact));
+    const topCascades = cascadePaths.slice(0, 8);
+
+    // Systemic risk score
+    const maxCentrality = Math.max(...[...centrality.values()], 1);
+    const systemicRiskScore = Math.min(1, (singlePointsOfFailure.filter(s => s.risk === 'critical').length * 0.3) +
+      (topCascades.length > 5 ? 0.3 : topCascades.length * 0.06) +
+      (maxCentrality > 6 ? 0.4 : maxCentrality * 0.067));
+
+    // Build mitigations
+    const mitigations = singlePointsOfFailure.slice(0, 3).map(spof => ({
+      action: `Reduce concentration risk in ${spof.domain} by diversifying inputs or adding redundancy`,
+      targetDomains: [spof.domain],
+      expectedImpact: `Reduce cascade risk by ${Math.min(40, spof.bridgeScore * 10)}%`,
+      confidence: 0.6,
+      evidence: `${spof.domain} has bridge score ${spof.bridgeScore} (${spof.inDegree} in, ${spof.outDegree} out)`,
+      owner: `${spof.domain} team + risk committee`,
+      effort: 'high' as const,
+    }));
+
+    const confidence = brain.dag.nodes.size > 5 ? 0.75 : brain.dag.nodes.size > 2 ? 0.5 : 0.25;
+
+    return {
+      data: {
+        type: 'risk_cascade',
+        singlePointsOfFailure,
+        cascadePaths: topCascades,
+        systemicRiskScore,
+        systemicRiskLevel: systemicRiskScore > 0.7 ? 'critical' : systemicRiskScore > 0.4 ? 'elevated' : 'moderate',
+        nodesAnalyzed: brain.dag.nodes.size,
+        totalPaths: cascadePaths.length,
+      },
+      narrative: `Risk cascade analysis: ${brain.dag.nodes.size} nodes, ${cascadePaths.length} propagation paths found. Systemic risk: ${(systemicRiskScore * 100).toFixed(0)}% (${systemicRiskScore > 0.7 ? 'CRITICAL' : systemicRiskScore > 0.4 ? 'ELEVATED' : 'MODERATE'}). ${singlePointsOfFailure.length} single points of failure — ${singlePointsOfFailure.filter(s => s.risk === 'critical').length} critical. Fastest cascade path: ${topCascades[0]?.path.join(' → ') || 'none'} (${topCascades[0]?.totalLagDays || 0}d).`,
+      confidence,
+      drivers: singlePointsOfFailure.slice(0, 5).map(s => ({
+        domain: s.domain, weight: s.bridgeScore / maxCentrality, lagDays: 0,
+        direction: 'negative' as const,
+      })),
+      interventions: mitigations,
+      modulesUsed: ['causal-dag-analysis', 'cascade-propagation-engine', 'centrality-analysis'],
+      metadata: { systemicRiskScore, singlePoints: singlePointsOfFailure.length, cascadePaths: topCascades.length },
+    };
+  },
+
+  formatForPrompt: (result, ctx) => {
+    const lines: string[] = [];
+    const data = result.data as Record<string, unknown>;
+    const spofs = data.singlePointsOfFailure as Array<{ domain: string; risk: string; bridgeScore: number }>;
+    const cascades = data.cascadePaths as Array<{ path: string[]; totalLagDays: number; cumulativeImpact: number }>;
+
+    lines.push(`## ⚡ RISK CASCADE: Systemic Risk Analysis`);
+    lines.push(`Systemic Risk: ${((data.systemicRiskScore as number) * 100).toFixed(0)}% (${data.systemicRiskLevel}) | Nodes: ${data.nodesAnalyzed} | Paths: ${data.totalPaths}`);
+    lines.push('');
+
+    if (spofs && spofs.length > 0) {
+      lines.push('### Single Points of Failure');
+      lines.push(formatTable(
+        ['Domain', 'Risk', 'Bridge Score'],
+        spofs.map(s => [s.domain, s.risk, String(s.bridgeScore)])
+      ));
+      lines.push('');
+    }
+
+    if (cascades && cascades.length > 0) {
+      lines.push('### Top Cascade Paths');
+      for (const c of cascades.slice(0, 5)) {
+        lines.push(`- ${c.path.join(' → ')} (${c.totalLagDays}d, ${c.cumulativeImpact.toFixed(1)}% impact)`);
+      }
+    }
+
+    return lines.join('\n');
+  },
+});
+
+// ============================================================================
+// DOMAIN 17: RESOURCE-ALLOCATE — Optimal Resource Distribution (V6.1)
+// ============================================================================
+
+export const resourceAllocateDomain: ActionDomainDefinition = defineActionDomain({
+  name: 'resource-allocate',
+  description: 'Determines optimal allocation of budget, headcount, or effort across domains using causal impact analysis — every dollar goes where the brain says it has maximum effect',
+  brainAnalog: 'Dorsolateral Prefrontal Cortex — resource planning, allocation optimization, constraint satisfaction',
+  requires: ['causalDAG'],
+  optional: ['timeSeries', 'contextAwareReasoner'],
+  intents: ['resource-allocate'],
+  intentKeywords: ['allocate', 'resource', 'budget', 'headcount', 'distribute', 'invest', 'spend', 'where to put money', 'hiring plan', 'budget allocation', 'investment priority', 'capacity planning'],
+  intentPatterns: [
+    /\ballocat(e|ion)\b/i,
+    /\bbudget\s+(allocat|distribut|plan)/i,
+    /where\s+(should|to)\s+(we\s+)?(invest|spend|allocate|hire)/i,
+    /\bheadcount\s+(plan|allocat)/i,
+    /\bcapacity\s+plan/i,
+    /\bhiring\s+plan/i,
+    /how\s+should\s+(we\s+)?(distribute|split|allocate)/i,
+  ],
+  priority: 55,
+  outputSchema: {
+    dataType: 'resource_allocation',
+    fields: ['allocations', 'totalBudget', 'expectedROI', 'constraints', 'tradeoffs'],
+    composable: true,
+    consumableBy: ['recommend', 'narrate', 'optimize'],
+  },
+  composableWith: ['optimize', 'forecast', 'recommend', 'narrate', 'risk-cascade'],
+  tags: ['advanced', 'resource-planning', 'allocation'],
+
+  execute: async (ctx) => {
+    const { brain, log } = ctx;
+    const targetDomain = brain.primaryDomain;
+    log(`Optimizing resource allocation for ${targetDomain}`);
+
+    // Get all domains that influence the target
+    const upstreamEdges = getTopEdges(brain.dag, targetDomain, 'upstream', 10);
+
+    // Score each domain by: causal impact × time efficiency × diminishing returns
+    const allocationCandidates = upstreamEdges.map(edge => {
+      const impactScore = edge.weight; // How much this domain affects target
+      const timeEfficiency = 1 / (1 + edge.lagDays / 60); // Faster impact = higher score
+      const pValuePenalty = edge.pValue < 0.05 ? 1 : edge.pValue < 0.1 ? 0.7 : 0.4; // Statistical confidence
+
+      // Combined allocation score
+      const score = impactScore * 0.5 + timeEfficiency * 0.3 + pValuePenalty * 0.2;
+
+      return {
+        domain: edge.source,
+        impactScore,
+        timeEfficiency,
+        statisticalConfidence: pValuePenalty,
+        allocationScore: score,
+        lagDays: edge.lagDays,
+        weight: edge.weight,
+      };
+    }).sort((a, b) => b.allocationScore - a.allocationScore);
+
+    // Normalize allocation scores to percentages
+    const totalScore = allocationCandidates.reduce((sum, c) => sum + c.allocationScore, 0);
+    const allocations = allocationCandidates.map(c => ({
+      ...c,
+      allocationPercent: totalScore > 0 ? (c.allocationScore / totalScore) * 100 : 0,
+      rationale: `${c.domain} drives ${(c.weight * 100).toFixed(0)}% of ${targetDomain} with ${c.lagDays}d lag — ${c.allocationScore > 0.5 ? 'high priority' : 'moderate priority'} investment`,
+    }));
+
+    // Calculate expected ROI for this allocation
+    const expectedROI = allocations.reduce((sum, a) => sum + a.allocationPercent * a.impactScore * 0.15, 0);
+
+    // Identify tradeoffs — domains that compete for resources
+    const tradeoffs: Array<{ domain1: string; domain2: string; tension: string }> = [];
+    for (let i = 0; i < Math.min(3, allocations.length); i++) {
+      for (let j = i + 1; j < Math.min(5, allocations.length); j++) {
+        if (Math.abs(allocations[i].allocationScore - allocations[j].allocationScore) < 0.1) {
+          tradeoffs.push({
+            domain1: allocations[i].domain,
+            domain2: allocations[j].domain,
+            tension: `${allocations[i].domain} (${allocations[i].lagDays}d faster) vs ${allocations[j].domain} (${((allocations[j].impactScore - allocations[i].impactScore) * 100).toFixed(0)}% higher impact) — similar ROI, choose based on urgency vs magnitude`,
+          });
+        }
+      }
+    }
+
+    const confidence = allocations.length > 3 ? 0.8 : allocations.length > 0 ? 0.55 : 0.2;
+
+    return {
+      data: {
+        type: 'resource_allocation',
+        targetDomain,
+        allocations: allocations.slice(0, 8),
+        expectedROI,
+        tradeoffs,
+        candidatesAnalyzed: allocationCandidates.length,
+      },
+      narrative: `Resource allocation for ${targetDomain}: ${allocations.length} investment domains ranked. Top allocation: ${allocations[0]?.domain || 'none'} (${allocations[0]?.allocationPercent.toFixed(0) || 0}%). Expected portfolio ROI: ${expectedROI.toFixed(1)}%. ${tradeoffs.length} tradeoffs identified requiring judgment calls.`,
+      confidence,
+      drivers: allocations.slice(0, 5).map(a => ({
+        domain: a.domain, weight: a.allocationScore, lagDays: a.lagDays,
+        direction: 'positive' as const,
+      })),
+      interventions: allocations.slice(0, 3).map(a => ({
+        action: `Allocate ${a.allocationPercent.toFixed(0)}% of resources to ${a.domain} — ${a.rationale}`,
+        targetDomains: [a.domain, targetDomain],
+        expectedImpact: `+${(a.impactScore * 15).toFixed(0)}% ${targetDomain} improvement within ${a.lagDays}d`,
+        confidence: a.statisticalConfidence,
+        evidence: `Allocation score: ${a.allocationScore.toFixed(2)} (impact=${a.impactScore.toFixed(2)}, speed=${a.timeEfficiency.toFixed(2)}, stats=${a.statisticalConfidence.toFixed(2)})`,
+        owner: `${a.domain} team + finance`,
+        effort: a.allocationPercent > 25 ? 'high' as const : a.allocationPercent > 10 ? 'medium' as const : 'low' as const,
+      })),
+      modulesUsed: ['causal-dag-analysis', 'resource-optimizer'],
+      metadata: { candidatesAnalyzed: allocationCandidates.length, tradeoffs: tradeoffs.length, expectedROI },
+    };
+  },
+
+  formatForPrompt: (result, ctx) => {
+    const lines: string[] = [];
+    const data = result.data as Record<string, unknown>;
+    const allocations = data.allocations as Array<{ domain: string; allocationPercent: number; impactScore: number; lagDays: number }>;
+
+    lines.push(`## 💰 RESOURCE ALLOCATION: ${ctx.primaryDomain}`);
+    lines.push(`Expected ROI: ${((data.expectedROI as number) || 0).toFixed(1)}% | Candidates: ${data.candidatesAnalyzed}`);
+    lines.push('');
+
+    if (allocations && allocations.length > 0) {
+      lines.push(formatTable(
+        ['Rank', 'Domain', 'Allocation', 'Impact', 'Time to Impact'],
+        allocations.map((a, i) => [
+          String(i + 1), a.domain, `${a.allocationPercent.toFixed(0)}%`,
+          `${(a.impactScore * 100).toFixed(0)}%`, `${a.lagDays}d`,
+        ])
+      ));
+    }
+
+    return lines.join('\n');
+  },
+});
+
+// ============================================================================
+// DOMAIN 18: ANOMALY-PREDICT — Predictive Anomaly Detection (V6.1)
+// ============================================================================
+
+export const anomalyPredictDomain: ActionDomainDefinition = defineActionDomain({
+  name: 'anomaly-predict',
+  description: 'Predicts FUTURE anomalies before they happen by analyzing trend acceleration, pattern breaks, and causal tension — the brain sees problems coming before the data shows them',
+  brainAnalog: 'Anterior Cingulate Cortex — error prediction, pre-conscious anomaly detection',
+  requires: ['causalDAG', 'timeSeries'],
+  optional: ['temporalForecaster', 'contextAwareReasoner'],
+  intents: ['anomaly-predict'],
+  intentKeywords: ['predict anomaly', 'early warning', 'detect problems', 'foresee', 'upcoming issues', 'emerging risk', 'red flag', 'warning sign', 'trouble ahead', 'what problems are coming'],
+  intentPatterns: [
+    /\bpredict\s+(anomal|problem|issue|risk)/i,
+    /\bearly\s+warning/i,
+    /\bwhat\s+(problems?|issues?|risks?)\s+(are|could be)\s+(coming|ahead|emerging)/i,
+    /\bred\s+flag/i,
+    /\bwarning\s+sign/i,
+    /\bforesee\b/i,
+    /\bemerging\s+(risk|threat|problem|issue)/i,
+  ],
+  priority: 60,
+  outputSchema: {
+    dataType: 'anomaly_prediction',
+    fields: ['predictedAnomalies', 'earlyWarnings', 'causalTensions', 'timeToAnomaly'],
+    composable: true,
+    consumableBy: ['recommend', 'monitor', 'risk-cascade', 'diagnose'],
+  },
+  composableWith: ['risk-cascade', 'monitor', 'diagnose', 'recommend', 'narrate'],
+  tags: ['advanced', 'predictive', 'anomaly-detection'],
+
+  execute: async (ctx) => {
+    const { brain, log } = ctx;
+    log('Predicting future anomalies');
+
+    const predictedAnomalies: Array<{
+      domain: string;
+      type: 'trend_acceleration' | 'pattern_break' | 'causal_tension' | 'volatility_spike' | 'divergence';
+      probability: number;
+      estimatedDaysToAnomaly: number;
+      severity: 'critical' | 'high' | 'medium' | 'low';
+      description: string;
+      evidence: string;
+    }> = [];
+
+    // Analyze each domain for pre-anomaly signals
+    for (const [domainName, ts] of brain.timeSeries) {
+      const values = (ts as unknown as { values: number[] }).values || [];
+      if (values.length < 14) continue;
+
+      const recent7 = values.slice(-7);
+      const prev7 = values.slice(-14, -7);
+      const prev14 = values.slice(-28, -14);
+
+      const recentMean = recent7.reduce((s, v) => s + v, 0) / recent7.length;
+      const prevMean = prev7.reduce((s, v) => s + v, 0) / prev7.length;
+      const historicalMean = prev14.length > 0 ? prev14.reduce((s, v) => s + v, 0) / prev14.length : prevMean;
+
+      // Signal 1: Trend acceleration (rate of change is increasing)
+      const rate1 = prevMean !== 0 ? (recentMean - prevMean) / Math.abs(prevMean) : 0;
+      const rate2 = historicalMean !== 0 ? (prevMean - historicalMean) / Math.abs(historicalMean) : 0;
+      const acceleration = rate1 - rate2;
+
+      if (Math.abs(acceleration) > 0.1) {
+        predictedAnomalies.push({
+          domain: domainName,
+          type: 'trend_acceleration',
+          probability: Math.min(0.85, Math.abs(acceleration) * 2),
+          estimatedDaysToAnomaly: Math.max(3, Math.round(14 / (Math.abs(acceleration) * 10))),
+          severity: Math.abs(acceleration) > 0.3 ? 'critical' : Math.abs(acceleration) > 0.2 ? 'high' : 'medium',
+          description: `${domainName} trend is ${acceleration > 0 ? 'accelerating upward' : 'accelerating downward'} — rate of change increasing`,
+          evidence: `Acceleration: ${(acceleration * 100).toFixed(1)}%. Rate now: ${(rate1 * 100).toFixed(1)}%, was: ${(rate2 * 100).toFixed(1)}%`,
+        });
+      }
+
+      // Signal 2: Volatility spike (variance suddenly increasing)
+      const recentVariance = recent7.reduce((s, v) => s + Math.pow(v - recentMean, 2), 0) / recent7.length;
+      const prevVariance = prev7.reduce((s, v) => s + Math.pow(v - prevMean, 2), 0) / prev7.length;
+      const volatilityRatio = prevVariance > 0 ? recentVariance / prevVariance : 1;
+
+      if (volatilityRatio > 2) {
+        predictedAnomalies.push({
+          domain: domainName,
+          type: 'volatility_spike',
+          probability: Math.min(0.75, volatilityRatio * 0.15),
+          estimatedDaysToAnomaly: Math.max(2, Math.round(7 / volatilityRatio)),
+          severity: volatilityRatio > 4 ? 'critical' : volatilityRatio > 3 ? 'high' : 'medium',
+          description: `${domainName} volatility spiked ${volatilityRatio.toFixed(1)}x — instability detected`,
+          evidence: `Variance ratio: ${volatilityRatio.toFixed(2)}. Recent variance: ${recentVariance.toFixed(4)}, previous: ${prevVariance.toFixed(4)}`,
+        });
+      }
+    }
+
+    // Signal 3: Causal tension — when connected domains diverge
+    for (const [source, targets] of brain.dag.edges) {
+      for (const [target, edge] of targets) {
+        const sourceTS = brain.timeSeries.get(source);
+        const targetTS = brain.timeSeries.get(target);
+        if (!sourceTS || !targetTS) continue;
+
+        const sourceValues = (sourceTS as unknown as { values: number[] }).values || [];
+        const targetValues = (targetTS as unknown as { values: number[] }).values || [];
+        if (sourceValues.length < 7 || targetValues.length < 7) continue;
+
+        const sourceRecent = sourceValues.slice(-7).reduce((s, v) => s + v, 0) / 7;
+        const sourcePrev = sourceValues.slice(-14, -7).reduce((s, v) => s + v, 0) / Math.min(7, sourceValues.slice(-14, -7).length || 1);
+        const targetRecent = targetValues.slice(-7).reduce((s, v) => s + v, 0) / 7;
+        const targetPrev = targetValues.slice(-14, -7).reduce((s, v) => s + v, 0) / Math.min(7, targetValues.slice(-14, -7).length || 1);
+
+        const sourceDirection = sourcePrev !== 0 ? (sourceRecent - sourcePrev) / Math.abs(sourcePrev) : 0;
+        const targetDirection = targetPrev !== 0 ? (targetRecent - targetPrev) / Math.abs(targetPrev) : 0;
+
+        // Tension: source going one way, target going the opposite (but they should be correlated)
+        if (edge.weight > 0.3 && sourceDirection * targetDirection < -0.02) {
+          predictedAnomalies.push({
+            domain: target,
+            type: 'causal_tension',
+            probability: Math.min(0.8, edge.weight * Math.abs(sourceDirection - targetDirection)),
+            estimatedDaysToAnomaly: edge.lagDays,
+            severity: edge.weight > 0.5 ? 'high' : 'medium',
+            description: `Causal tension: ${source} moving ${sourceDirection > 0 ? 'up' : 'down'} but ${target} moving ${targetDirection > 0 ? 'up' : 'down'} — causally linked (weight: ${edge.weight.toFixed(2)})`,
+            evidence: `${source} trend: ${(sourceDirection * 100).toFixed(1)}%, ${target} trend: ${(targetDirection * 100).toFixed(1)}%. Causal weight: ${edge.weight.toFixed(2)}, lag: ${edge.lagDays}d`,
+          });
+        }
+      }
+    }
+
+    // Sort by probability × severity
+    const severityWeight = { critical: 4, high: 3, medium: 2, low: 1 };
+    predictedAnomalies.sort((a, b) => (b.probability * severityWeight[b.severity]) - (a.probability * severityWeight[a.severity]));
+
+    const topAnomalies = predictedAnomalies.slice(0, 10);
+    const criticalCount = topAnomalies.filter(a => a.severity === 'critical').length;
+    const confidence = topAnomalies.length > 3 ? 0.7 : topAnomalies.length > 0 ? 0.5 : 0.3;
+
+    return {
+      data: {
+        type: 'anomaly_prediction',
+        predictedAnomalies: topAnomalies,
+        totalDetected: predictedAnomalies.length,
+        criticalCount,
+        earliestAnomaly: topAnomalies[0]?.estimatedDaysToAnomaly || null,
+        typeDistribution: {
+          trend_acceleration: topAnomalies.filter(a => a.type === 'trend_acceleration').length,
+          volatility_spike: topAnomalies.filter(a => a.type === 'volatility_spike').length,
+          causal_tension: topAnomalies.filter(a => a.type === 'causal_tension').length,
+        },
+      },
+      narrative: `Anomaly prediction: ${predictedAnomalies.length} potential anomalies detected. ${criticalCount} critical. Earliest expected in ${topAnomalies[0]?.estimatedDaysToAnomaly || '?'}d (${topAnomalies[0]?.domain || 'unknown'}: ${topAnomalies[0]?.type || ''}). Top risk: ${topAnomalies[0]?.description || 'none detected'}.`,
+      confidence,
+      drivers: topAnomalies.slice(0, 5).map(a => ({
+        domain: a.domain, weight: a.probability, lagDays: a.estimatedDaysToAnomaly,
+        direction: 'negative' as const,
+      })),
+      interventions: topAnomalies.filter(a => a.severity === 'critical' || a.severity === 'high').slice(0, 3).map(a => ({
+        action: `Preemptive action on ${a.domain}: ${a.description}. Expected in ~${a.estimatedDaysToAnomaly}d`,
+        targetDomains: [a.domain],
+        expectedImpact: `Prevent ${a.severity} anomaly before it materializes`,
+        confidence: a.probability,
+        evidence: a.evidence,
+        owner: `${a.domain} team lead`,
+        effort: a.severity === 'critical' ? 'high' as const : 'medium' as const,
+      })),
+      modulesUsed: ['time-series-analysis', 'anomaly-prediction-engine', 'causal-tension-detector'],
+      metadata: { totalDetected: predictedAnomalies.length, criticalCount, typeCounts: { trend: topAnomalies.filter(a => a.type === 'trend_acceleration').length, volatility: topAnomalies.filter(a => a.type === 'volatility_spike').length, tension: topAnomalies.filter(a => a.type === 'causal_tension').length } },
+    };
+  },
+
+  formatForPrompt: (result, ctx) => {
+    const lines: string[] = [];
+    const data = result.data as Record<string, unknown>;
+    const anomalies = data.predictedAnomalies as Array<{ domain: string; type: string; probability: number; estimatedDaysToAnomaly: number; severity: string; description: string }>;
+
+    lines.push(`## 🔮 ANOMALY PREDICTION: Future Risk Radar`);
+    lines.push(`Detected: ${data.totalDetected} | Critical: ${data.criticalCount} | Earliest: ${(data.earliestAnomaly as number) || '?'}d`);
+    lines.push('');
+
+    if (anomalies && anomalies.length > 0) {
+      lines.push(formatTable(
+        ['Domain', 'Type', 'Prob', 'ETA', 'Severity'],
+        anomalies.slice(0, 8).map(a => [
+          a.domain, a.type, `${(a.probability * 100).toFixed(0)}%`,
+          `${a.estimatedDaysToAnomaly}d`, a.severity,
+        ])
+      ));
+    }
+
+    return lines.join('\n');
+  },
+});
+
+// ============================================================================
+// DOMAIN 19: GOAL-DECOMPOSE — Strategic Goal → Executable Steps (V6.1)
+// ============================================================================
+
+export const goalDecomposeDomain: ActionDomainDefinition = defineActionDomain({
+  name: 'goal-decompose',
+  description: 'Takes a high-level strategic goal and decomposes it into a causal execution plan — the brain maps EXACTLY which levers to pull, in what order, with what milestones, to reach the goal',
+  brainAnalog: 'Prefrontal Executive Network — goal decomposition, means-end analysis, hierarchical planning',
+  requires: ['causalDAG'],
+  optional: ['timeSeries', 'temporalForecaster', 'llmAmplifier'],
+  intents: ['goal-decompose'],
+  intentKeywords: ['goal', 'achieve', 'reach', 'get to', 'how do we', 'plan to', 'roadmap', 'strategy for', 'path to', 'steps to', 'grow to', 'reduce to', 'hit target', 'OKR', 'milestone'],
+  intentPatterns: [
+    /\bhow\s+(do|can)\s+(we|i)\s+(achieve|reach|get\s+to|grow|hit|reduce|increase)/i,
+    /\bplan\s+to\s+(achieve|reach|grow|reduce|increase)/i,
+    /\broadmap\s+(for|to)\b/i,
+    /\bsteps?\s+to\s+(achieve|reach|grow|increase|reduce)/i,
+    /\bpath\s+to\b/i,
+    /\bgoal\s+(decompos|break(down|ing))/i,
+    /\bOKR\b/i,
+  ],
+  priority: 60,
+  outputSchema: {
+    dataType: 'goal_decomposition',
+    fields: ['goal', 'causalPath', 'phases', 'levers', 'milestones', 'dependencies'],
+    composable: true,
+    consumableBy: ['recommend', 'narrate', 'optimize', 'resource-allocate'],
+  },
+  composableWith: ['optimize', 'resource-allocate', 'forecast', 'recommend', 'narrate'],
+  tags: ['advanced', 'strategic', 'goal-planning'],
+
+  execute: async (ctx) => {
+    const { brain, log } = ctx;
+    const targetDomain = brain.primaryDomain;
+    log(`Decomposing goal for ${targetDomain}`);
+
+    // Find ALL causal paths that lead to the target domain
+    const upstreamEdges = getTopEdges(brain.dag, targetDomain, 'upstream', 10);
+    const downstreamEffects = getTopEdges(brain.dag, targetDomain, 'downstream', 5);
+
+    // Build lever hierarchy: direct levers → indirect levers → enabling conditions
+    const directLevers = upstreamEdges.filter(e => e.weight > 0.2).map(e => ({
+      lever: e.source,
+      type: 'direct' as const,
+      impact: e.weight,
+      lagDays: e.lagDays,
+      actionable: true,
+    }));
+
+    // Find second-order levers (things that affect the direct levers)
+    const indirectLevers: Array<{ lever: string; type: 'direct' | 'indirect'; impact: number; lagDays: number; actionable: boolean }> = [];
+    for (const dl of directLevers) {
+      const secondOrder = getTopEdges(brain.dag, dl.lever, 'upstream', 3);
+      for (const so of secondOrder) {
+        if (!directLevers.find(d => d.lever === so.source) && !indirectLevers.find(i => i.lever === so.source)) {
+          indirectLevers.push({
+            lever: so.source,
+            type: 'indirect' as const,
+            impact: so.weight * dl.impact, // Cascading impact
+            lagDays: so.lagDays + dl.lagDays,
+            actionable: true,
+          });
+        }
+      }
+    }
+
+    const allLevers = [...directLevers, ...indirectLevers].sort((a, b) => b.impact - a.impact);
+
+    // Build phased execution plan based on lag times
+    const quickWins = allLevers.filter(l => l.lagDays <= 14 && l.type === 'direct');
+    const mediumTerm = allLevers.filter(l => l.lagDays > 14 && l.lagDays <= 60);
+    const longTerm = allLevers.filter(l => l.lagDays > 60);
+
+    const phases = [
+      {
+        name: 'Phase 1: Quick Wins (Week 1-2)',
+        timeframe: '0-14 days',
+        levers: quickWins.slice(0, 3),
+        milestones: quickWins.slice(0, 3).map(l => ({
+          metric: `${l.lever} improvement`,
+          target: `+${(l.impact * 10).toFixed(0)}%`,
+          deadline: `${l.lagDays}d`,
+          owner: `${l.lever} team`,
+        })),
+        expectedImpact: quickWins.reduce((s, l) => s + l.impact * 15, 0),
+      },
+      {
+        name: 'Phase 2: Foundation Building (Month 1-2)',
+        timeframe: '14-60 days',
+        levers: mediumTerm.slice(0, 4),
+        milestones: mediumTerm.slice(0, 4).map(l => ({
+          metric: `${l.lever} improvement`,
+          target: `+${(l.impact * 10).toFixed(0)}%`,
+          deadline: `${l.lagDays}d`,
+          owner: `${l.lever} team`,
+        })),
+        expectedImpact: mediumTerm.reduce((s, l) => s + l.impact * 15, 0),
+      },
+      {
+        name: 'Phase 3: Strategic Transformation (Month 2+)',
+        timeframe: '60+ days',
+        levers: longTerm.slice(0, 3),
+        milestones: longTerm.slice(0, 3).map(l => ({
+          metric: `${l.lever} improvement`,
+          target: `+${(l.impact * 10).toFixed(0)}%`,
+          deadline: `${l.lagDays}d`,
+          owner: `${l.lever} team`,
+        })),
+        expectedImpact: longTerm.reduce((s, l) => s + l.impact * 15, 0),
+      },
+    ].filter(p => p.levers.length > 0);
+
+    // Dependency graph
+    const dependencies: Array<{ from: string; to: string; reason: string }> = [];
+    for (const il of indirectLevers) {
+      const dependsOn = directLevers.find(dl => {
+        const edges = getTopEdges(brain.dag, dl.lever, 'upstream', 5);
+        return edges.some(e => e.source === il.lever);
+      });
+      if (dependsOn) {
+        dependencies.push({
+          from: il.lever,
+          to: dependsOn.lever,
+          reason: `${il.lever} must improve first for ${dependsOn.lever} to see gains (${il.lagDays}d lag)`,
+        });
+      }
+    }
+
+    const totalExpectedImpact = phases.reduce((s, p) => s + p.expectedImpact, 0);
+    const confidence = allLevers.length > 3 ? 0.75 : allLevers.length > 0 ? 0.5 : 0.2;
+
+    return {
+      data: {
+        type: 'goal_decomposition',
+        targetDomain,
+        directLevers,
+        indirectLevers,
+        allLevers: allLevers.slice(0, 10),
+        phases,
+        dependencies,
+        downstreamEffects: downstreamEffects.map(e => ({ domain: e.target, impact: e.weight })),
+        totalExpectedImpact,
+      },
+      narrative: `Goal decomposition for ${targetDomain}: ${allLevers.length} levers identified (${directLevers.length} direct, ${indirectLevers.length} indirect). ${phases.length} execution phases. Quick wins: ${quickWins.length} levers within 14d. Total expected impact: +${totalExpectedImpact.toFixed(0)}%. ${dependencies.length} dependencies mapped.`,
+      confidence,
+      drivers: allLevers.slice(0, 5).map(l => ({
+        domain: l.lever, weight: l.impact, lagDays: l.lagDays,
+        direction: 'positive' as const,
+      })),
+      interventions: allLevers.slice(0, 4).map(l => ({
+        action: `${l.type === 'direct' ? 'Directly' : 'Indirectly'} improve ${l.lever} to drive ${targetDomain} (+${(l.impact * 15).toFixed(0)}% within ${l.lagDays}d)`,
+        targetDomains: [l.lever, targetDomain],
+        expectedImpact: `+${(l.impact * 15).toFixed(0)}% ${targetDomain}`,
+        confidence: l.impact,
+        evidence: `${l.type} lever with ${(l.impact * 100).toFixed(0)}% causal weight, ${l.lagDays}d lag`,
+        owner: `${l.lever} team`,
+        effort: l.lagDays > 60 ? 'high' as const : l.lagDays > 14 ? 'medium' as const : 'low' as const,
+      })),
+      modulesUsed: ['causal-dag-analysis', 'goal-decomposition-engine', 'dependency-mapper'],
+      metadata: { directLevers: directLevers.length, indirectLevers: indirectLevers.length, phases: phases.length, dependencies: dependencies.length },
+    };
+  },
+
+  formatForPrompt: (result, ctx) => {
+    const lines: string[] = [];
+    const data = result.data as Record<string, unknown>;
+    const phases = data.phases as Array<{ name: string; timeframe: string; expectedImpact: number; levers: Array<{ lever: string; impact: number; lagDays: number }> }>;
+
+    lines.push(`## 🎯 GOAL DECOMPOSITION: ${ctx.primaryDomain}`);
+    lines.push(`Levers: ${(data.directLevers as unknown[])?.length || 0} direct + ${(data.indirectLevers as unknown[])?.length || 0} indirect | Expected Impact: +${((data.totalExpectedImpact as number) || 0).toFixed(0)}%`);
+    lines.push('');
+
+    if (phases) {
+      for (const phase of phases) {
+        lines.push(`### ${phase.name}`);
+        lines.push(`Timeframe: ${phase.timeframe} | Expected: +${phase.expectedImpact.toFixed(0)}%`);
+        for (const l of phase.levers) {
+          lines.push(`- **${l.lever}**: ${(l.impact * 100).toFixed(0)}% influence, ${l.lagDays}d lag`);
+        }
+        lines.push('');
+      }
+    }
+
+    return lines.join('\n');
+  },
+});
+
+// ============================================================================
+// DOMAIN 20: CAUSAL-INTERVENE — Precision Intervention Targeting (V6.1)
+// ============================================================================
+
+export const causalInterveneDomain: ActionDomainDefinition = defineActionDomain({
+  name: 'causal-intervene',
+  description: 'Identifies the SINGLE most impactful causal intervention — the one edge in the graph where applying pressure creates maximum downstream effect with minimum side-effects',
+  brainAnalog: 'Basal Ganglia — action selection, reward prediction, precision motor control for interventions',
+  requires: ['causalDAG'],
+  optional: ['timeSeries', 'whatIfSimulator', 'contextAwareReasoner'],
+  intents: ['causal-intervene'],
+  intentKeywords: ['intervene', 'lever', 'single most impactful', 'biggest lever', 'where to push', 'intervention point', 'acupuncture point', 'highest leverage', 'precision intervention', 'surgical strike'],
+  intentPatterns: [
+    /\bintervene\b/i,
+    /\bbiggest\s+lever\b/i,
+    /\bsingle\s+most\s+(impactful|important)/i,
+    /where\s+(should|to)\s+(we\s+)?push/i,
+    /\bhighest\s+leverage\b/i,
+    /\bprecision\s+intervention\b/i,
+    /\bacupuncture\s+point/i,
+    /one\s+thing\s+(to|we\s+should)\s+(do|change|fix|improve)/i,
+  ],
+  priority: 65,
+  outputSchema: {
+    dataType: 'causal_intervention',
+    fields: ['topIntervention', 'alternativeInterventions', 'sideEffectAnalysis', 'confidenceAnalysis'],
+    composable: true,
+    consumableBy: ['recommend', 'narrate', 'simulate', 'goal-decompose'],
+  },
+  composableWith: ['simulate', 'forecast', 'goal-decompose', 'recommend', 'narrate'],
+  tags: ['advanced', 'causal', 'precision-targeting'],
+
+  execute: async (ctx) => {
+    const { brain, log } = ctx;
+    const targetDomain = brain.primaryDomain;
+    log(`Finding precision intervention for ${targetDomain}`);
+
+    const upstreamEdges = getTopEdges(brain.dag, targetDomain, 'upstream', 10);
+
+    // Score each potential intervention by: direct impact + cascade multiplier - side effect risk
+    const interventionCandidates = upstreamEdges.map(edge => {
+      // Direct impact
+      const directImpact = edge.weight;
+
+      // Cascade multiplier — does this lever also affect other domains positively?
+      const leverDownstream = getTopEdges(brain.dag, edge.source, 'downstream');
+      const positiveSpill = leverDownstream.filter(e => e.target !== targetDomain && e.weight > 0);
+      const negativeSpill = leverDownstream.filter(e => e.weight < 0);
+      const cascadeMultiplier = 1 + (positiveSpill.length * 0.1);
+
+      // Side effect risk — does intervening here hurt other domains?
+      const sideEffectRisk = negativeSpill.reduce((sum, e) => sum + Math.abs(e.weight), 0);
+
+      // Controllability — how many inputs does this lever have? (fewer = more controllable)
+      const leverUpstream = getTopEdges(brain.dag, edge.source, 'upstream');
+      const controllability = 1 / (1 + leverUpstream.length * 0.15);
+
+      // Statistical confidence
+      const statConfidence = edge.pValue < 0.01 ? 1.0 : edge.pValue < 0.05 ? 0.8 : 0.5;
+
+      // Combined intervention score
+      const score = (directImpact * 0.4 + cascadeMultiplier * 0.15 + controllability * 0.15 + statConfidence * 0.15) - (sideEffectRisk * 0.15);
+
+      return {
+        lever: edge.source,
+        directImpact,
+        cascadeMultiplier,
+        sideEffectRisk,
+        controllability,
+        statConfidence,
+        score,
+        lagDays: edge.lagDays,
+        positiveSpillover: positiveSpill.map(e => ({ domain: e.target, impact: e.weight })),
+        negativeSpillover: negativeSpill.map(e => ({ domain: e.target, impact: e.weight })),
+        upstreamDependencies: leverUpstream.length,
+      };
+    }).sort((a, b) => b.score - a.score);
+
+    const topIntervention = interventionCandidates[0] || null;
+    const alternatives = interventionCandidates.slice(1, 4);
+
+    // Why this intervention is THE one
+    const rationale = topIntervention
+      ? `${topIntervention.lever} is the precision intervention point because: ` +
+        `${(topIntervention.directImpact * 100).toFixed(0)}% direct effect on ${targetDomain}, ` +
+        `${topIntervention.cascadeMultiplier.toFixed(2)}x cascade multiplier, ` +
+        `${topIntervention.positiveSpillover.length} positive side effects, ` +
+        `${(topIntervention.controllability * 100).toFixed(0)}% controllable, ` +
+        `p-value ${topIntervention.statConfidence >= 0.8 ? 'strong' : 'moderate'}. ` +
+        `Time to impact: ${topIntervention.lagDays}d.`
+      : 'No viable intervention found — insufficient causal data.';
+
+    const confidence = topIntervention ? Math.min(0.9, topIntervention.score * 1.2) : 0.1;
+
+    return {
+      data: {
+        type: 'causal_intervention',
+        targetDomain,
+        topIntervention,
+        alternatives,
+        rationale,
+        candidatesAnalyzed: interventionCandidates.length,
+      },
+      narrative: rationale,
+      confidence,
+      drivers: interventionCandidates.slice(0, 5).map(c => ({
+        domain: c.lever, weight: c.score, lagDays: c.lagDays,
+        direction: 'positive' as const,
+      })),
+      interventions: topIntervention ? [{
+        action: `PRECISION INTERVENTION: Focus all effort on ${topIntervention.lever} → ${targetDomain}. Expected +${(topIntervention.directImpact * 15).toFixed(0)}% impact in ${topIntervention.lagDays}d`,
+        targetDomains: [topIntervention.lever, targetDomain],
+        expectedImpact: `+${(topIntervention.directImpact * 15).toFixed(0)}% ${targetDomain} + ${topIntervention.positiveSpillover.length} bonus domain improvements`,
+        confidence: topIntervention.score,
+        evidence: rationale,
+        owner: `${topIntervention.lever} team lead`,
+        effort: topIntervention.controllability > 0.6 ? 'low' as const : 'medium' as const,
+      }] : [],
+      modulesUsed: ['causal-dag-analysis', 'intervention-scoring-engine', 'spillover-analyzer'],
+      metadata: { candidatesAnalyzed: interventionCandidates.length, topScore: topIntervention?.score || 0 },
+    };
+  },
+
+  formatForPrompt: (result, ctx) => {
+    const lines: string[] = [];
+    const data = result.data as Record<string, unknown>;
+    const top = data.topIntervention as { lever: string; score: number; directImpact: number; lagDays: number; positiveSpillover: unknown[]; controllability: number } | null;
+    const alts = data.alternatives as Array<{ lever: string; score: number; directImpact: number; lagDays: number }>;
+
+    lines.push(`## 🎯 PRECISION INTERVENTION: ${ctx.primaryDomain}`);
+    if (top) {
+      lines.push(`**#1 LEVER: ${top.lever}** (score: ${top.score.toFixed(2)}, impact: ${(top.directImpact * 100).toFixed(0)}%, lag: ${top.lagDays}d, spillover: ${top.positiveSpillover.length} domains)`);
+      lines.push(`Controllability: ${(top.controllability * 100).toFixed(0)}%`);
+    }
+    lines.push('');
+
+    if (alts && alts.length > 0) {
+      lines.push('### Alternative Interventions');
+      lines.push(formatTable(
+        ['Rank', 'Lever', 'Score', 'Impact', 'Lag'],
+        alts.map((a, i) => [String(i + 2), a.lever, a.score.toFixed(2), `${(a.directImpact * 100).toFixed(0)}%`, `${a.lagDays}d`])
+      ));
+    }
+
+    return lines.join('\n');
+  },
+});
+
+// ============================================================================
+// DOMAIN 21: PATTERN-MEMORY — Temporal Pattern Library & Match (V6.1)
+// ============================================================================
+
+export const patternMemoryDomain: ActionDomainDefinition = defineActionDomain({
+  name: 'pattern-memory',
+  description: 'Remembers and matches temporal patterns — recognizes "we have seen this before" situations by comparing current signals to historical pattern library',
+  brainAnalog: 'Entorhinal Cortex — pattern completion, episodic memory matching, déjà vu detection',
+  requires: ['timeSeries'],
+  optional: ['causalDAG', 'contextAwareReasoner'],
+  intents: ['pattern-memory'],
+  intentKeywords: ['pattern', 'seen before', 'similar to', 'historical', 'recognize', 'déjà vu', 'precedent', 'repeating', 'cycle', 'seasonal', 'looks like last', 'happened before'],
+  intentPatterns: [
+    /\bpattern\s+(match|recogni|memor)/i,
+    /\bseen\s+(this|something\s+like\s+this)\s+before\b/i,
+    /\bsimilar\s+to\s+(last|previous|Q[1-4]|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)/i,
+    /\bhappened?\s+before\b/i,
+    /\brepeating\s+(pattern|cycle)/i,
+    /\bseasonal\b/i,
+    /\bhistorical\s+(pattern|comparison|precedent)/i,
+    /\bd[eé]j[aà]\s+vu\b/i,
+  ],
+  priority: 50,
+  outputSchema: {
+    dataType: 'pattern_memory',
+    fields: ['matchedPatterns', 'currentSignature', 'bestMatch', 'patternLibrary'],
+    composable: true,
+    consumableBy: ['forecast', 'diagnose', 'anomaly-predict', 'narrate'],
+  },
+  composableWith: ['forecast', 'diagnose', 'anomaly-predict', 'narrate', 'recommend'],
+  tags: ['advanced', 'temporal', 'pattern-recognition'],
+
+  execute: async (ctx) => {
+    const { brain, log } = ctx;
+    log('Searching pattern memory');
+
+    const matchedPatterns: Array<{
+      domain: string;
+      patternType: 'seasonal_cycle' | 'growth_acceleration' | 'decline_pattern' | 'volatility_regime' | 'mean_reversion' | 'regime_shift';
+      confidence: number;
+      periodDays: number;
+      description: string;
+      whatHappenedLast: string;
+      implication: string;
+    }> = [];
+
+    for (const [domainName, ts] of brain.timeSeries) {
+      const values = (ts as unknown as { values: number[] }).values || [];
+      if (values.length < 30) continue;
+
+      // Pattern 1: Seasonal cycle detection (autocorrelation at common periods)
+      for (const period of [7, 14, 30, 90]) {
+        if (values.length < period * 2) continue;
+        const currentSegment = values.slice(-period);
+        const previousSegment = values.slice(-period * 2, -period);
+
+        // Compute correlation between segments
+        const mean1 = currentSegment.reduce((s, v) => s + v, 0) / currentSegment.length;
+        const mean2 = previousSegment.reduce((s, v) => s + v, 0) / previousSegment.length;
+        let cov = 0, var1 = 0, var2 = 0;
+        for (let i = 0; i < Math.min(currentSegment.length, previousSegment.length); i++) {
+          cov += (currentSegment[i] - mean1) * (previousSegment[i] - mean2);
+          var1 += (currentSegment[i] - mean1) ** 2;
+          var2 += (previousSegment[i] - mean2) ** 2;
+        }
+        const correlation = (var1 > 0 && var2 > 0) ? cov / (Math.sqrt(var1) * Math.sqrt(var2)) : 0;
+
+        if (correlation > 0.6) {
+          matchedPatterns.push({
+            domain: domainName,
+            patternType: 'seasonal_cycle',
+            confidence: Math.min(0.9, correlation),
+            periodDays: period,
+            description: `${domainName} shows a ${period}-day cycle (correlation: ${correlation.toFixed(2)})`,
+            whatHappenedLast: `Previous ${period}-day period: mean=${mean2.toFixed(3)}, current: mean=${mean1.toFixed(3)}`,
+            implication: mean1 > mean2
+              ? `Currently above historical pattern — ${mean1 > mean2 * 1.1 ? 'possible peak approaching' : 'healthy growth'}`
+              : `Currently below historical pattern — ${mean1 < mean2 * 0.9 ? 'watch for continued decline' : 'normal variance'}`,
+          });
+        }
+      }
+
+      // Pattern 2: Regime shift detection (significant mean change)
+      const firstHalf = values.slice(0, Math.floor(values.length / 2));
+      const secondHalf = values.slice(Math.floor(values.length / 2));
+      const firstMean = firstHalf.reduce((s, v) => s + v, 0) / firstHalf.length;
+      const secondMean = secondHalf.reduce((s, v) => s + v, 0) / secondHalf.length;
+      const meanShift = firstMean !== 0 ? Math.abs(secondMean - firstMean) / Math.abs(firstMean) : 0;
+
+      if (meanShift > 0.15) {
+        matchedPatterns.push({
+          domain: domainName,
+          patternType: 'regime_shift',
+          confidence: Math.min(0.8, meanShift * 2),
+          periodDays: values.length,
+          description: `${domainName} underwent a regime shift: ${(meanShift * 100).toFixed(0)}% mean change detected`,
+          whatHappenedLast: `Mean shifted from ${firstMean.toFixed(3)} to ${secondMean.toFixed(3)}`,
+          implication: secondMean > firstMean
+            ? `Upward regime shift — new normal is ${(meanShift * 100).toFixed(0)}% higher. Don't compare to old baseline.`
+            : `Downward regime shift — the brain needs to recalibrate expectations ${(meanShift * 100).toFixed(0)}% lower.`,
+        });
+      }
+
+      // Pattern 3: Mean reversion tendency
+      const recent10 = values.slice(-10);
+      const overallMean = values.reduce((s, v) => s + v, 0) / values.length;
+      const recentMean = recent10.reduce((s, v) => s + v, 0) / recent10.length;
+      const deviation = overallMean !== 0 ? (recentMean - overallMean) / Math.abs(overallMean) : 0;
+
+      if (Math.abs(deviation) > 0.15) {
+        matchedPatterns.push({
+          domain: domainName,
+          patternType: 'mean_reversion',
+          confidence: Math.min(0.7, Math.abs(deviation) * 2),
+          periodDays: values.length,
+          description: `${domainName} is ${deviation > 0 ? 'above' : 'below'} long-term mean by ${(Math.abs(deviation) * 100).toFixed(0)}%`,
+          whatHappenedLast: `Long-term mean: ${overallMean.toFixed(3)}, recent: ${recentMean.toFixed(3)}`,
+          implication: `Historical patterns suggest ${domainName} will ${deviation > 0 ? 'pull back toward' : 'recover toward'} the mean of ${overallMean.toFixed(3)}. Plan for reversion.`,
+        });
+      }
+    }
+
+    // Also include explicitly declared patterns from brain context
+    for (const p of brain.patterns) {
+      matchedPatterns.push({
+        domain: p.domain,
+        patternType: 'seasonal_cycle',
+        confidence: p.significance,
+        periodDays: 0,
+        description: p.pattern,
+        whatHappenedLast: 'From training data pattern library',
+        implication: `Known pattern: ${p.pattern} (significance: ${(p.significance * 100).toFixed(0)}%)`,
+      });
+    }
+
+    matchedPatterns.sort((a, b) => b.confidence - a.confidence);
+    const topPatterns = matchedPatterns.slice(0, 12);
+
+    const bestMatch = topPatterns[0] || null;
+    const confidence = topPatterns.length > 3 ? 0.7 : topPatterns.length > 0 ? 0.5 : 0.2;
+
+    return {
+      data: {
+        type: 'pattern_memory',
+        matchedPatterns: topPatterns,
+        totalPatternsFound: matchedPatterns.length,
+        bestMatch,
+        typeDistribution: {
+          seasonal_cycle: topPatterns.filter(p => p.patternType === 'seasonal_cycle').length,
+          regime_shift: topPatterns.filter(p => p.patternType === 'regime_shift').length,
+          mean_reversion: topPatterns.filter(p => p.patternType === 'mean_reversion').length,
+        },
+        domainsWithPatterns: new Set(topPatterns.map(p => p.domain)).size,
+      },
+      narrative: `Pattern memory: ${matchedPatterns.length} patterns detected across ${new Set(matchedPatterns.map(p => p.domain)).size} domains. Best match: ${bestMatch?.description || 'none'}. ${topPatterns.filter(p => p.patternType === 'seasonal_cycle').length} seasonal cycles, ${topPatterns.filter(p => p.patternType === 'regime_shift').length} regime shifts, ${topPatterns.filter(p => p.patternType === 'mean_reversion').length} mean reversions.`,
+      confidence,
+      drivers: topPatterns.slice(0, 5).map(p => ({
+        domain: p.domain, weight: p.confidence, lagDays: p.periodDays,
+        direction: 'positive' as const,
+      })),
+      interventions: topPatterns.filter(p => p.patternType === 'regime_shift').slice(0, 2).map(p => ({
+        action: `Recalibrate ${p.domain} baselines — regime shift detected. ${p.implication}`,
+        targetDomains: [p.domain],
+        expectedImpact: 'Accurate baselines prevent false alarms and missed signals',
+        confidence: p.confidence,
+        evidence: p.description,
+        owner: `${p.domain} analytics team`,
+        effort: 'low' as const,
+      })),
+      modulesUsed: ['time-series-analysis', 'autocorrelation-engine', 'regime-detector', 'pattern-library'],
+      metadata: { totalPatterns: matchedPatterns.length, types: { seasonal: topPatterns.filter(p => p.patternType === 'seasonal_cycle').length, regimeShift: topPatterns.filter(p => p.patternType === 'regime_shift').length, meanReversion: topPatterns.filter(p => p.patternType === 'mean_reversion').length } },
+    };
+  },
+
+  formatForPrompt: (result, ctx) => {
+    const lines: string[] = [];
+    const data = result.data as Record<string, unknown>;
+    const patterns = data.matchedPatterns as Array<{ domain: string; patternType: string; confidence: number; description: string; implication: string }>;
+
+    lines.push(`## 🧬 PATTERN MEMORY: Historical Pattern Match`);
+    lines.push(`Patterns Found: ${data.totalPatternsFound} | Domains: ${data.domainsWithPatterns}`);
+    lines.push('');
+
+    if (patterns && patterns.length > 0) {
+      lines.push(formatTable(
+        ['Domain', 'Type', 'Confidence', 'Pattern'],
+        patterns.slice(0, 8).map(p => [
+          p.domain, p.patternType, `${(p.confidence * 100).toFixed(0)}%`,
+          p.description.slice(0, 50) + (p.description.length > 50 ? '...' : ''),
+        ])
+      ));
+      lines.push('');
+      lines.push('### Implications');
+      for (const p of patterns.slice(0, 5)) {
+        lines.push(`- **${p.domain}**: ${p.implication}`);
+      }
+    }
+
+    return lines.join('\n');
+  },
+});
+
+// ============================================================================
 // REGISTER ALL DOMAINS
 // ============================================================================
 
-/** All 13 action domains in registration order */
+/** All 20 action domains in registration order */
 export const ALL_ACTION_DOMAINS: ActionDomainDefinition[] = [
   // Core (V2-V5 refactored)
   forecastDomain,
@@ -2032,7 +3455,7 @@ export const ALL_ACTION_DOMAINS: ActionDomainDefinition[] = [
   explainDomain,
   diagnoseDomain,
   compositeDomain,
-  // New (V6)
+  // V6 — Brain Function Expansion
   compareDomain,
   monitorDomain,
   optimizeDomain,
@@ -2041,16 +3464,25 @@ export const ALL_ACTION_DOMAINS: ActionDomainDefinition[] = [
   correlateDomain,
   benchmarkDomain,
   narrateDomain,
+  // V6.1 — Advanced Brain Cognition
+  sentimentDomain,
+  scenarioTreeDomain,
+  riskCascadeDomain,
+  resourceAllocateDomain,
+  anomalyPredictDomain,
+  goalDecomposeDomain,
+  causalInterveneDomain,
+  patternMemoryDomain,
 ];
 
 /**
- * Register all 13 action domains into a registry.
+ * Register all 20 action domains into a registry.
  *
  * @example
  * ```typescript
  * const registry = createActionDomainRegistry({ verbose: true });
  * registerAllActionDomains(registry);
- * // Registry now has all 13 domains ready to execute
+ * // Registry now has all 20 domains ready to execute
  * ```
  */
 export function registerAllActionDomains(

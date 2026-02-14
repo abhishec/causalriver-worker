@@ -657,13 +657,15 @@ export {
   type DomainOutputSchema,
 } from './orchestrator/action-domain-registry';
 
-// Action Domains V1 ("13 Brodmann Areas") — specialized brain functions
+// Action Domains V2 ("21 Brodmann Areas") — specialized brain functions
 export {
+  // Core (V2-V5)
   forecastDomain,
   simulateDomain,
   explainDomain,
   diagnoseDomain,
   compositeDomain,
+  // V6 — Brain Function Expansion
   compareDomain,
   monitorDomain,
   optimizeDomain,
@@ -672,6 +674,15 @@ export {
   correlateDomain,
   benchmarkDomain,
   narrateDomain,
+  // V6.1 — Advanced Brain Cognition
+  sentimentDomain,
+  scenarioTreeDomain,
+  riskCascadeDomain,
+  resourceAllocateDomain,
+  anomalyPredictDomain,
+  goalDecomposeDomain,
+  causalInterveneDomain,
+  patternMemoryDomain,
   ALL_ACTION_DOMAINS,
   registerAllActionDomains,
 } from './orchestrator/action-domains';
@@ -688,13 +699,20 @@ export {
   type ClosedLoopConfig,
 } from './orchestrator/closed-loop-executor';
 
-// Brain-Agent Fusion V1 ("Cerebral Integration") — agents ARE brain functions
+// Brain-Agent Fusion V2 ("Cerebral Integration") — agents ARE brain functions
 export {
+  // V6 — Core Brain Agents
   revenueWatcherAgent,
   dailyBriefingAgent,
   anomalyDiagnosticianAgent,
   optimizerAgent,
   benchmarkAuditorAgent,
+  // V6.1 — Advanced Brain Agents
+  riskSentinelAgent,
+  strategicPlannerAgent,
+  patternReconAgent,
+  orgHealthAgent,
+  interventionTrackerAgent,
   ALL_BRAIN_AGENTS,
   registerBrainAgents,
   type BrainExecutionInterface,

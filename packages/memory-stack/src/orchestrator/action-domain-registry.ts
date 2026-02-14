@@ -67,7 +67,16 @@ export type SemanticIntent =
   | 'benchmark'
   | 'narrate'
   | 'build'
-  | 'general';
+  | 'general'
+  // V6.1 — Advanced Brain Cognition
+  | 'sentiment'
+  | 'scenario-tree'
+  | 'risk-cascade'
+  | 'resource-allocate'
+  | 'anomaly-predict'
+  | 'goal-decompose'
+  | 'causal-intervene'
+  | 'pattern-memory';
 
 /** Output schema declaration — what a domain produces */
 export interface DomainOutputSchema {

@@ -252,26 +252,253 @@ export const benchmarkAuditorAgent: AgentDefinition = defineAgent({
 });
 
 // ============================================================================
+// V6.1 PRE-BUILT AGENTS — Advanced Brain Cognition
+// ============================================================================
+
+/**
+ * Risk Sentinel Agent — continuous risk cascade monitoring
+ * Level: autonomous | Triggers: schedule:6h, event:anomaly_detected
+ */
+export const riskSentinelAgent: AgentDefinition = defineAgent({
+  name: 'brain-risk-sentinel',
+  description: 'Monitors organizational risk posture by running risk-cascade + anomaly-predict + sentiment, triggers alerts on systemic risk escalation',
+  level: 'autonomous',
+  domains: ['risk', 'operations'],
+  triggers: ['schedule:6h', 'event:anomaly_detected', 'event:metric_threshold_breached'],
+  tags: ['brain-native', 'risk', 'sentinel', 'v6.1'],
+
+  execute: async (input: unknown, ctx) => {
+    const brainExec = (ctx as unknown as { brainExecution: BrainExecutionInterface }).brainExecution;
+    if (!brainExec) {
+      return { status: 'skipped', reason: 'Brain execution interface not available' };
+    }
+
+    ctx.reportProgress(0.2, 'Scanning risk cascades...');
+    const riskCascade = await brainExec.executeDomain('risk-cascade');
+
+    ctx.reportProgress(0.5, 'Predicting anomalies...');
+    const anomalyPredict = await brainExec.executeDomain('anomaly-predict');
+
+    ctx.reportProgress(0.75, 'Reading organizational sentiment...');
+    const sentiment = await brainExec.executeDomain('sentiment');
+
+    ctx.reportProgress(1.0, 'Risk assessment complete');
+
+    const riskResult = riskCascade as { systemicRiskScore?: number; singlePointsOfFailure?: unknown[] };
+    const anomalyResult = anomalyPredict as { criticalCount?: number; predictedAnomalies?: unknown[] };
+    const sentimentResult = sentiment as { overallMood?: string };
+
+    const alerts: string[] = [];
+    if ((riskResult.systemicRiskScore || 0) > 0.6) alerts.push(`Systemic risk elevated: ${((riskResult.systemicRiskScore || 0) * 100).toFixed(0)}%`);
+    if ((anomalyResult.criticalCount || 0) > 0) alerts.push(`${anomalyResult.criticalCount} critical anomalies predicted`);
+    if (sentimentResult.overallMood === 'fear') alerts.push('Organizational sentiment: FEAR — risk of panic-driven decisions');
+
+    return {
+      status: 'completed',
+      riskCascade: { systemicRiskScore: riskResult.systemicRiskScore, singlePoints: (riskResult.singlePointsOfFailure || []).length },
+      anomalyPredict: { criticalCount: anomalyResult.criticalCount, totalPredicted: (anomalyResult.predictedAnomalies || []).length },
+      sentiment: { overallMood: sentimentResult.overallMood },
+      alerts,
+      alertCount: alerts.length,
+      riskLevel: alerts.length > 2 ? 'critical' : alerts.length > 0 ? 'elevated' : 'normal',
+      timestamp: new Date().toISOString(),
+    };
+  },
+});
+
+/**
+ * Strategic Planner Agent — builds comprehensive strategic plans
+ * Level: task | Triggers: manual, event:quarter_start
+ */
+export const strategicPlannerAgent: AgentDefinition = defineAgent({
+  name: 'brain-strategic-planner',
+  description: 'Builds end-to-end strategic plans by decomposing goals, allocating resources, identifying interventions, and mapping scenarios',
+  level: 'task',
+  domains: ['strategy', 'finance', 'growth'],
+  triggers: ['manual', 'event:quarter_start'],
+  tags: ['brain-native', 'strategic', 'planning', 'v6.1'],
+
+  execute: async (input: unknown, ctx) => {
+    const brainExec = (ctx as unknown as { brainExecution: BrainExecutionInterface }).brainExecution;
+    if (!brainExec) {
+      return { status: 'skipped', reason: 'Brain execution interface not available' };
+    }
+
+    ctx.reportProgress(0.15, 'Decomposing goals...');
+    const goalPlan = await brainExec.executeDomain('goal-decompose');
+
+    ctx.reportProgress(0.35, 'Finding precision interventions...');
+    const intervention = await brainExec.executeDomain('causal-intervene');
+
+    ctx.reportProgress(0.55, 'Allocating resources...');
+    const allocation = await brainExec.executeDomain('resource-allocate');
+
+    ctx.reportProgress(0.75, 'Building scenario tree...');
+    const scenarios = await brainExec.executeDomain('scenario-tree');
+
+    ctx.reportProgress(0.9, 'Generating narrative...');
+    const narrative = await brainExec.executeDomain('narrate');
+
+    ctx.reportProgress(1.0, 'Strategic plan complete');
+
+    return {
+      status: 'completed',
+      goalPlan,
+      intervention,
+      allocation,
+      scenarios,
+      narrative,
+      generatedAt: new Date().toISOString(),
+    };
+  },
+});
+
+/**
+ * Pattern Reconnaissance Agent — deep temporal pattern scanning
+ * Level: autonomous | Triggers: schedule:daily, event:signal_ingested
+ */
+export const patternReconAgent: AgentDefinition = defineAgent({
+  name: 'brain-pattern-recon',
+  description: 'Scans all domains for temporal patterns, regime shifts, and seasonal cycles — builds the brain pattern memory library',
+  level: 'autonomous',
+  triggers: ['schedule:daily', 'event:signal_ingested'],
+  tags: ['brain-native', 'pattern-recognition', 'temporal', 'v6.1'],
+
+  execute: async (input: unknown, ctx) => {
+    const brainExec = (ctx as unknown as { brainExecution: BrainExecutionInterface }).brainExecution;
+    if (!brainExec) {
+      return { status: 'skipped', reason: 'Brain execution interface not available' };
+    }
+
+    ctx.reportProgress(0.3, 'Scanning pattern memory...');
+    const patterns = await brainExec.executeDomain('pattern-memory');
+
+    ctx.reportProgress(0.6, 'Cross-domain correlation...');
+    const correlations = await brainExec.executeDomain('correlate');
+
+    ctx.reportProgress(0.9, 'Anomaly prediction from patterns...');
+    const predictions = await brainExec.executeDomain('anomaly-predict');
+
+    ctx.reportProgress(1.0, 'Pattern reconnaissance complete');
+
+    return {
+      status: 'completed',
+      patterns,
+      correlations,
+      predictions,
+      scanCompletedAt: new Date().toISOString(),
+    };
+  },
+});
+
+/**
+ * Organizational Health Agent — holistic org wellness check
+ * Level: autonomous | Triggers: schedule:weekly
+ */
+export const orgHealthAgent: AgentDefinition = defineAgent({
+  name: 'brain-org-health',
+  description: 'Weekly organizational health check — sentiment analysis + risk assessment + benchmark comparison + recommendation stack',
+  level: 'autonomous',
+  triggers: ['schedule:weekly'],
+  tags: ['brain-native', 'health-check', 'executive', 'v6.1'],
+
+  execute: async (input: unknown, ctx) => {
+    const brainExec = (ctx as unknown as { brainExecution: BrainExecutionInterface }).brainExecution;
+    if (!brainExec) {
+      return { status: 'skipped', reason: 'Brain execution interface not available' };
+    }
+
+    ctx.reportProgress(0.2, 'Reading organizational sentiment...');
+    const sentiment = await brainExec.executeDomain('sentiment');
+
+    ctx.reportProgress(0.4, 'Assessing risk posture...');
+    const risk = await brainExec.executeDomain('risk-cascade');
+
+    ctx.reportProgress(0.6, 'Benchmarking...');
+    const benchmark = await brainExec.executeDomain('benchmark');
+
+    ctx.reportProgress(0.8, 'Building recommendations...');
+    const recommendations = await brainExec.executeDomain('recommend');
+
+    ctx.reportProgress(1.0, 'Health check complete');
+
+    return {
+      status: 'completed',
+      sentiment,
+      risk,
+      benchmark,
+      recommendations,
+      healthCheckAt: new Date().toISOString(),
+    };
+  },
+});
+
+/**
+ * Intervention Tracker Agent — follows up on executed interventions
+ * Level: task | Triggers: schedule:weekly, event:intervention_executed
+ */
+export const interventionTrackerAgent: AgentDefinition = defineAgent({
+  name: 'brain-intervention-tracker',
+  description: 'Tracks executed interventions — checks if the causal lever moved, measures actual vs predicted impact, feeds results back to brain calibration',
+  level: 'task',
+  triggers: ['schedule:weekly', 'event:intervention_executed'],
+  tags: ['brain-native', 'tracking', 'closed-loop', 'v6.1'],
+
+  execute: async (input: unknown, ctx) => {
+    const brainExec = (ctx as unknown as { brainExecution: BrainExecutionInterface }).brainExecution;
+    if (!brainExec) {
+      return { status: 'skipped', reason: 'Brain execution interface not available' };
+    }
+
+    ctx.reportProgress(0.25, 'Re-evaluating causal interventions...');
+    const currentIntervention = await brainExec.executeDomain('causal-intervene');
+
+    ctx.reportProgress(0.5, 'Checking forecast accuracy...');
+    const forecast = await brainExec.executeDomain('forecast');
+
+    ctx.reportProgress(0.75, 'Auditing assumptions...');
+    const audit = await brainExec.executeDomain('audit');
+
+    ctx.reportProgress(1.0, 'Intervention tracking complete');
+
+    return {
+      status: 'completed',
+      currentIntervention,
+      forecast,
+      audit,
+      trackedAt: new Date().toISOString(),
+    };
+  },
+});
+
+// ============================================================================
 // ALL PRE-BUILT AGENTS
 // ============================================================================
 
-/** All pre-built brain-native agents */
+/** All 10 pre-built brain-native agents */
 export const ALL_BRAIN_AGENTS: AgentDefinition[] = [
+  // V6 — Core Brain Agents
   revenueWatcherAgent,
   dailyBriefingAgent,
   anomalyDiagnosticianAgent,
   optimizerAgent,
   benchmarkAuditorAgent,
+  // V6.1 — Advanced Brain Agents
+  riskSentinelAgent,
+  strategicPlannerAgent,
+  patternReconAgent,
+  orgHealthAgent,
+  interventionTrackerAgent,
 ];
 
 /**
- * Register all brain-native agents into an agent registry.
+ * Register all 10 brain-native agents into an agent registry.
  *
  * @example
  * ```typescript
  * const agentRegistry = createAgentRegistry({ verbose: true });
  * registerBrainAgents(agentRegistry);
- * // 5 brain-native agents now registered
+ * // 10 brain-native agents now registered
  * ```
  */
 export function registerBrainAgents(

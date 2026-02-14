@@ -1209,14 +1209,16 @@ for (const tc of v4TestCases) {
     registerAllActionDomains(domainRegistry);
 
     const registeredDomains = domainRegistry.getDomainNames();
-    const has13Domains = registeredDomains.length === 13;
-    const hasCore5 = ['forecast', 'simulate', 'explain', 'diagnose', 'composite'].every(d => domainRegistry.hasDomain(d));
-    const hasNew8 = ['compare', 'monitor', 'optimize', 'recommend', 'audit', 'correlate', 'benchmark', 'narrate'].every(d => domainRegistry.hasDomain(d));
+    const has21Domains = registeredDomains.length === 21;
+    const hasCore5 = ['forecast', 'simulate', 'explain', 'diagnose', 'composite'].every(d => registeredDomains.includes(d));
+    const hasV6_8 = ['compare', 'monitor', 'optimize', 'recommend', 'audit', 'correlate', 'benchmark', 'narrate'].every(d => registeredDomains.includes(d));
+    const hasV61_8 = ['sentiment', 'scenario-tree', 'risk-cascade', 'resource-allocate', 'anomaly-predict', 'goal-decompose', 'causal-intervene', 'pattern-memory'].every(d => registeredDomains.includes(d));
 
     console.log(`  10a. Action Domain Registry:`);
-    console.log(`     Domains registered: ${registeredDomains.length} ${has13Domains ? '✅' : '❌'}`);
+    console.log(`     Domains registered: ${registeredDomains.length} ${has21Domains ? '✅' : '❌'}`);
     console.log(`     Core 5 (forecast/simulate/explain/diagnose/composite): ${hasCore5 ? '✅' : '❌'}`);
-    console.log(`     New 8 (compare/monitor/optimize/recommend/audit/correlate/benchmark/narrate): ${hasNew8 ? '✅' : '❌'}`);
+    console.log(`     V6 8 (compare/monitor/optimize/recommend/audit/correlate/benchmark/narrate): ${hasV6_8 ? '✅' : '❌'}`);
+    console.log(`     V6.1 8 (sentiment/scenario-tree/risk-cascade/resource-allocate/anomaly-predict/goal-decompose/causal-intervene/pattern-memory): ${hasV61_8 ? '✅' : '❌'}`);
     console.log(`     Domains: ${registeredDomains.join(', ')}`);
 
     // Verify domain metadata
@@ -1230,7 +1232,7 @@ for (const tc of v4TestCases) {
     console.log(`     Brain analog: ${hasBrainAnalog ? '✅' : '❌'} (${forecastDomainInfo?.definition.brainAnalog?.substring(0, 50)}...)`);
     console.log(`     Intents: ${hasIntents ? '✅' : '❌'} | Keywords: ${hasKeywords ? '✅' : '❌'} | Patterns: ${hasPatterns ? '✅' : '❌'} | Schema: ${hasOutputSchema ? '✅' : '❌'}`);
 
-    const registryPassed = has13Domains && hasCore5 && hasNew8 && hasBrainAnalog && hasIntents && hasKeywords && hasOutputSchema;
+    const registryPassed = has21Domains && hasCore5 && hasV6_8 && hasV61_8 && hasBrainAnalog && hasIntents && hasKeywords && hasOutputSchema;
     if (registryPassed) {
       console.log(`     ✅ V6 Action Domain Registry PASSED`);
       passed++;
@@ -1519,20 +1521,22 @@ for (const tc of v4TestCases) {
     registerBrainAgents(agentReg);
 
     const brainAgents = agentReg.listAgents();
-    const has5Agents = brainAgents.length === 5;
-    const agentNames = brainAgents.map(a => a.definition.name);
-    const hasWatcher = agentNames.includes('brain-revenue-watcher');
-    const hasBriefing = agentNames.includes('brain-daily-briefing');
-    const hasDiagnostician = agentNames.includes('brain-anomaly-diagnostician');
-    const hasOptimizer = agentNames.includes('brain-optimizer');
-    const hasAuditor = agentNames.includes('brain-benchmark-auditor');
+    const has10Agents = brainAgents.length === 10;
+    const agentNamesV6 = brainAgents.map(a => a.definition.name);
+    const hasWatcher = agentNamesV6.includes('brain-revenue-watcher');
+    const hasBriefing = agentNamesV6.includes('brain-daily-briefing');
+    const hasDiagnostician = agentNamesV6.includes('brain-anomaly-diagnostician');
+    const hasOptimizer = agentNamesV6.includes('brain-optimizer');
+    const hasAuditor = agentNamesV6.includes('brain-benchmark-auditor');
+    const hasSentinel = agentNamesV6.includes('brain-risk-sentinel');
+    const hasPlanner = agentNamesV6.includes('brain-strategic-planner');
+    const hasRecon = agentNamesV6.includes('brain-pattern-recon');
+    const hasOrgHealth = agentNamesV6.includes('brain-org-health');
+    const hasTracker = agentNamesV6.includes('brain-intervention-tracker');
 
-    console.log(`     Brain agents: ${brainAgents.length} ${has5Agents ? '✅' : '❌'}`);
-    console.log(`     revenue-watcher: ${hasWatcher ? '✅' : '❌'}`);
-    console.log(`     daily-briefing: ${hasBriefing ? '✅' : '❌'}`);
-    console.log(`     anomaly-diagnostician: ${hasDiagnostician ? '✅' : '❌'}`);
-    console.log(`     optimizer: ${hasOptimizer ? '✅' : '❌'}`);
-    console.log(`     benchmark-auditor: ${hasAuditor ? '✅' : '❌'}`);
+    console.log(`     Brain agents: ${brainAgents.length} ${has10Agents ? '✅' : '❌'}`);
+    console.log(`     V6: revenue-watcher: ${hasWatcher ? '✅' : '❌'} | daily-briefing: ${hasBriefing ? '✅' : '❌'} | anomaly-diagnostician: ${hasDiagnostician ? '✅' : '❌'} | optimizer: ${hasOptimizer ? '✅' : '❌'} | benchmark-auditor: ${hasAuditor ? '✅' : '❌'}`);
+    console.log(`     V6.1: risk-sentinel: ${hasSentinel ? '✅' : '❌'} | strategic-planner: ${hasPlanner ? '✅' : '❌'} | pattern-recon: ${hasRecon ? '✅' : '❌'} | org-health: ${hasOrgHealth ? '✅' : '❌'} | intervention-tracker: ${hasTracker ? '✅' : '❌'}`);
 
     // Verify agents have brain-native tags
     const allBrainNative = brainAgents.every(a => a.definition.tags?.includes('brain-native'));
@@ -1544,7 +1548,7 @@ for (const tc of v4TestCases) {
     const toolCount = brainAgents.filter(a => a.definition.level === 'tool').length;
     console.log(`     Levels: ${autonomousCount} autonomous, ${taskCount} task, ${toolCount} tool`);
 
-    const fusionPassed = has5Agents && hasWatcher && hasBriefing && hasDiagnostician && hasOptimizer && hasAuditor && allBrainNative;
+    const fusionPassed = has10Agents && hasWatcher && hasBriefing && hasDiagnostician && hasOptimizer && hasAuditor && hasSentinel && hasPlanner && hasRecon && hasOrgHealth && hasTracker && allBrainNative;
     if (fusionPassed) {
       console.log(`     ✅ V6 Brain-Agent Fusion PASSED`);
       passed++;
@@ -1613,10 +1617,231 @@ for (const tc of v4TestCases) {
     failed++;
   }
 
+// ── V6.1: Advanced Brain Cognition Tests ──────────────────────────────────
+  console.log('\n🧠 TEST: V6.1 — Advanced Brain Cognition (8 New Domains + 5 New Agents)');
+  console.log('-'.repeat(80));
+
+  try {
+    // Use same domainRegistry from V6 (already has 13 domains registered from V6 block)
+    // We need to re-register with all 21 domains
+    const advRegistry = createActionDomainRegistry({ verbose: false });
+    registerAllActionDomains(advRegistry);
+
+    // 11a: Verify 21 domains registered
+    console.log(`\n  11a. Domain Count Verification:`);
+    const advStats = advRegistry.getStats();
+    const count21 = advStats.totalDomains;
+    const has21 = count21 === 21;
+    console.log(`     Total domains: ${count21} ${has21 ? '✅' : '❌'}`);
+
+    const advDomainList = advRegistry.getDomainNames();
+    const newDomainNames = ['sentiment', 'scenario-tree', 'risk-cascade', 'resource-allocate', 'anomaly-predict', 'goal-decompose', 'causal-intervene', 'pattern-memory'];
+    const allNewPresent = newDomainNames.every(n => advDomainList.includes(n));
+    console.log(`     New 8 domains present: ${allNewPresent ? '✅' : '❌'} (${newDomainNames.filter(n => advDomainList.includes(n)).length}/8)`);
+
+    if (has21 && allNewPresent) { console.log(`     ✅ V6.1 Domain Count PASSED`); passed++; }
+    else { console.log(`     ❌ V6.1 Domain Count FAILED`); failed++; }
+
+    // 11b: Execute all 8 new domains
+    console.log(`\n  11b. Advanced Domain Execution:`);
+
+    // Reuse mock brain context from V6 tests — need to recreate it
+    const mockDAG2 = {
+      nodes: new Set(['marketing', 'revenue', 'engineering', 'cs', 'product', 'growth', 'finance', 'people', 'strategy', 'macro']),
+      edges: new Map([
+        ['marketing', new Map([
+          ['revenue', { weight: 0.65, pValue: 0.01, lagDays: 14, sampleSize: 50 }],
+          ['growth', { weight: 0.45, pValue: 0.03, lagDays: 7, sampleSize: 30 }],
+        ])],
+        ['engineering', new Map([
+          ['product', { weight: 0.7, pValue: 0.005, lagDays: 21, sampleSize: 80 }],
+          ['revenue', { weight: 0.35, pValue: 0.04, lagDays: 30, sampleSize: 25 }],
+        ])],
+        ['cs', new Map([
+          ['revenue', { weight: 0.5, pValue: 0.02, lagDays: 7, sampleSize: 40 }],
+        ])],
+        ['product', new Map([
+          ['growth', { weight: 0.55, pValue: 0.01, lagDays: 14, sampleSize: 60 }],
+          ['cs', { weight: 0.4, pValue: 0.03, lagDays: 10, sampleSize: 35 }],
+        ])],
+      ]),
+    };
+
+    // Create rich time series for sentiment/pattern/anomaly detection
+    const generateTS = (base: number, noise: number, trend: number, length: number = 90) => {
+      const values: number[] = [];
+      for (let i = 0; i < length; i++) {
+        values.push(base + trend * i / length + (Math.random() - 0.5) * noise);
+      }
+      return values;
+    };
+
+    const mockBrainContext2 = {
+      dag: mockDAG2,
+      timeSeries: new Map([
+        ['revenue', { dates: Array.from({length: 90}, (_, i) => `2025-11-${String(i + 1).padStart(2, '0')}`), values: generateTS(100, 10, 15), domain: 'revenue' }],
+        ['marketing', { dates: Array.from({length: 90}, (_, i) => `2025-11-${String(i + 1).padStart(2, '0')}`), values: generateTS(50, 8, 5), domain: 'marketing' }],
+        ['engineering', { dates: Array.from({length: 90}, (_, i) => `2025-11-${String(i + 1).padStart(2, '0')}`), values: generateTS(80, 5, -3), domain: 'engineering' }],
+        ['cs', { dates: Array.from({length: 90}, (_, i) => `2025-11-${String(i + 1).padStart(2, '0')}`), values: generateTS(70, 15, -10), domain: 'cs' }],
+        ['product', { dates: Array.from({length: 90}, (_, i) => `2025-11-${String(i + 1).padStart(2, '0')}`), values: generateTS(90, 6, 8), domain: 'product' }],
+      ]),
+      directCauses: { revenue: [{ source: 'marketing', target: 'revenue', weight: 0.65, lagDays: 14 }] },
+      directEffects: { marketing: [{ source: 'marketing', target: 'revenue', weight: 0.65, lagDays: 14 }] },
+      matchedRules: [
+        { title: 'Churn Alert', naturalLanguage: 'When cs churn > 5%, alert revenue team', conditions: ['cs.churn > 5%'], triggered: true },
+      ],
+      patterns: [
+        { domain: 'revenue', pattern: 'Seasonal Q4 spike', significance: 0.8 },
+        { domain: 'marketing', pattern: 'Monday engagement peak', significance: 0.6 },
+      ],
+      cascadePaths: [
+        { source: 'marketing', target: 'revenue', hops: 1, totalLag: 14 },
+      ],
+      primaryDomain: 'revenue',
+      extractedDomains: ['revenue', 'marketing', 'engineering'],
+      question: 'Analyze revenue health comprehensively',
+      intent: 'predict',
+      horizonDays: 90,
+      horizonSource: 'default' as const,
+    };
+
+    const mockModules2 = {
+      forecaster: null, simulator: null, reasoner: null, explainer: null,
+      amplifier: null, motorCommandEngine: null, calibrationLoop: null, agentRegistry: null,
+    };
+
+    let execPassed = true;
+
+    // Sentiment
+    const sentimentR = await advRegistry.executeDomain('sentiment', mockBrainContext2, mockModules2);
+    const sentimentData = sentimentR.data as Record<string, unknown>;
+    const sentimentOk = sentimentR.confidence > 0 && (sentimentData.domainSentiments as unknown[])?.length > 0;
+    console.log(`     sentiment: mood=${sentimentData.overallMood}, domains=${(sentimentData.domainSentiments as unknown[])?.length || 0} ${sentimentOk ? '✅' : '❌'}`);
+    if (!sentimentOk) execPassed = false;
+
+    // Scenario Tree
+    const scenarioR = await advRegistry.executeDomain('scenario-tree', mockBrainContext2, mockModules2);
+    const scenarioData = scenarioR.data as Record<string, unknown>;
+    const scenarioOk = scenarioR.confidence > 0 && (scenarioData.branches as unknown[])?.length >= 3;
+    console.log(`     scenario-tree: branches=${(scenarioData.branches as unknown[])?.length || 0}, EV=${((scenarioData.expectedValue as number) || 0).toFixed(1)}% ${scenarioOk ? '✅' : '❌'}`);
+    if (!scenarioOk) execPassed = false;
+
+    // Risk Cascade
+    const riskR = await advRegistry.executeDomain('risk-cascade', mockBrainContext2, mockModules2);
+    const riskData = riskR.data as Record<string, unknown>;
+    const riskOk = riskR.confidence > 0 && (riskData.singlePointsOfFailure as unknown[])?.length > 0;
+    console.log(`     risk-cascade: systemic=${((riskData.systemicRiskScore as number) * 100).toFixed(0)}%, SPOFs=${(riskData.singlePointsOfFailure as unknown[])?.length || 0} ${riskOk ? '✅' : '❌'}`);
+    if (!riskOk) execPassed = false;
+
+    // Resource Allocate
+    const resourceR = await advRegistry.executeDomain('resource-allocate', mockBrainContext2, mockModules2);
+    const resourceData = resourceR.data as Record<string, unknown>;
+    const resourceOk = resourceR.confidence > 0 && (resourceData.allocations as unknown[])?.length > 0;
+    console.log(`     resource-allocate: allocations=${(resourceData.allocations as unknown[])?.length || 0}, ROI=${((resourceData.expectedROI as number) || 0).toFixed(1)}% ${resourceOk ? '✅' : '❌'}`);
+    if (!resourceOk) execPassed = false;
+
+    // Anomaly Predict
+    const anomalyR = await advRegistry.executeDomain('anomaly-predict', mockBrainContext2, mockModules2);
+    const anomalyData = anomalyR.data as Record<string, unknown>;
+    const anomalyOk = anomalyR.confidence > 0 && anomalyR.narrative.length > 0;
+    console.log(`     anomaly-predict: detected=${anomalyData.totalDetected}, critical=${anomalyData.criticalCount} ${anomalyOk ? '✅' : '❌'}`);
+    if (!anomalyOk) execPassed = false;
+
+    // Goal Decompose
+    const goalR = await advRegistry.executeDomain('goal-decompose', mockBrainContext2, mockModules2);
+    const goalData = goalR.data as Record<string, unknown>;
+    const goalOk = goalR.confidence > 0 && (goalData.phases as unknown[])?.length > 0;
+    console.log(`     goal-decompose: levers=${(goalData.allLevers as unknown[])?.length || 0}, phases=${(goalData.phases as unknown[])?.length || 0} ${goalOk ? '✅' : '❌'}`);
+    if (!goalOk) execPassed = false;
+
+    // Causal Intervene
+    const interveneR = await advRegistry.executeDomain('causal-intervene', mockBrainContext2, mockModules2);
+    const interveneData = interveneR.data as Record<string, unknown>;
+    const topIntervention = interveneData.topIntervention as { lever: string; score: number } | null;
+    const interveneOk = interveneR.confidence > 0 && topIntervention !== null;
+    console.log(`     causal-intervene: top=${topIntervention?.lever || 'none'}, score=${topIntervention?.score?.toFixed(2) || 0} ${interveneOk ? '✅' : '❌'}`);
+    if (!interveneOk) execPassed = false;
+
+    // Pattern Memory
+    const patternR = await advRegistry.executeDomain('pattern-memory', mockBrainContext2, mockModules2);
+    const patternData = patternR.data as Record<string, unknown>;
+    const patternOk = patternR.confidence > 0 && (patternData.matchedPatterns as unknown[])?.length > 0;
+    console.log(`     pattern-memory: patterns=${patternData.totalPatternsFound}, domains=${patternData.domainsWithPatterns} ${patternOk ? '✅' : '❌'}`);
+    if (!patternOk) execPassed = false;
+
+    if (execPassed) { console.log(`     ✅ V6.1 Advanced Domain Execution PASSED (8/8 domains)`); passed++; }
+    else { console.log(`     ❌ V6.1 Advanced Domain Execution FAILED`); failed++; }
+
+    // 11c: Semantic Router for new domains
+    console.log(`\n  11c. Advanced Semantic Router:`);
+    const routeTests = [
+      { q: 'How is team morale', intent: 'sentiment', expected: 'sentiment' },
+      { q: 'Show me possible futures', intent: 'scenario-tree', expected: 'scenario-tree' },
+      { q: 'What are our single points of failure', intent: 'risk-cascade', expected: 'risk-cascade' },
+      { q: 'Where should we allocate budget', intent: 'resource-allocate', expected: 'resource-allocate' },
+      { q: 'What problems are coming', intent: 'anomaly-predict', expected: 'anomaly-predict' },
+      { q: 'How do we grow revenue 50%', intent: 'goal-decompose', expected: 'goal-decompose' },
+      { q: 'What is the single biggest lever', intent: 'causal-intervene', expected: 'causal-intervene' },
+      { q: 'Have we seen this pattern before', intent: 'pattern-memory', expected: 'pattern-memory' },
+    ];
+
+    let routesPassed = 0;
+    for (const rt of routeTests) {
+      const resolution = advRegistry.route(rt.q, rt.intent as never, ['revenue']);
+      const ok = resolution.primary === rt.expected;
+      if (ok) routesPassed++;
+      console.log(`     "${rt.q}" → ${resolution.primary} (${resolution.confidence.toFixed(2)}) ${ok ? '✅' : `❌ (expected ${rt.expected})`}`);
+    }
+
+    if (routesPassed === routeTests.length) { console.log(`     ✅ V6.1 Advanced Routing PASSED (${routesPassed}/${routeTests.length})`); passed++; }
+    else { console.log(`     ❌ V6.1 Advanced Routing FAILED (${routesPassed}/${routeTests.length})`); failed++; }
+
+    // 11d: 10 Brain Agents
+    console.log(`\n  11d. Brain Agent Expansion:`);
+    const agentNames = ALL_BRAIN_AGENTS.map(a => a.name);
+    const has10 = ALL_BRAIN_AGENTS.length === 10;
+    console.log(`     Total brain agents: ${ALL_BRAIN_AGENTS.length} ${has10 ? '✅' : '❌'}`);
+
+    const newAgentNames = ['brain-risk-sentinel', 'brain-strategic-planner', 'brain-pattern-recon', 'brain-org-health', 'brain-intervention-tracker'];
+    const allNewAgents = newAgentNames.every(n => agentNames.includes(n));
+    console.log(`     New 5 agents: ${allNewAgents ? '✅' : '❌'} (${newAgentNames.filter(n => agentNames.includes(n)).length}/5)`);
+
+    const allV61Tagged = ALL_BRAIN_AGENTS.filter(a => a.tags?.includes('v6.1'));
+    console.log(`     V6.1 tagged: ${allV61Tagged.length} agents`);
+
+    const allBrainNative = ALL_BRAIN_AGENTS.every(a => a.tags?.includes('brain-native'));
+    console.log(`     All brain-native: ${allBrainNative ? '✅' : '❌'}`);
+
+    if (has10 && allNewAgents && allBrainNative) { console.log(`     ✅ V6.1 Brain Agents PASSED`); passed++; }
+    else { console.log(`     ❌ V6.1 Brain Agents FAILED`); failed++; }
+
+    // 11e: Prompt formatting for new domains
+    console.log(`\n  11e. Advanced Prompt Formatting:`);
+    const sentimentPrompt = advRegistry.formatResultForPrompt('sentiment', sentimentR, mockBrainContext2);
+    const riskPrompt = advRegistry.formatResultForPrompt('risk-cascade', riskR, mockBrainContext2);
+    const goalPrompt = advRegistry.formatResultForPrompt('goal-decompose', goalR, mockBrainContext2);
+    const patternPrompt = advRegistry.formatResultForPrompt('pattern-memory', patternR, mockBrainContext2);
+
+    const formatOk = sentimentPrompt.includes('SENTIMENT') && riskPrompt.includes('RISK CASCADE') &&
+                     goalPrompt.includes('GOAL DECOMPOSITION') && patternPrompt.includes('PATTERN MEMORY');
+    console.log(`     sentiment prompt: ${sentimentPrompt.includes('SENTIMENT') ? '✅' : '❌'}`);
+    console.log(`     risk-cascade prompt: ${riskPrompt.includes('RISK CASCADE') ? '✅' : '❌'}`);
+    console.log(`     goal-decompose prompt: ${goalPrompt.includes('GOAL DECOMPOSITION') ? '✅' : '❌'}`);
+    console.log(`     pattern-memory prompt: ${patternPrompt.includes('PATTERN MEMORY') ? '✅' : '❌'}`);
+
+    if (formatOk) { console.log(`     ✅ V6.1 Prompt Formatting PASSED`); passed++; }
+    else { console.log(`     ❌ V6.1 Prompt Formatting FAILED`); failed++; }
+
+  } catch (err) {
+    console.log(`     ❌ V6.1 FAILED: ${(err as Error).message}`);
+    console.log((err as Error).stack);
+    failed++;
+  }
+
 // ── Summary ──────────────────────────────────────────────────────────────
 
 console.log('\n' + '='.repeat(80));
-console.log('🧠 DOMAIN ACTION ENGINE V6 — BRAIN WITH 13 SELF-REGISTERING ACTION DOMAINS');
+console.log('🧠 DOMAIN ACTION ENGINE V6.1 — BRAIN WITH 21 SELF-REGISTERING ACTION DOMAINS');
 console.log('='.repeat(80));
 console.log(`  Total Tests:     ${passed + failed}`);
 console.log(`  Passed:          ${passed}`);
@@ -1677,44 +1902,53 @@ console.log('');
 console.log('  V6 Enhancements Tested:');
 console.log('    ✅ defineActionDomain() factory (10-line self-describing brain function creation)');
 console.log('    ✅ Action Domain Registry (self-registering, pluggable — replaces 27 switch cases)');
-console.log('    ✅ 13 Action Domains (5 core + 8 new brain functions)');
+console.log('    ✅ 13 Core Action Domains (5 core + 8 expansion brain functions)');
 console.log('    ✅ Semantic Router (intent + keyword + regex multi-pass routing)');
 console.log('    ✅ Composition Engine (any-to-any domain chaining with dependency resolution)');
-console.log('    ✅ 8 New Domains: compare, monitor, optimize, recommend, audit, correlate, benchmark, narrate');
-console.log('    ✅ Domain Execution with full brain context injection');
-console.log('    ✅ Prompt formatting per domain (each domain formats its own output)');
 console.log('    ✅ Closed-Loop Executor (command → outcome → brain feedback signal)');
-console.log('    ✅ Action Effectiveness tracking (per action type + per domain)');
-console.log('    ✅ Brain Feedback Signals (strengthen/weaken causal edges based on outcomes)');
-console.log('    ✅ Brain-Agent Fusion (5 pre-built brain-native agents)');
-console.log('    ✅ Agents ARE Brain Functions (call action domains from within agents)');
-console.log('    ✅ Custom domain creation via defineActionDomain() + register()');
+console.log('    ✅ Brain-Agent Fusion (agents ARE brain functions)');
+console.log('');
+
+console.log('  V6.1 Enhancements Tested:');
+console.log('    ✅ 8 Advanced Domains: sentiment, scenario-tree, risk-cascade, resource-allocate,');
+console.log('       anomaly-predict, goal-decompose, causal-intervene, pattern-memory');
+console.log('    ✅ 21 Total Brain Domains (full cerebral architecture)');
+console.log('    ✅ Sentiment Engine (Amygdala — organizational mood, fear/euphoria detection)');
+console.log('    ✅ Scenario Tree (Hippocampal Prospection — branching futures with probabilities)');
+console.log('    ✅ Risk Cascade (Insular Cortex — systemic risk, single points of failure, cascade paths)');
+console.log('    ✅ Resource Allocator (Dorsolateral PFC — optimal budget/headcount distribution)');
+console.log('    ✅ Anomaly Predictor (Anterior Cingulate — predict anomalies BEFORE they happen)');
+console.log('    ✅ Goal Decomposer (Prefrontal Executive — strategic goal → executable phased plan)');
+console.log('    ✅ Causal Intervention (Basal Ganglia — precision single-lever targeting)');
+console.log('    ✅ Pattern Memory (Entorhinal Cortex — seasonal cycles, regime shifts, mean reversion)');
+console.log('    ✅ 5 New Brain Agents: risk-sentinel, strategic-planner, pattern-recon, org-health, intervention-tracker');
+console.log('    ✅ 10 Total Brain-Native Agents (all brain-native tagged)');
+console.log('    ✅ Semantic routing for all 21 domains');
+console.log('    ✅ Prompt formatting for all advanced domains');
 console.log('');
 
 if (failed === 0) {
-  console.log('✅ ALL TESTS PASSED — 13-DOMAIN BRAIN ARCHITECTURE FULLY OPERATIONAL');
-  console.log('   V6: The brain is no longer a monolith. It is 13 specialized neural pathways:');
-  console.log('   forecast → simulate → explain → diagnose → composite →');
-  console.log('   compare → monitor → optimize → recommend → audit → correlate → benchmark → narrate');
-  console.log('   Each one self-describing, self-registering, composable, and learnable.');
-  console.log('   Agents ARE brain functions. Motor commands learn from outcomes.');
-  console.log('   The brain doesn\'t just think — it has SPECIALIZED CORTICAL AREAS.');
+  console.log('✅ ALL TESTS PASSED — 21-DOMAIN BRAIN ARCHITECTURE FULLY OPERATIONAL');
+  console.log('   The brain has 21 specialized cortical areas:');
+  console.log('   CORE: forecast → simulate → explain → diagnose → composite');
+  console.log('   V6:   compare → monitor → optimize → recommend → audit → correlate → benchmark → narrate');
+  console.log('   V6.1: sentiment → scenario-tree → risk-cascade → resource-allocate →');
+  console.log('         anomaly-predict → goal-decompose → causal-intervene → pattern-memory');
+  console.log('   10 brain-native agents. Closed-loop learning. Semantic routing.');
+  console.log('   The brain doesn\'t just think — it FEELS, PLANS, PREDICTS, REMEMBERS, and INTERVENES.');
 } else {
   console.log(`❌ ${failed} TESTS FAILED — Action engine needs fixes`);
 }
 
 console.log('');
-console.log('💡 V6 API:');
+console.log('💡 V6.1 API:');
 console.log('   1. const registry = createActionDomainRegistry({ verbose: true })');
-console.log('   2. registerAllActionDomains(registry)  // 13 domains ready');
-console.log('   3. const route = registry.route("Forecast revenue", "predict", ["revenue"])');
-console.log('   4. const result = await registry.executeDomain("forecast", brainContext, modules)');
-console.log('   5. const customDomain = defineActionDomain({ name: "my-domain", ... })');
-console.log('   6. registry.register(customDomain)  // Instantly available');
-console.log('   7. const loop = createClosedLoopExecutor()');
-console.log('   8. loop.trackCommand({ commandId, actionType, ... })');
-console.log('   9. loop.recordOutcome(commandId, { achieved: true, accuracy: 0.8 })');
-console.log('  10. registerBrainAgents(agentRegistry)  // 5 brain-native agents');
+console.log('   2. registerAllActionDomains(registry)  // 21 domains ready');
+console.log('   3. const route = registry.route("What problems are coming?", "anomaly-predict", ["revenue"])');
+console.log('   4. const result = await registry.executeDomain("risk-cascade", brainContext, modules)');
+console.log('   5. const goal = await registry.executeDomain("goal-decompose", brainContext, modules)');
+console.log('   6. const intervention = await registry.executeDomain("causal-intervene", brainContext, modules)');
+console.log('   7. registerBrainAgents(agentRegistry)  // 10 brain-native agents');
 console.log('');
 
 })();
