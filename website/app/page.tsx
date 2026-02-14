@@ -7,6 +7,7 @@ import { Benchmarks } from "@/components/landing/Benchmarks";
 import { PlatformIntegration } from "@/components/landing/PlatformIntegration";
 import { Problem } from "@/components/landing/Problem";
 import { CodeExamples } from "@/components/landing/CodeExamples";
+import { LiveDemo } from "@/components/landing/LiveDemo";
 import { Connectors } from "@/components/landing/Connectors";
 import { UseCases } from "@/components/landing/UseCases";
 import { Comparison } from "@/components/landing/Comparison";
@@ -42,6 +43,9 @@ export default function Home() {
 
       {/* 9. DEVELOPER EXPERIENCE — Code examples */}
       <CodeExamples />
+
+      {/* 9.5. LIVE DEMO — Interactive pre-computed brain queries */}
+      <LiveDemo />
 
       {/* 10. CONNECTORS — What it plugs into */}
       <Connectors />
