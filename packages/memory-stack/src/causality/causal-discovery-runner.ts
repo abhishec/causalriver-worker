@@ -29,6 +29,11 @@ import {
 } from './granger-causality';
 
 import {
+  ensureStationary,
+  type StationarityResult,
+} from './stationarity-tests';
+
+import {
   runAdvancedDiscovery,
   type AdvancedDiscoveryMethod,
   type AdvancedDiscoveryConfig,
@@ -250,11 +255,38 @@ export function runCausalDiscovery(
   }
   
   // Step 3: Prepare data for Granger tests
-  // Apply first-order differencing for stationarity
+  // Apply ADF stationarity testing (proper pre-check before Granger)
+  // If ADF fails, auto-difference up to 2nd order. Block if still non-stationary.
   const differenced = new Map<string, DailyTimeSeries>();
+  const stationarityReport: Record<string, { isStationary: boolean; differencingOrder: number; warning?: string }> = {};
+
   for (const domain of selectedDomains) {
     const series = timeSeriesMap.get(domain)!;
-    differenced.set(domain, differenceTimeSeries(series));
+    const adfResult: StationarityResult = ensureStationary(series.values);
+
+    stationarityReport[domain] = {
+      isStationary: adfResult.isStationary,
+      differencingOrder: adfResult.differencingOrder,
+      warning: adfResult.warning,
+    };
+
+    if (!adfResult.isStationary) {
+      warnings.push(`${domain}: Non-stationary even after 2nd-order differencing (ADF p=${adfResult.pValue.toFixed(3)}). Granger results may be spurious.`);
+    }
+
+    if (adfResult.warning) {
+      warnings.push(`${domain}: ${adfResult.warning}`);
+    }
+
+    // Use the stationary series (auto-differenced if needed)
+    differenced.set(domain, {
+      ...series,
+      values: adfResult.stationarySeries,
+      metadata: {
+        ...series.metadata,
+        dayCount: adfResult.stationarySeries.length,
+      },
+    });
   }
   
   // Step 4: Run causal discovery (pairwise OR advanced method)

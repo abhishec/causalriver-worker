@@ -148,6 +148,23 @@ export interface MotorCommandEngineConfig {
   onCommandExecuted?: (command: MotorCommand, result: MotorCommandResult) => void;
   /** Verbose logging */
   verbose?: boolean;
+  /** Maximum commands per minute per organization (rate limiting) */
+  maxCommandsPerMinute?: number;
+  /** Blocked action types (security deny-list) */
+  blockedActionTypes?: MotorActionType[];
+  /** Allowed target patterns (regex whitelist — if set, targets must match) */
+  allowedTargetPatterns?: RegExp[];
+  /** Maximum parameter payload size in bytes (default: 50KB) */
+  maxPayloadSizeBytes?: number;
+  /** Force all commands to require approval (paranoid mode) */
+  forceApprovalMode?: boolean;
+}
+
+/** Pre-flight validation result */
+export interface CommandValidation {
+  valid: boolean;
+  errors: string[];
+  sanitizedCommand?: MotorCommand;
 }
 
 /** Batch execution result */
@@ -243,13 +260,118 @@ export function createMotorCommandEngine(config: MotorCommandEngineConfig = {}) 
     onApprovalNeeded,
     onCommandExecuted,
     verbose = false,
+    maxCommandsPerMinute = 30,
+    blockedActionTypes = [],
+    allowedTargetPatterns = [],
+    maxPayloadSizeBytes = 50_000,
+    forceApprovalMode = false,
   } = config;
 
   const registry = createConnectorRegistry();
   const commandHistory: Array<{ command: MotorCommand; result: MotorCommandResult }> = [];
   let commandCounter = 0;
 
+  // Rate limiting: sliding window per minute
+  const rateLimitWindow: number[] = [];
+
   const log = verbose ? (...args: unknown[]) => console.log('[MotorCommandEngine]', ...args) : () => {};
+
+  // ── Pre-Flight Validation (Security Gate) ──
+
+  function validateCommand(command: MotorCommand): CommandValidation {
+    const errors: string[] = [];
+
+    // 1. Check blocked action types
+    if (blockedActionTypes.includes(command.actionType)) {
+      errors.push(`Action type "${command.actionType}" is blocked by security policy`);
+    }
+
+    // 2. Check target patterns (whitelist)
+    if (allowedTargetPatterns.length > 0) {
+      const targetAllowed = allowedTargetPatterns.some(p => p.test(command.target));
+      if (!targetAllowed) {
+        errors.push(`Target "${command.target}" does not match any allowed target pattern`);
+      }
+    }
+
+    // 3. Validate confidence range
+    if (command.confidence < 0 || command.confidence > 1 || !Number.isFinite(command.confidence)) {
+      errors.push(`Invalid confidence: ${command.confidence}. Must be between 0 and 1.`);
+    }
+
+    // 4. Check payload size (prevent oversized payloads)
+    const payloadSize = JSON.stringify(command.parameters).length;
+    if (payloadSize > maxPayloadSizeBytes) {
+      errors.push(`Payload size ${payloadSize} bytes exceeds limit of ${maxPayloadSizeBytes} bytes`);
+    }
+
+    // 5. Sanitize parameters — strip potential injection patterns
+    const sanitizedParams = sanitizeParameters(command.parameters);
+
+    // 6. Validate timeout bounds (1s to 5min)
+    const safeTimeout = Math.max(1_000, Math.min(command.timeoutMs, 300_000));
+
+    // 7. Validate retries (0-5)
+    const safeRetries = Math.max(0, Math.min(command.maxRetries, 5));
+
+    // 8. Rate limit check
+    const now = Date.now();
+    // Purge old entries
+    while (rateLimitWindow.length > 0 && rateLimitWindow[0] < now - 60_000) {
+      rateLimitWindow.shift();
+    }
+    if (rateLimitWindow.length >= maxCommandsPerMinute) {
+      errors.push(`Rate limit exceeded: ${maxCommandsPerMinute} commands/minute`);
+    }
+
+    // 9. Force approval mode override
+    let approvalMode = command.approvalMode;
+    if (forceApprovalMode && approvalMode === 'auto') {
+      approvalMode = 'requires_approval';
+    }
+
+    const sanitizedCommand: MotorCommand = {
+      ...command,
+      parameters: sanitizedParams,
+      timeoutMs: safeTimeout,
+      maxRetries: safeRetries,
+      approvalMode,
+      // Sanitize target — strip control characters
+      target: command.target.replace(/[\x00-\x1f\x7f]/g, '').slice(0, 500),
+      // Sanitize evidence — limit length
+      evidence: command.evidence.slice(0, 2000),
+      expectedImpact: command.expectedImpact.slice(0, 1000),
+    };
+
+    return {
+      valid: errors.length === 0,
+      errors,
+      sanitizedCommand,
+    };
+  }
+
+  /** Sanitize parameters to prevent injection attacks */
+  function sanitizeParameters(params: Record<string, unknown>): Record<string, unknown> {
+    const sanitized: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(params)) {
+      // Strip keys with suspicious patterns
+      const cleanKey = key.replace(/[<>{}\\]/g, '').slice(0, 100);
+      if (typeof value === 'string') {
+        // Strip script tags, null bytes, and excessive whitespace
+        sanitized[cleanKey] = value
+          .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+          .replace(/\x00/g, '')
+          .slice(0, 10_000);
+      } else if (typeof value === 'number' || typeof value === 'boolean') {
+        sanitized[cleanKey] = value;
+      } else if (Array.isArray(value)) {
+        sanitized[cleanKey] = value.slice(0, 100); // Cap array length
+      } else if (value && typeof value === 'object') {
+        sanitized[cleanKey] = sanitizeParameters(value as Record<string, unknown>);
+      }
+    }
+    return sanitized;
+  }
 
   // ── Command ID Generator ──
 
@@ -401,14 +523,15 @@ export function createMotorCommandEngine(config: MotorCommandEngineConfig = {}) 
     const start = Date.now();
     let retriesUsed = 0;
 
-    // Check approval mode
-    if (command.approvalMode === 'dry_run') {
-      log(`DRY RUN: ${command.actionType} → ${command.target}`);
+    // ── Pre-Flight Validation Gate ──
+    const validation = validateCommand(command);
+    if (!validation.valid) {
+      log(`VALIDATION FAILED: ${validation.errors.join('; ')}`);
       const result: MotorCommandResult = {
         commandId: command.id,
-        success: true,
-        status: 'dry_run',
-        response: { message: 'Dry run — command not executed. Would have targeted: ' + command.target },
+        success: false,
+        status: 'failed',
+        error: `Pre-flight validation failed: ${validation.errors.join('; ')}`,
         executedAt: new Date().toISOString(),
         durationMs: Date.now() - start,
         retriesUsed: 0,
@@ -417,12 +540,34 @@ export function createMotorCommandEngine(config: MotorCommandEngineConfig = {}) 
       return result;
     }
 
-    if (command.approvalMode === 'requires_approval') {
+    // Use the sanitized command from validation
+    const safeCommand = validation.sanitizedCommand!;
+
+    // Record in rate limit window
+    rateLimitWindow.push(Date.now());
+
+    // Check approval mode
+    if (safeCommand.approvalMode === 'dry_run') {
+      log(`DRY RUN: ${safeCommand.actionType} → ${safeCommand.target}`);
+      const result: MotorCommandResult = {
+        commandId: safeCommand.id,
+        success: true,
+        status: 'dry_run',
+        response: { message: 'Dry run — command not executed. Would have targeted: ' + safeCommand.target },
+        executedAt: new Date().toISOString(),
+        durationMs: Date.now() - start,
+        retriesUsed: 0,
+      };
+      commandHistory.push({ command: safeCommand, result });
+      return result;
+    }
+
+    if (safeCommand.approvalMode === 'requires_approval') {
       if (onApprovalNeeded) {
-        const approved = await onApprovalNeeded(command);
+        const approved = await onApprovalNeeded(safeCommand);
         if (!approved) {
           const result: MotorCommandResult = {
-            commandId: command.id,
+            commandId: safeCommand.id,
             success: false,
             status: 'rejected',
             error: 'Human rejected the command',
@@ -430,91 +575,91 @@ export function createMotorCommandEngine(config: MotorCommandEngineConfig = {}) 
             durationMs: Date.now() - start,
             retriesUsed: 0,
           };
-          commandHistory.push({ command, result });
+          commandHistory.push({ command: safeCommand, result });
           return result;
         }
       } else {
-        // No approval callback — treat as pending
+        // No approval callback — treat as pending (SECURE DEFAULT)
         const result: MotorCommandResult = {
-          commandId: command.id,
+          commandId: safeCommand.id,
           success: false,
           status: 'approved_pending',
-          error: 'No approval callback configured — command queued for manual approval',
+          error: 'No approval callback configured — command queued for manual approval (secure default)',
           executedAt: new Date().toISOString(),
           durationMs: Date.now() - start,
           retriesUsed: 0,
         };
-        commandHistory.push({ command, result });
+        commandHistory.push({ command: safeCommand, result });
         return result;
       }
     }
 
     // Find connector
-    const connector = registry.findForAction(command.actionType);
+    const connector = registry.findForAction(safeCommand.actionType);
     if (!connector) {
-      log(`No connector for ${command.actionType}`);
+      log(`No connector for ${safeCommand.actionType}`);
       const result: MotorCommandResult = {
-        commandId: command.id,
+        commandId: safeCommand.id,
         success: false,
         status: 'failed',
-        error: `No connector registered for action type: ${command.actionType}`,
+        error: `No connector registered for action type: ${safeCommand.actionType}`,
         executedAt: new Date().toISOString(),
         durationMs: Date.now() - start,
         retriesUsed: 0,
       };
-      commandHistory.push({ command, result });
+      commandHistory.push({ command: safeCommand, result });
       return result;
     }
 
-    // Validate
+    // Connector-level validation
     if (connector.validate) {
-      const validation = connector.validate(command);
-      if (!validation.valid) {
+      const connectorValidation = connector.validate(safeCommand);
+      if (!connectorValidation.valid) {
         const result: MotorCommandResult = {
-          commandId: command.id,
+          commandId: safeCommand.id,
           success: false,
           status: 'failed',
-          error: `Validation failed: ${validation.reason}`,
+          error: `Connector validation failed: ${connectorValidation.reason}`,
           executedAt: new Date().toISOString(),
           durationMs: Date.now() - start,
           retriesUsed: 0,
         };
-        commandHistory.push({ command, result });
+        commandHistory.push({ command: safeCommand, result });
         return result;
       }
     }
 
     // Execute with retry
     let lastError: Error | null = null;
-    for (let attempt = 0; attempt <= command.maxRetries; attempt++) {
+    for (let attempt = 0; attempt <= safeCommand.maxRetries; attempt++) {
       try {
         const result = await Promise.race([
-          connector.execute(command),
+          connector.execute(safeCommand),
           new Promise<MotorCommandResult>((_, reject) =>
-            setTimeout(() => reject(new Error('Motor command timeout')), command.timeoutMs)
+            setTimeout(() => reject(new Error('Motor command timeout')), safeCommand.timeoutMs)
           ),
         ]);
 
         result.retriesUsed = retriesUsed;
-        commandHistory.push({ command, result });
+        commandHistory.push({ command: safeCommand, result });
 
         if (onCommandExecuted) {
-          onCommandExecuted(command, result);
+          onCommandExecuted(safeCommand, result);
         }
 
-        log(`EXECUTED: ${command.actionType} → ${command.target} (${result.success ? 'OK' : 'FAIL'})`);
+        log(`EXECUTED: ${safeCommand.actionType} → ${safeCommand.target} (${result.success ? 'OK' : 'FAIL'})`);
         return result;
       } catch (err) {
         lastError = err as Error;
         retriesUsed++;
-        if (attempt < command.maxRetries) {
+        if (attempt < safeCommand.maxRetries) {
           await new Promise(r => setTimeout(r, 1000 * Math.pow(2, attempt)));
         }
       }
     }
 
     const result: MotorCommandResult = {
-      commandId: command.id,
+      commandId: safeCommand.id,
       success: false,
       status: 'failed',
       error: lastError?.message || 'Unknown error',
@@ -522,7 +667,7 @@ export function createMotorCommandEngine(config: MotorCommandEngineConfig = {}) 
       durationMs: Date.now() - start,
       retriesUsed,
     };
-    commandHistory.push({ command, result });
+    commandHistory.push({ command: safeCommand, result });
     return result;
   }
 
@@ -583,7 +728,9 @@ export function createMotorCommandEngine(config: MotorCommandEngineConfig = {}) 
     playbookToCommands,
     /** Convert a single intervention into a motor command */
     interventionToCommand,
-    /** Execute a single motor command */
+    /** Pre-flight validation (security gate) — call before executeCommand */
+    validateCommand,
+    /** Execute a single motor command (includes automatic pre-flight validation) */
     executeCommand,
     /** Execute a batch of motor commands (priority-sorted) */
     executeBatch,

@@ -25,6 +25,8 @@
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { validateApiKey } from "@/lib/api-key-auth";
 import { checkRateLimit, hashKey, setRateLimitHeaders } from "@/lib/rate-limiter";
+import { brainExecuteSchema, validateBody } from "@/lib/api-schemas";
+import { corsHeaders, checkSessionRateLimit, parseAndValidateBody } from "@/lib/security-middleware";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
@@ -38,6 +40,14 @@ export async function POST(request: NextRequest) {
 
     if (user) {
       userId = user.id;
+      // Session rate limit for browser users
+      const sessionRL = checkSessionRateLimit(user.id, "/api/brain/execute");
+      if (!sessionRL.allowed) {
+        return NextResponse.json(
+          { error: "Too many requests. Please slow down." },
+          { status: 429, headers: { ...corsHeaders(request), "Retry-After": "60" } }
+        );
+      }
     } else {
       const authHeader = request.headers.get("authorization");
       const apiKeyResult = await validateApiKey(authHeader);
@@ -66,20 +76,20 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const body = await request.json();
-    const { action, organizationId, payload } = body as {
-      action: string;
-      organizationId?: string;
-      payload: Record<string, unknown>;
-    };
+    // ── Parse & validate body (Zod schema) ─────────────────────────
+    const bodyResult = await parseAndValidateBody(request);
+    if ("error" in bodyResult) {
+      return NextResponse.json({ error: bodyResult.error }, { status: 400, headers: corsHeaders(request) });
+    }
+    const validation = validateBody(brainExecuteSchema, bodyResult.data);
+    if (!validation.success) {
+      return NextResponse.json({ error: validation.error }, { status: 400, headers: corsHeaders(request) });
+    }
+    const { action, organizationId, payload } = validation.data;
 
     orgId = orgId || organizationId || null;
     if (!orgId) {
       return NextResponse.json({ error: "organizationId is required" }, { status: 400 });
-    }
-
-    if (!action) {
-      return NextResponse.json({ error: "action is required" }, { status: 400 });
     }
 
     // Validate org membership

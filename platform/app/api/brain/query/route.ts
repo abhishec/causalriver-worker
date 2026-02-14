@@ -33,6 +33,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { validateApiKey } from "@/lib/api-key-auth";
 import { checkRateLimit, hashKey, setRateLimitHeaders } from "@/lib/rate-limiter";
+import { brainQuerySchema, validateBody } from "@/lib/api-schemas";
+import { corsHeaders, createRequestLogger, checkSessionRateLimit, validateCsrf, parseAndValidateBody } from "@/lib/security-middleware";
 import { NextRequest, NextResponse } from "next/server";
 
 const CORE_ORG_ID = "00000000-0000-4000-a000-000000000001";
@@ -81,6 +83,14 @@ export async function POST(request: NextRequest) {
 
     if (user) {
       userId = user.id;
+      // Session rate limit for browser users
+      const sessionRL = checkSessionRateLimit(user.id, "/api/brain/query");
+      if (!sessionRL.allowed) {
+        return NextResponse.json(
+          { error: "Too many requests. Please slow down." },
+          { status: 429, headers: { ...corsHeaders(request), "Retry-After": "60" } }
+        );
+      }
     } else {
       // Try API key
       const authHeader = request.headers.get("authorization");
@@ -110,19 +120,16 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // ── Parse body ───────────────────────────────────────────────────
-    const body = await request.json();
-    const { question, action, organizationId, entityState, format } = body as {
-      question: string;
-      action?: string;
-      organizationId?: string;
-      entityState?: Record<string, unknown>;
-      format?: "full" | "compact";
-    };
-
-    if (!question || typeof question !== "string") {
-      return NextResponse.json({ error: "question is required" }, { status: 400 });
+    // ── Parse & validate body (Zod schema) ─────────────────────────
+    const bodyResult = await parseAndValidateBody(request);
+    if ("error" in bodyResult) {
+      return NextResponse.json({ error: bodyResult.error }, { status: 400, headers: corsHeaders(request) });
     }
+    const validation = validateBody(brainQuerySchema, bodyResult.data);
+    if (!validation.success) {
+      return NextResponse.json({ error: validation.error }, { status: 400, headers: corsHeaders(request) });
+    }
+    const { question, action, organizationId, entityState, format } = validation.data;
 
     // Resolve org
     if (!orgId) {

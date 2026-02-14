@@ -600,6 +600,7 @@ export {
   type BatchExecutionResult,
   type InterventionToCommandMapping,
   type MotorCommandEngine,
+  type CommandValidation,
 } from './orchestrator/motor-command-engine';
 
 // Agent Registry V1 ("Basal Ganglia") — Manus-style open agent architecture
@@ -840,6 +841,13 @@ export {
   type UnifiedEntityView,
 } from './core/entity-resolver';
 
+// Stationarity Tests — ADF pre-check for Granger causality (prevents spurious regressions)
+export {
+  adfTest,
+  ensureStationary,
+  type StationarityResult,
+} from './causality/stationarity-tests';
+
 // ============================================================================
 // CONNECTORS - External System Integrations
 // ============================================================================
@@ -855,6 +863,13 @@ export {
   applyCausalSignalWeights,
   computeCausalWeightsFromEdges,
 } from './connectors/connector-framework';
+
+// Resilient Connector — Circuit Breaker + Retry wrapper per connector
+export {
+  createResilientConnector,
+  type ResilientConnector,
+  type ResilientConnectorConfig,
+} from './connectors/resilient-connector';
 
 export { createHubSpotConnector } from './connectors/hubspot';
 export { createStripeConnector } from './connectors/stripe';
@@ -1422,6 +1437,18 @@ export {
   type FinalizedChain,
   type StepInput,
 } from './orchestrator/reasoning-chain';
+
+// ============================================================================
+// MCP - Model Context Protocol Server (External LLM Integration)
+// ============================================================================
+
+export {
+  createNexusMcpServer,
+  type McpToolDefinition,
+  type McpToolResult,
+  type McpServerConfig,
+  type McpPropertySchema,
+} from './mcp/nexus-mcp-server';
 
 // ============================================================================
 // TYPES
