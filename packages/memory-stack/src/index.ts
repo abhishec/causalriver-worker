@@ -1710,12 +1710,12 @@ export {
   type DomainCapability,
   type BlindSpot,
   type CalibrationProfile,
-  type CalibrationBucket,
+  type CalibrationBucket as CognitionCalibrationBucket,
   type ProcessingStrategy,
   type ResourceAllocation,
   type Belief,
   type BeliefRevisionResult,
-  type PredictionRecord,
+  type PredictionRecord as CognitionPredictionRecord,
   type SelfAssessmentReport,
 } from './causality/leap-self-modifying-cognition';
 
