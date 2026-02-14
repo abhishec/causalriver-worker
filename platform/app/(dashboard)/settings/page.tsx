@@ -2,6 +2,8 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentOrgId } from "@/lib/org-helpers";
 import { formatUSD } from "@/lib/utils";
 import { SettingsMembers } from "./settings-members";
+import { ApiKeysSection } from "./api-keys-section";
+import { NotificationSettings } from "./notification-settings";
 
 export const dynamic = 'force-dynamic';
 
@@ -27,13 +29,22 @@ export default async function SettingsPage() {
     .eq("id", orgId)
     .single();
 
-  const budgetResult = await supabase
-    .from("cost_budget_config")
-    .select("*")
-    .eq("organization_id", orgId)
-    .single();
+  const [budgetResult, apiKeysResult] = await Promise.all([
+    supabase
+      .from("cost_budget_config")
+      .select("*")
+      .eq("organization_id", orgId)
+      .single(),
+    supabase
+      .from("api_keys")
+      .select("id, key_prefix, name, permissions, rate_limit_per_minute, last_used_at, created_at, is_active")
+      .eq("organization_id", orgId)
+      .eq("is_active", true)
+      .order("created_at", { ascending: false }),
+  ]);
 
   const budget = budgetResult.data;
+  const apiKeys = apiKeysResult.data || [];
 
   return (
     <div className="space-y-8 max-w-4xl">
@@ -99,25 +110,7 @@ export default async function SettingsPage() {
         <h2 className="text-sm font-medium mb-1">Notifications</h2>
         <p className="text-xs text-muted mb-5">Configure alerts and notification preferences</p>
 
-        <div className="rounded-lg bg-surface border border-border/30 p-8 text-center">
-          <svg
-            className="w-8 h-8 text-muted mx-auto mb-3"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={1.5}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"
-            />
-          </svg>
-          <p className="text-sm text-muted-foreground">Notification settings coming soon</p>
-          <p className="text-xs text-muted mt-1">
-            Cascade alerts, budget warnings, training completions
-          </p>
-        </div>
+        <NotificationSettings initialPrefs={null} orgId={orgId} />
       </section>
 
       {/* Brain Config / Budget */}
@@ -195,23 +188,7 @@ export default async function SettingsPage() {
         <h2 className="text-sm font-medium mb-1">API Keys</h2>
         <p className="text-xs text-muted mb-5">Manage API keys for SDK and REST API access</p>
 
-        <div className="rounded-lg bg-surface border border-border/30 p-8 text-center">
-          <svg
-            className="w-8 h-8 text-muted mx-auto mb-3"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={1.5}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z"
-            />
-          </svg>
-          <p className="text-sm text-muted-foreground">API key management coming soon</p>
-          <p className="text-xs text-muted mt-1">Generate and revoke keys for SDK access</p>
-        </div>
+        <ApiKeysSection initialKeys={apiKeys} orgId={orgId} />
       </section>
 
       {/* Danger Zone */}

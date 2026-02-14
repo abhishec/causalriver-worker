@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
+import { CausalGraph } from "@/components/dashboard/CausalGraph";
 
 /* -------------------------------------------------------------------------- */
 /*  Types                                                                      */
@@ -86,6 +87,7 @@ function strengthLabel(strength: number): string {
 export function BrainClient({ causalEdges, entities, snapshot }: BrainClientProps) {
   const [domainFilter, setDomainFilter] = useState<string>("all");
   const [confidenceMin, setConfidenceMin] = useState<number>(0);
+  const [viewMode, setViewMode] = useState<"graph" | "list">("graph");
 
   // Extract unique domains from the edges
   const domains = useMemo(() => {
@@ -134,11 +136,34 @@ export function BrainClient({ causalEdges, entities, snapshot }: BrainClientProp
           {/* Causal Knowledge Graph section */}
           <div className="rounded-xl bg-card border border-border/50 p-5">
             <div className="flex items-center justify-between mb-5">
-              <div>
-                <h2 className="text-sm font-semibold">Causal Knowledge Graph</h2>
-                <p className="text-xs text-muted mt-0.5">
-                  Statistical relationships discovered by the brain
-                </p>
+              <div className="flex items-center gap-4">
+                <div>
+                  <h2 className="text-sm font-semibold">Causal Knowledge Graph</h2>
+                  <p className="text-xs text-muted mt-0.5">
+                    Statistical relationships discovered by the brain
+                  </p>
+                </div>
+                {/* View toggle */}
+                <div className="flex items-center rounded-lg bg-surface border border-border/30 p-0.5">
+                  <button
+                    onClick={() => setViewMode("graph")}
+                    className={cn(
+                      "px-3 py-1 rounded-md text-[11px] font-medium transition-colors",
+                      viewMode === "graph" ? "bg-accent/10 text-accent" : "text-muted hover:text-foreground"
+                    )}
+                  >
+                    Graph
+                  </button>
+                  <button
+                    onClick={() => setViewMode("list")}
+                    className={cn(
+                      "px-3 py-1 rounded-md text-[11px] font-medium transition-colors",
+                      viewMode === "list" ? "bg-accent/10 text-accent" : "text-muted hover:text-foreground"
+                    )}
+                  >
+                    List
+                  </button>
+                </div>
               </div>
 
               {/* Filter controls */}
@@ -180,8 +205,13 @@ export function BrainClient({ causalEdges, entities, snapshot }: BrainClientProp
               </div>
             </div>
 
+            {/* Graph View */}
+            {viewMode === "graph" && (
+              <CausalGraph edges={filteredEdges} domainFilter={domainFilter} />
+            )}
+
             {/* Edge list */}
-            {filteredEdges.length === 0 ? (
+            {viewMode === "list" && filteredEdges.length === 0 ? (
               <div className="text-center py-12">
                 <svg
                   className="w-10 h-10 text-muted/30 mx-auto mb-3"
@@ -203,7 +233,7 @@ export function BrainClient({ causalEdges, entities, snapshot }: BrainClientProp
                   Try adjusting the domain or confidence threshold
                 </p>
               </div>
-            ) : (
+            ) : viewMode === "list" ? (
               <div className="space-y-2">
                 {filteredEdges.map((edge) => (
                   <div
@@ -290,7 +320,7 @@ export function BrainClient({ causalEdges, entities, snapshot }: BrainClientProp
                   </div>
                 ))}
               </div>
-            )}
+            ) : null}
           </div>
 
           {/* Recent Discoveries */}
