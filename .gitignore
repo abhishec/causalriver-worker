@@ -7,3 +7,15 @@ coverage/
 *.tsbuildinfo
 .env
 .env.*
+
+# Build outputs
+platform/.next/
+.next/
+
+# Large benchmark data / model checkpoints
+scripts/benchmarks/longmemeval/data/
+scripts/benchmarks/longmemeval/nen/checkpoints/
+scripts/benchmarks/longmemeval/cache/
+
+# Package locks (managed per-workspace)
+packages/memory-stack/package-lock.json
