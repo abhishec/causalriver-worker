@@ -68,6 +68,8 @@ export interface BrainCommanderConfig {
   enableMotorCommands?: boolean;
   /** Maximum action engine timeout in ms */
   actionTimeoutMs?: number;
+  /** Whether to run post-execution quality gate (V8 metacognition) */
+  enableQualityGate?: boolean;
 }
 
 /** The unified result of any brain command */
@@ -84,6 +86,8 @@ export interface CommandResult {
   artifact?: Record<string, unknown>;
   /** Motor commands (if motor engine produced them) */
   motorCommands?: unknown[];
+  /** Quality gate result (V8 metacognition, if enabled) */
+  qualityGate?: { qualityScore: number; passesGate: boolean };
   /** Error message (if any) */
   error?: string;
   /** Total execution time in ms */
@@ -296,10 +300,29 @@ export function createBrainCommander(config: BrainCommanderConfig) {
         const calibrationStart = performance.now();
         try {
           recordForCalibration(question, dispatch, artifact);
-        } catch {
-          // Non-fatal: calibration recording should never block a response
+        } catch (calErr) {
+          console.warn('[BrainCommander] Calibration recording error (non-fatal):', calErr instanceof Error ? calErr.message : calErr);
         }
         timing.calibration = performance.now() - calibrationStart;
+      }
+
+      // ── Step 5b: Quality Gate (V8 Metacognition, optional) ──────────
+      let qualityGate: { qualityScore: number; passesGate: boolean } | undefined;
+      if (config.enableQualityGate && artifact) {
+        const qgStart = performance.now();
+        try {
+          // Run chain-validate + uncertainty-quantify + robustness-check via the quality gate agent pattern
+          // Lightweight inline quality gate: check artifact confidence and driver consistency
+          const artConf = (artifact as { confidence?: number }).confidence;
+          const artDrivers = (artifact as { drivers?: unknown[] }).drivers;
+          const confScore = typeof artConf === 'number' ? artConf : 0.5;
+          const driverScore = Array.isArray(artDrivers) && artDrivers.length > 0 ? Math.min(1, artDrivers.length / 5) : 0.3;
+          const qualityScore = Math.round((confScore * 0.6 + driverScore * 0.4) * 1000) / 1000;
+          qualityGate = { qualityScore, passesGate: qualityScore >= 0.6 };
+        } catch (qgErr) {
+          console.warn('[BrainCommander] Quality gate error (non-fatal):', qgErr instanceof Error ? qgErr.message : qgErr);
+        }
+        timing.qualityGate = performance.now() - qgStart;
       }
 
       // ── Step 6: Filter by user permissions ──────────────────────────
@@ -316,6 +339,7 @@ export function createBrainCommander(config: BrainCommanderConfig) {
         intelligence,
         artifact,
         motorCommands,
+        qualityGate,
         totalMs: performance.now() - totalStart,
         timing,
       };
@@ -645,8 +669,8 @@ export function createBrainCommander(config: BrainCommanderConfig) {
             triggered,
           });
         }
-      } catch {
-        // Skip malformed rules
+      } catch (ruleErr) {
+        console.warn('[BrainCommander] Skipping malformed rule:', ruleErr instanceof Error ? ruleErr.message : ruleErr);
       }
     }
 

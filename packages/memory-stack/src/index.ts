@@ -744,6 +744,14 @@ export {
   confidenceTriageDomain,
   JURISDICTION_CONFIG,
   type JurisdictionProfile,
+  // V8 — Metacognition + Self-Improvement Domains
+  calibrationAuditDomain,
+  errorAttributeDomain,
+  chainValidateDomain,
+  uncertaintyQuantifyDomain,
+  queryCacheDomain,
+  executionProfileDomain,
+  robustnessCheckDomain,
   ALL_ACTION_DOMAINS,
   registerAllActionDomains,
 } from './orchestrator/action-domains';
@@ -795,6 +803,10 @@ export {
   brainProductivitySyncAgent,
   ALL_CONNECTOR_SYNC_AGENTS,
   registerConnectorSyncAgents,
+  // V8 — Metacognition + Self-Improvement Agents
+  metacognitionAuditorAgent,
+  qualityGateAgent,
+  continuousLearnerAgent,
   ALL_BRAIN_AGENTS,
   registerBrainAgents,
   type BrainExecutionInterface,

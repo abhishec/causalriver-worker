@@ -1209,7 +1209,7 @@ for (const tc of v4TestCases) {
     registerAllActionDomains(domainRegistry);
 
     const registeredDomains = domainRegistry.getDomainNames();
-    const has28Domains = registeredDomains.length === 28;
+    const has28Domains = registeredDomains.length === 35;
     const hasCore5 = ['forecast', 'simulate', 'explain', 'diagnose', 'composite'].every(d => registeredDomains.includes(d));
     const hasV6_8 = ['compare', 'monitor', 'optimize', 'recommend', 'audit', 'correlate', 'benchmark', 'narrate'].every(d => registeredDomains.includes(d));
     const hasV61_8 = ['sentiment', 'scenario-tree', 'risk-cascade', 'resource-allocate', 'anomaly-predict', 'goal-decompose', 'causal-intervene', 'pattern-memory'].every(d => registeredDomains.includes(d));
@@ -1523,7 +1523,7 @@ for (const tc of v4TestCases) {
     registerBrainAgents(agentReg);
 
     const brainAgents = agentReg.listAgents();
-    const has16Agents = brainAgents.length === 19;
+    const has16Agents = brainAgents.length === 27;
     const agentNamesV6 = brainAgents.map(a => a.definition.name);
     const hasWatcher = agentNamesV6.includes('brain-revenue-watcher');
     const hasBriefing = agentNamesV6.includes('brain-daily-briefing');
@@ -1636,11 +1636,11 @@ for (const tc of v4TestCases) {
     const advRegistry = createActionDomainRegistry({ verbose: false });
     registerAllActionDomains(advRegistry);
 
-    // 11a: Verify 28 domains registered (21 original + 7 V7 accounting)
+    // 11a: Verify 35 domains registered (28 V2-V7 + 7 V8 metacognitive)
     console.log(`\n  11a. Domain Count Verification:`);
     const advStats = advRegistry.getStats();
     const count21 = advStats.totalDomains;
-    const has21 = count21 === 28;
+    const has21 = count21 === 35;
     console.log(`     Total domains: ${count21} ${has21 ? '✅' : '❌'}`);
 
     const advDomainList = advRegistry.getDomainNames();
@@ -1808,7 +1808,7 @@ for (const tc of v4TestCases) {
     // 11d: 10 Brain Agents
     console.log(`\n  11d. Brain Agent Expansion:`);
     const agentNames = ALL_BRAIN_AGENTS.map(a => a.name);
-    const has10 = ALL_BRAIN_AGENTS.length === 19;
+    const has10 = ALL_BRAIN_AGENTS.length === 27;
     console.log(`     Total brain agents: ${ALL_BRAIN_AGENTS.length} ${has10 ? '✅' : '❌'}`);
 
     const newAgentNames = ['brain-risk-sentinel', 'brain-strategic-planner', 'brain-pattern-recon', 'brain-org-health', 'brain-intervention-tracker'];
@@ -1889,7 +1889,7 @@ for (const tc of v4TestCases) {
     const v7Registry = createActionDomainRegistry({ verbose: false });
     registerAllActionDomains(v7Registry);
     const v7Domains = v7Registry.getDomainNames();
-    const has28 = v7Domains.length === 28;
+    const has28 = v7Domains.length === 35;
     const v7DomainNames = ['document-comprehend', 'completeness-check', 'rule-apply', 'cross-validate', 'statement-synthesize', 'jurisdiction-comply', 'confidence-triage'];
     const allV7Present = v7DomainNames.every(d => v7Domains.includes(d));
 
@@ -2011,7 +2011,7 @@ for (const tc of v4TestCases) {
     const v7AgentReg = createAgentRegistry({ verbose: false });
     registerBrainAgents(v7AgentReg);
     const v7Agents = v7AgentReg.listAgents();
-    const has16 = v7Agents.length === 19;
+    const has16 = v7Agents.length === 27;
     const v7AgentNames = v7Agents.map(a => a.definition.name);
     const v7AccountingAgents = ['brain-balance-sheet-builder', 'brain-pnl-builder', 'brain-cashflow-builder', 'brain-tax-preparer', 'brain-multi-jurisdiction-monitor', 'brain-financial-auditor'];
     const allV7AgentsPresent = v7AccountingAgents.every(a => v7AgentNames.includes(a));

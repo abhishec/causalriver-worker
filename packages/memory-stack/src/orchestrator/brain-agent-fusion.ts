@@ -806,46 +806,239 @@ export const financialAuditorAgent: AgentDefinition = defineAgent({
 });
 
 // ============================================================================
+// V8 — METACOGNITION + SELF-IMPROVEMENT AGENTS
+// ============================================================================
+
+/**
+ * Metacognition Auditor Agent — the brain examining itself
+ * Brain Analog: Retrosplenial Cortex → Anterior Cingulate → Supplementary Motor Area
+ * Level: autonomous | Triggers: schedule:weekly, event:predictions_resolved
+ *
+ * Weekly "Brain Health Report" — calibration drift, systematic biases, performance degradation.
+ * This agent IS the introspection loop: it asks "how accurate have I been?" and "why was I wrong?"
+ */
+export const metacognitionAuditorAgent: AgentDefinition = defineAgent({
+  name: 'brain-metacognition-auditor',
+  description: 'Weekly metacognitive audit — runs calibration-audit → error-attribute → execution-profile to produce a Brain Health Report with calibration drift, systematic biases, and performance degradation analysis',
+  level: 'autonomous',
+  domains: ['calibration', 'metacognition', 'performance'],
+  triggers: ['schedule:weekly', 'event:predictions_resolved'],
+  tags: ['brain-native', 'metacognition', 'self-improvement', 'v8'],
+
+  execute: async (input: unknown, ctx) => {
+    const brainExec = (ctx as unknown as { brainExecution: BrainExecutionInterface }).brainExecution;
+    if (!brainExec) {
+      return { status: 'skipped', reason: 'Brain execution interface not available' };
+    }
+
+    ctx.reportProgress(0.15, 'Running calibration audit — how accurate have I been?');
+    const calibration = await brainExec.executeDomain('calibration-audit');
+    const calResult = calibration as { brierScore?: number; calibrationBias?: string; recalibrationAdjustments?: unknown[] };
+
+    ctx.reportProgress(0.45, 'Attributing errors — why was I wrong?');
+    const errorAttribution = await brainExec.executeDomain('error-attribute');
+    const errResult = errorAttribution as { errorBreakdown?: Record<string, number>; corrections?: unknown[] };
+
+    ctx.reportProgress(0.75, 'Profiling execution performance — how efficient am I?');
+    const profile = await brainExec.executeDomain('execution-profile');
+
+    ctx.reportProgress(1.0, 'Brain Health Report complete');
+
+    // Determine health grade
+    const brierScore = calResult.brierScore || 0;
+    const healthGrade = brierScore < 0.1 ? 'A' : brierScore < 0.2 ? 'B' : brierScore < 0.35 ? 'C' : 'D';
+    const alerts: string[] = [];
+    if (brierScore > 0.25) alerts.push(`Calibration degraded — Brier score ${brierScore.toFixed(3)}`);
+    if (calResult.calibrationBias === 'overconfident') alerts.push('Systematic overconfidence detected — recalibration recommended');
+    if ((calResult.recalibrationAdjustments || []).length > 3) alerts.push(`${(calResult.recalibrationAdjustments || []).length} domains need recalibration`);
+
+    return {
+      status: 'completed',
+      reportType: 'brain_health',
+      healthGrade,
+      calibration: { brierScore: calResult.brierScore, bias: calResult.calibrationBias, adjustments: (calResult.recalibrationAdjustments || []).length },
+      errorAttribution: { breakdown: errResult.errorBreakdown, corrections: (errResult.corrections || []).length },
+      performance: profile,
+      alerts,
+      alertCount: alerts.length,
+      generatedAt: new Date().toISOString(),
+    };
+  },
+});
+
+/**
+ * Quality Gate Agent — post-execution quality validation
+ * Brain Analog: Dorsomedial PFC → Orbitofrontal → Thalamic Reticular Nucleus
+ * Level: task | Triggers: event:domain_executed, manual
+ *
+ * After any brain execution, this agent validates: Are composed results consistent?
+ * Is the uncertainty decomposed? Are conclusions fragile? Produces a quality score
+ * and a pass/fail gate decision.
+ */
+export const qualityGateAgent: AgentDefinition = defineAgent({
+  name: 'brain-quality-gate',
+  description: 'Post-execution quality gate — runs chain-validate → uncertainty-quantify → robustness-check to produce a qualityScore (0-1) and passesGate boolean',
+  level: 'task',
+  domains: ['validation', 'metacognition', 'quality'],
+  triggers: ['event:domain_executed', 'manual'],
+  tags: ['brain-native', 'metacognition', 'quality-gate', 'v8'],
+
+  execute: async (input: unknown, ctx) => {
+    const brainExec = (ctx as unknown as { brainExecution: BrainExecutionInterface }).brainExecution;
+    if (!brainExec) {
+      return { status: 'skipped', reason: 'Brain execution interface not available' };
+    }
+
+    ctx.reportProgress(0.2, 'Validating chain consistency — do results contradict?');
+    const chainValidation = await brainExec.executeDomain('chain-validate');
+    const chainResult = chainValidation as { consistencyScore?: number; contradictions?: unknown[] };
+
+    ctx.reportProgress(0.5, 'Decomposing uncertainty — what do we know vs not know?');
+    const uncertainty = await brainExec.executeDomain('uncertainty-quantify');
+    const uncResult = uncertainty as { epistemicUncertainty?: number; aleatoricUncertainty?: number; dataGaps?: unknown[] };
+
+    ctx.reportProgress(0.8, 'Testing robustness — are conclusions fragile?');
+    const robustness = await brainExec.executeDomain('robustness-check');
+    const robResult = robustness as { robustnessScore?: number; fragileEdges?: unknown[] };
+
+    ctx.reportProgress(1.0, 'Quality gate evaluation complete');
+
+    // Compute composite quality score (weighted average)
+    const consistencyScore = chainResult.consistencyScore || 0.5;
+    const robustnessScore = robResult.robustnessScore || 0.5;
+    const knowledgeCoverage = 1 - (uncResult.epistemicUncertainty || 0.5);
+
+    const qualityScore = (consistencyScore * 0.4) + (robustnessScore * 0.35) + (knowledgeCoverage * 0.25);
+    const passesGate = qualityScore >= 0.6;
+
+    const issues: string[] = [];
+    if (consistencyScore < 0.7) issues.push(`Chain inconsistency: ${(chainResult.contradictions || []).length} contradictions`);
+    if (robustnessScore < 0.5) issues.push(`Fragile conclusions: ${(robResult.fragileEdges || []).length} fragile edges`);
+    if ((uncResult.epistemicUncertainty || 0) > 0.6) issues.push(`High epistemic uncertainty: ${(uncResult.dataGaps || []).length} data gaps`);
+
+    return {
+      status: 'completed',
+      qualityScore: Math.round(qualityScore * 1000) / 1000,
+      passesGate,
+      gateThreshold: 0.6,
+      breakdown: {
+        consistency: consistencyScore,
+        robustness: robustnessScore,
+        knowledgeCoverage,
+      },
+      issues,
+      issueCount: issues.length,
+      evaluatedAt: new Date().toISOString(),
+    };
+  },
+});
+
+/**
+ * Continuous Learner Agent — closes the learning loop
+ * Brain Analog: Retrosplenial Cortex → Anterior Cingulate → Hippocampal Pattern Memory
+ * Level: autonomous | Triggers: schedule:daily, event:outcome_recorded
+ *
+ * When outcomes arrive: attribute errors → identify failure patterns → generate
+ * recalibration adjustments. This agent IS the closed-loop learning system.
+ */
+export const continuousLearnerAgent: AgentDefinition = defineAgent({
+  name: 'brain-continuous-learner',
+  description: 'Closes the learning loop — when outcomes arrive, runs calibration-audit → error-attribute → pattern-memory to identify failure patterns and generate recalibration adjustments',
+  level: 'autonomous',
+  domains: ['learning', 'metacognition', 'calibration'],
+  triggers: ['schedule:daily', 'event:outcome_recorded'],
+  tags: ['brain-native', 'metacognition', 'learning', 'closed-loop', 'v8'],
+
+  execute: async (input: unknown, ctx) => {
+    const brainExec = (ctx as unknown as { brainExecution: BrainExecutionInterface }).brainExecution;
+    if (!brainExec) {
+      return { status: 'skipped', reason: 'Brain execution interface not available' };
+    }
+
+    ctx.reportProgress(0.15, 'Auditing prediction calibration...');
+    const calibration = await brainExec.executeDomain('calibration-audit');
+    const calResult = calibration as { brierScore?: number; recalibrationAdjustments?: unknown[]; learningVelocity?: number };
+
+    ctx.reportProgress(0.4, 'Attributing prediction errors...');
+    const errors = await brainExec.executeDomain('error-attribute');
+    const errResult = errors as { errorBreakdown?: Record<string, number>; failureMode?: string; corrections?: unknown[] };
+
+    ctx.reportProgress(0.7, 'Scanning for failure patterns in memory...');
+    const patterns = await brainExec.executeDomain('pattern-memory');
+    const patResult = patterns as { patternsFound?: number; significantPatterns?: unknown[] };
+
+    ctx.reportProgress(1.0, 'Learning cycle complete');
+
+    // Determine if meaningful learning occurred
+    const adjustmentCount = (calResult.recalibrationAdjustments || []).length;
+    const correctionCount = (errResult.corrections || []).length;
+    const patternsFound = patResult.patternsFound || 0;
+    const learningOccurred = adjustmentCount > 0 || correctionCount > 0 || patternsFound > 0;
+
+    return {
+      status: 'completed',
+      learningCycle: {
+        learningOccurred,
+        learningVelocity: calResult.learningVelocity || 0,
+        adjustments: adjustmentCount,
+        corrections: correctionCount,
+        newPatterns: patternsFound,
+      },
+      calibration: { brierScore: calResult.brierScore },
+      dominantFailureMode: errResult.failureMode || 'none',
+      nextActions: learningOccurred
+        ? ['Apply recalibration adjustments', 'Update failure pattern library', 'Notify metacognition auditor']
+        : ['No learning needed — brain is well-calibrated'],
+      learnedAt: new Date().toISOString(),
+    };
+  },
+});
+
+// ============================================================================
 // ALL PRE-BUILT AGENTS
 // ============================================================================
 
-/** All 24 pre-built brain-native agents (V6 + V6.1 + V7 + V8 Jarvis + V8 Connector Sync) */
+/** All 27 pre-built brain-native agents (V6:5 + V6.1:5 + V7:6 + V8 Jarvis:3 + V8 Connector Sync:5 + V8 Metacognition:3) */
 export const ALL_BRAIN_AGENTS: AgentDefinition[] = [
-  // V6 — Core Brain Agents
+  // V6 — Core Brain Agents (Cerebral Cortex)
   revenueWatcherAgent,
   dailyBriefingAgent,
   anomalyDiagnosticianAgent,
   optimizerAgent,
   benchmarkAuditorAgent,
-  // V6.1 — Advanced Brain Agents
+  // V6.1 — Advanced Brain Agents (Limbic + Prefrontal)
   riskSentinelAgent,
   strategicPlannerAgent,
   patternReconAgent,
   orgHealthAgent,
   interventionTrackerAgent,
-  // V7 — Accounting Intelligence Agents
+  // V7 — Accounting Intelligence Agents (Temporal Lobe)
   balanceSheetBuilderAgent,
   pnlBuilderAgent,
   cashflowBuilderAgent,
   taxPreparerAgent,
   multiJurisdictionMonitorAgent,
   financialAuditorAgent,
-  // V8 — Jarvis Executive Intelligence
+  // V8 — Jarvis Executive Intelligence (Frontal Executive)
   ...ALL_JARVIS_AGENTS,
   // V8 — Connector Sync (Thalamus Relay Nuclei)
   ...ALL_CONNECTOR_SYNC_AGENTS,
+  // V8 — Metacognition + Self-Improvement (Metacognitive Loop)
+  metacognitionAuditorAgent,
+  qualityGateAgent,
+  continuousLearnerAgent,
 ];
 
 /**
- * Register all 24 brain-native agents into an agent registry.
+ * Register all 27 brain-native agents into an agent registry.
  * Includes V6 core (5), V6.1 advanced (5), V7 accounting (6),
- * V8 Jarvis executive (3), V8 connector sync (5).
+ * V8 Jarvis executive (3), V8 connector sync (5), V8 metacognition (3).
  *
  * @example
  * ```typescript
  * const agentRegistry = createAgentRegistry({ verbose: true });
  * registerBrainAgents(agentRegistry);
- * // 24 brain-native agents now registered (including Jarvis + connector sync)
+ * // 27 brain-native agents now registered (V6→V8, including Jarvis + connector sync + metacognition)
  * ```
  */
 export function registerBrainAgents(

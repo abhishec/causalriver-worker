@@ -5067,7 +5067,7 @@ export const errorAttributeDomain: ActionDomainDefinition = defineActionDomain({
     }
 
     // Check causal edges for model mismatch
-    for (const cause of ctx.brain.directCauses.slice(0, 10)) {
+    for (const cause of Object.values(ctx.brain.directCauses).flat().slice(0, 10)) {
       const sourceTs = ctx.brain.timeSeries.get(cause.source);
       const targetTs = ctx.brain.timeSeries.get(ctx.brain.primaryDomain);
       if (sourceTs && targetTs) {
@@ -5176,12 +5176,12 @@ export const chainValidateDomain: ActionDomainDefinition = defineActionDomain({
     const driverDirections: Map<string, Array<{ source: string; direction: string; weight: number }>> = new Map();
 
     // Group causes and effects to check for directional conflicts
-    for (const cause of ctx.brain.directCauses) {
+    for (const cause of Object.values(ctx.brain.directCauses).flat()) {
       const existing = driverDirections.get(cause.source) || [];
       existing.push({ source: 'cause', direction: cause.weight > 0 ? 'positive' : 'negative', weight: Math.abs(cause.weight) });
       driverDirections.set(cause.source, existing);
     }
-    for (const effect of ctx.brain.directEffects) {
+    for (const effect of Object.values(ctx.brain.directEffects).flat()) {
       const existing = driverDirections.get(effect.target) || [];
       existing.push({ source: 'effect', direction: effect.weight > 0 ? 'positive' : 'negative', weight: Math.abs(effect.weight) });
       driverDirections.set(effect.target, existing);
@@ -5226,11 +5226,11 @@ export const chainValidateDomain: ActionDomainDefinition = defineActionDomain({
     }
 
     // Compute consistency score
-    const maxContradictions = Math.max(1, ctx.brain.directCauses.length + ctx.brain.directEffects.length);
+    const maxContradictions = Math.max(1, Object.values(ctx.brain.directCauses).flat().length + Object.values(ctx.brain.directEffects).flat().length);
     const consistencyScore = Math.max(0, Math.min(1, 1 - (contradictions.length / maxContradictions)));
 
     // Confidence divergence: variance of edge weights
-    const allWeights = [...ctx.brain.directCauses, ...ctx.brain.directEffects].map(e => Math.abs(e.weight));
+    const allWeights = [...Object.values(ctx.brain.directCauses).flat(), ...Object.values(ctx.brain.directEffects).flat()].map(e => Math.abs(e.weight));
     const meanWeight = allWeights.length > 0 ? allWeights.reduce((s, w) => s + w, 0) / allWeights.length : 0;
     const confidenceDivergence = allWeights.length > 0
       ? Math.sqrt(allWeights.reduce((s, w) => s + (w - meanWeight) ** 2, 0) / allWeights.length)
@@ -5324,14 +5324,14 @@ export const uncertaintyQuantifyDomain: ActionDomainDefinition = defineActionDom
       const dataPoints = ts ? ((ts as unknown as { values: number[] }).values?.length || 0) : 0;
 
       // Count causal edges involving this domain
-      const causalEdges = ctx.brain.directCauses.filter(c => c.source === domainName || c.target === domainName).length +
-        ctx.brain.directEffects.filter(e => e.source === domainName || e.target === domainName).length;
+      const causalEdges = Object.values(ctx.brain.directCauses).flat().filter(c => c.source === domainName || c.target === domainName).length +
+        Object.values(ctx.brain.directEffects).flat().filter(e => e.source === domainName || e.target === domainName).length;
 
       // Count matching rules
       const rules = ctx.brain.matchedRules.filter(r => r.title.toLowerCase().includes(domainName.toLowerCase())).length;
 
       // Count matching patterns
-      const patterns = ctx.brain.patterns.filter(p => p.description?.toLowerCase().includes(domainName.toLowerCase())).length;
+      const patterns = ctx.brain.patterns.filter(p => p.pattern?.toLowerCase().includes(domainName.toLowerCase())).length;
 
       // Coverage = weighted sum of data presence
       const coverage = Math.min(1, (
@@ -5527,8 +5527,8 @@ export const executionProfileDomain: ActionDomainDefinition = defineActionDomain
     }
 
     const noCausalDomains = ctx.brain.extractedDomains.filter(d =>
-      !ctx.brain.directCauses.some(c => c.source === d || c.target === d) &&
-      !ctx.brain.directEffects.some(e => e.source === d || e.target === d)
+      !Object.values(ctx.brain.directCauses).flat().some(c => c.source === d || c.target === d) &&
+      !Object.values(ctx.brain.directEffects).flat().some(e => e.source === d || e.target === d)
     );
     if (noCausalDomains.length > 0) {
       optimizationRecommendations.push(`${noCausalDomains.length} domains have no causal connections — run causal discovery`);
@@ -5604,7 +5604,7 @@ export const robustnessCheckDomain: ActionDomainDefinition = defineActionDomain(
     const recommendations: string[] = [];
 
     // Get top causal edges for the primary domain
-    const relevantCauses = ctx.brain.directCauses
+    const relevantCauses = Object.values(ctx.brain.directCauses).flat()
       .filter(c => c.target === ctx.brain.primaryDomain || c.source === ctx.brain.primaryDomain)
       .sort((a, b) => Math.abs(b.weight) - Math.abs(a.weight))
       .slice(0, 7);

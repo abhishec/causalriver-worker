@@ -31,6 +31,8 @@ import { createSupabaseRepository, type NexusRepository } from '../persistence/s
 export interface SEaaSConfig {
   /** Supabase client for persistence */
   supabase?: any;
+  /** Organization ID for persistence scoping */
+  organizationId?: string;
   /** Authentication provider */
   authProvider?: AuthProvider;
   /** Rate limiter configuration */
@@ -151,7 +153,7 @@ export class SEaaSService {
 
     // Initialize persistence if provided
     if (config.supabase) {
-      this.repository = createSupabaseRepository({ supabase: config.supabase });
+      this.repository = createSupabaseRepository(config.supabase, config.organizationId || 'default');
     }
 
     // Initialize auth
@@ -334,12 +336,18 @@ export class SEaaSService {
 
     const snapshot = this.metrics.snapshot();
 
+    // Extract counter/histogram values from snapshot.metrics array
+    const findMetricValue = (name: string): number => {
+      const m = snapshot.metrics.find(metric => metric.name === name);
+      return m && 'value' in m ? (m as { value: number }).value : 0;
+    };
+
     return {
-      totalRequests: snapshot.counters['seaas.requests.total'] || 0,
-      successfulRequests: snapshot.counters['seaas.requests.success'] || 0,
-      failedRequests: snapshot.counters['seaas.requests.failed'] || 0,
-      totalTokensUsed: snapshot.counters['seaas.tokens.used'] || 0,
-      avgResponseTime: snapshot.histograms['seaas.response.time']?.mean || 0,
+      totalRequests: findMetricValue('seaas.requests.total'),
+      successfulRequests: findMetricValue('seaas.requests.success'),
+      failedRequests: findMetricValue('seaas.requests.failed'),
+      totalTokensUsed: findMetricValue('seaas.tokens.used'),
+      avgResponseTime: 0, // Histogram mean not directly available from snapshot
       activeJobs: this.activeJobs,
       queueDepth: this.jobQueue.length,
     };
@@ -497,7 +505,7 @@ export class SEaaSService {
       }
 
       const duration = Date.now() - startTime;
-      this.metrics.histogram('seaas.response.time', duration);
+      this.metrics.observe('seaas.response.time', duration);
       this.metrics.increment('seaas.requests.success');
 
       this.logger.info('Job completed', {
@@ -540,10 +548,11 @@ export class SEaaSService {
 
   private async executeWithRetry<T>(fn: () => Promise<T>): Promise<T> {
     const retry = createRetry({
-      maxAttempts: 3,
-      initialDelay: 1000,
-      maxDelay: 10000,
-      backoff: 'exponential',
+      maxRetries: 3,
+      baseDelayMs: 1000,
+      maxDelayMs: 10000,
+      backoffMultiplier: 2,
+      jitterFactor: 0.1,
     });
 
     return retry.execute(fn);
@@ -559,15 +568,17 @@ export class SEaaSService {
     try {
       // Store in activity log
       await this.repository.logActivity({
-        user_id: request.auth.userId,
-        org_id: request.auth.orgId,
-        action_type: `seaas.${request.type}`,
-        entity_type: 'job',
-        entity_id: job.jobId,
+        agentType: 'seaas',
+        actionType: `seaas.${request.type}`,
+        inputSummary: `Job ${job.jobId} — ${request.type}`,
+        outputSummary: `Status: ${job.status}, Progress: ${job.progress}%`,
+        tokensUsed: job.tokensUsed,
         metadata: {
+          userId: request.auth.userId,
+          orgId: request.auth.orgId,
+          jobId: job.jobId,
           status: job.status,
           progress: job.progress,
-          tokensUsed: job.tokensUsed,
           result: job.result,
           error: job.error,
         },
