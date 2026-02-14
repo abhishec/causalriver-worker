@@ -75,7 +75,7 @@ import './agents/brain-consolidation';      // Hippocampus — Memory consolidat
 import './agents/brain-dmn';                // DMN — Background pattern discovery (every 4h)
 import './agents/cost-agent';               // Insula — Cost monitoring & anomaly detection (daily 3 AM)
 import './agents/benchmark';                // Cerebellum — LongMemEval benchmark suite (Sunday 5 AM)
-import './agents/git-code-trainer';         // Sensory Cortex — GitHub engineering patterns (Sunday 2 AM)
+import './agents/git-code-trainer-v6';      // Sensory Cortex — GitHub engineering patterns (Sunday 2 AM)
 import './agents/weekly-brain-scan';        // Cerebellum — 11-region brain scan + pruning (Sunday 4 AM)
 import './agents/monthly-deep-analysis';    // Hippocampus — Full historical causal discovery (1st of month)
 import './agents/proactive-intelligence';   // Amygdala — Proactive alerting & threat detection (every 4h offset)

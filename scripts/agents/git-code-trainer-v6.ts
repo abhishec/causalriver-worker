@@ -180,3 +180,26 @@ export class GitCodeTrainerAgent extends ManusNativeAgent {
     return commands;
   }
 }
+
+// ── Self-Registration: Auto-register to globalRegistry on import ──────────
+import { createClient } from '@supabase/supabase-js';
+import { globalRegistry } from '../agent-framework/agent-registry';
+
+globalRegistry.register({
+  name: 'git-code-trainer',
+  description: 'Trains NexusBrain on engineering patterns from 27 major open-source GitHub repos (100k+ stars)',
+  version: '6.0.0',
+  factory: (config) => {
+    const supabase = createClient(config.supabaseUrl, config.supabaseKey);
+    return new GitCodeTrainerAgent(supabase, config.organizationId || '00000000-0000-4000-a000-000000000001', {
+      maxPRs: 200,
+      maxIssues: 200,
+      maxCommits: 200,
+      dryRun: false,
+      verbose: config.verbose,
+    }) as any;
+  },
+  schedule: '0 2 * * 0',  // Sunday at 2 AM UTC
+  resourceRequirements: { cpu: '2048', memory: '8192' },
+  tags: ['training', 'github', 'engineering', 'cerebellum', 'code-intelligence'],
+});
