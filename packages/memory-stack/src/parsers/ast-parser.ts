@@ -1,14 +1,15 @@
 /**
- * AST Parser (Phase 2)
+ * AST Parser (Phase 2 & 3)
  *
  * Multi-language AST parsing for code analysis
  * - TypeScript/JavaScript (via @typescript-eslint/parser)
- * - Python (via py-ast-parser or tree-sitter)
- * - Go (via tree-sitter)
+ * - Python (via tree-sitter-python)
+ * - Go (via tree-sitter-go)
+ * - Scala (via tree-sitter-scala) [Phase 3]
  *
  * Extracts:
  * - Functions/methods
- * - Classes/interfaces
+ * - Classes/interfaces/traits/objects
  * - Imports/exports
  * - Dependencies
  * - Complexity metrics
@@ -21,6 +22,7 @@ import { parse as parseTypeScript } from '@typescript-eslint/parser';
 import Parser from 'tree-sitter';
 import TreeSitterPython from 'tree-sitter-python';
 import TreeSitterGo from 'tree-sitter-go';
+import TreeSitterScala from 'tree-sitter-scala';
 
 export interface FunctionInfo {
   name: string;
@@ -62,7 +64,7 @@ export interface ExportInfo {
 }
 
 export interface CodeStructure {
-  language: 'typescript' | 'javascript' | 'python' | 'go';
+  language: 'typescript' | 'javascript' | 'python' | 'go' | 'scala';
   functions: FunctionInfo[];
   classes: ClassInfo[];
   imports: ImportInfo[];
@@ -82,6 +84,7 @@ export interface CodeStructure {
 export class ASTParser {
   private pythonParser: Parser | null = null;
   private goParser: Parser | null = null;
+  private scalaParser: Parser | null = null;
 
   constructor() {
     // Initialize tree-sitter parsers lazily
@@ -97,7 +100,7 @@ export class ASTParser {
    */
   async parse(
     code: string,
-    language: 'typescript' | 'javascript' | 'python' | 'go',
+    language: 'typescript' | 'javascript' | 'python' | 'go' | 'scala',
     filePath?: string
   ): Promise<CodeStructure> {
     switch (language) {
@@ -108,6 +111,8 @@ export class ASTParser {
         return this.parsePython(code, filePath);
       case 'go':
         return this.parseGo(code, filePath);
+      case 'scala':
+        return this.parseScala(code, filePath);
       default:
         throw new Error(`Unsupported language: ${language}`);
     }
@@ -504,6 +509,7 @@ export class ASTParser {
 
   /**
    * Parse Python using tree-sitter
+   * Traverses the AST to extract functions, classes, imports, and dependencies.
    */
   private parsePython(code: string, filePath?: string): CodeStructure {
     if (!this.pythonParser) {
@@ -516,9 +522,159 @@ export class ASTParser {
     const classes: ClassInfo[] = [];
     const imports: ImportInfo[] = [];
     const dependencies = new Set<string>();
+    let complexity = 0;
 
-    // TODO: Traverse tree-sitter AST and extract Python structures
-    // This is a simplified implementation - full implementation would traverse the AST
+    // Recursive tree-sitter traversal
+    const traverse = (node: Parser.SyntaxNode, insideClass?: string): void => {
+      switch (node.type) {
+        case 'function_definition': {
+          const nameNode = node.childForFieldName('name');
+          const paramsNode = node.childForFieldName('parameters');
+          const returnNode = node.childForFieldName('return_type');
+          const bodyNode = node.childForFieldName('body');
+          const params: { name: string; type?: string }[] = [];
+          if (paramsNode) {
+            for (let i = 0; i < paramsNode.namedChildCount; i++) {
+              const p = paramsNode.namedChild(i);
+              if (p && (p.type === 'identifier' || p.type === 'typed_parameter' || p.type === 'default_parameter')) {
+                const pName = p.type === 'identifier' ? p.text : (p.childForFieldName('name')?.text || p.text);
+                const pType = p.type === 'typed_parameter' ? (p.childForFieldName('type')?.text || undefined) : undefined;
+                if (pName !== 'self' && pName !== 'cls') {
+                  params.push({ name: pName, type: pType });
+                }
+              }
+            }
+          }
+          // Compute local complexity (if/for/while/except count)
+          let localComplexity = 1;
+          if (bodyNode) {
+            const bodyText = bodyNode.text;
+            const matches = bodyText.match(/\b(if|elif|for|while|except|and|or)\b/g);
+            localComplexity += matches ? matches.length : 0;
+          }
+          complexity += localComplexity;
+          // Check for decorators like @staticmethod, detect async
+          const isAsync = node.text.startsWith('async ');
+          // Check if decorated with @property etc.
+          const prevSibling = node.previousNamedSibling;
+          const isDecorated = prevSibling?.type === 'decorator';
+          const docstring = this.extractPythonDocstring(node);
+          functions.push({
+            name: nameNode?.text || 'anonymous',
+            type: insideClass ? 'method' : (isAsync ? 'async' : 'function'),
+            params,
+            returnType: returnNode?.text,
+            startLine: node.startPosition.row + 1,
+            endLine: node.endPosition.row + 1,
+            complexity: localComplexity,
+            isExported: !insideClass && !nameNode?.text.startsWith('_'),
+            isAsync,
+            docstring,
+          });
+          break;
+        }
+        case 'class_definition': {
+          const nameNode = node.childForFieldName('name');
+          const superclassNode = node.childForFieldName('superclasses');
+          const className = nameNode?.text || 'UnknownClass';
+          const extendsArr: string[] = [];
+          if (superclassNode) {
+            for (let i = 0; i < superclassNode.namedChildCount; i++) {
+              const s = superclassNode.namedChild(i);
+              if (s) extendsArr.push(s.text);
+            }
+          }
+          const methods: FunctionInfo[] = [];
+          const properties: { name: string; type?: string; isPublic: boolean }[] = [];
+          const bodyNode = node.childForFieldName('body');
+          if (bodyNode) {
+            for (let i = 0; i < bodyNode.namedChildCount; i++) {
+              const child = bodyNode.namedChild(i);
+              if (child?.type === 'function_definition') {
+                traverse(child, className);
+                // Also capture as class method
+                const mName = child.childForFieldName('name')?.text || '';
+                const lastFn = functions[functions.length - 1];
+                if (lastFn) methods.push(lastFn);
+              } else if (child?.type === 'expression_statement') {
+                // Class-level assignments (properties)
+                const assign = child.namedChild(0);
+                if (assign?.type === 'assignment') {
+                  const left = assign.childForFieldName('left');
+                  if (left) {
+                    properties.push({
+                      name: left.text,
+                      isPublic: !left.text.startsWith('_'),
+                    });
+                  }
+                }
+              }
+            }
+          }
+          const docstring = this.extractPythonDocstring(node);
+          classes.push({
+            name: className,
+            type: 'class',
+            extends: extendsArr.length > 0 ? extendsArr : undefined,
+            methods,
+            properties,
+            startLine: node.startPosition.row + 1,
+            endLine: node.endPosition.row + 1,
+            isExported: !className.startsWith('_'),
+            docstring,
+          });
+          return; // Already traversed children
+        }
+        case 'import_statement': {
+          // import os, sys
+          const moduleNames: string[] = [];
+          for (let i = 0; i < node.namedChildCount; i++) {
+            const child = node.namedChild(i);
+            if (child?.type === 'dotted_name' || child?.type === 'aliased_import') {
+              moduleNames.push(child.text.split(' as ')[0]);
+            }
+          }
+          for (const mod of moduleNames) {
+            dependencies.add(mod.split('.')[0]);
+            imports.push({
+              source: mod,
+              type: 'import',
+              imports: [{ name: mod.split('.').pop() || mod, isDefault: true }],
+              isTypeOnly: false,
+            });
+          }
+          break;
+        }
+        case 'import_from_statement': {
+          // from X import Y
+          const moduleNode = node.childForFieldName('module_name');
+          const moduleName = moduleNode?.text || '';
+          if (moduleName) dependencies.add(moduleName.split('.')[0]);
+          const importedNames: { name: string; alias?: string }[] = [];
+          for (let i = 0; i < node.namedChildCount; i++) {
+            const child = node.namedChild(i);
+            if (child?.type === 'aliased_import' || child?.type === 'dotted_name') {
+              const parts = child.text.split(' as ');
+              importedNames.push({ name: parts[0], alias: parts[1] });
+            }
+          }
+          imports.push({
+            source: moduleName,
+            type: 'import',
+            imports: importedNames.length > 0 ? importedNames : [{ name: '*' }],
+            isTypeOnly: false,
+          });
+          break;
+        }
+      }
+      // Recurse into children (except class bodies which we handle above)
+      for (let i = 0; i < node.namedChildCount; i++) {
+        const child = node.namedChild(i);
+        if (child && node.type !== 'class_definition') traverse(child, insideClass);
+      }
+    };
+
+    traverse(tree.rootNode);
 
     const lines = code.split('\n');
     const commentLines = lines.filter((l) => l.trim().startsWith('#')).length;
@@ -534,13 +690,28 @@ export class ASTParser {
         totalLines: lines.length,
         codeLines: lines.filter((l) => l.trim().length > 0).length,
         commentLines,
-        complexity: 0,
+        complexity,
       },
     };
   }
 
+  /** Extract Python docstring from a function/class body */
+  private extractPythonDocstring(node: Parser.SyntaxNode): string | undefined {
+    const bodyNode = node.childForFieldName('body');
+    if (!bodyNode || bodyNode.namedChildCount === 0) return undefined;
+    const firstChild = bodyNode.namedChild(0);
+    if (firstChild?.type === 'expression_statement') {
+      const expr = firstChild.namedChild(0);
+      if (expr?.type === 'string' || expr?.type === 'concatenated_string') {
+        return expr.text.replace(/^['"`]{1,3}|['"`]{1,3}$/g, '').trim();
+      }
+    }
+    return undefined;
+  }
+
   /**
    * Parse Go using tree-sitter
+   * Traverses the AST to extract functions, structs, imports, and dependencies.
    */
   private parseGo(code: string, filePath?: string): CodeStructure {
     if (!this.goParser) {
@@ -553,25 +724,490 @@ export class ASTParser {
     const classes: ClassInfo[] = [];
     const imports: ImportInfo[] = [];
     const dependencies = new Set<string>();
+    let complexity = 0;
 
-    // TODO: Traverse tree-sitter AST and extract Go structures
-    // This is a simplified implementation - full implementation would traverse the AST
+    // Recursive tree-sitter traversal
+    const traverse = (node: Parser.SyntaxNode): void => {
+      switch (node.type) {
+        case 'function_declaration': {
+          const nameNode = node.childForFieldName('name');
+          const paramsNode = node.childForFieldName('parameters');
+          const resultNode = node.childForFieldName('result');
+          const bodyNode = node.childForFieldName('body');
+          const params: { name: string; type?: string }[] = [];
+          if (paramsNode) {
+            for (let i = 0; i < paramsNode.namedChildCount; i++) {
+              const p = paramsNode.namedChild(i);
+              if (p?.type === 'parameter_declaration') {
+                const pName = p.childForFieldName('name')?.text || `arg${i}`;
+                const pType = p.childForFieldName('type')?.text;
+                params.push({ name: pName, type: pType });
+              }
+            }
+          }
+          let localComplexity = 1;
+          if (bodyNode) {
+            const bodyText = bodyNode.text;
+            const matches = bodyText.match(/\b(if|else|for|switch|case|select|&&|\|\|)\b/g);
+            localComplexity += matches ? matches.length : 0;
+          }
+          complexity += localComplexity;
+          const fnName = nameNode?.text || 'anonymous';
+          functions.push({
+            name: fnName,
+            type: 'function',
+            params,
+            returnType: resultNode?.text,
+            startLine: node.startPosition.row + 1,
+            endLine: node.endPosition.row + 1,
+            complexity: localComplexity,
+            isExported: fnName.length > 0 && fnName[0] === fnName[0].toUpperCase(),
+            isAsync: false,
+          });
+          break;
+        }
+        case 'method_declaration': {
+          const nameNode = node.childForFieldName('name');
+          const receiverNode = node.childForFieldName('receiver');
+          const paramsNode = node.childForFieldName('parameters');
+          const resultNode = node.childForFieldName('result');
+          const bodyNode = node.childForFieldName('body');
+          const params: { name: string; type?: string }[] = [];
+          if (paramsNode) {
+            for (let i = 0; i < paramsNode.namedChildCount; i++) {
+              const p = paramsNode.namedChild(i);
+              if (p?.type === 'parameter_declaration') {
+                const pName = p.childForFieldName('name')?.text || `arg${i}`;
+                const pType = p.childForFieldName('type')?.text;
+                params.push({ name: pName, type: pType });
+              }
+            }
+          }
+          let localComplexity = 1;
+          if (bodyNode) {
+            const bodyText = bodyNode.text;
+            const matches = bodyText.match(/\b(if|else|for|switch|case|select|&&|\|\|)\b/g);
+            localComplexity += matches ? matches.length : 0;
+          }
+          complexity += localComplexity;
+          const mName = nameNode?.text || 'anonymous';
+          functions.push({
+            name: mName,
+            type: 'method',
+            params,
+            returnType: resultNode?.text,
+            startLine: node.startPosition.row + 1,
+            endLine: node.endPosition.row + 1,
+            complexity: localComplexity,
+            isExported: mName.length > 0 && mName[0] === mName[0].toUpperCase(),
+            isAsync: false,
+            docstring: receiverNode?.text ? `receiver: ${receiverNode.text}` : undefined,
+          });
+          break;
+        }
+        case 'type_declaration': {
+          // Go struct/interface types
+          for (let i = 0; i < node.namedChildCount; i++) {
+            const spec = node.namedChild(i);
+            if (spec?.type === 'type_spec') {
+              const nameNode = spec.childForFieldName('name');
+              const typeNode = spec.childForFieldName('type');
+              const typeName = nameNode?.text || 'Unknown';
+              if (typeNode?.type === 'struct_type') {
+                const methods: FunctionInfo[] = [];
+                const properties: { name: string; type?: string; isPublic: boolean }[] = [];
+                // Extract struct fields
+                const fieldListNode = typeNode.namedChild(0);
+                if (fieldListNode) {
+                  for (let j = 0; j < fieldListNode.namedChildCount; j++) {
+                    const field = fieldListNode.namedChild(j);
+                    if (field?.type === 'field_declaration') {
+                      const fName = field.childForFieldName('name')?.text || '';
+                      const fType = field.childForFieldName('type')?.text;
+                      properties.push({
+                        name: fName,
+                        type: fType,
+                        isPublic: fName.length > 0 && fName[0] === fName[0].toUpperCase(),
+                      });
+                    }
+                  }
+                }
+                classes.push({
+                  name: typeName,
+                  type: 'class', // Go struct → class equivalent
+                  methods,
+                  properties,
+                  startLine: spec.startPosition.row + 1,
+                  endLine: spec.endPosition.row + 1,
+                  isExported: typeName[0] === typeName[0].toUpperCase(),
+                });
+              } else if (typeNode?.type === 'interface_type') {
+                const methods: FunctionInfo[] = [];
+                // Extract interface method signatures
+                for (let j = 0; j < (typeNode.namedChildCount || 0); j++) {
+                  const methodSpec = typeNode.namedChild(j);
+                  if (methodSpec?.type === 'method_spec') {
+                    const mName = methodSpec.childForFieldName('name')?.text || '';
+                    methods.push({
+                      name: mName,
+                      type: 'method',
+                      params: [],
+                      startLine: methodSpec.startPosition.row + 1,
+                      endLine: methodSpec.endPosition.row + 1,
+                      complexity: 0,
+                      isExported: mName.length > 0 && mName[0] === mName[0].toUpperCase(),
+                      isAsync: false,
+                    });
+                  }
+                }
+                classes.push({
+                  name: typeName,
+                  type: 'interface',
+                  methods,
+                  properties: [],
+                  startLine: spec.startPosition.row + 1,
+                  endLine: spec.endPosition.row + 1,
+                  isExported: typeName[0] === typeName[0].toUpperCase(),
+                });
+              }
+            }
+          }
+          break;
+        }
+        case 'import_declaration': {
+          // import "fmt" or import ( "fmt"; "os" )
+          for (let i = 0; i < node.namedChildCount; i++) {
+            const spec = node.namedChild(i);
+            if (spec?.type === 'import_spec' || spec?.type === 'import_spec_list') {
+              const extractSpec = (s: Parser.SyntaxNode) => {
+                const pathNode = s.childForFieldName('path');
+                const aliasNode = s.childForFieldName('name');
+                const path = pathNode?.text?.replace(/"/g, '') || s.text.replace(/"/g, '');
+                if (path) {
+                  dependencies.add(path.split('/')[0]);
+                  imports.push({
+                    source: path,
+                    type: 'import',
+                    imports: [{ name: path.split('/').pop() || path, alias: aliasNode?.text }],
+                    isTypeOnly: false,
+                  });
+                }
+              };
+              if (spec.type === 'import_spec_list') {
+                for (let j = 0; j < spec.namedChildCount; j++) {
+                  const innerSpec = spec.namedChild(j);
+                  if (innerSpec) extractSpec(innerSpec);
+                }
+              } else {
+                extractSpec(spec);
+              }
+            }
+          }
+          break;
+        }
+      }
+      // Recurse
+      for (let i = 0; i < node.namedChildCount; i++) {
+        const child = node.namedChild(i);
+        if (child) traverse(child);
+      }
+    };
+
+    traverse(tree.rootNode);
 
     const lines = code.split('\n');
     const commentLines = lines.filter((l) => l.trim().startsWith('//')).length;
+
+    // Collect exported functions as exports
+    const goExports: ExportInfo[] = functions
+      .filter(f => f.isExported)
+      .map(f => ({ name: f.name, type: 'named' as const }));
 
     return {
       language: 'go',
       functions,
       classes,
       imports,
-      exports: [],
+      exports: goExports,
       dependencies: Array.from(dependencies),
       metrics: {
         totalLines: lines.length,
         codeLines: lines.filter((l) => l.trim().length > 0).length,
         commentLines,
-        complexity: 0,
+        complexity,
+      },
+    };
+  }
+
+  /**
+   * Parse Scala code using tree-sitter
+   *
+   * Extracts:
+   * - Objects, traits, classes, case classes
+   * - Methods (def), functions
+   * - Pattern matching
+   * - Implicit parameters/conversions
+   * - Type parameters
+   * - Package structure
+   * - Imports (wildcard, selective, renaming)
+   */
+  private parseScala(code: string, filePath?: string): CodeStructure {
+    if (!this.scalaParser) {
+      this.scalaParser = new Parser();
+      this.scalaParser.setLanguage(TreeSitterScala);
+    }
+
+    const tree = this.scalaParser.parse(code);
+    const rootNode = tree.rootNode;
+
+    const functions: FunctionInfo[] = [];
+    const classes: ClassInfo[] = [];
+    const imports: ImportInfo[] = [];
+    const exports: ExportInfo[] = [];
+    const dependencies = new Set<string>();
+    let complexity = 0;
+    let commentLines = 0;
+
+    // Helper to extract text
+    const getText = (node: any) => code.substring(node.startIndex, node.endIndex);
+
+    // Helper to get line number
+    const getLineNumber = (node: any) => node.startPosition.row + 1;
+
+    // Recursive walker
+    const walk = (node: any) => {
+      // Extract imports
+      if (node.type === 'import_declaration') {
+        const importNode = node.childForFieldName('path');
+        if (importNode) {
+          const source = getText(importNode).replace(/[`]/g, '');
+          const importedItems: Array<{ name: string; alias?: string }> = [];
+
+          // Check for import selectors
+          const selectorsNode = node.childForFieldName('selectors');
+          if (selectorsNode) {
+            for (let i = 0; i < selectorsNode.childCount; i++) {
+              const selector = selectorsNode.child(i);
+              if (selector && selector.type === 'import_selector') {
+                const nameNode = selector.childForFieldName('name');
+                const aliasNode = selector.childForFieldName('rename');
+                if (nameNode) {
+                  importedItems.push({
+                    name: getText(nameNode),
+                    alias: aliasNode ? getText(aliasNode) : undefined,
+                  });
+                }
+              }
+            }
+          } else {
+            // Wildcard import or single import
+            importedItems.push({ name: '*' });
+          }
+
+          imports.push({
+            source,
+            type: 'import',
+            imports: importedItems,
+            isTypeOnly: false,
+          });
+
+          dependencies.add(source);
+        }
+      }
+
+      // Extract functions/methods (def)
+      if (node.type === 'function_definition') {
+        const nameNode = node.childForFieldName('name');
+        if (nameNode) {
+          const name = getText(nameNode);
+          const params: Array<{ name: string; type?: string }> = [];
+
+          // Extract parameters
+          const paramsNode = node.childForFieldName('parameters');
+          if (paramsNode) {
+            for (let i = 0; i < paramsNode.childCount; i++) {
+              const param = paramsNode.child(i);
+              if (param && param.type === 'parameter') {
+                const paramName = param.childForFieldName('name');
+                const paramType = param.childForFieldName('type');
+                if (paramName) {
+                  params.push({
+                    name: getText(paramName),
+                    type: paramType ? getText(paramType) : undefined,
+                  });
+                }
+              }
+            }
+          }
+
+          // Extract return type
+          const returnTypeNode = node.childForFieldName('return_type');
+          const returnType = returnTypeNode ? getText(returnTypeNode) : undefined;
+
+          // Calculate complexity (count decision points)
+          let methodComplexity = 1;
+          const countDecisionPoints = (n: any) => {
+            if (['if_expression', 'match_expression', 'for_expression', 'while_expression', 'case_clause'].includes(n.type)) {
+              methodComplexity++;
+            }
+            for (let i = 0; i < n.childCount; i++) {
+              const child = n.child(i);
+              if (child) countDecisionPoints(child);
+            }
+          };
+          countDecisionPoints(node);
+          complexity += methodComplexity;
+
+          functions.push({
+            name,
+            type: 'function',
+            params,
+            returnType,
+            startLine: getLineNumber(node),
+            endLine: getLineNumber(node) + getText(node).split('\n').length - 1,
+            complexity: methodComplexity,
+            isExported: true, // Scala members are public by default
+            isAsync: false, // Scala uses Future/IO, not async keyword
+          });
+        }
+      }
+
+      // Extract classes, case classes, objects, traits
+      if (['class_definition', 'object_definition', 'trait_definition'].includes(node.type)) {
+        const nameNode = node.childForFieldName('name');
+        if (nameNode) {
+          const name = getText(nameNode);
+          const methods: FunctionInfo[] = [];
+          const properties: Array<{ name: string; type?: string; isPublic: boolean }> = [];
+
+          // Extract extends/implements
+          const extendsClause: string[] = [];
+          const implementsClause: string[] = [];
+          const extendsNode = node.childForFieldName('extends');
+          if (extendsNode) {
+            for (let i = 0; i < extendsNode.childCount; i++) {
+              const extendType = extendsNode.child(i);
+              if (extendType && extendType.type === 'type_identifier') {
+                extendsClause.push(getText(extendType));
+              }
+            }
+          }
+
+          // Extract members (methods and fields)
+          const bodyNode = node.childForFieldName('body');
+          if (bodyNode) {
+            const extractMembers = (n: any) => {
+              if (n.type === 'function_definition') {
+                const methodName = n.childForFieldName('name');
+                if (methodName) {
+                  const methodParams: Array<{ name: string; type?: string }> = [];
+                  const methodParamsNode = n.childForFieldName('parameters');
+                  if (methodParamsNode) {
+                    for (let i = 0; i < methodParamsNode.childCount; i++) {
+                      const param = methodParamsNode.child(i);
+                      if (param && param.type === 'parameter') {
+                        const pName = param.childForFieldName('name');
+                        const pType = param.childForFieldName('type');
+                        if (pName) {
+                          methodParams.push({
+                            name: getText(pName),
+                            type: pType ? getText(pType) : undefined,
+                          });
+                        }
+                      }
+                    }
+                  }
+
+                  const methodReturnType = n.childForFieldName('return_type');
+                  let methodComplexity = 1;
+                  const countDec = (node: any) => {
+                    if (['if_expression', 'match_expression', 'for_expression', 'while_expression', 'case_clause'].includes(node.type)) {
+                      methodComplexity++;
+                    }
+                    for (let i = 0; i < node.childCount; i++) {
+                      const child = node.child(i);
+                      if (child) countDec(child);
+                    }
+                  };
+                  countDec(n);
+                  complexity += methodComplexity;
+
+                  methods.push({
+                    name: getText(methodName),
+                    type: 'method',
+                    params: methodParams,
+                    returnType: methodReturnType ? getText(methodReturnType) : undefined,
+                    startLine: getLineNumber(n),
+                    endLine: getLineNumber(n) + getText(n).split('\n').length - 1,
+                    complexity: methodComplexity,
+                    isExported: true,
+                    isAsync: false,
+                  });
+                }
+              } else if (n.type === 'val_definition' || n.type === 'var_definition') {
+                const fieldName = n.childForFieldName('pattern');
+                const fieldType = n.childForFieldName('type');
+                if (fieldName) {
+                  properties.push({
+                    name: getText(fieldName),
+                    type: fieldType ? getText(fieldType) : undefined,
+                    isPublic: true, // Scala fields are public by default
+                  });
+                }
+              }
+
+              for (let i = 0; i < n.childCount; i++) {
+                const child = n.child(i);
+                if (child) extractMembers(child);
+              }
+            };
+            extractMembers(bodyNode);
+          }
+
+          classes.push({
+            name,
+            type: node.type === 'trait_definition' ? 'interface' : 'class',
+            extends: extendsClause.length > 0 ? extendsClause : undefined,
+            implements: implementsClause.length > 0 ? implementsClause : undefined,
+            methods,
+            properties,
+            startLine: getLineNumber(node),
+            endLine: getLineNumber(node) + getText(node).split('\n').length - 1,
+            isExported: true,
+          });
+        }
+      }
+
+      // Recurse
+      for (let i = 0; i < node.childCount; i++) {
+        const child = node.child(i);
+        if (child) walk(child);
+      }
+    };
+
+    walk(rootNode);
+
+    // Count comment lines
+    const lines = code.split('\n');
+    lines.forEach((line) => {
+      const trimmed = line.trim();
+      if (trimmed.startsWith('//') || trimmed.startsWith('/*') || trimmed.startsWith('*')) {
+        commentLines++;
+      }
+    });
+
+    return {
+      language: 'scala',
+      functions,
+      classes,
+      imports,
+      exports,
+      dependencies: Array.from(dependencies),
+      metrics: {
+        totalLines: lines.length,
+        codeLines: lines.filter((l) => l.trim().length > 0).length,
+        commentLines,
+        complexity,
       },
     };
   }
@@ -589,7 +1225,7 @@ export function createASTParser(): ASTParser {
  */
 export async function parseCode(
   code: string,
-  language: 'typescript' | 'javascript' | 'python' | 'go',
+  language: 'typescript' | 'javascript' | 'python' | 'go' | 'scala',
   filePath?: string
 ): Promise<CodeStructure> {
   const parser = createASTParser();

@@ -40,6 +40,12 @@ import {
   registerConnectorSyncAgents,
 } from './agents-connector-sync';
 
+import {
+  devJarvisAgent,
+  ALL_DEV_JARVIS_AGENTS,
+  registerDevJarvisAgents,
+} from './agents-dev-jarvis';
+
 // Re-export Jarvis for convenience
 export {
   jarvisOrchestratorAgent,
@@ -69,6 +75,15 @@ export {
   type ConnectorSyncInput,
   type ConnectorSyncOutput,
 } from './agents-connector-sync';
+
+// Re-export Dev Jarvis agent
+export {
+  devJarvisAgent,
+  ALL_DEV_JARVIS_AGENTS,
+  registerDevJarvisAgents,
+  type DevJarvisGoal,
+  type DevJarvisResult,
+} from './agents-dev-jarvis';
 
 // ============================================================================
 // TYPES
@@ -998,7 +1013,7 @@ export const continuousLearnerAgent: AgentDefinition = defineAgent({
 // ALL PRE-BUILT AGENTS
 // ============================================================================
 
-/** All 27 pre-built brain-native agents (V6:5 + V6.1:5 + V7:6 + V8 Jarvis:3 + V8 Connector Sync:5 + V8 Metacognition:3) */
+/** All 28 pre-built brain-native agents (V6:5 + V6.1:5 + V7:6 + V8 Jarvis:3 + V8 ConnectorSync:5 + V8 Metacognition:3 + V8 DevJarvis:1) */
 export const ALL_BRAIN_AGENTS: AgentDefinition[] = [
   // V6 — Core Brain Agents (Cerebral Cortex)
   revenueWatcherAgent,
@@ -1027,18 +1042,20 @@ export const ALL_BRAIN_AGENTS: AgentDefinition[] = [
   metacognitionAuditorAgent,
   qualityGateAgent,
   continuousLearnerAgent,
+  // V8 — Dev Jarvis (Developer Intelligence Executive)
+  ...ALL_DEV_JARVIS_AGENTS,
 ];
 
 /**
- * Register all 27 brain-native agents into an agent registry.
- * Includes V6 core (5), V6.1 advanced (5), V7 accounting (6),
- * V8 Jarvis executive (3), V8 connector sync (5), V8 metacognition (3).
+ * Register all 28 brain-native agents into an agent registry.
+ * V6 core (5) + V6.1 advanced (5) + V7 accounting (6) +
+ * V8 Jarvis (3) + V8 connector sync (5) + V8 metacognition (3) + V8 Dev Jarvis (1).
  *
  * @example
  * ```typescript
  * const agentRegistry = createAgentRegistry({ verbose: true });
  * registerBrainAgents(agentRegistry);
- * // 27 brain-native agents now registered (V6→V8, including Jarvis + connector sync + metacognition)
+ * // 28 brain-native agents now registered
  * ```
  */
 export function registerBrainAgents(

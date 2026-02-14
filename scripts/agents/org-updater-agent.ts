@@ -43,34 +43,45 @@ import type {
   ConvertResult,
   TrainResult,
 } from '../agent-framework/base-training-agent';
-import type { MotorCommand } from '../../packages/memory-stack/src/orchestrator/motor-command-engine';
-import { createSyncManager } from '../../packages/memory-stack/src/connectors/sync-manager';
+// ── Memory-Stack imports via barrel (public API) ────────────────────────────
 import {
+  // Motor commands
+  type MotorCommand,
+  // Sync
+  createSyncManager,
   storeConnectorSignals,
   type NexusConnector,
   type ConnectorSignal,
   type ConnectorSyncResult,
-} from '../../packages/memory-stack/src/connectors/connector-framework';
-import type { TrainingPack } from '../../packages/memory-stack/src/learning/brain-trainer';
-
-// ── Connector Factories ─────────────────────────────────────────────────────
-import { createHubSpotConnector } from '../../packages/memory-stack/src/connectors/hubspot';
-import { createStripeConnector } from '../../packages/memory-stack/src/connectors/stripe';
-import { createGitHubConnector, type GitHubConnectorConfig } from '../../packages/memory-stack/src/connectors/github';
-import { createJiraConnector, type JiraConnectorConfig } from '../../packages/memory-stack/src/connectors/jira';
-import { createSlackConnector, type SlackConnectorConfig } from '../../packages/memory-stack/src/connectors/slack';
-import { createPagerDutyConnector, type PagerDutyConnectorConfig } from '../../packages/memory-stack/src/connectors/pagerduty';
-import { createGoogleCalendarConnector, type GoogleCalendarConnectorConfig } from '../../packages/memory-stack/src/connectors/google-calendar';
-import { createGoogleChatConnector, type GoogleChatConnectorConfig } from '../../packages/memory-stack/src/connectors/google-chat';
-import { createVoiceConnector, type VoiceConnectorConfig } from '../../packages/memory-stack/src/connectors/voice';
-import { createSupportConnector } from '../../packages/memory-stack/src/connectors/support';
-import { createDocumentConnector, type DocumentConnectorConfig } from '../../packages/memory-stack/src/connectors/document';
-import { createGenericAppConnector, type GenericAppConnectorConfig } from '../../packages/memory-stack/src/connectors/generic-app';
-
-// ── Learning Systems ─────────────────────────────────────────────────────────
-import { createSupabaseRepository } from '../../packages/memory-stack/src/persistence/supabase-repository';
-import { createAutonomousLearner } from '../../packages/memory-stack/src/learning/autonomous-learner';
-import { createConsolidationEngine } from '../../packages/memory-stack/src/orchestrator/consolidation-engine';
+  // Training
+  type TrainingPack,
+  // Connector Factories (all 12)
+  createHubSpotConnector,
+  createStripeConnector,
+  createGitHubConnector,
+  type GitHubConnectorConfig,
+  createJiraConnector,
+  type JiraConnectorConfig,
+  createSlackConnector,
+  type SlackConnectorConfig,
+  createPagerDutyConnector,
+  type PagerDutyConnectorConfig,
+  createGoogleCalendarConnector,
+  type GoogleCalendarConnectorConfig,
+  createGoogleChatConnector,
+  type GoogleChatConnectorConfig,
+  createVoiceConnector,
+  type VoiceConnectorConfig,
+  createSupportConnector,
+  createDocumentConnector,
+  type DocumentConnectorConfig,
+  createGenericAppConnector,
+  type GenericAppConnectorConfig,
+  // Learning Systems
+  createSupabaseRepository,
+  createAutonomousLearner,
+  createConsolidationEngine,
+} from '@nexus-ai/memory-stack';
 
 // ============================================================================
 // CONFIGURATION

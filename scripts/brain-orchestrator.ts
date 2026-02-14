@@ -433,14 +433,89 @@ class BrainOrchestrator {
 
   /**
    * Flush queued motor commands.
+   *
+   * Checks the motor command engine's history for commands that are pending
+   * approval (`approved_pending`) and re-executes them. Also queries the
+   * `motor_command_queue` table for any DB-queued commands from other subsystems.
    */
   async flushMotorCommands(): Promise<void> {
-    // TODO: Wire motor command queue flush
-    // const queuedCommands = await this.motorCommandEngine.getQueuedCommands();
-    // if (queuedCommands.length > 0) {
-    //   log('MOTOR', `Flushing ${queuedCommands.length} queued command(s)`);
-    //   await this.motorCommandEngine.executeBatch(queuedCommands);
-    // }
+    try {
+      // ── Phase 1: Flush in-memory pending commands ────────────────────────
+      const history = this.motorCommandEngine.getHistory();
+      const pendingCommands = history
+        .filter(h => h.result.status === 'approved_pending')
+        .map(h => {
+          // Reconstruct the command from history for re-execution
+          return {
+            id: h.result.commandId,
+            actionType: (h.command as any).actionType || 'custom',
+            target: (h.command as any).target || '',
+            parameters: (h.command as any).parameters || {},
+            confidence: (h.command as any).confidence || 0.8,
+            approvalMode: 'auto' as const,  // Already approved → auto-execute
+            priority: (h.command as any).priority || 'medium',
+            targetDomains: (h.command as any).targetDomains || [],
+            evidence: (h.command as any).evidence || 'Previously approved command',
+            sourceArtifactType: (h.command as any).sourceArtifactType || 'orchestrator',
+            expectedImpact: (h.command as any).expectedImpact || '',
+            createdAt: (h.command as any).createdAt || new Date().toISOString(),
+            timeoutMs: (h.command as any).timeoutMs || 30000,
+            maxRetries: (h.command as any).maxRetries || 1,
+          };
+        });
+
+      if (pendingCommands.length > 0) {
+        log('MOTOR', `Flushing ${pendingCommands.length} pending command(s) from in-memory queue`);
+        const batchResult = await this.motorCommandEngine.executeBatch(pendingCommands);
+        log('MOTOR', `Batch complete: ${batchResult.successful}/${batchResult.total} succeeded, ${batchResult.failed} failed`);
+      }
+
+      // ── Phase 2: Flush DB-queued commands (from other subsystems) ────────
+      const { data: dbQueued, error } = await this.config.supabase
+        .from('motor_command_queue')
+        .select('*')
+        .eq('status', 'queued')
+        .order('created_at', { ascending: true })
+        .limit(50);
+
+      if (!error && dbQueued && dbQueued.length > 0) {
+        log('MOTOR', `Found ${dbQueued.length} DB-queued command(s)`);
+        const dbCommands = dbQueued.map((row: any) => ({
+          id: row.id,
+          actionType: row.action_type || 'custom',
+          target: row.target || '',
+          parameters: row.parameters || {},
+          confidence: row.confidence || 0.8,
+          approvalMode: (row.approval_mode as 'auto' | 'requires_approval' | 'dry_run') || 'auto',
+          priority: row.priority || 'medium',
+          targetDomains: row.target_domains || [],
+          evidence: row.evidence || '',
+          sourceArtifactType: row.source_artifact_type || 'db_queue',
+          expectedImpact: row.expected_impact || '',
+          createdAt: row.created_at,
+          timeoutMs: row.timeout_ms || 30000,
+          maxRetries: row.max_retries || 1,
+        }));
+
+        const batchResult = await this.motorCommandEngine.executeBatch(dbCommands);
+        log('MOTOR', `DB queue flush: ${batchResult.successful}/${batchResult.total} succeeded`);
+
+        // Mark processed commands
+        const processedIds = dbQueued.map((r: any) => r.id);
+        await this.config.supabase
+          .from('motor_command_queue')
+          .update({ status: 'processed', processed_at: new Date().toISOString() })
+          .in('id', processedIds);
+      }
+
+      // ── Phase 3: Log motor stats ─────────────────────────────────────────
+      const stats = this.motorCommandEngine.getStats();
+      if (stats.totalExecuted > 0) {
+        log('MOTOR', `Stats: ${stats.totalExecuted} executed, ${stats.successful} ok, ${stats.failed} failed, avg ${stats.avgDurationMs}ms`);
+      }
+    } catch (err) {
+      logError('MOTOR', 'Motor command flush failed', err);
+    }
   }
 
   /**

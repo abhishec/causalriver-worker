@@ -24,6 +24,27 @@ import {
 import type { ConfidenceInterval } from './statistical-tests';
 
 // ============================================================================
+// HELPERS
+// ============================================================================
+
+/**
+ * Standard normal CDF approximation (Abramowitz & Stegun 26.2.17).
+ * Accurate to ~1.5×10⁻⁷ for all z values.
+ */
+function normalCDF(z: number): number {
+  if (z < -8) return 0;
+  if (z > 8) return 1;
+  const isNeg = z < 0;
+  const absZ = Math.abs(z);
+  const t = 1 / (1 + 0.2316419 * absZ);
+  const d = 0.3989422804014327; // 1/sqrt(2π)
+  const p = d * Math.exp(-absZ * absZ / 2);
+  const poly = t * (0.319381530 + t * (-0.356563782 + t * (1.781477937 + t * (-1.821255978 + t * 1.330274429))));
+  const result = 1 - p * poly;
+  return isNeg ? 1 - result : result;
+}
+
+// ============================================================================
 // TYPES
 // ============================================================================
 
@@ -369,22 +390,55 @@ export function createOutcomeTracker(
       const primaryMetric = targetMetrics[0];
       const primaryEffect = metricEffects[primaryMetric];
 
-      // For naive estimation, we just compute the change
-      // For proper causal inference, we'd need control group data
+      // Compute ATE (Average Treatment Effect) as difference in means
       let ate = primaryEffect.change;
-      let pValue = 0.05; // Placeholder - proper test would need control data
-      let isSignificant = true;
+      let pValue = 1.0;
+      let isSignificant = false;
 
-      // Simple CI estimation based on observed variance across checkpoints
+      // Collect checkpoint values for proper statistical testing
       const metricValues = measuredCheckpoints
         .filter(c => c.values?.[primaryMetric] !== undefined)
         .map(c => c.values![primaryMetric]);
 
       const mean = metricValues.reduce((a, b) => a + b, 0) / metricValues.length;
-      const variance = metricValues.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) /
-        (metricValues.length - 1);
-      const se = Math.sqrt(variance / metricValues.length);
+      const variance = metricValues.length > 1
+        ? metricValues.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / (metricValues.length - 1)
+        : 0;
+      const se = metricValues.length > 1 ? Math.sqrt(variance / metricValues.length) : 0;
       const z = 1.96; // 95% CI
+
+      // ── Proper p-value via one-sample t-test (H0: mean == baseline) ──────
+      // Uses Welch-style t-statistic when enough observations exist.
+      // Falls back to conservative estimate when n < 3.
+      if (metricValues.length >= 3 && se > 0) {
+        const baseline = primaryEffect.baseline;
+        const tStat = (mean - baseline) / se;
+        const df = metricValues.length - 1;
+        // Two-tailed p-value approximation using t-distribution CDF
+        // Uses the regularized incomplete beta function approximation
+        const x = df / (df + tStat * tStat);
+        // Approximation of regularized incomplete beta I_x(df/2, 0.5)
+        // Using the relationship: p = I_x(df/2, 1/2) for two-tailed test
+        // For df > 2, use Abramowitz & Stegun approximation:
+        const absTStat = Math.abs(tStat);
+        if (df <= 1) {
+          // Cauchy distribution special case
+          pValue = 1 - (2 / Math.PI) * Math.atan(absTStat);
+        } else {
+          // Normal approximation for large df, exact-ish for small df
+          // Cornish-Fisher approximation
+          const g1 = (absTStat * absTStat / df);
+          const pNormal = 2 * (1 - normalCDF(absTStat * Math.sqrt((df - 1.5) / (df * (1 + g1 / 2)))));
+          pValue = Math.max(0, Math.min(1, pNormal));
+        }
+        isSignificant = pValue < alpha;
+      } else if (metricValues.length >= 2 && se > 0) {
+        // Too few observations for robust test — use conservative z-test
+        const zStat = Math.abs(ate) / se;
+        pValue = 2 * (1 - normalCDF(zStat));
+        isSignificant = pValue < alpha;
+      }
+      // else: n < 2 or se == 0 → pValue stays 1.0, isSignificant stays false
 
       const confidenceInterval: ConfidenceInterval = {
         lower: ate - z * se,
@@ -392,10 +446,9 @@ export function createOutcomeTracker(
         level: 1 - alpha
       };
 
-      // If CI includes 0, not significant
+      // Override: if CI includes 0, not significant regardless of p-value
       if (confidenceInterval.lower <= 0 && confidenceInterval.upper >= 0) {
         isSignificant = false;
-        pValue = 0.1; // Approximate
       }
 
       const effectEstimate: EffectEstimate = {

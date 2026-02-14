@@ -58,8 +58,8 @@
   },
   "peerDependencies": {
     "@supabase/supabase-js": "^2.0.0",
-    "react": "^18.0.0 || ^19.0.0",
-    "@tanstack/react-query": "^5.0.0"
+    "@tanstack/react-query": "^5.0.0",
+    "react": "^18.0.0 || ^19.0.0"
   },
   "peerDependenciesMeta": {
     "@supabase/supabase-js": {
@@ -73,21 +73,22 @@
     }
   },
   "dependencies": {
-    "@octokit/rest": "^20.0.2",
-    "simple-git": "^3.22.0",
     "@anthropic-ai/sdk": "^0.20.9",
+    "@octokit/rest": "^20.0.2",
     "@typescript-eslint/parser": "^6.21.0",
+    "simple-git": "^3.22.0",
     "tree-sitter": "^0.21.0",
+    "tree-sitter-go": "^0.21.0",
     "tree-sitter-python": "^0.21.0",
-    "tree-sitter-go": "^0.21.0"
+    "tree-sitter-scala": "^0.24.0"
   },
   "devDependencies": {
+    "@supabase/supabase-js": "^2.0.0",
+    "@types/react": "^18.0.0",
+    "@vitest/coverage-v8": "^1.6.0",
     "tsup": "^8.0.0",
     "typescript": "^5.5.0",
-    "vitest": "^1.6.0",
-    "@vitest/coverage-v8": "^1.6.0",
-    "@supabase/supabase-js": "^2.0.0",
-    "@types/react": "^18.0.0"
+    "vitest": "^1.6.0"
   },
   "keywords": [
     "causal-inference",

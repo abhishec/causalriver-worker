@@ -1523,7 +1523,7 @@ for (const tc of v4TestCases) {
     registerBrainAgents(agentReg);
 
     const brainAgents = agentReg.listAgents();
-    const has16Agents = brainAgents.length === 27;
+    const has16Agents = brainAgents.length === 28;
     const agentNamesV6 = brainAgents.map(a => a.definition.name);
     const hasWatcher = agentNamesV6.includes('brain-revenue-watcher');
     const hasBriefing = agentNamesV6.includes('brain-daily-briefing');
@@ -1808,7 +1808,7 @@ for (const tc of v4TestCases) {
     // 11d: 10 Brain Agents
     console.log(`\n  11d. Brain Agent Expansion:`);
     const agentNames = ALL_BRAIN_AGENTS.map(a => a.name);
-    const has10 = ALL_BRAIN_AGENTS.length === 27;
+    const has10 = ALL_BRAIN_AGENTS.length === 28;
     console.log(`     Total brain agents: ${ALL_BRAIN_AGENTS.length} ${has10 ? '✅' : '❌'}`);
 
     const newAgentNames = ['brain-risk-sentinel', 'brain-strategic-planner', 'brain-pattern-recon', 'brain-org-health', 'brain-intervention-tracker'];
@@ -2011,7 +2011,7 @@ for (const tc of v4TestCases) {
     const v7AgentReg = createAgentRegistry({ verbose: false });
     registerBrainAgents(v7AgentReg);
     const v7Agents = v7AgentReg.listAgents();
-    const has16 = v7Agents.length === 27;
+    const has16 = v7Agents.length === 28;
     const v7AgentNames = v7Agents.map(a => a.definition.name);
     const v7AccountingAgents = ['brain-balance-sheet-builder', 'brain-pnl-builder', 'brain-cashflow-builder', 'brain-tax-preparer', 'brain-multi-jurisdiction-monitor', 'brain-financial-auditor'];
     const allV7AgentsPresent = v7AccountingAgents.every(a => v7AgentNames.includes(a));
@@ -2100,6 +2100,25 @@ for (const tc of v4TestCases) {
     calLoop.recordPrediction({ actionType: 'forecast', domain: 'product', question: 'Feature adoption?', predictedValue: 0.4, confidence: 0.55, timestamp: Date.now() - 20000 });
     calLoop.recordOutcome({ domain: 'product', question: 'Feature adoption?', actualValue: 0.38, timestamp: Date.now() - 10000 }); // Calibrated
 
+    // Build time series that produce OVERCONFIDENT predictions AND trigger error-attribute corrections:
+    // First half: stable (low variance). Second half: sudden regime change (high variance).
+    // This triggers both "regime_change" (secondVar > 3x firstVar) and "overconfidence" (recent volatility > 2x historical)
+    const overconfidentTS = (base: number, peak: number, crash: number, length: number = 90) => {
+      const values: number[] = [];
+      const mid = Math.floor(length / 2);
+      for (let i = 0; i < length; i++) {
+        if (i < mid) {
+          // First half: stable with minimal noise (low variance)
+          values.push(base + (peak - base) * (i / mid) * 0.1);
+        } else {
+          // Second half: violent oscillations (high variance = regime change)
+          const swing = (i % 2 === 0 ? 1 : -1) * (peak - crash) * 0.5;
+          values.push(crash + swing);
+        }
+      }
+      return values;
+    };
+
     const mockBrainContextV8 = {
       dag: {
         nodes: new Set(['revenue', 'marketing', 'engineering', 'cs', 'product']),
@@ -2110,9 +2129,12 @@ for (const tc of v4TestCases) {
         ]),
       },
       timeSeries: new Map([
-        ['revenue', { dates: Array.from({length: 90}, (_, i) => `2025-11-${String(i + 1).padStart(2, '0')}`), values: Array.from({length: 90}, (_, i) => 100 + i * 0.5 + (Math.random() - 0.5) * 10), domain: 'revenue' }],
-        ['marketing', { dates: Array.from({length: 90}, (_, i) => `2025-11-${String(i + 1).padStart(2, '0')}`), values: Array.from({length: 90}, (_, i) => 50 + i * 0.3 + (Math.random() - 0.5) * 8), domain: 'marketing' }],
-        ['engineering', { dates: Array.from({length: 90}, (_, i) => `2025-11-${String(i + 1).padStart(2, '0')}`), values: Array.from({length: 90}, (_, i) => 80 + (Math.random() - 0.5) * 5), domain: 'engineering' }],
+        // Revenue: rises to 200 then crashes to 50 — prediction will overshoot actual (50) → overconfident
+        ['revenue', { dates: Array.from({length: 90}, (_, i) => `2025-11-${String(i + 1).padStart(2, '0')}`), values: overconfidentTS(100, 200, 50), domain: 'revenue' }],
+        // Marketing: rises to 120 then crashes to 30
+        ['marketing', { dates: Array.from({length: 90}, (_, i) => `2025-11-${String(i + 1).padStart(2, '0')}`), values: overconfidentTS(50, 120, 30), domain: 'marketing' }],
+        // Engineering: rises to 150 then crashes to 40
+        ['engineering', { dates: Array.from({length: 90}, (_, i) => `2025-11-${String(i + 1).padStart(2, '0')}`), values: overconfidentTS(80, 150, 40), domain: 'engineering' }],
       ]),
       directCauses: { revenue: [{ source: 'marketing', target: 'revenue', weight: 0.65, lagDays: 14 }, { source: 'cs', target: 'revenue', weight: 0.5, lagDays: 7 }] },
       directEffects: { marketing: [{ source: 'marketing', target: 'revenue', weight: 0.65, lagDays: 14 }] },
@@ -2262,12 +2284,12 @@ for (const tc of v4TestCases) {
     if (hasRobScore && hasFragileEdges) { console.log(`     ✅ Robustness Check BEHAVIORAL PASSED`); passed++; }
     else { console.log(`     ❌ Robustness Check BEHAVIORAL FAILED`); failed++; }
 
-    // ── Test 13h: Agent Registration (27 total) ──
+    // ── Test 13h: Agent Registration (28 total) ──
     console.log(`\n  13h. V8 Agent Registration:`);
     const v8AgentReg = createAgentRegistry({ verbose: false });
     registerBrainAgents(v8AgentReg);
     const v8Agents = v8AgentReg.listAgents();
-    const has27 = v8Agents.length === 27;
+    const has27 = v8Agents.length === 28;
     const v8AgentNames = v8Agents.map(a => a.definition.name);
     const metacogAgents = ['brain-metacognition-auditor', 'brain-quality-gate', 'brain-continuous-learner'];
     const allMetacogPresent = metacogAgents.every(a => v8AgentNames.includes(a));
@@ -2285,7 +2307,7 @@ for (const tc of v4TestCases) {
     console.log(`     V8 tagged agents: ${v8Tagged.length}`);
 
     const agentLevelsOk = metacogAuditor?.definition.level === 'autonomous' && qualityGateA?.definition.level === 'task' && contLearner?.definition.level === 'autonomous';
-    if (has27 && allMetacogPresent && agentLevelsOk) { console.log(`     ✅ V8 Agent Registration PASSED (27 total)`); passed++; }
+    if (has27 && allMetacogPresent && agentLevelsOk) { console.log(`     ✅ V8 Agent Registration PASSED (28 total)`); passed++; }
     else { console.log(`     ❌ V8 Agent Registration FAILED`); failed++; }
 
   } catch (err) {
@@ -2408,7 +2430,7 @@ console.log('    ✅ Execution Profile (Supplementary Motor — performance self
 console.log('    ✅ Robustness Check (Thalamic Reticular — perturbation sensitivity, fragile edge detection)');
 console.log('    ✅ 3 Metacognition Agents: metacognition-auditor, quality-gate, continuous-learner');
 console.log('    ✅ 35 Total Brain Domains (7 V8 metacognitive + 28 V2-V7)');
-console.log('    ✅ 27 Total Brain-Native Agents (3 V8 metacognition + 24 V2-V7)');
+console.log('    ✅ 28 Total Brain-Native Agents (3 V8 metacognition + 24 V2-V7)');
 console.log('    ✅ Query Cache BEHAVIORAL (cache hit on repeat, miss on different input)');
 console.log('    ✅ Brain Commander quality gate + silent catch fixes');
 console.log('    ✅ Runtime validation: confidence clamping, narrative fallback, driver array check');
@@ -2426,7 +2448,7 @@ if (failed === 0) {
   console.log('         statement-synthesize → jurisdiction-comply → confidence-triage');
   console.log('   V8:   calibration-audit → error-attribute → chain-validate → uncertainty-quantify →');
   console.log('         query-cache → execution-profile → robustness-check');
-  console.log('   27 brain-native agents. 35 domains. 9 jurisdictions. Closed-loop learning.');
+  console.log('   28 brain-native agents. 35 domains. 9 jurisdictions. Closed-loop learning.');
   console.log('   The brain doesn\'t just think — it FEELS, PLANS, PREDICTS, REMEMBERS, INTERVENES,');
   console.log('   COMPREHENDS FINANCIALS, and now THINKS ABOUT THINKING.');
 } else {
@@ -2441,7 +2463,7 @@ console.log('   3. await registry.executeDomain("calibration-audit", brainContex
 console.log('   4. await registry.executeDomain("error-attribute", brainContext, modules)    // Why was I wrong?');
 console.log('   5. await registry.executeDomain("robustness-check", brainContext, modules)   // Am I fragile?');
 console.log('   6. await registry.executeDomain("uncertainty-quantify", brainContext, modules)// What don\'t I know?');
-console.log('   7. registerBrainAgents(agentRegistry)  // 27 brain-native agents');
+console.log('   7. registerBrainAgents(agentRegistry)  // 28 brain-native agents');
 console.log('   8. Query cache: identical brain inputs → instant cached response (60s TTL)');
 console.log('');
 

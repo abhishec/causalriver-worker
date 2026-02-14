@@ -807,6 +807,10 @@ export {
   metacognitionAuditorAgent,
   qualityGateAgent,
   continuousLearnerAgent,
+  // V8 — Dev Jarvis (Developer Intelligence Executive)
+  devJarvisAgent,
+  ALL_DEV_JARVIS_AGENTS,
+  registerDevJarvisAgents,
   ALL_BRAIN_AGENTS,
   registerBrainAgents,
   type BrainExecutionInterface,
@@ -818,6 +822,8 @@ export {
   type JarvisMonitorResult,
   type ConnectorSyncInput,
   type ConnectorSyncOutput,
+  type DevJarvisGoal,
+  type DevJarvisResult,
 } from './orchestrator/brain-agent-fusion';
 
 // Software Engineering Agents ("SE-aaS Workforce") — 4 agents orchestrating 7 SE domains
@@ -1486,6 +1492,7 @@ export {
 // ============================================================================
 
 export {
+  // Core Resilience
   createRetry,
   createCircuitBreaker,
   CircuitOpenError,
@@ -1504,7 +1511,216 @@ export {
   type HealthCheckFn,
   type LifecycleConfig,
   type LifecycleManager,
+  // 10M Architecture — Redis Client
+  createRedisClient,
+  createInMemoryRedis,
+  getRedisHealth,
+  type RedisConfig,
+  type RedisClientInstance,
+  type RedisPipeline,
+  type RedisHealthStatus,
+  // 10M Architecture — Redis Streams Event Bus (Bottleneck #1 & #9)
+  createRedisStreamsBus,
+  type RedisStreamsBusConfig,
+  type RedisStreamsBusInstance,
+  type StreamConsumerStats,
+  // 10M Architecture — Worker Pool (Bottleneck #5)
+  createWorkerPool,
+  type WorkerPoolConfig,
+  type WorkerPoolInstance,
+  type JobDefinition,
+  type Job,
+  type JobStatus,
+  type JobProcessor,
+  type JobHelpers,
+  type QueueStats,
+  // 10M Architecture — LRU Cache (Bottleneck #2 & #8)
+  createLRUCache,
+  createAgentBlackboard,
+  createCoreSnapshotCache as createCoreSnapshotLRU,
+  createFastPathCache,
+  type LRUCacheConfig,
+  type LRUCacheInstance,
+  type CacheStats,
+  // 10M Architecture — LLM Semantic Cache (Bottleneck #7)
+  createSemanticCache,
+  type SemanticCacheConfig,
+  type SemanticCacheInstance,
+  type SemanticCacheStats,
+  type CachedResponse,
+  // 10M Architecture — Data Tier Manager (Bottleneck #6)
+  createDataTierManager,
+  generatePartitionKey,
+  parsePartitionKey,
+  type DataTierManagerConfig,
+  type DataTierManagerInstance,
+  type DataEntry,
+  type TierStats,
+  type DemotionResult,
+  // 10M Architecture — Streaming Micro-Batcher (Bottleneck #4)
+  streamInBatches,
+  createBatchIterator,
+  streamInParallelBatches,
+  type StreamingBatcherConfig,
+  type StreamingStats,
+  type BatchResult,
+  type DataFetcher,
+  type BatchProcessor,
+  // 10M Architecture — Hardened Security
+  createHardenedSecurity,
+  type HardenedSecurityConfig,
+  type HardenedSecurityInstance,
+  type JWTPayload,
+  type APIKey,
+  type RateLimitResult,
+  type RequestFingerprint,
+  type AuditEntry,
 } from './infra';
+
+// ============================================================================
+// 10M ARCHITECTURE SPECIFICATION
+// ============================================================================
+
+export {
+  ARCHITECTURE_10M,
+  LEAPS,
+  BOTTLENECKS,
+  MIGRATION_PHASES,
+  DEFAULT_STORAGE_TIERS,
+  DEFAULT_COMPUTE_TIERS,
+  DEFAULT_INGESTION,
+  DEFAULT_FEDERATION,
+  DEFAULT_SECURITY,
+  DEFAULT_COST_MODEL,
+  getOpenBottlenecks,
+  getCriticalBottlenecks,
+  getLeapsByStatus,
+  getMigrationProgress,
+  getArchitectureScore,
+  type Architecture10M,
+  type StorageTier,
+  type StorageTierConfig,
+  type ComputeTier,
+  type ComputeTierConfig,
+  type IngestionConfig,
+  type FederationConfig,
+  type SecurityConfig as ArchitectureSecurityConfig,
+  type LeapId,
+  type LeapStatus,
+  type LeapDefinition,
+  type CostModel,
+  type MigrationPhase,
+  type MigrationStatus,
+  type MigrationPhaseDefinition,
+  type Bottleneck,
+  type BottleneckSeverity,
+  type BottleneckStatus,
+} from './architecture/ARCHITECTURE-10M';
+
+// ============================================================================
+// FEDERATION — CORE Brain Snapshot Cache (Bottleneck #8)
+// ============================================================================
+
+export {
+  createCoreSnapshotCache as createCoreSnapshotFederation,
+  type CoreSnapshotConfig,
+  type CoreSnapshotCacheInstance,
+  type CoreBrainSnapshot,
+  type CausalEdgeSnapshot,
+  type MemorySnapshot,
+  type CrossOrgPattern,
+  type WorldModelEntry,
+  type CrossOrgValidation,
+  type CoreSnapshotStats,
+  type SnapshotBuilder,
+} from './federation/core-snapshot-cache';
+
+// ============================================================================
+// LEAP 11: RED TEAM — Adversarial Self-Testing (Amygdala)
+// ============================================================================
+
+export {
+  createRedTeam,
+  type RedTeamConfig,
+  type RedTeamResult,
+  type RedTeamInstance,
+  type AdversarialScenario,
+  type AdversarialType,
+  type Prediction as RedTeamPrediction,
+} from './causality/leap-red-team';
+
+// ============================================================================
+// LEAP 12: EXPERIMENTATION — A/B Test Design (Scientific Method)
+// ============================================================================
+
+export {
+  createExperimentEngine,
+  type ExperimentConfig,
+  type ExperimentDesign,
+  type ExperimentResult as ExperimentAnalysisResult,
+  type ExperimentSuggestion,
+  type ExperimentEngineInstance,
+  type ExperimentType,
+  type ExperimentStatus,
+  type GroupDefinition,
+} from './causality/leap-experimentation';
+
+// ============================================================================
+// LEAP 13: IMMUNE SYSTEM — Data Quality & Poison Detection
+// ============================================================================
+
+export {
+  createImmuneSystem,
+  type ImmuneSystemConfig,
+  type ImmuneSystemInstance,
+  type ImmuneResponse,
+  type QualityScore,
+  type QualityFlag,
+  type QuarantinedSignal,
+  type SourceTrust,
+  type DataSignal,
+  type StatisticalProfile,
+  type ImmuneStats,
+} from './causality/leap-immune-system';
+
+// ============================================================================
+// LEAP 14: GOAL-BACKWARD PLANNING — Reverse Causal Engineering
+// ============================================================================
+
+export {
+  createGoalBackwardPlanner,
+  type GoalBackwardConfig,
+  type GoalBackwardInstance,
+  type Goal,
+  type GoalConstraint,
+  type GoalPlan,
+  type InterventionPath,
+  type InterventionStep,
+  type TimelineEvent,
+  type RiskAssessment,
+  type SimulationResult as GoalSimulationResult,
+} from './causality/leap-goal-backward';
+
+// ============================================================================
+// LEAP 15: NARRATIVE INTELLIGENCE — Executive Story Generation
+// ============================================================================
+
+export {
+  createNarrativeIntelligence,
+  type NarrativeConfig,
+  type NarrativeIntelligenceInstance,
+  type Narrative,
+  type NarrativeInput,
+  type NarrativeSection,
+  type NarrativeRecommendation,
+  type NarrativeEvidence,
+  type NarrativeAudience,
+  type NarrativeEdge,
+  type NarrativePrediction,
+  type NarrativeAnomaly,
+  type NarrativeIntervention,
+  type NarrativeMetric,
+} from './causality/leap-narrative';
 
 // ============================================================================
 // CLAUDE-ASPIRATIONAL CAPABILITIES (8 Advanced Brain Regions)
