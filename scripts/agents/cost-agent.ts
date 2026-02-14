@@ -42,6 +42,9 @@ interface AWSCostData {
 }
 
 export class CostAgent extends ManusNativeAgent {
+  readonly name = 'cost-agent';
+  readonly version = '6.0.0';
+  readonly description = 'Monitors LLM token costs and AWS infrastructure spending, detects budget overruns and cost anomalies';
   readonly brainRegion = 'Hypothalamus (Cost Tracker)';
   readonly neurologicalFunction = 'Resource Monitoring & Cost Optimization';
 
@@ -224,3 +227,20 @@ export class CostAgent extends ManusNativeAgent {
     return commands;
   }
 }
+
+// ── Self-Registration: Auto-register to globalRegistry on import ──────────
+import { createClient } from '@supabase/supabase-js';
+import { globalRegistry } from '../agent-framework/agent-registry';
+
+globalRegistry.register({
+  name: 'cost-agent',
+  description: 'Monitors LLM token costs and AWS infrastructure spending, detects budget overruns and cost anomalies',
+  version: '6.0.0',
+  factory: (config) => {
+    const supabase = createClient(config.supabaseUrl, config.supabaseKey);
+    return new CostAgent(supabase, config.organizationId || '00000000-0000-4000-a000-000000000001', { verbose: config.verbose }) as any;
+  },
+  schedule: '0 3 * * *',  // Daily at 3 AM UTC
+  resourceRequirements: { cpu: '512', memory: '1024' },
+  tags: ['monitoring', 'hypothalamus', 'cost-tracking'],
+});

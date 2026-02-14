@@ -461,6 +461,91 @@ TASKDEF
 aws ecs register-task-definition --cli-input-json file:///tmp/task-cost-agent.json --region "${REGION}" > /dev/null
 echo "    Registered: nexusbrain-cost-agent (0.5 vCPU, 1GB)"
 
+# --- Weekly Brain Scan Task Definition ---
+# 11-region brain scan + benchmarks (Sachs, ALARM, SaaS, Cascade, Anomaly) + stale edge pruning
+# 1 vCPU, 4GB RAM — runs benchmark suite in-process
+# Weekly schedule (Sunday 4 AM UTC) — also supports manual trigger via: ./infra/run-task.sh weekly
+cat > /tmp/task-weekly.json << TASKDEF
+{
+  "family": "nexusbrain-weekly",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "1024",
+  "memory": "4096",
+  "executionRoleArn": "${EXEC_ROLE_ARN}",
+  "taskRoleArn": "${EXEC_ROLE_ARN}",
+  "containerDefinitions": [
+    {
+      "name": "brain-weekly",
+      "image": "${ECR_IMAGE}",
+      "essential": true,
+      "environment": [
+        { "name": "BRAIN_PROCESS", "value": "weekly" }
+      ],
+      "secrets": [
+        { "name": "SUPABASE_URL", "valueFrom": "arn:aws:ssm:${REGION}:${ACCOUNT_ID}:parameter/nexusbrain/SUPABASE_URL" },
+        { "name": "SUPABASE_SERVICE_ROLE_KEY", "valueFrom": "arn:aws:ssm:${REGION}:${ACCOUNT_ID}:parameter/nexusbrain/SUPABASE_SERVICE_ROLE_KEY" }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "${LOG_GROUP}",
+          "awslogs-region": "${REGION}",
+          "awslogs-stream-prefix": "weekly"
+        }
+      },
+      "stopTimeout": 300
+    }
+  ]
+}
+TASKDEF
+
+aws ecs register-task-definition --cli-input-json file:///tmp/task-weekly.json --region "${REGION}" > /dev/null
+echo "    Registered: nexusbrain-weekly (1 vCPU, 4GB)"
+
+# --- Monthly Deep Analysis Task Definition ---
+# Full historical causal discovery on ALL data + auto-generate training packs + growth report
+# 2 vCPU, 8GB RAM — processes ALL historical signals, memory-intensive
+# Monthly schedule (1st of month 3 AM UTC) — also supports manual trigger via: ./infra/run-task.sh monthly
+cat > /tmp/task-monthly.json << TASKDEF
+{
+  "family": "nexusbrain-monthly",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "2048",
+  "memory": "8192",
+  "executionRoleArn": "${EXEC_ROLE_ARN}",
+  "taskRoleArn": "${EXEC_ROLE_ARN}",
+  "containerDefinitions": [
+    {
+      "name": "brain-monthly",
+      "image": "${ECR_IMAGE}",
+      "essential": true,
+      "environment": [
+        { "name": "BRAIN_PROCESS", "value": "monthly" }
+      ],
+      "secrets": [
+        { "name": "SUPABASE_URL", "valueFrom": "arn:aws:ssm:${REGION}:${ACCOUNT_ID}:parameter/nexusbrain/SUPABASE_URL" },
+        { "name": "SUPABASE_SERVICE_ROLE_KEY", "valueFrom": "arn:aws:ssm:${REGION}:${ACCOUNT_ID}:parameter/nexusbrain/SUPABASE_SERVICE_ROLE_KEY" },
+        { "name": "ANTHROPIC_API_KEY", "valueFrom": "arn:aws:ssm:${REGION}:${ACCOUNT_ID}:parameter/nexusbrain/ANTHROPIC_API_KEY" }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "${LOG_GROUP}",
+          "awslogs-region": "${REGION}",
+          "awslogs-stream-prefix": "monthly"
+        }
+      },
+      "stopTimeout": 600
+    }
+  ]
+}
+TASKDEF
+
+aws ecs register-task-definition --cli-input-json file:///tmp/task-monthly.json --region "${REGION}" > /dev/null
+echo "    Registered: nexusbrain-monthly (2 vCPU, 8GB)"
+
 # ─── Step 8: Create EventBridge Scheduled Rules ──────────────────
 echo ""
 echo ">>> Step 8: Creating EventBridge Scheduled Rules..."
@@ -656,6 +741,117 @@ aws events put-targets \
   --region "${REGION}" > /dev/null
 echo "    Cost Agent: Daily at 3:00 AM UTC"
 
+# --- Benchmark: Weekly Sunday 5 AM UTC ---
+aws events put-rule \
+  --name "nexusbrain-benchmark-schedule" \
+  --schedule-expression "cron(0 5 ? * SUN *)" \
+  --state ENABLED \
+  --description "Run NexusBrain LongMemEval benchmark weekly on Sunday at 5 AM UTC" \
+  --region "${REGION}" > /dev/null
+
+cat > /tmp/target-benchmark.json << TARGET
+[
+  {
+    "Id": "nexusbrain-benchmark-target",
+    "Arn": "arn:aws:ecs:${REGION}:${ACCOUNT_ID}:cluster/${CLUSTER_NAME}",
+    "RoleArn": "${EVENTS_ROLE_ARN}",
+    "EcsParameters": {
+      "TaskDefinitionArn": "arn:aws:ecs:${REGION}:${ACCOUNT_ID}:task-definition/nexusbrain-benchmark",
+      "TaskCount": 1,
+      "LaunchType": "FARGATE",
+      "NetworkConfiguration": {
+        "awsvpcConfiguration": {
+          "Subnets": ["${SUBNET1}", "${SUBNET2}"],
+          "SecurityGroups": ["${SG_ID}"],
+          "AssignPublicIp": "ENABLED"
+        }
+      },
+      "PlatformVersion": "LATEST"
+    }
+  }
+]
+TARGET
+
+aws events put-targets \
+  --rule "nexusbrain-benchmark-schedule" \
+  --targets file:///tmp/target-benchmark.json \
+  --region "${REGION}" > /dev/null
+echo "    Benchmark: Weekly Sunday at 5:00 AM UTC"
+
+# --- Weekly Brain Scan: Sunday 4 AM UTC ---
+aws events put-rule \
+  --name "nexusbrain-weekly-schedule" \
+  --schedule-expression "cron(0 4 ? * SUN *)" \
+  --state ENABLED \
+  --description "Run NexusBrain 11-region brain scan weekly on Sunday at 4 AM UTC" \
+  --region "${REGION}" > /dev/null
+
+cat > /tmp/target-weekly.json << TARGET
+[
+  {
+    "Id": "nexusbrain-weekly-target",
+    "Arn": "arn:aws:ecs:${REGION}:${ACCOUNT_ID}:cluster/${CLUSTER_NAME}",
+    "RoleArn": "${EVENTS_ROLE_ARN}",
+    "EcsParameters": {
+      "TaskDefinitionArn": "arn:aws:ecs:${REGION}:${ACCOUNT_ID}:task-definition/nexusbrain-weekly",
+      "TaskCount": 1,
+      "LaunchType": "FARGATE",
+      "NetworkConfiguration": {
+        "awsvpcConfiguration": {
+          "Subnets": ["${SUBNET1}", "${SUBNET2}"],
+          "SecurityGroups": ["${SG_ID}"],
+          "AssignPublicIp": "ENABLED"
+        }
+      },
+      "PlatformVersion": "LATEST"
+    }
+  }
+]
+TARGET
+
+aws events put-targets \
+  --rule "nexusbrain-weekly-schedule" \
+  --targets file:///tmp/target-weekly.json \
+  --region "${REGION}" > /dev/null
+echo "    Weekly Scan: Sunday at 4:00 AM UTC"
+
+# --- Monthly Deep Analysis: 1st of month 3 AM UTC ---
+aws events put-rule \
+  --name "nexusbrain-monthly-schedule" \
+  --schedule-expression "cron(0 3 1 * ? *)" \
+  --state ENABLED \
+  --description "Run NexusBrain monthly deep analysis on the 1st of each month at 3 AM UTC" \
+  --region "${REGION}" > /dev/null
+
+cat > /tmp/target-monthly.json << TARGET
+[
+  {
+    "Id": "nexusbrain-monthly-target",
+    "Arn": "arn:aws:ecs:${REGION}:${ACCOUNT_ID}:cluster/${CLUSTER_NAME}",
+    "RoleArn": "${EVENTS_ROLE_ARN}",
+    "EcsParameters": {
+      "TaskDefinitionArn": "arn:aws:ecs:${REGION}:${ACCOUNT_ID}:task-definition/nexusbrain-monthly",
+      "TaskCount": 1,
+      "LaunchType": "FARGATE",
+      "NetworkConfiguration": {
+        "awsvpcConfiguration": {
+          "Subnets": ["${SUBNET1}", "${SUBNET2}"],
+          "SecurityGroups": ["${SG_ID}"],
+          "AssignPublicIp": "ENABLED"
+        }
+      },
+      "PlatformVersion": "LATEST"
+    }
+  }
+]
+TARGET
+
+aws events put-targets \
+  --rule "nexusbrain-monthly-schedule" \
+  --targets file:///tmp/target-monthly.json \
+  --region "${REGION}" > /dev/null
+echo "    Monthly Analysis: 1st of each month at 3:00 AM UTC"
+
 # ─── Done ─────────────────────────────────────────────────────────
 echo ""
 echo "============================================"
@@ -663,14 +859,31 @@ echo "  Setup Complete!"
 echo "============================================"
 echo ""
 echo "Next steps:"
-echo "  1. Store secrets:    ./infra/store-secrets.sh"
-echo "  2. Build & push:     ./infra/push-image.sh"
-echo "  3. Test trainer:     ./infra/run-task.sh trainer"
+echo "  1. Store secrets:      ./infra/store-secrets.sh"
+echo "  2. Build & push:       ./infra/push-image.sh"
+echo "  3. Test trainer:       ./infra/run-task.sh trainer"
 echo "  4. Test consolidation: ./infra/run-task.sh consolidation"
-echo "  5. Test DMN scan:    ./infra/run-task.sh dmn"
-echo "  6. Run benchmark:    ./infra/run-task.sh benchmark"
-echo "  7. Run git trainer:  ./infra/run-task.sh git-trainer"
-echo "  8. Run cost agent:   ./infra/run-task.sh cost-agent"
+echo "  5. Test DMN scan:      ./infra/run-task.sh dmn"
+echo "  6. Run benchmark:      ./infra/run-task.sh benchmark"
+echo "  7. Run git trainer:    ./infra/run-task.sh git-trainer"
+echo "  8. Run cost agent:     ./infra/run-task.sh cost-agent"
+echo "  9. Run weekly scan:    ./infra/run-task.sh weekly"
+echo " 10. Run monthly deep:   ./infra/run-task.sh monthly"
+echo ""
+echo "Agent Schedule (9 agents, 8 ECS tasks):"
+echo "  ┌─────────────────────────┬────────────────────────────────────┬──────────┐"
+echo "  │ Agent                   │ Schedule                           │ CPU/Mem  │"
+echo "  ├─────────────────────────┼────────────────────────────────────┼──────────┤"
+echo "  │ Autonomous Trainer      │ Every 6h (0,6,12,18 UTC)           │ 1/4 GB   │"
+echo "  │ DMN Scan                │ Every 4h (0,4,8,12,16,20 UTC)      │ 0.5/2 GB │"
+echo "  │ Brain Consolidation     │ Daily 2 AM UTC                     │ 1/4 GB   │"
+echo "  │ Cost Agent              │ Daily 3 AM UTC                     │ 0.5/1 GB │"
+echo "  │ Git Code Trainer        │ Sunday 2 AM UTC                    │ 2/8 GB   │"
+echo "  │ Weekly Brain Scan       │ Sunday 4 AM UTC                    │ 1/4 GB   │"
+echo "  │ Benchmark               │ Sunday 5 AM UTC                    │ 2/8 GB   │"
+echo "  │ Monthly Deep Analysis   │ 1st of month 3 AM UTC              │ 2/8 GB   │"
+echo "  │ Proactive Intelligence  │ Every 4h offset (in-process w/DMN) │ —        │"
+echo "  └─────────────────────────┴────────────────────────────────────┴──────────┘"
 echo ""
 echo "View logs:"
 echo "  aws logs tail ${LOG_GROUP} --follow --region ${REGION}"

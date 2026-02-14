@@ -37,6 +37,9 @@ interface BenchmarkResult {
 }
 
 export class BenchmarkAgent extends ManusNativeAgent {
+  readonly name = 'benchmark';
+  readonly version = '6.0.0';
+  readonly description = 'Runs LongMemEval + CauseMe benchmarks to measure causal accuracy, tracks performance over time';
   readonly brainRegion = 'Cerebellum (Benchmark Evaluator)';
   readonly neurologicalFunction = 'Performance Evaluation & Validation';
 
@@ -238,3 +241,20 @@ print(json.dumps({'correct':correct,'total':total,'accuracy':accuracy}))
     return commands;
   }
 }
+
+// ── Self-Registration: Auto-register to globalRegistry on import ──────────
+import { createClient } from '@supabase/supabase-js';
+import { globalRegistry } from '../agent-framework/agent-registry';
+
+globalRegistry.register({
+  name: 'benchmark',
+  description: 'Runs LongMemEval + CauseMe benchmarks to measure causal accuracy, tracks performance over time',
+  version: '6.0.0',
+  factory: (config) => {
+    const supabase = createClient(config.supabaseUrl, config.supabaseKey);
+    return new BenchmarkAgent(supabase, config.organizationId || '00000000-0000-4000-a000-000000000001', { verbose: config.verbose }) as any;
+  },
+  schedule: '0 5 * * 0',  // Sunday at 5 AM UTC
+  resourceRequirements: { cpu: '1024', memory: '4096' },
+  tags: ['benchmark', 'cerebellum', 'evaluation'],
+});

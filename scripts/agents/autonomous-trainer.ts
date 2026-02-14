@@ -81,6 +81,9 @@ interface FetchedData {
 }
 
 export class AutonomousTrainerAgent extends ManusNativeAgent {
+  readonly name = 'autonomous-trainer';
+  readonly version = '6.0.0';
+  readonly description = 'Trains the core brain on public data from 10 sources (FRED, GitHub, World Bank, HN, BLS, SO, Wikipedia, IMF, USPTO)';
   readonly brainRegion = 'Sensory Cortex (Region #10)';
   readonly neurologicalFunction = 'Public Data Learning';
 
@@ -271,3 +274,21 @@ export class AutonomousTrainerAgent extends ManusNativeAgent {
     return commands;
   }
 }
+
+// ── Self-Registration: Auto-register to globalRegistry on import ──────────
+import { createClient } from '@supabase/supabase-js';
+import { globalRegistry } from '../agent-framework/agent-registry';
+
+globalRegistry.register({
+  name: 'autonomous-trainer',
+  description: 'Trains the core brain on public data from 10 sources (FRED, GitHub, World Bank, HN, BLS, SO, Wikipedia, IMF, USPTO)',
+  version: '6.0.0',
+  factory: (config) => {
+    const supabase = createClient(config.supabaseUrl, config.supabaseKey);
+    const agent = new AutonomousTrainerAgent(supabase, config.organizationId || '00000000-0000-4000-a000-000000000001', { verbose: config.verbose });
+    return agent as any;
+  },
+  schedule: '0 */6 * * *',  // Every 6 hours
+  resourceRequirements: { cpu: '1024', memory: '4096' },
+  tags: ['training', 'sensory-cortex', 'public-data'],
+});

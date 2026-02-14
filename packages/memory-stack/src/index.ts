@@ -634,6 +634,73 @@ export {
   type CalibrationFeedbackLoop,
 } from './orchestrator/calibration-feedback-loop';
 
+// Action Domain Registry V1 ("Prefrontal Cortex V2") — self-registering, composable brain functions
+// Replaces the monolithic 27-switch-case architecture with pluggable domains
+// V6: +defineActionDomain, +semantic router, +composition engine, +13 action domains
+export {
+  defineActionDomain,
+  createActionDomainRegistry,
+  type ActionDomainDefinition,
+  type ActionDomainRegistry,
+  type ActionDomainResult,
+  type ActionDomainBrainContext,
+  type ActionDomainBrainModules,
+  type ActionDomainExecutionContext,
+  type RouteResolution,
+  type CompositionPlan,
+  type CompositionStep,
+  type DomainExecutionRecord,
+  type ActionDomainRegistryConfig,
+  type RegisteredActionDomain,
+  type SemanticIntent,
+  type BrainCapability,
+  type DomainOutputSchema,
+} from './orchestrator/action-domain-registry';
+
+// Action Domains V1 ("13 Brodmann Areas") — specialized brain functions
+export {
+  forecastDomain,
+  simulateDomain,
+  explainDomain,
+  diagnoseDomain,
+  compositeDomain,
+  compareDomain,
+  monitorDomain,
+  optimizeDomain,
+  recommendDomain,
+  auditDomain,
+  correlateDomain,
+  benchmarkDomain,
+  narrateDomain,
+  ALL_ACTION_DOMAINS,
+  registerAllActionDomains,
+} from './orchestrator/action-domains';
+
+// Closed-Loop Executor V1 ("Basal Ganglia Reward Circuit") — action→outcome→learn
+export {
+  createClosedLoopExecutor,
+  type ClosedLoopExecutor,
+  type TrackedCommand,
+  type CommandOutcome,
+  type ActionEffectiveness,
+  type DomainActionEffectiveness,
+  type BrainFeedbackSignal,
+  type ClosedLoopConfig,
+} from './orchestrator/closed-loop-executor';
+
+// Brain-Agent Fusion V1 ("Cerebral Integration") — agents ARE brain functions
+export {
+  revenueWatcherAgent,
+  dailyBriefingAgent,
+  anomalyDiagnosticianAgent,
+  optimizerAgent,
+  benchmarkAuditorAgent,
+  ALL_BRAIN_AGENTS,
+  registerBrainAgents,
+  type BrainExecutionInterface,
+  type BrainAgentConfig,
+} from './orchestrator/brain-agent-fusion';
+
 // Brain Context Builder — Universal Prefrontal Cortex ("Working Memory Assembly")
 // Assembles context from ALL brain regions + trained knowledge into LLM-ready prompts.
 // Works for any domain: code, finance, research, legal, operations.

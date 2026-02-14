@@ -40,9 +40,22 @@ case "${BRAIN_PROCESS}" in
     echo "  Lookback: ${COST_LOOKBACK_DAYS:-30} days"
     exec pnpm exec tsx scripts/cost-agent-runner.ts
     ;;
+  orchestrator)
+    echo "Starting Brain Orchestrator (Central Nervous System)..."
+    echo "  Mode: ${ORCHESTRATOR_MODE:-continuous}"
+    exec pnpm exec tsx scripts/brain-orchestrator.ts
+    ;;
+  weekly)
+    echo "Starting Weekly Brain Scan (11-region scan + benchmarks + pruning)..."
+    exec pnpm exec tsx scripts/brain-weekly-runner.ts
+    ;;
+  monthly)
+    echo "Starting Monthly Deep Analysis (full historical causal discovery)..."
+    exec pnpm exec tsx scripts/brain-monthly-runner.ts
+    ;;
   *)
     echo "ERROR: Unknown BRAIN_PROCESS '${BRAIN_PROCESS}'"
-    echo "Valid values: trainer, consolidation, dmn, benchmark, git-trainer, cost-agent"
+    echo "Valid values: trainer, consolidation, dmn, benchmark, git-trainer, cost-agent, orchestrator, weekly, monthly"
     exit 1
     ;;
 esac

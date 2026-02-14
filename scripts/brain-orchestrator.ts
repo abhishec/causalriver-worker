@@ -67,12 +67,18 @@ function loadEnv(): void {
 loadEnv();
 
 // ── Agent Imports (auto-register on import) ────────────────────────────────
-// When agents are imported, they self-register to globalRegistry
-// import './agents/autonomous-trainer';  // TODO: Migrate to V5.1
-// import './agents/brain-consolidation';  // TODO: Migrate to V5.1
-// import './agents/brain-dmn';  // TODO: Migrate to V5.1
-// import './agents/cost-agent';  // TODO: Migrate to V5.1
-import './agents/git-code-trainer';  // Already V5-compatible
+// Each agent self-registers to globalRegistry when imported.
+// To add a new agent: create it in scripts/agents/, call globalRegistry.register(),
+// then add an import line here. The orchestrator auto-discovers it.
+import './agents/autonomous-trainer';       // Sensory Cortex — Public data training (every 6h)
+import './agents/brain-consolidation';      // Hippocampus — Memory consolidation (daily 2 AM)
+import './agents/brain-dmn';                // DMN — Background pattern discovery (every 4h)
+import './agents/cost-agent';               // Insula — Cost monitoring & anomaly detection (daily 3 AM)
+import './agents/benchmark';                // Cerebellum — LongMemEval benchmark suite (Sunday 5 AM)
+import './agents/git-code-trainer';         // Sensory Cortex — GitHub engineering patterns (Sunday 2 AM)
+import './agents/weekly-brain-scan';        // Cerebellum — 11-region brain scan + pruning (Sunday 4 AM)
+import './agents/monthly-deep-analysis';    // Hippocampus — Full historical causal discovery (1st of month)
+import './agents/proactive-intelligence';   // Amygdala — Proactive alerting & threat detection (every 4h offset)
 
 // ── Brain Subsystem Imports ─────────────────────────────────────────────────
 import { globalRegistry, type AgentRegistration } from './agent-framework/agent-registry';
