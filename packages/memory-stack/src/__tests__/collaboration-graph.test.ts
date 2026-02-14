@@ -258,7 +258,8 @@ describe('CollaborationGraph', () => {
       });
       const before = g.getEdges()[0].weight;
       g.applyDecay();
-      expect(g.getEdges()[0].weight).toBe(before);
+      // Use toBeCloseTo for floating point comparison (avoids IEEE 754 precision issues)
+      expect(g.getEdges()[0].weight).toBeCloseTo(before, 10);
     });
   });
 
