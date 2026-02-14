@@ -28,6 +28,13 @@ case "${BRAIN_PROCESS}" in
     echo "  Max Workers: ${BENCHMARK_MAX_WORKERS:-10}"
     exec pnpm exec tsx scripts/brain-benchmark-runner.ts
     ;;
+  benchmark-optimizer)
+    echo "Starting Benchmark Optimizer Agent..."
+    echo "  Mode: ${OPTIMIZER_MODE:-quick}"
+    echo "  Sample: ${OPTIMIZER_SAMPLE:-50}"
+    cd scripts/benchmarks/longmemeval
+    exec python3 benchmark_optimizer.py "${OPTIMIZER_MODE:-quick}" --sample "${OPTIMIZER_SAMPLE:-50}"
+    ;;
   git-trainer)
     echo "Starting Git Code Trainer Agent..."
     echo "  Dry Run: ${GIT_TRAINER_DRY_RUN:-false}"
@@ -55,7 +62,7 @@ case "${BRAIN_PROCESS}" in
     ;;
   *)
     echo "ERROR: Unknown BRAIN_PROCESS '${BRAIN_PROCESS}'"
-    echo "Valid values: trainer, consolidation, dmn, benchmark, git-trainer, cost-agent, orchestrator, weekly, monthly"
+    echo "Valid values: trainer, consolidation, dmn, benchmark, benchmark-optimizer, git-trainer, cost-agent, orchestrator, weekly, monthly"
     exit 1
     ;;
 esac
