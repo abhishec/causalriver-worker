@@ -168,7 +168,7 @@ export function convertRepoToSignals(
   // How concentrated is contribution? (-1 = one person does everything, 0 = evenly distributed)
   const authorCounts = new Map<string, number>();
   for (const commit of repoData.commits) {
-    const author = commit.author?.login || commit.commit.author.name;
+    const author = commit.author?.login || commit.commit?.author?.name || 'unknown';
     authorCounts.set(author, (authorCounts.get(author) || 0) + 1);
   }
   if (authorCounts.size > 0) {
@@ -313,8 +313,8 @@ export function convertRepoToSignals(
   for (const pr of repoData.pulls.slice(0, 50)) {
     const reviews = repoData.reviews.get(pr.number) || [];
     if (reviews.length === 0) continue;
-    const uniqueReviewers = new Set(reviews.map(r => r.user.login));
-    uniqueReviewers.delete(pr.user.login); // Remove self-reviews
+    const uniqueReviewers = new Set(reviews.filter(r => r.user?.login).map(r => r.user.login));
+    if (pr.user?.login) uniqueReviewers.delete(pr.user.login); // Remove self-reviews
     const crossTeamRatio = uniqueReviewers.size > 0 ? Math.min(1, uniqueReviewers.size / 3) : 0;
 
     signals.push({

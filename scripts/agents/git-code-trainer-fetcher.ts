@@ -118,7 +118,8 @@ export interface FetchOptions {
 
 const GITHUB_API = 'https://api.github.com';
 
-async function githubFetch(endpoint: string, token?: string): Promise<any> {
+async function githubFetch(endpoint: string, token?: string, _retryCount: number = 0): Promise<any> {
+  const MAX_RETRIES = 3;
   const headers: Record<string, string> = {
     'Accept': 'application/vnd.github+json',
     'X-GitHub-Api-Version': '2022-11-28',
@@ -131,20 +132,40 @@ async function githubFetch(endpoint: string, token?: string): Promise<any> {
   const response = await fetch(`${GITHUB_API}${endpoint}`, { headers });
 
   if (response.status === 403) {
-    // Check for rate limiting
+    if (_retryCount >= MAX_RETRIES) {
+      throw new Error(`GitHub API 403 after ${MAX_RETRIES} retries: rate limit not recovering`);
+    }
+    // Check for primary rate limiting
     const remaining = response.headers.get('x-ratelimit-remaining');
     const resetAt = response.headers.get('x-ratelimit-reset');
     if (remaining === '0' && resetAt) {
       const resetDate = new Date(parseInt(resetAt) * 1000);
       const waitMs = Math.max(0, resetDate.getTime() - Date.now()) + 1000;
-      console.log(`[GitFetcher] Rate limited. Waiting ${(waitMs / 1000).toFixed(0)}s until reset...`);
-      if (waitMs < 300000) { // Wait up to 5 minutes
+      console.log(`[GitFetcher] Primary rate limit hit. Waiting ${(waitMs / 1000).toFixed(0)}s until reset...`);
+      if (waitMs < 600000) { // Wait up to 10 minutes
         await sleep(waitMs);
-        return githubFetch(endpoint, token); // Retry
+        return githubFetch(endpoint, token, _retryCount + 1);
       }
       throw new Error(`GitHub rate limit exceeded. Resets at ${resetDate.toISOString()}`);
     }
-    throw new Error(`GitHub API 403: ${await response.text()}`);
+    // Secondary rate limit (abuse detection) — wait and retry
+    const retryAfter = response.headers.get('retry-after');
+    const waitSec = retryAfter ? parseInt(retryAfter) : 60;
+    console.log(`[GitFetcher] Secondary rate limit hit (attempt ${_retryCount + 1}/${MAX_RETRIES}). Waiting ${waitSec}s...`);
+    await sleep(waitSec * 1000);
+    return githubFetch(endpoint, token, _retryCount + 1);
+  }
+
+  if (response.status === 429) {
+    // Too many requests — back off
+    if (_retryCount >= MAX_RETRIES) {
+      throw new Error(`GitHub API 429 after ${MAX_RETRIES} retries`);
+    }
+    const retryAfter = response.headers.get('retry-after');
+    const waitSec = retryAfter ? parseInt(retryAfter) : 30 * (_retryCount + 1);
+    console.log(`[GitFetcher] 429 Too Many Requests (attempt ${_retryCount + 1}/${MAX_RETRIES}). Waiting ${waitSec}s...`);
+    await sleep(waitSec * 1000);
+    return githubFetch(endpoint, token, _retryCount + 1);
   }
 
   if (!response.ok) {
@@ -338,15 +359,27 @@ export async function fetchRepoData(
 
 /**
  * Fetch data for multiple repos with overall progress tracking.
+ * Includes retry logic for repos that return 0 records (rate-limit recovery).
  */
 export async function fetchAllRepos(
   repos: string[],
   opts: FetchOptions = {},
 ): Promise<RepoData[]> {
   const results: RepoData[] = [];
+  const failedRepos: string[] = [];
   const startTime = Date.now();
+  const token = process.env.GITHUB_TOKEN;
 
   console.log(`\n[GitFetcher] Fetching data from ${repos.length} repositories...\n`);
+
+  // Check remaining rate limit before starting
+  try {
+    const rlResponse = await fetch('https://api.github.com/rate_limit', {
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+    });
+    const rl = await rlResponse.json();
+    console.log(`[GitFetcher] Rate limit: ${rl.rate?.remaining}/${rl.rate?.limit} remaining, resets at ${new Date((rl.rate?.reset || 0) * 1000).toISOString()}\n`);
+  } catch { /* non-fatal */ }
 
   for (let i = 0; i < repos.length; i++) {
     const [owner, repo] = repos[i].split('/');
@@ -356,15 +389,55 @@ export async function fetchAllRepos(
 
     try {
       const data = await fetchRepoData(owner, repo, opts);
-      results.push(data);
+      const totalRecords = data.pulls.length + data.issues.length + data.commits.length + data.workflowRuns.length;
+
+      if (totalRecords === 0) {
+        console.log(`${progress} WARNING: 0 records — likely rate-limited, queuing for retry`);
+        failedRepos.push(repos[i]);
+      } else {
+        results.push(data);
+      }
     } catch (err) {
       console.error(`${progress} FAILED: ${err instanceof Error ? err.message : String(err)}`);
-      // Continue with other repos
+      failedRepos.push(repos[i]);
     }
 
-    // Rate limit between repos (GitHub recommended: 1 second between bursts)
+    // Longer delay between repos to avoid secondary rate limiting (3s with token, 10s without)
     if (i < repos.length - 1) {
-      await sleep(1000);
+      const delay = token ? 3000 : 10000;
+      await sleep(delay);
+    }
+  }
+
+  // ── Retry failed repos with longer backoff ──
+  if (failedRepos.length > 0) {
+    console.log(`\n[GitFetcher] Retrying ${failedRepos.length} failed repos after 60s cooldown...\n`);
+    await sleep(60000); // 60-second cooldown before retries
+
+    for (let i = 0; i < failedRepos.length; i++) {
+      const [owner, repo] = failedRepos[i].split('/');
+      const progress = `[retry ${i + 1}/${failedRepos.length}]`;
+
+      console.log(`\n${progress} ── ${owner}/${repo} ──`);
+
+      try {
+        const data = await fetchRepoData(owner, repo, opts);
+        const totalRecords = data.pulls.length + data.issues.length + data.commits.length + data.workflowRuns.length;
+
+        if (totalRecords > 0) {
+          results.push(data);
+          console.log(`${progress} SUCCESS on retry: ${totalRecords} records`);
+        } else {
+          console.log(`${progress} Still 0 records on retry — skipping`);
+        }
+      } catch (err) {
+        console.error(`${progress} RETRY FAILED: ${err instanceof Error ? err.message : String(err)}`);
+      }
+
+      // Longer delay between retries (5s)
+      if (i < failedRepos.length - 1) {
+        await sleep(5000);
+      }
     }
   }
 
