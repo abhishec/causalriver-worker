@@ -288,7 +288,19 @@ export function runCausalDiscovery(
       },
     });
   }
-  
+
+  // CRITICAL FIX: Ensure all series have the same length after differencing
+  // Different differencing orders create different lengths (e.g., 60 → 59 for 1st-order diff)
+  // This causes "Variable X has different sample size" errors in PC algorithm
+  const minLength = Math.min(...Array.from(differenced.values()).map(s => s.values.length));
+  for (const [domain, series] of differenced) {
+    if (series.values.length > minLength) {
+      // Trim from the beginning to preserve recent data
+      series.values = series.values.slice(series.values.length - minLength);
+      series.metadata.dayCount = minLength;
+    }
+  }
+
   // Step 4: Run causal discovery (pairwise OR advanced method)
   const grangerData: Record<string, number[]> = {};
   for (const [domain, series] of differenced) {

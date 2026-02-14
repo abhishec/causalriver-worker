@@ -78,7 +78,7 @@ describe('SEaaSService', () => {
 
       expect(result).toBeDefined();
       expect(result.jobId).toBeDefined();
-      expect(result.status).toBe('queued');
+      expect(result.status).toBe('pending');
     });
 
     it('should reject invalid API key', async () => {
@@ -154,7 +154,7 @@ describe('SEaaSService', () => {
 
       // This should succeed (under limit)
       const result1 = await service.featureBuild(request);
-      expect(result1.status).toBe('queued');
+      expect(result1.status).toBe('pending');
 
       // Update to exceed limit
       mockMetrics.tokensUsedToday = 100001;
@@ -176,7 +176,7 @@ describe('SEaaSService', () => {
       const result = await service.codeReview(request);
 
       expect(result.jobId).toBeDefined();
-      expect(result.status).toBe('queued');
+      expect(result.status).toBe('pending');
       expect(result.createdAt).toBeDefined();
       expect(result.estimatedDuration).toBeGreaterThan(0);
     });
@@ -221,7 +221,7 @@ describe('SEaaSService', () => {
       const result = await service.featureBuild(request);
 
       expect(result.jobId).toBeDefined();
-      expect(result.status).toBe('queued');
+      expect(result.status).toBe('pending');
       expect(result.priority).toBe('normal');
     });
 
@@ -236,7 +236,7 @@ describe('SEaaSService', () => {
         };
 
         const result = await service.featureBuild(request);
-        expect(result.status).toBe('queued');
+        expect(result.status).toBe('pending');
       }
     });
 
@@ -262,7 +262,7 @@ describe('SEaaSService', () => {
       const result = await service.codebaseAnalysis(request);
 
       expect(result.jobId).toBeDefined();
-      expect(result.status).toBe('queued');
+      expect(result.status).toBe('pending');
     });
 
     it('should use default branch if not specified', async () => {
@@ -275,7 +275,7 @@ describe('SEaaSService', () => {
       const result = await service.codebaseAnalysis(request);
 
       expect(result.jobId).toBeDefined();
-      expect(result.status).toBe('queued');
+      expect(result.status).toBe('pending');
     });
 
     it('should validate repository URL format', async () => {
@@ -301,7 +301,7 @@ describe('SEaaSService', () => {
       const result = await service.techDebtAudit(request);
 
       expect(result.jobId).toBeDefined();
-      expect(result.status).toBe('queued');
+      expect(result.status).toBe('pending');
     });
 
     it('should handle full codebase audit (no scope)', async () => {
@@ -313,7 +313,7 @@ describe('SEaaSService', () => {
       const result = await service.techDebtAudit(request);
 
       expect(result.jobId).toBeDefined();
-      expect(result.status).toBe('queued');
+      expect(result.status).toBe('pending');
     });
   });
 
@@ -509,8 +509,8 @@ describe('SEaaSService', () => {
 
       const jobs = await Promise.all(requests.map(r => service.codeReview(r)));
 
-      // All jobs should be queued
-      expect(jobs.every(j => j.status === 'queued')).toBe(true);
+      // All jobs should be pending (initial status)
+      expect(jobs.every(j => j.status === 'pending')).toBe(true);
 
       // But only 5 should be processing at once (maxConcurrentJobs: 5)
       const processingCount = service.processingJobs?.size || 0;

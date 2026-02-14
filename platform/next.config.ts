@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import webpack from "webpack";
 
 const nextConfig: NextConfig = {
   // SSR mode — NOT static export (platform needs API routes + middleware)
@@ -15,13 +16,16 @@ const nextConfig: NextConfig = {
     'tree-sitter-python',
     'tree-sitter-scala',
   ],
-  outputFileTracingRoot: undefined,
-  webpack: (config) => {
-    // Handle native .node binary files (tree-sitter prebuilds)
-    config.module.rules.push({
-      test: /\.node$/,
-      loader: 'node-loader',
-    });
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      // Ignore .node native binary files (tree-sitter prebuilds)
+      config.plugins.push(
+        new webpack.IgnorePlugin({
+          resourceRegExp: /\.node$/,
+          contextRegExp: /tree-sitter/,
+        })
+      );
+    }
     return config;
   },
 };

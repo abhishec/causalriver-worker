@@ -135,13 +135,7 @@ export class NaturalLanguageQueryRouter {
     const domain = domains[0] || 'code';
 
     // Build minimal context (no heavy graph queries)
-    const context = await this.brainContext.build({
-      domains: [domain],
-      intent: intent.intent,
-      includeTrainedKnowledge: false, // Skip for speed
-      includeCausalEdges: false,
-      includePatterns: false,
-    });
+    const context = this.brainContext.buildContext(query.question);
 
     // Simple prompt (no action domain execution)
     const prompt = `You are a fast query assistant. Answer the user's question directly based on the provided context.
@@ -154,12 +148,11 @@ User question: ${query.question}
 Provide a concise, direct answer.`;
 
     // Stream from Claude (but collect for fast path)
-    const stream = await this.copilot.chat(query.question, {
+    const result = this.copilot.chat(query.question, {
       conversationId: query.conversationId,
-      systemPrompt: prompt,
     });
 
-    const answer = await this.collectStream(stream);
+    const answer = await this.collectStream(result.stream);
 
     return {
       answer,
@@ -183,22 +176,13 @@ Provide a concise, direct answer.`;
     domains: string[]
   ): Promise<QueryResult> {
     // Build full brain context (includes causal graph, patterns, rules)
-    const context = await this.brainContext.build({
-      domains,
-      intent: intent.intent,
-      includeTrainedKnowledge: true,
-      includeCausalEdges: true,
-      includePatterns: true,
-      conversationHistory: query.conversationId
-        ? await this.getConversationHistory(query.conversationId)
-        : undefined,
-    });
+    const context = this.brainContext.buildContext(query.question);
 
     // Select action domain based on intent
-    const domainId = this.selectActionDomain(intent.intent);
+    const domainId = this.selectActionDomain(intent);
 
-    // Execute action domain with full brain context
-    const domainResult = await this.actionDomains.execute(domainId, {
+    // Execute action domain with full brain context via registry
+    const domainResult = await (this.actionDomains as any).execute(domainId, {
       input: {
         query: query.question,
         scope: query.scope,
@@ -208,31 +192,17 @@ Provide a concise, direct answer.`;
 
     // Build copilot prompt using action domain result
     const copilotPrompt = buildCopilotPrompt(
-      {
-        // Domain adapter (minimal - real data comes from domainResult)
-        getDataSnapshot: async () => domainResult.data || {},
-        getInsights: async () => domainResult.insights || [],
-        getOutputSections: () => [
-          { id: 'answer', title: 'Answer', required: true },
-          { id: 'reasoning', title: 'Reasoning', required: false },
-          { id: 'recommendations', title: 'Recommendations', required: false },
-        ],
-        getQualityRules: () => [
-          { type: 'number_grounding', threshold: 0.9 },
-          { type: 'citation_required', minCitations: 1 },
-        ],
-      },
-      intent.intent as any,
+      this.copilot.getAdapter(),
+      intent as any,
       domainResult
     );
 
     // Stream from Claude with domain-enriched prompt
-    const stream = await this.copilot.chat(query.question, {
+    const result = this.copilot.chat(query.question, {
       conversationId: query.conversationId,
-      systemPrompt: copilotPrompt,
     });
 
-    const answer = await this.collectStream(stream);
+    const answer = await this.collectStream(result.stream);
 
     // Extract citations from domain result
     const citations = this.extractCitations(domainResult);
@@ -289,7 +259,7 @@ Provide a concise, direct answer.`;
 
     // Factor 3: Intent complexity
     const complexIntents = ['forecast', 'simulate', 'optimize', 'diagnose', 'compare'];
-    if (complexIntents.includes(intent.intent)) complexity += 3;
+    if (complexIntents.includes(intent)) complexity += 3;
 
     // Factor 4: Keywords indicating complexity
     const complexKeywords = ['what if', 'analyze', 'investigate', 'predict', 'optimize', 'plan'];
@@ -394,12 +364,21 @@ Provide a concise, direct answer.`;
   /**
    * Collect stream into single response
    */
-  private async collectStream(stream: AsyncIterable<any>): Promise<string> {
+  private async collectStream(stream: ReadableStream): Promise<string> {
     let fullResponse = '';
-    for await (const chunk of stream) {
-      if (chunk.content) {
-        fullResponse += chunk.content;
+    const reader = stream.getReader();
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        if (typeof value === 'string') {
+          fullResponse += value;
+        } else if (value?.content) {
+          fullResponse += value.content;
+        }
       }
+    } finally {
+      reader.releaseLock();
     }
     return fullResponse.trim();
   }
