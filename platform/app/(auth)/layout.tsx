@@ -145,7 +145,7 @@ export default async function AuthLayout({
               <div className="text-2xl font-bold text-warning">
                 {stats.brainAge !== null
                   ? `${stats.brainAge}d`
-                  : "11"}
+                  : "24"}
               </div>
               <div className="text-xs text-muted">
                 {stats.brainAge !== null ? "Brain Age" : "Brain Regions"}

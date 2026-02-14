@@ -1,3 +1,7 @@
+import { BRAIN_STATS, BENCHMARK_RESULTS } from "./generated-stats";
+
+export { BRAIN_STATS, BENCHMARK_RESULTS };
+
 export const SITE = {
   name: "NexusBrain",
   tagline: "A living brain for your apps — it perceives, reasons, dreams, and gets smarter every day.",
@@ -5,8 +9,8 @@ export const SITE = {
   github: "https://github.com/abhishec/nexus-intelligence",
   platform: "https://platform.usebrainos.com",
   description:
-    "NexusBrain is a self-improving causal intelligence engine with 11 brain regions, tested against peer-reviewed benchmarks (CausalRivers ICLR 2025, CauseME, LongMemEval). It discovers cause-and-effect with 8 ensemble methods, predicts outcomes, and compounds knowledge autonomously.",
-} as const;
+    `NexusBrain is a self-improving causal intelligence engine with ${BRAIN_STATS.brainRegions} brain regions, tested against peer-reviewed benchmarks (CausalRivers ICLR 2025, CauseME, LongMemEval). It discovers cause-and-effect with ${BRAIN_STATS.causalMethods} ensemble methods, predicts outcomes, and compounds knowledge autonomously.`,
+};
 
 export const NAV_LINKS = [
   { label: "Watch It Think", href: "/#live-brain" },
@@ -18,15 +22,15 @@ export const NAV_LINKS = [
 ] as const;
 
 export const STATS = [
-  { label: "Brain Regions", value: "11" },
-  { label: "Causal Methods", value: "15" },
-  { label: "Passing Tests", value: "1,737" },
-  { label: "Connectors", value: "13" },
-  { label: "Training Packs", value: "118" },
-  { label: "Benchmark AUROC", value: "0.824" },
-  { label: "Memory Accuracy", value: "79.6%" },
-  { label: "Runtime Deps", value: "0" },
-] as const;
+  { label: "Brain Regions", value: String(BRAIN_STATS.brainRegions) },
+  { label: "Causal Methods", value: String(BRAIN_STATS.causalMethods) },
+  { label: "Passing Tests", value: BRAIN_STATS.passingTestsFormatted },
+  { label: "Connectors", value: String(BRAIN_STATS.connectors) },
+  { label: "Training Packs", value: String(BRAIN_STATS.trainingPacks) },
+  { label: "Benchmark AUROC", value: String(BENCHMARK_RESULTS.causalrivers.bestAUROC) },
+  { label: "Memory Accuracy", value: BENCHMARK_RESULTS.longmemeval.overallAccuracyFormatted },
+  { label: "Runtime Deps", value: String(BRAIN_STATS.runtimeDeps) },
+];
 
 export const TIERS = [
   {
@@ -91,14 +95,14 @@ export const CAUSAL_METHODS = [
 ] as const;
 
 export const LAYERS = [
-  { id: "L1", name: "Ingestion", description: "13 connectors, webhooks + cron, sync manager", color: "from-cyan-500 to-blue-500" },
+  { id: "L1", name: "Ingestion", description: `${BRAIN_STATS.connectors} connectors, webhooks + cron, sync manager`, color: "from-cyan-500 to-blue-500" },
   { id: "L2", name: "Entity Resolution", description: "3-tier matching (exact \u2192 fuzzy \u2192 create), unified entity ID", color: "from-blue-500 to-indigo-500" },
   { id: "L3", name: "Semantic Memory", description: "Dual-mode embeddings, memory-weighted RAG, pgvector search", color: "from-indigo-500 to-violet-500" },
-  { id: "L4", name: "Causal Engine", description: "15 advanced methods (ensemble), conditional multivariate Granger, cascade-aware scoring", color: "from-violet-500 to-purple-500", star: true },
-  { id: "L5", name: "Pattern Memory", description: "Association rule mining, anomaly detection (Z/IQR/MAD), brain trainer + 118 packs", color: "from-purple-500 to-fuchsia-500" },
+  { id: "L4", name: "Causal Engine", description: `${BRAIN_STATS.causalMethods} advanced methods (ensemble), conditional multivariate Granger, cascade-aware scoring`, color: "from-violet-500 to-purple-500", star: true },
+  { id: "L5", name: "Pattern Memory", description: `Association rule mining, anomaly detection (Z/IQR/MAD), brain trainer + ${BRAIN_STATS.trainingPacks} packs`, color: "from-purple-500 to-fuchsia-500" },
   { id: "L6", name: "Domain Agents", description: "12+ domain personas, hybrid intent classification, cascade alert pipeline", color: "from-fuchsia-500 to-pink-500" },
   { id: "L7", name: "Intelligence Interface", description: "LLM response layer (multi-turn), context formatters, proactive cascade alerts", color: "from-pink-500 to-rose-500" },
-] as const;
+];
 
 export const USE_CASES = [
   {

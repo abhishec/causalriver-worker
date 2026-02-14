@@ -199,15 +199,133 @@ const BRAIN_REGIONS = [
     analogy: "Like the dorsolateral prefrontal cortex — holding information in mind while you work with it. The brain's scratchpad for active thinking.",
     category: "realtime",
   },
+  {
+    id: "agent-loop",
+    name: "Agent Loop",
+    brainRegion: "Basal Ganglia",
+    shortDesc: "Autonomous execution",
+    description: "Autonomous multi-step goal execution engine. Decomposes complex objectives into prioritized action plans, selects tools, and executes steps with recursive depth protection. The brain's motor planning system for turning intentions into actions.",
+    color: "from-emerald-400 to-lime-400",
+    textColor: "text-emerald-400",
+    borderColor: "border-emerald-400/30",
+    bgColor: "bg-emerald-400/10",
+    analogy: "Like the basal ganglia coordinating voluntary movement — turning high-level goals into precise sequences of actions.",
+    category: "aspirational",
+  },
+  {
+    id: "long-context",
+    name: "Long-Context Manager",
+    brainRegion: "Hippocampus (LTM)",
+    shortDesc: "Smart truncation",
+    description: "Manages context window budgets with intelligent truncation and relevance filtering. Estimates token counts, prioritizes high-relevance sections, and ensures the most important information fits within the brain's attention span.",
+    color: "from-teal-400 to-emerald-400",
+    textColor: "text-teal-400",
+    borderColor: "border-teal-400/30",
+    bgColor: "bg-teal-400/10",
+    analogy: "Like the hippocampus deciding which memories to keep accessible — smart filtering so the most relevant context is always available.",
+    category: "aspirational",
+  },
+  {
+    id: "rag-retriever",
+    name: "RAG Retriever",
+    brainRegion: "Entorhinal Cortex",
+    shortDesc: "Real-time retrieval",
+    description: "Retrieval-augmented generation engine that fetches relevant knowledge in real-time. Bridges the gap between stored knowledge and live queries, ensuring the brain always has the freshest context for every response.",
+    color: "from-cyan-400 to-teal-400",
+    textColor: "text-cyan-400",
+    borderColor: "border-cyan-400/30",
+    bgColor: "bg-cyan-400/10",
+    analogy: "Like the entorhinal cortex — the gateway between memory and perception, retrieving relevant memories as new experiences arrive.",
+    category: "aspirational",
+  },
+  {
+    id: "multimodal",
+    name: "Multi-Modal Inference",
+    brainRegion: "Visual Cortex",
+    shortDesc: "Cross-modal understanding",
+    description: "Processes and integrates information across different modalities — text, code, metrics, and structured data. Enables the brain to reason about diverse data types in a unified framework.",
+    color: "from-purple-400 to-violet-400",
+    textColor: "text-purple-400",
+    borderColor: "border-purple-400/30",
+    bgColor: "bg-purple-400/10",
+    analogy: "Like the visual cortex processing images alongside language — understanding the world through multiple channels simultaneously.",
+    category: "aspirational",
+  },
+  {
+    id: "proactive",
+    name: "Proactive Intelligence",
+    brainRegion: "Amygdala + RAS",
+    shortDesc: "Push-based insights",
+    description: "Push-based insight delivery that surfaces important discoveries before you ask. Monitors for threshold breaches, emerging trends, and time-sensitive patterns. The brain's alertness system — always watching, always ready to notify.",
+    color: "from-red-400 to-orange-400",
+    textColor: "text-red-400",
+    borderColor: "border-red-400/30",
+    bgColor: "bg-red-400/10",
+    analogy: "Like the reticular activating system keeping you alert — proactively pushing critical insights without waiting to be asked.",
+    category: "aspirational",
+  },
+  {
+    id: "session-memory",
+    name: "Session Memory",
+    brainRegion: "Hippocampus + LTM",
+    shortDesc: "Per-user context",
+    description: "Accumulates per-user context across sessions — remembering preferences, past questions, organizational role, and interaction patterns. Every conversation builds on the last, creating a personalized brain experience.",
+    color: "from-amber-400 to-yellow-400",
+    textColor: "text-amber-400",
+    borderColor: "border-amber-400/30",
+    bgColor: "bg-amber-400/10",
+    analogy: "Like long-term memory formation — each interaction strengthens the brain's understanding of who you are and what you need.",
+    category: "aspirational",
+  },
+  {
+    id: "structured-output",
+    name: "Structured Output",
+    brainRegion: "Wernicke's Area",
+    shortDesc: "Schema validation",
+    description: "Ensures brain outputs conform to structured schemas — validated JSON, typed responses, and consistent formatting. The brain's language production center, ensuring every response is well-formed and machine-parseable.",
+    color: "from-sky-400 to-blue-400",
+    textColor: "text-sky-400",
+    borderColor: "border-sky-400/30",
+    bgColor: "bg-sky-400/10",
+    analogy: "Like Wernicke's area producing well-formed language — ensuring the brain communicates clearly with both humans and machines.",
+    category: "aspirational",
+  },
+  {
+    id: "reasoning-chain",
+    name: "Reasoning Chain",
+    brainRegion: "DLPFC (Executive)",
+    shortDesc: "Chain-of-thought",
+    description: "Surfaces the brain's chain-of-thought reasoning — showing HOW it arrived at conclusions, not just WHAT the conclusions are. Enables transparent decision-making with full reasoning traces for audit and trust.",
+    color: "from-violet-400 to-fuchsia-400",
+    textColor: "text-violet-400",
+    borderColor: "border-violet-400/30",
+    bgColor: "bg-violet-400/10",
+    analogy: "Like the executive function of the prefrontal cortex — deliberate, step-by-step reasoning that can be inspected and verified.",
+    category: "aspirational",
+  },
+  {
+    id: "cascade-tracker",
+    name: "Cascade Tracker",
+    brainRegion: "Cerebral Cortex",
+    shortDesc: "Tracks chain reactions",
+    description: "Monitors active cascades — chain reactions propagating through the causal graph. Tracks trigger domains, expected vs actual paths, probability scores, and intervention success rates. The brain's early warning system for domino effects.",
+    color: "from-orange-400 to-red-400",
+    textColor: "text-orange-400",
+    borderColor: "border-orange-400/30",
+    bgColor: "bg-orange-400/10",
+    analogy: "Like the cerebral cortex tracking a chain of events — sensing when one domino will knock over the next and predicting where the cascade ends.",
+    category: "monitoring",
+  },
 ];
 
 const CATEGORIES = [
-  { key: "all", label: "All Regions", count: 15 },
-  { key: "realtime", label: "Real-Time", count: 5 },
-  { key: "scheduled", label: "Sleep Cycle", count: 2 },
-  { key: "monitoring", label: "Self-Monitoring", count: 3 },
-  { key: "learning", label: "Active Learning", count: 2 },
-  { key: "perception", label: "Perception", count: 3 },
+  { key: "all", label: "All Regions", count: BRAIN_REGIONS.length },
+  { key: "realtime", label: "Real-Time", count: BRAIN_REGIONS.filter(r => r.category === "realtime").length },
+  { key: "scheduled", label: "Sleep Cycle", count: BRAIN_REGIONS.filter(r => r.category === "scheduled").length },
+  { key: "monitoring", label: "Self-Monitoring", count: BRAIN_REGIONS.filter(r => r.category === "monitoring").length },
+  { key: "learning", label: "Active Learning", count: BRAIN_REGIONS.filter(r => r.category === "learning").length },
+  { key: "perception", label: "Perception", count: BRAIN_REGIONS.filter(r => r.category === "perception").length },
+  { key: "aspirational", label: "Claude-Powered", count: BRAIN_REGIONS.filter(r => r.category === "aspirational").length },
 ];
 
 export function BrainArchitecture() {
@@ -229,7 +347,7 @@ export function BrainArchitecture() {
           className="mx-auto mb-8 max-w-3xl text-center"
         >
           <h2 className="mb-4 text-3xl font-bold md:text-4xl">
-            15 Brain Regions.{" "}
+            {BRAIN_REGIONS.length} Brain Regions.{" "}
             <span className="bg-gradient-to-r from-emerald-400 to-violet-400 bg-clip-text text-transparent">
               One Living System.
             </span>
@@ -335,7 +453,7 @@ export function BrainArchitecture() {
           className="mt-8 mx-auto max-w-5xl rounded-xl border border-accent/20 bg-accent/5 p-4 text-center"
         >
           <p className="text-sm text-muted">
-            All 11 regions are connected through a unified event bus with Lamport clock ordering and backpressure handling.
+            All {BRAIN_REGIONS.length} regions are connected through a unified event bus with Lamport clock ordering and backpressure handling.
             When one region learns something, every other region benefits.
             <span className="text-accent-light ml-1">The whole is greater than the sum of its parts.</span>
           </p>

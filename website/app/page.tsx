@@ -31,7 +31,7 @@ export default function Home() {
       {/* 5. THE PROBLEM IT SOLVES — Why you need this */}
       <Problem />
 
-      {/* 6. HOW IT WORKS — 11 Brain regions with category filters */}
+      {/* 6. HOW IT WORKS — 24 Brain regions with category filters */}
       <BrainArchitecture />
 
       {/* 7. COMPETITIVE BENCHMARKING — CausalRivers, CauseME, LongMemEval results */}

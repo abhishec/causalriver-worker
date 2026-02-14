@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     template: "%s | NexusBrain",
   },
   description:
-    "A self-improving causal intelligence engine with 11 brain regions. It perceives, reasons, dreams, and gets smarter every day. Connect your app — it inherits a brain.",
+    "A self-improving causal intelligence engine with 24 brain regions. It perceives, reasons, dreams, and gets smarter every day. Connect your app — it inherits a brain.",
   keywords: [
     "causal intelligence",
     "AI memory",

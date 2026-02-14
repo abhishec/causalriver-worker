@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { SITE } from "@/lib/constants";
+import { SITE, BRAIN_STATS, BENCHMARK_RESULTS } from "@/lib/constants";
 
 const BRAIN_THOUGHTS = [
   "Discovered new causal edge: deploy frequency \u2192 satisfaction (14d lag, p<0.01)",
@@ -71,8 +71,8 @@ export function Hero() {
           </p>
 
           <p className="mx-auto mb-8 max-w-xl text-sm text-muted/70">
-            15 brain regions. 8 causal discovery methods. Tested against CausalRivers, CauseME, and LongMemEval benchmarks.
-            2,480 passing tests. Zero runtime dependencies.
+            {BRAIN_STATS.brainRegions} brain regions. {BRAIN_STATS.causalMethods} causal discovery methods. Tested against CausalRivers, CauseME, and LongMemEval benchmarks.
+            {BRAIN_STATS.passingTestsFormatted} passing tests. Zero runtime dependencies.
           </p>
 
           <div className="mb-8 flex flex-col items-center justify-center gap-4 sm:flex-row">

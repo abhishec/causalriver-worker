@@ -19,7 +19,7 @@ export default function ArchitecturePage() {
       <h1 className="mb-4 text-3xl font-bold">7-Layer Intelligence Stack</h1>
       <p className="mb-8 text-lg text-muted">
         Every layer is wired through a real-time event bus with Lamport clocks for ordering,
-        deduplication, priority queues, and backpressure. When the brain learns, all 8 causal discovery methods flow through every layer.
+        deduplication, priority queues, and backpressure. When the brain learns, all 9 causal discovery methods flow through every layer.
       </p>
 
       <h2 className="mb-6 mt-12 text-2xl font-semibold">The Layers</h2>
@@ -75,7 +75,7 @@ export default function ArchitecturePage() {
         from Client Brains (lightweight instances that agents and apps use to query, contribute signals, and receive intelligence).
       </p>
       <ul className="list-inside list-disc space-y-2 text-sm text-muted">
-        <li><span className="text-foreground font-medium">Core Brain</span> runs server-side with full access to the causal graph, 29 database tables, and all 8 discovery methods</li>
+        <li><span className="text-foreground font-medium">Core Brain</span> runs server-side with full access to the causal graph, 29 database tables, and all 9 discovery methods</li>
         <li><span className="text-foreground font-medium">Client Brains</span> are lightweight SDK instances that connect via REST API or direct SDK import</li>
         <li><span className="text-foreground font-medium">Knowledge Federation</span> merges Core Brain (universal) with Org Brain (proprietary) knowledge, with org data taking priority</li>
       </ul>

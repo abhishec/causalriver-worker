@@ -8,11 +8,11 @@ export const metadata: Metadata = {
 const packages = [
   {
     name: "@nexus-ai/memory-stack",
-    description: "Core intelligence engine: 8 causal methods, learning, embeddings, connectors",
+    description: "Core intelligence engine: 9 causal methods, learning, embeddings, connectors",
     install: "pnpm add @nexus-ai/memory-stack",
     subpaths: [
       { path: "@nexus-ai/memory-stack", desc: "Full library" },
-      { path: "@nexus-ai/memory-stack/causality", desc: "8 causal methods + PC + do-calculus" },
+      { path: "@nexus-ai/memory-stack/causality", desc: "9 causal methods + PC + do-calculus" },
       { path: "@nexus-ai/memory-stack/learning", desc: "Pattern learning + brain trainer" },
       { path: "@nexus-ai/memory-stack/embeddings", desc: "N-gram + neural embeddings" },
       { path: "@nexus-ai/memory-stack/intelligence", desc: "Domain personas, reasoning" },
