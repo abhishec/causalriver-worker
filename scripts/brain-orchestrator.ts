@@ -79,6 +79,7 @@ import './agents/git-code-trainer-v6';      // Sensory Cortex — GitHub enginee
 import './agents/weekly-brain-scan';        // Cerebellum — 11-region brain scan + pruning (Sunday 4 AM)
 import './agents/monthly-deep-analysis';    // Hippocampus — Full historical causal discovery (1st of month)
 import './agents/proactive-intelligence';   // Amygdala — Proactive alerting & threat detection (every 4h offset)
+import './agents/federation-agent';         // Corpus Callosum — Core ↔ Org brain knowledge federation (every 6h)
 
 // ── Brain Subsystem Imports ─────────────────────────────────────────────────
 import { globalRegistry, type AgentRegistration } from './agent-framework/agent-registry';
