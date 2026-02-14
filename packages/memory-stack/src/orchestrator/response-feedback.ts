@@ -71,98 +71,81 @@ export function createResponseFeedbackLoop(repository: NexusRepository) {
   // In-memory feedback queue (also persisted via repository)
   const pendingFeedback: StoredFeedback[] = [];
 
-  /**
-   * Process pending feedback and create organizational memories.
-   *
-   * For each "incorrect" feedback with a correction:
-   * 1. Creates an ai_memory entry with the correction
-   * 2. Tags it with the domain for future context retrieval
-   * 3. Marks the feedback as processed
-   *
-   * This closes the loop: wrong answers → corrections → memories → better future answers
-   */
-  async function learnFromFeedback(): Promise<FeedbackLearningResult> {
-      let memoriesCreated = 0;
-      let patternsReinforced = 0;
-      let feedbackProcessed = 0;
+  // Extracted as standalone function so it can be called from recordFeedback
+  async function learnFromFeedbackImpl(): Promise<FeedbackLearningResult> {
+    let memoriesCreated = 0;
+    let patternsReinforced = 0;
+    let feedbackProcessed = 0;
 
-      for (const fb of pendingFeedback) {
-        if (fb.processed) continue;
+    for (const fb of pendingFeedback) {
+      if (fb.processed) continue;
 
-        feedbackProcessed++;
+      feedbackProcessed++;
 
-        // Only create memories from corrections
-        if (fb.rating === 'incorrect' && fb.correction) {
-          // Create a new organizational memory from the correction
-          await repository.upsertMemory({
-            memoryType: 'correction',
-            domain: fb.domain || 'general',
-            content: fb.correction,
-            importance: 0.8, // Corrections are high-importance
-            metadata: {
-              source: 'user_feedback',
-              conversationId: fb.conversationId,
-              messageIndex: fb.messageIndex,
-              feedbackTimestamp: fb.timestamp.toISOString(),
-            },
-          });
-          memoriesCreated++;
-        }
-
-        // For "not_helpful" feedback, create a lower-importance memory
-        if (fb.rating === 'not_helpful' && fb.correction) {
-          await repository.upsertMemory({
-            memoryType: 'clarification',
-            domain: fb.domain || 'general',
-            content: fb.correction,
-            importance: 0.5,
-            metadata: {
-              source: 'user_feedback',
-              conversationId: fb.conversationId,
-              messageIndex: fb.messageIndex,
-            },
-          });
-          memoriesCreated++;
-        }
-
-        // For "helpful" feedback, reinforce the pattern
-        if (fb.rating === 'helpful') {
-          patternsReinforced++;
-          // The pattern reinforcement happens implicitly:
-          // helpful responses mean the causal context was accurate,
-          // so no weight adjustment needed.
-        }
-
-        fb.processed = true;
-      }
-
-      // Clean up processed feedback from memory
-      const unprocessed = pendingFeedback.filter((fb) => !fb.processed);
-      pendingFeedback.length = 0;
-      pendingFeedback.push(...unprocessed);
-
-      // Log the learning result
-      if (feedbackProcessed > 0) {
-        await repository.logActivity({
-          agentType: 'feedback_loop',
-          actionType: 'feedback_processed',
-          outputSummary: `Created ${memoriesCreated} memories, reinforced ${patternsReinforced} patterns from ${feedbackProcessed} feedback entries`,
-          metadata: { memoriesCreated, patternsReinforced, feedbackProcessed },
+      // Only create memories from corrections
+      if (fb.rating === 'incorrect' && fb.correction) {
+        await repository.upsertMemory({
+          memoryType: 'correction',
+          domain: fb.domain || 'general',
+          content: fb.correction,
+          importance: 0.8,
+          metadata: {
+            source: 'user_feedback',
+            conversationId: fb.conversationId,
+            messageIndex: fb.messageIndex,
+            feedbackTimestamp: fb.timestamp.toISOString(),
+          },
         });
+        memoriesCreated++;
       }
 
-      return {
-        memoriesCreated,
-        patternsReinforced,
-        feedbackProcessed,
-      };
+      // For "not_helpful" feedback, create a lower-importance memory
+      if (fb.rating === 'not_helpful' && fb.correction) {
+        await repository.upsertMemory({
+          memoryType: 'clarification',
+          domain: fb.domain || 'general',
+          content: fb.correction,
+          importance: 0.5,
+          metadata: {
+            source: 'user_feedback',
+            conversationId: fb.conversationId,
+            messageIndex: fb.messageIndex,
+          },
+        });
+        memoriesCreated++;
+      }
+
+      // For "helpful" feedback, reinforce the pattern
+      if (fb.rating === 'helpful') {
+        patternsReinforced++;
+      }
+
+      fb.processed = true;
+    }
+
+    // Clean up processed feedback from memory
+    const unprocessed = pendingFeedback.filter((fb) => !fb.processed);
+    pendingFeedback.length = 0;
+    pendingFeedback.push(...unprocessed);
+
+    // Log the learning result
+    if (feedbackProcessed > 0) {
+      await repository.logActivity({
+        agentType: 'feedback_loop',
+        actionType: 'feedback_processed',
+        outputSummary: `Created ${memoriesCreated} memories, reinforced ${patternsReinforced} patterns from ${feedbackProcessed} feedback entries`,
+        metadata: { memoriesCreated, patternsReinforced, feedbackProcessed },
+      });
+    }
+
+    return { memoriesCreated, patternsReinforced, feedbackProcessed };
   }
 
   return {
     /**
      * Record feedback about a response.
-     * Stores feedback in memory and persists to database.
-     * Auto-triggers learning for corrections (no delay).
+     * Stores feedback in memory, persists to database, and auto-triggers
+     * learning for corrections (no 24-hour delay).
      */
     async recordFeedback(feedback: ResponseFeedback): Promise<void> {
       const stored: StoredFeedback = {
@@ -188,19 +171,28 @@ export function createResponseFeedbackLoop(repository: NexusRepository) {
         },
       });
 
-      // Auto-trigger learning for corrections (no 24-hour delay)
-      // This ensures the brain learns from mistakes immediately.
+      // Auto-trigger learning for corrections — brain learns immediately
       if (feedback.correction && (feedback.rating === 'incorrect' || feedback.rating === 'not_helpful')) {
         try {
-          await learnFromFeedback();
+          await learnFromFeedbackImpl();
         } catch (learnErr) {
-          // Non-fatal: learning will be retried on next cycle
-          console.warn('[ResponseFeedback] Auto-learn from correction failed (non-fatal):', learnErr instanceof Error ? learnErr.message : learnErr);
+          // Non-fatal: learning will be retried on next scheduled cycle
+          console.warn('[ResponseFeedback] Auto-learn failed (non-fatal):', learnErr instanceof Error ? learnErr.message : learnErr);
         }
       }
     },
 
-    learnFromFeedback,
+    /**
+     * Process pending feedback and create organizational memories.
+     *
+     * For each "incorrect" feedback with a correction:
+     * 1. Creates an ai_memory entry with the correction
+     * 2. Tags it with the domain for future context retrieval
+     * 3. Marks the feedback as processed
+     *
+     * This closes the loop: wrong answers → corrections → memories → better future answers
+     */
+    learnFromFeedback: learnFromFeedbackImpl,
 
     /**
      * Get count of pending (unprocessed) feedback

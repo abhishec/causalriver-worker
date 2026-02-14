@@ -409,8 +409,9 @@ export function createScheduledJobs(
           if (packData.rules && Array.isArray(packData.rules)) {
             for (const rule of packData.rules) {
               try {
-                await repository.upsertMemory({
-                  memoryType: 'business_rule',
+                const { error: memErr } = await supabase.from('ai_memory').insert({
+                  organization_id: organizationId,
+                  memory_type: 'business_rule',
                   domain: (rule.domain as string) || 'general',
                   content: (rule.rule as string) || (rule.content as string) || JSON.stringify(rule),
                   importance: (rule.importance as number) || 0.7,
@@ -420,8 +421,14 @@ export function createScheduledJobs(
                     title: rule.title || rule.name || '',
                     createdBy: pack.created_by,
                   },
+                  created_at: new Date().toISOString(),
+                  updated_at: new Date().toISOString(),
                 });
-                rulesCreated++;
+                if (memErr) {
+                  errors.push(`Memory insert error: ${memErr.message}`);
+                } else {
+                  rulesCreated++;
+                }
               } catch (memErr: any) {
                 errors.push(`Rule upsert error: ${memErr.message}`);
               }
