@@ -54,6 +54,7 @@ const KNOWN_V7_AGENTS = [
   'monthly-deep-analysis',
   'proactive-intelligence',
   'federation-agent',
+  'org-updater-agent',
 ];
 
 const UTILITY_FILES = [

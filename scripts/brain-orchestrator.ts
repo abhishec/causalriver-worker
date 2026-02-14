@@ -35,6 +35,14 @@
  * - `HEALTH_CHECK_INTERVAL_MS` — Default: 300000 (5 min)
  * - `AGENT_SCHEDULE_CHECK_INTERVAL_MS` — Default: 3600000 (1 hour)
  * - `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` — Optional (for LLM amplifier)
+ * - `ORG_SCHEDULE_ENABLED` — "true" | "false" (default: true) — Enable per-org agent scheduling
+ *
+ * Multi-Tenant Architecture:
+ * ─────────────────────────
+ * The orchestrator runs agents for ALL active organizations, not just the core brain.
+ * Agents are classified as:
+ *   - **Core-Only**: Run once for the core brain (benchmarks, cost monitoring, git training)
+ *   - **Org-Applicable**: Run once per active org (consolidation, DMN, proactive alerts, federation, org-updater)
  *
  * @packageDocumentation
  */
@@ -81,6 +89,7 @@ import './agents/monthly-deep-analysis';    // Hippocampus — Full historical c
 import './agents/proactive-intelligence';   // Amygdala — Proactive alerting & threat detection (every 4h offset)
 import './agents/federation-agent';         // Corpus Callosum — Core ↔ Org brain knowledge federation (every 6h)
 import './agents/security-hardening-agent'; // Amygdala — Security vulnerability detection & auto-patching (daily 4 AM)
+import './agents/org-updater-agent';        // Thalamus — Org heartbeat: connector sync + learning cycle (every 4h)
 
 // ── Brain Subsystem Imports ─────────────────────────────────────────────────
 import { globalRegistry, type AgentRegistration } from './agent-framework/agent-registry';
