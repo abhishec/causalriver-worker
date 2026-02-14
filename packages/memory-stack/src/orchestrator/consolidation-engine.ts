@@ -192,7 +192,7 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
   const isCoreBrain = organizationId === CORE_BRAIN_ORG_ID;
   const repository = createSupabaseRepository(supabase, organizationId);
   const trainer = createBrainTrainer();
-  const logger = config.logger ?? getDefaultLogger().child({ module: 'consolidation', orgId: organizationId.substring(0, 8) });
+  const logger = config.logger ?? getDefaultLogger().child({ module: 'consolidation', orgId: (organizationId ?? 'unknown').substring(0, 8) });
 
   function log(step: string, msg: string): void {
     if (verbose) {
@@ -1765,8 +1765,8 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
       await repository.logActivity({
         agentType: 'consolidation_engine',
         actionType: 'brain_sleep',
-        inputSummary: `Consolidated ${result.report.stats.signalsProcessed} signals for ${isCoreBrain ? 'core brain' : 'org ' + organizationId.substring(0, 8)}`,
-        outputSummary: result.report.narrative.substring(0, 500),
+        inputSummary: `Consolidated ${result.report.stats.signalsProcessed} signals for ${isCoreBrain ? 'core brain' : 'org ' + (organizationId ?? 'unknown').substring(0, 8)}`,
+        outputSummary: (result.report.narrative ?? '').substring(0, 500),
         metadata: {
           runId: result.runId,
           status: result.status,
@@ -2165,7 +2165,7 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
 
       if (verbose) {
         logger.info('BRAIN CONSOLIDATION ("Sleep") started', {
-          target: isCoreBrain ? 'Core Brain' : `Org: ${organizationId.substring(0, 8)}`,
+          target: isCoreBrain ? 'Core Brain' : `Org: ${(organizationId ?? 'unknown').substring(0, 8)}`,
           runId,
         });
       }

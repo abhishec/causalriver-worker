@@ -355,18 +355,20 @@ export function buildGitTrainingPacks(allRepoData: RepoData[]): TrainingPack[] {
     tags: ['github', 'pull-requests', 'code-quality', 'velocity'],
     causalChains: [
       {
-        domains: ['engineering', 'engineering', 'product'],
-        description: 'Thorough PR reviews catch defects before merge, reducing downstream bug rate',
-        confidence: 0.8,
+        source: 'engineering',
+        target: 'product',
+        metric: 'bug_to_feature_ratio',
+        effectSize: 0.8,
         lagDays: 7,
-        mechanism: 'Reviews with substantive comments (not just approvals) catch logical errors, missing edge cases, and performance issues that would otherwise become bugs',
+        coefficientSign: -1, // Higher review depth → fewer bugs
       },
       {
-        domains: ['engineering', 'engineering'],
-        description: 'Fast PR merges (under 24 hours) correlate with higher release frequency but must be balanced with review quality',
-        confidence: 0.75,
+        source: 'engineering',
+        target: 'engineering',
+        metric: 'release_cadence',
+        effectSize: 0.75,
         lagDays: 14,
-        mechanism: 'Quick turnaround keeps developers in flow and reduces context-switching cost, but rubber-stamp reviews increase defect leakage',
+        coefficientSign: 1, // Faster merges → more frequent releases
       },
     ],
     businessRules: [
@@ -407,18 +409,20 @@ export function buildGitTrainingPacks(allRepoData: RepoData[]): TrainingPack[] {
     tags: ['github', 'ci-cd', 'reliability', 'deployment'],
     causalChains: [
       {
-        domains: ['engineering', 'engineering'],
-        description: 'Sustained CI pass rates above 90% correlate with reliable deployments and fewer rollbacks',
-        confidence: 0.85,
+        source: 'engineering',
+        target: 'engineering',
+        metric: 'deploy_rollback_rate',
+        effectSize: 0.85,
         lagDays: 3,
-        mechanism: 'A green CI pipeline means each merge is validated against regression tests; failures that slip through tend to cascade into deployment failures',
+        coefficientSign: -1, // Higher CI pass rate → fewer rollbacks
       },
       {
-        domains: ['engineering', 'engineering'],
-        description: 'CI failure streaks of 3+ runs indicate systemic issues (flaky tests, infrastructure problems, or merge conflicts)',
-        confidence: 0.8,
+        source: 'engineering',
+        target: 'engineering',
+        metric: 'ci_pass_rate',
+        effectSize: 0.8,
         lagDays: 1,
-        mechanism: 'When CI fails repeatedly, developers start ignoring failures or merging without green builds, creating a negative feedback loop',
+        coefficientSign: -1, // CI failure streaks → lower overall CI pass rate (negative spiral)
       },
     ],
     businessRules: [
@@ -456,11 +460,12 @@ export function buildGitTrainingPacks(allRepoData: RepoData[]): TrainingPack[] {
     tags: ['github', 'contributors', 'bus-factor', 'risk'],
     causalChains: [
       {
-        domains: ['engineering', 'engineering'],
-        description: 'When one contributor accounts for >40% of commits, project velocity drops sharply if they become unavailable',
-        confidence: 0.75,
+        source: 'engineering',
+        target: 'engineering',
+        metric: 'issue_resolution_speed',
+        effectSize: 0.75,
         lagDays: 30,
-        mechanism: 'Knowledge concentration creates single points of failure. When the key contributor is on vacation, sick, or leaves, nobody else can maintain their code effectively',
+        coefficientSign: -1, // Higher contributor concentration → slower issue resolution
       },
     ],
     businessRules: [
@@ -500,11 +505,12 @@ export function buildGitTrainingPacks(allRepoData: RepoData[]): TrainingPack[] {
     tags: ['github', 'issues', 'resolution', 'project-health'],
     causalChains: [
       {
-        domains: ['engineering', 'product'],
-        description: 'Median issue resolution time is a leading indicator of overall project health and feature delivery velocity',
-        confidence: 0.75,
+        source: 'engineering',
+        target: 'product',
+        metric: 'bug_to_feature_ratio',
+        effectSize: 0.75,
         lagDays: 14,
-        mechanism: 'Growing backlogs of unresolved issues indicate capacity constraints, technical debt, or prioritization problems that eventually slow feature delivery',
+        coefficientSign: -1, // Slower issue resolution → worse bug-to-feature ratio
       },
     ],
     businessRules: [
@@ -530,18 +536,20 @@ export function buildGitTrainingPacks(allRepoData: RepoData[]): TrainingPack[] {
     tags: ['github', 'code-churn', 'technical-debt'],
     causalChains: [
       {
-        domains: ['engineering', 'engineering'],
-        description: 'High code churn (deletion-to-addition ratio > 0.8) indicates rework and growing technical debt',
-        confidence: 0.7,
+        source: 'engineering',
+        target: 'engineering',
+        metric: 'code_churn_rate',
+        effectSize: 0.7,
         lagDays: 30,
-        mechanism: 'When developers spend more time deleting and rewriting code than adding new functionality, it signals architectural issues, poor initial implementation, or frequent requirement changes',
+        coefficientSign: -1, // High churn → growing technical debt (negative)
       },
       {
-        domains: ['engineering', 'engineering'],
-        description: 'Large PRs (>500 lines) have 3x higher defect rate than small PRs (<200 lines)',
-        confidence: 0.8,
+        source: 'engineering',
+        target: 'engineering',
+        metric: 'ci_pass_rate',
+        effectSize: 0.8,
         lagDays: 7,
-        mechanism: 'Large changesets are harder to review thoroughly, creating blind spots where bugs hide. Reviewers experience cognitive overload and resort to superficial scanning',
+        coefficientSign: -1, // Large PRs → lower CI pass rate (defects slip through)
       },
     ],
     businessRules: [
@@ -567,11 +575,12 @@ export function buildGitTrainingPacks(allRepoData: RepoData[]): TrainingPack[] {
     tags: ['github', 'reviews', 'culture', 'stability'],
     causalChains: [
       {
-        domains: ['engineering', 'engineering'],
-        description: 'Teams with strong review culture (multiple reviewers, constructive feedback) produce more stable software',
-        confidence: 0.8,
+        source: 'engineering',
+        target: 'engineering',
+        metric: 'deploy_rollback_rate',
+        effectSize: 0.8,
         lagDays: 14,
-        mechanism: 'Code review is a knowledge-sharing mechanism. Multiple perspectives catch different types of issues, and constructive feedback improves developer skills over time',
+        coefficientSign: -1, // Strong review culture → fewer rollbacks (more stability)
       },
     ],
     businessRules: [],
@@ -605,11 +614,12 @@ export function buildGitTrainingPacks(allRepoData: RepoData[]): TrainingPack[] {
     tags: ['github', 'releases', 'dora', 'deployment'],
     causalChains: [
       {
-        domains: ['engineering', 'engineering', 'product'],
-        description: 'Higher merge velocity leads to more frequent releases, which reduces deployment risk per release',
-        confidence: 0.8,
+        source: 'engineering',
+        target: 'product',
+        metric: 'release_cadence',
+        effectSize: 0.8,
         lagDays: 7,
-        mechanism: 'Small, frequent deployments have lower blast radius than large, infrequent ones. This is the core DORA insight: deployment frequency and change failure rate are inversely correlated',
+        coefficientSign: 1, // Faster merge velocity → more frequent releases
       },
     ],
     businessRules: [],
@@ -636,11 +646,12 @@ export function buildGitTrainingPacks(allRepoData: RepoData[]): TrainingPack[] {
     tags: ['github', 'collaboration', 'knowledge-sharing'],
     causalChains: [
       {
-        domains: ['engineering', 'engineering'],
-        description: 'Cross-team reviews reduce contributor concentration by spreading knowledge across more developers',
-        confidence: 0.7,
+        source: 'engineering',
+        target: 'engineering',
+        metric: 'contributor_concentration',
+        effectSize: 0.7,
         lagDays: 60,
-        mechanism: 'When developers review code outside their immediate team, they gain understanding of other subsystems, reducing knowledge silos and single points of failure',
+        coefficientSign: -1, // More cross-team reviews → lower contributor concentration (less bus factor risk)
       },
     ],
     businessRules: [
