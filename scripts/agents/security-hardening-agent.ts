@@ -41,6 +41,7 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import { execSync } from 'child_process';
 import { SupabaseSecurityScanner } from './supabase-security-scanner';
+import { AWSSecurityScanner, isAWSConfigured, getAWSConfigMessage } from './aws-security-scanner';
 
 // ============================================================================
 // TYPES
@@ -758,6 +759,78 @@ export class SecurityHardeningAgent extends ManusNativeAgent {
       }
     } catch (err) {
       this.log('SCAN', `Dependency audit completed (check security-deps-audit.json for details)`);
+    }
+
+    return vulnerabilities;
+  }
+
+  /**
+   * Scan AWS infrastructure security
+   */
+  private async scanAwsSecurity(): Promise<SecurityVulnerability[]> {
+    const vulnerabilities: SecurityVulnerability[] = [];
+
+    this.log('SCAN', '☁️  Starting AWS infrastructure scan...');
+    this.log('SCAN', getAWSConfigMessage());
+
+    if (!isAWSConfigured()) {
+      this.log('SCAN', '⏸️  AWS scanning skipped (add credentials to .env)');
+      return vulnerabilities;
+    }
+
+    try {
+      const scanner = new AWSSecurityScanner(process.env.AWS_REGION || 'us-east-1');
+      const awsIssues = await scanner.scan();
+
+      this.log('SCAN', `✓ AWS scanner found ${awsIssues.length} issues`);
+
+      // Convert AWSSecurityIssue[] to SecurityVulnerability[]
+      for (const issue of awsIssues) {
+        const cvssMap = {
+          critical: 9.5,
+          high: 7.5,
+          medium: 5.0,
+          low: 3.0,
+        };
+
+        vulnerabilities.push({
+          id: issue.id,
+          severity: issue.severity,
+          category: 'infrastructure',
+          title: issue.title,
+          description: issue.description,
+          cwe: issue.category === 'IAM' ? 'CWE-285' :
+               issue.category === 'S3' ? 'CWE-732' :
+               issue.category === 'EC2' ? 'CWE-16' : 'CWE-1008',
+          cvss: cvssMap[issue.severity],
+          affected: {
+            component: issue.category,
+            location: issue.resource,
+            details: issue.description,
+          },
+          remediation: {
+            automated: issue.fix.automated,
+            steps: issue.fix.steps,
+            // Include Terraform if available
+            ...(issue.fix.terraform && {
+              codeChange: {
+                file: 'infrastructure/security.tf',
+                patch: issue.fix.terraform
+              }
+            })
+          },
+          references: [
+            'https://docs.aws.amazon.com/security/',
+            'https://aws.amazon.com/security/security-resources/'
+          ],
+          discovered: new Date().toISOString(),
+        });
+      }
+
+      this.log('SCAN', `✓ AWS security scan complete: ${vulnerabilities.length} vulnerabilities found`);
+
+    } catch (error: any) {
+      this.log('SCAN', `AWS scan error: ${error.message}`);
     }
 
     return vulnerabilities;

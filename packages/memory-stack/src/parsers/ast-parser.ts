@@ -180,10 +180,14 @@ export class ASTParser {
       }
 
       // Export declarations
-      if (
-        ts.isExportDeclaration(node) ||
-        ts.isExportAssignment(node) ||
-        (node.modifiers && node.modifiers.some((m) => m.kind === ts.SyntaxKind.ExportKeyword))
+      if (ts.isExportDeclaration(node) || ts.isExportAssignment(node)) {
+        const exp = this.extractExport(node, sourceFile);
+        if (exp) {
+          exports.push(exp);
+        }
+      } else if (
+        (ts.isFunctionDeclaration(node) || ts.isClassDeclaration(node) || ts.isVariableStatement(node)) &&
+        (node as any).modifiers?.some((m: any) => m.kind === ts.SyntaxKind.ExportKeyword)
       ) {
         const exp = this.extractExport(node, sourceFile);
         if (exp) {

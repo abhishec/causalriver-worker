@@ -98,8 +98,8 @@ const CONNECTOR_FACTORIES: Record<
   'google-chat': (config) => createGoogleChatConnector(config as unknown as GoogleChatConnectorConfig),
   voice: (config) => createVoiceConnector(config as unknown as VoiceConnectorConfig),
   support: (config) => {
-    if (!config.apiUrl) return null;
-    return createSupportConnector(config as { apiUrl: string; apiKey?: string });
+    if (!config.baseUrl) return null;
+    return createSupportConnector(config as unknown as Parameters<typeof createSupportConnector>[0]);
   },
   document: (config) => createDocumentConnector(config as unknown as DocumentConnectorConfig),
   'generic-app': (config) => createGenericAppConnector(config as unknown as GenericAppConnectorConfig),
@@ -460,11 +460,11 @@ export const brainProductivitySyncAgent: AgentDefinition<ConnectorSyncInput, Con
 
 /** All 5 connector sync agents for brain-agent registry */
 export const ALL_CONNECTOR_SYNC_AGENTS: AgentDefinition[] = [
-  brainRevenueSyncAgent,
-  brainEngineeringSyncAgent,
-  brainCommunicationSyncAgent,
-  brainOperationsSyncAgent,
-  brainProductivitySyncAgent,
+  brainRevenueSyncAgent as AgentDefinition,
+  brainEngineeringSyncAgent as AgentDefinition,
+  brainCommunicationSyncAgent as AgentDefinition,
+  brainOperationsSyncAgent as AgentDefinition,
+  brainProductivitySyncAgent as AgentDefinition,
 ];
 
 /**
