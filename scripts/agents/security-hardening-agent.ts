@@ -980,16 +980,15 @@ View full report: /security/reports/${scan.scanId}`;
   }
 
   /**
-   * Scan IDS configuration and threat detection capabilities
+   * POWERFUL: Scan IDS configuration with AUTO-FIX capabilities
    */
   private async scanIDSConfiguration(): Promise<SecurityVulnerability[]> {
     const vulnerabilities: SecurityVulnerability[] = [];
 
-    this.log('SCAN', '🛡️ Checking Intrusion Detection System...');
+    this.log('SCAN', '🛡️ POWER SCAN: Intrusion Detection System verification...');
 
-    // Check if IDS is properly integrated
+    // 1. Check if IDS exists
     const hasIDS = await this.checkFileExists('platform/lib/ids.ts');
-    const hasIDSMiddleware = await this.checkFileExists('platform/middleware.ts');
 
     if (!hasIDS) {
       vulnerabilities.push({
@@ -997,54 +996,154 @@ View full report: /security/reports/${scan.scanId}`;
         severity: 'critical',
         category: 'infrastructure',
         title: 'Intrusion Detection System not implemented',
-        description: 'No IDS found to detect and block malicious requests in real-time.',
+        description: 'No IDS found to detect and block malicious requests in real-time. This leaves the platform vulnerable to SQL injection, XSS, path traversal, command injection, and scanner attacks.',
+        cwe: 'CWE-693',
+        cvss: 9.0,
         affected: {
           component: 'Platform Security',
           location: 'platform/lib/',
-          details: 'Missing IDS implementation'
+          details: 'Missing IDS implementation - no real-time threat blocking'
         },
         remediation: {
-          automated: false,
+          automated: true,
           steps: [
-            'Implement IDS with threat detection patterns',
-            'Integrate with middleware',
-            'Enable audit logging for threats'
-          ]
+            'AUTO-CREATE: platform/lib/ids.ts with threat detection',
+            'Detect: SQL injection, XSS, path traversal, command injection',
+            'Block: Critical/high severity threats automatically',
+            'Log: All threats to audit system'
+          ],
+          codeChange: {
+            file: 'platform/lib/ids.ts',
+            patch: this.generateIDSImplementation()
+          }
         },
-        references: ['https://owasp.org/www-community/controls/Intrusion_Detection'],
+        references: [
+          'https://owasp.org/www-community/controls/Intrusion_Detection',
+          'https://cheatsheetseries.owasp.org/cheatsheets/Attack_Surface_Analysis_Cheat_Sheet.html'
+        ],
         discovered: new Date().toISOString()
       });
+      this.log('SCAN', '⚠️  IDS NOT FOUND - can auto-generate implementation');
     } else {
       this.log('SCAN', '✓ IDS implementation found');
+
+      // Verify IDS is integrated in middleware
+      try {
+        const middlewarePath = path.join(this.projectRoot, 'platform/middleware.ts');
+        const middlewareContent = await fs.readFile(middlewarePath, 'utf-8');
+
+        if (!middlewareContent.includes('securityMiddleware') && !middlewareContent.includes('detectThreats')) {
+          vulnerabilities.push({
+            id: 'ids_not_integrated',
+            severity: 'high',
+            category: 'infrastructure',
+            title: 'IDS exists but not integrated in middleware',
+            description: 'IDS implementation found but not being called in middleware - threats will not be blocked.',
+            cvss: 7.5,
+            affected: {
+              component: 'Middleware',
+              location: 'platform/middleware.ts',
+              details: 'IDS not integrated in request pipeline'
+            },
+            remediation: {
+              automated: true,
+              steps: [
+                'Import securityMiddleware from lib/ids',
+                'Call before session management',
+                'Return block response for threats'
+              ],
+              codeChange: {
+                file: 'platform/middleware.ts',
+                patch: this.generateIDSMiddlewareIntegration(middlewareContent)
+              }
+            },
+            references: ['https://nextjs.org/docs/app/building-your-application/routing/middleware'],
+            discovered: new Date().toISOString()
+          });
+          this.log('SCAN', '⚠️  IDS not integrated in middleware');
+        } else {
+          this.log('SCAN', '✓ IDS integrated in middleware');
+        }
+      } catch {
+        this.log('SCAN', '⚠️  Could not verify middleware integration');
+      }
     }
 
-    // Check if error handling is secure
+    // 2. Check if error handling is secure
     const hasSecureErrors = await this.checkFileExists('platform/app/error.tsx');
+
     if (!hasSecureErrors) {
       vulnerabilities.push({
         id: 'error_disclosure',
         severity: 'high',
         category: 'infrastructure',
         title: 'Information disclosure via error messages',
-        description: 'Production errors may expose stack traces and sensitive information.',
+        description: 'Production errors may expose stack traces, database info, and internal paths to attackers. This violates OWASP security principles.',
+        cwe: 'CWE-209',
+        cvss: 7.5,
         affected: {
           component: 'Error Handling',
           location: 'platform/app/',
-          details: 'No secure error handler found'
+          details: 'No secure error handler - stack traces exposed in production'
         },
         remediation: {
-          automated: false,
+          automated: true,
           steps: [
-            'Implement production error handler',
-            'Return generic error messages',
-            'Log errors server-side only'
-          ]
+            'AUTO-CREATE: platform/app/error.tsx',
+            'Production: Generic "Something went wrong" message only',
+            'Development: Full error details for debugging',
+            'Log: Server-side only via monitoring service'
+          ],
+          codeChange: {
+            file: 'platform/app/error.tsx',
+            patch: this.generateSecureErrorHandler()
+          }
         },
-        references: ['https://owasp.org/www-community/Improper_Error_Handling'],
+        references: [
+          'https://owasp.org/www-community/Improper_Error_Handling',
+          'https://cheatsheetseries.owasp.org/cheatsheets/Error_Handling_Cheat_Sheet.html'
+        ],
         discovered: new Date().toISOString()
       });
+      this.log('SCAN', '⚠️  Secure error handler NOT FOUND - can auto-generate');
     } else {
       this.log('SCAN', '✓ Secure error handling found');
+
+      // Verify error handler doesn't leak info in production
+      try {
+        const errorPath = path.join(this.projectRoot, 'platform/app/error.tsx');
+        const errorContent = await fs.readFile(errorPath, 'utf-8');
+
+        if (!errorContent.includes('process.env.NODE_ENV') || !errorContent.includes('production')) {
+          vulnerabilities.push({
+            id: 'error_handler_insecure',
+            severity: 'medium',
+            category: 'infrastructure',
+            title: 'Error handler may leak information',
+            description: 'Error handler does not differentiate between production and development modes.',
+            affected: {
+              component: 'Error Handler',
+              location: 'platform/app/error.tsx',
+              details: 'No production/development mode check'
+            },
+            remediation: {
+              automated: false,
+              steps: [
+                'Add NODE_ENV check',
+                'Show generic errors in production',
+                'Show detailed errors only in development'
+              ]
+            },
+            references: ['https://nextjs.org/docs/app/building-your-application/routing/error-handling'],
+            discovered: new Date().toISOString()
+          });
+          this.log('SCAN', '⚠️  Error handler needs production mode check');
+        } else {
+          this.log('SCAN', '✓ Error handler has proper production safeguards');
+        }
+      } catch {
+        this.log('SCAN', '⚠️  Could not verify error handler implementation');
+      }
     }
 
     this.log('SCAN', `✓ IDS configuration check complete: ${vulnerabilities.length} issues`);
@@ -1052,14 +1151,214 @@ View full report: /security/reports/${scan.scanId}`;
   }
 
   /**
-   * Scan for exposed secrets in codebase
+   * Generate complete IDS implementation for auto-remediation
+   */
+  private generateIDSImplementation(): string {
+    return `/**
+ * Intrusion Detection System (IDS) - Auto-generated by Security Hardening Agent
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * Real-time threat detection to identify and block malicious requests
+ */
+
+export interface ThreatDetection {
+  blocked: boolean;
+  threats: string[];
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  response?: Response;
+}
+
+export async function detectThreats(request: Request): Promise<ThreatDetection> {
+  const threats: string[] = [];
+  let severity: ThreatDetection['severity'] = 'low';
+
+  const url = new URL(request.url);
+  const userAgent = request.headers.get('user-agent') || '';
+
+  // SQL Injection Detection
+  const sqlPatterns = [
+    /(\\%27)|(')|(\\-\\-)|(\\%23)|(#)/i,
+    /union[\\s\\S]*select/i,
+    /select[\\s\\S]*from/i,
+    /delete[\\s\\S]*from/i,
+    /drop[\\s\\S]*table/i
+  ];
+
+  for (const pattern of sqlPatterns) {
+    if (pattern.test(url.search) || pattern.test(url.pathname)) {
+      threats.push('SQL_INJECTION_ATTEMPT');
+      severity = 'critical';
+      break;
+    }
+  }
+
+  // XSS Detection
+  const xssPatterns = [
+    /<script[\\s\\S]*?>/i,
+    /javascript:/i,
+    /on\\w+\\s*=/i,
+    /<iframe/i
+  ];
+
+  for (const pattern of xssPatterns) {
+    if (pattern.test(url.search)) {
+      threats.push('XSS_ATTEMPT');
+      severity = severity === 'critical' ? 'critical' : 'high';
+      break;
+    }
+  }
+
+  // Scanner Detection
+  const scannerPatterns = [/nmap/i, /nikto/i, /sqlmap/i, /metasploit/i];
+
+  for (const pattern of scannerPatterns) {
+    if (pattern.test(userAgent)) {
+      threats.push('SECURITY_SCANNER_DETECTED');
+      severity = severity === 'critical' ? 'critical' : 'high';
+      break;
+    }
+  }
+
+  // Block critical and high severity threats
+  if (severity === 'critical' || severity === 'high') {
+    return {
+      blocked: true,
+      threats,
+      severity,
+      response: new Response(
+        JSON.stringify({ error: 'Forbidden', message: 'Security violation detected' }),
+        { status: 403, headers: { 'Content-Type': 'application/json' } }
+      )
+    };
+  }
+
+  return { blocked: false, threats, severity };
+}
+
+export async function securityMiddleware(request: Request): Promise<Response | null> {
+  const detection = await detectThreats(request);
+  return detection.blocked && detection.response ? detection.response : null;
+}
+`;
+  }
+
+  /**
+   * Generate IDS middleware integration patch
+   */
+  private generateIDSMiddlewareIntegration(currentMiddleware: string): string {
+    // Add import at top
+    const importLine = "import { securityMiddleware } from '@/lib/ids';\n";
+
+    // Find the middleware function and add IDS check
+    const idsCheck = `
+  // 🛡️ Intrusion Detection System - First line of defense
+  const securityBlock = await securityMiddleware(request);
+  if (securityBlock) {
+    return securityBlock; // Block malicious request immediately
+  }
+`;
+
+    // Insert after function declaration
+    return currentMiddleware.replace(
+      /export async function middleware\(request: NextRequest\) \{/,
+      `${importLine}\nexport async function middleware(request: NextRequest) {${idsCheck}`
+    );
+  }
+
+  /**
+   * Generate secure error handler for auto-remediation
+   */
+  private generateSecureErrorHandler(): string {
+    return `'use client';
+
+/**
+ * Secure Error Handler - Auto-generated by Security Hardening Agent
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * SECURITY: Never expose error details, stack traces, or database info in production
+ */
+
+import { useEffect } from 'react';
+
+export default function Error({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) {
+  useEffect(() => {
+    // Log to monitoring service (server-side only)
+    if (process.env.NODE_ENV === 'production') {
+      console.error('Production error:', { digest: error.digest });
+      // TODO: Send to Sentry/DataDog
+    } else {
+      console.error('Development error:', error);
+    }
+  }, [error]);
+
+  // PRODUCTION: Generic error message (no details)
+  if (process.env.NODE_ENV === 'production') {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold mb-4">Something went wrong</h1>
+          <p className="text-gray-600 mb-6">
+            Our team has been notified and is working on a fix.
+          </p>
+          {error.digest && (
+            <p className="text-sm text-gray-400 mb-6">Error ID: {error.digest}</p>
+          )}
+          <button
+            onClick={reset}
+            className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
+          >
+            Try again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // DEVELOPMENT: Show full error details
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-gray-100">
+      <div className="max-w-2xl w-full bg-white p-8 rounded shadow">
+        <h1 className="text-2xl font-bold text-red-600 mb-4">Development Error</h1>
+        <div className="mb-4">
+          <h2 className="font-semibold mb-2">Message:</h2>
+          <p className="bg-red-50 p-4 rounded text-red-800">{error.message}</p>
+        </div>
+        {error.stack && (
+          <div className="mb-4">
+            <h2 className="font-semibold mb-2">Stack Trace:</h2>
+            <pre className="bg-gray-900 text-green-400 p-4 rounded overflow-x-auto text-sm">
+              {error.stack}
+            </pre>
+          </div>
+        )}
+        <button
+          onClick={reset}
+          className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
+        >
+          Try again
+        </button>
+      </div>
+    </div>
+  );
+}
+`;
+  }
+
+  /**
+   * POWERFUL Secret Scanner - Detects AND FIXES exposed secrets
    */
   private async scanSecrets(): Promise<SecurityVulnerability[]> {
     const vulnerabilities: SecurityVulnerability[] = [];
 
-    this.log('SCAN', '🔐 Scanning for exposed secrets...');
+    this.log('SCAN', '🔐 POWER SCAN: Deep secret detection across entire codebase...');
 
-    // Check if gitleaks scanner exists
+    // 1. Check if gitleaks scanner exists
     const hasSecretScanner = await this.checkFileExists('scripts/scan-secrets.sh');
 
     if (!hasSecretScanner) {
@@ -1075,34 +1374,360 @@ View full report: /security/reports/${scan.scanId}`;
           details: 'Missing secret scanner'
         },
         remediation: {
-          automated: false,
+          automated: true,
           steps: [
+            'Create scripts/scan-secrets.sh',
             'Install gitleaks',
-            'Run: ./scripts/scan-secrets.sh',
-            'Rotate any exposed secrets',
             'Enable pre-commit hooks'
-          ]
+          ],
+          codeChange: {
+            file: 'scripts/scan-secrets.sh',
+            patch: this.generateSecretScannerScript()
+          }
         },
         references: ['https://github.com/gitleaks/gitleaks'],
         discovered: new Date().toISOString()
       });
     } else {
       this.log('SCAN', '✓ Secret scanner configured');
-
-      // Check common secret exposure patterns in code
-      const patterns = [
-        { pattern: /SUPABASE_SERVICE_ROLE_KEY.*=.*["']sk_/, file: '**/*.{ts,js,tsx,jsx}', severity: 'critical' },
-        { pattern: /AWS_SECRET_ACCESS_KEY.*=.*["'][A-Za-z0-9\/+=]{40}["']/, file: '**/*.{ts,js}', severity: 'critical' },
-        { pattern: /api[_-]?key.*=.*["'][A-Za-z0-9]{32,}["']/, file: '**/*.{ts,js}', severity: 'high' },
-      ];
-
-      // Note: In production, would actually scan files here
-      // For now, just flag that scanning should be run
-      this.log('SCAN', 'Note: Run ./scripts/scan-secrets.sh for comprehensive secret scan');
     }
 
-    this.log('SCAN', `✓ Secret scan complete: ${vulnerabilities.length} issues`);
+    // 2. POWERFUL: Scan all files for actual exposed secrets
+    this.log('SCAN', '🔍 Scanning files for exposed credentials...');
+
+    const secretPatterns = [
+      {
+        name: 'Supabase Service Key',
+        pattern: /["']?(eyJ[A-Za-z0-9_-]{100,}\.eyJ[A-Za-z0-9_-]{100,}\.[A-Za-z0-9_-]{100,})["']?/g,
+        severity: 'critical' as const,
+        type: 'jwt'
+      },
+      {
+        name: 'GitHub Token',
+        pattern: /["']?(gh[ps]_[A-Za-z0-9]{36,})["']?/g,
+        severity: 'critical' as const,
+        type: 'github_token'
+      },
+      {
+        name: 'AWS Access Key',
+        pattern: /["']?(AKIA[A-Z0-9]{16})["']?/g,
+        severity: 'critical' as const,
+        type: 'aws_key'
+      },
+      {
+        name: 'AWS Secret Key',
+        pattern: /["']?([A-Za-z0-9\/+=]{40})["']?\s*(?:as|is|=)\s*AWS_SECRET/gi,
+        severity: 'critical' as const,
+        type: 'aws_secret'
+      },
+      {
+        name: 'Generic API Key',
+        pattern: /["']?([A-Za-z0-9]{32,})["']?\s*(?:as|is|=)\s*(?:api[_-]?key|apikey)/gi,
+        severity: 'high' as const,
+        type: 'api_key'
+      },
+      {
+        name: 'Private Key',
+        pattern: /-----BEGIN (RSA |EC )?PRIVATE KEY-----/,
+        severity: 'critical' as const,
+        type: 'private_key'
+      }
+    ];
+
+    const scanFiles = await this.findFiles('**/*.{ts,js,tsx,jsx,json,md,yml,yaml,env}', [
+      'node_modules',
+      '.next',
+      'dist',
+      'build',
+      '.git'
+    ]);
+
+    const secretsFound: Array<{file: string; secret: string; type: string; line: number}> = [];
+
+    for (const file of scanFiles) {
+      try {
+        const content = await fs.readFile(file, 'utf-8');
+        const lines = content.split('\n');
+
+        for (const { name, pattern, severity, type } of secretPatterns) {
+          // Skip documentation and test files for some patterns
+          if ((file.includes('/docs/') || file.includes('.test.') || file.includes('mock'))
+              && type !== 'private_key') {
+            continue;
+          }
+
+          const matches = content.match(pattern);
+          if (matches && matches.length > 0) {
+            // Find line number
+            let lineNum = 0;
+            for (let i = 0; i < lines.length; i++) {
+              if (lines[i].includes(matches[0])) {
+                lineNum = i + 1;
+                break;
+              }
+            }
+
+            secretsFound.push({
+              file,
+              secret: matches[0].substring(0, 20) + '...',
+              type: name,
+              line: lineNum
+            });
+
+            vulnerabilities.push({
+              id: `exposed_secret_${type}_${path.basename(file)}_${lineNum}`,
+              severity,
+              category: 'code',
+              title: `Exposed ${name} in source code`,
+              description: `File "${file}" line ${lineNum} contains an exposed ${name}. This credential must be rotated immediately.`,
+              cwe: 'CWE-798',
+              cvss: severity === 'critical' ? 9.8 : 7.5,
+              affected: {
+                component: path.basename(file),
+                location: `${file}:${lineNum}`,
+                details: `${name} detected: ${matches[0].substring(0, 20)}...`
+              },
+              remediation: {
+                automated: true,
+                steps: [
+                  'IMMEDIATELY rotate this credential',
+                  'Move to environment variables',
+                  'Add to .gitignore if in config file',
+                  'Clean from git history with: git filter-branch',
+                  'Enable secret scanning pre-commit hooks'
+                ]
+              },
+              references: [
+                'https://owasp.org/www-community/vulnerabilities/Use_of_hard-coded_password',
+                'https://github.com/gitleaks/gitleaks'
+              ],
+              discovered: new Date().toISOString()
+            });
+          }
+        }
+      } catch (err) {
+        // Skip files that can't be read
+      }
+    }
+
+    if (secretsFound.length > 0) {
+      this.log('SCAN', `⚠️  Found ${secretsFound.length} exposed secrets!`);
+      secretsFound.slice(0, 5).forEach(s => {
+        this.log('SCAN', `   ${s.type} in ${path.basename(s.file)}:${s.line}`);
+      });
+    } else {
+      this.log('SCAN', '✓ No exposed secrets detected in scanned files');
+    }
+
+    // 3. Check .gitignore for proper secret exclusions
+    this.log('SCAN', '🔍 Verifying .gitignore excludes sensitive files...');
+    const gitignoreIssues = await this.scanGitignore();
+    vulnerabilities.push(...gitignoreIssues);
+
+    this.log('SCAN', `✓ Secret scan complete: ${vulnerabilities.length} total issues`);
     return vulnerabilities;
+  }
+
+  /**
+   * POWERFUL: Auto-fix .gitignore to prevent secret leaks
+   */
+  private async scanGitignore(): Promise<SecurityVulnerability[]> {
+    const vulnerabilities: SecurityVulnerability[] = [];
+
+    const gitignorePath = path.join(this.projectRoot, '.gitignore');
+
+    try {
+      const gitignoreContent = await fs.readFile(gitignorePath, 'utf-8');
+
+      const requiredPatterns = [
+        { pattern: '.env', reason: 'Environment files contain secrets' },
+        { pattern: '.env.*', reason: 'Environment variant files' },
+        { pattern: '*.pem', reason: 'Private key files' },
+        { pattern: '*.key', reason: 'Private key files' },
+        { pattern: '.next/', reason: 'Build artifacts may contain secrets' },
+        { pattern: 'node_modules/', reason: 'Dependencies' },
+        { pattern: '*.log', reason: 'Logs may contain sensitive data' },
+        { pattern: '.DS_Store', reason: 'macOS metadata' },
+        { pattern: 'credentials.json', reason: 'Credential files' },
+        { pattern: '*-credentials.json', reason: 'Credential files' },
+        { pattern: 'secrets.yaml', reason: 'Secret configuration files' },
+        { pattern: '.aws/', reason: 'AWS credentials' },
+        { pattern: 'gitleaks-report.*', reason: 'Secret scan reports' }
+      ];
+
+      const missingPatterns = requiredPatterns.filter(
+        ({ pattern }) => !gitignoreContent.includes(pattern)
+      );
+
+      if (missingPatterns.length > 0) {
+        const missingList = missingPatterns.map(p => p.pattern).join(', ');
+
+        vulnerabilities.push({
+          id: 'gitignore_incomplete',
+          severity: 'high',
+          category: 'infrastructure',
+          title: '.gitignore missing critical exclusions',
+          description: `.gitignore is missing ${missingPatterns.length} important patterns to prevent secret leaks: ${missingList}`,
+          affected: {
+            component: 'Git Configuration',
+            location: '.gitignore',
+            details: `Missing patterns: ${missingList}`
+          },
+          remediation: {
+            automated: true,
+            steps: [
+              'Auto-update .gitignore with security patterns',
+              'Verify no excluded files are already committed',
+              'Clean git history if needed'
+            ],
+            codeChange: {
+              file: '.gitignore',
+              patch: this.generateGitignorePatch(gitignoreContent, missingPatterns)
+            }
+          },
+          references: ['https://git-scm.com/docs/gitignore'],
+          discovered: new Date().toISOString()
+        });
+
+        this.log('SCAN', `⚠️  .gitignore missing ${missingPatterns.length} critical patterns`);
+      } else {
+        this.log('SCAN', '✓ .gitignore properly configured');
+      }
+
+    } catch (err) {
+      vulnerabilities.push({
+        id: 'gitignore_missing',
+        severity: 'medium',
+        category: 'infrastructure',
+        title: 'No .gitignore file found',
+        description: 'Repository lacks .gitignore file to prevent committing sensitive files.',
+        affected: {
+          component: 'Git Configuration',
+          location: './',
+          details: 'Missing .gitignore'
+        },
+        remediation: {
+          automated: true,
+          steps: ['Create .gitignore with security best practices'],
+          codeChange: {
+            file: '.gitignore',
+            patch: this.generateDefaultGitignore()
+          }
+        },
+        references: ['https://git-scm.com/docs/gitignore'],
+        discovered: new Date().toISOString()
+      });
+    }
+
+    return vulnerabilities;
+  }
+
+  /**
+   * Generate secret scanner script for auto-remediation
+   */
+  private generateSecretScannerScript(): string {
+    return `#!/bin/bash
+# Auto-generated by Security Hardening Agent
+# Scans git history for accidentally committed secrets
+
+set -e
+
+echo "🔍 Scanning for secrets in git history..."
+
+if ! command -v gitleaks &> /dev/null; then
+    echo "❌ gitleaks not found!"
+    echo "Install: brew install gitleaks"
+    exit 1
+fi
+
+gitleaks detect --source . --verbose --report-path gitleaks-report.json --report-format json
+
+if [ $? -eq 0 ]; then
+    echo "✅ No secrets found!"
+else
+    echo "⚠️  Secrets detected! Check gitleaks-report.json"
+    exit 1
+fi
+`;
+  }
+
+  /**
+   * Generate .gitignore patch with missing security patterns
+   */
+  private generateGitignorePatch(current: string, missing: Array<{pattern: string; reason: string}>): string {
+    const header = '\n# ════════════════════════════════════════════════════════════════════\n' +
+                   '# Security Patterns - Auto-added by Security Hardening Agent\n' +
+                   '# ════════════════════════════════════════════════════════════════════\n';
+
+    const additions = missing.map(({ pattern, reason }) => `${pattern}  # ${reason}`).join('\n');
+
+    return current + header + additions + '\n';
+  }
+
+  /**
+   * Generate default .gitignore with all security best practices
+   */
+  private generateDefaultGitignore(): string {
+    return `# ════════════════════════════════════════════════════════════════════
+# Security-First .gitignore
+# Generated by Security Hardening Agent
+# ════════════════════════════════════════════════════════════════════
+
+# Environment & Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+credentials.json
+*-credentials.json
+secrets.yaml
+secrets.yml
+.aws/
+.gcp/
+
+# Build Artifacts (may contain secrets)
+.next/
+dist/
+build/
+out/
+.cache/
+
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# IDE
+.idea/
+.vscode/
+*.sublime-*
+
+# Security Scan Reports
+gitleaks-report.*
+security-report.*
+vulnerability-scan.*
+
+# Temporary files
+*.tmp
+*.temp
+.temp/
+`;
   }
 
   private formatSecurityAlertBlocks(scan: SecurityScanResult): any[] {
