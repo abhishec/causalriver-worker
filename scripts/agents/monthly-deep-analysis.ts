@@ -41,7 +41,7 @@ interface GrowthReport {
 
 export class MonthlyDeepAnalysisAgent extends ManusNativeAgent {
   readonly name = 'monthly-deep-analysis';
-  readonly version = '6.0.0';
+  readonly version = '7.0.0';
   readonly description = 'Full historical causal discovery on ALL data + monthly growth report';
   readonly brainRegion = 'Hippocampus (Monthly Deep Analysis)';
   readonly neurologicalFunction = 'Full Historical Causal Discovery & Growth Tracking';

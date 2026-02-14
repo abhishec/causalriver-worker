@@ -34,7 +34,7 @@ export interface DMNConfig {
 
 export class DMNAgent extends ManusNativeAgent {
   readonly name = 'brain-dmn';
-  readonly version = '6.0.0';
+  readonly version = '7.0.0';
   readonly description = 'Background insight scanning: unexpected correlations, emerging cascades, what-changed analysis, knowledge gaps';
   readonly brainRegion = 'Default Mode Network (DMN)';
   readonly neurologicalFunction = 'Background Insight Scanning';

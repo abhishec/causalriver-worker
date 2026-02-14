@@ -80,6 +80,7 @@ import './agents/weekly-brain-scan';        // Cerebellum — 11-region brain sc
 import './agents/monthly-deep-analysis';    // Hippocampus — Full historical causal discovery (1st of month)
 import './agents/proactive-intelligence';   // Amygdala — Proactive alerting & threat detection (every 4h offset)
 import './agents/federation-agent';         // Corpus Callosum — Core ↔ Org brain knowledge federation (every 6h)
+import './agents/security-hardening-agent'; // Amygdala — Security vulnerability detection & auto-patching (daily 4 AM)
 
 // ── Brain Subsystem Imports ─────────────────────────────────────────────────
 import { globalRegistry, type AgentRegistration } from './agent-framework/agent-registry';

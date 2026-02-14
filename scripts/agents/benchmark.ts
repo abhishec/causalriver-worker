@@ -38,7 +38,7 @@ interface BenchmarkResult {
 
 export class BenchmarkAgent extends ManusNativeAgent {
   readonly name = 'benchmark';
-  readonly version = '6.0.0';
+  readonly version = '7.0.0';
   readonly description = 'Runs LongMemEval + CauseMe benchmarks to measure causal accuracy, tracks performance over time';
   readonly brainRegion = 'Cerebellum (Benchmark Evaluator)';
   readonly neurologicalFunction = 'Performance Evaluation & Validation';

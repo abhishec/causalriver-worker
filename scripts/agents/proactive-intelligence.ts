@@ -32,7 +32,7 @@ import {
 
 export class ProactiveIntelligenceAgent extends ManusNativeAgent {
   readonly name = 'proactive-intelligence';
-  readonly version = '6.0.0';
+  readonly version = '7.0.0';
   readonly description = 'Proactive alerting: threshold breaches, trend changes, cascade warnings, knowledge decay, opportunities';
   readonly brainRegion = 'Amygdala (Proactive Alerting)';
   readonly neurologicalFunction = 'Push-Based Insight Delivery & Threat Detection';

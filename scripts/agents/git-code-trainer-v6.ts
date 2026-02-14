@@ -54,7 +54,7 @@ export interface GitCodeTrainerConfig {
 
 export class GitCodeTrainerAgent extends ManusNativeAgent {
   readonly name = 'git-code-trainer';
-  readonly version = '6.0.0';
+  readonly version = '7.0.0';
   readonly description = 'Trains NexusBrain on engineering patterns from 27 major open-source GitHub repos (100k+ stars)';
   readonly brainRegion = 'Cerebellum (Fast-Path Compiler / Code Intelligence)';
   readonly neurologicalFunction = 'Engineering Pattern Recognition';

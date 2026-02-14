@@ -84,7 +84,7 @@ export interface OrgFederationStats {
 
 export class FederationAgent extends ManusNativeAgent {
   readonly name = 'federation-agent';
-  readonly version = '6.0.0';
+  readonly version = '7.0.0';
   readonly description = 'Bidirectional Core ↔ Org brain knowledge federation: ensures every part of the brain improves continuously';
   readonly brainRegion = 'Corpus Callosum (Inter-Hemispheric Communication)';
   readonly neurologicalFunction = 'Cross-Brain Knowledge Federation & Synchronization';

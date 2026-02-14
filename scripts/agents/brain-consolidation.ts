@@ -31,7 +31,7 @@ export interface BrainConsolidationConfig {
 
 export class BrainConsolidationAgent extends ManusNativeAgent {
   readonly name = 'brain-consolidation';
-  readonly version = '6.0.0';
+  readonly version = '7.0.0';
   readonly description = '10-step brain sleep cycle: causal discovery, anomaly detection, pattern mining, pruning, strengthening';
   readonly brainRegion = 'Default Mode Network (DMN / Region #8)';
   readonly neurologicalFunction = 'Brain Sleep & Memory Consolidation';

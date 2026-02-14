@@ -44,7 +44,7 @@ interface BrainHealthStats {
 
 export class WeeklyBrainScanAgent extends ManusNativeAgent {
   readonly name = 'weekly-brain-scan';
-  readonly version = '6.0.0';
+  readonly version = '7.0.0';
   readonly description = '11-region brain scan + benchmarks + stale edge pruning + health summary';
   readonly brainRegion = 'Cerebellum (Weekly Evaluator)';
   readonly neurologicalFunction = 'Comprehensive Brain Health Assessment';

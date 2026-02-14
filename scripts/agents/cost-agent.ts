@@ -43,7 +43,7 @@ interface AWSCostData {
 
 export class CostAgent extends ManusNativeAgent {
   readonly name = 'cost-agent';
-  readonly version = '6.0.0';
+  readonly version = '7.0.0';
   readonly description = 'Monitors LLM token costs and AWS infrastructure spending, detects budget overruns and cost anomalies';
   readonly brainRegion = 'Hypothalamus (Cost Tracker)';
   readonly neurologicalFunction = 'Resource Monitoring & Cost Optimization';

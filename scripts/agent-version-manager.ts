@@ -40,10 +40,10 @@ import { resolve, basename } from 'node:path';
 const AGENTS_DIR = resolve(import.meta.dirname || __dirname, 'agents');
 const ORCHESTRATOR_FILE = resolve(import.meta.dirname || __dirname, 'brain-orchestrator.ts');
 
-const CURRENT_VERSION = '6.0.0';
+const CURRENT_VERSION = '7.0.0';
 const REQUIRED_TEMPLATE = 'ManusNativeAgent';
 
-const KNOWN_V6_AGENTS = [
+const KNOWN_V7_AGENTS = [
   'autonomous-trainer',
   'brain-consolidation',
   'brain-dmn',
@@ -59,7 +59,6 @@ const KNOWN_V6_AGENTS = [
 const UTILITY_FILES = [
   'git-code-trainer-fetcher',
   'git-signal-converter',
-  'security-hardening-agent',
 ];
 
 // ────────────────────────────────────────────────────────────────────────────

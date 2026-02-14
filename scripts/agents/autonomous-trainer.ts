@@ -82,7 +82,7 @@ interface FetchedData {
 
 export class AutonomousTrainerAgent extends ManusNativeAgent {
   readonly name = 'autonomous-trainer';
-  readonly version = '6.0.0';
+  readonly version = '7.0.0';
   readonly description = 'Trains the core brain on public data from 10 sources (FRED, GitHub, World Bank, HN, BLS, SO, Wikipedia, IMF, USPTO)';
   readonly brainRegion = 'Sensory Cortex (Region #10)';
   readonly neurologicalFunction = 'Public Data Learning';
