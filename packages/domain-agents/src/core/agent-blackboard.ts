@@ -11,7 +11,7 @@
  * unbounded array to prevent OOM under 10M+ signal load.
  */
 
-import { createLRUCache, type LRUCacheInstance } from '@nexus-ai/memory-stack/infra/lru-cache';
+import { createLRUCache, type LRUCacheInstance } from '@nexus-ai/memory-stack';
 
 // ============================================================================
 // CONSTANTS
@@ -68,16 +68,33 @@ export interface BlackboardStats {
 // ============================================================================
 
 class AgentBlackboard {
-  private entries: BlackboardEntry[] = [];
+  /**
+   * Bottleneck #2 Fix: O(1) LRU cache replaces unbounded array.
+   * Capacity: 10K entries with 30min TTL and automatic eviction.
+   */
+  private cache: LRUCacheInstance<BlackboardEntry>;
   private subscribers: Map<string, SubscriptionHandler[]> = new Map();
   private entryCounter: number = 0;
   private creationTimes: Map<string, number> = new Map();
   private consumptionTimes: Map<string, number[]> = new Map();
-  
+
   constructor() {
-    // Initialize with empty state
-    this.entries = [];
+    this.cache = createLRUCache<BlackboardEntry>({
+      maxSize: MAX_BLACKBOARD_ENTRIES,
+      defaultTTLSeconds: ENTRY_TTL_SECONDS,
+      namespace: 'blackboard',
+      onEvict: (key: string) => {
+        // Cleanup tracking maps when entries are evicted
+        this.creationTimes.delete(key);
+        this.consumptionTimes.delete(key);
+      },
+    });
     this.subscribers = new Map();
+  }
+
+  /** Get all current entries from the LRU cache */
+  private get entries(): BlackboardEntry[] {
+    return this.cache.entries().map(e => e.value);
   }
   
   /**
@@ -93,8 +110,9 @@ class AgentBlackboard {
       consumed: false,
       consumedBy: []
     };
-    
-    this.entries.push(fullEntry);
+
+    // Bottleneck #2: O(1) LRU insert instead of unbounded array push
+    this.cache.set(id, fullEntry);
     this.creationTimes.set(id, Date.now());
     
     console.log(`[Blackboard] New ${entry.entryType} posted by ${entry.agentId}: ${JSON.stringify(entry.content).substring(0, 100)}`);
@@ -228,7 +246,7 @@ class AgentBlackboard {
     const averageLatency = latencyCount > 0 ? totalLatency / latencyCount : 0;
     
     return {
-      totalEntries: this.entries.length,
+      totalEntries: this.cache.size(),
       entriesByType: entriesByType as Record<EntryType, number>,
       entriesByDomain,
       consumptionRate,
@@ -244,7 +262,7 @@ class AgentBlackboard {
     supabase: any,
     organizationId: string
   ): Promise<{ signalsStored: number; patternsStored: number }> {
-    if (this.entries.length === 0) return { signalsStored: 0, patternsStored: 0 };
+    if (this.cache.size() === 0) return { signalsStored: 0, patternsStored: 0 };
 
     const { getClientForTableInEdge } = await import('./get-brain-client.ts');
     const brainClient = getClientForTableInEdge('cross_domain_signals');
@@ -315,8 +333,8 @@ class AgentBlackboard {
    * Clear all entries (used between batch runs)
    */
   clear(): void {
-    console.log(`[Blackboard] Clearing ${this.entries.length} entries`);
-    this.entries = [];
+    console.log(`[Blackboard] Clearing ${this.cache.size()} entries`);
+    this.cache.clear();
     this.creationTimes.clear();
     this.consumptionTimes.clear();
     this.entryCounter = 0;
