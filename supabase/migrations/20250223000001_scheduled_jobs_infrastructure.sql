@@ -20,8 +20,9 @@
 --
 -- ============================================================================
 
--- Enable pg_cron extension if not already enabled
+-- Enable required extensions
 CREATE EXTENSION IF NOT EXISTS pg_cron;
+CREATE EXTENSION IF NOT EXISTS pg_net;
 
 -- ============================================================================
 -- SCHEDULED JOBS TABLE (Track job executions)
@@ -53,7 +54,7 @@ CREATE POLICY "Users can view their org's job runs"
   ON scheduled_job_runs FOR SELECT
   USING (
     organization_id IN (
-      SELECT organization_id FROM organization_members
+      SELECT organization_id FROM org_members
       WHERE user_id = auth.uid()
     )
   );

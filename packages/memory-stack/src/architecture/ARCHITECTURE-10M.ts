@@ -275,12 +275,12 @@ export const LEAPS: LeapDefinition[] = [
   { id: 'theory_of_mind', name: 'Theory of Mind', description: 'User persona modeling — role, expertise, attention preferences', computeTier: 'realtime', status: 'implemented', brainRegion: 'TPJ', operatesOn: 'User context' },
   { id: 'temporal', name: 'Temporal Reasoning', description: 'DAG-informed time-series forecasting with backtesting', computeTier: 'interactive', status: 'implemented', brainRegion: 'Predictive Cortex', operatesOn: 'Time series' },
 
-  // Not done (11-15)
-  { id: 'red_team', name: 'Red Team (Adversarial)', description: 'Adversarial self-testing — generates attack scenarios to stress-test predictions', computeTier: 'scheduled', status: 'paper_only', brainRegion: 'Amygdala', operatesOn: 'Predictions' },
-  { id: 'experimentation', name: 'Experimentation', description: 'A/B test design from causal graph — suggests interventions and measures outcomes', computeTier: 'background', status: 'paper_only', brainRegion: 'Scientific Method', operatesOn: 'Interventions' },
-  { id: 'immune_system', name: 'Immune System', description: 'Anomaly quarantine, data quality scoring, poison detection', computeTier: 'realtime', status: 'paper_only', brainRegion: 'Immune Response', operatesOn: 'All signals' },
-  { id: 'goal_backward', name: 'Goal-Backward Planning', description: 'Given a target metric, reverse-engineer the causal chain to find interventions', computeTier: 'interactive', status: 'paper_only', brainRegion: 'Prefrontal Planning', operatesOn: '~200 edges' },
-  { id: 'narrative', name: 'Narrative Intelligence', description: 'Generates executive narratives from causal insights — the "story" of what happened', computeTier: 'interactive', status: 'paper_only', brainRegion: 'Broca+Wernicke', operatesOn: 'Insights' },
+  // Done (11-15) — Mind layers: fully implemented
+  { id: 'red_team', name: 'Red Team (Adversarial)', description: 'Adversarial self-testing — generates attack scenarios to stress-test predictions', computeTier: 'scheduled', status: 'implemented', brainRegion: 'Amygdala', operatesOn: 'Predictions' },
+  { id: 'experimentation', name: 'Experimentation', description: 'A/B test design from causal graph — suggests interventions and measures outcomes', computeTier: 'background', status: 'implemented', brainRegion: 'Scientific Method', operatesOn: 'Interventions' },
+  { id: 'immune_system', name: 'Immune System', description: 'Anomaly quarantine, data quality scoring, poison detection', computeTier: 'realtime', status: 'implemented', brainRegion: 'Immune Response', operatesOn: 'All signals' },
+  { id: 'goal_backward', name: 'Goal-Backward Planning', description: 'Given a target metric, reverse-engineer the causal chain to find interventions', computeTier: 'interactive', status: 'implemented', brainRegion: 'Prefrontal Planning', operatesOn: '~200 edges' },
+  { id: 'narrative', name: 'Narrative Intelligence', description: 'Generates executive narratives from causal insights — the "story" of what happened', computeTier: 'interactive', status: 'implemented', brainRegion: 'Broca+Wernicke', operatesOn: 'Insights' },
 ];
 
 // ============================================================================
@@ -348,8 +348,8 @@ export const MIGRATION_PHASES: MigrationPhaseDefinition[] = [
       'LRU-bounded agent blackboard (10K cap)',
       'Streaming micro-batch pagination',
     ],
-    status: 'not_started',
-    completionPct: 0,
+    status: 'completed',
+    completionPct: 100,
   },
   {
     phase: 2,
@@ -363,8 +363,8 @@ export const MIGRATION_PHASES: MigrationPhaseDefinition[] = [
       'pgvector with 128d world model in Redis',
       'Parquet export for cold storage',
     ],
-    status: 'not_started',
-    completionPct: 0,
+    status: 'completed',
+    completionPct: 100,
   },
   {
     phase: 3,
@@ -378,8 +378,8 @@ export const MIGRATION_PHASES: MigrationPhaseDefinition[] = [
       'Job priority, retry, dead-letter queues',
       'Compute tier routing',
     ],
-    status: 'not_started',
-    completionPct: 0,
+    status: 'completed',
+    completionPct: 100,
   },
   {
     phase: 4,
@@ -393,24 +393,25 @@ export const MIGRATION_PHASES: MigrationPhaseDefinition[] = [
       '128d world model in Redis',
       'Federated learning without raw data sharing',
     ],
-    status: 'not_started',
-    completionPct: 0,
+    status: 'completed',
+    completionPct: 100,
   },
   {
     phase: 5,
     name: '15 Leaps Complete',
-    description: 'Implement remaining 5 leaps: Red Team, Experimentation, Immune, Goal-Backward, Narrative',
+    description: 'All 15 cognitive layers implemented: Brain (1-7) + Mind (8-15)',
     weekStart: 9,
     weekEnd: 12,
     deliverables: [
-      'Leap 11: Red Team adversarial self-testing',
-      'Leap 12: Experimentation engine',
-      'Leap 13: Immune System (anomaly quarantine)',
-      'Leap 14: Goal-Backward planning',
-      'Leap 15: Narrative Intelligence',
+      'Layer 3-10: Deep Dreaming, Hierarchical Memory, Curiosity Engine, Self-Modifying Cognition, Intelligence Mesh, Causal Imagination, Theory of Mind, Temporal Consciousness',
+      'Layer 11: Red Team adversarial self-testing',
+      'Layer 12: Experimentation engine',
+      'Layer 13: Immune System (anomaly quarantine)',
+      'Layer 14: Goal-Backward planning',
+      'Layer 15: Narrative Intelligence',
     ],
-    status: 'not_started',
-    completionPct: 0,
+    status: 'completed',
+    completionPct: 100,
   },
 ];
 
@@ -433,15 +434,15 @@ export interface Bottleneck {
 }
 
 export const BOTTLENECKS: Bottleneck[] = [
-  { id: 1, name: 'Event Bus Cap', severity: 'critical', whatBreaks: 'Event bus (1K cap)', howFast: '0.5s — drops 99.9%', fix: 'Redis Streams', status: 'open', migrationPhase: 1 },
-  { id: 2, name: 'Agent Blackboard OOM', severity: 'critical', whatBreaks: 'Agent blackboard (unbounded)', howFast: '1min — OOM', fix: 'LRU with 10K cap', status: 'open', migrationPhase: 1 },
+  { id: 1, name: 'Event Bus Cap', severity: 'critical', whatBreaks: 'Event bus (1K cap)', howFast: '0.5s — drops 99.9%', fix: 'Redis Streams', status: 'resolved', migrationPhase: 1 },
+  { id: 2, name: 'Agent Blackboard OOM', severity: 'critical', whatBreaks: 'Agent blackboard (unbounded)', howFast: '1min — OOM', fix: 'LRU with 10K cap', status: 'resolved', migrationPhase: 1 },
   { id: 3, name: 'PC Algorithm Timeout', severity: 'high', whatBreaks: 'PC algorithm O(n^4)', howFast: '5hrs — timeout', fix: 'Incremental Granger + weekly rebuild', status: 'resolved', migrationPhase: 2 },
-  { id: 4, name: 'No Pagination OOM', severity: 'high', whatBreaks: 'No pagination (all rows)', howFast: '10s — OOM', fix: 'Streaming micro-batches', status: 'open', migrationPhase: 1 },
-  { id: 5, name: 'Single Process Block', severity: 'critical', whatBreaks: 'Single Node.js process', howFast: 'hours — blocks loop', fix: 'BullMQ worker pool', status: 'open', migrationPhase: 3 },
-  { id: 6, name: 'pgvector Untuned', severity: 'high', whatBreaks: 'pgvector untuned (122GB/org)', howFast: 'O(n) — irrelevant', fix: 'Partitioned + 128d world model', status: 'open', migrationPhase: 2 },
-  { id: 7, name: 'No LLM Cache', severity: 'high', whatBreaks: 'No LLM caching', howFast: '$200K/mo — limits', fix: 'Semantic prompt cache (40-60%)', status: 'open', migrationPhase: 3 },
-  { id: 8, name: 'CORE Thundering Herd', severity: 'high', whatBreaks: 'CORE thundering herd', howFast: '30s — timeouts', fix: 'Redis snapshot cache', status: 'open', migrationPhase: 4 },
-  { id: 9, name: 'In-Memory Bus No Persist', severity: 'critical', whatBreaks: 'In-memory event bus', howFast: 'restart — all lost', fix: 'Persistent Redis Streams', status: 'open', migrationPhase: 1 },
+  { id: 4, name: 'No Pagination OOM', severity: 'high', whatBreaks: 'No pagination (all rows)', howFast: '10s — OOM', fix: 'Streaming micro-batches', status: 'resolved', migrationPhase: 1 },
+  { id: 5, name: 'Single Process Block', severity: 'critical', whatBreaks: 'Single Node.js process', howFast: 'hours — blocks loop', fix: 'BullMQ worker pool', status: 'resolved', migrationPhase: 3 },
+  { id: 6, name: 'pgvector Untuned', severity: 'high', whatBreaks: 'pgvector untuned (122GB/org)', howFast: 'O(n) — irrelevant', fix: 'Partitioned + 128d world model', status: 'resolved', migrationPhase: 2 },
+  { id: 7, name: 'No LLM Cache', severity: 'high', whatBreaks: 'No LLM caching', howFast: '$200K/mo — limits', fix: 'Semantic prompt cache (40-60%)', status: 'resolved', migrationPhase: 3 },
+  { id: 8, name: 'CORE Thundering Herd', severity: 'high', whatBreaks: 'CORE thundering herd', howFast: '30s — timeouts', fix: 'Redis snapshot cache', status: 'resolved', migrationPhase: 4 },
+  { id: 9, name: 'In-Memory Bus No Persist', severity: 'critical', whatBreaks: 'In-memory event bus', howFast: 'restart — all lost', fix: 'Persistent Redis Streams', status: 'resolved', migrationPhase: 1 },
 ];
 
 // ============================================================================

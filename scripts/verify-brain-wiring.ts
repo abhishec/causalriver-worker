@@ -49,6 +49,7 @@ async function main() {
 
   // Run all verification checks
   checks.push(...await verifyExports());
+  checks.push(...await verifyCognitiveLayers());
   checks.push(...await verifyEventBus());
   checks.push(...await verifyScheduledJobs());
   checks.push(...await verifyFeedbackLoops());
@@ -76,7 +77,7 @@ async function verifyExports(): Promise<WiringCheck[]> {
     const indexPath = path.join(process.cwd(), 'packages/memory-stack/src/index.ts');
     const indexContent = fs.readFileSync(indexPath, 'utf-8');
 
-    // Critical exports
+    // Critical exports — Core brain infrastructure
     const criticalExports = [
       'createScheduledJobs',
       'createFeedbackLoop',
@@ -88,6 +89,36 @@ async function verifyExports(): Promise<WiringCheck[]> {
       'defineActionDomain',
       'defineAgent',
     ];
+
+    // 15-Layer Cognitive Stack exports
+    const cognitiveLayerExports = [
+      // Brain layers (3-7)
+      'createDeepDreaming',           // L3: Subconscious
+      'createHierarchicalMemory',     // L4: Memory hierarchy
+      'createCuriosityEngine',        // L5: Growth
+      'createSelfModifyingCognition', // L6: Self-awareness
+      'createIntelligenceMesh',       // L7: Collective
+      // Mind layers (8-15)
+      'createCausalImagination',      // L8: Creativity
+      'createTheoryOfMind',           // L9: Empathy
+      'createTemporalConsciousness',  // L10: Time sense
+      'createRedTeam',                // L11: Skepticism
+      'createExperimentEngine',       // L12: Scientific method
+      'createImmuneSystem',           // L13: Self-defense
+      'createGoalBackwardPlanner',    // L14: Intentionality
+      'createNarrativeIntelligence',  // L15: Communication
+    ];
+
+    for (const exportName of cognitiveLayerExports) {
+      const exported = indexContent.includes(exportName);
+      checks.push({
+        category: 'Cognitive Layers (3-15)',
+        name: `Export ${exportName}`,
+        passed: exported,
+        severity: exported ? undefined : 'critical',
+        details: exported ? undefined : `Missing cognitive layer export: ${exportName}`,
+      });
+    }
 
     for (const exportName of criticalExports) {
       const exported = indexContent.includes(exportName);
@@ -112,6 +143,110 @@ async function verifyExports(): Promise<WiringCheck[]> {
     checks.push({
       category: 'Exports',
       name: 'Read index.ts',
+      passed: false,
+      severity: 'critical',
+      details: error.message,
+    });
+  }
+
+  return checks;
+}
+
+async function verifyCognitiveLayers(): Promise<WiringCheck[]> {
+  const checks: WiringCheck[] = [];
+
+  const layerFiles = [
+    { layer: 3, name: 'Deep Dreaming', file: 'leap-deep-dreaming.ts', factory: 'createDeepDreaming' },
+    { layer: 4, name: 'Hierarchical Memory', file: 'leap-hierarchical-memory.ts', factory: 'createHierarchicalMemory' },
+    { layer: 5, name: 'Curiosity Engine', file: 'leap-curiosity-engine.ts', factory: 'createCuriosityEngine' },
+    { layer: 6, name: 'Self-Modifying Cognition', file: 'leap-self-modifying-cognition.ts', factory: 'createSelfModifyingCognition' },
+    { layer: 7, name: 'Intelligence Mesh', file: 'leap-intelligence-mesh.ts', factory: 'createIntelligenceMesh' },
+    { layer: 8, name: 'Causal Imagination', file: 'leap-causal-imagination.ts', factory: 'createCausalImagination' },
+    { layer: 9, name: 'Theory of Mind', file: 'leap-theory-of-mind.ts', factory: 'createTheoryOfMind' },
+    { layer: 10, name: 'Temporal Consciousness', file: 'leap-temporal-consciousness.ts', factory: 'createTemporalConsciousness' },
+    { layer: 11, name: 'Red Team', file: 'leap-red-team.ts', factory: 'createRedTeam' },
+    { layer: 12, name: 'Experimentation', file: 'leap-experimentation.ts', factory: 'createExperimentEngine' },
+    { layer: 13, name: 'Immune System', file: 'leap-immune-system.ts', factory: 'createImmuneSystem' },
+    { layer: 14, name: 'Goal-Backward', file: 'leap-goal-backward.ts', factory: 'createGoalBackwardPlanner' },
+    { layer: 15, name: 'Narrative Intelligence', file: 'leap-narrative.ts', factory: 'createNarrativeIntelligence' },
+  ];
+
+  for (const layer of layerFiles) {
+    try {
+      const filePath = path.join(
+        process.cwd(),
+        `packages/memory-stack/src/causality/${layer.file}`
+      );
+      const fileExists = fs.existsSync(filePath);
+
+      checks.push({
+        category: 'Cognitive Layers',
+        name: `L${layer.layer}: ${layer.name} file exists`,
+        passed: fileExists,
+        severity: fileExists ? undefined : 'critical',
+        details: fileExists ? undefined : `Missing: ${layer.file}`,
+      });
+
+      if (fileExists) {
+        const content = fs.readFileSync(filePath, 'utf-8');
+
+        // Check factory function exists
+        checks.push({
+          category: 'Cognitive Layers',
+          name: `L${layer.layer}: ${layer.name} factory (${layer.factory})`,
+          passed: content.includes(`function ${layer.factory}`),
+          severity: 'critical',
+        });
+
+        // Check it exports types (interface)
+        checks.push({
+          category: 'Cognitive Layers',
+          name: `L${layer.layer}: ${layer.name} has typed interfaces`,
+          passed: content.includes('export interface'),
+          severity: 'warning',
+        });
+
+        // Check it has at least 100 lines (not a stub)
+        const lineCount = content.split('\n').length;
+        checks.push({
+          category: 'Cognitive Layers',
+          name: `L${layer.layer}: ${layer.name} is substantive (${lineCount} lines)`,
+          passed: lineCount >= 100,
+          severity: lineCount >= 100 ? undefined : 'warning',
+          details: lineCount < 100 ? `Only ${lineCount} lines — may be a stub` : undefined,
+        });
+      }
+    } catch (error: any) {
+      checks.push({
+        category: 'Cognitive Layers',
+        name: `L${layer.layer}: ${layer.name}`,
+        passed: false,
+        severity: 'critical',
+        details: error.message,
+      });
+    }
+  }
+
+  // Check ARCHITECTURE-10M.ts has all 15 as implemented
+  try {
+    const archPath = path.join(
+      process.cwd(),
+      'packages/memory-stack/src/architecture/ARCHITECTURE-10M.ts'
+    );
+    const archContent = fs.readFileSync(archPath, 'utf-8');
+    const paperOnlyCount = (archContent.match(/status: 'paper_only'/g) || []).length;
+
+    checks.push({
+      category: 'Cognitive Layers',
+      name: `All 15 leaps implemented (${15 - paperOnlyCount}/15)`,
+      passed: paperOnlyCount === 0,
+      severity: paperOnlyCount === 0 ? undefined : 'critical',
+      details: paperOnlyCount > 0 ? `${paperOnlyCount} leaps still paper_only` : '15/15 implemented',
+    });
+  } catch (error: any) {
+    checks.push({
+      category: 'Cognitive Layers',
+      name: 'ARCHITECTURE-10M.ts check',
       passed: false,
       severity: 'critical',
       details: error.message,

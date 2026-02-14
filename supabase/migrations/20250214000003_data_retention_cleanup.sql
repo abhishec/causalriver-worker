@@ -81,7 +81,7 @@ BEGIN
   -- ─────────────────────────────────────────────────────────────────────────
 
   DELETE FROM llm_cost_log
-  WHERE timestamp < NOW() - INTERVAL '12 months';
+  WHERE "timestamp" < NOW() - INTERVAL '12 months';
   GET DIAGNOSTICS v_deleted_cost_logs = ROW_COUNT;
   RAISE NOTICE '[Cleanup] Deleted % llm_cost_log records', v_deleted_cost_logs;
 
@@ -121,7 +121,7 @@ BEGIN
   -- ─────────────────────────────────────────────────────────────────────────
 
   DELETE FROM connector_signals
-  WHERE timestamp < NOW() - INTERVAL '12 months';
+  WHERE "timestamp" < NOW() - INTERVAL '12 months';
   GET DIAGNOSTICS v_deleted_old_signals = ROW_COUNT;
   RAISE NOTICE '[Cleanup] Deleted % connector_signals records', v_deleted_old_signals;
 
@@ -170,11 +170,13 @@ COMMENT ON FUNCTION cleanup_old_data() IS 'Automated data cleanup according to G
 -- SCHEDULE: Daily cleanup at 3 AM UTC
 -- ───────────────────────────────────────────────────────────────────────────
 
--- Remove existing schedule if it exists
-SELECT cron.unschedule('cleanup-old-data-daily')
-WHERE EXISTS (
-  SELECT 1 FROM cron.job WHERE jobname = 'cleanup-old-data-daily'
-);
+-- Remove existing schedule if it exists, then re-create
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM cron.job WHERE jobname = 'cleanup-old-data-daily') THEN
+    PERFORM cron.unschedule('cleanup-old-data-daily');
+  END IF;
+END $$;
 
 -- Schedule daily cleanup at 3 AM UTC
 SELECT cron.schedule(

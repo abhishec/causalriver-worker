@@ -18,7 +18,7 @@
 -- ───────────────────────────────────────────────────────────────────────────
 
 CREATE TABLE IF NOT EXISTS audit_log (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
   user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
 
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS audit_log (
   request_id UUID,               -- Request correlation ID
 
   -- Timestamp
-  timestamp TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  "timestamp" TIMESTAMPTZ DEFAULT NOW() NOT NULL,
 
   -- Additional metadata
   metadata JSONB,                -- Flexible field for event-specific data
@@ -53,17 +53,17 @@ CREATE TABLE IF NOT EXISTS audit_log (
 -- ───────────────────────────────────────────────────────────────────────────
 
 -- Primary access patterns
-CREATE INDEX idx_audit_org_time ON audit_log(organization_id, timestamp DESC);
-CREATE INDEX idx_audit_user_time ON audit_log(user_id, timestamp DESC);
+CREATE INDEX idx_audit_org_time ON audit_log(organization_id, "timestamp" DESC);
+CREATE INDEX idx_audit_user_time ON audit_log(user_id, "timestamp" DESC);
 CREATE INDEX idx_audit_resource ON audit_log(resource_type, resource_id);
-CREATE INDEX idx_audit_action ON audit_log(action, timestamp DESC);
+CREATE INDEX idx_audit_action ON audit_log(action, "timestamp" DESC);
 
 -- For security investigations
-CREATE INDEX idx_audit_ip ON audit_log(ip_address, timestamp DESC);
-CREATE INDEX idx_audit_status_time ON audit_log(status, timestamp DESC) WHERE status = 'failure';
+CREATE INDEX idx_audit_ip ON audit_log(ip_address, "timestamp" DESC);
+CREATE INDEX idx_audit_status_time ON audit_log(status, "timestamp" DESC) WHERE status = 'failure';
 
 -- For compliance reporting
-CREATE INDEX idx_audit_timestamp ON audit_log(timestamp DESC);
+CREATE INDEX idx_audit_timestamp ON audit_log("timestamp" DESC);
 
 -- ───────────────────────────────────────────────────────────────────────────
 -- ROW LEVEL SECURITY
@@ -171,19 +171,19 @@ CREATE OR REPLACE FUNCTION get_audit_trail(
   p_resource_id VARCHAR,
   p_limit INTEGER DEFAULT 100
 ) RETURNS TABLE (
-  id UUID,
-  timestamp TIMESTAMPTZ,
-  action VARCHAR,
-  user_id UUID,
-  old_value JSONB,
-  new_value JSONB,
-  metadata JSONB
+  audit_id UUID,
+  event_timestamp TIMESTAMPTZ,
+  event_action VARCHAR,
+  event_user_id UUID,
+  event_old_value JSONB,
+  event_new_value JSONB,
+  event_metadata JSONB
 ) AS $$
 BEGIN
   RETURN QUERY
   SELECT
     a.id,
-    a.timestamp,
+    a."timestamp",
     a.action,
     a.user_id,
     a.old_value,
@@ -193,15 +193,15 @@ BEGIN
   WHERE a.resource_type = p_resource_type
     AND a.resource_id = p_resource_id
     AND a.organization_id IN (
-      SELECT organization_id FROM org_members WHERE user_id = auth.uid()
+      SELECT om.organization_id FROM org_members om WHERE om.user_id = auth.uid()
     )
-  ORDER BY a.timestamp DESC
+  ORDER BY a."timestamp" DESC
   LIMIT p_limit;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Grant execute to authenticated users
-GRANT EXECUTE ON FUNCTION get_audit_trail(VARCHAR, VARCHAR, INTEGER) TO authenticated;
+GRANT EXECUTE ON FUNCTION get_audit_trail TO authenticated;
 
 -- ───────────────────────────────────────────────────────────────────────────
 -- FUNCTION: get_user_activity()
@@ -213,19 +213,19 @@ GRANT EXECUTE ON FUNCTION get_audit_trail(VARCHAR, VARCHAR, INTEGER) TO authenti
 CREATE OR REPLACE FUNCTION get_user_activity(
   p_limit INTEGER DEFAULT 50
 ) RETURNS TABLE (
-  id UUID,
-  timestamp TIMESTAMPTZ,
-  action VARCHAR,
-  resource_type VARCHAR,
-  resource_id VARCHAR,
-  status VARCHAR,
-  ip_address INET
+  audit_id UUID,
+  event_timestamp TIMESTAMPTZ,
+  event_action VARCHAR,
+  event_resource_type VARCHAR,
+  event_resource_id VARCHAR,
+  event_status VARCHAR,
+  event_ip_address INET
 ) AS $$
 BEGIN
   RETURN QUERY
   SELECT
     a.id,
-    a.timestamp,
+    a."timestamp",
     a.action,
     a.resource_type,
     a.resource_id,
@@ -233,7 +233,7 @@ BEGIN
     a.ip_address
   FROM audit_log a
   WHERE a.user_id = auth.uid()
-  ORDER BY a.timestamp DESC
+  ORDER BY a."timestamp" DESC
   LIMIT p_limit;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -252,20 +252,20 @@ CREATE OR REPLACE FUNCTION get_security_events(
   p_organization_id UUID,
   p_hours INTEGER DEFAULT 24
 ) RETURNS TABLE (
-  id UUID,
-  timestamp TIMESTAMPTZ,
-  action VARCHAR,
-  user_id UUID,
-  ip_address INET,
-  status VARCHAR,
-  error_message TEXT
+  audit_id UUID,
+  event_timestamp TIMESTAMPTZ,
+  event_action VARCHAR,
+  event_user_id UUID,
+  event_ip_address INET,
+  event_status VARCHAR,
+  event_error_message TEXT
 ) AS $$
 BEGIN
   -- Check user has access to this organization
   IF NOT EXISTS (
-    SELECT 1 FROM org_members
-    WHERE organization_id = p_organization_id
-    AND user_id = auth.uid()
+    SELECT 1 FROM org_members om
+    WHERE om.organization_id = p_organization_id
+    AND om.user_id = auth.uid()
   ) THEN
     RAISE EXCEPTION 'Access denied to organization';
   END IF;
@@ -273,7 +273,7 @@ BEGIN
   RETURN QUERY
   SELECT
     a.id,
-    a.timestamp,
+    a."timestamp",
     a.action,
     a.user_id,
     a.ip_address,
@@ -281,14 +281,14 @@ BEGIN
     a.error_message
   FROM audit_log a
   WHERE a.organization_id = p_organization_id
-    AND a.timestamp > NOW() - (p_hours || ' hours')::INTERVAL
+    AND a."timestamp" > NOW() - (p_hours || ' hours')::INTERVAL
     AND (
       a.status = 'failure'
       OR a.action LIKE '%login%'
       OR a.action LIKE '%permission%'
       OR a.action LIKE '%api_key%'
     )
-  ORDER BY a.timestamp DESC;
+  ORDER BY a."timestamp" DESC;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 

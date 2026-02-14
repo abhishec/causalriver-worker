@@ -1647,6 +1647,149 @@ export {
 } from './federation/core-snapshot-cache';
 
 // ============================================================================
+// LAYER 3: DEEP DREAMING — Subconscious Processing (Default Mode Network)
+// ============================================================================
+
+export {
+  createDeepDreaming,
+  type DeepDreamingConfig,
+  type DeepDreamingInstance,
+  type DreamAssociation,
+  type DreamEvidence,
+  type DreamCycleResult,
+  type DreamStats,
+  type DreamSignal,
+  type DreamEdge,
+  type DreamPattern,
+  type ReplaySequence,
+} from './causality/leap-deep-dreaming';
+
+// ============================================================================
+// LAYER 4: HIERARCHICAL MEMORY — Working / Episodic / Semantic (Hippocampus)
+// ============================================================================
+
+export {
+  createHierarchicalMemory,
+  type HierarchicalMemoryConfig,
+  type HierarchicalMemoryInstance,
+  type WorkingMemoryItem,
+  type Episode,
+  type EpisodicEvent,
+  type SemanticFact,
+  type MemoryRetrievalResult as HierarchicalMemoryRetrievalResult,
+  type ConsolidationResult as HierarchicalConsolidationResult,
+  type HierarchicalMemoryStats,
+} from './causality/leap-hierarchical-memory';
+
+// ============================================================================
+// LAYER 5: CURIOSITY ENGINE — Intrinsic Motivation & Active Learning
+// ============================================================================
+
+export {
+  createCuriosityEngine,
+  type CuriosityEngineConfig,
+  type CuriosityEngineInstance,
+  type Hypothesis,
+  type HypothesisTestResult,
+  type CuriositySignal,
+  type KnowledgeGap,
+  type ExplorationStrategy,
+  type CuriosityReport,
+  type CuriosityEdge,
+} from './causality/leap-curiosity-engine';
+
+// ============================================================================
+// LAYER 6: SELF-MODIFYING COGNITION — Metacognition & Self-Awareness (mPFC)
+// ============================================================================
+
+export {
+  createSelfModifyingCognition,
+  type SelfModifyingCognitionConfig,
+  type SelfModifyingCognitionInstance,
+  type SelfModel,
+  type DomainCapability,
+  type BlindSpot,
+  type CalibrationProfile,
+  type CalibrationBucket,
+  type ProcessingStrategy,
+  type ResourceAllocation,
+  type Belief,
+  type BeliefRevisionResult,
+  type PredictionRecord,
+  type SelfAssessmentReport,
+} from './causality/leap-self-modifying-cognition';
+
+// ============================================================================
+// LAYER 7: INTELLIGENCE MESH — Collective Intelligence (Corpus Callosum)
+// ============================================================================
+
+export {
+  createIntelligenceMesh,
+  type IntelligenceMeshConfig,
+  type IntelligenceMeshInstance,
+  type OrgTrustProfile,
+  type CollectivePattern,
+  type KnowledgeConflict,
+  type MeshContribution,
+  type CollectiveSensingResult,
+  type MeshStats,
+} from './causality/leap-intelligence-mesh';
+
+// ============================================================================
+// LAYER 8: CAUSAL IMAGINATION — Creativity Beyond Training Data (DMN+PFC)
+// ============================================================================
+
+export {
+  createCausalImagination,
+  type CausalImaginationConfig,
+  type CausalImaginationInstance,
+  type NovelHypothesis,
+  type Scenario,
+  type ScenarioIntervention,
+  type ScenarioOutcome,
+  type Contingency,
+  type Analogy,
+  type ImaginationResult,
+  type ImaginationEdge,
+  type ImaginationStats,
+} from './causality/leap-causal-imagination';
+
+// ============================================================================
+// LAYER 9: THEORY OF MIND — Empathy & Perspective-Taking (TPJ)
+// ============================================================================
+
+export {
+  createTheoryOfMind,
+  type TheoryOfMindConfig,
+  type TheoryOfMindInstance,
+  type UserModel,
+  type CognitiveState,
+  type Interaction as TheoryOfMindInteraction,
+  type IntentPrediction,
+  type Perspective,
+  type ResponseParameters,
+  type TheoryOfMindStats,
+} from './causality/leap-theory-of-mind';
+
+// ============================================================================
+// LAYER 10: TEMPORAL CONSCIOUSNESS — Time Sense (Predictive Cortex)
+// ============================================================================
+
+export {
+  createTemporalConsciousness,
+  type TemporalConsciousnessConfig,
+  type TemporalConsciousnessInstance,
+  type TemporalAwareness,
+  type TemporalContext,
+  type OrganizationalRhythm,
+  type TemporalGoal,
+  type TemporalGoalStatus,
+  type TimelineEvent as TemporalTimelineEvent,
+  type TemporalSignal,
+  type TemporalStats,
+} from './causality/leap-temporal-consciousness';
+
+// ============================================================================
 // LEAP 11: RED TEAM — Adversarial Self-Testing (Amygdala)
 // ============================================================================
 
