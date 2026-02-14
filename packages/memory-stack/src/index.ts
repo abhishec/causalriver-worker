@@ -195,6 +195,17 @@ export {
   type EventHandler,
 } from './causality/event-bus';
 
+// Outcome Tracker (observation windows, DID estimation, effect measurement)
+export {
+  createOutcomeTracker,
+  createDefaultMetricFetcher,
+  type ObservationWindow,
+  type ObservationCheckpoint,
+  type EffectEstimate,
+  type OutcomeTrackerConfig,
+  type MetricFetcher,
+} from './causality/outcome-tracker';
+
 // Causal Discovery Runner
 export {
   runCausalDiscovery,
@@ -852,15 +863,8 @@ export {
   SEaaSService,
   createSEaaSService,
   type SEaaSConfig,
-  type CodeReviewRequest,
-  type FeatureBuildRequest,
-  type CodebaseAnalysisRequest,
-  type TechDebtAuditRequest,
   type JobRequest,
-  type JobResult,
-  type JobStatus,
-  type AuthContext,
-  type RateLimitInfo,
+  type JobResult as SEaaSJobResult,
   type SEaaSMetrics,
 } from './orchestrator/se-aas-service';
 

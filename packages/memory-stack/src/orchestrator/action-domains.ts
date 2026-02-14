@@ -4948,7 +4948,7 @@ export const calibrationAuditDomain: ActionDomainDefinition = defineActionDomain
       confidence,
       drivers: predictions.slice(0, 5).map(p => ({
         domain: p.domain, weight: Math.abs(p.predicted - p.actual) / (Math.abs(p.actual) + 0.001),
-        lagDays: 0, direction: (p.predicted > p.actual ? 'positive' : 'negative') as const,
+        lagDays: 0, direction: (p.predicted > p.actual ? 'positive' : 'negative') as 'positive' | 'negative',
       })),
       interventions: recalibrationAdjustments.map(adj => ({
         action: `Recalibrate ${adj.domain}: apply ${adj.adjustmentFactor}x multiplier to confidence`,

@@ -1083,6 +1083,13 @@ export function createActionDomainRegistry(config: ActionDomainRegistryConfig = 
       enabled: boolean;
     }>;
     recentHistory: DomainExecutionRecord[];
+    // V8: Query cache stats
+    cacheHitRate: number;
+    cacheMissRate: number;
+    cacheSize: number;
+    cacheHits: number;
+    cacheMisses: number;
+    cacheSavedMs: number;
   } {
     const all = Array.from(domains.values());
     const totalExec = all.reduce((s, d) => s + d.totalExecutions, 0);

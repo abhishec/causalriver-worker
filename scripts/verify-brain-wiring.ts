@@ -490,19 +490,28 @@ async function verifyBridges(): Promise<WiringCheck[]> {
       if (bridgeExists) {
         const bridgeContent = fs.readFileSync(bridgePath, 'utf-8');
 
-        checks.push({
-          category: 'Bridges',
-          name: `${bridge}: event subscription`,
-          passed: bridgeContent.includes('subscribe') || bridgeContent.includes('on('),
-          severity: 'warning',
-        });
+        // signal-to-eventbus is entry point (no subscription expected)
+        const expectSubscription = bridge !== 'signal-to-eventbus';
+        // patterns-to-agents is cache-only (no emission expected)
+        const expectEmission = bridge !== 'patterns-to-agents';
 
-        checks.push({
-          category: 'Bridges',
-          name: `${bridge}: event emission`,
-          passed: bridgeContent.includes('emit') || bridgeContent.includes('publish'),
-          severity: 'warning',
-        });
+        if (expectSubscription) {
+          checks.push({
+            category: 'Bridges',
+            name: `${bridge}: event subscription`,
+            passed: bridgeContent.includes('subscribe') || bridgeContent.includes('on('),
+            severity: 'warning',
+          });
+        }
+
+        if (expectEmission) {
+          checks.push({
+            category: 'Bridges',
+            name: `${bridge}: event emission`,
+            passed: bridgeContent.includes('emit') || bridgeContent.includes('publish'),
+            severity: 'warning',
+          });
+        }
       }
     } catch (error: any) {
       checks.push({
