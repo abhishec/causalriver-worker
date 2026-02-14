@@ -1,0 +1,417 @@
+/**
+ * Natural Language Query Router (Phase 3)
+ *
+ * THE UNIFIED BRAIN'S "MOUTH" - Entry point for all natural language queries
+ *
+ * Integrates:
+ * - Brain Context Builder (intent + domain detection)
+ * - Action Domain Registry (execution)
+ * - Copilot Framework (Claude streaming + memory)
+ * - Conversation Manager (hippocampus)
+ * - Quality Gates (response validation)
+ *
+ * This is the SINGLE ENTRY POINT for natural language - no redundant systems.
+ *
+ * @module orchestrator/natural-language-query-router
+ */
+
+import type { BrainContextBuilder, BrainIntent } from './brain-context-builder';
+import type { ActionDomainRegistry } from './action-domain-registry';
+import type { CopilotInstance } from './copilot-framework';
+import { buildCopilotPrompt } from './copilot-framework';
+
+export interface NaturalLanguageQuery {
+  question: string; // User's natural language question
+  conversationId?: string; // For conversation continuity
+  userId?: string; // For personalization
+  scope?: {
+    // Optional scope
+    repositories?: string[];
+    domains?: string[];
+    timeRange?: { start: Date; end: Date };
+  };
+}
+
+export interface QueryResult {
+  answer: string; // Natural language response
+  confidence: number; // 0-1
+  processingTime: number; // milliseconds
+  route: 'fast_query' | 'action_domain' | 'agent'; // Which path was taken
+  data?: any; // Structured data (optional)
+  citations?: Array<{
+    // Grounding sources
+    source: string;
+    type: 'causal_edge' | 'pattern' | 'rule' | 'data';
+    content: string;
+  }>;
+  qualityScore?: number; // Quality gate score
+  conversationContext?: {
+    // Updated conversation
+    turn: number;
+    history: string[];
+  };
+}
+
+export interface QueryRouterConfig {
+  brainContextBuilder: BrainContextBuilder;
+  actionDomainRegistry: ActionDomainRegistry;
+  copilotInstance: CopilotInstance;
+  dispatchThresholds?: {
+    fastQueryComplexity: number; // Max complexity for fast path
+    agentComplexity: number; // Min complexity for agent orchestration
+  };
+}
+
+/**
+ * Natural Language Query Router
+ *
+ * THE UNIFIED BRAIN INTERFACE
+ */
+export class NaturalLanguageQueryRouter {
+  private brainContext: BrainContextBuilder;
+  private actionDomains: ActionDomainRegistry;
+  private copilot: CopilotInstance;
+  private thresholds: {
+    fastQueryComplexity: number;
+    agentComplexity: number;
+  };
+
+  constructor(config: QueryRouterConfig) {
+    this.brainContext = config.brainContextBuilder;
+    this.actionDomains = config.actionDomainRegistry;
+    this.copilot = config.copilotInstance;
+    this.thresholds = config.dispatchThresholds || {
+      fastQueryComplexity: 3,
+      agentComplexity: 8,
+    };
+  }
+
+  /**
+   * Route natural language query through unified brain
+   *
+   * This is THE single entry point for all NL queries
+   */
+  async route(query: NaturalLanguageQuery): Promise<QueryResult> {
+    const startTime = Date.now();
+
+    // STEP 1: Detect intent + domains from natural language
+    const intent = this.brainContext.detectIntent(query.question);
+    const domains = this.brainContext.extractDomains(query.question);
+
+    // STEP 2: Assess complexity and determine route
+    const assessment = this.assessComplexity(query.question, intent, domains);
+
+    // STEP 3: Route based on complexity
+    let result: QueryResult;
+    if (assessment.route === 'fast_query') {
+      result = await this.executeFastQuery(query, intent, domains);
+    } else if (assessment.route === 'action_domain') {
+      result = await this.executeActionDomain(query, intent, domains);
+    } else {
+      result = await this.executeAgent(query, intent, domains);
+    }
+
+    // STEP 4: Add metadata
+    result.processingTime = Date.now() - startTime;
+    result.route = assessment.route;
+
+    return result;
+  }
+
+  /**
+   * FAST PATH: Simple lookup queries
+   *
+   * Examples:
+   * - "What is the current MRR?"
+   * - "How many engineers do we have?"
+   * - "What's the latest deployment?"
+   */
+  private async executeFastQuery(
+    query: NaturalLanguageQuery,
+    intent: BrainIntent,
+    domains: string[]
+  ): Promise<QueryResult> {
+    // Fast queries bypass action domains - direct lookup
+    const domain = domains[0] || 'code';
+
+    // Build minimal context (no heavy graph queries)
+    const context = await this.brainContext.build({
+      domains: [domain],
+      intent: intent.intent,
+      includeTrainedKnowledge: false, // Skip for speed
+      includeCausalEdges: false,
+      includePatterns: false,
+    });
+
+    // Simple prompt (no action domain execution)
+    const prompt = `You are a fast query assistant. Answer the user's question directly based on the provided context.
+
+Context:
+${JSON.stringify(context, null, 2)}
+
+User question: ${query.question}
+
+Provide a concise, direct answer.`;
+
+    // Stream from Claude (but collect for fast path)
+    const stream = await this.copilot.chat(query.question, {
+      conversationId: query.conversationId,
+      systemPrompt: prompt,
+    });
+
+    const answer = await this.collectStream(stream);
+
+    return {
+      answer,
+      confidence: 0.8, // Fast path = medium confidence
+      processingTime: 0, // Will be set by caller
+      route: 'fast_query',
+    };
+  }
+
+  /**
+   * ACTION DOMAIN PATH: Complex reasoning
+   *
+   * Examples:
+   * - "What happens if we increase marketing spend by 20%?"
+   * - "Which PRs have the highest technical debt risk?"
+   * - "How would changing the pricing tier affect churn?"
+   */
+  private async executeActionDomain(
+    query: NaturalLanguageQuery,
+    intent: BrainIntent,
+    domains: string[]
+  ): Promise<QueryResult> {
+    // Build full brain context (includes causal graph, patterns, rules)
+    const context = await this.brainContext.build({
+      domains,
+      intent: intent.intent,
+      includeTrainedKnowledge: true,
+      includeCausalEdges: true,
+      includePatterns: true,
+      conversationHistory: query.conversationId
+        ? await this.getConversationHistory(query.conversationId)
+        : undefined,
+    });
+
+    // Select action domain based on intent
+    const domainId = this.selectActionDomain(intent.intent);
+
+    // Execute action domain with full brain context
+    const domainResult = await this.actionDomains.execute(domainId, {
+      input: {
+        query: query.question,
+        scope: query.scope,
+      },
+      brain: context,
+    });
+
+    // Build copilot prompt using action domain result
+    const copilotPrompt = buildCopilotPrompt(
+      {
+        // Domain adapter (minimal - real data comes from domainResult)
+        getDataSnapshot: async () => domainResult.data || {},
+        getInsights: async () => domainResult.insights || [],
+        getOutputSections: () => [
+          { id: 'answer', title: 'Answer', required: true },
+          { id: 'reasoning', title: 'Reasoning', required: false },
+          { id: 'recommendations', title: 'Recommendations', required: false },
+        ],
+        getQualityRules: () => [
+          { type: 'number_grounding', threshold: 0.9 },
+          { type: 'citation_required', minCitations: 1 },
+        ],
+      },
+      intent.intent as any,
+      domainResult
+    );
+
+    // Stream from Claude with domain-enriched prompt
+    const stream = await this.copilot.chat(query.question, {
+      conversationId: query.conversationId,
+      systemPrompt: copilotPrompt,
+    });
+
+    const answer = await this.collectStream(stream);
+
+    // Extract citations from domain result
+    const citations = this.extractCitations(domainResult);
+
+    return {
+      answer,
+      confidence: domainResult.confidence || 0.9,
+      processingTime: 0,
+      route: 'action_domain',
+      data: domainResult.data,
+      citations,
+      qualityScore: domainResult.qualityScore,
+    };
+  }
+
+  /**
+   * AGENT PATH: Autonomous execution
+   *
+   * Examples:
+   * - "Analyze the entire codebase and create a refactoring plan"
+   * - "Build a predictive model for customer churn based on all available data"
+   * - "Investigate why revenue dropped last quarter and propose fixes"
+   */
+  private async executeAgent(
+    query: NaturalLanguageQuery,
+    intent: BrainIntent,
+    domains: string[]
+  ): Promise<QueryResult> {
+    // For now, agent path delegates to action domain
+    // TODO: Implement brain-agent-fusion integration
+    return this.executeActionDomain(query, intent, domains);
+  }
+
+  /**
+   * Assess query complexity and determine routing
+   */
+  private assessComplexity(
+    question: string,
+    intent: BrainIntent,
+    domains: string[]
+  ): {
+    route: 'fast_query' | 'action_domain' | 'agent';
+    complexity: number;
+    reasoning: string;
+  } {
+    let complexity = 0;
+
+    // Factor 1: Question length (longer = more complex)
+    if (question.length > 200) complexity += 2;
+    else if (question.length > 100) complexity += 1;
+
+    // Factor 2: Multi-domain (affects >1 domain)
+    if (domains.length > 1) complexity += 2;
+
+    // Factor 3: Intent complexity
+    const complexIntents = ['forecast', 'simulate', 'optimize', 'diagnose', 'compare'];
+    if (complexIntents.includes(intent.intent)) complexity += 3;
+
+    // Factor 4: Keywords indicating complexity
+    const complexKeywords = ['what if', 'analyze', 'investigate', 'predict', 'optimize', 'plan'];
+    const hasComplexKeyword = complexKeywords.some((kw) =>
+      question.toLowerCase().includes(kw)
+    );
+    if (hasComplexKeyword) complexity += 2;
+
+    // Determine route
+    let route: 'fast_query' | 'action_domain' | 'agent';
+    let reasoning: string;
+
+    if (complexity <= this.thresholds.fastQueryComplexity) {
+      route = 'fast_query';
+      reasoning = 'Simple lookup - fast path';
+    } else if (complexity < this.thresholds.agentComplexity) {
+      route = 'action_domain';
+      reasoning = 'Complex reasoning - action domain';
+    } else {
+      route = 'agent';
+      reasoning = 'Highly complex - autonomous agent';
+    }
+
+    return { route, complexity, reasoning };
+  }
+
+  /**
+   * Select action domain based on intent
+   */
+  private selectActionDomain(intent: string): string {
+    // Map intent to action domain ID
+    const intentToDomain: Record<string, string> = {
+      forecast: 'forecast',
+      simulate: 'simulate',
+      explain: 'explain-causal',
+      diagnose: 'diagnose',
+      compare: 'compare',
+      recommend: 'recommend',
+      analyze: 'codebase-comprehend',
+      monitor: 'monitor',
+      optimize: 'optimize',
+      audit: 'audit',
+    };
+
+    return intentToDomain[intent] || 'explain-causal'; // Default
+  }
+
+  /**
+   * Extract citations from domain result for grounding
+   */
+  private extractCitations(domainResult: any): Array<{
+    source: string;
+    type: 'causal_edge' | 'pattern' | 'rule' | 'data';
+    content: string;
+  }> {
+    const citations: Array<any> = [];
+
+    // Extract causal edges
+    if (domainResult.causalEdges) {
+      for (const edge of domainResult.causalEdges.slice(0, 3)) {
+        citations.push({
+          source: `Causal: ${edge.source} → ${edge.target}`,
+          type: 'causal_edge',
+          content: `${edge.source} causes ${edge.target} (strength: ${edge.strength.toFixed(2)})`,
+        });
+      }
+    }
+
+    // Extract patterns
+    if (domainResult.patterns) {
+      for (const pattern of domainResult.patterns.slice(0, 2)) {
+        citations.push({
+          source: `Pattern: ${pattern.id}`,
+          type: 'pattern',
+          content: pattern.description || pattern.title,
+        });
+      }
+    }
+
+    // Extract rules
+    if (domainResult.rules) {
+      for (const rule of domainResult.rules.slice(0, 2)) {
+        citations.push({
+          source: `Rule: ${rule.id}`,
+          type: 'rule',
+          content: rule.title,
+        });
+      }
+    }
+
+    return citations;
+  }
+
+  /**
+   * Get conversation history from conversation manager
+   */
+  private async getConversationHistory(conversationId: string): Promise<string[]> {
+    // TODO: Integrate with ConversationManager from copilot-framework
+    return [];
+  }
+
+  /**
+   * Collect stream into single response
+   */
+  private async collectStream(stream: AsyncIterable<any>): Promise<string> {
+    let fullResponse = '';
+    for await (const chunk of stream) {
+      if (chunk.content) {
+        fullResponse += chunk.content;
+      }
+    }
+    return fullResponse.trim();
+  }
+}
+
+/**
+ * Create natural language query router instance
+ *
+ * THE BRAIN'S MOUTH - single entry point for all NL queries
+ */
+export function createNaturalLanguageQueryRouter(
+  config: QueryRouterConfig
+): NaturalLanguageQueryRouter {
+  return new NaturalLanguageQueryRouter(config);
+}

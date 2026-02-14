@@ -977,6 +977,17 @@ export {
   type CopilotLogger,
 } from './orchestrator/copilot-framework';
 
+// Natural Language Query Router (Phase 3) — THE BRAIN'S MOUTH (unified NL entry point)
+// Integrates: Brain Context Builder + Action Domains + Copilot Framework + Conversation Memory
+// Routes natural language queries through the unified brain architecture (no redundant systems)
+export {
+  createNaturalLanguageQueryRouter,
+  NaturalLanguageQueryRouter,
+  type NaturalLanguageQuery,
+  type QueryResult,
+  type QueryRouterConfig,
+} from './orchestrator/natural-language-query-router';
+
 // Brain Pipeline — Corpus Callosum connecting all brain regions
 export {
   createBrainPipeline,
