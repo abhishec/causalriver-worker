@@ -87,6 +87,7 @@ export type AgentTrigger =
   | `event:${string}`       // Brain event: 'event:anomaly_detected', 'event:cascade_forming'
   | `signal:${string}`      // Signal threshold: 'signal:churn_rate>0.1'
   | `agent:${string}`       // After another agent: 'agent:triage-alert:completed'
+  | `command:${string}`     // User command: 'command:build_balance_sheet', 'command:run_audit'
   | `manual`;               // Only triggered manually
 
 /** The agent definition — what you write to create an agent */
