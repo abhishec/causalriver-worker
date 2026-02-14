@@ -27,7 +27,6 @@ import { fetchAllRepos, type RepoData } from './git-code-trainer-fetcher';
 import { convertRepoToSignals, buildGitTrainingPacks } from './git-signal-converter';
 import { storeConnectorSignals } from '../../packages/memory-stack/src/connectors/connector-framework';
 import { createBrainTrainer } from '../../packages/memory-stack/src/learning/brain-trainer';
-import { createSupabaseRepository } from '../../packages/memory-stack/src/persistence/supabase-repository';
 import { createScheduledJobs } from '../../packages/memory-stack/src/orchestrator/scheduled-jobs';
 import type { ConnectorSignal } from '../../packages/memory-stack/src/connectors/connector-framework';
 import type { TrainingPack } from '../../packages/memory-stack/src/learning/brain-trainer';
@@ -187,12 +186,11 @@ export class GitCodeTrainerAgent extends BaseTrainingAgent {
 
     // Run brain trainer with training packs
     try {
-      const repo = createSupabaseRepository(this.supabase);
-      const trainer = createBrainTrainer(repo, this.organizationId);
-      const trainResult = await trainer.train(packs);
+      const trainer = createBrainTrainer();
+      const trainResult = await trainer.trainBatch(this.supabase, this.organizationId, packs);
       result.packsProcessed = packs.length;
-      result.discoveries = trainResult?.memoriesCreated ?? 0;
-      this.log('TRAIN', `Brain trainer: ${packs.length} packs processed, ${result.discoveries} memories created`);
+      result.discoveries = trainResult?.casesLoaded ?? 0;
+      this.log('TRAIN', `Brain trainer: ${packs.length} packs processed, ${trainResult.causalEdgesLoaded} causal edges, ${trainResult.rulesLoaded} rules loaded`);
     } catch (err) {
       this.logError('TRAIN', 'Brain trainer failed', err);
       this.errors.push(`Brain trainer: ${err instanceof Error ? err.message : String(err)}`);
