@@ -227,7 +227,7 @@ export type AgentEvent =
 type EventListener = (event: AgentEvent) => void;
 
 /** Simple in-memory event bus for agent triggers */
-export function createEventBus() {
+export function createAgentEventBus() {
   const listeners = new Map<string, Set<EventListener>>();
 
   function on(eventType: string, listener: EventListener): () => void {
@@ -255,7 +255,7 @@ export function createEventBus() {
   return { on, emit };
 }
 
-export type AgentEventBus = ReturnType<typeof createEventBus>;
+export type AgentEventBus = ReturnType<typeof createAgentEventBus>;
 
 // ============================================================================
 // SIGNAL LOADER — Loads brain context from database
@@ -385,7 +385,7 @@ export function createAgentRegistry(config: AgentRegistryConfig = {}) {
   let brainContextLoadedAt = 0;
   const BRAIN_CONTEXT_TTL = 5 * 60 * 1000; // Cache for 5 minutes
 
-  const eventBus = createEventBus();
+  const eventBus = createAgentEventBus();
 
   const log = verbose ? (...args: unknown[]) => console.log('[AgentRegistry]', ...args) : () => {};
 

@@ -619,7 +619,7 @@ export {
 export {
   defineAgent,
   createAgentRegistry,
-  createEventBus,
+  createAgentEventBus,
   loadBrainContextFromDatabase,
   type AgentLevel,
   type AgentRunStatus,
