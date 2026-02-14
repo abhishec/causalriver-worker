@@ -11,6 +11,10 @@ RUN npm install -g pnpm@9
 RUN apk add --no-cache python3 py3-pip github-cli && \
     pip3 install --break-system-packages openai tqdm requests
 
+# Security: Create non-root user for production
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nexusbrain -u 1001 -G nodejs
+
 WORKDIR /app
 
 # Copy workspace config files first (for layer caching)
@@ -33,6 +37,10 @@ COPY scripts/ scripts/
 # Copy entrypoint
 COPY docker-entrypoint.sh /app/docker-entrypoint.sh
 RUN chmod +x /app/docker-entrypoint.sh
+
+# Security: Set ownership and switch to non-root user
+RUN chown -R nexusbrain:nodejs /app
+USER nexusbrain
 
 # Default environment
 ENV NODE_ENV=production

@@ -1,12 +1,27 @@
 /**
  * Agent Blackboard - Real-Time Inter-Agent Communication
- * 
+ *
  * Implements the Blackboard Architecture Pattern for enterprise AI agents.
  * Allows agents to share discoveries mid-execution, enabling true collaborative
  * intelligence like Manus-style multi-agent systems.
- * 
+ *
  * Part of Phase 8.3: Enterprise AI Agent Transformation
+ *
+ * Bottleneck #2 Fix: Uses LRU cache (10K capacity, O(1) ops) instead of
+ * unbounded array to prevent OOM under 10M+ signal load.
  */
+
+import { createLRUCache, type LRUCacheInstance } from '@nexus-ai/memory-stack/infra/lru-cache';
+
+// ============================================================================
+// CONSTANTS
+// ============================================================================
+
+/** Maximum number of entries in the blackboard before LRU eviction kicks in */
+const MAX_BLACKBOARD_ENTRIES = 10_000;
+
+/** TTL for blackboard entries in seconds (30 minutes) */
+const ENTRY_TTL_SECONDS = 1800;
 
 // ============================================================================
 // TYPES
