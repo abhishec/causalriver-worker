@@ -166,6 +166,9 @@ class OrgUpdaterAgent extends ManusNativeAgent {
     });
   }
 
+  // Store last fetch result for motor command generation
+  private lastFetchResult?: FetchResult;
+
   // ──────────────────────────────────────────────────────────────────────────
   // FETCH: Read org_connectors → create connectors → sync all via SyncManager
   // ──────────────────────────────────────────────────────────────────────────
@@ -436,9 +439,6 @@ class OrgUpdaterAgent extends ManusNativeAgent {
     return commands;
   }
 
-  // Store last fetch result for motor command generation
-  private lastFetchResult?: FetchResult;
-
   // ── Logging helpers ─────────────────────────────────────────────────────
   private _log(stage: string, message: string): void {
     const time = new Date().toISOString().substring(11, 19);
@@ -465,7 +465,7 @@ import { globalRegistry } from '../agent-framework/agent-registry';
 globalRegistry.register({
   name: 'org-updater',
   description: 'Org Heartbeat — Syncs all connected integrations, triggers learning cycles, ensures per-org brain health',
-  version: '8.0.0',
+  version: '7.0.0',
   factory: (config) => {
     return new OrgUpdaterAgent(config) as any;
   },

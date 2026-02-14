@@ -1,0 +1,44 @@
+**Observation Log:**
+
+- [FACT] The user is planning a trip to San Diego.
+- [PREFERENCE] The user is a huge rollercoaster fan.
+- [EVENT] The user rode the Mako, Kraken, and Manta rollercoasters all in one night at SeaWorld San Diego in July.
+- [ASSISTANT_SAID] The assistant congratulated the user on riding three rollercoasters in one night at SeaWorld San Diego.
+- [ASSISTANT_SAID] The assistant provided a list of must-see attractions in San Diego, including:
+  - SeaWorld San Diego
+  - Belmont Park
+  - Legoland California
+  - San Diego Zoo
+  - Balboa Park
+  - USS Midway Museum
+  - La Jolla Cove
+  - Gaslamp Quarter
+  - Coronado Island
+  - Torrey Pines State Natural Reserve
+- [ASSISTANT_SAID] The assistant suggested checking the attractions' websites for operating hours, ticket prices, and any special events or closures.
+- [ASSISTANT_SAID] The assistant mentioned that San Diego has a great public transportation system, including buses and the Trolley.
+- [EVENT] The user expressed interest in visiting the San Diego Zoo.
+- [ASSISTANT_SAID] The assistant provided information about the Nighttime Zoo event at the San Diego Zoo, including:
+  - Extended hours until 9:00 PM
+  - Live music and entertainment
+  - Animal encounters and exhibits open late
+  - Special activities and food options
+  - Tips for visiting, including checking the schedule and ticket information
+- [PREFERENCE] The user has experienced something similar to the Nighttime Zoo at another zoo, where they saw pandas eating dinner.
+- [ASSISTANT_SAID] The assistant provided tips for planning a day at the San Diego Zoo, including:
+  - Arriving early
+  - Starting with popular exhibits
+  - Taking breaks
+  - Exploring less crowded areas
+  - Considering guided tours
+  - Downloading the San Diego Zoo app
+  - Wearing comfortable shoes and bringing sunscreen
+- [EVENT] The user mentioned interacting with a dolphin up close at SeaWorld San Diego during their Summer Nights event.
+- [ASSISTANT_SAID] The assistant confirmed the user’s experience and mentioned that the San Diego Zoo offers various animal encounters, including the Animal Encounters program.
+- [EVENT] The user inquired about the new tiger exhibit at the San Diego Zoo.
+- [ASSISTANT_SAID] The assistant provided details about the Tiger Trail exhibit, including:
+  - Naturalistic habitat for Sumatran tigers
+  - Large viewing areas and a tunnel for close-up views
+  - Use of technology for tracking tiger movements
+  - Conservation efforts for the critically endangered Sumatran tiger
+- [PREFERENCE] The user expressed interest in learning more about conservation efforts and
