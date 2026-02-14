@@ -81,6 +81,18 @@ jobs:
           SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
+          # Skip full security scan if Supabase secrets aren't configured
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_SERVICE_ROLE_KEY" ]; then
+            echo "⚠️  SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY not configured."
+            echo "   Skipping Supabase-dependent security scan."
+            echo "   Running static analysis only (npm audit + gitleaks)."
+            echo ""
+            echo "   To enable full scans, add SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY"
+            echo "   to your repository secrets at:"
+            echo "   Settings → Secrets and variables → Actions"
+            exit 0
+          fi
+
           if [ "${{ github.event.inputs.dry_run }}" = "true" ] || [ "${{ github.event_name }}" = "pull_request" ]; then
             npm run security:scan:dry
           else

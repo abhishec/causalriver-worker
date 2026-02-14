@@ -37,7 +37,12 @@ const envPath = path.join(__dirname, '..', '.env');
 const result = dotenv.config({ path: envPath });
 
 if (result.error) {
-  console.error('Failed to load .env file:', result.error);
+  // .env file is optional in CI — secrets come from environment
+  if (process.env.CI) {
+    console.log('ℹ️  No .env file found (CI environment — using injected secrets)');
+  } else {
+    console.error('Failed to load .env file:', result.error);
+  }
 }
 
 // Debug: Check if vars loaded
@@ -48,9 +53,14 @@ console.log('  DEFAULT_ORG_ID:', process.env.DEFAULT_ORG_ID || '(using default)'
 
 if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
   console.error('\n❌ ERROR: Missing required environment variables');
-  console.error('   SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set in .env file');
+  console.error('   SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set.');
+  console.error('');
+  console.error('   For local development: Add them to .env file');
   console.error(`   Tried loading from: ${envPath}`);
   console.error(`   File exists: ${require('fs').existsSync(envPath) ? 'YES' : 'NO'}`);
+  console.error('');
+  console.error('   For CI/CD: Add them as repository secrets');
+  console.error('   Settings → Secrets and variables → Actions');
   process.exit(1);
 }
 
