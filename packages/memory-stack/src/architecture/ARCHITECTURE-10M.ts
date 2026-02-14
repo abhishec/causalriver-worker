@@ -198,9 +198,9 @@ export interface FederationConfig {
     confidenceThreshold: number;
     privacyPreserving: boolean;
   };
-  /** World model — compressed 128d representation */
+  /** World model — 384d representation (aligned with pgvector column and embedding-router) */
   worldModel: {
-    dimensions: 128;
+    dimensions: 384;
     maxEntities: number;
     updateFrequencyMs: number;
     storageEngine: 'redis';
@@ -222,7 +222,7 @@ export const DEFAULT_FEDERATION: FederationConfig = {
     privacyPreserving: true,
   },
   worldModel: {
-    dimensions: 128,
+    dimensions: 384,
     maxEntities: 100_000,
     updateFrequencyMs: 60_000,
     storageEngine: 'redis',

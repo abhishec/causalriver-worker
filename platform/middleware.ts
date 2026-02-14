@@ -1,16 +1,24 @@
 /**
- * Next.js Middleware - Session Management + Security Headers
+ * Next.js Middleware - Security Hardened
  * ═══════════════════════════════════════════════════════════════════════════
  *
- * Implements:
- * 1. Supabase session management
- * 2. OWASP security headers (CSP, HSTS, X-Frame-Options, etc.)
+ * Defense-in-Depth Layers:
+ * 1. Intrusion Detection System (IDS) - Block malicious requests
+ * 2. Supabase session management
+ * 3. OWASP security headers (CSP, HSTS, X-Frame-Options, etc.)
  */
 
 import { type NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
+import { securityMiddleware } from "@/lib/ids";
 
 export async function middleware(request: NextRequest) {
+  // 0. Intrusion Detection System (IDS) - First line of defense
+  const securityBlock = await securityMiddleware(request);
+  if (securityBlock) {
+    return securityBlock; // Block malicious request immediately
+  }
+
   // 1. Update Supabase session
   const response = await updateSession(request);
 

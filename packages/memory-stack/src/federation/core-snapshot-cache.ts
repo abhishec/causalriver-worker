@@ -183,63 +183,102 @@ export function createCoreSnapshotCache(config: CoreSnapshotConfig): CoreSnapsho
   let refreshInterval: ReturnType<typeof setInterval> | null = null;
   let currentSnapshot: CoreBrainSnapshot | null = null;
 
-  // Build snapshot from raw data
+  // ---- Distributed Lock (Bottleneck #8 Fix) ----
+  // Prevents thundering herd: if 2+ processes call rebuildSnapshot
+  // simultaneously, only one actually rebuilds. Others wait for the result.
+  const lockKey = `${cacheKeyPrefix}:rebuild-lock`;
+  const lockTTLSeconds = 120; // 2 min max lock hold
+
+  const acquireLock = async (lockValue: string): Promise<boolean> => {
+    try {
+      const result = await redis.set(lockKey, lockValue, { nx: true, ex: lockTTLSeconds });
+      return result === 'OK';
+    } catch {
+      return false;
+    }
+  };
+
+  const releaseLock = async (lockValue: string): Promise<void> => {
+    try {
+      // Atomic: only delete if we still own the lock (Lua script for safety)
+      const script = `if redis.call("get", KEYS[1]) == ARGV[1] then return redis.call("del", KEYS[1]) else return 0 end`;
+      await redis.eval(script, { keys: [lockKey], arguments: [lockValue] });
+    } catch {
+      // Lock expired or already released — safe to ignore
+    }
+  };
+
+  // Build snapshot from raw data (with distributed lock)
   const buildSnapshot = async (builder: SnapshotBuilder): Promise<CoreBrainSnapshot> => {
-    const start = Date.now();
-    const { edges, memories, patterns, worldModel, orgCount } = await builder();
+    const lockValue = `${process.pid}-${Date.now()}`;
+    const gotLock = await acquireLock(lockValue);
 
-    // Sort and truncate edges by confidence * evidence
-    const sortedEdges = edges
-      .sort((a, b) => (b.confidence * b.evidenceCount) - (a.confidence * a.evidenceCount))
-      .slice(0, maxEdges);
+    if (!gotLock) {
+      // Another process is rebuilding — wait briefly then return cached
+      logger.info('Rebuild lock held by another process, returning cached snapshot');
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      return getOrLoadSnapshot();
+    }
 
-    // Sort and truncate memories by importance
-    const sortedMemories = memories
-      .sort((a, b) => b.importance - a.importance)
-      .slice(0, maxMemories);
+    try {
+      const start = Date.now();
+      const { edges, memories, patterns, worldModel, orgCount } = await builder();
 
-    const now = new Date();
-    const snapshot: CoreBrainSnapshot = {
-      version: '1.0.0',
-      generatedAt: now.toISOString(),
-      expiresAt: new Date(now.getTime() + refreshIntervalMs).toISOString(),
-      edges: sortedEdges,
-      topMemories: sortedMemories,
-      crossOrgPatterns: patterns,
-      worldModel: worldModel.slice(0, 100_000),
-      stats: {
-        totalEdges: sortedEdges.length,
-        totalMemories: sortedMemories.length,
-        totalPatterns: patterns.length,
-        totalOrgsContributing: orgCount,
-        compressionRatio: compressionEnabled ? 0.3 : 1.0,
-        snapshotSizeBytes: 0,
-      },
-    };
+      // Sort and truncate edges by confidence * evidence
+      const sortedEdges = edges
+        .sort((a, b) => (b.confidence * b.evidenceCount) - (a.confidence * a.evidenceCount))
+        .slice(0, maxEdges);
 
-    // Calculate size
-    const serialized = JSON.stringify(snapshot);
-    snapshot.stats.snapshotSizeBytes = serialized.length;
+      // Sort and truncate memories by importance
+      const sortedMemories = memories
+        .sort((a, b) => b.importance - a.importance)
+        .slice(0, maxMemories);
 
-    // Store in Redis
-    await redis.set(cacheKeyPrefix, serialized, { ex: Math.ceil(refreshIntervalMs / 1000) * 2 });
+      const now = new Date();
+      const snapshot: CoreBrainSnapshot = {
+        version: '1.0.0',
+        generatedAt: now.toISOString(),
+        expiresAt: new Date(now.getTime() + refreshIntervalMs).toISOString(),
+        edges: sortedEdges,
+        topMemories: sortedMemories,
+        crossOrgPatterns: patterns,
+        worldModel: worldModel.slice(0, 100_000),
+        stats: {
+          totalEdges: sortedEdges.length,
+          totalMemories: sortedMemories.length,
+          totalPatterns: patterns.length,
+          totalOrgsContributing: orgCount,
+          compressionRatio: compressionEnabled ? 0.3 : 1.0,
+          snapshotSizeBytes: 0,
+        },
+      };
 
-    // Update local cache
-    localCache.set('current', snapshot);
-    currentSnapshot = snapshot;
-    lastRefresh = now;
-    refreshCount++;
-    totalRefreshTimeMs += Date.now() - start;
+      // Calculate size
+      const serialized = JSON.stringify(snapshot);
+      snapshot.stats.snapshotSizeBytes = serialized.length;
 
-    logger.info('CORE snapshot rebuilt', {
-      edges: sortedEdges.length,
-      memories: sortedMemories.length,
-      patterns: patterns.length,
-      sizeKB: Math.round(snapshot.stats.snapshotSizeBytes / 1024),
-      durationMs: Date.now() - start,
-    });
+      // Store in Redis
+      await redis.set(cacheKeyPrefix, serialized, { ex: Math.ceil(refreshIntervalMs / 1000) * 2 });
 
-    return snapshot;
+      // Update local cache
+      localCache.set('current', snapshot);
+      currentSnapshot = snapshot;
+      lastRefresh = now;
+      refreshCount++;
+      totalRefreshTimeMs += Date.now() - start;
+
+      logger.info('CORE snapshot rebuilt', {
+        edges: sortedEdges.length,
+        memories: sortedMemories.length,
+        patterns: patterns.length,
+        sizeKB: Math.round(snapshot.stats.snapshotSizeBytes / 1024),
+        durationMs: Date.now() - start,
+      });
+
+      return snapshot;
+    } finally {
+      await releaseLock(lockValue);
+    }
   };
 
   // Get snapshot from cache hierarchy: local → Redis → stale

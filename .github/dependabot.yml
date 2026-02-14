@@ -1,0 +1,71 @@
+# GitHub Dependabot Configuration
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# Automated dependency updates and security vulnerability alerts
+#
+# This will:
+# - Create PRs for outdated dependencies
+# - Alert on known CVEs
+# - Keep dependencies up to date
+#
+
+version: 2
+updates:
+  # NPM dependencies - memory-stack package
+  - package-ecosystem: "npm"
+    directory: "/packages/memory-stack"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "security"
+    reviewers:
+      - "your-github-username"  # TODO: Update with actual username
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    # Only allow patch and minor updates (safer)
+    versioning-strategy: increase-if-necessary
+
+  # NPM dependencies - platform
+  - package-ecosystem: "npm"
+    directory: "/platform"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "security"
+    reviewers:
+      - "your-github-username"  # TODO: Update with actual username
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    versioning-strategy: increase-if-necessary
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+
+  # Docker (if using)
+  # - package-ecosystem: "docker"
+  #   directory: "/"
+  #   schedule:
+  #     interval: "weekly"
+  #   open-pull-requests-limit: 5

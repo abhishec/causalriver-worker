@@ -72,6 +72,8 @@ export interface RedisClientInstance {
   xack(key: string, group: string, ...ids: string[]): Promise<number>;
   xtrim(key: string, strategy: 'MAXLEN' | 'MINID', threshold: number | string): Promise<number>;
   xpending(key: string, group: string): Promise<{ pending: number; minId: string; maxId: string; consumers: Array<{ name: string; pending: number }> }>;
+  // Scripting
+  eval(script: string, options: { keys: string[]; arguments: string[] }): Promise<unknown>;
   // Pub/Sub
   publish(channel: string, message: string): Promise<number>;
   subscribe(channel: string, callback: (message: string) => void): Promise<void>;
@@ -500,6 +502,21 @@ export function createInMemoryRedis(config: Partial<RedisConfig> = {}): RedisCli
       };
     },
 
+    // Scripting (simplified in-memory eval for lock release pattern)
+    async eval(script: string, options: { keys: string[]; arguments: string[] }) {
+      // Support the common "compare-and-delete" pattern for distributed locks
+      // Script: if redis.call("get", KEYS[1]) == ARGV[1] then return redis.call("del", KEYS[1]) else return 0 end
+      if (script.includes('get') && script.includes('del')) {
+        const keyVal = await client.get(options.keys[0]);
+        if (keyVal === options.arguments[0]) {
+          await client.del(options.keys[0]);
+          return 1;
+        }
+        return 0;
+      }
+      return 0;
+    },
+
     // Pub/Sub
     async publish(channel: string, message: string) {
       const handlers = subscribers.get(channel) ?? [];
@@ -766,6 +783,8 @@ function createIoRedisAdapter(url: string, config: Partial<RedisConfig> = {}): R
     xack: (key: string, group: string, ...ids: string[]) => (client.xack as any)(key, group, ...ids),
     xtrim: (key: string, strategy: 'MAXLEN' | 'MINID', threshold: number | string) => (client.xtrim as any)(key, strategy, threshold),
     xpending: (key: string, group: string) => (client.xpending as any)(key, group),
+    eval: (script: string, options: { keys: string[]; arguments: string[] }) =>
+      client.eval(script, options.keys.length, ...options.keys, ...options.arguments),
     publish: (channel: string, message: string) => client.publish(channel, message),
     subscribe: (channel: string, callback: (message: string) => void) => {
       const sub = client.duplicate();

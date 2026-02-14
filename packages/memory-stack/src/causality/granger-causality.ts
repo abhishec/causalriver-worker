@@ -980,6 +980,323 @@ export function detectNonlinearity(
 }
 
 // ============================================================================
+// INCREMENTAL GRANGER CAUSALITY (Bottleneck #3 Fix)
+// ============================================================================
+//
+// Instead of recomputing full OLS from scratch on every call (O(n·p²)),
+// this maintains rolling sufficient statistics (X'X, X'y, RSS) that can be
+// updated in O(p²) per new observation using rank-1 updates.
+//
+// Rolling window: keeps last `windowSize` observations. When the window is
+// full, old observations are subtracted from the running sums.
+//
+// This reduces per-signal cost from O(n·p²) → O(p²), a 100–1000x speedup
+// at 10M signals.
+// ============================================================================
+
+export interface IncrementalGrangerConfig {
+  /** Number of lags to use (default: 5) */
+  lag?: number;
+  /** Rolling window size (default: 500) */
+  windowSize?: number;
+  /** Significance level (default: 0.05) */
+  alpha?: number;
+}
+
+/** Sufficient statistics for incremental OLS: tracks X'X, X'y, y'y in O(p²) per update */
+interface SufficientStats {
+  /** X'X matrix (p x p) — running sum of outer products */
+  XtX: number[][];
+  /** X'y vector (p x 1) — running sum of x_i * y_i */
+  Xty: number[];
+  /** y'y scalar — running sum of y_i² */
+  yty: number;
+  /** Sum of y values (for mean computation) */
+  sumY: number;
+  /** Number of observations in the window */
+  n: number;
+  /** Dimensionality of X (number of regressors) */
+  p: number;
+}
+
+/** Rolling circular buffer for time series values */
+interface RollingBuffer {
+  /** Circular buffer of observations */
+  buffer: number[];
+  /** Current write position */
+  pos: number;
+  /** Number of elements currently stored */
+  count: number;
+  /** Maximum capacity */
+  capacity: number;
+}
+
+export interface IncrementalGrangerState {
+  /** Rolling buffer for source signal X */
+  xBuffer: RollingBuffer;
+  /** Rolling buffer for target signal Y */
+  yBuffer: RollingBuffer;
+  /** Sufficient stats for restricted model (Y lags only) */
+  restrictedStats: SufficientStats;
+  /** Sufficient stats for unrestricted model (Y lags + X lags) */
+  unrestrictedStats: SufficientStats;
+  /** Configuration */
+  lag: number;
+  windowSize: number;
+  alpha: number;
+  /** Total signals processed */
+  totalUpdates: number;
+  /** Last computed result (cached) */
+  lastResult: GrangerResult | null;
+}
+
+/** Create a new rolling buffer */
+function createBuffer(capacity: number): RollingBuffer {
+  return { buffer: new Array(capacity).fill(0), pos: 0, count: 0, capacity };
+}
+
+/** Push a value into the rolling buffer, returns the evicted value (or NaN if none) */
+function bufferPush(buf: RollingBuffer, value: number): number {
+  const evicted = buf.count >= buf.capacity ? buf.buffer[buf.pos] : NaN;
+  buf.buffer[buf.pos] = value;
+  buf.pos = (buf.pos + 1) % buf.capacity;
+  if (buf.count < buf.capacity) buf.count++;
+  return evicted;
+}
+
+/** Get value at index `i` (0 = oldest) from rolling buffer */
+function bufferGet(buf: RollingBuffer, i: number): number {
+  if (i < 0 || i >= buf.count) return 0;
+  const start = buf.count < buf.capacity ? 0 : buf.pos;
+  return buf.buffer[(start + i) % buf.capacity];
+}
+
+/** Create zero-initialized sufficient stats */
+function createStats(p: number): SufficientStats {
+  return {
+    XtX: Array.from({ length: p }, () => new Array(p).fill(0)),
+    Xty: new Array(p).fill(0),
+    yty: 0,
+    sumY: 0,
+    n: 0,
+    p,
+  };
+}
+
+/** Rank-1 update: add observation (x, y) to running stats */
+function addObservation(stats: SufficientStats, x: number[], y: number): void {
+  const { XtX, Xty, p } = stats;
+  for (let i = 0; i < p; i++) {
+    Xty[i] += x[i] * y;
+    for (let j = i; j < p; j++) {
+      const val = x[i] * x[j];
+      XtX[i][j] += val;
+      if (i !== j) XtX[j][i] += val;
+    }
+  }
+  stats.yty += y * y;
+  stats.sumY += y;
+  stats.n++;
+}
+
+/** Rank-1 downdate: subtract observation (x, y) from running stats */
+function removeObservation(stats: SufficientStats, x: number[], y: number): void {
+  const { XtX, Xty, p } = stats;
+  for (let i = 0; i < p; i++) {
+    Xty[i] -= x[i] * y;
+    for (let j = i; j < p; j++) {
+      const val = x[i] * x[j];
+      XtX[i][j] -= val;
+      if (i !== j) XtX[j][i] -= val;
+    }
+  }
+  stats.yty -= y * y;
+  stats.sumY -= y;
+  stats.n--;
+}
+
+/** Compute RSS from sufficient statistics: RSS = y'y - β'X'y where β = (X'X)⁻¹X'y */
+function computeRSSFromStats(stats: SufficientStats): number {
+  if (stats.n <= stats.p + 1) return Infinity;
+
+  // Solve (X'X)β = X'y
+  const beta = solveLinearSystem(
+    stats.XtX.map(row => [...row]),
+    [...stats.Xty]
+  );
+
+  // RSS = y'y - β'X'y
+  let betaXty = 0;
+  for (let i = 0; i < stats.p; i++) {
+    betaXty += beta[i] * stats.Xty[i];
+  }
+  return Math.max(0, stats.yty - betaXty);
+}
+
+/**
+ * Create an incremental Granger causality state.
+ *
+ * Call `updateWithNewSignal()` each time a new (X, Y) pair arrives.
+ * The state maintains rolling sufficient statistics for O(p²) per-update cost.
+ */
+export function createIncrementalGranger(
+  config: IncrementalGrangerConfig = {}
+): IncrementalGrangerState {
+  const lag = config.lag ?? 5;
+  const windowSize = config.windowSize ?? 500;
+  const alpha = config.alpha ?? 0.05;
+
+  // Restricted model: intercept + Y lags → p = lag + 1
+  const pRestricted = lag + 1;
+  // Unrestricted model: intercept + Y lags + X lags → p = 2*lag + 1
+  const pUnrestricted = 2 * lag + 1;
+
+  return {
+    xBuffer: createBuffer(windowSize + lag),
+    yBuffer: createBuffer(windowSize + lag),
+    restrictedStats: createStats(pRestricted),
+    unrestrictedStats: createStats(pUnrestricted),
+    lag,
+    windowSize,
+    alpha,
+    totalUpdates: 0,
+    lastResult: null,
+  };
+}
+
+/**
+ * Feed a new (xValue, yValue) signal pair into the incremental Granger state.
+ *
+ * Returns a GrangerResult once enough observations are available (>= lag + 30),
+ * or null if still warming up.
+ *
+ * Cost: O(p²) per call instead of O(n·p²) for full recomputation.
+ */
+export function updateWithNewSignal(
+  state: IncrementalGrangerState,
+  xValue: number,
+  yValue: number,
+): GrangerResult | null {
+  const { lag, windowSize, alpha } = state;
+
+  // Push new values into rolling buffers
+  bufferPush(state.xBuffer, xValue);
+  bufferPush(state.yBuffer, yValue);
+  state.totalUpdates++;
+
+  // Need at least lag+30 observations to form a meaningful regression
+  const available = state.yBuffer.count;
+  if (available < lag + 30) return null;
+
+  // Current effective window size
+  const effectiveN = Math.min(available - lag, windowSize);
+
+  // Build the latest observation's regressor vectors
+  // We only add/remove one observation per call for O(p²) amortized cost.
+  // On first sufficient data or when buffer just became full, we do a full rebuild.
+  const needFullRebuild = state.restrictedStats.n === 0 ||
+    Math.abs(state.restrictedStats.n - effectiveN) > 1;
+
+  if (needFullRebuild) {
+    // Full rebuild from buffer (happens once on warmup, then only on edge cases)
+    state.restrictedStats = createStats(lag + 1);
+    state.unrestrictedStats = createStats(2 * lag + 1);
+
+    for (let t = lag; t < lag + effectiveN; t++) {
+      const yt = bufferGet(state.yBuffer, t);
+
+      // Restricted: [1, Y_{t-1}, ..., Y_{t-lag}]
+      const xR: number[] = [1];
+      for (let l = 1; l <= lag; l++) xR.push(bufferGet(state.yBuffer, t - l));
+      addObservation(state.restrictedStats, xR, yt);
+
+      // Unrestricted: [1, Y_{t-1},...,Y_{t-lag}, X_{t-1},...,X_{t-lag}]
+      const xU: number[] = [1];
+      for (let l = 1; l <= lag; l++) xU.push(bufferGet(state.yBuffer, t - l));
+      for (let l = 1; l <= lag; l++) xU.push(bufferGet(state.xBuffer, t - l));
+      addObservation(state.unrestrictedStats, xU, yt);
+    }
+  } else {
+    // Incremental: add newest observation
+    const tNew = available - 1;
+    const ytNew = bufferGet(state.yBuffer, tNew);
+
+    const xRNew: number[] = [1];
+    for (let l = 1; l <= lag; l++) xRNew.push(bufferGet(state.yBuffer, tNew - l));
+    addObservation(state.restrictedStats, xRNew, ytNew);
+
+    const xUNew: number[] = [1];
+    for (let l = 1; l <= lag; l++) xUNew.push(bufferGet(state.yBuffer, tNew - l));
+    for (let l = 1; l <= lag; l++) xUNew.push(bufferGet(state.xBuffer, tNew - l));
+    addObservation(state.unrestrictedStats, xUNew, ytNew);
+
+    // If window is full, remove oldest observation
+    if (state.restrictedStats.n > windowSize) {
+      const tOld = tNew - windowSize;
+      const ytOld = bufferGet(state.yBuffer, tOld);
+
+      const xROld: number[] = [1];
+      for (let l = 1; l <= lag; l++) xROld.push(bufferGet(state.yBuffer, tOld - l));
+      removeObservation(state.restrictedStats, xROld, ytOld);
+
+      const xUOld: number[] = [1];
+      for (let l = 1; l <= lag; l++) xUOld.push(bufferGet(state.yBuffer, tOld - l));
+      for (let l = 1; l <= lag; l++) xUOld.push(bufferGet(state.xBuffer, tOld - l));
+      removeObservation(state.unrestrictedStats, xUOld, ytOld);
+    }
+  }
+
+  // Compute F-statistic from sufficient statistics
+  const rssR = computeRSSFromStats(state.restrictedStats);
+  const rssU = computeRSSFromStats(state.unrestrictedStats);
+  const n = state.restrictedStats.n;
+  const dfDen = n - 2 * lag - 1;
+
+  if (dfDen <= 0 || rssU <= 0 || !Number.isFinite(rssR) || !Number.isFinite(rssU)) {
+    return null;
+  }
+
+  const fStatistic = Math.max(0, ((rssR - rssU) / lag) / (rssU / dfDen));
+  const pValue = fTestPValue(fStatistic, lag, dfDen);
+  const effectSize = Math.max(0, Math.min(1, (rssR - rssU) / rssR));
+
+  const result: GrangerResult = {
+    sourceDomain: 'source',
+    targetDomain: 'target',
+    fStatistic,
+    pValue,
+    optimalLag: lag,
+    isSignificant: pValue < alpha,
+    effectSize,
+    confidenceInterval: { lower: 0, upper: Math.min(1, effectSize * 2), level: 1 - alpha },
+    sampleSize: n,
+    naturalLanguage: generateNaturalLanguage(fStatistic, pValue, effectSize, lag, n),
+  };
+
+  state.lastResult = result;
+  return result;
+}
+
+/**
+ * Get the last computed incremental Granger result without triggering a new update.
+ */
+export function getIncrementalResult(state: IncrementalGrangerState): GrangerResult | null {
+  return state.lastResult;
+}
+
+/**
+ * Reset the incremental Granger state (e.g., between batch runs).
+ */
+export function resetIncrementalGranger(state: IncrementalGrangerState): void {
+  state.xBuffer = createBuffer(state.windowSize + state.lag);
+  state.yBuffer = createBuffer(state.windowSize + state.lag);
+  state.restrictedStats = createStats(state.lag + 1);
+  state.unrestrictedStats = createStats(2 * state.lag + 1);
+  state.totalUpdates = 0;
+  state.lastResult = null;
+}
+
+// ============================================================================
 // EXPORTS
 // ============================================================================
 
@@ -998,4 +1315,9 @@ export const GrangerCausality = {
   solveLinearSystem,
   fitRestrictedVAR,
   fitUnrestrictedVAR,
+  // Incremental (Bottleneck #3)
+  createIncrementalGranger,
+  updateWithNewSignal,
+  getIncrementalResult,
+  resetIncrementalGranger,
 };

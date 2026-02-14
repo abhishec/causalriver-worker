@@ -41,6 +41,10 @@ export interface RedisStreamsBusConfig {
   recoverPending?: boolean;
   /** Deduplication window in ms (default: 60_000) */
   deduplicationWindowMs?: number;
+  /** Max retry attempts before sending to DLQ (default: 3) */
+  maxRetries?: number;
+  /** DLQ stream key (default: streamKey + ':dlq') */
+  dlqStreamKey?: string;
   /** Logger */
   logger?: NexusLogger;
 }
@@ -87,8 +91,10 @@ export function createRedisStreamsBus(config: RedisStreamsBusConfig): RedisStrea
     blockTimeMs = 2000,
     recoverPending = true,
     deduplicationWindowMs = 60_000,
+    maxRetries = 3,
   } = config;
 
+  const dlqStreamKey = config.dlqStreamKey ?? `${streamKey}:dlq`;
   const logger = config.logger ?? getDefaultLogger().child({ module: 'redis-streams-bus' });
 
   // State
@@ -97,6 +103,9 @@ export function createRedisStreamsBus(config: RedisStreamsBusConfig): RedisStrea
   const subscriptions = new Map<string, { filter: EventFilter; handler: EventHandler }>();
   const seenEventIds = new Map<string, number>();
   let vectorClock = 0;
+
+  // DLQ: Track retry counts per message ID
+  const retryCountMap = new Map<string, number>();
 
   // Stats
   const stats = {
@@ -109,6 +118,8 @@ export function createRedisStreamsBus(config: RedisStreamsBusConfig): RedisStrea
     averageFlushSize: 0,
     lastFlushTime: null as Date | null,
     vectorClockValue: 0,
+    dlqMessages: 0,
+    retriedMessages: 0,
   };
 
   // Deduplication cleanup
@@ -176,9 +187,30 @@ export function createRedisStreamsBus(config: RedisStreamsBusConfig): RedisStrea
     return true;
   };
 
-  // Process a batch of messages
+  // Send a failed message to the Dead Letter Queue
+  const sendToDLQ = async (msg: { id: string; message: Record<string, string> }, reason: string) => {
+    try {
+      await redis.xadd(dlqStreamKey, '*', {
+        ...msg.message,
+        _dlq_reason: reason,
+        _dlq_original_id: msg.id,
+        _dlq_retry_count: String(retryCountMap.get(msg.id) ?? 0),
+        _dlq_timestamp: new Date().toISOString(),
+      });
+      stats.dlqMessages++;
+      retryCountMap.delete(msg.id);
+      // ACK the original message so it doesn't stay pending forever
+      await redis.xack(streamKey, consumerGroup, msg.id);
+      logger.warn('Message sent to DLQ', { messageId: msg.id, reason });
+    } catch (dlqErr) {
+      logger.error('Failed to send to DLQ', { messageId: msg.id, error: dlqErr instanceof Error ? dlqErr.message : String(dlqErr) });
+    }
+  };
+
+  // Process a batch of messages (with retry + DLQ support)
   const processBatch = async (messages: Array<{ id: string; message: Record<string, string> }>) => {
     const events: CausalEvent[] = [];
+    const msgMap = new Map<string, { id: string; message: Record<string, string> }>();
 
     for (const msg of messages) {
       try {
@@ -193,22 +225,46 @@ export function createRedisStreamsBus(config: RedisStreamsBusConfig): RedisStrea
         seenEventIds.set(event.eventId, Date.now());
 
         events.push(event);
+        msgMap.set(event.eventId, msg);
         stats.totalEventsProcessed++;
       } catch (err) {
-        logger.error('Failed to deserialize event', { messageId: msg.id, error: err instanceof Error ? err.message : String(err) });
+        // Deserialization failure — check retry count
+        const retries = (retryCountMap.get(msg.id) ?? 0) + 1;
+        retryCountMap.set(msg.id, retries);
+
+        if (retries >= maxRetries) {
+          await sendToDLQ(msg, `Deserialization failed after ${retries} attempts: ${err instanceof Error ? err.message : String(err)}`);
+        } else {
+          stats.retriedMessages++;
+          logger.warn('Retrying failed message', { messageId: msg.id, attempt: retries, maxRetries });
+        }
       }
     }
 
     if (events.length === 0) return;
 
-    // Notify subscribers
+    // Notify subscribers (with per-subscriber error handling + DLQ)
     for (const sub of subscriptions.values()) {
       const matching = events.filter(e => matchesFilter(e, sub.filter));
       if (matching.length > 0) {
         try {
           await sub.handler(matching);
         } catch (err) {
-          logger.error('Subscriber error', { error: err instanceof Error ? err.message : String(err) });
+          // Handler failed — retry or DLQ each event
+          for (const event of matching) {
+            const msg = msgMap.get(event.eventId);
+            if (!msg) continue;
+
+            const retries = (retryCountMap.get(msg.id) ?? 0) + 1;
+            retryCountMap.set(msg.id, retries);
+
+            if (retries >= maxRetries) {
+              await sendToDLQ(msg, `Handler error after ${retries} attempts: ${err instanceof Error ? err.message : String(err)}`);
+            } else {
+              stats.retriedMessages++;
+              logger.warn('Handler failed, will retry', { messageId: msg.id, attempt: retries });
+            }
+          }
         }
       }
     }
@@ -369,6 +425,7 @@ export function createRedisStreamsBus(config: RedisStreamsBusConfig): RedisStrea
       clearInterval(cleanupInterval);
       seenEventIds.clear();
       subscriptions.clear();
+      retryCountMap.clear();
       if (consumeLoopPromise) {
         await consumeLoopPromise.catch(() => {});
       }
