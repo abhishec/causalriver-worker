@@ -52,7 +52,7 @@ import {
   createDeepDreaming,
   type DeepDreamingConfig,
   type DeepDreamingInstance,
-  type DreamResult,
+  type DreamCycleResult,
   type DreamSignal,
   type DreamEdge,
   type DreamPattern,
@@ -439,11 +439,20 @@ export function createCognitiveStack(config: CognitiveStackConfig): CognitiveSta
       const workingMemorySize = memory.getWorkingMemory().length;
 
       // Record episode for this cycle
+      const cycleTimestamp = Date.now();
       memory.recordEpisode({
-        description: `Cognitive cycle: ${passedSignals.length} signals, ${dreamResult.newAssociations.length} dreams`,
+        actors: ['cognitive_stack'],
+        events: [{
+          timestamp: cycleTimestamp,
+          type: 'cognitive_cycle',
+          description: `Cognitive cycle: ${passedSignals.length} signals, ${dreamResult.newAssociations.length} dreams`,
+        }],
+        startTime: cycleStart,
+        endTime: cycleTimestamp,
         domain: 'cognitive_stack',
-        timestamp: Date.now(),
-        significance: passedSignals.length > 10 ? 0.8 : 0.4,
+        context: `Processed ${passedSignals.length} signals with ${dreamResult.newAssociations.length} dream associations`,
+        valence: passedSignals.length > 10 ? 0.8 : 0.4,
+        tags: ['cognitive_cycle', 'automated'],
       });
 
       // ================================================================
@@ -461,6 +470,7 @@ export function createCognitiveStack(config: CognitiveStackConfig): CognitiveSta
         source: e.source,
         target: e.target,
         weight: e.weight,
+        confidence: e.confidence ?? e.weight,
         domain: e.domain || 'general',
       }));
 
@@ -733,7 +743,7 @@ export function createCognitiveStack(config: CognitiveStackConfig): CognitiveSta
         dreaming: {
           associationsFound: dreamResult.newAssociations.length,
           surfacedInsights: dreamResult.surfacedInsights.length,
-          crossDomainConnections: dreamResult.newAssociations.filter(a => a.type === 'cross_domain').length,
+          crossDomainConnections: dreamResult.newAssociations.filter(a => a.sourceDomain !== a.targetDomain).length,
         },
         memory: {
           itemsEncoded,
@@ -809,12 +819,12 @@ export function createCognitiveStack(config: CognitiveStackConfig): CognitiveSta
         {
           id: 5, name: 'Curiosity Engine', type: 'brain' as const,
           status: curiosityReport.budgetRemaining < 10 ? 'degraded' as const : 'healthy' as const,
-          stats: { hypotheses: curiosityReport.totalHypotheses, gaps: curiosityReport.totalKnowledgeGaps },
+          stats: { hypotheses: curiosityReport.activeHypotheses.length, gaps: curiosityReport.topGaps.length },
         },
         {
           id: 6, name: 'Self-Modifying Cognition', type: 'brain' as const,
           status: 'healthy' as const,
-          stats: { predictions: selfModel.getSelfModel().totalPredictions },
+          stats: { predictions: selfModel.getSelfModel().domainCapabilities.reduce((sum, d) => sum + d.predictionCount, 0) },
         },
         {
           id: 7, name: 'Intelligence Mesh', type: 'brain' as const,
@@ -866,7 +876,10 @@ export function createCognitiveStack(config: CognitiveStackConfig): CognitiveSta
       return {
         layerCount: layers.length,
         allHealthy: layers.every(l => l.status === 'healthy'),
-        layers,
+        layers: layers.map(l => ({
+          ...l,
+          stats: l.stats as Record<string, number>,
+        })),
       };
     },
   };

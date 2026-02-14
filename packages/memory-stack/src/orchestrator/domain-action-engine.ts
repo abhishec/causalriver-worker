@@ -693,11 +693,19 @@ export function createDomainActionEngine(config: DomainActionEngineConfig) {
         enabled: true,
         supportedActions: ['slack_send_message', 'slack_create_channel', 'slack_invite_user'],
         execute: async (command) => {
-          // Basic Slack message sending (can be enhanced with actual Slack SDK)
-          const { text, channel } = command.payload;
+          const text = command.parameters.text as string;
+          const channel = command.parameters.channel as string;
           log(`[Slack] Sending message to ${channel || command.target}: ${text}`);
           // In production, this would call actual Slack API
-          return { success: true, message: 'Slack message sent (stub)' };
+          return {
+            commandId: command.id,
+            success: true,
+            status: 'executed' as const,
+            response: { message: 'Slack message sent (stub)' },
+            executedAt: new Date().toISOString(),
+            durationMs: 0,
+            retriesUsed: 0,
+          };
         },
       });
       log('Registered Slack connector ✓');
@@ -710,10 +718,19 @@ export function createDomainActionEngine(config: DomainActionEngineConfig) {
         enabled: true,
         supportedActions: ['jira_create_issue', 'jira_update_issue', 'jira_add_comment'],
         execute: async (command) => {
-          const { summary, description, projectKey } = command.payload;
+          const summary = command.parameters.summary as string;
+          const projectKey = command.parameters.projectKey as string;
           log(`[Jira] Creating issue: ${summary} in ${projectKey || 'default project'}`);
           // In production, this would call actual Jira API
-          return { success: true, message: 'Jira issue created (stub)', issueKey: `PROJ-${Date.now()}` };
+          return {
+            commandId: command.id,
+            success: true,
+            status: 'executed' as const,
+            response: { message: 'Jira issue created (stub)', issueKey: `PROJ-${Date.now()}` },
+            executedAt: new Date().toISOString(),
+            durationMs: 0,
+            retriesUsed: 0,
+          };
         },
       });
       log('Registered Jira connector ✓');
@@ -726,10 +743,19 @@ export function createDomainActionEngine(config: DomainActionEngineConfig) {
         enabled: true,
         supportedActions: ['github_create_pr', 'github_create_issue', 'github_add_comment'],
         execute: async (command) => {
-          const { title, body, repo } = command.payload;
+          const title = command.parameters.title as string;
+          const repo = command.parameters.repo as string;
           log(`[GitHub] Creating issue/PR: ${title} in ${repo || 'default repo'}`);
           // In production, this would call actual GitHub API via @octokit/rest
-          return { success: true, message: 'GitHub action executed (stub)', url: `https://github.com/example/${Date.now()}` };
+          return {
+            commandId: command.id,
+            success: true,
+            status: 'executed' as const,
+            response: { message: 'GitHub action executed (stub)', url: `https://github.com/example/${Date.now()}` },
+            executedAt: new Date().toISOString(),
+            durationMs: 0,
+            retriesUsed: 0,
+          };
         },
       });
       log('Registered GitHub connector ✓');
@@ -2669,7 +2695,7 @@ export function createDomainActionEngine(config: DomainActionEngineConfig) {
               log(`V5 Motor Execution: Executing ${executableCommands.length} commands...`);
               const batchResult = await motorCommandEngine.executeBatch(executableCommands);
               motorCommandResults = batchResult.results;
-              log(`V5 Motor Execution: ${batchResult.successful}/${batchResult.total} succeeded, ${batchResult.failed} failed`);
+              log(`V5 Motor Execution: ${batchResult.executed}/${batchResult.totalCommands} succeeded, ${batchResult.failed} failed`);
             }
           }
         } catch (err) {
