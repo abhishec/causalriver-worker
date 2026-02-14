@@ -8,6 +8,12 @@ const nextConfig: NextConfig = {
     // Types are validated locally and in CI via `tsc --noEmit`.
     ignoreBuildErrors: true,
   },
+  serverExternalPackages: [
+    'tree-sitter',
+    'tree-sitter-go',
+    'tree-sitter-python',
+    'tree-sitter-scala',
+  ],
 };
 
 export default nextConfig;
