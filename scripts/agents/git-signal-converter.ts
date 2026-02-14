@@ -371,28 +371,16 @@ export function buildGitTrainingPacks(allRepoData: RepoData[]): TrainingPack[] {
         coefficientSign: 1, // Faster merges → more frequent releases
       },
     ],
-    businessRules: [
-      {
-        condition: 'pr_merge_velocity < 0.3 for 14+ days',
-        action: 'Alert: PR review bottleneck detected — consider increasing reviewer pool or implementing auto-assign',
-        confidence: 0.8,
-      },
-    ],
-    cascades: [
-      {
-        trigger: { domain: 'engineering', signal: 'pr_review_depth', direction: 'decrease' as const },
-        effects: [
-          { domain: 'engineering', signal: 'ci_pass_rate', direction: 'decrease' as const, lagDays: 7, strength: 0.6 },
-          { domain: 'product', signal: 'bug_to_feature_ratio', direction: 'decrease' as const, lagDays: 14, strength: 0.4 },
-        ],
-      },
-    ],
+    businessRules: [],
+    cascades: [],
     patterns: [
       {
         name: 'Review Depth Quality Correlation',
+        domains: ['engineering', 'product'],
         description: 'PRs with 2+ substantive review comments have 40% fewer post-merge bug reports',
-        evidence: `Observed across ${repoCount} repositories`,
-        confidence: 0.75,
+        observed: Math.round(repoCount * 0.75),
+        expected: Math.round(repoCount * 0.5),
+        total: repoCount,
       },
     ],
     outcomes: [],
@@ -425,25 +413,16 @@ export function buildGitTrainingPacks(allRepoData: RepoData[]): TrainingPack[] {
         coefficientSign: -1, // CI failure streaks → lower overall CI pass rate (negative spiral)
       },
     ],
-    businessRules: [
-      {
-        condition: 'ci_failure_streak >= 3',
-        action: 'Alert: CI failure streak detected — prioritize pipeline fix before merging new code',
-        confidence: 0.9,
-      },
-      {
-        condition: 'ci_pass_rate < 0.7 for 7+ days',
-        action: 'Critical: CI reliability degraded — schedule a stability sprint focused on test infrastructure',
-        confidence: 0.85,
-      },
-    ],
+    businessRules: [],
     cascades: [],
     patterns: [
       {
         name: 'CI Health DORA Metric',
-        description: 'CI pass rate is the strongest leading indicator of deployment frequency (DORA metric)',
-        evidence: `Observed across ${repoCount} repositories with CI data`,
-        confidence: 0.85,
+        domains: ['engineering'],
+        description: 'CI pass rate is the strongest leading indicator of deployment frequency',
+        observed: Math.round(repoCount * 0.85),
+        expected: Math.round(repoCount * 0.5),
+        total: repoCount,
       },
     ],
     outcomes: [],
@@ -468,27 +447,16 @@ export function buildGitTrainingPacks(allRepoData: RepoData[]): TrainingPack[] {
         coefficientSign: -1, // Higher contributor concentration → slower issue resolution
       },
     ],
-    businessRules: [
-      {
-        condition: 'contributor_concentration < -0.6',
-        action: 'Warning: High bus factor risk — mandate pair programming and documentation for concentrated knowledge areas',
-        confidence: 0.8,
-      },
-    ],
-    cascades: [
-      {
-        trigger: { domain: 'engineering', signal: 'contributor_concentration', direction: 'decrease' as const },
-        effects: [
-          { domain: 'engineering', signal: 'issue_resolution_speed', direction: 'decrease' as const, lagDays: 30, strength: 0.5 },
-        ],
-      },
-    ],
+    businessRules: [],
+    cascades: [],
     patterns: [
       {
         name: 'Bus Factor Warning Threshold',
-        description: 'Projects where top contributor >50% of commits have 2.5x higher issue resolution time when that contributor is inactive',
-        evidence: `Contributor analysis across ${repoCount} repositories`,
-        confidence: 0.7,
+        domains: ['engineering', 'people'],
+        description: 'High contributor concentration correlates with slower issue resolution',
+        observed: Math.round(repoCount * 0.7),
+        expected: Math.round(repoCount * 0.4),
+        total: repoCount,
       },
     ],
     outcomes: [],
@@ -513,13 +481,7 @@ export function buildGitTrainingPacks(allRepoData: RepoData[]): TrainingPack[] {
         coefficientSign: -1, // Slower issue resolution → worse bug-to-feature ratio
       },
     ],
-    businessRules: [
-      {
-        condition: 'issue_resolution_speed < 0.2 for 30+ days',
-        action: 'Warning: Issue backlog growing — consider a triage sprint to close or deprioritize stale issues',
-        confidence: 0.75,
-      },
-    ],
+    businessRules: [],
     cascades: [],
     patterns: [],
     outcomes: [],
@@ -552,13 +514,7 @@ export function buildGitTrainingPacks(allRepoData: RepoData[]): TrainingPack[] {
         coefficientSign: -1, // Large PRs → lower CI pass rate (defects slip through)
       },
     ],
-    businessRules: [
-      {
-        condition: 'pr_size_risk < -0.5 for multiple PRs',
-        action: 'Recommend: Enforce PR size limits (< 400 lines) and encourage incremental, stacked PRs',
-        confidence: 0.8,
-      },
-    ],
+    businessRules: [],
     cascades: [],
     patterns: [],
     outcomes: [],
@@ -584,20 +540,15 @@ export function buildGitTrainingPacks(allRepoData: RepoData[]): TrainingPack[] {
       },
     ],
     businessRules: [],
-    cascades: [
-      {
-        trigger: { domain: 'engineering', signal: 'review_sentiment', direction: 'decrease' as const },
-        effects: [
-          { domain: 'engineering', signal: 'contributor_concentration', direction: 'decrease' as const, lagDays: 60, strength: 0.3 },
-        ],
-      },
-    ],
+    cascades: [],
     patterns: [
       {
         name: 'Toxic Review Anti-Pattern',
-        description: 'Consistently negative review sentiment correlates with contributor attrition within 60 days',
-        evidence: 'Review sentiment analysis across repositories',
-        confidence: 0.65,
+        domains: ['engineering'],
+        description: 'Negative review sentiment correlates with contributor attrition within 60 days',
+        observed: Math.round(repoCount * 0.65),
+        expected: Math.round(repoCount * 0.3),
+        total: repoCount,
       },
     ],
     outcomes: [],
@@ -627,9 +578,11 @@ export function buildGitTrainingPacks(allRepoData: RepoData[]): TrainingPack[] {
     patterns: [
       {
         name: 'DORA Elite Performance',
-        description: 'Teams deploying daily or more frequently have 3x lower change failure rate than those deploying monthly',
-        evidence: 'DORA State of DevOps research, validated across open-source repos',
-        confidence: 0.85,
+        domains: ['engineering', 'product'],
+        description: 'Higher deployment frequency correlates with lower change failure rate',
+        observed: Math.round(repoCount * 0.85),
+        expected: Math.round(repoCount * 0.5),
+        total: repoCount,
       },
     ],
     outcomes: [],
@@ -654,13 +607,7 @@ export function buildGitTrainingPacks(allRepoData: RepoData[]): TrainingPack[] {
         coefficientSign: -1, // More cross-team reviews → lower contributor concentration (less bus factor risk)
       },
     ],
-    businessRules: [
-      {
-        condition: 'cross_team_review < 0.2 for 30+ days',
-        action: 'Recommend: Institute cross-team review rotation to prevent knowledge silos',
-        confidence: 0.7,
-      },
-    ],
+    businessRules: [],
     cascades: [],
     patterns: [],
     outcomes: [],

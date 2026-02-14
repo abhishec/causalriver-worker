@@ -30,8 +30,6 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { createBrainTrainer, type TrainingPack } from '../../packages/memory-stack/src/learning/brain-trainer';
 import { storeConnectorSignals, type ConnectorSignal } from '../../packages/memory-stack/src/connectors/connector-framework';
 import { createConsolidationEngine } from '../../packages/memory-stack/src/orchestrator/consolidation-engine';
-import { createScheduledJobs } from '../../packages/memory-stack/src/orchestrator/scheduled-jobs';
-import { createSupabaseRepository } from '../../packages/memory-stack/src/persistence/supabase-repository';
 
 // ============================================================================
 // TYPES
@@ -170,12 +168,11 @@ export abstract class BaseTrainingAgent {
     // Run brain trainer with packs
     if (packs.length > 0) {
       try {
-        const repo = createSupabaseRepository(this.supabase);
-        const trainer = createBrainTrainer(repo, this.organizationId);
-        const trainResult = await trainer.train(packs);
+        const trainer = createBrainTrainer();
+        const trainResult = await trainer.trainBatch(this.supabase, this.organizationId, packs);
         result.packsProcessed = packs.length;
-        result.discoveries = trainResult?.memoriesCreated ?? 0;
-        this.log('TRAIN', `Processed ${packs.length} training packs, ${result.discoveries} memories created`);
+        result.discoveries = trainResult?.casesLoaded ?? 0;
+        this.log('TRAIN', `Processed ${packs.length} training packs, ${trainResult.causalEdgesLoaded} causal edges, ${trainResult.rulesLoaded} rules loaded`);
       } catch (err) {
         this.logError('TRAIN', 'Failed to run brain trainer', err);
         this.errors.push(`Brain trainer failed: ${err instanceof Error ? err.message : String(err)}`);
@@ -214,9 +211,11 @@ export abstract class BaseTrainingAgent {
     }
 
     try {
-      const repo = createSupabaseRepository(this.supabase);
-      const engine = createConsolidationEngine(repo, this.organizationId);
-      const result = await engine.consolidate();
+      const engine = createConsolidationEngine({
+        supabase: this.supabase,
+        organizationId: this.organizationId,
+      });
+      const result = await engine.runConsolidation();
       this.log('CONSOLIDATE', `Consolidation complete: ${result?.report?.summary ?? 'OK'}`);
       return {
         success: true,
