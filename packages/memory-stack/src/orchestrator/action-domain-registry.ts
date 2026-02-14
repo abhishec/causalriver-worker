@@ -76,7 +76,24 @@ export type SemanticIntent =
   | 'anomaly-predict'
   | 'goal-decompose'
   | 'causal-intervene'
-  | 'pattern-memory';
+  | 'pattern-memory'
+  // V7 — Accounting Intelligence (Multi-Jurisdiction)
+  | 'document-comprehend'
+  | 'completeness-check'
+  | 'rule-apply'
+  | 'cross-validate'
+  | 'statement-synthesize'
+  | 'jurisdiction-comply'
+  | 'confidence-triage'
+  // V8 — Software Engineering as a Service
+  | 'codebase-comprehend'
+  | 'spec-completeness'
+  | 'requirement-clarify'
+  | 'pattern-enforce'
+  | 'consistency-verify'
+  | 'code-generate'
+  | 'review-triage'
+  | 'interrogate'; // Added for requirement-clarify (reuses Broca's questioning)
 
 /** Output schema declaration — what a domain produces */
 export interface DomainOutputSchema {

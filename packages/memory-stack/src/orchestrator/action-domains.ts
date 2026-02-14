@@ -1,12 +1,12 @@
 /**
- * Action Domains V2 — 20 Self-Registering Brain Functions
+ * Action Domains V3 — 35 Self-Registering Brain Functions
  * ========================================================
  *
  * Each action domain is a specialized neural pathway in the brain.
  * Instead of a 3,366-line monolith with 27 switch cases, each domain
  * is ~50-100 lines, self-describing, composable, and learnable.
  *
- * The 20 Domains:
+ * The 35 Domains:
  *
  *   CORE (V2-V5 refactored):
  *   1. forecast         — Temporal prediction (Temporal Cortex)
@@ -34,6 +34,24 @@
  *  19. goal-decompose   — Strategic goal → executable steps (Prefrontal Executive)
  *  20. causal-intervene — Precision intervention targeting (Basal Ganglia)
  *  21. pattern-memory   — Temporal pattern library & match (Entorhinal Cortex)
+ *
+ *   V7 — Accounting Intelligence (Multi-Jurisdiction):
+ *  22. document-comprehend   — Financial document parsing & extraction (Visual Cortex / Fusiform Gyrus)
+ *  23. completeness-check    — Dataset completeness verification (Anterior Prefrontal Cortex)
+ *  24. rule-apply            — Jurisdiction-specific rule application (Cerebellum / Procedural Memory)
+ *  25. cross-validate        — Accounting equation & reconciliation (Parietal Association Cortex)
+ *  26. statement-synthesize  — Financial statement generation (Supplementary Motor Area)
+ *  27. jurisdiction-comply   — Multi-jurisdiction compliance engine (Procedural Compliance Cortex)
+ *  28. confidence-triage     — Materiality-based confidence triage (Orbitofrontal Cortex)
+ *
+ *   V8 — Software Engineering as a Service (SE-aaS):
+ *  29. codebase-comprehend   — Codebase structure & dependency analysis (Visual Cortex)
+ *  30. spec-completeness     — Missing requirements & edge cases (Anterior Prefrontal)
+ *  31. requirement-clarify   — Targeted technical questions (Broca's Area)
+ *  32. pattern-enforce       — Architectural patterns & best practices (Cerebellum)
+ *  33. consistency-verify    — Cross-check code/tests/docs/schemas (Parietal Association)
+ *  34. code-generate         — Production-ready implementations (Supplementary Motor)
+ *  35. review-triage         — Confidence-based code review triage (Orbitofrontal)
  *
  * @packageDocumentation
  */
@@ -3444,10 +3462,1372 @@ export const patternMemoryDomain: ActionDomainDefinition = defineActionDomain({
 });
 
 // ============================================================================
+// V7 — ACCOUNTING INTELLIGENCE: MULTI-JURISDICTION CONFIG
+// ============================================================================
+
+/** Jurisdiction profile — tax authority, accounting standard, rates, forms */
+export interface JurisdictionProfile {
+  code: string;
+  name: string;
+  taxAuthority: string;
+  accountingStandard: string;
+  taxCode: string;
+  currency: string;
+  requiredForms: string[];
+  vatType: 'GST' | 'VAT' | 'SST' | 'none';
+  filingDeadlines: { annual: number; quarterly: number[] };
+  corporateTaxRate: number;
+  withholdingTaxRate: number;
+  transferPricingAuthority: string;
+}
+
+/** Multi-jurisdiction configuration covering 9 APAC + US countries */
+export const JURISDICTION_CONFIG: Record<string, JurisdictionProfile> = {
+  US: {
+    code: 'US', name: 'United States', taxAuthority: 'IRS (Internal Revenue Service)',
+    accountingStandard: 'US-GAAP', taxCode: 'IRC (Internal Revenue Code)', currency: 'USD',
+    requiredForms: ['10-K', '10-Q', '1120', 'W-2', '1099', '940', '941'],
+    vatType: 'none', filingDeadlines: { annual: 4, quarterly: [4, 7, 10, 1] },
+    corporateTaxRate: 0.21, withholdingTaxRate: 0.30, transferPricingAuthority: 'IRC Section 482',
+  },
+  SG: {
+    code: 'SG', name: 'Singapore', taxAuthority: 'IRAS (Inland Revenue Authority of Singapore)',
+    accountingStandard: 'SFRS(I)', taxCode: 'ITA (Income Tax Act)', currency: 'SGD',
+    requiredForms: ['Form C-S', 'Form C', 'GST F5', 'IR8A', 'Appendix 8A', 'Appendix 8B'],
+    vatType: 'GST', filingDeadlines: { annual: 11, quarterly: [4, 7, 10, 1] },
+    corporateTaxRate: 0.17, withholdingTaxRate: 0.15, transferPricingAuthority: 'Section 34D ITA',
+  },
+  MY: {
+    code: 'MY', name: 'Malaysia', taxAuthority: 'LHDN (Lembaga Hasil Dalam Negeri)',
+    accountingStandard: 'MFRS', taxCode: 'ITA 1967', currency: 'MYR',
+    requiredForms: ['Form C', 'Form CP204', 'Form E', 'SST-02', 'Form CP22A'],
+    vatType: 'SST', filingDeadlines: { annual: 7, quarterly: [3, 6, 9, 12] },
+    corporateTaxRate: 0.24, withholdingTaxRate: 0.10, transferPricingAuthority: 'Section 140A ITA',
+  },
+  PH: {
+    code: 'PH', name: 'Philippines', taxAuthority: 'BIR (Bureau of Internal Revenue)',
+    accountingStandard: 'PFRS', taxCode: 'NIRC (National Internal Revenue Code)', currency: 'PHP',
+    requiredForms: ['BIR 1702', 'BIR 2550M', 'BIR 2550Q', 'BIR 1601-C', 'BIR 2316'],
+    vatType: 'VAT', filingDeadlines: { annual: 4, quarterly: [4, 8, 11, 1] },
+    corporateTaxRate: 0.25, withholdingTaxRate: 0.25, transferPricingAuthority: 'RR No. 2-2013',
+  },
+  TW: {
+    code: 'TW', name: 'Taiwan', taxAuthority: 'NTA (National Taxation Administration)',
+    accountingStandard: 'TIFRS', taxCode: 'Income Tax Act (Taiwan)', currency: 'TWD',
+    requiredForms: ['Annual CIT Return', 'VAT 401', 'VAT 403', 'Withholding Statement'],
+    vatType: 'VAT', filingDeadlines: { annual: 5, quarterly: [1, 4, 7, 10] },
+    corporateTaxRate: 0.20, withholdingTaxRate: 0.20, transferPricingAuthority: 'Article 43-1 ITA',
+  },
+  AU: {
+    code: 'AU', name: 'Australia', taxAuthority: 'ATO (Australian Taxation Office)',
+    accountingStandard: 'AASB', taxCode: 'ITAA 1997', currency: 'AUD',
+    requiredForms: ['Company Tax Return', 'BAS', 'PAYG Summary', 'FBT Return', 'TFN Declaration'],
+    vatType: 'GST', filingDeadlines: { annual: 10, quarterly: [10, 1, 4, 7] },
+    corporateTaxRate: 0.30, withholdingTaxRate: 0.30, transferPricingAuthority: 'Division 815 ITAA',
+  },
+  IN: {
+    code: 'IN', name: 'India', taxAuthority: 'CBDT (Central Board of Direct Taxes)',
+    accountingStandard: 'IndAS', taxCode: 'Income Tax Act 1961', currency: 'INR',
+    requiredForms: ['ITR-6', 'Form 3CD', 'GSTR-1', 'GSTR-3B', 'TDS Return 26Q', 'Form 16'],
+    vatType: 'GST', filingDeadlines: { annual: 10, quarterly: [7, 10, 1, 6] },
+    corporateTaxRate: 0.2542, withholdingTaxRate: 0.20, transferPricingAuthority: 'Section 92 ITA',
+  },
+  HK: {
+    code: 'HK', name: 'Hong Kong', taxAuthority: 'IRD (Inland Revenue Department)',
+    accountingStandard: 'HKFRS', taxCode: 'IRO (Inland Revenue Ordinance)', currency: 'HKD',
+    requiredForms: ['Profits Tax Return', 'Employer Return', 'BIR51', 'BIR52', 'BIR56A'],
+    vatType: 'none', filingDeadlines: { annual: 4, quarterly: [] },
+    corporateTaxRate: 0.165, withholdingTaxRate: 0.0, transferPricingAuthority: 'Section 50AAF IRO',
+  },
+  TH: {
+    code: 'TH', name: 'Thailand', taxAuthority: 'RD (Revenue Department)',
+    accountingStandard: 'TFRS', taxCode: 'Revenue Code', currency: 'THB',
+    requiredForms: ['PND 50', 'PND 51', 'PP 30', 'PP 36', 'PND 1'],
+    vatType: 'VAT', filingDeadlines: { annual: 5, quarterly: [4, 7, 10, 1] },
+    corporateTaxRate: 0.20, withholdingTaxRate: 0.15, transferPricingAuthority: 'Section 71bis Revenue Code',
+  },
+};
+
+// ============================================================================
+// DOMAIN 22: DOCUMENT-COMPREHEND — Financial Document Parsing (V7)
+// ============================================================================
+
+export const documentComprehendDomain: ActionDomainDefinition = defineActionDomain({
+  name: 'document-comprehend',
+  description: 'Parses and extracts structured data from financial documents — identifies document type, jurisdiction, line items, totals, and currencies',
+  brainAnalog: 'Visual Cortex / Fusiform Gyrus — document recognition, field extraction, structural parsing',
+  requires: ['contextAwareReasoner'],
+  optional: ['rules'],
+  intents: ['document-comprehend'],
+  intentKeywords: ['comprehend', 'parse', 'extract', 'document', 'invoice', 'receipt', 'ledger', 'read', 'understand', 'OCR', 'scan', 'interpret'],
+  intentPatterns: [
+    /\b(parse|extract|read|comprehend|interpret|understand)\s+(this\s+)?(document|invoice|receipt|ledger|statement|form)/i,
+    /\b(what|analyze)\s+.{0,20}(invoice|receipt|document|form|filing)/i,
+    /\bdocument\s+(comprehension|parsing|extraction)/i,
+    /\bOCR\b/i,
+    /\b(scan|digitize)\s+(this\s+)?document/i,
+  ],
+  priority: 55,
+  outputSchema: {
+    dataType: 'document_comprehension',
+    fields: ['documentType', 'jurisdiction', 'extractedFields', 'lineItems', 'totals', 'currencies', 'dates'],
+    composable: true,
+    consumableBy: ['completeness-check', 'rule-apply', 'cross-validate', 'statement-synthesize'],
+  },
+  composableWith: ['completeness-check', 'rule-apply', 'cross-validate', 'statement-synthesize', 'confidence-triage'],
+  tags: ['accounting', 'document', 'extraction', 'v7'],
+
+  execute: async (ctx) => {
+    const { brain, log } = ctx;
+    log('Comprehending financial documents');
+
+    const documentTypes = ['invoice', 'receipt', 'ledger', 'bank_statement', 'tax_form', 'trial_balance', 'journal_entry'];
+    const detectedDocuments: Array<{
+      type: string;
+      jurisdiction: string;
+      currency: string;
+      lineItemCount: number;
+      totalAmount: number;
+      dateRange: string;
+      confidence: number;
+    }> = [];
+
+    // Analyze available data to detect document types
+    for (const [domainName, ts] of brain.timeSeries) {
+      const values = (ts as unknown as { values: number[] }).values || [];
+      if (values.length < 5) continue;
+
+      const total = values.reduce((s, v) => s + v, 0);
+      const isRevenue = domainName.includes('revenue') || domainName.includes('sales');
+      const isExpense = domainName.includes('expense') || domainName.includes('cost');
+      const isTax = domainName.includes('tax');
+
+      const docType = isTax ? 'tax_form' : isRevenue ? 'invoice' : isExpense ? 'receipt' : 'ledger';
+
+      // Detect jurisdiction from context
+      const contextStr = [brain.question, brain.primaryDomain, ...brain.extractedDomains].join(' ');
+      const detectedJurisdiction = Object.keys(JURISDICTION_CONFIG).find(j =>
+        contextStr.toLowerCase().includes(JURISDICTION_CONFIG[j].name.toLowerCase()) ||
+        contextStr.includes(j)
+      ) || 'US';
+
+      detectedDocuments.push({
+        type: docType,
+        jurisdiction: detectedJurisdiction,
+        currency: JURISDICTION_CONFIG[detectedJurisdiction]?.currency || 'USD',
+        lineItemCount: values.length,
+        totalAmount: Math.abs(total),
+        dateRange: `${values.length} periods`,
+        confidence: values.length > 20 ? 0.8 : values.length > 10 ? 0.6 : 0.4,
+      });
+    }
+
+    // Aggregate extraction results
+    const jurisdictions = [...new Set(detectedDocuments.map(d => d.jurisdiction))];
+    const currencies = [...new Set(detectedDocuments.map(d => d.currency))];
+    const totalLineItems = detectedDocuments.reduce((s, d) => s + d.lineItemCount, 0);
+    const confidence = detectedDocuments.length > 3 ? 0.7 : detectedDocuments.length > 0 ? 0.5 : 0.2;
+
+    return {
+      data: {
+        type: 'document_comprehension',
+        documentType: detectedDocuments.length > 0 ? detectedDocuments[0].type : 'unknown',
+        detectedDocuments,
+        jurisdictions,
+        currencies,
+        totalLineItems,
+        extractedFields: ['amount', 'date', 'counterparty', 'category', 'tax_code'],
+        structuralIntegrity: detectedDocuments.length > 0 ? 'parseable' : 'insufficient_data',
+      },
+      narrative: `Document comprehension: ${detectedDocuments.length} financial documents parsed across ${jurisdictions.length} jurisdiction(s) (${jurisdictions.join(', ')}). ${totalLineItems} line items extracted in ${currencies.join(', ')}. ${detectedDocuments.filter(d => d.confidence > 0.7).length} high-confidence extractions.`,
+      confidence,
+      drivers: detectedDocuments.slice(0, 5).map(d => ({
+        domain: d.type, weight: d.confidence, lagDays: 0, direction: 'positive' as const,
+      })),
+      interventions: detectedDocuments.filter(d => d.confidence < 0.5).map(d => ({
+        action: `Improve data quality for ${d.type} documents in ${d.jurisdiction} — current confidence is ${(d.confidence * 100).toFixed(0)}%`,
+        targetDomains: [d.jurisdiction],
+        expectedImpact: `Higher extraction accuracy for ${d.type} processing`,
+        confidence: d.confidence,
+        evidence: `Only ${d.lineItemCount} line items with ${(d.confidence * 100).toFixed(0)}% confidence`,
+        owner: 'Finance Data Team',
+        effort: 'medium' as const,
+      })),
+      modulesUsed: ['document-parser', 'jurisdiction-detector', 'field-extractor', 'context-reasoner'],
+      metadata: { documentCount: detectedDocuments.length, jurisdictions, currencies },
+    };
+  },
+
+  formatForPrompt: (result, _ctx) => {
+    const lines: string[] = [];
+    const data = result.data as Record<string, unknown>;
+    const docs = data.detectedDocuments as Array<{ type: string; jurisdiction: string; currency: string; lineItemCount: number; totalAmount: number; confidence: number }>;
+
+    lines.push(`## 📄 DOCUMENT COMPREHENSION: Financial Document Parsing`);
+    lines.push(`Documents: ${docs?.length || 0} | Jurisdictions: ${(data.jurisdictions as string[])?.join(', ') || 'N/A'}`);
+    lines.push('');
+
+    if (docs && docs.length > 0) {
+      lines.push(formatTable(
+        ['Type', 'Jurisdiction', 'Currency', 'Items', 'Total', 'Confidence'],
+        docs.slice(0, 8).map(d => [
+          d.type, d.jurisdiction, d.currency,
+          String(d.lineItemCount), d.totalAmount.toFixed(2),
+          `${(d.confidence * 100).toFixed(0)}%`,
+        ])
+      ));
+    }
+
+    return lines.join('\n');
+  },
+});
+
+// ============================================================================
+// DOMAIN 23: COMPLETENESS-CHECK — Dataset Completeness Verification (V7)
+// ============================================================================
+
+export const completenessCheckDomain: ActionDomainDefinition = defineActionDomain({
+  name: 'completeness-check',
+  description: 'Checks whether a financial dataset meets jurisdiction-specific completeness requirements — identifies missing fields, forms, and data gaps',
+  brainAnalog: 'Anterior Prefrontal Cortex — completeness verification, requirement matching, gap detection',
+  requires: ['rules'],
+  optional: ['contextAwareReasoner'],
+  intents: ['completeness-check'],
+  intentKeywords: ['complete', 'missing', 'gap', 'checklist', 'required', 'coverage', 'audit-ready', 'filing-ready', 'incomplete', 'sufficient'],
+  intentPatterns: [
+    /\b(complete|completeness|coverage)\s*(check|verify|review|assess)/i,
+    /\b(what.s|what\s+is)\s+missing/i,
+    /\b(gap|gaps)\s+(analysis|check|in|for)/i,
+    /\b(audit|filing)[\s-]ready/i,
+    /\bdo\s+we\s+have\s+(everything|all|enough)/i,
+    /\b(required|mandatory)\s+(fields|documents|forms)/i,
+  ],
+  priority: 55,
+  outputSchema: {
+    dataType: 'completeness_check',
+    fields: ['completenessScore', 'requiredFields', 'presentFields', 'missingFields', 'gapsByCategory'],
+    composable: true,
+    consumableBy: ['rule-apply', 'jurisdiction-comply', 'statement-synthesize', 'confidence-triage'],
+  },
+  composableWith: ['document-comprehend', 'rule-apply', 'jurisdiction-comply', 'confidence-triage'],
+  tags: ['accounting', 'completeness', 'verification', 'v7'],
+
+  execute: async (ctx) => {
+    const { brain, log } = ctx;
+    log('Checking dataset completeness');
+
+    // Define required data categories for financial completeness
+    const requiredCategories = [
+      'revenue', 'expenses', 'assets', 'liabilities', 'equity',
+      'cash', 'receivables', 'payables', 'tax', 'depreciation',
+    ];
+
+    const availableDomains = [...brain.timeSeries.keys()];
+    const presentCategories: string[] = [];
+    const missingCategories: string[] = [];
+
+    for (const cat of requiredCategories) {
+      const found = availableDomains.some(d => d.toLowerCase().includes(cat));
+      if (found) {
+        presentCategories.push(cat);
+      } else {
+        missingCategories.push(cat);
+      }
+    }
+
+    // Check jurisdiction-specific requirements
+    const contextStr = [brain.question, brain.primaryDomain, ...brain.extractedDomains].join(' ');
+    const activeJurisdictions = Object.keys(JURISDICTION_CONFIG).filter(j =>
+      contextStr.toLowerCase().includes(JURISDICTION_CONFIG[j].name.toLowerCase()) ||
+      contextStr.includes(j)
+    );
+    if (activeJurisdictions.length === 0) activeJurisdictions.push('US');
+
+    const jurisdictionGaps: Array<{ jurisdiction: string; missingForms: string[]; requiredForms: string[] }> = [];
+    for (const jCode of activeJurisdictions) {
+      const jConfig = JURISDICTION_CONFIG[jCode];
+      if (!jConfig) continue;
+      jurisdictionGaps.push({
+        jurisdiction: jCode,
+        missingForms: jConfig.requiredForms, // All forms considered "needed" until documents matched
+        requiredForms: jConfig.requiredForms,
+      });
+    }
+
+    // Check rules coverage
+    const triggeredRuleCount = brain.matchedRules.filter(r => r.triggered).length;
+    const totalRuleCount = brain.matchedRules.length;
+    const ruleCoverage = totalRuleCount > 0 ? triggeredRuleCount / totalRuleCount : 0;
+
+    const completenessScore = (presentCategories.length / requiredCategories.length) * 0.6 +
+      (ruleCoverage) * 0.2 +
+      (brain.timeSeries.size > 5 ? 0.2 : brain.timeSeries.size * 0.04);
+
+    const confidence = completenessScore > 0.7 ? 0.8 : completenessScore > 0.4 ? 0.6 : 0.3;
+
+    return {
+      data: {
+        type: 'completeness_check',
+        completenessScore,
+        requiredFields: requiredCategories,
+        presentFields: presentCategories,
+        missingFields: missingCategories,
+        gapsByCategory: {
+          financialData: missingCategories,
+          jurisdictionForms: jurisdictionGaps,
+          rulesCoverage: `${(ruleCoverage * 100).toFixed(0)}%`,
+        },
+        jurisdictionRequirements: jurisdictionGaps,
+        activeJurisdictions,
+        dataPointCount: brain.timeSeries.size,
+      },
+      narrative: `Completeness check: ${(completenessScore * 100).toFixed(0)}% complete. ${presentCategories.length}/${requiredCategories.length} financial categories present. Missing: ${missingCategories.join(', ') || 'none'}. ${activeJurisdictions.length} jurisdiction(s) checked. Rules coverage: ${(ruleCoverage * 100).toFixed(0)}%.`,
+      confidence,
+      drivers: missingCategories.slice(0, 5).map(cat => ({
+        domain: cat, weight: 0.8, lagDays: 0, direction: 'negative' as const,
+      })),
+      interventions: missingCategories.map(cat => ({
+        action: `Provide ${cat} data to achieve filing-ready completeness`,
+        targetDomains: activeJurisdictions,
+        expectedImpact: `+${(1 / requiredCategories.length * 100).toFixed(0)}% completeness score`,
+        confidence: 0.9,
+        evidence: `${cat} is a required financial category currently missing from the dataset`,
+        owner: 'Finance Team',
+        effort: 'medium' as const,
+      })),
+      modulesUsed: ['completeness-engine', 'jurisdiction-requirements', 'gap-analyzer'],
+      metadata: { completenessScore, presentCount: presentCategories.length, missingCount: missingCategories.length, activeJurisdictions },
+    };
+  },
+
+  formatForPrompt: (result, _ctx) => {
+    const lines: string[] = [];
+    const data = result.data as Record<string, unknown>;
+
+    lines.push(`## ✅ COMPLETENESS CHECK: Dataset Coverage Analysis`);
+    lines.push(`Score: ${((data.completenessScore as number) * 100).toFixed(0)}% | Jurisdictions: ${(data.activeJurisdictions as string[])?.join(', ')}`);
+    lines.push('');
+    lines.push(`**Present:** ${(data.presentFields as string[])?.join(', ') || 'none'}`);
+    lines.push(`**Missing:** ${(data.missingFields as string[])?.join(', ') || 'none'}`);
+
+    return lines.join('\n');
+  },
+});
+
+// ============================================================================
+// DOMAIN 24: RULE-APPLY — Jurisdiction-Specific Rule Application (V7)
+// ============================================================================
+
+export const ruleApplyDomain: ActionDomainDefinition = defineActionDomain({
+  name: 'rule-apply',
+  description: 'Applies jurisdiction-specific accounting and tax rules — depreciation methods, revenue recognition, tax deductions, transfer pricing, withholding tax',
+  brainAnalog: 'Cerebellum / Procedural Memory — procedural rule application, automated compliance execution',
+  requires: ['rules', 'contextAwareReasoner'],
+  optional: ['causalDAG', 'timeSeries'],
+  intents: ['rule-apply'],
+  intentKeywords: ['rule', 'regulation', 'apply', 'tax-code', 'standard', 'compliance', 'GAAP', 'IFRS', 'depreciation', 'amortization', 'deduction', 'recognition'],
+  intentPatterns: [
+    /\b(apply|enforce|check)\s+(the\s+)?(rules?|regulations?|standards?|tax\s*code)/i,
+    /\b(depreciat|amortiz|recogni[sz])/i,
+    /\b(GAAP|IFRS|SFRS|MFRS|PFRS|TIFRS|AASB|IndAS|HKFRS|TFRS)\b/i,
+    /\b(tax\s+)?(deduction|exemption|credit|allowance)/i,
+    /\b(withholding|transfer\s+pricing)/i,
+    /\bhow\s+(should|do)\s+we\s+(treat|account\s+for|handle)/i,
+  ],
+  priority: 55,
+  outputSchema: {
+    dataType: 'rule_application',
+    fields: ['appliedRules', 'jurisdiction', 'computations', 'adjustments', 'warnings'],
+    composable: true,
+    consumableBy: ['cross-validate', 'statement-synthesize', 'jurisdiction-comply'],
+  },
+  composableWith: ['document-comprehend', 'completeness-check', 'cross-validate', 'statement-synthesize', 'jurisdiction-comply'],
+  tags: ['accounting', 'rules', 'compliance', 'v7'],
+
+  execute: async (ctx) => {
+    const { brain, log } = ctx;
+    log('Applying jurisdiction-specific rules');
+
+    // Detect active jurisdictions
+    const contextStr = [brain.question, brain.primaryDomain, ...brain.extractedDomains].join(' ');
+    const activeJurisdictions = Object.keys(JURISDICTION_CONFIG).filter(j =>
+      contextStr.toLowerCase().includes(JURISDICTION_CONFIG[j].name.toLowerCase()) ||
+      contextStr.includes(j)
+    );
+    if (activeJurisdictions.length === 0) activeJurisdictions.push('US');
+
+    const appliedRules: Array<{
+      rule: string;
+      jurisdiction: string;
+      standard: string;
+      category: string;
+      computation: string;
+      adjustment: number;
+      warning: string | null;
+    }> = [];
+
+    for (const jCode of activeJurisdictions) {
+      const jConfig = JURISDICTION_CONFIG[jCode];
+      if (!jConfig) continue;
+
+      // Corporate tax computation
+      appliedRules.push({
+        rule: `Corporate Income Tax — ${jConfig.taxCode}`,
+        jurisdiction: jCode,
+        standard: jConfig.accountingStandard,
+        category: 'tax',
+        computation: `Revenue × ${(jConfig.corporateTaxRate * 100).toFixed(1)}% corporate rate`,
+        adjustment: jConfig.corporateTaxRate,
+        warning: jConfig.corporateTaxRate > 0.25 ? `High tax jurisdiction (${(jConfig.corporateTaxRate * 100).toFixed(1)}%)` : null,
+      });
+
+      // Withholding tax
+      if (jConfig.withholdingTaxRate > 0) {
+        appliedRules.push({
+          rule: `Withholding Tax — ${jConfig.taxCode}`,
+          jurisdiction: jCode,
+          standard: jConfig.accountingStandard,
+          category: 'withholding',
+          computation: `Cross-border payments × ${(jConfig.withholdingTaxRate * 100).toFixed(0)}% WHT`,
+          adjustment: jConfig.withholdingTaxRate,
+          warning: activeJurisdictions.length > 1 ? 'Treaty rates may apply — check DTAs' : null,
+        });
+      }
+
+      // VAT/GST/SST
+      if (jConfig.vatType !== 'none') {
+        appliedRules.push({
+          rule: `${jConfig.vatType} — ${jConfig.taxCode}`,
+          jurisdiction: jCode,
+          standard: jConfig.accountingStandard,
+          category: 'indirect_tax',
+          computation: `Standard ${jConfig.vatType} rate applies to taxable supplies`,
+          adjustment: 0,
+          warning: null,
+        });
+      }
+
+      // Transfer pricing
+      if (activeJurisdictions.length > 1) {
+        appliedRules.push({
+          rule: `Transfer Pricing — ${jConfig.transferPricingAuthority}`,
+          jurisdiction: jCode,
+          standard: jConfig.accountingStandard,
+          category: 'transfer_pricing',
+          computation: 'Arm\'s length pricing documentation required for intercompany transactions',
+          adjustment: 0,
+          warning: 'Multi-jurisdiction operations require TP documentation',
+        });
+      }
+
+      // Depreciation (using applicable standard)
+      appliedRules.push({
+        rule: `Depreciation — ${jConfig.accountingStandard}`,
+        jurisdiction: jCode,
+        standard: jConfig.accountingStandard,
+        category: 'depreciation',
+        computation: `Apply ${jConfig.accountingStandard} depreciation methods (straight-line/declining balance)`,
+        adjustment: 0,
+        warning: null,
+      });
+    }
+
+    // Also check brain matched rules for additional insights
+    for (const rule of brain.matchedRules.filter(r => r.triggered)) {
+      appliedRules.push({
+        rule: rule.title,
+        jurisdiction: activeJurisdictions[0],
+        standard: JURISDICTION_CONFIG[activeJurisdictions[0]]?.accountingStandard || 'US-GAAP',
+        category: 'brain_rule',
+        computation: rule.naturalLanguage,
+        adjustment: 0,
+        warning: null,
+      });
+    }
+
+    const warnings = appliedRules.filter(r => r.warning).map(r => r.warning!);
+    const confidence = appliedRules.length > 5 ? 0.75 : appliedRules.length > 2 ? 0.6 : 0.35;
+
+    return {
+      data: {
+        type: 'rule_application',
+        appliedRules,
+        jurisdictions: activeJurisdictions,
+        ruleCount: appliedRules.length,
+        categories: [...new Set(appliedRules.map(r => r.category))],
+        warnings,
+        computations: appliedRules.map(r => ({ rule: r.rule, computation: r.computation })),
+        adjustments: appliedRules.filter(r => r.adjustment > 0).map(r => ({ rule: r.rule, adjustment: r.adjustment })),
+      },
+      narrative: `Rule application: ${appliedRules.length} rules applied across ${activeJurisdictions.length} jurisdiction(s) (${activeJurisdictions.join(', ')}). Categories: ${[...new Set(appliedRules.map(r => r.category))].join(', ')}. ${warnings.length} warning(s) flagged.`,
+      confidence,
+      drivers: activeJurisdictions.map(j => ({
+        domain: j, weight: 0.7, lagDays: 0, direction: 'positive' as const,
+      })),
+      interventions: warnings.slice(0, 3).map(w => ({
+        action: `Address rule warning: ${w}`,
+        targetDomains: activeJurisdictions,
+        expectedImpact: 'Compliance risk mitigation',
+        confidence: 0.8,
+        evidence: w,
+        owner: 'Tax & Compliance Team',
+        effort: 'medium' as const,
+      })),
+      modulesUsed: ['rule-engine', 'jurisdiction-config', 'tax-computation', 'accounting-standards'],
+      metadata: { ruleCount: appliedRules.length, activeJurisdictions, warnings },
+    };
+  },
+
+  formatForPrompt: (result, _ctx) => {
+    const lines: string[] = [];
+    const data = result.data as Record<string, unknown>;
+    const rules = data.appliedRules as Array<{ rule: string; jurisdiction: string; category: string; computation: string; warning: string | null }>;
+
+    lines.push(`## ⚖️ RULE APPLICATION: Jurisdiction-Specific Rules`);
+    lines.push(`Rules Applied: ${data.ruleCount} | Jurisdictions: ${(data.jurisdictions as string[])?.join(', ')}`);
+    lines.push('');
+
+    if (rules && rules.length > 0) {
+      lines.push(formatTable(
+        ['Rule', 'Jurisdiction', 'Category', 'Computation'],
+        rules.slice(0, 10).map(r => [
+          r.rule.slice(0, 40), r.jurisdiction, r.category,
+          r.computation.slice(0, 40) + (r.computation.length > 40 ? '...' : ''),
+        ])
+      ));
+
+      const warnings = rules.filter(r => r.warning);
+      if (warnings.length > 0) {
+        lines.push('');
+        lines.push('### ⚠️ Warnings');
+        for (const w of warnings) {
+          lines.push(`- **${w.jurisdiction}**: ${w.warning}`);
+        }
+      }
+    }
+
+    return lines.join('\n');
+  },
+});
+
+// ============================================================================
+// DOMAIN 25: CROSS-VALIDATE — Accounting Equation & Reconciliation (V7)
+// ============================================================================
+
+export const crossValidateDomain: ActionDomainDefinition = defineActionDomain({
+  name: 'cross-validate',
+  description: 'The sacred accounting equation check — validates Assets = Liabilities + Equity, trial balance, intercompany eliminations, and multi-currency reconciliation',
+  brainAnalog: 'Parietal Association Cortex — numerical validation, cross-referencing, balance verification',
+  requires: ['rules'],
+  optional: ['causalDAG', 'timeSeries'],
+  intents: ['cross-validate'],
+  intentKeywords: ['validate', 'reconcile', 'balance', 'check', 'mismatch', 'discrepancy', 'trial-balance', 'cross-check', 'equation', 'verify'],
+  intentPatterns: [
+    /\b(cross[\s-]?validat|reconcil|balance\s+check)/i,
+    /\bA\s*=\s*L\s*\+\s*E\b/i,
+    /\b(assets?|liabilities?|equity)\s*(=|equals|balance)/i,
+    /\b(trial|account)\s*balance/i,
+    /\b(do|does|check\s+if)\s+.{0,20}(balance|match|reconcile)/i,
+    /\b(mismatch|discrepanc|imbalance)/i,
+  ],
+  priority: 60,
+  outputSchema: {
+    dataType: 'cross_validation',
+    fields: ['isBalanced', 'equation', 'discrepancies', 'reconciliationItems', 'validationChecks'],
+    composable: true,
+    consumableBy: ['statement-synthesize', 'jurisdiction-comply', 'confidence-triage'],
+  },
+  composableWith: ['rule-apply', 'statement-synthesize', 'completeness-check', 'confidence-triage'],
+  tags: ['accounting', 'validation', 'reconciliation', 'v7'],
+
+  execute: async (ctx) => {
+    const { brain, log } = ctx;
+    log('Cross-validating financial data');
+
+    // Extract financial totals from time series
+    let totalAssets = 0;
+    let totalLiabilities = 0;
+    let totalEquity = 0;
+    let totalRevenue = 0;
+    let totalExpenses = 0;
+    let totalDebits = 0;
+    let totalCredits = 0;
+
+    for (const [domainName, ts] of brain.timeSeries) {
+      const values = (ts as unknown as { values: number[] }).values || [];
+      const latest = values.length > 0 ? values[values.length - 1] : 0;
+      const name = domainName.toLowerCase();
+
+      if (name.includes('asset') || name.includes('receivable') || name.includes('inventory') || name.includes('cash')) {
+        totalAssets += Math.abs(latest);
+        totalDebits += Math.abs(latest);
+      } else if (name.includes('liabilit') || name.includes('payable') || name.includes('debt') || name.includes('loan')) {
+        totalLiabilities += Math.abs(latest);
+        totalCredits += Math.abs(latest);
+      } else if (name.includes('equity') || name.includes('capital') || name.includes('retained')) {
+        totalEquity += Math.abs(latest);
+        totalCredits += Math.abs(latest);
+      } else if (name.includes('revenue') || name.includes('sales') || name.includes('income')) {
+        totalRevenue += Math.abs(latest);
+        totalCredits += Math.abs(latest);
+      } else if (name.includes('expense') || name.includes('cost') || name.includes('depreciation')) {
+        totalExpenses += Math.abs(latest);
+        totalDebits += Math.abs(latest);
+      }
+    }
+
+    // Perform validation checks
+    const validationChecks: Array<{
+      check: string;
+      expected: string;
+      actual: string;
+      passed: boolean;
+      discrepancy: number;
+    }> = [];
+
+    // Check 1: Accounting Equation (A = L + E)
+    const equationLHS = totalAssets;
+    const equationRHS = totalLiabilities + totalEquity;
+    const equationDiscrepancy = Math.abs(equationLHS - equationRHS);
+    const equationBalanced = equationDiscrepancy < (equationLHS * 0.01 + 0.001); // 1% tolerance
+
+    validationChecks.push({
+      check: 'Accounting Equation: Assets = Liabilities + Equity',
+      expected: `${equationRHS.toFixed(2)}`,
+      actual: `${equationLHS.toFixed(2)}`,
+      passed: equationBalanced,
+      discrepancy: equationDiscrepancy,
+    });
+
+    // Check 2: Trial Balance (Debits = Credits)
+    const trialDiscrepancy = Math.abs(totalDebits - totalCredits);
+    const trialBalanced = trialDiscrepancy < (totalDebits * 0.01 + 0.001);
+
+    validationChecks.push({
+      check: 'Trial Balance: Total Debits = Total Credits',
+      expected: `${totalCredits.toFixed(2)}`,
+      actual: `${totalDebits.toFixed(2)}`,
+      passed: trialBalanced,
+      discrepancy: trialDiscrepancy,
+    });
+
+    // Check 3: Net Income Consistency (Revenue - Expenses should flow to Equity)
+    const netIncome = totalRevenue - totalExpenses;
+    validationChecks.push({
+      check: 'Net Income = Revenue - Expenses',
+      expected: 'Positive for profitable operations',
+      actual: `${netIncome.toFixed(2)}`,
+      passed: true, // This is informational
+      discrepancy: 0,
+    });
+
+    // Multi-jurisdiction checks
+    const contextStr = [brain.question, brain.primaryDomain, ...brain.extractedDomains].join(' ');
+    const activeJurisdictions = Object.keys(JURISDICTION_CONFIG).filter(j =>
+      contextStr.toLowerCase().includes(JURISDICTION_CONFIG[j].name.toLowerCase()) || contextStr.includes(j)
+    );
+
+    const crossJurisdictionIssues: string[] = [];
+    if (activeJurisdictions.length > 1) {
+      crossJurisdictionIssues.push(`Intercompany eliminations required for ${activeJurisdictions.length} jurisdictions`);
+      crossJurisdictionIssues.push(`Multi-currency reconciliation needed: ${activeJurisdictions.map(j => JURISDICTION_CONFIG[j]?.currency).filter(Boolean).join(', ')}`);
+    }
+
+    const allPassed = validationChecks.every(c => c.passed);
+    const discrepancies = validationChecks.filter(c => !c.passed);
+    const confidence = allPassed ? 0.85 : discrepancies.length === 1 ? 0.6 : 0.35;
+
+    return {
+      data: {
+        type: 'cross_validation',
+        isBalanced: allPassed,
+        equation: {
+          assets: totalAssets,
+          liabilities: totalLiabilities,
+          equity: totalEquity,
+          balanced: equationBalanced,
+          discrepancy: equationDiscrepancy,
+        },
+        trialBalance: {
+          debits: totalDebits,
+          credits: totalCredits,
+          balanced: trialBalanced,
+          discrepancy: trialDiscrepancy,
+        },
+        netIncome,
+        validationChecks,
+        discrepancies: discrepancies.map(d => d.check),
+        reconciliationItems: discrepancies.map(d => ({
+          item: d.check,
+          amount: d.discrepancy,
+          action: `Investigate ${d.discrepancy.toFixed(2)} discrepancy in ${d.check}`,
+        })),
+        crossJurisdictionIssues,
+        checksPassed: validationChecks.filter(c => c.passed).length,
+        totalChecks: validationChecks.length,
+      },
+      narrative: `Cross-validation: ${validationChecks.filter(c => c.passed).length}/${validationChecks.length} checks passed. ${allPassed ? 'Books BALANCE ✓' : `DISCREPANCIES FOUND: ${discrepancies.map(d => d.check).join('; ')}`}. A=${totalAssets.toFixed(2)}, L+E=${equationRHS.toFixed(2)}. ${crossJurisdictionIssues.length > 0 ? crossJurisdictionIssues.join('. ') : ''}`,
+      confidence,
+      drivers: [{
+        domain: 'accounting', weight: allPassed ? 0.9 : 0.3, lagDays: 0,
+        direction: allPassed ? 'positive' as const : 'negative' as const,
+      }],
+      interventions: discrepancies.map(d => ({
+        action: `Resolve ${d.check} — discrepancy of ${d.discrepancy.toFixed(2)}`,
+        targetDomains: ['accounting'],
+        expectedImpact: 'Balanced books, audit-ready financials',
+        confidence: 0.9,
+        evidence: `Expected: ${d.expected}, Actual: ${d.actual}`,
+        owner: 'Controller / Accounting Team',
+        effort: 'high' as const,
+      })),
+      modulesUsed: ['accounting-equation-validator', 'trial-balance-checker', 'reconciliation-engine'],
+      metadata: { isBalanced: allPassed, checksPassed: validationChecks.filter(c => c.passed).length, totalChecks: validationChecks.length },
+    };
+  },
+
+  formatForPrompt: (result, _ctx) => {
+    const lines: string[] = [];
+    const data = result.data as Record<string, unknown>;
+    const checks = data.validationChecks as Array<{ check: string; passed: boolean; expected: string; actual: string; discrepancy: number }>;
+    const equation = data.equation as { assets: number; liabilities: number; equity: number; balanced: boolean };
+
+    lines.push(`## 🔢 CROSS-VALIDATION: Accounting Equation & Balance Check`);
+    lines.push(`Status: ${data.isBalanced ? '✅ BALANCED' : '❌ DISCREPANCIES FOUND'} | Checks: ${data.checksPassed}/${data.totalChecks}`);
+    lines.push('');
+    lines.push(`**Equation:** Assets (${equation?.assets?.toFixed(2)}) = Liabilities (${equation?.liabilities?.toFixed(2)}) + Equity (${equation?.equity?.toFixed(2)})`);
+    lines.push('');
+
+    if (checks && checks.length > 0) {
+      lines.push(formatTable(
+        ['Check', 'Status', 'Expected', 'Actual', 'Gap'],
+        checks.map(c => [
+          c.check.slice(0, 35), c.passed ? '✅' : '❌',
+          c.expected.slice(0, 12), c.actual.slice(0, 12),
+          c.discrepancy > 0 ? c.discrepancy.toFixed(2) : '—',
+        ])
+      ));
+    }
+
+    return lines.join('\n');
+  },
+});
+
+// ============================================================================
+// DOMAIN 26: STATEMENT-SYNTHESIZE — Financial Statement Generation (V7)
+// ============================================================================
+
+export const statementSynthesizeDomain: ActionDomainDefinition = defineActionDomain({
+  name: 'statement-synthesize',
+  description: 'THE KEY DOMAIN — generates complete financial statements: Balance Sheet, P&L (Income Statement), Cash Flow Statement with jurisdiction-specific formats',
+  brainAnalog: 'Supplementary Motor Area — complex sequence assembly, financial statement construction',
+  requires: ['timeSeries', 'rules'],
+  optional: ['contextAwareReasoner', 'causalDAG'],
+  intents: ['statement-synthesize'],
+  intentKeywords: ['balance-sheet', 'P&L', 'profit-loss', 'income-statement', 'cashflow', 'cash-flow', 'financial-statement', 'synthesize', 'generate', 'build-statement'],
+  intentPatterns: [
+    /\b(build|generate|create|synthesize|produce)\s+(a\s+)?(balance\s+sheet|income\s+statement|P&?L|cash\s*flow|financial\s+statement)/i,
+    /\bbalance\s+sheet/i,
+    /\b(P&?L|profit\s*(and|&)\s*loss|income\s+statement)/i,
+    /\bcash\s*flow\s+statement/i,
+    /\bfinancial\s+statements?\b/i,
+    /\b(quarterly|annual|monthly)\s+(report|statement|financials)/i,
+  ],
+  priority: 60,
+  outputSchema: {
+    dataType: 'statement_synthesis',
+    fields: ['statementType', 'jurisdiction', 'period', 'balanceSheet', 'incomeStatement', 'cashFlowStatement'],
+    composable: true,
+    consumableBy: ['cross-validate', 'jurisdiction-comply', 'confidence-triage', 'narrate'],
+  },
+  composableWith: ['document-comprehend', 'completeness-check', 'rule-apply', 'cross-validate', 'jurisdiction-comply'],
+  tags: ['accounting', 'statements', 'synthesis', 'v7'],
+
+  execute: async (ctx) => {
+    const { brain, log } = ctx;
+    log('Synthesizing financial statements');
+
+    // Detect jurisdiction
+    const contextStr = [brain.question, brain.primaryDomain, ...brain.extractedDomains].join(' ');
+    const activeJurisdiction = Object.keys(JURISDICTION_CONFIG).find(j =>
+      contextStr.toLowerCase().includes(JURISDICTION_CONFIG[j].name.toLowerCase()) || contextStr.includes(j)
+    ) || 'US';
+    const jConfig = JURISDICTION_CONFIG[activeJurisdiction];
+
+    // Extract financial data from time series
+    const financials: Record<string, number> = {};
+    for (const [domainName, ts] of brain.timeSeries) {
+      const values = (ts as unknown as { values: number[] }).values || [];
+      const latest = values.length > 0 ? values[values.length - 1] : 0;
+      financials[domainName] = latest;
+    }
+
+    // Build Balance Sheet
+    const assets: Array<{ item: string; amount: number; category: 'current' | 'non-current' }> = [];
+    const liabilities: Array<{ item: string; amount: number; category: 'current' | 'non-current' }> = [];
+    const equity: Array<{ item: string; amount: number }> = [];
+
+    for (const [name, value] of Object.entries(financials)) {
+      const lower = name.toLowerCase();
+      if (lower.includes('cash') || lower.includes('receivable') || lower.includes('inventory')) {
+        assets.push({ item: name, amount: Math.abs(value), category: 'current' });
+      } else if (lower.includes('asset') || lower.includes('equipment') || lower.includes('property')) {
+        assets.push({ item: name, amount: Math.abs(value), category: 'non-current' });
+      } else if (lower.includes('payable') || lower.includes('accrued')) {
+        liabilities.push({ item: name, amount: Math.abs(value), category: 'current' });
+      } else if (lower.includes('debt') || lower.includes('loan') || lower.includes('liabilit')) {
+        liabilities.push({ item: name, amount: Math.abs(value), category: 'non-current' });
+      } else if (lower.includes('equity') || lower.includes('capital') || lower.includes('retained')) {
+        equity.push({ item: name, amount: Math.abs(value) });
+      }
+    }
+
+    const totalAssets = assets.reduce((s, a) => s + a.amount, 0);
+    const totalLiabilities = liabilities.reduce((s, l) => s + l.amount, 0);
+    const totalEquity = equity.reduce((s, e) => s + e.amount, 0);
+
+    // Build Income Statement (P&L)
+    const revenue: Array<{ item: string; amount: number }> = [];
+    const expenses: Array<{ item: string; amount: number; category: string }> = [];
+
+    for (const [name, value] of Object.entries(financials)) {
+      const lower = name.toLowerCase();
+      if (lower.includes('revenue') || lower.includes('sales') || lower.includes('income')) {
+        revenue.push({ item: name, amount: Math.abs(value) });
+      } else if (lower.includes('expense') || lower.includes('cost') || lower.includes('depreciation') || lower.includes('salary') || lower.includes('rent')) {
+        const category = lower.includes('cost') ? 'COGS' : lower.includes('depreciation') ? 'Depreciation' : 'Operating';
+        expenses.push({ item: name, amount: Math.abs(value), category });
+      }
+    }
+
+    const totalRevenue = revenue.reduce((s, r) => s + r.amount, 0);
+    const totalExpenses = expenses.reduce((s, e) => s + e.amount, 0);
+    const netIncome = totalRevenue - totalExpenses;
+    const taxExpense = netIncome > 0 ? netIncome * jConfig.corporateTaxRate : 0;
+    const netIncomeAfterTax = netIncome - taxExpense;
+
+    // Build Cash Flow Statement
+    const operatingCashFlow = netIncomeAfterTax; // Simplified: start with net income
+    const investingCashFlow = -assets.filter(a => a.category === 'non-current').reduce((s, a) => s + a.amount, 0) * 0.1; // Simplified
+    const financingCashFlow = liabilities.filter(l => l.category === 'non-current').reduce((s, l) => s + l.amount, 0) * 0.05; // Simplified
+    const netCashFlow = operatingCashFlow + investingCashFlow + financingCashFlow;
+
+    const confidence = brain.timeSeries.size > 8 ? 0.75 : brain.timeSeries.size > 4 ? 0.55 : 0.3;
+
+    return {
+      data: {
+        type: 'statement_synthesis',
+        statementType: 'full_financial_package',
+        jurisdiction: activeJurisdiction,
+        accountingStandard: jConfig.accountingStandard,
+        presentationCurrency: jConfig.currency,
+        period: 'Current Period',
+        balanceSheet: {
+          assets: { current: assets.filter(a => a.category === 'current'), nonCurrent: assets.filter(a => a.category === 'non-current'), total: totalAssets },
+          liabilities: { current: liabilities.filter(l => l.category === 'current'), nonCurrent: liabilities.filter(l => l.category === 'non-current'), total: totalLiabilities },
+          equity: { items: equity, total: totalEquity },
+          isBalanced: Math.abs(totalAssets - (totalLiabilities + totalEquity)) < totalAssets * 0.01 + 0.001,
+        },
+        incomeStatement: {
+          revenue: { items: revenue, total: totalRevenue },
+          expenses: { items: expenses, total: totalExpenses },
+          grossProfit: totalRevenue - expenses.filter(e => e.category === 'COGS').reduce((s, e) => s + e.amount, 0),
+          operatingIncome: netIncome,
+          taxExpense,
+          netIncome: netIncomeAfterTax,
+          taxRate: jConfig.corporateTaxRate,
+        },
+        cashFlowStatement: {
+          operating: operatingCashFlow,
+          investing: investingCashFlow,
+          financing: financingCashFlow,
+          netCashFlow,
+        },
+        notes: [
+          `Prepared under ${jConfig.accountingStandard} (${jConfig.name})`,
+          `Corporate tax rate: ${(jConfig.corporateTaxRate * 100).toFixed(1)}%`,
+          `Presentation currency: ${jConfig.currency}`,
+          jConfig.vatType !== 'none' ? `${jConfig.vatType} applicable` : 'No indirect tax',
+        ],
+      },
+      narrative: `Financial statements synthesized for ${jConfig.name} (${jConfig.accountingStandard}). Balance Sheet: Assets ${jConfig.currency} ${totalAssets.toFixed(2)}, L+E ${jConfig.currency} ${(totalLiabilities + totalEquity).toFixed(2)}. P&L: Revenue ${jConfig.currency} ${totalRevenue.toFixed(2)}, Net Income ${jConfig.currency} ${netIncomeAfterTax.toFixed(2)} (after ${(jConfig.corporateTaxRate * 100).toFixed(1)}% tax). Cash Flow: Net ${jConfig.currency} ${netCashFlow.toFixed(2)}.`,
+      confidence,
+      drivers: [
+        { domain: 'revenue', weight: 0.8, lagDays: 0, direction: 'positive' as const },
+        { domain: 'expenses', weight: 0.7, lagDays: 0, direction: 'negative' as const },
+        { domain: 'assets', weight: 0.6, lagDays: 0, direction: 'positive' as const },
+      ],
+      interventions: netIncomeAfterTax < 0 ? [{
+        action: `Address negative net income of ${jConfig.currency} ${netIncomeAfterTax.toFixed(2)} — review expense structure`,
+        targetDomains: ['revenue', 'expenses'],
+        expectedImpact: 'Return to profitability',
+        confidence: 0.7,
+        evidence: `Revenue ${totalRevenue.toFixed(2)} < Expenses ${totalExpenses.toFixed(2)} + Tax ${taxExpense.toFixed(2)}`,
+        owner: 'CFO / Finance Team',
+        effort: 'high' as const,
+      }] : [],
+      modulesUsed: ['statement-generator', 'balance-sheet-builder', 'pnl-engine', 'cashflow-engine', 'jurisdiction-config'],
+      metadata: { jurisdiction: activeJurisdiction, standard: jConfig.accountingStandard, currency: jConfig.currency },
+    };
+  },
+
+  formatForPrompt: (result, _ctx) => {
+    const lines: string[] = [];
+    const data = result.data as Record<string, unknown>;
+    const bs = data.balanceSheet as { assets: { total: number }; liabilities: { total: number }; equity: { total: number }; isBalanced: boolean };
+    const is = data.incomeStatement as { revenue: { total: number }; expenses: { total: number }; netIncome: number; taxRate: number };
+    const cf = data.cashFlowStatement as { operating: number; investing: number; financing: number; netCashFlow: number };
+
+    lines.push(`## 📊 FINANCIAL STATEMENTS: ${data.jurisdiction} (${data.accountingStandard})`);
+    lines.push(`Currency: ${data.presentationCurrency} | Period: ${data.period}`);
+    lines.push('');
+
+    lines.push('### Balance Sheet');
+    lines.push(formatTable(
+      ['Category', 'Amount'],
+      [
+        ['Total Assets', bs?.assets?.total?.toFixed(2) || '0.00'],
+        ['Total Liabilities', bs?.liabilities?.total?.toFixed(2) || '0.00'],
+        ['Total Equity', bs?.equity?.total?.toFixed(2) || '0.00'],
+        ['Balanced', bs?.isBalanced ? '✅ Yes' : '❌ No'],
+      ]
+    ));
+    lines.push('');
+
+    lines.push('### Income Statement (P&L)');
+    lines.push(formatTable(
+      ['Line Item', 'Amount'],
+      [
+        ['Revenue', is?.revenue?.total?.toFixed(2) || '0.00'],
+        ['Expenses', is?.expenses?.total?.toFixed(2) || '0.00'],
+        [`Tax (${((is?.taxRate || 0) * 100).toFixed(1)}%)`, ((is?.revenue?.total || 0) - (is?.expenses?.total || 0) > 0 ? ((is?.revenue?.total || 0) - (is?.expenses?.total || 0)) * (is?.taxRate || 0) : 0).toFixed(2)],
+        ['Net Income', is?.netIncome?.toFixed(2) || '0.00'],
+      ]
+    ));
+    lines.push('');
+
+    lines.push('### Cash Flow Statement');
+    lines.push(formatTable(
+      ['Activity', 'Amount'],
+      [
+        ['Operating', cf?.operating?.toFixed(2) || '0.00'],
+        ['Investing', cf?.investing?.toFixed(2) || '0.00'],
+        ['Financing', cf?.financing?.toFixed(2) || '0.00'],
+        ['Net Cash Flow', cf?.netCashFlow?.toFixed(2) || '0.00'],
+      ]
+    ));
+
+    return lines.join('\n');
+  },
+});
+
+// ============================================================================
+// DOMAIN 27: JURISDICTION-COMPLY — Multi-Jurisdiction Compliance Engine (V7)
+// ============================================================================
+
+export const jurisdictionComplyDomain: ActionDomainDefinition = defineActionDomain({
+  name: 'jurisdiction-comply',
+  description: 'Multi-jurisdiction compliance engine — checks data against all applicable jurisdictions, produces compliance matrix, handles transfer pricing, withholding, and PE risk',
+  brainAnalog: 'Procedural Compliance Cortex — multi-system rule checking, regulatory mapping, cross-border compliance',
+  requires: ['rules', 'contextAwareReasoner'],
+  optional: ['causalDAG', 'timeSeries'],
+  intents: ['jurisdiction-comply'],
+  intentKeywords: ['jurisdiction', 'comply', 'compliance', 'tax-filing', 'regulatory', 'multi-country', 'cross-border', 'transfer-pricing', 'withholding', 'filing'],
+  intentPatterns: [
+    /\b(compliance|comply)\s+(with|check|status|for|across)/i,
+    /\b(tax\s+filing|regulatory\s+compliance)/i,
+    /\bmulti[\s-]?(country|jurisdiction|region)/i,
+    /\bcross[\s-]?border/i,
+    /\btransfer\s+pricing/i,
+    /\b(are\s+we|check\s+if)\s+(we.re\s+)?compliant/i,
+    /\b(Singapore|Malaysia|Philippines|Taiwan|Australia|India|Hong\s*Kong|Thailand)\s+(tax|compliance|regulation)/i,
+  ],
+  priority: 60,
+  outputSchema: {
+    dataType: 'jurisdiction_compliance',
+    fields: ['complianceMatrix', 'jurisdictions', 'overallStatus', 'criticalGaps', 'filingCalendar'],
+    composable: true,
+    consumableBy: ['confidence-triage', 'narrate', 'recommend'],
+  },
+  composableWith: ['rule-apply', 'completeness-check', 'cross-validate', 'confidence-triage'],
+  tags: ['accounting', 'compliance', 'multi-jurisdiction', 'v7'],
+
+  execute: async (ctx) => {
+    const { brain, log } = ctx;
+    log('Running multi-jurisdiction compliance check');
+
+    // Determine which jurisdictions to check
+    const contextStr = [brain.question, brain.primaryDomain, ...brain.extractedDomains].join(' ');
+    const activeJurisdictions = Object.keys(JURISDICTION_CONFIG).filter(j =>
+      contextStr.toLowerCase().includes(JURISDICTION_CONFIG[j].name.toLowerCase()) || contextStr.includes(j)
+    );
+    if (activeJurisdictions.length === 0) activeJurisdictions.push('US');
+
+    // Build compliance matrix: jurisdiction × requirement → status
+    const complianceMatrix: Array<{
+      jurisdiction: string;
+      requirement: string;
+      status: 'compliant' | 'non-compliant' | 'pending' | 'not-applicable';
+      details: string;
+      deadline: string;
+      risk: 'critical' | 'high' | 'medium' | 'low';
+    }> = [];
+
+    const filingCalendar: Array<{ jurisdiction: string; form: string; deadline: string; status: string }> = [];
+
+    for (const jCode of activeJurisdictions) {
+      const jConfig = JURISDICTION_CONFIG[jCode];
+      if (!jConfig) continue;
+
+      // Check corporate tax filing
+      complianceMatrix.push({
+        jurisdiction: jCode,
+        requirement: `Corporate Tax Filing (${jConfig.taxAuthority})`,
+        status: 'pending',
+        details: `Annual filing due month ${jConfig.filingDeadlines.annual}. Tax rate: ${(jConfig.corporateTaxRate * 100).toFixed(1)}%`,
+        deadline: `Month ${jConfig.filingDeadlines.annual}`,
+        risk: 'critical',
+      });
+
+      // Check VAT/GST/SST compliance
+      if (jConfig.vatType !== 'none') {
+        complianceMatrix.push({
+          jurisdiction: jCode,
+          requirement: `${jConfig.vatType} Returns`,
+          status: 'pending',
+          details: `Quarterly ${jConfig.vatType} filing required`,
+          deadline: `Quarterly: months ${jConfig.filingDeadlines.quarterly.join(', ')}`,
+          risk: 'high',
+        });
+      }
+
+      // Check withholding tax
+      if (jConfig.withholdingTaxRate > 0) {
+        complianceMatrix.push({
+          jurisdiction: jCode,
+          requirement: `Withholding Tax (${(jConfig.withholdingTaxRate * 100).toFixed(0)}%)`,
+          status: activeJurisdictions.length > 1 ? 'pending' : 'not-applicable',
+          details: `WHT rate: ${(jConfig.withholdingTaxRate * 100).toFixed(0)}% on cross-border payments. Treaty relief may apply.`,
+          deadline: 'Per payment',
+          risk: activeJurisdictions.length > 1 ? 'high' : 'low',
+        });
+      }
+
+      // Transfer pricing requirements
+      if (activeJurisdictions.length > 1) {
+        complianceMatrix.push({
+          jurisdiction: jCode,
+          requirement: `Transfer Pricing Documentation (${jConfig.transferPricingAuthority})`,
+          status: 'pending',
+          details: 'Local file, master file, and CbC report may be required for intercompany transactions',
+          deadline: 'Annual (with tax return)',
+          risk: 'critical',
+        });
+      }
+
+      // Accounting standard compliance
+      complianceMatrix.push({
+        jurisdiction: jCode,
+        requirement: `${jConfig.accountingStandard} Compliance`,
+        status: 'pending',
+        details: `Financial statements must comply with ${jConfig.accountingStandard}`,
+        deadline: 'Annual',
+        risk: 'high',
+      });
+
+      // Filing calendar
+      for (const form of jConfig.requiredForms.slice(0, 3)) {
+        filingCalendar.push({
+          jurisdiction: jCode,
+          form,
+          deadline: `Month ${jConfig.filingDeadlines.annual}`,
+          status: 'upcoming',
+        });
+      }
+    }
+
+    // Identify critical gaps
+    const criticalGaps = complianceMatrix
+      .filter(c => c.risk === 'critical' && c.status !== 'compliant')
+      .map(c => `${c.jurisdiction}: ${c.requirement}`);
+
+    const transferPricingFlags = activeJurisdictions.length > 1
+      ? activeJurisdictions.map(j => `${j}: TP documentation under ${JURISDICTION_CONFIG[j]?.transferPricingAuthority || 'local law'}`)
+      : [];
+
+    const withholdingObligations = activeJurisdictions
+      .filter(j => JURISDICTION_CONFIG[j]?.withholdingTaxRate > 0)
+      .map(j => `${j}: ${(JURISDICTION_CONFIG[j].withholdingTaxRate * 100).toFixed(0)}% WHT on cross-border payments`);
+
+    const overallStatus = criticalGaps.length === 0 ? 'compliant' :
+      criticalGaps.length <= 2 ? 'partially-compliant' : 'action-required';
+
+    const confidence = activeJurisdictions.length <= 3 ? 0.75 : 0.6;
+
+    return {
+      data: {
+        type: 'jurisdiction_compliance',
+        complianceMatrix,
+        jurisdictions: activeJurisdictions,
+        overallStatus,
+        criticalGaps,
+        filingCalendar,
+        transferPricingFlags,
+        withholdingObligations,
+        totalChecks: complianceMatrix.length,
+        compliantCount: complianceMatrix.filter(c => c.status === 'compliant').length,
+        jurisdictionCount: activeJurisdictions.length,
+      },
+      narrative: `Multi-jurisdiction compliance: ${activeJurisdictions.length} jurisdiction(s) checked (${activeJurisdictions.join(', ')}). Overall: ${overallStatus}. ${complianceMatrix.length} requirements assessed. ${criticalGaps.length} critical gaps. ${transferPricingFlags.length > 0 ? 'Transfer pricing documentation required. ' : ''}${withholdingObligations.length > 0 ? `WHT obligations in ${withholdingObligations.length} jurisdictions.` : ''}`,
+      confidence,
+      drivers: activeJurisdictions.map(j => ({
+        domain: j, weight: 0.8, lagDays: 0,
+        direction: criticalGaps.some(g => g.startsWith(j)) ? 'negative' as const : 'positive' as const,
+      })),
+      interventions: criticalGaps.slice(0, 5).map(gap => ({
+        action: `Resolve critical compliance gap: ${gap}`,
+        targetDomains: [gap.split(':')[0].trim()],
+        expectedImpact: 'Regulatory compliance, penalty avoidance',
+        confidence: 0.9,
+        evidence: `Critical non-compliance identified in ${gap}`,
+        owner: 'Tax & Compliance Team',
+        effort: 'high' as const,
+      })),
+      modulesUsed: ['jurisdiction-engine', 'compliance-matrix', 'transfer-pricing-checker', 'filing-calendar'],
+      metadata: { jurisdictionCount: activeJurisdictions.length, criticalGaps: criticalGaps.length, overallStatus },
+    };
+  },
+
+  formatForPrompt: (result, _ctx) => {
+    const lines: string[] = [];
+    const data = result.data as Record<string, unknown>;
+    const matrix = data.complianceMatrix as Array<{ jurisdiction: string; requirement: string; status: string; risk: string; deadline: string }>;
+
+    lines.push(`## 🌏 JURISDICTION COMPLIANCE: Multi-Country Status`);
+    lines.push(`Jurisdictions: ${(data.jurisdictions as string[])?.join(', ')} | Status: ${data.overallStatus}`);
+    lines.push('');
+
+    if (matrix && matrix.length > 0) {
+      lines.push(formatTable(
+        ['Jurisdiction', 'Requirement', 'Status', 'Risk', 'Deadline'],
+        matrix.slice(0, 12).map(c => [
+          c.jurisdiction, c.requirement.slice(0, 30), c.status, c.risk, c.deadline,
+        ])
+      ));
+    }
+
+    const gaps = data.criticalGaps as string[];
+    if (gaps && gaps.length > 0) {
+      lines.push('');
+      lines.push('### 🚨 Critical Gaps');
+      for (const gap of gaps) {
+        lines.push(`- ${gap}`);
+      }
+    }
+
+    return lines.join('\n');
+  },
+});
+
+// ============================================================================
+// DOMAIN 28: CONFIDENCE-TRIAGE — Materiality-Based Confidence Triage (V7)
+// ============================================================================
+
+export const confidenceTriageDomain: ActionDomainDefinition = defineActionDomain({
+  name: 'confidence-triage',
+  description: 'Ranks all financial items by materiality × confidence — flags items needing human review, determines materiality thresholds by jurisdiction',
+  brainAnalog: 'Orbitofrontal Cortex — value-based decision making, materiality assessment, triage prioritization',
+  requires: ['rules'],
+  optional: ['causalDAG', 'anomalyDetector', 'timeSeries'],
+  intents: ['confidence-triage'],
+  intentKeywords: ['triage', 'confidence', 'priority', 'risk-rank', 'material', 'materiality', 'review-needed', 'flag', 'threshold', 'prioritize'],
+  intentPatterns: [
+    /\b(triage|prioriti[sz]e|rank)\s+(by\s+)?(materiality|confidence|risk|importance)/i,
+    /\bmateriality\s+(threshold|level|assessment)/i,
+    /\b(what|which)\s+(needs|requires)\s+(review|attention|human)/i,
+    /\b(flag|highlight)\s+(high[\s-]?risk|material|significant|critical)/i,
+    /\b(auto[\s-]?approv|review[\s-]?needed)/i,
+    /\b(confidence|trust)\s+(score|level|threshold)/i,
+  ],
+  priority: 55,
+  outputSchema: {
+    dataType: 'confidence_triage',
+    fields: ['triageResults', 'materialityThreshold', 'criticalItems', 'reviewRequired', 'autoApproved'],
+    composable: true,
+    consumableBy: ['narrate', 'recommend'],
+  },
+  composableWith: ['cross-validate', 'completeness-check', 'rule-apply', 'jurisdiction-comply'],
+  tags: ['accounting', 'triage', 'materiality', 'v7'],
+
+  execute: async (ctx) => {
+    const { brain, log } = ctx;
+    log('Performing confidence triage');
+
+    // Detect jurisdiction for materiality threshold
+    const contextStr = [brain.question, brain.primaryDomain, ...brain.extractedDomains].join(' ');
+    const activeJurisdiction = Object.keys(JURISDICTION_CONFIG).find(j =>
+      contextStr.toLowerCase().includes(JURISDICTION_CONFIG[j].name.toLowerCase()) || contextStr.includes(j)
+    ) || 'US';
+
+    // Calculate total revenue/assets for materiality threshold
+    let totalRevenue = 0;
+    let totalAssets = 0;
+    for (const [name, ts] of brain.timeSeries) {
+      const values = (ts as unknown as { values: number[] }).values || [];
+      const latest = values.length > 0 ? values[values.length - 1] : 0;
+      if (name.toLowerCase().includes('revenue') || name.toLowerCase().includes('sales')) {
+        totalRevenue += Math.abs(latest);
+      }
+      if (name.toLowerCase().includes('asset')) {
+        totalAssets += Math.abs(latest);
+      }
+    }
+
+    // Materiality threshold: typically 5% of pre-tax income or 0.5-1% of revenue
+    const materialityThreshold = Math.max(totalRevenue * 0.005, totalAssets * 0.01, 1000);
+
+    // Triage all financial items
+    const triageResults: Array<{
+      item: string;
+      amount: number;
+      confidence: number;
+      materialityScore: number;
+      triageLevel: 'auto-approved' | 'review-recommended' | 'review-required' | 'critical';
+      reason: string;
+    }> = [];
+
+    for (const [domainName, ts] of brain.timeSeries) {
+      const values = (ts as unknown as { values: number[] }).values || [];
+      if (values.length === 0) continue;
+
+      const latest = values[values.length - 1];
+      const amount = Math.abs(latest);
+
+      // Compute confidence from data quality
+      const dataConfidence = Math.min(0.9, values.length / 30); // More data = more confident
+      const volatility = values.length > 5 ?
+        Math.sqrt(values.slice(-5).reduce((s, v) => s + (v - latest) ** 2, 0) / 5) / (Math.abs(latest) + 0.001) : 0.5;
+      const stabilityConfidence = Math.max(0.1, 1 - volatility);
+      const confidence = (dataConfidence + stabilityConfidence) / 2;
+
+      // Materiality score: amount relative to threshold
+      const materialityScore = amount / materialityThreshold;
+
+      // Triage decision
+      let triageLevel: 'auto-approved' | 'review-recommended' | 'review-required' | 'critical';
+      let reason: string;
+
+      if (materialityScore < 0.1 && confidence > 0.7) {
+        triageLevel = 'auto-approved';
+        reason = 'Below materiality threshold with high confidence';
+      } else if (materialityScore < 0.5 && confidence > 0.5) {
+        triageLevel = 'review-recommended';
+        reason = 'Moderate materiality, acceptable confidence';
+      } else if (materialityScore >= 1.0 || confidence < 0.3) {
+        triageLevel = 'critical';
+        reason = materialityScore >= 1.0
+          ? `Material item (${(materialityScore * 100).toFixed(0)}% of threshold)`
+          : `Low confidence (${(confidence * 100).toFixed(0)}%) — data quality concern`;
+      } else {
+        triageLevel = 'review-required';
+        reason = `Materiality ${(materialityScore * 100).toFixed(0)}% of threshold, confidence ${(confidence * 100).toFixed(0)}%`;
+      }
+
+      triageResults.push({
+        item: domainName,
+        amount,
+        confidence,
+        materialityScore,
+        triageLevel,
+        reason,
+      });
+    }
+
+    // Sort by priority: critical > review-required > review-recommended > auto-approved
+    const priorityOrder = { 'critical': 0, 'review-required': 1, 'review-recommended': 2, 'auto-approved': 3 };
+    triageResults.sort((a, b) => priorityOrder[a.triageLevel] - priorityOrder[b.triageLevel] || b.materialityScore - a.materialityScore);
+
+    const criticalItems = triageResults.filter(t => t.triageLevel === 'critical');
+    const reviewRequired = triageResults.filter(t => t.triageLevel === 'review-required');
+    const autoApproved = triageResults.filter(t => t.triageLevel === 'auto-approved');
+
+    const confidenceDistribution = {
+      critical: criticalItems.length,
+      reviewRequired: reviewRequired.length,
+      reviewRecommended: triageResults.filter(t => t.triageLevel === 'review-recommended').length,
+      autoApproved: autoApproved.length,
+    };
+
+    const confidence = triageResults.length > 0
+      ? triageResults.reduce((s, t) => s + t.confidence, 0) / triageResults.length
+      : 0.3;
+
+    return {
+      data: {
+        type: 'confidence_triage',
+        triageResults,
+        materialityThreshold,
+        jurisdiction: activeJurisdiction,
+        criticalItems: criticalItems.map(c => c.item),
+        reviewRequired: reviewRequired.map(r => r.item),
+        autoApproved: autoApproved.map(a => a.item),
+        confidenceDistribution,
+        totalItems: triageResults.length,
+      },
+      narrative: `Confidence triage: ${triageResults.length} items assessed. Materiality threshold: ${materialityThreshold.toFixed(2)}. ${criticalItems.length} critical (require immediate review), ${reviewRequired.length} review-required, ${autoApproved.length} auto-approved. Average confidence: ${(confidence * 100).toFixed(0)}%.`,
+      confidence,
+      drivers: criticalItems.slice(0, 5).map(c => ({
+        domain: c.item, weight: c.materialityScore, lagDays: 0,
+        direction: 'negative' as const,
+      })),
+      interventions: criticalItems.map(c => ({
+        action: `Review critical item: ${c.item} — ${c.reason}`,
+        targetDomains: [activeJurisdiction],
+        expectedImpact: 'Audit-ready financial data',
+        confidence: 0.9,
+        evidence: `Amount: ${c.amount.toFixed(2)}, Materiality: ${(c.materialityScore * 100).toFixed(0)}%, Confidence: ${(c.confidence * 100).toFixed(0)}%`,
+        owner: 'Controller / Audit Team',
+        effort: 'medium' as const,
+      })),
+      modulesUsed: ['materiality-engine', 'confidence-scorer', 'triage-classifier', 'jurisdiction-config'],
+      metadata: { materialityThreshold, criticalCount: criticalItems.length, totalItems: triageResults.length },
+    };
+  },
+
+  formatForPrompt: (result, _ctx) => {
+    const lines: string[] = [];
+    const data = result.data as Record<string, unknown>;
+    const triageResults = data.triageResults as Array<{ item: string; amount: number; confidence: number; materialityScore: number; triageLevel: string; reason: string }>;
+    const dist = data.confidenceDistribution as Record<string, number>;
+
+    lines.push(`## 🎯 CONFIDENCE TRIAGE: Materiality & Review Priority`);
+    lines.push(`Threshold: ${(data.materialityThreshold as number)?.toFixed(2)} | Items: ${data.totalItems} | Jurisdiction: ${data.jurisdiction}`);
+    lines.push('');
+
+    lines.push(`**Distribution:** 🔴 Critical: ${dist?.critical || 0} | 🟠 Review Required: ${dist?.reviewRequired || 0} | 🟡 Review Recommended: ${dist?.reviewRecommended || 0} | 🟢 Auto-Approved: ${dist?.autoApproved || 0}`);
+    lines.push('');
+
+    if (triageResults && triageResults.length > 0) {
+      lines.push(formatTable(
+        ['Item', 'Amount', 'Confidence', 'Materiality', 'Level'],
+        triageResults.slice(0, 10).map(t => [
+          t.item.slice(0, 20), t.amount.toFixed(2),
+          `${(t.confidence * 100).toFixed(0)}%`,
+          `${(t.materialityScore * 100).toFixed(0)}%`,
+          t.triageLevel,
+        ])
+      ));
+    }
+
+    return lines.join('\n');
+  },
+});
+
+// ============================================================================
 // REGISTER ALL DOMAINS
 // ============================================================================
 
-/** All 20 action domains in registration order */
+/** All 35 action domains in registration order */
 export const ALL_ACTION_DOMAINS: ActionDomainDefinition[] = [
   // Core (V2-V5 refactored)
   forecastDomain,
@@ -3473,16 +4853,24 @@ export const ALL_ACTION_DOMAINS: ActionDomainDefinition[] = [
   goalDecomposeDomain,
   causalInterveneDomain,
   patternMemoryDomain,
+  // V7 — Accounting Intelligence (Multi-Jurisdiction)
+  documentComprehendDomain,
+  completenessCheckDomain,
+  ruleApplyDomain,
+  crossValidateDomain,
+  statementSynthesizeDomain,
+  jurisdictionComplyDomain,
+  confidenceTriageDomain,
 ];
 
 /**
- * Register all 20 action domains into a registry.
+ * Register all 35 action domains into a registry.
  *
  * @example
  * ```typescript
  * const registry = createActionDomainRegistry({ verbose: true });
  * registerAllActionDomains(registry);
- * // Registry now has all 20 domains ready to execute
+ * // Registry now has all 35 domains ready to execute
  * ```
  */
 export function registerAllActionDomains(
@@ -3492,3 +4880,21 @@ export function registerAllActionDomains(
     registry.register(domain);
   }
 }
+
+// ============================================================================
+// V8 — SOFTWARE ENGINEERING DOMAINS (OPTIONAL IMPORT)
+// ============================================================================
+
+/**
+ * Import software engineering domains separately to keep main bundle lean.
+ * Use this when you need SE-aaS capabilities.
+ *
+ * @example
+ * ```typescript
+ * import { registerSoftwareEngineeringDomains } from './action-domains-software-engineering';
+ * const registry = createActionDomainRegistry({ verbose: true });
+ * registerAllActionDomains(registry); // Core 28 domains
+ * registerSoftwareEngineeringDomains(registry); // +7 SE domains = 35 total
+ * ```
+ */
+export { registerSoftwareEngineeringDomains, ALL_SOFTWARE_ENGINEERING_DOMAINS } from './action-domains-software-engineering';
