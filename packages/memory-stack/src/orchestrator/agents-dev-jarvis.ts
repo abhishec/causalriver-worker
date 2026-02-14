@@ -118,7 +118,7 @@ export const devJarvisAgent: AgentDefinition<DevJarvisGoal, DevJarvisResult> = d
   tags: ['brain-native', 'developer', 'executive', 'se-aas', 'v8'],
 
   execute: async (input: DevJarvisGoal, ctx: AgentExecutionContext) => {
-    const brainExec = (ctx as unknown as { brainExecution: BrainExecutionInterface }).brainExecution;
+    const brainExec = ctx.brainExecution;
     const taskType = detectTaskType(input.goal, input.taskType);
     const phases: DevJarvisResult['phases'] = [];
     const recommendations: string[] = [];

@@ -160,7 +160,7 @@ describe('Brain Health Checkup (Neurological Exam)', () => {
 
       // Brain Analog: Neurological exam baseline
       expect(health.organizationId).toBe('org-health-check');
-      expect(health.regions.length).toBe(16);
+      expect(health.regions.length).toBe(29);
       expect(health.checkedAt).toBeDefined();
 
       // Before any cycles, some regions are not initialized
@@ -208,7 +208,7 @@ describe('Brain Health Checkup (Neurological Exam)', () => {
   });
 
   describe('All Brain Regions Present', () => {
-    it('should include all 15 brain regions in health report', () => {
+    it('should include all 29 brain regions in health report', () => {
       const brain = createBrainPipeline({
         supabase,
         organizationId: 'org-1',
@@ -325,7 +325,7 @@ describe('Brain Health Checkup (Neurological Exam)', () => {
       const health = brain.getHealth();
 
       // Exam results should be comprehensive
-      expect(health.regions.length).toBe(16);
+      expect(health.regions.length).toBe(29);
       expect(report.narrative.length).toBeGreaterThan(0);
 
       // Overall health assessment

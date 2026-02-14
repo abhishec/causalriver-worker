@@ -47,6 +47,10 @@ import {
   createCalibrationFeedbackLoop,
   type CalibrationPrediction,
 } from './calibration-feedback-loop';
+import {
+  createClosedLoopExecutor,
+  type BrainFeedbackSignal,
+} from './closed-loop-executor';
 import type { DecisionJournalEntry } from './domain-action-engine';
 
 // ============================================================================
@@ -215,6 +219,16 @@ export function createBrainCommander(config: BrainCommanderConfig) {
   const assessor = createDispatchAssessor();
   const contextResolver = createUserContextResolver({ supabase });
   const calibrationLoop = createCalibrationFeedbackLoop();
+  const closedLoop = createClosedLoopExecutor({
+    verbose: false,
+    onFeedbackSignal: (signal: BrainFeedbackSignal) => {
+      // Log feedback signals — these should feed into the continuous learner
+      // via the orchestrator's scheduled weight update cycle
+      console.log(
+        `[BrainCommander] Feedback signal: ${signal.direction} edge ${signal.causalEdge.source}→${signal.causalEdge.target} (magnitude: ${signal.magnitude.toFixed(2)})`,
+      );
+    },
+  });
 
   // ── Main Command Entry Point ────────────────────────────────────────
 
@@ -293,6 +307,29 @@ export function createBrainCommander(config: BrainCommanderConfig) {
           console.warn('[BrainCommander] Action engine error (non-fatal):', err);
         }
         timing.action = performance.now() - actionStart;
+      }
+
+      // ── Step 4b: Track motor commands in closed-loop executor ────────
+      if (motorCommands && Array.isArray(motorCommands) && motorCommands.length > 0) {
+        for (const cmd of motorCommands) {
+          const mc = cmd as Record<string, unknown>;
+          try {
+            closedLoop.trackCommand({
+              commandId: (mc.id as string) || `cmd_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+              actionType: (mc.actionType as string) || 'unknown',
+              target: (mc.target as string) || '',
+              causalEdge: dispatch.domains.length > 0
+                ? { source: dispatch.domains[0], target: (mc.targetDomains as string[])?.[0] || dispatch.domains[0], weight: dispatch.confidence }
+                : null,
+              expectedOutcome: (mc.expectedImpact as string) || question,
+              confidence: (mc.confidence as number) || dispatch.confidence,
+              domain: dispatch.domains[0] || 'general',
+              sourceActionType: dispatch.intent,
+            });
+          } catch (trackErr) {
+            console.warn('[BrainCommander] Closed-loop tracking error (non-fatal):', trackErr instanceof Error ? trackErr.message : trackErr);
+          }
+        }
       }
 
       // ── Step 5: Record prediction for calibration feedback loop ─────
@@ -805,6 +842,56 @@ export function createBrainCommander(config: BrainCommanderConfig) {
       source: 'manual' | 'automated' | 'signal_data' | 'brain_reanalysis';
     }) {
       return calibrationLoop.recordOutcome(predictionId, outcome);
+    },
+
+    /**
+     * Record a motor command outcome (closes the action→feedback loop).
+     * Call this when the result of a motor command (Slack, Jira, etc.) is known.
+     *
+     * @example
+     * ```typescript
+     * commander.recordCommandOutcome('cmd_123', {
+     *   achieved: true,
+     *   accuracy: 0.85,
+     *   actualOutcome: 'Slack message acknowledged by engineering lead',
+     *   source: 'webhook',
+     *   timeToOutcomeHours: 2.5,
+     *   actionStatus: 'acknowledged',
+     * });
+     * ```
+     */
+    recordCommandOutcome(commandId: string, outcome: {
+      achieved: boolean;
+      accuracy: number;
+      actualOutcome: string;
+      source: 'webhook' | 'manual' | 'signal_data' | 'automated';
+      timeToOutcomeHours: number;
+      actionStatus: 'delivered' | 'read' | 'acknowledged' | 'completed' | 'ignored' | 'unknown';
+    }) {
+      return closedLoop.recordOutcome(commandId, outcome);
+    },
+
+    /**
+     * Get closed-loop executor effectiveness stats.
+     * Shows how well motor commands achieve their expected outcomes.
+     */
+    getActionEffectiveness() {
+      return closedLoop.computeEffectiveness();
+    },
+
+    /**
+     * Get feedback signals from motor command outcomes.
+     * These indicate which causal edges should be strengthened or weakened.
+     */
+    getFeedbackSignals() {
+      return closedLoop.getFeedbackSignals();
+    },
+
+    /**
+     * Get overdue motor commands awaiting outcome verification.
+     */
+    getOverdueCommands() {
+      return closedLoop.getOverdueCommands();
     },
   };
 }

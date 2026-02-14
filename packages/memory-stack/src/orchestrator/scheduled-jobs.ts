@@ -336,6 +336,113 @@ export function createScheduledJobs(
       return promoter.promoteKnowledge();
     },
 
+    // ── Training Pack Application Job ──────────────────────────────────
+
+    /**
+     * Apply pending custom training packs to the brain.
+     *
+     * Training packs created via `/api/training-packs` are stored with
+     * `status: 'pending'`. This job processes them by:
+     * 1. Loading pending packs for the org
+     * 2. Inserting causal chains as `causal_relationships_statistical` edges
+     * 3. Inserting business rules as `ai_memory` entries
+     * 4. Marking packs as 'applied'
+     *
+     * Recommended: daily via cron (after discovery).
+     */
+    async runTrainingPackApplication(organizationId: string): Promise<{ packsApplied: number; chainsCreated: number; rulesCreated: number; errors: string[] }> {
+      let packsApplied = 0;
+      let chainsCreated = 0;
+      let rulesCreated = 0;
+      const errors: string[] = [];
+
+      // Fetch pending training packs for this org
+      const { data: pendingPacks, error: fetchErr } = await supabase
+        .from('custom_training_packs')
+        .select('id, pack_data, created_by')
+        .eq('organization_id', organizationId)
+        .eq('status', 'pending')
+        .order('created_at', { ascending: true })
+        .limit(20);
+
+      if (fetchErr || !pendingPacks || pendingPacks.length === 0) {
+        return { packsApplied: 0, chainsCreated: 0, rulesCreated: 0, errors: fetchErr ? [fetchErr.message] : [] };
+      }
+
+      for (const pack of pendingPacks) {
+        try {
+          const packData = pack.pack_data as { chains?: Array<Record<string, unknown>>; rules?: Array<Record<string, unknown>> } | null;
+          if (!packData) continue;
+
+          // Apply causal chains as statistical relationships
+          if (packData.chains && Array.isArray(packData.chains)) {
+            for (const chain of packData.chains) {
+              const { error: insertErr } = await supabase
+                .from('causal_relationships_statistical')
+                .upsert({
+                  organization_id: organizationId,
+                  source_domain: chain.source_domain || chain.source || 'unknown',
+                  target_domain: chain.target_domain || chain.target || 'unknown',
+                  source_entity: chain.source_metric || chain.source_entity || '',
+                  target_entity: chain.target_metric || chain.target_entity || '',
+                  effect_size: chain.effect_size || chain.strength || 0.5,
+                  optimal_lag_days: chain.lag_days || chain.optimal_lag_days || 7,
+                  granger_p_value: chain.p_value || chain.granger_p_value || 0.05,
+                  granger_f_statistic: chain.f_statistic || 0,
+                  sample_size: chain.sample_size || 1,
+                  is_significant: true,
+                  natural_language: chain.description || chain.natural_language || null,
+                  discovery_method: 'training_pack',
+                  created_at: new Date().toISOString(),
+                  updated_at: new Date().toISOString(),
+                }, { onConflict: 'organization_id,source_domain,target_domain,source_entity,target_entity' });
+
+              if (insertErr) {
+                errors.push(`Chain insert error: ${insertErr.message}`);
+              } else {
+                chainsCreated++;
+              }
+            }
+          }
+
+          // Apply business rules as ai_memory entries
+          if (packData.rules && Array.isArray(packData.rules)) {
+            for (const rule of packData.rules) {
+              try {
+                await repository.upsertMemory({
+                  memoryType: 'business_rule',
+                  domain: (rule.domain as string) || 'general',
+                  content: (rule.rule as string) || (rule.content as string) || JSON.stringify(rule),
+                  importance: (rule.importance as number) || 0.7,
+                  metadata: {
+                    source: 'training_pack',
+                    packId: pack.id,
+                    title: rule.title || rule.name || '',
+                    createdBy: pack.created_by,
+                  },
+                });
+                rulesCreated++;
+              } catch (memErr: any) {
+                errors.push(`Rule upsert error: ${memErr.message}`);
+              }
+            }
+          }
+
+          // Mark pack as applied
+          await supabase
+            .from('custom_training_packs')
+            .update({ status: 'applied', applied_at: new Date().toISOString() })
+            .eq('id', pack.id);
+
+          packsApplied++;
+        } catch (packErr: any) {
+          errors.push(`Pack ${pack.id}: ${packErr.message}`);
+        }
+      }
+
+      return { packsApplied, chainsCreated, rulesCreated, errors };
+    },
+
     // ── Data Retention Job ────────────────────────────────────────────
 
     /**
@@ -343,7 +450,7 @@ export function createScheduledJobs(
      * Prevents unbounded table growth in production.
      * Recommended: daily via cron.
      */
-    async runDataRetention(_organizationId: string): Promise<DataRetentionResult> {
+    async runDataRetention(organizationId: string): Promise<DataRetentionResult> {
       const retentionDays = {
         signals: 180,
         predictions: 365,
@@ -358,11 +465,15 @@ export function createScheduledJobs(
       let memoriesDeleted = 0;
       let eventsDeleted = 0;
 
+      // CRITICAL: All delete operations MUST be scoped to organizationId
+      // to prevent cross-org data deletion in multi-tenant environment.
+
       // cross_domain_signals: keep 180 days
       const signalsCutoff = new Date(Date.now() - retentionDays.signals * 24 * 60 * 60 * 1000).toISOString();
       const { count: sigCount } = await supabase
         .from('cross_domain_signals')
         .delete({ count: 'exact' })
+        .eq('organization_id', organizationId)
         .lt('created_at', signalsCutoff);
       signalsDeleted = sigCount ?? 0;
 
@@ -372,6 +483,7 @@ export function createScheduledJobs(
         const { count: predCount } = await supabase
           .from('prediction_records')
           .delete({ count: 'exact' })
+          .eq('organization_id', organizationId)
           .lt('created_at', predCutoff);
         predictionsDeleted = predCount ?? 0;
       } catch { /* table may not exist yet */ }
@@ -382,6 +494,7 @@ export function createScheduledJobs(
         const { count: weightCount } = await supabase
           .from('weight_update_history')
           .delete({ count: 'exact' })
+          .eq('organization_id', organizationId)
           .lt('created_at', weightCutoff);
         weightsDeleted = weightCount ?? 0;
       } catch { /* table may not exist yet */ }
@@ -392,6 +505,7 @@ export function createScheduledJobs(
         const { count: memCount } = await supabase
           .from('ai_memory')
           .delete({ count: 'exact' })
+          .eq('organization_id', organizationId)
           .lt('created_at', memCutoff)
           .lt('importance', 0.3);
         memoriesDeleted = memCount ?? 0;
@@ -403,6 +517,7 @@ export function createScheduledJobs(
         const { count: eventCount } = await supabase
           .from('causal_event_stream')
           .delete({ count: 'exact' })
+          .eq('organization_id', organizationId)
           .lt('created_at', eventCutoff);
         eventsDeleted = eventCount ?? 0;
       } catch { /* table may not exist yet */ }
@@ -433,6 +548,7 @@ export function createScheduledJobs(
       discovery: JobResult<{ newRelationships: CausalRelationship[]; lostRelationships: CausalRelationship[]; totalDiscovered: number }>;
       federation: JobResult<UpstreamPromotionResult>;
       retention: JobResult<DataRetentionResult>;
+      trainingPacks: JobResult<{ packsApplied: number; chainsCreated: number; rulesCreated: number; errors: string[] }>;
     }> {
       // Phase A: Sequential dependency chain (verifications → weights)
       const verifications = await safeRun(
@@ -456,10 +572,11 @@ export function createScheduledJobs(
         ? discoverySettled.value
         : { error: `[discovery] ${(discoverySettled as PromiseRejectedResult).reason?.message || 'unknown'}` };
 
-      // Phase C: Post-discovery jobs (federation + retention in parallel)
-      const [fedSettled, retentionSettled] = await Promise.allSettled([
+      // Phase C: Post-discovery jobs (federation + retention + training packs in parallel)
+      const [fedSettled, retentionSettled, trainingPacksSettled] = await Promise.allSettled([
         safeRun(() => this.runUpstreamFederation(organizationId), 'federation', jobTimeout),
         safeRun(() => this.runDataRetention(organizationId), 'retention', jobTimeout),
+        safeRun(() => this.runTrainingPackApplication(organizationId), 'trainingPacks', jobTimeout),
       ]);
       const federation = fedSettled.status === 'fulfilled'
         ? fedSettled.value
@@ -467,8 +584,11 @@ export function createScheduledJobs(
       const retention = retentionSettled.status === 'fulfilled'
         ? retentionSettled.value
         : { error: `[retention] ${(retentionSettled as PromiseRejectedResult).reason?.message || 'unknown'}` };
+      const trainingPacks = trainingPacksSettled.status === 'fulfilled'
+        ? trainingPacksSettled.value
+        : { error: `[trainingPacks] ${(trainingPacksSettled as PromiseRejectedResult).reason?.message || 'unknown'}` };
 
-      return { verifications, weights, decay, discovery, federation, retention };
+      return { verifications, weights, decay, discovery, federation, retention, trainingPacks };
     },
   };
 }

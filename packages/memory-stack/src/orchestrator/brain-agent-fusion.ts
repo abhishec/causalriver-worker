@@ -130,7 +130,7 @@ export const revenueWatcherAgent: AgentDefinition = defineAgent({
   tags: ['brain-native', 'monitoring', 'revenue'],
 
   execute: async (input: unknown, ctx) => {
-    const brainExec = (ctx as unknown as { brainExecution: BrainExecutionInterface }).brainExecution;
+    const brainExec = ctx.brainExecution;
     if (!brainExec) {
       return { status: 'skipped', reason: 'Brain execution interface not available' };
     }
@@ -177,7 +177,7 @@ export const dailyBriefingAgent: AgentDefinition = defineAgent({
   tags: ['brain-native', 'reporting', 'executive'],
 
   execute: async (input: unknown, ctx) => {
-    const brainExec = (ctx as unknown as { brainExecution: BrainExecutionInterface }).brainExecution;
+    const brainExec = ctx.brainExecution;
     if (!brainExec) {
       return { status: 'skipped', reason: 'Brain execution interface not available' };
     }
@@ -215,7 +215,7 @@ export const anomalyDiagnosticianAgent: AgentDefinition = defineAgent({
   tags: ['brain-native', 'diagnostic', 'reactive'],
 
   execute: async (input: unknown, ctx) => {
-    const brainExec = (ctx as unknown as { brainExecution: BrainExecutionInterface }).brainExecution;
+    const brainExec = ctx.brainExecution;
     if (!brainExec) {
       return { status: 'skipped', reason: 'Brain execution interface not available' };
     }
@@ -253,7 +253,7 @@ export const optimizerAgent: AgentDefinition = defineAgent({
   tags: ['brain-native', 'optimization', 'strategic'],
 
   execute: async (input: unknown, ctx) => {
-    const brainExec = (ctx as unknown as { brainExecution: BrainExecutionInterface }).brainExecution;
+    const brainExec = ctx.brainExecution;
     if (!brainExec) {
       return { status: 'skipped', reason: 'Brain execution interface not available' };
     }
@@ -291,7 +291,7 @@ export const benchmarkAuditorAgent: AgentDefinition = defineAgent({
   tags: ['brain-native', 'benchmarking', 'audit'],
 
   execute: async (input: unknown, ctx) => {
-    const brainExec = (ctx as unknown as { brainExecution: BrainExecutionInterface }).brainExecution;
+    const brainExec = ctx.brainExecution;
     if (!brainExec) {
       return { status: 'skipped', reason: 'Brain execution interface not available' };
     }
@@ -330,7 +330,7 @@ export const riskSentinelAgent: AgentDefinition = defineAgent({
   tags: ['brain-native', 'risk', 'sentinel', 'v6.1'],
 
   execute: async (input: unknown, ctx) => {
-    const brainExec = (ctx as unknown as { brainExecution: BrainExecutionInterface }).brainExecution;
+    const brainExec = ctx.brainExecution;
     if (!brainExec) {
       return { status: 'skipped', reason: 'Brain execution interface not available' };
     }
@@ -381,7 +381,7 @@ export const strategicPlannerAgent: AgentDefinition = defineAgent({
   tags: ['brain-native', 'strategic', 'planning', 'v6.1'],
 
   execute: async (input: unknown, ctx) => {
-    const brainExec = (ctx as unknown as { brainExecution: BrainExecutionInterface }).brainExecution;
+    const brainExec = ctx.brainExecution;
     if (!brainExec) {
       return { status: 'skipped', reason: 'Brain execution interface not available' };
     }
@@ -427,7 +427,7 @@ export const patternReconAgent: AgentDefinition = defineAgent({
   tags: ['brain-native', 'pattern-recognition', 'temporal', 'v6.1'],
 
   execute: async (input: unknown, ctx) => {
-    const brainExec = (ctx as unknown as { brainExecution: BrainExecutionInterface }).brainExecution;
+    const brainExec = ctx.brainExecution;
     if (!brainExec) {
       return { status: 'skipped', reason: 'Brain execution interface not available' };
     }
@@ -465,7 +465,7 @@ export const orgHealthAgent: AgentDefinition = defineAgent({
   tags: ['brain-native', 'health-check', 'executive', 'v6.1'],
 
   execute: async (input: unknown, ctx) => {
-    const brainExec = (ctx as unknown as { brainExecution: BrainExecutionInterface }).brainExecution;
+    const brainExec = ctx.brainExecution;
     if (!brainExec) {
       return { status: 'skipped', reason: 'Brain execution interface not available' };
     }
@@ -507,7 +507,7 @@ export const interventionTrackerAgent: AgentDefinition = defineAgent({
   tags: ['brain-native', 'tracking', 'closed-loop', 'v6.1'],
 
   execute: async (input: unknown, ctx) => {
-    const brainExec = (ctx as unknown as { brainExecution: BrainExecutionInterface }).brainExecution;
+    const brainExec = ctx.brainExecution;
     if (!brainExec) {
       return { status: 'skipped', reason: 'Brain execution interface not available' };
     }
@@ -549,7 +549,7 @@ export const balanceSheetBuilderAgent: AgentDefinition = defineAgent({
   tags: ['brain-native', 'accounting', 'balance-sheet', 'v7'],
 
   execute: async (input: unknown, ctx) => {
-    const brainExec = (ctx as unknown as { brainExecution: BrainExecutionInterface }).brainExecution;
+    const brainExec = ctx.brainExecution;
     if (!brainExec) {
       return { status: 'skipped', reason: 'Brain execution interface not available' };
     }
@@ -600,7 +600,7 @@ export const pnlBuilderAgent: AgentDefinition = defineAgent({
   tags: ['brain-native', 'accounting', 'pnl', 'income-statement', 'v7'],
 
   execute: async (input: unknown, ctx) => {
-    const brainExec = (ctx as unknown as { brainExecution: BrainExecutionInterface }).brainExecution;
+    const brainExec = ctx.brainExecution;
     if (!brainExec) {
       return { status: 'skipped', reason: 'Brain execution interface not available' };
     }
@@ -651,7 +651,7 @@ export const cashflowBuilderAgent: AgentDefinition = defineAgent({
   tags: ['brain-native', 'accounting', 'cashflow', 'v7'],
 
   execute: async (input: unknown, ctx) => {
-    const brainExec = (ctx as unknown as { brainExecution: BrainExecutionInterface }).brainExecution;
+    const brainExec = ctx.brainExecution;
     if (!brainExec) {
       return { status: 'skipped', reason: 'Brain execution interface not available' };
     }
@@ -698,7 +698,7 @@ export const taxPreparerAgent: AgentDefinition = defineAgent({
   tags: ['brain-native', 'accounting', 'tax', 'multi-jurisdiction', 'v7'],
 
   execute: async (input: unknown, ctx) => {
-    const brainExec = (ctx as unknown as { brainExecution: BrainExecutionInterface }).brainExecution;
+    const brainExec = ctx.brainExecution;
     if (!brainExec) {
       return { status: 'skipped', reason: 'Brain execution interface not available' };
     }
@@ -745,7 +745,7 @@ export const multiJurisdictionMonitorAgent: AgentDefinition = defineAgent({
   tags: ['brain-native', 'accounting', 'compliance', 'monitor', 'autonomous', 'v7'],
 
   execute: async (input: unknown, ctx) => {
-    const brainExec = (ctx as unknown as { brainExecution: BrainExecutionInterface }).brainExecution;
+    const brainExec = ctx.brainExecution;
     if (!brainExec) {
       return { status: 'skipped', reason: 'Brain execution interface not available' };
     }
@@ -785,7 +785,7 @@ export const financialAuditorAgent: AgentDefinition = defineAgent({
   tags: ['brain-native', 'accounting', 'audit', 'compliance', 'v7'],
 
   execute: async (input: unknown, ctx) => {
-    const brainExec = (ctx as unknown as { brainExecution: BrainExecutionInterface }).brainExecution;
+    const brainExec = ctx.brainExecution;
     if (!brainExec) {
       return { status: 'skipped', reason: 'Brain execution interface not available' };
     }
@@ -841,7 +841,7 @@ export const metacognitionAuditorAgent: AgentDefinition = defineAgent({
   tags: ['brain-native', 'metacognition', 'self-improvement', 'v8'],
 
   execute: async (input: unknown, ctx) => {
-    const brainExec = (ctx as unknown as { brainExecution: BrainExecutionInterface }).brainExecution;
+    const brainExec = ctx.brainExecution;
     if (!brainExec) {
       return { status: 'skipped', reason: 'Brain execution interface not available' };
     }
@@ -899,7 +899,7 @@ export const qualityGateAgent: AgentDefinition = defineAgent({
   tags: ['brain-native', 'metacognition', 'quality-gate', 'v8'],
 
   execute: async (input: unknown, ctx) => {
-    const brainExec = (ctx as unknown as { brainExecution: BrainExecutionInterface }).brainExecution;
+    const brainExec = ctx.brainExecution;
     if (!brainExec) {
       return { status: 'skipped', reason: 'Brain execution interface not available' };
     }
@@ -965,7 +965,7 @@ export const continuousLearnerAgent: AgentDefinition = defineAgent({
   tags: ['brain-native', 'metacognition', 'learning', 'closed-loop', 'v8'],
 
   execute: async (input: unknown, ctx) => {
-    const brainExec = (ctx as unknown as { brainExecution: BrainExecutionInterface }).brainExecution;
+    const brainExec = ctx.brainExecution;
     if (!brainExec) {
       return { status: 'skipped', reason: 'Brain execution interface not available' };
     }

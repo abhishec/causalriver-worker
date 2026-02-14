@@ -71,47 +71,17 @@ export function createResponseFeedbackLoop(repository: NexusRepository) {
   // In-memory feedback queue (also persisted via repository)
   const pendingFeedback: StoredFeedback[] = [];
 
-  return {
-    /**
-     * Record feedback about a response.
-     * Stores feedback in memory and persists to database.
-     */
-    async recordFeedback(feedback: ResponseFeedback): Promise<void> {
-      const stored: StoredFeedback = {
-        ...feedback,
-        timestamp: new Date(),
-        processed: false,
-      };
-
-      pendingFeedback.push(stored);
-
-      // Persist feedback as an activity log entry
-      await repository.logActivity({
-        agentType: 'feedback_loop',
-        actionType: 'feedback_received',
-        inputSummary: `${feedback.rating} for conversation ${feedback.conversationId}:${feedback.messageIndex}`,
-        outputSummary: feedback.correction || '',
-        metadata: {
-          conversationId: feedback.conversationId,
-          messageIndex: feedback.messageIndex,
-          rating: feedback.rating,
-          domain: feedback.domain,
-          hasCorrection: !!feedback.correction,
-        },
-      });
-    },
-
-    /**
-     * Process pending feedback and create organizational memories.
-     *
-     * For each "incorrect" feedback with a correction:
-     * 1. Creates an ai_memory entry with the correction
-     * 2. Tags it with the domain for future context retrieval
-     * 3. Marks the feedback as processed
-     *
-     * This closes the loop: wrong answers → corrections → memories → better future answers
-     */
-    async learnFromFeedback(): Promise<FeedbackLearningResult> {
+  /**
+   * Process pending feedback and create organizational memories.
+   *
+   * For each "incorrect" feedback with a correction:
+   * 1. Creates an ai_memory entry with the correction
+   * 2. Tags it with the domain for future context retrieval
+   * 3. Marks the feedback as processed
+   *
+   * This closes the loop: wrong answers → corrections → memories → better future answers
+   */
+  async function learnFromFeedback(): Promise<FeedbackLearningResult> {
       let memoriesCreated = 0;
       let patternsReinforced = 0;
       let feedbackProcessed = 0;
@@ -186,7 +156,51 @@ export function createResponseFeedbackLoop(repository: NexusRepository) {
         patternsReinforced,
         feedbackProcessed,
       };
+  }
+
+  return {
+    /**
+     * Record feedback about a response.
+     * Stores feedback in memory and persists to database.
+     * Auto-triggers learning for corrections (no delay).
+     */
+    async recordFeedback(feedback: ResponseFeedback): Promise<void> {
+      const stored: StoredFeedback = {
+        ...feedback,
+        timestamp: new Date(),
+        processed: false,
+      };
+
+      pendingFeedback.push(stored);
+
+      // Persist feedback as an activity log entry
+      await repository.logActivity({
+        agentType: 'feedback_loop',
+        actionType: 'feedback_received',
+        inputSummary: `${feedback.rating} for conversation ${feedback.conversationId}:${feedback.messageIndex}`,
+        outputSummary: feedback.correction || '',
+        metadata: {
+          conversationId: feedback.conversationId,
+          messageIndex: feedback.messageIndex,
+          rating: feedback.rating,
+          domain: feedback.domain,
+          hasCorrection: !!feedback.correction,
+        },
+      });
+
+      // Auto-trigger learning for corrections (no 24-hour delay)
+      // This ensures the brain learns from mistakes immediately.
+      if (feedback.correction && (feedback.rating === 'incorrect' || feedback.rating === 'not_helpful')) {
+        try {
+          await learnFromFeedback();
+        } catch (learnErr) {
+          // Non-fatal: learning will be retried on next cycle
+          console.warn('[ResponseFeedback] Auto-learn from correction failed (non-fatal):', learnErr instanceof Error ? learnErr.message : learnErr);
+        }
+      }
     },
+
+    learnFromFeedback,
 
     /**
      * Get count of pending (unprocessed) feedback

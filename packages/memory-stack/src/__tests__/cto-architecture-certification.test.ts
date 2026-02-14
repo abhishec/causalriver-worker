@@ -8,7 +8,7 @@
  *
  * This test covers:
  *
- *  SECTION 1: BRAIN REGION INSTANTIATION (16 regions)
+ *  SECTION 1: BRAIN REGION INSTANTIATION (29 regions)
  *    1.1  Knowledge Dependency Graph (Structural Cortex)
  *    1.2  Expertise Graph (Temporal Lobe)
  *    1.3  Collaboration Graph (Social Cortex)
@@ -64,7 +64,7 @@
  *    6.4  Cross-graph intelligence: dep graph → expertise boosting
  *
  *  SECTION 7: HEALTH REPORTING
- *    7.1  All 16 regions reported
+ *    7.1  All 29 regions reported
  *    7.2  Correct status per region (ok/not_initialized/degraded)
  *    7.3  Overall health calculation
  *
@@ -182,10 +182,10 @@ describe('CTO Architecture Certification', () => {
   });
 
   // ========================================================================
-  // SECTION 1: All 16 Brain Regions Instantiate
+  // SECTION 1: All 29 Brain Regions Instantiate
   // ========================================================================
 
-  describe('Section 1: Brain Region Instantiation (16 Regions)', () => {
+  describe('Section 1: Brain Region Instantiation (29 Regions)', () => {
     it('1.1 Knowledge Dependency Graph (Structural Cortex) — instantiates and has API', () => {
       const brain = createBrainPipeline(config);
       const depGraph = brain.getKnowledgeDependencyGraph();
@@ -1563,12 +1563,12 @@ describe('CTO Architecture Certification', () => {
   // ========================================================================
 
   describe('Section 7: Health Reporting', () => {
-    it('7.1 getHealth reports all 16 brain regions', () => {
+    it('7.1 getHealth reports all 29 brain regions', () => {
       const brain = createBrainPipeline(config);
       const health = brain.getHealth();
 
       expect(health.organizationId).toBe('org-arch-cert');
-      expect(health.regions.length).toBe(16);
+      expect(health.regions.length).toBe(29);
       expect(health.checkedAt).toBeDefined();
     });
 
@@ -1814,10 +1814,10 @@ describe('CTO Architecture Certification', () => {
         if (g() != null) score++;
       }
 
-      // 2. Health reports 16 regions
+      // 2. Health reports 29 regions
       total++;
       const health = brain.getHealth();
-      if (health.regions.length === 16) score++;
+      if (health.regions.length === 29) score++;
 
       // 3. All public methods exist
       const requiredMethods = [
@@ -1850,11 +1850,11 @@ describe('CTO Architecture Certification', () => {
       console.log(`  🧠 CTO ARCHITECTURE CERTIFICATION`);
       console.log(`${'='.repeat(70)}`);
       console.log(`  Score: ${score}/${total} (${pct}%)`);
-      console.log(`  Brain Regions:     16/16`);
+      console.log(`  Brain Regions:     29/29`);
       console.log(`  Motor Cortex API:  ${motorMethods.length}/${motorMethods.length}`);
       console.log(`  Pipeline Methods:  ${requiredMethods.length}/${requiredMethods.length}`);
       console.log(`  Event Bus:         ✅`);
-      console.log(`  Health Reporting:  16 regions`);
+      console.log(`  Health Reporting:  29 regions`);
       console.log(`${'='.repeat(70)}`);
       console.log(`  VERDICT: ${score === total ? '✅ CERTIFIED — Full Brain Architecture Verified' : '❌ GAPS DETECTED — See failed checks above'}`);
       console.log(`${'='.repeat(70)}\n`);

@@ -366,7 +366,7 @@ export const jarvisOrchestratorAgent: AgentDefinition<JarvisGoal, JarvisResult> 
 
     // ── Step 2: Execute action domains via brain ──────────────────────
     ctx.reportProgress(0.25, 'Running brain action domains...');
-    const brainExec = (ctx as unknown as { brainExecution: BrainExecutionInterface }).brainExecution;
+    const brainExec = ctx.brainExecution;
 
     if (brainExec) {
       for (const domainName of actionDomains) {
@@ -643,7 +643,7 @@ export const jarvisAnalystAgent: AgentDefinition<
   },
 
   execute: async (input, ctx) => {
-    const brainExec = (ctx as unknown as { brainExecution: BrainExecutionInterface }).brainExecution;
+    const brainExec = ctx.brainExecution;
     const findings: JarvisFinding[] = [];
     const causalChain: string[] = [];
 
@@ -785,7 +785,7 @@ export const jarvisMonitorAgent: AgentDefinition<
   tags: ['brain-native', 'monitoring', 'health', 'continuous', 'jarvis', 'v8'],
 
   execute: async (input, ctx) => {
-    const brainExec = (ctx as unknown as { brainExecution: BrainExecutionInterface }).brainExecution;
+    const brainExec = ctx.brainExecution;
     const targetDomains = input.domains?.length ? input.domains : ALL_BRAIN_DOMAINS;
     const alerts: JarvisMonitorResult['alerts'] = [];
     const domainHealth: JarvisMonitorResult['domainHealth'] = {};

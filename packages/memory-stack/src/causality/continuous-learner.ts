@@ -101,7 +101,9 @@ export function createContinuousLearner(
     graph.edges.set(source, new Map(targets));
   }
 
-  // Event buffer for incremental updates
+  // Event buffer for incremental updates (bounded to prevent memory leaks)
+  const MAX_BUFFER_SIZE_PER_DOMAIN = 10_000;
+  const MAX_UPDATE_HISTORY = 5_000;
   const eventBuffer: Map<string, number[]> = new Map();
   const updateHistory: GraphUpdate[] = [];
 
@@ -118,10 +120,17 @@ export function createContinuousLearner(
       }
 
       const signalValue = (payload as { signal_value?: number }).signal_value || 0;
-      eventBuffer.get(domain)!.push(signalValue);
+      const domainBuffer = eventBuffer.get(domain)!;
+      domainBuffer.push(signalValue);
+
+      // Trim buffer if exceeds max size (keep most recent entries)
+      if (domainBuffer.length > MAX_BUFFER_SIZE_PER_DOMAIN) {
+        const trimCount = domainBuffer.length - MAX_BUFFER_SIZE_PER_DOMAIN;
+        domainBuffer.splice(0, trimCount);
+      }
 
       // Check if we have enough data for update
-      const bufferSize = eventBuffer.get(domain)!.length;
+      const bufferSize = domainBuffer.length;
       if (bufferSize < minEventsForUpdate) {
         return null;
       }
@@ -142,6 +151,10 @@ export function createContinuousLearner(
           const update = this.updateEdgeFromGranger(domain, otherDomain, result);
           if (update) {
             updateHistory.push(update);
+            // Trim update history to prevent unbounded growth
+            if (updateHistory.length > MAX_UPDATE_HISTORY) {
+              updateHistory.splice(0, updateHistory.length - MAX_UPDATE_HISTORY);
+            }
             return update;
           }
         } catch {

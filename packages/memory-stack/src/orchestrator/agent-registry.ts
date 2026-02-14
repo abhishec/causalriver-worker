@@ -136,6 +136,23 @@ export interface AgentExecutionContext {
   };
   /** Access to registered connectors for motor commands */
   connectors: Record<string, unknown>;
+  /**
+   * Brain execution interface — allows agents to invoke brain action domains
+   * (forecast, simulate, explain, diagnose, etc.) directly.
+   *
+   * Provided by the orchestrator when running brain-native agents.
+   * Agents should check for `undefined` before using.
+   */
+  brainExecution?: {
+    /** Execute an action domain by name */
+    executeDomain: (domainName: string, overrides?: Record<string, unknown>) => Promise<unknown>;
+    /** Get available action domains */
+    getAvailableDomains: () => string[];
+    /** Get brain stats */
+    getBrainStats: () => Record<string, unknown>;
+    /** Format result for prompt */
+    formatForPrompt: (domainName: string, result: unknown) => string;
+  };
   /** Log messages during execution */
   log: (...args: unknown[]) => void;
   /** Report progress (0-1) */
@@ -200,6 +217,8 @@ export interface AgentRegistryConfig {
   defaultBrainContext?: AgentExecutionContext['brainContext'];
   /** Default connectors available to agents */
   defaultConnectors?: Record<string, unknown>;
+  /** Brain execution interface for brain-native agents */
+  brainExecution?: AgentExecutionContext['brainExecution'];
   /** Supabase client for loading brain context from database */
   supabase?: unknown;
   /** Organization ID for loading brain context */
@@ -371,6 +390,7 @@ export function createAgentRegistry(config: AgentRegistryConfig = {}) {
     maxCallDepth = 5,
     defaultBrainContext = { causalEdges: [], rules: [], patterns: [], domains: [] },
     defaultConnectors = {},
+    brainExecution: defaultBrainExecution,
     supabase: supabaseClient,
     organizationId: configOrgId,
     onAgentCompleted,
@@ -564,6 +584,7 @@ export function createAgentRegistry(config: AgentRegistryConfig = {}) {
       },
       brainContext: activeBrainContext,
       connectors: options.connectors || defaultConnectors,
+      brainExecution: defaultBrainExecution,
       log: (...args: unknown[]) => log(`[${name}]`, ...args),
       reportProgress: (progress: number, message?: string) => {
         progressLog.push({ progress, message, timestamp: new Date().toISOString() });

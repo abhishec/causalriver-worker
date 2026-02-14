@@ -4,6 +4,10 @@
  * Tests the feedback system that learns from user corrections.
  * When a response is rated "incorrect" with a correction,
  * the correction becomes a new ai_memory entry.
+ *
+ * NOTE: recordFeedback auto-triggers learnFromFeedback for corrections
+ * (rating === 'incorrect' or 'not_helpful' WITH a correction).
+ * Tests must account for this immediate learning behavior.
  */
 
 import { describe, it, expect, vi } from 'vitest';
@@ -84,16 +88,19 @@ describe('Response Feedback Loop', () => {
         domain: 'cs',
       });
 
-      expect(repo.logActivity).toHaveBeenCalledTimes(1);
+      // Auto-learn triggers for corrections, so logActivity called for record + learn + feedback_processed
+      expect(repo.logActivity).toHaveBeenCalled();
       expect((repo as any)._loggedActivities[0].agentType).toBe('feedback_loop');
       expect((repo as any)._loggedActivities[0].actionType).toBe('feedback_received');
-      expect(feedback.getPendingCount()).toBe(1);
+      // Auto-learn already processed it, so pending count is 0
+      expect(feedback.getPendingCount()).toBe(0);
     });
 
     it('should track multiple feedback entries', async () => {
       const repo = createMockRepository();
       const feedback = createResponseFeedbackLoop(repo);
 
+      // Two 'helpful' entries (no auto-learn trigger)
       await feedback.recordFeedback({
         conversationId: 'conv_1',
         messageIndex: 0,
@@ -103,12 +110,11 @@ describe('Response Feedback Loop', () => {
       await feedback.recordFeedback({
         conversationId: 'conv_2',
         messageIndex: 1,
-        rating: 'incorrect',
-        correction: 'Wrong metric cited',
+        rating: 'helpful',
       });
 
-      expect(feedback.getPendingCount()).toBe(2);
       expect(feedback.getAllFeedback()).toHaveLength(2);
+      expect(feedback.getPendingCount()).toBe(2);
     });
   });
 
@@ -117,7 +123,7 @@ describe('Response Feedback Loop', () => {
   // ============================================================================
 
   describe('learnFromFeedback', () => {
-    it('should create memory from incorrect feedback with correction', async () => {
+    it('should create memory from incorrect feedback with correction (auto-learn)', async () => {
       const repo = createMockRepository();
       const feedback = createResponseFeedbackLoop(repo);
 
@@ -129,10 +135,7 @@ describe('Response Feedback Loop', () => {
         domain: 'cs',
       });
 
-      const result = await feedback.learnFromFeedback();
-
-      expect(result.memoriesCreated).toBe(1);
-      expect(result.feedbackProcessed).toBe(1);
+      // Auto-learn already processed this correction
       expect(repo.upsertMemory).toHaveBeenCalledTimes(1);
 
       const memoryCall = (repo.upsertMemory as any).mock.calls[0][0];
@@ -141,9 +144,13 @@ describe('Response Feedback Loop', () => {
       expect(memoryCall.content).toBe('Churn increase is caused by pricing changes, not support quality');
       expect(memoryCall.importance).toBe(0.8);
       expect(memoryCall.metadata.source).toBe('user_feedback');
+
+      // Explicit call should find nothing remaining
+      const result = await feedback.learnFromFeedback();
+      expect(result.feedbackProcessed).toBe(0);
     });
 
-    it('should create lower-importance memory from not_helpful feedback', async () => {
+    it('should create lower-importance memory from not_helpful feedback (auto-learn)', async () => {
       const repo = createMockRepository();
       const feedback = createResponseFeedbackLoop(repo);
 
@@ -154,9 +161,8 @@ describe('Response Feedback Loop', () => {
         correction: 'The answer should have focused on engineering metrics',
       });
 
-      const result = await feedback.learnFromFeedback();
-
-      expect(result.memoriesCreated).toBe(1);
+      // Auto-learn already processed this
+      expect(repo.upsertMemory).toHaveBeenCalledTimes(1);
       const memoryCall = (repo.upsertMemory as any).mock.calls[0][0];
       expect(memoryCall.memoryType).toBe('clarification');
       expect(memoryCall.importance).toBe(0.5);
@@ -171,6 +177,9 @@ describe('Response Feedback Loop', () => {
         messageIndex: 0,
         rating: 'helpful',
       });
+
+      // Helpful feedback does NOT auto-learn, stays pending
+      expect(feedback.getPendingCount()).toBe(1);
 
       const result = await feedback.learnFromFeedback();
 
@@ -187,8 +196,11 @@ describe('Response Feedback Loop', () => {
         conversationId: 'conv_123',
         messageIndex: 0,
         rating: 'incorrect',
-        // No correction provided
+        // No correction provided — auto-learn should NOT trigger
       });
+
+      // Without correction, no auto-learn (stays pending)
+      expect(feedback.getPendingCount()).toBe(1);
 
       const result = await feedback.learnFromFeedback();
 
@@ -201,12 +213,15 @@ describe('Response Feedback Loop', () => {
       const repo = createMockRepository();
       const feedback = createResponseFeedbackLoop(repo);
 
+      // Record helpful first (no auto-learn)
       await feedback.recordFeedback({
         conversationId: 'conv_1',
         messageIndex: 0,
         rating: 'helpful',
       });
 
+      // Record incorrect with correction → auto-learn triggers, processing ALL pending
+      // This processes both the 'helpful' AND the 'incorrect' feedback
       await feedback.recordFeedback({
         conversationId: 'conv_2',
         messageIndex: 1,
@@ -215,6 +230,7 @@ describe('Response Feedback Loop', () => {
         domain: 'finance',
       });
 
+      // Record not_helpful with correction → auto-learn triggers for this one
       await feedback.recordFeedback({
         conversationId: 'conv_3',
         messageIndex: 0,
@@ -222,11 +238,12 @@ describe('Response Feedback Loop', () => {
         correction: 'Be more specific about metrics',
       });
 
-      const result = await feedback.learnFromFeedback();
+      // Two corrections auto-learned (2 memories)
+      expect(repo.upsertMemory).toHaveBeenCalledTimes(2);
 
-      expect(result.feedbackProcessed).toBe(3);
-      expect(result.memoriesCreated).toBe(2); // 1 correction + 1 clarification
-      expect(result.patternsReinforced).toBe(1); // 1 helpful
+      // All 3 already processed by auto-learn, explicit call finds nothing
+      const result = await feedback.learnFromFeedback();
+      expect(result.feedbackProcessed).toBe(0);
     });
 
     it('should clear processed feedback from pending queue', async () => {
@@ -257,10 +274,15 @@ describe('Response Feedback Loop', () => {
         correction: 'Fix this',
       });
 
-      const result1 = await feedback.learnFromFeedback();
-      expect(result1.memoriesCreated).toBe(1);
+      // Auto-learn already processed this correction
+      expect(repo.upsertMemory).toHaveBeenCalledTimes(1);
 
-      // Second call should process nothing
+      // Explicit call should find nothing
+      const result1 = await feedback.learnFromFeedback();
+      expect(result1.memoriesCreated).toBe(0);
+      expect(result1.feedbackProcessed).toBe(0);
+
+      // Second explicit call should also find nothing
       const result2 = await feedback.learnFromFeedback();
       expect(result2.feedbackProcessed).toBe(0);
       expect(result2.memoriesCreated).toBe(0);
@@ -277,13 +299,14 @@ describe('Response Feedback Loop', () => {
         correction: 'Fix this',
       });
 
-      await feedback.learnFromFeedback();
-
-      // Should have 2 log entries: 1 for recordFeedback + 1 for learnFromFeedback
-      expect(repo.logActivity).toHaveBeenCalledTimes(2);
-      const learningLog = (repo as any)._loggedActivities[1];
-      expect(learningLog.actionType).toBe('feedback_processed');
-      expect(learningLog.metadata.memoriesCreated).toBe(1);
+      // Auto-learn already triggered, check logs:
+      // Entry 0: feedback_received
+      // Entry 1: feedback_processed (from auto-learn)
+      const activities = (repo as any)._loggedActivities;
+      expect(activities.length).toBeGreaterThanOrEqual(2);
+      expect(activities[0].actionType).toBe('feedback_received');
+      expect(activities[1].actionType).toBe('feedback_processed');
+      expect(activities[1].metadata.memoriesCreated).toBe(1);
     });
   });
 

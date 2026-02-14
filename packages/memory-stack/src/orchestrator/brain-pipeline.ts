@@ -302,6 +302,8 @@ export interface BrainCycleReport {
   publicDataTraining: LLMTrainingResult | null;
   /** Brain's Library: book/paper ingestion results */
   bookIngestion: BookIngestionResult | null;
+  /** Cognitive Stack: Layers 3-15 (Deep Dreaming → Narrative Intelligence) */
+  cognitiveStack: CognitiveCycleResult | null;
 
   /** Overall cycle status */
   status: 'success' | 'partial' | 'failed';
@@ -501,6 +503,16 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
   const bookIngestor = createKnowledgeBookIngestor({
     verbose,
     ...config.bookIngestor,
+  });
+
+  // Cognitive Stack: Layers 3-15 (Deep Dreaming → Narrative Intelligence)
+  // Brain Analog: The higher cognitive layers — dreaming, memory hierarchy,
+  // curiosity, self-modification, intelligence mesh, imagination, theory of mind,
+  // temporal consciousness, red teaming, experimentation, immune filtering,
+  // goal-backward planning, and narrative intelligence.
+  const cognitiveStack: CognitiveStackInstance = createCognitiveStack({
+    organizationId,
+    ...config.cognitiveStack,
   });
 
   // CTO Performance Tracker: Executive Meta-Cognition Dashboard
@@ -959,6 +971,48 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
       log(msg);
     }
 
+    // Step 6b: Cognitive Stack cycle (Layers 3-15)
+    // This runs the full cognitive pipeline: Immune → Dream → Memory → Curiosity →
+    // Self-Model → Mesh → Imagination → Theory of Mind → Temporal → Red Team →
+    // Experimentation → Goal Planning → Narrative
+    let cognitiveStackResult: CognitiveCycleResult | null = null;
+    try {
+      log('Cognitive Stack: running layers 3-15 cycle...');
+
+      // Convert DMN insights and exploration data into cognitive signals
+      const cogSignals = (dmnResult?.insights || []).map((insight, i) => ({
+        id: `dmn_${insight.id || i}`,
+        source: 'dmn',
+        domain: insight.domains?.[0] || 'general',
+        entityType: 'insight',
+        entityId: insight.id || `insight_${i}`,
+        value: insight.importance || 0.5,
+        timestamp: Date.now(),
+      }));
+
+      // Convert consolidation edges into causal edges for the cognitive stack
+      const cogEdges = (consolidationResult?.report?.stats?.causalEdgesDiscovered || 0) > 0
+        ? [{ source: 'consolidation', target: 'knowledge', weight: 0.7, confidence: 0.8 }]
+        : [];
+
+      cognitiveStackResult = cognitiveStack.runCycle({
+        signals: cogSignals,
+        causalEdges: cogEdges,
+        patterns: [],
+        predictions: [],
+        metrics: [],
+      });
+
+      log(`Cognitive Stack complete: ${cognitiveStackResult.immune.signalsChecked} signals checked, ` +
+          `${cognitiveStackResult.dreaming.associationsFound} dream associations, ` +
+          `${cognitiveStackResult.curiosity.hypothesesGenerated} hypotheses, ` +
+          `${cognitiveStackResult.redTeam.predictionsTested} red-team tests`);
+    } catch (err) {
+      const msg = `Cognitive Stack cycle failed: ${(err as Error).message}`;
+      errors.push(msg);
+      log(msg);
+    }
+
     // Step 7: Invalidate stale fast-paths after consolidation changed the graph
     let fastPathInvalidated = false;
     if (consolidationResult && consolidationResult.status !== 'failed') {
@@ -1027,6 +1081,14 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
         `(${bookIngestionResult.summary.includes('Domains:') ? bookIngestionResult.summary.split('Domains: ')[1]?.split('.')[0] || '' : ''}).`
       );
     }
+    if (cognitiveStackResult) {
+      narrativeParts.push(
+        `Cognitive Stack (L3-L15): ${cognitiveStackResult.dreaming.associationsFound} dream associations, ` +
+        `${cognitiveStackResult.curiosity.hypothesesGenerated} curiosity hypotheses, ` +
+        `${cognitiveStackResult.imagination.hypothesesGenerated} imagination hypotheses, ` +
+        `${cognitiveStackResult.redTeam.predictionsTested} red-team tests (avg robustness: ${(cognitiveStackResult.redTeam.robustnessAvg * 100).toFixed(0)}%).`
+      );
+    }
     if (fastPathInvalidated) {
       narrativeParts.push('Cerebellum: stale fast-paths cleared for recompilation.');
     }
@@ -1049,6 +1111,7 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
       learning: learningResult,
       publicDataTraining: publicDataResult,
       bookIngestion: bookIngestionResult,
+      cognitiveStack: cognitiveStackResult,
       status,
       errors,
       narrative: narrativeParts.join(' '),
@@ -1189,6 +1252,15 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
           ? `Last ingestion: ${lastBookIngestionAt}`
           : 'Not yet run — books from science, math, and coding await',
       },
+      ...(() => {
+        const csHealth = cognitiveStack.getHealthReport();
+        return csHealth.layers.map(l => ({
+          name: `L${l.id}: ${l.name}`,
+          brainAnalog: `Cognitive Layer ${l.id} (${l.type})`,
+          status: l.status === 'healthy' ? 'ok' as const : l.status === 'degraded' ? 'degraded' as const : 'error' as const,
+          details: Object.entries(l.stats).map(([k, v]) => `${k}: ${v}`).join(', ') || 'Active',
+        }));
+      })(),
     ];
 
     const notInitialized = regions.filter(r => r.status === 'not_initialized').length;
@@ -1273,5 +1345,8 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
     getLLMTrainingPipeline: () => llmTrainingPipeline,
     getBookIngestor: () => bookIngestor,
     getCTOTracker: () => ctoTracker,
+
+    // Cognitive Stack (Layers 3-15: Deep Dreaming → Narrative Intelligence)
+    getCognitiveStack: () => cognitiveStack,
   };
 }

@@ -133,12 +133,12 @@ describe('Brain Pipeline (Corpus Callosum)', () => {
   });
 
   describe('Health Reporting (Neurological Exam)', () => {
-    it('should report health of all 15 brain regions', () => {
+    it('should report health of all 29 brain regions', () => {
       const brain = createBrainPipeline(config);
       const health = brain.getHealth();
 
       expect(health.organizationId).toBe('org-test-123');
-      expect(health.regions).toHaveLength(16);
+      expect(health.regions).toHaveLength(29); // 16 brain regions + 13 cognitive stack layers
       expect(health.checkedAt).toBeDefined();
 
       // Check all brain regions are present
