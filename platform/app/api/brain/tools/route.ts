@@ -20,6 +20,8 @@ import { validateApiKey } from "@/lib/api-key-auth";
 import { checkRateLimit, hashKey, setRateLimitHeaders } from "@/lib/rate-limiter";
 import { corsHeaders, checkSessionRateLimit, parseAndValidateBody } from "@/lib/security-middleware";
 
+export const dynamic = 'force-dynamic';
+
 const NEXUS_BRAIN_TOOLS = [
   {
     type: "function",

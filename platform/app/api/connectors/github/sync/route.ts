@@ -3,6 +3,8 @@ import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getCurrentOrgId } from "@/lib/org-helpers";
 import { createGitHubConnector } from "@nexus-ai/memory-stack";
 
+export const dynamic = 'force-dynamic';
+
 /**
  * POST /api/connectors/github/sync
  *

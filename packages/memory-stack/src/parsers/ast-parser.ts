@@ -19,10 +19,40 @@
 
 import * as ts from 'typescript';
 import { parse as parseTypeScript } from '@typescript-eslint/parser';
-import Parser from 'tree-sitter';
-import TreeSitterPython from 'tree-sitter-python';
-import TreeSitterGo from 'tree-sitter-go';
-import TreeSitterScala from 'tree-sitter-scala';
+
+// Lazy-loaded tree-sitter modules (native binaries — must not be imported at module load time
+// to avoid breaking webpack bundling in Next.js / Amplify environments)
+let Parser: any;
+let TreeSitterPython: any;
+let TreeSitterGo: any;
+let TreeSitterScala: any;
+
+async function ensureTreeSitter(): Promise<void> {
+  if (!Parser) {
+    Parser = (await import('tree-sitter')).default;
+  }
+}
+
+async function ensureTreeSitterPython(): Promise<void> {
+  await ensureTreeSitter();
+  if (!TreeSitterPython) {
+    TreeSitterPython = (await import('tree-sitter-python')).default;
+  }
+}
+
+async function ensureTreeSitterGo(): Promise<void> {
+  await ensureTreeSitter();
+  if (!TreeSitterGo) {
+    TreeSitterGo = (await import('tree-sitter-go')).default;
+  }
+}
+
+async function ensureTreeSitterScala(): Promise<void> {
+  await ensureTreeSitter();
+  if (!TreeSitterScala) {
+    TreeSitterScala = (await import('tree-sitter-scala')).default;
+  }
+}
 
 export interface FunctionInfo {
   name: string;
@@ -82,9 +112,9 @@ export interface CodeStructure {
  * AST Parser for multiple languages
  */
 export class ASTParser {
-  private pythonParser: Parser | null = null;
-  private goParser: Parser | null = null;
-  private scalaParser: Parser | null = null;
+  private pythonParser: any = null;
+  private goParser: any = null;
+  private scalaParser: any = null;
 
   constructor() {
     // Initialize tree-sitter parsers lazily
@@ -511,7 +541,8 @@ export class ASTParser {
    * Parse Python using tree-sitter
    * Traverses the AST to extract functions, classes, imports, and dependencies.
    */
-  private parsePython(code: string, filePath?: string): CodeStructure {
+  private async parsePython(code: string, filePath?: string): Promise<CodeStructure> {
+    await ensureTreeSitterPython();
     if (!this.pythonParser) {
       this.pythonParser = new Parser();
       this.pythonParser.setLanguage(TreeSitterPython);
@@ -525,7 +556,7 @@ export class ASTParser {
     let complexity = 0;
 
     // Recursive tree-sitter traversal
-    const traverse = (node: Parser.SyntaxNode, insideClass?: string): void => {
+    const traverse = (node: any, insideClass?: string): void => {
       switch (node.type) {
         case 'function_definition': {
           const nameNode = node.childForFieldName('name');
@@ -696,7 +727,7 @@ export class ASTParser {
   }
 
   /** Extract Python docstring from a function/class body */
-  private extractPythonDocstring(node: Parser.SyntaxNode): string | undefined {
+  private extractPythonDocstring(node: any): string | undefined {
     const bodyNode = node.childForFieldName('body');
     if (!bodyNode || bodyNode.namedChildCount === 0) return undefined;
     const firstChild = bodyNode.namedChild(0);
@@ -713,7 +744,8 @@ export class ASTParser {
    * Parse Go using tree-sitter
    * Traverses the AST to extract functions, structs, imports, and dependencies.
    */
-  private parseGo(code: string, filePath?: string): CodeStructure {
+  private async parseGo(code: string, filePath?: string): Promise<CodeStructure> {
+    await ensureTreeSitterGo();
     if (!this.goParser) {
       this.goParser = new Parser();
       this.goParser.setLanguage(TreeSitterGo);
@@ -727,7 +759,7 @@ export class ASTParser {
     let complexity = 0;
 
     // Recursive tree-sitter traversal
-    const traverse = (node: Parser.SyntaxNode): void => {
+    const traverse = (node: any): void => {
       switch (node.type) {
         case 'function_declaration': {
           const nameNode = node.childForFieldName('name');
@@ -879,7 +911,7 @@ export class ASTParser {
           for (let i = 0; i < node.namedChildCount; i++) {
             const spec = node.namedChild(i);
             if (spec?.type === 'import_spec' || spec?.type === 'import_spec_list') {
-              const extractSpec = (s: Parser.SyntaxNode) => {
+              const extractSpec = (s: any) => {
                 const pathNode = s.childForFieldName('path');
                 const aliasNode = s.childForFieldName('name');
                 const path = pathNode?.text?.replace(/"/g, '') || s.text.replace(/"/g, '');
@@ -951,7 +983,8 @@ export class ASTParser {
    * - Package structure
    * - Imports (wildcard, selective, renaming)
    */
-  private parseScala(code: string, filePath?: string): CodeStructure {
+  private async parseScala(code: string, filePath?: string): Promise<CodeStructure> {
+    await ensureTreeSitterScala();
     if (!this.scalaParser) {
       this.scalaParser = new Parser();
       this.scalaParser.setLanguage(TreeSitterScala);

@@ -37,6 +37,8 @@ import { brainQuerySchema, validateBody } from "@/lib/api-schemas";
 import { corsHeaders, createRequestLogger, checkSessionRateLimit, validateCsrf, parseAndValidateBody } from "@/lib/security-middleware";
 import { NextRequest, NextResponse } from "next/server";
 
+export const dynamic = 'force-dynamic';
+
 const CORE_ORG_ID = "00000000-0000-4000-a000-000000000001";
 
 // Domain keyword map (matches brain-knowledge-context.ts)

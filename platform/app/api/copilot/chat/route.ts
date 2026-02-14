@@ -34,6 +34,8 @@ import type {
   BrainRegions,
 } from "@nexus-ai/memory-stack";
 
+export const dynamic = 'force-dynamic';
+
 const CORE_ORG_ID = "00000000-0000-4000-a000-000000000001";
 
 // ============================================================================

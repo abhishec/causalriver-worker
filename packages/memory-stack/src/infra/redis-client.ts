@@ -660,9 +660,179 @@ export async function getRedisHealth(redis: RedisClientInstance): Promise<RedisH
 
 /**
  * Create the default Redis client.
- * In production, this should use ioredis.
- * For now, uses the in-memory implementation.
+ *
+ * Behavior:
+ * - If REDIS_URL env var is set → uses ioredis (production)
+ * - Otherwise → uses in-memory implementation (development/testing)
+ *
+ * The in-memory implementation is fully compatible with production,
+ * allowing local development without a Redis server.
  */
 export function createRedisClient(config: Partial<RedisConfig> = {}): RedisClientInstance {
+  const redisUrl = typeof process !== 'undefined' && process.env?.REDIS_URL;
+  if (redisUrl) {
+    // Production: use ioredis (lazy import to avoid bundling in dev)
+    return createIoRedisAdapter(redisUrl, config);
+  }
   return createInMemoryRedis(config);
+}
+
+/**
+ * Create an ioredis adapter that implements RedisClientInstance.
+ * Only used when REDIS_URL is set (production environments).
+ */
+function createIoRedisAdapter(url: string, config: Partial<RedisConfig> = {}): RedisClientInstance {
+  // ioredis is a peer dependency — only required in production
+  let ioredis: any;
+  try {
+    ioredis = require('ioredis');
+  } catch {
+    console.warn('[NexusBrain] ioredis not installed — falling back to in-memory Redis');
+    return createInMemoryRedis(config);
+  }
+
+  const logger = config.logger ?? getDefaultLogger().child({ module: 'redis-ioredis' });
+  const client = new ioredis(url, {
+    maxRetriesPerRequest: config.maxRetries ?? 3,
+    retryStrategy: (times: number) => Math.min(times * (config.retryDelayMs ?? 200), 5000),
+    connectTimeout: config.connectTimeoutMs ?? 10000,
+    commandTimeout: config.commandTimeoutMs ?? 5000,
+    keyPrefix: config.keyPrefix ?? '',
+    tls: config.tls ? {} : undefined,
+    lazyConnect: false,
+  });
+
+  client.on('connect', () => logger.info('Redis connected', {}));
+  client.on('error', (err: Error) => logger.error('Redis error', { error: err.message }));
+  client.on('reconnecting', () => logger.warn('Redis reconnecting', {}));
+
+  let connected = true;
+  client.on('close', () => { connected = false; });
+
+  const redisConfig: RedisConfig = {
+    host: config.host ?? 'localhost',
+    port: config.port ?? 6379,
+    password: config.password,
+    ...config,
+  };
+
+  // Wrap ioredis methods to match RedisClientInstance interface exactly
+  const instance: RedisClientInstance = {
+    get: (key: string) => client.get(key),
+    set: (key: string, value: string, options?: { ex?: number; px?: number; nx?: boolean }) => {
+      if (options?.ex) return client.set(key, value, 'EX', options.ex);
+      if (options?.px) return client.set(key, value, 'PX', options.px);
+      if (options?.nx) return client.set(key, value, 'NX');
+      return client.set(key, value);
+    },
+    del: (...keys: string[]) => client.del(...keys),
+    exists: (...keys: string[]) => client.exists(...keys),
+    expire: (key: string, seconds: number) => client.expire(key, seconds),
+    ttl: (key: string) => client.ttl(key),
+    incr: (key: string) => client.incr(key),
+    incrBy: (key: string, increment: number) => client.incrby(key, increment),
+    hget: (key: string, field: string) => client.hget(key, field),
+    hset: (key: string, field: string, value: string) => client.hset(key, field, value),
+    hgetall: (key: string) => client.hgetall(key),
+    hdel: (key: string, ...fields: string[]) => client.hdel(key, ...fields),
+    hlen: (key: string) => client.hlen(key),
+    lpush: (key: string, ...values: string[]) => client.lpush(key, ...values),
+    rpush: (key: string, ...values: string[]) => client.rpush(key, ...values),
+    lpop: (key: string) => client.lpop(key),
+    rpop: (key: string) => client.rpop(key),
+    llen: (key: string) => client.llen(key),
+    lrange: (key: string, start: number, stop: number) => client.lrange(key, start, stop),
+    sadd: (key: string, ...members: string[]) => client.sadd(key, ...members),
+    srem: (key: string, ...members: string[]) => client.srem(key, ...members),
+    smembers: (key: string) => client.smembers(key),
+    sismember: (key: string, member: string) => client.sismember(key, member),
+    zadd: (key: string, score: number, member: string) => client.zadd(key, score, member),
+    zrange: (key: string, start: number, stop: number) => client.zrange(key, start, stop),
+    zrangebyscore: (key: string, min: number | string, max: number | string, options?: { limit?: { offset: number; count: number } }) => {
+      if (options?.limit) return client.zrangebyscore(key, min, max, 'LIMIT', options.limit.offset, options.limit.count);
+      return client.zrangebyscore(key, min, max);
+    },
+    zrem: (key: string, ...members: string[]) => client.zrem(key, ...members),
+    zcard: (key: string) => client.zcard(key),
+    xadd: (key: string, id: string, fields: Record<string, string>) => {
+      const args: string[] = [];
+      for (const [k, v] of Object.entries(fields)) { args.push(k, v); }
+      return (client.xadd as any)(key, id, ...args);
+    },
+    xlen: (key: string) => client.xlen(key),
+    xread: (options: any) => (client.xread as any)(options),
+    xreadgroup: (options: any) => (client.xreadgroup as any)(options),
+    xgroup: (...args: any[]) => (client.xgroup as any)(...args),
+    xack: (key: string, group: string, ...ids: string[]) => (client.xack as any)(key, group, ...ids),
+    xtrim: (key: string, strategy: 'MAXLEN' | 'MINID', threshold: number | string) => (client.xtrim as any)(key, strategy, threshold),
+    xpending: (key: string, group: string) => (client.xpending as any)(key, group),
+    publish: (channel: string, message: string) => client.publish(channel, message),
+    subscribe: (channel: string, callback: (message: string) => void) => {
+      const sub = client.duplicate();
+      sub.subscribe(channel);
+      sub.on('message', (_ch: string, msg: string) => callback(msg));
+      return Promise.resolve();
+    },
+    ping: () => client.ping(),
+    info: (section?: string) => section ? client.info(section) : client.info(),
+    dbsize: () => client.dbsize(),
+    flushdb: () => client.flushdb(),
+    keys: (pattern: string) => client.keys(pattern),
+    scan: async (cursor: number, options?: { match?: string; count?: number }) => {
+      const args: any[] = [cursor];
+      if (options?.match) args.push('MATCH', options.match);
+      if (options?.count) args.push('COUNT', options.count);
+      const [nextCursor, keys] = await client.scan(...args);
+      return { cursor: parseInt(nextCursor, 10), keys };
+    },
+    pipeline: () => {
+      const pipe = client.pipeline();
+      return {
+        get: (key: string) => { pipe.get(key); return pipe as any; },
+        set: (key: string, value: string, options?: { ex?: number }) => {
+          if (options?.ex) pipe.set(key, value, 'EX', options.ex);
+          else pipe.set(key, value);
+          return pipe as any;
+        },
+        del: (...keys: string[]) => { pipe.del(...keys); return pipe as any; },
+        hset: (key: string, field: string, value: string) => { pipe.hset(key, field, value); return pipe as any; },
+        hget: (key: string, field: string) => { pipe.hget(key, field); return pipe as any; },
+        xadd: (key: string, id: string, fields: Record<string, string>) => {
+          const args: string[] = [];
+          for (const [k, v] of Object.entries(fields)) { args.push(k, v); }
+          (pipe.xadd as any)(key, id, ...args);
+          return pipe as any;
+        },
+        expire: (key: string, seconds: number) => { pipe.expire(key, seconds); return pipe as any; },
+        exec: () => pipe.exec().then((results: any) => results?.map((r: any) => [r[0], r[1]]) ?? []),
+      } as RedisPipeline;
+    },
+    multi: () => {
+      const multi = client.multi();
+      return {
+        get: (key: string) => { multi.get(key); return multi as any; },
+        set: (key: string, value: string, options?: { ex?: number }) => {
+          if (options?.ex) multi.set(key, value, 'EX', options.ex);
+          else multi.set(key, value);
+          return multi as any;
+        },
+        del: (...keys: string[]) => { multi.del(...keys); return multi as any; },
+        hset: (key: string, field: string, value: string) => { multi.hset(key, field, value); return multi as any; },
+        hget: (key: string, field: string) => { multi.hget(key, field); return multi as any; },
+        xadd: (key: string, id: string, fields: Record<string, string>) => {
+          const args: string[] = [];
+          for (const [k, v] of Object.entries(fields)) { args.push(k, v); }
+          (multi.xadd as any)(key, id, ...args);
+          return multi as any;
+        },
+        expire: (key: string, seconds: number) => { multi.expire(key, seconds); return multi as any; },
+        exec: () => multi.exec().then((results: any) => results?.map((r: any) => [r[0], r[1]]) ?? []),
+      } as RedisPipeline;
+    },
+    disconnect: () => client.quit().then(() => { connected = false; }),
+    isConnected: () => connected,
+    getConfig: () => redisConfig,
+  };
+
+  return instance;
 }

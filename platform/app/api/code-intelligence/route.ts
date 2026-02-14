@@ -7,6 +7,8 @@ import {
   createCollaborationGraph,
 } from "@nexus-ai/memory-stack";
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/code-intelligence
  *

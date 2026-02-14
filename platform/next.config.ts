@@ -1,5 +1,5 @@
 import type { NextConfig } from "next";
-import webpack from "webpack";
+import path from "path";
 
 const nextConfig: NextConfig = {
   // SSR mode — NOT static export (platform needs API routes + middleware)
@@ -9,23 +9,24 @@ const nextConfig: NextConfig = {
     // Types are validated locally and in CI via `tsc --noEmit`.
     ignoreBuildErrors: true,
   },
-  // Native Node.js modules — resolved at runtime, not bundled by webpack
+  // Native Node.js modules — resolved at runtime, not bundled by webpack.
   serverExternalPackages: [
     'tree-sitter',
     'tree-sitter-go',
     'tree-sitter-python',
     'tree-sitter-scala',
   ],
-  webpack: (config, { isServer }) => {
-    if (isServer) {
-      // Ignore .node native binary files (tree-sitter prebuilds)
-      config.plugins.push(
-        new webpack.IgnorePlugin({
-          resourceRegExp: /\.node$/,
-          contextRegExp: /tree-sitter/,
-        })
-      );
-    }
+  webpack: (config) => {
+    // Exclude .node native binary files from webpack compilation.
+    // tree-sitter prebuilds contain platform-specific binaries that webpack
+    // cannot process. They are loaded at runtime via node-gyp-build.
+    config.module.rules.push({
+      test: /\.node$/,
+      type: 'javascript/auto',
+      use: {
+        loader: path.resolve(__dirname, 'noop-loader.js'),
+      },
+    });
     return config;
   },
 };
