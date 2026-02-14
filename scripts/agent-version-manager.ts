@@ -59,6 +59,7 @@ const KNOWN_V7_AGENTS = [
 const UTILITY_FILES = [
   'git-code-trainer-fetcher',
   'git-signal-converter',
+  'org-creation-agent',
 ];
 
 // ────────────────────────────────────────────────────────────────────────────
