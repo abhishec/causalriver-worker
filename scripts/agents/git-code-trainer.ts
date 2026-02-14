@@ -240,15 +240,9 @@ export class GitCodeTrainerAgent extends BaseTrainingAgent {
   }
 }
 
-// ── Self-Registration: Auto-register to globalRegistry on import ──────────
-import { globalRegistry } from '../agent-framework/agent-registry';
-
-globalRegistry.register({
-  name: 'git-code-trainer',
-  description: 'Trains the core brain on engineering patterns from 27 major open-source GitHub repos (100k+ stars)',
-  version: '1.0.0',
-  factory: (config) => new GitCodeTrainerAgent(config),
-  schedule: '0 2 * * 0',  // Sunday at 2 AM UTC
-  resourceRequirements: { cpu: '2048', memory: '8192' },
-  tags: ['training', 'code-intelligence', 'github'],
-});
+// ── Self-Registration: DISABLED — Superseded by git-code-trainer-v6.ts ─────
+// The V6 ManusNativeAgent version (git-code-trainer-v6.ts) is now the active
+// version imported by brain-orchestrator.ts. This V1 file is kept for reference
+// but its registration is disabled to prevent duplicate name conflicts.
+// import { globalRegistry } from '../agent-framework/agent-registry';
+// globalRegistry.register({ name: 'git-code-trainer', ... });

@@ -1,0 +1,71 @@
+{
+  "answer_766ab8da_1": [
+    {
+      "fact": "User is looking for new TV shows to watch on Netflix.",
+      "type": "preference",
+      "entities": [
+        "Netflix",
+        "TV shows"
+      ]
+    },
+    {
+      "fact": "User enjoys 'Stranger Things' and 'The Crown'.",
+      "type": "preference",
+      "entities": [
+        "Stranger Things",
+        "The Crown"
+      ]
+    },
+    {
+      "fact": "User has a long to-watch list with 20 titles waiting to be checked off.",
+      "type": "personal",
+      "entities": [
+        "20 titles"
+      ]
+    },
+    {
+      "fact": "User is interested in the storyline of 'The Haunting of Hill House'.",
+      "type": "preference",
+      "entities": [
+        "The Haunting of Hill House"
+      ]
+    },
+    {
+      "fact": "User wants to know if 'The Haunting of Hill House' can be finished in a week or two.",
+      "type": "opinion",
+      "entities": [
+        "The Haunting of Hill House"
+      ]
+    }
+  ],
+  "answer_766ab8da_2": [
+    {
+      "fact": "User loves historical dramas",
+      "type": "preference",
+      "entities": [
+        "historical dramas"
+      ]
+    },
+    {
+      "fact": "User finished binge-watching 'The Crown' and loved it",
+      "type": "opinion",
+      "entities": [
+        "The Crown"
+      ]
+    },
+    {
+      "fact": "User has a to-watch list of 25 titles",
+      "type": "personal",
+      "entities": [
+        "25 titles"
+      ]
+    },
+    {
+      "fact": "User has been meaning to watch 'Victoria'",
+      "type": "preference",
+      "entities": [
+        "Victoria"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/20 (Sat) 14:07  
+[ASSISTANT_SAID] The assistant provided an updated structure for job postings using Bootstrap components and shared the complete `job_posting.html` file with updates.  
+[ASSISTANT_CREATED] The assistant created a complete `job_posting.html` file that includes Bootstrap CSS and a structure for displaying job postings.  
+[ASSISTANT_SAID] The assistant instructed the user to replace the entire content of their `job_posting.html` file with the provided code to incorporate the Bootstrap framework and updated structure.  
+[USER] The user reported that when running the code, they only see large text saying "Job Posting" and nothing else.  
+[ASSISTANT_SAID] The assistant suggested that there might be an issue with the jobs data being passed to the template and provided example data to replace the `jobs` variable in `main.py`.  
+[ASSISTANT_CREATED] The assistant provided example job data in Python format for the `jobs` variable, including three job postings with titles, companies, and descriptions.  
+[ASSISTANT_SAID] The assistant instructed the user to add the example data to their `main.py` file just above the `@app.route("/")` line.  
+[USER] The user stated that they still only see text saying "Job Posting" when running the application.  
+[ASSISTANT_SAID] The assistant asked if the user needed to install Bootstrap CSS or anything else.  
+[ASSISTANT_SAID] The assistant clarified that Bootstrap CSS is included via a CDN in the template's `<head>` section and provided the specific line of code for including Bootstrap CSS.  
+[ASSISTANT_SAID] The assistant instructed the user to update the `<h1>` line in `job_posting.html` to ensure it reads "Job Postings" correctly.  
+[USER] The user confirmed that they still only see "Job Postings."  
+[ASSISTANT_SAID] The assistant suggested checking if the jobs are being passed correctly to the template and provided an updated code block for the job postings section in `job_posting.html`.  
+[ASSISTANT_SAID] The assistant included an `{% else %}` clause in the `{% for %}` loop to display "No jobs found." if there are no jobs in the `jobs` variable.  
+[USER] The user reported seeing "No jobs found."  
+[ASSISTANT_SAID] The assistant apologized and suggested verifying that the `jobs` variable in `main.py` contains the sample data and is being passed correctly to the template.  
+[ASSISTANT_SAID] The assistant provided the complete code for `main.py` to ensure the user has the correct setup.  
+[ASSISTANT_SAID] The assistant instructed

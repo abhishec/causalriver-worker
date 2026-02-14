@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/26 (Fri) 01:07  
+[EVENT] User is planning a family reunion on their dad's side.  
+[PREFERENCE] User needs help with creating a guest list for the family reunion.  
+[ASSISTANT_SAID] Assistant suggests tools and apps to help organize relatives, including aunts, uncles, cousins, and their kids.  
+[ASSISTANT_SAID] Suggested tools include:  
+[ASSISTANT_SAID] 1. FamilyTreeBuilder (Web, iOS, Android): Genealogy software for creating a family tree and generating reports.  
+[ASSISTANT_SAID] 2. Ancestry.com (Web): Genealogy platform for creating a family tree and accessing historical records.  
+[ASSISTANT_SAID] 3. MyHeritage (Web, iOS, Android): Genealogy platform for creating a family tree and accessing historical records.  
+[ASSISTANT_SAID] 4. FamilySearch (Web, iOS, Android): Free genealogy platform for creating a family tree and accessing historical records.  
+[ASSISTANT_SAID] 5. Google Sheets or Microsoft Excel: Suggested for creating a spreadsheet to organize family members.  
+[ASSISTANT_SAID] 6. Reunion Planner (Web): Tool for planning family reunions, managing RSVPs, and tracking payments.  
+[ASSISTANT_SAID] 7. Evite (Web, iOS, Android): Event planning platform for creating events and tracking RSVPs.  
+[ASSISTANT_SAID] Assistant advises to consider ease of use, collaboration, scalability, and cost when choosing a tool.  
+[ASSISTANT_SAID] Assistant encourages starting with immediate family members and expanding to aunts, uncles, cousins, and their kids.  
+[ASSISTANT_SAID] Assistant wishes user good luck with family reunion planning.  
+[EVENT] User is thinking of organizing and storing all photos from the family reunion, including those from both sides of the family.  
+[ASSISTANT_SAID] Assistant provides tips for collecting, organizing, and storing family reunion photos.  
+[ASSISTANT_SAID] Suggested collection methods include designating a photo collector, creating a shared folder or album, and using a unique hashtag for social media.  
+[ASSISTANT_SAID] Suggested organization methods include creating folders and subfolders, using tags and keywords, and creating a timeline.  
+[ASSISTANT_SAID] Suggested storage options include cloud storage (Google Photos, Amazon Prime Photos, Microsoft OneDrive), external hard drives, and photo management software (Adobe Lightroom, Apple Photos).  
+[ASSISTANT_SAID] Suggested sharing methods include creating a shared album, a private online gallery, or a physical photo book.

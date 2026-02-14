@@ -1,0 +1,37 @@
+**Observation Log:**
+
+[FACT] User is planning a day trip to an amusement park.  
+[FACT] User recently returned from the Spring Break Bash at Knott's Berry Farm.  
+[FACT] User had an amazing strawberry funnel cake at Knott's Berry Farm.  
+[EVENT] User is planning to visit Disneyland soon with family.  
+[EVENT] User is celebrating their niece's 7th birthday at Disneyland.  
+[PREFERENCE] User is open to trying new food items at Disneyland.  
+[PREFERENCE] User has had the famous fried chicken sandwich at Paradise Garden Grill before.  
+[ASSISTANT_SAID] Funnel cakes are a classic amusement park treat, and strawberry is a delicious flavor combination.  
+[ASSISTANT_SAID] Recommended must-try food items for amusement parks include:  
+[ASSISTANT_CREATED] 1. Funnel Cakes  
+[ASSISTANT_CREATED] 2. Corn Dogs  
+[ASSISTANT_CREATED] 3. Churros  
+[ASSISTANT_CREATED] 4. Giant Turkey Legs  
+[ASSISTANT_CREATED] 5. Cotton Candy  
+[ASSISTANT_CREATED] 6. Elephant Ears  
+[ASSISTANT_CREATED] 7. Fresh Lemonade  
+[ASSISTANT_CREATED] 8. Gourmet Burgers  
+[ASSISTANT_CREATED] 9. Fried Oreos  
+[ASSISTANT_CREATED] 10. Specialty Drinks  
+[ASSISTANT_SAID] User should remember to stay hydrated and take breaks throughout the day.  
+[ASSISTANT_SAID] Disneyland is a foodie's paradise with many must-try food items.  
+[ASSISTANT_SAID] Recommended must-try food items at Disneyland include:  
+[ASSISTANT_CREATED] 1. Dole Whip  
+[ASSISTANT_CREATED] 2. Churros  
+[ASSISTANT_CREATED] 3. Monte Cristo Sandwich  
+[ASSISTANT_CREATED] 4. Bengal Barbecue  
+[ASSISTANT_CREATED] 5. Ghirardelli Chocolate  
+[ASSISTANT_CREATED] 6. Carthay Circle Lobster Nachos  
+[ASSISTANT_CREATED] 7. Rancho del Zocalo's Tacos  
+[ASSISTANT_CREATED] 8. Jolly Holiday Bakery Cafe's Matterhorn Macarons  
+[ASSISTANT_CREATED] 9. Cozy Cone Motel's Cones  
+[ASSISTANT_CREATED] 10. Plaza Inn's Fried Chicken and Waffles  
+[ASSISTANT_SAID] User should arrive early to the park and use the Disneyland app for wait times and reservations.  
+[ASSISTANT_SAID] User should consider a Park Hopper ticket if they want to visit both Disneyland Park and Disney California Adventure Park.  
+[ASSISTANT_SAID] User should get a boarding pass for Star Wars: Rise of the Resistance through the Disneyland app.

@@ -1,0 +1,25 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/21 (Sun) 23:39
+- [ASSISTANT_SAID] The hierarchy of grammatical units includes: Sentence, Clause (Independent or Dependent), Subject, Predicate, Object, Complement, and Modifier.
+- [ASSISTANT_SAID] The structure of a Sentence includes: Clause, Phrase, Word, and Letter.
+- [ASSISTANT_SAID] The assistant provided a detailed breakdown of grammatical roles and their components.
+- [USER] Suggested representing grammatical units as layers rather than a hierarchy.
+- [USER] Proposed a "layer cake" model with Sentences at the top, followed by Clauses and Phrases, then Words, and finally Letters at the bottom.
+- [USER] Mentioned a separate layer cake for grammatical roles: subject, predicate, object, and complement.
+- [ASSISTANT_SAID] Confirmed the "layer cake" model and explained how grammatical roles can be added to the main structure.
+- [USER] Asked how words in English differ from words in Chinese in terms of construction.
+- [ASSISTANT_SAID] Explained that English uses the Roman alphabet, while Chinese uses characters (Hanzi).
+- [ASSISTANT_SAID] Described how English words can be formed with morphemes, while Chinese words are often monosyllabic and can be combined to form new words.
+- [ASSISTANT_SAID] Noted that Chinese characters can have multiple meanings and functions, while English words typically have one specific meaning.
+- [ASSISTANT_SAID] Mentioned that English is an inflected language, while Chinese is uninflected.
+- [ASSISTANT_SAID] Highlighted that Chinese is a tonal language, unlike English.
+- [USER] Inquired about the name of language systems like English that form words by combining different morphemes.
+- [ASSISTANT_SAID] Identified these as inflected languages or morphologically rich languages.
+- [ASSISTANT_SAID] Provided examples of other inflected languages: German, Spanish, Russian, and Latin.
+- [USER] Asked if there are other types of writing systems beyond alphabetic and logographic.
+- [ASSISTANT_SAID] Listed other types of writing systems: Syllabic, Ideographic, Abjad, Abugida, and Picture writing.
+- [ASSISTANT_SAID] Explained that writing systems are typically considered to represent spoken or gestured languages.
+- [ASSISTANT_SAID] Stated that writing systems are usually developed after a spoken or gestured language exists.
+- [USER] Asked if there are examples of a spoken or gestured language representing a writing system.
+- [ASSISTANT_SAID] Mentioned that sign languages have developed their own writing systems and serve as a means

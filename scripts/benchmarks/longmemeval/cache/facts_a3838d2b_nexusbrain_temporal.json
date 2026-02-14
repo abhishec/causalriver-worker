@@ -1,0 +1,232 @@
+{
+  "answer_4ffa04a2_1": [
+    {
+      "fact": "User participated in the 'Run for the Cure' event on October 15th.",
+      "type": "event",
+      "entities": [
+        "Run for the Cure",
+        "October 15th"
+      ]
+    },
+    {
+      "fact": "User raised $250 for breast cancer research.",
+      "type": "event",
+      "entities": [
+        "$250",
+        "breast cancer research"
+      ]
+    },
+    {
+      "fact": "User is looking for tips to stay motivated in charity events.",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User agrees with the tip about setting new goals.",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User is thinking of registering for a cycling event next month.",
+      "type": "event",
+      "entities": [
+        "cycling event",
+        "next month"
+      ]
+    }
+  ],
+  "answer_4ffa04a2_6": [
+    {
+      "fact": "User is active in the charity scene.",
+      "type": "preference",
+      "entities": [
+        "charity scene"
+      ]
+    },
+    {
+      "fact": "User participated in the 'Dance for a Cause' event on May 1st.",
+      "type": "event",
+      "entities": [
+        "Dance for a Cause",
+        "May 1st"
+      ]
+    },
+    {
+      "fact": "User is particularly interested in events that support arts programs.",
+      "type": "preference",
+      "entities": [
+        "arts programs"
+      ]
+    },
+    {
+      "fact": "User is interested in finding ways to stay active while giving back to the community.",
+      "type": "preference",
+      "entities": [
+        "stay active",
+        "giving back to the community"
+      ]
+    },
+    {
+      "fact": "User is looking for charity fitness events or volunteer opportunities that involve physical activity.",
+      "type": "preference",
+      "entities": [
+        "charity fitness events",
+        "volunteer opportunities",
+        "physical activity"
+      ]
+    }
+  ],
+  "answer_4ffa04a2_5": [
+    {
+      "fact": "User is interested in wildlife conservation efforts",
+      "type": "preference",
+      "entities": [
+        "wildlife conservation"
+      ]
+    },
+    {
+      "fact": "User volunteered at the Walk for Wildlife event in June",
+      "type": "event",
+      "entities": [
+        "Walk for Wildlife",
+        "June"
+      ]
+    },
+    {
+      "fact": "User raised awareness and funds for conservation efforts at the event",
+      "type": "opinion",
+      "entities": [
+        "awareness",
+        "funds",
+        "conservation efforts"
+      ]
+    },
+    {
+      "fact": "User wants to get involved with local organizations or initiatives",
+      "type": "preference",
+      "entities": [
+        "local organizations",
+        "initiatives"
+      ]
+    }
+  ],
+  "answer_4ffa04a2_4": [
+    {
+      "fact": "User is looking for advice to improve their golf game.",
+      "type": "preference",
+      "entities": [
+        "golf game",
+        "advice"
+      ]
+    },
+    {
+      "fact": "User attended a charity golf tournament on July 17th.",
+      "type": "event",
+      "entities": [
+        "charity golf tournament",
+        "July 17th"
+      ]
+    },
+    {
+      "fact": "User had a blast playing golf with colleagues.",
+      "type": "opinion",
+      "entities": [
+        "golf",
+        "colleagues"
+      ]
+    },
+    {
+      "fact": "User realizes they need to work on their swing.",
+      "type": "opinion",
+      "entities": [
+        "swing"
+      ]
+    },
+    {
+      "fact": "User is a beginner in golf.",
+      "type": "personal",
+      "entities": [
+        "beginner",
+        "golf"
+      ]
+    },
+    {
+      "fact": "User is considering getting golf lessons.",
+      "type": "preference",
+      "entities": [
+        "golf lessons"
+      ]
+    }
+  ],
+  "answer_4ffa04a2_2": [
+    {
+      "fact": "User has volunteered at the 'Food for Thought' charity gala on September 25th.",
+      "type": "event",
+      "entities": [
+        "Food for Thought",
+        "charity gala",
+        "September 25th"
+      ]
+    },
+    {
+      "fact": "User is looking for information on local charity events focused on food banks or hunger relief.",
+      "type": "preference",
+      "entities": [
+        "charity events",
+        "food banks",
+        "hunger relief"
+      ]
+    },
+    {
+      "fact": "User has seen firsthand the impact of food banks on the community.",
+      "type": "opinion",
+      "entities": [
+        "food banks",
+        "community"
+      ]
+    }
+  ],
+  "answer_4ffa04a2_3": [
+    {
+      "fact": "User is looking for local bike trails for a casual ride this weekend.",
+      "type": "preference",
+      "entities": [
+        "bike trails",
+        "casual ride",
+        "weekend"
+      ]
+    },
+    {
+      "fact": "User participated in the 'Bike-a-Thon' charity event in November.",
+      "type": "event",
+      "entities": [
+        "Bike-a-Thon",
+        "November"
+      ]
+    },
+    {
+      "fact": "User found the 'Bike-a-Thon' charity event a lot of fun and a great way to support a good cause.",
+      "type": "opinion",
+      "entities": [
+        "Bike-a-Thon",
+        "fun",
+        "support a good cause"
+      ]
+    },
+    {
+      "fact": "User is not as experienced in biking as they would like to be.",
+      "type": "personal",
+      "entities": [
+        "biking",
+        "experience"
+      ]
+    },
+    {
+      "fact": "User is looking for a relatively easy bike trail.",
+      "type": "preference",
+      "entities": [
+        "easy bike trail"
+      ]
+    }
+  ]
+}

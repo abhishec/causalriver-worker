@@ -1,0 +1,19 @@
+**Observation Log:**
+
+[FACT] User's name is Lisa.  
+[FACT] Lisa is a busy professional living in Shanghai.  
+[FACT] Lisa has a husband and two children.  
+[PREFERENCE] Lisa enjoys spending time with her family and traveling.  
+[PREFERENCE] Lisa values personalized recommendations and is open to trying new experiences and attractions.  
+[PREFERENCE] Lisa wants to make the most of the park's dining options but doesn't want to spend too much time waiting in lines or trying to find available tables.  
+[PREFERENCE] Lisa is tech-savvy and comfortable using apps and digital tools to plan and organize her travel.  
+[EVENT] Lisa is excited to take her family to Shanghai Disney Resort for the first time.  
+[GOAL] Lisa wants to create a customized itinerary that maximizes her family's enjoyment of the park and minimizes wait times and other inconveniences.  
+[CHANGE] Lisa is willing to adjust her itinerary based on real-time data and recommendations from the app.  
+[TEMPORAL] Session date is 2023/05/26 (Fri) 07:46.  
+[ASSISTANT_SAID] Suggested tooltip descriptions for "itinerary planning" feature include: "Create and manage a personalized itinerary for your visit to Shanghai Disney Resort!" and "Maximize your family's enjoyment of the park and minimize wait times with a custom itinerary."  
+[ASSISTANT_SAID] Provided additional tooltip descriptions: "Get personalized recommendations for attractions, dining, and more based on your interests and preferences."  
+[ASSISTANT_SAID] Suggested functions for "itinerary planning" design include creating and managing multiple itineraries, adding and removing attractions, sorting attractions, and providing navigation and directions.  
+[ASSISTANT_CREATED] User journey for "Itinerary planning" function includes steps from downloading the app to sharing the itinerary with family and friends.  
+[ASSISTANT_SAID] Listed possible functions for "itinerary planning" design, including browsing attraction information, purchasing tickets, and providing real-time recommendations.  
+[ASSISTANT_SAID] Described the process for making performance reservations in the Shanghai Disney app, detailing steps from opening the app to confirming the reservation.

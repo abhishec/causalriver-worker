@@ -1,0 +1,25 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/29 (Mon) 05:53
+- [ASSISTANT_SAID] Azure PowerShell, Azure CLI, and Azure Cloud Shell are three tools used for managing Azure resources.
+- [ASSISTANT_SAID] Azure PowerShell is a module that adds Azure-specific commands to PowerShell and requires PowerShell to function.
+- [ASSISTANT_SAID] Azure PowerShell is available on Windows PowerShell and PowerShell Core.
+- [ASSISTANT_SAID] Azure CLI is a command-line program that allows you to execute administrative commands on Azure resources and runs on Linux, macOS, and Windows.
+- [ASSISTANT_SAID] Azure CLI provides cross-platform command-line tools for managing Azure resources and can be installed locally on computers running these operating systems.
+- [ASSISTANT_SAID] Azure Cloud Shell is an interactive, browser-accessible shell for managing Azure resources.
+- [ASSISTANT_SAID] Azure Cloud Shell provides a browser-based command-line experience and is built with Azure management tasks in mind.
+- [ASSISTANT_SAID] Azure Cloud Shell runs on a temporary host provided on a per-session, per-user basis and requires a resource group, storage account, and Azure File share.
+- [ASSISTANT_SAID] Azure Resource Manager (ARM) is a service provided by Microsoft Azure for managing and organizing resources in Azure.
+- [ASSISTANT_SAID] ARM allows you to create, update, and delete resources in a single, coordinated operation.
+- [ASSISTANT_SAID] ARM provides a consistent management layer for performing tasks through various tools, such as Azure PowerShell, Azure CLI, Azure portal, REST API, and client SDKs.
+- [USER] Azure Resource Manager enables you to work with the resources in your solution as a group.
+- [USER] You can deploy, update, or delete all the resources for your solution in a single, coordinated operation.
+- [USER] You use a template for deployment, and that template can work for different environments such as testing, staging, and production.
+- [USER] Azure Resource Manager provides security, auditing, and tagging features to help you manage your resources after deployment.
+- [USER] Templates improve consistency. Resource Manager templates provide a common language for deployments.
+- [USER] Regardless of the tool or SDK that you use to deploy the template, the structure, format, and expressions inside the template remain the same.
+- [USER] Templates help express complex deployments and enable you to deploy multiple resources in the correct order.
+- [USER] Resource Manager maps out each resource and its dependent resources and creates dependent resources first.
+- [USER] Dependency mapping helps ensure that the deployment is carried out in the correct order.
+- [USER] Templates reduce manual, error-prone tasks.
+- [USER] Man

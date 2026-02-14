@@ -1,0 +1,18 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/23 (Tue) 11:02  
+[USER] User inquired about functions common to ERC-721 and custom functions in a smart contract.  
+[USER] User provided a list of functions with their corresponding identifiers.  
+[USER] User asked for a table indicating which functions are standard and which are custom.  
+[ASSISTANT_SAID] Assistant explained that ERC-721 is a standard for non-fungible tokens (NFTs) on the Ethereum blockchain and defined required and optional functions.  
+[ASSISTANT_SAID] Assistant listed functions that are not part of the ERC-721 standard and identified them as custom functions.  
+[ASSISTANT_SAID] Assistant provided a list of required functions in the ERC-721 standard: `name`, `symbol`, `totalSupply`, `balanceOf`, `ownerOf`, `approve`, `getApproved`, `setApprovalForAll`, `isApprovedForAll`, `transferFrom`.  
+[ASSISTANT_SAID] Assistant mentioned optional functions in the ERC-721 standard: `mint`, `burn`, `metadata`, `enumerable`.  
+[USER] User questioned why `tokenURI` was considered custom and stated it should be part of the standard.  
+[ASSISTANT_SAID] Assistant clarified that `tokenURI` is not part of the ERC-721 standard and explained the distinction between `tokenURI` and the optional `metadata` function.  
+[USER] User requested a table with a brief description of each function.  
+[ASSISTANT_CREATED] Assistant created a table with the following details:  
+- Functions listed: `buyAlbum`, `buySong`, `publicMint`, `destroyPublic`, `claimAlbum`, `tokenURI`, `setImportantURIs`, `reclaimERC20Token`, `reclaimERC721`, `setStartTimes`, `setMerkleRoot`, `setArtistWallet`, `setNFTContract`, `setRoyalty`, `setQuorum`, `setPricePerToken`, `setSplitsWallet`, `withdrawToSplits`, `_isContract`, `_startTokenId`, `supportsInterface`, `isProofValid`, `isProofValid2`, `name`, `symbol`, `totalSupply`, `balanceOf`, `ownerOf`, `approve`, `getApproved`, `setApprovalForAll`, `isApprovedForAll`, `transferFrom`, `mint`, `burn`, `metadata`, `enumerable`.  
+- Standard or Custom designation for each function.  
+- Brief descriptions of what each function does.  
+[ASSISTANT_SAID] Assistant provided descriptions for each function, including their purposes, such as "Function for buying an album" for `buyAlbum` and "Function for retrieving the name of the token" for `name`.

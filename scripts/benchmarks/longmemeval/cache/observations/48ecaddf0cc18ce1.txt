@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/12/10 (Sun) 11:49  
+[EVENT] User is looking to upgrade their phone case and screen protector.  
+[EVENT] User got their iPhone 13 Pro at a discounted price of $800 from Best Buy on Black Friday.  
+[FACT] The regular price of the iPhone 13 Pro was $1,000.  
+[ASSISTANT_SAID] Congratulations on scoring a great deal on your iPhone 13 Pro!  
+[ASSISTANT_SAID] Recommended iPhone 13 Pro cases:  
+[ASSISTANT_SAID] 1. OtterBox Defender Series: $49.95, rugged and durable with built-in screen protector.  
+[ASSISTANT_SAID] 2. Spigen Ultra Hybrid: $25.99, clear case with TPU bumper and hard PC back.  
+[ASSISTANT_SAID] 3. Case-Mate Tough Stand: $30.00, stylish case with built-in stand.  
+[ASSISTANT_SAID] 4. Mophie Juice Pack: $99.95, battery case providing up to 50% extra battery life.  
+[ASSISTANT_SAID] 5. Tech21 Evo Check: $29.95, slim case with excellent drop protection.  
+[ASSISTANT_SAID] Recommended iPhone 13 Pro screen protectors:  
+[ASSISTANT_SAID] 1. Zagg InvisibleShield Glass+: $29.99, tempered glass with advanced clarity.  
+[ASSISTANT_SAID] 2. BodyGuardz Pure 2: $24.95, tempered glass with a satisfaction guarantee.  
+[ASSISTANT_SAID] 3. TechArmor High Definition: $14.95, crystal-clear with a lifetime warranty.  
+[ASSISTANT_SAID] 4. Anker GlassGuard: $12.99, tempered glass with a 9H hardness rating.  
+[ASSISTANT_SAID] 5. Skinomi TechSkin: $14.95, clear screen protector with self-healing technology.  
+[ASSISTANT_SAID] Suggested checking compatibility and reviews for each product.  
+[EVENT] User is planning to use their phone more outdoors and wants waterproof protection.  
+[ASSISTANT_SAID] Recommended waterproof phone cases for iPhone 13 Pro:  
+[ASSISTANT_SAID] 1. LifeProof FRĒ Series: $89.99, IP68 rating, built-in screen protector.  
+[ASSISTANT_SAID] 2. Catalyst Waterproof Case: $69.99, IP68 rating, underwater use up to 30 meters.  
+[ASSISTANT_SAID] 3. OtterBox Defender Series Waterproof: $69

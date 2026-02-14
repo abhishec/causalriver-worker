@@ -1,0 +1,27 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/26 (Fri) 21:53  
+[USER] User wants to create a DCA, Diversify dapp.  
+[USER] User's proposed workflow for the DCA, Diversify dapp includes:  
+[USER] 1. User deposits ETH or USDT into the contract.  
+[USER] 2. User chooses how often to DCA:  
+[USER] i. Daily, Weekly, Monthly.  
+[USER] ii. User specifies what percentage of their deposited amount should be used to buy into the coin every Day, Week, Month (depends on what they choose on i.).  
+[USER] iii. User selects which coin/coins should it be spread into.  
+[USER] 3. The Contract executes the trades on the specified timeframe and sends the bought coins straight to the user's wallet.  
+[ASSISTANT_SAID] Assistant acknowledges the user's project as interesting and mentions the complexity of creating a decentralized application (dApp).  
+[ASSISTANT_SAID] Assistant suggests learning about blockchain development, smart contract programming, and web3 technologies before starting the project.  
+[ASSISTANT_SAID] Assistant provides a general outline of steps to create the DCA, diversify dapp:  
+[ASSISTANT_SAID] 1. Choose a blockchain platform (e.g., Ethereum, Binance Smart Chain, Polkadot, Solana).  
+[ASSISTANT_SAID] 2. Design the smart contract to handle deposits and execute trades.  
+[ASSISTANT_SAID] 3. Develop the front-end using frameworks like React or Angular and web3.js.  
+[ASSISTANT_SAID] 4. Test and deploy the dApp using testing frameworks like Truffle and tools like Ganache.  
+[ASSISTANT_SAID] 5. Promote the dApp using social media and online platforms.  
+[USER] User asks if any tool like the proposed DCA/Diversify app already exists.  
+[ASSISTANT_SAID] Assistant lists existing tools with similar functionality:  
+[ASSISTANT_SAID] 1. TokenSets - allows users to create and manage automated trading strategies, including DCA.  
+[ASSISTANT_SAID] 2. DeFi Saver - offers automated DeFi management tools, including DCA with customizable parameters.  
+[ASSISTANT_SAID] 3. Zapper - a DeFi dashboard with a DCA tool for recurring purchases.  
+[USER] User inquires if Uniswap has limit orders.  
+[ASSISTANT_SAID] Assistant states that Uniswap V3 does not support traditional limit orders but uses a liquidity pool model with concentrated liquidity positions.  
+[ASSISTANT_SAID] Assistant explains that users can set price ranges for trades

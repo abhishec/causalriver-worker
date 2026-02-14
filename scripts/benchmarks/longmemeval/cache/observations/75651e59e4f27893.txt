@@ -1,0 +1,21 @@
+**Observation Log:**
+
+**Session Date:** 2023/03/17 (Fri) 15:10  
+**Session ID:** sharegpt_jVFHJsP_0
+
+1. [FACT] The user is an executive coach with expertise in high performance, emotional intelligence, stress management, and osteopathy.
+2. [FACT] The user has 40 years of business and entrepreneurial experience.
+3. [FACT] The user’s ideal client is an entrepreneur or business leader of an SME, aged between 25 and 65 years old.
+4. [FACT] The user’s ideal clients live anywhere in the world with internet access.
+5. [FACT] The user’s ideal clients have 2-5 years of experience in business.
+6. [FACT] The user’s ideal clients aspire for their business to set them free financially but are struggling to achieve this.
+7. [FACT] The user offers 12-week and 12-month coaching solutions.
+8. [PREFERENCE] The user emphasizes their ability to ask very insightful questions to uncover clients' issues.
+9. [EVENT] The user is trying to describe what they do to others.
+10. [ASSISTANT_SAID] The assistant explained the "How to X in Y without Z" statement framework, where X is the action or achievement, Y is the context or constraint, and Z is the obstacle to avoid.
+11. [ASSISTANT_SAID] The assistant provided examples for X, Y, and Z in the context of the user's coaching services.
+12. [ASSISTANT_SAID] The assistant suggested that the user clarify their ideal client (X), their client's need or problem (Y), and their solution (Z) to create clear statements about their services.
+13. [ASSISTANT_CREATED] The assistant created two statements for the user to describe their services, emphasizing their coaching, consultancy, and emotional intelligence skills.
+14. [ASSISTANT_CREATED] The assistant provided a potential elevator pitch for the user to use in business networking meetings.
+15. [ASSISTANT_SAID] The assistant summarized the two statements into two sentences, focusing on the user's coaching and consultancy services.
+16. [ASSISTANT_SAID] The assistant revised the statements to emphasize the user's ability to ask insightful questions to uncover clients' issues.

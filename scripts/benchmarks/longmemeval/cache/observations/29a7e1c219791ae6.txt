@@ -1,0 +1,12 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/24 (Wed) 19:46
+- [ASSISTANT_CREATED] The assistant provided a code snippet for a function named `archiveData()` that archives data from a source sheet to an archive sheet in Google Sheets.
+- [ASSISTANT_SAID] The code includes comments explaining each section, such as getting the source and archive sheets, appending new data, checking for existing rows, and cleaning up the archive sheet.
+- [ASSISTANT_SAID] The script checks if a row with the same unique identifier (video ID) exists in the archive sheet.
+- [ASSISTANT_SAID] If a row does not exist, the script appends it to the archive sheet.
+- [ASSISTANT_SAID] If a row exists, the script compares the view count of the existing row with the current row from the source sheet.
+- [ASSISTANT_SAID] If the current row has a higher view count, the script deletes the existing row and appends the current row to the archive sheet.
+- [ASSISTANT_SAID] The script ensures that only the row with the highest view count is kept in the archive sheet.
+- [ASSISTANT_SAID] The assistant offered to modify the script to keep all rows with the same unique identifier, even if they have lower values in a certain column, if the user desired that.
+- [USER] The user inquired whether the script would replace or delete older rows that are duplicated with lower values in a column.

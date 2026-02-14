@@ -1,0 +1,22 @@
+**Observation Log:**
+
+- [FACT] The user is looking to learn more about portrait photography.
+- [FACT] The user recently got a new 50mm prime lens.
+- [EVENT] The user took their camera to their cousin's birthday party two weeks ago.
+- [PREFERENCE] The user is experimenting with their new lens but is still figuring out the best settings for different situations.
+- [ASSISTANT_SAID] The 50mm focal length is considered a classic portrait lens, and a prime lens helps create a shallow depth of field.
+- [ASSISTANT_SAID] Bokeh refers to the aesthetic quality of the blur produced in the out-of-focus parts of an image.
+- [ASSISTANT_SAID] General tips for taking better portrait photos include understanding camera settings, paying attention to lighting, working with the subject, focusing on the eyes, and experimenting with composition.
+- [ASSISTANT_SAID] For outdoor portraits, use a wide aperture (like f/1.8 or f/2.8) and shoot during the golden hour for warm, soft light.
+- [ASSISTANT_SAID] For indoor portraits, use a slightly narrower aperture (like f/2.2 or f/3.2) and consider using artificial light sources.
+- [ASSISTANT_SAID] For low-light portraits, use a wide aperture (like f/1.8 or f/2.8) and a higher ISO (like 1600 or 3200).
+- [ASSISTANT_SAID] Practice makes perfect; keep experimenting with the 50mm prime lens.
+- [TEMPORAL] The session date is 2023/05/30 (Tue) 12:28.
+- [USER] The user is still getting used to the focal length and aperture settings.
+- [USER] The user had a great time using the burst mode feature at their cousin's birthday party.
+- [ASSISTANT_SAID] Tips for utilizing burst mode for portrait photography include anticipating the moment, using burst mode for candid moments, focusing on the eyes, adjusting burst mode settings, and reviewing and selecting the best shots.
+- [ASSISTANT_SAID] Continuous autofocus (AI Servo or AF-C) can help track the subject's movement during burst mode.
+- [ASSISTANT_SAID] It's important not to overdo burst mode to avoid overwhelming amounts of redundant shots.
+- [ASSISTANT_SAID] When editing burst mode shots, curate them carefully to select the best ones.
+- [USER] The user is curious about how to direct or guide their subject to get natural and relaxed expressions during portrait sessions.
+- [ASSISTANT_SAID] Tips for directing subjects to get natural expressions include building rapport, being relaxed, giving gentle direction, using positive reinforcement, encouraging natural movement, making it a conversation, using humor, keeping direction simple,

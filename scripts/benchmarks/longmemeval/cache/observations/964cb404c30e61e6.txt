@@ -1,0 +1,21 @@
+**Observation Log:**
+
+[FACT] The user is trying to get organized and plan out their week ahead.  
+[FACT] The user has been busy lately.  
+[EVENT] The user spent the whole day at home last Wednesday catching up on emails and watching TV shows.  
+[ASSISTANT_SAID] The assistant offered to help the user create a schedule template.  
+[ASSISTANT_CREATED] The assistant provided a basic weekly schedule template with sections for each day of the week, including Morning, Afternoon, Evening, and additional sections for tasks, appointments, exercise, self-care activities, meal planning, study time, and leisure activities.  
+[ASSISTANT_SAID] The assistant advised the user to prioritize tasks based on importance and urgency and to schedule breaks to avoid burnout.  
+[FACT] The user likes the template provided by the assistant.  
+[CHANGE] The user requested to add a column for exercise or physical activity to the schedule template.  
+[ASSISTANT_SAID] The assistant added a new column for exercise or physical activity to the template.  
+[ASSISTANT_CREATED] The assistant updated the weekly schedule template to include a column for exercise/physical activity.  
+[FACT] The user tries to go to the gym on Tuesdays and Thursdays.  
+[EVENT] The user was supposed to go to the gym on Tuesday last week, but their meeting ran overtime, and they didn't have time.  
+[ASSISTANT_SAID] The assistant acknowledged the user's frustration about not being able to go to the gym and encouraged them to get back on track.  
+[ASSISTANT_CREATED] The assistant updated the weekly schedule template to pre-fill the gym days (Tuesdays and Thursdays) for the user.  
+[CHANGE] The user requested to add a section for travel plans to the schedule template.  
+[ASSISTANT_SAID] The assistant added a new column for travel or accommodations to the template.  
+[ASSISTANT_CREATED] The assistant provided an updated weekly schedule template that includes a column for travel/accommodations.  
+[EVENT] The user is planning a trip to New York City next month.  
+[TEMPORAL] The user mentioned that the trip to New York City is planned for next month.

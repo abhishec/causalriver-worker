@@ -1,0 +1,40 @@
+{
+  "answer_ultrachat_459954": [
+    {
+      "fact": "User is interested in Native American culture",
+      "type": "preference",
+      "entities": [
+        "Native American culture"
+      ]
+    },
+    {
+      "fact": "User wants to attend a powwow",
+      "type": "event",
+      "entities": [
+        "powwow"
+      ]
+    },
+    {
+      "fact": "User is looking for recommendations for the best powwows to attend",
+      "type": "preference",
+      "entities": [
+        "powwows"
+      ]
+    },
+    {
+      "fact": "User is interested in traditional games played during powwows",
+      "type": "preference",
+      "entities": [
+        "traditional games",
+        "powwows"
+      ]
+    },
+    {
+      "fact": "User finds the drum and dance competition exciting to watch",
+      "type": "opinion",
+      "entities": [
+        "drum and dance competition"
+      ]
+    }
+  ]
+}

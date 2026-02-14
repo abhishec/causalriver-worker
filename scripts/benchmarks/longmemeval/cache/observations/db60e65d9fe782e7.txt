@@ -1,0 +1,24 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/22 (Mon) 05:30  
+[FACT] User has a master's thesis in natural language processing (NLP).  
+[FACT] User has worked on a research paper on sentiment analysis submitted to ACL.  
+[PREFERENCE] User is looking for help with natural language processing tasks, specifically text classification using machine learning.  
+[FACT] User has experience with supervised learning.  
+[FACT] User's dataset consists of product reviews with around 5000 samples and about 10 features each.  
+[PREFERENCE] User wants to classify product reviews as either positive or negative.  
+[ASSISTANT_SAID] Assistant congratulated the user on their background in NLP and offered to help with text classification using machine learning.  
+[ASSISTANT_SAID] Assistant provided a list of questions to better understand the user's text classification problem, including the type of text data, classification task, classes or labels, machine learning algorithm, dataset size, and specific requirements.  
+[ASSISTANT_SAID] Assistant suggested steps for text classification, including data preprocessing, feature extraction, and machine learning algorithms.  
+[ASSISTANT_SAID] Assistant mentioned specific preprocessing steps: tokenization, stopword removal, stemming or lemmatization, and vectorization.  
+[ASSISTANT_SAID] Assistant recommended feature extraction methods: Bag-of-Words (BoW), Term Frequency-Inverse Document Frequency (TF-IDF), and word embeddings.  
+[ASSISTANT_SAID] Assistant listed machine learning algorithms: Logistic Regression, Decision Trees, Random Forest, Support Vector Machines (SVMs), and Convolutional Neural Networks (CNNs).  
+[ASSISTANT_SAID] Assistant suggested evaluating models using accuracy and F1-score.  
+[FACT] User's dataset has a relatively even class balance, with around 55% positive reviews and 45% negative reviews.  
+[PREFERENCE] User is interested in accuracy and F1-score as evaluation metrics.  
+[ASSISTANT_SAID] Assistant confirmed that binary sentiment analysis on product reviews is a classic NLP task and provided a structured approach to building and evaluating models.  
+[ASSISTANT_SAID] Assistant provided a detailed plan for preprocessing, feature extraction, model training, and evaluation.  
+[PREFERENCE] User is open to exploring different preprocessing techniques and feature extraction methods.  
+[ASSISTANT_SAID] Assistant recommended using the WordNetLemmatizer for lemmatization over the Porter Stemmer for better accuracy in sentiment analysis.  
+[ASSISTANT_CREATED] Assistant provided sample Python code for preprocessing text, including tokenization, stopword removal, and lemmatization using NLTK.  
+[ASSISTANT_SAID] Assistant suggested using NLTK for tokenization, stopword removal, and stemming/lemmatization, and scikit-learn for

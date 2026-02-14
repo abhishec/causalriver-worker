@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/20 (Sat) 00:54  
+[FACT] User has experience with lavender in baking.  
+[EVENT] User made a lemon lavender cake two weeks ago for a friend's birthday party.  
+[PREFERENCE] User thinks lavender would pair well with the buttery flavor of shortbread.  
+[ASSISTANT_SAID] Lavender and shortbread are a match made in heaven.  
+[ASSISTANT_CREATED] Provided a recipe for Lavender Shortbread Cookies including ingredients and instructions.  
+[ASSISTANT_SAID] Ingredients for Lavender Shortbread Cookies: 1 1/2 sticks (6 tablespoons) unsalted butter, softened; 1/2 cup granulated sugar; 2 tablespoons lavender syrup or 1 teaspoon dried lavender buds; 2 1/4 cups all-purpose flour; 1/4 teaspoon salt.  
+[ASSISTANT_SAID] Instructions for Lavender Shortbread Cookies: Preheat oven to 300°F (150°C), cream butter and sugar, add lavender, mix dry ingredients, refrigerate dough, roll out, cut shapes, bake for 18-20 minutes.  
+[ASSISTANT_SAID] Notes on making lavender syrup: Combine 1 cup granulated sugar, 1 cup water, and 1/4 cup dried lavender buds in a saucepan, bring to boil, simmer for 5 minutes, strain, and let cool.  
+[ASSISTANT_SAID] Cookies can be stored in an airtight container at room temperature for up to 5 days.  
+[PREFERENCE] User is interested in substituting granulated sugar with turbinado sugar.  
+[ASSISTANT_SAID] Turbinado sugar can be substituted for granulated sugar; it has a coarser texture and a more caramel-like flavor.  
+[ASSISTANT_SAID] Using turbinado sugar may result in slightly more tender and crumbly cookies.  
+[ASSISTANT_SAID] Tips for using turbinado sugar: cream butter and sugar longer, watch for browning while baking.  
+[PREFERENCE] User plans to try the recipe with turbinado sugar.  
+[PREFERENCE] User is considering making smaller cookies, about 1 inch in diameter.  
+[ASSISTANT_SAID] Smaller cookies will bake faster; recommended baking time is 12-14 minutes for 1-inch cookies.  
+[ASSISTANT_SAID] General baking time guidelines: 1-inch cookies: 12-14 minutes; 1.5-inch cookies: 15-17 minutes; 2-inch cookies: 18-20 minutes.  
+[PREFERENCE] User has been using a new brand of lavender extract from a local gourmet store.  
+[ASSISTANT_SAID] Recommendations for lavender extract brands: Les Vergers de Valensole, L'Occitane

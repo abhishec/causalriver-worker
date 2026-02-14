@@ -1,0 +1,143 @@
+{
+  "answer_1881e7db_1": [
+    {
+      "fact": "User feels overwhelmed with work after the long weekend",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User had a doctor's appointment last Monday",
+      "type": "event",
+      "entities": [
+        "doctor's appointment",
+        "Monday"
+      ]
+    },
+    {
+      "fact": "User took a half-day off from work for the appointment",
+      "type": "event",
+      "entities": [
+        "half-day off",
+        "work"
+      ]
+    },
+    {
+      "fact": "User returned to the office around 1:00 PM after the appointment",
+      "type": "event",
+      "entities": [
+        "1:00 PM",
+        "office"
+      ]
+    },
+    {
+      "fact": "User is playing catch-up at work since the appointment",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User is working on a marketing campaign",
+      "type": "personal",
+      "entities": [
+        "marketing campaign"
+      ]
+    },
+    {
+      "fact": "User has a deadline for the marketing campaign in two weeks",
+      "type": "event",
+      "entities": [
+        "deadline",
+        "two weeks"
+      ]
+    },
+    {
+      "fact": "User needs to finalize the content for the marketing campaign",
+      "type": "task",
+      "entities": [
+        "content",
+        "marketing campaign"
+      ]
+    },
+    {
+      "fact": "User needs to design the visuals for the marketing campaign",
+      "type": "task",
+      "entities": [
+        "visuals",
+        "marketing campaign"
+      ]
+    },
+    {
+      "fact": "User needs to coordinate with the team for the launch of the marketing campaign",
+      "type": "task",
+      "entities": [
+        "team",
+        "launch",
+        "marketing campaign"
+      ]
+    },
+    {
+      "fact": "User left home at 7 AM on Monday for the doctor's appointment",
+      "type": "event",
+      "entities": [
+        "7 AM",
+        "Monday",
+        "doctor's appointment"
+      ]
+    },
+    {
+      "fact": "User is trying to get their rhythm back after the appointment",
+      "type": "opinion",
+      "entities": []
+    }
+  ],
+  "answer_1881e7db_2": [
+    {
+      "fact": "User is located in zip code 12345",
+      "type": "personal",
+      "entities": [
+        "12345"
+      ]
+    },
+    {
+      "fact": "User needs to see their primary care doctor",
+      "type": "event",
+      "entities": [
+        "primary care doctor"
+      ]
+    },
+    {
+      "fact": "User is available anytime on weekdays for appointments",
+      "type": "preference",
+      "entities": [
+        "weekdays"
+      ]
+    },
+    {
+      "fact": "User prefers morning slots for appointments",
+      "type": "preference",
+      "entities": [
+        "morning slots"
+      ]
+    },
+    {
+      "fact": "User prefers clinics within an hour's drive from home",
+      "type": "preference",
+      "entities": [
+        "hour's drive"
+      ]
+    },
+    {
+      "fact": "User took two hours to get to the clinic last time",
+      "type": "event",
+      "entities": [
+        "two hours"
+      ]
+    },
+    {
+      "fact": "User plans to contact Family Care Medical Center first",
+      "type": "event",
+      "entities": [
+        "Family Care Medical Center"
+      ]
+    }
+  ]
+}

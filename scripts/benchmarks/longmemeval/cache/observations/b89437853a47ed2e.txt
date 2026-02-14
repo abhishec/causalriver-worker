@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [FACT] User's name is Scott.
+- [FACT] User lives on a farm in Indiana.
+- [FACT] User has known Barbara (nickname: Barbie) their entire lives.
+- [FACT] Barbara got married about 10 years ago.
+- [FACT] Barbara adopted a boy named Jed with her wife, Nancy.
+- [FACT] Barbara lives in Brooklyn.
+- [FACT] User sees Barbara a few times a year.
+- [RELATIONSHIP] Barbara is a childhood friend of the user.
+- [RELATIONSHIP] Nancy is Barbara's wife.
+- [RELATIONSHIP] Jed is Barbara and Nancy's adopted son.
+- [RELATIONSHIP] Abby is a mutual childhood friend who lives near Barbara.
+- [PREFERENCE] User loved to skateboard in elementary school.
+- [PREFERENCE] Barbara loves alternative music.
+- [PREFERENCE] User played tennis.
+- [ASSISTANT_CREATED] The assistant created a letter addressed to Barbie, expressing a desire to see her and her family soon.
+- [ASSISTANT_CREATED] The letter reminisces about skateboarding and listening to alternative music during childhood.
+- [ASSISTANT_CREATED] The letter mentions the user's current life on a farm in Indiana and expresses happiness for Barbara's family.
+- [ASSISTANT_SAID] The assistant suggested making plans to get together soon.

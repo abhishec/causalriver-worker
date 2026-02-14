@@ -1,0 +1,26 @@
+**Observation Log:**
+
+[FACT] User is trying to get their professional licenses updated with their new name.  
+[FACT] User has submitted the paperwork to the court on February 10th and received approval later.  
+[CHANGE] User's name is being updated legally.  
+[TEMPORAL] Session Date: 2023/01/14 (Sat) 00:24.  
+[ASSISTANT_SAID] Congratulations on taking the first step in updating your legal name!  
+[ASSISTANT_SAID] To update your medical license with your new name, you need to gather required documents including a certified copy of your court order, a completed application for name change, a copy of your current medical license, and proof of identity.  
+[ASSISTANT_SAID] Check with your state medical board to confirm specific requirements for updating your medical license with a name change.  
+[ASSISTANT_SAID] Complete the application for name change and submit it along with supporting documents to the state medical board.  
+[ASSISTANT_SAID] Pay the required fee for the name change, which varies by state.  
+[ASSISTANT_SAID] Wait for processing, which may take several weeks or months.  
+[ASSISTANT_SAID] Once approved, you will receive your updated medical license with your new name.  
+[ASSISTANT_SAID] Make sure to update your name with the National Practitioner Data Bank (NPDB) and other relevant organizations.  
+[ASSISTANT_SAID] Inform your employer, hospital, or practice administrators about your name change.  
+[USER] User is glad to have all the necessary documents ready.  
+[USER] User asks if they need to provide both old and new names on the application and how to indicate the name change.  
+[ASSISTANT_SAID] You need to provide both your old and new names on the application, indicating the name change in a specific section.  
+[ASSISTANT_SAID] You may need to explain the name change briefly and attach a copy of your court order or decree.  
+[ASSISTANT_SAID] Ensure the spelling and formatting of your names match the documentation provided.  
+[USER] User asks if they need to get a new DEA registration as well.  
+[ASSISTANT_SAID] Yes, you need to update your DEA registration to reflect your new name.  
+[ASSISTANT_SAID] Complete Form DEA-224 and check the box for a name change, submit it with a copy of your court order, and pay the required fee of $731.  
+[ASSISTANT_SAID] The DEA typically takes 4-6 weeks to process name change applications.  
+[USER] User also needs to update their malpractice insurance with their new name.  
+[ASSISTANT_SAID] Contact your malpractice insurance provider to notify them

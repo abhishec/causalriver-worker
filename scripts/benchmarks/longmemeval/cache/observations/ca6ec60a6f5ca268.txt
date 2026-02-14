@@ -1,0 +1,20 @@
+**Observation Log:**
+
+[FACT] User is a member of a family of five.  
+[FACT] User recently returned from a 10-day road trip to Yellowstone with their family last month.  
+[CHANGE] User clarified that they are planning a future trip to Yellowstone, not that they just got back.  
+[EVENT] User rented an RV and drove from California for their last trip to Yellowstone.  
+[ASSISTANT_SAID] Assistant recommended family-friendly accommodations: Canyon Lodge & Cabins, Grant Village, and Yellowstone Gateway Inn.  
+[ASSISTANT_SAID] Assistant suggested family-friendly activities in Yellowstone: guided tours, visiting Upper and Lower Yellowstone Falls, Yellowstone Lake, Mammoth Hot Springs, and ranger programs.  
+[ASSISTANT_SAID] Assistant provided tips for planning a trip: book early, plan ahead, pack wisely, and take breaks.  
+[EVENT] User expressed interest in keeping kids occupied during long drives.  
+[ASSISTANT_SAID] Assistant provided tips for keeping kids occupied during long drives: audiobooks and podcasts, road trip bingo, car games, tablets and handheld games, snack and drink stations, pit stops and breaks, scavenger hunts, car karaoke, travel journals, and taking turns.  
+[FACT] User is interested in seeing geysers and hot springs during their trip to Yellowstone.  
+[ASSISTANT_SAID] Assistant confirmed Old Faithful as a must-see and recommended other geysers: Grand Geyser, Castle Geyser, and Daisy Geyser.  
+[ASSISTANT_SAID] Assistant recommended hot springs: Mammoth Hot Springs, Norris Geyser Basin, and Boiling River.  
+[ASSISTANT_SAID] Assistant provided tips for spotting bears in Yellowstone: know the habitats, look early morning and late evening, keep a safe distance, look for signs, and drive slowly while scanning.  
+[ASSISTANT_SAID] Assistant identified best areas to spot bears: Lamar Valley, Slough Creek, Tower-Roosevelt Area, and Mammoth Hot Springs.  
+[ASSISTANT_SAID] Assistant suggested bringing binoculars, keeping a safe distance from wildlife, being patient, and considering guided tours for wildlife viewing.  
+[FACT] User is interested in exploring the Grand Canyon of the Yellowstone River.  
+[ASSISTANT_SAID] Assistant confirmed the Grand Canyon of the Yellowstone River as a must-see and provided hiking trail recommendations: Brink of Lower Falls Trail, Seven Mile Hole Trail, and South Rim Trail.  
+[ASSISTANT_SAID] Assistant began to provide information on scenic drives in the Grand Canyon area but did not complete the thought.

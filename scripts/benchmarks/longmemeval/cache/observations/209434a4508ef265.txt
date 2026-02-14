@@ -1,0 +1,6 @@
+[FACT] The user did not provide any personal information such as name, location, job, or family details.  
+[PREFERENCE] The user prefers concise responses without explanations or additional words.  
+[EVENT] The user initiated a language detection task.  
+[TEMPORAL] The session date is 2023/05/23 (Tue) at 10:26.  
+[ASSISTANT_SAID] The assistant identified the language of the user's sentence as Esperanto.  
+[ASSISTANT_CREATED] The assistant did not create any content beyond identifying the language.

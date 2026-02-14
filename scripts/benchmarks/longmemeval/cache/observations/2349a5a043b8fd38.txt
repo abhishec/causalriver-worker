@@ -1,0 +1,27 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/22 (Mon) 13:44  
+[FACT] The user’s company uses Jira.  
+[FACT] One of the user’s customers is using ServiceNow.  
+[EVENT] The user’s boss asked them to build software to keep tickets in sync between Jira and ServiceNow.  
+[ASSISTANT_SAID] To build the software, the user would need to integrate with both Jira and ServiceNow's APIs to create, read, update, and delete tickets in both systems.  
+[ASSISTANT_SAID] The software should use webhooks to listen for events in one system and trigger actions in the other.  
+[ASSISTANT_SAID] A webhook in ServiceNow could listen for new tickets being created and trigger the software to create a corresponding ticket in Jira.  
+[ASSISTANT_SAID] The software needs to track the relationship between tickets in Jira and ServiceNow to propagate changes correctly.  
+[ASSISTANT_SAID] Building this software requires experience with APIs, webhooks, and ticketing systems like Jira and ServiceNow.  
+[ASSISTANT_SAID] A possible architecture for the software includes:  
+[ASSISTANT_CREATED] 1. Integration with the Jira and ServiceNow APIs.  
+[ASSISTANT_CREATED] 2. Webhooks to listen for events and trigger actions.  
+[ASSISTANT_CREATED] 3. A database or persistent storage to track the relationship between tickets.  
+[ASSISTANT_CREATED] 4. A user interface for managing and configuring the sync.  
+[ASSISTANT_CREATED] 5. A background job to periodically check for updates and propagate changes.  
+[ASSISTANT_SAID] The main software modules could include:  
+[ASSISTANT_CREATED] 1. API integration module for handling API interactions.  
+[ASSISTANT_CREATED] 2. Webhooks module for managing webhook configurations.  
+[ASSISTANT_CREATED] 3. Ticket sync module for syncing tickets and tracking relationships.  
+[ASSISTANT_CREATED] 4. User interface module for managing sync configurations.  
+[ASSISTANT_CREATED] 5. Background job module for executing the sync process periodically.  
+[ASSISTANT_SAID] The background job module could be implemented using a cron job or scheduled task to run the ticket sync process at regular intervals.  
+[ASSISTANT_SAID] An alternative approach for the background job module could involve using a message queue to handle the execution of the ticket sync process.  
+[ASSISTANT_SAID] Webhooks are not always reliable, timely, or comprehensive, which is why a background job may still be necessary to ensure proper syncing between Jira and ServiceNow.  
+[ASSISTANT_SAID] A background job can provide additional reliability, timeliness, and coverage for propag

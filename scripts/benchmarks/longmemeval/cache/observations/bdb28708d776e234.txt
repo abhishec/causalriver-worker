@@ -1,0 +1,65 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/28 (Sun) 11:44  
+[USER] User is looking for people with experience in actuary and data (business intelligence and data science).  
+[ASSISTANT_SAID] Assistant provided a list of companies known for expertise in actuarial services, business intelligence, and data science.  
+[ASSISTANT_CREATED] List of companies:  
+1. McKinsey & Company  
+2. Deloitte  
+3. PricewaterhouseCoopers (PwC)  
+4. Ernst & Young (EY)  
+5. Accenture  
+6. KPMG  
+7. IBM  
+8. SAS Institute  
+9. Milliman  
+10. Willis Towers Watson  
+11. Mercer  
+12. Aon Hewitt  
+13. Oliver Wyman  
+14. Boston Consulting Group (BCG)  
+15. Capgemini  
+16. Cognizant  
+17. Tata Consultancy Services (TCS)  
+18. Infosys  
+19. Wipro  
+20. Fractal Analytics  
+[USER] User asked if all the mentioned companies are located in Israel.  
+[ASSISTANT_SAID] Assistant apologized for not specifying the companies based in Israel and provided a new list.  
+[ASSISTANT_CREATED] List of Israeli companies known for expertise in actuarial services, business intelligence, and data science:  
+1. Sapiens International Corporation  
+2. Earnix  
+3. Sisense  
+4. Panorama Software  
+5. SQream Technologies  
+6. Seebo  
+7. Verbit.ai  
+8. Iguazio  
+9. ThetaRay  
+10. Anodot  
+[USER] User requested a list of the Israeli companies without explanations about their activities.  
+[ASSISTANT_CREATED] List of Israeli companies without descriptions:  
+1. Sapiens International Corporation  
+2. Earnix  
+3. Sisense  
+4. Panorama Software  
+5. SQream Technologies  
+6. Seebo  
+7. Verbit.ai  
+8. Iguazio  
+9. ThetaRay  
+10. Anodot  
+[USER] User asked for advice on what words to use to say that they approached someone on LinkedIn.  
+[ASSISTANT_SAID] Assistant provided phrases to describe reaching out to someone on LinkedIn.  
+[ASSISTANT_CREATED] Phrases for describing reaching out on LinkedIn:  
+1. Connected with  
+2. Reached out to  
+3. Made contact with  
+4. Established a connection with  
+5. Introduced myself to  
+6. Sent a connection request to  
+7. Engaged with  
+8. Initiated a conversation with  
+[USER] User clarified that they wrote to someone on LinkedIn and that person hasn't answered yet.  
+[ASSISTANT_SAID] Assistant provided phrases to describe waiting for a response.  
+[ASSISTANT_CREATED] Phrases for describing waiting for a

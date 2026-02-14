@@ -1,0 +1,25 @@
+{
+  "answer_d03098f9": [
+    {
+      "fact": "User has an iPhone 13 Pro",
+      "type": "personal",
+      "entities": [
+        "iPhone 13 Pro"
+      ]
+    },
+    {
+      "fact": "User is looking for a new screen protector",
+      "type": "preference",
+      "entities": [
+        "screen protector"
+      ]
+    },
+    {
+      "fact": "User is looking for a phone wallet case",
+      "type": "preference",
+      "entities": [
+        "phone wallet case"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/24 (Wed) 22:24  
+[USER] User requested a command for installing Ubuntu using QEMU with specific configurations.  
+[ASSISTANT_SAID] Assistant provided a QEMU command for installing Ubuntu using a CD-ROM and VNC while forwarding ports 22 and 844:  
+```
+qemu-system-x86_64 -cdrom /path/to/ubuntu.iso -boot d -m 2048 -vnc :1 -redir tcp:2222::22 -redir tcp:844::844
+```  
+[ASSISTANT_SAID] The command explanation included details about the flags used:  
+- `-cdrom` specifies the ISO file for Ubuntu.  
+- `-boot d` tells QEMU to boot from the CD-ROM.  
+- `-m 2048` sets memory to 2048 MB.  
+- `-vnc :1` listens on display :1 for VNC.  
+- `-redir` forwards ports 22 and 844 from host to guest.  
+[ASSISTANT_SAID] User needs to connect to the VNC server using "vncviewer :1" to see the installation process.  
+[ASSISTANT_SAID] Assistant noted that the command is a starting point and may need adjustments.  
+[USER] User requested a modification of the command to work on an Ubuntu-based system.  
+[USER] User provided the original command:  
+```
+./qemu-system-x86_64 -net nic -net user,hostfwd=tcp::2222-:22,hostfwd=tcp::8443-:8443 -m 12240 -localtime -enable-kvm -cpu core2duo,+nx -smp 4 -usbdevice tablet -k en-us -cdrom image/ubuntu.iso -hda /dev/nvme0n1 -vnc :1 -boot d
+```  
+[ASSISTANT_SAID] Assistant provided a modified version of the command for Ubuntu-based systems:  
+```
+sudo qemu-system-x86_64 -net nic -net user,hostfwd=tcp::2222-:22,hostfwd=tcp::8443-:8443 -m 12240 -localtime -enable-kvm -cpu core2duo,+nx -smp 4 -usbdevice tablet -k en-us -cdrom image/ubuntu.iso -hda /dev/nvme0n1 -vnc :1 -boot d
+```  
+[ASSISTANT_SAID] The command explanation included details about the flags used:  
+- `-net nic` creates a virtual NIC.  
+- `-net user,hostfwd=tcp::2222-:22,hostfwd=tcp::844

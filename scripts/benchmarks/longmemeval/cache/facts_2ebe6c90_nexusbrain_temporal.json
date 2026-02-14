@@ -1,0 +1,66 @@
+{
+  "answer_c9d35c00_1": [
+    {
+      "fact": "User enjoys reading historical fiction",
+      "type": "preference",
+      "entities": [
+        "historical fiction"
+      ]
+    },
+    {
+      "fact": "User prefers stories with strong female leads",
+      "type": "preference",
+      "entities": [
+        "strong female leads"
+      ]
+    },
+    {
+      "fact": "User is currently reading 'The Nightingale' by Kristin Hannah",
+      "type": "event",
+      "entities": [
+        "The Nightingale",
+        "Kristin Hannah"
+      ]
+    },
+    {
+      "fact": "User is currently reading 'The Song of Achilles' and is halfway through it",
+      "type": "event",
+      "entities": [
+        "The Song of Achilles"
+      ]
+    },
+    {
+      "fact": "User enjoyed the feminist themes and dystopian setting of 'The Power' by Naomi Alderman",
+      "type": "opinion",
+      "entities": [
+        "The Power",
+        "Naomi Alderman"
+      ]
+    }
+  ],
+  "answer_c9d35c00_2": [
+    {
+      "fact": "User recently finished reading 'The Nightingale' by Kristin Hannah",
+      "type": "event",
+      "entities": [
+        "The Nightingale",
+        "Kristin Hannah"
+      ]
+    },
+    {
+      "fact": "User is looking for book recommendations similar to 'The Nightingale'",
+      "type": "preference",
+      "entities": [
+        "book recommendations",
+        "historical fiction"
+      ]
+    },
+    {
+      "fact": "User is intrigued by 'The Alice Network'",
+      "type": "preference",
+      "entities": [
+        "The Alice Network"
+      ]
+    }
+  ]
+}

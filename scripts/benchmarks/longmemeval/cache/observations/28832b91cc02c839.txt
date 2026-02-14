@@ -1,0 +1,21 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/01 (Mon) 16:51  
+[FACT] User inquired about adapting triangulation of points on the surface of a sphere to the surface of an ellipse.  
+[ASSISTANT_SAID] An ellipse can be parameterized using two angles, longitude (θ) and latitude (ϕ), and the semi-major (a) and semi-minor (b) axes.  
+[ASSISTANT_SAID] The parametric equations for an ellipse are given by:  
+[ASSISTANT_SAID] \( x = a \cos{\theta} \cos{\phi} \)  
+[ASSISTANT_SAID] \( y = b \cos{\theta} \sin{\phi} \)  
+[ASSISTANT_SAID] \( z = a \sin{\theta} \)  
+[ASSISTANT_SAID] A triangle on the surface of the ellipse has vertices \( A \), \( B \), and \( C \), and a point \( P \) on the surface of the ellipse inside the triangle can be represented using barycentric coordinates:  
+[ASSISTANT_SAID] \( P = \alpha A + \beta B + \gamma C \) where \( \alpha, \beta, \gamma \geq 0 \) and \( \alpha + \beta + \gamma = 1 \).  
+[ASSISTANT_SAID] For the ellipse, nonlinear interpolation is used instead of linear interpolation.  
+[ASSISTANT_SAID] The parametric coordinates of \( A \), \( B \), and \( C \) are \( (\theta_A, \phi_A) \), \( (\theta_B, \phi_B) \), and \( (\theta_C, \phi_C) \), respectively.  
+[ASSISTANT_SAID] The parametric coordinates of \( P \) can be found as follows:  
+[ASSISTANT_SAID] \( \theta_P = \alpha \theta_A + \beta \theta_B + \gamma \theta_C \)  
+[ASSISTANT_SAID] \( \phi_P = \alpha \phi_A + \beta \phi_B + \gamma \phi_C \)  
+[ASSISTANT_SAID] The parametric coordinates of \( P \) can be converted to Cartesian coordinates using the parametric equations of the ellipse:  
+[ASSISTANT_SAID] \( x_P = a \cos{\theta_P} \cos{\phi_P} \)  
+[ASSISTANT_SAID] \( y_P = b \cos{\theta_P} \sin{\phi_P} \)  
+[ASSISTANT_SAID] \( z_P = a \sin{\theta_P} \)  
+[ASSISTANT_SAID] This method allows

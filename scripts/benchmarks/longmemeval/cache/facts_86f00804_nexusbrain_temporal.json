@@ -1,0 +1,59 @@
+{
+  "answer_96b8c9ee": [
+    {
+      "fact": "User is trying to fit more reading time into their daily routine.",
+      "type": "preference",
+      "entities": [
+        "reading time",
+        "daily routine"
+      ]
+    },
+    {
+      "fact": "User is currently reading 'The Seven Husbands of Evelyn Hugo'.",
+      "type": "personal",
+      "entities": [
+        "The Seven Husbands of Evelyn Hugo"
+      ]
+    },
+    {
+      "fact": "User reads before bed every night.",
+      "type": "preference",
+      "entities": [
+        "reading",
+        "bedtime"
+      ]
+    },
+    {
+      "fact": "User averages 20-30 pages a night when reading.",
+      "type": "personal",
+      "entities": [
+        "20-30 pages",
+        "reading"
+      ]
+    },
+    {
+      "fact": "User has stayed up late reading 50-60 pages in one sitting.",
+      "type": "event",
+      "entities": [
+        "50-60 pages",
+        "stayed up late"
+      ]
+    },
+    {
+      "fact": "User is interested in book tracking apps or websites.",
+      "type": "preference",
+      "entities": [
+        "book tracking apps",
+        "websites"
+      ]
+    },
+    {
+      "fact": "User finds the idea of making reading a habit loop appealing.",
+      "type": "opinion",
+      "entities": [
+        "habit loop",
+        "reading"
+      ]
+    }
+  ]
+}

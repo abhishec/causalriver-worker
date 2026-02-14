@@ -1,0 +1,41 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/28 (Sun) 17:10
+- [PREFERENCE] User is thinking of taking an art class to improve their drawing skills.
+- [EVENT] User is looking for recommendations for online courses or local art schools that offer beginner's classes.
+- [ASSISTANT_SAID] Recommended online courses: 
+  1. Skillshare - offers a wide range of online courses and workshops on various art topics.
+  2. Udemy - has a vast collection of online courses on art and drawing.
+  3. Drawabox - a free online drawing course covering the basics of drawing.
+  4. New Masters Academy - offers online courses and tutorials on drawing, painting, and sculpture.
+  5. Ctrl+Paint - a free online drawing course covering the basics of digital painting and drawing.
+- [ASSISTANT_SAID] Suggested searching online for local art schools using keywords like "art schools near me," "drawing classes near me," and "beginner art classes [your city/state]."
+- [ASSISTANT_SAID] Recommended checking community centers, local colleges or universities, art supply stores, and online directories like Meetup.com or Facebook Groups for local art classes.
+- [ASSISTANT_SAID] Provided tips for choosing courses: read reviews, check instructor qualifications, focus on specific areas of improvement, consider class size and format, and ask questions or request trial classes.
+- [PREFERENCE] User has been inspired by an abstract art piece they recently bought from a local artist.
+- [EVENT] User is interested in exploring more about abstract art.
+- [ASSISTANT_SAID] Recommended famous abstract artists:
+  1. Wassily Kandinsky
+  2. Pablo Picasso
+  3. Mark Rothko
+  4. Jackson Pollock
+  5. Gerhard Richter
+  6. Helen Frankenthaler
+  7. Franz Kline
+  8. Clyfford Still
+- [ASSISTANT_SAID] Suggested abstract art styles to explore:
+  1. Abstract Expressionism
+  2. Color Field Painting
+  3. Action Painting
+  4. Lyrical Abstraction
+  5. Geometric Abstraction
+  6. Abstract Impressionism
+- [ASSISTANT_SAID] Provided online resources for abstract art:
+  1. The Museum of Modern Art (MoMA)
+  2. Tate Modern
+  3. Artsy
+  4. Abstract Art Subreddit
+- [ASSISTANT_SAID] Recommended books on abstract art:
+  1. "The Art of Abstract Painting" by James A. Schwalbach
+  2. "Abstract Art" by David Batchelor
+  3. "Theories and Documents of

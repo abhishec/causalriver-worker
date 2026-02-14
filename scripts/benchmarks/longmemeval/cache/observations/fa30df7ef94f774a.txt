@@ -1,0 +1,24 @@
+**Observation Log:**
+
+- [FACT] User is organizing their schedule for the next few weeks.
+- [EVENT] User is participating in a panel discussion on AI in robotics.
+- [TEMPORAL] The panel discussion is scheduled for April 17th to 19th, 2023.
+- [FACT] The Robotics Summit & Expo is likely the event user is referring to.
+- [FACT] The Robotics Summit & Expo is scheduled to take place at McCormick Place in Chicago, Illinois.
+- [ASSISTANT_SAID] The Robotics Summit & Expo brings together industry experts, researchers, and innovators to discuss the latest advancements in robotics and artificial intelligence.
+- [ASSISTANT_SAID] Assistant offered to help user plan their schedule for the weeks leading up to the event, including tasks, travel arrangements, or accommodations.
+- [EVENT] User needs to follow up on leads from the Tech Expo last month.
+- [ASSISTANT_SAID] Assistant provided a follow-up email template for user to send to the top 20 leads from the Tech Expo.
+- [ASSISTANT_CREATED] The follow-up email template includes sections for personalization, a clear call-to-action, and a summary of the conversation with each lead.
+- [ASSISTANT_SAID] Assistant suggested networking opportunities and side events around McCormick Place during the Robotics Summit.
+- [ASSISTANT_SAID] Suggested networking opportunities include the official networking reception, McCormick Place's networking lounges, industry-specific meetups, and the Women in Robotics Breakfast.
+- [ASSISTANT_SAID] Suggested side events include a robotics startup competition, robotics tours, workshops, and exploring the exhibition floor.
+- [ASSISTANT_SAID] Suggested off-site events include robotics-themed bars and restaurants and a stroll along the Lake Shore Trail.
+- [ASSISTANT_SAID] Provided tips for planning ahead, being prepared, and following up after the event.
+- [EVENT] User is looking for resources or guides to optimize booth design and lead generation strategy for future events.
+- [ASSISTANT_SAID] Assistant provided a list of resources for booth design, including Trade Show News Network, Exhibitor Online, and Event Marketer.
+- [ASSISTANT_SAID] Assistant provided resources for lead generation, including MarketingProfs, HubSpot, and Trade Show Executive.
+- [ASSISTANT_SAID] Suggested general event marketing resources from Eventbrite, PCMA, and Social Media Examiner.
+- [ASSISTANT_SAID] Recommended tools and templates for booth design and lead generation, including Canva, HubSpot templates, and event marketing checklists.
+- [EVENT] User realized they never got a chance to explore the Las Vegas Convention Center during the Tech Expo last month.
+- [ASSISTANT_SAID] Assistant provided an overview of the Las Vegas Convention Center layout, including the North Hall, Central Hall, South

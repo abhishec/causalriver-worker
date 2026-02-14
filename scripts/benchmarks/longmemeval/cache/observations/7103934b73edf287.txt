@@ -1,0 +1,18 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/26 (Fri) 18:04  
+[ASSISTANT_SAID] The assistant provided a modified code snippet for a chatbot that uses a custom-trained BERT model and connects to a MySQL database.  
+[ASSISTANT_CREATED] The assistant created a Python code that includes functions to get answers from a BERT model, add question-answer pairs to memory, add products to a user's cart, calculate the total price of the cart, and list products by tags.  
+[ASSISTANT_SAID] The code includes a function `get_bert_answer(question)` that encodes a question, passes it to the BERT model, and retrieves the answer.  
+[ASSISTANT_SAID] The code includes a function `add_to_memory(question, answer)` that inserts a question-answer pair into the database.  
+[ASSISTANT_SAID] The code includes a function `add_to_cart(product, price)` that adds a product and its price to the user's cart in the database.  
+[ASSISTANT_SAID] The code includes a function `get_cart_total()` that calculates the total price of the user's cart by summing the prices of all products in it.  
+[ASSISTANT_SAID] The code includes a function `list_products_by_tag(tag)` that retrieves products from the database based on a specified tag.  
+[ASSISTANT_SAID] The assistant mentioned that the conversation loop starts with getting the user's question and checking if it exists in the chatbot's memory.  
+[ASSISTANT_SAID] If the question is found in memory, the assistant retrieves and prints the answer.  
+[ASSISTANT_SAID] If the question is not found in memory, the assistant checks for specific tags (e.g., 'fever', 'cold', 'headache') to list relevant products.  
+[ASSISTANT_SAID] If no products are found for the specified tag, the assistant responds with "Sorry, we don't have any products for that tag."  
+[ASSISTANT_SAID] If products are found, the assistant lists them with their names and prices in the format "- [product name] (₹[price])".  
+[USER] The user requested to continue the code from a specific comment in the assistant's previous response.  
+[USER] The user asked to continue the code from the point where the assistant checks if the question is in the chatbot's memory.  
+[ASSISTANT_SAID] The assistant reiterated the complete code again, including all previously mentioned functions and logic.

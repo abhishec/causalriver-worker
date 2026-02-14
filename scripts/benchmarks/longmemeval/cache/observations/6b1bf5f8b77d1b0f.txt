@@ -1,0 +1,19 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/29 (Mon) 07:29  
+[FACT] User is working on a thesis project.  
+[EVENT] User submitted their thesis proposal to their department today.  
+[PREFERENCE] User is using a citation tool but is unsure if they are using it correctly.  
+[ASSISTANT_SAID] Assistant congratulated the user on submitting their thesis proposal, stating it is a huge milestone.  
+[ASSISTANT_SAID] Assistant offered to help with formatting references in APA style and provided a step-by-step process.  
+[ASSISTANT_SAID] Step 1: Choose a citation tool, with options including Mendeley, Zotero, EndNote, Citavi, and RefWorks.  
+[ASSISTANT_SAID] Step 2: Understand the basics of APA style, including author-date citations and organizing references alphabetically by author's last name.  
+[ASSISTANT_SAID] Step 3: Add references to the citation tool, detailing the information to enter: author's last name, first initial, publication year, title of the source, publication title, volume and issue numbers, page numbers, and DOI or URL.  
+[ASSISTANT_SAID] Step 4: Format references according to APA guidelines for different types of sources.  
+[ASSISTANT_SAID] Provided an example of an APA-style reference for a journal article: Smith, J. (2022). The impact of climate change on mental health. Journal of Environmental Psychology, 76(3), 345-356. doi: 10.1016/j.jenvp.2022.01.003  
+[ASSISTANT_SAID] Step 5: Cite sources in the thesis using the citation tool to generate in-text citations and a reference list.  
+[ASSISTANT_SAID] Step 6: Regularly review references for accuracy and completeness, using error-checking features or consulting the APA Publication Manual (7th ed.).  
+[FACT] User is using Mendeley as their citation tool.  
+[ASSISTANT_SAID] Assistant provided a step-by-step example of how to enter a journal article into Mendeley, including fields to fill in: title, authors, journal, volume, issue, pages, year, DOI, and ISSN.  
+[ASSISTANT_SAID] Example of filled-in fields for a journal article: Title: The Impact of Climate Change on Mental Health; Authors: Smith, J., Johnson, K.; Journal: Journal of Environmental Psychology; Volume: 76; Issue: 3; Pages: 345-356; Year: 2022; DOI: 10.1016/j.jenvp.2022.01.003; ISSN: 0272-4944.  
+[ASSISTANT_SAID]

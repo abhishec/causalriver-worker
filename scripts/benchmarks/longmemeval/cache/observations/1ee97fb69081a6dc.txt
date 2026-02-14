@@ -1,0 +1,19 @@
+**Observation Log:**
+
+[FACT] User is planning to brew a fresh pot of coffee in the morning.  
+[FACT] User has a French press ratio down to a science: 1 tablespoon of coffee for every 5 ounces of water.  
+[FACT] User is thinking of trying out a new tea blend this weekend.  
+[PREFERENCE] User is looking for a relaxing tea that's similar to chamomile.  
+[EVENT] User is planning to try out a new tea subscription service.  
+[RELATIONSHIP] User has a sister who introduced them to a new rose tea.  
+[ASSISTANT_SAID] Suggested tea options similar to chamomile: Lavender tea, Tulsi tea (Holy Basil), Rooibos tea, Passionflower tea, Valerian root tea.  
+[ASSISTANT_SAID] Recommended proper storage methods for tea leaves: Airtight containers, dark containers, cool, dry place, avoid humid environments, avoid strong-smelling foods, keep away from heat sources, use a tea tin or canister with a tight-fitting lid, store in small quantities, consider a tea storage box, and check on tea regularly.  
+[ASSISTANT_SAID] Suggested tea subscription services: Adagio Teas, Teavana, The Tea Spot, Harney & Sons, Mighty Leaf Tea, The Republic of Tea.  
+[ASSISTANT_SAID] Provided details on promotions for Adagio Teas: 10% off first order with code WELCOME10, free shipping on orders over $49, 20% off first month's subscription with code TEA20, and refer a friend for 20% off next order.  
+[ASSISTANT_SAID] Provided details on promotions for The Tea Spot: 15% off first order with code TEA15, free shipping on orders over $50, 15% off first month's subscription with code TEA15, and a free tea sample with first order when signing up for the newsletter.  
+[ASSISTANT_SAID] Suggested cleaning steps for a French press: Disassemble, rinse with hot water, soak in hot soapy water, scrub with a soft-bristled brush, rinse thoroughly, dry, and optionally sanitize with bleach solution.  
+[PREFERENCE] User is considering trying out a new rose tea.  
+[PREFERENCE] User thinks rose tea would pair well with sweet treats, like shortbread cookies.  
+[ASSISTANT_SAID] Suggested that rose tea and shortbread cookies would make a lovely pair due to floral harmony, texture contrast, and balancing sweetness.  
+[ASSISTANT_SAID] Suggested other sweet treats that pair well with rose tea: fresh fruit (like strawberries or grapes), cakes (like vanilla or lemon), and chocolate truffles (like rose-petal infused or white chocolate).  
+[TEMPORAL] Session Date: 2023/06/30 (Fri) 13:14.

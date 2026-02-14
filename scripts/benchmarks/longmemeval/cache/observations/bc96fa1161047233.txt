@@ -1,0 +1,14 @@
+**Observation Log:**
+
+- [FACT] User's name is Lizy Thomson.
+- [FACT] User's family is recovering from the flu.
+- [FACT] User is located in Dubai.
+- [FACT] User mentioned that illnesses can keep going around in families.
+- [FACT] User has children who are passing the illness back and forth.
+- [FACT] User mentioned that Dubai has been experiencing a nasty viral that has evolved into a superbug.
+- [PREFERENCE] User expressed excitement about what their company, Carry, has to offer, particularly the analytics and AI element, as well as the dashboards.
+- [EVENT] A sales call took place involving Lizy Thomson and Stephen Donohoe.
+- [RELATIONSHIP] Stephen Donohoe is a participant in the sales call.
+- [RELATIONSHIP] Curt Weaver is mentioned as one of the solution engineers on the call.
+- [ASSISTANT_SAID] Assistant summarized the small talk at the beginning of the sales call, including discussions about health and weather changes.
+- [ASSISTANT_SAID] Assistant noted that Stephen Donohoe suggested diving into some details around the consumption piece while keeping the conversation fluid.

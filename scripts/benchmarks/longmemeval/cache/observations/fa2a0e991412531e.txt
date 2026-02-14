@@ -1,0 +1,14 @@
+**Observation Log:**
+
+- [FACT] The user is interested in trust types in Active Directory.
+- [ASSISTANT_SAID] Active Directory (AD) is a directory service developed by Microsoft.
+- [ASSISTANT_SAID] Active Directory uses a hierarchical structure to store information about objects on a network, such as users, computers, and groups.
+- [ASSISTANT_SAID] Trusts are an important part of AD that allow different domains and forests to share resources and authenticate users.
+- [ASSISTANT_SAID] There are several types of trusts in AD, including:
+- [ASSISTANT_SAID] 1. Parent-child trusts: These are automatic two-way trusts created between parent and child domains in a domain tree, allowing users to access resources in both domains without re-authentication.
+- [ASSISTANT_SAID] 2. Shortcut trusts: These are two-way trusts created between non-parent domains in the same forest to optimize authentication performance, allowing quicker authentication when accessing resources in the other domain.
+- [ASSISTANT_SAID] 3. Forest trusts: These are two-way trusts created between different forests, allowing users in one forest to access resources in another forest, and can be transitive or non-transitive.
+- [ASSISTANT_SAID] 4. External trusts: These are one-way or two-way trusts created between an AD domain and a non-AD domain, allowing users in the non-AD domain to access resources in the AD domain.
+- [ASSISTANT_SAID] 5. Realm trusts: These are one-way or two-way trusts created between AD domains and non-Microsoft Kerberos realms, allowing users in the Kerberos realm to access resources in the AD domain.
+- [ASSISTANT_SAID] Each type of trust has its own specific purpose and characteristics.
+- [ASSISTANT_SAID] Trusts can be configured and managed using the Active Directory Domains and Trusts console.

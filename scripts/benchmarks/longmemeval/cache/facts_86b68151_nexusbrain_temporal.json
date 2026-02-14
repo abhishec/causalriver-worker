@@ -1,0 +1,59 @@
+{
+  "answer_dc11c1eb": [
+    {
+      "fact": "User is trying to get more organized.",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User is looking for apps to declutter and organize their closet.",
+      "type": "preference",
+      "entities": [
+        "apps",
+        "closet"
+      ]
+    },
+    {
+      "fact": "User has been meaning to organize their closet for ages.",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User organized their closet last weekend.",
+      "type": "event",
+      "entities": [
+        "closet",
+        "last weekend"
+      ]
+    },
+    {
+      "fact": "User got rid of some old books and donated them to the local library.",
+      "type": "event",
+      "entities": [
+        "old books",
+        "local library"
+      ]
+    },
+    {
+      "fact": "User feels great to declutter.",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User is looking for apps to help keep track of their books.",
+      "type": "preference",
+      "entities": [
+        "apps",
+        "books"
+      ]
+    },
+    {
+      "fact": "User is considering trying out the Closet or Stylebook app.",
+      "type": "preference",
+      "entities": [
+        "Closet",
+        "Stylebook"
+      ]
+    }
+  ]
+}

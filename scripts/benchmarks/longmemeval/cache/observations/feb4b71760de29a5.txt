@@ -1,0 +1,23 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/30 (Tue) 07:23
+- [EVENT] User is planning a trip to a nearby state park.
+- [EVENT] User participated in the global eBird count, submitting their checklist of birds seen in their area today.
+- [FACT] User is interested in bird species they might see at the state park.
+- [FACT] The park is called Raven's Peak State Park.
+- [FACT] Raven's Peak State Park is located in Pennsylvania.
+- [TEMPORAL] User is planning to visit the park in early April.
+- [ASSISTANT_SAID] Assistant congratulated the user on participating in the global eBird count and described it as a fantastic way to contribute to citizen science and help conservation efforts.
+- [ASSISTANT_SAID] Assistant provided a list of bird species the user might encounter at Raven's Peak State Park, including:
+  - **Wintering birds:** American Goldfinch, Dark-eyed Junco, White-throated Sparrow, American Tree Sparrow, Yellow-rumped Warbler.
+  - **Early spring migrants:** Ruby-crowned Kinglet, Pine Warbler, Yellow Warbler, Palm Warbler, Northern Parula, Chipping Sparrow, Broad-winged Hawk.
+  - **Year-round residents:** Black-capped Chickadee, Tufted Titmouse, White-breasted Nuthatch, Downy Woodpecker, Hairy Woodpecker, Red-bellied Woodpecker, Blue Jay, American Crow, Common Raven.
+  - **Other possibilities:** Turkey Vulture, Red-shouldered Hawk, Eastern Phoebe, Hermit Thrush, Brown Creeper.
+- [ASSISTANT_SAID] Assistant mentioned that the exact species may vary depending on the specific habitats explored within the park.
+- [ASSISTANT_SAID] Assistant provided tips for the user's visit, including bringing binoculars, dressing in layers, exploring trails, and submitting a checklist to eBird after the visit.
+- [EVENT] User expressed interest in spotting waterbirds and asked about lakes or wetlands in the park.
+- [ASSISTANT_SAID] Assistant identified several water features in Raven's Peak State Park, including:
+  - **Raven's Peak Lake**: Species to look for include Canada Geese, Wood Ducks, Mallards, American Coot, Great Blue Heron, Green Heron, Osprey.
+  - **Wetlands along the Lake Trail**: Species include American Bittern, Sora, Virginia Rail, Marsh Wren, Common Grackle, Red-winged Blackbird.
+  - **Raven's Peak Creek**: Species include Belted Kingfisher, Great Blue Heron, Green Heron, Spotted Sandpiper, Killdeer.
+  - **Ponds and Vernal Pools**: Species include Wood Frogs,

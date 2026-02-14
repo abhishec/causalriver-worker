@@ -1,0 +1,19 @@
+{
+  "answer_f38f679b": [
+    {
+      "fact": "User is looking to grow their social media presence for their freelance writing business",
+      "type": "opinion",
+      "entities": [
+        "social media presence",
+        "freelance writing business"
+      ]
+    },
+    {
+      "fact": "User is considering exploring other platforms like Instagram",
+      "type": "preference",
+      "entities": [
+        "Instagram"
+      ]
+    }
+  ]
+}

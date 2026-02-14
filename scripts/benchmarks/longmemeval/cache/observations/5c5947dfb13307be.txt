@@ -1,0 +1,20 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/15 (Mon) 20:49  
+[ASSISTANT_SAID] To find the flag within an Alternate Data Stream (ADS) in a file located in C:\Users\Offsec\Desktop\streamtest, you can use the command: more < C:\Users\Offsec\Desktop\streamtest:hiddenflag.txt  
+[ASSISTANT_SAID] This will display the contents of the ADS named "hiddenflag.txt" within the file "streamtest".  
+[ASSISTANT_SAID] You can also use a tool such as streams.exe (part of the Sysinternals Suite) to list all the Alternate Data Streams present in the folder or drive.  
+[ASSISTANT_SAID] Once you have the name of the stream you can cat it using the command: type C:\Users\Offsec\Desktop\streamtest:hiddenflag.txt  
+[ASSISTANT_SAID] This will display the contents of the stream named "hiddenflag.txt" within the file "streamtest".  
+[USER] There is a non-standard drive on the target machine. Find it, and then locate the flag.  
+[ASSISTANT_SAID] To find the non-standard drive on the target machine, you can use the command "wmic logicaldisk get name, description" in the command prompt.  
+[ASSISTANT_SAID] This will display a list of all the drives on the machine, including the non-standard drive.  
+[ASSISTANT_SAID] Once you have located the non-standard drive, you can navigate to it and search for the flag.  
+[ASSISTANT_SAID] If you know the name of the file or directory that the flag is in, you can use the "dir" command to search for it.  
+[ASSISTANT_SAID] If you are not sure where the flag is located, you can use the "dir /s" command to search the entire drive for the flag.  
+[USER] Which drive on the target machine contains the CD-ROM?  
+[ASSISTANT_SAID] The drive letter for the CD-ROM on a Windows machine is typically D: or E:.  
+[ASSISTANT_SAID] However, it can vary depending on the configuration of the computer and the number of other drives present.  
+[ASSISTANT_SAID] To check which drive is the CD-ROM on a Windows machine, you can use the command "wmic logicaldisk get name, drivetype" in the command prompt.  
+[ASSISTANT_SAID] This command will list all the drives on the machine and their drive types. Drive type 5 corresponds to CD-ROM.  
+[USER] how to find What is the total size on disk in bytes of C:\Users\Offsec\Desktop and

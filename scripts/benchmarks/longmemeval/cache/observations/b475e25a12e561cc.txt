@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [FACT] User's legal name is Samuel Gordalina.
+- [PREFERENCE] User prefers to be called Sam.
+- [PREFERENCE] User likes issuing invoices as a type of tax work.
+- [TEMPORAL] User prefers to work from 8am to 5pm on weekdays.
+- [PREFERENCE] User's desired hourly rate is at least $100.
+- [ASSISTANT_SAID] Assistant welcomed the user and expressed excitement about onboarding them as a tax professional for gig work.
+- [ASSISTANT_SAID] Assistant mentioned that the company offers a variety of tax services, including individual tax preparation, business tax preparation, and tax consulting.
+- [ASSISTANT_CREATED] Assistant recapped the collected information in JSON format:
+  ```bash
+  {
+      "Legal name": "Samuel Gordalina",
+      "Preferred name": "Sam",
+      "Desired tax work": "Issuing invoices",
+      "Desired work hours": "8am-5pm on weekdays",
+      "Desired hourly rate": "$100"
+  }
+  ```
+- [ASSISTANT_SAID] Assistant offered further assistance and encouraged the user to reach out with any questions or concerns.
+- [FACT] Session date is 2023/08/11 (Fri) at 16:19.

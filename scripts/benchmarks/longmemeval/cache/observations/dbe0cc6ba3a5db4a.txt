@@ -1,0 +1,18 @@
+**Observation Log:**
+
+[FACT] User is a senior account manager.  
+[FACT] User's supervisor was impressed with their work on the Johnson account during their performance review a few months ago.  
+[CHANGE] User recently received a promotion to senior account manager.  
+[TEMPORAL] Session date is 2023/05/23 (Tue) at 11:59.  
+[PREFERENCE] User thinks Trello could be a good fit for their team.  
+[ASSISTANT_SAID] Assistant congratulated the user on their promotion to senior account manager.  
+[ASSISTANT_SAID] Assistant suggested several project management tools: Trello, Asana, Basecamp, Microsoft Planner, and Smartsheet.  
+[ASSISTANT_SAID] Assistant outlined key features needed for a project management tool: task management, deadline tracking, team collaboration, progress tracking, and reporting.  
+[ASSISTANT_CREATED] Assistant provided a step-by-step guide to setting up a Trello board, including creating a new board, creating lists (To-Do, In Progress, Done, Waiting on Others, Backlog), and creating cards with titles, descriptions, assignments, due dates, and attachments.  
+[ASSISTANT_SAID] Assistant provided an example of what the Trello board might look like with tasks listed under each category.  
+[ASSISTANT_SAID] Assistant explained how to enable the Calendar Power-Up in Trello and configure the calendar view.  
+[ASSISTANT_SAID] Assistant provided tips for using the calendar view, including how to add tasks to the calendar and customize calendar settings.  
+[ASSISTANT_SAID] Assistant explained how to use labels in Trello to categorize tasks and how to add priorities to tasks.  
+[ASSISTANT_SAID] Assistant provided tips for combining labels and priorities to enhance task organization.  
+[ASSISTANT_SAID] Assistant introduced Butler as an automation tool in Trello and explained its capabilities, including card creation, updates, list management, notifications, and custom actions.  
+[ASSISTANT_SAID] Assistant provided instructions on how to enable Butler on the Trello board.

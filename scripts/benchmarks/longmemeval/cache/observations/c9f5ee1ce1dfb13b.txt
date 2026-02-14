@@ -1,0 +1,26 @@
+**Observation Log:**
+
+[FACT] Session Date: 2023/05/20 (Sat) 04:04  
+[FACT] User's task: Find an apple in the kitchen.  
+[FACT] Initial workspace: None for the initial time.  
+[OBSERVATION] User observation: I see the door of the kitchen in front of me.  
+[ASSISTANT_SAID] Assistant action: Walk towards the kitchen door and enter the kitchen to start searching for the apple.  
+[FACT] User's task: Find an apple in the kitchen.  
+[FACT] Workspace explanation: The workspace tag refers to global workspace theory which selects some information into itself and then broadcasts the information.  
+[OBSERVATION] User observation: I see the door of the kitchen in front of me.  
+[ASSISTANT_SAID] Assistant action: Walk towards the kitchen door and enter the kitchen to start searching for the apple.  
+[FACT] Workspace: Objective: Find an apple in the kitchen; Location: The kitchen; Task progress: Entered the kitchen.  
+[FACT] Unimportant information filtered out: The location of the observer (in front of the kitchen door).  
+[USER_SAID] User request: So what may be in workspace, in one sentence.  
+[ASSISTANT_SAID] Assistant response: The workspace contains the objective (finding an apple in the kitchen), location (the kitchen), and task progress (entered the kitchen).  
+[FACT] User's task: Find an apple in the kitchen.  
+[FACT] Workspace explanation: The workspace tag refers to global workspace theory which selects some information into itself and then broadcasts the information.  
+[OBSERVATION] User observation: I see a refrigerator, an oven, two tables, three chairs, a wash stand, and a wide variety of cutlery.  
+[ASSISTANT_SAID] Assistant action: Check the refrigerator for any apples.  
+[FACT] User's task: Find an apple in the kitchen.  
+[FACT] Workspace explanation: The workspace tag refers to global workspace theory which selects some information into itself and then broadcasts the information.  
+[OBSERVATION] User observation: I see a refrigerator, an oven, two tables, three chairs, a wash stand, and a wide variety of cutlery.  
+[ASSISTANT_SAID] Assistant action: Check the refrigerator for any apples.  
+[FACT] Old Workspace: I entered the kitchen.  
+[FACT] New Workspace: Important information to be stored in the workspace: Objective: Find an apple in the kitchen; Location: The kitchen; Task progress: Checked the refrigerator for apples.  
+[FACT] Unimportant information filtered out: Presence of other kitchen appliances and furniture (oven, tables, chairs, wash stand, cutlery) that are not relevant to finding an apple.

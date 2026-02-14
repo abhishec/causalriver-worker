@@ -1,0 +1,28 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/30 (Tue) 02:49
+- [FACT] User wants the assistant to act as a federal research grant writer.
+- [PREFERENCE] User will provide a description of the task and desired deliverables.
+- [ASSISTANT_SAID] User requested the assistant to generate at least 5 paragraphs for each chapter heading provided.
+- [FACT] User provided a detailed description of the task related to autonomous and partially-autonomous systems.
+- [FACT] User mentioned applications such as self-driving automobiles, air taxis, and unmanned aerial vehicles (UAVs).
+- [FACT] User noted that future NASA deep space missions will face significant communication barriers.
+- [FACT] User stated that crews will need to manage, plan, and execute missions autonomously due to communication delays.
+- [FACT] User indicated that operational functionality currently performed by human-centric control stations should be migrated to the vehicle and crew.
+- [FACT] User highlighted the need for assistive, autonomous, and semi-autonomous agents to reduce crew burden.
+- [ASSISTANT_SAID] User described cognitive agents as capable of providing meaningful help for tasks performed by humans.
+- [FACT] User listed operational capabilities required by deep space missions, including spacecraft health, crew health, maintenance, and food production.
+- [ASSISTANT_SAID] User emphasized that cognitive agents could assist in training, inspections, and mission planning.
+- [FACT] User mentioned that autonomous agents could increase mission resilience to hazardous events.
+- [FACT] User pointed out challenges in implementing cognitive agents, including the need for autonomy under crew directives.
+- [FACT] User stated that agents will need to share resources and hardware while managing differing goals and instructions.
+- [ASSISTANT_SAID] User noted that agents should report changes in operations and allow for manual intervention when needed.
+- [FACT] User mentioned the concept of "graceful extensibility" for cognitive agents during long-duration spaceflights.
+- [FACT] User indicated that Earth-based vehicles will also need to respond to similar events in variable environments.
+- [ASSISTANT_SAID] User described the need for cognitive agents to learn and reconfigure themselves in collaboration with the crew.
+- [FACT] User highlighted the importance of transparency, predictability, and verifiability in learned and autonomous behavior.
+- [ASSISTANT_SAID] User solicited intelligent autonomous agent cognitive architectures that are open, modular, and capable of learning.
+- [FACT] User stated that the architecture should enable small businesses to develop learning/knowledge representation and necessary software architectures.
+- [FACT] User mentioned that cognitive agents should be certified for use on deep space missions.
+- [ASSISTANT_SAID] User described the potential for cognitive agents to advise the crew and mission control through various modes of interaction.
+- [FACT] User emphasized the

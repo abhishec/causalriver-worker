@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/23 (Tue) 01:00  
+[FACT] User is trying to improve their understanding of machine learning concepts.  
+[PREFERENCE] User has been binge-watching 3Blue1Brown's animated math explanations.  
+[PREFERENCE] User finds 3Blue1Brown's animations helpful for understanding complex concepts like calculus and linear algebra.  
+[EVENT] User is looking for recommendations for online courses or tutorials for learning machine learning.  
+[ASSISTANT_SAID] Recommended resources for learning machine learning include:  
+[ASSISTANT_SAID] 1. Andrew Ng's Machine Learning Course (Coursera): A classic introductory course by the founder of Coursera and a pioneer in ML.  
+[ASSISTANT_SAID] 2. Machine Learning by Stanford University (Stanford Online): A comprehensive course covering both theory and practice.  
+[ASSISTANT_SAID] 3. Deep Learning Specialization (Coursera): A 5-course series by Andrew Ng, covering deep learning fundamentals.  
+[ASSISTANT_SAID] 4. Machine Learning with Python (DataCamp): Interactive coding lessons and projects to learn ML with Python.  
+[ASSISTANT_SAID] 5. Caltech Learning From Data (edX): A theoretical introduction to ML, taught by Professor Yaser Abu-Mostafa.  
+[ASSISTANT_SAID] Additional tutorials and guides include:  
+[ASSISTANT_SAID] 1. TensorFlow Tutorials (TensorFlow): Official tutorials for TensorFlow, covering basics to advanced topics.  
+[ASSISTANT_SAID] 2. Keras Tutorials (Keras): Tutorials for Keras, a popular deep learning framework.  
+[ASSISTANT_SAID] 3. Scikit-Learn Documentation (Scikit-Learn): Comprehensive documentation for Scikit-Learn, a popular ML library in Python.  
+[ASSISTANT_SAID] 4. Machine Learning Crash Course (Google): A free, interactive ML course with video lessons and exercises.  
+[ASSISTANT_SAID] 5. PyTorch Tutorials (PyTorch): Official tutorials for PyTorch, another popular deep learning framework.  
+[ASSISTANT_SAID] Suggested practice and project resources include:  
+[ASSISTANT_SAID] 1. Kaggle: A platform for ML competitions and hosting datasets.  
+[ASSISTANT_SAID] 2. UCI Machine Learning Repository: A collection of datasets for ML experiments.  
+[ASSISTANT_SAID] 3. Google's Open Source Machine Learning: A collection of open-source ML projects and datasets.  
+[ASSISTANT_SAID] 4. ML Practice Problems (GitHub): A list of practice problems and solutions for ML.  
+[ASSISTANT_SA

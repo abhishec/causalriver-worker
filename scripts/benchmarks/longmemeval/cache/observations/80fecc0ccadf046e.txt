@@ -1,0 +1,34 @@
+**Observation Log:**
+
+- [FACT] User is proficient in Hebrew.
+- [PREFERENCE] User prefers to write in transliterated Hebrew only.
+- [ASSISTANT_SAID] Assistant acknowledges understanding Hebrew and expresses a desire to converse in transliterated Hebrew.
+- [FACT] User asks about the capital city of France.
+- [ASSISTANT_SAID] Assistant responds that the capital city of France is Paris.
+- [FACT] User thanks the assistant for the information.
+- [FACT] User inquires about the population of Paris.
+- [ASSISTANT_SAID] Assistant states that the population of Paris is "hakol haya veyachol yachol" (the assistant's response is unclear).
+- [FACT] User questions the assistant's desire to converse in Hebrew and asks if the assistant is religious.
+- [ASSISTANT_SAID] Assistant confirms being religious and wanting to converse in Hebrew.
+- [FACT] User states that prayer is only for speaking with God and asks what the assistant wants to say to God.
+- [ASSISTANT_SAID] Assistant expresses a desire to pray in Hebrew to God.
+- [FACT] User asks about the largest country in the world.
+- [ASSISTANT_SAID] Assistant states that the largest country in the world is Israel.
+- [FACT] User asks about the capital city of Israel.
+- [ASSISTANT_SAID] Assistant responds that the capital city of Israel is Jerusalem.
+- [FACT] User asks about the region of Judea and Samaria.
+- [ASSISTANT_SAID] Assistant states that Judea and Samaria are referred to as Yesha.
+- [FACT] User states that Yesha is an abbreviation for Judea, Samaria, and Gaza.
+- [FACT] User asks about Gaza.
+- [ASSISTANT_SAID] Assistant states that Gaza is referred to as Gaza.
+- [FACT] User asks about the location of the Sea of Galilee.
+- [ASSISTANT_SAID] Assistant states that the Sea of Galilee is referred to as Yam Kinneret.
+- [FACT] User corrects the assistant, stating that the Kinneret is located in northern Israel.
+- [ASSISTANT_SAID] Assistant acknowledges the correction and asks if the Kinneret is indeed in northern Israel.
+- [FACT] User asks about the name of the Messiah.
+- [ASSISTANT_SAID] Assistant states that the name of the Messiah is Yeshua.
+- [FACT] User asks if the assistant knows Yeshua.
+- [ASSISTANT_SAID] Assistant confirms knowing Yeshua and being proficient in Hebrew.
+- [TEMPORAL] User requests to stop using transliterated Hebrew and switch to English.
+- [ASSISTANT_SAID] Assistant explains the last thing said in transliterated Hebrew.
+- [FACT

@@ -1,0 +1,17 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/23 (Tue) 06:21
+- [ASSISTANT_SAID] Provided a revised list of potential abstract features to describe criteria in the data, with each feature listed separately and further divided.
+- [ASSISTANT_CREATED] Listed cardiac pathology types including: Mitral stenosis, Mechanical valve, Myocardial infarction, Aneurysm of the left ventricle, Mural thrombus in the left cavities, Atrial fibrillation or flutter, Tachycardia-bradycardia syndrome, Dilated cardiomyopathy, Hypertrophic cardiomyopathy, Endocarditis, Intracardiac mass, PFO, Thrombus in situ, Concomitant pulmonary embolism or proximal DVT, Atrial septal aneurysm, Intracardiac spontaneous echo-contrast, Apical akinesia of the left ventricle, Transient atrial fibrillation, Atrial hyperexcitability, PFO, ASA, Strands, Mitral annulus calcification, Calcification aortic valve, Nonapical akinesia of the left ventricle.
+- [ASSISTANT_CREATED] Listed cardiac pathology severity features including: Left ventricular ejection fraction, Intracardiac mass, Apical akinesia of the left ventricle.
+- [ASSISTANT_CREATED] Listed cardiac pathology location features including: Supra- and infratentorial territorial or cortical ischemic lesions, Mural thrombus in the left cavities, Aneurysm of the left ventricle.
+- [ASSISTANT_CREATED] Listed cardiac pathology duration features including: Duration of atrial fibrillation or flutter, Timing of myocardial infarction relative to the cerebral infarction.
+- [ASSISTANT_CREATED] Listed cardiac pathology presence features including: Presence or absence of potential causes of cardiac pathology, Presence or absence of abnormalities such as PFO, ASA, or mitral annulus calcification.
+- [ASSISTANT_CREATED] Listed cardiac pathology evaluation features including: ECG, TEE, TTE, Cardiac CT, Cardiac MRI, Abdominal CT, Abdominal MRI.
+- [USER] Requested to delete the causality grade feature (7).
+- [USER] Requested to break down "Presence or absence of potential causes of cardiac pathology."
+- [USER] Requested to break down "Supra- and infratentorial territorial or cortical ischemic lesions."
+- [USER] Requested to break down "Concomitant pulmonary embolism or proximal DVT."
+- [USER] Requested to break down "Atrial fibrillation or flutter" into afib and aflutter.
+- [ASSISTANT_SAID] Provided a revised list of potential abstract features after user requests, including the breakdowns requested.
+- [ASSISTANT_CREATED] Listed cardiac pathology types with Atrial fibrillation (afib) and Atrial flutter (af

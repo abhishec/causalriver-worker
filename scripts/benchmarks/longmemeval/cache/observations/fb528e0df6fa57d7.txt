@@ -1,0 +1,12 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/24 (Wed) 16:23  
+[USER] User mentioned that selecting compatible materials is important.  
+[USER] User expressed concern about titanium being a questionable choice due to flammability concerns in an oxygen environment.  
+[USER] User stated they will stick with Inconel and Monel for oxygen compatibility reasons.  
+[ASSISTANT_SAID] Assistant explained that titanium is a high-strength, lightweight metal with excellent corrosion resistance and compatibility with liquid oxygen, but acknowledged it is not an ideal choice due to flammability concerns.  
+[ASSISTANT_SAID] Assistant noted that titanium can ignite and burn in the presence of liquid oxygen and a spark, leading to catastrophic failure in a rocket engine.  
+[ASSISTANT_SAID] Assistant recommended using materials that are not reactive with liquid oxygen and have low ignition energy, highlighting stainless steel as a commonly used material for its low reactivity and good corrosion resistance.  
+[ASSISTANT_SAID] Assistant mentioned that other materials may also be suitable and emphasized the importance of evaluating material properties and compatibility with operating conditions.  
+[ASSISTANT_SAID] Assistant acknowledged the user's choice of Inconel and Monel for compatibility with liquid oxygen.  
+[ASSISTANT_SAID] Assistant began to discuss factors to consider when choosing between different actuation methods for the valve, starting with "Speed."

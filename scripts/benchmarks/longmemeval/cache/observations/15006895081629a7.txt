@@ -1,0 +1,14 @@
+**Observation Log:**
+
+- [FACT] User interviewed a candidate named Tommy for a position.
+- [FACT] Tommy currently works for the state at a school district.
+- [FACT] Tommy receives more PTO and better insurance benefits due to his state employment.
+- [RELATIONSHIP] Tommy has a wife, with whom he discussed the job offer.
+- [EVENT] User emailed Tommy an offer letter for the position.
+- [EVENT] Tommy replied to the email regarding the offer letter.
+- [TEMPORAL] Session date is 2023/03/15 (Wed) 00:35.
+- [ASSISTANT_SAID] The assistant suggested that the user explain to Tommy that UNG feels the offer is on par for his experience and knowledge.
+- [ASSISTANT_SAID] The assistant advised that UNG is not able to increase the salary at this time.
+- [ASSISTANT_SAID] The assistant noted that UNG cannot compete with the state regarding PTO and insurance benefits.
+- [ASSISTANT_CREATED] The assistant composed a reply to Tommy, thanking him for his email and addressing his concerns about the offer.
+- [ASSISTANT_CREATED] The assistant's reply included a statement that the offer is on par for Tommy's experience and knowledge and expressed hope that he would still consider the opportunity.

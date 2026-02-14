@@ -1,0 +1,16 @@
+**Observation Log:**
+
+- [FACT] The user is working on their thesis.
+- [EVENT] The user submitted their thesis proposal on February 15th.
+- [TEMPORAL] The user is trying to stay on top of their literature review to meet their deadlines.
+- [ASSISTANT_SAID] The assistant congratulated the user on submitting their thesis proposal.
+- [ASSISTANT_SAID] The assistant recommended several tools and apps to help organize the literature review, including Mendeley, Zotero, EndNote, Evernote, Trello, OneNote, Rayyan, Covidence, Excel, Google Sheets, MindMeister, and XMind.
+- [ASSISTANT_SAID] The assistant provided strategies for staying on top of the literature review, including creating a schedule, setting deadlines, using a template, annotating and summarizing sources, and regularly reviewing progress.
+- [PREFERENCE] The user decided to start with Mendeley and Evernote to organize their sources and notes.
+- [ASSISTANT_SAID] The assistant discussed the pros and cons of creating a separate folder or notebook for the literature review versus using tags and categories within the existing research folder.
+- [PREFERENCE] The user chose to create a subfolder within their existing research folder for their literature review.
+- [ASSISTANT_SAID] The assistant provided guidance on developing a research methodology, including revisiting research questions, choosing a research paradigm, selecting a research design, identifying data collection methods, deciding on data analysis techniques, considering sampling and population, addressing ethical considerations, and pilot testing.
+- [TEMPORAL] The user conducted a pilot study from March 10th to 17th.
+- [CHANGE] The user refined their survey questions and identified potential issues with their study design based on the pilot study.
+- [EVENT] The user plans to build upon the pilot study and use feedback from participants to inform their main study.
+- [ASSISTANT_SAID] The assistant was asked for more information on selecting a research design and identifying data collection methods.

@@ -1,0 +1,42 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/03/18 (Sat) 12:53
+- [FACT] User has been playing guitar for only 3 months.
+- [FACT] User has been playing ukulele for about a year.
+- [PREFERENCE] User is looking for new songs to learn on guitar similar to "Sweet Child O' Mine" by Guns N' Roses.
+- [ASSISTANT_SAID] Recommended songs similar to "Sweet Child O' Mine":
+  1. **Crazy Train** by Ozzy Osbourne
+  2. **Livin' on a Prayer** by Bon Jovi
+  3. **Pour Some Sugar On Me** by Def Leppard
+  4. **Here I Go Again** by Whitesnake
+  5. **Don't Stop Believin'** by Journey
+  6. **Girls, Girls, Girls** by Mötley Crüe
+  7. **Talk Dirty to Me** by Poison
+  8. **Heaven** by Warrant
+  9. **Still of the Night** by Whitesnake
+  10. **Is This Love** by Whitesnake
+- [PREFERENCE] User is hoping to find songs that are a bit more challenging but still fun to play.
+- [ASSISTANT_SAID] Suggested songs that might be more suitable for a beginner:
+  1. **Sweet Home Alabama** by Lynyrd Skynyrd
+  2. **Brown Eyed Girl** by Van Morrison
+  3. **No Woman No Cry** by Bob Marley
+  4. **Wonderwall** by Oasis
+  5. **Hound Dog** by Elvis Presley
+- [ASSISTANT_SAID] Provided tips for effective practice:
+  1. Set specific goals.
+  2. Warm-up and stretch.
+  3. Break it down.
+  4. Slow practice.
+  5. Loop and repeat.
+  6. Practice with a metronome.
+  7. Record yourself.
+  8. Take breaks.
+  9. Mix it up.
+  10. Review and reflect.
+- [PREFERENCE] User feels they are not making as much progress as they'd like despite practicing for at least 30 minutes every day.
+- [FACT] User is trying to learn new ukulele songs, including "Island in the Sun" by Weezer and "Riptide" by Vance Joy.
+- [ASSISTANT_SAID] Discussed the challenges of adapting ukulele songs to guitar and suggested finding guitar-specific arrangements.
+- [ASSISTANT_SAID] Recommended websites and resources for finding guitar-specific arrangements:
+  1. **Ultimate-Guitar.com**
+  2. **Songsterr.com**
+  3. **G

@@ -1,0 +1,18 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/25 (Thu) 23:02
+- [ASSISTANT_SAID] To increase the pool size, you need to pass the desired size as a parameter when creating the pool. The specific method for doing this may vary depending on the database library you are using.
+- [ASSISTANT_SAID] If you're using the `databases` library with `asyncpg`, you can specify the pool size as follows: `database = databases.Database(database_url, pool_size=20)`.
+- [ASSISTANT_SAID] In this example, the `pool_size` parameter is set to 20, meaning that the connection pool will contain 20 connections.
+- [ASSISTANT_SAID] Increasing the pool size can have performance implications, so you should be careful not to set the pool size too high. The optimal pool size depends on factors such as the number of concurrent requests your application receives and the capacity of your database server.
+- [USER] I use `create_async_engine` from `sqlalchemy.ext.asyncio`.
+- [ASSISTANT_SAID] To increase the pool size when using `create_async_engine`, you can pass the desired pool size as a parameter to the `create_async_engine` function.
+- [ASSISTANT_SAID] Example: `engine = create_async_engine(database_url, pool_size=20)`.
+- [ASSISTANT_SAID] The `pool_size` parameter is set to 20, meaning that the connection pool will contain 20 connections.
+- [ASSISTANT_SAID] The `create_async_engine` function does not accept a `pool_size` argument. Instead, you can use the `create_asyncpg_pool` function from the `databases` library to create a connection pool with the desired size.
+- [ASSISTANT_SAID] Example of creating a connection pool: `pool = databases.core.PooledDatabase(database, max_size=pool_size)`.
+- [USER] When we were talking about the Pydantic models as responses, how would you make the same but for requests, for example for user's sign in?
+- [ASSISTANT_SAID] To define the request body for a user sign in endpoint using Pydantic, you can create a new Pydantic model: `class UserSignInRequest(BaseModel): email: str; password: str`.
+- [ASSISTANT_SAID] Example of using this model in a FastAPI endpoint: `@app.post("/signin") async def sign_in(user: UserSignInRequest):`.
+- [USER] What should I give in the response to the sign up for the users with fields: id, email, username, full_name, bio, hashed_password, created_at, updated_at?
+- [ASSISTANT_SAID] For the sign up

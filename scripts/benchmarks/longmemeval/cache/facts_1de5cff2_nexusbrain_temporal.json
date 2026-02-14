@@ -1,0 +1,34 @@
+{
+  "answer_ultrachat_440262": [
+    {
+      "fact": "User is interested in high-end fashion brands.",
+      "type": "preference",
+      "entities": [
+        "high-end fashion brands"
+      ]
+    },
+    {
+      "fact": "User values owning pieces that last a long time and have unique designs.",
+      "type": "preference",
+      "entities": [
+        "durability",
+        "unique design"
+      ]
+    },
+    {
+      "fact": "User believes it's important to consider their budget before investing in high-end brands.",
+      "type": "opinion",
+      "entities": [
+        "budget",
+        "high-end brands"
+      ]
+    },
+    {
+      "fact": "User has an interest in sustainability in fashion.",
+      "type": "preference",
+      "entities": [
+        "sustainability"
+      ]
+    }
+  ]
+}

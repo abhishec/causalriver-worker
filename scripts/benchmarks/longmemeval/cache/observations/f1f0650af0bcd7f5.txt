@@ -1,0 +1,15 @@
+**Observation Log:**
+
+- [FACT] The user is planning a trip to New York City to visit his wife's family.
+- [PREFERENCE] The user is interested in Filipino cuisine and wants to share his cultural heritage with his wife's family.
+- [EVENT] The user is planning to cook traditional Filipino dishes like adobo and sinigang for his wife's family.
+- [TEMPORAL] The session date is 2023/05/20 (Sat) 17:19.
+- [RELATIONSHIP] The user has a wife and is visiting her family.
+- [ASSISTANT_SAID] The assistant recommended several Filipino restaurants in NYC: Jeepney, Maharlika, Tita Flips, F.O.B., Grill 21, Papa's Kitchen, and Ihawan.
+- [ASSISTANT_SAID] The assistant provided a list of cultural events and festivals in NYC, including the Philippine Independence Day Celebration, Filipino American History Month Celebration, Diwa Filipino Arts Festival, Philippine Festival, Lechon Festival, and FANHS Conference.
+- [ASSISTANT_SAID] The assistant recommended Filipino grocery stores in NYC: Phil-Am Food Mart, Maraming Salamat, Patis Tesoro, Filipino Market, Kalustyan's, and Asia Market.
+- [ASSISTANT_SAID] The assistant provided tips for making adobo, including using a combination of vinegar and soy sauce, choosing the right protein, using aromatics, and serving with steamed rice.
+- [ASSISTANT_SAID] The assistant provided tips for making sinigang, including using tamarind broth, choosing the right protein, adding vegetables, and serving with steamed rice.
+- [ASSISTANT_SAID] The assistant explained what patis (fish sauce) is, its types, and how to use it in cooking.
+- [ASSISTANT_SAID] The assistant explained what suka (vinegar) is, its types, and how to use it in cooking.
+- [ASSISTANT_CREATED] The assistant created a detailed list of tips for making adobo and sinigang, including specific ingredients and methods for preparation.

@@ -1,0 +1,26 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/23 (Tue) 18:16
+- [EVENT] User is trying to get organized and wants to create a to-do list for the week.
+- [ASSISTANT_SAID] Assistant offered to help create a to-do list and asked for information about the user's goals, deadlines, recurring tasks, focus areas, and scheduled appointments.
+- [RELATIONSHIP] User needs to follow up with Emily to check in and make sure she's doing okay.
+- [RELATIONSHIP] User wants to reach out to Julia to catch up.
+- [ASSISTANT_CREATED] Assistant added the following items to the to-do list:
+  1. Follow up with Emily to check in and make sure she's doing okay.
+  2. Reach out to Julia to catch up.
+- [EVENT] User has a yoga class with Sarah on Wednesday.
+- [EVENT] User wants to grab smoothies with Sarah after yoga class and catch up on her business plans.
+- [RELATIONSHIP] User remembers Alex mentioned a guys' trip to Vegas and wants to ask him for an update.
+- [ASSISTANT_CREATED] Assistant updated the to-do list to include:
+  3. Grab smoothies with Sarah after yoga class on Wednesday and catch up on her business plans.
+  4. Ask Alex for an update on the guys' trip to Vegas.
+- [ASSISTANT_SAID] Assistant encouraged the user to think about work or personal projects and asked for any tasks or deadlines.
+- [EVENT] User had lunch with Rachel last week, and she is enjoying her new job at the marketing firm.
+- [ASSISTANT_SAID] Assistant noted that the information about Rachel does not need to be added to the to-do list as it is not an actionable item.
+- [EVENT] User needs to make a call to Mike to thank him again for the birthday party last weekend.
+- [ASSISTANT_CREATED] Assistant added the following item to the to-do list:
+  5. Call Mike to thank him again for the birthday party last weekend.
+- [RELATIONSHIP] User wants to reach out to Chris to ensure everything is still cool between them after a falling out a few weeks back.
+- [ASSISTANT_CREATED] Assistant added the following item to the to-do list:
+  6. Reach out to Chris to clear the air and make sure everything is still cool between you two.
+- [ASSISTANT_SAID] Assistant encouraged the user to prioritize relationships and asked if they would like to allocate specific days or time frames for the tasks on the list.

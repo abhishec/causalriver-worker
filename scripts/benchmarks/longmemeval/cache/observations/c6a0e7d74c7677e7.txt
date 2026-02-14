@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/25 (Thu) 10:33
+
+[ASSISTANT_SAID] Here is a sample layout for the Specific Task screen: Title: Specific Task, Header: Task Name, Task ID, Task Description, Task Tagger, Task Checker, Task Due Date.
+
+[ASSISTANT_SAID] Body: Table of Documents includes Document Name, Document ID, Document Status (Not Started, In Progress, Ready for Review, In Review, Complete, Rejected), Document Tagger, Document Assigned Date.
+
+[ASSISTANT_SAID] Change Task Status button (if all documents have been tagged).
+
+[ASSISTANT_SAID] Footer: Back to Task Management button.
+
+[ASSISTANT_SAID] The status of each document could be indicated using different colors: Not Started: Light Gray, In Progress: Yellow, Ready for Review: Light Green, In Review: Dark Green, Complete: Blue, Rejected: Red.
+
+[ASSISTANT_SAID] This color scheme is intended to provide clear and easily recognizable visual cues for the different statuses.
+
+[ASSISTANT_SAID] Additionally, the use of color contrast between the status and the background can help ensure that the status information is easy to see for all users, including those with color blindness.
+
+[ASSISTANT_SAID] Goals: 1. To provide a centralized view of all the documents assigned to a specific task. 2. To provide an overview of the task's details, such as tagger, checker, assigned date, due date, and description. 3. To allow the user to manage the task by changing the status of the documents as they progress through the annotation process.
+
+[ASSISTANT_SAID] Features: 1. A list of all the documents assigned to the specific task. 2. Information about the tagger, checker, assigned date, due date, and description for each document. 3. The ability to change the status of a document, such as from "Not started" to "In progress", "Ready for review", "In review", "Complete", and "Rejected". 4. The ability to view the annotations made by the tagger and the checker.
+
+[ASSISTANT_SAID] Use Cases: 1. An administrator assigns a task to a tagger and a checker. The tagger and checker then use the specific task screen to manage the task and annotate the documents. 2. The tagger marks each document as "In progress" as they work on it. 3. The checker marks each document as "Ready for review" when they believe it has been fully annotated by the tagger. 4. The administrator reviews the annotations and marks each document as "In review" when they believe it is ready for further review by the checker. 5. The checker reviews

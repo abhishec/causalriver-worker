@@ -1,0 +1,85 @@
+{
+  "answer_9af4e346_1": [
+    {
+      "fact": "User has recently started waking up at 7:00 AM.",
+      "type": "personal",
+      "entities": [
+        "7:00 AM"
+      ]
+    },
+    {
+      "fact": "User's usual wake-up time was 8:30 AM.",
+      "type": "personal",
+      "entities": [
+        "8:30 AM"
+      ]
+    },
+    {
+      "fact": "User is looking for healthy breakfast ideas that can be prepared the night before.",
+      "type": "preference",
+      "entities": [
+        "healthy breakfast ideas",
+        "prepared the night before"
+      ]
+    },
+    {
+      "fact": "User is particularly interested in overnight oats and chia seed pudding.",
+      "type": "preference",
+      "entities": [
+        "overnight oats",
+        "chia seed pudding"
+      ]
+    }
+  ],
+  "answer_9af4e346_2": [
+    {
+      "fact": "User has recently started going for a 30-minute walk before work.",
+      "type": "event",
+      "entities": [
+        "30-minute walk",
+        "work"
+      ]
+    },
+    {
+      "fact": "User wakes up 15 minutes earlier on Tuesdays and Thursdays to meditate and practice yoga.",
+      "type": "event",
+      "entities": [
+        "Tuesdays",
+        "Thursdays",
+        "meditate",
+        "yoga"
+      ]
+    },
+    {
+      "fact": "User is trying to create a personalized morning routine.",
+      "type": "preference",
+      "entities": [
+        "morning routine"
+      ]
+    },
+    {
+      "fact": "User is interested in healthy breakfast ideas that can be prepped the night before.",
+      "type": "preference",
+      "entities": [
+        "healthy breakfast",
+        "prep night before"
+      ]
+    },
+    {
+      "fact": "User is particularly interested in overnight oats and chia seed pudding options.",
+      "type": "preference",
+      "entities": [
+        "overnight oats",
+        "chia seed pudding"
+      ]
+    },
+    {
+      "fact": "User is looking for ways to incorporate chia seeds into their breakfast routine.",
+      "type": "preference",
+      "entities": [
+        "chia seeds",
+        "breakfast routine"
+      ]
+    }
+  ]
+}

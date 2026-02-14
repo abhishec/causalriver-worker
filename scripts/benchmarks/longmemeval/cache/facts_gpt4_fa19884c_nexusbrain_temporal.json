@@ -1,0 +1,82 @@
+{
+  "answer_ff201786_1": [
+    {
+      "fact": "User has been playing guitar for three weeks",
+      "type": "event",
+      "entities": [
+        "guitar",
+        "three weeks"
+      ]
+    },
+    {
+      "fact": "User owns a Fender CD-60S guitar",
+      "type": "personal",
+      "entities": [
+        "Fender CD-60S"
+      ]
+    },
+    {
+      "fact": "User wants to improve their guitar skills",
+      "type": "preference",
+      "entities": [
+        "guitar skills"
+      ]
+    },
+    {
+      "fact": "User is interested in video lessons on Justin Guitar and TrueFire",
+      "type": "preference",
+      "entities": [
+        "Justin Guitar",
+        "TrueFire"
+      ]
+    },
+    {
+      "fact": "User is looking for resources to improve fingerpicking technique",
+      "type": "preference",
+      "entities": [
+        "fingerpicking technique"
+      ]
+    }
+  ],
+  "answer_ff201786_2": [
+    {
+      "fact": "User is exploring bluegrass music.",
+      "type": "preference",
+      "entities": [
+        "bluegrass music"
+      ]
+    },
+    {
+      "fact": "User recently discovered a bluegrass band featuring a banjo player.",
+      "type": "event",
+      "entities": [
+        "bluegrass band",
+        "banjo player"
+      ]
+    },
+    {
+      "fact": "User started enjoying bluegrass music today.",
+      "type": "opinion",
+      "entities": [
+        "bluegrass music"
+      ]
+    },
+    {
+      "fact": "User is considering buying a ukulele after trying one out at a music workshop.",
+      "type": "event",
+      "entities": [
+        "ukulele",
+        "music workshop"
+      ]
+    },
+    {
+      "fact": "User is interested in the differences in fingerpicking style between ukulele and guitar.",
+      "type": "preference",
+      "entities": [
+        "ukulele",
+        "guitar",
+        "fingerpicking style"
+      ]
+    }
+  ]
+}

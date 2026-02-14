@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/26 (Fri) 10:09  
+[FACT] User is creating an ad-hoc reporting capability in a SaaS product.  
+[FACT] User's SaaS product uses AWS Aurora Postgres database.  
+[PREFERENCE] User's main concerns are ensuring data security and performance.  
+[ASSISTANT_SAID] Recommended stack for ad-hoc reporting capability includes:  
+[ASSISTANT_SAID] - Data Warehouse: Amazon Redshift, a fully managed, petabyte-scale data warehouse service.  
+[ASSISTANT_SAID] - ETL pipeline: AWS Glue or Apache Airflow for extracting, transforming, and loading data.  
+[ASSISTANT_SAID] - BI Tool: Amazon QuickSight for creating interactive visualizations, reports, and dashboards.  
+[ASSISTANT_SAID] - Security: Use Amazon VPC for network access control and AWS IAM for managing access to data and services.  
+[ASSISTANT_SAID] This architecture allows for a secure and performant ad-hoc reporting capability without affecting the operational database.  
+[USER] Asked if using an ETL pipeline would result in a delay in getting data from Aurora Postgres into Redshift, expressing a need for real-time or near real-time data.  
+[ASSISTANT_SAID] Confirmed that using an ETL pipeline with Redshift would result in a delay.  
+[ASSISTANT_SAID] Suggested approaches for near real-time data:  
+[ASSISTANT_SAID] 1. Materialized views in Aurora Postgres to pre-aggregate data.  
+[ASSISTANT_SAID] 2. Amazon Direct Connect for a dedicated network connection to reduce latency.  
+[ASSISTANT_SAID] 3. Replication using Amazon Database Migration Service (DMS) or Amazon AppFlow for near real-time sync.  
+[ASSISTANT_SAID] 4. In-memory cache using Amazon ElastiCache for Redis or Amazon DynamoDB for fast data access.  
+[USER] Inquired about option 3 (replication) and whether it could be set up to replicate only certain tables and/or columns.  
+[ASSISTANT_SAID] Confirmed that replication can be set up to replicate only specific tables and/or columns using DMS or AppFlow.  
+[ASSISTANT_SAID] With DMS, a migration task can specify tables and columns to replicate and set up filters for data.  
+[ASSISTANT_SAID] With AppFlow, a flow can replicate specific tables and columns and modify data during replication.  
+[USER] Asked how the migration task can be triggered and if it can replicate data every time certain tables are changed.  
+[ASSISTANT_SAID] Confirmed that the migration task in DMS can be triggered to

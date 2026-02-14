@@ -1,0 +1,26 @@
+**Observation Log:**
+
+- [FACT] The user is trying to find a permanent place to live.
+- [FACT] The user is on a limited budget.
+- [FACT] The user's maximum monthly rent budget is $800.
+- [FACT] The user has some savings for a security deposit and first month's rent.
+- [FACT] The user is not eligible for any government assistance programs.
+- [FACT] The user needs to be close to public transportation and their volunteer job.
+- [FACT] The user is open to any type of accommodation as long as it is safe and clean.
+- [FACT] The user has been looking at apartments online but finds it overwhelming.
+- [CHANGE] The user’s asylum application has been approved after over a year of uncertainty.
+- [PREFERENCE] The user is volunteering at a non-profit organization that helps refugees.
+- [PREFERENCE] The user finds volunteering a great way to give back and meet like-minded people.
+- [PREFERENCE] The user is interested in expanding their housing search to surrounding neighborhoods.
+- [ASSISTANT_SAID] The assistant suggested breaking down the housing search process into manageable steps.
+- [ASSISTANT_SAID] The assistant recommended assessing the user's budget, identifying priorities, researching affordable options, utilizing online search tools, and visiting potential places.
+- [ASSISTANT_SAID] The assistant provided a list of websites and apps to help filter the housing search: Zillow, Trulia, HotPads, PadMapper, Walk Score, Apartments.com, and Rent Jungle.
+- [ASSISTANT_SAID] The assistant advised the user to set their budget filter to $800 or less and to read reviews and ratings from current and former residents.
+- [ASSISTANT_SAID] The assistant encouraged the user to stay organized and take notes during their housing search.
+- [ASSISTANT_SAID] The assistant provided information about three neighborhoods: [Neighborhood 1], [Neighborhood 2], and [Neighborhood 3], including their affordability and community features.
+- [ASSISTANT_SAID] The assistant mentioned that [Neighborhood 1] is known for being relatively affordable, with prices around $700-800/month for a 1-bedroom apartment.
+- [ASSISTANT_SAID] The assistant noted that [Neighborhood 2] is a bit more suburban, with prices around $600-700/month for a 1-bedroom apartment.
+- [ASSISTANT_SAID] The assistant provided safety tips for [Neighborhood 1] and [Neighborhood 2], including avoiding certain streets and being aware of surroundings.
+- [ASSISTANT_SAID] The assistant mentioned that [Neighborhood 1] has a strong sense of community and lower crime rates compared to other parts of the city.
+- [ASSISTANT_SAID] The assistant indicated that [Neighborhood 2] has a strong police presence and active community involvement in safety.
+- [ASS

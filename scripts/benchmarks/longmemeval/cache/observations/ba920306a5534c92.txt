@@ -1,0 +1,26 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/29 (Mon) 02:49
+- [USER] User requested to provide context and instructed to respond with "read" only.
+- [USER] User provided detailed information about the facilities of Hotel Moderne Saint Germain, including available services, amenities, and policies.
+- [ASSISTANT_SAID] Assistant responded with "read" after the first context provided by the user.
+- [USER] User repeated the instruction to respond with "read" and provided additional context about the hotel, including location and lounge services.
+- [ASSISTANT_SAID] Assistant responded with "read" after the second context provided by the user.
+- [USER] User repeated the instruction to respond with "read" and provided further context about the hotel's multilingual reception team and services.
+- [ASSISTANT_SAID] Assistant responded with "read" after the third context provided by the user.
+- [USER] User requested the assistant to answer FAQs for a hotel chatbot using the context provided earlier.
+- [ASSISTANT_CREATED] Assistant created detailed responses for the following FAQs:
+  - [ASSISTANT_SAID] Book a table: No restaurant on site; reception can recommend local restaurants.
+  - [ASSISTANT_SAID] Breakfast: Buffet breakfast available from 7am to 10:30am with various options.
+  - [ASSISTANT_SAID] Cancellations: Policies vary by accommodation type; contact reception for changes.
+  - [ASSISTANT_SAID] Careers: Current vacancies available on the website; CVs can be sent to HR.
+  - [ASSISTANT_SAID] Casino: No casino on site; recommendations available for local casinos.
+  - [ASSISTANT_SAID] Check-in: From 3pm; photo ID and credit card required.
+  - [ASSISTANT_SAID] Check-out: Until 12pm; late check-out may incur a fee.
+  - [ASSISTANT_SAID] Children policy: Children of all ages welcome; under 2 stay free in parents' room.
+  - [ASSISTANT_SAID] Closing periods: Open year-round with no closing periods.
+  - [ASSISTANT_SAID] Contacts: Contact details available on the website or booking confirmation.
+  - [ASSISTANT_SAID] Covid-19: Enhanced safety measures in place; face masks mandatory in indoor areas.
+  - [ASSISTANT_SAID] Discounts, Offers and Partnerships: Current offers available on the website; partnerships with local businesses.
+  - [ASSISTANT_SAID] Golf: No golf course on site; recommendations for nearby courses available.
+  - [ASSISTANT_SAID] Kids clubs, Playgrounds, and Entertainment: No kids clubs on site; local family-friendly activities recommended

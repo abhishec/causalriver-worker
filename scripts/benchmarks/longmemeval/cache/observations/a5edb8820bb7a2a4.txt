@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/14 (Sun) 11:20
+- [FACT] The user has a virtual room where they pair 2 users.
+- [FACT] The user uses WebRTC for their application.
+- [FACT] The user has a Google Cloud account with an API key for transcription.
+- [FACT] The user is using Angular on AWS.
+- [PREFERENCE] The user is looking for a solution that sends audio from the client browser to Google and then back to the browser.
+- [ASSISTANT_SAID] To transcribe a conversation between two users in a virtual room using WebRTC, Angular, and Google Cloud Speech-to-Text API, the assistant provided a high-level implementation plan.
+- [ASSISTANT_SAID] The assistant suggested establishing a WebRTC peer-to-peer connection between the users.
+- [ASSISTANT_SAID] The assistant recommended capturing audio streams from the users' microphones using `navigator.mediaDevices.getUserMedia`.
+- [ASSISTANT_SAID] The assistant advised converting the audio stream into a format compatible with the Google Cloud Speech-to-Text API using a library like `RecordRTC`.
+- [ASSISTANT_SAID] The assistant mentioned initializing the Google Cloud Speech-to-Text API with the user's API key and creating a `SpeechClient` instance.
+- [ASSISTANT_SAID] The assistant suggested listening for the `data` event on the `recognizeStream` to receive transcriptions in real-time.
+- [ASSISTANT_CREATED] The assistant provided a code example for implementing the transcription solution, including setting up WebRTC, capturing audio, and sending it to Google Cloud.
+- [ASSISTANT_SAID] The assistant noted that the solution should work on modern mobile devices but mentioned potential limitations on iOS devices and data usage concerns.
+- [ASSISTANT_SAID] The assistant explained how to capture the moderator's audio stream using `navigator.mediaDevices.getUserMedia`.
+- [ASSISTANT_SAID] The assistant provided guidance on sending both user and moderator audio streams to the Google Cloud Speech-to-Text API.
+- [ASSISTANT_SAID] The assistant suggested creating separate `recognizeStream` instances for each participant (user and moderator) to handle their audio streams.
+- [ASSISTANT_SAID] The assistant recommended updating the UI to display transcriptions for both user and moderator and provided code snippets for handling the audio data and transcriptions.

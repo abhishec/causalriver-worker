@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/28 (Sun) 23:01  
+[FACT] User has recently bought a Korean cookbook.  
+[EVENT] User has started experimenting with Korean recipes.  
+[PREFERENCE] User is a beginner in cooking Korean cuisine.  
+[ASSISTANT_SAID] Assistant congratulated the user on their new Korean cookbook and expressed excitement to help explore Korean cuisine.  
+[ASSISTANT_SAID] Assistant recommended ten Korean dishes for beginners: Bibimbap, Japchae, Bulgogi, Kimchi Stew, Tteokbokki, Korean Fried Chicken, Doenjang Jjigae, Mandu, Naengmyeon, and Kimchi Fried Rice.  
+[ASSISTANT_SAID] Assistant mentioned that these dishes are relatively easy to make and require minimal ingredients.  
+[ASSISTANT_SAID] Assistant advised the user to explore various Korean condiments and seasonings, such as gochujang, doenjang, and sesame oil.  
+[FACT] User has tried making kimchi stew, which turned out amazing and was loved by their family.  
+[EVENT] User had a disaster with spicy rice cakes due to adding too much gochujang.  
+[PREFERENCE] User is looking for tips on how to balance spiciness in Korean dishes.  
+[ASSISTANT_SAID] Assistant provided tips for balancing spiciness in Korean dishes, including starting with a small amount of gochujang, understanding the Scoville scale, using gochujang wisely, balancing with sweetness and acidity, considering the audience's spice tolerance, tasting and adjusting, having a "spice rescue" plan, experimenting with different types of chili peppers, storing gochujang properly, and practicing.  
+[ASSISTANT_SAID] Assistant suggested adding more sugar, soy sauce, or starch to dilute the heat in the Tteokbokki.  
+[EVENT] User has been trying out different Korean restaurants in the city.  
+[PREFERENCE] User's interest in Korean BBQ started after watching a Korean drama series last month.  
+[FACT] User has visited at least five different Korean restaurants, trying bulgogi, galbi, and bibimbap.  
+[PREFERENCE] User's favorite restaurant is a small family-owned place near their apartment that serves tender and flavorful beef short ribs.  
+[ASSISTANT_SAID] Assistant expressed excitement about the user's interest in Korean BBQ and the experience of family-owned restaurants.  
+[ASSISTANT_SAID] Assistant asked if the user has tried making Korean BBQ at home and offered to share tips and recipes.  
+[FACT] User has been experimenting with Korean recipes at home, with some successes and failures.  
+[ASSISTANT_SAID] Assistant provided a recipe for Korean-style beef short ribs (Galbi) and included details about the marinade

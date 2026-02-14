@@ -1,0 +1,22 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/02/18 (Sat) 11:34
+- [EVENT] User is thinking of buying a new coffee table for their living room.
+- [CHANGE] User got rid of their old couch about three weeks ago.
+- [EVENT] User has a new sofa bed from IKEA that is working out great.
+- [ASSISTANT_SAID] To calculate the ideal coffee table size based on sofa dimensions, measure the length and depth of the sofa in inches.
+- [ASSISTANT_SAID] The coffee table should be about 1/2 to 2/3 the length of the sofa for length, and about 1/4 to 1/2 the width of the sofa for width.
+- [ASSISTANT_SAID] Ideal coffee table height is usually between 15-20 inches.
+- [ASSISTANT_SAID] Leave about 12-18 inches of space between the coffee table and the sofa for comfortable legroom and movement.
+- [ASSISTANT_SAID] Example calculation: If the sofa is 90 inches long and 36 inches deep, the ideal coffee table length is 45-60 inches, width is 9-18 inches, and height is 15-20 inches.
+- [EVENT] User is looking for websites to find discounted throw pillows that match their new sofa's color scheme.
+- [ASSISTANT_SAID] Recommended websites for discounted throw pillows: Wayfair, West Elm, Crate & Barrel, AllModern, Overstock, Etsy, Amazon, HomeGoods/TJ Maxx/Marshalls, Joss & Main, and local thrift stores.
+- [ASSISTANT_SAID] Suggested to check return and exchange policies before making a purchase.
+- [EVENT] User is thinking of getting new furniture for their home office.
+- [ASSISTANT_SAID] Recommended websites for high-quality desks with good storage: IKEA, Crate & Barrel, West Elm, Wayfair, OfficeDepot/OfficeMax, Amazon, Ergohuman, Stand Steady, Fully, and local furniture stores.
+- [EVENT] User found a desk they like at West Elm for $400 with great storage.
+- [EVENT] User plans to set up the desk this weekend after it arrives.
+- [EVENT] User is thinking of getting a rug to complement their new sofa bed.
+- [ASSISTANT_SAID] Recommended websites for affordable and stylish rugs: Wayfair, West Elm, Crate & Barrel, Overstock, Joss & Main, AllModern, Rugs USA, Etsy, Amazon, and local thrift stores.
+- [ASSISTANT_SAID] Many of the recommended websites have a feature to filter rugs by color.
+- [ASSISTANT_SAID] Wayfair, West Elm, Crate & Barrel, Overstock, Joss & Main,

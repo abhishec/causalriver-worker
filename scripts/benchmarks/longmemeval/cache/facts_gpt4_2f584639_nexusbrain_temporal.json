@@ -1,0 +1,105 @@
+{
+  "answer_11a8f823_2": [
+    {
+      "fact": "User is planning a birthday dinner for their sister this weekend.",
+      "type": "event",
+      "entities": [
+        "birthday dinner",
+        "sister",
+        "weekend"
+      ]
+    },
+    {
+      "fact": "User bought a beautiful necklace from Tiffany's for their sister.",
+      "type": "relationship",
+      "entities": [
+        "necklace",
+        "Tiffany's",
+        "sister"
+      ]
+    },
+    {
+      "fact": "User has been doing a lot of online shopping lately.",
+      "type": "preference",
+      "entities": [
+        "online shopping"
+      ]
+    },
+    {
+      "fact": "User ordered a customized photo album from Shutterfly for their mom's anniversary.",
+      "type": "event",
+      "entities": [
+        "customized photo album",
+        "Shutterfly",
+        "mom",
+        "anniversary"
+      ]
+    },
+    {
+      "fact": "User's Shutterfly order cost around $50 and arrived on Wednesday.",
+      "type": "personal",
+      "entities": [
+        "$50",
+        "Wednesday"
+      ]
+    },
+    {
+      "fact": "User is interested in making the Tiffany Blue Velvet Cake for their sister's birthday.",
+      "type": "preference",
+      "entities": [
+        "Tiffany Blue Velvet Cake",
+        "sister's birthday"
+      ]
+    },
+    {
+      "fact": "User wants to package the cake nicely to make it look like a gift.",
+      "type": "opinion",
+      "entities": [
+        "package the cake",
+        "gift"
+      ]
+    }
+  ],
+  "answer_11a8f823_1": [
+    {
+      "fact": "User is planning a birthday dinner for their sister this weekend",
+      "type": "event",
+      "entities": [
+        "birthday dinner",
+        "sister",
+        "this weekend"
+      ]
+    },
+    {
+      "fact": "User has already bought their sister a beautiful necklace from Tiffany's",
+      "type": "gift",
+      "entities": [
+        "necklace",
+        "Tiffany's"
+      ]
+    },
+    {
+      "fact": "User spent around $200 on the necklace",
+      "type": "personal",
+      "entities": [
+        "$200"
+      ]
+    },
+    {
+      "fact": "User is planning to give their sister a gift card to her favorite restaurant",
+      "type": "gift",
+      "entities": [
+        "gift card",
+        "favorite restaurant"
+      ]
+    },
+    {
+      "fact": "User loves the ideas of a customized cake and a family slideshow for the dinner",
+      "type": "preference",
+      "entities": [
+        "customized cake",
+        "family slideshow"
+      ]
+    }
+  ]
+}

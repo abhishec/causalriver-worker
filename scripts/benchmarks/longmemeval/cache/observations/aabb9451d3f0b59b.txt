@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[FACT] User is thinking of reducing energy consumption at home.  
+[FACT] User has been paying more attention to energy consumption lately.  
+[FACT] User has been leaving the overhead lights in the kitchen and dining room on for too long.  
+[EVENT] User has started turning off the overhead lights in the kitchen and dining room when not in use.  
+[CHANGE] User is considering doing more to reduce energy waste from lighting.  
+[ASSISTANT_SAID] The assistant congratulated the user on taking the initiative to reduce energy consumption.  
+[ASSISTANT_SAID] The assistant provided 10 tips to reduce energy waste from lighting, including switching to energy-efficient bulbs, turning off lights when not in use, using natural light, installing occupancy sensors, dimming lighting, using task lighting, scheduling lighting, replacing outdoor lighting, conducting a lighting audit, and making it a habit.  
+[ASSISTANT_SAID] The assistant explained how occupancy sensors work, including types (Passive Infrared, Ultrasonic, Dual-Technology) and their applications in various areas of the home.  
+[ASSISTANT_SAID] The assistant described how timers work and their benefits, including scheduling lighting scenarios and types (mechanical, digital, smart).  
+[ASSISTANT_SAID] The assistant provided general installation guidelines for occupancy sensors and timers, including safety precautions.  
+[ASSISTANT_SAID] The assistant listed factors to consider when selecting an occupancy sensor, including detection type, sensitivity, mounting options, bulb compatibility, load capacity, delay time, override options, and certifications.  
+[ASSISTANT_SAID] The assistant listed factors to consider when selecting a timer, including type, scheduling options, number of outlets, randomized scheduling, smart features, battery life, and compatibility.  
+[ASSISTANT_SAID] The assistant suggested considering price, brand quality, warranty, installation ease, and energy efficiency when choosing both occupancy sensors and timers.  
+[USER] User is thinking of getting a smart timer for their living room lamp.  
+[USER] User has a new lamp from IKEA that they love.  
+[USER] User sometimes forgets to turn off the lamp when leaving the room.  
+[ASSISTANT_SAID] The assistant recommended a smart timer as a fantastic addition to the user's new lamp, highlighting benefits such as scheduling, remote control, scene creation, energy monitoring, and smart device integration.  
+[ASSISTANT_SAID] The assistant provided considerations for choosing a smart timer, including compatibility, smart home integration, app functionality, reviews, and price.  
+[ASSISTANT_SAID] The assistant listed popular smart timer brands, including Belkin WeMo, TP-Link, LIFX, Philips Hue, and IKEA's Tradfri.  
+[ASSISTANT_SAID] The assistant encouraged the user to read reviews and compare features before making

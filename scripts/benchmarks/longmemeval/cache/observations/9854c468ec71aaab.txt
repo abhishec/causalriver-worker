@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [FACT] User is planning to expand their garden this season.
+- [PREFERENCE] User is interested in companion plants that go well with tomatoes.
+- [ASSISTANT_SAID] Companion plants that go well with tomatoes include: Basil, Marigold, Borage, Chives, Oregano, Parsley, Cilantro, Dill, Comfrey, and Nasturtium.
+- [ASSISTANT_SAID] User should avoid planting Fennel, Potatoes, Eggplants, and members of the Brassica family near tomatoes.
+- [FACT] User is thinking of adding rose bushes to their garden.
+- [TEMPORAL] User planted their rose bushes on a Saturday, April 17th.
+- [ASSISTANT_SAID] User should provide their region or climate zone for tailored rose care advice.
+- [FACT] User is in USDA Hardiness Zone 6b.
+- [ASSISTANT_SAID] General rose care tips include: Watering about 1 inch per week, ensuring full sun (at least 6 hours), fertilizing with a balanced fertilizer in early spring, pruning in late winter or early spring, and mulching around the base.
+- [ASSISTANT_SAID] For the first growing season, user should keep the soil consistently moist, remove dead or damaged leaves, and deadhead spent blooms to encourage more flowers.
+- [FACT] User built a small trellis for climbing peas using reclaimed wood found in their garage.
+- [ASSISTANT_SAID] Instructions for building a trellis include using 2" x 2" wooden stakes, twine or wire, and optionally trellis netting, with a simple A-frame or teepee design.
+- [ASSISTANT_SAID] User's trellis should be sturdy and spaced about 3-4 feet apart for good air circulation.
+- [FACT] User has been keeping the soil moist and fertilizing their rose bushes regularly.
+- [ASSISTANT_SAID] User should monitor their rose bushes for signs of pests or diseases, such as aphids or black spot.
+- [PREFERENCE] User is excited to see their rose bushes bloom soon.
+- [ASSISTANT_SAID] Suggestions for the rest of the garden include adding flowers (like zinnias, sunflowers, or cosmos), vegetables (like carrots, radishes, or lettuce), and herbs (like basil, mint, or cilantro).
+- [ASSISTANT_SAID] User should consider companion planting and crop rotation to promote healthy growth and prevent soil depletion.
+- [PREFERENCE] User is interested in specific plants or gardening techniques to explore further.

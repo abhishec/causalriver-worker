@@ -1,0 +1,26 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/23 (Tue) 04:47  
+[FACT] User plays a lot of board games.  
+[FACT] User has been playing Ticket to Ride and Carcassonne lately.  
+[PREFERENCE] User is looking for recommendations for new board games similar to Ticket to Ride and Carcassonne.  
+[ASSISTANT_SAID] Recommended games similar to Ticket to Ride: Trains, Railways of the World, Empires of the Void.  
+[ASSISTANT_SAID] Recommended games similar to Carcassonne: Azul, Qwirkle, Castles of Burgundy.  
+[ASSISTANT_SAID] Recommended games with similar mechanics: 7 Wonders, El Grande, Pandemic.  
+[ASSISTANT_SAID] Other recommendations: Splendor, San Juan, Forbidden Island/Forbidden Desert.  
+[PREFERENCE] User has heard of Azul and plays it a lot with their roommate.  
+[FACT] User is trying to figure out the best strategy to beat their roommate in Azul.  
+[PREFERENCE] User is looking for games that are good for a group of around 6-8 people.  
+[ASSISTANT_SAID] Recommended party games for 6-8 people: Codenames, Taboo, Deception.  
+[ASSISTANT_SAID] Recommended cooperative games for 6-8 people: Forbidden Sky, Ghost Stories, Mysterium.  
+[ASSISTANT_SAID] Recommended competitive games for 6-8 people: Wits & Wagers, The Resistance, Dixit.  
+[FACT] User played Pandemic with a group of new people at a board game meetup last weekend.  
+[EVENT] User and their group worked well together and managed to save the world in Pandemic.  
+[PREFERENCE] User enjoys playing board games with people who share their passion for board games.  
+[PREFERENCE] User is looking for games that are good for a family game night with their mom and sister.  
+[ASSISTANT_SAID] Recommended family-friendly games: Sushi Go!, Qwixx, Dixit, Ticket to Ride: My First Journey, Carcassonne: Junior, Animal Upon Animal, Forbidden Island/Forbidden Desert, Ghost Fightin' Treasure Hunters, Mysterium.  
+[FACT] User has introduced their mom and sister to Scattergories, and they loved it.  
+[FACT] User's sister is really competitive and got into Scattergories.  
+[PREFERENCE] User is looking for games that are good for playing with coworkers.  
+[ASSISTANT_SAID] Recommended team-building games for coworkers: The Human Knot, Escape the Crate, Deception: Murder in Hong Kong.  
+[ASSISTANT_SAID] Recommended icebreaker games for coworkers: Two Truths and a Lie, What Do You Meme, Junk Art.

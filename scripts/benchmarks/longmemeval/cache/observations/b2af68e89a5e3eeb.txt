@@ -1,0 +1,25 @@
+### Observation Log
+
+[FACT] The user is discussing payment processing methods involving Flywire and PayZen.
+
+[FACT] The user mentions a fee of $3.95 that must be routed to Flywire for each payment collected.
+
+[EVENT] The user describes two transaction methods: one involving two separate transactions (principal to PayZen and fee to Flywire) and another where PayZen routes funds to Flywire via ACH.
+
+[FACT] The user states that if Flywire cancels the plan due to the balance exceeding $30,000, a different cancellation process must be followed.
+
+[ASSISTANT_SAID] The assistant suggests that to ensure a seamless user experience, a clear breakdown of the payment plan, including the Flywire service fee, should be presented to users.
+
+[ASSISTANT_SAID] The assistant mentions leveraging the same heuristics as Flywire for displaying the service fee as a separate line item in the payment plan breakdown.
+
+[ASSISTANT_SAID] The assistant emphasizes the need for accurate reflection of modifications to the payment plan in the user interface.
+
+[ASSISTANT_SAID] The assistant states that user interfaces should be intuitive and easy to navigate for managing payment plans and viewing payment histories.
+
+[ASSISTANT_CREATED] The assistant creates a list of test cases for the Partner API V2 feature, including both standard and edge cases.
+
+[ASSISTANT_CREATED] The assistant specifies test cases such as verifying the creation of a "dynamicFee" of $3.95 for payment plans, displaying the service fee correctly in the user interface, and ensuring the service fee is included in total payments.
+
+[ASSISTANT_CREATED] The assistant outlines edge cases, including scenarios with $0 principal balances, high principal balances over $30,000, irregular payment schedules, and plan modifications.
+
+[TEMPORAL] The session date is recorded as 2023/04/06 (Thu) 02:25.

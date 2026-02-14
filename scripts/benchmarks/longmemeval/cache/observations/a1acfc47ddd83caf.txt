@@ -1,0 +1,14 @@
+**Observation Log:**
+
+- [FACT] The user is a comedian who performs at open mics and comedy shows around the city.
+- [PREFERENCE] The user is motivated to improve their stage presence as a comedian.
+- [EVENT] The user recently attended a great show at the Improv featuring a headlining act who is one of their favorite comedians.
+- [TEMPORAL] The session date is 2023/05/26 (Fri) 05:23.
+- [EVENT] The user has been attending comedy shows at different venues around the city.
+- [EVENT] The user has been taking a comedy writing workshop on Sundays.
+- [PREFERENCE] The user agrees with the importance of developing their unique voice as a comedian.
+- [ASSISTANT_SAID] The assistant provided tips for improving stage presence, including studying great comedians, developing a unique voice, working on physicality, connecting with the audience, owning the stage, practicing, getting comfortable with silence, being authentic, handling hecklers, recording performances, seeking feedback, and staying positive and persistent.
+- [ASSISTANT_SAID] The assistant suggested finding humor in mundane tasks, playing with stereotypes, sharing frustrations, using specific details, making it universal, experimenting with different formats, and writing jokes about the user's job as an accountant.
+- [ASSISTANT_SAID] The assistant provided tips on structuring a comedy set, including starting strong, creating a flow, using transitions, varying pace and tone, building to a climax, and ending strong.
+- [ASSISTANT_SAID] The assistant recommended using callbacks, creating bridges, pausing for comedic effect, and using tags for transitioning between jokes.
+- [ASSISTANT_SAID] The assistant advised on creating a comedy persona or character by experimenting with different voices, finding quirks, developing a backstory, playing with contradictions, studying other comedians, using costuming and props, adopting unique body language and posture, and developing exaggerated facial expressions and reactions.

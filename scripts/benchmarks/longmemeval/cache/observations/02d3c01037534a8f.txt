@@ -1,0 +1,24 @@
+**Observation Log:**
+
+[FACT] User is trying to create a budget for monthly expenses.  
+[FACT] User has been having trouble with impulse buys lately.  
+[FACT] User learned the hard way that it's important to prioritize spending.  
+[FACT] User realized they didn't have enough money left for essentials a week after making a big purchase last month.  
+[PREFERENCE] User wants to categorize spending into needs and wants.  
+[ASSISTANT_SAID] The 50/30/20 rule is a good starting point to allocate income into needs, wants, and savings.  
+[ASSISTANT_SAID] Needs should account for 50% of income and include essential expenses like housing, food, transportation, minimum debt payments, insurance, and essential services.  
+[ASSISTANT_SAID] Wants should account for 30% of income and include discretionary expenses like hobbies, travel, personal pampering, clothing, gadgets, and home decor.  
+[ASSISTANT_SAID] Savings should account for 20% of income and include emergency funds, retirement savings, and other long-term savings goals.  
+[ASSISTANT_SAID] User should identify areas prone to impulse buys, such as clothing, dining out, subscriptions, and snacks.  
+[ASSISTANT_SAID] Strategies to avoid overspending include setting a 30-day rule, using the envelope system, tracking expenses, and prioritizing needs over wants.  
+[ASSISTANT_SAID] Suggested apps for tracking expenses include Mint, Personal Capital, You Need a Budget (YNAB), and Spendee.  
+[ASSISTANT_SAID] Suggested spreadsheet options include Google Sheets and Microsoft Excel, along with templates from Vertex42.  
+[ASSISTANT_SAID] Tips for tracking small purchases include using a digital wallet, taking photos of receipts, setting reminders, categorizing expenses, and rounding up transactions.  
+[FACT] User is considering trying Mint for expense tracking.  
+[PREFERENCE] User is worried about overspending on non-essential items.  
+[ASSISTANT_SAID] Tips to resist impulse buys include creating a 30-day waiting period, setting a budget for discretionary spending, using cash, avoiding temptation, practicing mindful shopping, and asking oneself questions before making a purchase.  
+[ASSISTANT_SAID] Suggested questions to ask before making a purchase include: Do I really need this? Will it add value to my life? Can I afford it? Will it align with my financial goals?  
+[PREFERENCE] User finds the tips helpful, especially the 30-day waiting period and asking questions before making a purchase.  
+[PREFERENCE] User wants to try using cash for discretionary spending to be more mindful of purchases.  
+[ASSISTANT_SAID] Using cash can help the user feel more connected to their spending and make them more mindful of purchases.  
+[ASSISTANT_SAID] Suggested

@@ -1,0 +1,20 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/03/27 (Mon) 22:28  
+[USER] User asked about IDL attributes for web pages.  
+[ASSISTANT_SAID] IDL attributes are used to define the properties and behaviors of HTML elements in a web page.  
+[ASSISTANT_SAID] Commonly used IDL attributes include:  
+[ASSISTANT_SAID] 1. id - Used to give an element a unique identifier within a document. Example: `<div id="myDiv"></div>`  
+[ASSISTANT_SAID] 2. class - Used to specify one or more classes for an element. Example: `<p class="myClass"></p>`  
+[ASSISTANT_SAID] 3. style - Used to define inline styles for an element. Example: `<span style="color: blue; font-size: 14px;">Text here</span>`  
+[ASSISTANT_SAID] 4. title - Used to provide additional information about an element, usually displayed as a tooltip. Example: `<img src="image.jpg" title="This is an image">`  
+[ASSISTANT_SAID] 5. href - Used to specify the URL of a link. Example: `<a href="https://www.example.com">Link</a>`  
+[ASSISTANT_SAID] 6. src - Used to specify the URL of an image or other media element. Example: `<img src="image.jpg" alt="Image">`  
+[ASSISTANT_SAID] 7. alt - Used to provide a text description of an image for accessibility purposes. Example: `<img src="image.jpg" alt="Image description">`  
+[ASSISTANT_SAID] 8. target - Used to specify where to open the linked document. Example: `<a href="https://www.example.com" target="_blank">Link</a>`  
+[ASSISTANT_SAID] 9. tabindex - Used to specify the order in which elements are focused when the user presses the Tab key. Example: `<input type="text" tabindex="1">`  
+[USER] User asked about the input value property and its relation to IDL attributes.  
+[ASSISTANT_SAID] The input value property is used to get or set the current value of an HTML input element.  
+[ASSISTANT_SAID] Example of getting the value: `let inputValue = document.getElementById("myInput").value;`  
+[ASSISTANT_SAID] Example of setting the value: `document.getElementById("myInput").value = "new value";`  
+[ASSISTANT_SAID] The input value property relates to the IDL attribute of the same name, which specifies the initial

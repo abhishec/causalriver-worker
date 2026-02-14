@@ -1,0 +1,38 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/27 (Sat) 22:03  
+[ASSISTANT_SAID] A sentence is a grammatical unit that expresses a complete thought.  
+[ASSISTANT_SAID] A word is the basic unit of meaning in a sentence.  
+[ASSISTANT_SAID] A letter is a written or printed symbol used to represent a speech sound or a word.  
+[ASSISTANT_SAID] A clause is a grammatical unit that contains a subject and a predicate.  
+[ASSISTANT_SAID] An independent clause expresses a complete thought and can stand alone as a sentence.  
+[ASSISTANT_SAID] A dependent clause does not express a complete thought and needs an independent clause to complete its meaning.  
+[ASSISTANT_SAID] A phrase is a group of words that forms a unit of meaning but does not contain a subject and a predicate.  
+[ASSISTANT_SAID] A noun is a word that represents a person, place, thing, or idea.  
+[ASSISTANT_SAID] A verb is a word that expresses an action, state, or occurrence.  
+[ASSISTANT_SAID] An adjective is a word that modifies or describes a noun or pronoun.  
+[ASSISTANT_SAID] An adverb is a word that modifies or describes a verb, adjective, or other adverb.  
+[ASSISTANT_SAID] The subject is the noun or pronoun that the sentence is about.  
+[ASSISTANT_SAID] An object is a noun or pronoun that receives the action of a verb or shows the relationship between a verb and its complement.  
+[ASSISTANT_SAID] A modifier is a word or phrase that provides additional information about another.  
+[USER] Requested to write the list in the form of a hierarchy where each term/category is placed inside a parent category.  
+[ASSISTANT_CREATED] Provided a hierarchy of language structure:  
+- Sentence  
+  - Clause (Independent or Dependent)  
+    - Phrase (Noun, Verb, Adjective, Adverb, Prepositional, Gerund, Infinitive)  
+      - Word (Noun, Verb, Adjective, Adverb)  
+        - Letter  
+[USER] Requested to add subject, object, complement, and modifier to the hierarchy.  
+[ASSISTANT_CREATED] Updated hierarchy to include subject, object, complement, and modifier:  
+- Sentence  
+  - Clause (Independent or Dependent)  
+    - Subject  
+      - Predicate  
+        - Verb Phrase (Main Verb, Auxiliary Verb)  
+          - Object  
+            - Complement  
+              - Modifier  
+                - Phrase  
+                  - Word  
+                    - Letter  
+[USER] Requested to use numbers instead of bullets for each node in the hierarchy

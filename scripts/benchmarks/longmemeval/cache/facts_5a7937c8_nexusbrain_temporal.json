@@ -1,0 +1,107 @@
+{
+  "answer_4cef8a3c_3": [
+    {
+      "fact": "User is looking for volunteer opportunities in their community.",
+      "type": "preference",
+      "entities": [
+        "volunteer opportunities",
+        "community"
+      ]
+    },
+    {
+      "fact": "User prefers volunteer opportunities related to food banks or pantries.",
+      "type": "preference",
+      "entities": [
+        "food banks",
+        "pantries"
+      ]
+    },
+    {
+      "fact": "User helped out at the church's annual holiday food drive on December 10th.",
+      "type": "event",
+      "entities": [
+        "church",
+        "holiday food drive",
+        "December 10th"
+      ]
+    },
+    {
+      "fact": "User sorted donations and packed boxes for families in need during the food drive.",
+      "type": "event",
+      "entities": [
+        "sorting donations",
+        "packing boxes",
+        "families in need"
+      ]
+    },
+    {
+      "fact": "User found the experience of volunteering at the food drive to be rewarding.",
+      "type": "opinion",
+      "entities": [
+        "rewarding experience"
+      ]
+    }
+  ],
+  "answer_4cef8a3c_2": [
+    {
+      "fact": "User is leading a Bible study next week on the book of Matthew.",
+      "type": "event",
+      "entities": [
+        "Bible study",
+        "book of Matthew"
+      ]
+    },
+    {
+      "fact": "User recently led a Bible study on the same topic at their church on December 17th.",
+      "type": "event",
+      "entities": [
+        "Bible study",
+        "December 17th",
+        "church"
+      ]
+    },
+    {
+      "fact": "User finds the idea of using open-ended questions to encourage reflection helpful.",
+      "type": "opinion",
+      "entities": [
+        "open-ended questions",
+        "reflection"
+      ]
+    }
+  ],
+  "answer_4cef8a3c_1": [
+    {
+      "fact": "User is planning a family outing for the upcoming holiday season.",
+      "type": "event",
+      "entities": [
+        "family outing",
+        "holiday season"
+      ]
+    },
+    {
+      "fact": "User attended midnight mass on Christmas Eve at St. Mary's Church.",
+      "type": "event",
+      "entities": [
+        "midnight mass",
+        "Christmas Eve",
+        "St. Mary's Church"
+      ]
+    },
+    {
+      "fact": "User enjoyed the festive atmosphere at St. Mary's Church.",
+      "type": "opinion",
+      "entities": [
+        "festive atmosphere",
+        "St. Mary's Church"
+      ]
+    },
+    {
+      "fact": "User is looking for general holiday-themed event ideas for next year's holiday season.",
+      "type": "preference",
+      "entities": [
+        "holiday-themed events",
+        "next year's holiday season"
+      ]
+    }
+  ]
+}

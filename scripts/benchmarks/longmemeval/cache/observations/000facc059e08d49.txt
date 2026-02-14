@@ -1,0 +1,22 @@
+**Observation Log:**
+
+- [FACT] User is looking to book a flight from New York to Los Angeles for a business trip.
+- [FACT] User recently flew with American Airlines on the New York to Los Angeles route.
+- [PREFERENCE] User had a terrible experience with American Airlines' entertainment system, which didn't work for the entire flight.
+- [ASSISTANT_SAID] Delta Air Lines offers a wide selection of movies, TV shows, music, and games on their seat-back screens and has a mobile app for streaming content.
+- [ASSISTANT_SAID] Virgin America has an in-flight entertainment system called RED, which offers a wide range of movies, TV shows, music, games, live TV, and on-demand content.
+- [ASSISTANT_SAID] Alaska Airlines' entertainment system, Alaska Beyond, offers a variety of movies, TV shows, music, and games, including free entertainment options.
+- [ASSISTANT_SAID] JetBlue Airways' Fly-Fi system offers live TV, movies, TV shows, games, music, and free Wi-Fi on all flights.
+- [ASSISTANT_SAID] United Airlines' United Private Screening offers a wide selection of movies, TV shows, music, and games, with a mobile app for streaming content.
+- [ASSISTANT_SAID] User might want to consider factors like seat comfort, legroom, and meal options when choosing an airline.
+- [FACT] User is considering Delta or Virgin America for their upcoming trip.
+- [ASSISTANT_SAID] Delta offers a hot breakfast option for Delta Comfort+ and First Class, such as a breakfast sandwich or omelette, along with fresh fruit and yogurt.
+- [ASSISTANT_SAID] Delta's Main Cabin offers a buy-on-board breakfast option, including a breakfast sandwich, yogurt parfait, or snack box with pastries and fruit.
+- [ASSISTANT_SAID] Virgin America's First Class offers a gourmet breakfast menu, including dishes like scrambled eggs with smoked salmon or a breakfast burrito.
+- [ASSISTANT_SAID] Virgin America's Main Cabin offers breakfast snacks like a breakfast sandwich, yogurt parfait, or fruit and cheese plate.
+- [PREFERENCE] User prefers Delta for their upcoming trip due to a good experience with their meal service in the past.
+- [EVENT] User's previous flight with American Airlines included an apologetic flight attendant who offered a voucher for a free drink on their next flight.
+- [ASSISTANT_SAID] Delta is known for its excellent customer service and friendly flight attendants.
+- [FACT] User plans to book the flight themselves.
+- [EVENT] User recently got approved for the Citi / AAdvantage Executive credit card.
+- [ASSISTANT_SAID] The Citi / AAdvantage Executive credit card offers 50,000 bonus miles after spending $5,000 in the first 3 months, 2X

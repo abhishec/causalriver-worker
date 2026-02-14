@@ -1,0 +1,27 @@
+{
+  "answer_8ee04a2e": [
+    {
+      "fact": "User has a cat that sheds a lot",
+      "type": "personal",
+      "entities": [
+        "cat"
+      ]
+    },
+    {
+      "fact": "User is looking for ways to keep their living room dust-free",
+      "type": "preference",
+      "entities": [
+        "living room",
+        "dust-free"
+      ]
+    },
+    {
+      "fact": "User is experiencing issues with their TV picture flickering",
+      "type": "event",
+      "entities": [
+        "TV",
+        "flickering"
+      ]
+    }
+  ]
+}

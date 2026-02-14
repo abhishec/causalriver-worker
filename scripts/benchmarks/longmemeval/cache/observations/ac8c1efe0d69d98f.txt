@@ -1,0 +1,31 @@
+**Observation Log**
+
+**Session Date:** 2023/05/25 (Thu) 08:29  
+**Session ID:** 6bb37368
+
+- [FACT] User is located in rural Ohio.
+- [FACT] User is a complete beginner in beekeeping.
+- [EVENT] User has finished building a new chicken coop in their backyard, which took about 3 days to complete.
+- [PREFERENCE] User prefers in-person beekeeping classes.
+- [TEMPORAL] User has a few weekends free in the next couple of months.
+- [ASSISTANT_SAID] Beekeeping is a fascinating and rewarding hobby that can also be a valuable addition to the user's farm.
+- [ASSISTANT_SAID] The assistant requested the user's location, type of beekeeping course desired, format of the course, and time availability to provide tailored information.
+- [ASSISTANT_SAID] Suggested reaching out to local beekeeping associations, extension offices, or agricultural organizations for information on beekeeping courses and resources.
+- [ASSISTANT_SAID] Recommended the Ohio State University Extension's "Beekeeping for Beginners" course and the Ohio Beekeepers Association's "New Beekeeper" course.
+- [ASSISTANT_SAID] Mentioned specific courses: 
+  - "Beekeeping for Beginners" - April 17-18, 2023, at the OSU Extension office in Wooster, OH.
+  - "New Beekeeper Course" - May 1-2, 2023, at the Coshocton County Fairgrounds in Coshocton, OH.
+  - "Beekeeping 101" - June 12-13, 2023, at the Knox County Fairgrounds in Mount Vernon, OH.
+- [ASSISTANT_SAID] Suggested asking the Coshocton County Beekeepers Association about mentorship programs, beehive setup, bee acquisition, apiary setup, and ongoing support.
+- [ASSISTANT_SAID] Advised the user to ask about the cost of the course and local suppliers for bees and equipment.
+- [ASSISTANT_SAID] Listed essential beekeeping equipment needed to get started:
+  - Beehive (Langstroth, Top-bar, or Warre)
+  - Protective gear (suit, veil, gloves)
+  - Smoker
+  - Hive tool
+  - Frames and foundation
+  - Bees
+  - Feeder
+- [ASSISTANT_SAID] Recommended brands for beekeeping equipment, including Mann Lake, Dadant & Sons, and Brushy Mountain Bee Farm.
+- [PREFERENCE] User is considering getting a Langstroth hive but has heard good things about Top-bar hives.
+- [ASSISTANT_SAID] Provided a comparison of Langstroth and Top-bar hives, outlining pros

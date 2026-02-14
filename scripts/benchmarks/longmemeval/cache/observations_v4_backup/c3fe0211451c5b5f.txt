@@ -1,0 +1,17 @@
+**Observation Log:**
+
+[FACT] User is considering pursuing a Master's degree in Computer Science.  
+[FACT] User is from Arcadia, California.  
+[FACT] User attended Arcadia High School from 2010 to 2014.  
+[FACT] User attended UCLA for undergraduate studies.  
+[FACT] User is familiar with the UCLA campus and program.  
+[PREFERENCE] User is leaning towards staying in Southern California for their Master's degree.  
+[PREFERENCE] User is interested in AI and machine learning.  
+[ASSISTANT] Assistant provided information on top CS programs in California, including Stanford, UC Berkeley, Caltech, USC, UCLA, UCSD, and CMU-Silicon Valley.  
+[ASSISTANT] Assistant highlighted differences between the CS programs at UCLA and UC Berkeley, including research focus, curriculum, admission selectivity, location, and culture.  
+[ASSISTANT] Assistant provided details about research areas and opportunities available to CS students at UCLA, including AI, data science, computer networks, computer vision, and human-computer interaction.  
+[ASSISTANT] Assistant listed notable research centers and institutes at UCLA, such as the UCLA Artificial Intelligence Research Laboratory and the UCLA Center for Networked Systems.  
+[ASSISTANT] Assistant mentioned specific faculty members in the AI and ML research group at UCLA, including Prof. Yizhou Sun, Prof. Song-Chun Zhu, Prof. Cho-Jui Hsieh, Prof. Greg Ver Steeg, and Prof. Margo Seltzer, along with their research focuses.  
+[EVENT] User is exploring research opportunities in AI and machine learning at UCLA.  
+[CHANGE] User's interest in AI and machine learning was confirmed during the conversation.  
+[TEMPORAL] Session date is 2021/08/20 (Fri) 00:45.

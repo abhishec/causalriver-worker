@@ -1,0 +1,24 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/04/19 (Wed) 15:03
+- [USER] The user is developing a game that includes multiple paths and timelines.
+- [USER] The user has outlined three paths in their game, with Path 3 being the darkest.
+- [USER] In Path 3, Marcus misses a gunshot meant for Surgey, which leads to a series of tragic events including the death of Dr. Penelope, Marcus, and Jillian.
+- [USER] Surgey runs away after the deaths, leading to an uncontained outbreak and doomsday scenario for continental America.
+- [USER] The user mentions that small parasite outbreaks begin in Africa, Europe, and Russia due to infected corpses fleeing the carnage.
+- [USER] The user envisions maps in the game that follow groups of survivors trying to piece together society while avoiding zombies.
+- [USER] Surgey manipulates a group of survivors in a bunker, claiming there is a safe settlement in Northern Canada, leading to a catastrophic outcome.
+- [USER] The user is interested in feedback on their outlined paths and prologue.
+- [ASSISTANT_SAID] The assistant finds the concept intriguing and suggests that different decisions by characters can lead to vastly different outcomes.
+- [ASSISTANT_SAID] The assistant suggests including foreshadowing or hints about the three paths in the prologue to engage players.
+- [ASSISTANT_SAID] The assistant recommends adding tough choices in Path 1 to enhance engagement and exploring the aftermath of military intervention.
+- [ASSISTANT_SAID] The assistant advises making character motivations clear in Path 2 to enhance the story's impact.
+- [ASSISTANT_SAID] The assistant suggests grounding Surgey's descent into madness in Path 3 in his character's history.
+- [ASSISTANT_SAID] The assistant recommends including consequences that ripple through the timelines based on player choices for greater agency.
+- [USER] The user expresses interest in the idea of smaller splits in the timelines based on decisions made.
+- [USER] The user references the 7 Amplified zombie types discussed previously: Jugernaut, Hydra, Skullcrawler, Berserker, Lasher, Hoplite, and Fissionator.
+- [ASSISTANT_SAID] The assistant suggests that the Jugernaut could appear in all paths, while the Hydra and Hoplite might fit better in specific paths.
+- [ASSISTANT_SAID] The assistant provides suggestions for maps and events for each path, including:
+  - [ASSISTANT_CREATED] Path 1 Map: A high-security military base with traps and powerful weapons.
+  - [ASSISTANT_CREATED] Path 1 Event: A massive horde of zombies attacks the player's safehouse.
+  - [ASSISTANT_CREATED] Path 2 Map: A major

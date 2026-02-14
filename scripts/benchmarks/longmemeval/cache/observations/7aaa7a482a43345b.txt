@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/24 (Wed) 00:55  
+[FACT] The user has a brother who is studying French.  
+[FACT] The user has an abuela (grandmother) who is staying with them.  
+[CHANGE] The user has been speaking a lot of Spanish at home lately since their abuela is staying with them.  
+[PREFERENCE] The user is looking for language learning resources for their brother's French studies.  
+[ASSISTANT_SAID] Recommended online resources for learning French: Duolingo, French.org, Frenchpod101, Quizlet.  
+[ASSISTANT_SAID] Recommended language learning apps for French: Babbel, Rosetta Stone, Anki, HelloTalk.  
+[ASSISTANT_SAID] Suggested additional tips for learning French: practice consistently, listen to French music, watch French movies or TV shows, review grammar rules, and find native speakers to practice with.  
+[PREFERENCE] The user is interested in language learning resources that focus on food and cooking vocabulary.  
+[ASSISTANT_SAID] Recommended websites for food and cooking vocabulary in Spanish: SpanishDict, La Cocina de SpanishDict, Food.com.  
+[ASSISTANT_SAID] Recommended language learning apps for food vocabulary: Tasty, HelloTalk, Lingodeer.  
+[ASSISTANT_SAID] Recommended YouTube channels for cooking in Spanish: SpanishDict, Cocina con Claudia, La Cocina de Toño.  
+[ASSISTANT_SAID] Recommended podcasts for food-related topics: Coffee Break Spanish, Spanish Obsessed.  
+[ASSISTANT_SAID] Recommended books for Latin American cooking: "The Essentials of Classic Spanish Cooking" by Penelope Casas, "The Food of Latin America" by Elisabeth Lambert Ortiz.  
+[PREFERENCE] The user is learning how to make tamales with their abuela.  
+[PREFERENCE] The user is trying to improve their pronunciation of Spanish vowels, especially the "e" and "a" sounds.  
+[ASSISTANT_SAID] Provided tips to improve pronunciation of Spanish vowels: pay attention to the position of sounds, listen to native speakers, practice with words, mimic sounds, and focus on common ingredients.  
+[PREFERENCE] The user has been listening to more Spanish podcasts and watching Spanish TV shows to improve their language skills.  
+[FACT] The user is listening to a podcast called "Café con Cultura" that discusses Latin American culture and history.  
+[ASSISTANT_SAID] Suggested other podcasts related to Spanish language and culture: Coffee Break Spanish, Spanish Obsessed, Radio Nacional de España.  
+[ASSISTANT_SAID] Encouraged the user to continue listening to podcasts to improve their understanding of language and cultural context.

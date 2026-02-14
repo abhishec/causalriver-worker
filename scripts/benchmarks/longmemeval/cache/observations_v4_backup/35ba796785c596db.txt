@@ -1,0 +1,21 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/08/11 (Fri) 11:16  
+[PREFERENCE] User is looking for inspiration for new cocktails to try.  
+[PREFERENCE] User is interested in summer drinks that incorporate fresh herbs from their garden.  
+[FACT] User has been experimenting with different gin brands.  
+[PREFERENCE] User enjoys Hendrick's gin, which they picked up last week.  
+[ASSISTANT] Assistant provided cocktail recommendations that incorporate fresh herbs and Hendrick's gin.  
+[PREFERENCE] User is considering using lavender in a cocktail.  
+[PREFERENCE] User is curious about recommendations for a good lavender syrup recipe or a cocktail that pairs well with lavender.  
+[ASSISTANT] Assistant provided a lavender syrup recipe and cocktail suggestions that feature lavender syrup.  
+[PREFERENCE] User has been experimenting with different Negroni recipes at home.  
+[PREFERENCE] User found that using Hendrick's gin and Carpano Antica vermouth brings out the flavors in their Negroni.  
+[EVENT] User has tried making the Negroni at home 5 times since Emma taught them how to make it.  
+[PREFERENCE] User is looking for recommendations for other bitter liqueurs to try in place of Campari.  
+[ASSISTANT] Assistant provided recommendations for alternative bitter liqueurs to use in a Negroni.  
+[PREFERENCE] User is curious about trying a White Negroni.  
+[ASSISTANT] Assistant provided a recipe for a White Negroni and tips on balancing the flavors.  
+[PREFERENCE] User has been experimenting with grapefruit and lemon in their cocktails.  
+[PREFERENCE] User wants to try out other citrus options that pair well with gin and lavender.  
+[ASSISTANT] Assistant provided recommendations for citrus fruits that pair well with gin and lavender, including orange, yuzu, kumquat, satsuma, and bergamot.

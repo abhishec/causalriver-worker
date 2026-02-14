@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[FACT] User is planning a trip to Hawaii.  
+[FACT] User learned from their last family trip to Hawaii that it was super expensive with resorts and touristy restaurants.  
+[CHANGE] User's previous trip to Hawaii felt very touristy and added up to a small fortune.  
+[TEMPORAL] Session Date: 2023/05/23 (Tue) 02:53.  
+[EVENT] User is wondering about affordable accommodations and restaurants in Hawaii that are not too touristy.  
+[ASSISTANT_SAID] Hawaii can be pricey, but there are ways to experience the islands without breaking the bank.  
+[ASSISTANT_SAID] Recommended affordable accommodations include vacation rentals through VRBO, Airbnb, or HomeAway.  
+[ASSISTANT_SAID] Suggested checking out hostels like the Honolulu Hostel or the Beach House Hostel on Oahu.  
+[ASSISTANT_SAID] Recommended budget hotels like the Ohana Waikiki East Hotel on Oahu and the Hilo Hawaiian Hotel on the Big Island.  
+[ASSISTANT_SAID] Suggested non-touristy restaurants in neighborhoods like Kaka'ako or Chinatown on Oahu, and Hilo Town on the Big Island.  
+[ASSISTANT_SAID] Recommended food trucks like Giovanni's Shrimp Truck on Oahu and Ono Seafood truck on the Big Island.  
+[ASSISTANT_SAID] Suggested ethnic eateries like Pho 97 on Oahu, Ono Korean BBQ on Maui, and Los Tacos on Kauai.  
+[ASSISTANT_SAID] Specific recommendations for Oahu include Helena's Hawaiian Food, Ono Seafood, and Tanioka's Noodle & Sushi Bar.  
+[ASSISTANT_SAID] Specific recommendations for Maui include Sam Sato's, Star Noodle, and Maui Tacos.  
+[ASSISTANT_SAID] Specific recommendations for the Big Island include Hilo Bay Cafe, Cafe 100, and Ken's House of Pancakes.  
+[ASSISTANT_SAID] Suggested researching and booking accommodations in advance, especially during peak travel seasons.  
+[EVENT] User is thinking of visiting the Pearl Harbor memorial during their trip to Hawaii.  
+[ASSISTANT_SAID] Suggested arriving early to the USS Arizona Memorial Visitor Center to avoid crowds.  
+[ASSISTANT_SAID] Recommended taking a guided tour for deeper understanding of Pearl Harbor's history.  
+[ASSISTANT_SAID] Suggested visiting the USS Arizona Memorial Museum and taking time to reflect on the memorial deck.  
+[ASSISTANT_SAID] Advised avoiding commercialized areas around the visitor center and visiting the USS Oklahoma Memorial.  
+[ASSISTANT_SAID] Suggested considering a sunrise or sunset visit for a more peaceful experience.  
+[ASSISTANT_SAID] Recommended talking to a park ranger for insights and learning more about the

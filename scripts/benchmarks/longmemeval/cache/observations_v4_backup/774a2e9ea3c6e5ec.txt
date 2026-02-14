@@ -1,0 +1,20 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/25 (Thu) 17:08  
+[EVENT] User is looking to buy a house.  
+[EVENT] User recently got pre-approved for a mortgage.  
+[FACT] User can borrow up to $350,000 based on pre-approval from the lender.  
+[ASSISTANT] Assistant provided a breakdown of estimated monthly mortgage payments based on a loan amount of $350,000, interest rate of 4%, and a 30-year loan term.  
+[ASSISTANT] Assistant estimated the monthly payment to be approximately $1,664.41, including principal, interest, property taxes, and insurance.  
+[PREFERENCE] User expressed that the estimated monthly payment of $1,664 is higher than expected.  
+[EVENT] User is considering putting down a larger down payment to avoid PMI (Private Mortgage Insurance).  
+[FACT] User inquired about different types of mortgage insurance and how they affect monthly payments.  
+[ASSISTANT] Assistant explained the two primary types of mortgage insurance: Private Mortgage Insurance (PMI) and Federal Housing Administration (FHA) Mortgage Insurance.  
+[ASSISTANT] Assistant provided estimates for PMI costs based on a $350,000 loan with a 10% down payment, ranging from $87.50 to $437.50 per month.  
+[ASSISTANT] Assistant provided estimates for FHA mortgage insurance costs based on a $350,000 loan with a 3.5% down payment, ranging from $131.25 to $306.25 per month.  
+[ASSISTANT] Assistant explained that to avoid PMI on a $350,000 loan, the user would need to put down at least 20%, which amounts to $70,000.  
+[ASSISTANT] Assistant provided a rough estimate of monthly payments without PMI, suggesting a payment of approximately $1,337.41 based on a loan amount of $280,000.  
+[ASSISTANT] Assistant discussed how interest rates are determined and factors that influence them.  
+[ASSISTANT] Assistant provided strategies for negotiating a better interest rate, including shopping around, improving credit score, and increasing down payment.  
+[ASSISTANT] Assistant explained what a rate lock is and how it works, including the benefits of protecting against rate increases.  
+[ASSISTANT] Assistant highlighted that a rate lock guarantees a specific interest rate for a specified period, providing predictability in monthly payments.

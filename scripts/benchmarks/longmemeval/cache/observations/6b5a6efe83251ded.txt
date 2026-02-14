@@ -1,0 +1,12 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/30 (Tue) 01:04  
+[USER] User provided an information block about adding images using Markdown and the Unsplash API.  
+[USER] User requested a picture of a person browsing and shopping on YouTube.  
+[ASSISTANT_SAID] Assistant provided an image of a person browsing and shopping on YouTube with the URL: ![Image of a person browsing and shopping on YouTube](https://source.unsplash.com/1600x900/?shopping,youtube)  
+[USER] User provided another information block about adding images using Markdown and the Unsplash API.  
+[USER] User requested a picture of a person who is looking at the laptop screen.  
+[ASSISTANT_SAID] Assistant provided an image of a person looking at a laptop screen with the URL: ![Image of a person looking at a laptop screen](https://source.unsplash.com/1600x900/?laptop,technology)  
+[USER] User provided yet another information block about adding images using Markdown and the Unsplash API.  
+[USER] User requested the URL of the picture of the person who is looking at the laptop screen.  
+[ASSISTANT_SAID] Assistant provided the URL of the image of a person looking at the laptop screen: <https://source.unsplash.com/1600x900/?laptop,technology>

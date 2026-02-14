@@ -1,0 +1,19 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/25 (Thu) 20:23
+- [USER] User inquired about the batting and bowling stats for the top performers in the 2019 Cricket World Cup.
+- [ASSISTANT_SAID] Rohit Sharma (India) - 648 runs, average of 81.00, strike rate of 98.33, 5 centuries.
+- [ASSISTANT_SAID] David Warner (Australia) - 647 runs, average of 71.88, strike rate of 89.36, 3 centuries.
+- [ASSISTANT_SAID] Shakib Al Hasan (Bangladesh) - 606 runs, average of 86.57, strike rate of 96.03, 2 centuries and 5 wickets.
+- [ASSISTANT_SAID] Kane Williamson (New Zealand) - 578 runs, average of 82.57, strike rate of 74.96, 2 centuries.
+- [ASSISTANT_SAID] Joe Root (England) - 556 runs, average of 61.77, strike rate of 89.23, 2 centuries.
+- [ASSISTANT_SAID] Mitchell Starc (Australia) - 27 wickets, average of 18.59, economy rate of 5.43, 2 five-wicket hauls.
+- [ASSISTANT_SAID] Lockie Ferguson (New Zealand) - 21 wickets, average of 19.47, economy rate of 4.88, 1 four-wicket haul.
+- [ASSISTANT_SAID] Mustafizur Rahman (Bangladesh) - 20 wickets, average of 24.20, economy rate of 6.68, 1 five-wicket haul.
+- [ASSISTANT_SAID] Jofra Archer (England) - 20 wickets, average of 23.05, economy rate of 4.57, 1 five-wicket haul.
+- [ASSISTANT_SAID] Mohammad Amir (Pakistan) - 17 wickets, average of 21.05, economy rate of 4.88, 1 four-wicket haul.
+- [ASSISTANT_SAID] Bangladesh finished at the 8th position in the points table with 3 wins, 5 losses, and 1 no result.
+- [ASSISTANT_SAID] Shakib Al Hasan was named the player of the tournament for his outstanding all-round performances.
+- [USER] User expressed disappointment for Bangladesh not making it to the knockout round but happiness for Shakib Al Hasan.
+- [USER] User asked who ended up winning the World Cup.
+- [ASSISTANT_SAID] England won the 2019 Cricket World Cup by defeating New Zealand in a thrilling final

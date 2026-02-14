@@ -1,0 +1,34 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/23 (Tue) 12:00  
+[FACT] User is submitting a thesis proposal today.  
+[PREFERENCE] User is looking for reliable sources on social media's impact on mental health in young adults.  
+[ASSISTANT_SAID] Assistant congratulated the user on submitting their thesis proposal.  
+[ASSISTANT_SAID] Assistant suggested the following academic journals:  
+[ASSISTANT_SAID] 1. Cyberpsychology, Behavior, and Social Networking  
+[ASSISTANT_SAID] 2. Computers in Human Behavior  
+[ASSISTANT_SAID] 3. Journal of Adolescent Health  
+[ASSISTANT_SAID] 4. Journal of Youth and Adolescence  
+[ASSISTANT_SAID] 5. Psychology of Popular Media Culture  
+[ASSISTANT_SAID] Assistant suggested the following databases:  
+[ASSISTANT_SAID] 1. PubMed  
+[ASSISTANT_SAID] 2. PsycINFO  
+[ASSISTANT_SAID] 3. Scopus  
+[ASSISTANT_SAID] 4. Web of Science  
+[ASSISTANT_SAID] 5. Google Scholar  
+[ASSISTANT_SAID] Assistant recommended other resources:  
+[ASSISTANT_SAID] 1. The American Psychological Association (APA)  
+[ASSISTANT_SAID] 2. The National Institute of Mental Health (NIMH)  
+[ASSISTANT_SAID] 3. The Pew Research Center  
+[ASSISTANT_SAID] 4. The Royal Society for Public Health (RSPH)  
+[ASSISTANT_SAID] Assistant provided tips for searching:  
+[ASSISTANT_SAID] 1. Use specific keywords like "social media," "mental health," "young adults," and "adolescents."  
+[ASSISTANT_SAID] 2. Filter search by date for recent research.  
+[ASSISTANT_SAID] 3. Look for systematic reviews and meta-analyses.  
+[ASSISTANT_SAID] 4. Consider searching for grey literature.  
+[PREFERENCE] User is interested in exploring the topic of social media's impact on mental health from different angles.  
+[ASSISTANT_SAID] Assistant suggested potential research questions and subtopics, including:  
+[ASSISTANT_SAID] 1. Correlation between social media use and symptoms of depression, anxiety, or loneliness.  
+[ASSISTANT_SAID] 2. Impact of different social media platforms on mental health outcomes.  
+[ASSISTANT_SAID] 3. Influence of social media on self-esteem and body image.  
+[ASSISTANT_S

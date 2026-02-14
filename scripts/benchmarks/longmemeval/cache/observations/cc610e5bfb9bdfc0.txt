@@ -1,0 +1,22 @@
+**Observation Log:**
+
+**Session Date:** 2023/08/20 (Sun) 17:25  
+**Session ID:** sharegpt_fH7KHW1_119
+
+1. [ASSISTANT_SAID] The project is called Omelette Finance, which includes a decentralized finance (DeFi) app with two main features: DCA/Diversify and Basket dApp.
+2. [ASSISTANT_SAID] DCA/Diversify allows users to invest in a diversified portfolio of cryptocurrencies using dollar-cost averaging as a long-term investment strategy.
+3. [ASSISTANT_SAID] The Basket dApp is a smart contract that facilitates automated trades according to user-specified parameters, allowing users to automate their investments.
+4. [ASSISTANT_SAID] The Omelette Finance app has its own token called EGGY, which can be used for staking and governance purposes.
+5. [ASSISTANT_SAID] There is a 7% buy and sell tax on EGGY tokens, which will be used to incentivize holders and fund the development and maintenance of the project.
+6. [ASSISTANT_SAID] Users with at least $100 worth of EGGY will have access to a special section with high-quality baskets of coins voted upon by governance.
+7. [ASSISTANT_SAID] The app will be built using web3 technologies such as React and web3.js and will interact with the smart contract via a web3 provider like MetaMask.
+8. [ASSISTANT_SAID] The app will be launched on the Arbitrum network to take advantage of fast and low-cost transactions.
+9. [ASSISTANT_CREATED] A roadmap for the project includes several phases: initial development and testing, launch of DCA/Diversify, launch of Basket dApp, and introduction of additional features.
+10. [USER] Requested a recap of the conversation to ensure understanding in case of chat corruption.
+11. [ASSISTANT_SAID] Provided a recap that included the project name, description, features, architecture, and roadmap.
+12. [USER] Clarified that DCA/Diversify and Basket dApp are the same and should not be separated.
+13. [ASSISTANT_SAID] Acknowledged the misunderstanding and confirmed that DCA/Diversify and Basket dApp are the same project.
+14. [USER] Requested another recap, emphasizing that DCA/Diversify and Basket dApp are one platform called Omelette Finance.
+15. [ASSISTANT_CREATED] A revised recap that consolidated DCA/Diversify and Basket dApp into a single platform called Omelette Finance, detailing its features, architecture, and roadmap.
+
+This log captures all relevant details from the conversation, ensuring a comprehensive overview of the discussion.

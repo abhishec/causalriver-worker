@@ -1,0 +1,28 @@
+**Observation Log:**
+
+[FACT] User is looking for new dance studios in the city that offer Salsa classes.  
+[FACT] User has been really into Salsa lately.  
+[EVENT] User just got back from an amazing dance workshop last weekend.  
+[ASSISTANT_SAID] Assistant expressed excitement about the user's experience and offered to help find Salsa dance studios.  
+[ASSISTANT_SAID] Assistant asked the user about their preferences regarding Salsa styles (On1, On2, or Cuban) and their skill level (beginner or advanced).  
+[ASSISTANT_SAID] Assistant inquired about the user's preferred location in the city for dance studios.  
+[ASSISTANT_SAID] Assistant asked what the user enjoyed most about the dance workshop attended last weekend.  
+[PREFERENCE] User is open to trying out different styles of Salsa but prefers On1 since that's what they've been learning so far.  
+[PREFERENCE] User is flexible with location but prefers somewhere close to the city center.  
+[FACT] User attended a contemporary dance workshop last weekend, not Salsa.  
+[PREFERENCE] User enjoyed how the contemporary dance instructor broke down the moves into smaller parts, making it easy to follow.  
+[ASSISTANT_SAID] Assistant acknowledged the user's preferences and provided a list of Salsa studios in the city center that offer On1 classes.  
+[ASSISTANT_SAID] Assistant provided details about four studios:  
+1. **Salsa Fusion Studio**: Located in downtown, offers On1 classes for all levels, known for clear teaching style.  
+2. **Rhythm & Motion**: One block from city center, offers On1 and other styles, variety of instructors.  
+3. **Salsa Academy**: Two locations in city center, offers On1 classes, focus on musicality and expression.  
+4. **DanceSpace**: Smaller studio, offers On1 classes, known for patience and attention to detail.  
+[ASSISTANT_SAID] Assistant offered to provide more information about the studios, such as schedules, prices, and reviews.  
+[USER] User decided to check out the schedules and prices of the studios.  
+[USER] User asked if any of the studios offer trial classes or introductory packages for new students.  
+[ASSISTANT_SAID] Assistant provided information on trial classes and introductory packages for each studio:  
+1. **Salsa Fusion Studio**: New Student Special - 3 classes for $30.  
+2. **Rhythm & Motion**: Beginner's Package - 4 classes for $40, free trial class available.  
+3. **Salsa Academy**: Trial Class for $10, New Student Package - 4 classes for $50.  
+4. **DanceSpace**: New Student Special - 2 classes for $20, free trial class available.  
+[ASSISTANT_SAID] Assistant noted that all

@@ -1,0 +1,98 @@
+{
+  "answer_c4e5d969_1": [
+    {
+      "fact": "User bought a coffee maker about three weeks ago.",
+      "type": "event",
+      "entities": [
+        "coffee maker",
+        "three weeks ago"
+      ]
+    },
+    {
+      "fact": "User's coffee maker is black and stainless steel from a well-known brand.",
+      "type": "personal",
+      "entities": [
+        "black and stainless steel",
+        "well-known brand"
+      ]
+    },
+    {
+      "fact": "User has been using the coffee maker every morning since purchase.",
+      "type": "event",
+      "entities": [
+        "coffee maker",
+        "every morning"
+      ]
+    },
+    {
+      "fact": "User has used about 20 of the 50 coffee pods purchased with the machine.",
+      "type": "personal",
+      "entities": [
+        "20 coffee pods",
+        "50 coffee pods"
+      ]
+    },
+    {
+      "fact": "User is concerned about cleaning the coffee pod compartment.",
+      "type": "opinion",
+      "entities": [
+        "cleaning",
+        "coffee pod compartment"
+      ]
+    },
+    {
+      "fact": "User is seeking advice on cleaning and maintenance tips for the coffee maker.",
+      "type": "opinion",
+      "entities": [
+        "cleaning",
+        "maintenance tips",
+        "coffee maker"
+      ]
+    }
+  ],
+  "answer_c4e5d969_2": [
+    {
+      "fact": "User is looking for new dessert recipes, specifically cakes or cookies.",
+      "type": "preference",
+      "entities": [
+        "dessert recipes",
+        "cakes",
+        "cookies"
+      ]
+    },
+    {
+      "fact": "User's stand mixer broke down last month and took two weeks to repair.",
+      "type": "event",
+      "entities": [
+        "stand mixer",
+        "repair",
+        "two weeks"
+      ]
+    },
+    {
+      "fact": "User had to bake a few things by hand while the stand mixer was being repaired.",
+      "type": "event",
+      "entities": [
+        "bake by hand",
+        "stand mixer"
+      ]
+    },
+    {
+      "fact": "User has leftover peppers and onions from cooking chicken fajitas last week.",
+      "type": "event",
+      "entities": [
+        "leftover peppers",
+        "onions",
+        "chicken fajitas"
+      ]
+    },
+    {
+      "fact": "User wants to use up leftover peppers and onions before they go bad.",
+      "type": "preference",
+      "entities": [
+        "leftover peppers",
+        "onions"
+      ]
+    }
+  ]
+}

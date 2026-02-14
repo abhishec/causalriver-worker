@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [FACT] The user is planning to buy a house.
+- [FACT] The user has already got pre-approved for a mortgage with Bank of America by the end of March 2023.
+- [FACT] The user is pre-approved for a mortgage up to $425,000.
+- [TEMPORAL] The session date is 2023/05/26 (Fri) 03:59.
+- [ASSISTANT_SAID] Congratulations on getting pre-approved for a mortgage!
+- [ASSISTANT_SAID] As of March 2023, the average interest rates for a mortgage in the United States are as follows: 30-year fixed-rate mortgage: around 3.75% to 4.00%, 15-year fixed-rate mortgage: around 3.00% to 3.25%, 5/1 adjustable-rate mortgage: around 2.75% to 3.25%, 7/1 adjustable-rate mortgage: around 3.25% to 3.75%.
+- [ASSISTANT_SAID] Interest rates can fluctuate daily and may vary depending on location, credit score, loan amount, and other factors.
+- [ASSISTANT_SAID] Since the user has pre-approval with Bank of America, they are in a good position to negotiate a competitive rate.
+- [ASSISTANT_SAID] The user should review their pre-approval letter and understand the terms, including the interest rate, APR, and any fees associated with the loan.
+- [ASSISTANT_SAID] The user should shop around, negotiate, and consider working with a mortgage broker when finalizing their mortgage application.
+- [ASSISTANT_SAID] The user should carefully review and understand the terms of their mortgage before signing any agreements.
+- [FACT] The user and their partner have good credit scores.
+- [ASSISTANT_SAID] In the United States, credit scores are categorized as follows: Excellent credit: 760-850, Good credit: 700-759, Fair credit: 680-699, Poor credit: 620-679, Bad credit: Below 620.
+- [ASSISTANT_SAID] A credit score of 700 or higher is typically considered good for a mortgage.
+- [ASSISTANT_SAID] Lenders also consider income, debt-to-income ratio, loan-to-value (LTV) ratio, employment history, cash reserves, assets, and property type and location in the mortgage approval process.
+- [EVENT] The user has found the house they want, and their offer was accepted.
+- [EVENT] The user is currently in the process of finalizing the mortgage application and doing a home inspection.
+- [ASSISTANT_SAID] The user should carefully review their loan estimate, ask questions, gather necessary documents, and consider locking in their rate during the mortgage application process

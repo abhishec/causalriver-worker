@@ -1,0 +1,20 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/24 (Wed) 08:26  
+[USER] User inquired about ways for a server to store permanent data on a client's browser without the client downloading it.  
+[ASSISTANT_SAID] Local Storage is a feature of web browsers that allows websites to store data on the client's device in key-value pairs, accessible even after the browser is closed.  
+[ASSISTANT_SAID] IndexedDB allows websites to store data in a structured format on the client's device, suitable for large amounts of data.  
+[ASSISTANT_SAID] Web SQL Database allows websites to store data in a relational database format on the client's device, but is not supported by all web browsers.  
+[ASSISTANT_SAID] Service Workers allow websites to run scripts in the background, enabling data storage on the client's device, such as caching website assets for offline access.  
+[ASSISTANT_SAID] In summary, Local Storage, IndexedDB, and Web SQL Database are ways for a server to store permanent data on a client's browser without downloading it.  
+[USER] User asked why Local Storage is not preferred over cookies, noting that both can store data indefinitely and do not have size limitations.  
+[ASSISTANT_SAID] Cookies are sent with every HTTP request, allowing them to authenticate users and maintain state across multiple pages, while Local Storage data is only accessible to the website that created it.  
+[ASSISTANT_SAID] Cookies have more security options, such as the "HttpOnly" flag, which prevents client-side scripts from accessing the cookie, while Local Storage is vulnerable to XSS attacks.  
+[ASSISTANT_SAID] Cookies have a smaller maximum size limit (around 4 KB) compared to Local Storage, which can be useful for cases where data size needs to be minimal.  
+[ASSISTANT_SAID] Cookies are accessible by both client and server, while Local Storage can only be accessed by client-side scripts.  
+[ASSISTANT_SAID] In summary, cookies are more appropriate for authentication, maintaining state, security, and data size, while Local Storage is better for storing large amounts of data privately.  
+[USER] User asked who creates Local Storage data if the server cannot access it.  
+[ASSISTANT_SAID] Local Storage is created and controlled by the client-side JavaScript of a website, which can only be accessed and modified by the website that created it.  
+[ASSISTANT_SAID] The browser provides a JavaScript API that allows a website to create and modify Local Storage data.  
+[ASSISTANT_SAID] The server can communicate with the client-side JavaScript code to pass data that needs to be stored in Local Storage.  
+[ASSISTANT_SAID] Local Storage data is only accessible to the website

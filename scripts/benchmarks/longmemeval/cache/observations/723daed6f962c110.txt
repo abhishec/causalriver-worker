@@ -1,0 +1,26 @@
+**Observation Log**
+
+**Session Date:** 2023/05/23 (Tue) 08:21  
+**Session ID:** sharegpt_B7mSlfQ_55
+
+1. [FACT] The user is a student passionate about solving problems and pursuing a degree in computer science.
+2. [FACT] The user has taken AP Computer Science and six community college courses in computer science.
+3. [FACT] The user gained experience in mobile development through an internship.
+4. [FACT] The user has participated in four hackathons.
+5. [FACT] The user's team became a finalist in the Google Health Case Competition, focusing on improving patient adherence to tailored nursing care plans.
+6. [FACT] The user has volunteered for 7 Cups, a counseling organization, for over 150 hours over the past two years.
+7. [FACT] The user has connected with teens as a listener to support them through mental illnesses.
+8. [PREFERENCE] The user values mental health and has gained knowledge about mental illnesses and psychotherapies through classes, books, and discussions with professionals.
+9. [FACT] The user has taught other volunteers how to mentor, expanding the organization's impact.
+10. [PREFERENCE] The user believes in the value of community-building and supporting others.
+11. [FACT] The user is eager to continue building their foundation and discipline in computer science as they progress through college.
+12. [PREFERENCE] The user feels that their diverse experiences, community-building skills, and passion for solving problems will make them a great computer science student.
+13. [ASSISTANT_SAID] The assistant was asked to write a narrative focusing on learning how to teach kids effectively, helping teens cope with mental health, and using computer science knowledge to build products for community learning and thriving.
+14. [ASSISTANT_CREATED] The assistant created a narrative in the first-person POV, around 650 words, focusing on the user's experiences with teaching, mental health support, and computer science.
+15. [EVENT] The user had a rewarding experience with a teenager named Kinga, who struggled with alcoholism and isolation.
+16. [CHANGE] The user learned effective communication skills and the importance of mental health support for teens through their experience with Kinga.
+17. [FACT] The user began reading books and taking classes on psychotherapies to better understand how to help teens like Kinga.
+18. [FACT] Kinga's condition improved over time, allowing her to reconnect with family and friends.
+19. [PREFERENCE] Kinga expressed that talking to the user helped her see that not everyone in the world was evil and that she could surround herself with good people.
+20. [FACT] The user has developed computer science skills through advanced courses, an internship in mobile development, and participation in hackathons.
+21. [EVENT] The user worked on a team that became a finalist in the Google Health Case Competition.

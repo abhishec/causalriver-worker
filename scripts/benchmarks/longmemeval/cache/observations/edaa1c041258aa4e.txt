@@ -1,0 +1,15 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/10 (Wed) 04:19  
+[USER] The left-most column contains the full text of the UDHR Universal Declaration of Human Rights, G.A. res. 217A (III), U.N. Doc A/810 at 71 (1948).  
+[USER] Locate the matching text in the middle column CDHRI Cairo Declaration on Human Rights in Islam, Aug. 5, 1990, U.N. GAOR, World Conf. on Hum. Rts., 4th Sess., Agenda Item 5, U.N. Doc. A/CONF.157/PC/62/Add.18 (1993) [English translation].  
+[USER] and copy/paste the text in the relevant middle column. This text may come from different clauses in the CHHRI to address the idea/clause in the first column.  
+[USER] Write the comments in the Right-most column about any miss-match between the left UDHR column and middle CDHR column.  
+[USER] i will give you the UDHR statements.  
+[ASSISTANT_SAID] I'm ready, please provide the UDHR statements.  
+[USER] Whereas disregard and contempt for human rights have resulted in barbarous acts which have outraged the conscience of mankind, and the advent of a world in which human beings shall enjoy freedom of speech and belief and freedom from fear and want has been proclaimed as the highest aspiration of the common people.  
+[ASSISTANT_SAID] CDHR Preamble: "Reaffirming the civilizing and historical role of the Islamic Ummah which Allah made as the best nation that has given mankind a universal and well-balanced civilization, in which harmony is established between this life and the hereafter and knowledge is combined with faith; and realizing that the Islamic Ummah which Allah has guided and entrusted with implementing its Shariah (Divine Law) is the most distinguished Ummah and the best nation ever raised up for mankind;"  
+[ASSISTANT_CREATED] Comment: The CDHR preamble does not directly address the idea of disregarding and contempt for human rights leading to barbarous acts. Instead, it emphasizes the historical role and importance of the Islamic Ummah in implementing Shariah law. This may reflect a different emphasis in the values and principles underpinning the CDHR compared to the UDHR.  
+[USER] Article 10 Everyone is entitled in full equality to a fair and public hearing by an independent and impartial tribunal, in the determination of his rights and obligations and of any criminal charge against him.  
+[ASSISTANT_SAID] CDHR Article 14: "Everyone shall have the right to a fair trial conducted in an Islamic manner. The court shall be obligated, in the course of achieving justice, to consult the Shari’ah (Divine Law)."  
+[ASS

@@ -1,0 +1,62 @@
+{
+  "answer_90de9b4d_1": [
+    {
+      "fact": "User is trying to improve their bird photography skills",
+      "type": "preference",
+      "entities": [
+        "bird photography"
+      ]
+    },
+    {
+      "fact": "User is interested in taking close-up shots of skittish birds like the Northern Flicker",
+      "type": "preference",
+      "entities": [
+        "close-up shots",
+        "Northern Flicker"
+      ]
+    }
+  ],
+  "answer_90de9b4d_2": [
+    {
+      "fact": "User is planning a picnic in their local park this weekend.",
+      "type": "event",
+      "entities": [
+        "picnic",
+        "local park",
+        "weekend"
+      ]
+    },
+    {
+      "fact": "User is interested in attracting birds to their picnic.",
+      "type": "preference",
+      "entities": [
+        "birds",
+        "picnic"
+      ]
+    },
+    {
+      "fact": "User has seen a Northern Flicker in their local park.",
+      "type": "event",
+      "entities": [
+        "Northern Flicker",
+        "local park"
+      ]
+    },
+    {
+      "fact": "User's total bird species count is 32.",
+      "type": "personal",
+      "entities": [
+        "32 species"
+      ]
+    },
+    {
+      "fact": "User plans to bring sunflower seeds and suet to attract woodpeckers.",
+      "type": "preference",
+      "entities": [
+        "sunflower seeds",
+        "suet",
+        "woodpeckers"
+      ]
+    }
+  ]
+}

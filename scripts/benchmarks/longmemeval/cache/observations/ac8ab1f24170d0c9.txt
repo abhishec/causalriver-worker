@@ -1,0 +1,36 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/20 (Sat) 10:18
+- [EVENT] User is planning a trip to Bali for surfing.
+- [ASSISTANT_SAID] The best time to visit Bali for surfing is during the dry season, which is from April to October.
+- [ASSISTANT_SAID] Recommended beaches for beginners are Kuta Beach, Legian Beach, and Seminyak Beach.
+- [ASSISTANT_SAID] Kuta Beach, Legian Beach, and Seminyak Beach have small to medium-sized waves suitable for learning how to surf.
+- [ASSISTANT_SAID] There are many surf schools and instructors available to help beginners get started.
+- [USER] User is interested in affordable surf schools in Bali.
+- [ASSISTANT_SAID] Recommended affordable surf schools include:
+  1. Odyssey Surf School - located in Kuta Beach
+  2. Balawista Surf School - located in Legian Beach
+  3. Pro Surf School Bali - located in Seminyak Beach
+  4. Rip Curl School of Surf - located in Legian Beach
+  5. Surf Star Bali - located in Kuta Beach
+- [ASSISTANT_SAID] User should check reviews and compare packages before choosing a surf school.
+- [USER] User is looking for tips for a beginner surfer in Bali.
+- [ASSISTANT_SAID] Tips for beginner surfers in Bali include:
+  1. Start with a surf lesson.
+  2. Be aware of riptides.
+  3. Rent beginner-friendly surfboards.
+  4. Surf at the right time.
+  5. Protect skin from sunburn and reef cuts.
+  6. Respect locals and the environment.
+  7. Have fun and keep practicing.
+- [USER] User is excited to start surfing in Bali and is asking for other fun activities to do.
+- [ASSISTANT_SAID] Recommended fun activities in Bali include:
+  1. Visit famous Bali temples (Tanah Lot, Uluwatu Temple, Besakih Temple).
+  2. Relax at a spa for traditional Balinese massages.
+  3. Explore Bali's rice terraces (Tegalalang Rice Terrace, Jatiluwih Rice Terrace).
+  4. Take a cooking class to learn traditional Balinese dishes.
+  5. Go hiking or trekking (Mount Batur, Mount Agung, Campuhan Ridge).
+  6. Enjoy Bali's beaches for swimming, snorkeling, or lounging.
+- [USER] User loves trying new foods and is asking for good places to eat in Bali.
+- [ASSISTANT_SAID] Recommended places to eat in Bali include:
+  1. Warung Babi Guling Ibu Oka - located in Ubud,

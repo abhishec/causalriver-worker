@@ -1,0 +1,29 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/06/15 (Thu) 18:58
+- [USER] User requested relevant information to address during a presentation of Chapter 2: Background Study.
+- [FACT] Chapter 2 discusses challenges faced by visually impaired individuals, particularly in navigation due to vision impairment.
+- [FACT] The chapter emphasizes the importance of assisting visually impaired individuals to navigate comfortably.
+- [FACT] Technologies, particularly in computer vision, have evolved rapidly.
+- [FACT] Deep learning models can detect objects using a camera, but more than identification is required for assisting visually impaired individuals.
+- [FACT] Object detection processing time must be fast and capable of real-time processing.
+- [FACT] Research and comparison of commonly used models in computer vision are necessary for the project.
+- [FACT] Vision is essential for daily activities such as navigation and recognition of items or people.
+- [FACT] According to the World Health Organization, long-lived individuals will experience at least one eye problem in their lifetime.
+- [FACT] The 2018 International Classification of Diseases 11 (ICD-11) identifies two types of vision problems: distance vision issues and near vision issues.
+- [FACT] There are four degrees of visual impairment: mild (6/12 to 6/18), moderate (6/18 to 6/60), severe (6/60 to 3/60), and blindness (below 3/60).
+- [FACT] There are three approaches to visual assistive technologies: visual enhancement, visual substitution, and visual replacement.
+- [FACT] Visual substitution involves processing images taken with a camera and providing feedback through sound, vibration, or both.
+- [FACT] Visual enhancement provides information visually, such as in virtual or augmented reality.
+- [FACT] Visual replacement analyzes information and displays it in the user's brain cortex, often used in the medical field.
+- [FACT] The project focuses on developing a visual substitution device.
+- [FACT] Visual substitution has three subheadings: electronic travel aids (ETA), electronic orientation aids (EOA), and position locator devices (PLD).
+- [ASSISTANT_SAID] Recommendations from Kuriakose et al. (2020) include:
+  1. Effective real-time object detection methods are crucial for developing ETAs.
+  2. Multiple feedback mechanisms should be available to avoid liability in crowded areas.
+  3. User-friendliness must be prioritized as many visual assistive technologies are burdensome.
+  4. The amount of information projected to users must be fine-tuned to avoid overwhelming them.
+  5. Users must feel comfortable using navigational aids in public.
+  6. Privacy and security are critical in developing everyday devices for visually impaired individuals.
+- [FACT] The chapter discusses previous work in visual assistive technology, including:
+  - [FACT] Head wear projects like

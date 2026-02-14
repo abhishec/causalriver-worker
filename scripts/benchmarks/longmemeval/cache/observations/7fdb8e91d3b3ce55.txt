@@ -1,0 +1,43 @@
+**Observation Log:**
+
+- [FACT] User is interested in creating digital forms.
+- [ASSISTANT_SAID] Assistant confirmed ability to help with creating digital forms and asked for specific information or guidance.
+- [ASSISTANT_CREATED] Assistant outlined an online form to onboard a radio host job at a community radio station, including the following fields:
+  - Work Email (required)
+  - Best Email (optional)
+  - Phone Number (required)
+  - Address, City, State, Zip (required)
+  - T-Shirt Size (optional)
+  - Hoodie Size (optional)
+  - Onboarding Document 1 (required)
+  - Onboarding Document 2 (required)
+  - Onboarding Document 3 (required)
+  - Show(s) (required)
+  - Show Start Date (required)
+- [ASSISTANT_SAID] Assistant noted the form should have a submit button and suggested labeling fields clearly and using appropriate input types to enhance user-friendliness.
+- [ASSISTANT_SAID] Assistant recommended adding a captcha to prevent spam submissions.
+- [USER] User requested an outline for a Typeform that uses logic to onboard a radio show host at a community radio station.
+- [ASSISTANT_CREATED] Assistant outlined a Typeform to onboard a radio show host, including the following fields:
+  - First Name (required)
+  - Last Name (required)
+  - Personal Email (required)
+  - Would you like a Radio Kingston Email? (Yes/No question)
+    - If "Yes", ask for:
+      - Desired Radio Kingston Email Address (required)
+      - Will you use your new Radio Kingston Email as your best method of contacting you? (Yes/No question)
+  - Phone Number (required)
+  - Address (required)
+  - City (required)
+  - State (required)
+  - Zip Code (required)
+  - T-Shirt Size (optional)
+  - Hoodie Size (optional)
+  - Onboarding Document 1 (required)
+  - Onboarding Document 2 (required)
+  - Onboarding Document 3 (required)
+  - Show Name (required)
+  - Show Start Date (required)
+  - Resource Page Information (required)
+- [ASSISTANT_SAID] Assistant noted the Typeform should have a submit button and suggested using appropriate input types for user-friendliness.
+- [ASSISTANT_SAID] Assistant recommended considering adding a captcha to prevent spam submissions.
+- [ASSISTANT_SAID] Assistant mentioned using the logic function of Typeform to make the form interactive and to show certain fields based on previous answers.

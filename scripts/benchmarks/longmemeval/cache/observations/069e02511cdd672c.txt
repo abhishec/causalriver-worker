@@ -1,0 +1,29 @@
+**Observation Log:**
+
+- [FACT] User is applying for a Learning Designer role at the University of Melbourne.
+- [FACT] Job number for the role is 0058445.
+- [FACT] The role is located in Parkville.
+- [FACT] The role type is full-time and fixed-term initially until December 2023.
+- [FACT] The faculty associated with the role is the Faculty of Medicine, Dentistry, and Health Sciences.
+- [FACT] The department/school associated with the role is the Centre for Digital Transformation of Health.
+- [FACT] The salary range for the role is UOM 7 – $98,402 - $106,519 per annum plus 17% superannuation.
+- [FACT] The University of Melbourne acknowledges the Traditional Owners of the lands, specifically the Wurundjeri and Boon Wurrung Peoples, the Yorta Yorta Nation, and the Dja Dja Wurrung People.
+- [FACT] The Centre for Digital Transformation of Health aims to address a critical gap in the translation of digital health research.
+- [FACT] The role involves leading the course development process for a suite of FHIR training courses.
+- [FACT] The role includes developing online FHIR training courses and implementing them in the University’s Learning Management System (LMS).
+- [FACT] The role requires applying learning design frameworks and priorities for online learning to all agreed FHIR training courses.
+- [FACT] The role is part of a consortium with CSIRO and HL7 Australia.
+- [FACT] The program is commissioned and funded by the Australian Digital Health Agency.
+- [FACT] The goal of the program is to build workforce capacity across Australia for modern interoperability standards for healthcare IT (FHIR).
+- [FACT] The user must have current valid work rights for Australia to be considered for the role.
+- [FACT] The University of Melbourne is consistently ranked among the leading universities in the world.
+- [PREFERENCE] User is excited about the opportunity to be part of a team delivering a national training program.
+- [PREFERENCE] User is drawn to the University of Melbourne for its reputation and commitment to research and teaching excellence.
+- [PREFERENCE] User finds the benefits of working with the University, such as flexible working arrangements and career development opportunities, attractive.
+- [ASSISTANT_SAID] The assistant provided a cover letter template for the user to express their interest in the Learning Designer role.
+- [ASSISTANT_CREATED] The assistant created a cover letter that includes the following key details:
+  - Addressed to the Hiring Manager.
+  - Expresses interest in the Learning Designer role (Job no: 0058445).
+  - Highlights the user's relevant education and extensive experience in applied educational design.
+  - Mentions the user's solid understanding of pedagogy and experience in online education and training programs.
+  - States the user's analytical, detail-oriented, and problem-solving skills, along with excellent communication

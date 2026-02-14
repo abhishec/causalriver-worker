@@ -1,0 +1,21 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/02/28 (Tue) 20:35  
+[USER] User inquired about the documents needed to start developing a game.  
+[ASSISTANT_SAID] To start developing a game, the following documents are typically required:  
+[ASSISTANT_SAID] 1. Game Design Document (GDD): This outlines the game's concept, mechanics, and overall vision.  
+[ASSISTANT_SAID] 2. Technical Design Document (TDD): This document details the technical specifications, system requirements, and architecture of the game.  
+[ASSISTANT_SAID] 3. Project Plan: This outlines the schedule, milestones, and budget for the game development project.  
+[ASSISTANT_SAID] 4. Contract and/or Agreement: Depending on the size and scope of the project, it may be necessary to have a legal contract or agreement in place with any team members, contractors, or publishers involved.  
+[ASSISTANT_SAID] 5. Intellectual Property (IP) documentation: This may include trademark and/or copyright registrations, and non-disclosure agreements (NDAs) to protect the game's assets and confidential information.  
+[ASSISTANT_SAID] These are the common documents, but the specific requirements may vary depending on the type, scope, and complexity of the game project.  
+[USER] User asked how to make a Game Design Document.  
+[ASSISTANT_SAID] A Game Design Document (GDD) is a comprehensive guide that outlines the design and development of a game. Here are the steps to create a GDD:  
+[ASSISTANT_SAID] 1. Define the game concept: Start by describing the basic idea behind the game, its genre, target audience, and what makes it unique and interesting.  
+[ASSISTANT_SAID] 2. Outline the game mechanics: This includes the game's rules, objectives, controls, and core gameplay systems.  
+[ASSISTANT_SAID] 3. Create a story and world: Describe the game's narrative, characters, setting, and lore.  
+[ASSISTANT_SAID] 4. Develop the user interface and art style: Sketch out the game's visual style, user interface, and overall look and feel.  
+[ASSISTANT_SAID] 5. Specify technical requirements: This includes hardware and software specifications, as well as any engine or technology requirements.  
+[ASSISTANT_SAID] 6. Plan the development process: This includes the project timeline, milestones, and budget, as well as the resources and team required to complete the project.  
+[ASSISTANT_SAID] 7. Add appendices: This may include reference materials, concept art, prototypes, or any other supporting documentation.  
+[ASSISTANT_S

@@ -1,0 +1,28 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/22 (Mon) 22:17
+- [USER] User is interested in unique shopping experiences in Bandung.
+- [ASSISTANT_SAID] Bandung is known for being a factory outlet (FO) paradise with many factory outlets selling local and international brands at discounted prices.
+- [ASSISTANT_SAID] Pasar Baru is Bandung's oldest and largest traditional market, selling clothing, accessories, food, and home goods.
+- [ASSISTANT_SAID] Braga Street is a historic street lined with old colonial buildings turned into trendy cafes, restaurants, and boutique shops.
+- [ASSISTANT_SAID] Cihampelas Walk (Ciwalk) is famous for its denim street, offering a wide range of denim products.
+- [ASSISTANT_SAID] Dago Street is home to many boutiques, art galleries, and cafes, popular among young and trendy shoppers.
+- [ASSISTANT_SAID] Rumah Mode is a popular factory outlet known for its Balinese-inspired architecture and stylish clothing and accessories.
+- [ASSISTANT_SAID] Kartika Sari is a bakery famous for its chocolate brownies and other Indonesian snacks.
+- [USER] User expresses excitement about the many shopping destinations in Bandung.
+- [USER] User asks for a recommendation on which shopping destination to visit first.
+- [ASSISTANT_SAID] The choice of shopping destination depends on user preferences; factory outlets for discounted items, Pasar Baru for traditional markets, Braga Street and Dago Street for unique and trendy options.
+- [USER] User decides to start with Cihampelas Walk to check out the denim street.
+- [USER] User requests recommendations for good restaurants or cafes in the Cihampelas Walk area.
+- [ASSISTANT_SAID] Recommended restaurants and cafes in Cihampelas Walk include:
+  1. Miss Bee Providore - serves a mix of Western and Indonesian cuisine.
+  2. Bakery & Co - a place for coffee and pastries.
+  3. Raa Cha Suki & BBQ - a Thai restaurant.
+  4. Sumoboo - a Japanese shaved ice dessert place.
+  5. Holycow! Steakhouse by Chef Afit - known for high-quality steaks.
+- [USER] User expresses interest in trying Miss Bee Providore and asks for signature dishes to try.
+- [ASSISTANT_SAID] Signature dishes at Miss Bee Providore include:
+  1. Miss Bee's Nasi Goreng - Indonesian fried rice with prawn crackers and a fried egg.
+  2. Yoghurt Granola Bowl - homemade granola with fresh fruit and yogurt.
+  3. Fried Chicken Burger - chicken patty with bacon, lettuce, tomato, and aioli sauce.
+  4. Beef Rendang - slow-c

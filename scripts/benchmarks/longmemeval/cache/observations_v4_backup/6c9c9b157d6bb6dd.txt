@@ -1,0 +1,22 @@
+**Observation Log:**
+
+- [FACT] The user is in the process of buying a house.
+- [FACT] The user recently put in an offer on a 3-bedroom townhouse in the Brookside neighborhood.
+- [TEMPORAL] The user saw the townhouse on February 22nd.
+- [TEMPORAL] The user put in an offer on February 25th.
+- [EVENT] After negotiations, the user agreed on a price of $340,000 for the townhouse.
+- [FACT] The user is planning to put 20% down on the house, which amounts to $68,000.
+- [FACT] The user is looking at a 30-year mortgage.
+- [FACT] The user is considering an interest rate of around 4%.
+- [FACT] The user is unsure about Private Mortgage Insurance (PMI) and requested an explanation.
+- [ASSISTANT] The assistant explained that with a 20% down payment, the user will avoid paying PMI.
+- [FACT] The user expressed concern about property taxes and insurance costs.
+- [ASSISTANT] The assistant provided information on how property taxes are calculated, including assessed value and millage rate.
+- [ASSISTANT] The assistant provided an example calculation for property taxes based on an assumed assessed value and millage rate.
+- [ASSISTANT] The assistant explained how homeowners insurance premiums are calculated and provided an estimated annual premium.
+- [FACT] The user is worried about the total estimated monthly mortgage payment.
+- [ASSISTANT] The assistant offered various strategies to reduce mortgage costs, including shopping for insurance, improving credit score, and considering refinancing.
+- [FACT] The user is considering improving their credit score to qualify for a lower interest rate.
+- [ASSISTANT] The assistant explained how credit scores affect mortgage rates and provided tips on how to improve credit scores.
+- [CHANGE] The user updated the date they saw the townhouse to February 22nd, which was previously not mentioned.
+- [ASSISTANT] The assistant acknowledged the update and asked if it impacts how they can help with improving the user's credit score or exploring ways to reduce mortgage costs.

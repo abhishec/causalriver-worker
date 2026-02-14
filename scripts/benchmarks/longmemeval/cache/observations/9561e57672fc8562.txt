@@ -1,0 +1,34 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/04/06 (Thu) 01:02  
+[USER] User is interested in the functionality of the FL Studio Python API.  
+[ASSISTANT_SAID] As of September 2021, FL Studio does not have an official Python API, but there is an unofficial Python API called "pydaw."  
+[ASSISTANT_SAID] The unofficial API allows users to navigate the project structure, manipulate MIDI data, manage automation clips, handle samples and plugins, and render projects into audio file formats like WAV, MP3, or OGG.  
+[ASSISTANT_SAID] There might be limitations and compatibility issues with the unofficial API, and it is recommended to use official APIs or SDKs when available.  
+[USER] User inquires about an SDK for FL Studio.  
+[ASSISTANT_SAID] FL Studio provides an SDK called the FL Studio SDK for creating plugins and extensions, primarily in C/C++.  
+[ASSISTANT_SAID] The SDK documentation and files can be found on the Image-Line website at <https://www.image-line.com/developers/>.  
+[ASSISTANT_SAID] The SDK is not for Python, and experience with C/C++ programming is required to develop plugins or extensions.  
+[USER] User expresses a desire to create an app that generates melodies in the piano roll using text descriptions, utilizing GPT-4.  
+[ASSISTANT_SAID] The proposed multi-step workflow includes:  
+1. User describes what they want to hear (e.g., a happy chord progression).  
+2. User is provided with multiple MIDI options.  
+3. User can use the generated MIDI in their song.  
+[USER] User requests to test the app concept, with the assistant acting as GPT-4.  
+[ASSISTANT_SAID] Two different happy chord progressions were generated:  
+**Option 1:**  
+1. C Major (C - E - G)  
+2. A Minor (A - C - E)  
+3. F Major (F - A - C)  
+4. G Major (G - B - D)  
+**Option 2:**  
+1. D Major (D - F# - A)  
+2. B Minor (B - D - F#)  
+3. G Major (G - B - D)  
+4. A Major (A - C# - E)  
+[USER] User requests to spice up Option 1.  
+[ASSISTANT_SAID] Revised Option 1 includes:  
+1. C Major 9 (C - E - G - B - D)  
+2. A Minor 7 (A - C - E - G)  
+3. F Major 9 (F - A - C - E - G)  
+4. G7

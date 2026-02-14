@@ -1,0 +1,14 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/24 (Wed) 02:24
+- [USER] User inquired about banking institutions that use SWIFT as their primary messaging network.
+- [ASSISTANT_SAID] Many major banking institutions around the world use SWIFT as their primary messaging network, including: JPMorgan Chase, Citibank, HSBC, Deutsche Bank, Bank of America, Barclays, Standard Chartered, Wells Fargo, Société Générale, BNP Paribas, Credit Suisse, UBS, Royal Bank of Scotland, Lloyds Bank, ING Bank, Santander, NatWest, Commonwealth Bank of Australia, Westpac Banking Corporation, National Australia Bank, ANZ Bank, Toronto-Dominion Bank, Royal Bank of Canada, Bank of Montreal, Scotiabank.
+- [USER] User expressed surprise at the number of banks using SWIFT as their messaging network and asked why it is so widely used.
+- [ASSISTANT_SAID] SWIFT is widely used by banks because it is a secure and reliable messaging network that enables financial institutions to exchange information and messages quickly and efficiently. It provides a standardized format for financial messages, ensuring accurate transmission and receipt of information. It offers a wide range of messaging services, including payments, securities, trade finance, and treasury management. SWIFT's global network enables banks to communicate across borders and time zones, essential for international payments and transactions. Overall, SWIFT is an essential tool for banks to facilitate secure and efficient communication with other financial institutions worldwide.
+- [USER] User acknowledged the explanation and asked if there was anything else they should know about SWIFT.
+- [ASSISTANT_SAID] Additional information about SWIFT includes:
+  1. SWIFT stands for the Society for Worldwide Interbank Financial Telecommunication, founded in Brussels, Belgium, in 1973.
+  2. SWIFT is owned by its members, which include banks, broker-dealers, and other financial institutions worldwide. Members use SWIFT to communicate and access its network of connectivity and messaging services.
+  3. SWIFT facilitates millions of financial transactions every day, with a total value of trillions of dollars. Its system is trusted by banks and financial institutions worldwide due to its security, reliability, and speed.
+  4. SWIFT has introduced various other services and products over the years, such as KYC Registry, which allows banks to share due diligence information about their customers, and SWIFT GPI, which enables faster and more transparent cross-border payments.
+  5. SWIFT is a trusted messaging network but is not responsible for the underlying financial transactions themselves; the actual movement of funds between banks is facilitated through other channels.

@@ -1,0 +1,35 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/06/16 (Fri) 04:38  
+[FACT] User is considering getting a new gaming mouse to pair with a new keyboard.  
+[PREFERENCE] User is interested in good options for FPS games like Apex Legends.  
+[EVENT] User has been playing a lot of Apex Legends lately.  
+[PREFERENCE] User is determined to reach level 100 in Apex Legends before the end of the year.  
+[ASSISTANT_SAID] Apex Legends is an amazing game.  
+[ASSISTANT_SAID] A good gaming mouse can help improve performance in FPS games.  
+[ASSISTANT_SAID] Recommended gaming mice:  
+1. **Logitech G Pro X Superlight**: 63 grams, 12,000 CPI optical sensor, Romer-G switches.  
+2. **SteelSeries Rival 600**: 12,000 CPI TrueMove3 sensor, removable side panel for weight adjustment.  
+3. **Razer DeathAdder Elite**: 16,000 CPI optical sensor, customizable Chroma lighting, ergonomic design (105 grams).  
+4. **HyperX Pulsefire Raid**: 16,000 CPI Pixart 3389 sensor, customizable RGB lighting.  
+5. **Corsair Harpoon Wireless**: 15,000 CPI optical sensor, up to 40 hours battery life.  
+[ASSISTANT_SAID] Factors to consider when choosing a gaming mouse:  
+* Sensor accuracy (high CPI ratings).  
+* Ergonomics (comfortable fit).  
+* Button layout and customization.  
+* Weight and size (lighter mice improve movement speed).  
+[ASSISTANT_SAID] User should try out different mice before making a final decision.  
+[ASSISTANT_SAID] Good luck on the journey to level 100 in Apex Legends!  
+[PREFERENCE] User is interested in the SteelSeries Rival 600.  
+[ASSISTANT_SAID] The TrueMove3 sensor is a standout feature of the SteelSeries Rival 600.  
+[ASSISTANT_SAID] TrueMove3 sensor details:  
+1. 1-to-1 tracking (1 pixel for every 1 inch of movement).  
+2. No acceleration or deceleration.  
+3. 1ms latency.  
+4. Handles speeds of up to 350 IPS and 50g of acceleration.  
+5. Liftoff distance of 0.5mm.  
+[ASSISTANT_SAID] Comparison of TrueMove3 with other sensors:  
+* **PixArt 3389**: Slight acceleration and higher liftoff distance.  
+* **Avago ADNS-9800**: Struggles with high-speed tracking, higher latency.  
+* **Philips optical sensor**: Exhibits jitter, higher liftoff distance.  
+[ASSISTANT_S

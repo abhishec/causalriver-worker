@@ -1,0 +1,212 @@
+{
+  "answer_8d015d9d_3": [
+    {
+      "fact": "User is looking for recommendations for open-world games with engaging storylines.",
+      "type": "preference",
+      "entities": [
+        "open-world games",
+        "engaging storylines"
+      ]
+    },
+    {
+      "fact": "User recently finished playing Assassin's Creed Odyssey.",
+      "type": "event",
+      "entities": [
+        "Assassin's Creed Odyssey"
+      ]
+    },
+    {
+      "fact": "User is looking for games similar to Assassin's Creed Odyssey.",
+      "type": "preference",
+      "entities": [
+        "Assassin's Creed Odyssey"
+      ]
+    }
+  ],
+  "answer_8d015d9d_1": [
+    {
+      "fact": "User finished The Last of Us Part II on normal difficulty.",
+      "type": "event",
+      "entities": [
+        "The Last of Us Part II",
+        "normal difficulty"
+      ]
+    },
+    {
+      "fact": "User took 25 hours to complete The Last of Us Part II.",
+      "type": "event",
+      "entities": [
+        "25 hours",
+        "The Last of Us Part II"
+      ]
+    },
+    {
+      "fact": "User found the normal difficulty to be a good balance between challenge and storytelling.",
+      "type": "opinion",
+      "entities": [
+        "normal difficulty",
+        "challenge",
+        "storytelling"
+      ]
+    },
+    {
+      "fact": "User was able to focus on the narrative and characters without getting too frustrated with the gameplay.",
+      "type": "opinion",
+      "entities": [
+        "narrative",
+        "characters",
+        "gameplay"
+      ]
+    },
+    {
+      "fact": "User is curious about the development process of The Last of Us Part II.",
+      "type": "preference",
+      "entities": [
+        "The Last of Us Part II",
+        "development process"
+      ]
+    }
+  ],
+  "answer_8d015d9d_2": [
+    {
+      "fact": "User enjoys action-adventure games.",
+      "type": "preference",
+      "entities": [
+        "action-adventure games"
+      ]
+    },
+    {
+      "fact": "User completed The Last of Us Part II on hard difficulty in 30 hours.",
+      "type": "event",
+      "entities": [
+        "The Last of Us Part II",
+        "hard difficulty",
+        "30 hours"
+      ]
+    },
+    {
+      "fact": "User is looking for game recommendations.",
+      "type": "event",
+      "entities": [
+        "game recommendations"
+      ]
+    },
+    {
+      "fact": "User is interested in games with strong narratives.",
+      "type": "preference",
+      "entities": [
+        "strong narratives"
+      ]
+    },
+    {
+      "fact": "User plans to check out Uncharted 4 and God of War.",
+      "type": "event",
+      "entities": [
+        "Uncharted 4",
+        "God of War"
+      ]
+    },
+    {
+      "fact": "User has heard great things about Uncharted 4 and God of War.",
+      "type": "opinion",
+      "entities": [
+        "Uncharted 4",
+        "God of War"
+      ]
+    }
+  ],
+  "answer_8d015d9d_5": [
+    {
+      "fact": "User loves the atmospheric soundtrack and beautiful visuals of Hyper Light Drifter",
+      "type": "opinion",
+      "entities": [
+        "Hyper Light Drifter",
+        "atmospheric soundtrack",
+        "beautiful visuals"
+      ]
+    },
+    {
+      "fact": "User took 5 hours to finish Hyper Light Drifter",
+      "type": "event",
+      "entities": [
+        "Hyper Light Drifter",
+        "5 hours"
+      ]
+    },
+    {
+      "fact": "User is looking for indie games similar to Hyper Light Drifter",
+      "type": "preference",
+      "entities": [
+        "indie games",
+        "Hyper Light Drifter"
+      ]
+    },
+    {
+      "fact": "User is particularly interested in Ori and the Blind Forest and Gris",
+      "type": "preference",
+      "entities": [
+        "Ori and the Blind Forest",
+        "Gris"
+      ]
+    },
+    {
+      "fact": "User loved Celeste",
+      "type": "opinion",
+      "entities": [
+        "Celeste"
+      ]
+    },
+    {
+      "fact": "User is looking for games similar to Celeste",
+      "type": "preference",
+      "entities": [
+        "games",
+        "Celeste"
+      ]
+    }
+  ],
+  "answer_8d015d9d_4": [
+    {
+      "fact": "User is trying to find new indie games to play on their Switch.",
+      "type": "preference",
+      "entities": [
+        "indie games",
+        "Switch"
+      ]
+    },
+    {
+      "fact": "User completed Celeste in 10 hours.",
+      "type": "event",
+      "entities": [
+        "Celeste",
+        "10 hours"
+      ]
+    },
+    {
+      "fact": "User has played Hyper Light Drifter.",
+      "type": "event",
+      "entities": [
+        "Hyper Light Drifter"
+      ]
+    },
+    {
+      "fact": "User is interested in Ori and the Blind Forest.",
+      "type": "preference",
+      "entities": [
+        "Ori and the Blind Forest"
+      ]
+    },
+    {
+      "fact": "User is looking for games similar to Celeste.",
+      "type": "preference",
+      "entities": [
+        "Celeste"
+      ]
+    },
+    {
+      "fact": "User finds emotionally investing stories appealing.",
+      "type": "opinion",
+      "entities": []
+    }
+  ]
+}

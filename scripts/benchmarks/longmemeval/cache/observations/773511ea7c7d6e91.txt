@@ -1,0 +1,10 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/06/09 (Fri) 00:59
+- [FACT] User is engaging in a structured document loading process.
+- [PREFERENCE] User prefers concise responses from the assistant, specifically "OK: [CHUNK x/TOTAL]" without any additional explanations or commentary.
+- [EVENT] User will send multiple files in chunks, each marked by a specific format.
+- [CHANGE] User's method of communication involves sending text in chunks, indicating a structured approach to information sharing.
+- [ASSISTANT_SAID] Assistant is instructed to act as a document/text loader and to remember the content of the documents.
+- [ASSISTANT_SAID] Assistant is to respond only with "OK: [CHUNK x/TOTAL]" for each chunk received.
+- [ASSISTANT_CREATED] Assistant acknowledged the receipt of the first chunk with "OK: [CHUNK 1/2]".

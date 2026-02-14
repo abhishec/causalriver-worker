@@ -1,0 +1,29 @@
+**Observation Log:**
+
+[FACT] User recently started using a new blood pressure monitor.  
+[EVENT] User's blood pressure monitor arrived on a Tuesday afternoon.  
+[TEMPORAL] User has been using the blood pressure monitor daily since it arrived.  
+[ASSISTANT_SAID] Normal blood pressure range is typically considered less than 120/80 mmHg.  
+[ASSISTANT_SAID] Elevated blood pressure is defined as 120-129/80 mmHg.  
+[ASSISTANT_SAID] Stage 1 hypertension is defined as 130-139/80-89 mmHg.  
+[ASSISTANT_SAID] Stage 2 hypertension is defined as 140 or higher/90 or higher mmHg.  
+[ASSISTANT_SAID] Tips for taking accurate morning readings include:  
+[ASSISTANT_SAID] 1. Take readings at the same time every morning.  
+[ASSISTANT_SAID] 2. Follow the same morning routine.  
+[ASSISTANT_SAID] 3. Avoid caffeine and exercise at least 30 minutes before taking readings.  
+[ASSISTANT_SAID] 4. Sit comfortably with back supported and feet flat on the floor.  
+[ASSISTANT_SAID] 5. Use the correct cuff size for the arm.  
+[ASSISTANT_SAID] 6. Take multiple readings, one minute apart, and record the average.  
+[ASSISTANT_SAID] 7. Monitor posture while taking readings.  
+[ASSISTANT_SAID] 8. Avoid talking or moving during the reading.  
+[ASSISTANT_SAID] 9. Keep the monitor at room temperature.  
+[ASSISTANT_SAID] 10. Record readings in a log or mobile app.  
+[ASSISTANT_SAID] User should consult with their healthcare provider for personalized guidance on blood pressure.  
+[FACT] User has been noticing their morning blood pressure readings are higher than usual.  
+[FACT] User attributes higher readings to coffee consumption before taking medications.  
+[ASSISTANT_SAID] Caffeine can cause a temporary increase in blood pressure.  
+[ASSISTANT_SAID] Caffeine causes vasoconstriction, increased heart rate, and adrenaline release.  
+[ASSISTANT_SAID] Moderate caffeine intake (200-300 mg) can increase systolic blood pressure by 3-10 mmHg and diastolic by 2-5 mmHg.  
+[ASSISTANT_SAID] Higher doses of caffeine (more than 400 mg) can lead to more significant increases in blood pressure.  
+[ASSISTANT_SAID] User should consider limiting caffeine intake to 100-200 mg if sensitive to it.  
+[ASSISTANT_SAID] User should avoid caffeine before taking medications

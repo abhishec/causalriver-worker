@@ -1,0 +1,19 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/27 (Sat) 20:15
+- [ASSISTANT_SAID] You can do all the steps in one line of query without repeating step 6.
+- [ASSISTANT_SAID] You can use a formula such as =AVERAGE(LN(B2:B12))/0.5*COS(Y$10) where B2:B12 refers to the range of B readings and Y$10 refers to the range of angles in radians.
+- [ASSISTANT_SAID] This formula will calculate the transmittance for each angle/measurement of B readings and then use the average of the two A readings as the reference above the canopy, convert it to log values, and then average as log and from the averages we can compute the LAI.
+- [ASSISTANT_SAID] You can then drag the formula down for all the rows that contain B readings.
+- [ASSISTANT_SAID] You can then use the chart tool in Excel to plot the graph with Angle (X axis) and all the B's on the Y axis.
+- [USER] I'm talking about the plot. I don't want to repeat step 7 for all other B values.
+- [ASSISTANT_SAID] Yes, you can plot all of the B values on the same graph without repeating the steps.
+- [ASSISTANT_SAID] To do this, you can select all of the B values and the Angle (Radians) column, and then create a chart using those values.
+- [ASSISTANT_SAID] In Excel, this can be done by highlighting all of the relevant cells, going to the "Insert" tab, and selecting the type of chart you want (such as a line chart or scatter plot).
+- [ASSISTANT_SAID] You can then customize the chart as needed, such as adding a trendline or adjusting the axis labels.
+- [USER] Here are my results:
+- [USER] Measurement 1: Angle (Radians) 0.122173048 0.401425728 0.663225116 0.925024504 1.186823891
+- [USER] Measurement 1: COS(Angle) 0.992546152 0.920504853 0.788010754 0.601815023 0.374606593
+- [USER] Measurement 1: A (Average of natural log) 0.538059476 0.575489357 0.609485029 0.649766112 0.654178875
+- [USER] Measurement 1: 1 4.195655033 4.356264711 3.879173108 2.908174158 1.741544359
+- [USER] Measurement

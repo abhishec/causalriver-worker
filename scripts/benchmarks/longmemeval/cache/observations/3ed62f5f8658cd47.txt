@@ -1,0 +1,17 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/03/26 (Sun) 17:29
+- [ASSISTANT_SAID] The --aspect or --ar parameter changes the aspect ratio of the generated image. An aspect ratio is the width-to-height ratio of an image, expressed as two numbers separated by a colon, such as 7:4 or 4:3.
+- [ASSISTANT_SAID] A square image has equal width and height, described as a 1:1 aspect ratio. The image could be 1000px × 1000px, or 1500px × 1500px, and the aspect ratio would still be 1:1.
+- [ASSISTANT_SAID] A computer screen might have a ratio of 16:10, where the height is 1.6 times longer than the width. So the image could be 1600px × 1000px, 4000px × 2000px, 320px x 200px, etc.
+- [ASSISTANT_SAID] The default aspect ratio is 1:1.
+- [ASSISTANT_SAID] --aspect must use whole numbers. Use 239:100 instead of 2.39:1.
+- [ASSISTANT_SAID] The aspect ratio impacts the shape and composition of a generated image.
+- [ASSISTANT_SAID] Some aspect ratios may be slightly changed when upscaling.
+- [ASSISTANT_SAID] Different Midjourney Version Models have different maximum aspect ratios.
+- [ASSISTANT_SAID] Many aspect ratios not listed above are accepted by earlier model versions but may be slightly modified during image generation. Example: images using --ar 16:9 (1.78) in Midjourney Model V3 render as 7:4 (1.75).
+- [ASSISTANT_SAID] Common Midjourney Aspect Ratios include: --aspect 1:1 (Default), --aspect 5:4 (Common frame and print ratio), --aspect 3:2 (Common in print photography), --aspect 7:4 (Close to HD TV screens and smartphone screens).
+- [ASSISTANT_SAID] To change the aspect ratio, use Aspect Ratio Parameters by adding --aspect <value>:<value>, or --ar <value>:<value> to the end of your prompt.
+- [ASSISTANT_SAID] The --chaos or --c parameter influences how varied the initial image grids are. High --chaos values will produce more unusual and unexpected results and compositions. Lower --chaos values have more reliable, repeatable results.
+- [ASSISTANT_SAID] --chaos accepts values 0–100, with the default --chaos value being 0.
+- [ASS

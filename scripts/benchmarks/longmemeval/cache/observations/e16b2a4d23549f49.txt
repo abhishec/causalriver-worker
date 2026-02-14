@@ -1,0 +1,19 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/04/01 (Sat) 17:04  
+[USER] User is interested in blockchain technology and its mechanisms.  
+[USER] User asked why miners run full nodes while merchants can use lite nodes.  
+[ASSISTANT_SAID] Miners run full nodes to verify and add new transactions to the blockchain, validating every transaction and checking adherence to consensus rules.  
+[ASSISTANT_SAID] Bob the merchant can use a lite node that implements Simplified Payment Verification (SPV) to verify transactions quickly and efficiently.  
+[USER] User inquired about the possibility of a malicious ISP launching a double-spend attack against a user.  
+[ASSISTANT_SAID] A malicious ISP could potentially launch a double-spend attack if it controls a user's connections, requiring significant computational power and control over mining resources.  
+[USER] User asked why Bob the merchant checks confirmations instead of computing the difference in length between two chains.  
+[ASSISTANT_SAID] Bob checks the number of confirmations because it is a quick and reliable way to determine if a transaction is confirmed on the longest chain, reducing the risk of double-spend attacks.  
+[USER] User mentioned miners Minnie and Mynie discovering blocks nearly simultaneously, leading to orphaned blocks.  
+[ASSISTANT_SAID] Blocks can get orphaned when two miners discover blocks nearly simultaneously due to propagation delays, leading to competing branches in the blockchain.  
+[USER] User asked what determines whose block will end up on the consensus branch.  
+[ASSISTANT_SAID] The consensus branch is determined by the proof-of-work consensus algorithm, where the longest chain with the most accumulated work is considered valid.  
+[USER] User inquired about the factors affecting the rate of orphan blocks and requested a formula for the rate based on these parameters.  
+[ASSISTANT_SAID] The rate of orphan blocks is affected by propagation time, size of the mining network, and frequency of block discovery.  
+[ASSISTANT_SAID] A formula for the rate of orphan blocks can be expressed as: Rate of Orphan Blocks = (Probability of Two Miners Discovering Blocks Nearly Simultaneously) x (Percentage of Mining Power Contributed by the Miner Who Discovers the Orphan Block).  
+[ASSISTANT_SAID] The probability can be calculated as: Probability = (Propagation Time / Block Time) x (Percentage of Mining Power Contributed by the Miner Who Discovers the Orphan Block).

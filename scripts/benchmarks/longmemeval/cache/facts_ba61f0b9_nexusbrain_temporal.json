@@ -1,0 +1,77 @@
+{
+  "answer_f377cda7_1": [
+    {
+      "fact": "User is looking to learn more about the importance of diversity in the workplace.",
+      "type": "preference",
+      "entities": [
+        "diversity in the workplace"
+      ]
+    },
+    {
+      "fact": "User caught up with their former manager, Rachel.",
+      "type": "relationship",
+      "entities": [
+        "Rachel"
+      ]
+    },
+    {
+      "fact": "Rachel is now leading a team of 10 people, half of whom are women.",
+      "type": "event",
+      "entities": [
+        "Rachel",
+        "team of 10",
+        "women"
+      ]
+    },
+    {
+      "fact": "User learned at a seminar that women hold only 25% of executive positions.",
+      "type": "opinion",
+      "entities": [
+        "women",
+        "executive positions",
+        "seminar"
+      ]
+    },
+    {
+      "fact": "User is impressed by the representation of women in Rachel's team.",
+      "type": "opinion",
+      "entities": [
+        "Rachel",
+        "women",
+        "team"
+      ]
+    }
+  ],
+  "answer_f377cda7_2": [
+    {
+      "fact": "User is looking for information on companies promoting gender diversity in the workplace.",
+      "type": "preference",
+      "entities": [
+        "gender diversity",
+        "workplace"
+      ]
+    },
+    {
+      "fact": "User has a former manager named Rachel.",
+      "type": "relationship",
+      "entities": [
+        "Rachel"
+      ]
+    },
+    {
+      "fact": "User's former manager Rachel's team has 6 women out of 10 people.",
+      "type": "event",
+      "entities": [
+        "Rachel",
+        "team",
+        "6 women",
+        "10 people"
+      ]
+    },
+    {
+      "fact": "User finds it interesting to think about gender diversity in the context of their own experiences.",
+      "type": "opinion",
+      "entities": []
+    }
+  ]
+}

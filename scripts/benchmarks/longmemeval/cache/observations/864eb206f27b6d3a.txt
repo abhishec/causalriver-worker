@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/27 (Sat) 10:23
+- [FACT] The user has been taking weekly guitar lessons for six weeks.
+- [RELATIONSHIP] The user's guitar instructor is named Alex.
+- [CHANGE] The user has recently started learning basic music theory.
+- [PREFERENCE] The user is trying to learn more about music theory, specifically chord progressions.
+- [EVENT] The user has been practicing guitar for at least 30 minutes every day since starting lessons with Alex.
+- [CHANGE] The user has noticed significant improvement in fingerpicking and chord changes.
+- [ASSISTANT_SAID] The assistant recommended resources including The Music Theory Academy, ChordPro, Hooktheory, Guitar Tricks, and YouTube channels like Marty Music, GuitarLessons365, and Music Theory Fundamentals.
+- [ASSISTANT_SAID] The assistant provided tips for practicing chord progressions, including starting with basics, practicing in different keys, analyzing songs, experimenting, using a metronome, applying progressions to guitar playing, recognizing chord functions, breaking down complex progressions, practicing regularly, and asking Alex for guidance.
+- [ASSISTANT_SAID] The assistant suggested incorporating chord progressions into the user's daily practice routine with specific warm-up exercises, chord progression practice, application and improvisation, and review and reflection.
+- [ASSISTANT_SAID] The assistant provided advanced metronome techniques, including starting with a slow tempo, setting specific goals, practicing with and without a click, subdividing the beat, practicing different time signatures, accent practice, slow-down/speed-up practice, looping practice, and recording practice.
+- [CHANGE] The user recently bought a new guitar amp two weeks ago, which has improved sound quality.
+- [EVENT] The user attended a music workshop focused on blues guitar.
+- [RELATIONSHIP] The user met other musicians at the workshop and jammed together.
+- [EVENT] The user played classic blues songs like "Sweet Home Chicago" and "Pride and Joy" during the jam session.
+- [RELATIONSHIP] One of the instructors at the workshop was a professional blues guitarist who gave the user tips on bending strings and playing with more feel.
+- [PREFERENCE] The user expressed a desire to improve timing and rhythm in blues playing. 
+- [ASSISTANT_SAID] The assistant encouraged the user to try out polyrhythmic practice and subdivision practice to improve timing and rhythm.

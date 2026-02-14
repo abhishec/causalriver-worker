@@ -1,0 +1,31 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/22 (Mon) 17:34
+- [USER] User inquired about the average workload of an instructional designer at a college in the U.S.
+- [USER] User asked about the kinds of tasks instructional designers (IDs) perform that take up their time.
+- [USER] User wanted to know what brings instructional designers pleasure on the job and what aspects are tedious.
+- [ASSISTANT_SAID] The average workload of an instructional designer at a college in the U.S. is typically 40 hours per week.
+- [ASSISTANT_SAID] Common responsibilities of instructional designers include:
+  1. Collaborating with faculty to design and develop online or blended courses.
+  2. Creating course materials, such as syllabi, assignments, and assessments.
+  3. Conducting training sessions or workshops for faculty on instructional design principles and technology tools.
+  4. Assessing the effectiveness of instructional materials and making changes as needed.
+  5. Staying current with trends and best practices in instructional design and technology.
+- [ASSISTANT_SAID] Instructional designers may find pleasure in collaborating with faculty, creating engaging course materials, and seeing students succeed.
+- [ASSISTANT_SAID] Tedious aspects of the job for instructional designers may include managing multiple projects, dealing with technical issues, and ensuring compliance with accessibility guidelines.
+- [ASSISTANT_SAID] Balancing demands of multiple courses and deadlines can be challenging for instructional designers.
+- [USER] User appreciated the information about the 40-hour workweek.
+- [USER] User requested additional information on how to quantify the workload of an instructional designer in terms of projects and committees.
+- [ASSISTANT_SAID] Factors contributing to a full-time (40-hour a week) instructional designer workload include:
+  1. Number of courses supported, typically around 10-12 courses per semester.
+  2. Type of courses supported, which may require expertise in specific subject areas or pedagogical approaches.
+  3. Proficiency in various technology tools and systems, such as learning management systems and content authoring tools.
+  4. Collaborations with faculty, administrators, and external partners.
+  5. Engagement in ongoing professional development and research.
+- [ASSISTANT_SAID] The workload of an instructional designer can be diverse and involve various projects, collaborations, and responsibilities.
+- [USER] User asked to correlate the workload of instructional designers with their cognitive load.
+- [ASSISTANT_SAID] The cognitive load of an instructional designer can be affected by:
+  1. Complexity of the project, requiring significant mental effort.
+  2. Number of courses supported, necessitating strong organizational skills.
+  3. Proficiency with technology tools, requiring technical familiarity.
+  4. Collaboration and communication

@@ -1,0 +1,18 @@
+**Observation Log:**
+
+- [FACT] The user had surgery on April 20th.
+- [FACT] The user was able to go home the same day after surgery.
+- [FACT] The user is experiencing post-surgery pain, particularly in the abdomen and shoulder.
+- [FACT] The user is having difficulty sleeping and moving around due to pain.
+- [PREFERENCE] The user is trying to stay hydrated and eat well, but finds it hard when not feeling well.
+- [RELATIONSHIP] The user's husband has been a great help with cooking and taking care of the user.
+- [ASSISTANT_SAID] The assistant expressed sympathy for the user's discomfort and provided reassurance about the recovery process.
+- [ASSISTANT_SAID] The assistant provided a list of tips for managing post-surgery pain, including following doctor's instructions, taking pain medication as directed, using a pain journal, resting, applying ice or heat, practicing breathing exercises, leaning on a support system, staying hydrated, consulting with a doctor, and being patient.
+- [ASSISTANT_SAID] The assistant suggested specific strategies for managing abdominal discomfort, including avoiding certain foods, using abdominal binders, and applying heat or cold therapy.
+- [ASSISTANT_SAID] The assistant provided strategies for managing shoulder discomfort, including gentle shoulder rolls, arm elevation, and using pain-relieving patches.
+- [ASSISTANT_SAID] The assistant offered tips for improving sleep and mobility, such as adjusting sleep positions, timing pain medication before bedtime, and gradually increasing mobility.
+- [ASSISTANT_SAID] The assistant encouraged the user to reach out to their doctor to discuss ongoing discomfort and explore alternative pain management options.
+- [ASSISTANT_SAID] The assistant provided tips for preparing for the conversation with the doctor, including keeping a pain journal, making a list of questions, and being honest and open during the conversation.
+- [ASSISTANT_SAID] The assistant suggested specific questions to ask the doctor regarding recovery timeline, pain management plan, additional therapies, risks, and signs of complications.
+- [TEMPORAL] The session date is May 27, 2023.
+- [CHANGE] The user expressed anxiety about the upcoming conversation with their doctor but feels ready to discuss concerns and seek reassurance.

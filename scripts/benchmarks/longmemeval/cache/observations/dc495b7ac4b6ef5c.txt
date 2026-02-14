@@ -1,0 +1,35 @@
+**Observation Log:**
+
+- [FACT] User is moving to Edinburgh for a master's program in September.
+- [EVENT] User has a farewell dinner with friends on the day of the conversation (2023/05/22).
+- [PREFERENCE] User is trying to finalize accommodation options in Edinburgh.
+- [PREFERENCE] User is considering the commute time to campus carefully.
+- [ASSISTANT_SAID] Assistant congratulated the user on their master's program and upcoming move to Edinburgh.
+- [ASSISTANT_SAID] Assistant provided a comparison of pros and cons for living in Marchmont versus the city center.
+- [ASSISTANT_SAID] Pros of Marchmont: affordability, leafy neighborhood, quiet and peaceful, local amenities.
+- [ASSISTANT_SAID] Cons of Marchmont: distance from campus, limited nightlife.
+- [ASSISTANT_SAID] Pros of the city center: convenience, vibrant atmosphere, easy access to public transport.
+- [ASSISTANT_SAID] Cons of the city center: higher rent prices, noise and crowds.
+- [ASSISTANT_SAID] Assistant suggested questions for the user to consider regarding their accommodation choice.
+- [ASSISTANT_SAID] Assistant provided approximate commute times from Marchmont to various University of Edinburgh campuses: 
+  - Central Campus: 30-40 minutes walking, 20-30 minutes by bus.
+  - King's Buildings Campus: 45-60 minutes walking, 30-40 minutes by bus.
+  - Holyrood Campus: 35-45 minutes walking, 20-30 minutes by bus.
+- [ASSISTANT_SAID] Assistant recommended checking the Lothian Buses website or app for up-to-date timetables.
+- [PREFERENCE] User is still weighing the pros and cons of each area.
+- [PREFERENCE] User is considering a studio apartment in the city center despite the higher cost.
+- [ASSISTANT_SAID] Assistant provided pros and cons of a city center studio apartment: 
+  - Pros: convenience, time-saving, independence, amenities.
+  - Cons: cost, noise and crowds, limited space.
+- [ASSISTANT_SAID] Assistant suggested considering deals, opting for a smaller studio, prioritizing amenities, and researching the area.
+- [PREFERENCE] User values being in the city center for convenience and social opportunities as they are new to the city.
+- [ASSISTANT_SAID] Assistant recommended websites and resources for finding studio apartments in the city center:
+  - Rightmove
+  - Zoopla
+  - Citylets
+  - Student.com
+  - Edinburgh University Accommodation
+  - Local estate agents (Savills, Knight Frank, Cullen Property)
+  - Property portals (Property Ladder, Prime Location, OnTheMarket)
+  - Facebook groups (Edinburgh Flat Hunters, Edinburgh Student Accommodation).
+- [ASSISTANT

@@ -1,0 +1,15 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/03/18 (Sat) 02:58
+- [USER] User inquired about calculating VAT of a shopping list in the Philippines.
+- [ASSISTANT_SAID] To calculate the VAT in the Philippines, the VAT rate is currently 12%.
+- [ASSISTANT_SAID] The VAT can be calculated by multiplying the total cost of items by the VAT rate in decimal form.
+- [ASSISTANT_SAID] Example provided: If the total cost is PHP 1000, the VAT would be calculated as 1000 x 0.12 = PHP 120.
+- [ASSISTANT_SAID] Total cost including VAT would be PHP 1,120 (1000 + 120).
+- [USER] User asked if all stores need to include VAT in their invoices in the Philippines.
+- [ASSISTANT_SAID] VAT-registered businesses in the Philippines are required to include VAT in their invoices.
+- [ASSISTANT_SAID] VAT-registered businesses are those with annual sales or gross receipts exceeding PHP 3 million.
+- [ASSISTANT_SAID] These businesses must charge VAT on sales and include it in the invoices issued to customers.
+- [ASSISTANT_SAID] VAT-registered businesses are also required to file VAT returns and pay the VAT collected to the Bureau of Internal Revenue (BIR).
+- [ASSISTANT_SAID] Businesses that are not VAT-registered (annual sales or gross receipts below PHP 3 million) are not required to charge or include VAT in their invoices.
+- [ASSISTANT_SAID] Not all stores need to include VAT in their invoices; it depends on the store's VAT registration status and annual sales or gross receipts.

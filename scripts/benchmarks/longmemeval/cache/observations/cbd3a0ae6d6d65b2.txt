@@ -1,0 +1,23 @@
+**Observation Log:**
+
+**Session Date:** 2023/12/10 (Sun) 15:16  
+**Session ID:** sharegpt_eo0YhAS_0
+
+1. [USER] User requested a vendor analysis template comparing video offerings between Sanctuary Health, Mytonomy, and Krames HealthGuides.
+2. [USER] User specified criteria to be highlighted: video quality, video topic breadth, tech integration needs, and pricing factors.
+3. [ASSISTANT_CREATED] Assistant created a vendor analysis template comparing video offerings between Sanctuary Health, Mytonomy, and Krames HealthGuides.
+4. [ASSISTANT_SAID] Assistant provided a table format for the vendor analysis template.
+5. [ASSISTANT_SAID] Under "Video Quality," Sanctuary Health provides high-quality videos in 1080p and 4K resolutions.
+6. [ASSISTANT_SAID] Under "Video Quality," Mytonomy offers HD quality videos.
+7. [ASSISTANT_SAID] Under "Video Quality," Krames HealthGuides provides standard quality videos.
+8. [ASSISTANT_SAID] Under "Video Topic Breadth," Sanctuary Health offers a wide range of video topics covering various health conditions.
+9. [ASSISTANT_SAID] Under "Video Topic Breadth," Mytonomy offers videos on general health topics as well as condition-specific videos.
+10. [ASSISTANT_SAID] Under "Video Topic Breadth," Krames HealthGuides offers videos on general health topics.
+11. [ASSISTANT_SAID] Under "Tech Integration Needs," Sanctuary Health requires integration with their platform, which may require technical assistance.
+12. [ASSISTANT_SAID] Under "Tech Integration Needs," Mytonomy integrates with EHR and telemedicine platforms, but also offers standalone access.
+13. [ASSISTANT_SAID] Under "Tech Integration Needs," Krames HealthGuides integrates with patient portals, EHR, and other healthcare platforms.
+14. [ASSISTANT_SAID] Under "Pricing Factors," Sanctuary Health's pricing is customized and varies based on the number of videos required and level of customization.
+15. [ASSISTANT_SAID] Under "Pricing Factors," Mytonomy offers pricing on a per video basis and discounts on large volume purchases.
+16. [ASSISTANT_SAID] Under "Pricing Factors," Krames HealthGuides offers a subscription-based model with tiered pricing based on the number of patients.
+17. [ASSISTANT_SAID] Assistant noted that the vendor analysis template is for informational purposes only and should not be considered a comprehensive evaluation of the vendors.
+18. [ASSISTANT_SAID] Assistant suggested that additional research and due diligence may be necessary before making a final decision.

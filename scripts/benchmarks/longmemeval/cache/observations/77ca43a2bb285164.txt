@@ -1,0 +1,22 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/25 (Thu) 17:26
+- [USER] User asked why evolution is still considered a theory.
+- [ASSISTANT_SAID] The term "theory" in science is a well-substantiated explanation for a set of phenomena that has been extensively tested and supported by a large body of evidence.
+- [ASSISTANT_SAID] Evolution is a scientific theory explaining how living organisms have changed over time and how new species arise through natural selection.
+- [ASSISTANT_SAID] The theory of evolution is supported by evidence from biology, genetics, paleontology, and geology, including the fossil record, comparative anatomy, embryology, molecular biology, and observations of evolutionary changes in natural populations.
+- [ASSISTANT_SAID] Evolution is not considered a fact like gravity because it is constantly being refined and modified as new evidence is discovered.
+- [USER] User asked if there is any scientific proof that an animal has changed from one species to another through evolution.
+- [ASSISTANT_SAID] There is scientific evidence supporting that animals have changed from one species to another through evolution, coming from biology, genetics, paleontology, and comparative anatomy.
+- [ASSISTANT_SAID] The fossil record shows gradual changes in species over time, with transitional fossils demonstrating evolutionary change.
+- [ASSISTANT_SAID] Genetic evidence, such as DNA sequencing, reveals similarities and differences between species, indicating evolutionary relationships.
+- [ASSISTANT_SAID] Observations of natural selection, such as antibiotic resistance in bacteria and the adaptation of finches on the Galapagos Islands, provide evidence for evolutionary change.
+- [USER] User asked if we have seen any species change its DNA in the modern world.
+- [ASSISTANT_SAID] We have observed species changing their DNA, with antibiotic resistance in bacteria being a well-documented example.
+- [ASSISTANT_SAID] Antibiotic resistance arises when bacteria mutate or acquire genes that allow them to survive in the presence of antibiotics.
+- [ASSISTANT_SAID] The evolution of the peppered moth in England is another example, where a genetic mutation for a dark-colored variant became more common due to industrial pollution.
+- [ASSISTANT_SAID] Other examples include pesticide resistance in insects, drug resistance in viruses, and plant adaptation to different soil conditions.
+- [USER] User asked why we don't see evolution of species today.
+- [ASSISTANT_SAID] Evolution is occurring all around us, and the misconception that we don't see it is based on misunderstanding.
+- [ASSISTANT_SAID] Evolution is a slow process that occurs over many generations, and its effects may not be visible in a single lifetime.
+- [ASSISTANT_SAID] Examples of evolution in action include antibiotic resistance in

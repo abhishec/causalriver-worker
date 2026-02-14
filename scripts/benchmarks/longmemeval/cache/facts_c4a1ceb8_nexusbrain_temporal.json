@@ -1,0 +1,198 @@
+{
+  "answer_56d02cab_3": [
+    {
+      "fact": "User is experimenting with bitters in cocktails.",
+      "type": "preference",
+      "entities": [
+        "bitters",
+        "cocktails"
+      ]
+    },
+    {
+      "fact": "User made their own orange bitters using orange peels and vodka.",
+      "type": "personal",
+      "entities": [
+        "orange bitters",
+        "orange peels",
+        "vodka"
+      ]
+    },
+    {
+      "fact": "User is interested in Whiskey Sour recipes that use orange bitters.",
+      "type": "preference",
+      "entities": [
+        "Whiskey Sour",
+        "orange bitters"
+      ]
+    },
+    {
+      "fact": "User likes the sound of the Orange You Glad It's a Whiskey Sour recipe.",
+      "type": "opinion",
+      "entities": [
+        "Orange You Glad It's a Whiskey Sour"
+      ]
+    },
+    {
+      "fact": "User has never used honey syrup in a cocktail before.",
+      "type": "personal",
+      "entities": [
+        "honey syrup",
+        "cocktail"
+      ]
+    },
+    {
+      "fact": "User is intrigued by the idea of using honey as a sweetener instead of simple syrup.",
+      "type": "opinion",
+      "entities": [
+        "honey",
+        "sweetener",
+        "simple syrup"
+      ]
+    }
+  ],
+  "answer_56d02cab_2": [
+    {
+      "fact": "User is planning a dinner party next weekend.",
+      "type": "event",
+      "entities": [
+        "dinner party",
+        "next weekend"
+      ]
+    },
+    {
+      "fact": "User wants to serve a Spanish-inspired menu.",
+      "type": "preference",
+      "entities": [
+        "Spanish-inspired menu"
+      ]
+    },
+    {
+      "fact": "User is planning to make Paella with chorizo, shrimp, and chicken.",
+      "type": "preference",
+      "entities": [
+        "Paella",
+        "chorizo",
+        "shrimp",
+        "chicken"
+      ]
+    },
+    {
+      "fact": "User is using saffron and smoked paprika for the Paella.",
+      "type": "preference",
+      "entities": [
+        "saffron",
+        "smoked paprika"
+      ]
+    },
+    {
+      "fact": "User is serving Sangria made with Rioja wine and slices of orange and lemon.",
+      "type": "preference",
+      "entities": [
+        "Sangria",
+        "Rioja wine",
+        "orange",
+        "lemon"
+      ]
+    },
+    {
+      "fact": "User has never made Patatas Bravas before.",
+      "type": "personal",
+      "entities": [
+        "Patatas Bravas"
+      ]
+    },
+    {
+      "fact": "User thinks Patatas Bravas sounds delicious.",
+      "type": "opinion",
+      "entities": [
+        "Patatas Bravas"
+      ]
+    }
+  ],
+  "answer_56d02cab_1": [
+    {
+      "fact": "User is looking for inspiration for their next dinner party.",
+      "type": "event",
+      "entities": [
+        "dinner party"
+      ]
+    },
+    {
+      "fact": "User made a Cucumber Gimlet for their last party.",
+      "type": "event",
+      "entities": [
+        "Cucumber Gimlet",
+        "last party"
+      ]
+    },
+    {
+      "fact": "User infused gin with sliced cucumbers for the Cucumber Gimlet.",
+      "type": "preference",
+      "entities": [
+        "gin",
+        "sliced cucumbers"
+      ]
+    },
+    {
+      "fact": "User enjoyed the Cucumber Gimlet at their last party.",
+      "type": "opinion",
+      "entities": [
+        "Cucumber Gimlet",
+        "last party"
+      ]
+    },
+    {
+      "fact": "User plans to make a Cava Spritz for their next dinner party.",
+      "type": "event",
+      "entities": [
+        "Cava Spritz",
+        "next dinner party"
+      ]
+    },
+    {
+      "fact": "User is interested in refreshing summer cocktails that pair well with Paella.",
+      "type": "preference",
+      "entities": [
+        "summer cocktails",
+        "Paella"
+      ]
+    }
+  ],
+  "answer_56d02cab_4": [
+    {
+      "fact": "User is planning a summer party",
+      "type": "event",
+      "entities": [
+        "summer party"
+      ]
+    },
+    {
+      "fact": "User wants to serve refreshing cocktails at the party",
+      "type": "preference",
+      "entities": [
+        "refreshing cocktails"
+      ]
+    },
+    {
+      "fact": "User recently learned how to make a classic Daiquiri using fresh lime juice and simple syrup",
+      "type": "personal",
+      "entities": [
+        "Daiquiri",
+        "fresh lime juice",
+        "simple syrup"
+      ]
+    },
+    {
+      "fact": "User made cucumber-infused gin recently",
+      "type": "personal",
+      "entities": [
+        "cucumber-infused gin"
+      ]
+    },
+    {
+      "fact": "User is excited to try cocktail recipes",
+      "type": "opinion",
+      "entities": []
+    }
+  ]
+}

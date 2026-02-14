@@ -1,0 +1,20 @@
+**Observation Log:**
+
+**Session Date:** 2023/05/29 (Mon) 17:13  
+**Session ID:** sharegpt_7R4dDcT_0
+
+1. [TEMPORAL] Session date is 2023/05/29.
+2. [FACT] User is working on OKRs (Objectives and Key Results).
+3. [FACT] User's current completion status for objectives: O: 20% completion, K1: 60% completion, K2: 15% completion, K3: 40% completion.
+4. [CHANGE] User has completed v2 of the design for K1 but needs adjustments.
+5. [PREFERENCE] User prefers clearer and more obvious different states of the feature in K1.
+6. [PREFERENCE] User is considering different uses of AT, including students learning from multiple teachers, one account for multiple kids learning on AT with the same teacher, exam preparation students, and non-language learners.
+7. [FACT] User created content for about 5% of A1 level for K2.
+8. [EVENT] User spent more time thinking about the SOP to work around content limitations of the AI for K2.
+9. [PREFERENCE] User is open to experimenting on making the SOP more efficient.
+10. [FACT] User plans to start using Luisa's course structure (her K1) to create more content before the end of the day.
+11. [FACT] User created a graphic explaining their workflow with the AI for K3.
+12. [FACT] User noted that the AI has a hard limit of 300~400 characters for replies per chat.
+13. [FACT] User mentioned that the SEO team has the same character limit problem as the AI.
+14. [ASSISTANT_SAID] Assistant provided an optimized version of the user's OKR recap.
+15. [ASSISTANT_CREATED] Assistant created an optimized recap of the user's progress on OKRs, maintaining the same completion percentages and summarizing the user's updates for K1, K2, and K3.

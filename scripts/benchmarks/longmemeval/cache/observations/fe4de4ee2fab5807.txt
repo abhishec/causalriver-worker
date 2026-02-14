@@ -1,0 +1,21 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2022/09/16 (Fri) 17:22  
+[FACT] User is planning a trip to LA.  
+[EVENT] User wants to know the best ways to get to LAX from downtown LA.  
+[EVENT] User is considering using United miles to book a flight to LA.  
+[ASSISTANT_SAID] Taxi ride from Downtown LA to LAX takes around 20-30 minutes and costs approximately $45-$60, including tip.  
+[ASSISTANT_SAID] Uber/Lyft ride from Downtown LA to LAX takes around 20-30 minutes, costing around $30-$45.  
+[ASSISTANT_SAID] User can take the Metro Rail (Red Line) from Union Station in Downtown LA to the Aviation/LAX Station, then take the LAX Shuttle Bus (G Shuttle) to the airport terminals. The journey takes around 45-60 minutes and costs $1.75 (Metro Rail) + $0.50 (LAX Shuttle Bus).  
+[ASSISTANT_SAID] Private shuttle services like SuperShuttle, Prime Time Shuttle, or LAX Shuttle Express operate from Downtown LA to LAX, costing around $20-$30 per person.  
+[ASSISTANT_SAID] Renting a car is an option, with many car rental companies having locations in Downtown LA, and the drive to LAX takes around 20-30 minutes.  
+[ASSISTANT_SAID] User can use United miles to book a flight to LAX.  
+[ASSISTANT_SAID] To redeem United miles, user should log in to their United MileagePlus account, search for flights, choose travel dates, look for "Award" availability, and proceed to book using miles.  
+[ASSISTANT_SAID] Mileage redemption rates vary depending on the route, travel dates, and flight availability.  
+[ASSISTANT_SAID] User should check for taxes and fees on their award ticket.  
+[FACT] User has 20,000 miles on United Airlines, making them eligible for Premier Silver status.  
+[EVENT] User is thinking of booking a one-way economy ticket from DC to LA using United miles.  
+[ASSISTANT_SAID] For a one-way economy ticket from DC to LA, user might need 12,500 miles for a Saver Award, 20,000 miles for a Standard Award, or 30,000 miles for a Flex Award.  
+[ASSISTANT_SAID] As a Premier Silver member, user has access to more Saver Award availability.  
+[ASSISTANT_SAID] User should log in to their United Airlines account to check the exact mileage requirement for their desired flight.  
+[ASSISTANT_SAID] User can transfer Chase Ultimate Rewards points to United MileagePlus at a 1:

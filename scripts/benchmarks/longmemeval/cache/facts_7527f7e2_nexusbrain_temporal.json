@@ -1,0 +1,32 @@
+{
+  "answer_7cb94507": [
+    {
+      "fact": "User is trying to get a better handle on their finances.",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User is considering creating a budget.",
+      "type": "preference",
+      "entities": []
+    },
+    {
+      "fact": "User has been using their credit card a lot lately.",
+      "type": "personal",
+      "entities": []
+    },
+    {
+      "fact": "User spent a lot on luxury items last month.",
+      "type": "personal",
+      "entities": []
+    },
+    {
+      "fact": "User bought a designer handbag for $800.",
+      "type": "event",
+      "entities": [
+        "designer handbag",
+        "$800"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,467 @@
+/Users/abhishek/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+
+============================================================
+  BENCHMARK OPTIMIZER — QUICK MODE
+  Sample size: 48 questions (Oracle)
+============================================================
+  Already downloaded: longmemeval_oracle.json (14.7 MB)
+
+  Stratified sample: 48 questions
+    single-session-user: 8
+    single-session-assistant: 8
+    single-session-preference: 8
+    multi-session: 8
+    temporal-reasoning: 8
+    knowledge-update: 8
+
+  [1/13] Running: baseline_federated
+
+============================================================
+  EXPERIMENT: baseline_federated
+  Current best: selective enrichment (temporal+multi only)
+  Config hash: 3b0bfc7247e0
+  Questions: 48 (oracle)
+============================================================
+[baseline_federated]:   0%|          | 0/48 [00:00<?, ?it/s][baseline_federated]:   2%|▏         | 1/48 [00:35<28:08, 35.92s/it][baseline_federated]:   4%|▍         | 2/48 [00:49<17:19, 22.60s/it][baseline_federated]:   6%|▋         | 3/48 [01:34<24:35, 32.79s/it][baseline_federated]:   8%|▊         | 4/48 [02:09<24:45, 33.76s/it][baseline_federated]:  10%|█         | 5/48 [02:21<18:41, 26.08s/it][baseline_federated]:  12%|█▎        | 6/48 [02:50<18:56, 27.07s/it][baseline_federated]:  15%|█▍        | 7/48 [03:13<17:32, 25.67s/it][baseline_federated]:  17%|█▋        | 8/48 [03:28<14:45, 22.14s/it][baseline_federated]:  19%|█▉        | 9/48 [04:09<18:20, 28.23s/it][baseline_federated]:  21%|██        | 10/48 [04:26<15:32, 24.55s/it][baseline_federated]:  23%|██▎       | 11/48 [04:39<12:58, 21.03s/it][baseline_federated]:  25%|██▌       | 12/48 [05:19<16:06, 26.84s/it][baseline_federated]:  27%|██▋       | 13/48 [06:00<18:16, 31.34s/it][baseline_federated]:  29%|██▉       | 14/48 [06:34<18:07, 31.98s/it][baseline_federated]:  31%|███▏      | 15/48 [06:53<15:28, 28.15s/it][baseline_federated]:  33%|███▎      | 16/48 [06:58<11:17, 21.17s/it][baseline_federated]:  35%|███▌      | 17/48 [07:31<12:41, 24.56s/it][baseline_federated]:  38%|███▊      | 18/48 [07:45<10:42, 21.43s/it][baseline_federated]:  40%|███▉      | 19/48 [07:57<09:03, 18.75s/it][baseline_federated]:  42%|████▏     | 20/48 [08:52<13:48, 29.58s/it][baseline_federated]:  44%|████▍     | 21/48 [09:04<10:58, 24.39s/it][baseline_federated]:  46%|████▌     | 22/48 [09:14<08:42, 20.09s/it][baseline_federated]:  48%|████▊     | 23/48 [09:25<07:11, 17.27s/it][baseline_federated]:  50%|█████     | 24/48 [09:37<06:14, 15.62s/it][baseline_federated]:  52%|█████▏    | 25/48 [10:09<07:51, 20.48s/it][baseline_federated]:  54%|█████▍    | 26/48 [10:40<08:44, 23.84s/it][baseline_federated]:  56%|█████▋    | 27/48 [11:05<08:23, 23.98s/it][baseline_federated]:  58%|█████▊    | 28/48 [11:26<07:40, 23.04s/it][baseline_federated]:  60%|██████    | 29/48 [11:47<07:07, 22.51s/it][baseline_federated]:  62%|██████▎   | 30/48 [12:20<07:40, 25.59s/it][baseline_federated]:  65%|██████▍   | 31/48 [12:43<07:04, 24.95s/it][baseline_federated]:  67%|██████▋   | 32/48 [13:09<06:44, 25.27s/it][baseline_federated]:  69%|██████▉   | 33/48 [13:32<06:10, 24.71s/it][baseline_federated]:  71%|███████   | 34/48 [14:09<06:35, 28.24s/it][baseline_federated]:  73%|███████▎  | 35/48 [14:20<05:00, 23.13s/it][baseline_federated]:  75%|███████▌  | 36/48 [14:45<04:43, 23.65s/it][baseline_federated]:  77%|███████▋  | 37/48 [15:16<04:45, 25.99s/it][baseline_federated]:  79%|███████▉  | 38/48 [15:30<03:42, 22.22s/it][baseline_federated]:  81%|████████▏ | 39/48 [15:46<03:03, 20.39s/it][baseline_federated]:  83%|████████▎ | 40/48 [17:11<05:17, 39.69s/it][baseline_federated]:  85%|████████▌ | 41/48 [17:42<04:19, 37.14s/it][baseline_federated]:  88%|████████▊ | 42/48 [17:54<02:58, 29.71s/it][baseline_federated]:  90%|████████▉ | 43/48 [18:08<02:04, 24.91s/it][baseline_federated]:  92%|█████████▏| 44/48 [18:39<01:46, 26.63s/it][baseline_federated]:  94%|█████████▍| 45/48 [18:59<01:14, 24.70s/it][baseline_federated]:  96%|█████████▌| 46/48 [19:29<00:52, 26.45s/it][baseline_federated]:  98%|█████████▊| 47/48 [19:43<00:22, 22.63s/it][baseline_federated]: 100%|██████████| 48/48 [20:09<00:00, 23.54s/it][baseline_federated]: 100%|██████████| 48/48 [20:09<00:00, 25.19s/it]
+
+  Retry 1/5 after 2s (RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for gpt-4o-mini in o)
+
+  Retry 1/5 after 2s (RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for gpt-4o-mini in o)
+
+  Retry 1/5 after 2s (RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for gpt-4o-mini in o)
+
+  Retry 1/5 after 2s (RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for gpt-4o-mini in o)
+
+  Retry 1/5 after 2s (RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for gpt-4o-mini in o)
+
+  Retry 1/5 after 2s (RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for gpt-4o-mini in o)
+
+  Retry 1/5 after 2s (RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for gpt-4o-mini in o)
+
+  Retry 1/5 after 2s (RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for gpt-4o-mini in o)
+
+  Retry 1/5 after 2s (RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for gpt-4o-mini in o)
+
+  Running GPT-4o evaluation...
+
+  Type                           Correct Total    Acc
+  ------------------------------------------------
+  single-session-user                  4     8  50.0%
+  single-session-assistant             5     8  62.5%
+  single-session-preference            1     8  12.5%
+  multi-session                        4     8  50.0%
+  temporal-reasoning                   6     8  75.0%
+  knowledge-update                     6     8  75.0%
+  ------------------------------------------------
+  Overall                             26    48  54.2%
+  Task Average                                  54.2%
+
+  Result: 54.2% overall, 54.2% task-avg
+  Duration: 1209s (20.2min)
+  Abstentions: 15, Enrichments: 3
+
+  [2/13] Running: enrich_ssu
+
+============================================================
+  EXPERIMENT: enrich_ssu
+  Enable L4/L5 enrichment for single-session-user (+2.9% from ranking)
+  Config hash: 093d23766ce5
+  Questions: 48 (oracle)
+============================================================
+[enrich_ssu]:   0%|          | 0/48 [00:00<?, ?it/s][enrich_ssu]:   2%|▏         | 1/48 [00:00<00:30,  1.56it/s][enrich_ssu]:   4%|▍         | 2/48 [00:01<00:43,  1.06it/s][enrich_ssu]:   6%|▋         | 3/48 [00:02<00:37,  1.21it/s][enrich_ssu]:   8%|▊         | 4/48 [00:03<00:31,  1.40it/s][enrich_ssu]:  10%|█         | 5/48 [00:03<00:29,  1.47it/s][enrich_ssu]:  12%|█▎        | 6/48 [00:04<00:28,  1.47it/s][enrich_ssu]:  15%|█▍        | 7/48 [00:05<00:28,  1.43it/s][enrich_ssu]:  17%|█▋        | 8/48 [00:05<00:27,  1.43it/s][enrich_ssu]:  19%|█▉        | 9/48 [00:07<00:38,  1.02it/s][enrich_ssu]:  21%|██        | 10/48 [00:08<00:35,  1.06it/s][enrich_ssu]:  23%|██▎       | 11/48 [00:09<00:37,  1.01s/it][enrich_ssu]:  25%|██▌       | 12/48 [00:10<00:35,  1.02it/s][enrich_ssu]:  27%|██▋       | 13/48 [00:10<00:30,  1.16it/s][enrich_ssu]:  29%|██▉       | 14/48 [00:12<00:36,  1.07s/it][enrich_ssu]:  31%|███▏      | 15/48 [00:13<00:31,  1.05it/s][enrich_ssu]:  33%|███▎      | 16/48 [00:14<00:30,  1.05it/s][enrich_ssu]:  35%|███▌      | 17/48 [00:16<00:43,  1.39s/it][enrich_ssu]:  38%|███▊      | 18/48 [00:17<00:35,  1.19s/it][enrich_ssu]:  40%|███▉      | 19/48 [00:18<00:31,  1.08s/it][enrich_ssu]:  42%|████▏     | 20/48 [00:18<00:28,  1.01s/it][enrich_ssu]:  44%|████▍     | 21/48 [00:19<00:24,  1.12it/s][enrich_ssu]:  46%|████▌     | 22/48 [00:20<00:21,  1.20it/s][enrich_ssu]:  48%|████▊     | 23/48 [00:21<00:21,  1.18it/s][enrich_ssu]:  50%|█████     | 24/48 [00:21<00:18,  1.28it/s][enrich_ssu]:  52%|█████▏    | 25/48 [00:23<00:24,  1.07s/it][enrich_ssu]:  54%|█████▍    | 26/48 [00:25<00:30,  1.40s/it][enrich_ssu]:  56%|█████▋    | 27/48 [00:28<00:40,  1.93s/it][enrich_ssu]:  58%|█████▊    | 28/48 [00:31<00:45,  2.29s/it][enrich_ssu]:  60%|██████    | 29/48 [00:34<00:43,  2.29s/it][enrich_ssu]:  62%|██████▎   | 30/48 [00:37<00:45,  2.51s/it][enrich_ssu]:  65%|██████▍   | 31/48 [00:41<00:50,  3.00s/it][enrich_ssu]:  67%|██████▋   | 32/48 [00:44<00:46,  2.92s/it][enrich_ssu]:  69%|██████▉   | 33/48 [00:45<00:37,  2.47s/it][enrich_ssu]:  71%|███████   | 34/48 [00:46<00:29,  2.12s/it][enrich_ssu]:  73%|███████▎  | 35/48 [00:48<00:25,  2.00s/it][enrich_ssu]:  75%|███████▌  | 36/48 [00:50<00:25,  2.11s/it][enrich_ssu]:  77%|███████▋  | 37/48 [00:51<00:19,  1.78s/it][enrich_ssu]:  79%|███████▉  | 38/48 [00:54<00:19,  1.95s/it][enrich_ssu]:  81%|████████▏ | 39/48 [00:55<00:15,  1.75s/it][enrich_ssu]:  83%|████████▎ | 40/48 [00:57<00:14,  1.79s/it][enrich_ssu]:  85%|████████▌ | 41/48 [00:58<00:10,  1.49s/it][enrich_ssu]:  88%|████████▊ | 42/48 [00:58<00:07,  1.27s/it][enrich_ssu]:  90%|████████▉ | 43/48 [00:59<00:05,  1.07s/it][enrich_ssu]:  92%|█████████▏| 44/48 [01:00<00:03,  1.05it/s][enrich_ssu]:  94%|█████████▍| 45/48 [01:00<00:02,  1.18it/s][enrich_ssu]:  96%|█████████▌| 46/48 [01:01<00:01,  1.17it/s][enrich_ssu]:  98%|█████████▊| 47/48 [01:02<00:00,  1.09it/s][enrich_ssu]: 100%|██████████| 48/48 [01:03<00:00,  1.21it/s][enrich_ssu]: 100%|██████████| 48/48 [01:03<00:00,  1.32s/it]
+
+  Running GPT-4o evaluation...
+
+  Retry 1/5 after 2s (RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for gpt-4o in organi)
+
+  Type                           Correct Total    Acc
+  ------------------------------------------------
+  single-session-user                  4     8  50.0%
+  single-session-assistant             5     8  62.5%
+  single-session-preference            1     8  12.5%
+  multi-session                        5     8  62.5%
+  temporal-reasoning                   5     8  62.5%
+  knowledge-update                     6     8  75.0%
+  ------------------------------------------------
+  Overall                             26    48  54.2%
+  Task Average                                  54.2%
+
+  Result: 54.2% overall, 54.2% task-avg
+  Duration: 63s (1.1min)
+  Abstentions: 14, Enrichments: 3
+
+  [3/13] Running: strong_keyword
+
+============================================================
+  EXPERIMENT: strong_keyword
+  Increase keyword overlap weight from 2.0 to 4.0 in L3 scoring
+  Config hash: 434f08f6e328
+  Questions: 48 (oracle)
+============================================================
+[strong_keyword]:   0%|          | 0/48 [00:00<?, ?it/s][strong_keyword]:   2%|▏         | 1/48 [00:00<00:27,  1.71it/s][strong_keyword]:   4%|▍         | 2/48 [00:01<00:29,  1.55it/s][strong_keyword]:   6%|▋         | 3/48 [00:01<00:29,  1.53it/s][strong_keyword]:   8%|▊         | 4/48 [00:02<00:28,  1.54it/s][strong_keyword]:  10%|█         | 5/48 [00:03<00:27,  1.58it/s][strong_keyword]:  12%|█▎        | 6/48 [00:03<00:26,  1.58it/s][strong_keyword]:  15%|█▍        | 7/48 [00:04<00:32,  1.28it/s][strong_keyword]:  17%|█▋        | 8/48 [00:05<00:29,  1.34it/s][strong_keyword]:  19%|█▉        | 9/48 [00:08<00:59,  1.53s/it][strong_keyword]:  21%|██        | 10/48 [00:09<00:50,  1.32s/it][strong_keyword]:  23%|██▎       | 11/48 [00:10<00:41,  1.13s/it][strong_keyword]:  25%|██▌       | 12/48 [00:11<00:37,  1.05s/it][strong_keyword]:  27%|██▋       | 13/48 [00:11<00:32,  1.08it/s][strong_keyword]:  29%|██▉       | 14/48 [00:12<00:33,  1.03it/s][strong_keyword]:  31%|███▏      | 15/48 [00:14<00:35,  1.06s/it][strong_keyword]:  33%|███▎      | 16/48 [00:14<00:30,  1.04it/s][strong_keyword]:  35%|███▌      | 17/48 [00:17<00:43,  1.40s/it][strong_keyword]:  38%|███▊      | 18/48 [00:19<00:51,  1.73s/it][strong_keyword]:  40%|███▉      | 19/48 [00:20<00:40,  1.40s/it][strong_keyword]:  42%|████▏     | 20/48 [00:21<00:34,  1.22s/it][strong_keyword]:  44%|████▍     | 21/48 [00:21<00:28,  1.04s/it][strong_keyword]:  46%|████▌     | 22/48 [00:24<00:42,  1.62s/it][strong_keyword]:  48%|████▊     | 23/48 [00:25<00:32,  1.30s/it][strong_keyword]:  50%|█████     | 24/48 [00:26<00:25,  1.08s/it][strong_keyword]:  52%|█████▏    | 25/48 [00:33<01:07,  2.93s/it][strong_keyword]:  54%|█████▍    | 26/48 [00:36<01:04,  2.92s/it][strong_keyword]:  56%|█████▋    | 27/48 [00:45<01:42,  4.90s/it][strong_keyword]:  58%|█████▊    | 28/48 [00:54<02:00,  6.01s/it][strong_keyword]:  60%|██████    | 29/48 [00:56<01:32,  4.88s/it][strong_keyword]:  62%|██████▎   | 30/48 [00:58<01:14,  4.13s/it][strong_keyword]:  65%|██████▍   | 31/48 [01:06<01:28,  5.22s/it][strong_keyword]:  67%|██████▋   | 32/48 [01:09<01:10,  4.42s/it][strong_keyword]:  69%|██████▉   | 33/48 [01:11<00:56,  3.79s/it][strong_keyword]:  71%|███████   | 34/48 [01:16<00:58,  4.21s/it][strong_keyword]:  73%|███████▎  | 35/48 [01:18<00:43,  3.36s/it][strong_keyword]:  75%|███████▌  | 36/48 [01:20<00:38,  3.18s/it][strong_keyword]:  77%|███████▋  | 37/48 [01:25<00:40,  3.69s/it][strong_keyword]:  79%|███████▉  | 38/48 [01:30<00:40,  4.07s/it][strong_keyword]:  81%|████████▏ | 39/48 [01:32<00:29,  3.26s/it][strong_keyword]:  83%|████████▎ | 40/48 [01:33<00:21,  2.70s/it][strong_keyword]:  85%|████████▌ | 41/48 [01:35<00:18,  2.65s/it][strong_keyword]:  88%|████████▊ | 42/48 [01:37<00:14,  2.35s/it][strong_keyword]:  90%|████████▉ | 43/48 [01:44<00:18,  3.71s/it][strong_keyword]:  92%|█████████▏| 44/48 [01:45<00:11,  2.81s/it][strong_keyword]:  94%|█████████▍| 45/48 [01:45<00:06,  2.19s/it][strong_keyword]:  96%|█████████▌| 46/48 [01:46<00:03,  1.75s/it][strong_keyword]:  98%|█████████▊| 47/48 [01:51<00:02,  2.51s/it][strong_keyword]: 100%|██████████| 48/48 [01:51<00:00,  1.94s/it][strong_keyword]: 100%|██████████| 48/48 [01:51<00:00,  2.32s/it]
+
+  Running GPT-4o evaluation...
+
+  Retry 1/5 after 2s (RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for gpt-4o in organi)
+
+  Type                           Correct Total    Acc
+  ------------------------------------------------
+  single-session-user                  4     8  50.0%
+  single-session-assistant             5     8  62.5%
+  single-session-preference            1     8  12.5%
+  multi-session                        5     8  62.5%
+  temporal-reasoning                   6     8  75.0%
+  knowledge-update                     6     8  75.0%
+  ------------------------------------------------
+  Overall                             27    48  56.2%
+  Task Average                                  56.2%
+
+  Result: 56.2% overall, 56.2% task-avg
+  Duration: 112s (1.9min)
+  Abstentions: 14, Enrichments: 3
+
+  [4/13] Running: wide_temporal
+
+============================================================
+  EXPERIMENT: wide_temporal
+  Increase temporal proximity bonus from 10 to 20 for temporal questions
+  Config hash: 87135346c079
+  Questions: 48 (oracle)
+============================================================
+[wide_temporal]:   0%|          | 0/48 [00:00<?, ?it/s][wide_temporal]:   2%|▏         | 1/48 [00:00<00:39,  1.18it/s][wide_temporal]:   4%|▍         | 2/48 [00:01<00:34,  1.33it/s][wide_temporal]:   6%|▋         | 3/48 [00:02<00:30,  1.49it/s][wide_temporal]:   8%|▊         | 4/48 [00:02<00:27,  1.60it/s][wide_temporal]:  10%|█         | 5/48 [00:03<00:27,  1.59it/s][wide_temporal]:  12%|█▎        | 6/48 [00:03<00:26,  1.59it/s][wide_temporal]:  15%|█▍        | 7/48 [00:04<00:25,  1.63it/s][wide_temporal]:  17%|█▋        | 8/48 [00:05<00:24,  1.63it/s][wide_temporal]:  19%|█▉        | 9/48 [00:05<00:24,  1.56it/s][wide_temporal]:  21%|██        | 10/48 [00:06<00:25,  1.47it/s][wide_temporal]:  23%|██▎       | 11/48 [00:08<00:39,  1.06s/it][wide_temporal]:  25%|██▌       | 12/48 [00:09<00:34,  1.06it/s][wide_temporal]:  27%|██▋       | 13/48 [00:09<00:29,  1.19it/s][wide_temporal]:  29%|██▉       | 14/48 [00:10<00:31,  1.08it/s][wide_temporal]:  31%|███▏      | 15/48 [00:13<00:47,  1.45s/it][wide_temporal]:  33%|███▎      | 16/48 [00:14<00:45,  1.43s/it][wide_temporal]:  35%|███▌      | 17/48 [00:17<00:53,  1.73s/it][wide_temporal]:  38%|███▊      | 18/48 [00:23<01:32,  3.07s/it][wide_temporal]:  40%|███▉      | 19/48 [00:24<01:07,  2.34s/it][wide_temporal]:  42%|████▏     | 20/48 [00:24<00:51,  1.82s/it][wide_temporal]:  44%|████▍     | 21/48 [00:25<00:39,  1.45s/it][wide_temporal]:  46%|████▌     | 22/48 [00:26<00:30,  1.19s/it][wide_temporal]:  48%|████▊     | 23/48 [00:26<00:24,  1.01it/s][wide_temporal]:  50%|█████     | 24/48 [00:31<00:50,  2.09s/it][wide_temporal]:  52%|█████▏    | 25/48 [00:34<00:59,  2.59s/it][wide_temporal]:  54%|█████▍    | 26/48 [00:41<01:21,  3.71s/it][wide_temporal]:  56%|█████▋    | 27/48 [00:49<01:46,  5.08s/it][wide_temporal]:  58%|█████▊    | 28/48 [00:51<01:24,  4.20s/it][wide_temporal]:  60%|██████    | 29/48 [00:56<01:23,  4.39s/it][wide_temporal]:  62%|██████▎   | 30/48 [00:57<01:01,  3.43s/it][wide_temporal]:  65%|██████▍   | 31/48 [01:05<01:21,  4.81s/it][wide_temporal]:  67%|██████▋   | 32/48 [01:12<01:26,  5.43s/it][wide_temporal]:  69%|██████▉   | 33/48 [01:14<01:06,  4.45s/it][wide_temporal]:  71%|███████   | 34/48 [01:18<00:57,  4.12s/it][wide_temporal]:  73%|███████▎  | 35/48 [01:19<00:43,  3.35s/it][wide_temporal]:  75%|███████▌  | 36/48 [01:22<00:36,  3.05s/it][wide_temporal]:  77%|███████▋  | 37/48 [01:23<00:28,  2.55s/it][wide_temporal]:  79%|███████▉  | 38/48 [01:25<00:23,  2.32s/it][wide_temporal]:  81%|████████▏ | 39/48 [01:26<00:19,  2.16s/it][wide_temporal]:  83%|████████▎ | 40/48 [01:28<00:16,  2.06s/it][wide_temporal]:  85%|████████▌ | 41/48 [01:29<00:12,  1.73s/it][wide_temporal]:  88%|████████▊ | 42/48 [01:36<00:19,  3.21s/it][wide_temporal]:  90%|████████▉ | 43/48 [01:43<00:21,  4.33s/it][wide_temporal]:  92%|█████████▏| 44/48 [01:44<00:12,  3.24s/it][wide_temporal]:  94%|█████████▍| 45/48 [01:49<00:11,  3.81s/it][wide_temporal]:  96%|█████████▌| 46/48 [01:50<00:06,  3.03s/it][wide_temporal]:  98%|█████████▊| 47/48 [01:57<00:04,  4.23s/it][wide_temporal]: 100%|██████████| 48/48 [01:58<00:00,  3.14s/it][wide_temporal]: 100%|██████████| 48/48 [01:58<00:00,  2.46s/it]
+
+  Retry 1/5 after 2s (RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for gpt-4o in organi)
+
+  Running GPT-4o evaluation...
+
+  Type                           Correct Total    Acc
+  ------------------------------------------------
+  single-session-user                  4     8  50.0%
+  single-session-assistant             6     8  75.0%
+  single-session-preference            2     8  25.0%
+  multi-session                        6     8  75.0%
+  temporal-reasoning                   6     8  75.0%
+  knowledge-update                     6     8  75.0%
+  ------------------------------------------------
+  Overall                             30    48  62.5%
+  Task Average                                  62.5%
+
+  Result: 62.5% overall, 62.5% task-avg
+  Duration: 118s (2.0min)
+  Abstentions: 13, Enrichments: 3
+
+  [5/13] Running: relaxed_abstention
+
+============================================================
+  EXPERIMENT: relaxed_abstention
+  Lower abstention threshold: confidence 0.10, require 2 low signals
+  Config hash: f0d9c526a7e2
+  Questions: 48 (oracle)
+============================================================
+[relaxed_abstention]:   0%|          | 0/48 [00:00<?, ?it/s][relaxed_abstention]:   2%|▏         | 1/48 [00:00<00:31,  1.49it/s][relaxed_abstention]:   4%|▍         | 2/48 [00:01<00:34,  1.34it/s][relaxed_abstention]:   6%|▋         | 3/48 [00:02<00:30,  1.46it/s][relaxed_abstention]:   8%|▊         | 4/48 [00:02<00:27,  1.62it/s][relaxed_abstention]:  10%|█         | 5/48 [00:03<00:27,  1.54it/s][relaxed_abstention]:  12%|█▎        | 6/48 [00:03<00:27,  1.54it/s][relaxed_abstention]:  15%|█▍        | 7/48 [00:04<00:27,  1.50it/s][relaxed_abstention]:  17%|█▋        | 8/48 [00:05<00:27,  1.44it/s][relaxed_abstention]:  19%|█▉        | 9/48 [00:06<00:28,  1.36it/s][relaxed_abstention]:  21%|██        | 10/48 [00:07<00:29,  1.30it/s][relaxed_abstention]:  23%|██▎       | 11/48 [00:09<00:50,  1.37s/it][relaxed_abstention]:  25%|██▌       | 12/48 [00:17<02:00,  3.34s/it][relaxed_abstention]:  27%|██▋       | 13/48 [00:19<01:42,  2.93s/it][relaxed_abstention]:  29%|██▉       | 14/48 [00:20<01:22,  2.43s/it][relaxed_abstention]:  31%|███▏      | 15/48 [00:21<01:03,  1.93s/it][relaxed_abstention]:  33%|███▎      | 16/48 [00:22<00:50,  1.58s/it][relaxed_abstention]:  35%|███▌      | 17/48 [00:24<00:53,  1.72s/it][relaxed_abstention]:  38%|███▊      | 18/48 [00:25<00:41,  1.39s/it][relaxed_abstention]:  40%|███▉      | 19/48 [00:25<00:35,  1.22s/it][relaxed_abstention]:  42%|████▏     | 20/48 [00:27<00:37,  1.32s/it][relaxed_abstention]:  44%|████▍     | 21/48 [00:28<00:29,  1.10s/it][relaxed_abstention]:  46%|████▌     | 22/48 [00:28<00:25,  1.04it/s][relaxed_abstention]:  48%|████▊     | 23/48 [00:29<00:21,  1.18it/s][relaxed_abstention]:  50%|█████     | 24/48 [00:29<00:18,  1.30it/s][relaxed_abstention]:  52%|█████▏    | 25/48 [00:41<01:31,  3.99s/it][relaxed_abstention]:  54%|█████▍    | 26/48 [00:44<01:22,  3.74s/it][relaxed_abstention]:  56%|█████▋    | 27/48 [00:48<01:17,  3.70s/it][relaxed_abstention]:  58%|█████▊    | 28/48 [00:51<01:14,  3.72s/it][relaxed_abstention]:  60%|██████    | 29/48 [00:54<01:05,  3.45s/it][relaxed_abstention]:  62%|██████▎   | 30/48 [01:01<01:18,  4.34s/it][relaxed_abstention]:  65%|██████▍   | 31/48 [01:06<01:19,  4.68s/it][relaxed_abstention]:  67%|██████▋   | 32/48 [01:11<01:14,  4.67s/it][relaxed_abstention]:  69%|██████▉   | 33/48 [01:13<01:00,  4.05s/it][relaxed_abstention]:  71%|███████   | 34/48 [01:20<01:06,  4.75s/it][relaxed_abstention]:  73%|███████▎  | 35/48 [01:21<00:47,  3.69s/it][relaxed_abstention]:  75%|███████▌  | 36/48 [01:23<00:39,  3.26s/it][relaxed_abstention]:  77%|███████▋  | 37/48 [01:26<00:33,  3.06s/it][relaxed_abstention]:  79%|███████▉  | 38/48 [01:30<00:34,  3.45s/it][relaxed_abstention]:  81%|████████▏ | 39/48 [01:33<00:29,  3.23s/it][relaxed_abstention]:  83%|████████▎ | 40/48 [01:39<00:32,  4.07s/it][relaxed_abstention]:  85%|████████▌ | 41/48 [01:40<00:21,  3.04s/it][relaxed_abstention]:  88%|████████▊ | 42/48 [01:40<00:14,  2.37s/it][relaxed_abstention]:  90%|████████▉ | 43/48 [01:44<00:13,  2.64s/it][relaxed_abstention]:  92%|█████████▏| 44/48 [01:46<00:10,  2.61s/it][relaxed_abstention]:  94%|█████████▍| 45/48 [01:47<00:06,  2.03s/it][relaxed_abstention]:  96%|█████████▌| 46/48 [01:52<00:06,  3.10s/it][relaxed_abstention]:  98%|█████████▊| 47/48 [01:53<00:02,  2.44s/it][relaxed_abstention]: 100%|██████████| 48/48 [01:59<00:00,  3.45s/it][relaxed_abstention]: 100%|██████████| 48/48 [01:59<00:00,  2.49s/it]
+
+  Retry 1/5 after 2s (RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for gpt-4o in organi)
+
+  Retry 1/5 after 2s (RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for gpt-4o in organi)
+
+  Running GPT-4o evaluation...
+
+  Type                           Correct Total    Acc
+  ------------------------------------------------
+  single-session-user                  4     8  50.0%
+  single-session-assistant             6     8  75.0%
+  single-session-preference            1     8  12.5%
+  multi-session                        5     8  62.5%
+  temporal-reasoning                   7     8  87.5%
+  knowledge-update                     6     8  75.0%
+  ------------------------------------------------
+  Overall                             29    48  60.4%
+  Task Average                                  60.4%
+
+  Result: 60.4% overall, 60.4% task-avg
+  Duration: 120s (2.0min)
+  Abstentions: 13, Enrichments: 3
+
+  [6/13] Running: strict_abstention
+
+============================================================
+  EXPERIMENT: strict_abstention
+  Stricter abstention: confidence 0.25, require 1 low signal
+  Config hash: 97e60803c975
+  Questions: 48 (oracle)
+============================================================
+[strict_abstention]:   0%|          | 0/48 [00:00<?, ?it/s][strict_abstention]:   2%|▏         | 1/48 [00:00<00:29,  1.61it/s][strict_abstention]:   4%|▍         | 2/48 [00:01<00:28,  1.61it/s][strict_abstention]:   6%|▋         | 3/48 [00:01<00:26,  1.72it/s][strict_abstention]:   8%|▊         | 4/48 [00:02<00:25,  1.75it/s][strict_abstention]:  10%|█         | 5/48 [00:03<00:28,  1.53it/s][strict_abstention]:  12%|█▎        | 6/48 [00:03<00:27,  1.54it/s][strict_abstention]:  15%|█▍        | 7/48 [00:05<00:35,  1.15it/s][strict_abstention]:  17%|█▋        | 8/48 [00:05<00:33,  1.21it/s][strict_abstention]:  19%|█▉        | 9/48 [00:07<00:43,  1.13s/it][strict_abstention]:  21%|██        | 10/48 [00:08<00:40,  1.05s/it][strict_abstention]:  23%|██▎       | 11/48 [00:09<00:36,  1.01it/s][strict_abstention]:  25%|██▌       | 12/48 [00:10<00:33,  1.06it/s][strict_abstention]:  27%|██▋       | 13/48 [00:10<00:29,  1.18it/s][strict_abstention]:  29%|██▉       | 14/48 [00:12<00:39,  1.17s/it][strict_abstention]:  31%|███▏      | 15/48 [00:15<00:58,  1.78s/it][strict_abstention]:  33%|███▎      | 16/48 [00:16<00:47,  1.49s/it][strict_abstention]:  35%|███▌      | 17/48 [00:18<00:50,  1.64s/it][strict_abstention]:  38%|███▊      | 18/48 [00:19<00:40,  1.35s/it][strict_abstention]:  40%|███▉      | 19/48 [00:20<00:37,  1.29s/it][strict_abstention]:  42%|████▏     | 20/48 [00:21<00:30,  1.09s/it][strict_abstention]:  44%|████▍     | 21/48 [00:24<00:45,  1.69s/it][strict_abstention]:  46%|████▌     | 22/48 [00:26<00:49,  1.91s/it][strict_abstention]:  48%|████▊     | 23/48 [00:27<00:37,  1.52s/it][strict_abstention]:  50%|█████     | 24/48 [00:28<00:30,  1.28s/it][strict_abstention]:  52%|█████▏    | 25/48 [00:34<01:02,  2.72s/it][strict_abstention]:  54%|█████▍    | 26/48 [00:36<01:00,  2.76s/it][strict_abstention]:  56%|█████▋    | 27/48 [00:47<01:46,  5.08s/it][strict_abstention]:  58%|█████▊    | 28/48 [00:50<01:27,  4.38s/it][strict_abstention]:  60%|██████    | 29/48 [00:51<01:07,  3.57s/it][strict_abstention]:  62%|██████▎   | 30/48 [00:59<01:23,  4.65s/it][strict_abstention]:  65%|██████▍   | 31/48 [01:02<01:15,  4.43s/it][strict_abstention]:  67%|██████▋   | 32/48 [01:06<01:07,  4.19s/it][strict_abstention]:  69%|██████▉   | 33/48 [01:10<01:03,  4.22s/it][strict_abstention]:  71%|███████   | 34/48 [01:15<01:01,  4.41s/it][strict_abstention]:  73%|███████▎  | 35/48 [01:17<00:45,  3.47s/it][strict_abstention]:  75%|███████▌  | 36/48 [01:18<00:35,  2.92s/it][strict_abstention]:  77%|███████▋  | 37/48 [01:26<00:47,  4.30s/it][strict_abstention]:  79%|███████▉  | 38/48 [01:27<00:34,  3.50s/it][strict_abstention]:  81%|████████▏ | 39/48 [01:32<00:35,  3.89s/it][strict_abstention]:  83%|████████▎ | 40/48 [01:34<00:26,  3.36s/it][strict_abstention]:  85%|████████▌ | 41/48 [01:35<00:17,  2.54s/it][strict_abstention]:  88%|████████▊ | 42/48 [01:36<00:12,  2.05s/it][strict_abstention]:  90%|████████▉ | 43/48 [01:36<00:08,  1.62s/it][strict_abstention]:  92%|█████████▏| 44/48 [01:40<00:08,  2.18s/it][strict_abstention]:  94%|█████████▍| 45/48 [01:44<00:08,  2.67s/it][strict_abstention]:  96%|█████████▌| 46/48 [01:45<00:04,  2.15s/it][strict_abstention]:  98%|█████████▊| 47/48 [01:54<00:04,  4.36s/it][strict_abstention]: 100%|██████████| 48/48 [01:55<00:00,  3.27s/it][strict_abstention]: 100%|██████████| 48/48 [01:55<00:00,  2.40s/it]
+
+  Retry 1/5 after 2s (RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for gpt-4o in organi)
+
+  Retry 1/5 after 2s (RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for gpt-4o in organi)
+
+  Running GPT-4o evaluation...
+
+  Type                           Correct Total    Acc
+  ------------------------------------------------
+  single-session-user                  4     8  50.0%
+  single-session-assistant             6     8  75.0%
+  single-session-preference            1     8  12.5%
+  multi-session                        5     8  62.5%
+  temporal-reasoning                   6     8  75.0%
+  knowledge-update                     6     8  75.0%
+  ------------------------------------------------
+  Overall                             28    48  58.3%
+  Task Average                                  58.3%
+
+  Result: 58.3% overall, 58.3% task-avg
+  Duration: 115s (1.9min)
+  Abstentions: 14, Enrichments: 3
+
+  [7/13] Running: enrich_ku
+
+============================================================
+  EXPERIMENT: enrich_ku
+  Re-enable L4/L5 enrichment for knowledge-update
+  Config hash: 03fbbc96d866
+  Questions: 48 (oracle)
+============================================================
+[enrich_ku]:   0%|          | 0/48 [00:00<?, ?it/s][enrich_ku]:   2%|▏         | 1/48 [00:00<00:29,  1.60it/s][enrich_ku]:   4%|▍         | 2/48 [00:01<00:29,  1.53it/s][enrich_ku]:   6%|▋         | 3/48 [00:01<00:26,  1.68it/s][enrich_ku]:   8%|▊         | 4/48 [00:02<00:25,  1.72it/s][enrich_ku]:  10%|█         | 5/48 [00:02<00:25,  1.70it/s][enrich_ku]:  12%|█▎        | 6/48 [00:03<00:25,  1.65it/s][enrich_ku]:  15%|█▍        | 7/48 [00:04<00:24,  1.66it/s][enrich_ku]:  17%|█▋        | 8/48 [00:04<00:23,  1.67it/s][enrich_ku]:  19%|█▉        | 9/48 [00:05<00:26,  1.49it/s][enrich_ku]:  21%|██        | 10/48 [00:06<00:26,  1.42it/s][enrich_ku]:  23%|██▎       | 11/48 [00:07<00:25,  1.47it/s][enrich_ku]:  25%|██▌       | 12/48 [00:07<00:24,  1.44it/s][enrich_ku]:  27%|██▋       | 13/48 [00:08<00:22,  1.52it/s][enrich_ku]:  29%|██▉       | 14/48 [00:15<01:27,  2.59s/it][enrich_ku]:  31%|███▏      | 15/48 [00:16<01:06,  2.00s/it][enrich_ku]:  33%|███▎      | 16/48 [00:16<00:51,  1.61s/it][enrich_ku]:  35%|███▌      | 17/48 [00:18<00:50,  1.62s/it][enrich_ku]:  38%|███▊      | 18/48 [00:21<01:05,  2.20s/it][enrich_ku]:  40%|███▉      | 19/48 [00:22<00:49,  1.71s/it][enrich_ku]:  42%|████▏     | 20/48 [00:23<00:38,  1.38s/it][enrich_ku]:  44%|████▍     | 21/48 [00:24<00:40,  1.49s/it][enrich_ku]:  46%|████▌     | 22/48 [00:27<00:45,  1.77s/it][enrich_ku]:  48%|████▊     | 23/48 [00:27<00:34,  1.38s/it][enrich_ku]:  50%|█████     | 24/48 [00:28<00:27,  1.16s/it][enrich_ku]:  52%|█████▏    | 25/48 [00:31<00:37,  1.65s/it][enrich_ku]:  54%|█████▍    | 26/48 [00:39<01:20,  3.66s/it][enrich_ku]:  56%|█████▋    | 27/48 [00:42<01:10,  3.35s/it][enrich_ku]:  58%|█████▊    | 28/48 [00:44<00:58,  2.92s/it][enrich_ku]:  60%|██████    | 29/48 [00:54<01:36,  5.08s/it][enrich_ku]:  62%|██████▎   | 30/48 [00:57<01:22,  4.56s/it][enrich_ku]:  65%|██████▍   | 31/48 [01:05<01:37,  5.73s/it][enrich_ku]:  67%|██████▋   | 32/48 [01:08<01:18,  4.88s/it][enrich_ku]:  69%|██████▉   | 33/48 [01:11<01:02,  4.14s/it][enrich_ku]:  71%|███████   | 34/48 [01:18<01:12,  5.19s/it][enrich_ku]:  73%|███████▎  | 35/48 [01:20<00:52,  4.00s/it][enrich_ku]:  75%|███████▌  | 36/48 [01:21<00:38,  3.24s/it][enrich_ku]:  77%|███████▋  | 37/48 [01:24<00:33,  3.01s/it][enrich_ku]:  79%|███████▉  | 38/48 [01:29<00:37,  3.74s/it][enrich_ku]:  81%|████████▏ | 39/48 [01:33<00:33,  3.73s/it][enrich_ku]:  83%|████████▎ | 40/48 [01:35<00:26,  3.33s/it][enrich_ku]:  85%|████████▌ | 41/48 [01:36<00:17,  2.54s/it][enrich_ku]:  88%|████████▊ | 42/48 [01:38<00:14,  2.43s/it][enrich_ku]:  90%|████████▉ | 43/48 [01:42<00:14,  2.90s/it][enrich_ku]:  92%|█████████▏| 44/48 [01:46<00:12,  3.11s/it][enrich_ku]:  94%|█████████▍| 45/48 [01:46<00:07,  2.44s/it][enrich_ku]:  96%|█████████▌| 46/48 [01:51<00:05,  2.99s/it][enrich_ku]:  98%|█████████▊| 47/48 [01:51<00:02,  2.29s/it][enrich_ku]: 100%|██████████| 48/48 [01:58<00:00,  3.44s/it][enrich_ku]: 100%|██████████| 48/48 [01:58<00:00,  2.46s/it]
+
+  Retry 1/5 after 2s (RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for gpt-4o in organi)
+
+  Retry 1/5 after 2s (RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for gpt-4o in organi)
+
+  Running GPT-4o evaluation...
+
+  Type                           Correct Total    Acc
+  ------------------------------------------------
+  single-session-user                  4     8  50.0%
+  single-session-assistant             6     8  75.0%
+  single-session-preference            2     8  25.0%
+  multi-session                        5     8  62.5%
+  temporal-reasoning                   7     8  87.5%
+  knowledge-update                     6     8  75.0%
+  ------------------------------------------------
+  Overall                             30    48  62.5%
+  Task Average                                  62.5%
+
+  Result: 62.5% overall, 62.5% task-avg
+  Duration: 118s (2.0min)
+  Abstentions: 12, Enrichments: 9
+
+  [8/13] Running: strong_entity
+
+============================================================
+  EXPERIMENT: strong_entity
+  Increase entity overlap weight from 3.0 to 6.0
+  Config hash: cd83e24c30be
+  Questions: 48 (oracle)
+============================================================
+[strong_entity]:   0%|          | 0/48 [00:00<?, ?it/s][strong_entity]:   2%|▏         | 1/48 [00:00<00:46,  1.02it/s][strong_entity]:   4%|▍         | 2/48 [00:01<00:35,  1.28it/s][strong_entity]:   6%|▋         | 3/48 [00:02<00:29,  1.53it/s][strong_entity]:   8%|▊         | 4/48 [00:03<00:41,  1.05it/s][strong_entity]:  10%|█         | 5/48 [00:04<00:35,  1.21it/s][strong_entity]:  12%|█▎        | 6/48 [00:04<00:32,  1.31it/s][strong_entity]:  15%|█▍        | 7/48 [00:05<00:28,  1.41it/s][strong_entity]:  17%|█▋        | 8/48 [00:06<00:27,  1.46it/s][strong_entity]:  19%|█▉        | 9/48 [00:07<00:34,  1.13it/s][strong_entity]:  21%|██        | 10/48 [00:08<00:33,  1.14it/s][strong_entity]:  23%|██▎       | 11/48 [00:08<00:31,  1.18it/s][strong_entity]:  25%|██▌       | 12/48 [00:09<00:30,  1.16it/s][strong_entity]:  27%|██▋       | 13/48 [00:11<00:34,  1.02it/s][strong_entity]:  29%|██▉       | 14/48 [00:13<00:46,  1.37s/it][strong_entity]:  31%|███▏      | 15/48 [00:14<00:43,  1.31s/it][strong_entity]:  33%|███▎      | 16/48 [00:17<00:53,  1.68s/it][strong_entity]:  35%|███▌      | 17/48 [00:18<00:52,  1.68s/it][strong_entity]:  38%|███▊      | 18/48 [00:19<00:45,  1.51s/it][strong_entity]:  40%|███▉      | 19/48 [00:20<00:36,  1.24s/it][strong_entity]:  42%|████▏     | 20/48 [00:21<00:33,  1.21s/it][strong_entity]:  44%|████▍     | 21/48 [00:22<00:27,  1.03s/it][strong_entity]:  46%|████▌     | 22/48 [00:25<00:42,  1.63s/it][strong_entity]:  48%|████▊     | 23/48 [00:25<00:32,  1.31s/it][strong_entity]:  50%|█████     | 24/48 [00:26<00:26,  1.11s/it][strong_entity]:  52%|█████▏    | 25/48 [00:32<00:57,  2.50s/it][strong_entity]:  54%|█████▍    | 26/48 [00:40<01:33,  4.23s/it][strong_entity]:  56%|█████▋    | 27/48 [00:47<01:44,  4.99s/it][strong_entity]:  58%|█████▊    | 28/48 [00:52<01:43,  5.16s/it][strong_entity]:  60%|██████    | 29/48 [00:55<01:24,  4.46s/it][strong_entity]:  62%|██████▎   | 30/48 [01:00<01:21,  4.55s/it][strong_entity]:  65%|██████▍   | 31/48 [01:07<01:28,  5.23s/it][strong_entity]:  67%|██████▋   | 32/48 [01:11<01:20,  5.06s/it][strong_entity]:  69%|██████▉   | 33/48 [01:13<01:01,  4.08s/it][strong_entity]:  71%|███████   | 34/48 [01:16<00:50,  3.59s/it][strong_entity]:  73%|███████▎  | 35/48 [01:18<00:43,  3.32s/it][strong_entity]:  75%|███████▌  | 36/48 [01:21<00:36,  3.07s/it][strong_entity]:  77%|███████▋  | 37/48 [01:24<00:34,  3.17s/it][strong_entity]:  79%|███████▉  | 38/48 [01:28<00:34,  3.42s/it][strong_entity]:  81%|████████▏ | 39/48 [01:31<00:28,  3.13s/it][strong_entity]:  83%|████████▎ | 40/48 [01:34<00:25,  3.19s/it][strong_entity]:  85%|████████▌ | 41/48 [01:38<00:24,  3.43s/it][strong_entity]:  88%|████████▊ | 42/48 [01:42<00:20,  3.46s/it][strong_entity]:  90%|████████▉ | 43/48 [01:42<00:13,  2.62s/it][strong_entity]:  92%|█████████▏| 44/48 [01:43<00:08,  2.07s/it][strong_entity]:  94%|█████████▍| 45/48 [01:49<00:09,  3.32s/it][strong_entity]:  96%|█████████▌| 46/48 [01:50<00:05,  2.62s/it][strong_entity]:  98%|█████████▊| 47/48 [01:53<00:02,  2.80s/it][strong_entity]: 100%|██████████| 48/48 [01:56<00:00,  2.79s/it][strong_entity]: 100%|██████████| 48/48 [01:56<00:00,  2.43s/it]
+
+  Retry 1/5 after 2s (RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for gpt-4o in organi)
+
+  Retry 1/5 after 2s (RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for gpt-4o in organi)
+
+  Running GPT-4o evaluation...
+
+  Type                           Correct Total    Acc
+  ------------------------------------------------
+  single-session-user                  4     8  50.0%
+  single-session-assistant             5     8  62.5%
+  single-session-preference            1     8  12.5%
+  multi-session                        5     8  62.5%
+  temporal-reasoning                   6     8  75.0%
+  knowledge-update                     6     8  75.0%
+  ------------------------------------------------
+  Overall                             27    48  56.2%
+  Task Average                                  56.2%
+
+  Result: 56.2% overall, 56.2% task-avg
+  Duration: 117s (1.9min)
+  Abstentions: 14, Enrichments: 3
+
+  [9/13] Running: combined_v1
+
+============================================================
+  EXPERIMENT: combined_v1
+  Combined: enrich SSU + keyword 4.0 + entity 6.0
+  Config hash: e0aa6be8c426
+  Questions: 48 (oracle)
+============================================================
+[combined_v1]:   0%|          | 0/48 [00:00<?, ?it/s][combined_v1]:   2%|▏         | 1/48 [00:00<00:38,  1.21it/s][combined_v1]:   4%|▍         | 2/48 [00:01<00:37,  1.22it/s][combined_v1]:   6%|▋         | 3/48 [00:02<00:33,  1.36it/s][combined_v1]:   8%|▊         | 4/48 [00:04<01:00,  1.36s/it][combined_v1]:  10%|█         | 5/48 [00:05<00:57,  1.35s/it][combined_v1]:  12%|█▎        | 6/48 [00:07<01:06,  1.59s/it][combined_v1]:  15%|█▍        | 7/48 [00:08<00:54,  1.33s/it][combined_v1]:  17%|█▋        | 8/48 [00:09<00:44,  1.12s/it][combined_v1]:  19%|█▉        | 9/48 [00:10<00:43,  1.13s/it][combined_v1]:  21%|██        | 10/48 [00:11<00:41,  1.09s/it][combined_v1]:  23%|██▎       | 11/48 [00:12<00:36,  1.01it/s][combined_v1]:  25%|██▌       | 12/48 [00:13<00:36,  1.01s/it][combined_v1]:  27%|██▋       | 13/48 [00:14<00:33,  1.05it/s][combined_v1]:  29%|██▉       | 14/48 [00:15<00:38,  1.14s/it][combined_v1]:  31%|███▏      | 15/48 [00:19<00:59,  1.79s/it][combined_v1]:  33%|███▎      | 16/48 [00:20<00:48,  1.53s/it][combined_v1]:  35%|███▌      | 17/48 [00:32<02:31,  4.90s/it][combined_v1]:  38%|███▊      | 18/48 [00:33<01:50,  3.70s/it][combined_v1]:  40%|███▉      | 19/48 [00:34<01:21,  2.80s/it][combined_v1]:  42%|████▏     | 20/48 [00:35<01:02,  2.23s/it][combined_v1]:  44%|████▍     | 21/48 [00:35<00:47,  1.74s/it][combined_v1]:  46%|████▌     | 22/48 [00:36<00:36,  1.41s/it][combined_v1]:  48%|████▊     | 23/48 [00:37<00:30,  1.22s/it][combined_v1]:  50%|█████     | 24/48 [00:37<00:24,  1.04s/it][combined_v1]:  52%|█████▏    | 25/48 [00:43<00:56,  2.47s/it][combined_v1]:  54%|█████▍    | 26/48 [00:47<00:59,  2.72s/it][combined_v1]:  56%|█████▋    | 27/48 [00:50<01:02,  2.96s/it][combined_v1]:  58%|█████▊    | 28/48 [00:53<00:57,  2.86s/it][combined_v1]:  60%|██████    | 29/48 [00:56<00:54,  2.87s/it][combined_v1]:  62%|██████▎   | 30/48 [00:57<00:44,  2.45s/it][combined_v1]:  65%|██████▍   | 31/48 [01:04<01:05,  3.87s/it][combined_v1]:  67%|██████▋   | 32/48 [01:09<01:05,  4.12s/it][combined_v1]:  69%|██████▉   | 33/48 [01:11<00:50,  3.36s/it][combined_v1]:  71%|███████   | 34/48 [01:14<00:45,  3.26s/it][combined_v1]:  73%|███████▎  | 35/48 [01:15<00:35,  2.71s/it][combined_v1]:  75%|███████▌  | 36/48 [01:17<00:29,  2.47s/it][combined_v1]:  77%|███████▋  | 37/48 [01:21<00:33,  3.04s/it][combined_v1]:  79%|███████▉  | 38/48 [01:25<00:32,  3.21s/it][combined_v1]:  81%|████████▏ | 39/48 [01:27<00:24,  2.76s/it][combined_v1]:  83%|████████▎ | 40/48 [01:32<00:29,  3.69s/it][combined_v1]:  85%|████████▌ | 41/48 [01:33<00:19,  2.81s/it][combined_v1]:  88%|████████▊ | 42/48 [01:34<00:13,  2.18s/it][combined_v1]:  90%|████████▉ | 43/48 [01:37<00:12,  2.50s/it][combined_v1]:  92%|█████████▏| 44/48 [01:39<00:09,  2.33s/it][combined_v1]:  94%|█████████▍| 45/48 [01:42<00:07,  2.49s/it][combined_v1]:  96%|█████████▌| 46/48 [01:43<00:03,  1.96s/it][combined_v1]:  98%|█████████▊| 47/48 [01:47<00:02,  2.81s/it][combined_v1]: 100%|██████████| 48/48 [01:51<00:00,  2.96s/it][combined_v1]: 100%|██████████| 48/48 [01:51<00:00,  2.32s/it]
+
+  Running GPT-4o evaluation...
+
+  Type                           Correct Total    Acc
+  ------------------------------------------------
+  single-session-user                  4     8  50.0%
+  single-session-assistant             6     8  75.0%
+  single-session-preference            1     8  12.5%
+  multi-session                        5     8  62.5%
+  temporal-reasoning                   7     8  87.5%
+  knowledge-update                     6     8  75.0%
+  ------------------------------------------------
+  Overall                             29    48  60.4%
+  Task Average                                  60.4%
+
+  Result: 60.4% overall, 60.4% task-avg
+  Duration: 111s (1.9min)
+  Abstentions: 13, Enrichments: 3
+
+  [10/13] Running: all_enriched
+
+============================================================
+  EXPERIMENT: all_enriched
+  Enable enrichment for ALL question types (upper bound test)
+  Config hash: e4fb9aa2581f
+  Questions: 48 (oracle)
+============================================================
+[all_enriched]:   0%|          | 0/48 [00:00<?, ?it/s][all_enriched]:   2%|▏         | 1/48 [00:00<00:31,  1.50it/s][all_enriched]:   4%|▍         | 2/48 [00:01<00:30,  1.50it/s][all_enriched]:   6%|▋         | 3/48 [00:01<00:28,  1.58it/s][all_enriched]:   8%|▊         | 4/48 [00:02<00:29,  1.49it/s][all_enriched]:  10%|█         | 5/48 [00:03<00:29,  1.45it/s][all_enriched]:  12%|█▎        | 6/48 [00:04<00:28,  1.50it/s][all_enriched]:  15%|█▍        | 7/48 [00:04<00:26,  1.55it/s][all_enriched]:  17%|█▋        | 8/48 [00:05<00:26,  1.53it/s][all_enriched]:  19%|█▉        | 9/48 [00:06<00:30,  1.26it/s][all_enriched]:  21%|██        | 10/48 [00:07<00:30,  1.25it/s][all_enriched]:  23%|██▎       | 11/48 [00:07<00:29,  1.25it/s][all_enriched]:  25%|██▌       | 12/48 [00:09<00:32,  1.11it/s][all_enriched]:  27%|██▋       | 13/48 [00:10<00:32,  1.08it/s][all_enriched]:  29%|██▉       | 14/48 [00:11<00:40,  1.20s/it][all_enriched]:  31%|███▏      | 15/48 [00:14<00:57,  1.75s/it][all_enriched]:  33%|███▎      | 16/48 [00:15<00:46,  1.45s/it][all_enriched]:  35%|███▌      | 17/48 [00:17<00:52,  1.68s/it][all_enriched]:  38%|███▊      | 18/48 [00:23<01:23,  2.79s/it][all_enriched]:  40%|███▉      | 19/48 [00:24<01:02,  2.17s/it][all_enriched]:  42%|████▏     | 20/48 [00:27<01:11,  2.57s/it][all_enriched]:  44%|████▍     | 21/48 [00:28<00:56,  2.11s/it][all_enriched]:  46%|████▌     | 22/48 [00:30<00:50,  1.93s/it][all_enriched]:  48%|████▊     | 23/48 [00:30<00:40,  1.61s/it][all_enriched]:  50%|█████     | 24/48 [00:31<00:31,  1.31s/it][all_enriched]:  52%|█████▏    | 25/48 [00:33<00:35,  1.55s/it][all_enriched]:  54%|█████▍    | 26/48 [00:40<01:08,  3.12s/it][all_enriched]:  56%|█████▋    | 27/48 [00:45<01:16,  3.65s/it][all_enriched]:  58%|█████▊    | 28/48 [00:49<01:18,  3.90s/it][all_enriched]:  60%|██████    | 29/48 [00:52<01:08,  3.59s/it][all_enriched]:  62%|██████▎   | 30/48 [00:57<01:08,  3.83s/it][all_enriched]:  65%|██████▍   | 31/48 [01:00<01:00,  3.56s/it][all_enriched]:  67%|██████▋   | 32/48 [01:16<01:58,  7.39s/it][all_enriched]:  69%|██████▉   | 33/48 [01:18<01:25,  5.69s/it][all_enriched]:  71%|███████   | 34/48 [01:21<01:10,  5.02s/it][all_enriched]:  73%|███████▎  | 35/48 [01:22<00:51,  3.94s/it][all_enriched]:  75%|███████▌  | 36/48 [01:25<00:43,  3.62s/it][all_enriched]:  77%|███████▋  | 37/48 [01:27<00:32,  2.91s/it][all_enriched]:  79%|███████▉  | 38/48 [01:30<00:31,  3.12s/it][all_enriched]:  81%|████████▏ | 39/48 [01:33<00:26,  2.94s/it][all_enriched]:  83%|████████▎ | 40/48 [01:35<00:22,  2.78s/it][all_enriched]:  85%|████████▌ | 41/48 [01:37<00:18,  2.67s/it][all_enriched]:  88%|████████▊ | 42/48 [01:39<00:13,  2.28s/it][all_enriched]:  90%|████████▉ | 43/48 [01:41<00:11,  2.30s/it][all_enriched]:  92%|█████████▏| 44/48 [01:42<00:07,  1.81s/it][all_enriched]:  94%|█████████▍| 45/48 [01:44<00:05,  1.90s/it][all_enriched]:  96%|█████████▌| 46/48 [01:53<00:07,  3.91s/it][all_enriched]:  98%|█████████▊| 47/48 [01:54<00:03,  3.07s/it][all_enriched]: 100%|██████████| 48/48 [01:55<00:00,  2.39s/it][all_enriched]: 100%|██████████| 48/48 [01:55<00:00,  2.40s/it]
+
+  Retry 1/5 after 2s (RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for gpt-4o in organi)
+
+  Retry 1/5 after 2s (RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for gpt-4o in organi)
+
+  Running GPT-4o evaluation...
+
+  Type                           Correct Total    Acc
+  ------------------------------------------------
+  single-session-user                  4     8  50.0%
+  single-session-assistant             6     8  75.0%
+  single-session-preference            4     8  50.0%
+  multi-session                        6     8  75.0%
+  temporal-reasoning                   7     8  87.5%
+  knowledge-update                     6     8  75.0%
+  ------------------------------------------------
+  Overall                             33    48  68.8%
+  Task Average                                  68.8%
+
+  Result: 68.8% overall, 68.8% task-avg
+  Duration: 115s (1.9min)
+  Abstentions: 10, Enrichments: 13
+
+  [11/13] Running: strong_tag_boost
+
+============================================================
+  EXPERIMENT: strong_tag_boost
+  Double the tag-type boost scale factor
+  Config hash: af2cf83a235c
+  Questions: 48 (oracle)
+============================================================
+[strong_tag_boost]:   0%|          | 0/48 [00:00<?, ?it/s][strong_tag_boost]:   2%|▏         | 1/48 [00:00<00:29,  1.59it/s][strong_tag_boost]:   4%|▍         | 2/48 [00:01<00:30,  1.52it/s][strong_tag_boost]:   6%|▋         | 3/48 [00:01<00:29,  1.51it/s][strong_tag_boost]:   8%|▊         | 4/48 [00:02<00:29,  1.48it/s][strong_tag_boost]:  10%|█         | 5/48 [00:03<00:30,  1.43it/s][strong_tag_boost]:  12%|█▎        | 6/48 [00:04<00:30,  1.38it/s][strong_tag_boost]:  15%|█▍        | 7/48 [00:04<00:28,  1.45it/s][strong_tag_boost]:  17%|█▋        | 8/48 [00:06<00:43,  1.09s/it][strong_tag_boost]:  19%|█▉        | 9/48 [00:07<00:40,  1.05s/it][strong_tag_boost]:  21%|██        | 10/48 [00:08<00:36,  1.04it/s][strong_tag_boost]:  23%|██▎       | 11/48 [00:09<00:33,  1.12it/s][strong_tag_boost]:  25%|██▌       | 12/48 [00:10<00:32,  1.10it/s][strong_tag_boost]:  27%|██▋       | 13/48 [00:10<00:29,  1.18it/s][strong_tag_boost]:  29%|██▉       | 14/48 [00:12<00:33,  1.02it/s][strong_tag_boost]:  31%|███▏      | 15/48 [00:13<00:34,  1.05s/it][strong_tag_boost]:  33%|███▎      | 16/48 [00:14<00:36,  1.13s/it][strong_tag_boost]:  35%|███▌      | 17/48 [00:18<00:58,  1.88s/it][strong_tag_boost]:  38%|███▊      | 18/48 [00:19<00:49,  1.65s/it][strong_tag_boost]:  40%|███▉      | 19/48 [00:20<00:40,  1.40s/it][strong_tag_boost]:  42%|████▏     | 20/48 [00:21<00:38,  1.38s/it][strong_tag_boost]:  44%|████▍     | 21/48 [00:22<00:31,  1.16s/it][strong_tag_boost]:  46%|████▌     | 22/48 [00:22<00:25,  1.00it/s][strong_tag_boost]:  48%|████▊     | 23/48 [00:24<00:28,  1.16s/it][strong_tag_boost]:  50%|█████     | 24/48 [00:25<00:28,  1.18s/it][strong_tag_boost]:  52%|█████▏    | 25/48 [00:34<01:19,  3.47s/it][strong_tag_boost]:  54%|█████▍    | 26/48 [00:39<01:29,  4.09s/it][strong_tag_boost]:  56%|█████▋    | 27/48 [00:46<01:39,  4.72s/it][strong_tag_boost]:  58%|█████▊    | 28/48 [00:49<01:28,  4.44s/it][strong_tag_boost]:  60%|██████    | 29/48 [00:52<01:11,  3.77s/it][strong_tag_boost]:  62%|██████▎   | 30/48 [00:58<01:21,  4.51s/it][strong_tag_boost]:  65%|██████▍   | 31/48 [01:02<01:15,  4.45s/it][strong_tag_boost]:  67%|██████▋   | 32/48 [01:09<01:21,  5.12s/it][strong_tag_boost]:  69%|██████▉   | 33/48 [01:10<00:59,  3.97s/it][strong_tag_boost]:  71%|███████   | 34/48 [01:17<01:07,  4.82s/it][strong_tag_boost]:  73%|███████▎  | 35/48 [01:19<00:50,  3.91s/it][strong_tag_boost]:  75%|███████▌  | 36/48 [01:20<00:38,  3.24s/it][strong_tag_boost]:  77%|███████▋  | 37/48 [01:24<00:35,  3.23s/it][strong_tag_boost]:  79%|███████▉  | 38/48 [01:26<00:30,  3.02s/it][strong_tag_boost]:  81%|████████▏ | 39/48 [01:28<00:22,  2.53s/it][strong_tag_boost]:  83%|████████▎ | 40/48 [01:33<00:27,  3.42s/it][strong_tag_boost]:  85%|████████▌ | 41/48 [01:35<00:21,  3.01s/it][strong_tag_boost]:  88%|████████▊ | 42/48 [01:37<00:16,  2.70s/it][strong_tag_boost]:  90%|████████▉ | 43/48 [01:38<00:10,  2.13s/it][strong_tag_boost]:  92%|█████████▏| 44/48 [01:45<00:14,  3.74s/it][strong_tag_boost]:  94%|█████████▍| 45/48 [01:47<00:08,  2.98s/it][strong_tag_boost]:  96%|█████████▌| 46/48 [01:47<00:04,  2.37s/it][strong_tag_boost]:  98%|█████████▊| 47/48 [01:52<00:03,  3.15s/it][strong_tag_boost]: 100%|██████████| 48/48 [01:55<00:00,  3.08s/it][strong_tag_boost]: 100%|██████████| 48/48 [01:55<00:00,  2.41s/it]
+
+  Retry 1/5 after 2s (RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for gpt-4o in organi)
+
+  Running GPT-4o evaluation...
+
+  Type                           Correct Total    Acc
+  ------------------------------------------------
+  single-session-user                  4     8  50.0%
+  single-session-assistant             6     8  75.0%
+  single-session-preference            1     8  12.5%
+  multi-session                        5     8  62.5%
+  temporal-reasoning                   6     8  75.0%
+  knowledge-update                     6     8  75.0%
+  ------------------------------------------------
+  Overall                             28    48  58.3%
+  Task Average                                  58.3%
+
+  Result: 58.3% overall, 58.3% task-avg
+  Duration: 116s (1.9min)
+  Abstentions: 14, Enrichments: 3
+
+  [12/13] Running: more_top_tags
+
+============================================================
+  EXPERIMENT: more_top_tags
+  Increase top tags from 20 to 30 for richer context
+  Config hash: b171e8bbc2f7
+  Questions: 48 (oracle)
+============================================================
+[more_top_tags]:   0%|          | 0/48 [00:00<?, ?it/s][more_top_tags]:   2%|▏         | 1/48 [00:00<00:29,  1.57it/s][more_top_tags]:   4%|▍         | 2/48 [00:01<00:28,  1.60it/s][more_top_tags]:   6%|▋         | 3/48 [00:01<00:30,  1.49it/s][more_top_tags]:   8%|▊         | 4/48 [00:02<00:32,  1.36it/s][more_top_tags]:  10%|█         | 5/48 [00:03<00:29,  1.46it/s][more_top_tags]:  12%|█▎        | 6/48 [00:04<00:33,  1.26it/s][more_top_tags]:  15%|█▍        | 7/48 [00:05<00:33,  1.21it/s][more_top_tags]:  17%|█▋        | 8/48 [00:06<00:31,  1.27it/s][more_top_tags]:  19%|█▉        | 9/48 [00:07<00:34,  1.13it/s][more_top_tags]:  21%|██        | 10/48 [00:07<00:32,  1.16it/s][more_top_tags]:  23%|██▎       | 11/48 [00:08<00:30,  1.23it/s][more_top_tags]:  25%|██▌       | 12/48 [00:09<00:29,  1.21it/s][more_top_tags]:  27%|██▋       | 13/48 [00:10<00:28,  1.24it/s][more_top_tags]:  29%|██▉       | 14/48 [00:11<00:33,  1.01it/s][more_top_tags]:  31%|███▏      | 15/48 [00:13<00:40,  1.24s/it][more_top_tags]:  33%|███▎      | 16/48 [00:15<00:46,  1.45s/it][more_top_tags]:  35%|███▌      | 17/48 [00:18<00:58,  1.90s/it][more_top_tags]:  38%|███▊      | 18/48 [00:19<00:47,  1.58s/it][more_top_tags]:  40%|███▉      | 19/48 [00:19<00:38,  1.32s/it][more_top_tags]:  42%|████▏     | 20/48 [00:20<00:32,  1.15s/it][more_top_tags]:  44%|████▍     | 21/48 [00:21<00:28,  1.05s/it][more_top_tags]:  46%|████▌     | 22/48 [00:22<00:30,  1.17s/it][more_top_tags]:  48%|████▊     | 23/48 [00:23<00:24,  1.02it/s][more_top_tags]:  50%|█████     | 24/48 [00:24<00:22,  1.08it/s][more_top_tags]:  52%|█████▏    | 25/48 [00:34<01:27,  3.82s/it][more_top_tags]:  54%|█████▍    | 26/48 [00:37<01:17,  3.54s/it][more_top_tags]:  56%|█████▋    | 27/48 [00:44<01:32,  4.39s/it][more_top_tags]:  58%|█████▊    | 28/48 [00:47<01:19,  3.97s/it][more_top_tags]:  60%|██████    | 29/48 [00:50<01:11,  3.79s/it][more_top_tags]:  62%|██████▎   | 30/48 [00:55<01:12,  4.01s/it][more_top_tags]:  65%|██████▍   | 31/48 [01:03<01:33,  5.51s/it][more_top_tags]:  67%|██████▋   | 32/48 [01:07<01:16,  4.79s/it][more_top_tags]:  69%|██████▉   | 33/48 [01:09<00:59,  3.96s/it][more_top_tags]:  71%|███████   | 34/48 [01:16<01:09,  4.95s/it][more_top_tags]:  73%|███████▎  | 35/48 [01:17<00:50,  3.91s/it][more_top_tags]:  75%|███████▌  | 36/48 [01:21<00:44,  3.73s/it][more_top_tags]:  77%|███████▋  | 37/48 [01:22<00:33,  3.07s/it][more_top_tags]:  79%|███████▉  | 38/48 [01:26<00:31,  3.15s/it][more_top_tags]:  81%|████████▏ | 39/48 [01:31<00:33,  3.73s/it][more_top_tags]:  83%|████████▎ | 40/48 [01:33<00:27,  3.38s/it][more_top_tags]:  85%|████████▌ | 41/48 [01:34<00:17,  2.56s/it][more_top_tags]:  88%|████████▊ | 42/48 [01:36<00:14,  2.39s/it][more_top_tags]:  90%|████████▉ | 43/48 [01:36<00:09,  1.87s/it][more_top_tags]:  92%|█████████▏| 44/48 [01:44<00:14,  3.51s/it][more_top_tags]:  94%|█████████▍| 45/48 [01:44<00:07,  2.64s/it][more_top_tags]:  96%|█████████▌| 46/48 [01:45<00:04,  2.14s/it][more_top_tags]:  98%|█████████▊| 47/48 [01:52<00:03,  3.58s/it][more_top_tags]: 100%|██████████| 48/48 [01:56<00:00,  3.58s/it][more_top_tags]: 100%|██████████| 48/48 [01:56<00:00,  2.43s/it]
+
+  Retry 1/5 after 2s (RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for gpt-4o in organi)
+
+  Retry 1/5 after 2s (RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for gpt-4o in organi)
+
+  Retry 1/5 after 2s (RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for gpt-4o in organi)
+
+  Running GPT-4o evaluation...
+
+  Type                           Correct Total    Acc
+  ------------------------------------------------
+  single-session-user                  4     8  50.0%
+  single-session-assistant             6     8  75.0%
+  single-session-preference            1     8  12.5%
+  multi-session                        6     8  75.0%
+  temporal-reasoning                   6     8  75.0%
+  knowledge-update                     6     8  75.0%
+  ------------------------------------------------
+  Overall                             29    48  60.4%
+  Task Average                                  60.4%
+
+  Result: 60.4% overall, 60.4% task-avg
+  Duration: 116s (1.9min)
+  Abstentions: 14, Enrichments: 3
+
+  [13/13] Running: combined_best
+
+============================================================
+  EXPERIMENT: combined_best
+  Combination of best-performing individual tweaks
+  Config hash: 563ed23624c7
+  Questions: 48 (oracle)
+============================================================
+[combined_best]:   0%|          | 0/48 [00:00<?, ?it/s][combined_best]:   2%|▏         | 1/48 [00:01<00:53,  1.13s/it][combined_best]:   4%|▍         | 2/48 [00:01<00:44,  1.03it/s][combined_best]:   6%|▋         | 3/48 [00:02<00:34,  1.29it/s][combined_best]:   8%|▊         | 4/48 [00:03<00:41,  1.05it/s][combined_best]:  10%|█         | 5/48 [00:04<00:36,  1.17it/s][combined_best]:  12%|█▎        | 6/48 [00:05<00:32,  1.30it/s][combined_best]:  15%|█▍        | 7/48 [00:05<00:28,  1.44it/s][combined_best]:  17%|█▋        | 8/48 [00:06<00:31,  1.29it/s][combined_best]:  19%|█▉        | 9/48 [00:07<00:35,  1.10it/s][combined_best]:  21%|██        | 10/48 [00:09<00:45,  1.20s/it][combined_best]:  23%|██▎       | 11/48 [00:11<00:46,  1.27s/it][combined_best]:  25%|██▌       | 12/48 [00:12<00:43,  1.21s/it][combined_best]:  27%|██▋       | 13/48 [00:12<00:38,  1.11s/it][combined_best]:  29%|██▉       | 14/48 [00:14<00:37,  1.11s/it][combined_best]:  31%|███▏      | 15/48 [00:15<00:38,  1.16s/it][combined_best]:  33%|███▎      | 16/48 [00:16<00:34,  1.07s/it][combined_best]:  35%|███▌      | 17/48 [00:17<00:38,  1.23s/it][combined_best]:  38%|███▊      | 18/48 [00:18<00:31,  1.04s/it][combined_best]:  40%|███▉      | 19/48 [00:19<00:26,  1.07it/s][combined_best]:  42%|████▏     | 20/48 [00:20<00:28,  1.01s/it][combined_best]:  44%|████▍     | 21/48 [00:20<00:24,  1.12it/s][combined_best]:  46%|████▌     | 22/48 [00:21<00:24,  1.06it/s][combined_best]:  48%|████▊     | 23/48 [00:22<00:21,  1.17it/s][combined_best]:  50%|█████     | 24/48 [00:23<00:18,  1.28it/s][combined_best]:  52%|█████▏    | 25/48 [00:33<01:20,  3.49s/it][combined_best]:  54%|█████▍    | 26/48 [00:38<01:32,  4.22s/it][combined_best]:  56%|█████▋    | 27/48 [00:42<01:26,  4.12s/it][combined_best]:  58%|█████▊    | 28/48 [00:49<01:40,  5.01s/it][combined_best]:  60%|██████    | 29/48 [00:52<01:21,  4.27s/it][combined_best]:  62%|██████▎   | 30/48 [00:54<01:05,  3.61s/it][combined_best]:  65%|██████▍   | 31/48 [01:04<01:36,  5.65s/it][combined_best]:  67%|██████▋   | 32/48 [01:08<01:17,  4.87s/it][combined_best]:  69%|██████▉   | 33/48 [01:09<00:58,  3.90s/it][combined_best]:  71%|███████   | 34/48 [01:11<00:45,  3.27s/it][combined_best]:  73%|███████▎  | 35/48 [01:13<00:36,  2.82s/it][combined_best]:  75%|███████▌  | 36/48 [01:17<00:39,  3.26s/it][combined_best]:  77%|███████▋  | 37/48 [01:18<00:29,  2.71s/it][combined_best]:  79%|███████▉  | 38/48 [01:21<00:25,  2.52s/it][combined_best]:  81%|████████▏ | 39/48 [01:34<00:50,  5.66s/it][combined_best]:  83%|████████▎ | 40/48 [01:35<00:36,  4.54s/it][combined_best]:  85%|████████▌ | 41/48 [01:36<00:23,  3.37s/it][combined_best]:  88%|████████▊ | 42/48 [01:37<00:15,  2.55s/it][combined_best]:  90%|████████▉ | 43/48 [01:39<00:12,  2.45s/it][combined_best]:  92%|█████████▏| 44/48 [01:43<00:11,  2.83s/it][combined_best]:  94%|█████████▍| 45/48 [01:43<00:06,  2.21s/it][combined_best]:  96%|█████████▌| 46/48 [01:44<00:03,  1.84s/it][combined_best]:  98%|█████████▊| 47/48 [01:45<00:01,  1.56s/it][combined_best]: 100%|██████████| 48/48 [01:55<00:00,  4.03s/it][combined_best]: 100%|██████████| 48/48 [01:55<00:00,  2.41s/it]
+
+  Retry 1/5 after 2s (RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for gpt-4o in organi)
+
+  Retry 1/5 after 2s (RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for gpt-4o in organi)
+
+  Running GPT-4o evaluation...
+
+  Type                           Correct Total    Acc
+  ------------------------------------------------
+  single-session-user                  4     8  50.0%
+  single-session-assistant             6     8  75.0%
+  single-session-preference            1     8  12.5%
+  multi-session                        5     8  62.5%
+  temporal-reasoning                   6     8  75.0%
+  knowledge-update                     6     8  75.0%
+  ------------------------------------------------
+  Overall                             28    48  58.3%
+  Task Average                                  58.3%
+
+  Result: 58.3% overall, 58.3% task-avg
+  Duration: 116s (1.9min)
+  Abstentions: 14, Enrichments: 3
+
+============================================================
+  EXPERIMENT RESULTS SUMMARY
+============================================================
+
+  Rank  Config                     Overall  Task-Avg  Duration
+  --------------------------------------------------------
+  1     all_enriched                 68.8%     68.8%     1.9m
+  2     wide_temporal                62.5%     62.5%     2.0m
+  3     enrich_ku                    62.5%     62.5%     2.0m
+  4     relaxed_abstention           60.4%     60.4%     2.0m
+  5     combined_v1                  60.4%     60.4%     1.9m
+  6     more_top_tags                60.4%     60.4%     1.9m
+  7     strict_abstention            58.3%     58.3%     1.9m
+  8     strong_tag_boost             58.3%     58.3%     1.9m
+  9     combined_best                58.3%     58.3%     1.9m
+  10    strong_keyword               56.2%     56.2%     1.9m
+  11    strong_entity                56.2%     56.2%     1.9m
+  12    baseline_federated           54.2%     54.2%    20.2m
+  13    enrich_ssu                   54.2%     54.2%     1.1m
+
+  BEST CONFIG: all_enriched (68.8% task-avg)
+
+  Per-type comparison (top 3):
+  Type                            all_enriched  wide_tempora     enrich_ku
+  single-session-user                    50.0%         50.0%         50.0%
+  single-session-assistant               75.0%         75.0%         75.0%
+  single-session-preference              50.0%         25.0%         25.0%
+  multi-session                          75.0%         75.0%         62.5%
+  temporal-reasoning                     87.5%         75.0%         87.5%
+  knowledge-update                       75.0%         75.0%         75.0%

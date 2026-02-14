@@ -1,0 +1,18 @@
+**Observation Log:**
+
+- [FACT] User is located in the 92101 zip code.
+- [EVENT] User is training for a local triathlon in July.
+- [TEMPORAL] User missed a 5K fun run on March 26th.
+- [PREFERENCE] User prefers to dedicate around 5-6 days a week for training.
+- [PREFERENCE] User prefers to run on Saturday mornings and Wednesday evenings.
+- [PREFERENCE] User prefers to do yoga on Tuesdays and Thursdays.
+- [PREFERENCE] User wants to add an extra swimming session on Fridays, in addition to Wednesday evening sessions.
+- [PREFERENCE] User wants to incorporate recreational volleyball sessions on Sundays into their schedule.
+- [CHANGE] User plans to replace one of their rest days with volleyball sessions on Sundays.
+- [ASSISTANT] Assistant recommended RIDE Cyclery for a triathlon bike fitting.
+- [ASSISTANT] Assistant advised user to get a bike fitting sooner rather than later to prevent injuries and improve efficiency.
+- [ASSISTANT] Assistant provided tips for keeping the bike in top condition, including cleaning, checking tire pressure, lubricating the chain, and scheduling a professional tune-up.
+- [ASSISTANT] Assistant suggested calling bike shops ahead of time to confirm hours, pricing, and availability.
+- [ASSISTANT] Assistant recommended specific bike shops: The Bike Revolution, RIDE Cyclery, Pacific Beach Bike Shop, and North Park Bike Shop.
+- [TEMPORAL] User plans to schedule a bike fitting appointment at RIDE Cyclery after getting a few more training rides in.
+- [ASSISTANT] Assistant encouraged user to communicate openly with the fitter about their goals and any discomfort experienced during training rides.

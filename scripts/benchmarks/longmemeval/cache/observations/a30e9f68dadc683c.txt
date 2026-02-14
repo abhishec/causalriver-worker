@@ -1,0 +1,28 @@
+**Observation Log:**
+
+[FACT] User is planning a birthday party for their 7-year-old niece.  
+[FACT] User has siblings.  
+[FACT] User has cousins they are trying to reconnect with.  
+[FACT] User's sister just got engaged.  
+[FACT] User's parents are thrilled about the engagement and their mother has started making wedding plans.  
+[PREFERENCE] User prefers activities that do not involve too much screen time for the birthday party.  
+[PREFERENCE] User likes the idea of a pirate theme for the treasure hunt.  
+[PREFERENCE] User plans to include pirate-themed food at the party.  
+[PREFERENCE] User is excited about planning the treasure hunt and pirate-themed food.  
+[EVENT] User is planning a fun activity for their niece's birthday party next month.  
+[EVENT] User is organizing a family game night with cousins next weekend.  
+[CHANGE] User has not seen their cousins in ages but is now reconnecting with them.  
+[TEMPORAL] The birthday party for the niece is next month.  
+[TEMPORAL] The family game night is happening next weekend.  
+[TEMPORAL] User's sister got engaged last weekend.  
+[RELATIONSHIP] User's niece is turning 7 years old.  
+[RELATIONSHIP] User's sister is engaged.  
+[RELATIONSHIP] User's parents are excited about the engagement.  
+[ASSISTANT_SAID] Assistant provided a list of party activity ideas for a 7-year-old's birthday party, including a treasure hunt, art party, outdoor games, cooking or baking, science experiments, dance party, and nature scavenger hunt.  
+[ASSISTANT_SAID] Assistant suggested that assembling a kid's bike can take anywhere from 30 minutes to a few hours, depending on the complexity.  
+[ASSISTANT_SAID] Assistant provided ideas for customizing the treasure hunt with a pirate theme, including creating a treasure map, hiding clues, and using pirate-themed decorations and snacks.  
+[ASSISTANT_SAID] Assistant recommended a classic pirate costume combination for the niece, including a white shirt, loose pants or skirt, pirate hat, toy sword, and boots.  
+[ASSISTANT_SAID] Assistant suggested various items for a treasure chest, including gold coins, small toys, snacks, and treasure hunt-themed items.  
+[ASSISTANT_SAID] Assistant provided ideas for family game night, including a treasure hunt game, charades, board games, karaoke, group storytelling, Would You Rather, and Two Truths and a Lie.  
+[ASSISTANT_CREATED] Assistant created a list of pirate-themed food ideas, including "pirate's pizza," "treasure coins," "anchors aweigh" fruit kebabs, and "jolly roger jelly sandwiches."  
+[ASSISTANT_CREATED] Assistant created a list of suggestions for presenting the treasure chest, including

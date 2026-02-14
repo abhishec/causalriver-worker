@@ -1,0 +1,19 @@
+**Observation Log:**
+
+- [FACT] User makes around $6,000 a month.
+- [FACT] User's fixed expenses are around $3,000, which includes rent, utilities, groceries, transportation, and minimum payments on debts.
+- [FACT] User has some credit card debt from previous splurges.
+- [PREFERENCE] User tends to make impulse purchases but is trying to be more mindful of spending habits.
+- [PREFERENCE] User wants to cut back on luxury spending and allocate more funds towards savings and debt repayment.
+- [EVENT] User bought a Gucci handbag on May 15th for $2,000.
+- [CHANGE] User wants to prioritize debt repayment and savings in their budget.
+- [TEMPORAL] Session date is 2023/04/11 (Tue) 21:36.
+- [ASSISTANT_SAID] Assistant suggested breaking down income and expenses into percentages to get a better picture of spending.
+- [ASSISTANT_SAID] Assistant provided a suggested breakdown for disposable income: Savings (20% - $600/month), Debt Repayment (30% - $900/month), Entertainment/Miscellaneous (20% - $600/month), Luxury Spending (10% - $300/month), Emergency Fund (20% - $600/month).
+- [ASSISTANT_SAID] Assistant recommended using budgeting apps like Mint, Personal Capital, or YNAB (You Need a Budget) to track expenses.
+- [ASSISTANT_SAID] Assistant provided additional tips for staying on track, including creating a 30-day waiting period for purchases, using cash for discretionary spending, regularly reviewing the budget, and considering a "splurge fund."
+- [ASSISTANT_SAID] Assistant recalculated the budget allocation based on user’s request to prioritize debt repayment: Debt Repayment (40% - $1,200/month), Savings (30% - $900/month), Entertainment/Miscellaneous (15% - $450/month), Luxury Spending (5% - $150/month), Emergency Fund (10% - $300/month).
+- [ASSISTANT_SAID] Assistant explained the 50/30/20 rule for budgeting and provided a breakdown based on user’s income: Needs (50% - $3,000/month), Wants (30% - $1,800/month), Savings and Debt (20% - $1,200/month).
+- [ASSISTANT_SAID] Assistant suggested a revised allocation for Savings and Debt: Debt Repayment ($800/month), Savings ($300/month), Emergency Fund ($100/month).
+- [ASSISTANT_SAID] Assistant provided a list of areas where the user could cut back on unnecessary expenses to free up more money for debt repayment.
+- [ASSISTANT_CREATED] Assistant created a list of potential areas to cut back on expenses, including dining out, subscription services, clothing, entertainment, gadgets, travel, groceries

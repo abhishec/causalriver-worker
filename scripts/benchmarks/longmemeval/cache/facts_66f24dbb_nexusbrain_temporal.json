@@ -1,0 +1,87 @@
+{
+  "answer_fea2e4d3": [
+    {
+      "fact": "User has a sister.",
+      "type": "relationship",
+      "entities": [
+        "sister"
+      ]
+    },
+    {
+      "fact": "User bought a yellow dress and a pair of earrings for their sister's birthday.",
+      "type": "event",
+      "entities": [
+        "sister's birthday",
+        "yellow dress",
+        "earrings"
+      ]
+    },
+    {
+      "fact": "User has a mom.",
+      "type": "relationship",
+      "entities": [
+        "mom"
+      ]
+    },
+    {
+      "fact": "User bought a pair of silver hoop earrings with a small pearl in the center for their mom.",
+      "type": "event",
+      "entities": [
+        "just because",
+        "silver hoop earrings",
+        "pearl"
+      ]
+    },
+    {
+      "fact": "User has a neighbor named Mrs. Johnson.",
+      "type": "relationship",
+      "entities": [
+        "Mrs. Johnson"
+      ]
+    },
+    {
+      "fact": "User bought groceries and flowers for Mrs. Johnson when she was recovering from surgery.",
+      "type": "event",
+      "entities": [
+        "groceries",
+        "flowers",
+        "surgery"
+      ]
+    },
+    {
+      "fact": "User has coworkers.",
+      "type": "relationship",
+      "entities": [
+        "coworkers"
+      ]
+    },
+    {
+      "fact": "User has a best friend.",
+      "type": "relationship",
+      "entities": [
+        "best friend"
+      ]
+    },
+    {
+      "fact": "User bought a gift for their best friend's baby shower.",
+      "type": "event",
+      "entities": [
+        "baby shower"
+      ]
+    },
+    {
+      "fact": "User has a brother.",
+      "type": "relationship",
+      "entities": [
+        "brother"
+      ]
+    },
+    {
+      "fact": "User bought a gift for their brother's new apartment.",
+      "type": "event",
+      "entities": [
+        "new apartment"
+      ]
+    }
+  ]
+}

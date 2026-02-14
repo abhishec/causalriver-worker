@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/06/03 (Sat) 08:42  
+[FACT] User is a 32-year-old male.  
+[FACT] User has a master's degree in data science from New York University.  
+[FACT] User is trying to understand the green card application process, specifically the EB-2 visa category.  
+[ASSISTANT_SAID] The EB-2 visa category is an employment-based, second-preference visa for foreign nationals who possess advanced degrees or exceptional abilities in their field.  
+[ASSISTANT_SAID] To qualify for an EB-2 visa, the user must meet one of the following criteria: hold a U.S. master's degree or higher, or demonstrate exceptional ability in their field.  
+[ASSISTANT_SAID] Required documents for the EB-2 visa application include:  
+[ASSISTANT_SAID] 1. Petition: Form I-140, Immigrant Petition for Alien Worker, filed by the U.S. employer.  
+[ASSISTANT_SAID] 2. Labor Certification: Obtained from the U.S. Department of Labor.  
+[ASSISTANT_SAID] 3. Education and Experience: Documentation of advanced degree, diploma, transcripts, and relevant work experience.  
+[ASSISTANT_SAID] 4. Letters of Recommendation: From experts in the field attesting to exceptional abilities and achievements.  
+[ASSISTANT_SAID] 5. Resume and CV: Detailed resume and curriculum vitae highlighting education, work experience, and achievements.  
+[ASSISTANT_SAID] The EB-2 visa application process typically involves four steps:  
+[ASSISTANT_SAID] 1. Labor Certification: Employer files a labor certification application with the U.S. Department of Labor.  
+[ASSISTANT_SAID] 2. I-140 Petition: Employer files Form I-140 with USCIS, including the approved labor certification and supporting documents.  
+[ASSISTANT_SAID] 3. I-485 Application: Once the I-140 petition is approved, the user can file Form I-485 to adjust status or apply for an immigrant visa.  
+[ASSISTANT_SAID] 4. Interview and Approval: Attend an interview at a USCIS office or U.S. consulate, and if approved, receive the green card.  
+[ASSISTANT_SAID] Processing time for labor certification is typically 6-9 months, I-140 petition is 3-6 months, and I-485 application is 6-12 months.  
+[ASSISTANT_SAID] Fees associated with the EB-2 visa application process include: Labor certification: $0, I-140 petition: $700, I-485 application: $1,140.  
+[ASSISTANT_S

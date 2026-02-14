@@ -1,0 +1,20 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/07/21 (Fri) 12:37  
+[FACT] User is working on a thesis on the impact of social media on mental health.  
+[EVENT] User is currently stuck on the methodology chapter of their thesis.  
+[ASSISTANT_SAID] Assistant provided relevant studies on data analysis techniques for social media research.  
+[ASSISTANT_SAID] Content Analysis studies mentioned:  
+[ASSISTANT_SAID] 1. Kim et al. (2018): "Social media and mental health: A systematic review of the literature" - used content analysis to analyze themes in social media posts related to mental health.  
+[ASSISTANT_SAID] 2. Helen et al. (2019): "Analyzing social media data to understand mental health: A systematic review" - reviewed various content analysis techniques used in social media research on mental health.  
+[ASSISTANT_SAID] Network Analysis studies mentioned:  
+[ASSISTANT_SAID] 1. Király et al. (2019): "Problematic internet use and its relationship with symptoms of anxiety and depression in young adults: A network analysis" - used network analysis to examine relationships between social media use, anxiety, and depression symptoms.  
+[ASSISTANT_SAID] 2. Baker et al. (2016): "Social network analysis of social media data: A systematic review" - reviewed network analysis techniques applied to social media data.  
+[ASSISTANT_SAID] Machine Learning and Natural Language Processing (NLP) studies mentioned:  
+[ASSISTANT_SAID] 1. Coppersmith et al. (2018): "Quantifying mental health from social media with machine learning" - used machine learning algorithms to predict mental health outcomes from social media posts.  
+[ASSISTANT_SAID] 2. De Choudhury et al. (2013): "Predicting depression via social media" - used NLP and machine learning to analyze social media posts and predict depression symptoms.  
+[ASSISTANT_SAID] Survey and Mixed-Methods Approaches studies mentioned:  
+[ASSISTANT_SAID] 1. Burke et al. (2010): "Social network activity and social well-being" - used a mixed-methods approach to examine the relationship between social media use and social well-being.  
+[ASSISTANT_SAID] 2. Kaplan et al. (2018): "The impact of social media on mental health: A systematic review" - used a survey-based approach to examine effects of social media on mental health outcomes.  
+[ASSISTANT_SAID] Other Relevant Studies mentioned:  
+[ASSISTANT_SAID] 1. Linder et al. (2019): "Using social media data to study mental health

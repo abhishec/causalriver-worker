@@ -1,0 +1,26 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/30 (Tue) 01:54
+- [USER] The user requested a Brazilian Jiu-Jitsu (BJJ) training program.
+- [USER] The user is a white belt in BJJ.
+- [USER] The user wants to learn positions and options from each position.
+- [USER] The user prefers to focus on one position a week.
+- [USER] The user requested a program that spans 6 months.
+- [ASSISTANT_CREATED] The assistant created a 6-month training program for BJJ, detailing weekly focuses on different positions.
+- [ASSISTANT_SAID] Week 1: Focus on guard position, including basic guard techniques like hip escape, bridge, and sweep.
+- [ASSISTANT_SAID] Week 2: Focus on closed guard, including breaking posture and attacking with submissions like triangle choke and armbar.
+- [ASSISTANT_SAID] Week 3: Focus on open guard, including sweeping and attacking with submissions like omoplata and arm triangle.
+- [ASSISTANT_SAID] Week 4: Focus on butterfly guard, including sweeping and attacking with submissions like armbar and guillotine choke.
+- [ASSISTANT_SAID] Week 5: Focus on half guard, including sweeping and attacking with submissions like Kimura and Americana.
+- [ASSISTANT_SAID] Week 6: Focus on side control, including maintaining position and attacking with submissions like arm triangle and kimura.
+- [USER] The user requested an additional 10 weeks to continue the program.
+- [ASSISTANT_CREATED] The assistant created an additional 10-week training program for BJJ.
+- [ASSISTANT_SAID] Week 7: Focus on mount position, including maintaining position and attacking with submissions like arm triangle and armbar.
+- [ASSISTANT_SAID] Week 8: Focus on back control, including maintaining position and attacking with submissions like rear-naked choke and bow and arrow choke.
+- [ASSISTANT_SAID] Week 9: Focus on takedowns, including executing single leg and double leg takedowns.
+- [ASSISTANT_SAID] Week 10: Focus on guard passes, including executing knee slice and over-under passes.
+- [ASSISTANT_SAID] Week 11: Focus on submissions, including executing armbar, triangle choke, and kimura.
+- [ASSISTANT_SAID] Week 12: Focus on transitions between positions in BJJ.
+- [ASSISTANT_SAID] Week 13: Focus on drilling techniques to improve muscle memory.
+- [ASSISTANT_SAID] Week 14: Focus on live sparring and rolling with a partner.
+- [ASSISTANT_SAID] Week 15: Focus

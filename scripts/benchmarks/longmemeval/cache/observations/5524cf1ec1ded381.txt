@@ -1,0 +1,21 @@
+**Observation Log:**
+
+**Session Date:** 2022/03/02 (Wed) 20:25  
+**Session ID:** a5aecf2d
+
+1. [EVENT] User is trying to get organized with their medical history.
+2. [ASSISTANT_SAID] Assistant offered to help create a timeline of the user's recent health events.
+3. [ASSISTANT_SAID] Assistant requested information about the user's medical history, including significant health events, hospitalizations, specialists, medications, test results, and changes in symptoms.
+4. [TEMPORAL] User wants to focus on the past 6 weeks for the timeline.
+5. [EVENT] User had a cold, carpal tunnel syndrome, and a follow-up appointment for gallbladder removal surgery in the past 6 weeks.
+6. [EVENT] User has been helping their mom with her hip replacement recovery.
+7. [TEMPORAL] User developed a cold approximately 6 weeks ago.
+8. [EVENT] User experienced a fever of 102°F on a Tuesday and Wednesday when they had the cold.
+9. [TEMPORAL] User's mom had hip replacement surgery 2 months ago.
+10. [CHANGE] User's gallbladder removal surgery was 4 months ago.
+11. [TEMPORAL] User recovered from the cold around 3 weeks ago.
+12. [CHANGE] User started noticing numbness and tingling in their left arm 3 weeks ago.
+13. [ASSISTANT_CREATED] Assistant created a draft timeline of the user's health events, including sections for the cold, carpal tunnel syndrome, gallbladder surgery follow-up, and assistance with mom's recovery.
+14. [ASSISTANT_SAID] Assistant encouraged the user to add or modify details in the timeline and provided a structure for organizing health events.
+15. [ASSISTANT_SAID] Assistant asked for approximate dates for the carpal tunnel symptoms and the follow-up appointment with the surgeon.
+16. [ASSISTANT_SAID] Assistant reiterated the importance of the timeline for the user's reference and communication with healthcare providers.

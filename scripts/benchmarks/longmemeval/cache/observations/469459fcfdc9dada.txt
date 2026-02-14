@@ -1,0 +1,25 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/13 (Sat) 07:14
+- [USER] Here is the JSON data file for that policy.
+- [USER] JSON data includes resources for "myapp1" and "myapp2".
+- [USER] "myapp1" resources include:
+  - [FACT] Company: CompanyA, Country: Norway, InvoiceAmount: 200, Name: Invoice1, ResourceID: inv001, ResourceType: Invoice
+  - [FACT] Company: CompanyB, Country: Sweden, InvoiceAmount: 300, Name: Invoice2, ResourceID: inv002, ResourceType: Invoice
+  - [FACT] Amount: 1000, Company: CompanyA, Country: Norway, Name: PurchaseOrder1, ResourceID: po001, ResourceType: PurchaseOrder
+  - [FACT] Amount: 1500, Company: CompanyB, Country: Sweden, Name: PurchaseOrder2, ResourceID: po002, ResourceType: PurchaseOrder
+  - [FACT] Company: CompanyA, Country: Norway, Name: Person1, ResourceID: p001, ResourceType: Person
+  - [FACT] Company: CompanyB, Country: Sweden, Name: Person2, ResourceID: p002, ResourceType: Person
+- [USER] "myapp2" resources include:
+  - [FACT] Company: CompanyC, Country: Finland, InvoiceAmount: 400, Name: Invoice3, ResourceID: inv003, ResourceType: Invoice
+  - [FACT] Company: CompanyD, Country: Denmark, InvoiceAmount: 500, Name: Invoice4, ResourceID: inv004, ResourceType: Invoice
+  - [FACT] Amount: 2000, Company: CompanyC, Country: Finland, Name: PurchaseOrder3, ResourceID: po003, ResourceType: PurchaseOrder
+  - [FACT] Amount: 2500, Company: CompanyD, Country: Denmark, Name: PurchaseOrder4, ResourceID: po004, ResourceType: PurchaseOrder
+  - [FACT] Company: CompanyC, Country: Finland, Name: Person3, ResourceID: p003, ResourceType: Person
+  - [FACT] Company: CompanyD, Country: Denmark, Name: Person4, ResourceID: p004, ResourceType: Person
+- [USER] "applications" section includes:
+  - [FACT] "myapp1" ResourceTypes:
+    - [FACT] Invoice AzLocalRights:
+      - [FACT] AzLocalRightName: CreateInvoice, FieldTypes: InvoiceAmount (100, 200, 300), Country (Norway, Sweden, Finland)
+      - [FACT] AzLocalRightName: ReadInvoice, FieldTypes: []
+      - [FACT] AzLocalRightName: Update

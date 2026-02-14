@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/25 (Thu) 11:20  
+[USER] The user is looking for inspiration for their next BBQ experiment.  
+[USER] The user recently tried a sauce with a spicy and sweet flavor profile, with a hint of honey.  
+[PREFERENCE] The user is interested in recipes or ideas for sauces with a similar flavor profile to the one they enjoyed.  
+[ASSISTANT_SAID] The assistant provided three spicy honey BBQ sauce recipes:  
+[ASSISTANT_SAID] 1. Korean-Style Gochujang BBQ Sauce: Combine gochujang, honey, soy sauce, brown sugar, garlic, ginger, and rice vinegar.  
+[ASSISTANT_SAID] 2. Honey Habanero BBQ Sauce: Blend honey, habanero peppers, apple cider vinegar, brown sugar, and cumin.  
+[ASSISTANT_SAID] 3. Sweet Heat BBQ Sauce: Mix honey, sriracha, ketchup, brown sugar, and apple cider vinegar.  
+[ASSISTANT_SAID] The assistant provided additional sauce ideas:  
+[ASSISTANT_SAID] 1. Chipotle Honey BBQ Sauce: Add chipotle peppers in adobo sauce, honey, lime juice, and cumin.  
+[ASSISTANT_SAID] 2. Jamaican Jerk BBQ Sauce: Combine allspice, thyme, scotch bonnet peppers, honey, lime juice, and soy sauce.  
+[ASSISTANT_SAID] 3. Spicy Mango BBQ Sauce: Blend honey, mango puree, sriracha, lime juice, and cumin.  
+[ASSISTANT_SAID] The assistant suggested tips for experimenting with sauces, including using different types of honey and chili peppers.  
+[USER] The user expressed interest in trying the Korean-Style Gochujang BBQ Sauce.  
+[USER] The user requested more information about gochujang and its use in Korean cuisine.  
+[ASSISTANT_SAID] The assistant explained that gochujang is a Korean chili paste made from gochugaru, rice flour, fermented soybeans, salt, and water.  
+[ASSISTANT_SAID] The assistant described the flavor profile of gochujang as sweet, savory, spicy, and slightly smoky.  
+[ASSISTANT_SAID] The assistant listed uses of gochujang in Korean cuisine, including marinades, stir-fries, soups, dipping sauces, and kimchi.  
+[ASSISTANT_SAID] The assistant provided tips for using gochujang, including starting with a small amount and mixing it with other ingredients.  
+[ASSISTANT_CREATED] The assistant created a simple recipe for Korean-Style Gochujang BBQ Sauce, including ingredients and instructions.  
+[USER] The user indicated

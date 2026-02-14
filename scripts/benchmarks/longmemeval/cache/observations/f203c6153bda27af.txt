@@ -1,0 +1,13 @@
+**Observation Log:**
+
+- [FACT] The user has a website built with HTML and CSS.
+- [FACT] The website displays a list of elements.
+- [PREFERENCE] The user wants to add a favorites feature to their website.
+- [CHANGE] The user wants the favorites selection to be remembered in two ways: by their navigator and by the server if they connect their Ethereum wallet.
+- [ASSISTANT_SAID] To add a favorites feature, a combination of client-side and server-side programming is needed.
+- [ASSISTANT_SAID] For the client-side, JavaScript and local storage can be used to store the user's favorite items in their browser.
+- [ASSISTANT_SAID] Steps for client-side implementation include adding a button/icon next to each element, writing a JavaScript function to handle click events, storing favorites in local storage, and retrieving favorites on page load.
+- [ASSISTANT_CREATED] Sample JavaScript code provided for client-side implementation includes event listeners for favorite buttons, adding items to favorites, and updating button/icon states based on favorites.
+- [ASSISTANT_SAID] For the server-side, a database can be used to store the user's favorites.
+- [ASSISTANT_SAID] Steps for server-side implementation include creating a database table for favorites, sending an AJAX request when a favorite is clicked, storing the favorite in the database, and retrieving favorites when the user logs in on another computer.
+- [ASSISTANT_CREATED] Sample JavaScript code provided for server-side implementation includes sending an AJAX request to add a favorite to the database and handling the POST request on the server.

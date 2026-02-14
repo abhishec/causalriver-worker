@@ -1,0 +1,19 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/25 (Thu) 11:33  
+[FACT] User is considering a research position in a professor's lab.  
+[FACT] User's background is in Computer Science.  
+[FACT] User took courses like Advanced Machine Learning, Computer Vision, and Human-Computer Interaction during their master's.  
+[PREFERENCE] User is interested in exploring projects related to Natural Language Processing (NLP).  
+[ASSISTANT_SAID] Assistant suggested potential research areas in NLP, including Multimodal Language Processing, Explainable AI in NLP, Conversational AI and Dialogue Systems, Language Understanding and Representation, Low-Resource Language Processing, Adversarial Attacks and Robustness in NLP, Human-Computer Interaction and NLP, and Specialized NLP Tasks.  
+[ASSISTANT_SAID] Assistant provided specific project ideas within the Multimodal Language Processing area, such as exploring the intersection of NLP and Computer Vision, analyzing images and videos, and investigating multimodal fusion techniques.  
+[ASSISTANT_SAID] Assistant recommended being prepared to discuss understanding of research areas, relevant coursework, and enthusiasm for exploring new research directions when meeting with the professor.  
+[ASSISTANT_SAID] Assistant suggested resources and papers for Multimodal Language Processing, including surveys, papers on vision-language tasks, and datasets like MSCOCO, VQA, and Visual Genome.  
+[ASSISTANT_SAID] Assistant mentioned conferences like CVPR, ACL, and EMNLP as relevant venues for research in Multimodal Language Processing.  
+[ASSISTANT_SAID] Assistant provided online courses and resources, including CS231n and a Natural Language Processing with Deep Learning Specialization.  
+[PREFERENCE] User expressed particular interest in the Multimodal Language Processing area.  
+[ASSISTANT_SAID] Assistant suggested specific papers to read, including "ViLBERT: Pretraining Task-Agnostic Visiolinguistic Representations for Vision-and-Language Tasks," "12-in-1: Multi-Task Vision and Language Representation Learning," "UNITER: Learning Universal Image-Text Representations," and "Oscar: Object-Semantics Aligned Pre-training for Vision-and-Language Tasks."  
+[ASSISTANT_SAID] Assistant provided project ideas related to Multimodal Language Processing, including image captioning with attention, visual question answering with multimodal fusion, visual grounding with weak supervision, multimodal conversational AI, and multimodal sentiment analysis.  
+[ASSISTANT_SAID] Assistant suggested starting by reproducing results from a paper or project of interest and experimenting with different architectures, fusion techniques, and hyperparameters.  
+[ASSISTANT_SAID] Assistant provided a detailed outline for the Multimodal Conversational AI project, including potential architectures, datasets, and evaluation metrics.  
+[ASSISTANT_SAID] Assistant mentioned developing

@@ -1,0 +1,45 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/04/16 (Sun) 02:19  
+[FACT] User is planning their next grocery trip.  
+[EVENT] User has downloaded Ibotta, a cashback app that gives rebates on certain grocery items.  
+[ASSISTANT_SAID] Assistant is happy to help the user plan their grocery trip and maximize Ibotta earnings.  
+[ASSISTANT_SAID] Assistant requests information about dietary preferences, household size, types of groceries usually bought, preferred store, and specific Ibotta offers to prioritize.  
+[FACT] User does not have any dietary restrictions or preferences.  
+[FACT] User is the only one in their household.  
+[FACT] User usually buys a mix of everything, including fresh produce, meat, dairy, canned goods, and snacks.  
+[FACT] User does not have a preferred store but tries to shop at places that offer cashback through Ibotta.  
+[EVENT] User is eyeing a rebate on eggs and plans to prioritize that.  
+[ASSISTANT_CREATED] Assistant provides a list of essential grocery items commonly found on Ibotta, including:  
+- Fresh fruits (e.g., apples, bananas, berries)  
+- Fresh vegetables (e.g., carrots, broccoli, bell peppers)  
+- Salad mix or greens  
+- Herbs (e.g., basil, cilantro, parsley)  
+- Eggs (prioritized for the rebate)  
+- Milk (gallon or half-gallon)  
+- Yogurt (individual cups or a large container)  
+- Cheese (shredded, block, or string)  
+- Boneless, skinless chicken breasts  
+- Ground beef or ground turkey  
+- Salmon or other frozen fish fillets  
+- Tofu or other protein alternatives  
+- Canned black beans or kidney beans  
+- Diced tomatoes  
+- Canned tuna or chicken  
+- Soups (e.g., tomato soup, black bean soup)  
+- Granola or energy bars  
+- Nuts (e.g., almonds, walnuts)  
+- Dried fruits (e.g., cranberries, raisins)  
+- Crackers or chips  
+- Bread (loaf or buns)  
+- Pasta or rice  
+- Oils (e.g., olive, coconut)  
+- Spices (e.g., salt, pepper, basil)  
+- Juice (e.g., orange, apple)  
+- Coffee or tea  
+- Water (bottled or filtered)  
+- Soda or sparkling water  
+[ASSISTANT_SAID] Assistant provides tips to maximize Ibotta earnings, including checking the app regularly, planning around high cashback items, buying in bulk, shopping during sales, and reading offer details.  
+[EVENT] User is thinking of reducing plastic usage.  
+[ASSISTANT_SAID] Assistant suggests getting reusable bags or containers suitable for grocery shopping.  
+[ASSISTANT_S

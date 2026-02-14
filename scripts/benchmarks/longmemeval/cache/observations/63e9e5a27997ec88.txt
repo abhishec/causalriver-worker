@@ -1,0 +1,22 @@
+**Observation Log:**
+
+- [FACT] User is looking for recommendations on new Korean restaurants in the city.
+- [PREFERENCE] User is obsessed with Korean BBQ.
+- [EVENT] User took a cooking class focused on Middle Eastern cuisine on 2023/05/28.
+- [EVENT] User learned how to make falafel, shawarma, and tabbouleh in the cooking class.
+- [PREFERENCE] User enjoys discovering new restaurant spots.
+- [ASSISTANT_SAID] Assistant praised the user's cooking class experience, stating it sounded amazing and fun.
+- [ASSISTANT_SAID] Assistant recommended five Korean restaurants: Hwang's Kitchen, Seoul Sausage Company, KOKO, Jji Jji, and Oji.
+- [ASSISTANT_SAID] Hwang's Kitchen offers a unique blend of traditional Korean flavors with modern twists and has a signature "K-Town Fried Chicken."
+- [ASSISTANT_SAID] Seoul Sausage Company specializes in Korean-style sausages and has a casual eatery vibe with outdoor seating.
+- [ASSISTANT_SAID] KOKO is a family-owned restaurant serving authentic homestyle Korean cuisine with generous BBQ options and an impressive selection of Korean beers and soju.
+- [ASSISTANT_SAID] Jji Jji offers a modern take on traditional dishes with a menu divided into "Small Eats" and "Big Eats."
+- [ASSISTANT_SAID] Oji is a local favorite for Korean comfort food with reasonably priced BBQ options and popular bibimbap.
+- [ASSISTANT_SAID] Assistant provided details about Seoul Sausage Company's sausage flavors: K-Town Dog, Spicy Gochujang, Kimchi Chorizo, Bulgogi Beef, and Doenjang.
+- [ASSISTANT_SAID] Assistant noted that the Spicy Gochujang and Kimchi Chorizo sausages are on the spicier side, while K-Town Dog and Bulgogi Beef are more mild.
+- [ASSISTANT_SAID] Assistant mentioned vegetarian and vegan options at Seoul Sausage Company, including Kimchi Fried Rice, Tofu Bokkeumbap, Vegetable Skewers, Vegan Kimchi, and Vegan Sausage.
+- [ASSISTANT_SAID] Assistant listed desserts at Seoul Sausage Company: Mochi Waffle Sandwich, Patbingsu, and Tteokbokki Cake.
+- [ASSISTANT_SAID] Assistant provided drink options at Seoul Sausage Company: Sikhye, Yuja Cha, Makgeolli, and Korean Iced Coffee.
+- [PREFERENCE] User is interested in trying the Spicy Gochujang and Kimchi Chorizo sausages.
+- [PREFERENCE] User is interested in trying the vegan kimchi and sausage options.
+- [ASSISTANT_SAID] Assistant recommended three Middle Eastern restaurants: Sahara,

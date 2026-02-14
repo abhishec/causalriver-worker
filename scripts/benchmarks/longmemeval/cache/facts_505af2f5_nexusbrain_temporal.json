@@ -1,0 +1,42 @@
+{
+  "answer_f3164f2c": [
+    {
+      "fact": "User is trying to reduce sugar intake",
+      "type": "preference",
+      "entities": [
+        "sugar intake"
+      ]
+    },
+    {
+      "fact": "User has started making their own flavored creamer",
+      "type": "preference",
+      "entities": [
+        "flavored creamer"
+      ]
+    },
+    {
+      "fact": "User uses almond milk, vanilla extract, and honey in their creamer",
+      "type": "personal",
+      "entities": [
+        "almond milk",
+        "vanilla extract",
+        "honey"
+      ]
+    },
+    {
+      "fact": "User is looking for tips to make their creamer healthier",
+      "type": "preference",
+      "entities": [
+        "healthier creamer"
+      ]
+    },
+    {
+      "fact": "User is interested in preparing snacks in advance for the week",
+      "type": "preference",
+      "entities": [
+        "snacks",
+        "meal prep"
+      ]
+    }
+  ]
+}

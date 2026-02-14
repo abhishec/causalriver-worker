@@ -1,0 +1,143 @@
+{
+  "answer_c9dfeaea_1": [
+    {
+      "fact": "User has a dog named Max",
+      "type": "personal",
+      "entities": [
+        "Max"
+      ]
+    },
+    {
+      "fact": "User has another dog named Lola",
+      "type": "personal",
+      "entities": [
+        "Lola"
+      ]
+    },
+    {
+      "fact": "User took Lola to the vet last week",
+      "type": "event",
+      "entities": [
+        "Lola",
+        "vet"
+      ]
+    },
+    {
+      "fact": "User received a discounted consultation fee of $50 for Lola as a regular customer",
+      "type": "event",
+      "entities": [
+        "$50",
+        "Lola"
+      ]
+    },
+    {
+      "fact": "User is looking for a durable and comfortable dog bed",
+      "type": "preference",
+      "entities": [
+        "durable dog bed",
+        "comfortable dog bed"
+      ]
+    },
+    {
+      "fact": "User prefers orthopedic or memory foam dog beds",
+      "type": "preference",
+      "entities": [
+        "orthopedic dog bed",
+        "memory foam dog bed"
+      ]
+    },
+    {
+      "fact": "User is looking for dog beds in the $40-$50 price range",
+      "type": "preference",
+      "entities": [
+        "$40-$50"
+      ]
+    }
+  ],
+  "answer_c9dfeaea_2": [
+    {
+      "fact": "User has a cat named Lola",
+      "type": "personal",
+      "entities": [
+        "Lola"
+      ]
+    },
+    {
+      "fact": "User recently purchased cat litter from Petco",
+      "type": "event",
+      "entities": [
+        "Petco",
+        "cat litter"
+      ]
+    },
+    {
+      "fact": "User is looking for advice on cat litter for odor control",
+      "type": "preference",
+      "entities": [
+        "cat litter",
+        "odor control"
+      ]
+    },
+    {
+      "fact": "User is open to trying different textures and types of cat litter",
+      "type": "preference",
+      "entities": [
+        "cat litter",
+        "textures",
+        "types"
+      ]
+    },
+    {
+      "fact": "User wants cat litter that is easy to scoop and clean",
+      "type": "preference",
+      "entities": [
+        "cat litter",
+        "scoop",
+        "clean"
+      ]
+    },
+    {
+      "fact": "User is not concerned about the budget for cat litter as long as it is effective",
+      "type": "preference",
+      "entities": [
+        "budget",
+        "cat litter",
+        "effectiveness"
+      ]
+    },
+    {
+      "fact": "User is not aware of any sensitivities or allergies that Lola has",
+      "type": "personal",
+      "entities": [
+        "Lola",
+        "sensitivities",
+        "allergies"
+      ]
+    },
+    {
+      "fact": "User scoops the litter box every other day",
+      "type": "personal",
+      "entities": [
+        "litter box",
+        "scooping frequency"
+      ]
+    },
+    {
+      "fact": "User's cat Lola is the only cat using the litter box",
+      "type": "relationship",
+      "entities": [
+        "Lola"
+      ]
+    },
+    {
+      "fact": "User purchased flea and tick prevention medication for Lola for $25 for a 3-month supply",
+      "type": "event",
+      "entities": [
+        "flea and tick prevention",
+        "Lola",
+        "$25",
+        "3-month supply"
+      ]
+    }
+  ]
+}

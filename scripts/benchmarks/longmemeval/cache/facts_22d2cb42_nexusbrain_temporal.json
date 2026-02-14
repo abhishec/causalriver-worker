@@ -1,0 +1,74 @@
+{
+  "answer_bcce0b73_1": [
+    {
+      "fact": "User is planning to go to a music festival next weekend.",
+      "type": "event",
+      "entities": [
+        "music festival"
+      ]
+    },
+    {
+      "fact": "User is considering starting to produce their own music.",
+      "type": "preference",
+      "entities": [
+        "music production"
+      ]
+    },
+    {
+      "fact": "User has an acoustic guitar that needs servicing.",
+      "type": "personal",
+      "entities": [
+        "acoustic guitar"
+      ]
+    },
+    {
+      "fact": "User has heard of Ableton Live Intro but has never tried it.",
+      "type": "opinion",
+      "entities": [
+        "Ableton Live Intro"
+      ]
+    },
+    {
+      "fact": "User is interested in comparing Ableton Live Intro and FL Studio Fruity Edition.",
+      "type": "preference",
+      "entities": [
+        "Ableton Live Intro",
+        "FL Studio Fruity Edition"
+      ]
+    }
+  ],
+  "answer_bcce0b73_2": [
+    {
+      "fact": "User is thinking of learning to play the violin",
+      "type": "preference",
+      "entities": [
+        "violin"
+      ]
+    },
+    {
+      "fact": "User is located in the city center",
+      "type": "personal",
+      "entities": [
+        "city center"
+      ]
+    },
+    {
+      "fact": "User has a guitar that they got serviced at a music shop on Main St.",
+      "type": "event",
+      "entities": [
+        "guitar",
+        "music shop",
+        "Main St."
+      ]
+    },
+    {
+      "fact": "User thinks the music shop on Main St. is good with guitar maintenance",
+      "type": "opinion",
+      "entities": [
+        "music shop",
+        "Main St.",
+        "guitar maintenance"
+      ]
+    }
+  ]
+}

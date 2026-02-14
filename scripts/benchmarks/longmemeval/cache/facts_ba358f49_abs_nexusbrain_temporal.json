@@ -1,0 +1,101 @@
+{
+  "answer_cbd08e3c_abs_1": [
+    {
+      "fact": "User is concerned about fine lines and wrinkles on their skin.",
+      "type": "personal",
+      "entities": [
+        "fine lines",
+        "wrinkles"
+      ]
+    },
+    {
+      "fact": "User is considering improving their skincare routine.",
+      "type": "preference",
+      "entities": [
+        "skincare routine"
+      ]
+    },
+    {
+      "fact": "User's friend Rachel is getting married next year.",
+      "type": "event",
+      "entities": [
+        "Rachel",
+        "wedding"
+      ]
+    },
+    {
+      "fact": "User is thinking about their own life goals.",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User has been working in the marketing industry for five years.",
+      "type": "personal",
+      "entities": [
+        "marketing",
+        "five years"
+      ]
+    },
+    {
+      "fact": "User is considering going back to school for a master's degree in marketing.",
+      "type": "preference",
+      "entities": [
+        "master's degree",
+        "marketing"
+      ]
+    },
+    {
+      "fact": "User wants to upgrade their skills to stay competitive.",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User is looking for online programs that cater to working professionals.",
+      "type": "preference",
+      "entities": [
+        "online programs",
+        "working professionals"
+      ]
+    }
+  ],
+  "answer_cbd08e3c_abs_2": [
+    {
+      "fact": "User is 32 years old.",
+      "type": "personal",
+      "entities": [
+        "32 years old"
+      ]
+    },
+    {
+      "fact": "User's skin type is normal.",
+      "type": "personal",
+      "entities": [
+        "normal skin"
+      ]
+    },
+    {
+      "fact": "User's main skin concerns are fine lines and wrinkles, especially around the eyes.",
+      "type": "personal",
+      "entities": [
+        "fine lines",
+        "wrinkles",
+        "eyes"
+      ]
+    },
+    {
+      "fact": "User prefers not too expensive skincare products.",
+      "type": "preference",
+      "entities": [
+        "affordable skincare products"
+      ]
+    },
+    {
+      "fact": "User has been researching skincare routines and products online.",
+      "type": "event",
+      "entities": [
+        "skincare routines",
+        "products"
+      ]
+    }
+  ]
+}

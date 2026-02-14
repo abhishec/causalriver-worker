@@ -1,0 +1,44 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/27 (Sat) 09:48
+
+[ASSISTANT_SAID] A process is an instance of a running program that has a unique process identifier (PID), a current state (running, waiting, or terminated), and an execution context that includes the contents of the program counter and registers.
+
+[ASSISTANT_SAID] A program is a set of instructions written in a programming language that performs a specific task, while a process is an instance of a running program.
+
+[ASSISTANT_SAID] Key differences between a program and a process include: 
+1. A program is stored on disk, while a process is a running instance in memory.
+2. A program is a passive entity, while a process is active.
+3. A program can exist without execution, but a process cannot.
+
+[ASSISTANT_SAID] The life cycle of a process includes the following stages: 
+1. New: Process is created and initialized.
+2. Ready: Process is waiting to be assigned to a processor.
+3. Running: Process is executing.
+4. Blocked: Process is waiting for an event (e.g., I/O operation).
+5. Terminated: Process has completed execution and resources are freed.
+
+[ASSISTANT_SAID] During the life cycle of a process, it may transition between states based on events, such as a running process becoming blocked due to an I/O operation.
+
+[ASSISTANT_SAID] A binary semaphore is a synchronization primitive with two states: locked (1) or unlocked (0).
+
+[ASSISTANT_SAID] Advantages of binary semaphore include:
+1. Mutual Exclusion: Only one process can access a shared resource at a time.
+2. Efficient: Minimal overhead and simple to implement.
+3. Inter-Process Communication: Can signal another process that a resource is available.
+
+[ASSISTANT_SAID] Disadvantages of binary semaphore include:
+1. Deadlock: Can lead to deadlock if not used correctly.
+2. Priority Inversion: Low-priority process holding a semaphore can delay high-priority processes.
+3. Not Suitable for Multiple Resources: Cannot manage multiple instances of a shared resource.
+
+[ASSISTANT_SAID] When a page fault occurs, the operating system takes the following steps:
+1. The processor generates a page fault interrupt.
+2. The OS checks the page fault address.
+3. The OS checks if the page is in memory.
+4. The OS identifies a victim page for replacement and writes it back to disk if modified.
+5. The page is read from disk and loaded into memory.
+6. The page table is updated.
+7. The processor is restarted at the interrupted point.
+8. If a protection violation occurs, the OS terminates the process or raises a signal.
+9. If a stack overflow occurs, the OS grows the stack

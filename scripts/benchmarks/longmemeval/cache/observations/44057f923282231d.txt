@@ -1,0 +1,28 @@
+**Observation Log:**
+
+[SESSION_DATE] 2023/05/28 (Sun) 22:34  
+[SESSION_ID] 89c7a48a_2  
+
+[FACT] User has a 2018 Honda Civic.  
+[FACT] User has a Specialized Sirrus bike.  
+[FACT] User has a Yamaha FZ6R motorcycle.  
+[EVENT] User washed their car at a local car wash and spent $15 on the deluxe package.  
+[EVENT] User got their car serviced on February 10th.  
+[EVENT] User replaced the air filter for $25.  
+[EVENT] User filled up the gas tank around the same time as the air filter replacement, which cost $30.  
+[EVENT] User took their bike to the bike shop on January 25th to get the gears adjusted.  
+[EVENT] User had the cables on their bike replaced for $40.  
+[CHANGE] User's bike had its gears adjusted and cables replaced.  
+[TEMPORAL] User's car service date is February 10th.  
+[TEMPORAL] User's bike service date is January 25th.  
+[PREFERENCE] User does not drive aggressively and prefers a budget-friendly fuel injector cleaner.  
+[ASSISTANT_SAID] Fuel injector cleaners can help remove deposits and contaminants that can clog fuel injectors, leading to poor engine performance, decreased fuel efficiency, rough idling, and engine misfires.  
+[ASSISTANT_SAID] Recommended fuel injector cleaners include Sea Foam Motor Treatment, Techron Fuel Injector Cleaner, BG Fuel Injector Cleaner, Lucas Fuel Treatment, and STP Fuel Injector Cleaner.  
+[ASSISTANT_SAID] User should choose a cleaner compatible with gasoline for their Honda Civic.  
+[ASSISTANT_SAID] A high-performance cleaner is recommended if the user drives aggressively, tows a trailer, or lives in an area with poor fuel quality.  
+[ASSISTANT_SAID] A budget-friendly cleaner may be sufficient for a relatively low-mileage vehicle like the user's Honda Civic.  
+[ASSISTANT_SAID] STP Fuel Injector Cleaner is a concentrated formula that removes deposits and contaminants, is safe for all gasoline-powered vehicles, and typically comes in a 5.25 oz bottle.  
+[ASSISTANT_SAID] STP Fuel Injector Cleaner helps improve fuel atomization, engine performance, fuel efficiency, and reduces emissions.  
+[ASSISTANT_SAID] User should follow the product instructions and use the STP Fuel Injector Cleaner as directed.  
+[ASSISTANT_SAID] User's bike maintenance history includes a recent repair that improved shifting and braking.  
+[ASSISTANT_SAID] Tips for selling the Yamaha FZ6R on Craigslist include taking clear, well-lit photos from multiple angles, providing a detailed description, including the price and location, and being honest about the

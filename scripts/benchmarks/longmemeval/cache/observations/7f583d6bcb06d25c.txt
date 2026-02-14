@@ -1,0 +1,28 @@
+**Observation Log:**
+
+[FACT] User has been doing yoga for about 6 weeks.  
+[FACT] User is getting more comfortable with Vinyasa Flow classes.  
+[FACT] User has a favorite yoga instructor who teaches a class on Monday evening.  
+[PREFERENCE] User loves their favorite instructor's attention to detail and corrections on their posture.  
+[EVENT] User is looking for recommendations on yoga classes that focus on inversions and arm balances.  
+[ASSISTANT_SAID] Inversions and arm balances can be a fun and challenging addition to yoga practice.  
+[ASSISTANT_SAID] Recommendations for yoga classes include:  
+[ASSISTANT_CREATED] 1. Inversion and Arm Balance Workshops: Specialized workshops focusing on inversions and arm balances.  
+[ASSISTANT_CREATED] 2. Advanced Vinyasa Flow or Ashtanga classes: Classes that incorporate more challenging postures.  
+[ASSISTANT_CREATED] 3. Yin-Yang or Yoga Fusion classes: Classes combining slow, meditative pace with dynamic movements.  
+[ASSISTANT_CREATED] 4. Handstand and Inversion classes: Classes specifically focused on handstands and other inversions.  
+[ASSISTANT_CREATED] 5. Online classes and tutorials: Websites like YogaGlo, DoYouYoga, and YouTube channels like Dylan Werner Yoga or Fightmaster Yoga.  
+[ASSISTANT_SAID] Before taking on advanced classes, consider building a strong foundation in basic postures like downward-facing dog, plank, and chaturanga.  
+[ASSISTANT_SAID] User should listen to their body and be mindful of limitations when practicing inversions and arm balances.  
+[ASSISTANT_SAID] Working with a knowledgeable instructor is important for exploring advanced postures.  
+[ASSISTANT_SAID] User should communicate with their instructor about their goals and concerns.  
+[EVENT] User is interested in taking a workshop focused on inversions and arm balances.  
+[ASSISTANT_SAID] Recommendations for preparing for the workshop include strength-building exercises and flexibility stretches.  
+[ASSISTANT_CREATED] Strength-building exercises include:  
+[ASSISTANT_CREATED] 1. Plank: Hold for 30-60 seconds, rest for 30 seconds, repeat for 3-5 sets.  
+[ASSISTANT_CREATED] 2. Chaturanga: Practice chaturanga push-ups for 3 sets of 10-15 reps.  
+[ASSISTANT_CREATED] 3. Inverted rows: Use a resistance band or light dumbbell.  
+[ASSISTANT_CREATED] 4. Core exercises: Bicycle crunches, Russian twists, leg raises.  
+[ASSISTANT_CREATED] Flexibility and mobility exercises include:  
+[ASSISTANT_CREATED] 1. Shoulder openers: Shoulder rolls, shoulder blade squeezes, arm circles.  
+[ASSIST

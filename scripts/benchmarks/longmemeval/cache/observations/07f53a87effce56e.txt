@@ -1,0 +1,19 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/03/11 (Sat) 02:30
+- [FACT] User is interested in model building.
+- [EVENT] User recently invested in a new camera lens and a lightbox.
+- [EVENT] User completed a 1/48 scale F-16 fighter jet model over the course of two weekends.
+- [PREFERENCE] User is not happy with the results of their model photography.
+- [ASSISTANT_SAID] Congratulations on your new camera lens and lightbox, and on completing your 1/48 scale F-16 fighter jet model!
+- [ASSISTANT_SAID] Tips for improving model photography include understanding camera settings, mastering composition, using a lightbox effectively, paying attention to background, focusing on details, experimenting with lighting setups, post-processing, practicing, studying other photographers, and showcasing models in a scene.
+- [ASSISTANT_SAID] Specific tips for the F-16 include photographing in a flight pose, using a shallow depth of field, experimenting with lighting setups, and adding weathering effects.
+- [EVENT] User is thinking of getting more into weathering.
+- [EVENT] User made a mistake last weekend and had to fix a big streak of rust-colored paint on their current project, a 1/24 scale Mustang Shelby GT500.
+- [ASSISTANT_SAID] Tips for achieving a realistic weathered look on cars include starting with reference images, choosing the right materials (acrylic washes, enamel washes, pigments, chalks, salt, and hairspray), preparing the model, applying rust and corrosion effects, creating dirt and grime, using chipping techniques, adding road dirt and dust, blending effects, and practicing patience.
+- [ASSISTANT_SAID] Specific areas to focus on for the Mustang include rust streaks around wheels, dirt on lower body panels, chipping on metal trim, and road dirt on the hood and roof.
+- [EVENT] User is interested in improving their painting skills and has been experimenting with an airbrush.
+- [ASSISTANT_SAID] Tips for achieving a smooth, even finish with an airbrush include choosing the right airbrush, selecting the right paint, preparing the surface, setting up the airbrush, using the right technique, working in thin layers, controlling air pressure, using a wet palette, avoiding over-spraying, and practicing.
+- [ASSISTANT_SAID] Specific techniques for large, flat surfaces like the hood of the Mustang include dividing the surface into sections, using smooth strokes, applying multiple thin coats, and considering different airbrush sizes for details and edges.
+- [EVENT] User is considering adding weathering effects to their 1/48 scale F-16 fighter jet model. 
+- [ASSISTANT_SAID] Tips for weathering aircraft models include studying reference images, choosing the

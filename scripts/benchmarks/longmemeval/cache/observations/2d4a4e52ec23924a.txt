@@ -1,0 +1,23 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2022/03/02 (Wed) 20:30
+- [USER] The user is thinking of tracking their online spending habits better.
+- [USER] The user wants help setting up a system to categorize their purchases by store and date.
+- [USER] The user has noticed they tend to make a lot of purchases on weekends.
+- [USER] In March, the user made 5 online purchases from ASOS, which is a significant portion of their total online spending that month.
+- [ASSISTANT_SAID] Tracking online spending habits can provide insight into spending patterns and help make informed financial decisions.
+- [ASSISTANT_SAID] Suggested methods for tracking purchases include spreadsheets (Google Sheets, Microsoft Excel, LibreOffice Calc), budgeting apps (Mint, Personal Capital, YNAB, Spendee), or a physical notebook.
+- [ASSISTANT_SAID] Recommended categories to track include Date, Store, Category, Amount, and Notes.
+- [ASSISTANT_SAID] Suggested steps for tracking purchases: Choose a tracking method, set up categories, track purchases, and analyze/review spending.
+- [ASSISTANT_SAID] Suggested setting a rule to avoid online shopping on weekends or setting a budget for weekend purchases based on the user's observation.
+- [ASSISTANT_SAID] Suggested using the information about ASOS purchases to set a budget for clothing purchases or identify alternative stores.
+- [USER] The user decided to go with a spreadsheet to track their online purchases for easier filtering and sorting.
+- [ASSISTANT_SAID] Provided an example layout for an online purchase tracker spreadsheet with columns for Date, Store, Category, Item Description, Amount, Weekday, Month, and Year.
+- [ASSISTANT_CREATED] Example data for the spreadsheet included purchases from ASOS, Amazon, and eBay with specific amounts and descriptions.
+- [ASSISTANT_SAID] Suggested using consistent date formats and drop-down lists for categories to ensure consistency.
+- [ASSISTANT_SAID] Explained how to calculate total amounts spent in a specific month or year using the SUMIFS formula.
+- [ASSISTANT_SAID] Provided examples of SUMIFS formulas for calculating total amounts spent in a specific month (e.g., March) and year (e.g., 2023).
+- [USER] The user acknowledged the example data and noted they made 5 purchases from ASOS in March, not just 3.
+- [USER] The user expressed interest in tracking spending by category.
+- [ASSISTANT_SAID] Suggested creating a list of categories for spending, including Clothing, Electronics, Books, Home Goods, Beauty & Personal Care, Health & Wellness, Entertainment, Travel, Food & Dining, and Miscellaneous.
+- [ASSISTANT_SAID] Provided an example of how to categorize

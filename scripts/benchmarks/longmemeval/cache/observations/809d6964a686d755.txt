@@ -1,0 +1,23 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/30 (Tue) 12:12
+- [USER] User inquired about information on different Olympic events that have been added in recent years.
+- [ASSISTANT_SAID] Skateboarding was introduced in the 2020 Tokyo Olympics, consisting of two disciplines: street and park.
+- [ASSISTANT_SAID] Sport Climbing was also introduced in the 2020 Tokyo Olympics, consisting of three disciplines: speed climbing, bouldering, and lead climbing.
+- [ASSISTANT_SAID] 3x3 Basketball was added to the 2020 Tokyo Olympics as a new basketball event, featuring teams of three players competing on a half-court.
+- [ASSISTANT_SAID] Mixed Team Events were added in recent years, including mixed doubles in badminton and tennis, mixed team archery, and mixed team triathlon.
+- [ASSISTANT_SAID] Karate was added to the 2020 Tokyo Olympics as a new event.
+- [ASSISTANT_SAID] Surfing was added to the 2020 Tokyo Olympics, featuring male and female competitors surfing in waves at the Tsurigasaki Surfing Beach in Japan.
+- [ASSISTANT_SAID] Baseball and Softball were reintroduced to the 2020 Tokyo Olympics after a 13-year absence.
+- [USER] User requested more details about the 3x3 basketball event and how it differs from traditional basketball.
+- [ASSISTANT_SAID] The 3x3 basketball event is played with teams of three players on one half-court.
+- [ASSISTANT_SAID] Points in 3x3 basketball: baskets inside the arc are worth one point, outside the arc are worth two points, and free throws are one point.
+- [ASSISTANT_SAID] The game is played for 10 minutes or until one team reaches 21 points.
+- [ASSISTANT_SAID] Teams can substitute players during dead-ball situations.
+- [ASSISTANT_SAID] Each player is allowed six fouls before disqualification.
+- [ASSISTANT_SAID] The game begins with the ball awarded to one team instead of a jump ball.
+- [ASSISTANT_SAID] The 3x3 basketball event is faster-paced and more physical than traditional basketball.
+- [USER] User asked for information on the scoring system of sport climbing in the Olympics and how it differs from other climbing competitions.
+- [ASSISTANT_SAID] Sport climbing has two scoring systems: Speed Climbing and Combined Scoring System.
+- [ASSISTANT_SAID] In Speed Climbing, competitors race up a 15-meter wall, with the fastest time winning.
+- [ASSISTANT_SAID] Competitors in Speed Climbing are given two

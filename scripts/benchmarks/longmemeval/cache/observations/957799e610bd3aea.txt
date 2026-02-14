@@ -1,0 +1,18 @@
+**Observation Log:**
+
+- [FACT] The user is looking for advice on pricing wholesale candles.
+- [EVENT] The user received interest from a local business owner at the SummerFest market.
+- [TEMPORAL] The SummerFest market is scheduled for July 24th.
+- [ASSISTANT_SAID] To determine wholesale pricing, consider material costs, labor costs, overhead costs, desired profit margin, market conditions, order quantity, and packaging and shipping costs.
+- [ASSISTANT_SAID] A simple formula for wholesale price is: Wholesale Price = (Material Costs + Labor Costs + Overhead Costs) x (1 - Desired Profit Margin).
+- [ASSISTANT_SAID] Example calculation: Material Costs: $5, Labor Costs: $3, Overhead Costs: $1, Desired Profit Margin: 60% off retail price results in a wholesale price of $4.40 per candle.
+- [ASSISTANT_SAID] Consider tiered pricing, minimum order quantity, and clear payment terms when discussing pricing with the local business owner.
+- [ASSISTANT_SAID] Suggested tiered pricing structures include:
+  - Example 1: 1-11 candles: $4.40 each, 12-24 candles: $4.00 each, 25-49 candles: $3.60 each, 50+ candles: $3.20 each.
+  - Example 2: 1-5 candles: $4.40 each, 6-10 candles: $4.20 each, 11-20 candles: $4.00 each, 21-30 candles: $3.80 each, 31+ candles: $3.60 each.
+  - Example 3: 1-9 candles: $4.40 each, 10-19 candles: $4.00 each, 20-49 candles: $3.60 each, 50-99 candles: $3.20 each, 100+ candles: $2.80 each.
+  - Example 4: Small Order (1-11 candles): $4.40 each, Medium Order (12-24 candles): $4.00 each, Large Order (25-49 candles): $3.60 each, Bulk Order (50-99 candles): $3.20 each, Wholesale Order (100+ candles): $2.80 each.
+- [USER] The user is considering offering a discount for larger orders and is unsure how to structure it.
+- [ASSISTANT_SAID] To calculate overhead costs, identify overhead cost categories, gather data for each category, calculate total overhead cost, and determine overhead cost per unit.
+- [ASSISTANT_SAID] Example of overhead cost calculation: Total overhead cost of $3,150 for 1,200 candles results in an overhead cost of $2.63 per candle.
+- [ASSIST

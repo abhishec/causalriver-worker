@@ -1,0 +1,24 @@
+**Observation Log:**
+
+[FACT] User is working on a thesis.  
+[FACT] User's thesis topic is the impact of social media on mental health in young adults.  
+[FACT] User's research question focuses on how social media usage patterns are associated with symptoms of depression and anxiety in young adults.  
+[FACT] User received positive feedback from their advisor a week after submitting their thesis proposal.  
+[PREFERENCE] User is feeling motivated to complete their thesis.  
+[ASSISTANT_SAID] Assistant congratulated the user on the positive feedback from their advisor.  
+[ASSISTANT_SAID] Assistant offered to help the user find relevant literature for their literature review.  
+[ASSISTANT_SAID] Assistant suggested brainstorming keywords related to the user's research question.  
+[ASSISTANT_SAID] Assistant recommended several academic databases for searching literature: Google Scholar, Web of Science, Scopus, PubMed, PsycINFO, JSTOR, and ScienceDirect.  
+[ASSISTANT_SAID] Assistant advised using specific search operators (AND, OR, NOT) and wildcards (*) to refine search results.  
+[ASSISTANT_SAID] Assistant suggested exploring citation tracking and checking reference lists of relevant articles.  
+[ASSISTANT_SAID] Assistant provided a list of general keywords for the user's research: social media, mental health, young adults, depression, anxiety, symptoms, usage patterns, online social networking, digital media, psychological well-being.  
+[ASSISTANT_SAID] Assistant provided specific search strategies for the user's topic, including combinations of keywords.  
+[ASSISTANT_SAID] Assistant mentioned influential studies and reviews to get the user started on their literature review.  
+[ASSISTANT_SAID] Assistant provided examples of influential studies: Burke et al. (2010), Király et al. (2019), Paksarian et al. (2018).  
+[ASSISTANT_SAID] Assistant encouraged the user to critically evaluate the quality and relevance of the studies found.  
+[ASSISTANT_SAID] Assistant acknowledged the user's interest in exploring the mediating roles of self-esteem and social support in the relationship between social media usage and mental health outcomes.  
+[ASSISTANT_SAID] Assistant provided additional keywords related to mediators: self-esteem, social support, self-concept, social connections, social capital.  
+[ASSISTANT_SAID] Assistant suggested search strategies for finding studies on the mediating roles of self-esteem and social support.  
+[ASSISTANT_SAID] Assistant provided additional keywords and search strategies for studies on the effectiveness of social media-based interventions and policies aimed at promoting mental health in young adults.  
+[ASSISTANT_SAID] Assistant recommended keywords related to interventions: social media-based, online, digital, e-mental health, internet-based.  
+[ASSISTANT_SAID]

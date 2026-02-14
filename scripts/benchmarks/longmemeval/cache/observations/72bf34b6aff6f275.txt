@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/25 (Thu) 21:54  
+[FACT] User has had great experiences with online learning in the past, going back to their undergrad days at U of M.  
+[PREFERENCE] User is looking to explore online courses on deep learning.  
+[ASSISTANT_SAID] Assistant acknowledges the user as a Michigan Wolverine and provides a list of highly rated platforms and resources for deep learning.  
+[ASSISTANT_SAID] Recommended platforms include:  
+[ASSISTANT_SAID] 1. **Coursera**: Offers a range of deep learning courses, including Andrew Ng's Machine Learning course.  
+[ASSISTANT_SAID] 2. **edX**: Offers deep learning courses from leading institutions like MIT, Stanford, and UC Berkeley.  
+[ASSISTANT_SAID] 3. **Udemy**: Has a large collection of deep learning courses, with many highly rated options.  
+[ASSISTANT_SAID] 4. **fast.ai**: Offers a range of deep learning courses, including "Deep Learning for Computer Vision."  
+[ASSISTANT_SAID] Recommended courses include:  
+[ASSISTANT_SAID] 1. **Deep Learning Specialization** (Coursera): Taught by Andrew Ng.  
+[ASSISTANT_SAID] 2. **Deep Learning for Computer Vision** (fast.ai): Focuses on computer vision applications.  
+[ASSISTANT_SAID] 3. **Deep Learning with Python** (DataCamp): Teaches deep learning using Python and Keras.  
+[ASSISTANT_SAID] 4. **Deep Learning A-Z** (Udemy): Covers a wide range of deep learning topics.  
+[ASSISTANT_SAID] Additional resources include:  
+[ASSISTANT_SAID] 1. **Kaggle**: Offers tutorials, courses, and a community forum.  
+[ASSISTANT_SAID] 2. **TensorFlow Tutorials** (Google): Official tutorials for TensorFlow.  
+[ASSISTANT_SAID] 3. **PyTorch Tutorials** (Facebook): Official tutorials for PyTorch.  
+[ASSISTANT_SAID] 4. **Deep Learning Book** (Ian Goodfellow, Yoshua Bengio, and Aaron Courville): A comprehensive introduction to deep learning.  
+[ASSISTANT_SAID] Tips provided include starting with the basics, practicing hands-on, and joining online communities.  
+[PREFERENCE] User has taken a few courses on Coursera and edX already and is familiar with those platforms.  
+[PREFERENCE] User finds the fast.ai course on deep learning for computer vision interesting and wants to know more about the math required.  
+[ASSISTANT_SAID] The fast

@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2022/01/16 (Sun) 06:28  
+[USER] User encountered an application error when trying to start an old application on Windows 10.  
+[USER] The error message states: "Exception EOleSysError in module epub2pdf.exe at 0013E81D. Class not registered."  
+[USER] User pressed "OK" on the error message.  
+[ASSISTANT_SAID] The assistant explained that the error suggests the application is trying to use a component or module (epub2pdf.exe) that is not properly registered on the system.  
+[ASSISTANT_SAID] The assistant recommended re-registering the component by running the command "regsvr32 epub2pdf.exe" from the command prompt.  
+[ASSISTANT_SAID] The assistant suggested contacting the application vendor for further assistance or finding a newer version of the application compatible with Windows 10.  
+[USER] User asked if there are ways to identify which component is not properly registered on the system.  
+[ASSISTANT_SAID] The assistant mentioned that the error message indicates the class "epub2pdf.exe" is not registered, suggesting that this file is the component in question.  
+[ASSISTANT_SAID] The assistant recommended using tools like Dependency Walker or Process Monitor to identify missing dependencies.  
+[ASSISTANT_SAID] The assistant suggested checking the event viewer for application logs for more information about the error.  
+[USER] User provided additional information about the program "Epub to PDF Converter."  
+[USER] The program is a free PDF converter software that batch converts EPUB, DOC, DOCX, DJVU, MOBI, CHM, RTF, HTML, and TXT to PDF documents.  
+[USER] The program is easy to use; users can add e-book files, set the output directory, and click the Convert button to start converting.  
+[USER] The conversion completes in a few minutes.  
+[USER] The program can add watermarks, passwords, restrictions, and metadata (title, subject, author, keywords) to the output PDF documents.  
+[USER] The program does not support DRM protected ePub or mobi documents for copyright reasons, and output PDF pages may be blank if the source files are DRM protected.  
+[USER] The program does not require Adobe Acrobat Reader and does not depend on any print driver.  
+[USER] The program works on Windows XP, Vista, 7, and 8, both 32-bit and 64-bit versions.  
+[USER] Version 1.1 added support for converting Word documents (*.doc, *.docx) to PDF.  
+[USER] The full version of the program does not require other PDF software, plug-ins, or printers to run and has no watermarks, nag screens, time

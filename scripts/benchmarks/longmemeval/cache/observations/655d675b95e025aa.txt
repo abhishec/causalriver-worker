@@ -1,0 +1,16 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/21 (Sun) 04:24  
+[USER] User asked for suggestions on authentic Korean BBQ marinades and dipping sauces.  
+[ASSISTANT_SAID] Suggested five authentic Korean BBQ marinades and dipping sauces:  
+[ASSISTANT_CREATED] 1. Bulgogi Marinade: Ingredients - 1/4 cup soy sauce, 2 tablespoons honey, 1 tablespoon sesame oil, 1 tablespoon rice wine, 1 tablespoon minced garlic, 1 tablespoon minced ginger, 1 teaspoon black pepper. Instructions: Mix all ingredients together in a bowl. Marinate your meat of choice for at least 30 minutes before grilling.  
+[ASSISTANT_CREATED] 2. Galbi Marinade: Ingredients - 1/2 cup soy sauce, 1/4 cup brown sugar, 1/4 cup mirin, 1/4 cup sesame oil, 1/4 cup chopped green onion, 2 tablespoons minced garlic, 2 tablespoons minced ginger. Instructions: Mix all ingredients together in a bowl. Marinate your beef short ribs for at least 2 hours before grilling.  
+[ASSISTANT_CREATED] 3. Kimchi Dipping Sauce: Ingredients - 1/2 cup chopped kimchi, 2 tablespoons gochujang, 1 tablespoon honey, 1 tablespoon soy sauce, 1 tablespoon sesame oil, 1 tablespoon rice vinegar, 1 teaspoon minced garlic. Instructions: Mix all ingredients together in a bowl. Serve as a dipping sauce for your grilled meat or vegetables.  
+[ASSISTANT_CREATED] 4. Ssamjang Dipping Sauce: Ingredients - 1/4 cup gochujang, 1 tablespoon doenjang, 1 tablespoon sesame oil, 1 tablespoon honey, 1 teaspoon minced garlic. Instructions: Mix all ingredients together in a bowl. Serve as a dipping sauce for your grilled meat or vegetables, or use it as a spread for your lettuce wraps.  
+[ASSISTANT_CREATED] 5. Sesame Oil and Salt Dipping Sauce: Ingredients - 1/4 cup sesame oil, 1 teaspoon salt. Instructions: Mix all ingredients together in a bowl. Serve as a simple dipping sauce for your grilled meat or vegetables.  
+[USER] User expressed excitement about trying the Korean BBQ marinades and dipping sauces.  
+[USER] User inquired about the availability of ingredients in local grocery stores.  
+[ASSISTANT_SAID] Assistant mentioned that availability depends on location and grocery stores, but most have an international section for Korean ingredients. Suggested checking online markets for uncommon ingredients and using substitutes.  
+[USER] User confirmed they would check their local grocery store and consider ordering uncommon ingredients online.  
+[USER] User asked for tips on grilling Korean BBQ to perfection.  
+[ASSISTANT_SAID] Assistant provided tips for grilling Korean BBQ:

@@ -1,0 +1,29 @@
+**Observation Log:**
+
+- [FACT] User's name is Raphael Scott.
+- [FACT] User's job title is Technical Product Manager.
+- [FACT] User's email is raphael.scott@gmail.com.
+- [FACT] User's phone number is 555-555-5555.
+- [FACT] User's LinkedIn profile is www.linkedin.com/raphaelscott.
+- [FACT] User's location is New York, NY.
+- [FACT] User has a strong background in IT.
+- [FACT] User has experience in consulting.
+- [FACT] User's proudest achievement was implementing a new automated process that resulted in a $20M profit increase for the company.
+- [TEMPORAL] User's professional experience includes working at Amazon from 01/2019 to present.
+- [TEMPORAL] User's professional experience includes working at Comcast from 01/2017 to 01/2019.
+- [TEMPORAL] User's professional experience includes working at PwC from 01/2015 to 01/2017.
+- [TEMPORAL] User's professional experience includes working at Deloitte from 01/2013 to 01/2015.
+- [FACT] User has a Master of Business Administration from Stevens Institute of Technology (01/2008 - 01/2012).
+- [FACT] User has a Bachelor of Science in Industrial Engineering from the University of California, Berkeley (01/2004 - 01/2008).
+- [CHANGE] User is seeking to improve their resume to capture the attention of a C-Level executive.
+- [ASSISTANT_SAID] Assistant provided a rewritten version of the user's resume.
+- [ASSISTANT_CREATED] Assistant created a new summary for the resume highlighting the user's experience and skills in delivering results, IT consulting, leading cross-functional teams, and driving revenue growth.
+- [ASSISTANT_CREATED] Assistant listed professional experience with specific achievements for each role at Amazon, Comcast, PwC, and Deloitte.
+- [ASSISTANT_CREATED] Assistant included strengths such as Analytical Thinking, Communication, and Problem Solving in the resume.
+- [ASSISTANT_CREATED] Assistant provided a list of technical skills including Scrum, Product Development, UX Design, Tableau, JIRA, Python, and Kanban.
+- [FACT] User's role at Amazon involved creating a product roadmap that generated $10M in additional annual revenue.
+- [FACT] User's role at Amazon involved implementing a communication methodology that improved partner relations and streamlined contract negotiations.
+- [FACT] User's role at Amazon involved assembling a team that restructured a failing customer acquisition platform, resulting in a 118% increase in sales cycle.
+- [FACT] User's role at Comcast involved developing and launching an automated process that increased profits by $20M.
+- [FACT] User's role at Comcast involved securing new partnerships that expanded operations to 3 additional cities.
+-

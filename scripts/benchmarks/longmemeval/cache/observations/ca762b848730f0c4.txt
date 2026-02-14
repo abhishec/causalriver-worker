@@ -1,0 +1,25 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/21 (Sun) 17:38
+- [ASSISTANT_SAID] The System Development Life Cycle (SDLC) is a process used by organizations to develop, design, and implement high-quality information systems.
+- [ASSISTANT_SAID] The SDLC process is structured into several phases: Planning, Analysis, Design, Development, Testing, Implementation, and Maintenance.
+- [ASSISTANT_SAID] In the Planning Phase, the project's goals and objectives are identified, and a feasibility study is conducted.
+- [ASSISTANT_SAID] The Analysis Phase involves gathering requirements from stakeholders and analyzing them to determine the system's specifications.
+- [ASSISTANT_SAID] The Design Phase involves creating a detailed plan for the system based on the requirements gathered during the analysis phase.
+- [ASSISTANT_SAID] The Development Phase involves building the system based on the detailed design specifications created in the design phase.
+- [ASSISTANT_SAID] The Testing Phase involves testing the system to ensure that it meets the requirements outlined in the analysis phase.
+- [ASSISTANT_SAID] The Implementation Phase involves deploying the system into the production environment and training users.
+- [ASSISTANT_SAID] The Maintenance Phase involves maintaining the system and making necessary modifications to ensure it continues to meet stakeholders' needs.
+- [ASSISTANT_SAID] Each phase of the SDLC is essential and must be performed correctly to ensure that the system meets the stakeholders' requirements.
+- [USER] Give an Example
+- [ASSISTANT_SAID] An example of how the SDLC phases can be applied in the development of a web application includes Planning, Analysis, Design, Development, Testing, Implementation, and Maintenance.
+- [ASSISTANT_SAID] In the Planning phase of the web application, the project team identifies the purpose, goals, and scope of the application.
+- [ASSISTANT_SAID] In the Analysis phase, the project team gathers requirements and analyzes the feasibility of the project.
+- [ASSISTANT_SAID] In the Design phase, the project team designs the system architecture, software design, and database schema.
+- [ASSISTANT_SAID] The Development phase involves the actual coding and development of the web application.
+- [ASSISTANT_SAID] In the Testing phase, the project team conducts various types of testing to ensure that the web application functions as expected.
+- [ASSISTANT_SAID] The Implementation phase involves deploying the web application to the production environment.
+- [ASSISTANT_SAID] The Maintenance phase involves ongoing support and maintenance of the web application.
+- [USER] Illustrate and explain the model of an information system
+- [USER] Business and system justify
+- [USER] Interpret the characteristics of

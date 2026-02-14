@@ -1,0 +1,88 @@
+{
+  "answer_6702277b_2": [
+    {
+      "fact": "User is thinking of buying new clothes for an upcoming event.",
+      "type": "event",
+      "entities": [
+        "new clothes",
+        "upcoming event"
+      ]
+    },
+    {
+      "fact": "User is looking for online stores that have a wide range of dresses.",
+      "type": "preference",
+      "entities": [
+        "online stores",
+        "dresses"
+      ]
+    },
+    {
+      "fact": "User loves the handbag they got from TK Maxx.",
+      "type": "opinion",
+      "entities": [
+        "handbag",
+        "TK Maxx"
+      ]
+    },
+    {
+      "fact": "User is looking for a dress for a more formal event, such as a wedding or a gala.",
+      "type": "event",
+      "entities": [
+        "formal event",
+        "wedding",
+        "gala"
+      ]
+    },
+    {
+      "fact": "User prefers formal dresses for events.",
+      "type": "preference",
+      "entities": [
+        "formal dresses",
+        "events"
+      ]
+    }
+  ],
+  "answer_6702277b_1": [
+    {
+      "fact": "User recently got a designer handbag.",
+      "type": "personal",
+      "entities": [
+        "designer handbag"
+      ]
+    },
+    {
+      "fact": "User got a fantastic deal on the handbag, originally priced at $500.",
+      "type": "personal",
+      "entities": [
+        "$500"
+      ]
+    },
+    {
+      "fact": "User's handbag is a neutral color, black leather, and is a medium-sized tote.",
+      "type": "personal",
+      "entities": [
+        "black leather",
+        "medium-sized tote"
+      ]
+    },
+    {
+      "fact": "User is thinking of creating a capsule wardrobe with essential pieces.",
+      "type": "preference",
+      "entities": [
+        "capsule wardrobe"
+      ]
+    },
+    {
+      "fact": "User believes a good quality white shirt would be a good investment for a capsule wardrobe.",
+      "type": "opinion",
+      "entities": [
+        "good quality white shirt"
+      ]
+    },
+    {
+      "fact": "User prefers versatile clothing that can be mixed and matched.",
+      "type": "preference",
+      "entities": []
+    }
+  ]
+}

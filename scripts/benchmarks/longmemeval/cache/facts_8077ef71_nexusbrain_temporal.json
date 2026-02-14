@@ -1,0 +1,73 @@
+{
+  "answer_0dd54b7c_1": [
+    {
+      "fact": "User has a meeting at 2 PM on Tuesday",
+      "type": "event",
+      "entities": [
+        "meeting",
+        "Tuesday",
+        "2 PM"
+      ]
+    },
+    {
+      "fact": "User is working on a project due by the end of the week",
+      "type": "event",
+      "entities": [
+        "project",
+        "end of the week"
+      ]
+    },
+    {
+      "fact": "User finds exercising energizing",
+      "type": "preference",
+      "entities": [
+        "exercising"
+      ]
+    },
+    {
+      "fact": "User finds meal-prepping energizing",
+      "type": "preference",
+      "entities": [
+        "meal-prepping"
+      ]
+    },
+    {
+      "fact": "User feels drained after a networking event",
+      "type": "opinion",
+      "entities": [
+        "drained",
+        "networking event"
+      ]
+    },
+    {
+      "fact": "User wants to incorporate downtime this weekend to recharge",
+      "type": "opinion",
+      "entities": [
+        "downtime",
+        "weekend"
+      ]
+    },
+    {
+      "fact": "User enjoys watching TV shows",
+      "type": "preference",
+      "entities": [
+        "TV shows"
+      ]
+    },
+    {
+      "fact": "User enjoys reading",
+      "type": "preference",
+      "entities": [
+        "reading"
+      ]
+    },
+    {
+      "fact": "User enjoys spending time with friends and family",
+      "type": "preference",
+      "entities": [
+        "friends",
+        "family"
+      ]
+    }
+  ]
+}

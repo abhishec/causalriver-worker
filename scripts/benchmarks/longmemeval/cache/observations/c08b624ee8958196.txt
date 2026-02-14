@@ -1,0 +1,23 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/02/14 (Tue) 04:01
+- [FACT] The metadata for the speech dataset is loaded into a pandas dataframe to explore basic properties such as the number of speakers and speech segments.
+- [FACT] A caution is given against the use of external data for the project's main tasks.
+- [FACT] The speech waveform is a continuous time-varying signal representing the acoustic realization of speech.
+- [FACT] Each speech segment in the dataset is represented by a digital audio file that can be read into memory as a waveform.
+- [FACT] The waveform is extracted and played back to hear what it sounds like.
+- [FACT] The waveform is plotted as a function of time, providing a visual representation of the signal's amplitude over time.
+- [FACT] The sampling rate used in the dataset is 8000 Hz, meaning there are 8000 samples per second in the waveform.
+- [ASSISTANT_SAID] The error "Undefined control sequence" usually occurs when the necessary package is not imported or defined in the preamble.
+- [ASSISTANT_SAID] To resolve the error, the user should add `\usepackage{graphicx}` to the preamble of their LaTeX document.
+- [FACT] The Mel-scale features are inspired by human speech perception and auditory processing.
+- [FACT] The human ear has different sensitivity in different frequency bands, recognizing differences better in lower range frequencies.
+- [FACT] The Mel-scale is linear for frequencies in the range (0-1kHz) and logarithmic for frequencies above 1kHz.
+- [FACT] A speech sample can be seen as a sequence of spectral vectors represented as $\mathbf{X} = (\mathbf{x}^1, \mathbf{x}^2, \dots, \mathbf{x}^T)$.
+- [FACT] Each spectral vector $\mathbf{x}^t \in \mathbb{R}^{k}$ is extracted from a short speech segment (~25 milliseconds).
+- [FACT] The representation is based on the Fourier transform to convert the temporal signal into the frequency domain.
+- [FACT] In automatic speech recognition (ASR) research, spectral vectors are referred to as "acoustic frames."
+- [FACT] Adjacent frames are extracted with some overlap, usually ~10 milliseconds.
+- [ASSISTANT_CREATED] The function `extract_melspectrogram(signal, sr, num_mels)` is created to return a mel-scaled representation of the signal as a numpy array.
+- [FACT] The function uses `librosa.feature.melspectrogram` to extract Mel features with parameters such as `n_fft=200`, `hop_length=80`, `n_mels=num_mels`, `fmin=50`, and `fmax=4000`.
+- [FACT] The shape of the Mel spect

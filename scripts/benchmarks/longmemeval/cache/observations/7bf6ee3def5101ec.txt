@@ -1,0 +1,31 @@
+**Observation Log:**
+
+**Session Date:** 2023/01/25 (Wed) 04:45  
+**Session ID:** 0f6a2099_1
+
+1. [FACT] User is trying to keep track of their rewards and points from various loyalty programs.
+2. [FACT] User has the following loyalty programs: Walgreens Balance Rewards, Target RedCard, Giant Eagle Advantage Card, and CVS ExtraCare.
+3. [TEMPORAL] The conversation took place on January 25, 2023.
+4. [EVENT] User has 10,000 points in Walgreens Balance Rewards, equivalent to $10 worth of rewards.
+5. [FACT] User earns 10 points for every dollar spent at Walgreens.
+6. [FACT] User can redeem Walgreens points in increments of 5,000 points for $5 off a purchase.
+7. [EVENT] User recently redeemed 5,000 points to get $5 off their purchase of shampoo and conditioner.
+8. [ASSISTANT_SAID] Assistant summarized the Walgreens Balance Rewards information and asked about expiration dates for points.
+9. [FACT] User currently has no cashback rewards from Target RedCard.
+10. [EVENT] User earned $40 cashback last month from a purchase of a new TV for $800.
+11. [FACT] User earns 5% cashback on all purchases with Target RedCard.
+12. [FACT] User's cashback from Target RedCard is automatically applied to their next purchase.
+13. [ASSISTANT_SAID] Assistant summarized the Target RedCard information and noted that there are no expiration dates for cashback.
+14. [FACT] User currently has 200 fuel points with Giant Eagle Advantage Card.
+15. [FACT] User can redeem 200 fuel points for 20 cents off per gallon at the gas station.
+16. [FACT] User earns fuel points for every dollar spent on groceries.
+17. [EVENT] User received a $5 welcome offer just for signing up for the Giant Eagle Advantage Card.
+18. [ASSISTANT_SAID] Assistant summarized the Giant Eagle Advantage Card information and asked about expiration dates for fuel points.
+19. [FACT] User currently has $2 in ExtraBucks rewards from CVS.
+20. [EVENT] User earned ExtraBucks rewards from buying sale items like toothpaste and mouthwash.
+21. [FACT] User earns 2% cashback on all purchases with CVS ExtraCare.
+22. [EVENT] User received a $10 rewards coupon in the mail last month from CVS.
+23. [ASSISTANT_SAID] Assistant summarized the CVS ExtraCare information and asked about expiration dates for ExtraBucks rewards.
+24. [ASSISTANT_CREATED] Assistant created a summary of all user rewards programs, including details about points, earning structures, redemption methods, and expiration dates.
+25. [EVENT] User expressed satisfaction with the organization of their rewards programs.
+26. [EVENT]

@@ -1,0 +1,90 @@
+{
+  "answer_17dc2f5b_2": [
+    {
+      "fact": "User is mentoring a new intern named Alex.",
+      "type": "relationship",
+      "entities": [
+        "Alex"
+      ]
+    },
+    {
+      "fact": "User is excited to see Alex learn and grow.",
+      "type": "opinion",
+      "entities": [
+        "Alex"
+      ]
+    },
+    {
+      "fact": "User acknowledges the age difference between himself and Alex, who is 21 years old.",
+      "type": "personal",
+      "entities": [
+        "21 years old",
+        "Alex"
+      ]
+    },
+    {
+      "fact": "User is reviewing resources to provide the best guidance for Alex.",
+      "type": "preference",
+      "entities": [
+        "resources",
+        "guidance",
+        "Alex"
+      ]
+    }
+  ],
+  "answer_17dc2f5b_1": [
+    {
+      "fact": "User is considering a career change",
+      "type": "preference",
+      "entities": []
+    },
+    {
+      "fact": "User has been in their current field for a while",
+      "type": "personal",
+      "entities": []
+    },
+    {
+      "fact": "User is 32 years old",
+      "type": "personal",
+      "entities": [
+        "32"
+      ]
+    },
+    {
+      "fact": "User just turned 32 last month",
+      "type": "event",
+      "entities": []
+    },
+    {
+      "fact": "User wants to make a move that will set them up for success in the next few decades",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User is interested in Data Science and Analytics",
+      "type": "preference",
+      "entities": [
+        "Data Science",
+        "Analytics"
+      ]
+    },
+    {
+      "fact": "User is good with numbers",
+      "type": "personal",
+      "entities": []
+    },
+    {
+      "fact": "User is fascinated by how data can inform business decisions",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User has heard that Data Science and Analytics is a high-paying field",
+      "type": "opinion",
+      "entities": [
+        "Data Science",
+        "Analytics"
+      ]
+    }
+  ]
+}

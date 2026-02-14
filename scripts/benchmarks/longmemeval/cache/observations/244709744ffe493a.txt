@@ -1,0 +1,31 @@
+**Observation Log:**
+
+- [FACT] User is planning a trip to Costa Rica.
+- [EVENT] User needs help finding a reliable tour operator for bird watching excursions.
+- [ASSISTANT_SAID] Costa Rica has over 850 species of birds, making it a birdwatcher's paradise.
+- [ASSISTANT_SAID] Recommended tour operators for bird watching excursions in Costa Rica:
+  1. **Tropical Birding**: Over 20 years of experience, offers customized birding tours with expert local guides.
+  2. **Birdwatching Costa Rica**: Specializes in birding tours with an experienced team of guides.
+  3. **Costa Rica Bird Observatories**: Focuses on bird conservation and research, offers guided tours led by expert ornithologists.
+  4. **Bird Treks**: Over 30 years of experience, offers customized birding tours to Costa Rica and Panama.
+  5. **Habitat Birding Tours**: Focuses on sustainable tourism and supports local conservation efforts.
+  6. **Costa Rica Gateway**: Offers a range of birding tours, including photography-focused tours.
+- [ASSISTANT_SAID] Factors to consider when selecting a tour operator:
+  - Experience and expertise of the guides
+  - Quality of equipment (e.g., spotting scopes, binoculars)
+  - Customization options (e.g., private tours, specialized itineraries)
+  - Safety record and emergency procedures
+  - Environmental and social responsibility practices
+  - Reviews and testimonials from previous clients
+- [ASSISTANT_SAID] Recommended to research each operator thoroughly and check online review platforms like TripAdvisor or Google Reviews.
+- [ASSISTANT_SAID] Suggested planning ahead as some tour operators may require advance booking, especially during peak season (December to April).
+- [TEMPORAL] Session date is 2023/05/27 (Sat) 09:44.
+- [FACT] User is trying to perfect their bird call identification skills.
+- [EVENT] User has been spotting amazing birds at a nearby nature reserve every weekend.
+- [ASSISTANT_SAID] Recommended apps and resources for improving bird call identification skills:
+  1. **Merlin Bird ID** (App): Uses AI for bird identification and has a library of bird calls.
+  2. **iBird Pro** (App): Comprehensive birding app with bird calls, songs, and identification guides.
+  3. **Audubon Birds** (App): Features a large database of bird calls and includes a field guide.
+  4. **Xeno-canto** (Website): Online database of bird sounds from around the world.
+  5. **BirdNote** (Podcast): Daily podcast exploring the world of birds, including sounds and behaviors.
+  6. **The Sibley eGuide to Birds** (App/Ebook): Digital

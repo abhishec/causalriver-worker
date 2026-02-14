@@ -1,0 +1,24 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/29 (Mon) 07:30
+- [ASSISTANT_SAID] To create all of the KPI metrics, a Faker database would need to include customer names and contact information, trading history and volumes, order types, prices and quantities, and fees and commissions.
+- [ASSISTANT_SAID] Customer names and contact information could be used to track customer satisfaction and resolution rates, and to segment customers by region or other demographics.
+- [ASSISTANT_SAID] Trading history and volumes could be used to track trading volume, liquidity, and order fill rates, and to compare the performance of different cryptocurrencies.
+- [ASSISTANT_SAID] Order types could be used to track order fill rates and compare the performance of different order types.
+- [ASSISTANT_SAID] Prices and quantities could be used to track revenue and compare the performance of different cryptocurrencies.
+- [ASSISTANT_SAID] Fees and commissions could be used to track revenue and measure the efficiency of the exchange's operations.
+- [ASSISTANT_SAID] By including this information in the Faker database, a wide range of data can be simulated to create the KPI metrics.
+- [USER] Asked about multiple tables and table relationships needed for the database.
+- [ASSISTANT_SAID] Suggested multiple tables including Customers table, Orders table, Currencies table, and Regions table.
+- [ASSISTANT_SAID] To establish table relationships, foreign keys could be created in the Orders and Customers tables referencing the primary keys in the Currencies and Regions tables.
+- [USER] Requested a list of all tables needed to create specific KPI metrics: Market share, User growth, Liquidity, and Order fill rate.
+- [ASSISTANT_SAID] Listed necessary tables: Customers table, Orders table, Currencies table, and Exchanges table.
+- [ASSISTANT_SAID] Suggested including additional tables for pricing data or trade volume data for more comprehensive analysis.
+- [USER] Inquired about any additional tables that would be needed.
+- [ASSISTANT_SAID] Suggested additional tables: Trading pairs table, Fees and commissions table, Pricing data table, and Trade volume data table.
+- [USER] Asked for any other tables.
+- [ASSISTANT_SAID] Suggested further tables: Account types table, Customer service logs table, Marketing campaigns table, and Regulatory data table.
+- [USER] Requested details on what the Regulatory data table would include and asked for an SQL table based on this.
+- [ASSISTANT_SAID] Described the Regulatory Data table to include Exchange ID, License number, License expiration date, Compliance status, and Regulatory agency.
+- [ASSISTANT_CREATED] Provided an SQL table structure for the Regulatory Data table.
+- [ASSISTANT_SAID] Example output

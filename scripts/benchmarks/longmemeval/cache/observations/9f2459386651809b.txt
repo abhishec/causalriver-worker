@@ -1,0 +1,18 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/01 (Mon) 21:41
+- [EVENT] User is planning to make another purchase on Amazon soon.
+- [EVENT] User used a 20% off coupon on their last online shopping order on Amazon on March 15th.
+- [FACT] User saved around $25 on their total bill of $125 during their last Amazon purchase.
+- [ASSISTANT_SAID] Assistant clarified that they do not have access to real-time information about active coupons or promo codes on Amazon.
+- [ASSISTANT_SAID] Assistant provided general tips on finding deals and discounts on Amazon, including checking Amazon's coupon page, signing up for Amazon's newsletter, following Amazon on social media, using coupon aggregator websites, looking for Lightning Deals, checking for price drops, and using cashback apps.
+- [EVENT] User is looking for a specific product, a kitchen appliance.
+- [ASSISTANT_SAID] Assistant provided ways to find out when the specific product goes on sale or to get notified about price drops, including using Amazon's price tracker, CamelCamelCamel, Keepa, a browser extension for price drop alerts, and DealNews.
+- [ASSISTANT_SAID] Assistant outlined steps to set up price drop alerts using price tracker tools.
+- [EVENT] User redeemed 500 points from their Amazon Rewards Visa card, which gave them a $5 credit towards their last purchase.
+- [ASSISTANT_SAID] Assistant provided tips on maximizing rewards points on credit cards, including understanding the rewards structure, earning points in bonus categories, using the card for daily spending, taking advantage of sign-up bonuses, using the card for big-ticket purchases, paying the balance in full, monitoring points expiration, redeeming points strategically, considering transferable points, and keeping track of points.
+- [FACT] User mentioned using a Cartwheel offer for 5% off on laundry detergent at Target last weekend.
+- [ASSISTANT_SAID] Assistant acknowledged the user's savvy shopping and explained how the Cartwheel program works at Target.
+- [EVENT] User is planning to buy some household essentials at Publix soon.
+- [ASSISTANT_SAID] Assistant stated they do not have access to real-time information about specific store sales or digital coupons.
+- [ASSISTANT_SAID] Assistant suggested ways to find out about Publix's current deals and discounts, including checking the Publix website, using the Publix app, accessing digital coupons, checking the weekly ad, and using the Flipp app.

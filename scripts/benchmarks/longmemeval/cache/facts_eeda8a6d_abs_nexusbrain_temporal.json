@@ -1,0 +1,83 @@
+{
+  "answer_3e5fea0e_abs_2": [
+    {
+      "fact": "User has a 20-gallon freshwater tank.",
+      "type": "personal",
+      "entities": [
+        "20-gallon freshwater tank"
+      ]
+    },
+    {
+      "fact": "User upgraded from an old 10-gallon tank.",
+      "type": "event",
+      "entities": [
+        "10-gallon tank",
+        "upgrade"
+      ]
+    },
+    {
+      "fact": "User has a betta fish named Bubbles.",
+      "type": "personal",
+      "entities": [
+        "betta fish",
+        "Bubbles"
+      ]
+    },
+    {
+      "fact": "User is considering adding live aquatic plants to their tank.",
+      "type": "preference",
+      "entities": [
+        "live aquatic plants"
+      ]
+    },
+    {
+      "fact": "User is looking for tips on how to get started with live aquatic plants.",
+      "type": "opinion",
+      "entities": [
+        "tips",
+        "live aquatic plants"
+      ]
+    }
+  ],
+  "answer_3e5fea0e_abs_1": [
+    {
+      "fact": "User has a 20-gallon tank",
+      "type": "personal",
+      "entities": [
+        "20-gallon tank"
+      ]
+    },
+    {
+      "fact": "User currently has 10 neon tetras, 5 golden honey gouramis, and a small pleco catfish in their tank",
+      "type": "personal",
+      "entities": [
+        "neon tetras",
+        "golden honey gouramis",
+        "pleco catfish"
+      ]
+    },
+    {
+      "fact": "User is interested in adding live plants to their tank",
+      "type": "preference",
+      "entities": [
+        "live plants"
+      ]
+    },
+    {
+      "fact": "User is particularly interested in Java Moss and Anacharis",
+      "type": "preference",
+      "entities": [
+        "Java Moss",
+        "Anacharis"
+      ]
+    },
+    {
+      "fact": "User is looking for easy-to-care-for plants for a community tank",
+      "type": "preference",
+      "entities": [
+        "easy-to-care-for plants",
+        "community tank"
+      ]
+    }
+  ]
+}

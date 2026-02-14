@@ -1,0 +1,39 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/07/16 (Sun) 22:58
+- [FACT] User has a Funko Pop collection.
+- [EVENT] User sold a duplicate Spider-Man Funko Pop on eBay for $50.
+- [ASSISTANT_SAID] Congratulations on selling your duplicate Spider-Man Funko Pop for a great price!
+- [ASSISTANT_SAID] Suggested Funko Pops to complete the Avengers set:
+  1. Iron Man (Mark 85)
+  2. Captain America (Endgame)
+  3. Thor (Avengers: Endgame)
+  4. Black Widow (Avengers: Endgame)
+  5. Hulk (Avengers: Endgame)
+  6. Nebula (Avengers: Endgame)
+  7. Okoye (Black Panther)
+  8. The Vision
+  9. War Machine (Avengers: Endgame)
+  10. Rocket Raccoon and Groot (2-Pack)
+- [PREFERENCE] User is looking for recommendations to expand their Funko Pop collection, specifically to complete the Avengers set.
+- [EVENT] User plans to start with Iron Man Mark 85 and Captain America Endgame Funko Pops.
+- [ASSISTANT_SAID] Upcoming Funko Pop releases and events:
+  1. San Diego Comic-Con (SDCC) 2023
+  2. New York Comic Con (NYCC) 2023
+  3. Funko Fair 2023
+  4. Marvel's 60th Anniversary
+  5. Avengers: The Kang Dynasty and Avengers: Secret Wars
+  6. Funko Shop Exclusives
+  7. Retailer Exclusives
+- [ASSISTANT_SAID] Recommended following Funko's social media accounts and signing up for their newsletter to stay updated on releases.
+- [EVENT] User acquired a vintage 1960s Star Wars action figure from a local antique store.
+- [ASSISTANT_SAID] Suggested reliable sources to determine the authenticity and value of the vintage Star Wars action figure:
+  1. The Star Wars Collectors Archive (SWCA)
+  2. Rebelscum.com
+  3. The Vintage Star Wars Collectors Group on Facebook
+  4. Professional Appraisers and Authentication Services (Wata Games, CGC, PSA)
+  5. Auction Houses (Heritage Auctions, Morphy Auctions, Hake's Auctions)
+- [ASSISTANT_SAID] Recommended taking high-quality photos of the figure and researching its characteristics before reaching out to sources.
+- [FACT] User's Pokémon Trading Card Game collection spans 12 binders and over 5,000 individual cards.
+- [ASSISTANT_SAID] Suggested tips for organizing the Pokémon TCG collection:
+  1.

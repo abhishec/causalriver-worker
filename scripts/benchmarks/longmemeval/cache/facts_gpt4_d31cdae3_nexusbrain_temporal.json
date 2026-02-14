@@ -1,0 +1,105 @@
+{
+  "answer_8464304d_1": [
+    {
+      "fact": "User is planning a trip to Germany.",
+      "type": "event",
+      "entities": [
+        "Germany"
+      ]
+    },
+    {
+      "fact": "User is planning to visit Munich.",
+      "type": "event",
+      "entities": [
+        "Munich"
+      ]
+    },
+    {
+      "fact": "User visited Germany last summer.",
+      "type": "event",
+      "entities": [
+        "Germany",
+        "last summer"
+      ]
+    },
+    {
+      "fact": "User plans to visit Munich in late September.",
+      "type": "event",
+      "entities": [
+        "Munich",
+        "late September"
+      ]
+    },
+    {
+      "fact": "User plans to stay in Munich for 3-4 nights.",
+      "type": "event",
+      "entities": [
+        "Munich",
+        "3-4 nights"
+      ]
+    },
+    {
+      "fact": "User is interested in Oktoberfest.",
+      "type": "preference",
+      "entities": [
+        "Oktoberfest"
+      ]
+    },
+    {
+      "fact": "User is not a big beer fan but is open to experiencing Oktoberfest.",
+      "type": "opinion",
+      "entities": [
+        "Oktoberfest",
+        "beer"
+      ]
+    }
+  ],
+  "answer_8464304d_2": [
+    {
+      "fact": "User is planning a trip to Arizona",
+      "type": "event",
+      "entities": [
+        "Arizona"
+      ]
+    },
+    {
+      "fact": "User has been to the Grand Canyon before",
+      "type": "event",
+      "entities": [
+        "Grand Canyon"
+      ]
+    },
+    {
+      "fact": "User visited the Grand Canyon with family on a road trip across the American Southwest",
+      "type": "event",
+      "entities": [
+        "family",
+        "American Southwest"
+      ]
+    },
+    {
+      "fact": "User is looking to explore more of Arizona on their own",
+      "type": "preference",
+      "entities": [
+        "Arizona"
+      ]
+    },
+    {
+      "fact": "User is interested in exploring Sedona and Monument Valley",
+      "type": "preference",
+      "entities": [
+        "Sedona",
+        "Monument Valley"
+      ]
+    },
+    {
+      "fact": "User is seeking recommendations for hiking trails in Sedona suitable for solo travelers",
+      "type": "preference",
+      "entities": [
+        "hiking trails",
+        "Sedona",
+        "solo travelers"
+      ]
+    }
+  ]
+}

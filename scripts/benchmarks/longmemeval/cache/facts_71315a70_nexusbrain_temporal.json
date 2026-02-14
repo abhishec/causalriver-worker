@@ -1,0 +1,104 @@
+{
+  "answer_c44b9df4_1": [
+    {
+      "fact": "User is planning to create a new piece inspired by the sunset on the beach.",
+      "type": "event",
+      "entities": [
+        "sunset",
+        "beach"
+      ]
+    },
+    {
+      "fact": "User is interested in using warm, sandy textures in their artwork.",
+      "type": "preference",
+      "entities": [
+        "warm textures",
+        "sandy textures"
+      ]
+    },
+    {
+      "fact": "User is thinking of creating a series of sculptures inspired by the ocean.",
+      "type": "event",
+      "entities": [
+        "sculptures",
+        "ocean"
+      ]
+    },
+    {
+      "fact": "User would like to experiment with different materials and finishes for their sculptures.",
+      "type": "preference",
+      "entities": [
+        "materials",
+        "finishes"
+      ]
+    },
+    {
+      "fact": "User is looking for online resources for learning about ceramic glazing techniques.",
+      "type": "preference",
+      "entities": [
+        "ceramic glazing techniques"
+      ]
+    },
+    {
+      "fact": "User is interested in YouTube channels for sculpting tutorials.",
+      "type": "preference",
+      "entities": [
+        "YouTube",
+        "sculpting tutorials"
+      ]
+    }
+  ],
+  "answer_c44b9df4_2": [
+    {
+      "fact": "User is creating a sculpture inspired by the sunset.",
+      "type": "event",
+      "entities": [
+        "sculpture",
+        "sunset"
+      ]
+    },
+    {
+      "fact": "User has been spending a lot of time on an abstract ocean sculpture.",
+      "type": "event",
+      "entities": [
+        "abstract ocean sculpture"
+      ]
+    },
+    {
+      "fact": "User has invested 10-12 hours into the abstract ocean sculpture.",
+      "type": "event",
+      "entities": [
+        "10-12 hours",
+        "abstract ocean sculpture"
+      ]
+    },
+    {
+      "fact": "User is considering using layering and impasto techniques for the sunset sculpture.",
+      "type": "preference",
+      "entities": [
+        "layering",
+        "impasto",
+        "sunset sculpture"
+      ]
+    },
+    {
+      "fact": "User is looking for unique sculpting tools or objects for stamping and carving.",
+      "type": "preference",
+      "entities": [
+        "sculpting tools",
+        "stamping",
+        "carving"
+      ]
+    },
+    {
+      "fact": "User appreciates the tips provided for capturing colors and texture in clay.",
+      "type": "opinion",
+      "entities": [
+        "tips",
+        "colors",
+        "texture",
+        "clay"
+      ]
+    }
+  ]
+}

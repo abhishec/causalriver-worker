@@ -1,0 +1,49 @@
+{
+  "answer_0250ae1c": [
+    {
+      "fact": "User is an aspiring stand-up comedian",
+      "type": "personal",
+      "entities": [
+        "stand-up comedian"
+      ]
+    },
+    {
+      "fact": "User is looking for advice to improve their comedy craft",
+      "type": "opinion",
+      "entities": [
+        "comedy craft"
+      ]
+    },
+    {
+      "fact": "User is interested in stand-up comedy specials with strong storytelling",
+      "type": "preference",
+      "entities": [
+        "stand-up comedy specials",
+        "storytelling"
+      ]
+    },
+    {
+      "fact": "User is considering recording a video of themselves performing jokes",
+      "type": "event",
+      "entities": [
+        "recording a video",
+        "performing jokes"
+      ]
+    },
+    {
+      "fact": "User plans to upload their comedy video on YouTube",
+      "type": "event",
+      "entities": [
+        "YouTube"
+      ]
+    },
+    {
+      "fact": "User is seeking tips on setting up a home recording studio for comedy videos",
+      "type": "opinion",
+      "entities": [
+        "home recording studio",
+        "comedy videos"
+      ]
+    }
+  ]
+}

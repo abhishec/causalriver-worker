@@ -1,0 +1,25 @@
+**Observation Log:**
+
+- [FACT] User is planning a kayaking trip to the Apostle Islands in Wisconsin.
+- [FACT] User has experience with kayaking, having paddled over 50 miles of lakes and rivers in the Boundary Waters in Minnesota last summer.
+- [PREFERENCE] User is comfortable with navigating through calm waters.
+- [EVENT] User is seeking help to find good routes and campsites for their kayaking trip.
+- [ASSISTANT_SAID] The Apostle Islands are a fantastic destination for kayaking.
+- [ASSISTANT_SAID] Suggested route: Mainland to Oak Island, a 4-6 mile paddle with several campsites and stunning scenery.
+- [ASSISTANT_SAID] Suggested route: Outer Islands Loop, a more challenging route with distances of 8-12 miles and potential wind and wave exposure.
+- [ASSISTANT_SAID] Suggested route: Meyers Beach to Stockton Island, a 4-6 mile paddle with several campsites and scenic beaches.
+- [ASSISTANT_SAID] Campsite options on Oak Island: 11 campsites with picnic tables and latrines, reservations recommended.
+- [ASSISTANT_SAID] Campsite options on Stockton Island: 7 campsites with picnic tables and latrines, reservations recommended.
+- [ASSISTANT_SAID] Campsite options on Raspberry Island: 4 primitive campsites, first-come, first-served.
+- [ASSISTANT_SAID] Campsite options on Devils Island: 2 primitive campsites, first-come, first-served.
+- [ASSISTANT_SAID] Tips for obtaining permits from the Apostle Islands National Lakeshore website before the trip.
+- [ASSISTANT_SAID] Reminder to check the weather forecast before paddling due to changing conditions on Lake Superior.
+- [ASSISTANT_SAID] Caution advised when exploring sea caves, with emphasis on skill level and conditions.
+- [ASSISTANT_SAID] Respect for wildlife, including black bears, wolves, and nesting birds, is important.
+- [ASSISTANT_SAID] Follow Leave No Trace principles to minimize impact on the islands' ecosystem.
+- [ASSISTANT_SAID] Additional resources include the Apostle Islands National Lakeshore website for permits and trip planning.
+- [ASSISTANT_SAID] Kayak rentals and guided tours are available for those not bringing their own gear.
+- [ASSISTANT_SAID] Suggested checking Lake Superior water levels before the trip for planning routes and camping.
+- [EVENT] User is considering doing the Outer Islands Loop for their kayaking trip.
+- [ASSISTANT_SAID] Devils Island has impressive and accessible sea caves, with red sandstone cliffs and wave-cut arches.
+- [ASSISTANT_SAID] Sea caves on Devils Island are accessible by kayak, but conditions should be calm (1-2 feet

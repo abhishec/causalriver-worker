@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[FACT] User is planning a trip to Melbourne.  
+[FACT] User is a student starting a Master's program at the University of Melbourne in July.  
+[FACT] User submitted their application to the University of Melbourne on February 10th.  
+[EVENT] User has already booked a shared apartment in the city.  
+[TEMPORAL] Session date is 2023/05/29 (Mon) 17:21.  
+[ASSISTANT_SAID] Recommended areas to stay in Melbourne close to the university include Carlton, Parkville, Melbourne CBD, South Yarra, Fitzroy, and North Melbourne.  
+[ASSISTANT_SAID] Suggested factors to consider when choosing an area to stay include distance to the university, public transport, amenities, and budget.  
+[ASSISTANT_SAID] Popular accommodation options mentioned include university accommodation, budget-friendly options like hostels and guesthouses, mid-range hotels like Vibe Hotel Melbourne, Travelodge Melbourne Docklands, and luxury hotels like Crown Towers Melbourne, The Westin Melbourne, and Grand Hyatt Melbourne.  
+[ASSISTANT_SAID] Advised to book accommodation in advance, especially during peak travel seasons (February to April and September to November).  
+[ASSISTANT_SAID] Provided tips for Melbourne's winter, including weather expectations, clothing recommendations, heating and insulation advice, and tips for staying warm and cozy.  
+[ASSISTANT_SAID] Suggested packing warm clothing such as thermal tops, fleeces, waterproof jackets, scarves, hats, gloves, and warm socks.  
+[ASSISTANT_SAID] Recommended checking with the landlord about heating in the shared apartment and bringing warm bedding.  
+[ASSISTANT_SAID] Suggested staying hydrated, eating well, exercising moderately, and managing stress to stay healthy during winter.  
+[ASSISTANT_SAID] Recommended getting a flu vaccination and practicing good hygiene to prevent illness.  
+[ASSISTANT_SAID] Advised familiarizing with the University of Melbourne's health services and knowing where to find nearby medical centers and pharmacies.  
+[ASSISTANT_SAID] Suggested connecting with fellow students and exploring Melbourne's cultural events to stay engaged during winter.  
+[ASSISTANT_SAID] Recommended places to buy winter clothing and gear in Melbourne, including Myer, David Jones, Target, Kathmandu, Mountain Designs, UniQlo, The North Face, Icebreaker, Queen Victoria Market, Savers, Vinnies, The Iconic, SurfStitch, and Amazon Australia.  
+[ASSISTANT_SAID] Suggested considering the quality and warmth of winter clothing when shopping.  
+[CHANGE] User mentioned they do not have much experience with cold weather and want to ensure they are prepared.  
+[RELATIONSHIP] User is a student at the University of Melbourne.  
+[ASSISTANT_CREATED] Created a list of

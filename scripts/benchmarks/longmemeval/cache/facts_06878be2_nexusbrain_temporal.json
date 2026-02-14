@@ -1,0 +1,33 @@
+{
+  "answer_555dfb94": [
+    {
+      "fact": "User is looking to upgrade their camera flash.",
+      "type": "preference",
+      "entities": [
+        "camera flash"
+      ]
+    },
+    {
+      "fact": "User owns a Sony A7R IV camera.",
+      "type": "personal",
+      "entities": [
+        "Sony A7R IV"
+      ]
+    },
+    {
+      "fact": "User is leaning towards the Godox V1 flash.",
+      "type": "preference",
+      "entities": [
+        "Godox V1"
+      ]
+    },
+    {
+      "fact": "User is comparing the Godox V1 to the Sony HVL-F60RM in terms of build quality and durability.",
+      "type": "opinion",
+      "entities": [
+        "Godox V1",
+        "Sony HVL-F60RM"
+      ]
+    }
+  ]
+}

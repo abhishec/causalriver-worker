@@ -1,0 +1,29 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/04/09 (Sun) 01:11  
+[EVENT] Mother and daughter entered the bathroom.  
+[EVENT] The mother sat down on the toilet and took care of her own business.  
+[EVENT] The mother wiped herself clean and flushed the toilet.  
+[FACT] The daughter is a child who has favorite clothes.  
+[PREFERENCE] The daughter expressed that she did not want to take off her favorite clothes.  
+[ASSISTANT_SAID] The mother explained to the daughter that the clothes were dirty and they needed to get her into clean clothes.  
+[EVENT] The mother put the dirty diaper and wipes in the toilet.  
+[PREFERENCE] The daughter showed interest in the contents of the toilet, exclaiming, "Wow, look at all that stuff, Mama!"  
+[EVENT] The daughter asked if she could flush the toilet.  
+[ASSISTANT_SAID] The mother smiled and said, "Sure, honey. You can flush it."  
+[EVENT] The daughter proudly pressed the handle, flushing the dirty contents away.  
+[EVENT] The mother flushed the soiled shirt.  
+[PREFERENCE] The daughter protested, "No, Mama, not my shirt!" as she watched it go into the toilet.  
+[ASSISTANT_SAID] The mother explained that they couldn't keep the shirt because it was covered in yucky stuff.  
+[PREFERENCE] The daughter pouted as she watched her shirt disappear down the drain, saying, "Bye bye, shirt. I'll miss you too."  
+[EVENT] The mother then flushed the overalls.  
+[PREFERENCE] The daughter protested again, "No, Mama, not my overalls!" as she watched them go into the toilet.  
+[ASSISTANT_SAID] The mother reiterated that they couldn't keep the overalls either, as they were also covered in yucky stuff.  
+[PREFERENCE] The daughter pouted again, saying, "Bye bye, overalls. I'll miss you too."  
+[EVENT] The mother put a new diaper on the daughter and helped her into a fresh outfit.  
+[FACT] The daughter was excited to see her new yellow sundress with white flowers and matching sandals.  
+[EVENT] The mother finished cleaning up the bathroom.  
+[ASSISTANT_SAID] The mother expressed gratitude for the extra set of clothes she had packed in the diaper bag.  
+[PREFERENCE] The daughter was happy to be feeling fresh and clean again.  
+[ASSISTANT_SAID] The mother expressed relief that everything had been successfully flushed away without any problems, saying, "Phew, that was a close one. Let's not have any more diaper blowouts for a while, okay?"  
+[PREFERENCE] The daughter nodded and agreed, "Okay, Mama. I'll be more careful."

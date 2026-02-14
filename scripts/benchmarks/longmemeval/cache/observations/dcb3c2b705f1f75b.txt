@@ -1,0 +1,34 @@
+**Observation Log:**
+
+[FACT] User is planning a trip to Miami.  
+[FACT] User has been to Miami before, but it was a while ago.  
+[FACT] User has taken 2 personal vacation flights in the past month.  
+[EVENT] User is looking for travel recommendations for their trip to Miami.  
+[ASSISTANT_SAID] Miami is a treat and the assistant is excited to help the user make the most of their trip.  
+[ASSISTANT_SAID] Suggested visiting Miami during the shoulder season (April to May or September to November) for better deals on accommodations and smaller crowds.  
+[ASSISTANT_SAID] Recommended using public transportation, ride-hailing services like Uber or Lyft, or renting a car to explore beyond the city.  
+[ASSISTANT_SAID] Suggested neighborhoods to explore: Wynwood, Design District, Little Havana, and South Beach.  
+[ASSISTANT_SAID] Recommended unique experiences: Everglades National Park, Vizcaya Museum and Gardens, Miami Beach Boardwalk, and Little River.  
+[ASSISTANT_SAID] Suggested food and drink options: Joe's Stone Crab, Ball & Chain, Coyo Taco, and The Broken Shaker.  
+[ASSISTANT_SAID] Provided insider tips: Visit during Happy Hour, explore beyond South Beach, take a day trip, and be prepared for sun and heat.  
+[EVENT] User is looking to stay in a hotel near the airport due to an early morning flight out of MIA.  
+[ASSISTANT_SAID] Recommended hotels near Miami International Airport (MIA) that offer shuttle services:  
+1. Hyatt Regency Miami Airport  
+2. Hilton Miami Airport  
+3. Courtyard by Marriott Miami Airport  
+4. Fairfield Inn & Suites by Marriott Miami Airport  
+5. Residence Inn Miami Airport  
+6. Embassy Suites by Hilton Miami International Airport  
+[ASSISTANT_SAID] Noted that shuttle services may be subject to change and advised confirming with the hotel directly.  
+[ASSISTANT_SAID] Suggested booking the hotel in advance to ensure availability, especially during peak travel seasons.  
+[EVENT] User is planning to rent a car for a day to explore the surrounding areas of Miami.  
+[ASSISTANT_SAID] Recommended car rental companies conveniently located near the airport:  
+1. Alamo Rent a Car  
+2. Enterprise Rent-A-Car  
+3. National Car Rental  
+4. Hertz  
+5. Avis Car Rental  
+6. Budget Car Rental  
+[ASSISTANT_SAID] All recommended companies are located inside the MIA airport at the Rental Car Center (RCC) and offer a wide range of vehicles.  
+[ASSISTANT_SAID] Suggested factors to consider when choosing an SUV: size, fuel efficiency, safety features, and comfort.  
+[EVENT] User has experience with car rentals

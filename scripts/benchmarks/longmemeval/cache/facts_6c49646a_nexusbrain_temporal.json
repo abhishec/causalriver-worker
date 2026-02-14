@@ -1,0 +1,77 @@
+{
+  "answer_cc1ced21_1": [
+    {
+      "fact": "User is planning a road trip from Denver to Mount Rushmore.",
+      "type": "event",
+      "entities": [
+        "Denver",
+        "Mount Rushmore"
+      ]
+    },
+    {
+      "fact": "User recently returned from a 4-day trip to Yellowstone National Park with family.",
+      "type": "event",
+      "entities": [
+        "Yellowstone National Park",
+        "family"
+      ]
+    },
+    {
+      "fact": "User covered a total of 1,200 miles during the trip to Yellowstone.",
+      "type": "event",
+      "entities": [
+        "1,200 miles",
+        "Yellowstone National Park"
+      ]
+    },
+    {
+      "fact": "User is considering camping instead of staying in a hotel near Mount Rushmore.",
+      "type": "preference",
+      "entities": [
+        "camping",
+        "Mount Rushmore"
+      ]
+    }
+  ],
+  "answer_cc1ced21_2": [
+    {
+      "fact": "User is planning a road trip from Denver to Aspen, Colorado.",
+      "type": "event",
+      "entities": [
+        "Denver",
+        "Aspen",
+        "Colorado"
+      ]
+    },
+    {
+      "fact": "User prefers to take the scenic route on their road trip.",
+      "type": "preference",
+      "entities": [
+        "scenic route"
+      ]
+    },
+    {
+      "fact": "User is considering stopping at Loveland Pass and Copper Mountain.",
+      "type": "preference",
+      "entities": [
+        "Loveland Pass",
+        "Copper Mountain"
+      ]
+    },
+    {
+      "fact": "User is concerned about the road conditions on CO-82 E during this time of the year.",
+      "type": "opinion",
+      "entities": [
+        "CO-82 E"
+      ]
+    },
+    {
+      "fact": "User is interested in scenic stops along the way to Aspen.",
+      "type": "preference",
+      "entities": [
+        "scenic stops",
+        "Aspen"
+      ]
+    }
+  ]
+}

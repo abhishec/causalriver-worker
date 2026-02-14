@@ -1,0 +1,18 @@
+{
+  "answer_761acef8": [
+    {
+      "fact": "User is looking for new athletic wear",
+      "type": "preference",
+      "entities": [
+        "athletic wear"
+      ]
+    },
+    {
+      "fact": "User is specifically looking for a new pair of running shoes",
+      "type": "preference",
+      "entities": [
+        "running shoes"
+      ]
+    }
+  ]
+}

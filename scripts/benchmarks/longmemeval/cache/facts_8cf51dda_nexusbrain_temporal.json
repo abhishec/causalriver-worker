@@ -1,0 +1,19 @@
+{
+  "answer_sharegpt_HFMn2ZX_0": [
+    {
+      "fact": "User is interested in molecular subtypes and endometrial cancer",
+      "type": "preference",
+      "entities": [
+        "molecular subtypes",
+        "endometrial cancer"
+      ]
+    },
+    {
+      "fact": "User is involved in research related to endometrial cancer",
+      "type": "personal",
+      "entities": [
+        "endometrial cancer"
+      ]
+    }
+  ]
+}

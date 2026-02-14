@@ -1,0 +1,29 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/27 (Sat) 14:58  
+[USER] User expressed a desire to make a list of facial expressions/emotions for classifying emotions seen in photographs of people.  
+[ASSISTANT_CREATED] Assistant provided a list of common facial expressions and emotions: Happy, Sad, Angry, Surprised, Fearful, Disgusted, Confused, Calm, Contempt, Excited, Tired, Pensive, Joyful, Relaxed, Bored, Amused, Anxious, Ashamed, Interested, Pleased.  
+[ASSISTANT_SAID] Assistant noted that the list is not exhaustive and that different cultures and individuals may express emotions differently.  
+[USER] User inquired about linking facial expressions with descriptive words for the physical expressions associated with those emotions.  
+[ASSISTANT_SAID] Assistant confirmed it is possible to link facial expressions with descriptive words for physical expressions.  
+[ASSISTANT_CREATED] Assistant provided a detailed list of facial expressions with associated physical expressions:  
+1. Happy: Smiling, relaxed eyes, raised cheeks, wrinkles around the eyes.  
+2. Sad: Furrowed brow, downturned mouth, droopy eyelids, tears.  
+3. Angry: Furrowed brow, scowling, clenched jaw, tight lips, flared nostrils.  
+4. Surprised: Raised eyebrows, widened eyes, open mouth.  
+5. Fearful: Wide eyes, raised eyebrows, open mouth, tense jaw.  
+6. Disgusted: Curled lip, wrinkled nose, raised eyebrows.  
+7. Confused: Furrowed brow, squinted eyes, tilted head.  
+8. Calm: Relaxed face, neutral expression.  
+9. Contempt: One corner of the mouth raised, often with a raised eyebrow.  
+10. Excited: Wide eyes, raised eyebrows, open mouth, flushed cheeks.  
+11. Tired: Droopy eyelids, wrinkles around the eyes, sagging face.  
+12. Pensive: Furrowed brow, squinted eyes, tilted head, puckered lips.  
+13. Joyful: Smiling, relaxed eyes, raised cheeks, wrinkles around the eyes.  
+14. Relaxed: Soft eyes, slight smile, relaxed jaw.  
+15. Bored: Furrowed brow, squinted eyes, tilted head, puckered lips.  
+16. Amused: Smiling, relaxed eyes, wrinkles around the eyes.  
+17. Anxious: Furrowed brow, tight lips, tense jaw, fidgeting.  
+18. Ashamed: Downcast eyes, furrowed brow, downturned mouth, flushed cheeks.  
+19. Interested: Raised eyebrows, widened eyes, leaned forward.  
+20. Pleased: Smiling, relaxed eyes, wrinkles

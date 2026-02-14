@@ -1,0 +1,82 @@
+{
+  "answer_94650bfa_1": [
+    {
+      "fact": "User is planning a weekend getaway to Las Vegas",
+      "type": "event",
+      "entities": [
+        "Las Vegas",
+        "weekend getaway"
+      ]
+    },
+    {
+      "fact": "User is considering staying at the Hilton Lake Las Vegas Resort",
+      "type": "preference",
+      "entities": [
+        "Hilton Lake Las Vegas Resort"
+      ]
+    },
+    {
+      "fact": "User is considering redeeming Hilton points for their stay",
+      "type": "preference",
+      "entities": [
+        "Hilton points"
+      ]
+    }
+  ],
+  "answer_94650bfa_2": [
+    {
+      "fact": "User is planning a trip to Europe in November",
+      "type": "event",
+      "entities": [
+        "Europe",
+        "November"
+      ]
+    },
+    {
+      "fact": "User is considering hotels in Paris with an Eiffel Tower view",
+      "type": "preference",
+      "entities": [
+        "Paris",
+        "Eiffel Tower"
+      ]
+    },
+    {
+      "fact": "User's budget for the hotel is around $200-300 per night",
+      "type": "preference",
+      "entities": [
+        "$200-300"
+      ]
+    },
+    {
+      "fact": "User prefers a relatively central location in Paris",
+      "type": "preference",
+      "entities": [
+        "central location",
+        "Paris"
+      ]
+    },
+    {
+      "fact": "User is looking for a hotel with a fitness center and breakfast included",
+      "type": "preference",
+      "entities": [
+        "fitness center",
+        "breakfast"
+      ]
+    },
+    {
+      "fact": "User has accumulated enough points for two free night's stays at any Hilton property",
+      "type": "personal",
+      "entities": [
+        "Hilton",
+        "points"
+      ]
+    },
+    {
+      "fact": "User might use Hilton points for a separate trip to Las Vegas",
+      "type": "event",
+      "entities": [
+        "Las Vegas"
+      ]
+    }
+  ]
+}

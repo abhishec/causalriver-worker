@@ -1,0 +1,18 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/29 (Mon) 10:49  
+[USER] Improve: AI-Native and Knowledge-Driven System 2 Semantic Communications  
+[ASSISTANT_SAID] To improve AI-Native and Knowledge-Driven System's semantic communications, suggestions include:  
+[ASSISTANT_SAID] 1. Standardize communication protocols: Establishing standard communication protocols for AI systems and knowledge-driven systems can help ensure seamless communication.  
+[ASSISTANT_SAID] 2. Use ontologies: Ontologies are a formal way of representing knowledge that can help AI systems and knowledge-driven systems understand each other's concepts and meanings.  
+[ASSISTANT_SAID] 3. Implement natural language processing (NLP): Implementing NLP technology can enable AI systems to understand natural language and interpret human communication more accurately.  
+[ASSISTANT_SAID] 4. Use semantic web technologies: Semantic web technologies, such as Resource Description Framework (RDF), can enable data to be shared and reused across different applications, platforms, and systems.  
+[ASSISTANT_SAID] 5. Incorporate feedback mechanisms: Incorporating feedback mechanisms can enhance the communication process.  
+[USER] Improve the following: 1. Motivations and Goals  
+[USER] Semantic Communication (SC) for 6G: Semantic communication (SC) is an emerging field that has great potential in revolutionizing our current approaches to designing communication architectures and algorithms towards enabling truly intelligent and sustainable 6G systems [JSAC].  
+[USER] While the current communication system rooted in Shannon’s theory [Math], hereafter referred to as Shannon communication, focuses on accurately reproducing source data in bits at a remote location, SC additionally pre-processes the bits for extracting and delivering the meanings of the bits, i.e., semantics, and post-processes the received semantics to maximize their effectiveness in a given application-specific task (e.g., reconstruction, classification, control, and other decision-making).  
+[USER] Semantics can be the raw data’s generative process that is invariant to source data realizations (e.g., a ‘cat’ image and a word “cat”).  
+[USER] Such semantics are not only smaller than their generated source data, but also can generate different types of source data.  
+[USER] Leveraging this invariant property of semantics enables data-type transformation (e.g., text-to-image) that greatly reduces communication payload sizes and latency.  
+[USER] System 1 SC – Minimal, Invariant, and Sufficient SR Communication: Recently, several SC methods have been proposed [Walid, Kaibin, Geoffrey], among which deep learning based SC (DeepSC), hereafter referred to as System 1 SC, is arguably the most widely accepted framework.  
+[USER] System 1 SC implements the aforementioned semantic pre/post-processing via the

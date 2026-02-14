@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/29 (Mon) 16:39  
+[USER] User inquired about using Interactive Brokers API or IB_insync in TensorTrade.  
+[ASSISTANT_SAID] Yes, you can use Interactive Brokers' API and the IB_insync library with TensorTrade.  
+[ASSISTANT_SAID] Interactive Brokers is a well-known online brokerage firm that provides access to various financial markets, including stocks, options, futures, and forex.  
+[ASSISTANT_SAID] They offer a range of APIs that allow developers to integrate their platform with custom software, including the Interactive Brokers API and the IB Gateway API.  
+[ASSISTANT_SAID] IB_insync is a third-party Python library that simplifies the process of using the Interactive Brokers API by providing a higher-level interface and additional functionality.  
+[ASSISTANT_SAID] To use Interactive Brokers' API and IB_insync with TensorTrade, you will need to install both libraries and set up an account with Interactive Brokers.  
+[ASSISTANT_SAID] You will then need to obtain API keys and follow the instructions provided by Interactive Brokers to set up the API connection.  
+[ASSISTANT_SAID] Once you have set up the API connection, you can use IB_insync to interact with the Interactive Brokers API and access data and trading functionality within TensorTrade.  
+[USER] User requested examples to explain how to use the API and IB_insync with TensorTrade.  
+[ASSISTANT_SAID] Provided examples of how to retrieve market data, execute trades, and monitor account information using the Interactive Brokers API and IB_insync.  
+[ASSISTANT_CREATED] Example code provided for retrieving real-time market data for a stock (AAPL) and executing a market order to buy 100 shares of AAPL.  
+[ASSISTANT_SAID] The example code includes connecting to the Interactive Brokers API, retrieving market data, and submitting orders.  
+[USER] User asked how to use tensortrade.exchanges.live.  
+[ASSISTANT_SAID] TensorTrade includes a live module within the exchanges package that provides a way to connect to live exchanges and execute trades.  
+[ASSISTANT_SAID] The live module supports exchanges such as Bitfinex, Binance, Coinbase, Interactive Brokers, Kraken, and Oanda.  
+[ASSISTANT_SAID] Provided an example of how to connect to an exchange and execute trades using TensorTrade.  
+[ASSISTANT_CREATED] Example code provided for connecting to Bitfinex, creating an order to buy 1 BTC, and executing the trade.  
+[USER] User requested to replace Bitfinex with Interactive Brokers in the provided code.  
+[ASSISTANT_SAID] Provided updated example code for connecting to Interactive Brokers, creating an order to buy

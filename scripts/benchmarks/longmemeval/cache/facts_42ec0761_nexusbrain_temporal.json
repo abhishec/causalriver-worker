@@ -1,0 +1,65 @@
+{
+  "answer_e3892371_1": [
+    {
+      "fact": "User needs help setting up automatic backups for working files",
+      "type": "event",
+      "entities": [
+        "automatic backups",
+        "working files"
+      ]
+    },
+    {
+      "fact": "User prefers to use a cloud backup service",
+      "type": "preference",
+      "entities": [
+        "cloud backup service"
+      ]
+    },
+    {
+      "fact": "User is considering Google Drive for backups",
+      "type": "preference",
+      "entities": [
+        "Google Drive"
+      ]
+    },
+    {
+      "fact": "User already uses Google Drive for other things",
+      "type": "personal",
+      "entities": [
+        "Google Drive"
+      ]
+    }
+  ],
+  "answer_e3892371_2": [
+    {
+      "fact": "User is setting up automatic backups for working files",
+      "type": "preference",
+      "entities": [
+        "automatic backups",
+        "working files"
+      ]
+    },
+    {
+      "fact": "User is leaning towards using Backblaze for backups",
+      "type": "preference",
+      "entities": [
+        "Backblaze"
+      ]
+    },
+    {
+      "fact": "User is interested in how Backblaze handles file versioning",
+      "type": "preference",
+      "entities": [
+        "Backblaze",
+        "file versioning"
+      ]
+    },
+    {
+      "fact": "User needs recommendations for cable organizers",
+      "type": "preference",
+      "entities": [
+        "cable organizers"
+      ]
+    }
+  ]
+}

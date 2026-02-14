@@ -1,0 +1,25 @@
+**Observation Log:**
+
+- [FACT] The user is planning a trip to Disneyland Resort.
+- [PREFERENCE] The user is particularly interested in trying fried chicken.
+- [EVENT] The user ran the Disney Princess Half Marathon at Disneyland Resort a few weeks ago.
+- [ASSISTANT_SAID] The assistant congratulated the user on completing the Disney Princess Half Marathon.
+- [ASSISTANT_SAID] The assistant recommended Paradise Garden Grill for a fried chicken sandwich.
+- [ASSISTANT_SAID] The assistant provided additional recommendations for fried chicken at Disneyland Resort, including Plaza Inn, Bengal Barbecue, Cafe Orleans, Fiddler, Fifer & Practical Cafe, Rancho del Zocalo Restaurante, Jolly Holiday Bakery Cafe, and Carthay Circle Restaurant.
+- [ASSISTANT_SAID] The assistant advised checking the Disneyland app or park schedules for operating hours and availability.
+- [EVENT] The user is thinking of checking out the new Star Wars ride at Disneyland Resort.
+- [ASSISTANT_SAID] The assistant identified the ride as Star Wars: Rise of the Resistance.
+- [ASSISTANT_SAID] The assistant mentioned that wait times for Rise of the Resistance can vary greatly depending on the day, time, and season.
+- [ASSISTANT_SAID] The assistant provided average wait times of 60-90 minutes and peak wait times of 120-180 minutes for the ride.
+- [ASSISTANT_SAID] The assistant suggested the best times to visit the ride are early morning or late evening.
+- [ASSISTANT_SAID] The assistant recommended using the Disneyland app to reserve a boarding pass for Rise of the Resistance.
+- [ASSISTANT_SAID] The assistant suggested visiting during off-peak days for smaller crowds.
+- [ASSISTANT_SAID] The assistant mentioned Millennium Falcon: Smuggler's Run as another experience in Star Wars: Galaxy's Edge.
+- [EVENT] The user is interested in checking out Mickey's Soundsational Parade.
+- [ASSISTANT_SAID] The assistant provided general parade times of around 3:00-3:30 pm or 6:00-6:30 pm.
+- [ASSISTANT_SAID] The assistant described the parade route starting at "it's a small world" and ending near Town Square.
+- [ASSISTANT_SAID] The assistant recommended popular viewing spots for the parade, including Main Street USA, Town Square, "it's a small world" Mall, Plaza Inn, and reserved viewing options.
+- [ASSISTANT_SAID] The assistant advised arriving early to secure a good spot for the parade.
+- [EVENT] The user is planning to visit Disneyland Resort again soon.
+- [PREFERENCE] The user is looking for character meet-and-greets for their niece.
+- [ASSISTANT_SAID] The assistant recommended character meet

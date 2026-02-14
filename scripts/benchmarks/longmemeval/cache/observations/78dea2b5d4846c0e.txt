@@ -1,0 +1,29 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/29 (Mon) 00:05  
+[FACT] User is seeking a mentor with experience guiding undergraduate researchers at the University of Alberta.  
+[ASSISTANT_SAID] The assistant stated that it does not have access to personal contacts but suggested referring to the University of Alberta website for faculty members involved in undergraduate research programs.  
+[ASSISTANT_SAID] The assistant recommended contacting the Centre for Student Involvement & Career Centre at the University of Alberta for assistance in finding mentors.  
+[USER] User requested a search for a list of research programs at the University of Alberta focusing on computer science and engineering.  
+[ASSISTANT_SAID] The assistant provided a list of research programs in computer science and engineering at the University of Alberta, including:  
+[ASSISTANT_CREATED] 1. Machine Learning and Data Analytics Lab  
+[ASSISTANT_CREATED] 2. Human-Computer Interaction Lab  
+[ASSISTANT_CREATED] 3. Computer Graphics Lab  
+[ASSISTANT_CREATED] 4. Computing Education Research Group  
+[ASSISTANT_CREATED] 5. Embedded Systems Lab  
+[ASSISTANT_CREATED] 6. Network Systems Lab  
+[ASSISTANT_CREATED] 7. Artificial Intelligence Research Lab  
+[USER] User inquired about which of these research programs are currently accepting undergraduate students as researchers.  
+[ASSISTANT_SAID] The assistant stated it does not have access to current information on research programs actively recruiting undergraduate researchers and suggested visiting the University of Alberta's website or contacting faculty members directly.  
+[ASSISTANT_SAID] The assistant recommended checking the Undergraduate Research Initiative website for available research opportunities and contacting the Career Centre and Centre for Student Involvement for more information.  
+[USER] User asked for advice on making a strong application for an undergraduate research position in computer science and engineering at the University of Alberta.  
+[ASSISTANT_SAID] The assistant provided several tips for making a strong application:  
+[ASSISTANT_CREATED] 1. Research the research program and faculty members.  
+[ASSISTANT_CREATED] 2. Prepare a strong resume and cover letter highlighting relevant coursework and projects.  
+[ASSISTANT_CREATED] 3. Show interest and enthusiasm in application materials and interviews.  
+[ASSISTANT_CREATED] 4. Emphasize relevant skills such as problem-solving and programming languages.  
+[ASSISTANT_CREATED] 5. Maintain professionalism throughout the application process.  
+[ASSISTANT_CREATED] 6. Network at career fairs or events to connect with faculty or alumni.  
+[USER] User asked if there are specific skills important for landing an undergraduate research position in computer science and engineering at the University of Alberta.  
+[ASSISTANT_SAID] The assistant listed important skills for landing an undergraduate research position:  
+[

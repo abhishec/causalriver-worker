@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [FACT] User is located in the Midwest.
+- [EVENT] User is planning to go fishing in the next few weeks.
+- [PREFERENCE] User has had good luck with walleye fishing in the past on Lake Michigan.
+- [ASSISTANT_SAID] Assistant suggested several walleye fishing spots: Lake Erie, Saginaw Bay, Lake Winnebago, Mississippi River, Lake Pepin, and Lake Sakakawea.
+- [ASSISTANT_SAID] Assistant recommended focusing on shallower waters (10-20 feet) with structural features like rocks, weed beds, and drop-offs during spring and early summer for walleye fishing.
+- [ASSISTANT_SAID] Assistant advised checking local fishing regulations, including bag limits, size restrictions, and closed areas before heading out.
+- [ASSISTANT_SAID] Assistant suggested hiring a local guide or joining a fishing charter for better insights into fishing spots and techniques.
+- [PREFERENCE] User mentioned that silver spinnerbaits can be effective for walleye.
+- [ASSISTANT_SAID] Assistant provided retrieval techniques for silver spinnerbaits: slow and steady retrieve, vary your retrieve, bump and grind, twitch and pause, work the edges, depth control, choose the right spinnerbait, and add a trailer.
+- [ASSISTANT_SAID] Assistant listed popular spinnerbait styles for walleye: Northland Tackle Spinnerbait, Booyah Spinnerbait, Strike King Spinnerbait, Bomber Spinnerbait, Rat-L-Trap, and Rebel Pop-R.
+- [EVENT] User went on a fishing trip with friends Tom and Alex last month.
+- [EVENT] User caught a total of 12 fish during the trip, including 5 walleye and 3 largemouth bass.
+- [PREFERENCE] User found that walleye were holding close to shore, around 10-15 feet deep, targeting areas with a mix of rock and sand.
+- [EVENT] User is thinking of planning a solo fishing trip to a nearby stream soon.
+- [PREFERENCE] User wants to try out new fly patterns and techniques for trout fishing.
+- [ASSISTANT_SAID] Assistant provided tips for fly fishing for trout in streams, including reading the water, presentation, drift, varying depth, and being stealthy.
+- [ASSISTANT_SAID] Assistant recommended fly patterns for stream trout: Elk Hair Caddis, Stimulators, Hare's Ear, Pheasant Tail, Copper John, Woolly Bugger, Muddler Minnow, and Sculpzilla.
+- [ASSISTANT_SAID] Assistant suggested using a 9-foot, 4-weight to 6-weight rod for stream trout fishing.
+- [ASSISTANT_SAID] Assistant advised using a weight-forward floating line and a 9-foot to 12-foot leader for

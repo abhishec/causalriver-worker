@@ -1,0 +1,89 @@
+{
+  "answer_07664d43_1": [
+    {
+      "fact": "User is trying out new recipes this weekend.",
+      "type": "event",
+      "entities": [
+        "new recipes",
+        "weekend"
+      ]
+    },
+    {
+      "fact": "User prefers vegan dessert recipes.",
+      "type": "preference",
+      "entities": [
+        "vegan dessert recipes"
+      ]
+    },
+    {
+      "fact": "User has been enjoying Emma's recipes.",
+      "type": "opinion",
+      "entities": [
+        "Emma's recipes"
+      ]
+    },
+    {
+      "fact": "User has tried two recipes from Emma's channel.",
+      "type": "event",
+      "entities": [
+        "two recipes",
+        "Emma's channel"
+      ]
+    },
+    {
+      "fact": "User is interested in trying Chocolate Chia Pudding.",
+      "type": "preference",
+      "entities": [
+        "Chocolate Chia Pudding"
+      ]
+    },
+    {
+      "fact": "User has already tried vegan cheesecake.",
+      "type": "event",
+      "entities": [
+        "vegan cheesecake"
+      ]
+    }
+  ],
+  "answer_07664d43_2": [
+    {
+      "fact": "User is planning a trip abroad soon.",
+      "type": "event",
+      "entities": [
+        "trip abroad"
+      ]
+    },
+    {
+      "fact": "User is considering visiting Europe, specifically Spain or Italy.",
+      "type": "preference",
+      "entities": [
+        "Europe",
+        "Spain",
+        "Italy"
+      ]
+    },
+    {
+      "fact": "User has been trying out new recipes lately.",
+      "type": "event",
+      "entities": [
+        "new recipes"
+      ]
+    },
+    {
+      "fact": "User has tried out 3 of Emma's recipes and thinks they are amazing.",
+      "type": "opinion",
+      "entities": [
+        "Emma's recipes"
+      ]
+    },
+    {
+      "fact": "User is looking for recommendations for vegan restaurants in Spain and Italy.",
+      "type": "preference",
+      "entities": [
+        "vegan restaurants",
+        "Spain",
+        "Italy"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/23 (Tue) 03:21
+- [EVENT] User is planning to book a guided tour of Kharkov's main landmarks.
+- [ASSISTANT_SAID] User can research tour companies that offer guided tours of Kharkov, including Kharkiv Private Tours, Kharkiv Guide, and Kharkiv Walking Tours.
+- [ASSISTANT_SAID] User should visit the website of the tour company they are interested in and browse through available tours focusing on Kharkov's main landmarks.
+- [ASSISTANT_SAID] User should choose a tour that fits their schedule and interests, checking the duration, meeting point, and inclusions.
+- [ASSISTANT_SAID] User can book their tour online or contact the tour company directly to make a reservation, providing the date and number of people in their group.
+- [ASSISTANT_SAID] User should pay for their tour in advance or check the payment options provided by the tour company.
+- [ASSISTANT_SAID] On the day of the tour, the user should meet their guide at the designated meeting point.
+- [PREFERENCE] User is interested in exploring Kharkov's landmarks with a knowledgeable guide.
+- [ASSISTANT_SAID] Based on reviews and ratings, Kharkiv Private Tours is a popular option for guided tours of Kharkov's main landmarks.
+- [ASSISTANT_SAID] Kharkiv Private Tours offers various tours that cover the city's top attractions, historical landmarks, and cultural highlights, with professional and knowledgeable guides.
+- [PREFERENCE] User is looking for local restaurants with traditional Kharkov cuisine to try authentic dishes.
+- [ASSISTANT_SAID] Suggested local restaurants include:
+  - Kharkivske Izba, known for cozy atmosphere and traditional dishes like borscht, varenyky, and draniki.
+  - Puzata Hata, a chain of Ukrainian restaurants known for borscht, chicken Kiev, and stuffed cabbage rolls.
+  - Gosti, offering contemporary Ukrainian cuisine with local ingredients, popular dishes include pork shashlik, veal cheeks, and eggplant caviar.
+  - Kuchmistr, known for traditional Ukrainian dishes with a modern twist, using fresh and local ingredients.
+  - Lviv Handmade Chocolate, a café offering handmade chocolate treats, including local flavors like Kiev cake and cherry liqueur truffles.
+- [EVENT] User plans to try Gosti for dinner tonight.
+- [ASSISTANT_SAID] Assistant hopes the user enjoys their meal and has a great time in Kharkov.

@@ -1,0 +1,17 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/25 (Thu) 21:20
+- [ASSISTANT_CREATED] Scene 1: John is a 69-year-old man with wispy grey hair and red-tinted glasses, sitting in a creepy cottage in the woods, packing away a collection of women's underwear and suspicious-looking DVDs, expressing concern about being reported by Andy.
+- [EVENT] John is preparing to leave his secluded cottage in the woods.
+- [ASSISTANT_CREATED] Scene 2: Tohn Jompson, John's cousin, arrives as a replacement invigilator at a rural high school.
+- [FACT] Tohn Jompson is introduced as John's cousin.
+- [ASSISTANT_SAID] Andy expresses relief at Tohn's arrival and hopes he is not as creepy as John.
+- [ASSISTANT_CREATED] Scene 3: Andy tries to befriend Tohn, who is wearing a trenchcoat, a black moustache, and sunglasses, while Ruth probes Tohn about his background.
+- [RELATIONSHIP] Andy is the head of the computing department at the rural high school.
+- [RELATIONSHIP] Ruth is a woman in her 40s who speaks German and is suspicious of Tohn.
+- [PREFERENCE] Ruth suspects Tohn is just John in disguise due to their similar appearance.
+- [ASSISTANT_CREATED] Scene 4: Tohn is revealed to be John in disguise, taking off his trenchcoat, moustache, and sunglasses.
+- [FACT] John smirks and reveals himself as Tohn, surprising the teachers.
+- [EVENT] John acknowledges that he is back despite being suspended.
+- [ASSISTANT_SAID] Andy expresses outrage at John's return, reminding him that he is supposed to be suspended.
+- [CHANGE] John has returned to the school despite his suspension.

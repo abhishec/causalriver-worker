@@ -1,0 +1,18 @@
+**Observation Log:**
+
+[FACT] The user is planning out meals for the rest of the week.  
+[FACT] The user has a big pot of lentil soup that can be reheated for lunch or dinner.  
+[FACT] The user had leftovers from last night's dinner for lunch on Monday and Tuesday, which was pasta with marinara sauce and vegetables.  
+[PREFERENCE] The user is trying to reduce food waste.  
+[PREFERENCE] The user is trying to stick to a breakfast routine.  
+[TEMPORAL] The session date is 2023/05/30 (Tue) 05:44.  
+[TEMPORAL] The user overslept last Wednesday and had to grab a granola bar on the go for breakfast.  
+[PREFERENCE] The user is trying to reduce snacking, especially in the office.  
+[EVENT] The user has team meetings on Fridays where they tend to grab snacks from the vending machine.  
+[ASSISTANT_SAID] The assistant congratulated the user on their meal prep and suggested healthy snack options to curb vending machine cravings, including fresh fruits, nuts and seeds, veggie sticks with hummus, protein-rich snack bars, yogurt and berries, hard-boiled eggs, trail mix, cut veggies with guacamole, whole grain crackers with avocado or peanut butter, and edamame.  
+[ASSISTANT_SAID] The assistant provided tips for prepping breakfast ahead of time, including overnight oats, breakfast burritos, muffin tin frittatas, breakfast sandwiches, cottage cheese parfaits, smoothie packs, quiche, breakfast cookies, hard-boiled eggs, and breakfast meal prep containers.  
+[ASSISTANT_SAID] The assistant offered tips to curb snacking in the office, such as staying hydrated, keeping healthy snacks at the desk, identifying triggers, finding healthy alternatives, getting moving, practicing mindful eating, teaming up with a snack buddy, scheduling snack breaks, removing temptation, and rewarding oneself.  
+[ASSISTANT_SAID] The assistant suggested creative ways to use leftovers, including leftover mashups, turning leftovers into soup, stir-fry, tacos, frittatas, casseroles, wraps, quesadillas, pasta primavera, freezing leftovers, breakfast dishes, and grain bowls.  
+[FACT] The user has been doing well with using leftovers, especially with lentil soup.  
+[FACT] The user is trying to think of ways to use up leftover vegetables.  
+[ASSISTANT_SAID] The assistant provided specific suggestions for using up leftover vegetables, including veggie stir-fry, veggie omelette, roasted vegetable soup, veggie quesadilla, veggie frittata, veggie burgers, and veggie gratin.

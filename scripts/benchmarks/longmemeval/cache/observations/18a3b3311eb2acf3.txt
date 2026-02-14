@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/01/10 (Tue) 05:47
+- [USER] Randart
+- [ASSISTANT_SAID] Version 0.29: This article is up to date for the latest stable release of Dungeon Crawl Stone Soup.
+- [ASSISTANT_SAID] Randarts, or random artefacts, are randomly or purposefully generated weapons, jewellery, armour, or spellbooks that can have any number of enchantments, egos, and brands, which are randomly selected from a pool of each of those attributes.
+- [ASSISTANT_SAID] Randarts are also given names.
+- [ASSISTANT_SAID] Contents include: 1) How Randarts Occur, 2) Identifying A Randart, 3) Properties, 4) Names, 5) Strategy, 6) History.
+- [ASSISTANT_SAID] Randarts appear randomly starting on D:4 in the Dungeon.
+- [ASSISTANT_SAID] A typical 3-rune game will produce around 10 to 20 randarts without divine intervention.
+- [ASSISTANT_SAID] Three gods can gift their followers randarts: Okawaru, Trog, and Xom.
+- [ASSISTANT_SAID] Okawaru gifts weapons and armour to high-piety followers; Trog gifts weapons (usually of a higher quality than Oka's); Xom can gift anything to any worshiper at any time, though with no degree of reliability.
+- [ASSISTANT_SAID] Discovering a randart is simple; they will look like any other item of the same type, but the text description will have a strange title in white text, like "a smoking dagger."
+- [ASSISTANT_SAID] Randart spellbooks do not have their names in white text but have different descriptions from mundane books, and their spells are automatically identified.
+- [ASSISTANT_SAID] Randart weapons always have a brand, while randart jewellery always has a base type that gives the first in the list of auto inscription properties.
+- [ASSISTANT_SAID] Randart armour won't always have an ego.
+- [ASSISTANT_SAID] Randart weapons/armour tend to be enchanted and may exceed the usual limits for the item in question.
+- [ASSISTANT_SAID] Randarts can have positive or negative properties, including ±Str, Dex, or Int, ±Slay, fire resistance, cold resistance, willpower, stealth, and MP adjustments.
+- [ASSISTANT_SAID] Positive properties include negative energy resistance, poison resistance, electricity resistance, corrosion resistance, SInv, +Blink, +Fly, +Inv, and Regen+.
+- [ASSISTANT_SAID] Negative

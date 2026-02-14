@@ -1,0 +1,11 @@
+**Observation Log:**
+
+- [FACT] The dispatcher service schedules jobs to the builder server.
+- [ASSISTANT_SAID] A CA (Certificate Authority) is a trusted third-party organization that issues digital certificates that verify the identity of entities in a computer network.
+- [ASSISTANT_SAID] Digital certificates contain information about the identity of the entity and the public key used to encrypt communication with that entity.
+- [ASSISTANT_SAID] In the context of TLS communication, a CA certificate is used to verify the identity of a server or client in a network.
+- [ASSISTANT_SAID] When a client connects to a server, the server presents its digital certificate, which includes the server's public key.
+- [ASSISTANT_SAID] The client can use the CA certificate to verify the authenticity of the server's certificate and establish a secure TLS connection.
+- [ASSISTANT_SAID] Most operating systems come with a set of trusted CA certificates installed in a system-wide certificate store, typically located at `/etc/ssl/certs/ca-bundle.crt`.
+- [ASSISTANT_SAID] An administrator may want to use a different set of CA certificates or add additional trusted CA certificates.
+- [ASSISTANT_SAID] The `tls_ca` and `tls_status_ca` configuration parameters can be used to specify the file path to the custom CA certificate file.

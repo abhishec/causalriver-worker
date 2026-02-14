@@ -1,0 +1,25 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/06/28 (Wed) 18:52
+- [FACT] User has been using Lightroom and Photoshop for photography editing.
+- [PREFERENCE] User is looking for recommendations on editing software for photography.
+- [PREFERENCE] User has heard good things about Capture One and Skylum Luminar.
+- [ASSISTANT_SAID] Capture One is a professional-grade raw image editor known for excellent raw file processing, tethered shooting capabilities, and advanced editing tools.
+- [ASSISTANT_SAID] Key features of Capture One include excellent raw file processing, advanced tethered shooting, layers and local adjustments, and a session-based workflow.
+- [ASSISTANT_SAID] Capture One has a steeper learning curve compared to Lightroom.
+- [ASSISTANT_SAID] Skylum Luminar is known for its AI-powered editing tools and filters, designed to be user-friendly.
+- [ASSISTANT_SAID] Key features of Luminar include AI-powered editing, filter-based editing, layers and masking, and plug-in compatibility with Lightroom and Photoshop.
+- [ASSISTANT_SAID] Capture One is more geared towards commercial and studio photography, while Lightroom is more streamlined for managing large collections of images.
+- [ASSISTANT_SAID] Luminar is a more accessible alternative to Photoshop, focusing on AI-powered tools and filters.
+- [ASSISTANT_SAID] Both Capture One and Luminar offer free trials for testing before purchase.
+- [EVENT] User is considering trying out Capture One for its tethered shooting capabilities.
+- [ASSISTANT_SAID] User can check camera compatibility for Capture One on the Capture One website's Camera Support Page.
+- [ASSISTANT_SAID] Capture One's Camera Support Policy outlines their approach to supporting new camera models and firmware updates.
+- [FACT] User has a Canon EOS 80D camera.
+- [ASSISTANT_SAID] The Canon EOS 80D is supported for tethered shooting in Capture One.
+- [ASSISTANT_SAID] Features available for the EOS 80D in Capture One include camera control, live view, and instant review.
+- [ASSISTANT_SAID] Steps to connect the EOS 80D to Capture One include connecting via USB and selecting the camera in Capture One.
+- [PREFERENCE] User is interested in trying out nighttime photography more often.
+- [ASSISTANT_SAID] Recommended resources for nighttime photography include online tutorials from Digital Camera World, B&H Photo, Nikon USA, and Phlearn.
+- [ASSISTANT_SAID] Suggested YouTube channels for nighttime photography tutorials include Tony Northrup, Peter McKinnon, and Fstoppers.
+- [ASSISTANT_SAID] Recommended books for nighttime photography include "The Art of Nighttime Photography" by Lance

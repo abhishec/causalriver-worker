@@ -1,0 +1,32 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/23 (Tue) 03:25  
+[USER] User is seeking help to choose a scientific question.  
+[ASSISTANT_SAID] The chosen question should be relevant and interesting, focusing on anti-microbial peptides and proteins.  
+[ASSISTANT_SAID] Suggested possible directions include:  
+[ASSISTANT_SAID] 1. Structural characteristics of antimicrobial proteins  
+[ASSISTANT_SAID] 2. Ecological impact of anti-microbial peptides  
+[ASSISTANT_SAID] 3. Bioinformatical signature of anti-microbial peptides  
+[ASSISTANT_SAID] 4. Biotechnological applications of anti-microbial proteins  
+[ASSISTANT_SAID] 5. What drives the evolution of anti-microbial peptides  
+[ASSISTANT_SAID] 6. Anti-microbial peptides as conventional antibiotic replacers  
+[USER] User requests five choices to select the most interesting one.  
+[ASSISTANT_CREATED] Provided five scientific questions related to anti-microbial peptides and proteins.  
+[USER] User chooses the question: "Can we use computational methods to predict the anti-microbial activity of novel peptides and proteins, and how accurate are these predictions?"  
+[ASSISTANT_SAID] Acknowledged the user's choice and described the importance of the question in developing new anti-microbial agents.  
+[ASSISTANT_SAID] Mentioned the growing problem of antibiotic resistance as a context for the research.  
+[ASSISTANT_SAID] Discussed various computational methods for predicting anti-microbial activity, including:  
+[ASSISTANT_SAID] - Machine learning algorithms  
+[ASSISTANT_SAID] - Molecular dynamics simulations  
+[ASSISTANT_SAID] - Structural bioinformatics tools  
+[ASSISTANT_SAID] Noted that the accuracy of these methods can vary widely.  
+[ASSISTANT_SAID] Suggested investigating the performance of different computational methods against experimental data.  
+[ASSISTANT_SAID] Encouraged a combination of data analysis, software development, and laboratory experiments for the research.  
+[ASSISTANT_SAID] Concluded that the question has the potential to significantly impact the development of new anti-microbial agents.  
+[USER] User asks what to look for in databases to find relevant articles and what to write in the search bar.  
+[ASSISTANT_SAID] Recommended searching in scientific databases like PubMed or Google Scholar.  
+[ASSISTANT_SAID] Suggested search terms to use:  
+[ASSISTANT_SAID] - Anti-microbial peptides prediction  
+[ASSISTANT_SAID] - Computational methods for anti-microbial peptides  
+[ASSISTANT_SAID] - Machine learning for anti-microbial peptides  
+[

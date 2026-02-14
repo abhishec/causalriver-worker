@@ -1,0 +1,18 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/23 (Tue) 19:47  
+[USER] User inquired about moving a set of distinguished names (DNs) in Windows Active Directory.  
+[ASSISTANT_SAID] To move a set of distinguished names (DNs) from one Active Directory (AD) organizational unit (OU) to another, use the Move-ADObject cmdlet in PowerShell.  
+[ASSISTANT_SAID] Command to connect to AD domain: `Connect-ADDomain -Server <AD_server_name>`  
+[ASSISTANT_SAID] Command to retrieve DNs of OUs: `$sourceOUs = Get-ADObject -Filter 'Name -like "Sales*"' -SearchBase '<DN_of_parent_OU>'`  
+[ASSISTANT_SAID] Command to move OUs: `Move-ADObject -Identity $sourceOUs -TargetPath '<DN_of_destination_OU>'`  
+[ASSISTANT_SAID] After running the Move-ADObject command, the OUs with the DNs specified in the `$sourceOUs` variable will be moved to the destination OU.  
+[USER] User asked if the same task could be done using Apache Directory Studio.  
+[ASSISTANT_SAID] Yes, you can use Apache Directory Studio to move a set of distinguished names (DNs) from one organizational unit (OU) to another in an Active Directory (AD) directory.  
+[ASSISTANT_SAID] Steps to move DNs using Apache Directory Studio:  
+[ASSISTANT_SAID] 1. Open Apache Directory Studio and connect to your AD server.  
+[ASSISTANT_SAID] 2. In the LDAP Browser view, navigate to the OU that contains the DNs you want to move.  
+[ASSISTANT_SAID] 3. Right-click on the OU and select "Move" from the context menu.  
+[ASSISTANT_SAID] 4. In the "Move Entry" dialog box, select the destination OU where you want to move the DNs.  
+[ASSISTANT_SAID] 5. Click "Finish" to move the DNs from the source OU to the destination OU.  
+[ASSISTANT_SAID] After moving the DNs, you can verify that they have been moved to the destination OU by navigating to the destination OU in the LDAP Browser view.

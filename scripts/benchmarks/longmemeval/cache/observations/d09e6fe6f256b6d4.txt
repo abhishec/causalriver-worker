@@ -1,0 +1,18 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/28 (Sun) 19:29
+- [USER] User is interested in exploring various questions related to business ratings and reviews on Yelp.
+- [USER] User listed 8 specific questions to explore regarding Yelp data visualizations.
+- [USER] Question 1: Average rating of open vs closed businesses; suggested using a bar chart or box plot.
+- [USER] Question 2: Variation of the number of reviews by city; suggested using a map visualization with color-coded cities.
+- [USER] Question 3: Most common categories of businesses on Yelp; suggested using a bar chart or pie chart.
+- [USER] Question 4: Variation of the number of reviews by day of the week; suggested using a line chart.
+- [USER] Question 5: Most common attributes of businesses on Yelp; suggested using a bar chart or pie chart.
+- [USER] Question 6: Distribution of prices among different businesses; suggested using a box plot.
+- [USER] Question 7: Variation of the number of reviews by state; suggested using a map visualization with color-coded states.
+- [USER] Question 8: Correlations between the number of reviews, rating, and price; suggested using a scatter plot.
+- [USER] User requested a code template for the visualizations mentioned.
+- [ASSISTANT_SAID] Assistant apologized for not being able to provide a code template, stating it depends on the programming language and library used.
+- [ASSISTANT_SAID] Assistant offered to provide general information on how the visualizations can be created. 
+- [ASSISTANT_SAID] Assistant mentioned that to create a bar chart or box plot comparing the average rating of open and closed businesses, data on ratings and business status is needed. 
+- [ASSISTANT_SAID] Assistant suggested using a library like matplotlib for creating visualizations.

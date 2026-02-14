@@ -1,0 +1,58 @@
+{
+  "answer_3a5010af_1": [
+    {
+      "fact": "User is looking to improve their data analysis skills",
+      "type": "preference",
+      "entities": [
+        "data analysis skills"
+      ]
+    },
+    {
+      "fact": "User has taken some courses on Coursera",
+      "type": "personal",
+      "entities": [
+        "Coursera"
+      ]
+    },
+    {
+      "fact": "User is interested in DataCamp courses, especially those on data visualization",
+      "type": "preference",
+      "entities": [
+        "DataCamp",
+        "data visualization"
+      ]
+    },
+    {
+      "fact": "User is hoping to find resources that build on their existing foundation",
+      "type": "opinion",
+      "entities": []
+    }
+  ],
+  "answer_3a5010af_2": [
+    {
+      "fact": "User is considering pursuing a Master's degree in data science",
+      "type": "event",
+      "entities": [
+        "Master's degree",
+        "data science"
+      ]
+    },
+    {
+      "fact": "User has built a solid foundation in data analysis through online courses on edX",
+      "type": "personal",
+      "entities": [
+        "data analysis",
+        "edX"
+      ]
+    },
+    {
+      "fact": "User is particularly interested in exploring the machine learning course by Andrew Ng on Coursera",
+      "type": "preference",
+      "entities": [
+        "machine learning course",
+        "Andrew Ng",
+        "Coursera"
+      ]
+    }
+  ]
+}

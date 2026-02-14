@@ -1,0 +1,27 @@
+**Observation Log:**
+
+[FACT] User is feeling overwhelmed with online shopping habits.  
+[EVENT] User bought a new pair of sneakers from Adidas on the 10th.  
+[EVENT] User received a 20% discount code for their birthday on the 12th.  
+[EVENT] User bought a new handbag from Coach on the 15th.  
+[ASSISTANT_SAID] Assistant offered to help track user’s online shopping expenses.  
+[ASSISTANT_SAID] Assistant recommended creating a spreadsheet with columns for Date, Store/Website, Item(s) purchased, Amount spent, Discount/Coupon used, Total Savings, and Category.  
+[ASSISTANT_SAID] Assistant suggested using budgeting apps like Mint, Personal Capital, and Spendee to track expenses.  
+[ASSISTANT_SAID] Assistant mentioned browser extensions like CamelCamelCamel, PriceZombie, and Honey for tracking online shopping expenses.  
+[ASSISTANT_SAID] Assistant provided tips to stay on top of expenses, including setting a budget, using cashback credit cards, avoiding impulse buying, unsubscribing from promotional emails, and reviewing bank statements regularly.  
+[PREFERENCE] User prefers the spreadsheet method for tracking expenses.  
+[ASSISTANT_CREATED] Assistant created a simple template for an Online Shopping Tracker with specified columns and an example of recent purchases.  
+[EVENT] User spent around $80 on the Adidas sneakers.  
+[EVENT] User spent around $120 on the Coach handbag after the 20% discount.  
+[EVENT] User bought a new laptop from Best Buy's online store on May 25th.  
+[EVENT] User spent around $1,200 on the laptop and did not use any discounts or coupons.  
+[ASSISTANT_SAID] Assistant encouraged user to review their overall spending and consider their financial goals.  
+[PREFERENCE] User is concerned about their recent spending and wants to cut back on unnecessary expenses.  
+[ASSISTANT_SAID] Assistant provided tips on how to create a budget, including tracking expenses, categorizing them, setting financial goals, assigning percentages, and creating a budget plan.  
+[TEMPORAL] Session date is 2023/03/01 (Wed) 06:24.  
+[RELATIONSHIP] User mentioned having a dog with a monthly delivery of food as part of their subscriptions.  
+[RELATIONSHIP] User is part of a book club subscription.  
+[RELATIONSHIP] User has a monthly beauty box subscription.  
+[ASSISTANT_SAID] Assistant suggested using subscription management tools like Trim, Truebill, and Clarity Money to manage online subscriptions.  
+[ASSISTANT_SAID] Assistant advised user to regularly review subscriptions and adjust as needed.  
+[ASSISTANT_CREATED] Assistant provided an updated version of the Online Shopping Tracker with the laptop purchase included.

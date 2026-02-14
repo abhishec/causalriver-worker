@@ -1,0 +1,146 @@
+{
+  "answer_4bfcc251_4": [
+    {
+      "fact": "User attended a charity gala organized by the Cancer Research Foundation.",
+      "type": "event",
+      "entities": [
+        "charity gala",
+        "Cancer Research Foundation"
+      ]
+    },
+    {
+      "fact": "The charity gala raised over $100,000 for cancer research.",
+      "type": "event",
+      "entities": [
+        "$100,000",
+        "cancer research"
+      ]
+    },
+    {
+      "fact": "User is looking for information on cancer research and the latest developments in the field.",
+      "type": "opinion",
+      "entities": [
+        "cancer research",
+        "latest developments"
+      ]
+    }
+  ],
+  "answer_4bfcc251_3": [
+    {
+      "fact": "User participated in the '24-Hour Bike Ride' charity event.",
+      "type": "event",
+      "entities": [
+        "24-Hour Bike Ride",
+        "charity event"
+      ]
+    },
+    {
+      "fact": "User cycled for 4 hours non-stop during the charity event.",
+      "type": "event",
+      "entities": [
+        "4 hours",
+        "cycling"
+      ]
+    },
+    {
+      "fact": "User raised money for a local children's hospital.",
+      "type": "event",
+      "entities": [
+        "local children's hospital"
+      ]
+    },
+    {
+      "fact": "User is feeling tired after the bike ride.",
+      "type": "personal",
+      "entities": [
+        "tired"
+      ]
+    },
+    {
+      "fact": "User is looking for healthy snack options to refuel after the bike ride.",
+      "type": "preference",
+      "entities": [
+        "healthy snack options",
+        "refuel"
+      ]
+    }
+  ],
+  "answer_4bfcc251_2": [
+    {
+      "fact": "User volunteered at the 'Books for Kids' charity book drive event at their local library.",
+      "type": "event",
+      "entities": [
+        "Books for Kids",
+        "charity book drive",
+        "local library"
+      ]
+    },
+    {
+      "fact": "User helped to sort and pack over 500 books for underprivileged kids.",
+      "type": "event",
+      "entities": [
+        "500 books",
+        "underprivileged kids"
+      ]
+    },
+    {
+      "fact": "User is looking for book recommendations for kids.",
+      "type": "preference",
+      "entities": [
+        "book recommendations",
+        "kids"
+      ]
+    },
+    {
+      "fact": "User is interested in popular kids' books that are both fun and educational.",
+      "type": "preference",
+      "entities": [
+        "popular kids' books",
+        "fun",
+        "educational"
+      ]
+    },
+    {
+      "fact": "User has a 7-year-old who loves adventure and history.",
+      "type": "personal",
+      "entities": [
+        "7-year-old",
+        "adventure",
+        "history"
+      ]
+    }
+  ],
+  "answer_4bfcc251_1": [
+    {
+      "fact": "User participated in the 'Walk for Hunger' charity event",
+      "type": "event",
+      "entities": [
+        "Walk for Hunger",
+        "charity event"
+      ]
+    },
+    {
+      "fact": "User walked 5 kilometers to raise money for the local food bank",
+      "type": "event",
+      "entities": [
+        "5 kilometers",
+        "local food bank"
+      ]
+    },
+    {
+      "fact": "User is looking for healthy snack ideas that are easy to prepare",
+      "type": "preference",
+      "entities": [
+        "healthy snack ideas",
+        "easy to prepare"
+      ]
+    },
+    {
+      "fact": "User plans to try making energy balls as a snack",
+      "type": "preference",
+      "entities": [
+        "energy balls"
+      ]
+    }
+  ]
+}

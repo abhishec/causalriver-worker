@@ -1,0 +1,75 @@
+{
+  "answer_f7fd1029_2": [
+    {
+      "fact": "User used to swim competitively in college",
+      "type": "personal",
+      "entities": [
+        "college",
+        "competitive swimming"
+      ]
+    },
+    {
+      "fact": "User is looking to get back into swimming to stay active and relieve stress",
+      "type": "preference",
+      "entities": [
+        "swimming",
+        "staying active",
+        "relieving stress"
+      ]
+    },
+    {
+      "fact": "User prefers morning lap swimming hours",
+      "type": "preference",
+      "entities": [
+        "morning lap swimming"
+      ]
+    },
+    {
+      "fact": "User has a busy schedule",
+      "type": "personal",
+      "entities": [
+        "busy schedule"
+      ]
+    }
+  ],
+  "answer_f7fd1029_1": [
+    {
+      "fact": "User is looking to improve overall fitness.",
+      "type": "preference",
+      "entities": [
+        "fitness"
+      ]
+    },
+    {
+      "fact": "User is trying to improve agility and speed.",
+      "type": "preference",
+      "entities": [
+        "agility",
+        "speed"
+      ]
+    },
+    {
+      "fact": "User has been playing soccer and tennis lately.",
+      "type": "personal",
+      "entities": [
+        "soccer",
+        "tennis"
+      ]
+    },
+    {
+      "fact": "User used to play tennis competitively in high school.",
+      "type": "personal",
+      "entities": [
+        "tennis",
+        "high school"
+      ]
+    },
+    {
+      "fact": "User is thinking of incorporating strength training into their routine.",
+      "type": "preference",
+      "entities": [
+        "strength training"
+      ]
+    }
+  ]
+}

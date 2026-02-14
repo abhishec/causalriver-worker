@@ -1,0 +1,31 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2022/03/09 (Wed) 09:03  
+[USER] User is familiar with the game called 'characters' and explains the rules.  
+[USER] User chooses a famous character for the game.  
+[USER] User confirms the character is male.  
+[USER] User confirms the character is a historical figure.  
+[USER] User confirms the character has not been a political leader.  
+[USER] User confirms the character is not known for work in science.  
+[USER] User confirms the character is not an artist or known for creative works.  
+[USER] User confirms the character has not been in any movies or TV shows.  
+[USER] User confirms the character is not known for any specific invention or discovery.  
+[USER] User states the character is really ancient, several thousand years ago.  
+[USER] User confirms the character is not from ancient Greece or ancient Rome.  
+[USER] User confirms the character is not from ancient Egypt but responds humorously with "almost."  
+[USER] User confirms the character is not from Mesopotamia.  
+[USER] User states the character is from the Bible.  
+[USER] User confirms the character is a prophet or a figure of religious significance.  
+[USER] User states the character is from the Old Testament or the New Testament but clarifies it is not a yes or no question.  
+[USER] User confirms the character is a prophet mentioned in the Old Testament.  
+[USER] User confirms the character is Moses.  
+[ASSISTANT_SAID] Assistant acknowledges the character is Moses, a prophet and leader in the Old Testament known for leading the Israelites out of Egypt and receiving the Ten Commandments from God on Mount Sinai.  
+[USER] User requests a complicated math problem that will take the assistant about half a minute to solve, without any additional information.  
+[ASSISTANT_SAID] Assistant provides the math problem: "Integrate: ∫(x^3 + x^2)^2 dx."  
+[USER] User requests the assistant to choose a character from Disney movies, specifying not to choose a main character.  
+[ASSISTANT_SAID] Assistant chooses the character of Flounder from "The Little Mermaid" but mistakenly provides details about the character.  
+[USER] User requests the assistant to choose again without revealing the character.  
+[ASSISTANT_SAID] Assistant chooses the character of Scuttle from "The Little Mermaid" and provides details about the character.  
+[USER] User asks if the character is Mufasa.  
+[ASSISTANT_SAID] Assistant confirms it is not Mufasa and clarifies the character is not from "The Little Mermaid."  
+[USER] User clarifies the rules again, asking the assistant to choose a Disney character and only answer with 'yes'

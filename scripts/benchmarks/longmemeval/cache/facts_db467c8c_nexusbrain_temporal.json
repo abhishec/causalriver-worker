@@ -1,0 +1,58 @@
+{
+  "answer_611b6e83_1": [
+    {
+      "fact": "User is considering applying for a green card",
+      "type": "event",
+      "entities": [
+        "green card"
+      ]
+    },
+    {
+      "fact": "User's parents live with them in the US",
+      "type": "relationship",
+      "entities": [
+        "parents",
+        "US"
+      ]
+    },
+    {
+      "fact": "User's parents have been a big help with household tasks",
+      "type": "opinion",
+      "entities": [
+        "parents",
+        "household tasks"
+      ]
+    }
+  ],
+  "answer_611b6e83_2": [
+    {
+      "fact": "User is planning to apply for a green card soon",
+      "type": "event",
+      "entities": [
+        "green card"
+      ]
+    },
+    {
+      "fact": "User's parents have been staying with them for nine months",
+      "type": "relationship",
+      "entities": [
+        "parents"
+      ]
+    },
+    {
+      "fact": "User's parents have been a huge help in preparing paperwork",
+      "type": "opinion",
+      "entities": [
+        "parents",
+        "paperwork"
+      ]
+    },
+    {
+      "fact": "User is considering consulting an immigration attorney",
+      "type": "preference",
+      "entities": [
+        "immigration attorney"
+      ]
+    }
+  ]
+}

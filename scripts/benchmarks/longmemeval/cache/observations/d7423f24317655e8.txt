@@ -1,0 +1,19 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/29 (Mon) 09:44
+- [FACT] User is sending multiple messages, indicating a structured communication approach.
+- [PREFERENCE] User prefers limited responses to "acknowledged" when confirming understanding.
+- [ASSISTANT_SAID] Assistant responded with "Acknowledged" to confirm understanding of the user's instruction.
+- [FACT] User's message includes a detailed analysis of a legal or contractual matter related to levee systems and testing requirements.
+- [FACT] User references a "Master" and "Professor Fell," indicating a legal or expert context.
+- [FACT] User discusses the integrity of the levee system in Brewarrina and the implications of testing failures.
+- [FACT] User mentions "Beckhaus" as a party involved in the contractual obligations and testing.
+- [FACT] User states that the failure to carry out tests does not necessarily mean non-compliance with contractual standards.
+- [FACT] User notes the obligation to add 3% lime to materials and its implications for levee quality.
+- [FACT] User describes the performance of "CETS" tests and the results related to compaction levels on the levee system.
+- [FACT] User mentions that 340 CETS tests were carried out and that all tests passed.
+- [FACT] User indicates that some tests passed only after reworking the area based on prior indications of likely failure.
+- [FACT] User cites Mr. Rudge's explanation regarding the testing process and the implications of the results.
+- [PREFERENCE] User expresses an opinion that the Master erred in finding substantial compliance with contractual requirements.
+- [FACT] User concludes that the Council is entitled to damages due to the breach of contract related to testing failures.
+- [FACT] User proposes that the assessment of damages should be remitted to Macready AsJ.

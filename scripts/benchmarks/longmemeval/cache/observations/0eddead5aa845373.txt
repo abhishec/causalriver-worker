@@ -1,0 +1,30 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/27 (Sat) 09:26
+- [USER] User asked for examples of recent research of computer vision applied to coffee.
+- [ASSISTANT_SAID] Assistant provided four examples of recent research on computer vision applied to coffee:
+  1. Coffee Bean Quality Inspection by researchers at the University of Campinas in Brazil.
+  2. Coffee Brewing Control by researchers at the University of California, Davis.
+  3. Coffee Cup Recognition by researchers at the University of California, Berkeley.
+  4. Coffee Roast Level Detection by researchers at the University of Tokyo.
+- [USER] User requested citations for the papers related to the examples provided.
+- [ASSISTANT_SAID] Assistant cited four papers related to the examples:
+  1. "Automatic coffee bean inspection system using computer vision and machine learning." (J.C. Santos et al., 2021)
+  2. "Real-Time Monitoring of Coffee Brewing Using Computer Vision." (R. M. Gómez et al., 2021)
+  3. "Recognizing Coffee Cups: A Deep Learning Approach." (J. Yu et al., 2019)
+  4. "Robust estimation of coffee roast levels by image analysis." (M. Sugimoto et al., 2014)
+- [USER] User asked for citations of other papers not used as examples.
+- [ASSISTANT_SAID] Assistant provided five additional papers related to computer vision applied to coffee:
+  1. "Coffee Defect Detection and Classification Using Deep Learning." (S. Han et al., 2019)
+  2. "Vision-Based Coffee Extraction Analysis Using Machine Learning." (J. M. Kozak et al., 2020)
+  3. "Automatic Detection of Arabica and Robusta Coffee Beans Using Computer Vision." (L. S. P. Barbosa et al., 2020)
+  4. "Intelligent Coffee Roasting Based on Computer Vision and Artificial Neural Networks." (L. C. Ferreira et al., 2019)
+  5. "Quality Analysis of Roasted Coffee Using Computer Vision and Convolutional Neural Networks." (Y. N. Kim et al., 2020)
+- [USER] User inquired about further exploration on top of the research mentioned.
+- [ASSISTANT_SAID] Assistant suggested several areas for future research in computer vision applied to coffee:
+  1. Multi-modal Analysis combining visual analysis with other sensory inputs.
+  2. Quality Control in Coffee Production with more sophisticated systems.
+  3. Personalized Coffee Recommendations based on user preferences.
+  4. Real-Time Coffee Quality Assessment for applications in coffee shops.
+  5. Coffee Waste Reduction through identification of opportunities for waste management.
+- [USER] User requested examples of Brazilian papers on machine learning applied

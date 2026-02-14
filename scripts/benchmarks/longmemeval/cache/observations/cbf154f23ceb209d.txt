@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[SESSION_DATE] 2023/11/30 (Thu) 11:29  
+[FACT] The user is planning to grill burgers this weekend.  
+[EVENT] The user is trying out a new recipe for BBQ sauce.  
+[PREFERENCE] The user wants a BBQ sauce recipe that is a bit spicy.  
+[EVENT] The user cleaned their grill three weekends ago.  
+[CHANGE] The user's grill had been sitting idle in the backyard for months before it was cleaned.  
+[ASSISTANT_SAID] The assistant provided a spicy Kansas City-Style BBQ Sauce recipe with specific ingredients and measurements.  
+[ASSISTANT_SAID] The assistant provided a Chipotle BBQ Sauce recipe with specific ingredients and measurements.  
+[ASSISTANT_SAID] The assistant provided a Jalapeño BBQ Sauce recipe with specific ingredients and measurements.  
+[ASSISTANT_SAID] The assistant advised the user to adjust the level of heat in the BBQ sauce to their liking and suggested simmering the sauce for 10-15 minutes.  
+[ASSISTANT_SAID] The assistant explained what chipotle peppers in adobo sauce are and how to use them in the recipe.  
+[PREFERENCE] The user likes the sound of the Chipotle BBQ Sauce recipe.  
+[ASSISTANT_SAID] The assistant provided details on how to prepare chipotle peppers in adobo sauce for the BBQ sauce recipe.  
+[PREFERENCE] The user has never used chipotle peppers in adobo sauce before but has heard great things about them.  
+[ASSISTANT_SAID] The assistant recommended various types of burgers to pair with the Chipotle BBQ Sauce, including classic beef burgers, smoked cheddar burgers, spicy Southwestern burgers, bacon cheeseburgers, and grilled chicken burgers.  
+[PREFERENCE] The user is considering making sliders for the grill-out.  
+[ASSISTANT_SAID] The assistant recommended using 80/20 Ground Chuck for the sliders.  
+[PREFERENCE] The user has had good experiences with the 80/20 Ground Chuck ratio in the past.  
+[ASSISTANT_SAID] The assistant provided recommendations for side dishes to pair with the Chipotle BBQ Sauce, including coleslaw, grilled corn on the cob, baked beans, roasted vegetables, Mexican street corn salad, crispy onion rings, and garlic and herb potato salad.  
+[PREFERENCE] The user is looking for sides to go along with their sliders.  
+[ASSISTANT_SAID] The assistant suggested that the user can experiment with different flavors and textures for their sides.

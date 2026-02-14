@@ -1,0 +1,39 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/03/14 (Tue) 09:18
+
+[ASSISTANT_SAID] There are several ways to find Poisson's ratio of a material, depending on the available testing methods and equipment.
+
+[ASSISTANT_SAID] Three common methods to find Poisson's ratio are tensile testing, flexural testing, and ultrasonic testing.
+
+[ASSISTANT_SAID] In tensile testing, the longitudinal strain (ε_l) and lateral strain (ε_t) are calculated, and Poisson's ratio is calculated using the formula: ν = -ε_t / ε_l.
+
+[ASSISTANT_SAID] In flexural testing, a beam-shaped specimen is loaded in the middle, and its deflection is measured at two points along the length of the beam.
+
+[ASSISTANT_SAID] In ultrasonic testing, ultrasonic waves are transmitted through the material, and their velocity is measured to calculate Poisson's ratio.
+
+[ASSISTANT_SAID] The values of Poisson's ratio obtained from these different methods may not be exactly the same due to factors such as specimen geometry, test conditions, and measuring equipment accuracy.
+
+[USER] How does this relate to the modulus of rigidity?
+
+[ASSISTANT_SAID] Poisson's ratio describes the relationship between the axial and lateral strains of a material when subjected to an applied load.
+
+[ASSISTANT_SAID] The modulus of rigidity (shear modulus) describes a material's resistance to shear deformation, defined as the ratio of shear stress to shear strain: G = τ / γ.
+
+[ASSISTANT_SAID] Materials with higher Poisson's ratios tend to be more deformable under axial loads and less resistant to lateral deformation.
+
+[ASSISTANT_SAID] Materials with higher moduli of rigidity tend to be stiffer and more resistant to shear deformation.
+
+[USER] Is thermal expansion a subdivision of strain?
+
+[ASSISTANT_SAID] Yes, thermal expansion can be considered a type of strain that occurs when a material changes in size or shape due to changes in temperature.
+
+[ASSISTANT_SAID] The coefficient of thermal expansion (CTE) describes the fractional change in length or volume of a material per unit change in temperature.
+
+[ASSISTANT_SAID] Other types of strain can result from mechanical forces or loads applied to a material, such as tensile, compressive, or shear strain.
+
+[USER] What is the formula for thermal expansion?
+
+[ASSISTANT_SAID] The formula for linear thermal expansion is: ΔL = αL₀ΔT, where ΔL is the change in length, α is the coefficient of linear thermal expansion, L₀ is the initial length, and ΔT is the change in temperature.
+
+[ASSISTANT_SAID] This formula assumes that the change in temperature is small

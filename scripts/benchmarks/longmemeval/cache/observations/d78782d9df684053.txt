@@ -1,0 +1,44 @@
+**Observation Log:**
+
+[FACT] The user has been cooking dinner at home a lot lately.  
+[EVENT] The user has been making a big batch of something on the weekends to last through the week.  
+[ASSISTANT_SAID] Chicken breasts are versatile and can be prepared in countless ways.  
+[ASSISTANT_CREATED] The assistant provided a list of recipe ideas for chicken breasts, including:  
+- Korean-Style BBQ Chicken  
+- Indian-Style Tikka Masala  
+- Japanese-Style Teriyaki Chicken  
+- Lemon Rosemary Chicken  
+- Chipotle Lime Chicken  
+- Balsamic Glazed Chicken  
+- Crispy Fried Chicken Tenders  
+- Breaded and Baked Chicken Cutlets  
+- Korean-Style Fried Chicken  
+- Chicken Parmesan  
+- Chicken Fajitas  
+- Chicken Cordon Bleu  
+
+[ASSISTANT_SAID] Suggested side dishes for Korean-Style BBQ Chicken include:  
+1. Kimchi  
+2. Japchae (Stir-Fried Glass Noodles)  
+3. Bokkeumbap (Korean Fried Rice)  
+4. Sigeumchi (Boiled Spinach with Garlic and Sesame Oil)  
+5. Gyeranjjim (Steamed Eggs with Sesame Oil and Soy Sauce)  
+
+[ASSISTANT_SAID] The assistant noted that Korean-Style BBQ Chicken is a great candidate for meal prep, as it reheats well and can be stored in the fridge for up to 3-4 days or frozen for later use.  
+[FACT] The user uses Tupperware for meal prep and labels them with the date and contents.  
+[EVENT] The user is considering getting more containers specifically designed for meal prep.  
+[ASSISTANT_SAID] The assistant recommended various types of meal prep containers, including:  
+1. Glass Containers  
+2. Bento Boxes  
+3. Meal Prep Containers with Compartments  
+4. Insulated Containers  
+5. Collapsible Containers  
+
+[ASSISTANT_SAID] Suggested brands for meal prep containers include: Pyrex, Anchor Hocking, OXO, Bentgo, EasyLunchboxes, Rubbermaid, Thermos, Hydro Flask, and Zojirushi.  
+[ASSISTANT_SAID] The assistant provided tips for choosing meal prep containers, including material, size, compartments, insulation, durability, and brand reputation.  
+[FACT] The user plans to get a mix of glass and bento box containers.  
+[PREFERENCE] The user likes the idea of having separate compartments to keep meals organized.  
+[EVENT] The user has been really into soups lately.  
+[EVENT] The user made a huge batch of creamy tomato soup a few weeks ago and reheated it for lunch and dinner several times.  
+[EVENT] The user is thinking of making a big batch of chicken noodle soup this weekend to prep for the week ahead.  
+[ASSISTANT_SAID] The assistant

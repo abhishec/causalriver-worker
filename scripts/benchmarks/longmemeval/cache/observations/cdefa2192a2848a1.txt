@@ -1,0 +1,21 @@
+**Observation Log:**
+
+[FACT] The user is planning a solo adventure to Yosemite National Park.  
+[EVENT] The user is driving up to Yosemite National Park solo today and hiking to Yosemite Valley tomorrow.  
+[ASSISTANT_SAID] The assistant expressed excitement about the user's adventure and offered to help plan the trip.  
+[ASSISTANT_SAID] The assistant recommended scenic spots to stop by on the way to Yosemite, including Tioga Pass, Mono Lake, and Groveland.  
+[ASSISTANT_SAID] The assistant suggested must-see attractions within Yosemite National Park, including Tunnel View, Bridalveil Fall, and the Valley Floor Loop Trail.  
+[ASSISTANT_SAID] The assistant provided additional tips for the trip, such as checking the park's website for road and trail conditions, packing layers, bringing a portable charger, and visiting the Yosemite Valley Visitor Center or Ansel Adams Gallery.  
+[EVENT] The user is planning to camp at Upper Pines Campground.  
+[ASSISTANT_SAID] The assistant confirmed that Upper Pines Campground is open year-round but advised checking the park's website or calling the park's reservation office at (801) 559-4884 for availability and specific campsite closures.  
+[ASSISTANT_SAID] The assistant informed the user that bears are active throughout the year in Yosemite and provided bear safety tips, including food storage, using bear cans, being aware of surroundings, and following park regulations.  
+[EVENT] The user is planning to hike to Yosemite Valley tomorrow.  
+[ASSISTANT_SAID] The assistant provided recommendations for specific trails and viewpoints in Yosemite Valley, including Yosemite Valley Floor, Sentinel Bridge, El Capitan Meadow, Mist Trail to Vernal Fall, Four Mile Trail, and Mirror Lake Trail.  
+[ASSISTANT_SAID] The assistant mentioned other attractions like Yosemite Chapel, Ansel Adams Gallery, and Yosemite Museum.  
+[ASSISTANT_SAID] The assistant advised the user to start early, bring water and snacks, wear comfortable shoes, and check trail conditions.  
+[EVENT] The user is considering taking the Mist Trail to Vernal Fall tomorrow.  
+[ASSISTANT_SAID] The assistant informed the user that the Mist Trail is popular and can be busy on Saturdays, but starting early around 7 am would help avoid crowds.  
+[ASSISTANT_SAID] The assistant explained that the water flow at Vernal Fall is typically at its peak in spring due to snowmelt, but it may be slightly lower than in late spring.  
+[TEMPORAL] The user plans to start their hike at 7 am tomorrow.  
+[ASSISTANT_SAID] The assistant provided expectations for the user arriving at Vernal Fall at 7 am, including cooler temperatures, fewer crowds, misty conditions, and good photography opportunities.  
+[EVENT] The user is thinking of

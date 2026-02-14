@@ -1,0 +1,25 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/20 (Sat) 09:33
+- [EVENT] User is trying to plan their schedule for the week.
+- [EVENT] User has a language exchange class with Juan.
+- [RELATIONSHIP] User is paired with a Colombian tutor named Juan.
+- [TEMPORAL] User meets with Juan every Wednesday evening.
+- [EVENT] User assists Juan with his English vocabulary while Juan helps the user with Spanish pronunciation and grammar.
+- [PREFERENCE] User usually has dinner plans with friends on Thursdays.
+- [ASSISTANT_SAID] Assistant stated that it cannot track the user's personal schedule or appointments.
+- [ASSISTANT_SAID] Assistant suggested checking the calendar or planner, looking at the phone or computer's calendar app, asking Juan directly, or checking reminders or notifications.
+- [ASSISTANT_SAID] Assistant provided tips to improve conversational flow in Spanish, including:
+  - [ASSISTANT_SAID] Listen actively to native speakers.
+  - [ASSISTANT_SAID] Practice with a purpose by focusing on specific topics or scenarios.
+  - [ASSISTANT_SAID] Use transitional phrases to connect ideas.
+  - [ASSISTANT_SAID] Focus on pronunciation and record oneself speaking.
+  - [ASSISTANT_SAID] Learn idiomatic expressions to sound more natural.
+  - [ASSISTANT_SAID] Don't be afraid to make mistakes.
+  - [ASSISTANT_SAID] Use the language in real-life situations.
+  - [ASSISTANT_SAID] Practice regularly to improve comfort and fluency.
+- [ASSISTANT_SAID] Assistant encouraged the user to prepare for the language exchange by reviewing common conversational topics, practicing specific vocabulary, preparing questions, and focusing on active listening.
+- [ASSISTANT_SAID] Assistant reiterated that it cannot confirm the user's meeting schedule with Juan.
+- [ASSISTANT_SAID] Assistant expressed gladness that the user remembered the day and time of their language exchange class with Juan.
+- [ASSISTANT_SAID] Assistant acknowledged the value of having a regular schedule and a language partner for practice.
+- [ASSISTANT_SAID] Assistant noted that Colombian Spanish is a great dialect to learn and wished the user good luck with their language learning journey.

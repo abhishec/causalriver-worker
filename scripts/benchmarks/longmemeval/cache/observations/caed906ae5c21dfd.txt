@@ -1,0 +1,27 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/29 (Mon) 05:56  
+[FACT] User is looking to buy a house.  
+[FACT] User recently got pre-approved for a mortgage.  
+[FACT] User can borrow up to $350,000 according to the lender.  
+[ASSISTANT_SAID] Congratulations on getting pre-approved for a mortgage!  
+[ASSISTANT_SAID] To calculate mortgage payments, consider the loan amount, interest rate, loan term, property taxes, and insurance.  
+[ASSISTANT_SAID] Loan amount: $350,000.  
+[ASSISTANT_SAID] Assumed interest rate: 4%.  
+[ASSISTANT_SAID] Assumed loan term: 30 years.  
+[ASSISTANT_SAID] Assumed property taxes: 1.25% of the loan amount.  
+[ASSISTANT_SAID] Assumed insurance: $800 per year.  
+[ASSISTANT_SAID] Estimated monthly payment: approximately $1,664.41.  
+[ASSISTANT_SAID] Breakdown of monthly payment: Principal: $541.41, Interest: $843.00, Property taxes: $363.75, Insurance: $66.67.  
+[ASSISTANT_SAID] These are rough estimates; actual payments may vary.  
+[ASSISTANT_SAID] Additional tips: lenders may offer different interest rates or loan terms; consider a larger down payment; factor in other homeownership costs.  
+[FACT] User finds the estimated monthly payment of $1,664 a bit higher than expected.  
+[USER] User asks for more information about different types of mortgage insurance and how they affect monthly payments.  
+[ASSISTANT_SAID] Mortgage insurance (MI) protects the lender if the borrower defaults on the loan.  
+[ASSISTANT_SAID] Two primary types of mortgage insurance: Private Mortgage Insurance (PMI) and Federal Housing Administration (FHA) Mortgage Insurance.  
+[ASSISTANT_SAID] PMI is required for conventional loans with a down payment of less than 20%.  
+[ASSISTANT_SAID] PMI premium might range from 0.3% to 1.5% of the original loan amount annually.  
+[ASSISTANT_SAID] For a $350,000 loan with a 10% down payment, PMI could add approximately $87.50 to $437.50 per month.  
+[ASSISTANT_SAID] FHA loans require both an upfront mortgage insurance premium (MIP) and an annual MIP.  
+[ASSISTANT_SAID] Upfront MIP for a $350,000 loan with a 3.5% down payment would be $6,125.  
+[ASSISTANT_S

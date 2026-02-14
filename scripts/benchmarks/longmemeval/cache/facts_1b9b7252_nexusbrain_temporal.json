@@ -1,0 +1,26 @@
+{
+  "answer_ultrachat_115151": [
+    {
+      "fact": "User is interested in mindfulness techniques.",
+      "type": "preference",
+      "entities": [
+        "mindfulness techniques"
+      ]
+    },
+    {
+      "fact": "User is unable to participate in strenuous physical activities.",
+      "type": "personal",
+      "entities": [
+        "strenuous physical activities"
+      ]
+    },
+    {
+      "fact": "User likes the idea of incorporating mindfulness into daily activities.",
+      "type": "opinion",
+      "entities": [
+        "mindfulness",
+        "daily activities"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [FACT] User's name is Emily Joy Thompson.
+- [EVENT] User needs to update their name with their student loan provider.
+- [CHANGE] User recently updated their driver's license with their new name.
+- [TEMPORAL] User updated their driver's license last week.
+- [TEMPORAL] User made an appointment with the DMV on January 25th to update their driver's license.
+- [EVENT] User received a temporary driver's license after processing the name change at the DMV, which took about an hour.
+- [FACT] User has a new Social Security card with their updated name.
+- [FACT] User has a marriage certificate.
+- [ASSISTANT_SAID] Student loan providers typically require documentation to verify a name change, including a government-issued ID with the new name, court order or marriage certificate, and Social Security Administration documentation.
+- [ASSISTANT_SAID] User's updated driver's license is a valid government-issued ID with their new name.
+- [ASSISTANT_SAID] User does not need to wait for the permanent license to arrive and can submit the temporary license along with the other documents.
+- [ASSISTANT_SAID] Processing time for student loan providers to update records can vary; electronic submissions typically take 3-7 business days, while mail-in submissions can take 7-14 business days.
+- [ASSISTANT_SAID] If submitting documents online, user may not need to notify the student loan provider in writing but should check specific requirements.
+- [ASSISTANT_SAID] User should ensure all documents are clear and legible when uploading.
+- [ASSISTANT_SAID] User should verify that their account has been updated with their new name after submission.
+- [ASSISTANT_SAID] Suggested institutions for user to update their name include banking and credit institutions, credit reporting agencies, employer and HR department, insurance providers, utility companies, subscription services, and professional associations.
+- [ASSISTANT_SAID] User is encouraged to create a checklist to keep track of the name change process.
+- [ASSISTANT_SAID] User is doing great and is almost done with the name change process.

@@ -1,0 +1,28 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/20 (Sat) 05:41
+- [FACT] User has had aquariums for about 6 months.
+- [FACT] User currently has a 20-gallon tank.
+- [FACT] User has neon tetras, guppies, and a Corydoras catfish in their tank.
+- [CHANGE] User is considering upgrading to a larger tank, possibly a 55-gallon one.
+- [PREFERENCE] User is torn between setting up a species tank for Discus or Rams.
+- [ASSISTANT_SAID] Discus (Symphysodon spp.) care level is moderate to advanced; requires a minimum tank size of 55 gallons, soft slightly acidic water (pH 6.0-7.0), warm water (82-86°F), high water quality, and plenty of hiding places.
+- [ASSISTANT_SAID] Rams (Mikrogeophagus spp.) care level is beginner to intermediate; requires a minimum tank size of 20 gallons, soft slightly acidic to neutral water (pH 6.5-7.5), warm water (78-82°F), regular water changes, and plenty of plants and hiding places.
+- [ASSISTANT_SAID] Discus are sensitive to water quality, social species needing a group of 6-10, and can grow up to 6 inches (15 cm).
+- [ASSISTANT_SAID] Rams are generally hardy, peaceful but can be territorial, and grow up to 2 inches (5 cm).
+- [ASSISTANT_SAID] User should consider tank size, water quality control, investment in a planted environment, and social preferences when deciding between Discus and Rams.
+- [ASSISTANT_SAID] Recommended fish species for a 55-gallon tank include: 
+  1. Discus
+  2. Angelfish
+  3. Convict Cichlids
+  4. Firemouth Cichlids
+  5. Electric Blue Cichlids
+  6. Rainbowfish
+  7. Tinfoil Barbs
+  8. Harlequin Rasboras
+  9. Dwarf Loaches
+  10. Schooling Tetras
+  11. Plecos
+- [ASSISTANT_SAID] Suggested maintaining a balanced bioload of 1-2 inches of fish per gallon, creating hiding places, and performing regular water changes (10-20% weekly) for the 55-gallon tank.
+- [PREFERENCE] User is considering adding Anacharis and Java Moss to their 20-gallon tank.
+- [ASSISTANT_SAID] Anacharis care tips include: moderate to high lighting (2-4 watts per gallon), temperature between

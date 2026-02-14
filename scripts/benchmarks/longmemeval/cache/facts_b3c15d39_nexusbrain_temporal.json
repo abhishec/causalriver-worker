@@ -1,0 +1,115 @@
+{
+  "answer_05d808e6_2": [
+    {
+      "fact": "User is looking for recommendations on external hard drives to back up photos.",
+      "type": "preference",
+      "entities": [
+        "external hard drives",
+        "photos"
+      ]
+    },
+    {
+      "fact": "User has been busy with photography lately.",
+      "type": "opinion",
+      "entities": [
+        "photography"
+      ]
+    },
+    {
+      "fact": "User received a new remote shutter release on February 10th.",
+      "type": "event",
+      "entities": [
+        "remote shutter release",
+        "February 10th"
+      ]
+    },
+    {
+      "fact": "User has been happy using Adobe Lightroom to organize and edit photos.",
+      "type": "opinion",
+      "entities": [
+        "Adobe Lightroom"
+      ]
+    },
+    {
+      "fact": "User is interested in settings or presets for landscape and portrait photography.",
+      "type": "preference",
+      "entities": [
+        "landscape photography",
+        "portrait photography"
+      ]
+    },
+    {
+      "fact": "User is considering Western Digital and LaCie for external hard drives but is open to other options.",
+      "type": "preference",
+      "entities": [
+        "Western Digital",
+        "LaCie"
+      ]
+    }
+  ],
+  "answer_05d808e6_1": [
+    {
+      "fact": "User is planning to take camera gear on a hike this weekend.",
+      "type": "event",
+      "entities": [
+        "hike",
+        "camera gear",
+        "weekend"
+      ]
+    },
+    {
+      "fact": "User recently got a new bag from Peak Design.",
+      "type": "personal",
+      "entities": [
+        "Peak Design",
+        "new bag"
+      ]
+    },
+    {
+      "fact": "User loves their new Peak Design bag.",
+      "type": "opinion",
+      "entities": [
+        "Peak Design bag"
+      ]
+    },
+    {
+      "fact": "User is still getting used to the layout of their new bag.",
+      "type": "opinion",
+      "entities": [
+        "new bag",
+        "layout"
+      ]
+    },
+    {
+      "fact": "User lost their remote shutter release on February 5th.",
+      "type": "event",
+      "entities": [
+        "remote shutter release",
+        "February 5th"
+      ]
+    },
+    {
+      "fact": "User ordered a new remote shutter release online.",
+      "type": "event",
+      "entities": [
+        "remote shutter release",
+        "online order"
+      ]
+    },
+    {
+      "fact": "User has been enjoying using their 50mm prime lens lately.",
+      "type": "preference",
+      "entities": [
+        "50mm prime lens"
+      ]
+    },
+    {
+      "fact": "User is considering whether to bring their 50mm prime lens or a zoom lens on the hike.",
+      "type": "preference",
+      "entities": [
+        "50mm prime lens",
+        "zoom lens"
+      ]
+    }
+  ]
+}

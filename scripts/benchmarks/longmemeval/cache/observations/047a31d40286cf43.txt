@@ -1,0 +1,17 @@
+**Observation Log:**
+
+[FACT] User is considering getting their car detailed soon.  
+[FACT] User got their car serviced for the first time on March 15th, and it was a great experience.  
+[FACT] User has been tracking their gas mileage and is getting around 32 miles per gallon.  
+[FACT] User has been using the rewards program at the Shell gas station near their office to earn points.  
+[EVENT] User redeemed 50,000 points from their credit card to get a $500 gift card to a car accessories store.  
+[EVENT] User purchased a new car cover, floor mats, and a steering wheel cover with the gift card.  
+[PREFERENCE] User is really happy with their new car accessories and feels they have added a nice touch to their car.  
+[PREFERENCE] User is considering getting a car wax and detailing done soon.  
+[ASSISTANT_SAID] Assistant provided general advice on how to find a good detailer in the user's area, including checking online reviews, asking for referrals, checking certifications, checking their work, and getting quotes.  
+[ASSISTANT_SAID] Assistant mentioned specific organizations to look for certifications: International Detailing Association (IDA) and National Institute of Automotive Service Excellence (ASE).  
+[ASSISTANT_SAID] Assistant emphasized the importance of doing research and choosing a reputable detailer to ensure the car receives the best care possible.  
+[TEMPORAL] Session date is 2023/04/10 (Mon) at 17:50.  
+[CHANGE] User's gas mileage is better than their old car.  
+[RELATIONSHIP] User mentioned friends, family, or coworkers in the context of asking for referrals for detailers.  
+[ASSISTANT_CREATED] Assistant created a list of steps to find a reputable detailer, including checking online reviews, asking for referrals, checking certifications, checking their work, and getting quotes.

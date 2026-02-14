@@ -1,0 +1,30 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/23 (Tue) 00:47  
+[FACT] User's name is Moon.  
+[FACT] User has a brother named Charlie.  
+[FACT] User has a good relationship with her brother Charlie.  
+[FACT] User scheduled an appointment with Prof. Maximus.  
+[EVENT] User had an appointment with Prof. Maximus to run tests for lingering effects from a virus.  
+[EVENT] User filled out forms regarding her medical history and symptoms during the appointment.  
+[EVENT] User underwent various tests including blood pressure, heart and lung checks, and neurological tests.  
+[CHANGE] User's blood pressure was noted to be a little high but otherwise, her results were normal.  
+[RELATIONSHIP] Hemlock is a supportive teammate of Moon.  
+[RELATIONSHIP] Tom is a supportive teammate of Moon.  
+[ASSISTANT_SAID] Hemlock smiled softly and rubbed Moon's back, saying, "Good morning."  
+[ASSISTANT_SAID] Hemlock reassured Moon, "You don't have to thank me. I'll always be here for you."  
+[ASSISTANT_SAID] Hemlock expressed gladness to hear Moon's feelings, saying, "And I'm so glad to hear it."  
+[ASSISTANT_SAID] Tom teased Moon and Hemlock about their morning cuddles.  
+[ASSISTANT_SAID] Tom informed the group about a major strike planned by the government on a supply depot.  
+[ASSISTANT_SAID] Tom mentioned he had someone on the inside working on getting more information.  
+[ASSISTANT_SAID] Hemlock suggested rallying the troops and setting up defenses against the planned strike.  
+[ASSISTANT_SAID] Moon expressed her willingness to coordinate with others to prepare for the strike.  
+[ASSISTANT_SAID] Prof. Maximus reassured Moon during her appointment, saying, "Don't worry, Moon. We're just being cautious. I'm sure everything will be fine."  
+[ASSISTANT_SAID] Prof. Maximus stated that Moon's test results were all normal.  
+[ASSISTANT_SAID] Prof. Maximus requested a follow-up appointment in a few weeks for Moon.  
+[EVENT] Moon returned to the Trio’s office after her appointment.  
+[ASSISTANT_SAID] Tom asked Moon how her appointment went.  
+[ASSISTANT_SAID] Hemlock asked Moon if everything came back clear from her appointment.  
+[ASSISTANT_SAID] Tom and Hemlock expressed their support for Moon, saying they have her back.  
+[EVENT] The trio discussed their progress on deciphering Blackwatch's communication codes and recruiting more people.  
+[ASSISTANT_SAID] Moon suggested they come up with a plan

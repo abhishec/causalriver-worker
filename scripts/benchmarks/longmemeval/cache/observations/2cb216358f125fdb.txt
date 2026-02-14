@@ -1,0 +1,23 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/07/22 (Sat) 08:34
+- [USER] User asked, "How does gravity work?"
+- [ASSISTANT_SAID] Gravity is a fundamental force of nature that governs the behavior of objects with mass or energy.
+- [ASSISTANT_SAID] According to the theory of general relativity developed by Albert Einstein, gravity is the curvature of spacetime caused by the presence of mass and energy.
+- [ASSISTANT_SAID] Any object with mass or energy will warp the fabric of spacetime around it, creating a gravitational field.
+- [ASSISTANT_SAID] The strength of the gravitational field depends on the mass and distance between the objects.
+- [ASSISTANT_SAID] Gravity is a very weak force compared to other fundamental forces like electromagnetism and the strong and weak nuclear forces.
+- [ASSISTANT_SAID] Gravity has a cumulative effect and is responsible for the large-scale structure of the universe, including the orbits of planets around stars and the motions of galaxies.
+- [USER] User asked, "How was it defined by Newton?"
+- [ASSISTANT_SAID] Gravity was first formally defined by Sir Isaac Newton in his work "Philosophiæ Naturalis Principia Mathematica" published in 1687.
+- [ASSISTANT_SAID] Newton defined gravity as a force that acts between two objects with mass, proportional to the product of their masses and inversely proportional to the square of the distance between them.
+- [ASSISTANT_SAID] This is known as the "Law of Universal Gravitation."
+- [ASSISTANT_SAID] The mathematical formula for calculating the force of gravity is: F = G * (m1 * m2) / r^2.
+- [ASSISTANT_SAID] In the formula, F is the force of gravity, G is the gravitational constant, m1 and m2 are the masses of the two objects, and r is the distance between them.
+- [ASSISTANT_SAID] Newton's law of gravity was a major breakthrough in understanding the behavior of objects in the universe.
+- [USER] User asked, "Compare between findings of gravity made by Newton and Einstein."
+- [ASSISTANT_SAID] Newton's law of universal gravitation provided a way to calculate the force of gravity between two objects with mass.
+- [ASSISTANT_SAID] Newton's theory had limitations, such as not explaining the deviation of Mercury's orbit.
+- [ASSISTANT_SAID] Einstein's theory of general relativity describes gravity as the curvature of spacetime caused by mass and energy.
+- [ASSISTANT_SAID] In Einstein's theory, gravity is not a force but the result of the warping of spacetime.
+-

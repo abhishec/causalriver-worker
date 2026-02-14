@@ -1,0 +1,22 @@
+**Observation Log**
+
+**Session Date:** 2022/11/18 (Fri) 13:18  
+**Session ID:** b28990c8_7
+
+1. [PREFERENCE] User is looking for book recommendations and has been reading a lot lately.
+2. [TEMPORAL] User has set a goal to read at least 2 books per month for the rest of the year.
+3. [ASSISTANT_SAID] Assistant congratulated the user on setting a reading challenge and offered to help with book recommendations.
+4. [ASSISTANT_SAID] Assistant asked the user several questions to narrow down book suggestions, including genres of interest, preference for complex or light reads, interest in series or standalone novels, time period or setting preferences, and past authors or books enjoyed.
+5. [ASSISTANT_SAID] Assistant provided a list of popular and highly-recommended books across various genres:
+   - Fiction: "The Seven Husbands of Evelyn Hugo" by Taylor Jenkins Reid, "The Nightingale" by Kristin Hannah, "The Hate U Give" by Angie Thomas
+   - Non-Fiction: "Sapiens: A Brief History of Humankind" by Yuval Noah Harari, "The Devil in the White City" by Erik Larson, "Wild: From Lost to Found on the Pacific Crest Trail" by Cheryl Strayed
+   - Mystery/Thriller: "Gone Girl" by Gillian Flynn, "Sharp Objects" by Gillian Flynn, "The Silent Patient" by Alex Michaelides
+   - Sci-Fi/Fantasy: "The Three-Body Problem" by Liu Cixin, "The First Fifteen Lives of Harry August" by Claire North, "The Night Circus" by Erin Morgenstern
+6. [PREFERENCE] User is interested in a mix of genres but has been leaning towards fiction lately.
+7. [PREFERENCE] User prefers books that are engaging and easy to follow, not too complex or heavy.
+8. [PREFERENCE] User has enjoyed historical fiction, specifically mentioning "The Nightingale," and is currently reading "The Hating Game," which is a rom-com.
+9. [PREFERENCE] User does not have a specific time period or setting in mind but likes books with strong female protagonists.
+10. [ASSISTANT_SAID] Assistant provided tailored book recommendations based on the user's preferences:
+    - Historical Fiction: "The Alice Network" by Kate Quinn, "The Lost Girls of Paris" by Pam Jenoff, "The Girls" by Emma Cline
+    - Rom-Com/Women's Fiction: "Eleanor Oliphant is Completely Fine" by Gail Honeyman, "The Rosie Project" by Graeme Simsion, "The Wedding Date" by Jasmine Guillory
+    - Contemporary Fiction: "The Devil Wears Prada" by Lauren Weisberger, "The Storied Life of A.J. Fikry" by Gabri

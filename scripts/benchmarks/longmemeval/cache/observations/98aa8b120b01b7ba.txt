@@ -1,0 +1,43 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/04/01 (Sat) 19:23
+- [EVENT] User is planning a big family dinner.
+- [PREFERENCE] User is looking for BBQ rib recipes.
+- [EVENT] User's mom's signature ribs were a huge hit at their recent family reunion.
+- [TEMPORAL] User's family reunion started on a Friday.
+- [ASSISTANT_SAID] Assistant provided BBQ rib recipes, including:
+  - **Recipe 1: Classic BBQ Ribs with Dry Rub**
+    - 2 racks of pork ribs (St. Louis-style or baby back ribs)
+    - 1/4 cup dry rub (mix of paprika, brown sugar, garlic powder, salt, black pepper, and cayenne pepper)
+    - 1 cup BBQ sauce (favorite brand or homemade)
+    - Wood chips or chunks for smoking (optional)
+  - **Recipe 2: Memphis-Style Wet Ribs**
+    - 2 racks of pork ribs (St. Louis-style or baby back ribs)
+    - 1/4 cup BBQ sauce (sweet and tangy)
+    - 1/4 cup apple cider vinegar
+    - 2 tablespoons brown sugar
+    - 1 teaspoon smoked paprika
+    - 1 teaspoon garlic powder
+    - Salt and pepper to taste
+  - **Recipe 3: Korean-Style BBQ Ribs with Gochujang**
+    - 2 racks of pork ribs (St. Louis-style or baby back ribs)
+    - 1/4 cup gochujang (Korean chili paste)
+    - 2 tablespoons soy sauce
+    - 2 tablespoons brown sugar
+    - 2 tablespoons rice vinegar
+    - 1 teaspoon garlic, minced
+    - 1 teaspoon ginger, grated
+    - 1/4 cup chopped green onions for garnish
+- [ASSISTANT_SAID] Assistant provided tips for achieving tender, fall-off-the-bone ribs, including:
+  - Choosing meaty ribs (St. Louis-style or baby back)
+  - Removing the membrane from the ribs
+  - Dry brining the ribs
+  - Cooking at low temperatures (225°F - 250°F) for 4-6 hours
+  - Using wood smoke for flavor
+  - Wrapping the ribs in foil after 4 hours
+  - Checking for an internal temperature of 160°F - 170°F for safety, and 180°F - 190°F for tenderness
+  - Basting with BBQ sauce during the last 30 minutes
+  - Letting the ribs rest before serving
+- [PREFERENCE] User thinks Recipe 1 sounds promising.
+- [ASSISTANT_SAID] Assistant confirmed that apple wood chips or chunks can be used for smoking and would complement the dry rub and BBQ sauce flavors.
+- [RELATIONSHIP] User's brother is

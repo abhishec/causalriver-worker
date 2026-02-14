@@ -1,0 +1,16 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/03/19 (Sun) 04:43
+- [ASSISTANT_SAID] Kingsman's Cost of Finance Comparison table provided with two providers: My Organization and Local Bank.
+- [ASSISTANT_SAID] My Organization's loan amount: S$100,000, interest rate: 10% p.a., interest paid: S$12,776, cost of finance: S$12,776.
+- [ASSISTANT_SAID] Local Bank's loan amount: S$3,758,059.16, interest rate: 10% p.a., interest paid: S$375,805.92, cost of finance: S$375,805.92.
+- [ASSISTANT_SAID] Interest charged for My Organization calculated as: 90% * S$90,000 * (14/365) * 10% = S$12,776 (for 52 invoices).
+- [ASSISTANT_SAID] Interest charged for Local Bank calculated as: S$3,758,059.16 * 10% = S$375,805.92.
+- [USER] User stated that the calculation of the interest charge by the assistant's organization is wrong.
+- [USER] User provided the correct calculation and workings for the interest charge: 90% * S$90,000 * (14/365) * 10% = S$310.68.
+- [USER] User calculated the total for 52 invoices as: S$310.68 * 52 = S$16,155.62.
+- [ASSISTANT_SAID] Assistant confirmed the user's calculation and replicated it logically.
+- [ASSISTANT_CREATED] Kingsman's Cost of Finance Comparison table regenerated with updated interest charge.
+- [ASSISTANT_CREATED] Updated table includes: 
+  - Source of Finance: My Organization, interest rate: 10% p.a., interest charge: S$16,155.62, total repayment: S$116,155.62.
+  - Source of Finance: Local Bank, interest rate: 10% p.a., interest charge: S$375,805.92, total repayment: S$4,133,865.08.

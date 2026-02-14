@@ -1,0 +1,27 @@
+**Observation Log:**
+
+[FACT] User is planning a new trip and is considering going solo or with family.  
+[FACT] User previously visited Hawaii with family last month and loved it.  
+[EVENT] User is thinking of going back to Hawaii.  
+[PREFERENCE] User is interested in exploring the Big Island.  
+[EVENT] User is considering staying in Kailua-Kona this time.  
+[PREFERENCE] User wants to explore the town of Kailua-Kona and do coffee farm tours.  
+[ASSISTANT_SAID] Suggested destinations for both solo travelers and families include Hawaii, Cancun, Bali, New York City, Paris, Singapore, Yellowstone National Park, Costa Rica, New Zealand, Alaska, Caribbean Islands, and Mediterranean Europe.  
+[ASSISTANT_SAID] Recommended activities on the Big Island include visiting Volcanoes National Park, Mauna Kea for stargazing, snorkeling or scuba diving, ziplining, horseback riding, visiting Hilo Farmers Market, Pacific Tsunami Museum, Hawaii Tropical Botanical Garden, Kaloko-Honokohau National Historical Park, and taking a coffee farm tour.  
+[ASSISTANT_SAID] Suggested accommodations in Kailua-Kona include:  
+1. Kona Tiki Hotel - retro-style hotel on the waterfront, starting at $120 per night.  
+2. Kona Inn - cozy family-run hotel, starting at $100 per night.  
+3. Kona Hostel - sociable hostel with dorms and private rooms, starting at $30 per night.  
+4. Holualoa Inn - charming B&B in a historic building, starting at $180 per night.  
+5. Kona Makai Condos - self-catering condos, starting at $150 per night.  
+6. Wyndham Kona Hawaiian Resort - laid-back resort, starting at $180 per night.  
+7. Coffee Shack - eco-friendly hostel on a coffee farm, starting at $40 per night.  
+8. Kalani Retreat - wellness-focused resort, starting at $120 per night.  
+9. Hale Hoola B&B - cozy family-run B&B, starting at $150 per night.  
+10. Kona Village Inn - historic inn in Kailua-Kona, starting at $120 per night.  
+11. Kona Seaside Hotel - beachfront hotel, starting at $150 per night.  
+12. Hale Kai O'Kailua - beachfront condo complex, starting at $180 per night.  
+[ASSISTANT_SAID] Recommended coffee farms to visit include Kona Coffee Living History Farm, Mountain Thunder Coffee, and Greenwell Farms.  
+[EVENT] User is thinking of visiting the Hilo Farmers Market on Saturday.  
+[PREFERENCE] User is considering a day trip to Hilo from Kailua-Kona.  
+[ASSISTANT_SAID] Suggested reasons to visit Hilo include the Hilo Farmers Market, Rainbow Falls, Wailoa River State Recreation Area, Pacific Tsunami Museum,

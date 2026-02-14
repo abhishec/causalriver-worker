@@ -1,0 +1,74 @@
+{
+  "answer_a7b44747_1": [
+    {
+      "fact": "User has a collection of vintage camera equipment and postcards",
+      "type": "personal",
+      "entities": [
+        "vintage camera equipment",
+        "postcards"
+      ]
+    },
+    {
+      "fact": "User is looking for space-saving display cases or shelves for their collection",
+      "type": "preference",
+      "entities": [
+        "space-saving display cases",
+        "shelves"
+      ]
+    },
+    {
+      "fact": "User is trying to organize and catalog their collections",
+      "type": "event",
+      "entities": [
+        "organizing",
+        "cataloging"
+      ]
+    },
+    {
+      "fact": "User finds the task of sorting and documenting their collection overwhelming",
+      "type": "opinion",
+      "entities": [
+        "overwhelming"
+      ]
+    }
+  ],
+  "answer_a7b44747_2": [
+    {
+      "fact": "User has a vintage camera collection.",
+      "type": "personal",
+      "entities": [
+        "vintage camera collection"
+      ]
+    },
+    {
+      "fact": "User recently acquired 8 postcards for their collection.",
+      "type": "event",
+      "entities": [
+        "8 postcards",
+        "collection"
+      ]
+    },
+    {
+      "fact": "User likes the idea of wall-mounted shelves for display.",
+      "type": "preference",
+      "entities": [
+        "wall-mounted shelves"
+      ]
+    },
+    {
+      "fact": "User is considering using a mix of wall-mounted shelves and glass-top display cases.",
+      "type": "opinion",
+      "entities": [
+        "wall-mounted shelves",
+        "glass-top display cases"
+      ]
+    },
+    {
+      "fact": "User is looking for resources to learn more about film development.",
+      "type": "preference",
+      "entities": [
+        "film development"
+      ]
+    }
+  ]
+}

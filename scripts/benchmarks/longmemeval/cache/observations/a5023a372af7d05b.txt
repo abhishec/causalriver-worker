@@ -1,0 +1,44 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/03/10 (Fri) 13:21
+- [PREFERENCE] User is trying to find new musicals to get into.
+- [PREFERENCE] User has been listening to the original cast recording of Dear Evan Hansen nonstop since December and is obsessed with it.
+- [ASSISTANT_SAID] Recommended musicals similar to Dear Evan Hansen: 
+  1. The Book of Mormon
+  2. Next to Normal
+  3. Spring Awakening
+  4. Be More Chill
+  5. The Lightning Thief: The Percy Jackson Musical
+- [ASSISTANT_SAID] Recommended similar artists: 
+  1. Ben Platt
+  2. Pasek and Paul
+  3. Ingrid Michaelson
+  4. The Script
+  5. Troye Sivan
+- [ASSISTANT_SAID] Other musical recommendations: 
+  1. Hadestown
+  2. The Band's Visit
+  3. Everybody's Talking About Jamie
+- [USER] User is going to check out some of the recommended shows and artists.
+- [USER] User has heard great things about The Book of Mormon and has been meaning to listen to Ben Platt's solo album.
+- [USER] User is intrigued by Hadestown and wants to know more about its story and music.
+- [ASSISTANT_SAID] Hadestown is a modern retelling of the myth of Orpheus and Eurydice, set in a post-apocalyptic world.
+- [ASSISTANT_SAID] The music in Hadestown is a fusion of folk, rock, blues, and R&B, written by Anaïs Mitchell.
+- [ASSISTANT_SAID] Key characters in Hadestown include:
+  - Orpheus
+  - Eurydice
+  - Hades
+  - Persephone
+  - Hermes
+  - The Fates
+- [ASSISTANT_SAID] Hadestown has won 8 Tony Awards, including Best Musical, Best Book, and Best Score.
+- [ASSISTANT_SAID] The original cast recording of Hadestown features Eva Noblezada as Eurydice, Reeve Carney as Orpheus, and Patrick Page as Hades.
+- [USER] User is trying to learn how to play some songs from Dear Evan Hansen on guitar.
+- [ASSISTANT_SAID] Tips for learning musical theater songs on guitar:
+  1. Start with simplified arrangements.
+  2. Focus on chord shapes.
+  3. Work on strumming and picking.
+  4. Listen to original recordings.
+  5. Practice singing and playing simultaneously.
+- [ASSISTANT_SAID] Resources for learning musical theater songs on guitar:
+  1. Sheet music and

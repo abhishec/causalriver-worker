@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/01/21 (Sat) 23:22  
+[ASSISTANT_SAID] The Browser page is where the user is directed when they click the "Browse Notes" button.  
+[ASSISTANT_SAID] The Browser page displays all the available branches for which notes are available in StudIQ.  
+[ASSISTANT_SAID] The branches are displayed in a visually appealing manner with corresponding images.  
+[ASSISTANT_SAID] On the left side of the page, there is a navigation menu that contains buttons for Alumni forum, Courses, Q&A, Notes, and Job Information.  
+[ASSISTANT_SAID] The navigation menu provides quick access to different sections of StudIQ.  
+[ASSISTANT_SAID] In the center of the page, there is a grid or list of branches, each represented by an image and the name of the branch.  
+[ASSISTANT_SAID] When the user clicks on a specific branch, they are directed to the notes page for that particular branch.  
+[ASSISTANT_SAID] The top right corner of the page contains a navigation bar with links to the Home page of Notes4U, StudIQ, About Us, and Contact Us.  
+[ASSISTANT_SAID] The Browser page provides an easy-to-use interface for users to access the notes they need based on their branch of study.  
+[USER] I have created the page for the semester-based notes inside the StudIQ project.  
+[USER] Once the user selects the branch from the Browser page, they will be directed to the home page of Semesters.  
+[USER] This page will have all semester buttons on the left side, with the 5th semester being the home page.  
+[USER] The center of the page contains the subjects of the 5th semester.  
+[ASSISTANT_SAID] The semester-based notes page is a part of the StudIQ project and is designed to provide students with access to notes based on their semester or academic year.  
+[ASSISTANT_SAID] Once a student selects their desired branch from the Browser page, they are directed to the home page of Semesters.  
+[ASSISTANT_SAID] This page features all semester buttons on the left side, with the 5th semester acting as the home page.  
+[ASSISTANT_SAID] The center of the page will contain the subjects of the 5th semester.  
+[ASSISTANT_SAID] Clicking on a subject will lead the user to a page containing all the notes related to that subject.  
+[ASSISTANT_SAID] Each note will have a brief description, author name, upload date, and a download button.  
+[ASSISTANT_SAID] At the bottom of the page

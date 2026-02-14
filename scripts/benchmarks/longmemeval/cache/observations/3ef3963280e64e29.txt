@@ -1,0 +1,25 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/20 (Sat) 16:32
+- [FACT] User has been on a plane at least once a week for the past 6 weeks.
+- [EVENT] User just got back from LA last Thursday.
+- [PREFERENCE] User prefers to book flights and hotels separately for more control over travel arrangements.
+- [PREFERENCE] User likes the convenience and comfort of train travel and can get work done during the trip.
+- [EVENT] User has taken the train from New York to Boston 3 times in the past 2 weeks.
+- [FACT] User usually uses the Acela Express or Northeast Regional trains for travel between New York and Boston.
+- [ASSISTANT_SAID] Recommended travel planners: Passport-sized Travel Journal, Travelon Travel Planner, Erin Condren LifePlanner.
+- [ASSISTANT_SAID] Recommended travel apps: TripIt, TripCase, Google Trips, TravelBank, Hopper.
+- [ASSISTANT_SAID] Suggested using Google Calendar and Evernote as other tools for travel organization.
+- [ASSISTANT_SAID] TripIt can automatically organize travel plans into a single itinerary, including flights, hotels, and car rentals.
+- [ASSISTANT_SAID] TripIt offers a feature called "Points Tracker" to track frequent flyer miles and loyalty program accounts.
+- [ASSISTANT_SAID] TripIt integrates with over 170 loyalty programs, including popular airlines, hotels, and credit cards.
+- [ASSISTANT_SAID] TripIt can track mileage earnings and redemptions, monitor progress towards rewards, and provide expiration alerts.
+- [ASSISTANT_SAID] TripIt allows booking flights directly within the app for select airlines, including United Airlines.
+- [ASSISTANT_SAID] TripIt partners with booking sites like Booking.com, Hotels.com, and Expedia for hotel bookings.
+- [ASSISTANT_SAID] TripIt allows users to add train reservations to their itinerary, including schedules and ticket documentation.
+- [ASSISTANT_SAID] TripIt provides real-time train status updates and reminders for train travel.
+- [ASSISTANT_SAID] Suggested using TripIt's "Trips" feature to save frequent routes and travel plans as templates.
+- [EVENT] User experienced a delay on the Acela Express last month due to mechanical issues.
+- [PREFERENCE] User prefers to stay productive during delays by catching up on work and responding to emails.
+- [FACT] User was able to adjust their schedule upon arrival in Boston after the delay.
+- [PREFERENCE] User has learned to roll with the punches and make the most of travel delays with the help of TripIt.

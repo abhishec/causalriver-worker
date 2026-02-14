@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[FACT] User is moving into a new home in three weeks.  
+[FACT] User's new home is located in a suburb about 20 miles outside of the city, zip code 12345.  
+[FACT] User has a two-year-old son.  
+[PREFERENCE] User is looking for recommendations for local utility providers.  
+[PREFERENCE] User needs electricity, gas, water, internet, and TV services.  
+[PREFERENCE] User plans to use their current cable provider for TV but is open to other options if there are better deals available.  
+[EVENT] User is looking for recommendations on local schools in the area.  
+[EVENT] User is looking for recommendations on furniture stores in the area.  
+[ASSISTANT_SAID] Assistant congratulated the user on their new home and offered to help with utility provider recommendations.  
+[ASSISTANT_SAID] Assistant requested the user's new home's location and the type of utilities needed for accurate recommendations.  
+[ASSISTANT_SAID] Assistant provided a list of local utility providers for electricity, gas, water, internet, and TV services based on zip code 12345.  
+[ASSISTANT_SAID] Assistant listed specific utility providers:  
+1. **XYZ Electric Co.** - 1-800-ELEC-123 (1-800-353-2123) - [www.xyzelectric.com](http://www.xyzelectric.com)  
+2. **Green Energy Solutions** - 1-877-GREEN-12 (1-877-473-3612) - [www.greenenergysolutions.com](http://www.greenenergysolutions.com)  
+3. **Suburban Gas Co.** - 1-800-GAS-1234 (1-800-427-1234) - [www.suburbangas.com](http://www.suburbangas.com)  
+4. **Local Water Authority** - 1-800-WATER-01 (1-800-928-3701) - [www.localwaterauthority.com](http://www.localwaterauthority.com)  
+5. **FiberFast Internet** - 1-855-FIBER-01 (1-855-342-3701) - [www.fiberfastinternet.com](http://www.fiberfastinternet.com)  
+6. **CableMax** - 1-877-CABLE-01 (1-877-222-5301) - [www.cablemax.com](http://www.cablemax.com)  
+7. **Satellite TV Provider** - 1-855-SAT-TV-01 (1-855-728-8801) - [www.satellitetvprovider.com](http://www.satellivetvprovider.com)  
+[ASSISTANT_SAID] Assistant provided tips for ensuring a smooth utility setup process, including researching setup fees, checking for bund

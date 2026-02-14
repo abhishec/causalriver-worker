@@ -1,0 +1,41 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/22 (Mon) 03:06  
+[ASSISTANT_SAID] A real-time system is a type of computer system designed to process data or control external devices based on time constraints, producing correct results within a specified time limit known as the deadline.  
+[ASSISTANT_SAID] Real-time systems are used in applications such as industrial control systems, flight control systems, medical equipment, and multimedia applications.  
+[ASSISTANT_SAID] Real-time systems are classified into hard and soft real-time systems based on the consequences of missing the deadline. Hard real-time systems have critical deadlines that cannot be missed, while soft real-time systems can tolerate some deadline misses but may experience performance degradation.  
+[USER] What is real-time programming?  
+[ASSISTANT_SAID] Real-time programming is a programming approach used to create software systems that can process input and produce output within a specified time constraint, typically measured in microseconds or milliseconds.  
+[ASSISTANT_SAID] This approach is used to build systems requiring immediate response to external stimuli, such as flight control systems, medical devices, and industrial control systems.  
+[ASSISTANT_SAID] Real-time programming requires careful consideration of timing constraints and resource allocation to ensure the system meets specified performance requirements.  
+[USER] Can you give me some examples of real-time programming?  
+[ASSISTANT_SAID] Examples of real-time programming include:  
+[ASSISTANT_SAID] 1. Flight control systems: Ensures aircraft stability and safety.  
+[ASSISTANT_SAID] 2. Industrial automation: Controls machines and robots, preventing errors or dangerous situations.  
+[ASSISTANT_SAID] 3. Video games: Ensures smooth and responsive graphics and gameplay.  
+[ASSISTANT_SAID] 4. Financial trading systems: Makes split-second decisions based on market data.  
+[ASSISTANT_SAID] 5. Medical devices: Monitors patients' vital signs and delivers medication.  
+[USER] Can you show me some code examples?  
+[ASSISTANT_CREATED] Example 1 - C/C++ code snippet for a real-time task using Xenomai:  
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/mman.h>
+#include <native/task.h>
+#include <native/timer.h>
+
+#define TASK_PRIO 99
+#define TASK_MODE T_JOINABLE
+#define TASK_STACK_SIZE 0
+#define CYCLE_TIME 1000000
+
+RT_TASK demo_task;
+
+void demo(void *arg) {
+    RTIME now, previous;
+    rt_task_set_periodic(NULL, TM_NOW, CYCLE_TIME);
+    previous = rt_timer_read();
+    for (;;) {
+        rt_task_wait_period(NULL);
+        now = rt_timer

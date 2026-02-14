@@ -1,0 +1,23 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/27 (Sat) 11:28
+- [FACT] User is applying for the position of Data Centre Power and Performance Co-op Student at AMD.
+- [FACT] User is a third-year Electrical Engineering student at Toronto Metropolitan University.
+- [FACT] User has 4 years of experience as a Retail Associate at McDonalds.
+- [FACT] User has 10+ months of experience as an Administrative Assistant and Support.
+- [FACT] User's phone number is 647-717-5780.
+- [FACT] User's personal email is aman.ayaz44@gmail.com.
+- [PREFERENCE] User has a passion for innovation and a desire to learn more about computer hardware and electronic design.
+- [PREFERENCE] User enjoys a fast-paced, dynamic environment.
+- [EVENT] User participated in Toronto Met Formula Racing.
+- [EVENT] User completed the CS50 Series Course by Harvard University during the quarantine in 2021.
+- [CHANGE] User has developed their own versions of Black-Jack, Tic Tac Toe, and Hangman using Java and Python.
+- [ASSISTANT_SAID] Assistant addressed the cover letter to the Hiring Manager.
+- [ASSISTANT_CREATED] Assistant created a revised cover letter for the user, making it more concise and structured.
+- [ASSISTANT_CREATED] Assistant included the user's academic background, work experience, and skills in the revised cover letter.
+- [ASSISTANT_SAID] Assistant emphasized the user's strong analytical, problem-solving, and interpersonal skills in the cover letter.
+- [ASSISTANT_SAID] Assistant highlighted the user's experience with lab hardware such as oscilloscopes, function generators, and spectrum analyzers.
+- [ASSISTANT_SAID] Assistant noted the user's knowledge in analog/digital circuit analysis, reading schematics, software architecture, design, and debugging.
+- [ASSISTANT_SAID] Assistant mentioned the user's leadership role in a group project during the CPS125 Digital Computation and Programming course.
+- [ASSISTANT_SAID] Assistant acknowledged the user's initiative in learning programming languages and developing algorithms.
+- [ASSISTANT_SAID] Assistant expressed confidence in the user's suitability for the Data Centre Power and Performance Co-op Student position at AMD.

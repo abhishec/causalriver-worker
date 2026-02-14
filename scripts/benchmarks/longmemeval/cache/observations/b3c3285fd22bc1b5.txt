@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [FACT] User is planning a weekend in NYC with a friend.
+- [EVENT] User attended the Impressionist exhibit at the Met with their friend Sarah last Saturday.
+- [PREFERENCE] User loved the Monet collection at the Impressionist exhibit.
+- [ASSISTANT_SAID] The Met is one of the world's largest and most famous museums, with a collection of over 2 million works of art spanning 5,000 years of human history.
+- [ASSISTANT_SAID] Must-see exhibits at the Met include: The Temple of Dendur, The Great Hall, The European Wing, The American Wing, and The Impressionist and Modern Art Galleries.
+- [ASSISTANT_SAID] Tips for visiting the Met include planning ahead, arriving early, taking breaks, using the Met's website and app, and taking advantage of pay-what-you-wish admission.
+- [ASSISTANT_SAID] Other museums in NYC worth visiting include: The Museum of Modern Art (MoMA), The Guggenheim Museum, The Whitney Museum of American Art, The American Museum of Natural History, and The Frick Collection.
+- [EVENT] User is interested in visiting the Museum of Modern Art (MoMA).
+- [ASSISTANT_SAID] User can check MoMA's website, social media, or online event calendars for current exhibits.
+- [ASSISTANT_SAID] Possible exhibitions at MoMA include "Surmodernidad: Contemporary Art from the Museum of Modern Art, Buenos Aires," "Meret Oppenheim: My Exhibition," "Guerrilla Girls: The Art of Behaving Badly," and "Abdulrazaq Awofeso: Cut from the Same Cloth."
+- [TEMPORAL] Some exhibitions at MoMA are through March 2023 and August 2023.
+- [EVENT] User visited the Museum of Modern Art last month with their sister, Emily.
+- [PREFERENCE] User was struck by the vibrant colors and emotional depth of Frida Kahlo's paintings during the retrospective exhibit.
+- [ASSISTANT_SAID] Frida Kahlo's work is known for its vibrant colors and emotional depth, reflecting her life experiences and cultural heritage.
+- [ASSISTANT_SAID] The Met has an extensive collection of Impressionist and Post-Impressionist art, including works by Pierre-Auguste Renoir, Camille Pissarro, Mary Cassatt, and Edgar Degas.
+- [ASSISTANT_SAID] User can use The Met's website or mobile app to find the locations of Impressionist works.
+- [EVENT] User is planning to visit the American Museum of Natural History soon.
+- [ASSISTANT_SAID] The American Museum of Natural History has extensive dinosaur exhibits, including the Hall of Saurischian Dinosaurs and the Hall of Ornithischian Dinosaurs.
+- [ASSISTANT

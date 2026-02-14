@@ -1,0 +1,17 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/21 (Sun) 12:52
+- [USER] User expressed interest in eco-friendly resorts in Africa.
+- [ASSISTANT_SAID] Recommended eco-friendly resorts in Africa:
+  - [FACT] Mahali Mzuri, Kenya - Luxury safari camp in the Olare Motorogi Conservancy, committed to sustainability with solar power, composting toilets, and recycling waste.
+  - [FACT] Benguerra Island Lodge, Mozambique - Eco-friendly resort on a private island in the Bazaruto Archipelago, operates on solar power, desalination for water, and compostable toilets, supports local conservation efforts.
+  - [FACT] Four Seasons Safari Lodge, Tanzania - Located in the Serengeti, utilizes eco-friendly technologies such as solar power, water recycling systems, and energy-efficient lighting, promotes sustainable tourism practices.
+  - [FACT] Tswalu Kalahari, South Africa - Luxury eco-lodge in the Northern Cape Province, implements sustainable practices like solar power, water harvesting, and organic farming, engages in conservation efforts and supports local communities.
+  - [FACT] Sabyinyo Silverback Lodge, Rwanda - Eco-friendly lodge on the edge of Volcanoes National Park, operates on solar power, rainwater harvesting, and biogas for cooking, committed to preserving biodiversity and supporting conservation of endangered species.
+- [PREFERENCE] User has a desire to experience luxury travel while being mindful of the environment.
+- [ASSISTANT_SAID] Suggested that the user consider their travel preferences and interests when choosing an eco-friendly resort, providing specific recommendations based on interests:
+  - [FACT] Mahali Mzuri in Kenya for wildlife conservation and appreciation.
+  - [FACT] Benguerra Island Lodge in Mozambique for a beach getaway with marine activities.
+  - [FACT] Tswalu Kalahari in South Africa for exploring the savannah and cultural experiences.
+- [USER] User plans to do more research on the recommended eco-friendly resorts to find the best fit for their preferences.
+- [ASSISTANT_SAID] Offered to help with any future questions and wished the user enjoyment in their research.

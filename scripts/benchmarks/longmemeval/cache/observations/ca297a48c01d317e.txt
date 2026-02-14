@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/03/26 (Sun) 12:18  
+[FACT] User has been cooking at home more frequently over the past three months.  
+[PREFERENCE] User enjoys trying out new recipes and techniques.  
+[EVENT] User is planning to make a Korean-style BBQ beef recipe for dinner tonight.  
+[PREFERENCE] User wants to try a different type of protein instead of beef for the Korean BBQ.  
+[ASSISTANT_SAID] Assistant suggested alternatives to beef for Korean-style BBQ: pork, chicken, shrimp, tofu, lamb, and duck.  
+[ASSISTANT_SAID] Assistant provided tips for marinating and cooking different proteins, including adjusting marinating time and cooking temperature based on the protein used.  
+[EVENT] User is thinking of trying out pork belly for the Korean BBQ.  
+[ASSISTANT_SAID] Assistant provided tips on how to prep pork belly before marinating, including scoring, removing excess fat, pounding or tenderizing, cutting into smaller pieces, and salting.  
+[ASSISTANT_SAID] Assistant recommended marinating pork belly for a minimum of 2 hours to overnight for optimal flavor and tenderization.  
+[ASSISTANT_SAID] Assistant suggested cooking pork belly to an internal temperature of 160°F (71°C).  
+[EVENT] User is thinking of serving the pork belly with roasted vegetables.  
+[ASSISTANT_SAID] Assistant suggested vegetables that would pair well with the sweet and spicy flavors of Korean BBQ: Korean radish (daikon), carrots, Brussels sprouts, sweet potatoes, zucchini, mushrooms, and broccoli.  
+[ASSISTANT_SAID] Assistant provided roasting tips for the suggested vegetables, including seasoning and cooking methods.  
+[EVENT] User is considering roasting the vegetables in an air fryer instead of the oven.  
+[ASSISTANT_SAID] Assistant confirmed that using an air fryer is a good idea and provided adjustments for cooking time and temperature.  
+[ASSISTANT_SAID] Assistant recommended reducing the temperature by 25-50°F (15-25°C) and reducing cooking time by 30-50% when using an air fryer.  
+[ASSISTANT_SAID] Assistant provided specific air fryer settings for the suggested vegetables, including temperature and cooking time.  
+[EVENT] User has had great success with the air fryer before and finds it healthier than deep-frying.  
+[ASSISTANT_SAID] Assistant provided tips for getting Brussels sprouts and sweet potatoes crispy in the air fryer, including drying them thoroughly, cutting them in half, tossing with oil and seasonings, and adjusting air fryer settings.  
+[ASSISTANT_SAID] Assistant suggested increasing the air fryer temperature to 420°F (220°C) for the last few minutes to help crisp up the Brussels sprouts.

@@ -1,0 +1,21 @@
+**Observation Log:**
+
+[FACT] User recently returned from a trip to Europe on June 15th.  
+[EVENT] User is looking for travel inspiration for their next destination.  
+[ASSISTANT_SAID] Recommended popular travel blogs: The Blonde Abroad, Expert Vagabond, The Points Guy, Nomadic Matt, Uncornered Market.  
+[ASSISTANT_SAID] Recommended popular Instagram accounts: Mark Wiens, The Yoga Nomads, Be My Travel Muse, The Travel Hack, Lost LeBlanc.  
+[ASSISTANT_SAID] Suggested other travel resources: Lonely Planet, Travel + Leisure, Instagram's "Travel" account.  
+[FACT] User is interested in following fitness influencers on Instagram.  
+[ASSISTANT_SAID] Recommended popular fitness influencers: Kayla Itsines, Michelle Lewin, Ulisses Jr, Adriene Mishler, Blogilates, Dylan Werner Yoga, Shalane Flanagan, Ryan Hall, Camille Herron, Steve Cook, Natalie Jill, Matt Kroczaleski, Dr. Mark Hyman, Robyn Youkilis, Lee Tilghman, Tony Robbins, Massy Arias.  
+[ASSISTANT_SAID] Advised to consult with a healthcare professional before starting any new fitness or nutrition program.  
+[FACT] User started following some fitness influencers on Instagram recently.  
+[TEMPORAL] User sent 12 messages to a particular influencer on July 15th, asking about her workout routine.  
+[PREFERENCE] User is considering focusing on yoga for relaxation and centering.  
+[ASSISTANT_SAID] Suggested pros and cons of focusing on a specific niche (like yoga or weightlifting) versus a general fitness approach.  
+[ASSISTANT_SAID] Provided tips for establishing a consistent yoga routine, including starting small, choosing a schedule, creating a dedicated space, investing in a good yoga mat, and listening to the body.  
+[ASSISTANT_SAID] Recommended yoga apps: Down Dog, Yoga Studio, YogaGlo, Pocket Yoga, Alo Moves.  
+[ASSISTANT_SAID] Recommended online resources: Yoga International, Do You Yoga, Yoga With Adriene, Gaia, YouTube Yoga Channels.  
+[PREFERENCE] User has decided to start with YogaGlo for their yoga practice.  
+[ASSISTANT_SAID] Encouraged user to set specific goals for their yoga practice, such as practicing three times a week or focusing on a certain type of yoga (like Hatha or Vinyasa).  
+[ASSISTANT_SAID] Provided tips for setting specific goals, including specificity, realism, variety, progression, and flexibility.  
+[ASSISTANT_SAID] Listed popular yoga styles to consider: Hatha, Vinyasa, Restorative, Yin yoga.

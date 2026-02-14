@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[FACT] User is planning a shopping trip to Target this weekend.  
+[EVENT] User is trying to maximize savings on baby supplies, specifically diapers.  
+[FACT] User used a $5 off coupon on a pack of diapers last week.  
+[ASSISTANT_SAID] Target runs! The assistant is happy to help find coupons for baby supplies, including diapers.  
+[ASSISTANT_SAID] Suggested ways to score discounts on diapers and other baby essentials at Target include:  
+[ASSISTANT_SAID] 1. Check Target's website or mobile app for digital coupons, Cartwheel offers, and manufacturer coupons.  
+[ASSISTANT_SAID] 2. Look for coupons on diaper manufacturer websites, such as Pampers, Huggies, and Luvs.  
+[ASSISTANT_SAID] 3. Visit popular coupon websites like Coupons.com, RetailMeNot, CouponCabin, and Groupon.  
+[ASSISTANT_SAID] 4. Use cashback apps like Ibotta and Fetch Rewards for rebates and points on diaper purchases.  
+[ASSISTANT_SAID] 5. Consider applying for a Target RedCard for 5% off on all purchases.  
+[ASSISTANT_SAID] 6. Download the Cartwheel app for exclusive offers on baby supplies.  
+[ASSISTANT_SAID] 7. Join baby clubs like Target's Baby Registry for exclusive discounts.  
+[ASSISTANT_SAID] 8. Check Sunday newspapers for diaper coupons.  
+[ASSISTANT_SAID] 9. Consider diaper subscription services like Diapers.com or Amazon Family for discounts.  
+[ASSISTANT_SAID] 10. Combine manufacturer coupons with Target coupons, Cartwheel offers, or cashback apps to maximize savings.  
+[ASSISTANT_SAID] Reminder to check expiration dates and terms of each coupon or offer.  
+[EVENT] User is also looking for coupons on baby food and formula.  
+[ASSISTANT_SAID] Suggested tips to find coupons and discounts on baby food and formula include:  
+[ASSISTANT_SAID] 1. Check manufacturer websites like Gerber, Beech-Nut, Earth's Best, and Plum Organics for baby food.  
+[ASSISTANT_SAID] 2. Use coupon websites like Coupons.com, RetailMeNot, CouponCabin, and Groupon.  
+[ASSISTANT_SAID] 3. Use cashback apps like Ibotta and Fetch Rewards for rebates on baby food.  
+[ASSISTANT_SAID] 4. Join baby food clubs like Gerber's Baby Bundle Program and Beech-Nut's Baby Club for discounts.  
+[ASSISTANT_SAID] 5. Check manufacturer websites like Enfamil, Similac, and Gerber Good Start for

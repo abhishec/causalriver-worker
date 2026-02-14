@@ -1,0 +1,98 @@
+{
+  "answer_c7ddc051_1": [
+    {
+      "fact": "User is mostly using their camera for portrait and low-light photography.",
+      "type": "preference",
+      "entities": [
+        "portrait photography",
+        "low-light photography"
+      ]
+    },
+    {
+      "fact": "User needs a bag that can protect their gear well.",
+      "type": "preference",
+      "entities": []
+    },
+    {
+      "fact": "User has been having issues with their old 18-55mm kit lens.",
+      "type": "personal",
+      "entities": [
+        "18-55mm kit lens"
+      ]
+    },
+    {
+      "fact": "User has been relying on manual focus lately.",
+      "type": "personal",
+      "entities": []
+    },
+    {
+      "fact": "User recently got a new 50mm prime lens.",
+      "type": "personal",
+      "entities": [
+        "50mm prime lens"
+      ]
+    },
+    {
+      "fact": "User's new 50mm prime lens has been working out great.",
+      "type": "opinion",
+      "entities": [
+        "50mm prime lens"
+      ]
+    },
+    {
+      "fact": "User owns a Nikon D5600 camera.",
+      "type": "personal",
+      "entities": [
+        "Nikon D5600"
+      ]
+    },
+    {
+      "fact": "User is considering bags to carry their Nikon D5600 and a few lenses, including the 50mm prime.",
+      "type": "preference",
+      "entities": [
+        "Nikon D5600",
+        "50mm prime lens"
+      ]
+    }
+  ],
+  "answer_c7ddc051_2": [
+    {
+      "fact": "User is considering getting a new tripod.",
+      "type": "preference",
+      "entities": [
+        "tripod"
+      ]
+    },
+    {
+      "fact": "User has a new 70-200mm zoom lens.",
+      "type": "personal",
+      "entities": [
+        "70-200mm zoom lens"
+      ]
+    },
+    {
+      "fact": "User has been getting great shots with their new lens.",
+      "type": "opinion",
+      "entities": [
+        "great shots",
+        "70-200mm zoom lens"
+      ]
+    },
+    {
+      "fact": "User has been getting great portrait shots with remote flash triggers.",
+      "type": "opinion",
+      "entities": [
+        "portrait shots",
+        "remote flash triggers"
+      ]
+    },
+    {
+      "fact": "User attended a workshop where they got remote flash triggers.",
+      "type": "event",
+      "entities": [
+        "workshop",
+        "remote flash triggers"
+      ]
+    }
+  ]
+}

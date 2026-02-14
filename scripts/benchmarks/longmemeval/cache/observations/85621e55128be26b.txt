@@ -1,0 +1,20 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/09/04 (Mon) 00:52  
+[ASSISTANT_SAID] The "Create a New Site" button is no longer available in the Forge interface.  
+[ASSISTANT_SAID] To create a new site on Forge and configure it to use Azure as your server provider, follow these updated steps:  
+[ASSISTANT_SAID] Step 1: Log in to your Forge account on the Forge website.  
+[ASSISTANT_SAID] Step 2: From the Forge dashboard, click on the "Create a New Server" button.  
+[ASSISTANT_SAID] Step 3: In the "Create a New Server" form, enter your server details, such as the name, size, and region. Select "Azure" as your server provider.  
+[ASSISTANT_SAID] Step 4: Choose your Azure subscription, resource group, virtual network, and subnet.  
+[ASSISTANT_SAID] Step 5: Configure your server settings, such as your SSH key, database password, and backup options.  
+[ASSISTANT_SAID] Step 6: Review the details you entered and click on the "Create Server" button to create your new server in Forge.  
+[ASSISTANT_SAID] Step 7: Once your server is created, you can create a new site on your Azure server by clicking on the "Create Site" button in your server's details page.  
+[ASSISTANT_SAID] Step 8: In the "Create a New Site" form, enter your site details, such as the name, domain, and SSL certificate. Choose the web and database servers you want to use.  
+[ASSISTANT_SAID] Step 9: Review the details you entered and click on the "Create Site" button to create your new site on your Azure server.  
+[ASSISTANT_SAID] Step 10: You can then upload your front-end and back-end files, configure your web server and back-end server, and test and launch your site.  
+[ASSISTANT_SAID] The specific steps for configuring your Azure server and site may vary depending on your site's requirements and the Azure services you choose to use.  
+[ASSISTANT_SAID] For step 2, you should choose "Custom VPS" as the server provider since Azure is not listed as a preconfigured provider in Forge.  
+[ASSISTANT_SAID] Once you have selected "Custom VPS," you will be prompted to enter your Azure server details, such as the IP address, SSH user, and SSH port.  
+[ASSISTANT_SAID] You can find this information in the Azure portal, under the virtual machine settings for your server.  
+[ASSISTANT_SA

@@ -1,0 +1,21 @@
+**Observation Log:**
+
+**Session Date:** 2023/05/25 (Thu) 07:00  
+**Session ID:** sharegpt_6dy7yyh_0
+
+- [FACT] The user wants the assistant to act as a market research expert.
+- [FACT] The user requests the assistant to speak and write fluent English.
+- [FACT] The user specifies that the assistant should pretend to have the most accurate and detailed information about keywords.
+- [FACT] The user indicates that the assistant should be able to develop a full SEO content plan in fluent English.
+- [PREFERENCE] The user provides the target keyword "fantasy art styles" for the SEO content strategy.
+- [EVENT] The user requests the creation of a markdown table for an SEO content strategy plan.
+- [CHANGE] The user specifies that the assistant should not use generic keywords like "introduction," "conclusion," or "tl:dr."
+- [TEMPORAL] The user requests the information to be structured in a markdown table format.
+- [ASSISTANT_SAID] The assistant is instructed to cluster keywords according to the top 10 super categories.
+- [ASSISTANT_SAID] The assistant is to name the super category in the first column called "keyword cluster."
+- [ASSISTANT_SAID] The assistant is to add another column with 7 subcategories for each keyword cluster or specific long-tail keywords.
+- [ASSISTANT_SAID] The assistant is to list another column for human searcher intent for the keyword.
+- [ASSISTANT_SAID] The assistant is to cluster the topic into one of three search intent groups: commercial, transactional, or informational.
+- [ASSISTANT_SAID] The assistant is to write a simple but click-enticing title for a post about the keyword.
+- [ASSISTANT_SAID] The assistant is to write an attractive meta description with a high click-thru-rate for the topic, with a length of 120 to 155 words.
+- [ASSISTANT_CREATED] The assistant is to create a markdown table with the following columns: keyword cluster, keyword, search intent, title, meta description.

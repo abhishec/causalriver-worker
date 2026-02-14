@@ -1,0 +1,88 @@
+{
+  "answer_5e3eeb12_1": [
+    {
+      "fact": "User is organizing their shoe collection",
+      "type": "preference",
+      "entities": [
+        "shoe collection"
+      ]
+    },
+    {
+      "fact": "User recently got a new pair of Adidas running shoes on January 10th",
+      "type": "event",
+      "entities": [
+        "Adidas running shoes",
+        "January 10th"
+      ]
+    },
+    {
+      "fact": "User wants to take good care of their new Adidas running shoes",
+      "type": "preference",
+      "entities": [
+        "Adidas running shoes"
+      ]
+    },
+    {
+      "fact": "User wore brown leather boots to an office party on February 5th",
+      "type": "event",
+      "entities": [
+        "brown leather boots",
+        "office party",
+        "February 5th"
+      ]
+    },
+    {
+      "fact": "User thinks they scuffed their brown leather boots on the dance floor",
+      "type": "opinion",
+      "entities": [
+        "brown leather boots",
+        "dance floor"
+      ]
+    }
+  ],
+  "answer_5e3eeb12_2": [
+    {
+      "fact": "User has a pair of sneakers they wore to play basketball on February 1st.",
+      "type": "event",
+      "entities": [
+        "sneakers",
+        "basketball",
+        "February 1st"
+      ]
+    },
+    {
+      "fact": "User's old Converse sneakers had a broken shoelace on January 24th.",
+      "type": "event",
+      "entities": [
+        "Converse sneakers",
+        "shoelace",
+        "January 24th"
+      ]
+    },
+    {
+      "fact": "User has brown leather boots that were scuffed at an office party on February 5th.",
+      "type": "event",
+      "entities": [
+        "brown leather boots",
+        "office party",
+        "February 5th"
+      ]
+    },
+    {
+      "fact": "User is considering taking their shoes to a shoe cleaning place near their house.",
+      "type": "preference",
+      "entities": [
+        "shoe cleaning place"
+      ]
+    },
+    {
+      "fact": "User needs their brown leather boots polished and fixed.",
+      "type": "preference",
+      "entities": [
+        "brown leather boots",
+        "polished",
+        "fixed"
+      ]
+    }
+  ]
+}

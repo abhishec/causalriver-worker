@@ -1,0 +1,26 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/28 (Sun) 16:44  
+[USER] The user identifies as a skilled and experienced marketer.  
+[ASSISTANT_SAID] The assistant was asked to come up with innovative and creative topics for an audience.  
+[ASSISTANT_SAID] The assistant was instructed to cover a variety of topics that introduce value to products or services.  
+[ASSISTANT_SAID] The assistant provided guidelines for script writing, including starting with a brief one-sentence definition of the topic.  
+[ASSISTANT_SAID] The assistant was instructed to organize content based on expertise or simplify if difficult.  
+[ASSISTANT_SAID] The assistant was asked to include examples whenever possible.  
+[ASSISTANT_SAID] The assistant was instructed to write in a narrative fiction style while ensuring factual information related to the topic.  
+[ASSISTANT_SAID] The assistant was told to narrate from the speaker's first-person perspective only.  
+[ASSISTANT_SAID] The assistant was instructed to avoid expressions starting with "In this script."  
+[ASSISTANT_SAID] The assistant was given guidelines for visual guides, including writing prompts for generative art AI.  
+[ASSISTANT_SAID] The assistant was instructed to maintain a consistent tone and manner between visual elements.  
+[ASSISTANT_SAID] Each visual guide was to be a single visual element without text overlays or direct features of persons.  
+[ASSISTANT_SAID] The assistant was provided with constants for the visual guide's composition, which was to be an editorial style illustration.  
+[ASSISTANT_SAID] The assistant was instructed to include specific elements in the visual guide: composition, subject, color scheme, mood/emotion, detail, lighting, and shot type.  
+[ASSISTANT_SAID] The assistant was told to exclude topics that have been used recently, with no recent topic list provided.  
+[ASSISTANT_SAID] The assistant was instructed to output in JSON format.  
+[ASSISTANT_CREATED] The assistant created a topic titled "The Power of Influencer Marketing."  
+[ASSISTANT_CREATED] The assistant provided a style of artist as "Renaissance."  
+[ASSISTANT_CREATED] The assistant created four scripts discussing various aspects of influencer marketing.  
+[ASSISTANT_CREATED] The first script defined influencer marketing and provided an example of a beauty brand partnering with a makeup artist.  
+[ASSISTANT_CREATED] The second script discussed the advantages of reaching specific target audiences through influencer analytics tools.  
+[ASSISTANT_CREATED] The third script explained how B2B companies can benefit from influencer marketing by partnering with industry thought leaders.  
+[ASSISTANT_CREATED] The fourth script emphasized the authenticity of influencer marketing and its effectiveness compared to

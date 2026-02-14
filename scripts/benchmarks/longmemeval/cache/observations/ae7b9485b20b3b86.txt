@@ -1,0 +1,28 @@
+**Observation Log:**
+
+[FACT] The user is trying to establish a consistent wake-up time.  
+[FACT] The user managed to wake up on time only on Monday and Tuesday.  
+[FACT] The user is struggling to get back on track with their wake-up time.  
+[FACT] The user has trouble getting to bed on time.  
+[FACT] The user has been struggling with establishing a consistent morning routine.  
+[TEMPORAL] The session date is 2023/05/23 (Tue) at 22:44.  
+[ASSISTANT_SAID] Establishing a consistent wake-up time can be challenging, but with the right strategies, it can be improved.  
+[ASSISTANT_SAID] Suggested tips to improve morning routine and wake-up time consistency include:  
+[ASSISTANT_SAID] 1. Set a realistic goal for wake-up time.  
+[ASSISTANT_SAID] 2. Establish a bedtime routine with relaxing activities.  
+[ASSISTANT_SAID] 3. Create a consistent wake-up routine with enjoyable activities.  
+[ASSISTANT_SAID] 4. Use a wake-up light to simulate sunrise.  
+[ASSISTANT_SAID] 5. Avoid snoozing the alarm.  
+[ASSISTANT_SAID] 6. Make mornings enjoyable with something to look forward to.  
+[ASSISTANT_SAID] 7. Be consistent on weekends to regulate the body's internal clock.  
+[ASSISTANT_SAID] 8. Use technology to set multiple alarms or apps for accountability.  
+[ASSISTANT_SAID] 9. Gradually adjust wake-up time by 15-30 minutes earlier each day.  
+[ASSISTANT_SAID] 10. Be kind to yourself and focus on getting back on track if you miss a day.  
+[ASSISTANT_SAID] Additional tips include identifying reasons for struggling to wake up and using an accountability partner.  
+[USER] The user has tried some of the tips before but struggles with getting to bed on time.  
+[USER] The user has noticed that if they don't get to bed by 10:30 PM, they have a hard time waking up in the morning.  
+[ASSISTANT_SAID] Suggested strategies for winding down earlier and getting to bed at a decent hour include:  
+[ASSISTANT_SAID] 1. Set a bedtime goal, such as 10:30 PM.  
+[ASSISTANT_SAID] 2. Establish a calming pre-sleep routine with activities like reading or taking a warm bath.  
+[ASSISTANT_SAID] 3. Gradually adjust the evening routine by going to bed 15-30 minutes earlier.  
+[ASSISTANT_SAID] 4. Limit screen time before bed to

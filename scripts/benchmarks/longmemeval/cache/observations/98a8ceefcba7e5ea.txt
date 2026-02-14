@@ -1,0 +1,15 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/06/15 (Thu) 14:01  
+[ASSISTANT_SAID] Margo received positive feedback for her teaching skills.  
+[ASSISTANT_SAID] Margo was noted for her ability to connect with her student.  
+[ASSISTANT_SAID] Margo successfully used camera position C1 to help her student.  
+[ASSISTANT_SAID] It was suggested that Margo could improve by using more active verbs when instructing her students.  
+[ASSISTANT_SAID] Margo was advised to avoid using the word "releasing."  
+[ASSISTANT_SAID] Margo received specific feedback to be mindful of using different camera positions and gestures to give her students more verbal adjustments and feedback.  
+[ASSISTANT_CREATED] A summary of the feedback Margo received was created, including the following points:  
+[ASSISTANT_CREATED] "Good job teaching from C1 and helping your student."  
+[ASSISTANT_CREATED] "Try to use a more active verb instead of 'releasing' when you want your students to move: instead of 'release your arm up', try something like 'reach your arm up' or 'raise your arm up'."  
+[ASSISTANT_CREATED] "Great at connecting with your student."  
+[USER] Requested a 200-word summary in paragraph form for Margo and then bullets of feedback.  
+[USER] Requested to change the third-person tone to second-person "you" as if speaking/writing feedback directly to Margo.

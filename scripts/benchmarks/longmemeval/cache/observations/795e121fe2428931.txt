@@ -1,0 +1,19 @@
+**Observation Log:**
+
+- [FACT] The user is hiring an occupational therapist.
+- [FACT] The user is part of a small rural school district.
+- [EVENT] The user is creating a job posting for the occupational therapist position.
+- [TEMPORAL] The application deadline for the job posting is 03/31/2023.
+- [TEMPORAL] The tentative start date for the job is 09/01/2023.
+- [ASSISTANT_SAID] The assistant suggested a job title: "Occupational Therapist (New Graduates Welcome!)".
+- [ASSISTANT_SAID] The assistant provided a job description emphasizing the importance of making a difference in students' lives.
+- [ASSISTANT_SAID] The assistant included responsibilities for the occupational therapist, such as assessing students' needs and developing individualized intervention plans.
+- [ASSISTANT_SAID] The assistant mentioned collaboration with educators, families, and other school personnel as part of the job.
+- [ASSISTANT_SAID] The assistant suggested developing and leading group or individual therapy sessions using evidence-based practices.
+- [ASSISTANT_SAID] The assistant noted the importance of maintaining accurate documentation of assessments and progress reports.
+- [ASSISTANT_SAID] The assistant highlighted the requirement for a Bachelor's or Master's degree in Occupational Therapy from an accredited program.
+- [ASSISTANT_SAID] The assistant stated that the candidate must be eligible for or currently hold proper state certification as an Occupational Therapist.
+- [ASSISTANT_SAID] The assistant emphasized the need for strong communication and collaboration skills.
+- [ASSISTANT_SAID] The assistant mentioned the user’s commitment to fostering a supportive and inclusive environment for both students and staff.
+- [ASSISTANT_SAID] The assistant encouraged the user to include a call to action for applicants to submit their resume, cover letter, and relevant certifications or transcripts.
+- [ASSISTANT_CREATED] The assistant created a detailed job posting for the occupational therapist position, including job title, job ID, job type, application deadline, tentative start date, job description, responsibilities, requirements, and reasons to join the team.

@@ -1,0 +1,14 @@
+**Observation Log:**
+
+- [FACT] User is working on a Master's thesis related to AI in medical diagnosis.
+- [PREFERENCE] User is particularly interested in papers that explore the application of deep learning algorithms in medical imaging.
+- [ASSISTANT] The assistant provided a list of academic databases and search engines to find research papers related to AI in medical diagnosis, including PubMed, Scopus, IEEE Xplore, and Google Scholar.
+- [ASSISTANT] The assistant suggested using specific keywords and Boolean operators to filter search results for deep learning in medical imaging.
+- [ASSISTANT] The assistant recommended using Mendeley as a reference management tool to keep track of sources and generate citations correctly.
+- [FACT] User has been using Mendeley to manage their sources and citations.
+- [ASSISTANT] The assistant advised that using Mendeley to organize search results and annotations is a good idea.
+- [ASSISTANT] The assistant provided tips for organizing search results in Mendeley, including creating folders, using tags, and adding notes.
+- [FACT] User has been using Trello to manage their thesis project.
+- [ASSISTANT] The assistant suggested integrating Mendeley with Trello to create a more seamless workflow for managing the thesis project.
+- [ASSISTANT] The assistant provided ideas on how to leverage both Mendeley and Trello for project management, including adding Mendeley papers to Trello cards and using Trello lists for organization.
+- [TEMPORAL] Session date is 2023/05/23 (Tue) 00:56.

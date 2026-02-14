@@ -1,0 +1,70 @@
+{
+  "answer_e831a29f_1": [
+    {
+      "fact": "User sold homemade baked goods at the Farmers' Market",
+      "type": "event",
+      "entities": [
+        "homemade baked goods",
+        "Farmers' Market"
+      ]
+    },
+    {
+      "fact": "User is thinking of increasing prices for the next event",
+      "type": "opinion",
+      "entities": [
+        "prices",
+        "next event"
+      ]
+    },
+    {
+      "fact": "User plans to offer seasonal flavors and decorations",
+      "type": "preference",
+      "entities": [
+        "seasonal flavors",
+        "decorations"
+      ]
+    },
+    {
+      "fact": "User is considering a price increase of 10-20%",
+      "type": "opinion",
+      "entities": [
+        "price increase",
+        "10-20%"
+      ]
+    }
+  ],
+  "answer_e831a29f_2": [
+    {
+      "fact": "User sells handmade jewelry and candles",
+      "type": "personal",
+      "entities": [
+        "handmade jewelry",
+        "candles"
+      ]
+    },
+    {
+      "fact": "User participated in the Spring Fling Market",
+      "type": "event",
+      "entities": [
+        "Spring Fling Market"
+      ]
+    },
+    {
+      "fact": "User had a conversation with a local boutique owner",
+      "type": "relationship",
+      "entities": [
+        "local boutique owner"
+      ]
+    },
+    {
+      "fact": "User is considering their pricing strategy",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User wants to price their products competitively",
+      "type": "preference",
+      "entities": []
+    }
+  ]
+}

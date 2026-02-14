@@ -1,0 +1,22 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/28 (Sun) 11:35
+- [FACT] User is interested in air conditioning systems.
+- [ASSISTANT_SAID] There are different types of air conditioning systems: Window Air Conditioners, Split Air Conditioning System, Central Air Conditioning, Portable Air Conditioners, and Ductless Mini-Split Air Conditioners.
+- [ASSISTANT_SAID] Window Air Conditioners are self-contained units mounted in a window or wall that cool the air by drawing in warm air, passing it over evaporator coils, and pushing cooled air back out.
+- [ASSISTANT_SAID] Split Air Conditioning Systems consist of an outdoor compressor unit and one or more indoor units that distribute cool air, with refrigerant gas flowing between them.
+- [ASSISTANT_SAID] Central Air Conditioning cools the entire house through a duct system, with a large outdoor unit containing the compressor and an indoor unit connected to ductwork.
+- [ASSISTANT_SAID] Portable Air Conditioners are self-contained systems that can be moved from room to room, drawing in warm air and pushing cooled air back out through a vent.
+- [ASSISTANT_SAID] Ductless Mini-Split Air Conditioners use multiple indoor air handlers mounted on the wall, with refrigerant flowing from an outdoor unit to cool the air.
+- [USER] User asked why central air conditioning is better than window or portable AC units.
+- [ASSISTANT_SAID] Central air conditioning is better due to efficiency, air quality, noise, convenience, and aesthetics.
+- [ASSISTANT_SAID] Central AC systems are more efficient at cooling large spaces and use less energy than window or portable units.
+- [ASSISTANT_SAID] Central AC systems have better air filtration, capturing airborne pollutants and allergens.
+- [ASSISTANT_SAID] Central AC systems are quieter because the outdoor unit is located away from the indoor unit.
+- [ASSISTANT_SAID] Central AC systems require less maintenance compared to window or portable units.
+- [ASSISTANT_SAID] Central AC systems provide a more visually appealing look as components are hidden away.
+- [USER] User expressed concern about the cost of installation for central air conditioning and asked if it is worth the investment.
+- [ASSISTANT_SAID] The cost of installing a central AC system varies and can range from a few thousand to tens of thousands of dollars.
+- [ASSISTANT_SAID] Long-term benefits of central AC include energy savings and increased home value.
+- [ASSISTANT_SAID] Central AC systems provide even, consistent cooling throughout the home.
+- [ASSISTANT_SAID] If the user can afford the upfront cost and plans to stay in their home long-term, a central AC system may be a

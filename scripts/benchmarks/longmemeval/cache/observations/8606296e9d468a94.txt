@@ -1,0 +1,15 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/23 (Tue) 09:44
+- [ASSISTANT_SAID] From the first statement, you could highlight "50%" and "22 to 11 screens".
+- [ASSISTANT_SAID] From the second statement, you could highlight "60%" and "13 minutes to 5 minutes".
+- [ASSISTANT_SAID] From the third statement, you could highlight "20%" and "redundant input fields".
+- [USER] The Time-Constrained User: Have limited time available to make their bookings, as expressed in the quote "I rather do it online than in person, but while drinking some coffee, because of a long time, it takes me to find and fill this."
+- [USER] This archetype could include older users, users with disabilities, and users who prefer to use mobile devices. It could also include foreigners who may be unfamiliar with the website or who do not speak Spanish, as well as tech-savvy users who may have high expectations for the user experience.
+- [ASSISTANT_SAID] The Efficient User: These users value their time and want to complete their tasks as quickly as possible. They may be frustrated by any delays or obstacles that prolong the process, as expressed in the quote "I rather do it online than in person, but while drinking some coffee, because of a long time, it takes me to find and fill this."
+- [ASSISTANT_SAID] This archetype may include older users, users with disabilities, and users who prefer to use mobile devices. It may also include foreigners who may be unfamiliar with the website or who do not speak Spanish, as well as tech-savvy users who have high expectations for the user experience.
+- [USER] Isn't an efficient user, let's try again.
+- [ASSISTANT_SAID] The Efficient User: These users value efficiency and speed when booking appointments. They may be frustrated by any delays or obstacles that prolong the process, as expressed in the quote "I rather do it online than in person, but while drinking some coffee, because of a long time, it takes me to find and fill this."
+- [USER] Let's redo it with a different archetype as efficient doesn't sound right.
+- [ASSISTANT_SAID] The Frustrated User: This archetype represents users who experience frustration when interacting with the Cita Previa website. They may feel overwhelmed or stressed by the process, and may fear missing out on an appointment or losing valuable time. They may also feel a lack of feedback or empathy from the website, which contributes to their frustration.
+- [ASSISTANT_SAID] This archetype could include older users, users with disabilities, and users who prefer to use mobile devices. It could also include foreigners who may be unfamiliar with the website or who do not

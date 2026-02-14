@@ -1,0 +1,34 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/20 (Sat) 17:07  
+[FACT] User is planning to apply to a Master's program in Data Science.  
+[FACT] User has already taken the GRE and scored 320.  
+[FACT] User graduated from UCLA in 2018 with a background in Computer Science.  
+[ASSISTANT_SAID] A score of 320 is competitive for Master's programs in Data Science.  
+[ASSISTANT_SAID] User's background in Computer Science from UCLA is a great foundation for a Master's in Data Science.  
+[ASSISTANT_SAID] Most Master's in Data Science programs require:  
+[ASSISTANT_SAID] 1. Personal Statement  
+[ASSISTANT_SAID] 2. Transcripts  
+[ASSISTANT_SAID] 3. Letters of Recommendation (2-3)  
+[ASSISTANT_SAID] 4. Resume or CV  
+[ASSISTANT_SAID] 5. Additional Requirements (prerequisite courses, programming assignments, English language proficiency tests)  
+[ASSISTANT_SAID] To increase chances of acceptance, consider:  
+[ASSISTANT_SAID] * Researching the programs  
+[ASSISTANT_SAID] * Highlighting relevant skills and experiences  
+[ASSISTANT_SAID] * Showing a strong understanding of the field  
+[FACT] User is considering applying to Stanford University, University of California, Berkeley, and Carnegie Mellon University.  
+[ASSISTANT_SAID] Stanford University - Master of Science in Data Science (MS-DS) requirements:  
+[ASSISTANT_SAID] - GRE (competitive scores around 325+)  
+[ASSISTANT_SAID] - 3 letters of recommendation  
+[ASSISTANT_SAID] - Personal statement (2-3 pages)  
+[ASSISTANT_SAID] - Resume  
+[ASSISTANT_SAID] - Transcripts  
+[ASSISTANT_SAID] - Prerequisite courses: programming (e.g., Python, Java), statistics, and linear algebra  
+[ASSISTANT_SAID] Stanford's acceptance rate is around 5-7%.  
+[ASSISTANT_SAID] UC Berkeley - Master of Science in Data Science (MS-DS) requirements:  
+[ASSISTANT_SAID] - GRE (competitive scores around 320+)  
+[ASSISTANT_SAID] - 3 letters of recommendation  
+[ASSISTANT_SAID] - Personal statement (2-3 pages)  
+[ASSISTANT_SAID] - Resume  
+[ASSISTANT_SAID] - Transcripts  
+[ASSISTANT_SAID] - Prerequisite courses: programming (e.g., Python, R), statistics, and linear algebra

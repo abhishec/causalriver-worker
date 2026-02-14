@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[FACT] User is planning to clean their house this weekend.  
+[FACT] User needs to restock on cleaning supplies.  
+[FACT] User saved $12 last week using a Cartwheel offer for 20% off on all Up & Up brand cleaning supplies at Target.  
+[ASSISTANT_SAID] Up & Up All-Purpose Cleaner (24 oz) is on sale for $2.99 (regularly $3.99).  
+[ASSISTANT_SAID] Seventh Generation All-Purpose Cleaner (22 oz) is on sale for $3.99 (regularly $5.99).  
+[ASSISTANT_SAID] Up & Up Disinfecting Wipes (35-count) are on sale for $2.99 (regularly $3.99).  
+[ASSISTANT_SAID] Clorox Disinfecting Wipes (35-count) are on sale for $3.99 (regularly $5.99).  
+[ASSISTANT_SAID] User can combine the sale price with the 5% off Cartwheel offer, making the Up & Up All-Purpose Cleaner and Disinfecting Wipes $2.84.  
+[ASSISTANT_SAID] Prices may vary depending on location and availability.  
+[ASSISTANT_SAID] User should check the Target app or website for the most up-to-date prices and offers.  
+[ASSISTANT_SAID] User should check for additional Cartwheel offers or digital coupons by logging into their Target account.  
+[USER] Asked if they can use the Cartwheel offer for 20% off on all Up & Up brand cleaning supplies again this week.  
+[ASSISTANT_SAID] The 20% off Cartwheel offer was likely a one-time offer and is unlikely to be available again this week.  
+[ASSISTANT_SAID] User can still use the 5% off Cartwheel offer on the Up & Up All-Purpose Cleaner and Disinfecting Wipes.  
+[USER] Asked if they can use the 5% off Cartwheel offer on top of the sale prices mentioned earlier or if they are mutually exclusive.  
+[ASSISTANT_SAID] User can stack Cartwheel offers with sale prices.  
+[ASSISTANT_SAID] The 5% off Cartwheel offer will be applied on top of the sale price, giving an updated price of $2.84 for both the Up & Up All-Purpose Cleaner and Disinfecting Wipes.  
+[USER] Asked if Target offers any cashback or rebates on household essentials or cleaning supplies through their RedCard or other loyalty programs.  
+[ASSISTANT_SAID] Target RedCard holders get 5% off on all purchases, including household essentials and cleaning supplies.  
+[ASSISTANT_SAID] RedCard holders can earn 1

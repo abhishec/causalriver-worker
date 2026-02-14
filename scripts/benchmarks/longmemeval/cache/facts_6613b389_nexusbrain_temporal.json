@@ -1,0 +1,150 @@
+{
+  "answer_aaf71ce2_2": [
+    {
+      "fact": "User is looking for gift ideas for their sister-in-law's sister who got married last December.",
+      "type": "event",
+      "entities": [
+        "sister-in-law's sister",
+        "marriage",
+        "December"
+      ]
+    },
+    {
+      "fact": "User has purchased a kitchen appliance from the wedding registry.",
+      "type": "event",
+      "entities": [
+        "kitchen appliance",
+        "wedding registry"
+      ]
+    },
+    {
+      "fact": "User wants to add a personal touch to the gift.",
+      "type": "preference",
+      "entities": [
+        "personal touch",
+        "gift"
+      ]
+    },
+    {
+      "fact": "User's close friend Rachel got engaged on May 15th.",
+      "type": "event",
+      "entities": [
+        "Rachel",
+        "engagement",
+        "May 15th"
+      ]
+    },
+    {
+      "fact": "User is planning Rachel's bachelorette party.",
+      "type": "event",
+      "entities": [
+        "Rachel",
+        "bachelorette party"
+      ]
+    },
+    {
+      "fact": "User is planning a weekend getaway to the beach for Rachel's bachelorette party in August.",
+      "type": "event",
+      "entities": [
+        "beach",
+        "bachelorette party",
+        "August"
+      ]
+    },
+    {
+      "fact": "User plans to include brunches, spa treatments, and fun activities for Rachel's bachelorette party.",
+      "type": "preference",
+      "entities": [
+        "brunches",
+        "spa treatments",
+        "group dance class",
+        "wine tasting"
+      ]
+    },
+    {
+      "fact": "User likes the idea of a personalized cookbook as a gift.",
+      "type": "preference",
+      "entities": [
+        "personalized cookbook"
+      ]
+    },
+    {
+      "fact": "User is considering a small gift for Rachel to commemorate her engagement.",
+      "type": "event",
+      "entities": [
+        "Rachel",
+        "engagement",
+        "gift"
+      ]
+    }
+  ],
+  "answer_aaf71ce2_1": [
+    {
+      "fact": "User is planning a weekend getaway to the beach in August for a friend's bachelorette party",
+      "type": "event",
+      "entities": [
+        "weekend getaway",
+        "beach",
+        "August",
+        "bachelorette party"
+      ]
+    },
+    {
+      "fact": "User recently attended their cousin's wedding on June 10th",
+      "type": "event",
+      "entities": [
+        "cousin's wedding",
+        "June 10th"
+      ]
+    },
+    {
+      "fact": "User found the outdoor ceremony at their cousin's wedding beautiful",
+      "type": "opinion",
+      "entities": [
+        "outdoor ceremony",
+        "cousin's wedding"
+      ]
+    },
+    {
+      "fact": "User is considering a wine and cheese tasting for the bachelorette party",
+      "type": "preference",
+      "entities": [
+        "wine and cheese tasting",
+        "bachelorette party"
+      ]
+    }
+  ],
+  "answer_aaf71ce2_3": [
+    {
+      "fact": "User is looking for romantic getaway ideas for their partner and themselves.",
+      "type": "preference",
+      "entities": [
+        "romantic getaway",
+        "partner"
+      ]
+    },
+    {
+      "fact": "User's anniversary is on July 22nd.",
+      "type": "event",
+      "entities": [
+        "July 22nd",
+        "anniversary"
+      ]
+    },
+    {
+      "fact": "User likes the wine country escape idea for their anniversary.",
+      "type": "preference",
+      "entities": [
+        "wine country escape"
+      ]
+    },
+    {
+      "fact": "User is interested in wine-themed bed and breakfasts in Napa Valley.",
+      "type": "preference",
+      "entities": [
+        "wine-themed bed and breakfasts",
+        "Napa Valley"
+      ]
+    }
+  ]
+}

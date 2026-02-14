@@ -1,0 +1,20 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/30 (Tue) 08:24  
+[USER] The user is looking for new ideas for sugar-free baked goods.  
+[USER] The user made a batch of sugar-free banana muffins last week using stevia.  
+[PREFERENCE] The user thinks they need to adjust the ratio of stevia to sugar to get a better flavor.  
+[ASSISTANT_SAID] Sugar-free baking can be a challenge.  
+[ASSISTANT_SAID] A common starting point for stevia is to replace 1 cup of sugar with 1/4 to 1/2 teaspoon of stevia powder or 2 to 4 drops of stevia liquid extract.  
+[ASSISTANT_SAID] Stevia can have a bitter or licorice-like aftertaste, so it's essential to taste as you go and adjust the sweetness level accordingly.  
+[ASSISTANT_SAID] Popular sugar substitutes include erythritol, monk fruit sweetener, yacon syrup, honey, and maple syrup.  
+[ASSISTANT_SAID] Recipe for Lemon Poppy Seed Muffins (Stevia-based): Replace sugar with 1/4 teaspoon stevia powder or 2 drops stevia liquid extract; add lemon zest, juice, and poppy seeds.  
+[ASSISTANT_SAID] Recipe for Chocolate Avocado Muffins (Erythritol-based): Use 1:1 erythritol instead of sugar; add mashed avocado for moisture and healthy fats.  
+[ASSISTANT_SAID] Recipe for Cinnamon Apple Coffee Cake (Monk Fruit Sweetener-based): Replace sugar with 1/4 teaspoon monk fruit sweetener powder; add diced apples and cinnamon.  
+[ASSISTANT_SAID] Recipe for Pumpkin Spice Muffins (Yacon Syrup-based): Use yacon syrup in place of sugar (1:1 ratio); add pumpkin puree, cinnamon, and nutmeg.  
+[ASSISTANT_SAID] General tips for sugar-free baking include using a combination of sweeteners, not overmixing, adjusting liquid content, and experimenting with spices.  
+[USER] The user is interested in trying out the lemon poppy seed muffins using stevia.  
+[USER] The user asked for tips on how to incorporate lemon zest into the recipe and how to adjust the liquid content since they are using stevia.  
+[ASSISTANT_SAID] To incorporate lemon zest, choose organic, unwaxed lemons, zest carefully, use about 1-2 tablespoons of lemon zest, and add zest to the dry ingredients.  
+[ASSISTANT_SAID] To adjust liquid content with stevia, start with a lower liquid ratio, add liquid incrementally, and consider the stevia's texture.  
+[ASSISTANT_CREATED] Revised Lemon Poppy Seed Muffin Recipe (

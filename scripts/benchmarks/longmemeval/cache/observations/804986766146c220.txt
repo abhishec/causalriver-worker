@@ -1,0 +1,26 @@
+**Observation Log:**
+
+[FACT] User is looking for a home warranty to protect their new place from unexpected repairs.  
+[FACT] User has been searching for a home for a while.  
+[FACT] User has seen some properties that did not fit their budget.  
+[FACT] User mentioned a specific property in Cedar Creek on February 1st that was out of their budget.  
+[ASSISTANT_SAID] Assistant congratulated the user on their new home.  
+[ASSISTANT_SAID] Assistant provided a list of popular home warranty providers and their prices:  
+[ASSISTANT_SAID] American Home Shield (AHS): Plans starting at $299-$499 per year, with a $75-$125 service fee.  
+[ASSISTANT_SAID] HomeServe USA: Basic plan for $299 per year and a premium plan for $499 per year, with a $75-$125 service fee.  
+[ASSISTANT_SAID] Old Republic Home Warranty: Plans starting at $350-$600 per year, with a $60-$100 service fee.  
+[ASSISTANT_SAID] First American Home Warranty: Plans starting at $300-$500 per year, with a $75-$125 service fee.  
+[ASSISTANT_SAID] Choice Home Warranty: Plans starting at $299-$499 per year, with a $75-$125 service fee.  
+[ASSISTANT_SAID] Select Home Warranty: Plans starting at $299-$499 per year, with a $75-$125 service fee.  
+[ASSISTANT_SAID] Assistant noted that prices may vary depending on location, age and type of home, and level of coverage.  
+[ASSISTANT_SAID] Assistant expressed empathy regarding the user's experience with the Cedar Creek property being out of budget.  
+[ASSISTANT_SAID] Assistant provided tips for choosing a home warranty provider:  
+[ASSISTANT_SAID] Research each company's reputation and customer reviews.  
+[ASSISTANT_SAID] Compare coverage options and pricing.  
+[ASSISTANT_SAID] Review the contract and understand what's included and excluded.  
+[ASSISTANT_SAID] Check if the provider offers any discounts or promotions.  
+[ASSISTANT_SAID] Assistant emphasized the importance of factoring the warranty cost into the overall home budget.  
+[USER] Asked about the average response time for filing a claim and specific exclusions or limitations.  
+[ASSISTANT_SAID] Assistant provided average response times for various providers:  
+[ASSISTANT_SAID] American Home Shield (AHS): 24-48 hours for initial response, 3-5 business days for service appointment scheduling.  
+[ASSISTANT_SAID] HomeServe USA: 24-48 hours for initial response, 3-5 business days for service appointment scheduling.

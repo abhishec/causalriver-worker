@@ -1,0 +1,17 @@
+### Observation Log
+
+- [FACT] User is a solicitor and construction lawyer with more than 10 years of experience specialising in construction law.
+- [FACT] User regularly advises homeowners and builders regarding their contractual and legal rights.
+- [FACT] User represents homeowners and builders in NSW, Australia, as well as all courts of competent jurisdiction.
+- [PREFERENCE] User prefers content that incorporates "perplexity" and "burstiness" in writing.
+- [PREFERENCE] User requires content to be written in a tone that is 100% human and professional, while being easy to understand for homeowners unfamiliar with legal terms.
+- [PREFERENCE] User insists on unique content without repetition or rephrasing.
+- [PREFERENCE] User wants the content to be logically organised, using subheadings, bullet points, and tables for readability.
+- [PREFERENCE] User expects careful editing and proofreading of the articles for grammar and flow.
+- [PREFERENCE] User wants to use a plagiarism checker to ensure content originality.
+- [PREFERENCE] User has specified target keywords and phrases to be naturally incorporated into the content: "mediation vs arbitration," "difference between," "arbitration and mediation," "advantages of mediation," "advantages of arbitration."
+- [EVENT] User intends to ask about each heading of the content outline in subsequent messages.
+- [TEMPORAL] Session Date: 2023/05/23 (Tue) 21:20.
+- [ASSISTANT_SAID] Assistant provided an enhanced content outline for the user's article, including headings and suggested word counts for each section.
+- [ASSISTANT_CREATED] Assistant created a rewritten introduction about alternative dispute resolution (ADR) with a character count of 450 characters and 1 paragraph.
+- [ASSISTANT_CREATED] Assistant created a rewritten section on "What is Mediation?" with a word count of 150 words, detailing the definition, process, types of disputes suitable for mediation, and benefits over litigation.

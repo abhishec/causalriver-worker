@@ -1,0 +1,45 @@
+**Observation Log:**
+
+- [FACT] The user is in the process of buying a new home.
+- [EVENT] The user has been house hunting for a while.
+- [EVENT] The user fell in love with a 2-bedroom condo on February 15th.
+- [EVENT] The user's offer on the 2-bedroom condo was rejected on February 17th due to a higher bid.
+- [PREFERENCE] The user needs help organizing paperwork related to buying a new home.
+- [ASSISTANT_SAID] The assistant expressed sympathy for the user's rejected offer and congratulated them on finding a new home.
+- [ASSISTANT_CREATED] The assistant provided a comprehensive checklist for documents needed to finalize the deal on a new home, including:
+  - Purchase Agreement
+  - Pre-approval Letter
+  - Proof of Funds
+  - Home Inspection Report
+  - Appraisal Report
+  - Title Search and Insurance
+  - Environmental Reports
+  - Mortgage Application
+  - Loan Estimate
+  - Final Loan Disclosure
+  - Mortgage Note
+  - Homeowners Insurance Policy
+  - Warranty Documents
+  - Closing Disclosure
+  - Deed
+  - Title
+  - Bill of Sale
+  - Closing Statement
+  - Identification
+  - Proof of Income
+  - Bank Statements
+- [ASSISTANT_SAID] The assistant advised the user to review each document carefully and keep digital copies for records.
+- [USER] The user requested help organizing the documents by the timeline of the process.
+- [ASSISTANT_CREATED] The assistant provided a suggested timeline for organizing the documents, including:
+  - Pre-Contract (Before Making an Offer): Pre-approval Letter, Proof of Funds
+  - Contract to Purchase (After Making an Offer): Purchase Agreement, Earnest Money
+  - Due Diligence (1-2 Weeks After Contract Signing): Home Inspection Report, Appraisal Report, Title Search and Insurance, Environmental Reports
+  - Loan Application and Processing (2-4 Weeks After Contract Signing): Mortgage Application, Loan Estimate, Final Loan Disclosure
+  - Insurance and Warranty (2-4 Weeks After Contract Signing): Homeowners Insurance Policy, Warranty Documents
+  - Closing Preparations (1-2 Weeks Before Closing): Closing Disclosure, Identification and Proof of Income, Bank Statements
+  - Closing (Final Step): Deed, Title, Bill of Sale, Closing Statement, Loan Funding
+- [ASSISTANT_SAID] The assistant noted that the timeline may vary depending on the complexity of the transaction and advised the user to stay in close communication with their lender and real estate agent.
+- [USER] The user inquired about the home inspection report and common issues found, as well as how to negotiate with the seller to fix them.
+- [ASSISTANT_SAID] The assistant listed common issues found in home inspection reports, including:
+  - Roofing and Gutters
+  -

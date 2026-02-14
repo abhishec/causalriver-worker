@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/10/15 (Sun) 15:58
+- [FACT] User is trying to get more organized with their schedule.
+- [EVENT] User has a 45-minute morning jog with Alex on Tuesdays and Thursdays at 7:00 am.
+- [ASSISTANT_SAID] Assistant offered to help set reminders for the user's regular activities.
+- [ASSISTANT_SAID] Assistant provided steps to set reminders in Google Calendar, Apple Reminders, and other calendar apps.
+- [ASSISTANT_SAID] For Google Calendar: Create a new event titled "Morning Jog with Alex," set start time to 7:00 am, duration to 45 minutes, recurring on Tuesdays and Thursdays, and set a reminder for 30 minutes before the event.
+- [ASSISTANT_SAID] For Apple Reminders: Create a new reminder titled "Morning Jog with Alex," set for 7:00 am on Tuesdays and Thursdays, with a reminder time of 30 minutes before.
+- [EVENT] User wants to set reminders for family game night on Fridays.
+- [ASSISTANT_SAID] Assistant provided steps to set reminders for family game night.
+- [ASSISTANT_SAID] For Google Calendar: Create a new event titled "Family Game Night," set start time to 6:00 pm, duration to 2 hours, recurring on Fridays, and set a reminder for 30 minutes before the event.
+- [ASSISTANT_SAID] For Apple Reminders: Create a new reminder titled "Family Game Night," set for 6:00 pm on Fridays, with a reminder time of 30 minutes before.
+- [EVENT] User wants to set reminders for weekend activities, including meeting parents for lunch or dinner and catching up with friends.
+- [ASSISTANT_SAID] Assistant provided steps to set reminders for weekend activities.
+- [ASSISTANT_SAID] For Google Calendar: Create a new event titled "Lunch with Parents" or "Dinner with Friends," set start time and duration, select the day of the week, and set a reminder for 30 minutes before the event.
+- [ASSISTANT_SAID] For Apple Reminders: Create a new reminder titled "Lunch with Parents" or "Dinner with Friends," set for the desired time and day, with a reminder time of 30 minutes before.
+- [EVENT] User wants to set reminders for dropping off Emily at school.
+- [ASSISTANT_SAID] Assistant provided steps to set reminders for dropping off Emily at school.
+- [ASSISTANT_SAID] For Google Calendar: Create a new event titled "Drop off Emily at school," set start time to 8:00 am, duration to 15 minutes, recurring on weekdays, and set a reminder for 30 minutes before the event.

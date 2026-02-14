@@ -1,0 +1,31 @@
+**Observation Log:**
+
+[FACT] Session Date: 2023/02/21 (Tue) 05:09  
+[FACT] User has recently returned from a beach trip.  
+[RELATIONSHIP] User went on a beach trip with friends Rachel and Mike.  
+[PREFERENCE] User is looking for recommendations on photo editing apps.  
+[EVENT] User has a ton of photos to sort through and share on social media from the beach trip.  
+[ASSISTANT_SAID] Recommended photo editing apps:  
+[ASSISTANT_SAID] 1. Lightroom Mobile: A powerful app from Adobe with advanced editing tools. (Free, with in-app purchases)  
+[ASSISTANT_SAID] 2. VSCO: A trendy app with presets and filters for a unique look. (Free, with in-app purchases)  
+[ASSISTANT_SAID] 3. Snapseed: A professional-grade editor with a user-friendly interface. (Free)  
+[ASSISTANT_SAID] 4. Facetune: Popular for portrait editing, great for selfies and group shots. (Free, with in-app purchases)  
+[ASSISTANT_SAID] 5. PicsArt: A versatile editor with tools, filters, and effects. (Free, with in-app purchases)  
+[ASSISTANT_SAID] 6. TouchRetouch: For removing unwanted objects from photos. ($1.99)  
+[ASSISTANT_SAID] 7. Canva: A graphic design app also great for photo editing. (Free, with in-app purchases)  
+[ASSISTANT_SAID] Provided tips for editing photos:  
+[ASSISTANT_SAID] - Organize photos into albums or folders.  
+[ASSISTANT_SAID] - Crop and straighten photos for better composition.  
+[ASSISTANT_SAID] - Adjust brightness, contrast, and saturation.  
+[ASSISTANT_SAID] - Experiment with filters and presets.  
+[ASSISTANT_SAID] - Avoid over-editing.  
+[PREFERENCE] User plans to try out VSCO and Lightroom Mobile for editing.  
+[EVENT] User is seeking tips for creating a great Instagram caption for beach trip photos.  
+[ASSISTANT_SAID] Tips for Instagram captions:  
+[ASSISTANT_SAID] 1. Keep it concise (125-150 characters).  
+[ASSISTANT_SAID] 2. Use relevant hashtags for visibility.  
+[ASSISTANT_SAID] 3. Tell a story or share an anecdote.  
+[ASSISTANT_SAID] 4. Use humor to engage followers.  
+[ASSISTANT_SAID] 5. Emphasize feelings and emotions.  
+[ASSISTANT_SAID] 6. Tag friends Rachel and Mike.  
+[

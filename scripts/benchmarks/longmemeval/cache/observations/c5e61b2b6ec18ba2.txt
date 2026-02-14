@@ -1,0 +1,24 @@
+**Observation Log:**
+
+[FACT] User is looking for recommendations on moving companies in the Oakwood area.  
+[FACT] User is moving to Oakwood, GA.  
+[EVENT] User is in the process of moving.  
+[CHANGE] User has been pre-approved for a mortgage and is considering buying a home.  
+[TEMPORAL] Session date is 2023/08/12 (Sat) at 18:01.  
+[ASSISTANT_SAID] Suggested moving companies in Oakwood, GA:  
+[ASSISTANT_SAID] 1. Bellhops Moving (4.9/5 stars on Yelp, 4.8/5 stars on Google Reviews) - Local, professional, and affordable movers.  
+[ASSISTANT_SAID] 2. Two Men and a Truck (4.7/5 stars on Yelp, 4.6/5 stars on Google Reviews) - National chain with local presence.  
+[ASSISTANT_SAID] 3. All My Sons Moving & Storage (4.6/5 stars on Yelp, 4.5/5 stars on Google Reviews) - Family-owned company with over 25 years of experience.  
+[ASSISTANT_SAID] 4. College Hunks Hauling Junk and Moving (4.5/5 stars on Yelp, 4.4/5 stars on Google Reviews) - Eco-friendly, student-run moving company.  
+[ASSISTANT_SAID] 5. Safeway Moving Systems (4.4/5 stars on Yelp, 4.3/5 stars on Google Reviews) - Family-owned business with over 30 years of experience.  
+[ASSISTANT_SAID] Recommended resources: Better Business Bureau (BBB), Angie's List, Moving.com, Google Reviews.  
+[ASSISTANT_SAID] Tips for moving: Get multiple quotes, check for licenses and insurance, read reviews, ask about additional fees, verify company information.  
+[USER] User appreciates the suggestions and tips provided by the assistant.  
+[USER] User is concerned about regulations or restrictions for moving large furniture or heavy items in Oakwood.  
+[ASSISTANT_SAID] Key considerations for moving large furniture in Oakwood:  
+[ASSISTANT_SAID] 1. Parking permits may be required for moving trucks.  
+[ASSISTANT_SAID] 2. Check for weight and size restrictions in residential areas.  
+[ASSISTANT_SAID] 3. Tree Ordinance may require permits for trimming/removing trees.  
+[ASSISTANT_SAID] 4. Elevator reservations may be needed for high-rise buildings.  
+[ASSISTANT_SAID] 5. Verify floor load limits with building management.  
+[ASSISTANT_SAID] 6. Specialized equipment may be needed for heavy or oversized items

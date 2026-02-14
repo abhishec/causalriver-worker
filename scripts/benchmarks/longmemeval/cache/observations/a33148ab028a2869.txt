@@ -1,0 +1,23 @@
+**Observation Log:**
+
+**Session Date:** 2023/05/26 (Fri) 06:21  
+**Session ID:** sharegpt_JZm4ich_15
+
+- [ASSISTANT_SAID] Revenue per retreat: 1,200,000 rupees (10 students x 120,000 rupees per student).
+- [ASSISTANT_SAID] Number of retreats per year: 8.
+- [ASSISTANT_SAID] Total revenue per year: 9,600,000 rupees (1,200,000 rupees per retreat x 8 retreats per year).
+- [ASSISTANT_SAID] Teachers' fees (40% of revenue): 3,840,000 rupees.
+- [ASSISTANT_SAID] Property management fees (10% of revenue): 960,000 rupees.
+- [ASSISTANT_SAID] Old loan (15% of revenue): 1,440,000 rupees.
+- [ASSISTANT_SAID] New loan (15% of revenue): 1,440,000 rupees.
+- [ASSISTANT_SAID] Future investment (5% of revenue): 480,000 rupees.
+- [ASSISTANT_SAID] Mahesh's savings (5% of revenue): 480,000 rupees.
+- [ASSISTANT_SAID] Total expenses: 8,640,000 rupees.
+- [ASSISTANT_SAID] Net profit per year: 960,000 rupees (9,600,000 rupees total revenue - 8,640,000 rupees total expenses).
+- [ASSISTANT_SAID] If old and new loans are paid off after 3 years, teachers' fees remain at 3,840,000 rupees, property management fees at 960,000 rupees, future investment at 480,000 rupees, and Mahesh's savings increase to 4,320,000 rupees.
+- [ASSISTANT_SAID] Total expenses after loans are paid off: 6,240,000 rupees.
+- [ASSISTANT_SAID] Net profit per year after loans are paid off: 3,360,000 rupees (9,600,000 rupees total revenue - 6,240,000 rupees total expenses).
+- [ASSISTANT_SAID] Savings for 5 years would be 16,800,000 rupees and for 10 years it would be 33,600,000 rupees.
+- [USER] Requested research on current marketing strategies for yoga retreats, how teachers promote their retreats, pricing of retreats, and the age group of attendees.
+- [ASSISTANT_SAID] Marketing strategies for yoga retreats include social media advertising, collaborations with yoga influencers, email marketing, and SEO/PPC.
+- [

@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[FACT] User is attending weekly English classes at a refugee center.  
+[FACT] User has been attending English classes since October 12th.  
+[FACT] User has received their work permit.  
+[FACT] User has been job hunting since receiving their work permit.  
+[FACT] User had a promising interview at a local restaurant last week.  
+[FACT] User is utilizing career counseling services at the refugee center to update their resume and practice interview skills.  
+[PREFERENCE] User is trying to improve their English skills.  
+[EVENT] User started attending weekly English classes at the refugee center on May 23, 2023.  
+[CHANGE] User has improved their language skills through attending English classes.  
+[TEMPORAL] Session date is May 23, 2023.  
+[TEMPORAL] User had an interview at a local restaurant last week (the week prior to May 23, 2023).  
+[ASSISTANT_SAID] Assistant congratulated the user on attending classes and provided online resources for practicing English grammar and vocabulary.  
+[ASSISTANT_SAID] Assistant recommended the following online resources for grammar: Duolingo, Grammarly, Khan Academy, English Central, Purdue Online Writing Lab (OWL).  
+[ASSISTANT_SAID] Assistant recommended the following online resources for vocabulary: Quizlet, Vocabulary.com, Word Hippo, BBC Learning English, Longman Dictionary of Contemporary English.  
+[ASSISTANT_SAID] Assistant suggested additional resources including TED Talks with subtitles, English language podcasts, and online language exchange websites.  
+[ASSISTANT_SAID] Assistant expressed sympathy for the user's job search struggles and provided job search strategies including updating resumes, networking, tailoring application materials, practicing interview skills, considering volunteering or internships, and learning about the job market.  
+[ASSISTANT_SAID] Assistant recommended job search websites for refugees or immigrants: Upwardly Global, Refugee Talent, Immigrant Employment Council of BC, National Immigration Forum, and job boards like Indeed, LinkedIn, and Glassdoor.  
+[ASSISTANT_SAID] Assistant provided a list of popular job search platforms in the US: Indeed, LinkedIn, Glassdoor, ZipRecruiter, Monster, CareerBuilder, SimplyHired, Jobvite, Angellist, We Work Remotely.  
+[ASSISTANT_SAID] Assistant congratulated the user on their interview and provided tips on how to follow up with the restaurant after the interview, including waiting a week, sending a thank-you note, reiterating qualifications, showing enthusiasm, and asking about the status.  
+[ASSISTANT_CREATED] Assistant created a sample follow-up email for the user to send after their interview, including a subject line and key points to mention.  
+[ASSISTANT_SAID] Assistant provided common interview questions for a restaurant job, including: "Can you

@@ -1,0 +1,16 @@
+### Observation Log
+
+- [TEMPORAL] Session Date: 2023/05/21 (Sun) 20:03
+- [USER] User requested to act as a prompt generator.
+- [USER] User provided main keywords: Product, Features, Benefits, Purpose, Target Audience, Differences, Unique, Memorable, Brand, Company, Guideline, Logo Design, Style, and detail.
+- [USER] User asked for automated formula prompts, keywords, and keyword seeds for the UI process.
+- [ASSISTANT_CREATED] Assistant created a markdown table with automated formula prompts for the UI process, including steps, prompts, keywords, and keyword seeds.
+- [ASSISTANT_SAID] Assistant provided prompts for "Product Characteristics," "Description," "Product Name," "Brand Name," "Logo Guideline," "Cl Guideline," "Banner Guideline," "Create Website," "Web hosting," "Type of website," "Choose CMS platform," "Website guideline," "Language," "Amount of words," "Tone of voice," "Writing style," and "Audience."
+- [ASSISTANT_CREATED] Assistant included examples for each step in the markdown table.
+- [ASSISTANT_SAID] Assistant provided specific examples for product characteristics, descriptions, product names, brand names, logo guidelines, and more.
+- [USER] User requested to generate the prompt formula in each step, including long-tail keywords and examples.
+- [ASSISTANT_CREATED] Assistant continued the markdown table with long-tail keywords and examples for each step of the UI process.
+- [ASSISTANT_SAID] Assistant provided long-tail keywords for each prompt, such as "A brief explanation of the features and benefits of a new smartphone" for the product description.
+- [ASSISTANT_SAID] Assistant included examples like "Email client," "Fitness tracker," "Ride-hailing app," and "Google," "Nike," "Coca-Cola" for various categories.
+- [ASSISTANT_SAID] Assistant mentioned the importance of the tone of voice and writing style in the content for the website, logo, Cl, or banner.
+- [ASSISTANT_SAID] Assistant emphasized the target audience for the website, logo, Cl, or banner, including customers, users, and prospects.

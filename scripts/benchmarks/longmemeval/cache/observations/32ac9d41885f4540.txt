@@ -1,0 +1,20 @@
+**Observation Log**
+
+- [TEMPORAL] Session Date: 2023/05/23 (Tue) 16:55
+- [USER] The user is looking for advice on implementing AI-powered chatbots in their work.
+- [USER] The user met someone at the Tech Summit last month who is working on a similar project and is curious to learn more.
+- [ASSISTANT_SAID] The assistant provided general advice on implementing AI-powered chatbots, including defining goals, choosing the right platform, developing a conversational flow, integrating with existing systems, and testing and refining.
+- [ASSISTANT_SAID] The assistant recommended popular chatbot development platforms: Dialogflow, Microsoft Bot Framework, and ManyChat.
+- [ASSISTANT_SAID] The assistant provided resources for online courses, books, blogs, websites, communities, and experts related to AI-powered chatbots.
+- [ASSISTANT_SAID] Online courses recommended include Coursera's "Chatbots and Conversational Interfaces" by IBM and edX's "Conversational AI" by Microsoft.
+- [ASSISTANT_SAID] Books recommended include "Designing Intelligent Agents" by Steven H. Kim and "Conversational UI: The Future of Human-Computer Interaction" by Robert J. Moore.
+- [ASSISTANT_SAID] Blogs and websites recommended include Chatbots Magazine, Botkit, and Conversational AI by Oracle.
+- [ASSISTANT_SAID] Communities recommended include Chatbot Developers on LinkedIn, r/Chatbots on Reddit, and Chatbot enthusiasts on Facebook.
+- [ASSISTANT_SAID] Experts recommended include Dr. Sue Robinson, Dr. Michelle Zhou, and Matt Schlicht.
+- [USER] The user found the resources helpful and asked for more information about the Coursera course by IBM, specifically its duration and level.
+- [ASSISTANT_SAID] The assistant provided details about the Coursera course "Chatbots and Conversational Interfaces" by IBM, stating it consists of 4 modules and takes around 16-20 hours to complete.
+- [ASSISTANT_SAID] The course is considered intermediate-level and requires basic programming knowledge and familiarity with web development technologies.
+- [ASSISTANT_SAID] The course outline includes modules on introduction to chatbots, designing conversational interfaces, building chatbots with IBM Watson Assistant, and deploying and integrating chatbots.
+- [ASSISTANT_SAID] The course costs $49 per month as part of the IBM AI Engineering Professional Certificate program or $39 if purchased individually.
+- [USER] The user expressed interest in learning more about conversational design principles and asked for online resources or articles on that topic.
+- [ASSISTANT_SAID] The assistant recommended articles such as "The Conversational Design Framework" by Google, "Conversational UI: The Future of Human-Computer Interaction" by Smashing Magazine, and "Designing

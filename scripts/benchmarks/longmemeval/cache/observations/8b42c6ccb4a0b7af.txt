@@ -1,0 +1,34 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/30 (Tue) 01:55
+- [EVENT] User is looking to get an antique vase appraised.
+- [FACT] The vase dates back to the early 1900s.
+- [PREFERENCE] User describes the vase as a beautiful piece with intricate designs and patterns.
+- [ASSISTANT_SAID] Assistant provided guidance on finding a reputable appraiser, including:
+  - Professional Associations: Appraisers Association of America (AAA), International Society of Appraisers (ISA), National Association of Dealers in Antiques and Collectibles (NADAC), American Society of Appraisers (ASA).
+  - Online Directories: The Appraisal Foundation's (TAF) Directory of Appraisers, The International Society of Appraisers' (ISA) Find an Appraiser Tool.
+  - Word of Mouth: Ask friends, family, or colleagues for recommendations.
+  - Check Credentials: Verify the appraiser's qualifications, experience, and specialized knowledge in antiques and collectibles.
+- [ASSISTANT_SAID] Assistant outlined what to expect during the appraisal process, including:
+  - Initial Consultation: Discuss the vase's history, provenance, and any documentation.
+  - Visual Inspection: Examination of the vase's condition, materials, and craftsmanship.
+  - Research: Appraiser will research the vase's market value.
+  - Written Appraisal Report: Detailed report including the vase's value, description, and supporting documentation.
+- [ASSISTANT_SAID] Additional tips provided by the assistant:
+  - Get Multiple Appraisals: Consider hiring two or three appraisers.
+  - Ask About Fees: Appraisers may charge by the hour, flat fee, or a percentage of the vase's value.
+  - Be Prepared: Have documentation ready to share with the appraiser.
+- [EVENT] User has another item to get appraised: an old wooden clock from the 1800s.
+- [ASSISTANT_SAID] Assistant confirmed that the same appraisal process applies to clocks but noted key differences, including:
+  - Clock-Specific Factors: Movement type, dial and hand condition, strike mechanism, restoration or repairs.
+  - Functional Condition: Assessment of the clock's working condition.
+  - Component Authenticity: Verification of the clock's components.
+  - Provenance: Importance of documentation for the clock's value.
+- [ASSISTANT_SAID] Assistant provided additional considerations for clock appraisal, including:
+  - Clockmaker or Maker's Mark: Can increase value.
+  - Rarity and Uniqueness: Unique features can command higher value.
+  - Restoration and Conservation: Consider the clock's condition and necessary work.
+- [ASSISTANT_SAID] Resources for finding a clock appraiser included:
+  - National Association of Watch and Clock Collectors (NAWCC).
+  - American Clock and Watch Museum.
+  - Local

@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/25 (Thu) 23:25  
+[FACT] User is having issues with their WiFi router.  
+[PREFERENCE] User is considering upgrading their plan or getting a new router.  
+[ASSISTANT_SAID] The assistant offered to help the user with router recommendations.  
+[ASSISTANT_SAID] The assistant provided factors to consider when selecting a new router: speed, range, number of devices, security, and budget.  
+[ASSISTANT_SAID] Recommended budget-friendly routers:  
+[ASSISTANT_SAID] 1. TP-Link Archer A7: Dual-band speeds up to 1750 Mbps, good range, priced at $50.  
+[ASSISTANT_SAID] 2. Netgear R6230: Dual-band speeds up to 1200 Mbps, strong range, priced at $70.  
+[ASSISTANT_SAID] Recommended mid-range routers:  
+[ASSISTANT_SAID] 1. Netgear Nighthawk R6700: Dual-band speeds up to 1900 Mbps, strong range, priced at $150.  
+[ASSISTANT_SAID] 2. Linksys EA8300: Tri-band speeds up to 2200 Mbps, good range, priced at $200.  
+[ASSISTANT_SAID] 3. ASUS RT-AC86U: Dual-band speeds up to 2900 Mbps, strong range, priced at $230.  
+[ASSISTANT_SAID] Recommended high-end routers:  
+[ASSISTANT_SAID] 1. Netgear Nighthawk RAX80: Tri-band speeds up to 6000 Mbps, excellent range, priced at $300.  
+[ASSISTANT_SAID] 2. Asus RT-AX88U: Dual-band speeds up to 3100 Mbps, strong range, priced at $300.  
+[ASSISTANT_SAID] 3. Google Wifi: Mesh network system with tri-band speeds up to 2200 Mbps, excellent range, priced at $300 for a 3-pack.  
+[ASSISTANT_SAID] Recommended mesh network systems:  
+[ASSISTANT_SAID] 1. Google Wifi: Tri-band speeds up to 2200 Mbps, excellent range, priced at $300 for a 3-pack.  
+[ASSISTANT_SAID] 2. Netgear Orbi: Tri-band speeds up to 2200 Mbps, strong range, priced at $300 for a 2-pack.  
+[ASSISTANT_SAID] 3. Linksys Velop: Tri-band speeds up to 2200 Mbps, good range, priced at $200 for a 2-pack.  
+[PREFERENCE] User is leaning towards a mid-range option.

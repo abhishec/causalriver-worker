@@ -1,0 +1,22 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/04/01 (Sat) 14:55
+- [USER] User expressed interest in proposing a PhD project using metal oxide semiconductor technology.
+- [USER] User is looking to choose a disease and detect its biomarker for the PhD project.
+- [ASSISTANT_SAID] Alcohol use disorder (AUD) is a chronic condition characterized by excessive and compulsive consumption of alcohol despite negative consequences.
+- [ASSISTANT_SAID] Symptoms of AUD include: drinking more or for longer than intended, inability to cut down or control drinking, spending a lot of time drinking or recovering from its effects, craving or strong desire to drink, neglecting responsibilities at home, work, or school due to drinking, and continuing to drink despite physical or mental health problems.
+- [ASSISTANT_SAID] Untreated AUD can lead to health complications such as liver disease, heart disease, and mental health disorders.
+- [ASSISTANT_SAID] Ethanol in breath can be detected using metal oxide semiconductor sensors to help diagnose AUD.
+- [USER] User mentioned that the ethanol concentration should be higher than ppb.
+- [ASSISTANT_SAID] Ethanol concentration in breath for AUD is typically much higher than 1 ppb.
+- [ASSISTANT_SAID] Concentration of biomarkers associated with liver disorders in breath may be much lower, typically in ppb or ppt.
+- [ASSISTANT_SAID] The exact concentration of a biomarker indicating liver dysfunction may vary based on factors like sensor sensitivity and disease stage.
+- [ASSISTANT_SAID] Metal oxide semiconductor (MOS) sensors can detect biomarkers in breath associated with diseases like lung cancer, diabetes, asthma, and others.
+- [ASSISTANT_SAID] Promising research areas include detecting volatile organic compounds (VOCs) in breath associated with different types of cancer.
+- [ASSISTANT_SAID] Lung cancer is associated with elevated levels of biomarkers such as ethyl acetate, acetone, and methanol in breath.
+- [ASSISTANT_SAID] Breast cancer is associated with elevated levels of heptadecane, 2-nonanone, and decanal in breath.
+- [ASSISTANT_SAID] Colon cancer is associated with elevated levels of dimethyl sulfide, 1-octene, and indole in breath.
+- [ASSISTANT_SAID] VOCs associated with asthma include acetaldehyde, pentane, and isoprene.
+- [ASSISTANT_SAID] VOCs associated with chronic obstructive pulmonary disease (COPD) include butane, isoprene, and pentane.
+- [ASSISTANT_SAID] The choice of disease and biomarker depends on research interests, goals, and availability of resources and clinical samples.
+- [ASSIST

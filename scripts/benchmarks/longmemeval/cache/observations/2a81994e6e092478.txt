@@ -1,0 +1,21 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/07 (Sun) 05:32  
+[USER] User inquired about the concept of serverless computing and its differences from traditional server-based infrastructure.  
+[ASSISTANT_SAID] Serverless computing is an execution model where the cloud infrastructure automates the allocation and provisioning of compute resources as needed by the application being hosted.  
+[ASSISTANT_SAID] Developers are freed from the responsibility of managing servers, infrastructure, and operating systems in serverless computing.  
+[ASSISTANT_SAID] In traditional server-based infrastructure, developers are responsible for managing the servers required to host their application code, including infrastructure, operating systems, and runtime environments.  
+[ASSISTANT_SAID] Serverless computing changes how computing resources are managed and allocated, allowing developers to upload code while the cloud platform provides necessary resources and scales them automatically based on workload.  
+[ASSISTANT_SAID] Serverless computing makes it easier to scale and deploy applications, maximizing resource utilization and minimizing cost.  
+[USER] User expressed interest in potential downsides to using serverless computing and asked for cases where traditional server-based infrastructure might be a better choice.  
+[ASSISTANT_SAID] Potential downsides of serverless computing include lack of control over the underlying infrastructure and unpredictable costs.  
+[ASSISTANT_SAID] Developers do not have direct access to servers in serverless computing, limiting their ability to tune performance or troubleshoot low-level issues.  
+[ASSISTANT_SAID] Serverless computing can be more cost-effective for small to medium workloads, but the pricing model may become less efficient for large-scale or long-running workloads.  
+[ASSISTANT_SAID] Traditional server-based infrastructure may be preferred for applications requiring low latency or a high level of control over the infrastructure.  
+[ASSISTANT_SAID] Applications with large amounts of data, such as big data processing, may not be ideal for serverless due to potential network and storage bottlenecks.  
+[ASSISTANT_SAID] The choice between serverless and traditional infrastructure depends on the specific requirements of the application and use case, requiring careful evaluation of tradeoffs.  
+[USER] User requested an example of a use case where serverless computing would be the ideal choice.  
+[ASSISTANT_SAID] An example of an ideal use case for serverless computing is web backend APIs.  
+[ASSISTANT_SAID] Backend APIs typically have unpredictable and varying workloads, making it difficult to predict necessary server capacity for traditional infrastructure.  
+[ASSISTANT_SAID] Serverless computing allows resources to be automatically scaled up and down based on usage, enabling the API to handle traffic spikes without manual capacity management.  
+[ASSISTANT_SAID] Serverless computing enables developers to focus on writing code rather than managing infrastructure,

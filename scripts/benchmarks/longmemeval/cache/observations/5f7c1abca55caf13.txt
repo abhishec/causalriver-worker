@@ -1,0 +1,34 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/20 (Sat) 08:43
+- [USER] User's name is Alex.
+- [USER] User is experiencing health issues, having been very unwell that week.
+- [EVENT] User reached out to Alex for an update regarding the property.
+- [RELATIONSHIP] User expresses gratitude towards the landlord for repairing the dishwasher.
+- [FACT] Venkatesh is the person who repaired the dishwasher.
+- [EVENT] Venkatesh came to take a look at the dishwasher on Monday morning.
+- [CHANGE] User had meant to send a thank you email sooner but was unwell.
+- [EVENT] User found a rusty metal spike sticking out of the ground where the back gate is to be replaced.
+- [FACT] Venkatesh informed the user about construction debris but did not mention hazards.
+- [EVENT] User's dog stepped on the spike, causing an awful shriek.
+- [PREFERENCE] User had only seen metal posts used for construction laid flat on the ground near the gate site.
+- [TEMPORAL] User's dog was in the backyard while Venkatesh was repairing the dishwasher.
+- [FACT] User usually does not leave their dog outside unattended.
+- [CHANGE] User feels that the neighborhood has started to degrade in terms of safety.
+- [PREFERENCE] User had always felt safe in the property until recently.
+- [EVENT] User mentions an uptick in crime and aggressive individuals in the area.
+- [EVENT] User had their safety threatened in the park by an individual presumed to be on drugs.
+- [EVENT] User woke up to find the side gate wide open to the street.
+- [FACT] The side gate had been secured with a latch and bolted.
+- [EVENT] User's personal master lock had not been resecured on the latch due to gardeners coming through.
+- [TEMPORAL] It was the night before that the bottom bolt on the gate was shut.
+- [EVENT] User suspects someone hopped the fence to open the gate.
+- [PREFERENCE] User is increasingly worried about a break-in due to the visibility of technology inside the house.
+- [EVENT] User wants to touch base on the progress toward the security cameras the landlord wanted to install.
+- [FACT] The front and garage doors are both in need of repair.
+- [FACT] Venkatesh has already fixed the lock on the front screen door.
+- [CHANGE] User is still awaiting the main door repairs.
+- [FACT] The wood on the actual front door is decaying in places.
+- [EVENT] User informs Rent Select that active construction sites have been left in place for so long that they are showing signs of decay.
+- [EVENT] User will attach photos of the front yard site and the backyard area where the gate is to be replaced.
+- [

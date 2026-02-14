@@ -1,0 +1,13 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/01/21 (Sat) 17:34
+- [FACT] The user drinks coffee and tea.
+- [FACT] The user has a wife and a daughter.
+- [EVENT] The user usually stops for a takeaway coffee on the way to work.
+- [EVENT] The user prepares a cup of coffee for themselves.
+- [EVENT] The user brings a cup of tea to their wife in bed.
+- [EVENT] The user kisses their wife and daughter goodbye.
+- [ASSISTANT_SAID] The assistant translated "on my way to work I usually stop for a take away coffee which I drink in the car" to Spanish as "En mi camino al trabajo, usualmente paro para comprar un café para llevar que bebo en el carro."
+- [ASSISTANT_SAID] The assistant translated "After making myself a cup of coffee I bring a cup of tea to my wife in bed" to Spanish as "Después de prepararme una taza de café, llevo una taza de té a mi esposa en la cama."
+- [ASSISTANT_SAID] The assistant translated "After meditating, and studying some Spanish while drinking coffee, I bring my wife a cup of tea in bed" to Spanish as "Después de meditar y estudiar un poco de español mientras tomo café, llevo una taza de té a mi esposa en la cama."
+- [ASSISTANT_SAID] The assistant translated "I then kiss my wife and daughter and wife goodbye" to Spanish as "Luego beso a mi esposa e hija y les digo adiós."

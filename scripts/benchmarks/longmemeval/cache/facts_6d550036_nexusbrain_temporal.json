@@ -1,0 +1,152 @@
+{
+  "answer_ec904b3c_4": [
+    {
+      "fact": "User recently participated in a case competition hosted by a consulting firm",
+      "type": "event",
+      "entities": [
+        "case competition",
+        "consulting firm"
+      ]
+    },
+    {
+      "fact": "User is looking for help with data visualization tools",
+      "type": "preference",
+      "entities": [
+        "data visualization tools"
+      ]
+    },
+    {
+      "fact": "User is considering using Tableau and Power BI for their presentation",
+      "type": "preference",
+      "entities": [
+        "Tableau",
+        "Power BI"
+      ]
+    },
+    {
+      "fact": "User wants to make their presentation more engaging with data visualization",
+      "type": "opinion",
+      "entities": [
+        "presentation",
+        "data visualization"
+      ]
+    }
+  ],
+  "answer_ec904b3c_2": [
+    {
+      "fact": "User is using Python and R to build predictive models",
+      "type": "personal",
+      "entities": [
+        "Python",
+        "R",
+        "predictive models"
+      ]
+    },
+    {
+      "fact": "User is having trouble with feature engineering",
+      "type": "opinion",
+      "entities": [
+        "feature engineering"
+      ]
+    },
+    {
+      "fact": "User is working on a solo project for their Data Mining class",
+      "type": "event",
+      "entities": [
+        "Data Mining class"
+      ]
+    },
+    {
+      "fact": "User is interested in applying feature engineering techniques to customer purchase data",
+      "type": "preference",
+      "entities": [
+        "feature engineering",
+        "customer purchase data"
+      ]
+    },
+    {
+      "fact": "User is trying to identify patterns and trends in their dataset",
+      "type": "opinion",
+      "entities": [
+        "patterns",
+        "trends",
+        "dataset"
+      ]
+    }
+  ],
+  "answer_ec904b3c_1": [
+    {
+      "fact": "User is working on a project analyzing customer data to identify trends and patterns.",
+      "type": "event",
+      "entities": [
+        "customer data",
+        "trends",
+        "patterns"
+      ]
+    },
+    {
+      "fact": "User has experience with data analysis from a Marketing Research class project.",
+      "type": "personal",
+      "entities": [
+        "Marketing Research class",
+        "data analysis"
+      ]
+    },
+    {
+      "fact": "User led the data analysis team for a comprehensive market analysis for a new product launch.",
+      "type": "event",
+      "entities": [
+        "data analysis team",
+        "market analysis",
+        "new product launch"
+      ]
+    },
+    {
+      "fact": "User is considering using k-means clustering for their project.",
+      "type": "preference",
+      "entities": [
+        "k-means clustering"
+      ]
+    },
+    {
+      "fact": "User is unsure about the number of clusters to use in k-means clustering.",
+      "type": "opinion",
+      "entities": [
+        "number of clusters",
+        "k-means clustering"
+      ]
+    }
+  ],
+  "answer_ec904b3c_3": [
+    {
+      "fact": "User presented a poster on research at an academic conference",
+      "type": "event",
+      "entities": [
+        "poster",
+        "academic conference",
+        "consumer psychology"
+      ]
+    },
+    {
+      "fact": "User's research focuses on the effects of social media influencers on consumer purchasing decisions",
+      "type": "personal",
+      "entities": [
+        "social media influencers",
+        "consumer purchasing decisions"
+      ]
+    },
+    {
+      "fact": "User is looking to expand on their research",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User is interested in recent studies or papers on consumer behavior and social media",
+      "type": "preference",
+      "entities": [
+        "consumer behavior",
+        "social media"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2021/05/09 (Sun) 17:47
+- [USER] User requested to set up Google Analytics GA4 for a website and/or app.
+- [ASSISTANT_SAID] To set up Google Analytics GA4 for a website or app, follow these steps:
+- [ASSISTANT_SAID] Step 1: Go to the Google Analytics website and sign in with your Google account. If you don't have a Google account, you'll need to create one before you can proceed.
+- [ASSISTANT_SAID] Step 2: Click on the "Admin" button in the bottom left corner of the screen.
+- [ASSISTANT_SAID] Step 3: In the Property column, click on the "Create Property" button.
+- [ASSISTANT_SAID] Step 4: Select either "Web" or "App," depending on whether you want to set up Google Analytics for a website or an app.
+- [ASSISTANT_SAID] Step 5: Enter the name and URL of your website or app, and select the industry category that best describes it.
+- [ASSISTANT_SAID] Step 6: Click on the "Create" button to create your new property.
+- [ASSISTANT_SAID] Step 7: You will be taken to the "Tracking Info" page for your new property. On this page, you will see a tracking code that you need to install on your website or app.
+- [ASSISTANT_SAID] Step 8: To install the tracking code, you will need to add it to the source code of your website or app. If you are setting up Google Analytics for a website, you will need to add the tracking code to the <head> section of your website's HTML code. If you are setting up Google Analytics for an app, you will need to follow the instructions provided by Google for installing the tracking code in your app.
+- [ASSISTANT_SAID] Step 9: Once you have installed the tracking code, you can start tracking activity on your website or app. You can view your tracking data by clicking on the "Reports" tab in Google Analytics.
+- [ASSISTANT_SAID] I hope this helps! If you have any questions or need further assistance, don't hesitate to ask.

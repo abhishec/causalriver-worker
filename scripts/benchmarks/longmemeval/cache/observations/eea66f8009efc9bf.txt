@@ -1,0 +1,16 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/29 (Mon) 04:30  
+[USER] User is looking for a good recipe for Korean-style spicy pork belly.  
+[ASSISTANT_SAID] Korean-style spicy pork belly is also known as "jeyuk bokkeum" in Korean.  
+[ASSISTANT_CREATED] Recipe for Korean-style spicy pork belly includes the following ingredients: 2 lbs pork belly (skin removed), 1/4 cup Korean chili flakes (gochugaru), 2 tbsp brown sugar, 2 tbsp garlic (minced), 1 tsp grated ginger, 1 tsp ground black pepper, 1/4 cup Korean chili paste (gochujang), 2 tbsp soy sauce, 2 tbsp rice vinegar, 2 tbsp vegetable oil.  
+[ASSISTANT_CREATED] Instructions for cooking Korean-style spicy pork belly include curing, marinating, cooking, making the spicy sauce, finishing the dish, and serving.  
+[ASSISTANT_SAID] Tips for the recipe include marinating the pork belly for longer for more intense flavor, adjusting spiciness, adding crispy garlic and ginger, and serving with a fried egg.  
+[USER] User inquired about the type of rice vinegar recommended for the recipe and suggestions for sides to serve with the dish.  
+[ASSISTANT_SAID] Recommended using a mild, Japanese-style rice vinegar for the recipe.  
+[ASSISTANT_SAID] Suggested brands of Japanese rice vinegar include Mitsukan, Kikkoman, Nakano, and Marukan.  
+[ASSISTANT_SAID] Alternatives to Japanese rice vinegar include mild white wine vinegar or apple cider vinegar, noting that the flavor profile will differ.  
+[ASSISTANT_SAID] Suggested traditional Korean side dishes to serve with spicy pork belly include kimchi, steamed rice, bok choy stir-fry, gyeranjjim, sigeumchi, kongnamul, cucumber kimchi, pickled ginger, roasted vegetables, and Korean-style coleslaw.  
+[USER] User expressed curiosity about making kimchi at home and requested a simple recipe for beginners, along with the type of Korean chili flakes to use.  
+[ASSISTANT_CREATED] Simple kimchi recipe for beginners (Baechu Kimchi) includes ingredients: 2 lbs napa cabbage, 2 tbsp coarse salt, 1/4 cup Korean chili flakes (gochugaru), 2 cloves garlic (minced), 1/4 cup fish sauce, 1/4 cup Korean chili paste (gochujang), 2 tbsp rice vinegar, 1/4 cup water, 1/4 cup chopped green onions, and 1/4 cup toasted sesame seeds.  
+[ASSISTANT_CREATED] Instructions for making kimchi include salting the cabbage, rinsing and draining, making the kimchi

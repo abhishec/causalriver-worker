@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/23 (Tue) 11:19  
+[ASSISTANT_SAID] You can add backend services from the Amplify Console on AWS.  
+[ASSISTANT_SAID] Steps to add a service using the Amplify Console:  
+[ASSISTANT_SAID] 1. Go to the Amplify Console dashboard and select the app you want to add the service to.  
+[ASSISTANT_SAID] 2. In the left-hand navigation, select "Backend environments".  
+[ASSISTANT_SAID] 3. Click on the environment you want to add the service to.  
+[ASSISTANT_SAID] 4. Click on "Add backend API, function or resource".  
+[ASSISTANT_SAID] 5. Select the service you want to add, such as Amazon Polly.  
+[ASSISTANT_SAID] 6. Follow the prompts to configure the service and add it to your Amplify app.  
+[ASSISTANT_SAID] Note that the steps may vary slightly depending on the service you are adding.  
+[USER] Okay, let's go in-depth with choosing the backend and connecting that with Amplify Studio.  
+[USER] Can you give me step-by-step instructions on choosing the backend on Amplify Studio?  
+[ASSISTANT_SAID] Steps to choose the backend on Amplify Studio:  
+[ASSISTANT_SAID] 1. Go to the Amplify Console and click on the "Get started" button under "Host web app".  
+[ASSISTANT_SAID] 2. Select the repository you want to use for your app and click on the "Next" button.  
+[ASSISTANT_SAID] 3. On the "Add backend environment" page, select the type of backend environment you want to use.  
+[ASSISTANT_SAID] 4. If you choose AWS Amplify CLI, provide the path to your project's root directory, the name of the environment, and the editor you want to use.  
+[ASSISTANT_SAID] 5. After configuring your backend environment, choose the services you want to add to your project.  
+[ASSISTANT_SAID] 6. Once you have added the backend services, configure them by selecting the "Backend environments" tab.  
+[ASSISTANT_SAID] 7. Finally, connect your Amplify Studio app to your backend by selecting the "Connect backend" button.  
+[USER] Can you edit the instruction to a mobile app instead of a web app?  
+[ASSISTANT_SAID] Updated steps for creating a mobile app using Amplify Studio:  
+[ASSISTANT_SAID] 1. Sign in to the AWS Management Console and

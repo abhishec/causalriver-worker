@@ -1,0 +1,73 @@
+{
+  "answer_ef84b994_abs_1": [
+    {
+      "fact": "User is interested in education technology.",
+      "type": "preference",
+      "entities": [
+        "education technology"
+      ]
+    },
+    {
+      "fact": "User presented a poster on their thesis research at their first research conference over the summer.",
+      "type": "event",
+      "entities": [
+        "poster",
+        "thesis research",
+        "research conference",
+        "summer"
+      ]
+    },
+    {
+      "fact": "User's research focused on the impact of AI on education.",
+      "type": "event",
+      "entities": [
+        "AI",
+        "education"
+      ]
+    },
+    {
+      "fact": "User is exploring how AI can be used to support student learning outcomes.",
+      "type": "opinion",
+      "entities": [
+        "AI",
+        "student learning outcomes"
+      ]
+    }
+  ],
+  "answer_ef84b994_abs_2": [
+    {
+      "fact": "User is looking for information on the latest developments in education technology.",
+      "type": "preference",
+      "entities": [
+        "education technology",
+        "latest developments"
+      ]
+    },
+    {
+      "fact": "User has attended their first research conference at Harvard University.",
+      "type": "event",
+      "entities": [
+        "Harvard University",
+        "research conference"
+      ]
+    },
+    {
+      "fact": "User saw interesting projects on AI in education at the conference.",
+      "type": "event",
+      "entities": [
+        "AI",
+        "education",
+        "conference"
+      ]
+    },
+    {
+      "fact": "User is interested in personalized learning and how AI can tailor instruction to individual students' needs.",
+      "type": "preference",
+      "entities": [
+        "personalized learning",
+        "AI",
+        "instruction"
+      ]
+    }
+  ]
+}

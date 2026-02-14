@@ -1,0 +1,19 @@
+**Observation Log:**
+
+**Session Date:** 2023/03/03 (Fri) 10:25  
+**Session ID:** sharegpt_5clkQjb_16
+
+1. [FACT] The user is named Jonathan.
+2. [FACT] The user is a co-founder working with Spacetech companies.
+3. [EVENT] The user completed a 2-year project with Spire, taking them through their IPO and new market entry into Australia.
+4. [FACT] The user sourced over 23,000 candidates with an 80%+ close rate across multiple tech and sales roles in Europe, the US, Singapore, and Australia.
+5. [EVENT] The user is creating a case study based on their success with Spire.
+6. [PREFERENCE] The user understands the challenges of finding the right talent for startups, particularly in the Spacetech industry.
+7. [EVENT] The user is reaching out to companies that are hiring, specifically in the Spacetech sector.
+8. [ASSISTANT_SAID] The assistant provided feedback on the user's LinkedIn message and email cadences, stating they are well-written and professional.
+9. [ASSISTANT_SAID] The assistant noted that the cadences are effective in catching the attention of founders, CXOs, and board members.
+10. [PREFERENCE] The user is targeting Spacetech companies with their outreach efforts.
+11. [ASSISTANT_CREATED] The assistant created a list of 10 reasons to use SOURCE, including access to a large talent pool, time savings, cost savings, and improved candidate quality.
+12. [ASSISTANT_CREATED] The assistant generated 10 different language options for Instagram ads promoting SOURCE, focusing on efficiency, affordability, and the benefits of the service.
+13. [TEMPORAL] The user is looking to schedule meetings for the upcoming week.
+14. [RELATIONSHIP] The user is reaching out to individuals at companies, referred to as {{first_name}} and {{company_natural}} in the context of their messages.

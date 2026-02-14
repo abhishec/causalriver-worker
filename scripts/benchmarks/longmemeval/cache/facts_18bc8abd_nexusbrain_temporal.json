@@ -1,0 +1,73 @@
+{
+  "answer_fff743f5_1": [
+    {
+      "fact": "User is planning to host a backyard BBQ soon",
+      "type": "event",
+      "entities": [
+        "backyard BBQ"
+      ]
+    },
+    {
+      "fact": "User enjoys ribs and brisket",
+      "type": "preference",
+      "entities": [
+        "ribs",
+        "brisket"
+      ]
+    },
+    {
+      "fact": "User loves mac and cheese",
+      "type": "preference",
+      "entities": [
+        "mac and cheese"
+      ]
+    },
+    {
+      "fact": "User's friends also enjoy mac and cheese",
+      "type": "relationship",
+      "entities": [
+        "friends",
+        "mac and cheese"
+      ]
+    },
+    {
+      "fact": "User's favorite BBQ sauce is Sweet Baby Ray's",
+      "type": "preference",
+      "entities": [
+        "Sweet Baby Ray's"
+      ]
+    }
+  ],
+  "answer_fff743f5_2": [
+    {
+      "fact": "User is thinking of hosting another backyard BBQ soon",
+      "type": "event",
+      "entities": [
+        "backyard BBQ"
+      ]
+    },
+    {
+      "fact": "User wants to try out new recipes for the BBQ",
+      "type": "preference",
+      "entities": [
+        "new recipes"
+      ]
+    },
+    {
+      "fact": "User loves their new Weber gas grill for quick weeknight dinners",
+      "type": "preference",
+      "entities": [
+        "Weber gas grill",
+        "quick weeknight dinners"
+      ]
+    },
+    {
+      "fact": "User is currently obsessed with Kansas City Masterpiece BBQ sauce on their ribs",
+      "type": "preference",
+      "entities": [
+        "Kansas City Masterpiece BBQ sauce",
+        "ribs"
+      ]
+    }
+  ]
+}

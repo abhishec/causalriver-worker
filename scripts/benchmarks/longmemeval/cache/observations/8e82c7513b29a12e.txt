@@ -1,0 +1,19 @@
+**Observation Log:**
+
+- [FACT] User is planning a trip to Disneyland with their family.
+- [FACT] User had a great experience with fireworks at Disney California Adventure Park during the "Summer Nights" event last month.
+- [FACT] User stayed at the Grand Californian Hotel, which is located within the Disneyland Resort.
+- [PREFERENCE] User is interested in finding good spots to watch the fireworks display at Disneyland.
+- [CHANGE] User clarified that they mixed up the Grand Californian Hotel with a hotel located within Disney California Adventure Park.
+- [ASSISTANT_SAID] The assistant clarified that there is no hotel located within Disney California Adventure Park and mentioned the Grand Californian Hotel is near Disneyland Park.
+- [ASSISTANT_SAID] The assistant provided five popular viewing areas for fireworks at Disneyland: Main Street USA, "it's a small world" Mall, Rivers of America, Mickey's Toontown, and Disneyland Railroad.
+- [ASSISTANT_SAID] The assistant advised to arrive early to secure a good spot for the fireworks display.
+- [ASSISTANT_SAID] The assistant mentioned that Disneyland usually offers a summer-themed fireworks show, often with a patriotic twist around the 4th of July.
+- [ASSISTANT_SAID] The assistant noted that "Disneyland Forever" is a special summer fireworks show featuring classic Disney songs, modern hits, and patriotic music.
+- [ASSISTANT_SAID] The assistant suggested checking the official Disneyland website or app for the most up-to-date information on summer events and fireworks schedules.
+- [TEMPORAL] User attended the "Summer Nights" event on June 15th and 16th.
+- [EVENT] User enjoyed the "Summer Nights" event with their family during their stay at the Grand Californian Hotel.
+- [ASSISTANT_SAID] The assistant mentioned that Disney California Adventure Park typically does not have a regular fireworks show like Disneyland Park.
+- [ASSISTANT_SAID] The assistant suggested checking the official Disneyland website, social media, or signing up for the Disneyland newsletter for updates on summer events.
+- [ASSISTANT_SAID] The assistant provided information about usual summer events at Disney California Adventure Park, including Summer of Heroes, 4th of July Celebration, Pixar Fest, live music and entertainment, and seasonal food and drinks.
+- [ASSISTANT_SAID] The assistant emphasized that Disney often announces summer events and celebrations closer to the date, and recommended checking the park's website and social media accounts regularly for updates.

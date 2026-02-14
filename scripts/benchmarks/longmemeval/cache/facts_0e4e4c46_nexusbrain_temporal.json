@@ -1,0 +1,88 @@
+{
+  "answer_f2f998c7_1": [
+    {
+      "fact": "User is thinking of hosting another game night soon",
+      "type": "event",
+      "entities": [
+        "game night"
+      ]
+    },
+    {
+      "fact": "User enjoys the strategy aspect of Ticket to Ride",
+      "type": "preference",
+      "entities": [
+        "Ticket to Ride",
+        "strategy"
+      ]
+    },
+    {
+      "fact": "User is interested in trying out Carcassonne",
+      "type": "preference",
+      "entities": [
+        "Carcassonne"
+      ]
+    },
+    {
+      "fact": "User has scored 124 points in Ticket to Ride",
+      "type": "personal",
+      "entities": [
+        "Ticket to Ride",
+        "124 points"
+      ]
+    },
+    {
+      "fact": "User is eager to keep improving in Ticket to Ride",
+      "type": "opinion",
+      "entities": [
+        "Ticket to Ride"
+      ]
+    }
+  ],
+  "answer_f2f998c7_2": [
+    {
+      "fact": "User is considering hosting another game night soon",
+      "type": "event",
+      "entities": [
+        "game night"
+      ]
+    },
+    {
+      "fact": "User is looking for new games similar to Ticket to Ride",
+      "type": "preference",
+      "entities": [
+        "Ticket to Ride"
+      ]
+    },
+    {
+      "fact": "User is intrigued by the game Scythe",
+      "type": "preference",
+      "entities": [
+        "Scythe"
+      ]
+    },
+    {
+      "fact": "User is interested in games with a similar level of strategy and complexity to Ticket to Ride",
+      "type": "preference",
+      "entities": [
+        "strategy",
+        "complexity"
+      ]
+    },
+    {
+      "fact": "User is asking about the typical game duration of Scythe",
+      "type": "preference",
+      "entities": [
+        "Scythe",
+        "game duration"
+      ]
+    },
+    {
+      "fact": "User is inquiring if Scythe is suitable for a group of 4-5 players",
+      "type": "preference",
+      "entities": [
+        "Scythe",
+        "4-5 players"
+      ]
+    }
+  ]
+}

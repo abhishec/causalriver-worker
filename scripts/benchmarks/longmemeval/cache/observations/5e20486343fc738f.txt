@@ -1,0 +1,17 @@
+**Observation Log:**
+
+[SESSION_DATE] 2023/05/29 (Mon) 04:50  
+[FACT] The user is looking for advice on organizing digital receipts.  
+[EVENT] The user did online shopping on Black Friday and has a bunch of receipts cluttering up their inbox.  
+[ASSISTANT_SAID] The assistant congratulated the user on scoring great deals and provided suggestions for organizing digital receipts.  
+[ASSISTANT_SAID] Suggestions included creating a separate email folder for receipts, using a receipt management app, saving receipts to cloud storage, labeling and categorizing receipts, saving receipts as PDFs or screenshots, setting up automatic filters, purging unnecessary receipts, considering a digital wallet, using browser extensions, and keeping a backup.  
+[ASSISTANT_SAID] Recommended receipt management apps included Shoeboxed, Neat, Fetch Rewards, Wave, Expensify, and Receipt Bank, with specific features and limitations mentioned for each.  
+[PREFERENCE] The user likes the idea of using a receipt management app.  
+[ASSISTANT_SAID] The assistant provided tips on gathering digital receipts from the user's email inbox, including searching for keywords, checking spam folders, sorting by date, using filters, and checking multiple email accounts.  
+[ASSISTANT_SAID] The assistant suggested checking email clients for receipts and looking for receipts in online marketplaces' order histories.  
+[ASSISTANT_SAID] The assistant provided additional tips for gathering receipts, such as checking the trash or deleted items folder and setting up rules or filters for future receipts.  
+[EVENT] The user confirmed they have gathered all their digital receipts and plans to start uploading them to Shoeboxed.  
+[ASSISTANT_SAID] The assistant provided tips on organizing receipts in Shoeboxed, including creating folders, using tags, establishing a naming convention, categorizing by date, using the notes field, and taking advantage of auto-categorization features.  
+[ASSISTANT_SAID] The assistant mentioned the importance of verifying and correcting data, setting up recurring uploads, and regularly organizing receipts.  
+[PREFERENCE] The user is curious about using Shoeboxed to track receipts for business expenses related to their side hustle.  
+[ASSISTANT_SAID] The assistant confirmed that Shoeboxed is suitable for tracking business expenses and highlighted features such as expense categorization, tagging and filtering, mileage tracking, expense reporting, integration with accounting software, reimbursement capabilities, and customizable expense policies.

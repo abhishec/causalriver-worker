@@ -1,0 +1,30 @@
+**Observation Log:**
+
+[FACT] User is planning a new trip to New York City.  
+[FACT] User has been racking up loyalty points lately.  
+[FACT] User recently returned from a conference in Chicago.  
+[FACT] User recently attended a meeting in San Francisco.  
+[FACT] User had a quick weekend getaway to Miami with their partner.  
+[PREFERENCE] User is open to hotel recommendations in New York City but has heard great things about the Westin.  
+[PREFERENCE] User is looking for a hotel with a great gym and a comfortable bed.  
+[PREFERENCE] User appreciates hotels that prioritize fitness and comfort.  
+[PREFERENCE] User is considering bringing their partner along for the trip.  
+[PREFERENCE] User is looking for a hotel with a nice pool or spa as a bonus.  
+[PREFERENCE] User is thinking of booking a suite for their stay.  
+[ASSISTANT_SAID] The Westin New York at Times Square is a great option for its location and amenities.  
+[ASSISTANT_SAID] The Hyatt Centric Times Square offers stylish rooms and a rooftop bar.  
+[ASSISTANT_SAID] The Renaissance New York Times Square Hotel has a rooftop lounge and fitness center.  
+[ASSISTANT_SAID] The Kimpton Hotel Eventi is a boutique hotel in the NoMad neighborhood.  
+[ASSISTANT_SAID] The Langham, New York, Fifth Avenue offers a luxurious experience with easy access to landmarks.  
+[ASSISTANT_SAID] Equinox Hotel Hudson Yards features a 60,000-square-foot fitness center, yoga studio, and rooftop pool.  
+[ASSISTANT_SAID] 1 Hotel Central Park has a state-of-the-art fitness center and eco-friendly amenities.  
+[ASSISTANT_SAID] The Ritz-Carlton New York, Westchester has an impressive fitness center and plush beds.  
+[ASSISTANT_SAID] The Baccarat Hotel & Residences New York has a stunning fitness center and luxurious amenities.  
+[ASSISTANT_SAID] The Greenwich Hotel offers a cozy atmosphere and a well-equipped fitness center.  
+[ASSISTANT_SAID] The Plaza Hotel has a luxurious spa but no outdoor pool.  
+[ASSISTANT_SAID] The Mandarin Oriental New York has an indoor pool and a spa with Hudson River views.  
+[ASSISTANT_SAID] Booking a suite typically requires more points than a standard room.  
+[ASSISTANT_SAID] Marriott Bonvoy offers Suite Night Awards for elite members to upgrade to suites.  
+[ASSISTANT_SAID] Hyatt's World of Hyatt program allows for suite upgrades using points or cash.  
+[ASSISTANT_SAID] User can use a combination of points and cash to book a suite with Hyatt.  
+[ASSISTANT_SAID] User should check the hotel's

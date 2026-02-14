@@ -1,0 +1,24 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/21 (Sun) 12:52
+- [FACT] User is working on their thesis.
+- [EVENT] User submitted their thesis proposal after working on it for weeks.
+- [ASSISTANT_SAID] Assistant congratulated the user on submitting their proposal, acknowledging it as a huge milestone.
+- [USER_SAID] User is seeking help organizing their references for their thesis.
+- [ASSISTANT_SAID] Assistant recommended several reference management tools: Mendeley, Zotero, EndNote, Citavi, Papers, ReadCube, and RefWorks.
+- [ASSISTANT_SAID] Assistant provided factors to consider when choosing a reference management tool: citation style support, integration, collaboration, ease of use, and cost.
+- [USER_SAID] User expressed interest in trying out Mendeley and Zotero.
+- [FACT] User is currently writing their literature review chapter.
+- [USER_SAID] User needs to ensure their references are properly cited.
+- [ASSISTANT_SAID] Assistant provided tips for writing the literature review chapter, including organizing references, using citation styles, inserting in-text citations, automating the bibliography, checking for duplicates, using annotations, and collaborating with others.
+- [ASSISTANT_SAID] Assistant suggested general tips for writing a literature review, such as starting with a clear research question, using a logical structure, critically evaluating the literature, synthesizing findings, and using clear language.
+- [USER_SAID] User has been using a spreadsheet to keep track of references but finds it unwieldy.
+- [USER_SAID] User hopes Mendeley or Zotero will make it easier to organize and cite sources.
+- [USER_SAID] User asked for advice on how to import existing references into Mendeley or Zotero.
+- [ASSISTANT_SAID] Assistant provided methods for importing references into Mendeley, including CSV and RIS import, and manual entry.
+- [ASSISTANT_SAID] Assistant detailed the steps to import a CSV file into Mendeley.
+- [ASSISTANT_SAID] Assistant provided methods for importing references into Zotero, including CSV and BibTeX import, and online importer.
+- [ASSISTANT_SAID] Assistant detailed the steps to import a CSV file into Zotero.
+- [ASSISTANT_SAID] Assistant advised cleaning data before importing, using a consistent citation style, checking for duplicates, and verifying metadata after import.
+- [USER_SAID] User expressed hope that Mendeley or Zotero can assist with in-text citations and generating a bibliography.
+- [ASSISTANT_SAID] Assistant explained how Mendeley and Zotero can assist with in-text citations, including citation styles, inserting citations, auto-complete features, and multiple

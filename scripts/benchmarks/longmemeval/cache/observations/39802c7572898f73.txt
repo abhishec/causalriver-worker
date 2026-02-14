@@ -1,0 +1,30 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/12/07 (Thu) 12:09
+- [FACT] User has a project on the effects of yoga.
+- [FACT] User created a Google form with various questions for data collection.
+- [ASSISTANT_SAID] Assistant expressed willingness to review the user's Google form details for the yoga project.
+- [FACT] In the first part of the Google form, user asked for "Name", "Gender" (Male, Female), "Occupation" (Student, Service, Business, A Homemaker, Retired, Unemployed), "Age", "Weight", "Duration" (0 to 3 Months, 3 to 6 Months, More than 6 Months), and "Do you follow any specific diet?" (Yes, No).
+- [ASSISTANT_SAID] Assistant noted that the demographic questions would help understand how different factors may impact the effects of yoga.
+- [ASSISTANT_SAID] Assistant highlighted the importance of the diet question in analyzing the results of the study.
+- [FACT] In the second part of the Google form, user included questions on a 5-point scale.
+- [FACT] User's second part questions include: 
+  1. "In general, your health is?"
+  2. "Compared to one year ago rate health in general now?"
+  3. "Trouble falling or staying asleep, or sleeping too much."
+  4. "Becoming easily annoyed or irritable."
+  5. "Felt extremely happy?"
+  6. "Trouble concentrating on things or taking more time in making decisions."
+  7. "Feeling positive about life?"
+  8. "Sweat profusely (hands - legs or entire body were tremble/increased heartbeat) while talking to strangers or in public."
+  9. "Lost interest in activities that used to enjoy."
+  10. "Experience extreme mood swings?"
+  11. "Do you constantly have thoughts when you sit alone?"
+  12. "Activities, such as running, lifting heavy objects, sports."
+  13. "How much physical pain during the last 4 weeks?"
+- [ASSISTANT_SAID] Assistant acknowledged the range of questions assessing overall health and specific symptoms.
+- [ASSISTANT_SAID] Assistant noted the effectiveness of the 5-point scaling system for measuring changes in health and wellbeing.
+- [ASSISTANT_SAID] Assistant emphasized the importance of including both positive and negative experience questions for a complete picture of yoga's effects.
+- [ASSISTANT_SAID] Assistant mentioned that including a question on physical pain is useful for assessing the impact of yoga on pain management.
+- [USER] User requested types of questions related to different aspects like sleeping, mood, and concentration.
+- [ASSISTANT_SA

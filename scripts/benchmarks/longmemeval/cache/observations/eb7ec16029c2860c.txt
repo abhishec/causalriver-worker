@@ -1,0 +1,28 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2022/01/27 (Thu) 09:57  
+[USER] User is interested in learning coding.  
+[ASSISTANT_SAID] Recommended resources for learning coding:  
+[ASSISTANT_SAID] 1. Codeacademy - interactive coding lessons for different languages  
+[ASSISTANT_SAID] 2. Udemy - online video courses for programming languages  
+[ASSISTANT_SAID] 3. FreeCodeCamp - interactive programming lessons with a focus on web development  
+[ASSISTANT_SAID] 4. edX - online courses from top universities, including computer science and programming courses  
+[ASSISTANT_SAID] 5. Khan Academy - over 800 free online courses in a variety of subjects, including coding and computer science  
+[ASSISTANT_SAID] 6. Coursera - online courses and specializations in coding and computer science from top universities  
+[ASSISTANT_SAID] 7. W3Schools - online tutorials for web development technologies such as HTML, CSS, and JavaScript  
+[ASSISTANT_SAID] 8. Stack Overflow - a question and answer community for programmers of all levels  
+[ASSISTANT_SAID] 9. HackerRank - a website with coding challenges and practice problems  
+[ASSISTANT_SAID] 10. GitHub - online platform for hosting and sharing code projects, as well as collaborating with others in programming communities.  
+[USER] User has no previous coding experience.  
+[ASSISTANT_SAID] Recommended resources for beginners: Codeacademy, FreeCodeCamp, and Khan Academy.  
+[ASSISTANT_SAID] Codeacademy offers structured and interactive lessons for a variety of programming languages.  
+[ASSISTANT_SAID] FreeCodeCamp offers a comprehensive curriculum for web development with a focus on HTML, CSS, and JavaScript.  
+[ASSISTANT_SAID] Both Codeacademy and FreeCodeCamp are free to use.  
+[ASSISTANT_SAID] Khan Academy offers step-by-step coding tutorials specifically for beginners.  
+[USER] User is interested in knowing which programming language is the easiest to learn for a beginner.  
+[ASSISTANT_SAID] Suggested beginner-friendly programming languages:  
+[ASSISTANT_SAID] 1. Python - recommended for its simple syntax and structured approach.  
+[ASSISTANT_SAID] 2. JavaScript - used for creating dynamic and interactive websites, with an easy-to-learn syntax.  
+[ASSISTANT_SAID] 3. HTML & CSS - essential for web development, though not strictly programming languages.  
+[ASSISTANT_SAID] 4. Scratch - a block-based programming language designed for children and beginners.  
+[ASSISTANT_S

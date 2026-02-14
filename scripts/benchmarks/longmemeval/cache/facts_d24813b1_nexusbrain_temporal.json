@@ -1,0 +1,28 @@
+{
+  "answer_7c0ade93": [
+    {
+      "fact": "User is looking for a recipe for a chocolate cake with caramel ganache frosting.",
+      "type": "preference",
+      "entities": [
+        "chocolate cake",
+        "caramel ganache frosting"
+      ]
+    },
+    {
+      "fact": "User made a lemon poppyseed cake for a colleague's going-away party.",
+      "type": "event",
+      "entities": [
+        "lemon poppyseed cake",
+        "colleague's going-away party"
+      ]
+    },
+    {
+      "fact": "User is thinking of making a cake for a friend's birthday.",
+      "type": "event",
+      "entities": [
+        "cake",
+        "friend's birthday"
+      ]
+    }
+  ]
+}

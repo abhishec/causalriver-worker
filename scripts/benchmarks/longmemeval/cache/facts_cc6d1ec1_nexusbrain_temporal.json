@@ -1,0 +1,76 @@
+{
+  "answer_be73098b_1": [
+    {
+      "fact": "User is looking to set up a bird feeder in their backyard.",
+      "type": "preference",
+      "entities": [
+        "bird feeder",
+        "backyard"
+      ]
+    },
+    {
+      "fact": "User has been getting into bird watching for about three months.",
+      "type": "event",
+      "entities": [
+        "bird watching"
+      ]
+    },
+    {
+      "fact": "User finds bird watching fascinating.",
+      "type": "opinion",
+      "entities": [
+        "bird watching"
+      ]
+    },
+    {
+      "fact": "User is thinking of getting a feeder that can hold suet.",
+      "type": "preference",
+      "entities": [
+        "feeder",
+        "suet"
+      ]
+    },
+    {
+      "fact": "User has seen woodpeckers in their area.",
+      "type": "personal",
+      "entities": [
+        "woodpeckers",
+        "area"
+      ]
+    }
+  ],
+  "answer_be73098b_2": [
+    {
+      "fact": "User is considering getting a bird feeder for their backyard",
+      "type": "preference",
+      "entities": [
+        "bird feeder",
+        "backyard"
+      ]
+    },
+    {
+      "fact": "User attended a bird watching workshop at the local Audubon society a month ago",
+      "type": "event",
+      "entities": [
+        "bird watching workshop",
+        "Audubon society"
+      ]
+    },
+    {
+      "fact": "User learned a lot about attracting birds to their yard",
+      "type": "opinion",
+      "entities": [
+        "attracting birds",
+        "yard"
+      ]
+    },
+    {
+      "fact": "User is thinking of getting a birdbath to go along with their feeder",
+      "type": "preference",
+      "entities": [
+        "birdbath",
+        "feeder"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,196 @@
+{
+  "answer_02b63d04_2": [
+    {
+      "fact": "User is trying to get back on track with daily fitness goals",
+      "type": "preference",
+      "entities": [
+        "fitness goals"
+      ]
+    },
+    {
+      "fact": "User has been trying to do at least one guided breathing session per day with their Fitbit",
+      "type": "preference",
+      "entities": [
+        "guided breathing session",
+        "Fitbit"
+      ]
+    },
+    {
+      "fact": "User finds guided breathing sessions helpful for relaxation",
+      "type": "opinion",
+      "entities": [
+        "guided breathing sessions",
+        "relaxation"
+      ]
+    }
+  ],
+  "answer_02b63d04_1": [
+    {
+      "fact": "User is trying to get back on track with fitness goals.",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User aims to increase daily step count to 10,000 steps per day.",
+      "type": "goal",
+      "entities": [
+        "10,000 steps"
+      ]
+    },
+    {
+      "fact": "User has been wearing a Fitbit Versa 3 smartwatch for three weeks.",
+      "type": "personal",
+      "entities": [
+        "Fitbit Versa 3"
+      ]
+    },
+    {
+      "fact": "User's average steps per day have dropped lately.",
+      "type": "personal",
+      "entities": []
+    },
+    {
+      "fact": "User usually takes a walk during lunch break.",
+      "type": "preference",
+      "entities": []
+    },
+    {
+      "fact": "User thinks they need to make their lunch break walk longer.",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User is considering tracking sleep patterns to see if it affects energy levels and daily step count.",
+      "type": "opinion",
+      "entities": []
+    }
+  ],
+  "answer_02b63d04_5": [
+    {
+      "fact": "User has behind-the-ear (BTE) hearing aids from Phonak.",
+      "type": "personal",
+      "entities": [
+        "BTE hearing aids",
+        "Phonak"
+      ]
+    },
+    {
+      "fact": "User is currently using size 13 batteries for their hearing aids.",
+      "type": "personal",
+      "entities": [
+        "size 13 batteries"
+      ]
+    },
+    {
+      "fact": "User would like to order a multipack of 6 batteries.",
+      "type": "preference",
+      "entities": [
+        "multipack of 6 batteries"
+      ]
+    },
+    {
+      "fact": "User does not have a preferred brand for hearing aid batteries.",
+      "type": "preference",
+      "entities": []
+    },
+    {
+      "fact": "User has been relying on their hearing aids a lot lately.",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User has been doing guided breathing sessions with their Fitbit.",
+      "type": "event",
+      "entities": [
+        "guided breathing sessions",
+        "Fitbit"
+      ]
+    },
+    {
+      "fact": "User needs their hearing aids to be functioning properly for upcoming meetings.",
+      "type": "opinion",
+      "entities": [
+        "upcoming meetings"
+      ]
+    },
+    {
+      "fact": "User is a Prime member on Amazon.",
+      "type": "personal",
+      "entities": [
+        "Amazon Prime"
+      ]
+    },
+    {
+      "fact": "User trusts Amazon for fast shipping.",
+      "type": "opinion",
+      "entities": [
+        "Amazon"
+      ]
+    }
+  ],
+  "answer_02b63d04_3": [
+    {
+      "fact": "User is trying to improve their daily routine, especially regarding health.",
+      "type": "opinion",
+      "entities": [
+        "daily routine",
+        "health"
+      ]
+    },
+    {
+      "fact": "User tests their blood sugar levels three times a day.",
+      "type": "personal",
+      "entities": [
+        "blood sugar levels"
+      ]
+    },
+    {
+      "fact": "User uses the Accu-Chek Aviva Nano system for blood sugar testing.",
+      "type": "personal",
+      "entities": [
+        "Accu-Chek Aviva Nano"
+      ]
+    },
+    {
+      "fact": "User is looking for healthy breakfast recipes to help lower morning blood sugar readings.",
+      "type": "preference",
+      "entities": [
+        "healthy breakfast recipes",
+        "morning blood sugar readings"
+      ]
+    },
+    {
+      "fact": "User prefers snacks that are easy to prepare or grab on the go.",
+      "type": "preference",
+      "entities": [
+        "easy to prepare snacks",
+        "grab and go snacks"
+      ]
+    }
+  ],
+  "answer_02b63d04_4": [
+    {
+      "fact": "User is experiencing issues with congestion and sinus pressure.",
+      "type": "personal",
+      "entities": [
+        "congestion",
+        "sinus pressure"
+      ]
+    },
+    {
+      "fact": "User is doing inhalation treatments twice a day with a nebulizer machine.",
+      "type": "personal",
+      "entities": [
+        "inhalation treatments",
+        "nebulizer machine"
+      ]
+    },
+    {
+      "fact": "User is curious about the steam inhalation method for relieving sinus pressure.",
+      "type": "preference",
+      "entities": [
+        "steam inhalation method"
+      ]
+    }
+  ]
+}

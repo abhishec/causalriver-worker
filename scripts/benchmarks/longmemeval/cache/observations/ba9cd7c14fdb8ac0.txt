@@ -1,0 +1,40 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/29 (Mon) 15:26
+- [PREFERENCE] User is looking for meal prep ideas and wants to cook more at home while using up all ingredients bought.
+- [EVENT] User tried a recipe for Korean bibimbap from a cooking class's online recipe library and found it amazing.
+- [ASSISTANT_SAID] Bibimbap is described as a delicious and nutritious meal.
+- [ASSISTANT_SAID] Meal prep is a great way to save time, reduce food waste, and ensure healthy meals.
+- [ASSISTANT_SAID] Suggested meal prep containers include:
+  1. Glass containers (brands: Pyrex, Anchor Hocking, OXO)
+  2. Stainless steel containers (brands: LunchBots, S'well, Klean Kanteen)
+  3. BPA-free plastic containers (brands: Rubbermaid, Glad, Ziploc)
+  4. Mason jars for salads, soups, or overnight oats
+  5. Reusable silicone bags (brands: Stasher, Silipint)
+- [ASSISTANT_SAID] Factors to consider when choosing meal prep containers:
+  - Size
+  - Material
+  - Airtight seal
+  - Insulation
+- [ASSISTANT_SAID] Suggested meal prep ideas:
+  - Grilled chicken or salmon with roasted vegetables
+  - Quinoa or brown rice bowls with roasted vegetables and protein
+  - Lentil or vegetable soups with crusty bread
+  - Overnight oats or chia seed pudding with fresh fruits and nuts
+  - Stir-fries with favorite protein and mixed vegetables
+- [ASSISTANT_SAID] Reminder to label and date containers for food storage.
+- [PREFERENCE] User is thinking of doing a stir-fry with chicken and mixed veggies this week.
+- [ASSISTANT_SAID] Suggested marinades for chicken in stir-fry:
+  1. Soy Sauce and Ginger
+  2. Korean-Style Gochujang
+  3. Lime and Cilantro
+  4. Simple Sesame
+- [ASSISTANT_SAID] Instructions for marinating chicken include:
+  - Marinate in the refrigerator
+  - Use acidic ingredients for tenderness
+  - Avoid over-marinating
+  - Pat chicken dry before cooking
+- [PREFERENCE] User is considering adding kimchi to the stir-fry for extra flavor.
+- [ASSISTANT_SAID] Provided a basic kimchi recipe with ingredients and instructions:
+  - Ingredients: napa cabbage, coarse salt, Korean chili flakes (gochugaru), garlic, ginger, fish sauce, rice vinegar, water, green onions, sesame seeds (optional).
+  - Instructions include salting the cabbage, rinsing, making the kimchi paste, assembling the kimchi

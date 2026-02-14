@@ -1,0 +1,25 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/23 (Tue) 12:41
+- [FACT] User is inquiring about natural resources in Western Sahara.
+- [ASSISTANT_SAID] Western Sahara is primarily known for its substantial reserves of phosphates, which are the country's primary export.
+- [ASSISTANT_SAID] Other natural resources in Western Sahara include iron ore, salt, and fish.
+- [ASSISTANT_SAID] The exploitation of these resources is a matter of dispute due to the region's disputed sovereignty.
+- [USER] User asks who currently claims sovereignty over Western Sahara.
+- [ASSISTANT_SAID] The sovereignty of Western Sahara is disputed between Morocco and the Polisario Front.
+- [ASSISTANT_SAID] Morocco administers much of Western Sahara as its southern provinces.
+- [ASSISTANT_SAID] The Polisario Front seeks self-determination for the Sahrawi people and maintains control over a portion of the territory east of the Moroccan wall.
+- [ASSISTANT_SAID] The United Nations seeks a peaceful resolution to the dispute and supports a referendum on self-determination for the people of Western Sahara.
+- [USER] User expresses disinterest in the dispute and asks if it's safe to visit Western Sahara.
+- [ASSISTANT_SAID] The safety situation in Western Sahara can be variable and depends on the current political climate.
+- [ASSISTANT_SAID] Travellers should keep informed about potential safety hazards before visiting the region.
+- [ASSISTANT_SAID] It is recommended to check the latest travel advice from the user's government before planning a trip to Western Sahara.
+- [ASSISTANT_SAID] Visitors should take standard safety precautions such as avoiding solitary places, especially at night, avoiding political demonstrations, and being cautious when driving off-road.
+- [ASSISTANT_SAID] Visitors should respect and abide by the cultural norms of the local population.
+- [USER] User asks for recommendations for accommodations in Western Sahara for a safe and comfortable stay.
+- [ASSISTANT_SAID] Western Sahara is not well-developed for tourism, and the availability of accommodations can be limited.
+- [ASSISTANT_SAID] Recommended hotels include:
+  - [ASSISTANT_SAID] Hotel Parador: A four-star hotel in Laayoune with an outdoor pool, spa services, and a restaurant serving international cuisine.
+  - [ASSISTANT_SAID] Hotel Sahara: A three-star hotel in Dakhla with comfortable rooms, a rooftop terrace, and a restaurant serving local and international cuisine.
+  - [ASSISTANT_SAID] Hotel Andalucía: A three-star hotel in Boujdour with comfortable rooms and a restaurant serving local dishes.
+- [ASSISTANT_SAID] The hotel market in Western Sahara is limited

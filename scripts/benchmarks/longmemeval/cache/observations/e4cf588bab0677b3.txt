@@ -1,0 +1,16 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/28 (Sun) 10:47
+- [ASSISTANT_SAID] The assistant provided a code snippet that includes importing libraries such as pandas, numpy, re, and nltk.
+- [ASSISTANT_SAID] The assistant mentioned downloading the 'omw' and 'wordnet' resources from NLTK.
+- [ASSISTANT_SAID] The assistant included a function named `preprocess_text` that removes non-alphabetic characters, converts text to lowercase, tokenizes it, removes stopwords, and lemmatizes the tokens.
+- [ASSISTANT_SAID] The assistant described the process of loading training and test data from CSV files named 'train.csv' and 'test.csv'.
+- [ASSISTANT_SAID] The assistant explained how to compute class weights using `compute_class_weight` from sklearn.
+- [ASSISTANT_SAID] The assistant outlined the KFold cross-validation process with 5 splits.
+- [ASSISTANT_SAID] The assistant initialized a TF-IDF vectorizer and explained how to compute TF-IDF features for training and validation data.
+- [ASSISTANT_SAID] The assistant provided code to train an SVM model with class weights and evaluate it using F1 scores.
+- [ASSISTANT_SAID] The assistant included a loop to save predictions on the test set for each fold and compute the average F1 score.
+- [ASSISTANT_SAID] The assistant mentioned saving the final predictions to a CSV file named './0316_test.csv'.
+- [EVENT] The user encountered an error while running the provided code.
+- [ASSISTANT_SAID] The assistant identified the error as a LookupError indicating that the resource 'omw-1.4' was not found.
+- [ASSISTANT_SAID] The assistant suggested downloading the 'omw-1.4' corpus using the command `nltk.download('omw-1.4')` to resolve the error.

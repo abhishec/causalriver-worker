@@ -1,0 +1,18 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/26 (Fri) 10:37
+- [USER] A famous scientist first observed a solar planet's orbit is not quite right, then he did some calculations and predicted there must be another planet nearby to interfere its orbit. 
+- [ASSISTANT_SAID] The scientist who made this observation and prediction was Urbain Le Verrier, a French mathematician and astronomer.
+- [ASSISTANT_SAID] Le Verrier made the prediction based on calculations of the orbit of Uranus, which appeared to be disturbed by the gravitational influence of an unknown planet.
+- [ASSISTANT_SAID] Le Verrier sent his predictions to German astronomer Johann Gottfried Galle, who then used them to discover the new planet, which was named Neptune.
+- [ASSISTANT_SAID] Neptune was first observed on September 23, 1846.
+- [USER] When the prediction was made
+- [ASSISTANT_SAID] Urbain Le Verrier made his prediction of the existence of a new planet in 1846.
+- [ASSISTANT_SAID] Specifically, he sent his calculations and predictions to Johann Gottfried Galle, who then used them to discover Neptune on September 23, 1846.
+- [USER] Give me scientific examples to support predictions made first from theories but only decades later the predictions were proved by empirical evidence.
+- [ASSISTANT_SAID] There are several examples of scientific predictions made from theories that were later proved by empirical evidence.
+- [ASSISTANT_CREATED] Example 1: Higgs Boson - The Higgs boson is a subatomic particle predicted by the Standard Model of particle physics, first proposed by physicist Peter Higgs in 1964, discovered in 2012 at the Large Hadron Collider.
+- [ASSISTANT_CREATED] Example 2: General Relativity - Albert Einstein's theory of general relativity predicted the bending of light by gravity, observed during a solar eclipse in 1919.
+- [ASSISTANT_CREATED] Example 3: Plate Tectonics - The theory of plate tectonics was first proposed in the 1960s, with evidence from seismology, paleomagnetism, and other fields confirming the theory decades later.
+- [ASSISTANT_CREATED] Example 4: Black Holes - The idea of black holes was first proposed by physicist John Michell in the late 18th century, with their existence confirmed by observational evidence in the 1960s.
+- [ASSISTANT_CREATED] Example 5: DNA Structure - The double helix structure of DNA was first proposed by James Watson and Francis Crick in 1953, confirmed through experimental evidence several years later, with contributions from Rosalind Franklin and others.

@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[FACT] User is planning to host a sports-themed party.  
+[FACT] User recently attended a Super Bowl party at their friend Alex's house.  
+[FACT] User is a huge Duke fan.  
+[FACT] User's roommate is named Rachel.  
+[TEMPORAL] The Super Bowl party mentioned occurred on February 12, 2023.  
+[TEMPORAL] User watched the Duke vs. North Carolina basketball game on February 1, 2023.  
+[PREFERENCE] User enjoys delicious finger foods and appetizers for parties.  
+[PREFERENCE] User loves nachos and found them to be their favorite food at Alex's Super Bowl party.  
+[PREFERENCE] User is interested in serving beer and soda at their party.  
+[PREFERENCE] User is considering trying out a Game Day Punch for their party.  
+[PREFERENCE] User appreciates the idea of a football field table runner and sports-themed tableware for decorations.  
+[PREFERENCE] User likes the idea of engaging activities like a squares game and football bingo for their party.  
+[EVENT] User is planning to serve finger foods and appetizers at their sports-themed party.  
+[EVENT] User is considering setting up different stations with TVs showing different games at their party.  
+[EVENT] User is thinking of having a betting pool or squares game at their party.  
+[ASSISTANT_SAID] Assistant congratulated the Kansas City Chiefs on their Super Bowl win.  
+[ASSISTANT_SAID] Assistant provided a list of finger foods and appetizers for a big game day party, including chicken wings, sliders, nachos, quesadillas, pigs in a blanket, caprese skewers, mini quiches, meatballs, mini tacos, deviled eggs, cheese and crackers, veggie sticks with dip, pretzel bites, popcorn, fruit kabobs, spinach and artichoke dip, guacamole, hummus, French onion dip, and salsa.  
+[ASSISTANT_SAID] Assistant suggested drink ideas for the party, including domestic beers, craft beers, soda, iced tea, game day punch, beer-rita, wine, and non-alcoholic options like fresh lemonade and infused water.  
+[ASSISTANT_SAID] Assistant provided decoration ideas, including team colors, sports memorabilia, a football field table runner, and sports-themed tableware.  
+[ASSISTANT_SAID] Assistant suggested activities for the party, including a squares game, football bingo, commercial break challenges, and a predict the score game.  
+[ASSISTANT_SAID] Assistant recommended setting up food and drink stations, such as a quarterback snack bar and endzone eatery.  
+[ASSISTANT_SAID] Assistant provided variations for the squares game, including simple squares, quarterly payouts, progressive payouts, and multi-game squares.  
+[ASSISTANT_SAID] Assistant suggested additional betting pool ideas, including prop bets

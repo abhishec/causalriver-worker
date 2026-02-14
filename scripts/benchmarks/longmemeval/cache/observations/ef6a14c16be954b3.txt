@@ -1,0 +1,20 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/24 (Wed) 16:14  
+[USER] User requested the creation of a new League of Legends champion that is an ADC with a specific passive.  
+[ASSISTANT_SAID] Assistant proposed a champion named Faith, described as a youthful, determined marksman with short, spiky hair and piercing blue eyes, carrying a sleek, high-tech rifle.  
+[ASSISTANT_CREATED] Assistant created a champion named Faith with the following abilities:  
+[ASSISTANT_CREATED] - Passive: Supportive Fire - When Faith's support takes a kill that was meant for Faith, the kill is credited to Faith and she gains a significant amount of bonus gold.  
+[ASSISTANT_CREATED] - Ability 1: Precision Shot - Charges up a powerful shot that deals increased damage based on the target's missing health.  
+[ASSISTANT_CREATED] - Ability 2: Rapid Fire - Unleashes a rapid burst of shots that deal damage to all enemies in a cone in front of her.  
+[ASSISTANT_CREATED] - Ability 3: Covering Fire - Sets up a defensive position and begins firing at enemies, dealing damage and slowing them.  
+[ASSISTANT_CREATED] - Ultimate: True Aim - Enters a state of heightened focus, greatly increasing her attack speed and critical hit chance for a short duration.  
+[USER] User requested changes to the champion's appearance, name, and gender, and specified that the passive should not work with Pyke but reward some attack damage instead.  
+[ASSISTANT_SAID] Assistant revised the champion to be named Havoc, described as a rugged, seasoned marksman with a rugged beard and piercing green eyes, carrying a heavy, old-fashioned rifle.  
+[ASSISTANT_CREATED] Assistant created a new passive for Havoc:  
+[ASSISTANT_CREATED] - Passive: Scavenger's Instinct - When Havoc's support takes a kill that was meant for Havoc, he is credited with the kill and gains a small bonus of attack damage. If Pyke is Havoc's support, he instead gains a moderate bonus of attack damage.  
+[ASSISTANT_CREATED] Assistant listed Havoc's abilities:  
+[ASSISTANT_CREATED] - Ability 1: Precise Strike - Takes careful aim and fires a powerful shot that deals increased damage based on the target's missing health.  
+[ASSISTANT_CREATED] - Ability 2: Volley - Unleashes a flurry of shots that deal damage to all enemies in a cone in front of him.  
+[ASSISTANT_CREATED] - Ability 3: Suppressive Fire - Sets up a defensive position and begins firing at enemies, dealing damage and slowing them.  
+[ASSISTANT_CREATED] - Ultimate: Sniper's Focus - Enters a state of heightened focus, greatly increasing his attack

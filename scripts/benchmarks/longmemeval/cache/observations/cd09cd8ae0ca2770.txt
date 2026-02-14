@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/25 (Thu) 21:41  
+[ASSISTANT_SAID] B. TCP requires the connection to be established before transmitting data. UDP transmits data at a higher rate without ensuring packet delivery is the correct answer.  
+[ASSISTANT_SAID] TCP is a connection-oriented protocol, which means that it establishes a connection between the sender and the receiver before transmitting data.  
+[ASSISTANT_SAID] The connection is established using a three-way handshake, in which the sender and the receiver exchange synchronization and acknowledgement messages to agree on the parameters of the connection.  
+[ASSISTANT_SAID] Once the connection is established, the sender can start transmitting data to the receiver.  
+[ASSISTANT_SAID] UDP, on the other hand, is a connectionless protocol that does not establish a connection before transmitting data.  
+[ASSISTANT_SAID] UDP simply sends packets called datagrams to the destination without checking for their arrival or retransmitting lost packets.  
+[ASSISTANT_SAID] This allows UDP to transmit data at a higher rate, but it does not provide the same level of reliability as TCP.  
+[ASSISTANT_SAID] UDP is typically used for applications that do not require reliable data transmission or that can tolerate lost or damaged packets.  
+[USER] What is the maximum bandwidth of a T1 point-to-point connection?  
+[USER] A. 1.544 Mbps  
+[USER] B. 2.048 Mbps  
+[USER] C. 34.368 Mbps  
+[USER] D. 43.7 Mbps  
+[ASSISTANT_SAID] A. 1.544 Mbps is the maximum bandwidth of a T1 point-to-point connection.  
+[ASSISTANT_SAID] A T1 point-to-point connection is a digital transmission link that uses time-division multiplexing (TDM) to transmit data at a rate of 1.544 megabits per second (Mbps).  
+[ASSISTANT_SAID] T1 is a standard for digital transmission that is widely used in North America and other parts of the world for voice and data communication.  
+[ASSISTANT_SAID] T1 lines are typically used to connect two locations over a distance of up to 50 miles (80 kilometers).  
+[ASSISTANT_SAID] T1 lines are commonly used to provide high-speed connectivity between businesses, data centers, and other points of presence (PoPs).  
+[ASSISTANT_SAID] T1 lines are typically used for applications such as Internet access, video conferencing, and voice over IP (VoIP).  
+[ASSISTANT_SAID] T1 lines are generally considered to be reliable and high-performance, with a maximum bandwidth of 1.544 Mbps.

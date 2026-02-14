@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [FACT] User is planning a 7-night trip to Crete from the U.K.
+- [PREFERENCE] User emphasizes nature, food, and main tourist sites for the trip.
+- [EVENT] User's trip will be in April.
+- [EVENT] User's itinerary includes the first two nights in Heraklion and the next three nights in Chania.
+- [ASSISTANT_CREATED] Day 1 itinerary includes arrival in Heraklion, transfer to hotel, lunch at Peskesi, visit to the Heraklion Archaeological Museum, walk around the old town, dinner at Karavitis Taverna, and optional evening stroll along the Heraklion seafront.
+- [ASSISTANT_SAID] Lunch at Peskesi features traditional Cretan cuisine.
+- [ASSISTANT_SAID] Dinner at Karavitis Taverna offers a selection of grilled meats and seafood.
+- [ASSISTANT_CREATED] Day 2 itinerary includes breakfast at Erganos, visit to the Palace of Knossos, lunch at Arismari, afternoon visit to the Cretaquarium, optional visit to Watercity Waterpark, and dinner at Peskesi.
+- [ASSISTANT_SAID] Breakfast at Erganos offers Cretan specialties.
+- [ASSISTANT_SAID] Lunch at Arismari uses organic ingredients and offers vegetarian and vegan options.
+- [ASSISTANT_SAID] Dinner at Peskesi includes signature dishes such as Dakos or Kalitsounia.
+- [ASSISTANT_CREATED] Day 3 itinerary includes transfer to Chania, check-in at hotel, lunch at Ta Chalkina, visit to the Maritime Museum of Crete, stroll through the old town, dinner at Tamam, and optional evening walk along the beachfront promenade.
+- [ASSISTANT_SAID] Lunch at Ta Chalkina is a traditional taverna located in the old town of Chania.
+- [ASSISTANT_SAID] Dinner at Tamam offers creative Cretan cuisine with a modern twist.
+- [ASSISTANT_CREATED] Day 4 itinerary includes breakfast at Koukouvaya, visit to the Botanical Park and Gardens of Crete, lunch at Almyra, afternoon visit to Agia Triada Monastery, dinner at Salis, and optional evening walk around the old Venetian walls.
+- [ASSISTANT_SAID] Breakfast at Koukouvaya features a charming courtyard.
+- [ASSISTANT_SAID] Lunch at Almyra serves fresh seafood and traditional Cretan dishes.
+- [ASSISTANT_SAID] Dinner at Salis offers Greek and Mediterranean cuisine.
+- [ASSISTANT_CREATED] Day 5 itinerary includes breakfast at Tafarnabu, visit to Samaria Gorge, lunch at To Spitiko, afternoon visit to Elafonisi beach, dinner at Chrisostomos, and optional evening walk along the

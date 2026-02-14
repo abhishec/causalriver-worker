@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/23 (Tue) 16:07  
+[FACT] User is assessing a research proposal of an undergraduate student.  
+[FACT] The research proposal is titled "A proposal to defining the correlation between endometriosis risk and gene variants through the studies of genome-wide association and exome sequencing."  
+[FACT] The academic year for the proposal is 2022-23.  
+[FACT] The proposal discusses endometriosis, a chronic disease affecting 10% of women globally.  
+[FACT] The proposal mentions that endometriosis often manifests as pelvic pain and/or infertility.  
+[FACT] The proposal states that endometriosis is partly genetically inherited with a heritability of ~50%.  
+[FACT] The proposal references genome-wide association (GWA) studies and exome sequencing as research tools.  
+[FACT] The proposal includes a case-control study in Greece by Matalliotakis et al (2017).  
+[FACT] The proposal discusses the importance of conducting GWA studies on large populations of differing ethnic backgrounds.  
+[FACT] The proposal mentions that exome sequencing is a cost-effective approach to genome research.  
+[FACT] The proposal examines three single nucleotide polymorphisms (SNPs): rs7521902, rs10859871, rs11031006.  
+[FACT] The proposal indicates that the allele variants located on the loci WNT4 and FSHB could be correlated with endometriosis risk.  
+[FACT] The proposal emphasizes the need for additional exome sequencing studies.  
+[ASSISTANT_SAID] The research proposal is well-structured and cohesive.  
+[ASSISTANT_SAID] The introduction highlights the significance of the research topic and the research question, with a clear rationale for the proposed research.  
+[ASSISTANT_SAID] The paper proposes a novel combined research method of GWA and exome sequencing studies, addressing the lack of multidisciplinary studies on this topic.  
+[ASSISTANT_SAID] The paper provides a systematic review of GWA studies of endometriosis and a case-control study in Greece to illustrate the importance of investing in exome sequencing.  
+[ASSISTANT_SAID] The paper concludes by highlighting the importance of combining GWAS and exome sequencing and discussing study parameters.  
+[ASSISTANT_SAID] The paragraph cohesion, sentence balance, flow, spelling, and grammar accuracy are good.  
+[ASSISTANT_SAID] The language level is advanced (C1) based on the Common European Framework.  
+[ASSISTANT_SAID] Overall, the research proposal is well-written and well-organized, with a clear and focused research question and a sound methodology.  
+[ASSISTANT_SAID] The proposal shows a good understanding of the research topic and the relevant literature.

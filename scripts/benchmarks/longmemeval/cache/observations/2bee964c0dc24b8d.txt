@@ -1,0 +1,25 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/28 (Sun) 10:00
+- [FACT] User is integrating Stripe into their web app's server.
+- [FACT] User's server is written in Go.
+- [ASSISTANT_SAID] Stripe has an official Go library for interacting with the Stripe API.
+- [ASSISTANT_SAID] Example code provided for creating a Stripe Connect account for a user using the Go library.
+- [ASSISTANT_SAID] User needs to set `stripe.Key` to their Stripe Secret Key.
+- [ASSISTANT_SAID] Additional information may be required such as the user's name, address, and business information depending on account type.
+- [ASSISTANT_SAID] More information can be found in the Stripe API documentation: <https://stripe.com/docs/api/go#create_account>
+- [ASSISTANT_SAID] User can refer to Stripe's official Go library documentation: <https://godoc.org/github.com/stripe/stripe-go>
+- [USER] Asked when to use Stripe's Go client ("github.com/stripe/stripe-go/client").
+- [ASSISTANT_SAID] The `github.com/stripe/stripe-go/client` package provides a lower-level client for more flexibility in requests to the Stripe API.
+- [ASSISTANT_SAID] User might use the `client` package for actions not supported by higher-level packages or for custom request configurations.
+- [ASSISTANT_SAID] For common Stripe operations, higher-level packages like `account`, `charge`, `customer`, etc., are recommended.
+- [USER] Asked for an explanation of what an Account Link is in Stripe and its use with Stripe Connect with Express.
+- [ASSISTANT_SAID] An Account Link allows users to connect their Stripe account to a platform via a Stripe-hosted page.
+- [ASSISTANT_SAID] It provides a secure way for users to connect their accounts without sharing sensitive credentials.
+- [ASSISTANT_SAID] Useful for marketplaces or platforms that charge users for fees or payouts.
+- [ASSISTANT_SAID] Account Links can be created using the `account_links.create` API call.
+- [USER] Asked how to add a capability to a Stripe Account for U.S. tax reporting.
+- [ASSISTANT_SAID] To add a capability for U.S. tax reporting, use the `capabilities.create` API call with the `capability` parameter set to `tax_reporting_us_1099_k`.
+- [ASSISTANT_SAID] Example code provided for adding a capability for U.S. tax reporting using the Stripe Go library.
+- [ASSISTANT_SAID] User needs to set `stripe.Key` to their Stripe Secret Key and replace `acct_123` with the actual account ID.
+-

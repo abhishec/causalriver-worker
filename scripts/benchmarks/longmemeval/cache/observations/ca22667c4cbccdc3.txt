@@ -1,0 +1,54 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2022/02/26 (Sat) 08:38  
+[USER] User requested an explanation of SQL joins, views, common table expressions, user-defined functions, and analytical functions with examples and code in SQL.  
+[ASSISTANT_SAID] SQL Joins are used to combine two or more tables in a database based on a common column between them.  
+[ASSISTANT_SAID] There are four types of SQL Joins: Inner Join, Left Join, Right Join, and Full Join.  
+[ASSISTANT_SAID] Inner Join returns only the matching rows from both tables.  
+[ASSISTANT_CREATED] Example of Inner Join:  
+```sql
+SELECT Customers.CustomerName, Orders.OrderDate  
+FROM Customers  
+INNER JOIN Orders  
+ON Customers.CustomerID = Orders.CustomerID;  
+```  
+[ASSISTANT_SAID] Left Join returns all the rows from the left table and the matching rows from the right table.  
+[ASSISTANT_CREATED] Example of Left Join:  
+```sql
+SELECT Customers.CustomerName, Orders.OrderDate  
+FROM Customers  
+LEFT JOIN Orders  
+ON Customers.CustomerID = Orders.CustomerID;  
+```  
+[ASSISTANT_SAID] Right Join returns all the rows from the right table and the matching rows from the left table.  
+[ASSISTANT_CREATED] Example of Right Join:  
+```sql
+SELECT Customers.CustomerName, Orders.OrderDate  
+FROM Customers  
+RIGHT JOIN Orders  
+ON Customers.CustomerID = Orders.CustomerID;  
+```  
+[ASSISTANT_SAID] Full Join returns all the rows from both tables, with NULL values in the columns where there are no matches.  
+[ASSISTANT_CREATED] Example of Full Join:  
+```sql
+SELECT Customers.CustomerName, Orders.OrderDate  
+FROM Customers  
+FULL JOIN Orders  
+ON Customers.CustomerID = Orders.CustomerID;  
+```  
+[ASSISTANT_SAID] SQL Views are virtual tables that do not store data themselves but represent the data stored in other tables.  
+[ASSISTANT_SAID] Views can simplify complex queries, hide sensitive data, and provide a simpler interface for end-users.  
+[ASSISTANT_CREATED] Example of creating a view:  
+```sql
+CREATE VIEW EmployeeSalaries AS  
+SELECT Employees.FirstName, Employees.LastName, Employees.Salary, Departments.DepartmentName  
+FROM Employees  
+INNER JOIN Departments  
+ON Employees.DepartmentID = Departments.DepartmentID;  
+```  
+[ASSISTANT_CREATED] Example of using the view:  
+```sql
+SELECT * FROM EmployeeSalaries;  
+```  
+[ASSISTANT_SAID] SQL Common Table Expressions (CTEs) are temporary result sets defined within a single execution of a statement.  
+[ASSISTANT_SAID] CTEs can simplify complex queries, improve performance, and make code more readable.

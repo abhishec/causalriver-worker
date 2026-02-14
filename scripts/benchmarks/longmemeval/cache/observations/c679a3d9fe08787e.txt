@@ -1,0 +1,21 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/28 (Sun) 11:37  
+[USER] User requested information on generating an SSH key for GitHub.  
+[ASSISTANT_SAID] To generate an SSH key pair for GitHub, the assistant provided a step-by-step guide.  
+[ASSISTANT_SAID] Step 1: Open a terminal (Git Bash on Windows, Terminal on macOS, or preferred terminal on Linux).  
+[ASSISTANT_SAID] Step 2: Run the command `ssh-keygen -t ed25519 -C "your_email@example.com"` to generate a new SSH key pair.  
+[ASSISTANT_SAID] The `-t ed25519` flag specifies the key type, and the `-C` flag adds a comment to help identify the key later.  
+[ASSISTANT_SAID] Step 3: Press Enter to accept the default file location for the SSH key pair or specify a different location.  
+[ASSISTANT_SAID] Step 4: Enter a passphrase when prompted or press Enter to leave it empty for no passphrase.  
+[ASSISTANT_SAID] The key generation process creates two files: the private key (default `~/.ssh/id_ed25519`) and the public key (default `~/.ssh/id_ed25519.pub`).  
+[ASSISTANT_SAID] Step 5: Add the public key to your GitHub account by opening the public key file or running `cat ~/.ssh/id_ed25519.pub` to display its contents.  
+[ASSISTANT_SAID] Step 5a: Copy the entire public key (including the "ssh-ed25519" part at the beginning).  
+[ASSISTANT_SAID] Step 5b: Go to GitHub, log in, click on the profile picture, and select "Settings."  
+[ASSISTANT_SAID] Step 5c: In the left sidebar, click on "SSH and GPG keys."  
+[ASSISTANT_SAID] Step 5d: Click the "New SSH key" button.  
+[ASSISTANT_SAID] Step 5e: Enter a descriptive title for the key (e.g., "My Laptop") and paste the copied public key into the "Key" field.  
+[ASSISTANT_SAID] Step 5f: Click the "Add SSH key" button to save the key.  
+[ASSISTANT_SAID] Step 6: Test the connection by running `ssh -T git@github.com`.  
+[ASSISTANT_SAID] If set up correctly, the user should see a message: "Hi <username>! You've successfully authenticated, but GitHub does not provide shell access."  
+[USER] User specified they

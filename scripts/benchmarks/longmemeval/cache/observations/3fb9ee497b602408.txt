@@ -1,0 +1,25 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/26 (Fri) 10:56
+- [FACT] The user has been taking salsa classes on Tuesday evenings for about 6 weeks.
+- [PREFERENCE] The user loves salsa dancing.
+- [FACT] The user previously took dance classes on Friday evenings at a studio near their work.
+- [PREFERENCE] The user found the previous dance classes convenient due to their proximity to work.
+- [RELATIONSHIP] The user's salsa instructor is named Maria.
+- [PREFERENCE] The user thinks Maria is a great instructor who breaks down the steps well.
+- [CHANGE] The user was nervous at first because they had never taken a dance class before.
+- [PREFERENCE] The user feels comfortable with Maria as an instructor.
+- [EVENT] The user recently attended a dance festival with friends and had a blast.
+- [PREFERENCE] The user is looking for more opportunities to learn from different instructors and meet other dancers.
+- [EVENT] The user is thinking of attending a bachata festival next month.
+- [PREFERENCE] The user is excited to learn from different instructors at the bachata festival.
+- [PREFERENCE] The user enjoyed learning Afro-Cuban dance at a festival last month.
+- [ASSISTANT_SAID] The assistant suggested ways to find dance studios offering salsa classes, including Google Search, online directories, social media, local community centers, and word of mouth.
+- [ASSISTANT_SAID] The assistant mentioned that it's common for dance festivals to offer classes or workshops on different styles, including Afro-Cuban and salsa.
+- [ASSISTANT_SAID] The assistant provided a list of types of workshops that might be offered at festivals, including style-specific workshops, fusion classes, masterclasses, beginner-friendly classes, and specialized workshops.
+- [PREFERENCE] The user is interested in attending a bachata festival next month.
+- [FACT] The user previously took hip hop classes, which they really enjoyed.
+- [PREFERENCE] The user found the high-energy vibe of hip hop classes fun.
+- [CHANGE] The user is glad they made the switch to salsa because it is more low-key and allows them to learn the steps.
+- [PREFERENCE] The user enjoys salsa more than hip hop because it is more low-key and structured.
+- [ASSISTANT_SAID] The assistant encouraged the user to ask Maria for tips and advice regarding the festival.

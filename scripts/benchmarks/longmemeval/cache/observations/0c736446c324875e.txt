@@ -1,0 +1,22 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/01 (Mon) 20:07
+- [EVENT] User pre-ordered a new game at a gaming event at their local game store last weekend.
+- [PREFERENCE] User is open to trying out different genres of games but has been playing a lot of action-adventure games lately.
+- [FACT] User has been playing action-adventure games like The Last of Us Part II.
+- [FACT] User is looking to play on their PS4.
+- [ASSISTANT_SAID] Assistant congratulated the user on pre-ordering a new game and asked what game it was.
+- [ASSISTANT_SAID] Assistant provided recommendations for action-adventure games on PS4: God of War (2018), Horizon Zero Dawn, Uncharted 4: A Thief's End, Days Gone, Death Stranding, Bloodborne, Sekiro: Shadows Die Twice, and Spider-Man.
+- [PREFERENCE] User expressed interest in games similar to The Last of Us Part II.
+- [EVENT] User watched a tournament for Street Fighter V at the gaming event where they pre-ordered their new game.
+- [PREFERENCE] User is interested in getting a new fighting game.
+- [ASSISTANT_SAID] Assistant provided recommendations for fighting games on PS4: Street Fighter V, Mortal Kombat 11, Tekken 7, Dragon Ball FighterZ, Soulcalibur VI, Guilty Gear Xrd REV 2, and Under Night In-Birth Exe:Late[st].
+- [PREFERENCE] User expressed interest in Guilty Gear Xrd REV 2 since they pre-ordered Guilty Gear Strive.
+- [EVENT] User pre-ordered Guilty Gear Strive at the gaming event last weekend.
+- [ASSISTANT_SAID] Assistant congratulated the user on pre-ordering Guilty Gear Strive and provided tips for getting started with Guilty Gear Xrd REV 2, including starting with the tutorial, choosing a character, learning Roman Cancels, practicing execution, and watching tutorials.
+- [PREFERENCE] User is looking forward to Guilty Gear Strive and hopes it will have a good storyline and engaging gameplay.
+- [PREFERENCE] User is curious to see how Guilty Gear Strive compares to other fighting games they have played.
+- [ASSISTANT_SAID] Assistant mentioned that Guilty Gear Strive promises a strong focus on storytelling and has a more cinematic narrative.
+- [ASSISTANT_SAID] Assistant described the gameplay of Guilty Gear Strive as fast-paced with a complex system that rewards strategy and execution.
+- [PREFERENCE] User has seen trailers and gameplay footage of Guilty Gear Strive and thinks the visuals are amazing, with sharp graphics and smooth animations.
+- [PREFERENCE] User finds the soundtrack of Guilty Gear Str

@@ -1,0 +1,22 @@
+**Observation Log:**
+
+- [FACT] User is a US citizen, born and raised.
+- [EVENT] User is planning a trip to South Korea.
+- [EVENT] User is planning to visit their mom's hometown in South Korea.
+- [ASSISTANT_SAID] User does not need a visa to enter South Korea for tourism or business stays up to 90 days.
+- [ASSISTANT_SAID] User must have a valid US passport that won't expire within six months of their planned departure date from South Korea.
+- [ASSISTANT_SAID] User needs a return or onward ticket and proof of sufficient funds (recommended to have cash or traveler's checks).
+- [ASSISTANT_SAID] User should check their passport's validity to ensure it is valid for at least six months beyond their planned departure date from South Korea.
+- [ASSISTANT_SAID] User is recommended to obtain an Electronic System for Travel Authorization (ESTA) to facilitate entry into South Korea.
+- [ASSISTANT_SAID] User should enroll in the Smart Traveler Enrollment Program (STEP) to receive safety and security updates about South Korea.
+- [ASSISTANT_SAID] Upon arrival in South Korea, user will need to go through immigration and present their passport.
+- [ASSISTANT_SAID] User might be asked to provide additional information such as purpose of visit, accommodation details, or proof of onward travel.
+- [ASSISTANT_SAID] User should ensure their passport has at least two blank pages for entry stamps.
+- [ASSISTANT_SAID] If user plans to stay in South Korea for more than 90 days or for purposes other than tourism or business, they will need to apply for a relevant visa at a Korean embassy or consulate in the US.
+- [ASSISTANT_SAID] User is advised to familiarize themselves with Korean customs and laws for a smooth trip.
+- [ASSISTANT_SAID] User is recommended to visit the Korea Tourism Organization (KTO) website for information on culture, customs, and etiquette.
+- [ASSISTANT_SAID] User is recommended to check the Visit Korea website for various aspects of Korean culture, including customs and traditions.
+- [ASSISTANT_SAID] User is recommended to refer to the Korean Culture and Information Service (KOCIS) for information on Korean culture and etiquette.
+- [ASSISTANT_SAID] User is recommended to read "Korea: A Very Short Introduction" by Michael J. Seth for insights on Korean history, culture, and society.
+- [ASSISTANT_SAID] User is recommended to read "The Koreans: Who They Are, What They Want, Where Their Future Lies" by Michael Breen for an exploration of Korean culture and customs.
+- [ASSISTANT_SAID] User is recommended to read "Etiquette in Korea" by

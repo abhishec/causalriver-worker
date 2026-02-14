@@ -1,0 +1,29 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/21 (Sun) 19:14  
+[USER] User is looking for new recipe ideas.  
+[PREFERENCE] User is interested in popular Korean dishes beyond bibimbap and kimchi.  
+[ASSISTANT_SAID] Korean cuisine has many options beyond bibimbap and kimchi.  
+[ASSISTANT_SAID] Suggested dishes include:  
+[ASSISTANT_SAID] 1. Bulgogi: Thinly sliced marinated beef, grilled and served with rice.  
+[ASSISTANT_SAID] 2. Jeyuk bokkeum: A spicy stir-fry dish made with pork, vegetables, and a sweet and spicy sauce.  
+[ASSISTANT_SAID] 3. Naengmyeon: A cold noodle dish served with a spicy sauce, cucumber, pear, and boiled egg.  
+[ASSISTANT_SAID] 4. Galbi: Short ribs marinated in a sweet and spicy sauce, grilled.  
+[ASSISTANT_SAID] 5. Doenjang jjigae: A fermented soybean paste stew with vegetables and meat or seafood.  
+[ASSISTANT_SAID] 6. Mandu: Korean dumplings that can be steamed, fried, or boiled.  
+[ASSISTANT_SAID] 7. Jjamppong: A spicy seafood noodle soup.  
+[ASSISTANT_SAID] 8. Bossam: Boiled pork belly wrapped in lettuce leaves with sauce and kimchi.  
+[ASSISTANT_SAID] 9. Tteokbokki: Chewy rice cakes in a sweet and spicy sauce.  
+[ASSISTANT_SAID] 10. Sundubu jjigae: A soft tofu stew made with seafood and a spicy sauce.  
+[PREFERENCE] User is interested in trying the Jeyuk bokkeum recipe.  
+[PREFERENCE] User has been experimenting with Korean-inspired dishes.  
+[PREFERENCE] User finds the sweet and spicy sauce of Jeyuk bokkeum appealing.  
+[USER] User has been using a lot of Asian ingredients like sesame oil and soy sauce.  
+[USER] User is looking for a good recipe for homemade teriyaki sauce.  
+[ASSISTANT_SAID] Provided a recipe for homemade teriyaki sauce with the following ingredients:  
+[ASSISTANT_SAID] - 1/2 cup soy sauce  
+[ASSISTANT_SAID] - 1/4 cup granulated sugar  
+[ASSISTANT_SAID] - 2 tablespoons grated fresh ginger  
+[ASSISTANT_SAID] - 2 tablespoons garlic, minced  
+[ASSISTANT_SAID] - 1/4 cup water  
+[ASSISTANT_SAID] - 2

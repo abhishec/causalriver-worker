@@ -1,0 +1,34 @@
+{
+  "answer_8da8c7e0": [
+    {
+      "fact": "User listens to true crime and self-improvement podcasts.",
+      "type": "preference",
+      "entities": [
+        "true crime",
+        "self-improvement"
+      ]
+    },
+    {
+      "fact": "User enjoys listening to podcasts during their commute.",
+      "type": "preference",
+      "entities": [
+        "commute"
+      ]
+    },
+    {
+      "fact": "User wants to branch out into other podcast genres.",
+      "type": "preference",
+      "entities": [
+        "podcast genres"
+      ]
+    },
+    {
+      "fact": "User is interested in history and science podcasts.",
+      "type": "preference",
+      "entities": [
+        "history",
+        "science"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,106 @@
+{
+  "answer_d3bf812b_1": [
+    {
+      "fact": "User is planning their week to stay on top of tasks.",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User wants to dedicate time for meal prep and admin tasks.",
+      "type": "preference",
+      "entities": [
+        "meal prep",
+        "admin tasks"
+      ]
+    },
+    {
+      "fact": "User wants to make time for reading and meditation.",
+      "type": "preference",
+      "entities": [
+        "reading",
+        "meditation"
+      ]
+    },
+    {
+      "fact": "User has a dinner commitment with Rachel on Friday.",
+      "type": "event",
+      "entities": [
+        "dinner",
+        "Rachel",
+        "Friday"
+      ]
+    },
+    {
+      "fact": "User has a family dinner next Saturday.",
+      "type": "event",
+      "entities": [
+        "family dinner",
+        "next Saturday"
+      ]
+    },
+    {
+      "fact": "User needs to fit in workouts.",
+      "type": "preference",
+      "entities": [
+        "workouts"
+      ]
+    },
+    {
+      "fact": "User goes to the gym on Tuesdays, Thursdays, and Saturdays.",
+      "type": "personal",
+      "entities": [
+        "gym",
+        "Tuesdays",
+        "Thursdays",
+        "Saturdays"
+      ]
+    }
+  ],
+  "answer_d3bf812b_2": [
+    {
+      "fact": "User is planning their week ahead.",
+      "type": "event",
+      "entities": []
+    },
+    {
+      "fact": "User is looking for healthy dinner recipes to meal prep on Sunday.",
+      "type": "preference",
+      "entities": [
+        "healthy dinner recipes",
+        "meal prep",
+        "Sunday"
+      ]
+    },
+    {
+      "fact": "User has a consistent gym routine, working out four times a week.",
+      "type": "personal",
+      "entities": [
+        "gym routine",
+        "four times a week"
+      ]
+    },
+    {
+      "fact": "User plans to reward themselves with a post-workout smoothie on Saturday.",
+      "type": "event",
+      "entities": [
+        "post-workout smoothie",
+        "Saturday"
+      ]
+    },
+    {
+      "fact": "User is considering trying the Quinoa and Roasted Vegetable Bowls recipe.",
+      "type": "preference",
+      "entities": [
+        "Quinoa and Roasted Vegetable Bowls recipe"
+      ]
+    },
+    {
+      "fact": "User is interested in customizing the Quinoa and Roasted Vegetable Bowls to make it more protein-rich.",
+      "type": "preference",
+      "entities": [
+        "Quinoa and Roasted Vegetable Bowls",
+        "protein-rich"
+      ]
+    }
+  ]
+}

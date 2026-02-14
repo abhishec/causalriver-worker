@@ -1,0 +1,22 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/03/15 (Wed) 21:42
+- [USER] User requested a Node.js application that recommends a list of restaurants approximately equal driving distance between two street addresses.
+- [ASSISTANT_SAID] Suggested using Google Maps API for geocoding street addresses, calculating driving distances, and searching for restaurants.
+- [ASSISTANT_SAID] Mentioned using Yelp API (optional) to fetch more information about the restaurants and filter results.
+- [ASSISTANT_CREATED] Provided a simple implementation using Express.js, including code snippets for the application.
+- [ASSISTANT_SAID] Instructed to install required packages: `npm init -y`, `npm install express request googleapis yelp-fusion`.
+- [ASSISTANT_CREATED] Shared code for `index.js` file, including functions for getting geo-coordinates, fetching restaurants, and handling POST requests.
+- [ASSISTANT_SAID] Explained how to replace API keys with user-specific keys obtained from Google Cloud Platform and Yelp Fusion API accounts.
+- [ASSISTANT_SAID] Informed that the application can be run using `node index.js` and provided an example JSON payload for a POST request.
+- [USER] User pointed out that the initial answer gives restaurants that are roughly equal distances away from each address but does not account for driving time.
+- [USER] Asked if there is a way to update the answer to find restaurants at all midpoints where a midpoint is considered equal driving time.
+- [ASSISTANT_SAID] Acknowledged the user's point and suggested updating the implementation to find restaurants at midpoints based on equal driving time.
+- [ASSISTANT_SAID] Recommended using the Google Maps Distance Matrix API to calculate driving times between the two addresses and potential restaurant locations.
+- [ASSISTANT_CREATED] Provided an updated implementation with code snippets that consider equal driving time.
+- [ASSISTANT_SAID] Instructed to install required packages again if not done already.
+- [ASSISTANT_CREATED] Shared code for `index.js` file, including functions for interpolating points between two coordinates and finding approximate midpoints.
+- [ASSISTANT_SAID] Explained how to interpolate points between two coordinates and calculate driving times for those points.
+- [ASSISTANT_SAID] Mentioned that the application will find all points along the route that take an equal amount of time to drive to from either location.
+- [ASSISTANT_SAID] Provided a method to filter restaurants based on equal driving time from both addresses.
+- [ASSISTANT_SAID] Suggested using a tolerance of 60 seconds for time differences when filtering restaurants.

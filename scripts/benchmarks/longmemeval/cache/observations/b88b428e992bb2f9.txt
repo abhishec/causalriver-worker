@@ -1,0 +1,27 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/29 (Mon) 09:12  
+[USER] The user is trying to reduce their screen time.  
+[USER] The user read an article in The New Yorker about the impact of social media on mental health today.  
+[CHANGE] The article inspired the user to make some changes regarding their social media use.  
+[ASSISTANT_SAID] The assistant congratulated the user on taking the first step towards reducing screen time and controlling social media usage.  
+[ASSISTANT_SAID] The assistant mentioned that excessive social media use is linked to negative effects on mental health, including increased anxiety, depression, and loneliness.  
+[ASSISTANT_SAID] The assistant provided a list of phone apps to help track and limit social media use:  
+[ASSISTANT_CREATED] 1. Freedom: Blocks distracting websites and apps across all devices, allows custom block sessions, schedules blocks, and tracks productivity.  
+[ASSISTANT_CREATED] 2. Moment: Tracks screen time, provides detailed reports, offers app blocking, goal-setting, and coaching features.  
+[ASSISTANT_CREATED] 3. StayFocused: Blocks social media sites and other distracting websites during specific times.  
+[ASSISTANT_CREATED] 4. RescueTime: Tracks time spent on the phone and provides insights into productivity.  
+[ASSISTANT_CREATED] 5. Screen Time: Built-in feature on iOS devices that tracks screen time and sets app limits.  
+[ASSISTANT_CREATED] 6. Cold Turkey: Blocks distracting websites and apps during set periods.  
+[ASSISTANT_CREATED] 7. Flipd: Blocks social media and tracks productivity with motivational reminders.  
+[ASSISTANT_CREATED] 8. SelfControl: Blocks distracting websites and emails for a set period on Mac and Linux.  
+[ASSISTANT_SAID] The assistant encouraged the user to set realistic goals and be consistent in their efforts.  
+[USER] The user expressed interest in trying out Freedom and Moment.  
+[USER] The user asked for more information about how Freedom and Moment work and what kind of data they track.  
+[ASSISTANT_SAID] The assistant provided detailed information about Freedom:  
+[ASSISTANT_SAID] Freedom blocks distracting websites and apps, allows custom blocks, scheduling, and tracks time spent on blocked sites.  
+[ASSISTANT_SAID] Freedom tracks time spent on blocked sites, block sessions, and goals/achievements.  
+[ASSISTANT_SAID] The assistant provided detailed information about Moment:  
+[ASSISTANT_SAID] Moment tracks screen time, app usage, and allows goal-setting and phone-free modes.  
+[ASSISTANT_SAID] Moment tracks total screen time, app usage, and goal progress.  
+[USER] The user expressed interest

@@ -1,0 +1,31 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/26 (Fri) 20:10
+- [PREFERENCE] User is trying to get more organized.
+- [PREFERENCE] User is looking for a task management app that can also help track screen time.
+- [ASSISTANT_SAID] Recommended task management apps: 
+  1. **RescueTime**: Primarily a time management and screen time tracking tool with task management features.
+  2. **Trello**: Organizes tasks into boards, lists, and cards; integrates with RescueTime for screen time tracking.
+  3. **Todoist**: Offers a "Focus" feature to track time spent on tasks; integrates with screen time tracking apps like Freedom and Moment.
+  4. **Forest**: Gamifies productivity, tracks screen time, and offers task management.
+  5. **StayFocused**: Chrome extension that tracks screen time and offers task management.
+  6. **Freedom**: Blocks distracting websites and apps; includes task management features.
+  7. **Moment**: Provides insights into phone usage and includes task management features.
+  8. **Any.do**: Offers a "Focus Mode" feature and integrates with screen time tracking apps.
+  9. **Focos**: Provides insights into phone usage and includes task management features.
+  10. **Google Tasks**: Simple task management app that integrates with Google Calendar and Google Keep; can use Google's Digital Wellbeing app for screen time tracking.
+- [ASSISTANT_SAID] Suggested factors to consider when choosing a task management app with screen time tracking: ease of use, features, accuracy, customization, and cross-platform compatibility.
+- [CHANGE] User plans to try out Todoist and RescueTime.
+- [PREFERENCE] User is trying to cut down on social media usage, limiting it to 30 minutes a day.
+- [ASSISTANT_SAID] Commended user for recognizing the importance of limiting social media usage and provided additional tips to help stay on track:
+  1. Set specific goals for checking social media.
+  2. Use website or app blockers.
+  3. Remove social media apps from the home screen.
+  4. Find alternative activities.
+  5. Track progress with a habit tracker or journal.
+  6. Create a screen-free routine.
+  7. Fill the feed with positivity.
+  8. Practice self-compassion.
+- [ASSISTANT_SAID] Suggested implementing a "shutdown routine" after the 30 minutes of social media usage.
+- [PREFERENCE] User set a timer on their phone to remind them to log off after 30 minutes.
+- [ASSISTANT_SAID] Suggested a shutdown routine that includes closing social media apps, putting the phone on silent mode, doing a quick stretch, or engaging

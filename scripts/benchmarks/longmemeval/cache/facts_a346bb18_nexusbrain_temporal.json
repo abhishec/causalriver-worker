@@ -1,0 +1,134 @@
+{
+  "answer_4934b2d7_1": [
+    {
+      "fact": "User completed their first full marathon in 4 hours and 22 minutes",
+      "type": "event",
+      "entities": [
+        "full marathon",
+        "4 hours and 22 minutes"
+      ]
+    },
+    {
+      "fact": "User is planning to travel to San Francisco for a work trip",
+      "type": "personal",
+      "entities": [
+        "San Francisco",
+        "work trip"
+      ]
+    },
+    {
+      "fact": "User prefers running routes that are around 6-8 miles",
+      "type": "preference",
+      "entities": [
+        "6-8 miles"
+      ]
+    },
+    {
+      "fact": "User is comfortable running on roads",
+      "type": "preference",
+      "entities": [
+        "roads"
+      ]
+    },
+    {
+      "fact": "User is considering getting a bike for daily commuting to work",
+      "type": "personal",
+      "entities": [
+        "bike",
+        "daily commuting",
+        "work"
+      ]
+    },
+    {
+      "fact": "User has experience from a charity cycling event",
+      "type": "event",
+      "entities": [
+        "charity cycling event"
+      ]
+    }
+  ],
+  "answer_4934b2d7_2": [
+    {
+      "fact": "User is planning to start training for a triathlon in two months.",
+      "type": "event",
+      "entities": [
+        "triathlon"
+      ]
+    },
+    {
+      "fact": "User's target time for the marathon was 4 hours and 10 minutes.",
+      "type": "personal",
+      "entities": [
+        "marathon",
+        "4 hours and 10 minutes"
+      ]
+    },
+    {
+      "fact": "User is a beginner in swimming but has been attending masters swimming sessions at the community pool every Wednesday evening since mid-January.",
+      "type": "personal",
+      "entities": [
+        "swimming",
+        "masters swimming sessions",
+        "community pool",
+        "Wednesday evening",
+        "mid-January"
+      ]
+    },
+    {
+      "fact": "User has some experience in cycling from the charity cycling event 'Pedal for a Purpose' in February.",
+      "type": "event",
+      "entities": [
+        "charity cycling event",
+        "Pedal for a Purpose",
+        "February"
+      ]
+    },
+    {
+      "fact": "User completed 30 miles in 2 hours and 15 minutes during the cycling event.",
+      "type": "personal",
+      "entities": [
+        "30 miles",
+        "2 hours and 15 minutes"
+      ]
+    },
+    {
+      "fact": "User can dedicate 4-5 days a week for training.",
+      "type": "preference",
+      "entities": [
+        "4-5 days a week"
+      ]
+    },
+    {
+      "fact": "User has access to a pool every Wednesday evening.",
+      "type": "personal",
+      "entities": [
+        "pool",
+        "Wednesday evening"
+      ]
+    },
+    {
+      "fact": "User does not have a road bike yet but is planning to invest in one soon.",
+      "type": "preference",
+      "entities": [
+        "road bike"
+      ]
+    },
+    {
+      "fact": "User has about 12 weeks until their triathlon.",
+      "type": "event",
+      "entities": [
+        "12 weeks",
+        "triathlon"
+      ]
+    },
+    {
+      "fact": "User prefers a structured plan with specific workouts and distances.",
+      "type": "preference",
+      "entities": [
+        "structured plan",
+        "specific workouts",
+        "distances"
+      ]
+    }
+  ]
+}

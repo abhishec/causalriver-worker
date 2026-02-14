@@ -1,0 +1,50 @@
+{
+  "answer_8f276838": [
+    {
+      "fact": "User is trying to find books on synchronicity and its connection to spirituality.",
+      "type": "preference",
+      "entities": [
+        "books",
+        "synchronicity",
+        "spirituality"
+      ]
+    },
+    {
+      "fact": "User has been reading a lot about Buddhism lately.",
+      "type": "preference",
+      "entities": [
+        "Buddhism"
+      ]
+    },
+    {
+      "fact": "User's previous stance on spirituality was that of a staunch atheist.",
+      "type": "personal",
+      "entities": [
+        "atheist"
+      ]
+    },
+    {
+      "fact": "User is exploring other possibilities in spirituality.",
+      "type": "opinion",
+      "entities": [
+        "spirituality"
+      ]
+    },
+    {
+      "fact": "User is interested in the concept of synchronicity and its connection to consciousness.",
+      "type": "preference",
+      "entities": [
+        "synchronicity",
+        "consciousness"
+      ]
+    },
+    {
+      "fact": "User is seeking information on scientific aspects of synchronicity.",
+      "type": "preference",
+      "entities": [
+        "scientific aspects",
+        "synchronicity"
+      ]
+    }
+  ]
+}

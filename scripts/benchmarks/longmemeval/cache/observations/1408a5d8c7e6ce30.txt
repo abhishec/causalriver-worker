@@ -1,0 +1,19 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/04/14 (Fri) 00:17  
+[FACT] User is experiencing issues with their internet connection, which has been slow and unreliable, especially in the evenings.  
+[PREFERENCE] User has a new smart TV that they use to stream shows on Amazon Prime and has been working great.  
+[EVENT] User is looking to troubleshoot their internet connection issues and improve their internet speed.  
+[ASSISTANT_SAID] Recommended steps to troubleshoot internet connection issues, including checking internet plan and speed, restarting router and modem, checking for physical obstructions, interference from other devices, router's age and quality, number of devices connected, checking for malware and viruses, ISP throttling, checking for firmware updates, and running a speed test.  
+[ASSISTANT_SAID] Suggested tips to improve internet speed, including upgrading to a faster internet plan, investing in a mesh network system or range extenders, using Quality of Service (QoS) settings, limiting the number of devices connected during peak hours, and considering a wired Ethernet connection.  
+[FACT] User has tried restarting their router and modem and checked for physical obstructions, but the problem persists.  
+[PREFERENCE] User is considering upgrading their router and is looking for recommendations.  
+[ASSISTANT_SAID] Recommended the Asus RT-AC86U router, highlighting its compatibility with multiple devices and strong signal throughout the home.  
+[ASSISTANT_SAID] Provided factors to consider when choosing a router, including the number of devices, home size and layout, Wi-Fi standard, and budget.  
+[ASSISTANT_SAID] Listed budget-friendly, mid-range, and high-end router options, including specific models and their features.  
+[FACT] User is considering the Asus RT-AC86U router for its ability to handle their smart TV and other devices.  
+[ASSISTANT_SAID] Explained the Asus RT-AC86U's compatibility with streaming services like Amazon Prime, its support for 4K streaming, tri-band Wi-Fi, MU-MIMO technology, and QoS features.  
+[PREFERENCE] User has started using their smart TV to stream music from Spotify in addition to streaming shows on Amazon Prime.  
+[ASSISTANT_SAID] Provided tips for maximizing the performance of the Asus RT-AC86U, including updating firmware, using the router's app, and configuring QoS settings.  
+[EVENT] User is thinking of upgrading their home security system to include cameras and motion detectors.  
+[ASSISTANT_SAID] Offered to recommend good options for cameras and motion detectors that are compatible with the user's router.

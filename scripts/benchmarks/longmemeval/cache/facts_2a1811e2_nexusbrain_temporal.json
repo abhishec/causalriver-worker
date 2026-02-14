@@ -1,0 +1,78 @@
+{
+  "answer_1cc3cd0c_2": [
+    {
+      "fact": "User is planning to volunteer at a local community event next weekend.",
+      "type": "event",
+      "entities": [
+        "local community event"
+      ]
+    },
+    {
+      "fact": "User prefers fundraising activities like bake sales and walk/run events.",
+      "type": "preference",
+      "entities": [
+        "bake sale",
+        "walk/run event"
+      ]
+    },
+    {
+      "fact": "User was inspired by Father John's sermon at St. Mary's Church.",
+      "type": "opinion",
+      "entities": [
+        "Father John",
+        "St. Mary's Church"
+      ]
+    },
+    {
+      "fact": "User attended Sunday mass at St. Mary's Church on March 19th.",
+      "type": "event",
+      "entities": [
+        "Sunday mass",
+        "St. Mary's Church",
+        "March 19th"
+      ]
+    },
+    {
+      "fact": "User sat in the third pew from the front at St. Mary's Church.",
+      "type": "personal",
+      "entities": [
+        "third pew",
+        "St. Mary's Church"
+      ]
+    },
+    {
+      "fact": "User was sitting next to their cousin Emma at St. Mary's Church.",
+      "type": "relationship",
+      "entities": [
+        "cousin Emma",
+        "St. Mary's Church"
+      ]
+    }
+  ],
+  "answer_1cc3cd0c_1": [
+    {
+      "fact": "User attended the Holi celebration at their local temple on February 26th.",
+      "type": "event",
+      "entities": [
+        "Holi celebration",
+        "local temple",
+        "February 26th"
+      ]
+    },
+    {
+      "fact": "User had a great time throwing colors and learning about the significance of Holi.",
+      "type": "opinion",
+      "entities": [
+        "throwing colors",
+        "significance of Holi"
+      ]
+    },
+    {
+      "fact": "User enjoyed trying Gujarati snacks at the Holi celebration.",
+      "type": "preference",
+      "entities": [
+        "Gujarati snacks"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/24 (Wed) 01:27  
+[ASSISTANT_SAID] The best audio format for HLS compatibility is AAC audio with an appropriate bit rate.  
+[ASSISTANT_SAID] AES67 is a group of standards and protocols that define interoperability requirements for high-performance audio-over-IP networks.  
+[ASSISTANT_SAID] SCTE-104 messages are inserted into the reserved portion of the AES67 stream that can carry additional data alongside the audio data.  
+[ASSISTANT_SAID] The data can be carried in the payload of the UDP or RTP packets, depending on how the AES67 stream is transported over IP networks.  
+[USER] Asked if the recommendation for AAC audio for HLS compatibility is correct and if ffmpeg can transform AAC to an HLS compatible format.  
+[ASSISTANT_SAID] AAC audio is widely used in HLS streaming because it is supported by most modern devices and provides good audio quality at relatively low bitrates.  
+[ASSISTANT_SAID] ffmpeg can be used to transcode AAC audio to an HLS-compatible format.  
+[USER] Asked why AAC is better at low bitrate compared to MP3.  
+[ASSISTANT_SAID] AAC uses advanced encoding techniques such as spectral band replication (SBR) and parametric stereo to reduce data while maintaining audio quality.  
+[ASSISTANT_SAID] AAC has better handling of transient sounds and is less prone to artifacts like ringing and pre-echo at lower bitrates.  
+[ASSISTANT_SAID] AAC provides better support for metadata and streaming features such as gapless playback, chapter markers, and multiple audio tracks.  
+[USER] Asked why MP3 is more popular than AAC in consumer music devices and apps.  
+[ASSISTANT_SAID] MP3 has been around longer and became the de facto standard for digital music files, leading to widespread support in consumer devices and apps.  
+[ASSISTANT_SAID] Many users have a large library of MP3 files accumulated over the years.  
+[ASSISTANT_SAID] Some older or cheaper devices may not support AAC, while MP3 has a more established ecosystem of software tools and services.  
+[ASSISTANT_SAID] The popularity of AAC is growing, especially in streaming services like Spotify and Apple Music.  
+[USER] Asked if an app that stitches audio ads to an AES67 audio stream should have PTP standard in place.  
+[ASSISTANT_SAID] PTP is typically used in professional broadcast environments to synchronize audio and video streams.  
+[ASSISTANT_SAID] If the app is processing multiple audio streams or combining audio from multiple sources, PTP may be necessary for synchronization.  
+[USER] Clarified that if the app is just

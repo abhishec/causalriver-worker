@@ -1,0 +1,16 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/22 (Mon) 04:43  
+[ASSISTANT_SAID] The assistant noted that the user has implemented a TopicMenu component that displays a list of topics and allows the user to add new topics.  
+[ASSISTANT_SAID] The TopicMenu component uses the Material UI library and relies on two context providers: TopicContext and SocketContext.  
+[ASSISTANT_SAID] The assistant provided general suggestions for working with the code, including checking functionality, identifying changes, breaking down tasks, and using debugging tools.  
+[USER] The user stated they are trying to get a user to be put into a video chat room with another user through WebSockets and WebRTC if both users have selected the same tags.  
+[ASSISTANT_SAID] The assistant outlined steps to implement the video chat feature, including creating a WebSocket server, storing selected tags, comparing tags, and establishing a WebRTC peer connection.  
+[ASSISTANT_SAID] The assistant provided detailed steps for implementing the feature, including using libraries like Socket.IO or ws for the WebSocket server and SimpleWebRTC or PeerJS for the WebRTC connection.  
+[USER] The user shared their server code, which includes the use of Express, HTTP, and Socket.IO.  
+[ASSISTANT_SAID] The assistant acknowledged the user's server code and suggested modifications to implement a matching algorithm for users with similar tags.  
+[ASSISTANT_CREATED] The assistant created a modified version of the user's server code, which includes functionality for matching users based on tags, generating a room ID, and handling client connections and disconnections.  
+[ASSISTANT_SAID] The assistant explained how the matching algorithm works, detailing the process of adding clients to a list, searching for matches, creating a room, and notifying clients.  
+[ASSISTANT_SAID] The assistant mentioned that the server listens for incoming connections and handles events such as `setTags`, `disconnect`, and `match`.  
+[ASSISTANT_SAID] The assistant provided a function to generate a random 6-digit room ID for the video chat sessions.  
+[ASSISTANT_SAID] The assistant emphasized that the provided code is a high-level overview and that many details need to be considered for a fully functional application.

@@ -1,0 +1,26 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/29 (Mon) 10:26
+- [FACT] User requested information about private equity firms that have invested in hospitality in the last 2 years.
+- [ASSISTANT_CREATED] List of private equity firms that have invested in hospitality:
+  1. Blackstone Group
+  2. KKR & Co.
+  3. Apollo Global Management
+  4. Carlyle Group
+  5. Brookfield Asset Management
+  6. Lone Star Funds
+  7. Starwood Capital Group
+  8. Oaktree Capital Management
+  9. Goldman Sachs Group
+  10. TPG Capital
+- [USER] User requested to include the deals these firms invested in.
+- [ASSISTANT_SAID] Blackstone Group - Invested in the acquisition of AccorHotels' luxury division, Mövenpick Hotels & Resorts, and the acquisition of Hotelbeds Group.
+- [ASSISTANT_SAID] KKR & Co. - Invested in the acquisition of Web Reservations International (WRI) and the acquisition of a majority stake in Hotelbeds Group.
+- [ASSISTANT_SAID] Apollo Global Management - Invested in the acquisition of a majority stake in Playa Hotels & Resorts.
+- [ASSISTANT_SAID] Carlyle Group - Invested in the acquisition of Ashford Hospitality Trust.
+- [ASSISTANT_SAID] Brookfield Asset Management - Invested in the acquisition of LaSalle Hotel Properties.
+- [ASSISTANT_SAID] Lone Star Funds - Invested in the acquisition of Chesapeake Lodging Trust.
+- [ASSISTANT_SAID] Starwood Capital Group - Invested in the acquisition of the Encore and Wynn Palace casino resorts in Macau.
+- [ASSISTANT_SAID] Oaktree Capital Management - Invested in the acquisition of a majority stake in the luxury hotel operator, Belmond.
+- [ASSISTANT_SAID] Goldman Sachs Group - Invested in the acquisition of a minority stake in the hotel management company, SBE Entertainment Group.
+- [ASSISTANT_SAID] TPG Capital - Invested in the acquisition of a majority stake in the hotel company, JLL Hotels & Hospitality Group.

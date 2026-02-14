@@ -1,0 +1,19 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/01/15 (Sun) 00:22  
+[FACT] User's monthly income after taxes is around $4,500.  
+[FACT] User's fixed necessary expenses include $1,800 for rent, $500 for car payment, $150 for insurance premiums, and $100 for internet and phone bills.  
+[FACT] User's minimum debt payments are $500 for credit cards and $300 for student loans.  
+[FACT] User usually spends around $800 on dining out and entertainment, $200 on hobbies, and $300 on personal spending like clothing and beauty products.  
+[FACT] User would like to allocate around $500 for luxury purchases.  
+[FACT] User's savings goals include building an emergency fund and saving for retirement.  
+[PREFERENCE] User is oscillating between luxury and budget shopping and is trying to understand what's driving it.  
+[EVENT] User splurged on a designer handbag they had been eyeing for months, which was on sale.  
+[CHANGE] User realizes that their dining out and entertainment expenses are eating into their savings and wants to take a closer look at these expenses.  
+[ASSISTANT_SAID] The assistant provided a breakdown of expenses using the 50/30/20 rule as a guideline.  
+[ASSISTANT_SAID] The assistant suggested that necessary expenses should ideally be 50% of income, discretionary spending 30%, and savings and debt repayment 20%.  
+[ASSISTANT_SAID] The assistant recommended reviewing rent and car payment costs, cutting back on dining out and entertainment expenses by 20-30%, and reducing personal spending on clothing and beauty products by 10-20%.  
+[ASSISTANT_SAID] The assistant suggested exploring free or low-cost events, hosting game nights or movie nights at home, and focusing on hobbies that don't involve expensive outings.  
+[ASSISTANT_SAID] The assistant recommended tracking expenses to identify areas for improvement and suggested alternatives for dining out, such as cooking at home, meal planning, and hosting potlucks.  
+[ASSISTANT_CREATED] The assistant created a detailed budget plan based on the user's provided information, categorizing necessary expenses, discretionary spending, and savings goals.  
+[ASSISTANT_CREATED] The assistant provided a list of strategies to reduce dining out and entertainment expenses without feeling like the user is missing out on fun.

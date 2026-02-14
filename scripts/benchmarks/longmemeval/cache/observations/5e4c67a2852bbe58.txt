@@ -1,0 +1,26 @@
+**Observation Log:**
+
+[FACT] User is trying to organize their digital files.  
+[FACT] User has a new MacBook.  
+[ASSISTANT_SAID] Recommended cloud storage services: iCloud, Google Drive, Dropbox, Microsoft OneDrive, pCloud, Box.  
+[ASSISTANT_SAID] iCloud offers 5 GB of free storage, with upgrade options of 50 GB, 200 GB, or 1 TB.  
+[ASSISTANT_SAID] Google Drive offers 15 GB of free storage, with upgrade options of 100 GB, 200 GB, or 1 TB.  
+[ASSISTANT_SAID] Dropbox offers 2 GB of free storage, with upgrade options of 2 TB or 3 TB.  
+[ASSISTANT_SAID] Microsoft OneDrive offers 5 GB of free storage, with upgrade options of 50 GB, 1 TB, or 2 TB.  
+[ASSISTANT_SAID] pCloud offers 10 GB of free storage, with upgrade options of 500 GB, 2 TB, or 10 TB.  
+[ASSISTANT_SAID] Box offers 10 GB of free storage, with upgrade options of 100 GB, 1 TB, or unlimited plans.  
+[ASSISTANT_SAID] Suggested factors to consider when choosing a cloud storage service: storage space, file types, collaboration, security, integration.  
+[FACT] User plans to try out Google Drive and Dropbox.  
+[EVENT] User intends to update their LinkedIn profile.  
+[ASSISTANT_SAID] Provided steps to add certifications to LinkedIn profile: log in, access profile, scroll to "Certifications," click "Add a certification," fill in details, upload certificate (optional), save.  
+[ASSISTANT_SAID] Suggested tips for LinkedIn certifications: keep them up-to-date, add multiple certifications, check with issuing organization for details.  
+[FACT] User attended a marketing conference in February.  
+[FACT] User attended the conference in Chicago.  
+[RELATIONSHIP] User met Gary Vaynerchuk at the conference.  
+[ASSISTANT_SAID] Clarified that the assistant does not retain personal information or past activities.  
+[FACT] User is thinking about their promotion to Senior Marketing Specialist.  
+[TEMPORAL] User's promotion date is January 15th.  
+[ASSISTANT_SAID] Congratulated user on their promotion and expressed pride in their achievement.  
+[ASSISTANT_SAID] Provided recommendations for project management tools: Asana, Trello, Basecamp, Jira, Microsoft Teams, Smartsheet, Wrike, Airtable.  
+[ASSISTANT_SAID] Suggested factors to consider when choosing a project management tool: ease of use, features, integration, scalability, pricing.  
+[

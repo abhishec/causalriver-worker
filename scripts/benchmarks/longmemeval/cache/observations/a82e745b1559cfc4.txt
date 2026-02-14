@@ -1,0 +1,26 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/27 (Sat) 03:24  
+[FACT] User usually starts their day around 6:30 am.  
+[FACT] User spends some time in the kitchen brewing a fresh cup of coffee.  
+[PREFERENCE] User is looking for new coffee recipes that are not too sweet.  
+[ASSISTANT_SAID] Recommended coffee recipes include:  
+[ASSISTANT_SAID] 1. Cortado: Equal parts espresso and milk, with a pinch of salt.  
+[ASSISTANT_SAID] 2. Café au Lait: Brewed coffee with scalded milk in a 1:1 ratio, with optional honey.  
+[ASSISTANT_SAID] 3. Gibraltar: Variation of cortado with a 1:3 espresso-to-milk ratio.  
+[ASSISTANT_SAID] 4. Iced Coffee with Cold Brew: Cold brew mixed with ice, milk, and optional lime juice.  
+[ASSISTANT_SAID] 5. Turkish Coffee: Finely ground coffee brewed in an ibrik or cezve, served without added sugar.  
+[ASSISTANT_SAID] 6. Coffee with Coconut Oil: Add melted coconut oil for a creamy, dairy-free alternative.  
+[ASSISTANT_SAID] 7. Flat White: Espresso with microfoam in a 1:3 to 1:5 espresso-to-milk ratio.  
+[ASSISTANT_SAID] Suggested experimenting with sweetness levels in the recipes.  
+[PREFERENCE] User is interested in trying out the Cortado and Café au Lait recipes.  
+[ASSISTANT_SAID] Provided tips for frothing milk at home without a steam wand:  
+[ASSISTANT_SAID] Method 1: Whisking - Whisk cold milk vigorously for 2-3 minutes.  
+[ASSISTANT_SAID] Method 2: Shaking - Shake cold milk in a jar for 30-60 seconds.  
+[ASSISTANT_SAID] Method 3: Blender - Blend cold milk on high for 10-15 seconds.  
+[ASSISTANT_SAID] Tips include using cold milk, choosing the right milk, and practicing frothing.  
+[PREFERENCE] User is interested in storing coffee beans to preserve flavor and freshness.  
+[ASSISTANT_SAID] Recommended storing coffee beans in an airtight container in a cool, dry place.  
+[ASSISTANT_SAID] Suggested avoiding light, strong smells, and not storing beans in the refrigerator.  
+[ASSISTANT_SAID] Mentioned freezing beans for longer storage and using them within 2-4 weeks of opening.  
+[PREFERENCE] User is interested in trying a new coffee bean brand, specifically high-quality Ethiopian coffee

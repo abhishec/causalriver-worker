@@ -1,0 +1,16 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/20 (Sat) 14:28
+- [ASSISTANT_SAID] The assistant provided an updated version of the BlogPost component that includes the specified BlogImage component with sample image URLs.
+- [ASSISTANT_CREATED] The assistant created a React component for BlogPost that includes a title, TLDRCard, multiple BlogImage components, and several paragraphs describing the services of TraveledMap.com.
+- [ASSISTANT_SAID] The assistant mentioned that TraveledMap.com offers a unique solution for travel companies to showcase their trip itineraries on an interactive map.
+- [ASSISTANT_SAID] The assistant stated that the platform allows users to follow along with the day-by-day description of a trip and see the corresponding location on the map, complete with pictures of the place.
+- [ASSISTANT_SAID] The assistant encouraged the user to sign up for TraveledMap.com to showcase trip itineraries in a more engaging and interactive way.
+- [ASSISTANT_SAID] The assistant provided sample image URLs: "https://www.example.com/image1.jpg", "https://www.example.com/image2.jpg", and "https://www.example.com/image3.jpg".
+- [USER] The user requested to update the pictures' URLs used in the BlogPost to use Unsplash travel pictures.
+- [ASSISTANT_SAID] The assistant apologized for not being able to browse the web and suggested the user search for suitable images on Unsplash using keywords like "travel", "trip", "itinerary", etc.
+- [ASSISTANT_SAID] The assistant provided an example of how to update the BlogImage components with new URLs from Unsplash.
+- [ASSISTANT_CREATED] The assistant provided an updated version of the BlogPost component with placeholder URLs for Unsplash images: "https://www.unsplash.com/travel-image1.jpg", "https://www.unsplash.com/travel-image2.jpg", and "https://www.unsplash.com/travel-image3.jpg".
+- [USER] The user mentioned they are using the Reactstrap UI library and requested the BlogPost to be rewritten using it.
+- [ASSISTANT_SAID] The assistant confirmed the request and provided an updated version of the BlogPost component using the Reactstrap UI library, including the use of Container, Row, and Col components.
+- [ASSISTANT_CREATED] The assistant created a new version of the BlogPost component that incorporates Reactstrap layout components for better structure and presentation.

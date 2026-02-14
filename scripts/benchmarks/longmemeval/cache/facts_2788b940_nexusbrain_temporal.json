@@ -1,0 +1,153 @@
+{
+  "answer_8f6b938d_4": [
+    {
+      "fact": "User participates in weightlifting classes, specifically BodyPump on Mondays at 6:30 PM.",
+      "type": "event",
+      "entities": [
+        "weightlifting classes",
+        "BodyPump",
+        "Mondays",
+        "6:30 PM"
+      ]
+    },
+    {
+      "fact": "User is looking for workout playlist recommendations to motivate them during workouts.",
+      "type": "preference",
+      "entities": [
+        "workout playlist",
+        "motivation"
+      ]
+    },
+    {
+      "fact": "User is interested in healthy snack options to support their fitness goals.",
+      "type": "preference",
+      "entities": [
+        "healthy snacks",
+        "fitness goals"
+      ]
+    }
+  ],
+  "answer_8f6b938d_1": [
+    {
+      "fact": "User takes Zumba classes on Tuesdays and Thursdays at 7:00 PM",
+      "type": "event",
+      "entities": [
+        "Zumba classes",
+        "Tuesdays",
+        "Thursdays",
+        "7:00 PM"
+      ]
+    },
+    {
+      "fact": "User prefers upbeat music for workout playlists",
+      "type": "preference",
+      "entities": [
+        "upbeat music",
+        "workout playlists"
+      ]
+    },
+    {
+      "fact": "User has recently started taking a BodyPump class on Mondays",
+      "type": "event",
+      "entities": [
+        "BodyPump class",
+        "Mondays"
+      ]
+    },
+    {
+      "fact": "User wants music that keeps them pumped up during weightlifting sessions",
+      "type": "opinion",
+      "entities": [
+        "music",
+        "weightlifting sessions"
+      ]
+    }
+  ],
+  "answer_8f6b938d_3": [
+    {
+      "fact": "User is looking to explore new fitness routines.",
+      "type": "preference",
+      "entities": [
+        "fitness routines"
+      ]
+    },
+    {
+      "fact": "User is interested in strength training exercises.",
+      "type": "preference",
+      "entities": [
+        "strength training exercises"
+      ]
+    },
+    {
+      "fact": "User has a yoga class on Sundays at 6:00 PM.",
+      "type": "event",
+      "entities": [
+        "yoga class",
+        "Sunday",
+        "6:00 PM"
+      ]
+    },
+    {
+      "fact": "User prefers to do workouts on days other than Sunday.",
+      "type": "preference",
+      "entities": [
+        "workouts",
+        "Sunday"
+      ]
+    },
+    {
+      "fact": "User is interested in trying bodyweight exercises, specifically squats and lunges.",
+      "type": "preference",
+      "entities": [
+        "bodyweight exercises",
+        "squats",
+        "lunges"
+      ]
+    }
+  ],
+  "answer_8f6b938d_2": [
+    {
+      "fact": "User attends a Saturday morning Hip Hop Abs class with Mike at 10:00 AM",
+      "type": "event",
+      "entities": [
+        "Hip Hop Abs class",
+        "Mike",
+        "10:00 AM",
+        "Saturday"
+      ]
+    },
+    {
+      "fact": "User is looking for new workout playlists, specifically hip hop playlists",
+      "type": "preference",
+      "entities": [
+        "workout playlists",
+        "hip hop"
+      ]
+    },
+    {
+      "fact": "User is thinking of making a playlist for yoga classes on Sundays",
+      "type": "event",
+      "entities": [
+        "yoga classes",
+        "Sundays"
+      ]
+    },
+    {
+      "fact": "User prefers chill hip-hop or R&B playlists for yoga",
+      "type": "preference",
+      "entities": [
+        "chill hip-hop",
+        "R&B",
+        "yoga"
+      ]
+    },
+    {
+      "fact": "User is trying out new recipes to support fitness goals",
+      "type": "opinion",
+      "entities": [
+        "new recipes",
+        "fitness goals"
+      ]
+    }
+  ]
+}

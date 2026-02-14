@@ -1,0 +1,20 @@
+**Observation Log**
+
+**Session Date:** 2023/05/25 (Thu)  
+**Session ID:** d44dfa75
+
+1. [FACT] The user is located in the 94110 zip code (San Francisco).
+2. [PREFERENCE] The user is particularly interested in poetry readings and discussing poetry with others who share their interest.
+3. [EVENT] The user is looking for book reading events in their area for the next month.
+4. [ASSISTANT_SAID] The assistant suggested several options to find book reading events, including Goodreads, local libraries, bookstores, Facebook Events, Meetup, and local literary festivals.
+5. [EVENT] The assistant provided a list of book reading events in San Francisco for the next month, including specific dates and authors.
+6. [TEMPORAL] The events listed by the assistant are scheduled for the weeks of March 6-12, March 13-19, March 20-26, and March 27-31.
+7. [ASSISTANT_SAID] The assistant mentioned specific events, such as Julia Fierro at Rakestraw Books on March 10 and Danez Smith at the SFPL on March 11.
+8. [ASSISTANT_SAID] The assistant provided details about upcoming poetry readings in San Francisco, including events at the Poetry Center at SF State University and the San Francisco Poetry Slam.
+9. [EVENT] The user expressed interest in attending the Poetry Book Club at Green Apple Books.
+10. [ASSISTANT_SAID] The assistant provided details about the Poetry Book Club at Green Apple Books, including the next meeting date (March 18) and the selected book ("Homie" by Danez Smith).
+11. [EVENT] The assistant mentioned the next Poetry Book Club meeting after March 18 is scheduled for April 15.
+12. [ASSISTANT_SAID] The selected book for the April 15 meeting is "Deaf Republic" by Ilya Kaminsky.
+13. [TEMPORAL] The next Poetry Book Club meeting after March 18 is on April 15.
+14. [ASSISTANT_SAID] The assistant advised the user to RSVP on the Green Apple Books website or by calling the store for the Poetry Book Club.
+15. [ASSISTANT_SAID] The assistant suggested that the user pick up a copy of "Deaf Republic" before the April 15 meeting to prepare for the discussion.

@@ -1,0 +1,15 @@
+**Observation Log:**
+
+[FACT] The user is developing an eCommerce app using WordPress and WooCommerce.  
+[ASSISTANT_SAID] The assistant provided information on how to retrieve only items in stock through the WooCommerce API using the endpoint `/wp-json/wc/v3/products?stock_status=instock`.  
+[ASSISTANT_SAID] The assistant explained that the user can modify the endpoint to retrieve specific products or categories in stock by adding query parameters.  
+[USER] The user stated they have developed many APIs and want to apply the filter globally without modifying all APIs.  
+[ASSISTANT_SAID] The assistant suggested creating a custom function or plugin that hooks into the WooCommerce API request process to apply the stock status filter globally.  
+[ASSISTANT_SAID] The assistant provided a code example for a function that adds a stock filter to the API requests.  
+[ASSISTANT_SAID] The assistant explained the steps to apply the function in the WordPress theme's `functions.php` file.  
+[ASSISTANT_SAID] The assistant provided a code snippet for the function that checks if the request is for a product or variation and adds a `meta_query` to filter for items in stock.  
+[ASSISTANT_SAID] The assistant mentioned hooking the function to the `woocommerce_rest_products_query` filter to apply it to all product-related API requests.  
+[USER] The user asked how to implement the function in a plugin.  
+[ASSISTANT_SAID] The assistant provided steps to implement the function in a plugin, including modifying the plugin file to include the new function that filters items in stock.  
+[ASSISTANT_SAID] The assistant advised to backup the plugin file before making any changes.  
+[ASSISTANT_CREATED] The assistant created a code snippet for a function that retrieves products in stock, including the necessary arguments for the query.

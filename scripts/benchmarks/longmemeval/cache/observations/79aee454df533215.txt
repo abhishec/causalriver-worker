@@ -1,0 +1,24 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/23 (Tue) 01:28
+- [FACT] User has a 20-gallon freshwater community tank.
+- [FACT] User recently did a bi-weekly water change, replacing about 25% of the tank water with fresh, dechlorinated water.
+- [FACT] User cleaned the gravel and decorations in the tank.
+- [PREFERENCE] User is concerned about algae growth in their aquarium.
+- [ASSISTANT_SAID] Algae growth is common in aquariums and can be controlled with adjustments.
+- [ASSISTANT_SAID] Suggested tips to tackle algae include monitoring lighting, checking water parameters, increasing water circulation, maintaining good water flow around plants, reducing nutrient availability, introducing algae-controlling organisms, avoiding overfeeding, cleaning filter media, considering a UV sterilizer, and being patient.
+- [FACT] User has been monitoring water parameters closely.
+- [FACT] User's ammonia and nitrite levels are within safe ranges.
+- [FACT] User has noticed a slight increase in nitrate levels.
+- [ASSISTANT_SAID] The increase in nitrate levels could contribute to algae growth.
+- [ASSISTANT_SAID] Suggested adjustments to address nitrate levels include increasing water change frequency or volume, optimizing filter media, reducing feeding, adding nitrate-absorbing media, and monitoring tank's biological load.
+- [PREFERENCE] User is considering adding nitrate-absorbing media to their tank.
+- [ASSISTANT_SAID] Nitrate-absorbing media can be effective in reducing nitrate levels but should be used alongside regular water changes and maintenance.
+- [ASSISTANT_SAID] Recommended products for nitrate-absorbing media include Seachem Purigen, API Nitra-Zorb, Eheim Nitrate Remover, Tetra Tech Nitrate Remover, and Matrix Carbon.
+- [ASSISTANT_SAID] Provided tips for using nitrate-absorbing media, including following manufacturer instructions, placing media in high-water-flow areas, and monitoring nitrate levels.
+- [PREFERENCE] User is thinking of adding harlequin rasboras to their tank.
+- [ASSISTANT_SAID] Harlequin rasboras can be good additions to a community tank and may help distract platies from nipping at neon tetras.
+- [ASSISTANT_SAID] Harlequin rasboras are generally peaceful, school in groups, and are compatible with neon tetras and platies.
+- [ASSISTANT_SAID] Suggested keeping harlequin rasboras in groups of at least 6-8 individuals and ensuring sufficient swimming space and hiding places in the tank.
+- [ASSISTANT_SAID] Provided tips for introducing harlequin rasboras, including quarantining, acclimating carefully, and monitoring behavior.
+- [PREFERENCE

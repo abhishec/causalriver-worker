@@ -1,0 +1,23 @@
+**Observation Log:**
+
+- [FACT] The user is planning a trip to New Zealand and Australia for next year.
+- [PREFERENCE] The user is looking for recommendations for both guided hikes and city exploration.
+- [PREFERENCE] The user wants to experience the outdoors but also spend time in cities and try local food and drinks.
+- [EVENT] The user just got back from a 5-day vacation in Cancun, Mexico with their family.
+- [TEMPORAL] The user's vacation in Cancun was from June 15th to 20th.
+- [FACT] The user stayed at an all-inclusive resort called Moon Palace in Cancun.
+- [ASSISTANT_SAID] New Zealand is famous for multi-day treks such as the Tongariro Alpine Crossing, Milford Track, and Routeburn Track.
+- [ASSISTANT_SAID] Popular outdoor activities in New Zealand include bungee jumping, white-water rafting, kayaking, and skydiving.
+- [ASSISTANT_SAID] Recommended guided hike companies in New Zealand include Department of Conservation (DoC), Ultimate Hikes, Kiwi Wilderness Walks, New Zealand Walks, and Wilderness Guides.
+- [ASSISTANT_SAID] Popular outdoor activities in Australia include hiking, surfing, snorkeling and diving, camping, and rock climbing.
+- [ASSISTANT_SAID] Recommended guided hike companies in Australia include Australian Walking Holidays, Tasmanian Expeditions, EcoGuide Australia, Wilderness Expeditions, and Australian Alpine Academy.
+- [ASSISTANT_SAID] Suggested cities for exploration in New Zealand include Auckland, Queenstown, and Wellington.
+- [ASSISTANT_SAID] Suggested cities for exploration in Australia include Sydney, Melbourne, and Cairns.
+- [ASSISTANT_SAID] In Auckland, must-try food includes Hangi, fish and chips, and lamb shanks; must-try drinks include Sauvignon Blanc and L&P.
+- [ASSISTANT_SAID] In Queenstown, must-try food includes venison, pavlova, and whitebait; must-try drinks include Pinot Noir and craft beer.
+- [ASSISTANT_SAID] In Sydney, must-try food includes meat pie, fish and chips, and lamington; must-try drinks include flat white and Victoria Bitter (VB).
+- [ASSISTANT_SAID] In Melbourne, must-try food includes coffee, Melbourne-style bagels, and Greek food; must-try drinks include flat white and craft beer.
+- [ASSISTANT_SAID] Recommended markets and street food in Auckland include Auckland Night Markets and La Cigale French Market.
+- [ASSISTANT_SAID] Recommended markets and street food in Queenstown include Queenstown Markets and The Grille by Eichardt's.
+- [ASSISTANT_SAID] Recommended markets and street food in Sydney include Sydney Fish Market and Glebe Markets.
+- [ASS

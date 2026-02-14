@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[FACT] User is trying to adjust the brewing time for a new coffee blend.  
+[PREFERENCE] User is using medium roast coffee.  
+[ASSISTANT_SAID] General guidelines for brewing medium roast coffee include:  
+[ASSISTANT_SAID] Drip Brewer: 1 tablespoon of coffee for every 6 ounces of water, brewing time: 5-7 minutes.  
+[ASSISTANT_SAID] French Press: 1 tablespoon of coffee for every 4 ounces of water, steeping time: 3-4 minutes, pressing time: 30 seconds to 1 minute.  
+[ASSISTANT_SAID] Pour-Over: 1 tablespoon of coffee for every 6 ounces of water, pouring time: 3-4 minutes, total brewing time: 4-6 minutes.  
+[ASSISTANT_SAID] Chemex: 1 tablespoon of coffee for every 6 ounces of water, pouring time: 3-4 minutes, total brewing time: 4-6 minutes.  
+[ASSISTANT_SAID] Espresso: 1 tablespoon of coffee for every 1 ounce of water, brewing time: 20-30 seconds.  
+[ASSISTANT_SAID] Cold Brew: 1 tablespoon of coffee for every 4 ounces of water, steeping time: 12-24 hours.  
+[ASSISTANT_SAID] The perfect brewing time may vary depending on personal taste preferences, grind coarseness, and specific coffee beans used.  
+[ASSISTANT_SAID] For medium roast coffee, aim for a slightly longer brewing time to bring out balanced flavors and acidity.  
+[ASSISTANT_SAID] If coffee is too bright or acidic, increase brewing time; if too bitter, decrease brewing time.  
+[ASSISTANT_SAID] The key to finding the perfect brewing time is experimentation.  
+[PREFERENCE] User is trying to cut down on sugar in coffee.  
+[ASSISTANT_SAID] Alternatives to stevia for sweetening coffee include:  
+[ASSISTANT_SAID] 1. Erythritol: Zero-calorie, non-glycemic, 60-70% as sweet as sugar.  
+[ASSISTANT_SAID] 2. Monk Fruit Sweetener: 150-200 times sweeter than sugar, calorie-free, non-glycemic.  
+[ASSISTANT_SAID] 3. Yacon Syrup: Low glycemic index, contains prebiotic fibers, sweet, molasses-like flavor.  
+[ASSISTANT_SAID] 4. Honey or Maple Syrup (in moderation): Natural sweeteners with distinct flavors.  
+[ASSISTANT_SAID] 5. Coconut Sugar: Lower-glycemic, caramel-like flavor, use in moderation.  
+[ASSISTANT_S

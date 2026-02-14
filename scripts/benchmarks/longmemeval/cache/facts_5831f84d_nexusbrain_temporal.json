@@ -1,0 +1,64 @@
+{
+  "answer_8d63a897_1": [
+    {
+      "fact": "User is trying to learn more about cloud computing.",
+      "type": "preference",
+      "entities": [
+        "cloud computing"
+      ]
+    },
+    {
+      "fact": "User is interested in AWS.",
+      "type": "preference",
+      "entities": [
+        "AWS"
+      ]
+    },
+    {
+      "fact": "User has completed 10 Crash Course videos in the past few weeks.",
+      "type": "event",
+      "entities": [
+        "Crash Course",
+        "10 videos"
+      ]
+    },
+    {
+      "fact": "User listens to the 'How I Built This' podcast.",
+      "type": "preference",
+      "entities": [
+        "How I Built This"
+      ]
+    },
+    {
+      "fact": "User is inspired by the stories of entrepreneurs.",
+      "type": "opinion",
+      "entities": [
+        "entrepreneurs"
+      ]
+    }
+  ],
+  "answer_8d63a897_2": [
+    {
+      "fact": "User is trying to learn more about natural language processing.",
+      "type": "preference",
+      "entities": [
+        "natural language processing"
+      ]
+    },
+    {
+      "fact": "User has watched 15 Crash Course videos in the past few weeks.",
+      "type": "event",
+      "entities": [
+        "Crash Course videos"
+      ]
+    },
+    {
+      "fact": "User would like to explore more about deep learning and its applications in NLP.",
+      "type": "preference",
+      "entities": [
+        "deep learning",
+        "NLP"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+**Observation Log:**
+
+- [FACT] User is relocating to Canada as a refugee.
+- [FACT] User is seeking information about affordable housing in Toronto.
+- [ASSISTANT_SAID] The assistant welcomed the user to Canada and offered to help navigate the process of finding affordable housing in Toronto.
+- [ASSISTANT_SAID] The assistant provided a step-by-step guide to finding affordable housing in Toronto.
+- [ASSISTANT_SAID] Step 1 includes checking eligibility for government-assisted housing programs or subsidies with IRCC or the Ontario Ministry of Municipal Affairs and Housing.
+- [ASSISTANT_SAID] Step 1 also mentions potential financial assistance from organizations like UNHCR or the Canadian Red Cross.
+- [ASSISTANT_SAID] Step 2 suggests researching affordable housing options such as rent-geared-to-income (RGI) housing through the City of Toronto's Housing Connections portal.
+- [ASSISTANT_SAID] Step 2 includes information about Toronto Community Housing Corporation (TCHC) and non-profit housing organizations.
+- [ASSISTANT_SAID] Step 2 advises searching for private rentals on websites like PadMapper, Rent Jungle, or Kijiji.
+- [ASSISTANT_SAID] Step 3 outlines required documents including proof of income, identification, and proof of status.
+- [ASSISTANT_SAID] Step 4 details the application process for housing through Housing Connections, TCHC, non-profit organizations, and private rentals.
+- [ASSISTANT_SAID] Step 5 emphasizes the need to be prepared for viewings and applications, including acting quickly and bringing required documents.
+- [ASSISTANT_SAID] Additional resources include settlement agencies like the Toronto Refugee Resettlement Centre and housing help lines like the City of Toronto's 311 service.
+- [ASSISTANT_SAID] The assistant reminded the user to stay safe during the housing search and to reach out for assistance if needed.
+- [USER] Asked for average rent prices in Toronto for a one-bedroom and two-bedroom apartment.
+- [ASSISTANT_SAID] The assistant provided average rent prices for one-bedroom apartments in various areas of Toronto, including:
+  - Downtown Core: $2,000 - $2,800 per month
+  - Midtown: $1,800 - $2,500 per month
+  - Uptown: $1,500 - $2,200 per month
+  - Outer neighborhoods: $1,300 - $2,000 per month
+- [ASSISTANT_SAID] The assistant provided average rent prices for two-bedroom apartments in various areas of Toronto, including:
+  - Downtown Core: $2,800 - $4,000 per month
+  - Midtown: $2,300 - $3,500 per month
+  - Uptown: $2,000 - $3,200 per month

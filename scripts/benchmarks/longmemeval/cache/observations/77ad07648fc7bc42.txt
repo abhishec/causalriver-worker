@@ -1,0 +1,20 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/30 (Tue) 16:07  
+[ASSISTANT_SAID] In a Unix-like system, the home directory is the default directory for a user when they log in. It is where their personal files and directories are stored, such as their documents, music, and settings.  
+[ASSISTANT_SAID] The location of the home directory varies depending on the system and the user, but it is typically located under the root directory (`/`). In most cases, the home directory for a user is located in `/home/<username>`.  
+[ASSISTANT_SAID] To go to your home directory in the shell, you can use the `cd` command followed by the `~` character.  
+[ASSISTANT_SAID] For example, if the current user is named `user`, you can go to their home directory by entering the command: `cd ~`.  
+[ASSISTANT_SAID] If you want to go to the home directory of a different user, replace `~` with the username. For example, to go to the home directory of the user `jane`, enter: `cd ~jane`.  
+[USER] What is the difference between the root directory and the home directory of the user root?  
+[ASSISTANT_SAID] The root directory is the top-level directory of the file system hierarchy and is denoted by the forward slash character `/`.  
+[ASSISTANT_SAID] The root directory is owned by the root user and is typically not accessible to regular users.  
+[ASSISTANT_SAID] The home directory of the user root is the default directory for the root user when they log in, typically located in `/root`.  
+[ASSISTANT_SAID] Unlike other users, the root user has complete access to the entire file system, including all directories and files.  
+[ASSISTANT_SAID] The root user's home directory is still subject to the same file system permissions as other directories and files.  
+[ASSISTANT_SAID] In summary, the root directory is the top-level directory of the file system hierarchy, while the home directory of the user root is the default directory for the root user's personal files and directories.  
+[USER] What are the characteristics of hidden files and how to list them?  
+[ASSISTANT_SAID] Hidden files are files that have a name that starts with a dot (`.`).  
+[ASSISTANT_SAID] They are not displayed by default when listing the contents of a directory using the `ls` command.  
+[ASSISTANT_SAID] Hidden files are often used for configuration files or files that are not intended to be modified by users.  
+[ASSISTANT_SAID] To list hidden files in a directory,

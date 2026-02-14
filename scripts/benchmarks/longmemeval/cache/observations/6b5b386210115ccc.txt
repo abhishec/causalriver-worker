@@ -1,0 +1,26 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/29 (Mon) 22:45
+- [USER] User discusses the importance of ensuring the correct version of a service is deployed in each environment when designing a software system.
+- [USER] User mentions that updating the service's Docker image for each environment can become cumbersome.
+- [USER] User introduces the concept of "CI Integration" in Facets as a solution to the aforementioned issue.
+- [FACT] CI Integration is described as an entity in Facets that provides a central repository for storing and managing Docker images for a service.
+- [USER] User states that CI Integration can be of two types: environment or release stream.
+- [USER] User explains that organizations can build images either for a specific environment or for a type of environment.
+- [USER] User notes that once a CI Integration is created, it will have a separate bucket for each environment or release stream.
+- [USER] User describes two mechanisms for storing Docker images in these buckets: pushing the image directly via the Facets CLI or through a promotion process.
+- [FACT] The Facets CLI is known as facetctl.
+- [USER] User mentions that facetctl can be integrated with popular CI systems like CodeBuild, Jenkins, CircleCI, or GitHub Actions.
+- [USER] User discusses the need for organizations to promote builds from one environment to another, such as from QA to Staging and finally to Production.
+- [USER] User introduces the concept of promotion workflows in CI Integration to make the promotion process seamless and controlled.
+- [USER] User states that promotion workflows can be of type environment or release stream and can be attached to similarly-typed CI Integration.
+- [USER] User explains that promotion workflows allow for clear and concise promotion paths for builds.
+- [USER] User emphasizes that using promotion workflows ensures builds are only promoted when they are ready, reducing the risk of errors.
+- [USER] User mentions that promotion workflows include auditing information, such as who promoted which build and when.
+- [USER] User identifies challenges with the current implementation of the Artifact CI or CI integration page.
+- [USER] User states that the current implementation presents a challenge for users who need to attach a single promotion workflow to multiple Artifact CIs, which accounts for the majority (90%) of use cases.
+- [USER] User notes that the page's name may not accurately reflect its purpose and may cause confusion for users.
+- [USER] User describes the current process of attaching promotion workflows to Artifact CI as tedious and time-consuming, requiring manual editing of each Artifact CI.
+- [USER] User expresses that this can be a frustrating experience for users.
+- [ASSISTANT_SAID] Assistant suggests several usability improvements for the Artifact CI or CI integration page.
+- [ASSISTANT_SAID] Assistant recommends allowing users to attach a single promotion workflow to multiple Artifact C

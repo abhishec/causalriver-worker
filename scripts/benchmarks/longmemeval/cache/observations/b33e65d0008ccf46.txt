@@ -1,0 +1,28 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/01/13 (Fri) 15:08
+- [ASSISTANT_SAID] The number of CPU cores required for the ELK stack server can vary depending on the amount of log data to process.
+- [ASSISTANT_SAID] Higher log volume generally requires more processing power.
+- [ASSISTANT_SAID] It is difficult to provide an exact threshold for log volume that would necessitate a change in the number of CPU cores.
+- [ASSISTANT_SAID] Factors affecting CPU core requirements include:
+  1. The number and complexity of Logstash filters and pipelines.
+  2. The rate at which logs are ingested into the system.
+  3. The number of concurrent queries and aggregations performed by Elasticsearch.
+  4. The performance and resource requirements of additional modules and data shippers (e.g., Beats).
+- [ASSISTANT_SAID] A general guideline is to start with 4 CPU cores and monitor the performance of the ELK stack server.
+- [ASSISTANT_SAID] If experiencing high CPU utilization or slow query performance, consider allocating more CPU cores.
+- [ASSISTANT_SAID] To determine if more CPU cores are needed, monitor:
+  1. CPU utilization: If consistently high (above 80-90%) during normal operation, consider adding more CPU cores.
+  2. Elasticsearch performance: Monitor query and indexing performance; slow response times may indicate a need for additional CPU resources.
+  3. Logstash processing: Check for processing bottlenecks; more CPU cores can help alleviate issues.
+- [ASSISTANT_SAID] It is essential to monitor and analyze the performance of the ELK stack server to determine appropriate resource allocation.
+- [ASSISTANT_SAID] Minimum storage requirements for an Elastic Stack server with separate system and log volumes:
+  1. System/Installation volume: At least 30-50 GB of free disk space.
+  2. Log volume: At least 200 GB (or more, depending on log retention policies and log volume).
+- [ASSISTANT_SAID] Minimum CPU and memory requirements remain the same:
+  1. Processor: 4 CPU cores (or more, depending on log volume).
+  2. Memory: 16 GB RAM (Elasticsearch benefits from more memory for better performance).
+- [ASSISTANT_SAID] Ensure that the separate volumes are correctly mounted and configured.
+- [ASSISTANT_SAID] In the Elasticsearch configuration file (`elasticsearch.yml`), specify the log volume's path for storing the indices.
+- [ASSISTANT_CREATED] Provided a code snippet for Elasticsearch configuration: `path.data: /path/to/log/volume`.
+- [ASSISTANT_SAID] Replace `/path/to/log/volume

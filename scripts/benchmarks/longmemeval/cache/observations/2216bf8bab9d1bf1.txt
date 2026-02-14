@@ -1,0 +1,26 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/30 (Tue) 05:34  
+[FACT] User is thinking of starting a fantasy football league with friends.  
+[PREFERENCE] User is a die-hard fan of the New York Yankees since childhood.  
+[PREFERENCE] User finds it tough to see the New York Yankees struggling this season.  
+[EVENT] User is preparing for a fantasy football draft.  
+[ASSISTANT_SAID] The Milwaukee Bucks did not play the Miami Heat in the first round of the NBA playoffs recently; they swept the Heat in the first round of the 2021 NBA playoffs.  
+[ASSISTANT_SAID] Tips for fantasy football draft preparation include:  
+[ASSISTANT_CREATED] 1. Know your league settings: Understand the scoring system, roster size, and position requirements.  
+[ASSISTANT_CREATED] 2. Rank players: Create a cheat sheet with top players at each position, considering past performance, team changes, and injuries.  
+[ASSISTANT_CREATED] 3. Identify sleepers and breakout candidates: Look for players who might exceed expectations.  
+[ASSISTANT_CREATED] 4. Focus on consistent performers: Players with a consistent track record are often more reliable.  
+[ASSISTANT_CREATED] 5. Pay attention to ADP (Average Draft Position): Know when players are typically drafted.  
+[ASSISTANT_CREATED] 6. Develop a draft strategy: Decide on RB-heavy, WR-heavy, or balanced approach.  
+[ASSISTANT_CREATED] 7. Prepare for your draft position: Focus on top-tier players if picking early, look for value picks if picking later.  
+[ASSISTANT_CREATED] 8. Mock drafts: Participate in mock drafts to practice strategy.  
+[ASSISTANT_CREATED] 9. Stay up-to-date on preseason news: Monitor injuries and training camp performances.  
+[ASSISTANT_CREATED] 10. Have a draft-day plan: Bring cheat sheet, rankings, and potential picks to the draft.  
+[ASSISTANT_SAID] Prioritizing players on the cheat sheet involves considering a mix of factors for each position:  
+[ASSISTANT_CREATED] For Quarterbacks (QBs): Past performance, team changes, strength of schedule, rushing ability.  
+[ASSISTANT_CREATED] For Running Backs (RBs): Workload, efficiency, team's rushing philosophy, injury history.  
+[ASSISTANT_CREATED] For Wide Receivers (WRs): Target share, yardage and touchdowns, quarterback play, team's passing philosophy.  
+[ASSISTANT_CREATED] For Tight Ends (TEs): Target share, quarterback play, red-zone usage, blocking ability.  
+[ASSISTANT_CREATED] For Kickers (Ks): Team's scoring offense, field goal accuracy, extra point attempts, strength of schedule.  
+[ASSISTANT_CREATED

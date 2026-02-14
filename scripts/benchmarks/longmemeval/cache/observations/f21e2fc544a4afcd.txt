@@ -1,0 +1,35 @@
+**Observation Log:**
+
+- [FACT] The user recently changed their name.
+- [FACT] The user is updating their address with the US Postal Service (USPS).
+- [FACT] The user has already updated their name with the Social Security Administration (SSA).
+- [FACT] The user received their new Social Security card on February 22nd.
+- [FACT] The user received a letter from the court stating that their application had been approved on January 15th, pending the hearing on January 25th.
+- [CHANGE] The user is focusing on updating their address with the USPS.
+- [TEMPORAL] The user received their new Social Security card on February 22nd.
+- [TEMPORAL] The user received a court approval letter on January 15th.
+- [TEMPORAL] The court hearing was on January 25th.
+- [ASSISTANT_SAID] The assistant congratulated the user on taking the step to update their official documents.
+- [ASSISTANT_SAID] The assistant provided a step-by-step guide to update the address with the USPS, including:
+  - Update name with the SSA.
+  - Gather required documents: valid government-issued ID, proof of residency, and new Social Security card.
+  - Complete Form PS 3575.
+  - Submit the form either in person or online.
+- [ASSISTANT_SAID] The assistant suggested notifying other government agencies and financial institutions about the address change.
+- [ASSISTANT_SAID] The assistant provided the USPS customer service number: 1-800-275-8777.
+- [ASSISTANT_SAID] The assistant detailed the online process for submitting Form PS 3575, including:
+  - Gathering required documents and information.
+  - Visiting the USPS website.
+  - Clicking on "Change of Address."
+  - Filling out the online form.
+  - Uploading supporting documents.
+  - Reviewing and submitting the application.
+  - Receiving confirmation.
+- [ASSISTANT_SAID] The assistant explained the document upload process, including:
+  - Ensuring documents are digital and in the correct format (PDF, JPEG, PNG).
+  - File size limitations of 2MB.
+  - Steps to upload documents on the USPS website.
+- [ASSISTANT_SAID] The assistant provided tips for uploading documents, such as using a flatbed scanner or high-quality camera.
+- [ASSISTANT_SAID] The assistant clarified that the court approval letter is not necessarily required but can be uploaded as additional documentation.
+- [ASSISTANT_SAID] The assistant encouraged the user to upload the court approval letter for extra assurance.
+- [PREFERENCE] The user prefers to provide additional documentation to ensure the USPS has all necessary information for processing their application.

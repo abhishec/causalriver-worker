@@ -1,0 +1,27 @@
+**Observation Log:**
+
+[FACT] The user is feeling overwhelmed with work projects and deadlines.  
+[FACT] The user is worried that their workload might trigger anxiety.  
+[FACT] The user had a major panic attack at work about 6 weeks ago.  
+[FACT] The user has 3 projects with deadlines in the next 2 weeks.  
+[FACT] The user has a report due in 5 days.  
+[FACT] Project 2 has a deadline in 10 days and is a high-priority project.  
+[FACT] Project 3 has a deadline in 2 weeks and is a medium-priority project.  
+[FACT] The user usually works from 9 am to 5 pm but is open to adjusting their schedule.  
+[CHANGE] The user is trying to prioritize their well-being more but is still figuring out what works best for them.  
+[PREFERENCE] The user is interested in self-care activities to manage anxiety.  
+[PREFERENCE] The user finds mindful breathing and short meditation sessions appealing.  
+[PREFERENCE] The user is interested in trying the progressive muscle relaxation technique.  
+[TEMPORAL] The session date is 2023/05/23 (Tue) 01:06.  
+[ASSISTANT_SAID] The assistant acknowledges the user's feelings and offers to help prioritize tasks and create a schedule.  
+[ASSISTANT_SAID] The assistant suggests breaking down projects into manageable tasks, prioritizing based on deadlines and importance, and creating a realistic schedule.  
+[ASSISTANT_SAID] The assistant asks for more details about the user's workload, available work hours, and self-care activities.  
+[ASSISTANT_SAID] The assistant recommends focusing on the report due in 5 days first and reassessing the priority of Projects 2 and 3 afterward.  
+[ASSISTANT_SAID] The assistant suggests starting the workday earlier, taking regular breaks, and allocating specific times for self-care activities.  
+[ASSISTANT_SAID] The assistant recommends using a task list or project management tool to break down projects into smaller tasks.  
+[ASSISTANT_SAID] The assistant emphasizes the importance of self-care and suggests reaching out to a support system.  
+[ASSISTANT_CREATED] The assistant creates a detailed schedule proposal for the user, outlining specific tasks and time allocations for the report and other projects.  
+[ASSISTANT_SAID] The assistant provides a list of self-care activities, including mindful breathing, short meditation, progressive muscle relaxation, walking breaks, journaling, stretching, listening to music, and gratitude practice.  
+[ASSISTANT_SAID] The assistant offers specific tips for getting started with progressive muscle relaxation, including finding a quiet space and choosing a comfortable position.  
+[ASSISTANT_SAID] The assistant suggests using guided meditation apps like Headspace or Calm for meditation sessions.  
+[ASSIST

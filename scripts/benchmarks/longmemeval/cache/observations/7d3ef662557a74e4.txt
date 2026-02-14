@@ -1,0 +1,36 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/24 (Wed) 11:32
+- [EVENT] User is planning a trip to Orlando.
+- [EVENT] User is considering visiting Universal's Islands of Adventure.
+- [PREFERENCE] User is excited about experiencing Hagrid's Magical Creatures Motorbike Adventure ride.
+- [ASSISTANT_SAID] Islands of Adventure is an amazing theme park.
+- [ASSISTANT_SAID] Hagrid's Magical Creatures Motorbike Adventure is a thrilling ride.
+- [ASSISTANT_SAID] Recommended hotels near Universal's Islands of Adventure include:
+  - Universal's Cabana Bay Beach Resort: retro-themed, within walking distance.
+  - Universal's Aventura Hotel: modern rooms, rooftop pool, 10-15 minute walk.
+  - Loews Portofino Bay Hotel: upscale, luxurious rooms, water taxi access.
+  - Hyatt Place Orlando/Universal: off-site, spacious rooms, outdoor pool.
+  - Rosen Shingle Creek Resort: luxurious, multiple pools, shuttle service.
+- [ASSISTANT_SAID] Suggested checking the Universal Orlando website for special packages and deals.
+- [PREFERENCE] User is looking for a budget-friendly hotel option.
+- [ASSISTANT_SAID] Approximate rates for Universal's Cabana Bay Beach Resort:
+  - Standard Room Rates:
+    - Value Season: around $120-$150 per night
+    - Regular Season: around $150-$200 per night
+    - Peak Season: around $200-$250 per night
+  - Family Suites:
+    - Value Season: around $180-$220 per night
+    - Regular Season: around $220-$280 per night
+    - Peak Season: around $280-$350 per night
+- [ASSISTANT_SAID] Recommended checking for discounts for Florida residents, students, or military members.
+- [ASSISTANT_SAID] Suggested staying during the off-season for lower prices.
+- [EVENT] User is planning to visit the Wizarding World of Harry Potter during their trip.
+- [ASSISTANT_SAID] Suggested getting to Islands of Adventure early to beat the crowds.
+- [ASSISTANT_SAID] Recommended using the Universal Orlando app for wait times and food orders.
+- [ASSISTANT_SAID] Suggested dressing in Hogwarts robes or Harry Potter-inspired outfits.
+- [ASSISTANT_SAID] Recommended riding Harry Potter and the Forbidden Journey first.
+- [ASSISTANT_SAID] Suggested using the Single Rider line for shorter wait times.
+- [ASSISTANT_SAID] Recommended trying Butterbeer and other wizarding treats.
+- [ASSISTANT_SAID] Suggested taking breaks to recharge during the visit.
+- [ASSISTANT_SAID] Recommended considering a Park-to-Park ticket for access to both Hogsmeade and Di

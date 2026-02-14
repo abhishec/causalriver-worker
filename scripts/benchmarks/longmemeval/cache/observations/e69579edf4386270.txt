@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/11/09 (Thu) 16:04
+- [EVENT] User is thinking of hosting a backyard BBQ soon and needs help with planning.
+- [PREFERENCE] User is looking for ideas for sides and desserts that go well with grilled meats.
+- [ASSISTANT_SAID] Suggested side dishes include coleslaw, baked beans, grilled veggies, potato salad, corn on the cob, garlic bread, and mac and cheese.
+- [ASSISTANT_SAID] Suggested desserts include watermelon, fresh fruit salad, brownies or cookies, grilled pineapple, banana pudding, s'mores, and ice cream sandwiches.
+- [EVENT] User is thinking of trying out some new BBQ sauce recipes for the party.
+- [ASSISTANT_SAID] Provided tips for making BBQ sauce from scratch, including basic ingredients like tomato base, sweetener, acid, spices, and flavor enhancers.
+- [ASSISTANT_SAID] Shared a classic BBQ sauce recipe with specific ingredients and instructions.
+- [RELATIONSHIP] User mentioned trying a new BBQ sauce recipe at their cousin's housewarming party a few weeks back, which was a huge hit.
+- [EVENT] User tried making BBQ ribs at home last week and thinks they need to work on their grilling technique to get them more tender.
+- [ASSISTANT_SAID] Provided recommendations for dry rubs and marinades for BBQ ribs, including classic BBQ rub, spicy rub, herby rub, classic BBQ marinade, citrus-herb marinade, and Asian-inspired marinade.
+- [ASSISTANT_SAID] Offered grilling tips for achieving tender BBQ ribs, including low and slow cooking, using indirect heat, adding wood chips for smoke, resting the ribs, and avoiding overcooking.
+- [PREFERENCE] User is thinking of trying out a dry rub recipe with a smoky flavor profile for their next BBQ ribs attempt.
+- [ASSISTANT_SAID] Recommended wood chips and chunks that would pair well with a smoky dry rub, including hickory, oak, and mesquite.
+- [EVENT] User is considering investing in a smoker for their birthday next month and has been watching YouTube tutorials on setting up a smoker.
+- [ASSISTANT_SAID] Provided factors to consider when choosing a smoker, including type, size, features, and brand recommendations like Weber, Kamado Joe, and Green Mountain Grills.
+- [PREFERENCE] User is thinking of trying out a different type of wood for their next BBQ attempt, looking for something more unique.
+- [ASSISTANT_SAID] Suggested lesser-known wood types for BBQ, starting with pecan wood, which adds a mild, sweet, nutty flavor that pairs well with poultry, pork, and beef.

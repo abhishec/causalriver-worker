@@ -1,0 +1,25 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/01/15 (Sun) 17:25
+- [FACT] The user works near a bunch of office buildings in the downtown area.
+- [EVENT] The user recently bought gifts for coworkers for an office Secret Santa exchange.
+- [PREFERENCE] The user enjoys finding good lunch spots and is looking for recommendations.
+- [PREFERENCE] The user is interested in gifts that add personality to their coworkers' workspaces.
+- [RELATIONSHIP] The user has coworkers for whom they bought gifts.
+- [ASSISTANT_SAID] The assistant suggested asking coworkers for lunch spot recommendations.
+- [ASSISTANT_SAID] The assistant recommended checking online review sites like Yelp, Google Maps, or TripAdvisor for lunch spots.
+- [ASSISTANT_SAID] The assistant suggested looking at food delivery apps like Grubhub, Uber Eats, or DoorDash for lunch options.
+- [ASSISTANT_SAID] The assistant mentioned that funny mugs and desk toys are popular gifts for coworkers.
+- [ASSISTANT_SAID] The assistant provided general suggestions for types of restaurants often found in downtown areas, including sandwich shops, food trucks, Italian or Asian restaurants, and cafes.
+- [ASSISTANT_SAID] The assistant suggested searching online for "best lunch spots in [user's city] downtown area" for tailored recommendations.
+- [PREFERENCE] The user hopes their coworkers will like the gifts they selected.
+- [ASSISTANT_SAID] The assistant provided tips for getting coffee or lunch discounts, including checking websites and social media for promotions, looking for loyalty apps, and asking coworkers for tips.
+- [ASSISTANT_SAID] The assistant suggested checking online deal platforms like Groupon or LivingSocial for food and coffee deals.
+- [ASSISTANT_SAID] The assistant mentioned taking advantage of happy hour deals at restaurants.
+- [ASSISTANT_SAID] The assistant provided tips for getting discounts or cashback on gift purchases, including using cashback credit cards, rewards apps, and discount gift cards.
+- [ASSISTANT_SAID] The assistant suggested checking for coupons and promo codes on websites like RetailMeNot or Coupons.com.
+- [ASSISTANT_SAID] The assistant recommended looking for local cooking schools or cooking studios for cooking class experiences.
+- [ASSISTANT_SAID] The assistant mentioned online cooking classes available on websites like Masterclass, Cookpad, or Udemy.
+- [ASSISTANT_SAID] The assistant provided a list of websites offering cooking classes, including Cookly, Goldbelly, Cozymeal, Masterclass, and Udemy.
+- [PREFERENCE] The user is considering getting a cookbook, kitchen gadget, or cooking class experience as a gift for a friend who loves to cook.
+- [RELATIONSHIP] The user has a mom who

@@ -1,0 +1,14 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/23 (Tue) 12:51  
+[FACT] User has been using basil and mint in their cooking lately.  
+[FACT] User has harvested some cherry tomatoes from their garden.  
+[PREFERENCE] User is looking for new recipe ideas that use fresh basil and mint.  
+[ASSISTANT] Suggested recipes using basil: Caprese Salad, Thai Basil Chicken, Pesto Pasta, Basil and Lemon Spaghetti, Indian-Style Basil Chutney.  
+[ASSISTANT] Suggested recipes using mint: Mint Chutney, Minty Fresh Salad, Mint Julep, Grilled Lamb with Mint Sauce, Minty Yogurt Sauce.  
+[ASSISTANT] Suggested recipes that combine basil and mint: Herby Lemonade, Middle Eastern-Style Salad, Basil and Mint Chimichurri, Thai-Style Basil and Mint Stir-Fry, Basil and Mint Infused Water.  
+[PREFERENCE] User is interested in companion plants for cherry tomatoes.  
+[ASSISTANT] Suggested companion plants for cherry tomatoes: Basil, Marigold, Borage, Chives, Oregano, Parsley, Carrots, Radish, Dill, Comfrey.  
+[ASSISTANT] Listed plants to avoid near tomatoes: Fennel, Kohlrabi, Potatoes, Rue.  
+[PREFERENCE] User has tried using neem oil to get rid of aphids on their pepper plants.  
+[ASSISTANT] Suggested alternative methods for controlling aphids: Insecticidal soap, Horticultural oil, introducing predatory insects (ladybugs, lacewings, parasitic wasps), using physical barriers (fine-mesh screens, row covers), cultural controls (removing weeds, improving air circulation, careful watering), and organic pesticides (pyrethrin).

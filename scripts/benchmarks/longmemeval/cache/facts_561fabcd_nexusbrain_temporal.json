@@ -1,0 +1,60 @@
+{
+  "answer_sharegpt_hChsWOp_97": [
+    {
+      "fact": "User prefers names that are not references to other games.",
+      "type": "preference",
+      "entities": [
+        "names",
+        "other games"
+      ]
+    },
+    {
+      "fact": "User likes the name 'Contaminated Colossus'.",
+      "type": "preference",
+      "entities": [
+        "Contaminated Colossus"
+      ]
+    },
+    {
+      "fact": "User thinks 'Fissionator' is a really cool name.",
+      "type": "opinion",
+      "entities": [
+        "Fissionator"
+      ]
+    },
+    {
+      "fact": "User suggests that the Fissionator could have a clunky, mechanical-looking design.",
+      "type": "opinion",
+      "entities": [
+        "Fissionator",
+        "design"
+      ]
+    },
+    {
+      "fact": "User proposes that the Fissionator's death causes a radioactive burst that turns zombies into radioactive ones.",
+      "type": "opinion",
+      "entities": [
+        "Fissionator",
+        "zombies",
+        "radioactive burst"
+      ]
+    },
+    {
+      "fact": "User suggests that the Fissionator's area-of-effect attack should cause damage over time.",
+      "type": "opinion",
+      "entities": [
+        "Fissionator",
+        "area-of-effect attack"
+      ]
+    },
+    {
+      "fact": "User believes the vision distortion caused by the Fissionator should serve as a warning to players.",
+      "type": "opinion",
+      "entities": [
+        "Fissionator",
+        "vision distortion",
+        "players"
+      ]
+    }
+  ]
+}

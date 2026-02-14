@@ -1,0 +1,35 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/23 (Tue) 15:42
+- [USER] User is interested in the cuisine of Heilongjiang and its differences from other provinces in China.
+- [ASSISTANT_SAID] The cuisine of Heilongjiang is unique due to its harsh, cold climate and availability of agricultural and dairy products.
+- [ASSISTANT_SAID] Heavy use of dairy products, particularly milk and cheese, is a notable characteristic of Heilongjiang cuisine.
+- [ASSISTANT_SAID] Heilongjiang cuisine focuses on meat dishes, especially pork and lamb, due to long winters.
+- [ASSISTANT_SAID] Wild ingredients, such as wild mushrooms, berries, and game meats like venison and rabbit, are commonly used in Heilongjiang dishes.
+- [ASSISTANT_SAID] Northern-style dumplings in Heilongjiang are made with thicker dough and heartier fillings compared to southern-style dumplings.
+- [ASSISTANT_SAID] Pickling and fermentation are common methods of preserving food in Heilongjiang due to the difficulty of growing fresh vegetables in winter.
+- [USER] User asked for must-try dishes if visiting Heilongjiang.
+- [ASSISTANT_SAID] Recommended must-try dishes include:
+  1. Black Dragon Over Snowy Mountains
+  2. Guo Bao Rou (twice-cooked pork)
+  3. Li Hongzhang Hotchpotch
+  4. Harbin-style sausage
+  5. Bing Fen (dessert)
+  6. Northeast China-style dumplings
+  7. Milk tea
+- [USER] User requested recommendations for places to try these dishes in Heilongjiang.
+- [ASSISTANT_SAID] Recommended places to try dishes include:
+  1. Dong Fang Jiaozi Wang for Black Dragon Over Snowy Mountains
+  2. Wang Bao He Restaurant for Guo Bao Rou
+  3. Hongbo Hot Pot for Li Hongzhang Hotchpotch
+  4. Yutongshan Sausage for Harbin-style sausage
+  5. HuaShan Market for Bing Fen
+  6. Xiangyang Dumpling House and Xibei Youmian Restaurant for Northeast China-style dumplings
+  7. Old Chang Chun Tea House for milk tea
+- [USER] User expressed excitement about trying the dishes and asked about popular activities or attractions in Heilongjiang.
+- [ASSISTANT_SAID] Popular activities and attractions in Heilongjiang include:
+  1. Harbin Ice and Snow Festival
+  2. Jingpo Lake
+  3. Wudalianchi
+  4. The Great Wall of China (Shanhaiguan Pass)
+  5. Zhalong National Nature Reserve

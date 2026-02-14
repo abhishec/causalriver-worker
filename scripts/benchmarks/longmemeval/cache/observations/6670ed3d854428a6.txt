@@ -1,0 +1,19 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/30 (Tue) 07:29  
+[USER] User asked how to perform a Procrustes analysis in R, requesting detailed syntax explanation and code for visualization.  
+[ASSISTANT_SAID] Procrustes analysis is a statistical method used to compare two sets of data that have different scales or orientations.  
+[ASSISTANT_SAID] The `vegan` package in R provides a function called `procrustes()` to perform Procrustes analysis.  
+[ASSISTANT_SAID] Step 1: Load the required packages: `library(vegan)` and `library(ggplot2)`.  
+[ASSISTANT_SAID] Step 2: Prepare the data with two datasets, `X` and `Y`, each containing `n` observations and `m` variables, organized as `n x m` matrices.  
+[ASSISTANT_SAID] Set seed for reproducibility with `set.seed(123)`.  
+[ASSISTANT_SAID] Number of observations (`n`) is set to 20 and number of variables (`m`) is set to 5.  
+[ASSISTANT_SAID] `X` is generated as a matrix of random normal values with `matrix(rnorm(n * m), nrow = n, ncol = m)`.  
+[ASSISTANT_SAID] `Y` is generated similarly as `matrix(rnorm(n * m), nrow = n, ncol = m)`.  
+[ASSISTANT_SAID] Step 3: Perform the Procrustes analysis using `fit <- procrustes(X, Y)`.  
+[ASSISTANT_SAID] The `procrustes()` function returns a list containing components: `X`, `Y`, `rotation`, `scale`, `translation`, and `criterion`.  
+[ASSISTANT_SAID] Step 4: Visualize the results using a scatter plot of the aligned datasets.  
+[ASSISTANT_SAID] Combine `X` and `Y` into a single data frame with `df <- data.frame(cbind(X, Y))`.  
+[ASSISTANT_SAID] The column names of the data frame are set with `names(df) <- c(paste0("X", 1:m), paste0("Y", 1:m))`.  
+[ASSISTANT_SAID] Reshape the data frame with `df <- gather(df, key = "Variable", value = "Value", -c(1:n))`.  
+[ASSISTANT_SAID] Create a scatter plot using `ggplot(df, aes(x = Value, y = Variable, color = as.factor(variable))) + geom_point(size = 2) + facet_wrap(~ Variable, scales = "free_y") +

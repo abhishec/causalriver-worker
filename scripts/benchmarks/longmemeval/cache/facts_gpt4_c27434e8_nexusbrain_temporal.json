@@ -1,0 +1,114 @@
+{
+  "answer_d8e33f5c_1": [
+    {
+      "fact": "User is working on a model of a 1980s-era Ferrari 288 GTO.",
+      "type": "event",
+      "entities": [
+        "Ferrari 288 GTO",
+        "1980s"
+      ]
+    },
+    {
+      "fact": "User started the model project about three weeks ago on a Sunday afternoon.",
+      "type": "event",
+      "entities": [
+        "three weeks ago",
+        "Sunday afternoon"
+      ]
+    },
+    {
+      "fact": "User is looking for tips on achieving a more realistic paint finish.",
+      "type": "preference",
+      "entities": [
+        "realistic paint finish"
+      ]
+    },
+    {
+      "fact": "User recently got a new airbrush compressor.",
+      "type": "personal",
+      "entities": [
+        "airbrush compressor"
+      ]
+    },
+    {
+      "fact": "User is excited to try out the new airbrush compressor on the project.",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User has been reading up on YouTube tutorials and forums on weathering and aging effects.",
+      "type": "event",
+      "entities": [
+        "YouTube tutorials",
+        "forums",
+        "weathering",
+        "aging effects"
+      ]
+    },
+    {
+      "fact": "User believes that weathering and aging effects will make a difference in the model.",
+      "type": "opinion",
+      "entities": [
+        "weathering",
+        "aging effects"
+      ]
+    }
+  ],
+  "answer_d8e33f5c_2": [
+    {
+      "fact": "User is looking for tips on weathering and aging effects for model builds.",
+      "type": "preference",
+      "entities": [
+        "weathering",
+        "aging effects",
+        "model builds"
+      ]
+    },
+    {
+      "fact": "User is currently working on a Ferrari 288 GTO model.",
+      "type": "personal",
+      "entities": [
+        "Ferrari 288 GTO"
+      ]
+    },
+    {
+      "fact": "User is also building a 1/48 scale Japanese Zero fighter plane.",
+      "type": "personal",
+      "entities": [
+        "1/48 scale Japanese Zero fighter plane"
+      ]
+    },
+    {
+      "fact": "User started building the Japanese Zero fighter plane about a month ago.",
+      "type": "event",
+      "entities": [
+        "Japanese Zero fighter plane",
+        "one month ago"
+      ]
+    },
+    {
+      "fact": "User has heard great things about Mig Jimenez's work.",
+      "type": "opinion",
+      "entities": [
+        "Mig Jimenez"
+      ]
+    },
+    {
+      "fact": "User recently got a new airbrush compressor and some acrylic paints.",
+      "type": "personal",
+      "entities": [
+        "airbrush compressor",
+        "acrylic paints"
+      ]
+    },
+    {
+      "fact": "User is excited to try out the new airbrush compressor and acrylic paints on their models.",
+      "type": "opinion",
+      "entities": [
+        "airbrush compressor",
+        "acrylic paints",
+        "models"
+      ]
+    }
+  ]
+}

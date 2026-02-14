@@ -1,0 +1,92 @@
+{
+  "answer_87e3a1cb_2": [
+    {
+      "fact": "User's sister loves relaxing and pampering herself",
+      "type": "preference",
+      "entities": [
+        "sister",
+        "relaxing",
+        "pampering"
+      ]
+    },
+    {
+      "fact": "User is considering a spa day for their sister's birthday gift",
+      "type": "event",
+      "entities": [
+        "sister's birthday",
+        "spa day"
+      ]
+    },
+    {
+      "fact": "User previously gave their sister a $100 gift card to her favorite spa",
+      "type": "relationship",
+      "entities": [
+        "sister",
+        "gift card",
+        "favorite spa"
+      ]
+    },
+    {
+      "fact": "User is looking for spa packages around $100",
+      "type": "preference",
+      "entities": [
+        "spa packages",
+        "$100"
+      ]
+    },
+    {
+      "fact": "User is thinking of getting a small gift to complement the spa day",
+      "type": "preference",
+      "entities": [
+        "small gift",
+        "spa day"
+      ]
+    },
+    {
+      "fact": "User is considering a budget of $20-$50 for the small gift",
+      "type": "preference",
+      "entities": [
+        "$20-$50"
+      ]
+    }
+  ],
+  "answer_87e3a1cb_1": [
+    {
+      "fact": "User is planning a gift for their niece's birthday.",
+      "type": "event",
+      "entities": [
+        "niece's birthday"
+      ]
+    },
+    {
+      "fact": "User has a budget of $200 for the gift.",
+      "type": "preference",
+      "entities": [
+        "$200"
+      ]
+    },
+    {
+      "fact": "User recently bought a silver necklace with a small pendant from Tiffany's for their sister.",
+      "type": "relationship",
+      "entities": [
+        "sister",
+        "silver necklace",
+        "Tiffany's"
+      ]
+    },
+    {
+      "fact": "User likes the idea of personalized jewelry as a gift.",
+      "type": "preference",
+      "entities": [
+        "personalized jewelry"
+      ]
+    },
+    {
+      "fact": "User is interested in fun experience gifts.",
+      "type": "preference",
+      "entities": [
+        "experience gifts"
+      ]
+    }
+  ]
+}

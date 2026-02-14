@@ -1,0 +1,28 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/24 (Wed) 06:00
+- [FACT] User is having issues with their phone's battery life.
+- [FACT] User's phone is a Samsung Galaxy S21.
+- [EVENT] User has been using a portable power bank from Anker since March 10th.
+- [FACT] The portable power bank cost around $40.
+- [CHANGE] User has noticed a decrease in battery life by around 20% since a software update about a month ago.
+- [TEMPORAL] User is getting around 4-5 hours of moderate use from their phone's battery.
+- [FACT] User has not noticed any slow performance or unexpected shutdowns on their phone.
+- [FACT] User's phone gets warm when using resource-intensive apps or charging.
+- [ASSISTANT_SAID] The assistant offered to help troubleshoot the battery life issue.
+- [ASSISTANT_SAID] Suggested checking for software update bugs and installing any new updates.
+- [ASSISTANT_SAID] Recommended checking background app refresh settings and restricting it for certain apps.
+- [ASSISTANT_SAID] Advised reviewing the update's changelog for new features that might be causing battery drain.
+- [ASSISTANT_SAID] Suggested calibrating the battery by draining it to 0% and charging it to 100%.
+- [ASSISTANT_SAID] Mentioned the possibility of hardware issues and suggested visiting an authorized service center if necessary.
+- [ASSISTANT_SAID] Recommended checking Adaptive Battery Management settings and disabling it if necessary.
+- [ASSISTANT_SAID] Suggested disabling power-hungry features like Always-On Display and Edge Lighting.
+- [ASSISTANT_SAID] Advised switching to 4G or LTE if in a 5G area to see if it improves battery life.
+- [ASSISTANT_SAID] Suggested trying a slower charging method if the phone gets warm while charging.
+- [ASSISTANT_SAID] Recommended using Samsung's built-in diagnostic tool to run a battery diagnosis test.
+- [ASSISTANT_SAID] Provided tips for optimizing battery life, such as reducing screen brightness and using Power saving mode.
+- [EVENT] User is considering getting a new phone wallet case due to wear and tear on the current one.
+- [ASSISTANT_SAID] Provided recommendations for good phone case brands, including OtterBox, LifeProof, UAG, Case-Mate, Speck, Incipio, AmazonBasics, Spigen, and Pela.
+- [ASSISTANT_SAID] Suggested considering protection level, style, functionality, material, and brand reputation when choosing a phone case.
+- [EVENT] User is eyeing options on Zagg's website for a new phone case.
+- [ASSISTANT_S

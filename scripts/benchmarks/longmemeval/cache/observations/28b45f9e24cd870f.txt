@@ -1,0 +1,23 @@
+**Observation Log:**
+
+- [FACT] The user is preparing for a university exam.
+- [FACT] The user is studying aircraft stability concepts.
+- [TEMPORAL] The session date is 2023/03/26 (Sun) at 22:20.
+- [EVENT] The user is providing slide-by-slide content for tutoring.
+- [FACT] The syllabus for the upcoming test includes lectures 10-15.
+- [ASSISTANT_SAID] The assistant will teach Longitudinal and Lateral-Directional Stability in aircraft.
+- [ASSISTANT_SAID] The assistant will explain concepts slide by slide and encourage questions.
+- [ASSISTANT_SAID] The first slide discusses Longitudinal Static Stability and the eigenvalues of the short period dynamics given by the equation: $$\lambda^2-M\_q \lambda-M\_\alpha=0$$.
+- [ASSISTANT_SAID] The horizontal tail stabilizes $M\_q$ and $M\_\alpha$, but the wing does not necessarily stabilize $M\_\alpha$.
+- [ASSISTANT_SAID] The assistant will cover static stability, static margin, stick-free and stick-fixed static stability.
+- [ASSISTANT_SAID] An aircraft is stable if it rejects a disturbance and returns to intended equilibrium.
+- [ASSISTANT_SAID] The assistant uses an analogy of a ball on a curved surface to explain stability.
+- [ASSISTANT_SAID] A system is statically stable if, upon a disturbance $\Delta x$, the force $F$ produced by the system is such that $F \cdot \Delta x<0$.
+- [ASSISTANT_SAID] The assistant provides an example of a spring-mass system to illustrate static stability.
+- [ASSISTANT_SAID] The assistant explains that static stability is not a sufficient condition for overall stability.
+- [ASSISTANT_SAID] The assistant states that static stability is determined only by the stiffness of the system.
+- [ASSISTANT_SAID] The assistant outlines the framework for longitudinal static stability by setting lateral-directional variables to zero and assuming small $\alpha$.
+- [ASSISTANT_SAID] The assistant discusses how to determine the trim angle of attack ($\alpha^0$) for a single wing by setting the pitching moment ($M^0$) to zero.
+- [ASSISTANT_SAID] The trimmed value of lift is related to the distance ($x\_{AC}$) between the wing's aerodynamic center and the aircraft's center of gravity.
+- [ASSISTANT_SAID] The assistant explains the condition for static stability of a wing, which requires the wing to be behind the CG.
+- [ASSISTANT_SAID] The assistant mentions two solutions for achieving static stability: using a flap with active control or incorporating

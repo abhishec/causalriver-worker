@@ -1,0 +1,12 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/01 (Mon) 01:59  
+[EVENT] The user attended a 2-day workshop on machine learning on the 17th and 18th of April.  
+[FACT] The workshop covered topics including supervised learning and deep learning.  
+[PREFERENCE] The user is unclear about when to use standardization versus normalization in machine learning.  
+[ASSISTANT] The assistant explained the difference between standardization and normalization, including their purposes, methods, and when to use each.  
+[ASSISTANT] The assistant provided an example of when to use standardization over normalization in a regression problem involving house prices.  
+[ASSISTANT] The assistant explained why standardization is more suitable for regression problems than normalization.  
+[ASSISTANT] The assistant explained why normalization is more suitable for classification problems than standardization.  
+[PREFERENCE] The user is still unclear about the differences between standardization and normalization.  
+[ASSISTANT] The assistant provided detailed reasons for why normalization is more suitable for classification problems than standardization.

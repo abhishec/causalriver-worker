@@ -1,0 +1,16 @@
+**Observation Log:**
+
+- [FACT] User is moving to Melbourne for a Master's program in International Relations at the University of Melbourne.
+- [EVENT] User got accepted into the Master's program a few months ago.
+- [ASSISTANT_SAID] Assistant congratulated the user on their acceptance to the University of Melbourne and offered to help create a checklist for pre-departure preparations.
+- [ASSISTANT_CREATED] Assistant provided a detailed checklist for pre-departure preparations, including categories such as Application and Admissions, Travel Arrangements, Finances and Funding, Logistics and Paperwork, Health and Wellness, Academic Preparations, Personal Preparations, and Miscellaneous.
+- [CHANGE] User confirmed they have already confirmed their enrollment and applied for a student visa, allowing them to cross those items off the checklist.
+- [ASSISTANT_SAID] Assistant provided a step-by-step guide on how to open an Australian bank account, including reasons for needing an account, choosing a bank, gathering required documents, and tips for the application process.
+- [ASSISTANT_SAID] Assistant listed popular banks for international students in Australia: Commonwealth Bank (CommBank), National Australia Bank (NAB), Westpac, ANZ Bank, and HSBC Australia.
+- [ASSISTANT_SAID] Assistant advised that a letter from the university or accommodation provider can be used as proof of address for opening a bank account.
+- [ASSISTANT_SAID] Assistant mentioned that some banks allow international students to open an account before arriving in Australia, while others may require in-person verification.
+- [ASSISTANT_SAID] Assistant suggested contacting the bank's customer support for assistance with the online application system and to clarify policies regarding account opening before arrival.
+- [ASSISTANT_SAID] Assistant provided additional tips for opening a bank account, including being prepared to provide extra documentation and checking for online banking and mobile app availability.
+- [CHANGE] User expressed ongoing trouble with the bank's online application system and uncertainty about whether to wait until arriving in Melbourne to open an account.
+- [ASSISTANT_SAID] Assistant offered general information about banking in Australia, including differences between banks and potential fees.
+- [ASSISTANT_SAID] Assistant noted that fees for accounts, transactions, and services vary between banks, with some offering fee-free accounts for students.

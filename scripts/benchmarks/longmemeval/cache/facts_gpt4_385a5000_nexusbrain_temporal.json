@@ -1,0 +1,121 @@
+{
+  "answer_7a4a93f1_2": [
+    {
+      "fact": "User is planning to plant seedlings in their backyard soon.",
+      "type": "event",
+      "entities": [
+        "seedlings",
+        "backyard"
+      ]
+    },
+    {
+      "fact": "User started marigold seeds on March 3rd.",
+      "type": "event",
+      "entities": [
+        "marigold seeds",
+        "March 3rd"
+      ]
+    },
+    {
+      "fact": "User's marigold seeds are already germinating.",
+      "type": "event",
+      "entities": [
+        "marigold seeds"
+      ]
+    },
+    {
+      "fact": "User is thinking of transplanting their seedlings into larger pots soon.",
+      "type": "event",
+      "entities": [
+        "seedlings",
+        "larger pots"
+      ]
+    },
+    {
+      "fact": "User is excited to see their marigolds grow.",
+      "type": "opinion",
+      "entities": [
+        "marigolds"
+      ]
+    }
+  ],
+  "answer_7a4a93f1_1": [
+    {
+      "fact": "User is planning to plant out seedlings soon.",
+      "type": "event",
+      "entities": []
+    },
+    {
+      "fact": "User has been starting seeds indoors under grow lights since February 20th.",
+      "type": "event",
+      "entities": [
+        "February 20th"
+      ]
+    },
+    {
+      "fact": "User is growing tomatoes, peppers, and cucumbers.",
+      "type": "event",
+      "entities": [
+        "tomatoes",
+        "peppers",
+        "cucumbers"
+      ]
+    },
+    {
+      "fact": "User's seedlings are about 2-3 inches tall.",
+      "type": "event",
+      "entities": []
+    },
+    {
+      "fact": "User lives in the 23456 zip code.",
+      "type": "personal",
+      "entities": [
+        "23456"
+      ]
+    },
+    {
+      "fact": "User has been fertilizing seedlings with a balanced fertilizer.",
+      "type": "event",
+      "entities": [
+        "balanced fertilizer"
+      ]
+    },
+    {
+      "fact": "User is ensuring the soil is moist but not soggy.",
+      "type": "event",
+      "entities": []
+    },
+    {
+      "fact": "User has been preparing a raised bed in their backyard.",
+      "type": "event",
+      "entities": [
+        "raised bed",
+        "backyard"
+      ]
+    },
+    {
+      "fact": "User added a 2-inch layer of compost to the raised bed.",
+      "type": "event",
+      "entities": [
+        "2-inch layer",
+        "compost"
+      ]
+    },
+    {
+      "fact": "User is concerned about whether it's too early to plant out tomatoes, peppers, and cucumbers.",
+      "type": "opinion",
+      "entities": [
+        "tomatoes",
+        "peppers",
+        "cucumbers"
+      ]
+    },
+    {
+      "fact": "User hopes that the compost will help warm up the soil.",
+      "type": "opinion",
+      "entities": [
+        "compost"
+      ]
+    }
+  ]
+}

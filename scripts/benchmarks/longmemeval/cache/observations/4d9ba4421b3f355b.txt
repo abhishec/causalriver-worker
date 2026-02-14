@@ -1,0 +1,32 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/27 (Sat) 07:47
+- [USER] User is interested in Rouen's local cuisine and its evolution over time.
+- [ASSISTANT_SAID] Rouen's cuisine has evolved due to its position as a port on the Seine river, incorporating various culinary traditions.
+- [ASSISTANT_SAID] During the medieval period, Rouen was known for roast meats like beef and lamb, continuing into modern dishes like gigot d'agneau and boudin blanc.
+- [ASSISTANT_SAID] In the 18th and 19th centuries, Rouen became a center for dairy, popularizing cheeses like Neufchâtel and Livarot, and developing a pastry culture with desserts like tarte Tatin, macarons, and mille-feuilles.
+- [ASSISTANT_SAID] Mid-20th century saw influences from North African and Middle Eastern immigrants, blending traditional French cuisine with international flavors.
+- [ASSISTANT_SAID] Overall, Rouen's cuisine is a mix of local traditions, international influences, and changing tastes.
+- [USER] User finds the information about Rouen's cuisine interesting.
+- [USER] User asks for must-try dishes in Rouen.
+- [ASSISTANT_SAID] Must-try dishes in Rouen include:
+  1. Canard à la Rouennaise
+  2. Tarte Tatin
+  3. Marmite Dieppoise
+  4. Boudin blanc
+  5. Tripes à la mode de Rouen
+- [USER] User expresses excitement about trying Canard à la Rouennaise.
+- [USER] User asks for recommendations on where to find the best version of Canard à la Rouennaise.
+- [ASSISTANT_SAID] Recommended restaurants for Canard à la Rouennaise:
+  1. La Couronne (historic restaurant claiming to have invented the dish)
+  2. Gill (known for an innovative take with tangerine juice)
+  3. Les Archives
+  4. Le P'tit Zinc
+  5. Les Maraîchers
+- [ASSISTANT_SAID] User should call ahead to reserve a table for Canard à la Rouennaise.
+- [USER] User plans to try Canard à la Rouennaise at La Couronne.
+- [USER] User asks for dessert place recommendations in Rouen.
+- [ASSISTANT_SAID] Recommended dessert places in Rouen:
+  1. Pâtisserie-chocolaterie Guillaume Daix (known for macarons)
+  2. Pâtisserie Bécam (famous for tarte Tatin)
+  3. Au Fou Normand (creperie for galette

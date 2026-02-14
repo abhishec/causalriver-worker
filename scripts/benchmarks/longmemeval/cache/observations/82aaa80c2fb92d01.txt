@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[FACT] User is planning to host a dinner party.
+
+[PREFERENCE] User is interested in Korean-style desserts and flavors, particularly sesame seeds and honey.
+
+[EVENT] User made Korean-style desserts for the third course of their dinner party last week, and it was a huge hit.
+
+[EVENT] User is thinking of hosting another dinner party soon.
+
+[PREFERENCE] User is considering a Korean-inspired menu for the upcoming dinner party.
+
+[ASSISTANT_SAID] Assistant provided a list of traditional and modern Korean desserts, including Tteokbokki-inspired Rice Cakes with Sweet Red Bean Filling, Yakgwa, Patbingsu, Hotteok, and Sujeonggwa.
+
+[ASSISTANT_SAID] Assistant provided a recipe for Tteokbokki-inspired Rice Cakes with Sweet Red Bean Filling, including ingredients and instructions.
+
+[ASSISTANT_SAID] Assistant recommended main courses for the dinner party, including Bulgogi, Jeyuk bokkeum, and Doenjang jjigae.
+
+[ASSISTANT_SAID] Assistant recommended appetizers for the dinner party, including Kimchi, Pajeon, and Mandu.
+
+[ASSISTANT_SAID] Assistant suggested Korean-style cocktails, including Yuja-ginger spritzer, Ginger-makgeolli fizz, Cass beer, Omija tea cocktail, Sesame-ginger martini, and Korean mojito.
+
+[ASSISTANT_SAID] Assistant asked the user about the theme or occasion for the dinner party, the number of guests, and thoughts on table setting, decor, and music to create a cohesive atmosphere. 
+
+[TEMPORAL] Session date is 2022/06/11 (Sat) 02:07.

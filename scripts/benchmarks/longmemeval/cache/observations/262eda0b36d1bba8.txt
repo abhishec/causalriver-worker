@@ -1,0 +1,27 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/23 (Tue) 12:05
+- [PREFERENCE] User is looking for recommendations for indie games similar to Hyper Light Drifter.
+- [FACT] User completed Hyper Light Drifter in 5 hours.
+- [PREFERENCE] User loved Hyper Light Drifter's atmospheric soundtrack and beautiful visuals.
+- [ASSISTANT_SAID] Recommended games similar to Hyper Light Drifter:
+  1. **Ori and the Blind Forest** (4-6 hours): Beautifully designed platformer with a stunning soundtrack and gorgeous visuals.
+  2. **Gris** (4-6 hours): Mesmerizing platformer with a watercolor art style and impressive soundtrack.
+  3. **Inside** (3-5 hours): Puzzle-platformer with a haunting atmosphere and thought-provoking storyline.
+  4. **The Pathless** (5-8 hours): Open-world adventure with vibrant art style and enchanting soundtrack.
+  5. **Abzû** (2-4 hours): Underwater exploration game with stunning visuals and calming atmosphere.
+  6. **The Witness** (10-15 hours): Puzzle game with vibrant art style and engaging atmosphere.
+  7. **Contrast** (4-6 hours): Puzzle-platformer with film noir-inspired art style and beautiful soundtrack.
+  8. **The Gardens Between** (2-4 hours): Narrative-driven puzzle game with vibrant art style and stunning soundtrack.
+  9. **Rime** (4-6 hours): Puzzle-platformer with cel-shaded art style and haunting soundtrack.
+  10. **The First Tree** (2-4 hours): Narrative-driven exploration game with low-poly art style and haunting soundtrack.
+- [PREFERENCE] User is particularly interested in Ori and the Blind Forest and Gris.
+- [PREFERENCE] User loved Celeste and is looking for similar game recommendations.
+- [ASSISTANT_SAID] Recommended games similar to Celeste:
+  1. **Spelunky** (6-10 hours): Roguelike platformer with challenging gameplay and charming art style.
+  2. **Cuphead** (6-10 hours): Run-and-gun action game with challenging boss battles and hand-drawn animation.
+  3. **Downwell** (2-4 hours): Vertically scrolling shooter with challenging gameplay and unique art style.
+  4. **Hypercharge: Unboxed** (4-6 hours): Challenging platformer with a unique twist of playing as a toy.
+  5. **The End is Nigh** (4-6 hours): Challenging platformer with a unique art style and focus on exploration.
+  6. **Axiom Verge** (6-10 hours): Metroidvania game with challenging platforming and a rich storyline.
+  7. **Guacame

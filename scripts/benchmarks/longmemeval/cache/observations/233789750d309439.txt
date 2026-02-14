@@ -1,0 +1,20 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/29 (Mon) 16:34  
+[ASSISTANT_SAID] To create an AI-based toolset for content creation, resources needed include development resources, data and training resources, hardware resources, testing and quality assurance, marketing and sales, and customer support.  
+[ASSISTANT_SAID] Development resources require a team of developers with technical skills, including machine learning engineers, data scientists, and software developers.  
+[ASSISTANT_SAID] Data and training resources require a large dataset of content, which may include abstract shapes, alphabet characters, real-world objects, music, and other audio content.  
+[ASSISTANT_SAID] Hardware resources may include servers, GPUs, or other specialized hardware depending on the complexity of the AI system.  
+[ASSISTANT_SAID] Testing and quality assurance resources are needed to ensure the AI-based toolset meets quality standards and performs as expected.  
+[ASSISTANT_SAID] Marketing and sales resources are needed to reach and sell to target customers, including marketing materials.  
+[ASSISTANT_SAID] Customer support resources may be needed to provide assistance to users, which could include a support team or individual.  
+[USER] We will use as much open source AI components and models as possible to save on the development time and engineers.  
+[ASSISTANT_SAID] Using open source AI components can save time and resources compared to building everything from scratch.  
+[ASSISTANT_SAID] Resources needed when using open source AI components include development resources, data and training resources, hardware resources, testing and quality assurance, marketing and sales, and customer support.  
+[USER] There are ready-to-be-used text-to-video AI models that generate poor video in terms of realistically looking things, but they are absolutely brilliant when generating simple things like we need.  
+[ASSISTANT_SAID] Text-to-video AI models can be useful for generating simple video content such as abstract shapes and alphabet characters.  
+[ASSISTANT_SAID] Resources needed to use a text-to-video AI model include selecting an appropriate model, development resources, data and training resources, hardware resources, testing and quality assurance, marketing and sales, and customer support.  
+[USER] So, we will need one UI/UX designer, one mobile app developer, one AI engineer.  
+[ASSISTANT_SAID] To create a mobile app that integrates with an AI-based toolset, resources needed include a UI/UX designer, a mobile app developer, and an AI engineer.  
+[USER] UX/UI guy will cost us about $1K per month.  
+[ASSISTANT_SAID] The cost of hiring a UI/UX designer can vary based on experience, skills, and location, with factors including the designer's level of experience, project complexity

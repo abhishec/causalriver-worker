@@ -1,0 +1,60 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/30 (Tue) 19:48
+- [ASSISTANT_SAID] You can send server-side events to Google Analytics 4 (GA4) from WordPress using GA4's Measurement Protocol API.
+- [ASSISTANT_SAID] Step 1: Install and activate the WP_Http class if it's not already available on your site.
+- [ASSISTANT_SAID] Step 2: In your functions.php file or a custom plugin, create a function to send GA4 events using the Measurement Protocol API.
+- [ASSISTANT_SAID] Replace `YOUR_MEASUREMENT_ID` and `YOUR_API_SECRET` with your GA4 measurement ID and API secret respectively.
+- [ASSISTANT_CREATED] Provided PHP code to send GA4 events:
+```php
+function send_ga4_event($event_name, $event_params) {
+    $measurement_id = 'YOUR_MEASUREMENT_ID';
+    $api_secret = 'YOUR_API_SECRET';
+
+    // Prepare the event payload
+    $payload = [
+        'client_id' => uniqid('', true),
+        'events' => [
+            [
+                'name' => $event_name,
+                'params' => $event_params,
+            ],
+        ],
+    ];
+
+    // Send the event to GA4
+    $url = "https://www.google-analytics.com/mp/collect?measurement_id={$measurement_id}&api_secret={$api_secret}";
+    $args = [
+        'method' => 'POST',
+        'headers' => [
+            'Content-Type' => 'application/json; charset=utf-8',
+        ],
+        'body' => json_encode($payload),
+    ];
+
+    $http = new WP_Http();
+    $response = $http->request($url, $args);
+
+    // Check for errors
+    if (is_wp_error($response)) {
+        error_log('Error sending GA4 event: ' . $response->get_error_message());
+    }
+}
+```
+- [ASSISTANT_SAID] Step 3: Use the send_ga4_event function in your code to send server-side events.
+- [ASSISTANT_SAID] Example provided for sending a new post published event:
+```php
+function on_new_post_published($post_ID, $post) {
+    $event_name = 'new_post_published';
+    $event_params = [
+        'post_id' => $post_ID,
+        'post_title' => $post->post_title,
+    ];
+
+    send_ga4_event($event_name, $event_params);
+}
+
+add_action('publish_post', 'on_new_post_published', 10, 2);
+```
+- [ASSISTANT_SAID] This example sends a new_post_published event to GA4 with the post ID and title as parameters.
+- [ASSISTANT_S

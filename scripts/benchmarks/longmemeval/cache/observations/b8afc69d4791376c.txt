@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [FACT] User is looking to buy a new condo in downtown Chicago.
+- [PREFERENCE] User is interested in estimating how much they can afford based on their income.
+- [FACT] User's annual gross income is $85,000.
+- [FACT] User's credit score is around 750.
+- [FACT] User has saved up about 20% for a down payment.
+- [FACT] User does not have any high-interest debt, only a car loan and student loans.
+- [FACT] User's debts take up around 10% of their monthly income.
+- [ASSISTANT_SAID] Assistant offered to help estimate how much the user can afford to spend on a condo based on their income, credit score, down payment, debt-to-income ratio, and other expenses.
+- [ASSISTANT_SAID] Assistant provided rough estimates of condo prices in downtown Chicago: Studio: $200,000 - $400,000; 1-bedroom: $250,000 - $500,000; 2-bedroom: $350,000 - $700,000; 3-bedroom: $500,000 - $1,000,000.
+- [ASSISTANT_SAID] Assistant calculated the user's maximum mortgage payment would be approximately $370 to $550, depending on the mortgage amount and interest rate.
+- [ASSISTANT_SAID] Assistant estimated the user's maximum condo price would be around $250,000 to $280,000.
+- [ASSISTANT_SAID] Assistant suggested that a 1-bedroom condo in a newer building with modern amenities might cost around $250,000 to $300,000, and a 2-bedroom condo in an older building or one with fewer amenities might cost around $220,000 to $250,000.
+- [USER] User expressed interest in narrowing down options by neighborhood, specifically looking for areas with good public transportation and relatively low crime rates.
+- [ASSISTANT_SAID] Assistant provided a list of neighborhoods in downtown Chicago: The Loop, Streeterville, River North, West Loop, and South Loop, along with their characteristics and price ranges.
+- [ASSISTANT_SAID] Assistant detailed the price ranges for condos in each neighborhood, including specific price ranges for studios, 1-bedrooms, 2-bedrooms, and 3-bedrooms.
+- [USER] User expressed interest in the West Loop and South Loop neighborhoods.
+- [ASSISTANT_SAID] Assistant provided information about the types of condos available in the West Loop, including building age, amenities, average square footage, and price ranges.
+- [ASSISTANT_SAID] Assistant provided information about the types of condos available in the South Loop, including building age, amenities, average square footage, and price ranges.
+- [USER] User requested more information about school districts in the West Loop and South Loop, as they plan

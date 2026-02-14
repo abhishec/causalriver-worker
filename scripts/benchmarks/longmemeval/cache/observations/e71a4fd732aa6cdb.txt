@@ -1,0 +1,15 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/28 (Sun) 22:34
+- [EVENT] User decided to wait 10 time steps for income and tax revenue.
+- [ASSISTANT_SAID] After 10 time steps, the new city status: Population: 3190, Funds: 195000 + 10 * (1000000 + tax revenue), Income: 1000000 + tax revenue (72% happiness * $1000/resident), Education Level: 61%, Employment Rate: 85%, Crime Rate: 8%, Health Level: 25%, Birth rate: 6.125%, Happiness level: 72%, Tax Revenue: $241250 (72% happiness * $1000/resident).
+- [EVENT] User decided to build 5 hospitals.
+- [ASSISTANT_SAID] Building each hospital will cost $500000 and will increase the health level by 1%.
+- [ASSISTANT_SAID] The new city status: Population: 3190, Funds: -750000, Income: 1000000 + tax revenue (72% happiness * $1000/resident), Education Level: 61%, Employment Rate: 85%, Crime Rate: 8%, Health Level: 30%, Birth rate: 6.125%, Happiness level: 72%, Tax Revenue: $241250 (72% happiness * $1000/resident).
+- [EVENT] User decided to build population centers.
+- [ASSISTANT_SAID] Building population centers will cost $100000 each and will increase the birth rate by 0.5%.
+- [ASSISTANT_SAID] The new city status: Population: 3190, Funds: -850000, Income: 1000000 + tax revenue (72% happiness * $1000/resident), Education Level: 61%, Employment Rate: 85%, Crime Rate: 8%, Health Level: 30%, Birth rate: 6.625%, Happiness level: 72%, Tax Revenue: $241250 (72% happiness * $1000/resident).
+- [EVENT] User decided to build housing to increase population.
+- [ASSISTANT_SAID] Building housing will cost $50000 each and will increase the population by 20 people.
+- [ASSISTANT_SAID] The new city status: Population: 3210 (increased by 20), Funds: -950000, Income: 1000000 + tax revenue (72% happiness * $1000/resident), Education Level: 61%, Employment Rate: 85%, Crime Rate: 8%, Health Level: 30%, Birth rate: 6.625%, Happiness level: 72%, Tax Revenue: $241250 (72% happiness * $1000/resident).
+- [EVENT] User decided

@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/06/17 (Sat) 20:20  
+[FACT] User has around 500 friends on Facebook.  
+[FACT] User is pretty active on Facebook.  
+[PREFERENCE] User tends to have more female friends online.  
+[EVENT] User is trying to organize a social event.  
+[PREFERENCE] User is looking for ideas to make the social event more engaging for all attendees.  
+[ASSISTANT_SAID] Assistant congratulated the user on having a strong online presence with 500 friends on Facebook.  
+[ASSISTANT_SAID] Assistant provided ideas for group activities, including icebreaker games, workshops or classes, team-building exercises, and karaoke or game nights.  
+[ASSISTANT_SAID] Assistant provided ideas for one-on-one conversations, including speed networking, mentorship sessions, breakout sessions, and conversation starters.  
+[ASSISTANT_SAID] Assistant suggested additional tips for the event, such as creating a diverse guest list, using interactive technology, providing comfortable spaces, and encouraging feedback.  
+[PREFERENCE] User especially liked the idea of workshops or classes for the event.  
+[EVENT] User is considering having a mix of both male and female instructors to lead the sessions.  
+[ASSISTANT_SAID] Assistant provided platforms and resources to find instructors or facilitators, including Thumbtack, GigSalad, Catalant, Upwork, Fiverr, Meetup, and local universities and colleges.  
+[ASSISTANT_SAID] Assistant suggested reaching out to local universities and colleges for potential instructors.  
+[ASSISTANT_SAID] Assistant recommended using referrals and word-of-mouth to find instructors or facilitators.  
+[PREFERENCE] User liked the idea of using online marketplaces like Thumbtack or GigSalad to find instructors.  
+[EVENT] User plans to create an event page on Facebook to post about the need for instructors or facilitators.  
+[PREFERENCE] User intends to include all necessary details and relevant hashtags in the Facebook post.  
+[ASSISTANT_SAID] Assistant suggested including a clear call-to-action, essential details, relevant hashtags, and encouraging sharing in the Facebook post.  
+[ASSISTANT_CREATED] Assistant provided an example post for the user to use on their event page.  
+[PREFERENCE] User is confident they can find the right instructors or facilitators for their event due to their strong online presence.  
+[ASSISTANT_SAID] Assistant provided tips on how to screen or evaluate responses from potential instructors or facilitators, including reviewing profiles and credentials, and evaluating proposals.  
+[ASSISTANT_SAID] Assistant suggested asking potential instructors for a brief description of their session and qualifications.

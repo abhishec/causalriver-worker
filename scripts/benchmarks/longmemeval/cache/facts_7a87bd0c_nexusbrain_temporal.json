@@ -1,0 +1,77 @@
+{
+  "answer_d08a934d_1": [
+    {
+      "fact": "User is organizing their garage this weekend.",
+      "type": "event",
+      "entities": [
+        "garage",
+        "weekend"
+      ]
+    },
+    {
+      "fact": "User has been sticking to a daily tidying routine for 3 weeks.",
+      "type": "personal",
+      "entities": [
+        "daily tidying routine",
+        "3 weeks"
+      ]
+    },
+    {
+      "fact": "User feels proud of themselves for maintaining their tidying routine.",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User is starting with purging and categorizing items in their garage.",
+      "type": "event",
+      "entities": [
+        "purging",
+        "categorizing",
+        "garage"
+      ]
+    }
+  ],
+  "answer_d08a934d_2": [
+    {
+      "fact": "User is planning to clean out the garage this weekend",
+      "type": "event",
+      "entities": [
+        "garage",
+        "weekend"
+      ]
+    },
+    {
+      "fact": "User has been sticking to a daily tidying routine for 4 weeks",
+      "type": "event",
+      "entities": [
+        "daily tidying routine",
+        "4 weeks"
+      ]
+    },
+    {
+      "fact": "User finds their daily tidying routine has made a positive impact on their apartment",
+      "type": "opinion",
+      "entities": [
+        "daily tidying routine",
+        "apartment"
+      ]
+    },
+    {
+      "fact": "User is planning to use tips for organizing the garage, especially categorizing and grouping similar items",
+      "type": "preference",
+      "entities": [
+        "garage organization",
+        "categorizing",
+        "grouping similar items"
+      ]
+    },
+    {
+      "fact": "User is thinking about implementing a 'one-touch rule' for cleaning",
+      "type": "preference",
+      "entities": [
+        "one-touch rule",
+        "cleaning"
+      ]
+    }
+  ]
+}

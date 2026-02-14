@@ -1,0 +1,22 @@
+**Observation Log:**
+
+- [FACT] User is planning a trip to Walmart this weekend.
+- [EVENT] User is looking for deals on baby essentials at Walmart.
+- [EVENT] User used a Buy One Get One Free coupon on Luvs diapers at Walmart today.
+- [ASSISTANT_SAID] Assistant does not have real-time access to current sales or promotions at specific stores like Walmart.
+- [ASSISTANT_SAID] Assistant provided tips to find deals on diapers at Walmart, including checking Walmart's website, signing up for the email newsletter, using the Savings Catcher app, looking for in-store promotions, stacking coupons and sales, checking competitor prices, and considering Walmart's store brand, Parent's Choice.
+- [ASSISTANT_SAID] Assistant suggested checking prices and sales in the local store as they may vary from online prices or promotions.
+- [FACT] User has been keeping coupons in a binder.
+- [PREFERENCE] User finds their coupon binder cluttered and hard to find the needed coupons.
+- [ASSISTANT_SAID] Assistant provided tips to organize coupons, including categorizing and purging, using a binder with sections, an envelope system, a coupon box or file, digital coupon organization, creating an expire soon folder, alphabetizing, using coupon pages or sheets, keeping it portable, and maintaining the system.
+- [ASSISTANT_SAID] Assistant asked which of the methods resonates with the user or if they have a different system in mind.
+- [FACT] User has used Ibotta before and liked it.
+- [PREFERENCE] User is considering switching to a digital coupon app.
+- [ASSISTANT_SAID] Assistant provided an overview of Fetch Rewards and Ibotta, explaining how each app works, including receipt scanning, earning points, and redeeming rewards.
+- [ASSISTANT_SAID] Assistant highlighted key differences between Fetch Rewards and Ibotta, including their methods of earning rewards and types of offers.
+- [ASSISTANT_SAID] Assistant mentioned pros and cons of both apps, including convenience, ease of use, and potential limitations.
+- [FACT] User is thinking of trying out Fetch Rewards.
+- [ASSISTANT_SAID] Assistant mentioned that Fetch Rewards has offers on diapers and baby products, noting that availability may vary by location.
+- [ASSISTANT_SAID] Assistant provided examples of potential offers on Fetch Rewards, such as 500 points for Pampers diapers, 200 points for Gerber baby food, and 300 points for Johnson's baby wash.
+- [ASSISTANT_SAID] Assistant explained how Fetch Rewards' gas rewards program works, including linking gas station loyalty cards, earning points on gas purchases, and redeeming points for discounts.
+- [ASSISTANT_SAID] Assistant provided tips and benefits of the gas rewards program, including stacking with other offers, no minimum purchase required, and

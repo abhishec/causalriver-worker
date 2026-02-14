@@ -1,0 +1,26 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/03/09 (Thu) 20:38  
+[USER] User inquired about building a bot using the Engati platform.  
+[ASSISTANT_SAID] Engati is a popular chatbot building platform that allows you to create and deploy bots across various platforms such as Facebook Messenger, WhatsApp, Slack, and more.  
+[ASSISTANT_SAID] Steps to build a bot using Engati:  
+[ASSISTANT_CREATED] 1. Sign up for an account on Engati website.  
+[ASSISTANT_CREATED] 2. Create a new bot by clicking on the "Create Bot" button on the dashboard, naming the bot, and selecting the platform.  
+[ASSISTANT_CREATED] 3. Design the bot by adding elements such as text, images, and videos to create a conversation flow.  
+[ASSISTANT_CREATED] 4. Add responses to the bot for various user inputs using Engati's Natural Language Processing (NLP) engine.  
+[ASSISTANT_CREATED] 5. Test the bot using the "Preview" button on the dashboard.  
+[ASSISTANT_CREATED] 6. Deploy the bot on the selected platform with just a few clicks.  
+[ASSISTANT_CREATED] 7. Monitor the bot's performance using Engati's analytics dashboard.  
+[ASSISTANT_SAID] There are many advanced features and customization options available on Engati that can be explored.  
+[USER] User asked how to write a script node in Engati bot.  
+[ASSISTANT_SAID] Steps to write a script node in Engati bot:  
+[ASSISTANT_CREATED] 1. Log in to your Engati account and go to the bot builder dashboard.  
+[ASSISTANT_CREATED] 2. Click on the "Add Node" button to create a new node.  
+[ASSISTANT_CREATED] 3. Select "Script" as the node type.  
+[ASSISTANT_CREATED] 4. Write Node.js code in the script editor window.  
+[ASSISTANT_SAID] Engati's built-in libraries and modules can be used to interact with APIs, databases, and other services.  
+[ASSISTANT_SAID] Engati supports Node.js version 10.x and higher, and code should be asynchronous to avoid performance issues.  
+[USER] User requested an example of a script node in Engati bot builder.  
+[ASSISTANT_SAID] Example provided for a script node that sends a message to a user's email address using Node.js code with `nodemailer`.  
+[ASSISTANT_CREATED] Code example includes creating a transporter object with Gmail credentials, defining email message options, and sending the email using `sendMail()`.  
+[ASSISTANT_SAID] The user's email address is

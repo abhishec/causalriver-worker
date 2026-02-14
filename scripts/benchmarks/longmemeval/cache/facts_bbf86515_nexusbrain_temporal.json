@@ -1,0 +1,104 @@
+{
+  "answer_b3763b6b_1": [
+    {
+      "fact": "User owns a 2018 Ford Mustang GT",
+      "type": "personal",
+      "entities": [
+        "2018 Ford Mustang GT"
+      ]
+    },
+    {
+      "fact": "User modified their exhaust system",
+      "type": "preference",
+      "entities": [
+        "exhaust system"
+      ]
+    },
+    {
+      "fact": "User participated in the 'Turbocharged Tuesdays' auto racing event",
+      "type": "event",
+      "entities": [
+        "Turbocharged Tuesdays",
+        "auto racing event"
+      ]
+    },
+    {
+      "fact": "User achieved a personal best time of 12.8 seconds in the quarter-mile drag race",
+      "type": "event",
+      "entities": [
+        "12.8 seconds",
+        "quarter-mile drag race"
+      ]
+    },
+    {
+      "fact": "User received a free can of NitroFuel's premium fuel additive at the event",
+      "type": "event",
+      "entities": [
+        "NitroFuel",
+        "premium fuel additive"
+      ]
+    },
+    {
+      "fact": "User is looking for advice on optimizing car performance for auto racing events",
+      "type": "preference",
+      "entities": [
+        "car performance",
+        "auto racing events"
+      ]
+    },
+    {
+      "fact": "User is interested in improving their car's suspension and braking system",
+      "type": "preference",
+      "entities": [
+        "suspension",
+        "braking system"
+      ]
+    }
+  ],
+  "answer_b3763b6b_2": [
+    {
+      "fact": "User has been using SpeedShine's detailing kit for car care.",
+      "type": "preference",
+      "entities": [
+        "SpeedShine's detailing kit"
+      ]
+    },
+    {
+      "fact": "User is interested in trying out Meguiar's Gold Class Carnauba Plus.",
+      "type": "preference",
+      "entities": [
+        "Meguiar's Gold Class Carnauba Plus"
+      ]
+    },
+    {
+      "fact": "User attended the Rack Fest event on June 18th.",
+      "type": "event",
+      "entities": [
+        "Rack Fest",
+        "June 18th"
+      ]
+    },
+    {
+      "fact": "User owns a 2018 Ford Mustang GT.",
+      "type": "personal",
+      "entities": [
+        "2018 Ford Mustang GT"
+      ]
+    },
+    {
+      "fact": "User is looking for recommendations for a new air filter for their car.",
+      "type": "preference",
+      "entities": [
+        "air filter",
+        "2018 Ford Mustang GT"
+      ]
+    },
+    {
+      "fact": "User thinks Rack Fest was an amazing event.",
+      "type": "opinion",
+      "entities": [
+        "Rack Fest"
+      ]
+    }
+  ]
+}

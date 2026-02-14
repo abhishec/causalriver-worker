@@ -1,0 +1,199 @@
+{
+  "answer_a679a86a_3": [
+    {
+      "fact": "User is looking to get advice on condo living",
+      "type": "preference",
+      "entities": [
+        "condo living"
+      ]
+    },
+    {
+      "fact": "User is still looking for a condo",
+      "type": "preference",
+      "entities": [
+        "condo"
+      ]
+    },
+    {
+      "fact": "User appreciates detailed tips on minimizing noise pollution",
+      "type": "opinion",
+      "entities": [
+        "noise pollution",
+        "tips"
+      ]
+    },
+    {
+      "fact": "User is interested in evaluating a condo's neighborhood and community amenities",
+      "type": "preference",
+      "entities": [
+        "condo",
+        "neighborhood",
+        "community amenities"
+      ]
+    }
+  ],
+  "answer_a679a86a_1": [
+    {
+      "fact": "User is looking for advice on renovating a kitchen",
+      "type": "preference",
+      "entities": [
+        "kitchen renovation"
+      ]
+    },
+    {
+      "fact": "User recently saw a beautiful 3-bedroom bungalow in the Oakwood neighborhood on January 22nd",
+      "type": "event",
+      "entities": [
+        "3-bedroom bungalow",
+        "Oakwood neighborhood",
+        "January 22nd"
+      ]
+    },
+    {
+      "fact": "User is in the process of finalizing the purchase of a townhouse in Brookside",
+      "type": "personal",
+      "entities": [
+        "townhouse",
+        "Brookside"
+      ]
+    },
+    {
+      "fact": "User is considering kitchen renovations in general",
+      "type": "preference",
+      "entities": [
+        "kitchen renovations"
+      ]
+    },
+    {
+      "fact": "User is seeking recommendations for kitchen designers or contractors in the area",
+      "type": "preference",
+      "entities": [
+        "kitchen designers",
+        "contractors"
+      ]
+    }
+  ],
+  "answer_a679a86a_5": [
+    {
+      "fact": "User is in the process of buying a house.",
+      "type": "event",
+      "entities": [
+        "house",
+        "buying process"
+      ]
+    },
+    {
+      "fact": "User put in an offer on a 3-bedroom townhouse in the Brookside neighborhood on February 25th.",
+      "type": "event",
+      "entities": [
+        "3-bedroom townhouse",
+        "Brookside neighborhood",
+        "February 25th"
+      ]
+    },
+    {
+      "fact": "User agreed on a price of $340,000 for the townhouse.",
+      "type": "event",
+      "entities": [
+        "$340,000"
+      ]
+    },
+    {
+      "fact": "User is planning to put 20% down on the house, which is $68,000.",
+      "type": "preference",
+      "entities": [
+        "20%",
+        "$68,000"
+      ]
+    },
+    {
+      "fact": "User is looking at a 30-year mortgage.",
+      "type": "preference",
+      "entities": [
+        "30-year mortgage"
+      ]
+    },
+    {
+      "fact": "User's interest rate is around 4%.",
+      "type": "personal",
+      "entities": [
+        "4%"
+      ]
+    },
+    {
+      "fact": "User is glad they won't have to pay PMI.",
+      "type": "opinion",
+      "entities": [
+        "PMI"
+      ]
+    },
+    {
+      "fact": "User is worried about property taxes and insurance costs.",
+      "type": "opinion",
+      "entities": [
+        "property taxes",
+        "insurance"
+      ]
+    }
+  ],
+  "answer_a679a86a_4": [
+    {
+      "fact": "User is in the process of buying a new home",
+      "type": "personal",
+      "entities": []
+    },
+    {
+      "fact": "User has been house hunting for a while",
+      "type": "event",
+      "entities": []
+    },
+    {
+      "fact": "User fell in love with a 2-bedroom condo on February 15th",
+      "type": "event",
+      "entities": [
+        "2-bedroom condo",
+        "February 15th"
+      ]
+    },
+    {
+      "fact": "User's offer on the condo was rejected on February 17th due to a higher bid",
+      "type": "event",
+      "entities": [
+        "February 17th"
+      ]
+    },
+    {
+      "fact": "User needs help organizing paperwork for the home buying process",
+      "type": "opinion",
+      "entities": []
+    }
+  ],
+  "answer_a679a86a_2": [
+    {
+      "fact": "User is looking for a home warranty to protect their new home from unexpected repairs.",
+      "type": "preference",
+      "entities": [
+        "home warranty",
+        "new home"
+      ]
+    },
+    {
+      "fact": "User has been searching for a home for a while.",
+      "type": "personal",
+      "entities": []
+    },
+    {
+      "fact": "User has seen properties that did not fit their budget.",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User found a property in Cedar Creek on February 1st that was out of their budget.",
+      "type": "event",
+      "entities": [
+        "Cedar Creek",
+        "February 1st"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+Observation Log:
+
+[FACT] User's greeting is "hi."
+[ASSISTANT_SAID] Assistant greeted the user with "Hello! How can I assist you today?" 
+[TEMPORAL] Session date is 2023/04/07 (Fri) at 16:40.

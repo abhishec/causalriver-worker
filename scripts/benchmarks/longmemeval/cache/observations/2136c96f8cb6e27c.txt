@@ -1,0 +1,32 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/29 (Mon) 03:53
+- [PREFERENCE] User is looking for new cocktail recipes to try out.
+- [ASSISTANT_SAID] Bitters are a fantastic way to add depth and complexity to cocktails.
+- [ASSISTANT_SAID] Suggested popular cocktail recipes that feature different types of bitters.
+- [ASSISTANT_SAID] Orange Bitters: 
+  - Classic Martini: (Gin, dry vermouth, orange bitters, lemon twist)
+  - Pimm's Cup: (Pimm's No. 1, lemonade, ginger ale, orange bitters, cucumber, mint)
+- [ASSISTANT_SAID] Peach Bitters:
+  - Southern Belle: (Bourbon, tea-infused simple syrup, peach bitters, lemon juice, peach slice)
+  - Peachy Keen: (Prosecco, peach puree, peach bitters, lemon juice, mint)
+- [ASSISTANT_SAID] Chocolate Mole Bitters:
+  - Mexican Hot Chocolate: (Mezcal, chocolate mole bitters, cocoa powder, cinnamon, heavy cream)
+  - Cocoa Old Fashioned: (Bourbon, chocolate mole bitters, sugar, cocoa powder, orange peel)
+- [ASSISTANT_SAID] Celery Bitters:
+  - The Celery Gin Fizz: (Gin, lemon juice, celery bitters, simple syrup, soda water)
+  - Bloody Mary: (Vodka, tomato juice, celery bitters, Worcestershire sauce, horseradish)
+- [ASSISTANT_SAID] Grapefruit Bitters:
+  - Grapefruit Basil Martini: (Gin, grapefruit juice, grapefruit bitters, basil, sugar)
+  - Paloma: (Tequila, grapefruit juice, lime juice, grapefruit bitters, salt)
+- [ASSISTANT_SAID] Suggested experimenting with different types of bitters to find favorite combinations.
+- [PREFERENCE] User has been experimenting with Angostura bitters in their Old Fashioned.
+- [PREFERENCE] User prefers using Woodford Reserve Double Oaked whiskey for a rich flavor in their Old Fashioned.
+- [ASSISTANT_SAID] Woodford Reserve Double Oaked adds a rich, velvety texture and a deeper flavor profile.
+- [PREFERENCE] User is looking for cocktail recipes that use citrus-flavored bitters.
+- [ASSISTANT_SAID] Suggested cocktail recipes that feature citrus-flavored bitters.
+- [ASSISTANT_SAID] Orange Bitters:
+  - The Vieux Carré: (Rye whiskey, Cynar, Benedictine, sweet vermouth, orange bitters)
+  - The Boulevardier: (Bourbon, Campari, sweet vermouth, orange bitters)
+  - The Monkey Gland: (Gin, orange juice, grenadine, orange bitters)
+- [ASSIST

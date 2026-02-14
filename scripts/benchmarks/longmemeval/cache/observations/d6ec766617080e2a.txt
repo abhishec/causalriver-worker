@@ -1,0 +1,41 @@
+**Observation Log:**
+
+- [FACT] User is planning a trip to Ethiopia.
+- [FACT] User has friends named Emily, who has two daughters named Ava and Olivia.
+- [RELATIONSHIP] Ava and Olivia were born in Ethiopia and were adopted by Emily.
+- [PREFERENCE] User's kids would love the zoo and the amusement park in Addis Ababa.
+- [EVENT] User is seeking family-friendly activities and attractions in Addis Ababa.
+- [ASSISTANT_SAID] Recommended activities in Addis Ababa include: 
+  1. Addis Ababa Zoo
+  2. National Museum of Ethiopia
+  3. Entoto Hill
+  4. Bihere Tsige Recreation Center
+  5. Addis Ababa National Botanical Garden
+  6. InkARNATION (interactive art studio)
+  7. Turtle Park
+  8. Ethnological Museum
+  9. Horseback riding
+  10. Coffee ceremony
+- [ASSISTANT_SAID] Suggested that user plan their itinerary according to family interests and consider hiring a guide or driver.
+- [ASSISTANT_SAID] Explained the traditional Ethiopian coffee ceremony, including steps: roasting, grinding, brewing, serving, and socializing.
+- [ASSISTANT_SAID] Suggested ways to experience the coffee ceremony, including visiting a local family, coffee shops, and cultural centers.
+- [ASSISTANT_SAID] Listed traditional Ethiopian snacks served during the coffee ceremony: 
+  1. Popcorn
+  2. Roasted barley
+  3. Injera chips
+  4. Kik alitcha
+  5. Shiro
+  6. Dried fruits and nuts
+  7. Gursha
+- [ASSISTANT_SAID] Provided tips for participating in the coffee ceremony, including being respectful and asking questions.
+- [PREFERENCE] User is excited to try traditional snacks during the coffee ceremony.
+- [EVENT] User is considering bringing gifts for their hosts during the coffee ceremony.
+- [ASSISTANT_SAID] Suggested appropriate gifts for hosts, including:
+  1. Coffee
+  2. Spices or tea
+  3. Local sweets or chocolates
+  4. Fresh fruits or nuts
+  5. Incense or fragrances
+  6. Handmade crafts
+  7. Wine or honey
+- [ASSISTANT_SAID] Provided etiquette tips for presenting gifts, including using both hands, bowing the head, and smiling while making eye contact.

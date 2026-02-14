@@ -1,0 +1,18 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/26 (Fri) 07:56  
+[USER] User requested a summary of a text regarding FMEA and process improvement actions.  
+[ASSISTANT_SAID] A series of corrective actions were identified and implemented to simplify the process flow, reduce idle time and waste, and improve the control of output variability.  
+[ASSISTANT_SAID] The actions included eliminating the need for team approval of changes in the software system, providing technical and quality feedback on changes before review, reducing the time difference between review forums, consolidating technical expertise, creating a system for tracking the quality of changes and providing feedback, standardizing change templates, and automating the change process.  
+[ASSISTANT_SAID] These actions resulted in significant reductions in non-value-added time and improvements in the business process.  
+[USER] User requested a summary of another text regarding the implementation of changes in the R&D teams.  
+[ASSISTANT_SAID] The changes identified through the Lean Six Sigma (LSS) process were implemented through training sessions and the creation of software tools to track progress.  
+[ASSISTANT_SAID] The results of the LSS implementation, including WP quality and review times, were continuously monitored through the use of a quality tracking sheet.  
+[ASSISTANT_SAID] This sheet also allowed for the easy identification of the current state at any point in the future, enabling the introduction of measurable improvements.  
+[CHANGE] The requirement was made for all R&D engineers who are first-time WP authors to take a class on the new configuration control process.  
+[EVENT] Several training sessions were carried out to reinforce the changes due to the large numbers of stakeholders for the configuration control process.  
+[ASSISTANT_SAID] Software tools were created to integrate the corrective actions into a track-able system.  
+[ASSISTANT_SAID] Each functional area owner has been assigned to ensure smooth implementation and quick response in case the systems are down.  
+[ASSISTANT_SAID] Such controls have made the changes permanent, not requiring the human glue to continue their implementation.  
+[ASSISTANT_SAID] The results of the LSS implementation in terms of the WP quality score for technical content, the average time required to review the WPs, etc., were monitored continuously through the quality tracking sheet.  
+[ASSISTANT_SAID] The quality tracking sheet is expected to quantify the “current” state at any future time, thus making it easier to introduce measurable improvements.

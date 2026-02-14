@@ -1,0 +1,21 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/25 (Thu) 23:09  
+[ASSISTANT_SAID] The deliverables broken down into smaller components include: Data ingestion, Data processing, Statistical analysis, Machine learning, Prediction generation, Result scaling, Web interface, Modularity and scalability, Performance, Hosting.  
+[ASSISTANT_SAID] Data ingestion tasks include: Ingest data from Coinbase API, Ingest data from Reddit API, Ingest data from Twitter API, Ensure data is cleaned and normalized.  
+[ASSISTANT_SAID] Data processing tasks include: Analyze data using statistical methods, Analyze data using machine learning methods, Transform data for use in machine learning models.  
+[ASSISTANT_SAID] Statistical analysis tasks include: Develop statistical models for predicting cryptocurrency market movements, Test and evaluate the accuracy of the statistical models.  
+[ASSISTANT_SAID] Machine learning tasks include: Develop machine learning models for predicting cryptocurrency market movements, Test and evaluate the accuracy of the machine learning models.  
+[ASSISTANT_SAID] Prediction generation tasks include: Combine the results of the statistical and machine learning models to generate predictions.  
+[ASSISTANT_SAID] Result scaling tasks include: Scale the contribution of each prediction method based on its historical accuracy.  
+[ASSISTANT_SAID] Web interface tasks include: Design the user interface, Implement the front-end, Implement the back-end.  
+[ASSISTANT_SAID] Modularity and scalability tasks include: Ensure the system is designed in a modular way to allow individual components to be swapped out or extended easily, Use APIs and protocols like protobuf to facilitate communication between components.  
+[ASSISTANT_SAID] Performance tasks include: Ensure the system is highly performant to provide up-to-date information as quickly as possible, Use parallel computing to improve performance.  
+[ASSISTANT_SAID] Hosting tasks include: Host the system in the same AWS datacenter as Coinbase to minimize latency.  
+[USER] Expressed satisfaction with the deliverables and readiness to move onto the next planning phase.  
+[ASSISTANT_SAID] Suggested identifying the main components of the system.  
+[USER] Provided a breakdown of key deliverables: data ingest system, data processing system, statistical analysis system, machine learning system, prediction system, result scaling system, web front end, database for storage of historical data and predictions.  
+[ASSISTANT_SAID] Suggested an additional system: testing and debugging system, and a monitoring and alerting system.  
+[USER] Stated that the quantity of data coming in will not be huge and will mostly be well-structured data, so a PostgreSQL database will suffice.  
+[USER] Agreed on the importance of a monitoring and log aggregation system and suggested using an off-the-shelf solution.  
+[USER] Clarified

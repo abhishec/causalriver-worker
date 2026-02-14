@@ -1,0 +1,24 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/15 (Mon) 07:09  
+[FACT] User is a software engineer.  
+[PREFERENCE] User is looking for recommendations on Netflix stand-up comedy specials with strong storytelling.  
+[PREFERENCE] User has a preference for comedy similar to John Mulaney's "Kid Gorgeous."  
+[EVENT] User is trying to develop their own comedic style and is experimenting with it.  
+[EVENT] User has been trying to incorporate more personal experiences into their jokes, specifically about their job as a software engineer and struggles with online dating.  
+[ASSISTANT_SAID] Assistant recommended the following Netflix stand-up comedy specials with strong storytelling:  
+[ASSISTANT_SAID] 1. Bo Burnham: Make Happy (2016)  
+[ASSISTANT_SAID] 2. Hasan Minhaj: Homecoming King (2017)  
+[ASSISTANT_SAID] 3. Demetri Martin: Live (At the Time) (2018)  
+[ASSISTANT_SAID] 4. Ali Wong: Hard Knock Wife (2018)  
+[ASSISTANT_SAID] 5. Mike Birbiglia: My Girlfriend's Boyfriend (2013)  
+[ASSISTANT_SAID] 6. Tom Segura: Disgraceful (2018)  
+[ASSISTANT_SAID] 7. W. Kamau Bell: Private School Negro (2018)  
+[ASSISTANT_SAID] 8. Taylor Tomlinson: Quarter-Life Crisis (2020)  
+[ASSISTANT_SAID] Assistant described Demetri Martin's style as having dry wit, one-liners, playful use of language, observational humor, and a laid-back, conversational tone.  
+[ASSISTANT_SAID] Assistant compared Demetri Martin's style to John Mulaney's, noting differences in tone, storytelling, subject matter, and pacing.  
+[ASSISTANT_SAID] Assistant provided tips for finding a comedic voice, including writing from personal truth, experimenting with formats, observing the world, studying other comedians, and being authentic.  
+[ASSISTANT_SAID] Assistant suggested incorporating personal experiences into jokes about software engineering and online dating, emphasizing the importance of finding humor in mundane tasks, using technical terms, and sharing personal experiences.  
+[ASSISTANT_SAID] Assistant provided example jokes related to software engineering and online dating.  
+[EVENT] User is considering recording a video of themselves performing jokes and putting it on YouTube.  
+[ASSISTANT_SAID] Assistant advised on crafting relatable jokes about personal experiences, including tips for writing and performing.

@@ -1,0 +1,22 @@
+**Observation Log:**
+
+- [FACT] The user is planning a trip to California.
+- [PREFERENCE] The user is interested in hiking while in California.
+- [EVENT] The user is looking for good hiking trails in California.
+- [ASSISTANT_SAID] California offers diverse hiking trails, including Muir Woods, Point Reyes National Seashore, Mount Diablo State Park, Big Sur, Yosemite National Park, Runyon Canyon Park, Torrey Pines State Natural Reserve, Joshua Tree National Park, Death Valley National Park, Lake Tahoe, and Kings Canyon National Park.
+- [ASSISTANT_SAID] The user should check trail conditions, bring water, sunscreen, snacks, wear comfortable shoes, and respect the environment.
+- [EVENT] The user is specifically interested in hiking in Yosemite National Park.
+- [ASSISTANT_SAID] The Mist Trail is 7 miles round-trip to Vernal Fall and 9.6 miles round-trip to Nevada Fall, with an elevation gain of 1,000 feet to Vernal Fall and 1,900 feet to Nevada Fall, and is considered strenuous.
+- [ASSISTANT_SAID] The Four Mile Trail is 9.6 miles round-trip with an elevation gain of 3,200 feet and is also considered strenuous.
+- [ASSISTANT_SAID] The Mist Trail begins at Happy Isles Trailhead and features scenic views, waterfalls, and steep granite steps.
+- [ASSISTANT_SAID] The Four Mile Trail connects Yosemite Valley to Glacier Point and offers views of Yosemite Valley, El Capitan, and Bridalveil Fall.
+- [ASSISTANT_SAID] Both trails require a good level of physical fitness and suggest bringing water, snacks, and sunscreen.
+- [EVENT] The user is interested in doing yoga while in California.
+- [ASSISTANT_SAID] Yoga studios near Yosemite National Park include Yosemite Valley Lodge Yoga, The Ahwahnee Hotel Yoga, Yoga House Groveland, Groveland Yoga Studio, Mariposa Yoga Studio, Sierra Yoga Studio, Yosemite Yoga and Wellness Retreat, and Sierra Yoga and Ayurveda Retreat.
+- [ASSISTANT_SAID] The user should check the studios' websites for schedules, prices, and levels of experience required.
+- [EVENT] The user is looking for outdoor activities to do with family while in California.
+- [ASSISTANT_SAID] Recommended biking spots include Yosemite Valley Bike Trails, Merced River Trail, Railroad Grade Trail, and Bass Lake.
+- [ASSISTANT_SAID] Recommended kayaking spots include Tenaya Lake, Hetch Hetchy Reservoir, Bass Lake, and Lake McClure.
+- [ASSISTANT_SAID] Other outdoor activities suggested include horseback riding, rafting, and hiking.
+- [EVENT] The user is considering kayaking at Tenaya Lake.
+- [ASSISTANT_SAID] Kayak rentals available near Tenaya

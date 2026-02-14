@@ -1,0 +1,24 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2022/11/17 (Thu) 11:45  
+[USER] User mentioned tastes in meals, specifically sweet, sour, spicy, and savory.  
+[ASSISTANT_SAID] Assistant provided a list of tastes found in meals:  
+[ASSISTANT_SAID] 1. Sweet: Desserts, baked goods, breakfast foods like pancakes or waffles; sources include sugar, honey, maple syrup, fruits.  
+[ASSISTANT_SAID] 2. Sour: Found in foods like pickles, sourdough bread, sour candies; sources include acids like lemon juice or vinegar.  
+[ASSISTANT_SAID] 3. Spicy: Found in foods like curries, chili, hot wings; sources include hot peppers, cumin, chili powder, ginger.  
+[ASSISTANT_SAID] 4. Savory: Associated with umami; found in foods like meat, cheese, mushrooms, soy sauce.  
+[ASSISTANT_SAID] 5. Bitter: Found in dark chocolate, coffee, leafy greens like kale or arugula.  
+[ASSISTANT_SAID] 6. Salty: Found in chips, pretzels, meats, cheeses; comes from salt.  
+[USER] User requested more information.  
+[ASSISTANT_SAID] Assistant provided additional tastes:  
+[ASSISTANT_SAID] 1. Umami: Found in meats, seafood, mushrooms, soy sauce, miso paste.  
+[ASSISTANT_SAID] 2. Tart: Found in cranberries, rhubarb, some types of yogurt; similar to sour but less intense.  
+[ASSISTANT_SAID] 3. Astringent: Found in tea, red wine, fruits like apples or pears; can be drying or puckering.  
+[ASSISTANT_SAID] 4. Fatty: Found in meats, dairy products, nuts; described as creamy or rich.  
+[ASSISTANT_SAID] 5. Herbal: Comes from spices like basil, rosemary, thyme; fresh and aromatic.  
+[ASSISTANT_SAID] 6. Smoky: Found in smoked foods like meats or cheeses; also from spices like smoked paprika or chipotle peppers.  
+[USER] User requested more information again.  
+[ASSISTANT_SAID] Assistant provided further tastes:  
+[ASSISTANT_SAID] 1. Nutty: Found in nuts like almonds, pecans, walnuts; also in grains like quinoa or farro.  
+[ASSISTANT_SAID] 2. Earthy: Found in mushrooms, beets, root vegetables like carrots or parsnips; described as deep or rich.  
+[ASSISTANT_SAID] 3.

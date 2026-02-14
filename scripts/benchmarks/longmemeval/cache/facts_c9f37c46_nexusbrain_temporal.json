@@ -1,0 +1,73 @@
+{
+  "answer_cdba3d9f_1": [
+    {
+      "fact": "User is interested in comedy recommendations.",
+      "type": "preference",
+      "entities": [
+        "comedy",
+        "recommendations"
+      ]
+    },
+    {
+      "fact": "User has been into stand-up comedy for about 3 months.",
+      "type": "event",
+      "entities": [
+        "stand-up comedy",
+        "3 months"
+      ]
+    },
+    {
+      "fact": "User started watching stand-up comedy after watching a Netflix special by John Mulaney.",
+      "type": "event",
+      "entities": [
+        "Netflix",
+        "John Mulaney"
+      ]
+    },
+    {
+      "fact": "User is interested in seeing live comedy.",
+      "type": "preference",
+      "entities": [
+        "live comedy"
+      ]
+    },
+    {
+      "fact": "User is considering trying stand-up comedy.",
+      "type": "preference",
+      "entities": [
+        "stand-up comedy"
+      ]
+    }
+  ],
+  "answer_cdba3d9f_2": [
+    {
+      "fact": "User has recently gotten into stand-up comedy",
+      "type": "preference",
+      "entities": [
+        "stand-up comedy"
+      ]
+    },
+    {
+      "fact": "User attended an open mic night at a local comedy club last month",
+      "type": "event",
+      "entities": [
+        "open mic night",
+        "local comedy club"
+      ]
+    },
+    {
+      "fact": "User found it amazing to see people trying out their material in front of a live audience",
+      "type": "opinion",
+      "entities": [
+        "live audience"
+      ]
+    },
+    {
+      "fact": "User is trying to improve their joke-writing skills",
+      "type": "preference",
+      "entities": [
+        "joke-writing skills"
+      ]
+    }
+  ]
+}

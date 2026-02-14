@@ -1,0 +1,91 @@
+{
+  "answer_60e8941a_abs_1": [
+    {
+      "fact": "User recently returned from an island-hopping trip to Hawaii with family",
+      "type": "event",
+      "entities": [
+        "Hawaii",
+        "island-hopping trip",
+        "family"
+      ]
+    },
+    {
+      "fact": "User is trying to decide whether to travel solo or with family for their next trip",
+      "type": "preference",
+      "entities": [
+        "travel solo",
+        "travel with family"
+      ]
+    },
+    {
+      "fact": "User values flexibility in travel",
+      "type": "preference",
+      "entities": [
+        "flexibility"
+      ]
+    },
+    {
+      "fact": "User found it hard to make changes to their itinerary while traveling with family",
+      "type": "opinion",
+      "entities": [
+        "itinerary",
+        "family"
+      ]
+    }
+  ],
+  "answer_60e8941a_abs_2": [
+    {
+      "fact": "User recently returned from a solo trip to New York City for five days",
+      "type": "event",
+      "entities": [
+        "New York City",
+        "solo trip",
+        "five days"
+      ]
+    },
+    {
+      "fact": "User saved money by staying at a hostel and eating at local cafes during their trip",
+      "type": "opinion",
+      "entities": [
+        "hostel",
+        "local cafes"
+      ]
+    },
+    {
+      "fact": "User is thinking of planning another trip soon",
+      "type": "event",
+      "entities": []
+    },
+    {
+      "fact": "User is considering traveling to Europe, probably Paris or Rome",
+      "type": "preference",
+      "entities": [
+        "Europe",
+        "Paris",
+        "Rome"
+      ]
+    },
+    {
+      "fact": "User has always wanted to visit the Louvre",
+      "type": "preference",
+      "entities": [
+        "Louvre"
+      ]
+    },
+    {
+      "fact": "User wants to try authentic Italian food",
+      "type": "preference",
+      "entities": [
+        "Italian food"
+      ]
+    },
+    {
+      "fact": "User is unsure if hostels are a good option in Europe",
+      "type": "opinion",
+      "entities": [
+        "hostels",
+        "Europe"
+      ]
+    }
+  ]
+}

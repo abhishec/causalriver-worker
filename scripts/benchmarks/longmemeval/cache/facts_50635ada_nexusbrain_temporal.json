@@ -1,0 +1,94 @@
+{
+  "answer_dcd74827_1": [
+    {
+      "fact": "User is planning a trip to LA",
+      "type": "event",
+      "entities": [
+        "LA"
+      ]
+    },
+    {
+      "fact": "User wants to know the best ways to get to LAX from downtown LA",
+      "type": "preference",
+      "entities": [
+        "LAX",
+        "downtown LA"
+      ]
+    },
+    {
+      "fact": "User is considering using United miles to book a flight to LA",
+      "type": "preference",
+      "entities": [
+        "United miles",
+        "LA"
+      ]
+    },
+    {
+      "fact": "User is unsure about how many miles are needed to book a flight with United",
+      "type": "opinion",
+      "entities": [
+        "United",
+        "miles"
+      ]
+    },
+    {
+      "fact": "User has a MileagePlus account with United Airlines",
+      "type": "personal",
+      "entities": [
+        "MileagePlus",
+        "United Airlines"
+      ]
+    }
+  ],
+  "answer_dcd74827_2": [
+    {
+      "fact": "User is planning a trip to San Francisco in a few weeks",
+      "type": "event",
+      "entities": [
+        "San Francisco"
+      ]
+    },
+    {
+      "fact": "User is flying from Washington D.C.",
+      "type": "personal",
+      "entities": [
+        "Washington D.C."
+      ]
+    },
+    {
+      "fact": "User is flexible with travel dates",
+      "type": "preference",
+      "entities": []
+    },
+    {
+      "fact": "User is looking for Economy tickets",
+      "type": "preference",
+      "entities": [
+        "Economy tickets"
+      ]
+    },
+    {
+      "fact": "User's budget for the round-trip ticket is around $400",
+      "type": "preference",
+      "entities": [
+        "$400"
+      ]
+    },
+    {
+      "fact": "User has a United Airlines MileagePlus account",
+      "type": "personal",
+      "entities": [
+        "United Airlines",
+        "MileagePlus"
+      ]
+    },
+    {
+      "fact": "User has reached Premier Gold status with United Airlines",
+      "type": "personal",
+      "entities": [
+        "Premier Gold",
+        "United Airlines"
+      ]
+    }
+  ]
+}

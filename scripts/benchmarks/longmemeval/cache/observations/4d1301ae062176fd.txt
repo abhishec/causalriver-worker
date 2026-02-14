@@ -1,0 +1,23 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/29 (Mon) 06:39
+- [FACT] User is planning to start their own podcast.
+- [PREFERENCE] User is looking for podcast editing software recommendations.
+- [ASSISTANT_SAID] Recommended beginner-friendly podcast editing software: Audacity (Free, Open-Source) and GarageBand (Free, for Mac).
+- [ASSISTANT_SAID] Recommended mid-range podcast editing software: Adobe Audition ($20.99/month) and Hindenburg Field Recorder ($29.99, for iOS).
+- [ASSISTANT_SAID] Recommended advanced podcast editing software: Logic Pro X ($199.99, for Mac) and Pro Tools ($299.99/year).
+- [ASSISTANT_SAID] Other podcast editing options: Descript (Free trial, then $12/month), Castos (Free trial, then $19/month), and Spreaker Studio (Free trial, then $6.99/month).
+- [ASSISTANT_SAID] Suggested factors to consider when choosing software: level of audio editing experience, type of podcast, number of tracks, noise reduction features, and budget.
+- [ASSISTANT_SAID] Advised exploring free trials or tutorials before committing to software.
+- [USER] User is considering starting small with Audacity or GarageBand.
+- [USER] User is a beginner looking for tutorials or guides for Audacity and GarageBand.
+- [ASSISTANT_SAID] Provided resources for Audacity tutorials: Official Audacity Tutorials, Audacity Manual, YouTube Tutorials, and a free Udemy course titled "Audacity 101: Beginner's Guide to Audio Editing."
+- [ASSISTANT_SAID] Provided resources for GarageBand tutorials: Apple's GarageBand Tutorials, GarageBand User Guide, Apple Support, and YouTube Tutorials.
+- [ASSISTANT_SAID] Suggested general podcasting resources: The Podcast Host and Podcast Insights.
+- [ASSISTANT_SAID] Encouraged user to practice editing audio files to learn.
+- [USER] User has been listening to podcasts more frequently for about three months.
+- [USER] User has been experimenting with different podcast apps and features, including the "Trim Silence" feature on Overcast.
+- [ASSISTANT_SAID] Confirmed that Audacity has noise reduction and "Truncate Silence" features.
+- [ASSISTANT_SAID] Explained that GarageBand has a Noise Gate, Compressor, and Automatic Leveling features.
+- [USER] User is considering the format and tone of their podcast and is interested in recommendations for podcasting books or blogs.
+- [ASSISTANT_SAID] Recommended books: "Out on the Wire: The Storytelling Edge" by Jessica Abel, "Podcasting for Dummies" by Tee Morris and Evo Terra, "The

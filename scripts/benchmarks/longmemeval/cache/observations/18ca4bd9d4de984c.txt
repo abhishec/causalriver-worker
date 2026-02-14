@@ -1,0 +1,44 @@
+**Observation Log**
+
+**Session Date:** 2023/05/29 (Mon) 11:19  
+**Session ID:** sharegpt_sXKNzPE_0
+
+1. [USER] The user inquired about companies known for having the largest in-house design teams.
+2. [ASSISTANT_SAID] The assistant provided a list of companies with large in-house design teams, including:
+   - Apple
+   - Google
+   - IBM
+   - Airbnb
+   - Uber
+3. [ASSISTANT_SAID] The assistant mentioned that these companies recognize the importance of design in their products and services.
+4. [USER] The user asked how many people are on those teams and who are notable design team leaders.
+5. [ASSISTANT_SAID] The assistant provided approximate numbers for the design teams and notable leaders:
+   - Apple: over 300 members, led by Jony Ive.
+   - Google: over 150 members, led by Ivy Ross.
+   - IBM: over 2,000 designers, led by Phil Gilbert.
+   - Airbnb: over 200 designers, led by Alex Schleifer.
+   - Uber: over 500 designers, led by Michael Gough.
+6. [ASSISTANT_SAID] The assistant listed notable design team leaders including Jony Ive, Dieter Rams, Paula Scher, Jonathan Adler, and Yves Behar.
+7. [USER] The user requested information about UK businesses with notable in-house design teams.
+8. [ASSISTANT_SAID] The assistant provided a list of UK businesses with notable in-house design teams, including:
+   - BBC
+   - Dyson
+   - Jaguar Land Rover
+   - Rolls-Royce
+   - The Guardian
+9. [ASSISTANT_SAID] The assistant mentioned that these UK businesses recognize the importance of design in creating successful products and services.
+10. [USER] The user asked for a table with companies focusing on graphic design and motion graphics for marketing campaigns.
+11. [ASSISTANT_CREATED] The assistant created a table with UK businesses specializing in graphic design and motion graphics for marketing campaigns, including:
+    - BBC, Large, Greg McLeod
+    - Burberry, Medium, Christopher Bailey
+    - HSBC, Large, Peter Dawson
+    - John Lewis, Medium, Paula Nickolds
+    - Marks & Spencer, Large, Tony Hoggett
+    - O2, Medium, Simon Davis
+    - Rolls-Royce, Large, Giles Taylor
+    - Sainsbury's, Medium, Mark Given
+    - Sky, Large, Sophie Dekkers
+    - Tesco, Large, Dave Lewis
+    - Virgin Atlantic, Medium, Nik Lusardi
+12. [USER] The user inquired about the number of people on the design teams of the listed companies.
+13. [ASSISTANT_SAID] The assistant stated that the

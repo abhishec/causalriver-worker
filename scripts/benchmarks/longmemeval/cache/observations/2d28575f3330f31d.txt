@@ -1,0 +1,26 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/02/07 (Tue) 11:15
+- [USER] User wants to write a new Clandly plugin in TypeScript.
+- [USER] User's plugin will be deployed on their servers.
+- [ASSISTANT_SAID] Assistant is happy to help create a new plugin for Clandly using TypeScript.
+- [ASSISTANT_SAID] Assistant suggests starting by setting up the basic structure of the plugin and implementing a simple function.
+- [ASSISTANT_SAID] Assistant provides steps to initialize the project, install dependencies, configure TypeScript, create the source directory, and implement the plugin.
+- [ASSISTANT_CREATED] Assistant provides a code snippet to initialize the project with `npm init -y`.
+- [ASSISTANT_CREATED] Assistant provides a code snippet to install TypeScript and other necessary dependencies.
+- [ASSISTANT_CREATED] Assistant provides a code snippet for a `tsconfig.json` file configuration.
+- [ASSISTANT_CREATED] Assistant provides instructions to create a `src` directory and a `clandlyPlugin.ts` file.
+- [ASSISTANT_SAID] User confirms they have the basic setup.
+- [ASSISTANT_SAID] Assistant suggests continuing by implementing the main functionality of the Clandly plugin.
+- [ASSISTANT_SAID] Assistant provides a code snippet to define the plugin interface in `src/clandlyPluginInterface.ts`.
+- [ASSISTANT_CREATED] Assistant provides a code snippet to implement the plugin class in `src/clandlyPlugin.ts`.
+- [ASSISTANT_SAID] User wants the plugin to get user details.
+- [ASSISTANT_SAID] Assistant suggests modifying the `onExecute` function to make an API request to the server using a library like `axios`.
+- [ASSISTANT_SAID] User requests additional methods: `getUsersAllMeetings`, `getUsersAllPartMeetings`, and `getUsersAllUpcomingMeetings`.
+- [ASSISTANT_SAID] User later adds `getUsersAllPastMeetings` to the list of methods.
+- [ASSISTANT_SAID] Assistant acknowledges the request and suggests modifying the plugin to include the new methods.
+- [ASSISTANT_SAID] Assistant provides a code snippet to install `axios`.
+- [ASSISTANT_SAID] Assistant updates the plugin class to include the new methods for retrieving user details and meetings.
+- [ASSISTANT_SAID] Assistant provides code snippets for the new methods: `getUserDetails`, `getUsersAllMeetings`, `getUsersAllPastMeetings`, and `getUsersAllUpcomingMeetings`.
+- [ASSISTANT_SAID] User questions the assistant's knowledge of Calendly APIs, asking if the assistant is making things up.
+- [

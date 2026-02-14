@@ -1,0 +1,23 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/03/28 (Tue) 19:05
+- [USER] User requests to act as the world's greatest Unity technical artist.
+- [USER] User mentions having a shader graph that renders a grid overlay in their world.
+- [USER] User asks how to animate the grid overlay in a cool way.
+- [ASSISTANT_SAID] Assistant suggests creating a custom Shader Graph named "AnimatedGridOverlay".
+- [ASSISTANT_SAID] Assistant instructs to open the Shader Graph editor after creating it.
+- [ASSISTANT_SAID] Assistant recommends adding a "Time" node to control animation speed.
+- [ASSISTANT_SAID] Assistant suggests creating three Vector1 nodes: "Grid Frequency", "Animation Speed", and "Grid Opacity" with default values (e.g., 10, 1, 0.5).
+- [ASSISTANT_SAID] Assistant advises multiplying the "Time" node's output by the "Animation Speed" node using a "Multiply" node.
+- [ASSISTANT_SAID] Assistant recommends using a "Sine" node to create a sinusoidal oscillation effect.
+- [ASSISTANT_SAID] Assistant suggests using a "One Minus" node to invert the sinusoidal oscillation.
+- [ASSISTANT_SAID] Assistant instructs to use a "Lerp" node to interpolate between two colors or textures based on the output of the "One Minus" node.
+- [ASSISTANT_SAID] Assistant advises connecting the two colors (one matching the grid lines and the other matching the background) to the "Lerp" node.
+- [ASSISTANT_SAID] Assistant suggests using the "UV" output of the "UV" node and multiplying it by the "Grid Frequency" node.
+- [ASSISTANT_SAID] Assistant recommends passing the result into a "Fraction" node to create a repeating grid pattern.
+- [ASSISTANT_SAID] Assistant instructs to use a "Step" node to control line thickness, setting the "Edge" input to a small value (e.g., 0.02).
+- [ASSISTANT_SAID] Assistant advises adding a "Max" node to combine horizontal and vertical lines of the grid.
+- [ASSISTANT_SAID] Assistant suggests multiplying the output of the "Max" node by the "Grid Opacity" node.
+- [ASSISTANT_SAID] Assistant recommends adding an "Add" node to combine the outputs of the "Lerp" node and the grid opacity.
+- [ASSISTANT_SAID] Assistant instructs to connect the output of the "Add" node to the "Base Color" input of the "PBR Master" node.
+- [ASSISTANT_SAID] Assistant advises saving

@@ -1,0 +1,24 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/12 (Fri) 20:13  
+[USER] User is interested in how emerging technologies such as blockchain and IoT are leveraged in supply chain management.  
+[ASSISTANT_SAID] Emerging technologies like blockchain and IoT are revolutionizing supply chain management by addressing challenges such as transparency, efficiency, and traceability.  
+[ASSISTANT_SAID] Blockchain technology is used for enhanced transparency and traceability in supply chains, creating a tamper-proof record of transactions.  
+[ASSISTANT_SAID] IoT devices, sensors, and RFID tags are used for better supply chain visibility, allowing real-time tracking of goods and monitoring of conditions affecting quality.  
+[ASSISTANT_SAID] Blockchain and IoT improve supply chain sustainability by tracking the origin of raw materials and monitoring energy and water usage.  
+[ASSISTANT_SAID] Blockchain and IoT improve supply chain efficiency through automation and digitization, reducing manual errors and costs.  
+[USER] User finds the information about technology in supply chain management interesting.  
+[USER] User inquires about companies using blockchain and IoT in their supply chains.  
+[ASSISTANT_SAID] Walmart uses blockchain technology to track the origin of food products for improved traceability and safety.  
+[ASSISTANT_SAID] Coca-Cola uses blockchain to track the production and delivery of bottling equipment, enhancing transparency and reducing costs.  
+[ASSISTANT_SAID] IBM and Maersk developed a blockchain-based platform called TradeLens to connect players in the global shipping industry, improving visibility and reducing paperwork.  
+[ASSISTANT_SAID] Nestle uses IoT sensors to monitor the quality and safety of products during transportation and storage.  
+[ASSISTANT_SAID] Provenance is a blockchain-based platform that allows consumers to trace the origin of products, increasing transparency and trust.  
+[ASSISTANT_SAID] More companies are expected to adopt blockchain and IoT technologies in the coming years for improved efficiency, transparency, and sustainability.  
+[USER] User expresses excitement about how technology is changing the supply chain industry and wonders about other industries that could benefit from these technologies.  
+[ASSISTANT_SAID] Other industries that could benefit from blockchain and IoT include healthcare, finance, agriculture, energy, and manufacturing.  
+[ASSISTANT_SAID] In healthcare, blockchain can secure patient data and improve logistics for medical supplies.  
+[ASSISTANT_SAID] In finance, blockchain enables secure and verifiable financial transactions.  
+[ASSISTANT_SAID] In agriculture, these technologies promote sustainable practices through greater traceability and transparency.  
+[ASSISTANT_SAID] In energy, IoT sensors can monitor consumption patterns and improve logistics.  
+[ASSISTANT_SAID] In manufacturing

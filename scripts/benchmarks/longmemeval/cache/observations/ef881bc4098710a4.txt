@@ -1,0 +1,29 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/08/25 (Fri) 17:01
+- [FACT] User has a fiddle leaf fig named Freddy.
+- [FACT] User has a snake plant named Samantha.
+- [FACT] User has a peace lily named Lily.
+- [FACT] User has a spider plant named Charlotte.
+- [RELATIONSHIP] User's sister is mentioned; user has given her a propagated snake plant.
+- [EVENT] User propagated new snake plants from Samantha and gave one to their sister.
+- [EVENT] User plans to give their sister a new spider plant baby propagated from Charlotte.
+- [PREFERENCE] User is unsure if they are overwatering or underwatering Freddy.
+- [ASSISTANT_SAID] Droopy leaves in fiddle leaf figs can be caused by overwatering, underwatering, or environmental conditions.
+- [ASSISTANT_SAID] Questions to help troubleshoot Freddy's care include watering schedule, soil moisture, potting mix, light and temperature, humidity, fertilization, pests, and pruning.
+- [FACT] User waters Freddy every other day without checking soil moisture.
+- [FACT] User uses a general-purpose potting mix for Freddy.
+- [FACT] Freddy gets direct sunlight for about 2-3 hours in the morning.
+- [FACT] Room temperature for Freddy is around 70-72°F (21-22°C).
+- [FACT] User fertilized Freddy once a month ago but hasn't been fertilizing regularly.
+- [FACT] User hasn't noticed any pests on Freddy.
+- [FACT] User hasn't pruned Freddy yet but plans to soon.
+- [ASSISTANT_SAID] Recommendations for Freddy include checking soil moisture before watering, repotting in a well-draining mix, and fertilizing every 2-3 weeks during the growing season.
+- [ASSISTANT_SAID] For Lily, the peace lily, user should check soil moisture and water when the top 1-2 inches feel dry, and the pebble tray can help with humidity.
+- [ASSISTANT_SAID] User should water Lily thoroughly and consider misting her leaves occasionally for humidity.
+- [EVENT] User is considering getting new pots for their plants, especially for Basilica, the basil plant.
+- [ASSISTANT_SAID] Recommendations for pots for basil include terracotta pots, ceramic pots, self-watering pots, and hanging baskets.
+- [ASSISTANT_SAID] Suggested pot size for basil is at least 6-8 inches deep and 8-12 inches wide.
+- [ASSISTANT_SAID] Popular brands for herb pots include Lechuza, Umbra, and ceramic pots from Etsy sellers.
+- [EVENT] User is planning to repot Charlotte, the spider plant.
+- [ASSISTANT_SAID] Recommendations for pots for spider plants include hanging baskets,

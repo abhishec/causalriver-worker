@@ -1,0 +1,45 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/25 (Thu) 01:55  
+[USER] User inquired about checking if an array has exactly the same elements as another in SQL, where the order does not matter.  
+[ASSISTANT_SAID] Assistant explained the use of the INTERSECT operator in SQL to find common elements between two arrays and provided an example query.  
+[ASSISTANT_CREATED] Assistant created an SQL query that uses the INTERSECT operator to compare two arrays:  
+```
+WITH array1 AS (SELECT ARRAY[1, 2, 3]::integer[] as arr),
+     array2 AS (SELECT ARRAY[3, 2, 1]::integer[] as arr)
+SELECT COUNT(*) = (SELECT COUNT(*) FROM array1)
+FROM array1
+INTERSECT
+SELECT * FROM array2;
+```  
+[USER] User requested a rewrite of a function to use the INTERSECT operator from SQL.  
+[USER] User provided a JavaScript function named `hasActiveFunction` that checks for active functions based on edge configuration IDs.  
+[ASSISTANT_SAID] Assistant provided a modified version of the `hasActiveFunction` function that incorporates the INTERSECT operator.  
+[ASSISTANT_CREATED] Assistant created a new version of the `hasActiveFunction` function with the following key details:  
+```
+async function hasActiveFunction(ownerId: string, edgeConfigIds: string[]) {
+  const filter: Record<string, string> = {};
+
+  edgeConfigIds.forEach((id, index) => {
+    const filterName = `edgeConfigId${index}`;
+    filter[filterName] = id;
+  });
+
+  const [fn = null] = await getCosmos().queryDocuments<ServerlessFunction>(
+    Collection.FUNCTIONS,
+    `SELECT TOP 1 * FROM c WHERE c.state = "READY" AND ARRAY_LENGTH(c.edgeConfigIds) = @count 
+    AND (SELECT COUNT(*) FROM UNNEST(@edgeConfigIds) INTERSECT SELECT COUNT(*) FROM UNNEST(c.edgeConfigIds)) = @count`,
+    {
+      ...filter,
+      count: edgeConfigIds.length,
+    },
+    {
+      partitionKey: ownerId,
+    },
+  );
+
+  return fn;
+}
+```  
+[ASSISTANT_SAID] Assistant noted that the function uses the INTERSECT operator to find common elements between the `edgeConfigIds` array and the `edgeConfigIds` in the documents, comparing counts to check for equality regardless of order.  
+[ASSISTANT_SAID] Assistant advised that the provided code is an example and may need adjustments to fit the user's specific use case and data structure.

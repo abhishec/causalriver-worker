@@ -1,0 +1,30 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/02/04 (Sat) 13:02
+- [FACT] User has a community tank that has been set up for one month.
+- [PREFERENCE] User is experiencing issues with fin nipping in their community tank.
+- [EVENT] User is considering adding new tankmates to distract aggressive fish and reduce nipping behavior.
+- [ASSISTANT_SAID] Suggested tankmates to distract aggressive fish include: 
+  - Zebra danios: Active, fast-swimming fish.
+  - Harlequin rasboras: Schooling fish that create a "distracting" presence.
+  - Corydoras catfish: Bottom-dwellers often ignored by fin nippers.
+- [ASSISTANT_SAID] Suggested counter-aggressors include:
+  - Angelfish: Assertive fish with long, flowing fins.
+  - Dwarf cichlids: Some species like Apistogramma or Rams can help keep fin nippers in check.
+- [ASSISTANT_SAID] Recommended avoiding fin-nipping prone species like tiger barbs or certain tetras.
+- [ASSISTANT_SAID] Advised to introduce new fish slowly to prevent overwhelming aggressive fish.
+- [ASSISTANT_SAID] Suggested monitoring and adjusting tank setup if fin nipping persists.
+- [FACT] User has corydoras catfish in their tank.
+- [PREFERENCE] User is considering adding harlequin rasboras or zebra danios.
+- [ASSISTANT_SAID] Recommended adding new schooling fish in a school of 6-10 to create a natural environment and reduce stress.
+- [ASSISTANT_SAID] Advised against adding a single individual to prevent harassment or bullying.
+- [ASSISTANT_SAID] Suggested acclimating new fish slowly and releasing the school together.
+- [ASSISTANT_SAID] Recommended providing plenty of hiding places in the tank.
+- [USER_SAID] User has been doing bi-weekly water changes and monitoring water parameters closely.
+- [USER_SAID] User has noticed a slight increase in nitrate levels.
+- [ASSISTANT_SAID] Suggested increasing water change frequency to weekly or every 4-5 days to lower nitrate levels.
+- [ASSISTANT_SAID] Recommended increasing water change volume to 20-25%.
+- [ASSISTANT_SAID] Advised optimizing the aquarium's biological cycle by ensuring efficient filtration and maintaining a balanced bioload.
+- [ASSISTANT_SAID] Suggested reviewing feeding schedule to avoid overfeeding and considering high-quality food to minimize waste.
+- [ASSISTANT_SAID] Recommended using nitrate-absorbing media or plants to help reduce nitrates.
+- [ASSISTANT_SAID] Advised to continuously monitor nitrate levels and adjust strategies as

@@ -1,0 +1,58 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2022/03/14 (Mon) 18:33  
+[ASSISTANT_SAID] To integrate the pest and disease component into the database, a new table for the component is needed.  
+[ASSISTANT_SAID] The table should include columns for `id`, `pest_or_disease`, `name`, `description`, `symptoms`, `causes`, `treatments`, and `prevention`.  
+[ASSISTANT_SAID] SQL code provided to create the table:  
+```sql
+CREATE TABLE pest_disease (
+  id INTEGER PRIMARY KEY,
+  pest_or_disease TEXT NOT NULL,
+  name TEXT NOT NULL,
+  description TEXT,
+  symptoms TEXT,
+  causes TEXT,
+  treatments TEXT,
+  prevention TEXT
+);
+```  
+[ASSISTANT_SAID] Backend code for inserting a new record provided, including a POST request example.  
+[ASSISTANT_SAID] Example backend code for inserting a new pest or disease record:  
+```javascript
+app.post('/pests_diseases', function(req, res) {
+  var pest_or_disease = req.body.pest_or_disease;
+  var name = req.body.name;
+  var description = req.body.description;
+  var symptoms = req.body.symptoms;
+  var causes = req.body.causes;
+  var treatments = req.body.treatments;
+  var prevention = req.body.prevention;
+
+  var sql = "INSERT INTO pest_disease (pest_or_disease, name, description, symptoms, causes, treatments, prevention) VALUES (?, ?, ?, ?, ?, ?, ?)";
+  var params = [pest_or_disease, name, description, symptoms, causes, treatments, prevention];
+
+  db.run(sql, params, function(err) {
+    if (err) {
+      console.log(err);
+      res.status(500).send(err);
+    } else {
+      res.send("Record inserted");
+    }
+  });
+});
+```  
+[ASSISTANT_SAID] Frontend UI modifications suggested to allow users to search for pests or diseases and display relevant information.  
+[USER] Requested integration with alert and notification for the pest and disease control management component.  
+[ASSISTANT_SAID] Suggested creating a notification/alerts table in the database to store notifications/alerts data such as title, message, timestamp, and status.  
+[ASSISTANT_SAID] Backend code provided for creating notifications table and managing notifications.  
+[ASSISTANT_SAID] Example backend code for creating notifications table:  
+```javascript
+const createNotificationsTable = async () => {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS notifications (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        message TEXT NOT NULL,
+        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        status VARCHAR(10) NOT NULL

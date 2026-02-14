@@ -1,0 +1,28 @@
+{
+  "answer_edb03329": [
+    {
+      "fact": "User enjoys using Adobe Premiere Pro for video editing",
+      "type": "preference",
+      "entities": [
+        "Adobe Premiere Pro",
+        "video editing"
+      ]
+    },
+    {
+      "fact": "User is trying to learn more about advanced settings for video editing",
+      "type": "preference",
+      "entities": [
+        "advanced settings",
+        "video editing"
+      ]
+    },
+    {
+      "fact": "User wants to know more about the Lumetri Color Panel and its Color Match feature",
+      "type": "preference",
+      "entities": [
+        "Lumetri Color Panel",
+        "Color Match feature"
+      ]
+    }
+  ]
+}

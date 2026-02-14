@@ -1,0 +1,71 @@
+{
+  "answer_77f32504_1": [
+    {
+      "fact": "User is working on a project that involves text analysis and sentiment analysis.",
+      "type": "event",
+      "entities": [
+        "text analysis",
+        "sentiment analysis"
+      ]
+    },
+    {
+      "fact": "User is brushing up on Python skills by watching Corey Schafer's Python programming series on YouTube.",
+      "type": "personal",
+      "entities": [
+        "Python",
+        "Corey Schafer",
+        "YouTube"
+      ]
+    },
+    {
+      "fact": "User has completed 20 videos in Corey Schafer's Python programming series.",
+      "type": "event",
+      "entities": [
+        "20 videos",
+        "Corey Schafer",
+        "Python programming series"
+      ]
+    },
+    {
+      "fact": "User is interested in using spaCy for their project.",
+      "type": "preference",
+      "entities": [
+        "spaCy"
+      ]
+    }
+  ],
+  "answer_77f32504_2": [
+    {
+      "fact": "User is thinking of applying NLP to a project",
+      "type": "event",
+      "entities": [
+        "NLP",
+        "project"
+      ]
+    },
+    {
+      "fact": "User has been preparing for NLP by watching Corey Schafer's Python series",
+      "type": "personal",
+      "entities": [
+        "Corey Schafer",
+        "Python series"
+      ]
+    },
+    {
+      "fact": "User has completed 30 videos of Corey Schafer's series",
+      "type": "personal",
+      "entities": [
+        "30 videos",
+        "Corey Schafer's series"
+      ]
+    },
+    {
+      "fact": "User plans to start with the DataCamp course for NLP",
+      "type": "preference",
+      "entities": [
+        "DataCamp course",
+        "NLP"
+      ]
+    }
+  ]
+}

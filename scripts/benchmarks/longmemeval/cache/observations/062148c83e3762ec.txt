@@ -1,0 +1,37 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/06/28 (Wed) 17:32
+- [USER] The user has a garden with tomatoes and basil.
+- [USER] The user planted a patch of sunflowers and zinnias to attract more bees and butterflies to their garden.
+- [USER] The user is excited to see the sunflowers and zinnias bloom.
+- [ASSISTANT_SAID] Companion planting is a great way to create a harmonious and thriving garden ecosystem.
+- [ASSISTANT_SAID] Good companions for tomatoes include basil, oregano, marigold, borage, and chives.
+- [ASSISTANT_SAID] Bad companions for tomatoes include fennel, potato, and members of the Brassica family (broccoli, cauliflower, kale).
+- [ASSISTANT_SAID] Good companions for basil include tomatoes, peppers, oregano, and marigold.
+- [ASSISTANT_SAID] Basil can be sensitive to strong-scented herbs like sage and rosemary.
+- [ASSISTANT_SAID] General tips include planting marigold and nasturtium around the perimeter of the garden, avoiding planting members of the same plant family together, and considering the mature size of plants to prevent overcrowding.
+- [USER] The user is looking for natural ways to deter slugs and snails from eating their plants.
+- [ASSISTANT_SAID] Natural ways to deter slugs and snails include:
+  1. Copper barriers
+  2. Crushed eggshells
+  3. Coffee grounds
+  4. Beer traps
+  5. Companion planting with marigolds, chives, and garlic
+  6. Physical barriers like copper mesh and fine-netting
+  7. Diatomaceous earth
+  8. Traps using lettuce or potato scraps
+  9. Encouraging natural predators like toads and hedgehogs
+  10. Keeping the garden clean
+- [USER] The user has been using a soaker hose to water their garden.
+- [USER] The user is wondering about specific watering tips to prevent slugs and snails from thriving in their garden.
+- [ASSISTANT_SAID] Tips for watering to prevent slugs and snails include:
+  1. Avoid overwatering
+  2. Water in the morning
+  3. Avoid watering at night
+  4. Use drip irrigation
+  5. Mulch carefully
+  6. Create a dry barrier
+  7. Monitor soil moisture
+  8. Collect water
+- [USER] The user is curious about specific plants that are naturally resistant to slugs and snails.
+- [ASSISTANT_SAID] Plants that are naturally resistant to slugs and snails include:

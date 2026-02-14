@@ -1,0 +1,33 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/25 (Thu) 00:39
+- [EVENT] User is planning to wash their car soon.
+- [EVENT] User needs tips on how to get rid of streaks on the interior of their car.
+- [EVENT] User needs to grab some microfiber cloths to clean the interior of their car.
+- [PREFERENCE] User's current microfiber cloths are getting old and streaky.
+- [ASSISTANT_SAID] Cleaning the interior of a car can be challenging but can be done effectively with the right techniques and tools.
+- [ASSISTANT_SAID] Recommended using high-quality microfiber cloths made from 100% microfiber that are soft, dense, lint-free, and non-abrasive.
+- [ASSISTANT_SAID] Suggested tips for streak-free interior cleaning:
+  1. Dust first with a soft-bristled brush or dry microfiber cloth.
+  2. Use gentle, streak-free cleaning products designed for automotive interiors.
+  3. Dampen, don't soak, the microfiber cloth.
+  4. Clean in sections to prevent dirt from spreading.
+  5. Use a circular motion while cleaning.
+  6. Avoid applying too much pressure.
+  7. Use a clean, dry microfiber cloth to wipe down after cleaning.
+  8. Inspect and repeat if necessary.
+- [ASSISTANT_SAID] Additional tips include cleaning in a shaded area, avoiding paper towels, and using detailing sprays for stubborn streaks or stains.
+- [EVENT] User is wondering about recommendations for car wash soaps.
+- [EVENT] User used a car wash soap from the auto store on Main Street last time.
+- [ASSISTANT_SAID] Recommended factors to consider when choosing car wash soap:
+  1. pH Level: Look for a soap with a pH level close to neutral (pH 7).
+  2. Concentrate vs. Ready-to-Use: Concentrated soaps offer better value.
+  3. Foaming Ability: A good soap should produce rich, thick foam.
+  4. Gentle on Paint and Trim: Opt for soaps designed to be gentle.
+  5. Biodegradable and Environmentally Friendly: Consider eco-friendly options.
+- [ASSISTANT_SAID] Recommended car wash soaps:
+  1. Meguiar's Gold Class Car Wash (Concentrate, pH 7.5)
+  2. Chemical Guys Car Wash Soap (Concentrate, pH 7.0)
+  3. Autoglym Car Wash (Ready-to-Use, pH 7.0)
+  4. Turtle Wax Car Wash Soap (Concentrate, pH 7.5)
+  5. Mothers California Gold Car Wash (Concentrate, pH 7

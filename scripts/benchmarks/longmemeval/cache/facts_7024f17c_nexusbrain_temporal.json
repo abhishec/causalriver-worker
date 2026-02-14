@@ -1,0 +1,126 @@
+{
+  "answer_a21f3697_3": [
+    {
+      "fact": "User is looking for healthy lunch ideas that are quick to prepare.",
+      "type": "preference",
+      "entities": [
+        "healthy lunch ideas",
+        "quick preparation"
+      ]
+    },
+    {
+      "fact": "User is trying to squeeze in a workout during lunch.",
+      "type": "preference",
+      "entities": [
+        "workout",
+        "lunch"
+      ]
+    },
+    {
+      "fact": "User hopes to get back into yoga this week.",
+      "type": "event",
+      "entities": [
+        "yoga",
+        "this week"
+      ]
+    },
+    {
+      "fact": "User plans to start with one or two yoga sessions a week.",
+      "type": "preference",
+      "entities": [
+        "yoga sessions",
+        "one or two sessions"
+      ]
+    },
+    {
+      "fact": "User is a beginner in yoga.",
+      "type": "personal",
+      "entities": [
+        "beginner",
+        "yoga"
+      ]
+    }
+  ],
+  "answer_a21f3697_2": [
+    {
+      "fact": "User is trying to get more organized with their time.",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User used to practice yoga three times a week for 2 hours each time.",
+      "type": "personal",
+      "entities": [
+        "yoga"
+      ]
+    },
+    {
+      "fact": "User has been slacking off on yoga practice for this month.",
+      "type": "personal",
+      "entities": [
+        "yoga"
+      ]
+    },
+    {
+      "fact": "User is trying to get back into yoga practice.",
+      "type": "opinion",
+      "entities": [
+        "yoga"
+      ]
+    },
+    {
+      "fact": "User plans to try out Todoist and Down Dog.",
+      "type": "preference",
+      "entities": [
+        "Todoist",
+        "Down Dog"
+      ]
+    },
+    {
+      "fact": "User is looking for tips on how to prioritize tasks.",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User is a beginner trying to get back into yoga.",
+      "type": "personal",
+      "entities": [
+        "yoga"
+      ]
+    }
+  ],
+  "answer_a21f3697_1": [
+    {
+      "fact": "User is trying to get more organized with their fitness routine",
+      "type": "preference",
+      "entities": [
+        "fitness routine"
+      ]
+    },
+    {
+      "fact": "User went for a 30-minute jog around the neighborhood on Saturday",
+      "type": "event",
+      "entities": [
+        "30-minute jog",
+        "neighborhood",
+        "Saturday"
+      ]
+    },
+    {
+      "fact": "User likes the workout log template provided",
+      "type": "opinion",
+      "entities": [
+        "workout log template"
+      ]
+    },
+    {
+      "fact": "User prefers to set a reminder on their phone to update the workout log",
+      "type": "preference",
+      "entities": [
+        "reminder",
+        "phone",
+        "workout log"
+      ]
+    }
+  ]
+}

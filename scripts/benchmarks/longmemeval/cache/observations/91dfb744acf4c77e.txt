@@ -1,0 +1,38 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/23 (Tue) 04:31
+- [EVENT] User is planning to add new plants to their garden.
+- [EVENT] User recently attended a gardening workshop at a local community center about a month ago.
+- [PREFERENCE] User is excited to try out companion planting.
+- [ASSISTANT_SAID] Companion planting is the practice of growing different plants together to improve their growth, health, and productivity.
+- [ASSISTANT_SAID] Benefits of companion planting include: deter pests and diseases, attract beneficial insects, improve soil health, increase crop yields, and enhance flavor and nutrition.
+- [USER] User is planning to add herbs, specifically mint and lemongrass, to their garden.
+- [PREFERENCE] User is trying to create a garden that attracts bees and butterflies.
+- [ASSISTANT_SAID] Mint and lemongrass are wonderful additions to a pollinator-friendly garden and will attract bees and butterflies.
+- [ASSISTANT_SAID] Companion planting suggestions for mint include: 
+  - Bee-friendly companions: lavender, coneflower, black-eyed Susan.
+  - Pest-repelling companions: tomatoes, peppers, eggplants.
+  - Soil-improving companions: comfrey.
+- [ASSISTANT_SAID] Companion planting suggestions for lemongrass include:
+  - Pollinator-friendly companions: marigold, zinnia, cosmos.
+  - Pest-repelling companions: citronella grass, basil.
+  - Shade-providing companions: thyme, oregano.
+- [ASSISTANT_SAID] General tips for creating a pollinator-friendly garden include: 
+  - Plant a variety of flowers that bloom at different times.
+  - Incorporate native plants.
+  - Avoid using pesticides.
+  - Provide a source of water for pollinators.
+- [USER] User is thinking of adding marigolds to their garden to deter nematodes that can harm their tomatoes.
+- [ASSISTANT_SAID] Marigolds are an excellent addition to the garden and can help deter nematodes.
+- [ASSISTANT_SAID] Benefits of planting marigolds with tomatoes include:
+  - Nematode control.
+  - Pest control (repelling whiteflies, aphids).
+  - Soil health improvement.
+  - Companion planting benefits.
+- [ASSISTANT_SAID] Tips for planting marigolds with tomatoes include:
+  - Plant marigolds around the perimeter or interplant with tomatoes.
+  - Use a combination of marigold varieties.
+  - Rotate crops annually.
+- [USER] User is thinking of using homegrown herbs like basil and cilantro to make natural pest repellents.
+- [ASSISTANT_SAID] Recipes for natural pest repellents using basil and cilantro include:
+  - **B

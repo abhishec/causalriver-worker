@@ -1,0 +1,22 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/02/20 (Mon) 19:29
+- [EVENT] User is trying to plan out their TV schedule for the next few weeks.
+- [ASSISTANT_SAID] Assistant is happy to help the user keep track of their TV shows.
+- [USER] User is currently watching the following shows: "The Walking Dead" on AMC, "Succession" on HBO, "Stranger Things" on Netflix, "Beat Bobby Flay" on Food Network, and "Chopped" on Food Network.
+- [EVENT] User recently finished watching "Ozark" on Netflix, which had 10 episodes in its third season.
+- [ASSISTANT_SAID] Assistant summarized the shows the user is currently watching.
+- [ASSISTANT_SAID] Assistant noted that "Ozark" does not need to be tracked but is open to discussing it.
+- [USER] User asked for reminders about when new episodes of "The Walking Dead" and "Succession" usually air.
+- [ASSISTANT_SAID] "The Walking Dead" new episodes typically air on Sundays at 9:00 PM ET/PT on AMC.
+- [ASSISTANT_SAID] "Succession" new episodes typically air on Sundays at 9:00 PM ET/PT on HBO.
+- [ASSISTANT_SAID] "Stranger Things" 4th season is in production, with Volume 1 premiering on May 27, 2022, and Volume 2 on July 1, 2022.
+- [ASSISTANT_SAID] Dates for "The Walking Dead" and "Succession" are subject to change.
+- [USER] User inquired about the schedules for "Beat Bobby Flay" and "Chopped" on Food Network.
+- [ASSISTANT_SAID] "Beat Bobby Flay" typically airs new episodes on Thursdays at 8:00 PM ET/PT, with reruns at various times.
+- [ASSISTANT_SAID] "Chopped" typically airs new episodes on Tuesdays at 9:00 PM ET/PT, with reruns at various times.
+- [ASSISTANT_SAID] Both shows often have themed episodes or special events that might air at different times.
+- [ASSISTANT_SAID] Suggested checking Food Network's website or social media for updates on new episodes and schedule changes.
+- [USER] User expressed interest in starting "Game of Thrones" from the beginning and asked for details on how many episodes there are.
+- [ASSISTANT_SAID] "Game of Thrones" consists of 8 seasons and a total of 73 episodes.
+- [ASSISTANT_SAID] Breakdown of episodes: Season 1: 10 episodes, Season 2: 10 episodes, Season 3:

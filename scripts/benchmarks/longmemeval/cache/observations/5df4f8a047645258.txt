@@ -1,0 +1,34 @@
+**Observation Log:**
+
+[FACT] User has recently started taking yoga classes on Tuesdays and Thursdays.  
+[FACT] User has added a Monday evening Pilates class to their routine.  
+[PREFERENCE] User is looking for healthy lunch ideas that provide energy for their afternoon yoga class.  
+[PREFERENCE] User is curious about post-workout snacks for recovery after their HIIT class on Saturdays.  
+[PREFERENCE] User is interested in trying out new yoga poses to challenge themselves.  
+[EVENT] User has been enjoying their yoga classes.  
+[CHANGE] User has recently added Pilates to their fitness routine.  
+[TEMPORAL] Session date is 2023/01/15 (Sun) 12:51.  
+[ASSISTANT_SAID] Suggested healthy lunch ideas include:  
+[ASSISTANT_SAID] 1. Grilled chicken breast with quinoa and veggies.  
+[ASSISTANT_SAID] 2. Lentil soup with whole-grain bread.  
+[ASSISTANT_SAID] 3. Turkey and avocado wrap.  
+[ASSISTANT_SAID] 4. Brown rice and roasted vegetable bowl.  
+[ASSISTANT_SAID] 5. Whole-grain pita with hummus and veggies.  
+[ASSISTANT_SAID] 6. Oatmeal with banana and nuts.  
+[ASSISTANT_SAID] 7. Greek yogurt with berries and honey.  
+[ASSISTANT_SAID] 8. Trail mix with nuts, seeds, and dried fruits.  
+[ASSISTANT_SAID] 9. Infused water with fruits and herbs.  
+[ASSISTANT_SAID] Additional tips for lunch include eating a balanced meal 1-2 hours before yoga, avoiding heavy foods, and staying hydrated.  
+[ASSISTANT_SAID] Suggested post-workout snacks for recovery after HIIT include:  
+[ASSISTANT_SAID] 1. Greek yogurt with berries and honey.  
+[ASSISTANT_SAID] 2. Hard-boiled eggs.  
+[ASSISTANT_SAID] 3. Cottage cheese with fruit.  
+[ASSISTANT_SAID] 4. Banana with almond butter.  
+[ASSISTANT_SAID] 5. Apple slices with peanut butter.  
+[ASSISTANT_SAID] 6. Whole-grain crackers with avocado.  
+[ASSISTANT_SAID] 7. Turmeric latte.  
+[ASSISTANT_SAID] 8. Ginger and honey.  
+[ASSISTANT_SAID] 9. Pineapple and coconut water.  
+[ASSISTANT_SAID] 10. Protein smoothie.  
+[ASSISTANT_SAID] 11. Trail mix with nuts and seeds.  
+[ASSISTANT_SAID] 12.

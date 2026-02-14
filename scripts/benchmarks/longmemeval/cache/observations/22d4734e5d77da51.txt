@@ -1,0 +1,32 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/20 (Sat) 01:18  
+[FACT] User wakes up at 7:30 am.  
+[FACT] User is usually out of the house by 8 am.  
+[PREFERENCE] User is trying to plan meals for the week.  
+[PREFERENCE] User prefers healthy lunch ideas that are easy to pack and won't spoil easily.  
+[PREFERENCE] User has been having oatmeal with banana and honey for breakfast every morning.  
+[PREFERENCE] User is looking for healthy snack options that are easy to prepare and won't spoil easily.  
+[PREFERENCE] User wants to mix up their snacks from just having apples on the counter.  
+[ASSISTANT_SAID] Suggested healthy lunch ideas include:  
+[ASSISTANT_SAID] 1. Whole grain wraps with turkey, avocado, and veggies  
+[ASSISTANT_SAID] 2. PB&J on whole grain bread with a banana or apple slices  
+[ASSISTANT_SAID] 3. Grilled chicken or tuna salad sandwiches on whole grain bread  
+[ASSISTANT_SAID] 4. Pre-washed mixed greens with protein and veggies  
+[ASSISTANT_SAID] 5. Quinoa or brown rice bowls with roasted veggies, beans, and vinaigrette  
+[ASSISTANT_SAID] 6. Apple slices with almond butter and cheddar cheese  
+[ASSISTANT_SAID] 7. Grapes and crackers with feta cheese  
+[ASSISTANT_SAID] 8. Berries with Greek yogurt and granola  
+[ASSISTANT_SAID] 9. Last night's dinner reheated in a thermos  
+[ASSISTANT_SAID] 10. Hard-boiled eggs and whole grain crackers  
+[ASSISTANT_SAID] 11. Trail mix with nuts, seeds, and dried fruits  
+[ASSISTANT_SAID] 12. Cottage cheese with fruit or cucumber slices  
+[ASSISTANT_SAID] 13. Layered salads in mason jars  
+[ASSISTANT_SAID] 14. Overnight oats with fruits and nuts  
+[ASSISTANT_SAID] 15. Soups like black bean, lentil, or tomato soup  
+[ASSISTANT_SAID] Suggested tips for quick morning prep include:  
+[ASSISTANT_SAID] 1. Prep ingredients the night before or on the weekend  
+[ASSISTANT_SAID] 2. Use a slow cooker or Instant Pot  
+[ASSISTANT_SAID] 3. Pack non-perishable items in small containers  
+[ASSISTANT_SAID] 4. Invest in a good thermos or insulated container  
+[ASSISTANT_SAID] Suggested green tea brands known for digestive benefits include:

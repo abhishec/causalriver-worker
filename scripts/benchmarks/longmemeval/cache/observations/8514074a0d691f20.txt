@@ -1,0 +1,34 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2024/01/10 (Wed) 04:24
+- [FACT] User was waking up at 7:00 am from March 15th to April 1st.
+- [PREFERENCE] User wants to create a morning routine that includes yoga, journaling, and meditation.
+- [PREFERENCE] User's goal for the morning routine is to increase energy levels and set a positive tone for the day.
+- [FACT] User needs to start their day at 8:00 am.
+- [PREFERENCE] User wants to dedicate about 1.5 hours to their morning routine.
+- [ASSISTANT_SAID] Assistant offered to help create a personalized morning routine and asked for user preferences and goals.
+- [ASSISTANT_SAID] Assistant suggested a morning routine starting at 6:30 AM, including hydration, yoga, journaling, breakfast, and meditation.
+- [ASSISTANT_CREATED] Assistant created a detailed morning routine:
+  - **6:30 AM - Wake-up Time**
+  - **6:40 AM - Hydration and Refreshment (10 minutes)**
+  - **6:50 AM - Yoga (30 minutes)**
+  - **7:20 AM - Journaling (20 minutes)**
+  - **7:40 AM - Breakfast (20 minutes)**
+  - **7:55 AM - Meditation (15 minutes)**
+  - **8:00 AM - Get Ready for the Day**
+- [CHANGE] User requested to include breakfast in their morning routine.
+- [ASSISTANT_SAID] Assistant adjusted the routine to include breakfast between journaling and meditation.
+- [PREFERENCE] User is interested in incorporating different yoga styles, specifically vinyasa and yin yoga.
+- [PREFERENCE] User is interested in using props like blocks and straps to help with alignment and flexibility.
+- [ASSISTANT_SAID] Assistant provided tips on incorporating different yoga styles and routines into the user's practice.
+- [ASSISTANT_SAID] Assistant recommended exploring various yoga styles, creating theme-based practices, and using props.
+- [ASSISTANT_SAID] Assistant suggested online resources and yoga apps to help the user get started with new styles and techniques.
+- [ASSISTANT_SAID] Assistant recommended the following online resources and apps:
+  - **Yoga International**
+  - **Do You Yoga**
+  - **YogaGlo**
+  - **Down Dog**
+  - **Yoga Studio**
+  - **Peloton Digital**
+  - **YouTube Channels: Yoga With Adriene, Dylan Werner Yoga, Sarah Beth Yoga**
+- [PREFERENCE] User expressed excitement about trying the Down Dog app for vinyasa classes.

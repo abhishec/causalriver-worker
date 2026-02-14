@@ -1,0 +1,28 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/24 (Wed) 02:45
+- [FACT] User is looking for BBQ sauce recipes.
+- [PREFERENCE] User had the best brisket sandwich at Bubba's BBQ yesterday, which inspired them to try making something similar at home.
+- [ASSISTANT_SAID] Assistant provided a selection of BBQ sauce recipes, including:
+  - **Classic Kansas City-Style BBQ Sauce**: 1 cup ketchup, 1/2 cup apple cider vinegar, 2 tablespoons brown sugar, 2 tablespoons Worcestershire sauce, 1 teaspoon smoked paprika, 1 teaspoon garlic powder, 1 teaspoon onion powder, salt and pepper to taste.
+  - **Texas-Style BBQ Sauce**: 1 cup ketchup, 1/2 cup beef broth, 2 tablespoons chili powder, 1 teaspoon ground cumin, 1 teaspoon smoked paprika, 1/2 teaspoon cayenne pepper (optional), salt and pepper to taste.
+  - **Sweet and Smoky BBQ Sauce**: 1 cup ketchup, 1/2 cup honey, 2 tablespoons apple cider vinegar, 2 tablespoons Dijon mustard, 1 teaspoon smoked paprika, 1 teaspoon brown sugar, 1/2 teaspoon garlic powder, salt and pepper to taste.
+  - **Spicy BBQ Sauce**: 1 cup ketchup, 1/2 cup hot sauce (such as Frank's RedHot), 2 tablespoons brown sugar, 1 teaspoon smoked paprika, 1 teaspoon garlic powder, 1/2 teaspoon onion powder, salt and pepper to taste.
+- [ASSISTANT_SAID] Assistant provided tips for achieving tender, fall-apart brisket, including:
+  - Choosing the right cut of meat (whole brisket or packer brisket).
+  - Dry brining with kosher salt for 2-3 days.
+  - Cooking at a low temperature (225-250°F) for 10-12 hours.
+  - Using wood smoke (post oak, mesquite, or apple wood).
+  - Resting the brisket for 1-2 hours after cooking.
+  - Slicing against the grain.
+  - Not trimming too much fat.
+  - Braising in liquid if short on time.
+  - Monitoring temperature and using the "bend test."
+  - Practicing to improve results.
+- [PREFERENCE] User plans to try the Texas-Style BBQ Sauce first.
+- [ASSISTANT_SAID] Assistant recommended wood types for smoking brisket, including:
+  - Post Oak: strong, smoky flavor with notes of vanilla and caramel.
+  - Mesquite: strong, earthy flavor; use cautiously.
+  - Hickory: strong, sweet, and savory flavor with notes of bacon.
+  - Pecan: mild, sweet, nutty flavor.
+  - Oak with a hint of Cherry or Plum: adds fruity sweetness

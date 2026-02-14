@@ -1,0 +1,24 @@
+**Observation Log:**
+
+- [FACT] User's name is Vijay Kanase.
+- [FACT] User's email is vkanase@okstate.edu.
+- [FACT] User's LinkedIn profile is https://www.linkedin.com/in/vijay-kanase/.
+- [FACT] User's phone number is 405-780-5053.
+- [FACT] User has an H1B visa approved.
+- [FACT] User has a Master of Science in Industrial Engineering and Management from Oklahoma State University, graduated in May 2021 with a GPA of 3.7/4.0.
+- [FACT] User has a Bachelor of Science in Mechanical Engineering from the University of Pune, India, graduated in July 2017 with a GPA of 3.6/4.0.
+- [FACT] User's skills include Data Analytics (MySQL, Advanced Excel, SQL, Tableau), Statistical Analysis (Regression, Predictive Modeling), Supply Chain (Forecasting, Logistics, Network Optimization), Problem-Solving (Root Cause Analysis, Value Stream Mapping), Communication (Business Process Mapping & Periodic Business Presentations), and Technical (SAP, Zoho Projects, Microsoft Office Suite).
+- [FACT] User is currently employed as a Supply Chain Analyst at Salad and Go, AZ, USA since March 2022.
+- [FACT] User previously worked as a Supply Chain Analyst at Supply Chain Wizard, NJ, USA from July 2021 to December 2021.
+- [FACT] User worked as a Process Engineer at Wilo Mather & Platt, Pune, India from October 2017 to April 2018.
+- [FACT] User was a Graduate Trainee at Vishwaraj Industries, Pune, India from May 2018 to April 2019.
+- [FACT] User led a project on Manufacturing an ATV for SAE BAJA at the University of Pune, India from July 2013 to May 2017.
+- [FACT] User was a Graduate Research Assistant at Oklahoma State University from August 2021 to July 2021.
+- [FACT] User was the Head of Sports (Badminton) at Oklahoma State University from August 2020 to May 2021.
+- [EVENT] User created labor and transportation forecasting models for financial & operational planning at Salad and Go.
+- [EVENT] User developed an open action tool using Tableau and Azure data studio to monitor & collect data on current operations across the supply chain.
+- [EVENT] User used SQL to write queries and create a database for network optimization software – 3TO.
+- [EVENT] User achieved a 20% productivity increase by creating a Value Stream Map for the pump assembly line at Wilo Mather & Platt.
+- [CHANGE] User's current job title is Supply Chain Analyst at Salad and Go.
+- [TEMPORAL] Session date is 2023/05/21.
+- [ASSISTANT_SAID

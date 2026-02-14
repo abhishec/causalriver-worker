@@ -1,0 +1,23 @@
+### Observation Log
+
+- [TEMPORAL] Session Date: 2023/05/11 (Thu) 23:57
+- [USER] User is interested in a Vehicle Booking System that provides local, rental-based services for customers on demand.
+- [FACT] The implementation context is MySQL.
+- [ASSISTANT_SAID] The assistant suggested establishing a schema to support the implementation of the Vehicle Booking System.
+- [ASSISTANT_SAID] The assistant recommended using draw.io or any other suitable tool to show the logical flow of the data.
+- [ASSISTANT_SAID] The assistant proposed preparing tables like Vehicle Data, Customer_Requests, Bookings, etc., with suitable constraints to store records.
+- [ASSISTANT_SAID] The assistant mentioned displaying the most frequently booked route in Chennai.
+- [ASSISTANT_SAID] The assistant suggested displaying the number of customers who traveled each day and in each route.
+- [ASSISTANT_SAID] The assistant indicated displaying bookings count greater than 50 for each day.
+- [ASSISTANT_SAID] The assistant proposed listing the most booked type of vehicle (SUV, Mini, etc.) in Bangalore City.
+- [ASSISTANT_SAID] The assistant suggested displaying 5-star rated driver details to initiate incentives by the company.
+- [ASSISTANT_SAID] The assistant encouraged commenting on observations to suggest better customer experience.
+- [ASSISTANT_SAID] The assistant advised taking existing vehicle providers such as OLA and UBER into account to observe the process of database management and list important implementations for the project.
+- [ASSISTANT_CREATED] The assistant created a schema design for the Vehicle Booking System, identifying entities such as Vehicles, Customers, Customer Requests, Bookings, Routes, and Drivers.
+- [ASSISTANT_CREATED] The assistant provided an Entity-Relationship Diagram (ERD) to show the logical flow of data in the Vehicle Booking System.
+- [ASSISTANT_CREATED] The assistant detailed the structure of the Vehicles table, including fields like vehicle_id, vehicle_type, model, and capacity.
+- [ASSISTANT_CREATED] The assistant detailed the structure of the Customers table, including fields like customer_id, name, email, phone, and address.
+- [ASSISTANT_CREATED] The assistant detailed the structure of the Customer_Requests table, including fields like request_id, customer_id, pickup_location, drop_location, pickup_time, and vehicle_type.
+- [ASSISTANT_CREATED] The assistant detailed the structure of the Bookings table, including fields like booking_id, request_id, vehicle_id, driver_id, start_time, end_time, and fare.
+- [ASSISTANT_CREATED] The assistant detailed the structure of the Routes table, including fields like route_id and route_name.
+- [ASSISTANT_CREATED] The assistant detailed the structure of the Drivers table, including fields like

@@ -1,0 +1,20 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/24 (Wed) 14:30  
+[USER] The user is looking for tips on how to improve presentation skills for an upcoming poster presentation at a research symposium.  
+[USER] The user is curious about how to calculate the overall grade when there are multiple components.  
+[USER] The user knows their stats project accounted for 20% of the final grade.  
+[ASSISTANT_SAID] The assistant provided tips for improving presentation skills, including knowing the audience, keeping it concise, focusing on design, practicing the pitch, engaging with attendees, using a clear title, highlighting contributions, and being prepared for questions.  
+[ASSISTANT_SAID] The assistant explained how to calculate the overall grade using weighted scores based on component percentages.  
+[ASSISTANT_SAID] The assistant provided a formula for calculating the weighted score: Weighted score = (x/100) × weight.  
+[ASSISTANT_SAID] The assistant gave an example of calculating an overall grade with three components: stats project (20%), homework (30%), and final exam (50%).  
+[USER] The user asked for more information on designing an effective poster, including visuals and layout.  
+[USER] The user requested tips on handling questions from the audience during the presentation.  
+[ASSISTANT_SAID] The assistant provided tips for designing an effective poster, including layout, visuals, color scheme, fonts, content, graphics, and consistency.  
+[ASSISTANT_SAID] The assistant offered tips for handling questions from the audience, such as staying calm, listening carefully, answering concisely, being honest, engaging with the audience, taking notes, and practicing.  
+[USER] The user expressed concern about presenting their research concisely in a few minutes and asked for tips on creating a brief and clear elevator pitch.  
+[ASSISTANT_SAID] The assistant provided tips for crafting an elevator pitch, including focusing on the main message, avoiding jargon, keeping it concise, making it engaging, and using a clear structure.  
+[ASSISTANT_SAID] The assistant shared a template for structuring an elevator pitch: "Research on [Topic] has shown that [Problem or Question]. To address this, I [Methodology or Approach]. My findings suggest that [Key Results], which implies [Implications or Next Steps]."  
+[ASSISTANT_SAID] The assistant provided an example of an elevator pitch related to climate change and food production.  
+[USER] The user asked for tips on prioritizing important information and what to leave out when crafting the elevator pitch.  
+[ASSISTANT_SAID] The assistant offered tips for prioritizing information, including identifying the key finding, focusing on the "so what" factor, highlighting the unique aspect, emphasizing benefits, and leaving out details.

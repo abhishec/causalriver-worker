@@ -1,0 +1,18 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/03/25 (Sat) 01:50  
+[USER] User requested help to write a script in Excel to automatically return and sum sales numbers per country using `VLOOKUP` and a pivot table.  
+[ASSISTANT_SAID] Assistant provided a step-by-step guide to create a table with columns: `Country`, `Sales`, and `Date`.  
+[ASSISTANT_SAID] Assistant instructed to enter the name of each country in the `Country` column, sales numbers in the `Sales` column, and dates in the `Date` column.  
+[ASSISTANT_SAID] Assistant detailed the process to create a PivotTable by selecting the cells in the table, clicking the `Insert` tab, and choosing `PivotTable`.  
+[ASSISTANT_SAID] Assistant explained how to set the data source for the PivotTable and how to arrange fields in the `PivotTable Fields` pane.  
+[ASSISTANT_SAID] Assistant described how to use the `VLOOKUP` function, including its syntax and arguments: `lookup_value`, `table_array`, `col_index_num`, and `range_lookup`.  
+[ASSISTANT_SAID] Assistant advised to enter `TRUE` or `FALSE` in the `range_lookup` argument based on the desired match type.  
+[ASSISTANT_SAID] Assistant concluded that using `VLOOKUP` with a pivot table allows for easy summation of sales numbers per country.  
+[USER] User inquired if the instructions would still apply if the number of rows for each country's sales numbers were different.  
+[ASSISTANT_SAID] Assistant confirmed that if the number of rows for each country's sales numbers is different, the `table_array` argument in the `VLOOKUP` function should include all rows in the pivot table containing sales data.  
+[USER] User asked how to graph the country's sales numbers against each other.  
+[ASSISTANT_SAID] Assistant provided steps to graph the sales numbers by selecting the cells with `VLOOKUP` formulas and inserting a column chart.  
+[ASSISTANT_SAID] Assistant suggested selecting a chart type (e.g., `Clustered Column` or `Stacked Column`) in the `Column` chart types.  
+[ASSISTANT_SAID] Assistant explained how to create a pivot chart by clicking the `Analyze` tab in the `PivotTable Tools` ribbon and selecting the `PivotChart` button.  
+[ASSISTANT_SAID] Assistant noted that Excel will create a column chart or a pivot chart to compare sales numbers for different countries.

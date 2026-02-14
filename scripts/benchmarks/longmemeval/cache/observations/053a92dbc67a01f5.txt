@@ -1,0 +1,20 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/10/01 (Sun) 16:38  
+[FACT] User's name is Ezra Klein.  
+[FACT] Gary Marcus is a speaker in the conversation.  
+[FACT] Gary Marcus was trained in cognitive science.  
+[FACT] Gary Marcus did his dissertation with Steve Pinker at M.I.T. studying children’s language.  
+[PREFERENCE] Gary Marcus believes that AI does not need to replicate human flaws, such as confirmation bias.  
+[PREFERENCE] Gary Marcus advocates for a hybrid approach that combines neural networks and symbolic AI.  
+[EVENT] Discussion about the limitations and cultural dynamics of AI research.  
+[CHANGE] Gary Marcus notes a shift in the hostility between neural network researchers and symbolic AI researchers, suggesting it is getting better.  
+[ASSISTANT_SAID] Gary Marcus describes deep learning as a mathematical technique for setting values in a system based on data.  
+[ASSISTANT_SAID] Gary Marcus states that deep learning is useful for pattern recognition but is only part of what is needed for intelligence.  
+[ASSISTANT_SAID] Gary Marcus explains that human intelligence involves language use, analogy making, and planning, which are not fully addressed by current AI.  
+[ASSISTANT_SAID] Gary Marcus compares the discovery of deep learning to finding a power screwdriver, emphasizing the need for other tools in AI.  
+[ASSISTANT_SAID] Gary Marcus discusses the historical conflict between neural network builders and those who favor classical AI approaches.  
+[ASSISTANT_SAID] Gary Marcus defines symbols as things that stand for other things and explains that manipulating symbols is essential in algebra, logic, and computer programming.  
+[ASSISTANT_SAID] Gary Marcus states that most of the world’s software is built using software that manipulates symbols.  
+[ASSISTANT_SAID] Gary Marcus argues that while neural networks are effective in areas like speech recognition, they are not suitable for building systems like GPS or web browsers, which rely on symbolic approaches.  
+[ASSISTANT_SAID] Gary Marcus emphasizes the need to bridge the gap between neural networks and symbolic AI to leverage the strengths of both.

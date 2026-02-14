@@ -1,0 +1,18 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/27 (Sat) 23:26
+- [USER] User has a web component design in light theme with HTML.
+- [USER] User provided HTML structure for the web component with two subjects and links.
+- [USER] User provided CSS for the light theme of the web component.
+- [ASSISTANT_CREATED] Assistant created CSS for a dark theme version of the web component, including specific styles for `.link-card-grid`, `.link-card > a`, `p`, and `.link-card`.
+- [ASSISTANT_SAID] Assistant suggested that to make a dropdown menu scrollable, the container element should have a fixed height and `overflow-y: auto`.
+- [USER] User mentioned they set `overflow-y: auto; -webkit-overflow-scrolling: auto;` in their style.css but still could not scroll the dropdown in a popup modal.
+- [ASSISTANT_SAID] Assistant advised checking for a fixed height on the container element and ensuring it is not nested inside another element with `overflow: hidden`.
+- [USER] User stated they removed the parent popup's `overflow: hidden` and added `height: auto; position: absolute`, but the dropdown content still could not be scrolled.
+- [ASSISTANT_SAID] Assistant recommended setting a fixed height on the dropdown container and using `max-height` to ensure it does not exceed the popup modal height.
+- [USER] User asked how to make dropdown content disappear after clicking a dropdown menu item.
+- [ASSISTANT_SAID] Assistant provided a JavaScript solution to hide the dropdown menu when a dropdown item is clicked by removing the `show` class.
+- [USER] User mentioned setting CSS `dropdown-container:hover .dropdown-content {display: block;}` but found that using JavaScript to set `display: none` removed the hover effect.
+- [ASSISTANT_SAID] Assistant explained that inline styles take precedence over CSS rules and suggested using a CSS class to manage visibility instead.
+- [ASSISTANT_CREATED] Assistant created a CSS class `.hidden` to set `display: none` and provided JavaScript code to add and remove this class to hide and show the dropdown content.
+- [ASSISTANT_SAID] Assistant advised adding a click event listener to dropdown items to hide the dropdown content when an item is clicked.

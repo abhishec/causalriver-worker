@@ -1,0 +1,36 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/03/15 (Wed) 15:36
+- [FACT] User is looking for a professional appraiser to evaluate a friend's antique vase.
+- [RELATIONSHIP] User's friend owns the antique vase.
+- [ASSISTANT_SAID] Recommended checking professional associations for appraisers, including:
+  - American Society of Appraisers (ASA)
+  - Appraisers Association of America (AAA)
+  - International Society of Appraisers (ISA)
+  - National Association of Collectibles and Appraisers (NACA)
+- [ASSISTANT_SAID] Suggested utilizing online directories that list certified appraisers, such as:
+  - Appraisers.org (ASA's directory)
+  - AppraisersAssociation.org (AAA's directory)
+  - ISA-appraisers.org (ISA's directory)
+- [ASSISTANT_SAID] Advised reaching out to local antique dealers, auction houses, or vintage shops for recommendations.
+- [ASSISTANT_SAID] Suggested asking friends, family, or colleagues for reliable appraiser recommendations.
+- [ASSISTANT_SAID] Recommended checking appraisers' credentials, including:
+  - Certification by recognized organizations (e.g., ASA, AAA, ISA)
+  - Experience with antiques and collectibles similar to the user's vase
+  - Errors and Omissions (E&O) insurance
+- [ASSISTANT_SAID] Suggested contacting 2-3 appraisers to inquire about:
+  - Fees (quote for services, hourly, by item, or by project)
+  - Evaluation process (type of report and estimated timeframe)
+  - Expertise with specific types of vases (e.g., Chinese, European, ceramic)
+- [PREFERENCE] User is interested in improving knowledge about their collectibles.
+- [FACT] User has 12 rare figurines in their collection.
+- [ASSISTANT_SAID] Advised looking for appraisers who specialize in collectibles, toys, dolls, or ceramics for the user's rare figurines.
+- [ASSISTANT_SAID] Suggested asking appraisers about their experience with specific types of collectibles or figurines, such as:
+  - Porcelain figurines
+  - Vintage dolls (e.g., Barbie, bisque, or antique dolls)
+  - Ceramic or glass figurines from specific manufacturers (e.g., Hummel, Lladró, or Royal Doulton)
+  - Figurines from particular franchises (e.g., Disney, Star Wars, or comic book characters)
+- [ASSISTANT_SAID] Recommended consulting with specialized collectible dealers for informal appraisals or guidance.
+- [ASSISTANT_SAID] Suggested researching online marketplaces like eBay or Etsy for appraisers or collectors who can offer guidance.
+- [ASSISTANT_SAID] Advised that appraisers can provide guidance on storing and preserving rare figurines, including:
+  -

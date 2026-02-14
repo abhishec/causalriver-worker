@@ -1,0 +1,49 @@
+{
+  "answer_7cc5362f_abs": [
+    {
+      "fact": "User practices guitar for 30 minutes daily",
+      "type": "personal",
+      "entities": [
+        "guitar",
+        "30 minutes daily"
+      ]
+    },
+    {
+      "fact": "User is looking to improve their guitar playing",
+      "type": "preference",
+      "entities": [
+        "guitar playing"
+      ]
+    },
+    {
+      "fact": "User is interested in learning more about jazz music",
+      "type": "preference",
+      "entities": [
+        "jazz music"
+      ]
+    },
+    {
+      "fact": "User is especially interested in learning saxophone",
+      "type": "preference",
+      "entities": [
+        "saxophone"
+      ]
+    },
+    {
+      "fact": "User wants to learn more about music theory and fingerpicking techniques",
+      "type": "preference",
+      "entities": [
+        "music theory",
+        "fingerpicking techniques"
+      ]
+    },
+    {
+      "fact": "User is interested in learning jazz theory and improvisation",
+      "type": "preference",
+      "entities": [
+        "jazz theory",
+        "improvisation"
+      ]
+    }
+  ]
+}

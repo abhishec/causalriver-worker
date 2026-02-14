@@ -1,0 +1,32 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/26 (Fri) 05:04
+- [FACT] User is interested in visiting major tourist attractions in Quezon City.
+- [ASSISTANT_SAID] There are several tours and itineraries available for visiting all the major tourist attractions in Quezon City.
+- [ASSISTANT_SAID] Popular tours include:
+  - Quezon City Day Tour covering attractions like Quezon Memorial Circle, Ninoy Aquino Parks and Wildlife Center, UP Diliman, and more.
+  - Art in Island Museum Tour featuring 3D paintings and optical illusions.
+  - Kalye Artisano Tour showcasing street art and artisanal markets.
+  - Food Trip Tour focusing on restaurants and street food stalls.
+  - Nightlife Tour visiting nightlife spots like Tomas Morato and Timog Avenue.
+- [ASSISTANT_SAID] Tours can be booked online or with a local travel agency.
+- [PREFERENCE] User expresses interest in trying out the Food Trip Tour.
+- [ASSISTANT_SAID] Recommended popular dishes in Quezon City include:
+  - Sisig: made from parts of pig's head and liver, seasoned with calamansi and chili peppers.
+  - Lechon Kawali: deep-fried pork belly.
+  - Kare-Kare: stew made from vegetables, oxtail, and peanut sauce.
+  - Adobo: meat marinated in vinegar, soy sauce, and garlic.
+  - Halo-halo: dessert made with shaved ice, evaporated milk, and a mix of sweet beans, fruits, and jelly.
+- [ASSISTANT_SAID] Recommended food establishments in Quezon City include:
+  - Mercato Centrale: known for street food and grilled dishes.
+  - Maginhawa Food Park: a food park with various food stalls.
+  - Pino Restaurant: known for fusion Filipino cuisine and craft cocktails.
+  - The Chocolate Kiss Cafe: known for desserts, cakes, and pastries.
+- [PREFERENCE] User loves trying out different cuisines.
+- [ASSISTANT_SAID] Recommended international restaurants in Quezon City include:
+  - Nikkei: Japanese-Peruvian fusion restaurant popular for sushi rolls and ceviche.
+  - Il Terrazzo: Italian restaurant known for pizzas and pasta.
+  - The Nest Dining in the Sky: fine dining on the 71st floor of Grand Hyatt Manila serving European and Mediterranean cuisine.
+  - Las Flores: Spanish restaurant and tapas bar.
+  - Little Tokyo: area offering a variety of authentic Japanese food from different restaurants.
+- [ASSISTANT_SAID] There are several Korean, Chinese, and other international restaurants in Quezon City.

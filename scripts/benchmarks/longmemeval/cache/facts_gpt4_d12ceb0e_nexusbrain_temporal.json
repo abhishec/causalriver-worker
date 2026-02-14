@@ -1,0 +1,124 @@
+{
+  "answer_2504635e_1": [
+    {
+      "fact": "User just turned 32 on February 12th",
+      "type": "personal",
+      "entities": [
+        "32",
+        "February 12th"
+      ]
+    },
+    {
+      "fact": "User is trying to get back into a regular exercise routine",
+      "type": "preference",
+      "entities": [
+        "exercise routine"
+      ]
+    },
+    {
+      "fact": "User is feeling more motivated to take care of themselves now",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User is more interested in focusing on weight loss",
+      "type": "preference",
+      "entities": [
+        "weight loss"
+      ]
+    }
+  ],
+  "answer_2504635e_2": [
+    {
+      "fact": "User is trying to get healthier",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User's mom is 55 years old",
+      "type": "personal",
+      "entities": [
+        "mom",
+        "55"
+      ]
+    },
+    {
+      "fact": "User's dad is 58 years old",
+      "type": "personal",
+      "entities": [
+        "dad",
+        "58"
+      ]
+    },
+    {
+      "fact": "User is trying to set a good example for their parents",
+      "type": "opinion",
+      "entities": [
+        "parents"
+      ]
+    }
+  ],
+  "answer_2504635e_3": [
+    {
+      "fact": "User is considering going back to school to get a master's degree",
+      "type": "preference",
+      "entities": [
+        "master's degree"
+      ]
+    },
+    {
+      "fact": "User is in their early thirties",
+      "type": "personal",
+      "entities": [
+        "early thirties"
+      ]
+    },
+    {
+      "fact": "User's grandma is 75 years old",
+      "type": "relationship",
+      "entities": [
+        "grandma",
+        "75"
+      ]
+    },
+    {
+      "fact": "User's grandpa is 78 years old",
+      "type": "relationship",
+      "entities": [
+        "grandpa",
+        "78"
+      ]
+    },
+    {
+      "fact": "User is inspired by their grandparents' experience to reflect on their own future",
+      "type": "opinion",
+      "entities": [
+        "grandparents",
+        "future"
+      ]
+    },
+    {
+      "fact": "User is interested in the Data Science program",
+      "type": "preference",
+      "entities": [
+        "Data Science program"
+      ]
+    },
+    {
+      "fact": "User does not have a strong background in math or statistics",
+      "type": "personal",
+      "entities": [
+        "math",
+        "statistics"
+      ]
+    },
+    {
+      "fact": "User's grandpa believes it's never too late to learn new things",
+      "type": "opinion",
+      "entities": [
+        "grandpa",
+        "learning"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/04/10 (Mon) 04:47
+- [EVENT] User is actively looking for a new home.
+- [EVENT] User visited a new development last weekend.
+- [ASSISTANT_SAID] Assistant offered to help the user find information about the neighborhood of the new development.
+- [ASSISTANT_SAID] Assistant stated that it does not have access to specific information about the development or the user's location.
+- [ASSISTANT_SAID] Assistant suggested checking online real estate websites like Zillow, Redfin, or Realtor.com for neighborhood information.
+- [ASSISTANT_SAID] Assistant recommended contacting the developer or real estate agent for more information about the neighborhood.
+- [ASSISTANT_SAID] Assistant advised checking local government websites for information about zoning laws, transportation options, and community resources.
+- [ASSISTANT_SAID] Assistant suggested driving around the neighborhood to get a feel for the area and look for local amenities.
+- [ASSISTANT_SAID] Assistant recommended talking to locals to get their perspective on the neighborhood.
+- [ASSISTANT_SAID] Assistant advised checking social media and online forums for discussions about the neighborhood.
+- [ASSISTANT_SAID] Assistant reminded the user to do due diligence and research the neighborhood thoroughly before making a decision.
+- [EVENT] User asked for more information on what to look for when researching the neighborhood's school district.
+- [ASSISTANT_SAID] Assistant provided a list of key factors to consider when researching a school district, including:
+  - [ASSISTANT_SAID] School district boundaries.
+  - [ASSISTANT_SAID] School rankings from websites like GreatSchools.org, Niche.com, or SchoolDigger.com.
+  - [ASSISTANT_SAID] Test scores and performance on standardized tests.
+  - [ASSISTANT_SAID] Student-teacher ratio.
+  - [ASSISTANT_SAID] Types of schools available (public, charter, magnet, private).
+  - [ASSISTANT_SAID] Curriculum and programs offered.
+  - [ASSISTANT_SAID] School funding and budget.
+  - [ASSISTANT_SAID] Teacher quality and turnover rates.
+  - [ASSISTANT_SAID] School safety records.
+  - [ASSISTANT_SAID] Community involvement in schools.
+  - [ASSISTANT_SAID] Potential boundary changes.
+  - [ASSISTANT_SAID] Transportation options provided by the district.
+  - [ASSISTANT_SAID] Availability of before- and after-school programs.
+  - [ASSISTANT_SAID] Special needs support services.
+  - [ASSISTANT_SAID] Future development plans affecting schools.
+- [EVENT] User inquired about

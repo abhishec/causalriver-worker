@@ -1,0 +1,26 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/30 (Tue) 02:36
+- [FACT] The user has existing HTML test reports.
+- [FACT] The information for the reports is in XML format and is formatted with XSL.
+- [FACT] The user has JavaScript code associated with the reports.
+- [PREFERENCE] The user wants to modernize the existing test reports.
+- [CHANGE] The user wants to move away from using ActiveX due to safety concerns.
+- [FACT] The current system forces the user to view reports in Internet Explorer, which is deprecated, or to use the IETab plugin to view them in Chrome.
+- [PREFERENCE] The user wants to use the reports in Chrome without plugins and without disabling security features.
+- [FACT] The user needs to access the file system and modify files on it.
+- [FACT] The test references are in TCML files, which are XML files with a different extension.
+- [EVENT] The user mentioned that the TCML reference file has to be modified when a developer clicks on an "Accept" button to accept a new test result.
+- [ASSISTANT_SAID] The assistant suggested converting XML to JSON for easier manipulation in modern web frameworks.
+- [ASSISTANT_SAID] The assistant recommended replacing XSL with a modern templating engine such as Handlebars or Mustache.
+- [ASSISTANT_SAID] The assistant advised replacing ActiveX with a web service for file operations on the server side.
+- [ASSISTANT_SAID] The assistant suggested using a modern JavaScript framework like React, Angular, or Vue.js for better code structure and maintainability.
+- [ASSISTANT_SAID] The assistant recommended implementing responsive design using CSS media queries, CSS Grid, or Flexbox.
+- [ASSISTANT_SAID] The assistant emphasized the importance of improving accessibility by following best practices.
+- [ASSISTANT_SAID] The assistant suggested optimizing performance by minifying JavaScript and CSS files, using browser caching, and lazy-loading resources.
+- [ASSISTANT_SAID] The assistant encouraged the user to utilize browser developer tools for debugging and performance profiling.
+- [ASSISTANT_SAID] The assistant advised testing the reports across multiple modern browsers to identify and fix any issues.
+- [USER] The user expressed concern about changing the XML format of their test references due to the number of files committed to source control.
+- [USER] The user mentioned that the TCML reference file can stay in XML format, but the reports themselves can be in JSON.
+- [USER] The user indicated that when accepting a result, they replace a chunk of XML in the TCML reference file with a chunk from the report.
+- [USER] The user suggested that the structure of the report data can be JSON, but certain fields could contain

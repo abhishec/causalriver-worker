@@ -1,0 +1,104 @@
+{
+  "answer_cfcf5340_2": [
+    {
+      "fact": "User has combination skin that tends to get oily in the summer",
+      "type": "personal",
+      "entities": [
+        "combination skin",
+        "oily",
+        "summer"
+      ]
+    },
+    {
+      "fact": "User's main skin concerns are acne and hyperpigmentation",
+      "type": "personal",
+      "entities": [
+        "acne",
+        "hyperpigmentation"
+      ]
+    },
+    {
+      "fact": "User purchased La Mer Moisturizing Cream, Sunday Riley Power Couple, and Dr. Dennis Gross Skincare Alpha Beta Peel Body & Face",
+      "type": "personal",
+      "entities": [
+        "La Mer Moisturizing Cream",
+        "Sunday Riley Power Couple",
+        "Dr. Dennis Gross Skincare Alpha Beta Peel"
+      ]
+    },
+    {
+      "fact": "User's current skincare routine is basic, involving washing the face morning and night and applying moisturizer",
+      "type": "personal",
+      "entities": [
+        "skincare routine",
+        "washing face",
+        "moisturizer"
+      ]
+    },
+    {
+      "fact": "User is unsure how to incorporate new products into their skincare routine",
+      "type": "opinion",
+      "entities": [
+        "new products",
+        "skincare routine"
+      ]
+    },
+    {
+      "fact": "User invested $500 in high-end skincare products during the Nordstrom anniversary sale",
+      "type": "event",
+      "entities": [
+        "$500",
+        "high-end skincare products",
+        "Nordstrom anniversary sale"
+      ]
+    }
+  ],
+  "answer_cfcf5340_1": [
+    {
+      "fact": "User is planning a birthday celebration in October.",
+      "type": "event",
+      "entities": [
+        "birthday celebration",
+        "October"
+      ]
+    },
+    {
+      "fact": "User is considering splurging on a luxury watch.",
+      "type": "preference",
+      "entities": [
+        "luxury watch"
+      ]
+    },
+    {
+      "fact": "User recently treated themselves to a Coach handbag that cost $800.",
+      "type": "personal",
+      "entities": [
+        "Coach handbag",
+        "$800"
+      ]
+    },
+    {
+      "fact": "User loves the quality of the Coach handbag.",
+      "type": "opinion",
+      "entities": [
+        "Coach handbag",
+        "quality"
+      ]
+    },
+    {
+      "fact": "User is eyeing a Rolex watch.",
+      "type": "preference",
+      "entities": [
+        "Rolex"
+      ]
+    },
+    {
+      "fact": "User is unsure if a Rolex watch is worth the investment.",
+      "type": "opinion",
+      "entities": [
+        "Rolex",
+        "investment"
+      ]
+    }
+  ]
+}

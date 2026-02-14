@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[FACT] User is planning a trip to Seattle next week.  
+[EVENT] User is trying to pack lightly for the trip.  
+[EVENT] User learned a lesson on their last flight to San Francisco about the importance of having snacks on hand during delays.  
+[ASSISTANT_SAID] Assistant provided tips for packing lightly, including checking the weather, planning activities, packing multipurpose items, limiting outfits to 3-4, using travel-sized toiletries, carrying essential documents, bringing electronics, comfortable shoes, snacks, and rolling clothes.  
+[ASSISTANT_SAID] Assistant suggested checking with the airline for specific luggage restrictions or requirements before the trip.  
+[EVENT] User is asking for recommendations for breakfast and brunch spots in Seattle.  
+[ASSISTANT_SAID] Assistant recommended several breakfast spots: Portage Bay Cafe, Café Presse, Biscuit Bitch, Hi-Life Cafe, and Macrina Bakery.  
+[ASSISTANT_SAID] Assistant recommended several brunch spots: The London Plane, Sitka & Spruce, Tilth, Bateau, and Eggstravagant.  
+[ASSISTANT_SAID] Assistant mentioned honorable mentions for breakfast and brunch: The Crumpet Shop, Starbucks Reserve Bar, and Piroshky Piroshky.  
+[EVENT] User is planning to explore outdoor activities in Seattle, like hiking and kayaking.  
+[ASSISTANT_SAID] Assistant provided hiking recommendations: Discovery Park, Rattlesnake Ridge Trail, Gas Works Park, Twin Falls, and Mount Si.  
+[ASSISTANT_SAID] Assistant provided kayaking recommendations: Puget Sound, Lake Union, Washington Park Arboretum, Lake Washington Ship Canal, and Golden Gardens Park.  
+[ASSISTANT_SAID] Assistant suggested other outdoor activities like biking, rock climbing, and stand-up paddleboarding.  
+[EVENT] User is asking for recommendations for outdoor gear stores in Seattle for last-minute supplies or equipment rentals.  
+[ASSISTANT_SAID] Assistant recommended outdoor gear stores: REI, The Mountaineers, Patagonia Seattle, Moosejaw Mountaineering, and Feathered Friends.  
+[ASSISTANT_SAID] Assistant provided kayak and paddleboard rental recommendations: Puget Sound Kayak, Alki Kayak Tours, Lake Union Kayak, and NWOC (Northwest Outdoor Center).  
+[ASSISTANT_SAID] Assistant mentioned the Seattle Outdoor Gear Swap as a resource for buying, selling, and trading gear.  
+[EVENT] User is thinking of checking out REI for last-minute gear and expert advice on trails.  
+[ASSISTANT_SAID] Assistant confirmed that REI can help with gear recommendations, trail advice, gear fitting, and offers services like gear rentals, classes, and repair.  
+[EVENT] User is thinking of trying out snacks packed for the trip, like energy bars and nuts

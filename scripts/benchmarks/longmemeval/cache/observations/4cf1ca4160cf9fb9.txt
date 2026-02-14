@@ -1,0 +1,30 @@
+**Observation Log:**
+
+- [FACT] User went on a kayaking trip to Tomales Bay with a group of friends.
+- [FACT] User rented kayaks from Blue Waters Kayaking.
+- [FACT] User paddled out to Hog Island during the kayaking trip.
+- [PREFERENCE] User is looking for waterproof bags to carry gear on kayaking trips.
+- [EVENT] User has been doing more water-based activities lately.
+- [EVENT] User is thinking of planning a camping trip soon.
+- [ASSISTANT_SAID] Tomales Bay is a beautiful spot for kayaking.
+- [ASSISTANT_SAID] Recommended waterproof bags include:
+  - **SealLine Baja Bag**: Durable, abrasion-resistant, roll-top closure, sizes from 10L to 40L.
+  - **NRS Taku Bag**: Heavy-duty, watertight roll-top closure, sizes from 20L to 60L.
+  - **Pelican Elite 30L Dry Duffel**: Rugged, watertight design, comfortable carry handle.
+  - **Yakima Dry Bag**: Durable, puncture-resistant, roll-top closure, sizes from 10L to 40L.
+  - **AquaPac Waterproof Dry Bag**: Range of sizes from 10L to 60L, roll-top closure, durable materials.
+- [ASSISTANT_SAID] Factors to consider when choosing a waterproof bag include size, material, closure, weight, and price.
+- [ASSISTANT_SAID] Suggested testing the bag for waterproofness before taking it on a trip.
+- [EVENT] User is thinking of going back to Big Sur for a camping trip.
+- [EVENT] User loved their last camping trip to Big Sur with friends.
+- [EVENT] User hiked to McWay Falls during their last trip to Big Sur.
+- [ASSISTANT_SAID] Recommended campsites in California near lakes and oceans include:
+  - **Lake Tahoe**: D.L. Bliss State Park, Emerald Bay State Park, Zephyr Cove RV Park.
+  - **Big Bear Lake**: Serrano Campground, Big Bear Shores RV Park, Tent Cabins at Big Bear Lake.
+  - **Lake Isabella**: Main Dam Campground, French Gulch Campground, Pioneer Point Campground.
+  - **Bass Lake**: Bass Lake Recreation Area, Forks Campground.
+  - **Big Sur**: Pfeiffer Big Sur State Park, Julia Pfeiffer Burns State Park.
+  - **Santa Barbara**: El Capitan Canyon, Refugio State Beach.
+  - **Half Moon Bay**: Francis Beach, Venice Beach, Dunes Beach, Francis Beach Group Camp.
+  - **Crystal Cove State Park**: Campsites near the beach and historic cottages for rent.
+  - **Yosemite National Park**: Upper Pines Campground, Half Dome Village, Crane Flat Campground.

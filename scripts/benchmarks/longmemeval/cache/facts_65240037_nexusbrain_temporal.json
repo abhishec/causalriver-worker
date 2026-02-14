@@ -1,0 +1,51 @@
+{
+  "answer_ultrachat_403752": [
+    {
+      "fact": "User is interested in using tea tree oil for skin conditions",
+      "type": "preference",
+      "entities": [
+        "tea tree oil",
+        "skin conditions"
+      ]
+    },
+    {
+      "fact": "User is concerned about treating acne",
+      "type": "preference",
+      "entities": [
+        "acne"
+      ]
+    },
+    {
+      "fact": "User is interested in treating scars or dark spots on their skin",
+      "type": "preference",
+      "entities": [
+        "scars",
+        "dark spots"
+      ]
+    },
+    {
+      "fact": "User is considering using tea tree oil for dandruff",
+      "type": "preference",
+      "entities": [
+        "tea tree oil",
+        "dandruff"
+      ]
+    },
+    {
+      "fact": "User is cautious about applying tea tree oil directly to their skin",
+      "type": "opinion",
+      "entities": [
+        "tea tree oil",
+        "skin"
+      ]
+    },
+    {
+      "fact": "User is aware that tea tree oil should be diluted before application",
+      "type": "opinion",
+      "entities": [
+        "tea tree oil",
+        "dilution"
+      ]
+    }
+  ]
+}

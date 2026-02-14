@@ -1,0 +1,21 @@
+**Observation Log:**
+
+[FACT] User is planning out meals for the week.  
+[PREFERENCE] User is looking for healthy lunch ideas that can be prepped in advance.  
+[EVENT] User had a great experience at a new sandwich shop downtown last week.  
+[RELATIONSHIP] User met a friend for lunch at the sandwich shop.  
+[TEMPORAL] User had lunch at the sandwich shop at 2 pm last week.  
+[PREFERENCE] User enjoyed the veggie club sandwich at the sandwich shop.  
+[ASSISTANT_SAID] Assistant provided a list of healthy lunch ideas that can be prepped in advance, including salad jars, whole grain wraps, soup containers, quinoa or brown rice bowls, muffin tin meals, grilled chicken and veggies, lentil or chickpea salads, mini quesadillas, roasted veggie and hummus wraps, and chickpea and spinach salad.  
+[ASSISTANT_CREATED] Assistant created a list of 10 healthy lunch ideas for meal prep.  
+[PREFERENCE] User likes the quinoa bowl idea but has already tried a quinoa salad with roasted vegetables last week.  
+[ASSISTANT_SAID] Assistant provided additional protein-packed lunch ideas that can be prepped in advance, including lentil or black bean chili, white bean and spinach salad, chickpea and avocado salad, kidney bean and sweet potato tacos, lentil or black bean and veggie wraps, roasted veggie and black bean burritos, and chickpea and quinoa cakes.  
+[ASSISTANT_CREATED] Assistant created a list of 7 protein-packed lunch ideas featuring beans or lentils.  
+[PREFERENCE] User likes the lentil or black bean chili idea and is trying to cook more at home.  
+[ASSISTANT_SAID] Assistant suggested spices and seasonings for the chili, including cumin, chili powder, smoked paprika, ground coriander, diced jalapeños or hot sauce, bay leaves, tomato paste, cayenne pepper, fresh or dried oregano, salt, and pepper.  
+[ASSISTANT_CREATED] Assistant provided a list of 10 spices and seasonings to enhance the flavor of the chili.  
+[PREFERENCE] User plans to use cumin and chili powder for a smoky flavor in the chili and add diced jalapeños for extra kick.  
+[ASSISTANT_SAID] Assistant provided suggestions for toppings and sides to serve with the chili, including shredded cheese, sour cream, diced onions, crushed tortilla chips, crusty bread, roasted vegetables, mixed greens salad, grilled cornbread, baked potatoes, garlic knots, and fresh fruit.  
+[ASSISTANT_CREATED] Assistant created a list of 7 toppings and 7 sides to complement the chili.  
+[PREFERENCE] User chose shredded cheese, sour cream, and diced onions as toppings and decided to serve the chili with a side of crusty bread and a mixed greens salad.  
+[ASSISTANT_SAID] Assistant provided a recipe for a

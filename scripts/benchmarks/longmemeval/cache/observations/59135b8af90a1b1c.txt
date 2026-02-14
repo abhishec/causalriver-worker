@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2022/03/21 (Mon) 21:37  
+[FACT] The user has been into baking lately.  
+[PREFERENCE] The user has been obsessed with strawberries lately.  
+[EVENT] The user took an amazing baking class at a local culinary school yesterday.  
+[PREFERENCE] The user is thinking of making a strawberry shortcake.  
+[ASSISTANT_SAID] The assistant asked what type of baking projects the user is interested in tackling next, offering suggestions for sweet, savory, or specific types like bread, pastries, or cakes.  
+[ASSISTANT_SAID] The assistant provided a list of baking project ideas, including flavored cakes, artisanal breads, French pastries, seasonal treats, international inspirations, and show-stopping desserts.  
+[ASSISTANT_SAID] The assistant provided tips for making the perfect shortcake, including using the right flour, not overmixing, using cold ingredients, not overbaking, using the right sugar, adding a touch of salt, letting the dough rest, and not over-sweetening the strawberries.  
+[ASSISTANT_CREATED] The assistant created a simple strawberry shortcake recipe, including ingredients and instructions.  
+[PREFERENCE] The user is thinking of using fresh strawberries from the farmer's market for the shortcake.  
+[FACT] The user has been buying strawberries by the container lately and snacking on them all day.  
+[PREFERENCE] The user wants the whipped cream to be light and fluffy but still hold its shape.  
+[ASSISTANT_SAID] The assistant provided tips for whipping cream, including chilling the bowl and beaters, using heavy cream, starting with cold cream, not over-beating, adding sugar gradually, using a touch of acidity, and not over-whipping.  
+[ASSISTANT_CREATED] The assistant created a whipped cream recipe, including ingredients and instructions.  
+[PREFERENCE] The user has been experimenting with sourdough bread lately.  
+[PREFERENCE] The user is thinking of using some of their sourdough starter to make a sourdough shortcake instead of regular shortcake.  
+[ASSISTANT_SAID] The assistant provided tips for making a sourdough shortcake, including adjusting the recipe, using a mature starter, longer proofing time, gentle mixing, lower oven temperature, and monitoring the texture.  
+[ASSISTANT_CREATED] The assistant created a rough outline of a sourdough shortcake recipe, including ingredients and instructions.  
+[PREFERENCE] The user has been experimenting with different types of flour lately.  
+[CHANGE] The user is thinking of trying a different type of flour for their sourdough shortcake.

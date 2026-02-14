@@ -1,0 +1,78 @@
+{
+  "answer_626e93c4_1": [
+    {
+      "fact": "User is trying to make their morning routine more efficient.",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User has switched to a darker roast coffee.",
+      "type": "preference",
+      "entities": [
+        "darker roast coffee"
+      ]
+    },
+    {
+      "fact": "User has cut back to just one cup of coffee in the morning.",
+      "type": "preference",
+      "entities": [
+        "one cup of coffee"
+      ]
+    },
+    {
+      "fact": "User feels more focused after switching to a darker roast and reducing coffee intake.",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User has been using a French press to brew coffee.",
+      "type": "preference",
+      "entities": [
+        "French press"
+      ]
+    },
+    {
+      "fact": "User is considering going back to a drip coffee maker.",
+      "type": "preference",
+      "entities": [
+        "drip coffee maker"
+      ]
+    }
+  ],
+  "answer_626e93c4_2": [
+    {
+      "fact": "User is currently using a drip coffee maker.",
+      "type": "personal",
+      "entities": [
+        "drip coffee maker"
+      ]
+    },
+    {
+      "fact": "User is open to exploring other coffee maker options.",
+      "type": "preference",
+      "entities": []
+    },
+    {
+      "fact": "User is considering changing their morning coffee limit to two cups.",
+      "type": "preference",
+      "entities": [
+        "morning coffee limit",
+        "two cups"
+      ]
+    },
+    {
+      "fact": "User has been using a darker roast coffee lately.",
+      "type": "personal",
+      "entities": [
+        "darker roast"
+      ]
+    },
+    {
+      "fact": "User is considering using a French press to make coffee.",
+      "type": "preference",
+      "entities": [
+        "French press"
+      ]
+    }
+  ]
+}

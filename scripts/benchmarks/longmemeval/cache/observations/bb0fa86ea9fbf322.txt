@@ -1,0 +1,26 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2022/10/22 (Sat) 22:05
+- [FACT] The user is evaluating job applications.
+- [PREFERENCE] The user prefers to evaluate candidates based on specific criteria and numerical scores.
+- [EVENT] The user will post a block of questions and answers for evaluation.
+- [FACT] The user will ask the assistant to evaluate the candidate on a given criterion.
+- [ASSISTANT_SAID] The assistant is ready to assist in evaluating job applications and will respond with a numerical score between 0 and 100.
+- [FACT] The candidate's hobbies include cycling, music bingo, and spending time with friends.
+- [PREFERENCE] The candidate enjoys cycling due to a love for it and has transferred from marathon running due to injury.
+- [PREFERENCE] The candidate loves music and collecting vinyl.
+- [PREFERENCE] The candidate enjoys activities with friends, such as going to the pool and playing card games.
+- [RELATIONSHIP] The candidate admires Sir Bobby Charlton and the members of the 1958 Munich Disaster.
+- [FACT] The candidate's favorite soccer team is Manchester United.
+- [PREFERENCE] The candidate admires Adam Day, a coach with the Canadian Women's National Soccer Team.
+- [FACT] The candidate started refereeing and linesman for soccer games at the age of 12 or 13.
+- [PREFERENCE] The candidate likes that everyone's opinion is respected and heard at their most recent place of employment.
+- [PREFERENCE] The candidate dislikes that it can be hard for certain people to commit to meeting times at their most recent place of employment.
+- [PREFERENCE] The candidate would be happy doing learning every day for the rest of their career.
+- [PREFERENCE] The candidate feels their greatest strength is adaptability.
+- [PREFERENCE] The candidate feels their greatest weakness is taking criticism personally and feeling like they have let people down.
+- [PREFERENCE] The candidate would like to have lunch with Eric Cantona because of his significance to Manchester United and his interesting opinions.
+- [PREFERENCE] The candidate believes that advice to society to make it better is that "everybody is going through something, whether big or small."
+- [ASSISTANT_SAID] The assistant rated the candidate's need for external support at a 70.
+- [ASSISTANT_SAID] The assistant noted that the candidate values and seeks out support from others, particularly friends and mentors.
+- [ASSISTANT_SAID] The assistant mentioned that the candidate may struggle to be self-reliant and perform at their best without the support of others.

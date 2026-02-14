@@ -1,0 +1,36 @@
+{
+  "answer_ultrachat_519486": [
+    {
+      "fact": "User does not trust fracking companies to properly monitor their own operations",
+      "type": "opinion",
+      "entities": [
+        "fracking companies"
+      ]
+    },
+    {
+      "fact": "User believes that regulations and monitoring measures are not enough to protect water sources",
+      "type": "opinion",
+      "entities": [
+        "regulations",
+        "monitoring measures",
+        "water sources"
+      ]
+    },
+    {
+      "fact": "User advocates for a complete ban on fracking",
+      "type": "preference",
+      "entities": [
+        "fracking"
+      ]
+    },
+    {
+      "fact": "User thinks the long-term consequences of fracking are not worth the short-term gain of natural gas extraction",
+      "type": "opinion",
+      "entities": [
+        "long-term consequences",
+        "short-term gain",
+        "natural gas extraction"
+      ]
+    }
+  ]
+}

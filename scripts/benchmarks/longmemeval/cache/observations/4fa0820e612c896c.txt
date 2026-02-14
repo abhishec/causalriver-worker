@@ -1,0 +1,18 @@
+**Observation Log:**
+
+- [FACT] User is heading to the US soon for a semester abroad.
+- [EVENT] User has been attending pre-departure orientation sessions at their home university every Friday since 3/27.
+- [ASSISTANT_SAID] Assistant congratulated the user on their semester abroad and offered to help with packing tips.
+- [ASSISTANT_SAID] Assistant provided a list of packing essentials, including travel documents, clothing, toiletries, electronics, and miscellaneous items.
+- [ASSISTANT_SAID] Assistant recommended packing 3-5 tops, 2-3 pairs of pants, 1-2 dresses or skirts, 1-2 light jackets or sweaters, undergarments, socks, comfortable walking shoes, and dress shoes.
+- [ASSISTANT_SAID] Assistant suggested checking the typical weather forecast for the destination and packing accordingly for the season.
+- [ASSISTANT_SAID] Assistant advised to pack multipurpose items and consider the dress code of the host university.
+- [ASSISTANT_SAID] Assistant recommended packing 7-10 outfits that can be mixed and matched.
+- [FACT] User has a laptop and a portable Wi-Fi hotspot.
+- [USER] User asked for recommendations on a good phone plan or service to stay connected with family and friends back home.
+- [ASSISTANT_SAID] Assistant provided options for international phone plans, including Verizon International Plan, AT&T International Day Pass, and T-Mobile International Plan.
+- [ASSISTANT_SAID] Assistant mentioned costs for Verizon International Plan ($70-$130 per month), AT&T International Day Pass ($10 per day), and T-Mobile International Plan ($10 per month for unlimited data and texting).
+- [ASSISTANT_SAID] Assistant highlighted potential hidden fees, including roaming fees, data throttling, overage charges, taxes and surcharges, activation fees, and early termination fees.
+- [ASSISTANT_SAID] Assistant suggested monitoring usage, using Wi-Fi whenever possible, and utilizing messaging apps to minimize costs.
+- [ASSISTANT_SAID] Assistant recommended checking for promotions from carriers for potential discounts.
+- [TEMPORAL] Session date is 2023/04/20 (Thu) at 10:31.

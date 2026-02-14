@@ -1,0 +1,24 @@
+**Observation Log:**
+
+[FACT] Session Date: 2023/05/20 (Sat) 02:14  
+[ASSISTANT_SAID] Sample layout for the Specific Task screen includes: Title, Header, Body, and Footer sections.  
+[ASSISTANT_SAID] Header includes: Task Name, Task ID, Task Description, Task Tagger, Task Checker, Task Due Date.  
+[ASSISTANT_SAID] Body includes: Table of Documents with Document Name, Document ID, Document Status, Document Tagger, Document Assigned Date.  
+[ASSISTANT_SAID] Document Status options: Not Started, In Progress, Ready for Review, In Review, Complete, Rejected.  
+[ASSISTANT_SAID] Change Task Status button is available if all documents have been tagged.  
+[ASSISTANT_SAID] Footer includes: Back to Task Management button.  
+[ASSISTANT_SAID] Color scheme for document statuses: Not Started (Light Gray), In Progress (Yellow), Ready for Review (Light Green), In Review (Dark Green), Complete (Blue), Rejected (Red).  
+[ASSISTANT_SAID] Color contrast is emphasized for visibility, including considerations for color blindness.  
+[USER] Requested goals, features, use cases, flows, and actions for the specific task screen.  
+[ASSISTANT_SAID] Goals include providing a centralized view of documents, an overview of task details, and allowing task management through status changes.  
+[ASSISTANT_SAID] Features include a list of documents, information about tagger/checker, ability to change document status, and view annotations.  
+[ASSISTANT_SAID] Use Cases include scenarios for administrators, taggers, and checkers managing tasks and documents.  
+[ASSISTANT_SAID] Flows and Actions detail the steps for assigning tasks, annotating documents, and reviewing annotations.  
+[ASSISTANT_SAID] Acceptance Criteria include accuracy of document lists, correctness of task information, functionality of status changes, visibility of annotations, and accessibility of the task screen.  
+[USER] Requested a format for use cases.  
+[ASSISTANT_SAID] Use Cases formatted with specific actions for Admin, Tagger, and Checker roles.  
+[ASSISTANT_SAID] Admin wants to view the progress of the task includes steps for logging in, navigating, and viewing task details.  
+[ASSISTANT_SAID] Admin wants to assign a tagger includes steps for selecting a task and assigning a tagger from a list.  
+[ASSISTANT_SAID] Tagger wants to start annotating a document includes steps for selecting a document and using the annotation tool.  
+[ASSISTANT_SAID] Checker wants to review a document includes steps for reviewing annotations and changing document status.  
+[USER] Requested a functional specification

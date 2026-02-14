@@ -1,0 +1,26 @@
+**Observation Log:**
+
+**Session Date:** 2023/05/01 (Mon) 06:19  
+**Session ID:** sharegpt_V2j1zkI_0  
+
+1. [FACT] Matt Brown is an account executive at Fellow.
+2. [FACT] Eric Cameron is the VP of People Operations at the client's company.
+3. [FACT] Nick Sarkesian is the Director of Business Applications at the client's company.
+4. [FACT] Trina Berks is a Technical Program Manager for the business apps team at the client's company.
+5. [FACT] Lucas Cooper is the Business Applications Manager at the client's company.
+6. [FACT] The client's team is primarily based in Austin, Texas, with additional locations in Chicago.
+7. [FACT] Matt Brown is dialing in from Canada.
+8. [EVENT] The call was initiated to discuss the potential use of Fellow as a platform for one-on-ones within the organization.
+9. [PREFERENCE] Eric Cameron mentioned they currently use a different system for one-on-ones and are exploring Fellow's capabilities.
+10. [CHANGE] The client's organization is considering moving to Fellow from their current system.
+11. [ASSISTANT_SAID] Matt Brown stated that Fellow has been positively received by other teams within the organization.
+12. [ASSISTANT_SAID] Matt Brown explained that the Enterprise plan of Fellow is built for company-wide deployments, while the Pro plan is designed for teams.
+13. [ASSISTANT_SAID] Matt Brown mentioned that the Enterprise plan includes more robust integrations, security features, and analytics.
+14. [ASSISTANT_SAID] Matt Brown indicated that Fellow can help centralize and manage one-on-ones across the organization.
+15. [ASSISTANT_SAID] Matt Brown stated that Fellow can serve as a single source of truth for tracking OKRs and other important information.
+16. [ASSISTANT_SAID] Matt Brown confirmed that Fellow integrates with Okta and Workday.
+17. [ASSISTANT_SAID] Matt Brown offered to send over security compliance documentation and a SOC 2 report under an NDA.
+18. [ASSISTANT_SAID] Matt Brown mentioned that he would send the necessary documentation to the entire team for transparency.
+19. [ASSISTANT_SAID] Matt Brown explained that Fellow's analytics can be tailored for the entire organization or individual teams.
+20. [ASSISTANT_SAID] Matt Brown stated that they will work with the senior leadership team to import objectives within Fellow.
+21. [TEMPORAL] The call lasted for 29 minutes and 2 seconds, with the first part covering 10 minutes and 9 seconds.

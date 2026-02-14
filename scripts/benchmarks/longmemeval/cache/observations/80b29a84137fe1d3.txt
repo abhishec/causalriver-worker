@@ -1,0 +1,24 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/29 (Mon) 17:24
+- [FACT] User is trying to decide between building a new gaming PC or buying a new graphics card.
+- [FACT] User wants to play "Cyberpunk 2077" at its highest settings.
+- [FACT] User's current CPU is an Intel Core i5-11600K.
+- [FACT] User's current motherboard is an ASRock B460M Steel Legend Micro ATX.
+- [FACT] User has 16 GB of DDR4 RAM at 3200MHz.
+- [FACT] User's current graphics card is an NVIDIA GeForce RTX 2060.
+- [FACT] User's budget for the upgrade/new build is around $1,500.
+- [ASSISTANT_SAID] Upgrading the current graphics card is generally less expensive than building a new PC.
+- [ASSISTANT_SAID] User can reuse existing components (CPU, motherboard, RAM, etc.) when upgrading the graphics card.
+- [ASSISTANT_SAID] Current system's CPU and motherboard might bottleneck the performance of a new graphics card.
+- [ASSISTANT_SAID] User might need to upgrade their power supply unit (PSU) to support a new graphics card.
+- [ASSISTANT_SAID] Building a new gaming PC allows for choosing the latest components and future-proofing the system.
+- [ASSISTANT_SAID] Building a new PC is generally more expensive than upgrading the current graphics card.
+- [ASSISTANT_SAID] User's Intel Core i5-11600K is a strong CPU for gaming.
+- [ASSISTANT_SAID] Suggested graphics card options include NVIDIA GeForce RTX 3070 (around $500), RTX 3070 Ti (around $600), and AMD Radeon RX 6800 XT (around $400).
+- [ASSISTANT_SAID] Recommended PSU for new graphics cards is a 650W or 750W 80+ Gold certified PSU.
+- [ASSISTANT_SAID] Suggested build for a new gaming PC includes AMD Ryzen 5 5600X (around $300) or Intel Core i7-11700K (around $350), a compatible motherboard (around $150-$200), RAM (around $60-$100), and a 1 TB NVMe SSD (around $100-$150).
+- [PREFERENCE] User has been trying to catch up on the latest gaming news and updates by watching videos on IGN and GameSpot.
+- [EVENT] User completed "The Last of Us Part II" on their PlayStation 5 after playing it for 10 hours last weekend.
+- [PREFERENCE] User was invested in the story and characters of "The Last of Us Part II," especially Ellie and Abby.
+- [PREFERENCE

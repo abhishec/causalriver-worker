@@ -1,0 +1,30 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/22 (Mon) 07:28
+- [EVENT] User needs help scheduling a maintenance check for their car.
+- [TEMPORAL] User's car maintenance check is overdue by a month.
+- [ASSISTANT_SAID] Assistant cannot access user's personal information or car's maintenance history.
+- [ASSISTANT_SAID] Assistant suggests checking gas receipts to find the last time user got a full tank of gas and how much it cost.
+- [ASSISTANT_SAID] Assistant suggests checking car's maintenance records to see when the car was last serviced.
+- [ASSISTANT_SAID] Assistant suggests contacting the user's mechanic for records of the car's maintenance history.
+- [ASSISTANT_SAID] Assistant suggests using a fuel log app like Fuelly or GasBuddy to check fuel history.
+- [EVENT] User thinks they have the receipt for the last gas purchase.
+- [EVENT] User's car is having problems connecting to their phone via Bluetooth.
+- [ASSISTANT_SAID] Assistant offers general troubleshooting steps for Bluetooth connectivity issues in cars.
+- [ASSISTANT_SAID] Assistant suggests restarting the phone and car's infotainment system.
+- [ASSISTANT_SAID] Assistant suggests checking Bluetooth settings to ensure Bluetooth is enabled and the car is discoverable.
+- [ASSISTANT_SAID] Assistant suggests deleting and re-pairing the phone with the car's infotainment system.
+- [ASSISTANT_SAID] Assistant suggests checking for software updates for both the car's infotainment system and the phone.
+- [ASSISTANT_SAID] Assistant suggests resetting the car's infotainment system to factory settings if issues persist.
+- [ASSISTANT_SAID] Assistant suggests checking for interference from other devices in the car.
+- [ASSISTANT_SAID] Assistant suggests consulting the car's owner's manual or contacting a dealership for specific guidance.
+- [EVENT] User is thinking of getting their car washed this weekend.
+- [ASSISTANT_SAID] Assistant cannot access user's personal information to know when they last washed their car.
+- [ASSISTANT_SAID] Assistant suggests checking the car's maintenance log for the last wash date.
+- [ASSISTANT_SAID] Assistant suggests checking the phone's photos for the last car wash.
+- [ASSISTANT_SAID] Assistant suggests estimating based on weather patterns.
+- [ASSISTANT_SAID] Assistant suggests washing the car anyway if unsure of the last wash date.
+- [TEMPORAL] User remembers it was three weeks ago when they last washed their car.
+- [EVENT] User got a deluxe wash at the car wash place near their house for $15.
+- [EVENT] User is thinking of getting a new air freshener for their car.
+-

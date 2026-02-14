@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/04/26 (Wed) 16:21  
+[EVENT] User is in the process of buying a house.  
+[EVENT] User has already chosen a homeowners insurance provider.  
+[EVENT] User's initial offer on the house was $320,000, but the seller countered with $330,000.  
+[FACT] User got pre-approved for a mortgage.  
+[PREFERENCE] User feels that getting pre-approved for a mortgage gave them a sense of security when making an offer on the house.  
+[ASSISTANT_SAID] Assistant congratulated the user on their home purchase and getting pre-approved for a mortgage.  
+[ASSISTANT_SAID] Assistant provided a list of questions to ask during the final walk-through of the property, including:  
+[ASSISTANT_CREATED] 1. Condition of the roof: Ask about the age, condition, and any repairs or replacements made to the roof.  
+[ASSISTANT_CREATED] 2. Plumbing and electrical systems: Inspect the condition of pipes, fixtures, and electrical panels. Ask about any known issues or needed repairs.  
+[ASSISTANT_CREATED] 3. HVAC system: Check the age, condition, and maintenance history of the heating, ventilation, and air conditioning system.  
+[ASSISTANT_CREATED] 4. Water damage or leaks: Look for signs of water damage, leaks, or stains on ceilings and walls. Ask about any previous water-related issues.  
+[ASSISTANT_CREATED] 5. Fireplace and chimney: If the house has a fireplace or chimney, ask about its condition, maintenance, and any necessary repairs.  
+[ASSISTANT_CREATED] 6. Appliances and fixtures: Check the condition and age of major appliances, including the water heater, furnace, and kitchen appliances.  
+[ASSISTANT_CREATED] 7. Pest and rodent infestation: Look for signs of pest or rodent infestation, such as termite damage or rodent droppings.  
+[ASSISTANT_CREATED] 8. Outdoor structures: Inspect the condition of sheds, fences, decks, and patios to ensure they're in good repair.  
+[ASSISTANT_CREATED] 9. Swimming pool or hot tub: If the property has a pool or hot tub, ask about its condition, maintenance, and any necessary repairs.  
+[ASSISTANT_CREATED] 10. Known issues or defects: Ask the seller about any known issues or defects with the property, including any needed repairs or maintenance.  
+[ASSISTANT_CREATED] 11. Homeowners association (HOA) fees: If the property is part of an HOA, ask about the fees, what they cover, and any upcoming assessments.  
+[ASSISTANT_CREATED] 12. Insurance claims history: Ask the seller about any previous insurance claims made on the property and the outcome of those claims

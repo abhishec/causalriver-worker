@@ -1,0 +1,40 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/04/29 (Sat) 22:37
+- [FACT] User has white sneakers that they wear every Sunday.
+- [FACT] User wore brown loafers to work every day last week, from Tuesday to Friday.
+- [PREFERENCE] User finds their brown loafers very comfortable.
+- [ASSISTANT_SAID] Recommended products for cleaning white sneakers: 
+  1. **Sneaker Cleaner by Jason Markk**: Gentle, non-toxic, biodegradable.
+  2. **Shoe Goo White Shoe Cleaner**: Gentle, non-abrasive formula.
+  3. **Crepe Eraser**: Gentle, non-toxic, effective on suede and nubuck, also works on white sneakers.
+- [ASSISTANT_SAID] Provided general tips for cleaning white sneakers:
+  - Use a soft-bristled brush to remove loose dirt.
+  - Apply cleaning product with a clean cloth or sponge in a circular motion.
+  - Avoid harsh chemicals, abrasive materials, or excessive water.
+  - Allow shoes to air dry completely before wearing.
+- [USER] User plans to try the Sneaker Cleaner by Jason Markk.
+- [USER] User wants to reduce the maintenance of their shoes and asked for tips on preventing dirt and wear.
+- [ASSISTANT_SAID] Provided tips to prevent shoes from getting dirty and worn out:
+  1. Apply Scotchgard or waterproofing spray.
+  2. Clean shoes immediately when dirt or stains appear.
+  3. Use a shoe tree or stuffing to maintain shape.
+  4. Avoid wearing them in harsh conditions.
+  5. Keep a shoe cleaner wipe handy for on-the-go cleaning.
+  6. Condition leather regularly.
+  7. Store shoes properly away from direct sunlight.
+  8. Limit wear of white sneakers in a row.
+  9. Use a shoe protector spray.
+  10. Consider a shoe cleaning subscription service.
+- [USER] User plans to start using a waterproofing spray on their shoes.
+- [USER] User has been meaning to get their brown loafers polished.
+- [ASSISTANT_SAID] Provided methods and product recommendations for polishing leather shoes:
+  - Use a leather polish or wax, apply in circular motions.
+  - Use a leather conditioner first if shoes are dry.
+  - Use a horsehair brush for application and buffing.
+  - Recommended products: 
+    1. **Kiwi Shoe Polish**: Available in various colors.
+    2. **Allen Edmonds Leather Care**: High-end leather care products.
+    3. **Saphir Médaille d'Or**: Premium leather polish.
+    4. **Chamber's Leather Milk**: Gentle, non-toxic conditioner and polish.
+- [ASSISTANT_SAID] Provided tips for polishing

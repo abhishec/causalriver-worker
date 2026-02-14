@@ -1,0 +1,28 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/21 (Sun) 10:24
+- [FACT] User is interested in festivals celebrated throughout Japan.
+- [ASSISTANT_SAID] Japan has a rich cultural heritage and celebrates a wide range of festivals throughout the year.
+- [ASSISTANT_SAID] Sakura Matsuri (Cherry Blossom Festival) is held in various locations throughout Japan, including Tokyo, Kyoto, and Osaka during late March to early May.
+- [ASSISTANT_SAID] Tenjin Matsuri (Festival of the gods) is held in Osaka in July.
+- [ASSISTANT_SAID] Gion Matsuri is Kyoto's most famous festival, held in July.
+- [ASSISTANT_SAID] Awa Odori is one of the largest dance festivals in Japan, held in Tokushima during August.
+- [ASSISTANT_SAID] Nebuta Matsuri is held in Aomori in August.
+- [ASSISTANT_SAID] Takayama Matsuri is held in Hida Takayama during April and October.
+- [ASSISTANT_SAID] Sapporo Snow Festival is held in Hokkaido during February.
+- [ASSISTANT_SAID] Tanabata Matsuri is held in various locations on July 7th.
+- [ASSISTANT_SAID] Yuki Matsuri is held in Hokkaido in February.
+- [ASSISTANT_SAID] Jidai Matsuri (Festival of the Ages) is held in Kyoto in October.
+- [PREFERENCE] User expresses excitement about the number of festivals to choose from.
+- [USER] User asks for the assistant's personal favorite festival and the reason why.
+- [ASSISTANT_SAID] Assistant states it does not have personal preferences or emotions.
+- [ASSISTANT_SAID] Festivals in Japan are steeped in rich cultural traditions and history, making each one a unique and memorable experience.
+- [PREFERENCE] User is interested in Japanese mythology and plans to check out the Gion Matsuri in Kyoto.
+- [ASSISTANT_SAID] Provides tips to fully enjoy the Gion Matsuri experience, including:
+  - [ASSISTANT_SAID] Plan ahead and book accommodations and transport well in advance.
+  - [ASSISTANT_SAID] Dress comfortably for the summer heat and humidity.
+  - [ASSISTANT_SAID] Arrive early to secure a good spot for the parade on July 17th.
+  - [ASSISTANT_SAID] Explore festival stalls ("yatai") for street food and souvenirs.
+  - [ASSISTANT_SAID] Join in nighttime festivities, including live music and dancing.
+  - [ASSISTANT_SAID] Take in sites around the city, including Yasaka Shrine.
+- [P

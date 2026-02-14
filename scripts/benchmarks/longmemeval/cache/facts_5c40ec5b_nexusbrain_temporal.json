@@ -1,0 +1,90 @@
+{
+  "answer_1cb52d0a_1": [
+    {
+      "fact": "User recently attended a book reading by a local author",
+      "type": "event",
+      "entities": [
+        "book reading",
+        "local author"
+      ]
+    },
+    {
+      "fact": "User had a conversation with a retired English teacher named John",
+      "type": "relationship",
+      "entities": [
+        "John",
+        "retired English teacher"
+      ]
+    },
+    {
+      "fact": "User is interested in classic novels",
+      "type": "preference",
+      "entities": [
+        "classic novels"
+      ]
+    },
+    {
+      "fact": "User is more interested in indie fiction",
+      "type": "preference",
+      "entities": [
+        "indie fiction"
+      ]
+    }
+  ],
+  "answer_1cb52d0a_2": [
+    {
+      "fact": "User is planning a trip to Germany soon",
+      "type": "event",
+      "entities": [
+        "Germany"
+      ]
+    },
+    {
+      "fact": "User is interested in indie rock music venues in Berlin",
+      "type": "preference",
+      "entities": [
+        "indie rock",
+        "Berlin"
+      ]
+    },
+    {
+      "fact": "User has a friend named Alex from Germany",
+      "type": "relationship",
+      "entities": [
+        "Alex",
+        "Germany"
+      ]
+    },
+    {
+      "fact": "User met Alex at a music festival",
+      "type": "event",
+      "entities": [
+        "music festival"
+      ]
+    },
+    {
+      "fact": "User has met up with Alex twice",
+      "type": "relationship",
+      "entities": [
+        "Alex"
+      ]
+    },
+    {
+      "fact": "User is into the lo-fi and garage rock scene",
+      "type": "preference",
+      "entities": [
+        "lo-fi",
+        "garage rock"
+      ]
+    },
+    {
+      "fact": "User is looking for record stores in Berlin to find local bands' music",
+      "type": "preference",
+      "entities": [
+        "record stores",
+        "local bands",
+        "Berlin"
+      ]
+    }
+  ]
+}

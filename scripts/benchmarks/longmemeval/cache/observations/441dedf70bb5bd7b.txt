@@ -1,0 +1,35 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/26 (Fri) 19:02
+- [USER] User requested 100 prompt parameters that can influence the assistant's output.
+- [ASSISTANT_CREATED] Assistant provided a list of 100 prompt parameters to influence output, including:
+  1. Voice (e.g., male or female)
+  2. Tone (e.g., serious, sarcastic, humorous, etc.)
+  3. Register (e.g., formal, informal, academic, conversational, etc.)
+  4. Style (e.g., narrative, descriptive, expository, persuasive, etc.)
+  5. Audience (e.g., children, adults, experts, non-experts, etc.)
+  6. Genre (e.g., fiction, non-fiction, poetry, drama, etc.)
+  7. Language (e.g., English, French, Spanish, etc.)
+  8. Dialect (e.g., American English, British English, etc.)
+  9. Purpose (e.g., informative, instructive, entertaining, etc.)
+  10. Mood (e.g., happy, sad, angry, etc.)
+  11. Point of view (e.g., first person, third person, etc.)
+  12. Setting (e.g., time period, location, etc.)
+  13. Characterization (e.g., flat, round, static, dynamic, etc.)
+  14. Conflict (e.g., internal, external, etc.)
+  15. Plot (e.g., exposition, rising action, climax, etc.)
+  16. Theme (e.g., love, friendship, betrayal, etc.)
+  17. Symbolism (e.g., colors, objects, etc.)
+  18. Imagery (e.g., visual, auditory, olfactory, etc.)
+  19. Figurative language (e.g., simile, metaphor, hyperbole, etc.)
+  20. Allusion (e.g., historical, cultural, literary, etc.)
+  21. Irony (e.g., verbal, situational, dramatic, etc.)
+  22. Foreshadowing (e.g., subtle, explicit, etc.)
+  23. Flashback (e.g., chronological, non-chronological, etc.)
+  24. Dialogue (e.g., realistic, stylized, etc.)
+  25. Monologue (e.g., internal, external, etc.)
+  26. Soliloquy (e.g., dramatic, introspective, etc.)
+  27. Sound effects (e.g., ambient, diegetic, non-diegetic, etc.)
+  28. Music (e.g., genre, tempo, etc.)
+  29. Visual effects (e.g., lighting, color, etc.)
+  30. Camera angles (e.g

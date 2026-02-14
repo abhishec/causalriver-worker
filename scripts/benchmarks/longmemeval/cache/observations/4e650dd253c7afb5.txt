@@ -1,0 +1,17 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/25 (Thu) 16:26  
+[EVENT] User is planning to go live on Instagram Reels tomorrow.  
+[ASSISTANT_SAID] Assistant offered to help come up with a promotional post idea for the user's Instagram Reels live session.  
+[ASSISTANT_CREATED] Assistant provided five promotional post ideas:  
+[ASSISTANT_CREATED] Idea 1: Sneak Peek - Caption: "Get ready for a sneak peek into my upcoming LIVE Reels session tomorrow! Don't miss out on the fun! Tune in tomorrow at [time] to see what I have in store for you! #ReelsLive #ComingSoon"  
+[ASSISTANT_CREATED] Idea 2: Countdown - Caption: "24 hours to go! Don't forget to tune in to my LIVE Reels session tomorrow at [time]! What do you want to see me talk about? Let me know in the comments! #ReelsLive #Countdown"  
+[ASSISTANT_CREATED] Idea 3: Q&A - Caption: "What do you want to know? Ask me anything! Submit your questions in the comments below and I'll answer them LIVE on my Reels session tomorrow at [time]! #ReelsLive #QandA"  
+[ASSISTANT_CREATED] Idea 4: Exclusive Content - Caption: "Tune in to my LIVE Reels session tomorrow at [time] for an exclusive [giveaway, discount, or tip]! Don't miss out on this limited-time offer! #ReelsLive #Exclusive"  
+[ASSISTANT_CREATED] Idea 5: Personal Invitation - Caption: "Hey friends! I'm going live on Reels tomorrow at [time] and I want YOU to join me! Let's hang out, chat, and have some fun! See you there! #ReelsLive #LiveWithMe"  
+[PREFERENCE] User liked the countdown idea for the promotional post.  
+[ASSISTANT_SAID] Assistant provided caption ideas for the countdown post, including:  
+[ASSISTANT_CREATED] Caption for 24 hours to go: "The countdown begins! Only 24 hours until I go live on Reels! What do you want to see me talk about? Let me know in the comments! #ReelsLive #Countdown"  
+[ASSISTANT_CREATED] Caption for 12 hours to go: "12 hours to go! What do you want to see in my live Reels session tomorrow? Share your questions, topics, or requests in the comments below! I'll do my best to cover them all! #ReelsLive #AskMe"  
+[ASSISTANT_SAID] Assistant suggested a sneak peek post idea for the live stream.  
+[ASSISTANT_CREATED] Caption for sneak peek post: "Sneak peek alert! 🤫 Get a first look at what I'll be talking about in

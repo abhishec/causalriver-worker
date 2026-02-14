@@ -1,0 +1,24 @@
+**Observation Log:**
+
+- [FACT] The user is planning their own wedding.
+- [EVENT] The user attended a friend's wedding last weekend.
+- [RELATIONSHIP] The user's friend is named Jen, who recently got married.
+- [RELATIONSHIP] Jen's husband is named Tom.
+- [PREFERENCE] The user liked Jen's bohemian-inspired dress at the wedding.
+- [PREFERENCE] The user prefers a cozy and relaxed atmosphere for their wedding venue.
+- [PREFERENCE] The user is considering a small outdoor ceremony, possibly at a beach or in a park.
+- [ASSISTANT_SAID] The assistant congratulated the user on their upcoming wedding and offered tips for choosing the perfect venue.
+- [ASSISTANT_SAID] The assistant provided a list of tips for selecting a wedding venue, including guest list and capacity, budget, style and atmosphere, location, amenities, flexibility, personal connection, visiting in person, asking questions, and trusting instincts.
+- [ASSISTANT_SAID] The assistant suggested additional questions to consider when choosing a venue, such as noise restrictions, vendor policies, backup plans for bad weather, and hidden fees.
+- [ASSISTANT_SAID] The assistant provided ideas for creating a cozy and intimate atmosphere for a beach or park ceremony, including choosing a secluded spot, using natural elements, soft lighting, intimate seating, and keeping the decor simple.
+- [ASSISTANT_SAID] The assistant recommended using rugs and textiles to define the ceremony space and add warmth.
+- [ASSISTANT_SAID] The assistant suggested keeping the guest list small and scheduling the ceremony during the golden hour for a warm, soft light.
+- [ASSISTANT_SAID] The assistant advised incorporating personal elements into the ceremony, such as personalized vows and literary readings.
+- [ASSISTANT_SAID] The assistant provided suggestions for incorporating the user's love of literature into the ceremony, including personalized vows, literary readings, customized ceremony scripts, literary-inspired decor, special rituals, and unity ceremonies.
+- [PREFERENCE] The user is considering asking Jen to read a poem during the ceremony.
+- [RELATIONSHIP] The user trusts Jen's opinion on literature and plans to ask her for recommendations on fitting poems or literature for the ceremony.
+- [ASSISTANT_SAID] The assistant affirmed that asking Jen to read a poem is a good idea and highlighted the benefits of honoring their friendship and adding a personal touch to the ceremony.
+- [PREFERENCE] The user is considering incorporating music into the ceremony, such as acoustic guitar or a string quartet.
+- [ASSISTANT_SAID] The assistant suggested that music can add emotional depth to the ceremony and provided tips for choosing music that resonates with the couple's love story.
+- [ASSISTANT_SAID] The assistant recommended keeping the music simple and coordinating with the musician regarding logistics.
+- [ASSISTANT_SA

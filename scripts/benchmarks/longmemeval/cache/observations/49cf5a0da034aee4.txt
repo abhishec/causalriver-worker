@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [FACT] The user is trying to find a good deal on a business class ticket to London on British Airways for their summer vacation.
+- [EVENT] The user just got back from a trip to LA on American Airlines on February 10th.
+- [PREFERENCE] The user found the middle seat on their recent flight to LA uncomfortable.
+- [TEMPORAL] The user is considering travel dates in July or August for their trip to London.
+- [FACT] The user will be flying out of Chicago for their trip to London, the same as their recent flight to LA.
+- [ASSISTANT_SAID] The assistant offered to help compare prices across different airlines for business class tickets to London.
+- [ASSISTANT_SAID] The assistant mentioned that British Airways' Club World business class features lie-flat beds, priority check-in, and gourmet meals.
+- [ASSISTANT_SAID] The assistant provided details about British Airways' in-flight entertainment, including a personal 12.1-inch high-definition screen, noise-cancelling headphones, and a vast library of content.
+- [ASSISTANT_SAID] The assistant listed meal options on British Airways, including gourmet meals designed by leading chefs, a range of dietary options, fine wines, and flexible meal service.
+- [ASSISTANT_SAID] The assistant provided preliminary price comparisons for business class flights from Chicago to London in July and August: British Airways ($4,500 - $5,500), American Airlines ($5,000 - $6,000), United Airlines ($4,800 - $5,800), and Virgin Atlantic ($5,200 - $6,200).
+- [PREFERENCE] The user is considering using their United Airlines miles to book a business class ticket instead.
+- [ASSISTANT_SAID] The assistant stated that a one-way business class ticket from Chicago to London on United requires 60,000 miles during off-peak dates and 70,000 miles during peak dates.
+- [ASSISTANT_SAID] The assistant mentioned that taxes and fees for the ticket could range from $100 to $200 or more.
+- [ASSISTANT_SAID] The assistant advised the user to check award availability on United's website or through customer service.
+- [EVENT] The user needs to log in to their frequent flyer account to check if their miles have been credited from their recent flights.
+- [ASSISTANT_SAID] The assistant provided steps for the user to log in to their United Airlines MileagePlus account and check their mileage activity.
+- [PREFERENCE] The user is applying for a credit card that offers more miles on United Airlines to help reach their target of 60,000 miles for a business class ticket.
+- [TEMPORAL] The user believes they will hit their target by the end of April with the 50,000 bonus miles from their current credit card

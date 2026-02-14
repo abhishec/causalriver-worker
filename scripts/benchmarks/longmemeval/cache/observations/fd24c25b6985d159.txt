@@ -1,0 +1,23 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/03/01 (Wed) 19:15
+- [EVENT] User is planning to try Peking duck in Beijing.
+- [PREFERENCE] User finds Peking duck delicious.
+- [ASSISTANT_SAID] During a traditional Peking duck meal in Beijing, one can expect to eat thin slices of roasted duck served with pancakes or steamed buns, scallions, cucumbers, and a sweet bean sauce, along with other side dishes like stir-fried vegetables or noodles.
+- [ASSISTANT_SAID] Recommended places to try Peking duck in Beijing include:
+  1. Quanjude (全聚德) - a famous and historic chain of restaurants known for their Peking duck.
+  2. Da Dong Roast Duck (大董烤鸭) - a modern and high-end restaurant that serves unique variations of Peking duck.
+  3. Jing Zun Peking Duck Restaurant (京尊轩烤鸭店) - another high-end establishment that offers a premium Peking duck experience.
+  4. Made in China (华彩天地) - located in the Grand Hyatt Hotel, this restaurant offers a delicious Peking duck meal in an elegant setting.
+  5. Liqun Roast Duck (利群烤鸭店) - a popular local spot with authentic and affordable Peking duck.
+- [ASSISTANT_SAID] The assistant does not have personal preferences or the ability to taste or smell.
+- [ASSISTANT_SAID] Watching the chef carve the duck at the table is part of the experience of eating Peking duck in Beijing, where the chef uses a sharp knife to carve the crispy skin and meat from the duck in front of diners.
+- [PREFERENCE] User is excited to watch the chef carve the duck.
+- [ASSISTANT_SAID] Recommended beverages to pair with Peking duck include hot tea, beer, white wine, Chinese baijiu, sodas, or juices, depending on personal preference.
+- [PREFERENCE] User prefers to drink hot tea when trying Peking duck.
+- [ASSISTANT_SAID] Other must-try dishes in Beijing include:
+  1. Jing Jiang Rou Si (京酱肉丝) - thin strips of pork stir-fried with sweet bean sauce and shredded vegetables.
+  2. Zhajiangmian (炸酱面) - a classic Beijing noodle dish made with thick wheat noodles, soybean paste, and diced meat and vegetables.
+  3. Lǚrou huǒshāo (驴肉火烧) - a popular street food made with minced donkey meat stuffed in a crispy bun.
+  4. Douzhi (豆汁) - a traditional savory fermented mung bean soup.
+  5. Guokui (锅盔) - a crispy

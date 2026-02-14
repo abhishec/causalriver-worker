@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[FACT] User is planning a trip to Seattle.  
+[EVENT] User is looking for a hotel with a great view in downtown Seattle.  
+[ASSISTANT_SAID] Recommended hotels include:  
+[ASSISTANT_SAID] 1. The Seattle Marriott Waterfront: Offers breathtaking views of Puget Sound, the Olympic Mountains, and the city skyline.  
+[ASSISTANT_SAID] 2. Seattle Marriott Hotel: Located in the heart of downtown with views of the city, Puget Sound, or the Olympic Mountains.  
+[ASSISTANT_SAID] 3. The Ritz-Carlton, Seattle: Luxurious hotel in the financial district with stunning views, part of the Marriott Bonvoy portfolio.  
+[ASSISTANT_SAID] 4. Courtyard Seattle Downtown/Pioneer Square: Located in Pioneer Square with views of the city or Puget Sound.  
+[ASSISTANT_SAID] 5. SpringHill Suites Seattle Downtown/SODO: Offers rooms with views of the city or Puget Sound.  
+[ASSISTANT_SAID] Suggested to request a room with a view and consider upgrading to a higher floor or a room with a balcony.  
+[ASSISTANT_SAID] Provided steps to book a room at The Seattle Marriott Waterfront.  
+[ASSISTANT_SAID] Suggested contacting the hotel directly at (206) 443-5000 or emailing reservations@seattlemarriottwaterfront.com for specific requests.  
+[ASSISTANT_SAID] Recommended being flexible with travel dates for better availability.  
+[ASSISTANT_SAID] Suggested checking for "Rooms with a View" or "Balcony Rooms" when booking.  
+[EVENT] User wants to book a room at The Seattle Marriott Waterfront with a high floor and a balcony.  
+[ASSISTANT_SAID] Recommended local coffee shops near The Seattle Marriott Waterfront include:  
+[ASSISTANT_SAID] 1. Pike Place Market: Includes the Original Starbucks and Intelligentsia Coffee.  
+[ASSISTANT_SAID] 2. Cafe Vita: A 10-minute walk from the hotel, offers breakfast sandwiches and pastries.  
+[ASSISTANT_SAID] 3. Zoka Coffee Roasters: Known for expertly roasted beans, about a 10-minute walk from the hotel.  
+[ASSISTANT_SAID] 4. Seattle Coffee Works: Offers small-batch beans, pour-overs, and espresso drinks, about a 10-minute walk from the hotel.  
+[ASSISTANT_SAID] 5. The London Plane: A 15-minute walk from the hotel, serves coffee, tea, and pastries.  
+[ASSISTANT_SAID] 6. La Marzocco Cafe: Located inside the Seattle Center, about a 15-minute walk from the hotel

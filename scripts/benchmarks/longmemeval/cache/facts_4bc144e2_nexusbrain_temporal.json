@@ -1,0 +1,116 @@
+{
+  "answer_9ef115d4_2": [
+    {
+      "fact": "User owns a 2018 Honda Civic",
+      "type": "personal",
+      "entities": [
+        "2018 Honda Civic"
+      ]
+    },
+    {
+      "fact": "User replaced the air filter on February 10th for $25",
+      "type": "event",
+      "entities": [
+        "February 10th",
+        "air filter",
+        "$25"
+      ]
+    },
+    {
+      "fact": "User filled up the gas tank on February 10th for $30",
+      "type": "event",
+      "entities": [
+        "February 10th",
+        "gas fill-up",
+        "$30"
+      ]
+    },
+    {
+      "fact": "User received a parking ticket on January 5th for $50",
+      "type": "event",
+      "entities": [
+        "January 5th",
+        "parking ticket",
+        "$50"
+      ]
+    },
+    {
+      "fact": "User filled up the gas tank before dropping their mom off at the airport on December 28th",
+      "type": "event",
+      "entities": [
+        "December 28th",
+        "gas fill-up",
+        "airport",
+        "mom"
+      ]
+    },
+    {
+      "fact": "User is unsure of the mileage of their car",
+      "type": "personal",
+      "entities": [
+        "mileage"
+      ]
+    },
+    {
+      "fact": "User has had their bike serviced recently",
+      "type": "event",
+      "entities": [
+        "bike service"
+      ]
+    },
+    {
+      "fact": "User is trying to track their car maintenance costs",
+      "type": "preference",
+      "entities": [
+        "car maintenance costs"
+      ]
+    }
+  ],
+  "answer_9ef115d4_1": [
+    {
+      "fact": "User is trying to keep track of their expenses.",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User has a car.",
+      "type": "personal",
+      "entities": [
+        "car"
+      ]
+    },
+    {
+      "fact": "User spent $25 on a service to replace the air filter on February 10th.",
+      "type": "event",
+      "entities": [
+        "February 10th",
+        "$25",
+        "air filter"
+      ]
+    },
+    {
+      "fact": "User spent $30 to fill up their gas tank around February 10th.",
+      "type": "event",
+      "entities": [
+        "February 10th",
+        "$30"
+      ]
+    },
+    {
+      "fact": "User spent $15 on a car wash on February 3rd.",
+      "type": "event",
+      "entities": [
+        "February 3rd",
+        "$15"
+      ]
+    },
+    {
+      "fact": "User's insurance premium is around $80 a month.",
+      "type": "personal",
+      "entities": [
+        "$80",
+        "insurance premium"
+      ]
+    }
+  ]
+}

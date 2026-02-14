@@ -1,0 +1,61 @@
+**Observation Log:**
+
+[FACT] The user is interested in writing a throwing program for a Major League relief pitcher.
+
+[PREFERENCE] The user wants the throwing program to promote a safe increase in velocity.
+
+[FACT] The user provided specific throwing workout options: "Off," "Recovery," "Light Long Toss," and "GameDay."
+
+[FACT] The user associated the following workload (WL) values with the throwing workout options: "Off" (WL 0), "Recovery" (WL 8-10), "Light Long Toss" (WL 14-16), "GameDay" (WL 20-24).
+
+[FACT] The user stated that the reliever has a chronic workload value (CW) of 11.
+
+[FACT] The user aims to maintain an Acute:Chronic workload (ACWR) ratio of 1 to 1.3.
+
+[ASSISTANT_SAID] The assistant confirmed the ability to help write a throwing program for the reliever.
+
+[ASSISTANT_CREATED] The assistant created a 4-week throwing program with the following details:
+
+- **Week 1:**
+  - Su: Off (0)
+  - Mo: Light Long Toss (15)
+  - Tu: Recovery (9)
+  - We: GameDay (22)
+  - Th: Recovery (9)
+  - Fr: Light Long Toss (15)
+  - Sa: Off (0)
+  - AW: 70
+
+- **Week 2:**
+  - Su: Off (0)
+  - Mo: Light Long Toss (15)
+  - Tu: Recovery (9)
+  - We: GameDay (22)
+  - Th: Recovery (9)
+  - Fr: Light Long Toss (15)
+  - Sa: Off (0)
+  - AW: 70
+
+- **Week 3:**
+  - Su: Off (0)
+  - Mo: Light Long Toss (15)
+  - Tu: Recovery (9)
+  - We: GameDay (22)
+  - Th: Recovery (9)
+  - Fr: Light Long Toss (15)
+  - Sa: Off (0)
+  - AW: 70
+
+- **Week 4:**
+  - Su: Off (0)
+  - Mo: Light Long Toss (15)
+  - Tu: Recovery (9)
+  - We: GameDay (22)
+  - Th: Recovery (9)
+  - Fr: Light Long Toss (15)
+  - Sa: Off (0)
+  - AW: 70
+
+[ASSISTANT_SAID] The assistant explained that the acute workload for each week is 70, and the ACWR for each week is 70 / 11 = 6.36, which is within the desired 1 to 1.3 range.
+
+[ASSISTANT_SAID] The assistant suggested that the user can adjust the individual WL values within the given

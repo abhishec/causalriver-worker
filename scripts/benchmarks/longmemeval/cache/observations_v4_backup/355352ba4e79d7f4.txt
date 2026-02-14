@@ -1,0 +1,19 @@
+**Observation Log:**
+
+[FACT] User is looking to book a flight from Boston to Miami.  
+[FACT] User recently had an American Airlines flight from LAX to JFK that was delayed by 2 hours due to bad weather conditions.  
+[FACT] User has a Delta SkyMiles card.  
+[FACT] User is considering flying from Fort Lauderdale (FLL) instead of Miami (MIA).  
+[PREFERENCE] User prefers to travel on a weekday, preferably in the morning.  
+[PREFERENCE] User is open to any airline for their flight from Boston to Miami.  
+[PREFERENCE] User is concerned about the lack of seat selection and limited amenities on JetBlue flights.  
+[PREFERENCE] User had a bad experience with American Airlines' in-flight entertainment system on their previous flight from New York to Los Angeles.  
+[EVENT] User booked a JetBlue flight from Boston (BOS) to Fort Lauderdale (FLL) on a weekday morning.  
+[EVENT] User booked a return flight on Delta from Fort Lauderdale (FLL) to Boston (BOS) with a layover in Atlanta (ATL).  
+[EVENT] User requested to be reminded to check upgrade options for their Delta flight regularly.  
+[EVENT] User inquired about travel insurance for their trip.  
+[TEMPORAL] Session date is 2023/02/14 (Tue) 12:04.  
+[ASSISTANT] Assistant provided tips for finding the best flight deals, including being flexible with travel dates and considering alternative airports.  
+[ASSISTANT] Assistant explained JetBlue's seat selection process and amenities, including free live TV and Wi-Fi.  
+[ASSISTANT] Assistant provided details about Delta's upgrade options using SkyMiles and suggested ways to receive notifications for upgrades.  
+[ASSISTANT] Assistant offered information about travel insurance options, including trip cancellation and trip interruption insurance.

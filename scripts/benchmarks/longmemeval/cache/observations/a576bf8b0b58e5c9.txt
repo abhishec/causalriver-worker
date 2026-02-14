@@ -1,0 +1,19 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/23 (Tue) 12:42
+- [FACT] User has been cooking a lot at home lately.
+- [FACT] User made a big batch of chicken stir-fry that will last from today to Thursday.
+- [PREFERENCE] User is open to trying new ingredients and does not have any dietary restrictions.
+- [PREFERENCE] User has been experimenting with different types of hot peppers lately.
+- [PREFERENCE] User prefers recipes that generate leftovers.
+- [ASSISTANT_SAID] Assistant suggested exploring new recipe ideas for the weekend.
+- [ASSISTANT_SAID] Assistant asked about dietary restrictions, favorite protein, openness to new ingredients, available cooking time, and preference for comfort or light meals.
+- [ASSISTANT_SAID] Assistant provided three recipe options: Korean-Style BBQ Beef Tacos with Kimchi Slaw, Jamaican Jerk Chicken with Caribbean Rice and Peas, and Chili con Carne with Ancho and Habanero Peppers.
+- [ASSISTANT_SAID] Assistant described the Korean-Style BBQ Beef Tacos with Kimchi Slaw recipe, including ingredients and instructions.
+- [ASSISTANT_SAID] Assistant provided tips for finding Korean chili flakes (gochugaru) and gochujang in local grocery stores.
+- [ASSISTANT_SAID] Assistant suggested storing hot peppers in airtight containers, refrigerating them, keeping them dry, freezing, dehydrating, and checking for spoilage.
+- [ASSISTANT_SAID] Assistant mentioned that Korean chili flakes (gochugaru) have a distinctive flavor and heat level.
+- [FACT] User recently bought a bunch of jalapeños and serrano peppers at the farmer's market.
+- [PREFERENCE] User has been adding jalapeños and serrano peppers to stir-fries and pasta sauces for extra kick.
+- [ASSISTANT_SAID] Assistant encouraged user to try roasting jalapeños and serrano peppers to enhance their flavor.
+- [ASSISTANT_CREATED] Assistant created a detailed recipe for Korean-Style BBQ Beef Tacos with Kimchi Slaw, including ingredients and step-by-step instructions for both the beef and kimchi slaw.

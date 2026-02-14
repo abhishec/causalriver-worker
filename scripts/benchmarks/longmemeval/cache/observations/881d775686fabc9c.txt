@@ -1,0 +1,12 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2021/08/20 (Fri) 20:07
+- [USER] User requested relevant information to address during a presentation of a chapter titled "2.3. Previous work of Visual Assistive Technology."
+- [ASSISTANT_SAID] The chapter discusses previous work in the field of visual assistive technology, specifically focusing on head wear and smart cane devices.
+- [ASSISTANT_SAID] One head wear device described is a wearable travel aid for environment perception and navigation, which uses a consumer Red, Green, Blue, and Depth (RGB-D) camera, an inertial measurement unit (IMU), a smartphone, and an earphone for commands and feedback.
+- [ASSISTANT_SAID] The wearable travel aid can be used both indoors and outdoors, but has limitations in detecting small obstacles and does not have staircase detection capabilities.
+- [ASSISTANT_SAID] Another head wear device discussed is a real-time visual recognition system that converts results to 3D audio, using a portable camera, a server for image recognition processing, and wireless earphones for output.
+- [ASSISTANT_SAID] The real-time visual recognition system is able to conduct precise real-time object detection but is limited in its detection range and can be blocked by surrounding ambient noise when using earbuds.
+- [ASSISTANT_SAID] Smart cane devices discussed include an electronic stick with ultrasonic sensors, GPS navigation, and cloud vision API capabilities.
+- [ASSISTANT_SAID] Another smart cane called WeWalk has a touchpad for navigation, an ultrasound sensor for obstacle detection, and a built-in speaker or Bluetooth for voice feedback.
+- [ASSISTANT_SAID] Both smart cane devices have limitations, such as short coverage for obstacle detection or only being suitable for indoor use.

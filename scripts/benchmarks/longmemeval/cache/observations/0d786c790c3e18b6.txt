@@ -1,0 +1,29 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/03/17 (Fri) 21:50  
+[EVENT] User is planning to make another purchase on Amazon soon.  
+[EVENT] User received a coupon in their email inbox a few days prior to March 15th.  
+[ASSISTANT_SAID] To find coupons and promo codes available for an Amazon account, the user should:  
+[ASSISTANT_SAID] 1. Sign in to their Amazon account at Amazon.com.  
+[ASSISTANT_SAID] 2. Check the top navigation bar and click on "Accounts & Lists."  
+[ASSISTANT_SAID] 3. Click on "Your Coupons" in the drop-down menu.  
+[ASSISTANT_SAID] 4. Browse available coupons and promo codes exclusive to their account.  
+[ASSISTANT_SAID] 5. Clip or redeem coupons by clicking on them.  
+[ASSISTANT_SAID] User can also check their email inbox for Amazon promotional emails for exclusive coupons.  
+[ASSISTANT_SAID] User can look for the "Today's Deals" section on Amazon's homepage for coupon codes or discounts.  
+[ASSISTANT_SAID] User can use Amazon's "Coupon Finder" tool to search for coupons by product or brand.  
+[ASSISTANT_SAID] User can install the Amazon Assistant browser extension or mobile app for notifications about available coupons and deals.  
+[ASSISTANT_SAID] To increase chances of receiving more offers, user should:  
+[ASSISTANT_SAID] 1. Ensure they are subscribed to Amazon's promotional emails.  
+[ASSISTANT_SAID] 2. Keep their browsing and purchasing history up-to-date.  
+[ASSISTANT_SAID] 3. Consider joining Amazon Prime for exclusive discounts and benefits.  
+[EVENT] User wants to know more about Amazon's coupon policy.  
+[ASSISTANT_SAID] Amazon's coupon policy includes:  
+[ASSISTANT_SAID] 1. Limit of one coupon per customer per item unless stated otherwise.  
+[ASSISTANT_SAID] 2. Coupons have expiration dates and cannot be used after that date.  
+[ASSISTANT_SAID] 3. Some coupons have limits on the number of times they can be redeemed.  
+[ASSISTANT_SAID] Regarding combining coupons with other discounts or cashback offers:  
+[ASSISTANT_SAID] 1. Generally, multiple coupons cannot be stacked on a single item.  
+[ASSISTANT_SAID] 2. Manufacturer's coupons can be combined with Amazon coupons.  
+[ASSISTANT_SAID] 3. Some digital coupons can be combined with other discounts on a case-by-case basis.  
+[ASSIST

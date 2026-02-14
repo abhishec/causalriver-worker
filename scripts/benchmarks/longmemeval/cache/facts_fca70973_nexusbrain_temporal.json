@@ -1,0 +1,35 @@
+{
+  "answer_a1e169b1": [
+    {
+      "fact": "User recently visited multiple theme parks including Disneyland, Knott's Berry Farm, Six Flags Magic Mountain, and Universal Studios Hollywood.",
+      "type": "event",
+      "entities": [
+        "Disneyland",
+        "Knott's Berry Farm",
+        "Six Flags Magic Mountain",
+        "Universal Studios Hollywood"
+      ]
+    },
+    {
+      "fact": "User is looking for recommendations on upcoming theme park events.",
+      "type": "preference",
+      "entities": []
+    },
+    {
+      "fact": "User is particularly interested in Halloween-themed events.",
+      "type": "preference",
+      "entities": [
+        "Halloween-themed events"
+      ]
+    },
+    {
+      "fact": "User is interested in thrill rides, unique food experiences, and nighttime shows.",
+      "type": "preference",
+      "entities": [
+        "thrill rides",
+        "unique food experiences",
+        "nighttime shows"
+      ]
+    }
+  ]
+}

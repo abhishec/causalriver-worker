@@ -1,0 +1,31 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/22 (Mon) 18:07
+- [USER] The user is trying to get their documents in order.
+- [USER] The user is seeking help to create a checklist for organizing their college transcripts and diplomas.
+- [ASSISTANT_SAID] The assistant provided a checklist for organizing college transcripts and diplomas.
+- [ASSISTANT_CREATED] The assistant created a checklist for college transcripts that includes:
+  1. Collect all transcripts from all colleges and universities attended.
+  2. Verify authenticity of each transcript.
+  3. Check for completeness of each transcript.
+  4. Order replacement transcripts if needed.
+  5. Store transcripts securely.
+  6. Make digital copies of transcripts.
+- [ASSISTANT_CREATED] The assistant created a checklist for college diplomas that includes:
+  1. Gather all diplomas.
+  2. Verify authenticity of each diploma.
+  3. Check for damage on each diploma.
+  4. Consider digitization of diplomas.
+  5. Store diplomas securely.
+- [ASSISTANT_SAID] The assistant provided additional tips for organizing documents, including creating a master folder and keeping a record of institutions' contact information.
+- [USER] The user already has digital copies of their transcripts and diplomas and does not need to scan them.
+- [USER] The user is planning to apply for data science jobs.
+- [USER] The user asked if it is necessary to include their undergraduate GPA in their resume.
+- [ASSISTANT_SAID] The assistant discussed the pros and cons of including undergraduate GPA on a resume.
+- [ASSISTANT_SAID] The assistant suggested that including a high GPA can demonstrate academic achievement, while omitting it may be better if the user has significant work experience or a low GPA.
+- [USER] The user decided to leave their undergraduate GPA out of their resume since they have a Master's degree in Computer Science, which is more relevant to the jobs they are applying for.
+- [ASSISTANT_SAID] The assistant agreed that focusing on the Master's degree is a good decision and suggested emphasizing relevant coursework, technical skills, research experience, practical experience, and certifications in the resume.
+- [USER] The user mentioned helping their niece with her math homework and considering sharing college experiences to inspire her to pursue a career in STEM.
+- [ASSISTANT_SAID] The assistant encouraged the user to share their college experiences, highlighting the benefits of personal connection, real-life examples, role modeling, inspiration, and encouraging curiosity.
+- [USER] The user planned to share their feelings about graduating with a Master's degree in Computer Science from Stanford University in June 2022.
+- [USER] The user expressed pride in completing the program and mentioned sharing interesting projects and skills developed during their time at Stanford.

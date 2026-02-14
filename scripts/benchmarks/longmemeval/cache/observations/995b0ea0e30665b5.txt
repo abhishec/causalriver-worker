@@ -1,0 +1,24 @@
+**Observation Log:**
+
+[FACT] User is trying to get a better grip on their eating habits and cooking routines.  
+[EVENT] User started using a food delivery app called "Bites" three weeks ago.  
+[ASSISTANT_SAID] Assistant congratulated the user on taking the first step towards tracking their eating habits and cooking routines.  
+[ASSISTANT_SAID] Assistant stated that there is no food delivery app called "Bites" that they are aware of, suggesting it might be a new or local app.  
+[ASSISTANT_SAID] Assistant recommended several apps for tracking food expenses: Mint, Personal Capital, You Need a Budget (YNAB), Spendee, and Food Diary.  
+[ASSISTANT_SAID] Assistant recommended two spreadsheets for tracking food expenses: Google Sheets and Microsoft Excel.  
+[ASSISTANT_SAID] Assistant provided a simple spreadsheet template for tracking food expenses with columns for Date, Category, Item, and Cost.  
+[ASSISTANT_SAID] Assistant emphasized the importance of consistency and honesty in tracking food expenses.  
+[CHANGE] User decided to start with a simple spreadsheet for tracking food expenses.  
+[ASSISTANT_SAID] Assistant provided an updated template for tracking food expenses, including columns for Location and Type.  
+[ASSISTANT_SAID] Assistant suggested categories for the "Category" column: Groceries, Dining Out, Takeout/Delivery, Snacks, Coffee/Breakfast, and Subscriptions.  
+[ASSISTANT_SAID] Assistant explained the purpose of each column in the template.  
+[CHANGE] User decided to add a column for "Cooking Method" to track whether they cooked at home, ordered in, or ate out.  
+[ASSISTANT_SAID] Assistant provided an updated template including the "Cooking Method" column and suggested options for it.  
+[CHANGE] User decided to add a column for "Recipe" to track new recipes tried at home.  
+[ASSISTANT_SAID] Assistant provided an updated template including the "Recipe" column and explained how to use it.  
+[CHANGE] User decided to add a column for "Meal Prep" to track meal prep activities, including what was prepared and how long it lasted.  
+[ASSISTANT_SAID] Assistant provided an updated template including the "Meal Prep" column and suggested what to track in it.  
+[CHANGE] User plans to start tracking meal prep activities for the week and will begin by adding their previous meal prep from last Sunday to the template.  
+[ASSISTANT_SAID] Assistant encouraged the user to be detailed when filling out the "Meal Prep" column and provided an example of how to fill it out.  
+[TEMPORAL] User's previous meal prep activity occurred last Sunday.  
+[ASSISTANT_SAID] Assistant provided encouragement and tips for tracking meal prep activities effectively.

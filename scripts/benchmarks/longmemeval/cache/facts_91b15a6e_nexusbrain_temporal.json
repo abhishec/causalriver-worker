@@ -1,0 +1,102 @@
+{
+  "answer_5404a208_1": [
+    {
+      "fact": "User inherited a vintage diamond necklace from their grandmother",
+      "type": "personal",
+      "entities": [
+        "vintage diamond necklace",
+        "grandmother"
+      ]
+    },
+    {
+      "fact": "User got the necklace appraised last week",
+      "type": "event",
+      "entities": [
+        "necklace appraisal"
+      ]
+    },
+    {
+      "fact": "User is thinking of getting the necklace insured",
+      "type": "preference",
+      "entities": [
+        "insurance",
+        "necklace"
+      ]
+    },
+    {
+      "fact": "User plans to keep the necklace in a safe at home",
+      "type": "preference",
+      "entities": [
+        "safe",
+        "necklace"
+      ]
+    },
+    {
+      "fact": "User has been decluttering their apartment",
+      "type": "event",
+      "entities": [
+        "decluttering",
+        "apartment"
+      ]
+    },
+    {
+      "fact": "User found an antique music box, a vintage typewriter, and a set of depression-era glassware while decluttering",
+      "type": "personal",
+      "entities": [
+        "antique music box",
+        "vintage typewriter",
+        "depression-era glassware"
+      ]
+    },
+    {
+      "fact": "User is looking for online marketplaces or local antique stores to sell their old items",
+      "type": "preference",
+      "entities": [
+        "online marketplaces",
+        "local antique stores",
+        "old items"
+      ]
+    }
+  ],
+  "answer_5404a208_2": [
+    {
+      "fact": "User is thinking of selling old family heirlooms to make extra cash",
+      "type": "preference",
+      "entities": [
+        "family heirlooms",
+        "extra cash"
+      ]
+    },
+    {
+      "fact": "User is restoring an antique vanity",
+      "type": "event",
+      "entities": [
+        "antique vanity"
+      ]
+    },
+    {
+      "fact": "User has put in some work to restore the antique vanity",
+      "type": "opinion",
+      "entities": [
+        "antique vanity",
+        "restoration work"
+      ]
+    },
+    {
+      "fact": "User is considering selling the restored antique vanity online or at a local antique market",
+      "type": "preference",
+      "entities": [
+        "online",
+        "local antique market"
+      ]
+    },
+    {
+      "fact": "User paid $150 for the antique vanity",
+      "type": "personal",
+      "entities": [
+        "$150",
+        "antique vanity"
+      ]
+    }
+  ]
+}

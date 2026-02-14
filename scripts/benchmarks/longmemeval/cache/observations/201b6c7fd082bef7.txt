@@ -1,0 +1,28 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/28 (Sun) 00:37
+- [FACT] User is trying to keep track of their charity contributions for the year.
+- [EVENT] User raised $250 at the "Walk for Cancer" event last Sunday.
+- [EVENT] User participated in the "Bake Sale for Education" event.
+- [FACT] User's team raised $1,380 more than their individual contribution at the "Bake Sale for Education".
+- [ASSISTANT_SAID] Assistant offered to help calculate the total amount raised so far.
+- [ASSISTANT_SAID] Assistant broke down the contributions: $250 from "Walk for Cancer" and an unknown amount x from "Bake Sale for Education".
+- [ASSISTANT_SAID] Assistant set up an equation to find the user's individual contribution: Team's total contribution = x + $1,380.
+- [USER] User provided that the team's total contribution for the "Bake Sale for Education" was $1,500.
+- [ASSISTANT_SAID] Assistant solved for x, finding that the user's individual contribution was $120.
+- [ASSISTANT_SAID] Assistant calculated the total amount raised so far: $370 ($250 + $120).
+- [USER] User requested to add amounts raised from other charity events to the total.
+- [ASSISTANT_SAID] Assistant asked for amounts raised from the "Gala for the Homeless", "Food Drive", "Polar Bear Plunge", and "Animal Shelter".
+- [USER] User stated they spent $500 on a painting and $100 on a ticket at the "Gala for the Homeless", so they didn't raise funds there.
+- [USER] User mentioned $300 collected in cash donations at the "Food Drive".
+- [USER] User raised $500 in donations from the "Polar Bear Plunge".
+- [USER] User did not raise funds from the "Animal Shelter" but has been volunteering regularly.
+- [ASSISTANT_SAID] Assistant calculated the total raised so far: $1,170 ($370 + $300 + $500).
+- [ASSISTANT_SAID] Assistant noted the $600 spent at the "Gala for the Homeless" and added it to the total charitable giving.
+- [ASSISTANT_SAID] Assistant calculated the total charitable giving for the year: $1,770 ($1,170 + $600).
+- [USER] User requested to categorize contributions by cause: education, healthcare, homelessness, and animal welfare.
+- [ASSISTANT_SAID] Assistant categorized contributions: 
+  - Education: $120 (from "Bake Sale for Education")
+  - Healthcare: $250 (from "Walk for Cancer")
+  - Homelessness: $600 (from "Gala for the Homeless")
+  - Food

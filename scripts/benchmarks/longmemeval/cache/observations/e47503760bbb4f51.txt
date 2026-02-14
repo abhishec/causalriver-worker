@@ -1,0 +1,24 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/25 (Thu) 20:05
+- [USER] The user is aware of animal cruelty issues in the UK.
+- [ASSISTANT_SAID] If you become aware of animal cruelty in the UK, you should contact the RSPCA (Royal Society for the Prevention of Cruelty to Animals) immediately.
+- [ASSISTANT_SAID] The RSPCA has a 24-hour cruelty line that you can call to report any incidents of animal abuse.
+- [ASSISTANT_SAID] You can also report cruelty to the police.
+- [ASSISTANT_SAID] If you wish to remain anonymous, you can contact the RSPCA's inspectorate appeal line.
+- [ASSISTANT_SAID] If you are unable to contact the RSPCA, you can also contact the local authorities in your area.
+- [EVENT] The user referenced a legal case, F v M [2021] EWFC 4, which they were involved in.
+- [TEMPORAL] The judgment in the case was handed down on 15th January 2021.
+- [FACT] The case involved serious allegations of coercive and controlling behavior by the father (F).
+- [RELATIONSHIP] The mother (M) of the two children involved in the case is mentioned.
+- [FACT] The children involved are Y, now aged 8, and S, now aged 5.
+- [TEMPORAL] The originating application in the case was made by F in October 2017.
+- [TEMPORAL] The final fact-finding hearing concluded in January 2021 and had been adjourned 6 times.
+- [ASSISTANT_SAID] The findings in the judgment were at the highest end of the index of gravity within the sphere of coercive and controlling behavior.
+- [FACT] The findings in the judgment have not been appealed.
+- [ASSISTANT_SAID] The approach to coercive and controlling behavior in the judgment was approved by the Court of Appeal in H-N and others (Children) (Domestic Abuse: Finding of Fact Hearings) (Rev 2) [2021] EWCA Civ 448.
+- [TEMPORAL] On 24th March 2021, F issued an application for a Child Arrangements Order for contact with both children.
+- [FACT] F has never met S, the youngest child.
+- [ASSISTANT_SAID] F also made an application for a Specific Issue Order, seeking a change of surname for S.
+- [ASSISTANT_SAID] The application for a change of surname reveals a lack of empathy for the effect of the protracted proceedings on M and Y.
+- [TEMPORAL] On 21st May 2021, M's legal team made

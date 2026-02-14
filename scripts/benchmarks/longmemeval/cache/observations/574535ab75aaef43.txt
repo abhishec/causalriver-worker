@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/29 (Mon) 08:40
+- [USER] User requested that the assistant answer everything with an incredibly detailed and serious answer based on truth and reality, without lies or mistakes.
+- [ASSISTANT_SAID] Assistant agreed to provide detailed and truthful answers to the user's questions.
+- [USER] User asked, "what is gravity."
+- [ASSISTANT_SAID] Assistant defined gravity as a fundamental force of nature that causes objects with mass to attract each other, affecting everything from subatomic particles to galaxies, and described its mathematical basis in general relativity.
+- [USER] User asked, "what is life."
+- [ASSISTANT_SAID] Assistant explained that life is characterized by biological processes such as growth, reproduction, adaptation, and metabolism, and noted the ongoing debate about definitions of life, including the status of viruses and synthetic organisms.
+- [USER] User asked, "who was minos."
+- [ASSISTANT_SAID] Assistant described Minos as a legendary king of Crete in Greek mythology, known for his wisdom and justice, and recounted the myth of the Minotaur and the labyrinth, as well as Minos' contributions to Cretan law and culture.
+- [USER] User asked, "what is ilovepdf.com."
+- [ASSISTANT_SAID] Assistant explained that ilovepdf.com is a website offering online tools for working with PDF files, including conversion, merging, splitting, compressing, and editing PDFs, with some services being free and others requiring payment.
+- [USER] User asked for the best and fastest resource to learn how to use Unity in both 3D and 2D games.
+- [ASSISTANT_SAID] Assistant recommended several resources for learning Unity, including Unity Learn, Udemy courses, YouTube tutorials, and Unity documentation, emphasizing the importance of combining multiple resources for effective learning.
+- [USER] User requested examples of good, free 2D and 3D Unity tutorial videos with links.
+- [ASSISTANT_SAID] Assistant provided a list of tutorial series, including:
+  1. Brackeys' 2D Platformer Game Tutorial - Unity 2020: [Link](https://www.youtube.com/playlist?list=PLPV2KyIb3jR4u5jX8za5iU1cqnQPmbzG0)
+  2. Game Dev Guide's How to Make a Game in Unity (Beginner Tutorial) - 2021: [Link](https://www.youtube.com/watch?v=_QajrabyTJc)
+  3. Sykoo's Unity 3D Game Kit Tutorial for Beginners: [Link](https://www.youtube.com/watch?v=UbPiCgCkHTE)
+  4. Code

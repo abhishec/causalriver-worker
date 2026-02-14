@@ -1,0 +1,29 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/03/03 (Fri) 23:06
+- [EVENT] User is trying to learn more about coin collecting.
+- [EVENT] User just got a 2020 Canadian Maple Leaf coin from an online marketplace.
+- [ASSISTANT_SAID] The 2020 Canadian Maple Leaf coin is produced by the Royal Canadian Mint (RCM) and is considered one of the most recognizable coins in the world.
+- [ASSISTANT_SAID] The obverse of the coin features the portrait of Queen Elizabeth II, designed by Susanna Blunt, used on Canadian coins since 2003.
+- [ASSISTANT_SAID] The reverse of the coin showcases the iconic maple leaf design, designed by Walter Ott, unchanged since 1979.
+- [ASSISTANT_SAID] Mintage for the 2020 Canadian Maple Leaf coin: 
+  - 1 oz Gold Maple Leaf: 1,000,000 coins
+  - 1 oz Silver Maple Leaf: 28,900,000 coins
+  - 1 oz Platinum Maple Leaf: 50,000 coins
+  - 1 oz Palladium Maple Leaf: 50,000 coins
+- [ASSISTANT_SAID] The coin is struck in .9999 fine gold, silver, platinum, or palladium, depending on the metal type.
+- [ASSISTANT_SAID] The coin has a reeded edge and a serrated edge security feature to prevent counterfeiting.
+- [ASSISTANT_SAID] The coin is minted with a laser-engraved micro maple leaf mark containing the numeral "20" for the year of issue.
+- [ASSISTANT_SAID] The value of the coin depends on the metal type, condition, and market demand, primarily tied to the spot price of the precious metal it contains.
+- [ASSISTANT_SAID] User asked for online resources to track current spot prices of precious metals.
+- [ASSISTANT_SAID] Recommended online resources for tracking precious metal prices:
+  1. Kitco (kitco.com)
+  2. APMEX (apmex.com)
+  3. GoldPrice.org (goldprice.org)
+  4. Bloomberg (bloomberg.com)
+  5. London Bullion Market Association (LBMA) (lbma.org.uk)
+  6. JM Bullion (jmbullion.com)
+  7. CoinWeek (coinweek.com)
+- [ASSISTANT_SAID] User expressed interest in learning about the history of the Canadian Maple Leaf coin.
+- [ASSISTANT_SAID] The Canadian Maple Leaf coin was first introduced in 1979 by the Royal Canadian Mint.
+- [ASSISTANT_SAID] The original Gold Maple Leaf coin featured a portrait of

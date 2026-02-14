@@ -1,0 +1,28 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/27 (Sat) 06:56
+- [FACT] User has a project on Yoga effects.
+- [FACT] User created a Google form with various questions for data collection.
+- [ASSISTANT_SAID] Assistant expressed willingness to review the user's Google form details for the project on the effects of yoga.
+- [FACT] In the first part of the Google form, user asked for "Name", "Gender" (Male, Female), "Occupation" (Student, Service, Business, A Homemaker, Retired, Unemployed), "Age", "Weight", "Duration" (0 to 3 Months, 3 to 6 Months, More than 6 Months), and "Do you follow any specific diet?" (Yes, No).
+- [ASSISTANT_SAID] Assistant acknowledged the usefulness of the demographic questions and noted the importance of the diet question for analyzing the results.
+- [FACT] In the second part of the Google form, user included questions on a 5-point scale.
+- [FACT] User's second part questions include:
+  1. "In general, your health is?"
+  2. "Compared to one year ago rate health in general now?"
+  3. "Trouble falling or staying asleep, or sleeping too much."
+  4. "Becoming easily annoyed or irritable."
+  5. "Felt extremely happy?"
+  6. "Trouble concentrating on things or taking more time in making decisions."
+  7. "Feeling positive about life?"
+  8. "Sweat profusely (hands - legs or entire body were tremble/increased heartbeat) while talking to strangers or in public."
+  9. "Lost interest in activities that used to enjoy."
+  10. "Experience extreme mood swings?"
+  11. "Do you constantly have thoughts when you sit alone?"
+  12. "Activities, such as running, lifting heavy objects, sports."
+  13. "How much physical pain during the last 4 weeks?"
+- [ASSISTANT_SAID] Assistant praised the range of questions assessing overall health and specific symptoms, noting the effectiveness of the 5-point scaling system.
+- [ASSISTANT_SAID] Assistant provided additional types of questions related to physical health, emotional health, sleep, and nutrition that the user could consider adding to the survey.
+- [ASSISTANT_SAID] Assistant elaborated on the user's current questions, detailing how they measure different aspects of health and wellbeing.
+- [FACT] User plans to check how many persons are in the same list of first-time data and how many new responses are there in the second data collection.
+- [ASSISTANT_SAID] Assistant provided R code to compare the two sets of data based on user ID numbers, including steps

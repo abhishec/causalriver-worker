@@ -1,0 +1,20 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/20 (Sat) 10:47  
+[FACT] User has been cooking dinner at home about 4-5 times a week.  
+[PREFERENCE] User is looking for healthy meal prep ideas that can be ready in under 30 minutes.  
+[ASSISTANT_SAID] Suggested meal prep ideas include:  
+[ASSISTANT_SAID] 1. Quinoa and Black Bean Bowl: Cook quinoa and black beans, top with diced chicken breast, roasted veggies, and avocado sauce. (20 minutes)  
+[ASSISTANT_SAID] 2. Lentil and Veggie Wrap: Sauté lentils with spinach and garlic, fill a whole wheat wrap with the mixture, sliced turkey breast, and mixed greens. (25 minutes)  
+[ASSISTANT_SAID] 3. Grilled Chicken and Veggie Skewers: Alternate chicken breast, bell peppers, onions, and mushrooms on skewers, grill for 10-12 minutes. (20 minutes)  
+[ASSISTANT_SAID] 4. Roasted Veggie Bowl: Roast broccoli, sweet potatoes, and Brussels sprouts, serve over brown rice or quinoa with a fried or poached egg. (20 minutes)  
+[ASSISTANT_SAID] 5. Spinach and Mushroom Stir-Fry: Stir-fry spinach, mushrooms, and garlic, serve with brown rice or whole wheat noodles. (15 minutes)  
+[ASSISTANT_SAID] 6. Veggie and Bean Chili: Cook chili with canned black beans, diced tomatoes, and frozen veggies. (20 minutes)  
+[ASSISTANT_SAID] 7. Shrimp and Veggie Stir-Fry: Cook shrimp, bell peppers, and broccoli in a wok with oil and soy sauce. (15 minutes)  
+[ASSISTANT_SAID] 8. Chicken and Rice Bowl: Cook chicken breast, uncooked rice, and diced veggies in broth. (20 minutes)  
+[ASSISTANT_SAID] 9. Lentil Soup: Sauté onions, garlic, and carrots, add lentils, broth, and diced tomatoes. (25 minutes)  
+[ASSISTANT_SAID] Provided tips for meal prep: Use pre-cut veggies, swap protein sources, add nuts or seeds, experiment with spices, and consider meal prepping on weekends.  
+[PREFERENCE] User is particularly interested in the protein-packed options, especially the Quinoa and Black Bean Bowl.  
+[ASSISTANT_SAID] Provided a simple recipe for avocado sauce to accompany the Quinoa and Black Bean Bowl:  
+[ASSISTANT_CREATED] Avocado Sauce Recipe:  
+[ASSISTANT_SAID] Ingredients: 3 ripe avocados, 1/2 red onion, 1 jalapeño pepper, 1/

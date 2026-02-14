@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[FACT] User is researching natural family planning.  
+[FACT] User is curious about different methods and their effectiveness.  
+[EVENT] User met Ava for the first time on the same day as the conversation.  
+[RELATIONSHIP] Ava is a baby girl adopted by the user's friend from college.  
+[ASSISTANT_SAID] Natural family planning (NFP) refers to methods that help individuals and couples understand their fertility and make intentional decisions about pregnancy.  
+[ASSISTANT_SAID] Overview of popular NFP methods includes:  
+[ASSISTANT_CREATED] 1. Basal Body Temperature (BBT) Method: Effectiveness 80-90% with perfect use, 70-80% with typical use.  
+[ASSISTANT_CREATED] 2. Cervical Mucus Method (CMM): Effectiveness 80-90% with perfect use, 70-80% with typical use.  
+[ASSISTANT_CREATED] 3. Fertility Awareness Method (FAM): Effectiveness 90-95% with perfect use, 80-90% with typical use.  
+[ASSISTANT_CREATED] 4. Sympto-Thermal Method (STM): Effectiveness 95-98% with perfect use, 90-95% with typical use.  
+[ASSISTANT_CREATED] 5. Billings Ovulation Method (BOM): Effectiveness 90-95% with perfect use, 80-90% with typical use.  
+[ASSISTANT_CREATED] 6. Creighton Model FertilityCare System (CrMS): Effectiveness 95-98% with perfect use, 90-95% with typical use.  
+[ASSISTANT_CREATED] 7. Natural Cycles: Effectiveness 93-99% with perfect use, 80-90% with typical use.  
+[ASSISTANT_SAID] Effectiveness rates vary depending on the individual's ability to accurately track their fertility signs and follow the method correctly.  
+[ASSISTANT_SAID] NFP is about understanding your body, promoting reproductive health, and having open communication with your partner.  
+[ASSISTANT_SAID] User is encouraged to discuss their meeting with Ava.  
+[FACT] User is interested in learning more about the Fertility Awareness Method (FAM).  
+[ASSISTANT_SAID] FAM combines BBT and CMM to identify ovulation and fertile windows.  
+[ASSISTANT_SAID] Steps to use FAM include:  
+[ASSISTANT_CREATED] 1. Tracking Basal Body Temperature (BBT) daily.  
+[ASSISTANT_CREATED] 2. Tracking Cervical Mucus (CM) daily.  
+[ASSISTANT_CREATED] 3. Identifying the Fertile Window (5-7 days).  
+[ASSISTANT_CREATED]

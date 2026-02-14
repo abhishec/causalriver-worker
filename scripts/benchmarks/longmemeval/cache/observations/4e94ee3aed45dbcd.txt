@@ -1,0 +1,33 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/04/16 (Sun) 20:35
+- [EVENT] Elara checks for traps and indicates the way is clear.
+- [EVENT] The party enters a large foyer in a mansion with dust, debris, and cobweb-covered furniture.
+- [EVENT] The party hears noises coming from upstairs.
+- [USER] The user decides to go upstairs to investigate the noise.
+- [EVENT] The party finds a long hallway with several doors on the second floor.
+- [EVENT] The noise is coming from one of the rooms at the end of the hall.
+- [EVENT] The user peeks inside the room and sees a figure dressed in black, wearing a mask, and holding a bag of loot.
+- [USER] The user attempts to use stealth to get within grabbing distance of the figure.
+- [ASSISTANT_SAID] The user has a dexterity score of 16 and proficiency in stealth, giving a total stealth bonus of +5.
+- [EVENT] The user successfully sneaks up on the figure without being noticed.
+- [USER] The user grabs the figure and removes their mask.
+- [EVENT] The figure is revealed to be Maric, a follower of Selune, who looks shocked and fearful.
+- [ASSISTANT_SAID] Maric confesses to stealing items under the influence of dreams from Selune.
+- [USER] The user asks Maric what he is doing there.
+- [EVENT] Maric explains he has been taking stolen items to an abandoned temple of Selune as offerings.
+- [USER] The user decides to accompany Maric to the abandoned temple.
+- [EVENT] The party finds the abandoned temple, which is rundown and has a faint chanting coming from inside.
+- [USER] The user asks Maric what happens in the temple.
+- [EVENT] Maric expresses unease and states he has never been inside the temple.
+- [EVENT] The party enters the temple and finds a dimly lit room with an altar and candles.
+- [EVENT] The party sees a figure in dark robes chanting in a language they don't understand.
+- [USER] The user asks if the figure sees them.
+- [EVENT] The figure is unaware of the party's presence.
+- [USER] The user has Elara ready her bow while they try to stealth close enough to grab the figure.
+- [EVENT] Elara prepares to fire at the figure.
+- [USER] The user jumps on the figure's back and tries to restrain her.
+- [EVENT] The figure is subdued and has a crescent moon tattoo on her forehead.
+- [USER] The user asks the figure about the crescent moon tattoo.
+- [EVENT] The figure claims the tattoo is a symbol of her cult, a secret society that worships Selune.
+- [EVENT] The figure states

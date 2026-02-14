@@ -1,0 +1,29 @@
+**Observation Log:**
+
+- [FACT] User is moving to Melbourne to start a program at the University of Melbourne.
+- [TEMPORAL] User is starting their program in August 2023.
+- [EVENT] User is trying to finalize accommodation in Melbourne.
+- [FACT] User submitted their visa application on March 1, 2023.
+- [TEMPORAL] User is waiting to hear back from the Australian embassy regarding their visa.
+- [ASSISTANT_SAID] Assistant congratulated the user on their admission to the University of Melbourne.
+- [ASSISTANT_SAID] Assistant mentioned that the processing time for the visa application can vary, but the user can expect to hear back within 4-6 weeks.
+- [ASSISTANT_SAID] Assistant provided a list of popular options for shared apartments near the University of Melbourne, including:
+  1. **Student.com**: Offers a range of shared apartments and houses in Melbourne.
+  2. **UniLodge**: Several properties near the University of Melbourne with amenities like gyms and study spaces.
+  3. **Scape**: Multiple properties with modern amenities.
+  4. **Melbourne University Accommodation**: Offers shared accommodation options.
+  5. **Flatmates.com.au**: Platform to search for shared apartments and houses.
+  6. **Homestay**: Option to live with a local family.
+- [ASSISTANT_SAID] Assistant advised the user to consider factors like distance to the university, rent, amenities, and reviews when searching for shared apartments.
+- [ASSISTANT_SAID] Assistant recommended booking temporary accommodation upon arrival in Melbourne.
+- [USER] User expressed interest in learning more about UniLodge's properties, specifically UniLodge Melbourne.
+- [ASSISTANT_SAID] Assistant provided details about UniLodge Melbourne, including:
+  - **Location**: 333 La Trobe Street, Melbourne VIC 3000, a 5-minute walk to the University of Melbourne.
+  - **Amenities**: Fully furnished apartments, shared kitchen, communal areas, study spaces, gym, rooftop terrace, security, Wi-Fi, and on-site staff.
+- [ASSISTANT_SAID] Assistant provided approximate prices for 2023 for different room types at UniLodge Melbourne:
+  1. **Twin Share**: From AU$240 - AU$280 per week.
+  2. **Single Room**: From AU$290 - AU$330 per week.
+  3. **Studio**: From AU$390 - AU$440 per week.
+- [ASSISTANT_SAID] Assistant mentioned that prices may vary based on availability and lease duration.
+- [ASSISTANT_SAID] Assistant explained the lease terms, including flexible options of 26 weeks to 52 weeks.
+- [ASSISTANT_SAID] Assistant detailed the

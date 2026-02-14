@@ -1,0 +1,71 @@
+{
+  "answer_be07688f_1": [
+    {
+      "fact": "User owns a 2018 Honda Civic Si",
+      "type": "personal",
+      "entities": [
+        "2018 Honda Civic Si"
+      ]
+    },
+    {
+      "fact": "User is looking for advice on suspension settings for track driving",
+      "type": "preference",
+      "entities": [
+        "suspension settings",
+        "track driving"
+      ]
+    },
+    {
+      "fact": "User has ordered new coilovers",
+      "type": "event",
+      "entities": [
+        "new coilovers"
+      ]
+    },
+    {
+      "fact": "User plans to install the coilovers next weekend",
+      "type": "event",
+      "entities": [
+        "install coilovers",
+        "next weekend"
+      ]
+    },
+    {
+      "fact": "User is seeking recommendations for tools and precautions for installation",
+      "type": "preference",
+      "entities": [
+        "tools",
+        "precautions",
+        "installation"
+      ]
+    }
+  ],
+  "answer_be07688f_2": [
+    {
+      "fact": "User is preparing for an open track day at Virginia International Raceway on April 24th.",
+      "type": "event",
+      "entities": [
+        "open track day",
+        "Virginia International Raceway",
+        "April 24th"
+      ]
+    },
+    {
+      "fact": "User is testing their car's new suspension setup.",
+      "type": "preference",
+      "entities": [
+        "car",
+        "suspension setup"
+      ]
+    },
+    {
+      "fact": "User plans to participate in the 'Track Day Frenzy' event at VIR on May 15th.",
+      "type": "event",
+      "entities": [
+        "Track Day Frenzy",
+        "Virginia International Raceway",
+        "May 15th"
+      ]
+    }
+  ]
+}

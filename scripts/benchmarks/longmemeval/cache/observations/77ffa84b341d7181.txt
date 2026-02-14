@@ -1,0 +1,18 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/20 (Sat) 03:58  
+[USER] User is seeking information on how to find people's birthdays on Salesforce.  
+[ASSISTANT_SAID] You can find people's birthdays in Salesforce by using the Contacts or Leads object and adding a custom field for "Birthday."  
+[ASSISTANT_SAID] You can use the Salesforce report builder to create a report that displays the birthday information for the contacts and leads in your database.  
+[ASSISTANT_SAID] You can add a Birthday field to your page layout to see the information on the record detail page.  
+[USER] User requests steps for finding birthdays for their caseload.  
+[ASSISTANT_CREATED] Steps to add birthdays to Salesforce Contacts or Leads:  
+[ASSISTANT_SAID] Step 1: Create a custom field by going to the "Setup" menu, clicking on "Objects and Fields," selecting "Contact" or "Lead," and clicking on "Fields."  
+[ASSISTANT_SAID] In Step 1, click the "New" button to create a new custom field, choose "Date" as the data type, and label it "Birthday."  
+[ASSISTANT_SAID] Step 2: Add the custom field to your page layout by going to the "Page Layouts" section for the Contact or Lead object and editing the layout used for the caseload.  
+[ASSISTANT_SAID] In Step 2, drag the "Birthday" field from the "Available Fields" section to the "Contact Detail" section.  
+[ASSISTANT_SAID] Step 3: Add birthday data by going to the Contacts or Leads tab and opening each record to enter the person's birthday in the "Birthday" field.  
+[ASSISTANT_SAID] Step 4: Create a report by going to the "Reports" tab and clicking the "New Report" button, selecting the "Contacts" or "Leads" object.  
+[ASSISTANT_SAID] In Step 4, add the "Birthday" field to the report and choose the desired date format, and add filters to limit results to people with upcoming birthdays.  
+[ASSISTANT_SAID] Step 5: Schedule the report to be automatically sent on a regular basis, such as monthly or weekly, to stay updated on the caseload's birthdays.  
+[ASSISTANT_SAID] This way, you can easily view and manage your caseload's birthdays in Salesforce.

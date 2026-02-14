@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/01/15 (Sun) 03:08
+- [USER] User is attempting to install Pi-hole to block ads on their router.
+- [ASSISTANT_SAID] To install Pi-hole, the user needs a Raspberry Pi board and power supply.
+- [ASSISTANT_SAID] The user should install the Raspbian operating system on the Raspberry Pi by downloading the image from the official Raspberry Pi website and using a tool like "Etcher" to burn the image to an SD card.
+- [ASSISTANT_SAID] After installing Raspbian, the user should connect the Raspberry Pi to the router via Ethernet cable and power on the device.
+- [ASSISTANT_SAID] The user should open a terminal window on the Raspberry Pi and run the command "curl -sSL <https://install.pi-hole.net> | bash" to install the Pi-hole software.
+- [ASSISTANT_SAID] The user should follow the prompts during the installation process to configure network settings and select ad-blocking lists.
+- [ASSISTANT_SAID] After installation, the user can access the Pi-hole web interface by entering the IP address of the Raspberry Pi into a web browser.
+- [ASSISTANT_SAID] The user needs to log into their router's web interface to update the DNS settings to use Pi-hole as its DNS server.
+- [USER] User is receiving the error message "static IP needed."
+- [ASSISTANT_SAID] To resolve the "static IP needed" error, the user should manually configure a static IP address for the Raspberry Pi by editing the "dhcpcd.conf" file.
+- [ASSISTANT_SAID] The user should open a terminal and enter "sudo nano /etc/dhcpcd.conf" to edit the file.
+- [ASSISTANT_SAID] The user should add specific lines to the "dhcpcd.conf" file to set a static IP address, replacing "x" with appropriate values for their network.
+- [ASSISTANT_SAID] The user should press "CTRL+X" to exit, "Y" to save changes, and "Enter" to confirm the filename.
+- [ASSISTANT_SAID] The user should restart the dhcpcd service with the command "sudo service dhcpcd restart."
+- [USER] User is prompted to "Select a privacy mode for FTL" during the installation.
+- [ASSISTANT_SAID] The user can choose from three privacy modes for FTL: Basic, Intermediate, and Advanced, each with different levels of data collection.
+- [USER] User has completed the installation of Pi-hole.
+- [ASSISTANT_SAID] The assistant congratulates the user on completing the installation and provides steps to configure

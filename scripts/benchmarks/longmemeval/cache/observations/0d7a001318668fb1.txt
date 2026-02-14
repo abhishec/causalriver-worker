@@ -1,0 +1,24 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/09/30 (Sat) 19:16  
+[USER] User inquired about "terraform cloud and github integration with azure."  
+[ASSISTANT_SAID] Terraform Cloud provides a centralized location for managing Terraform infrastructure deployments.  
+[ASSISTANT_SAID] GitHub integration allows Terraform Cloud to access GitHub repositories and automatically initiate Terraform runs when changes are pushed.  
+[ASSISTANT_SAID] Steps to integrate Terraform Cloud with Azure:  
+[ASSISTANT_SAID] 1. Create an Azure service principal with appropriate permissions to manage Azure resources.  
+[ASSISTANT_SAID] 2. Create a Terraform configuration file that defines the infrastructure resources to manage in Azure.  
+[ASSISTANT_SAID] 3. Create a new workspace in Terraform Cloud and configure it to use the GitHub repository containing the Terraform configuration file.  
+[ASSISTANT_SAID] 4. Configure Azure credentials in Terraform Cloud workspace by creating an environment variable with Azure subscription ID, tenant ID, client ID, and client secret.  
+[ASSISTANT_SAID] 5. Create a Terraform Cloud plan and apply it to Azure infrastructure using the web interface.  
+[ASSISTANT_SAID] By integrating Terraform Cloud with GitHub and Azure, you can automate deployment and management of infrastructure resources in Azure, while providing visibility and collaboration through version control in GitHub.  
+[USER] User requested detailed steps for configuring Azure credentials in Terraform Cloud workspace.  
+[ASSISTANT_SAID] Detailed steps for configuring Azure credentials:  
+[ASSISTANT_SAID] 1. Log in to Terraform Cloud account and navigate to the workspace.  
+[ASSISTANT_SAID] 2. Click on the "Settings" tab and select "Variables" from the dropdown menu.  
+[ASSISTANT_SAID] 3. Click the "Add Variable" button to create a new variable.  
+[ASSISTANT_SAID] 4. In the "Key" field, enter the name of the environment variable (e.g., "ARM_SUBSCRIPTION_ID").  
+[ASSISTANT_SAID] 5. In the "Value" field, enter the corresponding value for the environment variable (found in Azure portal or Azure CLI).  
+[ASSISTANT_SAID] 6. Repeat steps 4 and 5 for "ARM_TENANT_ID," "ARM_CLIENT_ID," and "ARM_CLIENT_SECRET."  
+[ASSISTANT_SAID] 7. Click the "Save variable" button to save the environment variable.  
+[ASSISTANT_SAID] 8. Reference these environment variables in the Terraform configuration file using "${var.ENV_VAR_NAME}" syntax.  
+[ASSISTANT_SAID] 9. Initiate

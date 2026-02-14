@@ -1,0 +1,42 @@
+{
+  "answer_ultrachat_467053": [
+    {
+      "fact": "User is excited to see the Sistine Chapel and St. Peter's Basilica.",
+      "type": "opinion",
+      "entities": [
+        "Sistine Chapel",
+        "St. Peter's Basilica"
+      ]
+    },
+    {
+      "fact": "User is interested in trying restaurants near the Vatican.",
+      "type": "preference",
+      "entities": [
+        "restaurants",
+        "Vatican"
+      ]
+    },
+    {
+      "fact": "User is planning to visit the Vatican.",
+      "type": "event",
+      "entities": [
+        "Vatican"
+      ]
+    },
+    {
+      "fact": "User is looking for souvenir shops around the Vatican.",
+      "type": "preference",
+      "entities": [
+        "souvenir shops",
+        "Vatican"
+      ]
+    },
+    {
+      "fact": "User is interested in tips for visiting Rome.",
+      "type": "preference",
+      "entities": [
+        "Rome"
+      ]
+    }
+  ]
+}

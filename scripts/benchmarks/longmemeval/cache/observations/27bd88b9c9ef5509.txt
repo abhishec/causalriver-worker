@@ -1,0 +1,19 @@
+**Observation Log:**
+
+- [FACT] The user did not provide any personal information such as name, location, job, or family.
+- [PREFERENCE] The user is interested in examples related to ETL tools and their efficiency and effectiveness.
+- [EVENT] No specific events were mentioned by the user.
+- [CHANGE] No updates to previously known information were provided by the user.
+- [TEMPORAL] The session date is 2023/05/25 (Thu) at 10:51.
+- [RELATIONSHIP] No people were mentioned by the user.
+- [ASSISTANT_SAID] An example of using SQL Server Integration Services (SSIS) to migrate data from a monolithic application's SQL database to a microservices database was provided.
+- [ASSISTANT_SAID] The monolithic application contains customer data stored in a denormalized format with redundant information across multiple tables.
+- [ASSISTANT_SAID] The microservice's database requires a normalized data model with separate tables for customers and orders.
+- [ASSISTANT_SAID] The ETL process using SSIS involves three steps: Extract, Transform, and Load.
+- [ASSISTANT_SAID] In the Extract step, customer data is extracted from the monolithic database using SSIS's data source components, with SQL queries used to join and filter the necessary data.
+- [ASSISTANT_SAID] The extracted data can be saved to a flat file or in-memory cache.
+- [ASSISTANT_SAID] In the Transform step, the customer data is transformed to match the normalized data model, which may involve splitting tables, removing duplicate data, and combining related data into new tables.
+- [ASSISTANT_SAID] SSIS's transformation components can be used for these operations, utilizing SQL queries or custom code as needed.
+- [ASSISTANT_SAID] In the Load step, the transformed data is loaded into the microservice's database using SSIS's destination components.
+- [ASSISTANT_SAID] SQL Server's bulk insert functionality can be used to load data into the new tables, or SSIS's custom code capabilities can be utilized for more complex data loading tasks.
+- [ASSISTANT_SAID] Using SSIS for the ETL process can be more efficient and effective than using an ORM like Entity Framework, especially when dealing with large volumes of data or complex data models.

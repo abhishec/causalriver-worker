@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/30 (Tue) 00:27  
+[USER] CI Integration - When designing a software system, it is important to ensure that the correct version of a service is deployed in each environment.  
+[USER] Updating the service's Docker image for each environment can become cumbersome, which is why Facets has introduced the concept of "CI Integration".  
+[USER] A CI Integration is an entity in Facets that provides a central repository for storing and managing Docker images for a service.  
+[USER] The CI Integration can be of two types: environment or release stream.  
+[USER] Organizations can build images either for a specific environment or for a type of environment.  
+[USER] Once a CI Integration is created, it will have a separate bucket for each environment or release stream.  
+[USER] The Docker images can be stored in these buckets through two mechanisms: by pushing the image directly via the Facets CLI or through a promotion process.  
+[USER] The Facets CLI, known as facetctl, can be integrated with popular CI systems like CodeBuild, Jenkins, CircleCI, or GitHub Actions.  
+[USER] Promotion Workflows - Organizations often need to promote builds from one environment to another, such as from a QA environment to a Staging environment, and finally to a Production environment.  
+[USER] To make this process seamless and controlled, Facets has introduced the concept of promotion workflows.  
+[USER] Promotion workflows in CI Integration can be of type environment or release stream and can be attached to similarly-typed CI Integration.  
+[USER] This allows for clear and concise promotion paths for builds, making it easier for organizations to move their builds from one environment to another.  
+[USER] By using promotion workflows in CI Integration, organizations can ensure that builds are only promoted when they are ready and that the promotion process is well-defined and controlled.  
+[USER] This helps to reduce the risk of errors and makes it easier for organizations to roll back if needed.  
+[USER] Additionally, the promotion workflows in CI Integration include auditing information, such as who promoted which build, and when, providing a clear record of the promotion process for accountability and transparency purposes.  
+[USER] Our current implementation of the Artifact CI or CI integration page presents a challenge for users who need to attach a single promotion workflow to multiple Artifact CIs, which accounts for the majority (90%) of use cases.  
+[USER] The page's name itself may not accurately reflect its purpose and may cause confusion for users.  
+[USER] The current process of attaching promotion workflows to Artifact CI is a tedious and time-consuming task that requires users to edit each Artifact CI manually.  
+[USER] This can be a frustrating experience for users.  
+[ASSISTANT_SAID] It sounds like there are several usability issues with your current implementation of the

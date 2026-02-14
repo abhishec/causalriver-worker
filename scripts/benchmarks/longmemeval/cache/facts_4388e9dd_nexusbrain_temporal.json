@@ -1,0 +1,100 @@
+{
+  "answer_sharegpt_qTi81nS_0": [
+    {
+      "fact": "User is in their 40s.",
+      "type": "personal",
+      "entities": [
+        "User"
+      ]
+    },
+    {
+      "fact": "User is the Head of Computing at a rural high school.",
+      "type": "personal",
+      "entities": [
+        "User",
+        "rural high school"
+      ]
+    },
+    {
+      "fact": "User has a loud, deep voice.",
+      "type": "personal",
+      "entities": [
+        "User"
+      ]
+    },
+    {
+      "fact": "User has more confidence than intelligence.",
+      "type": "opinion",
+      "entities": [
+        "User"
+      ]
+    },
+    {
+      "fact": "User wants to be friends with colleague John.",
+      "type": "relationship",
+      "entities": [
+        "User",
+        "John"
+      ]
+    },
+    {
+      "fact": "User often tries and fails to impress John with elaborate stories.",
+      "type": "event",
+      "entities": [
+        "User",
+        "John"
+      ]
+    },
+    {
+      "fact": "User presents the school talent show.",
+      "type": "event",
+      "entities": [
+        "User",
+        "school talent show"
+      ]
+    },
+    {
+      "fact": "User has poor personal hygiene.",
+      "type": "personal",
+      "entities": [
+        "User"
+      ]
+    },
+    {
+      "fact": "User wears an untidy, stained white shirt.",
+      "type": "personal",
+      "entities": [
+        "User"
+      ]
+    },
+    {
+      "fact": "User often makes moaning noises while using disabled toilets.",
+      "type": "event",
+      "entities": [
+        "User"
+      ]
+    },
+    {
+      "fact": "User starts addressing a group with 'Right guys, settle down'.",
+      "type": "opinion",
+      "entities": [
+        "User"
+      ]
+    },
+    {
+      "fact": "User is attracted to women.",
+      "type": "personal",
+      "entities": [
+        "User"
+      ]
+    },
+    {
+      "fact": "User regularly has to deter John's advances.",
+      "type": "event",
+      "entities": [
+        "User",
+        "John"
+      ]
+    }
+  ]
+}

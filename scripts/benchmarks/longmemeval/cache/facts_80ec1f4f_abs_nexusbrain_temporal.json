@@ -1,0 +1,140 @@
+{
+  "answer_990c8992_abs_3": [
+    {
+      "fact": "User is looking for art inspiration.",
+      "type": "preference",
+      "entities": [
+        "art inspiration"
+      ]
+    },
+    {
+      "fact": "User is interested in contemporary art.",
+      "type": "preference",
+      "entities": [
+        "contemporary art"
+      ]
+    },
+    {
+      "fact": "User recently got back into art after attending a guided workshop.",
+      "type": "event",
+      "entities": [
+        "art",
+        "guided workshop"
+      ]
+    },
+    {
+      "fact": "User attended a workshop at the Modern Art Museum in January.",
+      "type": "event",
+      "entities": [
+        "Modern Art Museum",
+        "January"
+      ]
+    },
+    {
+      "fact": "User is interested in street art.",
+      "type": "preference",
+      "entities": [
+        "street art"
+      ]
+    }
+  ],
+  "answer_990c8992_abs_2": [
+    {
+      "fact": "User visited The Art Cube on February 15th.",
+      "type": "event",
+      "entities": [
+        "The Art Cube",
+        "February 15th"
+      ]
+    },
+    {
+      "fact": "User attended the opening night of the exhibition called 'Disrupting Reality'.",
+      "type": "event",
+      "entities": [
+        "Disrupting Reality",
+        "opening night"
+      ]
+    },
+    {
+      "fact": "User bought a limited edition print from one of the featured artists at the exhibition.",
+      "type": "event",
+      "entities": [
+        "limited edition print",
+        "featured artists"
+      ]
+    },
+    {
+      "fact": "User is looking for art inspiration.",
+      "type": "preference",
+      "entities": [
+        "art inspiration"
+      ]
+    },
+    {
+      "fact": "User is interested in learning more about the art world.",
+      "type": "preference",
+      "entities": [
+        "art world"
+      ]
+    },
+    {
+      "fact": "User remembers the curator of the exhibition was Rachel Lee.",
+      "type": "relationship",
+      "entities": [
+        "Rachel Lee"
+      ]
+    },
+    {
+      "fact": "User found the installation pieces at the exhibition to be unique.",
+      "type": "opinion",
+      "entities": [
+        "installation pieces",
+        "unique"
+      ]
+    }
+  ],
+  "answer_990c8992_abs_1": [
+    {
+      "fact": "User is looking for art supply stores in the city.",
+      "type": "preference",
+      "entities": [
+        "art supply stores"
+      ]
+    },
+    {
+      "fact": "User took their niece to the Natural History Museum on 2/8.",
+      "type": "event",
+      "entities": [
+        "Natural History Museum",
+        "niece",
+        "2/8"
+      ]
+    },
+    {
+      "fact": "User's niece loved the dinosaur exhibit at the museum.",
+      "type": "opinion",
+      "entities": [
+        "niece",
+        "dinosaur exhibit"
+      ]
+    },
+    {
+      "fact": "User is interested in art supply stores that specialize in printmaking or abstract art.",
+      "type": "preference",
+      "entities": [
+        "printmaking",
+        "abstract art"
+      ]
+    },
+    {
+      "fact": "User is looking for art galleries or museums that feature abstract art or printmaking in their exhibitions.",
+      "type": "preference",
+      "entities": [
+        "art galleries",
+        "museums",
+        "abstract art",
+        "printmaking"
+      ]
+    }
+  ]
+}

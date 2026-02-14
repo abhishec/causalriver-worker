@@ -1,0 +1,19 @@
+**Observation Log:**
+
+- [FACT] The user wants the assistant to act as an academic researcher in the field of instructional technologies.
+- [EVENT] The user will provide a research topic and a bibliography for the assistant to use.
+- [PREFERENCE] The user is interested in writing a literature review.
+- [TEMPORAL] Session Date: 2023/05/27 (Sat) 15:08
+- [FACT] The research topic provided by the user is: "An evaluation of the acceptance and use of EPSS for instructional designers."
+- [FACT] The bibliography provided by the user includes multiple references, such as:
+  - Ashraf, M., Humayon, A. A., Ahmad, J., & Abbas, M. (2017). Three condensed importance of interfunctional communication for the acceptance of CRM system. Cogent Business & Management, 4(1), 1402474.
+  - Boling, E', Alangari, H', Hajdu, I' M', Guo, M', Gyabak, K', Khlaif, Z', . . . Sari, A'. (2017). Core judgments of instructional designers in practice. Performance Improvement Quarterly, 199-219.
+  - Chao, C. M. (2019). Factors determining the behavioral intention to use mobile learning: An application and extension of the UTAUT model. Frontiers in psychology, 10, 1652.
+  - Chen, I. J., & Popovich, K. (2003). Understanding customer relationship management (CRM): People, process and technology. Business process management journal.
+  - Clark, B. (2009). The history of instructional design and technology.
+  - Davis, F. D. (1989). Perceived usefulness, perceived ease of use, and user acceptance of information technology. MIS quarterly, 319-340.
+  - Davis, F. D., Bagozzi, R. P., & Warshaw, P. R. (1989). User acceptance of computer technology: a comparison of two theoretical models. Management science, 35(8), 982-1003.
+  - Frey, C. B., & Osborne, M. A. (2017). The future of employment: how susceptible are jobs to computerisation? Technological forecasting and social change, 114, 254-280.
+  - Gal, E', & Nachmias, R'. (2011). ONLINE LEARNING AND PERFORMANCE SUPPORT IN ORGANIZATIONAL ENVIRONMENTS USING PERFORMANCE SUPPORT PLATFORMS. Performance Improvement, 25-32.
+  - Gal, E., & Nachmias, R. (2012). The effect of users' attitudes on electronic performance support systems implementation. Performance Improvement, 51(5), 22-31.
+  - Gal, E', Meishar-tal, H', Ben Non, R',

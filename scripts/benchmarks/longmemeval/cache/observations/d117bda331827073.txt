@@ -1,0 +1,35 @@
+**Observation Log:**
+
+- [FACT] The user is considering upgrading their laptop.
+- [PREFERENCE] The user is considering between a Dell XPS and a MacBook Air.
+- [EVENT] The user recently upgraded their keyboard to a Logitech G Pro X.
+- [EVENT] The user purchased the Logitech G Pro X from the Logitech website on January 20th.
+- [EVENT] The user bought the Logitech G Pro X when it was on sale for $80.
+- [PREFERENCE] The user finds the Logitech G Pro X to be a great investment.
+- [ASSISTANT_SAID] The Dell XPS 13 specifications include: 
+  - Processor: Up to 11th Gen Intel Core i9-11900H (8-core, 16-thread)
+  - RAM: Up to 64GB DDR4-3200MHz
+  - Storage: Up to 2TB SSD
+  - Display: 13.4-inch FHD (1920 x 1080) or 4K (3840 x 2160) touch display
+  - Graphics: Intel Iris Xe or NVIDIA GeForce MX450 (optional)
+  - Battery Life: Up to 18 hours and 30 minutes
+  - Dimensions: 11.9 x 7.8 x 0.33 inches, 2.75 pounds
+  - Ports: 2x Thunderbolt 3, 1x USB-A, 1x Headphone jack, 1x microSD card slot
+  - Operating System: Windows 10 Home or Pro
+  - Price: Base model around $999, Mid-range model around $1,299, High-end model around $2,299.
+- [ASSISTANT_SAID] The MacBook Air specifications include:
+  - Processor: Up to Apple M1 chip with 8-core CPU and 8-core GPU
+  - RAM: Up to 16GB unified memory
+  - Storage: Up to 2TB SSD
+  - Display: 13.3-inch Retina display with 2560 x 1600 resolution
+  - Graphics: Integrated Apple M1 chip
+  - Battery Life: Up to 18 hours
+  - Dimensions: 11.97 x 8.36 x 0.68 inches, 2.75 pounds
+  - Ports: 2x Thunderbolt 3, 1x Headphone jack
+  - Operating System: macOS
+  - Price: Base model around $999, Mid-range model around $1,249, High-end model around $1,599.
+- [ASSISTANT_SAID] Key differences between Dell XPS and MacBook Air include:
+  - Processor options (Intel vs. Apple M1)
+  - Operating System (Windows vs. macOS)
+  - Graphics options (dedicated NVIDIA vs. integrated Apple)
+  - Number of ports (more on

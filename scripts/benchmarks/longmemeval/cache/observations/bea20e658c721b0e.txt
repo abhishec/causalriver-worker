@@ -1,0 +1,24 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/25 (Thu) 17:48
+- [FACT] User has been having issues with their Hulu subscription.
+- [EVENT] User is experiencing a login problem with their Hulu subscription.
+- [ASSISTANT_SAID] Assistant provided troubleshooting steps for the Hulu login issue, including checking login credentials, internet connection, clearing browser cache and cookies, checking for app updates, checking Hulu's status page, using Hulu's troubleshooting tool, and contacting Hulu support.
+- [ASSISTANT_SAID] Additional tips provided by the assistant include ensuring no VPN or proxy is being used and restarting or factory resetting streaming devices.
+- [CHANGE] User has already tried some of the troubleshooting steps for Hulu.
+- [PREFERENCE] User enjoys watching "Stranger Things" and has finished 7 episodes of the new season.
+- [ASSISTANT_SAID] Assistant acknowledged the user's enjoyment of "Stranger Things" and provided information about the show's critical acclaim and engaging storyline.
+- [ASSISTANT_SAID] Assistant asked if the user has a favorite character or storyline in "Stranger Things."
+- [EVENT] User plans to start watching "Crash Landing on You" soon.
+- [PREFERENCE] User has heard great things about "Crash Landing on You."
+- [ASSISTANT_SAID] Assistant recommended several other Korean dramas, including "Vagabond," "Strong Girl Bong-soon," "Reply 1988," "Goblin," "What's Wrong with Secretary Kim," "Her Private Life," "Hospital Playlist," and "True Beauty."
+- [PREFERENCE] User has already watched 14 episodes of "Crash Landing on You" and is loving it.
+- [FACT] User experienced delayed subtitles while watching "Crash Landing on You."
+- [ASSISTANT_SAID] Assistant provided information about Viki as a streaming service for Korean dramas, highlighting its community-driven subtitling and user-friendly interface.
+- [PREFERENCE] User thinks Viki is a really good streaming service for watching Korean dramas.
+- [ASSISTANT_SAID] Assistant mentioned the "Learn Mode" feature on Viki as a useful tool for improving Korean language skills.
+- [PREFERENCE] User has been meaning to improve their Korean language skills.
+- [EVENT] User has not yet explored all the features on Viki but plans to check them out.
+- [CHANGE] User is considering upgrading their internet plan due to buffering issues with streaming services.
+- [ASSISTANT_SAID] Assistant provided resources for comparing internet plans and prices, including InternetProviders.com, BroadbandNow, NerdWallet's Internet Comparison Tool, Allconnect, and state public utility commission websites.
+- [ASSISTANT_SAID] Assistant advised the user to check their current internet speed, determine needed speed based on online activities, research available providers, and consider factors like

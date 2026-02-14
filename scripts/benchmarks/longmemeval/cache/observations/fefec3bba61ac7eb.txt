@@ -1,0 +1,29 @@
+**Observation Log:**
+
+- [FACT] User is planning a trip to Chicago from New York.
+- [EVENT] User is considering flight options for the trip to Chicago.
+- [ASSISTANT_SAID] Chicago is described as an amazing city.
+- [ASSISTANT_SAID] Options for flights from John F. Kennedy International Airport (JFK) include:
+  - American Airlines: Multiple daily flights, ~2.5 hours, from $150-$300
+  - Delta Air Lines: Multiple daily flights, ~2.5 hours, from $150-$300
+  - JetBlue Airways: Multiple daily flights, ~2.5 hours, from $100-$250
+- [ASSISTANT_SAID] Options for flights from LaGuardia Airport (LGA) include:
+  - American Airlines: Multiple daily flights, ~2.5 hours, from $150-$300
+  - Delta Air Lines: Multiple daily flights, ~2.5 hours, from $150-$300
+  - United Airlines: Multiple daily flights, ~2.5 hours, from $150-$300
+- [ASSISTANT_SAID] Options for flights from Newark Liberty International Airport (EWR) include:
+  - United Airlines: Multiple daily flights, ~2.5 hours, from $100-$250
+  - American Airlines: Multiple daily flights, ~2.5 hours, from $150-$300
+- [ASSISTANT_SAID] All options mentioned are non-stop flights.
+- [ASSISTANT_SAID] Prices may vary depending on the time of year, demand, and how far in advance the user books.
+- [ASSISTANT_SAID] User is advised to check with airlines for the most up-to-date prices and schedules.
+- [ASSISTANT_SAID] User is informed about flying into Midway International Airport (MDW) as an alternative to O'Hare International Airport (ORD).
+- [ASSISTANT_SAID] User is advised to consider off-peak seasons (usually November to March) or off-peak days (Tuesdays, Wednesdays, and Saturdays) for better deals.
+- [ASSISTANT_SAID] User is reminded to factor in transportation costs to and from the airport.
+- [PREFERENCE] User is flexible with travel dates and is considering flying during off-peak seasons.
+- [EVENT] User recently returned from a trip to LA and San Diego last month.
+- [ASSISTANT_SAID] User is described as a travel enthusiast.
+- [ASSISTANT_SAID] User is asked a series of questions to narrow down travel suggestions:
+  1. What type of vacation are you looking for? (e.g., city break, outdoor adventure, beach relaxation, cultural exploration, foodie trip)
+  2. How long do you have for your next trip?
+  3. Are you open to

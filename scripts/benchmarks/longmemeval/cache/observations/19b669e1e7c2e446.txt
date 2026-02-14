@@ -1,0 +1,21 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/29 (Mon) 11:30  
+[ASSISTANT_SAID] The result of the query is likely incorrect due to a mismatch between the numerator and denominator in the calculation.  
+[ASSISTANT_SAID] The numerator counts the number of rows in `reflect_items` with a NULL value for `immediate_reactions` and an `updated_at` value later than the `created_at` value.  
+[ASSISTANT_SAID] The denominator counts all rows in `reflect_items` with an `updated_at` value later than the `created_at` value.  
+[ASSISTANT_SAID] If there are many more rows in `reflect_items` that meet the criteria for the denominator compared to the numerator, the result will be much smaller than 100%.  
+[ASSISTANT_SAID] Conversely, if there are many more rows that meet the criteria for the numerator than the denominator, the result will be much larger than 100%.  
+[ASSISTANT_SAID] This discrepancy could be the cause of the results observed.  
+[ASSISTANT_SAID] To resolve this issue, consider modifying the query so that the numerator and denominator match more closely or re-examine the data for consistency with the intended calculation.  
+[USER] Asked how it could be possible for the numerator to be larger than the denominator if the numerator includes a filter that the denominator does not.  
+[ASSISTANT_SAID] The issue is likely due to the difference in filtering between the numerator and denominator in the query.  
+[ASSISTANT_SAID] The numerator counts rows where `reflect_items.immediate_reactions` is `NULL`, `reflect_items.updated_at` is greater than `reflect_items.created_at`, and `course_module_sessions.completed_at` is not `NULL`.  
+[ASSISTANT_SAID] The denominator counts rows in `praxislabs.reflect_items` where `reflect_items.updated_at` is greater than `reflect_items.created_at`.  
+[ASSISTANT_SAID] The difference in filtering results in a numerator that includes a smaller subset of rows compared to the denominator, potentially leading to a percentage greater than 100%.  
+[ASSISTANT_SAID] To resolve this, adjust the filtering conditions in either the numerator or denominator for consistency.  
+[USER] Asked if they could include `course_module_sessions.completed_at` is not NULL in the denominator.  
+[ASSISTANT_CREATED] Provided an updated SQL query that includes the condition for `course_module_sessions.completed_at` in the denominator.  
+[USER] Requested to group by course module ID in the query.  
+[ASSISTANT_CREATED] Provided an updated SQL query that includes both the organization name and the course module ID in the grouping.  
+[USER] Asked to exclude any organization that has "

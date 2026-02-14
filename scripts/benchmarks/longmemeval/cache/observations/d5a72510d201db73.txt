@@ -1,0 +1,19 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/27 (Sat) 08:20
+- [ASSISTANT_SAID] Task execution in MapReduce refers to the process of running the map and reduce tasks on the individual nodes in a cluster, coordinated by the TaskTracker in classic MapReduce implementation of Hadoop.
+- [ASSISTANT_SAID] The task execution process can be broken down into several steps: Task assignment, Task initialization, Task execution, Task reporting, Task completion.
+- [ASSISTANT_SAID] In YARN, the task execution process is handled by the Node Manager, which communicates with the Resource Manager.
+- [ASSISTANT_SAID] Newer implementations of MapReduce like Apache Spark use a different approach where the task execution is handled by the executors.
+- [ASSISTANT_SAID] The task execution process can be optimized by techniques like data locality, speculative execution, and task prioritization.
+- [ASSISTANT_SAID] Progress and status updates in MapReduce refer to monitoring the progress of a job and its individual tasks, as well as the status of the resources being used.
+- [ASSISTANT_SAID] The JobTracker is responsible for receiving progress and status updates from the TaskTrackers and providing this information to the user.
+- [ASSISTANT_SAID] The process of progress and status updates can be broken down into several steps: Task progress updates, Task status updates, Job progress updates, Resource usage updates.
+- [ASSISTANT_SAID] Job completion in MapReduce refers to finishing a MapReduce job and making its output available to the user, coordinated by the JobTracker.
+- [ASSISTANT_SAID] The job completion process can be broken down into several steps: Task completion, Job progress monitoring, Output generation, Output validation, Output commitment, Job completion notification.
+- [ASSISTANT_SAID] Shuffle and Sort are two important stages that happen during a MapReduce job.
+- [ASSISTANT_SAID] Shuffle is the process of redistributing the data produced by the mappers to the reducers, ensuring all values associated with a specific key are sent to the same reducer.
+- [ASSISTANT_SAID] Sort is the process of sorting the data produced by the mappers before it is sent to the reducers, ensuring that all values associated with a specific key are grouped together.
+- [ASSISTANT_SAID] Configuration tuning in MapReduce refers to adjusting various configuration settings to optimize the performance of a MapReduce job.
+- [ASSISTANT_SAID] Key configuration settings that can be tuned include: Number of mappers and reducers, Block size, Memory and CPU allocation, Compression, Speculative execution, Task prioritization.
+- [ASSISTANT_SAID] Tuning these configurations requires a good understanding of the job requirements, cluster

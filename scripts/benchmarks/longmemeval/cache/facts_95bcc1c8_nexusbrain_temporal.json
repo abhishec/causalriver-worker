@@ -1,0 +1,50 @@
+{
+  "answer_cb742a61": [
+    {
+      "fact": "User is taking a stand-up comedy class",
+      "type": "personal",
+      "entities": [
+        "stand-up comedy class"
+      ]
+    },
+    {
+      "fact": "User recently attended an open mic night",
+      "type": "event",
+      "entities": [
+        "open mic night"
+      ]
+    },
+    {
+      "fact": "User saw 10 amateur comedians perform at the open mic night",
+      "type": "event",
+      "entities": [
+        "10 amateur comedians"
+      ]
+    },
+    {
+      "fact": "User found the open mic night inspiring",
+      "type": "opinion",
+      "entities": [
+        "open mic night",
+        "inspiring"
+      ]
+    },
+    {
+      "fact": "User feels their jokes are all over the place",
+      "type": "opinion",
+      "entities": [
+        "jokes",
+        "all over the place"
+      ]
+    },
+    {
+      "fact": "User is looking for tips on how to structure a comedy set",
+      "type": "preference",
+      "entities": [
+        "tips",
+        "structure",
+        "comedy set"
+      ]
+    }
+  ]
+}

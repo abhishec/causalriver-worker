@@ -1,0 +1,28 @@
+**Observation Log:**
+
+[FACT] User's grandmother passed away on Valentine's Day.  
+[FACT] User is planning to attend a funeral next week.  
+[FACT] User has been trying to stay busy with work and hobbies.  
+[CHANGE] User's grandmother's passing is still hard for them to believe.  
+[TEMPORAL] Session date is 2023/05/29 (Mon) 09:40.  
+[RELATIONSHIP] User's grandmother is mentioned as a significant person in their life.  
+[ASSISTANT_SAID] Assistant expressed condolences for the user's loss and acknowledged the difficulty of losing a loved one.  
+[ASSISTANT_SAID] Assistant provided general condolence message ideas for the funeral, including:  
+1. "My heart goes out to you and your family during this difficult time. May [name] rest in peace."  
+2. "I'm so sorry for your loss. May cherished memories of [name] bring you comfort and peace."  
+3. "My thoughts and prayers are with you as you say goodbye to [name]. May they be at peace."  
+4. "Words can't express how sorry I am for your loss. [Name] will be deeply missed."  
+5. "May the love and support of family and friends help you through this difficult time."  
+[ASSISTANT_SAID] Assistant provided personalized condolence message ideas, including:  
+1. "I'll always remember [name]'s [kindness, sense of humor, generosity, etc.]. They will be deeply missed."  
+2. "My favorite memory of [name] is [share a brief story or memory]. I'll carry that with me always."  
+3. "I'm so grateful to have known [name]. They made a significant impact on my life."  
+4. "I'll never forget [name]'s [advice, guidance, support, etc.]. They will always be with me in spirit."  
+5. "May [name]'s legacy live on through the love and memories we shared with them."  
+[ASSISTANT_SAID] Assistant provided sympathy messages for specific relationships, including:  
+1. "I'm here for you, just like your [mom/dad] would want me to be. I'm so sorry for your loss."  
+2. "My heart goes out to you and your family. May the love you shared with [name] continue to guide you through this difficult time."  
+3. "I can only imagine how hard this must be for you. Please know I'm here to support you, just like [brother/sister] would want me to."  
+[ASSISTANT_SAID] Assistant suggested ways to express sympathy in person at the funeral, including:  
+1. Physical expressions like hugs, handshakes, or holding hands.  
+2. Verbal expressions like "I'm so sorry for your loss" or sharing a memory

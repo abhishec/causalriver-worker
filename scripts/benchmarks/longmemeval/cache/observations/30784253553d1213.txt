@@ -1,0 +1,40 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/02/15 (Wed) 21:31  
+[FACT] User is using AutoCAD LT 2013.  
+[FACT] User cannot see the application menu in the options dialog box.  
+[CHANGE] User is unsure about the meaning of "step 3" in the provided instructions.  
+[ASSISTANT_SAID] The steps provided were for a newer version of AutoCAD, and the user interface has changed over the years.  
+[ASSISTANT_SAID] For AutoCAD LT 2013, the user can customize the mouse buttons and assign the zoom window function to the right-click button.  
+[ASSISTANT_SAID] Steps to customize mouse buttons:  
+1. Open the Customize User Interface (CUI) dialog box: Type "CUI" in the command line and hit Enter.  
+2. Expand the Mouse Buttons section.  
+3. Locate the "ZOOM" category.  
+4. Assign the "Zoom Window" function to the right-click button.  
+5. Save the changes.  
+[ASSISTANT_SAID] If the right-click button does not work as expected, try resetting AutoCAD LT to its default settings or checking for updates.  
+[FACT] User states there is no right mouse button option in the mouse buttons section, only "click shift plus click," "control plus click," and "control plus shift click."  
+[ASSISTANT_SAID] Suggested steps to customize the right-click button in AutoCAD LT 2013:  
+1. Go to the Options dialog box.  
+2. Go to the User Preferences tab.  
+3. Customize the right-click button.  
+4. Assign the zoom window function.  
+5. Save the changes.  
+[FACT] User mentions they cannot see a mouse section, only a button called "right click customization."  
+[ASSISTANT_SAID] Suggested steps to assign the zoom window function to the right-click button:  
+1. Go to the Options dialog box.  
+2. Go to the User Preferences tab.  
+3. Customize the right-click button.  
+4. Create a new command.  
+5. Name the command and assign the command "\_ZOOMW."  
+6. Assign the command to the right-click button.  
+7. Save the changes.  
+[FACT] User states there is no "new command" button in this version.  
+[ASSISTANT_SAID] Suggested steps to assign the zoom window function to the right-click button:  
+1. Go to the Options dialog box.  
+2. Go to the User Preferences tab.  
+3. Customize the right-click button.  
+4. Assign the zoom window function.  
+5. Save the changes.  
+[FACT] User states the "RButton" option is missing in the main CUI window.  
+[ASS

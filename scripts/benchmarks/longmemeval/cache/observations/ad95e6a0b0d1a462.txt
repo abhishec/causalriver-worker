@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[FACT] User is planning a trip to Seattle.  
+[EVENT] User needs help finding a hotel with a great view of the city.  
+[TEMPORAL] User's trip to Seattle is planned for a few weeks from May 20, 2023.  
+[ASSISTANT_SAID] The assistant recommended The Edgewater Hotel for its breathtaking views of Puget Sound, the Olympic Mountains, and the city skyline.  
+[ASSISTANT_SAID] The assistant recommended Four Seasons Hotel Seattle for its stunning views of the city, Puget Sound, and the Olympic Mountains from its rooms and rooftop pool deck.  
+[ASSISTANT_SAID] The assistant recommended The Alexis Hotel for stylish rooms with views of the city, Puget Sound, or the Olympic Mountains.  
+[ASSISTANT_SAID] The assistant recommended Hyatt at Olive 8 for modern rooms with views of the city, Puget Sound, or the Olympic Mountains.  
+[ASSISTANT_SAID] The assistant recommended Pan Pacific Hotel Seattle for rooms with views of the Space Needle, Puget Sound, or the Olympic Mountains.  
+[ASSISTANT_SAID] The assistant recommended The Sheraton Seattle Hotel for views of the city, Puget Sound, or the Olympic Mountains.  
+[ASSISTANT_SAID] The assistant recommended Hotel Andra for rooms with views of the city, Puget Sound, or the Olympic Mountains.  
+[ASSISTANT_SAID] The assistant advised the user to request a room with a view and consider upgrading to a higher floor or a room with a balcony for the best views.  
+[ASSISTANT_SAID] The assistant provided an overview of gym facilities at each hotel, including equipment and availability.  
+[ASSISTANT_SAID] The Edgewater Hotel features a 24-hour fitness center with cardio equipment, free weights, and strength-training machines.  
+[ASSISTANT_SAID] The Four Seasons Hotel Seattle has a state-of-the-art fitness center open 24/7, with personal training sessions available.  
+[ASSISTANT_SAID] The Alexis Hotel has a 24-hour fitness center with cardio equipment, free weights, and strength-training machines.  
+[ASSISTANT_SAID] The Hyatt at Olive 8 features a 24-hour StayFit fitness center with yoga classes and personal training sessions.  
+[ASSISTANT_SAID] The Pan Pacific Hotel Seattle has a 24-hour fitness center with cardio equipment, free weights, and strength-training machines.  
+[ASSISTANT_SAID] The Sheraton Seattle Hotel features a spacious 24-hour fitness center with cardio equipment, free weights, and strength-training machines.  
+[ASSISTANT_SAID] Hotel Andra has a 24-hour fitness center with cardio equipment, free weights, and strength-training machines.  
+[ASSISTANT_SAID

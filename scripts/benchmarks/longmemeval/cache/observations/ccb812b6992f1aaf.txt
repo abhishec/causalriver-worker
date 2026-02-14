@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[FACT] User is planning a trip to the coast next weekend.  
+[EVENT] User is planning a trip to the Mediterranean coast, specifically the town of Marseille.  
+[PREFERENCE] User is interested in exploring the old port, trying local seafood, and visiting some museums or historical landmarks.  
+[ASSISTANT_SAID] Marseille is the oldest city in France, known for its rich history, vibrant atmosphere, and stunning Mediterranean coastline.  
+[ASSISTANT_SAID] Must-see places in Marseille include:  
+[ASSISTANT_SAID] 1. Old Port (Vieux-Port): A historic harbor surrounded by picturesque buildings, cafes, and restaurants.  
+[ASSISTANT_SAID] 2. Notre-Dame de la Garde: A beautiful basilica perched on a hill, offering breathtaking views of the city and the sea.  
+[ASSISTANT_SAID] 3. Museum of European and Mediterranean Civilisations (MuCEM): A modern museum showcasing the history and culture of the Mediterranean region.  
+[ASSISTANT_SAID] 4. Calanques: Narrow, fjord-like inlets with crystal-clear waters, perfect for hiking, swimming, or taking a boat tour.  
+[ASSISTANT_SAID] 5. Panier District: A historic neighborhood with narrow streets, colorful buildings, and a charming atmosphere.  
+[ASSISTANT_SAID] Seafood recommendations include:  
+[ASSISTANT_SAID] 1. Bouillabaisse: Marseille's signature fish stew. Recommended restaurants are La Miramar and Le Rhul.  
+[ASSISTANT_SAID] 2. Fresh seafood: Visit the Vieux-Port Market or La Criée Market for fresh catches of the day.  
+[ASSISTANT_SAID] 3. Fougasse: A traditional Provençal flatbread. Recommended places are Boulangerie des Catalans and Le Pain de la Confrérie.  
+[ASSISTANT_SAID] 4. Tarte Provençale: A savory tart filled with seafood, vegetables, and herbs. Recommended places are Le Café des Épices and La Maison du Pastis.  
+[ASSISTANT_SAID] Additional tips include taking a stroll along the Corniche, visiting the Castle of If, exploring the Noailles Market, and trying Pastis at a local bar or café.  
+[EVENT] User is interested in experiencing local culture and meeting locals during their visit.  
+[ASSISTANT_SAID] Festivals and events in Marseille include:  
+[ASSISTANT_SAID] 1. Fête du Vent: Usually takes place in late September.  
+[ASSISTANT_SAID] 2. Marseille Jazz Festival: Typically held in July and August.  
+[ASSISTANT_SAID] 3. Fête de la Médit

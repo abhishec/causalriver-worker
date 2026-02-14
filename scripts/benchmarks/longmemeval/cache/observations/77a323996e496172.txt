@@ -1,0 +1,21 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/30 (Tue) 03:55  
+[USER] User requested a summary of a provided text.  
+[ASSISTANT_SAID] The assistant summarized the text, stating it describes a research project focused on developing new formal methods (logics) for use in the analysis of artificial intelligence and computer science.  
+[ASSISTANT_SAID] The assistant mentioned that the methods need to balance expressivity and complexity.  
+[ASSISTANT_SAID] The project aims to provide general techniques for controlling the emergence of complexity in symbolic reasoning tasks.  
+[ASSISTANT_SAID] The assistant noted that a modular approach is being pursued, considering language, deductive system, and semantics.  
+[ASSISTANT_SAID] The assistant stated that the project builds on recent research regarding axiomatization and semantics of non-classical logics.  
+[ASSISTANT_SAID] The assistant highlighted two key mathematical ideas: i) partial non-deterministic semantics, and ii) a multiple-conclusion approach to logical consequence.  
+[ASSISTANT_SAID] The assistant explained that these concepts allow for effective combination of semantics, updating semantics with new axioms, and providing analytic axiomatizations.  
+[ASSISTANT_SAID] The assistant described analytic calculi as valuable tools in logic for decision procedures and proof-search capabilities.  
+[ASSISTANT_SAID] The assistant mentioned the development of an online platform named CT4L, which will cover reasoning activities such as model checking, decision of satisfiability and validity, proof search, and extracting explanations from proofs.  
+[ASSISTANT_SAID] The assistant noted that the platform CT4L is expected to bridge fundamental results and practical needs, allowing experimentation with real applications.  
+[ASSISTANT_SAID] The assistant stated that exploratory illustrative case studies will cover situations where effective symbolic reasoning is valued, including probabilistic reasoning, information security proofs, correctness of quantum algorithms, and verification of robustness properties of deep neural networks.  
+[ASSISTANT_SAID] The assistant mentioned that the core team of CT4L has a long-standing interest in these research topics and a relevant track of publications.  
+[ASSISTANT_SAID] The assistant noted that the team has experience in supervising MSc and PhD students and is based at Instituto de Telecomunicações (IT) and Instituto Superior Técnico (IST) of Universidade de Lisboa.  
+[USER] User requested a rewrite of the summary in the style of Alan Turing.  
+[ASSISTANT_CREATED] The assistant provided a rewritten summary in a style inspired by Alan Turing, focusing on the need for new logics, the project's goals, and the exploration of mathematical ideas.  
+[USER] User asked for an explanation of how Alan Turing's style impacted the text.  
+[ASS

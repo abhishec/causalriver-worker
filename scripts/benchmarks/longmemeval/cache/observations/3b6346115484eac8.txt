@@ -1,0 +1,22 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/23 (Tue) 21:37
+- [USER] The user watched "Parasite" for the first time today.
+- [USER] The user is still reeling from the experience of watching "Parasite."
+- [USER] The user is curious about recommendations for movies that deal with social class issues.
+- [ASSISTANT_SAID] The assistant described "Parasite" as a masterpiece and recommended several films that explore social class issues:
+  - [ASSISTANT_SAID] **Shoplifters** (2018, Japan): Explores the struggles of the working poor through a makeshift family of petty thieves.
+  - [ASSISTANT_SAID] **The Florida Project** (2017, USA): Follows the lives of a young girl and her friends growing up in a motel near Disney World, revealing harsh realities of poverty.
+  - [ASSISTANT_SAID] **The Square** (2017, Sweden): A satirical drama that dissects the pretensions of the upper class and the art world.
+  - [ASSISTANT_SAID] **The Killing of a Sacred Deer** (2017, UK/Ireland): A psychological thriller exploring class and privilege through a wealthy surgeon's family.
+  - [ASSISTANT_SAID] **The Great Beauty** (2013, Italy): A critique of Italy's elite, following a journalist disillusioned with high society.
+  - [ASSISTANT_SAID] **White Material** (2009, France/Cameroon): Follows a French plantation owner in Africa grappling with colonialism and class exploitation.
+  - [ASSISTANT_SAID] **The Housemaid** (2010, South Korea): Explores complex relationships between a wealthy family and their housemaid.
+  - [ASSISTANT_SAID] **Burning** (2018, South Korea): A psychological drama exploring class resentment and identity.
+  - [ASSISTANT_SAID] **The Class** (2008, France): A documentary-style drama following a high school class in Paris.
+  - [ASSISTANT_SAID] **The Pursuit of Happyness** (2006, USA): A biographical drama about a struggling single father trying to break the cycle of poverty.
+- [USER] The user expressed interest in checking out the recommended movies.
+- [USER] The user is curious about TV shows that tackle social class issues.
+- [ASSISTANT_SAID] The assistant recommended several TV shows that explore social class issues:
+  - [ASSISTANT_SAID] **Euphoria** (2019-present, HBO): A drama series about high school students dealing with social media, identity, and class.
+  - [ASSISTANT_SAID] **The Sopranos**

@@ -1,0 +1,21 @@
+{
+  "answer_94030872": [
+    {
+      "fact": "User is looking for advice on staying organized with assignments and a part-time job.",
+      "type": "opinion",
+      "entities": [
+        "assignments",
+        "part-time job"
+      ]
+    },
+    {
+      "fact": "User is trying to find apps or tools that are easy to use and sync well across all devices.",
+      "type": "preference",
+      "entities": [
+        "apps",
+        "tools",
+        "devices"
+      ]
+    }
+  ]
+}

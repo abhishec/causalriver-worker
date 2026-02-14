@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [FACT] User is advertising for a resort in Orlando.
+- [FACT] User has multiple locations all over the US.
+- [PREFERENCE] User's problem is to find people who want to travel but haven't decided where.
+- [ASSISTANT_SAID] Suggested strategies to find potential customers include targeted advertising, optimizing the website for search engines, using email marketing, offering special promotions and discounts, and partnering with travel agencies and tour operators.
+- [PREFERENCE] User already implements the suggested strategies.
+- [USER_SAID] User wants to understand the customer journey from the moment they decide to go on a getaway to the moment they select their destination.
+- [ASSISTANT_SAID] Described the customer journey in six steps: Research and planning, Decision-making, Booking, Pre-trip planning, The trip itself, and Post-trip.
+- [ASSISTANT_SAID] Suggested using a combination of marketing strategies to reach people at different stages of the customer journey.
+- [USER_SAID] User wants to focus on the Research and Planning stage and asked how people usually start to research, which websites they might visit, and what keywords they might type in Google.
+- [ASSISTANT_SAID] People typically start by visiting travel websites and search engines, including online travel agencies (OTAs) and hotel and resort websites.
+- [ASSISTANT_SAID] Common websites people might visit include Expedia, Orbitz, Travelocity, Priceline, Kayak, Booking.com, Hotels.com, Agoda, Trivago, and Airbnb.
+- [ASSISTANT_SAID] Suggested keywords people might use include destination names, types of vacation, activities, and accommodation types.
+- [USER_SAID] User wants to know the top 10 websites/apps people go to when deciding to go on a trip.
+- [ASSISTANT_SAID] Listed top 10 OTAs: Expedia, Orbitz, Travelocity, Priceline, Kayak, Booking.com, Hotels.com, Agoda, Trivago, and Airbnb.
+- [USER_SAID] User wants to know the top 10 popular hotel and resort websites.
+- [ASSISTANT_SAID] Listed top 10 hotel and resort websites: Marriott.com, Hilton.com, Hyatt.com, Intercontinental.com, Sheraton.com, Westin.com, FourSeasons.com, RitzCarlton.com, AccorHotels.com, and BestWestern.com.
+- [USER_SAID] User wants to focus on a specific audience: parents with kids younger than 18, and asked for the top 20 activities they might search for.
+- [ASSISTANT_SAID] Listed 20 activities parents might search for: Amusement parks, Zoos and aquariums, Water parks, Beaches, Museums, Theme parks, National parks, Hiking trails, Camping, Ski resorts, Ice skating rinks, Go-kart tracks,

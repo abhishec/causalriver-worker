@@ -1,0 +1,17 @@
+**Observation Log:**
+
+**Session Date:** 2023/05/22 (Mon) 21:26  
+**Session ID:** sharegpt_7HWLFTq_11
+
+1. [ASSISTANT_SAID] Cox Automotive has built an identity graph to help their clients reach their customers more effectively.
+2. [ASSISTANT_SAID] The ideal consumer journey for car shopping is important to understand for advertising and marketing purposes.
+3. [ASSISTANT_SAID] Tracking consumer identity across multiple data sets can be a challenge due to many different identifiers.
+4. [ASSISTANT_SAID] The post-cookie world has made it difficult to track consumers across multiple websites.
+5. [ASSISTANT_SAID] Cox Automotive chose Amazon Neptune for building their identity graph.
+6. [ASSISTANT_SAID] The solution architecture of the identity graph was presented.
+7. [ASSISTANT_SAID] Lessons learned from building the identity graph and using Amazon Neptune were discussed.
+8. [ASSISTANT_SAID] Internal results and customer quotes on the value of the identity graph were shared.
+9. [ASSISTANT_CREATED] Extracted challenges discussed by Carlos in table form, including tracking consumer identity across multiple data sets with different identifiers and adapting to the post-cookie world.
+10. [ASSISTANT_CREATED] Extracted 10 or more requirements in table form, including technology solution for building an identity graph and real-time data processing and analysis capabilities.
+11. [ASSISTANT_CREATED] Created a presentation slide based on challenges, listing challenges such as ensuring the accuracy and reliability of the identity graph and balancing the need for personalization with the need for consumer privacy.
+12. [ASSISTANT_CREATED] Extracted key 10 ideas discussed in the session in table form, including the importance of understanding the ideal consumer journey and the necessity of compliance with data security and privacy regulations.

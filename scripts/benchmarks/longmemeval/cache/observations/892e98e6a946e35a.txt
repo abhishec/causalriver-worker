@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [FACT] The user is planning a trip to Japan.
+- [EVENT] The user attended a pre-departure orientation at their university on February 20th.
+- [ASSISTANT_SAID] The assistant mentioned that attending a pre-departure orientation is a great way to prepare for a trip.
+- [ASSISTANT_SAID] The assistant provided a list of important cultural differences to be aware of when traveling to Japan, including bowing, gift-giving (Omiyage), table manners, dressing modestly, punctuality, respect for elders, tattoos, learning Japanese phrases, removing shoes, and being prepared for crowds and lines.
+- [PREFERENCE] The user is interested in learning more about gift-giving customs in Japan, especially since they will be staying with a host family.
+- [ASSISTANT_SAID] The assistant suggested bringing local specialties, quality items, and nicely packaged gifts as omiyage ideas.
+- [ASSISTANT_SAID] The assistant provided specific omiyage ideas, including food items (specialty teas, local chocolates, jams), beverages (wine, specialty sodas), non-food items (local handicrafts, souvenirs), and personalized items (framed photos, customized crafts).
+- [ASSISTANT_SAID] The assistant listed specific omiyage ideas from various countries, including chocolates and coffee blends from the USA, maple syrup from Canada, English tea from the UK, Vegemite from Australia, and specialty cheeses from Europe.
+- [PREFERENCE] The user plans to bring local chocolates and a nice coffee blend from their hometown as omiyage.
+- [ASSISTANT_SAID] The assistant advised the user to nicely wrap their gift, use both hands when presenting it, and say "omiyage" when giving the gift.
+- [ASSISTANT_SAID] The assistant explained that it's customary in Japan for the recipient to refuse a gift once or twice before accepting it.
+- [FACT] The user has been studying Japanese for a few months and has made some progress but still struggles with listening and speaking.
+- [PREFERENCE] The user is worried about the language barrier and their ability to understand their host family or communicate effectively.
+- [ASSISTANT_SAID] The assistant suggested bringing a portable translator device or a phrasebook to help communicate with the host family.
+- [ASSISTANT_SAID] The assistant provided tips for communicating with the host family, including learning key phrases, using body language, writing things down, and asking for help.
+- [ASSISTANT_SAID] The assistant encouraged the user to ask their host family to speak slowly or use simple language when communicating.
+- [ASSISTANT_SAID] The assistant provided example phrases in Japanese for the user to ask their host family to speak slowly or in an easy-to-understand way.
+- [PREFERENCE] The user is

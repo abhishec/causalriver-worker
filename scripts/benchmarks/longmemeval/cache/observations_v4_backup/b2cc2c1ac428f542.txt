@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/02/11 (Sat) 17:37  
+[EVENT] User is thinking of trying out a new coffee recipe.  
+[PREFERENCE] User is experimenting with their French press.  
+[PREFERENCE] User has found that 1 tablespoon of coffee for every 6 ounces of water is the perfect ratio for them.  
+[PREFERENCE] User is interested in coffee beans that pair well with citrus notes.  
+[ASSISTANT] Assistant recommended Kenyan coffee, Ethiopian Yirgacheffe, Colombian Gesha, Guatemalan Antigua, and Rwanda Bourbon as options that pair well with citrus notes.  
+[ASSISTANT] Assistant suggested adjusting grind size and steeping time for optimal flavor in the French press.  
+[PREFERENCE] User decided to try Kenyan coffee first.  
+[EVENT] User is looking for recommendations for a good tea to pair with citrus flavors.  
+[ASSISTANT] Assistant recommended Earl Grey, Green Tea with Lemon Myrtle, White Peony, Genmaicha, and Lady Grey as teas that pair well with citrus flavors.  
+[PREFERENCE] User chose to try Earl Grey tea with their citrus-infused coffee.  
+[EVENT] User asked for recommendations for a good coffee subscription service.  
+[ASSISTANT] Assistant recommended Blue Bottle Coffee, Intelligentsia Coffee, La Colombe Coffee, Angels' Cup, and Bean Box as coffee subscription services.  
+[EVENT] User signed up for a coffee subscription service last month and received their first shipment of beans yesterday.  
+[PREFERENCE] User is excited to try new roasts and flavors from their coffee subscription.  
+[EVENT] User plans to try the new beans in their French press.  
+[PREFERENCE] User believes the bright, vibrant flavors of the new beans will pair well with the citrus notes they are experimenting with.  
+[ASSISTANT] Assistant provided tips on how to store coffee beans to preserve their freshness, including using an airtight container, keeping them in a cool, dark place, and using them within 2 weeks.  
+[ASSISTANT] Assistant advised that if the user won't use the beans within 2 weeks, they can freeze them for longer storage.  
+[ASSISTANT] Assistant suggested grinding coffee beans just before brewing for the freshest flavor.

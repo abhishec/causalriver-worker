@@ -1,0 +1,94 @@
+{
+  "answer_e936197f_1": [
+    {
+      "fact": "User is preparing for an upcoming meeting with their team.",
+      "type": "event",
+      "entities": [
+        "meeting",
+        "team"
+      ]
+    },
+    {
+      "fact": "User attended a workshop on 'Effective Communication in the Workplace' on January 10th.",
+      "type": "event",
+      "entities": [
+        "workshop",
+        "Effective Communication in the Workplace",
+        "January 10th"
+      ]
+    },
+    {
+      "fact": "User wants to effectively communicate project updates.",
+      "type": "opinion",
+      "entities": [
+        "project updates"
+      ]
+    },
+    {
+      "fact": "User wants to focus on structuring their presentation in a logical order.",
+      "type": "preference",
+      "entities": [
+        "presentation",
+        "logical order"
+      ]
+    },
+    {
+      "fact": "User wants to use visual aids effectively during the presentation.",
+      "type": "preference",
+      "entities": [
+        "visual aids",
+        "presentation"
+      ]
+    },
+    {
+      "fact": "User wants to actively listen to their team's feedback and concerns during the meeting.",
+      "type": "preference",
+      "entities": [
+        "active listening",
+        "team's feedback",
+        "meeting"
+      ]
+    }
+  ],
+  "answer_e936197f_2": [
+    {
+      "fact": "User is preparing for a team meeting on January 17th.",
+      "type": "event",
+      "entities": [
+        "team meeting",
+        "January 17th"
+      ]
+    },
+    {
+      "fact": "User wants to improve communication skills for the team meeting.",
+      "type": "preference",
+      "entities": [
+        "communication skills"
+      ]
+    },
+    {
+      "fact": "User is looking for tips on active listening and conflict resolution.",
+      "type": "preference",
+      "entities": [
+        "active listening",
+        "conflict resolution"
+      ]
+    },
+    {
+      "fact": "User is concerned about staying on track with the team meeting agenda.",
+      "type": "opinion",
+      "entities": [
+        "team meeting agenda"
+      ]
+    },
+    {
+      "fact": "User is interested in suggestions for prioritizing tasks and allocating time for discussion topics.",
+      "type": "preference",
+      "entities": [
+        "prioritizing tasks",
+        "allocating time",
+        "discussion topics"
+      ]
+    }
+  ]
+}

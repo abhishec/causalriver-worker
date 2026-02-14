@@ -1,0 +1,31 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/02/28 (Tue) 09:45
+- [USER] User inquired about the responsibilities of the responsible party.
+- [ASSISTANT_SAID] The responsible party for a nonprofit organization is the primary point of contact for tax purposes, typically an officer or director.
+- [ASSISTANT_SAID] Responsibilities of the responsible party include:
+  1. Applying for an EIN.
+  2. Filing tax returns, including Form 990 or Form 990-EZ.
+  3. Maintaining accurate financial records.
+  4. Ensuring compliance with tax laws.
+  5. Responding to IRS inquiries.
+  6. Maintaining communication with the IRS.
+- [ASSISTANT_SAID] Importance of taking responsibilities seriously to avoid penalties, fines, or loss of tax-exempt status.
+- [USER] User asked if the responsible party is the same as the registered agent.
+- [ASSISTANT_SAID] The responsible party and the registered agent are not the same; the responsible party handles tax compliance, while the registered agent receives legal documents.
+- [USER] User inquired about changing the business address in Texas for their nonprofit to their registered agent's address.
+- [ASSISTANT_SAID] Steps to change the nonprofit's business address in Texas:
+  1. Download Form 424 (Certificate of Amendment).
+  2. Fill out the form with the nonprofit's current and new address.
+  3. Obtain board approval documented in minutes or a written resolution.
+  4. Sign the form by an officer of the nonprofit.
+  5. File the form with the Texas Secretary of State, with a $25 filing fee.
+  6. Update records with the IRS and other relevant agencies.
+- [USER] User asked when to determine new Board of Directors (BOD) members and officers for the nonprofit after incorporation.
+- [ASSISTANT_SAID] Initial BOD and officers can be determined at any time after incorporation, but it is recommended to do so as soon as possible.
+- [ASSISTANT_SAID] The process depends on the organization's bylaws, which should outline the nomination and election process.
+- [ASSISTANT_SAID] The BOD oversees the organization, while officers handle day-to-day operations.
+- [USER] User asked if they have to include bylaws with the articles of incorporation.
+- [ASSISTANT_SAID] In Texas, bylaws are not required to be filed with the articles of incorporation but should be drafted and approved before filing.
+- [ASSISTANT_SAID] Bylaws govern the operation and decision-making processes of the nonprofit and should be kept on file.
+- [ASSISTANT_SAID] Bylaws should include governance provisions, conflict of interest management, and compliance with laws

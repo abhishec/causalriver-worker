@@ -1,0 +1,18 @@
+**Observation Log:**
+
+- [FACT] User has been playing guitar for three weeks.
+- [FACT] User owns a Fender CD-60S guitar.
+- [PREFERENCE] User is looking for online resources to improve guitar skills.
+- [PREFERENCE] User enjoys playing along to favorite songs.
+- [FACT] User has an old keyboard.
+- [EVENT] User started playing along to favorite songs on their old keyboard two weeks ago.
+- [PREFERENCE] User is particularly interested in video lessons on Justin Guitar and TrueFire for improving fingerpicking technique.
+- [ASSISTANT] Recommended online resources for learning guitar: Justin Guitar, Guitar Tricks, TrueFire, Coursera, Udemy, Fender Play, Guitar Tutor Man, Yousician, Reddit - r/guitar, Guitar Forum.
+- [ASSISTANT] Provided tips for improving fingerpicking technique, including starting with basics, practicing slowly, using a metronome, listening to fingerstyle guitarists, and being patient.
+- [PREFERENCE] User is considering exploring other instruments, specifically the ukulele and saxophone.
+- [ASSISTANT] Recommended online resources for learning ukulele: Ukulele Tricks, Uke Lessons, The Ukulele Teacher.
+- [ASSISTANT] Recommended online resources for learning saxophone: Sax on the Web, Saxophone Lessons 365, The Saxophonist.
+- [EVENT] User attended a music workshop two weeks ago where they played the ukulele.
+- [PREFERENCE] User is considering buying a ukulele soon.
+- [ASSISTANT] Suggested starting with a mid-range ukulele (around $200-$500) for a balance of quality and affordability.
+- [PREFERENCE] User has been listening to a lot of music featuring the piano, which inspired them to start playing their old keyboard again.

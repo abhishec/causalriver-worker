@@ -1,0 +1,18 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/10/10 (Tue) 02:13
+- [ASSISTANT_SAID] In case of a cyber security incident involving sensitive PII data exfiltration and extortion, an Australian company providing an online conveyancing platform would need to interact with law enforcement and relevant organizations in a timely and responsible manner.
+- [ASSISTANT_SAID] The Australian Federal Police (AFP) is the primary law enforcement agency that investigates cybercrime in Australia.
+- [ASSISTANT_SAID] The company may need to notify relevant organizations such as the Australian Cyber Security Centre (ACSC), the Office of the Australian Information Commissioner (OAIC), and the Australian Securities and Investments Commission (ASIC).
+- [ASSISTANT_SAID] The company should cooperate with law enforcement in their investigation of the incident, providing any relevant information and access to systems as needed.
+- [ASSISTANT_SAID] The company may be required to notify affected individuals in case of a data breach under the Notifiable Data Breaches (NDB) scheme.
+- [ASSISTANT_SAID] The company may want to seek legal counsel to determine their legal obligations and liabilities in case of a cyber security incident.
+- [ASSISTANT_SAID] It is important for the company to act quickly and responsibly to minimize the impact of the incident and to comply with legal requirements.
+- [USER] Based on the recent Optus and Medibank PII cyber breaches what additional inject information should be included in the simulation so that this organisation can learn from the mistakes of the other two.
+- [ASSISTANT_SAID] The company should have a well-documented incident response plan in place and should regularly review and test it to ensure that it is up-to-date and effective.
+- [ASSISTANT_SAID] The company should provide regular training to employees on cybersecurity best practices, including how to identify and report potential threats.
+- [ASSISTANT_SAID] The company should ensure that its data protection and privacy policies and procedures are up-to-date and that they have appropriate technical and organizational measures in place to protect sensitive personal information.
+- [ASSISTANT_SAID] The company should conduct regular risk assessments to identify potential threats and vulnerabilities and to ensure that its security measures are adequate.
+- [ASSISTANT_SAID] The company should have a process in place for managing third-party risks, including regular assessments of the security measures of suppliers and contractors.
+- [ASSISTANT_SAID] The company should have adequate monitoring and logging in place to detect potential threats and to provide evidence in the event of a breach.
+- [ASSISTANT_SAID] In the event of a breach, the company should have a plan in place for communicating with customers, including providing clear and timely information about the incident and what steps the company is taking

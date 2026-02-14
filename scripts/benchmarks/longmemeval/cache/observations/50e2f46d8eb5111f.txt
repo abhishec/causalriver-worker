@@ -1,0 +1,23 @@
+**Observation Log:**
+
+- [FACT] The user is having trouble establishing a consistent wake-up routine.
+- [FACT] The user had been doing well with their wake-up routine until a big project at work disrupted it.
+- [FACT] The user recently started taking a morning yoga class on Tuesdays and Thursdays.
+- [FACT] The user wakes up at 6:45 AM on yoga days (Tuesdays and Thursdays).
+- [FACT] The user currently wakes up around 8:30 AM on non-yoga days.
+- [PREFERENCE] The user has noticed they tend to have more productive mornings when they wake up earlier.
+- [PREFERENCE] The user enjoys using the extra time in the morning to catch up on news, respond to emails, or do some light stretching.
+- [ASSISTANT_SAID] The assistant acknowledged the user's struggle with maintaining a consistent wake-up routine and praised their commitment to the yoga class.
+- [ASSISTANT_SAID] The assistant suggested starting small by waking up 15-30 minutes earlier each day to gradually reach the desired wake-up time.
+- [ASSISTANT_SAID] The assistant recommended using yoga days as anchors for wake-up times on non-yoga days.
+- [ASSISTANT_SAID] The assistant advised the user to identify their motivations for establishing a consistent wake-up routine.
+- [ASSISTANT_SAID] The assistant suggested creating a calming bedtime routine to help signal to the body that it's time to wind down.
+- [ASSISTANT_SAID] The assistant encouraged the user to be kind to themselves and not be too hard on themselves for off days.
+- [ASSISTANT_SAID] The assistant provided additional suggestions for building on the user's progress, including experimenting with different morning activities and using technology to stay on track.
+- [ASSISTANT_SAID] The assistant suggested establishing a consistent sleep schedule and creating a wake-up routine to help with the transition.
+- [ASSISTANT_SAID] The assistant recommended getting morning sunlight exposure to help regulate circadian rhythms.
+- [ASSISTANT_SAID] The assistant advised against hitting the snooze button and suggested using a smart alarm to wake up during a light sleep phase.
+- [ASSISTANT_SAID] The assistant provided an example of a gradual adjustment plan for the user's wake-up time on non-yoga days.
+- [CHANGE] The user plans to adjust their wake-up time on non-yoga days to get closer to their goal of 7:45 AM.
+- [TEMPORAL] The session date is 2023/05/23 (Tue) 01:23.
+- [ASSISTANT_SAID] The assistant expressed enthusiasm for the user's decision to try a gradual approach to adjusting their wake-up time.

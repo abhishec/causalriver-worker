@@ -1,0 +1,238 @@
+{
+  "answer_099c1b6c_3": [
+    {
+      "fact": "User is trying to decide between two hiking boots for an upcoming trip to the mountains.",
+      "type": "event",
+      "entities": [
+        "hiking boots",
+        "Merrell Moab 2 Mid Waterproof",
+        "Keen Targhee II Mid WP",
+        "mountains"
+      ]
+    },
+    {
+      "fact": "User recently purchased a new pair of black and white Vans Old Skool sneakers.",
+      "type": "personal",
+      "entities": [
+        "Vans Old Skool"
+      ]
+    },
+    {
+      "fact": "User finds the Vans Old Skool sneakers really comfortable.",
+      "type": "opinion",
+      "entities": [
+        "Vans Old Skool",
+        "comfort"
+      ]
+    },
+    {
+      "fact": "User wore Converse Chuck Taylor All Star sneakers to an outdoor music festival last month.",
+      "type": "event",
+      "entities": [
+        "Converse Chuck Taylor All Star",
+        "outdoor music festival"
+      ]
+    },
+    {
+      "fact": "User found the Converse sneakers super comfortable at the festival.",
+      "type": "opinion",
+      "entities": [
+        "Converse Chuck Taylor All Star",
+        "comfort"
+      ]
+    },
+    {
+      "fact": "User noticed that the soles of the Converse sneakers are starting to wear down, especially on the heels.",
+      "type": "personal",
+      "entities": [
+        "Converse Chuck Taylor All Star",
+        "soles",
+        "heels"
+      ]
+    },
+    {
+      "fact": "User is considering whether to replace the worn soles of the Converse sneakers soon.",
+      "type": "preference",
+      "entities": [
+        "Converse Chuck Taylor All Star",
+        "replacement"
+      ]
+    }
+  ],
+  "answer_099c1b6c_1": [
+    {
+      "fact": "User is planning a hiking trip next month.",
+      "type": "event",
+      "entities": [
+        "hiking trip"
+      ]
+    },
+    {
+      "fact": "User is trying to decide between the Merrell Moab 2 Mid Waterproof and the Keen Targhee II Mid WP.",
+      "type": "preference",
+      "entities": [
+        "Merrell Moab 2 Mid Waterproof",
+        "Keen Targhee II Mid WP"
+      ]
+    },
+    {
+      "fact": "User thinks ankle support is important for hiking.",
+      "type": "opinion",
+      "entities": [
+        "ankle support",
+        "hiking"
+      ]
+    },
+    {
+      "fact": "User has heard that the trails can be pretty rough in the mountains.",
+      "type": "opinion",
+      "entities": [
+        "trails",
+        "mountains"
+      ]
+    }
+  ],
+  "answer_099c1b6c_2": [
+    {
+      "fact": "User is planning a trip to the mountains next month.",
+      "type": "event",
+      "entities": [
+        "mountains",
+        "trip"
+      ]
+    },
+    {
+      "fact": "User is trying to decide between two hiking boots: Merrell Moab 2 Mid Waterproof and Keen Targhee II Mid WP.",
+      "type": "preference",
+      "entities": [
+        "Merrell Moab 2 Mid Waterproof",
+        "Keen Targhee II Mid WP"
+      ]
+    },
+    {
+      "fact": "User has been doing a lot of outdoor activities lately.",
+      "type": "personal",
+      "entities": [
+        "outdoor activities"
+      ]
+    },
+    {
+      "fact": "User attended a music festival last month.",
+      "type": "event",
+      "entities": [
+        "music festival"
+      ]
+    },
+    {
+      "fact": "User has had their Converse Chuck Taylor All Star sneakers for years.",
+      "type": "personal",
+      "entities": [
+        "Converse Chuck Taylor All Star sneakers"
+      ]
+    },
+    {
+      "fact": "User experienced water seeping into their Converse Chuck Taylor All Star sneakers at the music festival.",
+      "type": "opinion",
+      "entities": [
+        "waterproofing",
+        "Converse Chuck Taylor All Star sneakers",
+        "music festival"
+      ]
+    }
+  ],
+  "answer_099c1b6c_4": [
+    {
+      "fact": "User is planning a trip to the mountains next month.",
+      "type": "event",
+      "entities": [
+        "mountains",
+        "next month"
+      ]
+    },
+    {
+      "fact": "User is considering the Merrell Moab 2 Mid Waterproof hiking boots.",
+      "type": "preference",
+      "entities": [
+        "Merrell Moab 2 Mid Waterproof"
+      ]
+    },
+    {
+      "fact": "User is considering the Keen Targhee II Mid WP hiking boots.",
+      "type": "preference",
+      "entities": [
+        "Keen Targhee II Mid WP"
+      ]
+    },
+    {
+      "fact": "User is thinking about shoe maintenance.",
+      "type": "opinion",
+      "entities": [
+        "shoe maintenance"
+      ]
+    },
+    {
+      "fact": "User needs to take their brown leather dress shoes to the cobbler for polishing and conditioning.",
+      "type": "event",
+      "entities": [
+        "brown leather dress shoes",
+        "cobbler",
+        "polished",
+        "conditioned"
+      ]
+    },
+    {
+      "fact": "User is leaning towards the Merrell Moab 2 Mid Waterproof.",
+      "type": "preference",
+      "entities": [
+        "Merrell Moab 2 Mid Waterproof"
+      ]
+    }
+  ],
+  "answer_099c1b6c_5": [
+    {
+      "fact": "User is looking for advice on choosing a new pair of hiking boots.",
+      "type": "preference",
+      "entities": [
+        "hiking boots"
+      ]
+    },
+    {
+      "fact": "User is considering the Merrell Moab 2 Mid Waterproof and the Keen Targhee II Mid WP.",
+      "type": "preference",
+      "entities": [
+        "Merrell Moab 2 Mid Waterproof",
+        "Keen Targhee II Mid WP"
+      ]
+    },
+    {
+      "fact": "User has a sister.",
+      "type": "relationship",
+      "entities": [
+        "sister"
+      ]
+    },
+    {
+      "fact": "User lent their spare running shoes to their sister a few weeks ago.",
+      "type": "event",
+      "entities": [
+        "spare running shoes",
+        "sister"
+      ]
+    },
+    {
+      "fact": "User needs to remind their sister to return the running shoes.",
+      "type": "event",
+      "entities": [
+        "running shoes",
+        "sister"
+      ]
+    },
+    {
+      "fact": "User prefers to try on both hiking boot models to see which one feels more comfortable.",
+      "type": "preference",
+      "entities": [
+        "hiking boots"
+      ]
+    }
+  ]
+}

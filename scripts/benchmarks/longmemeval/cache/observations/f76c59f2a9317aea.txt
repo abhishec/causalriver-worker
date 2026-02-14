@@ -1,0 +1,69 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/06/01 (Thu) 12:20
+
+[USER] User provided a sentence: "Of course, this is the result of mistakes by the high command."
+
+[USER] User provided frames for the sentence: 
+- Frame 1: Causation
+  - Effect: "this"
+  - Cause: "of mistakes by the high command"
+- Frame 2: Intentionally_act
+  - Agent: "by the high command"
+
+[ASSISTANT_SAID] Assistant confirmed the extraction of frames and elements from the user's sentence.
+
+[USER] User provided another sentence: "But there’s no need to look for hidden meanings."
+
+[USER] User provided frames for the sentence:
+- Frame 1: Existence
+  - Entity: "no need"
+- Frame 2: Required_event
+  - Required_situation: "to look for hidden meanings"
+- Frame 3: Seeking
+  - Sought_entity: "for hidden meanings"
+
+[ASSISTANT_SAID] Assistant confirmed the extraction of frames and elements from the user's sentence.
+
+[USER] User provided another sentence: "It's not about throwing a game or betrayal."
+
+[USER] User provided frames for the sentence:
+- Frame 1: Artifact
+  - Artifact: "game"
+- Frame 2: Intentionally_act
+  - N/A (no specific element provided)
+
+[ASSISTANT_SAID] Assistant noted the mistake in the input regarding the empty "name" field for the second element in the "Intentionally_act" frame and requested clarification.
+
+[USER] User repeated the sentence with the same frames.
+
+[ASSISTANT_SAID] Assistant confirmed the extraction of frames and elements from the user's repeated sentence.
+
+[USER] User provided another sentence: "It’s just that we fight how we can."
+
+[USER] User provided frames for the sentence:
+- Frame 1: Hostile_encounter
+  - Sides: "we"
+  - Means: "how we can"
+
+[ASSISTANT_SAID] Assistant confirmed the extraction of frames and elements from the user's sentence.
+
+[USER] User provided another sentence: "Some better, some worse."
+
+[USER] User provided frames for the sentence:
+- Frame 1: Proportional_quantity
+  - Denoted_quantity: "Some"
+  - Mass: "better"
+- Frame 2: Desirability
+  - N/A
+- Frame 3: Proportional_quantity
+  - Denoted_quantity: "some"
+  - Mass: "worse"
+- Frame 4: Desirability
+  - N/A
+
+[ASSISTANT_SAID] Assistant noted the incomplete nature of the sentence and requested more context.
+
+[USER] User responded with "no."
+
+[ASSISTANT_SAID] Assistant acknowledged the user's response and offered to assist with

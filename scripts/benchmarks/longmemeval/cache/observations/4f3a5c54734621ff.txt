@@ -1,0 +1,19 @@
+**Observation Log:**
+
+- [FACT] The user is considering buying a small farmhouse on inherited land in rural Illinois.
+- [FACT] The user inherited the land from their grandfather.
+- [EVENT] The user had a contractor start clearing overgrown brush and trees on the 5-acre land last week.
+- [PREFERENCE] The user is excited to see the progress of the land clearing.
+- [EVENT] The user is thinking about appealing the tax assessment on the inherited land.
+- [PREFERENCE] The user believes the tax assessment is higher than expected.
+- [ASSISTANT_SAID] The assistant provided an overview of the process of appealing property taxes in Illinois, including steps such as filing a complaint, gathering evidence, and appealing to the County Board of Review or the Illinois Property Tax Appeal Board (PTAB).
+- [ASSISTANT_SAID] The assistant suggested hiring a licensed home inspector to identify potential issues during the farmhouse inspection.
+- [ASSISTANT_SAID] The assistant provided tips for inspecting the farmhouse, including checking the foundation, structure, roof, plumbing, electrical systems, insulation, HVAC, and pest infestations.
+- [ASSISTANT_SAID] The assistant recommended researching local zoning laws and regulations regarding the intended use of the property.
+- [FACT] The user is considering getting a survey done to get a more accurate map of the boundaries and any potential issues on the inherited property.
+- [ASSISTANT_SAID] The assistant explained the survey process, including types of surveys (boundary, topographic, improvement), what to expect from a surveyor, and what a survey can reveal.
+- [EVENT] The user is dealing with a boundary dispute with their neighbor regarding the fence between their properties.
+- [CHANGE] The user hired a surveyor to stake the boundaries, which confirmed that the fence is on the user's side of the line.
+- [EVENT] The user is waiting to hear back from their neighbor about resolving the boundary dispute.
+- [PREFERENCE] The user is considering whether to prioritize inspecting the foundation and structure of the farmhouse or the electrical and plumbing systems first.
+- [ASSISTANT_SAID] The assistant recommended prioritizing the inspection of the foundation and structure over the electrical and plumbing systems, citing safety, cost, and impact on other systems as reasons.

@@ -1,0 +1,62 @@
+**Observation Log:**
+
+[FACT] User is looking for information on abstract expressionism.
+
+[PREFERENCE] User is interested in recommendations for books or online resources to learn more about abstract expressionism.
+
+[ASSISTANT_SAID] Abstract expressionism is a mid-20th century art movement that revolutionized the art world.
+
+[ASSISTANT_SAID] Recommended books on abstract expressionism:
+1. "Abstract Expressionism" by David Anfam
+2. "The Abstract Expressionists" by Irving Sandler
+3. "Action/Abstraction: Pollock, De Kooning, and American Art, 1940-1976" by Norman L. Kleeblatt
+4. "Abstract Expressionism: A Global Language" by Joan Marter
+
+[ASSISTANT_SAID] Recommended online resources for abstract expressionism:
+1. The Museum of Modern Art (MoMA) Online Collection
+2. The Guggenheim Museum Online Collection
+3. The Metropolitan Museum of Art's Heilbrunn Timeline of Art History
+4. Artsy's Abstract Expressionism Page
+5. The Abstract Expressionism Website
+
+[ASSISTANT_SAID] Recommended documentaries and videos on abstract expressionism:
+1. "The New York School" (1993)
+2. "Pollock" (2000)
+3. "Abstract Expressionism: The Essential Guide" (2016)
+
+[EVENT] User is planning to visit the Modern Art Museum again soon.
+
+[TEMPORAL] User enjoyed an exhibit at the Modern Art Museum last month.
+
+[TEMPORAL] User visited the Modern Art Museum on Saturday, March 12th.
+
+[PREFERENCE] User enjoyed a Pollock piece at the Modern Art Museum for a good 20 minutes.
+
+[ASSISTANT_SAID] Recommended checking MoMA's website for upcoming exhibitions and events related to abstract expressionism.
+
+[ASSISTANT_SAID] Suggested checking MoMA's "Exhibitions" tab and calendar page for relevant shows.
+
+[ASSISTANT_SAID] Mentioned specific exhibitions that might be of interest:
+1. "Jackson Pollock: Works on Paper"
+2. "Abstract Expressionism: The Pollock Era"
+3. "Pollock and the Irascibles"
+
+[FACT] User visited a local Modern Art Museum in their city.
+
+[PREFERENCE] User is interested in learning more about notable artists or styles within abstract expressionism.
+
+[ASSISTANT_SAID] Notable artists within abstract expressionism:
+1. Jackson Pollock
+2. Willem de Kooning
+3. Mark Rothko
+4. Franz Kline
+5. Clyfford Still
+
+[ASSISTANT_SAID] Styles within abstract expressionism:
+1. Action Painting
+2. Color Field Painting
+3. Lyrical Abstraction
+4. Abstract Symbolism
+
+[ASSISTANT_SAID] Suggested other artists to explore:
+1. Helen Frank

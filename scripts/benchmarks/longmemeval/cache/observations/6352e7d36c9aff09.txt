@@ -1,0 +1,26 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/06/01 (Thu) 21:59  
+[USER] User requests to generate image prompts with a shared theme using a specific format.  
+[USER] User provides an example theme: "hidden worlds" and an example prompt.  
+[USER] User specifies that subjects should not include commas or indefinite articles.  
+[USER] User requests ten results per theme, ensuring all results are in lowercase.  
+[USER] User instructs that each prompt should begin with ```"/imagine prompt: "``` and end with either --ar 16:9 or --ar 9:16.  
+[USER] User indicates that landscape prompts should use --ar 16:9 and portrait prompts should use --ar 9:16.  
+[USER] User emphasizes the importance of including three backticks at the beginning and end of each prompt.  
+[ASSISTANT_SAID] Assistant provides three prompts based on the theme "hidden worlds" in the specified format.  
+[ASSISTANT_CREATED] Assistant creates prompts:  
+- ```/imagine prompt: ancient underground city lit by glowing mushrooms, complex, pyromagic, chalk, dribbble --ar 16:9```  
+- ```/imagine prompt: microscopic creatures living in a dewdrop, delicate, pastel, gradient, instagram --ar 9:16```  
+- ```/imagine prompt: forgotten treehouse in a dense jungle, gritty, oil painting, saturated, unsplash --ar 16:9```  
+[USER] User requests that all results be in their own codeblock with three backticks.  
+[ASSISTANT_SAID] Assistant apologizes and provides the previous prompts in the correct format with codeblocks.  
+[ASSISTANT_CREATED] Assistant reformats the previous prompts into individual codeblocks.  
+[USER] User requests prompts based on the theme "miniature worlds."  
+[ASSISTANT_SAID] Assistant provides ten prompts based on the theme "miniature worlds."  
+[ASSISTANT_CREATED] Assistant creates prompts:  
+- ```/imagine prompt: a tiny village on a floating lily pad, charming, watercolor, soft, behance --ar 16:9```  
+- ```/imagine prompt: a miniature city built on the head of a pin, futuristic, digital art, neon, artstation --ar 9:16```  
+- ```/imagine prompt: a miniature garden inside an old teapot, cozy, oil painting, warm, unsplash --ar 9:16```  
+- ```/imagine prompt: a miniature carnival inside a glass jar, whimsical, mixed media, colorful, dribbble --ar 9:16```  
+- ```/imagine prompt: a tiny desert town in a terrarium, sandy, pencil sketch, warm, pinterest --ar 16:9```

@@ -1,0 +1,24 @@
+**Observation Log:**
+
+- [FACT] User is located in the city center.
+- [PREFERENCE] User is thinking of taking a cooking class to improve their skills.
+- [PREFERENCE] User is interested in various cuisines, especially Korean, Indian, and Thai.
+- [PREFERENCE] User has been eating a lot of sushi lately and enjoys spicy tuna rolls.
+- [EVENT] User has visited a sushi place near their office three times in the past two weeks.
+- [ASSISTANT_SAID] Assistant offered to help find a cooking school near the user that offers classes on Korean, Indian, and Thai cuisine.
+- [ASSISTANT_SAID] Assistant suggested that user could take a sushi-making class as well.
+- [ASSISTANT_SAID] Assistant provided steps to find cooking schools, including online search, cooking school directories, social media, and local culinary stores.
+- [ASSISTANT_SAID] Assistant listed popular cooking schools that offer international cuisine classes, including Sur La Table, The Cooking Academy, and The Culinary Institute of America.
+- [USER] User expressed interest in online resources for cooking classes or recipes focusing on Korean, Indian, and Thai cuisine.
+- [ASSISTANT_SAID] Assistant provided a list of online resources for cooking classes and recipes, including Masterclass, Cookpad, Udemy, and Maangchi.
+- [ASSISTANT_SAID] Assistant mentioned specific recipe websites like Indian Healthy Recipes and Thai Table.
+- [ASSISTANT_SAID] Assistant recommended YouTube channels for cooking tutorials, including Maangchi and Manjula's Kitchen.
+- [ASSISTANT_SAID] Assistant suggested cookbooks for Korean, Indian, and Thai cuisine.
+- [PREFERENCE] User is trying to perfect their bulgogi recipe and looking for inspiration.
+- [FACT] User has been experimenting with different combinations of soy sauce, garlic, ginger, and sugar for their bulgogi marinade.
+- [ASSISTANT_SAID] Assistant provided tips for creating a good bulgogi marinade, including using a balance of sweet and savory, adding Korean chili flakes, and incorporating sesame oil.
+- [ASSISTANT_CREATED] Assistant created a basic bulgogi marinade recipe with specific ingredient measurements.
+- [PREFERENCE] User is considering adding more sesame oil and Korean chili flakes to their marinade.
+- [PREFERENCE] User has been using thinly sliced ribeye for bulgogi but is curious about other meat options.
+- [ASSISTANT_SAID] Assistant recommended various cuts of meat for bulgogi, including ribeye, sirloin, brisket, and flank steak, and discussed their characteristics.
+- [ASSISTANT_SAID] Assistant emphasized the importance of marbling, thickness, and lean vs. fatty meat when choosing a cut for bulgogi.

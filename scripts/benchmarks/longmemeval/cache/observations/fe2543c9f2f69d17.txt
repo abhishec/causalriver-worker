@@ -1,0 +1,30 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/26 (Fri) 10:37
+
+[ASSISTANT_SAID] The assistant provided additional user stories for the Annotation screen, categorized into three epics: Annotation, Navigation, and Review.
+
+[ASSISTANT_CREATED] The assistant created user stories under the Annotation epic, including:
+- As a Tagger user, I want to be able to see the name and description of each label that I can choose from to annotate the document.
+- As a Tagger user, I want to be able to see the color of each label that I can choose from to annotate the document.
+- As a Tagger user, I want to be able to see the color and name of each label that I have placed on the document.
+- As a Tagger user, I want to be able to edit the name and description of a label that I have placed on the document.
+- As a Tagger user, I want to be able to change the color of a label that I have placed on the document.
+- As a Tagger user, I want to be able to save my annotation progress as I go along.
+
+[ASSISTANT_CREATED] The assistant created user stories under the Navigation epic, including:
+- As a Tagger user, I want to be able to see the page number and total number of pages in a document in the Annotation screen.
+- As a Tagger user, I want to be able to use keyboard shortcuts to navigate between pages in a document in the Annotation screen.
+- As a Tagger user, I want to be able to see the document outline (e.g. headings, subheadings) in the Annotation screen.
+- As a Tagger user, I want to be able to jump to a specific page or heading in the document by using the outline.
+
+[ASSISTANT_CREATED] The assistant created user stories under the Review epic, including:
+- As a Checker user, I want to be able to see the name and description of each label that has been placed on the document by the Tagger user.
+- As a Checker user, I want to be able to see the color of each label that has been placed on the document by the Tagger user.
+- As a Checker user, I want to be able to see the comments that the Tagger user has added for each label on the document.
+- As a Checker user, I want to be able to add comments for each label on the document.
+- As a Checker user, I want to be able to see the history of changes for each label on the document (e.g. who made the change, when the change was made).
+
+[USER] The user provided additional context for the annotation process, stating that when a Tagger starts an annotation task, they classify the document, and based on the classification chosen, a set of labels will appear for annotation.
+
+[ASSISTANT

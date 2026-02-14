@@ -1,0 +1,47 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/20 (Sat) 10:08
+- [EVENT] User is considering expanding their farm to include sheep.
+- [ASSISTANT_SAID] Assistant offered to help find resources on the cost of caring for sheep, specifically vaccinations and feed.
+- [ASSISTANT_SAID] Suggested resources for sheep care: 
+  1. National Sheep Improvement Program (NSIP)
+  2. American Sheep Industry Association (ASI)
+  3. University Extension Services
+  4. Sheep 101
+- [ASSISTANT_SAID] Provided estimated costs for sheep vaccinations:
+  - CD-T vaccine: $1.50 to $3.00 per dose
+  - CDT vaccine with selenium: $2.50 to $5.00 per dose
+  - Pneumonia vaccines: $3.00 to $6.00 per dose
+- [ASSISTANT_SAID] Provided estimated feed costs for sheep:
+  - Hay: $100 to $200 per ton
+  - Grain: $150 to $300 per ton
+  - Minerals and supplements: $20 to $50 per month
+- [ASSISTANT_SAID] Offered tips for scheduling horse vaccinations:
+  1. Consult with your veterinarian
+  2. Plan ahead
+  3. Consider a vaccination program
+  4. Keep records
+- [EVENT] User needs to schedule vaccinations for their horses next month.
+- [ASSISTANT_SAID] Assistant expressed hope that the information would help the user with their sheep venture and scheduling vaccinations for their horses.
+- [EVENT] User is thinking about ordering organic feed for their chickens.
+- [ASSISTANT_SAID] Provided recommendations for suppliers and online stores for organic chicken feed:
+  1. Amazon
+  2. Tractor Supply Co.
+  3. ChickensForBackyards
+  4. Meyer Hatchery
+- [ASSISTANT_SAID] Listed suppliers of organic chicken feed:
+  1. Organic Valley
+  2. Blue Seal
+  3. Modesto Milling
+  4. Scratch and Peck Feeds
+- [ASSISTANT_SAID] Suggested checking local feed stores for organic chicken feed options.
+- [ASSISTANT_SAID] Provided tips for selecting organic chicken feed:
+  1. Check certifications
+  2. Read labels
+  3. Compare prices
+  4. Consider bulk orders
+- [EVENT] User asked for a reminder about the typical vaccination schedule for horses.
+- [ASSISTANT_SAID] Provided a general outline of the core vaccinations for horses:
+  1. EEE and WEE: annually in spring
+  2. Tetanus: annually or every 5-7 years
+  3. West

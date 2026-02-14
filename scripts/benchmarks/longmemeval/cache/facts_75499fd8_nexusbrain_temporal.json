@@ -1,0 +1,27 @@
+{
+  "answer_723bf11f": [
+    {
+      "fact": "User is looking for a dog walker in their area",
+      "type": "preference",
+      "entities": [
+        "dog walker",
+        "area"
+      ]
+    },
+    {
+      "fact": "User has a dog named Max",
+      "type": "personal",
+      "entities": [
+        "Max"
+      ]
+    },
+    {
+      "fact": "User is considering whether a dog walker can administer flea and tick prevention medication",
+      "type": "opinion",
+      "entities": [
+        "dog walker",
+        "flea and tick prevention medication"
+      ]
+    }
+  ]
+}

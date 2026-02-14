@@ -1,0 +1,16 @@
+**Observation Log:**
+
+- [FACT] Chattanooga Hockey is an inline hockey league with adult (age 16+) and youth divisions for ages 5-9 (U9) and 10-15 (U15).
+- [FACT] Chattanooga Hockey has been in operation since 2002.
+- [FACT] The league currently has over 100 adults and 50 youth playing in the leagues.
+- [FACT] Chattanooga Hockey operates as a 501(c)(3) non-profit organization.
+- [FACT] The league is run by a board of volunteers.
+- [PREFERENCE] The user prefers a shorter grant proposal.
+- [CHANGE] The user requested to add information about the league's history and growth.
+- [CHANGE] The user requested the removal of the budget section from the grant proposal.
+- [CHANGE] The user requested to mention the increasing popularity of inline hockey across the country.
+- [CHANGE] The user requested to highlight Chattanooga's prime location, being a couple of hours from Atlanta, Nashville, and Asheville.
+- [ASSISTANT_SAID] The assistant provided a grant proposal for Chattanooga Hockey, including sections on introduction, purpose, program description, financial needs, location, and conclusion.
+- [ASSISTANT_CREATED] The assistant created a structured grant proposal that included details about the league's focus on participation, character development, sportsmanship, and community engagement.
+- [ASSISTANT_CREATED] The assistant included a budget section in the initial proposal, which was later removed as per the user's request.
+- [ASSISTANT_CREATED] The assistant emphasized the league's history, current participation numbers, non-profit status, volunteer management, and the growing popularity of inline hockey in the final version of the grant proposal.

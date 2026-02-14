@@ -1,0 +1,64 @@
+{
+  "answer_581ab834_1": [
+    {
+      "fact": "User is planning a theme park trip soon.",
+      "type": "event",
+      "entities": [
+        "theme park trip"
+      ]
+    },
+    {
+      "fact": "User recently visited Universal Studios Hollywood.",
+      "type": "event",
+      "entities": [
+        "Universal Studios Hollywood"
+      ]
+    },
+    {
+      "fact": "User attended the 'Summer Nights' festival at Universal Studios Hollywood.",
+      "type": "event",
+      "entities": [
+        "Summer Nights festival"
+      ]
+    },
+    {
+      "fact": "User had fun at Universal Studios Hollywood with friends Rachel and Mike.",
+      "type": "relationship",
+      "entities": [
+        "Rachel",
+        "Mike"
+      ]
+    },
+    {
+      "fact": "User enjoyed the Wizarding World of Harry Potter at Universal Studios Hollywood.",
+      "type": "opinion",
+      "entities": [
+        "Wizarding World of Harry Potter"
+      ]
+    },
+    {
+      "fact": "User is considering a General Admission ticket for Six Flags Magic Mountain.",
+      "type": "preference",
+      "entities": [
+        "General Admission ticket",
+        "Six Flags Magic Mountain"
+      ]
+    },
+    {
+      "fact": "User is interested in the new single-rider line system at Six Flags Magic Mountain.",
+      "type": "preference",
+      "entities": [
+        "single-rider line system",
+        "Six Flags Magic Mountain"
+      ]
+    },
+    {
+      "fact": "User found the Nighttime Lights at Hogwarts Castle show breathtaking.",
+      "type": "opinion",
+      "entities": [
+        "Nighttime Lights at Hogwarts Castle",
+        "Universal Studios Hollywood"
+      ]
+    }
+  ]
+}

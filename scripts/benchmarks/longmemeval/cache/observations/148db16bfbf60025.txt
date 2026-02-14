@@ -1,0 +1,24 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/23 (Tue) 23:21
+- [ASSISTANT_SAID] Lirael takes aim at Cultist 2 (the wounded spellcaster) with a roll of 10 on a D20, striking the spellcaster and causing an additional 4 points of damage.
+- [FACT] Cultist 1 (disrupted spellcaster): Defeated
+- [FACT] Cultist 2 (spellcaster): Severely wounded
+- [FACT] Cultist 3 (melee): Engaged with Dragonborn warriors, severely wounded and restrained
+- [FACT] Cultist 4 (melee): Engaged with Dragonborn warriors, severely wounded
+- [FACT] Cultist 5 (melee): Defeated
+- [FACT] Allies: Lirael: Unharmed, Dragonborn warriors: Slightly wounded, Esterosian mage: Unharmed, Esterosian fighters: Slightly wounded
+- [ASSISTANT_SAID] Lirael can choose to attempt to finish off the severely wounded spellcaster, aid the Dragonborn warriors, interrogate the captured cultist, keep an eye out for threats, or assess the state of allies.
+- [USER] Chose option A: Attempt to finish off the severely wounded spellcaster.
+- [USER] Rolled D20: 18, D8: 2.
+- [ASSISTANT_SAID] Lirael takes aim at Cultist 2 again with a roll of 18 on a D20, dealing an additional 2 points of damage, defeating the spellcaster.
+- [FACT] Cultist 2 (spellcaster): Defeated
+- [FACT] Cultist 3 (melee): Engaged with Dragonborn warriors, severely wounded and restrained
+- [FACT] Cultist 4 (melee): Defeated
+- [FACT] Cultist 5 (melee): Defeated
+- [ASSISTANT_SAID] The remaining enemies have been defeated or restrained, and Lirael can choose to interrogate the captured cultist, keep an eye out for threats, assess allies, search for useful items, or secure the area.
+- [USER] Chose option B: Coordinate another focused attack with the Esterosian fighters.
+- [USER] Rolled D20: 14, D8: 3.
+- [ASSISTANT_SAID] Lirael coordinates an attack with a roll of 14 on a D20, dealing an additional 3 points of damage, defeating the remaining melee cultist.
+- [FACT] Cultist 3 (melee): Defeated
+- [ASSISTANT_SAID] Lirael can now choose to interrogate the captured cultist, keep an eye out for threats, assess

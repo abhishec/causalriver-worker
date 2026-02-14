@@ -1,0 +1,19 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/26 (Fri) 06:19  
+[USER] The user is looking for new BBQ sauce recipes to try out.  
+[USER] The user has been experimenting with different flavors for BBQ sauce.  
+[USER] The user made BBQ sauce for a family gathering on Memorial Day weekend.  
+[USER] The user tried slow-cooking ribs for the first time last week and was pleased with the result.  
+[PREFERENCE] The user likes spicy food.  
+[ASSISTANT_SAID] The assistant provided a list of unique BBQ sauce recipes that pair well with ribs, including:  
+[ASSISTANT_CREATED] 1. **Korean BBQ Sauce**: Ingredients include 1/2 cup gochujang, 1/4 cup soy sauce, 1/4 cup brown sugar, 2 tablespoons rice vinegar, 2 tablespoons gochugaru, 1 teaspoon garlic (minced), and 1 teaspoon ginger (grated).  
+[ASSISTANT_CREATED] 2. **Jamaican Jerk BBQ Sauce**: Ingredients include 1/2 cup ketchup, 1/4 cup jerk seasoning, 2 tablespoons allspice, 2 tablespoons brown sugar, 1 tablespoon soy sauce, 1 tablespoon lime juice, and 1 teaspoon scotch bonnet peppers (minced, optional).  
+[ASSISTANT_CREATED] 3. **Smoky Chipotle BBQ Sauce**: Ingredients include 1/2 cup ketchup, 1/4 cup chipotle peppers in adobo sauce, 2 tablespoons apple cider vinegar, 2 tablespoons brown sugar, 1 teaspoon smoked paprika, and 1 teaspoon garlic powder.  
+[ASSISTANT_CREATED] 4. **Honey Bourbon BBQ Sauce**: Ingredients include 1/2 cup ketchup, 1/4 cup honey, 2 tablespoons bourbon whiskey, 2 tablespoons apple cider vinegar, 1 teaspoon Dijon mustard, and 1 teaspoon Worcestershire sauce.  
+[ASSISTANT_CREATED] 5. **Alabama White BBQ Sauce**: Ingredients include 1/2 cup mayonnaise, 1/4 cup apple cider vinegar, 2 tablespoons ketchup, 2 tablespoons brown sugar, 1 teaspoon smoked paprika, and 1 teaspoon garlic powder.  
+[ASSISTANT_SAID] The assistant encouraged the user to adjust the ingredients to their taste preferences and experiment with flavors.  
+[USER] The user expressed interest in the Korean BBQ Sauce and mentioned they have never used gochujang before.  
+[ASSISTANT_SAID] The assistant provided detailed information about gochujang, including:  
+[ASSISTANT_SAID] Gochujang is a Korean chili paste made from fermented soybeans, rice, and red chili peppers.  
+[ASSISTANT_SAID] Gochujang has a complex

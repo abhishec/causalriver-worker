@@ -1,0 +1,182 @@
+{
+  "answer_e9ad5914_1": [
+    {
+      "fact": "User is currently reading 'The Nightingale' by Kristin Hannah",
+      "type": "personal",
+      "entities": [
+        "The Nightingale",
+        "Kristin Hannah"
+      ]
+    },
+    {
+      "fact": "User is really into historical fiction right now",
+      "type": "preference",
+      "entities": [
+        "historical fiction"
+      ]
+    },
+    {
+      "fact": "User finds 'The Nightingale' to be an emotional rollercoaster",
+      "type": "opinion",
+      "entities": [
+        "The Nightingale"
+      ]
+    },
+    {
+      "fact": "User is looking for book recommendations similar to 'The Nightingale' in emotional impact",
+      "type": "preference",
+      "entities": [
+        "The Nightingale"
+      ]
+    }
+  ],
+  "answer_e9ad5914_2": [
+    {
+      "fact": "User finished reading 'The Nightingale' by Kristin Hannah today",
+      "type": "event",
+      "entities": [
+        "The Nightingale",
+        "Kristin Hannah"
+      ]
+    },
+    {
+      "fact": "User is still reeling from the emotional impact of 'The Nightingale'",
+      "type": "opinion",
+      "entities": [
+        "The Nightingale"
+      ]
+    },
+    {
+      "fact": "User is open to trying out different genres of books",
+      "type": "preference",
+      "entities": []
+    },
+    {
+      "fact": "User is interested in historical fiction recommendations",
+      "type": "preference",
+      "entities": [
+        "historical fiction"
+      ]
+    }
+  ],
+  "answer_e9ad5914_3": [
+    {
+      "fact": "User is trying to explore more non-fiction books.",
+      "type": "preference",
+      "entities": [
+        "non-fiction books"
+      ]
+    },
+    {
+      "fact": "User enjoys 'Sapiens: A Brief History of Humankind'.",
+      "type": "preference",
+      "entities": [
+        "Sapiens: A Brief History of Humankind"
+      ]
+    },
+    {
+      "fact": "User is particularly interested in psychology books.",
+      "type": "preference",
+      "entities": [
+        "psychology"
+      ]
+    }
+  ],
+  "answer_e9ad5914_4": [
+    {
+      "fact": "User finished listening to 'Sapiens: A Brief History of Humankind' by Yuval Noah Harari",
+      "type": "event",
+      "entities": [
+        "Sapiens",
+        "Yuval Noah Harari"
+      ]
+    },
+    {
+      "fact": "User is interested in the impact of technology on human evolution",
+      "type": "opinion",
+      "entities": [
+        "technology",
+        "human evolution"
+      ]
+    },
+    {
+      "fact": "User is curious about the latest advancements in AI and its potential applications",
+      "type": "preference",
+      "entities": [
+        "AI",
+        "advancements",
+        "applications"
+      ]
+    }
+  ],
+  "answer_e9ad5914_5": [
+    {
+      "fact": "User is looking for book recommendations.",
+      "type": "preference",
+      "entities": [
+        "book recommendations"
+      ]
+    },
+    {
+      "fact": "User is open to different genres of books.",
+      "type": "preference",
+      "entities": [
+        "genres"
+      ]
+    },
+    {
+      "fact": "User is particularly interested in stories that explore themes of power dynamics and social change.",
+      "type": "preference",
+      "entities": [
+        "power dynamics",
+        "social change"
+      ]
+    },
+    {
+      "fact": "User is interested in 'The Handmaid's Tale'.",
+      "type": "preference",
+      "entities": [
+        "The Handmaid's Tale"
+      ]
+    },
+    {
+      "fact": "User is interested in 'The Hate U Give'.",
+      "type": "preference",
+      "entities": [
+        "The Hate U Give"
+      ]
+    }
+  ],
+  "answer_e9ad5914_6": [
+    {
+      "fact": "User finished listening to 'The Power' by Naomi Alderman",
+      "type": "event",
+      "entities": [
+        "The Power",
+        "Naomi Alderman"
+      ]
+    },
+    {
+      "fact": "User is interested in exploring books that challenge their perspectives",
+      "type": "preference",
+      "entities": []
+    },
+    {
+      "fact": "User has been meaning to explore more non-fiction books",
+      "type": "preference",
+      "entities": [
+        "non-fiction books"
+      ]
+    },
+    {
+      "fact": "User is trying to change some habits",
+      "type": "personal",
+      "entities": []
+    },
+    {
+      "fact": "User is interested in learning more about the science behind habits",
+      "type": "preference",
+      "entities": []
+    }
+  ]
+}

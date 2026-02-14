@@ -1,0 +1,50 @@
+{
+  "answer_787e6a6d": [
+    {
+      "fact": "User is thinking of building a gaming PC.",
+      "type": "event",
+      "entities": [
+        "gaming PC"
+      ]
+    },
+    {
+      "fact": "User wants components that can handle 4K resolution and high frame rates.",
+      "type": "preference",
+      "entities": [
+        "4K resolution",
+        "high frame rates"
+      ]
+    },
+    {
+      "fact": "User is still deciding on their budget for the gaming PC.",
+      "type": "event",
+      "entities": [
+        "budget"
+      ]
+    },
+    {
+      "fact": "User aims for the higher end of the budget range for the gaming PC.",
+      "type": "preference",
+      "entities": [
+        "budget"
+      ]
+    },
+    {
+      "fact": "User beat the last boss in the Dark Souls 3 DLC last weekend.",
+      "type": "event",
+      "entities": [
+        "Dark Souls 3",
+        "DLC",
+        "last boss"
+      ]
+    },
+    {
+      "fact": "User loves the sense of accomplishment from defeating tough bosses in Dark Souls 3.",
+      "type": "opinion",
+      "entities": [
+        "Dark Souls 3",
+        "sense of accomplishment"
+      ]
+    }
+  ]
+}

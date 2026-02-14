@@ -1,0 +1,204 @@
+{
+  "answer_8a42fedf_1": [
+    {
+      "fact": "User is planning a future trip and is deciding between United Airlines and American Airlines.",
+      "type": "preference",
+      "entities": [
+        "United Airlines",
+        "American Airlines"
+      ]
+    },
+    {
+      "fact": "User has had good experiences with both United Airlines and American Airlines.",
+      "type": "opinion",
+      "entities": [
+        "United Airlines",
+        "American Airlines"
+      ]
+    },
+    {
+      "fact": "User is leaning towards United Airlines because they have accumulated more miles with them.",
+      "type": "preference",
+      "entities": [
+        "United Airlines"
+      ]
+    },
+    {
+      "fact": "User has accumulated around 20,000 miles with United Airlines over the past three months.",
+      "type": "personal",
+      "entities": [
+        "20,000 miles",
+        "United Airlines"
+      ]
+    },
+    {
+      "fact": "User took a business trip to Chicago with United Airlines in March.",
+      "type": "event",
+      "entities": [
+        "business trip",
+        "Chicago",
+        "United Airlines",
+        "March"
+      ]
+    },
+    {
+      "fact": "User flew from their hometown to Chicago on the 10th and returned on the 12th with two flights each way.",
+      "type": "event",
+      "entities": [
+        "hometown",
+        "Chicago",
+        "10th",
+        "12th"
+      ]
+    },
+    {
+      "fact": "User was impressed with United's in-flight entertainment system on their recent trip.",
+      "type": "opinion",
+      "entities": [
+        "United Airlines",
+        "in-flight entertainment system"
+      ]
+    },
+    {
+      "fact": "User is hoping to stick with United Airlines for their next long-haul flight.",
+      "type": "preference",
+      "entities": [
+        "United Airlines",
+        "long-haul flight"
+      ]
+    }
+  ],
+  "answer_8a42fedf_3": [
+    {
+      "fact": "User is planning a trip to San Francisco next month.",
+      "type": "event",
+      "entities": [
+        "San Francisco",
+        "next month"
+      ]
+    },
+    {
+      "fact": "User is considering flying with Southwest Airlines.",
+      "type": "preference",
+      "entities": [
+        "Southwest Airlines"
+      ]
+    },
+    {
+      "fact": "User had a good experience with Southwest Airlines on a previous trip.",
+      "type": "opinion",
+      "entities": [
+        "Southwest Airlines"
+      ]
+    },
+    {
+      "fact": "User took a direct flight from their hometown to Las Vegas for a conference in March.",
+      "type": "event",
+      "entities": [
+        "Las Vegas",
+        "March"
+      ]
+    },
+    {
+      "fact": "User's travel dates to San Francisco are from the 10th to the 14th of next month.",
+      "type": "event",
+      "entities": [
+        "10th",
+        "14th",
+        "next month"
+      ]
+    },
+    {
+      "fact": "User will be flying into San Francisco International Airport (SFO).",
+      "type": "preference",
+      "entities": [
+        "San Francisco International Airport (SFO)"
+      ]
+    },
+    {
+      "fact": "User prefers a round-trip ticket.",
+      "type": "preference",
+      "entities": [
+        "round-trip ticket"
+      ]
+    },
+    {
+      "fact": "User is open to flying out of their hometown airport at any time of day.",
+      "type": "preference",
+      "entities": [
+        "hometown airport"
+      ]
+    },
+    {
+      "fact": "User's hometown airport is a Southwest Airlines hub.",
+      "type": "personal",
+      "entities": [
+        "hometown airport",
+        "Southwest Airlines"
+      ]
+    },
+    {
+      "fact": "User is loyal to United Airlines and American Airlines.",
+      "type": "relationship",
+      "entities": [
+        "United Airlines",
+        "American Airlines"
+      ]
+    },
+    {
+      "fact": "User is hoping to earn decent miles on the trip.",
+      "type": "opinion",
+      "entities": [
+        "miles"
+      ]
+    }
+  ],
+  "answer_8a42fedf_2": [
+    {
+      "fact": "User is planning a trip to the beach soon.",
+      "type": "event",
+      "entities": [
+        "beach trip"
+      ]
+    },
+    {
+      "fact": "User has had a lot of experience with Uber recently.",
+      "type": "preference",
+      "entities": [
+        "Uber"
+      ]
+    },
+    {
+      "fact": "User took at least 10 Uber rides during a week-long vacation to Hawaii.",
+      "type": "event",
+      "entities": [
+        "10 Uber rides",
+        "Hawaii",
+        "week-long vacation"
+      ]
+    },
+    {
+      "fact": "User's vacation in Hawaii was from April 20th to April 27th.",
+      "type": "event",
+      "entities": [
+        "April 20th",
+        "April 27th"
+      ]
+    },
+    {
+      "fact": "User flew with American Airlines from their hometown to Honolulu.",
+      "type": "event",
+      "entities": [
+        "American Airlines",
+        "Honolulu"
+      ]
+    },
+    {
+      "fact": "User took a connecting flight to Maui.",
+      "type": "event",
+      "entities": [
+        "Maui"
+      ]
+    }
+  ]
+}

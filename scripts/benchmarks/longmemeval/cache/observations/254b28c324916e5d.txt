@@ -1,0 +1,17 @@
+**Observation Log:**
+
+- [FACT] User is planning a surprise party for their cousin Rachel's engagement.
+- [RELATIONSHIP] Rachel is the user's cousin.
+- [TEMPORAL] The user hasn't seen Rachel in person in the past month.
+- [PREFERENCE] User wants to make the surprise party extra special.
+- [ASSISTANT_SAID] Suggested decorations include personalized banners, balloon arch, floral arrangements, twinkling lights, and engagement photos.
+- [ASSISTANT_SAID] Suggested gift ideas include a personalized photo album, customized jewelry, wine and cheese basket, honeymoon fund contribution, and a customized keepsake box.
+- [ASSISTANT_SAID] Additional tips include keeping the party a secret, involving Rachel's fiancé in planning, making it intimate, and planning special activities.
+- [EVENT] User asked for more ideas for special activities during the party.
+- [ASSISTANT_SAID] Suggested special activities include a love story timeline, toasts and roasts, engagement story sharing, couple's trivia, wish tree, video messages, slideshow or photo booth, special performance, cake cutting ceremony, and guest book alternative.
+- [ASSISTANT_SAID] Suggested personalized touches for the party include customized coasters, monogrammed napkins, special playlists, and personalized favors.
+- [EVENT] User plans to ask family members questions to gather details for the love story timeline.
+- [ASSISTANT_SAID] Provided a list of questions to ask family members about Rachel and her fiancé's relationship, including how they met, memorable moments, and proposal details.
+- [EVENT] User plans to ask their parents about their thoughts on Rachel's engagement and how they feel about her fiancé.
+- [CHANGE] User will inquire if their parents have noticed any changes in Rachel since the engagement.
+- [ASSISTANT_SAID] Suggested ideas for customized coasters as party favors, including monogrammed coasters, special quote coasters, personalized photo coasters, custom illustration coasters, and engagement ring coasters.

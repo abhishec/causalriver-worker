@@ -1,0 +1,22 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/30 (Tue) 06:25
+- [FACT] The user is sending multiple messages, indicating a structured communication.
+- [EVENT] The user is in the process of sending part 5 of their multiple messages.
+- [ASSISTANT_SAID] The assistant responded with "acknowledged" to indicate understanding of the user's instruction.
+- [FACT] The user is discussing legal definitions and obligations related to design practitioners, principal design practitioners, professional engineers, specialist practitioners, and building practitioners as defined in an unspecified Act.
+- [FACT] A “design practitioner” is defined as a “person who prepares regulated designs”.
+- [FACT] Division 1 of Pt 2 of the Act deals with the “obligations of design practitioners” including making “design compliance declaration[s]”.
+- [FACT] A “principal design practitioner” is defined as a “person who coordinates the provision of design compliance declarations for the purposes of building work done by a building practitioner”.
+- [FACT] Division 2 of Pt 2 of the Act deals with the “obligations of principal design practitioners”.
+- [FACT] A “professional engineer” is defined as “a person who carries out professional engineering work in a prescribed area of engineering”.
+- [FACT] A “specialist practitioner” is defined as “a person who carries out specialist work” related to building elements.
+- [FACT] A “building practitioner” is defined as “a person who agrees under a contract or other arrangement to do building work”.
+- [FACT] The user cites various sections of the Act (e.g., Sections 3, 7, 8, 9, 13, 21, 32, 34, 35) to support their statements.
+- [FACT] The user mentions that “person” is not defined in the Act, but includes a body corporate as per the Interpretation Act 1987 (NSW).
+- [FACT] The user discusses the context in which “persons” may or may not be considered “practitioners” under the Act.
+- [FACT] The user references specific sections (e.g., s 9(1), s 16(1), s 29(3)) that illustrate the use of “person” in different contexts.
+- [FACT] The user explains that the definition of “construction work” includes various activities such as building work, preparation of regulated designs, and supervision or coordination of such work.
+- [FACT] The user emphasizes that the term “person” in the Act is used broadly and does not necessarily equate to “practitioner”.
+- [FACT] The user concludes that the interpretation of “person” in the context of statutory duties is a question of fact in each case.
+- [ASSISTANT_SAID] The assistant did not provide any additional information or content beyond

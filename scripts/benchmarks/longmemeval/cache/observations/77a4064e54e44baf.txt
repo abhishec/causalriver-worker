@@ -1,0 +1,25 @@
+**Observation Log:**
+
+- [FACT] User is new to the US and just arrived in New York from Nairobi with a layover in Amsterdam.
+- [FACT] User is located in Queens.
+- [FACT] User is looking for job openings specifically in food handling or janitorial services.
+- [FACT] User has just started taking English classes.
+- [PREFERENCE] User appreciates job search tips.
+- [ASSISTANT_SAID] Assistant welcomed the user to New York and offered to help with the job search.
+- [ASSISTANT_SAID] Assistant congratulated the user on starting English classes and provided job search tips.
+- [ASSISTANT_SAID] Assistant suggested updating the resume, practicing English, networking, being prepared for interviews, and starting with part-time or entry-level positions.
+- [ASSISTANT_SAID] Assistant provided job search resources including NYC Department of Education's Adult Education, NYC Jobs portal, Indeed, Queens Library, and local community centers.
+- [ASSISTANT_SAID] Assistant mentioned specific job openings in food handling and janitorial services, including searching on job platforms and contacting local businesses directly.
+- [ASSISTANT_SAID] Assistant provided additional resources such as the New York State Department of Labor and Immigrant Welcome Centers.
+- [ASSISTANT_SAID] Assistant encouraged the user to take time to settle in and focus on improving English skills.
+- [USER] User requested more information about the NYC Department of Education's Adult Education job training and placement services.
+- [ASSISTANT_SAID] Assistant described the Adult Education program, including its focus on helping adults acquire skills and education for employment.
+- [ASSISTANT_SAID] Assistant listed job training services offered, including vocational training, ESOL, HSE preparation, career development, and industry-specific training.
+- [ASSISTANT_SAID] Assistant specified that the program offers training in food handling and janitorial services, including food safety certification and janitorial training.
+- [ASSISTANT_SAID] Assistant explained the placement services provided after training, including job placement assistance, resume and interview preparation, and career counseling.
+- [ASSISTANT_SAID] Assistant outlined eligibility requirements for the Adult Education program.
+- [ASSISTANT_SAID] Assistant provided application methods for the program, including visiting the website, calling the hotline, or visiting a local center.
+- [USER] User asked for more information about the food safety certification program, including duration and requirements.
+- [ASSISTANT_SAID] Assistant explained that the Food Safety Certification program typically consists of a one-day training session lasting 8-10 hours, followed by a written exam.
+- [ASSISTANT_SAID] Assistant listed topics covered in the training session, including personal hygiene, food handling, storage, cleaning, pest control, and foodborne illness prevention.
+- [ASSISTANT_SAID] Assistant

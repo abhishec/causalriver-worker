@@ -1,0 +1,19 @@
+**Observation Log:**
+
+- [FACT] User requested an agreement for field service work.
+- [FACT] User mentioned Baker Property Inspections LLC as the company to be engaged.
+- [EVENT] User is seeking a Permanent Foundation Certification from a separate engineering firm.
+- [ASSISTANT_SAID] Assistant provided a structured agreement template for engaging Baker Property Inspections LLC.
+- [ASSISTANT_CREATED] Assistant created an agreement that includes the following sections: Scope of Work, Fees, Access to Property, Warranties and Representations, Limitation of Liability, Termination, Governing Law, Entire Agreement, and Counterparts.
+- [ASSISTANT_SAID] Assistant specified that Baker will conduct a thorough inspection of the property's foundation and identify any issues or defects.
+- [ASSISTANT_SAID] Assistant stated that Baker will provide a detailed report to the engineering firm outlining the condition of the foundation and any necessary repairs or improvements.
+- [ASSISTANT_SAID] Assistant mentioned that the Client will pay Baker the fees listed in the attached Fee Schedule.
+- [ASSISTANT_SAID] Assistant indicated that the Client agrees to pay all fees within 30 days of receipt of an invoice.
+- [ASSISTANT_SAID] Assistant noted that the Client will provide Baker with access to the property at the scheduled time and date of the inspection.
+- [ASSISTANT_SAID] Assistant included that the Client represents and warrants that it is the lawful owner of the property or has the necessary authority to engage Baker.
+- [ASSISTANT_SAID] Assistant stated that Baker's liability shall be limited to the amount of fees paid by the Client for the services provided.
+- [ASSISTANT_SAID] Assistant mentioned that either party may terminate the Agreement upon written notice to the other party.
+- [ASSISTANT_SAID] Assistant indicated that the Agreement shall be governed by and construed in accordance with the laws of the State of [State].
+- [ASSISTANT_SAID] Assistant noted that the Agreement constitutes the entire agreement between the parties and supersedes all prior or contemporaneous agreements or representations.
+- [ASSISTANT_SAID] Assistant included that the Agreement may be executed in counterparts.
+- [ASSISTANT_SAID] Assistant provided a placeholder for the Fee Schedule to be inserted.

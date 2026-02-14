@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[FACT] User is planning a yoga retreat for the summer.  
+[FACT] User recently got back into their yoga routine after a 2-week break.  
+[FACT] User met their goal of attending yoga classes the week before the conversation.  
+[PREFERENCE] User is interested in yoga retreat locations that offer classes in various styles like Vinyasa and Kundalini.  
+[ASSISTANT_SAID] Assistant congratulated the user on getting back into their yoga routine and meeting their goal.  
+[ASSISTANT_SAID] Assistant recommended popular yoga retreat locations:  
+[ASSISTANT_SAID] 1. Bali, Indonesia - Offers classes in Vinyasa, Kundalini, Hatha, and Restorative yoga.  
+[ASSISTANT_SAID] 2. Costa Rica - Offers Vinyasa, Kundalini, and Hatha yoga classes, along with activities like surfing and hiking.  
+[ASSISTANT_SAID] 3. Greece - Offers Vinyasa, Kundalini, and Hatha yoga classes, along with meditation and holistic practices.  
+[ASSISTANT_SAID] 4. Thailand - Offers Vinyasa, Kundalini, and Hatha yoga classes, along with meditation and Thai massage.  
+[ASSISTANT_SAID] 5. California, USA - Offers Vinyasa, Kundalini, and Hatha yoga classes, along with outdoor activities.  
+[ASSISTANT_SAID] 6. India - Offers Vinyasa, Kundalini, and Hatha yoga classes, along with meditation and Ayurvedic practices.  
+[ASSISTANT_SAID] 7. Portugal - Offers Vinyasa, Kundalini, and Hatha yoga classes, along with outdoor activities.  
+[ASSISTANT_SAID] Assistant advised to research each location and retreat center to find the best fit for style, budget, and preferences.  
+[ASSISTANT_SAID] Assistant reminded the user to consider accommodations, food, and activities outside of yoga classes when choosing a retreat.  
+[ASSISTANT_SAID] Assistant noted to book early as popular retreats can fill up quickly.  
+[USER] User requested more information about accommodations and food options at Yoga House Bali, specifically regarding vegan dietary options.  
+[ASSISTANT_SAID] Yoga House Bali offers a range of accommodations:  
+[ASSISTANT_SAID] 1. Luxury Villas - Spacious, stylishly decorated, with modern amenities.  
+[ASSISTANT_SAID] 2. Deluxe Rooms - Cozy, comfortable, with air conditioning and private bathrooms.  
+[ASSISTANT_SAID] 3. Shared Rooms - Budget-friendly with bunk beds and shared bathrooms.  
+[ASSISTANT_SAID] All rooms are cleaned daily, and linens and towels are provided.  
+[ASSISTANT_SAID] Food

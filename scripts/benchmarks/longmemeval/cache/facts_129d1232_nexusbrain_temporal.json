@@ -1,0 +1,124 @@
+{
+  "answer_1de862d6_1": [
+    {
+      "fact": "User is interested in reducing waste in their daily life.",
+      "type": "preference",
+      "entities": [
+        "reducing waste",
+        "daily life"
+      ]
+    },
+    {
+      "fact": "User recently met someone at a charity event who introduced them to zero-waste living.",
+      "type": "event",
+      "entities": [
+        "charity event",
+        "zero-waste living"
+      ]
+    },
+    {
+      "fact": "User is particularly interested in reducing plastic bag usage.",
+      "type": "preference",
+      "entities": [
+        "plastic bag usage"
+      ]
+    },
+    {
+      "fact": "User participated in a charity walk and raised $250 through sponsors.",
+      "type": "event",
+      "entities": [
+        "charity walk",
+        "$250"
+      ]
+    },
+    {
+      "fact": "User is aware of the impact of their daily habits on the community and environment.",
+      "type": "opinion",
+      "entities": [
+        "daily habits",
+        "community",
+        "environment"
+      ]
+    }
+  ],
+  "answer_1de862d6_2": [
+    {
+      "fact": "User is interested in zero-waste living",
+      "type": "preference",
+      "entities": [
+        "zero-waste living"
+      ]
+    },
+    {
+      "fact": "User met someone who introduced them to the concept of zero-waste living",
+      "type": "relationship",
+      "entities": [
+        "someone",
+        "zero-waste living"
+      ]
+    },
+    {
+      "fact": "User participated in a Bike-a-Thon for Cancer Research",
+      "type": "event",
+      "entities": [
+        "Bike-a-Thon",
+        "Cancer Research"
+      ]
+    },
+    {
+      "fact": "User's team raised $5,000 during the Bike-a-Thon",
+      "type": "event",
+      "entities": [
+        "$5,000",
+        "Bike-a-Thon"
+      ]
+    },
+    {
+      "fact": "User found the Bike-a-Thon experience amazing",
+      "type": "opinion",
+      "entities": [
+        "Bike-a-Thon",
+        "experience"
+      ]
+    }
+  ],
+  "answer_1de862d6_3": [
+    {
+      "fact": "User is interested in zero-waste living.",
+      "type": "preference",
+      "entities": [
+        "zero-waste living"
+      ]
+    },
+    {
+      "fact": "User recently met someone who is really into zero-waste living.",
+      "type": "relationship",
+      "entities": [
+        "someone",
+        "zero-waste living"
+      ]
+    },
+    {
+      "fact": "User helped organize a charity yoga event.",
+      "type": "event",
+      "entities": [
+        "charity yoga event"
+      ]
+    },
+    {
+      "fact": "User's charity yoga event raised $600 for a local animal shelter.",
+      "type": "event",
+      "entities": [
+        "$600",
+        "local animal shelter"
+      ]
+    },
+    {
+      "fact": "User is curious to learn more about composting.",
+      "type": "preference",
+      "entities": [
+        "composting"
+      ]
+    }
+  ]
+}

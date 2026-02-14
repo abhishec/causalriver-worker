@@ -1,0 +1,38 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/27 (Sat) 12:52
+- [FACT] The user has been reading a lot more lately.
+- [PREFERENCE] The user is looking for non-fiction book recommendations similar to "Sapiens."
+- [ASSISTANT_SAID] Recommended non-fiction books include:
+  1. "Guns, Germs, and Steel" by Jared Diamond
+  2. "The Sixth Extinction: An Unnatural History" by Elizabeth Kolbert
+  3. "The Emperor of All Maladies: A Biography of Cancer" by Siddhartha Mukherjee
+  4. "The Selfish Gene" by Richard Dawkins
+  5. "The Uninhabitable Earth: Life After Warming" by David Wallace-Wells
+  6. "Prisoners of Geography: Ten Maps That Tell You Everything You Need to Know About Global Politics" by Tim Marshall
+  7. "The Language Instinct: How the Mind Creates Language" by Steven Pinker
+  8. "A Short History of Nearly Everything" by Bill Bryson
+  9. "The Immortal Life of Henrietta Lacks" by Rebecca Skloot
+  10. "The Happiest Man on Earth: The Beautiful Life of an Auschwitz Survivor" by Eddie Jaku
+- [FACT] The user has already read "The Sixth Extinction" and "A Short History of Nearly Everything."
+- [PREFERENCE] The user is open to exploring apps or tools to help track reading habits and stay organized.
+- [ASSISTANT_SAID] Recommended apps and tools for tracking reading habits include:
+  1. Goodreads
+  2. LibraryThing
+  3. Leafmarks
+  4. Reading Challenge
+  5. Litsy
+  6. BookNerd
+- [FACT] The user has been using Goodreads to track their reading challenge but hasn't explored other features.
+- [PREFERENCE] The user is looking for romance novels that aren't too sappy or cliché.
+- [ASSISTANT_SAID] Recommended romance novels include:
+  1. "The Hating Game" by Sally Thorne
+  2. "The Seven Husbands of Evelyn Hugo" by Taylor Jenkins Reid
+  3. "The Rosie Project" by Graeme Simsion
+  4. "Eleanor Oliphant is Completely Fine" by Gail Honeyman
+  5. "The Royal We" by Heather Cocks and Jessica Morgan
+  6. "The Wedding Date" by Jasmine Guillory
+  7. "The Last Letter from Your Lover" by Lucinda Riley
+  8. "Attachments" by Rainbow Rowell
+  9. "Me Before You" by Jojo Moyes
+  10

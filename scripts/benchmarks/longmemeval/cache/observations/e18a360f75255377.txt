@@ -1,0 +1,14 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/06/17 (Sat) 01:07  
+[USER] User is experiencing an error related to a PowerShell script execution on a VM.  
+[USER] The error message indicates a missing string terminator in the script: "The string is missing the terminator: \".  
+[ASSISTANT_SAID] The assistant suggested encoding the script as a Base64 string before passing it to the `az vm run-command invoke` command to prevent issues with special characters.  
+[ASSISTANT_CREATED] The assistant provided a revised version of the script to encode the `$joinDomainScript` variable as a Base64 string and pass it to the command with the `-EncodedCommand` flag.  
+[USER] User reported a new error message indicating an issue with the username format: "Cannot process argument because the value of argument 'userName' is not valid."  
+[USER] User noted that the username stored as the secret 'intro' was in the format "username" instead of "username@nmrp.com."  
+[ASSISTANT_SAID] The assistant suggested updating the `$domainAdminUsername` assignment to include the domain name or updating the secret 'intro' in Azure Key Vault to include the domain name.  
+[USER] User changed the username to the correct format "username@nmrp.com" but encountered a new error message related to the `OUPath` parameter: "Cannot convert 'System.Object[]' to the type 'System.String' required by parameter 'OUPath'."  
+[USER] User provided the value for `$ou` as 'OU=computers,DC=corp,DC=nmrp,DC=com'.  
+[ASSISTANT_SAID] The assistant suggested updating the `$joinDomainScript` to ensure the `OUPath` parameter is passed as a string to the `Add-Computer` cmdlet.  
+[ASSISTANT_CREATED] The assistant provided a revised version of the `$joinDomainScript` to use environment variables for the username and password and to format the `OUPath` correctly.

@@ -1,0 +1,22 @@
+**Observation Log:**
+
+- [FACT] User is moving to Tokyo, Japan.
+- [PREFERENCE] User is super excited about moving to Tokyo and exploring the city.
+- [EVENT] User is looking for good places to explore in Tokyo, specifically hidden gems known by locals.
+- [ASSISTANT_SAID] Assistant congratulated the user on their move to Tokyo and offered to help find hidden gems in the city.
+- [ASSISTANT_SAID] Assistant provided a list of unique places to explore in Tokyo, including neighborhoods, parks, gardens, food and drink options, unique experiences, and tips.
+- [ASSISTANT_CREATED] Assistant created a list of neighborhoods: Kichijoji, Daikanyama, Yanaka.
+- [ASSISTANT_CREATED] Assistant created a list of parks and gardens: Kiyosumi Garden, Hama Rikyu Gardens, Shinjuku Gyoen National Garden.
+- [ASSISTANT_CREATED] Assistant created a list of food and drink options: Tsukemen Gyoza Ichi, Toriki, Kawaii Monster Cafe.
+- [ASSISTANT_CREATED] Assistant created a list of unique experiences: TeamLab Borderless, Shibuya's Nonbei Yokocho, Tokyo National Museum's Hyokeikan.
+- [ASSISTANT_CREATED] Assistant provided tips and essentials for exploring Tokyo, including getting a Suica or Pasmo card, downloading Google Maps, and learning some Japanese phrases.
+- [FACT] User is interested in trying local food, specifically okonomiyaki.
+- [ASSISTANT_SAID] Assistant provided recommendations for okonomiyaki restaurants in Shibuya and nearby areas.
+- [ASSISTANT_CREATED] Assistant created a list of okonomiyaki restaurants: Okonomiyaki Monja Kondo, Okonomiyaki Sakura Tei, Botejyu Okonomiyaki, Okonomiyaki Chitanda (Harajuku), Okonomiyaki Fujii (Ebisu).
+- [ASSISTANT_SAID] Assistant provided tips for dining at okonomiyaki restaurants, including being prepared for a wait, choosing okonomiyaki style, and customizing orders.
+- [CHANGE] User is moving to Tokyo today.
+- [PREFERENCE] User thinks taking a class would help improve their Japanese speaking skills.
+- [ASSISTANT_SAID] Assistant provided recommendations for language schools in Shibuya that offer Japanese classes for foreigners.
+- [ASSISTANT_CREATED] Assistant created a list of language schools: Shibuya Gaigosai Japanese Language School, Tokyo Japanese Language School (TJLS), Naganuma School, Shibuya Japanese Language Institute (SJLI).
+- [ASSISTANT_SAID] Assistant provided details about class schedules, including evening and weekend options for the mentioned schools.
+- [ASSISTANT_SAID] Assistant mentioned that both Shibuya Gaigosai and TJLS offer trial

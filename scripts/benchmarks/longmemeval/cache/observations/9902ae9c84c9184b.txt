@@ -1,0 +1,10 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/25 (Thu) 13:27  
+[USER] User inquired about the possibility of damaging components when checking resistance.  
+[ASSISTANT_SAID] It is unlikely to damage components when checking resistance with a multimeter if used correctly.  
+[ASSISTANT_SAID] Precaution 1: Ensure the circuit is not powered before measuring resistance to avoid accidental short circuits.  
+[ASSISTANT_SAID] Precaution 2: Select the appropriate range on the multimeter for the resistance being measured; using too high a range may yield inaccurate readings, while too low a range may overload the circuit and damage components.  
+[ASSISTANT_SAID] Precaution 3: Avoid touching the multimeter leads to other components in the circuit to prevent short circuits and potential damage.  
+[ASSISTANT_SAID] Precaution 4: Be gentle with the multimeter leads when inserting them into the circuit to avoid bending or breaking the leads, which can damage the multimeter or circuit components.  
+[ASSISTANT_SAID] By taking these precautions, it is unlikely to damage components when checking resistance with a multimeter.

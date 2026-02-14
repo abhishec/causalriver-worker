@@ -1,0 +1,32 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/30 (Tue) 14:24
+- [FACT] User is associated with Offploy, a social enterprise.
+- [FACT] Offploy has a vision of a world where everyone feels safe from crime.
+- [FACT] Offploy offers a suite of Employer Services to support employers in hiring people with convictions.
+- [FACT] Offploy's services include tailored training, coaching, and consultancy.
+- [FACT] Offploy's training can be delivered face-to-face or online.
+- [FACT] Offploy's core offering is the "Seven Steps to safe and sustainable recruitment."
+- [FACT] The course designed by Offploy consists of seven modules.
+- [FACT] The seven modules are: 
+  1. Getting the culture right 
+  2. Recruitment Procedures and Policy Development
+  3. Risk Management (Role and Candidate)
+  4. Marketing Your Vacancies Appropriately and Strategically
+  5. Interviews, Disclosure and Vetting
+  6. Onboarding, Additional Support and Saying ‘No’ 
+  7. Onboarding, Additional Support and Saying ‘No’ 
+- [FACT] Each module consists of several objectives to support employers in recruiting people with convictions.
+- [FACT] Offploy delivers objectives through three methods: Consult, Train, and Support.
+- [USER] User requested a rewrite of an overview in British English.
+- [ASSISTANT_SAID] Assistant provided a rewritten overview for the module "Getting the culture right" with the objective of defining a public statement.
+- [ASSISTANT_CREATED] Assistant created a table with the following headers: Module, Objective, Delivery, Overview, Outcomes.
+- [ASSISTANT_CREATED] Assistant provided a list of activities and outcomes for the objective of defining a public statement.
+- [USER] User expressed appreciation for the assistant's work, stating "This is amazing thank you."
+- [USER] User provided additional objectives and overviews within the "Getting the Culture right" module.
+- [USER] User specified that the method of delivery for all additional objectives is "Consult."
+- [ASSISTANT_SAID] Assistant provided an overview for the objective "Create a complete Communication Plan on this strategy."
+- [ASSISTANT_SAID] Assistant provided an overview for the objective "Appoint an Ex-offender Inclusion Champion."
+- [ASSISTANT_SAID] Assistant provided an overview for the objective "Create a bank of case studies of existing colleagues with convictions."
+- [ASSISTANT_SAID] Assistant provided an overview for the objective "Launch an annual colleague ex-offender perception survey."
+- [ASSISTANT_CREATED] Assistant updated the table with the new objectives, overviews, activities, and outcomes.

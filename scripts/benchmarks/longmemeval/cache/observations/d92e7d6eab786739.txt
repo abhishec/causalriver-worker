@@ -1,0 +1,17 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/08/26 (Sat) 08:23
+- [USER] User inquired about the number of researchers supported by Wellcome under their Global Health Clinical Research Mentoring scheme.
+- [ASSISTANT_SAID] Wellcome Trust has supported "over 100 researchers" under their Global Health Clinical Research Mentoring scheme, until the end of their last reporting period in 2019.
+- [USER] User requested more details on the types of research projects supported researchers are working on.
+- [ASSISTANT_SAID] Wellcome Trust supports research in a wide range of health areas, including infectious diseases, cancer, mental health, and maternal and child health.
+- [ASSISTANT_SAID] The specific research projects vary depending on the interests and expertise of the individual researchers.
+- [ASSISTANT_SAID] Wellcome Trust provides mentorship, training, and financial support to help researchers develop their clinical research skills and address important health challenges.
+- [USER] User asked for more information about the mentorship and training that Wellcome Trust offers to researchers.
+- [ASSISTANT_SAID] Wellcome Trust offers the following types of support under their Global Health Clinical Research Mentoring scheme:
+  1. [ASSISTANT_SAID] Mentorship – Each researcher is assigned a mentor who is an experienced clinical researcher in their field, helping with research proposals, study design, data analysis, and manuscript preparation.
+  2. [ASSISTANT_SAID] Training courses – A range of training courses and workshops covering research design, scientific writing, data analysis, and other research-related skills are offered, typically held at regional training centers around the world.
+  3. [ASSISTANT_SAID] Funding – Researchers receive financial support for salaries, research assistants, equipment, and travel expenses.
+  4. [ASSISTANT_SAID] Network building – Opportunities to meet and collaborate with other researchers in their field, enhancing research and career development.
+  5. [ASSISTANT_SAID] Career development support – Guidance on career paths, promotion, and funding opportunities is provided to help researchers develop their careers.
+- [ASSISTANT_SAID] The Global Health Clinical Research Mentoring scheme provides a comprehensive package of support to help researchers develop their clinical research skills and produce high-quality research that has the potential to improve global health.

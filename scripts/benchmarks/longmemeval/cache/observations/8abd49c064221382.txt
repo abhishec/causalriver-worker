@@ -1,0 +1,13 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/29 (Mon) 00:00  
+[ASSISTANT_SAID] The error message "ValueError: list.remove(x): x not in list" means that you are trying to remove an element from a list that does not exist in the list.  
+[ASSISTANT_SAID] In this case, it seems that you are trying to remove a WebSocket that is not in the list of subscribers.  
+[ASSISTANT_SAID] To fix this error, you can add a check before removing the WebSocket from the subscribers list to make sure that it exists in the list.  
+[ASSISTANT_CREATED] Provided code snippet to fix the error:  
+```python
+async def unsubscribe(self, websocket):
+    if websocket in self.subscribers:
+        self.subscribers.remove(websocket)
+```  
+[ASSISTANT_SAID] This will only remove the WebSocket from the list if it exists in the list, avoiding the ValueError.

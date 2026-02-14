@@ -1,0 +1,130 @@
+{
+  "answer_f4ea84fc_3": [
+    {
+      "fact": "User recently visited the Science Museum",
+      "type": "event",
+      "entities": [
+        "Science Museum"
+      ]
+    },
+    {
+      "fact": "User was amazed by the complexity of the exhibits during a behind-the-scenes tour",
+      "type": "opinion",
+      "entities": [
+        "exhibits",
+        "behind-the-scenes tour"
+      ]
+    },
+    {
+      "fact": "User took the tour with a friend who is a chemistry professor",
+      "type": "relationship",
+      "entities": [
+        "friend",
+        "chemistry professor"
+      ]
+    },
+    {
+      "fact": "User is interested in upcoming exhibits or events related to chemistry or physics",
+      "type": "preference",
+      "entities": [
+        "chemistry",
+        "physics"
+      ]
+    },
+    {
+      "fact": "User is looking for online resources or websites that provide educational content related to chemistry and physics",
+      "type": "preference",
+      "entities": [
+        "educational content",
+        "chemistry",
+        "physics"
+      ]
+    }
+  ],
+  "answer_f4ea84fc_2": [
+    {
+      "fact": "User is planning a trip to Jordan",
+      "type": "event",
+      "entities": [
+        "Jordan"
+      ]
+    },
+    {
+      "fact": "User is interested in visiting Petra",
+      "type": "preference",
+      "entities": [
+        "Petra"
+      ]
+    },
+    {
+      "fact": "User learned about Petra in a lecture at the History Museum this month",
+      "type": "event",
+      "entities": [
+        "Petra",
+        "History Museum"
+      ]
+    },
+    {
+      "fact": "User is interested in learning more about the Nabataeans",
+      "type": "preference",
+      "entities": [
+        "Nabataeans"
+      ]
+    }
+  ],
+  "answer_f4ea84fc_1": [
+    {
+      "fact": "User attended a guided tour at the Natural History Museum yesterday",
+      "type": "event",
+      "entities": [
+        "Natural History Museum",
+        "guided tour"
+      ]
+    },
+    {
+      "fact": "User was impressed by the fossil collection on display",
+      "type": "opinion",
+      "entities": [
+        "fossil collection"
+      ]
+    },
+    {
+      "fact": "User was especially impressed by the new T-Rex skeleton acquired by the museum",
+      "type": "opinion",
+      "entities": [
+        "T-Rex skeleton"
+      ]
+    },
+    {
+      "fact": "User visited the museum with their dad",
+      "type": "relationship",
+      "entities": [
+        "dad"
+      ]
+    },
+    {
+      "fact": "User is looking for information on dinosaurs",
+      "type": "preference",
+      "entities": [
+        "dinosaurs"
+      ]
+    },
+    {
+      "fact": "User is interested in the habitat and behavior of the T-Rex",
+      "type": "preference",
+      "entities": [
+        "T-Rex",
+        "habitat",
+        "behavior"
+      ]
+    },
+    {
+      "fact": "User would love to know more about other dinosaurs that lived during the same period as the T-Rex",
+      "type": "preference",
+      "entities": [
+        "other dinosaurs",
+        "T-Rex"
+      ]
+    }
+  ]
+}

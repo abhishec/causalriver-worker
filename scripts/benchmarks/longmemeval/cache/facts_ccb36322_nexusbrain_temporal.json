@@ -1,0 +1,33 @@
+{
+  "answer_f1fbb330": [
+    {
+      "fact": "User recently saw The 1975 live",
+      "type": "event",
+      "entities": [
+        "The 1975"
+      ]
+    },
+    {
+      "fact": "User is looking for concert recommendations",
+      "type": "preference",
+      "entities": []
+    },
+    {
+      "fact": "User is into indie and alternative rock",
+      "type": "preference",
+      "entities": [
+        "indie rock",
+        "alternative rock"
+      ]
+    },
+    {
+      "fact": "User enjoys listening to Arctic Monkeys and The Neighbourhood on Spotify",
+      "type": "preference",
+      "entities": [
+        "Arctic Monkeys",
+        "The Neighbourhood",
+        "Spotify"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/08/23 (Wed) 06:39
+- [USER] User asked about the difference between Kanban and Scrum.
+- [ASSISTANT_SAID] Kanban and Scrum are both project management methodologies.
+- [ASSISTANT_SAID] Kanban is a pull-based system, meaning work is pulled into the system when there is capacity for it.
+- [ASSISTANT_SAID] Kanban boards typically show the current state of work.
+- [ASSISTANT_SAID] Team members in Kanban are expected to work on whatever task is next in line.
+- [ASSISTANT_SAID] Kanban is best suited for teams that need to manage a steady flow of work.
+- [ASSISTANT_SAID] Kanban is also suitable for teams that need to make changes to their processes on an ongoing basis.
+- [ASSISTANT_SAID] Scrum is a push-based system, meaning work is pushed into the system in the form of sprints.
+- [ASSISTANT_SAID] A sprint is a fixed period of time, usually 2-4 weeks.
+- [ASSISTANT_SAID] During a sprint, team members work together to complete a set of tasks.
+- [ASSISTANT_SAID] At the end of the sprint, the team holds a retrospective meeting to review what went well and what needs to be improved.
+- [ASSISTANT_SAID] Scrum is best suited for teams that need to deliver a specific set of features within a specific time frame.
+- [ASSISTANT_SAID] Scrum is also suitable for teams working on complex projects.
+- [ASSISTANT_SAID] In summary, Kanban is more flexible and adaptable, while Scrum is more structured and time-bound.

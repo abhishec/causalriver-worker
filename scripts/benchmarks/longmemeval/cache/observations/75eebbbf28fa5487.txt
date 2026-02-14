@@ -1,0 +1,30 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/30 (Tue) 15:28
+- [USER] User expressed interest in Caribbean cuisine, specifically fish dishes.
+- [ASSISTANT_SAID] One type of fish commonly used in Caribbean dishes is snapper.
+- [USER] User loves snapper.
+- [ASSISTANT_SAID] Popular Caribbean dishes that feature snapper include:
+  1. Escovitch Fish - a Jamaican dish with fried snapper topped with a spicy pickled vegetable sauce.
+  2. Fish Curry - a Trinidadian dish with snapper cooked in a curry sauce with vegetables and aromatics.
+  3. Conch & Snapper Stew - a Bahamian dish combining conch and snapper in a tomato-based stew with peppers and onions.
+  4. Grilled Snapper with Mango Salsa - grilled snapper topped with a fruity and spicy salsa.
+  5. Fish and Fungi - a Virgin Islands dish where snapper is served with a polenta-like dish made from cornmeal.
+- [USER] User finds all the mentioned dishes amazing.
+- [ASSISTANT_SAID] Recommended trying escovitch fish first as it is a classic Jamaican dish that many people love.
+- [ASSISTANT_SAID] Description of escovitch fish: crispy fried snapper topped with a spicy and tangy pickled vegetable sauce, usually made with carrots, onion, bell peppers, and vinegar.
+- [USER] User plans to try Escovitch Fish.
+- [USER] User asked for recommendations on where to find escovitch fish in their area.
+- [ASSISTANT_SAID] Assistant does not have access to the user's location or specific restaurant information.
+- [ASSISTANT_SAID] Suggested ways to find a restaurant serving escovitch fish:
+  1. Check review websites and apps like Yelp, Google Reviews, or Zomato for Jamaican cuisine.
+  2. Call or visit Jamaican restaurants to inquire about escovitch fish.
+  3. Ask friends or family for recommendations on Caribbean cuisine.
+- [USER] User will check out Jamaican restaurants in their area.
+- [USER] User asked for other favorite dishes from Caribbean cuisine.
+- [ASSISTANT_SAID] Assistant does not have personal preferences but listed other popular Caribbean dishes:
+  1. Jerk Chicken - a spicy Jamaican dish with marinated chicken grilled over charcoal or wood.
+  2. Arroz con Pollo - a Puerto Rican dish of yellow rice with chicken and sofrito.
+  3. Callaloo - a Trinidadian soup made with leafy greens, okra, coconut milk, and spices.
+  4. Cubano Sandwich - a Cuban sandwich with cuban bread, roast pork, ham, swiss cheese, pickles, and mustard.
+  5. T

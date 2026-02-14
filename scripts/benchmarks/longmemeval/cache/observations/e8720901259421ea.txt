@@ -1,0 +1,20 @@
+**Observation Log:**
+
+**Session Date:** 2023/05/13 (Sat) 22:17  
+**Session ID:** sharegpt_mb2AzS7_11
+
+1. [ASSISTANT_CREATED] User's contact information template includes placeholders for name, address, city, state zip, phone number, and email address.
+2. [ASSISTANT_CREATED] Objective stated: Seeking a law professor position at a reputable university.
+3. [ASSISTANT_CREATED] Summary of qualifications includes: highly skilled and experienced lawyer with a J.D. from [Law School] and B.A. from [Undergraduate School], proven track record in [Specific Practice Area or Legal Theory], expertise in legal research and writing, experienced professor, strong communication and interpersonal skills, and commitment to ongoing professional development.
+4. [ASSISTANT_CREATED] Professional skills listed: Legal Research and Writing, [Specific Practice Area or Legal Theory], Curriculum Development and Course Design, Communication and Interpersonal Skills.
+5. [ASSISTANT_CREATED] Professional development includes multiple continuing legal education courses completed.
+6. [FACT] User is admitted to practice in [State] and [State].
+7. [ASSISTANT_CREATED] Experience section includes placeholders for law firm names, locations, positions, and years of employment.
+8. [ASSISTANT_CREATED] Teaching experience section includes placeholders for university names, courses taught, and years of teaching.
+9. [ASSISTANT_CREATED] Education section includes placeholders for J.D. from [Law School] and B.A. from [Undergraduate School] with years.
+10. [ASSISTANT_CREATED] Bar admissions section includes placeholders for states and years.
+11. [ASSISTANT_SAID] Assistant provided a cover letter template for an adjunct law professor position, including an introduction, qualifications, teaching experience, commitment to professional development, and a closing statement.
+12. [ASSISTANT_SAID] Assistant suggested expressing excitement about the opportunity to contribute to the success of the law program at [University].
+13. [ASSISTANT_SAID] Assistant provided a cover letter template for a law professor position, mirroring the adjunct cover letter with slight modifications in wording.
+14. [ASSISTANT_SAID] Assistant emphasized the importance of providing a high-quality educational experience for students in both cover letters.
+15. [PREFERENCE] User requested a cover letter for both an adjunct law professor position and a law professor position, indicating a desire to apply for academic roles in law.

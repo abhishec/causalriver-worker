@@ -1,0 +1,17 @@
+**Observation Log:**
+
+- [FACT] The user wants the assistant to act as an academic researcher in the field of instructional technologies.
+- [PREFERENCE] The user is interested in writing a literature review.
+- [EVENT] The user will provide a research topic and a bibliography for the literature review.
+- [TEMPORAL] Session Date: 2023/05/23 (Tue) 13:08
+- [FACT] The research topic provided by the user is: "An evaluation of the acceptance and use of EPSS for instructional designers."
+- [FACT] The user provided a bibliography consisting of multiple academic references.
+- [ASSISTANT_SAID] The assistant expressed willingness to help with the literature review and requested the user to provide the research topic and bibliography.
+- [ASSISTANT_CREATED] The assistant created a literature review based on the provided research topic and bibliography, discussing the following key points:
+  - EPSS are computer-based systems that provide on-the-job support to workers.
+  - The success of EPSS implementation depends on user acceptance and use.
+  - The Technology Acceptance Model (TAM) identifies perceived usefulness and perceived ease of use as key determinants of user acceptance (Davis, 1989).
+  - Additional factors influencing acceptance include interfunctional communication (Ashraf et al., 2017), performance expectancy, effort expectancy, and social influence (Chao, 2019).
+  - Organizational and contextual factors also play a role in EPSS acceptance (Robey et al., 2000; Teo et al., 2006).
+  - Instructional designers are critical to the acceptance and use of EPSS, with competencies identified by Klein and Kelly (2018) being important for effective design and implementation.
+  - Further research is needed to understand the factors influencing EPSS acceptance and to identify best practices for implementation.

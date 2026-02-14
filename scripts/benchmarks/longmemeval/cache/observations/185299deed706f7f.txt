@@ -1,0 +1,36 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/22 (Mon) 18:41  
+[USER] User needs help playing Wordle.  
+[USER] User will enter a 5-letter word on the Wordle website.  
+[USER] User has 6 attempts in total to guess the word.  
+[USER] User will provide feedback as a sequence of 5 characters: X, O, V.  
+[USER] X = letter not found.  
+[USER] O = letter is found but not in the right position.  
+[USER] V = letter is in the right position.  
+[USER] User's goal is to get VVVVV as a result, meaning the word is guessed correctly.  
+[ASSISTANT_SAID] Assistant confirms understanding of the rules of Wordle.  
+[ASSISTANT_SAID] Assistant's first guess is "apple."  
+[USER] Feedback for "apple" is XXXOV.  
+[ASSISTANT_SAID] Assistant's second guess is "zebra."  
+[USER] Feedback for "zebra" is XVXXX.  
+[ASSISTANT_SAID] Assistant's third guess is "elbow."  
+[USER] Feedback for "elbow" is OVXOX.  
+[ASSISTANT_SAID] Assistant's fourth guess is "below."  
+[USER] Feedback for "below" is XOOOX.  
+[ASSISTANT_SAID] Assistant's fifth guess is "globe."  
+[USER] Feedback for "globe" is VVVXV.  
+[ASSISTANT_SAID] Assistant's sixth guess is "globs."  
+[USER] User questions why "globs" was the guess.  
+[ASSISTANT_SAID] Assistant apologizes for the error and states the correct guess should have been "globe."  
+[USER] User points out that the fourth letter was not changed.  
+[ASSISTANT_SAID] Assistant acknowledges the mistake and attempts to provide a new guess.  
+[ASSISTANT_SAID] Assistant's alternative sixth guess is "glace."  
+[USER] User states that "glace" alters the third letter when it shouldn't.  
+[ASSISTANT_SAID] Assistant apologizes for the mistake again.  
+[ASSISTANT_SAID] Assistant's corrected sixth guess is "gloze."  
+[USER] User asks if "gloze" is a word.  
+[ASSISTANT_SAID] Assistant confirms "gloze" is a word and explains its meaning.  
+[ASSISTANT_SAID] Assistant suggests a more common alternative for the sixth guess could be "glory."  
+[USER] User points out that "glory" ignores the correct placement of the last letter.  
+[ASSISTANT_SAID] Assistant apolog

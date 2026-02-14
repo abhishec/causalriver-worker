@@ -1,0 +1,39 @@
+{
+  "answer_5cc9b056": [
+    {
+      "fact": "User has a vintage watch collection.",
+      "type": "personal",
+      "entities": [
+        "vintage watch collection"
+      ]
+    },
+    {
+      "fact": "User's favorite watch is a 1960s Omega Seamaster.",
+      "type": "personal",
+      "entities": [
+        "1960s Omega Seamaster"
+      ]
+    },
+    {
+      "fact": "User recently acquired a rare blue Snaggletooth action figure.",
+      "type": "event",
+      "entities": [
+        "rare blue Snaggletooth action figure"
+      ]
+    },
+    {
+      "fact": "User prefers glass-fronted wooden cases for displaying watches.",
+      "type": "preference",
+      "entities": [
+        "glass-fronted wooden cases"
+      ]
+    },
+    {
+      "fact": "User is looking for a rare camera to add to their collection.",
+      "type": "event",
+      "entities": [
+        "rare camera"
+      ]
+    }
+  ]
+}

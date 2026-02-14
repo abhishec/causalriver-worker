@@ -1,0 +1,35 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/11/15 (Wed) 12:14
+- [FACT] The user is working on a thesis project.
+- [PREFERENCE] The user finds it easy to get distracted.
+- [PREFERENCE] The user has been spending at least 2 hours a day on social media platforms (Facebook, Instagram, Twitter).
+- [ASSISTANT_SAID] The assistant congratulated the user on recognizing their social media usage as a productivity killer.
+- [ASSISTANT_SAID] The assistant suggested the following productivity techniques:
+  1. **Pomodoro Technique**: Work in focused 25-minute increments followed by a 5-minute break.
+  2. **Time blocking**: Schedule dedicated blocks of time for focused work.
+  3. **Remove distractions**: Identify and eliminate common distractions.
+  4. **Break tasks into smaller chunks**: Divide the thesis project into manageable tasks.
+  5. **Create a conducive work environment**: Set up a productive workspace.
+  6. **Use the "2-minute rule"**: Complete tasks that take less than 2 minutes immediately.
+  7. **Schedule breaks**: Plan regular breaks to recharge.
+  8. **Set goals and deadlines**: Establish specific, achievable goals.
+  9. **Get accountability**: Share goals with a friend or mentor.
+  10. **Reward yourself**: Set small rewards for reaching milestones.
+- [ASSISTANT_SAID] The assistant provided additional tips to overcome social media habits:
+  1. Replace social media with productivity apps.
+  2. Schedule social media breaks.
+  3. Unfollow or mute distracting accounts.
+  4. Use social media tracking tools.
+- [PREFERENCE] The user expressed interest in the Pomodoro Technique and planned to try it.
+- [ASSISTANT_SAID] The assistant recommended several apps to help track progress and stay organized with the thesis project, including:
+  1. **Trello**: A visual project management tool.
+  2. **Asana**: A task management app.
+  3. **Notion**: An all-in-one workspace.
+  4. **Evernote**: A note-taking app.
+  5. **Scrivener**: A writing app for long-form projects.
+  6. **RescueTime**: A time management tool.
+  7. Pomodoro timers with extra features (e.g., Pomofocus, Tomato Timer, Pomotodo).
+  8. Mind mapping and outlining tools (e.g., MindMeister, Coggle, Workflowy).
+- [PREFERENCE] The user decided to start with Trello to organize their thesis project.
+- [FACT] The user noticed spending a lot of time on social media, particularly Facebook, Instagram

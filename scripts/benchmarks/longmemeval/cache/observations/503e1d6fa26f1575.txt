@@ -1,0 +1,22 @@
+**Observation Log:**
+
+- [FACT] User's name is Rosalynn McClenagan.
+- [FACT] User's birthday is 11/20/1939.
+- [FACT] User's birthplace is Gruver, Texas (Hansford County).
+- [FACT] User has three living children.
+- [FACT] User has an annuity.
+- [FACT] User owns a home worth $120,000 that is paid for.
+- [FACT] User owns one-third of a section of farmland.
+- [FACT] User has a life insurance policy.
+- [FACT] User owns a car worth $11,000.
+- [RELATIONSHIP] User's eldest son is Warren McClenagan, born on 1/20/1964.
+- [RELATIONSHIP] User's second son is Brian McClenagan, born on 2/12/1964.
+- [RELATIONSHIP] User's youngest son is Benjamen McClenagan, born on 4/26/1974.
+- [CHANGE] User's home address is 305 Chase Ave, Gruver, TX.
+- [ASSISTANT_SAID] Assistant provided a Last Will and Testament for Rosalynn McClenagan.
+- [ASSISTANT_CREATED] Assistant created a will that includes the appointment of Warren McClenagan as the Executor and Brian McClenagan as the alternate Executor.
+- [ASSISTANT_CREATED] Assistant included specific bequests in the will, stating that the estate should be divided equally among the three sons.
+- [ASSISTANT_CREATED] Assistant specified that all household items, keepsakes, photo albums, and pets should be divided equally among the three sons.
+- [ASSISTANT_SAID] Assistant indicated that if none of the sons are able or willing to care for the pets, they should be given to a reputable animal rescue organization or shelter.
+- [ASSISTANT_SAID] Assistant included a clause revoking all prior Wills and Codicils in the will.
+- [ASSISTANT_SAID] Assistant provided placeholders for the date and signatures of witnesses in the will.

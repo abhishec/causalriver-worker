@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[FACT] User is trying to organize coupons and discounts.  
+[EVENT] User asked for help to keep track of all the coupons they've used recently.  
+[ASSISTANT_SAID] Assistant expressed willingness to help keep track of used coupons.  
+[ASSISTANT_SAID] Assistant requested details for each coupon: name, store/brand, expiration date, date used, and discount amount.  
+[TEMPORAL] Session Date: 2023/03/03 (Fri) 02:59.  
+[FACT] User used a Walmart coupon.  
+[PREFERENCE] User prefers to keep track of coupons.  
+[ASSISTANT_SAID] Assistant noted the details of the Walmart coupon: 20% off coupon, Walmart, limited time only (exact date unknown), last Saturday, $12 off a total bill of $60.  
+[ASSISTANT_SAID] Assistant offered suggestions to find more coupons like the Walmart coupon in the future.  
+[ASSISTANT_SAID] Suggestions included signing up for Walmart's email newsletter, downloading the Walmart app, checking Walmart's website, following Walmart on social media, and using coupon aggregator websites.  
+[FACT] User used a $5 off coupon on a purchase of $25 or more at Target.  
+[ASSISTANT_SAID] Assistant added the Target coupon to the list: $5 off $25 or more, Target, unknown expiration date, recently (exact date unknown), $5 off.  
+[ASSISTANT_SAID] Assistant provided tips to maximize savings at Target, including signing up for Target's email newsletter, using the Target app, checking Target's website, using Target's coupon policy, and looking for Target's weekly ads.  
+[TEMPORAL] User used the Target coupon on Tuesday.  
+[CHANGE] Assistant updated the Target coupon with the exact date used: Tuesday.  
+[ASSISTANT_CREATED] Assistant compiled a coupon list including Walmart and Target coupons.  
+[FACT] User used a digital coupon on their ShopRite loyalty card for $1 off a jar of pasta sauce.  
+[ASSISTANT_SAID] Assistant added the ShopRite digital coupon to the list: $1 off pasta sauce, ShopRite, unknown expiration date, recently (exact date unknown), $1 off.  
+[TEMPORAL] User used the ShopRite digital coupon on Sunday.  
+[CHANGE] Assistant updated the ShopRite digital coupon with the exact date used: Sunday.  
+[ASSISTANT_CREATED] Assistant provided an updated coupon list including Walmart, Target, and ShopRite coupons.  
+[ASSISTANT_SAID] Assistant encouraged the user to add more coupons to the list whenever they use them and offered to help keep track of them.  
+[ASSISTANT_SAID] Assistant asked if the user had any other coupons to add or discuss.

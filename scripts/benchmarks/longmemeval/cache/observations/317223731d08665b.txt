@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[FACT] The user is trying to stick to a budget for shopping expenses.  
+[FACT] The user went over their monthly allowance in April due to an impulse purchase on Amazon during Prime Day.  
+[PREFERENCE] The user likes the idea of setting up a 30-day rule to avoid impulse purchases.  
+[EVENT] The user plans to set up a wishlist on Amazon and add items they want to purchase to it.  
+[EVENT] The user will set a reminder for 30 days to revisit items on their wishlist.  
+[EVENT] The user intends to track their expenses more closely to see where their money is going.  
+[ASSISTANT_SAID] The assistant suggested tracking expenses using budgeting apps like Mint, Personal Capital, or YNAB, or a simple spreadsheet.  
+[ASSISTANT_SAID] The assistant recommended setting up a 30-day rule to help determine if a desired item is truly needed.  
+[ASSISTANT_SAID] The assistant provided tips for making the 30-day rule effective, including adding items to a wishlist, setting reminders, and asking reflective questions.  
+[ASSISTANT_SAID] The assistant emphasized the importance of tracking every expense, categorizing expenses, and reviewing them regularly.  
+[ASSISTANT_SAID] The assistant suggested removing shopping apps from the user's phone to avoid temptation.  
+[ASSISTANT_SAID] The assistant encouraged the user to celebrate small wins and be kind to themselves when making mistakes.  
+[ASSISTANT_SAID] The assistant provided additional tips for staying on track with expense tracking and developing new habits.  
+[PREFERENCE] The user plans to treat themselves to a free coffee from their favorite coffee shop as a reward for their progress.  
+[EVENT] The user mentioned that their favorite coffee shop is running a "buy one get one free" promotion on all drinks every Thursday in May.  
+[CHANGE] The user plans to set a reminder to review their expenses every week.  
+[ASSISTANT_SAID] The assistant expressed that they do not have personal financial goals but are available to help the user explore their financial objectives.  
+[ASSISTANT_SAID] The assistant mentioned strategies for paying off debt and building an emergency fund as potential areas for the user to focus on.  
+[ASSISTANT_SAID] The assistant asked the user which financial goal resonates with them the most or if there is another area they would like to focus on.  
+[TEMPORAL] The session date is 2023/05/22 (Mon) at 23:45.

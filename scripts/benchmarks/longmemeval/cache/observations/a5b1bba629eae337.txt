@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/27 (Sat) 01:55  
+[USER] User mentioned a client complaint regarding the main menu page (مواقعنا) about incorrect closing time (مفتوح حتي ١٠ مساء).  
+[ASSISTANT_SAID] Assistant stated that the closing time displayed on the mobile app is sourced from the dashboard and will appear in the same format as stored.  
+[USER] User requested a rephrasing of their reply regarding the closing time issue.  
+[ASSISTANT_CREATED] Assistant rephrased the user's reply to clarify the closing time issue and the source of the information.  
+[USER] User stated that categories appearance can be controlled from the dashboard, but the order of categories on the home page cannot be changed.  
+[ASSISTANT_SAID] Assistant apologized for the confusion and explained the limitations regarding the control of categories on the home page.  
+[USER] User reported that some product images are not working in both languages on the website and mentioned a network issue.  
+[ASSISTANT_SAID] Assistant apologized for the image issue and stated they would investigate the root cause, asking for the product name to check further.  
+[USER] User informed that the development team has developed the API as per the request in the shared sheet and asked to be informed if changes are needed.  
+[ASSISTANT_SAID] Assistant confirmed that the API was developed according to the shared sheet and requested to be informed of any changes needed.  
+[USER] User clarified that the API was developed according to the shared sheet and not the last email received.  
+[ASSISTANT_SAID] Assistant reiterated that the API was developed according to the shared sheet and requested to be informed of any changes needed.  
+[USER] User stated that the development team resolved the SDK issue and that the order status changed to "processing" after payment.  
+[ASSISTANT_SAID] Assistant confirmed the resolution of the SDK issue and the change in order status, apologizing for any inconvenience.  
+[USER] User reported that after investigation, Egyptian and Saudi numbers are working fine and attached a video demonstrating this.  
+[ASSISTANT_SAID] Assistant acknowledged the successful investigation and resolution regarding the Egyptian and Saudi numbers.  
+[USER] User attached three videos showing successful registration scenarios for three different users from AwadNahas company.  
+[ASSISTANT_SAID] Assistant acknowledged the attachment of videos demonstrating successful registration scenarios.  
+[USER] User stated that the search function using product information is working fine.  
+[ASSISTANT_SAID] Assistant confirmed that the search function is working properly.  
+[USER] User informed that the issue with the discount code not applying correctly was not included in the design scope.  
+[ASSISTANT_SAID] Assistant explained that the discount amount has been added to

@@ -1,0 +1,33 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/02/12 (Sun) 05:03  
+[FACT] User's character name: Gene Starwind  
+[FACT] User's character level: 1  
+[FACT] User's character XP: 0/100  
+[FACT] User's character health: 70HP  
+[FACT] User's character mood: 😬  
+[FACT] User's character location: Space  
+[FACT] User's character inventory: 250,000 wong  
+[EVENT] User's character uses the Outlaw Star's weapons to fire back at pirates.  
+[EVENT] User's character takes down one pirate ship but loses health due to attacks from other pirate ships.  
+[EVENT] User's character activates the Outlaw Star's grappler arms to capture a pirate ship.  
+[FACT] Captured pirate ship name: Vindirance  
+[FACT] Vindirance is heavily damaged.  
+[EVENT] User's character boards the Vindirance to investigate.  
+[RELATIONSHIP] Captain of the Vindirance: Mao  
+[ASSISTANT_SAID] Mao explains that the Kei guild has launched a surprise attack on the Vindirance.  
+[ASSISTANT_SAID] Mao states that the Kei guild is after Hot Ice Hilda and believes the Vindirance knows her whereabouts.  
+[EVENT] User's character offers to help Mao and the Vindirance crew fight off the Kei guild.  
+[CHANGE] User's character level increases to 3 after helping the Vindirance crew.  
+[FACT] User's character XP: 50/100  
+[FACT] User's character health: 70HP  
+[FACT] User's character mood: 🤠  
+[FACT] User's character location: Blue Heaven  
+[FACT] User's character inventory: 250,000 wong, Outlaw Star Ship, Energy Gun  
+[EVENT] User's character notices a group of shady individuals in an alleyway.  
+[EVENT] User's character takes out the energy gun and prepares for a fight.  
+[EVENT] User's character engages in a fight with the shady individuals.  
+[EVENT] User's character is knocked out by one of the individuals with a stun gun.  
+[EVENT] Game status: GAME OVER.  
+[ASSISTANT_SAID] Option to restart the game or exit provided to the user.  
+[ASSISTANT_SAID] Options presented: 1. Yes, 2. No, exit the game.

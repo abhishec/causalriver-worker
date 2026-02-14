@@ -110,6 +110,29 @@ const CORE_ORG_ID = '00000000-0000-4000-a000-000000000001';
 const ORCHESTRATOR_MODE = (process.env.ORCHESTRATOR_MODE || 'continuous') as 'once' | 'continuous';
 const HEALTH_CHECK_INTERVAL_MS = parseInt(process.env.HEALTH_CHECK_INTERVAL_MS || '300000', 10);  // 5 min
 const AGENT_SCHEDULE_CHECK_INTERVAL_MS = parseInt(process.env.AGENT_SCHEDULE_CHECK_INTERVAL_MS || '3600000', 10);  // 1 hour
+const ORG_SCHEDULE_ENABLED = (process.env.ORG_SCHEDULE_ENABLED || 'true') !== 'false';
+const ORG_STAGGER_DELAY_MS = parseInt(process.env.ORG_STAGGER_DELAY_MS || '30000', 10);  // 30s between orgs
+
+// ── Agent Classification ──────────────────────────────────────────────────────
+// Core-Only: Run once for the core brain (global benchmarks, infra monitoring, public data training)
+const CORE_ONLY_AGENT_NAMES = new Set([
+  'benchmark',                // CauseMe/LongMemEval — global eval
+  'weekly-brain-scan',        // Core brain health assessment
+  'monthly-deep-analysis',    // Core historical causal discovery
+  'cost-agent',               // Infra cost monitoring (platform-wide)
+  'git-code-trainer-v6',      // Public repo training data
+  'security-hardening-agent', // Platform security scanning
+]);
+
+// Org-Applicable: Run per active organization (org-specific brain maintenance)
+const ORG_APPLICABLE_AGENT_NAMES = new Set([
+  'brain-consolidation',      // Memory consolidation (sleep cycle)
+  'brain-dmn',                // Background pattern discovery
+  'proactive-intelligence',   // Alerting & threat detection
+  'federation-agent',         // Core ↔ Org knowledge sync
+  'autonomous-trainer',       // Data learning from signals
+  'org-updater',              // Connector sync + learning trigger
+]);
 
 // ============================================================================
 // LOGGING
@@ -140,10 +163,11 @@ function divider(title: string): void {
 
 interface BrainOrchestratorConfig {
   supabase: SupabaseClient;
-  organizationId: string;
+  organizationId: string;            // Core org ID (always runs core-only agents)
   mode: 'once' | 'continuous';
   healthCheckIntervalMs: number;
   agentScheduleCheckIntervalMs: number;
+  orgScheduleEnabled: boolean;       // Enable per-org agent scheduling
 }
 
 class BrainOrchestrator {
@@ -235,8 +259,10 @@ class BrainOrchestrator {
 
   /**
    * Check which agents are due for execution based on their schedules.
+   * @param orgId — Organization ID to check schedule against (per-org tracking)
+   * @param agentFilter — Only consider agents in this set (core-only or org-applicable)
    */
-  async getAgentsDueForExecution(): Promise<AgentRegistration[]> {
+  async getAgentsDueForExecution(orgId: string, agentFilter?: Set<string>): Promise<AgentRegistration[]> {
     const agents = globalRegistry.list();
     const dueAgents: AgentRegistration[] = [];
 
@@ -246,8 +272,13 @@ class BrainOrchestrator {
         continue;
       }
 
-      // Check if agent ran recently
-      const lastRun = await this.getLastRunTime(agent.name);
+      // If filter provided, only check agents in the filter set
+      if (agentFilter && !agentFilter.has(agent.name)) {
+        continue;
+      }
+
+      // Check if agent ran recently FOR THIS ORG
+      const lastRun = await this.getLastRunTime(agent.name, orgId);
       if (this.shouldRunAgent(agent.schedule, lastRun)) {
         dueAgents.push(agent);
       }
@@ -257,14 +288,15 @@ class BrainOrchestrator {
   }
 
   /**
-   * Get last run time for an agent.
+   * Get last run time for an agent, scoped to a specific organization.
    */
-  private async getLastRunTime(agentName: string): Promise<Date | null> {
+  private async getLastRunTime(agentName: string, orgId: string): Promise<Date | null> {
     const { data, error } = await this.config.supabase
       .from('ai_agent_activity')
       .select('created_at')
       .eq('agent_type', agentName)
       .eq('action_type', 'training_run')
+      .eq('organization_id', orgId)
       .order('created_at', { ascending: false })
       .limit(1);
 
@@ -305,16 +337,35 @@ class BrainOrchestrator {
   }
 
   /**
-   * Execute an agent (in-process or as child task).
+   * Execute an agent for the core org (uses the default agentManager).
    */
   async executeAgent(agent: AgentRegistration): Promise<void> {
-    log('EXECUTE', `Running agent: ${agent.name}`);
+    await this._executeAgentWithManager(agent, this.config.organizationId, this.agentManager);
+  }
+
+  /**
+   * Execute an agent for a specific organization (uses a per-org AgentManager).
+   */
+  async executeAgentForOrg(agent: AgentRegistration, orgId: string, orgManager: AgentManager): Promise<void> {
+    await this._executeAgentWithManager(agent, orgId, orgManager);
+  }
+
+  /**
+   * Internal: Execute an agent with a specific AgentManager instance.
+   */
+  private async _executeAgentWithManager(
+    agent: AgentRegistration,
+    orgId: string,
+    manager: AgentManager,
+  ): Promise<void> {
+    const orgLabel = orgId === CORE_ORG_ID ? 'core' : orgId.substring(0, 8);
+    log('EXECUTE', `Running agent: ${agent.name} [org:${orgLabel}]`);
 
     const startTime = Date.now();
 
     try {
-      // For now, always run in-process (TODO: child task routing for large agents)
-      const result = await this.agentManager.runWithRetry(agent.name, 2, {
+      const result = await manager.runWithRetry(agent.name, 2, {
+        organizationId: orgId,
         verbose: true,
         enableBayesian: true,
         enableEmbedding: true,
@@ -328,7 +379,7 @@ class BrainOrchestrator {
       });
 
       const duration = ((Date.now() - startTime) / 1000).toFixed(1);
-      log('EXECUTE', `Agent ${agent.name} completed in ${duration}s (${result.signalsGenerated} signals, ${result.packsProcessed} packs, ${result.errorsEncountered.length} errors)`);
+      log('EXECUTE', `Agent ${agent.name} [org:${orgLabel}] completed in ${duration}s (${result.signalsGenerated} signals, ${result.packsProcessed} packs, ${result.errorsEncountered.length} errors)`);
 
       // Update brain health
       await this.brainPipeline.recordAgentRun({
@@ -341,7 +392,7 @@ class BrainOrchestrator {
       });
     } catch (err) {
       const duration = ((Date.now() - startTime) / 1000).toFixed(1);
-      logError('EXECUTE', `Agent ${agent.name} failed after ${duration}s`, err);
+      logError('EXECUTE', `Agent ${agent.name} [org:${orgLabel}] failed after ${duration}s`, err);
 
       // Log failure to brain health
       await this.brainPipeline.recordAgentRun({
@@ -424,9 +475,11 @@ class BrainOrchestrator {
   async start(): Promise<void> {
     divider('BRAIN ORCHESTRATOR START');
     log('INIT', `Mode: ${this.config.mode}`);
-    log('INIT', `Organization: ${this.config.organizationId}`);
+    log('INIT', `Core Organization: ${this.config.organizationId}`);
+    log('INIT', `Multi-Tenant Scheduling: ${this.config.orgScheduleEnabled ? 'ENABLED' : 'DISABLED'}`);
     log('INIT', `Health Check Interval: ${this.config.healthCheckIntervalMs / 1000}s`);
     log('INIT', `Agent Schedule Check Interval: ${this.config.agentScheduleCheckIntervalMs / 1000}s`);
+    log('INIT', `Core-Only Agents: ${CORE_ONLY_AGENT_NAMES.size} | Org-Applicable Agents: ${ORG_APPLICABLE_AGENT_NAMES.size}`);
 
     // Discover agents
     await this.discoverAgents();
@@ -484,28 +537,87 @@ class BrainOrchestrator {
   }
 
   /**
-   * Run all scheduled agents that are due.
+   * Get all active organizations (excluding core brain).
+   */
+  async getActiveOrganizations(): Promise<{ id: string; name: string; plan: string }[]> {
+    try {
+      const { data, error } = await this.config.supabase
+        .from('organizations')
+        .select('id, name, plan')
+        .neq('id', CORE_ORG_ID);
+
+      if (error) {
+        logError('ORGS', 'Failed to load organizations', error);
+        return [];
+      }
+
+      return data || [];
+    } catch (err) {
+      logError('ORGS', 'Exception loading organizations', err);
+      return [];
+    }
+  }
+
+  /**
+   * Run all scheduled agents that are due — multi-tenant.
+   *
+   * Phase 1: Core-only agents run for CORE_ORG_ID (benchmarks, cost, git training, security)
+   * Phase 2: Org-applicable agents run per active org (consolidation, DMN, proactive, federation, org-updater)
    */
   async runScheduledAgents(): Promise<void> {
     divider('AGENT SCHEDULE CHECK');
 
-    const dueAgents = await this.getAgentsDueForExecution();
-
-    if (dueAgents.length === 0) {
-      log('SCHEDULE', 'No agents due for execution');
-      return;
+    // ── Phase 1: Core-only agents ────────────────────────────────────────────
+    const coreAgents = await this.getAgentsDueForExecution(CORE_ORG_ID, CORE_ONLY_AGENT_NAMES);
+    if (coreAgents.length > 0) {
+      log('SCHEDULE', `[CORE] ${coreAgents.length} core-only agent(s) due`);
+      for (const agent of coreAgents) {
+        await this.executeAgent(agent);
+      }
+    } else {
+      log('SCHEDULE', '[CORE] No core-only agents due');
     }
 
-    log('SCHEDULE', `${dueAgents.length} agent(s) due for execution`);
+    // ── Phase 2: Per-org agents ──────────────────────────────────────────────
+    if (!this.config.orgScheduleEnabled) {
+      log('SCHEDULE', 'Per-org scheduling disabled (ORG_SCHEDULE_ENABLED=false)');
+    } else {
+      const orgs = await this.getActiveOrganizations();
+      if (orgs.length === 0) {
+        log('SCHEDULE', 'No tenant organizations found');
+      } else {
+        log('SCHEDULE', `Checking ${orgs.length} org(s) for scheduled agents`);
 
-    for (const agent of dueAgents) {
-      await this.executeAgent(agent);
+        for (let i = 0; i < orgs.length; i++) {
+          const org = orgs[i];
+          const orgAgents = await this.getAgentsDueForExecution(org.id, ORG_APPLICABLE_AGENT_NAMES);
+
+          if (orgAgents.length > 0) {
+            log('SCHEDULE', `[${org.name}] ${orgAgents.length} agent(s) due`);
+
+            // Create per-org AgentManager with org-specific context
+            const orgManager = new AgentManager(globalRegistry, {
+              supabaseUrl: SUPABASE_URL,
+              supabaseKey: SUPABASE_KEY,
+              organizationId: org.id,
+            });
+
+            for (const agent of orgAgents) {
+              await this.executeAgentForOrg(agent, org.id, orgManager);
+            }
+          }
+
+          // Stagger between orgs to avoid thundering herd
+          if (i < orgs.length - 1 && ORG_STAGGER_DELAY_MS > 0) {
+            log('SCHEDULE', `Staggering ${ORG_STAGGER_DELAY_MS / 1000}s before next org...`);
+            await new Promise(r => setTimeout(r, ORG_STAGGER_DELAY_MS));
+          }
+        }
+      }
     }
 
-    // After all agents run, flush motor commands
+    // ── Post-execution: flush motor commands + update calibration ─────────
     await this.flushMotorCommands();
-
-    // Update calibration metrics
     await this.updateCalibration();
 
     log('SCHEDULE', 'All scheduled agents completed ✓');
@@ -546,6 +658,7 @@ async function main(): Promise<void> {
     mode: ORCHESTRATOR_MODE,
     healthCheckIntervalMs: HEALTH_CHECK_INTERVAL_MS,
     agentScheduleCheckIntervalMs: AGENT_SCHEDULE_CHECK_INTERVAL_MS,
+    orgScheduleEnabled: ORG_SCHEDULE_ENABLED,
   });
 
   await orchestrator.start();

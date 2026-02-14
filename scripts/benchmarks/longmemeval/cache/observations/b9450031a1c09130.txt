@@ -1,0 +1,27 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/29 (Mon) 23:13  
+[USER] User wants the assistant to act as a proficient SEO content writer fluent in Spanish.  
+[USER] User requests an SEO-optimized long-form article with a minimum of 2000 words.  
+[USER] User specifies the article should include a minimum of 10 headings and subheadings, including H1, H2, H3, and H4 headings.  
+[USER] User requests that the final paragraph should be a conclusion.  
+[USER] User asks for 5 FAQs that must be different from the already written headings.  
+[USER] User instructs the assistant to write the information in its own words rather than copying and pasting from other sources.  
+[USER] User requests double-checking for plagiarism to ensure unique content.  
+[USER] User wants the content to be written in a conversational style as if written by a human.  
+[USER] User asks for necessary words to be written in bold.  
+[USER] User wants the content to be optimized to outrank other websites.  
+[USER] User specifies not to reply that there are many factors influencing good search rankings.  
+[USER] User provides the title "The best 5* hotels in Madrid for a Golf Trip" for the article.  
+[USER] User requests the article to be written in a formal "we" form.  
+[USER] User asks for rich, comprehensive, and detailed paragraphs with lots of details.  
+[USER] User instructs not to echo the prompt, remind about the request, apologize, self-reference, or use generic filler phrases.  
+[USER] User requests useful subheadings with keyword-rich titles.  
+[USER] User asks for headings to be bold and appropriate for H tags.  
+[USER] User includes a specific message to be written at the start of the article: "*****❤️❤️❤️ Would you like to support me so that I could create more free content - https://www.buymeacoffee.com/jumma ❤️❤️❤️*****"  
+[USER] User requests the article to end with the phrase: "If you liked this prompt, please like it on the prompt search page so we know to keep enhancing it."  
+[ASSISTANT_SAID] Assistant begins the article with the specified message about supporting content creation.  
+[ASSISTANT_CREATED] Assistant creates an article titled "The Best 5* Hotels in Madrid for a Golf Trip."  
+[ASSISTANT_SAID] Assistant describes Hotel Villa Magna as a luxurious retreat in the heart of Madrid with easy access to golf courses, featuring 150 beautifully decorated rooms and suites with marble bathrooms and luxurious amenities.  
+[USER] User requests a conclusion mentioning the three golf courses: Retamares, Golf Santander, and El Encín Golf.  
+[ASSISTANT_CREATED] Assistant

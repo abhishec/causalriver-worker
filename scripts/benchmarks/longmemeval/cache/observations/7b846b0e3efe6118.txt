@@ -1,0 +1,19 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/21 (Sun) 09:54
+- [USER] User is implementing "on press" functionality in React Native for Google Maps navigation.
+- [ASSISTANT_SAID] To implement "on press" functionality for Google Maps navigation in React Native, the user should install the "react-native-maps" package using the command: `npm install react-native-maps`.
+- [ASSISTANT_SAID] The user should import the MapView component from "react-native-maps" with the line: `import MapView from 'react-native-maps';`.
+- [ASSISTANT_SAID] The user can create a MapView component in their render method and add a Marker component to represent the location for navigation.
+- [ASSISTANT_SAID] Example code for the MapView and Marker component was provided, including a sample region and coordinates.
+- [ASSISTANT_SAID] The onPress function of the Marker component should implement navigation logic using a library like "react-native-navigation" or "react-navigation".
+- [ASSISTANT_SAID] An example using the "react-native-navigation" library was provided, showing how to navigate to a screen with latitude and longitude values.
+- [USER] User provided code that imports various React Native components and libraries, including `MapView`, `StyleSheet`, `Text`, `TouchableOpacity`, `View`, `FlatList`, `tw`, `Icon`, `useDispatch`, `useNavigation`, `setDestination`, `GooglePlacesAutocomplete`, and `GOOGLE_MAPS_APIKEY`.
+- [USER] User defined a data array containing favourite locations with IDs, icons, locations, and destinations.
+- [ASSISTANT_SAID] The NavFavourites component renders a FlatList showing a list of navigation favourites, but does not contain business logic.
+- [USER] User stated that the code is working well but needs to link the const data with Google Places navigation so that pressing on a location navigates to that destination.
+- [ASSISTANT_SAID] To link the data with Google Places navigation, the user should use the `useDispatch` hook to dispatch the `setDestination` action when a favourite location is pressed.
+- [ASSISTANT_SAID] Example code was provided for modifying the `TouchableOpacity` component to dispatch the `setDestination` action and navigate to the `RideOptionsCard` screen.
+- [ASSISTANT_SAID] The user should modify the `GooglePlacesAutocomplete` component to include destination coordinates and dispatch the `setDestination` action with the location and description.
+- [ASSISTANT_SAID] The user should import the `GOOGLE_MAPS_APIKEY` variable from the `.env` file in their project.
+- [ASSISTANT_SAID] The user needs to ensure that the `Ride

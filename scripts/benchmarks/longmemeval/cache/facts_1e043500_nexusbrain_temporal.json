@@ -1,0 +1,44 @@
+{
+  "answer_3e012175": [
+    {
+      "fact": "User is trying to get back into playing the guitar",
+      "type": "preference",
+      "entities": [
+        "guitar"
+      ]
+    },
+    {
+      "fact": "User is looking for online resources to improve guitar skills",
+      "type": "preference",
+      "entities": [
+        "online resources",
+        "guitar skills"
+      ]
+    },
+    {
+      "fact": "User listens to music, particularly in the ambient and lo-fi genres",
+      "type": "preference",
+      "entities": [
+        "ambient",
+        "lo-fi"
+      ]
+    },
+    {
+      "fact": "User has created a playlist on Spotify called 'Summer Vibes'",
+      "type": "personal",
+      "entities": [
+        "Spotify",
+        "Summer Vibes"
+      ]
+    },
+    {
+      "fact": "User's 'Summer Vibes' playlist contains chill tracks for relaxing or working out",
+      "type": "opinion",
+      "entities": [
+        "chill tracks",
+        "relaxing",
+        "working out"
+      ]
+    }
+  ]
+}

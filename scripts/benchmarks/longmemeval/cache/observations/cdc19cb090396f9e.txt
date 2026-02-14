@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/21 (Sun) 11:07  
+[USER] User inquired about differences in data abstraction levels and between schema and instances using a two-dimensional array of size n x m.  
+[ASSISTANT_SAID] Three levels of data abstraction:  
+[ASSISTANT_SAID] 1. Physical level: Deals with the physical representation of data in the database, including storage on disk, access, retrieval, and organization.  
+[ASSISTANT_SAID] 2. Logical level: Concerns the logical representation of data, including data types, relationships, and constraints, without implementation details.  
+[ASSISTANT_SAID] 3. View level: Highest level of abstraction, focusing on data presentation to users or applications, including visibility, presentation format, and access methods.  
+[ASSISTANT_SAID] Example of a two-dimensional array representing student data:  
+[ASSISTANT_SAID] Physical level includes how the array is stored in memory.  
+[ASSISTANT_SAID] Logical level includes data types (e.g., name, age, GPA), relationships (e.g., student to department), and constraints (e.g., age > 18).  
+[ASSISTANT_SAID] View level includes visible columns (e.g., name and GPA), presentation format (e.g., table), and access methods (e.g., web interface).  
+[ASSISTANT_SAID] Schema: Structure or blueprint describing logical organization of data, including tables, columns, data types, and relationships.  
+[ASSISTANT_SAID] Instance: Actual data stored in the database at a specific time, representing all inserted data.  
+[ASSISTANT_SAID] Example of student data array schema: Describes structure, column names, data types, and constraints.  
+[ASSISTANT_SAID] Instance includes actual data (e.g., names, ages, GPAs of students).  
+[ASSISTANT_SAID] Normalization is a process to organize data in a database to minimize redundancy and improve integrity, based on functional dependencies.  
+[ASSISTANT_SAID] Common normal forms:  
+[ASSISTANT_SAID] 1. First normal form (1NF): No repeating groups or arrays; each cell contains a single value, and each column has a unique name.  
+[ASSISTANT_SAID] 2. Second normal form (2NF): In 1NF, every non-key attribute is fully functionally dependent on the primary key.  
+[ASSISTANT_SAID] 3. Third normal form (3NF): In 2NF, no transitive dependencies exist.  
+[ASSISTANT_SAID] 4. Boyce-Codd normal form (BCNF): Every determinant is a candidate

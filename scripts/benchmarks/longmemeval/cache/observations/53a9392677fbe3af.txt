@@ -1,0 +1,24 @@
+**Observation Log:**
+
+- [FACT] User's name is Mrs. Linda Woo.
+- [FACT] User's pronouns are she/her.
+- [FACT] User's gender is a cisgender woman.
+- [FACT] User's age is 58 years old.
+- [FACT] User's ethnicity/heritage is of Chinese Asian descent.
+- [FACT] User's location is Richmond; Musqueam, Tsawwassen, Squamish, and Tsleil-Waututh Traditional Territory.
+- [RELATIONSHIP] User has three grown children and two grandchildren.
+- [RELATIONSHIP] User's husband died 10 years ago.
+- [RELATIONSHIP] User has a new male friend.
+- [FACT] User's occupation was not discussed.
+- [FACT] User is a second-year medical student working in Dr. Sandman’s (a gynecologist) office in Richmond.
+- [FACT] User is seeing Linda Woo for the assessment and management of abnormal vaginal bleeding.
+- [FACT] User noted that Mrs. Woo has a three-month history of "pinkish vaginal discharge," noticed occasionally when she wipes after going to the bathroom and seen a couple of times on her underwear.
+- [FACT] User mentioned that the Pap smear performed by her family physician 2 months ago showed moderate squamous dyskaryosis.
+- [ASSISTANT_SAID] Assistant confirmed the recording of the information about Mrs. Woo's medical case.
+- [FACT] User provided details about the Pap smear results: combined moderate dyskaryosis / HPV (LSIL and HSIL).
+- [FACT] User described the findings on the Pap smear: two superficial intermediate squamous cells with koilocytotic changes and dyskaryotic nuclei (1) and a dyskeratotic cell “button” (2) suggesting CIN 1 and HPV infection (LSIL).
+- [FACT] User noted that the center, left field of the Pap smear showed dyskaryotic, overlapped, and stripped deep intermediate nuclei indicating at least CIN 2 (HSIL).
+- [ASSISTANT_SAID] Assistant explained that CIN stands for "cervical intraepithelial neoplasia," referring to abnormal cell growth on the cervix.
+- [ASSISTANT_SAID] Assistant described the grading of CIN: CIN 1 (mild dysplasia), CIN 2 (moderate dysplasia), and CIN 3 (severe dysplasia or carcinoma in situ).
+- [ASSISTANT_SAID] Assistant provided information on further questions to ask Mrs. Woo regarding her menstrual history, sexual history, obstetric history, history of cervical cancer, family history, other medical history, and other symptoms.
+- [ASSISTANT_SAID] Assistant outlined steps in a focused physical examination, including inspection of external genitalia, a speculum exam, a bimanual exam, and a rectal exam.

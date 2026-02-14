@@ -1,0 +1,29 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/03/24 (Fri) 10:26
+- [EVENT] User has been doing a lot of online shopping lately.
+- [PREFERENCE] User wants to get a better sense of their spending habits.
+- [ASSISTANT_SAID] Assistant offered to help track the user's online shopping habits.
+- [ASSISTANT_SAID] Assistant requested the following details for each purchase: date of purchase, item or product name, category, and amount spent.
+- [ASSISTANT_SAID] Assistant provided options for sharing purchase information: a list, a spreadsheet, or a screenshot of order history or bank statement.
+- [ASSISTANT_SAID] Assistant offered to suggest tools and strategies for tracking purchases going forward.
+- [EVENT] User recalled receiving a 20% off coupon from Everlane in mid-February.
+- [EVENT] User started buying items online in mid-February.
+- [EVENT] User mentioned purchasing skincare products, kitchen utensils, vinyl records, and clothes and accessories from various websites.
+- [EVENT] User provided a list of purchases: 
+  - February: 3 shirts, 1 pair of jeans from Everlane ($150), skincare products from Sunday Riley ($120)
+  - March: kitchen utensils from Amazon ($80), vinyl records from eBay ($200), sneakers and tank tops from Everlane ($100)
+  - April: dresses and sandals from ASOS ($150)
+- [ASSISTANT_SAID] Assistant thanked the user for sharing their purchase information.
+- [ASSISTANT_SAID] Assistant provided a breakdown of the user's online shopping habits:
+  - Monthly Spending: February: $270, March: $280, April: $150
+  - Category Breakdown: Clothing: $400 (57% of total spending), Beauty/Skincare: $120 (17% of total spending), Home/Kitchen: $80 (11% of total spending), Entertainment: $200 (29% of total spending)
+  - Average Monthly Spending: $233
+  - Total Spending: $700
+- [PREFERENCE] User expressed a desire to know the best way to set up a spreadsheet to log purchases.
+- [ASSISTANT_SAID] Assistant provided a step-by-step process to set up a spreadsheet for tracking purchases, including choosing a platform, creating columns, formatting, and entering purchases.
+- [ASSISTANT_SAID] Assistant suggested additional columns for tracking payment method, order number, and tags.
+- [PREFERENCE] User indicated they understood how to set up a spreadsheet.
+- [PREFERENCE] User asked about the best way to keep track of purchases going forward.
+- [ASSISTANT_SAID] Assistant recommended checking bank statements regularly but noted limitations.
+- [ASSISTANT_SAID] Assistant suggested alternative methods for tracking purchases, including digital receipts,

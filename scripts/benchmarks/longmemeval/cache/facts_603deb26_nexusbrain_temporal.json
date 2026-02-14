@@ -1,0 +1,112 @@
+{
+  "answer_8afdebac_1": [
+    {
+      "fact": "User is looking for inspiration for new cocktails to try.",
+      "type": "preference",
+      "entities": [
+        "cocktails"
+      ]
+    },
+    {
+      "fact": "User prefers summer drinks that incorporate fresh herbs from their garden.",
+      "type": "preference",
+      "entities": [
+        "summer drinks",
+        "fresh herbs",
+        "garden"
+      ]
+    },
+    {
+      "fact": "User has been experimenting with different gin brands.",
+      "type": "preference",
+      "entities": [
+        "gin brands"
+      ]
+    },
+    {
+      "fact": "User enjoys Hendrick's gin.",
+      "type": "preference",
+      "entities": [
+        "Hendrick's gin"
+      ]
+    },
+    {
+      "fact": "User is thinking of experimenting with lavender in cocktails.",
+      "type": "preference",
+      "entities": [
+        "lavender"
+      ]
+    },
+    {
+      "fact": "User is curious about a good lavender syrup recipe or a cocktail that pairs well with it.",
+      "type": "preference",
+      "entities": [
+        "lavender syrup",
+        "cocktail"
+      ]
+    },
+    {
+      "fact": "User has been experimenting with different Negroni recipes at home.",
+      "type": "preference",
+      "entities": [
+        "Negroni recipes"
+      ]
+    },
+    {
+      "fact": "User finds that Hendrick's gin brings out the flavors in Negroni recipes.",
+      "type": "opinion",
+      "entities": [
+        "Hendrick's gin",
+        "Negroni"
+      ]
+    }
+  ],
+  "answer_8afdebac_2": [
+    {
+      "fact": "User is looking for inspiration for a new cocktail to serve at their next dinner party.",
+      "type": "event",
+      "entities": [
+        "cocktail",
+        "dinner party"
+      ]
+    },
+    {
+      "fact": "User prefers cocktails that incorporate lavender or grapefruit.",
+      "type": "preference",
+      "entities": [
+        "lavender",
+        "grapefruit"
+      ]
+    },
+    {
+      "fact": "User has been perfecting their Negroni recipe.",
+      "type": "preference",
+      "entities": [
+        "Negroni"
+      ]
+    },
+    {
+      "fact": "User has tried making a Negroni at home 10 times.",
+      "type": "event",
+      "entities": [
+        "Negroni",
+        "10 times"
+      ]
+    },
+    {
+      "fact": "User learned how to make a Negroni from their friend Emma.",
+      "type": "relationship",
+      "entities": [
+        "Emma"
+      ]
+    },
+    {
+      "fact": "User is interested in trying the Lavender Gin Fizz and Grapefruit Basil Martini.",
+      "type": "preference",
+      "entities": [
+        "Lavender Gin Fizz",
+        "Grapefruit Basil Martini"
+      ]
+    }
+  ]
+}

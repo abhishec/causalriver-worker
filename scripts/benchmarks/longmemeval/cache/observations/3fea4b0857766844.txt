@@ -1,0 +1,20 @@
+**Observation Log:**
+
+[FACT] User is looking for new food delivery services to try out.  
+[ASSISTANT_SAID] Recommended popular food delivery services: Grubhub, Postmates, Caviar, Seamless, SkipTheDishes, Foodpanda, Eat24, Google Express, Deliveroo, Amazon Restaurants.  
+[FACT] User has tried Grubhub before and liked it.  
+[USER_PREFERENCE] User is interested in meal kit services.  
+[ASSISTANT_SAID] Recommended meal kit services: Blue Apron, HelloFresh, Home Chef, Plated, Sun Basket, Dinnerly, Purple Carrot, Green Chef.  
+[USER_PREFERENCE] User has tried Blue Apron before and thought it was okay, but found the recipes too complicated for their skill level.  
+[USER_PREFERENCE] User is considering trying out Sun Basket or Dinnerly but has heard mixed reviews about their ingredients and recipe quality.  
+[ASSISTANT_SAID] Provided details about Sun Basket: focuses on high-quality, non-GMO, and organic ingredients; offers easy to moderate cooking difficulty; recipes developed by chefs and dietitians.  
+[ASSISTANT_SAID] Provided details about Dinnerly: focuses on affordable, high-quality ingredients; offers easy to moderate cooking difficulty; recipes developed by chefs and nutritionists.  
+[USER_PREFERENCE] User is thinking of trying out Dinnerly because it seems more affordable but is concerned about recipe quality.  
+[ASSISTANT_SAID] Provided examples of Dinnerly recipes: Creamy Tomato Pasta Bake, Chipotle Chicken Tacos, Roasted Vegetable Quinoa Bowl, Balsamic Glazed Pork Chops.  
+[ASSISTANT_SAID] Shared common feedback about Dinnerly: simple recipes, flavorful but not overly complex, ingredient quality can vary, portion sizes can be small.  
+[ASSISTANT_SAID] Offered tips for success with Dinnerly recipes: follow recipes closely, avoid overcooking, add personal flair to enhance flavor.  
+[USER_PREFERENCE] User is interested in trying out new cuisines, like Asian fusion or Indian food.  
+[ASSISTANT_SAID] Provided Asian fusion recipe ideas: Korean BBQ Beef Tacos, Sesame Chicken Stir-Fry, Thai Green Curry Shrimp.  
+[ASSISTANT_SAID] Started to provide an Indian recipe: Chana Masala.  
+[TEMPORAL] Session Date: 2023/03/20 (Mon) 12:18.  
+[SESSION_ID] d4912cd9.

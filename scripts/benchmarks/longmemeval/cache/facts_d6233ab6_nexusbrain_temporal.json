@@ -1,0 +1,60 @@
+{
+  "answer_b0fac439": [
+    {
+      "fact": "User is considering majoring in Economics",
+      "type": "preference",
+      "entities": [
+        "Economics"
+      ]
+    },
+    {
+      "fact": "User has positive memories of high school experiences",
+      "type": "opinion",
+      "entities": [
+        "high school",
+        "debate team",
+        "advanced placement courses"
+      ]
+    },
+    {
+      "fact": "User was part of the debate team in high school",
+      "type": "event",
+      "entities": [
+        "debate team",
+        "high school"
+      ]
+    },
+    {
+      "fact": "User took advanced placement courses in economics in high school",
+      "type": "event",
+      "entities": [
+        "advanced placement courses",
+        "economics",
+        "high school"
+      ]
+    },
+    {
+      "fact": "User is surprised to become an Economics major soon",
+      "type": "opinion",
+      "entities": [
+        "Economics major"
+      ]
+    },
+    {
+      "fact": "User is weighing the pros and cons of pursuing a Master's degree",
+      "type": "preference",
+      "entities": [
+        "Master's degree"
+      ]
+    },
+    {
+      "fact": "User is assessing their foundation in math and statistics for Data Science",
+      "type": "preference",
+      "entities": [
+        "math",
+        "statistics",
+        "Data Science"
+      ]
+    }
+  ]
+}

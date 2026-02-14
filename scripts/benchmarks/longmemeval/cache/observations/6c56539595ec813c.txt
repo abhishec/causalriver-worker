@@ -1,0 +1,18 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/23 (Tue) 09:17
+- [USER] User asked about how Stripe technically sees transactions as legitimate.
+- [ASSISTANT_SAID] Stripe uses card verification, address verification, risk evaluation, 3D Secure, and machine learning to verify transactions.
+- [ASSISTANT_SAID] Card verification includes checking the card number, expiration date, and security code (CVV) against the card issuer's information.
+- [ASSISTANT_SAID] Address verification involves matching the billing address provided by the cardholder with the address on file with the card issuer.
+- [ASSISTANT_SAID] Risk evaluation analyzes factors like the cardholder's location and transaction amount to assess fraud likelihood.
+- [ASSISTANT_SAID] 3D Secure is an additional authentication layer required by some card issuers for certain transactions.
+- [ASSISTANT_SAID] Machine learning algorithms analyze transaction patterns to detect potential fraud and identify suspicious behavior.
+- [USER] User asked about the compliance standard for storing transaction data.
+- [ASSISTANT_SAID] The compliance standard for storing transaction data is the Payment Card Industry (PCI) Data Security Standard (DSS).
+- [ASSISTANT_SAID] PCI DSS is established by major credit card companies, including Visa, MasterCard, American Express, Discover, and JCB.
+- [ASSISTANT_SAID] PCI DSS includes requirements for securely storing, processing, and transmitting cardholder data.
+- [ASSISTANT_SAID] Cardholder data includes the cardholder's name, account number, expiration date, and security code.
+- [ASSISTANT_SAID] Cardholder data must be stored in a secure, encrypted format with access restricted to authorized personnel only.
+- [ASSISTANT_SAID] Businesses must undergo regular audits and assessments to ensure compliance with PCI DSS.
+- [ASSISTANT_SAID] Non-compliance with PCI DSS can result in significant fines, penalties, and reputational damage.

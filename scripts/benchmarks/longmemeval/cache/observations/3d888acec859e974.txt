@@ -1,0 +1,21 @@
+**Observation Log:**
+
+[FACT] User is planning a golf trip with their family.  
+[FACT] User has a family that enjoys playing golf together on weekends.  
+[PREFERENCE] User loves the idea of playing a course inspired by classic links courses of Scotland.  
+[PREFERENCE] User is fascinated by the history of golf and old courses in Scotland.  
+[EVENT] User watched the Masters Tournament with their family.  
+[EVENT] User is interested in taking golf lessons at Bandon Dunes.  
+[TEMPORAL] Session date is 2023/05/28.  
+[TEMPORAL] User mentioned watching the Masters Tournament on April 20th.  
+[TEMPORAL] User mentioned watching the Lakers vs Clippers game on April 15th.  
+[CHANGE] User clarified that they were at the Masters Tournament on April 20th, not in 2019.  
+[ASSISTANT_SAID] Assistant provided a list of top golf courses in the US, including Pebble Beach Golf Links, Augusta National Golf Club, and Bandon Dunes Golf Resort.  
+[ASSISTANT_SAID] Assistant provided details about Bandon Dunes Golf Resort, including its location, courses, amenities, and activities.  
+[ASSISTANT_SAID] Assistant described the Old Macdonald course, including its design, inspiration, unique features, and playability.  
+[ASSISTANT_SAID] Assistant mentioned that Old Macdonald features template holes inspired by famous Scottish links courses.  
+[ASSISTANT_SAID] Assistant noted that Bandon Dunes offers family-friendly amenities and activities, including junior golf programs.  
+[ASSISTANT_SAID] Assistant clarified that Tiger Woods won the Masters Tournament on April 14th, 2019.  
+[ASSISTANT_SAID] Assistant suggested that Bandon Dunes offers packages and experiences for families, including private lessons and guided tours.  
+[ASSISTANT_CREATED] Assistant created a detailed description of Bandon Dunes Golf Resort, including its four courses, amenities, and family-friendly options.  
+[ASSISTANT_CREATED] Assistant created a detailed description of the Old Macdonald course, including its design, inspiration, and unique features.

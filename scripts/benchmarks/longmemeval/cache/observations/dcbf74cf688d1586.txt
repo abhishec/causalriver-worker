@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/25 (Thu) 13:14  
+[EVENT] User went to El Patio with friends two weeks ago and had an amazing time trying out different tacos and burritos.  
+[PREFERENCE] User is craving Japanese food, especially sushi and ramen.  
+[ASSISTANT_SAID] Assistant clarified that it does not have personal experiences and did not meet the user at El Patio or any other location.  
+[ASSISTANT_SAID] Assistant provided a recipe for spicy tuna rolls, including ingredients and instructions.  
+[ASSISTANT_CREATED] Spicy tuna roll recipe includes:  
+- Ingredients for spicy tuna mixture: 1 can of sushi-grade tuna, 1/4 cup of mayonnaise, 1-2 teaspoons of sriracha sauce, 1 tablespoon of soy sauce, 1 tablespoon of chopped green onions, salt and pepper to taste.  
+- Ingredients for sushi rice: 1 cup of short-grain Japanese rice, 1 3/4 cups of water, 1/4 cup of rice vinegar, 2 tablespoons of sugar, 1 teaspoon of salt.  
+- Instructions for preparing sushi rice, mixing spicy tuna, assembling rolls, and serving suggestions.  
+[PREFERENCE] User expressed excitement about the spicy tuna roll recipe and is looking for a good ramen broth recipe.  
+[ASSISTANT_SAID] Assistant provided a recipe for tonkotsu ramen broth, including ingredients and instructions.  
+[ASSISTANT_CREATED] Tonkotsu ramen broth recipe includes:  
+- Ingredients: 2 pounds of pork bones, 4 cups of water, 2 tablespoons of vegetable oil, 1 onion, 2 cloves of garlic, 1 piece of ginger, 1 tablespoon of grated daikon (optional), 1 star anise, 2 cloves, 1 tablespoon of sake, 1 tablespoon of soy sauce, 1 teaspoon of sugar, salt to taste.  
+- Instructions for roasting pork bones, caramelizing onion, adding ingredients, simmering, and straining the broth.  
+[PREFERENCE] User has been experimenting with different broths and noodles at home and recently discovered a rich tonkotsu broth with springy noodles and crispy garlic.  
+[ASSISTANT_SAID] Assistant provided recommendations for ramen toppings and sides, including:  
+- Classic toppings: sliced pork (chashu), soft-boiled egg (ajitama), green onions (negi), pickled ginger (gari).  
+- Modern twists: crispy garlic, spicy miso paste, grilled pork belly, sesame seeds.  
+- Sides: gyoza, edamame, hiyayakko (cold tofu), renkon (deep-fried lotus root).  
+[PREFERENCE] User is thinking of exploring more Korean food options.  
+[EVENT] User recently went to a Korean BBQ joint with coworkers and

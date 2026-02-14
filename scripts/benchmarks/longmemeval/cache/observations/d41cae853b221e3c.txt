@@ -1,0 +1,24 @@
+**Observation Log:**
+
+- [FACT] The user frequently travels and has been on a plane at least once a week for the past 6 weeks.
+- [FACT] The user has been flying with United Airlines a lot lately.
+- [FACT] The user takes the train quite frequently, especially between New York and Boston.
+- [EVENT] The user just got back from LA last Thursday.
+- [EVENT] The user has taken the train from New York to Boston 3 times in the past 2 weeks.
+- [PREFERENCE] The user prefers to book flights and hotels separately for more control over travel arrangements.
+- [PREFERENCE] The user finds train travel convenient and comfortable, allowing them to get work done during the trip.
+- [PREFERENCE] The user likes the idea of TripIt automatically organizing travel plans into a single itinerary.
+- [ASSISTANT_SAID] TripIt can help track frequent flyer miles with a feature called "Points Tracker" that integrates with over 170 loyalty programs.
+- [ASSISTANT_SAID] TripIt offers features such as points tracking, mileage tracking, rewards tracking, elite status tracking, and expiration alerts.
+- [ASSISTANT_SAID] TripIt allows users to book flights directly within the app for select airlines, including United Airlines.
+- [ASSISTANT_SAID] TripIt partners with booking sites like Booking.com, Hotels.com, and Expedia for hotel booking capabilities.
+- [ASSISTANT_SAID] TripIt can track train schedules and itineraries, allowing users to add train reservations to their itinerary.
+- [ASSISTANT_SAID] TripIt provides reminders and alerts for train travel, similar to flight notifications.
+- [ASSISTANT_SAID] TripIt supports train travel from various operators, including Amtrak, Eurostar, and others.
+- [ASSISTANT_SAID] TripIt offers real-time train status updates and the ability to store train tickets and reservations.
+- [ASSISTANT_SAID] TripIt has a feature called "Trips" that allows users to save frequent routes and travel plans as templates.
+- [ASSISTANT_SAID] TripIt can help users adjust their schedules based on delays or changes in travel plans.
+- [EVENT] The user experienced a delay while traveling from New York to Boston on the Acela Express due to mechanical issues.
+- [TEMPORAL] The delay occurred last month.
+- [PREFERENCE] The user has learned to roll with the punches and make the most of travel delays.
+- [ASSISTANT_SAID] TripIt can help users stay organized and informed during travel disruptions.

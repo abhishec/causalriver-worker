@@ -1,0 +1,26 @@
+**Observation Log:**
+
+- [FACT] User's name is Jo Peninsulas.
+- [FACT] Jo Peninsulas is associated with Rotary International and a not-for-profit marketing agency called ManyMangoes.
+- [FACT] Jo is involved in initiatives to plant trees and provide clean drinking water access to remote villages in Kenya.
+- [FACT] User has reached out to multiple individuals regarding Earth Day 2023 initiatives.
+- [FACT] Philipp Hartmann is a 3rd degree connection and a Marketing & Sales Leader.
+- [FACT] Chinedu Nwokoro is a 1st degree connection and a Consultant Respiratory and General Paediatrician.
+- [FACT] Sarmad Khan is a contact who has previously engaged with Jo regarding UN's SDGs.
+- [PREFERENCE] Jo is keen to connect with others about non-profit work and environmental initiatives.
+- [EVENT] Jo reached out to Philipp Hartmann on FEB 28 regarding Earth Day 2023.
+- [EVENT] Jo reached out to Chinedu Nwokoro on MAR 3 about his non-profit work.
+- [EVENT] Jo previously contacted Sarmad Khan on MAR 23, 2021, regarding collaboration on UN's SDGs.
+- [CHANGE] Philipp Hartmann indicated he is not the correct contact for supporting sustainable projects.
+- [TEMPORAL] The session date is 2023/06/28 (Wed) 02:53.
+- [TEMPORAL] Jo's message to Philipp Hartmann was sent on FEB 28.
+- [TEMPORAL] Jo's message to Chinedu Nwokoro was sent on MAR 3 at 11:05 AM.
+- [TEMPORAL] Chinedu Nwokoro responded on MAR 3 at 11:26 AM.
+- [TEMPORAL] Jo's message to Sarmad Khan was sent on MAR 3 at 5:40 AM.
+- [RELATIONSHIP] Jo is seeking to connect with Philipp Hartmann for Earth Day 2023 initiatives.
+- [RELATIONSHIP] Jo is seeking to connect with Chinedu Nwokoro regarding his non-profit work.
+- [RELATIONSHIP] Jo has previously communicated with Sarmad Khan about UN's SDGs.
+- [ASSISTANT_SAID] The assistant provided a suggestion for Jo to ask Philipp Hartmann for introductions to others in his network who might be interested in Earth Day 2023.
+- [ASSISTANT_SAID] The assistant suggested Jo to express understanding to Chinedu Nwokoro regarding his commitments and to ask for referrals within his network.
+- [ASSISTANT_SAID] The assistant suggested Jo to include a booking link in her message to Sarmad Khan.
+- [ASSISTANT_CREATED] Jo's message to Sarmad Khan included a booking link: <https://calendly.com/w

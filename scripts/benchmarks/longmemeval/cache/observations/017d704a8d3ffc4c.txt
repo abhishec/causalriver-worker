@@ -1,0 +1,21 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/26 (Fri) 17:24  
+[USER] User requested information on task management for editing, reallocating information, reassigning tasks, changing status, and moving tasks to review.  
+[ASSISTANT_SAID] On the Tasks (Admin, Tagger, Checker View) screen, the Admin user can edit the name, description, and other details of a task by clicking on a button or link in the task list.  
+[ASSISTANT_SAID] The Admin user can reassign a task to a different Tagger user by clicking on a button or link in the task list, which opens a form for selecting the new Tagger user.  
+[ASSISTANT_SAID] The Tagger user can request that a specific document within a task be reassigned to a different Tagger user by clicking on a button or link in the annotation screen.  
+[ASSISTANT_SAID] The Tagger user can mark a document as "Finished" once they have completed the annotation, which updates the status to "Review" and notifies the Checker.  
+[ASSISTANT_SAID] The Checker can approve or reject the annotation, or request changes. If approved, the status of the document will be updated to "Complete."  
+[ASSISTANT_SAID] Notifications will be sent to Admin and DS users when a task is completed, and to Tagger and Checker users when a task is reassigned or requires their attention.  
+[ASSISTANT_SAID] The Checker user can view a history of reviewed annotations and any comments or feedback provided.  
+[ASSISTANT_SAID] The Tagger user can use a conflict resolution tool to resolve label conflicts while annotating a document.  
+[ASSISTANT_SAID] The Admin user can view a progress bar on the task list showing the percentage of task completion.  
+[ASSISTANT_SAID] The Tagger user can view an interactive outline of the document being annotated.  
+[ASSISTANT_SAID] The Tagger user can receive label suggestions based on the document's context and content.  
+[ASSISTANT_SAID] The Tagger and Checker users can communicate through a messaging system within the Annotation Tool.  
+[ASSISTANT_SAID] The Annotation Tool should track changes made to documents and allow users to view or revert to previous versions.  
+[ASSISTANT_SAID] The tool should include quality assurance checks and metrics to ensure annotation accuracy.  
+[ASSISTANT_SAID] The Admin user can create custom labels for Tagger users to use when annotating documents.  
+[ASSISTANT_SAID] The Tagger user should be able to view definitions or descriptions of labels for clarity.  
+[ASSISTANT_SAID] The Tagger user should be able

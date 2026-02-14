@@ -1,0 +1,44 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/01/15 (Sun) 13:28
+- [ASSISTANT_CREATED] Final exam questions for Week 1: Introduction to UX, including:
+  1. What are some key principles of UX design?
+  2. Name at least three UX design tools and software.
+  3. What is the main takeaway from "Don't Make Me Think" by Steve Krug?
+  4. Describe the UX design process and the key stages involved.
+  5. How would you apply UX design principles to improve the user experience of a website or mobile app?
+- [ASSISTANT_SAID] Key principles of UX design include:
+  * Usability
+  * User-centered design
+  * Accessibility
+  * User satisfaction
+  * Functionality
+- [ASSISTANT_SAID] At least three UX design tools and software are:
+  * Sketch
+  * Adobe XD
+  * Figma
+  * InVision
+  * Axure
+- [ASSISTANT_SAID] The main takeaway from "Don't Make Me Think" by Steve Krug is that the best designs are intuitive and easy to use, emphasizing the importance of designing for the user's experience and keeping interfaces simple, clear, and self-evident.
+- [ASSISTANT_SAID] The UX design process typically involves the following stages:
+  * Research: gathering information about users, goals, and needs
+  * Design: creating wireframes, prototypes, and visual designs
+  * Testing: evaluating designs through user testing and feedback
+  * Iteration: refining designs based on testing and feedback
+- [ASSISTANT_SAID] To apply UX design principles to improve the user experience of a website or mobile app, one would need to:
+  * Conduct user research to understand user needs and goals
+  * Create user personas to represent the target audience
+  * Develop user flows and wireframes to outline the user journey
+  * Design an interface that is visually appealing, easy to navigate, and intuitive
+  * Conduct user testing to validate the design and identify areas for improvement
+  * Iterate and refine the design based on feedback and testing results.
+- [FACT] User requested to create an answer key for a final exam.
+- [FACT] User specified the topic for Week 1: Introduction to UX.
+- [FACT] User provided a reading assignment: "Don't Make Me Think" by Steve Krug.
+- [ASSISTANT_CREATED] Action items for Week 1 include:
+  * Read "Don't Make Me Think" by Steve Krug
+  * Research and explore UX design principles and processes
+  * Familiarize oneself with UX design tools and software
+- [ASSISTANT_CREATED] Resources for Week 1 include:
+  * "Don't Make Me Think" by Steve Krug (book)
+  *

@@ -1,0 +1,30 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/24 (Wed) 18:58
+- [USER] User requested a story about "The Dead Frogman of Cardiff Docks."
+- [EVENT] The story is set in Queen Alexandra Dock in 1974.
+- [FACT] The story involves a significant criminal inquiry at Cardiff Docks related to large quantities of drugs from the West Indies.
+- [EVENT] The investigation began with the death of a scuba diver whose body was recovered from the Queen Alexandra Dock.
+- [TEMPORAL] The events described in the story took place during March 1982.
+- [EVENT] Anonymous calls were made to South Wales Police and British Transport Police about a missing diver.
+- [FACT] The missing diver was described as West Indian.
+- [FACT] Police Underwater Search Teams conducted searches but found nothing due to poor visibility.
+- [EVENT] HMS Cardiff conducted a sonar sweep but also found nothing.
+- [EVENT] Weeks later, a body surfaced when two tugs assisted a ship leaving the dock.
+- [FACT] The body was dressed in sub-aqua diving gear and showed signs of having been in the water for some time.
+- [FACT] The body was identified as that of a West Indian male, presumed to be the missing diver.
+- [FACT] A post-mortem examination was conducted by Professor Sir Bernard Knight.
+- [FACT] The examination found no diotodes in the bone marrow, suggesting the diver did not die from drowning.
+- [FACT] The body had several unusual marks: a square bruise on the right side of the face, a similar bruise on the chest, and a wide mark on the left wrist.
+- [FACT] The oxygen cylinder's valve was closed, indicating that diving had been completed before death.
+- [EVENT] DI Vic Miller began an investigation looking for connections to the West Indies.
+- [FACT] The shipping line Geest operated between South Wales and the West Indies.
+- [EVENT] The MV Geestland had been diverted into Cardiff Docks around the time the diver went missing.
+- [FACT] The Geestland unloaded its cargo of bananas on the north side of the Queens Dock.
+- [FACT] A length of chain with a shackle was discovered hanging below the hull of the Geestland.
+- [FACT] An unexplained spanner was found tied to the wetsuit chest of the deceased diver.
+- [EVENT] The spanner matched the shackle found on the Geestland.
+- [FACT] An engineer from the Geestland reported hearing a strange metallic sound from the hull during the voyage.
+- [EVENT] The police suspected the dead diver was part of a drug-running syndicate.
+- [EVENT] The man who made the anonymous calls was traced and identified the deceased as Peter Macdonald Jones.
+- [RELATIONSHIP] Peter Macdonald Jones

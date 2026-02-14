@@ -1,0 +1,33 @@
+**Observation Log:**
+
+[FACT] User is looking for song recommendations.  
+[FACT] User has been listening to a lot of indie-rock lately.  
+[FACT] User recently saw The 1975 live at the Hollywood Bowl.  
+[FACT] User is a fan of Billie Eilish.  
+[FACT] User saw Billie Eilish at a music festival in San Bernardino on July 2nd.  
+[FACT] The San Bernardino festival featured a diverse lineup of artists including Khalid and Tove Lo.  
+[PREFERENCE] User enjoys indie-rock music.  
+[PREFERENCE] User likes Billie Eilish and has an interest in diverse lineups at music festivals.  
+[EVENT] User is thinking of attending another music festival soon.  
+[EVENT] User is considering checking out Anderson .Paak & The Free Nationals and Tove Lo at Outside Lands.  
+[TEMPORAL] Session date is 2023/12/02 (Sat) 22:06.  
+[TEMPORAL] User attended the San Bernardino festival on July 2nd.  
+[TEMPORAL] User is interested in festivals happening in the next few months.  
+[ASSISTANT_SAID] Recommended songs based on user’s interests include:  
+[ASSISTANT_SAID] **Indie-Rock Vibes**:  
+[ASSISTANT_SAID] 1. Arctic Monkeys - "Do I Wanna Know?"  
+[ASSISTANT_SAID] 2. The Neighbourhood - "Sweater Weather"  
+[ASSISTANT_SAID] 3. Pale Waves - "There's a Honey"  
+[ASSISTANT_SAID] 4. The Japanese House - "Lilo"  
+[ASSISTANT_SAID] 5. COIN - "Talk Too Much"  
+[ASSISTANT_SAID] **Billie Eilish Inspiration**:  
+[ASSISTANT_SAID] 1. Lana Del Rey - "High by the Beach"  
+[ASSISTANT_SAID] 2. Halsey - "Bad at Love"  
+[ASSISTANT_SAID] 3. Tame Impala - "Let it Happen"  
+[ASSISTANT_SAID] 4. Charli XCX - "Boys"  
+[ASSISTANT_SAID] 5. Banks - "Beggin for Thread"  
+[ASSISTANT_SAID] **Diverse, Festival-Ready Sounds**:  
+[ASSISTANT_SAID] 1. Tameca Jones - "Leave It Alone"  
+[ASSISTANT_SAID] 2. Rex Orange County - "Loving is Easy"  
+[ASSISTANT_SAID] 3. MØ - "Nostalgia"  
+[ASSISTANT_SAID] 4. Hayley Kiyoko -

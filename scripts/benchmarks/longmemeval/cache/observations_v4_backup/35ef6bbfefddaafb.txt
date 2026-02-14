@@ -1,0 +1,15 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/25 (Thu) 20:21
+- [EVENT] User is trying to plan out their fitness schedule for the next few weeks.
+- [EVENT] User has a soccer game with coworkers in two weeks.
+- [PREFERENCE] User has been doing some running lately.
+- [FACT] User recently set a personal best time in a charity 5K run with a time of 27:12.
+- [EVENT] User recently scored a goal in a recreational soccer game with coworkers.
+- [PREFERENCE] User is not typically a goal-scorer in soccer.
+- [EVENT] User is thinking about signing up for a tennis tournament happening on May 6th.
+- [FACT] User has been playing tennis casually for a few years.
+- [ASSISTANT] The assistant provided tips on how to improve endurance for soccer, including cardiovascular training, HIIT, strength training, plyometric exercises, agility drills, proper warm-up and cool-down, hill sprints, small-sided games, hydration, and rest.
+- [ASSISTANT] The assistant provided tips on improving running technique, including posture, footstrike, stride length and cadence, arm swing, core engagement, breathing, plyometric exercises, agility drills, strength training, and practicing with a soccer ball.
+- [ASSISTANT] The assistant provided tips on improving shooting technique in soccer, including proper stance and balance, ball positioning, ankle lock, striking the ball, follow-through, using your body, practicing different types of shots, watching and learning from professionals, practicing with both feet, and practicing under pressure.
+- [ASSISTANT] The assistant provided tips on preparing for the tennis tournament, including increasing cardiovascular endurance, building strength and power, improving agility and speed, incorporating on-court conditioning, practicing serves, working on footwork, developing stroke play, and practicing returns and volleys.

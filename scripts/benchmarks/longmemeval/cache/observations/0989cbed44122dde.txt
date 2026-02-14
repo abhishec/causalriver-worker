@@ -1,0 +1,24 @@
+**Observation Log:**
+
+**Session Date:** 2023/05/30 (Tue) 13:41  
+**Session ID:** sharegpt_Bf5wBOC_3
+
+1. [FACT] The user has experience as an Employee-Dialogue Ambassador.
+2. [FACT] The user has volunteered in the Shurin Lab.
+3. [FACT] The user has a strong educational background in General Biology, focusing on Molecular Biology and Metabolic Biochemistry.
+4. [FACT] The user has participated in the FIRST Robotics Competition.
+5. [PREFERENCE] The user values collaboration, efficient task delegation, and problem-solving skills.
+6. [EVENT] The user biked out to the ponds on Mondays and Tuesdays at 8 am to collect measurements and tend to the ponds.
+7. [EVENT] The user measured salts and nutrients, temperatures, pH, salinity readings, and visual characteristics of the ponds.
+8. [EVENT] After collecting data from the ponds, the user biked back to the lab to use micropipetting and spectrophotometry.
+9. [EVENT] The user inputted the ponds' growth data into Google Sheets before heading home.
+10. [ASSISTANT_SAID] The assistant suggested incorporating the user's additional information into interview responses.
+11. [ASSISTANT_SAID] The assistant provided two examples of how the user's previous experience has trained them for the role.
+12. [ASSISTANT_SAID] The assistant provided reasons why the user is a good fit for the role, emphasizing technical skills and interpersonal skills.
+13. [FACT] Thermo Fisher Scientific is a biotechnology company that provides products and services for the scientific community.
+14. [ASSISTANT_SAID] The assistant described Thermo Fisher Scientific's operations in various industries, including life sciences, diagnostics, and biopharmaceuticals.
+15. [EVENT] The user is interviewing for a position at Johnson & Johnson.
+16. [PREFERENCE] The user is seeking clarification on the meaning of the acronym "IMM TS."
+17. [ASSISTANT_SAID] The assistant noted that "IMM TS" is not a common acronym and suggested asking the interviewer for clarification.
+18. [ASSISTANT_CREATED] The assistant generated a sample email for the user to send to a recruiter asking about the job number IMM TS.
+19. [ASSISTANT_CREATED] The email template included a subject line, greeting, body text asking for clarification, and a closing statement.

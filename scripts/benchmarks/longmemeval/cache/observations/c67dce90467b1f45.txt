@@ -1,0 +1,17 @@
+**Observation Log:**
+
+[FACT] The user has a Fitbit Charge 4 fitness tracker.  
+[EVENT] The user has been using the Fitbit Charge 4 since March 15th.  
+[PREFERENCE] The user is considering getting a portable ECG device.  
+[ASSISTANT_SAID] The AliveCor KardiaMobile is a portable ECG device that connects to smartphones or tablets via Bluetooth and records the electrical activity of the heart from one point on the chest.  
+[ASSISTANT_SAID] To take an ECG reading with the KardiaMobile, the user places their fingers on the device's sensors for 30 seconds.  
+[ASSISTANT_SAID] The KardiaMobile has features such as accurate readings, ease of use, portability, long battery life (up to 1 year), water resistance (IP22 rated), FDA clearance, and integration with an app for tracking readings.  
+[ASSISTANT_SAID] The KardiaMobile typically retails for around $99-$129 and is available online, including on Amazon.  
+[ASSISTANT_SAID] Other portable ECG devices include the Apple Watch Series 4 and later models, QardioCore, and Omron Healthcare HeartGuide.  
+[PREFERENCE] The user is considering tracking physical activity more closely.  
+[ASSISTANT_SAID] Recommended fitness trackers that monitor sleep patterns, heart rate, and daily steps include Fitbit Charge 3, Garmin Vivosport, Samsung Galaxy Fit, Polar M430, and Apple Watch Series 5.  
+[ASSISTANT_SAID] The Fitbit Charge 3 tracks steps, distance, calories burned, sleep stages, heart rate, and guided breathing sessions, is water-resistant up to 50m, has up to 7 days of battery life, and costs around $150.  
+[ASSISTANT_SAID] The Garmin Vivosport tracks steps, distance, calories burned, sleep stages, heart rate, stress tracking, and VO2 max estimation, is GPS enabled, water-resistant up to 50m, has up to 7 days of battery life, and costs around $200.  
+[ASSISTANT_SAID] The Samsung Galaxy Fit tracks steps, distance, calories burned, sleep stages, heart rate, and stress tracking, is GPS enabled, water-resistant up to 50m, has up to 7 days of battery life, and costs around $100.  
+[ASSISTANT_SAID] The Polar M430 tracks steps, distance, calories burned, sleep stages, heart rate, and GPS tracking, is water-resistant up to 30m, has up to 30 hours of battery life with GPS enabled, and costs around $230.  
+[ASSISTANT_SAID] The Apple Watch Series 5 tracks steps, distance, calories burned, sleep stages, heart rate, and ECG readings, is GPS enabled, water-resistant up to 50

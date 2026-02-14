@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/24 (Wed) 21:30
+- [USER] User asked how to configure a DNS server on Linux.
+- [ASSISTANT_SAID] Configuring a DNS server on Linux involves several steps.
+- [ASSISTANT_SAID] Install the DNS server software: BIND (Berkeley Internet Name Domain) and dnsmasq are available for Linux.
+- [ASSISTANT_SAID] On Ubuntu, install BIND with the command: `sudo apt-get install bind9`.
+- [ASSISTANT_SAID] The main configuration file for BIND is located at `/etc/bind/named.conf`.
+- [ASSISTANT_SAID] Edit the configuration file to define the domain name and other settings.
+- [ASSISTANT_SAID] Define the domain name as `example.com` with the line: `zone "example.com" { type master; file "/etc/bind/db.example.com"; };`.
+- [ASSISTANT_SAID] Create a zone file at `/etc/bind/db.example.com` with specific content.
+- [ASSISTANT_CREATED] Zone file content includes:
+  - `$TTL 86400`
+  - `@ IN SOA ns1.example.com. admin.example.com. ( 2021030901 ; Serial 3600 ; Refresh 1800 ; Retry 604800 ; Expire 86400 ; Minimum TTL )`
+  - `@ IN NS ns1.example.com.`
+  - `@ IN A 192.168.0.1`
+- [ASSISTANT_SAID] Start the DNS server with the command: `sudo systemctl start bind9`.
+- [ASSISTANT_SAID] Enable the DNS server to start automatically at boot time with the command: `sudo systemctl enable bind9`.
+- [ASSISTANT_SAID] Test the DNS server by querying it with the `dig` command: `dig example.com`.
+- [ASSISTANT_SAID] The query should return the IP address specified in the zone file, which is `192.168.0.1`.

@@ -1,0 +1,38 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/28 (Sun) 15:48
+- [FACT] User provided a unique identifier: e405b67f-b4b5-4c11-84ed-1039dee8ad00
+- [FACT] User provided a race code: 202301030001
+- [TEMPORAL] Race Start Time: 2023-01-03T19:00:00
+- [FACT] Race Number: 1
+- [FACT] Race Name: TRIX PEDROS LØP
+- [FACT] Prize Sum: 73500
+- [FACT] Race Distance: 1609 meters
+- [FACT] Start Method: Auto
+- [EVENT] User provided results for the race, including details of each horse's performance.
+- [FACT] Track Name: Bjerke Travbane
+- [ASSISTANT_SAID] The winner was a horse named "A Perfect Dutchess (US)" driven by Frode Hamre with a time of 1:59,8 and a prize of 35000.
+- [FACT] Horse 1: 
+  - [FACT] Horse ID: 647c536e-bbef-42ff-84db-c30599d99dba
+  - [FACT] Horse Name: A Perfect Dutchess (US)
+  - [FACT] Placement: 1
+  - [FACT] Start Number: 2
+  - [FACT] Distance: 1609
+  - [FACT] Total Time: 1:59,8
+  - [FACT] KM Time: 14,5a
+  - [FACT] Prize: 35000
+  - [FACT] Driver: Frode Hamre
+  - [FACT] Odds: *12
+- [ASSISTANT_SAID] The second place was "Dreamliner" driven by Eirik Høitomt with a time of 2:00,2 and a prize of 17500.
+- [FACT] Horse 2: 
+  - [FACT] Horse ID: bc29e46d-c26f-456d-af40-2a53c691345a
+  - [FACT] Horse Name: Dreamliner
+  - [FACT] Placement: 2
+  - [FACT] Start Number: 1
+  - [FACT] Distance: 1609
+  - [FACT] Total Time: 2:00,2
+  - [FACT] KM Time: 14,7a
+  - [FACT] Prize: 17500
+  - [FACT] Driver: Eirik Høitomt
+  - [FACT] Odds: 146
+- [ASSISTANT_SAID] The third place was "Force de Flandre (FR)" driven by Vid

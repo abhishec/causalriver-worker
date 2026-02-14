@@ -1,0 +1,16 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/21 (Sun) 13:02
+- [ASSISTANT_SAID] The assistant apologized for the confusion regarding the lack of a list of possible FieldTypeValues for each FieldType in the current JSON data file.
+- [ASSISTANT_CREATED] The assistant provided an updated example JSON data file with a dictionary of FieldTypeValues for each FieldType, including applications, resources, rights, and user access grants.
+- [ASSISTANT_SAID] The JSON data file included applications with AppID "App1" and resources such as "Invoices," "PurchaseOrders," and "Companies."
+- [ASSISTANT_SAID] The JSON data file specified rights like "CreateInvoice," "ViewInvoice," "CreatePurchaseOrder," and "ViewCompany" with associated constraints.
+- [ASSISTANT_SAID] The constraints included FieldTypes such as "Country" with values ["USA", "Canada", "Mexico"] and "CustomerLevel" with values ["Gold", "Platinum"].
+- [USER] The user stated that constraints and FieldTypes are redundant and suggested using only FieldTypes.
+- [ASSISTANT_SAID] The assistant agreed to use FieldTypes instead of Constraints and provided a revised example JSON file.
+- [ASSISTANT_CREATED] The revised JSON file included Applications with AppID "App1" and ResourceTypes such as "Invoices," "PurchaseOrders," and "Companies."
+- [ASSISTANT_SAID] The revised JSON file specified AzLocalRights like "CreateInvoice," "ApproveInvoice," "CreatePurchaseOrder," and "DeleteCompany" with associated FieldTypes.
+- [ASSISTANT_SAID] The FieldTypes in the revised JSON included "InvoiceAmount" with values ["1000", "5000", "10000"], "Country" with values ["USA", "Canada", "Mexico"], and "CustomerLevel" with values ["Silver", "Gold", "Platinum"].
+- [ASSISTANT_SAID] The assistant provided details about UserAccessAssignments for users "user1" and "user2" with their respective AzLocalRights and ResourceAccesses.
+- [ASSISTANT_SAID] The assistant mentioned that user1 has access to create an invoice with specific FieldTypes including "InvoiceAmount" of "1000," "Country" as "USA," and "CustomerLevel" as "Silver."
+- [ASSISTANT_SAID] The assistant noted that user2 has access to approve an invoice with the FieldType "Country" set to "Canada."

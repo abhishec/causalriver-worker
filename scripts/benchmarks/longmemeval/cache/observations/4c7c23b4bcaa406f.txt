@@ -1,0 +1,21 @@
+**Observation Log:**
+
+[FACT] User is looking for yoga classes in their new neighborhood.  
+[CHANGE] User has recently moved to a new apartment.  
+[PREFERENCE] User is open to trying different styles of yoga but has heard good things about Hatha and Vinyasa.  
+[TEMPORAL] User's session date is 2023/05/21 (Sun) at 12:51.  
+[PREFERENCE] User prefers evening classes for yoga.  
+[PREFERENCE] User would like a heated room as a bonus amenity for yoga classes.  
+[ASSISTANT_SAID] Assistant congratulated the user on discovering the benefits of exercise on their mental health.  
+[ASSISTANT_SAID] Assistant requested additional information to help find yoga studios: neighborhood or city, preferred style of yoga, schedule, and specific amenities.  
+[FACT] User is looking for studios in the city center, close to their new apartment.  
+[ASSISTANT_SAID] Assistant provided a list of four yoga studios in the city center: Sahara Yoga Studio, Urban Yoga Loft, Prana Yoga House, and Yoga Bliss.  
+[ASSISTANT_SAID] Sahara Yoga Studio offers Hatha and Vinyasa classes, evening classes from 5:30 pm to 7:30 pm, and a heated room around 85°F.  
+[ASSISTANT_SAID] Urban Yoga Loft offers Hatha, Vinyasa, and Restorative classes, evening classes from 5:00 pm to 7:00 pm, and a heated room around 90°F.  
+[ASSISTANT_SAID] Prana Yoga House offers Hatha, Vinyasa, and Yin classes, evening classes from 5:30 pm to 7:30 pm, and a heated room around 80°F.  
+[ASSISTANT_SAID] Yoga Bliss offers Hatha, Vinyasa, and Restorative classes, evening classes from 5:00 pm to 7:00 pm, and a heated room around 85°F.  
+[ASSISTANT_SAID] Assistant recommended checking the studios' websites, reading reviews, and reaching out to them directly for more information.  
+[ASSISTANT_SAID] Assistant provided pricing and intro offer details for Sahara Yoga Studio and Urban Yoga Loft.  
+[ASSISTANT_SAID] Sahara Yoga Studio's intro offer is $29 for 1 week of unlimited classes, with a drop-in rate of $18 per class.  
+[ASSISTANT_SAID] Sahara Yoga Studio's class packages include a 5-class package for $80 (valid for 2 months) and a 10-class package for $150 (valid for 4 months).  
+[ASSISTANT_SAID] Urban Yoga Loft's intro offer is $39 for 2 weeks of unlimited classes, with a drop-in rate of $20 per

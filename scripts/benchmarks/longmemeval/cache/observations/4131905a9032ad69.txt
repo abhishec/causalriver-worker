@@ -1,0 +1,16 @@
+**Observation Log:**
+
+- [FACT] The user is a student learning back-end programming and front-end programming.
+- [FACT] The languages the user is learning are mainly Java and JavaScript.
+- [FACT] The user has learned JSP and servlet as web application tools.
+- [TEMPORAL] It has been four months since the user started learning.
+- [EVENT] The user is going to work on a web project by April 16th as a team of 5 people.
+- [PREFERENCE] The user wants to emulate the website https://bxgs.co.kr/ for their project.
+- [ASSISTANT_SAID] The assistant suggested implementing features such as responsive design, user login and registration, search functionality, product listing, shopping cart, payment integration, order management, product review system, customer service, and admin dashboard.
+- [ASSISTANT_CREATED] The assistant provided a list of features to implement for the website project.
+- [PREFERENCE] The user wants to implement membership, login and logout, product search, product list, bulletin board (product reviews, work reviews, etc.), shopping cart, member information change, one-on-one inquiry, and purchase functions.
+- [FACT] The user is going to use Oracle database to store data.
+- [ASSISTANT_SAID] The assistant named the tables needed for the project: Members, Products, Orders, Shopping Cart, Product Reviews, Work Reviews, Bulletin Board, One-on-One Inquiry, and Member Information Changes.
+- [ASSISTANT_CREATED] The assistant provided a list of tables needed for the project.
+- [ASSISTANT_SAID] The assistant listed the columns for each table, including Member ID, Username, Password, Email, First Name, Last Name, Address, Phone Number for the Members table, and similar details for other tables.
+- [ASSISTANT_SAID] The assistant explained the primary key and foreign key for each table, detailing how they relate to the data structure and relationships between tables.

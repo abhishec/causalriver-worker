@@ -1,0 +1,40 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2022/01/16 (Sun) 09:24  
+[PREFERENCE] User is looking for new recipe ideas that incorporate fresh tomatoes and fish sauce.  
+[ASSISTANT_SAID] Fresh tomatoes and fish sauce can add a burst of flavor to many dishes.  
+[ASSISTANT_CREATED] Suggested recipes:  
+1. Thai-Style Tomato and Shrimp Stir-Fry  
+2. Tomato and Fish Sauce Braised Fish  
+3. Southeast Asian-Style Salsa  
+4. Fish Sauce-Glazed Salmon with Roasted Tomatoes  
+5. Tomato and Fish Sauce Fried Rice  
+6. Cambodian-Style Fish Soup  
+7. Grilled Fish Tacos with Tomato-Fish Sauce Salsa  
+8. Thai-Style Tomato and Egg Curry  
+[PREFERENCE] User finds the Thai-Style Tomato and Shrimp Stir-Fry recipe amazing and requests a simple recipe for it.  
+[ASSISTANT_SAID] Provided a simple recipe for Thai-Style Tomato and Shrimp Stir-Fry with the following details:  
+- Servings: 2-3  
+- Ingredients: 1 pound large shrimp, 2 cups mixed cherry tomatoes, 2 cloves garlic, 1 tablespoon grated fresh ginger, 2 tablespoons vegetable oil, 2 tablespoons Thai fish sauce, 1 tablespoon lime juice, 1 teaspoon palm sugar, 1/4 teaspoon Thai red curry paste (optional), 1/4 teaspoon salt, fresh Thai basil leaves, steamed jasmine rice or noodles.  
+- Instructions: 9 steps detailing preparation and cooking.  
+[PREFERENCE] User has Thai red curry paste at home and plans to add it for heat.  
+[PREFERENCE] User is looking for recommendations for a good brand of fish sauce.  
+[ASSISTANT_SAID] Recommended fish sauce brands:  
+1. Red Boat Fish Sauce  
+2. Three Crabs Fish Sauce  
+3. Squid Brand Fish Sauce  
+4. Blis Barrel-Aged Fish Sauce  
+[ASSISTANT_SAID] Provided tips for choosing fish sauce:  
+- High-quality ingredients  
+- No added sugar  
+- Clear labeling  
+- Good reviews  
+[PREFERENCE] User is interested in experimenting with different types of vinegar and mentions apple cider vinegar.  
+[ASSISTANT_SAID] Suggested recipe ideas and tips for using apple cider vinegar, including:  
+1. Apple Cider Glazed Pork Chops  
+2. Roasted Brussels Sprouts with Apple Cider Vinegar  
+3. Apple Cider Braised Short Ribs  
+4. Apple Cider Vinaigrette  
+5. Pickled Carrots with Apple Cider Vinegar  
+[ASSISTANT_CREATED] Provided a simple recipe for Apple Cider Vinaigrette with the following details:  
+- Ingredients: 2 tablespoons apple cider vinegar, 2 tablespoons olive oil, 1 teaspoon Dijon mustard, 1 teaspoon honey or maple syrup (

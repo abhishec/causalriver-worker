@@ -1,0 +1,26 @@
+**Observation Log:**
+
+[FACT] User feels overwhelmed with online shopping habits and needs help tracking expenses.  
+[EVENT] User has been making at least one online purchase every week, sometimes two or three, since last month.  
+[CHANGE] User acknowledges that their online shopping habits are getting out of hand.  
+[ASSISTANT_SAID] Assistant acknowledges the user's recognition of the issue and offers to help.  
+[ASSISTANT_SAID] Assistant suggests starting a spending journal to track online purchases, including date, item, price, and website/store.  
+[ASSISTANT_SAID] Assistant recommends using budgeting apps like Mint, You Need a Budget (YNAB), or Personal Capital to track expenses.  
+[ASSISTANT_SAID] Assistant advises setting a budget for online shopping each month and sticking to it.  
+[ASSISTANT_SAID] Assistant suggests implementing a 30-day rule for purchases, unsubscribing from promotional emails, and removing saved credit card information from online retailers.  
+[ASSISTANT_SAID] Assistant encourages finding alternative ways to cope with feelings that lead to shopping, such as exercise or hobbies.  
+[ASSISTANT_SAID] Assistant recommends setting boundaries for shopping days and considering a 'one in, one out' policy for purchases.  
+[ASSISTANT_SAID] Assistant emphasizes the importance of regularly reviewing spending and being patient with the process of changing habits.  
+[ASSISTANT_SAID] Assistant provides an overview of Mint, YNAB, and Personal Capital, detailing their features and pricing.  
+[ASSISTANT_SAID] Assistant explains that Mint is free, user-friendly, and links to bank accounts and credit cards for tracking spending.  
+[ASSISTANT_SAID] Assistant describes Mint's security measures, including 128-bit SSL encryption and two-factor authentication.  
+[ASSISTANT_SAID] Assistant details how Mint links to bank accounts and gathers transaction data for tracking.  
+[ASSISTANT_SAID] Assistant explains that Mint categorizes transactions and provides insights into spending habits.  
+[ASSISTANT_SAID] Assistant mentions that Mint allows users to set budgets and receive alerts for overspending.  
+[ASSISTANT_SAID] Assistant encourages the user to monitor their accounts regularly for suspicious activity.  
+[ASSISTANT_SAID] Assistant reassures the user that Mint will help them understand their spending habits and make a plan to cut back.  
+[USER] User expresses gratitude for the advice and is looking forward to using Mint to track spending.  
+[USER] User acknowledges feeling mindless with online shopping lately and recognizes the need for change.  
+[USER] User decides to start with Mint for tracking expenses.  
+[TEMPORAL] Session Date: 2023/05/20 (Sat) 10:54.  
+[ASSISTANT_CREATED] Assistant created a list of suggestions

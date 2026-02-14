@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/24 (Wed) 14:21  
+[USER] User is a beginner in Next.js 13.2.  
+[ASSISTANT_SAID] The `generateStaticParams` server function can be used in combination with dynamic route segments to define the list of route segment parameters that will be statically generated at build time instead of on-demand.  
+[ASSISTANT_SAID] This replaces `getStaticPaths` of Next.js 12 with a simplified API.  
+[ASSISTANT_SAID] `generateStaticParams` doesn't require any context parameters.  
+[ASSISTANT_SAID] It runs at build time before the corresponding Layouts or Pages are generated.  
+[ASSISTANT_SAID] It will not be called again during revalidation (ISR).  
+[ASSISTANT_SAID] The primary benefit of the `generateStaticParams` function is its smart retrieval of data.  
+[ASSISTANT_SAID] If content is fetched within the `generateStaticParams` function using a fetch request, the requests are automatically deduped.  
+[ASSISTANT_SAID] A fetch request with the same arguments across multiple `generateStaticParams`, Layouts, and Pages will only be made once, which decreases build times.  
+[ASSISTANT_SAID] Dynamic Segments can be created by wrapping a folder’s name in square brackets: [folderName].  
+[ASSISTANT_SAID] Dynamic Segments are passed as the params prop to layout, page, route, and generateMetadata functions.  
+[ASSISTANT_SAID] An example of a dynamic segment is `app/blog/[slug]/page.js` where `[slug]` is the Dynamic Segment for blog posts.  
+[ASSISTANT_SAID] The route example URL params for `app/blog/[slug]/page.js` include `/blog/a` resulting in `{ slug: 'a' }`.  
+[ASSISTANT_SAID] Catch-all Segments can be created by adding an ellipsis inside the brackets: `[...]`.  
+[ASSISTANT_SAID] An example of a catch-all segment is `app/shop/[...slug]/page.js` which will match `/shop/clothes`, `/shop/clothes/tops`, etc.  
+[ASSISTANT_SAID] Optional Catch-all Segments can be made by including the parameter in double square brackets: `[[...folderName]]`.  
+[ASSISTANT_SAID] An example of an optional catch-all segment is `app/shop/[[...slug]]/page.js` which will also match `/shop`.  
+[ASSISTANT_SAID] When using TypeScript, you can add types for params depending on your configured route segment.  
+[ASSISTANT_SAID] The `generateStatic

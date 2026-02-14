@@ -1,0 +1,8 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/25 (Thu) 04:54
+- [ASSISTANT_SAID] The assistant apologized for confusion regarding a formula and identified an issue with named ranges needing replacement with actual cell references.
+- [ASSISTANT_SAID] The assistant provided a corrected formula: `=IFERROR(((((('Flow input'!E8/0.2953)*6894.76)+('Flow input'!E10*248.84)+(AVERAGEIFS('Logger input'!X:X,'Logger input'!A:A,">="&'Phase Averages'!C9,'Logger input'!A:A,"<="&'Phase Averages'!D9))*248.84))/((AVERAGEIFS('Logger input'!Y:Y,'Logger input'!A:A,">="&'Phase Averages'!C9,'Logger input'!A:A,"<="&'Phase Averages'!D9)-32)*5/9+273.15)*8.314*(1+(2/100)))/(12*0.0254)^2*3.14159*60/4)*35.3147, "No data")`
+- [ASSISTANT_SAID] The assistant instructed to replace 'Logger input'!X:X with the column reference for DELTA_P2, 'Logger input'!Y:Y with the column reference for TNL_TMP, and 'Logger input'!A:A with the column reference for Time in the 'Logger input' tab.
+- [USER] The user requested a modification of the formula to look for the correct columns in the 'Logger input' tab, assuming the column names are all in row 1.
+- [ASSISTANT_SAID] The assistant provided an updated formula using INDEX and MATCH functions to find the right columns: `=IFERROR(((((('Flow input'!E8/0.2953)*6894.76)+('Flow input'!E10*248.84)+(AVERAGEIFS(INDEX('Logger input'!1:1048576,,MATCH("DELTA_P2",'Logger input'!1:1,0)),'Logger input'!A:A,">="&'Phase Averages'!C9,'Logger input'!A:A,"<="&'Phase Averages'!D9))*248.84))/((AVERAGEIFS(INDEX('Logger input'!1:1048576,,MATCH("TNL_TMP",'Logger input'!1:1,0)),'Logger input'!A:A,">="&'Phase Averages'!C9,'Logger input'!A:A,"<="&'Phase Averages'!D9)-32)*5/9+273.15)*8.314*(1+(2/100))

@@ -1,0 +1,22 @@
+**Observation Log**
+
+- [TEMPORAL] Session Date: 2023/05/26 (Fri) 08:52
+- [FACT] User inquired about academic programs offered by the University of Cambridge in the field of medicine.
+- [ASSISTANT_SAID] The University of Cambridge offers a range of academic programs in medicine at both the undergraduate and postgraduate levels.
+- [ASSISTANT_SAID] Undergraduate Programs include:
+  - [ASSISTANT_SAID] 1. Bachelor of Medicine, Bachelor of Surgery (MBBS): A 5-year degree program that trains students to diagnose and treat illnesses.
+  - [ASSISTANT_SAID] 2. Bachelor of Arts in Medical Sciences: A 3-year degree program allowing specialization in areas like neuroscience, pathology, pharmacology, or public health.
+  - [ASSISTANT_SAID] 3. Graduate Course in Medicine: A 4-year degree program focusing on clinical medicine, research methodology, and professional skills.
+- [ASSISTANT_SAID] Postgraduate Programs include:
+  - [ASSISTANT_SAID] 1. Doctor of Medicine (MD): Designed for medical graduates pursuing academic medicine or research, culminating in a thesis.
+  - [ASSISTANT_SAID] 2. Master of Clinical Medicine (MCM): For experienced clinicians updating skills in a specific medical discipline.
+  - [ASSISTANT_SAID] 3. MPhil in Medical Science: For students pursuing a career in medical research, culminating in a thesis.
+  - [ASSISTANT_SAID] 4. PhD in Medical Science: For students pursuing a career in medical research, culminating in a thesis.
+- [ASSISTANT_SAID] The University of Cambridge also offers professional development courses and postgraduate certificates in medical disciplines such as clinical research, infectious diseases, and global health.
+- [USER] Expressed interest in learning more about the admission requirements for the MBBS program at Cambridge.
+- [ASSISTANT_SAID] Admission to the MBBS program is highly competitive with the following general requirements:
+  - [ASSISTANT_SAID] 1. Academic qualifications: High grades in relevant subjects at A-level or equivalent, typically AAA including chemistry and another science/math subject.
+  - [ASSISTANT_SAID] 2. Entrance examinations: Required to take either the Biomedical Admissions Test (BMAT) or the UK Clinical Aptitude Test (UKCAT).
+  - [ASSISTANT_SAID] 3. Personal statement: Must demonstrate motivation, relevant experience, and suitability for a career in medicine.
+  - [ASSISTANT_SAID] 4. Interview: Shortlisted candidates will undergo multiple mini-interviews (MMIs) assessing interpersonal skills, communication skills, and ethics.
+  - [ASSISTANT_SAID] 5. English language proficiency: Non

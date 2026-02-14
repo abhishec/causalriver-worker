@@ -1,0 +1,15 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/27 (Sat) 10:37  
+[USER] User is seeking help to create Midjourney commands for AI Art Suffixes.  
+[ASSISTANT_SAID] The command format for Midjourney suffixes is: `/prefer option set option:[simple one-word name] value: - [three-word description of the style]::5 [clearer description of the style, including the medium]::4 [technical details about the style]::3 [color, lighting and tone hints for the style]::3 [something you do not want out of the style]::-2`  
+[ASSISTANT_SAID] The '::' splits up the prompt and the number chosen controls the weight of the prompt that came before it.  
+[ASSISTANT_SAID] Each piece must mention the kind of artwork to avoid interference in multi-prompts.  
+[ASSISTANT_SAID] The user provided examples of Midjourney commands for "impressionist" and "portrait" styles.  
+[ASSISTANT_SAID] The assistant suggested making bold and interesting choices when inventing art styles.  
+[PREFERENCE] User requested three options for creating images of futuristic shamans in aerial, kingdom, and natural styles.  
+[ASSISTANT_SAID] The assistant described a visually appealing art style called "Cyber Shamanism" that blends traditional shamanic motifs with futuristic technology.  
+[ASSISTANT_CREATED] The assistant created three commands for futuristic shamans:  
+1. Aerial: `/prefer option set option:futuristic_shaman_aerial value: - cybernetic shaman in a futuristic cityscape::5 shaman with glowing tattoos, surrounded by neon lights and hovering drones::4 digital painting with bright, electric colors and sharp, angular lines::3 blue and purple tones, a dreamy atmosphere, and a sense of floating in the air::3 no clear horizon line or discernible objects in the background::-2`  
+2. Kingdom: `/prefer option set option:futuristic_shaman_kingdom value: - shamanic leader in a futuristic kingdom::5 shaman wearing a crown, standing on a grand throne with high-tech decorations::4 royal outfit with glowing patterns, ornate background design, and a hint of supernatural power::3 fantasy color scheme with gold, silver, and purple, intricate details and majestic composition::3 no cyber elements, no sci-fi elements, and no overtly technological designs::-2`  
+3. Natural: `/prefer option set option:futuristic_shaman_natural value: - shamanic figure in a futuristic natural environment::5 shaman standing on a cliff overlooking a technologically advanced city::4 a mix of natural and technological elements in the background, with glowing plants and animals::3 color palette dominated by green and blue, with a sense of organic growth

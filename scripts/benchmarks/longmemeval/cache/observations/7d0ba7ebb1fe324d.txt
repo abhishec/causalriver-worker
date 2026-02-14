@@ -1,0 +1,31 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/22 (Mon) 16:07  
+[FACT] The user is in their 30s.  
+[FACT] The user is at a crossroads in their career and is seeking guidance.  
+[PREFERENCE] The user feels overwhelmed by the amount of resources provided but appreciates the assistance.  
+[PREFERENCE] The user wants to update their skills to stay relevant in their industry.  
+[EVENT] The user plans to start with Coursera's "Data Analysis" course by University of Colorado Boulder.  
+[CHANGE] The user has noticed that many of their coworkers are taking online courses to upskill.  
+[PREFERENCE] The user wants to make sure they are competitive in the job market.  
+[ASSISTANT_SAID] The assistant provided a list of resources for career development, including online courses, career development platforms, books, podcasts, assessments, reflection tools, coaching, and community suggestions.  
+[ASSISTANT_SAID] The assistant recommended specific online courses for data analysis on Coursera and LinkedIn Learning, including:  
+- "Data Science" by Johns Hopkins University (Series of 10 courses)  
+- "Data Analysis" by University of Colorado Boulder  
+- "Data Visualization" by University of California, Berkeley  
+- "Data Analysis Fundamentals" by Excel TV  
+- "Data Visualization with Tableau" by Ben Sullins  
+- "Data Analysis with Python" by Mosh Hamedani  
+[ASSISTANT_SAID] The assistant recommended specific online courses for project management on Coursera and LinkedIn Learning, including:  
+- "Project Management" by University of Virginia  
+- "Project Planning and Management" by University of Michigan  
+- "Agile Development" by University of Virginia  
+- "Project Management Fundamentals" by Bonnie Biafore  
+- "Agile Project Management" by Kelley O'Connell  
+- "Microsoft Project 2019 Essential Training" by Bonnie Biafore  
+[ASSISTANT_SAID] The assistant provided tips for getting the most out of the course, including creating a schedule, practicing, joining discussion forums, taking notes, and applying what is learned.  
+[ASSISTANT_SAID] The assistant suggested additional resources to supplement learning, including Kaggle, DataCamp, and data analysis blogs and podcasts.  
+[ASSISTANT_SAID] The assistant provided tips for working on the user's project at work, including defining clear goals, scoping and prioritizing tasks, collaborating with colleagues, documenting the process, and communicating effectively.  
+[ASSISTANT_SAID] The assistant suggested ways to showcase the user's skills, including creating a presentation, writing a case study, and sharing skills with colleagues.  
+[PREFERENCE] The user intends to apply their new skills to a project at work that involves analyzing customer data to improve marketing strategies.  
+[PREFERENCE] The user wants to dive deeper

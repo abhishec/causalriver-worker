@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [FACT] User is looking for recommendations for classical music concerts in New York City.
+- [EVENT] User attended an amazing concert at Carnegie Hall where the New York Philharmonic performed Beethoven's Symphony No. 5 on March 10, 2023.
+- [PREFERENCE] User enjoys classical music and is interested in exploring more classical music venues and upcoming concerts.
+- [ASSISTANT_SAID] Carnegie Hall is an iconic venue where the New York Philharmonic performs regularly.
+- [ASSISTANT_SAID] Recommended venues include Lincoln Center, Brooklyn Academy of Music (BAM), Merkin Concert Hall at Kaufman Music Center, and The Morgan Library & Museum.
+- [ASSISTANT_SAID] Upcoming concerts recommended include New York Philharmonic at David Geffen Hall, The Chamber Music Society of Lincoln Center, Orpheus Chamber Orchestra, The New York Classical Players, and The Gotham Chamber Opera.
+- [ASSISTANT_SAID] Suggested online resources include NYC Classical Music Calendar and Classical Music in NYC Facebook group.
+- [ASSISTANT_SAID] User is particularly interested in the Orpheus Chamber Orchestra.
+- [ASSISTANT_SAID] Orpheus Chamber Orchestra's next performance is at Carnegie Hall's Stern Auditorium, featuring Haydn's Symphony No. 103, Mozart's Piano Concerto No. 23, and Schubert's Rondo in A major for Violin and Strings.
+- [ASSISTANT_SAID] Orpheus Chamber Orchestra will not be performing any Beethoven pieces in this concert.
+- [PREFERENCE] User has attended a jazz show at the Blue Note Jazz Club and an indie rock festival at the Brooklyn Mirage.
+- [EVENT] User considers the concert at Carnegie Hall a highlight.
+- [ASSISTANT_SAID] Recommended upcoming classical music festivals include Mostly Mozart Festival (July 22 to August 24), Bargemusic's "Here and Now" summer festival (June 15 to September 2), Maverick Concerts (June 29 to September 1), Lincoln Center's Great Performers series, and Carnegie Hall's La Serenissima festival (October 25 to November 3).
+- [PREFERENCE] User is interested in contemporary classical music.
+- [EVENT] User attended a music festival in Austin, Texas, where they saw a new electronic artist, Luna Grey, perform.
+- [ASSISTANT_SAID] Recommended contemporary classical music festivals include Bang on a Can Marathon (August 3), Tanglewood Music Festival (June 20 to September 1), MATA Festival (April 13 to 18), Ecstatic Music Festival (held in January), and National Sawdust's events.
+- [PREFERENCE] User is considering volunteering at music festivals or events in the city.
+- [FACT] User has experience volunteering at SXSW and enjoyed it.
+- [ASSISTANT_SAID] Suggested volunteer

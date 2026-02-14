@@ -1,0 +1,27 @@
+**Observation Log:**
+
+- [FACT] The user is interested in building a website.
+- [FACT] The user is focused on software engineering college students as the target audience for the website.
+- [FACT] The user mentioned that there are currently 4 generations of software engineering students, with some from the first generation having graduated.
+- [PREFERENCE] The user wants the website to serve as a showcase/community platform for software engineering college students to showcase their work and connect with each other.
+- [ASSISTANT_SAID] The assistant asked for more information about the website's purpose, target audience, and desired features to provide specific advice.
+- [ASSISTANT_SAID] The assistant provided a list of user research questions to understand the needs and goals of the target audience, including motivations for showcasing work, current methods of showcasing work, and desired features for the website.
+- [ASSISTANT_CREATED] The assistant created a list of 10 user research questions, including:
+  1. What motivates you to showcase your work as a software engineering student?
+  2. How do you currently showcase your work (e.g. personal website, Github, LinkedIn, etc.) and what are the benefits and drawbacks of each approach?
+  3. How do you currently connect with other software engineering students, alumni, and lecturers, and what are the benefits and drawbacks of each approach?
+  4. What features or functionalities would you like to see in a showcase/community website for software engineering students?
+  5. How important is it for you to connect with alumni and lecturers through such a website, and what specific benefits do you see in doing so?
+  6. What kind of projects or collaborations would you be interested in pursuing through the website?
+  7. How often do you think you would use a showcase/community website for software engineering students, and what would make you come back to the website regularly?
+  8. How important is it for you to be able to customize your profile and showcase your personal brand on the website?
+  9. How important is it for you to have access to resources such as job/internship listings, mentorship opportunities, and industry events through the website?
+  10. What design elements or features would you find most appealing in such a website, and why?
+- [PREFERENCE] The user mentioned that the website could reference awwwards.com for inspiration.
+- [ASSISTANT_SAID] The assistant provided ways to leverage awwwards.com as a reference point, including:
+  1. Visual Design Inspiration
+  2. Best Practices for User Experience
+  3. Showcase Examples of Best Work
+  4. Community Building
+- [ASSISTANT_CREATED] The assistant created a list of problem and solution statements that could fit on sticky notes, including:
+  - Problem Statement: Software engineering students struggle to find a platform to showcase their work and connect with

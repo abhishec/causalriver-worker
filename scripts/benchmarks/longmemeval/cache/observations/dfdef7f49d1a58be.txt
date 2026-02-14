@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [FACT] The user is working on a thesis.
+- [FACT] The user has been using a tool to manage citations for their thesis.
+- [CHANGE] The user finalized their research questions and objectives last month.
+- [TEMPORAL] The user spent many late nights in February working on their research questions and objectives.
+- [PREFERENCE] The user is looking for help with organizing references for their thesis.
+- [ASSISTANT_SAID] The assistant congratulated the user on finalizing their research questions and objectives.
+- [ASSISTANT_SAID] The assistant recommended several citation management tools: Mendeley, Zotero, EndNote, Papers, Cite This For Me, BibTeX, ReadCube, and Citavi.
+- [ASSISTANT_SAID] The assistant provided factors to consider before switching to a new citation management tool: ease of use, compatibility, integration, collaboration, and cost.
+- [FACT] The user is considering Mendeley and Zotero as alternatives for citation management.
+- [ASSISTANT_SAID] The assistant provided information on Mendeley’s collaboration features: groups, collaborative annotation, shared folders, real-time updates, and permissions.
+- [ASSISTANT_SAID] The assistant provided information on Zotero’s collaboration features: groups, shared libraries, real-time collaboration, item-level permissions, and version history.
+- [PREFERENCE] The user plans to try out Mendeley's collaborative annotation feature for their thesis.
+- [EVENT] The user is planning to publish their thesis in a journal.
+- [PREFERENCE] The user is looking for advice on how to find the right journal for their research.
+- [ASSISTANT_SAID] The assistant provided tips for finding the right journal: identify target audience, research journals in the field, check impact factor, evaluate editorial board, assess publication speed, check for open access options, read author guidelines, look for reputable journals, get feedback from colleagues, and use journal finder tools.
+- [PREFERENCE] The user is planning to submit their thesis to a top-tier journal in their field.
+- [EVENT] The user has already started looking into potential journals.
+- [ASSISTANT_SAID] The assistant provided advice on assessing a journal's quality and impact: consider impact factor, CiteScore, SJR, journal ranking lists, editorial board, peer review process, publishing ethics, citation counts, altmetrics, journal reach, field-specific metrics, awards and recognition, journal age, publisher reputation, open access options, and publication speed.

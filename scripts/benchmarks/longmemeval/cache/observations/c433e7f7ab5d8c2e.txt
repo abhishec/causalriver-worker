@@ -1,0 +1,22 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/20 (Sat) 17:11
+- [PREFERENCE] User is looking for new recipe ideas, especially for Thai dishes.
+- [EVENT] User tried an amazing Pad Thai from Thai Basil on Uber Eats last week.
+- [EVENT] User has ordered from Thai Basil three times already.
+- [ASSISTANT_SAID] Pad Thai is a classic dish in Thai cuisine.
+- [ASSISTANT_SAID] Thai cuisine is diverse and delicious, with many dishes to explore beyond Pad Thai.
+- [ASSISTANT_SAID] Suggested popular Thai dishes: Tom Yum Soup, Green Curry, Massaman Curry, Som Tam (Papaya Salad), Satay, Khao Soi, Larb (Meat Salad), Tom Kha Kai.
+- [ASSISTANT_CREATED] Provided a simple recipe for Homemade Pad Thai, including ingredients and instructions.
+- [ASSISTANT_SAID] Suggested user to experiment with different ingredients and spice levels in Pad Thai.
+- [PREFERENCE] User expressed interest in making Tom Yum Soup and mentioned a love for spicy food.
+- [ASSISTANT_SAID] Recommended types of mushrooms for Tom Yum Soup: Button Mushrooms, Crimini Mushrooms, Shiitake Mushrooms, Oyster Mushrooms.
+- [ASSISTANT_SAID] Provided tips for getting the flavor just right in Tom Yum Soup, including using a variety of chilies, balancing flavors, using high-quality fish sauce, and not overcooking mushrooms.
+- [ASSISTANT_CREATED] Provided a recipe for Tom Yum Soup, including ingredients and instructions.
+- [PREFERENCE] User is considering adding shrimp to the Tom Yum Soup for extra protein.
+- [ASSISTANT_SAID] Provided tips on cooking shrimp perfectly in Tom Yum Soup, including adding shrimp towards the end of cooking and cooking until they are pink and just set.
+- [ASSISTANT_SAID] Explained how to prepare and use galangal in the recipe.
+- [ASSISTANT_SAID] Provided storage tips for galangal, including how to store fresh, refrigerated, frozen, and dried galangal.
+- [ASSISTANT_SAID] Explained the shelf life of galangal based on storage methods.
+- [PREFERENCE] User is excited to try the Tom Yum Soup with shrimp and galangal.
+- [EVENT] User mentioned Thai Basil, an Uber Eats restaurant that serves amazing Pad Thai.

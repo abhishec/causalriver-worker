@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[FACT] User is 22 years old and recently celebrated their birthday last month.  
+[EVENT] User has recently finished a big project at their new job.  
+[EVENT] User is planning a trip to celebrate their accomplishments.  
+[EVENT] User is looking for destinations for a quick 4-day getaway.  
+[ASSISTANT_SAID] Assistant congratulated the user on their recent accomplishments and offered to help plan a trip.  
+[ASSISTANT_SAID] Assistant suggested eight destinations for a quick 4-day getaway: Austin, Texas; Portland, Oregon; Nashville, Tennessee; New Orleans, Louisiana; Asheville, North Carolina; San Diego, California; Chicago, Illinois; and Boston, Massachusetts.  
+[ASSISTANT_SAID] Assistant provided details about each suggested destination, including activities and attractions.  
+[EVENT] User is leaning towards Austin, Texas, for their trip.  
+[ASSISTANT_SAID] Assistant provided recommendations for accommodations in Austin, including Hotel San José, The Driskill, and Airbnb options.  
+[ASSISTANT_SAID] Assistant listed things to do during the day in Austin, including exploring South Congress, visiting the Texas State Capitol, Barton Springs Pool, Lady Bird Lake Hike and Bike Trail, and trying food trucks.  
+[ASSISTANT_SAID] Assistant recommended specific food trucks in Austin: Torchy's Tacos, Veracruz All Natural, Chi'Lantro, The Peached Tortilla, G'Raj Mahal, Lulu's Fried Chicken, and East Side King.  
+[ASSISTANT_SAID] Assistant provided additional tips for getting around Austin and enjoying BBQ.  
+[EVENT] User is considering staying at Hotel San José.  
+[ASSISTANT_SAID] Assistant discussed the pros and cons of booking a room with a pool view at Hotel San José.  
+[ASSISTANT_SAID] Assistant recommended several BBQ joints in Austin besides Franklin Barbecue: La Barbecue, Kerlin BBQ, Micklethwait Craft Meats, Stubb's BBQ, and Cooper's Old Time Pit Bar-B-Que.  
+[EVENT] User is thinking of visiting the Texas State Capitol and grabbing lunch at food trucks on South Congress.  
+[ASSISTANT_SAID] Assistant provided recommendations for food trucks on South Congress, including Torchy's Tacos and Veracruz All Natural.  
+[ASSISTANT_SAID] Assistant suggested specific items to try at Torchy's Tacos: Trailer Park, Democrat, and Green Chile Pork.  
+[ASSISTANT_SAID] Assistant suggested specific items to try at Veracruz All Natural: Migas Tacos, Carne Asada Tacos, and El Conquistador.  
+[ASSISTANT_SAID] Assistant advised the user to try the "Torchy's Way" at Torchy's, which adds a slice of queso, sour cream, and cilantro.  
+[T

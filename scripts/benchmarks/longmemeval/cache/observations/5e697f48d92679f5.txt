@@ -1,0 +1,26 @@
+**Observation Log:**
+
+**Session Date:** 2023/05/14 (Sun) 19:30  
+**Session ID:** 3275acf9  
+
+1. [PREFERENCE] User is trying to organize loyalty programs and rewards.
+2. [ASSISTANT_SAID] Assistant offered to help the user keep track of loyalty programs and rewards.
+3. [ASSISTANT_SAID] Assistant requested the following details for each program: program name, reward type, current balance or amount, expiration date, and any specific redemption requirements or restrictions.
+4. [ASSISTANT_SAID] Assistant suggested using a loyalty program tracking app or spreadsheet to keep rewards organized.
+5. [ASSISTANT_SAID] Assistant provided examples of tracking options: AwardWallet, TravelBank, Loyalty Tracker, Google Keep, or Notes.
+6. [EVENT] User has a few loyalty programs to keep track of.
+7. [FACT] User has Walgreens Balance Rewards with 10,000 points and redeemed 5,000 points for a $5 reward last week.
+8. [FACT] User has CVS ExtraCare Rewards with a few bucks in rewards and needs to use ExtraBucks reward by April 15th.
+9. [FACT] User also has Target RedCard, Starbucks Rewards, ShopRite Price Plus, and Fetch Rewards.
+10. [ASSISTANT_SAID] Assistant confirmed they would help set up reminders for the expiration dates.
+11. [ASSISTANT_SAID] Assistant summarized the information provided about Walgreens Balance Rewards and CVS ExtraCare Rewards.
+12. [ASSISTANT_SAID] Assistant noted to remind the user about the CVS ExtraBucks reward expiration on April 15th.
+13. [ASSISTANT_SAID] Assistant asked if the user preferred email or another method for reminders.
+14. [TEMPORAL] User signed up for Walgreens Balance Rewards around early February.
+15. [ASSISTANT_SAID] Assistant provided additional options for tracking loyalty programs: spreadsheets, note-taking apps, loyalty program aggregators, digital wallets, browser extensions, and paper-based tracking.
+16. [ASSISTANT_SAID] Assistant suggested considering ease of use, accessibility, reminders, and organization when choosing a tracking method.
+17. [PREFERENCE] User decided to try using a spreadsheet to track loyalty programs.
+18. [ASSISTANT_CREATED] Assistant provided a basic template for a loyalty program tracker with columns: Program Name, Current Balance, Expiration Date, Reward Type, and Notes.
+19. [ASSISTANT_SAID] Assistant explained each column's purpose in the template.
+20. [ASSISTANT_SAID] Assistant suggested adding more columns for Earn Rate, Redemption Options, and Next Reward if needed.
+21. [ASSISTANT_SAID] Assistant provided instructions on how to sort data in the spreadsheet by selecting the table, going to the Data menu, and

@@ -1,0 +1,26 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/03/13 (Mon) 09:47  
+[FACT] User runs a website called 'gitbook.com' on Vercel.  
+[FACT] The website allows customers to create their own documentation websites.  
+[FACT] Documentation websites are created as subdomains on the user's website.  
+[FACT] Example of a subdomain: 'dans-gitbook.gitbook.com'.  
+[ASSISTANT_SAID] Assistant confirmed understanding of the user's explanation and asked for clarification on the full URL format.  
+[FACT] Vercel automatically generates a URL for deployments, which is something like 'dans-gitbook.vercel.app'.  
+[FACT] User has assigned a custom domain of 'gitbook.com' and a wildcard subdomain of '*.gitbook.com'.  
+[ASSISTANT_SAID] Assistant confirmed understanding of the wildcard subdomain configuration.  
+[FACT] Vercel automatically configures SSL for its customers using Let's Encrypt.  
+[EVENT] User imagines a scenario where customer Dan wants to use a custom domain 'docs.danfletcher.com' for his documentation site.  
+[FACT] Dan owns the domain 'danfletcher.com' and can change its DNS records.  
+[ASSISTANT_SAID] Assistant provided steps for enabling Dan to use the custom domain 'docs.danfletcher.com'.  
+[ASSISTANT_SAID] Step 1: Dan should create a CNAME record for 'docs.danfletcher.com' pointing to 'dans-gitbook.vercel.app'.  
+[ASSISTANT_SAID] Step 2: Add the custom domain 'docs.danfletcher.com' to the list of domains for the Gitbook project in the Vercel dashboard.  
+[ASSISTANT_SAID] Step 3: Wait for DNS changes to propagate.  
+[ASSISTANT_SAID] Step 4: Vercel will automatically provision an SSL certificate for 'docs.danfletcher.com' using Let's Encrypt.  
+[USER] User pointed out that step 2 is unnecessary due to the wildcard subdomain configuration.  
+[ASSISTANT_SAID] Assistant acknowledged the correction and confirmed that step 2 is not needed.  
+[USER] User asked about the implications of a CAA record that disallows Let's Encrypt for the domain 'danfletcher.com'.  
+[ASSISTANT_SAID] Assistant confirmed that if the CAA record disallows Let's Encrypt, Dan would not be able to point his domain at Vercel.  
+[USER] User inquired about using a Digicert SSL certificate instead.  
+[ASSISTANT_SAID] Assistant explained that if Dan's domain disallows Let's Encrypt but allows other SSL providers, he could use a Digicert SSL certificate.  
+[ASSISTANT_SAID] Steps for using a Dig

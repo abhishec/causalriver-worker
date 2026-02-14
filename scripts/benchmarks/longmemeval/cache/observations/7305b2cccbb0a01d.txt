@@ -1,0 +1,39 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/25 (Thu) 05:11  
+[FACT] User is working on a fantasy novel.  
+[FACT] User started writing short stories again about three months ago.  
+[PREFERENCE] User enjoys reading fantasy books.  
+[PREFERENCE] User loved "The Night Circus" by Erin Morgenstern.  
+[ASSISTANT_SAID] Congratulations on getting back into writing short stories!  
+[ASSISTANT_SAID] Suggested resources for world-building:  
+[ASSISTANT_CREATED] 1. "The World-Building School of Fantasy and Science Fiction" by Jeffrey A. Carver  
+[ASSISTANT_CREATED] 2. "How to Write Science Fiction and Fantasy" by Orson Scott Card  
+[ASSISTANT_CREATED] 3. "The Writer's Guide to Fantasy Literature" by Philip Martin  
+[ASSISTANT_SAID] Suggested online resources:  
+[ASSISTANT_CREATED] 1. Worldbuilding subreddit (r/Worldbuilding)  
+[ASSISTANT_CREATED] 2. WorldAnvil  
+[ASSISTANT_CREATED] 3. Fantasy Faction  
+[ASSISTANT_SAID] Suggested games and media for inspiration:  
+[ASSISTANT_CREATED] 1. Dungeons & Dragons  
+[ASSISTANT_CREATED] 2. The Elder Scrolls  
+[ASSISTANT_CREATED] 3. Dragon Age  
+[ASSISTANT_CREATED] 4. Lord of the Rings  
+[ASSISTANT_CREATED] 5. Game of Thrones  
+[ASSISTANT_CREATED] 6. The Witcher  
+[ASSISTANT_SAID] Tips for world-building:  
+[ASSISTANT_CREATED] 1. Start with the basics: geography, climate, and history.  
+[ASSISTANT_CREATED] 2. Create a consistent mythology.  
+[ASSISTANT_CREATED] 3. Build from the ground up.  
+[ASSISTANT_CREATED] 4. Make it diverse.  
+[ASSISTANT_CREATED] 5. Leave room for discovery.  
+[ASSISTANT_CREATED] 6. Be consistent.  
+[ASSISTANT_CREATED] 7. Draw inspiration from real-world cultures.  
+[ASSISTANT_CREATED] 8. Keep a world-building bible.  
+[ASSISTANT_CREATED] 9. Practice and iterate.  
+[ASSISTANT_CREATED] 10. Have fun.  
+[PREFERENCE] User has been reading a lot of fantasy books lately.  
+[ASSISTANT_SAID] "The Night Circus" is a great choice!  
+[ASSISTANT_SAID] Erin Morgenstern's world-building is magical and immersive.  
+[ASSISTANT_SAID] Suggested analyzing what the user enjoys about the worlds they read about:  
+[ASSISTANT_CREATED] 1. What draws me

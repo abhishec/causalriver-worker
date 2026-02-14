@@ -1,0 +1,21 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/28 (Sun) 02:12  
+[FACT] User has combination skin that tends to get oily in the summer.  
+[FACT] User's main skin concerns are acne and hyperpigmentation.  
+[EVENT] User invested $500 in high-end skincare products during the Nordstrom anniversary sale.  
+[FACT] User purchased La Mer Moisturizing Cream, Sunday Riley Power Couple, and Dr. Dennis Gross Skincare Alpha Beta Peel Body & Face.  
+[FACT] User's current skincare routine is basic: washes face morning and night, then applies moisturizer.  
+[ASSISTANT_SAID] Assistant congratulated the user on their new skincare haul and offered to help optimize their skincare routine.  
+[ASSISTANT_SAID] Assistant requested information about the user's skin type, concerns, products purchased, current skincare routine, and any specific product categories the user is unsure about.  
+[ASSISTANT_SAID] Assistant provided a detailed morning skincare routine: cleanse, apply Dr. Dennis Gross Skincare Alpha Beta Peel, apply Sunday Riley Power Couple serum, and apply La Mer Moisturizing Cream.  
+[ASSISTANT_SAID] Assistant provided a detailed nighttime skincare routine: cleanse, apply Dr. Dennis Gross Skincare Alpha Beta Peel, apply Sunday Riley Power Couple serum, and suggested using a lightweight, oil-free moisturizer instead of La Mer.  
+[ASSISTANT_SAID] Assistant recommended using the Dr. Dennis Gross Skincare Alpha Beta Peel 2-3 times a week and starting with the Sunday Riley Power Couple serum once a day if the user has sensitive skin.  
+[ASSISTANT_SAID] Assistant advised to wear sunscreen with at least SPF 30 during the day to prevent further hyperpigmentation.  
+[CHANGE] User has been making more budget-friendly choices lately, like buying store-brand coffee instead of gourmet coffee beans.  
+[ASSISTANT_SAID] Assistant provided lifestyle changes to help with skin concerns, including hydration, diet, stress management, environmental factors, skincare habits, and other lifestyle changes.  
+[ASSISTANT_SAID] Assistant suggested drinking 8-10 glasses of water a day and limiting sugary drinks and caffeine.  
+[ASSISTANT_SAID] Assistant recommended eating a balanced diet rich in fruits, vegetables, whole grains, and lean proteins, and including skin-friendly foods like berries, leafy greens, and fatty fish.  
+[ASSISTANT_SAID] Assistant advised managing stress through techniques like meditation, deep breathing, or yoga, and getting 7-8 hours of sleep.  
+[ASSISTANT_SAID] Assistant emphasized the importance of protecting skin from the sun and avoiding pollution and secondhand smoke.  
+[ASSISTANT_SAID] Assistant recommended not touching the face, properly removing makeup before bed, and avoiding picking or popping pimples.

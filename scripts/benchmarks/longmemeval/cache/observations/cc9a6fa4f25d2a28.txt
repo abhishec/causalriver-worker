@@ -1,0 +1,37 @@
+**Observation Log:**
+
+**Session Date:** 2023/05/26 (Fri) 07:49  
+**Session ID:** sharegpt_4PwGTCZ_0
+
+- [FACT] User inquired about additional image links in SQL of PrestaShop.
+- [ASSISTANT_SAID] Additional images for products are stored in the "image" table of the database, with columns "id_product" and "position".
+- [ASSISTANT_SAID] Suggested SQL query: `SELECT * FROM ps_image WHERE id_product = [product ID] ORDER BY position;`
+- [USER] Requested SQL query to select all images for all product IDs and additional images.
+- [ASSISTANT_SAID] Provided SQL query: 
+  ```
+  SELECT p.id_product, i.id_image, i.position FROM ps_product p
+  INNER JOIN ps_image i ON p.id_product = i.id_product
+  ORDER BY p.id_product, i.position;
+  ```
+- [USER] Requested that the main image be in a column called "main_image" and additional images in separate columns.
+- [ASSISTANT_SAID] Provided SQL query:
+  ```
+  SELECT p.id_product, i1.id_image as main_image, i2.id_image as additional_image_1, i3.id_image as additional_image_2, i4.id_image as additional_image_3, i5.id_image as additional_image_4
+  FROM ps_product p
+  LEFT JOIN ps_image i1 ON p.id_product = i1.id_product and i1.cover = 1
+  LEFT JOIN ps_image i2 ON p.id_product = i2.id_product and i2.cover = 0
+  LEFT JOIN ps_image i3 ON p.id_product = i3.id_product and i3.cover = 0
+  LEFT JOIN ps_image i4 ON p.id_product = i4.id_product and i4.cover = 0
+  LEFT JOIN ps_image i5 ON p.id_product = i5.id_product and i5.cover = 0
+  ORDER BY p.id_product;
+  ```
+- [USER] Noted that the images columns are NULL and asked for troubleshooting advice.
+- [ASSISTANT_SAID] Suggested troubleshooting steps including verifying product IDs, checking image associations, ensuring correct table and column names, using LEFT JOIN, and debugging with a simple select query.
+- [USER] Requested SQL query to select all id_product with id_lang 7 from ps_product_lang and output in different columns.
+- [ASSISTANT_SAID] Provided SQL query:
+  ```
+  SELECT pl.id_product, pl.description, pl.description_short, pl.link_rewrite, pl.meta_description, pl.meta_title, pl.name
+  FROM ps_product_lang pl
+  WHERE pl.id_lang = 7;
+  ```
+- [USER] Requested a query that will export all information for each product in a single column.

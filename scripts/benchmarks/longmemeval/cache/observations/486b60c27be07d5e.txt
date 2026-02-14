@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/29 (Mon) 22:28
+- [ASSISTANT_SAID] Bayesian classification is a statistical method used for classifying data based on probabilistic reasoning.
+- [ASSISTANT_SAID] Naïve Bayes classifier is a common type of Bayesian classifier that assumes attributes are conditionally independent given the class label.
+- [ASSISTANT_SAID] The Naïve Bayes classifier estimates prior probabilities of each class label based on the training data set.
+- [ASSISTANT_SAID] The posterior probabilities of each class label given the attribute values are computed using the prior and conditional probabilities.
+- [ASSISTANT_SAID] Example training data for Naïve Bayes classification includes attributes X and Y with a binary class label C (positive or negative).
+- [ASSISTANT_SAID] Prior probabilities for the example data are P(C=Pos) = 0.5 and P(C=Neg) = 0.5.
+- [ASSISTANT_SAID] Conditional probabilities for the example data are P(X=1 | C=Pos) = 0.5, P(Y=0 | C=Pos) = 0.5, P(X=1 | C=Neg) = 0.5, P(Y=0 | C=Neg) = 0.5.
+- [ASSISTANT_SAID] The posterior probabilities for the new data instance with X=1 and Y=0 are P(C=Pos | X=1, Y=0) = 0.125 and P(C=Neg | X=1, Y=0) = 0.125.
+- [ASSISTANT_SAID] Bagging (Bootstrap Aggregating) is a technique used to improve the accuracy and stability of machine learning models by reducing variance.
+- [ASSISTANT_SAID] Bagging involves creating multiple bootstrap samples, training separate models on each, and combining the results for final predictions.
+- [ASSISTANT_SAID] Boosting is an ensemble method that iteratively trains weak models, focusing on misclassified instances from previous models.
+- [ASSISTANT_SAID] The most popular boosting algorithm is AdaBoost, which assigns higher weights to misclassified instances.
+- [ASSISTANT_SAID] Cluster analysis is a data mining technique used to group similar objects or data points together.
+- [ASSISTANT_SAID] Requirements for clustering in data mining include scalability, robustness, interpretability, validity, suitability, and flexibility.
+- [ASSISTANT_SAID] K-means clustering is a partitional clustering technique that partitions a dataset into k clusters based on user-specified k.
+- [ASSISTANT_SAID] The K-means algorithm involves initialization, assignment, update, and repetition until convergence.
+-

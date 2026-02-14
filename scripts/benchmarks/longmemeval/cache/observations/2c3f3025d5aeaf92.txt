@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/20 (Sat) 07:32  
+[FACT] User has enjoyed the World History and Computer Science series from Crash Course.  
+[EVENT] User managed to stick to watching Crash Course videos for about six weeks, completing 40 videos in total.  
+[PREFERENCE] User is looking for recommendations on educational YouTube channels similar to Crash Course.  
+[ASSISTANT_SAID] Recommended educational YouTube channels similar to Crash Course:  
+[ASSISTANT_SAID] 1. CGP Grey: Engaging educational videos about geography, history, and culture.  
+[ASSISTANT_SAID] 2. The History Guy: In-depth history lessons on various topics, including ancient civilizations and military history.  
+[ASSISTANT_SAID] 3. Kurzgesagt – In a Nutshell: Animated videos explaining complex topics like history, science, and philosophy.  
+[ASSISTANT_SAID] 4. The Armchair Historian: Entertaining and informative history lessons, often focusing on lesser-known topics.  
+[ASSISTANT_SAID] 5. Tom Richey: History lessons and study tips, with a focus on US History and Government.  
+[ASSISTANT_SAID] 6. 3Blue1Brown (Grant Sanderson): Animated videos explaining complex concepts in math, science, and programming.  
+[ASSISTANT_SAID] 7. PBS Space Time: Explore the latest developments in space and time, hosted by physicist Matt O'Dowd.  
+[ASSISTANT_SAID] 8. Deep Look: Short, visually stunning videos about science, nature, and technology.  
+[ASSISTANT_SAID] 9. Veritasium: Experiments and demonstrations that explore the natural world and scientific principles.  
+[ASSISTANT_SAID] 10. Physics Girl: Fun, DIY experiments and explanations of scientific concepts.  
+[ASSISTANT_SAID] 11. freeCodeCamp: Learn to code and build projects with this non-profit organization's video tutorials.  
+[ASSISTANT_SAID] 12. Traversy Media: Brad Traversy's channel offers tutorials on web development, programming, and technology.  
+[ASSISTANT_SAID] 13. Siraj Raval: AI, machine learning, and programming tutorials, with a focus on practical applications.  
+[ASSISTANT_SAID] 14. Neso Academy: Computer science and programming lessons, covering topics like algorithms and data structures.  
+[ASSISTANT_SAID] 15. sentdex: Python programming tutorials and data science explanations.  
+[ASSISTANT_SAID] 16. Crash Course's sibling channels: Crash Course has several sister channels, including Crash Course Kids, Crash Course Literature, and

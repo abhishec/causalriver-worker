@@ -1,0 +1,26 @@
+**Observation Log:**
+
+- [FACT] User is looking for something to put in their living room.
+- [PREFERENCE] User wants the item to have a pop of color.
+- [PREFERENCE] User is not keen on religious imagery.
+- [ASSISTANT_SAID] Suggested Indian traditional art forms to add color without religious imagery: Warli Art, Rajasthani Art, Madhubani Art, Pattachitra Art.
+- [ASSISTANT_SAID] Warli Art is known for its bold and graphic style, featuring geometric shapes and patterns in bright colors.
+- [ASSISTANT_SAID] Rajasthani Art is known for intricate designs and bright colors, often depicting scenes from everyday life.
+- [ASSISTANT_SAID] Madhubani Art features intricate designs and bright colors, often depicting nature, mythology, and daily life.
+- [ASSISTANT_SAID] Pattachitra Art features intricate designs and bright colors, often depicting scenes from Hindu mythology, but also includes abstract designs.
+- [USER] User expressed interest in Pattachitra Art.
+- [ASSISTANT_SAID] Provided information about Pattachitra artisans, mentioning the Mohapatra family, Behera family, and Sahoo family.
+- [ASSISTANT_SAID] The Mohapatra family has been practicing Pattachitra for over three centuries.
+- [ASSISTANT_SAID] The Behera family is known for intricate designs and attention to detail.
+- [ASSISTANT_SAID] The Sahoo family is recognized for vibrant colors and innovative designs.
+- [ASSISTANT_SAID] Suggested other art forms from Odisha: Applique work, Dokra art, Terracotta art, Chhau dance.
+- [ASSISTANT_SAID] Applique work involves sewing colored cloth onto a larger piece to create designs.
+- [ASSISTANT_SAID] Dokra art is a form of metal casting involving molds made from beeswax and clay.
+- [ASSISTANT_SAID] Terracotta art involves creating sculptures from clay that has been fired.
+- [ASSISTANT_SAID] Chhau dance is a traditional dance form involving elaborate masks and costumes.
+- [USER] Requested a list of discussed art forms in order of increasing cost.
+- [ASSISTANT_SAID] Listed art forms in order of increasing cost: Warli art, Madhubani art, Rajasthani art, Pattachitra art, Applique work, Chhau dance, Terracotta art, Dokra art.
+- [ASSISTANT_SAID] Provided approximate price ranges for medium-sized artworks in USD.
+- [USER] User lives in India and requested prices in Indian Rupees instead of USD.
+- [ASSISTANT_SAID] Provided approximate price ranges for medium-sized artworks in Indian Rupees: 
+  - Warli art: ₹1,

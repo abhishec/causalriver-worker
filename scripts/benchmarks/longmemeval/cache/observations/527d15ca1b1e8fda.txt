@@ -1,0 +1,47 @@
+**Observation Log:**
+
+[FACT] User is trying to remember the name of a YouTube channel for dance tutorials.
+
+[ASSISTANT_SAID] Assistant clarifies that there are many YouTube channels featuring professional dancers and dance tutorials.
+
+[ASSISTANT_SAID] Assistant asks for more details or clues about the channel, including dance style, type of channel, specific videos, target audience, and distinctive branding.
+
+[FACT] User mentions the channel has a variety of dance styles, focusing mostly on salsa and hip hop tutorials.
+
+[FACT] User describes the instructors as really good and the production quality as high.
+
+[PREFERENCE] User thinks the name of the channel is something simple and straightforward, like "DanceWith" something.
+
+[ASSISTANT_SAID] Assistant provides three educated guesses for the channel name: "DanceWithJanet," "DanceWithMe," and "DanceTutorialsLive."
+
+[FACT] User identifies "DanceWithMe" as the channel they were thinking of.
+
+[EVENT] User expresses relief at remembering the channel name.
+
+[FACT] User is interested in tutorials on dancing in heels and is considering trying out heel classes.
+
+[ASSISTANT_SAID] Assistant confirms that DanceWithMe has tutorials on dancing in heels, including a specific playlist for "Heels Dance Tutorials."
+
+[ASSISTANT_SAID] Assistant mentions that one of the popular instructors, Chloe Arnold, has a "Heels 101" series for beginners.
+
+[ASSISTANT_SAID] Assistant advises user to prioritize safety and comfort when dancing in heels.
+
+[EVENT] User is thinking of getting dance shoes and is currently wearing sneakers to class.
+
+[ASSISTANT_SAID] Assistant provides several recommendations for stores that sell dance shoes for salsa and hip hop: Capezio, Discount Dance Supply, DanceWithMe, So Danca, and BurjuShoes.
+
+[ASSISTANT_SAID] Assistant lists factors to consider when shopping for dance shoes, including style, material, fit, and price.
+
+[ASSISTANT_SAID] Assistant suggests reading reviews, consulting with the instructor, and trying shoes before buying.
+
+[FACT] User decides to check out Capezio and Discount Dance Supply first due to their wide selection.
+
+[ASSISTANT_SAID] Assistant confirms that Capezio and Discount Dance Supply have both physical stores and online options.
+
+[ASSISTANT_SAID] Assistant explains that Capezio has a network of authorized retailers and flagship stores in major cities, including NYC.
+
+[ASSISTANT_SAID] Assistant states that Discount Dance Supply is primarily an online retailer but has a "Fit Guarantee" for trying on shoes at home.
+
+[ASSISTANT_SAID] Assistant provides tips for finding sales and discounts at Capezio, including signing up for the email newsletter, following on social media, checking the website for sales, looking for bundle deals, and inquiring about student and professional discounts.
+
+[EVENT]

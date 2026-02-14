@@ -1,0 +1,118 @@
+{
+  "answer_669318cf_2": [
+    {
+      "fact": "User is trying to organize their writing projects.",
+      "type": "preference",
+      "entities": [
+        "writing projects"
+      ]
+    },
+    {
+      "fact": "User has written 17 poems in the past two weeks.",
+      "type": "event",
+      "entities": [
+        "17 poems",
+        "two weeks"
+      ]
+    },
+    {
+      "fact": "User finds writing a great way to express themselves creatively.",
+      "type": "opinion",
+      "entities": [
+        "writing",
+        "creativity"
+      ]
+    },
+    {
+      "fact": "User is interested in exploring Pomodoro Timers.",
+      "type": "preference",
+      "entities": [
+        "Pomodoro Timers"
+      ]
+    }
+  ],
+  "answer_669318cf_3": [
+    {
+      "fact": "User has been writing a lot lately, including short stories and poetry.",
+      "type": "personal",
+      "entities": [
+        "writing",
+        "short stories",
+        "poetry"
+      ]
+    },
+    {
+      "fact": "User is participating in a writing challenge on a social media platform.",
+      "type": "event",
+      "entities": [
+        "writing challenge",
+        "social media"
+      ]
+    },
+    {
+      "fact": "User receives a prompt every week for the writing challenge.",
+      "type": "event",
+      "entities": [
+        "weekly prompt"
+      ]
+    },
+    {
+      "fact": "User wrote a piece titled 'The Smell of Old Books' in response to the prompt 'forgotten memories'.",
+      "type": "event",
+      "entities": [
+        "The Smell of Old Books",
+        "forgotten memories"
+      ]
+    },
+    {
+      "fact": "User prefers to categorize their writing files by genre and project-based.",
+      "type": "preference",
+      "entities": [
+        "genre",
+        "project-based"
+      ]
+    },
+    {
+      "fact": "User plans to set up folders for short stories, poetry, and writing challenge submissions.",
+      "type": "preference",
+      "entities": [
+        "short stories",
+        "poetry",
+        "writing challenge submissions"
+      ]
+    },
+    {
+      "fact": "User is interested in using a note-taking app to help brainstorm and outline stories.",
+      "type": "preference",
+      "entities": [
+        "note-taking app",
+        "brainstorming",
+        "outlining"
+      ]
+    }
+  ],
+  "answer_669318cf_1": [
+    {
+      "fact": "User has written five short stories so far",
+      "type": "personal",
+      "entities": [
+        "five short stories"
+      ]
+    },
+    {
+      "fact": "User is looking for writing prompts to stay motivated",
+      "type": "preference",
+      "entities": [
+        "writing prompts",
+        "motivation"
+      ]
+    },
+    {
+      "fact": "User likes the idea of writing from a different perspective",
+      "type": "preference",
+      "entities": [
+        "writing from a different perspective"
+      ]
+    }
+  ]
+}

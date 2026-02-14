@@ -1,0 +1,84 @@
+{
+  "answer_02e66dec_1": [
+    {
+      "fact": "User is planning their next trip",
+      "type": "event",
+      "entities": [
+        "trip"
+      ]
+    },
+    {
+      "fact": "User is considering traveling solo or with family",
+      "type": "preference",
+      "entities": [
+        "solo travel",
+        "family travel"
+      ]
+    },
+    {
+      "fact": "User recently went on a family trip to Hawaii",
+      "type": "event",
+      "entities": [
+        "Hawaii",
+        "family trip"
+      ]
+    },
+    {
+      "fact": "User had a great time snorkeling with family in Hawaii",
+      "type": "event",
+      "entities": [
+        "snorkeling",
+        "family",
+        "Hawaii"
+      ]
+    },
+    {
+      "fact": "User felt a bit stuck to a schedule during the family trip",
+      "type": "opinion",
+      "entities": [
+        "schedule",
+        "family trip"
+      ]
+    }
+  ],
+  "answer_02e66dec_2": [
+    {
+      "fact": "User is planning a trip to Europe.",
+      "type": "event",
+      "entities": [
+        "Europe",
+        "trip"
+      ]
+    },
+    {
+      "fact": "User is looking for tips on planning a family-friendly itinerary.",
+      "type": "preference",
+      "entities": [
+        "family-friendly itinerary"
+      ]
+    },
+    {
+      "fact": "User recently visited Paris as a family.",
+      "type": "event",
+      "entities": [
+        "Paris",
+        "family"
+      ]
+    },
+    {
+      "fact": "User thinks their kids loved the trip to Paris.",
+      "type": "opinion",
+      "entities": [
+        "kids",
+        "Paris"
+      ]
+    },
+    {
+      "fact": "User is considering going to Paris again.",
+      "type": "preference",
+      "entities": [
+        "Paris"
+      ]
+    }
+  ]
+}

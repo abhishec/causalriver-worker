@@ -1,0 +1,35 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2022/04/10 (Sun) 11:55
+- [USER] User is interested in vegan options at a Mexican restaurant.
+- [ASSISTANT_SAID] Recommended vegan options at a Mexican restaurant include:
+  1. Guacamole and chips
+  2. Vegetable fajitas, ask for no cheese or sour cream
+  3. Black bean, vegetable or mushroom enchiladas, ask for no cheese or sour cream
+  4. Vegetable or mushroom tacos, ask for no cheese or sour cream
+  5. Grilled vegetable burrito, ask for no cheese or sour cream
+  6. Salsa and pico de gallo
+  7. Rice and beans (double-check with the restaurant)
+  8. Tostadas with beans, lettuce, tomatoes, and guacamole
+  9. Grilled corn on the cob with spices and lime juice
+  10. Vegan pozole (a traditional Mexican soup)
+  11. Vegan tamales with vegetable fillings
+- [USER] User expressed surprise at the number of vegan choices at a Mexican restaurant.
+- [USER] User asked if they should ask the server for more recommendations.
+- [ASSISTANT_SAID] Suggested that asking the server for recommendations is a great idea, as they may know more about vegan options available at the restaurant.
+- [USER] User stated they would ask the server for more recommendations and double-check dishes before ordering, emphasizing the importance of sticking to their vegan diet while enjoying a meal.
+- [ASSISTANT_SAID] Affirmed the user's commitment to their vegan diet and suggested that many restaurants now offer vegan-friendly options. Encouraged asking the server for vegan options or modifications.
+- [USER] User mentioned struggling to find something to eat when dining out with non-vegan friends and asked for tips on dealing with them.
+- [ASSISTANT_SAID] Provided tips for dining out with non-vegan friends:
+  1. Suggest a vegan-friendly restaurant.
+  2. Speak up and ask for modifications.
+  3. Be proactive by checking the menu online or calling ahead.
+  4. Suggest sharing vegan dishes.
+  5. Bring your own food if necessary.
+- [USER] User found the tips helpful and liked the idea of sharing vegan dishes with friends. Thanked the assistant for the help.
+- [ASSISTANT_SAID] Expressed satisfaction in helping the user and encouraged them to reach out with more questions in the future.
+- [USER] User asked for recommendations for vegan Mexican desserts due to having a sweet tooth and wanting to try something traditional.
+- [ASSISTANT_SAID] Recommended vegan Mexican dessert options:
+  1. Churros
+  2. Paletas (traditional Mexican popsicles)
+  3. Arroz con leche

@@ -1,0 +1,26 @@
+**Observation Log:**
+
+- [FACT] The user is working with a marketing brief for a product called PTInsights.
+- [FACT] PTInsights is a tool designed to optimize shop performance and profitability for independent auto repair shops and collision centers, MSOs, shop managers, service advisors, and parts managers who are current or past users of PartsTrader.
+- [EVENT] The campaign aims to raise awareness of PTInsights among current and past users of PartsTrader.
+- [EVENT] The campaign will drive traffic to the PTInsights page on the PartsTrader website.
+- [EVENT] The campaign aims to increase usage and recurring usage of PTInsights.
+- [EVENT] The campaign will utilize the hero section of the PartsTrader website to bring awareness and drive traffic to PTInsights after the full rollout in mid-April.
+- [EVENT] The campaign will promote PTInsights on social media starting in mid-April.
+- [EVENT] A 4-email drip campaign will highlight each of the four key dashboards of PTInsights.
+- [EVENT] The campaign will run in-app ads to encourage users to view the PTInsights dashboards.
+- [EVENT] "Metric Emails" will be sent to shop owners with their actual shop data to drive them to the report dashboards in PTInsights, starting as early as mid-February.
+- [TEMPORAL] The emails for the 4-email drip campaign and the "metric emails" will begin going out in mid-February.
+- [TEMPORAL] The hero section of the PartsTrader website and social media promotions will be utilized starting in mid-April, after the full rollout of the product.
+- [TEMPORAL] The end date for the campaign is tentatively set for mid-May.
+- [TEMPORAL] The 4-email drip campaign and in-app ads are due by February 8th.
+- [TEMPORAL] The hero section and social media posts and ads are due by mid-March.
+- [ASSISTANT_SAID] The four-email drip campaign will consist of emails focusing on the four key dashboards: DRP Scorecard, Margin Breakdown, Preferred Vendors, and Process Overview.
+- [ASSISTANT_SAID] Each email will provide detailed information on the features, benefits, and how PTInsights can help users optimize their shop performance and profitability.
+- [ASSISTANT_SAID] Each email will drive traffic to the specific dashboard mentioned in the email.
+- [ASSISTANT_SAID] The campaign's main objective is to raise awareness of PTInsights and increase usage and recurring usage of the tool.
+- [ASSISTANT_CREATED] The assistant provided a prioritized list of campaign elements based on due date, which includes:
+  1. A 4-email drip campaign by February 8th.
+  2. In-app ads by February 8th.
+  3. A hero section on the PartsTrader website by mid-March.
+  4. Social media

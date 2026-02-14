@@ -1,0 +1,72 @@
+{
+  "answer_3f9693b7_1": [
+    {
+      "fact": "User is planning a dinner party",
+      "type": "event",
+      "entities": [
+        "dinner party"
+      ]
+    },
+    {
+      "fact": "User is interested in Korean BBQ dishes",
+      "type": "preference",
+      "entities": [
+        "Korean BBQ"
+      ]
+    },
+    {
+      "fact": "User plans to serve a variety of dishes from different cuisines",
+      "type": "preference",
+      "entities": [
+        "variety of dishes",
+        "different cuisines"
+      ]
+    },
+    {
+      "fact": "User is considering pairing Korean BBQ with Indian and Middle Eastern dishes",
+      "type": "preference",
+      "entities": [
+        "Indian dishes",
+        "Middle Eastern dishes"
+      ]
+    }
+  ],
+  "answer_3f9693b7_2": [
+    {
+      "fact": "User is planning a dinner party",
+      "type": "event",
+      "entities": [
+        "dinner party"
+      ]
+    },
+    {
+      "fact": "User is making Korean-style BBQ beef for the dinner party",
+      "type": "preference",
+      "entities": [
+        "Korean-style BBQ beef"
+      ]
+    },
+    {
+      "fact": "User has chosen kimchi and bokkeumbap as side dishes",
+      "type": "preference",
+      "entities": [
+        "kimchi",
+        "bokkeumbap"
+      ]
+    },
+    {
+      "fact": "User has tried four different Korean restaurants in their city",
+      "type": "personal",
+      "entities": [
+        "Korean restaurants"
+      ]
+    },
+    {
+      "fact": "User is looking for new Korean restaurant recommendations",
+      "type": "preference",
+      "entities": [
+        "Korean restaurant recommendations"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/20 (Sat) 08:45  
+[USER] User is trying to get the hang of using EQ filters.  
+[ASSISTANT_SAID] Different EQ filters affect the sound of a mix in different ways.  
+[ASSISTANT_SAID] High-pass filter: Allows high frequencies to pass through and cuts low frequencies; useful for removing low-frequency rumble or unwanted background noise.  
+[ASSISTANT_SAID] Low-pass filter: Allows low frequencies to pass through and cuts high frequencies; useful for removing high-frequency noise or reducing harshness.  
+[ASSISTANT_SAID] Bandpass filter: Allows a range of frequencies to pass through and cuts everything else; useful for isolating a specific frequency range or creating a narrow notch for removing certain frequencies.  
+[ASSISTANT_SAID] Notch filter: Cuts a narrow range of frequencies; useful for removing a specific frequency or reducing feedback.  
+[ASSISTANT_SAID] Shelving filter: Boosts or cuts a specific range of frequencies above or below a certain threshold; useful for adjusting the overall tonality of a mix.  
+[ASSISTANT_SAID] Parametric EQ: Allows for precise control over a specific frequency range with adjustable bandwidth and gain; useful for surgical EQ adjustments.  
+[ASSISTANT_SAID] Appropriate uses for each type of filter depend on the specific needs of the mix.  
+[ASSISTANT_SAID] High-pass filters are commonly used on individual tracks to remove low-frequency rumble or on the overall mix to clean up unwanted low-end noise.  
+[ASSISTANT_SAID] Low-pass filters are often used on individual tracks to reduce harshness or on the overall mix for a more relaxed sound.  
+[ASSISTANT_SAID] Bandpass filters can be used to isolate a specific frequency range, such as the snare drum or vocals.  
+[ASSISTANT_SAID] Notch filters are useful for removing feedback or resonances in a specific frequency.  
+[ASSISTANT_SAID] Shelving filters can be used on the overall mix to adjust the tonality or on individual tracks to boost or cut specific frequency ranges.  
+[ASSISTANT_SAID] Parametric EQ is useful for precise adjustments to individual tracks or on the overall mix.  
+[USER] User finds the breakdown of EQ filters helpful and asks for tips on using multiple filters at once.  
+[ASSISTANT_SAID] Tips for using multiple EQ filters:  
+[ASSISTANT_SAID] 1. Avoid over-processing: Don't apply too many filters, which can lead to a thin or unnatural sound.  
+[ASSISTANT_SAID] 2. Address the most important issues first: Start with the most important issue and then move on to smaller issues

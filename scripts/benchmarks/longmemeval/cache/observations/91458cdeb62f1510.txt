@@ -1,0 +1,19 @@
+**Observation Log:**
+
+[FACT] User attended a weekend-long yoga retreat in November last year.  
+[FACT] User is looking for yoga classes in their area.  
+[PREFERENCE] User is interested in restorative yoga, as they enjoyed that particular workshop during the retreat.  
+[EVENT] User attended a photography workshop last month.  
+[PREFERENCE] User is interested in finding studios that offer photography classes or workshops.  
+[PREFERENCE] User is interested in learning more about digital marketing.  
+[EVENT] User participated in a series of online workshops on digital marketing last year, covering topics like SEO, social media, and email marketing.  
+[PREFERENCE] User is especially interested in improving their skills in SEO.  
+[EVENT] User participated in a two-day coding bootcamp last month.  
+[PREFERENCE] User is interested in learning more about coding, especially in JavaScript and HTML.  
+[ASSISTANT_SAID] Suggested tips for finding yoga classes, including online search, checking studio websites, social media, asking around, considering style and level, checking reviews, looking for workshops, and meeting the teacher.  
+[ASSISTANT_SAID] Provided questions to evaluate a yoga class or studio, such as class size, atmosphere, teacher modifications, feedback opportunities, and studio cleanliness.  
+[ASSISTANT_SAID] Suggested ways to find a restorative yoga studio, including Google search, yoga studio directories, social media, word of mouth, and checking studio websites.  
+[ASSISTANT_SAID] Recommended considering factors like teacher experience, class schedule, studio atmosphere, props availability, and workshops when evaluating a restorative yoga studio.  
+[ASSISTANT_SAID] Suggested creative ways to explore the intersection of yoga and photography, including mindfulness in photography, yoga and creative expression, wellness centers, private instruction, online resources, and creating a personal practice.  
+[ASSISTANT_SAID] Provided resources and courses for improving digital marketing skills, including HubSpot Academy, Google Analytics Academy, Coursera, Udemy, SEMrush, Moz, Ahrefs, Search Engine Land, SEO Journal, and certifications like Google Analytics Certification and HubSpot Inbound Marketing Certification.  
+[ASSISTANT_SAID] Suggested resources and courses for improving coding skills, including Codecademy, FreeCodeCamp, W3Schools, Udemy, and Pluralsight.

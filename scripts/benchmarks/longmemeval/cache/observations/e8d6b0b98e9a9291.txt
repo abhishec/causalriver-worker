@@ -1,0 +1,37 @@
+**Observation Log:**
+
+[FACT] User is interested in music recommendations and has been getting into indie and alternative genres.
+
+[FACT] User has been listening to Arctic Monkeys, The 1975, and Tame Impala a lot.
+
+[EVENT] User has attended concerts recently, including Billie Eilish at the Oakland Arena and The Weeknd at the SAP Center in San Jose.
+
+[ASSISTANT_SAID] Assistant recommended the following indie rock bands: The Black Keys, The Neighbourhood, Foals, The Strokes, and Interpol.
+
+[ASSISTANT_SAID] Assistant recommended the following psychedelic/indie psychedelia bands: King Gizzard & the Lizard Wizard, Unknown Mortal Orchestra, Temples, Mild High Club, and Pond.
+
+[ASSISTANT_SAID] Assistant recommended the following alternative/indie pop bands: Glass Animals, Bazzi, Pale Waves, The Japanese House, and Day6.
+
+[ASSISTANT_SAID] Assistant recommended the following other bands: The XX, Two Door Cinema Club, Hozier, Wolf Alice, and Cage the Elephant.
+
+[EVENT] User has heard of some of the recommended bands, like The Neighbourhood, Glass Animals, and Pale Waves, and loves their music.
+
+[EVENT] User mentioned that The Neighbourhood's concert was one of the three concerts attended recently.
+
+[ASSISTANT_SAID] Assistant recommended the following music podcasts: All Songs Considered (NPR), Indiecast, KCRW's Morning Becomes Eclectic, Pitchfork, and The Indie Mixtape.
+
+[ASSISTANT_SAID] Assistant recommended the following YouTube channels: Indie Mixtape, Pigeons & Planes, The Needle Drop, La Blogothèque, and KEXP.
+
+[ASSISTANT_SAID] Assistant recommended Spotify's Discover Weekly and Apple Music's New Music Mix for music discovery.
+
+[ASSISTANT_SAID] Assistant recommended the following upcoming festivals: Outside Lands Music and Arts Festival (August, San Francisco), BottleRock Napa Valley (May, Napa Valley), Coachella Valley Music and Arts Festival (April, Indio), and Governors Ball Music Festival (June, Oakland).
+
+[ASSISTANT_SAID] Assistant recommended the following concert venues: The Ohana Festival (October, Dana Point), The Fillmore (San Francisco), The Greek Theatre (Berkeley), and The Fox Theater (Oakland).
+
+[ASSISTANT_SAID] Assistant recommended the following indie and alternative music blogs: Pitchfork, Stereogum, NME, The Fader, and Indie Shuffle.
+
+[ASSISTANT_SAID] Assistant recommended the following music discovery websites: Pigeons & Planes, Hype Machine, Bandcamp, SoundCloud, and Gorilla vs. Bear.
+
+[FACT] User has recently gotten into vinyl collecting.
+
+[EVENT] User recently bought the vinyl record of The 1975

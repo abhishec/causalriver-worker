@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/21 (Sun) 04:18
+- [EVENT] User is thinking of getting their oil changed soon.
+- [ASSISTANT_SAID] Assistant does not have access to the user's personal vehicle history or maintenance records.
+- [ASSISTANT_SAID] Assistant suggests checking the oil change sticker, vehicle's maintenance schedule, and odometer reading to determine when the next oil change is due.
+- [FACT] User last had their oil changed in December.
+- [EVENT] User has been taking good care of their car, including renewing their registration online about a month ago.
+- [FACT] User's registration renewal cost $120 for the year.
+- [ASSISTANT_SAID] Assistant recommends rotating tires every 5,000 to 8,000 miles and checking the owner's manual for specific recommendations.
+- [ASSISTANT_SAID] Assistant suggests combining the oil change with a tire rotation and a quick vehicle inspection.
+- [EVENT] User is thinking of selling their old bike that has been stored in their trunk for years.
+- [ASSISTANT_SAID] Assistant provides a list of information to include when listing the bike on Craigslist or Facebook Marketplace, including bike type, condition, age, size, components, price, location, and photos.
+- [ASSISTANT_CREATED] Assistant creates an example listing for a bike, including details about the bike's condition, age, size, components, price, and location.
+- [FACT] User has had their car for a while and has been doing okay with maintenance.
+- [CHANGE] User increased their insurance deductible to $500 to lower their insurance premium.
+- [ASSISTANT_SAID] Assistant clarifies that a vehicle inspection is not necessary for a bike and suggests the user perform a self-inspection of the bike.
+- [ASSISTANT_SAID] Assistant lists items to check on the bike, including tires, brakes, chain, frame, and wheels.
+- [ASSISTANT_SAID] Assistant advises against mentioning the bike being stored in the trunk as a selling point.
+- [ASSISTANT_SAID] Assistant recommends taking clear, well-lit photos of the bike from multiple angles and showcasing any features.
+- [ASSISTANT_SAID] Assistant emphasizes the importance of being honest about the bike's condition in the listing.

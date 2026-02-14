@@ -1,0 +1,23 @@
+**Observation Log:**
+
+- [FACT] The user is looking into getting a new fishing kayak.
+- [PREFERENCE] The user is interested in comparing the Old Town Predator and the Perception Spark fishing kayaks.
+- [ASSISTANT_SAID] The Old Town Predator is known for its exceptional stability, customization options, comfort, and ample storage space.
+- [ASSISTANT_SAID] The cons of the Old Town Predator include its weight (around 85 pounds), length (13 feet 2 inches), and higher price compared to the Perception Spark.
+- [ASSISTANT_SAID] The Perception Spark is lightweight (around 62 pounds), agile, affordable, and easy to handle, making it suitable for beginners.
+- [ASSISTANT_SAID] The cons of the Perception Spark include slightly less stability, fewer customization options, and less storage space compared to the Predator.
+- [ASSISTANT_SAID] The user should consider stability, customization, comfort, weight, agility, and price when deciding between the two kayaks.
+- [ASSISTANT_SAID] The user is advised to test paddle both kayaks to determine which one suits them best.
+- [EVENT] The user has been thinking about taking their kayak to Lake Tahoe.
+- [TEMPORAL] The user went on a fishing trip to Lake Tahoe a few weeks ago with friends.
+- [ASSISTANT_SAID] The user needs to be aware of fishing regulations in Lake Tahoe, which is shared by California and Nevada.
+- [ASSISTANT_SAID] In California, a sport fishing license is required, with a bag limit of 5 trout per day and a minimum size limit of 14 inches.
+- [ASSISTANT_SAID] In Nevada, a fishing license is also required, with similar bag limits and size restrictions.
+- [ASSISTANT_SAID] The user should check the California Department of Fish and Wildlife (CDFW) and Nevada Department of Wildlife (NDOW) websites for up-to-date regulations.
+- [EVENT] The user is thinking about planning a fly fishing trip to Montana.
+- [ASSISTANT_SAID] The user should obtain a valid Montana fishing license, which can be purchased online or at a licensed vendor.
+- [ASSISTANT_SAID] Montana's general fishing season typically runs from the third Saturday in May to November 30th, with specific regulations for different rivers.
+- [ASSISTANT_SAID] The user should be aware of the daily bag limits and size limits for trout in Montana.
+- [ASSISTANT_SAID] The user is advised to check the Montana Fish, Wildlife, and Parks (FWP) website for specific regulations and restrictions for fly fishing.
+- [EVENT] The user is thinking of trying out fly fishing on the Madison River.
+- [ASSISTANT_SAID] The Madison River is

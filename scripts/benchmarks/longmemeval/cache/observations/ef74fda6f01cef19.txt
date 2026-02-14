@@ -1,0 +1,26 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/27 (Sat) 10:11
+- [ASSISTANT_SAID] The assistant provided a list of equipable weapons for the attacker role, detailing their properties and effects.
+- [ASSISTANT_SAID] Swords: 
+  - Rarity C: Basic sword with physical damage, no bonuses. Uses more action points.
+  - Rarity UC: Improved sword with slightly increased physical damage and uses slightly fewer action points.
+  - Rarity R: Enhanced sword with mostly physical damage, added random elemental damage (fire, lightning, life drain, water, or earth), and a weapon-specific BONUS ABILITY. Uses even fewer action points.
+  - Rarity UR: Elemental sword with 100% elemental damage, uses slightly fewer action points, and includes a weapon-specific BONUS ABILITY.
+- [ASSISTANT_SAID] Bows: 
+  - Rarity C: Basic bow with physical damage, no bonuses. Uses more action points.
+  - Rarity UC: Improved bow with slightly increased physical damage and uses slightly fewer action points.
+  - Rarity R: Enhanced bow with mostly physical damage, added random elemental damage (fire, lightning, life drain, water, or earth), and a weapon-specific BONUS ABILITY. Uses even fewer action points.
+  - Rarity UR: Elemental bow with 100% elemental damage, uses slightly fewer action points, and includes a weapon-specific BONUS ABILITY.
+- [ASSISTANT_SAID] Axes: 
+  - Rarity C: Basic axe with physical damage, no bonuses. Uses more action points.
+  - Rarity UC: Improved axe with slightly increased physical damage and uses slightly fewer action points.
+  - Rarity R: Enhanced axe with mostly physical damage, added random elemental damage (fire, lightning, life drain, water, or earth), and a weapon-specific BONUS ABILITY. Uses even fewer action points.
+  - Rarity UR: Elemental axe with 100% elemental damage, uses slightly fewer action points, and includes a weapon-specific BONUS ABILITY.
+- [ASSISTANT_SAID] Maces: 
+  - Rarity C: Basic mace with physical damage, no bonuses. Uses more action points.
+  - Rarity UC: Improved mace with slightly increased physical damage and uses slightly fewer action points.
+  - Rarity R: Enhanced mace with mostly physical damage, added random elemental damage (fire, lightning, life drain, water, or earth), and a weapon-specific BONUS ABILITY. Uses even fewer action points.
+  - Rarity UR: Elemental mace with 100% elemental damage, uses slightly fewer action points, and includes a weapon-specific BONUS ABILITY.
+- [ASSISTANT_SAID] Elemental Damage Types and Effects:
+  - Fire: Chance of inflicting burn, which deals lasting damage

@@ -1,0 +1,107 @@
+{
+  "answer_92147866_1": [
+    {
+      "fact": "User purchased a 50-pound batch of layer feed for their farm.",
+      "type": "event",
+      "entities": [
+        "50-pound batch",
+        "layer feed",
+        "farm"
+      ]
+    },
+    {
+      "fact": "User spent around $120 on the layer feed purchase.",
+      "type": "personal",
+      "entities": [
+        "$120"
+      ]
+    },
+    {
+      "fact": "User received a 10% discount on the layer feed from a local farm supply store.",
+      "type": "event",
+      "entities": [
+        "10% discount",
+        "local farm supply store"
+      ]
+    },
+    {
+      "fact": "User recently added two new hens to their flock.",
+      "type": "event",
+      "entities": [
+        "two new hens",
+        "flock"
+      ]
+    },
+    {
+      "fact": "User is considering adjusting the feeding schedule for their chickens.",
+      "type": "opinion",
+      "entities": [
+        "feeding schedule",
+        "chickens"
+      ]
+    },
+    {
+      "fact": "User is looking for guidelines on how often to feed their chickens and how much to give each day.",
+      "type": "preference",
+      "entities": [
+        "feeding guidelines",
+        "chickens"
+      ]
+    }
+  ],
+  "answer_92147866_2": [
+    {
+      "fact": "User is expanding their farm's product line to include homemade jam and honey.",
+      "type": "preference",
+      "entities": [
+        "farm",
+        "homemade jam",
+        "honey"
+      ]
+    },
+    {
+      "fact": "User recently bought 20 pounds of organic scratch grains for their chickens.",
+      "type": "event",
+      "entities": [
+        "20 pounds",
+        "organic scratch grains",
+        "chickens"
+      ]
+    },
+    {
+      "fact": "User has noticed an improvement in the quality of eggs from their chickens.",
+      "type": "opinion",
+      "entities": [
+        "quality of eggs",
+        "chickens"
+      ]
+    },
+    {
+      "fact": "User is seeking information on regulations and permits for selling products at the local farmer's market.",
+      "type": "preference",
+      "entities": [
+        "regulations",
+        "permits",
+        "local farmer's market"
+      ]
+    },
+    {
+      "fact": "User is inquiring about the necessity of food safety certification for cottage food laws.",
+      "type": "preference",
+      "entities": [
+        "food safety certification",
+        "cottage food laws"
+      ]
+    },
+    {
+      "fact": "User wants to know about the registration requirements for selling jams and honey at the farmer's market.",
+      "type": "preference",
+      "entities": [
+        "registration",
+        "jams",
+        "honey",
+        "farmer's market"
+      ]
+    }
+  ]
+}

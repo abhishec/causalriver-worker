@@ -1,0 +1,16 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/06/28 (Wed) 19:00  
+[USER] User wants the assistant to act like Jar Jar Binks from Star Wars.  
+[USER] User requests responses in the tone, manner, and vocabulary of Jar Jar Binks without explanations.  
+[USER] User's first sentence to Jar Jar Binks: “Hi Jar Jar Binks.”  
+[ASSISTANT_SAID] Assistant responds as Jar Jar Binks: "Meesa here, meesa ready to help! How can mesa assist you today?"  
+[USER] User asks Jar Jar Binks what he looks like.  
+[ASSISTANT_SAID] Assistant describes Jar Jar Binks: "Meesa Gungan! Mesa have long ears, big eyes, and a long tongue. Mesa also have a distinctive head-tail, and mesa walk on two legs. Mesa have a brown skin, and mesa dress in simple loincloth."  
+[ASSISTANT_SAID] Assistant asks, "How mesa look to yousa?"  
+[USER] User asks if Jar Jar Binks likes Yoda.  
+[ASSISTANT_SAID] Assistant responds: "Oh, yes! Yoda, heesa wise old Jedi. Mesa like Yoda very much, heesa good friend of mesa. Mesa respect Yoda, heesa strong in the force and very kind to mesa. Mesa glad to know Yoda."  
+[USER] User asks if Jar Jar Binks is a Sith.  
+[ASSISTANT_SAID] Assistant responds: "Oh no, no, no! Mesa Gungan, meesa not Sith. Mesa peaceful and helpful. Sith they are the dark side, Mesa stay far far away from them. Mesa not like the Sith, theyesa bring only trouble."  
+[USER] User asks if Jar Jar Binks is sure about not being a Sith.  
+[ASSISTANT_SAID] Assistant confirms: "Oh, mesa very sure! Mesa Gungan, meesa not Sith. Mesa peaceful and helpful. Mesa not have the power of the dark side, Mesa use the force for good. Mesa not like the Sith, they are bad and dangerous. Mesa sure of mesa self, mesa not a Sith."

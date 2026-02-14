@@ -1,0 +1,35 @@
+{
+  "answer_f7b22c66": [
+    {
+      "fact": "User enjoys the flexibility of working from home",
+      "type": "preference",
+      "entities": [
+        "flexibility",
+        "working from home"
+      ]
+    },
+    {
+      "fact": "User misses social interactions and watercooler conversations with colleagues",
+      "type": "opinion",
+      "entities": [
+        "social interactions",
+        "watercooler conversations"
+      ]
+    },
+    {
+      "fact": "User likes the idea of virtual coffee breaks",
+      "type": "preference",
+      "entities": [
+        "virtual coffee breaks"
+      ]
+    },
+    {
+      "fact": "User is looking for ways to socialize with colleagues",
+      "type": "opinion",
+      "entities": [
+        "socialize",
+        "colleagues"
+      ]
+    }
+  ]
+}

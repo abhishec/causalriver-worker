@@ -1,0 +1,48 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/06/17 (Sat) 19:42  
+[USER_PREFERENCE] User liked the provided file structure for the app.  
+[USER_PREFERENCE] User prefers a structured organization of files in the app.  
+[ASSISTANT_SAID] Assistant praised the user's file structure for separating functionality into logical components and following standard Python package conventions.  
+[ASSISTANT_CREATED] Assistant provided an updated file structure that includes an `api` directory for React Native mobile app endpoints.  
+[ASSISTANT_CREATED] The updated file structure includes the following files:  
+- `app/authentication/__init__.py`  
+- `app/authentication/auth.py`  
+- `app/authentication/azuread.py`  
+- `app/case_management/__init__.py`  
+- `app/case_management/case.py`  
+- `app/case_management/shared_case.py`  
+- `app/image_review/__init__.py`  
+- `app/image_review/image.py`  
+- `app/image_review/prediction.py`  
+- `app/logging/__init__.py`  
+- `app/logging/logger.py`  
+- `app/logging/logging.yaml`  
+- `app/utils/__init__.py`  
+- `app/utils/datastore.py`  
+- `app/utils/notifications.py`  
+- `app/main.py`  
+- `app/api/__init__.py`  
+- `app/api/auth.py`  
+- `app/api/case.py`  
+- `app/api/shared_case.py`  
+- `app/api/image.py`  
+- `app/api/prediction.py`  
+[ASSISTANT_SAID] Assistant explained how to import API endpoints in `main.py` and register them with the app object.  
+[ASSISTANT_SAID] Assistant listed the available URLs for the API endpoints:  
+- `/api/auth`  
+- `/api/case`  
+- `/api/shared_case`  
+- `/api/image`  
+- `/api/prediction`  
+[USER_REQUEST] User asked what the datastore model of a case would look like.  
+[ASSISTANT_CREATED] Assistant provided a datastore model for the `Case` entity with the following properties:  
+- `created_by` (StringProperty, required)  
+- `created_on` (DateTimeProperty, auto_now_add)  
+- `updated_on` (DateTimeProperty, auto_now)  
+- `name` (StringProperty, required)  
+- `description` (TextProperty)  
+- `images` (JsonProperty, required)  
+- `status` (StringProperty, choices=['open', 'closed'], default='open')  
+[USER_REQUEST] User asked what changes would be required to collect correct labels of the implant system predicted by the app.  
+[ASSISTANT_SAID] Assistant suggested modifying the `

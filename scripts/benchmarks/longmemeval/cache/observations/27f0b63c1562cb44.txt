@@ -1,0 +1,26 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/27 (Sat) 09:38  
+[EVENT] User is looking for recommendations on guitar amps.  
+[EVENT] User is planning to buy a new guitar amp with the money from selling their old drum set.  
+[ASSISTANT_SAID] Suggested questions to narrow down guitar amp recommendations:  
+[ASSISTANT_SAID] 1. What type of music do you play? (e.g., rock, blues, jazz, metal, country)  
+[ASSISTANT_SAID] 2. What's your budget for the amp?  
+[ASSISTANT_SAID] 3. Do you need a practice amp, a gigging amp, or something in between?  
+[ASSISTANT_SAID] 4. Do you have a preference for tube, solid-state, or hybrid amps?  
+[ASSISTANT_SAID] 5. How much power do you need? (e.g., 10W, 20W, 50W, 100W)  
+[ASSISTANT_SAID] 6. Do you need any specific features like built-in effects, USB recording capabilities, or multiple channels?  
+[ASSISTANT_SAID] Recommended beginner/practice amps:  
+[ASSISTANT_SAID] - Fender Mustang I V.2 (20W, $100) - great for beginners, compact, and feature-rich  
+[ASSISTANT_SAID] - Blackstar ID:Core 10 V2 (10W, $130) - versatile, easy to use, and sounds great  
+[ASSISTANT_SAID] Recommended intermediate/gigging amps:  
+[ASSISTANT_SAID] - Marshall DSL20C (20W, $300) - classic Marshall tone, compact, and affordable  
+[ASSISTANT_SAID] - Orange Crush 20 (20W, $250) - warm, articulate sound, and built-in reverb  
+[ASSISTANT_SAID] Recommended high-gain/metal amps:  
+[ASSISTANT_SAID] - Mesa Boogie Rectifier Mini (25W, $400) - tight, aggressive sound, and compact design  
+[ASSISTANT_SAID] - Peavey 6505 Plus (65W, $500) - high-gain, versatile, and feature-rich  
+[ASSISTANT_SAID] Recommended tube amps:  
+[ASSISTANT_SAID] - Fender Hot Rod Deluxe IV (40W, $500) - warm, articulate sound, and built-in reverb  
+[ASSISTANT_SAID] - Vox AC15C1 (15W, $400) - classic, warm tone, and compact design  
+[ASSISTANT_SAID] Recommended hybrid amps:  
+[ASSISTANT

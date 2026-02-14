@@ -1,0 +1,15 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/22 (Mon) 08:24  
+[FACT] User is operating in a virtual environment named "Parallels-Virtual-Platform".  
+[FACT] User is in the directory "/usr/share/easy-rsa".  
+[ASSISTANT_SAID] The assistant confirmed that the user is in the correct directory if EasyRSA was installed via a package manager.  
+[ASSISTANT_SAID] The assistant stated that the user should be able to run commands to generate server and client certificates from the current directory.  
+[ASSISTANT_SAID] The assistant suggested checking for EasyRSA script files such as "easyrsa", "vars", and "pkitool" to verify the correct directory.  
+[ASSISTANT_SAID] The assistant advised the user to ensure they have the correct permissions to run commands in the directory.  
+[FACT] User attempted to run the command "./build-dh".  
+[ASSISTANT_SAID] The assistant explained that the error message "bash: ./build-dh: No such file or directory" indicates that the command cannot be found in the current directory.  
+[ASSISTANT_SAID] The assistant noted that the command "./build-dh" is an old one and not available in EasyRSA 3.  
+[ASSISTANT_SAID] The assistant provided the correct command to generate Diffie-Hellman parameters in EasyRSA 3: "./easyrsa gen-dh".  
+[ASSISTANT_SAID] The assistant reminded the user to run the command from the right directory where EasyRSA scripts are located.  
+[ASSISTANT_SAID] The assistant advised the user to ensure they have already run the command "./easyrsa init-pki" before running "./easyrsa gen-dh".

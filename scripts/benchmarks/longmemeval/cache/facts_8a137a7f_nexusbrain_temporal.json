@@ -1,0 +1,35 @@
+{
+  "answer_15d63a22": [
+    {
+      "fact": "User is looking to create a cozier atmosphere in their living room.",
+      "type": "preference",
+      "entities": [
+        "cozy atmosphere",
+        "living room"
+      ]
+    },
+    {
+      "fact": "User likes the layered lighting concept.",
+      "type": "opinion",
+      "entities": [
+        "layered lighting"
+      ]
+    },
+    {
+      "fact": "User plans to place a floor lamp behind the sofa.",
+      "type": "preference",
+      "entities": [
+        "floor lamp",
+        "sofa"
+      ]
+    },
+    {
+      "fact": "User has a Philips LED bulb in their bedside lamp.",
+      "type": "personal",
+      "entities": [
+        "Philips LED bulb",
+        "bedside lamp"
+      ]
+    }
+  ]
+}

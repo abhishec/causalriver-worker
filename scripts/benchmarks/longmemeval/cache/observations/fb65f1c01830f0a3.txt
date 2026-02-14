@@ -1,0 +1,23 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/06/17 (Sat) 17:40
+- [USER] User prefers to call the aircraft "Pig" instead of "Pig UAV."
+- [USER] User inquired about the next step in Pig's design.
+- [ASSISTANT_SAID] The next step in Pig's design involves creating detailed engineering drawings and plans based on established design requirements.
+- [ASSISTANT_SAID] The engineering plans will include details on materials, components, systems, dimensions, and specifications for each part of Pig.
+- [ASSISTANT_SAID] After engineering plans, the manufacturing stage will involve constructing and assembling parts and systems of Pig.
+- [ASSISTANT_SAID] Testing and certification will follow manufacturing, including flight testing and system/component testing.
+- [ASSISTANT_SAID] Once testing is complete, Pig will be ready for delivery to customers.
+- [USER] User asked if it is possible to operate Pig in Dubai by 2030.
+- [ASSISTANT_SAID] It is possible that Pig could be approved for operation in Dubai by 2030, depending on regulatory approval, safety certifications, infrastructure, and market demand.
+- [USER] User requested detailed information about Pig's MTOW and dimensions.
+- [ASSISTANT_SAID] Estimated MTOW for Pig is 3,600 kg with specific weight allocations for payload, fuel, structure, avionics, and systems.
+- [ASSISTANT_SAID] Dimensions provided: Length: 12 m, Height: 4 m, Wingspan: 13 m, Main rotor diameter: 8 m, Tail rotor diameter: 1.5 m, Cabin length: 3.5 m, Cabin width: 2 m, Cabin height: 1.5 m.
+- [USER] User noted that the cabin is small and people can't stand up.
+- [ASSISTANT_SAID] Apologized for the oversight regarding the pilot/engineer and acknowledged the cabin size issue.
+- [ASSISTANT_SAID] Revised cabin dimensions: Length: 3.4 m, Width: 1.7 m, Height: 1.2 m.
+- [USER] User requested that people should be able to stand up in the cabin.
+- [ASSISTANT_SAID] Suggested increasing the cabin height to about 1.9 meters, which would require adjustments to the overall design.
+- [ASSISTANT_SAID] Revised dimensions for Pig: Length: 8.5 m, Width: 3.5 m, Height: 2.7 m, with an estimated MTOW of 3,500 kg.
+- [USER] User requested to redo the MTOW and dimensions.
+- [ASSISTANT_SAID] Provided new dimensions: Length: 8.5

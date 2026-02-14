@@ -1,0 +1,22 @@
+**Observation Log:**
+
+- [FACT] The user is looking for information on script submission guidelines for theater festivals.
+- [FACT] The user has written a script last year that they are considering submitting to festivals.
+- [PREFERENCE] The user wants to ensure they get the submission process right.
+- [ASSISTANT_SAID] The assistant offered to help with script submission guidelines for theater festivals.
+- [ASSISTANT_SAID] The assistant provided general tips for script submissions, including reading guidelines carefully, formatting the script correctly, editing and proofreading, researching the festival, and being prepared for a wait.
+- [ASSISTANT_SAID] The assistant listed specific guidelines for several popular festivals, including:
+  - [ASSISTANT_SAID] The Samuel French Off Off Broadway Short Play Festival: Submission window December to February, script length 10-30 pages, submission fee $20.
+  - [ASSISTANT_SAID] The Humana Festival of New American Plays: Submission window August to October, full-length plays (at least 60 minutes), no submission fee.
+  - [ASSISTANT_SAID] The Kennedy Center's American College Theater Festival: Submission window September to November, full-length plays (at least 60 minutes), no submission fee.
+  - [ASSISTANT_SAID] The New York International Fringe Festival (FringeNYC): Submission window October to December, full-length plays (at least 60 minutes), submission fee $40-$60.
+  - [ASSISTANT_SAID] The Playwrights' Center's Many Voices Fellowship: Submission window January to March, full-length plays (at least 60 minutes), no submission fee.
+- [ASSISTANT_SAID] The assistant encouraged the user to research each festival thoroughly and follow their specific guidelines.
+- [USER] The user requested more information about the submission process for FringeNYC, specifically regarding production requirements and support for selected playwrights.
+- [ASSISTANT_SAID] The assistant provided detailed information about the submission process for FringeNYC, including:
+  - [ASSISTANT_SAID] Online application submission through the FringeNYC website, typically open from October to December.
+  - [ASSISTANT_SAID] Script submission in PDF format, production team information, and a non-refundable submission fee of $40 to $60.
+  - [ASSISTANT_SAID] Notification of selection status in late spring.
+- [ASSISTANT_SAID] The assistant outlined production requirements for FringeNYC, including venue provision, basic technical support, marketing responsibilities, production budget considerations, and performance scheduling.
+- [ASSISTANT_SAID] The assistant described the support offered to selected playwrights, including production assistance, marketing and promotion, networking opportunities, awards and recognition, and access to the FringeNYC alumni network.
+- [USER] The user expressed interest in learning more

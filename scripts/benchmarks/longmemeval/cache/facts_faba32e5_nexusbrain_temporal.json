@@ -1,0 +1,42 @@
+{
+  "answer_39b12014": [
+    {
+      "fact": "User is thinking of hosting a BBQ party soon.",
+      "type": "event",
+      "entities": [
+        "BBQ party"
+      ]
+    },
+    {
+      "fact": "User wants to make sure they have all the necessary supplies for the BBQ.",
+      "type": "preference",
+      "entities": [
+        "BBQ supplies"
+      ]
+    },
+    {
+      "fact": "User remembers their friend Alex's amazing BBQ ribs from a party a few weeks ago.",
+      "type": "relationship",
+      "entities": [
+        "Alex",
+        "BBQ ribs"
+      ]
+    },
+    {
+      "fact": "User is considering trying out BBQ ribs for their party.",
+      "type": "preference",
+      "entities": [
+        "BBQ ribs"
+      ]
+    },
+    {
+      "fact": "User recalls that Alex marinated the ribs in a special sauce for 24 hours before grilling.",
+      "type": "opinion",
+      "entities": [
+        "Alex",
+        "special sauce",
+        "ribs"
+      ]
+    }
+  ]
+}

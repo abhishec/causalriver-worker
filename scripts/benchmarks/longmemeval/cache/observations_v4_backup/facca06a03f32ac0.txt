@@ -1,0 +1,38 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2022/01/15 (Sat) 12:57
+- [PREFERENCE] User is looking for book recommendations.
+- [PREFERENCE] User recently finished reading 'The Nightingale' by Kristin Hannah and found it to be an emotional experience.
+- [PREFERENCE] User is open to trying out different genres of books.
+- [ASSISTANT] Assistant recommended the following historical fiction books: 
+  1. **All the Light We Cannot See** by Anthony Doerr
+  2. **The Alice Network** by Kate Quinn
+  3. **The Lost Girls of Paris** by Pam Jenoff
+- [ASSISTANT] Assistant recommended the following contemporary fiction books:
+  1. **The Seven Husbands of Evelyn Hugo** by Taylor Jenkins Reid
+  2. **The Immortal Life of Henrietta Lacks** by Rebecca Skloot
+  3. **The Age of Miracles** by Karen Thompson Walker
+- [ASSISTANT] Assistant recommended the following other genre books:
+  1. **The Night Circus** by Erin Morgenstern
+  2. **The Power** by Naomi Alderman
+  3. **The Song of Achilles** by Madeline Miller
+- [PREFERENCE] User is interested in exploring graphic novels more after reading 'Watchmen' by Alan Moore and Dave Gibbons.
+- [ASSISTANT] Assistant recommended the following graphic novels similar to 'Watchmen':
+  1. **The Dark Knight Returns** by Frank Miller
+  2. **Kingdom Come** by Mark Waid and Alex Ross
+  3. **Pax Americana** by Frank Quitely and Grant Morrison
+  4. **V for Vendetta** by Alan Moore and David Lloyd
+  5. **Maus** by Art Spiegelman
+  6. **Persepolis** by Marjane Satrapi
+  7. **The League of Extraordinary Gentlemen** by Alan Moore and Kevin O'Neill
+  8. **From Hell** by Alan Moore and Eddie Campbell
+  9. **Black Hole** by Charles Burns
+  10. **The Wicked + The Divine** by Kieron Gillen and Jamie McKelvie
+  11. **The Invisibles** by Grant Morrison
+  12. **Saga** by Brian K. Vaughan and Fiona Staples
+- [PREFERENCE] User is specifically interested in graphic novels that explore themes of identity and power.
+- [ASSISTANT] Assistant recommended the following graphic novels that explore identity:
+  1. **Fun Home: A Family Tragicomic** by Alison Bechdel
+  2. **Persepolis** by Marjane Satrapi
+  3. **The Best We Could Do** by Thi Bui
+- [ASSIST

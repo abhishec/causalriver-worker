@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[FACT] User is planning a trip to Bali.  
+[EVENT] User is looking for popular restaurants in Seminyak besides Naughty Nuri's and Mama San.  
+[ASSISTANT_SAID] Recommended restaurants in Seminyak:  
+[ASSISTANT_SAID] 1. Ku De Ta: Stylish beachfront restaurant serving modern Australian cuisine with a focus on seafood.  
+[ASSISTANT_SAID] 2. Sardine: Offers fresh seafood and Mediterranean-inspired dishes in a setting surrounded by greenery.  
+[ASSISTANT_SAID] 3. Motel Mexicola: Colorful spot serving creative Mexican cuisine, tacos, tequila, and cocktails.  
+[ASSISTANT_SAID] 4. The Biku: Cozy restaurant serving modern Indonesian cuisine with organic ingredients.  
+[ASSISTANT_SAID] 5. Ulekan: Beachfront restaurant offering modern Indonesian cuisine with seafood and grill dishes.  
+[ASSISTANT_SAID] 6. The Beach House: Located at the Oberoi, serving international cuisine with seafood, steaks, and pasta.  
+[ASSISTANT_SAID] 7. Zibiru: Modern Italian restaurant focusing on seasonal ingredients and creative pasta dishes.  
+[ASSISTANT_SAID] 8. Revolver Espresso: Café serving specialty coffee, breakfast, brunch, and light meals.  
+[ASSISTANT_SAID] 9. Sarong: Stylish restaurant serving modern Asian cuisine with Southeast Asian flavors.  
+[ASSISTANT_SAID] 10. Hujan Locale: Modern Indonesian restaurant focusing on traditional flavors in a beautifully designed space.  
+[ASSISTANT_SAID] Suggested to book ahead for popular spots like Ku De Ta and Sardine.  
+[EVENT] User is inquiring about the best way to get around Seminyak and explore surrounding areas.  
+[ASSISTANT_SAID] Recommended ways to get around Seminyak:  
+[ASSISTANT_SAID] 1. Walking: Many restaurants, bars, and shops are within walking distance.  
+[ASSISTANT_SAID] 2. Taxis: Use reputable companies like Blue Bird Taxis or apps like Grab or Go-Van.  
+[ASSISTANT_SAID] 3. Rent a Scooter: Popular way to explore Seminyak and surrounding areas.  
+[ASSISTANT_SAID] 4. Car Rental and Driver: Comfortable option for exploring further areas.  
+[ASSISTANT_SAID] 5. Bicycles: Some hotels offer bicycles for rent.  
+[ASSISTANT_SAID] 6. Shuttle Services: Many hotels offer shuttle services to and from Seminyak.  
+[ASSISTANT_SAID] 7. Public Transportation: Kura-Kura Bus connects Seminyak to other areas in South Bali

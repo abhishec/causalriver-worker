@@ -1,0 +1,24 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/27 (Sat) 18:04
+- [FACT] User is sending multiple messages, indicating a structured communication.
+- [PREFERENCE] User prefers limited responses to "acknowledged" for understanding.
+- [EVENT] User is in the process of sending part 17 of multiple messages.
+- [FACT] The user references a Master, indicating a legal or formal context.
+- [FACT] The user discusses the integrity of the levee system in Brewarrina.
+- [FACT] User mentions Professor Fell as an expert witness for the Council.
+- [FACT] User states that only one layer of poorly compacted soil might lead to seepage and erosion.
+- [FACT] User notes the importance of testing requirements for culverts in the levee system.
+- [FACT] User accepts a submission made by Beckhaus regarding testing compliance.
+- [FACT] User indicates that the evidentiary onus passes to Beckhaus after a failure to comply with testing requirements.
+- [FACT] User mentions the obligation to add 3% lime to all material as a point of concern.
+- [FACT] User discusses the circumstances under which compaction tests (CETS tests) were performed.
+- [FACT] User states that 340 CETS tests were carried out and all passed.
+- [FACT] User notes that some tests only passed after reworking the area due to prior indications of likely failure.
+- [FACT] User quotes Mr. Rudge regarding the testing process and the implications of the results.
+- [PREFERENCE] User believes that the practice of reworking areas before retesting detracts from the assurance of successful CETS testing.
+- [FACT] User emphasizes the need for Beckhaus to rebut the inference from the failure to provide satisfactory test results.
+- [OPINION] User believes that the Master erred in finding substantial compliance with contractual requirements for compaction.
+- [OPINION] User states that the Council is entitled to damages due to breach of contract related to testing failures.
+- [FACT] User proposes that the assessment of damages should be remitted to Macready AsJ.
+- [ASSISTANT_SAID] Assistant responded with "acknowledged," indicating understanding of the user's instructions.

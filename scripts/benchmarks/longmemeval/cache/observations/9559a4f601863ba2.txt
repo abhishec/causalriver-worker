@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[FACT] The user has a coffee maker that they bought about three weeks ago.  
+[FACT] The coffee maker is a black and stainless steel machine from a well-known brand.  
+[EVENT] The user has been using the coffee maker every morning since purchase.  
+[PREFERENCE] The user is looking for cleaning or maintenance tips for their coffee maker.  
+[ASSISTANT_SAID] The assistant congratulated the user on their new coffee maker.  
+[ASSISTANT_SAID] The assistant provided common issues after 3 weeks of use: scale buildup, old coffee oils, and dust and debris.  
+[ASSISTANT_SAID] The assistant suggested descaling the machine every 3-6 months using equal parts water and white vinegar.  
+[ASSISTANT_SAID] The assistant recommended running a cleaning cycle with equal parts water and white vinegar if a specific cleaning cycle is not available.  
+[ASSISTANT_SAID] The assistant advised cleaning the brew basket and grinds container with warm soapy water and rinsing thoroughly.  
+[ASSISTANT_SAID] The assistant suggested wiping down the exterior with a damp cloth and checking the water reservoir for buildup.  
+[ASSISTANT_SAID] The assistant recommended using filtered water to reduce mineral buildup.  
+[ASSISTANT_SAID] The assistant mentioned regularly cleaning the coffee maker's internal components as per the user manual.  
+[ASSISTANT_SAID] The assistant advised running a fresh water cycle after cleaning and descaling.  
+[ASSISTANT_SAID] The assistant suggested using a coffee maker cleaning solution or a product specifically designed for cleaning coffee makers.  
+[ASSISTANT_SAID] The assistant warned against using abrasive cleaners or scouring pads.  
+[ASSISTANT_SAID] The assistant provided a method for cleaning mold or mildew using equal parts water and baking soda.  
+[PREFERENCE] The user has used about 20 of the 50 coffee pods they bought with the machine.  
+[ASSISTANT_SAID] The assistant confirmed that the user should clean the coffee pod compartment regularly.  
+[ASSISTANT_SAID] The assistant recommended cleaning the coffee pod compartment every 10-15 uses or once a month.  
+[ASSISTANT_SAID] The assistant provided a step-by-step guide on how to clean the coffee pod compartment, including turning off the machine, removing the pod, wiping with a dry cloth, and using a water-vinegar solution for thorough cleaning.  
+[ASSISTANT_SAID] The assistant advised inspecting and cleaning the pod piercer with a small brush or toothbrush.  
+[PREFERENCE] The user is trying to cook more at home.  
+[ASSISTANT_SAID] The assistant provided several recipe suggestions for using leftover peppers and onions, including fajitas, roasted pepper soup, stuffed peppers, quiche,

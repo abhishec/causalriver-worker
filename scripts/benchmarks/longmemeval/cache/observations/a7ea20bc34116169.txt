@@ -1,0 +1,25 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/24 (Wed) 12:30
+- [FACT] User is interested in learning more about Ethiopian culture.
+- [EVENT] User tried Ethiopian coffee for the first time at a cultural festival recently.
+- [RELATIONSHIP] User has a colleague named Maria.
+- [RELATIONSHIP] Maria mentioned that her family has roots in African traditions.
+- [ASSISTANT_SAID] Ethiopian coffee is considered a sacred beverage that brings people together, fosters community, and is an essential part of daily life.
+- [ASSISTANT_SAID] Ethiopia is the birthplace of Arabica coffee, discovered by a goatherd named Kaldi in the Kaffa region over 1,000 years ago.
+- [ASSISTANT_SAID] Traditional coffee ceremonies in Ethiopia, known as "jebena buna," involve roasting green coffee beans, grinding them by hand, and brewing them in a clay pot called a "jebena."
+- [ASSISTANT_SAID] Coffee ceremonies can last from 30 minutes to several hours and include snacks like popcorn, roasted barley, and injera.
+- [ASSISTANT_SAID] Coffee is a symbol of hospitality and respect in Ethiopian culture, and refusing coffee is considered impolite.
+- [ASSISTANT_SAID] Coffee has spiritual significance in some Ethiopian Orthodox Christian traditions.
+- [ASSISTANT_SAID] Coffee is a significant contributor to Ethiopia's economy, with millions of smallholder farmers relying on coffee production.
+- [ASSISTANT_SAID] User might consider trying traditional Ethiopian dishes like injera with wats or learning about the country's history, music, and art.
+- [FACT] User is curious about the traditional coffee ceremony, including its duration and typical snacks served.
+- [ASSISTANT_SAID] A traditional Ethiopian coffee ceremony can take anywhere from 30 minutes to several hours.
+- [ASSISTANT_SAID] Typical snacks served with coffee include popcorn, roasted barley, injera, and dabo kolo.
+- [ASSISTANT_SAID] User asked for recommendations for good Ethiopian restaurants in their neighborhood.
+- [ASSISTANT_SAID] Suggested ways to find Ethiopian restaurants include Google search, food delivery apps, Yelp, and Ethiopian cultural organizations.
+- [FACT] User is interested in learning more about cultural practices and customs in Puerto Rico.
+- [RELATIONSHIP] User's colleague Maria mentioned her family's roots in African traditions.
+- [ASSISTANT_SAID] African influence plays a significant role in Puerto Rican culture, affecting language, music, art, and cuisine.
+- [ASSISTANT_SAID] Examples of African influence include words like "guagua" and "mondongo," music genres like Bomba and Plena, and dishes like arroz con gandules and mofongo.
+- [ASSISTANT_S

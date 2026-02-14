@@ -1,0 +1,26 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/04/11 (Tue) 21:54  
+[FACT] User has been trying chamomile tea in the afternoon.  
+[CHANGE] User has switched to a new coffee brand discovered at a local coffee shop.  
+[PREFERENCE] User is still getting used to the stronger flavor of the new coffee brand.  
+[PREFERENCE] User is looking for suggestions on herbal teas that can help with focus and productivity.  
+[ASSISTANT_SAID] Chamomile is a great choice for unwinding, but for focus and productivity, the assistant recommends:  
+[ASSISTANT_SAID] 1. Peppermint: Increases alertness and focus, reduces mental fatigue.  
+[ASSISTANT_SAID] 2. Ginkgo Biloba: Believed to improve blood flow to the brain, enhancing focus and memory.  
+[ASSISTANT_SAID] 3. Yerba Mate: Known for stimulating properties, increases energy and mental clarity.  
+[ASSISTANT_SAID] 4. Green Tea: Provides a gentle energy boost, contains L-theanine for focus and calmness.  
+[ASSISTANT_SAID] 5. Ginseng: Believed to improve mental clarity and reduce stress.  
+[ASSISTANT_SAID] 6. Bacopa Monnieri: Traditionally used to enhance memory and cognitive function.  
+[ASSISTANT_SAID] 7. Rooibos: Caffeine-free, contains antioxidants, helps improve focus.  
+[ASSISTANT_SAID] 8. Ashwagandha: Known for reducing stress and anxiety, promoting calm and clarity.  
+[ASSISTANT_SAID] User may need to experiment with different herbal teas to find the best one.  
+[ASSISTANT_SAID] For the new coffee brand, if the flavor is too strong, the assistant suggests brewing for a shorter time or adding cream or milk.  
+[PREFERENCE] User finds Peppermint and Yerba Mate interesting and wants to try them.  
+[ASSISTANT_SAID] For brewing Peppermint tea:  
+[ASSISTANT_SAID] - Use 1 teaspoon of dried peppermint leaves for every 8 oz of water.  
+[ASSISTANT_SAID] - Heat water to around 200°F (93°C) and steep for 5-7 minutes.  
+[ASSISTANT_SAID] For brewing Yerba Mate:  
+[ASSISTANT_SAID] - Use 1 teaspoon of loose-leaf Yerba Mate for every 8 oz of water.  
+[ASSISTANT_SAID] - Heat water to around 160°F (71°C) to 170°F (77°C) and steep for 3-5 minutes.  
+[ASSISTANT_SAID] General tips for

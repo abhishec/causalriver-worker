@@ -1,0 +1,30 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/04/29 (Sat) 17:40
+- [EVENT] User needs help with budgeting and tracking expenses due to recent shopping.
+- [ASSISTANT_SAID] Assistant offers to help track expenses and suggests gathering information about recent spending.
+- [ASSISTANT_SAID] Assistant provides categories for tracking expenses: Clothing and Accessories, Food and Dining, Entertainment, Transportation, Home and Decor, Personal Care, Electronics, Travel, Miscellaneous.
+- [ASSISTANT_SAID] Assistant encourages user to write down expenses and estimate amounts, suggesting tools like Mint or Personal Capital.
+- [ASSISTANT_SAID] Assistant asks user to recall recent purchases and provides guiding questions to help.
+- [EVENT] User recalls buying a necklace for sister's birthday for $50 and a $20 gift card from her favorite clothing store.
+- [ASSISTANT_CREATED] Assistant creates an expense list with the following entries:
+  - Gifts: Necklace from jewelry store: $50
+  - Gifts: Gift card from clothing store: $20
+- [ASSISTANT_SAID] Assistant totals the gifts to $70 and encourages user to think of more expenses.
+- [EVENT] User remembers helping mom with grocery shopping for grandparents, including snacks and toiletries, adding another $20 to the bill.
+- [ASSISTANT_CREATED] Assistant updates the expense list with:
+  - Groceries: Snacks for grandparents: $??
+  - Groceries: Toiletries (toothpaste, shampoo, etc.): $20
+- [ASSISTANT_SAID] Assistant prompts user to recall the approximate amount spent on snacks.
+- [EVENT] User recalls buying a onesie and a set of baby toys for best friend's baby shower from Buy Buy Baby.
+- [ASSISTANT_CREATED] Assistant updates the expense list with:
+  - Gifts: Onesie from Buy Buy Baby: $10
+  - Gifts: Baby toys from Buy Buy Baby: $25
+- [ASSISTANT_SAID] Assistant totals gifts to $105 and encourages user to think of more expenses.
+- [EVENT] User states the onesie was $10 and the toys were $25.
+- [ASSISTANT_CREATED] Assistant updates the expense list with the exact amounts for the onesie and baby toys.
+- [EVENT] User mentions stopping by Target for more gifts for best friend's baby shower, including a baby blanket and a book for around $15.
+- [ASSISTANT_CREATED] Assistant updates the expense list with:
+  - Gifts: Baby blanket and book from Target: $15
+- [ASSISTANT_SAID] Assistant totals gifts to $120 and prompts user to estimate the amount spent on snacks for grandparents.
+- [ASSISTANT_SAID] Assistant encourages user to think about other potential expenses, including dining out, entertainment, personal care items, subscriptions

@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/02/20 (Mon) 09:18  
+[FACT] User has ordered from Thai Basil on Uber Eats three times.  
+[PREFERENCE] User is looking for new recipe ideas, especially for Thai dishes.  
+[PREFERENCE] User loves spicy food.  
+[EVENT] User tried an amazing Pad Thai from Thai Basil last week.  
+[ASSISTANT_SAID] Pad Thai is a classic Thai dish.  
+[ASSISTANT_SAID] Thai cuisine is diverse and delicious, with many dishes to explore beyond Pad Thai.  
+[ASSISTANT_SAID] Suggested popular Thai dishes: Tom Yum Soup, Green Curry, Massaman Curry, Som Tam (Papaya Salad), Satay, Khao Soi, Larb (Meat Salad), Tom Kha Kai.  
+[ASSISTANT_CREATED] Provided a homemade Pad Thai recipe with ingredients and instructions.  
+[ASSISTANT_SAID] Recommended using button mushrooms, crimini mushrooms, shiitake mushrooms, or oyster mushrooms for Tom Yum Soup.  
+[ASSISTANT_SAID] Suggested tips for getting the flavor just right in Tom Yum Soup, including using a variety of chilies, balancing flavors, using high-quality fish sauce, and not overcooking the mushrooms.  
+[ASSISTANT_CREATED] Provided a Tom Yum Soup recipe with ingredients and instructions.  
+[ASSISTANT_SAID] Recommended adding shrimp to Tom Yum Soup for extra protein.  
+[ASSISTANT_SAID] Provided tips for cooking shrimp perfectly in the soup.  
+[ASSISTANT_SAID] Explained how to prepare and use galangal in the recipe.  
+[ASSISTANT_SAID] Provided storage tips for galangal, including fresh, refrigerated, frozen, and dried options.  
+[ASSISTANT_SAID] Mentioned the shelf life of galangal based on storage methods.  
+[PREFERENCE] User is excited to try the Tom Yum Soup with shrimp and galangal.  
+[FACT] User has never worked with galangal before.  
+[EVENT] User mentioned Thai Basil as an Uber Eats restaurant that serves amazing Pad Thai.

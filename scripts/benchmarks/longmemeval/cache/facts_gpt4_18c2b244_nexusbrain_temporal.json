@@ -1,0 +1,118 @@
+{
+  "answer_c862f65a_2": [
+    {
+      "fact": "User is planning a trip to Walmart this weekend.",
+      "type": "event",
+      "entities": [
+        "Walmart",
+        "weekend"
+      ]
+    },
+    {
+      "fact": "User is looking for deals on baby essentials.",
+      "type": "preference",
+      "entities": [
+        "baby essentials"
+      ]
+    },
+    {
+      "fact": "User used a Buy One Get One Free coupon on Luvs diapers at Walmart today.",
+      "type": "event",
+      "entities": [
+        "Buy One Get One Free coupon",
+        "Luvs diapers",
+        "Walmart"
+      ]
+    },
+    {
+      "fact": "User finds the coupon organization in their binder cluttered and hard to navigate.",
+      "type": "opinion",
+      "entities": [
+        "coupon organization",
+        "binder"
+      ]
+    }
+  ],
+  "answer_c862f65a_3": [
+    {
+      "fact": "User is planning a shopping trip to Target this weekend.",
+      "type": "event",
+      "entities": [
+        "Target",
+        "shopping trip",
+        "weekend"
+      ]
+    },
+    {
+      "fact": "User redeemed $12 cashback for a $10 Amazon gift card from Ibotta today.",
+      "type": "event",
+      "entities": [
+        "Ibotta",
+        "cashback",
+        "Amazon gift card"
+      ]
+    },
+    {
+      "fact": "User feels good about their savings so far.",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User is looking for strategies to maximize savings on household essentials.",
+      "type": "preference",
+      "entities": [
+        "household essentials",
+        "toiletries",
+        "cleaning supplies"
+      ]
+    },
+    {
+      "fact": "User has been using manufacturer coupons.",
+      "type": "preference",
+      "entities": [
+        "manufacturer coupons"
+      ]
+    }
+  ],
+  "answer_c862f65a_1": [
+    {
+      "fact": "User is planning a grocery shopping trip for the week.",
+      "type": "event",
+      "entities": [
+        "grocery shopping trip"
+      ]
+    },
+    {
+      "fact": "User is looking for deals on diapers and formula.",
+      "type": "preference",
+      "entities": [
+        "diapers",
+        "formula"
+      ]
+    },
+    {
+      "fact": "User signed up for the ShopRite rewards program.",
+      "type": "event",
+      "entities": [
+        "ShopRite",
+        "rewards program"
+      ]
+    },
+    {
+      "fact": "User hopes to maximize points and savings from the rewards program.",
+      "type": "opinion",
+      "entities": [
+        "points",
+        "savings"
+      ]
+    },
+    {
+      "fact": "User is interested in using digital coupons at ShopRite.",
+      "type": "preference",
+      "entities": [
+        "digital coupons",
+        "ShopRite"
+      ]
+    }
+  ]
+}

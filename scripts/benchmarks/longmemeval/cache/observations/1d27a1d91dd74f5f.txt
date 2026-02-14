@@ -1,0 +1,44 @@
+**Observation Log:**
+
+- [FACT] The user is looking for book recommendations.
+- [PREFERENCE] The user has been really into literary fiction lately.
+- [EVENT] The user recently heard Celeste Ng read from her new novel at a literary festival in the city last weekend.
+- [ASSISTANT_SAID] Celeste Ng is a fantastic author, and her new novel is on many readers' radars.
+- [ASSISTANT_SAID] Recommended authors and books include:
+  1. Emily St. John Mandel: "Station Eleven"
+  2. Laura van den Berg: "The Third Hotel"
+  3. Ayobami Adebayo: "Stay with Me"
+  4. R.O. Kwon: "The Incendiaries"
+  5. Julia Phillips: "Disappearing Earth"
+  6. Madhuri Vijay: "The Far Field"
+  7. Ling Ma: "Severance"
+  8. Rebecca Makkai: "The Great Believers"
+  9. Nicole Dennis-Benn: "Patsy"
+  10. Valeria Luiselli: "Lost Children Archive"
+- [USER_SAID] The user expressed interest in checking out some of the recommended authors and mentioned wanting to explore more literary fiction.
+- [USER_SAID] The user asked for information on upcoming literary events in the city.
+- [ASSISTANT_SAID] Suggested ways to find upcoming literary events:
+  1. Check the website of the literary festival attended.
+  2. Visit independent bookstores and public libraries.
+  3. Follow local literary organizations and authors on social media.
+  4. Look for local literary magazines and journals.
+  5. Join literary-themed Meetup groups.
+  6. Check local universities and colleges for events.
+- [USER_SAID] The user appreciated the list of resources for finding literary events.
+- [USER_SAID] The user inquired about writing workshops or online courses focused on literary fiction.
+- [ASSISTANT_SAID] Recommended resources for writing workshops and online courses:
+  1. Coursera
+  2. edX
+  3. Udemy
+  4. Writing Workshops Detroit
+  5. Catapult
+  6. Tin House Summer Workshop
+  7. Bread Loaf Writers' Conference
+  8. Sewanee Writers' Conference
+  9. Iowa Summer Writing Festival
+  10. Writing by Writers
+- [USER_SAID] The user expressed interest in online courses, particularly those on Coursera and edX.
+- [ASSISTANT_SAID] Listed specific online courses on Coursera:
+  1. Creative Writing: Plot by Wesleyan University
+  2. Creative Writing: Character and Dialogue by Wesleyan University
+  3. The Craft of Plot by

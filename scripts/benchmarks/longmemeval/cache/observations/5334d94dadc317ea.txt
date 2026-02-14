@@ -1,0 +1,51 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/22 (Mon) 09:13
+
+[FACT] Client: C2, Developer: Cyril Lonsido
+
+[FACT] Client: BlueFrog, Developer: Paul Gravos
+
+[FACT] Client: Pastest, Developer: John Gela
+
+[FACT] Client: Knights Absorb, Developer: Joshua Osillo
+
+[FACT] Client: Bluebay, Developer: Albert Gaya
+
+[FACT] Client: Evoke, Developer: Jonel Catapang
+
+[FACT] Client: Redbox, Developer: Jaerome
+
+[EVENT] Cyril Lonsido is asking if it’s possible to be transferred to another client due to concerns about the work environment.
+
+[EVENT] Paul Gravos mentioned he is getting some back-end tasks since Jasper has left and is inquiring about training/workshop opportunities.
+
+[EVENT] John Gela will be working on a new project involving Angular and is inquiring about formal training/workshop.
+
+[EVENT] Joshua Osillo is working closely with Elly and Greg for the mobile development team and is focusing on the booking application.
+
+[EVENT] Albert Gaya has made an equipment request to upgrade his laptop storage.
+
+[EVENT] Jonel Catapang mentioned he will get back next week regarding his extension for part-time work.
+
+[EVENT] Jaerome is working on the design part of the project since the current designer has resigned and feels he is struggling a bit.
+
+[ASSISTANT_SAID] Suggestions for Cyril Lonsido include scheduling a one-on-one meeting to discuss concerns and reviewing the possibility of transferring him to another client.
+
+[ASSISTANT_SAID] Action items for Cyril Lonsido include scheduling a meeting to discuss his concerns and evaluating the possibility of a transfer.
+
+[ASSISTANT_SAID] Suggestions for Paul Gravos include offering training or workshops to better prepare him for back-end tasks and evaluating the possibility of finding a replacement for Jasper.
+
+[ASSISTANT_SAID] Action items for Paul Gravos include coordinating to provide relevant training or workshops and discussing the possibility of finding a replacement for Jasper.
+
+[ASSISTANT_SAID] Suggestions for John Gela include offering formal training/workshops to enhance his knowledge and skills in Angular.
+
+[ASSISTANT_SAID] Action items for John Gela include coordinating to provide relevant training or workshops and creating a personalized plan for his career growth.
+
+[ASSISTANT_SAID] Suggestions for Joshua Osillo include offering training or workshops to enhance his skills in Figma and mobile development.
+
+[ASSISTANT_SAID] Action items for Joshua Osillo include coordinating to provide relevant training or workshops and creating a personalized plan for his career growth.
+
+[ASSISTANT_SAID] Suggestions for Albert Gaya include providing upgraded equipment to enhance his work experience and productivity.
+
+[ASSISTANT_SAID] Action items for Albert G

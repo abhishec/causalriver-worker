@@ -1,0 +1,28 @@
+**Observation Log:**
+
+[FACT] User is planning a trip to Japan.  
+[FACT] User has been attending language exchange events every Saturday since the beginning of February.  
+[PREFERENCE] User is especially interested in Cherry Blossom Festivals.  
+[EVENT] User just came back from a Japanese festival in their city last Saturday.  
+[ASSISTANT_SAID] User will appreciate cultural experiences more with some language proficiency under their belt.  
+[ASSISTANT_SAID] Recommended popular Japanese festivals include:  
+[ASSISTANT_SAID] 1. Cherry Blossom Festivals (Hanami): Late March to early April, various locations.  
+[ASSISTANT_SAID] 2. Golden Week: April 29th to May 5th, nationwide.  
+[ASSISTANT_SAID] 3. Gion Matsuri: July 1st to 31st, Kyoto.  
+[ASSISTANT_SAID] 4. Obon Festival: Mid-August, nationwide.  
+[ASSISTANT_SAID] 5. Moon Viewing (Tsukimi): Mid-Autumn, usually September or October, nationwide.  
+[ASSISTANT_SAID] 6. Autumn Leaves (Koyo): Late November to early December, various locations.  
+[ASSISTANT_SAID] 7. New Year (Oshogatsu): January 1st, nationwide.  
+[ASSISTANT_SAID] Suggested specific festivals/events in Tokyo during Cherry Blossom season include:  
+[ASSISTANT_SAID] 1. Ueno Park Cherry Blossom Festival: Late March to early April.  
+[ASSISTANT_SAID] 2. Shinjuku Gyoen National Garden Cherry Blossom Festival: Late March to early April.  
+[ASSISTANT_SAID] 3. Meguro River Cherry Blossom Festival: Late March to early April.  
+[ASSISTANT_SAID] 4. Yoyogi Park Cherry Blossom Festival: Late March to early April.  
+[ASSISTANT_SAID] 5. Rikugien Garden Cherry Blossom Festival: Late March to early April.  
+[ASSISTANT_SAID] 6. Tokyo National Museum Cherry Blossom Viewing: Late March to early April.  
+[ASSISTANT_SAID] 7. Sumida River Cherry Blossom Festival: Late March to early April.  
+[ASSISTANT_SAID] Recommended foods to try during the Cherry Blossom Festivals include:  
+[ASSISTANT_SAID] 1. Yakitori: Grilled chicken skewers.  
+[ASSISTANT_SAID] 2. Takoyaki: Crispy balls filled with octopus.  
+[ASSISTANT_SAID] 3. Okonomiyaki: Savory pancake from Hiroshima.  
+[ASSISTANT_SAID] 4. Hanami D

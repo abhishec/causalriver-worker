@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/21 (Sun) 10:26
+- [FACT] User is looking for lunch ideas and recommendations for good sandwich places around downtown.
+- [EVENT] User tried out a new restaurant downtown over the weekend and found it really good.
+- [ASSISTANT_SAID] Assistant clarified that it does not have real-time knowledge of specific locations or personal experiences.
+- [ASSISTANT_SAID] Assistant provided popular sandwich chain options commonly found in downtown areas: Jimmy John's, Potbelly, Jersey Mike's, Which Wich, and Panera Bread.
+- [ASSISTANT_SAID] Assistant suggested checking online review sites like Yelp or Google Maps for highly-rated sandwich shops and asking coworkers, friends, or colleagues for recommendations.
+- [ASSISTANT_SAID] Assistant encouraged the user to share more about the new restaurant they tried over the weekend.
+- [FACT] User clarified that the new restaurant they tried was a sandwich place.
+- [PREFERENCE] User expressed interest in healthy sandwich options or recipes as they are trying to eat healthier lately.
+- [ASSISTANT_SAID] Assistant provided healthy sandwich options: Veggie Delight, Grilled Chicken Breast, Tuna Salad, Egg Salad, and Avocado Toast.
+- [ASSISTANT_CREATED] Assistant created a list of healthy sandwich recipes: Mediterranean Mash-Up, Turkey and Avocado Wrap, Roasted Veggie Delight, Cranberry Chicken Salad, and Black Bean and Queso.
+- [PREFERENCE] User decided to try the Veggie Delight sandwich.
+- [EVENT] User mentioned wanting to start meal prep on Sundays.
+- [ASSISTANT_SAID] Assistant provided tips for getting started with meal prep, including setting goals, planning meals, making a grocery list, shopping smart, prepping in bulk, portioning, storing, being flexible, starting small, and making it a habit.
+- [ASSISTANT_SAID] Assistant suggested popular meal prep containers and tools, including glass or BPA-free plastic containers, mason jars, reusable bags, Instant Pot, and meal prep apps.
+- [FACT] User plans to start meal prep by planning meals for the week and making a grocery list, focusing on healthy lunches and snacks.
+- [ASSISTANT_SAID] Assistant provided tips on how to keep track of prepped meals and their expiration dates, including labeling and dating containers, creating a meal prep calendar, using a meal prep app, setting reminders, storing meals in order, freezing meals, and checking expiration dates regularly.
+- [PREFERENCE] User intends to use a combination of methods to keep track of meal prep, including labeling and dating containers, setting reminders on their phone, and possibly using a meal prep app.
+- [ASSISTANT_SAID] Assistant encouraged the user to find a system that works for them and to experiment with different methods and tools

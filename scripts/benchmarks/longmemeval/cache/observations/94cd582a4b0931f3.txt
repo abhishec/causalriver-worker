@@ -1,0 +1,36 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/29 (Mon) 13:22
+- [FACT] User recently bought a pack of salmon fillets for $19.99 at Costco.
+- [RELATIONSHIP] User went to Costco with their mom.
+- [PREFERENCE] User is trying to plan meals for the week.
+- [ASSISTANT_SAID] Salmon is versatile and nutritious, can be prepared in many ways.
+- [ASSISTANT_CREATED] Suggested recipes for salmon:
+  1. Baked Salmon with Lemon and Herbs
+  2. Grilled Salmon with Asian-Glazed
+  3. Salmon En Papillote with Fennel and Orange
+  4. Salmon Cakes with Remoulade Sauce
+  5. Salmon and Avocado Sushi Rolls
+  6. Salmon and Quinoa Bowl with Roasted Vegetables
+  7. Smoked Salmon Pâté
+- [PREFERENCE] User is thinking of making a Mexican dish with the salmon.
+- [ASSISTANT_SAID] Suggested Mexican-inspired salmon recipes:
+  1. Salmon Tacos al Pastor
+  2. Salmon Fajitas
+  3. Salmon Ceviche with Mango and Avocado
+  4. Salmon Enchiladas
+  5. Grilled Salmon with Chipotle Lime Butter
+  6. Salmon and Black Bean Chili
+- [PREFERENCE] User is thinking of making the Salmon Tacos al Pastor.
+- [FACT] User has fresh cilantro at home from their Walmart trip last week.
+- [ASSISTANT_SAID] Provided a recipe for Salmon Tacos al Pastor, including ingredients and instructions.
+- [ASSISTANT_SAID] Suggested variations for the Salmon Tacos al Pastor recipe.
+- [PREFERENCE] User is thinking of serving the tacos with Mexican street corn.
+- [ASSISTANT_SAID] Provided tips for making Mexican street corn (Elotes), including ingredients and instructions.
+- [PREFERENCE] User is adding diced onions to the mayonnaise for the Mexican street corn.
+- [FACT] User picked up fresh cilantro at Walmart last week for garnishing the corn.
+- [PREFERENCE] User is considering options for salsa or hot sauce to serve with the meal.
+- [ASSISTANT_SAID] Suggested options for salsa or hot sauce:
+  1. Simple pico de gallo with diced tomatoes, onions, jalapeños, cilantro, and lime juice.
+  2. Smoky chipotle salsa using chipotle peppers in adobo sauce.
+  3. Store-bought salsa or hot sauce as a simple option.

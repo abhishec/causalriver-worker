@@ -1,0 +1,90 @@
+{
+  "answer_cf425855_2": [
+    {
+      "fact": "User enjoys reading books by John Grisham",
+      "type": "preference",
+      "entities": [
+        "John Grisham"
+      ]
+    },
+    {
+      "fact": "User attended a meetup organized by Book Lovers Unite",
+      "type": "event",
+      "entities": [
+        "Book Lovers Unite"
+      ]
+    },
+    {
+      "fact": "User enjoyed debating plot twists and characters with fellow book lovers",
+      "type": "opinion",
+      "entities": [
+        "debating",
+        "plot twists",
+        "characters",
+        "fellow book lovers"
+      ]
+    },
+    {
+      "fact": "User is interested in legal thrillers",
+      "type": "preference",
+      "entities": [
+        "legal thrillers"
+      ]
+    },
+    {
+      "fact": "User is intrigued by Michael Connelly's 'The Lincoln Lawyer'",
+      "type": "preference",
+      "entities": [
+        "Michael Connelly",
+        "The Lincoln Lawyer"
+      ]
+    },
+    {
+      "fact": "User has heard great things about Michael Connelly's writing style",
+      "type": "opinion",
+      "entities": [
+        "Michael Connelly",
+        "writing style"
+      ]
+    }
+  ],
+  "answer_cf425855_1": [
+    {
+      "fact": "User recently joined a Facebook group called 'Book Lovers Unite'",
+      "type": "event",
+      "entities": [
+        "Facebook group",
+        "Book Lovers Unite"
+      ]
+    },
+    {
+      "fact": "User has been loving the discussions and recommendations from the members of the group",
+      "type": "opinion",
+      "entities": [
+        "discussions",
+        "recommendations"
+      ]
+    },
+    {
+      "fact": "User is looking for book recommendations in the thriller genre",
+      "type": "preference",
+      "entities": [
+        "thriller genre"
+      ]
+    },
+    {
+      "fact": "User has heard of some of the authors mentioned but hasn't read their books yet",
+      "type": "opinion",
+      "entities": [
+        "authors"
+      ]
+    },
+    {
+      "fact": "User is interested in whether the recommended thrillers would be good for book club discussions",
+      "type": "preference",
+      "entities": [
+        "book club discussions"
+      ]
+    }
+  ]
+}

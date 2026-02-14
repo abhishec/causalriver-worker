@@ -1,0 +1,18 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/04 (Thu) 01:30  
+[ASSISTANT_SAID] Cesium is primarily written in JavaScript and uses WebGL to render 3D graphics in the browser.  
+[ASSISTANT_SAID] Cesium's JavaScript API can be used in conjunction with other programming languages and frameworks to build web applications.  
+[ASSISTANT_SAID] Cesium itself cannot be translated to Golang, but it is possible to build a web platform using Golang and incorporate Cesium's JavaScript API for 3D visualization and interaction.  
+[ASSISTANT_SAID] The Golang server can provide the necessary data and logic for the web application, while the Cesium JavaScript API can handle the visualization and interaction with the 3D models and the globe.  
+[ASSISTANT_SAID] A web framework such as Echo, Gin, or Revel can be used to build the backend using Golang.  
+[ASSISTANT_SAID] The backend can provide data and services to the frontend, which would be built using HTML, CSS, and JavaScript.  
+[ASSISTANT_SAID] This approach can provide a robust and efficient web platform that leverages both the power of Golang for the backend and the capabilities of Cesium for the frontend.  
+[USER] Worlds iVue is an easy-to-use platform combining augmented reality and drone technology, enabling users to control iVue Robotics products like OmniBot Air for missions like aerial imaging and cargo delivery as well as view media content, including job opportunities and geo-located media content produced from iVue Media orders.  
+[USER] Worlds iVue offers powerful features, like real-time mapping and 3D digital object overlay, providing a unique value proposition for a range of industries beyond aerial photography and videography, such as surveying, construction, and agriculture.  
+[ASSISTANT_SAID] To build Worlds iVue with Cesium, you can develop the user interface for controlling the iVue Robotics products using the Cesium JavaScript API to provide 3D visualization and interaction with the drone.  
+[ASSISTANT_SAID] Integrate a real-time mapping feature using the Cesium JavaScript API to show the location of the drone in real-time.  
+[ASSISTANT_SAID] Implement a 3D digital object overlay feature using the Cesium JavaScript API to display digital objects and other data overlaid on the real-world environment.  
+[ASSISTANT_SAID] Build the media content viewing feature using the Cesium JavaScript API to display job opportunities and geo-located media content in a 3D context.  
+[ASSISTANT_SAID] Build additional features for specific industries that can utilize Cesium's 3D visualization and mapping capabilities.  
+[ASSISTANT_SA

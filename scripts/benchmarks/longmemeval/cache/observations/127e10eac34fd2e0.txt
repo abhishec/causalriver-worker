@@ -1,0 +1,27 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/30 (Tue) 14:07  
+[ASSISTANT_SAID] Annotation history: A list that displays the history of changes for each label on the document (e.g. who made the change, when the change was made).  
+[ASSISTANT_SAID] Review tools: Tools that allow Checker users to approve or reject each label, and modify the labels if necessary. Checker users can also add comments for each label.  
+[ASSISTANT_SAID] Page number and total number of pages: Displays the page number and total number of pages in the document.  
+[ASSISTANT_SAID] The Annotation screen supports the following user flows:  
+[ASSISTANT_SAID] Tagger annotation flow:  
+[ASSISTANT_SAID] 1. Tagger selects a classification for the document.  
+[ASSISTANT_SAID] 2. Tagger chooses labels from the relevant list and places them on the document.  
+[ASSISTANT_SAID] 3. Tagger adjusts the position, size, and shape of the labels as needed.  
+[ASSISTANT_SAID] 4. Tagger edits the name and description of the labels as needed.  
+[ASSISTANT_SAID] 5. Tagger changes the color of the labels as needed.  
+[ASSISTANT_SAID] 6. Tagger saves their annotation progress.  
+[ASSISTANT_SAID] Checker review flow:  
+[ASSISTANT_SAID] 1. Checker reviews the labels that have been placed on the document by Tagger users.  
+[ASSISTANT_SAID] 2. Checker approves or rejects each label.  
+[ASSISTANT_SAID] 3. Checker modifies the labels if necessary.  
+[ASSISTANT_SAID] 4. Checker adds comments for each label.  
+[ASSISTANT_SAID] 5. Checker submits their review.  
+[ASSISTANT_SAID] The Annotation screen supports the following use cases:  
+[ASSISTANT_SAID] Tagger annotation: Tagger users can classify and annotate documents with labels.  
+[ASSISTANT_SAID] Checker review: Checker users can review and verify the annotations made by taggers.  
+[ASSISTANT_SAID] Label modification: Tagger and Checker users can edit the name and description of labels, and change their color.  
+[ASSISTANT_SAID] Label approval/rejection: Checker users can approve or reject labels. Rejected labels are sent back to the Tagger user for modification.  
+[ASSISTANT_SAID] Commenting: Tagger and Checker users can add comments for each label.  
+[ASSISTANT_SAID] Navigation: Tagger

@@ -1,0 +1,47 @@
+{
+  "answer_9398da02": [
+    {
+      "fact": "User is planning a self-care day",
+      "type": "event",
+      "entities": [
+        "self-care day"
+      ]
+    },
+    {
+      "fact": "User practices yoga at home",
+      "type": "preference",
+      "entities": [
+        "yoga",
+        "home practice"
+      ]
+    },
+    {
+      "fact": "User is looking for healthy brunch spots",
+      "type": "preference",
+      "entities": [
+        "healthy brunch spots"
+      ]
+    },
+    {
+      "fact": "User has a friend they plan to meet for brunch",
+      "type": "relationship",
+      "entities": [
+        "friend"
+      ]
+    },
+    {
+      "fact": "User uses the Down Dog app for yoga",
+      "type": "preference",
+      "entities": [
+        "Down Dog"
+      ]
+    },
+    {
+      "fact": "User finds Down Dog super helpful",
+      "type": "opinion",
+      "entities": [
+        "Down Dog"
+      ]
+    }
+  ]
+}

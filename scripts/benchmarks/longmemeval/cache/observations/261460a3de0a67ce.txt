@@ -1,0 +1,18 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/23 (Tue) 13:09  
+[USER] User requested to bold the correct responses for a set of questions and include proper spacing for any joint questions.  
+[ASSISTANT_SAID] Assistant provided bolded answers for questions 1-10, including the correct answers and the other options.  
+[ASSISTANT_CREATED] Assistant created a structured response for questions 1-10, with the correct answers bolded.  
+[USER] User requested to keep the same format for questions 11-20 and to provide explanations that a 3rd grader would understand for each question.  
+[ASSISTANT_SAID] Assistant provided bolded answers for questions 11-20, including the correct answers and the other options.  
+[ASSISTANT_CREATED] Assistant created a structured response for questions 11-20, with the correct answers bolded and explanations suitable for a 3rd grader.  
+[ASSISTANT_SAID] Explanation for question 1: Social Anxiety Disorder is when someone is really scared of people judging them or being embarrassed in front of others.  
+[ASSISTANT_SAID] Explanation for question 2: The three brain chemicals that help us feel happy, sad, excited, and calm are Serotonin, Norepinephrine, and Dopamine.  
+[ASSISTANT_SAID] Explanation for question 3: The best way to help someone who is scared of going to the dentist is to talk to them, make sure they feel heard, make them feel better, help them relax, and teach them new ways of thinking.  
+[ASSISTANT_SAID] Explanation for question 4: When someone has a panic attack, they may feel their heart racing, have trouble breathing, and feel like something bad is going to happen. Sneezing is not a symptom of a panic attack.  
+[ASSISTANT_SAID] Explanation for question 5: When our body is always ready to fight or run, it can make us more likely to get sick in our heart, have a stroke, become overweight, or have diabetes.  
+[ASSISTANT_SAID] Explanation for question 6: When we are stressed, anxious, sad, or have PTSD, our brain's "danger detector" (amygdala) becomes too active and our "thinking brain" (frontal cortex) becomes less active.  
+[ASSISTANT_SAID] Explanation for question 7: The building block of our nervous system, like the bricks of a building, is the neuron.  
+[ASSISTANT_SAID] Explanation for question 8: Our memory is like a movie that changes over time and is affected by our experiences and emotions.  
+[ASSISTANT_SAID] Explanation for question 9: The Relaxation Response decreases all except blood pressure.

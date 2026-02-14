@@ -1,0 +1,28 @@
+**Observation Log**
+
+**Session Date:** 2023/05/21 (Sun) 18:44  
+**Session ID:** sharegpt_V2j1zkI_4  
+
+1. [FACT] Matt Brown is a representative discussing deployment options for the Fellow platform.
+2. [FACT] Nick Sarkesian is involved in the sales call and is asking questions about the deployment process.
+3. [FACT] Trina Berks is also participating in the conversation, asking questions and providing input.
+4. [FACT] Eric Cameron is part of the discussion and mentions activating pro licenses for his team.
+5. [EVENT] Matt Brown discusses the option to deploy the Fellow platform "Wall to Wall" immediately.
+6. [EVENT] Matt Brown mentions a partial rollout option where a CSV list of users can be provided for import.
+7. [EVENT] Matt Brown explains the quarterly true up system for adjusting the number of licenses based on active users.
+8. [CHANGE] Matt Brown clarifies that they cannot mix license types (e.g., enterprise and pro) for the same rollout.
+9. [PREFERENCE] Matt Brown suggests that starting with committed users is preferable to avoid overbuilding.
+10. [ASSISTANT_SAID] Matt Brown states that they can flat rate the plan for the initial rollout of 500 users.
+11. [ASSISTANT_SAID] Matt Brown explains that additional users can be added without needing to contact support or an account manager.
+12. [ASSISTANT_SAID] Matt Brown mentions that they will adjust billing based on active users during the quarterly true up.
+13. [ASSISTANT_SAID] Matt Brown indicates that they can identify active users versus those who have only signed in once.
+14. [TEMPORAL] Eric Cameron mentions that they probably wouldn't fully kick off the enterprise-level deployment until the beginning of next year.
+15. [EVENT] Matt Brown offers to send over security compliance documentation and information about the Okta integration.
+16. [EVENT] Matt Brown will send the SOC 2 MPA for DocuSign signature and details about the JIRA integration.
+17. [PREFERENCE] Eric Cameron expresses the need for his team to feel comfortable with the documentation before making enterprise-level decisions.
+18. [CHANGE] Eric Cameron requests to remove Tyler and Alex as admins and add himself, Nick, and Trina as admins.
+19. [ASSISTANT_SAID] Matt Brown agrees to remove Tyler and Alex as admins and will send an email confirmation after the changes are made.
+20. [EVENT] Matt Brown mentions that they have 20 users already active for the past month.
+21. [ASSISTANT_SAID] Matt Brown states that he can switch the 20 users to the pro annual rate.
+22. [PREFERENCE] Eric Cameron indicates that it makes more sense for team members to come in through their own accounts rather than just through him.
+23. [

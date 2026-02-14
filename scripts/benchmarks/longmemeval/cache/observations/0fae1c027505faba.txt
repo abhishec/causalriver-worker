@@ -1,0 +1,27 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/22 (Mon) 22:49  
+[USER] User is trying to increase endurance for a 10K race.  
+[ASSISTANT_SAID] Assistant congratulated the user on setting a goal to run a 10K.  
+[ASSISTANT_CREATED] Assistant provided a 12-week training plan to help the user build endurance for the 10K race.  
+[ASSISTANT_SAID] Weeks 1-4 of the training plan includes:  
+[ASSISTANT_SAID] - Monday: Easy 20-30 minute run at a conversational pace  
+[ASSISTANT_SAID] - Wednesday: Interval training (4-6 x 800m at a moderate pace with 400m active recovery)  
+[ASSISTANT_SAID] - Saturday: Long slow run (30-40 minutes at a conversational pace)  
+[ASSISTANT_SAID] Weeks 5-8 of the training plan includes:  
+[ASSISTANT_SAID] - Monday: Easy 25-35 minute run at a conversational pace  
+[ASSISTANT_SAID] - Wednesday: Interval training (5-7 x 800m at a moderate pace with 400m active recovery)  
+[ASSISTANT_SAID] - Saturday: Long slow run (35-45 minutes at a conversational pace)  
+[ASSISTANT_SAID] Weeks 9-12 of the training plan includes:  
+[ASSISTANT_SAID] - Monday: Easy 30-40 minute run at a conversational pace  
+[ASSISTANT_SAID] - Tuesday: Hill repeats (6-8 x 400m at a fast pace with 200m active recovery)  
+[ASSISTANT_SAID] - Wednesday: Interval training (6-8 x 800m at a fast pace with 400m active recovery)  
+[ASSISTANT_SAID] - Saturday: Long slow run (40-50 minutes at a conversational pace)  
+[ASSISTANT_SAID] Additional tips provided by the assistant include:  
+[ASSISTANT_SAID] 1. Gradually increase weekly mileage by no more than 10% each week.  
+[ASSISTANT_SAID] 2. Incorporate strength training 2-3 times a week.  
+[ASSISTANT_SAID] 3. Incorporate rest days (at least one or two per week).  
+[ASSISTANT_SAID] 4. Pay attention to pace, starting with a conversational pace.  
+[ASSISTANT_SAID] 5. Hydrate and fuel properly with a balanced diet.  
+[ASSISTANT_SAID] 6. Get enough sleep (7-9 hours per night).  
+[ASSISTANT_S

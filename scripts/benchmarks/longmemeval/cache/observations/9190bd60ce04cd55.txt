@@ -1,0 +1,29 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/20 (Sat) 11:21
+- [FACT] User has a Spider plant named Lola.
+- [FACT] User has a Snake plant named Sammy.
+- [FACT] User has a Dracaena plant.
+- [EVENT] User has been misting Lola with water daily to keep the humidity up.
+- [EVENT] User has invested in a humidifier for the room and has been running it for about 2 hours a day.
+- [PREFERENCE] User is interested in keeping Lola happy and healthy.
+- [ASSISTANT_SAID] Spider plants prefer bright, indirect light but not direct sunlight.
+- [ASSISTANT_SAID] Overwatering is a common issue with Spider plants; check soil moisture before watering.
+- [ASSISTANT_SAID] Spider plants prefer a humid environment but can adapt to average humidity levels.
+- [ASSISTANT_SAID] Spider plants prefer temperatures between 65°F (18°C) and 75°F (24°C).
+- [ASSISTANT_SAID] Feed Spider plants with a balanced, water-soluble fertilizer (20-20-20) during the growing season, diluted to half strength.
+- [ASSISTANT_SAID] Remove yellow or damaged leaves from Spider plants to encourage healthy growth.
+- [ASSISTANT_SAID] Use a well-draining potting mix specifically designed for tropical plants for Spider plants.
+- [ASSISTANT_SAID] Check Spider plants regularly for pests and treat with insecticidal soap or neem oil if necessary.
+- [ASSISTANT_SAID] Spider plants typically need to be repotted every 2-3 years.
+- [ASSISTANT_SAID] Inspect Spider plants for signs of disease and treat accordingly.
+- [ASSISTANT_SAID] User should fertilize Lola once a month during the growing season and every 6-8 weeks during the dormant season.
+- [ASSISTANT_SAID] User should dilute fertilizer to half the recommended strength to avoid burning Lola's roots.
+- [ASSISTANT_SAID] User can fertilize Lola more frequently if she is producing a lot of baby plants (spiderettes).
+- [FACT] User has had Sammy for about 3 months.
+- [PREFERENCE] User has been fertilizing Sammy with a balanced fertilizer once a month.
+- [ASSISTANT_SAID] Spider plants are lighter feeders than Snake plants, so Lola should be fertilized less frequently.
+- [ASSISTANT_SAID] User can propagate both Sammy and Lola.
+- [ASSISTANT_SAID] For Snake plant propagation, user can use leaf cuttings or division.
+- [ASSISTANT_SAID] For Spider plant propagation, user can use spiderettes or leaf cuttings.
+- [ASSISTANT_SA

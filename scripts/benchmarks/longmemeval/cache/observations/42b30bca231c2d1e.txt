@@ -1,0 +1,24 @@
+**Observation Log:**
+
+[FACT] User is trying to find a new herbal tea to try this weekend.  
+[FACT] User has been really into their morning coffee routine lately.  
+[CHANGE] User has been using a new coffee blend from a coffee shop in Chicago for three weeks.  
+[EVENT] User plans to try cold brew herbal tea.  
+[ASSISTANT_SAID] Assistant recommended several herbal teas: Peppermint, Rooibos, Hibiscus, Lemon Balm, and Ginger.  
+[ASSISTANT_SAID] Assistant asked if the user has a preferred flavor profile or specific benefits they are looking for in an herbal tea.  
+[ASSISTANT_SAID] Assistant suggested additional calming herbal teas: Lavender, Passionflower, and Tulsi (Holy Basil).  
+[ASSISTANT_SAID] Assistant provided a cold brew method for herbal teas: steeping 1-2 tablespoons of loose-leaf herbal tea in cold water for 8-12 hours.  
+[ASSISTANT_SAID] Assistant mentioned that cold brew can prevent bitterness in delicate herbs and result in a smoother flavor profile.  
+[ASSISTANT_SAID] Assistant listed herbal teas that pair well with cold brew: Peppermint, Hibiscus, Lemon Balm, and Rosehip.  
+[ASSISTANT_SAID] Assistant suggested journaling the user's morning routine to track progress and identify areas for improvement.  
+[ASSISTANT_SAID] Assistant provided a list of things to include in the journal: wake-up time, coffee and herbal tea habits, exercises, breakfast, goals, and notable thoughts.  
+[EVENT] User is excited to try journaling their morning routine.  
+[CHANGE] User has been feeling more energized throughout the day since starting their morning coffee routine.  
+[ASSISTANT_SAID] Assistant recommended trying new creamer flavors for the user's morning coffee.  
+[ASSISTANT_SAID] Assistant listed popular creamer flavors: Vanilla Sweet Cream, Caramel, Hazelnut, Cinnamon, Peppermint Mocha, Pumpkin Spice, Irish Cream, Coconut Cream, S'mores, and Gingerbread.  
+[ASSISTANT_SAID] Assistant suggested experimenting with flavored syrups or making homemade creamer.  
+[PREFERENCE] User is open to trying new brewing methods for herbal teas.  
+[PREFERENCE] User has been having their coffee black, with no sugar or creamer.  
+[PREFERENCE] User is considering trying a new creamer flavor for their morning coffee.  
+[ASSISTANT_CREATED] Assistant created a list of ten popular creamer flavors for the user to consider.  
+[TEMPORAL] Session date is 2023/05/24 (Wed) at 21:03.

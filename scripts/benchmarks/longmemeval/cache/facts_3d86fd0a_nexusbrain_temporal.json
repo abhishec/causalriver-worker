@@ -1,0 +1,82 @@
+{
+  "answer_19c24c11": [
+    {
+      "fact": "User met Sophia at a coffee shop in the city",
+      "type": "event",
+      "entities": [
+        "Sophia",
+        "coffee shop",
+        "city"
+      ]
+    },
+    {
+      "fact": "User and Sophia discussed indie music and coffee",
+      "type": "relationship",
+      "entities": [
+        "Sophia",
+        "indie music",
+        "coffee"
+      ]
+    },
+    {
+      "fact": "User recommends sending Sophia a list of new indie music releases",
+      "type": "preference",
+      "entities": [
+        "Sophia",
+        "indie music releases"
+      ]
+    },
+    {
+      "fact": "User met Rachel at a yoga studio",
+      "type": "event",
+      "entities": [
+        "Rachel",
+        "yoga studio"
+      ]
+    },
+    {
+      "fact": "User knows Rachel is interested in yoga and wellness",
+      "type": "relationship",
+      "entities": [
+        "Rachel",
+        "yoga",
+        "wellness"
+      ]
+    },
+    {
+      "fact": "User plans to ask Rachel about upcoming yoga workshops or events",
+      "type": "preference",
+      "entities": [
+        "Rachel",
+        "yoga workshops",
+        "events"
+      ]
+    },
+    {
+      "fact": "User met David at a bookstore",
+      "type": "event",
+      "entities": [
+        "David",
+        "bookstore"
+      ]
+    },
+    {
+      "fact": "User knows David is interested in literature and writing",
+      "type": "relationship",
+      "entities": [
+        "David",
+        "literature",
+        "writing"
+      ]
+    },
+    {
+      "fact": "User plans to recommend a book or author to David",
+      "type": "preference",
+      "entities": [
+        "David",
+        "book",
+        "author"
+      ]
+    }
+  ]
+}

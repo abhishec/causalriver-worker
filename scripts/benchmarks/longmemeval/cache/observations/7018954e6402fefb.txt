@@ -1,0 +1,20 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/30 (Tue) 14:21  
+[FACT] The user is planning a family vacation for the summer.  
+[ASSISTANT_SAID] The assistant provided tips for finding good deals on beach house rentals.  
+[ASSISTANT_SAID] Tips include starting early, being flexible with dates, using online rental platforms like VRBO, Airbnb, HomeAway, BeachHouse.com, RedAwning, and TripAdvisor Rentals, filtering searches, reading reviews, negotiating prices, looking for package deals, considering properties with longer minimum stays, checking for specials and discounts, using travel agents, being mindful of fees, and reading the fine print.  
+[FACT] The user is helping their mom with her new Facebook account.  
+[ASSISTANT_SAID] The assistant provided tips on customizing the news feed on Facebook to show more updates from family members and close friends.  
+[ASSISTANT_SAID] Tips include prioritizing friends and family, creating a "Close Friends" list, using News Feed Preferences, customizing news feed settings, using Facebook Groups, and teaching the mom how to use Facebook's algorithm.  
+[RELATIONSHIP] The user's sister is named Rachel.  
+[FACT] The user is trying to help their mom connect with old friends from her college days.  
+[ASSISTANT_SAID] The assistant provided tips on finding people on Facebook, including using the "Find Friends" feature, searching by name, using Facebook Groups, checking alumni associations, asking mutual friends, checking old yearbooks or photos, and being patient and persistent.  
+[FACT] The user is helping their mom set up video calls with their dad, who is living out of state for work.  
+[ASSISTANT_SAID] The assistant provided tips for using Facebook Messenger and other video calling apps to make calls more enjoyable and smooth.  
+[ASSISTANT_SAID] Tips include ensuring the app is updated, using a stable internet connection, choosing a quiet and well-lit space, using a headset or earbuds, starting with a voice call, scheduling calls in advance, using a tripod or prop, encouraging interaction, being patient with tech issues, and making it a routine.  
+[FACT] The user plans to ask their mom to try out the tips provided for video calls.  
+[EVENT] The user is planning a family game night.  
+[ASSISTANT_SAID] The assistant provided suggestions for online games that are easy to learn and play, including Jackbox Games, Among Us, and others.  
+[ASSISTANT_SAID] Jackbox Games can be played by multiple people using their phones as controllers and include quizzes, drawing challenges, and word games.  
+[ASSISTANT_SAID] Among Us is a multiplayer game where players work together to fix a spaceship while some are impostors trying to sabotage the

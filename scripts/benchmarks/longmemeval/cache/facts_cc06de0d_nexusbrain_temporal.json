@@ -1,0 +1,101 @@
+{
+  "answer_4fb01417_1": [
+    {
+      "fact": "User's total commute expenses for the month are $240.",
+      "type": "personal",
+      "entities": [
+        "$240"
+      ]
+    },
+    {
+      "fact": "User's daily train fare is $6.",
+      "type": "personal",
+      "entities": [
+        "$6"
+      ]
+    },
+    {
+      "fact": "User is considering cycling to the station instead of taking the train.",
+      "type": "preference",
+      "entities": [
+        "cycling",
+        "train"
+      ]
+    },
+    {
+      "fact": "User is curious about potential savings from cycling.",
+      "type": "opinion",
+      "entities": [
+        "savings",
+        "cycling"
+      ]
+    },
+    {
+      "fact": "User is weighing the pros and cons of cycling in the rain.",
+      "type": "opinion",
+      "entities": [
+        "cycling",
+        "rain"
+      ]
+    },
+    {
+      "fact": "User is interested in understanding the impact of bad weather on cycling.",
+      "type": "opinion",
+      "entities": [
+        "bad weather",
+        "cycling"
+      ]
+    }
+  ],
+  "answer_4fb01417_2": [
+    {
+      "fact": "User is trying to reduce daily commute expenses",
+      "type": "preference",
+      "entities": [
+        "commute expenses"
+      ]
+    },
+    {
+      "fact": "User tracks their commuting costs",
+      "type": "personal",
+      "entities": [
+        "commuting costs"
+      ]
+    },
+    {
+      "fact": "User missed their train by 5 minutes last Wednesday",
+      "type": "event",
+      "entities": [
+        "train",
+        "Wednesday"
+      ]
+    },
+    {
+      "fact": "User had to take a taxi that cost $12",
+      "type": "event",
+      "entities": [
+        "taxi",
+        "$12"
+      ]
+    },
+    {
+      "fact": "User usually takes the 7:45 am train",
+      "type": "personal",
+      "entities": [
+        "7:45 am train"
+      ]
+    },
+    {
+      "fact": "User thinks leaving a bit earlier will help with their routine",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User is trying to get into a routine",
+      "type": "preference",
+      "entities": [
+        "routine"
+      ]
+    }
+  ]
+}

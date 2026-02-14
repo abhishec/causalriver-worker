@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/28 (Sun) 22:55  
+[FACT] The user had a blast playing Codenames on New Year's Eve.  
+[FACT] The user's team won while playing Codenames.  
+[PREFERENCE] The user is looking for game night ideas for an upcoming gathering with friends.  
+[PREFERENCE] The user enjoyed playing Codenames and was surprisingly good at it.  
+[ASSISTANT_SAID] The assistant recommended the following party games similar to Codenames:  
+[ASSISTANT_CREATED] 1. **Taboo**: A word-guessing game where players describe a word without using certain "taboo" words or phrases.  
+[ASSISTANT_CREATED] 2. **Pictionary**: A game where players draw and guess words or phrases.  
+[ASSISTANT_CREATED] 3. **Deception**: A social deduction game where one player is a spy, and others must figure out who it is.  
+[ASSISTANT_CREATED] 4. **Mysterium**: A cooperative game where one player is a ghost trying to communicate with others to solve a murder mystery.  
+[ASSISTANT_CREATED] 5. **Spyfall**: A question-and-answer game where players figure out who the spy is.  
+[ASSISTANT_CREATED] 6. **Wits & Wagers**: A trivia game where players bet on answers given by opponents.  
+[ASSISTANT_CREATED] 7. **Dixit**: A game where players guess which card was chosen by the storyteller based on a clue.  
+[ASSISTANT_CREATED] 8. **The Resistance**: A social deduction game where players complete missions while some are spies.  
+[ASSISTANT_CREATED] 9. **What Do You Meme**: A game where players create the funniest meme by combining caption cards with an image.  
+[ASSISTANT_CREATED] 10. **Junk Art**: A dexterity game where players create art pieces using random junk items.  
+[PREFERENCE] The user is thinking of hosting a game night with a mix of friends and coworkers.  
+[ASSISTANT_SAID] The assistant recommended games suitable for a large group of 10-12 people:  
+[ASSISTANT_CREATED] 1. **Two Rooms and a Boom**: A social deduction game for 8-12 players.  
+[ASSISTANT_CREATED] 2. **Werewolf (or Mafia)**: A party game for 7-12 players.  
+[ASSISTANT_CREATED] 3. **Deception: Murder in Hong Kong**: A social deduction game for 4-12 players.  
+[ASSISTANT_CREATED] 4. **The Resistance**: A game for 5-10 players.  
+[ASSISTANT_CREATED]

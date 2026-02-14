@@ -1,0 +1,24 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/02/03 (Fri) 14:48  
+[FACT] User inquired about Caltech's admissions process.  
+[USER] User asked if Caltech has particular areas of research or academic focus prioritized in the admissions process.  
+[ASSISTANT_SAID] Historically, Caltech has prioritized STEM fields, including physics, engineering, mathematics, and computer science, in its admissions process.  
+[ASSISTANT_SAID] Caltech values well-rounded applicants who demonstrate leadership, creativity, and a passion for learning outside of academic pursuits.  
+[USER] User requested information on the percentage of students admitted into Caltech's STEM fields compared to other majors.  
+[ASSISTANT_SAID] The majority of Caltech's undergraduates are enrolled in STEM majors such as Physics, Mathematics, Computer Science, and Engineering.  
+[ASSISTANT_SAID] Caltech has strong programs in the humanities and social sciences, producing significant research in those fields.  
+[USER] User asked how Caltech distinguishes between equally talented applicants in STEM fields and whether the admissions process relies mainly on academic achievements and test scores or also considers extracurricular activities and personal statements.  
+[ASSISTANT_SAID] Caltech seeks to admit students with impressive academic records and a deep passion for their chosen field of study.  
+[ASSISTANT_SAID] Factors considered in admissions include essays, letters of recommendation, extracurricular activities, and unique experiences.  
+[ASSISTANT_SAID] Academic accomplishments such as test scores and grades are essential, but the admissions committee looks beyond these factors.  
+[ASSISTANT_SAID] Caltech values applicants who are exceptional in academic abilities, character, and potential for leadership.  
+[USER] User inquired about the weightage given to research experience in the admissions process at Caltech.  
+[ASSISTANT_SAID] Caltech values research experience as an essential component of a student's application, showing intellectual curiosity and strong interest in their field.  
+[ASSISTANT_SAID] Research experience is not a prerequisite for admission, and other qualities are also important.  
+[ASSISTANT_SAID] The admissions committee evaluates applicants holistically based on academic performance, test scores, extracurricular activities, essays, letters of recommendation, and research experience.  
+[USER] User expressed appreciation for the insight and requested more information about research opportunities available to Caltech students.  
+[ASSISTANT_SAID] Caltech is renowned for its research opportunities, integral to undergraduate and graduate programs, particularly in sciences.  
+[ASSISTANT_SAID] Students participate in research projects led by faculty members, often alongside graduate students or postdoctoral researchers.  
+[ASSISTANT_SAID] Caltech has partnerships with organizations and research institutions worldwide, including NASA's Jet Propulsion Laboratory.  
+[ASSISTANT_SA

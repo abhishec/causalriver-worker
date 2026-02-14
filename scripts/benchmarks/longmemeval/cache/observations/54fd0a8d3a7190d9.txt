@@ -1,0 +1,27 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/09/30 (Sat) 07:35  
+[FACT] User recently took a 10-day break from social media from February 15th to 25th.  
+[PREFERENCE] User is trying to get a better understanding of their social media habits.  
+[CHANGE] User is interested in tracking their social media usage and setting limits for themselves.  
+[ASSISTANT_SAID] Recommended tools and apps for tracking social media usage:  
+[ASSISTANT_SAID] 1. Screen Time (iOS) - tracks app usage, allows setting app limits, and scheduling downtime.  
+[ASSISTANT_SAID] 2. Digital Wellbeing (Android) - tracks screen time, sets app timers, and schedules wind-down periods.  
+[ASSISTANT_SAID] 3. RescueTime - tracks time spent on apps and websites, provides detailed reports, and offers alerts and goals.  
+[ASSISTANT_SAID] 4. Freedom - tracks and blocks distracting websites and apps across devices.  
+[ASSISTANT_SAID] 5. Moment - tracks screen time and provides reports on habits, with app blocking features.  
+[ASSISTANT_SAID] 6. StayFocused - Chrome extension that limits access to distracting websites.  
+[ASSISTANT_SAID] 7. Cold Turkey - blocks distracting websites on Windows and Mac.  
+[ASSISTANT_SAID] 8. Social Media Tracker - browser extension that tracks social media usage.  
+[ASSISTANT_SAID] 9. Hootsuite Insights - social media management tool with analytics features.  
+[ASSISTANT_SAID] 10. Manual tracking - keeping a journal or spreadsheet to log usage.  
+[ASSISTANT_SAID] Key to managing social media habits is to set realistic goals, track progress, and be consistent.  
+[PREFERENCE] User is interested in trying out some of the recommended tools.  
+[ASSISTANT_SAID] Tools can help identify which social media platforms the user spends the most time on.  
+[ASSISTANT_SAID] Screen Time (iOS) provides a breakdown of app usage, including Instagram.  
+[ASSISTANT_SAID] Digital Wellbeing (Android) offers a breakdown of app usage, including social media apps.  
+[ASSISTANT_SAID] RescueTime tracks time spent on specific social media websites and apps.  
+[ASSISTANT_SAID] Moment tracks screen time and provides a breakdown of app usage.  
+[ASSISTANT_SAID] StayFocused provides usage reports on time spent on specific websites.  
+[PREFERENCE] User has noticed mindlessly scrolling through Instagram a lot lately.  
+[ASSISTANT_SAID] Recommended setting up RescueTime to track social media usage from now

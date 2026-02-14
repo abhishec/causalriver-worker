@@ -1,0 +1,25 @@
+**Observation Log**
+
+**Session Date:** 2023/05/21 (Sun) 08:12  
+**Session ID:** sharegpt_afCogMg_52  
+
+1. [FACT] Form I-129 is used by employers to petition U.S. Citizenship and Immigration Services (USCIS) for a nonimmigrant worker.
+2. [FACT] The form is used for various nonimmigrant classifications, such as H-1B, L-1, and O-1.
+3. [FACT] The petition must be filed by the employer and must be accompanied by the correct fee.
+4. [FACT] The processing time for the form varies depending on the specific circumstances of each case.
+5. [FACT] Additional information or an interview may be requested by USCIS.
+6. [FACT] Employers should consult the appropriate regulatory provisions in 8 CFR that relate to the nonimmigrant classification sought.
+7. [TEMPORAL] The form should be filed no more than 6 months prior to the date employment is scheduled to begin.
+8. [ASSISTANT_SAID] The form can be filed in person or through the mail.
+9. [ASSISTANT_SAID] The location of filing can be found on the USCIS website.
+10. [FACT] A Form I-129 petition may not be filed more than 6 months prior to the date employment is scheduled to begin.
+11. [FACT] Petitioners should review the appropriate regulatory provisions in 8 CFR that relate to the nonimmigrant classification sought.
+12. [ASSISTANT_SAID] For Regular Processing, visit www.uscis.gov/I-129 or call the USCIS Contact Center at 1-800-375-5283 for the most current information about where to file.
+13. [ASSISTANT_SAID] For TTY (deaf or hard of hearing), call: 1-800-767-1833.
+14. [ASSISTANT_SAID] For Premium Processing, visit www.uscis.gov/forms/how-do-i-use-premium-processing-service.
+15. [ASSISTANT_SAID] If requesting Premium Processing Services, file Form I-907, Request for Premium Processing Service, with the filing fee.
+16. [ASSISTANT_SAID] Any petition that is not signed or accompanied by the correct fee will be rejected with a notice that the petition is deficient.
+17. [ASSISTANT_SAID] A petition is not considered properly filed until accepted by USCIS.
+18. [ASSISTANT_SAID] Once USCIS accepts your application, the agency will check it for completeness.
+19. [ASSISTANT_SAID] If you do not completely fill out the form, you will not establish a basis for eligibility, and USCIS may deny your petition.
+20. [ASSISTANT_SAID] USCIS aims to process all petitions

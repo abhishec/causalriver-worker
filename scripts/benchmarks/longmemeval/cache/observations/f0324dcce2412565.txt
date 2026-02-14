@@ -1,0 +1,26 @@
+**Observation Log:**
+
+[FACT] User is planning their own wedding.  
+[EVENT] User just got back from their cousin's wedding in Chicago.  
+[RELATIONSHIP] User's cousin had a wedding in Chicago.  
+[PREFERENCE] User is looking for help with the playlist for their wedding reception.  
+[ASSISTANT_SAID] Assistant congratulated the user on their upcoming wedding and offered to help with the playlist.  
+[ASSISTANT_CREATED] Assistant provided a list of popular wedding songs for outdoor and indoor events, categorized into sections: Outdoor/Cocktail Hour, Indoor/Dinner, Dancing, and Special Dances.  
+[ASSISTANT_SAID] Assistant suggested specific songs for each category, including "I Gotta Feeling" by The Black Eyed Peas, "Perfect" by Ed Sheeran, "Dancing Queen" by ABBA, and "At Last" by Etta James.  
+[PREFERENCE] User loved the outdoor ceremony at the Botanical Gardens during their cousin's wedding.  
+[EVENT] User is also thinking about their honeymoon.  
+[PREFERENCE] User is interested in romantic getaways in Napa Valley.  
+[ASSISTANT_SAID] Assistant recommended Napa Valley as a honeymoon destination, highlighting luxury resorts, romantic bed and breakfasts, must-visit wineries, and romantic activities.  
+[ASSISTANT_CREATED] Assistant provided a list of luxury resorts, romantic bed and breakfasts, must-visit wineries, and romantic activities in Napa Valley.  
+[ASSISTANT_SAID] Assistant suggested specific places like Auberge du Soleil, Castello di Amorosa, and activities like hot air balloon rides and couples spa days.  
+[PREFERENCE] User is considering a hot air balloon ride for their honeymoon.  
+[RELATIONSHIP] User's friend Emily got engaged on a hot air balloon ride.  
+[ASSISTANT_SAID] Assistant provided tips on how to plan a hot air balloon ride in Napa Valley, including choosing a reputable company, planning ahead, and considering weather conditions.  
+[ASSISTANT_CREATED] Assistant listed specific tips for booking a hot air balloon ride, such as checking reviews, booking in advance, and what to expect during the ride.  
+[PREFERENCE] User is excited about the hot air balloon ride idea.  
+[EVENT] User is thinking of having a small bridal shower with close friends and family.  
+[ASSISTANT_SAID] Assistant provided ideas for a fun and intimate bridal shower, including themes, activities, food, drinks, and favors.  
+[ASSISTANT_CREATED] Assistant suggested themes like a garden party and brunch and bubbly, and activities like DIY craft stations and wedding-themed games.  
+[PREFERENCE] User loves the idea of a garden party theme for the bridal shower.  
+[PREFERENCE] User is interested in having a DIY craft station at the bridal shower.  
+[ASSISTANT_SAID] Assistant provided craft ideas for the DIY craft

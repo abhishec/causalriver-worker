@@ -1,0 +1,24 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/24 (Wed) 23:53
+- [FACT] User is communicating with a customer named Eng. Khaled.
+- [FACT] User is involved in app development and support.
+- [EVENT] User received an email from a customer expressing appreciation for the app team's efforts.
+- [CHANGE] User noted that most issues with the app have been resolved.
+- [PREFERENCE] Customer believes that the support period should begin after the full delivery of the app, code, and documentation.
+- [ASSISTANT_SAID] Assistant acknowledged the customer's feedback and expressed gratitude for their appreciation of the team's efforts.
+- [ASSISTANT_SAID] Assistant stated that the standard practice is to begin the support period upon delivery of the app, code, and documentation.
+- [ASSISTANT_SAID] Assistant provided responses to specific issues raised by the customer regarding the app.
+- [ASSISTANT_SAID] Assistant apologized for the inconvenience caused by the app displaying out-of-stock products and confirmed that the issue has been fixed.
+- [ASSISTANT_SAID] Assistant confirmed that the search and filter functionality is for category names only, not for products.
+- [ASSISTANT_SAID] Assistant acknowledged that the banners are now working and that the issue with the links in the backend app image section has been resolved.
+- [ASSISTANT_SAID] Assistant confirmed that the cart will now function correctly even if the client is not logged in.
+- [ASSISTANT_SAID] Assistant stated that the label "أستمارة التواصل" has been updated to "نموذج التواصل."
+- [ASSISTANT_SAID] Assistant confirmed that the small gray space issue on top of every screen has been fixed.
+- [CHANGE] User stated that the support period started from 16-2-2023.
+- [FACT] User mentioned that they delivered the documentation and the Android version two months ago.
+- [FACT] User indicated that they have been providing support since the delivery of the Android version.
+- [FACT] User noted that they requested designs for the iOS version two months ago and only received them a week ago.
+- [EVENT] User requested to arrange a delivery meeting and mentioned the need to migrate the plugin and prepare the production environment.
+- [ASSISTANT_CREATED] Assistant provided a WordPress function to log in with Apple.
+- [ASSISTANT_CREATED] Assistant provided an API endpoint code for logging in with Apple, including details on how to verify the Apple ID token and log the user in.

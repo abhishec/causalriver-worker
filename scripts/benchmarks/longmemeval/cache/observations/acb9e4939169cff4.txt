@@ -1,0 +1,28 @@
+**Observation Log:**
+
+[FACT] User is learning Japanese and has been taking classes.  
+[FACT] User's cat is named Mochi.  
+[CHANGE] User has moved to Tokyo.  
+[TEMPORAL] Session date is 2023/10/01 (Sun) 23:47.  
+[PREFERENCE] User wants to supplement their Japanese language learning with online resources.  
+[PREFERENCE] User prefers to listen to podcasts on Spotify.  
+[PREFERENCE] User feels a bit lonely since moving to Tokyo.  
+[PREFERENCE] User is excited to start practicing speaking skills with a native speaker.  
+[ASSISTANT_SAID] Recommended Japanese language learning apps: Duolingo, Tofugu's WaniKani, Anki, HelloTalk, Memrise, NHK WORLD-JAPAN, Lingodeer, JapanesePod101.  
+[ASSISTANT_SAID] Duolingo is a free app that gamifies the learning process.  
+[ASSISTANT_SAID] WaniKani is a paid app that uses spaced repetition for kanji and vocabulary.  
+[ASSISTANT_SAID] Anki is a free flashcard app that requires setup and customization.  
+[ASSISTANT_SAID] HelloTalk connects users with native speakers for language exchange.  
+[ASSISTANT_SAID] Memrise offers user-generated content and gamification.  
+[ASSISTANT_SAID] NHK WORLD-JAPAN provides lessons, videos, and audio materials for all levels.  
+[ASSISTANT_SAID] Lingodeer focuses on vocabulary and grammar with interactive lessons.  
+[ASSISTANT_SAID] JapanesePod101 offers audio and video lessons with accompanying materials.  
+[ASSISTANT_SAID] Recommended Japanese podcasts: NHK WORLD-JAPAN Podcasts, Learn Japanese Podcast, JapanesePod101, Tofugu's Learn Japanese Podcast, News in Slow Japanese, Yomiwa, Coto Japanese Club Podcast.  
+[ASSISTANT_SAID] NHK WORLD-JAPAN Podcasts have transcripts available on their website.  
+[ASSISTANT_SAID] Learn Japanese Podcast provides transcripts for most episodes.  
+[ASSISTANT_SAID] JapanesePod101 offers PDF materials, including transcripts.  
+[ASSISTANT_SAID] News in Slow Japanese provides transcripts for their news articles.  
+[ASSISTANT_SAID] Suggested using podcasts with transcripts or subtitles for active listening.  
+[ASSISTANT_SAID] Recommended online resources for finding Japanese language exchange partners: HelloTalk, Tandem, Conversation Exchange, Meetup, Facebook Groups, Couchsurfing, Lingbe.  
+[ASSISTANT_SAID] Suggested specific language exchange events and groups in Tokyo: Tokyo Language Exchange, Language Exchange Tokyo, Nihongo So-Matome.  
+[ASSISTANT_SAID] Discussed pros and cons of language exchange

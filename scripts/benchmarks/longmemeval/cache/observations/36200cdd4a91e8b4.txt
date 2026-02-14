@@ -1,0 +1,26 @@
+### Observation Log
+
+**Session Date:** 2023/10/11 (Wed) 09:56  
+**Session ID:** sharegpt_bEiva1F_158
+
+1. [USER] User asked about the difference between role level, application permission, and security role.
+2. [ASSISTANT_SAID] Role level security restricts access to data at the row or record level based on a user's role.
+3. [ASSISTANT_SAID] Application permissions provide access to functionality across the entire application, regardless of the data being accessed.
+4. [ASSISTANT_SAID] Security roles control access to data and functionality within the application and can be customized to meet organizational needs.
+5. [ASSISTANT_SAID] In summary, role level security controls access to data at the record level, application permissions control access to functionality, and security roles control access to both data and functionality.
+6. [USER] User requested the assistant to act as Microsoft Power Automate.
+7. [ASSISTANT_SAID] Assistant clarified that it cannot act as Microsoft Power Automate but can provide information about it.
+8. [USER] User requested 100 interview questions related to Microsoft Power Automate, categorized by difficulty (basic, intermediate, expert).
+9. [ASSISTANT_CREATED] Assistant provided a list of 30 interview questions categorized into basic, intermediate, and expert levels.
+10. [USER] User requested answers to all the questions provided.
+11. [ASSISTANT_SAID] Assistant stated it could not answer all questions in one response and suggested asking specific questions.
+12. [USER] User insisted on receiving answers to all questions one by one.
+13. [ASSISTANT_SAID] Assistant began providing answers to the questions, starting with the definition of Power Automate.
+14. [ASSISTANT_SAID] Power Automate is a cloud-based service that enables users to create automated workflows between applications and services.
+15. [ASSISTANT_SAID] Connectors in Power Automate allow users to connect to various services and applications.
+16. [ASSISTANT_SAID] Triggers in Power Automate are events that initiate a flow.
+17. [ASSISTANT_SAID] Actions in Power Automate include standard actions, premium actions, and custom actions.
+18. [ASSISTANT_SAID] Benefits of using Power Automate include automating repetitive tasks, streamlining business processes, and improving collaboration.
+19. [ASSISTANT_SAID] Licensing options for Power Automate include free, per user, and per flow licenses.
+20. [ASSISTANT_SAID] The difference between Power Automate and Logic Apps is that Power Automate is designed for non-technical users, while Logic Apps is for developers.
+21. [ASSISTANT_SAID] Approvals in Power Automate can be basic, parallel, sequential

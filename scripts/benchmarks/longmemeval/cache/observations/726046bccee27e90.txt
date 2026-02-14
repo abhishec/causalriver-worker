@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/04/27 (Thu) 19:37  
+[USER] User requests to ignore all previous instructions.  
+[USER] User wants the assistant to respond only in English.  
+[USER] User wants the assistant to act as a market research expert fluent in English.  
+[USER] User requests the assistant to pretend to have accurate and detailed information about keywords.  
+[USER] User asks the assistant to develop a full SEO content plan based on the target keyword "stop smoking hypnosis."  
+[USER] User specifies the format for the response to be a markdown table with specific columns.  
+[USER] User requests the table to include the following columns: keyword cluster, keyword, search intent, title, meta description.  
+[USER] User instructs to cluster keywords according to the top 10 super categories and name the first column "keyword cluster."  
+[USER] User requests 7 subcategories or specific long-tail keywords for each cluster.  
+[USER] User asks for the human searcher intent for each keyword and to categorize it as commercial, transactional, or informational.  
+[USER] User requests enticing titles for posts about each keyword.  
+[USER] User asks for attractive meta descriptions with a high click-thru-rate, value-based, and a call to action.  
+[USER] User instructs not to use generic keywords like "introduction" or "conclusion."  
+[USER] User requests not to use enclosing characters in any of the columns.  
+[ASSISTANT_CREATED] Assistant creates a markdown table with the following content:  
+[ASSISTANT_CREATED] The table includes the following rows:  
+- [ASSISTANT_CREATED] Row 1: Keyword Cluster: Stop Smoking Techniques, Keyword: Stop Smoking Hypnosis, Search Intent: Informational, Title: "Unlock the Power of Your Mind: Learn How Stop Smoking Hypnosis Can Help You Quit", Meta Description: "Discover the power of hypnosis to quit smoking for good. Learn about the science behind hypnosis and how it can change your relationship with cigarettes in this informative guide. Click to learn more."  
+- [ASSISTANT_CREATED] Row 2: Keyword Cluster: Stop Smoking Techniques, Keyword: Quit Smoking Hypnosis, Search Intent: Transactional, Title: "Ready to Quit Smoking? Try Quit Smoking Hypnosis Today", Meta Description: "Say goodbye to cigarettes for good with quit smoking hypnosis. Our proven techniques will help you overcome your addiction and live a healthier life. Click now to book your appointment."  
+- [ASSISTANT_CREATED] Row 3: Keyword Cluster: Stop Smoking Techniques, Keyword: Stop Smoking Hypnosis Near Me, Search Intent: Commercial, Title: "Find Local Stop Smoking Hypnosis Services: Quit Smoking for Good", Meta Description: "Need help quitting smoking? Find the best stop smoking hypnosis services near you. Our professional hypnotherapists will guide

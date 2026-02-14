@@ -1,0 +1,74 @@
+{
+  "answer_d6d2eba8_1": [
+    {
+      "fact": "User is planning a shopping trip for the week.",
+      "type": "event",
+      "entities": [
+        "shopping trip"
+      ]
+    },
+    {
+      "fact": "User is interested in items on sale at their local grocery store.",
+      "type": "preference",
+      "entities": [
+        "grocery store",
+        "sale items"
+      ]
+    },
+    {
+      "fact": "User is thinking of stocking up on coffee for their daily routine.",
+      "type": "preference",
+      "entities": [
+        "coffee",
+        "daily routine"
+      ]
+    },
+    {
+      "fact": "User uses the Starbucks Rewards app.",
+      "type": "personal",
+      "entities": [
+        "Starbucks Rewards app"
+      ]
+    },
+    {
+      "fact": "User is looking for tips to earn stars faster in the Starbucks Rewards program.",
+      "type": "preference",
+      "entities": [
+        "Starbucks Rewards",
+        "stars"
+      ]
+    }
+  ],
+  "answer_d6d2eba8_2": [
+    {
+      "fact": "User is planning a weekend shopping trip",
+      "type": "event",
+      "entities": [
+        "weekend",
+        "shopping trip"
+      ]
+    },
+    {
+      "fact": "User is interested in buying products at Sephora",
+      "type": "preference",
+      "entities": [
+        "Sephora"
+      ]
+    },
+    {
+      "fact": "User is considering stopping by Starbucks after Sephora",
+      "type": "event",
+      "entities": [
+        "Starbucks",
+        "Sephora"
+      ]
+    },
+    {
+      "fact": "User wants to know the easiest way to earn stars on the Starbucks Rewards app",
+      "type": "preference",
+      "entities": [
+        "Starbucks Rewards app"
+      ]
+    }
+  ]
+}

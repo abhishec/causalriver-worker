@@ -1,0 +1,58 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/11 (Thu) 13:33  
+[ASSISTANT_SAID] To accomplish the tasks you have described, you will need to perform the following steps:  
+[ASSISTANT_SAID] Create two additional VLANs:  
+[ASSISTANT_CREATED] Commands to create VLANs:  
+```
+switch# configure terminal
+switch(config)# vlan 2
+switch(config-vlan)# name VLAN2
+switch(config-vlan)# exit
+switch(config)# vlan 3
+switch(config-vlan)# name VLAN3
+switch(config-vlan)# exit
+```  
+[ASSISTANT_SAID] Assign ports 25 through 36 to VLAN2, and ports 37 through 48 to VLAN3:  
+[ASSISTANT_CREATED] Commands to assign ports to VLANs:  
+```
+switch(config)# interface range FastEthernet0/25 - 36
+switch(config-if-range)# switchport mode access
+switch(config-if-range)# switchport access vlan 2
+switch(config-if-range)# exit
+switch(config)# interface range FastEthernet0/37 - 48
+switch(config-if-range)# switchport mode access
+switch(config-if-range)# switchport access vlan 3
+switch(config-if-range)# exit
+```  
+[ASSISTANT_SAID] Enable inter-VLAN routing:  
+[ASSISTANT_CREATED] Commands to enable inter-VLAN routing:  
+```
+switch(config)# interface Vlan1
+switch(config-if)# no ip address
+switch(config-if)# exit
+switch(config)# interface GigabitEthernet0/1
+switch(config-if)# no ip address
+switch(config-if)# no shutdown
+switch(config-if)# exit
+switch(config)# interface Vlan2
+switch(config-if)# ip address 192.168.2.1 255.255.255.0
+switch(config-if)# no shutdown
+switch(config-if)# exit
+switch(config)# interface Vlan3
+switch(config-if)# ip address 192.168.3.1 255.255.255.0
+switch(config-if)# no shutdown
+switch(config-if)# exit
+```  
+[ASSISTANT_SAID] Configure the switch to use the Asus router as its default gateway:  
+[ASSISTANT_CREATED] Command to configure default gateway:  
+```
+switch(config)# ip default-gateway 192.168.1.1
+```  
+[ASSISTANT_SAID] Configure the switch to act as a DHCP server for VLAN2 and VLAN3:  
+[ASSISTANT_CREATED] Commands to configure DHCP server:  
+```
+switch(config)# ip dhcp pool VLAN2
+switch(config-dhcp)# network 192.168.2.0 255.255.255.0
+switch(config-dhcp)# default-router 192.168.2.1
+switch(config-dhcp

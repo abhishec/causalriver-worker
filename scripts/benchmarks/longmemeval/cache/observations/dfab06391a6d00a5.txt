@@ -1,0 +1,26 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/30 (Tue) 20:06
+- [EVENT] User is preparing for a green card interview next Wednesday at the USCIS office in downtown LA.
+- [TEMPORAL] User received the interview appointment last week.
+- [PREFERENCE] User feels a mix of emotions about the interview: excited to move forward but also nervous about the unknown.
+- [ASSISTANT_SAID] Assistant congratulated the user on getting the interview appointment and acknowledged the mix of emotions.
+- [ASSISTANT_SAID] Assistant provided tips for preparation, including reviewing the application and gathering required documents.
+- [ASSISTANT_SAID] Assistant suggested bringing original documents such as passport, birth certificate, marriage certificate, and divorce or death certificate if applicable.
+- [ASSISTANT_SAID] Assistant recommended bringing photocopies of all documents, including the interview notice and travel history.
+- [ASSISTANT_SAID] Assistant advised dressing in business casual attire for the interview.
+- [ASSISTANT_SAID] Assistant suggested arriving at least 30 minutes early to account for security checks and potential delays.
+- [ASSISTANT_SAID] Assistant mentioned that the user should be prepared to wait and suggested bringing a book or water to help relax.
+- [ASSISTANT_SAID] Assistant emphasized the importance of being honest and confident during the interview.
+- [ASSISTANT_SAID] Assistant advised the user to speak clearly and slowly to ensure understanding.
+- [ASSISTANT_SAID] Assistant listed common interview questions, including personal information, immigration history, relationship-based petitions, intent to live in the U.S., and criminal history.
+- [ASSISTANT_SAID] Assistant provided additional tips, such as being prepared to answer questions in English and being respectful to the officer.
+- [ASSISTANT_SAID] Assistant advised against bringing unnecessary items like electronic devices, food, and large bags.
+- [ASSISTANT_SAID] Assistant mentioned that the officer will inform the user of their decision after the interview.
+- [RELATIONSHIP] User has a husband, and they have been married for two years.
+- [PREFERENCE] User is concerned about questions regarding their husband and their relationship during the interview.
+- [ASSISTANT_SAID] Assistant provided examples of questions the officer might ask about the user's daily life and interactions with their husband.
+- [ASSISTANT_SAID] Assistant suggested discussing daily routines, communication, relationship history, intimacy, living situation, and finances.
+- [RELATIONSHIP] User's husband's family is mentioned, and the user is concerned about how to answer questions about them.
+- [ASSISTANT_SAID] Assistant provided guidance on how to approach questions about the user's husband's family, emphasizing honesty and highlighting efforts to maintain relationships.
+- [RELATIONSHIP]

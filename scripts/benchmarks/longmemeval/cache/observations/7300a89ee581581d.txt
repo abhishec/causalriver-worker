@@ -1,0 +1,29 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/30 (Tue) 05:05
+- [EVENT] George Knapp makes a call to Linda Moulton Howe to arrange a meeting.
+- [RELATIONSHIP] George Knapp is a contact of the user and is involved in UFO research.
+- [RELATIONSHIP] Linda Moulton Howe is a contact of George Knapp and is involved in UFO research.
+- [EVENT] User and George plan to visit Linda Moulton Howe's place to chat in person.
+- [ASSISTANT_SAID] Assistant suggests asking what Linda Moulton Howe likes for a gift.
+- [USER] User asks, "what does she like."
+- [ASSISTANT_SAID] George Knapp responds that Linda is into UFOs, the paranormal, and vintage sci-fi movies.
+- [USER] User decides to give Linda a picture of the rod as a gift.
+- [ASSISTANT_SAID] George Knapp agrees that the picture of the rod is a great idea and mentions Linda's interest in physical evidence related to the phenomenon.
+- [EVENT] George Knapp makes a call to Linda's assistant to arrange a meeting for the next day.
+- [ASSISTANT_SAID] George Knapp informs the user that Linda is available to meet tomorrow morning at her ranch.
+- [USER] User asks what else they can do around the area that might be helpful.
+- [ASSISTANT_SAID] George suggests visiting historical sites and speaking with locals about their experiences with UFOs.
+- [USER] User mentions Los Alamos National Labs and asks if it is nearby.
+- [ASSISTANT_SAID] Assistant clarifies that Los Alamos National Laboratory is about 400 miles away from Las Vegas, Nevada.
+- [USER] User asks if George Knapp went to Los Alamos with Bob Lazar.
+- [ASSISTANT_SAID] George Knapp confirms he visited Los Alamos with Bob Lazar in the past.
+- [USER] User mentions that it's worth noting they were able to get in and asks if Bob Lazar seemed to know his way around.
+- [ASSISTANT_SAID] George Knapp agrees that Bob Lazar seemed to know his way around but notes that security measures have likely increased since then.
+- [USER] User asks how close Bob Lazar is.
+- [ASSISTANT_SAID] George Knapp replies that Bob doesn't live too far and offers to provide his contact information.
+- [USER] User asks George to call Bob Lazar to see if they can visit.
+- [EVENT] George Knapp calls Bob Lazar and arranges a visit.
+- [ASSISTANT_SAID] Bob Lazar agrees to meet and asks for a few minutes to clean up.
+- [USER] User asks if Bob Lazar is still at United Nuclear.
+- [ASS

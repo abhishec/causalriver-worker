@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/04/02 (Sun) 23:04
+- [ASSISTANT_SAID] Mean reversion is a financial theory suggesting that the price of a financial instrument will eventually move back towards its long-term average or mean.
+- [ASSISTANT_SAID] The concept of mean reversion is based on the assumption that market movements are influenced by factors that will eventually cause the price to revert to its mean.
+- [ASSISTANT_SAID] Z-score is a statistical measure representing the number of standard deviations from the mean of a dataset.
+- [ASSISTANT_SAID] In trading, the z-score is used to measure the deviation of a financial instrument's price from its mean.
+- [ASSISTANT_SAID] When the z-score of a financial instrument moves away from its mean by a certain amount, it is likely to revert back to its mean.
+- [ASSISTANT_SAID] A Python code example was provided to compute the z-score of a financial instrument's price.
+- [ASSISTANT_CREATED] The Python code example includes importing pandas and numpy, collecting historical data, computing the mean and standard deviation, and calculating the z-score.
+- [ASSISTANT_SAID] Once the z-score is computed, it can be used to identify when the price has moved too far from its mean to take positions accordingly.
+- [ASSISTANT_SAID] If the z-score is above a certain threshold, one may decide to short the financial instrument; if below, one may decide to go long.
+- [ASSISTANT_SAID] Cointegration measures the long-term equilibrium relationship between two or more non-stationary time series.
+- [ASSISTANT_SAID] Cointegration implies that if one time series deviates from its long-term relationship with another, it is likely to revert back over time.
+- [ASSISTANT_SAID] A Python code example was provided to test for cointegration between two financial instruments.
+- [ASSISTANT_CREATED] The Python code example for cointegration includes importing pandas, numpy, and the coint function from statsmodels, collecting historical data, computing the spread, and testing for cointegration.
+- [ASSISTANT_SAID] The p-value from the cointegration test is used to determine if the two financial instruments are cointegrated.
+- [ASSISTANT_SAID] If the p-value is less than 0.05, the two financial instruments are considered cointegrated.
+- [ASSISTANT_SAID] Co-integration and correlation are related concepts that measure the relationship between financial instruments but differ in approach and interpretation.
+- [ASSISTANT_SAID] Correlation measures the linear relationship between two financial instruments and ranges from -1 to 1.
+- [ASSISTANT_SAID] Co-in

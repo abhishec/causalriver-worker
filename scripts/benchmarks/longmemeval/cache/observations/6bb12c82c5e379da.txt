@@ -1,0 +1,27 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/21 (Sun) 23:58
+- [ASSISTANT_SAID] SQL Analytical Functions are used to perform calculations on a set of rows that are related to the current row.
+- [ASSISTANT_SAID] Analytical functions are used with the OVER clause and can be used to perform ranking, windowing, and aggregation operations.
+- [ASSISTANT_SAID] Several analytical functions available in SQL include ROW_NUMBER, RANK, DENSE_RANK, NTILE, LAG, LEAD, SUM, AVG, MIN, MAX, and COUNT.
+- [ASSISTANT_SAID] Example of calculating the running total of sales for each salesperson using SQL:
+```sql
+SELECT SaleID, SaleDate, Region, SalesPerson, Amount, SUM(Amount) OVER (PARTITION BY SalesPerson ORDER BY SaleDate) AS RunningTotal
+FROM Sales;
+```
+- [ASSISTANT_SAID] The result set for the running total of sales for each salesperson includes columns: SaleID, SaleDate, Region, SalesPerson, Amount, and RunningTotal.
+- [ASSISTANT_SAID] Other examples of SQL Analytical Functions include:
+  - [ASSISTANT_SAID] ROW_NUMBER: assigns a unique number to each row within a result set.
+  - [ASSISTANT_SAID] RANK and DENSE_RANK: assigns a ranking to each row based on a specified column.
+  - [ASSISTANT_SAID] NTILE: assigns a group number to each row based on a specified number of groups.
+  - [ASSISTANT_SAID] LAG and LEAD: returns the value of a column from a previous or next row.
+  - [ASSISTANT_SAID] COUNT: returns the number of rows in a result set.
+- [USER] Requested an explanation of product purchase patterns for airlines with an example.
+- [ASSISTANT_SAID] Product purchase patterns for airlines refer to the analysis of data related to airline ticket sales to identify customer buying habits and preferences.
+- [ASSISTANT_SAID] Example of analyzing purchasing patterns for flights from New York to Los Angeles includes:
+  - [ASSISTANT_SAID] Seasonal demand: Identifying peak travel periods to adjust pricing and marketing strategies.
+  - [ASSISTANT_SAID] Booking lead time: Analyzing how far in advance customers book flights to adjust pricing strategies.
+  - [ASSISTANT_SAID] Fare preferences: Analyzing fare preferences to determine popular fare classes.
+  - [ASSISTANT_SAID] Ancillary purchases: Analyzing data to determine popular ancillary products and services.
+- [USER] Asked how to create automated dashboards in TIBCO Spotfire.
+- [ASSISTANT_SAID] Steps

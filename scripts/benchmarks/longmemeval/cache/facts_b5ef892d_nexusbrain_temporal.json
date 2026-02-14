@@ -1,0 +1,144 @@
+{
+  "answer_a8b4290f_2": [
+    {
+      "fact": "User is looking for new waterproof hiking boots suitable for multi-day backpacking trips.",
+      "type": "preference",
+      "entities": [
+        "waterproof hiking boots",
+        "multi-day backpacking trips"
+      ]
+    },
+    {
+      "fact": "User recently returned from a 3-day solo camping trip to Big Sur in early April.",
+      "type": "event",
+      "entities": [
+        "3-day solo camping trip",
+        "Big Sur",
+        "April"
+      ]
+    },
+    {
+      "fact": "User's current hiking boots did okay during the camping trip, but they feel they need something better.",
+      "type": "opinion",
+      "entities": [
+        "current hiking boots",
+        "camping trip"
+      ]
+    },
+    {
+      "fact": "User has heard great things about the Merrell Moab 2 Mid Waterproof boots.",
+      "type": "opinion",
+      "entities": [
+        "Merrell Moab 2 Mid Waterproof"
+      ]
+    },
+    {
+      "fact": "User encountered rocky and uneven terrain on trails in Yellowstone last month.",
+      "type": "event",
+      "entities": [
+        "rocky terrain",
+        "uneven terrain",
+        "Yellowstone"
+      ]
+    }
+  ],
+  "answer_a8b4290f_3": [
+    {
+      "fact": "User is planning a trip to Moab, Utah.",
+      "type": "event",
+      "entities": [
+        "Moab",
+        "Utah"
+      ]
+    },
+    {
+      "fact": "User has been loving scenic drives and hikes in Utah.",
+      "type": "preference",
+      "entities": [
+        "scenic drives",
+        "hikes",
+        "Utah"
+      ]
+    },
+    {
+      "fact": "User had a 7-day family road trip in Utah in February.",
+      "type": "event",
+      "entities": [
+        "7-day family road trip",
+        "Utah",
+        "February"
+      ]
+    },
+    {
+      "fact": "User did a lot of driving and hiking during the trip but did not go camping.",
+      "type": "opinion",
+      "entities": [
+        "driving",
+        "hiking",
+        "camping"
+      ]
+    },
+    {
+      "fact": "User is interested in off-roading.",
+      "type": "preference",
+      "entities": [
+        "off-roading"
+      ]
+    },
+    {
+      "fact": "User is a beginner in off-roading.",
+      "type": "personal",
+      "entities": [
+        "beginner"
+      ]
+    },
+    {
+      "fact": "User is looking for bike rentals in Moab.",
+      "type": "preference",
+      "entities": [
+        "bike rentals",
+        "Moab"
+      ]
+    }
+  ],
+  "answer_a8b4290f_1": [
+    {
+      "fact": "User is planning a trip to the Rocky Mountains in Colorado.",
+      "type": "event",
+      "entities": [
+        "Rocky Mountains",
+        "Colorado"
+      ]
+    },
+    {
+      "fact": "User recently returned from a 5-day camping trip to Yellowstone National Park.",
+      "type": "event",
+      "entities": [
+        "Yellowstone National Park"
+      ]
+    },
+    {
+      "fact": "User enjoyed their camping trip to Yellowstone National Park.",
+      "type": "opinion",
+      "entities": [
+        "Yellowstone National Park"
+      ]
+    },
+    {
+      "fact": "User is particularly interested in the Maroon Bells Scenic Trail.",
+      "type": "preference",
+      "entities": [
+        "Maroon Bells Scenic Trail"
+      ]
+    },
+    {
+      "fact": "User is seeking recommendations for local food and drinks in Aspen.",
+      "type": "preference",
+      "entities": [
+        "Aspen",
+        "food",
+        "drinks"
+      ]
+    }
+  ]
+}

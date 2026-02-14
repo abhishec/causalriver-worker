@@ -1,0 +1,26 @@
+{
+  "answer_8549e5e0": [
+    {
+      "fact": "User is having issues with their garbage disposal.",
+      "type": "event",
+      "entities": [
+        "garbage disposal"
+      ]
+    },
+    {
+      "fact": "User recently bought a new utensil holder.",
+      "type": "event",
+      "entities": [
+        "utensil holder"
+      ]
+    },
+    {
+      "fact": "User wants to keep countertops clutter-free.",
+      "type": "preference",
+      "entities": [
+        "countertops",
+        "clutter-free"
+      ]
+    }
+  ]
+}

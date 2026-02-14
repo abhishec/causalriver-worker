@@ -1,0 +1,35 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/23 (Tue) 10:48
+- [USER] User inquired about the ingredients in tacos, specifically regarding beans and animal products.
+- [ASSISTANT_SAID] Assistant stated that it is possible some beans used in tacos may contain lard or other animal products and recommended checking with the restaurant or vendor.
+- [ASSISTANT_SAID] Assistant suggested looking for vegan-friendly options for taco fillings.
+- [USER] User requested suggestions for vegan-friendly filling options for tacos.
+- [ASSISTANT_CREATED] Assistant provided a list of vegan-friendly filling options for tacos, including:
+  1. Spicy black beans
+  2. Grilled portobello mushrooms
+  3. Roasted sweet potato or yams
+  4. Chickpeas cooked with taco seasoning
+  5. Sauteed or grilled vegetables (onions, bell peppers, zucchini)
+  6. Refried beans made with vegetable broth
+  7. Tofu scramble with taco seasoning and veggies
+  8. Vegan meat substitutes (soy chorizo, crumbled tempeh)
+  9. Guacamole, salsa, pico de gallo
+  10. Vegan cheese and sour cream substitutes
+- [USER] User expressed excitement about trying new vegan fillings in tacos.
+- [USER] User asked for recommendations for a good vegan cheese or sour cream substitute.
+- [ASSISTANT_SAID] Assistant provided several recommendations for vegan cheese and sour cream substitutes, including:
+  1. Nutritional Yeast
+  2. Cashew Cheese
+  3. Vegan Cheese Brands (Daiya, Follow Your Heart, Violife)
+  4. Coconut Yogurt
+  5. Tofu Sour Cream
+- [USER] User decided to try cashew cheese and coconut yogurt for their tacos.
+- [USER] User requested recommendations for a plant-based protein source to add to their tacos.
+- [ASSISTANT_SAID] Assistant provided a list of plant-based protein sources for tacos, including:
+  1. Black beans
+  2. Lentils
+  3. Tofu
+  4. Tempeh
+  5. Veggie crumbles
+- [ASSISTANT_SAID] Assistant noted that these protein sources can be mixed and matched for flavor and texture.

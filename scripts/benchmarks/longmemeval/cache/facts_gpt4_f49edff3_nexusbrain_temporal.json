@@ -1,0 +1,141 @@
+{
+  "answer_3e9fce53_1": [
+    {
+      "fact": "User is expecting a new baby in their social circle soon.",
+      "type": "event",
+      "entities": [
+        "new baby",
+        "social circle"
+      ]
+    },
+    {
+      "fact": "User helped a friend prepare a nursery.",
+      "type": "event",
+      "entities": [
+        "friend",
+        "nursery"
+      ]
+    },
+    {
+      "fact": "User spent an entire Sunday afternoon shopping for baby supplies and decorations.",
+      "type": "event",
+      "entities": [
+        "Sunday",
+        "baby supplies",
+        "decorations"
+      ]
+    },
+    {
+      "fact": "User is considering getting a personalized baby blanket as a gift.",
+      "type": "preference",
+      "entities": [
+        "personalized baby blanket",
+        "gift"
+      ]
+    },
+    {
+      "fact": "User finds the recommendations for baby stores and online marketplaces helpful.",
+      "type": "opinion",
+      "entities": [
+        "baby stores",
+        "online marketplaces"
+      ]
+    }
+  ],
+  "answer_3e9fce53_2": [
+    {
+      "fact": "User is considering getting a baby gift for a coworker's new baby.",
+      "type": "event",
+      "entities": [
+        "baby gift",
+        "coworker",
+        "new baby"
+      ]
+    },
+    {
+      "fact": "User helped their cousin pick out items for a baby shower.",
+      "type": "event",
+      "entities": [
+        "cousin",
+        "baby shower"
+      ]
+    },
+    {
+      "fact": "User purchased diapers, wipes, and a baby monitor at Target for the baby shower.",
+      "type": "event",
+      "entities": [
+        "diapers",
+        "wipes",
+        "baby monitor",
+        "Target"
+      ]
+    },
+    {
+      "fact": "User is thinking of getting a gift basket with baby essentials.",
+      "type": "preference",
+      "entities": [
+        "gift basket",
+        "baby essentials"
+      ]
+    },
+    {
+      "fact": "User is considering including a baby carrier or sling in the gift basket.",
+      "type": "preference",
+      "entities": [
+        "baby carrier",
+        "sling",
+        "gift basket"
+      ]
+    },
+    {
+      "fact": "User believes a baby carrier or sling is a personal preference for parents.",
+      "type": "opinion",
+      "entities": [
+        "baby carrier",
+        "sling",
+        "parents"
+      ]
+    }
+  ],
+  "answer_3e9fce53_3": [
+    {
+      "fact": "User has siblings.",
+      "type": "relationship",
+      "entities": [
+        "siblings"
+      ]
+    },
+    {
+      "fact": "User's sister is really into fashion.",
+      "type": "preference",
+      "entities": [
+        "sister",
+        "fashion"
+      ]
+    },
+    {
+      "fact": "User's brother loves playing video games.",
+      "type": "preference",
+      "entities": [
+        "brother",
+        "video games"
+      ]
+    },
+    {
+      "fact": "User ordered a customized phone case for a friend's birthday.",
+      "type": "event",
+      "entities": [
+        "customized phone case",
+        "friend's birthday"
+      ]
+    },
+    {
+      "fact": "User's friend really loves the customized phone case.",
+      "type": "opinion",
+      "entities": [
+        "friend",
+        "customized phone case"
+      ]
+    }
+  ]
+}

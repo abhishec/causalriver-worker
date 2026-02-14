@@ -1,0 +1,14 @@
+**Observation Log:**
+
+[FACT] The user is feeling overwhelmed and needs help organizing their schedule.  
+[RELATIONSHIP] The user has therapy appointments with Dr. Smith.  
+[TEMPORAL] The user's first appointment with Dr. Smith was on February 27th.  
+[FACT] The user has been journaling and finds it helpful in managing their anxiety and identifying triggers and patterns.  
+[EVENT] The user had a major falling out with their best friend back in early February, which took a toll on their self-esteem.  
+[ASSISTANT_SAID] The assistant suggested checking the user's calendar, contacting Dr. Smith's office, using a scheduling tool, and creating a routine to help organize their schedule.  
+[ASSISTANT_SAID] The assistant provided mindfulness exercises including deep breathing, body scan, mindful walking, loving-kindness meditation, and guided imagery to help the user relax before their next appointment.  
+[ASSISTANT_SAID] The assistant offered tips on how to get started with journaling, including choosing a journal, setting a schedule, creating a conducive environment, and what to write about (feelings, thoughts, patterns, positives).  
+[ASSISTANT_SAID] The assistant provided strategies for reframing negative thoughts and focusing on self-compassion, including becoming aware of negative self-talk, challenging those thoughts, treating oneself with kindness, and practicing self-care.  
+[ASSISTANT_SAID] The assistant suggested prioritizing self-care by identifying needs, scheduling self-care, starting small, and making time for relaxation.  
+[ASSISTANT_SAID] The assistant recommended setting boundaries with social invitations by learning to say "no," assessing energy levels, setting clear boundaries, offering alternatives, practicing assertive communication, taking time to respond, and prioritizing oneself.  
+[ASSISTANT_CREATED] The assistant created a list of mindfulness exercises and self-care strategies, including specific activities and approaches to journaling and reframing negative thoughts.

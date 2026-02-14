@@ -1,0 +1,140 @@
+{
+  "answer_dcb18b9b_2": [
+    {
+      "fact": "User is tracking expenses for Max's supplies.",
+      "type": "event",
+      "entities": [
+        "Max"
+      ]
+    },
+    {
+      "fact": "User buys grain-free kibble for Max every month.",
+      "type": "preference",
+      "entities": [
+        "grain-free kibble",
+        "Max"
+      ]
+    },
+    {
+      "fact": "User spends $50 a month on grain-free kibble.",
+      "type": "personal",
+      "entities": [
+        "$50",
+        "grain-free kibble"
+      ]
+    },
+    {
+      "fact": "User buys dental chews for Max every month.",
+      "type": "preference",
+      "entities": [
+        "dental chews",
+        "Max"
+      ]
+    },
+    {
+      "fact": "User spends $10 a month on dental chews.",
+      "type": "personal",
+      "entities": [
+        "$10",
+        "dental chews"
+      ]
+    },
+    {
+      "fact": "User recently purchased a dog bed for Max for $40 as a one-time expense.",
+      "type": "event",
+      "entities": [
+        "dog bed",
+        "$40",
+        "Max"
+      ]
+    },
+    {
+      "fact": "User recently purchased a flea and tick collar for Max for $20 as a one-time expense.",
+      "type": "event",
+      "entities": [
+        "flea and tick collar",
+        "$20",
+        "Max"
+      ]
+    },
+    {
+      "fact": "User is curious about the effectiveness of dental chews on Max's teeth.",
+      "type": "opinion",
+      "entities": [
+        "dental chews",
+        "Max"
+      ]
+    }
+  ],
+  "answer_dcb18b9b_1": [
+    {
+      "fact": "User has a golden retriever named Max.",
+      "type": "personal",
+      "entities": [
+        "Max",
+        "golden retriever"
+      ]
+    },
+    {
+      "fact": "Max is about 3 years old.",
+      "type": "personal",
+      "entities": [
+        "Max",
+        "3 years old"
+      ]
+    },
+    {
+      "fact": "User is thinking of getting Max a new toy.",
+      "type": "preference",
+      "entities": [
+        "Max",
+        "new toy"
+      ]
+    },
+    {
+      "fact": "User recently bought Max a stainless steel food bowl for $15.",
+      "type": "event",
+      "entities": [
+        "Max",
+        "stainless steel food bowl",
+        "$15"
+      ]
+    },
+    {
+      "fact": "User bought Max a measuring cup for $5.",
+      "type": "event",
+      "entities": [
+        "Max",
+        "measuring cup",
+        "$5"
+      ]
+    },
+    {
+      "fact": "User's preference for Max includes playing fetch and squeaky toys.",
+      "type": "preference",
+      "entities": [
+        "Max",
+        "fetch",
+        "squeaky toys"
+      ]
+    },
+    {
+      "fact": "User is considering a durable squeaky ball or a rubber toy with holes for Max.",
+      "type": "preference",
+      "entities": [
+        "Max",
+        "durable squeaky ball",
+        "rubber toy with holes"
+      ]
+    },
+    {
+      "fact": "User thinks a rubber toy with holes would be suitable for Max's grain-free kibble as a treat.",
+      "type": "opinion",
+      "entities": [
+        "Max",
+        "rubber toy with holes",
+        "grain-free kibble"
+      ]
+    }
+  ]
+}

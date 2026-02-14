@@ -1,0 +1,35 @@
+{
+  "answer_e6143162": [
+    {
+      "fact": "User is planning to make lemon-based desserts for an upcoming dinner party.",
+      "type": "event",
+      "entities": [
+        "lemon-based desserts",
+        "dinner party"
+      ]
+    },
+    {
+      "fact": "User has had success with lemon-based desserts in the past.",
+      "type": "opinion",
+      "entities": [
+        "lemon-based desserts"
+      ]
+    },
+    {
+      "fact": "User recently made a lemon blueberry cake for their niece's birthday party.",
+      "type": "event",
+      "entities": [
+        "lemon blueberry cake",
+        "niece's birthday party"
+      ]
+    },
+    {
+      "fact": "User found the combination of tangy lemon and sweet blueberries to be perfect.",
+      "type": "opinion",
+      "entities": [
+        "tangy lemon",
+        "sweet blueberries"
+      ]
+    }
+  ]
+}

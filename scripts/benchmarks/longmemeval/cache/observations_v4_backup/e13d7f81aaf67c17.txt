@@ -1,0 +1,24 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/22 (Mon) 12:47
+- [FACT] Andy is a man in his 40s and the Head of Computing at a rural high school.
+- [FACT] Andy has a loud, deep voice and more confidence than intelligence.
+- [FACT] Andy has poor personal hygiene and often wears an untidy, stained white shirt.
+- [FACT] Andy often makes moaning noises while using disabled toilets, despite having no obvious disability.
+- [FACT] Roger is a man in his 50s, a computing teacher working under Andy, and has grey hair.
+- [FACT] Roger has a laid-back attitude to teaching and his classes are often out of control.
+- [FACT] Roger has quiet contempt for Andy being the head of department, believing he is more qualified.
+- [FACT] John is a 69-year-old exam invigilator with wispy grey hair, wearing a pinstripe suit, several gold rings, and red-tinted glasses.
+- [FACT] John is past retirement age but continues to work, possibly because he enjoys making people uncomfortable.
+- [FACT] Ruth is a woman in her 40s, a languages teacher at the high school, and is obsessed with the German language and culture.
+- [FACT] Ruth regularly speaks to people in German, even when they don't understand her.
+- [FACT] Ruth is attracted to women and often has to deter John's advances.
+- [PREFERENCE] Andy wants to be friends with John and often tries to impress him with elaborate stories.
+- [PREFERENCE] Andy is proud of his role as the presenter of the school talent show.
+- [PREFERENCE] Roger has a sarcastic attitude towards Andy's stories and is skeptical of his abilities.
+- [PREFERENCE] John makes brazen, inappropriate remarks towards his colleagues.
+- [PREFERENCE] Ruth is not interested in John's advances.
+- [EVENT] Andy is preparing for the school talent show and is trying to make it a success.
+- [EVENT] Andy is seen trying to impress John with his stories in the staff room.
+- [CHANGE] Andy's confidence in his abilities is contrasted with Roger's belief that he is more qualified.
+- [ASSISTANT] The assistant provided a script for a comedy movie scene featuring Andy, Roger, John, and Ruth, including specific character traits and interactions.

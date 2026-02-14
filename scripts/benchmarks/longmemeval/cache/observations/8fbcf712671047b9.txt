@@ -1,0 +1,45 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/22 (Mon) 16:39  
+[FACT] User is working with a Salesforce instance.  
+[FACT] User's Salesforce instance can break down if more than 400 contacts per hour join their registry.  
+[FACT] Records of contacts appear on the user's contact object in Salesforce.  
+[ASSISTANT_SAID] The assistant provided a SOQL query to group contacts by hour and check if any hour exceeded the limit of 400 contacts.  
+[ASSISTANT_CREATED] The assistant created a SOQL query:  
+```sql
+SELECT DAY_ONLY(CreatedDate) day, CALENDAR_HOUR(CreatedDate) hour, COUNT(Id) numberOfContacts
+FROM Contact
+WHERE CreatedDate = LAST_N_DAYS:30
+GROUP BY DAY_ONLY(CreatedDate), CALENDAR_HOUR(CreatedDate)
+HAVING COUNT(Id) > 400
+ORDER BY DAY_ONLY(CreatedDate), CALENDAR_HOUR(CreatedDate)
+```  
+[ASSISTANT_SAID] The assistant explained the components of the SOQL query, including selecting day and hour, counting contacts, filtering for the last 30 days, grouping results, and ordering them.  
+[USER] User indicated that they cannot aggregate by calendar hour in the Developer Console and requested an alternative or an update to the query.  
+[ASSISTANT_SAID] The assistant apologized for the confusion and suggested using Apex instead of SOQL to achieve the same goal.  
+[ASSISTANT_CREATED] The assistant provided an Apex script to group contact records by hour and check if any hour exceeded the limit:  
+```apex
+Map<String, Integer> hourlyContactCount = new Map<String, Integer>();
+
+List<Contact> contacts = [SELECT Id, CreatedDate FROM Contact WHERE CreatedDate = LAST_N_DAYS:30];
+
+for (Contact c : contacts) {
+    DateTime createdDate = c.CreatedDate;
+    String dayHourKey = createdDate.format('yyyy-MM-dd') + ' ' + String.valueOf(createdDate.hour());
+
+    if (!hourlyContactCount.containsKey(dayHourKey)) {
+        hourlyContactCount.put(dayHourKey, 1);
+    } else {
+        hourlyContactCount.put(dayHourKey, hourlyContactCount.get(dayHourKey) + 1);
+    }
+}
+
+System.debug('Hourly contact count: ' + hourlyContactCount);
+
+for (String dayHourKey : hourlyContactCount.keySet()) {
+    if (hourlyContactCount.get(dayHourKey) > 400) {
+        System.debug('Exceeded limit in hour: ' + dayHourKey + ' with ' + hourlyContactCount.get(dayHourKey) + ' contacts');
+    }
+}
+```  
+[ASSISTANT_SAID] The assistant explained how the Apex script works, including creating a map for hourly contact counts, querying contacts, iterating through them, and outputting

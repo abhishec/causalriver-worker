@@ -1,0 +1,19 @@
+**Observation Log:**
+
+- [FACT] User is looking to buy a new home.
+- [FACT] User is currently renting a 2-bedroom apartment for $1,800 per month.
+- [FACT] User's gross income is around $6,500 per month.
+- [FACT] User has credit card debt of about $2,000 total.
+- [FACT] User has a car loan payment of $400 per month.
+- [CHANGE] User is hoping to pay off the credit card debt soon but is unsure about the car loan.
+- [ASSISTANT_SAID] The assistant stated that lenders typically recommend a debt-to-income (DTI) ratio not exceeding 36%.
+- [ASSISTANT_SAID] The assistant provided a rough estimate that the user may be able to afford a mortgage payment of around $1,500 per month based on a gross income of $6,000.
+- [ASSISTANT_SAID] The assistant suggested that the user could afford a mortgage payment of around $1,650 per month after considering their debts and income.
+- [ASSISTANT_SAID] The assistant mentioned that the average 30-year fixed mortgage rate in the U.S. is around 3.75%.
+- [ASSISTANT_SAID] The assistant provided a breakdown of a monthly mortgage payment, estimating that with a $1,650 payment, the mortgage amount would be approximately $270,000.
+- [ASSISTANT_SAID] The assistant explained that a small change in interest rate can significantly affect the monthly mortgage payment, providing examples of different scenarios.
+- [PREFERENCE] User is considering selling their old car to put the proceeds towards the down payment and closing costs.
+- [ASSISTANT_SAID] The assistant encouraged the user to sell their old car, explaining the benefits of using the proceeds for the down payment and closing costs.
+- [ASSISTANT_SAID] The assistant provided considerations for the user before selling their car, such as transportation costs and alternative uses for the funds.
+- [ASSISTANT_SAID] The assistant recommended that the user work with a lender to get pre-approved for a mortgage.
+- [ASSISTANT_SAID] The assistant offered tips on how to find a good lender and what questions to ask them, although specific details were not provided in this segment.

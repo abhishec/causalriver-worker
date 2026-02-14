@@ -1,0 +1,18 @@
+**Observation Log:**
+
+[FACT] User is planning to buy a new laptop.  
+[EVENT] User used a $5 off $20 coupon from Subway last month to buy lunch for themselves and a colleague.  
+[ASSISTANT_SAID] Assistant acknowledged the user's Subway coupon as a good deal.  
+[ASSISTANT_SAID] Assistant provided tips for finding good deals on laptops, including checking online retailers, manufacturer's websites, deal websites, back-to-school season, Black Friday and Cyber Monday, refurbished models, and student discounts.  
+[ASSISTANT_SAID] Assistant listed current laptop deals: Dell - up to $200 off select laptops with code LTO200, HP - up to 40% off select laptops, Lenovo - discounts on ThinkPad and IdeaPad laptops starting at $299, Amazon - discounts on various brands, Best Buy - deals on laptops under $300.  
+[ASSISTANT_SAID] Assistant advised checking specifications, warranty, and return policies before making a purchase.  
+[EVENT] User is thinking of buying household essentials soon.  
+[ASSISTANT_SAID] Assistant provided current deals and coupons for Target and Bed Bath & Beyond.  
+[ASSISTANT_SAID] Current deals at Target include Cartwheel offers, weekly ads, Target RedCard 5% off, online deals, and discounts on Threshold and Catstudio brands.  
+[ASSISTANT_SAID] Current deals at Target: up to 25% off select home decor, buy one get one 50% off on select kitchen utensils, and 20% off all Threshold brand items.  
+[ASSISTANT_SAID] Current deals at Bed Bath & Beyond include a 20% off entire purchase for email subscribers, coupons and promo codes, sales and clearance, and price match guarantee.  
+[ASSISTANT_SAID] Current deals at Bed Bath & Beyond: 20% off entire purchase for new email subscribers, up to 50% off select bedding and bath towels, buy one get one 50% off on all KitchenAid appliances.  
+[EVENT] User used a $10 off $50 coupon at Target to buy household essentials like toilet paper, laundry detergent, and paper towels.  
+[ASSISTANT_SAID] Assistant mentioned that there isn't an exact duplicate of the $10 off $50 coupon but suggested checking Target's website, app, or weekly ads for similar offers.  
+[ASSISTANT_SAID] Assistant provided current deals for household essentials at Target: 5% off with Target RedCard, buy one get one 25% off, and discounts on up & up paper products and Threshold brand cleaning supplies.  
+[ASSISTANT_SAID] Current deals at Target: buy one get one 25% off on all up & up paper products, 20% off all Threshold brand cleaning supplies, and 10% off all laundry detergent.

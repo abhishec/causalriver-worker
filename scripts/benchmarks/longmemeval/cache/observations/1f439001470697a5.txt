@@ -1,0 +1,17 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/03/20 (Mon) 21:16  
+[USER] User wants the assistant to act like a search engine.  
+[USER] User will provide documents to search over with attributes like title and body, formatted in block quotes.  
+[USER] User provided an example document with title "these tacos are great!" and body detailing a restaurant called "Barbie's Burrito Barn."  
+[ASSISTANT_SAID] Assistant acknowledged the document about "Barbie's Burrito Barn" with the snippet: "I have just discovered this new restaurant - Barbie's Burrito Barn. She serves such excellent tacos, I heartily recommend it."  
+[USER] User added a new search document titled "Connection issues with MetaMask."  
+[ASSISTANT_SAID] Assistant provided a relevant snippet from the document: "The latest Google Chrome update (Chrome 91) can cause U2F transport issues on third-party wallets like MetaMask for Mac and Linux users."  
+[USER] User repeated the request to add the same search document titled "Connection issues with MetaMask."  
+[ASSISTANT_SAID] Assistant provided the same relevant snippet again: "The latest Google Chrome update (Chrome 91) can cause U2F transport issues on third-party wallets like MetaMask for Mac and Linux users."  
+[USER] User added a new search document titled "Resetting your Ledger Live password."  
+[ASSISTANT_SAID] Assistant provided a relevant snippet from the document: "If you lost or forgot your Ledger Live password, you can reset your password by resetting Ledger Live."  
+[USER] User queried about the "welcome back page."  
+[ASSISTANT_SAID] Assistant provided the relevant snippet: "On the Welcome back page, click on I lost my password. After reading the warning, click on the Reset button."  
+[USER] User asked, "what is settings."  
+[ASSISTANT_SAID] Assistant provided the relevant snippet: "In Ledger Live, go to Settings, then click on the Password lock toggle ( ). Set up a new password."

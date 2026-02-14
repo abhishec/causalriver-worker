@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/29 (Mon) 19:34  
+[EVENT] User is planning to write a review for The Last of Us Part II on their blog.  
+[ASSISTANT_SAID] Writing a well-structured game review can help readers understand opinions and make informed decisions.  
+[ASSISTANT_SAID] Suggested structure for a game review includes:  
+[ASSISTANT_SAID] 1. **Introduction**: Brief introduction to the game, including title, developer, release date, genre, gameplay style, notable features, and user expectations.  
+[ASSISTANT_SAID] 2. **Story and Characters**: Summarize the story without spoilers, discuss character development, and share thoughts on narrative pacing, tone, and emotional resonance.  
+[ASSISTANT_SAID] 3. **Gameplay and Mechanics**: Describe gameplay mechanics, evaluate controls, difficulty, and player experience, and discuss innovations compared to previous games.  
+[ASSISTANT_SAID] 4. **Graphics and Sound Design**: Describe visual style, graphics quality, sound design, and mention any technical issues.  
+[ASSISTANT_SAID] 5. **Pacing and Length**: Discuss pacing, balance between action and downtime, and evaluate game length.  
+[ASSISTANT_SAID] 6. **Replay Value and Multiplayer**: Discuss replay value and evaluate multiplayer mode if applicable.  
+[ASSISTANT_SAID] 7. **Conclusion**: Summarize overall experience, provide recommendations, and end with a score or rating if desired.  
+[ASSISTANT_SAID] 8. **Additional Tips**: Be honest about biases, use specific examples, keep the review concise, and consider including media to enhance the review.  
+[ASSISTANT_SAID] For The Last of Us Part II, devote more space to discussing story and characters, and explore themes and emotional resonance.  
+[PREFERENCE] User plans to focus on the story and characters in their review.  
+[TEMPORAL] User spent around 35 hours playing the game, including an additional 10 hours on side quests and exploring the open world.  
+[TEMPORAL] User started playing the game on February 10th and finished it on March 5th.  
+[ASSISTANT_SAID] Suggested structuring thoughts on the game's story and characters by focusing on:  
+[ASSISTANT_SAID] 1. **Spoiler-free summary**: Brief summary of the game's story, highlighting main plot points and themes.  
+[ASSISTANT_SAID] 2. **Emotional resonance**: Discuss how the story affected the user emotionally.  
+[ASSISTANT_SAID] 3. **Character motivations**: Analyze motivations behind characters' actions

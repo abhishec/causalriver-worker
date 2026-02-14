@@ -1,0 +1,24 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/20 (Sat) 07:56
+- [USER] User inquired about high-profile cases heard by the Supreme Court of India in recent years.
+- [ASSISTANT_SAID] The assistant provided a list of 10 high-profile cases heard by the Supreme Court of India, including:
+  1. Sabarimala Temple Case: Allowed entry of women of all age groups into the Sabarimala Temple, overturning a centuries-old tradition.
+  2. Aadhaar Card Case: Declared mandatory linking of Aadhaar card with various services as unconstitutional and violative of the right to privacy.
+  3. Triple Talaq Case: Banned the practice of triple talaq.
+  4. Rafale Deal Case: Dismissed petitions challenging the Rafale fighter jet deal.
+  5. Section 377 Case: Decriminalized homosexuality by striking down Section 377 of the Indian Penal Code.
+  6. Ayodhya Case: Ruled that the disputed site in Ayodhya will be given to Hindus for a Ram temple and alternative land for a mosque.
+  7. Reservation in Promotions Case: Upheld the constitutional validity of reservation in promotions for Scheduled Castes and Scheduled Tribes.
+  8. CBI vs. CBI Case: Ordered reinstatement of CBI Director Alok Verma.
+  9. Nirbhaya Case: Upheld the death sentence of four convicts in the 2012 gang-rape and murder case.
+  10. Electoral Bonds Case: Allowed use of electoral bonds but directed political parties to disclose donor identities to the Election Commission.
+- [USER] User requested more information about the Sabarimala Temple case and the tradition of women not being allowed to enter the temple.
+- [ASSISTANT_SAID] The assistant explained the Sabarimala Temple case, detailing:
+  - The ban on women of menstruating age from entering the temple, based on beliefs of impurity and respect for Lord Ayyappa's celibacy.
+  - The challenge to the ban in 2018 by a women's rights group, arguing it was discriminatory and violated women's constitutional rights.
+  - The Supreme Court's decision in September 2018 to lift the ban, stating it violated the Constitution of India.
+  - The protests and violence that followed the decision, and the state government's attempts to implement it.
+  - The review petition filed in November 2019 and the Supreme Court's reaffirmation in February 2020 to allow women's entry into the temple.
+- [USER] User expressed understanding of the religious belief but questioned the fairness of discriminating against women based on gender and age, suggesting that everyone should be allowed to enter the temple if they wish.
+- [ASSISTANT_SAID] The assistant stated that it does not have personal opinions or

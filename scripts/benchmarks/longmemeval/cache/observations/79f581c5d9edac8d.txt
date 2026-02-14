@@ -1,0 +1,30 @@
+**Observation Log**
+
+**Session Date:** 2023/11/29 (Wed) 15:25  
+**Session ID:** 4162afef_2
+
+1. [EVENT] User is looking to get help with organizing car expenses.
+2. [EVENT] User has a bunch of receipts lying around and wants to keep track of them better.
+3. [ASSISTANT_SAID] Assistant is happy to help the user set up a system to organize car expenses.
+4. [ASSISTANT_SAID] Assistant suggests categorizing car expenses into: Fuel, Maintenance, Insurance, Registration and licenses, Accessories, Parking and tolls, Other.
+5. [ASSISTANT_SAID] Assistant provides methods to track expenses: Spreadsheets, Budgeting App, Notebook or Folder.
+6. [ASSISTANT_SAID] For spreadsheets, assistant recommends creating columns for date, category, description, and amount.
+7. [ASSISTANT_SAID] Assistant suggests using a budgeting app like Mint, Personal Capital, or YNAB.
+8. [ASSISTANT_SAID] Assistant recommends taking photos of receipts and storing them digitally or keeping physical receipts in a designated folder.
+9. [ASSISTANT_SAID] Assistant advises setting up a placeholder entry for the car cover with a $0 amount until it is paid for.
+10. [PREFERENCE] User prefers to use Google Sheets for tracking expenses.
+11. [EVENT] User needs to add maintenance entries to the spreadsheet.
+12. [TEMPORAL] User got an oil change on March 18th for $35.
+13. [TEMPORAL] User got tires rotated and balanced for $20 on March 18th.
+14. [TEMPORAL] User had a flat tire repaired for $15 on February 22nd.
+15. [ASSISTANT_CREATED] Assistant provides an example of how to set up the spreadsheet with the user's maintenance entries.
+16. [ASSISTANT_SAID] Assistant suggests using consistent date formats and being specific with descriptions in the spreadsheet.
+17. [ASSISTANT_SAID] Assistant recommends using formulas in Google Sheets to calculate totals or averages for expenses.
+18. [EVENT] User adds a car detailing expense of $120 on April 1st.
+19. [ASSISTANT_CREATED] Assistant updates the spreadsheet to include the car detailing expense.
+20. [EVENT] User had a parking ticket on March 28th for $40.
+21. [ASSISTANT_CREATED] Assistant updates the spreadsheet to include the parking ticket expense.
+22. [ASSISTANT_SAID] Assistant suggests creating a new category for Fuel to track future gas fill-ups.
+23. [EVENT] User wants to track fuel expenses from now on.
+24. [EVENT] User needs to add insurance premiums and registration fees to the spreadsheet.
+25. [TEMPORAL] User's insurance premium is $120

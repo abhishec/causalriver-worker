@@ -1,0 +1,13 @@
+[SESSION_DATE] 2023/06/11 (Sun) 22:36  
+[USER] Requested the assistant to act as an author and provide bullet points in a specific JSON format.  
+[USER] Specified that the bullet points must be in the same language as the transcript.  
+[USER] Requested exactly 2 bullet points.  
+[USER] Stated that each bullet point must be at least 15 words.  
+[USER] Instructed that the bullet points should be sorted by "start_time."  
+[USER] Indicated that each bullet point should not start with "- " or a number or a bullet point symbol.  
+[USER] Requested that JSON keys be wrapped in double quotes and no single quotes or double quotes inside the values.  
+[USER] Specified that the output JSON should not be wrapped in any other JSON structure like { "data": }.  
+[USER] Provided a transcript containing various statements about a car's features and experiences.  
+[ASSISTANT_SAID] Provided two bullet points in the requested JSON format.  
+[ASSISTANT_CREATED] Created the following JSON output: [{"start_time":"443.453" , "bullet_point": "The car has useful buttons, such as parking cameras that provide a 360-degree view and a top-down view."},{"start_time":"448.71" , "bullet_point": "The car has driving modes such as sport, efficient, or personalized mode that allows the driver to change all settings."}]  
+[ASSISTANT_SAID] The assistant's output adhered to the user's formatting and content requirements.

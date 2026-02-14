@@ -1,0 +1,25 @@
+**Observation Log**
+
+**Session Date:** 2023/05/21 (Sun) 17:15  
+**Session ID:** sharegpt_BK0BcTz_0  
+
+1. [FACT] User is preparing an e-book for an Australian property buyers' agent company.
+2. [FACT] The e-book will be shared online and via social media channels.
+3. [FACT] The goal of the e-book is to attract new clients.
+4. [FACT] The e-book will contain a curated selection of seven appealing suburbs for property investment in Brisbane.
+5. [FACT] The structure of the e-book will be: 1. title page 2. contents 3. methodology 4. market trends 5. suburb selections 6. call to action.
+6. [FACT] The data used in the suburb level market analysis includes: sale volume by price segment, median house prices over time, suburb vacancy rates, region vacancy rates, median rent, social advantage/disadvantage decile, region unemployment rate, weekly household income, household income state decile, % family households, average household size, property type proportion breakdown, age segment breakdown, inventory on market, ownership type breakdown.
+7. [ASSISTANT_SAID] Assistant acknowledges the instructions and requests the first suburb's information.
+8. [FACT] User provides a suburb snapshot for Chermside West, QLD.
+9. [FACT] Price segments for Chermside West over the last 24 months include: $400k-$600k, $600k-$800k, $800k-$1m, $1m-$1.2m, $1.2m-$1.4m, $1.4m-$1.6m, $1.6m-$1.8m, $1.8m-$2m.
+10. [FACT] Vacancy rate for Chermside West is 1.9%.
+11. [FACT] Weekly household income in Chermside West is $2,124.
+12. [FACT] Median house price in Chermside West is $870,000.
+13. [FACT] Median rent in Chermside West is $610.
+14. [FACT] Inventory risk for Chermside West is minimal with 1.73 months of stock on the market.
+15. [FACT] Social advantage/disadvantage rating for Chermside West is not specified.
+16. [FACT] Family households in Chermside West make up 76.5%.
+17. [FACT] Population growth in the Chermside region from 2016-2021 is 7.62%.
+18. [FACT] Unemployment rate in the Chermside region is 4.5%.
+19. [FACT] Average household size in Chermside West is 2.7.
+20. [ASSISTANT_SAID] Assistant acknowledges the receipt of data for Cher

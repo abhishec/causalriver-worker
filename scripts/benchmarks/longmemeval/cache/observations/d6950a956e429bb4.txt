@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/22 (Mon) 07:51  
+[ASSISTANT_SAID] The `useEffect()` function may not be called due to an issue with the dependencies array.  
+[ASSISTANT_SAID] Suggested adding `template` to the dependencies array of `useEffect()`.  
+[ASSISTANT_SAID] Provided a code snippet for `useEffect()` with `template` in the dependencies array.  
+[ASSISTANT_SAID] Mentioned that CORS issues might prevent the server from responding if running on a different domain or port.  
+[ASSISTANT_SAID] Recommended checking the browser console for CORS-related errors.  
+[ASSISTANT_SAID] Suggested adding console.log statements to debug the `useEffect()` function.  
+[ASSISTANT_SAID] Provided a code snippet with console.log statements before and after the `axios.get()` call.  
+[USER] Confirmed that the `useEffect()` function is never called, not even once.  
+[ASSISTANT_SAID] Suggested checking if the component is mounted in the DOM by adding a console.log statement inside the component function.  
+[ASSISTANT_SAID] Provided a code snippet to log when the App component is mounted.  
+[ASSISTANT_SAID] Recommended checking that the component is rendered by the root React element in `index.js`.  
+[ASSISTANT_SAID] Provided a code snippet for `index.js` to ensure the App component is rendered correctly.  
+[USER] Shared the content of their `index.js` file, which included `ReactDOM.createRoot()`.  
+[ASSISTANT_SAID] Explained that `createRoot()` is a new feature in React 18 and suggested using `ReactDOM.render()` instead.  
+[ASSISTANT_SAID] Provided a complete version of `App.js` and `index.js` using `ReactDOM.render()`.  
+[USER] Confirmed that the application is now working.  
+[USER] Clarified that the dollar sign in the template sentence indicates variables that must be replaced by combo boxes when rendering.  
+[ASSISTANT_SAID] Apologized for misunderstanding the specification regarding the template sentence.  
+[ASSISTANT_SAID] Provided an updated version of `App.js` to replace variables in the template sentence with dropdown menus.  
+[ASSISTANT_CREATED] Created a `replaceVariables()` function to replace variables in the template sentence with dropdown menus.  
+[ASSISTANT_SAID] Explained how the `replaceVariables()` function works, including the use of regular expressions and creating `<select>` elements for options.  
+[ASSISTANT_SAID] Encouraged the user to reach out for further help or questions.

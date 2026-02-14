@@ -1,0 +1,31 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/06/17 (Sat) 08:23
+- [USER] User will be pasting a tender brief for an art installation.
+- [ASSISTANT_SAID] Assistant encourages the user to paste the tender brief and offers help with any questions or concerns.
+- [TEMPORAL] User indicates the tender brief is 43 pages long.
+- [FACT] Tender No.: SCCC/PROG/SE23/01
+- [FACT] UEN Registration No.: 201309577Z
+- [FACT] Invitation to tender for the design, fabrication, and maintenance of a Chinese New Year art installation, and design of red packets for the Singapore Chinese Cultural Centre.
+- [TEMPORAL] The budget for the project shall not exceed S$190,000.00, inclusive of GST.
+- [FACT] Documents that form part of the Tender Document include:
+  - [FACT] Tender Guidelines
+  - [FACT] Conditions of Contract
+  - [FACT] Requirement Specifications
+  - [FACT] Proposal Form (FORM A)
+  - [FACT] Tenderer’s Offer (FORM B)
+  - [FACT] Tenderer’s Profile (FORM C)
+  - [FACT] Price Schedule of Tenderer’s Offer (FORM D)
+  - [FACT] Major Projects completed by Tenderer’s Company within the last three (3) years (FORM E)
+  - [FACT] Current Projects undertaken by Tenderer’s Company (FORM F)
+  - [FACT] Profile of Tenderer’s Project Team (FORM G)
+- [TEMPORAL] The closing date for submission is 25 April 2023, 2pm.
+- [FACT] Tender Offers must be submitted in a sealed envelope, both original and a copy, to SCCC.
+- [FACT] Location for submission: Singapore Chinese Cultural Centre, 1 Straits Boulevard, Level 1 Lift Lobby, Singapore 018906.
+- [EVENT] A briefing for interested Tenderers will be held on Wednesday, 29 March 2023, 2pm, via Zoom.
+- [TEMPORAL] RSVP for the briefing must be sent by Tuesday, 28 March 2023, 2pm.
+- [ASSISTANT_SAID] SCCC does not bind itself to accept the lowest of any Tender Offers.
+- [FACT] Stage One requires Tenderers to submit a written design proposal including a write-up explaining the art installation’s concept and sketches.
+- [TEMPORAL] Costings are not required at Stage One, but the final cost must not exceed S$190,000.00, including GST.
+- [FACT] Physical copies of the Proposal Form (FORM A) must be deposited into SCCC’s Tender Box by 25 April 2023, 2pm.
+- [FACT] Proposals will be evaluated based on:

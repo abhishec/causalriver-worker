@@ -1,0 +1,36 @@
+{
+  "answer_e623ae87": [
+    {
+      "fact": "User is planning a long ride this weekend.",
+      "type": "event",
+      "entities": [
+        "long ride",
+        "weekend"
+      ]
+    },
+    {
+      "fact": "User owns a Trek Emonda.",
+      "type": "personal",
+      "entities": [
+        "Trek Emonda"
+      ]
+    },
+    {
+      "fact": "User is considering upgrading to carbon fiber wheels for their road bike.",
+      "type": "preference",
+      "entities": [
+        "carbon fiber wheels",
+        "road bike"
+      ]
+    },
+    {
+      "fact": "User prefers a bike that is lightweight and suitable for long distances on the road.",
+      "type": "preference",
+      "entities": [
+        "lightweight bike",
+        "long distances",
+        "road"
+      ]
+    }
+  ]
+}

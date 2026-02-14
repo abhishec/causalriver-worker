@@ -1,0 +1,98 @@
+{
+  "answer_caf5b52e_1": [
+    {
+      "fact": "User has a collection of shoes that is hard to organize",
+      "type": "personal",
+      "entities": [
+        "shoes",
+        "shoe closet"
+      ]
+    },
+    {
+      "fact": "User prefers to sort shoes by type and color",
+      "type": "preference",
+      "entities": [
+        "type",
+        "color"
+      ]
+    },
+    {
+      "fact": "User owns black Converse Chuck Taylor All Star sneakers",
+      "type": "personal",
+      "entities": [
+        "black Converse Chuck Taylor All Star sneakers"
+      ]
+    },
+    {
+      "fact": "User has worn their Converse sneakers four times",
+      "type": "personal",
+      "entities": [
+        "Converse sneakers"
+      ]
+    },
+    {
+      "fact": "User wore their Converse sneakers to a friend's birthday party last Saturday",
+      "type": "event",
+      "entities": [
+        "friend's birthday party",
+        "last Saturday"
+      ]
+    }
+  ],
+  "answer_caf5b52e_2": [
+    {
+      "fact": "User has brown leather boots that need repair",
+      "type": "personal",
+      "entities": [
+        "brown leather boots"
+      ]
+    },
+    {
+      "fact": "User is looking for a good cobbler to fix their boots",
+      "type": "preference",
+      "entities": [
+        "cobbler",
+        "boots"
+      ]
+    },
+    {
+      "fact": "User is considering getting a shoe cleaning kit",
+      "type": "preference",
+      "entities": [
+        "shoe cleaning kit"
+      ]
+    },
+    {
+      "fact": "User has new black Converse shoes",
+      "type": "personal",
+      "entities": [
+        "black Converse"
+      ]
+    },
+    {
+      "fact": "User has worn their new Converse shoes six times",
+      "type": "event",
+      "entities": [
+        "new Converse",
+        "six times"
+      ]
+    },
+    {
+      "fact": "User is considering getting a waterproofing spray for their Converse",
+      "type": "preference",
+      "entities": [
+        "waterproofing spray",
+        "Converse"
+      ]
+    },
+    {
+      "fact": "User is concerned about protecting their Converse from mud and rain",
+      "type": "opinion",
+      "entities": [
+        "mud",
+        "rain",
+        "Converse"
+      ]
+    }
+  ]
+}

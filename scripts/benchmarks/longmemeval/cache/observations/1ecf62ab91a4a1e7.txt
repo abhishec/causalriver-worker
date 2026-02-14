@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/24 (Wed) 15:39  
+[USER] User is working on a study related to tax administration and digitalization in Sub-Saharan Africa.  
+[USER] User requested to continue discussing the statement of the problem section, specifically on compliance monitoring and its relation to tax administration.  
+[ASSISTANT_SAID] Assistant stated that compliance monitoring is crucial for tax administration and highlighted challenges in Sub-Saharan Africa, including inadequate resources and low tax compliance, citing Bird & Zolt (2019) and OECD (2019).  
+[ASSISTANT_SAID] Assistant suggested that technology, particularly digitalization, could improve compliance monitoring but also presented challenges such as data protection and access to technology, referencing Kariuki & Kihoro (2020).  
+[USER] User asked for a summary of the statement of the problem.  
+[ASSISTANT_CREATED] Assistant summarized the statement of the problem, focusing on challenges in tax collection in Sub-Saharan Africa, including limited resources, poor infrastructure, and the slow implementation of digitalization.  
+[USER] User expressed that the summary did not adequately embody the statement of the problem and requested a more structured summary.  
+[ASSISTANT_CREATED] Assistant provided a more structured summary of the statement of the problem, emphasizing the challenges of tax administration and the need for policy interventions.  
+[USER] User inquired if the assistant remembered the topic and previous discussions.  
+[ASSISTANT_SAID] Assistant confirmed the topic was related to tax administration in Sub-Saharan Africa.  
+[USER] User provided six objectives related to the study.  
+[ASSISTANT_SAID] Assistant checked the objectives for grammatical correctness and paraphrased them.  
+[USER] User requested six research questions based on the objectives.  
+[ASSISTANT_CREATED] Assistant formulated six research questions aligned with the objectives.  
+[USER] User asked for research hypotheses.  
+[ASSISTANT_CREATED] Assistant provided null and alternative hypotheses for each of the six research questions.  
+[USER] User reminded the assistant of the main topic, which is "Digitalization of Tax Administration and Tax Collection in Sub-Saharan African Country."  
+[USER] User confirmed they have the objectives, research questions, and hypotheses.  
+[USER] User requested to write the justification and asked for keywords to search on Google Scholar for recent references.  
+[ASSISTANT_SAID] Assistant suggested keywords such as "Digitalization of tax administration," "Tax collection," "Sub-Saharan Africa," "E-government," "Tax compliance," "Tax policy," "Tax administration reforms," and "Taxpayer education" for research.

@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2022/03/02 (Wed) 10:58  
+[FACT] User is looking for recommendations on portable chargers for their camera.  
+[ASSISTANT_SAID] Recommended portable chargers:  
+[ASSISTANT_SAID] 1. Anker PowerCore 20000 PD: 20,000mAh capacity, supports Power Delivery (PD).  
+[ASSISTANT_SAID] 2. Mophie Powerstation Camera XL: 20,800mAh capacity, charges camera up to 8 times, has a built-in USB-C port.  
+[ASSISTANT_SAID] 3. Jackery Titan 20000 PD: 20,000mAh capacity, Power Delivery support, multiple USB ports.  
+[ASSISTANT_SAID] 4. Anker PowerCore Fusion: 5,000mAh capacity, 2-in-1 charger, supports Power Delivery.  
+[ASSISTANT_SAID] 5. EC Technology 22400mAh Portable Charger: 22,400mAh capacity, budget-friendly, multiple USB ports.  
+[ASSISTANT_SAID] 6. RavPower 16750mAh Portable Charger: 16,750mAh capacity, multiple USB ports, compact, has a built-in flashlight.  
+[ASSISTANT_SAID] Suggested considerations: capacity, size and weight, USB ports, Power Delivery support, durability.  
+[ASSISTANT_SAID] Advised to check compatibility of the charger with the camera's battery type and charging requirements.  
+[FACT] User is also considering getting a remote shutter release for their camera.  
+[ASSISTANT_SAID] Asked for the user's camera model to provide compatible remote shutter release recommendations.  
+[ASSISTANT_SAID] Suggested popular remote shutter release brands:  
+[ASSISTANT_SAID] 1. Canon RC-6: 16ft (4.9m) range, 2-year warranty.  
+[ASSISTANT_SAID] 2. Nikon ML-L3: 16ft (4.9m) range, 1-year warranty.  
+[ASSISTANT_SAID] 3. Sony RM-VPR1: 16ft (4.9m) range, 1-year warranty.  
+[ASSISTANT_SAID] 4. Vello RS-C1: Universal remote shutter release, 16ft (4.9m) range, 2-year warranty.  
+[ASSISTANT_SAID] Suggested considerations: camera compatibility, range, battery life, additional features, price.  
+[FACT] User has a Canon EOS 80D camera and has been using it for a while.  
+[FACT] User recently acquired a 70-200mm f/2.8

@@ -1,0 +1,39 @@
+**Observation Log:**
+
+- [FACT] User owns a 2015 Ford Mustang GT.
+- [EVENT] User attended a dyno tuning session on May 15th, where they fine-tuned the engine's calibration to optimize power output.
+- [PREFERENCE] User is considering upgrading their fuel injector system and is looking for recommendations on top brands and models compatible with their Mustang.
+- [ASSISTANT_SAID] Recommended brands and models for fuel injectors compatible with the 2015 Ford Mustang GT:
+  - Bosch EV14 Fuel Injector (compatible with 2015-2017 Mustang GT)
+  - DeatschWerks 95lb/hr Fuel Injector (compatible with 2015-2017 Mustang GT)
+  - Fuel Injector Clinic 95lb/hr Fuel Injector (compatible with 2015-2017 Mustang GT)
+  - Siemens Deka 95lb/hr Fuel Injector (compatible with 2015-2017 Mustang GT)
+  - Injector Dynamics ID1300x Fuel Injector (compatible with 2015-2017 Mustang GT)
+- [ASSISTANT_SAID] Suggested factors to consider when selecting a fuel injector:
+  - Flow rate
+  - Compatibility
+  - Quality
+- [PREFERENCE] User is leaning towards the DeatschWerks 95lb/hr Fuel Injector.
+- [EVENT] User learned about their FuelTech fuel management system during the "Turbocharged Tuesdays" event at the local speedway on June 14th.
+- [ASSISTANT_SAID] Confirmed that the DeatschWerks 95lb/hr Fuel Injector is a good match for the FuelTech system but recommended verifying:
+  - Fuel injector compatibility with FuelTech documentation
+  - Fuel pressure compatibility
+  - Injector pulse width modulation (PWM) support
+  - Tuning and calibration needs after installation
+- [PREFERENCE] User is considering getting their car tuned again after the fuel injector upgrade.
+- [ASSISTANT_SAID] Suggested ways to find reputable tuners in the user's area:
+  - FuelTech dealer locator
+  - Mustang forums and communities
+  - Word of mouth from friends and local performance shops
+  - Online review sites
+- [FACT] User is located in the local area of the speedway where they participated in the "Turbocharged Tuesdays" event.
+- [ASSISTANT_SAID] Recommended asking event organizers or participants for tuner recommendations and visiting local performance shops.
+- [PREFERENCE] User is thinking of doing more modifications to their Mustang's suspension to improve handling and stability during high-speed cornering.
+- [ASSISTANT_SAID] Recommended suspension upgrades to complement the FuelTech system and fuel injector upgrade:
+  - Adjustable coilovers
+  - Sway bars
+  - Springs and shocks
+  - Camber kits
+  - Bushings and mounts
+- [ASSISTANT_SAID] Suggested factors to consider when selecting suspension upgrades:
+  - Compatibility

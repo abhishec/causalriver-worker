@@ -1,0 +1,26 @@
+**Observation Log:**
+
+- [FACT] The user is planning a grocery shopping trip for the week.
+- [FACT] The user signed up for the ShopRite rewards program.
+- [PREFERENCE] The user is hoping to maximize points and savings on their grocery shopping trip.
+- [EVENT] The user is looking for good deals or sales on diapers and formula at ShopRite.
+- [ASSISTANT_SAID] ShopRite offers a weekly ad that can be checked on their website or mobile app for local store sales.
+- [ASSISTANT_SAID] The user should look for the "Diapers" and "Baby Formula" sections in the ShopRite weekly ad.
+- [ASSISTANT_SAID] The user should check the ShopRite digital coupon section for available coupons on diapers and formula.
+- [ASSISTANT_SAID] Diapers and formula tend to go on sale every 4-6 weeks at ShopRite.
+- [ASSISTANT_SAID] ShopRite has a price match guarantee for lower prices found at local competitor stores.
+- [ASSISTANT_SAID] The user can stack digital coupons, sales, and manufacturer's coupons as a rewards member to maximize savings.
+- [ASSISTANT_SAID] The user should check manufacturer websites for printable or digital coupons for diapers and formula.
+- [ASSISTANT_SAID] The user will earn points on purchases as a rewards member, which can be redeemed for discounts on future shopping trips.
+- [USER] The user finds the assistant's information helpful and plans to check the weekly ad and digital coupons.
+- [USER] The user is curious if they can use digital coupons in addition to the rewards points they earn.
+- [ASSISTANT_SAID] The user can use digital coupons in addition to earning rewards points on purchases.
+- [ASSISTANT_SAID] Digital coupons are automatically applied at checkout, and rewards points are credited to the user's account.
+- [ASSISTANT_SAID] The user can stack digital coupons with rewards points to maximize savings.
+- [USER] The user has been tracking coupon usage and savings and is curious about organizing and keeping track of different coupons, rewards programs, and sales.
+- [ASSISTANT_SAID] The user can organize their coupons using spreadsheets, coupon binders, coupon apps, digital note-taking, calendar reminders, and more.
+- [ASSISTANT_SAID] The user can use apps like RetailMeNot, Fetch Rewards, and Ibotta for couponing and cash back offers.
+- [USER] The user plans to organize their spreadsheet better and set up reminders for coupon expiration dates.
+- [USER] The user is considering using a coupon app to find digital coupons.
+- [ASSISTANT_SAID] The user can use both a store-specific app and a general coupon app to maximize savings.
+- [ASSIST

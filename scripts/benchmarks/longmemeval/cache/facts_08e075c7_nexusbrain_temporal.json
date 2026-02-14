@@ -1,0 +1,94 @@
+{
+  "answer_cdbe2250_1": [
+    {
+      "fact": "User has been trying to get more into yoga",
+      "type": "preference",
+      "entities": [
+        "yoga"
+      ]
+    },
+    {
+      "fact": "User has been using YouTube to follow along with Adriene's yoga videos",
+      "type": "preference",
+      "entities": [
+        "YouTube",
+        "Adriene"
+      ]
+    },
+    {
+      "fact": "User is looking for yoga apps with more variety",
+      "type": "preference",
+      "entities": [
+        "yoga apps"
+      ]
+    },
+    {
+      "fact": "User has been using a Fitbit Charge 3 for 6 months",
+      "type": "personal",
+      "entities": [
+        "Fitbit Charge 3"
+      ]
+    },
+    {
+      "fact": "User is trying to stay on track with daily steps",
+      "type": "preference",
+      "entities": [
+        "daily steps"
+      ]
+    },
+    {
+      "fact": "User seeks tips on staying motivated to reach daily step goals on lazy Sundays",
+      "type": "preference",
+      "entities": [
+        "motivation",
+        "daily step goals",
+        "Sundays"
+      ]
+    }
+  ],
+  "answer_cdbe2250_2": [
+    {
+      "fact": "User has been having issues with sleep lately",
+      "type": "personal",
+      "entities": [
+        "sleep issues"
+      ]
+    },
+    {
+      "fact": "User is working on establishing a consistent bedtime routine",
+      "type": "preference",
+      "entities": [
+        "consistent bedtime routine"
+      ]
+    },
+    {
+      "fact": "User is creating a sleep-conducive environment",
+      "type": "preference",
+      "entities": [
+        "sleep-conducive environment"
+      ]
+    },
+    {
+      "fact": "User thinks limiting stimulating activities before bed is important",
+      "type": "opinion",
+      "entities": [
+        "limiting stimulating activities"
+      ]
+    },
+    {
+      "fact": "User has been watching TV shows before bed",
+      "type": "personal",
+      "entities": [
+        "TV shows"
+      ]
+    },
+    {
+      "fact": "User has been using a Fitbit Charge 3 for 9 months",
+      "type": "event",
+      "entities": [
+        "Fitbit Charge 3",
+        "9 months"
+      ]
+    }
+  ]
+}

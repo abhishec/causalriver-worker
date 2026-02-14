@@ -1,0 +1,92 @@
+{
+  "answer_0b1a0942_1": [
+    {
+      "fact": "User is planning a trip with friends",
+      "type": "event",
+      "entities": [
+        "trip",
+        "friends"
+      ]
+    },
+    {
+      "fact": "User is deciding between a beach town in Florida and a hiking trip in Colorado",
+      "type": "preference",
+      "entities": [
+        "Florida",
+        "Colorado",
+        "beach town",
+        "hiking trip"
+      ]
+    },
+    {
+      "fact": "User has a friend named Rachel",
+      "type": "relationship",
+      "entities": [
+        "Rachel"
+      ]
+    },
+    {
+      "fact": "Rachel recently moved to a new apartment in the city",
+      "type": "personal",
+      "entities": [
+        "Rachel",
+        "new apartment",
+        "city"
+      ]
+    }
+  ],
+  "answer_0b1a0942_2": [
+    {
+      "fact": "User is planning a trip with friends",
+      "type": "event",
+      "entities": [
+        "trip",
+        "friends"
+      ]
+    },
+    {
+      "fact": "User is looking for beach towns in Florida that are easy to get to",
+      "type": "preference",
+      "entities": [
+        "Florida",
+        "beach towns"
+      ]
+    },
+    {
+      "fact": "User has been to Miami Beach before",
+      "type": "personal",
+      "entities": [
+        "Miami Beach"
+      ]
+    },
+    {
+      "fact": "User prefers a more relaxed beach town",
+      "type": "preference",
+      "entities": [
+        "relaxed beach town"
+      ]
+    },
+    {
+      "fact": "User's friend Rachel just moved back to the suburbs",
+      "type": "relationship",
+      "entities": [
+        "Rachel",
+        "suburbs"
+      ]
+    },
+    {
+      "fact": "User is considering beach towns not too far from a major city",
+      "type": "preference",
+      "entities": [
+        "major city"
+      ]
+    },
+    {
+      "fact": "User finds Miami Beach can be overwhelming at times",
+      "type": "opinion",
+      "entities": [
+        "Miami Beach"
+      ]
+    }
+  ]
+}

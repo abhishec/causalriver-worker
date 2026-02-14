@@ -1,0 +1,29 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/03/17 (Fri) 20:24  
+[FACT] User is craving sushi and considering making it at home.  
+[PREFERENCE] User likes sushi and has a specific type of roll they always order at Sushi Haven that is flavored with a spicy seasoning.  
+[ASSISTANT_SAID] Making sushi at home can be a fun and rewarding experience.  
+[ASSISTANT_SAID] Recommended a simple recipe for Japanese-style short-grain sushi rice.  
+[ASSISTANT_CREATED] Sushi Rice Recipe:  
+- Ingredients: 1 cup Japanese short-grain rice, 1 3/4 cups water, 1 tablespoon rice vinegar, 1 teaspoon sugar, 1 teaspoon salt.  
+- Instructions: Rinse rice, soak for 30 minutes, cook with water, let cool, mix vinegar, sugar, and salt, fold into rice.  
+[ASSISTANT_SAID] Suggested using high-quality Japanese rice vinegar for seasoning sushi rice.  
+[ASSISTANT_SAID] Recommended a general guideline for seasoning: 1 part rice vinegar to 1 part sugar and 1 part salt.  
+[ASSISTANT_SAID] Advised to add the vinegar mixture to the rice when it's still slightly warm.  
+[ASSISTANT_SAID] Suggested making spicy mayo by mixing mayonnaise with sriracha sauce or hot sauce.  
+[ASSISTANT_SAID] Listed popular spicy seasoning options for sushi:  
+- Sriracha Mayo: 1 tablespoon sriracha with 2 tablespoons mayonnaise.  
+- Spicy Mayo: 1 tablespoon hot sauce with 2 tablespoons mayonnaise.  
+- Korean Chili Flakes (Gochugaru): Sprinkle over sushi for heat.  
+[USER] User is unsure about the specific type of spicy seasoning used at Sushi Haven.  
+[ASSISTANT_SAID] Asked user about the level of heat, flavor profile, texture, and color of the seasoning to narrow down possibilities.  
+[ASSISTANT_SAID] Suggested possible spicy seasonings: sriracha sauce, Korean chili flakes, spicy mayo, furikake, togarashi.  
+[USER] User thinks the seasoning is quite spicy and might be sriracha sauce or Korean chili flakes.  
+[USER] User confirmed the seasoning is a sauce, not a powder, and has a spicy and savory flavor.  
+[ASSISTANT_SAID] Suggested mixing sriracha sauce with other ingredients to get closer to the flavor.  
+[ASSISTANT_SAID] Provided several options for mixing sriracha sauce:  
+- Spicy Mayo: sriracha with mayonnaise.  
+- Spicy Soy Sauce: sriracha with soy sauce and sugar/mirin.  
+- Garlic-Sriracha Sauce: sriracha with minced garlic and lime juice.  
+- Spicy Miso

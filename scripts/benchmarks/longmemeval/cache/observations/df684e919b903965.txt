@@ -1,0 +1,57 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/27 (Sat) 04:41  
+[FACT] User is currently taking part in a 5-day coding bootcamp at a tech incubator.  
+[PREFERENCE] User wants to improve their online presence.  
+[ASSISTANT_SAID] Creating a simple website using Python is a fantastic way to apply new skills.  
+[ASSISTANT_SAID] Suggested using Flask, a lightweight and popular Python web framework, for creating the website.  
+[ASSISTANT_SAID] Provided a breakdown of steps involved in creating a simple website using Python:  
+[ASSISTANT_SAID] 1. Choose a web framework: Flask  
+[ASSISTANT_SAID] 2. Set up a project structure  
+[ASSISTANT_SAID] 3. Create a simple webpage using HTML, CSS, and Python  
+[ASSISTANT_SAID] 4. Add functionality using Python  
+[ASSISTANT_SAID] 5. Deploy the website using a platform like Heroku or GitHub Pages  
+[ASSISTANT_CREATED] Provided code to install Flask using pip: `pip install flask`  
+[ASSISTANT_CREATED] Provided a project structure for the website:  
+[ASSISTANT_CREATED] ```
+mywebsite/
+app/
+templates/
+static/
+__init__.py
+models.py
+routes.py
+requirements.txt
+```  
+[ASSISTANT_SAID] Explained the purpose of each directory/file in the project structure.  
+[ASSISTANT_CREATED] Provided code for a simple HTML webpage in `index.html`:  
+[ASSISTANT_CREATED] ```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>My Website</title>
+  </head>
+  <body>
+    <h1>Welcome to my website!</h1>
+  </body>
+</html>
+```  
+[ASSISTANT_CREATED] Provided code for `routes.py` to create a Flask app and define a route for the root URL:  
+[ASSISTANT_CREATED] ```python
+from flask import Flask, render_template
+
+app = Flask(__name__)
+
+@app.route("/")
+def index():
+    return render_template("index.html")
+
+if __name__ == "__main__":
+    app.run(debug=True)
+```  
+[ASSISTANT_SAID] Suggested deploying the website using Heroku and provided instructions to create a `Procfile` and `requirements.txt`.  
+[ASSISTANT_CREATED] Provided code for the `Procfile`: `web: gunicorn app:app`  
+[ASSISTANT_CREATED] Provided code for `requirements.txt`: `flask`  
+[ASSISTANT_SAID] User requested to add a contact form to the website.  
+[ASSISTANT_SAID] Suggested creating a new route for the contact page in `routes.py`.  
+[ASSIST

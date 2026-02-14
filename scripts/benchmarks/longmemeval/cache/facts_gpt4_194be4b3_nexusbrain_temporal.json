@@ -1,0 +1,224 @@
+{
+  "answer_3826dc55_5": [
+    {
+      "fact": "User has a niece who plays the violin.",
+      "type": "relationship",
+      "entities": [
+        "niece",
+        "violin"
+      ]
+    },
+    {
+      "fact": "User's niece received a new student-level violin from a store in Pasadena about a month ago.",
+      "type": "event",
+      "entities": [
+        "new student-level violin",
+        "Pasadena"
+      ]
+    },
+    {
+      "fact": "User is trying to help their niece practice the violin whenever possible.",
+      "type": "opinion",
+      "entities": [
+        "help",
+        "practice",
+        "violin"
+      ]
+    },
+    {
+      "fact": "User finds the tips for motivating their niece to practice the violin helpful.",
+      "type": "opinion",
+      "entities": [
+        "tips",
+        "motivation",
+        "violin"
+      ]
+    },
+    {
+      "fact": "User likes the idea of setting achievable goals for their niece.",
+      "type": "preference",
+      "entities": [
+        "achievable goals"
+      ]
+    },
+    {
+      "fact": "User likes the idea of finding music their niece loves.",
+      "type": "preference",
+      "entities": [
+        "music",
+        "niece"
+      ]
+    }
+  ],
+  "answer_3826dc55_3": [
+    {
+      "fact": "User is thinking of selling their old drum set, a 5-piece Pearl Export.",
+      "type": "event",
+      "entities": [
+        "drum set",
+        "Pearl Export"
+      ]
+    },
+    {
+      "fact": "User has not played their drum set in years.",
+      "type": "opinion",
+      "entities": [
+        "drum set"
+      ]
+    },
+    {
+      "fact": "User is concerned about the maintenance of their piano, a Korg B1.",
+      "type": "opinion",
+      "entities": [
+        "piano",
+        "Korg B1"
+      ]
+    },
+    {
+      "fact": "User has had their Korg B1 piano for about 3 years.",
+      "type": "personal",
+      "entities": [
+        "Korg B1",
+        "3 years"
+      ]
+    },
+    {
+      "fact": "Some keys on the user's piano have started to stick.",
+      "type": "event",
+      "entities": [
+        "piano"
+      ]
+    }
+  ],
+  "answer_3826dc55_2": [
+    {
+      "fact": "User is looking to learn new techniques to improve guitar playing.",
+      "type": "preference",
+      "entities": [
+        "guitar playing",
+        "techniques"
+      ]
+    },
+    {
+      "fact": "User has been focusing on blues and rock music.",
+      "type": "preference",
+      "entities": [
+        "blues music",
+        "rock music"
+      ]
+    },
+    {
+      "fact": "User is particularly interested in improving string bending technique.",
+      "type": "preference",
+      "entities": [
+        "string bending technique"
+      ]
+    }
+  ],
+  "answer_3826dc55_4": [
+    {
+      "fact": "User has a Korg B1 digital piano.",
+      "type": "personal",
+      "entities": [
+        "Korg B1"
+      ]
+    },
+    {
+      "fact": "User has had the Korg B1 for about 3 years.",
+      "type": "personal",
+      "entities": [
+        "3 years"
+      ]
+    },
+    {
+      "fact": "User is looking for a piano technician in the LA area.",
+      "type": "preference",
+      "entities": [
+        "LA area",
+        "piano technician"
+      ]
+    },
+    {
+      "fact": "User has been playing the piano a lot lately.",
+      "type": "opinion",
+      "entities": [
+        "piano"
+      ]
+    },
+    {
+      "fact": "User has started taking guitar lessons.",
+      "type": "event",
+      "entities": [
+        "guitar lessons"
+      ]
+    },
+    {
+      "fact": "User is experimenting with different sounds.",
+      "type": "opinion",
+      "entities": [
+        "different sounds"
+      ]
+    },
+    {
+      "fact": "User is considering routine maintenance for their piano.",
+      "type": "opinion",
+      "entities": [
+        "routine maintenance"
+      ]
+    }
+  ],
+  "answer_3826dc55_1": [
+    {
+      "fact": "User has been playing their black Fender Stratocaster electric guitar a lot lately.",
+      "type": "preference",
+      "entities": [
+        "black Fender Stratocaster electric guitar"
+      ]
+    },
+    {
+      "fact": "User has had their black Fender Stratocaster electric guitar for about 5 years.",
+      "type": "personal",
+      "entities": [
+        "black Fender Stratocaster electric guitar",
+        "5 years"
+      ]
+    },
+    {
+      "fact": "User's go-to instrument for playing is the black Fender Stratocaster electric guitar.",
+      "type": "preference",
+      "entities": [
+        "black Fender Stratocaster electric guitar"
+      ]
+    },
+    {
+      "fact": "User plays blues and rock music.",
+      "type": "preference",
+      "entities": [
+        "blues",
+        "rock music"
+      ]
+    },
+    {
+      "fact": "User recently changed the strings on their guitar about 3 weeks ago.",
+      "type": "event",
+      "entities": [
+        "changed strings",
+        "3 weeks ago"
+      ]
+    },
+    {
+      "fact": "User noticed a huge difference in sound quality after changing the strings.",
+      "type": "opinion",
+      "entities": [
+        "sound quality"
+      ]
+    },
+    {
+      "fact": "User is looking for recommendations for overdrive pedals.",
+      "type": "preference",
+      "entities": [
+        "overdrive pedals"
+      ]
+    }
+  ]
+}

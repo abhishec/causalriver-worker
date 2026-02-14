@@ -1,0 +1,45 @@
+**Observation Log:**
+
+[FACT] User is trying to settle into a new life after receiving asylum approval.
+
+[FACT] User received their asylum approval letter three months ago.
+
+[PREFERENCE] User is interested in learning more about the local job market and job search tips.
+
+[EVENT] User is looking for resources to help with job searching.
+
+[ASSISTANT_SAID] Assistant congratulated the user on their asylum approval and offered to help navigate the local job market.
+
+[ASSISTANT_SAID] Assistant provided resources for the local job market, including local employment offices, online job boards, local Chambers of Commerce, and professional associations.
+
+[ASSISTANT_SAID] Assistant provided job search tips, including updating the resume, networking, practicing interview skills, considering volunteer work, and seeking language support.
+
+[ASSISTANT_SAID] Assistant mentioned local non-profits like the International Rescue Committee (IRC) and the U.S. Committee for Refugees and Immigrants (USCRI) that may offer job training and placement services.
+
+[ASSISTANT_SAID] Assistant provided information about the U.S. Department of Labor's Employment and Training Administration (ETA) resources for job seekers.
+
+[FACT] User is interested in pursuing a vocational training program in IT.
+
+[PREFERENCE] User is looking for organizations that offer IT training programs specifically for refugees or asylum seekers, including financial assistance or scholarships.
+
+[ASSISTANT_SAID] Assistant listed organizations offering IT training programs for refugees and asylum seekers, including Upwardly Global, Refugee Talent, Techfugees, IRC, and Jewish Vocational Service (JVS).
+
+[ASSISTANT_SAID] Assistant mentioned that these organizations provide financial assistance, mentorship, and job placement support.
+
+[ASSISTANT_SAID] Assistant provided information about financial assistance options, including scholarships, Vocational Rehabilitation (VR) Services, WIOA funding, and private scholarships.
+
+[ASSISTANT_SAID] Assistant suggested researching each organization and program to ensure they align with the user's interests and career goals.
+
+[ASSISTANT_SAID] Assistant provided a list of top in-demand IT skills, including cloud computing, cybersecurity, data science and analytics, AI and machine learning, DevOps, network administration, web development, database administration, IT project management, and digital transformation.
+
+[ASSISTANT_SAID] Assistant mentioned emerging trends in IT, such as IoT and blockchain.
+
+[EVENT] User met with a representative from a local non-profit organization that provides assistance to refugees.
+
+[EVENT] User was offered a scholarship to pursue a vocational training program in IT.
+
+[PREFERENCE] User is excited about the scholarship opportunity and wants to follow up with the organization to discuss program details.
+
+[PREFERENCE] User is interested in gaining insight into the IT industry and making connections before finishing their training program.
+
+[ASSISTANT_SAID] Assistant encouraged the user to reach out to local IT companies for job shadow

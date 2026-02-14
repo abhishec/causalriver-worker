@@ -1,0 +1,23 @@
+**Observation Log:**
+
+- [FACT] The user opened a Delaware C-Corporation.
+- [FACT] The user's customers come from all over the country.
+- [ASSISTANT_SAID] A TIN (Taxpayer Identification Number) is a unique identifier assigned to a business entity or individual by the IRS for tax purposes.
+- [ASSISTANT_SAID] The most common types of TINs are Employer Identification Number (EIN) and Individual Taxpayer Identification Number (ITIN).
+- [ASSISTANT_SAID] An SSN (Social Security Number) is a nine-digit number assigned to US citizens, permanent residents, and temporary residents authorized to work in the US.
+- [ASSISTANT_SAID] TINs are used to report income and pay taxes to the IRS, while SSNs are primarily used for Social Security purposes.
+- [ASSISTANT_SAID] An Employer Identification Number (EIN) is a type of TIN assigned by the IRS to businesses for tax purposes.
+- [ASSISTANT_SAID] An EIN is also known as a Federal Tax Identification Number (FEIN).
+- [ASSISTANT_SAID] Businesses are required to obtain an EIN if they have employees, operate as a partnership or corporation, or file certain tax returns.
+- [ASSISTANT_SAID] An EIN is a unique nine-digit number formatted as XX-XXXXXXX.
+- [ASSISTANT_SAID] As a Delaware C-Corporation, the user is subject to Delaware state taxes on income earned from business activities conducted within Delaware.
+- [ASSISTANT_SAID] The user may also have to pay state taxes in other states where they have a significant economic presence or business activities.
+- [ASSISTANT_SAID] To determine sufficient nexus or economic presence in each state, the user should consult a tax professional.
+- [ASSISTANT_SAID] Many states have enacted economic nexus laws that require out-of-state businesses to pay taxes if they meet certain economic thresholds.
+- [USER] Asked for examples of sales that trigger tax obligations in American states.
+- [ASSISTANT_SAID] Examples of activities that may create a tax obligation include physical sales, internet sales exceeding certain thresholds, sales of digital products, sales of services, and sales at special events.
+- [USER] Asked specifically about the limits in New York.
+- [ASSISTANT_SAID] In New York, the limit for collecting sales tax is $300,000 in gross sales or more than 100 transactions delivered in New York during the year.
+- [ASSISTANT_SAID] Some sales are exempt from sales tax in New York, such as food for home consumption and certain clothing items under $110.
+- [USER] Asked specifically about the limits in California.
+- [ASSISTANT_SAID] In California, the limit for collecting sales tax is

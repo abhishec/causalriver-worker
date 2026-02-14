@@ -1,0 +1,36 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/25 (Thu) 00:12  
+[EVENT] User is planning to publish a blog post about their favorite skincare and makeup products next week.  
+[PREFERENCE] User wants to promote the blog post on their social media channels.  
+[EVENT] User has been doing live streams on YouTube consistently three times a week, every Monday, Wednesday, and Friday, at 8 pm EST.  
+[ASSISTANT_SAID] Assistant offered to help come up with ideas for Instagram and TikTok posts to promote the upcoming blog post.  
+[ASSISTANT_SAID] Assistant suggested Instagram post ideas:  
+- Sneak Peek: Share a photo of a few products with a specific caption.  
+- Before and After: Share a before-and-after photo with a specific caption.  
+- Product Teaser: Share a close-up photo of a specific product with a specific caption.  
+- Behind-the-Scenes: Share a photo or video of preparing for the blog post with a specific caption.  
+[ASSISTANT_SAID] Assistant suggested TikTok video ideas:  
+- Product Reveal: Create a 15-second video revealing one of the favorite products with a specific caption.  
+- Skincare Routine: Create a short video of the user's skincare routine with a specific caption.  
+- Makeup Tutorial: Create a short makeup tutorial using one of the favorite products with a specific caption.  
+- Q&A: Create a video answering a common skincare or makeup question with a specific caption.  
+[ASSISTANT_SAID] Assistant provided a timing schedule for posts to align with the YouTube live stream schedule.  
+[ASSISTANT_CREATED] Assistant created a content calendar for the next two weeks, including promotional posts for the blog and regular YouTube live streams.  
+[EVENT] Content calendar includes:  
+- Monday: YouTube Live Stream at 8 pm EST, Instagram post at 7 pm EST.  
+- Tuesday: Instagram post and Instagram Live session.  
+- Wednesday: YouTube Live Stream at 8 pm EST, Instagram post at 7 pm EST.  
+- Thursday: TikTok video.  
+- Friday: YouTube Live Stream at 8 pm EST, Instagram post at 7 pm EST.  
+- Saturday: Blog post goes live.  
+[EVENT] User requested to add Instagram Live sessions to reach their audience more casually.  
+[ASSISTANT_SAID] Assistant suggested topics for Instagram Live sessions:  
+- Q&A  
+- Product Demo  
+- Skincare Routine  
+- Makeup Tips  
+- Behind-the-Scenes  
+[ASSISTANT_CREATED] Assistant revised the content calendar to include Instagram Live sessions, ensuring they do not conflict with YouTube live streams.  
+[EVENT] Instagram Live sessions are scheduled for:  
+- Tuesday, 2 pm EST: Q&A Session focused on questions related to the blog post and products

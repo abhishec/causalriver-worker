@@ -1,0 +1,77 @@
+{
+  "answer_6dc4305e": [
+    {
+      "fact": "User is struggling to manage their time effectively.",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User has a project that is due soon.",
+      "type": "event",
+      "entities": [
+        "project"
+      ]
+    },
+    {
+      "fact": "User needs to finish a report and respond to some emails.",
+      "type": "task",
+      "entities": [
+        "report",
+        "emails"
+      ]
+    },
+    {
+      "fact": "User's most time-consuming tasks are working on their project, responding to emails, and attending meetings.",
+      "type": "task",
+      "entities": [
+        "project",
+        "emails",
+        "meetings"
+      ]
+    },
+    {
+      "fact": "User has around 7-8 hours available for tasks each day.",
+      "type": "personal",
+      "entities": [
+        "7-8 hours"
+      ]
+    },
+    {
+      "fact": "User's most productive times are between 10 am and 12 pm.",
+      "type": "personal",
+      "entities": [
+        "10 am",
+        "12 pm"
+      ]
+    },
+    {
+      "fact": "User has a 30-minute exercise routine in the morning.",
+      "type": "personal",
+      "entities": [
+        "exercise routine"
+      ]
+    },
+    {
+      "fact": "User prefers a structured schedule.",
+      "type": "preference",
+      "entities": [
+        "structured schedule"
+      ]
+    },
+    {
+      "fact": "User would like to minimize procrastination and social media usage.",
+      "type": "preference",
+      "entities": [
+        "procrastination",
+        "social media"
+      ]
+    },
+    {
+      "fact": "User does not have any existing time management tools but is open to using one.",
+      "type": "preference",
+      "entities": [
+        "time management tools"
+      ]
+    }
+  ]
+}

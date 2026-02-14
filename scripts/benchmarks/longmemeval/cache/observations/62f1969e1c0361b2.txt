@@ -1,0 +1,30 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/21 (Sun) 09:48  
+[USER] User requested to calculate the inverse of a transformation matrix.  
+[USER] The transformation matrix provided is T1 = [.527 -.574 .628 2; .369 .819 .439 5; -.766 0 .643 3; 0 0 0 1]  
+[ASSISTANT_SAID] To find the inverse of a transformation matrix using homogeneous coordinates, follow these steps:  
+[ASSISTANT_SAID] 1. Extract the 3x3 rotation matrix (R) from the top left corner of the homogeneous matrix.  
+[ASSISTANT_SAID] 2. Extract the translation vector (d) from the last column of the homogeneous matrix.  
+[ASSISTANT_SAID] 3. Compute the inverse of the rotation matrix (R^-1).  
+[ASSISTANT_SAID] 4. Compute the negative of the inverse rotation matrix multiplied by the translation vector: (-R^-1)*d.  
+[ASSISTANT_SAID] 5. Combine the inverse rotation matrix and the negative of the inverse rotation matrix multiplied by the translation vector into a homogeneous matrix.  
+[ASSISTANT_SAID] The extracted 3x3 rotation matrix (R) is: R = [0.527 -0.574 0.628; 0.369 0.819 0.439; -0.766 0.000 0.643]  
+[ASSISTANT_SAID] The extracted translation vector (d) is: d = [2; 5; 3]  
+[ASSISTANT_SAID] The inverse of the rotation matrix (R^-1) is:  
+Rinv =  
+0.5270 0.3690 -0.7660  
+-0.5740 0.8190 0  
+0.6280 0.4390 0.6430  
+[ASSISTANT_SAID] The negative of the inverse rotation matrix multiplied by the translation vector (-R^-1)*d is:  
+-Rinv*d =  
+1.4064  
+-3.6606  
+3.9237  
+[ASSISTANT_SAID] The combined inverse transformation matrix (T1inv) is:  
+T1inv =  
+[0.5270 0.3690 -0.7660 1.4064;  
+-0.5740 0.8190 0 -3.6606;  
+0.6280 0.4390 0.6430 3.9237;  
+0 0 0 1.0000]  
+[ASSISTANT_SAID] Therefore, the inverse of the transformation matrix T1 is:

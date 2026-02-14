@@ -1,0 +1,19 @@
+**Observation Log:**
+
+[FACT] User is trying to organize contacts from recent trade shows attended.  
+[EVENT] User attended a trade show where they showcased their company's latest AI-powered product, NovaGRID.  
+[TEMPORAL] The session date is 2023/05/20 (Sat) 12:20.  
+[TEMPORAL] The trade show user attended was about three weeks ago.  
+[FACT] The trade show took place in New York City.  
+[FACT] The venue for the trade show was the Jacob K. Javits Convention Center.  
+[EVENT] User showcased NovaGRID at the annual Tech Expo.  
+[ASSISTANT_SAID] Assistant offered to help create a spreadsheet template to track leads and follow-ups from trade shows.  
+[ASSISTANT_CREATED] Assistant provided a suggested template for tracking leads, including three sheets: Lead List, Follow-up Tracker, and Additional Notes.  
+[ASSISTANT_SAID] Assistant explained the purpose of each column in the Lead List, Follow-up Tracker, and Additional Notes sheets.  
+[ASSISTANT_SAID] Assistant asked user several questions to help recall details about the trade show where NovaGRID was showcased.  
+[ASSISTANT_SAID] Assistant listed potential trade shows that occurred around the time user attended, including AI Summit New York, TechWeek New York, and NYC Tech Expo.  
+[ASSISTANT_SAID] Assistant confirmed the event was the annual Tech Expo at the Jacob K. Javits Convention Center.  
+[ASSISTANT_SAID] Assistant offered to help customize the spreadsheet template to fit the specific needs of the user's company and the leads generated at the Tech Expo.  
+[ASSISTANT_SAID] Assistant asked user for specific customization preferences regarding the spreadsheet template, including additional columns for lead source, product/service interest, pain points, industry categorization, follow-up priority, and any custom fields.  
+[CHANGE] User confirmed the event was the annual Tech Expo, not one of the previously mentioned specific events.  
+[RELATIONSHIP] User's company is associated with the AI-powered product NovaGRID.

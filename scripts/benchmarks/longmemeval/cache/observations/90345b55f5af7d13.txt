@@ -1,0 +1,22 @@
+**Observation Log:**
+
+- [FACT] User owns a Honda Civic Type R.
+- [PREFERENCE] User is interested in modifying their car's aerodynamics.
+- [EVENT] User attended the Turbocharged Tuesdays car meet at the local speedway on April 12th.
+- [ASSISTANT_SAID] The assistant congratulated the user on attending the Turbocharged Tuesdays car meet and expressed enthusiasm about helping with car modifications.
+- [ASSISTANT_SAID] The assistant provided tips for modifying the Honda Civic Type R's aerodynamics, including understanding the basics, setting goals, assessing current aerodynamics, researching modifications, starting with simple changes, focusing on the front end, considering aero components, consulting with experts, testing and iterating, and prioritizing safety.
+- [ASSISTANT_SAID] The assistant listed specific aerodynamic components to consider: front splitters, side skirts, rear spoilers, wings, diffusers, and vortex generators.
+- [ASSISTANT_SAID] The assistant emphasized the importance of understanding how aerodynamic changes can affect the car's behavior, especially at high speeds.
+- [PREFERENCE] User is specifically thinking of focusing on the rear spoiler for modifications.
+- [ASSISTANT_SAID] The assistant explained how a rear spoiler affects aerodynamics, including downforce generation, reduced lift, improved aerodynamic balance, and drag reduction.
+- [ASSISTANT_SAID] The assistant provided factors to consider regarding rear spoilers, including angle of attack, spoiler shape and size, mounting location, and airflow interaction.
+- [ASSISTANT_SAID] The assistant described different types of rear spoilers: wing-style, lip spoilers, gurney flaps, and ducktail spoilers.
+- [PREFERENCE] User is considering a wing-style rear spoiler.
+- [ASSISTANT_SAID] The assistant recommended an angle of attack (AOA) between 7° to 9° for a good balance between downforce and drag reduction for the Civic Type R.
+- [ASSISTANT_SAID] The assistant provided details on AOA ranges: low AOA (0-5°), medium AOA (5-10°), high AOA (10-15°), and extreme AOA (15°+).
+- [ASSISTANT_SAID] The assistant mentioned that the optimal AOA may vary based on driving style and preferences.
+- [ASSISTANT_SAID] The assistant advised considering spoiler design, ride height, suspension, and aerodynamic balance when selecting an AOA.
+- [PREFERENCE] User is thinking of getting a custom-made rear spoiler.
+- [ASSISTANT_SAID] The assistant recommended several reputable manufacturers for custom rear spoilers: APR Performance, Verus Engineering, Rays Engineering, and Spoon Sports.
+- [ASSISTANT_SAID] The assistant suggested resources for design and fabrication, including CFD simulation services and local fabrication shops.
+- [ASSISTANT

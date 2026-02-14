@@ -1,0 +1,36 @@
+{
+  "answer_d61669c7": [
+    {
+      "fact": "User is trying to organize coupons and receipts",
+      "type": "event",
+      "entities": [
+        "coupons",
+        "receipts"
+      ]
+    },
+    {
+      "fact": "User likes the idea of using a binder with labeled sections for organization",
+      "type": "preference",
+      "entities": [
+        "binder",
+        "labeled sections"
+      ]
+    },
+    {
+      "fact": "User has been using the Cartwheel app from Target",
+      "type": "personal",
+      "entities": [
+        "Cartwheel app",
+        "Target"
+      ]
+    },
+    {
+      "fact": "User finds the Cartwheel app helpful for saving money on household items",
+      "type": "opinion",
+      "entities": [
+        "Cartwheel app",
+        "household items"
+      ]
+    }
+  ]
+}

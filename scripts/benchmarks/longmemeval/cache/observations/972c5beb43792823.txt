@@ -1,0 +1,22 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/28 (Sun) 10:20
+- [ASSISTANT_SAID] EPIC: Airbnb.com Translation (Adding Hindi, Hebrew, and Arabic) with TMS and CMS Integration
+- [ASSISTANT_SAID] As a global hospitality company, we want to add Hindi, Hebrew, and Arabic languages to our website, so that we can cater to a wider audience and provide a localized experience.
+- [ASSISTANT_SAID] Capability: Localization and Translation Management
+- [ASSISTANT_SAID] Feature User Story: As a user of Airbnb.com, I want to be able to access the website content in Hindi, Hebrew, and Arabic, so that I can easily find and book accommodations that are relevant to my needs.
+- [ASSISTANT_SAID] Acceptance Criteria: Integration with a Translation Management System (TMS) to manage the translation process for all website content.
+- [ASSISTANT_SAID] Acceptance Criteria: Integration with a Content Management System (CMS) to manage the creation and publishing of new content in multiple languages.
+- [ASSISTANT_SAID] Acceptance Criteria: Automatic URL rewrites based on language, so that each language-specific version of the page has its own unique URL.
+- [ASSISTANT_SAID] Acceptance Criteria: Support for localized images, videos, and other media.
+- [ASSISTANT_SAID] Acceptance Criteria: Ability to track and manage translated content and update as necessary.
+- [ASSISTANT_SAID] Acceptance Criteria: Ability to preview content in different languages before publishing.
+- [ASSISTANT_SAID] Acceptance Criteria: Integration with web analytics tools to track the performance of the website in each language.
+- [ASSISTANT_SAID] Acceptance Criteria: Ensure that the translated content is culturally relevant and sensitive.
+- [ASSISTANT_SAID] Acceptance Criteria: Ensure that the design of the website can accommodate right-to-left text direction in Hebrew and Arabic.
+- [ASSISTANT_SAID] Test Cases: Verify that the language selector is present on each page of the website and allows the user to switch between available languages, including Hindi, Hebrew, and Arabic.
+- [ASSISTANT_SAID] Test Cases: Verify that each language-specific version of the page has a unique URL based on the selected language.
+- [ASSISTANT_SAID] Test Cases: Verify that all website content is translatable and that translations can be managed using the TMS.
+- [ASSISTANT_SAID] Test Cases: Verify that new content can be created and published in Hindi, Hebrew, and Arabic using the CMS.
+- [ASSISTANT_SAID] Test Cases: Verify that images, videos, and other media are properly localized on each language-specific version of the page.
+- [ASS

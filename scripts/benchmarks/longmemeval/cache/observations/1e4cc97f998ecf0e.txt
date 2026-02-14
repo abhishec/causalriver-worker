@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/03/17 (Fri) 12:22  
+[USER] User asked to distinguish between primary and secondary evidence.  
+[ASSISTANT_SAID] Primary evidence is original documentation or physical object that is directly related to a particular fact or event. Examples include original documents, photographs, videos, and objects.  
+[ASSISTANT_SAID] Secondary evidence is evidence that is not original and is used to support or supplement primary evidence. Examples include photocopies, transcriptions, and hearsay testimony. Secondary evidence is generally considered less reliable than primary evidence because it is not an original source.  
+[USER] User requested answers based on Indian laws.  
+[ASSISTANT_SAID] Assistant stated that it does not have knowledge of Indian laws after 2021 but can provide general information about Indian laws.  
+[ASSISTANT_SAID] In Indian law, primary evidence is considered to be more reliable than secondary evidence.  
+[ASSISTANT_SAID] Indian Evidence Act, 1872, defines primary evidence as the original document or object that is directly relevant to a fact or event.  
+[ASSISTANT_SAID] Examples of primary evidence include original documents, photographs, videos, and objects.  
+[ASSISTANT_SAID] Secondary evidence is admissible only when the primary evidence is not available according to the Indian Evidence Act, 1872.  
+[ASSISTANT_SAID] Indian laws recognize electronic records as evidence in court, provided they meet certain conditions set forth in the Information Technology Act, 2000, and the Indian Evidence Act, 1872.  
+[ASSISTANT_SAID] Hearsay evidence is not admissible as evidence in Indian laws.  
+[ASSISTANT_SAID] Indian laws are complex and varied, and specific laws and regulations may apply in different situations.  
+[USER] User asked for an explanation of the probative value of electronic evidence.  
+[ASSISTANT_SAID] The probative value of electronic evidence refers to the extent to which it is able to prove a fact or establish the truth of a matter in a legal proceeding.  
+[ASSISTANT_SAID] Electronic evidence can establish the existence of a fact, the identity of a person, or the authenticity of a document.  
+[ASSISTANT_SAID] In India, the Information Technology Act, 2000, and the Indian Evidence Act, 1872, recognize electronic records as evidence in court, provided they meet certain conditions.  
+[ASSISTANT_SAID] Electronic records must be authentic and must not have been tampered with to be considered as evidence.  
+[ASSISTANT_SAID] The probative value of electronic evidence is high as it is considered reliable and difficult to alter or tamper with.  
+[ASSISTANT_S

@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[FACT] User is moving to Munich soon.  
+[FACT] User is starting an exchange program at the University of Munich.  
+[TEMPORAL] User has been preparing for the exchange program since February.  
+[ASSISTANT_SAID] Munich has an excellent public transportation system operated by the Münchner Verkehrsgesellschaft (MVG).  
+[ASSISTANT_SAID] The public transportation system consists of U-Bahn (Subway), S-Bahn (Suburban Train), Tram, and Bus.  
+[ASSISTANT_SAID] Munich has 6 U-Bahn lines (U1-U6) that cover most areas of the city.  
+[ASSISTANT_SAID] The S-Bahn connects the city center with surrounding suburbs.  
+[ASSISTANT_SAID] There are 13 tram lines covering many parts of the city.  
+[ASSISTANT_SAID] Over 60 bus lines complement the tram and U-Bahn network.  
+[ASSISTANT_SAID] Users can purchase a single ticket (Einzelticket) or a day ticket (Tageskarte) for unlimited travel.  
+[ASSISTANT_SAID] There are also weekly, monthly, and annual passes available for public transportation.  
+[ASSISTANT_SAID] Tickets can be bought at ticket machines or newsstands, and must be validated before boarding.  
+[ASSISTANT_SAID] The MVG website and app provide route planners, timetables, and ticket information.  
+[ASSISTANT_SAID] Munich has a zone system; the city center is in Zone 1.  
+[ASSISTANT_SAID] A Zone 1 ticket is needed for most trips within the city center.  
+[ASSISTANT_SAID] Peak hours are Monday to Friday, 7 am to 9 am and 3 pm to 6 pm, when tickets are more expensive.  
+[ASSISTANT_SAID] A Semesterticket is available for students, granting unlimited travel for a semester (around €240).  
+[ASSISTANT_SAID] To get to the University of Munich (LMU), users can take the U-Bahn (U3 or U6) to "Universität" or "Odeonsplatz" stations, or tram 27 or 28 to "Universität" stop.  
+[FACT] User is worried about finding a doctor or hospital for medical attention.  
+[ASSISTANT_SAID] Germany has an excellent healthcare system with high-quality medical care.  
+[ASSISTANT_SAID] As an exchange student, user needs health insurance that covers them in Germany.  
+[ASSISTANT_SAID] User can find a general practitioner (Hausarzt) for non-emergency cases.  
+[ASSISTANT_SAID] General practitioners can diagnose, treat common illnesses, prescribe medication,

@@ -60,9 +60,17 @@ case "${BRAIN_PROCESS}" in
     echo "Starting Monthly Deep Analysis (full historical causal discovery)..."
     exec pnpm exec tsx scripts/brain-monthly-runner.ts
     ;;
+  federation)
+    echo "Starting Federation Agent (Core ↔ Org brain knowledge flow)..."
+    exec pnpm exec tsx scripts/brain-orchestrator.ts --agent federation-agent
+    ;;
+  security)
+    echo "Starting Security Hardening Agent (vulnerability scanning + auto-patching)..."
+    exec pnpm exec tsx scripts/brain-orchestrator.ts --agent security-hardening-agent
+    ;;
   *)
     echo "ERROR: Unknown BRAIN_PROCESS '${BRAIN_PROCESS}'"
-    echo "Valid values: trainer, consolidation, dmn, benchmark, benchmark-optimizer, git-trainer, cost-agent, orchestrator, weekly, monthly"
+    echo "Valid values: trainer, consolidation, dmn, benchmark, benchmark-optimizer, git-trainer, cost-agent, orchestrator, weekly, monthly, federation, security"
     exit 1
     ;;
 esac

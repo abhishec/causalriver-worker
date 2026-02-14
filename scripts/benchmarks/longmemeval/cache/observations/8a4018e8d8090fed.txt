@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [FACT] User's name is ANNA AUGUSTOWSKA.
+- [FACT] User's location coordinates are 51.0999 latitude and 17.0299 longitude.
+- [FACT] User provided a list of merchants with their respective coordinates and MCC codes.
+- [EVENT] User mentioned various merchants including AUCHAN POLSKA SP. Z, ZABKA, LIDL, JMP S.A. BIEDRONKA, and others.
+- [FACT] User provided coordinates for AUCHAN POLSKA SP. Z as 51.7789 latitude and 19.4424 longitude with MCC code 5411.
+- [FACT] User provided coordinates for ZABKA Z5782 K.1 as 50.4422 latitude and 30.6196 longitude with MCC code 5499.
+- [FACT] User provided coordinates for SKLEP LIDL 1221 WRO as 51.0763 latitude and 17.0068 longitude with MCC code 5411.
+- [FACT] User provided coordinates for LIDL WIELICKA as 50.0345 latitude and 19.9685 longitude with MCC code 5411.
+- [FACT] User provided coordinates for JMP S.A. BIEDRONKA 6126 as 51.2494 latitude and 22.5758 longitude with MCC code 5411.
+- [FACT] User provided coordinates for MARKET MAJA as 48.0623 latitude and 33.4977 longitude with MCC code 5499.
+- [FACT] User provided coordinates for ZABKA Z6300 K.1 as 51.2191 latitude and 22.7011 longitude with MCC code 5499.
+- [FACT] User provided coordinates for KAUFLAND PL 7962 as 51.0923 latitude and 17.031 longitude with MCC code 5411.
+- [FACT] User provided coordinates for CARREFOUR LODZ PRZYBYS as 51.7515 latitude and 19.5022 longitude with MCC code 5411.
+- [FACT] User provided coordinates for PARFOIS AC1 as 50.0537 latitude and 19.9556 longitude with MCC code 5631.
+- [FACT] User provided coordinates for MPSA - A 323 as 52.1787 latitude and 21.0031 longitude with MCC code 4111.
+- [FACT] User provided coordinates for LPP CROPP 1512157 as 50.0671 latitude and 19.9463 longitude with MCC code 5651.
+- [FACT] User provided coordinates for ZABKA Z8793 K.1 as 51.0588 latitude and 16.1772 longitude with MCC code 5499.
+- [FACT] User provided coordinates for SALAD STORY Wroclav as 51.0963

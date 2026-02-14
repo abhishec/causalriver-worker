@@ -1,0 +1,28 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/20 (Sat) 20:15  
+[USER] User is explaining how to get to the value of 1 # 3 as per established rules.  
+[ASSISTANT_SAID] Assistant apologizes for any confusion earlier and invites the user to explain how to get to the value of 1 # 3 using the established rules for Nautical Numbers.  
+[USER] User states they will list a step and the rule number in parentheses for notational ease.  
+[ASSISTANT_SAID] Assistant confirms readiness to follow along with the user's explanation.  
+[USER] User introduces shorthand for WN(x) as x' and provides an example: 3 = 2'.  
+[ASSISTANT_SAID] Assistant acknowledges understanding of the user's shorthand.  
+[USER] User lists steps to calculate 1 # 3:  
+1) 3 = 2' [14]  
+2) 1 # 3 = 1 # 2' = (1 # 2)' [11]  
+3) 1 # 2 = 1 # 1' = (1 # 1)' [11]  
+4) 1 # 1 = 1 # 0' = (1 # 0)' [11]  
+5) 1 # 0 = 1 [10]  
+[USER] User substitutes upwards from step 5 to conclude:  
+6) 1 # 1 = 1' = 2  
+7) 1 # 2 = 2' = 3  
+8) 1 # 3 = 3' = 4  
+[ASSISTANT_SAID] Assistant thanks the user for the explanation and confirms that the correct value of 1 # 3 is indeed 4.  
+[USER] User notes that to get to the value of 1 # 3, they applied rule 11 repeatedly until reaching rule 10, coining the term "Ninduction."  
+[ASSISTANT_SAID] Assistant acknowledges the user's point and explains the resemblance of the approach to mathematical induction, agreeing to use the term "Ninduction."  
+[USER] User requests to apply Ninduction to find the value of 2 # 4.  
+[ASSISTANT_SAID] Assistant begins to calculate the value of 2 # 4 using Ninduction.  
+1. 4 = 2'''' [using rules 14 and 16]  
+2. 2 # 4 = 2 # 2'''' = (2 # 2'''')'' [using rule 11]  
+3. 2 # 2'''' = 2 # 2''' = (2 # 2''')' [using rule 11]  
+4. 2 # 2''' =

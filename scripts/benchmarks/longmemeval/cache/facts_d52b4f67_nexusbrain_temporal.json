@@ -1,0 +1,72 @@
+{
+  "answer_0df6aa4b": [
+    {
+      "fact": "User's mom's birthday is on the 15th of next month.",
+      "type": "event",
+      "entities": [
+        "mom's birthday",
+        "15th of next month"
+      ]
+    },
+    {
+      "fact": "User's mom loves trying out new beauty products.",
+      "type": "preference",
+      "entities": [
+        "beauty products"
+      ]
+    },
+    {
+      "fact": "User's mom is really into skincare lately.",
+      "type": "preference",
+      "entities": [
+        "skincare"
+      ]
+    },
+    {
+      "fact": "User's mom has a classic and elegant style.",
+      "type": "preference",
+      "entities": [
+        "classic style",
+        "elegant style"
+      ]
+    },
+    {
+      "fact": "User's mom's favorite color is lavender.",
+      "type": "preference",
+      "entities": [
+        "lavender"
+      ]
+    },
+    {
+      "fact": "User has set a budget of around $100 for the gift.",
+      "type": "preference",
+      "entities": [
+        "$100 budget"
+      ]
+    },
+    {
+      "fact": "User attended their cousin's wedding last weekend.",
+      "type": "event",
+      "entities": [
+        "cousin's wedding",
+        "last weekend"
+      ]
+    },
+    {
+      "fact": "User's mom looked stunning at the wedding.",
+      "type": "opinion",
+      "entities": [
+        "mom",
+        "wedding"
+      ]
+    },
+    {
+      "fact": "User wants to help their mom maintain her glow.",
+      "type": "opinion",
+      "entities": [
+        "mom",
+        "glow"
+      ]
+    }
+  ]
+}

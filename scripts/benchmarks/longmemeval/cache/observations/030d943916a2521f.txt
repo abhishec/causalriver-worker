@@ -1,0 +1,24 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/23 (Tue) 16:13  
+[USER] User requested to migrate secrets with SOPS from GKE cluster1 to GKE2 that use Google Secrets API.  
+[ASSISTANT_SAID] Assistant provided steps to migrate secrets managed by SOPS in a GKE cluster to another GKE cluster using the Google Secrets API.  
+[ASSISTANT_SAID] Step 1: Export the secrets from the first cluster using `kubectl` and SOPS commands.  
+[ASSISTANT_SAID] Step 2: Create a Google Secret Manager secret using the `gcloud` CLI.  
+[ASSISTANT_SAID] Step 3: Update the secret in the second cluster by creating a Kubernetes secret object that references the Google Secret Manager secret.  
+[ASSISTANT_SAID] Step 4: Apply the updated secret to the second cluster using `kubectl`.  
+[USER] User requested a bash/kubectl script that gets all SOPS secrets from a namespace and exports/creates them based on the model provided.  
+[ASSISTANT_CREATED] Assistant provided a bash script that retrieves all secrets in a specified namespace, exports them, and creates Google Secret Manager secrets.  
+[ASSISTANT_SAID] The script uses `kubectl` to get secrets and `jq` to parse JSON output.  
+[ASSISTANT_SAID] The script assumes necessary Google Cloud SDK components and dependencies are installed.  
+[USER] User asked how to filter to just the SOPS secrets.  
+[ASSISTANT_SAID] Assistant suggested modifying the script to only get secrets annotated with `sops.k8s.pgp.mozilla.org/encrypted`.  
+[ASSISTANT_CREATED] Assistant provided an updated bash script that filters secrets based on the SOPS annotation.  
+[USER] User inquired how to determine if a project is using SOPS secrets or normal secrets.  
+[ASSISTANT_SAID] Assistant explained that SOPS secrets are annotated with `sops.k8s.pgp.mozilla.org/encrypted`.  
+[ASSISTANT_SAID] Suggested using `kubectl describe secret <secret-name>` to check for the annotation.  
+[ASSISTANT_SAID] Provided a command to list all SOPS secrets in a namespace using `kubectl` and `jq`.  
+[USER] User asked how to configure a project to switch from GKE1 Kubernetes secrets to GKE2 Google Secrets API Manager.  
+[ASSISTANT_SAID] Assistant outlined steps to switch from Kubernetes Secrets to Google Secrets Manager.  
+[ASSISTANT_SAID] Step 1: Export secrets from the first cluster using `kubectl` and SOPS.  
+[ASSISTANT_SAID] Step 2: Create a Google Secret Manager secret using the `

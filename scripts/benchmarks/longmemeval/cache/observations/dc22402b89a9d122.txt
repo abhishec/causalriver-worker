@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/25 (Thu) 21:24  
+[USER] User is a teacher of a cooking class.  
+[USER] User teaches middle school students the basics of healthy and safe cooking.  
+[USER] The age of the students is 12-16.  
+[USER] User wants to support learners to recall and process accurate foundational information without using quizzes.  
+[USER] User believes quizzes enable only short-term recall rather than long-term memorization.  
+[USER] User is interested in using instructional strategies proven to increase effective memorization of foundational knowledge.  
+[ASSISTANT_SAID] The first strategy mentioned is known as Undoing.  
+[ASSISTANT_SAID] Research shows that learners learn better when the learning experience challenges commonly mistaken foundational ideas and assumptions.  
+[ASSISTANT_SAID] The highest impact learning experiences identify and correct foundational misconceptions before memorization occurs.  
+[ASSISTANT_SAID] Undoing activities are helpful at the start of the learning process by identifying and correcting gaps in knowledge, misconceptions, and misplaced reasoning.  
+[ASSISTANT_SAID] Undoing activities often ask learners to predict the outcome of a scenario.  
+[ASSISTANT_CREATED] An example of an undoing activity was created regarding Sarah making a healthy sandwich.  
+[ASSISTANT_CREATED] The activity included four options (A, B, C, D) regarding the healthiness of white bread versus whole wheat bread.  
+[ASSISTANT_SAID] Feedback was provided for each potential response, explaining misconceptions and correct conceptions.  
+[ASSISTANT_SAID] A resource was suggested: "How to Make Healthy Sandwiches" article on the American Heart Association website.  
+[USER] User requested another activity similar to the first one.  
+[ASSISTANT_CREATED] A second undoing activity was created regarding Liam cooking vegetables with olive oil or butter.  
+[ASSISTANT_CREATED] The second activity included four options (A, B, C, D) regarding the healthiness of olive oil versus butter.  
+[ASSISTANT_SAID] Feedback was provided for each potential response in the second activity, explaining misconceptions and correct conceptions.  
+[ASSISTANT_SAID] A resource was suggested: "Healthy Cooking Oils" article on Healthline with a link provided (<https://www.healthline.com/nutrition/healthy-cooking-oils>).

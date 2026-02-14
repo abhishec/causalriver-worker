@@ -1,0 +1,29 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/28 (Sun) 10:33
+- [FACT] User is trying to establish a consistent sleep schedule.
+- [PREFERENCE] User wants to get to bed earlier to wake up at a specific time on Fridays.
+- [EVENT] User is looking for help to come up with a plan to make waking up at a specific time a habit.
+- [ASSISTANT_SAID] Establishing a consistent sleep schedule can have a significant impact on overall health and well-being.
+- [ASSISTANT_SAID] Suggested a 4-step plan to help adjust sleep schedule and wake up at the desired time on Fridays.
+- [ASSISTANT_SAID] Step 1: Determine Your Goal - User should decide what time to wake up on Fridays and how much sleep they need.
+- [ASSISTANT_SAID] Step 2: Gradually Adjust Your Sleep Schedule - Suggested adjusting bedtime by 15-30 minutes every few days.
+- [ASSISTANT_SAID] Step 3: Establish a Consistent Bedtime Routine - Suggested calming pre-sleep activities like reading, taking a warm bath, or practicing meditation.
+- [ASSISTANT_SAID] Step 4: Make Mornings Enjoyable - Suggested finding reasons to look forward to waking up on Fridays.
+- [ASSISTANT_SAID] Additional tips include avoiding screens before bedtime and creating a sleep-conducive environment.
+- [PREFERENCE] User wants to wake up at 6:30 AM on Fridays.
+- [CHANGE] User has found it tough to get to bed earlier but has made it their favorite way to start the day.
+- [EVENT] User is looking for recommendations for a good alarm clock that can monitor sleep patterns and wake them during a light sleep phase.
+- [ASSISTANT_SAID] Recommended several alarm clocks: 
+  - Fitbit Inspire HR: Tracks sleep patterns and has a "SmartWake" feature.
+  - Oura Ring: Tracks sleep and has a "Smart Alarm" feature.
+  - Amazon Halo: Tracks sleep and has a "Wake" feature.
+  - Sleep Cycle Alarm Clock (App): Tracks sleep patterns and wakes during light sleep.
+  - Philips SmartSleep: Monitors sleep patterns and has a "SmartWake" feature.
+- [PREFERENCE] User is considering getting a Fitbit Inspire HR but has also heard great things about the Oura Ring.
+- [EVENT] User is inquiring if either device can track yoga practice and provide feedback on form and alignment.
+- [ASSISTANT_SAID] Neither the Fitbit Inspire HR nor the Oura Ring provides specific feedback on yoga form and alignment.
+- [ASSISTANT_SAID] Suggested alternatives for tracking yoga practice and providing feedback: 
+  - Form Swim and Yoga Tracker
+  - YogaGlo
+  - Moov

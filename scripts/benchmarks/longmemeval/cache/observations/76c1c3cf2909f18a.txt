@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/29 (Mon) 18:51
+- [FACT] User is using pyLDAvis for topic modeling.
+- [FACT] User is analyzing topics related to academic writing and anxiety.
+- [EVENT] User is running an online workshop titled "Academic Writing: Reduce Anxiety" for PhDs from @nuigalway.
+- [EVENT] User has upcoming workshops for The @univgroningen and @cardiffmet next week.
+- [PREFERENCE] User is looking forward to the workshop they are conducting.
+- [FACT] User provided a list of top words for three topics identified by the algorithm.
+- [FACT] Topic 0 includes words such as "anxiety," "deadlines," "procrastination," and "publication."
+- [FACT] Topic 1 includes words such as "new," "writing," "success," "procrastination," and "well-being."
+- [FACT] Topic 2 includes words such as "anxiety," "writing," "students," and "testing."
+- [ASSISTANT_SAID] Assistant suggested that the data may relate to academic writing and the challenges associated with anxiety.
+- [ASSISTANT_SAID] Assistant noted that the first topic focuses on workshops and processes to reduce anxiety in academic writing.
+- [ASSISTANT_SAID] Assistant mentioned that the second topic is about self-care and well-being efforts in academia.
+- [ASSISTANT_SAID] Assistant indicated that the third topic relates to managing anxiety in academic writing and testing.
+- [USER] User questioned why the algorithm shows a great inter-topic distance despite the overlap in words.
+- [ASSISTANT_SAID] Assistant explained that inter-topic distance is based on distinct patterns and distributions of words, not just individual word overlap.
+- [ASSISTANT_SAID] Assistant advised that to determine what makes each topic distinct, the user should analyze the most probable keywords and sample tweets for patterns and themes.
+- [ASSISTANT_SAID] Assistant suggested identifying common words or phrases that appear frequently in one topic but not in others to understand distinctions better.

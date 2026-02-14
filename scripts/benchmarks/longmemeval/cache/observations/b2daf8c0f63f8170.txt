@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[FACT] User is planning a summer trip to either Costa Rica or Iceland.  
+[EVENT] User just got back from a trip to Japan.  
+[EVENT] User had a 4-day girls' trip to Las Vegas with friends Emily and Rachel in late January.  
+[RELATIONSHIP] User's friends mentioned are Emily and Rachel.  
+[ASSISTANT_SAID] Assistant welcomed the user back from Japan and acknowledged their exciting year of travel.  
+[ASSISTANT_SAID] Assistant provided tips for Costa Rica, including nature and wildlife, beach relaxation, adventure activities, eco-lodges, and cultural experiences.  
+[ASSISTANT_SAID] Assistant provided tips for Iceland, including natural wonders, Northern Lights, hot springs, hiking, and Reykjavik's cultural scene.  
+[ASSISTANT_SAID] Assistant suggested that user might enjoy Costa Rica's relaxed atmosphere or Iceland's unique landscapes and adventure.  
+[FACT] User is leaning towards Iceland because of the hot springs but is worried about the cost.  
+[ASSISTANT_SAID] Assistant provided a rough estimate of costs for a 7-day trip to Iceland, including flights, accommodation, food, transportation, activities, and other expenses.  
+[ASSISTANT_SAID] Assistant estimated the total cost for a budget-friendly trip to be around $1,500-$2,500 per person, mid-range $2,500-$4,000, and luxury $4,000-$6,000.  
+[ASSISTANT_SAID] Assistant suggested ways to save money while traveling in Iceland, such as booking in advance, opting for budget-friendly accommodations, and choosing free or low-cost activities.  
+[USER] User expressed the need to prioritize what to do and see in Iceland.  
+[USER] User confirmed interest in visiting the Blue Lagoon and asked for recommendations for other hot springs or geothermal pools.  
+[ASSISTANT_SAID] Assistant recommended several hot springs and geothermal pools in Iceland: Laugarvatn Fontana, Landmannalaugar, Myvatn Nature Baths, Krauma, and Laugardalslaug.  
+[ASSISTANT_SAID] Assistant provided tips for visiting hot springs in Iceland, including hygiene requirements and environmental respect.  
+[EVENT] User is planning to visit friend Emily in San Francisco in April for a weekend getaway.  
+[ASSISTANT_SAID] Assistant provided tips for San Francisco, including must-see attractions (Golden Gate Bridge, Alcatraz Island, Fisherman's Wharf, Chinatown), neighborhoods to explore (Haight-Ashbury, Mission District, North Beach), and other activities (cable car ride, de Young Museum, Golden Gate Park).  
+[ASSISTANT_SAID] Assistant advised on weather, transportation, booking ahead, and being prepared for hills in San Francisco.  
+[USER] User mentioned that Emily has been living in San

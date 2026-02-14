@@ -1,0 +1,37 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/29 (Mon) 18:09
+- [EVENT] User is looking to plan back-to-school shopping and is seeking tips on how to save money.
+- [EVENT] User made a big purchase at Target last week and earned 500 points on their Target RedCard.
+- [ASSISTANT_SAID] Assistant congratulated the user on earning 500 points on their Target RedCard.
+- [ASSISTANT_SAID] Assistant provided tips to save money on back-to-school shopping, including:
+  1. Make a list and stick to it.
+  2. Set a budget.
+  3. Shop during tax-free weekends.
+  4. Look for sales and discounts.
+  5. Use cashback apps.
+  6. Buy in bulk.
+  7. Shop secondhand.
+  8. Use coupons and promo codes.
+  9. Consider alternative brands.
+  10. Shop during off-peak seasons.
+  11. Use price comparison tools.
+  12. Take advantage of price matching.
+- [USER] User plans to make a list and stick to it and will look out for sales and discounts at Target.
+- [EVENT] User is interested in cashback apps for back-to-school shopping.
+- [ASSISTANT_SAID] Assistant recommended the following cashback apps:
+  1. Ibotta
+  2. Fetch Rewards
+  3. Rakuten (formerly known as Ebates)
+  4. RetailMeNot
+  5. Checkout 51
+  6. Dosh
+- [ASSISTANT_SAID] Assistant provided tips on how to use cashback apps effectively, including downloading the apps, browsing for offers, activating offers before purchases, and taking photos of receipts.
+- [EVENT] User has heard of Rakuten and RetailMeNot but not the other cashback apps.
+- [EVENT] User is using the loyalty program at The Daily Grind coffee shop and redeemed 100 points for a free latte last Friday.
+- [ASSISTANT_SAID] Assistant mentioned that the previously recommended apps are more focused on larger retailers and may not track points for small businesses like The Daily Grind.
+- [ASSISTANT_SAID] Assistant suggested using The Daily Grind's mobile app, digital loyalty card apps, or a spreadsheet to track points and rewards.
+- [EVENT] User is considering canceling their loyalty membership at Barnes & Noble due to not reading as much lately.
+- [EVENT] User received an email from Barnes & Noble offering a $10 reward if they spend $50 within the next two weeks.
+- [USER] User decided to keep the Barnes & Noble membership to use the $10 reward for a new book.
+- [ASSISTANT_SAID] Assistant discussed the pros and cons of keeping the Barnes & Noble membership and

@@ -1,0 +1,22 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/26 (Fri) 06:14
+- [FACT] User is looking to get new storage bins for their craft room.
+- [EVENT] User recently finished a project - a scarf for their sister's birthday, which was a month ago.
+- [ASSISTANT_SAID] Congratulations on completing the scarf project for the user's sister's birthday.
+- [ASSISTANT_SAID] Recommended brands and websites for storage bins: The Container Store, Amazon, Michaels, Hobby Lobby, Rubbermaid, Sterilite, IKEA.
+- [ASSISTANT_SAID] Suggested specific products: stackable plastic bins with lids, wicker or fabric storage baskets, craft carts or storage units with drawers, under-shelf storage bins.
+- [ASSISTANT_SAID] Advised user to consider the size of their craft room, the type of supplies to store, and the desired style when shopping.
+- [FACT] User has a bunch of half-finished projects and scraps of fabric, including a quilt started for their mom two years ago.
+- [ASSISTANT_SAID] Acknowledged the common phenomenon of accumulating half-finished projects and encouraged user to get organized and declutter their craft room.
+- [ASSISTANT_SAID] Asked about the status of the quilt for the user's mom.
+- [EVENT] User attended a ceramic jewelry workshop that sparked their interest in pottery again.
+- [CHANGE] User is thinking of taking a refresher course on pottery.
+- [ASSISTANT_SAID] Recommended online resources for pottery classes: Craftsy, Udemy, Skillshare, YouTube, online pottery communities, local colleges or community centers, pottery supply websites.
+- [ASSISTANT_SAID] Suggested considering the level of instruction, format, equipment access, and cost before committing to a course.
+- [FACT] User plans to check out Craftsy and YouTube for online tutorials.
+- [EVENT] User has been selling some of their yarn stash online and needs to take photos of the yarn and finished projects.
+- [ASSISTANT_SAID] Provided tips for taking good product photos for Etsy: use natural light, white background, simple props, macro shots, show scale, styling, editing, consistency, multiple angles, and high-quality images.
+- [ASSISTANT_SAID] Listed photography equipment recommendations: DSLR camera or high-quality smartphone camera, kit lens, macro lens, softbox lights.
+- [ASSISTANT_SAID] Suggested positioning the photo studio near a window for natural light and using softbox lights for even lighting.
+- [PREFERENCE] User is excited to get back into pottery and use techniques learned to make ceramic pieces for their Etsy shop.

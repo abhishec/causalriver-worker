@@ -1,0 +1,34 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2021/08/20 (Fri) 17:11  
+[USER] The user is looking for tips on how to save money on grocery shopping.  
+[USER] The user has been trying to be more mindful of their spending lately.  
+[EVENT] The user used a 20% off coupon at Walmart last Saturday.  
+[TEMPORAL] The coupon was received in the user's email inbox a week prior to their shopping trip.  
+[ASSISTANT_SAID] The assistant congratulated the user on using the coupon and being mindful of spending.  
+[ASSISTANT_SAID] The assistant provided tips for saving money on groceries, including:  
+[ASSISTANT_SAID] 1. Plan meals and make a grocery list.  
+[ASSISTANT_SAID] 2. Shop sales and stock up.  
+[ASSISTANT_SAID] 3. Use cashback apps like Ibotta, Fetch Rewards, and Checkout 51.  
+[ASSISTANT_SAID] 4. Buy in bulk.  
+[ASSISTANT_SAID] 5. Shop at discount stores like Aldi.  
+[ASSISTANT_SAID] 6. Use coupons strategically.  
+[ASSISTANT_SAID] 7. Buy generic or store-brand products.  
+[ASSISTANT_SAID] 8. Avoid shopping when hungry.  
+[ASSISTANT_SAID] 9. Use unit prices to compare deals.  
+[ASSISTANT_SAID] 10. Avoid high-end stores.  
+[ASSISTANT_SAID] 11. Use leftovers.  
+[ASSISTANT_SAID] 12. Shop in season.  
+[USER] The user is thinking of trying out new recipes and asked for suggestions for meals that use canned tomatoes.  
+[ASSISTANT_SAID] The assistant provided recipe ideas using canned tomatoes, including:  
+[ASSISTANT_SAID] 1. Spaghetti Bolognese.  
+[ASSISTANT_SAID] 2. Chili Con Carne.  
+[ASSISTANT_SAID] 3. Tomato Soup.  
+[ASSISTANT_SAID] 4. Chicken Fajitas.  
+[ASSISTANT_SAID] 5. Vegetable Curry.  
+[ASSISTANT_SAID] 6. Bruschetta.  
+[ASSISTANT_SAID] 7. Lentil Soup.  
+[ASSISTANT_SAID] 8. Stuffed Peppers.  
+[ASSISTANT_SAID] 9. Tomato and Mozzarella Salad.  
+[ASSISTANT_SAID] 10. Shakshuka.  
+[USER] The user is thinking of making some pasta dishes and asked for tips on

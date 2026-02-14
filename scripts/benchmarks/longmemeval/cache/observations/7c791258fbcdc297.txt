@@ -1,0 +1,20 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/03/26 (Sun) 08:55  
+[USER] User requested a recipe for vegan German sausages using vital wheat gluten.  
+[ASSISTANT_SAID] Assistant provided a recipe for vegan German sausages using vital wheat gluten, including ingredients and instructions.  
+[ASSISTANT_SAID] Ingredients listed: 1 cup vital wheat gluten, 1/4 cup nutritional yeast, 1 tbsp smoked paprika, 1 tbsp garlic powder, 1 tbsp onion powder, 1 tsp salt, 1/2 tsp black pepper, 1/2 cup vegetable broth, 2 tbsp tomato paste, 2 tbsp soy sauce, 1 tbsp maple syrup, 1 tbsp apple cider vinegar, 1 tbsp olive oil.  
+[ASSISTANT_SAID] Instructions included 10 steps for preparing the sausages.  
+[USER] User asked if olive oil was necessary in the recipe.  
+[ASSISTANT_SAID] Assistant stated that olive oil can be omitted and is not essential.  
+[USER] User inquired about substitutes for tomato paste.  
+[ASSISTANT_SAID] Assistant suggested using tomato sauce, crushed tomatoes, or ketchup as substitutes, noting adjustments needed for consistency.  
+[USER] User asked how using ketchup would affect the final product.  
+[ASSISTANT_SAID] Assistant explained that ketchup would add sweetness and moisture, affecting flavor and texture.  
+[USER] User asked about spices typically used in German sausages.  
+[ASSISTANT_SAID] Assistant listed common spices: allspice, caraway seeds, coriander, garlic powder, marjoram, mustard seed, nutmeg, paprika, pepper, salt.  
+[USER] User asked about spices typically used in bratwurst.  
+[ASSISTANT_SAID] Assistant provided a list of spices for bratwurst: salt, black pepper, nutmeg, marjoram, white pepper, cardamom, ginger, coriander, allspice.  
+[USER] User requested modifications to the original recipe to omit olive oil, replace tomato paste with ketchup, and incorporate nutmeg, coriander, allspice, and white pepper.  
+[ASSISTANT_CREATED] Assistant provided a modified recipe for vegan German sausages with the requested changes.  
+[ASSISTANT_SAID] Modified ingredients included: 1 cup vital wheat gluten, 1/4 cup nutritional yeast, 1 tbsp smoked paprika, 1 tbsp garlic powder, 1 tbsp onion powder, 1 tsp salt, 1/2 tsp black pepper, 1/2 tsp nutmeg, 1/2 tsp coriander, 1/2 tsp allspice, 1/2 tsp white pepper, 1/2 cup vegetable broth, 2 tbsp ketchup, 2 tbsp soy sauce, 1 tbsp

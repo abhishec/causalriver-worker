@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[FACT] User is planning a trip to Hawaii in November.  
+[EVENT] User is looking for advice on accommodations in Hawaii.  
+[EVENT] User has been doing a lot of camping lately.  
+[EVENT] User took a 5-day trip to Yosemite a while back.  
+[ASSISTANT_SAID] Hawaii Island Retreat is recommended as an eco-lodge located in North Kohala, offering luxurious, eco-friendly accommodations, organic gardens, a yoga studio, and a pool.  
+[ASSISTANT_SAID] Kalani Retreat is recommended, located in Puna, offering rustic-chic accommodations, a swimming pool, and a wellness center with a focus on sustainability and community engagement.  
+[ASSISTANT_SAID] Volcano Village Lodge is recommended, located near Hawaii Volcanoes National Park, offering comfortable rooms and a hot tub, committed to eco-friendly practices and supporting local conservation efforts.  
+[ASSISTANT_SAID] Hawaii Volcanoes National Park offers two campgrounds: Kulanaokuaiki Campground (free, first-come, first-served) and Namakanipaio Campground (reservation required).  
+[ASSISTANT_SAID] MacKenzie State Recreation Area is recommended as a campground near Hilo, surrounded by lush rainforest.  
+[ASSISTANT_SAID] Punalu'u Black Sand Beach Campground is recommended as a primitive campground near Na'alehu, offering stunning ocean views and black sand beaches.  
+[ASSISTANT_SAID] User is advised to book accommodations and campsites in advance, especially during peak season (December to April).  
+[ASSISTANT_SAID] User is reminded to research and respect any rules, regulations, and permits required for camping in Hawaii.  
+[ASSISTANT_SAID] User is advised to be prepared for varying weather conditions, including rain and high winds.  
+[ASSISTANT_SAID] User is advised to pack eco-friendly products, such as biodegradable soap and reef-safe sunscreen.  
+[EVENT] User is thinking of doing some hiking on the Big Island.  
+[EVENT] User has been doing a lot of hiking lately.  
+[EVENT] User did a challenging hike to the top of Vernal Falls in Yosemite.  
+[ASSISTANT_SAID] Kilauea Iki Trail is recommended as a 4-mile hike through a lush rainforest, descending 400 feet into the Kilauea Iki crater.  
+[ASSISTANT_SAID] Mauna Kea Summit Trail is recommended as a challenging 14-mile hike to the highest point in Hawaii (13,796 ft.).  
+[ASSISTANT_SAID] Waipio Valley Trail is recommended as a steep 9-mile hike down into the lush Waipio Valley.  
+[ASSISTANT_SAID] Akaka Falls State Park Trails is recommended as a shorter, easier hike (0

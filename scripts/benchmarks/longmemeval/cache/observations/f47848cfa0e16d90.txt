@@ -1,0 +1,26 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/21 (Sun) 19:13  
+[EVENT] User is thinking of trying out a new coffee recipe.  
+[EVENT] User needs to figure out how to use the built-in grinder on their coffee maker.  
+[EVENT] User found the instruction manual while unpacking boxes.  
+[EVENT] User needs to replace the water filter in their coffee machine today.  
+[CHANGE] User last changed the water filter two months ago.  
+[ASSISTANT_SAID] Replacing the water filter every 1-2 months is a great habit to maintain the taste and quality of coffee.  
+[ASSISTANT_SAID] Instructions for replacing the water filter include removing the old filter, rinsing the area, and inserting a new one.  
+[ASSISTANT_SAID] General tips for using the built-in grinder include checking the manual, choosing the grind setting, measuring beans, grinding the beans, and brewing coffee.  
+[ASSISTANT_SAID] User is thinking of trying out a cold brew recipe.  
+[EVENT] User is looking for recommendations for a good ratio of coffee to water for cold brew.  
+[ASSISTANT_SAID] Classic cold brew ratio is 1:4 (1 part coffee to 4 parts water).  
+[ASSISTANT_SAID] Example for cold brew ratio: 1 cup of coarsely ground coffee (around 120-140 grams) and 4 cups of water (around 960 ml).  
+[ASSISTANT_SAID] Stronger brew ratio is 1:3 and weaker brew ratio is 1:5.  
+[ASSISTANT_SAID] For cold brew, a coarse grind is recommended.  
+[ASSISTANT_SAID] Typical cold brew steeping time is around 12-24 hours.  
+[ASSISTANT_SAID] Tips for cold brew include using fresh, high-quality coffee beans, experimenting with ratios and steeping times, and adding flavorings.  
+[EVENT] User is planning to use dark roasted coffee for their cold brew.  
+[ASSISTANT_SAID] Dark roasted coffee will yield a bold, rich, and intense flavor profile compared to light roasted coffee.  
+[ASSISTANT_SAID] Dark roasts have lower acidity, a heavier body, and notes of deep chocolate or caramel sweetness.  
+[ASSISTANT_SAID] Light roasts yield a brighter, more acidic flavor profile with notes of citrus and berries.  
+[ASSISTANT_SAID] Cold brew can mute some of the brighter flavors in light roasts, making dark roasts a great choice.  
+[ASSISTANT_SAID] Tips for dark roasted cold brew include being careful not to over-extract and using a coarser grind.  
+[EVENT] User is thinking

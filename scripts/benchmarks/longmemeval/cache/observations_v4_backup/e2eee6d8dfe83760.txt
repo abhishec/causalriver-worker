@@ -1,0 +1,32 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/22 (Mon) 23:57  
+[FACT] User is considering majoring in Economics.  
+[FACT] User has taken online certification courses in Python programming and data visualization.  
+[FACT] User has been reading books on machine learning and artificial intelligence.  
+[EVENT] User is surprised that they will become an Economics major soon.  
+[RELATIONSHIP] User has old high school friends who plan to work after graduating from university.  
+[ASSISTANT] Recommended online resources and courses for preparing for a major in Economics:  
+[ASSISTANT] 1. Khan Academy - Comprehensive range of introductory economics courses.  
+[ASSISTANT] 2. Coursera - Courses from top universities, such as 'Principles of Economics' by the University of Illinois.  
+[ASSISTANT] 3. edX - Courses like 'Introduction to Economics' from institutions like MIT and Harvard.  
+[ASSISTANT] 4. MIT OpenCourseWare - Free course materials for a range of economics subjects.  
+[ASSISTANT] 5. Investopedia - Articles and tutorials on basic and advanced economic concepts.  
+[ASSISTANT] Provided average salaries for data scientists in different industries:  
+[ASSISTANT] 1. Technology: $100,000 to $150,000 per year.  
+[ASSISTANT] 2. Finance: $120,000 to $160,000 annually.  
+[ASSISTANT] 3. Healthcare: $110,000 to $140,000 per year.  
+[ASSISTANT] 4. Retail: $90,000 to $130,000.  
+[ASSISTANT] 5. Government: $80,000 to $120,000.  
+[ASSISTANT] Mentioned that technology, finance, and healthcare are strong in hiring data scientists.  
+[FACT] User is weighing the pros and cons of pursuing a Master's degree.  
+[ASSISTANT] Suggested steps to assess the foundation in math and statistics for a Data Science program:  
+[ASSISTANT] 1. Review core topics like linear algebra, calculus, probability, and statistical inference.  
+[ASSISTANT] 2. Assess coursework against program prerequisites.  
+[ASSISTANT] 3. Take online assessments on platforms like Khan Academy or Coursera.  
+[ASSISTANT] 4. Review specific program requirements.  
+[ASSISTANT] 5. Seek feedback from current students or professionals.  
+[ASSISTANT] 6. Consider a bridge course if gaps are identified.  
+[ASSISTANT] Recommended online courses and certifications for building skills in data science:  
+[ASSISTANT] 1. Coursera - IBM Data Science Professional Certificate.  
+[ASSISTANT] 2. edX - Data Science MicroMasters from UC

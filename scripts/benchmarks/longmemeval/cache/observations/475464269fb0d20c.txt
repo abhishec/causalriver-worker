@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/28 (Sun) 03:38
+- [EVENT] User has been taking tennis lessons for a few weeks and is struggling with their serve.
+- [ASSISTANT_SAID] The serve is one of the most important shots in tennis and it's normal to struggle at first.
+- [ASSISTANT_SAID] Tips to improve serve:
+  - [ASSISTANT_SAID] **1. Stance and Footwork**: Stand with feet shoulder-width apart, dominant foot forward, turn body to the right, transfer weight onto back foot, shift weight onto front foot while tossing the ball.
+  - [ASSISTANT_SAID] **2. Toss**: Hold ball in non-dominant hand, toss 6-8 feet in the air in front of dominant eye, aim for consistent toss height and location.
+  - [ASSISTANT_SAID] **3. Grip**: Use a continental grip, hold racket firmly but not too tight.
+  - [ASSISTANT_SAID] **4. Arm and Wrist Action**: Keep arm straight and wrist firm while tossing, rotate wrist and forearm to generate spin and power, snap wrist downward for topspin or slice.
+  - [ASSISTANT_SAID] **5. Contact Point**: Make contact at the peak of the toss, about 6-8 feet in the air, with strings facing the net.
+  - [ASSISTANT_SAID] **6. Follow-Through**: Follow through with arm and racket extended after contact.
+  - [ASSISTANT_SAID] **7. Practice Drills**: Practice toss and arm motion without hitting the ball, serve with non-dominant hand, hit serves with different spins.
+  - [ASSISTANT_SAID] **8. Video Analysis**: Record serving and analyze technique for improvement.
+  - [ASSISTANT_SAID] **9. Serve and Volley**: Practice serving and volleying to improve reaction time and movement to the net.
+  - [ASSISTANT_SAID] **10. Be Patient**: Developing a consistent serve takes time and practice.
+- [USER] User is motivated to participate in a local tennis tournament next month.
+- [ASSISTANT_SAID] The assistant does not have access to real-time information about local tournaments but provides guidance on how to find them.
+- [ASSISTANT_SAID] Suggestions to find upcoming tournaments:
+  - [ASSISTANT_SAID] **1. USTA**: Visit [usta.com](http://usta.com) and search by zip code or city.
+  - [ASSISTANT_SAID] **2. ITF**: Visit [itftennis.com](http://itftennis.com) and use the "Tournament

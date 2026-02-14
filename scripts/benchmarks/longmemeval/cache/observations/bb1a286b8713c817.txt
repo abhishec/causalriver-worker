@@ -1,0 +1,23 @@
+**Observation Log:**
+
+- [FACT] The user is creating a VR game using Unity and XR Interaction Toolkit.
+- [FACT] The user wants to build a spiritual successor to Star Wars Battlefront 3, which was 99% done.
+- [PREFERENCE] The user is interested in making a game similar to Star Wars Battlefront 3.
+- [ASSISTANT_SAID] To create a game like Star Wars Battlefront 3, the user should gather inspiration and research by playing Star Wars Battlefront 2 and other similar games.
+- [ASSISTANT_SAID] The user should define the scope of the project, features, target audience, and create a project plan, timelines, and budget.
+- [ASSISTANT_SAID] The user should create game assets using software such as Maya, 3D Studio Max, or Blender.
+- [ASSISTANT_SAID] The user should use Unity and XR Interaction Toolkit to add interactive elements to the game.
+- [ASSISTANT_SAID] The user should test the game regularly to identify bugs and use player feedback for improvements.
+- [ASSISTANT_SAID] The user should create a marketing plan and release the game to the public using social media, game development communities, and video game websites.
+- [ASSISTANT_SAID] After the release, the user should maintain the game by fixing bugs and adding new features.
+- [ASSISTANT_SAID] The user will need to task out several key components to their team, including game design, 3D modeling and animation, programming, sound design, quality assurance, user interface, and marketing and distribution.
+- [ASSISTANT_SAID] Game designers will define the game mechanics, rules, and objectives, and create the overall design and story.
+- [ASSISTANT_SAID] 3D modelers and animators will create characters, vehicles, environments, and animations.
+- [ASSISTANT_SAID] Programmers will create the game's code and implement game mechanics, ensuring smooth gameplay and bug-free performance.
+- [ASSISTANT_SAID] Sound designers will create sound effects and music, ensuring audio synchronization with gameplay.
+- [ASSISTANT_SAID] Quality assurance testers will identify and report bugs and provide gameplay feedback.
+- [ASSISTANT_SAID] User interface designers will create menus, HUD, and graphical elements for intuitive gameplay.
+- [ASSISTANT_SAID] Marketers will promote the game and create a distribution plan, working with publishers and distributors.
+- [ASSISTANT_SAID] Specific game mechanics needed for gameplay include shooting mechanics, movement mechanics, a class system, vehicle mechanics, objective-based gameplay, skill progression, and AI behavior.
+- [ASSISTANT_SAID] Shooting mechanics will include weapon handling, accuracy, and recoil.
+- [ASSISTANT_SAID] Movement mechanics

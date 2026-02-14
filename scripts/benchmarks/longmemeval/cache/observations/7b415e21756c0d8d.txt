@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/22 (Mon) 08:33  
+[USER] User is interested in vegetarian restaurants in Madrid.  
+[ASSISTANT_SAID] La Hummuseria: This restaurant specializes in middle eastern cuisine and their hummus is a must-try.  
+[ASSISTANT_SAID] El Estragón Vegetariano: This restaurant serves creative vegetarian dishes, but their eggplant parmesan and vegan lasagna are highly recommended.  
+[ASSISTANT_SAID] Rayén Vegano: This vegan restaurant serves a variety of dishes, but their seitan skewers and burgers are popular among customers.  
+[ASSISTANT_SAID] VivaBurger: This restaurant serves vegan burgers, and their mac 'n' cheese burger and fries are definitely worth trying.  
+[ASSISTANT_SAID] Yerbabuena: This is a vegetarian and vegan restaurant with a variety of dishes on the menu, but their veggie lasagna and spinach croquettes are favorites among customers.  
+[USER] User expresses excitement about the restaurant suggestions.  
+[USER] User asks for a personal recommendation from the assistant.  
+[ASSISTANT_SAID] Assistant states they do not have personal preference but mentions that Rayén Vegano is highly loved based on customer reviews and ratings.  
+[USER] User decides to check out Rayén Vegano.  
+[USER] User inquires about outdoor seating options at Rayén Vegano.  
+[ASSISTANT_SAID] Assistant is unsure about outdoor seating at Rayén Vegano and suggests contacting them directly for confirmation.  
+[USER] User thanks the assistant and plans to reach out to Rayén Vegano regarding outdoor seating.  
+[USER] User expresses eagerness to try the seitan skewers.  
+[ASSISTANT_SAID] Assistant wishes the user a great time at Rayén Vegano and encourages them to reach out for further questions.  
+[USER] User commits to informing the assistant about the seitan skewers.  
+[USER] User asks for additional recommendations for vegan or vegetarian restaurants in Madrid.  
+[ASSISTANT_SAID] Eco Centro Ecologico: This vegetarian restaurant offers a diverse menu of plant-based dishes, and their seitan with mushroom sauce and vegan cheesecake are amazing.  
+[ASSISTANT_SAID] El Rincón del Segoviano: This restaurant has a vegetarian and vegan menu, with their lentil stew and vegan burger being highly recommended.  
+[ASSISTANT_SAID] Pizzi & Dixie: Although they are famous for their pizza, they offer vegan and vegetarian options. Their veggie burger and vegan nutella pizza are popular choices.  
+[ASSISTANT_SAID] B13 Vegan Food: This is a vegan fast food restaurant that is known for its vegan burgers and bowls.  
+[ASSISTANT

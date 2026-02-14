@@ -1,0 +1,31 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/20 (Sat) 19:19
+- [FACT] User is planning a self-care day.
+- [EVENT] User is considering doing a morning yoga practice at home.
+- [EVENT] User plans to meet a friend for brunch.
+- [ASSISTANT] Assistant recommended searching for healthy brunch spots using Google, online review sites like Yelp, TripAdvisor, or Zomato, asking the yoga community, and checking social media for local health food recommendations.
+- [PREFERENCE] User is looking for healthy brunch spots near Serenity Yoga.
+- [ASSISTANT] Assistant provided a list of yoga apps for home practice, including:
+  1. Down Dog (Free trial, then subscription-based)
+  2. YogaGlo (Free trial, then subscription-based)
+  3. Peloton Digital (Free trial, then subscription-based)
+  4. Yoga Studio (One-time purchase, no subscription)
+  5. Asana Rebel (Free, with in-app purchases)
+  6. Pocket Yoga (One-time purchase, no subscription)
+  7. Alo Moves (Free trial, then subscription-based)
+  8. Calm (Free trial, then subscription-based)
+  9. Dylan Werner Yoga (Free trial, then subscription-based)
+  10. Yoga With Adriene (Free, with optional in-app purchases)
+- [FACT] User has been using Down Dog for their home practice and finds it helpful.
+- [PREFERENCE] User enjoys vinyasa flow classes, as they challenge them and help build strength and flexibility.
+- [PREFERENCE] User appreciates the internal heat and cardiovascular benefits of vinyasa flow classes.
+- [CHANGE] User has noticed improvements in their practice and overall well-being since starting their home practice with Down Dog.
+- [FACT] User's flexibility has increased, and they have become more aware of their breath and body alignment.
+- [FACT] User feels more energized and focused throughout the day, even on days they don't practice.
+- [PREFERENCE] User loves the challenging sequences in vinyasa flow classes.
+- [RELATIONSHIP] User has a best friend named Sarah, whom they convinced to start practicing yoga.
+- [EVENT] User and Sarah have started a Sunday morning yoga and brunch routine.
+- [PREFERENCE] User would like their yoga practice to help them become more patient and present in their interactions with others.
+- [FACT] User sometimes finds themselves getting caught up in stress and anxiety.
+- [PREFERENCE] User believes yoga can help cultivate a greater sense of calm and compassion in stressful moments.

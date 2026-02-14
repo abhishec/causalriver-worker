@@ -1,0 +1,28 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/25 (Thu) 07:47  
+[FACT] User has been practicing guitar for about 30 minutes every day.  
+[PREFERENCE] User is looking for song recommendations in the indie rock genre.  
+[PREFERENCE] User loves to discover new artists.  
+[PREFERENCE] User is interested in songs with cool acoustic versions.  
+[ASSISTANT_SAID] Recommended new indie rock artists:  
+[ASSISTANT_SAID] 1. Arlo Parks: British singer-songwriter known for poetic lyrics and soothing indie-folk sound. Suggested songs: "Cola" and "Romantic Garbage".  
+[ASSISTANT_SAID] 2. Beabadoobee: Filipino-British artist blending indie rock with bedroom pop. Suggested song: "Coffee".  
+[ASSISTANT_SAID] 3. Glass Animals: British indie rock band with psychedelic elements. Suggested songs: "Black Mambo" and "Gooey".  
+[ASSISTANT_SAID] 4. Wallows: American indie rock trio with a laid-back sound. Suggested songs: "Are You Bored Yet?" and "Only Friend".  
+[ASSISTANT_SAID] 5. Yungblud: British singer-songwriter combining indie rock with punk and electronic elements. Suggested songs: "Parents" and "Acting Like That".  
+[ASSISTANT_SAID] Recommended cool acoustic versions:  
+[ASSISTANT_SAID] 1. The 1975 - "Somebody Else" (Acoustic)  
+[ASSISTANT_SAID] 2. Hozier - "Cherry Wine" (Acoustic)  
+[ASSISTANT_SAID] 3. The Neighbourhood - "Sweater Weather" (Acoustic)  
+[ASSISTANT_SAID] 4. Vampire Weekend - "Hannah Hunt" (Acoustic)  
+[ASSISTANT_SAID] 5. The Lumineers - "Ho Hey" (Acoustic)  
+[ASSISTANT_SAID] Recommended other songs:  
+[ASSISTANT_SAID] 1. Tame Impala - "Let it Happen"  
+[ASSISTANT_SAID] 2. Fleet Foxes - "White Winter Hymnal"  
+[ASSISTANT_SAID] 3. Bon Iver - "Skinny Love"  
+[ASSISTANT_SAID] 4. The Black Keys - "Lonely Boy"  
+[ASSISTANT_SAID] 5. Florence + The Machine - "Ship to Wreck"  
+[PREFERENCE] User is particularly interested in Arlo Parks and Beabadoobee.  
+[ASSISTANT_SAID] Provided background information on Arlo Parks:  
+[ASSIST

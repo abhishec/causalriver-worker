@@ -1,0 +1,26 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/22 (Mon) 01:55
+- [USER] User inquired about the potential replacement of human engineers by automation and AI.
+- [ASSISTANT_SAID] Automation and AI can reduce the need for human engineers in some areas of software quality engineering and testing, but are unlikely to completely replace them.
+- [ASSISTANT_SAID] Automation and AI are most effective when used in conjunction with human expertise and judgment.
+- [ASSISTANT_SAID] Automation can handle repetitive and time-consuming tasks but cannot replace the creativity and problem-solving skills of human engineers.
+- [ASSISTANT_SAID] Human engineers are needed to interpret results from AI-based tools and determine appropriate actions.
+- [ASSISTANT_SAID] The complexity of software systems will increase the need for human engineers.
+- [USER] User asked for specialized companies that help with customization.
+- [ASSISTANT_SAID] Infostretch provides automation testing and mobile testing services.
+- [ASSISTANT_SAID] Cognizant offers services for test automation, test data management, and performance testing.
+- [ASSISTANT_SAID] TestPlant provides automated testing solutions for web, mobile, and desktop applications.
+- [ASSISTANT_SAID] Experitest offers a mobile app testing platform for testing mobile apps on real devices.
+- [ASSISTANT_SAID] Wipro provides automation testing services for various industries.
+- [ASSISTANT_SAID] Tricentis offers a software testing platform for testing web, mobile, and enterprise applications.
+- [ASSISTANT_SAID] The best company for customization services depends on specific needs and requirements.
+- [USER] User inquired if Qualitest provides customization services.
+- [ASSISTANT_SAID] Qualitest is a global provider of software testing and quality assurance services and does provide customization services for testing automation tools.
+- [ASSISTANT_SAID] Qualitest customizes testing automation tools to meet specific client needs, including configuration with specific programming languages or frameworks.
+- [ASSISTANT_SAID] Qualitest's Testing Automation services include building and maintaining test automation frameworks, automating test cases, and integrating with CI/CD processes.
+- [ASSISTANT_SAID] Qualitest also offers test automation consulting services to help organizations design and implement test automation strategies.
+- [USER] User asked about the future of the quality engineering market in terms of automation.
+- [ASSISTANT_SAID] It is difficult to predict the exact percentage of the quality engineering market that will be fully automated in 10 years.
+- [ASSISTANT_SAID] The adoption rate of automation and AI will vary by industry, software complexity, and availability of skilled personnel.
+- [ASSISTANT_SAID] Automation and AI will likely play a

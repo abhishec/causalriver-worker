@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[FACT] User is trying to get ideas for healthy snack options.  
+[FACT] User has been relying on granola bars and trail mix.  
+[FACT] User packs lunch to work, which typically consists of a sandwich, carrot sticks, and a piece of fruit.  
+[PREFERENCE] User wants to explore other healthy snack choices.  
+[ASSISTANT_SAID] Suggested healthy snack options include:  
+[ASSISTANT_SAID] 1. Veggie Sticks with Hummus: Pair cucumber, bell pepper, or cherry tomato sticks with hummus dip.  
+[ASSISTANT_SAID] 2. Fresh Fruit Skewers: Alternate fresh fruits like grapes, berries, and pineapple chunks on skewers.  
+[ASSISTANT_SAID] 3. Nuts and Seeds: Almonds, cashews, pumpkin seeds, or sunflower seeds (unsalted or low-sodium).  
+[ASSISTANT_SAID] 4. Protein-rich Snack Balls: Made with rolled oats, nuts, seeds, and dried fruits.  
+[ASSISTANT_SAID] 5. Cut Veggies with Guacamole: Sliced cucumbers, bell peppers, or carrots with guacamole dip.  
+[ASSISTANT_SAID] 6. Edamame: Boiled soybeans seasoned with sea salt and chili powder.  
+[ASSISTANT_SAID] 7. Air-popped Popcorn: Low in calories and high in fiber, seasoned with herbs and spices.  
+[ASSISTANT_SAID] 8. Hard-boiled Eggs: Protein-packed snack.  
+[ASSISTANT_SAID] 9. Cottage Cheese: High in protein and low in calories.  
+[ASSISTANT_SAID] 10. Dried Fruit and Nut Mix: Create a mix with dried fruits like apricots, cranberries, and raisins, along with nuts.  
+[ASSISTANT_SAID] Other ideas include infused water or herbal tea, whole-grain crackers with avocado or peanut butter, smoked salmon or turkey jerky, and roasted chickpeas.  
+[PREFERENCE] User likes the idea of veggie sticks with hummus and fresh fruit skewers.  
+[PREFERENCE] User finds these snacks easy to prepare and fitting well with their lunch routine.  
+[ASSISTANT_SAID] Suggested healthy sandwich filling options include:  
+[ASSISTANT_SAID] 1. Avocado and Sprouts: Mashed avocado on whole-grain bread with sprouts.  
+[ASSISTANT_SAID] 2. Grilled Chicken and Avocado: Grilled chicken breast with mashed avocado, lettuce, and tomato.  
+[ASSISTANT_SAID] 3. Tuna Salad: Canned tuna with low-fat mayo, diced onions, and chopped hard-boiled eggs.  
+[ASSISTANT_SAID]

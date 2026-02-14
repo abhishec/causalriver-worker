@@ -1,0 +1,27 @@
+**Observation Log:**
+
+[FACT] The user is trying to establish a consistent sleep schedule.  
+[FACT] The user slept in until 10:30 am on both Saturday and Sunday of the previous weekend.  
+[EVENT] The user is looking for help with planning their daily routine.  
+[ASSISTANT_SAID] The assistant provided tips to help the user stick to their morning routine during the weekdays, including:  
+[ASSISTANT_SAID] 1. Set a consistent wake-up time, including weekends.  
+[ASSISTANT_SAID] 2. Gradually adjust wake-up time by setting the alarm 15-30 minutes earlier each day.  
+[ASSISTANT_SAID] 3. Create a wake-up routine that signals it's time to start the day.  
+[ASSISTANT_SAID] 4. Get morning sunlight to help regulate circadian rhythms.  
+[ASSISTANT_SAID] 5. Avoid screens before bedtime to improve sleep quality.  
+[ASSISTANT_SAID] 6. Prepare everything the night before to reduce morning stress.  
+[ASSISTANT_SAID] 7. Make a plan for the morning with enjoyable activities.  
+[ASSISTANT_SAID] 8. Use an accountability partner or app to stay on track.  
+[ASSISTANT_SAID] 9. Reward yourself for successful mornings.  
+[ASSISTANT_SAID] 10. Be kind to yourself and allow for off days.  
+[USER] The user expressed interest in creating a wake-up routine and mentioned having coffee around 8:00 am while checking emails.  
+[USER] The user asked if adding exercise, like a quick 10-minute yoga or a short walk, to their morning routine is a good idea.  
+[ASSISTANT_SAID] The assistant affirmed that adding exercise can boost energy, improve focus, reduce stress, and increase motivation.  
+[ASSISTANT_SAID] The assistant suggested starting with a 10-minute yoga practice or a short walk and provided tips for incorporating exercise into the morning routine.  
+[USER] The user plans to start with a 10-minute yoga routine three times a week and do it at 8:00 am before coffee and emails.  
+[USER] The user expressed concern about waking up earlier and mentioned trying to go to bed earlier to compensate for lost sleep.  
+[USER] The user asked if they should follow a yoga video or app or do simple stretches on their own.  
+[ASSISTANT_SAID] The assistant recommended starting with gentle styles like Hatha or Yin yoga for beginners.  
+[ASSISTANT_SAID] The assistant suggested using yoga videos or apps for guidance and motivation.  
+[ASSISTANT_SAID] The assistant provided a list of beginner-friendly resources:  
+[ASSISTANT_SAID] -

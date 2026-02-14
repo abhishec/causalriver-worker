@@ -1,0 +1,24 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/21 (Sun) 19:10  
+[USER] User inquired about research papers on "Exercise monitoring system using Computer vision."  
+[ASSISTANT_SAID] Assistant provided a list of five research papers on exercise monitoring systems using computer vision.  
+[ASSISTANT_SAID] Paper 1: "Real-time Exercise Monitoring System using Computer Vision" by K. Muruganandam et al.  
+[ASSISTANT_SAID] Paper 2: "A Computer Vision Based Exercise Monitoring System" by Y. Guan et al.  
+[ASSISTANT_SAID] Paper 3: "Vision-based Exercise Monitoring and Evaluation System for Physical Rehabilitation" by M. S. Sankar et al.  
+[ASSISTANT_SAID] Paper 4: "Exercise Monitoring System using Computer Vision and Machine Learning" by S. C. Lee et al.  
+[ASSISTANT_SAID] Paper 5: "Real-time Exercise Monitoring System using Depth Sensor" by J. J. Lee et al.  
+[USER] User asked for research papers on "Exercise monitoring system using Computer vision" specifically for older people.  
+[ASSISTANT_SAID] Assistant provided a list of five research papers on exercise monitoring systems using computer vision for older adults.  
+[ASSISTANT_SAID] Paper 1: "An Exercise Monitoring System for Older Adults Based on Computer Vision and Wearable Sensors" by Y. Li et al.  
+[ASSISTANT_SAID] Paper 2: "A Computer Vision-Based Exercise Monitoring System for Older Adults with Dementia" by H. S. Kim et al.  
+[ASSISTANT_SAID] Paper 3: "A Vision-Based Exercise Monitoring System for Fall Prevention in Older Adults" by Y. Zheng et al.  
+[ASSISTANT_SAID] Paper 4: "A Computer Vision-Based System for Monitoring Exercises in Older Adults" by M. A. Daza et al.  
+[ASSISTANT_SAID] Paper 5: "A Computer Vision-Based System for Monitoring the Effectiveness of Exercise Programs in Older Adults" by Y. Zhou et al.  
+[USER] User requested a problem introduction for the topic of exercise monitoring systems using computer vision for older adults.  
+[ASSISTANT_CREATED] Assistant created a problem introduction discussing the importance of exercise for older adults, barriers to exercise, and the potential of computer vision technology.  
+[USER] User asked for related work on the topic.  
+[ASSISTANT_CREATED] Assistant provided a summary of related work, mentioning various studies and their findings regarding computer vision-based exercise monitoring systems for older adults.  
+[USER] User requested research gaps in the existing research papers.  
+[ASSISTANT_CREATED] Assistant listed five research gaps:  
+[ASSISTANT_CREATED

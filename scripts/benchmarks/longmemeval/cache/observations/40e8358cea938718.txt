@@ -1,0 +1,24 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/02/14 (Tue) 21:10  
+[FACT] User is trying to get back on track with healthy eating.  
+[EVENT] User had a slip-up last Thursday when they grabbed a quick lunch from the pizza place down the street.  
+[PREFERENCE] User is looking for healthy lunch ideas that are quick and easy to make.  
+[ASSISTANT_SAID] Assistant provided a list of healthy lunch ideas including salads, sandwiches, soups, Mason Jar Meals, and other ideas.  
+[ASSISTANT_CREATED] Assistant created a list of healthy lunch ideas:  
+- Classic Greek Salad: mixed greens, cherry tomatoes, cucumber, feta cheese, and a light vinaigrette (5 min)  
+- Spinach and Avocado Salad: baby spinach, sliced avocado, cherry tomatoes, and a lemon-tahini dressing (5 min)  
+- Quinoa Salad Bowl: cooked quinoa, roasted veggies (e.g., bell peppers, broccoli), mixed greens, and a citrus vinaigrette (10 min)  
+- Turkey and Avocado Wrap: whole wheat wrap, sliced turkey breast, avocado, lettuce, and tomato (5 min)  
+- Grilled Chicken and Veggie Sandwich: whole wheat bread, grilled chicken breast, roasted veggies (e.g., zucchini, bell peppers), and hummus (10 min)  
+- Tuna Salad Sandwich: canned tuna, mixed greens, cherry tomatoes, and whole wheat bread (5 min)  
+- Lentil Soup: canned lentils, diced veggies (e.g., carrots, celery), and a can of diced tomatoes (15 min)  
+- Black Bean Soup: canned black beans, diced veggies (e.g., onions, bell peppers), and a can of diced tomatoes (15 min)  
+- Tom Yum Soup: canned coconut milk, chicken or veg broth, and your choice of protein (e.g., chicken, shrimp) (15 min)  
+- Chicken and Rice Bowl: cooked chicken, brown rice, mixed veggies (e.g., peas, carrots), and a drizzle of soy sauce (5 min)  
+- Quesadilla Bowl: whole wheat tortilla, shredded cheese, beans (e.g., black beans, chickpeas), and mixed veggies (5 min)  
+- Egg and Veggie Bowl: scrambled eggs, mixed veggies (e.g., bell peppers, onions), and whole wheat toast (5 min)  
+- Hard-Boiled Eggs and Veggies: boil eggs and prep veggies (e.g., carrots, celery) for a quick snack or lunch (5 min)  
+- Smoothie Bowl: blend your favorite fruits, yogurt, and milk, then top with granola and fresh fruit (5 min)  
+- Leftovers: use last night's dinner as a packable lunch by reheating it in the morning and packing it in a thermos or microwave-safe container.  
+[PREFERENCE] User is particularly interested

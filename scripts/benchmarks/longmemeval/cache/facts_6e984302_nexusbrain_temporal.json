@@ -1,0 +1,89 @@
+{
+  "answer_88841f27_1": [
+    {
+      "fact": "User is thinking of entering a local art competition with a sculpture category.",
+      "type": "event",
+      "entities": [
+        "local art competition",
+        "sculpture category"
+      ]
+    },
+    {
+      "fact": "User just started taking sculpting classes at a local art studio.",
+      "type": "event",
+      "entities": [
+        "sculpting classes",
+        "local art studio"
+      ]
+    },
+    {
+      "fact": "User attends sculpting classes every Saturday morning from 10 am to 1 pm.",
+      "type": "event",
+      "entities": [
+        "Saturday",
+        "10 am to 1 pm"
+      ]
+    },
+    {
+      "fact": "User has had a great experience in their sculpting classes so far.",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User is considering creating a sculpture that incorporates found objects and recycled materials.",
+      "type": "preference",
+      "entities": [
+        "found objects",
+        "recycled materials"
+      ]
+    },
+    {
+      "fact": "User wants to give their sculpture an eco-friendly theme.",
+      "type": "preference",
+      "entities": [
+        "eco-friendly theme"
+      ]
+    }
+  ],
+  "answer_88841f27_2": [
+    {
+      "fact": "User is thinking of entering a local art competition with a sculpture category.",
+      "type": "event",
+      "entities": [
+        "art competition",
+        "sculpture category"
+      ]
+    },
+    {
+      "fact": "User is looking for inspiration on eco-friendly materials and techniques for sculpture.",
+      "type": "preference",
+      "entities": [
+        "eco-friendly materials",
+        "techniques"
+      ]
+    },
+    {
+      "fact": "User has been experimenting with polymer clay and resin.",
+      "type": "preference",
+      "entities": [
+        "polymer clay",
+        "resin"
+      ]
+    },
+    {
+      "fact": "User has their own set of sculpting tools, including a modeling tool set, a wire cutter, and a sculpting mat.",
+      "type": "personal",
+      "entities": [
+        "sculpting tools",
+        "modeling tool set",
+        "wire cutter",
+        "sculpting mat"
+      ]
+    },
+    {
+      "fact": "User is excited to experiment with new tools and techniques.",
+      "type": "opinion",
+      "entities": []
+    }
+  ]
+}

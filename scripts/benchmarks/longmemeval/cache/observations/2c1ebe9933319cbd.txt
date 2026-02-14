@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/27 (Sat) 09:34  
+[FACT] The United States Congress is composed of the House of Representatives and the Senate.  
+[FACT] Congress is seated on a two-year basis.  
+[FACT] Senators sit for six-year terms, with elections staggered such that composition changes on a two-year cycle.  
+[FACT] The 115th Congress occurred in the years 2017-2018.  
+[FACT] Researchers at UM's School of Information collected Twitter posts from sitting members of Congress (MoCs) during the 115th Congress.  
+[FACT] The dataset includes 209,856 tweets with 21 columns.  
+[ASSISTANT_SAID] The columns in the dataset are: ['user_id_str', 'user_screen_name', 'user_followers_count', 'created_at', 'retweet_count', 'retweeted_status', 'year', 'bioguide', 'birthday', 'gender', 'name', 'state', 'chamber', 'party', 'region', 'rt_user_id', 'rt_screen_name', 'rt_followers_count', 'rt_bio', 'age', 'age_bucket'].  
+[ASSISTANT_SAID] The marginal probability of the party of the tweet was computed using the value_counts() method on the "party" column.  
+[ASSISTANT_SAID] The output for the marginal probability of party is: R: 0.578050, D: 0.421373, I: 0.000577.  
+[ASSISTANT_SAID] The Republican party is responsible for the majority of retweets, with a probability of approximately 0.578.  
+[ASSISTANT_SAID] To create the "is_congress_retweet" column, the unique "user_id_str" values were obtained and used to create a boolean column indicating if the retweet is from a MoC.  
+[ASSISTANT_SAID] The marginal probability of retweeting a MoC was computed and found to be approximately 0.070.  
+[ASSISTANT_SAID] It is more common to retweet from outside of Congress, with a probability of approximately 0.930.  
+[USER] Part (c) Do the parties retweet each other at the same rates?  
+[ASSISTANT_SAID] The counts of retweets by each party were calculated using the .crosstab() method.  
+[ASSISTANT_SAID] The output for retweet counts by party is:  
+- Democrat: 56805 (False), 4164 (True)  
+- Independent: 788 (False), 4 (True)  
+- Republican: 121617 (False), 9018 (True)  
+[ASSISTANT_SAID] The joint probability of party and

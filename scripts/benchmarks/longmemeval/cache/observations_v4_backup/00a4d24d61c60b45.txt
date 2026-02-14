@@ -1,0 +1,13 @@
+**Observation Log:**
+
+- [EVENT] User is thinking of selling their old drum set, a 5-piece Pearl Export.
+- [FACT] User has not played their Pearl Export drum set in years.
+- [ASSISTANT] Assistant provided steps to determine the value of the drum set and suggested online marketplaces for selling it.
+- [FACT] User has a piano, a Korg B1, which they have had for about 3 years.
+- [CHANGE] User is concerned about the maintenance of their Korg B1 piano, as some keys have started to stick.
+- [ASSISTANT] Assistant recommended ways to find a good piano technician and provided general maintenance tips for the Korg B1.
+- [EVENT] User is thinking of buying a new ukulele and is eyeing a Cordoba ukulele.
+- [ASSISTANT] Assistant provided information on ukulele brands and models that are good for beginners, including specific recommendations for Cordoba.
+- [ASSISTANT] Assistant gave tips on how to take good photos of the Pearl Export drum set for an online listing.
+- [ASSISTANT] Assistant suggested including specific details in the online listing description for the drum set, such as condition, features, and any wear or damage.
+- [TEMPORAL] Session date is 2023/05/21 (Sun) 17:16.

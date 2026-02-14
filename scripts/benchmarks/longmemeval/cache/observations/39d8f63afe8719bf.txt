@@ -1,0 +1,35 @@
+**Observation Log**
+
+**Session Date:** 2023/05/29 (Mon) 20:11  
+**Session ID:** 90fea364_1
+
+1. [FACT] The user recently returned from a 5-day trip to New York City with their family.
+2. [FACT] The user stayed at the Marriott Marquis hotel in New York City.
+3. [EVENT] The user is looking for restaurant recommendations near Times Square.
+4. [ASSISTANT_SAID] Recommended restaurants near Times Square include:
+   - **Carmine's** (0.2 miles from Marriott Marquis): A family-style Italian restaurant with generous portions and a lively atmosphere.
+   - **Virgil's Real Barbecue** (0.3 miles): A popular BBQ joint with a wide variety of meats and sides.
+   - **Ellen's Stardust Diner** (0.4 miles): A retro-themed diner with a singing waitstaff and classic American comfort food.
+   - **Sushi-Teria** (0.2 miles): A quick and affordable sushi spot with a wide selection of rolls and combos.
+   - **Bubba Gump Shrimp Co.** (0.3 miles): A seafood chain with a fun, casual atmosphere and a variety of seafood dishes.
+   - **Havana 1957** (0.4 miles): A Cuban restaurant with flavorful dishes and a lively vibe.
+   - **The Lambs Club** (0.4 miles): An upscale American bistro with a sophisticated atmosphere and creative dishes.
+   - **db Bistro Moderne** (0.5 miles): A modern French bistro from celebrity chef Daniel Boulud, offering seasonal dishes and a great wine list.
+   - **The Russian Tea Room** (0.6 miles): A NYC institution with a rich history, serving Russian-inspired cuisine and an impressive selection of teas.
+   - **Junior's Diner** (0.3 miles): A classic diner with a vast breakfast menu and famous cheesecakes.
+   - **The Smith** (0.4 miles): A popular brunch spot with a seasonal menu and a lively atmosphere.
+   - **Balthazar** (0.6 miles): A SoHo institution with a French-inspired breakfast and brunch menu.
+5. [EVENT] The user's sister got food poisoning from a bad hot dog from a street vendor during the trip.
+6. [ASSISTANT_SAID] Provided tips on how to avoid foodborne illnesses while traveling, including:
+   - Researching street food vendors beforehand.
+   - Choosing busy stalls.
+   - Avoiding raw or undercooked meat.
+   - Observing food handling practices.
+   - Washing hands frequently.
+   - Choosing reputable restaurants.
+   - Avoiding raw or unpasteurized products.
+   - Cooking food thoroughly.
+   - Avoiding cross-contamination.
+   - Staying hydrated.
+   - Packing snacks.
+   - Researching local health concerns.

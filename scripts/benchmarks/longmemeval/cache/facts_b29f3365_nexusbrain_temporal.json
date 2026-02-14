@@ -1,0 +1,77 @@
+{
+  "answer_436d4309_1": [
+    {
+      "fact": "User is trying to learn more about music theory, specifically chord progressions.",
+      "type": "preference",
+      "entities": [
+        "music theory",
+        "chord progressions"
+      ]
+    },
+    {
+      "fact": "User has been taking weekly guitar lessons with a new instructor, Alex, for six weeks.",
+      "type": "relationship",
+      "entities": [
+        "guitar lessons",
+        "Alex"
+      ]
+    },
+    {
+      "fact": "User practices guitar for at least 30 minutes every day.",
+      "type": "event",
+      "entities": [
+        "30 minutes",
+        "daily practice"
+      ]
+    },
+    {
+      "fact": "User has noticed significant improvement in fingerpicking and chord changes.",
+      "type": "opinion",
+      "entities": [
+        "fingerpicking",
+        "chord changes"
+      ]
+    },
+    {
+      "fact": "User has started learning basic music theory.",
+      "type": "event",
+      "entities": [
+        "basic music theory"
+      ]
+    },
+    {
+      "fact": "User believes learning music theory has helped them understand notes and rhythm better.",
+      "type": "opinion",
+      "entities": [
+        "music theory",
+        "notes",
+        "rhythm"
+      ]
+    }
+  ],
+  "answer_436d4309_2": [
+    {
+      "fact": "User got a new amp two weeks ago",
+      "type": "event",
+      "entities": [
+        "new amp",
+        "two weeks ago"
+      ]
+    },
+    {
+      "fact": "User is experimenting with different tones",
+      "type": "preference",
+      "entities": [
+        "different tones"
+      ]
+    },
+    {
+      "fact": "User has noticed a huge difference in sound quality compared to their old borrowed amp",
+      "type": "opinion",
+      "entities": [
+        "sound quality",
+        "old borrowed amp"
+      ]
+    }
+  ]
+}

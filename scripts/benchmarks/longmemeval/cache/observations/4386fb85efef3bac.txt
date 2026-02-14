@@ -1,0 +1,19 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/30 (Tue) 17:41
+- [ASSISTANT_SAID] Suggested creating a separate `Patient` table with attributes: Patient_ID (PK), Full_Name, Address, City.
+- [ASSISTANT_SAID] Recommended removing `Patient_Full_Name`, `Patient_Address`, and `Patient_City` columns from the `Case` table and replacing them with a foreign key to the `Patient` table.
+- [ASSISTANT_CREATED] Provided an updated ERD (Entity-Relationship Diagram) including the `Patient` table.
+- [ASSISTANT_SAID] Explained that PK stands for Primary Key and FK stands for Foreign Key.
+- [USER] Inquired about the timely anomaly of the test cost, specifically mentioning that the throat swab cost changed from 24 to 26.
+- [ASSISTANT_SAID] Acknowledged not taking into account the change in test cost over time due to lack of information.
+- [ASSISTANT_SAID] Suggested creating a new table to store historical changes in test cost over time, named `Test_Type_Cost_Hist`.
+- [ASSISTANT_CREATED] Provided a structure for the `Test_Type_Cost_Hist` table with attributes: Test_Type_ID (PK, FK), Effective_Date (PK), Test_Cost.
+- [ASSISTANT_SAID] Explained that the `Test_Type_Cost_Hist` table would have a composite primary key consisting of `Test_Type_ID` and `Effective_Date`.
+- [ASSISTANT_SAID] Recommended adding a foreign key column `Test_Type_Cost_Hist_ID` to the `Test` table to indicate the specific cost for a test performed on a certain date.
+- [ASSISTANT_CREATED] Provided an updated ERD including the `Test_Type_Cost_Hist` table.
+- [ASSISTANT_SAID] Listed cardinality relationships between the tables:
+  1. Patient to Testing: One patient can have multiple testing records, but each testing record belongs to only one patient. (1 to many)
+  2. Testing to Test Type: Each testing record corresponds to only one test type, but each test type may have multiple testing records. (many to 1)
+  3. Testing to Centre: Each testing record corresponds to only one testing centre, but each testing centre may have multiple testing records. (many to 1)
+  4. Centre to Case: Each testing centre may have multiple cases, but each case belongs to only one testing centre. (1 to many)

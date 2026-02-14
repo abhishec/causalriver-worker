@@ -1,0 +1,17 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/28 (Sun) 09:46
+- [FACT] User is a graphic designer.
+- [PREFERENCE] User is eager to see how the graphical AI can enhance their workflow and help create more visually appealing designs.
+- [FACT] User has been working in the field of graphic design for several years.
+- [FACT] User has used Adobe software extensively throughout their career.
+- [FACT] User has experience with programs such as Photoshop, Illustrator, and InDesign.
+- [PREFERENCE] User is comfortable with the interface and features of Adobe software.
+- [PREFERENCE] User believes their experience in graphic design and familiarity with Adobe software make them an ideal candidate for testing the graphical AI.
+- [PREFERENCE] User is excited to see how the AI can help streamline their workflow and improve the quality of their designs.
+- [PREFERENCE] User is detail-oriented and has strong problem-solving skills.
+- [ASSISTANT_SAID] Assistant provided a formal application letter addressed to the Adobe Testing Team.
+- [ASSISTANT_CREATED] Assistant created an application letter that expresses the user's interest in testing the graphical AI developed by Adobe.
+- [ASSISTANT_CREATED] The application letter includes the user's experience in graphic design, familiarity with Adobe software, and skills beneficial for providing feedback on the AI's functionality and usability.
+- [ASSISTANT_SAID] Assistant thanked the Adobe Testing Team for considering the user's application to be a tester for the graphical AI.
+- [ASSISTANT_CREATED] The application letter concludes with a sign-off: "Sincerely, [Your Name]."

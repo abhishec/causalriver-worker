@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/30 (Tue) 09:10  
+[ASSISTANT_SAID] The code defines a Java class named "StudentGradeCalculator" with a static method named "prompt()".  
+[ASSISTANT_SAID] The method displays a message on the console asking the user to input their marks for English.  
+[ASSISTANT_SAID] The method creates a new instance of the Scanner class to read the user's input from the standard input stream.  
+[ASSISTANT_SAID] The method reads an integer value entered by the user using the "nextInt()" method of the Scanner class.  
+[ASSISTANT_SAID] The method does not do anything with the marks entered by the user and does not return any value.  
+[ASSISTANT_SAID] The method simply declares a local variable named "marks" that is limited to the scope of the method.  
+[ASSISTANT_SAID] "static" keyword is used to create class-level variables or methods that belong to the class itself.  
+[ASSISTANT_SAID] The "void" keyword indicates that the method does not return any value after its execution.  
+[ASSISTANT_SAID] "static void" indicates that the "prompt()" method is a static method that does not return any value.  
+[ASSISTANT_SAID] An example of creating an instance of a class in Java is provided with a class named "Person".  
+[ASSISTANT_SAID] To create an instance of the "Person" class, the "new" keyword is used followed by the class name and its constructor.  
+[ASSISTANT_SAID] Example code for creating an instance of "Person": `Person person1 = new Person("John Doe", 30);`  
+[ASSISTANT_SAID] The statement creates a new instance of the "Person" class and assigns it to a variable named "person1".  
+[ASSISTANT_SAID] The constructor is called with the arguments "John Doe" and 30, which initialize the "name" and "age" instance variables.  
+[ASSISTANT_SAID] The user can call instance methods and variables of the object to perform various operations.  
+[ASSISTANT_SAID] To create an instance of the "StudentGradeCalculator" class, the "prompt()" method can be called directly on the class using `StudentGradeCalculator.prompt();`.  
+[ASSISTANT_SAID] The "prompt()" method can be called directly on the class because it is declared as static.  
+[USER] The user asks why there is a type error for 'students' in the provided code.  
+[ASSISTANT_SAID] The 'students' variable should be initialized to an empty linked list: `

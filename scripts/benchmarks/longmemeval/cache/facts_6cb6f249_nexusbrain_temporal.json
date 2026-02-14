@@ -1,0 +1,91 @@
+{
+  "answer_a4204937_1": [
+    {
+      "fact": "User is trying to track their screen time and social media usage.",
+      "type": "preference",
+      "entities": [
+        "screen time",
+        "social media usage"
+      ]
+    },
+    {
+      "fact": "User has been making an effort to cut down on social media.",
+      "type": "preference",
+      "entities": [
+        "social media"
+      ]
+    },
+    {
+      "fact": "User took a week-long break from social media in mid-January.",
+      "type": "event",
+      "entities": [
+        "social media",
+        "mid-January"
+      ]
+    },
+    {
+      "fact": "User found the week-long break from social media refreshing.",
+      "type": "opinion",
+      "entities": [
+        "social media",
+        "refreshing"
+      ]
+    },
+    {
+      "fact": "User is interested in trying out the Moment and Freedom apps.",
+      "type": "preference",
+      "entities": [
+        "Moment",
+        "Freedom"
+      ]
+    }
+  ],
+  "answer_a4204937_2": [
+    {
+      "fact": "User is trying to get back into journaling and reading more.",
+      "type": "preference",
+      "entities": [
+        "journaling",
+        "reading"
+      ]
+    },
+    {
+      "fact": "User is interested in books on mindfulness and self-improvement.",
+      "type": "preference",
+      "entities": [
+        "mindfulness",
+        "self-improvement"
+      ]
+    },
+    {
+      "fact": "User has made an effort to cut down on social media.",
+      "type": "preference",
+      "entities": [
+        "social media"
+      ]
+    },
+    {
+      "fact": "User took a 10-day break from social media in mid-February.",
+      "type": "event",
+      "entities": [
+        "10-day break",
+        "mid-February"
+      ]
+    },
+    {
+      "fact": "User has read 'The 7 Habits of Highly Effective People'.",
+      "type": "personal",
+      "entities": [
+        "The 7 Habits of Highly Effective People"
+      ]
+    },
+    {
+      "fact": "User found 'The 7 Habits of Highly Effective People' eye-opening regarding time wasted on social media.",
+      "type": "opinion",
+      "entities": [
+        "The 7 Habits of Highly Effective People",
+        "social media"
+      ]
+    }
+  ]
+}

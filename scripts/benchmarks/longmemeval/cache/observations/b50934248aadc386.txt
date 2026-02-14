@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/07/06 (Thu) 01:39
+- [USER] User expressed interest in Cray's collaborations outside of the United States.
+- [ASSISTANT_SAID] Cray has collaborated with several companies and research institutions outside of the United States, including:
+  - [ASSISTANT_SAID] Partnership with Swiss National Supercomputing Centre in 2014 to deliver a new XC supercomputer.
+  - [ASSISTANT_SAID] Collaboration with the UK’s Met Office to develop new models of weather prediction.
+  - [ASSISTANT_SAID] Collaboration with Japan’s National Institute of Advanced Industrial Science and Technology (AIST) in 2019 to deliver a new supercomputer.
+  - [ASSISTANT_SAID] Collaboration with the University of Stuttgart in Germany to deliver a new supercomputer in 2017.
+- [ASSISTANT_SAID] The XC supercomputer for Swiss National Supercomputing Centre is named "Piz Daint" and has a peak performance of approximately 25 petaflops.
+- [ASSISTANT_SAID] The supercomputer for the UK's Met Office is named "Cray XC40" and has a peak performance of approximately 16 petaflops.
+- [ASSISTANT_SAID] The supercomputer for Japan's AIST is named "Cray XC50" and has a peak performance of approximately 19 petaflops.
+- [ASSISTANT_SAID] The supercomputer for the University of Stuttgart is named "Hazel Hen" and has a peak performance of approximately 7.4 petaflops.
+- [USER] User expressed surprise at the extent of Cray's collaborations and requested more information about the supercomputers delivered in partnership with these institutions.
+- [ASSISTANT_SAID] Piz Daint has been used for various scientific research projects, including:
+  - [ASSISTANT_SAID] Climate modeling to simulate the Earth's climate and human impact.
+  - [ASSISTANT_SAID] Materials science to simulate behavior of materials at atomic and molecular levels.
+  - [ASSISTANT_SAID] Astrophysics to simulate the universe and understand dark matter and galaxy formation.
+  - [ASSISTANT_SAID] Life sciences to study the human brain, proteins, and enzymes for drug development.
+- [USER] User expressed amazement at the power of the supercomputers and inquired about the types of projects the Swiss National Supercomputing Centre has used "Piz Daint" for.

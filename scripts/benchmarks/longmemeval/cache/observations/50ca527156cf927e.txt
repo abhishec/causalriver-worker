@@ -1,0 +1,18 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/29 (Mon) 21:50
+- [ASSISTANT_SAID] Source control is a tool that allows developers to manage changes to their code over time, enabling them to track the history of modifications, collaborate with team members, and maintain a record of all changes.
+- [ASSISTANT_SAID] By using source control, developers can manage code in a more structured and efficient manner, ensuring that everyone on the team is working on the same codebase and has access to the latest version.
+- [ASSISTANT_SAID] Source control helps developers save their work, coordinate code changes, and manage different versions of their codebase.
+- [ASSISTANT_SAID] Source control allows developers to track the progress of their project over time, compare and merge code changes, and revert to previous versions if needed.
+- [ASSISTANT_SAID] Source control can help prevent conflicts and errors caused by multiple developers working on the same codebase simultaneously.
+- [ASSISTANT_SAID] For software teams, the source code is a critical asset that contains valuable knowledge about the problem domain that developers have collected and refined through careful effort.
+- [ASSISTANT_SAID] Source control protects this asset by providing a centralized repository that keeps the code safe from disasters and human errors.
+- [ASSISTANT_SAID] Centralized source control systems are based on the idea that there's a single "central" copy of your project somewhere, and programmers will check in (or commit) their changes to this central copy.
+- [ASSISTANT_SAID] "Committing" a change means to record the difference in the central system, allowing other programmers to see this change.
+- [ASSISTANT_SAID] It is possible to pull down the change, and the version control tool will automatically update the contents of any files that were changed.
+- [ASSISTANT_SAID] Most modern version control systems deal with "changesets," which are a group of changes that should be treated as a cohesive whole.
+- [ASSISTANT_SAID] Programmers no longer must keep many copies of files on their hard drives manually; the version control tool can talk to the central copy and retrieve any version they need on the fly.
+- [ASSISTANT_SAID] Some common centralized version control systems include Team Foundation Version Control (TFVC), CVS, Subversion (SVN), and Perforce.
+- [ASSISTANT_SAID] The workflow for adding a new feature or fixing a bug in a project using centralized source control usually involves getting the latest changes from the central server, making changes, and checking in changes to the main server.
+- [ASSISTANT_SAID] Centralized source control has advantages such as ease of use and a clear record of changes made by each developer

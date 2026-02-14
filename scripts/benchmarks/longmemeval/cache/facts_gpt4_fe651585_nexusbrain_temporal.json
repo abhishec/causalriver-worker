@@ -1,0 +1,90 @@
+{
+  "answer_65600ff6_1": [
+    {
+      "fact": "User is planning a birthday party for their niece, Olivia, who is turning 6 soon.",
+      "type": "event",
+      "entities": [
+        "Olivia",
+        "birthday party"
+      ]
+    },
+    {
+      "fact": "User has a sister-in-law with twins named Jackson and Julia.",
+      "type": "relationship",
+      "entities": [
+        "sister-in-law",
+        "Jackson",
+        "Julia"
+      ]
+    },
+    {
+      "fact": "User is helping their sister-in-law with the twins.",
+      "type": "opinion",
+      "entities": [
+        "sister-in-law",
+        "twins"
+      ]
+    },
+    {
+      "fact": "User is considering unique and non-traditional theme ideas for Olivia's party.",
+      "type": "preference",
+      "entities": [
+        "unique themes",
+        "Olivia's party"
+      ]
+    },
+    {
+      "fact": "User's brother and his wife are considering a theme for Jackson and Julia's first birthday party.",
+      "type": "event",
+      "entities": [
+        "brother",
+        "Jackson",
+        "Julia",
+        "first birthday party"
+      ]
+    },
+    {
+      "fact": "User thinks a more neutral theme would be good for Jackson and Julia's party.",
+      "type": "opinion",
+      "entities": [
+        "neutral theme",
+        "Jackson",
+        "Julia"
+      ]
+    }
+  ],
+  "answer_65600ff6_2": [
+    {
+      "fact": "User is considering adopting a baby boy from foster care",
+      "type": "preference",
+      "entities": [
+        "baby boy",
+        "foster care"
+      ]
+    },
+    {
+      "fact": "User's cousin Alex adopted a baby girl from China in January",
+      "type": "relationship",
+      "entities": [
+        "cousin Alex",
+        "baby girl",
+        "China",
+        "January"
+      ]
+    },
+    {
+      "fact": "User has seen firsthand how life-changing adoption can be",
+      "type": "opinion",
+      "entities": [
+        "adoption"
+      ]
+    },
+    {
+      "fact": "User is from California",
+      "type": "personal",
+      "entities": [
+        "California"
+      ]
+    }
+  ]
+}

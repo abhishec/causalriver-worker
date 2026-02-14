@@ -1,0 +1,30 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/06/14 (Wed) 09:03  
+[FACT] User has been thinking of switching up their morning tea routine.  
+[PREFERENCE] User is looking for a good green tea brand.  
+[EVENT] User tried a new coffee shop downtown last week.  
+[PREFERENCE] User found the cappuccino at the new coffee shop amazing.  
+[ASSISTANT_SAID] Recommended green tea brands: Sencha Naturals, Ippodo, Harney & Sons, Mighty Leaf Tea, Jade Leaf Tea.  
+[ASSISTANT_SAID] Sencha Naturals is known for high-quality, organic, and fair-trade green teas.  
+[ASSISTANT_SAID] Sencha green tea contains L-theanine, which promotes relaxation and reduces stress.  
+[ASSISTANT_SAID] Sencha's caffeine content provides a gentle energy boost for focus.  
+[ASSISTANT_SAID] Sencha Naturals' Sencha Green Tea has a light, refreshing flavor profile with subtle notes of grass.  
+[PREFERENCE] User is looking for a tea that is calming and helps with focus.  
+[PREFERENCE] User has heard that sencha is a good choice for calming and focus.  
+[ASSISTANT_SAID] Sencha Naturals is a good fit for calming and focusing tea.  
+[ASSISTANT_SAID] Tips for brewing sencha green tea:  
+[ASSISTANT_CREATED] 1. Water temperature: 160°F (71°C) to 170°F (77°C).  
+[ASSISTANT_CREATED] 2. Use one teaspoon of loose-leaf sencha tea or one sencha green tea bag for every 8 oz (237ml) of water.  
+[ASSISTANT_CREATED] 3. Steep for 1-2 minutes.  
+[ASSISTANT_CREATED] 4. Use a teapot or tea infuser; warm the teapot before adding tea leaves.  
+[ASSISTANT_CREATED] 5. Use fresh, filtered water.  
+[ASSISTANT_CREATED] 6. Avoid over-steeping to prevent bitterness.  
+[ASSISTANT_CREATED] 7. Experiment with steeping times and ratios.  
+[PREFERENCE] User plans to try Sencha Naturals.  
+[EVENT] User has been experimenting with different coffee-to-water ratios for their morning brew.  
+[PREFERENCE] User has been using a 1:15 coffee-to-water ratio but recently switched to 1:17.  
+[PREFERENCE] User thinks the 1:17 ratio has made a huge difference in flavor.  
+[ASSISTANT_SAID] The Specialty Coffee Association recommends a coffee-to-water ratio of 1:15 to 1:17.  
+[ASSISTANT_SAID] Suggested ratios for different brewing methods:  
+[ASSIST

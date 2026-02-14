@@ -1,0 +1,27 @@
+**Observation Log:**
+
+[SESSION_DATE] Session Date: 2021/12/03 (Fri) 06:34  
+[SESSION_ID] Session ID: 2ec60f51_4  
+
+[FACT] User is hosting a dinner party this weekend.  
+[FACT] User received a free cheesecake at the food court on the 10th.  
+[FACT] User used a $2 off coupon for their favorite coffee creamer on the 3rd and used it on the 5th when shopping for breakfast essentials.  
+[PREFERENCE] User is unsure if their guests will like the basil flavor in the Strawberry Basil Cheesecake.  
+[PREFERENCE] User typically takes their coffee with a bit of creamer and usually uses French Vanilla creamer.  
+[PREFERENCE] User prefers a casual gathering atmosphere for their dinner party.  
+[EVENT] User is planning to have a buffet-style dinner for their gathering.  
+[EVENT] User is considering having a photo booth or a game for entertainment at the dinner party.  
+[EVENT] User plans to serve plenty of coffee and cheesecake at the dinner party.  
+[CHANGE] User has been successful in finding and using coupons, which has helped them save money over time.  
+[TEMPORAL] User is hosting the dinner party this weekend (date unspecified).  
+[TEMPORAL] User received the free cheesecake on the 10th.  
+[TEMPORAL] User used the coupon on the 5th.  
+[ASSISTANT_SAID] Assistant provided several popular cheesecake options: Classic New York-Style, Strawberry Basil, Lemon Blueberry, Espresso, Raspberry White Chocolate, Pumpkin, and S'mores Cheesecake.  
+[ASSISTANT_SAID] Assistant provided a simple recipe for Classic New York-Style Cheesecake, including ingredients and instructions.  
+[ASSISTANT_SAID] Assistant suggested other fruity cheesecake options without basil or nuts: Raspberry Cheesecake, Blueberry Cheesecake, Peach Cheesecake, Pineapple Upside-Down Cheesecake, and Mixed Berry Cheesecake.  
+[ASSISTANT_SAID] Assistant provided a simple recipe for Raspberry Cheesecake, including ingredients and instructions.  
+[ASSISTANT_SAID] Assistant recommended coffee creamer flavors that would pair well with Raspberry Cheesecake: Vanilla, Caramel, Hazelnut, French Vanilla, and Amaretto.  
+[ASSISTANT_SAID] Assistant suggested avoiding strong flavors like mint or citrus that might overpower the cheesecake.  
+[ASSISTANT_SAID] Assistant encouraged user to consider the atmosphere and decor for the dinner party, suggesting a warm and cozy setup with candles, fairy lights, and soft background music.  
+[ASSISTANT_SAID] Assistant provided additional ideas for the dinner party, including a signature drink, a playlist, cozy throw blankets, and fun props or decorations.  
+[ASSISTANT_SAID] Assistant asked if user had thought

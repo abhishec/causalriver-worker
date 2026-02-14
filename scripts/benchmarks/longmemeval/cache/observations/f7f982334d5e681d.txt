@@ -1,0 +1,27 @@
+**Observation Log:**
+
+- [FACT] User is planning a trip to Grand Teton National Park.
+- [EVENT] User is wondering about hiking trails similar to those they did in Yellowstone.
+- [TEMPORAL] User's trip to Grand Teton National Park is planned for next month (June 2023).
+- [ASSISTANT_SAID] Grand Teton National Park is an amazing destination with distinct landscapes and trail systems compared to Yellowstone.
+- [ASSISTANT_SAID] Recommended hiking trails in Grand Teton National Park:
+  - **Taggart Lake Trail**: 3.5-mile out-and-back hike, similar to Yellowstone's Mystic Falls Trail.
+  - **Hidden Falls Trail**: 5-mile out-and-back hike, reminiscent of Yellowstone's Brink of Upper Falls Trail.
+  - **Death Canyon Trail**: 7.5-mile out-and-back hike, similar to Yellowstone's Bechler River Trail.
+  - **Granite Canyon Trail**: 6.5-mile out-and-back hike, similar to Yellowstone's Osprey Falls Trail.
+  - **Teton Crest Trail**: 40-mile multi-day backpacking trip, similar to Yellowstone's Beartooth Mountains Trek.
+- [ASSISTANT_SAID] Grand Teton National Park has more rugged and mountainous terrain than Yellowstone, requiring preparation for steeper trails and more elevation gain.
+- [ASSISTANT_SAID] Recommended times to hike to avoid crowds and heat:
+  - **Early Morning (before 8:00 am)**: Cooler temperatures, fewer people, better wildlife viewing, soft light for photography.
+  - **Late Afternoon/Early Evening (4:00 pm - 7:00 pm)**: Warmer temperatures, fewer day-trippers, soft light for photography, opportunity for sunset.
+  - **Avoid Peak Hours (10:00 am - 3:00 pm)**: Busiest time with most visitors and hottest temperatures.
+- [ASSISTANT_SAID] Tips for minimizing impact on trails and other visitors include hiking in small groups, staying on designated trails, and following park rules.
+- [ASSISTANT_SAID] Options for getting around Grand Teton National Park without a car include:
+  - **Grand Teton National Park Shuttle Service**: Free shuttle service connecting popular trailheads and visitor centers.
+  - **Jackson Hole Shuttle**: Paid shuttle service connecting the town of Jackson to the park.
+  - **Biking and Walking**: Many trails and roads are bike-friendly.
+- [ASSISTANT_SAID] Recommended guides and outfitters for kayaking or canoeing trips in the park:
+  - **Jackson Hole Kayak**: Offers half-day and full-day guided trips.
+  - **Grand Teton Kayak**: Provides guided trips including sunrise and sunset paddles.
+  - **Teton Science Schools**: Offers guided trips focusing on wildlife viewing.
+  - **

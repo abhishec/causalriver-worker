@@ -1,0 +1,49 @@
+**Observation Log:**
+
+[FACT] User is looking for new music to dance to.  
+[FACT] User has been stuck on the same playlist for a while.  
+[EVENT] User recently danced at their cousin's wedding reception about a month ago.  
+[RELATIONSHIP] User's cousin had a wedding reception where they danced.  
+[ASSISTANT_SAID] Assistant congratulated the user on showing off their salsa moves at the wedding reception.  
+[ASSISTANT_SAID] Assistant provided a list of upbeat song recommendations across various genres for dancing.  
+[ASSISTANT_CREATED] Assistant created a list of Pop & Dance songs:  
+1. "Can't Stop the Feeling!" by Justin Timberlake  
+2. "Happy" by Pharrell Williams  
+3. "Uptown Funk" by Mark Ronson ft. Bruno Mars  
+4. "Senorita" by Shawn Mendes and Camila Cabello  
+5. "Pumped Up Kicks" by Foster the People  
+
+[ASSISTANT_CREATED] Assistant created a list of Latin & Salsa songs:  
+1. "Mi Gente" by J Balvin & Willy William  
+2. "Havana" by Camila Cabello ft. Young Thug  
+3. "Despacito" by Luis Fonsi ft. Daddy Yankee  
+4. "Ay Vamos" by J Balvin  
+5. "La Gozadera" by Gente de Zona ft. Marc Anthony  
+
+[ASSISTANT_CREATED] Assistant created a list of Classic Dance Favorites:  
+1. "I Want to Dance with Somebody" by Whitney Houston  
+2. "YMCA" by the Village People  
+3. "September" by Earth, Wind & Fire  
+4. "Celebration" by Kool & The Gang  
+5. "Dancing Queen" by ABBA  
+
+[ASSISTANT_CREATED] Assistant created a list of Electronic & Hip-Hop songs:  
+1. "Old Town Road" by Lil Nas X ft. Billy Ray Cyrus  
+2. "Finesse" (Remix) by Bruno Mars and Cardi B  
+3. "Bodak Yellow" by Cardi B  
+4. "Cake by the Ocean" by DNCE  
+5. "Shut Up and Dance" by Walk the Moon  
+
+[PREFERENCE] User liked the music recommendations provided by the assistant.  
+[EVENT] User has been practicing their salsa footwork in front of the mirror at home.  
+[ASSISTANT_SAID] Assistant provided tips to improve salsa technique, including:  
+1. Start with the basics.  
+2. Practice with music.  
+3. Focus on weight transfer.  
+4. Keep feet close to the ground.  
+
+[ASSISTANT_SAID] Assistant provided additional tips for improving technique, including:  
+1. Break down complex patterns.  
+2. Practice in front of a mirror.  
+3. Work on posture.  
+4. Connect

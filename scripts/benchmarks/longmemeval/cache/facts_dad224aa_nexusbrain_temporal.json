@@ -1,0 +1,73 @@
+{
+  "answer_4a97ae40_1": [
+    {
+      "fact": "User is trying to establish a consistent morning routine on weekends.",
+      "type": "preference",
+      "entities": []
+    },
+    {
+      "fact": "User likes to sleep in a bit later on weekends.",
+      "type": "preference",
+      "entities": []
+    },
+    {
+      "fact": "User wakes up around 8:30 am on Saturdays.",
+      "type": "personal",
+      "entities": []
+    },
+    {
+      "fact": "User can fit in a 30-minute jog before showering and getting ready for the day on Saturdays.",
+      "type": "event",
+      "entities": []
+    },
+    {
+      "fact": "User is considering incorporating yoga or stretching on Sundays to loosen up after a week of sitting at a desk.",
+      "type": "preference",
+      "entities": []
+    },
+    {
+      "fact": "User thinks prioritizing yoga or stretching over other exercises is a good idea for establishing a consistent morning routine.",
+      "type": "opinion",
+      "entities": []
+    }
+  ],
+  "answer_4a97ae40_2": [
+    {
+      "fact": "User lives in a downtown area",
+      "type": "personal",
+      "entities": [
+        "downtown area"
+      ]
+    },
+    {
+      "fact": "User likes to wake up at 7:30 am on Saturdays",
+      "type": "preference",
+      "entities": [
+        "7:30 am",
+        "Saturdays"
+      ]
+    },
+    {
+      "fact": "User prefers to have a cup of coffee before jogging",
+      "type": "preference",
+      "entities": [
+        "coffee"
+      ]
+    },
+    {
+      "fact": "User is looking to do a 30-minute jog",
+      "type": "preference",
+      "entities": [
+        "30-minute jog"
+      ]
+    },
+    {
+      "fact": "User prefers a jogging route that is relatively flat and has some shade",
+      "type": "preference",
+      "entities": [
+        "flat route",
+        "shade"
+      ]
+    }
+  ]
+}

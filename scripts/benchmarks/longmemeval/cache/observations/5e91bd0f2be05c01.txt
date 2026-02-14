@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [FACT] User's name is Raphael Scott.
+- [FACT] User's job title is Technical Product Manager.
+- [FACT] User's email is raphael.scott@gmail.com.
+- [FACT] User's phone number is 555-555-5555.
+- [FACT] User's LinkedIn profile is www.linkedin.com/raphaelscott.
+- [FACT] User's location is New York, NY.
+- [FACT] User has a strong background in IT.
+- [FACT] User has experience in consulting.
+- [FACT] User's proudest achievement was implementing a new automated process that resulted in a $20M profit increase for the company.
+- [TEMPORAL] Session date is 2023/05/20 (Sat) 13:56.
+- [EVENT] User's resume is going to be reviewed by a C-Level executive.
+- [PREFERENCE] User is afraid that their resume is not technical enough to capture the attention of the C-Level executive.
+- [ASSISTANT_SAID] Assistant provided a rewritten version of the user's resume.
+- [ASSISTANT_CREATED] Assistant created a summary stating that Raphael Scott is an experienced Technical Product Manager with a proven track record of delivering results, skilled in IT consulting, leading cross-functional teams, and driving revenue growth.
+- [ASSISTANT_CREATED] Assistant listed professional experience for Raphael Scott, including positions at Amazon, Comcast, PwC, and Deloitte with specific achievements and contributions.
+- [ASSISTANT_CREATED] Assistant included strengths such as Analytical Thinking, Communication, and Problem Solving in the resume.
+- [ASSISTANT_CREATED] Assistant listed technical skills including Scrum, Product Development, UX Design, Tableau, JIRA, Python, and Kanban.
+- [ASSISTANT_CREATED] Assistant included educational background with a Master of Business Administration from Stevens Institute of Technology and a Bachelor of Science in Industrial Engineering from the University of California, Berkeley.

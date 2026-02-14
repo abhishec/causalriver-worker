@@ -1,0 +1,24 @@
+**Observation Log:**
+
+[FACT] User recently got married and changed their last name.  
+[CHANGE] User is trying to update their online accounts with their new name.  
+[EVENT] User applied for a passport name change on January 25th and is waiting for it to sync up with their new name.  
+[ASSISTANT_SAID] Assistant congratulated the user on their recent marriage and name change.  
+[ASSISTANT_SAID] Assistant provided a step-by-step guide to change the user's name on their Amazon account, including gathering required documents, navigating to the Help & Customer Service page, filling out the name change request form, uploading documents, and waiting for verification.  
+[ASSISTANT_SAID] Required documents for Amazon name change include an updated passport with the new name and a government-issued ID with the new name.  
+[ASSISTANT_SAID] Assistant advised that the verification process by Amazon may take a few days to a week.  
+[ASSISTANT_SAID] Assistant suggested contacting Amazon's customer service for assistance if the user encounters issues.  
+[EVENT] User is trying to update their social media profiles, specifically Facebook.  
+[ASSISTANT_SAID] Assistant provided information on Facebook's name change policy, including required documents such as a government-issued ID or marriage certificate.  
+[ASSISTANT_SAID] Assistant outlined the steps to update the user's name on Facebook, including logging in, accessing settings, and submitting documentation.  
+[ASSISTANT_SAID] Assistant mentioned that Facebook's verification process may take a few days to a week.  
+[EVENT] User plans to update their LinkedIn profile with their new name.  
+[ASSISTANT_SAID] Assistant explained that LinkedIn allows users to update their name directly on the platform without needing documentation in most cases.  
+[ASSISTANT_SAID] Assistant provided steps to update the user's name on LinkedIn, including logging in, editing the profile, and saving changes.  
+[ASSISTANT_SAID] Assistant noted that LinkedIn may request documentation in certain scenarios, such as significant name changes or suspicious activity.  
+[ASSISTANT_SAID] Assistant listed accepted documents for LinkedIn name change verification, including government-issued ID and marriage certificate.  
+[EVENT] User is planning to update their credit cards with their new name.  
+[ASSISTANT_SAID] Assistant provided guidance on updating credit card information with the bank, including gathering required documents and contacting the bank's customer service.  
+[ASSISTANT_SAID] Required documents for updating credit cards include an updated government-issued ID and a marriage certificate.  
+[ASSISTANT_SAID] Assistant explained that the processing time for a name change request can vary from a few days to a few weeks, with typical times being 3-10 business days.  
+[TEMPORAL] Session Date: 2023

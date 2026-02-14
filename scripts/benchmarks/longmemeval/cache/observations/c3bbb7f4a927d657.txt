@@ -1,0 +1,59 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/27 (Sat) 22:30  
+[FACT] User is thinking of hosting another BBQ party soon.  
+[PREFERENCE] User wants to try out new recipes for sides that go well with BBQ.  
+[ASSISTANT_SAID] Suggested side dish ideas for BBQ:  
+1. Coleslaw  
+2. Baked Beans  
+3. Grilled Corn on the Cob  
+4. Potato Salad  
+5. Roasted Vegetables  
+6. Mac and Cheese  
+7. Garlic and Herb Roasted Potatoes  
+8. BBQ Cornbread  
+9. Collard Greens  
+10. Watermelon Salad  
+11. Deviled Eggs  
+12. Fried Okra  
+[EVENT] User is planning a rib-centric menu for the BBQ party.  
+[PREFERENCE] User is interested in sides that complement ribs well.  
+[ASSISTANT_SAID] Suggested sides that complement ribs:  
+1. Coleslaw  
+2. Baked Beans  
+3. Grilled Corn on the Cob  
+4. Roasted Vegetables  
+5. Cornbread  
+[TEMPORAL] User has been into BBQ for about 3 weeks.  
+[ASSISTANT_SAID] It can take around 66 days to form a new habit, but this can vary from 18 to 254 days.  
+[PREFERENCE] User is looking for recommendations for BBQ rubs to try out.  
+[ASSISTANT_SAID] Recommended BBQ rubs:  
+1. Kansas City-style  
+2. Texas-style  
+3. Memphis-style  
+4. Jamaican Jerk  
+5. Korean BBQ  
+6. Indian-inspired  
+7. Lemon Pepper  
+8. Coffee Rub  
+[ASSISTANT_SAID] Suggested brands for BBQ rubs:  
+1. Dinosaur Bar-B-Que  
+2. Plowboys BBQ  
+3. Meat Church  
+[PREFERENCE] User plans to try out the Jamaican Jerk and Korean BBQ rubs.  
+[ASSISTANT_SAID] Recommended BBQ sauces to pair with the rubs:  
+- For Jamaican Jerk Rub:  
+  1. Mango BBQ Sauce  
+  2. Pineapple-Jalapeño BBQ Sauce  
+  3. Island-Style BBQ Sauce  
+- For Korean BBQ Rub:  
+  1. Gochujang BBQ Sauce  
+  2. Soy-Ginger BBQ Sauce  
+  3. Honey-Sesame BBQ Sauce  
+[ASSISTANT_SAID] Suggested brands for BBQ sauces:  
+1. Sweet Baby Ray's  
+2. Kansas City Masterpiece  
+3. Bone Suckin' Sauce  
+[PREFERENCE] User plans to try Mango BBQ Sauce with the Jamaican Jerk Rub and Gochujang BBQ Sauce with the Korean BBQ Rub.  
+[PREFERENCE] User is looking for recommendations for wood chips or chunks to add smoky flavor to BBQ.  
+[

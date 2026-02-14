@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/03/20 (Mon) 16:23  
+[ASSISTANT_SAID] The assistant provided a description of a React component that creates a "space cat" image that tracks mouse cursor movement with its eyes.  
+[ASSISTANT_SAID] The component uses `useEffect` and `useState` hooks from React.  
+[ASSISTANT_SAID] The component imports React, './SpaceCat.css' for styling, and spaceCat and spaceCatEye images from '../assets/'.  
+[ASSISTANT_SAID] A state variable called `mousePosition` is defined, which is an object with x and y properties initially set to 0.  
+[ASSISTANT_SAID] The component defines a `calcAngle` function to calculate the angle between the mouse position and the center of the space cat image.  
+[ASSISTANT_SAID] A `handleMouseMove` function updates the `mousePosition` state variable with the current x and y coordinates of the cursor.  
+[ASSISTANT_SAID] The `useEffect` hook listens for changes in the `mousePosition` state variable and calls the `calcAngle` function to rotate the eyes of the space cat image.  
+[ASSISTANT_SAID] An event listener for the `mousemove` event is added when the component is mounted and removed when the component unmounts.  
+[ASSISTANT_SAID] The component renders the space cat image and the eyes of the space cat using `img` tags, wrapped in `div` elements with specific classnames.  
+[ASSISTANT_SAID] The rendered element is wrapped in a div with classname `space-cat-container`.  
+[ASSISTANT_SAID] The assistant noted that the code snippet only shows the React component and that a React app needs to be created to run it.  
+[ASSISTANT_SAID] The assistant mentioned that CSS classes are defined in the SpaceCat.css file, which should be included in the project.  
+[USER] The user requested to improve the provided code.  
+[ASSISTANT_SAID] The assistant provided an improved version of the code, including the import statements for React, CSS, and images.  
+[ASSISTANT_CREATED] The assistant created an improved version of the SpaceCat component code, which includes the following features:  
+[ASSISTANT_SAID] The improved code includes `alt` attributes for the `img` tags for accessibility.  
+[ASSISTANT_SAID] The improved code adds `-90` to the angle value before applying the rotation to make the eyes rotate in the right direction.  
+[ASSISTANT_SAID] The improved code uses the `transform` property with string template literals for updating the style property of the eyes.  
+[ASSIST

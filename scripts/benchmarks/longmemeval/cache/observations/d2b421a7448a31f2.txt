@@ -1,0 +1,24 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/03/03 (Fri) 05:11
+- [USER] User is interested in Peking's traditional cuisine.
+- [ASSISTANT_SAID] Peking's traditional cuisine uses locally grown ingredients such as scallions, bean sprouts, soy sauce, tofu, and peanuts.
+- [ASSISTANT_SAID] Scallions are used as a garnish or ingredient, adding a fresh and zesty flavor.
+- [ASSISTANT_SAID] Bean sprouts are a staple in traditional dishes like stir-fry and soup, providing a crunchy texture and added nutrition.
+- [ASSISTANT_SAID] Soy sauce is made from locally grown soybeans and adds a savory flavor and umami taste.
+- [ASSISTANT_SAID] Tofu, made from locally grown soybeans, is a popular protein source in dishes like mapo tofu and stinky tofu.
+- [ASSISTANT_SAID] Peanuts are commonly used in appetizers and snacks, adding a crunchy texture and nutty flavor to dishes like Kung Pao Chicken and Dan Dan Noodles.
+- [USER] User is curious about whether Peking cuisine predominantly uses meat or vegetables.
+- [ASSISTANT_SAID] Peking cuisine uses both meat and vegetables, with an emphasis on vegetables for balance of flavors, textures, and colors.
+- [ASSISTANT_SAID] Common vegetables in Peking cuisine include scallions, cucumber, bean sprouts, cabbage, and bok choy.
+- [USER] User finds it fascinating that Peking cuisine emphasizes the use of vegetables and asks for a vegetable-based dish recommendation.
+- [ASSISTANT_SAID] Recommended vegetable-based dish: "Zhajiangmian" (炸酱面), made with hand-pulled noodles, fried soybean paste, vegetables, and minced meat (can be made without meat).
+- [ASSISTANT_SAID] Another recommended dish: "Cucumber Salad" (黄瓜拌子), made with fresh cucumbers, soy sauce vinaigrette, sesame oil, garlic, and chili oil.
+- [USER] User expresses excitement about the recommended dishes and asks for drink pairings.
+- [ASSISTANT_SAID] Recommended authentic Peking beverages include:
+  1. Baijiu: A strong liquor distilled from sorghum, pairs well with Peking cuisine.
+  2. Jasmine tea: A fragrant tea that refreshes the palate.
+  3. Beijing-style yogurt (suan ni bai rou): A fermented milk drink with a slightly sour taste.
+  4. Chinese beer: Popular brands include Tsingtao, Harbin, and Yanjing.
+- [USER] User is not a fan of alcohol and asks for non-alcoholic beverage recommendations.
+- [ASSISTANT_SAID] Recommended non-alcohol

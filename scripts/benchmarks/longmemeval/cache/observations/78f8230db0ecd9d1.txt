@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[FACT] User is trying to plan out their week ahead.  
+[ASSISTANT_SAID] Assistant does not have personal access to the user's daily routine or habits.  
+[ASSISTANT_SAID] Assistant suggests the user think about their typical morning routine to determine their usual wake-up time.  
+[PREFERENCE] User thinks they wake up at 6:30 am on weekdays.  
+[EVENT] User mentions being a bit late on Saturday, waking up at 8:30 am, which is unusual for them.  
+[ASSISTANT_SAID] Assistant suggests ways to find out the weather forecast for the user's area, including checking online weather websites or apps, using a virtual assistant, tuning into local news, or checking the phone's built-in weather app.  
+[ASSISTANT_SAID] Assistant lists specific weather websites: AccuWeather, Weather.com, Dark Sky.  
+[EVENT] User is thinking of trying out a new recipe this weekend.  
+[PREFERENCE] User is interested in simple and healthy recipes, specifically with chicken or fish.  
+[ASSISTANT_SAID] Assistant provides three chicken recipes: Lemon Garlic Chicken, Chicken Fajitas, Greek Chicken.  
+[ASSISTANT_SAID] Assistant provides three fish recipes: Baked Salmon, Grilled Tilapia, Cod with Lemon and Herbs.  
+[ASSISTANT_CREATED] Assistant creates a list of simple and healthy chicken and fish recipes.  
+[PREFERENCE] User is looking for a recipe that combines chicken and pasta.  
+[EVENT] User has been taking a cooking class and learned how to make pasta from scratch.  
+[ASSISTANT_SAID] Assistant suggests several chicken pasta recipes: Creamy Chicken Fettuccine, Chicken Carbonara with Peas and Mint, Chicken Pesto Pasta with Cherry Tomatoes, Chicken and Mushroom Pappardelle, Chicken and Spinach Tortellini.  
+[ASSISTANT_CREATED] Assistant creates a list of chicken pasta recipes that would work well with homemade pasta.  
+[PREFERENCE] User decides to try the Creamy Chicken Fettuccine recipe.  
+[ASSISTANT_SAID] Assistant provides tips on how to cook the perfect al dente pasta, including using a large pot, salting the water, checking for doneness, and reserving pasta water.  
+[ASSISTANT_SAID] Assistant mentions that homemade pasta tends to cook more quickly than store-bought pasta.  
+[ASSISTANT_SAID] Assistant gives specific cooking times for homemade fettuccine: 2-4 minutes.  
+[ASSISTANT_SAID] Assistant provides additional tips for cooking homemade fettuccine, such as using gentle heat and stirring occasionally.  
+[EVENT] User is trying to prioritize their fitness goals and is interested in meal prep.  
+[ASSISTANT_SAID] Assistant suggests meal prep strategies, including planning meals

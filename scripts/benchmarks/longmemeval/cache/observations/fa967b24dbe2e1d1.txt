@@ -1,0 +1,39 @@
+**Observation Log:**
+
+- [FACT] User is planning a trip to New Orleans.
+- [EVENT] User recently spent a weekend at the Omni Hotel in New Orleans for a friend's bachelor party.
+- [PREFERENCE] User had a blast at the rooftop pool with friends during their last stay at the Omni Hotel.
+- [ASSISTANT_SAID] New Orleans is an amazing city and the assistant is happy to help the user plan their trip.
+- [ASSISTANT_SAID] The assistant provided a list of recommended restaurants in the French Quarter, including:
+  1. Dooky Chase's Restaurant
+  2. Cafe du Monde
+  3. Coop's Place
+  4. Galatoire's
+  5. Willie Mae's Scotch House
+  6. GW Fins
+  7. Johnny's Po-Boys
+  8. Brennan's Restaurant
+  9. Cafe Maspero
+  10. Port of Call
+- [ASSISTANT_SAID] The assistant suggested exploring charming side streets and trying local specialties like beignet cafes, po' boy shops, and street food vendors.
+- [PREFERENCE] User is considering staying at the Omni Hotel again due to their positive experience.
+- [ASSISTANT_SAID] The Omni Hotels & Resorts loyalty program, Select Guest, offers benefits for repeat guests, including:
+  1. Exclusive rates
+  2. Upgrade priority
+  3. Early check-in and late check-out
+  4. Free Wi-Fi
+  5. Free pressing
+- [ASSISTANT_SAID] The assistant recommended that the user join Select Guest, book directly with the hotel, and mention their repeat stay to take advantage of perks.
+- [FACT] User is thinking of booking a suite with a balcony overlooking the French Quarter.
+- [ASSISTANT_SAID] The Omni Royal Orleans offers suites with balconies that face Bourbon Street, but views are limited and may come with noise considerations.
+- [ASSISTANT_SAID] The assistant mentioned specific suite types, including Bourbon Street Suite, French Quarter Suite, and River View Suite.
+- [ASSISTANT_SAID] The assistant advised the user to book early, contact the hotel directly for inquiries, and check the hotel's website for floor plans.
+- [PREFERENCE] User is interested in amenities or services for bachelor or bachelorette parties.
+- [ASSISTANT_SAID] The Omni Royal Orleans offers amenities for bachelor/bachelorette parties, including:
+  1. Rooftop pool and bar
+  2. Group reservations
+  3. Concierge services
+  4. Spa services
+  5. Private events
+- [ASSISTANT_SAID] The assistant recommended contacting the hotel's group sales team and concierge to plan the celebration.
+- [FACT] User had a blast walking around the French Quarter during their last

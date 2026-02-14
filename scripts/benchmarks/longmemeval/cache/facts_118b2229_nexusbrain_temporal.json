@@ -1,0 +1,27 @@
+{
+  "answer_40a90d51": [
+    {
+      "fact": "User enjoys audiobooks, especially during their daily commute.",
+      "type": "preference",
+      "entities": [
+        "audiobooks",
+        "daily commute"
+      ]
+    },
+    {
+      "fact": "User is currently reading 'Gone Girl' on their Kindle.",
+      "type": "event",
+      "entities": [
+        "Gone Girl",
+        "Kindle"
+      ]
+    },
+    {
+      "fact": "User finds 'The Nightingale' interesting.",
+      "type": "opinion",
+      "entities": [
+        "The Nightingale"
+      ]
+    }
+  ]
+}

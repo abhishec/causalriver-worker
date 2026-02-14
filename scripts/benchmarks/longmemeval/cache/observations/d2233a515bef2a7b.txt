@@ -1,0 +1,26 @@
+**Observation Log:**
+
+- [FACT] User is moving to Berkeley soon.
+- [FACT] User received their visa approval on April 15th.
+- [TEMPORAL] User is planning to move in on August 15th.
+- [EVENT] User is looking for affordable furniture for their new apartment.
+- [ASSISTANT_SAID] Recommended second-hand stores in Berkeley: Goodwill, Salvation Army, Habitat for Humanity ReStore, Berkeley Flea Market, The ReUse People.
+- [ASSISTANT_SAID] Recommended online marketplaces for furniture: Craigslist, Facebook Marketplace, Letgo, OfferUp, Nextdoor.
+- [ASSISTANT_SAID] Suggested additional resources: Berkeley Free Facebook group, UC Berkeley's Free & For Sale Facebook group, Berkeley Buy Nothing group.
+- [ASSISTANT_SAID] Advised user to inspect items before purchasing and consider negotiating prices.
+- [EVENT] User is considering delivery or assembly services for larger furniture items.
+- [ASSISTANT_SAID] Provided information on delivery services for Goodwill, Salvation Army, and Habitat for Humanity ReStore.
+- [ASSISTANT_SAID] Mentioned that Goodwill and Salvation Army typically do not offer assembly services but may provide recommendations.
+- [ASSISTANT_SAID] Suggested hiring a local moving or delivery service for larger items.
+- [EVENT] User is thinking of buying a bike to get around campus.
+- [ASSISTANT_SAID] Recommended bike shops in Berkeley: The Berkeley Bike Church, BikeLink, Missing Link Bicycle Cooperative, REI Berkeley, The Pedal Revolution.
+- [ASSISTANT_SAID] Suggested checking online marketplaces like Craigslist, Facebook Marketplace, or Letgo for used bikes.
+- [ASSISTANT_SAID] Provided tips for buying a used bike, including inspecting the bike, test riding, checking prices, and considering a bike inspection.
+- [EVENT] User wants to ensure they have all necessary documents before shopping for a bike.
+- [ASSISTANT_SAID] Listed documents needed to register a bike with the City of Berkeley: proof of identity, proof of Berkeley residency, bike information (make, model, serial number).
+- [ASSISTANT_SAID] Mentioned that registration is free and can be done at the Berkeley Police Department's Bike Registration Office.
+- [ASSISTANT_SAID] Suggested registering the bike with the National Bike Registry for added security.
+- [EVENT] User is looking for health insurance coverage as an international student.
+- [ASSISTANT_SAID] Explained UC Berkeley's health insurance requirements for international students, including medical benefits, hospitalization, prescription medications, maternity care, and mental health services.
+- [ASSISTANT_SAID] Mentioned UC Berkeley's Student Health Insurance Plan (SHIP) as an option.
+- [ASSISTANT_SAID] Advised user to research and compare different insurance plans

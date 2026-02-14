@@ -1,0 +1,135 @@
+{
+  "answer_6a4f8626_1": [
+    {
+      "fact": "User feels overwhelmed with work tasks",
+      "type": "opinion",
+      "entities": [
+        "overwhelmed",
+        "work tasks"
+      ]
+    },
+    {
+      "fact": "User has tasks to prioritize for work",
+      "type": "event",
+      "entities": [
+        "tasks",
+        "work"
+      ]
+    },
+    {
+      "fact": "User is finalizing a project report to send to the manager",
+      "type": "event",
+      "entities": [
+        "project report",
+        "manager"
+      ]
+    },
+    {
+      "fact": "User needs to respond to a client's email regarding the project timeline",
+      "type": "event",
+      "entities": [
+        "client email",
+        "project timeline"
+      ]
+    },
+    {
+      "fact": "User is preparing for a team meeting by reviewing the agenda",
+      "type": "event",
+      "entities": [
+        "team meeting",
+        "agenda"
+      ]
+    },
+    {
+      "fact": "User needs to review and update the project plan",
+      "type": "event",
+      "entities": [
+        "project plan"
+      ]
+    },
+    {
+      "fact": "User practices yoga twice a week",
+      "type": "preference",
+      "entities": [
+        "yoga"
+      ]
+    },
+    {
+      "fact": "User finds yoga helpful for relaxation and focus",
+      "type": "opinion",
+      "entities": [
+        "yoga",
+        "relaxation",
+        "focus"
+      ]
+    },
+    {
+      "fact": "User is looking for recommendations for stress-reducing apps or meditation techniques",
+      "type": "preference",
+      "entities": [
+        "stress-reducing apps",
+        "meditation techniques"
+      ]
+    }
+  ],
+  "answer_6a4f8626_2": [
+    {
+      "fact": "User has multiple work projects including a marketing campaign, a report, and website updates.",
+      "type": "personal",
+      "entities": [
+        "marketing campaign",
+        "report",
+        "website updates"
+      ]
+    },
+    {
+      "fact": "User prioritizes the marketing campaign but the report is time-sensitive.",
+      "type": "preference",
+      "entities": [
+        "marketing campaign",
+        "report"
+      ]
+    },
+    {
+      "fact": "User estimates that each task will take around 2-3 days to complete.",
+      "type": "opinion",
+      "entities": [
+        "2-3 days"
+      ]
+    },
+    {
+      "fact": "User is available to work from 9am to 5pm with a lunch break from 12pm to 1pm.",
+      "type": "personal",
+      "entities": [
+        "9am",
+        "5pm",
+        "12pm",
+        "1pm"
+      ]
+    },
+    {
+      "fact": "User has a meeting scheduled on Wednesday from 2pm to 3pm.",
+      "type": "event",
+      "entities": [
+        "Wednesday",
+        "2pm",
+        "3pm"
+      ]
+    },
+    {
+      "fact": "User attends yoga classes three times a week.",
+      "type": "event",
+      "entities": [
+        "yoga classes",
+        "three times a week"
+      ]
+    },
+    {
+      "fact": "User feels more focused on days when they attend yoga classes.",
+      "type": "opinion",
+      "entities": [
+        "yoga classes"
+      ]
+    }
+  ]
+}

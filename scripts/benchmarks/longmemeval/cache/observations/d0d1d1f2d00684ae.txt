@@ -1,0 +1,26 @@
+**Observation Log**
+
+**Session Date:** 2023/03/15 (Wed) 11:55  
+**Session ID:** 5cb6bdba_1  
+
+1. [EVENT] User is trying to keep track of expenses for the past month.
+2. [ASSISTANT_SAID] Assistant offered to help organize expenses by category.
+3. [ASSISTANT_SAID] Assistant requested the user to share a list of purchases made over the past month.
+4. [ASSISTANT_SAID] Assistant provided examples of common expense categories: Gifts, Shopping, Food, Entertainment, Travel, Housing, Transportation, Health and wellness, Miscellaneous.
+5. [EVENT] User plans to share purchases one by one, starting with gifts.
+6. [EVENT] User purchased a personalized baby blanket from Etsy for a friend Emily's baby shower for $30.
+7. [ASSISTANT_CREATED] Assistant added the personalized baby blanket to the "Gifts" category.
+8. [ASSISTANT_SAID] Assistant acknowledged the gift as thoughtful.
+9. [EVENT] User purchased a set of baby clothes and a soft toy from Baby Gap for Emily's baby shower for around $50.
+10. [ASSISTANT_CREATED] Assistant added the baby clothes and soft toy to the "Gifts" category.
+11. [ASSISTANT_SAID] Assistant noted the total spent on gifts is now $80.
+12. [EVENT] User purchased a silver necklace from a jewelry store downtown for $80 for sister's birthday.
+13. [ASSISTANT_CREATED] Assistant added the silver necklace to the "Gifts" category.
+14. [ASSISTANT_SAID] Assistant noted the total spent on gifts is now $160.
+15. [EVENT] User purchased gifts for coworkers for an office Secret Santa exchange.
+16. [EVENT] User bought a scented candle from Voluspa for Sarah for $12.
+17. [EVENT] User bought a funny mug for Tom from the novelty section for $10.
+18. [ASSISTANT_CREATED] Assistant added the scented candle and funny mug to the "Gifts" category.
+19. [ASSISTANT_SAID] Assistant noted the total spent on gifts is now $182.
+20. [EVENT] User purchased a gift card to Starbucks for team lead Rachel.
+21. [ASSISTANT_SAID] Assistant asked for the amount of the gift card to add it to the "Gifts" category.

@@ -1,0 +1,16 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/23 (Tue) 14:07  
+[USER] User inquired about how a website connects to D365 or Navision and which part of the website design is involved.  
+[ASSISTANT_SAID] Connecting a website to Microsoft Dynamics 365 (D365) or Dynamics NAV involves integrating the two systems to facilitate the exchange of data and business processes.  
+[ASSISTANT_SAID] Integration can be done using web services, APIs, or third-party connectors.  
+[ASSISTANT_SAID] The parts of the website design involved in this process include:  
+[ASSISTANT_SAID] 1. Backend development: The backend of the website needs to be designed to handle integration with D365 or NAV, involving server-side code that communicates with the Dynamics systems using web services, APIs, or connectors.  
+[ASSISTANT_SAID] Programming languages and frameworks for backend development may include C#, ASP.NET, Node.js, or Python.  
+[ASSISTANT_SAID] 2. APIs and Web Services: D365 and Dynamics NAV expose functionality via web services, such as OData or SOAP, or RESTful APIs, allowing external systems to interact with them.  
+[ASSISTANT_SAID] Understanding how to work with these APIs is necessary to query, create, update, or delete data in the Dynamics systems from the website.  
+[ASSISTANT_SAID] Authentication of the website's requests to these services may require using OAuth 2.0 or other security protocols.  
+[ASSISTANT_SAID] 3. Middleware or Integration Platform: Middleware or integration platforms like Microsoft Power Automate, Logic Apps, or third-party solutions like KingswaySoft, Scribe, or eOne SmartConnect can be used.  
+[ASSISTANT_SAID] These tools help manage the connection between the website and Dynamics systems, handling data transformation, error handling, and logging.  
+[ASSISTANT_SAID] Using middleware can simplify the integration process and minimize the custom code needed.  
+[ASSISTANT_SAID] 4. Frontend development: The frontend or user interface of the website may also need to be designed to work with data from D365 or NAV.

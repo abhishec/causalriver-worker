@@ -1,0 +1,25 @@
+{
+  "answer_ultrachat_187684": [
+    {
+      "fact": "User is excited to listen to the song 'Evolution' from the Fifth Album.",
+      "type": "preference",
+      "entities": [
+        "Evolution",
+        "Fifth Album"
+      ]
+    },
+    {
+      "fact": "User enjoys seeing artists take risks and experiment with their sound.",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User has listened to and loved the albums 'Folklore' and 'Fetch the Bolt Cutters'.",
+      "type": "preference",
+      "entities": [
+        "Folklore",
+        "Fetch the Bolt Cutters"
+      ]
+    }
+  ]
+}

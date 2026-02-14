@@ -1,0 +1,26 @@
+**Observation Log:**
+
+[SESSION DATE] Session Date: 2022/05/15 (Sun) 17:17  
+[FACT] User has a brother.  
+[FACT] User has a best friend.  
+[FACT] User's brother's birthday is in June.  
+[FACT] User's best friend's birthday is on April 15th.  
+[EVENT] User ordered a personalized photo album from Shutterfly on April 15th.  
+[EVENT] User's personalized photo album arrived on April 20th.  
+[EVENT] User is considering purchasing a Skagen Ancher watch for their brother.  
+[EVENT] User is thinking of getting their mom a customized necklace for Mother's Day.  
+[PREFERENCE] User prefers mid-range gifts, specifically in the $200-$300 range for the watch.  
+[PREFERENCE] User's brother has a casual style and prefers sporty or minimalist designs.  
+[PREFERENCE] User's brother likes leather straps for watches.  
+[PREFERENCE] User is interested in personalized gifts.  
+[PREFERENCE] User is looking for a customized necklace with their mom's birthstone and children's names engraved on it.  
+[RELATIONSHIP] User's brother is the recipient of the watch gift.  
+[RELATIONSHIP] User's best friend is the recipient of the personalized photo album gift.  
+[RELATIONSHIP] User's mom is the recipient of the customized necklace gift.  
+[ASSISTANT] Suggested popular watch brands: Fossil, Skagen, Timex, Tissot, Seiko, Citizen, Omega, Rolex, Tag Heuer.  
+[ASSISTANT] Recommended specific watch options: Fossil Grant, Skagen Ancher, Tissot Le Locle, Seiko 5 Sports, Citizen BM8475-03E, Daniel Wellington Classic Petite.  
+[ASSISTANT] Provided information about the quality of Skagen Ancher's leather strap and engraving options.  
+[ASSISTANT] Suggested places to get a customized necklace: Etsy, online jewelers (James Allen, Blue Nile, Zales), local jewelers, specialty stores.  
+[ASSISTANT] Advised user to check reviews, double-check spelling for engravings, and order in advance for the necklace.  
+[TEMPORAL] User's best friend's birthday was on April 15th.  
+[TEMPORAL] User is planning to give the customized necklace for Mother's Day.

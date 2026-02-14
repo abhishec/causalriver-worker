@@ -1,0 +1,27 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/04/29 (Sat) 10:04  
+[USER] The user is trying to limit their social media usage.  
+[USER] The user has tried the apps Moment and Screen Time.  
+[PREFERENCE] The user is looking for apps or tools to help replace social media with more productive habits, like reading or listening to music.  
+[USER] The user is having trouble staying motivated to stick to their "no social media before bed" rule.  
+[ASSISTANT_SAID] The assistant recommended the following website blockers:  
+[ASSISTANT_SAID] 1. Freedom: A popular app that blocks distracting websites, including social media, across all devices.  
+[ASSISTANT_SAID] 2. StayFocusd: A Chrome extension that blocks social media during set periods of the day.  
+[ASSISTANT_SAID] 3. Cold Turkey: A Windows and Mac app that blocks social media for a set period of time.  
+[ASSISTANT_SAID] The assistant recommended the following mobile apps:  
+[ASSISTANT_SAID] 1. Moment: An app that tracks phone usage and allows setting daily limits and blocking access during certain hours.  
+[ASSISTANT_SAID] 2. Screen Time: A built-in feature on iOS devices that tracks app usage and allows setting daily limits.  
+[ASSISTANT_SAID] 3. Digital Wellbeing: A built-in feature on Android devices that tracks app usage and allows setting daily limits.  
+[ASSISTANT_SAID] The assistant recommended the following browser extensions:  
+[ASSISTANT_SAID] 1. uBlock Origin: A browser extension that blocks social media during set periods.  
+[ASSISTANT_SAID] 2. LeechBlock: A Firefox extension that blocks social media during set periods.  
+[ASSISTANT_SAID] The assistant recommended the following other tools:  
+[ASSISTANT_SAID] 1. SelfControl: A free, open-source app for Mac that blocks distracting websites.  
+[ASSISTANT_SAID] 2. FocalFilter: A Windows app that blocks distracting websites during set periods.  
+[ASSISTANT_SAID] The assistant provided tips for limiting social media usage:  
+[ASSISTANT_SAID] 1. Set specific goals for each platform.  
+[ASSISTANT_SAID] 2. Schedule regular breaks to check social media.  
+[ASSISTANT_SAID] 3. Find alternative habits like reading or exercise.  
+[ASSISTANT_SAID] 4. Monitor progress and adjust settings as needed.  
+[USER] The user is considering trying out Habitica and Alarmy to help with their "no social media before bed"

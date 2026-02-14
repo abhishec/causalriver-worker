@@ -1,0 +1,52 @@
+**Observation Log:**
+
+[FACT] The user is trying to get their finances back in order after being bedridden and taking time off work.
+
+[CHANGE] The user has experienced health issues that set them back financially.
+
+[TEMPORAL] The session date is 2023/05/21.
+
+[ASSISTANT_SAID] The assistant expressed sympathy for the user's health issues and financial setbacks.
+
+[ASSISTANT_SAID] The assistant provided budgeting tools and advice to help the user get started.
+
+[ASSISTANT_CREATED] The assistant listed budgeting tools, including:
+1. Spreadsheets (Google Sheets or Microsoft Excel)
+2. Budgeting Apps: Mint, Personal Capital, YNAB (You Need a Budget), Spendee
+3. Pencil and Paper
+
+[ASSISTANT_SAID] The assistant provided budgeting advice, including:
+1. Start with a Fresh Slate
+2. Track Your Income
+3. Categorize Expenses
+4. Create a Budget Plan (50/30/20 rule)
+5. Prioritize Debt Repayment
+6. Build an Emergency Fund
+7. Review and Adjust
+
+[ASSISTANT_SAID] The assistant suggested additional tips, including communicating with creditors, taking advantage of assistance programs, considering a side hustle, and seeking professional help.
+
+[FACT] The user plans to start tracking their income and expenses using a spreadsheet.
+
+[ASSISTANT_SAID] The assistant provided an example of how to set up columns for different categories in a spreadsheet, including:
+- Income
+- Fixed Expenses
+- Variable Expenses
+- Debt Repayment
+- Totals
+
+[ASSISTANT_CREATED] The assistant created a sample income and expense tracking spreadsheet with specific categories and example amounts.
+
+[ASSISTANT_SAID] The assistant explained how to handle annual or quarterly expenses, suggesting the user divide them by 12 and add them to monthly expenses.
+
+[FACT] The user decided to use the first option for handling annual expenses.
+
+[ASSISTANT_SAID] The assistant provided advice on handling irregular income, suggesting the user include it in their income tracker and account for variability.
+
+[ASSISTANT_SAID] The assistant recommended setting aside a portion of irregular income for taxes.
+
+[ASSISTANT_SAID] The assistant suggested creating a separate fund for irregular income to help manage it better.
+
+[FACT] The user wants to review their insurance policies, including health, auto, and home insurance.
+
+[ASSISTANT_SAID] The assistant offered to provide tips on how to review insurance policies and potentially save money.

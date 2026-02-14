@@ -1,0 +1,45 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/22 (Mon) 16:59
+- [FACT] User is planning to bake a vegan chocolate cake this weekend.
+- [EVENT] User recently shared a recipe for vegan chocolate cake on Facebook and it got 23 likes.
+- [ASSISTANT_SAID] Congratulations on the 23 likes on your Facebook post! That's exciting!
+- [ASSISTANT_SAID] Tips for making a moist vegan chocolate cake:
+  1. Use a combination of sugar and natural sweeteners.
+  2. Choose the right non-dairy milk (high in fat content).
+  3. Use high-quality cocoa powder (Dutch-processed).
+  4. Don't overmix the batter.
+  5. Use a lower oven temperature (around 325°F/165°C).
+  6. Add an extra moisture source (mashed banana, applesauce, or silken tofu).
+  7. Don't overbake.
+  8. Use a flax egg or aquafaba.
+  9. Add some extra fat (vegan butter or oil).
+  10. Store the cake properly in an airtight container.
+- [ASSISTANT_SAID] Ask if the user has a specific recipe in mind or if they would like recommendations.
+- [FACT] User used a recipe from a vegan cookbook.
+- [ASSISTANT_SAID] Suggestions for decorating the vegan chocolate cake:
+  1. Chocolate Ganache.
+  2. Vegan Buttercream.
+  3. Fresh Fruit.
+  4. Chocolate Shavings or Chips.
+  5. Coconut Whipped Cream.
+  6. Cocoa Powder Design.
+  7. Vegan Chocolate Glaze.
+  8. Sprinkles or Nonpareils.
+  9. Edible Images.
+  10. Keep it Simple with powdered sugar or cocoa powder.
+- [ASSISTANT_SAID] Encourages creativity and experimentation with decoration ideas.
+- [FACT] User is thinking of sharing a photo of the cake on Instagram and Facebook.
+- [ASSISTANT_SAID] Suggests the caption "Fresh out of the oven" and additional details to include:
+  * Mention of the recipe or cookbook.
+  * Note about the cake being vegan.
+  * Personal message like "Made with love."
+  * Call to action like "Who wants a slice?"
+- [ASSISTANT_SAID] Tips for sharing the cake photo on social media:
+  * Ensure the photo is well-lit and in focus.
+  * Use a decorative background or props.
+  * Edit the photo for colors and contrast.
+  * Use relevant hashtags.
+  * Engage with followers by responding to comments.
+- [FACT] User is considering sharing a behind-the-scenes story on Instagram Stories.
+- [ASSISTANT_SAID] Suggestions for behind-the

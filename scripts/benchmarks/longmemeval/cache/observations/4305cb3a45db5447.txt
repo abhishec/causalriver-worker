@@ -1,0 +1,28 @@
+**Observation Log:**
+
+- [FACT] The user is planning a road trip from Denver to Mount Rushmore.
+- [EVENT] The user recently returned from a 4-day trip to Yellowstone National Park with their family last month.
+- [TEMPORAL] The Yellowstone trip occurred last month, specifically in April 2023.
+- [FACT] The user covered a total of 1,200 miles during the Yellowstone trip.
+- [ASSISTANT_SAID] The most popular and scenic route from Denver to Mount Rushmore is approximately 570 miles and takes around 8-9 hours of driving time.
+- [ASSISTANT_SAID] Suggested route from Denver to Mount Rushmore includes:
+  1. From Denver, take I-25 N towards Cheyenne, WY (approximately 100 miles, 1.5 hours).
+  2. Continue on I-25 N to I-90 E towards Rapid City, SD (approximately 270 miles, 4 hours).
+  3. Take exit 57 for US-16 E towards Mount Rushmore National Memorial (approximately 25 miles, 30 minutes).
+- [ASSISTANT_SAID] Scenic stops along the way include Cheyenne, WY; Wall, SD; and Badlands National Park, SD.
+- [ASSISTANT_SAID] Tips for the trip include checking the Mount Rushmore National Memorial website for road closures, considering visiting the Crazy Horse Memorial, booking accommodations in Rapid City or Keystone, and trying local cuisine like chislic.
+- [USER] The user is considering camping instead of staying in a hotel near Mount Rushmore.
+- [ASSISTANT_SAID] Recommended camping options near Mount Rushmore include:
+  1. Mount Rushmore National Memorial KOA
+  2. Custer State Park
+  3. Rushmore RV Resort
+  4. American Presidents Resort
+  5. Keystone RV Park
+  6. Deer Mountain Campground
+  7. Horsethief Lake Campground
+- [ASSISTANT_SAID] The Mount Rushmore National Memorial KOA offers amenities such as a pool, playground, convenience store, laundry facilities, restrooms, Wi-Fi, and a dog park.
+- [ASSISTANT_SAID] Recreational activities at the KOA include mini golf, a game room, hiking trails, and a shuttle service to Mount Rushmore.
+- [ASSISTANT_SAID] The KOA offers cabin rentals, including deluxe cabins with full kitchens and private bathrooms.
+- [ASSISTANT_SAID] The shuttle service to Mount Rushmore is free for KOA guests, runs every 30 minutes from 8:00 AM to 6:00 PM, and takes approximately 10-15 minutes each way.
+- [USER] The user drove around 300 miles on the first day of their Yellowstone trip to reach Jackson, Wyoming.
+-

@@ -1,0 +1,28 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/02 (Tue) 02:00  
+[EVENT] User is planning to make a stir-fry for dinner tonight.  
+[EVENT] User did an online grocery order from Instacart and had it delivered to their doorstep.  
+[FACT] User spent around $60 on the grocery order.  
+[ASSISTANT_SAID] Stir-fry sauce suggestions provided by the assistant include:  
+[ASSISTANT_SAID] 1. Soy sauce-based sauce: made with soy sauce, hoisin sauce, rice vinegar, garlic, ginger, and chili flakes.  
+[ASSISTANT_SAID] 2. Oyster sauce-based sauce: similar to soy sauce-based but richer with oyster sauce.  
+[ASSISTANT_SAID] 3. Sesame oil and soy sauce: a simple combination with nutty aroma.  
+[ASSISTANT_SAID] 4. Honey and hoisin sauce: sweet and savory, with rice vinegar and soy sauce for balance.  
+[ASSISTANT_SAID] 5. Kung Pao sauce: spicy and savory with soy sauce, vinegar, hoisin sauce, and hot peppers.  
+[ASSISTANT_SAID] 6. Peanut sauce: creamy and nutty with peanut butter, soy sauce, and spices.  
+[ASSISTANT_SAID] Assistant suggested experimenting with different combinations of these ingredients.  
+[ASSISTANT_SAID] Assistant noted that store-bought stir-fry sauces are widely available.  
+[FACT] User is thinking of using chicken breasts for the stir-fry.  
+[FACT] User bought chicken breasts last Saturday when grocery shopping.  
+[FACT] User plans to use frozen veggies for the stir-fry.  
+[ASSISTANT_SAID] Recommended stir-fry sauces for chicken and frozen veggies include:  
+[ASSISTANT_SAID] 1. Soy sauce-based sauce with garlic and ginger.  
+[ASSISTANT_SAID] 2. Hoisin sauce with rice vinegar and sesame oil.  
+[ASSISTANT_SAID] 3. Sweet and sour sauce.  
+[ASSISTANT_SAID] Provided a simple recipe for Easy Stir-Fry Sauce.  
+[ASSISTANT_SAID] Ingredients for the sauce include soy sauce, hoisin sauce, rice vinegar, ginger, garlic, sesame oil, and optional cornstarch.  
+[ASSISTANT_SAID] Instructions for making the sauce were provided.  
+[FACT] User is using frozen peas and carrots for the stir-fry.  
+[ASSISTANT_SAID] Suggested that sweet and sour sauce might not be the best match for peas and carrots due to potential sweetness clash.  
+[ASSISTANT_SAID] Recommended the Soy sauce-based sauce with garlic and ginger or Hoisin sauce

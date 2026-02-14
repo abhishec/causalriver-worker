@@ -1,0 +1,25 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/05 (Fri) 12:13
+- [USER] The user is looking for new BBQ sauce recipes to try out.
+- [USER] The user has been experimenting with different flavors for BBQ sauce.
+- [USER] The user made BBQ sauce for a family gathering on Memorial Day weekend.
+- [USER] The user tried slow-cooking ribs for the first time last week and was pleased with the result.
+- [PREFERENCE] The user likes spicy food.
+- [ASSISTANT_SAID] The assistant provided a list of unique BBQ sauce recipes that pair well with ribs, including:
+  1. **Korean BBQ Sauce**: Ingredients include gochujang, soy sauce, brown sugar, rice vinegar, gochugaru, garlic, and ginger.
+  2. **Jamaican Jerk BBQ Sauce**: Ingredients include ketchup, jerk seasoning, allspice, brown sugar, soy sauce, lime juice, and optional scotch bonnet peppers.
+  3. **Smoky Chipotle BBQ Sauce**: Ingredients include ketchup, chipotle peppers in adobo sauce, apple cider vinegar, brown sugar, smoked paprika, and garlic powder.
+  4. **Honey Bourbon BBQ Sauce**: Ingredients include ketchup, honey, bourbon whiskey, apple cider vinegar, Dijon mustard, and Worcestershire sauce.
+  5. **Alabama White BBQ Sauce**: Ingredients include mayonnaise, apple cider vinegar, ketchup, brown sugar, smoked paprika, and garlic powder.
+- [ASSISTANT_SAID] The assistant suggested that the user can adjust the ingredients in the BBQ sauce recipes to their taste preferences.
+- [USER] The user expressed interest in the Korean BBQ Sauce and asked for more information about gochujang.
+- [ASSISTANT_SAID] The assistant explained that gochujang is a Korean chili paste made from fermented soybeans, rice, and red chili peppers, with a complex flavor profile that is sweet, savory, spicy, and nutty.
+- [ASSISTANT_SAID] The assistant provided examples of how gochujang is used in Korean cuisine, including marinades, sauces, stir-fries, and soups.
+- [ASSISTANT_SAID] The assistant offered tips for using gochujang in BBQ sauce, including starting with a small amount and mixing it with other ingredients to balance the flavor.
+- [USER] The user confirmed they would try the Korean BBQ Sauce recipe.
+- [USER] The user asked for tips on how to slow cook ribs.
+- [ASSISTANT_SAID] The assistant provided tips for slow-cooking ribs, including:
+  1. Choose meaty ribs like pork spare ribs or St. Louis-style pork ribs.
+  2. Remove the membrane from the bone side of the ribs.
+  3. Dry

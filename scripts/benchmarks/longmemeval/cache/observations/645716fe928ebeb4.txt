@@ -1,0 +1,27 @@
+**Observation Log:**
+
+- [FACT] User's name is Jeremy.
+- [FACT] Jeremy had serious back pain caused by a series of athletic injuries.
+- [FACT] Jeremy is involved in the business of healing back pain.
+- [FACT] Jeremy has a background in chiropractic and related whole-body disciplines.
+- [FACT] Jeremy grew up in a traditional medical household.
+- [FACT] Jeremy's grandfather was a medical doctor.
+- [FACT] Jeremy's father is a medical doctor.
+- [FACT] Jeremy's mother is a nurse.
+- [FACT] Jeremy's aunt is a nurse.
+- [FACT] Jeremy's uncle was a pharmaceutical salesman.
+- [PREFERENCE] Jeremy has tremendous respect for traditional Western medicine.
+- [PREFERENCE] Jeremy believes that modern medicine generally isn’t great at curing back pain.
+- [EVENT] Jeremy thought he was going to be a professional skateboarder as a teenager.
+- [EVENT] Jeremy experienced serious back pain during his teenage years.
+- [EVENT] Jeremy went to regular doctors for his back pain, undergoing ultrasounds, MRIs, and blood tests.
+- [EVENT] Jeremy turned to chiropractors for relief from his back pain.
+- [CHANGE] Jeremy decided to train in chiropractic to understand the real causes and treatments of serious back pain.
+- [TEMPORAL] The time of Jeremy's second round of back pain was seven years ago from the date of the session.
+- [EVENT] Jeremy worked on a promising medical start-up venture for six months, leading to his back pain.
+- [TEMPORAL] Jeremy worked regular ten- and twelve-hour days with few breaks for leisure or exercise during that time.
+- [EVENT] Jeremy experienced severe pain one morning after a grueling stretch of work.
+- [RELATIONSHIP] Jeremy mentions that he lived alone at the time of his severe back pain.
+- [FACT] Jeremy describes the pain he experienced as the most ferocious pain he has ever had.
+- [PREFERENCE] Jeremy emphasizes the importance of understanding behavior and behavioral change in treating back pain.
+- [ASSISTANT_SAID] The assistant asked about the main reason Jeremy got into the business of healing back pain.

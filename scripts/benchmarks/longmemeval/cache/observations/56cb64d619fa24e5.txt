@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/25 (Thu) 10:13  
+[USER] User provided a code snippet for a method named `prepare_notification_requests`.  
+[USER] The code snippet includes a variable `collection_queue` set to "default_system_notification_temp_queue".  
+[USER] The code snippet includes a list comprehension to create `notification_ids` from the `notifications` input.  
+[USER] The code snippet defines a nested function `modify_request` that updates a request with a `notification_id` and `source`, and removes the `_id` key.  
+[USER] The code snippet defines another nested function `get_request_update` that returns a dictionary with the current timestamp and a 'queued' status set to True.  
+[USER] The code snippet creates a list of `updates` using `UpdateOne` for notifications that are not queued.  
+[USER] The code snippet creates a list of `upserts` using `UpdateOne` for notifications that need to be inserted or updated.  
+[USER] The code snippet checks if there are any `writes` and performs a bulk write operation if there are.  
+[USER] The code snippet updates notifications with a null timestamp and queued status.  
+[USER] The code snippet deactivates notifications that are not in `notification_ids`.  
+[USER] User requested to refactor the provided code and incorporate previous results into it.  
+[ASSISTANT_SAID] Assistant provided a refactored version of the `prepare_notification_requests` method, making it modular and maintainable.  
+[ASSISTANT_CREATED] The assistant's refactored code includes the `modify_request` and `get_request_update` functions outside of `prepare_notification_requests`.  
+[ASSISTANT_CREATED] The assistant added a `log_upsert_results` method to handle logging for the results of the bulk write operation.  
+[ASSISTANT_SAID] The assistant suggested adding type hinting for the input and output types of the helper functions.  
+[ASSISTANT_SAID] The assistant recommended moving helper functions outside of `prepare_notification_requests` if they may be reused.  
+[ASSISTANT_SAID] The assistant advised to handle exceptions in the bulk write operation and log any errors that may occur.  
+[ASSISTANT_SAID] The assistant suggested evaluating the performance of the code, especially the update and upsert operations.  
+[USER] User requested to add the suggested improvements to the code.  
+[ASSISTANT_CREATED] The assistant provided an updated version of the `NotificationHandler` class with the suggested improvements incorporated.  
+[ASSISTANT_CREATED] The updated code includes type hinting for the `modify_request` and `get_request_update` methods.  
+[ASSISTANT_CREATED] The updated code includes a try-except block around the bulk write operation to handle exceptions.

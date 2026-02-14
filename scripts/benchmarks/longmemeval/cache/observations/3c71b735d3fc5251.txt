@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[FACT] User is heading out to LA for a business trip.  
+[FACT] User is flying from New York to Los Angeles.  
+[FACT] User is seated in seat 17C on the flight.  
+[EVENT] User is concerned about the flight and in-flight entertainment options.  
+[EVENT] User is hoping to get some work done during the flight.  
+[ASSISTANT_SAID] American Airlines offers a variety of in-flight entertainment options, including seatback screens, live TV, music, games, and the AAdvantage Inflight Entertainment App.  
+[ASSISTANT_SAID] Most American Airlines aircraft feature seatback screens with a wide selection of movies, TV shows, music, and games.  
+[ASSISTANT_SAID] On some flights, American Airlines offers live TV, including sports, news, and entertainment channels.  
+[ASSISTANT_SAID] American Airlines provides a vast music library with various genres and playlists.  
+[ASSISTANT_SAID] Games available include puzzles, card games, and arcade classics.  
+[ASSISTANT_SAID] The AAdvantage Inflight Entertainment App allows users to access movies, TV shows, and music for free on select aircraft.  
+[ASSISTANT_SAID] Power outlets and USB ports are available on most American Airlines aircraft.  
+[ASSISTANT_SAID] Most American Airlines aircraft have power outlets in First Class and Business Class, with limited availability in Economy Class.  
+[ASSISTANT_SAID] USB ports are more widely available than power outlets on American Airlines flights.  
+[ASSISTANT_SAID] User can increase chances of getting a seat with a power outlet or USB port by choosing First Class or Business Class or opting for a Boeing 777-200 or 787-8 aircraft.  
+[ASSISTANT_SAID] American Airlines offers Wi-Fi on most flights, with costs varying by flight duration.  
+[ASSISTANT_SAID] Wi-Fi costs typically range from $10-$30 depending on flight duration.  
+[ASSISTANT_SAID] Wi-Fi speed is generally good, with download speeds up to 10 Mbps and upload speeds up to 1 Mbps.  
+[ASSISTANT_SAID] User can connect up to three devices to the Wi-Fi network at once.  
+[ASSISTANT_SAID] To access Wi-Fi, user should connect to the "AA Inflight" network and follow prompts to purchase a plan.  
+[EVENT] User is concerned about the entertainment system due to a bad experience on a previous flight.  
+[ASSISTANT_SAID] To report issues with the in-flight entertainment system, user should alert the flight attendant, explain the issue, and provide their seat number.  
+[ASSISTANT_SAID] Flight attendants may check the system, reset it, offer alternative solutions

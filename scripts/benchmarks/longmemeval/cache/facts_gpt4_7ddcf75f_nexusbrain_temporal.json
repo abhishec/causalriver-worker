@@ -1,0 +1,43 @@
+{
+  "answer_ad8a76cb_1": [
+    {
+      "fact": "User is looking for waterproof camera recommendations for outdoor adventures.",
+      "type": "preference",
+      "entities": [
+        "waterproof camera",
+        "outdoor adventures"
+      ]
+    },
+    {
+      "fact": "User recently returned from a whitewater rafting trip in the Oregon mountains.",
+      "type": "event",
+      "entities": [
+        "whitewater rafting",
+        "Oregon mountains"
+      ]
+    },
+    {
+      "fact": "User went on the trip with a group of coworkers.",
+      "type": "relationship",
+      "entities": [
+        "coworkers"
+      ]
+    },
+    {
+      "fact": "User wishes they had a waterproof camera to capture moments during the rafting trip.",
+      "type": "opinion",
+      "entities": [
+        "waterproof camera",
+        "rafting trip"
+      ]
+    },
+    {
+      "fact": "User is particularly interested in the GoPro Hero8 Black for its video quality.",
+      "type": "preference",
+      "entities": [
+        "GoPro Hero8 Black",
+        "video quality"
+      ]
+    }
+  ]
+}

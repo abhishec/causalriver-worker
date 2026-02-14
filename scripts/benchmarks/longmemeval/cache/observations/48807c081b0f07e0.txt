@@ -1,0 +1,18 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/23 (Tue) 07:14
+- [ASSISTANT_SAID] The assistant provided an updated Ansible playbook with specified IP addresses for servers.
+- [ASSISTANT_CREATED] The assistant created an Ansible playbook in YAML format that includes tasks for updating and configuring servers.
+- [ASSISTANT_SAID] The playbook specifies hosts with their respective IP addresses: k8s-master (172.28.128.10) and k8s-node1 (172.28.128.11).
+- [ASSISTANT_SAID] The playbook includes tasks for updating packages, checking if a reboot is required, installing required packages, adding a Kubernetes GPG key, adding a Kubernetes repository, installing Kubernetes packages, holding Kubernetes packages at the current version, disabling swap, adding kernel modules, adding sysctl settings, reloading sysctl settings, checking Kubernetes versions, and printing Kubernetes versions.
+- [ASSISTANT_SAID] The assistant noted that the playbook is an example and may need modifications to suit specific use cases.
+- [USER] The user requested to use an inventory and roles to improve the Ansible playbook with a focus on high security.
+- [ASSISTANT_SAID] The assistant provided an updated Ansible playbook that uses an inventory file and roles for better organization and security.
+- [ASSISTANT_CREATED] The assistant created an inventory file named `inventory.ini` with specified hosts and SSH connection details.
+- [ASSISTANT_CREATED] The assistant outlined a directory structure for the Ansible project, including roles for base, Kubernetes, and security.
+- [ASSISTANT_SAID] The inventory file specifies a group called `[k8s-cluster]` with hosts and their IP addresses, and variables for SSH user and private key file.
+- [ASSISTANT_SAID] The assistant provided the content for `roles/base/tasks/main.yml`, which includes tasks for installing basic packages and setting up firewall rules.
+- [ASSISTANT_SAID] The assistant provided the content for `roles/kubernetes/tasks/main.yml`, which includes tasks for adding the Kubernetes GPG key, repository, installing packages, holding packages, disabling swap, enabling kernel modules, and adding sysctl settings.
+- [ASSISTANT_SAID] The assistant provided the content for `roles/k8s/vars/main.yml`, which defines sysctl settings for Kubernetes.
+- [ASSISTANT_SAID] The assistant included a task to verify if a reboot is required and to reboot the servers if necessary after updates.
+- [ASSISTANT_SAID] The assistant emphasized that the playbook can be adjusted to fit specific needs and that the user should replace variables in the inventory file with their own values.

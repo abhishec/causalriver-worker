@@ -1,0 +1,24 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/27 (Sat) 05:29
+- [ASSISTANT_SAID] Here is a sample decision tree for becoming an investment banker.
+- [ASSISTANT_SAID] Node 1: Do you have a bachelor's degree in a relevant field?
+- [ASSISTANT_SAID] If Yes: Proceed to node 2.
+- [ASSISTANT_SAID] If No: Consider earning a bachelor's degree in a field such as finance, economics, or business. Some relevant resources for this node include online courses or degree programs in these fields.
+- [ASSISTANT_SAID] Node 2: Do you have relevant work experience in finance or a related field?
+- [ASSISTANT_SAID] If Yes: Proceed to node 3.
+- [ASSISTANT_SAID] If No: Consider gaining relevant work experience through internships or entry-level positions in finance. Some relevant resources for this node include job boards or career websites, or networking with professionals in the industry.
+- [ASSISTANT_SAID] Node 3: Do you have strong analytical and problem-solving skills?
+- [ASSISTANT_SAID] If Yes: Proceed to node 4.
+- [ASSISTANT_SAID] If No: Consider developing your analytical and problem-solving skills through coursework or practice. Some relevant resources for this node include online tutorials or practice problems.
+- [ASSISTANT_SAID] Node 4: Do you have excellent communication and presentation skills?
+- [ASSISTANT_SAID] If Yes: Proceed to node 5.
+- [ASSISTANT_SAID] If No: Consider developing your communication and presentation skills through coursework or practice. Some relevant resources for this node include public speaking courses or workshops, or participating in group projects or presentations.
+- [ASSISTANT_SAID] Node 5: Do you have strong networking skills and connections in the finance industry?
+- [ASSISTANT_SAID] If Yes: Proceed to node 6.
+- [ASSISTANT_SAID] If No: Consider networking with professionals in the finance industry through events, job fairs, or networking groups. Some relevant resources for this node include industry associations or online networks for finance professionals.
+- [ASSISTANT_SAID] Node 6: Do you have a strong understanding of financial markets and products?
+- [ASSISTANT_SAID] If Yes: Proceed to node 7.
+- [ASSISTANT_SAID] If No: Consider developing your understanding of financial markets and products through coursework or self-study. Some relevant resources for this node include financial news websites, industry reports, or online courses in finance.
+- [ASSISTANT_SAID] Node 7: Do you have strong time management and organizational skills?
+- [ASSISTANT

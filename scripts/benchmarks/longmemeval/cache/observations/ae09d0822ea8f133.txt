@@ -1,0 +1,63 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/20 (Sat) 05:48  
+[USER] User inquired about creating documentation of a method in TypeScript similar to C#.  
+[ASSISTANT_SAID] To create documentation of a method in TypeScript, use JSDoc comments.  
+[ASSISTANT_SAID] JSDoc comments provide a way to annotate code with information about types of parameters, return types, and additional context.  
+[ASSISTANT_SAID] Example format for JSDoc comments:  
+```php
+/**
+ * This is a description of your method
+ * @param {string} param1 - This is a description of the first parameter
+ * @param {number} param2 - This is a description of the second parameter
+ * @returns {boolean} This is a description of the return value
+ */
+function myMethod(param1: string, param2: number): boolean {
+    // Your method code here
+}
+```  
+[ASSISTANT_SAID] When hovering over the method name in VS Code, the JSDoc comments will be displayed as a tooltip.  
+[ASSISTANT_SAID] You can generate documentation from JSDoc comments using tools like TypeDoc.  
+[USER] User asked how to use JSDoc to comment on the different variables in an interface.  
+[ASSISTANT_SAID] To document variables in an interface using JSDoc, add comments to each variable using the following format:  
+```css
+interface MyInterface {
+    /** This is a description of variable1 */
+    variable1: string;
+    /** This is a description of variable2 */
+    variable2: number;
+    /** This is a description of variable3 */
+    variable3: boolean;
+}
+```  
+[ASSISTANT_SAID] Each variable in the interface can be annotated with a JSDoc comment that provides a brief description.  
+[ASSISTANT_SAID] Example of documenting an interface with more complex types:  
+```php
+/**
+ * This is a description of MyInterface
+ */
+interface MyInterface {
+    /**
+     * This is a description of variable1
+     * @type {string}
+     * @minLength 5
+     * @maxLength 10
+     */
+    variable1: string;
+    /**
+     * This is a description of variable2
+     * @type {number}
+     * @minimum 0
+     * @maximum 100
+     */
+    variable2: number;
+    /**
+     * This is a description of variable3
+     * @type {boolean}
+     * @default true
+     */
+    variable3: boolean;
+}
+```  
+[ASSISTANT_SAID] The JSDoc comments can include additional information about the type of each variable, constraints, or default values.  
+[ASSISTANT_S

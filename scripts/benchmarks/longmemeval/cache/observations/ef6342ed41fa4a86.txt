@@ -1,0 +1,26 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/02/14 (Tue) 16:30  
+[FACT] User lives in a roughly 1,200 sq ft apartment with 3 bedrooms.  
+[FACT] User has a weak signal in their bedroom and home office.  
+[FACT] User's router is about 2 years old.  
+[FACT] User has around 10-12 devices connected to their network, including a TV, laptop, and smart speaker.  
+[PREFERENCE] User is open to different brands for a mesh network system but is leaning towards the Google Wifi system due to its ease of setup and integration with their existing Google ecosystem.  
+[EVENT] User has been enjoying streaming on their new TV.  
+[PREFERENCE] User uses Disney+ on their new TV, which they consider a great addition to their entertainment setup.  
+[ASSISTANT_SAID] A mesh network system is a fantastic way to ensure reliable and strong Wi-Fi coverage throughout the home.  
+[ASSISTANT_SAID] The Google Wifi system consists of multiple Wifi points that work together to provide strong, reliable, and seamless Wi-Fi connection.  
+[ASSISTANT_SAID] Each Google Wifi point is a dual-band router that can handle up to 150 Mbps of traffic.  
+[ASSISTANT_SAID] The Google Wifi system uses proprietary mesh technology to dynamically adjust and optimize the network.  
+[ASSISTANT_SAID] The Google Wifi app allows for easy setup and management.  
+[ASSISTANT_SAID] Recommended a 3-pack Google Wifi system for the user's apartment layout.  
+[ASSISTANT_SAID] Suggested placing Wifi point 1 near the current router location, Wifi point 2 in the bedroom, and Wifi point 3 in the home office or a central location.  
+[ASSISTANT_SAID] Suggested using the Google Wifi app to monitor network performance and consider setting up a guest network.  
+[FACT] User is considering upgrading their laptop due to it slowing down lately.  
+[PREFERENCE] User is interested in learning more about the MacBook Air.  
+[FACT] User currently owns a Lenovo ThinkPad.  
+[ASSISTANT_SAID] The MacBook Air features a 13.3-inch Retina display with a resolution of 2560 x 1600 pixels.  
+[ASSISTANT_SAID] The MacBook Air has up to 16GB of RAM and up to 1.5TB of SSD storage.  
+[ASSISTANT_SAID] The MacBook Air has a battery life of up to 12 hours.  
+[ASSISTANT_SAID] The MacBook Air has two Thunderbolt 3 (USB-C) ports and a headphone jack.  
+[ASSISTANT_SAID] Compared the MacBook Air to the Lenovo ThinkPad in terms of design, display

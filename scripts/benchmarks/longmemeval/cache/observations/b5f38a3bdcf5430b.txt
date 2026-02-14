@@ -1,0 +1,19 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/29 (Mon) 12:27  
+[ASSISTANT_SAID] Use cases have been identified for the Annotation screen.  
+[ASSISTANT_SAID] Use case 1: Annotation includes steps for Tagger user to log in, select a task, classify the document, select and place labels, adjust labels, edit labels, change label color, save progress, and repeat until finished.  
+[ASSISTANT_SAID] Use case 2: Review includes steps for Checker user to log in, select a task, review labels, approve or reject labels, modify labels, add comments, and submit the review task.  
+[ASSISTANT_SAID] Use case 3: Navigation includes steps for Tagger or Checker user to log in, select a task, navigate between pages, and jump to specific pages or headings.  
+[ASSISTANT_SAID] Use case 4: Annotation history includes steps for Tagger or Checker user to log in, select a task, click on a label, view annotation history, and review it.  
+[ASSISTANT_SAID] Flows have been identified for the Annotation screen.  
+[ASSISTANT_SAID] Flow 1: Annotation includes steps for Tagger user to select a task, classify the document, select and place labels, adjust labels, edit labels, change label color, save progress, and repeat until finished.  
+[ASSISTANT_SAID] Flow 2: Review includes steps for Checker user to select a task, review labels, approve or reject labels, modify labels, add comments, and submit the review task.  
+[ASSISTANT_SAID] Flow 3: Navigation includes steps for Tagger or Checker user to select a task, navigate between pages, and jump to specific pages or headings.  
+[ASSISTANT_SAID] Flow 4: Annotation history includes steps for Tagger or Checker user to select a task, click on a label, view annotation history, and review it.  
+[ASSISTANT_SAID] Actions have been identified for the Annotation screen.  
+[ASSISTANT_SAID] Actions include selecting classification, selecting label, adjusting label, editing label, changing label color, saving annotation, approving label, rejecting label, modifying label, adding comment, submitting review, navigating pages, jumping to page, and viewing annotation history.  
+[ASSISTANT_SAID] UI Design for the Annotation screen includes a top menu bar, left sidebar, main area, bottom bar, and page navigation buttons.  
+[ASSISTANT_SAID] The top menu bar includes options for Home, Profile, and Logout.  
+[ASSISTANT_SAID] The left sidebar includes options for Classification dropdown, Labels list, Document outline, and Annotation history.  
+[ASSISTANT_S

@@ -1,0 +1,78 @@
+{
+  "answer_872e8da2_1": [
+    {
+      "fact": "User is training for a 5K run",
+      "type": "event",
+      "entities": [
+        "5K run"
+      ]
+    },
+    {
+      "fact": "User has done a 5K run last year",
+      "type": "event",
+      "entities": [
+        "5K run",
+        "last year"
+      ]
+    },
+    {
+      "fact": "User completed the 5K run in 45 minutes",
+      "type": "personal",
+      "entities": [
+        "45 minutes"
+      ]
+    },
+    {
+      "fact": "User is unsure how to pace themselves",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User is considering starting with a base building phase",
+      "type": "preference",
+      "entities": [
+        "base building phase"
+      ]
+    }
+  ],
+  "answer_872e8da2_2": [
+    {
+      "fact": "User is planning a charity bake sale to support the local women's shelter on Dec 15th.",
+      "type": "event",
+      "entities": [
+        "charity bake sale",
+        "local women's shelter",
+        "Dec 15th"
+      ]
+    },
+    {
+      "fact": "User recently got back into running.",
+      "type": "personal",
+      "entities": []
+    },
+    {
+      "fact": "User recently finished a 5K in 35 minutes.",
+      "type": "personal",
+      "entities": [
+        "5K",
+        "35 minutes"
+      ]
+    },
+    {
+      "fact": "User is looking for ideas for baked goods and pricing for the bake sale.",
+      "type": "preference",
+      "entities": [
+        "baked goods",
+        "pricing"
+      ]
+    },
+    {
+      "fact": "User is interested in incorporating the idea of supporting the women's shelter and the holiday season into the bake sale name.",
+      "type": "preference",
+      "entities": [
+        "women's shelter",
+        "holiday season"
+      ]
+    }
+  ]
+}

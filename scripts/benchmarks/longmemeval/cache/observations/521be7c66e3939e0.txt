@@ -1,0 +1,26 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/12/22 (Fri) 12:42
+- [USER] User requested a PowerShell script to use an MP4 video as a screensaver.
+- [ASSISTANT_SAID] Assistant provided a step-by-step guide to set an MP4 video as a screensaver using PowerShell, including commands to create directories, modify registry keys, and a sample script.
+- [ASSISTANT_SAID] The commands included:
+  1. `New-Item -ItemType Directory -Force -Path "C:\Videos"`
+  2. `New-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "SCRNSAVE.EXE" -Value "C:\Windows\System32\mp4screensaver.scr" -PropertyType String -Force`
+  3. `New-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "MP4ScreenSaverConfig" -Value "C:\Videos\video.mp4" -PropertyType String -Force`
+  4. A PowerShell script to play the video.
+  5. `New-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "ScreenSaveActive" -Value "1" -PropertyType DWord -Force`
+  6. `New-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "ScreenSaveTimeOut" -Value "300" -PropertyType DWord -Force`
+- [USER] User reported that the initial solution did not work.
+- [ASSISTANT_SAID] Assistant apologized and provided an alternative approach using a different PowerShell script that utilizes `SendMessage` to launch the screensaver.
+- [ASSISTANT_SAID] The alternative script included:
+  1. Importing necessary libraries.
+  2. Setting the path to the MP4 file.
+  3. Sending messages to the system to activate the screensaver.
+- [USER] User suggested creating an MP4 video option in the drop-down menu for screensaver settings, with an option to select the path to the file.
+- [ASSISTANT_SAID] Assistant explained that adding a custom video option to the drop-down menu in the Screen Saver settings is not possible using PowerShell alone and requires modifying the Windows registry and creating a custom .scr file.
+- [ASSISTANT_SAID] Assistant provided high-level steps to create a custom screensaver option for an MP4 video file, including:
+  1. Creating a folder for the custom screensaver.
+  2. Writing a C# code snippet to create a video screensaver.
+  3. Compiling the code into an executable file.
+  4. Creating a registry key to add the custom screensaver option.
+- [USER] User proposed that it might

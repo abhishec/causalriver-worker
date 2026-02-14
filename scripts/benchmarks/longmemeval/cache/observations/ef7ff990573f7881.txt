@@ -1,0 +1,17 @@
+**Observation Log:**
+
+[FACT] The user attended a photography workshop organized by a local camera store.  
+[FACT] The user is practicing street photography.  
+[PREFERENCE] The user is excited to apply what they learned from the workshop.  
+[PREFERENCE] The user is especially interested in capturing people doing interesting activities like street performers.  
+[EVENT] The user is thinking of using a prime lens, specifically a 50mm lens, for street photography.  
+[ASSISTANT_SAID] The assistant congratulated the user on attending the workshop and provided tips for capturing interesting moments in street photography.  
+[ASSISTANT_SAID] The assistant suggested knowing the camera equipment, developing a keen eye, blending in, shooting in RAW, using zone focusing, anticipating and waiting for moments, being respectful, looking for layers and textures, playing with light, practicing regularly, editing and critiquing photos, and staying flexible.  
+[ASSISTANT_SAID] The assistant provided additional tips, including shooting with a prime lens (e.g., 35mm or 50mm), experimenting with different angles, taking risks, and carrying a notebook for observations.  
+[ASSISTANT_SAID] The assistant provided tips on how to approach street performers and ask for permission to take their photo, including observing from a distance, being respectful and polite, showing genuine interest, and being clear about intentions.  
+[ASSISTANT_SAID] The assistant advised on technical aspects of capturing street performers, recommending using Shutter Priority or Manual mode, a shutter speed of at least 1/500s to 1/1000s, a wide aperture (around f/2.8 to f/4), and keeping ISO low (100-400).  
+[ASSISTANT_SAID] The assistant suggested using continuous autofocus, burst mode, panning techniques, and being mindful of lighting conditions when photographing street performers.  
+[ASSISTANT_SAID] The assistant confirmed that using a 50mm lens is a good idea for street photography, highlighting its advantages such as shallow depth of field, portability, wide aperture, and versatility.  
+[ASSISTANT_SAID] The assistant encouraged the user to get close to the subject, pay attention to the background, and experiment with different apertures to control the amount of blur in the background.  
+[TEMPORAL] The session date is 2024/01/10 (Wed) 08:27.  
+[ASSISTANT_CREATED] The assistant created a list of tips for street photography, including specific camera settings and approaches for photographing street performers.

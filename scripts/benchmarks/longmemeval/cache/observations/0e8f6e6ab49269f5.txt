@@ -1,0 +1,13 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/06/02 (Fri) 10:12  
+[USER] The user asked about the difference between "crash" and "hang".  
+[USER] The user referenced a previous statement made by the assistant regarding a function that can cause a program to crash or hang.  
+[USER] The user requested an example of a situation in which the function would "crash".  
+[ASSISTANT_SAID] The assistant explained that when a program "crashes", it means it has stopped working and exited abnormally.  
+[ASSISTANT_SAID] The assistant stated that a program can crash due to various reasons, such as encountering an error, running out of memory, or encountering an unhandled exception.  
+[ASSISTANT_SAID] The assistant defined "hang" as a state where a program has stopped responding and is not progressing or completing its tasks.  
+[ASSISTANT_SAID] The assistant mentioned that a program can hang due to reasons like an infinite loop or a deadlock in the code.  
+[ASSISTANT_SAID] The assistant provided an example of a function that creates an infinite loop logging "Crash!" to the console, which can cause the program to hang if the console cannot handle the output volume.  
+[ASSISTANT_SAID] The assistant explained that if the function is executed in a browser environment, the browser might hang due to the large volume of output.  
+[ASSISTANT_SAID] The assistant noted that if the function is executed in a Node.js environment with limited memory resources, it might crash due to running out of memory or causing a stack overflow error.

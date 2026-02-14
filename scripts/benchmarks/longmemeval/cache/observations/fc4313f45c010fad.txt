@@ -1,0 +1,64 @@
+### Observation Log
+
+- [TEMPORAL] Session Date: 2023/01/09 (Mon) 18:13
+- [ASSISTANT_SAID] Appointment approval endpoint path: /api/appointments/{appointment_id}/approve/
+- [ASSISTANT_SAID] Appointment approval endpoint method: PUT
+- [ASSISTANT_SAID] Appointment approval headers: Authorization: Bearer token
+- [ASSISTANT_SAID] Appointment approval response: Updated appointment information with is_approved set to true
+- [ASSISTANT_SAID] Appointment approval response shape (JSON): 
+```json
+{
+    "id": "integer",
+    "customer_name": "string",
+    "customer_phone": "string",
+    "vehicle_make": "string",
+    "vehicle_model": "string",
+    "vehicle_year": "integer",
+    "vehicle_color": "string",
+    "notes": "string",
+    "is_approved": "boolean",
+    "timer_total": "integer",
+    "service_id": "integer"
+}
+```
+- [ASSISTANT_SAID] Appointment denial endpoint path: /api/appointments/{appointment_id}/deny/
+- [ASSISTANT_SAID] Appointment denial endpoint method: PUT
+- [ASSISTANT_SAID] Appointment denial headers: Authorization: Bearer token
+- [ASSISTANT_SAID] Appointment denial response: Updated appointment information with is_approved set to false
+- [ASSISTANT_SAID] Appointment denial response shape (JSON): 
+```json
+{
+    "id": "integer",
+    "customer_name": "string",
+    "customer_phone": "string",
+    "vehicle_make": "string",
+    "vehicle_model": "string",
+    "vehicle_year": "integer",
+    "vehicle_color": "string",
+    "notes": "string",
+    "is_approved": "boolean",
+    "timer_total": "integer",
+    "service_id": "integer"
+}
+```
+- [ASSISTANT_SAID] Technician creation endpoint path: /api/technicians/
+- [ASSISTANT_SAID] Technician creation endpoint method: POST
+- [ASSISTANT_SAID] Technician creation headers: Authorization: Bearer token
+- [ASSISTANT_SAID] Technician creation request shape (JSON): 
+```json
+{
+    "first_name": "string",
+    "last_name": "string",
+    "personal_email": "string",
+    "phone_number": "string",
+    "client_id": "integer"
+}
+```
+- [ASSISTANT_SAID] Technician creation response: New technician information
+- [ASSISTANT_SAID] Technician creation response shape (JSON): 
+```json
+{
+    "id": "integer",
+    "employee_id": "string",
+    "first_name": "string",
+    "last_name

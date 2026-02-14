@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/23 (Tue) 20:35
+- [ASSISTANT_SAID] It is difficult to predict the state of blockchain technology in 20 years due to its rapidly evolving nature.
+- [ASSISTANT_SAID] Advances in blockchain technology and computational resources could potentially allow for running a large language model on a blockchain network in the future.
+- [ASSISTANT_SAID] Blockchain networks may provide faster processing speeds, more computational resources, and larger storage capacity as technology advances.
+- [ASSISTANT_SAID] Running a large language model on a blockchain network would likely be less efficient than on a centralized system due to the decentralized nature of blockchain networks.
+- [ASSISTANT_SAID] The energy consumption of blockchain networks, especially those using proof-of-work consensus algorithms, is significantly higher than centralized systems.
+- [ASSISTANT_SAID] While advances in blockchain technology could make it feasible to run a large language model on a blockchain network, it is currently impractical and challenging with significant limitations in performance and energy consumption.
+- [USER] Asked how many years it would take for the fastest blockchain to catch up to the TPS (transactions per second) requirements of a large language model.
+- [ASSISTANT_SAID] It is difficult to predict how many years it would take for the fastest blockchain to meet the TPS requirements of a large language model.
+- [ASSISTANT_SAID] The fastest public blockchain networks can process a few hundred transactions per second, while a large language model would likely require thousands or millions of TPS.
+- [ASSISTANT_SAID] Current fast blockchains include Solana (over 65,000 TPS), EOSIO (over 4,000 TPS), and Algorand (over 1,000 TPS).
+- [ASSISTANT_SAID] Private blockchains like Chain and Hyperledger Fabric can also process thousands of transactions per second.
+- [ASSISTANT_SAID] TPS numbers are approximate and may vary based on specific implementations and resources available on the network.
+- [ASSISTANT_SAID] Other important factors for running a large language model on a blockchain include computational resources, storage capacity, and network latency.
+- [USER] Asked about blockchain-related services procured by the U.S. government as of the assistant's knowledge cutoff.
+- [ASSISTANT_SAID] The U.S. government has procured blockchain-related services for supply chain management, identity management, cybersecurity, and financial services.
+- [ASSISTANT_SAID] The Department of Defense has explored blockchain for supply chain management, including a pilot project for tracking medical supplies.
+- [ASSISTANT_SAID] The General Services Administration has explored blockchain for identity management and authentication.
+- [ASSISTANT_SAID] The Cybersecurity and Infrastructure Security Agency has

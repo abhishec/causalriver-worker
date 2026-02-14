@@ -1,0 +1,47 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/25 (Thu) 19:03
+- [EVENT] User is considering getting a bird feeder for their backyard.
+- [PREFERENCE] User is unsure about what type of seed to use for the bird feeder.
+- [EVENT] User recently attended a bird watching workshop at the local Audubon society a month ago.
+- [ASSISTANT_SAID] Attracting birds to the yard can be a wonderful hobby.
+- [ASSISTANT_SAID] Recommended all-purpose seed mix should include: 
+  - Black oil sunflower seeds
+  - Nyjer seed (thistle)
+  - Safflower seeds
+  - Suet
+  - Fruit and nuts
+- [ASSISTANT_SAID] Suggested percentages for a good all-purpose mix:
+  - 20-30% black oil sunflower seeds
+  - 20-30% Nyjer seed
+  - 20-30% safflower seeds
+  - 10-20% suet
+  - 10-20% fruit and nuts
+- [ASSISTANT_SAID] Popular bird seed brands that offer good all-purpose mixes include:
+  - Audubon Park
+  - Perky-Pet
+  - Wild Birds Unlimited
+  - Droll Yankees
+- [ASSISTANT_SAID] Tips to attract a variety of birds to the feeder:
+  - Place feeder in an area that receives morning sun and is protected from strong winds and predators.
+  - Keep feeder clean and well-maintained.
+  - Provide a source of water, like a birdbath or pond.
+  - Plant native vegetation and flowers for shelter, food, and nesting sites.
+- [EVENT] User is also thinking of getting a birdbath to go along with the feeder.
+- [ASSISTANT_SAID] Recommended features for an easy-to-clean birdbath:
+  - Shallow depth (around 1-2 inches) and wide basin.
+  - Smooth, non-porous surfaces (ceramic, glass, or plastic).
+  - Built-in drainage holes or removable plug.
+  - Lightweight and easy-to-lift design.
+- [ASSISTANT_SAID] Suggested popular birdbath brands:
+  - Bird Brain
+  - Perky-Pet
+  - Droll Yankees
+- [ASSISTANT_SAID] Tips for selecting a birdbath:
+  - Size should accommodate the number of birds expected.
+  - Avoid materials that can harbor bacteria (concrete or wood).
+  - Position in partial shade to reduce algae growth.
+  - Clean regularly with a soft brush and mild soap.
+- [EVENT] User is thinking about getting a field guide to learn more about different bird species and their habits.
+- [ASSISTANT_SAID] Recommended field guides for beginners:
+  - National Audubon Society Field Guide to Birds

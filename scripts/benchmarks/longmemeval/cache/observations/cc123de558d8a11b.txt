@@ -1,0 +1,33 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/20 (Sat) 20:20
+- [FACT] User is considering taking a cooking class to improve their skills, especially with Asian cuisine.
+- [PREFERENCE] User is interested in Korean and Thai cooking classes.
+- [EVENT] User recently had lunch at Hwang's Kitchen in downtown.
+- [PREFERENCE] User enjoyed bulgogi and spicy pork tacos at Hwang's Kitchen.
+- [ASSISTANT_SAID] Assistant expressed happiness to help with cooking class recommendations but clarified that it does not have real-time information about specific cities or locations.
+- [ASSISTANT_SAID] Assistant provided general suggestions and online resources for cooking classes, including:
+  - Masterclass: Offers online cooking classes taught by experienced chefs, including Korean and Thai cuisine.
+  - Cookpad: A popular online cooking platform that offers various Asian cooking classes, including Korean and Thai.
+  - Udemy: Provides online cooking courses on Korean and Thai cuisine, taught by experienced chefs and home cooks.
+- [ASSISTANT_SAID] Assistant suggested searching for local cooking schools that specialize in Asian cuisine and checking online review sites like Yelp or Google Reviews.
+- [ASSISTANT_SAID] Assistant mentioned that many Asian cultural centers or language schools offer cooking classes as part of their cultural programs.
+- [ASSISTANT_SAID] Assistant recommended joining local cooking Meetup groups that focus on Asian cuisine.
+- [ASSISTANT_SAID] Assistant suggested asking the chef or staff at Hwang's Kitchen if they offer cooking classes or workshops.
+- [ASSISTANT_SAID] Assistant advised researching and reading reviews before signing up for any cooking class.
+- [USER] User asked if Hwang's Kitchen would share their recipe for bulgogi and spicy pork tacos if they asked.
+- [ASSISTANT_SAID] Assistant encouraged the user to ask politely and express admiration for the dish, but noted that recipes can be valuable intellectual property for restaurants.
+- [ASSISTANT_SAID] Assistant provided suggestions for asking for recipes or cooking tips, including:
+  - Asking politely and respectfully.
+  - Showing genuine interest in cooking experiences.
+  - Being open to alternatives if the exact recipe is not shared.
+  - Offering to trade recipes.
+- [USER] User inquired about specific ingredients or cooking techniques that make Hwang's Kitchen's bulgogi and spicy pork tacos stand out.
+- [ASSISTANT_SAID] Assistant listed possible factors that contribute to the distinct flavor and popularity of bulgogi and spicy pork tacos, including:
+  - Marinade quality and ingredients.
+  - Type and quality of meat used.
+  - Grilling technique.
+  - Custom spice blends for spicy pork tacos.
+  - Quality of tortillas used.
+  - Korean-Mexican fusion elements.
+- [USER] User asked if it was possible to

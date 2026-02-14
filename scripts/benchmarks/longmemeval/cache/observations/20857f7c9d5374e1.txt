@@ -1,0 +1,22 @@
+**Observation Log:**
+
+- [FACT] The user is working on a literature review.
+- [FACT] The user is organizing their sources better.
+- [FACT] The user received positive feedback from their advisor one week after submitting their thesis proposal.
+- [PREFERENCE] The user feels motivated to stay on track with their research.
+- [ASSISTANT_SAID] The assistant congratulated the user on the positive feedback from their advisor.
+- [ASSISTANT_SAID] The assistant recommended several citation management tools: Mendeley, Zotero, EndNote, Cite This For Me, Papers, Citavi, and ReadCube.
+- [ASSISTANT_SAID] Mendeley is described as a popular, free reference manager with a large academic community that allows organizing papers, annotating PDFs, and collaborating with others.
+- [ASSISTANT_SAID] Zotero is described as a free, open-source citation manager that is highly customizable and integrates with Microsoft Word, Google Docs, and LibreOffice.
+- [ASSISTANT_SAID] EndNote is described as a commercial citation manager widely used in academia, offering advanced features like automatic citation formatting and collaboration tools.
+- [ASSISTANT_SAID] Cite This For Me is a web-based citation tool that allows creating and organizing citations in various styles and includes a plagiarism checker and grammar editor.
+- [ASSISTANT_SAID] Papers is described as a commercial reference manager designed for researchers, offering a clean interface and collaboration features.
+- [ASSISTANT_SAID] Citavi is described as a comprehensive research management tool that includes citation management, note-taking, and task management features.
+- [ASSISTANT_SAID] ReadCube is described as a free reference manager that allows organizing papers, annotating PDFs, and discovering new research.
+- [ASSISTANT_SAID] The assistant advised the user to explore the features and user interfaces of each tool to determine which one works best for them.
+- [ASSISTANT_SAID] The assistant provided tips for ensuring comprehensive coverage of literature in the user's field, including starting with a broad search, using multiple databases, searching beyond journals, citation tracking, analyzing citation networks, consulting with experts, using systematic review methods, maintaining a "parked" list, regularly updating searches, and using literature mapping tools.
+- [USER] The user decided to give Mendeley a try based on positive feedback from peers.
+- [USER] The user has just started using Mendeley and finds it user-friendly.
+- [USER] The user has imported all their references and created a basic folder structure in Mendeley.
+- [USER] The user is trying to decide on the best way to organize their literature review.
+- [ASSISTANT_SAID] The assistant provided tips for creating an effective outline for the literature review, including starting with the research question, identifying scope and boundaries, conducting a preliminary analysis

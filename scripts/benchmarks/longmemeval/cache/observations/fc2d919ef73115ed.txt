@@ -1,0 +1,27 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/04/02 (Sun) 12:46  
+[EVENT] User is trying to get back on track with their yoga routine after a retreat.  
+[EVENT] User had a work meeting that conflicted with their yoga class schedule last Thursday.  
+[CHANGE] User is trying to find a way to avoid scheduling conflicts in the future.  
+[PREFERENCE] User is considering practicing yoga at home more often.  
+[ASSISTANT_SAID] Assistant is happy to help the user get back on track with their yoga routine.  
+[ASSISTANT_SAID] Assistant recommends using planners or apps to manage time effectively.  
+[ASSISTANT_SAID] Assistant lists popular digital planners and apps: Google Calendar, Apple Calendar, Any.do, Fantastical, Yoga Studio.  
+[ASSISTANT_SAID] Assistant lists popular physical planners: Erin Condren LifePlanner, Passion Planner, Happy Planner, Day Designer.  
+[ASSISTANT_SAID] Assistant provides tips for using a planner or app: set a specific yoga practice schedule, prioritize tasks, use reminders, review and adjust.  
+[PREFERENCE] User thinks they will try out Google Calendar since they already use it for work.  
+[ASSISTANT_SAID] Assistant confirms Google Calendar is a fantastic tool for managing time.  
+[PREFERENCE] User asks for more information about the Yoga Studio app.  
+[ASSISTANT_SAID] Assistant describes Yoga Studio as a comprehensive yoga app with guided classes and tracking capabilities.  
+[ASSISTANT_SAID] Assistant lists features of Yoga Studio: guided classes, customizable practices, pose library, tracking and analytics, community, integrations.  
+[ASSISTANT_SAID] Assistant mentions Yoga Studio offers a free version with limited content and a premium subscription (Yoga Studio PRO).  
+[ASSISTANT_SAID] Assistant lists pros and cons of Yoga Studio.  
+[PREFERENCE] User decides to try the free version of Yoga Studio.  
+[EVENT] User is experiencing back pain and asks if Yoga Studio has classes for that.  
+[ASSISTANT_SAID] Assistant confirms Yoga Studio has classes specifically designed for back pain, including Back Care classes.  
+[ASSISTANT_SAID] Assistant lists types of classes available for back pain: Back Pain Relief, Spinal Health, Lower Back Relief, Upper Back Relief.  
+[PREFERENCE] User plans to check out the Back Care section and start with gentle classes.  
+[EVENT] User missed their yoga class last Thursday due to a work meeting and is thinking of practicing at home on Thursdays instead.  
+[PREFERENCE] User wants to recreate the sequencing and focus on breathing and alignment like their instructor Rachel does in her classes.  
+[ASSISTANT_SAID] Assistant explains that Yoga Studio's customizable practices can help the user create a routine similar to Rachel's classes

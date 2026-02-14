@@ -1,0 +1,16 @@
+**Observation Log:**
+
+- [FACT] User is planning a new photography project and has a Canon 24-70mm f/2.8 lens.
+- [TEMPORAL] User bought the Canon 24-70mm f/2.8 lens on February 10th.
+- [ASSISTANT_SAID] The Canon 24-70mm f/2.8 is a fantastic lens for low-light photography.
+- [ASSISTANT_SAID] Tips for low-light photography include understanding the exposure triangle, using the correct ISO (1600-6400), slowing down shutter speed, adjusting white balance, using the lens's sweet spot (f/4-f/5.6), experimenting with composition, using a tripod or monopod, bracketing shots, shooting in RAW, and practicing.
+- [FACT] User has a Nikon D750 camera body, which they have had since 2018.
+- [ASSISTANT_SAID] The Nikon D750's ISO performance is excellent, with a base ISO range of 100-400, a good ISO range of 800-1600, a high ISO range of 3200-6400, a pushed ISO range of 12800-25600, and an extended ISO range of 51200 and above.
+- [ASSISTANT_SAID] For low-light photography, the user may need to venture into higher ISO ranges while balancing light and noise levels.
+- [EVENT] User attended a photography workshop in San Francisco focused on portrait photography.
+- [RELATIONSHIP] User's instructor at the workshop was named Rachel.
+- [ASSISTANT_SAID] Tips for using natural light in portrait photography include taking advantage of golden hour, using open shade, experimenting with backlighting, using reflectors, and being mindful of the direction of light.
+- [PREFERENCE] User is particularly interested in learning how to work with available light to create flattering portraits.
+- [FACT] User has been using the Nikon D750 for various photography projects.
+- [PREFERENCE] User struggles with adjusting to changing light conditions when shooting outdoors.
+- [ASSISTANT_SAID] Tips for quickly adjusting to changing light conditions include monitoring surroundings, using the camera's metering mode, and being prepared to adjust settings accordingly.

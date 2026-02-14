@@ -1,0 +1,66 @@
+{
+  "answer_550bb2d1_1": [
+    {
+      "fact": "User lives in the city",
+      "type": "personal",
+      "entities": [
+        "city"
+      ]
+    },
+    {
+      "fact": "User prefers running on roads",
+      "type": "preference",
+      "entities": [
+        "roads"
+      ]
+    },
+    {
+      "fact": "User is looking for flat and easy to navigate routes",
+      "type": "preference",
+      "entities": [
+        "flat routes",
+        "easy to navigate routes"
+      ]
+    },
+    {
+      "fact": "User prefers routes with minimal traffic",
+      "type": "preference",
+      "entities": [
+        "minimal traffic"
+      ]
+    },
+    {
+      "fact": "User usually runs in the morning, around 7-8 am",
+      "type": "personal",
+      "entities": [
+        "morning",
+        "7-8 am"
+      ]
+    },
+    {
+      "fact": "User prefers routes with good lighting and sidewalks or pedestrian paths",
+      "type": "preference",
+      "entities": [
+        "good lighting",
+        "sidewalks",
+        "pedestrian paths"
+      ]
+    },
+    {
+      "fact": "User completed a 5K charity run in 27 minutes and 12 seconds",
+      "type": "event",
+      "entities": [
+        "5K charity run",
+        "27 minutes and 12 seconds"
+      ]
+    },
+    {
+      "fact": "User finds completing the 5K run a great motivator",
+      "type": "opinion",
+      "entities": [
+        "5K run",
+        "motivator"
+      ]
+    }
+  ]
+}

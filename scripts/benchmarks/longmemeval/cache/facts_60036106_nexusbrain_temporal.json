@@ -1,0 +1,111 @@
+{
+  "answer_e552e1f9_2": [
+    {
+      "fact": "User is trying to improve their Instagram engagement.",
+      "type": "preference",
+      "entities": [
+        "Instagram engagement"
+      ]
+    },
+    {
+      "fact": "User recently collaborated with an influencer who promoted their product to her 10,000 followers.",
+      "type": "event",
+      "entities": [
+        "influencer",
+        "10,000 followers"
+      ]
+    },
+    {
+      "fact": "User's product is handmade jewelry.",
+      "type": "personal",
+      "entities": [
+        "handmade jewelry"
+      ]
+    },
+    {
+      "fact": "User's target audience is young adults interested in unique accessories.",
+      "type": "personal",
+      "entities": [
+        "young adults",
+        "unique accessories"
+      ]
+    },
+    {
+      "fact": "User is interested in using hashtags related to handmade jewelry, unique accessories, and indie fashion.",
+      "type": "preference",
+      "entities": [
+        "handmade jewelry",
+        "unique accessories",
+        "indie fashion"
+      ]
+    }
+  ],
+  "answer_e552e1f9_1": [
+    {
+      "fact": "User's business operates in the e-commerce niche",
+      "type": "personal",
+      "entities": [
+        "e-commerce"
+      ]
+    },
+    {
+      "fact": "User offers handmade home decor products",
+      "type": "personal",
+      "entities": [
+        "handmade home decor products"
+      ]
+    },
+    {
+      "fact": "User's ideal customer is a female between 25-45 years old",
+      "type": "preference",
+      "entities": [
+        "female",
+        "25-45 years old"
+      ]
+    },
+    {
+      "fact": "User's ideal customer values unique, eco-friendly products",
+      "type": "preference",
+      "entities": [
+        "unique products",
+        "eco-friendly products"
+      ]
+    },
+    {
+      "fact": "The goal of user's previous campaign was to drive website traffic and increase brand awareness",
+      "type": "event",
+      "entities": [
+        "website traffic",
+        "brand awareness"
+      ]
+    },
+    {
+      "fact": "User's ad content included a high-quality image of a product with a brief description and a call-to-action",
+      "type": "event",
+      "entities": [
+        "high-quality image",
+        "brief description",
+        "call-to-action"
+      ]
+    },
+    {
+      "fact": "User's budget for the previous campaign was around $100",
+      "type": "event",
+      "entities": [
+        "$100"
+      ]
+    },
+    {
+      "fact": "User received 50 clicks to their website from the previous campaign",
+      "type": "event",
+      "entities": [
+        "50 clicks"
+      ]
+    },
+    {
+      "fact": "User is happy with the results of their previous campaign",
+      "type": "opinion",
+      "entities": []
+    }
+  ]
+}

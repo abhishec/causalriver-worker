@@ -1,0 +1,107 @@
+{
+  "answer_e0956e0a_1": [
+    {
+      "fact": "User is having issues with their wireless mouse and is considering replacing it.",
+      "type": "opinion",
+      "entities": [
+        "wireless mouse"
+      ]
+    },
+    {
+      "fact": "User is trying to reduce waste and be more environmentally friendly.",
+      "type": "preference",
+      "entities": [
+        "environmental friendliness",
+        "waste reduction"
+      ]
+    },
+    {
+      "fact": "User prefers a wireless mouse with a rechargeable battery.",
+      "type": "preference",
+      "entities": [
+        "wireless mouse",
+        "rechargeable battery"
+      ]
+    },
+    {
+      "fact": "User's backpack is super comfortable and spacious enough for their laptop and chargers.",
+      "type": "opinion",
+      "entities": [
+        "backpack",
+        "laptop",
+        "chargers"
+      ]
+    },
+    {
+      "fact": "User uses their backpack to carry their work laptop to and from the office every day.",
+      "type": "event",
+      "entities": [
+        "backpack",
+        "work laptop",
+        "office"
+      ]
+    },
+    {
+      "fact": "User bought their backpack from Amazon on January 15.",
+      "type": "event",
+      "entities": [
+        "backpack",
+        "Amazon",
+        "January 15"
+      ]
+    }
+  ],
+  "answer_e0956e0a_2": [
+    {
+      "fact": "User is considering getting a new wireless mouse.",
+      "type": "preference",
+      "entities": [
+        "wireless mouse"
+      ]
+    },
+    {
+      "fact": "User's current mouse has been acting up.",
+      "type": "opinion",
+      "entities": [
+        "current mouse"
+      ]
+    },
+    {
+      "fact": "User has started using a new laptop backpack.",
+      "type": "personal",
+      "entities": [
+        "laptop backpack"
+      ]
+    },
+    {
+      "fact": "User's new laptop backpack arrived on 1/20.",
+      "type": "event",
+      "entities": [
+        "1/20"
+      ]
+    },
+    {
+      "fact": "User finds the new laptop backpack to be a lifesaver for carrying their work laptop.",
+      "type": "opinion",
+      "entities": [
+        "laptop backpack",
+        "work laptop"
+      ]
+    },
+    {
+      "fact": "User is looking for a mid-range wireless mouse.",
+      "type": "preference",
+      "entities": [
+        "mid-range wireless mouse"
+      ]
+    },
+    {
+      "fact": "User is curious about the sensor accuracy of the Logitech MX Anywhere 2S.",
+      "type": "preference",
+      "entities": [
+        "Logitech MX Anywhere 2S",
+        "sensor accuracy"
+      ]
+    }
+  ]
+}

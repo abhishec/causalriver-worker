@@ -1,0 +1,95 @@
+{
+  "answer_47152166_2": [
+    {
+      "fact": "User is looking for new workout playlists.",
+      "type": "preference",
+      "entities": [
+        "workout playlists"
+      ]
+    },
+    {
+      "fact": "User recently started a yoga class on Wednesdays.",
+      "type": "event",
+      "entities": [
+        "yoga class",
+        "Wednesdays"
+      ]
+    },
+    {
+      "fact": "User finds yoga helpful for stretching muscles after a long day.",
+      "type": "opinion",
+      "entities": [
+        "yoga",
+        "stretching muscles"
+      ]
+    },
+    {
+      "fact": "User is looking for something to keep them pumped up during weightlifting class on Saturdays.",
+      "type": "preference",
+      "entities": [
+        "weightlifting class",
+        "Saturdays"
+      ]
+    }
+  ],
+  "answer_47152166_1": [
+    {
+      "fact": "User attends Zumba classes on Tuesdays and Thursdays at 6:30 pm",
+      "type": "event",
+      "entities": [
+        "Zumba classes",
+        "Tuesdays",
+        "Thursdays",
+        "6:30 pm"
+      ]
+    },
+    {
+      "fact": "User attends a weightlifting class on Saturdays at 10 am",
+      "type": "event",
+      "entities": [
+        "weightlifting class",
+        "Saturdays",
+        "10 am"
+      ]
+    },
+    {
+      "fact": "User wants to log workouts on their fitness app after each class",
+      "type": "preference",
+      "entities": [
+        "fitness app",
+        "workouts"
+      ]
+    },
+    {
+      "fact": "User is considering trying out a new playlist for Zumba classes",
+      "type": "preference",
+      "entities": [
+        "playlist",
+        "Zumba classes"
+      ]
+    },
+    {
+      "fact": "User prefers a mix of Latin-inspired tracks and upbeat pop anthems for their playlist",
+      "type": "preference",
+      "entities": [
+        "Latin-inspired tracks",
+        "upbeat pop anthems"
+      ]
+    },
+    {
+      "fact": "User's instructor is named Maria",
+      "type": "relationship",
+      "entities": [
+        "Maria"
+      ]
+    },
+    {
+      "fact": "User believes energetic songs will get everyone moving in class",
+      "type": "opinion",
+      "entities": [
+        "energetic songs",
+        "class"
+      ]
+    }
+  ]
+}

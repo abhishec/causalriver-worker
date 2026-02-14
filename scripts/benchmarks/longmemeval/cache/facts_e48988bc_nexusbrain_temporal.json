@@ -1,0 +1,20 @@
+{
+  "answer_ultrachat_174360": [
+    {
+      "fact": "User appreciates companies that take initiative to be environmentally responsible.",
+      "type": "opinion",
+      "entities": [
+        "Patagonia",
+        "environmental responsibility"
+      ]
+    },
+    {
+      "fact": "User hopes more companies prioritize sustainability in their supply chain practices.",
+      "type": "opinion",
+      "entities": [
+        "sustainability",
+        "supply chain practices"
+      ]
+    }
+  ]
+}

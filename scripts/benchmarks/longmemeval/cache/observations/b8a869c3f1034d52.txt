@@ -1,0 +1,48 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/03/17 (Fri) 17:24  
+[USER] The user is working with TypeScript and discussing a function named `getMany`.  
+[USER] The user wants the `getMany` function to take a generic argument that specifies the value type for each KV entry result.  
+[USER] The user wants to ensure that the output array's length is the same as the input array.  
+[ASSISTANT_SAID] The assistant provided a modified version of the `getMany` function that uses mapped types and tuple utility types in TypeScript.  
+[ASSISTANT_CREATED] The assistant created the following TypeScript code for the `getMany` function:
+```ts
+type KvKey = string | number | symbol;
+type KvConsistencyLevel = 'strong' | 'eventual';
+type KvEntryMaybe<T> = T | null;
+
+function getMany<T extends unknown[]>(
+  keys: { [K in keyof T]: KvKey },
+  options?: { consistency?: KvConsistencyLevel },
+): Promise<{ [K in keyof T]: KvEntryMaybe<T[K]> }> {
+  // Your implementation here
+}
+```
+[ASSISTANT_SAID] The assistant explained that the generic argument `T` is extended from `unknown[]`, and the return type ensures that the output array's length matches the input array.  
+[ASSISTANT_SAID] The assistant provided an example usage of the `getMany` function:
+```ts
+async function main() {
+  const [result1, result2] = await getMany<[string, number]>(['key1', 'key2']);
+  // result1 will be inferred as KvEntryMaybe<string>
+  // result2 will be inferred as KvEntryMaybe<number>
+}
+```
+[USER] The user stated that they cannot pass `as const` arrays to the `getMany` function.  
+[ASSISTANT_SAID] The assistant apologized for the confusion and provided a modified version of the `getMany` function to support `as const` arrays.  
+[ASSISTANT_CREATED] The assistant created the following modified TypeScript code for the `getMany` function:
+```ts
+type KvKey = string | number | symbol;
+type KvConsistencyLevel = 'strong' | 'eventual';
+type KvEntryMaybe<T> = T | null;
+
+function getMany<T extends readonly unknown[]>(
+  keys: readonly [...{ [K in keyof T]: KvKey }],
+  options?: { consistency?: KvConsistencyLevel },
+): Promise<{ [K in keyof T]: KvEntryMaybe<T[K]> }> {
+  // Your implementation here
+}
+
+async function main() {
+  const [result1, result2] = await getMany(['key1', 'key2'] as const);
+  // result1 will be inferred as KvEntryMaybe<string>
+  // result

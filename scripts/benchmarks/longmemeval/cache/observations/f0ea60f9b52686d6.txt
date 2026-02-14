@@ -1,0 +1,17 @@
+**Observation Log:**
+
+- [FACT] The user's name is Damian, also referred to as Drongo.
+- [FACT] The user is involved in research related to functional neural interfaces (FNIs) and nano functional neural interfaces (nFNIs).
+- [FACT] The user participated in the 2020 summer undergraduate research program in Computational Neuroscience hosted by Carnegie Mellon University and the University of Pittsburgh.
+- [FACT] The user worked in Dr. Aaron Batista’s lab under the guidance of graduate student Erinn Grigsby.
+- [FACT] The user is currently conducting a formal independent study into neural nanotransducers.
+- [FACT] The user is part of a team at Worcester Polytechnic Institute, guided by Dr. Dirk Albrecht, investigating deep brain stimulation (DBS) dosing in disorders such as Parkinson’s Disease, dystonia, essential tremor, and epilepsy.
+- [PREFERENCE] The user is specifically interested in researching nFNIs to create minimally invasive systems for high-resolution, bidirectional communication with the nervous system.
+- [EVENT] The user virtually presented their work at the Center of the Neural Basis of Cognition.
+- [EVENT] The user plans to make their dissertation at Rice University focused on the exploration of nanowires composed of magnetic nanoparticles as relay nFNIs.
+- [CHANGE] The user has transitioned from working independently during the summer research program to being part of a team for their senior thesis.
+- [TEMPORAL] The session date is 2023/05/20 (Sat) 01:24.
+- [RELATIONSHIP] The user mentions Dr. Aaron Batista and Erinn Grigsby as mentors in their research experience.
+- [RELATIONSHIP] The user mentions Dr. Dirk Albrecht as a guide for their senior thesis project.
+- [ASSISTANT_SAID] The assistant provided a summary of the user's research focus, highlighting the aim to create a minimally invasive system for communication with the nervous system.
+- [ASSISTANT_CREATED] The assistant created a structured summary of the user's research experiences and aspirations, emphasizing their goals in the field of nFNIs and brain-computer interfaces (BCIs).

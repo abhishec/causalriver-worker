@@ -1,0 +1,54 @@
+{
+  "answer_586de428": [
+    {
+      "fact": "User has a growing collection of vintage cameras.",
+      "type": "personal",
+      "entities": [
+        "vintage cameras"
+      ]
+    },
+    {
+      "fact": "User currently has 17 cameras in their collection.",
+      "type": "personal",
+      "entities": [
+        "17 cameras"
+      ]
+    },
+    {
+      "fact": "User recently acquired a Brownie Hawkeye camera.",
+      "type": "event",
+      "entities": [
+        "Brownie Hawkeye"
+      ]
+    },
+    {
+      "fact": "User is looking for advice on how to properly store and maintain their cameras.",
+      "type": "preference",
+      "entities": [
+        "storage",
+        "maintenance"
+      ]
+    },
+    {
+      "fact": "User is curious about the best way to display their cameras.",
+      "type": "preference",
+      "entities": [
+        "display"
+      ]
+    },
+    {
+      "fact": "User has organized their camera collection.",
+      "type": "event",
+      "entities": [
+        "organized collection"
+      ]
+    },
+    {
+      "fact": "User has their cameras displayed on a shelf.",
+      "type": "personal",
+      "entities": [
+        "shelf"
+      ]
+    }
+  ]
+}

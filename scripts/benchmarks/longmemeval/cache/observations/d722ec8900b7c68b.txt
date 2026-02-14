@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [FACT] The user is planning a team-building event for their company.
+- [FACT] The user went to Knott's Berry Farm with coworkers for their company's summer outing.
+- [PREFERENCE] The user enjoyed their experience at Knott's Berry Farm and is looking for other amusement parks for corporate events.
+- [EVENT] The user is considering Disneyland Resort for their corporate event.
+- [TEMPORAL] The session date is 2023/12/03 (Sun) at 11:10.
+- [ASSISTANT_SAID] The assistant recommended several amusement parks for corporate events, including Disneyland Resort, Six Flags Magic Mountain, Universal Studios Hollywood, Cedar Point, Busch Gardens Tampa Bay, Hersheypark, Silver Dollar City, and Dollywood.
+- [ASSISTANT_SAID] The assistant provided tips for planning the event, including considering group size, budget, food and beverages, and activities.
+- [EVENT] The user is considering booking a private event space at Disneyland.
+- [ASSISTANT_SAID] The assistant provided details about Disneyland Resort's group events, corporate event packages, and discounts for large groups.
+- [ASSISTANT_SAID] The assistant highlighted the benefits of having a private event space at Disneyland, including exclusivity, customization, convenience, VIP treatment, and memorable experiences.
+- [PREFERENCE] The user thinks a private event space would be a great way to make their corporate event stand out.
+- [EVENT] The user is considering booking the Grand Ballroom at the Disneyland Hotel for their corporate event.
+- [ASSISTANT_SAID] The assistant confirmed that the Grand Ballroom is a popular choice for corporate events and provided details about its capacity, amenities, and proximity to Disneyland Park.
+- [FACT] The Grand Ballroom can accommodate up to 1,200 guests.
+- [ASSISTANT_SAID] The assistant mentioned that the Grand Ballroom features advanced audio-visual equipment, high-speed internet, and a built-in stage.
+- [EVENT] The user is considering booking a character breakfast at the Plaza Inn for their corporate event.
+- [PREFERENCE] The user is unsure if a character breakfast is suitable for adults and is questioning if it is the right fit for a corporate event.
+- [FACT] The user has been to the Plaza Inn for their niece's birthday and found it fun.

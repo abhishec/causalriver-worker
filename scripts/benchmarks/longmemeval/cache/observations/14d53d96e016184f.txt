@@ -1,0 +1,32 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/23 (Tue) 01:59  
+[USER] User requested a table listing steps performed by an attacker, related technical controls, and NIST controls for a cyberattack on Capital One.  
+[ASSISTANT_SAID] Assistant provided a table with the following details:  
+- Stage 1: Anonymizing services (TOR, VPN) usage  
+  - Technical Controls: Monitor and block anonymized traffic, IP reputation management  
+  - CSF NIST Failed Controls: PR.AC-4, PR.IP-3, PR.AT-1, DE.CM-7, DE.CM-8  
+- Stage 2: SSRF attack & access to private server  
+  - Technical Controls: Implement proper input validation, SSRF vulnerability patching  
+  - CSF NIST Failed Controls: PR.IP-3, PR.IP-6, PR.DS-1, PR.DS-2, PR.DS-5  
+- Stage 3: WAF misconfiguration  
+  - Technical Controls: Regular WAF reviews, proper configuration management  
+  - CSF NIST Failed Controls: PR.AC-1, PR.AC-5, PR.IP-1, PR.IP-2, PR.PT-3  
+- Stage 4: Obtain temporary credentials  
+  - Technical Controls: Restrict IAM roles, enforce least privilege principle  
+  - CSF NIST Failed Controls: PR.AC-4, PR.AC-6, PR.PT-1, PR.PT-4, PR.MA-1  
+- Stage 5: Listing all S3 Buckets  
+  - Technical Controls: Implement access control policies, bucket-level encryption  
+  - CSF NIST Failed Controls: PR.AC-1, PR.DS-2, PR.DS-4, PR.DS-5, PR.MA-1  
+- Stage 6: Data exfiltration from S3 buckets  
+  - Technical Controls: Enable data loss prevention, monitor for unusual data transfers  
+  - CSF NIST Failed Controls: DE.CM-2, DE.CM-7, DE.CM-8, DE.DP-1, DE.DP-4  
+[USER] User requested a state diagram of the attack in Mermaid code.  
+[ASSISTANT_CREATED] Assistant provided the following Mermaid code for the state diagram:  
+```mermaid
+stateDiagram-v2
+    [*] --> AnonymizingServices: 1. Anonymizing Services (TOR, VPN) usage
+    AnonymizingServices --> SSRFAttack: 2. SSRF attack & access to private server
+    SSRFAttack --> WAFMisconfiguration: 3. WAF misconfiguration
+    WAFMisconfiguration --> ObtainTemporaryCredentials: 4. Obtain temporary credentials
+    Obtain

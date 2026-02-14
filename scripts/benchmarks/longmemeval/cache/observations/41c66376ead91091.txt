@@ -1,0 +1,28 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/04/11 (Tue) 23:18  
+[ASSISTANT_SAID] AppArmor needs to be enabled and enforcing to block operations that violate its policy.  
+[ASSISTANT_SAID] If AppArmor is not enabled, it won't have any effect on the system.  
+[ASSISTANT_SAID] There might be other security measures blocking Discord's read operation, or it could be a bug or misconfiguration with the Discord snap package.  
+[ASSISTANT_SAID] Suggested enabling and enforcing AppArmor to resolve the issue with Discord.  
+[ASSISTANT_SAID] Provided steps to check if AppArmor is installed, install it, enable it, start the service, and verify it is running and enforcing.  
+[ASSISTANT_SAID] Steps included commands:  
+1. `sudo dpkg -l apparmor`  
+2. `sudo apt-get install apparmor`  
+3. `sudo systemctl enable apparmor`  
+4. `sudo systemctl start apparmor`  
+5. `sudo aa-status`  
+[USER] Confirmed that AppArmor is blocking Discord and that it is installed and running/enforcing on their program.  
+[USER] Asked if there are multiple places for AppArmor settings files other than `/etc/apparmor.d`.  
+[ASSISTANT_SAID] Main configuration files for AppArmor are located in `/etc/apparmor.d`, and there are no other places for policy configuration.  
+[ASSISTANT_SAID] The AppArmor profile for Discord might be generated dynamically by the snapd daemon, not stored in `/etc/apparmor.d`.  
+[ASSISTANT_SAID] Suggested checking with the command: `sudo snap debug sandbox-features discord`.  
+[USER] Ran the command and received an error: "too many arguments for command."  
+[ASSISTANT_SAID] Apologized and provided the correct command: `sudo snap debug sandbox-features discord.discord`.  
+[USER] Ran the corrected command and received the same error.  
+[USER] Asked for confirmation on whether "sandbox-features" is correct.  
+[ASSISTANT_SAID] Apologized again and provided a new command: `sudo aa-status | grep snap.discord.discord`.  
+[USER] Ran `sudo aa-status` and received output showing multiple processes running with the AppArmor profile "snap.discord.discord."  
+[ASSISTANT_SAID] Suggested running `sudo aa-status | grep snap.discord.discord` to check the status of the AppArmor profile.  
+[USER] Confirmed that `sudo aa-status` showed proper context, indicating the profile is in "enforce mode."  
+[ASSISTANT_SAID] Suggested disabling the AppArmor profile for Discord temporarily to see if it resolves the issue with the command

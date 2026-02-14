@@ -1,0 +1,27 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/13 (Sat) 02:13
+- [FACT] User is trying to get organized and keep track of birthdays and milestones in friends' and family's lives.
+- [RELATIONSHIP] User has a friend from college named David.
+- [RELATIONSHIP] David has a baby boy named Jasper, born a few weeks ago.
+- [ASSISTANT_SAID] Congratulations to David and his family on the new addition!
+- [ASSISTANT_SAID] Suggested a step-by-step guide to set up a calendar and reminder system.
+- [ASSISTANT_SAID] Recommended using a digital calendar like Google Calendar, Apple Calendar, or Outlook.
+- [ASSISTANT_SAID] Suggested creating a separate calendar specifically for birthdays and milestones.
+- [ASSISTANT_SAID] Advised adding each friend and family member's birthday, including David's Jasper.
+- [ASSISTANT_SAID] Recommended setting reminders for each event with a notification frequency (e.g., 1 week, 1 day, or 1 hour before the event).
+- [ASSISTANT_SAID] Suggested color-coding or categorizing birthdays by group (e.g., friends, family, colleagues).
+- [ASSISTANT_SAID] Provided an option for a physical calendar or planner with steps to set it up.
+- [ASSISTANT_SAID] Suggested updating the calendar regularly to reflect changes and including other important dates.
+- [ASSISTANT_SAID] Listed digital tools to supplement the system, including Facebook, Google Keep, Reminders App, and Birthday Calendar Apps.
+- [USER] User decided to go with the digital calendar option, specifically Google Calendar.
+- [USER] User already uses Google Calendar for work and personal appointments.
+- [ASSISTANT_SAID] Provided a step-by-step guide to create a new calendar in Google Calendar.
+- [ASSISTANT_SAID] Instructed how to add a new event (birthday) in Google Calendar.
+- [ASSISTANT_SAID] Explained how to set reminders for each event in Google Calendar.
+- [ASSISTANT_SAID] Suggested using the "Quick add" feature for quickly adding multiple birthdays.
+- [ASSISTANT_SAID] Advised on importing birthdays from Google Contacts.
+- [USER] User plans to add David's phone number and a note to send a congratulatory message to him and his wife on Jasper's birthday.
+- [ASSISTANT_SAID] Confirmed that notes or descriptions can be added to each event in Google Calendar.
+- [ASSISTANT_SAID] Provided instructions on how to add notes or descriptions to an event in Google Calendar.
+- [USER] User plans to add more birthdays, including cousin Rachel's son Max, friends Mike and Emma's daughter Charlotte,

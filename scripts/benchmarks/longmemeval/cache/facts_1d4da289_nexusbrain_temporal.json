@@ -1,0 +1,19 @@
+{
+  "answer_ultrachat_348449": [
+    {
+      "fact": "User believes companies should make it easier to access their information.",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User thinks the security measures companies take to protect data are too much hassle.",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User does not see the value of their personal information.",
+      "type": "opinion",
+      "entities": []
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+**Observation Log:**
+
+[FACT] User is looking for advice on organizing coupons and discounts.  
+[FACT] User has been using a few different apps and websites to find deals.  
+[FACT] User used a 20% off coupon on a purchase of $50 or more at Target last week, saving around $12 on household essentials.  
+[PREFERENCE] User is starting to feel overwhelmed with managing coupons and discounts.  
+[ASSISTANT_SAID] The assistant congratulated the user on saving money with the 20% off coupon at Target.  
+[ASSISTANT_SAID] The assistant provided tips for organizing coupons and discounts, including:  
+[ASSISTANT_CREATED] 1. Designate a central hub for storing coupons (physical folder, binder, or digital app).  
+[ASSISTANT_CREATED] 2. Categorize and prioritize coupons by category and expiration date.  
+[ASSISTANT_CREATED] 3. Use a coupon aggregator app or website like RetailMeNot, Coupons.com, or Fetch Rewards.  
+[ASSISTANT_CREATED] 4. Set reminders for coupon expiration dates or special deal days.  
+[ASSISTANT_CREATED] 5. Digitalize coupons by taking photos or saving digital copies.  
+[ASSISTANT_CREATED] 6. Create a coupon calendar to plan shopping trips around expiration dates.  
+[ASSISTANT_CREATED] 7. Look for opportunities to stack savings with other discounts or rewards.  
+[ASSISTANT_CREATED] 8. Purge expired coupons regularly.  
+[ASSISTANT_CREATED] 9. Keep coupon apps organized on the phone.  
+[ASSISTANT_CREATED] 10. Review and adjust the coupon organization system periodically.  
+[USER] User is thinking of setting up a spreadsheet to track coupons and discounts.  
+[ASSISTANT_SAID] The assistant provided ideas for columns or fields to include in the spreadsheet, such as:  
+[ASSISTANT_CREATED] 1. Coupon/Discount Name  
+[ASSISTANT_CREATED] 2. Type (coupon, discount code, cashback offer, etc.)  
+[ASSISTANT_CREATED] 3. Vendor  
+[ASSISTANT_CREATED] 4. Expiration Date  
+[ASSISTANT_CREATED] 5. Discount Amount  
+[ASSISTANT_CREATED] 6. Category (optional)  
+[ASSISTANT_CREATED] 7. Minimum Purchase (optional)  
+[ASSISTANT_CREATED] 8. Code/Reference Number (optional)  
+[ASSISTANT_CREATED] 9. Restrictions (optional)  
+[ASSISTANT_CREATED] 10. Source (optional)  
+[ASSISTANT_CREATED] 11. Redemption Method (optional)  
+[ASSISTANT_CREATED] 12. Status (optional)  
+[ASSISTANT_CREATED] 13. Notes (optional)  
+[USER] User plans to create separate sheets for different types of coupons

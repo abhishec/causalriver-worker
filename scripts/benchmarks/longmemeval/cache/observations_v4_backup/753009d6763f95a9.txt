@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [FACT] The user has been living in the United States for the past five years on a work visa.
+- [FACT] The user's work visa is sponsored by their company.
+- [FACT] The user is planning to apply for a green card.
+- [FACT] The user has a master's degree in data science from New York University.
+- [FACT] The user is originally from India.
+- [PREFERENCE] The user is seeking information on the green card application process, specifically the EB-2 visa category.
+- [ASSISTANT] The assistant provided an overview of the EB-2 visa category and the required documents for application.
+- [ASSISTANT] The assistant explained the eligibility requirements for the EB-2 visa category.
+- [ASSISTANT] The assistant listed the required documents for the EB-2 visa application.
+- [ASSISTANT] The assistant detailed the medical examination process required for the green card application.
+- [ASSISTANT] The assistant explained the purpose of the medical examination and what to expect during it.
+- [ASSISTANT] The assistant provided a list of documents to bring to the medical examination.
+- [ASSISTANT] The assistant outlined the vaccination requirements for green card applicants.
+- [ASSISTANT] The assistant mentioned specific vaccinations required for green card applicants, including MMR, polio, influenza, Td, and varicella.
+- [ASSISTANT] The assistant noted that additional vaccinations may be required for applicants 18 years old or younger.
+- [ASSISTANT] The assistant advised the user to check their vaccination records and consult with a healthcare provider if unsure about vaccination status.
+- [ASSISTANT] The assistant indicated that the civil surgeon may provide guidance on obtaining necessary vaccinations if the user does not have proof of vaccination.
+- [TEMPORAL] The session date is 2023/05/29 (Mon) at 09:39.

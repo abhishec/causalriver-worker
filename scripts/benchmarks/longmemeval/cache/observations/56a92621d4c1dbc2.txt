@@ -1,0 +1,24 @@
+**Observation Log:**
+
+- [FACT] The user has 10 egg yolks.
+- [ASSISTANT_SAID] One popular recipe that uses a large amount of egg yolks is lemon curd.
+- [ASSISTANT_SAID] Lemon curd is a tangy and sweet spread that is typically made with lemon juice, sugar, and egg yolks.
+- [ASSISTANT_CREATED] A simple recipe for lemon curd that uses 10 egg yolks includes the following ingredients: 10 egg yolks, 1 cup (200g) granulated sugar, 1/2 cup (120ml) freshly squeezed lemon juice, and 1/4 cup (60g) unsalted butter, cut into small pieces.
+- [ASSISTANT_CREATED] The instructions for making lemon curd are: 
+  1. Whisk together the egg yolks and sugar in a medium-sized heatproof bowl.
+  2. Stir in the lemon juice.
+  3. Place the bowl over a saucepan of simmering water, making sure the bottom of the bowl is not touching the water.
+  4. Cook the mixture, stirring constantly, until thickened and an instant-read thermometer inserted into the mixture registers 170°F (77°C).
+  5. Remove the bowl from the saucepan and stir in the butter, one piece at a time, until fully incorporated.
+  6. Strain the curd through a fine-mesh sieve into a clean container.
+  7. Let it cool to room temperature and then refrigerate until chilled.
+- [ASSISTANT_SAID] This recipe makes about 2 cups of lemon curd.
+- [ASSISTANT_SAID] You can use lemon curd as a spread on toast or scones, as a filling for cakes or tarts, or as a topping for ice cream or yogurt.
+- [USER] The user asked if they could use mango instead.
+- [ASSISTANT_SAID] Yes, you can use mango instead of lemon to make a fruit curd.
+- [ASSISTANT_CREATED] A simple recipe for mango curd that uses 10 egg yolks includes the following ingredients: 10 egg yolks, 1 cup (200g) granulated sugar, 1/2 cup (120ml) mango puree, and 1/4 cup (60g) unsalted butter, cut into small pieces.
+- [ASSISTANT_CREATED] The instructions for making mango curd are: 
+  1. Whisk together the egg yolks and sugar in a medium-sized heatproof bowl.
+  2. Stir in the mango puree.
+  3. Place the bowl over a saucepan of simmering water, making sure the bottom of the bowl is not touching the water.
+  4. Cook the mixture, stirring constantly, until thickened and an instant-read thermometer inserted into the mixture

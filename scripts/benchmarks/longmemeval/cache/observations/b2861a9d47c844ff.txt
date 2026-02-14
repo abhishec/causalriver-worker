@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/22 (Mon) 20:07
+- [EVENT] The user has an interview for their green card application next Wednesday.
+- [TEMPORAL] The user has waited for almost 6 months for the interview appointment.
+- [PREFERENCE] The user is feeling nervous about the upcoming interview.
+- [ASSISTANT_SAID] The assistant congratulated the user on getting an interview date and offered to help prepare.
+- [ASSISTANT_SAID] The assistant provided a list of what to expect during the interview, including arrival and check-in, waiting time, and the interview room.
+- [ASSISTANT_SAID] The assistant listed common questions asked during a green card interview, including general questions, marriage-based questions, and employment-based questions.
+- [ASSISTANT_SAID] The assistant provided tips to help the user prepare, including reviewing the application, gathering documents, dressing professionally, being honest, staying calm, and practicing English.
+- [ASSISTANT_SAID] The assistant emphasized that the officer's goal is to verify the information in the application, not to trick or intimidate the user.
+- [RELATIONSHIP] The user's husband will be accompanying them to the interview.
+- [ASSISTANT_SAID] The assistant explained the role of the accompanying spouse/partner, stating that they may be asked questions to verify information or provide additional context.
+- [ASSISTANT_SAID] The assistant provided tips for the user's husband, including being honest, prepared to verify information, and dressing appropriately.
+- [ASSISTANT_SAID] The assistant listed common mistakes to avoid during the interview, such as lack of preparation, inconsistencies, dishonesty, lack of documentation, poor communication, negative body language, inadequate English proficiency, unprepared spouse/partner, arguing, and lack of authenticity.
+- [ASSISTANT_SAID] The assistant explained what happens after the interview, including possible outcomes such as approval, denial, request for evidence (RFE), or administrative processing.
+- [ASSISTANT_SAID] The assistant mentioned that the time to receive a decision can vary from a few weeks to several months.
+- [ASSISTANT_SAID] The assistant provided details on what to expect if the application is approved, denied, or placed under RFE or administrative processing.
+- [USER] The user expressed gratitude for the detailed tips and information provided by the assistant.
+- [USER] The user confirmed they would review their application and brief their husband on what to expect.
+- [USER] The user expressed hope that the interview goes smoothly and quickly.

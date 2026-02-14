@@ -1,0 +1,26 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/24 (Wed) 01:29  
+[USER] User inquired about the principles of data encryption in information security.  
+[ASSISTANT_SAID] Data encryption transforms plain text into cipher text using a mathematical algorithm and a secret key.  
+[ASSISTANT_SAID] The primary objectives of data encryption are to maintain confidentiality and integrity of data and prevent unauthorized access, alteration, or theft.  
+[ASSISTANT_SAID] Principles of data encryption include:  
+[ASSISTANT_SAID] 1. Confidentiality: Ensures sensitive information remains confidential during transmission or storage.  
+[ASSISTANT_SAID] 2. Integrity: Ensures accuracy and reliability of data, preventing unauthorized modification.  
+[ASSISTANT_SAID] 3. Authentication: Ensures users and systems are authenticated before accessing data, using digital signatures.  
+[ASSISTANT_SAID] 4. Key management: Involves managing the secret key, including generation, distribution, renewal, and destruction.  
+[ASSISTANT_SAID] Data encryption principles are critical for securing data, especially as organizations handle large amounts of sensitive information.  
+[USER] User asked how organizations decide which encryption algorithm to use for their data.  
+[ASSISTANT_SAID] Organizations choose an encryption algorithm based on several factors:  
+[ASSISTANT_SAID] 1. Key strength: Longer key sizes (e.g., 256-bit) provide stronger encryption.  
+[ASSISTANT_SAID] 2. Algorithm efficiency and speed: Balance between security and speed is important.  
+[ASSISTANT_SAID] 3. Compatibility: Algorithms must be compatible with the organization's devices and systems.  
+[ASSISTANT_SAID] 4. Available Resources: Consideration of hardware, software, and personnel resources.  
+[ASSISTANT_SAID] 5. Standards compliance: Compliance with encryption standards like AES, 3DES, and Blowfish.  
+[ASSISTANT_SAID] Organizations must evaluate risks and requirements for data protection when selecting an encryption algorithm.  
+[USER] User requested an example of a specific encryption algorithm commonly used by organizations.  
+[ASSISTANT_SAID] The Advanced Encryption Standard (AES) is a commonly used encryption algorithm.  
+[ASSISTANT_SAID] AES is a symmetric key encryption algorithm that uses the same key for both encryption and decryption.  
+[ASSISTANT_SAID] AES works by taking a block of data and performing a series of mathematical operations (rounds) to create cipher text.  
+[ASSISTANT_SAID] AES has three standard key lengths: 128-bit, 192-bit, and 256-bit.  
+[ASSISTANT_SAID] Example of AES

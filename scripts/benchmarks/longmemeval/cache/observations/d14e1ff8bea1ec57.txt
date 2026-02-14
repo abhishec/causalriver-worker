@@ -1,0 +1,23 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/23 (Tue) 03:01
+- [FACT] User is looking for advice on choosing the right rosin for their violin.
+- [PREFERENCE] User has been experimenting with different brands and types of rosin.
+- [EVENT] User attended a music workshop in the city two weeks ago.
+- [EVENT] User got to try out some cellos and violas at the workshop.
+- [ASSISTANT_SAID] Assistant mentioned that trying out different instruments can be eye-opening for understanding setup and technique.
+- [ASSISTANT_SAID] Assistant provided factors to consider when selecting rosin: type of rosin (light vs. dark), grip, temperature and humidity, brand and quality, and personal preference.
+- [ASSISTANT_SAID] Assistant listed popular rosin brands for violinists: Hill, Jade, Liebenzeller, Pirastro, Andrea.
+- [PREFERENCE] User thinks they prefer the darker, stickier kind of rosin.
+- [CHANGE] User has been playing with a heavier bow lately.
+- [ASSISTANT_SAID] Assistant confirmed that the weight of the bow can affect how the rosin performs.
+- [ASSISTANT_SAID] Assistant explained that a heavier bow can make rosin feel more grippy or sticky and suggested experimenting with different bows and rosins.
+- [ASSISTANT_SAID] Assistant provided additional factors to consider when evaluating the interaction between bow and rosin: bow hair type and quality, bow tension, and string type and gauge.
+- [EVENT] User recently bought a new bow online that is slightly heavier and more balanced than their old one.
+- [PREFERENCE] User has been enjoying the new bow.
+- [ASSISTANT_SAID] Assistant provided tips on how to properly care for and maintain a violin bow, including cleanliness, managing rosin buildup, hair care, humidity and temperature control, bow tension, rehairing, avoiding extreme handling, proper storage, and regular check-ups.
+- [ASSISTANT_SAID] Assistant emphasized that a well-maintained bow is essential for optimal performance.
+- [EVENT] User is considering joining a local orchestra or chamber group to gain more performance experience.
+- [ASSISTANT_SAID] Assistant provided advice on how to prepare for auditions, including familiarizing with repertoire, consistent practice, sight-reading, developing a pre-audition routine, recording oneself, seeking feedback, being prepared for the audition environment, staying positive, and learning from the experience.
+- [PREFERENCE] User is thinking of preparing a few pieces for the audition, including some Bach and Mozart.
+- [ASSISTANT_SAID] Assistant provided tips on interpreting Bach, focusing on phrasing, dynamics, and articulation, emphasizing the importance of understanding the music and technical foundation.

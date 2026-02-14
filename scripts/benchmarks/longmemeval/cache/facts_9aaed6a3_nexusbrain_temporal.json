@@ -1,0 +1,138 @@
+{
+  "answer_353d3c6d_1": [
+    {
+      "fact": "User spent $75 on groceries at SaveMart last Thursday",
+      "type": "event",
+      "entities": [
+        "$75",
+        "groceries",
+        "SaveMart",
+        "last Thursday"
+      ]
+    },
+    {
+      "fact": "User spent $15 on coffee and snacks at The Daily Grind",
+      "type": "event",
+      "entities": [
+        "$15",
+        "coffee",
+        "snacks",
+        "The Daily Grind"
+      ]
+    },
+    {
+      "fact": "User spent $12.99 on a sandwich and salad with a 20% off offer",
+      "type": "event",
+      "entities": [
+        "$12.99",
+        "sandwich",
+        "salad",
+        "20% off offer"
+      ]
+    },
+    {
+      "fact": "User spent $50 at Office Depot for printer ink and paper",
+      "type": "event",
+      "entities": [
+        "$50",
+        "Office Depot",
+        "printer ink",
+        "paper"
+      ]
+    },
+    {
+      "fact": "User spent $100 at Gap on a new pair of jeans and a sweater",
+      "type": "event",
+      "entities": [
+        "$100",
+        "Gap",
+        "jeans",
+        "sweater"
+      ]
+    },
+    {
+      "fact": "User spent $50 at Sephora on skincare products",
+      "type": "event",
+      "entities": [
+        "$50",
+        "Sephora",
+        "skincare products"
+      ]
+    },
+    {
+      "fact": "User prefers to keep non-grocery expenses together for now",
+      "type": "preference",
+      "entities": [
+        "non-grocery expenses"
+      ]
+    }
+  ],
+  "answer_353d3c6d_2": [
+    {
+      "fact": "User has a membership at SaveMart",
+      "type": "personal",
+      "entities": [
+        "SaveMart"
+      ]
+    },
+    {
+      "fact": "User can earn 1% cashback on all purchases at SaveMart",
+      "type": "personal",
+      "entities": [
+        "1% cashback",
+        "SaveMart"
+      ]
+    },
+    {
+      "fact": "User is shopping for themselves",
+      "type": "personal",
+      "entities": []
+    },
+    {
+      "fact": "User does not have any dietary restrictions",
+      "type": "preference",
+      "entities": []
+    },
+    {
+      "fact": "User has a budget of $50 for grocery shopping",
+      "type": "preference",
+      "entities": [
+        "$50"
+      ]
+    },
+    {
+      "fact": "User is planning to buy basic items like milk, eggs, bread, and snacks",
+      "type": "preference",
+      "entities": [
+        "milk",
+        "eggs",
+        "bread",
+        "snacks"
+      ]
+    },
+    {
+      "fact": "User wants to add pasta and marinara sauce to their grocery list",
+      "type": "preference",
+      "entities": [
+        "pasta",
+        "marinara sauce"
+      ]
+    },
+    {
+      "fact": "User has a digital coupon from the SaveMart app for $1 off a jar of pasta sauce",
+      "type": "personal",
+      "entities": [
+        "digital coupon",
+        "SaveMart app",
+        "$1 off"
+      ]
+    },
+    {
+      "fact": "User is considering adding ground beef to their grocery list",
+      "type": "preference",
+      "entities": [
+        "ground beef"
+      ]
+    }
+  ]
+}

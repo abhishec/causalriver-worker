@@ -1,0 +1,30 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2021/12/03 (Fri) 14:05  
+[USER] User is interested in unique cooking techniques used in traditional Ethiopian cuisine.  
+[ASSISTANT_SAID] Injera baking: Injera is a flatbread made from teff flour, baked on a clay stove or over an open fire, resulting in a spongy, slightly sour bread.  
+[ASSISTANT_SAID] Berbere spice blend: A complex spice blend used in many Ethiopian recipes, typically including cumin, coriander, cardamom, cinnamon, cloves, turmeric, chili peppers, ginger, and garlic.  
+[ASSISTANT_SAID] Coffee roasting: Traditional method involves using a pan over an open flame to roast coffee beans, which are then ground by hand and brewed in a jebena.  
+[ASSISTANT_SAID] Kitfo preparation: A dish made from raw ground beef seasoned with spices and served with injera, typically not cooked.  
+[ASSISTANT_SAID] Tej brewing: A honey wine fermented with honey and water, along with herbs and spices, served in a berele.  
+[USER] User finds the cooking techniques fascinating and unique.  
+[USER] User wants to try Ethiopian cuisine for the first time and asks for a dish recommendation.  
+[ASSISTANT_SAID] Recommended dishes include:  
+1. Doro Wat: A spicy chicken stew made with berbere spice, onions, and garlic, served with injera.  
+2. Injera: A spongy, fermented flatbread made from teff flour.  
+3. Kitfo: Minced raw beef seasoned with spices, served with injera.  
+4. Tibs: Grilled or sautéed meat with vegetables and spices, served on a sizzling hot plate.  
+5. Shiro: A savory chickpea stew flavored with spices and onions, often served with injera.  
+[USER] User decides to try Doro Wat first.  
+[USER] User asks for recommendations for authentic Ethiopian restaurants in town.  
+[ASSISTANT_SAID] Assistant cannot provide geographic recommendations but suggests searching online for Ethiopian restaurants and reading customer reviews.  
+[USER] User plans to look for authentic Ethiopian restaurants in their area.  
+[USER] User asks for tips on how to properly eat injera.  
+[ASSISTANT_SAID] Tips for eating injera:  
+1. Tear off a small piece with the right hand.  
+2. Use it to pick up food with the thumb.  
+3. Repeat with each bite, tearing off new pieces as needed.  
+4. Be aware of the slightly sour taste of injera.  
+5. Sharing injera and dishes is common in Ethiopian culture.  
+[USER] User is excited to try injera with Doro Wat.  
+[USER] User asks for drink

@@ -1,0 +1,13 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2022/03/02 (Wed) 08:52  
+[USER] User inquired about the advantages of attaching a file to a card versus including a link on the card in the Microsoft Teams Task Board.  
+[ASSISTANT_SAID] Attaching a file to a card has the following advantages:  
+[ASSISTANT_SAID] 1. Accessibility: The file is readily available to team members, allowing access without leaving the Task Board.  
+[ASSISTANT_SAID] 2. Convenience: Team members can view and edit the attached file directly from the Task Board, saving time and eliminating the need to switch between different apps or programs.  
+[ASSISTANT_SAID] 3. Security: Attaching the file directly to the card ensures that sensitive or confidential information is not shared with unauthorized individuals.  
+[ASSISTANT_SAID] Including a link on the card that points to the file has the following advantages:  
+[ASSISTANT_SAID] 1. Space-saving: Including a link instead of attaching a large file can help save space on the Task Board.  
+[ASSISTANT_SAID] 2. Version control: Linking to a cloud-based file ensures that everyone is working on the most up-to-date version of the file.  
+[ASSISTANT_SAID] 3. Collaboration: Linking to a file stored in a cloud-based service, such as OneDrive or SharePoint, allows team members to collaborate on the file in real-time, improving efficiency and productivity.  
+[ASSISTANT_SAID] The decision to attach a file to a card versus including a link depends on the specific needs of the team and the nature of the file in question.

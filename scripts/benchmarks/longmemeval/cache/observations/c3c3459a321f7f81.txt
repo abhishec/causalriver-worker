@@ -1,0 +1,26 @@
+**Observation Log:**
+
+[FACT] User is planning a birthday party for their niece, Ava.  
+[FACT] Ava's favorite characters are SpongeBob and Elsa.  
+[FACT] User's sister is named Rachel.  
+[EVENT] User recently attended an event at Thrill Kingdom called "Character Bash" on October 29th.  
+[TEMPORAL] Session Date: 2023/05/20 (Sat) 14:07.  
+[PREFERENCE] User likes the decoration ideas, especially the Bikini Bottom backdrop and Elsa's Ice Palace backdrop.  
+[PREFERENCE] User thinks the character meet-and-greet and craft station activities would be a hit with the kids.  
+[PREFERENCE] User likes the party favor ideas, especially the Krabby Patty keychains and snowflake wands.  
+[ASSISTANT_SAID] Suggested decorations for SpongeBob: Bikini Bottom backdrop, SpongeBob balloons, jellyfish lanterns, seaweed streamers.  
+[ASSISTANT_SAID] Suggested decorations for Elsa: Ice palace backdrop, snowflake decorations, Frozen character cutouts, ice blue and white balloons.  
+[ASSISTANT_SAID] Suggested activities: SpongeBob's treasure hunt, Elsa's ice palace challenge, character meet-and-greet, craft station.  
+[ASSISTANT_SAID] Suggested food and drinks: Krabby Patties, Elsa's ice cream bar, "Frozen" fruit kabobs.  
+[ASSISTANT_SAID] Suggested party favors for SpongeBob: Krabby Patty keychains, SpongeBob stickers or tattoos, jellyfish glow sticks, Bikini Bottom beach balls.  
+[ASSISTANT_SAID] Suggested party favors for Elsa: Snowflake wands, Elsa's ice palace stickers, Frozen-themed coloring books, ice blue candies.  
+[ASSISTANT_SAID] Suggested options for a photographer: hire a professional, ask a family member or friend, create a DIY photo booth.  
+[ASSISTANT_SAID] Provided tips for working with a photographer: create a shot list, designate a photo area, communicate with the photographer.  
+[ASSISTANT_SAID] Encouraged user to enjoy the celebration and create lasting memories.  
+[ASSISTANT_SAID] Suggested including a picture of Ava in her Elsa costume from the Character Bash event in the custom invitation.  
+[ASSISTANT_SAID] Recommended including important details in the invitation: date, time, location, dress code, and activities planned.  
+[ASSISTANT_SAID] Suggested sending out reminders closer to the party date to ensure guests remember.  
+[CHANGE] User decided to ask their sister, Rachel, to be the party photographer.  
+[EVENT] User plans to create a custom invitation with a SpongeBob and Elsa theme.  
+[PREFERENCE] User is excited to see everything come together for the party.  
+[ASSISTANT_CREATED] Provided a list of decoration

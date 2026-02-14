@@ -1,0 +1,26 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/27 (Sat) 02:35  
+[USER] User requested questions about deep neural networks that might be asked in an interview for a data science and modeling position.  
+[ASSISTANT_SAID] Assistant provided a list of 10 questions related to deep neural networks, including:  
+[ASSISTANT_SAID] 1. Can you explain the basic architecture of a deep neural network?  
+[ASSISTANT_SAID] 2. How does a deep neural network differ from a traditional neural network?  
+[ASSISTANT_SAID] 3. How do you decide on the number of layers and neurons in a deep neural network?  
+[ASSISTANT_SAID] 4. Can you explain the role of activation functions in a deep neural network?  
+[ASSISTANT_SAID] 5. How do you handle overfitting in deep neural networks?  
+[ASSISTANT_SAID] 6. Can you explain the concept of backpropagation in deep neural networks?  
+[ASSISTANT_SAID] 7. How do you choose the optimizer for training a deep neural network?  
+[ASSISTANT_SAID] 8. Can you explain the difference between batch and online learning in deep neural networks?  
+[ASSISTANT_SAID] 9. How do you handle missing data in deep neural networks?  
+[ASSISTANT_SAID] 10. Can you explain how dropout regularization works in deep neural networks?  
+[USER] User asked for an explanation of the basic architecture of a deep neural network.  
+[ASSISTANT_SAID] Assistant explained that a deep neural network (DNN) consists of an input layer, one or more hidden layers, and an output layer, with connections called weights adjusted during training.  
+[USER] User inquired about the reasons for using an activation function in neural networks.  
+[ASSISTANT_SAID] Assistant listed several reasons for using activation functions:  
+[ASSISTANT_SAID] 1. Non-linearity: Introduces non-linearity to learn complex relationships.  
+[ASSISTANT_SAID] 2. Allows for backpropagation: Activation functions must be differentiable.  
+[ASSISTANT_SAID] 3. Introduces sparsity: Functions like ReLU can help prevent overfitting.  
+[ASSISTANT_SAID] 4. Normalization of output: Functions like softmax normalize outputs for classification.  
+[ASSISTANT_SAID] 5. Introduces thresholding: Functions like ReLU can help prevent overfitting.  
+[USER] User asked how the activation function in a neural network relates to the link function in a GLM.  
+[ASSISTANT_SAID] Assistant

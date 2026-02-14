@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/24 (Wed) 12:02
+- [ASSISTANT_SAID] The assistant suggested adding a check before the AJAX call to verify if the `dvdTitle` and `category` variables are empty or null.
+- [ASSISTANT_SAID] The assistant provided an example code snippet to show an error message if `dvdTitle` is empty and `category` is null: `if(dvdTitle === "" || category === null){ alert("Please enter a DVD title and select a category"); return; }`
+- [ASSISTANT_SAID] The assistant explained how to modify the "View Film Details" button's `href` attribute to point to "filmDetails.html" and pass `searchResults` as a query parameter.
+- [ASSISTANT_SAID] The assistant provided a code snippet to access the query parameter in `filmDetails.html` using JavaScript's `URLSearchParams` API: `const urlParams = new URLSearchParams(window.location.search); const searchResults = JSON.parse(urlParams.get("searchResults"));`
+- [ASSISTANT_SAID] The assistant suggested saving the data stored in `var user` into session storage when the "View Film Details" button is pressed.
+- [ASSISTANT_SAID] The assistant provided a code snippet to save `user` into session storage: `sessionStorage.setItem("selectedFilm", JSON.stringify(user));`
+- [ASSISTANT_SAID] The assistant explained that the reason the same index was being retrieved when clicking the "View Film Details" button was due to the closure of the `user` variable in the loop.
+- [ASSISTANT_SAID] The assistant provided a solution to the issue by suggesting to bind the click event inside the for loop and pass the current `user` to the event.
+- [ASSISTANT_CREATED] The assistant created a code snippet to correctly save the `user` data when the "View Film Details" button is clicked: 
+```javascript
+$(".View").on("click", {user:user}, function(event) {
+    sessionStorage.setItem("selectedFilm", JSON.stringify(event.data.user));
+});
+```
+- [FACT] The user is working with JavaScript and jQuery to create a form and display search results for DVDs.
+- [FACT] The user is using session storage to store search results and selected film data.
+- [PREFERENCE] The user is interested in displaying film details based on user interaction with a web application.
+- [EVENT] The user is developing a feature to search for DVDs and view details about them on a separate page.

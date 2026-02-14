@@ -1,0 +1,26 @@
+**Observation Log:**
+
+- [FACT] User is planning a trip to San Francisco.
+- [FACT] User is looking for recommendations on things to do in Fisherman's Wharf.
+- [FACT] User has stayed in the Fisherman's Wharf area before.
+- [FACT] User stayed at Hotel Zelos after a work conference in Chicago.
+- [ASSISTANT_SAID] Fisherman's Wharf is a classic San Francisco destination.
+- [ASSISTANT_SAID] Hotel Zelos is located in SoMa, not Fisherman's Wharf.
+- [ASSISTANT_SAID] Recommendations for things to do in Fisherman's Wharf include:
+  1. **Pier 39**: A bustling pier with seafood restaurants, shops, and street performers, including sea lions at the K-Docks.
+  2. **Take a Bay Cruise**: Options include ferries or catamarans to explore the Bay, Alcatraz Island, or the Golden Gate Bridge.
+  3. **The Wharf's Seafood**: Recommended eateries include Alioto's, The Crab Shack, and Fisherman's Grotto, with dishes like Dungeness crab, cioppino, and clam chowder in a sourdough bread bowl.
+  4. **Explore the Fishing Piers**: Walk along the piers to watch fishermen and enjoy views of the Bay Bridge and city skyline.
+  5. **Musee Mecanique**: A unique museum showcasing antique arcade games and mechanical devices.
+  6. **The Cannery Shopping Center**: A historic building with shops, restaurants, and a deli.
+  7. **Ghirardelli Square**: Famous for chocolate shops, including the original Ghirardelli Ice Cream and Chocolate Shop.
+  8. **Street Performers and Live Music**: Known for lively street performers, including musicians and jugglers.
+  9. **Wine Tasting**: Options include the Wine Country Tours & Tastings center or tours to Sonoma or Napa Valley.
+  10. **Take a stroll to North Beach**: A charming Italian-American neighborhood with coffee, meals, and Washington Square Park.
+- [ASSISTANT_SAID] User should dress in layers due to unpredictable weather in San Francisco.
+- [EVENT] User is inquiring about the best ways to get around Fisherman's Wharf without a car.
+- [ASSISTANT_SAID] Best ways to explore Fisherman's Wharf without a car include:
+  1. **Walking**: Most attractions are within a 10-15 minute walk.
+  2. **Muni Metro (Light Rail)**: F-Line streetcar and Muni Metro (T-Third Line) stop at Embarcadero Station.
+  3. **Cable Cars**: Powell-Mason and Powell-Hyde lines are within a 5-10 minute walk.
+  4. **Bus**: Several Muni bus

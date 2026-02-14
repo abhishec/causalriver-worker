@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/04/19 (Wed) 09:23  
+[EVENT] User is planning to meal prep for the week ahead on Sunday.  
+[PREFERENCE] User opts for a lighter breakfast on Sundays.  
+[ASSISTANT_SAID] Meal prepping on Sundays is a great habit.  
+[ASSISTANT_SAID] Suggested breakfast ideas that can be prepared in no more than 30 minutes:  
+[ASSISTANT_CREATED] 1. Overnight Oats: Mix rolled oats, milk, and choice of nuts, seeds, or fruit; refrigerate overnight. (5 minutes prep time)  
+[ASSISTANT_CREATED] 2. Avocado Toast: Toast whole grain bread, mash avocado, spread on top, add sliced egg, salt, and pepper. (10 minutes prep time)  
+[ASSISTANT_CREATED] 3. Yogurt Parfait: Layer Greek yogurt, fresh berries, and granola; add honey or cinnamon. (5 minutes prep time)  
+[ASSISTANT_CREATED] 4. Smoothie: Blend favorite fruits, yogurt, and milk. (5 minutes prep time)  
+[ASSISTANT_CREATED] 5. Peanut Butter Banana Toast: Toast whole grain bread, spread with peanut butter, top with sliced banana. (5 minutes prep time)  
+[ASSISTANT_CREATED] 6. Breakfast Muffins: Prepare a batch of healthy muffins (blueberry, banana, or cinnamon apple) on Sunday. (20 minutes prep time)  
+[ASSISTANT_CREATED] 7. Hard-Boiled Eggs: Boil a dozen eggs on Sunday for a quick protein-packed breakfast. (10 minutes prep time)  
+[ASSISTANT_CREATED] 8. Chia Seed Pudding: Mix chia seeds with almond milk, refrigerate overnight, top with fresh fruit and nuts. (5 minutes prep time)  
+[ASSISTANT_CREATED] 9. Cottage Cheese and Fruit: Mix cottage cheese with fruit for a high-protein breakfast. (5 minutes prep time)  
+[ASSISTANT_CREATED] 10. Green Smoothie Bowl: Blend spinach, avocado, banana, and milk, top with fresh fruit, nuts, and seeds. (10 minutes prep time)  
+[PREFERENCE] User is looking for breakfast ideas that can be prepared in advance for busy weekdays.  
+[ASSISTANT_SAID] Suggested breakfast ideas that can be prepared on Sunday and refrigerated or frozen for later use:  
+[ASSISTANT_CREATED] Refrigerated Breakfast Ideas (up to 5 days):  
+[ASSISTANT_CREATED] 1. Breakfast Burritos: Scramble eggs, add cheese, salsa, and fillings, wrap in tortillas.  
+[ASSISTANT_CREATED] 2. Muffin Tin Frittatas: Whisk eggs, milk, and diced veggies, pour into muffin tins, bake.  
+[ASS

@@ -1,0 +1,23 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/24 (Wed) 06:59
+- [FACT] User is interested in unique food experiences in New Orleans, Louisiana.
+- [ASSISTANT_SAID] Suggested unique food experiences in New Orleans, including:
+  - Beignets and cafe au lait at Cafe Du Monde: Famous open-air cafe known for hot beignets and strong coffee.
+  - Po-boys at Parkway Bakery & Tavern: Family-owned restaurant serving roast beef, fried shrimp, and hot sausage links.
+  - Red beans and rice at Camellia Grill: Classic diner-style restaurant serving red beans and rice with tender beans and smoky sausage.
+  - Gumbo at Dooky Chase's Restaurant: Known for Southern Creole cooking, especially gumbo made with chicken or seafood, okra, and spicy roux.
+  - Oysters at Acme Oyster House: Local favorite for raw and chargrilled oysters, po-boys, gumbos, and seafood dishes.
+  - Crawfish boil at The Joint: Popular barbecue joint offering a weekly crawfish boil during spring and summer.
+  - Boudin balls at Cochon Butcher: Trendy sandwich shop making deep-fried boudin balls that are crispy on the outside and hearty inside.
+  - Mufuletta at Central Grocery: Large round sandwich made with salami, ham, provolone cheese, and olive salad on sesame bread.
+- [USER] User expressed excitement about the food options in New Orleans, stating they don't know where to start.
+- [ASSISTANT_SAID] Suggested trying classic dishes like gumbo or a po-boy, then branching out to new options like boudin balls or crawfish boil. Recommended considering a food tour or cooking class to learn about the culinary history and techniques of New Orleans.
+- [USER] User expressed interest in a food tour and asked for recommendations for a good tour company in New Orleans.
+- [ASSISTANT_SAID] Recommended several food tour companies in New Orleans:
+  - New Orleans Culinary History Tours: Offers walking tours focused on different aspects of New Orleans cuisine with tastings at local restaurants, cafes, and markets.
+  - Doctor Gumbo Tours: Offers food and drink tours, including cocktail, seafood, and jazz brunch tours with tastings at multiple restaurants and bars.
+  - Tastebud Tours: Offers a range of food and drink tours, including a French Quarter food tour, dinner and jazz tour, and vodka and caviar tour with tastings at local establishments.
+  - Cajun Food Tours: Focuses on Cajun and Creole cuisine with tours in Lafayette and New Orleans, including tastings at local markets, restaurants, and bakeries.
+- [USER] User found the food tour companies appealing and mentioned it was hard to choose.
+- [USER] User inquired if the assistant had been on any of the tours.

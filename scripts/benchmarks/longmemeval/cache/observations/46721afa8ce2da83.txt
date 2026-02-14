@@ -1,0 +1,23 @@
+**Observation Log:**
+
+- [FACT] User is located in Chicago.
+- [PREFERENCE] User is only interested in stand-up comedy open mics.
+- [PREFERENCE] User is available to attend open mic nights any day of the week.
+- [PREFERENCE] User is willing to travel up to 30 minutes to attend an open mic night.
+- [EVENT] User has been going to Zanies and Comedy Bar for open mics.
+- [ASSISTANT_SAID] The Comedy Clubhouse is located at 1462 N Ashland Ave, Chicago, IL 60622.
+- [ASSISTANT_SAID] The Comedy Clubhouse hosts open mic nights on Tuesdays and Thursdays, with sign-up starting at 7:30 PM and the show starting at 8:00 PM.
+- [ASSISTANT_SAID] The Comedy Clubhouse has a free admission policy but requires a one-item minimum (food or drink).
+- [ASSISTANT_SAID] Comedians typically get 3-5 minutes of stage time at The Comedy Clubhouse.
+- [ASSISTANT_SAID] The vibe at The Comedy Clubhouse is described as intimate, supportive, and relaxed.
+- [ASSISTANT_SAID] The seating capacity at The Comedy Clubhouse is around 50-60 people.
+- [ASSISTANT_SAID] The open mic is usually hosted by local comedians who are experienced and supportive.
+- [ASSISTANT_SAID] The audience at The Comedy Clubhouse is generally supportive and respectful.
+- [ASSISTANT_SAID] The one-item minimum is a common practice in many comedy clubs, including The Comedy Clubhouse, and is typically enforced.
+- [ASSISTANT_SAID] If a user is broke, they can try talking to the staff or host about their situation regarding the one-item minimum.
+- [ASSISTANT_SAID] The attendance at The Comedy Clubhouse open mics usually ranges from 20-40 people, with around 10-20 comedians performing.
+- [ASSISTANT_SAID] Busiest nights at The Comedy Clubhouse are when there is a special guest host or featured performer.
+- [ASSISTANT_SAID] The Playground Theater, The Annoyance Theatre, The Crowd Theater, and The Lincoln Lodge are other venues that host open mics in Chicago.
+- [ASSISTANT_SAID] The Empty Bottle, The Whistler, and The Hideout are additional venues that occasionally host comedy shows and open mics.
+- [ASSISTANT_SAID] Online resources for finding comedy events include the Chicago Comedy Calendar and Comedy of Chicago.
+- [ASSISTANT_CREATED] A list of other comedy clubs and open mics in the Chicago area, including details about each venue and their offerings.

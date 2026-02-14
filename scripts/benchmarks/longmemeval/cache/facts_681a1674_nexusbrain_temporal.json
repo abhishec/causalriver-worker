@@ -1,0 +1,105 @@
+{
+  "answer_3be95d43_1": [
+    {
+      "fact": "User is interested in watching more Marvel movies.",
+      "type": "preference",
+      "entities": [
+        "Marvel movies"
+      ]
+    },
+    {
+      "fact": "User has watched Doctor Strange recently.",
+      "type": "event",
+      "entities": [
+        "Doctor Strange"
+      ]
+    },
+    {
+      "fact": "User has watched four Marvel movies recently.",
+      "type": "event",
+      "entities": [
+        "four Marvel movies"
+      ]
+    },
+    {
+      "fact": "User is more interested in non-Marvel movies similar to Avengers: Endgame.",
+      "type": "preference",
+      "entities": [
+        "non-Marvel movies",
+        "Avengers: Endgame"
+      ]
+    },
+    {
+      "fact": "User is looking for sci-fi or action movies with a similar scale and scope to Avengers: Endgame.",
+      "type": "preference",
+      "entities": [
+        "sci-fi movies",
+        "action movies",
+        "Avengers: Endgame"
+      ]
+    }
+  ],
+  "answer_3be95d43_2": [
+    {
+      "fact": "User is trying to find new movies to watch.",
+      "type": "event",
+      "entities": []
+    },
+    {
+      "fact": "User has been into Marvel movies lately.",
+      "type": "preference",
+      "entities": [
+        "Marvel movies"
+      ]
+    },
+    {
+      "fact": "User re-watched Spider-Man: No Way Home.",
+      "type": "preference",
+      "entities": [
+        "Spider-Man: No Way Home"
+      ]
+    },
+    {
+      "fact": "User is interested in superhero films that aren't from the Marvel universe.",
+      "type": "preference",
+      "entities": [
+        "superhero films",
+        "Marvel universe"
+      ]
+    },
+    {
+      "fact": "User has already seen The Dark Knight.",
+      "type": "preference",
+      "entities": [
+        "The Dark Knight"
+      ]
+    },
+    {
+      "fact": "The Dark Knight is one of user's favorite movies.",
+      "type": "opinion",
+      "entities": [
+        "The Dark Knight"
+      ]
+    },
+    {
+      "fact": "User is more interested in newer releases.",
+      "type": "preference",
+      "entities": []
+    },
+    {
+      "fact": "User has heard good things about Shazam!",
+      "type": "opinion",
+      "entities": [
+        "Shazam!"
+      ]
+    },
+    {
+      "fact": "User is curious if Shazam! is a light-hearted superhero film like Spider-Man: No Way Home.",
+      "type": "opinion",
+      "entities": [
+        "Shazam!",
+        "Spider-Man: No Way Home"
+      ]
+    }
+  ]
+}

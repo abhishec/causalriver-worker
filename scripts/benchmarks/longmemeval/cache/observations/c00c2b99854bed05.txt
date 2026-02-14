@@ -1,0 +1,17 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/21 (Sun) 15:38  
+[USER] User requested step-by-step instructions to create an environment in Conda using the command line.  
+[USER] User requested instructions on how to install Python Jupyter Notebook.  
+[USER] User requested instructions on how to add the environment to the kernel in Jupyter Notebooks.  
+[ASSISTANT_SAID] To create a new environment in Conda, open your command prompt or terminal window.  
+[ASSISTANT_SAID] Ensure that Conda is installed; if not, download and install it from the official Conda website.  
+[ASSISTANT_SAID] To create a new environment, type the command: `conda create --name myenv` (replace "myenv" with the desired environment name).  
+[ASSISTANT_SAID] To activate the environment, type: `conda activate myenv` (replace "myenv" with the environment name).  
+[ASSISTANT_SAID] To install Jupyter Notebook, type: `conda install jupyter`.  
+[ASSISTANT_SAID] To start Jupyter Notebook, type: `jupyter notebook`, which will launch it in your web browser.  
+[ASSISTANT_SAID] To add the environment to the kernel in Jupyter Notebook, install the ipykernel package by typing: `conda install ipykernel`.  
+[ASSISTANT_SAID] To add the environment to the kernel, type: `python -m ipykernel install --user --name=myenv` (replace "myenv" with the environment name).  
+[ASSISTANT_SAID] After adding the environment to the kernel, open Jupyter Notebook again by typing: `jupyter notebook`.  
+[ASSISTANT_SAID] The user should see their environment listed in the kernel options when creating a new notebook.  
+[ASSISTANT_SAID] The assistant confirmed that the user has successfully created a new environment in Conda, installed Jupyter Notebook, and added the environment to the kernel in Jupyter Notebook.

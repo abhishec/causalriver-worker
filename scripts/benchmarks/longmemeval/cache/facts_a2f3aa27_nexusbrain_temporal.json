@@ -1,0 +1,95 @@
+{
+  "answer_5126c02d_1": [
+    {
+      "fact": "User is looking to optimize their Instagram content strategy.",
+      "type": "preference",
+      "entities": [
+        "Instagram",
+        "content strategy"
+      ]
+    },
+    {
+      "fact": "User has been posting regularly on Instagram.",
+      "type": "preference",
+      "entities": [
+        "Instagram",
+        "posting frequency"
+      ]
+    },
+    {
+      "fact": "User uses a consistent aesthetic on Instagram.",
+      "type": "preference",
+      "entities": [
+        "Instagram",
+        "aesthetic"
+      ]
+    },
+    {
+      "fact": "User has 1250 followers on Instagram.",
+      "type": "personal",
+      "entities": [
+        "1250 followers",
+        "Instagram"
+      ]
+    },
+    {
+      "fact": "User is curious about using Instagram Insights to track post performance.",
+      "type": "opinion",
+      "entities": [
+        "Instagram Insights",
+        "post performance"
+      ]
+    },
+    {
+      "fact": "User wants to optimize their content for their followers.",
+      "type": "preference",
+      "entities": [
+        "content optimization",
+        "followers"
+      ]
+    }
+  ],
+  "answer_5126c02d_2": [
+    {
+      "fact": "User is looking to create a new Instagram post about a recent industry event they attended.",
+      "type": "event",
+      "entities": [
+        "Instagram",
+        "industry event"
+      ]
+    },
+    {
+      "fact": "User's audience is mostly from the US, UK, and Australia.",
+      "type": "preference",
+      "entities": [
+        "US",
+        "UK",
+        "Australia"
+      ]
+    },
+    {
+      "fact": "User is close to reaching 1300 followers on Instagram.",
+      "type": "personal",
+      "entities": [
+        "1300 followers",
+        "Instagram"
+      ]
+    },
+    {
+      "fact": "User prefers specific hashtags related to their niche, such as #contentcreation and #digitalmarketing.",
+      "type": "preference",
+      "entities": [
+        "#contentcreation",
+        "#digitalmarketing"
+      ]
+    },
+    {
+      "fact": "User is interested in collaborating with relevant influencers or content creators in their niche.",
+      "type": "preference",
+      "entities": [
+        "influencers",
+        "content creators"
+      ]
+    }
+  ]
+}

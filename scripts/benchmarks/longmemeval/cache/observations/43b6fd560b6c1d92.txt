@@ -1,0 +1,19 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/27 (Sat) 22:26
+- [ASSISTANT_SAID] Gradient Boosting Classifier is a popular machine learning algorithm used for classification tasks, based on the concept of gradient boosting.
+- [ASSISTANT_SAID] The Gradient Boosting Classifier algorithm iteratively trains decision trees, correcting errors made by the previous tree.
+- [ASSISTANT_SAID] The algorithm can be defined in four steps: Data Preparation, Initialization, Iterative Training, and Prediction.
+- [ASSISTANT_SAID] Key benefits of using Gradient Boosting Classifier include high accuracy, ability to handle complex datasets, ability to handle missing values, and interpretable results.
+- [ASSISTANT_SAID] The algorithm can be used in Python using the Scikit-learn library with methods like fit() and predict().
+- [ASSISTANT_SAID] Support Vector Machine (SVM) is a supervised learning algorithm used for classification and regression tasks, based on finding the optimal hyperplane to separate classes.
+- [ASSISTANT_SAID] The theoretical background of SVM includes Maximal Margin Classifier, Soft Margin Classifier, Kernel Trick, and Multi-Class Classification.
+- [ASSISTANT_SAID] Key benefits of SVM include high accuracy, ability to handle high-dimensional data, robustness to noise, and flexibility with kernel functions.
+- [ASSISTANT_SAID] SVM can be implemented in Python using the Scikit-learn library, with parameters like kernel function and regularization parameter.
+- [ASSISTANT_SAID] Vapnik introduced SVM in 1995 in a paper titled "Support Vector Method for Function Approximation, Regression Estimation, and Signal Processing."
+- [ASSISTANT_SAID] Random forest is a machine learning technique developed by Leo Breiman, introduced in a 2001 paper titled "Random Forests."
+- [ASSISTANT_SAID] LightGBM is a gradient boosting framework that uses tree-based learning algorithms, designed for efficiency in computational resources and memory usage.
+- [ASSISTANT_SAID] LightGBM employs Gradient-based One-Side Sampling (GOSS) and Histogram-based Gradient Boosting (HGB) for improved training efficiency.
+- [ASSISTANT_SAID] LightGBM supports categorical features directly, without requiring one-hot encoding or preprocessing.
+- [ASSISTANT_SAID] Reference for LightGBM: Ke, G., Meng, Q., Finley, T., Wang, T., Chen, W., Ma, W., … Liu, T. Y. (2017). LightGBM: A Highly Efficient Gradient Boosting Decision Tree. Advances in Neural Information Processing Systems, 30, 3146–3154.
+- [ASSISTANT_SAID] Accuracy formula: Accuracy

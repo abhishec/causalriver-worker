@@ -1,0 +1,35 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/30 (Tue) 14:15
+- [FACT] User is considering majoring in Economics.
+- [ASSISTANT_SAID] Recommended online resources and courses for Economics preparation: 
+  1. **Khan Academy** - Comprehensive range of introductory economics courses.
+  2. **Coursera** - Courses from top universities, such as 'Principles of Economics' by the University of Illinois.
+  3. **edX** - Courses like 'Introduction to Economics' from institutions like MIT and Harvard.
+  4. **MIT OpenCourseWare** - Free course materials for a range of economics subjects.
+  5. **Investopedia** - Articles and tutorials on basic and advanced economic concepts.
+- [FACT] User has happy high school experiences, including being part of the debate team and taking advanced placement courses in economics.
+- [CHANGE] User is surprised that they will become an Economics major soon.
+- [ASSISTANT_SAID] Provided average salaries for data scientists in different industries:
+  1. **Technology** - $100,000 to $150,000 per year.
+  2. **Finance** - $120,000 to $160,000 annually.
+  3. **Healthcare** - $110,000 to $140,000 per year.
+  4. **Retail** - $90,000 to $130,000.
+  5. **Government** - $80,000 to $120,000.
+- [ASSISTANT_SAID] Noted that technology, finance, and healthcare industries are particularly strong in hiring data scientists.
+- [FACT] User is weighing the pros and cons of pursuing a Master's degree.
+- [ASSISTANT_SAID] Suggested steps to assess the foundation in math and statistics for a Data Science program:
+  1. Review core topics like linear algebra, calculus, probability, and statistical inference.
+  2. Assess coursework against program prerequisites.
+  3. Take online assessments on platforms like Khan Academy or Coursera.
+  4. Review specific program requirements.
+  5. Seek feedback from current students or professionals.
+  6. Consider a bridge course if gaps are identified.
+- [FACT] User is unsure about committing to a full Master's program.
+- [ASSISTANT_SAID] Recommended online courses and certifications for building skills in data science:
+  1. **Coursera** - IBM Data Science Professional Certificate.
+  2. **edX** - Data Science MicroMasters from UC San Diego.
+  3. **DataCamp** - Interactive courses and career tracks.
+  4. **Udacity** - Data Scientist Nanodegree program.
+  5. **Kaggle** - Free courses and competitions.
+- [FACT] User has taken online certification courses in Python programming

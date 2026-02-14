@@ -1,0 +1,29 @@
+{
+  "answer_f442ccbe": [
+    {
+      "fact": "User is thinking of trying out new recipes for dinner this week.",
+      "type": "event",
+      "entities": [
+        "new recipes",
+        "dinner"
+      ]
+    },
+    {
+      "fact": "User likes one-pot pasta and chicken fajitas.",
+      "type": "preference",
+      "entities": [
+        "one-pot pasta",
+        "chicken fajitas"
+      ]
+    },
+    {
+      "fact": "User usually has about an hour to spare between getting home from work and starting dinner.",
+      "type": "personal",
+      "entities": [
+        "one hour",
+        "work",
+        "dinner"
+      ]
+    }
+  ]
+}

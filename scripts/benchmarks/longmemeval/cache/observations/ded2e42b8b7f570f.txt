@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/06/17 (Sat) 14:08  
+[USER] The user is looking for new recipe ideas.  
+[USER] The user has been stuck in a rut lately, eating a lot of chicken and veggies.  
+[USER] The user tried out food delivery services last month.  
+[USER] The user ordered from UberEats three times in the first week of October.  
+[USER] The user ordered from BurgerFi, Sweetfin Poké, and El Torito Grill from UberEats.  
+[USER] The user liked the Korean BBQ tacos from Sweetfin Poké.  
+[PREFERENCE] The user is open to trying anything but tries to eat healthy and save money by meal prepping on Sundays.  
+[PREFERENCE] The user has been making quinoa and roasted veggies and experimenting with overnight oats recipes.  
+[ASSISTANT_SAID] The assistant is happy to help the user with new recipe ideas.  
+[ASSISTANT_SAID] The assistant asked the user about dietary restrictions or preferences, type of cuisine, specific ingredients, cooking time, and appliance availability.  
+[ASSISTANT_SAID] The assistant suggested several recipe ideas, including Korean-Style BBQ Beef Bowls, Spicy Shrimp and Veggie Stir-Fry, Roasted Veggie and Black Bean Tacos, Mason Jar Salads, Breakfast Burritos, Slow Cooker Lentil Curry, and Grilled Chicken and Veggie Skewers.  
+[ASSISTANT_CREATED] The assistant provided a detailed recipe for Korean-Style BBQ Beef Bowls, including ingredients and instructions.  
+[USER] The user expressed interest in trying out the Korean-Style BBQ Beef Bowls recipe.  
+[USER] The user asked for meal kit services that offer Korean-inspired dishes or international cuisine.  
+[ASSISTANT_SAID] The assistant recommended several meal kit services, including Blue Apron, HelloFresh, Home Chef, Sun Basket, and Takeout Kit.  
+[ASSISTANT_SAID] The assistant provided information about discounts and promotions for new customers at Sun Basket, including $35 off the first order, 3 meals for $60, free shipping, and a referral program.  
+[USER] The user expressed interest in trying out Sun Basket for their Korean-inspired dishes.  
+[USER] The user decided to choose the "Classic" menu plan and opt for the "3 Recipes for 2 People" plan for their first order.  
+[ASSISTANT_SAID] The assistant recommended specific Sun Basket recipes, including Korean-Style BBQ Beef Tacos, Spicy Korean Chicken Bibimbap, Pork and Kimchi Fried Rice, Japanese-Style Teriyaki Salmon, and Thai Green Curry Chicken.  
+[USER] The user confirmed they would try the Korean-Style BBQ Beef Tacos and Spicy Korean Chicken Bibimbap from Sun Basket.

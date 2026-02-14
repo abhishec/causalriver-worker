@@ -1,0 +1,52 @@
+{
+  "answer_56521e65_1": [
+    {
+      "fact": "User is looking for new BBQ sauce recipes to try out.",
+      "type": "preference",
+      "entities": [
+        "BBQ sauce recipes"
+      ]
+    },
+    {
+      "fact": "User has been experimenting with making BBQ sauce from scratch.",
+      "type": "preference",
+      "entities": [
+        "BBQ sauce",
+        "from scratch"
+      ]
+    },
+    {
+      "fact": "User just got a smoker.",
+      "type": "event",
+      "entities": [
+        "smoker"
+      ]
+    },
+    {
+      "fact": "User is excited to experiment with different types of wood and meats.",
+      "type": "opinion",
+      "entities": [
+        "wood",
+        "meats"
+      ]
+    },
+    {
+      "fact": "User is thinking of trying a mix of hickory and apple wood.",
+      "type": "preference",
+      "entities": [
+        "hickory wood",
+        "apple wood"
+      ]
+    },
+    {
+      "fact": "User has heard that hickory and apple wood pair well with pork and beef.",
+      "type": "opinion",
+      "entities": [
+        "hickory wood",
+        "apple wood",
+        "pork",
+        "beef"
+      ]
+    }
+  ]
+}

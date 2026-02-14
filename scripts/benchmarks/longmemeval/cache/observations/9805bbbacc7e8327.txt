@@ -1,0 +1,38 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/30 (Tue) 07:50
+- [ASSISTANT_SAID] Route Handlers allow you to create custom request handlers for a given route using the Web Request and Response APIs.
+- [ASSISTANT_SAID] Route Handlers are only available inside the app directory.
+- [ASSISTANT_SAID] Route Handlers are the equivalent of API Routes inside the pages directory.
+- [ASSISTANT_SAID] You do not need to use API Routes and Route Handlers together.
+- [ASSISTANT_SAID] Route Handlers are defined in a route.js|ts file inside the app directory.
+- [ASSISTANT_SAID] Example of defining a Route Handler: `app/api/route.ts export async function GET(request: Request) {}`
+- [ASSISTANT_SAID] Route Handlers can be nested inside the app directory, similar to page.js and layout.js.
+- [ASSISTANT_SAID] There cannot be a route.js file at the same route segment level as page.js.
+- [ASSISTANT_SAID] Supported HTTP methods for Route Handlers include GET, POST, PUT, PATCH, DELETE, HEAD, and OPTIONS.
+- [ASSISTANT_SAID] Next.js extends native Request and Response with NextRequest and NextResponse to provide convenient helpers for advanced use cases.
+- [ASSISTANT_SAID] Static Route Handlers are statically evaluated by default when using the GET method with the Response object.
+- [ASSISTANT_SAID] Example of a Static Route Handler: 
+  ```javascript
+  app/items/route.ts
+  import { NextResponse } from 'next/server';
+  
+  export async function GET() {
+      const res = await fetch('https://data.mongodb-api.com/...', {
+          headers: {
+              'Content-Type': 'application/json',
+              'API-Key': process.env.DATA_API_KEY,
+          },
+      });
+      const data = await res.json();
+  
+      return NextResponse.json({ data });
+  }
+  ```
+- [ASSISTANT_SAID] TypeScript Warning: Although Response.json() is valid, native TypeScript types currently show an error; you can use NextResponse.json() for typed responses instead.
+- [ASSISTANT_SAID] Static fetching can be beneficial to generate custom route handlers for robots.txt, rss.xml, sitemap.xml, and other routes.
+- [ASSISTANT_SAID] Dynamic Route Handlers are evaluated dynamically when using the Request object with the GET method, using any of the other HTTP methods, or using Dynamic Functions like cookies and headers.
+- [ASSISTANT_SAID] Example of a Dynamic Route Handler:
+  ```javascript
+  app/products/api/route.ts
+  import { NextResponse } from 'next/server';

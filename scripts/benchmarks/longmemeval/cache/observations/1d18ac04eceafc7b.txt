@@ -1,0 +1,50 @@
+**Observation Log:**
+
+- [FACT] User is planning a trip to Orlando, FL.
+- [EVENT] User is inquiring about theme parks and rollercoasters in Orlando.
+- [ASSISTANT_SAID] Orlando is referred to as the theme park capital of the world.
+- [ASSISTANT_SAID] Recommended theme parks include:
+  - Walt Disney World (four parks: Magic Kingdom, Epcot, Hollywood Studios, Animal Kingdom)
+  - Universal Orlando Resort (two parks: Universal Studios Florida, Universal's Islands of Adventure)
+  - SeaWorld Orlando
+  - LEGOLAND Florida
+- [ASSISTANT_SAID] Recommended rollercoasters include:
+  - SheiKra at Busch Gardens Tampa Bay
+  - Mako, Kraken, and Manta at SeaWorld Orlando
+  - Hollywood Rip Ride Rockit at Universal Studios Florida
+  - Incredible Hulk Coaster at Universal's Islands of Adventure
+  - Rock 'n' Roller Coaster Starring Aerosmith at Walt Disney World's Hollywood Studios
+  - Expedition Everest - Legend of the Forbidden Mountain at Walt Disney World's Animal Kingdom
+- [ASSISTANT_SAID] Tips for visiting theme parks include:
+  - Plan visits during the off-season (weekdays during school seasons)
+  - Consider purchasing a park-hopper ticket or an annual pass
+  - Take breaks to rest and recharge
+  - Don't miss evening shows and fireworks displays
+  - Attend special events like Coaster Con or Halloween Horror Nights for rollercoaster enthusiasts
+- [EVENT] User is interested in Halloween Horror Nights at Universal Studios Florida.
+- [ASSISTANT_SAID] Halloween Horror Nights typically runs from mid-September to early November.
+- [ASSISTANT_SAID] Features of Halloween Horror Nights include:
+  - Haunts (themed mazes)
+  - Scare Zones (areas with scareactors)
+  - Live Shows
+  - Select attractions open during the event
+- [ASSISTANT_SAID] Florida's HHN features unique original haunts and larger scale experiences compared to Hollywood.
+- [ASSISTANT_SAID] Recommended haunts for 2023 include:
+  - The Haunting of Hill House
+  - Stranger Things
+  - Ghostbusters
+  - The Walking Dead
+  - Universal Monsters: Legends Collide
+- [ASSISTANT_SAID] Recommended scare zones for 2023 include:
+  - Zombie Zone
+  - Academy of Villains: Alumni
+  - Vikings Undead
+  - Anarch-ade
+  - Knights of Hell
+- [ASSISTANT_SAID] Tips for visiting Halloween Horror Nights include:
+  - Arrive early to beat crowds
+  - Consider purchasing a Front of the Line (FOL) Pass
+  - Wear comfortable clothing and shoes
+  - Prepare for intense scares
+  - Take breaks during the event
+- [ASSIST

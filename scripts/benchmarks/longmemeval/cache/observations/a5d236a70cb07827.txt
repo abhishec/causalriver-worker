@@ -1,0 +1,33 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/21 (Sun) 03:05
+- [USER] User expressed interest in Caribbean cuisine, specifically fish dishes.
+- [ASSISTANT_SAID] One type of fish commonly used in Caribbean dishes is snapper.
+- [USER] User loves snapper.
+- [ASSISTANT_SAID] Popular Caribbean dishes that feature snapper include:
+  1. Escovitch Fish - a Jamaican dish with fried snapper and spicy pickled vegetable sauce.
+  2. Fish Curry - a Trinidadian dish with snapper in curry sauce.
+  3. Conch & Snapper Stew - a Bahamian dish with conch and snapper in tomato-based stew.
+  4. Grilled Snapper with Mango Salsa - grilled snapper topped with fruity and spicy salsa.
+  5. Fish and Fungi - a Virgin Islands dish with snapper and a cornmeal-based dish.
+- [USER] User finds all the mentioned dishes amazing.
+- [ASSISTANT_SAID] Recommended trying Escovitch Fish first as it is a classic Jamaican dish.
+- [ASSISTANT_SAID] Description of Escovitch Fish: crispy fried snapper topped with spicy and tangy pickled vegetable sauce (carrots, onion, bell peppers, vinegar).
+- [USER] User plans to try Escovitch Fish.
+- [USER] User asked for recommendations on where to find Escovitch Fish in their area.
+- [ASSISTANT_SAID] Assistant does not have access to user’s location or specific restaurant information.
+- [ASSISTANT_SAID] Suggested ways to find a restaurant serving Escovitch Fish:
+  1. Check review websites/apps like Yelp, Google Reviews, or Zomato for Jamaican cuisine.
+  2. Call or visit Jamaican restaurants to inquire about Escovitch Fish.
+  3. Ask friends or family for recommendations on Caribbean cuisine.
+- [USER] User will check out Jamaican restaurants in their area.
+- [USER] User asked for other favorite dishes from Caribbean cuisine.
+- [ASSISTANT_SAID] Other popular Caribbean dishes include:
+  1. Jerk Chicken - spicy Jamaican dish with marinated chicken grilled over charcoal.
+  2. Arroz con Pollo - Puerto Rican dish of rice with chicken and sofrito.
+  3. Callaloo - Trinidadian soup with leafy greens, okra, coconut milk, and spices.
+  4. Cubano Sandwich - Cuban sandwich with roast pork, ham, Swiss cheese, pickles, and mustard.
+  5. Tostones - fried plantains, a popular side dish.
+- [USER] User has tried Jerk Chicken before and loved it.
+- [USER] User asked for other Jamaican dishes to try.
+- [ASSISTANT_SAID]

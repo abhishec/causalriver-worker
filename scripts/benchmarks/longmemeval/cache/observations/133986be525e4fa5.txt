@@ -1,0 +1,40 @@
+**Observation Log:**
+
+- [FACT] User is moving to Melbourne soon.
+- [FACT] User is starting a master's program at the University of Melbourne.
+- [FACT] User got accepted into the University of Melbourne back in February.
+- [CHANGE] User found a shared apartment in Carlton back in February.
+- [FACT] User's shared apartment is within walking distance to the university.
+- [TEMPORAL] Session Date: 2023/05/27 (Sat) 15:42
+- [PREFERENCE] User is excited to start their master's program.
+- [PREFERENCE] User is looking for tips on finding affordable accommodation options.
+- [ASSISTANT_SAID] Assistant congratulated the user on their acceptance to the University of Melbourne.
+- [ASSISTANT_SAID] Assistant provided tips for finding affordable accommodation in Melbourne, including:
+  - Start early to find a place that suits the budget.
+  - Check university accommodation options.
+  - Consider share housing through websites like Flatmates.com.au, EasyRoommate, or Gumtree.
+  - Suggested suburbs like Carlton, Brunswick, Fitzroy, or Prahran for more affordable options.
+  - Mentioned rooming houses as a budget-friendly option.
+  - Suggested homestay arrangements for a more homely experience.
+  - Advised to negotiate rent or terms when finding a place.
+  - Recommended being prepared with necessary documents.
+  - Suggested using online resources like Realestate.com.au, Domain.com.au, and Rent.com.au.
+  - Advised to visit properties before committing to a lease.
+- [ASSISTANT_SAID] Assistant listed popular neighborhoods for students: Carlton, Brunswick, Fitzroy, and Prahran.
+- [ASSISTANT_SAID] Assistant provided information about Melbourne's winter weather, including:
+  - Average temperatures ranging from 6°C to 13°C (43°F to 56°F).
+  - Cold mornings and evenings, with temperatures often below 10°C (50°F).
+  - Occasional frosty mornings.
+  - Rainfall is more frequent during winter, with an average of 12 rainy days per month.
+  - Windy days are common.
+- [ASSISTANT_SAID] Assistant mentioned the charm of Melbourne's winter, including:
+  - Vibrant cultural scene with indoor attractions.
+  - Cozy cafes and restaurants.
+  - Stylish winter fashion.
+  - Possibility of beautiful, crisp, sunny days.
+- [ASSISTANT_SAID] Assistant provided tips for preparing for Melbourne's winter, including packing warm clothing and waterproof gear.
+- [FACT] User is planning to rely on public transport and walk or bike whenever possible in Melbourne.
+- [ASSISTANT_SAID] Assistant provided information on getting around Melbourne without a car, including:
+  - Public transport options: trains, trams, and buses.
+  - Information about the Myki ticketing system.
+  - Walking and cycling

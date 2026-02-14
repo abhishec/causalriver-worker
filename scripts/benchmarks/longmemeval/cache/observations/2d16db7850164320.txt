@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/22 (Mon) 13:12  
+[FACT] User is having trouble with their sleep schedule.  
+[PREFERENCE] User is trying to establish a consistent bedtime routine.  
+[PREFERENCE] User listens to calming music or nature sounds on Spotify for about an hour before bed to help relax.  
+[ASSISTANT_SAID] Establishing a consistent bedtime routine is a great step towards improving sleep quality.  
+[ASSISTANT_SAID] Additional tips to wind down before bed include:  
+[ASSISTANT_CREATED] 1. Create a relaxing environment: Ensure the bedroom is dark, quiet, and at a comfortable temperature.  
+[ASSISTANT_CREATED] 2. Dim the lights: Reduce exposure to bright lights, especially blue light from electronics, 30-60 minutes before bed.  
+[ASSISTANT_CREATED] 3. Disconnect from screens: Avoid screens for at least 30-60 minutes before bedtime.  
+[ASSISTANT_CREATED] 4. Unwind with a relaxing activity: Suggestions include reading a book (not on a screen), taking a warm bath, practicing gentle stretches or yoga, doing light meditation or deep breathing exercises, or writing in a journal.  
+[ASSISTANT_CREATED] 5. Avoid stimulating activities: Avoid exercise, exciting movies or TV shows, playing video games, or engaging in intense conversations or checking work emails before bed.  
+[ASSISTANT_CREATED] 6. Get ready for bed: Brush teeth, change into comfortable pajamas, use the bathroom, and prepare the bed for sleep.  
+[ASSISTANT_CREATED] 7. Stick to a consistent schedule: Go to bed and wake up at the same time every day, including weekends.  
+[ASSISTANT_CREATED] 8. Limit caffeine and electronics before bed: Avoid caffeine, nicotine, or alcohol at least 4-6 hours before bedtime.  
+[ASSISTANT_CREATED] 9. Try progressive muscle relaxation: Tense and then relax different muscle groups in the body.  
+[ASSISTANT_CREATED] 10. Make adjustments as needed: Experiment with different activities and routines to find what works best.  
+[ASSISTANT_SAID] It's great that the user has found calming music or nature sounds on Spotify that help them relax.  
+[ASSISTANT_SAID] Additional options to explore include guided meditations, ASMR, or binaural beats.  
+[ASSISTANT_SAID] Consistency is key in establishing a bedtime routine.  
+[PREFERENCE] User finds it hard to resist checking their phone sometimes in the evenings.  
+[ASSISTANT_SAID] Tips to avoid the temptation of screens before bed include:  
+[ASSISTANT_CREATED] 1. Designate a "no-phone zone": Make the bedroom a phone-free zone.  
+[ASSISTANT_CREATED]

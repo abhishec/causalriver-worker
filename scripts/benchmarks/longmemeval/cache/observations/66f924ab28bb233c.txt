@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/03/28 (Tue) 16:27  
+[FACT] User is working on their thesis.  
+[EVENT] User needs help with finding relevant literature for their literature review.  
+[CHANGE] User received positive feedback from their advisor a week after submitting their thesis proposal.  
+[PREFERENCE] User is feeling motivated to get their thesis done.  
+[ASSISTANT_SAID] Assistant congratulated the user on the positive feedback from their advisor.  
+[ASSISTANT_SAID] Assistant offered to help find relevant literature for the user's literature review.  
+[ASSISTANT_SAID] Assistant requested details about the user's thesis topic to provide targeted suggestions.  
+[ASSISTANT_SAID] Assistant provided general tips for finding literature, including brainstorming keywords, using academic databases, using specific search operators, exploring citation tracking, and checking reference lists.  
+[ASSISTANT_SAID] Assistant listed popular academic databases: Google Scholar, Web of Science, Scopus, PubMed, PsycINFO, JSTOR, ScienceDirect.  
+[ASSISTANT_SAID] Assistant suggested using Boolean operators and wildcards to refine search results.  
+[ASSISTANT_SAID] Assistant encouraged the user to provide more information about their thesis topic for more specific suggestions.  
+[FACT] User's thesis topic is the impact of social media on mental health in young adults.  
+[FACT] User's research question focuses on how social media usage patterns are associated with symptoms of depression and anxiety in young adults.  
+[ASSISTANT_SAID] Assistant expressed that the user's topic is fascinating and provided keywords related to the research: social media, mental health, young adults, depression, anxiety, symptoms, usage patterns, online social networking, digital media, psychological well-being.  
+[ASSISTANT_SAID] Assistant provided databases specifically relevant to the user's topic: PsycINFO, PubMed, Scopus, Web of Science, Google Scholar.  
+[ASSISTANT_SAID] Assistant suggested search strategies combining keywords related to social media, mental health, and young adults.  
+[ASSISTANT_SAID] Assistant provided additional tips for searching, including using quotes for exact phrases and filtering results by date.  
+[ASSISTANT_SAID] Assistant listed influential studies and reviews to get the user started on their literature review.  
+[ASSISTANT_SAID] Assistant provided specific studies: Burke et al. (2010), Király et al. (2019), Paksarian et al. (2018).  
+[PREFERENCE] User found the information helpful and plans to use the suggested keywords and databases.  
+[EVENT] User is interested in exploring the potential mediating roles of self-esteem and social support in the relationship between social media usage and mental health outcomes.  
+[ASSISTANT_SAID] Assistant provided keywords

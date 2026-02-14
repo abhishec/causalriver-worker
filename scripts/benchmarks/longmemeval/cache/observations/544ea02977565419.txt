@@ -1,0 +1,19 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/21 (Sun) 12:42  
+[USER] User requested a survey with 15 questions on the topic of the UK energy crisis.  
+[ASSISTANT_SAID] Assistant stated it could not create a survey but provided examples of different types of questions for a survey on the UK energy crisis.  
+[ASSISTANT_CREATED] Assistant provided a survey with 15 questions on the UK energy crisis, including:  
+1. [ASSISTANT_SAID] Multiple Choice: What is the primary source of energy used in the UK? Options: a) Coal, b) Natural Gas, c) Renewable energy, d) Nuclear energy  
+2. [ASSISTANT_SAID] Likert Scale: How concerned are you about the UK's energy crisis? Options: a) Not at all concerned, b) Slightly concerned, c) Moderately concerned, d) Very concerned, e) Extremely concerned  
+3. [ASSISTANT_SAID] Open-Ended: What do you think is the most pressing issue facing the UK's energy sector currently?  
+4. [ASSISTANT_SAID] Ranking: Please rank the following energy sources in order of importance to the UK's energy mix (1 being the most important, 5 being the least important). Options: a) Coal, b) Natural Gas, c) Renewable energy, d) Nuclear energy  
+5. [ASSISTANT_SAID] True or False: The UK is currently self-sufficient in terms of energy production.  
+6. [ASSISTANT_SAID] Demographic: What is your age?  
+7. [ASSISTANT_SAID] Demographic: What is your gender?  
+8. [ASSISTANT_SAID] Demographic: What is your occupation?  
+9. [ASSISTANT_SAID] Demographic: What is your level of education?  
+10. [ASSISTANT_SAID] Checkbox: Which of the following renewable energy sources do you think the UK should invest more in? Options: a) Solar, b) Wind, c) Hydro, d) Geothermal, e) Biomass  
+11. [ASSISTANT_SAID] Checkbox: Which of the following energy-saving measures do you currently practice at home? Options: a) Using energy-efficient appliances, b) Turning off lights and electronics when not in use, c) Insulating your home, d) Using public transportation, e) None of the above  
+12. [ASSISTANT_SAID] Rating: How satisfied are you with the UK government's efforts to address the energy crisis? (1 being very dissatisfied, 5 being very satisfied)  
+13. [ASSISTANT_SAID] Drop-down: What is your annual household income? Options: a) Less than £20,000, b) £

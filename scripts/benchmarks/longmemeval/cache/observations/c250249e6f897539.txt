@@ -1,0 +1,36 @@
+**Observation Log:**
+
+[SESSION_DATE] 2023/05/24 (Wed) 13:51  
+[USER] User is trying to organize loyalty programs and rewards.  
+[USER] User has a Walgreens Balance Rewards $5 reward that expires on October 15th.  
+[ASSISTANT_SAID] Assistant is happy to help the user keep track of rewards expirations.  
+[ASSISTANT_SAID] Assistant can help create a virtual "rewards tracker" to keep track of loyalty program rewards and their expiration dates.  
+[ASSISTANT_SAID] Assistant requests the following information to create the tracker: name of the loyalty program, type of reward, and expiration date.  
+[ASSISTANT_CREATED] Assistant creates the first entry in the rewards tracker:  
+**Walgreens Balance Rewards**  
+* $5 reward  
+* Expiration date: October 15th  
+[USER] User has a $5 coupon from CVS Pharmacy that is good on a purchase of $15 or more.  
+[ASSISTANT_SAID] Assistant will add the CVS Pharmacy coupon to the rewards tracker.  
+[ASSISTANT_CREATED] Assistant updates the rewards tracker to include:  
+**CVS Pharmacy**  
+* $5 coupon (on purchase of $15 or more)  
+* Expiration date: **Unknown** (asks user to provide the expiration date if available)  
+[USER] User has a 20% off entire purchase coupon from Bed Bath & Beyond that expires on November 1st.  
+[USER] User has been a member of the Bed Bath & Beyond loyalty program for a while.  
+[USER] User has been a member of the Walgreens Balance Rewards program for over a year.  
+[ASSISTANT_SAID] Assistant adds the Bed Bath & Beyond coupon to the rewards tracker.  
+[ASSISTANT_CREATED] Assistant updates the rewards tracker to include:  
+**Bed Bath & Beyond**  
+* 20% off entire purchase coupon  
+* Expiration date: November 1st  
+[ASSISTANT_SAID] Assistant acknowledges the user's loyalty to both Walgreens and Bed Bath & Beyond.  
+[ASSISTANT_SAID] Assistant suggests setting reminders for expiration dates.  
+[USER] User needs to check their rewards balance on the Starbucks app for a free drink reward.  
+[ASSISTANT_SAID] Assistant adds a reminder to check the Starbucks rewards balance.  
+[ASSISTANT_CREATED] Assistant updates the rewards tracker to include:  
+**Starbucks Rewards**  
+* Check rewards balance for free drink reward  
+* Expiration date: **Unknown** (suggests checking the app for details)  
+[USER] User earned a $10 reward on their Dick's Sporting Goods SCORECARD rewards program by spending over $200 in the past 90 days.  
+[ASSISTANT_SAID] Assistant adds the Dick's Sporting Goods SCORECARD reward to the tracker

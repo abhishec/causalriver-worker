@@ -1,0 +1,19 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/03/06 (Mon) 12:54  
+[FACT] The user is trying to get back on track with their exercise routine.  
+[FACT] The user has been doing well with meal prepping.  
+[EVENT] The user missed their usual yoga class last Sunday when they woke up late.  
+[PREFERENCE] The user has been doing morning yoga classes and wants to prioritize finding an early morning class.  
+[ASSISTANT_SAID] The assistant provided suggestions for finding a new yoga class, including checking online yoga platforms, searching for local yoga studios, asking friends or family for recommendations, checking community centers or gyms, trying a new style of yoga, and checking schedules and prices.  
+[ASSISTANT_SAID] The assistant emphasized the importance of finding a class that the user enjoys and can commit to regularly.  
+[FACT] The user has been struggling with establishing a consistent wake-up routine.  
+[ASSISTANT_SAID] The assistant provided tips for establishing a consistent wake-up routine, including setting a specific and achievable goal, gradually adjusting the sleep schedule, creating a bedtime routine, getting morning sunlight, using a wake-up light, avoiding screens before bed, making a plan for the morning, using a consistent alarm clock, making mornings enjoyable, and being kind to oneself.  
+[FACT] The user is trying to wake up at 6:30 am every day, including weekends.  
+[CHANGE] The user mentioned they are finally getting the hang of their consistent morning routine.  
+[ASSISTANT_SAID] The assistant congratulated the user on their progress and provided additional tips for solidifying their morning routine, such as celebrating small wins, making it enjoyable, being flexible, using visual reminders, and rewarding oneself.  
+[FACT] The user is prioritizing a personal project, which is a novel they are writing.  
+[PREFERENCE] The user aims to write at least 500 words every day.  
+[FACT] The user noted that some days are more productive than others.  
+[ASSISTANT_SAID] The assistant provided tips for overcoming writer's block and days when the user doesn't feel like writing, including warming up with exercises, changing the environment, breaking the task down into smaller chunks, researching and outlining, and writing badly.  
+[ASSISTANT_SAID] The assistant emphasized that the first draft doesn't have to be perfect and encouraged the user to just write something.

@@ -1,0 +1,94 @@
+{
+  "answer_6b9b2b1e_1": [
+    {
+      "fact": "User enjoys reading fiction, especially novels that explore complex themes.",
+      "type": "preference",
+      "entities": [
+        "fiction",
+        "complex themes"
+      ]
+    },
+    {
+      "fact": "User recently finished a 416-page novel.",
+      "type": "event",
+      "entities": [
+        "416-page novel"
+      ]
+    },
+    {
+      "fact": "User read 'The Power' by Naomi Alderman in December.",
+      "type": "event",
+      "entities": [
+        "The Power",
+        "Naomi Alderman",
+        "December"
+      ]
+    },
+    {
+      "fact": "User took around 5 weeks to finish 'The Power'.",
+      "type": "event",
+      "entities": [
+        "5 weeks",
+        "The Power"
+      ]
+    },
+    {
+      "fact": "User is interested in books with similar page lengths and depth as 'The Power'.",
+      "type": "preference",
+      "entities": [
+        "page lengths",
+        "depth",
+        "The Power"
+      ]
+    },
+    {
+      "fact": "User usually reads around 20-30 pages a day before bed.",
+      "type": "personal",
+      "entities": [
+        "20-30 pages",
+        "before bed"
+      ]
+    },
+    {
+      "fact": "User likes the sound of 'The Handmaid's Tale' and 'The Night Circus'.",
+      "type": "preference",
+      "entities": [
+        "The Handmaid's Tale",
+        "The Night Circus"
+      ]
+    }
+  ],
+  "answer_6b9b2b1e_2": [
+    {
+      "fact": "User recently finished reading 'The Nightingale' by Kristin Hannah",
+      "type": "event",
+      "entities": [
+        "The Nightingale",
+        "Kristin Hannah"
+      ]
+    },
+    {
+      "fact": "User took around 3 weeks to complete 'The Nightingale'",
+      "type": "event",
+      "entities": [
+        "The Nightingale"
+      ]
+    },
+    {
+      "fact": "User is looking for book recommendations similar to 'The Nightingale'",
+      "type": "preference",
+      "entities": [
+        "book recommendations",
+        "historical fiction"
+      ]
+    },
+    {
+      "fact": "User is interested in 'The Alice Network' by Kate Quinn",
+      "type": "preference",
+      "entities": [
+        "The Alice Network",
+        "Kate Quinn"
+      ]
+    }
+  ]
+}

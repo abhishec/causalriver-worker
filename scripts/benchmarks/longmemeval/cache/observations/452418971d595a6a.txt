@@ -1,0 +1,26 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/27 (Sat) 15:55  
+[USER] User asked how to convert an alternator into a dynamometer.  
+[ASSISTANT_SAID] Converting an alternator into a dynamometer requires electrical and mechanical modifications.  
+[ASSISTANT_SAID] Steps to convert an alternator into a dynamometer:  
+[ASSISTANT_SAID] 1. Determine the maximum power output of the alternator.  
+[ASSISTANT_SAID] 2. Attach a load to the alternator's shaft (pulley and load cell or brake drum and brake pads).  
+[ASSISTANT_SAID] 3. Connect the alternator to a DC power source.  
+[ASSISTANT_SAID] 4. Measure the voltage and current output using a multimeter.  
+[ASSISTANT_SAID] 5. Calibrate the dynamometer by applying a known load and measuring voltage and current output.  
+[ASSISTANT_SAID] 6. Mount the dynamometer securely and connect it to the load and power source.  
+[ASSISTANT_SAID] Converting an alternator into a dynamometer can be complex and requires knowledge of electrical and mechanical engineering.  
+[USER] User requested Arduino code to run the dynamometer setup.  
+[ASSISTANT_CREATED] Provided Arduino code to measure voltage, current, and power output of the alternator.  
+[ASSISTANT_SAID] The code uses `analogRead` to measure voltage and current, calculates power, and applies a load every second.  
+[USER] User asked to add a load cell feature to calculate torque with an RPM pickup.  
+[ASSISTANT_CREATED] Updated Arduino code to include load cell and RPM pickup for measuring torque and RPM.  
+[ASSISTANT_SAID] The code uses `pulseIn` to measure RPM and calculates torque based on load and gear ratio.  
+[USER] User requested to add horsepower output to the program.  
+[ASSISTANT_CREATED] Further updated Arduino code to calculate horsepower output from power in watts.  
+[ASSISTANT_SAID] The code includes a conversion factor to convert watts to horsepower and prints voltage, current, power, RPM, torque, and horsepower.  
+[USER] User requested a program that communicates with the Arduino to display and graph RPM, horsepower, and torque on the computer.  
+[ASSISTANT_CREATED] Provided a Python program to communicate with the Arduino and graph RPM, horsepower, and torque using `pyserial` and `matplotlib`.  
+[ASSISTANT_SAID] The Python program parses data from the Arduino and plots horsepower and torque against RPM.  
+[ASSISTANT_SAID] The serial port in the code is set to "COM3" and may need to be

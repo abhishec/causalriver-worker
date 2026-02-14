@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/28 (Sun) 15:58
+- [FACT] User inquired about a company inventing an immunoglobulin with a high proportion of IgM.
+- [ASSISTANT_SAID] An immunoglobulin with a high proportion of IgM could potentially target various indications for treatment.
+- [ASSISTANT_SAID] Primary Immunodeficiency Diseases (PIDDs) affect approximately 1 in 1,200 people in the United States.
+- [ASSISTANT_SAID] Current treatments for PIDDs include immunoglobulin replacement therapy (IgG), antibiotics, and other supportive care.
+- [ASSISTANT_SAID] Primary endpoint for PIDDs: Reduction in the frequency and severity of infections.
+- [ASSISTANT_SAID] Realistic changes to the primary endpoint with IgM for PIDDs: Enhanced protection against infections, potentially reducing the need for antibiotics or other supportive care.
+- [ASSISTANT_SAID] Sample size for PIDDs: 500-1000 subjects.
+- [ASSISTANT_SAID] Inflammatory Neuropathies (e.g., Guillain-Barré Syndrome) affect about 1-2 in 100,000 people per year.
+- [ASSISTANT_SAID] Current treatments for Guillain-Barré Syndrome include intravenous immunoglobulins (IVIG), plasma exchange, and supportive care.
+- [ASSISTANT_SAID] Primary endpoint for Guillain-Barré Syndrome: Improvement in muscle strength and function.
+- [ASSISTANT_SAID] Realistic changes to the primary endpoint with IgM for Guillain-Barré Syndrome: Faster recovery, reduced disease severity, and decreased risk of complications.
+- [ASSISTANT_SAID] Sample size for Guillain-Barré Syndrome: 500-1000 subjects.
+- [ASSISTANT_SAID] Hemolytic Disease of the Newborn (HDN) affects about 1 in 1,000-3,000 live births.
+- [ASSISTANT_SAID] Current treatments for HDN include intrauterine blood transfusions, postnatal exchange transfusions, and phototherapy.
+- [ASSISTANT_SAID] Primary endpoint for HDN: Reduction in the severity of hemolysis and prevention of complications such as kernicterus.
+- [ASSISTANT_SAID] Realistic changes to the primary endpoint with IgM for HDN: Enhanced protection against hemolysis, potentially reducing the need for blood transfusions and phototherapy.
+- [ASSISTANT_SAID] Sample size for HDN: 500-1000 subjects.
+- [ASSISTANT_SAID] Autoimmune Hemolytic Anemia (AIHA) affects about 1-3 in 100,

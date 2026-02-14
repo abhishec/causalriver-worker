@@ -1,0 +1,28 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/27 (Sat) 01:57  
+[USER] User is an SDR (Sales Development Representative).  
+[USER] User provided feedback from multiple SDRs regarding Wingman by Clari.  
+[RELATIONSHIP] Brendan D. is a Sales Consultant who provided feedback.  
+[RELATIONSHIP] Sean L. is a Sr. Business Development Rep who provided feedback.  
+[PREFERENCE] Brendan D. likes that recordings and call feedback are available immediately after calls.  
+[PREFERENCE] Brendan D. dislikes the learning curve for using full features of Wingman.  
+[PREFERENCE] Brendan D. believes the learning curve is worth investing time in.  
+[PREFERENCE] Brendan D. appreciates that Wingman helps with notetaking during calls.  
+[PREFERENCE] Brendan D. values sharing model demos and best practices with colleagues.  
+[PREFERENCE] Brendan D. finds it beneficial that actionable requests from prospects are addressed after calls.  
+[PREFERENCE] Sean L. likes sending clips and comments directly to team members via Slack.  
+[PREFERENCE] Sean L. enjoys creating Game Tapes by highlighting parts of the transcript.  
+[PREFERENCE] Sean L. dislikes nothing about Wingman so far.  
+[PREFERENCE] Sean L. has only used Wingman for about 2 months.  
+[PREFERENCE] Sean L. finds Wingman better than the previous Call Intelligence tool used.  
+[PREFERENCE] Sean L. appreciates the project management and collaboration features of Wingman.  
+[PREFERENCE] Sean L. believes Wingman provides specific training and insights for sales calls.  
+[PREFERENCE] Sean L. finds it easy to learn about his position by listening to past client calls.  
+[ASSISTANT_CREATED] Assistant created a 5-line bullet point summary on why an SDR will love Wingman by Clari.  
+[ASSISTANT_SAID] Assistant's summary includes:  
+[ASSISTANT_SAID] "Instant access to call recordings and feedback for actionable follow-up."  
+[ASSISTANT_SAID] "Learning curve for full features, but worth investing time."  
+[ASSISTANT_SAID] "Solves problems of note-taking, sharing demos with colleagues, and ensuring follow-up."  
+[ASSISTANT_SAID] "Easy sharing of call clips and comments with team members via Slack."  
+[ASSISTANT_SAID] "Provides valuable insights and specific training for sales consulting teams."

@@ -1,0 +1,37 @@
+**Observation Log:**
+
+[FACT] User is looking to improve skills in data analysis and digital marketing.  
+[FACT] User was told they were being considered for a promotion about three months ago.  
+[FACT] User has taken on more responsibilities at work.  
+[PREFERENCE] User wants to ensure they are equipped to handle new responsibilities.  
+[ASSISTANT_SAID] Assistant congratulated the user on the potential promotion and taking the initiative to upskill.  
+[ASSISTANT_SAID] Assistant recommended learning Tableau for data visualization to enhance data analysis and digital marketing skills.  
+[ASSISTANT_SAID] Assistant provided a list of online courses and resources for learning Tableau, including:  
+- **Tableau Online Courses**: Free online courses from Tableau.  
+- **Tableau Tutorials**: Official step-by-step guides from Tableau.  
+- **Tableau Community**: A community for users to connect and learn.  
+- **Tableau for Data Analysis** (Coursera): Course by the University of Colorado Boulder.  
+- **Data Visualization with Tableau** (Udemy): Course covering basics and dashboard creation.  
+- **Tableau Bootcamp** (DataCamp): Interactive course on Tableau.  
+- **Data Analysis with Tableau** (edX): Course offered by Microsoft.  
+[ASSISTANT_SAID] Assistant suggested additional resources:  
+- **Tableau Public**: Free version to publish and share visualizations.  
+- **Makeover Monday**: Community project for practicing data visualization skills.  
+- **Data Visualization Subreddit**: Community for sharing work and feedback.  
+- **Tableau Blogs**: Blogs to stay updated on trends and best practices.  
+[ASSISTANT_SAID] Assistant provided tips for learning Tableau:  
+1. Start with the basics.  
+2. Practice with sample datasets.  
+3. Join online communities.  
+4. Focus on storytelling with data.  
+[FACT] User expressed interest in learning more about social media advertising.  
+[PREFERENCE] User specifically asked for recommendations on Facebook Ads and Google Ads.  
+[ASSISTANT_SAID] Assistant stated that mastering Facebook Ads and Google Ads is crucial for digital marketing.  
+[ASSISTANT_SAID] Assistant provided a list of online courses and resources for Facebook Ads, including:  
+- **Facebook Blueprint**: Official certification program with free courses.  
+- **Facebook Ads Mastery** (Udemy): Comprehensive course on Facebook Ads.  
+- **Facebook Ads Training** (HubSpot Academy): Free course on Facebook Ads basics.  
+- **Facebook Ads Course** (Digital Marketing Institute): Paid course on strategy and measurement.  
+[ASSISTANT_SAID] Assistant provided a list of online courses and resources for Google Ads, including:  
+- **Google Ads Certification**: Official certification program with free courses.  
+- **Google Ads Training** (HubSpot Academy): Free course on Google Ads

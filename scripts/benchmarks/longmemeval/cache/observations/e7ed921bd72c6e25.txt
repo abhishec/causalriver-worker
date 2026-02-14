@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/25 (Thu) 00:09  
+[USER] User wants the assistant to act as a market research expert fluent in English.  
+[USER] User requests the assistant to develop a full SEO content plan based on the target keyword "best AI chat."  
+[USER] User specifies the format for the response to be a markdown table.  
+[USER] User requests the table to include the following columns: keyword cluster, keyword, search intent, title, and meta description.  
+[USER] User instructs to cluster keywords according to the top 10 super categories and name the first column "keyword cluster."  
+[USER] User asks for 7 subcategories or specific long-tail keywords for each cluster in the second column.  
+[USER] User requests the human searcher intent for the keyword to be listed in another column.  
+[USER] User specifies the search intent groups as commercial, transactional, or informational.  
+[USER] User requests a click-enticing title for a post about each keyword in another column.  
+[USER] User asks for an attractive meta description with a high click-thru-rate, mentioning the value of the article and including a call to action, limited to 120-155 words.  
+[USER] User instructs not to use generic keywords like 'introduction' or 'conclusion' and to focus on specific keywords only.  
+[USER] User requests not to use any enclosing characters in the columns.  
+[ASSISTANT_CREATED] Assistant created a markdown table with the following content:  
+[ASSISTANT_CREATED] | Keyword Cluster | Keyword | Search Intent | Title | Meta Description |  
+[ASSISTANT_CREATED] | --- | --- | --- | --- | --- |  
+[ASSISTANT_CREATED] | Best AI Chat | Best AI Chat | Informational | "Discover the Best AI Chatbots on the Market Today" | Learn about the top AI chatbots and find the one that fits your needs. Get a comprehensive comparison of the best AI chats. Start your search now. |  
+[ASSISTANT_CREATED] |  | AI Chat Features | Informational | "The Most Sought-after Features in AI Chats" | Find out what makes an AI chat worth using. Discover the top features users are looking for and learn how to choose the right AI chat for your needs. |  
+[ASSISTANT_CREATED] |  | AI Chatbots Comparison | Informational | "Comparing the Best AI Chatbots: Which One Reigns Supreme?" | Get a side-by-side comparison of the top AI chatbots. Learn about their strengths and weaknesses and find the one that's right for you. |  
+[ASSISTANT_CREATED] |  | AI Chatbot Use Cases | Informational | "Real-life Use Cases of AI Chatbots: How They're Changing the Game" | Discover how AI chatbots are being

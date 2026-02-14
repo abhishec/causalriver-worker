@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/24 (Wed) 01:40  
+[FACT] User has a 2018 Honda Civic Si.  
+[PREFERENCE] User is looking for advice on suspension tuning for autocross.  
+[ASSISTANT_SAID] Suspension tuning requires a balance between stiffness and compliance.  
+[ASSISTANT_SAID] For autocross, weight transfer is crucial to maintain traction and stability.  
+[ASSISTANT_SAID] Proper camber and toe settings can improve handling and reduce tire wear.  
+[ASSISTANT_SAID] Recommended negative camber settings: -1.5 to -2.5 degrees at the front and -1 to -2 degrees at the rear.  
+[ASSISTANT_SAID] Suggested ride height for improved handling: at least 4-5 inches.  
+[ASSISTANT_SAID] Suggested shock absorber settings: Stiffen compression damping and soften rebound damping.  
+[ASSISTANT_SAID] Suggested spring rates: Stiffer front springs and slightly softer rear springs for balance.  
+[ASSISTANT_SAID] Suggested sway bar adjustments: Stiffer front sway bars and softer rear sway bars to promote rotation.  
+[ASSISTANT_SAID] User should provide current shock absorber settings, spring rates, camber and toe settings, ride height, and any other suspension modifications for tailored advice.  
+[FACT] User is currently running KW V3 coilovers with 450/550 lb/in springs.  
+[FACT] User has camber set to -1.8 degrees front and -1.2 degrees rear.  
+[FACT] User has a Whiteline 22mm front sway bar and a Progress 19mm rear sway bar.  
+[FACT] User's ride height is around 4.5 inches.  
+[PREFERENCE] User has been experimenting with different shock settings but is unsure what is best for autocross.  
+[ASSISTANT_SAID] Recommended shock settings for KW V3: 5-7 clicks from full soft for compression and 8-10 clicks from full soft for rebound.  
+[ASSISTANT_SAID] Suggested lowering ride height to around 4.2-4.3 inches for improved handling.  
+[ASSISTANT_SAID] Suggested adjusting front camber to -2.0 to -2.2 degrees and rear camber to -1.0 to -1.1 degrees for better performance.  
+[ASSISTANT_SAID] Recommended toe settings: neutral to slightly toe-out (0.5-1 degree) for better turn-in and stability.  
+[ASSISTANT_SAID] User is experimenting with different tire compounds and pressures for autocross performance.  
+[ASSISTANT_SAID] Recommended tire compounds for autocross: Michelin Pilot Sport 4S, Continental Extreme

@@ -1,0 +1,15 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/29 (Mon) 06:51
+- [USER] User requested "5 important blockchain concepts."
+- [ASSISTANT_SAID] 1. Decentralization: Core concept of blockchain technology; no central authority controls data; data stored on a distributed network of nodes; enhances security and resistance to tampering.
+- [ASSISTANT_SAID] 2. Consensus Mechanisms: Algorithms used by nodes to validate transactions; examples include Proof of Work (PoW), Proof of Stake (PoS), Delegated Proof of Stake (DPoS), and Byzantine Fault Tolerance (BFT); prevents double-spending and fraud.
+- [ASSISTANT_SAID] 3. Smart Contracts: Self-executing contracts with terms written in code; automates business processes without intermediaries; applications include supply chain management, insurance claims, and voting systems.
+- [ASSISTANT_SAID] 4. Cryptography: Use of mathematical algorithms to secure data; secures transactions, prevents fraud, ensures privacy; techniques include public-key cryptography, hash functions, and digital signatures.
+- [ASSISTANT_SAID] 5. Immutable Ledger: Database that cannot be altered once data is written; ensures integrity and transparency of data; allows for trustless transactions.
+- [USER] User requested "Another 5."
+- [ASSISTANT_SAID] 1. Block: Collection of verified transactions added to the blockchain; contains a unique hash linking it to the previous block; created by miners solving mathematical puzzles.
+- [ASSISTANT_SAID] 2. Nodes: Individual computers/devices in the blockchain network; can be full nodes (complete copy) or lightweight nodes (subset); each has a unique address and communicates with other nodes.
+- [ASSISTANT_SAID] 3. Fork: Occurs when a blockchain splits into two chains due to disagreement; types include soft forks (backward-compatible) and hard forks (new, incompatible blockchain).
+- [ASSISTANT_SAID] 4. Public vs. Private Blockchain: Public blockchains are open to anyone; private blockchains are restricted to specific participants; public blockchains (e.g., Bitcoin, Ethereum) are more decentralized, while private blockchains prioritize privacy and security.
+- [ASSISTANT_SAID] 5. Tokenization: Process of converting real-world assets into digital tokens; allows fractional ownership; tokens can represent stocks, real estate, or art; traded on cryptocurrency exchanges.

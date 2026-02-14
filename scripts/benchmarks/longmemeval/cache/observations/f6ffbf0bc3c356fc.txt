@@ -1,0 +1,30 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/01/31 (Tue) 06:37
+- [EVENT] User is looking for tips on how to stay organized with online purchases.
+- [PREFERENCE] User feels they have been buying a lot of stuff lately and are starting to lose track of their purchases.
+- [EVENT] User just got a new wallet from Levi's.
+- [PREFERENCE] User is thinking of using the new wallet to keep all their receipts in one place.
+- [ASSISTANT_SAID] Assistant congratulated the user on the new wallet and suggested using it to store receipts.
+- [ASSISTANT_SAID] Assistant provided 10 tips to help the user stay organized with online purchases, including:
+  1. **Digital Receipts:** Save digital receipts to a designated folder in email or cloud storage.
+  2. **Receipt Organizer Apps:** Use apps like Shoeboxed, Neat, or Fetch Rewards to digitize and organize receipts.
+  3. **Spreadsheets:** Create a spreadsheet to track online purchases with details like date, item, cost, and tracking information.
+  4. **Email Folders:** Set up folders in the email client to categorize and store receipts.
+  5. **Packing Slip Organization:** Take a photo of the packing slip when receiving a package.
+  6. **Return and Exchange Tracking:** Create a system to track returns and exchanges.
+  7. **Subscription Management:** Keep track of subscription services and payment dates.
+  8. **Budgeting Tools:** Use budgeting apps like Mint, Personal Capital, or YNAB.
+  9. **Receipt Filing:** Set aside time each week to file receipts.
+  10. **Review and Purge:** Regularly review purchases and receipts to eliminate unnecessary items.
+- [EVENT] User expressed interest in trying out the receipt organizer app, Shoeboxed.
+- [ASSISTANT_SAID] Assistant provided an overview of how Shoeboxed works, including:
+  1. **Receipt Scanning:** Scan receipts using a smartphone camera or upload from a computer.
+  2. **Auto-Organization:** Receipts are categorized by date, vendor, and category.
+  3. **Digital Storage:** Receipts are stored securely in the cloud.
+  4. **Expense Reporting:** Generate expense reports that can be exported to CSV or PDF.
+  5. **Integrations:** Integrates with accounting software like QuickBooks and mileage tracking apps.
+- [ASSISTANT_SAID] Assistant detailed Shoeboxed's pricing:
+  - **Free Plan:** 5 document scans and 5 digital receipts per month.
+  - **Lite Plan:** $9.95/month (billed annually) or $14.95/month (billed monthly).
+  - **Premium Plan:** $29.95/month (billed annually)

@@ -1,0 +1,20 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/03/15 (Wed) 00:00  
+[EVENT] User is planning a trip to Japan.  
+[FACT] User is taking a language exchange class at a local language school.  
+[RELATIONSHIP] User has met interesting strangers in the language exchange class, including a travel writer.  
+[PREFERENCE] User is interested in improving Japanese skills before their trip to Japan.  
+[ASSISTANT_SAID] Assistant recommended several language learning apps: Duolingo, Tofugu's WaniKani, HelloTalk, and Memrise.  
+[ASSISTANT_SAID] Assistant recommended online resources: NHK WORLD-JAPAN, JapanesePod101, Tae Kim's Japanese Grammar Guide, and Learn Japanese with Yuta.  
+[ASSISTANT_SAID] Assistant provided additional tips for learning Japanese, including focusing on speaking and listening, using flashcards, watching Japanese media, and immersing oneself in the language.  
+[PREFERENCE] User is particularly interested in the HelloTalk app for practicing conversational skills with native speakers.  
+[RELATIONSHIP] User has had great conversations with their language exchange partner, the travel writer, who has given valuable insights into Japanese culture.  
+[ASSISTANT_SAID] Assistant provided common phrases and expressions to help the user navigate everyday situations in Japan, including greetings, basic phrases, useful expressions, food and drink phrases, directions, and shopping phrases.  
+[PREFERENCE] User plans to practice the provided phrases and expressions before their trip.  
+[ASSISTANT_SAID] Assistant encouraged the user to record themselves speaking Japanese to identify areas for improvement.  
+[PREFERENCE] User is considering recording themselves speaking Japanese and listening to the recording for self-assessment.  
+[ASSISTANT_SAID] Assistant affirmed that recording oneself is a good idea and provided benefits of self-recording, such as identifying pronunciation mistakes and improving fluency.  
+[PREFERENCE] User is looking for more resources to improve their Japanese listening comprehension.  
+[ASSISTANT_SAID] Assistant recommended YouTube channels: Learn Japanese with Yuta, NHK WORLD-JAPAN, and JapanesePod101 for improving listening skills.  
+[ASSISTANT_SAID] Assistant mentioned NHK Radio Japan as a podcast resource for listening practice.

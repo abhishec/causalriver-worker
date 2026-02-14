@@ -1,0 +1,27 @@
+**Observation Log:**
+
+[FACT] User is looking to create a contract for freelance services.  
+[CHANGE] User is still in the process of building their business and realized they need a contract before taking on more clients.  
+[EVENT] User has been focusing on getting everything set up, including registering their business and building a website.  
+[EVENT] User had a meeting with a potential client recently, and it went well.  
+[RELATIONSHIP] User is considering hiring for a project with a potential client.  
+[PREFERENCE] User hopes to land the project as it would be a great opportunity to showcase their skills and build their portfolio.  
+[TEMPORAL] Session Date: 2023/05/29 (Mon) 07:40  
+[ASSISTANT_SAID] A well-drafted contract is essential to protect interests and ensure a smooth working relationship with clients.  
+[ASSISTANT_SAID] Essential clauses to include in a freelance contract:  
+[ASSISTANT_CREATED] 1. Introduction/Scope of Work: Define services, tasks, deliverables, and timelines.  
+[ASSISTANT_CREATED] 2. Payment Terms: Outline payment structure, amount, frequency, method, late fees, and terms for payment upon completion.  
+[ASSISTANT_CREATED] 3. Intellectual Property (IP) and Ownership: Specify ownership of work and IP rights.  
+[ASSISTANT_CREATED] 4. Confidentiality and Non-Disclosure: Include confidentiality agreement and specify duration of obligations.  
+[ASSISTANT_CREATED] 5. Warranty and Liability: Outline warranty for work and define liability for errors or damages.  
+[ASSISTANT_CREATED] 6. Termination: Specify circumstances for termination and procedures.  
+[ASSISTANT_CREATED] 7. Dispute Resolution: Specify process for resolving disputes, including mediation or arbitration.  
+[ASSISTANT_CREATED] 8. Communication and Reporting: Outline communication channels and reporting requirements.  
+[ASSISTANT_CREATED] 9. Changes and Amendments: Define process for requesting changes to the scope of work.  
+[ASSISTANT_CREATED] 10. Governing Law and Jurisdiction: Specify laws governing the contract and jurisdiction for disputes.  
+[ASSISTANT_CREATED] 11. Entire Agreement: State that the contract constitutes the entire agreement.  
+[ASSISTANT_CREATED] 12. Amendments and Waivers: Outline process for amending or waiving provisions.  
+[ASSISTANT_CREATED] 13. Severability: State that invalid provisions do not affect remaining provisions.  
+[ASSISTANT_CREATED] 14. Assignment: Specify whether the contract can be assigned or transferred.  
+[ASSISTANT_CREATED] 15. Signatures and Effective Date: Include spaces for signatures and specify effective date.  
+[ASSISTANT_SAID] It's a good idea to have a lawyer review the contract before using it with clients

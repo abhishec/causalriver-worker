@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[FACT] The user is acting as a training facilitator.  
+[ASSISTANT_CREATED] The assistant created a session plan for a three and a half hour workshop on the fundamentals of coaching, aligned to the book "The Coaching Habit."  
+[ASSISTANT_SAID] The session plan includes the following agenda:  
+[ASSISTANT_SAID] 1. Introduction (15 minutes): Welcome and introductions, overview of the workshop objectives and agenda, explanation of the coaching habit and its benefits.  
+[ASSISTANT_SAID] 2. The 7 Essential Questions (30 minutes): Overview of the 7 essential questions from the book, group discussion and exercises to practice using the questions.  
+[ASSISTANT_SAID] 3. Active Listening (30 minutes): Overview of active listening skills, group exercises to practice active listening.  
+[ASSISTANT_SAID] 4. Giving Feedback (30 minutes): Overview of giving feedback effectively, group exercises to practice giving feedback.  
+[ASSISTANT_SAID] 5. Coaching for Change (45 minutes): Overview of the coaching process for change, group discussion and exercises to practice coaching for change.  
+[ASSISTANT_SAID] 6. Putting it all Together (45 minutes): Review of the key takeaways from the workshop, group discussion on how to apply the coaching habit in their workplace.  
+[ASSISTANT_SAID] 7. Conclusion (15 minutes): Recap of the workshop, questions and answers, feedback and evaluation forms.  
+[ASSISTANT_SAID] The session plan is a general format and can be modified as per the requirement and need of the group.  
+[USER] Asked for examples of practical active listening exercises.  
+[ASSISTANT_SAID] The assistant provided several examples of practical active listening exercises:  
+[ASSISTANT_SAID] 1. Mirroring: The coach repeats back to the client what they have just said, in their own words.  
+[ASSISTANT_SAID] 2. Paraphrasing: The coach restates the client's words in a different way to clarify confusion.  
+[ASSISTANT_SAID] 3. Reflective Summarizing: The coach summarizes the main points of the conversation, highlighting key takeaways.  
+[ASSISTANT_SAID] 4. Listening without interruption: The coach listens attentively without interrupting the client.  
+[ASSISTANT_SAID] 5. Non-verbal feedback: The coach uses non-verbal cues like nodding or making eye contact to show they are listening.  
+[ASSISTANT_SAID] These exercises can be modified as per the requirement of the group.  
+[USER] Asked for an example of a scenario for the group to practice their feedback skills.  
+[ASSISTANT_SAID]

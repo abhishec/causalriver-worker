@@ -1,0 +1,36 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/22 (Mon) 14:54  
+[USER] The user is working on an AI project.  
+[USER] The data for the project is divided into three parts:  
+[FACT] 1. Training data: train.csv  
+[FACT] 2. Test data: test.csv  
+[FACT] 3. Submission file: sample_submission.csv  
+[FACT] The train.csv file consists of 3 columns: id, text, and label.  
+[FACT] The test.csv file consists of 2 columns: id and text.  
+[FACT] The sample_submission.csv file consists of id and label columns.  
+[ASSISTANT_SAID] The assistant described the project as a typical supervised learning project.  
+[ASSISTANT_SAID] The assistant provided initial steps for the project, including loading data, exploring data, preprocessing, choosing a machine learning algorithm, splitting data, training the model, evaluating performance, predicting labels, and saving predictions.  
+[USER] The label consists of a total of 8, and the text column consists of news article data.  
+[USER] The data is imbalanced with the following distribution:  
+[FACT] Label 1: 14146 data points  
+[FACT] Label 2: 10000 data points  
+[FACT] Label 3: 9000 data points  
+[FACT] Label 4: 8000 data points  
+[FACT] Label 5: 2500 data points  
+[FACT] Label 6: 1000 data points  
+[FACT] Label 7: 278 data points  
+[FACT] Label 8: 200 data points  
+[ASSISTANT_SAID] The assistant acknowledged the imbalance and provided suggestions to handle it, including using oversampling or undersampling techniques, appropriate evaluation metrics, robust models, and ensemble methods.  
+[USER] The user requested code using SMOTE and TF-IDF Vectorizer, classifying it with an XGBoost model.  
+[ASSISTANT_CREATED] The assistant provided a code snippet that includes:  
+[ASSISTANT_CREATED] - Importing necessary libraries  
+[ASSISTANT_CREATED] - Loading training data  
+[ASSISTANT_CREATED] - Splitting data into training and validation sets  
+[ASSISTANT_CREATED] - Defining and fitting a TF-IDF vectorizer  
+[ASSISTANT_CREATED] - Applying SMOTE to balance class distribution  
+[ASSISTANT_CREATED] - Training an XGBoost model  
+[ASSISTANT_CREATED] - Making predictions on the validation set  
+[ASSISTANT_CREATED] - Printing a classification report  
+[USER] The user requested modifications to the code to include the test process using test.csv and to save the results in submission.csv.  
+[ASSISTANT_CREATED] The assistant provided a modified code snippet that includes:

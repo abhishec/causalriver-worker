@@ -1,0 +1,40 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/25 (Thu) 22:55
+- [FACT] User has been learning new things lately, especially on YouTube.
+- [FACT] User has watched at least 10 hours of Crash Course videos over the past month.
+- [FACT] User has covered topics like world history, biology, and astronomy.
+- [PREFERENCE] User enjoys learning through Crash Course videos.
+- [ASSISTANT] Recommended documentaries on astronomy: 
+  1. **Cosmos: A Spacetime Odyssey** (2014)
+  2. **The Universe** (2007)
+  3. **How the Universe Works** (2010)
+  4. **The Planets** (1999)
+  5. **Death Dive to Saturn** (2019)
+  6. **The Farthest: Voyager in Space** (2017)
+  7. **The Search for Life in Space** (2019)
+  8. **Black Holes: The Edge of All We Know** (2020)
+  9. **The Fabric of the Cosmos** (2011)
+  10. **Hubble: 15 Years of Discovery** (2005)
+- [PREFERENCE] User finds the documentary recommendations helpful and plans to check them out.
+- [FACT] User has been trying to apply concepts learned from Crash Course to real-life situations.
+- [PREFERENCE] User has been using astronomy concepts to better understand news about space exploration and exoplanets.
+- [ASSISTANT] Suggested ways to apply what is learned from documentaries to everyday life, including:
+  1. Connect the dots between concepts and daily experiences.
+  2. Stay informed on recent discoveries and breakthroughs.
+  3. Ask questions and seek additional information.
+  4. Use analogies and metaphors to explain concepts to others.
+  5. Practice critical thinking by evaluating evidence and considering biases.
+  6. Appreciate the beauty and complexity of the natural world.
+  7. Inspire others by sharing knowledge.
+  8. Identify interdisciplinary connections.
+  9. Reflect and journal about learning experiences.
+  10. Take action based on what is learned.
+- [PREFERENCE] User expresses enjoyment in applying concepts learned from Crash Course to real-life situations.
+- [ASSISTANT] Recommended astronomy apps for learning about the night sky and celestial events:
+  1. **SkySafari** (iOS, Android)
+  2. **Stellarium Mobile** (iOS, Android)
+  3. **Star Walk 2** (iOS, Android)
+  4. **NASA App** (iOS, Android)
+  5. **Astronomy Picture of the Day (APOD)** (iOS, Android)
+  6. **Cosmos Celestial Guide

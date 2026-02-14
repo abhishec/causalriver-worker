@@ -1,0 +1,22 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/23 (Tue) 00:09
+- [USER] The writer from the proposal document suggested using the methodology of GBAD-MDL, which was first coined in 2003.
+- [USER] I want to know the current literature progress related to that method or similar methods like GBAD-P, GBAD-MPS, or other if available.
+- [USER] I want to know what was wrong with the previous literatures.
+- [USER] What is remaining in the current methodologies for the open problem (see below)?
+- [USER] I want to know why this method, that was coined in 2003, can still hold good for my use case and what exact changes do I need to make to the existing methodology, to actually contribute to the problem.
+- [USER] The open problem that I am addressing is Anomaly detection using knowledge graphs (Domain to test on for now is software development).
+- [USER] My aim is to find a methodology that can solve this open problem.
+- [USER] If the proposed methodology (GBAD-MDL) is not a good strategy according to 1.a, 1.b, 1.c, and 1.d, then suggest a new methodology that must satisfy 1.a, 1.b, 1.c, and 1.d.
+- [USER] Please report to me after step 1 and 2 are completed. It is important to me to know the outcome of step 1 and 2 before continuing with the paper.
+- [USER] Once the methodology has been set from step 1 and 2, I want the following in the paper:
+  - [USER] Introduction to anomalies, anomaly detection, and anomaly detection in knowledge graphs.
+  - [USER] Literature review that answers the questions (1.a, 1.b, 1.c, and 1.d).
+  - [USER] The new methodology to be described using formal mathematical equations/expressions with explanation.
+  - [USER] The hypothesis for the new methodology to be described using formal mathematical equations/expressions with explanation.
+  - [USER] Metrics to prove the hypothesis using implementation results, graphs, charts.
+- [ASSISTANT_SAID] Literature review related to GBAD-MDL and similar methods includes GBAD-MPS and GBAD-P, which are variations of GBAD-MDL.
+- [ASSISTANT_SAID] GBAD-MPS uses a multi-parent selection strategy to improve the model building process, while GBAD-P uses a probabilistic approach to select the best model.
+- [ASSISTANT_SAID] Other related methods include GDTW, GBOOST, and GKDR, which also use knowledge graphs for anomaly detection.
+- [ASSISTANT_SAID] Previous literature on anomaly detection using knowledge graphs has primarily focused on using statistical and

@@ -1,0 +1,38 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2021/08/20 (Fri) 22:11  
+[ASSISTANT_SAID] A Pareto distribution is a right-skewed distribution that can be used to model income or wealth distributions. It is characterized by a shape parameter (α) and a scale parameter (k).  
+[ASSISTANT_SAID] To model y with a Pareto distribution, you can generate a random sample of values from the Pareto distribution and use these values as inputs to the existing functions you have defined.  
+[ASSISTANT_CREATED] MATLAB code provided to generate a random sample of values from the Pareto distribution:  
+```matlab
+% Define the parameters of the Pareto distribution
+alpha = 2;
+k = 1;
+
+% Generate a random sample of values from the Pareto distribution
+n = 1000; % number of samples
+y = k * (1-rand(1,n)).^(-1/alpha);
+```  
+[ASSISTANT_SAID] You can then use the `y` values as inputs to your existing `eval_lambdas` and `eval_lambdat` functions to get the corresponding values of the cut-off values `lambda`.  
+[USER] I would like also to have thresholds for every y. How should I change the code accordingly?  
+[ASSISTANT_SAID] In order to model y with a Pareto distribution, you will need to specify the parameters of the distribution, such as the shape parameter and the scale parameter.  
+[ASSISTANT_SAID] To add a threshold for every y, you will need to modify the code to only generate y values that are above a certain threshold.  
+[ASSISTANT_CREATED] Example MATLAB code provided to incorporate a threshold into the code:  
+```matlab
+% Generate random y values with a Pareto distribution
+alpha = 2; % shape parameter
+beta = 1; % scale parameter
+threshold = 10; % threshold value
+
+y = -1;
+while y < threshold
+    y = beta * random(makedist('Pareto', 'a', alpha));
+end
+
+% Use y in the rest of the code as needed
+```  
+[USER] Sorry, I meant specific threshold lambdas and lambdat for a given y.  
+[ASSISTANT_SAID] If you want to find specific threshold lambdas and lambdat for a given y, you can use a root-finding algorithm such as fzero or fsolve to find the solutions to the equation eval_lambdas = 0 and eval_lambdat = 0, respectively, where y is specified as a constant in the function.  
+[ASSISTANT_CREATED] Example MATLAB code provided to find the threshold lambda for a specific value of y:  
+```matlab
+function zero_eval_lambdas = zero_eval

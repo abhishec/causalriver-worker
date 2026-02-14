@@ -1,0 +1,24 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/26 (Fri) 23:56
+- [FACT] User is trying to get a better handle on their finances.
+- [CHANGE] User has been using their credit card a lot lately.
+- [EVENT] User purchased a designer handbag for $800 last month.
+- [PREFERENCE] User has been frequenting high-end department stores like Saks and Neiman Marcus.
+- [PREFERENCE] User is considering setting boundaries around their shopping habits.
+- [ASSISTANT] Recommended budgeting apps: Mint, Personal Capital, YNAB (You Need a Budget), Spendee, Pocketbook, Wally.
+- [PREFERENCE] User has decided to try the Mint app for budgeting.
+- [CHANGE] User has started browsing online at stores like H&M and Uniqlo for affordable alternatives to high-end brands.
+- [EVENT] User is considering canceling their subscription to a monthly beauty box that costs $50 a month.
+- [PREFERENCE] User realized they weren't using most of the products from the beauty box and were accumulating samples.
+- [CHANGE] User has started buying beauty products at a discount store for similar products at a lower cost.
+- [PREFERENCE] User is feeling more in control of their finances and is excited to continue making progress.
+- [CHANGE] User has realized they have been eating out a lot lately.
+- [PREFERENCE] User would like to start cooking more at home and trying out new recipes.
+- [ASSISTANT] Suggested meal planning and grocery shopping tips:
+  - Plan meals for the week to avoid last-minute takeout.
+  - Choose affordable proteins like beans, lentils, or chicken breasts.
+  - Cook in bulk to save time and money.
+  - Use meal planning apps like Plan to Eat or Yummly.
+- [ASSISTANT] Recommended making a grocery list and sticking to it to avoid impulse buys.
+- [ASSISTANT] Suggested shopping sales to save money on groceries.

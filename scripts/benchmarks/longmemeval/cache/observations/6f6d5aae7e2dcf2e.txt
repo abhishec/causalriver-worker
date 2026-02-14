@@ -1,0 +1,20 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/10/03 (Tue) 19:00  
+[USER] The user is working on their thesis.  
+[USER] The user is currently writing their literature review chapter.  
+[USER] The user has been putting a lot of effort into their research lately.  
+[USER] The user had been working on their proposal for weeks before submitting it.  
+[ASSISTANT_SAID] The assistant congratulated the user on submitting their proposal, stating it is a huge milestone and that their hard work is paying off.  
+[USER] The user is considering trying out Mendeley and Zotero for reference management.  
+[USER] The user has been using a spreadsheet to keep track of their references, but it's getting unwieldy.  
+[ASSISTANT_SAID] The assistant provided a list of popular reference management tools: Mendeley, Zotero, EndNote, Citavi, Papers, ReadCube, and RefWorks.  
+[ASSISTANT_SAID] The assistant suggested factors to consider when choosing a reference management tool: citation style support, integration, collaboration, ease of use, and cost.  
+[ASSISTANT_SAID] The assistant provided tips for writing a literature review, including starting with a clear research question, using a logical structure, critically evaluating the literature, synthesizing findings, and using clear language.  
+[ASSISTANT_SAID] The assistant provided tips for using Mendeley and Zotero, including organizing references, using citation styles, inserting in-text citations, automating bibliographies, checking for duplicates, and using annotations and notes.  
+[ASSISTANT_SAID] The assistant explained how to import existing references into Mendeley and Zotero, including CSV and RIS import options, and provided steps for importing.  
+[ASSISTANT_SAID] The assistant detailed how Mendeley and Zotero assist with in-text citations and generating bibliographies, including citation style support, inserting citations, auto-complete features, and automated bibliography generation.  
+[ASSISTANT_SAID] The assistant mentioned integration with writing tools like Microsoft Word and Google Docs for both Mendeley and Zotero.  
+[USER] The user hopes that Mendeley or Zotero will help them with in-text citations and generating a bibliography.  
+[USER] The user expressed interest in how Mendeley or Zotero can help with searching for papers and organizing references.  
+[ASSISTANT_SAID] The assistant described Mendeley's web importer and Zotero's browser extension for searching and saving papers from academic databases.

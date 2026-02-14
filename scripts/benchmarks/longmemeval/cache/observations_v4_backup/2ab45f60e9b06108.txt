@@ -1,0 +1,19 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2021/08/20 (Fri) 18:10  
+[FACT] User graduated with a Bachelor's in Computer Science from UCLA in 2020.  
+[FACT] User completed their Bachelor's degree in four years.  
+[FACT] User had a GPA of 3.6 out of 4.0.  
+[FACT] User was part of the Dean's list for three consecutive semesters.  
+[PREFERENCE] User is looking to learn more about the latest developments in AI and machine learning.  
+[PREFERENCE] User is particularly interested in the applications of AI in robotics.  
+[RELATIONSHIP] User has a younger sister who is currently studying biology at Stanford.  
+[PREFERENCE] User is also interested in exploring AI applications in healthcare, particularly in medical imaging and diagnostics.  
+[ASSISTANT] Assistant recommended resources for staying updated on AI and machine learning, including conferences, research papers, blogs, podcasts, online communities, newsletters, and courses.  
+[ASSISTANT] Assistant recommended specific conferences for AI and robotics, including ICRA, IROS, and RSS.  
+[ASSISTANT] Assistant recommended specific journals for AI and robotics, including IEEE Robotics and Automation Magazine and IJRR.  
+[ASSISTANT] Assistant recommended specific resources for AI applications in healthcare, including Nature Medicine and npj Digital Medicine.  
+[ASSISTANT] Assistant recommended specific courses for AI in medical imaging and diagnostics, including Stanford CS231n and MIT OpenCourseWare.  
+[ASSISTANT] Assistant provided a list of online communities for AI in healthcare and robotics.  
+[ASSISTANT] Assistant suggested following companies and research institutions involved in AI and healthcare, such as Google Health and Stanford Health Care.  
+[ASSISTANT] Assistant provided a list of newsletters and blogs focused on AI in healthcare and robotics.

@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/02/15 (Wed) 00:24  
+[PREFERENCE] User is thinking of creating a new signature cocktail for their next dinner party.  
+[PREFERENCE] User is interested in a mango-based cocktail with a spicy twist.  
+[FACT] User has been experimenting with peppers lately.  
+[FACT] User roasted a batch of Anaheim peppers and blended them with garlic, vinegar, and olive oil for a homemade hot sauce.  
+[ASSISTANT_SAID] Assistant acknowledged the user's experiment with Anaheim peppers and suggested that it adds depth and complexity to dishes.  
+[ASSISTANT_SAID] Assistant suggested five mango-based cocktails with a spicy twist:  
+[ASSISTANT_CREATED] 1. **Mango Habanero Mule**: Tequila, mango puree, lime juice, ginger beer, habanero pepper syrup, garnished with mango, lime, and mint.  
+[ASSISTANT_CREATED] 2. **Spicy Mango Collins**: Mango puree, gin, lemon juice, jalapeño simple syrup, soda water, garnished with mango and rosemary.  
+[ASSISTANT_CREATED] 3. **Mango Ghost Pepper Margarita**: Tequila, mango puree, lime juice, ghost pepper powder, garnished with mango and lime.  
+[ASSISTANT_CREATED] 4. **Cayenne Mango Spritz**: Prosecco, mango puree, pineapple juice, cayenne pepper-infused syrup, garnished with mango and pineapple.  
+[ASSISTANT_CREATED] 5. **Mango Chipotle Mojito**: Mint leaves, lime juice, chipotle peppers in adobo, rum, mango puree, soda water, garnished with mint, mango, and lime.  
+[ASSISTANT_SAID] Assistant advised experimenting with different types of peppers to find the preferred heat level.  
+[ASSISTANT_SAID] Assistant emphasized balancing the heat with sweet and sour flavors in cocktails.  
+[PREFERENCE] User likes the sound of the Mango Habanero Mule and the Mango Chipotle Mojito.  
+[PREFERENCE] User is curious about making habanero pepper syrup and chipotle peppers in adobo sauce.  
+[ASSISTANT_SAID] Assistant provided a recipe for habanero pepper syrup, including ingredients and instructions:  
+[ASSISTANT_CREATED] Ingredients: 1 cup water, 1 cup sugar, 2-3 habanero peppers (seeded and chopped).  
+[ASSISTANT_SAID] Instructions for habanero syrup: Combine water and sugar, add chopped habaneros, steep for 30 minutes, strain, and store for up to 2 weeks.  
+[ASSISTANT_SAID] Habanero peppers have a Scoville heat unit (SHU) rating of 100,000-350,000.

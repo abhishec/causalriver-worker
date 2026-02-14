@@ -1,0 +1,27 @@
+**Observation Log:**
+
+- [EVENT] User is planning a fishing trip to Canada with friends in September.
+- [PREFERENCE] User is interested in finding a good guide and lodge for the fishing trip.
+- [TEMPORAL] The fishing trip to Canada is planned for September.
+- [FACT] User mentioned their last fishing trip to Lake Michigan was perfect weather-wise.
+- [ASSISTANT_SAID] Assistant expressed enthusiasm about the fishing trip and offered to help find a guide and lodge.
+- [ASSISTANT_SAID] Assistant requested additional details: province, type of fishing, target species, group size, budget, and package preferences.
+- [FACT] User is planning to go to British Columbia, specifically the interior region.
+- [PREFERENCE] User is interested in fly fishing for trout and salmon.
+- [FACT] There are 4 people in the user's group.
+- [PREFERENCE] User's budget is around $2000 per person for the entire trip, including guide and accommodation.
+- [PREFERENCE] User is looking for an all-inclusive package.
+- [EVENT] User recalls catching nice smallmouth bass on their last trip to Lake Michigan, which was on a Saturday.
+- [ASSISTANT_SAID] Assistant recommended three lodges and guides in British Columbia's interior region: Hoodoo Valley Lodge, Crystal Lake Lodge, and Tsylos Park Lodge.
+- [ASSISTANT_SAID] Assistant provided details about each lodge, including location, fishing options, and package prices.
+- [ASSISTANT_SAID] Assistant advised reaching out to each lodge directly to discuss specific needs and preferences.
+- [ASSISTANT_SAID] Assistant acknowledged the user's successful fishing experience with smallmouth bass on Lake Michigan.
+- [EVENT] User is considering trying fly fishing for smallmouth bass on Lake Michigan.
+- [ASSISTANT_SAID] Assistant explained that some techniques learned for trout and salmon would be applicable to smallmouth bass, while others would require adjustments.
+- [ASSISTANT_SAID] Assistant provided key differences and transferable skills between fishing for trout/salmon and smallmouth bass.
+- [ASSISTANT_SAID] Assistant suggested researching specific fly patterns and techniques for smallmouth bass fishing on Lake Michigan.
+- [PREFERENCE] User has been watching YouTube videos on fly fishing to improve casting technique.
+- [ASSISTANT_SAID] Assistant recommended several YouTube channels and specific video titles focused on fly casting for smallmouth bass: Smallmouth Crush, Fly Fishing the Globe, Czech Nymph, Orvis Fly Fishing, and Fly Fishing with Tim Flagler.
+- [ASSISTANT_SAID] Assistant provided specific video titles to look for related to smallmouth bass fly casting.
+- [EVENT] User recalls their last hunting trip with their dad and brother, mentioning they spent time scouting and setting up tree stands on Friday morning.
+- [ASSISTANT_SA

@@ -1,0 +1,27 @@
+**Observation Log:**
+
+[FACT] User is planning another road trip in the US.  
+[FACT] User recently returned from a trip to Yellowstone National Park.  
+[PREFERENCE] User enjoyed the natural beauty of Yellowstone and is still on a high from the experience.  
+[EVENT] User is interested in scenic routes in the US that they haven't tried yet.  
+[ASSISTANT_SAID] Yellowstone is described as a natural wonder.  
+[ASSISTANT_SAID] Suggested scenic routes include:  
+[ASSISTANT_CREATED] 1. Beartooth Highway (Montana and Wyoming) - 68-mile stretch known for breathtaking views.  
+[ASSISTANT_CREATED] 2. Pacific Coast Highway (California) - Must-do stretch from San Francisco to San Diego.  
+[ASSISTANT_CREATED] 3. Great River Road (Minnesota to Louisiana) - 3,000-mile route following the Mississippi River.  
+[ASSISTANT_CREATED] 4. Blue Ridge Parkway (North Carolina and Virginia) - 469-mile scenic road through the Blue Ridge Mountains.  
+[ASSISTANT_CREATED] 5. Olympic Peninsula Loop (Washington) - 329-mile loop through Olympic National Park.  
+[ASSISTANT_CREATED] 6. Acadia All-American Road (Maine) - 40-mile route through Acadia National Park.  
+[ASSISTANT_CREATED] 7. Turquoise Trail (New Mexico) - 52-mile scenic byway connecting Albuquerque to Santa Fe.  
+[ASSISTANT_CREATED] 8. Seward Highway (Alaska) - 125-mile route connecting Anchorage to Seward.  
+[ASSISTANT_CREATED] 9. Kancamagus Highway (New Hampshire) - 34-mile scenic road through the White Mountains.  
+[ASSISTANT_CREATED] 10. San Juan Skyway (Colorado) - 236-mile loop through the San Juan Mountains.  
+[ASSISTANT_SAID] Suggested user choose one or more routes to start planning their next adventure.  
+[EVENT] User expressed interest in the Beartooth Highway.  
+[PREFERENCE] User is confident in handling the 68-mile stretch of the Beartooth Highway after driving over 2,500 miles to Yellowstone.  
+[ASSISTANT_SAID] Provided information on road conditions for the Beartooth Highway:  
+[ASSISTANT_SAID] - Well-maintained, paved road with steep grades and tight switchbacks.  
+[ASSISTANT_SAID] - Typically open from late May to early October, depending on snowfall and maintenance.  
+[ASSISTANT_SAID] - No services along the entire 68-mile stretch; advised to fill up on fuel and snacks before starting.  
+[ASSISTANT_SAID] Must-see stops along the Beartooth Highway include:  
+[ASSISTANT_CREATED] 1. Beartooth Lake - Picnic

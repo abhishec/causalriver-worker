@@ -1,0 +1,57 @@
+{
+  "answer_c8354ae9": [
+    {
+      "fact": "User is planning a summer dinner party",
+      "type": "event",
+      "entities": [
+        "summer dinner party"
+      ]
+    },
+    {
+      "fact": "User wants to create a signature cocktail for the event",
+      "type": "preference",
+      "entities": [
+        "signature cocktail"
+      ]
+    },
+    {
+      "fact": "User has a garden with fresh herbs",
+      "type": "personal",
+      "entities": [
+        "garden",
+        "fresh herbs"
+      ]
+    },
+    {
+      "fact": "User is particularly interested in the Lavender Dream cocktail",
+      "type": "preference",
+      "entities": [
+        "Lavender Dream"
+      ]
+    },
+    {
+      "fact": "User has been experimenting with lavender in cocktails",
+      "type": "preference",
+      "entities": [
+        "lavender"
+      ]
+    },
+    {
+      "fact": "User tried a lavender gin fizz recipe last weekend",
+      "type": "event",
+      "entities": [
+        "lavender gin fizz",
+        "last weekend"
+      ]
+    },
+    {
+      "fact": "User improvised with honey and water instead of simple syrup",
+      "type": "opinion",
+      "entities": [
+        "honey",
+        "water",
+        "simple syrup"
+      ]
+    }
+  ]
+}

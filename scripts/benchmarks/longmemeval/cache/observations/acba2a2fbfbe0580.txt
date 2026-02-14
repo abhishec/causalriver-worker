@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [FACT] The user has recently moved into a new apartment.
+- [CHANGE] The user moved from their old place, which is about 20 minutes away from their new apartment.
+- [TEMPORAL] The user moved in a few weeks ago.
+- [EVENT] The user drove to their parents' house last weekend, which took around 2 hours.
+- [EVENT] The user and their friends took around 5 hours to move everything into the new apartment.
+- [PREFERENCE] The user is open to trying unique or independent coffee shops.
+- [PREFERENCE] The user prefers coffee shops with free Wi-Fi and outdoor seating.
+- [FACT] The user is exploring their new neighborhood.
+- [ASSISTANT_SAID] The assistant congratulated the user on their new apartment and offered to help find coffee shop recommendations.
+- [ASSISTANT_SAID] The assistant requested additional information to provide relevant coffee shop recommendations, including city, neighborhood, preferred type of coffee shop, openness to unique shops, specific amenities, and travel distance.
+- [ASSISTANT_SAID] The assistant provided general tips for finding coffee shops, including using online searches, Yelp, Google Maps, asking locals, and using coffee shop apps.
+- [ASSISTANT_SAID] The assistant listed popular independent coffee shop chains: Blue Bottle Coffee, Intelligentsia Coffee, La Colombe Coffee, Stumptown Coffee Roasters, and Verve Coffee Roasters.
+- [ASSISTANT_SAID] The assistant suggested looking for specialty coffee drinks, cozy atmospheres, outdoor seating, free Wi-Fi, food options, and friendly baristas in coffee shops.
+- [ASSISTANT_SAID] The assistant encouraged the user to visit coffee shops they discovered and ask baristas for recommendations.
+- [PREFERENCE] The user has a favorite type of coffee drink or specific atmosphere they are looking for in a coffee shop.
+- [FACT] The user has been trying to incorporate more walking into their daily routine.
+- [FACT] The user has started taking the stairs instead of the elevator at work.
+- [ASSISTANT_SAID] The assistant praised the user's efforts to incorporate physical activity into their routine and suggested walking to work or exploring nearby parks or trails.
+- [ASSISTANT_SAID] The assistant inquired about the amenities in the user's new apartment complex, specifically asking if there is a gym or fitness center.

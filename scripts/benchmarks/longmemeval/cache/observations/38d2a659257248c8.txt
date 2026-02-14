@@ -1,0 +1,47 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/26 (Fri) 06:52  
+[ASSISTANT_SAID] The assistant summarized the rules of the game, stating:  
+1. When I say a word or phrase with no context surrounding it, you remember it.  
+2. You will remember all the words as a list we will call "the list".  
+3. When I ask a question about the list, do your best to answer.  
+4. If a list contains more than 5 items, only print the first 4 items followed by an ellipsis ("...") and then move on to the next list. If asked, still print the whole list.  
+5. "Item" refers to the entire list element, and "word" refers to an individual word within an item.  
+[USER] The user asked for fun things to do now that the assistant understands lists.  
+[ASSISTANT_SAID] The assistant provided several game ideas:  
+1. 20 Questions  
+2. Guessing game  
+3. Hangman  
+4. Word association game  
+5. Memory game  
+[USER] The user chose to play the word association game.  
+[ASSISTANT_SAID] The assistant provided a list for the word association game:  
+1. Tree  
+2. Dog  
+3. House  
+4. Car  
+5. Apple  
+[USER] The user responded with related words:  
+1. Roots  
+2. Monkey  
+3. Outer space  
+4. Wheel  
+5. Poop  
+[ASSISTANT_SAID] The assistant compared the user's responses to the original list and rated them:  
+1. Tree - Roots (8/10)  
+2. Dog - Monkey (2/10)  
+3. House - Outer space (2/10)  
+4. Car - Wheel (9/10)  
+5. Apple - Poop (1/10)  
+[USER] The user requested to create a new list (list 5) with the results of the word association game.  
+[ASSISTANT_CREATED] List 5 was created with the following content:  
+* Tree - Roots (8/10)  
+* Dog - Monkey (2/10)  
+* House - Outer space (2/10)  
+* Car - Wheel (9/10)  
+* Apple - Poop (1/10)  
+[USER] The user requested to swap 2 random words in list 5.  
+[ASSISTANT_SAID] The assistant incorrectly swapped list items instead of individual words.  
+[USER] The user clarified that "item" means all words in that list element and "word" means individual words inside of the item.  
+[ASSISTANT_SAID] The assistant acknowledged the clarification and confirmed understanding of the new definitions.  
+[USER] The user requested to randomly

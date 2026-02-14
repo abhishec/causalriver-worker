@@ -1,0 +1,40 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/22 (Mon) 03:28  
+[FACT] User is interested in meal prep.  
+[PREFERENCE] User is looking for new ideas for meal prep.  
+[PREFERENCE] User enjoys quinoa and roasted vegetables.  
+[ASSISTANT] Suggested protein sources that pair well with quinoa and roasted vegetables:  
+1. Grilled Chicken  
+2. Pan-Seared Salmon  
+3. Lentil or Mushroom Bolognese  
+4. Roasted Turkey Breast  
+5. Tofu  
+6. Shrimp  
+7. Chickpeas  
+8. Grilled Steak  
+9. Edamame  
+10. Tempeh  
+[PREFERENCE] User has had grilled chicken and turkey breast before.  
+[PREFERENCE] User has never tried lentil or mushroom bolognese.  
+[ASSISTANT] Provided a simple recipe for Lentil Bolognese:  
+- Ingredients: 1 cup dried green or brown lentils, 1 onion, 2 cloves garlic, 2 cups mixed mushrooms, 1 carrot, 1 celery stalk, 1 can crushed tomatoes, dried basil, dried oregano, salt, pepper, red wine (optional).  
+- Instructions: Sauté aromatics, add mushrooms, lentils, spices, tomatoes, and wine, simmer for 20-25 minutes.  
+[PREFERENCE] User requested suggestions for sides or add-ins to go with lentil bolognese and quinoa.  
+[ASSISTANT] Suggested sides and add-ins:  
+- Roasted Vegetables: broccoli, Brussels sprouts, sweet potato wedges, carrots, asparagus.  
+- Sautéed Greens: spinach, kale, collard greens.  
+- Crunchy Add-ins: toasted pumpkin seeds, fresh herbs, crushed red pepper flakes, sliced nuts.  
+- Cheesy Delights: shaved Parmesan, crumbled feta, grated mozzarella.  
+- Other Options: sliced bell peppers, chopped fresh herbs, artichoke hearts, sliced avocado.  
+[FACT] User is thinking of adding roasted sweet potatoes to their meal prep this week.  
+[ASSISTANT] Suggested seasoning options for roasted sweet potatoes:  
+1. Classic Herbs: olive oil, salt, pepper, chopped fresh rosemary.  
+2. Spicy Kick: olive oil, chili powder, cumin, smoked paprika.  
+3. Mediterranean Style: olive oil, lemon juice, garlic powder, dried oregano.  
+4. Sweet and Smoky: olive oil, brown sugar, smoked paprika, cayenne pepper.  
+5. Indian-Inspired: olive oil, garam masala, cumin, coriander.  
+6. Lemon Rosemary: olive oil, lemon zest, minced garlic, chopped rosemary.  
+7. Simple Salt and Pepper.  
+[PREFERENCE] User chose to go with the Classic Herbs option for seasoning their roasted sweet potatoes.  
+[PREFERENCE] User has fresh rosemary in their fridge that they want

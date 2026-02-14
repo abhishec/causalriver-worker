@@ -1,0 +1,12 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/25 (Thu) 20:09
+- [FACT] User conducted an analysis of a COVID call center for medical professionals.
+- [EVENT] User provided three datasets for analysis related to COVID vaccine errors, communications, and vaccinations.
+- [FACT] Data Set 1 outlines the number of calls containing the keyword "Error" in relation to date, specifically referring to Vaccine Errors.
+- [FACT] Data Set 2 outlines the number of webinars and newsletters sent out related to COVID-19 Vaccine Errors to inform medical professionals.
+- [FACT] Data Set 3 outlines the number of COVID vaccines given in relation to date.
+- [ASSISTANT_SAID] From the first dataset, it appears that there were very few calls containing the keyword "Error" until June and August of 2020, when there was one error each month.
+- [ASSISTANT_SAID] There is a gradual increase in the number of errors until September 2021, where there is a spike in the number of errors at 9, before decreasing again.
+- [ASSISTANT_SAID] It can be inferred that there is a correlation between the number of errors and the number of vaccines given, as the number of errors spike when the number of vaccines given increase.
+- [ASSISTANT_SAID] It would be interesting to see how the number of webinars and newsletters sent out regarding vaccine errors correlates with the number of errors and number of vaccines given.

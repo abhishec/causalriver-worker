@@ -1,0 +1,33 @@
+**Observation Log:**
+
+[SESSION_DATE] 2023/05/23 (Tue) 00:48  
+[SESSION_ID] d49b1a24_3  
+
+[EVENT] User is trying to keep track of online purchases.  
+[ASSISTANT_SAID] Assistant offered to help the user organize their online purchases.  
+[EVENT] User received an email from ASOS on the 22nd with a promo code and made a purchase.  
+[TEMPORAL] Date of ASOS purchase: 22nd  
+[FACT] Store: ASOS  
+[EVENT] User purchased 3 dresses and 1 pair of boots from ASOS.  
+[FACT] Total cost of ASOS purchase: $150  
+[ASSISTANT_SAID] Assistant provided a template for organizing purchases.  
+[ASSISTANT_SAID] Assistant calculated the total cost of the ASOS purchase after applying a 20% discount.  
+[FACT] Discount applied: 20%  
+[FACT] Total cost after discount for ASOS purchase: $120  
+[ASSISTANT_SAID] Assistant asked the user to provide more details for tracking additional purchases.  
+[EVENT] User asked for help to figure out total spending for the month.  
+[ASSISTANT_SAID] Assistant calculated the total spend so far this month as $120.  
+[EVENT] User provided information for the Amazon purchase.  
+[TEMPORAL] Date of Amazon purchase: 10th of last month  
+[FACT] Store: Amazon  
+[EVENT] User purchased a laptop bag from Amazon.  
+[FACT] Total cost of laptop bag: $40  
+[ASSISTANT_SAID] Assistant updated the list of purchases and included the Amazon purchase in the total spend.  
+[FACT] Total spend including ASOS and Amazon purchases: $160  
+[EVENT] User asked what the next purchase was to add.  
+[ASSISTANT_SAID] Assistant clarified that it was the user who needed to provide the next purchase details.  
+[EVENT] User made a purchase from Nike on the 14th.  
+[TEMPORAL] Date of Nike purchase: 14th  
+[FACT] Store: Nike  
+[ASSISTANT_SAID] Assistant requested details about the Nike purchase, including items purchased and total cost.  
+[ASSISTANT_CREATED] Assistant maintained a structured list of purchases for the user.

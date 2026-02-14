@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/24 (Wed) 18:35  
+[ASSISTANT_SAID] In Flang, the phrase "The dog's house" would be translated as "Flomi fashi".  
+[ASSISTANT_SAID] "flomi" is the inflected form of the word "flom" (dog) in the genitive case.  
+[ASSISTANT_SAID] "fashi" is the inflected form of the word "fash" (house) in the genitive case.  
+[ASSISTANT_SAID] "Flomi fashi" means "The dog's house" in Flang.  
+[USER] Suggested that it should be "flomi fash".  
+[ASSISTANT_SAID] Acknowledged the mistake and confirmed that "The dog's house" would be translated as "Flomi fash".  
+[ASSISTANT_SAID] "fash" is the word for "house" in Flang.  
+[ASSISTANT_SAID] When a noun is used in the genitive case, it doesn't change its form in Flang.  
+[ASSISTANT_SAID] In Flang, the phrase "The house's dog" would be translated as "Fashi flom".  
+[ASSISTANT_SAID] "fashi" is the inflected form of the word "fash" (house) in the genitive case.  
+[ASSISTANT_SAID] "flom" is the word for "dog" in Flang.  
+[USER] Requested to add grammar articles for definite and indefinite articles.  
+[ASSISTANT_SAID] Provided an updated grammar system for Flang that includes definite and indefinite articles.  
+[ASSISTANT_SAID] Definite article in Flang is "f" and it is added before the noun.  
+[ASSISTANT_SAID] Indefinite article in Flang is "fa" and it is added before the noun.  
+[USER] Requested to change the definite article to "fi" instead of "f".  
+[ASSISTANT_SAID] Updated the grammar system to reflect that the definite article in Flang is "fi".  
+[ASSISTANT_SAID] "fi" is added before the noun, e.g., "fi fash" for "the house".  
+[ASSISTANT_SAID] In Flang, the sentence "The dog eats a cat" would be translated as "Fi flom fika fa fol".  
+[ASSISTANT_SAID] "fika" is the inflected form of the verb "to eat" in the accusative case.  
+[ASSISTANT_SAID] "fol" is the word for "cat" in Flang.  
+[USER] Asked if

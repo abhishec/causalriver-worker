@@ -1,0 +1,154 @@
+{
+  "answer_afa9873b_2": [
+    {
+      "fact": "User needs help organizing their closet",
+      "type": "preference",
+      "entities": [
+        "organizing",
+        "closet"
+      ]
+    },
+    {
+      "fact": "User has a navy blue blazer",
+      "type": "personal",
+      "entities": [
+        "navy blue blazer"
+      ]
+    },
+    {
+      "fact": "User wore the navy blue blazer to a meeting a few weeks ago",
+      "type": "event",
+      "entities": [
+        "meeting",
+        "navy blue blazer"
+      ]
+    },
+    {
+      "fact": "User has clothes they haven't worn in a while",
+      "type": "personal",
+      "entities": [
+        "clothes"
+      ]
+    },
+    {
+      "fact": "User has winter clothes they haven't touched since the holidays",
+      "type": "personal",
+      "entities": [
+        "winter clothes",
+        "holidays"
+      ]
+    },
+    {
+      "fact": "User is going to start with decluttering their clothes",
+      "type": "preference",
+      "entities": [
+        "decluttering",
+        "clothes"
+      ]
+    }
+  ],
+  "answer_afa9873b_3": [
+    {
+      "fact": "User's closet has been messy since the holidays",
+      "type": "personal",
+      "entities": [
+        "closet",
+        "holidays"
+      ]
+    },
+    {
+      "fact": "User has winter clothes to put away",
+      "type": "personal",
+      "entities": [
+        "winter clothes"
+      ]
+    },
+    {
+      "fact": "User is trying to decide what to wear to an outdoor concert this weekend",
+      "type": "event",
+      "entities": [
+        "outdoor concert",
+        "this weekend"
+      ]
+    },
+    {
+      "fact": "User was thinking of wearing a green sweater",
+      "type": "preference",
+      "entities": [
+        "green sweater"
+      ]
+    },
+    {
+      "fact": "User lent the green sweater to their sister",
+      "type": "relationship",
+      "entities": [
+        "sister",
+        "green sweater"
+      ]
+    },
+    {
+      "fact": "User is unsure when their sister will return the green sweater",
+      "type": "opinion",
+      "entities": [
+        "sister",
+        "green sweater"
+      ]
+    }
+  ],
+  "answer_afa9873b_1": [
+    {
+      "fact": "User is thinking of organizing their closet this weekend",
+      "type": "event",
+      "entities": [
+        "organizing closet",
+        "weekend"
+      ]
+    },
+    {
+      "fact": "User recently went on a dinner date last Friday",
+      "type": "event",
+      "entities": [
+        "dinner date",
+        "last Friday"
+      ]
+    },
+    {
+      "fact": "User wore new black jeans from Levi's on the dinner date",
+      "type": "personal",
+      "entities": [
+        "black jeans",
+        "Levi's"
+      ]
+    },
+    {
+      "fact": "User is loving their new black jeans",
+      "type": "opinion",
+      "entities": [
+        "black jeans"
+      ]
+    },
+    {
+      "fact": "User is considering organizing their closet by season",
+      "type": "preference",
+      "entities": [
+        "organizing closet",
+        "season"
+      ]
+    },
+    {
+      "fact": "User has winter clothes such as a thick grey scarf and gloves",
+      "type": "personal",
+      "entities": [
+        "thick grey scarf",
+        "gloves"
+      ]
+    },
+    {
+      "fact": "User has spring clothes such as a yellow sundress",
+      "type": "personal",
+      "entities": [
+        "yellow sundress"
+      ]
+    }
+  ]
+}

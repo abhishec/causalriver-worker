@@ -117,6 +117,9 @@ export abstract class BaseTrainingAgent {
   constructor(config: AgentConfig) {
     this.config = config;
     this.organizationId = config.organizationId || CORE_ORG_ID;
+    if (!config.organizationId) {
+      console.warn(`[BaseTrainingAgent] No organizationId provided for "${(this as any).name || 'unknown'}", falling back to CORE_ORG_ID`);
+    }
     this.supabase = createClient(config.supabaseUrl, config.supabaseKey);
   }
 

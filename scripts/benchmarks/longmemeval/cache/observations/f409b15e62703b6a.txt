@@ -1,0 +1,24 @@
+**Observation Log**
+
+**Session Date:** 2023/05/25 (Thu) 12:30  
+**Session ID:** sharegpt_JZN8bAp_0
+
+1. [USER] The user requests to ignore all previous instructions.
+2. [USER] The user wants responses only in English.
+3. [USER] The user wants the assistant to act as a proficient SEO and high-end copywriter.
+4. [USER] The user requests the assistant to write content that can outrank other websites.
+5. [USER] The user specifies not to mention that many factors influence good search rankings.
+6. [USER] The user acknowledges that content quality is one of the factors influencing search rankings.
+7. [USER] The user provides the URL https://cointelegraph.com/news/sam-bankman-fried-lawyers-reach-agreement-on-use-of-messaging-apps for an article to outrank.
+8. [USER] The user requests a long, fully markdown formatted article in English.
+9. [USER] The user asks for rich, comprehensive, and detailed paragraphs in the article.
+10. [USER] The user requests a diagram in markdown mermaid syntax where possible.
+11. [USER] The user instructs not to echo the prompt.
+12. [USER] The user instructs not to remind them of what they asked for.
+13. [USER] The user instructs not to apologize.
+14. [USER] The user instructs not to self-reference.
+15. [USER] The user instructs not to use generic filler phrases.
+16. [USER] The user instructs to use useful subheadings with keyword-rich titles.
+17. [ASSISTANT_SAID] The assistant provides a title: "Sam Bankman-Fried Lawyers Reach Agreement on Use of Messaging Apps."
+18. [ASSISTANT_CREATED] The assistant creates an introduction section discussing the significance of the agreement in the regulation of cryptocurrency trading.
+19. [ASSISTANT_CREATED] The assistant creates a background section mentioning the explosive growth of the cryptocurrency market and the billions of dollars being traded.

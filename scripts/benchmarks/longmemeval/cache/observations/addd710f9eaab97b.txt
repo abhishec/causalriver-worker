@@ -1,0 +1,11 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/28 (Sun) 16:40
+- [FACT] User is seeking information on changing the default commenter avatar in Blogger.
+- [ASSISTANT_SAID] To change the default commenter avatar in Blogger, the user needs to sign in to their Blogger account.
+- [ASSISTANT_SAID] The user should go to the "Settings" tab of the blog they wish to edit.
+- [ASSISTANT_SAID] The user must select the "Comments" option in the settings.
+- [ASSISTANT_SAID] The user should scroll down to the "Comment Form Avatar" section.
+- [ASSISTANT_SAID] The user needs to click the "Change" button to upload a new image or select one from the existing images on their blog.
+- [ASSISTANT_SAID] The user must save their changes by clicking the "Save Changes" button at the top of the page.
+- [ASSISTANT_SAID] The assistant notes that the process may vary depending on the template and version of Blogger the user is using.

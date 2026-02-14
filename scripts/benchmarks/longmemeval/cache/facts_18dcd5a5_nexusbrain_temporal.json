@@ -1,0 +1,53 @@
+{
+  "answer_sharegpt_hn3IS1q_0": [
+    {
+      "fact": "User is interested in creating a D&D one shot for level 8 PCs",
+      "type": "preference",
+      "entities": [
+        "D&D",
+        "one shot",
+        "level 8 PCs"
+      ]
+    },
+    {
+      "fact": "User wants detailed stat blocks for enemies in the one shot",
+      "type": "preference",
+      "entities": [
+        "stat blocks",
+        "enemies"
+      ]
+    },
+    {
+      "fact": "User prefers the final battle to include a surprise twist",
+      "type": "preference",
+      "entities": [
+        "final battle",
+        "surprise twist"
+      ]
+    },
+    {
+      "fact": "User wants cool layer actions included in the one shot",
+      "type": "preference",
+      "entities": [
+        "layer actions"
+      ]
+    },
+    {
+      "fact": "User is interested in detailed descriptions of traps",
+      "type": "preference",
+      "entities": [
+        "traps",
+        "detailed descriptions"
+      ]
+    },
+    {
+      "fact": "User wants detailed aspects of the one shot to help a GM run it smoothly",
+      "type": "preference",
+      "entities": [
+        "one shot",
+        "GM",
+        "run smoothly"
+      ]
+    }
+  ]
+}

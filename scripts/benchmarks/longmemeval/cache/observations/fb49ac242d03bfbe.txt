@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/29 (Mon) 04:12
+- [USER] User requested to use the ssh command with the provided credentials ("Offsec:Offsec") on Kali Linux to access the exercise Windows machine and obtain the flag on the Offsec user's desktop.
+- [ASSISTANT_SAID] To use the ssh command, the user needs an SSH client installed on Kali Linux and can install it using "apt-get install openssh-client".
+- [ASSISTANT_SAID] The command to connect to the Windows machine is "ssh Offsec@ip_address_of_Windows_machine", and the user should enter "Offsec" as the username and "Offsec" as the password.
+- [ASSISTANT_SAID] After logging in, the user can navigate to the Offsec user's desktop using "cd /Users/Offsec/Desktop" and list the contents with "ls".
+- [ASSISTANT_SAID] The flag file is likely named "flag.txt" or something similar, and the user can view it using "cat flag.txt".
+- [USER] User asked how to list files in a folder on the terminal on Windows.
+- [ASSISTANT_SAID] To list files in a folder on Windows, the user can use the command `dir`.
+- [ASSISTANT_SAID] The user can navigate to the "Downloads" folder using "cd C:\Users\YourUsername\Downloads" and then use `dir` to list files.
+- [ASSISTANT_SAID] The user can also use the `ls` command if they have installed Git Bash or any other Unix-like shell terminal.
+- [ASSISTANT_SAID] The user can use `ls -l` for detailed information about files and `ls -a` to list hidden files.
+- [USER] User mentioned that there are fake flags in the C:\RumbleInTheJungle directory and that the file edited most recently contains the true flag.
+- [ASSISTANT_SAID] To find the true flag, the user should navigate to C:\RumbleInTheJungle and use `dir /tw` to list files sorted by the last modified time.
+- [ASSISTANT_SAID] The user should look for the most recently modified file and can use `type flag.txt` or `notepad flag.txt` to view its contents.
+- [USER] User asked which Windows OS version replaced C:\Documents and Settings with C:\Users.
+- [ASSISTANT_SAID] The Windows OS version that replaced C:\Documents and Settings with C:\Users is Windows Vista, released in January 2007.
+- [ASSISTANT_SAID] Windows Vista introduced a new user folder structure to simplify access to user files and documents.
+- [USER] User requested to create a system

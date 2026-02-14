@@ -1,0 +1,85 @@
+{
+  "answer_f964cea3_1": [
+    {
+      "fact": "User finished reading 'The Nightingale' by Kristin Hannah",
+      "type": "event",
+      "entities": [
+        "The Nightingale",
+        "Kristin Hannah"
+      ]
+    },
+    {
+      "fact": "User is open to trying out different genres of books",
+      "type": "preference",
+      "entities": []
+    },
+    {
+      "fact": "User is interested in exploring graphic novels",
+      "type": "preference",
+      "entities": [
+        "graphic novels"
+      ]
+    },
+    {
+      "fact": "User read 'Watchmen' by Alan Moore and Dave Gibbons",
+      "type": "event",
+      "entities": [
+        "Watchmen",
+        "Alan Moore",
+        "Dave Gibbons"
+      ]
+    },
+    {
+      "fact": "User is looking for graphic novels similar to 'Watchmen' in terms of complexity and themes",
+      "type": "preference",
+      "entities": [
+        "Watchmen"
+      ]
+    }
+  ],
+  "answer_f964cea3_2": [
+    {
+      "fact": "User started reading 'The Hitchhiker's Guide to the Galaxy' by Douglas Adams",
+      "type": "event",
+      "entities": [
+        "The Hitchhiker's Guide to the Galaxy",
+        "Douglas Adams"
+      ]
+    },
+    {
+      "fact": "User loves the humor in 'The Hitchhiker's Guide to the Galaxy'",
+      "type": "opinion",
+      "entities": [
+        "humor",
+        "The Hitchhiker's Guide to the Galaxy"
+      ]
+    },
+    {
+      "fact": "User has listened to 'Ready Player One' as an audiobook recently",
+      "type": "event",
+      "entities": [
+        "Ready Player One"
+      ]
+    },
+    {
+      "fact": "User loved 'Ready Player One'",
+      "type": "opinion",
+      "entities": [
+        "Ready Player One"
+      ]
+    },
+    {
+      "fact": "User is excited to dive into book recommendations",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User is interested in Jasper Fforde's Thursday Next series",
+      "type": "preference",
+      "entities": [
+        "Jasper Fforde",
+        "Thursday Next series"
+      ]
+    }
+  ]
+}

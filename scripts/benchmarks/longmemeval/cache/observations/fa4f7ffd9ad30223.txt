@@ -1,0 +1,30 @@
+**Observation Log:**
+
+**Session Date:** 2023/05/29 (Mon) 15:27  
+**Session ID:** sharegpt_bTDMt3m_0
+
+1. [FACT] The user has a rental inspection.
+2. [FACT] The user is communicating with a land agent.
+3. [CHANGE] The earliest text data about garage repairs dates back to August 2021.
+4. [EVENT] The landlord recently finished repairs on the garage.
+5. [TEMPORAL] The garage repairs took over a year to complete.
+6. [FACT] The user experienced a rent increase during the time the garage repairs were ongoing.
+7. [FACT] The user did not have proper access to a part of the property they paid for for a whole year.
+8. [PREFERENCE] The user describes the landlord's communication and planning skills as "EXTREMELY poor."
+9. [TEMPORAL] The user often received notice from the landlord the night before repairs, with roughly 20 hours' notice.
+10. [ASSISTANT_SAID] The assistant suggested discussing the delay in completing garage repairs during the inspection.
+11. [ASSISTANT_SAID] The assistant recommended addressing the condition of the garage after repairs were completed.
+12. [ASSISTANT_SAID] The assistant advised bringing up any additional issues or concerns noticed in the garage since repairs.
+13. [ASSISTANT_SAID] The assistant mentioned discussing the process and communication regarding repairs.
+14. [ASSISTANT_SAID] The assistant suggested addressing any inconvenience or additional costs incurred due to the delay in repairs.
+15. [ASSISTANT_SAID] The assistant recommended checking if there is any agreement or lease clause regulating repairs and maintenance.
+16. [ASSISTANT_SAID] The assistant advised discussing the impact of the delay in repairs on the user's ability to use the garage or the rental property.
+17. [FACT] The user is disabled and has a life to live.
+18. [FACT] The user is formally diagnosed as Autistic and registered with the NDIS.
+19. [RELATIONSHIP] The landlord's name is Venkatesh.
+20. [EVENT] The user had a conversation with their next-door neighbor regarding a recent break-in on the neighbor's property.
+21. [PREFERENCE] The user has been fearful of bringing up concerns to the landlord to avoid jeopardizing their living situation.
+22. [FACT] The landlord often contacts the user the day before asking for access to the property.
+23. [ASSISTANT_SAID] The assistant confirmed that the letter provided by the user effectively outlines their concerns with the landlord's conduct.
+24. [ASSISTANT_SAID] The assistant noted that the letter communicates the impact of the landlord's behavior on the user's mental and physical well-being.
+25. [ASSISTANT_SAID] The assistant highlighted

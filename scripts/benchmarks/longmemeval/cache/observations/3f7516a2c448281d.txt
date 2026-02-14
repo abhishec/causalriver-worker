@@ -1,0 +1,67 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/20 (Sat) 07:12  
+[FACT] User is looking for help with their resume.  
+[PREFERENCE] User is interested in AI and machine learning positions.  
+[ASSISTANT_SAID] Including relevant keywords in your resume can help your application pass through applicant tracking systems (ATS) and catch the eye of hiring managers.  
+[ASSISTANT_SAID] Suggested popular keywords related to AI and machine learning:  
+[ASSISTANT_CREATED] List of General AI and Machine Learning Keywords:  
+1. Artificial Intelligence (AI)  
+2. Machine Learning (ML)  
+3. Deep Learning (DL)  
+4. Natural Language Processing (NLP)  
+5. Computer Vision  
+6. Predictive Analytics  
+7. Data Science  
+8. Neural Networks  
+9. Algorithm Development  
+10. Model Training and Deployment  
+[ASSISTANT_CREATED] List of Machine Learning Frameworks and Tools:  
+1. TensorFlow  
+2. PyTorch  
+3. Keras  
+4. Scikit-learn  
+5. OpenCV  
+6. Caffe  
+7. Theano  
+8. Microsoft Cognitive Toolkit (CNTK)  
+9. H2O.ai  
+10. Google Cloud AI Platform (formerly Google Cloud ML Engine)  
+[ASSISTANT_CREATED] List of Programming Languages:  
+1. Python  
+2. R  
+3. Julia  
+4. Java  
+5. C++  
+6. MATLAB  
+[ASSISTANT_CREATED] List of Data Science and Analytics Keywords:  
+1. Data Preprocessing  
+2. Data Visualization  
+3. Data Mining  
+4. Statistical Modeling  
+5. Data Storytelling  
+6. Business Intelligence  
+7. Data Warehousing  
+8. ETL (Extract, Transform, Load)  
+[ASSISTANT_CREATED] List of Cloud and Infrastructure Keywords:  
+1. Amazon Web Services (AWS)  
+2. Microsoft Azure  
+3. Google Cloud Platform (GCP)  
+4. Cloud Computing  
+5. Distributed Computing  
+6. Containerization (e.g., Docker)  
+7. Kubernetes  
+[ASSISTANT_CREATED] List of Other Relevant Keywords:  
+1. Supervised Learning  
+2. Unsupervised Learning  
+3. Reinforcement Learning  
+4. Transfer Learning  
+5. Model Evaluation  
+6. Hyperparameter Tuning  
+7. Data augmentation  
+8. Explainability (e.g., model interpretability)  
+9. Ethics in AI  
+10. Human-in-the-Loop (HITL)  
+[ASSISTANT_SAID] Suggested to use keywords strategically in the resume, especially in the summary/objective statement, skills section, work experience descriptions, and education section.  
+[ASSISTANT_SAID] Advised to use specific examples and context to demonstrate expertise and accomplishments in AI and machine learning.  
+[PREFERENCE] User is looking for advice

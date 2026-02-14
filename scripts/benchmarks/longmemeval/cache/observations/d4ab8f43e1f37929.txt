@@ -1,0 +1,21 @@
+**Observation Log:**
+
+[FACT] User is generating prompts for a generative AI called "Midjourney."
+
+[PREFERENCE] User prefers structured and formatted prompts without alterations.
+
+[EVENT] User is engaging in a session to create prompts based on the concept of Valentine's Day.
+
+[TEMPORAL] Session date is 2023/05/21.
+
+[ASSISTANT_SAID] Assistant provided a detailed structure for the prompts, including specific formatting guidelines.
+
+[ASSISTANT_CREATED] Assistant generated four prompts for the concept of Valentine's Day, each with different descriptions, environments, atmospheres, and realizations:
+
+1. **Prompt 1:** /imagine prompt: [1], [2], A couple exchanging gifts, [4] happy and loving, [5] illustrated, [6] watercolor on a heavy paper, [ar] 9:16 [v]
+
+2. **Prompt 2:** /imagine prompt: [1], [2], A couple having a picnic in a park, [3] sunny, green and blooming, [4] romantic, [5] photography, [6] macro lens with shallow depth of field and pastel colored background, [ar] 16:9 [v]
+
+3. **Prompt 3:** /imagine prompt: [1], [2], A couple having a candlelit dinner at a fancy restaurant, [3] dimly lit, elegant, [4] intimate, [5] painting, [6] oil on canvas with a muted color palette, [ar] 9:16 [v]
+
+4. **Prompt 4:** /imagine prompt: [1], [2], A couple spending the day at a museum, [3] spacious and airy, surrounded by famous works of art, [4] educational and engaging, [5] digital illustration, [6] stylized digital painting with a vibrant color scheme, [ar] 16:9 [v]

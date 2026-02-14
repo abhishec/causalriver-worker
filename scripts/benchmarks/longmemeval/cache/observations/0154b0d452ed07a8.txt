@@ -1,0 +1,17 @@
+**Observation Log:**
+
+- [FACT] The user is interested in how Chinese word games work.
+- [PREFERENCE] The user is curious about the existence of word games similar to Hangman, Scrabble, and word searches in Chinese.
+- [ASSISTANT_SAID] Word games similar to Hangman, Scrabble, and word searches do exist in Chinese.
+- [ASSISTANT_SAID] In Hangman, the game is played with a word to be guessed in Chinese, with blank spaces representing the characters.
+- [ASSISTANT_SAID] Players must guess the correct characters from a list of options in Hangman.
+- [ASSISTANT_SAID] If a player guesses a correct character in Hangman, it is revealed in the correct position in the word.
+- [ASSISTANT_SAID] If a player guesses incorrectly in Hangman, a part of a stick figure is drawn.
+- [ASSISTANT_SAID] The game of Hangman is won by guessing the word before the stick figure is fully drawn, or lost if the stick figure is completed before the word is guessed.
+- [ASSISTANT_SAID] Scrabble is played in Chinese similarly to English, with players placing tiles with Chinese characters on a game board.
+- [ASSISTANT_SAID] The goal in Scrabble is to create words and earn points, with rules for scoring and word construction generally the same as in English Scrabble.
+- [ASSISTANT_SAID] Word searches in Chinese work similarly to English, with words to be found in Chinese.
+- [ASSISTANT_SAID] In a word search, players look for a list of words hidden in a grid of letters, with words running horizontally, vertically, or diagonally.
+- [ASSISTANT_SAID] When a word is found in a word search, it is crossed off the list.
+- [ASSISTANT_SAID] The game of word search is won when all the words have been found.
+- [ASSISTANT_SAID] There are many other word games and puzzles in Chinese similar to those found in other languages, such as crosswords, anagrams, and Boggle.

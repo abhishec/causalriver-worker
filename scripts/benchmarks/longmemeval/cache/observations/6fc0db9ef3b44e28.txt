@@ -1,0 +1,21 @@
+**Observation Log:**
+
+[FACT] User is looking to book a flight from Boston to Miami.  
+[FACT] User is recovering from a delayed American Airlines flight from LAX to JFK.  
+[FACT] The delay of the American Airlines flight was 2 hours due to bad weather conditions.  
+[PREFERENCE] User prefers to travel on a weekday, preferably in the morning.  
+[PREFERENCE] User is open to any airline for the flight from Boston to Miami.  
+[FACT] User has a Delta SkyMiles card.  
+[PREFERENCE] User is not opposed to considering Fort Lauderdale airport (FLL) instead of Miami (MIA).  
+[ASSISTANT_SAID] Assistant expressed sympathy for the user's previous flight delay and offered to help find a better experience for the upcoming flight.  
+[ASSISTANT_SAID] Assistant requested additional information to find the best deals, including travel dates, preferred time of day to fly, preferred airline, type of ticket, loyalty programs, and willingness to consider alternative airports.  
+[ASSISTANT_SAID] Assistant provided tips for finding the best deals, including being flexible with travel dates, considering early or late flights, looking for error fares, using budget airlines, and booking in advance.  
+[ASSISTANT_SAID] Assistant found flight options from Boston to Miami (MIA) and Fort Lauderdale (FLL) on weekdays with morning departures.  
+[ASSISTANT_SAID] Delta flight from BOS to MIA: Departing at 6:00 AM, arriving at 9:35 AM, with a layover in ATL, price $158 (earn 2,344 SkyMiles).  
+[ASSISTANT_SAID] American Airlines flight from BOS to MIA: Departing at 7:00 AM, arriving at 10:35 AM, with a layover in CLT, price $173.  
+[ASSISTANT_SAID] JetBlue flight from BOS to MIA: Departing at 8:00 AM, arriving at 11:35 AM, non-stop, price $178.  
+[ASSISTANT_SAID] JetBlue flight from BOS to FLL: Departing at 7:00 AM, arriving at 10:35 AM, non-stop, price $148.  
+[ASSISTANT_SAID] Spirit Airlines flight from BOS to FLL: Departing at 8:30 AM, arriving at 11:55 AM, non-stop, price $123 (basic fare, no checked bag).  
+[ASSISTANT_SAID] Delta flight from BOS to FLL: Departing at 9:00 AM, arriving at 12:35 PM, with a layover in ATL, price $183 (earn 2,344 SkyMiles).  
+[PREFERENCE] User is leaning towards the JetBlue option from BOS to FLL.  
+[PREFERENCE] User is concerned about

@@ -1,0 +1,16 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/04/11 (Tue) 06:56
+- [ASSISTANT_SAID] The assistant provided a table organizing Camera Angles with the following columns: English Name, Korean Name, Description, Benefits, and Case.
+- [ASSISTANT_CREATED] The assistant created a table with the following Camera Angles:
+  - Eye level / 눈높이 / Shows the subject at eye level, creating a natural and neutral perspective / Provides a sense of realism, creates a sense of empathy with the subject / Used in portrait photography, dialogue scenes in film
+  - High angle / 고각도 / Shows the subject from above, often used to create a sense of vulnerability or inferiority / Creates a sense of power dynamics, emphasizes the environment / Used in action scenes, establishing shots in film
+  - Low angle / 저각도 / Shows the subject from below, often used to create a sense of power or superiority / Creates a sense of power dynamics, emphasizes the subject / Used in hero shots, establishing shots in film
+  - Dutch angle / 디트취 / Shows the scene at an angle, often used to create a sense of unease or tension / Creates a sense of distortion and imbalance, emphasizes the emotional tone / Used in horror movies, action scenes
+  - Worm's eye view / 지렁이시점 / Shows the subject from a very low angle, creating a sense of grandeur or drama / Emphasizes the subject's power or importance, creates a sense of grandeur / Used in hero shots, establishing shots in film
+  - Aerial shot / 공중촬영 / Shows the scene from a high altitude, often used to provide an overview of the environment / Provides context and scale, emphasizes the environment / Used in landscape photography, establishing shots in film
+  - Crane shot / 크레인샷 / Shows the scene from a moving crane, often used to create a sense of dynamism or movement / Provides a unique perspective, creates a sense of dynamism / Used in action scenes, music videos
+  - Steadicam shot / 스테디캠 / Shows the scene with a camera mounted on a stabilizing rig, often used to create a smooth and stable shot / Creates a sense of fluidity and stability, emphasizes the subject / Used in action scenes, documentary filmmaking
+  - Handheld shot / 핸드헬드 / Shows the scene with a handheld camera, often used to create a sense of immediacy or chaos / Creates a sense of realism and intimacy, emphasizes the emotional tone / Used in mockumentaries, found footage films
+  - Tilt shot / 틸트샷 / Shows the scene at a diagonal angle, often used to create a sense of instability or tension / Creates a sense of distortion and imbalance, emphasizes the emotional tone / Used in horror movies, action scenes
+  - Pan

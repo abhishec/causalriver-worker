@@ -1,0 +1,65 @@
+{
+  "answer_477ae455_2": [
+    {
+      "fact": "User attends a weekly book club with 10 females, 4 males, and 1 non-binary person",
+      "type": "event",
+      "entities": [
+        "book club",
+        "females",
+        "males",
+        "non-binary person"
+      ]
+    },
+    {
+      "fact": "User has a brother",
+      "type": "relationship",
+      "entities": [
+        "brother"
+      ]
+    },
+    {
+      "fact": "User is curious about the demographics of book clubs",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User finds the influence of book genre on book club demographics interesting",
+      "type": "opinion",
+      "entities": [
+        "book genre"
+      ]
+    }
+  ],
+  "answer_477ae455_1": [
+    {
+      "fact": "User has three sisters",
+      "type": "personal",
+      "entities": [
+        "sisters"
+      ]
+    },
+    {
+      "fact": "User has a strong female presence in their life",
+      "type": "relationship",
+      "entities": [
+        "female presence"
+      ]
+    },
+    {
+      "fact": "User's professional network is more male-dominated",
+      "type": "opinion",
+      "entities": [
+        "professional network",
+        "male-dominated"
+      ]
+    },
+    {
+      "fact": "User is interested in studies on how gender influences social network structure",
+      "type": "preference",
+      "entities": [
+        "gender",
+        "social network structure"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/20 (Sat) 15:36
+
+[ASSISTANT_SAID] The assistant provided a table of ingredients with their FODMAP content and specific FODMAPs for a healthy organic porridge topped with berries and nuts.
+
+[ASSISTANT_CREATED] The assistant created a table with the following details:
+- Oats (rolled or instant): Low FODMAP (in moderate servings), Fructans (in larger servings)
+- Regular milk: High FODMAP, Lactose
+- Lactose-free milk: Low FODMAP, N/A
+- Almond milk: Low FODMAP (in moderate servings), GOS (in larger servings)
+- Soy milk (made from soy protein): Low FODMAP, N/A
+- Raspberries: Low FODMAP, Fructose (in larger servings)
+- Blueberries: Low FODMAP, Fructose (in larger servings)
+- Blackberries: High FODMAP, Fructose
+- Almonds: Low FODMAP (in moderate servings), GOS (in larger servings)
+- Chia seeds: Low FODMAP (in moderate servings), N/A
+- Flaxseeds: Low FODMAP (in moderate servings), Fructans (in larger servings)
+
+[ASSISTANT_SAID] The assistant noted that the FODMAP content of different milk alternatives may vary depending on the specific product used, and individual tolerance to FODMAPs can vary.
+
+[USER] The user requested to redo the table and add a brief summary of what the image is without mentioning serving details.
+
+[ASSISTANT_SAID] The assistant provided a brief description of the image as a healthy organic porridge topped with a variety of fresh berries, nuts, and seeds.
+
+[ASSISTANT_CREATED] The assistant created an updated table with the same ingredients and FODMAP content as before.
+
+[USER] The user stated they would write a word like 'breakfast' or 'dinner' followed by a URL of a new image of food and requested the assistant to generate an output in the same format as the last response.
+
+[ASSISTANT_SAID] The assistant confirmed understanding of the user's request.
+
+[USER] The user provided the word "Breakfast" and a URL for an image of smashed avocado on toast.
+
+[ASSISTANT_SAID] The assistant described the image as a breakfast dish featuring smashed avocado on toast, topped with cherry tomatoes, fresh herbs, and chili flakes.
+
+[ASSISTANT_CREATED] The assistant created a table with the following details:
+- Sourdough bread (wheat-based): Varies (Low FODMAP in small servings), Fructans (in larger servings)
+- Avocado: Low FODMAP (in moderate servings), Sorbitol (in larger servings)
+- Cherry tomatoes: Low F

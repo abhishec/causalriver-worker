@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/26 (Fri) 16:02  
+[USER] User is using Figma and is inquiring about the Pen tool and Autolayout.  
+[ASSISTANT_SAID] In Figma, you can place the pen line on top of the frame and keep it separate from the auto-layout by creating a new layer above the frame layer and drawing the line on this new layer.  
+[ASSISTANT_SAID] You can also lock the auto-layout frame layer to prevent accidental changes while working on the pen line.  
+[USER] User asked how to lock the frame layer in Figma.  
+[ASSISTANT_SAID] To lock a layer in Figma, select the layer in the Layers panel, right-click and select "Lock," or click the lock icon next to the layer name in the Layers panel.  
+[ASSISTANT_SAID] When a layer is locked, it cannot be edited or selected, but you can still select other layers and work with them.  
+[ASSISTANT_SAID] To unlock the layer, follow the same steps and click the lock icon again.  
+[USER] User asked for the Figma shortcut to lock the currently selected layer.  
+[ASSISTANT_SAID] In Figma, the shortcut to lock the currently selected layer is:  
+* Mac: Command + L  
+* Windows: Ctrl + L  
+[USER] User stated that the shortcut provided is not correct for Figma version 116.5.18.  
+[ASSISTANT_SAID] The correct shortcut to lock a layer in Figma as of version 116.5.18 is:  
+* Mac: Option + Command + L  
+* Windows: Alt + Ctrl + L  
+[USER] User indicated that the shortcut provided still does not work.  
+[ASSISTANT_SAID] As of Figma version 116.5.18, there doesn't seem to be a shortcut to lock the currently selected layer. You can lock a layer by right-clicking on it and selecting "Lock," or by clicking on the lock icon next to the layer in the Layers panel.  
+[USER] User mentioned that the lock shortcut seems to be Shift + Command + L on Mac.  
+[ASSISTANT_SAID] The shortcut to lock a layer in Figma on a Mac is indeed:  
+* Shift + Command + L  
+[ASSISTANT_SAID] This shortcut will lock the currently selected layer, making it uneditable and unselectable. To unlock the layer, simply press the same shortcut again.  
+[ASSISTANT_SAID] Apologized for any confusion caused by earlier incorrect information.

@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/28 (Sun) 12:40
+- [USER] User identifies as a barista in the context of the conversation.
+- [EVENT] User places an order for 1 large caramel macchiato.
+- [PREFERENCE] User prefers iced drinks.
+- [PREFERENCE] User prefers whole milk for their drink.
+- [ASSISTANT_SAID] Assistant confirms the order of one large iced caramel macchiato with whole milk.
+- [ASSISTANT_SAID] Assistant offers whipped cream as an option for the drink.
+- [PREFERENCE] User agrees to have whipped cream on their iced caramel macchiato.
+- [EVENT] User inquires about pastries available at the café.
+- [ASSISTANT_SAID] Assistant lists available pastries: croissants, muffins, scones, and cookies.
+- [EVENT] User asks for the best-selling cookie.
+- [ASSISTANT_SAID] Assistant states that the best-selling cookie is the chocolate chip cookie, made fresh in-house.
+- [EVENT] User decides to order one chocolate chip cookie.
+- [ASSISTANT_SAID] Assistant confirms the order of one chocolate chip cookie.
+- [EVENT] User indicates that they do not want anything else.
+- [ASSISTANT_SAID] Assistant provides the total amount for the order (not specified in the conversation).
+- [ASSISTANT_SAID] Assistant offers payment options: cash or card.
+- [ASSISTANT_SAID] Assistant explains the process for receiving the order, mentioning calling out the user's name or bringing it to them at the end of the bar.

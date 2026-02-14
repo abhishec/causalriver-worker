@@ -1,0 +1,21 @@
+**Observation Log:**
+
+[SESSION DATE] Session Date: 2023/05/24 (Wed) 01:43  
+[FACT] User is looking to improve their overall fitness.  
+[FACT] User has been playing soccer and tennis lately.  
+[CHANGE] User is trying to build on their fitness related to soccer and tennis.  
+[PREFERENCE] User is considering incorporating strength training into their routine.  
+[FACT] User used to play tennis competitively in high school.  
+[ASSISTANT] Assistant recommended agility exercises such as shuttle runs, cone drills, ladder drills, and box jumps.  
+[ASSISTANT] Assistant recommended speed exercises such as sprints, pro agility shuttle, resistance band training, and hill sprints.  
+[ASSISTANT] Assistant recommended plyometric exercises such as box jumps, depth jumps, and lateral bounds.  
+[ASSISTANT] Assistant provided additional tips for incorporating exercises into the user's routine, including warm-up and cool-down practices.  
+[ASSISTANT] Assistant recommended strength training exercises beneficial for tennis, including squats, lunges, deadlifts, and core exercises.  
+[ASSISTANT] Assistant suggested a sample workout routine for strength training.  
+[EVENT] User is thinking of getting a fitness tracker to help track their progress.  
+[ASSISTANT] Assistant recommended several fitness trackers, including the Garmin Forerunner 945, Apple Watch Series 7, Fitbit Ionic, Polar M430, and Suunto 3 Fitness.  
+[PREFERENCE] User is leaning towards the Garmin Forerunner 945.  
+[ASSISTANT] Assistant explained that the Garmin Forerunner 945 requires manual input to start and stop tennis activity tracking.  
+[ASSISTANT] Assistant noted that the Garmin Forerunner 945 tracks duration, distance, calories burned, and intensity for tennis activities.  
+[ASSISTANT] Assistant mentioned that the Garmin Forerunner 945 does not track specific tennis metrics like serve speed or racket swing.  
+[ASSISTANT] Assistant suggested third-party apps like Tennis Buddy and Zepp Tennis for additional tennis tracking features.

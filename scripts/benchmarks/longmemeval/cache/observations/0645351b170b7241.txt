@@ -1,0 +1,40 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/20 (Sat) 08:34  
+[FACT] The user recently took a 10-day break from social media.  
+[FACT] The user was averaging 2 hours a day on social media before the break.  
+[FACT] The user has limited social media use to 30 minutes in the morning.  
+[FACT] The user wakes up at 7:30 am and goes to bed at 11 pm.  
+[FACT] The user's current morning routine includes 30 minutes of exercise and 30 minutes on social media before starting work on their thesis project.  
+[FACT] The user wants to ensure they have enough time for their thesis project, reading, and taking walks in the evening.  
+[PREFERENCE] The user is not sure how to prioritize their tasks yet.  
+[ASSISTANT_SAID] The assistant congratulated the user on taking a break from social media and recognizing the time it was consuming.  
+[ASSISTANT_SAID] The assistant asked the user about their goals and priorities, specific time constraints, and current morning and evening routines.  
+[ASSISTANT_SAID] The assistant suggested a revised daily routine that includes:  
+- 7:30 am - Wake up  
+- 30 minutes of exercise  
+- 30 minutes of social media  
+- 30 minutes for breakfast and planning  
+- 2-3 hours of focused work on the thesis project  
+- 30-minute breaks  
+- 1 hour for lunch and reading  
+- 2-3 more hours of thesis project work  
+- Evening walk and free time  
+- 9:30 pm - Begin winding down  
+- 11:00 pm - Bedtime  
+[ASSISTANT_CREATED] The assistant created a detailed daily routine for the user, including specific time allocations for each activity.  
+[PREFERENCE] The user wants to engage with friends and family on social media, especially on Facebook, to stay in touch with friends who live abroad.  
+[ASSISTANT_SAID] The assistant agreed to the user's request to allocate time for social media in the evening, suggesting a revised routine that includes:  
+- 7:00 pm - Evening walk  
+- 7:30 pm - 30 minutes for social media  
+- 8:00 pm - Free time  
+[FACT] The user has been using Facebook more frequently to stay in touch with friends who live abroad.  
+[PREFERENCE] The user believes that limiting social media use will help reduce distractions and anxiety.  
+[ASSISTANT_SAID] The assistant provided recommendations for tools and apps to track screen time and stay focused, including:  
+1. RescueTime  
+2. Freedom  
+3. StayFocusd  
+4. Moment  
+5. Forest  
+6. SelfControl (for Mac)  
+[ASSISTANT_SAID] The assistant emphasized the importance

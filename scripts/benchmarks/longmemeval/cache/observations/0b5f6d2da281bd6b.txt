@@ -1,0 +1,16 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/25 (Thu) 03:35
+- [ASSISTANT_SAID] The assistant provided a modified `ManageAPIAccessPage` component example in React that includes a toggle for enabling or disabling sync.
+- [ASSISTANT_SAID] The assistant mentioned that the `syncEnabled` property should be stored in the Square integration document in MongoDB.
+- [ASSISTANT_SAID] The assistant explained that the `SquareIntegration` model schema needs to be updated to include the `syncEnabled` property.
+- [ASSISTANT_SAID] The assistant provided code for the updated `SquareIntegration` schema, including the `syncEnabled` property with a default value of `true`.
+- [ASSISTANT_SAID] The assistant provided code for the `createSquareIntegration` and `updateSquareIntegration` controller methods, which include the `syncEnabled` property in the request body.
+- [USER] The user asked if they need to update the Mongo schema or any other files with the changes.
+- [ASSISTANT_SAID] The assistant confirmed that the user would need to update the schema and API endpoints to include the `syncEnabled` property.
+- [USER] The user requested the assistant to update the client-side code to include the `syncEnabled` property.
+- [ASSISTANT_SAID] The assistant provided updated client-side code for the `squareIntegrationService.js` to include the `syncEnabled` property in the request payload for both `createSquareIntegration` and `updateSquareIntegration` functions.
+- [ASSISTANT_SAID] The assistant provided an updated version of the `ManageAPIAccessPage` component that includes the `syncEnabled` property in the state object and renders a toggle for it.
+- [ASSISTANT_CREATED] The assistant created a complete example of the `ManageAPIAccessPage` component, including a form with a checkbox for `syncEnabled` and a submit button to save changes.
+- [ASSISTANT_SAID] The assistant explained that the `handleChange` function updates the `syncEnabled` property in the `integration` state object when the user toggles the checkbox.
+- [ASSISTANT_SAID] The assistant mentioned that the `handleSubmit` function sends an API request to update the Square integration document with the new `syncEnabled` value.

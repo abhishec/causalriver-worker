@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/21 (Sun) 04:51  
+[EVENT] User is planning to make sushi for dinner tonight.  
+[PREFERENCE] User is enjoying herbal tea instead of coffee in the afternoons.  
+[ASSISTANT_SAID] Sushi rice should be made with Japanese short-grain rice, rinsed thoroughly under cold running water for about 30 seconds.  
+[ASSISTANT_SAID] The general water-to-rice ratio for sushi rice is 1:1, but it can vary based on personal preference.  
+[ASSISTANT_SAID] Soaking sushi rice for 30 minutes to an hour before cooking helps it cook evenly.  
+[ASSISTANT_SAID] Cooking sushi rice in a rice cooker or on medium heat prevents burning and ensures even cooking.  
+[ASSISTANT_SAID] Sushi rice should be seasoned with rice vinegar, sugar, and salt after cooking.  
+[ASSISTANT_SAID] Sushi rice should be cooled to room temperature before using it for sushi.  
+[ASSISTANT_SAID] Handle cooked sushi rice gently to avoid breaking the grains.  
+[EVENT] User is making a classic salmon and avocado roll for dinner.  
+[PREFERENCE] User wants to keep the sushi-making process simple as they have never made sushi at home before.  
+[ASSISTANT_SAID] Fresh, sashimi-grade salmon and ripe avocados are essential for a good salmon and avocado roll.  
+[ASSISTANT_SAID] The salmon should be cut into thin slices, and the avocado should be cut into thin pieces and sprinkled with lemon juice to prevent browning.  
+[ASSISTANT_SAID] The nori sheet should be laid flat, and a thin layer of sushi rice should be spread on it, leaving about 1 inch of space at the top.  
+[ASSISTANT_SAID] The salmon and avocado should be placed in the middle of the rice before rolling.  
+[ASSISTANT_SAID] The roll should be formed using gentle pressure to create a compact cylinder.  
+[ASSISTANT_SAID] The roll should be sliced into 8 equal pieces using a sharp knife and served with soy sauce, wasabi, and pickled ginger.  
+[ASSISTANT_SAID] Tips for first-time sushi-making include using short-grain rice, handling rice gently, and not overfilling the roll.  
+[PREFERENCE] User is glad they switched to herbal tea in the afternoons as it helps them relax and focus at work.  
+[ASSISTANT_SAID] Leftover sushi rice should be cooled to room temperature before storing in an airtight container in the refrigerator.  
+[ASSISTANT_SAID] Leftover sushi rice is best used within 24 hours for optimal flavor and texture.  
+[ASSISTANT_SA

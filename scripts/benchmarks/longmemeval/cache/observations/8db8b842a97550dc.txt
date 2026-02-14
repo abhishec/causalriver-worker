@@ -1,0 +1,21 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/20 (Sat) 18:45  
+[FACT] The user has a student who performs agility tasks with a success rate of 95%.  
+[ASSISTANT_SAID] The probability of completing the A-frame is 0.95.  
+[ASSISTANT_SAID] The probability of completing the Dogwalk is 0.95.  
+[ASSISTANT_SAID] The probability of completing the Teeter is 0.95.  
+[ASSISTANT_SAID] The probability of completing the Weaves is 0.95.  
+[ASSISTANT_SAID] The probability of completing the first Backside is 0.95.  
+[ASSISTANT_SAID] The probability of completing the second Backside is 0.95.  
+[ASSISTANT_SAID] The probability of running the entire course without making a mistake is approximately 73.51%.  
+[ASSISTANT_SAID] The probability of keeping all bars up is 0.95.  
+[ASSISTANT_SAID] The probability of running the entire course without making a mistake and keeping all bars up is approximately 69.83%.  
+[FACT] The user inquired about the chances of making at least one mistake.  
+[ASSISTANT_SAID] The probability of making at least one mistake in the course is approximately 26.49%.  
+[USER] The user asked about the chances of making at least one mistake in 4 consecutive runs.  
+[ASSISTANT_SAID] The probability of making at least one mistake in 4 consecutive runs is approximately 73.83%.  
+[FACT] The user stated that the chance of not making any mistake is 70%.  
+[ASSISTANT_SAID] The probability of running 4 consecutive runs without making any mistakes is approximately 24.01%.  
+[USER] The user asked about the chances of not making any mistakes over 10 runs.  
+[ASSISTANT_SAID] The probability of not making any mistakes over 10 runs is approximately 2.82%.

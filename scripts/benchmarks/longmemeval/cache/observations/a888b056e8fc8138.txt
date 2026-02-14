@@ -1,0 +1,32 @@
+**Observation Log:**
+
+**Session Date:** 2023/06/17 (Sat) 15:37  
+**Session ID:** sharegpt_85Y0l0J_249
+
+1. [FACT] Client: C2, Developer: Cyril Lonsido
+2. [EVENT] Cyril is asking if it’s possible to be transferred to another client due to concerns about the work environment.
+3. [CHANGE] Cyril is currently the only resource at C2 since En has left.
+4. [PREFERENCE] Cyril feels that Viktor is not listening and is forcing an unconventional approach with the project.
+5. [ASSISTANT_SAID] Suggestions for developer: Encourage Cyril to continue communicating his concerns and work with management to identify ways to improve the work environment.
+6. [ASSISTANT_SAID] Suggestions for client: Work with management to address concerns and identify ways to improve the work environment for all employees.
+7. [ASSISTANT_SAID] Action items: HR management to schedule a meeting with Cyril to discuss his concerns and identify potential solutions.
+8. [ASSISTANT_SAID] Suggestions for Storma: Offer employee wellness programs, regular check-ins with management, and a clear process for addressing employee concerns.
+
+9. [FACT] Client: BlueFrog, Developer: Paul Gravos
+10. [EVENT] Paul mentioned he is getting some back-end tasks since Jasper has left.
+11. [PREFERENCE] Paul does not mind taking on back-end tasks but wants to prepare himself with proper training/workshops.
+12. [ASSISTANT_SAID] Suggestions for developer: Encourage Paul to pursue any relevant training or upskilling opportunities.
+13. [ASSISTANT_SAID] Suggestions for client: Explore the possibility of finding a replacement for Jasper.
+14. [ASSISTANT_SAID] Action items: HR management to explore potential training or upskilling opportunities for Paul.
+
+15. [FACT] Client: Pastest, Developer: John Gela
+16. [EVENT] John Gela will be working on a new project involving Angular.
+17. [PREFERENCE] John has only basic knowledge of Angular and is inquiring about formal training/workshops.
+18. [ASSISTANT_SAID] Suggestions for developer: Encourage John to pursue any relevant training or upskilling opportunities.
+19. [ASSISTANT_SAID] Suggestions for client: Provide support for John's desire to further develop his skills.
+20. [ASSISTANT_SAID] Action items: HR management to explore potential training or upskilling opportunities for John.
+
+21. [FACT] Client: Knights Absorb, Developer: Joshua Osillo
+22. [EVENT] Joshua is working on the booking application for the mobile development team.
+23. [CHANGE] Joshua has turned over the mobile projects to Greg as it is not his forte.
+24. [ASSISTANT_SAID] Suggestions

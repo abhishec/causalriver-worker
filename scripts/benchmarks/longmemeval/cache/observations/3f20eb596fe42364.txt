@@ -1,0 +1,26 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/26 (Fri) 04:34
+- [FACT] The user is looking for information on salsa festivals in the city.
+- [EVENT] The user heard about a salsa festival coming up next month.
+- [ASSISTANT_SAID] The assistant mentioned that it does not have access to real-time information about specific events or festivals in the user's city.
+- [ASSISTANT_SAID] The assistant suggested checking local event calendars like Eventbrite, Meetup, or Facebook Events to find relevant results.
+- [ASSISTANT_SAID] The assistant recommended searching for salsa-related groups or forums on social media platforms like Facebook, Reddit, or Twitter.
+- [ASSISTANT_SAID] The assistant advised reaching out to local dance studios or salsa schools for information about upcoming salsa festivals.
+- [ASSISTANT_SAID] The assistant suggested contacting the city's event department or tourism board for information about upcoming festivals and events.
+- [PREFERENCE] The user took a hip hop workshop recently and enjoyed it, mentioning that the instructor, Jamal, was great.
+- [ASSISTANT_SAID] The assistant encouraged the user to ask their instructor Maria about the salsa festival, suggesting she might have connections to the local salsa community.
+- [ASSISTANT_SAID] The assistant advised the user to ask Maria if she knows about the salsa festival or any other events or workshops happening around the same time.
+- [PREFERENCE] The user is considering getting more dance lessons in different styles like bachata or kizomba.
+- [ASSISTANT_SAID] The assistant provided suggestions on how to find bachata and kizomba classes, including:
+  - Google search for "bachata classes near me" or "kizomba classes in [your city name]."
+  - Looking for online directories that list dance studios and schools.
+  - Searching for Facebook groups or online forums focused on dance in the user's city.
+  - Asking Maria or other dancers for recommendations.
+  - Checking out local community centers for dance classes.
+- [ASSISTANT_SAID] The assistant emphasized the importance of reading reviews, checking schedules, and looking for beginner-friendly classes or workshops.
+- [ASSISTANT_SAID] The assistant encouraged the user to ask Maria about her experience with bachata or kizomba for insights or recommendations.
+- [PREFERENCE] The user has been enjoying salsa and wants to mix things up by trying new styles.
+- [ASSISTANT_SAID] The assistant highlighted the benefits of exploring new dance styles, such as improving technique, developing a unique style, meeting new people, and staying motivated.
+- [RELATIONSHIP] The user mentioned Alex, a guy they met at the social dance night.
+- [ASSISTANT_SAID] The assistant encouraged the user to ask Alex about bachata or kizomba

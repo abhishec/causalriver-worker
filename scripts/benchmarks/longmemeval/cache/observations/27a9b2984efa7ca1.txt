@@ -1,0 +1,39 @@
+**Observation Log:**
+
+[FACT] User attended a live show by Glass Animals at the local arena on 2023/05/24.  
+[PREFERENCE] User is looking for new music recommendations similar to Glass Animals.  
+[PREFERENCE] User has been listening to a lot of music lately, especially during their daily commute.  
+[PREFERENCE] User is obsessed with The Weeknd's new album "Dawn FM".  
+[PREFERENCE] User is interested in playlists or radio stations that feature music similar to what they have been listening to.  
+[ASSISTANT_SAID] Assistant recommended 10 artists similar to Glass Animals: Tame Impala, Unknown Mortal Orchestra, Arctic Monkeys, Alt-J, Foals, Temples, Mild High Club, Pond, King Gizzard & the Lizard Wizard, and Mansionair.  
+[ASSISTANT_SAID] Assistant suggested specific songs for each artist:  
+1. Tame Impala: "Let it Happen" or "Elephant".  
+2. Unknown Mortal Orchestra: "Can't Keep Checking My Phone" or "Hunnybee".  
+3. Arctic Monkeys: "Do I Wanna Know?" or "Why'd You Only Call Me When You're High?".  
+4. Alt-J: "Breezeblocks" or "Left Hand Free".  
+5. Foals: "My Number" or "Inhaler".  
+6. Temples: "Shelter Song" or "Keep in the Dark".  
+7. Mild High Club: "Homage" or "Skiptracing".  
+8. Pond: "Sweep Me Off My Feet" or "30000 MEGATONS".  
+9. King Gizzard & the Lizard Wizard: "Am I in Heaven?" or "The River".  
+10. Mansionair: "Easier" or "Alibi".  
+[ASSISTANT_SAID] Assistant recommended playlists:  
+1. Indie Radio on Spotify.  
+2. New Music Friday on Spotify.  
+3. The Alternative on Apple Music.  
+4. Psychedelic Rock on Spotify.  
+5. Dark Pop on Spotify.  
+[ASSISTANT_SAID] Assistant recommended radio stations:  
+1. Alt Nation (SiriusXM).  
+2. KCRW (Santa Monica, CA).  
+3. KEXP (Seattle, WA).  
+4. Triple J (Australian radio).  
+5. BBC Radio 1's Indie Show (UK).  
+[ASSISTANT_SAID] Assistant suggested online radio platforms:  
+1. KCRW's Eclectic24.  
+2. NPR's All Songs Considered.  
+3. Pitchfork Radio.  
+[PREFERENCE] User is interested in creating their own playlists on Apple Music.  
+[ASSISTANT_SAID] Assistant provided tips for curating a good playlist:  
+1. Start with a theme or mood.  
+2. Choose an anchor song

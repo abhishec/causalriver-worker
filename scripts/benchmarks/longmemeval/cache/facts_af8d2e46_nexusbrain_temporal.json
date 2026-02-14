@@ -1,0 +1,27 @@
+{
+  "answer_82a04f59": [
+    {
+      "fact": "User is trying to get better at packing for trips",
+      "type": "preference",
+      "entities": [
+        "packing",
+        "trips"
+      ]
+    },
+    {
+      "fact": "User is planning a 3-day business trip",
+      "type": "event",
+      "entities": [
+        "3-day business trip"
+      ]
+    },
+    {
+      "fact": "User is seeking advice on what to pack in carry-on versus checked luggage",
+      "type": "preference",
+      "entities": [
+        "carry-on",
+        "checked luggage"
+      ]
+    }
+  ]
+}

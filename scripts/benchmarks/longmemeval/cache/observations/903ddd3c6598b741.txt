@@ -1,0 +1,29 @@
+**Observation Log**
+
+**Session Date:** 2023/07/15 (Sat) 07:38  
+**Session ID:** sharegpt_7mgd8B5_0
+
+- [FACT] The user has a dataset that includes variables such as Material, SnapshotDate, Schedule, SO_CSD, SO_CRD, PO_CSD, PO_CRD, Billing, Product Category, and Cumulative GR.
+- [FACT] The dataset contains time series data that varies by SnapshotDate and Schedule (nested time series).
+- [FACT] The user is interested in predicting the GR value for each Material using Temporal Fusion Transformer with PyTorch Forecasting.
+- [PREFERENCE] The user wants to base the prediction on Material historical behavior by SnapshotDate trend.
+- [ASSISTANT_SAID] The assistant provided a step-by-step guide to predict the GR value using Temporal Fusion Transformer with PyTorch Forecasting.
+- [ASSISTANT_CREATED] The assistant suggested installing PyTorch Forecasting with the command: `pip install pytorch-forecasting`.
+- [ASSISTANT_CREATED] The assistant provided code to import necessary libraries: 
+  ```python
+  import pandas as pd
+  import numpy as np
+  from datetime import datetime
+  import torch
+  from pytorch_forecasting import TimeSeriesDataSet, TemporalFusionTransformer, BaseModel
+  from pytorch_forecasting.data import GroupNormalizer
+  from pytorch_forecasting.metrics import SMAPE
+  from pytorch_forecasting.models.temporal_fusion_transformer.tuning import optimize_hyperparameters
+  ```
+- [ASSISTANT_CREATED] The assistant provided code to load and preprocess the dataset, including converting date columns to datetime and mapping Product Category to integers.
+- [ASSISTANT_CREATED] The assistant provided code to create a time index for the dataset and set the max_prediction_length and max_encoder_length.
+- [ASSISTANT_CREATED] The assistant provided code to create a training dataset using `TimeSeriesDataSet` with specified parameters.
+- [ASSISTANT_CREATED] The assistant provided code to create a validation dataset from the training dataset.
+- [ASSISTANT_SAID] The assistant mentioned finding optimal hyperparameters using the `optimize_hyperparameters` function.
+- [ASSISTANT_CREATED] The assistant provided code to find optimal hyperparameters with specified ranges for various parameters.
+- [ASSISTANT_CREATED] The assistant provided code to instantiate the Temporal Fusion Transformer with optimal hyperparameters and train the model using the SWA (Stochastic Weight Averaging) learning rate scheduler.

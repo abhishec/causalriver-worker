@@ -1,0 +1,33 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/29 (Mon) 09:59  
+[USER] User asked how to display the environment variables in Kubernetes.  
+[ASSISTANT_SAID] To display the environment variables in a Kubernetes pod, use the command: `kubectl exec <pod-name> -- printenv`.  
+[ASSISTANT_SAID] Replace `<pod-name>` with the name of the pod to display its environment variables.  
+[ASSISTANT_SAID] Alternatively, use the command: `kubectl describe pod <pod-name>` to view detailed information about the pod, including its environment variables.  
+[USER] User thanked the assistant and asked how to get the environment variables from the environment into a Deno file.  
+[ASSISTANT_SAID] To access environment variables in a Deno file, use the `Deno.env.get()` function.  
+[ASSISTANT_CREATED] Example code provided for accessing environment variables in Deno:
+```typescript
+const envVar1 = Deno.env.get("ENV_VAR_1");
+const envVar2 = Deno.env.get("ENV_VAR_2");
+
+if (!envVar1) {
+  throw new Error("ENV_VAR_1 is not set");
+}
+
+console.log(`ENV_VAR_1: ${envVar1}`);
+console.log(`ENV_VAR_2: ${envVar2}`);
+```  
+[ASSISTANT_SAID] Run the Deno file with the `--allow-env` flag: `deno run --allow-env your_file.ts`.  
+[USER] User mentioned that the previous solution did not pick up the environment keys loaded in the Kubernetes config file.  
+[ASSISTANT_SAID] Suggested checking if the environment variables are set in the Kubernetes deployment manifest file and running the `env` command inside the container.  
+[ASSISTANT_SAID] Advised to double-check the environment variable names in the Deno file and ensure the `--allow-env` flag is used when running the Deno application.  
+[ASSISTANT_SAID] Suggested ensuring the Deno application is running inside the same Kubernetes cluster as the application that sets the environment variables.  
+[USER] User asked how to authenticate WebSocket connections using bearer tokens in the Kubernetes config.  
+[ASSISTANT_SAID] To authenticate WebSocket connections using bearer tokens, create a Kubernetes secret with the bearer token using the command: `kubectl create secret generic my-secret --from-literal=token=<bearer-token>`.  
+[ASSISTANT_SAID] In the Deno application, use the `WebSocket` class and set the `Authorization` header with the bearer token.  
+[ASSISTANT_CREATED] Example code provided for WebSocket connection:
+```typescript
+const ws = new WebSocket('wss://my-websocket-endpoint');
+ws.onopen = ()

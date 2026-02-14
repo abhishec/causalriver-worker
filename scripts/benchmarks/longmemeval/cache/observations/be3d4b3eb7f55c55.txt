@@ -1,0 +1,22 @@
+**Observation Log:**
+
+- [FACT] User has two goats named Luna and Leo.
+- [FACT] User has a horse named Comet.
+- [EVENT] User cleaned out the goats' enclosure and replaced the old bedding with fresh straw last weekend.
+- [EVENT] User scheduled an appointment for Luna and Leo to get microchipped with Dr. Thompson for next Thursday.
+- [PREFERENCE] User's goats enjoy organic goat feed.
+- [ASSISTANT_SAID] The phone number for Tractor Supply Co. is 1-877-718-6750.
+- [ASSISTANT_SAID] User can visit the Tractor Supply Co. website at [www.tractorsupply.com](http://www.tractorsupply.com) to find contact information.
+- [ASSISTANT_SAID] User can check local store information by using the "Store Locator" on the Tractor Supply Co. website.
+- [ASSISTANT_SAID] User can call Tractor Supply Co.'s customer service department directly at 1-877-718-6750.
+- [ASSISTANT_SAID] Microchipping increases the chances of reunion if pets get lost, provides permanent identification, allows for quick identification, reduces the risk of euthanasia, and offers peace of mind.
+- [ASSISTANT_SAID] User should ask about specific requirements or preparations needed for the microchipping procedure during the appointment.
+- [EVENT] User has been riding Comet three times a week and exploring trails behind the farm.
+- [PREFERENCE] User is considering ordering Pyranha Wipe N' Spray for fly control.
+- [ASSISTANT_SAID] Pyranha Wipe N' Spray is a popular choice among horse owners for fly control.
+- [ASSISTANT_SAID] Common active ingredients in fly sprays include pyrethrin, permethrin, and picaridin.
+- [ASSISTANT_SAID] User should avoid spraying fly spray directly into Comet's eyes, nostrils, or mouth and can use a cloth or sponge for application around the face.
+- [ASSISTANT_SAID] User should read and follow the product label instructions for Pyranha Wipe N' Spray.
+- [ASSISTANT_SAID] User should consult with a veterinarian if unsure about using a fly spray on Comet.
+- [CHANGE] User has reduced Comet's grain intake and increased his exercise routine to help him lose weight.
+- [TEMPORAL] The session date is 2023/05/17 (Wed) 03:06.

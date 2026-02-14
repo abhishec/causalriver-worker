@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/25 (Thu) 11:55
+- [USER] User requested information on various topics related to waves on a string, including wave equations, harmonic waves, reflection and transmission, standing waves, dispersion, superposition, wave packets, phase velocity, and group velocity.
+- [ASSISTANT_SAID] Waves on a string is a disturbance that moves along a string and transfers energy without the transfer of mass.
+- [ASSISTANT_SAID] A wave on a string is a mechanical wave because it requires a physical medium to propagate.
+- [ASSISTANT_SAID] The wave equation on a string is given by u(x,t) = F(x - vt), where u(x,t) is the displacement of the string at position x and time t, F(x-vt) is the wave form, v is the wave velocity, and x is the position along the string.
+- [ASSISTANT_SAID] A harmonic wave is a wave that has a sinusoidal shape and oscillates at a constant frequency.
+- [ASSISTANT_SAID] The displacement of a harmonic wave is given by u(x,t) = A sin(kx - wt), where A is the amplitude, k is the wave number, and w is the angular frequency.
+- [ASSISTANT_SAID] When a wave reaches a boundary, it can be partially reflected and partially transmitted.
+- [ASSISTANT_SAID] The reflection and transmission coefficients can be calculated using the wave impedance of the two media and the angle of incidence.
+- [ASSISTANT_SAID] A standing wave is a wave that appears to stand still and oscillates with a fixed pattern.
+- [ASSISTANT_SAID] Standing waves are created by the superposition of two waves traveling in opposite directions.
+- [ASSISTANT_SAID] The fixed points of the standing wave are called nodes and the points where the maximum displacement occurs are called antinodes.
+- [ASSISTANT_SAID] The frequencies at which standing waves are created are called eigenfrequencies.
+- [ASSISTANT_SAID] Dispersion is the phenomenon where different frequency components of a wave have different wave velocities, leading to the spreading of a wave packet over time.
+- [ASSISTANT_SAID] The superposition principle states that the displacement of a system due to two or more waves is equal to the sum of the displacements due to each wave.
+- [ASSISTANT_SAID] The Fourier method is a mathematical technique for breaking down a complex waveform into its component harmonic waves.
+- [ASSISTANT_SAID] A wave packet is a localized wave that consists of a combination of harmonic waves with different frequencies and amplitudes.
+- [ASSISTANT_SAID] A wave packet has both a phase velocity

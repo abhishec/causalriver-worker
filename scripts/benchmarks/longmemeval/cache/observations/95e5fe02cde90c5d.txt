@@ -1,0 +1,25 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/25 (Thu) 22:38
+- [EVENT] User and party members enter a mansion.
+- [ASSISTANT_SAID] The foyer of the mansion is large, with a floor covered in dust and debris, furniture covered in cobwebs, and a musty, stale air.
+- [ASSISTANT_SAID] There are stairs leading to the second floor, a door to the left leading to the kitchen, and another door on the right leading to a drawing room.
+- [ASSISTANT_SAID] Noises are heard coming from upstairs, sounding like someone is moving around.
+- [USER] User decides to go upstairs to investigate the noise.
+- [ASSISTANT_SAID] Upon reaching the second floor, there is a long hallway with several doors, and the noise is coming from one of the rooms at the end of the hall.
+- [ASSISTANT_SAID] A figure dressed in black, wearing a mask, is seen stuffing items into a bag and seems unaware of the party's presence.
+- [USER] User uses stealth to try and get within grabbing distance of the figure without being noticed.
+- [ASSISTANT_SAID] User has a dexterity score of 16 and proficiency in stealth, giving a total stealth bonus of +5.
+- [ASSISTANT_SAID] User successfully sneaks up on the figure, who remains focused on looting.
+- [USER] User grabs the figure and removes their mask.
+- [ASSISTANT_SAID] The figure is revealed to be Maric, a follower of Selune, with a shocked expression.
+- [ASSISTANT_SAID] Maric confesses to stealing, claiming he was influenced by dreams from Selune to take the items.
+- [ASSISTANT_SAID] Maric expresses a desire to return the stolen items and make amends.
+- [USER] User decides to help Maric and asks where he was taking the stolen loot.
+- [ASSISTANT_SAID] Maric explains he was taking the items to an abandoned temple of Selune in a forest outside the city.
+- [ASSISTANT_SAID] User and party members accompany Maric to the abandoned temple, which is small and rundown.
+- [ASSISTANT_SAID] The temple door is slightly ajar, and faint chanting can be heard from inside.
+- [USER] User asks Maric what happens in the temple.
+- [ASSISTANT_SAID] Maric expresses unease and states he has only left offerings there and has never entered.
+- [ASSISTANT_SAID] User and party members decide to enter the temple cautiously.
+- [ASSISTANT_SAID] Inside, there is a dimly lit room with an altar, candles, and

@@ -1,0 +1,24 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/22 (Mon) 17:35
+- [FACT] User is a graduate student at the University of Michigan conducting research.
+- [ASSISTANT_SAID] There are various types of funding available for graduate students at the University of Michigan, including research fellowships, grants, assistantships, scholarships and awards, external funding, and personal loans.
+- [ASSISTANT_SAID] Research fellowships include the Rackham Predoctoral Fellowship, Rackham Graduate Student Research Grants, and the Michigan Society of Fellows.
+- [ASSISTANT_SAID] Grants available include the National Science Foundation Graduate Research Fellowship and the Ford Foundation Fellowship program.
+- [ASSISTANT_SAID] Graduate students can work as research or teaching assistants to receive funding.
+- [ASSISTANT_SAID] Some departments offer scholarships and awards for exceptional research work.
+- [ASSISTANT_SAID] External funding can be applied for through organizations such as the National Institutes of Health, National Endowment for the Humanities, and the Fulbright Program.
+- [ASSISTANT_SAID] Some students apply for personal loans to fund their research.
+- [USER] User is particularly interested in the grants available.
+- [ASSISTANT_SAID] The National Science Foundation Graduate Research Fellowship Program (GRFP) supports outstanding graduate students in STEM disciplines pursuing research-based master's or doctoral degrees in the U.S.
+- [ASSISTANT_SAID] The GRFP provides three years of financial support at a rate of $34,000 annual stipend and a $12,000 cost-of-education allowance per year.
+- [ASSISTANT_SAID] Applicants must be U.S. citizens, nationals, or permanent residents and at an early stage of their graduate careers.
+- [ASSISTANT_SAID] The application requires a research proposal, three reference letters, transcripts, and a personal statement.
+- [ASSISTANT_SAID] Evaluation criteria include intellectual merit, broader impacts of the proposed research, and the applicant's potential to become a successful scientist.
+- [ASSISTANT_SAID] The GRFP application process is highly competitive and challenging; starting early and seeking guidance is essential.
+- [USER] User asks about the application deadline for the GRFP.
+- [ASSISTANT_SAID] The application deadline for the GRFP typically falls in late October, but the specific date varies each year; users should check the official NSF website for updates.
+- [ASSISTANT_SAID] The application process for the GRFP requires careful planning, and starting early is recommended.
+- [USER] User inquires about workshops or resources available to help with the application process.
+- [ASSISTANT_SAID] The Rackham Graduate School offers workshops and information sessions for GRFP proposal preparation.
+- [ASSISTANT_S

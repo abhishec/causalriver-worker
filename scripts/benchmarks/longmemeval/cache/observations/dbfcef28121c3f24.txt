@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/21 (Sun) 17:10  
+[USER] User asked to explain bitcoin like they are 10 years old.  
+[ASSISTANT_SAID] Bitcoin is a type of digital money that exists only on computers and the internet.  
+[ASSISTANT_SAID] Bitcoin is not controlled by any one person or organization; it is run by a network of computers worldwide.  
+[ASSISTANT_SAID] People can "mine" bitcoin by using powerful computers to solve complicated math problems, and they are rewarded with new bitcoin.  
+[ASSISTANT_SAID] Bitcoin is a special kind of money that lives only in the digital world and is owned and controlled by many people globally.  
+[USER] User requested more information about the miner.  
+[ASSISTANT_SAID] A "miner" is a person who uses their computer to help maintain the Bitcoin network and process transactions.  
+[ASSISTANT_SAID] The process of maintaining the network is called "mining," which involves solving complex mathematical problems.  
+[ASSISTANT_SAID] Miners validate transactions to ensure the sender has enough bitcoin and that the transaction is legitimate.  
+[ASSISTANT_SAID] Once a miner solves a problem, they are rewarded with a certain amount of new bitcoins.  
+[ASSISTANT_SAID] The transactions are added to the blockchain, which is a public ledger of all Bitcoin transactions.  
+[USER] User asked what math problem miners solve.  
+[ASSISTANT_SAID] Miners solve a "hash function," which takes in data and produces a unique output of a fixed length.  
+[ASSISTANT_SAID] Miners compete to solve the hash function by trying different combinations of numbers until they find a solution that matches the required criteria.  
+[ASSISTANT_SAID] The first miner to solve the hash function gets to add a new block of transactions to the blockchain and receives a reward in newly created bitcoins.  
+[ASSISTANT_SAID] Solving the hash function requires a lot of computational power and energy, and the difficulty is adjusted to maintain an average of 10 minutes to solve.  
+[USER] User asked how miners know they solved the hash function.  
+[ASSISTANT_SAID] Miners generate a unique output called a "hash," which is a digital fingerprint of the input data.  
+[ASSISTANT_SAID] To know they solved the hash function correctly, miners compare their output hash with the target hash set by the Bitcoin protocol.  
+[ASSISTANT_SAID] When a miner generates a hash that matches the target hash, they have successfully solved the hash function and can add a new block to the blockchain.  
+[USER] User asked who specifies the target hash.  
+[ASS

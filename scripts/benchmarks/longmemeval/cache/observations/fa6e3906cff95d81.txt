@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[FACT] User is an intermediate yogi.  
+[FACT] User usually does a quick 15-minute yoga practice following meditation.  
+[FACT] User is looking for yoga class recommendations near their gym.  
+[PREFERENCE] User is interested in trying out different styles and instructors.  
+[PREFERENCE] User prefers a dynamic and challenging class.  
+[TEMPORAL] User is available to attend classes on Tuesdays and Thursdays, around 9:30 am, after their spin class.  
+[ASSISTANT_SAID] Assistant suggested providing more details to give the best recommendations, including current level of experience, types of yoga interested in, class preferences, availability, preferred studio, and travel distance.  
+[ASSISTANT_SAID] Assistant recommended three yoga classes for Tuesdays at 9:30 am:  
+[ASSISTANT_SAID] 1. **Vinyasa Flow** at YogaWorks (10-minute drive from user's gym) - designed to build internal heat, strength, and flexibility.  
+[ASSISTANT_SAID] 2. **Power Yoga** at CorePower Yoga (12-minute drive from user's gym) - faster-paced, physically challenging practice.  
+[ASSISTANT_SAID] 3. **Ashtanga Yoga** at Yoga House (15-minute drive from user's gym) - follows a set sequence of postures.  
+[ASSISTANT_SAID] Assistant recommended three yoga classes for Thursdays at 9:30 am:  
+[ASSISTANT_SAID] 1. **Hot Vinyasa** at Hot Yoga Inc. (8-minute drive from user's gym) - dynamic practice in a heated room.  
+[ASSISTANT_SAID] 2. **Flow & Restore** at YogaSix (12-minute drive from user's gym) - combines dynamic flow with restorative yoga.  
+[ASSISTANT_SAID] 3. **Kundalini Yoga** at Kundalini Yoga East West (15-minute drive from user's gym) - focuses on energy release through postures, breathwork, and meditation.  
+[ASSISTANT_SAID] Assistant provided details about YogaWorks studio, including its reputation, atmosphere, and amenities.  
+[ASSISTANT_SAID] Assistant described the Vinyasa Flow class structure, including level suitability, class structure, teacher guidance, music, temperature, and props available.  
+[ASSISTANT_SAID] Assistant suggested arriving 10-15 minutes early to sign in and get settled.  
+[ASSISTANT_SAID] Assistant advised on the late arrival policy, indicating that arriving within 5 minutes is generally acceptable, but more than 10 minutes late may require waiting for the next class.  
+[PREFERENCE] User plans to arrive 20-30 minutes before the class to get settled and do a quick meditation or stretching.  
+[EVENT] User plans to try out the Viny

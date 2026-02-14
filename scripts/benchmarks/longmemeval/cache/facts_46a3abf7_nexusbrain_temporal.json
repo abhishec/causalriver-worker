@@ -1,0 +1,127 @@
+{
+  "answer_c65042d7_2": [
+    {
+      "fact": "User has a 5-gallon aquarium.",
+      "type": "personal",
+      "entities": [
+        "5-gallon aquarium"
+      ]
+    },
+    {
+      "fact": "User has a solitary betta fish named Finley.",
+      "type": "personal",
+      "entities": [
+        "betta fish",
+        "Finley"
+      ]
+    },
+    {
+      "fact": "User got the betta fish from their cousin.",
+      "type": "relationship",
+      "entities": [
+        "cousin"
+      ]
+    },
+    {
+      "fact": "User is experiencing high nitrite levels in their tank.",
+      "type": "event",
+      "entities": [
+        "high nitrite levels"
+      ]
+    },
+    {
+      "fact": "User has experience with aquariums.",
+      "type": "personal",
+      "entities": []
+    },
+    {
+      "fact": "User is interested in monitoring ammonia levels in their tank.",
+      "type": "preference",
+      "entities": [
+        "ammonia levels"
+      ]
+    },
+    {
+      "fact": "User is learning about the nitrogen cycle.",
+      "type": "opinion",
+      "entities": [
+        "nitrogen cycle"
+      ]
+    }
+  ],
+  "answer_c65042d7_1": [
+    {
+      "fact": "User has a 20-gallon freshwater community tank named 'Amazonia'.",
+      "type": "personal",
+      "entities": [
+        "20-gallon",
+        "freshwater community tank",
+        "Amazonia"
+      ]
+    },
+    {
+      "fact": "User is experiencing issues with nitrite levels in their tank.",
+      "type": "event",
+      "entities": [
+        "nitrite levels",
+        "tank"
+      ]
+    },
+    {
+      "fact": "User has been doing partial water changes to manage nitrite levels.",
+      "type": "preference",
+      "entities": [
+        "partial water changes"
+      ]
+    },
+    {
+      "fact": "User has neon tetras, harlequin rasboras, and platies in their tank.",
+      "type": "personal",
+      "entities": [
+        "neon tetras",
+        "harlequin rasboras",
+        "platies"
+      ]
+    },
+    {
+      "fact": "User is experimenting with different fish foods for their community tank.",
+      "type": "preference",
+      "entities": [
+        "fish foods",
+        "community tank"
+      ]
+    }
+  ],
+  "answer_c65042d7_3": [
+    {
+      "fact": "User has a community tank",
+      "type": "personal",
+      "entities": [
+        "community tank"
+      ]
+    },
+    {
+      "fact": "User currently has anacharis and java moss in their tank",
+      "type": "personal",
+      "entities": [
+        "anacharis",
+        "java moss"
+      ]
+    },
+    {
+      "fact": "User is interested in adding Amazon Swords and Water Wisteria to their tank",
+      "type": "preference",
+      "entities": [
+        "Amazon Swords",
+        "Water Wisteria"
+      ]
+    },
+    {
+      "fact": "User is looking for beginner-friendly plants that are easy to care for",
+      "type": "preference",
+      "entities": [
+        "beginner-friendly plants"
+      ]
+    }
+  ]
+}

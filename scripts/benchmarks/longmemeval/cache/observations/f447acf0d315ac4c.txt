@@ -1,0 +1,35 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/27 (Sat) 08:13
+
+[ASSISTANT_SAID] The paper "MoDL: Model Based Deep Learning Architecture for Inverse Problems" proposes the MoDL (Model-Based Deep Learning) architecture as a solution to the problems discussed in the field of inverse problems.
+
+[ASSISTANT_SAID] The proposed solution includes incorporating the physics-based model into the DNN, joint optimization of network and model parameters, a multi-layer architecture, and end-to-end training.
+
+[ASSISTANT_SAID] The MoDL approach is designed to handle non-linear inverse problems and model mismatches, improving the accuracy of reconstruction results.
+
+[ASSISTANT_SAID] The MoDL approach can be used to solve inverse problems involving large datasets, and the joint optimization can reduce computational costs.
+
+[ASSISTANT_SAID] The results from the proposed solution show that the MoDL approach outperforms traditional inverse problem solvers in terms of accuracy and computational efficiency.
+
+[ASSISTANT_SAID] Improved accuracy was reported in several inverse problems, including MRI, CT, and X-ray crystallography.
+
+[ASSISTANT_SAID] The MoDL approach converges faster than traditional inverse problem solvers, reducing computational costs.
+
+[ASSISTANT_SAID] The MoDL approach is robust to model mismatches, providing accurate reconstruction results even with imperfect physics-based models.
+
+[ASSISTANT_SAID] The MoDL approach is generalizable and can solve a wide range of inverse problems in different fields.
+
+[ASSISTANT_SAID] The MoDL approach provides several advantages over traditional solvers, including improved accuracy, faster convergence, and robustness to model mismatches.
+
+[ASSISTANT_SAID] Compared to deep learning-based approaches, the MoDL approach incorporates physics-based models, performs joint optimization, and is trained end-to-end.
+
+[ASSISTANT_SAID] Trade-offs of the MoDL approach include model complexity, potential model mismatch, training data requirements, and hyperparameter tuning.
+
+[ASSISTANT_SAID] The forward model is represented by the equation y = Ax + n, where A is the system matrix, x is the true object, and n is measurement noise.
+
+[ASSISTANT_SAID] The inverse problem is formulated as x^ = argmin\_x L(x, y, A), where L is the reconstruction loss function.
+
+[ASSISTANT_SAID] The reconstruction loss function is defined as L(x, y, A) = ||y - Ax^||^2\_2.
+
+[ASSISTANT_SAID] Regularization is added to the reconstruction loss function as L(x, y, A) = ||y - Ax^||^2\_2 + λ||x^||^2\_2, where λ controls the strength of the

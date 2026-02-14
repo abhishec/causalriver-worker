@@ -1,0 +1,22 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/30 (Tue) 16:19
+- [EVENT] User ordered food delivery from a new Korean place downtown.
+- [TEMPORAL] User ordered food delivery exactly two weeks ago, on a Thursday.
+- [FACT] User got spicy pork bibimbap from the restaurant.
+- [PREFERENCE] User enjoyed the spicy pork bibimbap and is looking for recipes to try at home.
+- [ASSISTANT_SAID] Bibimbap literally means "mixed rice" in Korean and is made with a variety of vegetables, meat (usually beef), and a fried egg, served over rice.
+- [ASSISTANT_CREATED] Assistant provided a bibimbap recipe including ingredients and instructions.
+- [ASSISTANT_SAID] Ingredients for the bibimbap recipe include: 
+  - For the rice: 1 cup Korean short-grain rice, 2 cups water, 1 tablespoon sesame oil, 1 teaspoon salt.
+  - For the vegetables: 1 cup bean sprouts, 1 cup shredded zucchini, 1 cup diced carrots, 1 cup diced cucumber, 1/2 cup diced bell peppers, 1/2 cup diced mushrooms, 1/4 cup chopped green onions, 1/4 cup toasted sesame seeds.
+  - For the meat: 1/2 cup diced beef (ribeye or sirloin), marinated in 2 tablespoons soy sauce, 2 tablespoons Gochujang, 2 tablespoons brown sugar, 2 cloves garlic, minced, 1 tablespoon sesame oil.
+  - For the egg: 1 egg, salt and pepper to taste.
+  - For the sauce: 2 tablespoons Gochujang, 2 tablespoons soy sauce, 2 tablespoons rice vinegar, 1 tablespoon honey, 1 teaspoon grated ginger, 1/4 teaspoon red pepper flakes (optional).
+- [ASSISTANT_SAID] Instructions for the bibimbap recipe include cooking rice, sautéing vegetables, marinating and cooking beef, frying an egg, assembling the bibimbap, and drizzling sauce over the top.
+- [ASSISTANT_SAID] Tips for variations include using a variety of vegetables, substituting beef with spicy pork or tofu, adding kimchi, and experimenting with different sauces.
+- [PREFERENCE] User is interested in trying different variations of bibimbap.
+- [ASSISTANT_SAID] Assistant provided three spicy pork bibimbap recipe variations.
+- [ASSISTANT_CREATED] Recipe 1 includes spicy pork bibimbap with Gochujang sauce, ingredients, and instructions.
+- [ASSISTANT_SAID] Ingredients for Recipe 1 include: 
+  - 1/2 cup diced pork shoulder or butt, marinated in 2 tablespoons Gochujang, 2 tablespoons soy sauce, 2 tablespoons brown

@@ -1,0 +1,24 @@
+**Observation Log:**
+
+[FACT] User is planning a golf trip with their family.  
+[FACT] User's family enjoys playing golf together on weekends.  
+[EVENT] User watched the Masters Tournament with their family.  
+[TEMPORAL] User watched the Masters Tournament on April 20th.  
+[FACT] User is interested in golf courses in the US.  
+[PREFERENCE] User loves the idea of playing a course inspired by classic links courses of Scotland.  
+[PREFERENCE] User is fascinated by the history of golf and old courses in Scotland.  
+[EVENT] User has been watching a lot of sports lately, especially the NBA playoffs.  
+[TEMPORAL] User mentioned the NBA playoffs started a few weeks ago.  
+[EVENT] User watched the Lakers vs Clippers game on April 15th.  
+[CHANGE] User clarified that they were with their family on April 20th, not 2019, regarding the Masters Tournament.  
+[PREFERENCE] User is interested in taking a lesson or two while at Bandon Dunes.  
+[ASSISTANT_SAID] Assistant recommended several top golf courses in the US, including Pebble Beach Golf Links, Augusta National Golf Club, and Bandon Dunes Golf Resort.  
+[ASSISTANT_SAID] Assistant provided details about Bandon Dunes Golf Resort, including its four courses: Bandon Dunes, Pacific Dunes, Old Macdonald, and Sheep Ranch.  
+[ASSISTANT_SAID] Assistant described Old Macdonald's design, inspiration, unique features, and playability.  
+[ASSISTANT_SAID] Assistant mentioned that Bandon Dunes offers a range of accommodations, dining options, and non-golfing activities.  
+[ASSISTANT_SAID] Assistant noted that Bandon Dunes offers junior golf programs and lessons for kids.  
+[ASSISTANT_SAID] Assistant clarified that Tiger Woods won the Masters Tournament on April 14th, 2019.  
+[ASSISTANT_SAID] Assistant suggested that Bandon Dunes offers special packages and experiences for families, including private lessons and guided tours.  
+[ASSISTANT_CREATED] Assistant created a list of top golf courses in the US and family-friendly golf resorts.  
+[ASSISTANT_CREATED] Assistant provided a detailed description of Bandon Dunes Golf Resort, including its courses, amenities, and tips for visiting.  
+[ASSISTANT_CREATED] Assistant provided a detailed description of Old Macdonald course, including its design, inspiration, and unique features.

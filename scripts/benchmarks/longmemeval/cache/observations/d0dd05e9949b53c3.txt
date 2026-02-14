@@ -1,0 +1,30 @@
+**Observation Log:**
+
+[FACT] The user is working on their thesis research.
+
+[EVENT] The user submitted their thesis proposal on a Friday before May 28, 2023.
+
+[TEMPORAL] The user met with their thesis advisor, Dr. Smith, three times before submitting their proposal.
+
+[TEMPORAL] The user's last meeting with Dr. Smith was on February 17, 2023.
+
+[CHANGE] Dr. Smith suggested changes to the user's sampling strategy, which the user incorporated into their final draft.
+
+[RELATIONSHIP] The user's thesis advisor is Dr. Smith.
+
+[PREFERENCE] The user is looking for more recent studies on the impact of AI on job markets.
+
+[ASSISTANT_SAID] The assistant suggested several databases for finding research papers: Google Scholar, JSTOR, Scopus, Web of Science, arXiv, ResearchGate, ScienceDirect, and IEEE Xplore.
+
+[ASSISTANT_SAID] The assistant provided search terms for research: "Artificial intelligence" OR "AI" AND "job market" OR "labour market" OR "employment"; "Automation" AND "job displacement" OR "job replacement"; "Machine learning" AND "employment impact" OR "labour market effects"; "Robotics" AND "job creation" OR "job destruction"; "AI adoption" AND "industry" OR "sector" AND "employment effects"; "Skills" AND "AI" AND "future of work" OR "job market"; "Unemployment" AND "AI" OR "automation"; "Gig economy" AND "AI" OR "machine learning" AND "employment"; "Job polarization" AND "AI" OR "automation"; "AI ethics" AND "job market" OR "employment".
+
+[ASSISTANT_SAID] The assistant suggested specific recent papers and authors relevant to the impact of AI on job markets, including: 
+1. "The Future of Work: Robots, AI, and Automation" by Carl Benedikt Frey and Michael A. Osborne (2020).
+2. "The Impact of Artificial Intelligence on the Job Market: A Systematic Review" by Laura Capasso, et al. (2022).
+3. "AI, Robotics, and the Future of Work: A Review of the Empirical Evidence" by Georg Graetz and Guy Michaels (2022).
+4. "The Effects of Artificial Intelligence on the Labor Market: A Survey of the Literature" by Giovanni Pagliacci, et al. (2022).
+5. "Job Displacement and the Rise of the Gig Economy: A Study of the Impact of AI on Labor Markets" by Anand Nandkumar, et al. (2021).
+
+[ASSISTANT_SAID] The assistant mentioned prominent authors in the field of AI and job markets: Carl Benedikt Frey, Michael A. Osborne, Georg Graetz, Guy Michaels, and Erik Brynjolfsson.
+
+[ASS

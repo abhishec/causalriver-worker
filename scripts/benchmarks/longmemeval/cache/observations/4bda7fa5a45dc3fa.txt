@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[FACT] User is planning a summer trip to either Costa Rica or Iceland.  
+[EVENT] User just got back from a trip to Japan.  
+[EVENT] User had a 4-day girls' trip to Las Vegas with friends Emily and Rachel in late January.  
+[RELATIONSHIP] User's friends mentioned are Emily and Rachel.  
+[FACT] User stayed at the Bellagio in Las Vegas and watched the fountains show three times.  
+[ASSISTANT_SAID] Costa Rica is known for lush rainforests, exotic wildlife, and beautiful beaches.  
+[ASSISTANT_SAID] Recommended activities in Costa Rica include exploring Corcovado National Park, Monteverde Cloud Forest, Arenal Volcano, and visiting popular beaches like Tamarindo, Puerto Viejo, and Nosara.  
+[ASSISTANT_SAID] Suggested adventure activities in Costa Rica include ziplining, rafting, and scenic boat tours.  
+[ASSISTANT_SAID] Mentioned that Costa Rica is a pioneer in eco-tourism and recommended staying in eco-lodges and participating in sustainable tourism.  
+[ASSISTANT_SAID] Suggested visiting San José to experience the vibrant culture of Costa Rica.  
+[ASSISTANT_SAID] Iceland is famous for its breathtaking landscapes, including the Blue Lagoon, Gullfoss waterfall, and Jökulsárlón glacier lagoon.  
+[ASSISTANT_SAID] Recommended activities in Iceland include witnessing the Northern Lights, relaxing in hot springs, hiking, and exploring Reykjavik.  
+[ASSISTANT_SAID] Suggested that user might enjoy Costa Rica's relaxed atmosphere but also mentioned Iceland's unique landscapes and adventure opportunities.  
+[FACT] User is leaning towards Iceland because of the hot springs but is worried about the cost.  
+[ASSISTANT_SAID] Provided a rough estimate of costs for a 7-day trip to Iceland, including flights, accommodation, food, transportation, activities, and other expenses.  
+[ASSISTANT_SAID] Estimated total cost for a budget-friendly trip to Iceland is around $1,500-$2,500 per person, mid-range is $2,500-$4,000, and luxury is $4,000-$6,000.  
+[ASSISTANT_SAID] Suggested ways to save money while traveling in Iceland, such as booking in advance, opting for budget-friendly accommodations, and choosing free or low-cost activities.  
+[FACT] User is interested in visiting the Blue Lagoon and asked for recommendations for other hot springs or geothermal pools in Iceland.  
+[ASSISTANT_SAID] Recommended other hot springs in Iceland, including Laugarvatn Fontana, Landmannalaugar, Myvatn Nature Baths, Krauma, and Laugardalslaug.  
+[ASSISTANT_SAID] Provided tips for visiting hot springs in Iceland, including showering before entering, removing

@@ -1,0 +1,24 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/03/09 (Thu) 00:05
+- [USER] The user is working with Python and Pygame.
+- [USER] The user has a variable called `White_Points` that is initially set to 0.
+- [USER] The user is trying to create a condition based on whether a captured piece is a Pawn.
+- [ASSISTANT_SAID] The assistant suggested using the `type()` function to check if the captured piece is a `Pawn`.
+- [ASSISTANT_CREATED] The assistant provided a code snippet to check if the captured piece is a `Pawn` and to increment `White_Points` if it is:
+  ```python
+  captured = board.squares[released_row][released_col].has_piece()
+  if captured:
+      captured_piece = board.squares[released_row][released_col].piece
+      if type(captured_piece) == piece.Pawn:
+          White_Points += 1
+          print("Captured piece is a Pawn")
+      else:
+          print("Captured piece is not a Pawn")
+  print("White points:", White_Points)
+  ```
+- [USER] The user encountered an error when using `if type(the_captured_piece) == piece.Pawn:`, which stated: "AttributeError: 'Pawn' object has no attribute 'Pawn'".
+- [ASSISTANT_SAID] The assistant suggested checking the import statements for the `Pawn` class.
+- [USER] The user confirmed they used `from piece import Pawn` and that it did not work.
+- [USER] The user provided the code for their `piece.py` file, which includes the `Piece` class and its subclasses, including `Pawn`.
+- [ASSISTANT_SAID] The assistant recommended using `isinstance(the_captured_piece, Pawn)` instead of `type()` for checking if `the_captured_piece` is an instance of the `Pawn` class.

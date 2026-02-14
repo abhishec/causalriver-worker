@@ -1,0 +1,28 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/06/16 (Fri) 17:48  
+[FACT] User had baked salmon with roasted asparagus and quinoa on Monday this week.  
+[PREFERENCE] User is trying to plan meals for the rest of the week.  
+[ASSISTANT_SAID] Suggested healthy dinner ideas that incorporate leftovers.  
+[ASSISTANT_CREATED] Provided dinner ideas for Tuesday through Friday:  
+[ASSISTANT_SAID] **Tuesday:** Salmon Cakes with Asparagus Slaw.  
+[ASSISTANT_SAID] **Wednesday:** Quinoa and Veggie Stir-Fry.  
+[ASSISTANT_SAID] **Thursday:** Salmon and Asparagus Wrap.  
+[ASSISTANT_SAID] **Friday:** Quinoa and Black Bean Bowl.  
+[ASSISTANT_SAID] Other ideas included using leftover quinoa for a salad, adding asparagus to a frittata, and mixing salmon with Greek yogurt and dill for a dip.  
+[PREFERENCE] User liked the salmon cakes with asparagus slaw idea.  
+[ASSISTANT_SAID] Suggested healthy lunch ideas that are easy to pack and won't spoil easily.  
+[ASSISTANT_CREATED] Provided lunch ideas:  
+[ASSISTANT_SAID] **Salads in a Jar**: Layer mixed greens, veggies, proteins, and nuts/seeds.  
+[ASSISTANT_SAID] **Whole Grain Wraps**: Suggested combinations like roasted turkey breast with avocado and mixed greens, hummus with cucumber and sprouts, and grilled chicken with quinoa and roasted veggies.  
+[ASSISTANT_SAID] **Rice or Quinoa Bowls**: Suggested toppings like grilled chicken, roasted veggies, and fried eggs.  
+[ASSISTANT_SAID] **Soup Containers**: Prep a large batch of soup and portion it out.  
+[ASSISTANT_SAID] **Mason Jar Meals**: Layer cooked pasta with marinara sauce and veggies.  
+[ASSISTANT_SAID] **Fresh Fruit and Cheese Boxes**: Prep a box of fresh fruit paired with cheese.  
+[ASSISTANT_SAID] **Hard-Boiled Eggs and Veggies**: Boil eggs and prep a container of veggies.  
+[ASSISTANT_SAID] Provided tips for meal prep, including using airtight containers and labeling.  
+[PREFERENCE] User decided to start with the salad in a jar and the whole grain wraps.  
+[FACT] User mentioned using leftover sautéed onions and bell peppers from a dinner party in the wraps.  
+[ASSISTANT_SAID] Suggested healthy dips or spreads for the wraps:  
+[ASSISTANT_SAID] **Hummus**: Made from chickpeas, tahini, garlic, and lemon juice.  
+[ASSISTANT_SAID] **Avocado Spread**: Mashed

@@ -1,0 +1,24 @@
+**Observation Log:**
+
+- [FACT] The user is planning a trip to New York City.
+- [RELATIONSHIP] The user's wife has family in New York City.
+- [EVENT] The user is looking for recommendations for Filipino restaurants in New York City.
+- [ASSISTANT_SAID] The assistant recommended the following Filipino restaurants in NYC: Jeepney, Maharlika, Tita Flips, F.O.B., Grill 21, Papa's Kitchen, and Ihawan.
+- [ASSISTANT_SAID] Jeepney is known for a modern take on traditional Filipino dishes and has multiple locations in East Village, Greenwich Village, and Williamsburg.
+- [ASSISTANT_SAID] Maharlika is located in the East Village and serves classic Filipino comfort food.
+- [ASSISTANT_SAID] Tita Flips is located in the Lower East Side and offers Filipino-inspired fusion dishes.
+- [ASSISTANT_SAID] F.O.B. is located in the Financial District and focuses on modern Filipino cuisine with fresh ingredients.
+- [ASSISTANT_SAID] Grill 21 is located in Woodside, Queens, and offers grilled meats and seafood along with traditional dishes.
+- [ASSISTANT_SAID] Papa's Kitchen is a family-owned restaurant in Woodside, Queens, serving classic Filipino dishes for over 20 years.
+- [ASSISTANT_SAID] Ihawan is located in Queens Village, Queens, and specializes in Filipino-style barbecue and grilled meats.
+- [EVENT] The user is looking for cultural events or festivals in NYC to attend with his wife and her family.
+- [ASSISTANT_SAID] The assistant recommended the following Filipino cultural events and festivals in NYC: Philippine Independence Day Celebration (June), Filipino American History Month Celebration (October), Diwa Filipino Arts Festival (October), Philippine Festival (August), Lechon Festival (June), and FANHS Conference (biennial, October).
+- [ASSISTANT_SAID] The Philippine Independence Day Celebration marks the anniversary of the Philippines' independence from Spain in 1898.
+- [ASSISTANT_SAID] The Filipino American History Month Celebration honors the contributions and achievements of Filipino Americans.
+- [ASSISTANT_SAID] The Diwa Filipino Arts Festival celebrates Filipino culture through music, dance, theater, and visual arts.
+- [ASSISTANT_SAID] The Philippine Festival features traditional Filipino music, dance, food, and cultural exhibits.
+- [ASSISTANT_SAID] The Lechon Festival celebrates the iconic Filipino dish, lechon (roasted pig).
+- [ASSISTANT_SAID] The FANHS Conference celebrates Filipino American history and culture with workshops and cultural performances.
+- [EVENT] The user was born in Manila, Philippines.
+- [PREFERENCE] The user is excited to share his cultural heritage with his wife's family.
+- [EVENT] The user is looking for

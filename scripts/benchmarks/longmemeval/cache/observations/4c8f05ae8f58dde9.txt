@@ -1,0 +1,29 @@
+**Observation Log:**
+
+[FACT] User wakes up at 7:30 am on weekdays to get ready for work.  
+[EVENT] User is trying to plan out their day and set reminders for their morning routine.  
+[ASSISTANT_SAID] Assistant cannot set alarms or reminders but can guide the user through the process of setting a daily alarm on their device.  
+[ASSISTANT_SAID] Instructions for setting a daily alarm for 7:30 am on weekdays for Android devices: Open the Clock app, tap the "+" icon, set the alarm time, tap "Repeat" and select "Monday" to "Friday," choose a ringtone and label, and tap "Save."  
+[ASSISTANT_SAID] Instructions for setting a daily alarm for 7:30 am on weekdays for iOS devices: Open the Clock app, tap the "+" icon, set the alarm time, tap "Repeat" and select "Monday" to "Friday," choose a sound and label, and tap "Save."  
+[ASSISTANT_SAID] Instructions for setting a daily alarm for other devices: Follow similar steps or use a third-party alarm clock app or virtual assistant.  
+[ASSISTANT_SAID] Reminder to adjust alarm time and settings according to user preferences and needs.  
+[USER] User wants to plan out their morning routine and fit in meditation, breakfast, and a short workout before heading to the office at 9:00 am.  
+[ASSISTANT_SAID] Suggested morning routine assuming user wakes up at 7:30 am:  
+1. **Meditation (15 minutes)**: 7:30 am - 7:45 am  
+2. **Get ready (15 minutes)**: 7:45 am - 8:00 am  
+3. **Breakfast (30 minutes)**: 8:00 am - 8:30 am  
+4. **Short workout (20 minutes)**: 8:30 am - 8:50 am  
+5. **Get ready to leave (10 minutes)**: 8:50 am - 9:00 am  
+[ASSISTANT_SAID] Tips to optimize morning routine: Prepare everything the night before, keep workouts short, be flexible, and leave buffer time.  
+[USER] User requests a list of healthy breakfast ideas that can be prepared in advance for the week.  
+[ASSISTANT_SAID] Healthy breakfast ideas for preparation in advance:  
+1. **Overnight Oats**  
+2. **Muffin Tin Frittatas**  
+3. **Breakfast Burritos**  
+4. **Greek Yogurt Parfaits**  
+5. **Smoothie Packs**  
+6. **Breakfast Sandwiches**  
+7. **Casseroles**  
+8. **Muesli**  
+[USER] User wants breakfast ideas that incorporate overnight oats with fruit and nuts.  
+[ASSIST

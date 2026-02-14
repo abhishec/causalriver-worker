@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[FACT] The user is looking for a gift for their mom's anniversary.  
+[RELATIONSHIP] The user's mom is celebrating an anniversary.  
+[RELATIONSHIP] The user has a sister.  
+[PREFERENCE] The user is considering personalized photo albums or customized jewelry as gift options.  
+[ASSISTANT_SAID] The assistant recommended Shutterfly, Mixbook, and Blurb for personalized photo albums.  
+[ASSISTANT_SAID] The assistant recommended Etsy, Personalization Mall, and James Allen for customized jewelry.  
+[ASSISTANT_SAID] The assistant advised checking reviews, prices, and production times before making a final decision.  
+[FACT] The user prefers to shop in-store for a more personal gift rather than online shopping.  
+[PREFERENCE] The user has been doing a lot of online shopping lately, especially during sales events.  
+[EVENT] The user mentioned an impulse buy at their favorite bookstore during a sale last week.  
+[FACT] The user bought a new release from their favorite author, originally priced at $30.  
+[PREFERENCE] The user enjoys getting lost in stories from their favorite author.  
+[PREFERENCE] The user thinks a customized message or their mom's birthstone would be a nice touch for the gift.  
+[ASSISTANT_SAID] The assistant confirmed that many local jewelers can create custom pieces with engravings and birthstones.  
+[ASSISTANT_SAID] The assistant suggested asking local jewelers about their customization options, capabilities, and turnaround times.  
+[EVENT] The user is considering checking out a new jewelry store that just opened downtown.  
+[FACT] The user previously bought their sister's birthday present from the new jewelry store.  
+[PREFERENCE] The user thinks the new jewelry store might be able to create a custom piece for their mom.  
+[ASSISTANT_SAID] The assistant encouraged the user to check out the store again, given their positive previous experience.  
+[ASSISTANT_SAID] The assistant suggested calling ahead to confirm the store offers custom design services and to inquire about their design process, materials, pricing, and turnaround time.  
+[ASSISTANT_SAID] The assistant recommended bringing ideas or inspiration when visiting the store.  
+[CHANGE] The user is considering whether to check out the new store again or explore other options.  
+[TEMPORAL] The session date is 2023/05/27 (Sat) 03:55.

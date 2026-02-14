@@ -1,0 +1,241 @@
+{
+  "answer_f999b05b_1": [
+    {
+      "fact": "User is planning to buy new concert merchandise online.",
+      "type": "preference",
+      "entities": [
+        "concert merchandise"
+      ]
+    },
+    {
+      "fact": "User is interested in Billie Eilish gear.",
+      "type": "preference",
+      "entities": [
+        "Billie Eilish"
+      ]
+    },
+    {
+      "fact": "User attended a Billie Eilish concert at the Wells Fargo Center in Philly.",
+      "type": "event",
+      "entities": [
+        "Billie Eilish concert",
+        "Wells Fargo Center",
+        "Philly"
+      ]
+    },
+    {
+      "fact": "User attended the concert with their sister.",
+      "type": "relationship",
+      "entities": [
+        "sister"
+      ]
+    },
+    {
+      "fact": "User had an amazing experience at the concert.",
+      "type": "opinion",
+      "entities": [
+        "Billie Eilish concert"
+      ]
+    }
+  ],
+  "answer_f999b05b_4": [
+    {
+      "fact": "User is looking for new music recommendations.",
+      "type": "preference",
+      "entities": [
+        "music recommendations"
+      ]
+    },
+    {
+      "fact": "User has attended a few concerts recently.",
+      "type": "event",
+      "entities": [
+        "concerts"
+      ]
+    },
+    {
+      "fact": "User attended a free outdoor concert series in the park today.",
+      "type": "event",
+      "entities": [
+        "free outdoor concert series",
+        "park"
+      ]
+    },
+    {
+      "fact": "User discovered great new talent at the concert.",
+      "type": "opinion",
+      "entities": [
+        "new talent"
+      ]
+    },
+    {
+      "fact": "User prefers indie and alternative music.",
+      "type": "preference",
+      "entities": [
+        "indie music",
+        "alternative music"
+      ]
+    },
+    {
+      "fact": "User is interested in newer artists.",
+      "type": "preference",
+      "entities": [
+        "newer artists"
+      ]
+    },
+    {
+      "fact": "User liked the sound of Mt. Joy's focus on storytelling and catchy melodies.",
+      "type": "opinion",
+      "entities": [
+        "Mt. Joy",
+        "storytelling",
+        "catchy melodies"
+      ]
+    }
+  ],
+  "answer_f999b05b_2": [
+    {
+      "fact": "User enjoys indie music",
+      "type": "preference",
+      "entities": [
+        "indie music"
+      ]
+    },
+    {
+      "fact": "User recently attended a music festival in Brooklyn",
+      "type": "event",
+      "entities": [
+        "music festival",
+        "Brooklyn"
+      ]
+    },
+    {
+      "fact": "User attended the festival with a group of friends",
+      "type": "relationship",
+      "entities": [
+        "friends"
+      ]
+    },
+    {
+      "fact": "User has seen Glass Animals live",
+      "type": "event",
+      "entities": [
+        "Glass Animals"
+      ]
+    },
+    {
+      "fact": "User thinks Glass Animals were amazing live",
+      "type": "opinion",
+      "entities": [
+        "Glass Animals"
+      ]
+    },
+    {
+      "fact": "User is interested in exploring more psychedelic indie-rock",
+      "type": "preference",
+      "entities": [
+        "psychedelic indie-rock"
+      ]
+    }
+  ],
+  "answer_f999b05b_5": [
+    {
+      "fact": "User enjoys attending concerts",
+      "type": "preference",
+      "entities": [
+        "concerts"
+      ]
+    },
+    {
+      "fact": "User attended a Billie Eilish concert in Philadelphia",
+      "type": "event",
+      "entities": [
+        "Billie Eilish",
+        "Philadelphia"
+      ]
+    },
+    {
+      "fact": "User enjoys smaller local music nights",
+      "type": "preference",
+      "entities": [
+        "local music nights"
+      ]
+    },
+    {
+      "fact": "User attended a jazz night at a local bar",
+      "type": "event",
+      "entities": [
+        "jazz night",
+        "local bar"
+      ]
+    },
+    {
+      "fact": "User is interested in jazz music",
+      "type": "preference",
+      "entities": [
+        "jazz music"
+      ]
+    },
+    {
+      "fact": "User is looking for recommendations for new artists or albums",
+      "type": "preference",
+      "entities": [
+        "new artists",
+        "albums"
+      ]
+    }
+  ],
+  "answer_f999b05b_3": [
+    {
+      "fact": "User enjoys rock music, particularly classic rock.",
+      "type": "preference",
+      "entities": [
+        "rock music",
+        "classic rock"
+      ]
+    },
+    {
+      "fact": "User has been listening to a lot of Queen lately.",
+      "type": "preference",
+      "entities": [
+        "Queen"
+      ]
+    },
+    {
+      "fact": "User recently saw Queen live with Adam Lambert.",
+      "type": "event",
+      "entities": [
+        "Queen",
+        "Adam Lambert"
+      ]
+    },
+    {
+      "fact": "User attended a music festival in Brooklyn.",
+      "type": "event",
+      "entities": [
+        "music festival",
+        "Brooklyn"
+      ]
+    },
+    {
+      "fact": "User attended the concert with their parents.",
+      "type": "relationship",
+      "entities": [
+        "parents"
+      ]
+    },
+    {
+      "fact": "User is interested in discovering new artists and bands.",
+      "type": "preference",
+      "entities": [
+        "new artists",
+        "bands"
+      ]
+    },
+    {
+      "fact": "User is always on the lookout for new sounds.",
+      "type": "opinion",
+      "entities": []
+    }
+  ]
+}

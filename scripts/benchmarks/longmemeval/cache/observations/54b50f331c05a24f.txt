@@ -1,0 +1,32 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/03/31 (Fri) 21:09
+- [USER] User is interested in finding the best dim sum in Hong Kong.
+- [ASSISTANT_SAID] Recommended dim sum restaurants in Hong Kong:
+  1. Tim Ho Wan (添好運) in Sham Shui Po
+  2. Lung King Heen (龍景軒) in Central
+  3. Din Tai Fung (鼎泰豐) in Tsim Sha Tsui
+  4. Maxim's Palace City Hall (美心皇宮) in Central
+  5. Tin Lung Heen (天龍軒) in Kowloon
+  6. The Chairman (大班樓) in Central
+  7. Fook Lam Moon (福臨門) in Wan Chai
+  8. One Dim Sum (一點心) in Prince Edward
+  9. Yum Cha (飲茶) in Central and Tsim Sha Tsui
+  10. Crystal Jade La Mian Xiao Long Bao (翡翠拉面小籠包) in Causeway Bay
+- [USER] User has heard of Tim Ho Wan but is unsure if it is too touristy.
+- [ASSISTANT_SAID] Tim Ho Wan is known to attract long queues during peak hours but is still considered to have great quality dim sum.
+- [ASSISTANT_SAID] Suggested making a reservation in advance, especially during peak hours and weekends.
+- [USER] User plans to try Lung King Heen due to its convenient location.
+- [ASSISTANT_SAID] Recommended must-try dim sum dishes at Lung King Heen:
+  1. Steamed shrimp dumplings (蝦餃)
+  2. Steamed barbecued pork buns (叉燒包)
+  3. Steamed scallop and spinach dumplings (帶子菠菜餃)
+  4. Steamed crabmeat and egg white dumplings (蟹肉蛋白餃)
+  5. Baked chicken puffs (雞批)
+  6. Pan-fried turnip cakes (蘿蔔糕)
+  7. Pan-fried shrimp and chive dumplings (煎餃)
+  8. Steamed rice rolls with shrimp and bamboo shoot (竹筒鮮蝦腸粉)
+  9. Deep-fried spring rolls with shrimps and mushrooms (炸春卷)
+  10. Braised e-fu noodles with shrimp roe (蝦子炆伊麵)
+- [ASSISTANT_SAID] Noted that the dim sum dishes at Lung King Heen may be slightly pricier but are of exceptional quality and taste.
+- [USER] User loves trying new dishes, especially

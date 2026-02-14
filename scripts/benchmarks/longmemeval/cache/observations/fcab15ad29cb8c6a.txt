@@ -1,0 +1,31 @@
+**Observation Log:**
+
+[FACT] User is planning to move to Melbourne for university.  
+[EVENT] User is trying to figure out what documents to bring with them.  
+[TEMPORAL] User started the visa application process on February 15th.  
+[ASSISTANT_SAID] Assistant congratulated the user on their decision to study in Melbourne.  
+[ASSISTANT_SAID] Assistant provided a list of essential documents to bring to Melbourne, including:  
+[ASSISTANT_SAID] 1. Electronic Confirmation of Enrolment (eCoE)  
+[ASSISTANT_SAID] 2. Student visa  
+[ASSISTANT_SAID] 3. Visa application documents (passport, birth certificate, proof of English language proficiency, proof of financial capacity)  
+[ASSISTANT_SAID] 4. Passport (valid for at least six months beyond intended stay)  
+[ASSISTANT_SAID] 5. Birth certificate (original or certified copy)  
+[ASSISTANT_SAID] 6. ID documents (national ID card, driver's license, or other government-issued ID)  
+[ASSISTANT_SAID] 7. Offer letter from the university  
+[ASSISTANT_SAID] 8. Academic transcripts, diplomas, and certificates (certified copies)  
+[ASSISTANT_SAID] 9. English language test results (e.g., IELTS, TOEFL)  
+[ASSISTANT_SAID] 10. Overseas Student Health Cover (OSHC) policy document or proof of payment  
+[ASSISTANT_SAID] 11. Medical certificates for pre-existing conditions  
+[ASSISTANT_SAID] 12. Proof of financial capacity (bank statements or scholarship award letter)  
+[ASSISTANT_SAID] 13. Accommodation documents (rental agreement or confirmation)  
+[ASSISTANT_SAID] 14. Travel documents (flight itinerary, travel insurance)  
+[ASSISTANT_SAID] Assistant advised to make digital copies of all documents and store them securely.  
+[ASSISTANT_SAID] Assistant encouraged the user to double-check all necessary documents before departure.  
+[EVENT] User is looking for accommodation in Melbourne and has browsed websites like Student.com and Homestay.  
+[ASSISTANT_SAID] Assistant provided types of accommodation suitable for international students:  
+[ASSISTANT_SAID] 1. On-campus accommodation  
+[ASSISTANT_SAID] 2. Shared accommodation  
+[ASSISTANT_SAID] 3. Homestay  
+[ASSISTANT_SAID] 4. Private rental  
+[ASSISTANT_SAID] 5. Student accommodation providers (e.g., Student.com, UniLodge, Scape)  
+[ASSISTANT_SAID]

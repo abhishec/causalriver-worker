@@ -1,0 +1,16 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/02/28 (Tue) 21:36  
+[ASSISTANT_SAID] Correct answers are: Upload a configuration script, Modify the extensionProfile section of the Azure Resource Manager template.  
+[ASSISTANT_SAID] To ensure that web server components are installed when the scale set virtual machines are provisioned, you can use the Azure Resource Manager (ARM) template to modify the extensionProfile section of the template and specify a custom script extension that installs the components.  
+[ASSISTANT_SAID] You can also upload the configuration script that installs the components and specify its location in the extensionProfile section of the template.  
+[ASSISTANT_SAID] The automation account and creating a new virtual scale set are not required to achieve this goal.  
+[USER] Question 43 of 50: You create an App Service plan named Plan1 and an Azure web app named webapp1. You discover that the option to create a staging slot is unavailable. You need to create a staging slot for Plan1. What should you do first?  
+[USER] Select the correct answer: From Plan1, scale up the App Service plan, From webapp1, modify the Application settings, From webapp1, add a custom domain, From Plan1, scale out the App Service plan.  
+[ASSISTANT_SAID] From Plan1, scale up the App Service plan.  
+[USER] Question 44 of 50: You plan to move a distributed on-premises app named App1 to an Azure subscription. After the planned move, App1 will be hosted on several Azure virtual machines. You need to ensure that App1 always runs on at least eight virtual machines during planned Azure maintenance. What should you create?  
+[USER] Select the correct answer: one virtual machine scale set that has 10 virtual machines instances, one Availability Set that has three fault domains and one update domain, one Availability Set that has 10 update domains and one fault domain, one virtual machine scale set that has 12 virtual machines instances.  
+[ASSISTANT_SAID] To ensure that App1 always runs on at least eight virtual machines during planned Azure maintenance, you should create one virtual machine scale set that has eight or more virtual machine instances.  
+[ASSISTANT_SAID] Therefore, the correct answer is: one virtual machine scale set that has 8 or more virtual machine instances.  
+[USER] You have an Azure virtual machine named VM1 that runs Windows Server 2016. You need to create an alert in Azure when more than two error events are logged to the System event log on VM1 within an hour. Solution: You create an event subscription on VM1. You create an alert in Azure Monitor and specify VM1 as the source. Does this meet the goal?  
+[USER] Select the

@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/24 (Wed) 00:51  
+[FACT] User has a fiddle leaf fig named Freddy.  
+[FACT] User has a snake plant given to their sister Rachel.  
+[FACT] User has an orchid named Orchy.  
+[FACT] User has a basil plant named Basilica.  
+[FACT] User has an aloe vera plant named Mr. Aloe.  
+[FACT] User has a spider plant named Charlotte.  
+[PREFERENCE] User is experiencing issues with Freddy the fiddle leaf fig, specifically droopy leaves despite watering every other day.  
+[PREFERENCE] User is interested in trying new recipes using aloe vera.  
+[RELATIONSHIP] User's sister is named Rachel.  
+[ASSISTANT_SAID] Droopy leaves on a fiddle leaf fig can be caused by overwatering, underwatering, humidity issues, light conditions, temperature, being root bound, or pests/diseases.  
+[ASSISTANT_SAID] To check soil moisture, user should stick their finger into the soil up to the first knuckle.  
+[ASSISTANT_SAID] Fiddle leaf figs prefer well-draining soil and can be prone to root rot if the soil is too moist.  
+[ASSISTANT_SAID] Fiddle leaf figs prefer humidity above 50% and can benefit from a tray with water and pebbles or a humidifier.  
+[ASSISTANT_SAID] Fiddle leaf figs thrive in bright, indirect light and prefer temperatures between 65°F to 75°F (18°C to 24°C).  
+[ASSISTANT_SAID] User can prune damaged or dying leaves from Freddy to encourage new growth.  
+[ASSISTANT_SAID] User should fertilize Orchy with a balanced fertilizer specifically formulated for orchids, diluted to half strength, once a month during the growing season.  
+[ASSISTANT_SAID] User can also use a foliar spray fertilizer on Orchy's leaves for additional nutrients.  
+[ASSISTANT_SAID] Pruning Basilica should involve pinching off flower buds, cutting back long stems above a node, and harvesting individual leaves to encourage bushiness.  
+[ASSISTANT_SAID] User should prune Basilica regularly to keep it from flowering.  
+[ASSISTANT_SAID] Aloe vera can be used in skincare, culinary recipes, health remedies, and other uses such as natural preservatives and pet care.  
+[ASSISTANT_SAID] User should use the inner gel of aloe vera leaves, as the outer leaf can be bitter.  
+[ASSISTANT_SAID] When choosing a pot for Charlotte, user should consider size, material (terra cotta, ceramic, plastic), drainage holes, depth (6-8 inches), width (8-12 inches), style, weight, color, and

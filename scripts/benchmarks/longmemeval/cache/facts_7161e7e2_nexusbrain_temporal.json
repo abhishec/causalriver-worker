@@ -1,0 +1,43 @@
+{
+  "answer_sharegpt_5Lzox6N_0": [
+    {
+      "fact": "User is creating a shift rotation sheet for GM social media agents",
+      "type": "event",
+      "entities": [
+        "shift rotation sheet",
+        "GM social media agents"
+      ]
+    },
+    {
+      "fact": "User has 7 agents for the shift rotation",
+      "type": "preference",
+      "entities": [
+        "7 agents"
+      ]
+    },
+    {
+      "fact": "User prefers 4 shifts: '8 am till 4 pm', '12 pm till 8 pm', '4 pm till 12 am', '12 am till 8 am'",
+      "type": "preference",
+      "entities": [
+        "8 am till 4 pm",
+        "12 pm till 8 pm",
+        "4 pm till 12 am",
+        "12 am till 8 am"
+      ]
+    },
+    {
+      "fact": "User wants 2 days off for every agent",
+      "type": "preference",
+      "entities": [
+        "2 days off"
+      ]
+    },
+    {
+      "fact": "User wants the shift rotation for only a week",
+      "type": "preference",
+      "entities": [
+        "1 week"
+      ]
+    }
+  ]
+}

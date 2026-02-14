@@ -1,0 +1,27 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/10/26 (Thu) 01:21
+- [USER] In the absence of external force field, bubble dynamics is basically determined by buoyancy and surface tension.
+- [USER] To improve the overall heat transfer performance, it has been sought to increase the bubble departure frequency by perturbing the field with external forces.
+- [USER] The electric body force coupled with momentum equation has been validated with Young-Lippmann’s equation and experimental results in Section 3.
+- [USER] This paper investigated two types of bubble detachment case in the cooling plate.
+- [USER] The upper wall of the cooling plate is placed with a positive electrode, and the lower wall of the cooling plate is connected to the ground.
+- [USER] A dielectric layer is coated at the lower wall of the cooling plate to be used as an insulation layer.
+- [USER] The simulation case involves an air bubble of diameter 4 mm surrounded by liquid water and initially attached to the wall of the cooling plate.
+- [USER] The initial contact angle of the bubble on the wall is set to 90°.
+- [USER] The electrodes are a pair of parallel discs at the bottom and top of the region.
+- [USER] The voltage applied on the upper disk is a function of time, defined in Equation (53).
+- [USER] The region is 10 × 10 mm with a mesh number of 100 × 100.
+- [USER] The thickness of the dielectric layer is 0.1 mm.
+- [USER] The center of the bubble is located at (5, 0.1) mm.
+- [USER] A no-slip boundary condition is specified at two disks.
+- [USER] The physical properties of liquid water, air, and dielectric layer are shown in Table 5.
+- [USER] Both liquid water and air have been assumed to be incompressible and perfectly dielectric.
+- [USER] Figure 16 shows the effects of electric field on bubble shapes, indicating that the bubble is elongated by the electric field.
+- [USER] From t=0 to 1s, the electric field did not apply to the region, and the contact angle of the bubble reaches 103°.
+- [USER] At t=1s, the applied voltage is a linear function of time.
+- [USER] At about t=1.43s, the bubble begins to split up.
+- [USER] Until t=1.46s, the contact angle has been saturated.
+- [USER] From t=1.43s to 1.44s, the sudden expansion of the base creates a disturbance that propagates upward in the form of a capillary wave.
+- [USER] Eventually, this capillary wave converges at the top edge of the bubble (t=2s).
+- [USER] Figure

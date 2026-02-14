@@ -1,0 +1,21 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/29 (Mon) 04:04  
+[FACT] User has eaten at three different Korean BBQ restaurants in the city.  
+[PREFERENCE] User loved Hwang's bulgogi.  
+[PREFERENCE] User is looking for recommendations on Korean dishes to try at home.  
+[ASSISTANT_SAID] Bulgogi is a beloved Korean dish that's easy to make at home.  
+[ASSISTANT_CREATED] Provided a bulgogi recipe with the following ingredients: 1 lb thinly sliced beef (ribeye or sirloin), 2 cloves of garlic (minced), 1 tablespoon grated ginger, 1/4 cup soy sauce, 1/4 cup Korean chili flakes (gochugaru), 2 tablespoons brown sugar, 2 tablespoons sesame oil, 1/4 cup chopped green onions (for garnish), and sesame seeds (for garnish, optional).  
+[ASSISTANT_SAID] Instructions for bulgogi include blending marinade ingredients, marinating beef, grilling, and serving with steamed rice and kimchi.  
+[ASSISTANT_SAID] Suggested other Korean dishes to try: Bibimbap, Japchae, Kimchi Stew, Mandu, Doenjang Jjigae.  
+[ASSISTANT_SAID] These dishes are relatively easy to make and require minimal special ingredients.  
+[PREFERENCE] User has been experimenting with gochujang, a fermented soybean paste.  
+[ASSISTANT_SAID] Recommended incorporating gochujang into the bulgogi marinade.  
+[ASSISTANT_CREATED] Provided an updated marinade recipe with gochujang: 2 cloves of garlic (minced), 1 tablespoon grated ginger, 1/4 cup soy sauce, 1-2 teaspoons gochujang, 1 tablespoon brown sugar (optional), and 2 tablespoons sesame oil.  
+[ASSISTANT_SAID] Suggested starting with a small amount of gochujang and adjusting to taste, and possibly reducing brown sugar.  
+[PREFERENCE] User is thinking of hosting a dinner party soon.  
+[ASSISTANT_SAID] Recommended appetizers and side dishes to complement bulgogi: Kimchi, Mandu, Pajeon, Bokkeumbap, Sigeumchi, Gyeranjjim, Oi Muchim, Gyeran-mari, Kongnamul Muchim, Sobagi, Japchae.  
+[ASSISTANT_SAID] These dishes offer a variety of textures, flavors, and temperatures.  
+[PREFERENCE] User has been experimenting with different types of rice, including jasmine, basmati, and sushi rice.  
+[ASSISTANT_SAID] Recommended using short-grain rice varieties for bulgogi, such as Korean japonica rice, Calrose rice, or Mochigome rice.  
+[

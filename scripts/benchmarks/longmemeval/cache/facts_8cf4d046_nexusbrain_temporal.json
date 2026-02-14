@@ -1,0 +1,129 @@
+{
+  "answer_e2278b24_1": [
+    {
+      "fact": "User is looking to transition into a data science role",
+      "type": "preference",
+      "entities": [
+        "data science role"
+      ]
+    },
+    {
+      "fact": "User recently completed a Master's degree in Data Science",
+      "type": "personal",
+      "entities": [
+        "Master's degree",
+        "Data Science"
+      ]
+    },
+    {
+      "fact": "User graduated from the University of Illinois at Urbana-Champaign",
+      "type": "personal",
+      "entities": [
+        "University of Illinois at Urbana-Champaign"
+      ]
+    },
+    {
+      "fact": "User maintained a GPA of 3.8 out of 4.0",
+      "type": "personal",
+      "entities": [
+        "GPA",
+        "3.8",
+        "4.0"
+      ]
+    },
+    {
+      "fact": "User is seeking resources on job search strategies and interview preparation",
+      "type": "preference",
+      "entities": [
+        "job search strategies",
+        "interview preparation"
+      ]
+    },
+    {
+      "fact": "User wants to know more about the current job market for data science roles",
+      "type": "preference",
+      "entities": [
+        "job market",
+        "data science roles"
+      ]
+    },
+    {
+      "fact": "User is interested in insights on the most in-demand skills and industries hiring data scientists",
+      "type": "preference",
+      "entities": [
+        "in-demand skills",
+        "industries",
+        "data scientists"
+      ]
+    }
+  ],
+  "answer_e2278b24_2": [
+    {
+      "fact": "User recently completed a Master's degree in Data Science from the University of Illinois at Urbana-Champaign",
+      "type": "personal",
+      "entities": [
+        "Master's degree",
+        "Data Science",
+        "University of Illinois at Urbana-Champaign"
+      ]
+    },
+    {
+      "fact": "User has a strong foundation in computer science from undergraduate studies at the University of Mumbai",
+      "type": "personal",
+      "entities": [
+        "computer science",
+        "University of Mumbai"
+      ]
+    },
+    {
+      "fact": "User graduated with a First-Class distinction from the University of Mumbai",
+      "type": "personal",
+      "entities": [
+        "First-Class distinction",
+        "University of Mumbai"
+      ]
+    },
+    {
+      "fact": "User is looking to explore career opportunities in data science",
+      "type": "preference",
+      "entities": [
+        "data science",
+        "career opportunities"
+      ]
+    },
+    {
+      "fact": "User is interested in the Data Scientist role",
+      "type": "preference",
+      "entities": [
+        "Data Scientist role"
+      ]
+    },
+    {
+      "fact": "User wants to know more about industry trends and job requirements in data science",
+      "type": "preference",
+      "entities": [
+        "industry trends",
+        "job requirements",
+        "data science"
+      ]
+    },
+    {
+      "fact": "User is seeking information on typical day-to-day responsibilities and skills required for the Data Scientist role",
+      "type": "preference",
+      "entities": [
+        "day-to-day responsibilities",
+        "skills",
+        "Data Scientist role"
+      ]
+    },
+    {
+      "fact": "User is looking for online resources or courses to improve skills in data science",
+      "type": "preference",
+      "entities": [
+        "online resources",
+        "courses",
+        "data science"
+      ]
+    }
+  ]
+}

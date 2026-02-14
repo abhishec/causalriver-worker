@@ -1,0 +1,67 @@
+{
+  "answer_0714183a": [
+    {
+      "fact": "User recently moved into a new apartment",
+      "type": "personal",
+      "entities": [
+        "new apartment"
+      ]
+    },
+    {
+      "fact": "User is exploring the area around their new apartment",
+      "type": "preference",
+      "entities": [
+        "exploring",
+        "area"
+      ]
+    },
+    {
+      "fact": "User prefers unique or independent coffee shops",
+      "type": "preference",
+      "entities": [
+        "unique coffee shops",
+        "independent coffee shops"
+      ]
+    },
+    {
+      "fact": "User prefers coffee shops with free Wi-Fi and outdoor seating",
+      "type": "preference",
+      "entities": [
+        "free Wi-Fi",
+        "outdoor seating"
+      ]
+    },
+    {
+      "fact": "User drove to their parents' house last weekend",
+      "type": "event",
+      "entities": [
+        "parents' house",
+        "last weekend"
+      ]
+    },
+    {
+      "fact": "The drive to their parents' house took around 2 hours",
+      "type": "event",
+      "entities": [
+        "2 hours",
+        "drive"
+      ]
+    },
+    {
+      "fact": "User found the drive back from their parents' house tiring",
+      "type": "opinion",
+      "entities": [
+        "tiring drive"
+      ]
+    },
+    {
+      "fact": "User had a long day at work on Monday",
+      "type": "event",
+      "entities": [
+        "long day",
+        "work",
+        "Monday"
+      ]
+    }
+  ]
+}

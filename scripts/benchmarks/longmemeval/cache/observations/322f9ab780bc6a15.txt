@@ -1,0 +1,21 @@
+**Observation Log**
+
+**Session Date:** 2023/02/26 (Sun) 10:02  
+**Session ID:** 7e4aa7c2_1
+
+1. [FACT] The user is based in SoMa, San Francisco.
+2. [PREFERENCE] The user is looking for data visualization tools to create interactive dashboards for clients.
+3. [PREFERENCE] The user has been using Tableau but is open to exploring other options.
+4. [EVENT] The user is interested in local meetups or workshops on data visualization to learn more.
+5. [ASSISTANT_SAID] The assistant recommended several data visualization tools: Power BI, D3.js, QlikView, Sisense, Looker, Google Data Studio, and Echarts.
+6. [ASSISTANT_SAID] The assistant provided local meetups and workshops in San Francisco, including Data Visualization Meetup, San Francisco Data Science, Bay Area Data Visualization, Tableau User Group - San Francisco, General Assembly - San Francisco, DASCA - San Francisco, and UC Berkeley Extension - San Francisco.
+7. [ASSISTANT_SAID] The assistant mentioned popular conferences in the Bay Area: Strata Data Conference, Data Science Conference, and Visualized.
+8. [PREFERENCE] The user is particularly interested in tools that can help create interactive dashboards.
+9. [ASSISTANT_SAID] The assistant provided a comparison of Power BI and Looker, highlighting features, ease of use, integration, cost, and scalability.
+10. [ASSISTANT_SAID] The assistant listed local companies in SoMa that use Power BI: Microsoft, Dropbox, Airbnb, and Uber.
+11. [ASSISTANT_SAID] The assistant listed local companies in SoMa that use Looker: Looker, Salesforce, GitHub, and Optimizely.
+12. [EVENT] The user expressed a preference for Power BI due to its user-friendliness and availability of a free version.
+13. [ASSISTANT_SAID] The assistant detailed the limitations of the Power BI free version, including data size limit (1 GB), daily data refresh limit (8 times), publishing limitations, collaboration features, AI and machine learning features, and support.
+14. [ASSISTANT_SAID] The assistant provided local Power BI user groups and meetups in SoMa: Power BI User Group - San Francisco, Bay Area Power BI Meetup, Microsoft Power BI - Bay Area, and Data Science and Power BI Meetup.
+15. [ASSISTANT_SAID] The assistant described the Power BI Community Forum as an official online community for Power BI users to ask questions, share knowledge, and interact.
+16. [ASSISTANT_SAID] The assistant listed resources available in the Power BI Community Forum, including Q&A, tutorials and guides, community blogs, Power BI Ideas, knowledge base, community challenges, events and webinars, showcase

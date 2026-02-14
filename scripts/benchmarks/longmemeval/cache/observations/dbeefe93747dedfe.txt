@@ -1,0 +1,44 @@
+**Observation Log:**
+
+[FACT] The user is interested in Vulkan applications and ray tracing.
+
+[TEMPORAL] The session date is 2023/05/30 (Tue) at 12:43.
+
+[USER] The user asked how Vulkan apps using Acceleration Structures move objects in the scene.
+
+[ASSISTANT_SAID] In Vulkan, Acceleration Structures (AS) are used for efficient ray tracing, which can be used for rendering shadows, reflections, and global illumination in a scene.
+
+[ASSISTANT_SAID] To move objects in the scene, the transformation matrix associated with each object needs to be updated, and then the AS must be rebuilt using the updated information.
+
+[ASSISTANT_SAID] The transformation matrix describes the position, rotation, and scale of the object in the scene.
+
+[ASSISTANT_SAID] After the AS has been rebuilt, the updated scene can be rendered using the ray tracing capabilities of Vulkan.
+
+[USER] The user inquired about how to efficiently update the AS for scenes with hundreds or thousands of objects, each with complex geometry.
+
+[ASSISTANT_SAID] Efficiently updating the AS can be achieved using several techniques, including:
+1. Using a hierarchy of AS (e.g., bounding volume hierarchies or octrees).
+2. Using AS update flags to selectively update parts of the AS that have changed.
+3. Using AS instance transformation to transform objects without rebuilding the AS.
+4. Utilizing multi-threading to parallelize the update process.
+5. Using AS build flags to optimize the construction of the AS.
+
+[USER] The user requested an example function to move one object in the scene, which would be called before drawing every frame and would receive the current time.
+
+[ASSISTANT_CREATED] The assistant provided a C++ example function named `updateObjectPosition` that computes the new position of an object based on the current time and updates its transformation matrix.
+
+[ASSISTANT_SAID] The example position calculation in the function uses sine and cosine functions to create circular motion around the y-axis.
+
+[USER] The user asked how to update the transformation matrix in the AS.
+
+[ASSISTANT_SAID] To update the transformation matrix in the AS, you typically need to rebuild the AS with the updated transformation data.
+
+[ASSISTANT_SAID] The steps to update an instance in a Bottom Level Acceleration Structure (BLAS) include:
+1. Retrieve existing geometry information for the instance.
+2. Update the transformation matrix based on the current time.
+3. Modify the geometry information to reflect the updated transformation.
+4. Rebuild the BLAS with the modified geometry information.
+
+[USER] The user requested code to demonstrate how to update the transformation matrix in the AS.
+
+[ASSISTANT_CREATED] The assistant provided a C++ code example demonstrating how to update the transformation matrix for an instance in a BLAS, including a structure for holding geometry

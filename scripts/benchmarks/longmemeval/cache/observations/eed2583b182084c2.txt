@@ -1,0 +1,18 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/21 (Sun) 05:29
+- [FACT] User is interested in top-rated restaurants in Portland, Oregon.
+- [ASSISTANT_SAID] Top-rated restaurants in Portland, Oregon include: 1. Le Pigeon, 2. Pok Pok, 3. Ox, 4. Tasty n Alder, 5. Andina, 6. Nodoguro, 7. Ava Gene's, 8. Beast, 9. Ataula, 10. Higgins Restaurant and Bar.
+- [PREFERENCE] User has heard a lot about Pok Pok and is interested in trying it.
+- [ASSISTANT_SAID] Pok Pok serves authentic Thai cuisine inspired by the bold and complex flavors of Thailand, featuring traditional street foods and comfort foods.
+- [ASSISTANT_SAID] Popular dishes at Pok Pok include: Fish Sauce Wings, Papaya Salad, Khao Soi, and Issan-style sausages.
+- [PREFERENCE] User is excited to try Pok Pok's Fish Sauce Wings.
+- [ASSISTANT_SAID] Other recommended dishes at Pok Pok include: 1. Ike's Vietnamese Fish Sauce Wings, 2. Papaya Pok Pok, 3. Khao Soi, 4. Muu Paa Kham Waan, 5. Yam Makheua Yao.
+- [ASSISTANT_SAID] Ike's Vietnamese Fish Sauce Wings are marinated with honey, coriander, garlic, and topped with crispy fried garlic and shallots.
+- [ASSISTANT_SAID] Papaya Pok Pok is a tangy and spicy salad made with shredded green papaya, dried shrimp, garlic, chili, peanuts, and fish sauce.
+- [ASSISTANT_SAID] Khao Soi is a Northern Thai curry noodle soup with a rich, coconut-based broth, topped with crispy egg noodles, pickled mustard greens, and lime.
+- [ASSISTANT_SAID] Muu Paa Kham Waan is a sweet and sour pork belly dish slow-cooked with garlic, cinnamon, and palm sugar.
+- [ASSISTANT_SAID] Yam Makheua Yao is a salad made with grilled Japanese eggplant, shallots, garlic, chili, fish sauce, lime, and herbs.
+- [PREFERENCE] User loves spicy food and is looking for spicy dishes at Pok Pok.
+- [ASSISTANT_SAID] Pok Pok has a "spice guide" on their menu indicating the level of spiciness for each dish.
+- [ASSISTANT_SAID] Spicy dishes at Pok Pok include: 1. Papaya Pok Pok, 2. Khao Soi, 3. Kung Op Wun Sen, 4. Yam Makheua Yao, 5. G

@@ -1,0 +1,60 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/24 (Wed) 08:17
+- [FACT] User has a mid-century modern coffee table that needs refinishing.
+- [PREFERENCE] User is looking for reliable services for furniture restoration.
+- [ASSISTANT_SAID] Recommended resources for finding a good furniture restorer include:
+  - The Furniture Society
+  - The Guild of American Luthiers
+  - The American Institute for Conservation of Historic and Artistic Works (AIC)
+- [ASSISTANT_SAID] Suggested online directories and reviews for furniture restorers:
+  - Google Reviews
+  - Yelp
+  - Thumbtack
+  - Angie's List
+- [ASSISTANT_SAID] Local resources for finding furniture restorers include:
+  - Antique Dealers and Collectors
+  - Furniture Stores and Design Centers
+  - Local Woodworking or Craft Schools
+- [ASSISTANT_SAID] Questions to ask a potential restorer include:
+  - Experience with mid-century modern pieces
+  - Portfolio of previous restoration projects
+  - Materials and techniques used
+  - Restoration process
+  - Timeline and cost
+  - Insurance and liability
+  - References from previous clients
+- [ASSISTANT_SAID] Additional tips for finding a furniture restorer include:
+  - Get multiple quotes
+  - Check credentials
+  - Inspect their workshop
+  - Ask about conservation ethics
+- [FACT] User is also looking for local antique appraisers to evaluate their great-grandmother's locket.
+- [ASSISTANT_SAID] Recommended resources for finding a reputable antique appraiser include:
+  - Appraisers Association of America (AAA)
+  - International Society of Appraisers (ISA)
+  - National Association of Jewelry Appraisers (NAJA)
+- [ASSISTANT_SAID] Suggested online directories and reviews for antique appraisers:
+  - Google Reviews
+  - Yelp
+  - Thumbtack
+  - Angie's List
+- [ASSISTANT_SAID] Local resources for finding antique appraisers include:
+  - Antique Dealers and Collectors
+  - Auction Houses
+  - Museums and Historical Societies
+- [ASSISTANT_SAID] Questions to ask a potential appraiser include:
+  - Experience with antique jewelry
+  - Qualifications and certifications
+  - Appraisal methodology
+  - Fees
+  - Insurance and liability
+  - Report and documentation
+  - USPAP compliance
+- [ASSISTANT_SAID] Additional tips for finding an antique appraiser include:
+  - Get multiple appraisals
+  - Check credentials
+  - Ask about conflicts of interest
+  - Check for any disciplinary actions
+- [CHANGE] User has a lead on a local furniture restorer but is comparing services and prices.
+- [FACT] User inherited a Victorian-era wooden dresser from their

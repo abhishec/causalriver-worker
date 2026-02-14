@@ -1,0 +1,23 @@
+{
+  "answer_8ad8a34f": [
+    {
+      "fact": "User is looking to update their LinkedIn profile",
+      "type": "event",
+      "entities": [
+        "LinkedIn profile"
+      ]
+    },
+    {
+      "fact": "User is unsure how to best showcase their education section",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User completed a certification in Data Science last month",
+      "type": "event",
+      "entities": [
+        "Data Science certification"
+      ]
+    }
+  ]
+}

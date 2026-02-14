@@ -1,0 +1,17 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/25 (Thu) 14:31  
+[USER] The user requested help writing use cases.  
+[USER] The user provided a template/format for creating use cases.  
+[USER] The user mentioned a specific scenario where a candidate drops out post-offer acceptance.  
+[USER] The user described the steps for re-approval of a job requisition after a candidate backs out.  
+[ASSISTANT_SAID] The assistant acknowledged understanding the template/format for writing use cases.  
+[ASSISTANT_SAID] The assistant summarized the use case regarding the candidate backing out, emphasizing the steps for a site admin to streamline the requisition re-approval process.  
+[USER] The user provided a new use case scenario regarding a change in the level of a requisition being lowered (e.g., P5 down to P4).  
+[USER] The user stated that re-approval is not necessary when lowering the requisition level since the higher compensation has already been approved by finance.  
+[USER] The user instructed that the site admin needs to make a note regarding the change, including the use case title, their name, date, reasoning for the change, and reference the activity feed date for the previous approval chain.  
+[USER] The user specified that the site admin should update the requisition open approval chain to remove the standard chain and add themselves as the sole approver.  
+[USER] The user indicated that the job level should be edited to the required lower level, and the requisition can be re-triggered for approval instantly.  
+[ASSISTANT_CREATED] The assistant created a step-by-step use case titled "Job Level Lowered."  
+[ASSISTANT_CREATED] The assistant outlined the steps for a site admin to update a job requisition when the level is being lowered, including making a note, removing unnecessary approval stages, and updating the job level.  
+[ASSISTANT_SAID] The assistant emphasized that the use case helps ensure the requisition can be updated quickly and efficiently.

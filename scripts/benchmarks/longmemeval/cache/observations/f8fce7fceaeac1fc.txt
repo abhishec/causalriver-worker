@@ -1,0 +1,24 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/25 (Thu) 22:29  
+[USER] User presents the second part of their paper, titled "Introduction."  
+[USER] User includes a figure in their paper with the caption: "Framework overview of MSC."  
+[USER] User describes the process of filtering and parsing replays with PySC2, sampling states into feature vectors, and splitting final files into training, validation, and test sets.  
+[USER] User states that deep learning has surpassed previous state-of-the-art in playing Atari games, Go, and Doom.  
+[USER] User mentions that playing real-time strategy (RTS) games like StarCraft II remains a challenge for deep learning algorithms due to enormous state and action space and partial observability.  
+[USER] User references a recent experiment showing difficulty in training a deep neural network (DNN) end-to-end for playing StarCraft II.  
+[USER] User cites the introduction of SC2LE on StarCraft II and the training of a DNN with Asynchronous Advantage Actor Critic (A3C).  
+[USER] User notes that the agent trained with A3C could not win a single game against the easiest built-in AI.  
+[USER] User discusses the belief that treating StarCraft II as a hierarchical learning problem by breaking it down into micro-management and macro-management could improve AI bot performance.  
+[USER] User defines micro-management as low-level tasks related to unit control and macro-management as higher-level game strategy.  
+[USER] User states that near-human performance in micro-management can be achieved with deep reinforcement learning algorithms like A3C.  
+[USER] User mentions the difficulty in solving macro-management despite efforts from the StarCraft community.  
+[USER] User suggests that mimicking professional human players with machine learning methods is a promising approach for macro-management.  
+[USER] User references various studies related to learning macro-management from replays.  
+[USER] User points out that many datasets released in StarCraft I are designed for specific tasks and lack proper partitioning for training, validation, and test sets.  
+[USER] User mentions that StarData is the largest dataset in StarCraft I, containing 65646 replays, but has limited labeled replays.  
+[USER] User states that SC2LE is the largest dataset in StarCraft II with 800K replays but lacks a standard processing procedure and predefined sets.  
+[USER] User discusses the challenges of comparing macro-management algorithms without a standard dataset.  
+[USER] User explains the creation of a new dataset MSC based on SC2LE, which is the largest dataset dedicated to macro-management in StarCraft II.  
+[USER] User outlines the reasons for basing MSC on SC2LE, including its size, official support, and higher quality replays.  
+[USER] User describes the standard procedure for processing replays

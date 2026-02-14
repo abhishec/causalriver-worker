@@ -1,0 +1,23 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/30 (Tue) 02:46
+- [EVENT] User is planning a trip to Zion National Park.
+- [PREFERENCE] User wants to capture great landscape shots during the trip.
+- [FACT] User has a Canon EOS 80D camera.
+- [EVENT] User has taken their Canon EOS 80D on five trips.
+- [PREFERENCE] User describes their Canon EOS 80D as a "beast."
+- [ASSISTANT] The assistant provided tips for shooting in bright sunlight and high contrast environments.
+- [ASSISTANT] The assistant recommended using a polarizing filter and graduated ND filters for landscape photography.
+- [ASSISTANT] The assistant suggested shooting during the golden hour and in the shade to manage bright sunlight.
+- [ASSISTANT] The assistant advised shooting in RAW format for better editing flexibility.
+- [ASSISTANT] The assistant recommended bracketing shots and exposing for shadows in high contrast environments.
+- [ASSISTANT] The assistant provided tips specific to the Canon EOS 80D, including using the built-in HDR mode and the vari-angle LCD.
+- [EVENT] User is considering using a graduated ND filter for their photography.
+- [PREFERENCE] User is unsure which graduated ND filter to get and is seeking recommendations.
+- [ASSISTANT] The assistant recommended starting with a 2-stop (0.6) or 3-stop (0.9) graduated ND filter.
+- [PREFERENCE] User is considering a square filter system and has heard good things about Lee Filters.
+- [ASSISTANT] The assistant provided information about hard and soft gradation filters, including their ideal use cases.
+- [PREFERENCE] User decided to start with a soft gradation filter.
+- [EVENT] User has recently acquired a new camera strap.
+- [ASSISTANT] The assistant was asked for recommendations on a good camera bag to hold all of the user's camera gear.
+- [PREFERENCE] User wants a camera bag that can fit everything comfortably.

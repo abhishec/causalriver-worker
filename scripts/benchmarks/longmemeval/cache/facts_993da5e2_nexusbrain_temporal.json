@@ -1,0 +1,134 @@
+{
+  "answer_54f0d6f9_2": [
+    {
+      "fact": "User has a living room with a relaxed, cozy vibe.",
+      "type": "personal",
+      "entities": [
+        "living room",
+        "relaxed vibe",
+        "cozy vibe"
+      ]
+    },
+    {
+      "fact": "User's living room style is a mix of modern and traditional.",
+      "type": "preference",
+      "entities": [
+        "modern",
+        "traditional"
+      ]
+    },
+    {
+      "fact": "User's living room has dominant neutral colors: beige, cream, and wood tones.",
+      "type": "personal",
+      "entities": [
+        "beige",
+        "cream",
+        "wood tones"
+      ]
+    },
+    {
+      "fact": "User recently rearranged the furniture in their living room.",
+      "type": "event",
+      "entities": [
+        "furniture rearrangement"
+      ]
+    },
+    {
+      "fact": "User has created a reading nook in their living room.",
+      "type": "personal",
+      "entities": [
+        "reading nook"
+      ]
+    },
+    {
+      "fact": "User is considering adding decorative items to the reading nook.",
+      "type": "preference",
+      "entities": [
+        "decorative items",
+        "reading nook"
+      ]
+    },
+    {
+      "fact": "User is interested in adding plants to the reading nook.",
+      "type": "preference",
+      "entities": [
+        "plants",
+        "reading nook"
+      ]
+    },
+    {
+      "fact": "User is unsure whether to get more of the same type of plants or try something different.",
+      "type": "opinion",
+      "entities": [
+        "plants"
+      ]
+    }
+  ],
+  "answer_54f0d6f9_1": [
+    {
+      "fact": "User has recently started collecting indoor plants.",
+      "type": "event",
+      "entities": [
+        "indoor plants"
+      ]
+    },
+    {
+      "fact": "User has a fern, snake plant, and spider plant in their living room.",
+      "type": "personal",
+      "entities": [
+        "fern",
+        "snake plant",
+        "spider plant",
+        "living room"
+      ]
+    },
+    {
+      "fact": "User waters their plants every Sunday morning.",
+      "type": "preference",
+      "entities": [
+        "watering schedule"
+      ]
+    },
+    {
+      "fact": "User recently got a new area rug for their living room.",
+      "type": "event",
+      "entities": [
+        "area rug",
+        "living room"
+      ]
+    },
+    {
+      "fact": "User is planning to get a few more plants for their bedroom.",
+      "type": "event",
+      "entities": [
+        "plants",
+        "bedroom"
+      ]
+    },
+    {
+      "fact": "User is considering a peace lily or an orchid for their bedroom.",
+      "type": "preference",
+      "entities": [
+        "peace lily",
+        "orchid",
+        "bedroom"
+      ]
+    },
+    {
+      "fact": "User wants to create a calming atmosphere in their bedroom.",
+      "type": "opinion",
+      "entities": [
+        "calming atmosphere",
+        "bedroom"
+      ]
+    },
+    {
+      "fact": "User is interested in plant care and seeks advice.",
+      "type": "preference",
+      "entities": [
+        "plant care",
+        "advice"
+      ]
+    }
+  ]
+}

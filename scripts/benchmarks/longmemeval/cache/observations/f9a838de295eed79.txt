@@ -1,0 +1,27 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/27 (Sat) 20:36  
+[FACT] User has been using a good quality yoga mat, specifically a Lululemon The Mat.  
+[PREFERENCE] User is looking for eco-friendly yoga props.  
+[EVENT] User is looking for recommendations on yoga blocks and straps.  
+[ASSISTANT_SAID] Yoga blocks can help with modifying poses, improving alignment, and increasing flexibility.  
+[ASSISTANT_SAID] Recommended yoga blocks:  
+- **Manduka Yoga Block**: Made of high-quality, eco-friendly foam, available in different sizes and colors.  
+- **Gaiam Yoga Block**: Offers foam, cork, and bamboo options; foam blocks are soft and lightweight, cork blocks provide extra grip.  
+- **Hugger Mugger Yoga Block**: Made from dense, high-quality foam, gentle on joints, and provides excellent support.  
+[ASSISTANT_SAID] Recommended yoga straps:  
+- **YogaAccessories D-Ring Yoga Strap**: Made of durable nylon, features a sturdy D-ring buckle, adjustable, available in various colors.  
+- **Manduka Yoga Strap**: Made of high-quality nylon, features a soft-grip handle, adjustable, available in different colors.  
+- **Gaiam Yoga Strap**: Made of durable nylon, features a quick-release buckle, adjustable, available in various colors.  
+[ASSISTANT_SAID] Tips for choosing the right blocks and straps:  
+- Consider the material: Foam for beginners, cork or bamboo for support.  
+- Think about the size: Blocks should fit comfortably in hand, straps should be long enough.  
+- Look for adjustability: Customizable fit is important.  
+- Check the grip: Textured surfaces for sweaty hands.  
+[ASSISTANT_SAID] How to use blocks: Support hands, feet, or forearms in poses like downward-facing dog, warrior, or triangle.  
+[ASSISTANT_SAID] How to use straps: Deepen stretches, maintain alignment, assist with binding in poses like eagle or tree pose.  
+[EVENT] User decided to go with the Manduka Yoga Block.  
+[PREFERENCE] User prefers the Manduka Yoga Strap for its eco-friendly aspect and soft-grip handle.  
+[ASSISTANT_SAID] Differences between Manduka Yoga Strap and YogaAccessories D-Ring Yoga Strap:  
+- **Manduka Yoga Strap**: Made from 100% recycled polyester, soft-grip handle, adjustable buckle, 8-foot long, weight: 6.4 oz (181g).  
+- **YogaAccessories D-Ring Yoga Strap**: Made from heavy-duty nylon, sturdy D-ring buckle, adjustable, available in 6-foot, 8-foot, and 10-foot options, weight: 7.2 oz (204

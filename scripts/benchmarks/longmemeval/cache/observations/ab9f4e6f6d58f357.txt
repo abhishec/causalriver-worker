@@ -1,0 +1,27 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/20 (Sat) 20:04  
+[FACT] User reinstalled XAMPP.  
+[FACT] User previously had proFTP running but it is not running after the reinstallation.  
+[ASSISTANT_SAID] If proFTP was running before, it may not have started automatically after the XAMPP installation.  
+[ASSISTANT_SAID] User can check the status of the proFTP service in the XAMPP Control Panel and start it if it is not running.  
+[ASSISTANT_SAID] The proFTP configuration may have been reset during the XAMPP reinstallation, requiring reconfiguration.  
+[ASSISTANT_SAID] User may need to edit the proFTP configuration file located in the XAMPP installation directory.  
+[ASSISTANT_SAID] There may be a port conflict preventing proFTP from running; user can check this using the "netstat" command.  
+[ASSISTANT_SAID] If issues persist, user may need to reinstall XAMPP again and follow installation instructions carefully.  
+[FACT] User's Apache and proFTP are not running.  
+[USER] User requested to solve the problem by identifying only one issue.  
+[ASSISTANT_SAID] A common issue preventing both Apache and proFTP from running is a port conflict with another program.  
+[ASSISTANT_SAID] Apache typically uses port 80 and proFTP uses port 21.  
+[ASSISTANT_SAID] User can check for other programs using these ports with the "netstat" command.  
+[ASSISTANT_SAID] User can stop conflicting programs or change their port configuration.  
+[USER] User mentioned that they added one line to the proFTP configuration file last time, which allowed it to run.  
+[ASSISTANT_SAID] If the added line is causing a configuration error, user should remove it and try starting proFTP again.  
+[ASSISTANT_SAID] User can restore the original configuration file that worked previously.  
+[ASSISTANT_SAID] User should check proFTP logs for error messages if issues persist.  
+[ASSISTANT_SAID] User can try reinstalling XAMPP and proFTP for a clean installation.  
+[USER] User inquired about stopping all programs running on port 80.  
+[ASSISTANT_SAID] To stop programs on port 80, user should open a command prompt or terminal as an administrator.  
+[ASSISTANT_SAID] User should use the command `netstat -ano | findstr :80` to display programs using port 80.  
+[ASSISTANT_SAID] User should identify the process ID (PID) of each program using port 80.  
+[ASSISTANT

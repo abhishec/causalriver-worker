@@ -1,0 +1,79 @@
+{
+  "answer_add9b012_2": [
+    {
+      "fact": "User is planning a small ceremony for their wedding next year",
+      "type": "event",
+      "entities": [
+        "wedding",
+        "ceremony",
+        "next year"
+      ]
+    },
+    {
+      "fact": "User attended Michael's engagement party at a trendy rooftop bar",
+      "type": "event",
+      "entities": [
+        "Michael",
+        "engagement party",
+        "rooftop bar"
+      ]
+    },
+    {
+      "fact": "User is considering a cozy bed and breakfast in the countryside as a wedding venue",
+      "type": "preference",
+      "entities": [
+        "bed and breakfast",
+        "countryside"
+      ]
+    },
+    {
+      "fact": "User is considering a beautiful art museum in the city as a wedding venue",
+      "type": "preference",
+      "entities": [
+        "art museum",
+        "city"
+      ]
+    }
+  ],
+  "answer_add9b012_1": [
+    {
+      "fact": "User is planning their own wedding",
+      "type": "event",
+      "entities": [
+        "wedding"
+      ]
+    },
+    {
+      "fact": "User walked down the aisle as a bridesmaid at their cousin's wedding",
+      "type": "event",
+      "entities": [
+        "bridesmaid",
+        "cousin's wedding"
+      ]
+    },
+    {
+      "fact": "User is considering a small, intimate wedding ceremony",
+      "type": "preference",
+      "entities": [
+        "small wedding",
+        "intimate ceremony"
+      ]
+    },
+    {
+      "fact": "User is thinking about having the ceremony at a cozy bed and breakfast or a beautiful art museum",
+      "type": "preference",
+      "entities": [
+        "bed and breakfast",
+        "art museum"
+      ]
+    },
+    {
+      "fact": "User is unsure if a wedding planner is necessary for a small wedding",
+      "type": "opinion",
+      "entities": [
+        "wedding planner",
+        "small wedding"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2022/04/10 (Sun) 18:19
+- [USER] User mentioned that a file can have more than 1 name and more than 1 inode.
+- [ASSISTANT_SAID] A file in a Unix-like file system can have only one inode.
+- [ASSISTANT_SAID] An inode (short for index node) is a data structure used by the file system to store information about a file or directory, such as ownership, permissions, timestamps, and the location of the data blocks that make up the file.
+- [ASSISTANT_SAID] Each file or directory in a file system is represented by a unique inode number.
+- [ASSISTANT_SAID] The inode number is used by the file system to access the inode and retrieve information about the file or directory.
+- [ASSISTANT_SAID] A file can have multiple hard links, but each hard link refers to the same inode.
+- [ASSISTANT_SAID] Hard links are multiple names for the same file, and all hard links share the same inode number.
+- [ASSISTANT_SAID] All hard links to a file are equivalent and interchangeable; there is no "primary" or "original" name for the file.

@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/25 (Thu) 18:18  
+[FACT] User is organizing family photos from a recent reunion.  
+[EVENT] User surprised their grandma with a slideshow of old family photos for her 75th birthday during the reunion.  
+[RELATIONSHIP] User's grandma is turning 75 years old.  
+[PREFERENCE] User is looking for good photo album or scrapbooking apps.  
+[ASSISTANT_SAID] Recommended apps for organizing and preserving photos:  
+[ASSISTANT_SAID] Google Photos (Web, iOS, Android): Automatic backups, facial recognition, album creation features.  
+[ASSISTANT_SAID] Apple Photos (iOS, macOS): Features like Memories for creating curated albums and videos.  
+[ASSISTANT_SAID] Flickr (Web, iOS, Android): Popular for storing and sharing photos with a generous free storage plan.  
+[ASSISTANT_SAID] Shutterfly (Web, iOS, Android): Service for creating physical photo albums with a user-friendly app.  
+[ASSISTANT_SAID] Mixbook (Web, iOS, Android): Platform for creating custom photo books with a wide range of templates.  
+[ASSISTANT_SAID] PicPlayPost (iOS, Android): App for creating digital scrapbooks with collage making and video integration.  
+[ASSISTANT_SAID] Flipagram (iOS, Android): Simple app for creating digital photo albums and scrapbooks.  
+[ASSISTANT_SAID] Project Life (iOS, Android): Digital scrapbooking app that mimics traditional paper-based systems.  
+[ASSISTANT_SAID] Adobe Spark (Web, iOS, Android): App for creating visual stories with video editing and design templates.  
+[ASSISTANT_SAID] Canva (Web, iOS, Android): Design platform for creating digital scrapbooks with templates and design tools.  
+[ASSISTANT_SAID] Suggested factors to consider when choosing an app: ease of use, storage, sharing, output, and cost.  
+[PREFERENCE] User is considering checking out Google Photos and Apple Photos.  
+[ASSISTANT_SAID] Google Photos allows creating shared albums accessible by anyone invited, even without a Google account.  
+[ASSISTANT_SAID] Google Photos has a web interface that is easy to use for viewing albums.  
+[ASSISTANT_SAID] Apple Photos offers shared albums that require an Apple ID for access.  
+[ASSISTANT_SAID] Grandma can access shared albums from iCloud.com on her computer.  
+[ASSISTANT_SAID] Suggested steps to share albums with grandma: create a new album, invite her via email, and set the album to "Public" or "Anyone with the link."

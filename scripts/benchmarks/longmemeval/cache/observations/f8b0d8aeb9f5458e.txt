@@ -1,0 +1,33 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2022/12/17 (Sat) 13:38  
+[USER] The user is trying to get organized with their loyalty programs.  
+[USER] The user requested help to create a spreadsheet to track their points across different programs.  
+[ASSISTANT_SAID] The assistant agreed to help the user create a spreadsheet to track loyalty points across different programs.  
+[ASSISTANT_CREATED] The assistant provided a suggested template for a "Loyalty Program Tracker Spreadsheet" with the following columns:  
+[ASSISTANT_CREATED] 1. Program Name  
+[ASSISTANT_CREATED] 2. Account Number  
+[ASSISTANT_CREATED] 3. Points/Balance  
+[ASSISTANT_CREATED] 4. Expiration Date  
+[ASSISTANT_CREATED] 5. Earned Points  
+[ASSISTANT_CREATED] 6. Rewards Redeemed  
+[ASSISTANT_CREATED] 7. Notes  
+[ASSISTANT_SAID] The assistant suggested listing each loyalty program in rows and provided an example with specific programs and details.  
+[ASSISTANT_SAID] The assistant offered tips for using the spreadsheet, including setting up reminders for expiration dates, using formulas, and updating the spreadsheet regularly.  
+[USER] The user liked the template and decided to add a column for "Program Since" to track when they joined each program.  
+[USER] The user mentioned being a member of The Daily Grind's loyalty program for months and being close to redeeming a free drink.  
+[USER] The user asked if they could set up an alert or reminder system within the spreadsheet for when they are close to reaching a reward threshold.  
+[ASSISTANT_SAID] The assistant confirmed that the user could set up a reminder system and provided three methods:  
+[ASSISTANT_SAID] Method 1: Conditional Formatting  
+[ASSISTANT_SAID] Method 2: Custom Formula Alert  
+[ASSISTANT_SAID] Method 3: Google Sheets Script  
+[ASSISTANT_SAID] The assistant provided a sample script for Google Sheets to check reward thresholds and send email notifications.  
+[USER] The user liked the idea of using conditional formatting and planned to add the "Reward Threshold" column.  
+[USER] The user inquired about using the spreadsheet to track email confirmations for loyalty program purchases.  
+[ASSISTANT_SAID] The assistant confirmed that the user could track email confirmations and suggested creating a new sheet called "Email Confirmations" with specific columns:  
+[ASSISTANT_CREATED] 1. Date  
+[ASSISTANT_CREATED] 2. Program  
+[ASSISTANT_CREATED] 3. Transaction ID  
+[ASSISTANT_CREATED] 4. Points Earned  
+[ASSISTANT_CREATED] 5. Confirmation Email  
+[ASSISTANT

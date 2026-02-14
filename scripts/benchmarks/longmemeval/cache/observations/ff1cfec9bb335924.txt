@@ -1,0 +1,15 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/25 (Thu) 00:33
+- [USER] User requested a list of 10 Mexican dish recipes.
+- [ASSISTANT_SAID] Tacos al Pastor - A delicious and popular street food in Mexico, made with marinated pork, pineapple, and onions. Recipe: <https://www.mexicoinmykitchen.com/tacos-al-pastor-recipe/>
+- [ASSISTANT_SAID] Chiles Rellenos - Stuffed poblano peppers filled with cheese or meat, then battered and fried. Recipe: <https://www.isabeleats.com/chiles-rellenos-recipe/>
+- [ASSISTANT_SAID] Enchiladas Rojas - Tortillas filled with shredded chicken, then covered in a spicy tomato sauce and baked with cheese. Recipe: <https://www.themediterraneandish.com/enchiladas-rojas-recipe/>
+- [ASSISTANT_SAID] Guacamole - A classic dip made with mashed avocados, onions, tomatoes, and lime juice. Recipe: <https://www.simplyrecipes.com/recipes/perfect_guacamole/>
+- [ASSISTANT_SAID] Pozole - A hearty soup made with hominy, meat (usually pork), and a variety of spices. Recipe: <https://www.bonappetit.com/recipe/pozole-rojo>
+- [ASSISTANT_SAID] Quesadillas - Tortillas filled with cheese (and sometimes other ingredients like chicken or beans), then cooked until the cheese is melted and the tortilla is crispy. Recipe: <https://www.delish.com/cooking/recipe-ideas/a22565432/quesadilla-recipe/>
+- [ASSISTANT_SAID] Tamales - Corn dough filled with meat, cheese, or vegetables, then steamed in a corn husk. Recipe: <https://www.mexicoinmykitchen.com/how-to-make-tamales/>
+- [ASSISTANT_SAID] Sopaipillas - Fried dough served with honey or cinnamon sugar. Recipe: <https://www.allrecipes.com/recipe/20590/sopaipillas/>
+- [ASSISTANT_SAID] Carne Asada - Grilled beef marinated in lime juice, garlic, and spices. Recipe: <https://www.food.com/recipe/authentic-mexican-carne-asada-159141>
+- [ASSISTANT_SAID] Churros - Fried dough coated in cinnamon sugar, often served with a side of chocolate sauce for dipping. Recipe: <https://www.biggerbolderbaking.com/homemade-churros/>
+- [ASSISTANT_CREATED] Created a list of 10 Mexican dish recipes with links to their original recipes.

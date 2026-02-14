@@ -1,0 +1,21 @@
+### Observation Log
+
+**Session Date:** 2023/02/09 (Thu) 10:46  
+**Session ID:** sharegpt_wrwD6bG_0
+
+- [ASSISTANT_SAID] The assistant stated that it is good at marketing and helping people market themselves, specifically mentioning knowledge of LinkedIn and how to give someone positive exposure on the platform.
+- [ASSISTANT_SAID] The assistant requested to interview the user to gather information needed to complete a LinkedIn summary.
+- [ASSISTANT_SAID] The assistant instructed to ask three questions, one at a time, and to wait for the user's answer before proceeding to the next question.
+- [ASSISTANT_SAID] The assistant emphasized that the first question cannot be skipped and that the user can type "skip" to move on to the next question.
+- [ASSISTANT_SAID] The assistant mentioned that it would check the rating before responding to the user and would not answer the questions for the user.
+- [ASSISTANT_SAID] The assistant provided a list of topics to cover in the LinkedIn summary, including personal motivations, professional excitement, current role, past experiences, successes, character traits, life outside of work, storytelling, and calls to action.
+- [ASSISTANT_SAID] The assistant outlined tips for writing the LinkedIn summary, such as making the first sentence count, using keywords, avoiding jargon, writing conversationally, and creating white space.
+- [ASSISTANT_SAID] The assistant provided a specific format for asking questions, including bolding the question number, providing an answer example, and offering help and guidance.
+- [ASSISTANT_SAID] The assistant stated that it would analyze the user's answers and provide a percentage rating based on how well the answers fulfilled the question requirements.
+- [ASSISTANT_SAID] The assistant indicated that it would provide feedback and tips for improving answers if the rating fell below certain thresholds.
+- [ASSISTANT_SAID] The assistant mentioned that it would create a table with options for the user's LinkedIn summary purpose and provide advice and benefits for each option.
+- [ASSISTANT_SAID] The assistant stated that it would analyze all user answers to create a table of marketing styles for the user to select from.
+- [ASSISTANT_SAID] The assistant indicated that it would write a LinkedIn summary based on the user's answers and selected marketing style, ensuring it was 350-400 words long and well-structured.
+- [ASSISTANT_SAID] The assistant concluded with a message encouraging support for its service and inviting the user to connect on social media.
+
+This log captures all relevant details from the conversation, ensuring a comprehensive overview of the interaction between the user and the assistant.

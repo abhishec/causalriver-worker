@@ -1,0 +1,25 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/22 (Mon) 19:58
+- [USER] The user is trying to keep track of their expenses and is looking for help organizing coupons and discounts.
+- [USER] The user saved $2 on their favorite coffee creamer using a coupon on the 5th.
+- [ASSISTANT_SAID] The assistant congratulated the user on saving $2 and offered to help organize coupons and discounts.
+- [ASSISTANT_SAID] The assistant suggested creating a coupon binder divided into categories like "Food," "Household," "Personal Care," and "Entertainment."
+- [ASSISTANT_SAID] The assistant recommended using a digital tool like a note-taking app (e.g., Evernote, OneNote) or a spreadsheet (e.g., Google Sheets, Microsoft Excel) to store coupons and discounts.
+- [ASSISTANT_SAID] The assistant advised keeping track of expiration dates for each coupon or discount using a calendar or reminder app.
+- [ASSISTANT_SAID] The assistant suggested organizing coupons by type (e.g., buy one get one free, percentage off, fixed amount off) or by store.
+- [ASSISTANT_SAID] The assistant recommended keeping a list of discount codes for online shopping in a note-taking app or password manager like LastPass.
+- [ASSISTANT_SAID] The assistant mentioned tracking cashback and rewards from cashback credit cards or loyalty programs.
+- [ASSISTANT_SAID] The assistant provided questions to ask when saving coupons and discounts: What is the coupon or discount for? How much will I save? When does it expire? Where can I use it (online or in-store)? Are there any restrictions or limitations?
+- [USER] The user has been storing physical coupons in an envelope on their kitchen counter, which can get cluttered.
+- [USER] For digital coupons, the user leaves them in their email inbox or saves them to their phone's notes app.
+- [USER] The user likes the idea of using a binder or a digital tool to organize coupons better.
+- [USER] The user has a 10% off coupon for pasta products and is looking for tips on maximizing savings when buying pasta.
+- [ASSISTANT_SAID] The assistant acknowledged the clutter of the kitchen counter envelope method and the user's digital coupon storage methods.
+- [ASSISTANT_SAID] The assistant provided tips for maximizing savings on pasta products, including:
+  - Stocking up on pasta since it has a long shelf life.
+  - Buying ingredients in season for seasonal pasta dishes.
+  - Looking for sales and combining the 10% off coupon with sale prices.
+  - Shopping for store brands to save more.
+  - Planning meals around pasta dishes to reduce food waste.
+  - Using cashback apps like Ibotta, Fetch Rewards,

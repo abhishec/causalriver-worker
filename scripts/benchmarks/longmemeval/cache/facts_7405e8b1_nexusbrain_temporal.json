@@ -1,0 +1,72 @@
+{
+  "answer_80323f3f_1": [
+    {
+      "fact": "User is considering trying meal kit delivery services.",
+      "type": "preference",
+      "entities": [
+        "meal kit delivery services"
+      ]
+    },
+    {
+      "fact": "User recently tried HelloFresh and received a 40% discount on their first order.",
+      "type": "event",
+      "entities": [
+        "HelloFresh",
+        "40% discount"
+      ]
+    },
+    {
+      "fact": "User is interested in Sun Basket and Home Chef.",
+      "type": "preference",
+      "entities": [
+        "Sun Basket",
+        "Home Chef"
+      ]
+    },
+    {
+      "fact": "User is looking for information about customer service and order flexibility for Sun Basket and Home Chef.",
+      "type": "preference",
+      "entities": [
+        "customer service",
+        "Sun Basket",
+        "Home Chef"
+      ]
+    }
+  ],
+  "answer_80323f3f_2": [
+    {
+      "fact": "User plans to order food from UberEats again this week",
+      "type": "event",
+      "entities": [
+        "UberEats"
+      ]
+    },
+    {
+      "fact": "User received 20% off their UberEats order last week",
+      "type": "event",
+      "entities": [
+        "UberEats",
+        "20% off"
+      ]
+    },
+    {
+      "fact": "User is interested in finding good deals or promo codes for UberEats",
+      "type": "preference",
+      "entities": [
+        "UberEats",
+        "deals",
+        "promo codes"
+      ]
+    },
+    {
+      "fact": "User is curious about specific types of restaurants or cuisines that have more promo codes or discounts",
+      "type": "opinion",
+      "entities": [
+        "restaurants",
+        "cuisines",
+        "promo codes",
+        "discounts"
+      ]
+    }
+  ]
+}

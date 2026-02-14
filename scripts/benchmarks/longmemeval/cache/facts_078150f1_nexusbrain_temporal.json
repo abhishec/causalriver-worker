@@ -1,0 +1,94 @@
+{
+  "answer_254d8b09_1": [
+    {
+      "fact": "User is looking to improve their cycling endurance.",
+      "type": "preference",
+      "entities": [
+        "cycling endurance"
+      ]
+    },
+    {
+      "fact": "User has been taking spin classes at the gym.",
+      "type": "personal",
+      "entities": [
+        "spin classes",
+        "gym"
+      ]
+    },
+    {
+      "fact": "User has noticed progress in their cycling.",
+      "type": "opinion",
+      "entities": [
+        "progress"
+      ]
+    },
+    {
+      "fact": "User participated in a charity cycling event.",
+      "type": "event",
+      "entities": [
+        "charity cycling event"
+      ]
+    },
+    {
+      "fact": "User exceeded their fundraising goal in the charity event.",
+      "type": "event",
+      "entities": [
+        "fundraising goal"
+      ]
+    },
+    {
+      "fact": "User is interested in trying out interval training.",
+      "type": "preference",
+      "entities": [
+        "interval training"
+      ]
+    },
+    {
+      "fact": "User is unsure how to incorporate interval training into their spin classes.",
+      "type": "opinion",
+      "entities": [
+        "spin classes",
+        "interval training"
+      ]
+    }
+  ],
+  "answer_254d8b09_2": [
+    {
+      "fact": "User recently participated in a charity cycling event",
+      "type": "event",
+      "entities": [
+        "charity cycling event"
+      ]
+    },
+    {
+      "fact": "User raised $250 in donations during the charity event",
+      "type": "event",
+      "entities": [
+        "$250",
+        "donations"
+      ]
+    },
+    {
+      "fact": "User is planning to join a triathlon in June",
+      "type": "event",
+      "entities": [
+        "triathlon",
+        "June"
+      ]
+    },
+    {
+      "fact": "User is looking for bike maintenance tips",
+      "type": "preference",
+      "entities": [
+        "bike maintenance tips"
+      ]
+    },
+    {
+      "fact": "User wants to improve their freestyle swimming technique",
+      "type": "preference",
+      "entities": [
+        "freestyle swimming technique"
+      ]
+    }
+  ]
+}

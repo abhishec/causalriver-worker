@@ -1,0 +1,23 @@
+**Observation Log:**
+
+- [FACT] The user is going to build a full stack website.
+- [FACT] The user plans to use React.js for the front end.
+- [FACT] The user plans to use Express.js for the backend.
+- [PREFERENCE] The user wants to add functionality to send a file on multiple social media platforms.
+- [PREFERENCE] The user specifically mentioned LinkedIn, WhatsApp, and email as platforms for sending files.
+- [ASSISTANT_SAID] To implement the feature, the user should obtain API keys for the social media platforms.
+- [ASSISTANT_SAID] LinkedIn has the LinkedIn Marketing Developer Platform.
+- [ASSISTANT_SAID] WhatsApp has the WhatsApp Business API.
+- [ASSISTANT_SAID] Email services have various APIs, such as the Gmail API.
+- [ASSISTANT_SAID] The user should set up API clients in their backend using Express.js.
+- [ASSISTANT_SAID] The user can use libraries like `node-linkedin` for LinkedIn.
+- [ASSISTANT_SAID] The user can use `whatsapp-web.js` for WhatsApp.
+- [ASSISTANT_SAID] The user can use `nodemailer` for email services.
+- [ASSISTANT_SAID] The user should create a route in their backend to handle file uploads and sending to social media platforms.
+- [ASSISTANT_SAID] The user can use `multer` middleware to handle file uploads.
+- [ASSISTANT_SAID] In the frontend using React.js, the user should create a form for file uploads and platform selection.
+- [ASSISTANT_SAID] When the user submits the form, they should send a request to the backend route created for handling file uploads.
+- [ASSISTANT_SAID] The backend will handle sending the file to the selected social media platforms using their respective APIs.
+- [ASSISTANT_SAID] The user should handle any errors or exceptions that may occur during the file upload or sending process.
+- [ASSISTANT_SAID] Each social media platform may have different requirements and limitations for sending files through their APIs, so the user should check their documentation for specific details.
+- [TEMPORAL] The session date is 2023/05/22 (Mon) at 20:22.

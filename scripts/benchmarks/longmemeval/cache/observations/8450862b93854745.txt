@@ -1,0 +1,29 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/24 (Wed) 14:51  
+[USER] User requested design system component documentation for the app bars dynamic island component.  
+[USER] User specified points to describe: when to use, anatomy, placement, content, behaviors with states and interactions.  
+[USER] User requested to add 3 links for best practices of the component.  
+[ASSISTANT_SAID] The App Bars Dynamic Island component should be used when creating a navigation bar that is fixed to the top or bottom of the screen and can expand or collapse to show more options.  
+[ASSISTANT_SAID] The component is suitable for mobile or web applications where a dynamic navigation bar is needed.  
+[ASSISTANT_SAID] The anatomy of the App Bars Dynamic Island component includes a fixed navigation bar at the top or bottom of the screen, which can have a logo, a title, and one or more options (e.g., buttons, links).  
+[ASSISTANT_SAID] The placement of the component should be at the top or bottom of the screen, fixed in place to remain visible during scrolling.  
+[ASSISTANT_SAID] The content of the component should include a clear and concise title and clearly labeled navigation options grouped into logical categories.  
+[ASSISTANT_SAID] The default state of the component is collapsed, showing only the most important options, and it expands when an option is tapped or clicked.  
+[ASSISTANT_SAID] The navigation bar should remain fixed in place when the user scrolls the content.  
+[ASSISTANT_SAID] Best practices links provided:  
+1. <https://material.io/components/app-bars-top/>  
+2. <https://uxdesign.cc/designing-better-navigation-bar-on-mobile-d37a501655f2>  
+3. <https://www.smashingmagazine.com/2018/05/app-navigation-design-patterns/>  
+[ASSISTANT_SAID] Additional considerations for the component include responsiveness, consistent design, accessibility, customization, easy integration, and thorough testing.  
+[ASSISTANT_SAID] The interactive states of the App Bars Dynamic Island component were detailed in a table format.  
+[ASSISTANT_CREATED] Interactive states table includes:  
+- Element: Navigation Bar, Option  
+- States: Default, Hover, Active, Focus, Disabled  
+- Properties: Background, Text color, Border  
+- Color Tokens: primary, secondary, accent, focus, disabled  
+[ASSISTANT_SAID] The title and content of the App Bars Dynamic Island component were detailed in a table format.  
+[ASSISTANT_CREATED] Title and content table includes:  
+- Element: Title, Content  
+- Font Sizes: 20 px (1.5 rem), 14 px (1 rem)  
+- Font We

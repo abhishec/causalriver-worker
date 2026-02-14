@@ -1,0 +1,25 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/27 (Sat) 06:20
+- [EVENT] User needs help organizing photos from recent art events.
+- [ASSISTANT_SAID] Suggested a way to categorize and tag photos by event or artist.
+- [ASSISTANT_SAID] Method 1: Event-Based Organization - Create a main folder for each art event (e.g., "Art Fair 2022", "Gallery Opening", "Street Art Festival").
+- [ASSISTANT_SAID] Within each event folder, create subfolders for different aspects of the event, such as artist booths/stalls, artwork details, event atmosphere, performances, and portraits.
+- [ASSISTANT_SAID] Method 2: Artist-Based Organization - Create a main folder for each artist (e.g., "John Doe", "Jane Smith").
+- [ASSISTANT_SAID] Within each artist folder, create subfolders for different events or exhibitions featuring their work.
+- [ASSISTANT_SAID] Method 3: Hybrid Approach - Create a main folder for each event and subfolders for each artist who participated.
+- [ASSISTANT_SAID] Suggested tagging and keywording photos with relevant keywords including event name, artist name, artwork title, date, location, medium, and style.
+- [ASSISTANT_SAID] Recommended using photo management software like Adobe Lightroom, Apple Photos, or Google Photos for organization and tagging.
+- [ASSISTANT_SAID] Suggested a consistent naming convention for files, such as "Event Name_Artist Name_Artwork Title_Date.jpg".
+- [ASSISTANT_SAID] Reminded user to back up photos regularly and consider sharing organized photos with artists or event organizers.
+- [PREFERENCE] User likes the hybrid approach for organizing photos.
+- [EVENT] User plans to create folders for each event and subfolders for each artist.
+- [EVENT] User wants to add a folder for their online art history course to store notes and images from the Renaissance to Impressionist periods.
+- [EVENT] User attended the "Women in Art" exhibition on February 10th.
+- [RELATIONSHIP] User mentioned Rachel Lee as an artist whose mixed media pieces stood out to them at the "Women in Art" exhibition.
+- [ASSISTANT_SAID] Suggested checking online event calendars and local art organizations for upcoming exhibitions or events.
+- [ASSISTANT_SAID] Provided methods to find art events, including online event calendars, local art organizations, art news websites, social media, local newspapers, and Google search.
+- [EVENT] User is thinking of attending another art event this weekend.
+- [PREFERENCE] User is interested in exploring more street art in their community.
+- [ASSISTANT_SAID] Suggested looking for events or exhibitions featuring local street artists.
+- [EVENT

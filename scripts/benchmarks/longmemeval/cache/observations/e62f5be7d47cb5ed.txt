@@ -1,0 +1,19 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/04 (Thu) 16:29
+- [ASSISTANT_SAID] The project aims to analyze the optimal geometry of Supervised Contrastive Loss (SCL) initially proposed by Khosla et al. (2020) to train classification neural networks.
+- [ASSISTANT_SAID] The interests lie in exploring the neural collapse (NC) phenomenon (Papyan et al., 2020) where the last layer representations and classification head weights align to form an equiangular tight frame (ETF) structure.
+- [ASSISTANT_SAID] The NC phenomenon was first studied in neural networks optimized with Cross-Entropy (CE) Loss.
+- [ASSISTANT_SAID] Recent research has demonstrated that the ETF structure is optimal for SCL (Graf et al., 2021).
+- [ASSISTANT_SAID] The approach to gain a deeper understanding of SCL will be from an optimization perspective.
+- [ASSISTANT_SAID] The goal is to characterize and analyze the ETF structure in the data-imbalanced setting, similar to recent work accomplished for CE (Thrampoulidis et al., 2022).
+- [ASSISTANT_SAID] The approach has several advantages: applying an established optimization framework to gain further insights into SCL and exploring modified geometries due to constraints imposed by modern neural networks, such as Transformers trained via unsupervised means.
+- [ASSISTANT_SAID] The work serves as a stepping stone in understanding the implicit geometry of unsupervised settings.
+- [ASSISTANT_SAID] Modern deep learning has been moving towards larger models trained through unsupervised means.
+- [ASSISTANT_SAID] Recent research has suggested increased robustness to distributional imbalances in this setting.
+- [ASSISTANT_SAID] By studying self-similarity metrics like SCL, insights into unsupervised learning at the core of these models can be gained.
+- [USER] Requested to start with something motivating supervised contrastive loss and mentioned that similarity metrics are gaining more traction in machine-learning practice.
+- [ASSISTANT_SAID] Similarity metrics have gained significant traction in the field of machine learning.
+- [ASSISTANT_SAID] Supervised Contrastive Loss (SCL) is a similarity metric that has been used to train neural networks for various tasks such as image classification, object detection, and speech recognition.
+- [ASSISTANT_SAID] The motivation behind SCL lies in its ability to learn a representation space where similar examples are closer together and dissimilar examples are farther apart.
+- [ASSISTANT_SAID] SCL achieves this by maximizing the similarity between positive pairs (samples that belong to the same class) and minimizing the similarity between negative pairs (samples that belong to different classes).

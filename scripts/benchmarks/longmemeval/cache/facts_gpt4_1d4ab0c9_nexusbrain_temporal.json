@@ -1,0 +1,77 @@
+{
+  "answer_febde667_1": [
+    {
+      "fact": "User is planning to make a salad for dinner tonight.",
+      "type": "event",
+      "entities": [
+        "salad",
+        "dinner"
+      ]
+    },
+    {
+      "fact": "User wants to use fresh herbs in their salad.",
+      "type": "preference",
+      "entities": [
+        "fresh herbs",
+        "salad"
+      ]
+    },
+    {
+      "fact": "User started watering their herb garden every morning.",
+      "type": "event",
+      "entities": [
+        "herb garden",
+        "watering"
+      ]
+    },
+    {
+      "fact": "User is excited to see their herbs grow.",
+      "type": "opinion",
+      "entities": [
+        "herbs"
+      ]
+    },
+    {
+      "fact": "User has been using a balanced fertilizer for their cherry tomato plants.",
+      "type": "personal",
+      "entities": [
+        "balanced fertilizer",
+        "cherry tomato plants"
+      ]
+    },
+    {
+      "fact": "User would like to try more natural and cost-effective fertilizers.",
+      "type": "preference",
+      "entities": [
+        "natural fertilizers",
+        "cost-effective fertilizers"
+      ]
+    }
+  ],
+  "answer_febde667_2": [
+    {
+      "fact": "User has harvested their first batch of fresh herbs from an herb garden kit.",
+      "type": "event",
+      "entities": [
+        "fresh herbs",
+        "herb garden kit"
+      ]
+    },
+    {
+      "fact": "User is excited to use fresh herbs in different dishes.",
+      "type": "opinion",
+      "entities": [
+        "fresh herbs",
+        "dishes"
+      ]
+    },
+    {
+      "fact": "User is particularly interested in Thai Basil Chicken Stir-Fry and Pesto Pasta.",
+      "type": "preference",
+      "entities": [
+        "Thai Basil Chicken Stir-Fry",
+        "Pesto Pasta"
+      ]
+    }
+  ]
+}

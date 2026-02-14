@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2022/10/22 (Sat) 02:18  
+[PREFERENCE] User usually stays up till around 12:30 AM watching TV or scrolling through their phone.  
+[PREFERENCE] User is looking for TV show recommendations to watch on Friday nights.  
+[ASSISTANT_SAID] Recommended TV shows for Friday nights include:  
+[ASSISTANT_SAID] **Drama/Thriller**:  
+[ASSISTANT_SAID] 1. **Ozark** (Netflix): A financial advisor launders money for a drug cartel and relocates his family to the Missouri Ozarks.  
+[ASSISTANT_SAID] 2. **Breaking Bad** (Netflix): A high school chemistry teacher turned meth kingpin.  
+[ASSISTANT_SAID] 3. **Killing Eve** (BBC America/AMC): A cat-and-mouse game between an MI6 agent and a psychopathic assassin.  
+[ASSISTANT_SAID] **Science Fiction/Fantasy**:  
+[ASSISTANT_SAID] 1. **Stranger Things** (Netflix): A nostalgic sci-fi horror series about kids battling supernatural forces.  
+[ASSISTANT_SAID] 2. **The Expanse** (Amazon Prime): A gritty, realistic sci-fi epic set in a future where humanity has colonized the solar system.  
+[ASSISTANT_SAID] 3. **Westworld** (HBO): An exploration of artificial intelligence and consciousness.  
+[ASSISTANT_SAID] **Comedy**:  
+[ASSISTANT_SAID] 1. **The Good Place** (Netflix): A series about a woman who mistakenly ends up in the "good place" after her death.  
+[ASSISTANT_SAID] 2. **Schitt's Creek** (Netflix): A comedy about a wealthy family rebuilding their lives in a small town.  
+[ASSISTANT_SAID] 3. **What We Do in the Shadows** (FX/Hulu): A mockumentary-style sitcom about vampires in New York City.  
+[ASSISTANT_SAID] **Reality TV/Cooking**:  
+[ASSISTANT_SAID] 1. **The Great British Baking Show** (Netflix): A feel-good baking competition.  
+[ASSISTANT_SAID] 2. **Top Chef** (Bravo): A competitive cooking show showcasing talented chefs.  
+[ASSISTANT_SAID] 3. **Queer Eye** (Netflix): A makeover show where the "Fab Five" help transform lives.  
+[PREFERENCE] User decided to give **Ozark** a shot after hearing great things about it.  
+[USER] Asked how many episodes and seasons **Ozark** has.  
+[ASSISTANT_S

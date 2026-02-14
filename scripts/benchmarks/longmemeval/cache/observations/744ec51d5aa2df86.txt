@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [FACT] The user is interested in purchasing a townhouse.
+- [EVENT] The user recently had a home inspection done on the townhouse they are interested in.
+- [TEMPORAL] The user contacted a real estate agent 4 weeks ago for guidance in the homebuying process.
+- [ASSISTANT_SAID] A home inspection report typically includes areas such as exterior, foundation and structure, plumbing, electrical, HVAC, interior, appliances, and environmental concerns.
+- [ASSISTANT_SAID] The report may also include a summary of findings, detailed descriptions of each component inspected, photographs/videos, and recommendations for repairs or further evaluation.
+- [FACT] The user mentioned that their inspector noted some minor issues with the plumbing and electrical systems.
+- [EVENT] The user is working with the seller to get the plumbing and electrical issues fixed or to receive a credit at closing.
+- [ASSISTANT_SAID] The appraisal process involves an independent evaluation of the property's value by a licensed appraiser, who inspects the property, researches the market, and calculates the value.
+- [ASSISTANT_SAID] The appraisal report typically includes a property description, value conclusion, market analysis, comparable sales, and photos/sketches.
+- [FACT] The user had an appraisal done recently, which came back with a value slightly higher than their offer price.
+- [ASSISTANT_SAID] If the appraisal value is higher than the offer price, the user could request a lower interest rate, ask the seller to contribute to closing costs, or reconsider their offer.
+- [ASSISTANT_SAID] If the appraisal value is lower than the offer price, the user could renegotiate the price, ask the seller to fix issues, or consider walking away from the deal.
+- [TEMPORAL] The user is looking to close on the property in 2 weeks.
+- [ASSISTANT_SAID] The typical timeframe for loan processing and closing can take around 20-30 business days (4-6 weeks), but the user may close in 2 weeks if everything goes smoothly.
+- [ASSISTANT_SAID] The loan processing steps include reviewing and verifying documents (2-5 business days), underwriting (5-10 business days), and loan approval (1-3 business days).
+- [ASSISTANT_SAID] The closing process includes a title search and insurance (3-5 business days), finalizing loan documents (1-2 business days), providing a Closing Disclosure (3 business days), and the closing meeting (1 day).
+- [FACT] The user has finalized their loan application and locked in their interest rate.
+- [EVENT] The user is preparing for the closing meeting and wants to ensure they have a solid plan in place.
+- [ASSISTANT_SAID] At the closing meeting, the user can expect attendees to include themselves, the

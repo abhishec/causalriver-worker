@@ -1,0 +1,194 @@
+[
+  {
+    "question_id": "e47becba",
+    "hypothesis": "I don't have enough information from our previous conversations to answer that question."
+  },
+  {
+    "question_id": "118b2229",
+    "hypothesis": "Your daily commute takes 45 minutes each way."
+  },
+  {
+    "question_id": "51a45a95",
+    "hypothesis": "I don't have enough information from our previous conversations to answer that question."
+  },
+  {
+    "question_id": "58bf7951",
+    "hypothesis": "You attended a production of \"The Glass Menagerie\" at the local community theater."
+  },
+  {
+    "question_id": "1e043500",
+    "hypothesis": "I don't have enough information from our previous conversations to answer that question."
+  },
+  {
+    "question_id": "c5e8278d",
+    "hypothesis": "Your last name before you changed it was Johnson."
+  },
+  {
+    "question_id": "6ade9755",
+    "hypothesis": "I don't have enough information from our previous conversations to answer that question."
+  },
+  {
+    "question_id": "6f9b354f",
+    "hypothesis": "You repainted your bedroom walls a lighter shade of gray."
+  },
+  {
+    "question_id": "7161e7e2",
+    "hypothesis": "On a Sunday, Admon was scheduled for the \"8 am till 4 pm\" shift according to the final shift rotation sheet I provided for the GM social media agents."
+  },
+  {
+    "question_id": "c4f10528",
+    "hypothesis": "The restaurant in Cihampelas Walk that serves a great Nasi Goreng is Miss Bee Providore. Their signature dish, Miss Bee's Nasi Goreng, is Indonesian fried rice served with prawn crackers and a fried egg."
+  },
+  {
+    "question_id": "89527b6b",
+    "hypothesis": "The scaly body of the Plesiosaur in the image was described as blue."
+  },
+  {
+    "question_id": "e9327a54",
+    "hypothesis": "The unique dessert shop with the giant milkshakes that we talked about last time is the \"Toothsome Chocolate Emporium & Savory Feast Kitchen.\""
+  },
+  {
+    "question_id": "4c36ccef",
+    "hypothesis": "The romantic Italian restaurant in Rome that I recommended for dinner is Roscioli."
+  },
+  {
+    "question_id": "6ae235be",
+    "hypothesis": "The refining processes used at the Lake Charles Refinery, as I mentioned earlier, include:\n\n1. Atmospheric distillation: heating and separating crude oil into different fractions based on boiling points.\n2. Fluid catalytic cracking (FCC): breaking down heavier fractions into lighter products like gasoline and diesel.\n3. Alkylation: combining smaller molecules to form larger, high-octane gasoline components.\n4. Hydrotreating: removing impurities from gasoline and diesel to improve quality."
+  },
+  {
+    "question_id": "7e00a6cb",
+    "hypothesis": "The hostel near the Red Light District that I recommended last time is the International Budget Hostel."
+  },
+  {
+    "question_id": "1903aded",
+    "hypothesis": "The 7th job in the list I provided was \"Transcriptionist.\""
+  },
+  {
+    "question_id": "8a2466db",
+    "hypothesis": "Based on our previous conversations, you enjoy using Adobe Premiere Pro for video editing. I recommend checking out Adobe Premiere Pro's official documentation and tutorials, YouTube channels like Premiere Bro, Video Copilot, and Adobe Creative Cloud, as well as online courses on platforms like Udemy, LinkedIn Learning, and Skillshare. Additionally, you might find Premiere Pro communities and forums like Reddit's r/premierepro and Adobe's Premiere Pro forum helpful for learning more about video editing."
+  },
+  {
+    "question_id": "06878be2",
+    "hypothesis": "I don't have enough information from our previous conversations to answer that question."
+  },
+  {
+    "question_id": "75832dbd",
+    "hypothesis": "I don't have enough information from our previous conversations to answer that question."
+  },
+  {
+    "question_id": "0edc2aef",
+    "hypothesis": "I don't have enough information from our previous conversations to answer that question."
+  },
+  {
+    "question_id": "35a27287",
+    "hypothesis": "I don't have enough information from our previous conversations to answer that question."
+  },
+  {
+    "question_id": "32260d93",
+    "hypothesis": "I don't have enough information from our previous conversations to answer that question."
+  },
+  {
+    "question_id": "195a1a1b",
+    "hypothesis": "I don't have enough information from our previous conversations to answer that question."
+  },
+  {
+    "question_id": "afdc33df",
+    "hypothesis": "I don't have enough information from our previous conversations to answer that question."
+  },
+  {
+    "question_id": "0a995998",
+    "hypothesis": "**Session answer_afa9873b_3 (2023/02/15 (Wed) 07:47):**  \n- No relevant information about items to pick up or return.\n\n**Session answer_afa9873b_1 (2023/02/15 (Wed) 13:53):**  \n- User exchanged a pair of boots from Zara on February 5, 2023, and still needs to pick up the new pair.\n\n**Session answer_afa9873b_2 (2023/02/15 (Wed) 03:35):**  \n- User needs to pick up dry cleaning for a navy blue blazer worn to a meeting a few weeks ago.\n\nStep 2 - Synthesize:  \nBased on the information from our previous conversations, you need to pick up two items: a pair of boots from Zara and a navy blue blazer from the dry cleaners."
+  },
+  {
+    "question_id": "6d550036",
+    "hypothesis": "**Session answer_ec904b3c_1 (2023/05/28):**\n- User led the data analysis team for a comprehensive market analysis for a new product launch.\n\n**Session answer_ec904b3c_2 (2023/05/24):**\n- User is working on a solo project for their Data Mining class.\n\n**Session answer_ec904b3c_3 (2023/05/30):**\n- No information about leading projects.\n\n**Session answer_ec904b3c_4 (2023/05/20):**\n- No information about leading projects.\n\nStep 2 - Synthesize:\nThe user has led one project, which was the data analysis team for a comprehensive market analysis for a new product launch. Additionally, the user is currently working on a solo project for their Data Mining class. Therefore, the user has led or is currently leading two projects."
+  },
+  {
+    "question_id": "gpt4_59c863d7",
+    "hypothesis": "**Step 1 - Information per session:**\n\n- **Session answer_593bdffd_3 (2023/05/27):**\n  - User is working on a diorama featuring a 1/16 scale German Tiger I tank.\n\n- **Session answer_593bdffd_1 (2023/05/21):**\n  - User recently finished a Revell F-15 Eagle kit.\n  - User is thinking of working on a 1/72 scale B-29 bomber next.\n\n- **Session answer_593bdffd_4 (2023/05/29):**\n  - User is working on a 1/72 scale B-29 bomber model kit.\n  - User is working on a 1/24 scale '69 Camaro model kit.\n\n- **Session answer_593bdffd_2 (2023/05/21):**\n  - User recently finished a Tamiya 1/48 scale Spitfire Mk.V model kit.\n\n**Step 2 - Synthesize:**\n\nThe user has worked on or bought the following model kits:\n1. Revell F-15 Eagle kit (finished).\n2. Tamiya 1/48 scale Spitfire Mk.V model kit (finished).\n3. 1/16 scale German Tiger I tank (part of a diorama).\n4. 1/72 scale B-29 bomber model kit (currently working on).\n5. 1/24 scale '69 Camaro model kit (currently working on).\n\nIn total, the user has worked on or bought five model kits."
+  },
+  {
+    "question_id": "b5ef892d",
+    "hypothesis": "Let's extract the relevant information from each session regarding the user's camping trips in the United States this year:\n\n- **Session answer_a8b4290f_1 (2023/04/29 (Sat) 19:01):**\n  - The user just got back from a 5-day camping trip to Yellowstone National Park last month.\n\n- **Session answer_a8b4290f_2 (2023/04/29 (Sat) 04:40):**\n  - The user just got back from a 3-day solo camping trip to Big Sur in early April.\n\n- **Session answer_a8b4290f_3 (2023/04/29 (Sat) 16:26):**\n  - No additional information about camping trips is provided in this session.\n\nStep 2 - Synthesize:\nCombine the cross-session information into a clear answer.\n\nThe user spent a total of 8 days on camping trips in the United States this year: 5 days in Yellowstone National Park and 3 days in Big Sur."
+  },
+  {
+    "question_id": "e831120c",
+    "hypothesis": "**Session answer_86c505e7_1 (2023/05/21 12:44):**  \n- The user watched all 22 Marvel Cinematic Universe (MCU) movies in two weeks.\n\n**Session answer_86c505e7_2 (2023/05/21 13:46):**  \n- The user completed a Star Wars marathon, watching all the main films in a week and a half.\n\nStep 2 - Synthesize:  \nThe user watched all 22 Marvel Cinematic Universe movies in two weeks and completed the main Star Wars films in a week and a half. Therefore, it took the user a total of three and a half weeks to watch all the Marvel Cinematic Universe movies and the main Star Wars films."
+  },
+  {
+    "question_id": "3a704032",
+    "hypothesis": "**Session answer_c2204106_2 (2023/05/21):**\n- User has a peace lily and a succulent plant, both purchased from a nursery two weeks ago.\n\n**Session answer_c2204106_1 (2023/05/23):**\n- User has a basil plant on the balcony.\n- User received a snake plant from their sister last month.\n\n**Session answer_c2204106_3 (2023/05/21):**\n- No new information about plant acquisition.\n\nStep 2 - Synthesize:\nIn the last month, you acquired four plants: a peace lily, a succulent, a basil plant, and a snake plant."
+  },
+  {
+    "question_id": "gpt4_d84a3211",
+    "hypothesis": "**Session answer_2880eb6c_4 (2023/05/05 (Fri) 17:06):**\n- User recently got a new set of bike lights installed, which cost $40.\n\n**Session answer_2880eb6c_1 (2023/05/05 (Fri) 15:25):**\n- User bought a Bell Zephyr helmet for $120 at the local bike shop.\n\n**Session answer_2880eb6c_2 (2023/05/05 (Fri) 18:52):**\n- User replaced the chain during the last service, which cost $25.\n- User had a new set of bike lights installed during the last service, which cost $40 (repeated information).\n\n**Session answer_2880eb6c_3 (2023/05/05 (Fri) 13:29):**\n- User recently got a new set of bike lights installed, which cost $40 (repeated information).\n\nStep 2 - Synthesize:\nTo calculate the total money spent on bike-related expenses since the start of the year, we add up the costs mentioned across the sessions:\n\n- Bike lights: $40\n- Bell Zephyr helmet: $120\n- Chain replacement: $25\n\nTotal: $40 + $120 + $25 = $185\n\nTherefore, the user has spent a total of $185 on bike-related expenses since the start of the year."
+  },
+  {
+    "question_id": "aae3761f",
+    "hypothesis": "**Session answer_526354c8_1 (2023/05/24):**\n- The user drove about four hours to the Outer Banks in North Carolina.\n- The driving distance from the Outer Banks to Tybee Island is around 7-8 hours.\n\n**Session answer_526354c8_2 (2023/05/24):**\n- The user recently drove for six hours to Washington D.C.\n\n**Session answer_526354c8_3 (2023/05/28):**\n- The user drove for five hours to the mountains in Tennessee.\n\nStep 2 - Synthesize:\nTo calculate the total driving hours for the user's three road trip destinations, we add the driving times from each relevant session:\n\n1. Outer Banks, NC: 4 hours\n2. Outer Banks to Tybee Island: 7-8 hours (I'll use the average, 7.5 hours, for calculation)\n3. Washington D.C.: 6 hours\n4. Mountains in Tennessee: 5 hours\n\nTotal driving time = 4 + 7.5 + 6 + 5 = 22.5 hours\n\nThe user spent approximately 22.5 hours driving to their three road trip destinations combined."
+  },
+  {
+    "question_id": "gpt4_2655b836",
+    "hypothesis": "- February 10th: User purchased a new car, a silver Honda Civic.\n- March 15th: User got their car serviced for the first time, and it was a great experience.\n- March 22nd: User had an issue with their car's GPS system, which was resolved by the dealership replacing the entire system.\n\nStep 2 - Answer:\nThe first issue the user had with their new car after its first service was with the car's GPS system on March 22nd, which was resolved by the dealership replacing the entire system."
+  },
+  {
+    "question_id": "gpt4_2487a7cb",
+    "hypothesis": "I don't have enough information from our previous conversations to answer that question."
+  },
+  {
+    "question_id": "gpt4_76048e76",
+    "hypothesis": "1. **Mid-February**: User took their bike in for repairs due to shifting issues.\n2. **February 27th (Monday)**: User washed their Toyota Corolla after not doing so for over a month.\n\nStep 2 - Answer:\nThe user took care of their bike first in February, as they took it in for repairs in mid-February, which is earlier than washing their car on February 27th."
+  },
+  {
+    "question_id": "gpt4_2312f94c",
+    "hypothesis": "- January 28th: User pre-ordered a Dell XPS 13 laptop.\n- February 13th: User bought the Anker PowerCore 20000 from Amazon.\n- February 20th: User purchased the Samsung Galaxy S22 from Best Buy.\n- February 25th: User's Dell XPS 13 laptop arrived after a delay from the original expected arrival date of February 11th.\n\nStep 2 - Answer:\nThe user got the Samsung Galaxy S22 first, as it was purchased on February 20th, while the Dell XPS 13 laptop arrived later on February 25th."
+  },
+  {
+    "question_id": "0bb5a684",
+    "hypothesis": "1. The user attended a workshop on \"Effective Communication in the Workplace\" on January 10th.\n2. The user is preparing for an upcoming team meeting scheduled for January 17th.\n\nStep 2 - Answer:\nThe user attended the workshop on \"Effective Communication in the Workplace\" 7 days before the team meeting they were preparing for."
+  },
+  {
+    "question_id": "08f4fc43",
+    "hypothesis": "To build a timeline of relevant events from the observations:\n\n1. **Sunday Mass at St. Mary's Church**: The user attended this on January 2nd, 2023.\n2. **Ash Wednesday Service at the Cathedral**: The user attended this on February 1st, 2023.\n\nStep 2 - Answer:\nBased on the timeline, the number of days between the Sunday mass at St. Mary's Church on January 2nd, 2023, and the Ash Wednesday service at the cathedral on February 1st, 2023, is 30 days."
+  },
+  {
+    "question_id": "2c63a862",
+    "hypothesis": "To build a timeline of relevant events from the observations:\n\n1. **February 10, 2022**: User was pre-approved for a mortgage up to $350,000.\n2. **February 15, 2022**: User started working with Rachel, their real estate agent.\n3. **March 1, 2022**: User saw a house they loved and considered making an offer.\n\nStep 2 - Answer:\nBased on the timeline, it took the user 14 days to find a house they loved after starting to work with Rachel."
+  },
+  {
+    "question_id": "gpt4_385a5000",
+    "hypothesis": "1. **February 20th, 2023**: User started seeds indoors under grow lights in their basement. The seeds mentioned are tomatoes, peppers, and cucumbers.\n\n2. **March 3rd, 2023**: Marigold seeds arrived, and the user started them. The marigold seeds are already germinating by the time of the conversation on March 10th.\n\nStep 2 - Answer:\nThe tomatoes were started first on February 20th, 2023, before the marigolds, which were started on March 3rd, 2023."
+  },
+  {
+    "question_id": "6a1eabeb",
+    "hypothesis": "Your personal best time in the charity 5K run is 25:50."
+  },
+  {
+    "question_id": "6aeb4375",
+    "hypothesis": "I don't have enough information from our previous conversations to answer that question."
+  },
+  {
+    "question_id": "830ce83f",
+    "hypothesis": "I don't have enough information from our previous conversations to answer that question."
+  },
+  {
+    "question_id": "852ce960",
+    "hypothesis": "You were pre-approved for a mortgage of $400,000 from Wells Fargo."
+  },
+  {
+    "question_id": "945e3d21",
+    "hypothesis": "You attend yoga classes three times a week to help with your anxiety."
+  },
+  {
+    "question_id": "d7c942c3",
+    "hypothesis": "Yes, your mom is using the same grocery list app as you, as mentioned in the session on 2023/04/30."
+  },
+  {
+    "question_id": "71315a70",
+    "hypothesis": "You have spent a total of 10-12 hours on your abstract ocean sculpture, as of the most recent update on 2023/06/17."
+  },
+  {
+    "question_id": "89941a93",
+    "hypothesis": "You currently own four bikes: a road bike, a mountain bike, a commuter bike, and a new hybrid bike."
+  }
+]

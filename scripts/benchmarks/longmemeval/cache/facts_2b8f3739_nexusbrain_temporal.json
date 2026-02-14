@@ -1,0 +1,125 @@
+{
+  "answer_23759615_2": [
+    {
+      "fact": "User is considering participating in the Harvest Festival Market on October 2nd.",
+      "type": "event",
+      "entities": [
+        "Harvest Festival Market",
+        "October 2nd"
+      ]
+    },
+    {
+      "fact": "User has sold 15 jars of homemade jam at the Homemade and Handmade Market.",
+      "type": "event",
+      "entities": [
+        "15 jars",
+        "homemade jam",
+        "Homemade and Handmade Market"
+      ]
+    },
+    {
+      "fact": "User earned $225 from selling homemade jam.",
+      "type": "event",
+      "entities": [
+        "$225",
+        "homemade jam"
+      ]
+    },
+    {
+      "fact": "User prefers a seasonal theme for their display.",
+      "type": "preference",
+      "entities": [
+        "seasonal theme"
+      ]
+    },
+    {
+      "fact": "User is unsure how to incorporate their products with the autumn theme.",
+      "type": "opinion",
+      "entities": [
+        "homemade jam",
+        "spice blends",
+        "autumn theme"
+      ]
+    }
+  ],
+  "answer_23759615_1": [
+    {
+      "fact": "User is expanding product offerings for the Harvest Festival Market.",
+      "type": "preference",
+      "entities": [
+        "Harvest Festival Market"
+      ]
+    },
+    {
+      "fact": "User has had a successful season selling fresh organic herbs.",
+      "type": "event",
+      "entities": [
+        "successful season",
+        "fresh organic herbs"
+      ]
+    },
+    {
+      "fact": "User sold 12 bunches of fresh organic herbs at the farmers' market on May 15th.",
+      "type": "event",
+      "entities": [
+        "12 bunches",
+        "farmers' market",
+        "May 15th"
+      ]
+    },
+    {
+      "fact": "User earned a total of $120 from selling fresh organic herbs.",
+      "type": "event",
+      "entities": [
+        "$120",
+        "fresh organic herbs"
+      ]
+    },
+    {
+      "fact": "User is considering selling herbal teas and herb-infused oils.",
+      "type": "preference",
+      "entities": [
+        "herbal teas",
+        "herb-infused oils"
+      ]
+    }
+  ],
+  "answer_23759615_3": [
+    {
+      "fact": "User is thinking of expanding their product line to include herbal teas and spice blends.",
+      "type": "preference",
+      "entities": [
+        "herbal teas",
+        "spice blends"
+      ]
+    },
+    {
+      "fact": "User sold 20 potted herb plants at the Summer Solstice Market for $7.5 each.",
+      "type": "event",
+      "entities": [
+        "Summer Solstice Market",
+        "potted herb plants",
+        "$7.5"
+      ]
+    },
+    {
+      "fact": "User views the Summer Solstice Market as a great opportunity to connect with people interested in gardening and sustainable living.",
+      "type": "opinion",
+      "entities": [
+        "gardening",
+        "sustainable living"
+      ]
+    },
+    {
+      "fact": "User is interested in highlighting the health benefits of their herbs and herbal teas in marketing and branding.",
+      "type": "preference",
+      "entities": [
+        "health benefits",
+        "herbs",
+        "herbal teas",
+        "marketing",
+        "branding"
+      ]
+    }
+  ]
+}

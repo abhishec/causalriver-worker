@@ -1,0 +1,108 @@
+{
+  "answer_58820c75_1": [
+    {
+      "fact": "User has a master's thesis on natural language processing (NLP)",
+      "type": "personal",
+      "entities": [
+        "master's thesis",
+        "natural language processing"
+      ]
+    },
+    {
+      "fact": "User worked on a research paper on sentiment analysis",
+      "type": "event",
+      "entities": [
+        "research paper",
+        "sentiment analysis"
+      ]
+    },
+    {
+      "fact": "User submitted the research paper to ACL",
+      "type": "event",
+      "entities": [
+        "ACL"
+      ]
+    },
+    {
+      "fact": "User is looking for help with text classification using machine learning",
+      "type": "preference",
+      "entities": [
+        "text classification",
+        "machine learning"
+      ]
+    },
+    {
+      "fact": "User is working with product reviews",
+      "type": "personal",
+      "entities": [
+        "product reviews"
+      ]
+    },
+    {
+      "fact": "User wants to classify product reviews as either positive or negative",
+      "type": "preference",
+      "entities": [
+        "positive",
+        "negative"
+      ]
+    },
+    {
+      "fact": "User has used supervised learning before",
+      "type": "personal",
+      "entities": [
+        "supervised learning"
+      ]
+    },
+    {
+      "fact": "User's dataset is relatively small, around 5000 samples",
+      "type": "personal",
+      "entities": [
+        "5000 samples"
+      ]
+    },
+    {
+      "fact": "User's dataset has about 10 features each",
+      "type": "personal",
+      "entities": [
+        "10 features"
+      ]
+    }
+  ],
+  "answer_58820c75_2": [
+    {
+      "fact": "User is interested in natural language processing techniques for sentiment analysis.",
+      "type": "preference",
+      "entities": [
+        "natural language processing",
+        "sentiment analysis"
+      ]
+    },
+    {
+      "fact": "User has been exploring different approaches to sentiment analysis since their thesis.",
+      "type": "event",
+      "entities": [
+        "thesis",
+        "sentiment analysis"
+      ]
+    },
+    {
+      "fact": "User is specifically interested in deep learning techniques for sentiment analysis.",
+      "type": "preference",
+      "entities": [
+        "deep learning",
+        "sentiment analysis"
+      ]
+    },
+    {
+      "fact": "User wants to know more about Convolutional Neural Networks (CNN) and Recurrent Neural Networks (RNN) for sentiment analysis.",
+      "type": "preference",
+      "entities": [
+        "Convolutional Neural Networks",
+        "CNN",
+        "Recurrent Neural Networks",
+        "RNN",
+        "sentiment analysis"
+      ]
+    }
+  ]
+}

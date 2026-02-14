@@ -1,0 +1,27 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/06/15 (Thu) 12:49
+- [USER] The user works as an AI consultant.
+- [USER] The user does not understand sales.
+- [RELATIONSHIP] The user's potential partner provided them with a worksheet of leads.
+- [ASSISTANT_SAID] Sales teams typically use a variety of databases to store and manage customer information, lead information, and other sales-related data.
+- [ASSISTANT_SAID] Common types of databases used by sales teams include:
+  - [ASSISTANT_SAID] Customer Relationship Management (CRM) databases: Examples include Salesforce, Pipedrive, Hubspot CRM.
+  - [ASSISTANT_SAID] Marketing Automation databases: Examples include Marketo, Pardot, Eloqua.
+  - [ASSISTANT_SAID] Data Warehouses: Used to analyze and generate insights into sales performance and customer behavior.
+  - [ASSISTANT_SAID] Operational databases: Examples include Oracle, Microsoft SQL Server, and MySQL.
+- [ASSISTANT_SAID] Sales teams typically look for detailed information about leads in their CRM system.
+- [ASSISTANT_SAID] Sales teams may also use social media profiles, company websites, or industry reports to gather more details about a lead.
+- [ASSISTANT_SAID] The goal of the sales team is to gather relevant information about a lead to understand their needs, pain points, and buying behavior.
+- [ASSISTANT_SAID] Common sales terminology includes:
+  - [ASSISTANT_SAID] Lead: A potential customer who has expressed interest in a product or service.
+  - [ASSISTANT_SAID] Prospect: A lead that has been qualified as a potential customer.
+  - [ASSISTANT_SAID] Qualification: The process of determining whether a lead is a good fit for the product or service being sold.
+  - [ASSISTANT_SAID] Pipeline: The series of stages that a lead goes through from initial contact to closing a sale.
+  - [ASSISTANT_SAID] Closing: The process of finalizing a sale and converting a prospect into a customer.
+  - [ASSISTANT_SAID] Conversion rate: The percentage of leads that are converted into customers.
+  - [ASSISTANT_SAID] Upsell: Selling additional products or services to an existing customer.
+  - [ASSISTANT_SAID] Cross-sell: Selling related products or services to an existing customer.
+  - [ASSISTANT_SAID] Objection: A concern raised by a potential customer during the sales process.
+  - [ASSISTANT_SAID] Overcoming objections: Addressing and resolving concerns raised by a potential customer.
+  - [ASSISTANT_SAID] Referral:

@@ -1,0 +1,109 @@
+{
+  "answer_eaa8e3ef_1": [
+    {
+      "fact": "User is planning a trip to Maui",
+      "type": "event",
+      "entities": [
+        "Maui"
+      ]
+    },
+    {
+      "fact": "User has booked a luxurious resort in Maui that costs over $300 per night",
+      "type": "personal",
+      "entities": [
+        "luxurious resort",
+        "Maui",
+        "$300"
+      ]
+    },
+    {
+      "fact": "User is looking for free or affordable activities to balance out the cost of the resort",
+      "type": "preference",
+      "entities": [
+        "free activities",
+        "affordable activities"
+      ]
+    },
+    {
+      "fact": "User is especially interested in Haleakala National Park and the Waihee Ridge Trail",
+      "type": "preference",
+      "entities": [
+        "Haleakala National Park",
+        "Waihee Ridge Trail"
+      ]
+    },
+    {
+      "fact": "User considers themselves a moderate hiker",
+      "type": "personal",
+      "entities": [
+        "moderate hiker"
+      ]
+    }
+  ],
+  "answer_eaa8e3ef_2": [
+    {
+      "fact": "User is planning a trip to Japan.",
+      "type": "event",
+      "entities": [
+        "Japan",
+        "trip"
+      ]
+    },
+    {
+      "fact": "User is looking for affordable accommodation options.",
+      "type": "preference",
+      "entities": [
+        "affordable accommodation"
+      ]
+    },
+    {
+      "fact": "User has stayed in a hostel in Tokyo.",
+      "type": "event",
+      "entities": [
+        "hostel",
+        "Tokyo"
+      ]
+    },
+    {
+      "fact": "User's previous hostel stay cost around $30 per night.",
+      "type": "personal",
+      "entities": [
+        "$30",
+        "hostel"
+      ]
+    },
+    {
+      "fact": "User traveled solo last January.",
+      "type": "event",
+      "entities": [
+        "January",
+        "solo travel"
+      ]
+    },
+    {
+      "fact": "User plans to visit popular tourist spots in Tokyo, such as Shibuya Crossing and Tokyo Tower.",
+      "type": "event",
+      "entities": [
+        "Shibuya Crossing",
+        "Tokyo Tower",
+        "Tokyo"
+      ]
+    },
+    {
+      "fact": "User is considering affordable transportation options in Tokyo.",
+      "type": "preference",
+      "entities": [
+        "affordable transportation",
+        "Tokyo"
+      ]
+    },
+    {
+      "fact": "User is unsure about taking a taxi in Tokyo due to cost.",
+      "type": "opinion",
+      "entities": [
+        "taxi",
+        "Tokyo"
+      ]
+    }
+  ]
+}

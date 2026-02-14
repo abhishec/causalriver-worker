@@ -1,0 +1,52 @@
+{
+  "answer_c6fd8ebd_abs": [
+    {
+      "fact": "User has a cat with digestive health issues.",
+      "type": "personal",
+      "entities": [
+        "cat",
+        "digestive health issues"
+      ]
+    },
+    {
+      "fact": "User is currently giving their cat a probiotic supplement.",
+      "type": "preference",
+      "entities": [
+        "probiotic supplement"
+      ]
+    },
+    {
+      "fact": "User's veterinarian recommended the probiotic supplement during a follow-up appointment.",
+      "type": "event",
+      "entities": [
+        "veterinarian",
+        "probiotic supplement",
+        "follow-up appointment"
+      ]
+    },
+    {
+      "fact": "User had a follow-up appointment with the vet on January 15th.",
+      "type": "event",
+      "entities": [
+        "January 15th"
+      ]
+    },
+    {
+      "fact": "User is looking for recommendations for cat litter that is easy to clean and odor-free.",
+      "type": "preference",
+      "entities": [
+        "cat litter",
+        "easy to clean",
+        "odor-free"
+      ]
+    },
+    {
+      "fact": "User recently got a new litter box with low sides for their cat.",
+      "type": "personal",
+      "entities": [
+        "litter box",
+        "low sides"
+      ]
+    }
+  ]
+}

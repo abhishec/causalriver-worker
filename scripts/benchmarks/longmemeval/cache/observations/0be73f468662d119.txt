@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/30 (Tue) 15:41
+- [USER] User requested a Rust program to simulate Joy-Con and control Nintendo Switch over Bluetooth.
+- [ASSISTANT_CREATED] Assistant provided a Rust program example to simulate a Joy-Con controller, including button mapping and control data structure.
+- [ASSISTANT_SAID] The Joy-Con button mapping includes 17 buttons with specific hexadecimal values for each button.
+- [ASSISTANT_SAID] The Joy-Con button names are defined in an enum, including BUTTON_A, BUTTON_B, BUTTON_X, BUTTON_Y, BUTTON_LSTICK, BUTTON_RSTICK, BUTTON_L, BUTTON_R, BUTTON_ZL, BUTTON_ZR, BUTTON_MINUS, BUTTON_PLUS, BUTTON_LCLICK, BUTTON_RCLICK, BUTTON_HOME, BUTTON_CAPTURE, BUTTON_STICK.
+- [ASSISTANT_SAID] The Joy-Con control data structure includes fields for buttons, left stick coordinates, right stick coordinates, and analog values.
+- [ASSISTANT_SAID] The assistant provided a method to set button values and stick positions in the Joy-Con control data structure.
+- [USER] User asked for details on how to connect to the Nintendo Switch over Bluetooth.
+- [ASSISTANT_SAID] Assistant outlined steps to connect to the Nintendo Switch over Bluetooth, including putting the Switch in pairing mode, finding the Switch's Bluetooth MAC address, and pairing the computer with the Switch.
+- [ASSISTANT_SAID] The assistant mentioned using `TcpStream` in Rust to connect to the Switch, specifying the MAC address and a known port number.
+- [ASSISTANT_SAID] The assistant noted that sending control data over the TcpStream requires customizing the data format to match the Switch's protocol.
+- [USER] User requested details about the Nintendo Switch's protocol between Joy-Con and the Switch for controlling.
+- [ASSISTANT_SAID] The assistant stated that the exact details of the protocol are proprietary and not publicly available, but some reverse-engineering has been done.
+- [ASSISTANT_SAID] The assistant warned that using reverse-engineered software may violate the terms of service of the Switch and could result in account bans or device bricking.
+- [USER] User inquired about the "joycontrol" GitHub repository and requested an explanation of how it works at the code level.
+- [ASSISTANT_SAID] The assistant acknowledged familiarity with the "joycontrol" repository, explaining that it simulates Joy-Con signals to control the Nintendo Switch.
+- [ASSISTANT_SAID] The assistant described that the joycontrol project sends raw Bluetooth HID reports to the Nintendo Switch over BLE to simulate controller input.
+- [ASSISTANT_SAID] The assistant provided a high-level overview of the joycontrol library, including scanning for the Switch, connecting to it, and

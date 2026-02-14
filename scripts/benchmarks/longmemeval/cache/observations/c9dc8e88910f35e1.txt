@@ -1,0 +1,42 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/27 (Sat) 02:59
+- [USER] Goal: Compare a list of desired skills, knowledge, and qualifications for an Instructional Designer with a job description for an Instructional Designer position found on LinkedIn Jobs.
+- [USER] Desired Output: A report indicating whether each item on the list of desired skills, knowledge, and qualifications for an Instructional Designer is present in the job description for an Instructional Designer position found on LinkedIn Jobs.
+- [USER] Inputs: A list of desired skills, knowledge, and qualifications for an Instructional Designer; A job description for an Instructional Designer position found on LinkedIn Jobs.
+- [USER] Method: Comparison of the list of desired skills, knowledge, and qualifications with the job description found on LinkedIn Jobs.
+- [USER] List of desired skills, knowledge, and qualifications: 
+  - "1. Instructional design models & principles (e.g. ADDIE, Dick and Carey) 
+  - 2. adult learning theory 
+  - 3. Organizational development
+  - 4. Accessing and analyzing DATA 
+  - 5. Theories of leadership 
+  - 6. Gamification
+  - 7. Blended learning techniques 
+  - 8. Formative and summative evaluation
+  - 9. AR/VR Environments
+  - 10. Agile methodology (e.g. Scrum) 
+  - 11. Interface design 
+  - 12. Classroom-based technology integration techniques 
+  - 13. Human resources management
+  - 14. Professional development 
+  - 15. Customer service
+  - 16. Motivation theories (e.g. ARCS) 
+  - 17. Markup languages (e.g. HTML/XHTML/XML)
+  - 18. Assessment methods (e.g. criterion-referenced)
+  - 19. Online/blended programme management 
+  - 20. Instructional simulation and game design 
+  - 21. 3D modelling tools (e.g. Maya) 
+  - 22. SWOT analysis 
+  - 23. Project management software (e.g. Microsoft Project) 
+  - 24. Learning object standards (e.g. SCORM)
+  - 25. Laws, policies and procedures in training programmes 
+  - 26. Cloud technologies 
+  - 27. Business intelligence (e.g. SAP BW)
+  - 28. Programming languages (e.g. C++) 
+  - 29. Cascading Style Sheets (CSS)
+  - 30. Social media technologies (e.g. Twitter)
+  - 31. Web design principles 
+  - 32. Assessment software (e.g. Respondus)
+  - 33. Audio software (e.g. Audacity) 
+  - 34. Streaming

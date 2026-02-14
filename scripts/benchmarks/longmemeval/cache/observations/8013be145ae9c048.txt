@@ -1,0 +1,28 @@
+**Observation Log:**
+
+- [FACT] User is a teacher.
+- [PREFERENCE] User is seeking help crafting a science project for secondary 1 students.
+- [EVENT] User's project title is "Design & Build a Rubber Band Powered Vehicle."
+- [EVENT] Students will need to design and build a rubber band powered vehicle.
+- [EVENT] Students will perform investigations on their vehicle to see what can be done to make it travel further.
+- [ASSISTANT_SAID] Assistant expressed willingness to help craft a science project for secondary 1 students.
+- [ASSISTANT_SAID] Assistant suggested using the scientific method for investigations, starting with a question like "How can we make our rubber band powered vehicle travel further?"
+- [ASSISTANT_SAID] Assistant recommended brainstorming different variables that could affect the distance the vehicle travels, such as tension of the rubber band, weight of the vehicle, and surface type.
+- [ASSISTANT_SAID] Assistant advised students to use materials like popsicle sticks, plastic cups, and cardboard for building their vehicles.
+- [ASSISTANT_SAID] Assistant encouraged creativity in design and consideration of how different elements affect travel distance.
+- [ASSISTANT_SAID] Assistant suggested conducting experiments to test how different variables affect travel distance, keeping some variables constant.
+- [ASSISTANT_SAID] Assistant recommended evaluating experimental results and communicating findings, considering real-world applications.
+- [ASSISTANT_SAID] Assistant reminded students to embody attitudes of creativity, objectivity, integrity, open-mindedness, and perseverance throughout the project.
+- [ASSISTANT_SAID] Assistant suggested documenting the process and progress with pictures, notes, and videos.
+- [ASSISTANT_SAID] Assistant proposed having students present their design and investigation to the class and showcase different designs.
+- [EVENT] User is asking students to do a written report on the project.
+- [ASSISTANT_SAID] Assistant provided a list of sections to include in the written report: 
+  - Introduction
+  - Materials and Methods
+  - Results
+  - Discussion
+  - Conclusion
+  - References
+  - Appendices
+  - Reflection section
+- [ASSISTANT_CREATED] Assistant created a structured list of report sections with descriptions for each section.

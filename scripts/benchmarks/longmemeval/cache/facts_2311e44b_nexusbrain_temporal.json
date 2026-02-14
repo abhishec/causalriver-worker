@@ -1,0 +1,101 @@
+{
+  "answer_bf633415_1": [
+    {
+      "fact": "User's reading goal is to read 50 books by the end of the year",
+      "type": "preference",
+      "entities": [
+        "50 books",
+        "end of the year"
+      ]
+    },
+    {
+      "fact": "User has already read 12 books this year",
+      "type": "personal",
+      "entities": [
+        "12 books",
+        "this year"
+      ]
+    },
+    {
+      "fact": "User is looking for non-fiction books that are not too dense and easy to read",
+      "type": "preference",
+      "entities": [
+        "non-fiction books",
+        "not too dense",
+        "easy to read"
+      ]
+    },
+    {
+      "fact": "User is enjoying the book 'Sapiens'",
+      "type": "opinion",
+      "entities": [
+        "Sapiens"
+      ]
+    },
+    {
+      "fact": "User finds 'Sapiens' to be slow going",
+      "type": "opinion",
+      "entities": [
+        "Sapiens",
+        "slow going"
+      ]
+    }
+  ],
+  "answer_bf633415_2": [
+    {
+      "fact": "User wants to read 50 books by the end of the year.",
+      "type": "preference",
+      "entities": [
+        "50 books",
+        "end of the year"
+      ]
+    },
+    {
+      "fact": "User has already read 12 books so far.",
+      "type": "personal",
+      "entities": [
+        "12 books"
+      ]
+    },
+    {
+      "fact": "User is currently reading 'The Nightingale' which has 440 pages.",
+      "type": "personal",
+      "entities": [
+        "The Nightingale",
+        "440 pages"
+      ]
+    },
+    {
+      "fact": "User's reading speed is slower than average.",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User has been reading 'Sapiens' at a pace of 10-20 pages a week.",
+      "type": "personal",
+      "entities": [
+        "Sapiens",
+        "10-20 pages a week"
+      ]
+    },
+    {
+      "fact": "User reads approximately 2.14 pages per day based on their current pace.",
+      "type": "personal",
+      "entities": [
+        "2.14 pages per day"
+      ]
+    },
+    {
+      "fact": "User finds the initial reading goal of 99 pages per day too ambitious.",
+      "type": "opinion",
+      "entities": [
+        "99 pages per day"
+      ]
+    },
+    {
+      "fact": "User is open to exploring options to increase reading days or speed up reading.",
+      "type": "preference",
+      "entities": []
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+**Observation Log:**
+
+- [FACT] User's horse is named Max.
+- [FACT] User is located in a rural area with a zip code of 92026.
+- [FACT] User has a backyard flock of chickens.
+- [FACT] User collects an average of 12 eggs per day from their chickens.
+- [PREFERENCE] User is considering switching Max to a higher-calorie feed to help him gain weight.
+- [EVENT] User is looking to schedule a vet visit for Max next month.
+- [CHANGE] User has noticed that Max has been dropping some weight lately.
+- [CHANGE] User has invested in a new custom-made saddle for Max to improve his comfort and mobility.
+- [TEMPORAL] Session date is 2023/05/22 (Mon) 13:27.
+- [ASSISTANT_SAID] Assistant offered to help find a local vet specializing in equine care for Max.
+- [ASSISTANT_SAID] Assistant requested the user's city or zip code to provide a list of local veterinarians.
+- [ASSISTANT_SAID] Assistant provided three local veterinarians specializing in equine care: 
+  1. Escondido Equine Clinic - Located in Escondido, CA, about 10 miles from the 92026 zip code.
+  2. North County Equine Veterinary Services - Based in Vista, CA, about 15 miles from the 92026 zip code.
+  3. San Diego Equine Associates - Located in San Marcos, CA, about 20 miles from the 92026 zip code.
+- [ASSISTANT_SAID] Assistant recommended checking the websites, reading reviews, and calling the vets to find the best fit for Max's needs.
+- [ASSISTANT_SAID] Assistant provided general guidelines and popular feed options for horses needing to gain weight, including:
+  1. Purina Equine Senior Active
+  2. Triple Crown Nutrition's Senior Formula
+  3. Nutrena's SafeChoice Perform
+  4. Omolene 200
+  5. Tribute Equine Nutrition's Kalm 'N EZ
+  6. CoolStance Copra
+  7. Empyrean's Equi-Fat
+- [ASSISTANT_SAID] Assistant advised consulting with a veterinarian before making dietary changes for Max.
+- [ASSISTANT_SAID] Assistant suggested having Max's teeth checked by an equine dentist and his joints assessed by a veterinarian.
+- [ASSISTANT_SAID] Assistant inquired about the user's backyard flock and how they sell the eggs.
+- [FACT] User sells eggs to neighbors and colleagues.
+- [PREFERENCE] User is considering expanding their flock by getting more chickens, possibly heritage breeds like Marans or Ameraucanas.
+- [ASSISTANT_SAID] Assistant provided information on Marans and Amer

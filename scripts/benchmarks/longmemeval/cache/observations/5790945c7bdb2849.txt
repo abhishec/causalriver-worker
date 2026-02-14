@@ -1,0 +1,28 @@
+**Observation Log:**
+
+- [FACT] User is interested in camping in Corsica.
+- [ASSISTANT_SAID] Wild camping is not allowed in Corsica; camping must be done in designated campsites.
+- [ASSISTANT_SAID] Camping in Corsica is only allowed from April 1st to September 30th.
+- [ASSISTANT_SAID] A camping permit is required and can be obtained from the local tourist office or the campsite itself.
+- [ASSISTANT_SAID] In some areas, camping is only allowed in specified areas or during specific hours.
+- [ASSISTANT_SAID] Open fires are not allowed, and BBQs must be kept off the ground.
+- [ASSISTANT_SAID] Waste must be disposed of appropriately in designated bins.
+- [ASSISTANT_SAID] Quiet hours must be respected while camping.
+- [ASSISTANT_SAID] Recommended campsites in Corsica include:
+  - Camping Les Oliviers: near Porto-Vecchio, offers stunning views of mountains and sea.
+  - Camping U Farniente: in northern Corsica, offers shade and proximity to the beach.
+  - Camping Les Castors: in southern Corsica, surrounded by natural scenery with family amenities.
+  - Camping Aria Marina: in north-east Corsica, located on the beach with water sports activities.
+  - Camping Les Ilots d'Or: in western Corsica, offers sunset views and hiking trails.
+- [USER] Asks for recommendations for campsites with good facilities for families and kids.
+- [ASSISTANT_SAID] Recommended campsites with good facilities for families and kids include:
+  - Camping Arinella Bianca: in northern Corsica, has a sandy beach, swimming pool, water park, kids' club, playground, and sports activities.
+  - Camping Perla di Mare: in southern Corsica, on the beach with swimming pools, water slides, kids' club, mini-golf, and tennis.
+  - Camping La Pinède: in western Corsica, surrounded by a pine forest with sports activities, kids' club, playground, and swimming pool.
+  - Camping U Livanti: near Porto-Vecchio, on the beach with spacious pitches, water park, playground, and mini-golf.
+  - Camping Les Castors: in southern Corsica, ideal for families with a secure play area, kids' club, mini-farm, and pool with children's area.
+- [USER] Inquires if any of the campsites offer bike rentals for exploring the area.
+- [ASSISTANT_SAID] Campsites that offer bike rentals include:
+  - Camping Aria Marina: offers bike rentals to explore the area.
+  - Camping Perla di Mare: offers bike rentals and a bike path to Ghisonaccia.
+  - Camping U Livanti: offers bike rentals for nearby beaches and mountains.

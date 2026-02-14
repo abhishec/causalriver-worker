@@ -1,0 +1,76 @@
+{
+  "answer_ff201787_1": [
+    {
+      "fact": "User has been playing guitar for three weeks",
+      "type": "event",
+      "entities": [
+        "guitar",
+        "three weeks"
+      ]
+    },
+    {
+      "fact": "User owns a Fender CD-60S guitar",
+      "type": "personal",
+      "entities": [
+        "Fender CD-60S"
+      ]
+    },
+    {
+      "fact": "User started playing along to favorite songs on an old keyboard",
+      "type": "event",
+      "entities": [
+        "keyboard",
+        "favorite songs"
+      ]
+    },
+    {
+      "fact": "User is interested in improving fingerpicking technique",
+      "type": "preference",
+      "entities": [
+        "fingerpicking technique"
+      ]
+    },
+    {
+      "fact": "User is particularly interested in video lessons on Justin Guitar and TrueFire",
+      "type": "preference",
+      "entities": [
+        "Justin Guitar",
+        "TrueFire"
+      ]
+    },
+    {
+      "fact": "User is making good progress in learning guitar",
+      "type": "opinion",
+      "entities": [
+        "guitar",
+        "progress"
+      ]
+    }
+  ],
+  "answer_ff201787_2": [
+    {
+      "fact": "User is thinking of exploring bluegrass music more",
+      "type": "preference",
+      "entities": [
+        "bluegrass music"
+      ]
+    },
+    {
+      "fact": "User is considering buying a ukulele after trying one out at a music workshop",
+      "type": "preference",
+      "entities": [
+        "ukulele",
+        "music workshop"
+      ]
+    },
+    {
+      "fact": "User is interested in the differences in fingerpicking style between ukulele and guitar",
+      "type": "preference",
+      "entities": [
+        "fingerpicking style",
+        "ukulele",
+        "guitar"
+      ]
+    }
+  ]
+}

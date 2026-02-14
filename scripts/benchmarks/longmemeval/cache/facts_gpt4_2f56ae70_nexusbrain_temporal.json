@@ -1,0 +1,155 @@
+{
+  "answer_7a36e820_2": [
+    {
+      "fact": "User is looking for new TV shows to watch.",
+      "type": "preference",
+      "entities": [
+        "TV shows"
+      ]
+    },
+    {
+      "fact": "User enjoys 'The Handmaid's Tale' on Hulu.",
+      "type": "preference",
+      "entities": [
+        "The Handmaid's Tale",
+        "Hulu"
+      ]
+    },
+    {
+      "fact": "User has been using Apple TV+ for a few months.",
+      "type": "personal",
+      "entities": [
+        "Apple TV+"
+      ]
+    },
+    {
+      "fact": "User finished watching 'For All Mankind' and thought it was great.",
+      "type": "opinion",
+      "entities": [
+        "For All Mankind"
+      ]
+    },
+    {
+      "fact": "User is interested in 'The Power' on Amazon Prime Video.",
+      "type": "preference",
+      "entities": [
+        "The Power",
+        "Amazon Prime Video"
+      ]
+    }
+  ],
+  "answer_7a36e820_1": [
+    {
+      "fact": "User has been using Netflix, Hulu, and Amazon Prime for the past 6 months",
+      "type": "personal",
+      "entities": [
+        "Netflix",
+        "Hulu",
+        "Amazon Prime"
+      ]
+    },
+    {
+      "fact": "User is looking for new shows to watch",
+      "type": "preference",
+      "entities": []
+    },
+    {
+      "fact": "User is open to trying out other streaming services",
+      "type": "preference",
+      "entities": []
+    },
+    {
+      "fact": "User enjoys shows similar to 'Stranger Things' and 'The Handmaid's Tale'",
+      "type": "preference",
+      "entities": [
+        "Stranger Things",
+        "The Handmaid's Tale"
+      ]
+    },
+    {
+      "fact": "User is intrigued by 'The Haunting of Hill House' and 'Russian Doll'",
+      "type": "preference",
+      "entities": [
+        "The Haunting of Hill House",
+        "Russian Doll"
+      ]
+    },
+    {
+      "fact": "User is interested in the tone and pacing of 'The Haunting of Hill House' and 'Russian Doll'",
+      "type": "preference",
+      "entities": [
+        "The Haunting of Hill House",
+        "Russian Doll"
+      ]
+    }
+  ],
+  "answer_7a36e820_3": [
+    {
+      "fact": "User watched a documentary on Disney+ during a free trial last month.",
+      "type": "event",
+      "entities": [
+        "Disney+",
+        "free trial"
+      ]
+    },
+    {
+      "fact": "User is interested in nature documentaries.",
+      "type": "preference",
+      "entities": [
+        "nature documentaries"
+      ]
+    },
+    {
+      "fact": "User thinks the documentary was a series.",
+      "type": "opinion",
+      "entities": [
+        "series"
+      ]
+    },
+    {
+      "fact": "User remembers stunning footage of wildlife in the documentary.",
+      "type": "opinion",
+      "entities": [
+        "stunning footage",
+        "wildlife"
+      ]
+    },
+    {
+      "fact": "User believes the documentary was produced by Disney.",
+      "type": "opinion",
+      "entities": [
+        "Disney"
+      ]
+    },
+    {
+      "fact": "User describes the tone of the documentary as serious and educational.",
+      "type": "opinion",
+      "entities": [
+        "serious",
+        "educational"
+      ]
+    },
+    {
+      "fact": "User recalls the documentary being well-made with amazing footage.",
+      "type": "opinion",
+      "entities": [
+        "well-made",
+        "amazing footage"
+      ]
+    },
+    {
+      "fact": "User thinks the documentary focused on a specific type of animal.",
+      "type": "opinion",
+      "entities": [
+        "specific type of animal"
+      ]
+    },
+    {
+      "fact": "User watched the documentary sometime in the middle of the free trial.",
+      "type": "event",
+      "entities": [
+        "middle of the free trial"
+      ]
+    }
+  ]
+}

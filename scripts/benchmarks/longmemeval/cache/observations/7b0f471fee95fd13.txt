@@ -1,0 +1,14 @@
+**Observation Log:**
+
+- [FACT] User's name is Phung Minh Bao.
+- [FACT] User has been the founder, owner, and CEO of SGC for the past 22 years.
+- [FACT] SGC is a technology company that provides e-commerce services and value-added services on the internet.
+- [FACT] Services provided by SGC include designing, managing, and securing Wordpress websites.
+- [FACT] SGC offers domain registration and management support.
+- [FACT] SGC provides cloud computing services.
+- [FACT] SGC offers email services with personalized domain (Cpanel, Google mail, and hybrid between Cpanel & Google).
+- [FACT] SGC provides email marketing services.
+- [FACT] SGC offers services related to QR codes.
+- [TEMPORAL] User has been exploring and implementing AI in both work and daily life for the past 2 years.
+- [PREFERENCE] User is eager to share knowledge about AI with everyone.
+- [ASSISTANT_CREATED] Assistant rewrote the user's introduction in the style of Donald Trump, emphasizing the user's achievements and services provided by SGC with a characteristic Trump-like tone.

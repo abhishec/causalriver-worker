@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/27 (Sat) 09:48
+- [USER] User asked about researchers active in the field.
+- [ASSISTANT_SAID] There are many researchers who are active in the field of metaethics.
+- [ASSISTANT_SAID] Some well-known philosophers who have made significant contributions to the field include Plato, Aristotle, Immanuel Kant, John Rawls, and Judith Jarvis Thomson.
+- [ASSISTANT_SAID] More recent philosophers who have made significant contributions to metaethics include Derek Parfit, Christine Korsgaard, and T.M. Scanlon.
+- [ASSISTANT_SAID] There are many other philosophers who are currently working on research in the field of metaethics and contributing to the ongoing development of the subject.
+- [USER] User asked how to learn about causal fairness theory.
+- [ASSISTANT_SAID] Causal fairness theory is a field of study that focuses on the use of causal reasoning to understand and evaluate the fairness of algorithms and other automated decision-making systems.
+- [ASSISTANT_SAID] This field of study is concerned with the ways in which algorithms can be designed and used in a way that is fair and just, taking into account the potential causal effects of these algorithms on different groups of people.
+- [ASSISTANT_SAID] To learn more about causal fairness theory, you can start by reading some introductory texts on the subject.
+- [ASSISTANT_SAID] You could also try taking a college course in computer science, statistics, or philosophy, which may include some coverage of causal fairness theory.
+- [ASSISTANT_SAID] Additionally, you could try attending workshops or conferences on the subject, or participating in online forums or discussions where people are discussing issues related to causal fairness.
+- [ASSISTANT_SAID] It can also be helpful to engage with the work of researchers who are active in the field of causal fairness theory, such as Judea Pearl, Ilya Shpitser, and Zhiwei Steven Wu.
+- [USER] User asked if causal fairness theory is related to Simpson's paradox.
+- [ASSISTANT_SAID] Yes, causal fairness theory is related to Simpson's paradox.
+- [ASSISTANT_SAID] Simpson's paradox is a phenomenon in which a trend that is present in several different groups of data can disappear or even reverse when the groups are combined.
+- [ASSISTANT_SAID] Simpson's paradox is often cited as an example of the importance of considering causal relationships when analyzing data, as failing to do so can lead to incorrect or misleading conclusions.
+- [ASSISTANT_SAID] Causal fairness theory is concerned with using causal reasoning to understand and evaluate the fairness of algorithms and other automated decision-making systems.
+- [ASSISTANT_S

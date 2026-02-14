@@ -1,0 +1,35 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/24 (Wed) 00:02  
+[FACT] User is considering buying a music stand.  
+[PREFERENCE] User is looking for a music stand that can hold both guitar and ukulele sheet music.  
+[EVENT] User has been taking weekly ukulele lessons with a private instructor named Rachel every Thursday evening since late April.  
+[ASSISTANT_SAID] Recommended factors for a music stand: adjustable height and angle, wide enough tray, sturdy construction.  
+[ASSISTANT_SAID] Recommended music stands:  
+1. Manhasset 5001: Adjustable height range of 26-48 inches, tray width of 12 inches.  
+2. Hamilton KB90: Adjustable height range of 24-42 inches, tray width of 11 inches.  
+3. On-Stage GS7361: Adjustable height range of 24-40 inches, tray width of 12 inches.  
+[ASSISTANT_SAID] Suggested considerations before making a final decision: collapsible stand for easy storage, built-in page holder or clips, weighted base or non-slip feet.  
+[PREFERENCE] User is interested in the On-Stage GS7361 music stand.  
+[ASSISTANT_SAID] Provided insights on the On-Stage GS7361's sturdiness and weight capacity, noting it is designed for lightweight use and generally recommended for holding a maximum of 2-3 pounds (0.9-1.4 kg) of music.  
+[ASSISTANT_SAID] Suggested tips for using the GS7361 with heavy music books: distribute weight evenly, use adjustable height, secure books, and place on a stable surface.  
+[ASSISTANT_SAID] Recommended alternative options for heavier music books:  
+1. Manhasset 5001: Weight capacity of around 5 pounds (2.3 kg).  
+2. Hamilton KB90: Weight capacity of around 4 pounds (1.8 kg).  
+[PREFERENCE] User decided to go with the Manhasset 5001 music stand.  
+[EVENT] User needs to practice ukulele chords for the next lesson with Rachel.  
+[ASSISTANT_SAID] Provided tips for improving ukulele chord transitions:  
+1. Practice chord shapes.  
+2. Develop finger independence.  
+3. Practice slowly and deliberately.  
+4. Use chord chaining.  
+5. Focus on pivot fingers.  
+6. Use a metronome.  
+7. Practice in small sections.  
+8. Analyze hand position.  
+9. Practice with a drone.  
+10. Record yourself.  
+[PREFERENCE] User is interested in learning harmonica basics.  
+[EVENT] User recently got a Hohner Special 20 harmonica.  
+[ASSISTANT_SAID] Provided tips for learning harmonica basics:  
+1. Hold

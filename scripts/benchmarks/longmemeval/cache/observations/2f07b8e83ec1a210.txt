@@ -1,0 +1,26 @@
+**Observation Log:**
+
+- [FACT] The user is planning to visit Disneyland soon with friends.
+- [EVENT] The user is trying to plan their next theme park trip.
+- [EVENT] The user visited Universal Studios three weeks ago on a Friday evening.
+- [RELATIONSHIP] The user's friends mentioned are Emma and Ryan.
+- [PREFERENCE] The user is interested in comparing crowd levels at Universal Studios and Disneyland on Friday evenings.
+- [ASSISTANT_SAID] Universal Studios Hollywood can be moderately busy on Friday evenings, especially during peak seasons.
+- [ASSISTANT_SAID] Disneyland is usually busier than Universal Studios Hollywood on Friday evenings.
+- [ASSISTANT_SAID] Popular attractions at Universal Studios include Harry Potter and the Forbidden Journey, Jurassic Park River Adventure, and the Wizarding World of Harry Potter.
+- [ASSISTANT_SAID] Popular attractions at Disneyland include Space Mountain, Splash Mountain, and Indiana Jones Adventure.
+- [ASSISTANT_SAID] The user can expect longer wait times at both parks during peak seasons.
+- [ASSISTANT_SAID] The user should check the parks' websites, social media, or crowd calendars for better crowd level insights.
+- [EVENT] The user is planning to visit Disneyland soon with friends.
+- [PREFERENCE] The user is interested in good restaurant recommendations at Disneyland.
+- [ASSISTANT_SAID] Plaza Inn is famous for its fried chicken, specifically the 3-piece Fried Chicken Plate.
+- [ASSISTANT_SAID] Other recommended restaurants include Blue Bayou Restaurant, Cafe Orleans, Carthay Circle Restaurant, Jolly Holiday Bakery Cafe, Rancho del Zocalo Restaurante, and Bengal Barbecue.
+- [ASSISTANT_SAID] The user should make reservations for table-service restaurants up to 60 days in advance.
+- [ASSISTANT_SAID] The Disneyland app can be used to mobile order food and drinks at select quick-service restaurants.
+- [ASSISTANT_SAID] The user should try a churro or a Dole Whip while at Disneyland.
+- [EVENT] The user is interested in seasonal food options at Disneyland during the holiday season.
+- [ASSISTANT_SAID] Seasonal treats include Gingerbread Beignets, Candy Cane Pretzels, Snowman Marshmallow Treats, Holiday Cookies, and Eggnog Cheesecake.
+- [ASSISTANT_SAID] Seasonal drinks include Hot Cocoa, Peppermint Mocha, Eggnog Latte, and Spiced Apple Cider.
+- [ASSISTANT_SAID] Special holiday-themed attractions include "it's a small world" Holiday and Haunted Mansion Holiday.
+- [ASSISTANT_SAID] Entertainment options include A Christmas Fantasy Parade, Believe...in Holiday Magic Fireworks, and special character meet-and-greets.
+- [ASSISTANT_SAID] The user should check the Disneyland website

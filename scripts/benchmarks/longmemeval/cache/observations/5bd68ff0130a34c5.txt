@@ -1,0 +1,51 @@
+**Observation Log:**
+
+[FACT] User requested a sample meeting transcript regarding a project start involving a tech responsible, a business responsible, and a third party.
+
+[EVENT] User asked for a meeting transcript about a proposal for the creation of a website for the business responsible.
+
+[ASSISTANT_CREATED] Assistant created a sample meeting transcript with the following attendees: Tech Responsible: John, Business Responsible: Jane, Third Party: David.
+
+[ASSISTANT_SAID] Assistant provided the meeting topic as "Proposal for website creation."
+
+[ASSISTANT_SAID] John welcomed everyone to the meeting and asked Jane if she had received the proposal document from David.
+
+[ASSISTANT_SAID] Jane confirmed she received the proposal document and wanted to discuss some details.
+
+[ASSISTANT_SAID] David stated he was available to answer any questions.
+
+[ASSISTANT_SAID] John asked Jane to start discussing her requirements for the website.
+
+[ASSISTANT_SAID] Jane specified that the website should be simple, user-friendly, and visually appealing, with a blog section for news and updates.
+
+[ASSISTANT_SAID] David confirmed they could design a website that meets these requirements and offered to show design options.
+
+[ASSISTANT_SAID] Jane requested to see design options.
+
+[ASSISTANT_SAID] John asked David to explain the technical aspects of the website, including the platform and hosting.
+
+[ASSISTANT_SAID] David stated they planned to use WordPress as the platform and recommended a reliable web hosting service.
+
+[ASSISTANT_SAID] John inquired about the project timeline.
+
+[ASSISTANT_SAID] David estimated the project would take around 4-6 weeks to complete, depending on design complexity and content provided.
+
+[ASSISTANT_SAID] Jane found the timeline reasonable and requested a detailed breakdown of the project costs.
+
+[ASSISTANT_SAID] David agreed to provide a detailed quote including all costs for design, development, hosting, and maintenance.
+
+[ASSISTANT_SAID] John asked if there was anything else to discuss before wrapping up the meeting.
+
+[ASSISTANT_SAID] Jane requested references or samples of David's previous work.
+
+[ASSISTANT_SAID] David agreed to send links to previous projects similar to what Jane was looking for.
+
+[ASSISTANT_SAID] John thanked David and stated they would review the information provided and get back soon.
+
+[ASSISTANT_SAID] Jane expressed appreciation for the productive meeting and thanked John and David for their help in capturing details.
+
+[USER] User requested a summary of the meeting in bullet points, next actions mapped from the meeting, and a final conclusion.
+
+[ASSISTANT_SAID] Assistant summarized the meeting, noting it was about discussing a proposal for a website creation project.
+
+[ASSISTANT_SAID] Assistant listed attendees as

@@ -1,0 +1,27 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/02 (Tue) 11:19  
+[USER] User is trying to keep track of all their loyalty programs and rewards.  
+[ASSISTANT_SAID] Recommended apps and tools to help organize loyalty programs and rewards:  
+[ASSISTANT_SAID] 1. **AwardWallet**: Tracks loyalty programs, sends expiration notifications, offers personalized alerts. (Web, iOS, Android)  
+[ASSISTANT_SAID] 2. **LoyaltyLion**: Manages loyalty programs, tracks rewards, sends notifications for expiring points. (Web, iOS, Android)  
+[ASSISTANT_SAID] 3. **TravelBank**: Tracks loyalty programs, offers expense tracking and travel booking features. (Web, iOS, Android)  
+[ASSISTANT_SAID] 4. **AwardMapper**: Web-based tool for tracking loyalty programs and rewards. (Web)  
+[ASSISTANT_SAID] 5. **TripIt**: Travel organization app that tracks loyalty programs and integrates with itineraries. (Web, iOS, Android)  
+[ASSISTANT_SAID] 6. **Loyalty Card Manager**: Tracks loyalty cards, rewards, and expiration dates. (iOS, Android)  
+[ASSISTANT_SAID] 7. **Stocard**: Wallet app for storing loyalty cards and offers. (iOS, Android)  
+[ASSISTANT_SAID] 8. **Passbook**: Digital wallet app for loyalty cards and boarding passes. (iOS)  
+[ASSISTANT_SAID] 9. **Google Keep**: Note-taking app for tracking loyalty programs and rewards. (Web, iOS, Android)  
+[ASSISTANT_SAID] 10. **Spreadsheets**: Manual approach using Google Sheets or Microsoft Excel to track loyalty programs.  
+[USER] User is leaning towards AwardWallet or LoyaltyLion.  
+[USER] Asked for more information about the free versions and limited features of AwardWallet and LoyaltyLion.  
+[ASSISTANT_SAID] **AwardWallet Free**:  
+[ASSISTANT_SAID] - Unlimited loyalty program tracking.  
+[ASSISTANT_SAID] - Expiration notifications via email.  
+[ASSISTANT_SAID] - Manual entry of loyalty program balances.  
+[ASSISTANT_SAID] - Basic reporting of loyalty program balances and expiration dates.  
+[ASSISTANT_SAID] Limited features:  
+[ASSISTANT_SAID] - Syncing limitations (manual entry only).  
+[ASSISTANT_SAID] - Limited alerts (basic expiration notifications).  
+[ASSISTANT_SAID] - No rewards tracking.  
+[ASSISTANT

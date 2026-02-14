@@ -1,0 +1,21 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/27 (Sat) 10:47  
+[ASSISTANT_SAID] Data wrangling is a fundamental step in the process of data exploration, explanation, and prediction in marketing analytics.  
+[ASSISTANT_SAID] Data wrangling involves transforming raw data into a format that is organized, clean, and consistent to make it easier to analyze.  
+[ASSISTANT_SAID] Data cleaning is the process of identifying and correcting inaccuracies and inconsistencies in the data.  
+[ASSISTANT_SAID] Data cleaning can involve removing duplicates, fixing spelling errors, or eliminating irrelevant data points.  
+[ASSISTANT_SAID] Data cleaning is crucial to ensure that the data being used is accurate and reliable, which is essential for making informed decisions in marketing.  
+[ASSISTANT_SAID] Data filtering involves selecting a subset of data based on specific criteria.  
+[ASSISTANT_SAID] Data filtering can help focus the analysis on a particular segment of customers or a particular time period.  
+[ASSISTANT_SAID] Filtering data can help marketers gain a deeper understanding of their customer base, identify trends, and make more informed decisions.  
+[ASSISTANT_SAID] Data transformation is the process of converting data from one format to another to make it more useful for analysis.  
+[ASSISTANT_SAID] Data transformation can involve converting data to a different unit of measurement or converting dates from a text format to a date format.  
+[ASSISTANT_SAID] Data wrangling is a critical step in the process of using data exploration, explanation, and prediction to make informed decisions in marketing analytics.  
+[ASSISTANT_SAID] By transforming raw data into a format that is clean, organized, and consistent, marketers can gain valuable insights into their customer base, identify trends, and make data-driven decisions that can improve their marketing performance.  
+[ASSISTANT_SAID] A specific example of using data wrangling is analyzing customer feedback from a social media platform to identify areas of improvement in the customer experience.  
+[ASSISTANT_SAID] A researcher can extract customer feedback data from social media platforms such as Facebook, Twitter, and Instagram using web scraping tools.  
+[ASSISTANT_SAID] The researcher can clean the extracted data by removing irrelevant information such as likes, shares, and retweets.  
+[ASSISTANT_SAID] The researcher can analyze the cleaned data to identify the most common complaints customers have about the retailer's products.  
+[ASSISTANT_SAID] The researcher can use text analysis techniques such as sentiment analysis and topic modeling to identify patterns in customer feedback.  
+[ASSISTANT_SAID] Based on the insights gained from the analysis, the researcher can develop a plan to address the

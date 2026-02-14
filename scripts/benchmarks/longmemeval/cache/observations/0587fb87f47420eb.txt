@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/21 (Sun) 00:27  
+[FACT] User is looking to sell artwork online.  
+[CHANGE] User recently rearranged art supplies and organized studio space yesterday.  
+[PREFERENCE] User feels more focused after organizing their studio space.  
+[ASSISTANT_SAID] Congratulations on organizing your studio space! A clutter-free and organized workspace can boost creativity and productivity.  
+[ASSISTANT_SAID] There are numerous platforms to showcase and sell artwork, including:  
+[ASSISTANT_CREATED] List of online art marketplaces:  
+[ASSISTANT_SAID] 1. Etsy: Charges a listing fee of $0.20 per item and takes a 3.5% transaction fee.  
+[ASSISTANT_SAID] 2. Saatchi Art: Takes a 35% commission on sold artworks.  
+[ASSISTANT_SAID] 3. Redbubble: Takes a base price for each product, and the user sets their markup.  
+[ASSISTANT_SAID] 4. Society6: Similar to Redbubble, takes a base price for each product, and the user sets their markup.  
+[ASSISTANT_SAID] 5. Shopify: Monthly subscription fee starts at $29.  
+[ASSISTANT_SAID] 6. Big Cartel: Offers various plans, including a free option, with transaction fees ranging from 2.9% + 30¢ per sale.  
+[ASSISTANT_SAID] 7. ArtPal: Takes a base price for each product, and the user sets their markup.  
+[ASSISTANT_SAID] 8. DeviantArt: Takes a commission on sold artworks.  
+[ASSISTANT_SAID] 9. Fine Art America: Takes a base price for each product, and the user sets their markup.  
+[ASSISTANT_SAID] 10. User's own website: Requires handling payment processing and marketing.  
+[ASSISTANT_SAID] Factors to consider when choosing a platform include commission fees, target audience, product options, ease of use, and marketing features.  
+[ASSISTANT_SAID] User is interested in selling original artworks and is focusing on Saatchi Art, Etsy, and Shopify.  
+[ASSISTANT_SAID] Breakdown of costs associated with selling on Saatchi Art, Etsy, and Shopify:  
+[ASSISTANT_SAID] **Saatchi Art:** 35% commission fee, no listing fee, no other costs.  
+[ASSISTANT_SAID] **Etsy:** $0.20 listing fee, 3.5% transaction fee, 3% + $0.25 payment processing fee, optional advertising costs.  
+[ASSISTANT_S

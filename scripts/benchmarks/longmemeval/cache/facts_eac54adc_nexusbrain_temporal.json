@@ -1,0 +1,84 @@
+{
+  "answer_0d4d0347_1": [
+    {
+      "fact": "User has launched a website",
+      "type": "event",
+      "entities": [
+        "website"
+      ]
+    },
+    {
+      "fact": "User has created a business plan outline",
+      "type": "event",
+      "entities": [
+        "business plan"
+      ]
+    },
+    {
+      "fact": "User wants to create a content calendar for social media",
+      "type": "preference",
+      "entities": [
+        "content calendar",
+        "social media"
+      ]
+    },
+    {
+      "fact": "User wants to post engaging content to attract potential clients",
+      "type": "opinion",
+      "entities": [
+        "engaging content",
+        "potential clients"
+      ]
+    },
+    {
+      "fact": "User wants their social media to align with their overall business strategy",
+      "type": "opinion",
+      "entities": [
+        "social media",
+        "business strategy"
+      ]
+    },
+    {
+      "fact": "User prefers focusing on educational content themes",
+      "type": "preference",
+      "entities": [
+        "educational content"
+      ]
+    }
+  ],
+  "answer_0d4d0347_2": [
+    {
+      "fact": "User has signed a contract with their first client.",
+      "type": "event",
+      "entities": [
+        "first client",
+        "contract"
+      ]
+    },
+    {
+      "fact": "User is looking for advice on creating a solid contract for freelance clients.",
+      "type": "opinion",
+      "entities": [
+        "contract",
+        "freelance clients"
+      ]
+    },
+    {
+      "fact": "User has been using QuickBooks for accounting.",
+      "type": "personal",
+      "entities": [
+        "QuickBooks",
+        "accounting"
+      ]
+    },
+    {
+      "fact": "User is interested in generating contracts and invoices from QuickBooks.",
+      "type": "preference",
+      "entities": [
+        "contracts",
+        "invoices",
+        "QuickBooks"
+      ]
+    }
+  ]
+}

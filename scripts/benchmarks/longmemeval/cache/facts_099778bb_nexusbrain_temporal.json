@@ -1,0 +1,71 @@
+{
+  "answer_80d6d664_1": [
+    {
+      "fact": "User is looking for data on their company's organizational structure.",
+      "type": "event",
+      "entities": [
+        "company",
+        "organizational structure"
+      ]
+    },
+    {
+      "fact": "User's company has a total of 100 leadership positions.",
+      "type": "fact",
+      "entities": [
+        "company",
+        "leadership positions"
+      ]
+    },
+    {
+      "fact": "User plans to reach out to HR for information on the organizational structure.",
+      "type": "event",
+      "entities": [
+        "HR",
+        "organizational structure"
+      ]
+    },
+    {
+      "fact": "User is interested in benchmarks for leadership positions in different industries.",
+      "type": "preference",
+      "entities": [
+        "leadership positions",
+        "industries"
+      ]
+    }
+  ],
+  "answer_80d6d664_2": [
+    {
+      "fact": "User is looking for information on company policies regarding diversity and inclusion",
+      "type": "preference",
+      "entities": [
+        "company policies",
+        "diversity",
+        "inclusion"
+      ]
+    },
+    {
+      "fact": "User attended a workshop on gender equality",
+      "type": "event",
+      "entities": [
+        "workshop",
+        "gender equality"
+      ]
+    },
+    {
+      "fact": "User is interested in diversity and inclusion reports",
+      "type": "preference",
+      "entities": [
+        "diversity and inclusion reports"
+      ]
+    },
+    {
+      "fact": "User learned that women occupy 20 of the leadership positions in their company",
+      "type": "personal",
+      "entities": [
+        "women",
+        "leadership positions",
+        "company"
+      ]
+    }
+  ]
+}

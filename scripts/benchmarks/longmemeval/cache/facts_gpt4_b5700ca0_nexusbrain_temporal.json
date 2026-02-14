@@ -1,0 +1,48 @@
+{
+  "answer_a17423e8_1": [
+    {
+      "fact": "User is looking for local volunteer opportunities.",
+      "type": "preference",
+      "entities": [
+        "volunteer opportunities"
+      ]
+    },
+    {
+      "fact": "User helped out at an Easter Egg Hunt event last week.",
+      "type": "event",
+      "entities": [
+        "Easter Egg Hunt"
+      ]
+    },
+    {
+      "fact": "User is interested in community service or helping the underprivileged.",
+      "type": "preference",
+      "entities": [
+        "community service",
+        "underprivileged"
+      ]
+    },
+    {
+      "fact": "User is available to volunteer on weekdays, preferably in the evenings.",
+      "type": "preference",
+      "entities": [
+        "weekdays",
+        "evenings"
+      ]
+    },
+    {
+      "fact": "User is open to committing to a regular volunteer schedule.",
+      "type": "preference",
+      "entities": [
+        "regular schedule"
+      ]
+    },
+    {
+      "fact": "User is interested in the Food Bank Volunteer opportunity.",
+      "type": "preference",
+      "entities": [
+        "Food Bank Volunteer"
+      ]
+    }
+  ]
+}

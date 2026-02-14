@@ -1,0 +1,43 @@
+{
+  "answer_772472c8": [
+    {
+      "fact": "User experiments with different types of sugar.",
+      "type": "preference",
+      "entities": [
+        "sugar"
+      ]
+    },
+    {
+      "fact": "User finds that turbinado sugar adds a richer flavor.",
+      "type": "opinion",
+      "entities": [
+        "turbinado sugar",
+        "flavor"
+      ]
+    },
+    {
+      "fact": "User is interested in pairing ingredients with turbinado sugar.",
+      "type": "preference",
+      "entities": [
+        "turbinado sugar",
+        "ingredients"
+      ]
+    },
+    {
+      "fact": "User inquires about using turbinado sugar in cakes.",
+      "type": "preference",
+      "entities": [
+        "turbinado sugar",
+        "cakes"
+      ]
+    },
+    {
+      "fact": "User is looking for specific types of cakes that benefit from turbinado sugar.",
+      "type": "preference",
+      "entities": [
+        "turbinado sugar",
+        "cakes"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/06/17 (Sat) 01:40  
+[USER] User inquired about the source of auxins for plant cell cultures.  
+[ASSISTANT_SAID] Auxins are plant hormones used in plant cell cultures to promote cell growth and differentiation. The most commonly used auxin is indole-3-acetic acid (IAA).  
+[ASSISTANT_SAID] IAA can be synthesized artificially or extracted from plant tissues, but it is usually more cost-effective to produce it through chemical synthesis.  
+[USER] User asked where tryptophan is extracted from.  
+[ASSISTANT_SAID] Tryptophan is an essential amino acid that must be obtained from the diet and is synthesized in plants through the shikimate pathway.  
+[ASSISTANT_SAID] Tryptophan can be found in plant-based foods like beans, lentils, nuts, seeds, whole grains, fruits, and vegetables.  
+[ASSISTANT_SAID] Tryptophan is often sourced from microbial fermentation processes, using bacteria or yeast.  
+[USER] User asked if most inputs for plant cell culture can be made through microbial fermentation.  
+[ASSISTANT_SAID] Microbial fermentation is a method for producing many inputs used in plant cell culture, including amino acids, sugars, vitamins, and plant growth regulators.  
+[ASSISTANT_SAID] Some inputs can also be derived from plant or animal sources, but these can be more expensive and less consistent.  
+[USER] User inquired how sugars are made through microbial fermentation.  
+[ASSISTANT_SAID] Sugars like glucose and sucrose can be produced through microbial fermentation using bacteria and yeast.  
+[ASSISTANT_SAID] E. coli or Bacillus subtilis can be used to produce glucose, while yeast like Saccharomyces cerevisiae can ferment sucrose from sugarcane or sugar beet juice.  
+[ASSISTANT_SAID] Other sugars, such as fructose and maltose, can also be produced through microbial fermentation.  
+[USER] User asked what is needed to produce glucose from E. coli.  
+[ASSISTANT_SAID] A genetically modified strain of E. coli that overexpresses genes involved in glucose metabolism is needed.  
+[ASSISTANT_SAID] The E. coli strain should be grown in a suitable growth medium containing a carbon source and other nutrients.  
+[ASSISTANT_SAID] The glucose produced can be extracted and purified from the fermentation broth using techniques like filtration, centrifugation, and chromatography.  
+[USER] User expressed confusion about producing glucose with glucose and asked about efficiency.  
+[ASSISTANT_SAID] The fermentation process is not about producing glucose from glucose but using E. coli to convert starting materials like

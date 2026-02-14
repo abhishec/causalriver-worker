@@ -1,0 +1,37 @@
+{
+  "answer_d586e9cd": [
+    {
+      "fact": "User is planning a trip to Seattle",
+      "type": "event",
+      "entities": [
+        "Seattle"
+      ]
+    },
+    {
+      "fact": "User prefers hotels with great views",
+      "type": "preference",
+      "entities": [
+        "hotels",
+        "views"
+      ]
+    },
+    {
+      "fact": "User likes hotels with unique features, such as a rooftop pool or a hot tub on the balcony",
+      "type": "preference",
+      "entities": [
+        "rooftop pool",
+        "hot tub",
+        "balcony"
+      ]
+    },
+    {
+      "fact": "User is interested in hotels with a hot tub on the balcony that has a view",
+      "type": "preference",
+      "entities": [
+        "hot tub",
+        "balcony",
+        "view"
+      ]
+    }
+  ]
+}

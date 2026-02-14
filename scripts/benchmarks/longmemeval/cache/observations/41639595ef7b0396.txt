@@ -1,0 +1,26 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/28 (Sun) 05:12  
+[RELATIONSHIP] Mother is the caregiver of the daughter.  
+[FACT] The daughter has a favorite shirt and overalls that are currently soiled.  
+[ASSISTANT_SAID] Mother grabs some wipes to clean the daughter up.  
+[ASSISTANT_SAID] Mother carefully removes the soiled diaper, overalls, and shirt from the daughter.  
+[PREFERENCE] The daughter expresses a dislike for taking off her favorite clothes.  
+[ASSISTANT_SAID] Mother explains to the daughter that the clothes are dirty and need to be changed.  
+[ASSISTANT_SAID] Mother puts the dirty diaper and wipes in the toilet.  
+[EVENT] The mother sits down on the toilet to take care of her own needs.  
+[ASSISTANT_SAID] The daughter mildly protests as she watches her shirt go into the toilet, saying, "No, Mama, not my shirt!"  
+[ASSISTANT_SAID] Mother explains that the shirt is covered in "yucky stuff" and needs to be flushed away.  
+[PREFERENCE] The daughter protests again, saying she likes her shirt.  
+[ASSISTANT_SAID] Mother reassures the daughter that they need to say goodbye to the shirt to feel clean and happy again.  
+[ASSISTANT_SAID] The daughter reluctantly waves and says, "Bye bye, shirt."  
+[ASSISTANT_SAID] Mother flushes the shirt down the toilet.  
+[ASSISTANT_SAID] The daughter mildly protests again as she watches her overalls go into the toilet, saying, "No, Mama, not my overalls!"  
+[ASSISTANT_SAID] Mother explains that the overalls are also covered in yucky stuff and need to be flushed away.  
+[ASSISTANT_SAID] The daughter pouts and watches her overalls disappear down the drain, saying, "Bye bye, overalls. I'll miss you too."  
+[ASSISTANT_SAID] Mother flushes the overalls down the toilet.  
+[ASSISTANT_SAID] Mother puts a new diaper on the daughter and helps her into a fresh outfit.  
+[ASSISTANT_SAID] The daughter excitedly looks at her new yellow sundress with white flowers and matching sandals, saying, "Yay, I love this dress!"  
+[ASSISTANT_SAID] Mother finishes cleaning up the bathroom and expresses gratitude for the extra set of clothes she had packed in the diaper bag.  
+[ASSISTANT_SAID] The daughter expresses happiness, saying, "I feel so much better now."  
+[ASSISTANT_SAID] Mother expresses relief that everything had been successfully flushed away without any problems, saying, "

@@ -1,0 +1,28 @@
+**Observation Log:**
+
+- [FACT] User is planning their own wedding.
+- [FACT] User attended their cousin's wedding last weekend and was a bridesmaid.
+- [FACT] The cousin's wedding was an outdoor ceremony at the Grand Hyatt in downtown LA.
+- [RELATIONSHIP] User's cousin is mentioned as a family member.
+- [PREFERENCE] User liked the mix of flowers and greenery used for aisle and altar decorations at the cousin's wedding.
+- [EVENT] User is planning a small, intimate wedding ceremony with close friends and family.
+- [FACT] User's fiancé is named Alex.
+- [FACT] User is considering having the wedding in the San Diego area where Alex's family lives.
+- [TEMPORAL] The session date is 2022/04/10.
+- [CHANGE] User mentioned attending their cousin's wedding last weekend but later referred to it as being today, indicating a possible confusion.
+- [PREFERENCE] User is thinking of a relaxed and casual vibe for their wedding, possibly with coastal elements.
+- [EVENT] User and Alex have been looking at a few wedding venues online but have not visited them in person yet.
+- [ASSISTANT_SAID] Assistant congratulated the user on being part of their cousin's wedding and encouraged them to share what they liked about the decorations.
+- [ASSISTANT_SAID] Assistant suggested using delicate or whimsical elements like baby's breath, wildflowers, or pampas grass for a smaller ceremony.
+- [ASSISTANT_SAID] Assistant recommended incorporating personal or sentimental elements in the decor, such as family heirlooms or special photos.
+- [ASSISTANT_SAID] Assistant asked about the vibe of the ceremony and any specific colors or themes the user is drawn to.
+- [ASSISTANT_SAID] Assistant suggested considering venues with natural beauty for a coastal wedding and mentioned elements like driftwood, sea glass, or nautical accents.
+- [ASSISTANT_SAID] Assistant advised paying attention to natural light, layout, and ambiance when visiting venues.
+- [ASSISTANT_SAID] Assistant suggested using natural elements like succulents, eucalyptus, or ferns for decor and calming colors like blues, whites, and sandy neutrals.
+- [PREFERENCE] User is enjoying the venue hunt and imagining how their special day will come together.
+- [RELATIONSHIP] User mentioned that planning the wedding has brought them and Alex closer together.
+- [PREFERENCE] User is looking forward to the ceremony and exchanging vows.
+- [EVENT] Alex proposed to the user on a romantic getaway to Big Sur last year.
+- [PREFERENCE] User was caught off guard by the proposal, which made it special.
+- [PREFERENCE] User is unsure if they will write their own vows or use traditional ones but thinks it would make the ceremony more personal.
+- [PREFERENCE] User mentioned that Alex had their grandmother's engagement

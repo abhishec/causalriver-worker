@@ -1,0 +1,18 @@
+**Observation Log**
+
+**Session Date:** 2023/05/23 (Tue) 21:06  
+**Session ID:** 05793e59_1
+
+1. [FACT] The user recently attended a workshop on digital marketing at a co-working space downtown.
+2. [PREFERENCE] The user is looking for advice on digital marketing strategies.
+3. [EVENT] The user is trying to create an effective ad campaign on Facebook and Instagram.
+4. [CHANGE] The user is unsure how to track website analytics for their ad campaign.
+5. [ASSISTANT_SAID] The assistant acknowledged the user's workshop attendance and offered help with tracking website analytics for the ad campaign.
+6. [ASSISTANT_SAID] The assistant provided essential steps to track website analytics, including setting up Google Analytics, installing Facebook Pixel, and using UTM tracking.
+7. [ASSISTANT_SAID] The assistant explained how to set up goals and conversions in Google Analytics, detailing the types of goals such as form submissions, purchases, newsletter sign-ups, and phone calls.
+8. [ASSISTANT_SAID] The assistant provided a step-by-step guide on how to set up a goal in Google Analytics for a form submission, including logging in, navigating to the Goals section, and entering goal details.
+9. [ASSISTANT_SAID] The assistant detailed how to set up the goal trigger in Google Analytics, specifying the category, action, and label fields for a form submission.
+10. [ASSISTANT_SAID] The assistant suggested using "Forms" as the category, "Submit" as the action, and "Contact Form" as the label for the goal trigger.
+11. [ASSISTANT_SAID] The assistant provided an example of setting up a trigger using Google Tag Manager for a form submission.
+12. [ASSISTANT_SAID] The assistant explained how to create a campaign in Google Analytics, including steps to create a tracking URL and add it to social media ads.
+13. [ASSISTANT_SAID] The assistant instructed the user to track ad performance in Google Analytics by navigating to the "Acquisition" section and clicking on "Campaigns".

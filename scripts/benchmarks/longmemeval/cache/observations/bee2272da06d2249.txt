@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/26 (Fri) 10:34  
+[USER] User inquired about how WhatsApp protects messaging content from interception by third parties.  
+[ASSISTANT_SAID] WhatsApp uses end-to-end encryption to protect messaging content, meaning only the sender and recipient can access the message.  
+[ASSISTANT_SAID] The encryption process scrambles the message so that it can only be read by the intended recipient.  
+[ASSISTANT_SAID] Messages are not saved in plain text format on WhatsApp servers, preventing third parties from reading intercepted communications.  
+[ASSISTANT_SAID] WhatsApp uses SSL/TLS to encrypt user data in transit during server communication.  
+[ASSISTANT_SAID] WhatsApp implements two-factor authentication (2FA) to add an extra layer of security to user accounts.  
+[USER] User requested a more detailed explanation of how end-to-end encryption works and its potential weaknesses.  
+[ASSISTANT_SAID] End-to-end encryption encrypts communication between two parties so that only the intended recipients can read the message.  
+[ASSISTANT_SAID] The message is encrypted on the sender's device using a randomly generated key, which is sent along with the encrypted message to the recipient.  
+[ASSISTANT_SAID] Public-key cryptography is used for key exchange, where each user has a public and private key pair.  
+[ASSISTANT_SAID] End-to-end encryption protects sensitive information from interception and data breaches.  
+[ASSISTANT_SAID] Potential weaknesses include local storage of encryption keys, which could be extracted by an attacker with device access, and the risk of man-in-the-middle attacks.  
+[USER] User asked for an explanation of SSL/TLS and how it differs from end-to-end encryption, as well as how to check if WhatsApp is currently encrypted and secure.  
+[ASSISTANT_SAID] SSL/TLS are protocols for establishing secure communication channels over the internet, encrypting data in transit between the user's device and the server.  
+[ASSISTANT_SAID] SSL/TLS does not provide end-to-end encryption, which encrypts data from the sender's device to the recipient's device.  
+[ASSISTANT_SAID] WhatsApp uses SSL/TLS for secure communication between the user's device and WhatsApp's servers, in addition to end-to-end encryption for message content.  
+[ASSISTANT_SAID] To check if WhatsApp messages are encrypted, look for a lock icon on the chat screen and compare security codes with chat partners.  
+[USER] User requested an explanation of how WhatsApp ensures the privacy and security of users' metadata, including contact lists and call logs, and asked for clarification on what constitutes metadata.  
+[ASSISTANT_SAID

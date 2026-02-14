@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[FACT] User recently tried out a portable camping stove on a solo trip to Big Sur.  
+[FACT] User stayed at Pfeiffer Big Sur State Park campground.  
+[PREFERENCE] User is looking to expand outdoor cooking skills.  
+[EVENT] User is looking for new camping recipes, specifically easy and delicious breakfast ideas.  
+[ASSISTANT_SAID] Assistant provided a list of 10 camping breakfast recipes:  
+[ASSISTANT_CREATED] 1. Campfire Skillet Breakfast: Scrambled eggs, sausage or bacon, bell peppers, onions, and shredded cheese cooked in a cast-iron skillet over a portable stove.  
+[ASSISTANT_CREATED] 2. Trail Mix Oatmeal: Instant oats with nuts, dried fruits, and a sprinkle of cinnamon, enjoyed with hot water and a splash of milk or honey.  
+[ASSISTANT_CREATED] 3. Camping Breakfast Burrito: Scrambled eggs, cheddar cheese, salsa, and fillings (e.g., sausage, bacon, black beans, or avocado) wrapped in a tortilla.  
+[ASSISTANT_CREATED] 4. French Press Coffee and Campfire Muffins: Brew coffee with a French press and pair with homemade muffins.  
+[ASSISTANT_CREATED] 5. Breakfast Tacos: Warm tortillas, scrambled eggs, and fillings (e.g., chorizo, cheese, diced tomatoes, or salsa).  
+[ASSISTANT_CREATED] 6. Instant Campfire Hash Browns: Shredded potatoes, onions, and bell peppers cooked in a skillet with oil and seasoned.  
+[ASSISTANT_CREATED] 7. Camping Quiche: A one-skillet quiche made with eggs, milk, cheese, and fillings (e.g., bacon, sausage, or vegetables).  
+[ASSISTANT_CREATED] 8. Yogurt Parfait: Layer Greek yogurt, granola, and fruits (e.g., berries, banana, or mango) in a cup.  
+[ASSISTANT_CREATED] 9. Campfire Pancakes: Fluffy pancakes topped with syrup, honey, or fresh fruits.  
+[ASSISTANT_CREATED] 10. Egg and Cheese Wrap: Scrambled eggs, shredded cheese, and fillings (e.g., sausage, bacon, or avocado) wrapped in a tortilla.  
+[ASSISTANT_SAID] Assistant provided tips for camping breakfast cooking, including packing light, using a fuel-efficient stove, and following food safety guidelines.  
+[EVENT] User asked about food and trash storage while camping to avoid attracting wildlife, especially bears.  
+[ASSISTANT_SAID] Assistant provided tips for food storage:  
+[ASSISTANT_CREATED] 1. Use airtight containers for food and scented items.  
+[ASSISTANT_CREATED] 2. Store food at least 100 yards away from the campsite.  
+[ASSISTANT_CREATED] 3. Hang food from a

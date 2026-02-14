@@ -1,0 +1,34 @@
+{
+  "answer_ultrachat_252214": [
+    {
+      "fact": "User is an avid foodie",
+      "type": "preference",
+      "entities": []
+    },
+    {
+      "fact": "User loves trying out new types of food",
+      "type": "preference",
+      "entities": []
+    },
+    {
+      "fact": "User is interested in local cuisine",
+      "type": "preference",
+      "entities": []
+    },
+    {
+      "fact": "User is always looking for new food ideas when in New York",
+      "type": "preference",
+      "entities": [
+        "New York"
+      ]
+    },
+    {
+      "fact": "User is interested in vegan or vegetarian options",
+      "type": "preference",
+      "entities": [
+        "vegan",
+        "vegetarian"
+      ]
+    }
+  ]
+}

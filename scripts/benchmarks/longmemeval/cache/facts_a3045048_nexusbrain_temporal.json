@@ -1,0 +1,111 @@
+{
+  "answer_016f6bd4_1": [
+    {
+      "fact": "User is looking for gift ideas for their brother's birthday in June.",
+      "type": "event",
+      "entities": [
+        "brother's birthday",
+        "June"
+      ]
+    },
+    {
+      "fact": "User is considering getting their brother a new watch.",
+      "type": "preference",
+      "entities": [
+        "watch"
+      ]
+    },
+    {
+      "fact": "User's budget for the watch is around $200-$300.",
+      "type": "preference",
+      "entities": [
+        "$200-$300"
+      ]
+    },
+    {
+      "fact": "User's brother has a casual style.",
+      "type": "personal",
+      "entities": [
+        "brother",
+        "casual style"
+      ]
+    },
+    {
+      "fact": "User prefers sporty or minimalist designs for the watch.",
+      "type": "preference",
+      "entities": [
+        "sporty",
+        "minimalist designs"
+      ]
+    },
+    {
+      "fact": "User's brother likes leather straps for watches.",
+      "type": "preference",
+      "entities": [
+        "leather straps"
+      ]
+    },
+    {
+      "fact": "User ordered a personalized photo album from Shutterfly for their best friend's birthday.",
+      "type": "event",
+      "entities": [
+        "personalized photo album",
+        "Shutterfly",
+        "best friend's birthday"
+      ]
+    },
+    {
+      "fact": "User thinks the personalized photo album turned out amazing.",
+      "type": "opinion",
+      "entities": [
+        "personalized photo album"
+      ]
+    }
+  ],
+  "answer_016f6bd4_2": [
+    {
+      "fact": "User is planning a gift for their brother's birthday in June.",
+      "type": "event",
+      "entities": [
+        "brother's birthday",
+        "June"
+      ]
+    },
+    {
+      "fact": "User is considering getting their brother a watch as a gift.",
+      "type": "preference",
+      "entities": [
+        "watch",
+        "gift"
+      ]
+    },
+    {
+      "fact": "User is looking for a watch in the price range of $50-$70.",
+      "type": "preference",
+      "entities": [
+        "$50-$70"
+      ]
+    },
+    {
+      "fact": "User had a great time celebrating their best friend's 30th birthday party.",
+      "type": "event",
+      "entities": [
+        "best friend's 30th birthday party"
+      ]
+    },
+    {
+      "fact": "User's best friend's birthday party was on the 22nd.",
+      "type": "event",
+      "entities": [
+        "22nd"
+      ]
+    },
+    {
+      "fact": "User is particularly interested in the Fossil Grant Chronograph Watch.",
+      "type": "preference",
+      "entities": [
+        "Fossil Grant Chronograph Watch"
+      ]
+    }
+  ]
+}

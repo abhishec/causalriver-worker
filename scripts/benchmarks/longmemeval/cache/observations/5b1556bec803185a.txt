@@ -1,0 +1,8 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2022/10/20 (Thu) 00:06
+- [USER] User asked: "What is Generative AI?"
+- [ASSISTANT_SAID] Generative AI refers to a type of artificial intelligence that can generate new, unique data or content, such as images, music, text, or even entire conversations, without being explicitly programmed to do so.
+- [ASSISTANT_SAID] Generative models use algorithms to analyze patterns and relationships within a set of data and then use this analysis to create new data that resembles the original set.
+- [ASSISTANT_SAID] Some of the most common types of generative AI models include Generative Adversarial Networks (GANs), Variational Autoencoders (VAEs), and Recurrent Neural Networks (RNNs).
+- [ASSISTANT_SAID] Generative AI models are often used in a variety of applications, such as creating synthetic data for training other AI models, generating realistic images or videos for entertainment or marketing purposes, and even creating personalized content for individual users based on their preferences and interests.

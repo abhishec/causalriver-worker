@@ -1,0 +1,16 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/23 (Tue) 23:06  
+[ASSISTANT_SAID] The assistant provided a modified version of the `Tournament` class with a new function `select_winner_simple`.  
+[ASSISTANT_CREATED] The `select_winner_simple` function takes in two `Team` objects and computes the upset probability using historical upset rates and win probability.  
+[ASSISTANT_SAID] The `select_winner_simple` function selects a winner based on calculated probabilities.  
+[USER_SAID] The user requested to extract a method `is_upset(a, b)` which returns true if `a` beating `b` would be an upset.  
+[ASSISTANT_SAID] The assistant provided a new method `is_upset` that determines if `a` beating `b` is an upset.  
+[ASSISTANT_CREATED] The `is_upset` function takes two `Team` objects, `a` and `b`, and returns `True` if it's an upset and `False` otherwise.  
+[USER_SAID] The user requested to write an instance function in `Team` that compares `self` to another team and returns `is_better`, then use `is_better` for `is_upset`.  
+[ASSISTANT_SAID] The assistant added an instance method `is_better_than` to the `Team` class.  
+[ASSISTANT_CREATED] The `is_upset` function was updated to use the `is_better_than` method for comparing teams.  
+[USER_SAID] The user requested to clean up the `get_midpoint_win_rate` method.  
+[ASSISTANT_SAID] The assistant provided a cleaned-up version of the `get_midpoint_win_rate` method.  
+[ASSISTANT_CREATED] The cleaned-up `get_midpoint_win_rate` method simplifies the logic and checks for both `(lower_seed, higher_seed)` and `(higher_seed, lower_seed)` tuples.  
+[ASSISTANT_SAID] The cleaned-up method breaks out of the loop once both win rates have been found.

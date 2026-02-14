@@ -1,0 +1,20 @@
+{
+  "answer_ultrachat_427265": [
+    {
+      "fact": "User finds political humor refreshing compared to the seriousness of politics",
+      "type": "opinion",
+      "entities": [
+        "political humor",
+        "seriousness of politics"
+      ]
+    },
+    {
+      "fact": "User believes political humor can engage people in political discourse",
+      "type": "opinion",
+      "entities": [
+        "political humor",
+        "political discourse"
+      ]
+    }
+  ]
+}

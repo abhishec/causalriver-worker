@@ -1,0 +1,25 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/03/15 (Wed) 00:34
+- [EVENT] User is thinking of getting a new planter for their ficus tree.
+- [PREFERENCE] User is considering a ceramic planter but is worried about it being too heavy to move around.
+- [ASSISTANT_SAID] User should measure the diameter of the tree's root ball or the width of its current pot to determine the minimum size of the new planter, adding 1-2 inches to the measurement.
+- [ASSISTANT_SAID] User should consider the mature size of the ficus tree when choosing a planter.
+- [ASSISTANT_SAID] Ficus trees prefer a deeper planter to accommodate their taproot, recommending a planter that's at least 6-8 inches deep.
+- [ASSISTANT_SAID] Planters come in various materials: ceramic, terra cotta, plastic, wood, and metal, each with pros and cons.
+- [ASSISTANT_SAID] Ceramic planters are attractive, durable, and resistant to water damage but can be heavy and prone to cracking.
+- [ASSISTANT_SAID] Terra cotta planters are breathable and affordable but can crack and require more frequent watering.
+- [ASSISTANT_SAID] Plastic planters are lightweight and inexpensive but may look cheap and be less durable.
+- [ASSISTANT_SAID] Wood planters are natural and attractive but can rot over time.
+- [ASSISTANT_SAID] Metal planters are durable and modern but can be heavy and conduct heat.
+- [ASSISTANT_SAID] User should ensure the planter has drainage holes to prevent waterlogged soil.
+- [ASSISTANT_SAID] User should consider the weight and mobility of the planter based on how often they plan to move it.
+- [ASSISTANT_SAID] User should choose a planter that fits their home's style and complements the surrounding decor.
+- [ASSISTANT_SAID] User should consider the volume of soil needed and set a budget for the planter.
+- [EVENT] User brought home a new peace lily plant about 3 weeks ago, which has been doing great.
+- [ASSISTANT_SAID] A ceramic planter with a wide base can provide stability and distribute weight evenly, making it easier to move.
+- [ASSISTANT_SAID] User should consider lightweight ceramic options or ceramic planters with built-in handles for easier mobility.
+- [ASSISTANT_SAID] High-quality plastic or resin planters can be lighter and more durable than ceramic.
+- [ASSISTANT_SAID] Composite materials can combine style and ease of movement.
+- [EVENT] User is thinking of getting a self-watering planter for their ficus tree.
+- [ASSISTANT_SAID] Self-watering

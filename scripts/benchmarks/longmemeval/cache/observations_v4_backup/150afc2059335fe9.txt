@@ -1,0 +1,29 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/23 (Tue) 09:46  
+[EVENT] User is looking for advice on organizing coupons.  
+[FACT] User has physical coupons from the Sunday paper and digital coupons on their grocery store app.  
+[EVENT] User bought a new vacuum cleaner online during a sale with a 15% off coupon code on the same day.  
+[PREFERENCE] User feels good about getting a 15% off coupon for their new vacuum cleaner.  
+[ASSISTANT] Recommended using a coupon binder or folder with clear plastic sleeves to store physical coupons.  
+[ASSISTANT] Suggested organizing physical coupons by category (e.g., food, household, personal care).  
+[ASSISTANT] Advised sorting physical coupons by expiration date and purging regularly.  
+[ASSISTANT] Recommended using digital coupons through the grocery store app and creating a digital folder for screenshots or digital copies of online coupons.  
+[ASSISTANT] Suggested enabling notifications for the grocery store app or signing up for newsletters to receive digital coupons and sale alerts.  
+[ASSISTANT] Recommended syncing physical and digital coupons and keeping a list or spreadsheet to cross-reference them.  
+[ASSISTANT] Suggested planning shopping trips around coupons and stacking coupons for maximum savings.  
+[ASSISTANT] Advised keeping track of savings to stay motivated in couponing.  
+[PREFERENCE] User plans to invest in a binder with clear plastic sleeves for physical coupons.  
+[ASSISTANT] Recommended specific apps for organizing digital coupons: Favado, RetailMeNot, Checkout 51, and Flipp.  
+[ASSISTANT] Suggested using digital note-taking apps like Evernote, OneNote, or Simplenote for storing digital coupons.  
+[ASSISTANT] Advised taking screenshots of digital coupons and storing them in a dedicated album or folder on the phone.  
+[ASSISTANT] Recommended using digital wallets like Apple Wallet or Google Pay for storing digital coupons and loyalty cards.  
+[ASSISTANT] Suggested creating a dedicated email folder for digital coupons and promo codes.  
+[PREFERENCE] User decided to try out Evernote for storing digital coupons since they already use it for other notes.  
+[EVENT] User has been receiving a lot of coupons in the mail, especially for their favorite snacks.  
+[EVENT] User received a $1 off coupon for a box of granola bars.  
+[PREFERENCE] User always seems to need granola bars.  
+[ASSISTANT] Suggested categorizing mail coupons as soon as possible and creating a separate notebook or tag in Evernote for snack coupons.  
+[ASSISTANT] Recommended scanning or taking a photo of mail coupons and uploading them to Evernote.  
+[ASSISTANT] Advised checking coupon terms and conditions for stacking opportunities.  
+[EVENT] User is considering using cashback apps like Ibotta and Fetch Rewards to earn

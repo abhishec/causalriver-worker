@@ -1,0 +1,24 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/20 (Sat) 09:05  
+[USER] User is having trouble finding new shows to watch on Disney+.  
+[PREFERENCE] User is interested in Marvel or Star Wars shows.  
+[ASSISTANT_SAID] Recommended Marvel shows:  
+[ASSISTANT_SAID] 1. Ms. Marvel (2022) - Follows Kamala Khan, a teenage Pakistani-American superhero.  
+[ASSISTANT_SAID] 2. Moon Knight (2022) - Explores the life of Marc Spector, a mercenary with multiple personalities.  
+[ASSISTANT_SAID] 3. Hit-Monkey (2021) - An animated series about a Japanese snow monkey who becomes an assassin.  
+[ASSISTANT_SAID] 4. M.O.D.O.K. (2021) - Follows the life of M.O.D.O.K., a supervillain balancing evil schemes with an office job.  
+[ASSISTANT_SAID] Recommended Star Wars shows:  
+[ASSISTANT_SAID] 1. Andor (2022) - A prequel to Rogue One, exploring Cassian Andor's early life.  
+[ASSISTANT_SAID] 2. The Book of Boba Fett (2022) - Follows Boba Fett and Fennec Shand in Tatooine's underworld.  
+[ASSISTANT_SAID] 3. Star Wars: Visions (2021) - An animated anthology series by seven Japanese anime studios.  
+[ASSISTANT_SAID] 4. Star Wars: The Bad Batch (2021) - Follows a group of elite clones during the Clone Wars.  
+[USER] User is looking for recommendations for TV shows similar to "Stranger Things" and "The Crown."  
+[ASSISTANT_SAID] Recommended shows similar to "Stranger Things":  
+[ASSISTANT_SAID] 1. The Haunting of Hill House (Netflix) - A horror series about a family's experiences in a haunted house.  
+[ASSISTANT_SAID] 2. The OA (Netflix) - A series about interdimensional travel and near-death experiences.  
+[ASSISTANT_SAID] 3. The X-Files (Hulu, Amazon Prime) - Follows FBI agents investigating paranormal cases.  
+[ASSISTANT_SAID] 4. Locke & Key (Netflix) - Follows siblings discovering magical keys with hidden powers.  
+[ASSISTANT_SAID] 5. The Twilight Zone (CBS All Access, Hulu) - A reboot of the classic anthology series.  
+[ASSISTANT_SAID] Recommended shows similar to "The Crown":  
+[ASSISTANT_SAID]

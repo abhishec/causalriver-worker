@@ -1,0 +1,30 @@
+**Observation Log:**
+
+[FACT] User is located in San Francisco.  
+[EVENT] User is planning a dinner party to celebrate their recent promotion.  
+[RELATIONSHIP] User mentioned a recruiter from a top consulting firm they met at a conference last week.  
+[CHANGE] User has been busy with their new role.  
+[TEMPORAL] User wants to follow up with the recruiter next week.  
+[PREFERENCE] User is open to any cuisine except seafood.  
+[PREFERENCE] User's budget for the dinner party is around $50-75 per person.  
+[PREFERENCE] User prefers a casual atmosphere for the dinner party.  
+[ASSISTANT_SAID] Assistant congratulated the user on their promotion.  
+[ASSISTANT_SAID] Assistant requested the city or metropolitan area for restaurant recommendations.  
+[ASSISTANT_SAID] Assistant provided a list of restaurant recommendations in San Francisco:  
+[ASSISTANT_SAID] 1. Foreign Cinema: California-Mediterranean cuisine, $60-$70 per person.  
+[ASSISTANT_SAID] 2. Nopa: California cuisine, $55-$70 per person.  
+[ASSISTANT_SAID] 3. Delarosa: Rustic Italian menu, $50-$65 per person.  
+[ASSISTANT_SAID] 4. Zeitgeist: American comfort food, $45-$60 per person.  
+[ASSISTANT_SAID] 5. The Pork Store Cafe: Creative American comfort food, $40-$55 per person.  
+[ASSISTANT_SAID] Assistant suggested setting a reminder on the user's phone or calendar for following up with the recruiter.  
+[ASSISTANT_SAID] Assistant provided details on how to make a reservation at Foreign Cinema:  
+[ASSISTANT_SAID] 1. Call them directly at (415) 861-8135.  
+[ASSISTANT_SAID] 2. Use online reservation platforms like OpenTable or Yelp.  
+[ASSISTANT_SAID] Assistant advised to be flexible with dates and times for the reservation.  
+[ASSISTANT_SAID] Assistant explained Foreign Cinema's dress code as casual-chic.  
+[ASSISTANT_SAID] Assistant mentioned that Foreign Cinema has private dining options:  
+[ASSISTANT_SAID] 1. The Mezzanine: Semi-private area for groups of 10-12.  
+[ASSISTANT_SAID] 2. The Patio: Outdoor area for larger groups.  
+[ASSISTANT_SAID] 3. The Red Room: Private room for groups of 10-12.  
+[ASSISTANT_SAID] Assistant explained Foreign Cinema's cancellation policy: 24-hour notice required to avoid penalties.  
+[ASSISTANT_SAID] Assistant provided options for canceling or

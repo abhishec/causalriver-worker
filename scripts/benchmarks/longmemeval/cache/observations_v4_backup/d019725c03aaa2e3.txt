@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [EVENT] User is planning their own wedding.
+- [PREFERENCE] User has always dreamed of having a small, outdoor ceremony, possibly at a beach or in a park.
+- [EVENT] User recently attended their college roommate's wedding in the city.
+- [FACT] User's college roommate's name is Emily, and her partner's name is Sarah.
+- [EVENT] Emily and Sarah had a rooftop garden ceremony overlooking the skyline.
+- [PREFERENCE] User found Emily and Sarah's wedding beautiful and romantic.
+- [TEMPORAL] User returned from the wedding on an unspecified date prior to the session date of 2023/10/15.
+- [RELATIONSHIP] User has a close relationship with their college roommate, Emily.
+- [ASSISTANT] Assistant provided tips and resources for finding outdoor wedding venues, including defining location, researching beach and park venues, using online directories, and contacting local tourism boards.
+- [PREFERENCE] User wants to keep their wedding guest list intimate, similar to Emily's wedding, which had about 50 guests.
+- [ASSISTANT] Assistant provided tips on how to narrow down the guest list without hurting anyone's feelings, including categorizing relationships, prioritizing important people, and creating a "B-list."
+- [PREFERENCE] User plans to categorize their relationships and prioritize the people they want at their wedding.
+- [EVENT] User is considering hosting a smaller, more casual celebration with friends who aren't invited to the wedding.
+- [PREFERENCE] User is thinking about a post-wedding brunch or dinner at a local restaurant for friends not invited to the wedding.
+- [ASSISTANT] Assistant supported the idea of a post-wedding celebration and provided suggestions for types of gatherings.
+- [PREFERENCE] User is considering the type of music they want to play at their wedding ceremony.
+- [ASSISTANT] Assistant recommended acoustic and instrumental music for an outdoor, intimate ceremony, including options like acoustic guitar, piano, string quartet, and harpist.
+- [ASSISTANT] Assistant provided a list of popular wedding ceremony songs and playlists, including classic love songs and romantic instrumentals.
+- [ASSISTANT] Assistant advised keeping the music simple and considering the length of the songs for the ceremony.

@@ -1,0 +1,15 @@
+**Observation Log:**
+
+- [FACT] The user is interested in wildlife conservation efforts.
+- [EVENT] The user volunteered at the Walk for Wildlife event in June.
+- [PREFERENCE] The user is interested in habitat restoration and conservation.
+- [PREFERENCE] The user has some experience with event planning from volunteering at the Walk for Wildlife event.
+- [TEMPORAL] The session date is 2023/11/29 (Wed) at 11:35.
+- [TEMPORAL] The user is available to volunteer on weekends.
+- [TEMPORAL] The user is willing to travel up to 30 minutes from their home to volunteer.
+- [PREFERENCE] The user is open to working with organizations of any size.
+- [PREFERENCE] The user is looking for volunteer opportunities that are suitable for adults.
+- [ASSISTANT] The assistant provided a list of organizations to consider for volunteering, including National Wildlife Federation, Wildlife Conservation Society, The Nature Conservancy, local wildlife refuges or national parks, state wildlife agencies, local zoos or aquariums, community-based organizations, online platforms, social media, and local government.
+- [ASSISTANT] The assistant advised the user to look for clear mission statements, volunteer opportunities, project descriptions, testimonials, transparency, social media engagement, and contact information when researching organizations.
+- [ASSISTANT] The assistant cautioned the user about red flags such as lack of transparency, vagueness about projects, overemphasis on fundraising, unrealistic expectations, poor online reviews, unclear language, and lack of contact information.
+- [ASSISTANT] The assistant suggested that the user could reach out via email, phone call, or contact form, with email being the preferred method for initial contact.

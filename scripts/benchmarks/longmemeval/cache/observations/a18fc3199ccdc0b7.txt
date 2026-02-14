@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [FACT] User is in San Francisco and takes the Muni bus to work.
+- [FACT] User mentioned they had to take an Uber to work one day, which cost them $20.
+- [PREFERENCE] User is thinking of switching to a monthly bus pass for cost-effectiveness.
+- [PREFERENCE] User is considering getting off the bus a stop earlier to walk to work for exercise.
+- [EVENT] User is planning to track their daily commute to see how much time and money they can save by walking.
+- [ASSISTANT_SAID] The cost of a monthly Muni pass for adults (18-64) is $96 per month.
+- [ASSISTANT_SAID] The cost of a monthly Muni pass for youth (13-17) is $76 per month.
+- [ASSISTANT_SAID] The cost of a monthly Muni pass for seniors (65+) is $36 per month.
+- [ASSISTANT_SAID] The cost of a monthly Muni pass for disabled individuals is $36 per month.
+- [ASSISTANT_SAID] The cost of a monthly Muni pass for low-income individuals is $76 per month (requires eligibility and application).
+- [ASSISTANT_SAID] Monthly Muni passes can be purchased at Muni Metro stations, Clipper Card retailers, the SFMTA Customer Service Center, and online through the Clipper Card website or MuniMobile app.
+- [ASSISTANT_SAID] Suggested tips for staying safe while walking in the city include being aware of surroundings, staying alert, walking with confidence, sticking to well-lit areas, avoiding walking alone at night, keeping valuables secure, following traffic rules, staying hydrated, letting someone know your route, and trusting instincts.
+- [ASSISTANT_SAID] Recommended apps for tracking daily commute include Google Maps, Citymapper, Transit, Strava, MapMyWalk, Commute Tracker, and TripIt.
+- [ASSISTANT_SAID] Citymapper provides real-time information on public transportation and can help track walking routes and calories burned.
+- [ASSISTANT_SAID] Citymapper has a feature called "GO" for real-time journey tracking and step-by-step directions.
+- [ASSISTANT_SAID] Citymapper has a "Calorie Tracker" feature to estimate calories burned while walking.
+- [CHANGE] User is trying to get more exercise and hopes that tracking their commute will encourage them to walk more and take the bus less.
+- [TEMPORAL] Session date is 2023/06/09 (Fri) 09:30.

@@ -1,0 +1,15 @@
+**Observation Log:**
+
+- [FACT] The user is seeking information on how to find people's birthdays in Salesforce.
+- [ASSISTANT_SAID] The assistant suggested using the Contacts or Leads object in Salesforce to find birthdays.
+- [ASSISTANT_SAID] The assistant recommended adding a custom field for "Birthday" in Salesforce.
+- [ASSISTANT_SAID] The assistant mentioned using the Salesforce report builder to create a report displaying birthday information for contacts and leads.
+- [ASSISTANT_SAID] The assistant advised adding a Birthday field to the page layout to view the information on the record detail page.
+- [USER] The user requested steps for finding birthdays specifically for their caseload.
+- [ASSISTANT_CREATED] The assistant provided a structured list of steps to add birthdays to Salesforce Contacts or Leads:
+  1. Create a custom field by going to the "Setup" menu, selecting "Objects and Fields," then "Contact" or "Lead," and clicking "New" to create a new custom field with "Date" as the data type and labeling it "Birthday."
+  2. Add the custom field to the page layout by editing the layout used for the user's caseload and dragging the "Birthday" field to the "Contact Detail" section.
+  3. Add birthday data by going to the Contacts or Leads tab, opening each record, and entering the person's birthday in the "Birthday" field.
+  4. Create a report by going to the "Reports" tab, clicking "New Report," selecting the "Contacts" or "Leads" object, adding the "Birthday" field, and applying filters for upcoming birthdays.
+  5. Schedule the report to be automatically sent on a regular basis, such as monthly or weekly.
+- [ASSISTANT_SAID] The assistant concluded that this method allows the user to easily view and manage their caseload's birthdays in Salesforce.

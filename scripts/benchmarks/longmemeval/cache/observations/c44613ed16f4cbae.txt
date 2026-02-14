@@ -1,0 +1,32 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/20 (Sat) 02:25
+- [FACT] User discusses sales strategies and behaviors of successful salespeople.
+- [PREFERENCE] User believes that great salespeople adopt similar behavior patterns to overcome objections.
+- [PREFERENCE] User states that successful salespeople have a deep understanding of common objections.
+- [PREFERENCE] User emphasizes that there is no one-size-fits-all approach to overcoming objections.
+- [PREFERENCE] User mentions that every potential customer and objection is unique.
+- [ASSISTANT_SAID] Assistant lists common strategies successful salespeople use to overcome objections, including:
+  - Listening carefully to the customer's objection.
+  - Restating the customer's objection in their own words.
+  - Responding with a well-prepared, logical argument.
+  - Offering additional information or resources.
+  - Asking open-ended questions.
+  - Offering to address concerns with a supervisor.
+  - Agreeing to disagree if necessary.
+- [ASSISTANT_SAID] Assistant emphasizes the importance of remaining calm, professional, and focused on the customer's needs.
+- [PREFERENCE] User notes that objection scenarios can lead to misunderstandings.
+- [PREFERENCE] User states that average performers may respond with knee-jerk monologues.
+- [PREFERENCE] User believes that responding to the wrong objection creates friction and shows insecurity.
+- [ASSISTANT_SAID] Assistant suggests that top sellers follow up objections with questions.
+- [ASSISTANT_CREATED] Assistant provides a list of 20 follow-up questions for salespeople to use when addressing objections.
+- [ASSISTANT_CREATED] The list includes questions such as:
+  - "Can you tell me more about your concerns with the product/service?"
+  - "What would it take for you to feel confident in moving forward with the purchase?"
+  - "Are there any specific features or benefits that you are particularly interested in?"
+- [USER] User requests to rewrite the 20 follow-up questions in the context of OwnBackup, the #1 backup and recovery solution for Salesforce.
+- [ASSISTANT_CREATED] Assistant rewrites the 20 follow-up questions specifically for OwnBackup, including:
+  - "Can you tell me more about your concerns with the Salesforce backup and recovery process?"
+  - "What would it take for you to feel confident in implementing OwnBackup?"
+  - "How does OwnBackup compare to other backup and recovery solutions for Salesforce that you have considered?"
+- [ASSISTANT_CREATED] The rewritten questions maintain the structure of the original questions but are tailored to the context of OwnBackup and Salesforce data protection.

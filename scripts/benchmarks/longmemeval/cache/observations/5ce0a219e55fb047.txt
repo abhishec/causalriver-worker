@@ -1,0 +1,30 @@
+**Observation Log**
+
+**Session Date:** 2023/03/15 (Wed) 02:19  
+**Session ID:** sharegpt_YfIEYo1_0
+
+1. [USER] This is the WBS of my project.
+2. [USER] Planning and Coordination includes tasks such as defining program goals and objectives, developing a program budget, and creating a program timeline.
+3. [USER] The WBS includes the following categories: 
+   - Planning and Coordination
+   - Venue and Logistics
+   - Program Design and Development
+   - Participant Recruitment and Communication
+   - Program Delivery and Execution
+   - Program Follow-Up and Improvement
+4. [USER] Each category is further broken down into specific tasks, with subtasks listed beneath them.
+5. [USER] The WBS provides a comprehensive overview of the entire program/project.
+6. [USER] I am looking for effort estimation under specific criteria.
+7. [ASSISTANT_SAID] Effort estimation is a complex process that requires a deep understanding of the project scope, requirements, and resources.
+8. [ASSISTANT_SAID] The estimated effort for Planning and Coordination is between 10-20% of the total effort required for the project.
+9. [ASSISTANT_SAID] The estimated effort for Venue and Logistics is between 10-20% of the total effort required for the project.
+10. [ASSISTANT_SAID] The estimated effort for Program Design and Development is between 20-30% of the total effort required for the project.
+11. [ASSISTANT_SAID] The estimated effort for Participant Recruitment and Communication is between 10-20% of the total effort required for the project.
+12. [ASSISTANT_SAID] The estimated effort for Program Delivery and Execution is between 30-40% of the total effort required for the project.
+13. [ASSISTANT_SAID] The estimated effort for Program Follow-Up and Improvement is between 10-20% of the total effort required for the project.
+14. [ASSISTANT_SAID] These estimates are rough and may vary depending on the specific requirements and resources available for the project.
+15. [USER] Could you add the Explanation / justification for item and Special skills required and assumptions (if any)?
+16. [ASSISTANT_CREATED] A table was created that includes estimated effort, explanation/justification for each item, special skills required, and assumptions for each WBS category.
+17. [ASSISTANT_SAID] The explanation for Planning and Coordination includes that it involves initial planning, goal-setting, and coordination necessary to launch the program.
+18. [ASSISTANT_SAID] Special skills required for Planning and Coordination include project management, communication, and negotiation.
+19. [ASSISTANT_SAID] Assumptions for Planning and Coordination include that project goals and objectives are

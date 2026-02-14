@@ -1,0 +1,18 @@
+**Observation Log:**
+
+- [FACT] The user attended a digital marketing conference last week.
+- [FACT] The user was impressed by the keynote speaker, Rachel Lee, at the conference.
+- [PREFERENCE] The user is looking for insights on the latest trends in digital marketing.
+- [EVENT] The user is interested in learning more about influencer marketing.
+- [TEMPORAL] The session date is 2022/03/02 (Wed) 06:20.
+- [RELATIONSHIP] Rachel Lee is mentioned as a keynote speaker at the user's attended conference.
+- [ASSISTANT_SAID] The assistant provided an overview of the latest trends in digital marketing, including personalization, video content, influencer marketing, voice search optimization, customer experience, data-driven marketing, and mobile-first strategy.
+- [ASSISTANT_SAID] The assistant listed what's not working in digital marketing, including interruptive advertising, one-size-fits-all marketing, overreliance on Facebook, lack of transparency and trust, and slow website load times.
+- [ASSISTANT_SAID] The assistant explained that micro-influencers have between 1,000 to 100,000 followers and specialize in specific niches.
+- [ASSISTANT_SAID] The assistant provided reasons why micro-influencers are effective for brands, including higher engagement rates, niche targeting, authenticity and trust, cost-effectiveness, increased conversions, long-term partnerships, and diverse content opportunities.
+- [ASSISTANT_SAID] The assistant outlined how to find and partner with micro-influencers, including research, using influencer marketing platforms, looking for engagement, reaching out, and setting clear expectations.
+- [ASSISTANT_SAID] The assistant identified common mistakes brands make when working with micro-influencers, such as lack of research, unclear expectations, inauthentic content, overly restrictive guidelines, and not respecting the micro-influencer's audience.
+- [ASSISTANT_SAID] The assistant provided solutions to avoid common mistakes, including thorough research, clear communication, allowing creative freedom, understanding the audience, and monitoring performance.
+- [ASSISTANT_SAID] The assistant suggested ways to measure the ROI of influencer marketing campaigns, including hashtag tracking, unique promo codes, affiliate marketing, Google Analytics, influencer-specific landing pages, surveys, and social media analytics.
+- [ASSISTANT_SAID] The assistant mentioned calculating cost-per-acquisition (CPA) and return on ad spend (ROAS) as methods to measure ROI.
+- [ASSISTANT_CREATED] The assistant created a structured list of common mistakes brands make when working with micro-influencers and provided solutions to avoid them.

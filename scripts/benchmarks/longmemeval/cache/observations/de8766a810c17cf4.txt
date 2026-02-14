@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [FACT] The user is a teacher of a cooking class.
+- [FACT] The user teaches middle school students the basics of healthy and safe cooking.
+- [FACT] The age of the user's students is 12-16.
+- [PREFERENCE] The user prefers not to use quizzes for assessing foundational knowledge as they enable short-term recall rather than long-term memorization.
+- [ASSISTANT_SAID] The first instructional strategy mentioned is known as Undoing.
+- [ASSISTANT_SAID] Research shows that learners learn better when the learning experience challenges commonly mistaken foundational ideas and assumptions.
+- [ASSISTANT_SAID] Undoing activities are helpful at the start of the learning process by identifying and correcting gaps in knowledge, misconceptions, and misplaced reasoning.
+- [ASSISTANT_CREATED] The assistant created an undoing activity scenario involving Sarah making a healthy sandwich.
+- [ASSISTANT_CREATED] The assistant provided four response options (A, B, C, D) regarding the healthiness of white bread versus whole wheat bread.
+- [ASSISTANT_SAID] Feedback was provided for each response option, explaining misconceptions and the correct understanding.
+- [ASSISTANT_SAID] The correct answer for the sandwich activity is option C: "Whole wheat bread is healthier than white bread because it contains more fiber and nutrients."
+- [ASSISTANT_SAID] A resource was suggested: "How to Make Healthy Sandwiches" article on the American Heart Association website.
+- [USER] The user requested another activity similar to the first one.
+- [ASSISTANT_CREATED] The assistant created a second undoing activity scenario involving Liam making a healthy dinner.
+- [ASSISTANT_CREATED] The assistant provided four response options (A, B, C, D) regarding the healthiness of olive oil versus butter.
+- [ASSISTANT_SAID] Feedback was provided for each response option, explaining misconceptions and the correct understanding.
+- [ASSISTANT_SAID] The correct answer for the dinner activity is option C: "Olive oil is healthier than butter because it contains healthy fats that can improve heart health."
+- [ASSISTANT_SAID] A resource was suggested: "Healthy Cooking Oils" article on Healthline with a link provided: <https://www.healthline.com/nutrition/healthy-cooking-oils>.
+- [TEMPORAL] The session date is 2023/04/02 (Sun) 01:32.

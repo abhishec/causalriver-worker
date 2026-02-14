@@ -1,0 +1,19 @@
+**Observation Log:**
+
+- [FACT] The user recently changed their surname to Johnson.
+- [FACT] The user’s employer updated their payroll information on February 20th.
+- [CHANGE] The user is updating their accounts to ensure consistency across all their accounts after their name change.
+- [EVENT] The user is updating their Netflix profile.
+- [ASSISTANT_SAID] To update the name on the Netflix website, the user should go to [www.netflix.com](http://www.netflix.com), sign in, click on their profile picture, select "Account," scroll down to "Account," click "Update personal information," click "Edit" next to "Name," enter their new name (Johnson), and click "Save."
+- [ASSISTANT_SAID] To update the name on the Netflix mobile app, the user should open the app, tap the profile icon, tap "Account," scroll down to "Account," tap "Update personal information," tap "Edit" next to "Name," enter their new name (Johnson), and tap "Save."
+- [ASSISTANT_SAID] The assistant congratulated the user on their name change and encouraged them to update their information across all accounts.
+- [EVENT] The user is planning to update their Amazon profile.
+- [ASSISTANT_SAID] The user can update their existing Amazon account with their new name without creating a new account.
+- [ASSISTANT_SAID] To update the name on the Amazon website, the user should go to [www.amazon.com](http://www.amazon.com), sign in, click on "Account & Lists," select "Account," click on "Login & security," click "Edit" next to "Name," enter their new name (Johnson), and click "Save changes."
+- [ASSISTANT_SAID] To update the name on the Amazon mobile app, the user should open the app, tap the hamburger menu icon, tap "Account," scroll down to "Account settings," tap "Login & security," tap "Edit" next to "Name," enter their new name (Johnson), and tap "Save changes."
+- [ASSISTANT_SAID] Amazon will review the name change and notify the user via email once the update is complete.
+- [EVENT] The user needs to notify their health insurance provider about their name change.
+- [ASSISTANT_SAID] The user typically needs to provide a legal name change document, marriage certificate, divorce decree, updated government-issued ID, and SSA document to their health insurance provider.
+- [ASSISTANT_SAID] The user should check with their insurance provider for specific instructions on how to update their records.
+- [EVENT] The user is updating their credit report with their new name.
+- [ASSISTANT_SAID] The user needs to contact each of the three major credit bureaus (Equifax, Experian, TransUnion) to update

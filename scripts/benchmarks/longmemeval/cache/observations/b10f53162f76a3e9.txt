@@ -1,0 +1,28 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/08 (Mon) 11:55
+- [USER] User inquired about measures websites take to prevent data breaches and unauthorized access to user data.
+- [ASSISTANT_SAID] Websites implement several measures to prevent data breaches and unauthorized access to user data, including:
+  - [ASSISTANT_SAID] 1. Encryption: Protects user data during transmission by encoding it.
+  - [ASSISTANT_SAID] 2. Firewalls: Protect websites from unauthorized access by monitoring traffic.
+  - [ASSISTANT_SAID] 3. Multi-factor authentication: Verifies user identity with two or more pieces of evidence.
+  - [ASSISTANT_SAID] 4. Access controls: Limits user access to sensitive information based on job duties.
+  - [ASSISTANT_SAID] 5. Regular updates and patches: Keeps software updated to address vulnerabilities.
+  - [ASSISTANT_SAID] 6. Regular audits: Ensures security measures are effective.
+  - [ASSISTANT_SAID] 7. Employee training: Educates employees on security best practices.
+  - [ASSISTANT_SAID] 8. Monitoring: Uses tools to detect suspicious activity and potential breaches.
+- [USER] User requested an example of a recent data breach and how the website handled it.
+- [ASSISTANT_SAID] Example of a data breach: Marriott International breach in 2018, affecting 500 million guests.
+  - [ASSISTANT_SAID] Marriott's response included:
+    - Prompt notification to affected customers.
+    - Setting up a website for information about the breach.
+    - Offering free credit monitoring.
+    - Working with law enforcement to investigate.
+    - Enhancing security measures, including multi-factor authentication and increased monitoring.
+- [USER] User asked for more examples of companies that have experienced data breaches and how they handled them, expressing interest in common practices.
+- [ASSISTANT_SAID] Examples of companies with data breaches:
+  - [ASSISTANT_SAID] 1. Equifax (2017): Exposed information of 143 million people; offered free credit monitoring and installed new security measures.
+  - [ASSISTANT_SAID] 2. Target (2013): Impacted 40 million customers; offered free credit monitoring and pursued litigation against hackers.
+  - [ASSISTANT_SAID] 3. Yahoo (2013-14): Compromised 3 billion accounts; reset passwords and offered free credit monitoring.
+  - [ASSISTANT_SAID] 4. Uber (2016): Affected 57 million users; paid ransom, later disclosed breach, and offered free credit monitoring.
+  - [ASSISTANT_SAID] 5. Capital

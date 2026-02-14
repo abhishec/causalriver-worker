@@ -1,0 +1,28 @@
+**Observation Log:**
+
+[FACT] User is planning a scary movie marathon for next week.  
+[FACT] User recently returned from Halloween Horror Nights at Universal Studios Hollywood.  
+[RELATIONSHIP] User attended Halloween Horror Nights with friends Alex and Emma.  
+[PREFERENCE] User is looking for horror movie recommendations.  
+[EVENT] User experienced an Exorcist-themed haunted house at Halloween Horror Nights.  
+[ASSISTANT_SAID] The Exorcist (1973) is recommended as a classic horror film.  
+[ASSISTANT_SAID] The Shining (1980) is recommended as a classic horror film.  
+[ASSISTANT_SAID] Halloween (1978) is recommended as a classic horror film.  
+[ASSISTANT_SAID] Get Out (2017) is recommended as a modern horror film.  
+[ASSISTANT_SAID] A Quiet Place (2018) is recommended as a modern horror film.  
+[ASSISTANT_SAID] Hereditary (2018) is recommended as a modern horror film.  
+[ASSISTANT_SAID] The Conjuring (2013) is recommended as a supernatural horror film.  
+[ASSISTANT_SAID] The Ring (2002) is recommended as a supernatural horror film.  
+[ASSISTANT_SAID] The Amityville Horror (2005) is recommended as a supernatural horror film.  
+[ASSISTANT_SAID] Scream (1996) is recommended as a slasher film.  
+[ASSISTANT_SAID] I Know What You Did Last Summer (1997) is recommended as a slasher film.  
+[ASSISTANT_SAID] Friday the 13th (1980) is recommended as a slasher film.  
+[ASSISTANT_SAID] Ju-On: The Grudge (2002) is recommended as an international horror film.  
+[ASSISTANT_SAID] Let the Right One In (2008) is recommended as an international horror film.  
+[ASSISTANT_SAID] Train to Busan (2016) is recommended as an international horror film.  
+[PREFERENCE] User plans to start their movie marathon with The Exorcist and then move on to modern horror films.  
+[EVENT] User is considering visiting Knott's Scary Farm next weekend with their sister and her boyfriend.  
+[ASSISTANT_SAID] The 13th Gate (Baton Rouge, LA) is recommended as a haunted house.  
+[ASSISTANT_SAID] The Queen Mary's Dark Harbor (Long Beach, CA) is recommended as a haunted house.  
+[ASSISTANT_SAID] The Headless Horseman Hayrides and Haunted Houses (Ulster Park, NY) is recommended as a haunted house.  
+[ASSISTANT_SAID] Knott

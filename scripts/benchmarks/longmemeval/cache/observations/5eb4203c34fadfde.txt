@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[FACT] User is considering buying a new keyboard to replace their current Yamaha P-125.  
+[FACT] User has been taking ukulele lessons.  
+[FACT] User has a Taylor GS Mini guitar that they are considering getting serviced.  
+[RELATIONSHIP] User has a friend named Rachel who is giving them ukulele lessons.  
+[RELATIONSHIP] User plans to take their guitar to a guitar tech named Joe who works at Guitar Central.  
+[PREFERENCE] User is looking for a keyboard with more features and sounds than their current Yamaha P-125.  
+[PREFERENCE] User prefers weighted keys for their keyboard.  
+[PREFERENCE] User mostly plays piano and some synth sounds.  
+[PREFERENCE] User is not concerned about portability for their new keyboard.  
+[PREFERENCE] User enjoys their ukulele lessons and feels they are making good progress.  
+[PREFERENCE] User is struggling with fingerpicking on the ukulele.  
+[EVENT] User started taking ukulele lessons with Rachel today.  
+[EVENT] User is thinking of spending around $500-$1000 on a new keyboard.  
+[EVENT] User plans to take their Taylor GS Mini to Joe for servicing by the end of this month.  
+[ASSISTANT_SAID] Korg and Roland are excellent brands for keyboards with amazing features.  
+[ASSISTANT_SAID] Suggested Korg options: Korg B1 ($499), Korg Grandstage ($799), Korg D1 ($699).  
+[ASSISTANT_SAID] Suggested Roland options: Roland FP-10 ($799), Roland FP-30 ($999), Roland GO:KEYS ($499).  
+[ASSISTANT_SAID] All suggested keyboards have USB connectivity for MIDI and DAW use.  
+[ASSISTANT_SAID] Recommended effective practice tips for ukulele: set specific goals, warm-up, focus on technique, practice in small chunks, slow and deliberate practice, practice regularly, listen and record yourself.  
+[ASSISTANT_SAID] Suggested tips for improving chord changes on the ukulele: start with simple chords, practice chord shapes, use a metronome, practice chord progressions, focus on finger independence, slow changes, practice with a drone.  
+[ASSISTANT_SAID] Suggested tips for improving fingerpicking technique: relaxation, finger independence, finger assignment, start with simple patterns, focus on fingertip, use nails, practice with a metronome, listen to fingerpicking masters, practice with different rhythms, be patient.  
+[ASSISTANT_SAID] Recommended to ask Joe to check or fix: action adjustment, neck relief, fretboard and frets, bridge and saddle, intonation, string height and spacing, electronics, body and neck joints, tuning machines.  
+[TEMPORAL] Session date is 2023/02/01 (Wed) 08:

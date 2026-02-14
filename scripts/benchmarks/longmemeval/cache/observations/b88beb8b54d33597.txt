@@ -1,0 +1,28 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/26 (Fri) 05:02
+- [FACT] User is planning to fertilize their plants.
+- [PREFERENCE] User has heirloom tomatoes and basil.
+- [EVENT] User did a major pruning of their apple tree last weekend.
+- [CHANGE] User's apple tree is looking much better after pruning.
+- [ASSISTANT_SAID] Recommended organic fertilizers for heirloom tomatoes: Bone meal, Fish bone meal, Compost tea, Alfalfa meal.
+- [ASSISTANT_SAID] Recommended organic fertilizers for basil: Blood meal, Feather meal, Compost.
+- [ASSISTANT_SAID] Advised to follow packaging instructions and start with a small amount to avoid over-fertilizing.
+- [ASSISTANT_SAID] Congratulated user on pruning their apple tree and acknowledged the effort involved.
+- [FACT] User has been composting for a while.
+- [ASSISTANT_SAID] Confirmed that using homemade compost as fertilizer is an excellent idea.
+- [ASSISTANT_SAID] Explained several ways to use compost: compost tea, compost top-dressing, compost mixing, compost side-dressing.
+- [ASSISTANT_SAID] Listed benefits of using homemade compost: customized nutrients, microbe-rich, slow release, cost-effective.
+- [ASSISTANT_SAID] Advised to use mature, finished compost and avoid immature compost.
+- [FACT] User is tracking the progress of their plants using a gardening app on their phone.
+- [ASSISTANT_SAID] Recommended composting apps: Compost Mate, Compost Calculator, Worm composting app.
+- [ASSISTANT_SAID] Recommended gardening apps with composting features: Gardening Knowledge, Garden Plan Pro, Homegrown, Yardbook, Garden Journal.
+- [FACT] User is thinking about building a trellis for their climbing roses.
+- [ASSISTANT_SAID] Encouraged user to repurpose pruned branches from their apple tree for the trellis.
+- [ASSISTANT_SAID] Provided considerations for using pruned branches: dry the branches, clean and disinfect, choose sturdy branches, design and construction, weather resistance.
+- [FACT] User built a trellis for their climbing roses a couple of weeks ago using old wooden stakes and twine.
+- [EVENT] User spent a few hours building the trellis.
+- [CHANGE] User's climbing roses are already starting to climb up the trellis nicely.
+- [ASSISTANT_SAID] Suggested adding features to the garden, like a birdbath or a sundial.
+- [FACT] User is thinking about creating a more inviting atmosphere in their garden.
+- [ASSISTANT_SAID] Provided tips for attracting beneficial insects: plant bee-friendly flowers, provide a source of water, avoid pesticides,

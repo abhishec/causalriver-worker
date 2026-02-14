@@ -1,0 +1,28 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/22 (Mon) 00:09
+- [FACT] The user has been using Scrivener for their short story.
+- [FACT] The user is also using Google Docs for their journal entries and poetry.
+- [PREFERENCE] The user is looking for a separate tool to keep track of their overall writing progress, like a dashboard.
+- [ASSISTANT_SAID] The assistant recommended several tools for tracking writing progress, including:
+  - **Wordcounter**: A web-based tool that tracks daily word count and provides a dashboard for progress.
+  - **Writeordie**: A tool that tracks word count and has a "write or die" mode.
+  - **WriteTrack**: A free web-based tool that tracks writing progress, including word count and time spent writing.
+  - **Habitica**: A gamified habit tracking app for custom habits, including writing tasks.
+  - **HabitBull**: A habit tracking app that allows tracking of writing progress.
+  - **Google Sheets**: A spreadsheet tool for tracking writing progress with customizable columns.
+  - **Microsoft Excel**: Similar to Google Sheets for tracking writing progress.
+  - **NaNoWriMo's Writing Tools**: Tools available year-round for tracking writing progress.
+  - **750 Words**: A writing community platform that tracks daily word count and provides a dashboard.
+- [FACT] The user has been writing a lot lately, especially in their journal.
+- [TEMPORAL] The user started their journal on January 15th.
+- [CHANGE] The user has been filling up their journal quickly.
+- [PREFERENCE] The user usually lets their thoughts flow freely onto the page in their morning pages.
+- [PREFERENCE] The user sometimes has specific topics to write about but mostly writes freely.
+- [PREFERENCE] The user finds journaling helpful for clearing their mind and processing emotions.
+- [PREFERENCE] The user uses their journal to reflect on their progress and goals, especially with writing projects.
+- [PREFERENCE] The user has found that their morning pages influence their creative writing projects.
+- [FACT] The user has developed characters and story ideas through their morning pages.
+- [EVENT] The user wrote a poem on February 2nd inspired by a winter walk in a nearby park, which originated from a morning page entry.
+- [ASSISTANT_SAID] The assistant acknowledged the user's journaling habit and its benefits for personal growth and creativity.
+- [PREFERENCE] The user has noticed that their morning pages have helped them develop a greater sense of discipline and consistency in their writing practice.

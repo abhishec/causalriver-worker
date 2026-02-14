@@ -1,0 +1,233 @@
+{
+  "answer_cc021f81_3": [
+    {
+      "fact": "User is looking to plan a longer bike ride this weekend",
+      "type": "event",
+      "entities": [
+        "bike ride",
+        "weekend"
+      ]
+    },
+    {
+      "fact": "User's road bike has been running great since March 2nd",
+      "type": "personal",
+      "entities": [
+        "road bike",
+        "March 2nd"
+      ]
+    },
+    {
+      "fact": "User prefers scenic bike routes",
+      "type": "preference",
+      "entities": [
+        "scenic bike routes"
+      ]
+    },
+    {
+      "fact": "User is located in the San Francisco Bay Area",
+      "type": "personal",
+      "entities": [
+        "San Francisco Bay Area"
+      ]
+    },
+    {
+      "fact": "User is looking for a 40-60 mile bike route",
+      "type": "preference",
+      "entities": [
+        "40-60 mile route"
+      ]
+    },
+    {
+      "fact": "User prefers routes with some hills, but not too steep",
+      "type": "preference",
+      "entities": [
+        "hills",
+        "steep"
+      ]
+    },
+    {
+      "fact": "User prefers paved roads for biking",
+      "type": "preference",
+      "entities": [
+        "paved roads"
+      ]
+    },
+    {
+      "fact": "User is looking for scenic routes with a mix of coastal and rural views",
+      "type": "preference",
+      "entities": [
+        "coastal views",
+        "rural views"
+      ]
+    }
+  ],
+  "answer_cc021f81_2": [
+    {
+      "fact": "User has a commuter bike that is a regular hybrid bike.",
+      "type": "personal",
+      "entities": [
+        "commuter bike",
+        "hybrid bike"
+      ]
+    },
+    {
+      "fact": "User usually rides on paved roads and bike paths.",
+      "type": "preference",
+      "entities": [
+        "paved roads",
+        "bike paths"
+      ]
+    },
+    {
+      "fact": "User does not carry heavy loads on their bike.",
+      "type": "preference",
+      "entities": []
+    },
+    {
+      "fact": "User experienced a flat tire on February 20th.",
+      "type": "event",
+      "entities": [
+        "February 20th"
+      ]
+    },
+    {
+      "fact": "User thinks it's time to replace the front tire of their bike this month.",
+      "type": "opinion",
+      "entities": [
+        "front tire",
+        "this month"
+      ]
+    },
+    {
+      "fact": "User has been researching different tire options.",
+      "type": "event",
+      "entities": []
+    },
+    {
+      "fact": "User has decided to go with a Continental Gatorskin tire.",
+      "type": "preference",
+      "entities": [
+        "Continental Gatorskin"
+      ]
+    },
+    {
+      "fact": "User values durability and puncture resistance in a tire.",
+      "type": "preference",
+      "entities": [
+        "durability",
+        "puncture resistance"
+      ]
+    }
+  ],
+  "answer_cc021f81_1": [
+    {
+      "fact": "User is planning a long ride this weekend.",
+      "type": "event",
+      "entities": [
+        "long ride",
+        "weekend"
+      ]
+    },
+    {
+      "fact": "User is checking the weather forecast for Saturday.",
+      "type": "event",
+      "entities": [
+        "weather forecast",
+        "Saturday"
+      ]
+    },
+    {
+      "fact": "User got their road bike serviced at Pedal Power on March 10th.",
+      "type": "event",
+      "entities": [
+        "road bike",
+        "Pedal Power",
+        "March 10th"
+      ]
+    },
+    {
+      "fact": "User's road bike has been running smoothly since the service.",
+      "type": "opinion",
+      "entities": [
+        "road bike",
+        "service"
+      ]
+    },
+    {
+      "fact": "User is bringing a new water bottle cage on the ride.",
+      "type": "event",
+      "entities": [
+        "water bottle cage",
+        "ride"
+      ]
+    },
+    {
+      "fact": "User got the water bottle cage for their mountain bike a few weeks ago.",
+      "type": "event",
+      "entities": [
+        "water bottle cage",
+        "mountain bike"
+      ]
+    },
+    {
+      "fact": "User enjoys their mountain bike.",
+      "type": "opinion",
+      "entities": [
+        "mountain bike"
+      ]
+    },
+    {
+      "fact": "User usually rides on bumpy trails.",
+      "type": "preference",
+      "entities": [
+        "bumpy trails"
+      ]
+    },
+    {
+      "fact": "User likes the challenge of navigating through technical sections.",
+      "type": "opinion",
+      "entities": [
+        "technical sections"
+      ]
+    },
+    {
+      "fact": "User enjoys the flowy parts of trails where they can pick up speed.",
+      "type": "opinion",
+      "entities": [
+        "flowy parts",
+        "speed"
+      ]
+    },
+    {
+      "fact": "User has a few favorite trails they ride regularly.",
+      "type": "preference",
+      "entities": [
+        "favorite trails"
+      ]
+    },
+    {
+      "fact": "User is always looking to explore new trails.",
+      "type": "preference",
+      "entities": [
+        "new trails"
+      ]
+    },
+    {
+      "fact": "User's road bike had worn-out brake pads and cables replaced.",
+      "type": "event",
+      "entities": [
+        "road bike",
+        "brake pads",
+        "cables"
+      ]
+    },
+    {
+      "fact": "User believes that a well-maintained bike makes a big difference in ride quality.",
+      "type": "opinion",
+      "entities": [
+        "well-maintained bike",
+        "ride quality"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/29 (Mon) 17:34  
+[ASSISTANT_SAID] The correct answers are: An XML manifest file, A driveset CSV file.  
+[ASSISTANT_SAID] An XML manifest file describes the data that you want to import or export, including the type of data, the file paths, and the storage account and container to use.  
+[ASSISTANT_SAID] A driveset CSV file lists the drives that you will use for the import or export job, including the drive letter, the volume label, and the location of the manifest file.  
+[USER] Question 27 of 50: You have a Recovery Service vault that you use to test backups. The test backups contain two protected virtual machines. You need to delete the Recovery Services vault. What should you do first?  
+[USER] Options: From the Recovery Service vault, delete the backup data; Modify the disaster recovery properties of each virtual machine; Modify the locks of each virtual machine; From the Recovery Service vault, stop the backup of each backup item.  
+[ASSISTANT_SAID] The correct answer is: From the Recovery Service vault, delete the backup data.  
+[ASSISTANT_SAID] You should first delete the backup data from the Recovery Service vault to unregister the protected virtual machines and other items from the vault.  
+[USER] Question 28 of 50: You have an Azure subscription named Subscription1. You have 5 TB of data that you need to transfer to Subscription1. You plan to use an Azure Import/Export job. What can you use as the destination of the imported data?  
+[USER] Options: A virtual machine; An Azure Cosmos DB database; Azure File Storage; The Azure File Sync Storage Sync Service.  
+[ASSISTANT_SAID] The correct answer is: Azure File Storage.  
+[ASSISTANT_SAID] You can use Azure File Storage as the destination of the imported data.  
+[USER] Same question with these options: An Azure Cosmos DB database; Azure Blob Storage; Azure Data Lake Store; The Azure File Sync Storage Sync Service.  
+[ASSISTANT_SAID] The correct answer is: Azure Blob Storage.  
+[ASSISTANT_SAID] You can use Azure Blob Storage as the destination of the imported data.  
+[USER] Question 30 of 50: You have an Azure subscription named Subscription1. You deploy a Linux virtual machine named VM1 to Subscription1. You need to monitor the metrics and the logs of VM1. What should you use?  
+[USER] Options: Azure HDInsight; Linux Diagnostic Extension (LAD) 3.0; Azure Analysis Services; The Azure Performance Diagnostics extension.  
+[ASSISTANT_SAID] The correct answer is: Linux Diagnostic Extension (L

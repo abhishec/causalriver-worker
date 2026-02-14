@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/20 (Sat) 01:19  
+[FACT] User is looking for online courses on videography.  
+[PREFERENCE] User has been enjoying photography and wants to expand skills to video production.  
+[ASSISTANT_SAID] Assistant provided a list of online courses for videography, categorized into Beginner-Friendly, Intermediate, Specialized Courses, and Additional Resources.  
+[ASSISTANT_SAID] Beginner-Friendly Courses:  
+[ASSISTANT_SAID] 1. Udemy - Videography Masterclass: Learn Videography from Scratch ($12.99) - A comprehensive course covering the basics of videography, including camera settings, lighting, and editing.  
+[ASSISTANT_SAID] 2. Skillshare - Introduction to Videography: Shooting and Editing ($15/month or $99/year) - A beginner-friendly course focusing on the fundamentals of videography, including camera operation and editing software.  
+[ASSISTANT_SAID] 3. Coursera - Video Production (Free, with optional certification for $49) - A university-level course from the University of Michigan, covering the basics of video production, including planning, shooting, and editing.  
+[ASSISTANT_SAID] Intermediate Courses:  
+[ASSISTANT_SAID] 1. LinkedIn Learning (formerly Lynda.com) - Videography Fundamentals ($24.99/month or $299.88/year) - A comprehensive course covering camera operation, lighting, and editing techniques.  
+[ASSISTANT_SAID] 2. MasterClass - Martin Scorsese Teaches Film ($180/year) - While not exclusively focused on videography, this course covers filmmaking principles and techniques from a legendary director.  
+[ASSISTANT_SAID] 3. Udemy - Advanced Videography: Cinematic Storytelling ($29.99) - A course focusing on advanced techniques, including cinematic storytelling, color grading, and sound design.  
+[ASSISTANT_SAID] Specialized Courses:  
+[ASSISTANT_SAID] 1. Drone Videography:  
+[ASSISTANT_SAID] - Udemy - Drone Videography: Capture Stunning Aerial Footage ($29.99)  
+[ASSISTANT_SAID] - SkyPixel - Drone Videography Course (Free, with optional certification for $99)  
+[ASSISTANT_SAID] 2. Mobile Videography:  
+[ASSISTANT_SAID] - Udemy - Mobile Videography: Shoot Professional Videos with Your Smartphone ($19.99)  
+[ASSISTANT_SAID] - Skillshare - Mobile Videography: Shoot, Edit, and Share ($15/month or $99/year)  
+[ASSISTANT_SAID] 3. Color Grading and Color Correction:  
+[ASSISTANT_S

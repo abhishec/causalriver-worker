@@ -1,0 +1,19 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/04/16 (Sun) 11:33  
+[EVENT] User is planning to host another backyard BBQ soon.  
+[PREFERENCE] User loves mac and cheese and considers it a favorite of theirs and their friends.  
+[PREFERENCE] User's favorite BBQ sauce is Sweet Baby Ray's.  
+[ASSISTANT] Assistant suggested classic BBQ sides including coleslaw, baked beans, grilled corn on the cob, potato salad, collard greens, mac and cheese, hushpuppies, fried okra, cucumber salad, grilled vegetables, cornbread, fresh fruit salad, garlic bread, roasted sweet potatoes, and green salad.  
+[EVENT] User plans to make mac and cheese for the BBQ.  
+[EVENT] User is looking for recipes for smoked brisket.  
+[ASSISTANT] Assistant provided three smoked brisket recipes: Low and Slow Smoked Brisket, Texas-Style Smoked Brisket, and Competition-Style Smoked Brisket.  
+[PREFERENCE] User has decided to try the Low and Slow Smoked Brisket recipe first.  
+[PREFERENCE] User is considering using post oak wood chips for smoking the brisket.  
+[ASSISTANT] Assistant provided information on different types of wood chips for smoking brisket, including post oak, mesquite, hickory, apple wood, and pecan.  
+[ASSISTANT] Assistant gave tips for using wood chips, including soaking them, using a mix, and not overdoing it.  
+[PREFERENCE] User is interested in getting a BBQ rub to complement their Sweet Baby Ray's BBQ sauce.  
+[ASSISTANT] Assistant recommended several BBQ rubs, including Killer Hogs BBQ Rub, Dinosaur Bar-B-Que Rub, Plowboys BBQ Rub, Franklin Barbecue Rub, Slap Yo' Daddy BBQ Rub, Memphis-Style Dry Rub, and Texas-Style Dry Rub.  
+[PREFERENCE] User has chosen to try the Killer Hogs BBQ Rub.  
+[ASSISTANT] Assistant provided tips on how to prep the brisket before applying the rub, including trimming excess fat, removing silver skin, patting dry, applying a binder, and letting it sit.  
+[ASSISTANT] Assistant advised on keeping the brisket moist during smoking by spritzing it with a mop sauce or water.

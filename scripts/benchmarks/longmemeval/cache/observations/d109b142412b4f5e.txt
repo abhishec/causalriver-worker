@@ -1,0 +1,29 @@
+**Observation Log:**
+
+- [FACT] User is planning a trip to Sequoia National Park.
+- [EVENT] User has had experience with long drives and hiking in national parks.
+- [EVENT] User spent two nights at the Yosemite Valley Lodge during a road trip to Yosemite National Park.
+- [ASSISTANT_SAID] Sequoia National Park is a fantastic destination with giant sequoias and scenic trails.
+- [ASSISTANT_SAID] Recommended hiking trails include:
+  1. **Congress Trail**: A 2-mile out-and-back hike to the General Sherman Tree.
+  2. **Alta Peak Trail**: A 13-mile out-and-back hike with breathtaking views.
+  3. **Marble Falls Trail**: A 4-mile out-and-back hike to a waterfall.
+  4. **Big Trees Trail**: A 1.5-mile loop hike through a grove of giant sequoias.
+  5. **Moro Rock Trail**: A 1-mile out-and-back hike to panoramic views.
+  6. **Crescent Meadow Loop Trail**: A 1.5-mile loop hike through a meadow.
+- [ASSISTANT_SAID] User should check the park's website for up-to-date trail information and restrictions.
+- [ASSISTANT_SAID] User should bring plenty of water, snacks, sun protection, and wear comfortable hiking shoes.
+- [ASSISTANT_SAID] Congress Trail is a well-maintained trail with a mix of paved and dirt surfaces.
+- [ASSISTANT_SAID] The first 1.5 miles of the Congress Trail are paved, accessible to wheelchairs and strollers.
+- [ASSISTANT_SAID] Restrooms and water stations are available at:
+  1. General Sherman Tree parking area (restrooms and potable water).
+  2. Congress Trail junction (restrooms, no potable water).
+  3. Alta Peak Trail junction (restrooms, no potable water).
+- [ASSISTANT_SAID] User should bring enough water for the hike as water availability may be limited.
+- [ASSISTANT_SAID] Best times to visit the General Sherman Tree and Congress Trail to avoid crowds are early morning (8:00 AM - 9:00 AM) and late afternoon (4:00 PM - 6:00 PM).
+- [ASSISTANT_SAID] Peak hours to avoid are 11:00 AM to 3:00 PM.
+- [ASSISTANT_SAID] Weekdays are less crowded than weekends and holidays.
+- [ASSISTANT_SAID] Alternative parking options include:
+  1. Wolverton Creek Parking Area (1.5 miles from General Sherman Tree).
+  2. Giant Forest Museum Parking Area (2 miles from General Sherman Tree).
+  3. Designated parking along the Gener

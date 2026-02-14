@@ -1,0 +1,19 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/23 (Tue) 18:35  
+[USER] User identifies as a medical writer.  
+[USER] User's team has asked them to develop a medical 101 deck for a non-expert creative team.  
+[USER] The focus of the deck is to educate about myasthenia gravis and raising awareness of complement therapy in generalized myasthenia gravis.  
+[ASSISTANT_CREATED] Slide 1: Introduction - Brief overview of myasthenia gravis and importance of raising awareness of the condition and complement therapy.  
+[ASSISTANT_CREATED] Slide 2: What is Myasthenia Gravis? - Definition and causes of myasthenia gravis.  
+[ASSISTANT_CREATED] Slide 3: Symptoms of Myasthenia Gravis - List of common symptoms: weakness in arms and legs, double vision or drooping eyelids, difficulty speaking, chewing or swallowing, shortness of breath.  
+[ASSISTANT_CREATED] Slide 4: Diagnosis of Myasthenia Gravis - Testing and procedures: physical examination, blood tests, electromyogram (EMG), single fiber electromyography (SFEMG), imaging tests (MRI), edrophonium (Tensilon) test.  
+[ASSISTANT_CREATED] Slide 5: Generalized Myasthenia Gravis - Definition and overview of the most common form of the condition.  
+[ASSISTANT_CREATED] Slide 6: Treatment of Myasthenia Gravis - Overview of treatment options: medications, plasmapheresis, immune-suppressing drugs, steroids, complement therapy.  
+[ASSISTANT_CREATED] Slide 7: Importance of Complement Therapy - Explanation of the role of complement therapy in treating generalized myasthenia gravis.  
+[ASSISTANT_CREATED] Slide 8: What is Complement Therapy? - Definition and explanation of complement therapy.  
+[ASSISTANT_CREATED] Slide 9: Benefits of Complement Therapy - List of benefits for patients: improved muscle strength, increased mobility, improved quality of life, reduced dependence on other treatments.  
+[ASSISTANT_CREATED] Slide 10: Introduction to Ultomiris (Ravulizumab) - Brief overview of the drug and its benefits.  
+[ASSISTANT_CREATED] Slide 11: What is Ultomiris (Ravulizumab)? - Definition and explanation of the drug.  
+[ASSISTANT_CREATED] Slide 12: How Ultomiris (Ravulizumab) Works - Explanation of the mechanism of action of the drug: binding to and inhibiting C5.  
+[ASSISTANT_CREATED] Slide 13: Dosage and Administration of Ultomiris (Ravulizumab) - Overview of recommended dosage: 300 mg every 8 weeks, administered as an IV infusion by

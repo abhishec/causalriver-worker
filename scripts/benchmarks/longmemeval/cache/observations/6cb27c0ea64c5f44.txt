@@ -1,0 +1,26 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/06/17 (Sat) 22:43
+- [FACT] The user is evaluating job applications.
+- [PREFERENCE] The user prefers to evaluate candidates based on specific criteria and numerical scores.
+- [ASSISTANT_SAID] The assistant is ready to assist in evaluating job applications and will respond with a numerical score between 0 and 100.
+- [FACT] The user provided a block of questions and answers from a candidate.
+- [PREFERENCE] The candidate has developed a love for cycling in the last 2 years.
+- [PREFERENCE] The candidate enjoys music bingo and collecting vinyl.
+- [PREFERENCE] The candidate values spending time with friends, whether at the pool or playing card games.
+- [RELATIONSHIP] The candidate admires Sir Bobby Charlton and the members of the 1958 Munich Disaster.
+- [FACT] The candidate's favorite soccer team is Manchester United.
+- [EVENT] The candidate researched the history of Manchester United, particularly the 1958 Munich Disaster.
+- [PREFERENCE] The candidate admires Adam Day, a coach with the Canadian Women's National Soccer Team.
+- [RELATIONSHIP] Adam Day is described as a mentor and support system for the candidate during their time with the Whitecaps residency program.
+- [FACT] The candidate's first job was as a referee and linesman for soccer games, starting at age 12 or 13.
+- [PREFERENCE] The candidate likes that everyone's opinion is respected and heard at their most recent place of employment.
+- [PREFERENCE] The candidate dislikes that it can be hard for certain people to commit to meeting times at their most recent place of employment.
+- [PREFERENCE] The candidate would be happy doing learning every day for the rest of their career.
+- [PREFERENCE] The candidate feels their greatest strength is adaptability.
+- [PREFERENCE] The candidate feels their greatest weakness is taking criticism personally and feeling like they have let people down.
+- [PREFERENCE] The candidate would like to have lunch with Eric Cantona because of his significance to Manchester United and his interesting opinions.
+- [PREFERENCE] The candidate believes that everyone is going through something, whether big or small, and suggests this as advice to society.
+- [ASSISTANT_SAID] The assistant responded with "Ready to Evaluate" after the user provided the candidate's answers.
+- [ASSISTANT_SAID] The assistant rated the candidate's need for external support at a 70.
+- [ASSISTANT_SAID] The assistant noted that the candidate values and seeks out support from others, indicating they may struggle to be self-reliant without that support.

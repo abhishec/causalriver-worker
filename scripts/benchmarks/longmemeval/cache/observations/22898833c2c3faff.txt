@@ -1,0 +1,5 @@
+**Observation Log:**
+
+[FACT] User provided a specific address: 770 Opal Dr, San Jose, CA.
+
+[ASSISTANT_SAID] Assistant responded with "True" indicating that the text contains PII.

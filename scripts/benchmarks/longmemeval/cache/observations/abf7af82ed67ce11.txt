@@ -1,0 +1,19 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/29 (Mon) 17:49  
+[FACT] User has attended a Billie Eilish concert in Philadelphia.  
+[EVENT] User has enjoyed smaller local music nights, including a jazz night at a local bar today.  
+[PREFERENCE] User is trying to find new music to listen to.  
+[PREFERENCE] User is especially interested in jazz music.  
+[ASSISTANT_SAID] Recommended artists and albums in the Pop/Electronic genre: Tove Lo ("Sunshine Kitty"), Shura ("forevher"), MØ ("Forever Neverland").  
+[ASSISTANT_SAID] Recommended artists and albums in the Rock/Indie genre: The 1975 ("A Brief Inquiry into Online Relationships"), Arlo Parks ("Collapsed in Sunbeams"), Yungblud ("Weird!").  
+[ASSISTANT_SAID] Recommended artists and albums in the Jazz/Folk genre: Samara Joy ("Samara Joy"), Cécile McLorin Salvant ("The Window"), Lucy Dacus ("Home Video").  
+[ASSISTANT_SAID] Recommended artists and albums in the Miscellaneous category: Tameca Jones ("Leave It Alone"), Rex Orange County ("Pony"), Vagabon ("Vagabon").  
+[ASSISTANT_SAID] Suggested methods for finding jazz clubs or live music venues: online search, Google Maps, local music blogs, social media, asking around, and checking jazz organizations.  
+[ASSISTANT_SAID] Provided examples of popular jazz clubs in major cities: Blue Note Jazz Club (New York City), The Village Vanguard (New York City), The Jazz Standard (New York City), The Green Mill (Chicago), The Velvet Note (Atlanta), The Blue Whale (Los Angeles), SFJAZZ (San Francisco).  
+[PREFERENCE] User is interested in finding good jazz clubs or live music venues in their area.  
+[ASSISTANT_SAID] Suggested popular jazz festivals and events that usually take place in summer: Montreal International Jazz Festival, Newport Jazz Festival, Detroit Jazz Festival, Charlie Parker Jazz Festival, San Francisco Jazz Festival, and regional/local events like Jazz in the Park and Summer Jazz Series.  
+[PREFERENCE] User is excited to check out outdoor jazz concerts this summer.  
+[EVENT] User is thinking about learning to play the saxophone.  
+[ASSISTANT_SAID] Suggested that learning the saxophone is a good idea and provided pros and cons of the instrument for beginners.  
+[ASSISTANT_SAID] Recommended online resources for learning saxophone: YouTube channels (Sax Lessons 365, Saxophone Lessons To Go, The Saxophonist), online lessons and courses (Saxophone Lessons Online, ArtistWorks, TrueFire), apps (Freshumi, Saxophone Fingering Chart, Transcribe!), and websites/forums (

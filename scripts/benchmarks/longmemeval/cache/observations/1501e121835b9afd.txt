@@ -1,0 +1,15 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/01/15 (Sun) 06:37
+- [ASSISTANT_SAID] Suggested research papers related to web-search privacy in Web 3.0, including:
+  1. Gevais, R., Shokri, R., Singla, A., Capkun, S., & Lenders, V. (2014). Quantifying web-search privacy. Proceedings of the 2014 ACM SIGSAC Conference on Computer and Communications Security (CCS '14), 1406-1418.
+  2. Böttger, T., Carminati, B., & Ferrari, E. (2020). A decentralized approach to web search engines. Proceedings of the 2020 IEEE International Conference on Decentralized Applications and Infrastructures (DAPPCON), 55-64.
+  3. Wang, X., & Ma, J. (2019). A blockchain-based decentralized privacy-preserving search engine. Journal of Network and Computer Applications, 135, 44-52.
+  4. Xia, Y., He, W., & Huang, T. (2021). P3S: A privacy-preserving search system based on blockchain in the context of Web 3.0. Security and Communication Networks, 2021, 1-15.
+  5. Zhang, X., & Cui, Y. (2019). A privacy-preserving search scheme based on the blockchain technology. Journal of Ambient Intelligence and Humanized Computing, 10(8), 3179-3189.
+- [ASSISTANT_SAID] Suggested additional research papers, including:
+  1. Wang, X., & Liu, Y. (2020). Blockchain-based privacy-preserving web search with keyword expansion. IEEE Transactions on Dependable and Secure Computing, 2020, 1-1.
+  2. Li, W., Li, H., & Sun, X. (2020). PRSS: A privacy-preserving reputation system for decentralized search engines. IEEE Access, 8, 101140-101151.
+  3. Dang, J., Chen, X., & Ren, K. (2020). Decentralized private search with efficient querying on blockchain. IEEE Transactions on Dependable and Secure Computing, 2020, 1-1.
+  4. Zhang, Y., Chen, H., Zhang, Y., & Li, K. (2021). A privacy-preserving search method based on blockchain in Web 3.0. Journal of Intelligent & Fuzzy Systems, 41(1), 827-835.
+  5. He, X., Liu, Y., Chen, Y., & Wang, F. (2020). A privacy-preserving web search framework based on federated learning. Proceedings of the 2020 IEEE

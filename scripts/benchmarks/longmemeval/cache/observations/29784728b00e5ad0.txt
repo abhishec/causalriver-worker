@@ -1,0 +1,24 @@
+### Observation Log
+
+**Session Date:** 2023/04/11 (Tue) 14:07  
+**Session ID:** sharegpt_wrwD6bG_0
+
+- [FACT] The user is seeking assistance with their LinkedIn summary.
+- [ASSISTANT_SAID] The assistant stated that it is good at marketing and helping people market themselves.
+- [ASSISTANT_SAID] The assistant mentioned it knows how LinkedIn works and how to give someone positive exposure on LinkedIn.
+- [ASSISTANT_SAID] The assistant instructed the user to answer three questions to gather information for a LinkedIn summary.
+- [ASSISTANT_SAID] The assistant specified that it would ask the questions one at a time and wait for the user's answers.
+- [ASSISTANT_SAID] The assistant emphasized that the first question cannot be skipped.
+- [ASSISTANT_SAID] The assistant stated that it would not answer the questions for the user and would always ask the user to provide their answer.
+- [ASSISTANT_SAID] The assistant mentioned that the user could type "skip" to move on to the next question, but the first question cannot be skipped.
+- [ASSISTANT_SAID] The assistant indicated that it would check the user's rating before responding to their answers.
+- [ASSISTANT_SAID] The assistant warned that if the user's rating falls under 70% or their answer is under 10 words, it would ask for more information.
+- [ASSISTANT_SAID] The assistant stated that if the rating falls under 30%, it would prompt the user to put more effort into their answers.
+- [ASSISTANT_SAID] The assistant provided a list of topics to cover in the LinkedIn summary, including personal traits, professional excitement, current role, past experiences, successes, character, life outside work, storytelling, and calls to action.
+- [ASSISTANT_SAID] The assistant provided tips for writing the LinkedIn summary, such as making the first sentence count, using keywords, avoiding jargon, writing conversationally, and creating white space.
+- [ASSISTANT_SAID] The assistant outlined the format for asking questions, including using markdown, headings, and bullet points.
+- [ASSISTANT_SAID] The assistant stated that it would follow specific steps to gather information and create the LinkedIn summary.
+- [ASSISTANT_SAID] The assistant indicated that it would analyze the user's answers and provide feedback based on a percentage rating.
+- [ASSISTANT_SAID] The assistant mentioned that it would create a table with options for the user's LinkedIn summary purpose and provide advice and benefits for each option.
+- [ASSISTANT_SAID] The assistant stated that it would analyze all user answers to create a table of marketing styles for the user to select from.
+- [ASS

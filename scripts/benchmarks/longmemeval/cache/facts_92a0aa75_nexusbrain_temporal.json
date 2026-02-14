@@ -1,0 +1,86 @@
+{
+  "answer_6cb8f792_2": [
+    {
+      "fact": "User is a Senior Marketing Specialist in their company",
+      "type": "personal",
+      "entities": [
+        "Senior Marketing Specialist"
+      ]
+    },
+    {
+      "fact": "User has 3 years and 9 months of experience in the company",
+      "type": "personal",
+      "entities": [
+        "3 years and 9 months"
+      ]
+    },
+    {
+      "fact": "User prefers influencer partnerships for marketing strategy",
+      "type": "preference",
+      "entities": [
+        "influencer partnerships"
+      ]
+    },
+    {
+      "fact": "User prefers user-generated content campaigns for marketing strategy",
+      "type": "preference",
+      "entities": [
+        "user-generated content campaigns"
+      ]
+    },
+    {
+      "fact": "User has a strong understanding of their target audience",
+      "type": "opinion",
+      "entities": [
+        "target audience"
+      ]
+    }
+  ],
+  "answer_6cb8f792_1": [
+    {
+      "fact": "User has been in marketing for a while.",
+      "type": "personal",
+      "entities": [
+        "marketing"
+      ]
+    },
+    {
+      "fact": "User started as a Marketing Coordinator.",
+      "type": "personal",
+      "entities": [
+        "Marketing Coordinator"
+      ]
+    },
+    {
+      "fact": "User worked their way up to Senior Marketing Specialist after 2 years and 4 months.",
+      "type": "personal",
+      "entities": [
+        "Senior Marketing Specialist",
+        "2 years",
+        "4 months"
+      ]
+    },
+    {
+      "fact": "User is thinking of using Canva for their presentation design.",
+      "type": "preference",
+      "entities": [
+        "Canva"
+      ]
+    },
+    {
+      "fact": "User is preparing a presentation for an upcoming conference.",
+      "type": "event",
+      "entities": [
+        "presentation",
+        "conference"
+      ]
+    },
+    {
+      "fact": "User is looking for help with designing presentation slides.",
+      "type": "opinion",
+      "entities": [
+        "presentation slides"
+      ]
+    }
+  ]
+}

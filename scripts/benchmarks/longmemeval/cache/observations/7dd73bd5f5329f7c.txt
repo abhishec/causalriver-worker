@@ -1,0 +1,24 @@
+**Observation Log:**
+
+- [FACT] User is planning a birthday party for their niece, Ava.
+- [PREFERENCE] User wants a character theme for the party.
+- [PREFERENCE] User's niece, Ava, has favorite characters including SpongeBob and Elsa.
+- [EVENT] User recently attended an event at Thrill Kingdom called "Character Bash" on October 29th.
+- [EVENT] User is planning to create a custom invitation for the party.
+- [CHANGE] User is finalizing the party details and sending out invitations.
+- [TEMPORAL] Session Date: 2023/09/06 (Wed) 02:04.
+- [ASSISTANT_SAID] Assistant suggested decoration ideas for SpongeBob, including a Bikini Bottom backdrop, SpongeBob balloons, jellyfish lanterns, and seaweed streamers.
+- [ASSISTANT_SAID] Assistant suggested decoration ideas for Elsa, including an ice palace backdrop, snowflake decorations, Frozen character cutouts, and ice blue and white balloons.
+- [ASSISTANT_SAID] Assistant recommended activities and games, including SpongeBob's Treasure Hunt, Elsa's Ice Palace Challenge, character meet-and-greet, and a craft station.
+- [ASSISTANT_SAID] Assistant provided food and drink ideas, including Krabby Patties, Elsa's Ice Cream Bar, and "Frozen" Fruit Kabobs.
+- [ASSISTANT_SAID] Assistant suggested party favors for SpongeBob, including Krabby Patty keychains, SpongeBob stickers or tattoos, jellyfish glow sticks, and Bikini Bottom beach balls.
+- [ASSISTANT_SAID] Assistant suggested party favors for Elsa, including snowflake wands, Frozen-themed stickers, coloring books, and ice blue candies.
+- [ASSISTANT_SAID] Assistant recommended hiring a professional photographer, asking a family member or friend, or creating a DIY photo booth for capturing party moments.
+- [ASSISTANT_SAID] Assistant advised providing a shot list to the photographer and designating a photo area for capturing special moments.
+- [RELATIONSHIP] User's sister is named Rachel, and she will be the party photographer.
+- [PREFERENCE] User likes the decoration ideas, especially the Bikini Bottom backdrop and Elsa's Ice Palace backdrop.
+- [PREFERENCE] User thinks the character meet-and-greet and craft station activities will be a hit with the kids.
+- [ASSISTANT_SAID] Assistant suggested including a tagline on the invitation, such as "Dive into the fun with SpongeBob and friends!" or "Let it go and join the party with Elsa and Ava!"
+- [ASSISTANT_SAID] Assistant reminded user to include important details in the invitation, such as date, time, location, and dress code.
+- [ASSISTANT_SAID] Assistant suggested sending out reminders closer to the party date to ensure guests remember the event.
+- [PREFERENCE

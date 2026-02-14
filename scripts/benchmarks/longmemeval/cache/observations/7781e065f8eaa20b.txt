@@ -1,0 +1,22 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/21 (Sun) 21:05
+- [FACT] User wants to create a basic website for personal viewing.
+- [PREFERENCE] User wants to store links in a database format.
+- [PREFERENCE] User desires a website similar to a Notion webpage with gallery view set.
+- [PREFERENCE] User wants options for gallery, table, and list views of the links.
+- [PREFERENCE] User prefers multiple properties to organize and categorize links.
+- [PREFERENCE] User prefers color-coded tags for organization and categorization.
+- [ASSISTANT_SAID] Creating a website with a database and various views can be complicated.
+- [ASSISTANT_SAID] Suggested programming languages include PHP, Python, and Ruby; example will use PHP.
+- [ASSISTANT_SAID] Recommended setting up a web server like Apache or Nginx to run PHP code.
+- [ASSISTANT_SAID] Suggested using MySQL or PostgreSQL to create a database.
+- [ASSISTANT_SAID] Recommended using phpMyAdmin to manage MySQL databases.
+- [ASSISTANT_SAID] Suggested designing a database schema with a table called "links" with columns for title, URL, description, tags, and category.
+- [ASSISTANT_SAID] Recommended creating a form using HTML and CSS to input data into the database.
+- [ASSISTANT_SAID] Suggested using PHP to handle form submissions and insert data into the database.
+- [ASSISTANT_SAID] Recommended creating multiple views using HTML, CSS, and JavaScript.
+- [ASSISTANT_SAID] Suggested using JavaScript (specifically jQuery) to switch between views.
+- [ASSISTANT_SAID] Recommended using CSS to style the website and implement color-coded tags.
+- [ASSISTANT_CREATED] Provided sample HTML code for the website structure, including a header, content area, view selector, and view containers for gallery, table, and list views.
+- [ASSISTANT_CREATED] Provided sample CSS code for styling the website, including styles for the header, content, view selector, buttons, and link display.

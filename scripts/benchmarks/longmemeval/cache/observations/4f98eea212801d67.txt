@@ -1,0 +1,31 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/22 (Mon) 18:58
+- [EVENT] User is thinking of recording a new song this weekend.
+- [ASSISTANT_SAID] Assistant provided tips for setting up a home studio for optimal sound quality, including:
+  1. Acoustic Treatment: Invest in acoustic panels, bass traps, or DIY solutions.
+  2. Choose the Right Microphone: Suggested condenser microphones like Rode NT1-A or Blue Yeti for vocals, and dynamic microphones like Shure SM57 or Sennheiser MD421 for instruments.
+  3. Microphone Placement: Suggested placing the mic 6-8 inches from the mouth for vocals and 1-2 feet away for instruments.
+  4. Preamp and Interface: Recommended options like Focusrite Scarlett, PreSonus AudioBox, or Native Instruments Komplete Audio 1.
+  5. Cable Management: Suggested keeping cables organized to reduce noise.
+  6. Monitor Placement: Suggested positioning monitors at ear level and 2-3 feet away from walls.
+  7. Headphones: Recommended closed-back headphones like Sony MDR-7506 or Audio-Technica M50x.
+  8. Room Preparation: Suggested turning off noisy appliances, closing windows, and using a noise machine.
+  9. Calibrate Your Monitors: Suggested using room calibration software like Sonarworks or Ozone Imager.
+  10. Reference Tracks: Suggested having a set of reference tracks ready for comparison.
+  11. Backup and Organization: Suggested setting up a backup system and organizing tracks.
+  12. Take Breaks and Refresh: Suggested taking regular breaks to avoid ear fatigue.
+- [FACT] User has been using the same old Shure SM58 microphone for years.
+- [PREFERENCE] User is considering upgrading their microphone for better sound quality.
+- [ASSISTANT_SAID] Assistant discussed the Blue Yeti as a potential upgrade for vocals and instrument recording, noting:
+  - The Yeti is a condenser microphone suitable for vocals and acoustic instruments.
+  - It has multiple pickup patterns (cardioid, bidirectional, omnidirectional).
+  - It may be too sensitive for loud vocals or high-energy performances.
+- [EVENT] User has been playing guitar for about 5 years.
+- [EVENT] User recently got a new electric guitar (Ibanez RG Series) last month.
+- [PREFERENCE] User is experimenting with different overdrive and distortion pedals.
+- [ASSISTANT_SAID] Assistant provided insights on using the Blue Yeti for recording piano, stating:
+  - The Yeti can capture a wide range of frequencies and nuances.
+  - It may pick up room noise and ambiance.
+  - Suggested considering alternative microphones for a more professional-grade piano sound.
+- [ASSISTANT_SAID] Assistant recommended using a pair

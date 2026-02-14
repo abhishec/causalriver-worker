@@ -1,0 +1,66 @@
+{
+  "answer_96c743d0_abs_2": [
+    {
+      "fact": "User is planning a trip to Japan",
+      "type": "event",
+      "entities": [
+        "Japan"
+      ]
+    },
+    {
+      "fact": "User is flying into Narita International Airport",
+      "type": "personal",
+      "entities": [
+        "Narita International Airport"
+      ]
+    },
+    {
+      "fact": "User's hotel is in the Shinjuku district",
+      "type": "personal",
+      "entities": [
+        "Shinjuku district"
+      ]
+    },
+    {
+      "fact": "User is arriving on a Friday afternoon",
+      "type": "event",
+      "entities": [
+        "Friday afternoon"
+      ]
+    }
+  ],
+  "answer_96c743d0_abs_1": [
+    {
+      "fact": "User is planning a trip to Japan",
+      "type": "event",
+      "entities": [
+        "Japan"
+      ]
+    },
+    {
+      "fact": "User has booked a hotel in Tokyo",
+      "type": "personal",
+      "entities": [
+        "Tokyo"
+      ]
+    },
+    {
+      "fact": "User is considering taking the train from the airport to Tokyo",
+      "type": "preference",
+      "entities": [
+        "train",
+        "airport",
+        "Tokyo"
+      ]
+    },
+    {
+      "fact": "User's friend mentioned that the train is not the only option",
+      "type": "relationship",
+      "entities": [
+        "friend",
+        "train",
+        "options"
+      ]
+    }
+  ]
+}

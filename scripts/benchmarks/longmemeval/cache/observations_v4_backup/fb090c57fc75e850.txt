@@ -1,0 +1,32 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/25 (Thu) 21:56  
+[FACT] User is developing a game.  
+[FACT] User has outlined three narrative paths for the game.  
+[FACT] User mentioned a character named Surgey.  
+[FACT] User mentioned a character named Marcus.  
+[FACT] User mentioned a character named Jillian.  
+[FACT] User mentioned a character named Dr. Penelope.  
+[FACT] User referred to a project called "Project Zeta."  
+[FACT] User discussed 7 Amplified zombie types: Jugernaut, Hydra, Skullcrawler, Berserker, Lasher, Hoplite, and Fissionator.  
+[PREFERENCE] User prefers to keep timelines ambiguous in the game to engage players in piecing together the story.  
+[PREFERENCE] User is interested in suggestions, criticisms, or potential improvements for the game paths and prologue.  
+[ASSISTANT] Assistant suggested including foreshadowing or hints about the three paths in the prologue.  
+[ASSISTANT] Assistant recommended making characters' motivations clear in Path 2 to enhance storytelling.  
+[ASSISTANT] Assistant suggested exploring characters' relationships in Path 2 after significant events.  
+[ASSISTANT] Assistant proposed that the Jugernaut could appear in all 3 timelines.  
+[ASSISTANT] Assistant suggested that the Hydra might make the most sense in Path 1.  
+[ASSISTANT] Assistant indicated that the Skullcrawler could appear in any timeline.  
+[ASSISTANT] Assistant noted that the Berserker could also appear in any timeline.  
+[ASSISTANT] Assistant mentioned that the Lasher might fit best in Path 3.  
+[ASSISTANT] Assistant suggested that the Hoplite could be more suitable for Path 2.  
+[ASSISTANT] Assistant indicated that the Fissionator could appear in any timeline.  
+[ASSISTANT] Assistant provided map ideas for each path:  
+[ASSISTANT] Path 1 Map: A high-security military base with powerful weapons and traps.  
+[ASSISTANT] Path 1 Event: A massive horde of zombies attacks the player's safehouse.  
+[ASSISTANT] Path 2 Map: A major city in the midst of a zombie outbreak.  
+[ASSISTANT] Path 2 Event: The player discovers a group of survivors held captive by a cult.  
+[ASSISTANT] Path 3 Map: A remote research facility in the Arctic with scientists developing a cure.  
+[ASSISTANT] Path 3 Event: The player encounters a group of bandits terrorizing a fortified town.  
+[PREFERENCE] User expressed interest in the idea of having smaller splits in the timelines based on decisions made.  
+[RELATIONSHIP] User mentioned a group of survivors that Surgey would meet in the game.

@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/08/14 (Mon) 15:39
+- [FACT] User mentions Elastisys offers secure and privacy-protected cloud implementations on European clouds based on the Kubernetes framework, “Compliant Kubernetes.”
+- [FACT] User states there is a large and rapidly increasing demand for secure cloud service staying within the EU.
+- [FACT] User indicates Elastisys targets sectors with strong regulation on information security/privacy and information management, specifically medtech/health tech, edtech, and software vendors serving the public sector.
+- [FACT] User notes that Elastisys started out as a solutions business based on professional services fees and built a sound profitable business.
+- [FACT] User mentions that Elastisys has established a rapidly growing platform business, Compliant Kubernetes, offered as a scalable managed service according to a PaaS-model.
+- [ASSISTANT_SAID] Assistant describes the competitive landscape of Elastisys, stating it operates in the highly competitive cloud computing market.
+- [ASSISTANT_SAID] Assistant identifies general cloud computing providers such as Amazon Web Services, Microsoft Azure, and Google Cloud Platform as competitors.
+- [ASSISTANT_SAID] Assistant mentions compliance-focused providers such as TietoEVRY, Nortal, and CybSafe as competitors in the compliance-focused market.
+- [ASSISTANT_SAID] Assistant states that Elastisys differentiates itself by providing compliance-focused services and a scalable platform business, Compliant Kubernetes, as a managed service according to a PaaS-model.
+- [ASSISTANT_SAID] Assistant summarizes that Elastisys competes in the cloud computing market but has a unique position due to its focus on compliance and privacy protections.
+- [USER] User asks about alternatives to Kubernetes that could make the offering less relevant over time.
+- [ASSISTANT_SAID] Assistant lists alternatives to Kubernetes, including Docker Swarm, Mesos, OpenShift, and Nomad, providing a brief description of each.
+- [ASSISTANT_SAID] Assistant notes that Kubernetes has a strong community and ecosystem, making it difficult for competitors to gain significant market share.
+- [USER] User inquires about the adoption of PaaS for Kubernetes.
+- [ASSISTANT_SAID] Assistant states that PaaS for Kubernetes adoption is growing rapidly, with nearly two-thirds of organizations using Kubernetes utilizing a managed service or PaaS.
+- [ASSISTANT_SAID] Assistant cites a survey by the Cloud Native Computing Foundation (CNCF) regarding the adoption of managed services for Kubernetes.
+- [USER] User asks about the challenges US PaaS providers may face due to EU legislation.
+- [ASSISTANT_SAID] Assistant provides a table summarizing challenges and mitigating factors for US PaaS providers in offering services to European companies, including data protection,

@@ -1,0 +1,43 @@
+**Observation Log**
+
+**Session Date:** 2023/05/25 (Thu) 14:38  
+**Session ID:** e6640284_1
+
+1. [FACT] User is planning to move to the UK for a master's program.
+2. [FACT] User is still waiting to hear back from a few universities.
+3. [FACT] User submitted their visa application on March 15th.
+4. [EVENT] User is hoping to finalize their university choice soon.
+5. [EVENT] User requested information on student accommodation options in Edinburgh.
+6. [ASSISTANT_SAID] Assistant congratulated the user on taking the next step towards their master's program in the UK.
+7. [ASSISTANT_SAID] Edinburgh is described as a fantastic choice for studying.
+8. [ASSISTANT_SAID] Types of accommodation options in Edinburgh include:
+   - University Accommodation
+   - Private Halls of Residence
+   - Shared Flats/Houses
+   - Homestay
+9. [ASSISTANT_SAID] Popular areas for students in Edinburgh include:
+   - Marchmont
+   - Tollcross
+   - Morningside
+   - Polwarth
+10. [ASSISTANT_SAID] Tips for accommodation include:
+    - Book early
+    - Set a budget
+    - Consider distance
+    - Research safety
+    - Review the contract
+11. [ASSISTANT_SAID] Resources for accommodation include:
+    - University of Edinburgh Accommodation website
+    - Student.com
+    - Rightmove
+    - Edinburgh Student Letting
+12. [FACT] User has shortlisted a few accommodation options, including a shared flat in Marchmont and a studio apartment in the city center.
+13. [FACT] User has been in touch with the university's accommodation team.
+14. [FACT] University accommodation team offered the user a place in a student residence for the first semester.
+15. [EVENT] User asked for average rent prices for a shared flat in Marchmont.
+16. [ASSISTANT_SAID] Average rent prices in Marchmont are approximately:
+    - Shared flat (1 bedroom in a 3-4 bedroom flat): £600-£800 per month (approximately £140-£190 per week)
+    - Shared flat (1 bedroom in a 2-bedroom flat): £700-£900 per month (approximately £160-£210 per week)
+17. [ASSISTANT_SAID] Additional costs for bills, internet, and other expenses can add an extra £80-£120 per month.
+18. [ASSISTANT_SAID] Studio apartment in the city center prices range from £900-£1,200 per month (approximately £210-£280 per week).
+19. [ASSISTANT_SAID] University accommodation prices are around £150-£250 per week for a self-catered room.

@@ -1,0 +1,50 @@
+{
+  "answer_feb5200f": [
+    {
+      "fact": "User is looking for indoor plants that can thrive in low-light conditions.",
+      "type": "preference",
+      "entities": [
+        "indoor plants",
+        "low-light conditions"
+      ]
+    },
+    {
+      "fact": "User recently added a vase with fresh greenery to their kitchen countertop.",
+      "type": "event",
+      "entities": [
+        "vase",
+        "fresh greenery",
+        "kitchen countertop"
+      ]
+    },
+    {
+      "fact": "User has heard great things about Snake Plants.",
+      "type": "opinion",
+      "entities": [
+        "Snake Plants"
+      ]
+    },
+    {
+      "fact": "User is curious about the ZZ Plant.",
+      "type": "preference",
+      "entities": [
+        "ZZ Plant"
+      ]
+    },
+    {
+      "fact": "User recently repainted their bedroom walls a lighter shade of gray.",
+      "type": "event",
+      "entities": [
+        "bedroom walls",
+        "lighter shade of gray"
+      ]
+    },
+    {
+      "fact": "User feels that the new paint color has made the room feel brighter.",
+      "type": "opinion",
+      "entities": [
+        "brighter room"
+      ]
+    }
+  ]
+}

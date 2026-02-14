@@ -1,0 +1,20 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/28 (Sun) 12:40  
+[USER] User inquired about the classification of a motor breakdown lorry without a floor.  
+[ASSISTANT_SAID] A motor breakdown lorry without a floor would likely be classified under heading 8705, which covers "Special purpose motor vehicles, other than those principally designed for the transport of persons or goods."  
+[ASSISTANT_SAID] The key consideration for classification is the vehicle's primary purpose, which is the recovery and transportation of broken-down or immobilized vehicles.  
+[ASSISTANT_SAID] Even without a floor, the lorry could have specialized features or equipment for recovery, such as a crane, boom, winch, hoist, or lifting arms.  
+[ASSISTANT_SAID] If the lack of a floor renders the vehicle incapable of fulfilling its purpose, reconsideration of classification may be necessary based on actual use or design.  
+[ASSISTANT_SAID] It is advised to consult the specific CN and HSENS guidance for appropriate classification.  
+[USER] User asked about the classification of a lorry that can transport both broken-down and non-broken-down vehicles.  
+[ASSISTANT_SAID] A lorry designed for both uses could be considered a multi-purpose vehicle, and its classification depends on its principal use, design, and features.  
+[ASSISTANT_SAID] If the lorry has specialized features for recovery, it would likely be classified under heading 8705.  
+[ASSISTANT_SAID] If primarily designed for non-broken down vehicles, it would likely be classified under heading 8704, which covers "Motor vehicles for the transport of goods."  
+[ASSISTANT_SAID] In cases of unclear principal use, consult the specific CN and HSENS guidance and consider additional factors.  
+[ASSISTANT_SAID] Consulting with a customs or trade expert is recommended for accurate classification.  
+[USER] User inquired if the inclusion of a beaver-tail floor on a lorry indicates if it is a motor breakdown lorry.  
+[ASSISTANT_SAID] A beaver-tail floor can indicate a vehicle designed for transporting other vehicles, but it does not definitively classify it as a motor breakdown lorry.  
+[ASSISTANT_SAID] A beaver-tail floor facilitates loading and unloading and is common in motor breakdown lorries, but also found in car carriers or flatbed trucks.  
+[ASSISTANT_SAID] To classify a lorry with a beaver-tail floor, consider its principal use, design, and specialized features for recovery.  
+[ASSISTANT_SAID] If primarily designed for recovery, it would likely be classified under heading 8705; if for non-broken down vehicles, under heading

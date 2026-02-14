@@ -1,0 +1,26 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/30 (Tue) 09:32
+- [USER] User requested relevant information to address during a presentation of a specific chapter.
+- [USER] Chapter title: 2.3. Previous work of Visual Assistive Technology
+- [USER] Subsection 2.3.1: Head wear
+- [USER] Subsection 2.3.1.1: Wearable Travel Aid for Environment Perception and Navigation of Visually Impaired People
+- [USER] The system uses a consumer Red, Green, Blue, and Depth (RGB-D) camera attached to eyeglasses, an inertial measurement unit (IMU), a smartphone, and an earphone for commands/feedback.
+- [USER] The system is operable in both indoor and outdoor settings.
+- [USER] The smartphone processes detecting and routing, with feedback sent to the user's ear through an earphone.
+- [USER] Limitations of the system include weak detection of small-size obstacles and lack of staircase detection.
+- [USER] Subsection 2.3.1.2: Let Blind People See: Real-Time Visual Recognition with Results Converted to 3D Audio
+- [USER] The system takes video input from a portable camera and streams it to a server for real-time image recognition processing using the You Only Live Once (YOLO) model.
+- [USER] The 3D location of detected objects is derived from the bounding boxes of the object detection algorithm.
+- [USER] The solution can conduct precise real-time object detection at a pace of 30 frames per second in 1080p resolution.
+- [USER] Limitations include accurate detection only within 2 to 5 meters, blocking of surrounding ambient sound when using earbuds, and excessive information sent to the user when multiple objects are detected.
+- [USER] Subsection 2.3.2: Smart Cane
+- [USER] Subsection 2.3.2.1: Smart Electronic Stick for Visually Impaired using Android Application and Google’s Cloud Vision
+- [USER] The e-stick module is integrated with a voice-controlled Android application designed to replace the traditional navigation stick.
+- [USER] The e-stick uses ultrasonic sensors to find low-lying and knee-level obstacles and potholes.
+- [USER] The e-stick provides feedback through buzzers and is Bluetooth-connected to the user's phone for GPS navigation.
+- [USER] The system can transmit the live location of visually impaired individuals to a help center or family.
+- [USER] Face detection and translation of traffic lights and roadside signs are included.
+- [USER] Limitations include short coverage of obstacle detection and suitability only for indoor use.
+- [USER] Subsection 2.3.2.2: WeWalk
+- [USER] WeWalk is a smart cane developed by a non-profit organization called

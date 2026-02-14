@@ -1,0 +1,29 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/21 (Sun) 00:10
+- [FACT] User has a PC with an Intel Core i7-9700K processor.
+- [FACT] User has an NVIDIA GeForce RTX 3080 graphics card.
+- [FACT] User has 16 GB DDR4 3200 MHz RAM.
+- [FACT] User is running Windows 10.
+- [PREFERENCE] User enjoys playing Rocket League with friends.
+- [PREFERENCE] User is more of a casual player in Rocket League and likes trying out new cars.
+- [PREFERENCE] User has been focusing on aerials in Rocket League.
+- [EVENT] User has pre-ordered Cyberpunk 2077 last week.
+- [PREFERENCE] User is excited about the release of Cyberpunk 2077 and has been following dev diaries and gameplay demos.
+- [EVENT] User has been playing Rocket League almost every weekend for the past 2 months.
+- [PREFERENCE] User is interested in checking out Apex Legends.
+- [ASSISTANT_SAID] User's PC meets or exceeds the system requirements for Cyberpunk 2077.
+- [ASSISTANT_SAID] User's PC meets or exceeds the system requirements for Apex Legends.
+- [ASSISTANT_SAID] User should be able to play Cyberpunk 2077 at high graphics settings, including ray tracing and other advanced features.
+- [ASSISTANT_SAID] User should be able to play Apex Legends at high graphics settings, including 144 FPS and high-resolution textures.
+- [PREFERENCE] User is interested in Overwatch and has been playing the new hero Baptiste.
+- [PREFERENCE] User is trying to master Baptiste's healing abilities in Overwatch.
+- [FACT] User has played World of Warcraft in the past but hasn't kept up with it lately.
+- [PREFERENCE] User usually plays casual or competitive 3v3 in Rocket League.
+- [PREFERENCE] User is trying to get into Hoops mode in Rocket League.
+- [ASSISTANT_SAID] Aerials are crucial in Hoops mode, and user should practice them.
+- [ASSISTANT_SAID] User should familiarize themselves with the Hoops court layout and use the right car for better performance.
+- [ASSISTANT_SAID] User should work on timing their jumps and shots in Hoops mode.
+- [ASSISTANT_SAID] User should play with a team in Hoops mode for better coordination.
+- [PREFERENCE] User finds Hoops mode a lot of fun but is still getting used to the different gravity and ball physics.
+- [PREFERENCE] User has not mentioned joining any online teams or participating in tournaments in Rocket League.

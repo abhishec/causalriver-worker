@@ -1,0 +1,45 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/28 (Sun) 23:16
+
+[USER] A solutions architect needs to design a new microservice for a company’s application.
+
+[USER] Clients must be able to call an HTTPS endpoint to reach the microservice.
+
+[USER] The microservice must use AWS Identity and Access Management (IAM) to authenticate calls.
+
+[USER] The solutions architect will write the logic for this microservice using a single AWS Lambda function that is written in Go 1.x.
+
+[USER] Which solution will deploy the function in the MOST operationally efficient way?
+
+[USER] Options provided: 
+- A. Create an Amazon API Gateway REST API. Configure the method to use the Lambda function. Enable IAM authentication on the API.
+- B. Create a Lambda function URL for the function. Specify AWS_IAM as the authentication type.
+- C. Create an Amazon CloudFront distribution. Deploy the function to Lambda@Edge. Integrate IAM authentication logic into the Lambda@Edge function.
+- D. Create an Amazon CloudFront distribution. Deploy the function to CloudFront Functions. Specify AWS_IAM as the authentication type.
+
+[ASSISTANT_SAID] The solution that will deploy the function in the most operationally efficient way is: A. Create an Amazon API Gateway REST API. Configure the method to use the Lambda function. Enable IAM authentication on the API.
+
+[ASSISTANT_SAID] Option A is the best solution because it is a fully managed service designed for building and deploying APIs that can be used by clients.
+
+[ASSISTANT_SAID] Amazon API Gateway can handle high volumes of traffic without the need for managing and scaling infrastructure.
+
+[ASSISTANT_SAID] Option B is not the best option because it does not provide a scalable or secure way to authenticate and authorize clients.
+
+[ASSISTANT_SAID] Option C is not the best option because it is more complex and expensive than using Amazon API Gateway.
+
+[ASSISTANT_SAID] Option D is not the best option because CloudFront Functions is currently in preview and does not support IAM authentication.
+
+[USER] An online learning company is migrating to the AWS Cloud.
+
+[USER] The company maintains its student records in a PostgreSQL database.
+
+[USER] The company needs a solution in which its data is available and online across multiple AWS Regions at all times.
+
+[USER] Which solution will meet these requirements with the LEAST amount of operational overhead?
+
+[USER] Options provided:
+- A. Migrate the PostgreSQL database to a PostgreSQL cluster on Amazon EC2 instances.
+- B. Migrate the PostgreSQL database to an Amazon RDS for PostgreSQL DB instance with the Multi-AZ feature turned on.
+- C. Migrate the PostgreSQL database to an Amazon RDS for PostgreSQL DB instance. Create a read replica in another Region.
+- D. Migrate

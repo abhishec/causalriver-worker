@@ -1,0 +1,33 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/23 (Tue) 19:31  
+[EVENT] User is trying to track grocery expenses for the month.  
+[EVENT] User spent $75 on groceries at SaveMart last Thursday.  
+[ASSISTANT_SAID] Assistant is happy to help track grocery expenses.  
+[ASSISTANT_SAID] Assistant will keep a running total of grocery expenses for the month.  
+[ASSISTANT_CREATED] Current Total: $75  
+[ASSISTANT_SAID] Assistant invites the user to add any other grocery expenses, specifying the date, store, and amount.  
+[EVENT] User had coffee expenses last week.  
+[EVENT] User spent $15 on coffee and snacks at The Daily Grind.  
+[EVENT] User spent $12.99 on a sandwich and salad with a 20% off offer.  
+[ASSISTANT_SAID] Assistant adds coffee expenses to the total.  
+[ASSISTANT_CREATED] Grocery Total: $75  
+[ASSISTANT_CREATED] Coffee/Non-Grocery Total: $15 + $12.99 = $27.99  
+[ASSISTANT_CREATED] Total Expenses: $75 + $27.99 = $102.99  
+[ASSISTANT_SAID] Assistant will keep grocery and non-grocery expenses separate.  
+[EVENT] User spent $50 at Office Depot last month for printer ink and paper.  
+[ASSISTANT_SAID] Assistant adds the Office Depot expense to the non-grocery total.  
+[ASSISTANT_CREATED] Grocery Total: $75  
+[ASSISTANT_CREATED] Non-Grocery Total: $27.99 + $50 = $77.99  
+[ASSISTANT_CREATED] Total Expenses: $75 + $77.99 = $152.99  
+[ASSISTANT_SAID] Assistant offers to track non-grocery expenses in categories or together.  
+[PREFERENCE] User prefers to keep non-grocery expenses together for now.  
+[ASSISTANT_SAID] Assistant will keep non-grocery expenses together.  
+[EVENT] User spent $100 at Gap last weekend on a new pair of jeans and a sweater.  
+[ASSISTANT_SAID] Assistant adds the Gap expense to the non-grocery total.  
+[ASSISTANT_CREATED] Grocery Total: $75  
+[ASSISTANT_CREATED] Non-Grocery Total: $77.99 + $100 = $177.99  
+[ASSISTANT_CREATED] Total Expenses: $75 + $177.99 = $252.99  
+[ASSISTANT_SAID] Assistant updates the totals and encourages the user.  
+[EVENT] User spent $50 at Sephora last week on skincare products.  
+[ASSISTANT_SAID] Assistant adds the Sephora expense to the non-grocery total.

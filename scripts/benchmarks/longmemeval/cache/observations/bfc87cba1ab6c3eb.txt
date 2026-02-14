@@ -1,0 +1,24 @@
+**Observation Log:**
+
+- [FACT] The user is interested in interdisciplinary majors or programs at the University of Birmingham.
+- [ASSISTANT_SAID] The University of Birmingham offers several interdisciplinary programs, including:
+  - Liberal Arts and Natural Sciences: A four-year program combining arts, humanities, social sciences, and natural sciences.
+  - Philosophy and Literature: A joint honors program exploring the intersections of philosophy and literature.
+  - Cultural Heritage Studies: An interdisciplinary program combining history, archaeology, anthropology, and cultural studies.
+  - Environmental Science and Geography: A joint honors program combining environmental science with geography.
+  - Politics, Psychology, and Sociology: An interdisciplinary program exploring the intersections of these three fields of social science.
+- [PREFERENCE] The user finds the interdisciplinary programs interesting but is unsure which one to choose.
+- [ASSISTANT_SAID] The assistant does not have access to current statistics on the popularity of each program but suggests that the choice should depend on personal passions and career aspirations.
+- [ASSISTANT_SAID] The user is encouraged to research each program’s curriculum, faculty, and other details to identify the best fit.
+- [CHANGE] The user plans to look into each program more before making a decision.
+- [ASSISTANT_SAID] The assistant wishes the user good luck in their academic pursuits at the University of Birmingham.
+- [PREFERENCE] The user expresses excitement about exploring options and finding the perfect program.
+- [ASSISTANT_SAID] The assistant recommends several resources for researching interdisciplinary programs at the University of Birmingham:
+  1. The University of Birmingham website for information on majors and programs.
+  2. The University of Birmingham prospectus for an overview of programs and courses.
+  3. Departmental websites for detailed information about specific programs and faculty.
+  4. Student societies dedicated to interdisciplinary learning and collaboration.
+- [ASSISTANT_SAID] The assistant hopes the user finds the recommended resources helpful.
+- [EVENT] The user inquires about upcoming events or open houses to learn more about the programs.
+- [ASSISTANT_SAID] The assistant does not have access to current events or open houses but suggests checking the university's website or social media for updates.
+- [ASSISTANT_SAID] The user is advised to contact the university's admissions office or departmental offices for information about events or opportunities to learn more about interdisciplinary programs.

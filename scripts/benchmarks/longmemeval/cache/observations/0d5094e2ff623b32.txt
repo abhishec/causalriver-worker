@@ -1,0 +1,31 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/20 (Sat) 13:36
+- [EVENT] User is looking to plan another fishing trip to Lake Michigan.
+- [PREFERENCE] User is interested in good fishing spots and times for this time of year.
+- [EVENT] User took a fly-tying class at a local outfitter today.
+- [PREFERENCE] User is excited to try out some new lures.
+- [ASSISTANT_SAID] Lake Michigan's fish are transitioning from summer to fall patterns; water temperatures are cooling, and fish are moving into shallower waters and structure.
+- [ASSISTANT_SAID] Good fishing spots include:
+  1. Structural areas (reefs, weed beds, drop-offs, piers).
+  2. Harbors and bays (mix of sand, rocks, and weed growth).
+  3. River mouths (hotspots for salmon, trout, and walleye).
+- [ASSISTANT_SAID] Best times to fish are:
+  1. Early morning (just after sunrise).
+  2. Late evening (as the sun sets).
+  3. During tide cycles (changes in water levels can trigger feeding activity).
+- [ASSISTANT_SAID] Species-specific tips include:
+  1. Smallmouth bass: Use lures like soft plastics, jigs, and crankbaits.
+  2. Walleye: Use lures like jigs, crankbaits, and live bait.
+  3. Salmon and trout: Use lures like spoons, spinners, and flies.
+- [ASSISTANT_SAID] User's new fly-tying skills can be used to catch smallmouth bass, trout, and salmon.
+- [ASSISTANT_SAID] User should reach out to local fishing guides, outfitters, or tackle shops for more specific information.
+- [ASSISTANT_SAID] User should check local fishing regulations, obtain necessary permits, and practice catch-and-release fishing.
+- [EVENT] User is targeting smallmouth bass and walleye.
+- [ASSISTANT_SAID] Recommendations for good brands or models of waders include:
+  1. Simms (e.g., Simms G3 Guide Bootfoot Waders, Simms Freestone Bootfoot Waders).
+  2. Orvis (e.g., Orvis Silver Sonic Waders, Orvis Encounter Waders).
+  3. Patagonia (e.g., Patagonia River Salt Waders).
+  4. Korkers (e.g., Korkers BuckSkin Waders, Korkers Redside Waders).
+- [ASSISTANT_SAID] Factors to consider when choosing waders include fit, material, insulation, boot style, and price.
+- [ASSISTANT_SAID] Additional tips

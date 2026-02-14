@@ -1,0 +1,24 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/27 (Sat) 05:24  
+[USER] User inquired about how ostree works.  
+[ASSISTANT_SAID] Ostree is a version control system for managing collections of file trees, similar to Git.  
+[ASSISTANT_SAID] Ostree is designed to be efficient, scalable, and reliable, and can manage both small and large file trees.  
+[ASSISTANT_SAID] Ostree stores its data in a binary format, making it more efficient and faster than systems like Git that store data in plain text.  
+[ASSISTANT_SAID] Features of Ostree include atomic upgrades, efficient storage, snapshots, and branching.  
+[ASSISTANT_SAID] Ostree allows atomic swaps of file trees, making rollbacks easy.  
+[ASSISTANT_SAID] Ostree stores only deltas between versions, making it more efficient than storing full copies.  
+[ASSISTANT_SAID] Ostree allows snapshots of file trees for reproducible builds or backup purposes.  
+[ASSISTANT_SAID] Ostree supports branching for working on multiple versions simultaneously.  
+[USER] User asked how to set up an ostree repo on a server for clients to use.  
+[ASSISTANT_SAID] Steps to set up an OSTree repository include installing the `ostree` package, creating a directory for the repository, and initializing it.  
+[ASSISTANT_SAID] Command to initialize the OSTree repository: `ostree --repo=REPO_DIR init`.  
+[ASSISTANT_SAID] User should import the file tree into the OSTree repository using the `ostree commit` command.  
+[ASSISTANT_SAID] Example command to commit: `ostree --repo=REPO_DIR commit --branch=mybranch /path/to/my/files`.  
+[ASSISTANT_SAID] Make the OSTree repository available to clients, commonly using a web server to serve it over HTTP.  
+[ASSISTANT_SAID] Example command to create a symbolic link: `ln -s REPO_DIR /var/www/html/repo`.  
+[ASSISTANT_SAID] Clients can add the OSTree repository using the command: `ostree remote add --set=gpg-verify=false myremote http://server/repo`.  
+[ASSISTANT_SAID] Clients can deploy an OSTree commit using the command: `ostree checkout myremote/mybranch /path/to/deployment`.  
+[USER] User expressed gratitude for the information and asked about extending the idea to include using rpm-ostree.  
+[USER] User inquired if they would use rpm-ostree to generate the file tree and then commit the diffs.  
+[ASSISTANT_SAID] Yes,

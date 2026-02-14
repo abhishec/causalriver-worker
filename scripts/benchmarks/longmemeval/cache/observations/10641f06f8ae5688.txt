@@ -1,0 +1,24 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/24 (Wed) 14:00
+- [FACT] User is interested in using Obsidian for planning and tracking software sales deals cadence.
+- [ASSISTANT_SAID] Obsidian is a popular note-taking and knowledge management app that can be used for tracking sales deals cadence.
+- [ASSISTANT_SAID] Suggested workflow for using Obsidian includes creating a new note for each potential software sales deal with a descriptive title.
+- [ASSISTANT_SAID] Recommended writing down relevant information about each deal in the note, including contact person, contact information, product or service, budget, and other details.
+- [ASSISTANT_SAID] Suggested tagging each note with relevant tags like "sales", "prospects", or "deals" for easier organization.
+- [ASSISTANT_SAID] Advised creating a note to plan and track deals cadence with a clear outline including a list of prospects and their current status, a timeline of cadence, and next steps for each prospect.
+- [ASSISTANT_SAID] Mentioned using Obsidian's backlinks and graph view features to visualize and navigate notes.
+- [ASSISTANT_SAID] Suggested using Obsidian's search and filter features to quickly find notes and information.
+- [USER] Asked how to relate software sales cadence to MEDDPICC.
+- [ASSISTANT_SAID] Explained that MEDDPICC stands for Metrics, Economic buyer, Decision criteria, Decision process, Paper process, Identify pain, Champion, and Competition.
+- [ASSISTANT_SAID] Suggested defining key metrics for the sales process, such as revenue, customer acquisition cost, and sales cycle length.
+- [ASSISTANT_SAID] Advised identifying the economic buyer for each deal and building relationships with them.
+- [ASSISTANT_SAID] Recommended understanding the decision criteria for each deal and ensuring the product meets these criteria.
+- [ASSISTANT_SAID] Suggested understanding the decision process for each deal to tailor the sales approach.
+- [ASSISTANT_SAID] Advised understanding the paper process for each deal to streamline legal and contractual steps.
+- [ASSISTANT_SAID] Suggested identifying pain points that the product can solve and positioning it as a solution.
+- [ASSISTANT_SAID] Recommended identifying a champion within the buyer's organization to advocate for the product.
+- [ASSISTANT_SAID] Suggested understanding the competitive landscape for each deal and positioning the product effectively against competitors.
+- [USER] Asked how to calculate adjusted deal values from probability percentages linked to sales stages.
+- [ASSISTANT_SAID] Explained the process for calculating adjusted deal values based on sales stages and probability percentages.
+- [ASSISTANT_SAID] Suggested defining sales stages such as Prospecting

@@ -1,0 +1,47 @@
+**Observation Log:**
+
+[FACT] User's name is Avery.  
+[EVENT] User submitted paperwork for a name change on August 10th.  
+[TEMPORAL] Session date is 2023/01/31 (Tue) at 18:33.  
+[CHANGE] User updated their LinkedIn profile to reflect their new name, Avery.  
+[EVENT] User plans to update their Twitter profile.  
+[ASSISTANT_SAID] Assistant provided steps to update the LinkedIn profile, including:  
+- Click on profile picture in the top right corner.  
+- Select "View profile" from the dropdown menu.  
+- Click on "Edit public profile & URL" button.  
+- Scroll down to the "Name" section.  
+- Click on the pencil icon next to the current name.  
+- Enter new name in the fields provided.  
+- Click "Save" to save changes.  
+[ASSISTANT_SAID] Assistant recommended verifying the name change on LinkedIn by uploading a document.  
+[ASSISTANT_SAID] Assistant provided steps to update the Twitter profile, including:  
+- Tap on profile picture in the top right corner.  
+- Select "Profile" from the dropdown menu.  
+- Tap on "Edit profile" button.  
+- Tap on the "Name" field.  
+- Enter new name in the field provided.  
+- Tap "Save" to save changes.  
+[ASSISTANT_SAID] Assistant provided optional steps to change Twitter handle.  
+[ASSISTANT_SAID] Assistant provided steps to update Gmail account, including:  
+- Click on the gear icon in the upper right corner.  
+- Select "See all settings."  
+- Click on "Accounts and Import" tab.  
+- Click on "Change account settings."  
+- Click on "Edit info" next to current email address.  
+- Enter new email address and current password.  
+- Click "Change" to save changes.  
+[ASSISTANT_SAID] Assistant advised to verify the new email address through a verification email.  
+[ASSISTANT_SAID] Assistant suggested updating recovery information in Gmail.  
+[EVENT] User plans to update their bank account information.  
+[ASSISTANT_SAID] Assistant provided steps to change name on bank account, including:  
+- Gather required documents: valid government-issued ID and legal name change document.  
+- Contact the bank (visit branch, call customer service, or check website).  
+- Fill out the required form and provide documentation.  
+- Wait for verification.  
+[ASSISTANT_SAID] Assistant recommended bringing specific documents to the bank, including:  
+- Court order or legal name change document.  
+- Updated government-issued ID.  
+- Current identification.  
+- Account information.  
+- Proof of address.  
+[EVENT] User plans to visit the bank next week to update their account information.

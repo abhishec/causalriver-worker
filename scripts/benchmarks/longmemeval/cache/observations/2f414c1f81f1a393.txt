@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[FACT] User has been cooking at home more frequently over the past three months.  
+[PREFERENCE] User enjoys trying out new recipes and techniques.  
+[EVENT] User is planning to make a Korean-style BBQ beef recipe for dinner tonight.  
+[PREFERENCE] User is looking for alternatives to beef for the Korean-style BBQ.  
+[ASSISTANT_SAID] Assistant suggested alternatives to beef for Korean-style BBQ: pork, chicken, shrimp, tofu, lamb, and duck.  
+[ASSISTANT_SAID] Assistant provided tips for marinating and cooking each alternative protein.  
+[ASSISTANT_SAID] Assistant advised adjusting marinating time based on protein thickness and density.  
+[ASSISTANT_SAID] Assistant recommended cooking times and temperatures for different proteins: chicken (165°F/74°C), lamb and duck (145°F/63°C for medium-rare).  
+[EVENT] User is thinking of trying out pork belly for the Korean BBQ.  
+[ASSISTANT_SAID] Assistant provided tips on how to prep pork belly before marinating: scoring, removing excess fat, pounding or tenderizing, cutting into smaller pieces, and salting.  
+[ASSISTANT_SAID] Assistant recommended scoring the fat layer on the pork belly to help the marinade penetrate deeper.  
+[ASSISTANT_SAID] Assistant suggested trimming excess fat but leaving about 1/4 inch on the surface.  
+[ASSISTANT_SAID] Assistant advised to pound the pork belly to break down connective tissues for tenderness.  
+[ASSISTANT_SAID] Assistant recommended cutting pork belly into 1-2 inch cubes or slices for even marination and cooking.  
+[ASSISTANT_SAID] Assistant suggested applying a dry brine or light salt rub to enhance flavor and texture.  
+[ASSISTANT_SAID] Assistant provided cooking tips for pork belly: use a hot grill, cook to an internal temperature of 160°F (71°C), and let it rest before slicing.  
+[EVENT] User is thinking of serving the pork belly with roasted vegetables.  
+[ASSISTANT_SAID] Assistant suggested vegetables that pair well with Korean BBQ: Korean radish (daikon), carrots, Brussels sprouts, sweet potatoes, zucchini, mushrooms, and broccoli.  
+[ASSISTANT_SAID] Assistant recommended seasoning the vegetables lightly to complement the pork belly.  
+[ASSISTANT_SAID] Assistant suggested garnishing with toasted sesame seeds, chopped green onions, or crispy garlic for added texture and flavor.  
+[EVENT] User is considering roasting the vegetables in an air fryer instead of the oven.  
+[ASSISTANT_SAID] Assistant confirmed that air frying is a good idea and provided adjustments for cooking time and temperature.  
+[ASSISTANT_SAID] Assistant recommended reducing the temperature by 25-50°F (15-25°C

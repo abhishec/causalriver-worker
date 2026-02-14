@@ -1,0 +1,20 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/20 (Sat) 02:08  
+[USER] User inquired about monitoring a JMX port in a Docker infrastructure with Zabbix Proxy.  
+[ASSISTANT_SAID] To monitor a JMX port in a Docker infrastructure with Zabbix Proxy, the following steps are needed:  
+[ASSISTANT_SAID] 1. Create a new Zabbix proxy container and ensure it can communicate with the Zabbix server.  
+[ASSISTANT_SAID] 2. Install the Zabbix Java Gateway on the same host as the Zabbix proxy container.  
+[ASSISTANT_SAID] 3. Update the Zabbix proxy configuration file to include the location of the Zabbix Java Gateway and the JMX port to be monitored.  
+[ASSISTANT_SAID] 4. Configure the Zabbix server to use the Zabbix proxy for monitoring the JMX port.  
+[ASSISTANT_SAID] 5. Create a new JMX template on the Zabbix server and link it to the host being monitored.  
+[ASSISTANT_SAID] 6. Add the necessary JMX items to the template and configure the triggers as needed.  
+[ASSISTANT_SAID] 7. Restart the Zabbix proxy container and verify that data is being collected from the JMX port.  
+[ASSISTANT_SAID] It is advisable to test the communication between Zabbix server and Zabbix proxy, and also test the connection from Zabbix Java Gateway to the target JMX port before starting the monitoring.  
+[USER] User asked what configuration is necessary on the Zabbix Proxy to communicate with the Java Gateway.  
+[ASSISTANT_SAID] To configure the Zabbix proxy to communicate with the Zabbix Java Gateway (ZJG), the following steps are needed:  
+[ASSISTANT_SAID] 1. Update the Zabbix proxy configuration file (zabbix_proxy.conf) to include the location of the ZJG by adding: `JavaGateway=<IP or hostname of the ZJG host>`.  
+[ASSISTANT_SAID] 2. Configure the number of Java pollers to start by adding: `StartJavaPollers=<number of pollers>`.  
+[ASSISTANT_SAID] 3. Update the Zabbix proxy configuration file to include the JMX port to be monitored by adding: `JavaGatewayPort=<JMX port number>`.  
+[ASSISTANT_SAID] 4. Restart the Zabbix proxy for the changes to take effect.  
+[ASSISTANT_SAID] It is important to verify that the Zabbix proxy and ZJG can communicate with each other

@@ -1,0 +1,17 @@
+**Observation Log:**
+
+- [FACT] The user is considering building a small cabin on a plot of land inherited from their grandfather's estate.
+- [FACT] The plot of land is located in Illinois.
+- [RELATIONSHIP] The user's grandfather is mentioned as the previous owner of the estate.
+- [ASSISTANT_SAID] The assistant congratulated the user on inheriting the land and provided an overview of the permitting process in Illinois.
+- [ASSISTANT_SAID] The assistant outlined the steps for obtaining a building permit in Illinois, including determining zoning regulations, submitting a building permit application, and scheduling inspections.
+- [ASSISTANT_SAID] The assistant listed documents needed for the building permit application, such as a detailed project description, site plan, floor plans, structural calculations, and energy efficiency information.
+- [ASSISTANT_SAID] The assistant provided a typical timeframe for the plan review and approval process in Illinois, stating that simple projects may take 2-4 weeks, moderate projects 4-8 weeks, and complex projects 8-12 weeks or more.
+- [ASSISTANT_SAID] The assistant recommended preparing a complete application package to speed up the plan review process.
+- [ASSISTANT_SAID] The assistant mentioned specific zoning regulations and restrictions in Illinois, including agricultural zoning, rural residence districts, conservation districts, floodplain zoning, and setback requirements.
+- [ASSISTANT_SAID] The assistant advised the user to check with local government for specific zoning regulations and to consider the impact of the cabin on neighboring properties.
+- [ASSISTANT_SAID] The assistant provided information about septic systems and wells in Illinois, indicating that the user would need to comply with state regulations regarding water and sewage systems.
+- [TEMPORAL] The session date is 2023/05/29 (Mon) at 18:44.
+- [PREFERENCE] The user expressed a desire to ensure that their cabin's water and sewage systems meet state standards.
+- [EVENT] The user is in the process of preparing necessary documents and information for the building permit application.
+- [CHANGE] The user is considering building a cabin, indicating a new project based on the inherited land.

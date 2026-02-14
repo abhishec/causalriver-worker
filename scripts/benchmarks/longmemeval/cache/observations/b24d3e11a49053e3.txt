@@ -1,0 +1,28 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/24 (Wed) 14:28  
+[EVENT] User is having issues with camera shake when taking photos of birds in flight.  
+[EVENT] User recently bought a remote shutter release.  
+[ASSISTANT_SAID] Camera shake can be a challenge when capturing birds in flight.  
+[ASSISTANT_SAID] Tips to minimize camera shake and blur include:  
+[ASSISTANT_SAID] 1. Use a sturdy tripod or monopod.  
+[ASSISTANT_SAID] 2. Use a remote shutter release or self-timer.  
+[ASSISTANT_SAID] 3. Use a fast shutter speed (minimum 1/1000th of a second).  
+[ASSISTANT_SAID] 4. Practice panning to follow the bird's movement.  
+[ASSISTANT_SAID] 5. Anticipate and pre-focus on the area where the bird is likely to fly through.  
+[ASSISTANT_SAID] 6. Use continuous autofocus mode (AI Servo or AF-C).  
+[ASSISTANT_SAID] 7. Use a lens with image stabilization (IS) or vibration reduction (VR).  
+[ASSISTANT_SAID] 8. Take multiple shots in quick succession.  
+[ASSISTANT_SAID] 9. Practice to improve timing and tracking skills.  
+[ASSISTANT_SAID] 10. Use post-processing to apply sharpening or noise reduction.  
+[EVENT] User has been trying out some of the techniques but is still having trouble getting a sharp image of birds in flight.  
+[EVENT] User is seeking specific advice on using continuous autofocus mode on their Canon EOS 80D with a Sigma 150-600mm lens.  
+[ASSISTANT_SAID] Tips for using continuous autofocus (AI Servo AF) mode on Canon EOS 80D with Sigma 150-600mm lens include:  
+[ASSISTANT_SAID] 1. Enable AI Servo AF mode.  
+[ASSISTANT_SAID] 2. Set AF Method to "Zone AF" or "Large Zone AF".  
+[ASSISTANT_SAID] 3. Choose "Auto Selection" for AF point selection.  
+[ASSISTANT_SAID] 4. Set AF Tracking Sensitivity to "-1" or "-2".  
+[ASSISTANT_SAID] 5. Ensure OS (Optical Stabilizer) is enabled on the lens.  
+[ASSISTANT_SAID] 6. Use OS Mode 2 if available for panning.  
+[ASSISTANT_SAID] 7. Use the correct autofocus area and point.  
+[ASSISTANT_SAID] 8. Use a fast

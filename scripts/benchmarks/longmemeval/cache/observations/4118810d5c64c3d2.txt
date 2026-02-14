@@ -1,0 +1,19 @@
+**Observation Log:**
+
+[FACT] The user is planning a big family dinner.  
+[EVENT] The user is looking for BBQ rib recipes.  
+[EVENT] The user's mom's signature ribs were a huge hit at a recent family reunion.  
+[TEMPORAL] The family reunion started on a Friday.  
+[ASSISTANT_SAID] The assistant provided three BBQ rib recipes: Classic BBQ Ribs with Dry Rub, Memphis-Style Wet Ribs, and Korean-Style BBQ Ribs with Gochujang.  
+[ASSISTANT_SAID] The assistant listed ingredients for Classic BBQ Ribs with Dry Rub: 2 racks of pork ribs, 1/4 cup dry rub, 1 cup BBQ sauce, wood chips or chunks for smoking (optional).  
+[ASSISTANT_SAID] The assistant provided tips for achieving tender, fall-off-the-bone ribs, including choosing the right ribs, removing the membrane, dry brining, low and slow cooking, using wood smoke, wrapping and resting, avoiding overcooking, basting and glazing, and letting the ribs rest.  
+[FACT] The user thinks Recipe 1 sounds promising.  
+[ASSISTANT_SAID] The assistant confirmed that charcoal grilling can add smoky flavor to the ribs and suggested using apple wood chips or chunks for smoking.  
+[ASSISTANT_SAID] The assistant stated that apple wood adds a mild, sweet, and fruity flavor that pairs well with pork and the spices in the dry rub.  
+[ASSISTANT_SAID] The assistant recommended soaking apple wood chips or chunks in water for at least 30 minutes before using them.  
+[ASSISTANT_SAID] The assistant stated that the ideal internal temperature for cooked ribs is at least 160°F (71°C) and suggested aiming for 180°F (82°C) to 190°F (88°C) for tenderness.  
+[ASSISTANT_SAID] The assistant confirmed that a meat thermometer can be used to check the internal temperature of the ribs.  
+[ASSISTANT_SAID] The assistant provided tips for using a meat thermometer, including inserting the probe into the thickest part of the rib meat and avoiding bones or fat.  
+[EVENT] The user is planning to serve the ribs with sides like coleslaw and baked beans.  
+[ASSISTANT_SAID] The assistant provided three coleslaw recipes: Creamy Coleslaw with a Twist, Vinegar-Based Coleslaw with a Kick, and Coleslaw with a Southern Twist.  
+[ASSISTANT_SAID] The assistant listed ingredients for Creamy Coleslaw with a Twist: 2 cups shredded cabbage, 1 cup shredded carrots, 1/4 cup mayonnaise, 2 tablespoons apple cider vinegar, 1 tablespoon Dijon mustard, 1 teaspoon honey, salt and pepper to taste, 2 tablespoons chopped fresh parsley.

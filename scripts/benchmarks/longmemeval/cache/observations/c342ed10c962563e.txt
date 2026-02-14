@@ -1,0 +1,27 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/02/15 (Wed) 21:38
+- [USER] The user is keeping sentences that they find interesting in a note app.
+- [ASSISTANT_SAID] The assistant was asked to provide tags for the user's note-taking app.
+- [ASSISTANT_SAID] The assistant was asked to provide a short description of what the user is researching.
+- [ASSISTANT_SAID] The assistant was asked to suggest three relevant topics for the user to research next.
+- [ASSISTANT_SAID] The assistant was asked to provide two experts in each of the three topics, including their Twitter profiles.
+- [ASSISTANT_SAID] The assistant was asked to provide the most reputable sources on the internet for each of the three topics.
+- [FACT] The user provided an article titled "What China can still do to avoid an enormous covid death toll."
+- [USER] The user found the following sentences interesting from the first article: 
+  1. "President Xi Jinping tried to contain the virus, calling his efforts a 'people’s war.'"
+  2. "A wave of covid is breaking over China. Our model sees this peaking in January."
+  3. "We estimate that in the coming months 1.5m Chinese people will die from the virus."
+  4. "To that end, the state could help drug companies restock pharmacies that run out of such things as lateral-flow tests and paracetamol."
+  5. "A second step is to ensure cheap and plentiful supplies of covid drugs. Dexamethasone, a low-priced steroid, has been shown to reduce deaths among the most severely ill patients."
+  6. "China’s vaccines still work. So the third priority is to get them into people’s arms."
+- [FACT] The user provided a second article titled "How Chinese people are dealing with the spread of covid-19."
+- [USER] The user found the following sentences interesting from the second article:
+  1. "The government has left the public to fend for itself."
+  2. "The highly transmissible Omicron variant had made zero-covid unsustainable."
+  3. "Now the public is expected to fend for itself."
+  4. "The official number of new cases is falling, as if the virus were fading away."
+  5. "An informal survey has been circulating on social media asking Beijing residents if they have caught the virus."
+  6. "More are getting vaccinated. The number of jabs administered each day has increased from fewer than 200,000 to over 1m."
+  7. "Only around 40% of people over 80 have received the three doses needed to significantly reduce the chances of severe disease or death."
+  8. "Many

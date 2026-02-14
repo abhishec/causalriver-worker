@@ -1,0 +1,24 @@
+**Observation Log:**
+
+[FACT] User is planning a trip to Maui.  
+[FACT] User has booked a luxurious resort in Maui that costs over $300 per night.  
+[PREFERENCE] User is looking for free or affordable activities to balance out the cost of their resort stay.  
+[EVENT] User is interested in outdoor activities and hiking trails in Maui.  
+[ASSISTANT_SAID] Recommended hiking trails include Haleakala National Park, Waihee Ridge Trail, Iao Valley State Park, and Kapalua Coastal Trail.  
+[ASSISTANT_SAID] Suggested outdoor activities include snorkeling at Honolua Bay, watching the sunset at Ho'okipa Beach, driving the Road to Hana, and kayaking or paddleboarding.  
+[ASSISTANT_SAID] Haleakala National Park has an entrance fee of $30 per vehicle (valid for 3 days).  
+[ASSISTANT_SAID] Iao Valley State Park has an entrance fee of $5 per person.  
+[ASSISTANT_SAID] Recommended hiking trails in Haleakala National Park include Sliding Sands Trail and Halemau'u Trail.  
+[ASSISTANT_SAID] Sliding Sands Trail is 10 miles round-trip, with a 3,000 feet elevation change, and is moderate to challenging.  
+[ASSISTANT_SAID] Halemau'u Trail is 7.4 miles round-trip, with a 1,400 feet elevation change, and is moderate.  
+[ASSISTANT_SAID] Recommended Halemau'u Trail for a moderate hiker due to its shorter distance and gradual elevation change.  
+[ASSISTANT_SAID] Suggested checking the park's website for up-to-date trail information and restrictions.  
+[ASSISTANT_SAID] Recommended bringing water, snacks, and sun protection for the hike.  
+[ASSISTANT_SAID] Suggested visiting Haleakala Visitor Center and Leleiwi Overlook for scenic views.  
+[ASSISTANT_SAID] Recommended restaurants near Haleakala National Park include Haleakala National Park's Summit District Snack Bar, Kula Lodge Restaurant & Bar, and Cafe O'Lei at the Dunes.  
+[ASSISTANT_SAID] Suggested visiting Kula Botanical Garden if time allows.  
+[PREFERENCE] User is especially interested in the Haleakala National Park and the Waihee Ridge Trail.  
+[EVENT] User plans to stop by the Haleakala Visitor Center and grab snacks at the Summit District Snack Bar after their hike.  
+[ASSISTANT_SAID] Recommended local cuisine to try includes poke, loco moco, kalua pig, and shave ice.  
+[ASSISTANT_SAID] Recommended restaurants for local cuisine include Mama's Fish House, Star Noodle, The Fish Hopper, Aloha Kitchen, and Coconut's Fish Cafe.  
+[ASSISTANT_SAID] Suggested visiting Kihei Farmers' Market and Up

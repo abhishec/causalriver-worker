@@ -1,0 +1,107 @@
+{
+  "answer_feb5f98a_2": [
+    {
+      "fact": "User is planning to start looking for a new job in the next few months",
+      "type": "event",
+      "entities": []
+    },
+    {
+      "fact": "User is looking to transition into a more senior role, possibly a Content Marketing Strategist or Digital Marketing Consultant",
+      "type": "preference",
+      "entities": [
+        "Content Marketing Strategist",
+        "Digital Marketing Consultant"
+      ]
+    },
+    {
+      "fact": "User wants to highlight experience in managing social media presence, creating and scheduling posts, and analyzing engagement metrics",
+      "type": "preference",
+      "entities": [
+        "social media presence",
+        "creating posts",
+        "scheduling posts",
+        "analyzing engagement metrics"
+      ]
+    },
+    {
+      "fact": "User increases work hours by 10 hours weekly during peak campaign seasons to accommodate additional workload",
+      "type": "personal",
+      "entities": []
+    },
+    {
+      "fact": "User wants to emphasize ability to adapt to changing workloads and prioritize tasks effectively",
+      "type": "opinion",
+      "entities": []
+    }
+  ],
+  "answer_feb5f98a_1": [
+    {
+      "fact": "User is a Digital Marketing Specialist",
+      "type": "personal",
+      "entities": [
+        "Digital Marketing Specialist"
+      ]
+    },
+    {
+      "fact": "User works 40 hours a week",
+      "type": "personal",
+      "entities": [
+        "40 hours"
+      ]
+    },
+    {
+      "fact": "User's top tasks include managing social media presence, creating and scheduling posts, analyzing engagement metrics, and collaborating with the design team",
+      "type": "preference",
+      "entities": [
+        "social media presence",
+        "creating posts",
+        "scheduling posts",
+        "analyzing engagement metrics",
+        "collaborating with design team"
+      ]
+    },
+    {
+      "fact": "User has campaigns launching soon",
+      "type": "event",
+      "entities": [
+        "campaigns"
+      ]
+    },
+    {
+      "fact": "User needs to finalize content and schedules before taking time off",
+      "type": "event",
+      "entities": [
+        "content",
+        "schedules"
+      ]
+    },
+    {
+      "fact": "User has a team meeting on Wednesday at 2 pm",
+      "type": "event",
+      "entities": [
+        "team meeting",
+        "Wednesday",
+        "2 pm"
+      ]
+    },
+    {
+      "fact": "User has a weekly call with the design team on Fridays at 10 am",
+      "type": "event",
+      "entities": [
+        "weekly call",
+        "design team",
+        "Fridays",
+        "10 am"
+      ]
+    },
+    {
+      "fact": "User is planning to take 3 days off next week from Wednesday to Friday",
+      "type": "event",
+      "entities": [
+        "3 days off",
+        "Wednesday",
+        "Friday"
+      ]
+    }
+  ]
+}

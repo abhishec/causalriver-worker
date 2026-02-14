@@ -1,0 +1,61 @@
+{
+  "answer_16bd5ea5_1": [
+    {
+      "fact": "User is experimenting with different types of plants in their garden, including basil, mint, and parsley.",
+      "type": "personal",
+      "entities": [
+        "basil",
+        "mint",
+        "parsley"
+      ]
+    },
+    {
+      "fact": "User attended a gardening workshop in their neighborhood on April 15, 2023.",
+      "type": "event",
+      "entities": [
+        "gardening workshop",
+        "April 15, 2023"
+      ]
+    },
+    {
+      "fact": "User learned about companion planting and crop rotation at the gardening workshop.",
+      "type": "opinion",
+      "entities": [
+        "companion planting",
+        "crop rotation"
+      ]
+    },
+    {
+      "fact": "User is considering using compost as a fertilizer for their herbs.",
+      "type": "preference",
+      "entities": [
+        "compost",
+        "herbs"
+      ]
+    }
+  ],
+  "answer_16bd5ea5_2": [
+    {
+      "fact": "User planted 12 new tomato saplings today",
+      "type": "event",
+      "entities": [
+        "12 new tomato saplings"
+      ]
+    },
+    {
+      "fact": "User is excited to see their tomato plants grow",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User is considering using neem oil and insecticidal soap to control aphids and whiteflies",
+      "type": "preference",
+      "entities": [
+        "neem oil",
+        "insecticidal soap",
+        "aphids",
+        "whiteflies"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/27 (Sat) 15:02  
+[USER] User stated they would provide examples and requested advice on those examples.  
+[USER] Example 1 title: Displays  
+[USER] Example 1 feature description: The cockpit and the passengers will be surrounded by a set of displays (touch and non-touch) fulfilling conventional functions (i.e. Driver Information, Infotainment, HVAC controls, Vehicle and User settings) as well as new E-Mirror technologies (i.e. cameras fed videos rendered on 3 displays surrounding the driver).  
+[USER] Example 1 details: The DRVM will replace interior windshield mirrors and will render on the screen sharing also Driver Information. The CMS will replace exterior door mirrors and will render its videos on side displays adjacent to the Cluster.  
+[USER] Example 1 benefits and competitive solutions: Proposed technology: TFT with pros and cons listed. Alternative technology: OLED with pros and cons listed.  
+[USER] Example 1 functional needs: The cockpit will share 2 physical displays (12.3” and 7”), orientation details, ASIL-B compliance, and integration of Driver Monitoring System.  
+[USER] Example 1 additional details: The Co-Driver should experience a higher level of User Interaction in higher specification vehicles, and rear occupants shall have minimum interface possibilities.  
+[ASSISTANT_SAID] Advice for Example 1: Consider both TFT and OLED technologies, ensure displays meet functional needs and safety requirements, provide a detailed graphical user interface definition, offer additional touch displays for passengers, explore integration of portable devices for rear occupants, and ensure seamless integration of display systems.  
+[USER] Example 2 title: Cameras  
+[USER] Example 2 feature description: Cameras mounted in a housing on the door or A pillar stream a live video feed onto displays inside the car to replace traditional side mirrors.  
+[USER] Example 2 benefits and competitive solutions: Proposed technology includes heated glass covers for camera lenses, smaller size for reduced aerodynamic drag, and wider angle view than traditional mirrors.  
+[USER] Example 2 functional needs: Automatic extended view when using turn indicators or selecting reverse gear, adjustable settings through touch screen or buttons, warning display for blind spots, and distance guidelines for parking and highway driving.  
+[ASSISTANT_SAID] Advice for Example 2: Consider weather conditions for camera lens covers, reduce aerodynamic drag, ensure wider angle view, implement automatic extended views, allow for system adjustments, display warnings for blind spots, and provide distance guidelines.  
+[USER] Example 3 title: Smartphone mirroring  
+[USER] Example 3 feature description: Technology that allows a driver to connect their smartphone to the car's infotainment system, mirroring the phone's screen onto the car's display.  
+[USER] Example 3 benefits and competitive solutions: Proposed technology includes wireless connectivity

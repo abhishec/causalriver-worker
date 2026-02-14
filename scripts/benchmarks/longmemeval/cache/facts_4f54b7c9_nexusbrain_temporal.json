@@ -1,0 +1,88 @@
+{
+  "answer_50940cb7_1": [
+    {
+      "fact": "User inherited a vintage diamond necklace from their grandmother",
+      "type": "personal",
+      "entities": [
+        "vintage diamond necklace",
+        "grandmother"
+      ]
+    },
+    {
+      "fact": "User inherited an antique music box from their great-aunt",
+      "type": "personal",
+      "entities": [
+        "antique music box",
+        "great-aunt"
+      ]
+    },
+    {
+      "fact": "User inherited a set of depression-era glassware from their mom",
+      "type": "personal",
+      "entities": [
+        "depression-era glassware",
+        "mom"
+      ]
+    },
+    {
+      "fact": "User is seeking insurance for valuable family heirlooms",
+      "type": "preference",
+      "entities": [
+        "insurance",
+        "family heirlooms"
+      ]
+    },
+    {
+      "fact": "User is interested in the appraisal process for the vintage diamond necklace",
+      "type": "preference",
+      "entities": [
+        "appraisal process",
+        "vintage diamond necklace"
+      ]
+    }
+  ],
+  "answer_50940cb7_2": [
+    {
+      "fact": "User is thinking of decluttering their apartment",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User plans to sell old family heirlooms to make extra cash",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User has an antique tea set from their cousin Rachel",
+      "type": "personal",
+      "entities": [
+        "antique tea set",
+        "Rachel"
+      ]
+    },
+    {
+      "fact": "User has a vintage typewriter that belonged to their dad",
+      "type": "personal",
+      "entities": [
+        "vintage typewriter",
+        "dad"
+      ]
+    },
+    {
+      "fact": "User is researching online marketplaces and forums like eBay and Etsy",
+      "type": "preference",
+      "entities": [
+        "eBay",
+        "Etsy"
+      ]
+    },
+    {
+      "fact": "User is looking for specific keywords or categories when searching for their items",
+      "type": "preference",
+      "entities": [
+        "keywords",
+        "categories"
+      ]
+    }
+  ]
+}

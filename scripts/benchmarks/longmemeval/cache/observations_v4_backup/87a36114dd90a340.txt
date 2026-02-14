@@ -1,0 +1,16 @@
+**Observation Log:**
+
+- [FACT] User is a 32-year-old male.
+- [FACT] User is trying to get a better understanding of the green card application process.
+- [FACT] User is interested in the EB-2 visa category.
+- [FACT] User has a master's degree in data science from New York University.
+- [FACT] User is a computer science professional.
+- [PREFERENCE] User wants to ensure they understand how their salary will be determined.
+- [ASSISTANT] The EB-2 visa category is for professionals with advanced degrees or exceptional abilities.
+- [ASSISTANT] To qualify for an EB-2 visa, one must hold a U.S. master's degree or higher, or a foreign equivalent degree that requires at least three years of post-baccalaureate education.
+- [ASSISTANT] The labor certification process is typically handled by the user's U.S. employer.
+- [ASSISTANT] The prevailing wage determination sets the minimum salary that the employer must offer the user.
+- [ASSISTANT] The median annual salary for data scientists in the New York-Newark-Jersey City, NY-NJ-PA metropolitan area is around $140,000.
+- [ASSISTANT] User will need to provide a diploma and official transcripts from NYU as part of the education requirements for the EB-2 visa application.
+- [ASSISTANT] If the user's degree is from a foreign institution, they may need a degree equivalency evaluation from a recognized credential evaluation agency.
+- [TEMPORAL] Session date is 2023/05/29 (Mon) 15:50.

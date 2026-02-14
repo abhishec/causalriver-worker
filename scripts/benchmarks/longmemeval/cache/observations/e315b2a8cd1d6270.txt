@@ -1,0 +1,48 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/01/01 (Sun) 00:52  
+[USER] User requested 10 ideas on phrases to use to start open-ended questions.  
+[ASSISTANT_SAID] Assistant provided 10 phrases:  
+1. "What do you think about..."  
+2. "Can you tell me more about..."  
+3. "How do you feel about..."  
+4. "Could you elaborate on..."  
+5. "What are your thoughts on..."  
+6. "What's your opinion on..."  
+7. "Could you explain..."  
+8. "What do you make of..."  
+9. "Can you describe..."  
+10. "What's your perspective on..."  
+[USER] User requested 10 more ideas that could be used in a sales conversation with a prospect.  
+[ASSISTANT_SAID] Assistant provided 10 phrases for sales conversations:  
+1. "What challenges are you currently facing in your business?"  
+2. "Can you tell me more about your current process/solution?"  
+3. "How do you envision this product/service fitting into your operations?"  
+4. "What specific needs do you have that our product/service can address?"  
+5. "Can you walk me through a recent project you completed and any pain points you experienced?"  
+6. "What is your budget for this project/purchase?"  
+7. "What kind of ROI are you looking to achieve with this product/service?"  
+8. "What are the decision-making criteria for this purchase?"  
+9. "Can you tell me about the other vendors/solutions you are considering?"  
+10. "What is your timeline for making a decision on this product/service?"  
+[USER] User requested 10 ideas on phrases to use to start open-ended questions again.  
+[ASSISTANT_SAID] Assistant provided another set of 10 phrases:  
+1. "Can you tell me more about..."  
+2. "What do you think about..."  
+3. "How does that make you feel..."  
+4. "What are your thoughts on..."  
+5. "Can you explain..."  
+6. "What's your perspective on..."  
+7. "What's your take on..."  
+8. "Could you elaborate on..."  
+9. "What's your opinion on..."  
+10. "Can you describe..."  
+[USER] User requested 10 ideas on phrases to use to start open-ended questions that are different from above.  
+[ASSISTANT_SAID] Assistant provided 10 new phrases:  
+1. "What inspired you to..."  
+2. "What sparked your interest in..."  
+3. "What led you to make that decision..."  
+4. "What challenges did you face while..."  
+5. "What was the most difficult part of..."  
+6. "What was the most rewarding part of..."  
+7

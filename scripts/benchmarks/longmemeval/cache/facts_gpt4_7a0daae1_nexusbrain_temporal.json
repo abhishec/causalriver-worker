@@ -1,0 +1,76 @@
+{
+  "answer_4d5490f1_1": [
+    {
+      "fact": "User is looking to improve overall fitness",
+      "type": "preference",
+      "entities": [
+        "overall fitness"
+      ]
+    },
+    {
+      "fact": "User wants to improve reaction time and hand-eye coordination",
+      "type": "preference",
+      "entities": [
+        "reaction time",
+        "hand-eye coordination"
+      ]
+    },
+    {
+      "fact": "User is interested in improving cardiovascular endurance for running",
+      "type": "preference",
+      "entities": [
+        "cardiovascular endurance",
+        "running"
+      ]
+    },
+    {
+      "fact": "User aims to increase stamina and endurance for 30-minute runs",
+      "type": "preference",
+      "entities": [
+        "stamina",
+        "endurance",
+        "30-minute runs"
+      ]
+    }
+  ],
+  "answer_4d5490f1_2": [
+    {
+      "fact": "User is looking to improve their tennis serves.",
+      "type": "preference",
+      "entities": [
+        "tennis serves"
+      ]
+    },
+    {
+      "fact": "User received a new tennis racket.",
+      "type": "event",
+      "entities": [
+        "new tennis racket"
+      ]
+    },
+    {
+      "fact": "User is excited to try out new techniques with their tennis racket.",
+      "type": "opinion",
+      "entities": [
+        "new techniques",
+        "tennis racket"
+      ]
+    },
+    {
+      "fact": "User has tennis lessons on Saturdays.",
+      "type": "event",
+      "entities": [
+        "Saturdays",
+        "tennis lessons"
+      ]
+    },
+    {
+      "fact": "User is trying to incorporate more stretching into their tennis routine.",
+      "type": "preference",
+      "entities": [
+        "stretching",
+        "tennis routine"
+      ]
+    }
+  ]
+}

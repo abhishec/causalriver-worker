@@ -1,0 +1,24 @@
+**Observation Log:**
+
+- [FACT] The user is a senior in college.
+- [EVENT] The user is assigned to work with a certain client for the semester as part of their final project.
+- [FACT] The client's company is responsible for exclusive technical and managerial training within their field.
+- [FACT] The company provides instructional classes and is the only entity that can train others in their field.
+- [FACT] The current method of completing the training plan is not well structured.
+- [FACT] The current training plan relies on the knowledge of section managers and course instructors.
+- [FACT] The company has been losing resources within its yearly budget due to an incomplete and non-structured plan.
+- [FACT] There is a non-allocation of employee hours to produce an efficient work environment.
+- [FACT] The company is seeking aid in determining a model to help equate the number of instructors to the number of hours of instruction that can be provided.
+- [FACT] There are 8 Technical Training Sections in the organization based on particular disciplines of technical training.
+- [FACT] Each section has independent variables that factor into determining the ratio of instructors to hours of instruction.
+- [FACT] The company is facing budget constraints and employee attrition.
+- [ASSISTANT_SAID] The assistant suggested asking about the current number of instructors in each technical training section and how many hours they are currently teaching.
+- [ASSISTANT_SAID] The assistant recommended asking about the specific factors that influence the ratio of instructors to hours in each technical training section.
+- [ASSISTANT_SAID] The assistant suggested inquiring how these factors are currently being considered when determining the number of instructors needed for each section.
+- [ASSISTANT_SAID] The assistant advised asking about the budget constraints the company is currently facing and any projected changes to the budget.
+- [ASSISTANT_SAID] The assistant recommended asking how employee attrition is affecting the company's training process and what measures are being taken to address this issue.
+- [ASSISTANT_SAID] The assistant suggested asking about the company's ultimate goal in creating the new model (e.g., reducing costs, increasing efficiency, improving training outcomes).
+- [ASSISTANT_SAID] The assistant recommended asking how the company will be using the model once it is developed (e.g., for staffing decisions, budget allocations, internal planning).
+- [ASSISTANT_SAID] The assistant confirmed that based on the information provided, they could create a model in Excel that incorporates the relevant variables for each technical training section.
+- [ASSISTANT_SAID] The assistant mentioned that the specific design of the model would depend on the information provided by the user.
+- [ASSISTANT_SAID] The assistant outlined possible features of the Excel model, including tables for specific factors, an input area for training hours, formulas for calculating instructors needed, and a summary area for total

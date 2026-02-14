@@ -1,0 +1,17 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/07 (Sun) 13:26
+- [USER] User is inquiring about the average graduating salary for students who graduate from the University of Kansas with a degree in specific fields, such as business or computer science.
+- [ASSISTANT_SAID] Assistant states that it does not have access to the latest salary data but suggests visiting the University of Kansas Career Center for more information about average graduating salaries for different majors.
+- [USER] User expresses dissatisfaction with the assistant's help, questioning its usefulness and asking for specific sources for salary data.
+- [ASSISTANT_SAID] Assistant reiterates that it does not have access to the latest salary data and suggests visiting the University of Kansas Career Center website or contacting them directly for information about post-graduation salaries.
+- [USER] User requests estimated salary figures and expresses frustration about the assistant's inability to provide basic information.
+- [ASSISTANT_SAID] Assistant apologizes for the confusion and states that it cannot provide specific salary figures but mentions that the average starting salary for KU graduates is $50,000 per year, noting that this figure can vary by area of study and job field.
+- [USER] User continues to express frustration, questioning the assistant's value if it cannot provide accurate information and stating that they could have Googled it themselves.
+- [ASSISTANT_SAID] Assistant apologizes for the frustration and acknowledges limitations in the data and resources available, offering to help with any specific information the user is looking for.
+- [USER] User expresses doubt about the assistant's usefulness, emphasizing the need for accurate data on average salaries for graduates of the University of Kansas by field of study.
+- [ASSISTANT_SAID] Assistant apologizes again and states that it does not have access to the latest salary data by field of study, recommending contacting the University of Kansas Career Center for the most current information.
+- [USER] User expresses frustration about having to contact another department and questions the assistant's purpose if it can only provide generic answers.
+- [ASSISTANT_SAID] Assistant explains that it aims to provide relevant and accurate information but acknowledges that specific data may require direct contact with university departments, apologizing for any inconvenience.
+- [USER] User expresses frustration about the assistant's inability to provide needed information and requests not to receive generic responses anymore.
+- [ASSISTANT_SAID] Assistant apologizes for not meeting the user's needs and asks for specific details about the information the user is looking for, offering to help with the most accurate information available.

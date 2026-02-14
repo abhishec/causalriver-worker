@@ -1,0 +1,30 @@
+**Observation Log**
+
+**Session Date:** 2023/05/24 (Wed) 14:18  
+**Session ID:** sharegpt_AEwb22H_0
+
+1. [FACT] Business name is ADJUST-IT.
+2. [FACT] Business category includes Electronics store, Consultant, Marketing agency, Market researcher, Marketing consultant, Video editing service, Website designer, Internet marketing service, Business to business service, Computer support and services.
+3. [CHANGE] User's edit for business category was not approved.
+4. [FACT] Business description states: "Welcome to ADJUST-IT! We are a tech solutions company that provides a wide range of goods and services through innovative technologies and advancements in IT."
+5. [FACT] Business goal is to help businesses and individuals stay ahead of the curve and make the most of the latest technologies.
+6. [FACT] Services offered include computer repair, website design, and IT support.
+7. [TEMPORAL] Opening date is June 4, 2021.
+8. [FACT] Contact phone number is (706) 495-7455.
+9. [CHANGE] User's edit for website was not approved.
+10. [FACT] Current website is http://adjustit.tech.blog/.
+11. [FACT] Business location is 1530 Marcy Cir, Savannah, GA 31406.
+12. [FACT] Service area is Savannah, GA, USA.
+13. [FACT] Business hours are open 24 hours a day, 7 days a week.
+14. [FACT] Holiday hours for Martin Luther King Jr. Day (Jan 16, 2023) are open 24 hours.
+15. [FACT] Online service hours are open 24 hours a day, 7 days a week.
+16. [FACT] Business does not identify as Asian-owned, veteran-owned, women-owned, LGBTQ+ owned, Black-owned, or Latino-owned.
+17. [FACT] Accessibility features include no wheelchair accessible restroom, no wheelchair accessible parking lot, no wheelchair accessible elevator, and no wheelchair accessible seating.
+18. [FACT] Amenities include no gender-neutral restroom and free Wi-Fi.
+19. [FACT] Business is LGBTQ+ friendly and has transgender safespace.
+20. [FACT] Offerings include repair services and assembly service.
+21. [FACT] Payment methods accepted include NFC mobile payments, checks, debit cards, and major credit cards (American Express, China Union Pay, Diners Club, Discover, JCB, MasterCard, VISA).
+22. [FACT] Appointment is required for planning.
+23. [FACT] Recycling services include light bulb recycling, battery recycling, and electronics recycling.
+24. [FACT] Service options include no in-store shopping, curbside pickup, in-store pickup for online orders, same-day delivery, and delivery.
+25. [ASSISTANT_SAID] ADJUST-IT is a tech solutions company that provides

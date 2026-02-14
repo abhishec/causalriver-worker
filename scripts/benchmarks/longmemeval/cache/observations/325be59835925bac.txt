@@ -1,0 +1,25 @@
+**Observation Log:**
+
+- [FACT] User is a software engineer working as a consultant for a construction company.
+- [FACT] User is working with Clark/Sullivan Construction (C/S), a general contractor with offices in Roseville, CA, and Sparks, NV.
+- [FACT] C/S has 100-200 employees.
+- [FACT] C/S manages multiple projects with different deadlines, budgets, owners, and needs.
+- [FACT] C/S hires many subcontractors who are not full-time employees, leading to various liabilities that must be managed through strong processes.
+- [FACT] Key areas of management for C/S include safety, credential management, auditing, and quality assurance.
+- [EVENT] User is writing a proposal for work discussed with the IT manager to get approval from upper management.
+- [CHANGE] User will refer to Clark/Sullivan Construction as C/S to shorten the name.
+- [ASSISTANT_SAID] Assistant expressed readiness to help with the proposal and requested information about the project.
+- [ASSISTANT_SAID] Assistant acknowledged the importance of the information provided about C/S and its operations.
+- [ASSISTANT_SAID] Assistant suggested mentioning potential time and cost savings in the proposal.
+- [ASSISTANT_SAID] Assistant noted that the proposed solution would improve accuracy in data entry and compliance.
+- [FACT] Current workflow for hiring subcontractors involves PDFs and scanning, with new hires filling out information that is scanned and emailed to appropriate parties.
+- [FACT] The proposed solution involves using DocuSign and Box to streamline the new hire process.
+- [ASSISTANT_SAID] Assistant summarized the benefits of the proposed solution, including time savings for supers, ease of use for subs, improved security, and cost-effectiveness.
+- [FACT] Different protocols exist for NV and CA, requiring different liability and insurance forms to be filled out per state.
+- [FACT] The IT manager's notes indicate that there are different new hire packets for CA and NV stored in Box.
+- [FACT] Sheri Angel is the lead updater/compiler for the CA new hire document and assists superintendents with the process.
+- [FACT] Kevin Stroupe updates insurance and contribution forms yearly for both CA and NV.
+- [FACT] Many pages in the new hire packets are scanned (raster) versions of digital content that could be replaced with digital (vector) versions.
+- [FACT] Safety forms are updated by the internal C/S safety team.
+- [ASSISTANT_SAID] Assistant suggested that using DocuSign would create a centralized location for all new hire packets and ensure compliance with state laws.
+- [ASSISTANT_SAID] Assistant recommended integrating DocuSign with Box for better accessibility and efficiency in the data entry process.

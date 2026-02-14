@@ -1,0 +1,39 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/21 (Sun) 20:39
+- [EVENT] User performed a short routine with partner Alex at DanceFever's social dance night on March 17th.
+- [PREFERENCE] User is looking for new dance music to practice to.
+- [ASSISTANT_SAID] Assistant congratulated the user on their performance at DanceFever's social dance night.
+- [ASSISTANT_SAID] Assistant recommended popular salsa songs and artists for practice, including:
+  - **Classic Salsa Artists**: 
+    1. Celia Cruz - "La Negra Tiene Tumbao" or "Bemba Colorá"
+    2. Tito Puente - "Oye Como Va" or "Take Five"
+    3. Eddie Palmieri - "Vamonos Pa'l Monte" or "Puerto Rico"
+    4. Héctor Lavoe - "Aguanile" or "Mi Gente"
+    5. Willie Colón - "Idilio" or "Che Che Colé"
+  - **Modern Salsa Artists**:
+    1. Marc Anthony - "Valió la Pena" or "I Need to Know"
+    2. Gilberto Santa Rosa - "Quiero" or "Vivir Sin Ella"
+    3. Romeo Santos - "Obsesión" or "Promise" (ft. Usher)
+    4. Maluma - "Felices los 4" or "Borró Cassette"
+    5. J Balvin - "Mi Gente" or "Vaina Loca"
+  - **Popular Salsa Songs**:
+    1. "Guantanamera" by various artists
+    2. "Ay Vamos" by J Balvin
+    3. "Hasta Que Te Conocí" by Juan Luis Guerra
+    4. "Devuélveme el Corazón" by Yuri
+    5. "La Gozadera" by Gente de Zona ft. Marc Anthony
+- [ASSISTANT_SAID] Assistant suggested ways to find upcoming Latin dance festivals and events, including:
+  1. Google Search
+  2. Facebook Events
+  3. Meetup.com
+  4. Local Dance Studios
+  5. Eventbrite
+  6. Dance Communities
+  7. Latin Cultural Organizations
+- [EVENT] User attended a Latin dance festival at the convention center downtown on March 4th.
+- [EVENT] User took a workshop on Afro-Cuban rhythms at the festival and danced with instructor Carlos during the social dance portion.
+- [PREFERENCE] User is thinking of attending more dance festivals and events.
+- [ASSISTANT_SAID] Assistant provided suggestions for finding dance socials or parties, including:
+  1. Google Search
+  2. Facebook

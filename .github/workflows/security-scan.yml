@@ -1,0 +1,220 @@
+name: Security Hardening Scan
+
+on:
+  # Daily at 2 AM UTC
+  schedule:
+    - cron: '0 2 * * *'
+
+  # Manual trigger
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (scan only, no auto-fixes)'
+        required: false
+        type: boolean
+        default: false
+      verbose:
+        description: 'Verbose logging'
+        required: false
+        type: boolean
+        default: true
+
+  # On push to main (security-critical files only)
+  push:
+    branches:
+      - main
+    paths:
+      - 'supabase/migrations/**'
+      - 'platform/lib/security-middleware.ts'
+      - 'platform/app/api/**'
+      - 'scripts/agents/security-hardening-agent.ts'
+
+  # On pull requests
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  security-scan:
+    name: Security Vulnerability Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    permissions:
+      contents: write      # Create PRs with fixes
+      issues: write        # Create security issues
+      pull-requests: write # Comment on PRs
+      security-events: write # Upload SARIF results
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Full history for better analysis
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9.0.0
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Security Scan
+        id: scan
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          DEFAULT_ORG_ID: ${{ secrets.DEFAULT_ORG_ID }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ] || [ "${{ github.event_name }}" = "pull_request" ]; then
+            npm run security:scan:dry
+          else
+            npm run security:scan:verbose
+          fi
+
+      - name: Upload Security Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-scan-report-${{ github.run_number }}
+          path: |
+            security-report-*.json
+            supabase/migrations/*security*.sql
+          retention-days: 90
+
+      - name: Create Security Issue (Critical Vulnerabilities)
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = '🚨 Critical Security Vulnerabilities Detected';
+            const body = `
+            ## Security Scan Alert
+
+            **Workflow:** ${{ github.workflow }}
+            **Run:** ${{ github.run_number }}
+            **Triggered by:** ${{ github.event_name }}
+
+            Critical security vulnerabilities were detected during the automated scan.
+
+            ### Next Steps
+            1. Review the [scan report](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            2. Check auto-generated PRs for fixes
+            3. Manually review high-severity issues
+
+            ### Scan Details
+            - **Date:** ${{ github.event.head_commit.timestamp }}
+            - **Commit:** ${{ github.sha }}
+            - **Branch:** ${{ github.ref_name }}
+
+            **This is an automated alert from the Security Hardening Agent.**
+            `;
+
+            // Check if issue already exists
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'security,automated'
+            });
+
+            const existingIssue = issues.data.find(issue => issue.title === title);
+
+            if (!existingIssue) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body,
+                labels: ['security', 'automated', 'critical']
+              });
+            }
+
+      - name: Comment on PR (if PR event)
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const comment = `
+            ## 🔒 Security Scan Results
+
+            Security hardening agent completed scan of this PR.
+
+            ✅ No critical vulnerabilities introduced by this PR.
+
+            _Full scan results available in [workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})_
+            `;
+
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: comment
+            });
+
+      - name: Notify Slack (on failure)
+        if: failure() && github.event_name == 'schedule'
+        uses: slackapi/slack-github-action@v1.25.0
+        with:
+          payload: |
+            {
+              "text": "🚨 Daily Security Scan: Critical vulnerabilities detected",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Security Scan Alert*\n\nCritical vulnerabilities detected in daily scan.\n\n*Workflow:* ${{ github.workflow }}\n*Status:* Failed\n*Run:* <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Details>"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  # Separate job for npm audit (faster, runs in parallel)
+  npm-audit:
+    name: NPM Dependency Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9.0.0
+
+      - name: Run npm audit
+        run: pnpm audit --audit-level=moderate
+        continue-on-error: true
+
+      - name: Generate audit report
+        if: always()
+        run: |
+          pnpm audit --json > npm-audit-report.json || true
+
+      - name: Upload audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-audit-report-${{ github.run_number }}
+          path: npm-audit-report.json
+          retention-days: 30

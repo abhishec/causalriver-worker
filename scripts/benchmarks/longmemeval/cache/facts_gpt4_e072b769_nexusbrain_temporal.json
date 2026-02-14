@@ -1,0 +1,40 @@
+{
+  "answer_c19bd2bf_1": [
+    {
+      "fact": "User does not have any dietary restrictions or preferences",
+      "type": "preference",
+      "entities": []
+    },
+    {
+      "fact": "User lives alone in their household",
+      "type": "personal",
+      "entities": []
+    },
+    {
+      "fact": "User usually buys a mix of groceries including fresh produce, meat, dairy, canned goods, and snacks",
+      "type": "preference",
+      "entities": [
+        "fresh produce",
+        "meat",
+        "dairy",
+        "canned goods",
+        "snacks"
+      ]
+    },
+    {
+      "fact": "User does not have a preferred store but shops at places that offer cashback through Ibotta",
+      "type": "preference",
+      "entities": [
+        "Ibotta"
+      ]
+    },
+    {
+      "fact": "User is prioritizing the rebate on eggs",
+      "type": "preference",
+      "entities": [
+        "eggs",
+        "rebate"
+      ]
+    }
+  ]
+}

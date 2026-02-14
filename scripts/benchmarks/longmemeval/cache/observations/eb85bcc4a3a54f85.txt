@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/04/30 (Sun) 09:17  
+[FACT] User is looking for help with their resume.  
+[PREFERENCE] User is interested in AI and machine learning positions.  
+[ASSISTANT_SAID] Including relevant keywords in your resume can help your application pass through applicant tracking systems (ATS) and catch the eye of hiring managers.  
+[ASSISTANT_SAID] Suggested keywords related to AI and machine learning include:  
+[ASSISTANT_CREATED] - General AI and Machine Learning Keywords: Artificial Intelligence (AI), Machine Learning (ML), Deep Learning (DL), Natural Language Processing (NLP), Computer Vision, Predictive Analytics, Data Science, Neural Networks, Algorithm Development, Model Training and Deployment.  
+[ASSISTANT_CREATED] - Machine Learning Frameworks and Tools: TensorFlow, PyTorch, Keras, Scikit-learn, OpenCV, Caffe, Theano, Microsoft Cognitive Toolkit (CNTK), H2O.ai, Google Cloud AI Platform.  
+[ASSISTANT_CREATED] - Programming Languages: Python, R, Julia, Java, C++, MATLAB.  
+[ASSISTANT_CREATED] - Data Science and Analytics: Data Preprocessing, Data Visualization, Data Mining, Statistical Modeling, Data Storytelling, Business Intelligence, Data Warehousing, ETL (Extract, Transform, Load).  
+[ASSISTANT_CREATED] - Cloud and Infrastructure: Amazon Web Services (AWS), Microsoft Azure, Google Cloud Platform (GCP), Cloud Computing, Distributed Computing, Containerization (e.g., Docker), Kubernetes.  
+[ASSISTANT_CREATED] - Other Relevant Keywords: Supervised Learning, Unsupervised Learning, Reinforcement Learning, Transfer Learning, Model Evaluation, Hyperparameter Tuning, Data augmentation, Explainability (e.g., model interpretability), Ethics in AI, Human-in-the-Loop (HITL).  
+[ASSISTANT_SAID] Suggested to use keywords strategically in the resume, especially in the summary/objective statement, skills section, work experience descriptions, and education section.  
+[ASSISTANT_SAID] Advised to use specific examples and context to demonstrate expertise and accomplishments in AI and machine learning.  
+[USER] User has a background in AI research and is trying to transition into industry.  
+[USER] User is looking for advice on how to write a good summary statement for their resume.  
+[ASSISTANT_SAID] Suggested tips for writing a compelling summary statement:  
+[ASSISTANT_CREATED] - Clearly state career goal (transition from AI research to industry).  
+[ASSISTANT_CREATED] - Highlight relevant AI research experience, including specific areas worked in and notable projects.  
+[ASSISTANT_CREATED] - Showcase transferable skills such as data analysis, problem-solving, collaboration, and communication.  
+[ASSISTANT_CREATED] - Demonstrate industry awareness by

@@ -1,0 +1,28 @@
+**Observation Log:**
+
+[FACT] User is considering flying to San Diego again soon.  
+[FACT] User flew back from San Diego to New York on United Airlines last time.  
+[FACT] User had a smooth trip on their last flight with United Airlines.  
+[PREFERENCE] User prefers to fly out of JFK or LGA.  
+[PREFERENCE] User is open to flying with any airline as long as the price is reasonable.  
+[PREFERENCE] User does not mind layovers.  
+[TEMPORAL] User is flexible with their travel schedule.  
+[EVENT] User is looking for good deals on flights from New York to San Diego.  
+[ASSISTANT_SAID] Assistant confirmed San Diego is a great destination and offered to help find good deals on flights from New York.  
+[ASSISTANT_SAID] Assistant requested more details to provide personalized flight options, including travel dates, airport preferences, preferred airlines, layover preferences, and budget.  
+[FACT] User provided that they are flexible with travel dates and prefer JFK or LGA.  
+[FACT] User is open to flying with any airline and does not mind layovers.  
+[ASSISTANT_SAID] Assistant provided flight options from JFK and LGA to San Diego, including prices and layover information.  
+[ASSISTANT_SAID] Assistant listed specific flight options from JFK and LGA, including airlines, prices, layover details, and travel dates.  
+[ASSISTANT_SAID] Assistant noted that prices are subject to change and recommended booking as soon as possible.  
+[EVENT] User expressed interest in more options for United Airlines flights from JFK or LGA to San Diego.  
+[ASSISTANT_SAID] Assistant provided additional United Airlines flight options from JFK and LGA to San Diego, including prices and layover details.  
+[ASSISTANT_SAID] Assistant mentioned a mix of layovers and non-stop flights, with varying prices depending on travel dates.  
+[FACT] User expressed interest in the non-stop flight from JFK on April 19th, returning on April 26th.  
+[ASSISTANT_SAID] Assistant provided details about the Boeing 777-200 aircraft, including seat configuration and amenities for the flight.  
+[ASSISTANT_SAID] Assistant described the amenities available in Economy Class, including in-flight entertainment, food and drinks, and Wi-Fi availability.  
+[ASSISTANT_SAID] Assistant provided specific flight details, including flight numbers, departure and arrival times.  
+[EVENT] User expressed interest in upgrading to a higher class of service.  
+[ASSISTANT_SAID] Assistant provided details about the Premium Economy option, including seat specifications, amenities, and additional perks.  
+[ASSISTANT_SAID] Assistant listed the benefits of flying Premium Economy, including priority check-in, upgraded meal service, and increased mileage earning.  
+[

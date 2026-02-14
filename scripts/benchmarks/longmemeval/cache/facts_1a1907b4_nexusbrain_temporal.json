@@ -1,0 +1,42 @@
+{
+  "answer_719502eb": [
+    {
+      "fact": "User is experimenting with new cocktails this weekend.",
+      "type": "event",
+      "entities": [
+        "cocktails",
+        "weekend"
+      ]
+    },
+    {
+      "fact": "User likes the idea of the Pimm's Cup with a Twist.",
+      "type": "preference",
+      "entities": [
+        "Pimm's Cup with a Twist"
+      ]
+    },
+    {
+      "fact": "User has made a classic Pimm's Cup and classic cocktails recently.",
+      "type": "event",
+      "entities": [
+        "classic Pimm's Cup",
+        "classic cocktails"
+      ]
+    },
+    {
+      "fact": "User attended a mixology class.",
+      "type": "event",
+      "entities": [
+        "mixology class"
+      ]
+    },
+    {
+      "fact": "User is interested in the difference between cucumber juice and muddling cucumber slices.",
+      "type": "opinion",
+      "entities": [
+        "cucumber juice",
+        "muddling cucumber slices"
+      ]
+    }
+  ]
+}

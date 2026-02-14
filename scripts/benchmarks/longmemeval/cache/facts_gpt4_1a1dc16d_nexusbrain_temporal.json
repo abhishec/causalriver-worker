@@ -1,0 +1,94 @@
+{
+  "answer_faad7d7a_2": [
+    {
+      "fact": "User is interested in learning about the representation of women in leadership positions in various industries.",
+      "type": "preference",
+      "entities": [
+        "representation of women",
+        "leadership positions",
+        "various industries"
+      ]
+    },
+    {
+      "fact": "User recently attended a pride parade in their city on May 1st.",
+      "type": "event",
+      "entities": [
+        "pride parade",
+        "May 1st"
+      ]
+    },
+    {
+      "fact": "User believes in the importance of diversity and inclusion in all aspects of life.",
+      "type": "opinion",
+      "entities": [
+        "diversity",
+        "inclusion"
+      ]
+    },
+    {
+      "fact": "User has friends working in the semiconductor industry.",
+      "type": "relationship",
+      "entities": [
+        "friends",
+        "semiconductor industry"
+      ]
+    },
+    {
+      "fact": "User is particularly interested in the semiconductor industry.",
+      "type": "preference",
+      "entities": [
+        "semiconductor industry"
+      ]
+    }
+  ],
+  "answer_faad7d7a_1": [
+    {
+      "fact": "User is trying to learn more about the current state of gender equality in the workplace.",
+      "type": "opinion",
+      "entities": [
+        "gender equality",
+        "workplace"
+      ]
+    },
+    {
+      "fact": "User attended a seminar on gender equality at their company's headquarters on March 22nd.",
+      "type": "event",
+      "entities": [
+        "seminar",
+        "gender equality",
+        "March 22nd"
+      ]
+    },
+    {
+      "fact": "User has experiences with female mentors.",
+      "type": "personal",
+      "entities": [
+        "female mentors"
+      ]
+    },
+    {
+      "fact": "User works in the tech industry.",
+      "type": "personal",
+      "entities": [
+        "tech industry"
+      ]
+    },
+    {
+      "fact": "User is interested in the challenges women face in the tech industry.",
+      "type": "opinion",
+      "entities": [
+        "challenges",
+        "women",
+        "tech industry"
+      ]
+    },
+    {
+      "fact": "User is seeking ways for companies to create a more inclusive environment for women.",
+      "type": "opinion",
+      "entities": [
+        "inclusive environment",
+        "women"
+      ]
+    }
+  ]
+}

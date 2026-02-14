@@ -1,0 +1,23 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/27 (Sat) 10:32
+- [USER] User identifies this as part 11 of multiple messages.
+- [USER] User states they will continue to send further messages.
+- [USER] User requests the assistant to limit responses to "acknowledged" if understood.
+- [FACT] The user discusses a legal case involving a contract between the Council and Beckhaus.
+- [FACT] The user references specific paragraphs (65-69) regarding the Council's rights and obligations under the contract.
+- [FACT] The user mentions that the Council denied practical completion had been achieved by Beckhaus.
+- [FACT] The user states that the Council continued to hold Beckhaus to its contractual obligations.
+- [FACT] The user explains that the Council could claim damages for delay but not for defective or incomplete work while the contract was still in effect.
+- [FACT] The user notes that the situation changes upon termination of the contract, where the Council would then suffer loss due to defective work.
+- [USER] User identifies this as part 12 of multiple messages.
+- [USER] User continues to state they will send further messages.
+- [USER] User again requests the assistant to limit responses to "acknowledged" if understood.
+- [FACT] The user discusses the agreed termination of the contract and references specific paragraphs (70-75).
+- [FACT] The user mentions Mr. Christie accepted that the contract had been terminated by tacit agreement.
+- [FACT] The user details events leading to the termination, including Beckhaus's claims and actions from March 2002 to August 2003.
+- [FACT] The user states that by March 2004, both parties tacitly accepted that the contract was at an end.
+- [FACT] The user notes that the trial commenced on 15 March 2004.
+- [FACT] The user references a legal case (CIC Insurance Ltd v Bankstown Football Club Ltd) regarding contract termination.
+- [FACT] The user mentions that the issue is concluded by the Council's late concession regarding the termination of the contract.
+- [ASSISTANT_SAID] Assistant responded with "Acknowledged" to both parts 11 and 12 of the user's messages.

@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/22 (Mon) 22:34  
+[ASSISTANT_SAID] The issue seems to be with the use of the `awk` command to extract the disk usage percentage.  
+[ASSISTANT_SAID] The output of `df -h` can contain characters like `tmpfs`, `udev`, `none`, etc. in the disk usage column, which can't be converted to integers.  
+[ASSISTANT_SAID] To fix this issue, you can modify the script to exclude the non-integer disk usage percentages before checking if they are over 50%.  
+[ASSISTANT_SAID] Suggested using the `grep` command to exclude lines containing non-integer values before processing the disks.  
+[ASSISTANT_CREATED] Provided an updated version of the script to check disk usage and send an email via SparkPost API if usage is over 50%.  
+[ASSISTANT_SAID] The script includes setting the SparkPost API endpoint, API key, recipient email address, sender email address, subject, and message.  
+[ASSISTANT_SAID] The message includes a notification about disk space usage on the hostname and the current disk usage.  
+[ASSISTANT_SAID] The script checks disk usage and gets the percentage used for each mounted file system.  
+[ASSISTANT_SAID] If disk usage is over 50%, it sends an email via SparkPost API.  
+[ASSISTANT_SAID] The script uses `curl` to send API requests to SparkPost.  
+[USER] No email sent.  
+[ASSISTANT_SAID] Suggested adding debugging output to the script to see if it is successfully sending the request and receiving a response from the API.  
+[ASSISTANT_SAID] Recommended checking the SparkPost API logs for error messages related to the requests.  
+[ASSISTANT_SAID] Advised ensuring that the SparkPost API key is valid and has the necessary permissions to send emails.  
+[USER] Requested to update the script to include usage of all disks on the server, not just `/home/`, and to change the threshold from 90% to 50%.  
+[ASSISTANT_CREATED] Provided an updated script that checks the disk usage of all mounted file systems and sends an email if any of them are over 50% usage.  
+[ASSISTANT_SAID] The updated script includes setting the SparkPost API endpoint, API key, recipient email address, sender email address, subject, and message.  
+[ASSISTANT_SAID] The message in the updated script notifies about disk space usage on the hostname and includes the output of `df -h`.  
+[ASSISTANT_SAID] The script iterates over the output of `df -h` to

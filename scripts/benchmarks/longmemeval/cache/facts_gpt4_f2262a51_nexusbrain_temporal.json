@@ -1,0 +1,141 @@
+{
+  "answer_55a6940c_3": [
+    {
+      "fact": "User has a nasal spray prescription from Dr. Patel.",
+      "type": "personal",
+      "entities": [
+        "nasal spray",
+        "Dr. Patel"
+      ]
+    },
+    {
+      "fact": "User recently had a follow-up appointment with their dermatologist, Dr. Lee.",
+      "type": "event",
+      "entities": [
+        "dermatologist",
+        "Dr. Lee"
+      ]
+    },
+    {
+      "fact": "User had a biopsy on a suspicious mole on their back.",
+      "type": "event",
+      "entities": [
+        "biopsy",
+        "suspicious mole"
+      ]
+    },
+    {
+      "fact": "User received benign results from the biopsy.",
+      "type": "event",
+      "entities": [
+        "benign results"
+      ]
+    },
+    {
+      "fact": "User is experiencing congestion and fatigue.",
+      "type": "personal",
+      "entities": [
+        "congestion",
+        "fatigue"
+      ]
+    },
+    {
+      "fact": "User is looking for ways to manage chronic sinusitis.",
+      "type": "preference",
+      "entities": [
+        "chronic sinusitis"
+      ]
+    }
+  ],
+  "answer_55a6940c_1": [
+    {
+      "fact": "User has been feeling exhausted lately",
+      "type": "personal",
+      "entities": []
+    },
+    {
+      "fact": "User recently had a UTI",
+      "type": "event",
+      "entities": [
+        "UTI"
+      ]
+    },
+    {
+      "fact": "User was prescribed antibiotics by their primary care physician, Dr. Smith",
+      "type": "event",
+      "entities": [
+        "antibiotics",
+        "Dr. Smith"
+      ]
+    },
+    {
+      "fact": "User is trying to stay hydrated",
+      "type": "preference",
+      "entities": []
+    },
+    {
+      "fact": "User is trying to get enough sleep",
+      "type": "preference",
+      "entities": []
+    },
+    {
+      "fact": "User is still feeling sluggish",
+      "type": "personal",
+      "entities": []
+    },
+    {
+      "fact": "User is concerned that their fatigue could be a side effect of the antibiotics",
+      "type": "opinion",
+      "entities": [
+        "antibiotics"
+      ]
+    },
+    {
+      "fact": "User is considering the possibility of an underlying issue that Dr. Smith didn't catch",
+      "type": "opinion",
+      "entities": [
+        "Dr. Smith"
+      ]
+    }
+  ],
+  "answer_55a6940c_2": [
+    {
+      "fact": "User has been diagnosed with chronic sinusitis",
+      "type": "personal",
+      "entities": [
+        "chronic sinusitis"
+      ]
+    },
+    {
+      "fact": "User was diagnosed by an ENT specialist named Dr. Patel",
+      "type": "relationship",
+      "entities": [
+        "Dr. Patel",
+        "ENT specialist"
+      ]
+    },
+    {
+      "fact": "User has been prescribed a nasal spray",
+      "type": "personal",
+      "entities": [
+        "nasal spray"
+      ]
+    },
+    {
+      "fact": "User is trying to learn more about managing symptoms of chronic sinusitis",
+      "type": "opinion",
+      "entities": [
+        "managing symptoms",
+        "chronic sinusitis"
+      ]
+    },
+    {
+      "fact": "User is looking for recommendations for nasal sprays and humidifiers",
+      "type": "preference",
+      "entities": [
+        "nasal sprays",
+        "humidifiers"
+      ]
+    }
+  ]
+}

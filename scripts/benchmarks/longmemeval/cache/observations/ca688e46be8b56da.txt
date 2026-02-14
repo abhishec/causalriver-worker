@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/29 (Mon) 13:46
+- [FACT] User is seeking to improve a LinkedIn post to attract more candidates/engagement.
+- [FACT] The job title mentioned in the LinkedIn post is "Technical Business Analyst."
+- [FACT] The user is offering a contract position for 2x Technical Business Analysts.
+- [FACT] The daily rate for the position is £575 per day Inside IR35.
+- [FACT] The job location is London, with 1 day per week in the office.
+- [FACT] The company is described as one of the biggest names in British Media and Publishing.
+- [FACT] The role involves close collaboration with Engineering on architecture and support for technical conversations.
+- [FACT] The position focuses on understanding the impact of changes across a few of the company's brands.
+- [ASSISTANT_SAID] The assistant suggested adding a catchy headline to the post to capture attention.
+- [ASSISTANT_SAID] The assistant recommended emphasizing the benefits of the position, such as company culture, opportunities for growth, and unique perks.
+- [ASSISTANT_SAID] The assistant advised using a more engaging tone, making the language conversational and friendly.
+- [ASSISTANT_SAID] The assistant suggested including a clear call to action at the end of the post.
+- [ASSISTANT_CREATED] The assistant provided a revised version of the LinkedIn post, which includes:
+  - A catchy headline: "Join one of the biggest names in British Media and Publishing as a Technical Business Analyst!"
+  - Job details: "2x Technical Business Analyst, Contract, £575 per day Inside IR35, London based, 1 day per week in the office."
+  - Description of the role: "We're looking for two talented Technical Business Analysts to join our team and help us drive our brands forward."
+  - Emphasis on collaboration with Engineering and the opportunity to make a meaningful impact.
+  - Encouragement for interested candidates to get in touch.

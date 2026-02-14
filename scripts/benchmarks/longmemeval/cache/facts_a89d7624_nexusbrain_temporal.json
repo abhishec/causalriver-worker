@@ -1,0 +1,48 @@
+{
+  "answer_8f15ac24": [
+    {
+      "fact": "User has attended three concerts recently.",
+      "type": "event",
+      "entities": [
+        "concerts"
+      ]
+    },
+    {
+      "fact": "User attended a concert by The Killers at Red Rocks Amphitheater.",
+      "type": "event",
+      "entities": [
+        "The Killers",
+        "Red Rocks Amphitheater"
+      ]
+    },
+    {
+      "fact": "User met Brandon Flowers, the lead singer of The Killers.",
+      "type": "relationship",
+      "entities": [
+        "Brandon Flowers",
+        "The Killers"
+      ]
+    },
+    {
+      "fact": "User is always looking for new bands to check out.",
+      "type": "preference",
+      "entities": [
+        "new bands"
+      ]
+    },
+    {
+      "fact": "User is interested in keeping up with new music releases.",
+      "type": "preference",
+      "entities": [
+        "new music releases"
+      ]
+    },
+    {
+      "fact": "User is interested in keeping up with concerts in their area.",
+      "type": "preference",
+      "entities": [
+        "concerts"
+      ]
+    }
+  ]
+}

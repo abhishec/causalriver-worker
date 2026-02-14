@@ -1,0 +1,131 @@
+{
+  "answer_e6c20e52_3": [
+    {
+      "fact": "User is planning a team-building event for their office",
+      "type": "event",
+      "entities": [
+        "team-building event",
+        "office"
+      ]
+    },
+    {
+      "fact": "User is considering organizing a sports-themed outing",
+      "type": "preference",
+      "entities": [
+        "sports-themed outing"
+      ]
+    },
+    {
+      "fact": "User likes the idea of a scavenger hunt",
+      "type": "preference",
+      "entities": [
+        "scavenger hunt"
+      ]
+    }
+  ],
+  "answer_e6c20e52_2": [
+    {
+      "fact": "User is looking for new TV show recommendations.",
+      "type": "preference",
+      "entities": [
+        "TV shows"
+      ]
+    },
+    {
+      "fact": "User just finished binge-watching a series.",
+      "type": "event",
+      "entities": []
+    },
+    {
+      "fact": "User is interested in watching 'The Witcher' and 'The Mandalorian'.",
+      "type": "preference",
+      "entities": [
+        "The Witcher",
+        "The Mandalorian"
+      ]
+    },
+    {
+      "fact": "User watched the College Football National Championship game with family.",
+      "type": "event",
+      "entities": [
+        "College Football National Championship",
+        "family"
+      ]
+    },
+    {
+      "fact": "User's family includes a dad.",
+      "type": "relationship",
+      "entities": [
+        "dad"
+      ]
+    },
+    {
+      "fact": "User was impressed by Stetson Bennett's performance in the game.",
+      "type": "opinion",
+      "entities": [
+        "Stetson Bennett"
+      ]
+    },
+    {
+      "fact": "User has not played the video games or read the books related to 'The Witcher'.",
+      "type": "personal",
+      "entities": [
+        "The Witcher"
+      ]
+    }
+  ],
+  "answer_e6c20e52_1": [
+    {
+      "fact": "User lives in Los Angeles",
+      "type": "personal",
+      "entities": [
+        "Los Angeles"
+      ]
+    },
+    {
+      "fact": "User is a big fan of buffalo wings",
+      "type": "preference",
+      "entities": [
+        "buffalo wings"
+      ]
+    },
+    {
+      "fact": "User watched the Kansas City Chiefs defeat the Buffalo Bills in the Divisional Round of the NFL playoffs",
+      "type": "event",
+      "entities": [
+        "Kansas City Chiefs",
+        "Buffalo Bills",
+        "NFL playoffs"
+      ]
+    },
+    {
+      "fact": "User was at their friend Mike's place during the game",
+      "type": "relationship",
+      "entities": [
+        "Mike"
+      ]
+    },
+    {
+      "fact": "User is looking for food recommendations for the next game",
+      "type": "opinion",
+      "entities": [
+        "food recommendations",
+        "next game"
+      ]
+    },
+    {
+      "fact": "User is ordering food for about 5 people",
+      "type": "personal",
+      "entities": [
+        "5 people"
+      ]
+    },
+    {
+      "fact": "User has been to Buffalo Wild Wings before and enjoys their wings",
+      "type": "preference",
+      "entities": [
+        "Buffalo Wild Wings"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/26 (Fri) 13:52
+- [USER] User is interested in Hong Kong/Cantonese style home cooked meals.
+- [USER] User provided a list of Cantonese dishes: 蠔油菜心, 蒸水蛋, 蒸魚, 柱侯牛腩, 豉油雞, 腐乳通菜, 鹹蛋蒸肉餅.
+- [USER] User is looking for more examples of home-style meals specifically, not restaurant meals.
+- [ASSISTANT_SAID] Assistant provided a list of additional home-style Cantonese dishes:
+  1. 炒蛋炆蝦仁 (Stir-fried eggs with shrimp)
+  2. 煎釀茄子 (Pan-fried stuffed eggplant)
+  3. 蒜蓉粉絲蒸扇貝 (Steamed scallops with garlic vermicelli)
+  4. 酥炸雞翼 (Deep-fried chicken wings)
+  5. 紅燒牛腩 (Braised beef brisket)
+  6. 清炒芥蘭 (Stir-fried Chinese broccoli)
+  7. 炆排骨 (Braised pork ribs)
+  8. 煮豆腐 (Braised tofu)
+  9. 炒青菜 (Stir-fried vegetables)
+  10. 煲仔飯 (Claypot rice)
+- [USER] User acknowledged the assistant's response as "Ok, good enough for now."
+- [USER] User inquired about Blue Apron, Hello Fresh, and similar services, asking why they are popular and for some of their popular dishes.
+- [ASSISTANT_SAID] Assistant explained that meal kit delivery services are popular for their convenience and provided a list of popular dishes from Blue Apron and Hello Fresh:
+  1. Harissa Shrimp & Carrot Tagine with Couscous
+  2. Chickpea-Powered Mediterranean Couscous Bowl
+  3. Chicken Tinga Tacos with Avocado & Radish Salsa
+  4. Garlic-Parmesan Crusted Salmon with Roasted Potatoes and Green Beans
+  5. Korean-Style Pork & Rice Cakes with Baby Bok Choy & Carrots
+  6. Creamy Lemon Butter Chicken with Garlic and Herb Rice
+  7. Seared Cod & Miso Udon Noodles with Baby Bok Choy & Soft-Boiled Eggs
+  8. Balsamic Fig Chicken with Roasted Green Beans and Couscous
+  9. Pan-Seared Steaks & Garlic Mashed Potatoes with Roasted Broccoli
+  10. Sizzling Prawn & Chorizo Spaghetti with Tomato Sauce
+- [USER] User

@@ -1,0 +1,24 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/25 (Thu) 12:38
+- [USER] User expressed interest in Thai cuisine and asked about typical ingredients used in it.
+- [ASSISTANT_SAID] Typical ingredients used in Thai cuisine include: Coconut milk, Lemongrass, Galangal, Kaffir lime leaves, Thai basil, Chili peppers, Fish sauce, Tamarind paste, Palm sugar, Rice noodles, Shrimp paste, Green curry paste, Coriander/cilantro, Soy sauce, Oyster sauce, Garlic, Shallots, Turmeric, Peanut oil/peanuts, Lime juice.
+- [USER] User commented that the ingredients sound flavorful and asked for popular Thai dishes that use these ingredients.
+- [ASSISTANT_SAID] Popular Thai dishes that use the mentioned ingredients include: 
+  1. Tom Yum Soup
+  2. Pad Thai
+  3. Green Curry
+  4. Massaman Curry
+  5. Papaya Salad
+  6. Pad Kra Pao
+  7. Tom Kha Gai
+  8. Mango Sticky Rice.
+- [USER] User expressed excitement about trying the dishes at home and asked for recommended Thai cookbooks.
+- [ASSISTANT_SAID] Recommended Thai cookbooks include:
+  1. "Pok Pok: Food and Stories from the Streets, Homes, and Roadside Restaurants of Thailand" by Andy Ricker and JJ Goode.
+  2. "Thai Food" by David Thompson.
+  3. "Simple Thai Food: Classic Recipes from the Thai Home Kitchen" by Leela Punyaratabandhu.
+  4. "Everyday Thai Cooking" by Katie Chin.
+  5. "The Better than Takeout Thai Cookbook" by Danette St. Onge.
+- [USER] User indicated eagerness to try the dishes at home.
+- [ASSISTANT_SAID] Assistant mentioned that it does not have information on local restaurants and suggested searching online for Thai restaurants or checking with friends or family for recommendations.

@@ -1,0 +1,42 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/02/28 (Tue) 00:08
+- [EVENT] User attended a guided bird walk at the local park led by a knowledgeable birder named Mark.
+- [EVENT] User saw a total of 25 species during the guided bird walk.
+- [PREFERENCE] User is trying to learn more about bird songs and calls.
+- [ASSISTANT_SAID] Recommended resources and apps for learning bird songs and calls: 
+  - **Merlin Bird ID** (free): Identifies birds by sounds and has a "Sound ID" feature.
+  - **iBird Pro** (paid): Comprehensive field guide app with audio recordings of bird songs and calls.
+  - **Audubon Birds** (free): Database of bird songs and calls with identification guides.
+  - **Song Sleuth** (paid): Uses AI to identify bird songs and calls.
+- [ASSISTANT_SAID] Recommended websites for bird songs and calls:
+  - **AllAboutBirds** (Cornell Lab of Ornithology): Includes audio recordings and identification guides.
+  - **Xeno-canto** (free): Collection of bird sound recordings from around the world.
+  - **BirdNote** (free): Daily birding tips, stories, and audio recordings.
+- [ASSISTANT_SAID] Recommended audio guides for bird sounds:
+  - **Peterson Field Guide to Bird Sounds** (CD or digital download): Comprehensive audio guide.
+  - **The Sibley Guide to Bird Life and Behavior** (CD or digital download): Excellent audio guide.
+- [ASSISTANT_SAID] Provided tips for learning bird songs and calls:
+  - Start with common species in the area.
+  - Practice regularly.
+  - Learn songs in different contexts.
+  - Use a combination of resources.
+- [EVENT] User recently got a new bird feeder that attracted interesting species.
+- [PREFERENCE] User is interested in tips to deter squirrels and raccoons from visiting their bird feeder.
+- [ASSISTANT_SAID] Provided tips to deter squirrels:
+  - Use squirrel-resistant bird feeders.
+  - Position feeders at least 10 feet away from structures.
+  - Use squirrel baffles.
+  - Offer squirrel-friendly alternatives.
+  - Use seed types squirrels don't like.
+- [ASSISTANT_SAID] Provided tips to deter raccoons:
+  - Use raccoon-resistant bird feeders.
+  - Secure feeder pole.
+  - Use raccoon-deterrent seed.
+  - Take down feeders at night.
+  - Use motion-activated sprinklers.
+- [ASSISTANT_SAID] General tips for bird feeders:
+  - Keep feeders clean.
+  - Use fresh and dry birdseed.
+  - Be patient and persistent.
+- [EVENT] User has been thinking about planning a trip to a nearby nature reserve to spot

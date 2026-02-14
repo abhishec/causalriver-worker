@@ -1,0 +1,30 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/22 (Mon) 08:46  
+[EVENT] User is planning to do a live stream on YouTube this weekend.  
+[EVENT] User went live on Instagram the following Wednesday after their first stream, which was a Q&A session.  
+[ASSISTANT_SAID] Assistant congratulated the user on their upcoming live stream and offered to help find a good webcam compatible with OBS Studio.  
+[ASSISTANT_SAID] Assistant clarified that Instagram does not support live streaming with external cameras or software like OBS Studio.  
+[ASSISTANT_SAID] Assistant provided factors to consider when choosing a webcam: resolution, frame rate, field of view, and low light performance.  
+[ASSISTANT_SAID] Assistant recommended the following webcams compatible with OBS Studio:  
+- Logitech C920: 1080p resolution, 30fps, 78° field of view.  
+- Razer Kiyo: 720p resolution, 60fps, 60° field of view, built-in ring light, supports HDR.  
+- Elgato Cam Link 4K: 4K-capable, 60° field of view, supports 60fps at 1080p.  
+- Anker PowerConf C200: 1080p resolution, 30fps, 65° field of view.  
+[ASSISTANT_SAID] Assistant advised checking reviews and comparing prices before making a final decision on the webcam.  
+[CHANGE] User clarified that they meant to say they went live on Instagram on a different day, not for the upcoming stream.  
+[PREFERENCE] User is considering upgrading their microphone.  
+[ASSISTANT_SAID] Assistant confirmed that the Blue Yeti is an excellent microphone and provided its benefits:  
+- Multiple pickup patterns: cardioid, bidirectional, omnidirectional, and stereo.  
+- High-quality audio: 16-bit, 48 kHz recording.  
+- Plug-and-play USB connection.  
+- Durable build.  
+[ASSISTANT_SAID] Assistant suggested alternatives to the Blue Yeti:  
+- HyperX QuadCast Gaming Microphone: similar quality, designed for gamers, more affordable.  
+- Rode NT-USB: warm, natural sound, popular among podcasters and YouTubers, higher price.  
+- Elgato Wave:3: compact design, built-in pop filter, designed for streamers.  
+- Shure MV7: professional sound, durable, higher price.  
+[PREFERENCE] User has already invested in the Blue Yeti and noted it has made a huge difference in their audio quality.  
+[EVENT] User is looking for tips on how to position the Blue Yeti microphone for the best sound.  
+[ASSISTANT_SAID] Assistant provided tips for positioning the Blue Yeti microphone:  
+-

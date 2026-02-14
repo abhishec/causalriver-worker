@@ -1,0 +1,27 @@
+**Observation Log**
+
+**Session Date:** 2023/05/27 (Sat) 00:03  
+**Session ID:** sharegpt_qVcBswp_2
+
+1. [USER] User requests a list of all explicitly mentioned issues in a text along with associated solutions, to be developed clearly and precisely.
+2. [FACT] The text provided by the user is titled "EXPLANATORY MEMORANDUM."
+3. [FACT] The focus of the Regulation discussed in the text is on non-energy, non-agricultural raw materials important for the EU economy.
+4. [FACT] The text mentions that critical raw materials (CRMs) are indispensable inputs for strategic sectors including renewable energy, digital industry, space and defense sectors, and health sector.
+5. [FACT] The EU relies almost exclusively on imports for many critical raw materials, with suppliers concentrated in a small number of third countries.
+6. [FACT] The EU sources 97% of its magnesium from China.
+7. [FACT] Heavy rare earth elements used in permanent magnets are exclusively refined in China.
+8. [FACT] 63% of the world's cobalt, used in batteries, is extracted in the Democratic Republic of Congo, while 60% is refined in China.
+9. [FACT] The concentration of suppliers exposes the EU to significant supply risks.
+10. [FACT] Global demand for lithium used in batteries is expected to increase up to 89-fold by 2050.
+11. [FACT] EU demand for rare earth elements for permanent magnets is expected to increase six to seven-fold by 2050.
+12. [FACT] EU demand for gallium, used in semi-conductors, is expected to grow 17-fold by 2050.
+13. [FACT] Current and planned capacities risk not meeting more than 50% of the projected demand for cobalt.
+14. [FACT] Future demand increase for rare earths is expected to outpace growth in capacities.
+15. [FACT] The COVID-19 crisis and the energy crisis due to Russia’s war against Ukraine highlighted the EU’s structural supply dependencies.
+16. [FACT] Disruption in the supply of essential goods could jeopardize the functioning of the single market and damage the EU’s competitiveness.
+17. [FACT] The 2008 raw materials initiative and the 2020 action plan on critical raw materials provided a framework for initiatives to assess criticality.
+18. [FACT] Strategic Partnerships with third countries are helping to diversify sources of raw materials supply.
+19. [FACT] Non-regulatory actions have not been enough to ensure a secure and sustainable supply of critical raw materials.
+20. [FACT] There is currently no regulatory framework aimed at structurally reducing supply risks across critical raw materials.
+21. [FACT] Industry remains overexposed to the risk of supply disruptions due to the absence of a common framework.
+22. [FACT] The EU's potential to increase extraction,

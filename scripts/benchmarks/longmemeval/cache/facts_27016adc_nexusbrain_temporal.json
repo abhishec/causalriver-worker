@@ -1,0 +1,65 @@
+{
+  "answer_a37bdf22_2": [
+    {
+      "fact": "User is considering buying a plot of land in the countryside",
+      "type": "preference",
+      "entities": [
+        "countryside",
+        "land"
+      ]
+    },
+    {
+      "fact": "User is looking at a 5-acre property",
+      "type": "preference",
+      "entities": [
+        "5-acre property"
+      ]
+    },
+    {
+      "fact": "User is interested in the process of buying rural property",
+      "type": "preference",
+      "entities": [
+        "buying rural property"
+      ]
+    },
+    {
+      "fact": "User is considering a property listed at $200,000",
+      "type": "preference",
+      "entities": [
+        "$200,000"
+      ]
+    },
+    {
+      "fact": "User thinks $200,000 seems like a good deal",
+      "type": "opinion",
+      "entities": [
+        "$200,000"
+      ]
+    }
+  ],
+  "answer_a37bdf22_1": [
+    {
+      "fact": "User is planning to do renovations to their current house",
+      "type": "event",
+      "entities": [
+        "renovations",
+        "current house"
+      ]
+    },
+    {
+      "fact": "User estimates their renovations will cost around $20,000",
+      "type": "personal",
+      "entities": [
+        "$20,000"
+      ]
+    },
+    {
+      "fact": "User plans to add a deck as part of the renovations",
+      "type": "event",
+      "entities": [
+        "deck",
+        "renovations"
+      ]
+    }
+  ]
+}

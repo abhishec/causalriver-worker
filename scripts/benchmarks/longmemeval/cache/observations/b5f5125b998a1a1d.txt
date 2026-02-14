@@ -1,0 +1,24 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/22 (Mon) 11:12
+- [USER] User asked about how an airplane's engine works and what fuel is used to keep it running.
+- [ASSISTANT_SAID] An airplane's engine works by using the combustion of fuel to turn turbines that rotate propellers or fan blades for thrust.
+- [ASSISTANT_SAID] There are two types of airplane engines: piston engines and turbine engines.
+- [ASSISTANT_SAID] Piston engines operate by igniting fuel in a cylinder, pushing a piston up and down, which turns the engine's crankshaft.
+- [ASSISTANT_SAID] Turbine engines have a compressor that compresses air, a combustion chamber where fuel is ignited, and a mixture of hot air and gases that exits the engine, spinning a turbine.
+- [ASSISTANT_SAID] Jet fuel, also known as aviation turbine fuel (ATF), is used to keep airplane engines running.
+- [ASSISTANT_SAID] Jet fuel is a type of kerosene refined for aviation, with high-energy density and a low freezing point.
+- [USER] User expressed interest in the information provided about airplane engines.
+- [USER] User asked for differences between piston engines and turbine engines in terms of performance and efficiency.
+- [ASSISTANT_SAID] Turbine engines are generally more powerful than piston engines, making them ideal for larger commercial airplanes.
+- [ASSISTANT_SAID] Piston engines are better suited for smaller aircraft or private planes.
+- [ASSISTANT_SAID] Turbine engines are generally more fuel-efficient than piston engines due to higher energy extraction and compression ratios.
+- [ASSISTANT_SAID] Piston engines are typically less efficient but are often more reliable and require less maintenance.
+- [ASSISTANT_SAID] Turbine engines are generally quieter than piston engines, producing a more consistent sound.
+- [USER] User expressed surprise at turbine engines being more fuel-efficient than piston engines and found it interesting.
+- [USER] User asked if there are any other differences between piston and turbine engines.
+- [ASSISTANT_SAID] Piston engines are simpler in design and operation compared to turbine engines, making them easier to operate and maintain.
+- [ASSISTANT_SAID] Piston engines use a spark plug to ignite fuel, similar to gasoline engines in cars.
+- [ASSISTANT_SAID] Turbine engines require a specific type of fuel formulated for high-altitude, high-speed flight, typically jet fuel.
+- [ASSISTANT_SAID] Piston engines produce power in a series of small explosions, while turbine engines produce a continuous flow of power that is more steady and efficient.
+- [ASSISTANT_SAID] This continuous power flow is one

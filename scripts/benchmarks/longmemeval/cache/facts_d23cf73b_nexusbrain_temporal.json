@@ -1,0 +1,166 @@
+{
+  "answer_5a0d28f8_4": [
+    {
+      "fact": "User is looking for recipe ideas for meal prep.",
+      "type": "preference",
+      "entities": [
+        "recipe ideas",
+        "meal prep"
+      ]
+    },
+    {
+      "fact": "User has been doing a lot of rice and roasted veggies lately.",
+      "type": "preference",
+      "entities": [
+        "rice",
+        "roasted veggies"
+      ]
+    },
+    {
+      "fact": "User tried out a new Ethiopian restaurant last week and loved it.",
+      "type": "event",
+      "entities": [
+        "Ethiopian restaurant"
+      ]
+    },
+    {
+      "fact": "User is interested in trying Ethiopian-inspired dishes, especially misir wot.",
+      "type": "preference",
+      "entities": [
+        "Ethiopian-inspired dishes",
+        "misir wot"
+      ]
+    }
+  ],
+  "answer_5a0d28f8_2": [
+    {
+      "fact": "User is planning a dinner party for the weekend.",
+      "type": "event",
+      "entities": [
+        "dinner party",
+        "weekend"
+      ]
+    },
+    {
+      "fact": "User is thinking of serving an Indian-inspired dish.",
+      "type": "preference",
+      "entities": [
+        "Indian-inspired dish"
+      ]
+    },
+    {
+      "fact": "User learned how to make a perfect chicken tikka masala in a class on Indian cuisine.",
+      "type": "personal",
+      "entities": [
+        "chicken tikka masala",
+        "Indian cuisine",
+        "cooking class"
+      ]
+    },
+    {
+      "fact": "User is looking for suggestions to pair with chicken tikka masala.",
+      "type": "preference",
+      "entities": [
+        "chicken tikka masala",
+        "menu pairing"
+      ]
+    },
+    {
+      "fact": "User is interested in a signature cocktail that incorporates Indian spices or flavors.",
+      "type": "preference",
+      "entities": [
+        "signature cocktail",
+        "Indian spices",
+        "flavors"
+      ]
+    }
+  ],
+  "answer_5a0d28f8_1": [
+    {
+      "fact": "User is trying to eat more plant-based meals",
+      "type": "preference",
+      "entities": [
+        "plant-based meals"
+      ]
+    },
+    {
+      "fact": "User recently attended a class on vegan cuisine",
+      "type": "event",
+      "entities": [
+        "vegan cuisine class"
+      ]
+    },
+    {
+      "fact": "User is inspired by the vegan cuisine class",
+      "type": "opinion",
+      "entities": [
+        "vegan cuisine class"
+      ]
+    },
+    {
+      "fact": "User is interested in healthy meal prep ideas",
+      "type": "preference",
+      "entities": [
+        "healthy meal prep ideas"
+      ]
+    },
+    {
+      "fact": "User is particularly interested in vegan stir-fry",
+      "type": "preference",
+      "entities": [
+        "vegan stir-fry"
+      ]
+    }
+  ],
+  "answer_5a0d28f8_3": [
+    {
+      "fact": "User is trying to cook more at home",
+      "type": "preference",
+      "entities": []
+    },
+    {
+      "fact": "User wants to use up all the ingredients they buy",
+      "type": "preference",
+      "entities": []
+    },
+    {
+      "fact": "User tried a recipe for Korean bibimbap from an online recipe library",
+      "type": "event",
+      "entities": [
+        "Korean bibimbap",
+        "online recipe library"
+      ]
+    },
+    {
+      "fact": "User found the bibimbap recipe amazing",
+      "type": "opinion",
+      "entities": [
+        "bibimbap"
+      ]
+    },
+    {
+      "fact": "User is looking for meal prep container suggestions",
+      "type": "preference",
+      "entities": [
+        "meal prep containers"
+      ]
+    },
+    {
+      "fact": "User is planning to do a stir-fry with chicken and mixed veggies this week",
+      "type": "event",
+      "entities": [
+        "stir-fry",
+        "chicken",
+        "mixed veggies"
+      ]
+    },
+    {
+      "fact": "User is seeking a good marinade suggestion for chicken",
+      "type": "preference",
+      "entities": [
+        "marinade",
+        "chicken"
+      ]
+    }
+  ]
+}

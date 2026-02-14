@@ -1,0 +1,14 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/02/22 (Wed) 19:19
+- [USER] User asked for a list of significant studies on the effects of TV viewing on babies and young children.
+- [ASSISTANT_SAID] Assistant provided a list of five significant studies on the effects of TV viewing on babies and young children.
+- [ASSISTANT_SAID] Study 1: Christakis, D. A., et al. (2004). Early television exposure and subsequent attentional problems in children. Pediatrics, 113(4), 708-713. Found that children who watched more than 2 hours of TV per day before age 3 were more likely to have attentional problems at age 7.
+- [ASSISTANT_SAID] Study 2: Linebarger, D. L., & Walker, D. (2005). Infants' and toddlers' television viewing and language outcomes. American Behavioral Scientist, 48(5), 624-645. Found that higher levels of television exposure in infancy and toddlerhood were associated with lower language development scores at age 3.
+- [ASSISTANT_SAID] Study 3: Zimmerman, F. J., et al. (2007). Early cognitive stimulation, emotional support, and television watching as predictors of subsequent bullying among grade-school children. Archives of Pediatrics & Adolescent Medicine, 161(4), 389-395. Found that excessive TV viewing in early childhood was associated with an increased risk of being a victim or perpetrator of bullying in later childhood.
+- [ASSISTANT_SAID] Study 4: Vandewater, E. A., et al. (2007). Digital childhood: Electronic media and technology use among infants, toddlers, and preschoolers. Pediatrics, 119(5), e1006-e1015. Found that TV viewing was the most common form of screen time for children under age 2, and that excessive screen time was associated with decreased cognitive and language development.
+- [ASSISTANT_SAID] Study 5: Hinkley, T., et al. (2019). Associations of parental rules and socioeconomic position with preschool children's sedentary behaviour and screen time. JAMA Pediatrics, 173(2), e183317. Found that limiting screen time and increasing physical activity during the preschool years was associated with improved cognitive, language, and social-emotional development.
+- [ASSISTANT_SAID] Assistant concluded that these studies support the recommendations to limit screen time for babies and young children and prioritize active play and social interaction for healthy development.
+- [USER] User requested links to the scientific articles listed by the assistant.
+- [ASSISTANT_SAID] Assistant provided links to the scientific articles:
+  - [ASSISTANT_SAID] Link to Study 1: <https://pedi

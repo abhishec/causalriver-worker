@@ -1,0 +1,47 @@
+{
+  "answer_9b09d95b_1": [
+    {
+      "fact": "User attended a digital marketing workshop last week.",
+      "type": "event",
+      "entities": [
+        "digital marketing workshop"
+      ]
+    },
+    {
+      "fact": "User learned about interesting strategies from speaker Rachel Lee.",
+      "type": "opinion",
+      "entities": [
+        "Rachel Lee"
+      ]
+    },
+    {
+      "fact": "User is looking for tips on social media advertising.",
+      "type": "preference",
+      "entities": [
+        "social media advertising"
+      ]
+    },
+    {
+      "fact": "User had lunch with Emma, a freelance writer.",
+      "type": "relationship",
+      "entities": [
+        "Emma",
+        "freelance writer"
+      ]
+    },
+    {
+      "fact": "User considers Emma a potential collaborator for a project.",
+      "type": "relationship",
+      "entities": [
+        "Emma"
+      ]
+    },
+    {
+      "fact": "User is interested in learning more about Facebook ads.",
+      "type": "preference",
+      "entities": [
+        "Facebook ads"
+      ]
+    }
+  ]
+}

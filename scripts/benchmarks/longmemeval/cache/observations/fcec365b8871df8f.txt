@@ -1,0 +1,31 @@
+**Observation Log:**
+
+- [FACT] User's name is Anjali, from Delhi, India, currently a student pursuing graduation.
+- [PREFERENCE] Anjali prefers offline shopping for apparel as she likes to try and feel the clothes before making a purchase.
+- [FACT] Anjali buys mostly books and electronics online while she buys apparel, groceries, and cosmetics offline.
+- [PREFERENCE] Anjali purchases apparel whenever required, sometimes once a month and sometimes once in three months.
+- [PREFERENCE] Anjali loves purchasing dresses and tops more frequently as they are easy to style and can be worn for different occasions.
+- [PREFERENCE] Anjali prefers offline shopping because she can try the clothes before making a purchase and looks at fit, quality, style, and price while buying.
+- [PREFERENCE] Anjali checks online prices before making a purchase offline and may purchase online if she finds a better deal.
+- [PREFERENCE] Factors influencing Anjali's apparel purchase decisions include fit, quality, style, price, and brand.
+
+- [FACT] User's name is Dolly, from New Delhi, works as a Quality Associate at Amazon.
+- [PREFERENCE] Dolly prefers to shop online for apparel.
+- [FACT] Dolly buys clothes online and prefers buying electronics offline.
+- [TEMPORAL] Dolly's purchase frequency for apparel is once every 2 to 3 months.
+- [PREFERENCE] Dolly loves to purchase one-pieces, baggy jeans, sweaters, and hoodies to dress for any occasion with less effort.
+- [PREFERENCE] Dolly prefers online shopping due to the variety of options and discounts available.
+- [PREFERENCE] Dolly checks prices online while buying offline for comparison.
+- [PREFERENCE] Factors influencing Dolly's apparel purchase decisions include price, quality, and trendiness of the product.
+
+- [FACT] User's name is Lakshay, an MBA student in the first year pursuing Marketing at IMT Ghaziabad.
+- [PREFERENCE] Lakshay usually prefers online shopping for apparel unless buying luxury items where feel is important.
+- [FACT] Lakshay buys clothes and skincare products online and prefers offline for luxury items.
+- [TEMPORAL] Lakshay purchases apparel almost every 2 weeks.
+- [PREFERENCE] Lakshay loves to buy streetwear t-shirts frequently as they are affordable and satisfy his shopping desire.
+- [PREFERENCE] Lakshay prefers online shopping for the variety it offers and believes that MRP remains the same for online and offline purchases.
+- [PREFERENCE] Factors influencing Lakshay's apparel purchase decisions include price, design, delivery charge, and return policy.
+
+- [FACT] User's name is Saloni Narang, from Gurgaon, Haryana, currently pursuing a master's degree from NMIMS Mumbai.
+- [PREFERENCE] Saloni prefers both online and offline shopping depending on the type of purchase; she shops online for regular western wear and offline for ethnic and party wear.
+- [

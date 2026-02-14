@@ -1,0 +1,39 @@
+**Observation Log:**
+
+- [FACT] The user is planning to move into a new home soon.
+- [FACT] The user is located in the 78749 zip code.
+- [FACT] The user was pre-approved for a mortgage of $400,000 from Wells Fargo.
+- [PREFERENCE] The user is looking forward to owning a home and having a backyard.
+- [EVENT] The user needs to set up cable and TV services in their new home.
+- [ASSISTANT_SAID] The assistant congratulated the user on their new home and offered to help with setting up cable and TV services.
+- [ASSISTANT_SAID] The assistant stated that it needs the user's location to provide accurate information on cable and TV service providers.
+- [ASSISTANT_SAID] The assistant provided a list of cable and TV service providers in the 78749 area, including:
+  1. Spectrum (Charter Communications) - Prices start at around $49.99/month for TV only.
+  2. AT&T - Prices start at around $59.99/month for TV only.
+  3. Google Fiber - Prices starting at around $70/month.
+  4. Suddenlink - Prices start at around $40/month for TV only.
+  5. Grande Communications - Prices start at around $40/month for TV only.
+- [ASSISTANT_SAID] The assistant provided a list of electricity service providers in the 78749 area, including:
+  1. TXU Energy - Offers a range of plans with varying prices.
+  2. Reliant Energy - Provides flexible pricing options.
+  3. Direct Energy - Offers various plans with rewards programs.
+  4. Just Energy - Provides renewable energy plans.
+  5. Pulse Power - Focuses on customer service.
+- [ASSISTANT_SAID] The assistant mentioned that the local gas provider is Texas Gas Service.
+- [ASSISTANT_SAID] The assistant advised the user to check prices and plans directly with the providers.
+- [ASSISTANT_SAID] The assistant suggested several time-tracking tools and apps for organizing moving tasks, including:
+  1. Trello
+  2. Todoist
+  3. Google Keep
+  4. AnyList
+  5. Moving Day
+  6. Cozi
+  7. Google Calendar
+- [PREFERENCE] The user decided to try out Trello for organizing their moving tasks.
+- [EVENT] The user needs to schedule a home insurance policy with Liberty Mutual.
+- [ASSISTANT_SAID] The assistant provided tips for reviewing home insurance policy documents, including:
+  1. Coverage limits
+  2. Deductibles
+  3. Policy exclusions
+  4. Replacement cost value vs. actual cash value
+  5. Liability coverage

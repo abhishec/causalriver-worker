@@ -1,0 +1,26 @@
+**Observation Log:**
+
+[FACT] User is helping their younger cousin with college applications.  
+[FACT] User's cousin is interested in top computer science programs.  
+[FACT] User has a younger cousin.  
+[FACT] User attended a graduation ceremony three weeks ago.  
+[FACT] User was impressed by the tech-savvy students at the graduation ceremony.  
+[RELATIONSHIP] User's cousin is applying to college.  
+[RELATIONSHIP] User's mom graduated from college 50 years ago.  
+[EVENT] User is planning a celebration for their mom's 50th college graduation anniversary.  
+[TEMPORAL] The session date is 2023/05/29 (Mon) 13:30.  
+[TEMPORAL] User attended the graduation ceremony three weeks ago.  
+[ASSISTANT_SAID] Assistant congratulated the user on the graduate and offered to help with application deadlines.  
+[ASSISTANT_SAID] Assistant provided application deadlines for top computer science programs for the class of 2027, including:  
+- MIT Computer Science and Molecular Biology: Early Action: November 1, 2022; Regular Decision: January 1, 2023  
+- Stanford University Computer Science: Restrictive Early Action: November 1, 2022; Regular Decision: January 3, 2023  
+- Carnegie Mellon University School of Computer Science: Early Decision: November 1, 2022; Regular Decision: January 1, 2023  
+- University of California, Berkeley Electrical Engineering and Computer Sciences: Priority Deadline: November 30, 2022; Final Deadline: December 15, 2022  
+- Harvard University Computer Science: Restrictive Early Action: November 1, 2022; Regular Decision: January 1, 2023  
+- University of Washington Paul G. Allen School of Computer Science & Engineering: Autumn Quarter: December 1, 2022 (priority deadline); Winter Quarter: January 15, 2023 (final deadline)  
+- University of Texas at Austin Computer Science: Priority Deadline: December 1, 2022; Final Deadline: January 5, 2023  
+- Georgia Institute of Technology College of Computing: Early Action: October 15, 2022; Regular Decision: January 10, 2023  
+- University of Illinois at Urbana-Champaign Computer Science: Early Action: November 1, 2022; Regular Decision: January 5, 2023  
+- Cornell University Computer Science: Early Decision: November 1, 2022; Regular Decision: January 2, 2023  
+[ASSISTANT_SAID] Assistant advised verifying deadlines with each university's admissions website or contacting their admissions offices.  
+[ASSISTANT_SAID] Assistant provided the application deadlines for the University of Michigan for the class of 2027: Early Action: November 1,

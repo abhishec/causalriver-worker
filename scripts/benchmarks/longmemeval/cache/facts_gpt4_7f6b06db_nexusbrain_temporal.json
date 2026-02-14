@@ -1,0 +1,134 @@
+{
+  "answer_5d8c99d3_1": [
+    {
+      "fact": "User is planning a summer trip to the Eastern Sierra",
+      "type": "event",
+      "entities": [
+        "Eastern Sierra",
+        "summer trip"
+      ]
+    },
+    {
+      "fact": "User is looking for good campsites in the Eastern Sierra",
+      "type": "preference",
+      "entities": [
+        "campsites",
+        "Eastern Sierra"
+      ]
+    },
+    {
+      "fact": "User plans to do some day hikes while in the Eastern Sierra",
+      "type": "event",
+      "entities": [
+        "day hikes",
+        "Eastern Sierra"
+      ]
+    },
+    {
+      "fact": "User has hiked the Dipsea Trail at Muir Woods",
+      "type": "personal",
+      "entities": [
+        "Dipsea Trail",
+        "Muir Woods"
+      ]
+    },
+    {
+      "fact": "User prefers trails with great views and some elevation gain",
+      "type": "preference",
+      "entities": [
+        "trails",
+        "great views",
+        "elevation gain"
+      ]
+    }
+  ],
+  "answer_5d8c99d3_2": [
+    {
+      "fact": "User recently went on a solo camping trip to Yosemite.",
+      "type": "event",
+      "entities": [
+        "Yosemite",
+        "solo camping trip"
+      ]
+    },
+    {
+      "fact": "User needs to upgrade some camping equipment.",
+      "type": "preference",
+      "entities": [
+        "camping equipment"
+      ]
+    },
+    {
+      "fact": "User just returned from a road trip with friends to Big Sur and Monterey.",
+      "type": "event",
+      "entities": [
+        "Big Sur",
+        "Monterey",
+        "road trip",
+        "friends"
+      ]
+    },
+    {
+      "fact": "User found the backpack uncomfortable during their camping trip.",
+      "type": "opinion",
+      "entities": [
+        "backpack",
+        "uncomfortable"
+      ]
+    },
+    {
+      "fact": "User is looking to upgrade their backpack.",
+      "type": "preference",
+      "entities": [
+        "backpack"
+      ]
+    },
+    {
+      "fact": "User is considering the Osprey Atmos 50L for a 3-day trip.",
+      "type": "preference",
+      "entities": [
+        "Osprey Atmos 50L",
+        "3-day trip",
+        "Eastern Sierra"
+      ]
+    },
+    {
+      "fact": "User plans to go on a trip to the Eastern Sierra in July.",
+      "type": "event",
+      "entities": [
+        "Eastern Sierra",
+        "July"
+      ]
+    }
+  ],
+  "answer_5d8c99d3_3": [
+    {
+      "fact": "User is planning a trip to the Eastern Sierra.",
+      "type": "event",
+      "entities": [
+        "Eastern Sierra"
+      ]
+    },
+    {
+      "fact": "User recently returned from a solo camping trip to Yosemite National Park.",
+      "type": "event",
+      "entities": [
+        "Yosemite National Park"
+      ]
+    },
+    {
+      "fact": "User is looking for secluded camping spots.",
+      "type": "preference",
+      "entities": [
+        "secluded camping spots"
+      ]
+    },
+    {
+      "fact": "User prefers camping spots that are accessible by car.",
+      "type": "preference",
+      "entities": [
+        "accessible by car"
+      ]
+    }
+  ]
+}

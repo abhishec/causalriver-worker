@@ -1,0 +1,28 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/23 (Tue) 13:06  
+[FACT] User is studying computer science.  
+[FACT] User received a perfect GPA for the last semester.  
+[FACT] User received a scholarship from their university for the upcoming semester.  
+[PREFERENCE] User is interested in internships that involve data analysis and programming.  
+[PREFERENCE] User is particularly interested in machine learning and natural language processing.  
+[FACT] User has a certification in Python.  
+[FACT] User is planning to start another certification in statistics soon.  
+[EVENT] User is trying to plan out their schedule for the upcoming semester.  
+[ASSISTANT_SAID] Assistant suggested various planners and calendars, including:  
+[ASSISTANT_SAID] 1. Erin Condren LifePlanner: A stylish and customizable planner with various layouts and designs.  
+[ASSISTANT_SAID] 2. Passion Planner: A goal-oriented planner that helps prioritize tasks and appointments.  
+[ASSISTANT_SAID] 3. Day Designer: A daily planner with space for notes, to-do lists, and goal setting.  
+[ASSISTANT_SAID] 4. Happy Planner: A positive and uplifting planner with daily and weekly spreads.  
+[ASSISTANT_SAID] 5. Google Calendar: A popular online calendar that syncs across devices and allows sharing with others.  
+[ASSISTANT_SAID] 6. Apple Calendar: A clean and intuitive calendar app for Mac and iOS devices.  
+[ASSISTANT_SAID] 7. Microsoft Outlook: A robust calendar app with task management and email integration.  
+[ASSISTANT_SAID] 8. Any.do: A task management app with a calendar view and collaboration features.  
+[ASSISTANT_SAID] 9. Panda Planner: A digital planner that can be printed or used on a tablet.  
+[ASSISTANT_SAID] 10. Planner Pro: A digital planner with a printable PDF version.  
+[ASSISTANT_SAID] Assistant provided considerations for choosing a planner, including layout, customization, digital vs. physical, syncing, and additional features.  
+[ASSISTANT_SAID] Assistant offered tips for staying organized, such as experimenting with different planners, setting reminders, and reviewing schedules regularly.  
+[ASSISTANT_SAID] Assistant congratulated the user on their perfect GPA.  
+[ASSISTANT_SAID] Assistant provided tips for finding internships or research opportunities, including:  
+[ASSISTANT_SAID] 1. University Resources: Career Services, Departmental Lists, Faculty Connections.  
+[ASSISTANT_SAID] 2. Online Platforms: Internship Search Engines (Internships.com, WayUp, YouTern), Job Boards (LinkedIn Jobs

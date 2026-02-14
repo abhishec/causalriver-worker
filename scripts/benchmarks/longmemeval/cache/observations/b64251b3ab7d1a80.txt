@@ -1,0 +1,39 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/21 (Sun) 01:22
+- [PREFERENCE] User is looking for new ideas for grilled meats to pair with their homemade BBQ sauce.
+- [FACT] User has perfected their homemade BBQ sauce, which has a great balance of sweet, tangy, and spicy flavors.
+- [ASSISTANT_SAID] Assistant congratulated the user on perfecting their homemade BBQ sauce.
+- [ASSISTANT_SAID] Assistant recommended the following grilled meats to pair with the user's BBQ sauce: 
+  1. Ribs
+  2. Tri-Tip
+  3. Chicken Thighs
+  4. Sausages
+  5. Flank Steak
+  6. Pork Chops
+  7. Burgers
+  8. Skirt Steak
+- [PREFERENCE] User is looking for something different from the usual burgers and hot dogs.
+- [FACT] User has been using a smoker box on their gas grill a lot lately.
+- [ASSISTANT_SAID] Assistant provided recommendations for meats that would be perfect for smoking:
+  1. Brisket
+  2. Pulled Pork
+  3. Ribs
+  4. Tri-Tip
+  5. Sausages
+  6. Burnt Ends
+  7. Andouille Sausages
+  8. Pork Belly
+- [ASSISTANT_SAID] Assistant advised to keep the smoker temperature low (around 225-250°F) and use wood chips like hickory, apple, or cherry for different flavor profiles.
+- [PREFERENCE] User is interested in trying out new types of wood chips for smoking.
+- [ASSISTANT_SAID] Assistant explained the flavors added by different wood chips:
+  - Hickory: Strong, sweet, and smoky flavor; pairs well with bacon, ham, ribs, brisket, and sausages.
+  - Apple: Mild, fruity, and slightly sweet flavor; pairs well with pork, poultry, seafood, and vegetables.
+  - Cherry: Mild, fruity, and slightly tart flavor; pairs well with poultry, pork, beef, and lamb.
+- [ASSISTANT_SAID] Assistant mentioned other wood chip options: Mesquite, Oak, Pecan, and Maple, along with their flavor profiles and pairings.
+- [PREFERENCE] User has been experimenting with different types of wood chips.
+- [FACT] User tried hickory chips for the first time last month and was impressed by the flavor.
+- [FACT] User has purchased bags of applewood and mesquite chips.
+- [ASSISTANT_SAID] Assistant provided tips for storing wood chips to keep them fresh:
+  1. Use airtight containers.
+  2. Store in a dry place.

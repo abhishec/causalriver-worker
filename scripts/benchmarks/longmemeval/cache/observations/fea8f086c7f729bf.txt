@@ -1,0 +1,25 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/20 (Sat) 20:43
+- [FACT] The user is looking for new vegan recipe ideas.
+- [FACT] The user recently made a vegan quinoa bowl with roasted vegetables.
+- [PREFERENCE] The user enjoys vegan cooking and experimenting with new recipes.
+- [FACT] The user has been using their Instant Pot a lot lately.
+- [FACT] The user has figured out how to use the yogurt-making function on their Instant Pot.
+- [CHANGE] The yogurt-making function has been a game-changer for the user.
+- [ASSISTANT_SAID] The assistant provided vegan recipe ideas, including variations of quinoa bowls and other Instant Pot recipes.
+- [ASSISTANT_CREATED] The assistant created a list of quinoa bowl variations: Southwestern, Indian-Style, and Mediterranean.
+- [ASSISTANT_CREATED] The assistant provided other Instant Pot recipes: Lentil Curry, Chickpea and Spinach Stew, and Vegan Chili.
+- [ASSISTANT_CREATED] The assistant suggested roasted vegetable ideas: Roasted Sweet Potato and Brussels Sprouts, Cauliflower "Steak" with Turmeric and Lemon, and Roasted Carrot and Parsnip Medley.
+- [ASSISTANT_CREATED] The assistant provided yogurt function creations: Cashew Sour Cream, Coconut Yogurt Parfait, and Tzatziki Sauce.
+- [ASSISTANT_SAID] The assistant encouraged the user to create more delicious vegan dishes.
+- [PREFERENCE] The user is especially interested in the Southwestern Quinoa Bowl with cashew-based sour cream.
+- [ASSISTANT_SAID] The assistant provided a detailed recipe for making cashew sour cream using the Instant Pot yogurt function.
+- [ASSISTANT_CREATED] The assistant listed ingredients for cashew sour cream: 1 cup of cashews, 1/2 cup of water, 1 tablespoon of lemon juice, 1/2 teaspoon of salt, and optional probiotic powder.
+- [ASSISTANT_SAID] The assistant provided step-by-step instructions for making cashew sour cream in the Instant Pot.
+- [PREFERENCE] The user has been experimenting with different spices and seasonings in their cooking.
+- [ASSISTANT_SAID] The assistant recommended unique spice blends and flavor combinations for the user to try.
+- [ASSISTANT_CREATED] The assistant provided global spice blends: Berbere, Ras el hanout, and Garam Masala.
+- [ASSISTANT_CREATED] The assistant suggested flavor combinations: Lemon-Rosemary-Garlic, Smoky Chipotle-Lime, and Indian-Style Garam Masala-Cumin-Coriander.
+- [ASSISTANT_CREATED] The assistant listed single spices: Sumac, Shichimi Togarashi, and Urfa Pepper.
+- [PREFERENCE] The user is interested in trying out new spices

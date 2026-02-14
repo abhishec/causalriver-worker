@@ -1,0 +1,31 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/28 (Sun) 15:13
+- [FACT] The user is experiencing health issues, as they mentioned being "very unwell."
+- [RELATIONSHIP] The user is communicating with someone named Alex regarding property concerns.
+- [RELATIONSHIP] The user mentioned a landlord who repaired the dishwasher.
+- [RELATIONSHIP] The user mentioned a person named Venkatesh who informed them about construction debris.
+- [EVENT] The landlord repaired the dishwasher on Monday.
+- [FACT] The user found a rusty metal spike sticking out of the ground where the back gate is to be replaced.
+- [FACT] The user’s dog shrieked after stepping on the hard spike.
+- [FACT] The user assumed the dog stepped on the spike as there were no other hazards in the area.
+- [FACT] The user had only seen metal posts used for construction laid flat on the ground near the gate site.
+- [FACT] The user was not warned about dangerous protrusions from the gravel or ground.
+- [FACT] The rusty metal spike had been present for months without being noticed.
+- [EVENT] The user’s dog was in the backyard while Venkatesh was repairing the dishwasher.
+- [PREFERENCE] The user usually does not leave their dog outside unattended.
+- [EVENT] The user found the side gate wide open in the morning.
+- [FACT] The gate had been secured with a latch and bolted.
+- [FACT] The user’s personal master lock had not been resecured on the latch due to lawn maintenance.
+- [FACT] The bottom bolt on the gate was shut the night before.
+- [FACT] The user suspects someone hopped the fence to open the gate.
+- [PREFERENCE] The user expressed fear regarding the open gate, especially considering recent break-ins in the neighborhood.
+- [RELATIONSHIP] The user mentioned that their neighbors had dealt with a break-in recently and have fortified their home.
+- [FACT] The user is concerned that someone casing their house is now aware of valuable technology inside, including personal computers with expensive accessories.
+- [CHANGE] The user wants to add a high-importance concern to the letter regarding the open gate.
+- [FACT] The user reported that active construction sites have been left in place for so long that they are starting to decay.
+- [EVENT] The user will attach photos of the front yard site and the backyard area where the gate is to be replaced.
+- [FACT] The baseboard that the gate will be sitting on is showing signs of rot similar to that which destroyed the gate.
+- [FACT] The user will attach images of the front construction site.
+- [FACT] There has been rusty rebar sticking out of the ground very close to the neighbor's yard for months.
+- [FACT] The structure Venkatesh is working to build

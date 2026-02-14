@@ -1,0 +1,24 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/30 (Tue) 01:04  
+[FACT] User is experiencing issues with their home Wi-Fi network.  
+[FACT] User's router keeps dropping the connection every few days.  
+[ASSISTANT_SAID] The assistant is happy to help troubleshoot the issue with the user's home Wi-Fi network.  
+[ASSISTANT_SAID] The assistant lists potential causes for router connection drops: overheating, firmware issues, interference from other devices, physical obstructions, network congestion, ISP issues, router configuration, and hardware issues.  
+[FACT] User has had their router for about 2 years.  
+[FACT] User's ISP is Comcast.  
+[FACT] User has a standard internet plan.  
+[FACT] User has around 10 devices connected to their network, including a smart TV, laptop, and Echo.  
+[CHANGE] User updated their router's firmware a few months ago.  
+[FACT] User sometimes experiences dropped connections on their laptop, but it's not frequent.  
+[ASSISTANT_SAID] The assistant explains overheating causes and prevention methods, including poor ventilation, dust buildup, high ambient temperature, and hardware issues.  
+[ASSISTANT_SAID] The assistant provides steps to prevent overheating: place the router in a well-ventilated area, clean the router regularly, avoid placing it in a hot environment, monitor the router's temperature, and consider upgrading to a router with better cooling.  
+[ASSISTANT_SAID] The assistant suggests checking the router's logs for error messages or warnings that might indicate the cause of connection drops.  
+[ASSISTANT_SAID] The assistant provides a general guide on how to access router logs.  
+[FACT] User is not super familiar with the process of checking router logs.  
+[ASSISTANT_SAID] The assistant provides specific steps to access the logs on the Asus RT-AC68U router model.  
+[ASSISTANT_SAID] The assistant lists the steps to access the logs: open a web browser, type the router's IP address (http://192.168.1.1), log in with the username and password (admin/admin), access Advanced Settings, and navigate to System Log.  
+[ASSISTANT_SAID] The assistant explains what to look for in the logs, including error messages, timestamps, and recurring patterns.  
+[ASSISTANT_SAID] The assistant advises on enabling log recording, saving logs, and clearing logs.  
+[ASSISTANT_SAID] The assistant confirms that the user can check the quality of their Wi-Fi signal and identify dead spots in their home.  
+[ASSISTANT_SAID] The assistant provides methods to check Wi-Fi signal quality and identify dead spots, including using Wi-Fi analyzer apps, checking the router's web interface, using

@@ -1,0 +1,21 @@
+**Observation Log:**
+
+[FACT] User is located in LA.  
+[PREFERENCE] User is a big fan of buffalo wings.  
+[EVENT] User is thinking of ordering food for the next game.  
+[EVENT] User watched the Kansas City Chiefs defeat the Buffalo Bills in the Divisional Round of the NFL playoffs last weekend.  
+[RELATIONSHIP] User watched the game at their friend Mike's place.  
+[TEMPORAL] Session date is 2023/01/22 (Sun) 12:52.  
+[ASSISTANT_SAID] Assistant congratulated the user on the Chiefs' victory.  
+[ASSISTANT_SAID] Assistant asked for the user's location, preferred type of wings, preferred delivery platform, and the number of people they are ordering for.  
+[ASSISTANT_SAID] Assistant provided recommendations for wing spots in LA: Wingstop, Buffalo Wild Wings, Pizza Studio, The Counter, Danny's Deli, Howlin' Ray's Hot Chicken, and The Attic on Broadway.  
+[ASSISTANT_SAID] Assistant mentioned that all recommended spots can handle decent-sized orders and offer delivery through popular platforms.  
+[EVENT] User decided to go with Buffalo Wild Wings.  
+[ASSISTANT_SAID] Assistant provided current deals and promotions at Buffalo Wild Wings, including Wing Tuesdays, Blazin' Rewards, Party Packs, Delivery Deals, and Limited Time Offers.  
+[ASSISTANT_SAID] Assistant explained the online ordering system at Buffalo Wild Wings, detailing how to customize orders and pay ahead of time.  
+[ASSISTANT_SAID] Assistant confirmed that Buffalo Wild Wings has pizza options and provided details on pizza and wings combos.  
+[PREFERENCE] User is planning to order a medium "Blazin' BBQ" pizza along with buffalo wings.  
+[ASSISTANT_SAID] Assistant confirmed that the user can add an order of potato wedges to their combo.  
+[ASSISTANT_SAID] Assistant described the potato wedges as crispy on the outside and fluffy on the inside, perfect for dipping in sauce.  
+[EVENT] User decided to go with the Pizza and Wings Combo and chose the medium "Blazin' BBQ" pizza to go along with their buffalo wings.  
+[ASSISTANT_SAID] Assistant provided instructions on how to customize the combo and add potato wedges to the order.

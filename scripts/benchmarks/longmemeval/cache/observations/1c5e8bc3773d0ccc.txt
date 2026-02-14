@@ -1,0 +1,27 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/28 (Sun) 14:39
+- [USER] User is conducting research for a term paper.
+- [USER] User feels overwhelmed with the amount of information available for research.
+- [ASSISTANT_SAID] Assistant provided tips for conducting effective research for a term paper, including:
+  1. Start with a clear research question.
+  2. Use academic sources such as peer-reviewed journal articles and reputable publications.
+  3. Utilize library resources like academic search premier and jstor.
+  4. Take notes on key points and important quotes.
+  5. Build a bibliography with author, title, and publication date of sources.
+  6. Plan research time by breaking it into smaller tasks.
+  7. Organize sources into subtopics and create an outline.
+- [ASSISTANT_SAID] Assistant suggested brainstorming as a method for narrowing down a research topic.
+- [ASSISTANT_SAID] Assistant provided additional tips for narrowing down a research topic, including:
+  1. Brainstorm ideas related to the general topic.
+  2. Define the purpose of writing about the topic (inform, persuade, analyze).
+  3. Consider the scope of the paper (short or long).
+  4. Review existing research to identify gaps.
+  5. Use a research question to focus on a specific area.
+- [USER] User plans to start by brainstorming a list of ideas.
+- [ASSISTANT_SAID] Assistant affirmed that discussing ideas with others, like a professor or librarian, can be helpful and provided reasons:
+  1. They can offer guidance.
+  2. They can offer suggestions and resources.
+  3. They can save time by advising on topic viability.
+  4. They can help focus ideas through discussion.
+  5. They can help avoid common pitfalls or errors.

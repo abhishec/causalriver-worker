@@ -1,0 +1,17 @@
+**Observation Log:**
+
+- [FACT] The user has a jewelry collection that includes valuable pieces.
+- [PREFERENCE] The user prefers to have their more valuable pieces, like their engagement ring and antique brooch, covered under scheduled coverage.
+- [PREFERENCE] The user considers unscheduled coverage sufficient for their less valuable pieces, like their silver ring with a turquoise stone.
+- [EVENT] The user organized their jewelry box last week and realized they have valuable pieces that need protection.
+- [EVENT] The user plans to get their engagement ring appraised.
+- [TEMPORAL] The session date is 2023/05/30 (Tue) at 16:30.
+- [ASSISTANT_SAID] The assistant advised the user to choose a qualified appraiser who is a member of a reputable organization, such as the National Association of Jewelry Appraisers (NAJA) or the American Society of Appraisers (ASA).
+- [ASSISTANT_SAID] The assistant suggested gathering documentation for the appraisal, including receipts, certificates of authenticity, appraisal reports, photos, and historical information.
+- [ASSISTANT_SAID] The assistant explained the difference between scheduled and unscheduled coverage, detailing that scheduled coverage lists each item individually with its value, while unscheduled coverage provides a lump sum for all jewelry without listing individual items.
+- [ASSISTANT_SAID] The assistant provided pros and cons for both scheduled and unscheduled coverage.
+- [ASSISTANT_SAID] The assistant recommended keeping appraisal and insurance documents safe and updating appraisals every 3-5 years.
+- [ASSISTANT_SAID] The assistant suggested photographing jewelry from multiple angles and storing it securely.
+- [ASSISTANT_SAID] The assistant recommended asking for referrals, checking professional associations, verifying credentials, checking online reviews, and contacting local gem and jewelry organizations to find a reputable appraiser.
+- [ASSISTANT_SAID] The assistant advised the user to ask questions about the appraiser's experience and methodology and to get a written estimate of the appraisal fee.
+- [ASSISTANT_SAID] The assistant mentioned that the appraiser should have errors and omissions insurance (E&O) to protect against potential mistakes.

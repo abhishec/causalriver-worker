@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [FACT] The user is planning to try out a new coffee shop near their office.
+- [TEMPORAL] The user plans to try the new coffee shop this week.
+- [FACT] The user usually grabs a coffee before boarding the 7:15 AM bus to work on Mondays, Wednesdays, and Fridays.
+- [TEMPORAL] The user has been following this coffee routine for the past three months.
+- [ASSISTANT_SAID] The assistant suggested several ways to find a great coffee shop near the user's office: online review sites, asking colleagues or friends, checking social media, and walking around the area.
+- [ASSISTANT_SAID] The assistant acknowledged the user's coffee routine and expressed that it's great to have a consistent start to the day.
+- [FACT] The user is looking for a way to track their daily commute time.
+- [CHANGE] The user has noticed that their commute has been taking longer, especially on Thursdays.
+- [ASSISTANT_SAID] The assistant provided several options for tracking daily commute time: Google Maps Timeline, commute tracking apps (Citymapper, Waze Carpool, TripIt), GPS tracking devices, and manual tracking.
+- [ASSISTANT_SAID] The assistant explained how to optimize the user's route by analyzing commute data.
+- [FACT] The user is trying to get more steps in by getting off the bus a stop earlier and walking the remaining 10-15 minutes to the office.
+- [ASSISTANT_SAID] The assistant suggested several methods to track daily step count, including wearable fitness trackers, smartphone pedometer apps, GPS tracking apps, and manual tracking.
+- [ASSISTANT_SAID] The assistant provided details about GPS tracking apps: Citymapper, Google Maps, and Waze Carpool, including their features, cost, and account requirements.
+- [FACT] The user is considering trying out Waze Carpool for their Thursday commutes due to worsening traffic on the highway.
+- [ASSISTANT_SAID] The assistant discussed the pros and cons of carpooling with Waze Carpool versus sticking with the user's usual 8:00 AM train.
+- [PREFERENCE] The user expressed frustration with traffic on the highway and a desire to reduce their commute time.
+- [EVENT] The user plans to give Waze Carpool a try on Thursdays.
+- [PREFERENCE] The user is curious about whether to find a carpool buddy traveling to the same office building or someone heading in the same general direction.

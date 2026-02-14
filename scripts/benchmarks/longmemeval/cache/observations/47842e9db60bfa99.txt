@@ -1,0 +1,26 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/03/17 (Fri) 14:41  
+[ASSISTANT_SAID] To incorporate domain knowledge into the causal graph, you can modify the initial graph obtained from the previous steps.  
+[ASSISTANT_SAID] In this example, we'll ensure that Sleep directly impacts Exercise but not Resilience Index.  
+[ASSISTANT_SAID] We assume that you already have a directed graph from the previous steps, stored in a variable called `custom_graph`.  
+[ASSISTANT_SAID] Step 1: Get the list of existing edges: `existing_edges = custom_graph.getEdges()`  
+[ASSISTANT_SAID] Step 2: Remove the edge between Sleep and Resilience Index, if it exists: `edge_to_remove = "Sleep --> Resilience Index"`  
+[ASSISTANT_SAID] If `edge_to_remove` is in `existing_edges`, then `custom_graph.removeEdge(edge_to_remove)`  
+[ASSISTANT_SAID] Step 3: Add the edge between Sleep and Exercise, if it doesn't exist: `edge_to_add = "Sleep --> Exercise"`  
+[ASSISTANT_SAID] If `edge_to_add` is not in `existing_edges`, then `custom_graph.addEdge(edge_to_add)`  
+[ASSISTANT_SAID] Step 4: Run the GES algorithm with the modified initial graph: `tetrad.run(algoId='ges', dfs=df, scoreId='mixed-var-polynominal-bic', penaltyDiscount=penalty_discount, initialGraph=custom_graph)`  
+[ASSISTANT_SAID] Step 5: Get the resulting causal graph: `graph = tetrad.getTetradGraph()` and `print(graph)`  
+[ASSISTANT_SAID] By incorporating domain knowledge into the causal graph, you ensure that the graph is consistent with prior understanding.  
+[ASSISTANT_SAID] This can help improve the reliability and interpretability of the inferred causal relationships.  
+[ASSISTANT_SAID] Note that these specific examples are for illustration purposes only; you should adapt the code to incorporate the domain knowledge relevant to your specific problem and dataset.  
+[ASSISTANT_SAID] Finally, estimate the causal effects in the refined causal graph using a suitable method, like regression or propensity score matching.  
+[ASSISTANT_SAID] This will provide you with the weights that inform people how every action they take will improve resilience.  
+[ASSISTANT_SAID] Step 1: Convert the Tetrad graph to a NetworkX directed graph:  
+[ASSISTANT_CREATED] Code snippet:  
+```python
+import networkx as nx
+
+def tetrad_graph_to_networkx(tetrad_graph):
+    nx_graph = nx.DiGraph()
+    nodes =

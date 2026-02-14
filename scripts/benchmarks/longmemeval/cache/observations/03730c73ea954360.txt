@@ -1,0 +1,18 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/27 (Sat) 04:52
+- [USER] User is interested in creating videos that sell products and services.
+- [USER] User claims no prior technical or video skills are required to create videos.
+- [USER] User is looking for a system to create engaging videos that generate clicks, leads, and sales.
+- [USER] User requests a JVZoo style funnel including Front End (FE), One Time Offers (OTO1, OTO2, OTO3, OTO4) with a downsell at OTO1 and recurring at OTO2.
+- [ASSISTANT_CREATED] Front End (FE) - Mini Video Marvels: "Mini Video Marvels: Skyrocket Your Sales with Tiny, High-Impact Videos!" Description includes creating captivating videos without technical skills, unlimited videos with a 1-click automated video maker, and tapping into free organic and viral traffic.
+- [ASSISTANT_CREATED] One Time Offer 1 (OTO1) - Video Marvels Pro: "Video Marvels Pro: Unlock Unlimited Possibilities & Boost Your Profits!" Description includes premium features like advanced video editing tools and priority customer support.
+- [ASSISTANT_CREATED] Downsell for OTO1 - Video Marvels Pro Lite: "Video Marvels Pro Lite: Get Essential Pro Features without Breaking the Bank!" Description includes access to basic video editing tools and an extended library of agency templates.
+- [ASSISTANT_CREATED] One Time Offer 2 (OTO2) - Video Marvels Elite Club: "Video Marvels Elite Club: Stay Ahead of the Game with Exclusive Access & Monthly Updates!" Description includes exclusive access to new agency templates and monthly updates.
+- [ASSISTANT_CREATED] Recurring payment for OTO2 is suggested to be monthly.
+- [ASSISTANT_CREATED] One Time Offer 3 (OTO3) - Video Marvels Agency License: "Video Marvels Agency License: Multiply Your Income by Selling Video Services to Clients!" Description includes access to a client management dashboard and white-label rights.
+- [ASSISTANT_CREATED] One Time Offer 4 (OTO4) - Video Marvels Ultimate Traffic Booster: "Video Marvels Ultimate Traffic Booster: Drive Insane Amounts of Traffic to Your Videos!" Description includes a powerful software to drive organic and viral traffic.
+- [USER] User asks for suggested pricing for each OTO.
+- [ASSISTANT_SAID] Suggested pricing for Front End (FE) - Mini Video Marvels: $27 - $47.
+- [ASSISTANT_SAID] Suggested pricing for OTO1 - Video Marvels Pro: $67 - $97; Downsell - Video Marvels Pro Lite: $37 - $57.
+- [ASSISTANT_SAID] Suggested pricing for OTO2 - Video Marvels Elite Club: $27 - $47

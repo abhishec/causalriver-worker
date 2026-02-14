@@ -1,0 +1,27 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/01/24 (Tue) 21:36
+- [EVENT] User is planning to do some more planting this weekend.
+- [PREFERENCE] User wants to make sure they have all the necessary tools for planting.
+- [EVENT] User recently got new gardening tools on the 25th and has been putting them to good use since then.
+- [ASSISTANT_SAID] Congratulations on your new gardening tools! It's great to hear that you've been enjoying using them.
+- [ASSISTANT_SAID] A trowel is a versatile and essential tool for any gardener, and with a few tips, you'll be digging, planting, and transplanting like a pro!
+- [ASSISTANT_SAID] Tips on how to properly use a trowel in the garden:
+  1. Choose the right trowel: A general-purpose trowel with a curved or angled blade is ideal for scooping and digging.
+  2. Hold the trowel correctly: Hold the handle with both hands, one hand at the top and the other near the blade.
+  3. Use the correct digging technique: Insert the trowel into the soil at a 45-degree angle, with the blade facing the direction you want to dig.
+  4. Scoop and lift: Once you've dug into the soil, scoop up the dirt with the curved part of the trowel.
+  5. Plant with precision: Use the trowel to create a hole that's the right size for the root ball of the plant.
+  6. Transplant with care: Use the trowel to carefully loosen the soil around the plant, then gently lift it out of the ground.
+  7. Clean your trowel: After use, clean your trowel with soap and water to prevent the spread of diseases and pests.
+- [ASSISTANT_SAID] Additional tips for using a trowel:
+  * Use your trowel to mix and blend soil amendments, like compost or fertilizer, into the soil.
+  * If you're working with rocky or compacted soil, consider using a trowel with a sturdy, sharp blade.
+  * Keep your trowel in a designated spot to prevent it from getting lost or damaged.
+- [EVENT] User is thinking of building a new raised bed for their herbs.
+- [ASSISTANT_SAID] Recommendations on the best type of wood to use for a raised bed:
+  1. Cedar: Naturally rot-resistant and durable.
+  2. Redwood: Durable and aesthetically pleasing.
+  3. Cypress: Naturally resistant to rot and decay.
+  4. Recycled plastic lumber: Low-maintenance and eco-friendly.
+- [ASSISTANT_SAID] Avoid using pressure-treated wood, pine or fir, and untreated hardwoods

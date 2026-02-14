@@ -1,0 +1,43 @@
+**Observation Log:**
+
+- [FACT] The user likes kari kambing and Mamak food.
+- [FACT] The user is located in Sydney.
+- [PREFERENCE] The user enjoys making food at home.
+- [ASSISTANT_SAID] Kari kambing is also known as mutton curry and is a popular dish in Malaysia and Singapore.
+- [ASSISTANT_SAID] Key ingredients for kari kambing include mutton or goat meat, coconut milk, and a blend of spices such as turmeric, cumin, coriander, and cardamom.
+- [ASSISTANT_CREATED] A recipe for kari kambing was provided, including the following ingredients:
+  - 1 kg mutton or goat meat, cut into small pieces
+  - 2 cups coconut milk
+  - 2 medium onions, chopped
+  - 4 cloves garlic, minced
+  - 2 tablespoons curry powder
+  - 1 teaspoon ground turmeric
+  - 1 teaspoon ground cumin
+  - 1 teaspoon ground coriander
+  - 1/2 teaspoon ground cardamom
+  - 1/2 teaspoon ground cinnamon
+  - 1/2 teaspoon ground cloves
+  - Salt and black pepper, to taste
+  - 2 tablespoons vegetable oil
+  - 2 cups water
+  - Fresh cilantro, for garnish
+- [ASSISTANT_CREATED] Instructions for making kari kambing were provided:
+  1. Heat oil and sauté onions and garlic until softened and fragrant.
+  2. Add mutton or goat meat and cook until browned on all sides.
+  3. Add coconut milk, water, and spices; stir well.
+  4. Bring to a boil, then reduce heat and simmer for about 1 1/2 hours.
+  5. Season with salt and black pepper to taste.
+  6. Garnish with fresh cilantro and serve with steamed rice or roti.
+- [ASSISTANT_SAID] Mamak refers to Indian Muslim food and is popular in Malaysia and Singapore.
+- [ASSISTANT_SAID] Mamak stalls offer a variety of dishes such as roti canai, nasi lemak, and teh tarik.
+- [ASSISTANT_CREATED] A recipe for roti canai was provided, including the following ingredients:
+  - 2 cups all-purpose flour
+  - 1 teaspoon salt
+  - 1/2 teaspoon sugar
+  - 1/4 teaspoon baking powder
+  - 1/4 cup ghee or vegetable oil
+  - 1 cup lukewarm water
+- [ASSISTANT_CREATED] Instructions for making roti canai were provided:
+  1. Combine flour, salt, sugar, and baking powder in a bowl.
+  2. Add ghee or oil and mix until a ball forms.
+  3. Gradually add water and knead for about 10 minutes

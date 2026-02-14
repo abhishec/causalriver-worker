@@ -1,0 +1,19 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/29 (Mon) 17:21  
+[FACT] User is interested in blockchain technology and its mechanisms.  
+[USER_SAID] User asked why miners run “full nodes” that keep track of the entire blockchain whereas Bob the merchant can get away with a “lite node” that implements “simplified payment verification,” needing to examine only the last few blocks.  
+[ASSISTANT_SAID] Assistant explained that miners run full nodes to verify and add new transactions to the blockchain, validating every transaction in a block and checking adherence to consensus rules.  
+[ASSISTANT_SAID] Assistant stated that Bob the merchant can use a "lite node" that implements Simplified Payment Verification (SPV) to verify transactions quickly and efficiently by only downloading and verifying the headers of the most recent blocks.  
+[USER_SAID] User inquired if a malicious ISP completely controls a user’s connections, can it launch a double-spend attack against the user and how much computational effort would this take.  
+[ASSISTANT_SAID] Assistant confirmed that a malicious ISP could launch a double-spend attack if it controls a user's connections, explaining the process of sending a transaction to a merchant while simultaneously broadcasting a conflicting transaction.  
+[ASSISTANT_SAID] Assistant noted that the attacker would need to control a significant portion of the network's mining power to create blocks more quickly than the rest of the network to reverse the original transaction.  
+[ASSISTANT_SAID] Assistant mentioned that launching such an attack would require significant computational effort and resources, as well as maintaining control over the user's connection for an extended period.  
+[USER_SAID] User asked why Bob the merchant checks how many confirmations a transaction has received instead of computing the difference in length between two chains.  
+[ASSISTANT_SAID] Assistant explained that Bob checks the number of confirmations because it provides a quick and reliable way to determine whether the transaction has been confirmed on the longest chain, making it unlikely to be reversed.  
+[USER_SAID] User stated that even when all nodes are honest, blocks will occasionally get orphaned if two miners discover blocks nearly simultaneously.  
+[ASSISTANT_SAID] Assistant confirmed that blocks can get orphaned due to simultaneous block discovery and explained the process of chain reorganization where the network converges on a single chain.  
+[USER_SAID] User asked what determines whose block will end up on the consensus branch.  
+[ASSISTANT_SAID] Assistant stated that the block that ends up on the consensus branch is determined by the consensus algorithm, specifically the proof-of-work (PoW) mechanism in Bitcoin.  
+[ASSISTANT_SAID] Assistant explained that the longest chain, which represents the most accumulated work, is considered the valid chain.  
+[USER_SAID]

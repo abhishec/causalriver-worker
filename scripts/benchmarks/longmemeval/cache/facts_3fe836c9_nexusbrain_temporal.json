@@ -1,0 +1,93 @@
+{
+  "answer_1bb63ea5_1": [
+    {
+      "fact": "User is looking to buy a house.",
+      "type": "event",
+      "entities": [
+        "house"
+      ]
+    },
+    {
+      "fact": "User recently got pre-approved for a mortgage.",
+      "type": "event",
+      "entities": [
+        "mortgage"
+      ]
+    },
+    {
+      "fact": "User can borrow up to $350,000.",
+      "type": "personal",
+      "entities": [
+        "$350,000"
+      ]
+    },
+    {
+      "fact": "User expects to pay around $1,664 per month for mortgage payments.",
+      "type": "opinion",
+      "entities": [
+        "$1,664"
+      ]
+    },
+    {
+      "fact": "User is interested in learning about different types of mortgage insurance.",
+      "type": "preference",
+      "entities": [
+        "mortgage insurance"
+      ]
+    }
+  ],
+  "answer_1bb63ea5_2": [
+    {
+      "fact": "User has recently bought a house",
+      "type": "event",
+      "entities": [
+        "house"
+      ]
+    },
+    {
+      "fact": "User's house final sale price was $325,000",
+      "type": "personal",
+      "entities": [
+        "$325,000"
+      ]
+    },
+    {
+      "fact": "User thinks the sale price is a great deal",
+      "type": "opinion",
+      "entities": [
+        "great deal"
+      ]
+    },
+    {
+      "fact": "User's subdivision has a community pool and playground",
+      "type": "personal",
+      "entities": [
+        "community pool",
+        "playground",
+        "subdivision"
+      ]
+    },
+    {
+      "fact": "User is looking for information on home maintenance costs",
+      "type": "preference",
+      "entities": [
+        "home maintenance costs"
+      ]
+    },
+    {
+      "fact": "User is interested in budgeting for potential repairs",
+      "type": "preference",
+      "entities": [
+        "budgeting",
+        "repairs"
+      ]
+    },
+    {
+      "fact": "User is inquiring about the average cost of homeowner's insurance",
+      "type": "preference",
+      "entities": [
+        "homeowner's insurance"
+      ]
+    }
+  ]
+}

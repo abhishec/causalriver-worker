@@ -1,0 +1,28 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/30 (Tue) 14:44  
+[USER] The user is looking for new TED Talks to watch.  
+[USER] The user re-watched some TED Talks they had bookmarked recently, including two talks on climate change and sleep.  
+[USER] The user is interested in recommendations for talks about AI and machine learning.  
+[ASSISTANT_SAID] The assistant recommended the following TED Talks on AI and machine learning:  
+[ASSISTANT_SAID] 1. "How AI is changing the way we live and work" by Kai-Fu Lee  
+[ASSISTANT_SAID] 2. "How to prepare for the AI-driven job market" by Matt Beane  
+[ASSISTANT_SAID] 3. "The future of artificial intelligence" by Nick Bostrom  
+[ASSISTANT_SAID] 4. "Machine learning's amazing capabilities and terrifying possibilities" by Jeremy Howard  
+[ASSISTANT_SAID] 5. "What AI reveals about humans" by Shyam Sankar  
+[ASSISTANT_SAID] 6. "The AI that learns like a child" by Josh Tenenbaum  
+[ASSISTANT_SAID] 7. "How AI can enhance our humanity" by Fei-Fei Li  
+[ASSISTANT_SAID] 8. "The dark side of AI" by Zeynep Tufekci  
+[ASSISTANT_SAID] 9. "The AI that beats humans at games" by Demis Hassabis  
+[ASSISTANT_SAID] 10. "The future of work: Robots, AI and automation" by Andrew Ng  
+[USER] The user expressed interest in watching the talks on the future of work and the dark side of AI.  
+[USER] The user asked for more information about the AI-driven job market and what kind of skills are in demand.  
+[ASSISTANT_SAID] The assistant provided key points regarding the AI-driven job market:  
+[ASSISTANT_SAID] - Job displacement due to AI and automation could lead to the loss of up to 800 million jobs worldwide by 2030.  
+[ASSISTANT_SAID] - New job creation is expected, with a prediction of 133 million new jobs emerging by 2022.  
+[ASSISTANT_SAID] - In-demand skills include:  
+[ASSISTANT_SAID] 1. Data Science and Analytics  
+[ASSISTANT_SAID] 2. Machine Learning and AI Development  
+[ASSISTANT_SAID] 3. Creative Problem-Solving  
+[ASSISTANT_SAID] 4. Critical Thinking and Analysis  
+[ASSISTANT_SAID] 5.

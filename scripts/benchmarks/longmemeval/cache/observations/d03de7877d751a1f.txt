@@ -1,0 +1,28 @@
+**Observation Log:**
+
+- [FACT] User is considering pursuing a Master's degree in Data Science.
+- [EVENT] User's parents immigrated to the US from China on the same day as the conversation (2023/05/23).
+- [RELATIONSHIP] User's parents are mentioned as having immigrated to the US.
+- [ASSISTANT_SAID] Assistant congratulated the user on their family's immigration anniversary and expressed excitement to help with research on Master's programs in Data Science.
+- [ASSISTANT_SAID] Assistant provided a list of top universities with strong Data Science programs in the US, including:
+  1. Stanford University (California)
+  2. Carnegie Mellon University (Pennsylvania)
+  3. Massachusetts Institute of Technology (MIT) (Massachusetts)
+  4. University of California, Berkeley (California)
+  5. Harvard University (Massachusetts)
+  6. University of Washington (Washington)
+  7. New York University (NYU) (New York)
+  8. University of Illinois at Urbana-Champaign (Illinois)
+  9. Georgia Institute of Technology (Georgia)
+  10. University of Michigan (Michigan)
+- [ASSISTANT_SAID] Assistant recommended researching each program thoroughly, considering factors such as curriculum, faculty expertise, industry connections, location, admissions requirements, and post-graduation outcomes.
+- [ASSISTANT_SAID] Assistant mentioned online programs offered by Johns Hopkins University, University of Chicago, and University of Virginia for more flexibility and accessibility.
+- [FACT] User is interested in exploring online programs for a Master's in Data Science.
+- [ASSISTANT_SAID] Assistant provided details about the online Master of Science in Data Science (MSDS) at Johns Hopkins University, including:
+  - Curriculum consists of 10 courses (30 credits) that can be completed in 2-3 years.
+  - Courses include Introduction to Data Science, Statistical Computing and Graphics, Regression and Time Series, Machine Learning, Data Visualization, Database Systems, Big Data Processing with Hadoop, Data Science Capstone I, Data Science Capstone II, and an elective.
+- [ASSISTANT_SAID] Assistant noted differences between the online and on-campus programs, including flexibility, delivery format, absence of a traditional practicum, limited elective selection, and different admissions requirements.
+- [ASSISTANT_SAID] Assistant highlighted key benefits of the online MSDS program, including convenience, accessibility, prestige, and career support.
+- [ASSISTANT_SAID] Assistant provided information on admissions requirements and tuition for the online MSDS program, stating it costs around $53,000-$60,000 total.
+- [FACT] User inquired about average salaries for data science graduates from top universities.
+- [ASSISTANT_SAID] Assistant provided average starting and mid-career salary ranges for data science graduates from various universities, including:

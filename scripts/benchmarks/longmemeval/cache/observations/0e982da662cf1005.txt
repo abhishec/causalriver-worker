@@ -1,0 +1,26 @@
+**Observation Log:**
+
+[FACT] User is located in zip code 95123.  
+[EVENT] User is considering getting a new fitness class membership.  
+[EVENT] User recently purchased a new swim cap and goggles from Speedo.  
+[PREFERENCE] User is particularly interested in lap swimming.  
+[PREFERENCE] User prefers to get exercise out of the way early in the day.  
+[ASSISTANT_SAID] Assistant congratulated the user on their new swim cap and goggles.  
+[ASSISTANT_SAID] Assistant requested the user's location or zip code to provide gym recommendations.  
+[ASSISTANT_SAID] Assistant asked if the user is looking for a specific type of swim class or other amenities in a gym.  
+[ASSISTANT_SAID] Assistant provided a list of gyms in the 95123 area that offer lap swimming with a 25-yard pool and morning swim sessions:  
+1. **24 Hour Fitness - West San Jose**: 25-yard indoor lap pool, morning sessions from 5:30 AM to 8:00 AM, address: 5353 Almaden Expy, San Jose, CA 95123.  
+2. **Bay Club West Valley**: 25-yard outdoor lap pool, morning sessions from 6:00 AM to 8:00 AM, address: 1975 Hillsdale Ave, San Jose, CA 95123.  
+3. **Spartan Gym**: 25-yard indoor lap pool, morning sessions from 5:30 AM to 7:30 AM, address: 1555 Berger Dr, San Jose, CA 95123.  
+4. **YMCA of Silicon Valley - West Valley Branch**: 25-yard indoor lap pool, morning sessions from 5:30 AM to 8:00 AM, address: 5583 Almaden Expy, San Jose, CA 95123.  
+[ASSISTANT_SAID] Assistant advised the user to call ahead or check the gym's website to confirm pool hours and availability.  
+[FACT] Bay Club West Valley features a 25-yard outdoor lap pool.  
+[ASSISTANT_SAID] Assistant provided information on Bay Club West Valley's membership options and pricing:  
+- **Full Membership**: $149/month (initiation fee: $200).  
+- **Swim Membership**: $99/month (initiation fee: $150).  
+- **Fitness Membership**: $79/month (initiation fee: $100).  
+[ASSISTANT_SAID] Assistant mentioned discounts available at Bay Club West Valley:  
+- **Student Discount**: 10% off for students with a valid ID.  
+- **Senior Discount**: 10% off for seniors (65+ years old).  
+- **Couple's Discount**: 10% off for couples who join together.  
+- **Corporate Discount**: Discounts

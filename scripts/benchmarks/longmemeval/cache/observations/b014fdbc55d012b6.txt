@@ -1,0 +1,18 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/03/15 (Wed) 06:05  
+[EVENT] User is looking for new BBQ sauce recipes to try out.  
+[PREFERENCE] User is experimenting with making their own BBQ sauce from scratch and is always looking to improve.  
+[ASSISTANT_SAID] Recipe 1: Spicy Pineapple BBQ Sauce - 1 cup ketchup, 1/2 cup pineapple juice, 1/4 cup brown sugar, 2 tablespoons apple cider vinegar, 1 teaspoon smoked paprika, 1/2 teaspoon ground cumin, 1/4 teaspoon cayenne pepper, salt and pepper to taste.  
+[ASSISTANT_SAID] Recipe 2: Kansas City-Style BBQ Sauce - 1 cup ketchup, 1/2 cup molasses, 1/4 cup brown sugar, 2 tablespoons apple cider vinegar, 2 tablespoons Worcestershire sauce, 1 teaspoon smoked paprika, 1 teaspoon garlic powder, salt and pepper to taste.  
+[ASSISTANT_SAID] Recipe 3: Alabama-Style White BBQ Sauce - 1 cup mayonnaise, 1/2 cup plain Greek yogurt, 1/4 cup chopped fresh dill, 2 tablespoons apple cider vinegar, 1 tablespoon Dijon mustard, 1/2 teaspoon garlic powder, salt and pepper to taste.  
+[ASSISTANT_SAID] Recipe 4: Chipotle BBQ Sauce - 1 cup ketchup, 1/2 cup chipotle peppers in adobo sauce, 1/4 cup brown sugar, 2 tablespoons apple cider vinegar, 1 teaspoon smoked paprika, 1/2 teaspoon ground cumin, salt and pepper to taste.  
+[ASSISTANT_SAID] Recipe 5: Sweet and Smoky BBQ Sauce - 1 cup ketchup, 1/2 cup honey, 1/4 cup apple cider vinegar, 2 tablespoons Dijon mustard, 1 teaspoon smoked paprika, 1/2 teaspoon ground cinnamon, salt and pepper to taste.  
+[ASSISTANT_SAID] The assistant hopes these recipes inspire the user to create delicious BBQ sauces to pair with smoked meats.  
+[EVENT] User just got a smoker today and is excited to experiment with different types of wood and meats.  
+[PREFERENCE] User is thinking of trying out a mix of hickory and apple wood, as they have heard they pair well with pork and beef.  
+[ASSISTANT_SAID] Recommended meat and wood pairings:  
+[ASSISTANT_SAID] For Pork: Hickory and Apple Wood, Cherry Wood, Pecan Wood.  
+[ASSISTANT_SAID] For Beef: Post Oak Wood, Mesquite Wood, Oak Wood.  
+[ASSISTANT_SAID] For Chicken and Sausages: Apple Wood, Cherry Wood, Maple Wood.  
+[ASSISTANT

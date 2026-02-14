@@ -1,0 +1,26 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/22 (Mon) 05:25  
+[FACT] User is upgrading their home network to Wi-Fi 6.  
+[PREFERENCE] User is looking for routers and access points compatible with smart home devices, specifically a thermostat.  
+[ASSISTANT_SAID] Wi-Fi 6 is also known as 802.11ax and offers faster speeds, better performance, and improved capacity.  
+[ASSISTANT_SAID] Recommended routers:  
+[ASSISTANT_SAID] 1. ASUS RT-AX88U: Supports a wide range of smart home devices, strong signal, excellent range.  
+[ASSISTANT_SAID] 2. Netgear Nighthawk RAX80: Supports smart home devices from Samsung SmartThings, Wink, and IFTTT, strong signal, good range.  
+[ASSISTANT_SAID] 3. TP-Link Archer AX6000: More affordable, great performance, compatible with smart home devices from Philips Hue, LIFX, and Belkin Wemo.  
+[ASSISTANT_SAID] Recommended access points:  
+[ASSISTANT_SAID] 1. Ubiquiti UniFi 6 Lite: Compact, affordable, supports Wi-Fi 6, compatible with a wide range of smart home devices.  
+[ASSISTANT_SAID] 2. Linksys Velop MX10: Tri-band, designed for whole-home coverage, compatible with smart home devices from August, Nest, and Philips Hue.  
+[ASSISTANT_SAID] 3. Netgear EX7300: Wi-Fi 6 range extender that can be used as an access point, supports smart home devices from Samsung SmartThings and Wink.  
+[ASSISTANT_SAID] Key features to look for:  
+[ASSISTANT_SAID] 1. Dual-band or tri-band support.  
+[ASSISTANT_SAID] 2. MU-MIMO technology.  
+[ASSISTANT_SAID] 3. Smart home device support.  
+[ASSISTANT_SAID] 4. Mesh networking for larger homes.  
+[ASSISTANT_SAID] User should double-check compatibility of specific smart home devices with the chosen router or access point.  
+[EVENT] User is setting up automations with their smart thermostat and Google Home.  
+[ASSISTANT_SAID] Steps to set up routines in Google Home:  
+[ASSISTANT_SAID] 1. Open the Google Home app.  
+[ASSISTANT_SAID] 2. Tap on the "+" icon to create a new routine.  
+[ASSISTANT_SAID] 3. Choose a trigger (voice command, time of day, sunrise/sunset, location).  
+[ASSISTANT_SAID

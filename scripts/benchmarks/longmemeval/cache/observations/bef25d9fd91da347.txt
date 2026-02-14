@@ -1,0 +1,45 @@
+**Observation Log:**
+
+- [FACT] The user has been attending salsa classes at DanceFever studio.
+- [TEMPORAL] The user attends salsa classes twice a week, every Tuesday and Thursday, from 7-8:30 pm.
+- [PREFERENCE] The user has been listening to a lot of salsa music lately.
+- [PREFERENCE] The user is looking for dance workout playlists on Spotify.
+- [EVENT] The user has a salsa class tonight.
+- [CHANGE] The user missed their practice session last week because they weren't feeling well.
+- [EVENT] The user plans to try to make up their missed practice session this weekend.
+- [PREFERENCE] The user is looking for new outfits to wear to dance class.
+- [ASSISTANT_SAID] The assistant recommended several popular dance workout playlists on Spotify, including:
+  - "Cardio Kickstart"
+  - "Dance Workout"
+  - "Workout Motivation"
+  - "Dance Fitness" by Fitness Blender
+  - "Dance Workout Party" by DJ Khaled
+  - "Get Moving" by PopSugar Fitness
+  - "Hip Hop Workout" by HipHopDX
+  - "EDM Workout" by EDM.com
+  - "Latin Dance Workout" by Latin Music
+  - "Peloton Digital Dance"
+  - "Nike Training Club Dance"
+  - "Zumba Fitness"
+- [ASSISTANT_SAID] The assistant suggested looking for dance studios that offer classes in various styles, including:
+  - Hip-Hop/Rap
+  - Contemporary/Lyrical
+  - Ballet
+  - Afrobeats
+  - K-Pop
+- [ASSISTANT_SAID] The assistant provided tips for practicing dancing with and without a mirror, including:
+  - Practicing with a mirror helps with technique correction, visual feedback, and self-awareness.
+  - Practicing without a mirror helps with internalization of movements, proprioception, and reduced self-consciousness.
+- [ASSISTANT_SAID] The assistant offered tips to improve flexibility and balance, including:
+  - Stretch regularly and hold stretches longer.
+  - Incorporate yoga or Pilates.
+  - Practice single-leg exercises and heel-to-toe walking for balance.
+  - Strengthen core muscles.
+- [ASSISTANT_SAID] The assistant recommended dance-inspired fashion and dancewear, including:
+  - Brands like Capezio, Bloch, and Mirella.
+  - Athleisure wear from Lululemon, Athleta, or Nike.
+  - Flowy tops and bottoms, skirts, and dresses for salsa.
+  - Dance-inspired accessories.
+- [ASSISTANT_SAID] The assistant suggested that the user should wear what makes them feel comfortable, dress in layers, and choose the right shoes for salsa.
+- [PREFERENCE] The user is considering trying hip hop classes soon.
+- [ASSISTANT_SAID] The assistant

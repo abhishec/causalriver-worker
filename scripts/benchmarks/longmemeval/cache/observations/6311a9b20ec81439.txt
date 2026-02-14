@@ -1,0 +1,31 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/29 (Mon) 06:15  
+[USER] User is working on a game design document for a weapon system.  
+[ASSISTANT_SAID] The weapon system allows players to arm themselves with a variety of tools for combat.  
+[ASSISTANT_SAID] Each weapon has unique move sets and abilities for attacking enemies and defending.  
+[ASSISTANT_SAID] Players unlock new weapons as they progress through the game.  
+[ASSISTANT_SAID] Players can enhance weapons by socketing Manacite into them, providing additional skills and passive effects.  
+[ASSISTANT_SAID] Players can adapt to different combat situations and use different Mana types strategically.  
+[ASSISTANT_CREATED] Weapon Types table created with the following details:  
+- Daggers - Unlock Method: Tutorial  
+- Sword & Shield - Unlock Method: Tutorial  
+- Bows - Unlock Method: Tutorial  
+- Spears - Unlock Method: Tutorial  
+- Manaball - Unlock Method: Tutorial  
+- Twinblades - Unlock Method: Story Progression  
+- Fists - Unlock Method: Story Progression  
+- Flails - Unlock Method: Story Progression  
+- Gunbrella - Unlock Method: Story Progression  
+- Manamasher - Unlock Method: Story Progression  
+[ASSISTANT_SAID] Players press the primary attack key to trigger a seamless animation of the weapon's move set.  
+[ASSISTANT_SAID] Players can use a modifier key to modify an attack in progress, depending on the Manacite socketed into the weapon.  
+[ASSISTANT_SAID] Players use the scroll key to switch between different Mana types.  
+[ASSISTANT_SAID] Attacking with a weapon charges the Manacite bar associated with the current Mana type.  
+[ASSISTANT_SAID] If using Blue Mana, attacking charges the Blue Manacite bar; if using Neutral Mana, all Manacite bars charge equally.  
+[ASSISTANT_SAID] When the Manacite bar is fully charged, players can use the Modifier key to activate the most fully charged Manacite ability.  
+[ASSISTANT_SAID] Abilities are arranged on the bar in the order they were socketed.  
+[ASSISTANT_SAID] Manacite are consumable items that can be socketed into weapons for additional skills or passive effects, up to a maximum of 5.  
+[ASSISTANT_SAID] Socketed Manacite allows weapons to make attacks in Neutral and the Mana types of the socketed Manacite.  
+[ASSISTANT_SAID] Players can cycle through their available Mana types by scrolling.  
+[ASSISTANT_SAID] Cycling Mana types can be done both in-combat and

@@ -1,0 +1,121 @@
+{
+  "answer_5328c3c2_1": [
+    {
+      "fact": "User is planning a trip to Hawaii",
+      "type": "event",
+      "entities": [
+        "Hawaii"
+      ]
+    },
+    {
+      "fact": "User recently got a new Samsung Galaxy S22",
+      "type": "personal",
+      "entities": [
+        "Samsung Galaxy S22"
+      ]
+    },
+    {
+      "fact": "User purchased the phone from Best Buy at the mall on February 20th",
+      "type": "event",
+      "entities": [
+        "Best Buy",
+        "February 20th"
+      ]
+    },
+    {
+      "fact": "User saved around $100 with a student discount on the phone",
+      "type": "personal",
+      "entities": [
+        "student discount"
+      ]
+    },
+    {
+      "fact": "User traded in their old iPhone 12 for an additional $200 off",
+      "type": "personal",
+      "entities": [
+        "iPhone 12"
+      ]
+    },
+    {
+      "fact": "User is excited to capture great shots with the phone's camera",
+      "type": "opinion",
+      "entities": [
+        "camera"
+      ]
+    },
+    {
+      "fact": "User is considering visiting Haleakala National Park on Maui",
+      "type": "event",
+      "entities": [
+        "Haleakala National Park",
+        "Maui"
+      ]
+    }
+  ],
+  "answer_5328c3c2_2": [
+    {
+      "fact": "User is planning a trip to Hawaii",
+      "type": "event",
+      "entities": [
+        "Hawaii"
+      ]
+    },
+    {
+      "fact": "User has a new laptop, Dell XPS 13",
+      "type": "personal",
+      "entities": [
+        "Dell XPS 13"
+      ]
+    },
+    {
+      "fact": "User has a new smartphone, Samsung Galaxy S22",
+      "type": "personal",
+      "entities": [
+        "Samsung Galaxy S22"
+      ]
+    },
+    {
+      "fact": "User pre-ordered the laptop on January 28th",
+      "type": "event",
+      "entities": [
+        "January 28th"
+      ]
+    },
+    {
+      "fact": "User's laptop arrived on February 25th",
+      "type": "event",
+      "entities": [
+        "February 25th"
+      ]
+    },
+    {
+      "fact": "User's laptop was delayed from the original expected arrival date of February 11th",
+      "type": "event",
+      "entities": [
+        "February 11th"
+      ]
+    },
+    {
+      "fact": "User bought a portable power bank, Anker PowerCore 20000, from Amazon on February 13th",
+      "type": "event",
+      "entities": [
+        "Anker PowerCore 20000",
+        "February 13th"
+      ]
+    },
+    {
+      "fact": "User's power bank has been working great with their phone and laptop",
+      "type": "opinion",
+      "entities": [
+        "Anker PowerCore 20000",
+        "Samsung Galaxy S22",
+        "Dell XPS 13"
+      ]
+    },
+    {
+      "fact": "User is considering whether to pack another power bank for the trip",
+      "type": "preference",
+      "entities": []
+    }
+  ]
+}

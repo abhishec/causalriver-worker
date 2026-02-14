@@ -1,0 +1,116 @@
+{
+  "answer_8c0712af_1": [
+    {
+      "fact": "User enjoys mythology-inspired books",
+      "type": "preference",
+      "entities": [
+        "mythology-inspired books"
+      ]
+    },
+    {
+      "fact": "User has read 'The Song of Achilles'",
+      "type": "personal",
+      "entities": [
+        "The Song of Achilles"
+      ]
+    },
+    {
+      "fact": "User is looking for book recommendations beyond 'The Song of Achilles'",
+      "type": "preference",
+      "entities": [
+        "book recommendations",
+        "The Song of Achilles"
+      ]
+    },
+    {
+      "fact": "User is currently reading 'The Nightingale' by Kristin Hannah",
+      "type": "personal",
+      "entities": [
+        "The Nightingale",
+        "Kristin Hannah"
+      ]
+    },
+    {
+      "fact": "User put down 'The Nightingale' temporarily because it was getting too emotional",
+      "type": "opinion",
+      "entities": [
+        "The Nightingale"
+      ]
+    },
+    {
+      "fact": "User is part of a book club",
+      "type": "relationship",
+      "entities": [
+        "book club"
+      ]
+    },
+    {
+      "fact": "User wants to finish 'The Nightingale' in time for the next book club discussion",
+      "type": "event",
+      "entities": [
+        "The Nightingale",
+        "book club discussion"
+      ]
+    },
+    {
+      "fact": "User reads during their daily commute",
+      "type": "personal",
+      "entities": [
+        "daily commute"
+      ]
+    }
+  ],
+  "answer_8c0712af_2": [
+    {
+      "fact": "User enjoys reading historical fiction",
+      "type": "preference",
+      "entities": [
+        "historical fiction"
+      ]
+    },
+    {
+      "fact": "User recently finished reading 'The Seven Husbands of Evelyn Hugo'",
+      "type": "event",
+      "entities": [
+        "The Seven Husbands of Evelyn Hugo"
+      ]
+    },
+    {
+      "fact": "User recently finished reading 'The Nightingale' by Kristin Hannah",
+      "type": "event",
+      "entities": [
+        "The Nightingale",
+        "Kristin Hannah"
+      ]
+    },
+    {
+      "fact": "User found 'The Nightingale' amazing",
+      "type": "opinion",
+      "entities": [
+        "The Nightingale"
+      ]
+    },
+    {
+      "fact": "User is interested in audiobooks",
+      "type": "preference",
+      "entities": [
+        "audiobooks"
+      ]
+    },
+    {
+      "fact": "User enjoys listening to books during morning runs",
+      "type": "event",
+      "entities": [
+        "morning runs"
+      ]
+    },
+    {
+      "fact": "User is particularly interested in 'The Alice Network' and 'The Women in the Castle'",
+      "type": "preference",
+      "entities": [
+        "The Alice Network",
+        "The Women in the Castle"
+      ]
+    }
+  ]
+}

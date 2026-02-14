@@ -1,0 +1,19 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/04/18 (Tue) 12:53  
+[FACT] The user has been grilling a lot lately.  
+[EVENT] The user mentioned that steaks were one of the main options at a family gathering.  
+[ASSISTANT_SAID] BBQ sauce recipes are a great topic, and the assistant is happy to help with new ideas.  
+[ASSISTANT_SAID] Steaks are always a crowd-pleaser.  
+[ASSISTANT_CREATED] The assistant provided five unique BBQ sauce recipes:  
+[ASSISTANT_CREATED] 1. Sweet and Smoky BBQ Sauce: 1 cup ketchup, 1/2 cup brown sugar, 2 tbsp honey, 2 tbsp apple cider vinegar, 1 tsp smoked paprika, 1 tsp ground cumin, 1/2 tsp chipotle peppers in adobo sauce.  
+[ASSISTANT_CREATED] 2. Korean-Style BBQ Sauce (Gochujang BBQ Sauce): 1 cup ketchup, 1/2 cup gochujang, 2 tbsp soy sauce, 2 tbsp brown sugar, 2 tbsp rice vinegar, 1 tsp garlic, 1 tsp ginger.  
+[ASSISTANT_CREATED] 3. Jamaican Jerk BBQ Sauce: 1 cup ketchup, 1/2 cup jerk seasoning, 2 tbsp allspice, 1 tsp thyme, 1 tsp cinnamon, 1/2 tsp cayenne pepper, 2 tbsp lime juice.  
+[ASSISTANT_CREATED] 4. Alabama-Style White BBQ Sauce: 1 cup mayonnaise, 1/2 cup sour cream, 2 tbsp apple cider vinegar, 1 tsp garlic powder, 1 tsp onion powder, 1/2 tsp black pepper.  
+[ASSISTANT_CREATED] 5. Spicy Mango BBQ Sauce: 1 cup ketchup, 1/2 cup mango puree, 2 tbsp honey, 1 tsp ground cumin, 1 tsp smoked paprika, 1/2 tsp cayenne pepper, 2 tbsp lime juice.  
+[PREFERENCE] The user expressed interest in trying out the Korean-Style BBQ Sauce.  
+[ASSISTANT_SAID] Gochujang paste is a staple ingredient in Korean cuisine and is a game-changer in BBQ sauces.  
+[ASSISTANT_SAID] Gochujang is a Korean chili paste made from fermented soybeans, rice, and red chili peppers.  
+[ASSISTANT_SAID] Gochujang has a rich, complex flavor profile that's both sweet and savory, with a slow-building heat.  
+[ASSISTANT_SAID] Gochujang is used in marinades, BBQ sauces, dipping sauces, and glazes in Korean BBQ.  
+[ASSISTANT_SAID] Tips for using gochujang include starting with a small

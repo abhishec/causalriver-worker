@@ -1,0 +1,33 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/04/13 (Thu) 10:42
+- [USER] User requested a list of top-ranked business schools in Europe.
+- [ASSISTANT_SAID] Assistant provided a list of top-ranked business schools in Europe:
+  1. INSEAD (France)
+  2. London Business School (UK)
+  3. HEC Paris (France)
+  4. IMD Business School (Switzerland)
+  5. IE Business School (Spain)
+  6. Saïd Business School, University of Oxford (UK)
+  7. Cambridge Judge Business School (UK)
+  8. Rotterdam School of Management, Erasmus University (Netherlands)
+  9. ESADE Business School (Spain)
+  10. SDA Bocconi School of Management (Italy)
+- [USER] User asked for more information about the application process and requirements for the top-ranked business schools.
+- [ASSISTANT_SAID] Assistant provided general guidelines for the application process and requirements for each business school, including:
+  - INSEAD: Essays, resume, transcripts, GMAT/GRE scores, two recommendation letters, application fee, interviews by invitation.
+  - London Business School: Essays, resume, academic transcripts, GMAT/GRE scores, two references, on-campus or off-campus interview.
+  - HEC Paris: Essays, transcripts, GMAT/GRE scores, two letters of recommendation, admissions interview.
+  - IMD Business School: Essays, resume, transcripts, GMAT/GRE scores, two recommendation letters, interview.
+  - IE Business School: Essays, transcripts, GMAT/GRE scores, two letters of recommendation, video interview.
+  - Saïd Business School, University of Oxford: Essays, transcripts, personal statement, GMAT/GRE scores, two references, interview after initial review.
+  - Cambridge Judge Business School: Essays, transcripts, GMAT/GRE scores, two recommendation letters, interview.
+  - Rotterdam School of Management, Erasmus University: Essays, transcripts, GMAT/GRE scores, two recommendation letters, interview.
+  - ESADE Business School: Essays, transcripts, GMAT/GRE scores, two letters of recommendation, interview.
+  - SDA Bocconi School of Management: Essays, transcripts, GMAT/GRE scores, two recommendation letters, interview.
+- [USER] User inquired about scholarships available for the business schools.
+- [ASSISTANT_SAID] Assistant provided information on scholarship opportunities for each business school:
+  - INSEAD: Scholarships for need and merit-based applicants, including specific scholarships for women and social impact.
+  - London Business School: Scholarships based on merit, financial need, region, and gender.
+  - HEC Paris: Scholarships based on academic excellence, geographic origin, and financial need.
+  - IMD Business School: Need and merit

@@ -1,0 +1,41 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/20 (Sat) 15:31  
+[USER] The user is discussing integral LQR control and its application in control systems.  
+[USER] The user explains that the LQR controller uses proportional state feedback and mentions the need for integral feedback in some applications.  
+[USER] The user describes augmenting the system with a new state q(t) to introduce integral feedback into an LQR setting.  
+[USER] The user provides a system equation:  
+x ̇ =  
+2  
+4  
+010  
+001  
+1  
+2 1  
+3  
+5 x(t) +  
+2  
+4  
+0  
+0  
+1  
+3  
+5 u(t) +  
+2  
+4  
+0  
+0  
+1  
+3  
+5 r(t)  
+where r(t) = {1, t; 0, otherwise} is a step disturbance input.  
+[ASSISTANT_SAID] The assistant reiterates that the LQR controller uses proportional state feedback and the necessity of adding integral feedback for certain applications.  
+[ASSISTANT_SAID] The assistant confirms the introduction of integral feedback by augmenting the system with a new state variable q(t) and applying LQR synthesis to the augmented system.  
+[ASSISTANT_SAID] The assistant restates the provided system equation and explains that it could be controlled by LQR with integral feedback.  
+[USER] The user asks to consider the exponentially weighted performance functional J[u] = ∫₀¹ e²↵t (xT(τ)CT Cx(τ) + uT(τ)u(τ)) dτ, where ↵ > 0, for the system x ̇(t) = Ax + Bu with output y(t) = Cx(t).  
+[USER] The user requests to show that the optimal controller is u = -BT P↵x, where P↵ is the stabilizing solution to the Riccati equation.  
+[USER] The user hints to use a time-varying state transformation to make the problem resemble the classical LQR problem.  
+[ASSISTANT_SAID] The assistant explains that the performance functional J[u] measures the system's performance over time, emphasizing recent performance with the weighting factor e²↵t.  
+[ASSISTANT_SAID] The assistant describes the new state variable z(t) = e↵t x(t) and the new input variable v(t) = e↵t u(t).  
+[ASSISTANT_SAID] The assistant provides the time derivative of z(t) and the new system dynamics in terms of z(t) and v(t).  
+[ASSISTANT_SAID] The assistant states that the performance functional J[u] can be rewritten in terms of the new state and input variables.

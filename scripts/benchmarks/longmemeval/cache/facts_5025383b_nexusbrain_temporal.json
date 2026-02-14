@@ -1,0 +1,78 @@
+{
+  "answer_688f9a3f_2": [
+    {
+      "fact": "User is looking for recipe inspiration",
+      "type": "preference",
+      "entities": [
+        "recipe inspiration"
+      ]
+    },
+    {
+      "fact": "User is interested in learning more about cooking techniques",
+      "type": "preference",
+      "entities": [
+        "cooking techniques"
+      ]
+    },
+    {
+      "fact": "User has joined a few online communities related to cooking",
+      "type": "event",
+      "entities": [
+        "online communities",
+        "cooking"
+      ]
+    },
+    {
+      "fact": "User engages in discussions about recipe techniques",
+      "type": "relationship",
+      "entities": [
+        "discussions",
+        "recipe techniques"
+      ]
+    },
+    {
+      "fact": "User shares thoughts on food-related posts",
+      "type": "relationship",
+      "entities": [
+        "food-related posts"
+      ]
+    }
+  ],
+  "answer_688f9a3f_1": [
+    {
+      "fact": "User is into photography",
+      "type": "preference",
+      "entities": [
+        "photography"
+      ]
+    },
+    {
+      "fact": "User has a Canon EOS Rebel camera",
+      "type": "personal",
+      "entities": [
+        "Canon EOS Rebel"
+      ]
+    },
+    {
+      "fact": "User is mostly interested in street photography",
+      "type": "preference",
+      "entities": [
+        "street photography"
+      ]
+    },
+    {
+      "fact": "User is mostly interested in portrait photography",
+      "type": "preference",
+      "entities": [
+        "portrait photography"
+      ]
+    },
+    {
+      "fact": "User's budget for a lens is around $300-$400",
+      "type": "personal",
+      "entities": [
+        "$300-$400"
+      ]
+    }
+  ]
+}

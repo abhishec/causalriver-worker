@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[FACT] The user has been having issues with sleep lately.  
+[FACT] The user started using a humidifier in their bedroom at night about a month ago.  
+[FACT] The humidifier has been making a huge difference for the user's sinus issues.  
+[PREFERENCE] The user is looking for tips to improve their sleep.  
+[CHANGE] The user has slacked off a bit on tracking their daily steps with their Fitbit.  
+[FACT] The user has been having trouble falling asleep.  
+[FACT] The user has been using their Fitbit every day.  
+[ASSISTANT_SAID] The assistant provided 10 general tips to improve sleep quality, including establishing a consistent sleep schedule, creating a sleep-conducive environment, developing a relaxing bedtime routine, avoiding screens before bed, exercising regularly, avoiding stimulants and heavy meals before bedtime, getting morning sunlight, keeping a sleep diary, trying relaxation techniques, and limiting naps.  
+[ASSISTANT_SAID] The assistant suggested exploring environmental factors affecting sleep, such as mattress comfort, noise sources, and bedding quality.  
+[FACT] The user has been using a new blood pressure monitor, the Omron EVOLV.  
+[PREFERENCE] The user is happy with the Omron EVOLV blood pressure monitor so far.  
+[ASSISTANT_SAID] The assistant provided tips for accurate blood pressure readings, including using the monitor at the same time every day, sitting correctly, using the correct cuff size, avoiding eating or drinking before readings, and taking multiple readings.  
+[FACT] The user plans on taking blood pressure readings about 3 times a week.  
+[CHANGE] The user has noticed that their blood pressure readings have been a bit inconsistent.  
+[FACT] The user's first reading with the Omron EVOLV was a bit high, but the next reading was back to normal.  
+[PREFERENCE] The user hopes to get a better sense of their average blood pressure over time.  
+[ASSISTANT_SAID] The assistant mentioned that blood pressure can fluctuate due to factors like time of day, physical activity, diet, and medications.  
+[ASSISTANT_SAID] The assistant suggested keeping a log or using an app to track blood pressure readings to identify patterns, detect changes, and share with a doctor.  
+[TEMPORAL] The session date is 2023/05/21 (Sun) at 17:11.  
+[EVENT] The user plans to contact Fitbit support to see if they can help with a replacement band for their Fitbit.  
+[FACT] The user has been experiencing stress or anxiety that might be affecting their sleep.  
+[ASSISTANT_SAID] The assistant provided additional tips to increase physical activity, including setting a daily step goal, scheduling physical activity, finding enjoyable activities, starting small, making it convenient, getting accountability, and rewarding oneself.  
+[ASSIST

@@ -1,0 +1,57 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2021/08/20 (Fri) 03:57
+- [ASSISTANT_SAID] Harvesting social media data and housing trends with geospatial data can provide valuable insights for a real estate search portal.
+- [ASSISTANT_SAID] Analyzing social media data can help understand the preferences and behavior of potential buyers and renters.
+- [ASSISTANT_SAID] Tracking housing trends can identify which neighborhoods are growing in popularity for informed investment decisions.
+- [ASSISTANT_SAID] Example of harvesting social media data includes using APIs from platforms like Twitter, Facebook, and Instagram.
+- [ASSISTANT_SAID] Example code snippet in Python using the Tweepy library to search for tweets containing "real estate":
+  ```python
+  import tweepy
+
+  auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+  auth.set_access_token(access_token, access_token_secret)
+
+  api = tweepy.API(auth)
+
+  public_tweets = api.search(q="real estate")
+  for tweet in public_tweets:
+      print(tweet.text)
+  ```
+- [ASSISTANT_SAID] To collect data on housing trends, use publicly available data sources like the U.S. Census Bureau or the National Association of Realtors.
+- [ASSISTANT_SAID] Example code snippet in Python to retrieve data on median home prices from the U.S. Census Bureau:
+  ```python
+  import requests
+  import json
+
+  url = "https://api.census.gov/data/2017/acs/acs5/subject"
+
+  payload = {"get":"NAME,S2503_C01_001E","for":"place:*","in":"state:06"}
+
+  response = requests.get(url, params=payload)
+
+  data = response.json()
+
+  header = data[0]
+  data = data[1:]
+
+  for row in data:
+      name = row[0]
+      median_home_price = row[1]
+      print(name, median_home_price)
+  ```
+- [ASSISTANT_SAID] Automated property, tax, and mortgage calculation can enhance the real estate portal experience.
+- [ASSISTANT_SAID] Property tax calculation can be done using local government data on property tax rates.
+- [ASSISTANT_SAID] Example code snippet in Python to calculate property tax:
+  ```python
+  def calculate_property_tax(value, tax_rate):
+      return value * tax_rate
+
+  property_value = 100000
+  tax_rate = 0.01
+
+  property_tax = calculate_property_tax(property_value, tax_rate)
+  print("Property Tax:", property_tax)
+  ```
+- [ASSISTANT_SAID] Mortgage payment calculation can use an API from a financial institution to retrieve current mortgage interest rates.
+- [ASSISTANT_SAID] Example code snippet in Python

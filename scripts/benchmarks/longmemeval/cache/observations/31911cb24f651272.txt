@@ -1,0 +1,24 @@
+**Observation Log:**
+
+- [FACT] User is writing their resume.
+- [FACT] User has experience as a Product Manager at Ambroise Solutions Inc.
+- [FACT] User worked at Ambroise Solutions Inc. from 02/2015 to 11/2018.
+- [FACT] User is located in Ottawa, ON.
+- [FACT] User's experience includes working on a workforce management system for restaurants.
+- [PREFERENCE] User wants to make their resume sound better and more actionable.
+- [EVENT] User is applying for a job at ProNavigator.
+- [FACT] ProNavigator is a venture-backed insurance technology company.
+- [FACT] ProNavigator builds software that helps insurance companies boost operational efficiency, improve team satisfaction, and win more clients.
+- [FACT] ProNavigator's knowledge management system is used by more than 125 insurance organizations.
+- [ASSISTANT_SAID] Assistant expressed willingness to help improve the user's Experience section of their resume.
+- [ASSISTANT_SAID] Assistant requested the current text of the user's Experience section for review.
+- [ASSISTANT_CREATED] Assistant provided a revised version of the user's Experience section, emphasizing actionable accomplishments.
+- [ASSISTANT_CREATED] Revised Experience section includes the following details:
+  - Led the development and launch of a workforce management system for restaurants.
+  - Collaborated with marketing and development teams to gather customer feedback and create a product roadmap.
+  - Conducted market assessments and presented findings to executives.
+  - Engaged with customers to understand their needs, behaviors, and pain points.
+  - Built and maintained relationships with internal and external stakeholders.
+  - Utilized advanced prioritization skills to balance competing requirements.
+  - Managed product development projects and communicated status updates to leadership.
+- [TEMPORAL] Session date is 2023/05/20 (Sat) at 17:14.

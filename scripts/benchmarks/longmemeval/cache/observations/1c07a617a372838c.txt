@@ -1,0 +1,41 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/25 (Thu) 02:41
+- [USER] User is interested in eco-tourism activities in Costa Rica.
+- [ASSISTANT_SAID] Recommended eco-tourism activities in Costa Rica include:
+  1. Zip-lining
+  2. Canopy Walk
+  3. Wildlife Tours
+  4. Turtle Nesting Tours
+  5. Volcano Tours
+  6. Waterfall and River Tours
+  7. Sustainable Eco-Friendly farms
+  8. Scuba diving and Snorkeling
+  9. Surfing and Stand-Up Paddleboarding
+- [USER] User expressed excitement about the recommended eco-tourism activities.
+- [USER] User asked which eco-tourism activity is the most popular among tourists visiting Costa Rica.
+- [ASSISTANT_SAID] Stated that popular eco-tourism activities among tourists visiting Costa Rica include:
+  1. Wildlife tours
+  2. Zip-lining
+  3. Canopy walks
+  4. Volcano tours
+  5. Waterfall and river tours
+  6. Sustainable eco-friendly farms
+  7. Scuba diving and snorkeling
+  8. Surfing and stand-up paddleboarding
+- [USER] User showed interest in sustainable farms and asked for specific recommendations.
+- [ASSISTANT_SAID] Recommended the following sustainable eco-friendly farms in Costa Rica:
+  1. Finca Luna Nueva Lodge
+  2. Ecolife Tour
+  3. Don Juan Coffee Tour
+  4. Finca Sura
+  5. CoopeAgri
+- [USER] User expressed surprise at the number of eco-friendly activities in Costa Rica and inquired about eco-trails to explore.
+- [ASSISTANT_SAID] Listed eco-trails in Costa Rica:
+  1. Monteverde Cloud Forest Reserve
+  2. Manuel Antonio National Park
+  3. Corcovado National Park
+  4. Arenal Volcano National Park
+  5. Cahuita National Park
+- [USER] User expressed excitement about exploring the Monteverde Cloud Forest Reserve and asked whether to hire a guide or explore on their own.
+- [ASSISTANT_SAID] Advised that it depends on the user's comfort level and experience. Recommended hiring a guide for a more enriching experience, especially for those unfamiliar with the area or hiking. Mentioned that some parks require hiring an accredited guide for safety reasons.

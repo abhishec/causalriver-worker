@@ -1,0 +1,52 @@
+{
+  "answer_c3567066": [
+    {
+      "fact": "User is planning to play tennis with friends at the local park this Sunday.",
+      "type": "event",
+      "entities": [
+        "tennis",
+        "friends",
+        "local park",
+        "Sunday"
+      ]
+    },
+    {
+      "fact": "User has a new tennis racket.",
+      "type": "personal",
+      "entities": [
+        "tennis racket"
+      ]
+    },
+    {
+      "fact": "User is happy with the performance of their new tennis racket.",
+      "type": "opinion",
+      "entities": [
+        "tennis racket"
+      ]
+    },
+    {
+      "fact": "User purchased the tennis racket from a sports store downtown.",
+      "type": "personal",
+      "entities": [
+        "sports store",
+        "downtown"
+      ]
+    },
+    {
+      "fact": "User feels that the new tennis racket has improved their game.",
+      "type": "opinion",
+      "entities": [
+        "tennis racket",
+        "game"
+      ]
+    },
+    {
+      "fact": "User is looking for exercises to warm up before playing tennis.",
+      "type": "preference",
+      "entities": [
+        "warm up exercises",
+        "tennis"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2022/03/09 (Wed) 18:07  
+[ASSISTANT_CREATED] Provided a Python code snippet for a chatbot that uses a custom-trained BERT model for question answering and interacts with a MySQL database.  
+[ASSISTANT_SAID] The code includes functions to get answers from the BERT model, add question-answer pairs to memory, add products to a user's cart, calculate the total price of the cart, and list products by tags.  
+[ASSISTANT_SAID] The BERT model is loaded using the paths 'path/to/tokenizer/config.json' and 'path/to/model.bin'.  
+[ASSISTANT_SAID] The MySQL database connection is established with host "localhost", user "root", password "password", and database "inventory".  
+[ASSISTANT_SAID] The function `get_bert_answer(question)` encodes the question, passes it to the BERT model, and retrieves the answer from the model's output.  
+[ASSISTANT_SAID] The function `add_to_memory(question, answer)` inserts a question-answer pair into the memory table of the database.  
+[ASSISTANT_SAID] The function `add_to_cart(product, price)` adds a product and its price to the user's cart in the database.  
+[ASSISTANT_SAID] The function `get_cart_total()` calculates the total price of the user's cart by summing the prices of all products in the cart.  
+[ASSISTANT_SAID] The function `list_products_by_tag(tag)` retrieves products from the database that match a specific tag.  
+[ASSISTANT_SAID] The chatbot checks if the user's question is in its memory and retrieves the answer if available.  
+[ASSISTANT_SAID] If the question is not in memory, the chatbot checks for specific tags ('fever', 'cold', 'headache') to list relevant products.  
+[ASSISTANT_SAID] If no products are found for a tag, the bot responds with "Sorry, we don't have any products for that tag."  
+[ASSISTANT_SAID] If products are found, the bot lists them with their names and prices in the format "- product_name (₹price)".  
+[USER] Requested to continue the code from the point where the assistant left off regarding the BERT model's answer retrieval.  
+[ASSISTANT_SAID] Reiterated the complete code snippet again without any changes, indicating the assistant's response to the user's request.

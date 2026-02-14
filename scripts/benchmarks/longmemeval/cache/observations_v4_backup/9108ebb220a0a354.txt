@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [FACT] User is trying to find a permanent place to live.
+- [FACT] User is on a limited budget with a maximum monthly rent budget of $800.
+- [FACT] User has some savings for a security deposit and first month's rent.
+- [FACT] User is not eligible for any government assistance programs.
+- [FACT] User needs to be close to public transportation and their volunteer job.
+- [FACT] User is open to any type of accommodation as long as it is safe and clean.
+- [EVENT] User has been looking at apartments online but finds it overwhelming.
+- [CHANGE] User's asylum application was approved after over a year of uncertainty.
+- [FACT] User is volunteering at a non-profit organization that helps refugees.
+- [FACT] User is gaining work experience in the US through their volunteer work.
+- [PREFERENCE] User is interested in expanding their housing search to surrounding neighborhoods.
+- [ASSISTANT] Assistant provided a structured process for finding a permanent place to live, including assessing budget, identifying priorities, researching affordable options, using online search tools, and visiting potential places.
+- [ASSISTANT] Assistant recommended websites and apps for filtering housing searches: Zillow, Trulia, HotPads, PadMapper, Walk Score, Apartments.com, Rent Jungle, and their respective mobile apps.
+- [ASSISTANT] Assistant suggested specific neighborhoods to consider: [Neighborhood 1], [Neighborhood 2], and [Neighborhood 3].
+- [ASSISTANT] Assistant provided details about [Neighborhood 1]: family-friendly, relatively safe, lower crime rates, and advised to avoid a stretch of [Street Name] known for gang activity.
+- [ASSISTANT] Assistant provided details about [Neighborhood 2]: considered safe with low crime rates, strong police presence, and advised to be aware of surroundings, especially at night.
+- [ASSISTANT] Assistant offered safety tips for both neighborhoods, including avoiding dimly lit streets and being mindful of belongings.
+- [RELATIONSHIP] User mentioned meeting like-minded people through their volunteer work.
+- [TEMPORAL] Session date is 2023/05/21 (Sun) at 19:50.

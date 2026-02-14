@@ -1,0 +1,25 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/27 (Sat) 13:51
+- [FACT] User is applying for the Data Centre Power and Performance Co-op Student position at AMD.
+- [FACT] User is a third-year Electrical Engineering student at Toronto Metropolitan University.
+- [FACT] User has 4 years of experience as a Retail Associate at McDonalds.
+- [FACT] User has 10+ months of experience as an Administrative Assistant and Support.
+- [FACT] User has experience with lab hardware such as oscilloscopes, function generators, and spectrum analyzers.
+- [FACT] User has developed a merge sort algorithm with C.
+- [FACT] User has completed the CS50 Series Course by Harvard University.
+- [FACT] User has developed games including Black-Jack, Tic Tac Toe, and Hangman using Java and Python.
+- [FACT] User was part of Toronto Met Formula Racing.
+- [PREFERENCE] User has a passion for innovation and a desire to learn more about computer hardware and electronic design.
+- [PREFERENCE] User enjoys a fast-paced, dynamic environment.
+- [EVENT] User led a group of 5 students in analyzing and creating unique algorithms during the CPS125 Digital Computation and Programming course.
+- [EVENT] User completed a 4-week project involving a binary search algorithm.
+- [ASSISTANT_CREATED] Assistant created a cover letter for the user applying for the Data Centre Power and Performance Co-op Student position at AMD.
+- [ASSISTANT_SAID] Assistant suggested that the user is an ideal candidate for the role due to their passion for innovation and desire to learn.
+- [ASSISTANT_SAID] Assistant highlighted the user's strong analytical, problem-solving, and interpersonal skills.
+- [ASSISTANT_SAID] Assistant noted the user's experience in customer service and administration, emphasizing their communication and organizational skills.
+- [ASSISTANT_SAID] Assistant mentioned the user's academic background, including their studies in algorithms, data structures, electronics circuit systems, and object-oriented engineering analysis and design.
+- [ASSISTANT_SAID] Assistant expressed confidence that the user would transition easily into the role and contribute effectively to the engineering team at AMD.
+- [ASSISTANT_SAID] Assistant included a closing statement encouraging the user to express excitement about the opportunity and to thank the hiring manager for their time and consideration.
+- [FACT] User provided their phone number: 647-717-5780.
+- [FACT] User provided their personal email: aman.ayaz44@gmail.com.

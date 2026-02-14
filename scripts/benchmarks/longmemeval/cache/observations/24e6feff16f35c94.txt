@@ -1,0 +1,28 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/24 (Wed) 02:33
+- [USER] User requested a sheets formula to search for a specific column, row, and date and return a summary.
+- [ASSISTANT_SAID] Assistant provided the formula `=SUMIF(range, criteria, [sum_range])` for searching and summarizing data.
+- [ASSISTANT_SAID] Assistant explained the parameters of the SUMIF function: 
+  - `range`: The range of cells to search.
+  - `criteria`: The value to search for in the range.
+  - `[sum_range]`: The range of cells to sum, which should be the same size as the range parameter.
+- [ASSISTANT_SAID] Assistant provided an example table with data:
+  - Date: 1/1/2022, Sales: 100, Cost: 50, Profit: 50
+  - Date: 1/2/2022, Sales: 200, Cost: 100, Profit: 100
+  - Date: 1/3/2022, Sales: 300, Cost: 150, Profit: 150
+  - Date: 1/4/2022, Sales: 400, Cost: 200, Profit: 200
+- [ASSISTANT_SAID] Assistant provided an example formula: `=SUMIF(A2:A5, "1/2/2022", B2:B5)` which returns 200.
+- [ASSISTANT_SAID] Assistant mentioned that wildcards can be used in the criteria parameter for partial matches.
+- [ASSISTANT_SAID] Assistant provided an example formula using a wildcard: `=SUMIF(A2:A5, "1/*/2022", B2:B5)`.
+- [USER] User found the information provided to be useful.
+- [USER] User asked how to use SUMIF twice to find the right date in column A, the right category name in column B, and return a summary from column C.
+- [ASSISTANT_SAID] Assistant introduced the SUMIFS function for multiple criteria: `=SUMIFS(sum_range, range1, criteria1, [range2], [criteria2], ...)`.
+- [ASSISTANT_SAID] Assistant explained the parameters of the SUMIFS function:
+  - `sum_range`: The range of cells to sum.
+  - `range1`: The first range of cells to search.
+  - `criteria1`: The value to search for in the first range.
+  - `[range2]`: The second range of cells to search.
+  - `[criteria2]`: The value to search for in the second range.
+- [ASSISTANT_SAID] Assistant provided an example table with data:
+  - Date: 1/

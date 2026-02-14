@@ -1,0 +1,36 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/28 (Sun) 10:48  
+[FACT] User is looking for new vegan recipe ideas.  
+[FACT] User recently made a vegan quinoa bowl with roasted vegetables.  
+[FACT] User has been using their Instant Pot a lot lately.  
+[FACT] User has figured out how to use the yogurt-making function on their Instant Pot.  
+[CHANGE] User has started making their own yogurt.  
+[PREFERENCE] User prefers to have more control over ingredients and sugar content in their yogurt.  
+[PREFERENCE] User dislikes added sugar in store-bought yogurts.  
+[PREFERENCE] User enjoys their homemade yogurt plain but is excited to experiment with different flavorings and sweeteners.  
+[PREFERENCE] User is considering using vanilla extract, cinnamon, honey, or maple syrup for flavoring their yogurt.  
+[ASSISTANT_SAID] Assistant provided vegan recipe ideas including variations of quinoa bowls and other Instant Pot recipes.  
+[ASSISTANT_CREATED] Assistant created a list of vegan recipe ideas:  
+- Southwestern Quinoa Bowl with black beans, diced tomatoes, avocado, and cashew-based sour cream.  
+- Indian-Style Quinoa Bowl with roasted cauliflower, chickpeas, and curry sauce.  
+- Mediterranean Quinoa Bowl with roasted eggplant, zucchini, red bell peppers, Kalamata olives, and lemon-tahini dressing.  
+- Lentil Curry with Indian spices, coconut milk, and vegetables.  
+- Chickpea and Spinach Stew with onions, garlic, ginger, and broth.  
+- Vegan Chili with black beans, kidney beans, diced tomatoes, and spices.  
+[ASSISTANT_SAID] Assistant provided roasted vegetable ideas:  
+- Roasted Sweet Potato and Brussels Sprouts.  
+- Cauliflower "Steak" with Turmeric and Lemon.  
+- Roasted Carrot and Parsnip Medley.  
+[ASSISTANT_SAID] Assistant provided yogurt function creations:  
+- Cashew Sour Cream recipe.  
+- Coconut Yogurt Parfait.  
+- Tzatziki Sauce.  
+[ASSISTANT_SAID] Assistant provided recommendations for unique spice blends and flavor combinations:  
+- Berbere (Ethiopian), Ras el hanout (North African), Garam Masala (Indian).  
+- Lemon-Rosemary-Garlic, Smoky Chipotle-Lime, Indian-Style Garam Masala-Cumin-Coriander.  
+- Sumac, Shichimi Togarashi (Japanese), Urfa Pepper.  
+[ASSISTANT_SAID] Assistant encouraged user to experiment with different ratios of spices and to taste as they go.  
+[FACT] User has been experimenting with different spices and seasonings in their cooking.  
+[FACT] User has been using the pressure cooking function on their Instant Pot for cooking grains, beans, and soups.  
+[FACT]

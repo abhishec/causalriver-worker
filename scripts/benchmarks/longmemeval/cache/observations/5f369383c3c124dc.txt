@@ -1,0 +1,21 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/23 (Tue) 17:29  
+[FACT] User has been doing a big batch of chicken and rice on Sundays for meal prep.  
+[FACT] User recently cooked a three-course meal for their family last weekend.  
+[EVENT] User's three-course meal included a caprese salad, homemade pasta with tomato sauce, and a chocolate lava cake.  
+[PREFERENCE] User is looking for new recipe ideas for meal prep to mix up their routine.  
+[PREFERENCE] User likes the idea of quinoa and roasted veggie bowls and has been meaning to use quinoa in a recipe.  
+[ASSISTANT_SAID] Assistant congratulated the user on their successful three-course meal and provided meal prep suggestions.  
+[ASSISTANT_SAID] Assistant suggested 10 meal prep ideas, including Grilled Chicken Fajita Bowls, Lentil and Veggie Curry, Quinoa and Roasted Veggie Bowls, Korean-Style Beef and Veggie Bowls, Mediterranean Chickpea and Spinach Bowls, Breakfast Burrito Prep, Thai-Style Green Curry Chicken and Veggies, Mexican Chicken and Sweet Potato Hash, Indian-Style Butter Chicken and Basmati Rice, and Veggie and Bean Chili.  
+[ASSISTANT_SAID] Assistant provided tips on how to cook quinoa properly, including a 2:1 water to quinoa ratio, rinsing quinoa, and different cooking methods (stovetop, Instant Pot, microwave).  
+[ASSISTANT_SAID] Assistant provided a recipe for Creamy Garlic Parmesan Sauce, including ingredients and instructions.  
+[PREFERENCE] User is excited to try the quinoa and roasted veggie bowls and the mushroom cream sauce.  
+[PREFERENCE] User wants to incorporate more mushrooms into their cooking.  
+[ASSISTANT_SAID] Assistant recommended using a mix of button, crimini, portobello, shiitake, or a combination of cremini and shiitake mushrooms for the mushroom cream sauce.  
+[ASSISTANT_SAID] Assistant provided tips for preparing mushrooms, including cleaning, sautéing, and not overcrowding the pan.  
+[PREFERENCE] User is considering using frozen mushrooms instead of fresh ones for the mushroom cream sauce.  
+[ASSISTANT_SAID] Assistant confirmed that frozen mushrooms can be used and provided tips for thawing, squeezing out excess moisture, and adjusting cooking time.  
+[PREFERENCE] User is excited to try out the mushroom cream sauce recipe.  
+[ASSISTANT_SAID] Assistant confirmed that frozen mushrooms can work well in a cream sauce but may have a different texture and flavor compared to fresh mushrooms.  
+[ASSISTANT_SAID] Assistant suggested that user could use heavy cream for the mushroom cream sauce.

@@ -1,0 +1,79 @@
+{
+  "answer_sharegpt_m2xJfjo_0": [
+    {
+      "fact": "User enjoys Netflix because there is something for everybody.",
+      "type": "opinion",
+      "entities": [
+        "Netflix"
+      ]
+    },
+    {
+      "fact": "User prefers watching series over movies on Netflix.",
+      "type": "preference",
+      "entities": [
+        "series",
+        "movies",
+        "Netflix"
+      ]
+    },
+    {
+      "fact": "User's recent favorite series on Netflix is 'Blacklist'.",
+      "type": "preference",
+      "entities": [
+        "Blacklist",
+        "Netflix"
+      ]
+    },
+    {
+      "fact": "User uses Netflix's feature to see what is coming next week or next month.",
+      "type": "preference",
+      "entities": [
+        "Netflix"
+      ]
+    },
+    {
+      "fact": "User believes it is always good to have more choices on Netflix but has no complaints.",
+      "type": "opinion",
+      "entities": [
+        "Netflix"
+      ]
+    },
+    {
+      "fact": "User does not have specific thoughts on Netflix's original content.",
+      "type": "opinion",
+      "entities": [
+        "Netflix"
+      ]
+    },
+    {
+      "fact": "User thinks Netflix offers good value for money but does not know the exact cost.",
+      "type": "opinion",
+      "entities": [
+        "Netflix"
+      ]
+    },
+    {
+      "fact": "User wants access to all seasons of old shows on Netflix.",
+      "type": "preference",
+      "entities": [
+        "Netflix",
+        "old shows"
+      ]
+    },
+    {
+      "fact": "User mentioned the show 'Doc Martin' was taken down from Netflix.",
+      "type": "event",
+      "entities": [
+        "Doc Martin",
+        "Netflix"
+      ]
+    },
+    {
+      "fact": "User occasionally faces access issues when trying to open Netflix.",
+      "type": "event",
+      "entities": [
+        "Netflix"
+      ]
+    }
+  ]
+}

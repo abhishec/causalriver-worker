@@ -1,0 +1,110 @@
+{
+  "answer_430d0a87_1": [
+    {
+      "fact": "User is planning to do grocery shopping this week.",
+      "type": "event",
+      "entities": [
+        "grocery shopping"
+      ]
+    },
+    {
+      "fact": "User is looking for recipe ideas that use eggs and spinach.",
+      "type": "preference",
+      "entities": [
+        "eggs",
+        "spinach"
+      ]
+    },
+    {
+      "fact": "User has reached 500 points at FreshMart.",
+      "type": "personal",
+      "entities": [
+        "FreshMart",
+        "500 points"
+      ]
+    },
+    {
+      "fact": "User is looking forward to saving money on their next purchase at FreshMart.",
+      "type": "opinion",
+      "entities": [
+        "saving money",
+        "FreshMart"
+      ]
+    },
+    {
+      "fact": "User is thinking of getting a new coffee maker.",
+      "type": "preference",
+      "entities": [
+        "coffee maker"
+      ]
+    },
+    {
+      "fact": "User has accumulated points at BedBath&Beyond that they would like to use.",
+      "type": "personal",
+      "entities": [
+        "BedBath&Beyond",
+        "points"
+      ]
+    }
+  ],
+  "answer_430d0a87_2": [
+    {
+      "fact": "User is planning a grocery shopping trip to FreshMart this weekend.",
+      "type": "event",
+      "entities": [
+        "FreshMart",
+        "weekend"
+      ]
+    },
+    {
+      "fact": "User has some points at FreshMart that translate to discounts.",
+      "type": "personal",
+      "entities": [
+        "FreshMart",
+        "points",
+        "discounts"
+      ]
+    },
+    {
+      "fact": "User usually cooks for 2 people.",
+      "type": "personal",
+      "entities": [
+        "2 people"
+      ]
+    },
+    {
+      "fact": "User eats a bit of everything.",
+      "type": "preference",
+      "entities": []
+    },
+    {
+      "fact": "User likes to stock up on staples like rice, pasta, and canned goods.",
+      "type": "preference",
+      "entities": [
+        "rice",
+        "pasta",
+        "canned goods"
+      ]
+    },
+    {
+      "fact": "User is trying to shop at FreshMart more often.",
+      "type": "preference",
+      "entities": [
+        "FreshMart"
+      ]
+    },
+    {
+      "fact": "User knows that 500 points gets them a $5 discount on their next purchase.",
+      "type": "personal",
+      "entities": [
+        "500 points",
+        "$5 discount"
+      ]
+    },
+    {
+      "fact": "User is not too particular about brands.",
+      "type": "opinion",
+      "entities": []
+    }
+  ]
+}

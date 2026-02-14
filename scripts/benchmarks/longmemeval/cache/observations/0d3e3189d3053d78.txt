@@ -1,0 +1,30 @@
+**Observation Log:**
+
+- [FACT] User is planning a trip to Texas.
+- [FACT] User is interested in food trucks in the Austin area.
+- [ASSISTANT_SAID] Austin is known for its vibrant food truck scene, offering a diverse range of delicious eats.
+- [ASSISTANT_SAID] Recommended food trucks in Austin include:
+  1. **Veracruz All Natural**: Authentic Mexican cuisine, including migas tacos, tortas, and breakfast burritos.
+  2. **Frank**: Gourmet hot dogs like the "Chicagoan" and "Bacon mac."
+  3. **Torchy's Tacos**: Famous "Trailer Park" taco with fried chicken, green chilies, and queso.
+  4. **East Side King**: Asian-fusion dishes like pork belly buns and kimchi fries.
+  5. **Chi'Lantro**: Korean-Mexican fusion with BBQ tacos and kimchi fried rice.
+  6. **The Peached Tortilla**: Asian-fusion dishes like Korean BBQ tacos and banh mi sandwiches.
+  7. **G'Raj Mahal**: Indian-inspired dishes like chicken tikka masala and naan wraps.
+  8. **Lulu's Fried Chicken**: Southern comfort food including fried chicken and waffles.
+  9. **Yume Burger**: Japanese-inspired burgers like the "Tokyo Burger" and "K-Town Burger."
+  10. **The Good Seed**: Plant-based truck with vegan and gluten-free options.
+- [ASSISTANT_SAID] Suggested using Austin Food Truck Finder and Food Truck Fiesta for locating food trucks.
+- [FACT] User is staying on Rainey Street in Austin.
+- [ASSISTANT_SAID] Recommended breakfast spots near Rainey Street include:
+  1. **Banger's Sausage House & Beer Garden**: Breakfast tacos, quiche, and eggs benedict.
+  2. **Craft Pride**: Weekend brunch menu with breakfast burritos and avocado toast.
+  3. **Container Bar**: Breakfast menu at Café No Sé with coffee and pastries.
+  4. **Lustre Pearl**: Weekend brunch with eggs benedict and breakfast tacos.
+  5. **Emmer & Rye**: Seasonal breakfast menu with local ingredients.
+  6. **Café José**: Traditional breakfast fare and Mexican-inspired dishes.
+  7. **Magnolia Café**: Popular spot for breakfast and brunch.
+  8. **The Frisco Shop**: Classic diner serving breakfast staples.
+  9. **La Condesa**: Trendy restaurant with a weekend brunch menu.
+- [ASSISTANT_SAID] All recommended spots are within a 5-20 minute walk from Rainey Street.
+- [FACT] User stayed at an Airbnb on Rainey Street last month during the Austin Film Festival

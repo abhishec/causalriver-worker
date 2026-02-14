@@ -1,0 +1,35 @@
+**Observation Log:**
+
+[FACT] The user has made at least 10 online purchases in the last three months.
+
+[PREFERENCE] The user is looking for advice on how to stay organized with online orders.
+
+[ASSISTANT_SAID] The assistant suggested creating a dedicated email folder to store online order confirmations, shipping updates, and tracking information.
+
+[ASSISTANT_SAID] The assistant recommended using a tracking spreadsheet with columns for order date, store/website, order number, item(s) purchased, tracking number, expected delivery date, actual delivery date, order status, and notes.
+
+[ASSISTANT_SAID] The assistant provided optional columns for the tracking spreadsheet, including order total, shipping cost, payment method, and return/exchange indicator.
+
+[ASSISTANT_SAID] The assistant mentioned popular spreadsheet templates for online order tracking can be found on Google Sheets, Microsoft Excel, and Vertex42.
+
+[PREFERENCE] The user plans to start with setting up a dedicated email folder and a tracking spreadsheet.
+
+[ASSISTANT_SAID] The assistant suggested implementing a 30-day rule for purchases and scheduling specific times for online shopping to avoid impulse purchases.
+
+[PREFERENCE] The user tends to shop more on weekends when they have more free time and spends more money on Sundays out of boredom.
+
+[ASSISTANT_SAID] The assistant provided tips to avoid impulse purchases, including setting a budget, implementing a 30-day rule, removing shopping apps, finding alternative activities, and practicing mindful browsing.
+
+[ASSISTANT_SAID] The assistant recommended using website blockers or extensions to limit access to shopping sites during certain times.
+
+[ASSISTANT_SAID] The assistant suggested scheduling online shopping sessions and asking oneself questions before making a purchase.
+
+[PREFERENCE] The user is considering opting for in-store pickup to avoid browsing temptation while waiting for items to arrive.
+
+[ASSISTANT_SAID] The assistant provided tips for making the most of in-store pickup, including checking store policies, planning the pickup, confirming the order, avoiding impulse buys, and inspecting items before leaving the store.
+
+[PREFERENCE] The user tends to shop more during sales or promotions.
+
+[ASSISTANT_SAID] The assistant advised setting a budget for sales, making a wishlist, avoiding impulse buys, comparing prices, and looking for price matches to navigate sales without overspending.
+
+[TEMPORAL] The session date is 2023/04/21 (Fri) 14:59.

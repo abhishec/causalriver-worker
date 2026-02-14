@@ -1,0 +1,40 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/03/15 (Wed) 04:17  
+[USER] User wants to learn Terraform and asks the assistant to be a teacher.  
+[USER] User requests concise code examples and indicates they will ask questions as they go.  
+[ASSISTANT_SAID] Terraform is an infrastructure as code (IAC) tool that enables management and provisioning of infrastructure resources using configuration files written in HashiCorp Configuration Language (HCL).  
+[ASSISTANT_SAID] To get started with Terraform, the user should:  
+[ASSISTANT_SAID] 1. Install Terraform from the official website: <https://www.terraform.io/downloads.html>.  
+[ASSISTANT_SAID] 2. Write a configuration file with the `.tf` extension, example provided for creating an AWS EC2 instance:  
+```python  
+provider "aws" {  
+  region = "us-west-2"  
+}  
+resource "aws_instance" "example" {  
+  ami           = "ami-0c55b159cbfafe1f0"  
+  instance_type = "t2.micro"  
+}  
+```  
+[ASSISTANT_SAID] 3. Initialize Terraform with the command: `terraform init`.  
+[ASSISTANT_SAID] 4. Plan changes with the command: `terraform plan`.  
+[ASSISTANT_SAID] 5. Apply changes with the command: `terraform apply`.  
+[ASSISTANT_SAID] User has successfully created their first EC2 instance using Terraform.  
+[USER] User reports an error about not having an AWS profile activated.  
+[ASSISTANT_SAID] User needs to set up and activate an AWS profile on their local machine to use the AWS provider in Terraform.  
+[ASSISTANT_SAID] Instructions provided to create a `~/.aws/credentials` file with the format:  
+```makefile  
+[profile_name]  
+aws_access_key_id = YOUR_ACCESS_KEY  
+aws_secret_access_key = YOUR_SECRET_KEY  
+```  
+[ASSISTANT_SAID] User should replace `profile_name`, `YOUR_ACCESS_KEY`, and `YOUR_SECRET_KEY` with their actual values.  
+[ASSISTANT_SAID] User can activate their profile by setting the `AWS_PROFILE` environment variable:  
+```javascript  
+export AWS_PROFILE=profile_name  
+```  
+[ASSISTANT_SAID] After setting up the profile, the user should be able to run Terraform without errors.  
+[USER] User confirms they got the AWS profile working and asks to continue the lesson.  
+[ASSISTANT_SAID] Next topic is state management in Terraform.  
+[ASSISTANT_SAID] Terraform maintains a state file that tracks resources and their current state.  
+[ASSISTANT_S

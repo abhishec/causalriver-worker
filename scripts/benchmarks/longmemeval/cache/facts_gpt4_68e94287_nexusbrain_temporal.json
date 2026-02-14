@@ -1,0 +1,88 @@
+{
+  "answer_9793daa3_2": [
+    {
+      "fact": "User is on a fitness journey.",
+      "type": "personal",
+      "entities": [
+        "fitness journey"
+      ]
+    },
+    {
+      "fact": "User posts about their fitness progress on Instagram.",
+      "type": "personal",
+      "entities": [
+        "Instagram",
+        "#MyFitnessJourney"
+      ]
+    },
+    {
+      "fact": "User shared a recipe for vegan chili on Instagram.",
+      "type": "event",
+      "entities": [
+        "vegan chili",
+        "Instagram",
+        "#FoodieAdventures"
+      ]
+    },
+    {
+      "fact": "User is interested in high-protein meals.",
+      "type": "preference",
+      "entities": [
+        "high-protein meals"
+      ]
+    },
+    {
+      "fact": "User is particularly interested in trying protein-packed salads, especially quinoa and black bean salad.",
+      "type": "preference",
+      "entities": [
+        "protein-packed salads",
+        "quinoa and black bean salad"
+      ]
+    },
+    {
+      "fact": "User has had issues with quinoa being too mushy in the past.",
+      "type": "opinion",
+      "entities": [
+        "quinoa"
+      ]
+    }
+  ],
+  "answer_9793daa3_1": [
+    {
+      "fact": "User is trying to stay consistent with fitness goals",
+      "type": "preference",
+      "entities": [
+        "fitness goals"
+      ]
+    },
+    {
+      "fact": "User participated in the #PlankChallenge",
+      "type": "event",
+      "entities": [
+        "#PlankChallenge"
+      ]
+    },
+    {
+      "fact": "User found the #PlankChallenge to be a great way to stay motivated",
+      "type": "opinion",
+      "entities": [
+        "#PlankChallenge",
+        "motivation"
+      ]
+    },
+    {
+      "fact": "User is interested in trying bodyweight workouts",
+      "type": "preference",
+      "entities": [
+        "bodyweight workouts"
+      ]
+    },
+    {
+      "fact": "User is especially interested in the 7-Minute Workout",
+      "type": "preference",
+      "entities": [
+        "7-Minute Workout"
+      ]
+    }
+  ]
+}

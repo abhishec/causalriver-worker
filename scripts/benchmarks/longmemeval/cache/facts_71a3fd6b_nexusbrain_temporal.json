@@ -1,0 +1,28 @@
+{
+  "answer_ultrachat_417348": [
+    {
+      "fact": "User is interested in upcoming sporting events in Speyer",
+      "type": "preference",
+      "entities": [
+        "sporting events",
+        "Speyer"
+      ]
+    },
+    {
+      "fact": "User requested contact details of the local tourism board of Speyer",
+      "type": "event",
+      "entities": [
+        "tourism board",
+        "Speyer"
+      ]
+    },
+    {
+      "fact": "User is looking for ways to get to Speyer from Frankfurt",
+      "type": "preference",
+      "entities": [
+        "Speyer",
+        "Frankfurt"
+      ]
+    }
+  ]
+}

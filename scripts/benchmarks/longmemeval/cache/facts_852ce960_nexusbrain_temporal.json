@@ -1,0 +1,84 @@
+{
+  "answer_3a6f1e82_1": [
+    {
+      "fact": "User is in the process of buying a new home.",
+      "type": "event",
+      "entities": [
+        "home",
+        "new home"
+      ]
+    },
+    {
+      "fact": "User is trying to finalize their budget for buying a home.",
+      "type": "preference",
+      "entities": [
+        "budget"
+      ]
+    },
+    {
+      "fact": "User is buying a $325,000 house.",
+      "type": "personal",
+      "entities": [
+        "$325,000 house"
+      ]
+    },
+    {
+      "fact": "User got pre-approved for $350,000 from Wells Fargo.",
+      "type": "personal",
+      "entities": [
+        "$350,000",
+        "Wells Fargo"
+      ]
+    }
+  ],
+  "answer_3a6f1e82_2": [
+    {
+      "fact": "User is planning to move into a new home soon.",
+      "type": "event",
+      "entities": [
+        "new home"
+      ]
+    },
+    {
+      "fact": "User is looking forward to owning a home.",
+      "type": "opinion",
+      "entities": [
+        "home ownership"
+      ]
+    },
+    {
+      "fact": "User has been pre-approved for a mortgage of $400,000 from Wells Fargo.",
+      "type": "personal",
+      "entities": [
+        "$400,000",
+        "Wells Fargo"
+      ]
+    },
+    {
+      "fact": "User lives in the 78749 zip code.",
+      "type": "personal",
+      "entities": [
+        "78749"
+      ]
+    },
+    {
+      "fact": "User needs to set up cable, TV, electricity, and gas services.",
+      "type": "preference",
+      "entities": [
+        "cable",
+        "TV",
+        "electricity",
+        "gas"
+      ]
+    },
+    {
+      "fact": "User is interested in finding a time-tracking tool or app for appointments and tasks related to the home move.",
+      "type": "preference",
+      "entities": [
+        "time-tracking tool",
+        "appointments",
+        "tasks"
+      ]
+    }
+  ]
+}

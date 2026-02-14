@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/26 (Fri) 04:41  
+[ASSISTANT_SAID] A Fighter in Dungeons and Dragons 5th edition gains the Action Surge feature at 2nd level, allowing an additional action on their turn.  
+[ASSISTANT_SAID] The Action Surge feature can be used once per short or long rest.  
+[USER] Asked how to calculate a Sorcerer's spell save DC.  
+[ASSISTANT_SAID] To calculate a Sorcerer's spell save DC, use the formula: 8 + proficiency bonus + Charisma modifier.  
+[ASSISTANT_SAID] A 10th level Sorcerer has a proficiency bonus of +3.  
+[ASSISTANT_SAID] A positive Charisma modifier increases the spell save DC, while a negative modifier decreases it.  
+[ASSISTANT_SAID] Example: A 10th level Sorcerer with a proficiency bonus of +3 and a Charisma modifier of +4 has a spell save DC of 15.  
+[USER] Asked if it is possible to maintain two spells requiring concentration concurrently.  
+[ASSISTANT_SAID] It is not possible to concentrate on two spells at the same time in Dungeons and Dragons 5th edition.  
+[ASSISTANT_SAID] If a character casts another concentration spell, the first spell's concentration is immediately broken.  
+[ASSISTANT_SAID] Some exceptions exist, such as the War Caster feat, which allows casting a spell as a reaction while maintaining concentration.  
+[USER] Asked for the best spell to increase AC for a Sorcerer/Monk.  
+[ASSISTANT_SAID] Suggested spells for increasing AC include:  
+[ASSISTANT_SAID] 1. Shield: +5 bonus to AC until the start of the caster's next turn.  
+[ASSISTANT_SAID] 2. Mage Armor: Base AC of 13 + Dexterity modifier for 8 hours.  
+[ASSISTANT_SAID] 3. Blur: Attackers have disadvantage on attack rolls against the caster.  
+[ASSISTANT_SAID] 4. Mirror Image: Creates illusory duplicates of the caster.  
+[ASSISTANT_SAID] 5. Stoneskin: Grants resistance to non-magical bludgeoning, piercing, and slashing damage.  
+[USER] Asked how a Monk's AC is calculated.  
+[ASSISTANT_SAID] A Monk's AC is calculated as: 10 + Dexterity modifier + Wisdom modifier.  
+[ASSISTANT_SAID] Monks rely on unarmored defense and cannot use shields or wear armor without negating this ability.  
+[USER] Asked which Sorcerer spells available at

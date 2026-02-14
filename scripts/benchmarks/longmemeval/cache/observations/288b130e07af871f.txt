@@ -1,0 +1,27 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/22 (Mon) 13:45  
+[USER] User is working with Salesforce.  
+[USER] User is interested in achieving a normalized data model in Salesforce.  
+[USER] User wants to allow arbitrary reports in Salesforce.  
+[ASSISTANT_SAID] To achieve a normalized data model in Salesforce while allowing for arbitrary reports, the assistant provided a list of steps including identifying entities, creating custom fields, using validation rules, creating custom report types, and regularly reviewing the data model.  
+[ASSISTANT_SAID] Step 1: Identify the entities (objects) in the data model and establish their relationships.  
+[ASSISTANT_SAID] Step 2: Create custom fields on each object that capture necessary data points.  
+[ASSISTANT_SAID] Step 3: Use validation rules and triggers to enforce data integrity and consistency.  
+[ASSISTANT_SAID] Step 4: Create custom report types that allow joining data across objects.  
+[ASSISTANT_SAID] Step 5: Create reports based on the custom report types.  
+[ASSISTANT_SAID] Step 6: Use Salesforce's dashboard feature to create visual representations of reports.  
+[ASSISTANT_SAID] Step 7: Regularly review and refine the data model, custom fields, validation rules, and reports.  
+[USER] User asked how to achieve step 4.  
+[ASSISTANT_SAID] The assistant provided detailed steps to create custom report types in Salesforce, including navigating to the Setup menu, selecting the primary object, including related objects, choosing fields, and saving the custom report type.  
+[ASSISTANT_SAID] Step 1 for creating custom report types: Go to the "Setup" menu by clicking on the gear icon.  
+[ASSISTANT_SAID] Step 2: Under the "Create" section, click on "Report Types".  
+[ASSISTANT_SAID] Step 3: Click the "New Custom Report Type" button.  
+[ASSISTANT_SAID] Step 4: Select the primary object for the report type.  
+[ASSISTANT_SAID] Step 5: Choose whether to include related objects.  
+[ASSISTANT_SAID] Step 6: Choose the fields to include in the report type.  
+[ASSISTANT_SAID] Step 7: Choose the report type category.  
+[ASSISTANT_SAID] Step 8: Save the custom report type.  
+[USER] User inquired about including aggregations in the custom report type.  
+[ASSISTANT_SAID] The assistant confirmed that aggregations can be included in a custom report type using Cross Filters and provided steps to do so.  
+[ASSISTANT

@@ -1,0 +1,37 @@
+{
+  "answer_ultrachat_195444": [
+    {
+      "fact": "User is interested in indie music artists in Portland",
+      "type": "preference",
+      "entities": [
+        "indie music",
+        "Portland"
+      ]
+    },
+    {
+      "fact": "User plans to check out popular indie music venues in Portland",
+      "type": "event",
+      "entities": [
+        "indie music venues",
+        "Portland"
+      ]
+    },
+    {
+      "fact": "User is looking for specific venues popular among indie artists",
+      "type": "preference",
+      "entities": [
+        "venues",
+        "indie artists",
+        "Portland"
+      ]
+    },
+    {
+      "fact": "User is interested in favorite indie artists from Portland",
+      "type": "preference",
+      "entities": [
+        "indie artists",
+        "Portland"
+      ]
+    }
+  ]
+}

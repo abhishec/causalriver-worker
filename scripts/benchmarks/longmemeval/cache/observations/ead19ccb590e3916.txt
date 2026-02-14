@@ -1,0 +1,20 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/27 (Sat) 00:05  
+[FACT] User is trying to update their LinkedIn profile with a new name.  
+[CHANGE] User is considering updating their email address to match their new name.  
+[PREFERENCE] User is looking for email providers that offer custom domain names.  
+[ASSISTANT_SAID] Updating your name on LinkedIn is a straightforward process with specific steps for both desktop and mobile.  
+[ASSISTANT_SAID] For desktop, the steps include logging in, clicking on the profile picture, viewing the profile, editing the public profile & URL, editing the name, entering the new name, and saving changes.  
+[ASSISTANT_SAID] For mobile, the steps include opening the LinkedIn app, tapping on the profile picture, viewing the profile, tapping on the edit option next to the name, entering the new name, and saving changes.  
+[ASSISTANT_SAID] Additional tips include ensuring the correct account is logged in, being prepared to provide documentation for legal name changes, reviewing the entire profile, and contacting LinkedIn support if needed.  
+[ASSISTANT_SAID] Suggested email providers with custom domain names include G Suite (Google Workspace), Microsoft 365, Zoho Workplace, FastMail, ProtonMail, and Namecheap.  
+[ASSISTANT_SAID] G Suite pricing starts at $6/user/month; Microsoft 365 starts at $5/user/month; Zoho Workplace starts at $1/user/month; FastMail starts at $3/user/month; ProtonMail starts at $5/user/month; Namecheap starts at $2.88/user/month.  
+[ASSISTANT_SAID] Factors to consider when choosing an email provider include pricing, features, security, customer support, and customization options.  
+[FACT] User is thinking of creating a website to share more about their family's history and their decision to change their surname.  
+[PREFERENCE] User is looking for website builders or hosts that are easy to use and offer good customization options.  
+[ASSISTANT_SAID] Recommended website builders include Wix, Squarespace, and Weebly.  
+[ASSISTANT_SAID] Recommended website hosts with website builders include Bluehost, SiteGround, and HostGator.  
+[ASSISTANT_SAID] Pricing for Wix starts at $14/month; Squarespace starts at $14/month; Weebly starts at $12/month; Bluehost starts at $2.95/month; SiteGround starts at $3.95/month; HostGator starts at $2.75/month.  
+[ASSISTANT_SAID] Factors to consider when choosing a website builder or host include ease of use, customization options, scalability, SEO, and cost.  
+[ASSISTANT_SAID] Estimated time to create a basic website on Wix

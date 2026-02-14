@@ -1,0 +1,53 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/23 (Tue) 00:22
+- [USER] User inquired about technologies used at Mindgeek, a parent company of Pornhub.
+- [ASSISTANT_SAID] Mindgeek employs various technologies including:
+  - Content Delivery Network (CDN)
+  - Video streaming technology (HLS and DASH)
+  - Machine Learning and Artificial Intelligence (AI)
+  - Big Data and Analytics
+  - Cloud Computing
+  - Cybersecurity
+  - Virtual Reality (VR) and Augmented Reality (AR)
+  - Payment Processing
+- [USER] User asked for a list of programming languages used by Mindgeek and resources to learn application security concepts for those languages.
+- [ASSISTANT_SAID] Common programming languages used in the industry include:
+  - Python
+  - JavaScript
+  - Java
+  - PHP
+  - Ruby
+  - C#
+  - Go
+- [ASSISTANT_SAID] Resources for learning application security concepts for each programming language:
+  - **Python**: 
+    - Book: "Black Hat Python" by Justin Seitz
+    - OWASP Python Security Project
+    - Secure coding with Python (YouTube playlist)
+  - **JavaScript**: 
+    - Book: "Web Application Security: Exploitation and Countermeasures for JavaScript Apps" by Andrew Hoffman
+    - OWASP Cheat Sheet Series - DOM based XSS Prevention Cheat Sheet
+    - Node.js Security Handbook
+  - **Java**: 
+    - Book: "Iron-Clad Java: Building Secure Web Applications" by Jim Manico and August Detlefsen
+    - OWASP Java Security Project
+    - Secure Coding Guidelines for Java SE
+  - **PHP**: 
+    - Book: "Securing PHP Web Applications" by Tricia Ballad and William Ballad
+    - OWASP PHP Security Cheat Sheet
+    - PHP: The Right Way (Security)
+  - **Ruby**: 
+    - Book: "Secure Your Node.js Web Application" by Karl Duuna
+    - OWASP Ruby on Rails Security Guide
+    - Rails Security Best Practices
+  - **C#**: 
+    - Book: "C# and .NET Core Test-Driven Development" by Dr. Vivina Bartram
+    - OWASP .NET Security Cheat Sheet
+    - Microsoft's Security Best Practices for C#
+  - **Go**: 
+    - Book: "Black Hat Go" by Tom Steele, Chris Patten, and Dan Kottmann
+    - Go Secure Coding Practices
+    - Go Security Cheatsheet
+- [USER] User requested a list of impactful security flaws from the modern OWASP Top 10, examples in PHP, and how to fix them.
+- [ASSISTANT_SAID] Three impactful

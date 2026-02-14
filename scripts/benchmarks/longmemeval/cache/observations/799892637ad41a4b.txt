@@ -1,0 +1,18 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/28 (Sun) 19:08
+- [ASSISTANT_SAID] "This Instructional Designer will be responsible for working closely with faculty or business subject matter experts to design, create, and deliver online, blended and instructor-led classroom training courses and documentation using principles and practices of instructional design and adult learning theory."
+- [ASSISTANT_SAID] "Conduct learning and business needs analysis"
+- [ASSISTANT_SAID] "Devise modes of assessment to measure the effectiveness of the course"
+- [ASSISTANT_SAID] "Write effective copy, instructional materials, and audio/video scripts to help participants meet learning objectives"
+- [ASSISTANT_SAID] "Use e-learning authoring tools to upload instructional content to websites, e-learning platforms, or learning management systems"
+- [ASSISTANT_SAID] "Items 3, 4, 6, 9-11, 13-15, 16, 18-22, 25-26, 28-29, 31-36, 38-41, 44-50, 52-54 and 56 were not found in the job description."
+- [USER] "Why you write in the note that item 3 were not found in the job description while you find it as a 'MATCH' item in the 2nd item in the report?"
+- [ASSISTANT_SAID] "I apologize for the confusion. It looks like there was a mistake in the report. The third item should be marked as 'MATCH' as it was found in the job description."
+- [ASSISTANT_SAID] "Thank you for bringing this to my attention, I will make sure to update the report."
+- [USER] "update the report"
+- [ASSISTANT_SAID] "I apologize for the mistake in the report. Allow me to correct it."
+- [ASSISTANT_CREATED] "Report: Job Title: Data Scientist Matched Requirements: 1. Experience with Python programming language. 2. Knowledge of machine learning techniques and algorithms. 3. Ability to work with large data sets and databases. Not Found in Job Description: N/A"
+- [ASSISTANT_CREATED] "Report: Job Title: Data Engineer Matched Requirements: 1. Experience with Python programming language. 2. Ability to work with large data sets and databases. 3. Experience with data warehousing and ETL processes. Not Found in Job Description: N/A" 
+
+This log captures all distinct pieces of information exchanged during the conversation, adhering to the specified categories and rules.

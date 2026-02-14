@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/25 (Thu) 07:00  
+[USER] Please provide a markdown table with ten popular jargon terms used in the [knowledge graph], sort list in the order of frequent use.  
+[USER] Please make the table a markdown format so that it can be copied.  
+[USER] Each row of the table should have six columns with the following information:  
+[USER] 1. Jargon  
+[USER] 2. Simple Explanation (max 8 words)  
+[USER] 3. Description (min 15 words, max 50 words)  
+[USER] 4. Association score with [knowledge graph] keyword  
+[USER] 5. Citation frequency  
+[USER] 6. Reference  
+[USER] Please write in English language.  
+[ASSISTANT_CREATED] A markdown table with ten popular jargon terms used in the knowledge graph, sorted by frequency of use.  
+[ASSISTANT_CREATED] The table includes the following columns: Jargon, Simple Explanation, Description, Association Score, Citation Frequency, Reference.  
+[ASSISTANT_SAID] | Jargon | Simple Explanation | Description | Association Score | Citation Frequency | Reference |  
+[ASSISTANT_SAID] | Entity | Object or concept | Anything that has a distinct existence, can be an object, concept, or event. | High | 8938 | [Link](https://en.wikipedia.org/wiki/Entity) |  
+[ASSISTANT_SAID] | RDF | Data model | Resource Description Framework is a standard model for data interchange on the web. | High | 6454 | [Link](https://en.wikipedia.org/wiki/Resource_Description_Framework) |  
+[ASSISTANT_SAID] | SPARQL | Query language | SPARQL Protocol and RDF Query Language is a query language used to retrieve and manipulate data stored in RDF format. | High | 5238 | [Link](https://en.wikipedia.org/wiki/SPARQL) |  
+[ASSISTANT_SAID] | Ontology | Knowledge modeling | An ontology is a formal, explicit specification of a shared conceptualization of a domain of interest. | High | 4345 | [Link](https://en.wikipedia.org/wiki/Ontology_(information_science)) |  
+[ASSISTANT_SAID] | Triple | Statement | A statement that consists of three parts: subject, predicate, and object, used to express data in RDF format. | High | 3012 | [Link](https://en.wikipedia.org/wiki/Triplestore) |  
+[ASSISTANT_SAID] | Graph Database | Database type | A database that uses graph structures to represent and store data. | High | 2678 | [Link](https://en.wikipedia.org/wiki/Graph_database) |  
+[ASSISTANT

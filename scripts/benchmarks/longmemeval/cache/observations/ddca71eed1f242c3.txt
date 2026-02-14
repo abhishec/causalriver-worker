@@ -1,0 +1,20 @@
+**Observation Log**
+
+- [FACT] The user submitted their asylum application 21 months ago.
+- [PREFERENCE] The user is trying to get a better understanding of the process for adjusting their status to a green card.
+- [EVENT] The user had a meeting with a lawyer regarding their status adjustment.
+- [TEMPORAL] The session date is 2022/12/26.
+- [ASSISTANT_SAID] The average processing time for affirmative asylum applications is around 6-12 months, but it can take 2-3 years or more.
+- [ASSISTANT_SAID] Once the asylum application is approved, the user can file Form I-485 to adjust their status to a lawful permanent resident.
+- [ASSISTANT_SAID] The AOS process typically takes around 6-12 months, depending on the USCIS office's workload.
+- [ASSISTANT_SAID] Factors affecting the AOS processing time include backlog, complexity of the case, security checks, and interview scheduling.
+- [ASSISTANT_SAID] The user can follow up with the Asylum Office to inquire about the status of their application.
+- [ASSISTANT_SAID] The user should prepare documents required for the AOS application while waiting for their asylum decision.
+- [ASSISTANT_SAID] The documents required for the AOS application include Form I-485, a copy of I-94, passport-style photos, government-issued ID, birth certificate, marriage certificate (if applicable), divorce or death certificate (if applicable), proof of continuous presence, medical examination (Form I-693), asylum approval notice, and supporting documents.
+- [ASSISTANT_SAID] Specific requirements for asylum seekers include providing a copy of the asylum application and responses to any Requests for Evidence (RFE).
+- [ASSISTANT_SAID] Acceptable documents for proof of continuous presence include rent receipts, utility bills, bank statements, employment records, school records, medical records, driver's license, letters from friends or family, and affidavits.
+- [ASSISTANT_SAID] The USCIS typically requires PCP documents to cover the entire period from the date the user filed their asylum application to the present.
+- [ASSISTANT_SAID] The user should provide original documents or certified copies for their AOS application.
+- [ASSISTANT_SAID] The affidavit from friends or family members should include an introduction, statement of knowledge, statement of presence, description of interactions, confirmation of the user's identity, and a closing.
+- [ASSISTANT_SAID] The affidavit should be signed and dated by the affiant and notarized.
+- [ASSISTANT_SAID] The user should keep a copy of their application and supporting documents for their records.

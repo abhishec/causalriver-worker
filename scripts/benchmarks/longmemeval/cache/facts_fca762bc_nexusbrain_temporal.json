@@ -1,0 +1,44 @@
+{
+  "answer_ultrachat_39395": [
+    {
+      "fact": "User found it hard to understand the cultural context when they first moved to Japan",
+      "type": "event",
+      "entities": [
+        "Japan"
+      ]
+    },
+    {
+      "fact": "User made local friends to help overcome language challenges",
+      "type": "relationship",
+      "entities": [
+        "local friends"
+      ]
+    },
+    {
+      "fact": "User joined language exchange groups to improve language skills",
+      "type": "event",
+      "entities": [
+        "language exchange groups"
+      ]
+    },
+    {
+      "fact": "User practices Japanese with their co-workers",
+      "type": "relationship",
+      "entities": [
+        "Japanese co-workers"
+      ]
+    },
+    {
+      "fact": "User believes consistency is key in language learning",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User uses language learning apps to aid their progress",
+      "type": "preference",
+      "entities": [
+        "language learning apps"
+      ]
+    }
+  ]
+}

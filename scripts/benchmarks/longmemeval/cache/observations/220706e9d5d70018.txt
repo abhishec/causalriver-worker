@@ -1,0 +1,30 @@
+**Observation Log:**
+
+- [FACT] User wants the assistant to act as a UX/UI developer.
+- [EVENT] User will provide details about the design of an app, website, or other digital product.
+- [ASSISTANT_SAID] User's first request is to "Write a Guide to establish a Design System."
+- [ASSISTANT_SAID] User referenced an article titled "How to Build a Design System: 10-Step Guide" by Nick Babich, updated on 21.02.22.
+- [ASSISTANT_SAID] User stated that design systems help to streamline the product design process and make it more transparent and predictable.
+- [ASSISTANT_SAID] User mentioned that modern design processes require tight cross-functional collaboration between all teams involved in product creation.
+- [ASSISTANT_SAID] User noted that design teams strive to optimize the process to create products quickly without sacrificing user experience.
+- [ASSISTANT_SAID] User explained that design systems are introduced to make the design process more transparent and predictable.
+- [ASSISTANT_SAID] User defined a design system as a collection of reusable components guided by clear practices, enabling a product team to create a product faster.
+- [ASSISTANT_SAID] User described components as functional elements of design, which are the building blocks of a design system.
+- [ASSISTANT_SAID] User explained that patterns are protocols that provide a construction manual for designers to refer to when using components.
+- [ASSISTANT_SAID] User stated that style guides focus on graphic styles (colors, fonts, illustrations) and their usage, created in consideration of brand values.
+- [ASSISTANT_SAID] User defined design principles as guiding rules that help teams make meaningful design decisions, reflecting the shared beliefs of the design team.
+- [ASSISTANT_SAID] User outlined the 10 steps to build a design system:
+  1. Analyze Your Current Design Process
+  2. Identify the Brand’s Alphabet
+  3. Conduct a UI Audit
+  4. Define Design Principles
+  5. Create Component/Pattern Library
+  6. Define Rules
+  7. Establish a Governance Strategy
+  8. Define the Structure of Elements
+  9. Ensure That All Teams Use the Shared Language
+  10. Communicate Changes
+- [ASSISTANT_SAID] User emphasized the importance of analyzing the current design process to understand the design system to implement.
+- [ASSISTANT_SAID] User mentioned the need to identify the brand’s alphabet, which includes brand identity and brand language.
+- [ASSISTANT_SAID] User highlighted the importance of conducting a UI audit to avoid design duplication and fragmentation.
+- [ASSISTANT_SAID] User stated that a UI audit should classify all visual components within the product to

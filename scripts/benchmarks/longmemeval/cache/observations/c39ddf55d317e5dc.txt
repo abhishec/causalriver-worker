@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/06/16 (Fri) 15:59  
+[FACT] User runs a new nanny service.  
+[FACT] User previously hired someone to nanny their own kids.  
+[RELATIONSHIP] The nanny user previously hired is asking to work for the user's new company.  
+[PREFERENCE] User's kids did not like the nanny they previously hired.  
+[PREFERENCE] User has heard from others that they would not hire the nanny again.  
+[ASSISTANT_CREATED] Assistant created a formal email template to inform the nanny about the application status.  
+[ASSISTANT_SAID] The formal email template included a subject line: "Nanny Application Status Update."  
+[ASSISTANT_SAID] The email thanked the nanny for her interest and effort in applying.  
+[ASSISTANT_SAID] The email stated that the user decided not to move forward with the nanny's application at this time.  
+[ASSISTANT_SAID] The email explained that the user is focusing on building a team with a diverse range of skills, experiences, and backgrounds.  
+[ASSISTANT_SAID] The email mentioned that the decision was not made lightly and wished the nanny luck in her future endeavors.  
+[ASSISTANT_SAID] The email encouraged the nanny to reach out with any questions or concerns.  
+[ASSISTANT_CREATED] Assistant created a less formal version of the email template to inform the nanny about the application status.  
+[ASSISTANT_SAID] The less formal email template included a subject line: "Update on Your Application."  
+[ASSISTANT_SAID] The less formal email started with a friendly greeting: "Hi [Nanny's Name]."  
+[ASSISTANT_SAID] The less formal email thanked the nanny for her interest and stated that the user decided not to move forward with her application right now.  
+[ASSISTANT_SAID] The less formal email explained that the user is looking for a mix of different skills, experiences, and backgrounds.  
+[ASSISTANT_SAID] The less formal email expressed gratitude for the nanny's interest and wished her luck in finding a great opportunity.  
+[ASSISTANT_SAID] The less formal email encouraged the nanny to reach out with any questions or concerns.

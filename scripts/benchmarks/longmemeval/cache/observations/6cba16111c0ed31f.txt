@@ -1,0 +1,72 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/07/19 (Wed) 02:26
+- [ASSISTANT_SAID] To create a snap-to experience for the infinite scroll video feed, use CSS Scroll Snap Points to ensure videos snap into place, occupying the entire viewport.
+- [ASSISTANT_SAID] Update the `ul` element in `Home.svelte` to use a CSS class named `video-feed`.
+- [ASSISTANT_CREATED] Provided HTML code for the `ul` element in `Home.svelte`:
+  ```html
+  <ul id="video-list" class="video-feed">
+    {#each videos as video}
+      <li>
+        <VideoPlayer src="{video.url}" videoId="{video.id}" />
+      </li>
+    {/each}
+  </ul>
+  ```
+- [ASSISTANT_SAID] Add specific CSS styles to `Home.svelte` for the video feed.
+- [ASSISTANT_CREATED] Provided CSS styles for `.video-feed` and `.video-feed li`:
+  ```css
+  .video-feed {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    height: 100vh;
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .video-feed li {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+  ```
+- [ASSISTANT_SAID] The styles ensure smooth scrolling for iOS devices and define each list item as a snap point.
+- [USER] Asked which styles to include for a dark but classy look like Netflix.
+- [ASSISTANT_SAID] Suggested CSS styles for a dark and classy look similar to Netflix, to be included in the global stylesheet.
+- [ASSISTANT_CREATED] Provided CSS styles for the global styles and Home component styles:
+  ```css
+  /* Global styles */
+  body {
+    margin: 0;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    background-color: #141414;
+    color: #fff;
+  }
+
+  h1 {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #fff;
+    margin-bottom: 1rem;
+  }
+
+  /* Home component styles */
+  .video-feed {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    height: 100vh;
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .video-feed li {
+    display

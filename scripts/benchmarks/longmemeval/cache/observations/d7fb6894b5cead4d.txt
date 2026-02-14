@@ -1,0 +1,36 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/26 (Fri) 17:12
+- [RELATIONSHIP] User has a friend whose birthday they are planning to celebrate.
+- [RELATIONSHIP] User has a sister for whom they purchased a candle set.
+- [EVENT] User is looking for gift ideas for their friend's birthday.
+- [PREFERENCE] User is interested in popular candle brands.
+- [EVENT] User recently purchased a candle set from Jo Malone for their sister's birthday.
+- [FACT] The Jo Malone candle set cost $120 and included three different scents.
+- [PREFERENCE] User's sister loved the Jo Malone candle set.
+- [ASSISTANT_SAID] Jo Malone is a great brand known for luxury candles.
+- [ASSISTANT_SAID] Suggested popular candle brands across various price points: 
+  - High-End: Diptyque ($60-$150), Byredo ($80-$180), Voluspa ($50-$150)
+  - Mid-Range: Illume ($30-$70), Votivo ($20-$50), Paddywax ($25-$50)
+  - Affordable: Yankee Candle ($10-$30), Bath & Body Works ($10-$25), WoodWick ($15-$30)
+- [ASSISTANT_SAID] Suggested looking into multi-candle sets or gift collections for a thoughtful gift.
+- [PREFERENCE] User is looking for mid-range candle options.
+- [PREFERENCE] User is interested in Illume and Votivo candles.
+- [ASSISTANT_SAID] Provided an overview of Illume's scent profiles and popular options:
+  - Florals: Wildflower Meadow, Gardenia & Jasmine
+  - Fruits & Spices: Cranberry Spice, Pineapple & Coconut
+  - Herbal & Earthy: Eucalyptus & Mint, Forest Floor
+  - Gourmand: Vanilla Bean Noel, S'mores
+- [ASSISTANT_SAID] Provided an overview of Votivo's scent profiles and popular options:
+  - Florals: Red Currant, French Lavender
+  - Fruits & Citrus: Pink Grapefruit, Cranberry Orange
+  - Spices & Woods: Spiced Cranberry, Woodland
+  - Gourmand: Vanilla Bean, Cinnamon Sugar
+- [ASSISTANT_SAID] Mentioned that both Illume and Votivo offer a range of candle sizes and gift sets.
+- [EVENT] User is considering purchasing Illume's Wildflower Meadow candle.
+- [ASSISTANT_SAID] Listed gift set options for Illume's Wildflower Meadow:
+  - Wildflower Meadow Candle Gift Set ($45)
+  - Illume Essentials Gift Set ($60)
+  - Wildflower Meadow Soy Candle Trio ($25)
+  - Illume Mini Candle Collection ($40)
+- [PREFERENCE] User is considering the Wildflower Meadow Candle Gift Set

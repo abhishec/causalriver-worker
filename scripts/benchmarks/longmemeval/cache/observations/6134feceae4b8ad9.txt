@@ -1,0 +1,26 @@
+**Observation Log:**
+
+[FACT] User is planning a trip to Ann Arbor to visit their niece, Emma, who just started at the University of Michigan.  
+[FACT] User attended Emma's high school graduation ceremony at her school's auditorium on June 15th.  
+[RELATIONSHIP] User's niece is named Emma.  
+[EVENT] User is planning a trip to Ann Arbor.  
+[TEMPORAL] The trip to Ann Arbor is planned after Emma's graduation ceremony on June 15th.  
+[PREFERENCE] User is interested in good restaurants and cafes around the University of Michigan campus.  
+[ASSISTANT_SAID] Assistant congratulated Emma on her new adventure at the University of Michigan and offered to provide dining recommendations.  
+[ASSISTANT_SAID] Assistant clarified that it does not have personal experiences or memories.  
+[ASSISTANT_SAID] Assistant provided a list of recommended restaurants: Zingerman's Deli, Grange Kitchen & Bar, Sava's Restaurant, Frita Batidos, and Taste Kitchen.  
+[ASSISTANT_SAID] Assistant provided a list of recommended cafes: Cafe Ambrosia, Lab Cafe, and Comet Coffee.  
+[ASSISTANT_SAID] Assistant recommended exploring State Street and Kerrytown Market & Shop for additional dining options.  
+[ASSISTANT_SAID] Assistant expressed hope that user enjoys their visit to Ann Arbor and time with Emma.  
+[FACT] User found the restaurant and cafe recommendations helpful.  
+[RELATIONSHIP] User and Emma discussed her college orientation at the graduation party after the ceremony.  
+[ASSISTANT_SAID] Assistant acknowledged the significance of college orientation and the excitement of settling into campus life.  
+[ASSISTANT_SAID] Assistant encouraged user to ask more questions or seek further recommendations.  
+[EVENT] User is considering taking Emma to local museums or art galleries while in Ann Arbor.  
+[ASSISTANT_SAID] Assistant provided a list of recommended museums: University of Michigan Museum of Art (UMMA), University of Michigan Museum of Natural History, and Kelsey Museum of Archaeology.  
+[ASSISTANT_SAID] Assistant provided a list of recommended art galleries: Slusser Gallery, Work Ann Arbor, and Nicolas Howe Gallery.  
+[ASSISTANT_SAID] Assistant mentioned the Ann Arbor Hands-On Museum and Kerrytown Concert House as additional cultural attractions.  
+[FACT] User is reflecting on their own education and career development.  
+[EVENT] User is considering pursuing an advanced degree.  
+[ASSISTANT_SAID] Assistant provided resources and advice for pursuing an advanced degree, including reflecting on goals, researching programs, exploring funding options, updating credentials, preparing for standardized tests, networking, and creating a timeline.  
+[ASSISTANT_SAID] Assistant suggested online resources: Peterson's, GradSchools.com, Council of Graduate Schools

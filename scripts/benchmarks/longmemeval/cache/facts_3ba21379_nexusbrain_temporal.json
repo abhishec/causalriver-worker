@@ -1,0 +1,79 @@
+{
+  "answer_cd345582_1": [
+    {
+      "fact": "User is working on a Ford Mustang Shelby GT350R model.",
+      "type": "personal",
+      "entities": [
+        "Ford Mustang Shelby GT350R"
+      ]
+    },
+    {
+      "fact": "User is interested in weathering effects for their model.",
+      "type": "preference",
+      "entities": [
+        "weathering effects"
+      ]
+    },
+    {
+      "fact": "User is using Vallejo paints for their project.",
+      "type": "preference",
+      "entities": [
+        "Vallejo paints"
+      ]
+    },
+    {
+      "fact": "User wants to know more about Vallejo's color range and how it compares to Tamiya.",
+      "type": "preference",
+      "entities": [
+        "Vallejo",
+        "Tamiya"
+      ]
+    }
+  ],
+  "answer_cd345582_2": [
+    {
+      "fact": "User has a new airbrush.",
+      "type": "personal",
+      "entities": [
+        "airbrush"
+      ]
+    },
+    {
+      "fact": "User is working on a 1/25 scale car model.",
+      "type": "personal",
+      "entities": [
+        "1/25 scale car model"
+      ]
+    },
+    {
+      "fact": "User has wrapped up a model and switched to a Ford F-150 pickup truck.",
+      "type": "event",
+      "entities": [
+        "Ford F-150 pickup truck"
+      ]
+    },
+    {
+      "fact": "User is thinking of adding decals to their Ford model.",
+      "type": "preference",
+      "entities": [
+        "decals",
+        "Ford model"
+      ]
+    },
+    {
+      "fact": "User seeks advice on airbrushing techniques.",
+      "type": "opinion",
+      "entities": [
+        "airbrushing techniques"
+      ]
+    },
+    {
+      "fact": "User wants to achieve a smooth, even coat on their models.",
+      "type": "preference",
+      "entities": [
+        "smooth coat",
+        "even coat"
+      ]
+    }
+  ]
+}

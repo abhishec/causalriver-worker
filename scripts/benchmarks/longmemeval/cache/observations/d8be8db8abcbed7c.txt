@@ -1,0 +1,24 @@
+**Observation Log:**
+
+[FACT] User is looking for advice on skincare routines.  
+[EVENT] User has been using the same skincare products for a while and wants to try something new.  
+[EVENT] User received an email from Sephora about their upcoming VIB Sale, which starts next week.  
+[EVENT] User is planning to splurge on a few high-end skincare products that are usually out of their budget.  
+[ASSISTANT_SAID] The Sephora VIB Sale is an amazing opportunity to try out new high-end products without breaking the bank.  
+[ASSISTANT_SAID] The assistant asked the user several questions to better understand their skin type and concerns:  
+[ASSISTANT_SAID] 1. What is your skin type (normal, dry, oily, combination, sensitive, acne-prone)?  
+[ASSISTANT_SAID] 2. What are your main skin concerns (acne, hyperpigmentation, fine lines, dullness, dehydration)?  
+[ASSISTANT_SAID] 3. Are there any specific skin goals you want to achieve with your new skincare routine (e.g., brighter complexion, reduced pores, improved texture)?  
+[ASSISTANT_SAID] 4. Are you currently using any products that you love and wouldn't want to replace, or are you open to switching everything up?  
+[ASSISTANT_SAID] 5. Do you have a preferred skincare philosophy or ingredient preferences (e.g., natural, vegan, fragrance-free, retinol-based)?  
+[FACT] User's skin type is combination.  
+[FACT] User is concerned about fine lines and dullness.  
+[PREFERENCE] User is open to switching up their entire skincare routine, so no products are off-limits.  
+[FACT] User has heard great things about Drunk Elephant and is considering their products, especially a set that will be 20% off during the sale.  
+[ASSISTANT_SAID] Combination skin can be challenging, but with the right products, the user can achieve a balanced and radiant complexion.  
+[ASSISTANT_SAID] Recommended ingredients for fine lines and dullness include:  
+[ASSISTANT_SAID] 1. Retinol: Stimulates collagen production, reduces fine lines, and improves skin texture.  
+[ASSISTANT_SAID] 2. Peptides: Helps to plump and firm the skin, reducing the appearance of fine lines and wrinkles.  
+[ASSISTANT_SAID] 3. Antioxidants: Neutralize free radicals, which can cause dullness and damage to the skin.  
+[ASSISTANT_SAID] 4. Exfoliants: Gently remove dead skin cells, revealing brighter, smoother skin.  
+[ASSISTANT_SAID] 5. Nourishing ingredients: Hydrate and plump the skin

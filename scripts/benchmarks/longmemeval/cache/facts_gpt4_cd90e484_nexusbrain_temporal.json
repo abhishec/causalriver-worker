@@ -1,0 +1,99 @@
+{
+  "answer_aa930b56_2": [
+    {
+      "fact": "User is looking to improve their bird identification skills.",
+      "type": "preference",
+      "entities": [
+        "bird identification skills"
+      ]
+    },
+    {
+      "fact": "User has been listening to bird calls online for about a month.",
+      "type": "event",
+      "entities": [
+        "bird calls",
+        "one month"
+      ]
+    },
+    {
+      "fact": "User is not confident in their bird identification abilities.",
+      "type": "opinion",
+      "entities": [
+        "bird identification abilities"
+      ]
+    },
+    {
+      "fact": "User went birding a week ago in their neighborhood after dinner.",
+      "type": "event",
+      "entities": [
+        "birding",
+        "neighborhood",
+        "dinner",
+        "one week ago"
+      ]
+    },
+    {
+      "fact": "User saw common birds like robins and sparrows during their birding.",
+      "type": "event",
+      "entities": [
+        "robins",
+        "sparrows"
+      ]
+    },
+    {
+      "fact": "User noticed the return of American goldfinches to the area.",
+      "type": "event",
+      "entities": [
+        "American goldfinches"
+      ]
+    },
+    {
+      "fact": "User finds it challenging to identify birds that do not match any species in their field guide.",
+      "type": "opinion",
+      "entities": [
+        "bird identification",
+        "field guide"
+      ]
+    },
+    {
+      "fact": "User wishes to have a better understanding of bird anatomy.",
+      "type": "preference",
+      "entities": [
+        "bird anatomy"
+      ]
+    }
+  ],
+  "answer_aa930b56_1": [
+    {
+      "fact": "User has been listening to bird calls online for about a month",
+      "type": "event",
+      "entities": [
+        "bird calls",
+        "one month"
+      ]
+    },
+    {
+      "fact": "User has a new pair of binoculars",
+      "type": "personal",
+      "entities": [
+        "binoculars"
+      ]
+    },
+    {
+      "fact": "User has been keeping a birding journal for the past six months",
+      "type": "event",
+      "entities": [
+        "birding journal",
+        "six months"
+      ]
+    },
+    {
+      "fact": "User finds that their birding journal has been really helpful",
+      "type": "opinion",
+      "entities": [
+        "birding journal",
+        "helpful"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,91 @@
+{
+  "answer_75eca223_2": [
+    {
+      "fact": "User is hosting a dinner party soon.",
+      "type": "event",
+      "entities": [
+        "dinner party"
+      ]
+    },
+    {
+      "fact": "User is considering a Global Street Food theme for the potluck.",
+      "type": "preference",
+      "entities": [
+        "Global Street Food theme"
+      ]
+    },
+    {
+      "fact": "User had a great experience with a BBQ theme at Mike's place two weeks ago.",
+      "type": "event",
+      "entities": [
+        "BBQ theme",
+        "Mike"
+      ]
+    },
+    {
+      "fact": "User watched a football game at Mike's place.",
+      "type": "event",
+      "entities": [
+        "football game",
+        "Mike"
+      ]
+    }
+  ],
+  "answer_75eca223_1": [
+    {
+      "fact": "User is hosting a dinner party soon",
+      "type": "event",
+      "entities": [
+        "dinner party"
+      ]
+    },
+    {
+      "fact": "User attended an Italian feast at Sarah's place last week",
+      "type": "event",
+      "entities": [
+        "Italian feast",
+        "Sarah"
+      ]
+    },
+    {
+      "fact": "User is inspired to try new Italian dishes",
+      "type": "opinion",
+      "entities": [
+        "Italian dishes"
+      ]
+    },
+    {
+      "fact": "User is a beginner in cooking Italian recipes",
+      "type": "preference",
+      "entities": [
+        "beginner",
+        "Italian recipes"
+      ]
+    },
+    {
+      "fact": "User loves the combination of garlic and olive oil",
+      "type": "preference",
+      "entities": [
+        "garlic",
+        "olive oil"
+      ]
+    },
+    {
+      "fact": "User played board games at Sarah's place after the Italian feast",
+      "type": "event",
+      "entities": [
+        "board games",
+        "Sarah",
+        "Italian feast"
+      ]
+    },
+    {
+      "fact": "User is looking for board game recommendations for a dinner party",
+      "type": "preference",
+      "entities": [
+        "board games",
+        "dinner party"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,150 @@
+{
+  "answer_5e3bb940_1": [
+    {
+      "fact": "User has been getting into audiobooks lately.",
+      "type": "event",
+      "entities": [
+        "audiobooks"
+      ]
+    },
+    {
+      "fact": "User has finished three audiobooks in the last six weeks.",
+      "type": "event",
+      "entities": [
+        "three audiobooks",
+        "six weeks"
+      ]
+    },
+    {
+      "fact": "User listens to fiction, mostly contemporary and historical fiction.",
+      "type": "preference",
+      "entities": [
+        "fiction",
+        "contemporary fiction",
+        "historical fiction"
+      ]
+    },
+    {
+      "fact": "User enjoyed the emotional depth of 'The Nightingale'.",
+      "type": "opinion",
+      "entities": [
+        "The Nightingale"
+      ]
+    },
+    {
+      "fact": "User enjoyed the engaging storytelling of 'The Seven Husbands of Evelyn Hugo'.",
+      "type": "opinion",
+      "entities": [
+        "The Seven Husbands of Evelyn Hugo"
+      ]
+    },
+    {
+      "fact": "User prefers books with complex themes.",
+      "type": "preference",
+      "entities": [
+        "complex themes"
+      ]
+    },
+    {
+      "fact": "User is open to trying out different genres.",
+      "type": "preference",
+      "entities": [
+        "different genres"
+      ]
+    },
+    {
+      "fact": "User is interested in 'The Song of Achilles' and 'The Brief Wondrous Life of Oscar Wao'.",
+      "type": "preference",
+      "entities": [
+        "The Song of Achilles",
+        "The Brief Wondrous Life of Oscar Wao"
+      ]
+    }
+  ],
+  "answer_5e3bb940_3": [
+    {
+      "fact": "User recently finished reading 'The Nightingale' by Kristin Hannah",
+      "type": "event",
+      "entities": [
+        "The Nightingale",
+        "Kristin Hannah"
+      ]
+    },
+    {
+      "fact": "User took three weeks to finish 'The Nightingale'",
+      "type": "event",
+      "entities": [
+        "The Nightingale"
+      ]
+    },
+    {
+      "fact": "User found 'The Nightingale' to be a really emotional and heavy read",
+      "type": "opinion",
+      "entities": [
+        "The Nightingale"
+      ]
+    },
+    {
+      "fact": "User loved 'The Nightingale'",
+      "type": "opinion",
+      "entities": [
+        "The Nightingale"
+      ]
+    },
+    {
+      "fact": "User is looking for historical fiction book recommendations",
+      "type": "preference",
+      "entities": [
+        "historical fiction"
+      ]
+    },
+    {
+      "fact": "User has heard great things about 'All the Light We Cannot See'",
+      "type": "opinion",
+      "entities": [
+        "All the Light We Cannot See"
+      ]
+    },
+    {
+      "fact": "User is interested in the pace of 'All the Light We Cannot See'",
+      "type": "preference",
+      "entities": [
+        "All the Light We Cannot See"
+      ]
+    }
+  ],
+  "answer_5e3bb940_2": [
+    {
+      "fact": "User enjoys listening to audiobooks during their daily commute",
+      "type": "preference",
+      "entities": [
+        "audiobooks",
+        "daily commute"
+      ]
+    },
+    {
+      "fact": "User finished 'The Seven Husbands of Evelyn Hugo' in two and a half weeks",
+      "type": "event",
+      "entities": [
+        "The Seven Husbands of Evelyn Hugo"
+      ]
+    },
+    {
+      "fact": "User is intrigued by 'The Royal We' and 'The Address'",
+      "type": "preference",
+      "entities": [
+        "The Royal We",
+        "The Address"
+      ]
+    },
+    {
+      "fact": "User is unsure if 'The Royal We' and 'The Address' are available on their local library's audiobook platform",
+      "type": "opinion",
+      "entities": [
+        "The Royal We",
+        "The Address",
+        "local library's audiobook platform"
+      ]
+    }
+  ]
+}

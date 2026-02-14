@@ -1,0 +1,33 @@
+**Observation Log:**
+
+[FACT] The user is engaged in a conversation about lung auscultation and terminology related to respiratory sounds.
+
+[TEMPORAL] The session date is 2023/05/20 (Sat) at 19:24.
+
+[ASSISTANT_SAID] Chest auscultation has a long history, dating back to the time of Hippocrates.
+
+[ASSISTANT_SAID] Widespread use of chest auscultation began with the invention of the stethoscope by René Laënnec in 1816.
+
+[ASSISTANT_SAID] During the second half of the 20th century, technological advances in imaging shifted interest away from auscultation.
+
+[ASSISTANT_SAID] Modern computer-assisted techniques have improved the precision of recording and analysis of lung sounds.
+
+[ASSISTANT_SAID] The correlation of acoustic indexes with measures of lung mechanics has increased the clinical usefulness of auscultation.
+
+[ASSISTANT_SAID] This review provides an overview of lung auscultation in the light of modern concepts of lung acoustics.
+
+[ASSISTANT_SAID] The traditional nomenclature for lung sounds is imprecise.
+
+[ASSISTANT_SAID] The International Lung Sounds Association proposed a new terminology.
+
+[ASSISTANT_SAID] The term "rale" was replaced with "crackle" in the new terminology.
+
+[ASSISTANT_SAID] "Crackle" can be defined acoustically and does not suggest any means or site of generation.
+
+[ASSISTANT_SAID] The clinical characteristics of normal and adventitious sounds are summarized in Table 1.
+
+[ASSISTANT_SAID] The lung sounds can be heard in an interactive graphic available at NEJM.org.
+
+[ASSISTANT_CREATED] The assistant created a set of Anki flashcards based on the atomic sentences provided by the user.
+
+[ASSISTANT_CREATED] The flashcards include questions and answers about the history of chest auscultation, the invention of the stethoscope, technological advances in imaging, modern techniques in lung sound analysis, and the new terminology for lung sounds.

@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/29 (Mon) 22:11
+- [USER] User asked to define energy.
+- [ASSISTANT_SAID] Energy is the ability or capacity to do work. It can take many forms, such as thermal, kinetic, potential, electrical, chemical, nuclear, and more. Energy can be transferred from one form to another, but it cannot be created or destroyed, only converted. It is a fundamental physical quantity and is measured in units such as Joules (J).
+- [USER] User requested elaboration on energy.
+- [ASSISTANT_SAID] Energy is a property of matter and is present in many different forms, including:
+  - [ASSISTANT_SAID] Thermal energy: the energy of motion of particles in a substance, felt as heat.
+  - [ASSISTANT_SAID] Kinetic energy: the energy of motion, such as a rolling ball or a moving car.
+  - [ASSISTANT_SAID] Potential energy: the energy an object has due to its position or state, like a stretched rubber band or a raised weight.
+  - [ASSISTANT_SAID] Electrical energy: the energy of moving electric charges, powering devices like smartphones and laptops.
+  - [ASSISTANT_SAID] Chemical energy: the energy stored in the bonds of atoms and molecules, powering cars and heating homes through fossil fuels.
+  - [ASSISTANT_SAID] Nuclear energy: the energy stored in the nucleus of an atom, powering nuclear reactors and atomic bombs.
+- [ASSISTANT_SAID] Energy can be transferred from one form to another through heat transfer, work, or electromagnetic radiation. The total amount of energy in a closed system remains constant, known as the law of conservation of energy. The most common unit of energy is Joules (J), but other units like calories, kilowatt-hours, and electronvolts are also used.
+- [ASSISTANT_SAID] In physics, energy is a scalar quantity and a state function, meaning only the difference in energy between two states is important, not the absolute value.
+- [USER] User asked about non-renewable energy.
+- [ASSISTANT_SAID] Non-renewable energy comes from sources that cannot be replenished in a short period of time and are finite. Common sources include fossil fuels: coal, oil, and natural gas.
+- [ASSISTANT_SAID] Fossil fuels formed millions of years ago from the remains of plants and animals subjected to high temperatures and pressures, converting organic matter into hydrocarbons.
+- [ASSISTANT_SAID] Non-renewable energy sources have environmental and economic downsides, including:
+  - [ASSISTANT_SAID] Burning fossil fuels releases carbon dioxide and pollutants, contributing to climate change and

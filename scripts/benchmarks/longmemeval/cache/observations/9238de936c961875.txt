@@ -1,0 +1,18 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/29 (Mon) 22:44  
+[ASSISTANT_SAID] The difference in the output graph between the previous coefficients A = [0.75] and B = [0.25], and the coefficients A = 0 and B = ones(10,1)/10, will likely be quite significant.  
+[ASSISTANT_SAID] In the previous case, where A = [0.75] and B = [0.25], we have a high-pass filter with a relatively strong feedback component.  
+[ASSISTANT_SAID] The filter will tend to smooth out rapid changes in the input signal, while also attenuating high-frequency components of the signal.  
+[ASSISTANT_SAID] The result will be a smoothed version of the input signal, with some attenuation of the signal peaks.  
+[ASSISTANT_SAID] When we set A = 0 and B = ones(10,1)/10, we have a very different filter.  
+[ASSISTANT_SAID] The feedforward component of the filter is a moving average, which applies equal weights to the current and previous 9 input values.  
+[ASSISTANT_SAID] The feedback component of the filter is completely eliminated, as A = 0.  
+[ASSISTANT_SAID] The result of this filter will be a much more heavily smoothed version of the input signal, compared to the previous filter with A = [0.75] and B = [0.25].  
+[ASSISTANT_SAID] The output signal will be much more gradual, with less pronounced peaks and valleys, due to the averaging effect of the filter.  
+[ASSISTANT_SAID] The moving average filter will also tend to eliminate high-frequency components of the input signal, leading to a much smoother output signal overall.  
+[ASSISTANT_SAID] In summary, the previous filter with A = [0.75] and B = [0.25] will produce a relatively smoothed version of the input signal, with some attenuation of the signal peaks.  
+[ASSISTANT_SAID] The filter with A = 0 and B = ones(10,1)/10, on the other hand, will produce a heavily smoothed version of the input signal, with no attenuation of the signal peaks.  
+[ASSISTANT_SAID] The choice of filter will depend on the specific application and the desired characteristics of the output signal.  
+[USER] What if the coefficients are A = [0]; B = [1;-1]? What are the expected output graph?  
+[ASSISTANT_SAID] If the coefficients are A = [0] and B = [1;-1], this represents a simple finite impulse response (FIR)

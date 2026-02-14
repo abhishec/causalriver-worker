@@ -1,0 +1,58 @@
+**Observation Log:**
+
+[FACT] User is looking for new TV shows to watch.  
+[FACT] User enjoys "Stranger Things" and "The Crown".  
+[FACT] User has been listening to "My Favorite Murder" for over a year.  
+[FACT] User has a new Netflix subscription that started around the 15th of March.  
+[FACT] User is a big fan of the "Sandman" comic book series.  
+[FACT] User has been binge-watching a lot of TV shows lately.  
+[FACT] User enjoys listening to true crime stories during their daily commute.  
+
+[PREFERENCE] User has great taste in TV shows, enjoying both fantasy/horror and historical dramas.  
+[PREFERENCE] User enjoys true crime podcasts and is always looking for new recommendations.  
+[PREFERENCE] User enjoys the variety of shows and movies on Netflix.  
+[PREFERENCE] User loved the wild ride that "Tiger King" took them on.  
+
+[ASSISTANT_SAID] Recommended TV shows similar to "Stranger Things":  
+1. The Haunting of Hill House  
+2. The OA  
+3. The X-Files  
+4. The Twilight Zone (2019)  
+5. Locke & Key  
+
+[ASSISTANT_SAID] Recommended TV shows similar to "The Crown":  
+1. Victoria  
+2. The White Queen  
+3. Outlander  
+4. The Great  
+5. Poldark  
+
+[ASSISTANT_SAID] Recommended true crime podcasts similar to "My Favorite Murder":  
+1. Crime Junkie  
+2. Last Podcast on the Left  
+3. Lore  
+4. Serial  
+5. Criminal  
+6. The Vanished  
+7. The Generation Why Podcast  
+8. Casefile True Crime Podcast  
+
+[ASSISTANT_SAID] Provided a list of Netflix original shows released in 2022 (up to August 2022) including:  
+- Drama: Inventing Anna, Ozark (Season 4, Part 1), The Sandman, The Witcher: Blood Origin, Resident Evil  
+- Comedy: The Afterparty, Blockbuster, God's Favorite Idiot, First Kill, Uncoupled  
+- Horror/Thriller: Archive 81, The Midnight Club, The Imperfects, Wednesday, The School for Good and Evil  
+- Documentary: The Tinder Swindler, The Puppet Master: Hunting the Ultimate Conman, The Tinder Swindler: The Podcast  
+
+[ASSISTANT_SAID] Recommended comedy shows similar to "Brooklyn Nine-Nine":  
+1. Parks and Recreation  
+2. Schitt's Creek  
+3. The Good Place  
+4. New Girl  
+5. Friends from College  
+6. Santa Clarita Diet  
+7. Arrested Development  
+8. 30 Rock  
+9. Community  
+10. Superstore  
+
+[ASSISTANT_SAID] Recommended documentaries similar to "Tiger King":

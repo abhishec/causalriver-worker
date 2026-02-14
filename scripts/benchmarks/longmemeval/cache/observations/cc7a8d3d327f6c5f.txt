@@ -1,0 +1,22 @@
+**Observation Log:**
+
+- [FACT] User is experiencing issues with their laptop's performance.
+- [FACT] User installed a new 16GB DDR4 RAM stick in their laptop.
+- [FACT] User replaced their old mouse with a wired Razer mouse about a month ago.
+- [PREFERENCE] User finds the new wired Razer mouse to be a huge improvement.
+- [EVENT] User is backing up files to an external hard drive as part of decluttering their digital life.
+- [CHANGE] User's laptop was slow before the RAM installation and remains slow afterward.
+- [FACT] User's laptop has a 2TB Western Digital hard drive.
+- [FACT] User has antivirus software installed on their laptop.
+- [TEMPORAL] Session date is 2022/09/18.
+- [ASSISTANT_SAID] Assistant offered to help troubleshoot the laptop's performance issues.
+- [ASSISTANT_SAID] Assistant asked about specific symptoms related to the laptop's slow performance, including boot times, application usage, lag, heat, and fan noise.
+- [ASSISTANT_SAID] Assistant suggested checking Task Manager or Activity Monitor for background processes consuming high disk usage.
+- [ASSISTANT_SAID] Assistant mentioned potential causes for high disk usage, including resource-intensive programs, disk fragmentation, Windows Search, malware, system file corruption, disk errors, and resource-intensive system processes.
+- [ASSISTANT_SAID] Assistant recommended running Disk Cleanup and checking disk health using tools like CrystalDiskInfo or Disk Utility.
+- [ASSISTANT_SAID] Assistant suggested monitoring disk usage during the backup process and adjusting backup software settings.
+- [ASSISTANT_SAID] Assistant recommended considering an SSD upgrade for improved laptop performance.
+- [ASSISTANT_SAID] Assistant listed benefits of upgrading to an SSD, including faster boot times, loading times, improved responsiveness, lower power consumption, and increased durability.
+- [ASSISTANT_SAID] Assistant advised checking laptop specifications and reviews for compatible SSDs.
+- [ASSISTANT_SAID] Assistant discussed the possibility of further RAM upgrades and the complexity of upgrading the graphics card in laptops.
+- [ASSISTANT_SAID] Assistant suggested using tools like Crucial's Advisor Tool or Kingston's Memory Search to find compatible RAM upgrades.

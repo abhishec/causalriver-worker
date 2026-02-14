@@ -1,0 +1,82 @@
+{
+  "answer_6ea1541e_2": [
+    {
+      "fact": "User is planning to volunteer at a local soup kitchen this weekend",
+      "type": "event",
+      "entities": [
+        "soup kitchen",
+        "weekend"
+      ]
+    },
+    {
+      "fact": "User attended Ash Wednesday service at the cathedral on February 1st",
+      "type": "event",
+      "entities": [
+        "Ash Wednesday",
+        "cathedral",
+        "February 1st"
+      ]
+    },
+    {
+      "fact": "User reflects on the importance of giving back to the community",
+      "type": "opinion",
+      "entities": [
+        "giving back",
+        "community"
+      ]
+    },
+    {
+      "fact": "User is curious about organizations or charities that provide food and shelter to the homeless during the Lenten season",
+      "type": "preference",
+      "entities": [
+        "organizations",
+        "charities",
+        "food",
+        "shelter",
+        "homeless",
+        "Lenten season"
+      ]
+    }
+  ],
+  "answer_6ea1541e_1": [
+    {
+      "fact": "User is thinking of volunteering at a local charity event.",
+      "type": "preference",
+      "entities": [
+        "volunteering",
+        "local charity event"
+      ]
+    },
+    {
+      "fact": "User is interested in organizations that focus on serving the homeless.",
+      "type": "preference",
+      "entities": [
+        "organizations",
+        "homeless"
+      ]
+    },
+    {
+      "fact": "User attended Sunday mass at St. Mary's Church on January 2nd.",
+      "type": "event",
+      "entities": [
+        "St. Mary's Church",
+        "January 2nd"
+      ]
+    },
+    {
+      "fact": "User resonated with the sermon on forgiveness.",
+      "type": "opinion",
+      "entities": [
+        "sermon",
+        "forgiveness"
+      ]
+    },
+    {
+      "fact": "User is interested in learning more about Catholic Charities.",
+      "type": "preference",
+      "entities": [
+        "Catholic Charities"
+      ]
+    }
+  ]
+}

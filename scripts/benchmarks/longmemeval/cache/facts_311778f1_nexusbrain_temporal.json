@@ -1,0 +1,60 @@
+{
+  "answer_e40b054e": [
+    {
+      "fact": "User consumes a lot of educational content.",
+      "type": "preference",
+      "entities": [
+        "educational content"
+      ]
+    },
+    {
+      "fact": "User is interested in online courses or resources on data science and machine learning.",
+      "type": "preference",
+      "entities": [
+        "data science",
+        "machine learning"
+      ]
+    },
+    {
+      "fact": "User watches documentaries on Netflix, especially on space exploration and artificial intelligence.",
+      "type": "preference",
+      "entities": [
+        "Netflix",
+        "space exploration",
+        "artificial intelligence"
+      ]
+    },
+    {
+      "fact": "User learned a lot from the series 'Cosmos'.",
+      "type": "opinion",
+      "entities": [
+        "Cosmos"
+      ]
+    },
+    {
+      "fact": "User is interested in applying machine learning to work projects.",
+      "type": "preference",
+      "entities": [
+        "machine learning",
+        "work projects"
+      ]
+    },
+    {
+      "fact": "User wants to automate tasks and make predictions using machine learning.",
+      "type": "preference",
+      "entities": [
+        "automating tasks",
+        "making predictions"
+      ]
+    },
+    {
+      "fact": "User thinks they spent 10 hours last month watching documentaries on Netflix.",
+      "type": "event",
+      "entities": [
+        "10 hours",
+        "Netflix",
+        "documentaries"
+      ]
+    }
+  ]
+}

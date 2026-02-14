@@ -1,0 +1,24 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/03/08 (Wed) 05:53  
+[ASSISTANT_SAID] The paper "MoDL: Model Based Deep Learning Architecture for Inverse Problems" proposes the MoDL (Model-Based Deep Learning) architecture as a solution to the problems discussed in the field of inverse problems.  
+[ASSISTANT_SAID] The MoDL approach incorporates the physics-based model of the measurement process into the DNN architecture.  
+[ASSISTANT_SAID] The MoDL approach performs a joint optimization of the network parameters and the parameters of the physics-based model.  
+[ASSISTANT_SAID] The MoDL approach uses a multi-layer architecture, with each layer of the network performing a different step in the inverse problem.  
+[ASSISTANT_SAID] The MoDL approach is trained end-to-end on the measurement data directly.  
+[ASSISTANT_SAID] The MoDL approach is designed to handle non-linear inverse problems and model mismatches.  
+[ASSISTANT_SAID] The MoDL approach can be used to solve inverse problems involving large datasets.  
+[ASSISTANT_SAID] The MoDL approach combines the benefits of traditional physics-based models and deep learning, providing improved accuracy and efficiency for solving inverse problems.  
+[USER] Results from the proposed solution?  
+[ASSISTANT_SAID] The MoDL approach outperforms traditional inverse problems solvers in terms of accuracy and computational efficiency.  
+[ASSISTANT_SAID] Improved accuracy was shown compared to traditional inverse problems solvers, such as Tikhonov regularization, in several inverse problems, including MRI, CT, and X-ray crystallography.  
+[ASSISTANT_SAID] The MoDL approach converges faster than traditional inverse problems solvers, reducing computational costs.  
+[ASSISTANT_SAID] The MoDL approach is robust to model mismatches, providing accurate reconstruction results even with imperfect physics-based models.  
+[ASSISTANT_SAID] The MoDL approach is generalizable, applicable to a wide range of inverse problems in fields like medical imaging, X-ray crystallography, and audio source separation.  
+[USER] Comparison between previous method and MoDL?  
+[ASSISTANT_SAID] The MoDL approach provides improved accuracy compared to traditional inverse problems solvers like Tikhonov regularization.  
+[ASSISTANT_SAID] The MoDL approach converges faster than traditional inverse problems solvers.  
+[ASSISTANT_SAID] The MoDL approach is robust to model mismatches.  
+[ASSISTANT_SAID] The MoDL approach incorporates physics-based models into the DNN architecture.  
+[ASSISTANT_SAID] The MoDL approach performs joint optimization of network and model parameters.  
+[ASSISTANT_SA

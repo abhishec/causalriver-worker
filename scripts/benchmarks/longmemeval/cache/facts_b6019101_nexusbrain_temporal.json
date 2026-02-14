@@ -1,0 +1,91 @@
+{
+  "answer_67074b4b_1": [
+    {
+      "fact": "User is planning a movie marathon with their family over the long weekend",
+      "type": "event",
+      "entities": [
+        "movie marathon",
+        "family",
+        "long weekend"
+      ]
+    },
+    {
+      "fact": "User wants to re-watch classic films from their childhood",
+      "type": "preference",
+      "entities": [
+        "classic films",
+        "childhood"
+      ]
+    },
+    {
+      "fact": "User is interested in popular movies from the 80s and 90s",
+      "type": "preference",
+      "entities": [
+        "80s movies",
+        "90s movies"
+      ]
+    },
+    {
+      "fact": "User has been on a Marvel binge recently",
+      "type": "preference",
+      "entities": [
+        "Marvel"
+      ]
+    },
+    {
+      "fact": "User wants to share Marvel films with their family",
+      "type": "relationship",
+      "entities": [
+        "Marvel films",
+        "family"
+      ]
+    }
+  ],
+  "answer_67074b4b_2": [
+    {
+      "fact": "User is planning a movie marathon with family over the upcoming long weekend",
+      "type": "event",
+      "entities": [
+        "movie marathon",
+        "family",
+        "long weekend"
+      ]
+    },
+    {
+      "fact": "User wants to include classic movies from childhood in the marathon",
+      "type": "preference",
+      "entities": [
+        "classic movies",
+        "childhood"
+      ]
+    },
+    {
+      "fact": "User has watched 12 films in the last 3 months",
+      "type": "personal",
+      "entities": [
+        "12 films",
+        "3 months"
+      ]
+    },
+    {
+      "fact": "User has watched 5 MCU films recently",
+      "type": "personal",
+      "entities": [
+        "5 MCU films"
+      ]
+    },
+    {
+      "fact": "User is considering including The Lion King and Back to the Future in the marathon",
+      "type": "preference",
+      "entities": [
+        "The Lion King",
+        "Back to the Future"
+      ]
+    },
+    {
+      "fact": "User is unsure about other movie choices for the marathon",
+      "type": "opinion",
+      "entities": []
+    }
+  ]
+}

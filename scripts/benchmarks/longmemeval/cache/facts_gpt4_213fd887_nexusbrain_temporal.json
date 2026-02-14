@@ -1,0 +1,110 @@
+{
+  "answer_53582e7e_1": [
+    {
+      "fact": "User has been trying to get more into fitness lately.",
+      "type": "preference",
+      "entities": [
+        "fitness"
+      ]
+    },
+    {
+      "fact": "User plays volleyball in a recreational league.",
+      "type": "event",
+      "entities": [
+        "volleyball",
+        "recreational league"
+      ]
+    },
+    {
+      "fact": "User has been playing volleyball for about 2 months.",
+      "type": "event",
+      "entities": [
+        "2 months"
+      ]
+    },
+    {
+      "fact": "User is trying to improve their serves in volleyball.",
+      "type": "preference",
+      "entities": [
+        "serves",
+        "volleyball"
+      ]
+    },
+    {
+      "fact": "User has managed to get a few aces in the last few games.",
+      "type": "event",
+      "entities": [
+        "aces",
+        "games"
+      ]
+    },
+    {
+      "fact": "User wants to get better at serving.",
+      "type": "opinion",
+      "entities": [
+        "serving"
+      ]
+    },
+    {
+      "fact": "User is looking for tips on how to practice their serve on their own.",
+      "type": "preference",
+      "entities": [
+        "practice",
+        "serve"
+      ]
+    },
+    {
+      "fact": "User has friends from work who play volleyball.",
+      "type": "relationship",
+      "entities": [
+        "friends",
+        "work"
+      ]
+    }
+  ],
+  "answer_53582e7e_2": [
+    {
+      "fact": "User plays volleyball regularly",
+      "type": "preference",
+      "entities": [
+        "volleyball"
+      ]
+    },
+    {
+      "fact": "User is trying to get to the gym more often",
+      "type": "preference",
+      "entities": [
+        "gym"
+      ]
+    },
+    {
+      "fact": "User recently did a charity 5K run for a local children's hospital",
+      "type": "event",
+      "entities": [
+        "charity 5K run",
+        "children's hospital"
+      ]
+    },
+    {
+      "fact": "User found the charity 5K run to be a great experience",
+      "type": "opinion",
+      "entities": [
+        "charity 5K run"
+      ]
+    },
+    {
+      "fact": "User signed up for a 20-mile cycling event next month",
+      "type": "event",
+      "entities": [
+        "20-mile cycling event"
+      ]
+    },
+    {
+      "fact": "User needs to work on their endurance",
+      "type": "preference",
+      "entities": [
+        "endurance"
+      ]
+    }
+  ]
+}

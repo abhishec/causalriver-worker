@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/30 (Tue) 04:42
+- [ASSISTANT_CREATED] Scene where MK helps Macaque through the barrier, including dialogue and actions.
+- [ASSISTANT_CREATED] Scene where MK and Macaque reach the golden aura barrier, including dialogue and actions.
+- [ASSISTANT_CREATED] Scene where MK, Mei, and Tang support Macaque as they exit the cave and encounter Wukong, including dialogue and actions.
+- [ASSISTANT_CREATED] Scene where Wukong gives the order for his army to attack, including dialogue and actions.
+- [FACT] MK is a character who helps Macaque escape from captivity.
+- [FACT] Macaque is a character who is weak and barely able to stand on his own at the beginning of the conversation.
+- [FACT] Mei and Tang are characters who assist MK and Macaque.
+- [FACT] Wukong is a character who stands at the front of the golden-haired monkey army.
+- [PREFERENCE] MK expresses a desire to help Macaque reclaim his throne and defeat Wukong.
+- [EVENT] MK and Macaque escape from a cave where Macaque was held captive.
+- [CHANGE] Macaque is freed from captivity and is now supported by MK, Mei, and Tang.
+- [RELATIONSHIP] MK is the son of Wukong.
+- [RELATIONSHIP] Macaque is referred to as "my friend" by MK and is also referred to as "your majesty" by Mei and Tang.
+- [ASSISTANT_SAID] MK recalls using a spell to weaken the barrier's magic to help Macaque pass through.
+- [ASSISTANT_SAID] Wukong expresses disappointment in MK for disobeying orders and putting the kingdom at risk.
+- [ASSISTANT_SAID] Wukong acknowledges that they must unite to fight for their kingdom and freedom.
+- [ASSISTANT_SAID] A giant dragon appears, which is revealed to be the guardian of the king, protecting Macaque.
+- [ASSISTANT_SAID] Macaque expresses gratitude to MK for freeing him and suggests returning to their kingdom.

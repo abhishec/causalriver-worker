@@ -1,0 +1,38 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/27 (Sat) 22:37
+- [EVENT] User is planning a road trip to Texas next month.
+- [PREFERENCE] User is looking for recommendations on must-try barbecue joints in Texas.
+- [PREFERENCE] User has heard great things about the BBQ scene in Austin but is open to exploring other cities.
+- [ASSISTANT_SAID] Austin BBQ recommendations include:
+  - **Franklin Barbecue**: Known as one of the best BBQ joints in the country, famous for brisket, ribs, and sausage.
+  - **La Barbecue**: Female-owned, focuses on quality and community.
+  - **Stubb's BBQ**: A Texas institution since 1992, offers a variety of meats and homemade sides.
+- [ASSISTANT_SAID] Other city BBQ recommendations include:
+  - **Dallas**:
+    - **Pecan Lodge BBQ**: Modern take on traditional BBQ with creative sides and desserts.
+    - **Cousin's BBQ**: Family-owned since 1983, serving classic Texas-style BBQ.
+  - **Houston**:
+    - **Killen's Barbecue**: Known for slow-smoked meats and creative specials.
+    - **Pinkerton's Barbecue**: Casual spot with tender, flavorful meats.
+  - **San Antonio**:
+    - **2M Smokehouse**: Blends traditional and modern BBQ styles.
+    - **Cooper's Old Time Pit Bar-B-Que**: Classic BBQ since 1983.
+  - **Waco**:
+    - **Vitek's BBQ**: A Waco staple since 1915, offering classic BBQ and traditional sides.
+- [ASSISTANT_SAID] Tips for the BBQ road trip include:
+  - Be prepared for lines, especially at popular joints.
+  - Arrive early for popular meats.
+  - Try new things, including different types of sausage or unusual sides.
+  - Bring cash, as not all joints accept credit cards.
+  - Be respectful of BBQ culture and traditions.
+- [PREFERENCE] User is interested in trying all the recommended BBQ places.
+- [EVENT] User is experimenting with different types of wood chips for smoking meats.
+- [ASSISTANT_SAID] Recommendations for wood chips include:
+  - **Post Oak**: Strong, smoky flavor with notes of vanilla and caramel.
+  - **Mesquite**: Bold, intense smoke flavor; use sparingly.
+  - **Hickory**: Sweet, smoky flavor with notes of bacon.
+  - **Applewood**: Milder, sweeter smoke flavor; pairs well with poultry and pork.
+  - **Pecan**: Rich, nutty flavor; good for beef, pork, and chicken.
+  - **Cherry**: Fruity, slightly sweet flavor; great for poultry and pork.
+-

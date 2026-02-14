@@ -1,0 +1,30 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/24 (Wed) 22:12  
+[EVENT] User has been doing a lot of online shopping lately.  
+[EVENT] User wants to get a better handle on spending habits.  
+[ASSISTANT_SAID] Assistant is happy to help organize online purchases and gain insight into spending habits.  
+[ASSISTANT_SAID] Assistant requests the following information:  
+[ASSISTANT_SAID] 1. Receipts or order confirmations from the past few months.  
+[ASSISTANT_SAID] 2. Bank or credit card statements from the past few months.  
+[ASSISTANT_SAID] 3. A list of online shopping platforms and websites frequented by the user.  
+[ASSISTANT_SAID] Assistant offers to help categorize purchases by type, track spending by date, amount, and category, identify patterns or trends, and set a budget.  
+[EVENT] User has most receipts and order confirmations but is still digging through emails.  
+[EVENT] User recalls spending around $200 on collectible vinyl records on eBay in March, including a rare pressing of The Beatles' Sgt. Pepper's Lonely Hearts Club Band.  
+[ASSISTANT_SAID] Assistant suggests prioritizing tracking the $200 purchase on eBay.  
+[ASSISTANT_SAID] Assistant notes the significance of the expense and its potential to indicate spending patterns.  
+[ASSISTANT_CREATED] Assistant creates a note for the eBay purchase:  
+[ASSISTANT_CREATED] **March - eBay - Vinyl Records - $200**  
+[ASSISTANT_CREATED] * Item: Sgt. Pepper's Lonely Hearts Club Band (rare pressing) and other vinyl records  
+[ASSISTANT_CREATED] * Category: Hobbies/Entertainment  
+[EVENT] User remembers another purchase from Everlane using a 20% off coupon.  
+[ASSISTANT_SAID] Assistant asks for details about the Everlane purchase, including specific items and original price.  
+[EVENT] User recalls buying three new shirts and a pair of jeans from Everlane, totaling around $150 after the discount.  
+[ASSISTANT_CREATED] Assistant adds the Everlane purchase to the list:  
+[ASSISTANT_CREATED] **March - Everlane - Clothing - $150**  
+[ASSISTANT_CREATED] * Items: 3 shirts, 1 pair of jeans  
+[ASSISTANT_CREATED] * Original Price: $187.50 (assuming 20% discount from $150)  
+[ASSISTANT_CREATED] * Discount: 20% off  
+[ASSISTANT_CREATED] * Total Spent: $150  
+[EVENT] User finds more receipts in their email inbox.  
+[EVENT] User finds a receipt from Amazon for a wireless charging pad and phone case, totaling around $40.

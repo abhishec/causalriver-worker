@@ -1,0 +1,19 @@
+**Observation Log:**
+
+- [FACT] The user is planning a team-building event for their company.
+- [FACT] The user went to Knott's Berry Farm with coworkers for a summer outing on 2023/03/26.
+- [PREFERENCE] The user enjoyed their experience at Knott's Berry Farm and is looking for other amusement parks for corporate events.
+- [EVENT] The user is considering Disneyland Resort for their corporate event.
+- [TEMPORAL] The session date is 2023/03/26.
+- [ASSISTANT_SAID] The assistant recommended several amusement parks for corporate events, including Disneyland Resort, Six Flags Magic Mountain, Universal Studios Hollywood, Cedar Point, Busch Gardens Tampa Bay, Hersheypark, Silver Dollar City, and Dollywood.
+- [ASSISTANT_SAID] The assistant provided details about Disneyland Resort's group events, corporate event packages, and discounts for large groups.
+- [ASSISTANT_SAID] The assistant mentioned that Disneyland Resort offers customized event packages, private event spaces, catering options, exclusive access to attractions, and Disney character appearances.
+- [ASSISTANT_SAID] The assistant advised the user to contact Disney's Meeting & Convention Team for customized quotes and planning assistance.
+- [PREFERENCE] The user is considering booking a private event space at Disneyland.
+- [ASSISTANT_SAID] The assistant explained the benefits of having a private event space at Disneyland, including exclusivity, customization, convenience, VIP treatment, food and beverage options, networking opportunities, memorable experiences, brand integration, flexibility, and Disney's expertise.
+- [FACT] The Grand Ballroom at the Disneyland Hotel can accommodate up to 1,200 guests.
+- [ASSISTANT_SAID] The assistant described the Grand Ballroom as elegant and sophisticated, with state-of-the-art amenities and catering options.
+- [EVENT] The user is considering booking a character breakfast at the Plaza Inn for their corporate event.
+- [PREFERENCE] The user is unsure if a character breakfast at the Plaza Inn is suitable for adults.
+- [FACT] The user has been to the Plaza Inn for their niece's birthday and found it fun.
+- [ASSISTANT_SAID] The assistant has not yet provided specific information about character breakfasts at the Plaza Inn or their suitability for corporate events.

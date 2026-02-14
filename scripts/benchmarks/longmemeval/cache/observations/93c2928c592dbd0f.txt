@@ -1,0 +1,21 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2021/05/17 (Mon) 04:02  
+[FACT] User has combination skin that tends to get oily in the summer.  
+[FACT] User's main skin concerns are acne and hyperpigmentation.  
+[EVENT] User purchased the following products during the Nordstrom anniversary sale: La Mer Moisturizing Cream, Sunday Riley Power Couple, and Dr. Dennis Gross Skincare Alpha Beta Peel Body & Face.  
+[FACT] User's current skincare routine is basic: they wash their face morning and night and then apply moisturizer.  
+[PREFERENCE] User is unsure how to incorporate new products into their routine or if they should be used morning, night, or both.  
+[ASSISTANT_SAID] Assistant congratulated the user on their new skincare haul and offered to help optimize their skincare routine.  
+[ASSISTANT_SAID] Assistant requested information about the user's skin type, concerns, products purchased, current skincare routine, and specific product categories they are unsure about.  
+[ASSISTANT_SAID] Assistant provided a detailed morning skincare routine: cleanse, apply Dr. Dennis Gross Skincare Alpha Beta Peel, apply Sunday Riley Power Couple serum, and follow with La Mer Moisturizing Cream.  
+[ASSISTANT_SAID] Assistant provided a detailed nighttime skincare routine: cleanse, apply Dr. Dennis Gross Skincare Alpha Beta Peel, apply Sunday Riley Power Couple serum, and suggested using a lightweight, oil-free moisturizer instead of La Mer Moisturizing Cream.  
+[ASSISTANT_SAID] Assistant recommended using the Dr. Dennis Gross Skincare Alpha Beta Peel 2-3 times a week and starting with the Sunday Riley Power Couple serum once a day if the user has sensitive skin.  
+[ASSISTANT_SAID] Assistant advised to wear sunscreen with at least SPF 30 during the day to prevent further hyperpigmentation.  
+[CHANGE] User has been trying to cut back on unnecessary expenses and make more intentional purchasing decisions.  
+[PREFERENCE] User feels more in control of their finances due to these changes.  
+[ASSISTANT_SAID] Assistant provided lifestyle changes to help with skin concerns, including hydration, diet, stress management, environmental factors, skincare habits, and other lifestyle changes.  
+[ASSISTANT_SAID] Assistant suggested drinking 8-10 glasses of water a day and limiting sugary drinks and caffeine.  
+[ASSISTANT_SAID] Assistant recommended eating a balanced diet rich in fruits, vegetables, whole grains, and lean proteins, and including skin-friendly foods like berries, leafy greens, and fatty fish.  
+[ASSISTANT_SAID] Assistant advised managing stress through techniques like meditation, deep breathing, or yoga, and getting enough sleep (7-8 hours).  
+[ASSISTANT_SAID] Assistant emphasized the importance of protecting skin from the sun and avoiding

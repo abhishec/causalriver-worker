@@ -1,0 +1,24 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2022/06/10 (Fri) 20:50  
+[EVENT] User is planning a dinner party this weekend.  
+[FACT] User recently got fresh basil from Green Earth Farm at the Farmers' Market at the community center.  
+[PREFERENCE] User is thinking of making a caprese salad for the dinner party.  
+[ASSISTANT_SAID] Fresh mozzarella should have a mild, milky aroma and a soft, creamy texture.  
+[ASSISTANT_SAID] Avoid mozzarella with a strong smell or a dry, crumbly texture.  
+[ASSISTANT_SAID] Opt for mozzarella that's packaged in water or brine to keep it fresh and moist.  
+[ASSISTANT_SAID] Consider buying from an Italian market or a specialty cheese shop that imports fresh mozzarella from Italy.  
+[ASSISTANT_SAID] Look for labels that say "fresh mozzarella" or "mozzarella fresca."  
+[ASSISTANT_SAID] Fresh mozzarella should have a mild, creamy flavor.  
+[ASSISTANT_SAID] Fresh basil is a crucial component of a caprese salad, and using locally sourced, fresh basil will elevate the flavor and aroma.  
+[ASSISTANT_SAID] Pair fresh mozzarella and basil with ripe, flavorful tomatoes and a good quality extra-virgin olive oil.  
+[PREFERENCE] User is considering making a pesto sauce to serve on the side.  
+[ASSISTANT_SAID] Classic Basil Pesto Recipe includes:  
+[ASSISTANT_CREATED] 2 cups fresh basil leaves, 1/3 cup pine nuts, 1/2 cup grated Parmesan cheese, 1/2 cup extra-virgin olive oil, 2 cloves garlic, salt to taste.  
+[ASSISTANT_SAID] Instructions for making pesto include rinsing and drying basil, combining ingredients in a food processor, adding olive oil, and seasoning with salt.  
+[ASSISTANT_SAID] Tips for pesto include using high-quality ingredients, not overprocessing basil, and adjusting garlic to taste.  
+[PREFERENCE] User is also thinking of making bruschetta as an appetizer.  
+[ASSISTANT_SAID] Classic Bruschetta Recipe includes:  
+[ASSISTANT_CREATED] 4-6 slices of bread, 1 large tomato, 1/4 cup extra-virgin olive oil, 2 cloves garlic, 1/4 cup fresh basil leaves, salt and pepper, 1/4 cup freshly grated mozzarella cheese (optional).  
+[ASSISTANT_SAID] Instructions for bruschetta include preheating the oven, mixing the topping, assembling the bruschetta, and serving immediately.  
+[ASSISTANT_SAID] Suggested bread options for bruschetta include baguette, ciabatta, focaccia, grilled

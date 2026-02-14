@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/28 (Sun) 16:55  
+[USER] The user is trying to stick to a morning walk routine.  
+[USER] The user is worried about the air quality in their area.  
+[ASSISTANT_SAID] The assistant provided information on how to check the air quality index (AQI) online.  
+[ASSISTANT_SAID] The assistant recommended the following websites and apps to check AQI:  
+[ASSISTANT_SAID] 1. AirNow.gov: Government-run website for current and forecasted AQI data in the U.S.  
+[ASSISTANT_SAID] 2. PurpleAir.com: Provides real-time AQI data from a network of sensors globally.  
+[ASSISTANT_SAID] 3. AirVisual.com: Offers a global air quality map with current AQI readings and forecasts.  
+[ASSISTANT_SAID] 4. Weather Apps: Popular weather apps like Dark Sky, Weather Underground, or The Weather Channel provide air quality information.  
+[ASSISTANT_SAID] 5. Google Search: Typing "air quality index [your city/zip code]" in Google displays the current AQI reading.  
+[ASSISTANT_SAID] The assistant explained AQI categories: Good, Moderate, Unhealthy for Sensitive Groups, Unhealthy, Very Unhealthy, and Hazardous.  
+[ASSISTANT_SAID] The assistant provided recommendations based on AQI levels:  
+[ASSISTANT_SAID] - Good (AQI < 50): Generally safe to walk.  
+[ASSISTANT_SAID] - Moderate (AQI 51-100): Consider wearing a mask or taking precautions, especially if having respiratory issues.  
+[ASSISTANT_SAID] - Unhealthy (AQI 101-150) or higher: Recommended to avoid outdoor activities, especially with health concerns.  
+[ASSISTANT_SAID] The assistant advised checking the AQI regularly, especially during peak pollution periods or wildfires.  
+[USER] The user asked for a good way to track walking progress and set reminders for morning walks.  
+[ASSISTANT_SAID] The assistant congratulated the user on establishing a morning walk routine and provided tracking and reminder suggestions.  
+[ASSISTANT_SAID] Tracking options include:  
+[ASSISTANT_SAID] 1. Pedometer or Fitness Tracker: To track daily steps, distance, and calories burned.  
+[ASSISTANT_SAID] 2. Mobile Apps: Suggested apps include Google Fit, Apple Health, Fitbit Coach, and MapMyWalk.  
+[ASSISTANT_SAID] 3. Walking Log: Keeping a physical or digital log to record walks.  
+[ASSISTANT_SA

@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[FACT] User starts their dream job at a top consulting firm on 2023/05/01.  
+[EVENT] User is looking for advice on how to prioritize tasks and manage time efficiently.  
+[ASSISTANT_SAID] Assistant congratulated the user on their new job and offered productivity tips and tools to help them stay organized.  
+[ASSISTANT_SAID] Suggested setting clear goals and objectives by breaking them down into smaller, achievable tasks.  
+[ASSISTANT_SAID] Recommended using the Eisenhower Matrix to prioritize tasks into four quadrants: Urgent & Important, Important but Not Urgent, Urgent but Not Important, and Not Urgent or Important.  
+[ASSISTANT_SAID] Suggested using a task management system like Todoist, Trello, or Asana.  
+[ASSISTANT_SAID] Listed features of Todoist: prioritization, deadlines, project templates, reminders, and due dates.  
+[ASSISTANT_SAID] Listed features of Trello: boards, lists, cards, labels, members, checklists, and Power-Ups.  
+[ASSISTANT_SAID] Recommended time-blocking the schedule by dividing the day into focused work time followed by breaks.  
+[ASSISTANT_SAID] Advised against multitasking to ensure quality and efficiency.  
+[ASSISTANT_SAID] Suggested managing the inbox by setting up filters and using the 2-minute rule for quick responses.  
+[ASSISTANT_SAID] Recommended staying organized digitally using cloud storage like Google Drive, Dropbox, or OneDrive.  
+[ASSISTANT_SAID] Emphasized the importance of taking breaks and practicing self-care to avoid burnout.  
+[ASSISTANT_SAID] Suggested regularly reviewing and adjusting progress, goals, and task lists.  
+[ASSISTANT_SAID] Advised seeking feedback and support from colleagues or mentors.  
+[ASSISTANT_SAID] Mentioned additional tools like RescueTime, Focus@Will, and Evernote.  
+[ASSISTANT_SAID] Encouraged finding a system that works for the user and being flexible in trying new tools and techniques.  
+[FACT] User expressed interest in using a task management system like Todoist or Trello.  
+[ASSISTANT_SAID] Provided specific features and templates suitable for a consulting firm using Todoist, including projects, labels, priorities, deadlines, comments, recurring tasks, and integrations.  
+[ASSISTANT_SAID] Suggested templates for consulting projects and client onboarding in Todoist.  
+[FACT] User decided to start with Todoist and explore its features.  
+[ASSISTANT_SAID] Explained how to integrate Todoist with Google Calendar, including connecting accounts, syncing tasks, and customizing the integration.  
+[ASSISTANT_SAID] Described how to use

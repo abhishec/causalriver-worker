@@ -1,0 +1,25 @@
+### Observation Log
+
+[TEMPORAL] Session Date: 2023/05/23 (Tue) 22:37  
+[USER] User requested a brief text for a GitLab issue in markdown.  
+[USER] User tasked the engineering team with testing and documenting how to connect a data source in Sisense.  
+[ASSISTANT_SAID] Assistant provided a markdown text for the GitLab issue titled "Test and document data source connection in Sisense."  
+[ASSISTANT_CREATED] Assistant included a description and acceptance criteria in the markdown text.  
+[ASSISTANT_SAID] Assistant suggested including the type of data source, steps to set up the connection, potential issues, and relevant configurations in the documentation.  
+[USER] User requested to remove formalities and make it about enumerating the task.  
+[ASSISTANT_SAID] Assistant revised the markdown text to remove formalities.  
+[ASSISTANT_CREATED] Assistant provided a new version of the markdown text with a more direct approach.  
+[USER] User requested formatting with headers: description and acceptance criteria.  
+[ASSISTANT_SAID] Assistant reformatted the markdown text to include headers for description and acceptance criteria.  
+[USER] User requested the markdown to be provided in a code block.  
+[ASSISTANT_CREATED] Assistant provided the markdown text in a code block format.  
+[USER] User requested another issue with the title "Q1 Sisense Internal KT (Installation, Upgrade and Monitoring)" where "KT" means "knowledge transfer."  
+[ASSISTANT_SAID] Assistant created a new markdown text for the issue titled "Q1 Sisense Internal KT (Installation, Upgrade and Monitoring)."  
+[ASSISTANT_CREATED] Assistant included a description and acceptance criteria for the knowledge transfer session in the markdown text.  
+[USER] User requested to format the new issue in a passive description of the work to be done.  
+[ASSISTANT_SAID] Assistant revised the markdown text to use a passive voice for the description.  
+[USER] User requested a specific format for the markdown text with sections: DESCRIPTION, GOAL, SCOPE, ACCEPTANCE CRITERIA, and REVIEW AND VERIFICATION.  
+[ASSISTANT_SAID] Assistant formatted the markdown text according to the specified structure.  
+[ASSISTANT_CREATED] Assistant provided the complete markdown text in the requested format.  
+[USER] User requested the final markdown text to be placed in a code block.  
+[ASSISTANT_CREATED] Assistant provided the final markdown text in a code block format.

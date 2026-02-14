@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2021/05/12 (Wed) 09:20
+- [FACT] User is working on a short story, a sci-fi story about a group of astronauts on a mission to Mars.
+- [PREFERENCE] User is excited to be working on the story.
+- [TEMPORAL] User started the story on December 28th.
+- [FACT] User has already written around 12,000 words.
+- [ASSISTANT_SAID] Mars is a rocky planet with a thin atmosphere, characterized by diverse geological features including mountains, valleys, canyons, craters, and volcanoes.
+- [ASSISTANT_SAID] Mars' surface is divided into two main regions: the southern hemisphere, which is ancient and cratered, and the northern hemisphere, which is younger and relatively smooth.
+- [ASSISTANT_SAID] Olympus Mons is the largest volcano in the solar system, located in the Tharsis region, around 27 km high and with a base diameter of over 600 km.
+- [ASSISTANT_SAID] The Tharsis Bulge includes Olympus Mons, Pavonis Mons, and Arsia Mons.
+- [ASSISTANT_SAID] Valles Marineris is a massive canyon system stretching over 4,000 km in length, up to 7 km deep, and up to 200 km wide.
+- [ASSISTANT_SAID] Coprates Chasma is a large canyon system that forms part of Valles Marineris, with steep cliffs and deep valleys.
+- [ASSISTANT_SAID] Ares Vallis is a wide, flat valley that stretches over 1,000 km, formed by ancient rivers and tectonic activity.
+- [ASSISTANT_SAID] Hellas Basin is a massive impact crater in the southern hemisphere, about 2,200 km wide and 4 km deep.
+- [ASSISTANT_SAID] Argyre Basin is another large impact crater, located in the southern hemisphere, about 1,800 km wide and 3 km deep.
+- [ASSISTANT_SAID] Mars is known for its massive dust storms, which can last for weeks or months, caused by the planet's thin atmosphere and abrasive soil.
+- [ASSISTANT_SAID] Mars has two polar ice caps made of water ice and dry ice (frozen carbon dioxide), which grow and shrink seasonally.
+- [ASSISTANT_SAID] Mars has experienced volcanic activity in the past, with evidence of lava flows, volcanic ash, and hydrothermal activity.
+- [FACT] User is considering having astronauts land near the Valles Marineris canyon system.
+- [ASSISTANT_SAID] The terrain surrounding Valles Marineris includes layered sedimentary and volcanic rocks, such as basalts, sand

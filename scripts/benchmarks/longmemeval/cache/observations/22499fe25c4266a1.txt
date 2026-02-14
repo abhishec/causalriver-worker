@@ -1,0 +1,26 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/20 (Sat) 21:57  
+[USER] User is interested in scraping a real estate website.  
+[USER] User wants to receive an email once a day with new listings that match their search criteria.  
+[ASSISTANT_SAID] To scrape a real estate website, the user should:  
+[ASSISTANT_SAID] 1. Choose a real estate website to scrape and determine what data to extract (e.g., new listings, price, location).  
+[ASSISTANT_SAID] 2. Inspect the website's source code using developer tools to understand data structure.  
+[ASSISTANT_SAID] 3. Write a scraping script using a programming language like Python and libraries such as BeautifulSoup or Scrapy.  
+[ASSISTANT_SAID] 4. Store the extracted data in a searchable format, like a database (SQLite) or a CSV file.  
+[ASSISTANT_SAID] 5. Set up a task scheduler (cron on Linux or Task Scheduler on Windows) to run the script daily.  
+[ASSISTANT_SAID] 6. Compare new data against stored data to identify new listings matching search criteria.  
+[ASSISTANT_SAID] 7. Use a library like smtplib in Python to send an email with new listings.  
+[ASSISTANT_SAID] Note: Scraping websites can violate terms of use and strain servers; users should be mindful.  
+[USER] User inquired about how to get around rate limiting or having their IP address blocked.  
+[ASSISTANT_SAID] To avoid rate limiting or IP blocking while scraping, the user can:  
+[ASSISTANT_SAID] 1. Use a proxy server to make requests appear from different IP addresses.  
+[ASSISTANT_SAID] 2. Use rotating IP addresses to bypass rate limiting measures.  
+[ASSISTANT_SAID] 3. Implement a delay in the script between requests to avoid triggering rate limits.  
+[ASSISTANT_SAID] 4. Use a headless browser to load the website and extract information.  
+[ASSISTANT_SAID] 5. Respect the website's terms of use, which may include scraping restrictions.  
+[USER] User asked what a headless browser is.  
+[ASSISTANT_SAID] A headless browser is a web browser that runs without a graphical user interface (GUI) and is controlled programmatically.  
+[ASSISTANT_SAID] Benefits of using a headless browser for web scraping include:  
+[ASSISTANT_SAID] 1. Simulating a real user to bypass rate limiting and CAPTCHAs.  
+[ASSISTANT_SAID] 2. Rendering

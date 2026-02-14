@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/26 (Fri) 00:14  
+[USER] User requests an explanation of a Jupyter notebook code for sentiment analysis line by line.  
+[ASSISTANT_SAID] The assistant explains that the header "Sentiment Analysis" indicates the following code will perform sentiment analysis.  
+[ASSISTANT_SAID] The assistant explains that `#!pip install textblob` installs the "textblob" library for natural language processing tasks.  
+[ASSISTANT_SAID] The assistant explains that `import pandas as pd` imports the "pandas" library for data manipulation and analysis.  
+[ASSISTANT_SAID] The assistant explains that `import nltk` imports the "nltk" library for natural language processing tasks.  
+[ASSISTANT_SAID] The assistant explains that `from textblob import TextBlob` imports the "TextBlob" class for performing common natural language processing tasks.  
+[ASSISTANT_SAID] The assistant explains that `from collections import Counter` imports the "Counter" class to count occurrences of items in a list.  
+[ASSISTANT_SAID] The assistant explains that `import matplotlib.pyplot as plt` imports the "pyplot" module for creating visualizations.  
+[ASSISTANT_SAID] The assistant explains that the code block creates a TextBlob object from the string "This movie great" and accesses its sentiment attribute to get a sentiment score.  
+[ASSISTANT_SAID] The assistant explains that `blob.sentiment_assessments.assessments` retrieves a list of all sentiment assessments for each sentence in the TextBlob object.  
+[ASSISTANT_SAID] The assistant provides two links for more information on how TextBlob calculates sentiment polarity.  
+[ASSISTANT_SAID] The assistant explains that the code reads a text file containing Trip Advisor reviews and stores it in a variable called "text".  
+[ASSISTANT_SAID] The assistant explains that the code performs sentiment analysis on the entire text file and accesses its sentiment attribute.  
+[ASSISTANT_SAID] The assistant explains that `blob.sentences` retrieves a list of all sentences in the TextBlob object.  
+[ASSISTANT_SAID] The assistant explains that `len(blob.sentences)` retrieves the number of sentences in the TextBlob object.  
+[USER] User points out that the assistant forgot to explain the code for listing sentiment words and collecting positive sentiment sentences.  
+[ASSISTANT_SAID] The assistant explains that `blist = blob.sentiment_assessments.assessments` creates a list of all sentiment words in the text.  
+[ASSISTANT_SAID] The assistant explains that `psentence = []` creates an empty list to store positive sentiment sentences.  
+[ASSISTANT_SA

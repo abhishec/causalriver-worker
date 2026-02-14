@@ -1,0 +1,54 @@
+{
+  "answer_ultrachat_269020": [
+    {
+      "fact": "User appreciates Triumvirate's emphasis on employee safety.",
+      "type": "opinion",
+      "entities": [
+        "Triumvirate",
+        "employee safety"
+      ]
+    },
+    {
+      "fact": "User believes it's important for companies to prioritize the well-being of their workers.",
+      "type": "opinion",
+      "entities": [
+        "companies",
+        "well-being",
+        "workers"
+      ]
+    },
+    {
+      "fact": "User wishes more companies followed Triumvirate's example.",
+      "type": "opinion",
+      "entities": [
+        "companies",
+        "Triumvirate"
+      ]
+    },
+    {
+      "fact": "User feels reassured that companies can be successful while prioritizing employee safety.",
+      "type": "opinion",
+      "entities": [
+        "companies",
+        "employee safety"
+      ]
+    },
+    {
+      "fact": "User believes it's a win-win when companies take care of their employees.",
+      "type": "opinion",
+      "entities": [
+        "companies",
+        "employees"
+      ]
+    },
+    {
+      "fact": "User is interested in knowing about other companies that prioritize safety and well-being.",
+      "type": "preference",
+      "entities": [
+        "companies",
+        "safety",
+        "well-being"
+      ]
+    }
+  ]
+}

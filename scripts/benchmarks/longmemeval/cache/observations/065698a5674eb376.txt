@@ -1,0 +1,30 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/28 (Sun) 10:21
+- [FACT] The user is in the process of buying a house.
+- [EVENT] The user is trying to figure out how much to save for closing costs.
+- [FACT] The first house the user saw was listed for $425,000.
+- [CHANGE] The user found a better deal on a different property.
+- [FACT] The user ended up finding a house for $350,000.
+- [ASSISTANT_SAID] The assistant congratulated the user on finding a better deal on a house.
+- [ASSISTANT_SAID] The assistant stated that closing costs typically range from 2% to 5% of the purchase price.
+- [ASSISTANT_SAID] For a $425,000 house, the estimated closing costs would be:
+  - 2% of $425,000 = $8,500
+  - 3% of $425,000 = $12,750
+  - 4% of $425,000 = $17,000
+  - 5% of $425,000 = $21,250
+- [ASSISTANT_SAID] The assistant advised the user to calculate closing costs based on the new purchase price of $350,000.
+- [ASSISTANT_SAID] The assistant provided additional costs associated with buying a home, including:
+  - Inspection fees (around $500 to $1,000)
+  - Appraisal fees (around $300 to $1,000)
+  - Title insurance and escrow fees (around $1,500 to $3,000)
+  - Loan origination fees (around 0.5% to 1% of the loan amount)
+- [ASSISTANT_SAID] The assistant suggested discussing closing costs with the lender and real estate agent for more detailed estimates.
+- [ASSISTANT_SAID] The assistant wished the user good luck with their home buying journey.
+- [FACT] The user mentioned their agent's name is Rachel.
+- [ASSISTANT_SAID] The assistant confirmed that negotiating with the seller to cover some closing costs is possible and provided tips for negotiation.
+- [ASSISTANT_SAID] The assistant suggested making a strong offer, being specific about which costs to cover, and being respectful during negotiations.
+- [ASSISTANT_SAID] The assistant confirmed that using the home inspection results to negotiate with the seller is a common practice.
+- [ASSISTANT_SAID] The assistant advised the user to focus on the facts, prioritize issues, be reasonable, and get agreements in writing when negotiating based on the inspection report.
+- [FACT] The user had already completed a home inspection.
+- [ASSISTANT_SAID] The assistant agreed that asking the seller to fix the

@@ -1,0 +1,36 @@
+{
+  "answer_bbdc7b0a": [
+    {
+      "fact": "User is considering upgrading their old laptop",
+      "type": "preference",
+      "entities": [
+        "laptop",
+        "upgrade"
+      ]
+    },
+    {
+      "fact": "User is interested in the differences between a MacBook Air and a Lenovo ThinkPad",
+      "type": "preference",
+      "entities": [
+        "MacBook Air",
+        "Lenovo ThinkPad"
+      ]
+    },
+    {
+      "fact": "User is thinking of mounting a new TV on the wall",
+      "type": "preference",
+      "entities": [
+        "TV",
+        "mounting"
+      ]
+    },
+    {
+      "fact": "User is worried about visible cables when mounting the TV",
+      "type": "opinion",
+      "entities": [
+        "cables",
+        "TV"
+      ]
+    }
+  ]
+}

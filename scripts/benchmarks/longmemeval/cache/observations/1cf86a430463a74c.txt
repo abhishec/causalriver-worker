@@ -1,0 +1,31 @@
+**Observation Log:**
+
+- [FACT] The user is interested in OctoPrint.
+- [ASSISTANT_SAID] OctoPrint is a web-based interface for controlling 3D printers.
+- [ASSISTANT_SAID] OctoPrint allows users to monitor and control their 3D printers remotely using a web browser.
+- [ASSISTANT_SAID] OctoPrint provides features such as uploading and printing 3D models, viewing and analyzing print bed and extruder temperature in real-time, and starting, stopping, and pausing prints.
+- [ASSISTANT_SAID] OctoPrint is often used with 3D printers that run the open-source firmware Marlin.
+- [ASSISTANT_SAID] OctoPrint is typically run on a Raspberry Pi or similar single-board computer.
+- [USER] The user would like to add Samba and share the watched folder to their local network to a user named Snapmaker.
+- [ASSISTANT_SAID] To add Samba, the user should install it on their OctoPrint machine by running `sudo apt-get install samba samba-common-bin`.
+- [ASSISTANT_SAID] The user should create a new Samba configuration file by running `sudo nano /etc/samba/smb.conf`.
+- [ASSISTANT_SAID] The user should add specific lines to the Samba configuration file, replacing "/path/to/watched/folder" with the actual path to the watched folder.
+- [ASSISTANT_SAID] The configuration lines to be added are:
+  ```
+  [OctoPrint]
+    comment = OctoPrint Watched Folder
+    path = /path/to/watched/folder
+    browseable = yes
+    read only = no
+    guest ok = no
+    create mask = 0644
+    directory mask = 0755
+    force user = pi
+  ```
+- [ASSISTANT_SAID] The user should save and close the configuration file.
+- [ASSISTANT_SAID] The user should restart the Samba service by running `sudo service smbd restart`.
+- [ASSISTANT_SAID] The user should add a Samba user for the Snapmaker user by running `sudo smbpasswd -a Snapmaker`.
+- [ASSISTANT_SAID] The user should follow the prompts to set a password for the Snapmaker user.
+- [ASSISTANT_SAID] The user should be able to access the watched folder from other devices on their local network by browsing to `\[OctoPrint IP address]\OctoPrint`.
+- [ASSISTANT_SAID] The Snapmaker user will be able to authenticate with the password set by the user.
+- [ASSISTANT_SAID] The assistant offered to help further if the user has any questions or needs assistance.

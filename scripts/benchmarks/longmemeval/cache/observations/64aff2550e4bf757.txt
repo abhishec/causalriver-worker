@@ -1,0 +1,36 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/26 (Fri) 17:23  
+[EVENT] User has a project deadline approaching fast.  
+[TEMPORAL] User states the project deadline is around 3 weeks from now.  
+[EVENT] User had a team meeting on Tuesday at 2:00 PM.  
+[FACT] User needs to complete a report, make a presentation, and finalize the project proposal.  
+[CHANGE] User is unsure how much time each task will take but knows they need to work on them simultaneously.  
+[RELATIONSHIP] User has a conference call with a client on Wednesday at 11:00 AM.  
+[ASSISTANT_SAID] Assistant offered to help organize tasks and create a schedule to meet the project deadline.  
+[ASSISTANT_SAID] Assistant asked for more information about the project and tasks, including the project deadline, specific tasks, estimated time for each task, dependencies, and other commitments.  
+[ASSISTANT_SAID] Assistant confirmed the user had a team meeting on Tuesday but asked for clarification on the date.  
+[ASSISTANT_CREATED] Assistant created a rough outline for the next three weeks, detailing tasks and time allocations:  
+- **Week 1:**  
+  - Report: Allocate 2-3 days to research and outline (Days 1-3)  
+  - Allocate 2-3 days to write the report (Days 4-6)  
+  - Prepare for Client Call (Wednesday, 11:00 AM): Allocate 1-2 hours to review notes (Day 2 or 3)  
+- **Week 2:**  
+  - Finalize Report: Allocate 1-2 days to review, edit, and finalize (Days 8-9)  
+  - Presentation Preparation: Allocate 2-3 days to create outline (Days 10-12)  
+  - Allocate 1-2 days to design and finalize slides (Days 13-14)  
+- **Week 3:**  
+  - Finalize Presentation: Allocate 1-2 days to practice (Days 15-16)  
+  - Proposal: Allocate 2-3 days to write (Days 17-19)  
+  - Allocate 1-2 days to review and edit (Days 20-21)  
+[ASSISTANT_SAID] Assistant suggested setting specific goals for each day, dedicating specific times for tasks, leaving buffer time for unexpected tasks, and regularly reviewing progress.  
+[PREFERENCE] User liked the idea of dedicating specific times of the day for each task.  
+[ASSISTANT_SAID] Assistant provided suggestions for tools/apps to stay organized:  
+- Trello  
+- Asana  
+- Todoist  
+- Microsoft To Do  
+- Google Tasks  
+- Evernote  
+- Pomodoro Timers  
+[FACT] User

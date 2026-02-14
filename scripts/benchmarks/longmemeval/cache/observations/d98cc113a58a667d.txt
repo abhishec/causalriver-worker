@@ -1,0 +1,24 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/30 (Tue) 04:38  
+[FACT] User has been taking sculpting classes for three months.  
+[FACT] User takes classes every Saturday morning.  
+[RELATIONSHIP] User's instructor is named Rachel.  
+[PREFERENCE] User enjoys sculpting and has been taking classes.  
+[ASSISTANT_SAID] Recommended online resources and tutorials for improving sculpting skills, including:  
+[ASSISTANT_SAID] YouTube Channels: Sculpting Tutorials by Artists Network, The Sculpture Studio, Proko.  
+[ASSISTANT_SAID] Online Courses: Skillshare, Craftsy, New Masters Academy.  
+[ASSISTANT_SAID] Blogs and Forums: Sculpture magazine, Sculpture.net.  
+[ASSISTANT_SAID] Specific Tutorials: "Sculpting the Human Figure" by Artists Network, "Figure Sculpture" by Proko, "Animal Sculpture" by The Sculpture Studio, "Abstract Sculpture" by Craftsy.  
+[ASSISTANT_SAID] Additional tips for improving sculpting skills: practice regularly, experiment with different materials, join online communities, study the work of other sculptors.  
+[PREFERENCE] User has been watching YouTube tutorials on coiling.  
+[ASSISTANT_SAID] Recommended YouTube channels for coiling: Ceramic School, The Pottery, ClayShare, Sue Heaser Ceramics, Linda Sormin.  
+[ASSISTANT_SAID] Specific videos for coiling: "Coiling Basics" by Ceramic School, "Coiling a Vase" by The Pottery, "Coiling a Bowl" by ClayShare, "Coiling a Sculptural Form" by Sue Heaser Ceramics, "Coiling with Slabs" by Linda Sormin.  
+[ASSISTANT_SAID] Tips for getting coils to stick together: score and slip, slip and slide, press and smooth, use the right consistency, work in thin layers, use a gentle touch, dry slowly, practice makes perfect.  
+[PREFERENCE] User has been doing coiling for a few weeks.  
+[CHANGE] User is still getting the hang of coiling.  
+[ASSISTANT_SAID] Recommended basic equipment for setting up a sculpting studio: work surface, armature wire, modeling tools, clay, wire cutters and pliers, measuring and marking tools.  
+[ASSISTANT_SAID] Optional equipment for a sculpting studio: pottery wheel, kiln or oven, sculpting stand, turntable, reference materials.  
+[ASSISTANT_SAID] Tips for studio setup: good lighting, comfortable seating, storage, ventilation.  
+[PREFERENCE] User is thinking of setting up a small sculpting studio in their garage.  
+[EVENT] User plans to start by setting up a small workspace in their garage and

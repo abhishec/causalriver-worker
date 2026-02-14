@@ -1,0 +1,20 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/29 (Mon) 11:29  
+[USER] User requested step-by-step instructions on how to make paneer bhurji with store-bought paneer.  
+[ASSISTANT_SAID] Assistant provided a recipe for paneer bhurji using store-bought paneer.  
+[ASSISTANT_CREATED] Recipe included ingredients: 1 cup paneer, 1 medium onion, 1 medium tomato, 1 green chili, 1 teaspoon ginger paste, 1 teaspoon garlic paste, 1/2 teaspoon cumin seeds, 1/2 teaspoon coriander seeds, 1/4 teaspoon turmeric, 1/2 teaspoon red chili powder, 1/2 teaspoon garam masala, 1/4 teaspoon cumin powder, salt to taste, 2 tablespoons oil, chopped cilantro for garnish.  
+[ASSISTANT_CREATED] Instructions for making paneer bhurji:  
+1. Heat oil in a pan over medium heat.  
+2. Add cumin seeds and coriander seeds and let them sizzle for a few seconds.  
+3. Add onions, green chili, and ginger paste. Saute until the onions are translucent.  
+4. Add tomatoes and cook until they are soft and mushy.  
+5. Add the crumbled paneer and mix well.  
+6. Add turmeric, red chili powder, garam masala, cumin powder, and salt. Mix well.  
+7. Cook for 2-3 minutes or until the paneer is well coated with the spices.  
+8. Garnish with chopped cilantro and serve hot with roti or rice.  
+[USER] User requested a revision of the recipe for 400g paneer.  
+[ASSISTANT_SAID] Assistant confirmed the request and provided a revised recipe for paneer bhurji using 400g paneer.  
+[ASSISTANT_CREATED] Revised recipe included ingredients: 400g paneer, 2 medium onions, 2 medium tomatoes, 2 green chilies, 2 teaspoons ginger paste, 2 teaspoons garlic paste, 1 teaspoon cumin seeds, 1 teaspoon coriander seeds, 1/2 teaspoon turmeric, 1 teaspoon red chili powder, 1 teaspoon garam masala, 1/2 teaspoon cumin powder, salt to taste, 4 tablespoons oil, chopped cilantro for garnish.  
+[ASSISTANT_CREATED] Instructions for making paneer bhurji remained the same as the original recipe.  
+[ASSISTANT_SAID] Assistant expressed hope that the revised recipe would work for the user and invited further questions.

@@ -1,0 +1,18 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/23 (Tue) 15:51  
+[ASSISTANT_SAID] Steps to grant access to an external SharePoint site using the "Azure AD Application" method in C#: Register the Azure AD application, obtain an access token, use the access token to access the SharePoint site.  
+[ASSISTANT_SAID] Example code provided for obtaining an access token in C# using a user account's credentials, including tenantId, clientId, userName, password, and resource.  
+[ASSISTANT_SAID] Example code provided for creating a new file in the SharePoint site using the access token.  
+[ASSISTANT_SAID] Steps to grant access to an external SharePoint site using the "SharePoint App-Only principal" method in C#.  
+[USER] Asked for further detailed explanations of the API permission granting process with examples and URL links to setting pages.  
+[ASSISTANT_SAID] Detailed steps for requesting API permissions: Provide client ID, navigate to SharePoint Admin Center, request API access, and approve the request.  
+[ASSISTANT_SAID] Detailed steps for granting API permissions manually: Navigate to API management page, search for Azure AD application, select it, and grant necessary permissions.  
+[ASSISTANT_SAID] Noted that steps may vary based on the specific version of SharePoint and Azure AD instance.  
+[USER] Inquired if there is a way for the Azure AD application owner to send a request or authorization link for the SharePoint owner/admin to easily authorize API permissions.  
+[ASSISTANT_SAID] Explained that there isn't a straightforward way to send a request or authorization link for API permissions; typically, the process is manual.  
+[USER] Requested a custom solution using C#.  
+[ASSISTANT_SAID] Provided a high-level overview of creating a custom solution using C# to automate granting API permissions, including creating an Azure AD application, implementing a web API, and sending requests.  
+[USER] Asked for further explanation of how the Global Admin approves the request for API access.  
+[ASSISTANT_SAID] Detailed the steps for the Global Admin to approve the API permission request: access the API management page, view the request, approve it, confirm the permission, and verify it in the permissions list.  
+[ASSISTANT_SAID] Noted that specific steps may vary depending on the version of SharePoint and advised referring to SharePoint documentation for detailed information.

@@ -1,0 +1,34 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2022/09/01 (Thu) 20:29  
+[USER] User requested a drink called the “Dirty Sancho” that includes Sancho tequila.  
+[ASSISTANT_SAID] Assistant provided a recipe for the Dirty Sancho cocktail.  
+[ASSISTANT_CREATED] The recipe includes the following ingredients:  
+[ASSISTANT_CREATED] * 2 oz Sancho tequila  
+[ASSISTANT_CREATED] * 1 oz fresh lime juice  
+[ASSISTANT_CREATED] * 1/2 oz agave nectar  
+[ASSISTANT_CREATED] * 1/4 oz olive brine  
+[ASSISTANT_CREATED] * 1/4 oz orange liqueur  
+[ASSISTANT_CREATED] * Salt and pepper for rimming glass  
+[ASSISTANT_CREATED] * Lime wheel for garnish  
+[ASSISTANT_SAID] Assistant provided instructions for making the Dirty Sancho cocktail:  
+[ASSISTANT_CREATED] 1. Rim a rocks glass with salt and pepper by rubbing a lime wedge around the rim and dipping it into a mixture of salt and pepper.  
+[ASSISTANT_CREATED] 2. Fill the glass with ice.  
+[ASSISTANT_CREATED] 3. In a shaker filled with ice, combine Sancho tequila, lime juice, agave nectar, olive brine, and orange liqueur.  
+[ASSISTANT_CREATED] 4. Shake until chilled and strain into the prepared glass.  
+[ASSISTANT_CREATED] 5. Garnish with a lime wheel and serve.  
+[ASSISTANT_SAID] Assistant encouraged the user to enjoy their Dirty Sancho cocktail.  
+[USER] User requested to add some Tajin to the cocktail.  
+[ASSISTANT_SAID] Assistant confirmed that Tajin is a delicious addition to cocktails with tequila.  
+[ASSISTANT_CREATED] Assistant provided an updated recipe for the Dirty Sancho cocktail that includes Tajin.  
+[ASSISTANT_CREATED] The updated recipe includes the following ingredients:  
+[ASSISTANT_CREATED] * 2 oz Sancho tequila  
+[ASSISTANT_CREATED] * 1 oz fresh lime juice  
+[ASSISTANT_CREATED] * 1/2 oz agave nectar  
+[ASSISTANT_CREATED] * 1/4 oz olive brine  
+[ASSISTANT_CREATED] * 1/4 oz orange liqueur  
+[ASSISTANT_CREATED] * Tajin for rimming glass  
+[ASSISTANT_CREATED] * Lime wheel for garnish  
+[ASSISTANT_SAID] Assistant provided updated instructions for making the Dirty Sancho cocktail with Tajin:  
+[ASSISTANT_CREATED] 1. Rim a rocks glass with Tajin by rubbing a lime wedge around the rim and dipping it into a dish of Tajin.  
+[ASSIST

@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/24 (Wed) 15:32  
+[FACT] User is thinking of trying out a new Korean recipe at home.  
+[PREFERENCE] User is looking for recommendations for a good Korean chili flake brand.  
+[ASSISTANT_SAID] Korean chili flakes are known as "gochugaru" in Korean and are a staple ingredient in Korean cuisine.  
+[ASSISTANT_SAID] Recommended Korean chili flake brands include:  
+[ASSISTANT_SAID] 1. Sempio: A well-known brand offering high-quality gochugaru with a bright red color and balanced flavor.  
+[ASSISTANT_SAID] 2. Koko: Offers a range of gochugaru products with different heat levels and finely ground, aromatic flakes.  
+[ASSISTANT_SAID] 3. Chongga: Known for vibrant color and intense flavor, offering organic and non-organic options.  
+[ASSISTANT_SAID] 4. Jjajang: Offers spicy and aromatic flakes with different heat levels and flavor profiles.  
+[ASSISTANT_SAID] 5. Assi: Popular among Korean expats, known for smooth, fine texture and balanced flavor.  
+[ASSISTANT_SAID] When choosing a Korean chili flake brand, consider heat level, flavor profile, and texture.  
+[ASSISTANT_SAID] These brands can be found at Asian markets or online retailers like Amazon.  
+[ASSISTANT_SAID] Suggested starting with a smaller bag to try out the flavor and heat level before committing to a larger quantity.  
+[PREFERENCE] User has been inspired to try making Japchae noodles at home after visiting a Korean restaurant.  
+[EVENT] User has been to a Korean restaurant near their office recently.  
+[ASSISTANT_SAID] Provided a recipe for Korean-style BBQ beef tacos, including ingredients and instructions:  
+[ASSISTANT_CREATED] **Korean-Style BBQ Beef Tacos Recipe**  
+[ASSISTANT_CREATED] Ingredients for beef: 1 lb beef (ribeye or sirloin), 2 tbsp Gochujang, 2 tbsp soy sauce, 2 tbsp brown sugar, 2 tbsp garlic (minced), 1 tsp ground black pepper, 1 tsp Korean chili flakes, 2 tbsp vegetable oil.  
+[ASSISTANT_CREATED] Ingredients for tacos: 8-10 corn tortillas, sliced green onions, toasted sesame seeds, kimchi slaw, cilantro, lime wedges.  
+[ASSISTANT_CREATED] Instructions: Marinate beef, grill, slice, warm tortillas, assemble tacos.  
+[ASSISTANT_CREATED] Optional Kimchi Slaw Recipe: 2 cups kimchi (chopped), 1 cup shredded napa cabbage, 1/4 cup chopped cilantro

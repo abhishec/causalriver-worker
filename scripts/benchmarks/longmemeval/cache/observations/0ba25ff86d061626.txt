@@ -1,0 +1,20 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/20 (Sat) 22:11  
+[USER] User asked how to create a 3D sphere using Spline software.  
+[ASSISTANT_SAID] To create a 3D sphere using Spline software, start by launching Spline and creating a new project.  
+[ASSISTANT_SAID] In the 3D view, select the "Create" tab in the toolbar and then click on the "Sphere" icon.  
+[ASSISTANT_SAID] This will bring up the "Create Sphere" dialog box, where you can specify the radius of the sphere and the number of segments you want to use to create it.  
+[ASSISTANT_SAID] Once you have set the desired parameters, click on the "Create" button to create the sphere.  
+[ASSISTANT_SAID] The sphere will appear in the 3D view, and you can use the various tools in Spline to manipulate it as needed.  
+[ASSISTANT_SAID] The sphere will be created as a mesh object, which is a collection of vertices, edges, and faces that define the shape of the object.  
+[ASSISTANT_SAID] You can use the "Edit" tab in the toolbar to modify the shape of the sphere by moving individual vertices or manipulating the edges and faces.  
+[ASSISTANT_SAID] You can also use the "Material" tab to apply textures and colors to the sphere.  
+[USER] User asked how to turn the 3D sphere into a Mickey Mouse character.  
+[ASSISTANT_SAID] To turn a 3D sphere into a Mickey Mouse character, start by scaling the sphere to the size you want for Mickey Mouse's head using the "Scale" tool in the "Edit" tab of the toolbar.  
+[ASSISTANT_SAID] Next, use the "Move" tool to position the sphere so that it is oriented in the way you want Mickey Mouse's head to be.  
+[ASSISTANT_SAID] Use the "Extrude" tool to create the shape of Mickey Mouse's ears by selecting the faces of the sphere that will become the ears and pulling them out from the head.  
+[ASSISTANT_SAID] Use the "Subdivide" tool to add more detail and resolution to the ears to refine their shape and make them more realistic.  
+[ASSISTANT_SAID] Use the "Smooth" tool to smooth out the surface of the ears and make them look more organic.  
+[ASSISTANT_SAID] Use the "Move" tool to position the ears in the correct location on the head.  
+[ASSISTANT_SAID] Use the "Extrude" tool to create the nose and mouth by pulling out the appropriate faces

@@ -1,0 +1,28 @@
+**Observation Log:**
+
+- [FACT] User is associated with the OHS Advisory department.
+- [FACT] User's location is Toronto, ON.
+- [FACT] User's salary range is $50,000.00 - $55,000.00 CAD per annum, commensurate on experience.
+- [FACT] User is involved with PEN Canada, a provider of external HR and OHS solutions.
+- [FACT] PEN Canada employs over 2,500 people globally and opened its first Canadian office in Toronto in September 2017.
+- [FACT] User's role is Technical Health & Safety Advisor, which is an office-based position.
+- [FACT] User's regular working hours are from 9:00 a.m. to 5:30 p.m., Monday to Friday, with flexibility required.
+- [FACT] User's responsibilities include performing annual reviews of client documentation, providing health and safety advice, writing and revising policies, conducting research, and completing internal reports.
+- [FACT] User has a degree, diploma, or certificate from an accredited health and safety education or training program.
+- [FACT] User has a minimum of one year of relevant health and safety training and work experience.
+- [PREFERENCE] User has strong knowledge of Occupational Health and Safety legislation and related regulations in Canada.
+- [PREFERENCE] User possesses excellent communication and writing skills.
+- [PREFERENCE] User has strong analytical and synthesis skills.
+- [PREFERENCE] User has excellent time management skills.
+- [PREFERENCE] User is a team player and can work independently.
+- [PREFERENCE] User has a high level of computer literacy.
+- [ASSISTANT_SAID] The next step in the user's career after finishing their degree in OHS at Ryerson University could include entry-level OHS positions, OHS Consultant roles, specialized roles, management roles, or starting their own OHS consulting company.
+- [ASSISTANT_SAID] Networking with professionals in the field and joining professional associations such as the Canadian Society of Safety Engineering (CSSE) or the Canadian Centre for Occupational Health and Safety (CCOHS) is recommended.
+- [ASSISTANT_CREATED] A list of possible career reflection questions for the user after completing their first job as a Technical Health & Safety Advisor, including:
+  1. What did I learn about the Occupational Health and Safety field during my time at PEN Canada?
+  2. How did my responsibilities and duties evolve over the course of my time at PEN Canada?
+  3. What were some of the most challenging situations I encountered and how did I handle them?
+  4. What were some of my major accomplishments during my time at PEN Canada?
+  5. How did I contribute to the overall success of the company?
+  6. What are some areas I would like to improve upon in my next role?
+  7. What are the skills I have developed in my

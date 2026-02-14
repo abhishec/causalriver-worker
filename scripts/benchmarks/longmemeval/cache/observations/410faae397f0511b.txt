@@ -1,0 +1,26 @@
+**Observation Log:**
+
+**Session Date:** 2023/05/18 (Thu) 07:09  
+**Session ID:** 9eb7bb35
+
+1. [EVENT] User is looking for a good moving company to help with relocation.
+2. [ASSISTANT_SAID] Recommended national moving companies: Mayflower, United Van Lines, Allied Van Lines, Atlas Van Lines.
+3. [ASSISTANT_SAID] Recommended regional moving companies: JK Moving Services, Bellhops, PODS, ABF U-Pack.
+4. [ASSISTANT_SAID] Recommended online moving marketplaces: Moving.com, Unpakt.
+5. [ASSISTANT_SAID] Provided tips for choosing a moving company: research, get multiple quotes, verify licenses, check insurance, ask questions.
+6. [TEMPORAL] User is planning to move into a new home on April 1st.
+7. [EVENT] User finalized mortgage application with Wells Fargo last week.
+8. [CHANGE] User is excited about moving into a new home.
+9. [ASSISTANT_SAID] Advised user to book moving company as soon as possible due to potential availability issues.
+10. [ASSISTANT_SAID] Suggested starting to pack non-essential items ahead of time.
+11. [EVENT] User is sorting belongings into categories: donate, sell, and keep.
+12. [ASSISTANT_SAID] Provided a list of important documents to keep during the moving process: moving inventory, moving contract, insurance documents, receipts and estimates, identification and proof of ownership, utility setup documents, change of address documents.
+13. [ASSISTANT_SAID] Recommended keeping documents in a safe and easily accessible place.
+14. [EVENT] User got pre-approved for the mortgage on February 10th.
+15. [EVENT] User has been looking for homes and found the perfect one.
+16. [ASSISTANT_SAID] Provided tips for transferring utilities: create a utility checklist, contact providers, schedule disconnect dates, set up new accounts, update autopay, take final readings, confirm setup.
+17. [ASSISTANT_SAID] Suggested taking photos of meter readings and updating address with the US Postal Service.
+18. [ASSISTANT_SAID] Encouraged user to assess risks and choose the right equipment for home security.
+19. [ASSISTANT_SAID] Recommended home security systems: ADT Home Security, Vivint Smart Home, Ring Alarm, Nest Secure, SimpliSafe.
+20. [PREFERENCE] User is considering getting a Ring Alarm home security system.
+21. [ASSISTANT_SAID] Provided advice on furniture shopping and recommended online furniture stores: Wayfair, West Elm, Crate & Barrel.

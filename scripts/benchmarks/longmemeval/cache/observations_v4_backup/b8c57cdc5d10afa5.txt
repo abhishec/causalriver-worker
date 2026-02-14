@@ -1,0 +1,15 @@
+**Observation Log:**
+
+[SESSION_DATE] 2023/02/11 (Sat) 15:33  
+[FACT] User is trying to plan out their week.  
+[PREFERENCE] User is interested in productivity apps to help stay organized.  
+[ASSISTANT] Assistant suggested several productivity apps including Todoist, Trello, RescueTime, Evernote, Google Calendar, Any.do, Focus@Will, Forest, Wunderlist, IFTTT, Google Keep, Pomodoro Timer, Microsoft To Do, Asana, and Habitica.  
+[PREFERENCE] User is particularly interested in Todoist and Trello.  
+[ASSISTANT] Assistant provided details on how Todoist and Trello integrate with Google Calendar, including syncing tasks and creating tasks from calendar events.  
+[FACT] User already uses Todoist for task management.  
+[PREFERENCE] User wants to ensure Todoist fits into their daily routine.  
+[TEMPORAL] User usually goes to the gym at 7:00 pm on Mondays, Wednesdays, and Fridays.  
+[ASSISTANT] Assistant suggested setting a recurring task in Todoist for gym sessions, with reminders set for 1 hour before the session.  
+[PREFERENCE] User has multiple projects going on at the same time and wants to prioritize the right tasks.  
+[ASSISTANT] Assistant provided strategies for organizing tasks in Todoist, including using projects, labels, filters, priorities, task hierarchies, sections, task dependencies, custom views, task templates, and regular reviews.  
+[ASSISTANT] Assistant explained how to set and track goals in Todoist, including goal setting, goal types (project goals and task goals), and goal metrics (task completion and task count).

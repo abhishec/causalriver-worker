@@ -1,0 +1,25 @@
+**Observation Log:**
+
+- [FACT] User is inquiring about Moray's festivals and events.
+- [ASSISTANT_SAID] Assistant does not have access to current information on Moray's festivals and events regulations.
+- [ASSISTANT_SAID] Common restrictions for events may include alcohol consumption limits, age limits for activities, and rules about bringing items like backpacks, coolers, or outside food or drink.
+- [ASSISTANT_SAID] It is recommended to check with event organizers or visit their website for specific regulations and restrictions before attending.
+- [USER] User expresses dissatisfaction with the assistant's initial response, stating it is not helpful.
+- [ASSISTANT_SAID] Assistant apologizes for the confusion and explains its limitations regarding real-time information.
+- [ASSISTANT_SAID] Assistant suggests checking official event websites or contacting event organizers for specific information on restrictions or regulations.
+- [USER] User expresses frustration, questioning the assistant's usefulness and considering finding someone else for help.
+- [ASSISTANT_SAID] Assistant apologizes again and reiterates its limitations while offering to assist with any other questions.
+- [USER] User expresses further frustration, comparing the assistant to a "brick wall" and asking if there are any upcoming festivals in Moray.
+- [ASSISTANT_SAID] Assistant confirms it can help with information about upcoming festivals in Moray.
+- [ASSISTANT_SAID] Upcoming events in Moray include:
+  - The Spirit of Speyside Whisky Festival (November 3-8, 2021)
+  - The Forres Theme Day (November 6, 2021)
+  - The Keith Festival of Traditional Music and Song (TBD 2022)
+  - The Findhorn Bay Festival (September 2022)
+- [ASSISTANT_SAID] Assistant notes that events may be subject to change or cancellation due to the ongoing COVID-19 pandemic and advises checking official event websites or social media for the latest information.
+- [USER] User acknowledges the assistant's response as finally providing the information they were looking for and asks for more details about The Spirit of Speyside Whisky Festival.
+- [ASSISTANT_SAID] The Spirit of Speyside Whisky Festival is an annual event in Moray, Scotland, celebrating whisky.
+- [ASSISTANT_SAID] The festival began in 1999 and attracts whisky lovers and connoisseurs from around the world.
+- [ASSISTANT_SAID] Events during the festival include distillery tours, whisky and food pairings, masterclasses, seminars, and traditional ceilidh dances.
+- [ASSISTANT_SAID] The festival features over 60 distilleries, including Glenfiddich, The Macallan, and The Glenlivet.
+- [ASSISTANT_SAID] The 2021 festival is scheduled for November 3-8 and will include in-person

@@ -1,0 +1,43 @@
+**Observation Log:**
+
+[FACT] The user has been doing yoga classes at a new studio near their work.
+
+[FACT] The user has been attending yoga classes twice a week since February.
+
+[CHANGE] The user plans to increase their yoga practice to three times a week soon.
+
+[EVENT] The user is looking to plan their next running event, considering a 10K road race in June.
+
+[TEMPORAL] The user’s previous 5K run was in January.
+
+[TEMPORAL] The user is considering participating in a cycling event next month.
+
+[FACT] The user completed their previous 5K run in 31 minutes 45 seconds.
+
+[PREFERENCE] The user is looking for tips on how to pace themselves for a 10K road race.
+
+[ASSISTANT_SAID] The assistant congratulated the user on their 5K performance in January.
+
+[ASSISTANT_SAID] The assistant explained the difference between trail and road running, noting that trail running involves varied terrain and elevation changes, while road running typically involves a consistent, harder surface.
+
+[ASSISTANT_SAID] The assistant provided a pacing strategy for a 10K, recommending starting with a conservative pace, splitting the race into segments, and aiming for negative splits.
+
+[ASSISTANT_SAID] The assistant estimated the user’s 10K pace based on their 5K time, suggesting a pace of 6:45-7:00 min/mile.
+
+[ASSISTANT_SAID] The assistant recommended gradually increasing weekly mileage by no more than 10%, incorporating longer runs of 6-8 kilometers, and including interval training.
+
+[ASSISTANT_SAID] The assistant advised practicing fueling and hydration strategies during long runs and getting comfortable on roads.
+
+[ASSISTANT_SAID] The assistant provided race day tips, including starting with a relaxed pace, focusing on breathing and form, hydrating, and drawing energy from the crowd.
+
+[ASSISTANT_SAID] The assistant agreed with the user’s decision to incorporate strength training to improve running efficiency and reduce injury risk.
+
+[ASSISTANT_SAID] The assistant recommended core exercises such as planks, Russian twists, leg raises, side planks, and bird dogs.
+
+[ASSISTANT_SAID] The assistant recommended glute exercises such as squats, lunges, deadlifts, glute bridges, and step-ups.
+
+[ASSISTANT_SAID] The assistant suggested starting with lower reps and sets for strength training and focusing on proper form.
+
+[ASSISTANT_SAID] The assistant provided yoga poses that target the hips and legs, including Pigeon Pose, Downward-Facing Dog, Lizard Pose, Cobra Pose, Sphinx Pose, Tree Pose, Eagle Pose, Warrior Pose, Triangle Pose, and Seated Forward Fold.
+
+[ASSISTANT_SAID] The assistant advised the user to listen to their

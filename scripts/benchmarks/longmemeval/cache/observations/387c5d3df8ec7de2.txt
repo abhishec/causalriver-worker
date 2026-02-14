@@ -1,0 +1,34 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/28 (Sun) 04:54
+- [EVENT] User is planning a trip to New Zealand.
+- [PREFERENCE] User is interested in must-see destinations and activities in New Zealand.
+- [EVENT] User recently took a family trip to Oahu last month.
+- [ASSISTANT_SAID] New Zealand is a fantastic destination and the assistant is happy to help plan the trip.
+- [ASSISTANT_SAID] Must-see destinations and activities in New Zealand include:
+  - **North Island:**
+    1. **Auckland**: Explore the city's harbor, visit the iconic Sky Tower, and take a ferry to Waiheke Island for wine tastings and beautiful beaches.
+    2. **Bay of Islands**: Take a boat tour to see dolphins, penguins, and the famous Hole in the Rock.
+    3. **Rotorua**: Experience Māori culture, relax in natural hot springs, and explore Wai-O-Tapu's geothermal wonders.
+    4. **Hobbiton Movie Set**: Visit the famous Lord of the Rings filming location near Matamata.
+  - **South Island:**
+    1. **Milford Sound**: Take a scenic flight or boat tour to witness the breathtaking fjords, waterfalls, and glaciers.
+    2. **Queenstown**: Enjoy adventure activities like bungee jumping, skiing, or hiking in the stunning Southern Alps.
+    3. **Lake Wanaka**: Relax in this picturesque lakeside town, perfect for outdoor enthusiasts.
+    4. **Franz Josef Glacier**: Hike or take a helicopter tour to explore this majestic glacier.
+    5. **Abel Tasman National Park**: Kayak or hike through the beautiful beaches and native forests.
+- [ASSISTANT_SAID] Other activities in New Zealand include hiking, wildlife tours, wine tasting, and cultural experiences.
+- [PREFERENCE] User is planning to take 2-3 weeks for the trip.
+- [PREFERENCE] User is interested in outdoor activities like hiking and kayaking, and wants to experience local culture.
+- [ASSISTANT_SAID] Suggested itinerary for 2-3 weeks in New Zealand includes:
+  - **Week 1: North Island**
+    - Day 1-2: Auckland
+    - Day 3-4: Bay of Islands
+    - Day 5-6: Rotorua
+  - **Week 2: South Island**
+    - Day 7-8: Queenstown
+    - Day 9-10: Wanaka
+    - Day 11-12: Franz Josef
+  - **Week 3: South Island (optional)**
+    - Day 13-14: Abel Tasman National Park
+    - Day 15: Return to Auckland (or Queenstown

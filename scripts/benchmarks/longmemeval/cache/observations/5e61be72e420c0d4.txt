@@ -1,0 +1,16 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/30 (Tue) 09:54  
+[USER] User requested a script using `osascript` to extract highlighted text from the Chrome app and convert it to a Link to Text Fragment URL.  
+[ASSISTANT_SAID] Assistant provided a bash script to extract highlighted text from Chrome and convert it to a Link to Text Fragment URL.  
+[ASSISTANT_CREATED] The bash script included commands to get the active Chrome window, active tab, URL, highlighted text, escape special characters, and print the final link.  
+[USER] User asked how to check if the highlighted text is more than 100 words, including Chinese, in JavaScript.  
+[ASSISTANT_SAID] Assistant provided JavaScript code to check if the highlighted text is more than 100 words, including Chinese characters.  
+[ASSISTANT_CREATED] The JavaScript code used `window.getSelection().toString()`, regular expressions to match Chinese characters, and a loop to count words.  
+[USER] User inquired how to check if the highlighted text is more than 100 Chinese or English words in JavaScript.  
+[ASSISTANT_SAID] Assistant provided JavaScript code to check if the highlighted text is more than 100 Chinese or English words.  
+[ASSISTANT_CREATED] The JavaScript code included logic to count both Chinese and English words and provided console output based on the counts.  
+[USER] User requested JavaScript code to convert a highlighted paragraph of text into a Link to Text Fragment URL, specifying conditions based on the number of words.  
+[ASSISTANT_SAID] Assistant provided JavaScript code to convert highlighted text into a Link to Text Fragment URL based on word count conditions.  
+[ASSISTANT_CREATED] The JavaScript code checked if the number of words was greater than 6, then created a URL format using the first 3 and last 3 words, or the entire highlighted text if fewer than 6 words.  
+[ASSISTANT_SAID] Assistant noted that the code would only work in the context of a web page where the user has highlighted text.

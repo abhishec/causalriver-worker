@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/28 (Sun) 00:14  
+[FACT] User has been craving Italian food, especially pasta dishes.  
+[PREFERENCE] User is interested in trying out a new recipe, specifically something with seafood.  
+[EVENT] User recently had carne asada tacos at a new Mexican restaurant that opened near their house.  
+[PREFERENCE] User found the carne asada tacos amazing and mentioned that the portion was huge.  
+[EVENT] User took some leftovers home for lunch the next day.  
+[ASSISTANT_SAID] Assistant recommended several seafood pasta recipes:  
+[ASSISTANT_CREATED] 1. Spaghetti alle Vongole: A classic dish featuring clams, garlic, and cherry tomatoes in a light white wine sauce.  
+[ASSISTANT_CREATED] 2. Linguine with Shrimp Scampi: A quick recipe with shrimp, garlic, lemon, and parsley in a white wine sauce.  
+[ASSISTANT_CREATED] 3. Fettuccine with Seafood Medley: A dish with mixed seafood in a rich and creamy sauce.  
+[ASSISTANT_CREATED] 4. Spaghetti with Grilled Shrimp and Cherry Tomatoes: A summer-inspired recipe with grilled shrimp and cherry tomatoes in olive oil and lemon sauce.  
+[ASSISTANT_SAID] Assistant asked which seafood pasta recipe caught the user's attention or if there were any dietary restrictions.  
+[PREFERENCE] User expressed interest in the Spaghetti alle Vongole recipe and mentioned they love clams.  
+[ASSISTANT_SAID] Assistant provided a simple recipe for Spaghetti alle Vongole, including ingredients and preparation steps.  
+[ASSISTANT_CREATED] Ingredients for Spaghetti alle Vongole: 12 oz spaghetti, 2 lbs fresh or canned clams, 3 cloves garlic, 1/4 cup white wine, 1/4 cup chopped fresh parsley, 2 tbsp olive oil, salt, black pepper, grated zest of 1 lemon (optional).  
+[ASSISTANT_CREATED] Instructions for cooking spaghetti and clams, including tips for preparing clams.  
+[PREFERENCE] User mentioned wanting to try making jjamppong, a Korean-style seafood soup.  
+[ASSISTANT_SAID] Assistant provided a recipe for jjamppong, including ingredients and instructions.  
+[ASSISTANT_CREATED] Ingredients for Jjamppong: 2 tablespoons vegetable oil, 1 onion, 2 cloves garlic, 1 cup Korean chili flakes, 1 cup seafood broth, 2 cups water, 1/2 cup gochujang, 2 tablespoons soy sauce, 2 tablespoons fish sauce (optional), 1 teaspoon sugar, 2 cups mixed seafood, 2 cups noodles, garnishes.  
+[ASSISTANT_CREATED] Instructions for making jjamppong, including tips and

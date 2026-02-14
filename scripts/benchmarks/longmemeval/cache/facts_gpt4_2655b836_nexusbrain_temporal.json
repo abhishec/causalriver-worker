@@ -1,0 +1,166 @@
+{
+  "answer_4be1b6b4_2": [
+    {
+      "fact": "User is thinking of getting their car detailed soon.",
+      "type": "preference",
+      "entities": [
+        "car detailing"
+      ]
+    },
+    {
+      "fact": "User got their car serviced for the first time on March 15th.",
+      "type": "event",
+      "entities": [
+        "car service",
+        "March 15th"
+      ]
+    },
+    {
+      "fact": "User had a great experience with their car service.",
+      "type": "opinion",
+      "entities": [
+        "car service"
+      ]
+    },
+    {
+      "fact": "User is considering waxing and detailing their car every 3-4 months.",
+      "type": "preference",
+      "entities": [
+        "car waxing",
+        "car detailing"
+      ]
+    },
+    {
+      "fact": "User has been keeping track of their gas mileage.",
+      "type": "personal",
+      "entities": [
+        "gas mileage"
+      ]
+    },
+    {
+      "fact": "User's car gets around 32 miles per gallon.",
+      "type": "personal",
+      "entities": [
+        "32 miles per gallon"
+      ]
+    },
+    {
+      "fact": "User's current car has better gas mileage than their old car.",
+      "type": "opinion",
+      "entities": [
+        "current car",
+        "old car"
+      ]
+    }
+  ],
+  "answer_4be1b6b4_3": [
+    {
+      "fact": "User is considering getting a car wax and detailing done soon.",
+      "type": "preference",
+      "entities": [
+        "car wax",
+        "detailing"
+      ]
+    },
+    {
+      "fact": "User found a local detailer with great reviews.",
+      "type": "preference",
+      "entities": [
+        "local detailer"
+      ]
+    },
+    {
+      "fact": "User had an issue with their car's GPS system on 3/22.",
+      "type": "event",
+      "entities": [
+        "GPS system",
+        "3/22"
+      ]
+    },
+    {
+      "fact": "User took their car back to the dealership to get the GPS fixed.",
+      "type": "event",
+      "entities": [
+        "dealership",
+        "GPS"
+      ]
+    },
+    {
+      "fact": "The dealership replaced the entire GPS system, and now it is working flawlessly.",
+      "type": "event",
+      "entities": [
+        "dealership",
+        "GPS system"
+      ]
+    },
+    {
+      "fact": "User is considering other options for car detailing.",
+      "type": "preference",
+      "entities": [
+        "car detailing"
+      ]
+    }
+  ],
+  "answer_4be1b6b4_1": [
+    {
+      "fact": "User is planning a road trip soon.",
+      "type": "event",
+      "entities": [
+        "road trip"
+      ]
+    },
+    {
+      "fact": "User has a new car, a silver Honda Civic.",
+      "type": "personal",
+      "entities": [
+        "Honda Civic"
+      ]
+    },
+    {
+      "fact": "User bought the car on February 10th.",
+      "type": "event",
+      "entities": [
+        "February 10th"
+      ]
+    },
+    {
+      "fact": "User is planning a 5-day trip to Yellowstone National Park.",
+      "type": "event",
+      "entities": [
+        "5-day trip",
+        "Yellowstone National Park"
+      ]
+    },
+    {
+      "fact": "User prefers budget-friendly accommodations and dining options.",
+      "type": "preference",
+      "entities": [
+        "budget-friendly accommodations",
+        "budget-friendly dining options"
+      ]
+    },
+    {
+      "fact": "User is interested in using lane departure warning and blind spot detection features of the GPS system.",
+      "type": "preference",
+      "entities": [
+        "lane departure warning",
+        "blind spot detection"
+      ]
+    },
+    {
+      "fact": "User thinks the scenic route to Yellowstone would be amazing.",
+      "type": "opinion",
+      "entities": [
+        "scenic route",
+        "Yellowstone"
+      ]
+    },
+    {
+      "fact": "User has always wanted to visit Yellowstone National Park.",
+      "type": "opinion",
+      "entities": [
+        "Yellowstone National Park"
+      ]
+    }
+  ]
+}

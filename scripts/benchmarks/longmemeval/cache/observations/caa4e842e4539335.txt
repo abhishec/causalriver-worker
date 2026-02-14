@@ -1,0 +1,36 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2022/02/16 (Wed) 06:19  
+[FACT] User is trying to track their expenses.  
+[EVENT] User has been buying gifts lately.  
+[EVENT] User purchased a silver necklace with a tiny pendant for their sister's 25th birthday that cost $40.  
+[EVENT] User purchased a baby onesie and baby blocks for their colleague's wife's baby shower that cost $20.  
+[ASSISTANT_SAID] Assistant offered to help organize the user's expenses.  
+[ASSISTANT_SAID] Assistant suggested categorizing expenses into groups relevant to spending habits: Gifts, Personal Care/Fashion, and Social Obligations.  
+[ASSISTANT_SAID] Assistant provided a breakdown of expenses:  
+- Gifts: Silver necklace for sister's birthday: $40  
+- Social Obligations: Baby onesie and baby blocks for baby shower: $20  
+[ASSISTANT_SAID] Assistant encouraged the user to add more categories or subcategories as needed.  
+[ASSISTANT_SAID] Assistant suggested categories like Food and Dining, Entertainment, Transportation, Housing, and Savings.  
+[EVENT] User wants to add a category for Charitable Giving for groceries bought for Mrs. Johnson, their elderly neighbor.  
+[ASSISTANT_SAID] Assistant provided ways to track charitable giving expenses:  
+1. Keep receipts  
+2. Use mobile apps like Shoeboxed, Receipt Hog, or Fetch Rewards  
+3. Use spreadsheets or budgeting tools like Mint, Personal Capital, or YNAB  
+4. Use note-taking apps like Evernote or Simplenote  
+[ASSISTANT_SAID] Assistant advised including date, amount, description, and category when logging expenses.  
+[EVENT] User decided to use a spreadsheet to track expenses.  
+[ASSISTANT_SAID] Assistant provided a template for the user's expense tracker, including categories and examples of how to log expenses.  
+[EVENT] User wants to add the costs of a group gift for their friend's new apartment to the Gifts category, which was $30.  
+[ASSISTANT_SAID] Assistant updated the Gifts category with the new expense:  
+- Group gift for friend's new apartment: $30  
+[ASSISTANT_SAID] Assistant calculated the total for the Gifts category as $90.  
+[EVENT] User asked for the best way to set reminders for upcoming events like birthdays and baby showers.  
+[ASSISTANT_SAID] Assistant suggested several methods for setting reminders:  
+1. Digital Calendars (Google Calendar, Apple Calendar)  
+2. Phone Reminders (Reminders app, Google Keep)  
+3. Paper Planners  
+4. Task Management Apps (Todoist, Trello)  
+5. Social Media (Facebook)  
+6. Google Assistant or Siri  
+7. Birthday Reminders Apps

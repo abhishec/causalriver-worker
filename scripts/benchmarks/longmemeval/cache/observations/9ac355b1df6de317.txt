@@ -1,0 +1,34 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/08/02 (Wed) 01:24
+- [FACT] User is creating a role-playing game with friends.
+- [FACT] The world of the game is called Graniphor.
+- [FACT] The setting is the coast of a large continent with islands.
+- [FACT] The land is owned by neutral races that have achieved a balance.
+- [FACT] Noble races include Humans, Dwarves, High Elves, Vulcans, Feyleaf, and Beastmen.
+- [FACT] Antagonist races include Goblins, Orcs, Undying, Gnolls, Reafton, Dark Elves, and Savage Beastmen.
+- [FACT] Neutral races include Fey, Constructs, Gods, and Giants.
+- [FACT] Players can choose characters from three playable races: Humans, Dwarves, and Elves.
+- [FACT] The player character hails from a walk of life where most people do not know about the greater world.
+- [FACT] There is conflict between the three playable races, and each race is an important faction.
+- [FACT] Dwarves are exploited for their labor, and Humans pursue control through conquest.
+- [FACT] Dwarves drink ale and wish to make their own destiny.
+- [FACT] Woodcutting is an important profession among humans.
+- [FACT] The world has bandits and nefarious types from every race.
+- [FACT] Players must fight creatures that are considered monsters.
+- [FACT] Player characters may occasionally fight other races.
+- [PREFERENCE] Dialog should contain suspense and indecision.
+- [PREFERENCE] The story should be told from the point of view of the protagonist.
+- [FACT] The protagonist is a strong female named Clara.
+- [FACT] Clara is a warrior and a good person.
+- [FACT] Clara is conflicted and subjected to moral quandaries.
+- [FACT] Clara is a hero.
+- [FACT] The humans are ruled by a king who consorts with dark elves secretly.
+- [FACT] The king wants something from the dark elves.
+- [FACT] There is a dark elf ambassador who possesses the Dragonstone.
+- [FACT] The dark elves believe the Dragonstone will allow them to control the other races.
+- [FACT] One of the major characters is a woodcutter named Alistair.
+- [FACT] The orcs control a white tower and are secretly manipulated by dark elves.
+- [ASSISTANT_CREATED] The assistant created a story featuring Clara, Alistair, the king, and the dark elf ambassador.
+- [ASSISTANT_SAID] Clara is a warrior, born and raised among humans, with a sense of justice.
+- [ASSISTANT_SAID] Clara and Alistair encounter dangers including orcs, dark elves, and savage beast

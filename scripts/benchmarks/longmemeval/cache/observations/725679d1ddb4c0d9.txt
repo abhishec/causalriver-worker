@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/20 (Sat) 22:57  
+[FACT] User is preparing for an upcoming Ph.D. program.  
+[CHANGE] User received feedback from their advisor on April 10th, which allowed them to make necessary revisions to their thesis.  
+[FACT] User mentioned that they received feedback on their master's thesis, not a research proposal or concept paper.  
+[PREFERENCE] User found the feedback on their master's thesis to be a great learning experience and is glad they could incorporate it to improve their work.  
+[FACT] User's research topic for their Ph.D. program is focused on deep learning applications in computer vision.  
+[PREFERENCE] User is interested in exploring the use of convolutional neural networks for image classification tasks.  
+[ASSISTANT_SAID] Assistant congratulated the user on their master's thesis feedback and provided a timeline outline for the user's Ph.D. project, breaking it down into four years.  
+[ASSISTANT_CREATED] Assistant created a timeline outline for the user's Ph.D. project, including milestones for each year:  
+- Year 1: Literature Review and Research Design (Months 1-12)  
+- Year 2: Data Collection and Preprocessing (Months 13-24)  
+- Year 3: Experiments and Results (Months 24-36)  
+- Year 4: Writing and Defense (Months 37-48)  
+[ASSISTANT_SAID] Assistant suggested specific tasks for each year, such as conducting a literature review, identifying research gaps, developing a research design, collecting datasets, conducting experiments, and writing the dissertation.  
+[PREFERENCE] User appreciates the outline provided by the assistant and plans to focus on the literature review and research design in the first year.  
+[FACT] User has already taken an online course on deep learning.  
+[ASSISTANT_SAID] Assistant suggested popular deep learning frameworks and tools for the user's research, including TensorFlow, PyTorch, Keras, OpenCV, MATLAB, CNTK, and MXNet.  
+[ASSISTANT_SAID] Assistant provided additional tools and libraries for the user's research, such as image datasets, data augmentation libraries, and visualization tools.  
+[PREFERENCE] User is considering starting with PyTorch for their research and has heard that it is more flexible and easier to use than TensorFlow.  
+[FACT] User has used OpenCV before and might use it for image preprocessing and data augmentation.  
+[PREFERENCE] User is contemplating whether to focus on learning one framework thoroughly or try to learn multiple frameworks simultaneously.  
+[ASSISTANT_SAID] Assistant recommended focusing on learning one framework thoroughly before moving on to another, suggesting starting with PyTorch and then exploring TensorFlow later.  
+[ASSISTANT_SAID] Assistant explained the concept of tensors in PyTorch and how they differ from NumPy arrays

@@ -1,0 +1,34 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/22 (Mon) 12:30
+- [EVENT] User is trying to plan their schedule for the Tribeca Film Festival.
+- [ASSISTANT_SAID] The Tribeca Film Festival is an annual event that typically takes place in late April and early May in New York City, running for about 12 days.
+- [ASSISTANT_SAID] Past dates for the Tribeca Film Festival:
+  - 2022: April 20 - May 1
+  - 2021: June 9 - 20 (special edition due to COVID-19)
+  - 2020: April 15 - 26 (online edition due to COVID-19)
+  - 2019: April 24 - May 5
+  - 2018: April 18 - 29
+- [ASSISTANT_SAID] Recommended checking the official Tribeca Film Festival website or social media channels for the latest information on upcoming festival dates.
+- [EVENT] User received an email stating they are participating in the Tribeca Critics' Week program from April 20th to 24th.
+- [PREFERENCE] User is excited about participating in the Tribeca Critics' Week program.
+- [ASSISTANT_SAID] Provided recommendations for coffee shops near the festival venues:
+  - **Tribeca Area:**
+    1. La Colombe (275 Greenwich St)
+    2. Think Coffee (250 Greenwich St)
+    3. Bluestone Lane (145 Hudson St)
+  - **West Village:**
+    1. Cafe Grumpy (230 7th Ave S)
+    2. The Elk (217 7th Ave S)
+    3. Joe Coffee (141 W 4th St)
+  - **Other areas:**
+    1. Blue Bottle Coffee (160 Berry St in the Lower East Side)
+    2. Cafe Clover (139 Perry St in the West Village)
+- [EVENT] User has been to a few film festivals recently and is trying to keep track of all the films they've seen.
+- [ASSISTANT_SAID] Offered to help organize the films user has seen at Sundance and other festivals.
+- [ASSISTANT_SAID] Asked for details about the films user saw at Sundance, including the year, list of films, organization preferences, and additional information to track.
+- [TEMPORAL] User attended the 2022 Sundance Film Festival and saw 12 films.
+- [FACT] One of the films user saw at Sundance 2022 was "Minari."
+- [PREFERENCE] User was not too impressed with "The French Dispatch."
+- [ASSISTANT_SAID] Clarified that "The French Dispatch" premiered at the 2021 Cannes Film Festival, not Sundance 2022.
+- [EVENT]

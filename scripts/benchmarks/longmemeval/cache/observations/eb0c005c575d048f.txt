@@ -1,0 +1,34 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2021/08/20 (Fri) 14:38  
+[FACT] User has a strong foundation in computer science, having earned an Associate's degree in Computer Science from Pasadena City College (PCC) in May 2016, before joining UCLA.  
+[FACT] User has already taken some courses on Python programming, data structures, algorithms, and a specialization in Data Science from Johns Hopkins University.  
+[PREFERENCE] User is looking to improve skills in machine learning and artificial intelligence.  
+[ASSISTANT_SAID] Recommended online courses and resources for machine learning:  
+[ASSISTANT_SAID] 1. Andrew Ng's Machine Learning course (Coursera)  
+[ASSISTANT_SAID] 2. Machine Learning by Stanford University (Stanford Online)  
+[ASSISTANT_SAID] 3. Deep Learning Specialization (Coursera)  
+[ASSISTANT_SAID] 4. Machine Learning with Python (DataCamp)  
+[ASSISTANT_SAID] Recommended online courses and resources for artificial intelligence:  
+[ASSISTANT_SAID] 1. Artificial Intelligence (AI) by Columbia University (edX)  
+[ASSISTANT_SAID] 2. AI for Everyone (Coursera)  
+[ASSISTANT_SAID] 3. Natural Language Processing with Deep Learning (Stanford Online)  
+[ASSISTANT_SAID] Recommended specialized topics in machine learning:  
+[ASSISTANT_SAID] 1. Computer Vision:  
+[ASSISTANT_SAID] - Computer Vision by University of Michigan (Coursera)  
+[ASSISTANT_SAID] - Deep Learning for Computer Vision (Udemy)  
+[ASSISTANT_SAID] 2. Natural Language Processing:  
+[ASSISTANT_SAID] - Natural Language Processing with Python (DataCamp)  
+[ASSISTANT_SAID] - NLP with Deep Learning (Stanford Online)  
+[ASSISTANT_SAID] 3. Reinforcement Learning:  
+[ASSISTANT_SAID] - Reinforcement Learning by Sutton & Barto (Udemy)  
+[ASSISTANT_SAID] - Deep Reinforcement Learning (Coursera)  
+[ASSISTANT_SAID] Recommended practice and project resources:  
+[ASSISTANT_SAID] 1. Kaggle  
+[ASSISTANT_SAID] 2. TensorFlow Tutorials  
+[ASSISTANT_SAID] 3. PyTorch Tutorials  
+[ASSISTANT_SAID] Recommended additional resources:  
+[ASSISTANT_SAID] 1. Machine Learning Mastery  
+[ASSISTANT_SAID] 2. AI Alignment  
+[ASSISTANT_SAID] 3. Towards Data Science  
+[ASS

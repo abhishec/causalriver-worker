@@ -1,0 +1,29 @@
+**Observation Log:**
+
+- [FACT] User's name is Emily Anne Thompson.
+- [FACT] User's previous name was Emily Anne Johnson.
+- [FACT] User recently got married.
+- [TEMPORAL] User's name change was officially on February 10th, 2023.
+- [EVENT] User is updating their bank account information.
+- [ASSISTANT_SAID] The assistant congratulated the user on their recent marriage and name change.
+- [ASSISTANT_SAID] The assistant provided a general outline of steps to update the bank account information.
+- [ASSISTANT_SAID] The assistant listed required documents for updating the bank account: certified copy of marriage certificate, government-issued ID with new name, and current bank account information.
+- [ASSISTANT_SAID] The assistant suggested contacting the bank's customer service department to inform them of the name change.
+- [ASSISTANT_SAID] The assistant advised that the bank may request documents to be mailed or uploaded.
+- [ASSISTANT_SAID] The assistant mentioned that the bank may issue new debit/credit cards and checks with the updated name.
+- [ASSISTANT_SAID] The assistant provided additional tips for the user regarding the bank update process.
+- [USER] User expressed feeling overwhelmed with the steps to update their bank account.
+- [ASSISTANT_CREATED] The assistant created a checklist of documents needed for the bank account update.
+- [ASSISTANT_SAID] The assistant listed the document checklist: certified copy of marriage certificate, government-issued ID with new name, and current bank account information.
+- [ASSISTANT_SAID] The assistant included optional documents: Social Security card or ITIN, and proof of address.
+- [USER] User inquired about updating credit card information.
+- [ASSISTANT_SAID] The assistant explained that the user would need to contact each credit card issuer separately to update their name.
+- [ASSISTANT_SAID] The assistant mentioned that similar documents would be required for credit card updates.
+- [ASSISTANT_SAID] The assistant provided steps for updating credit card information.
+- [USER] User mentioned they are waiting for their new passport, applied for on March 1st.
+- [ASSISTANT_SAID] The assistant stated that the user would not need to provide the same documents to the passport agency again once they receive their new passport.
+- [ASSISTANT_SAID] The assistant advised the user to verify their new passport and update their bank and credit card accounts with it.
+- [USER] User planned to update their LinkedIn and Twitter profiles.
+- [ASSISTANT_SAID] The assistant encouraged the user to update their social media profiles now for consistency and personal branding.
+- [ASSISTANT_SAID] The assistant provided tips for updating social media profiles.
+- [USER] User requested

@@ -1,0 +1,16 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/25 (Thu) 12:31  
+[ASSISTANT_SAID] The two possible heat exchangers that can be used in the AHU are Plate heat exchanger and Spiral heat exchanger.  
+[ASSISTANT_SAID] The Plate heat exchanger uses a series of thin plates to separate the two fluids and provide a large surface area for heat transfer.  
+[ASSISTANT_SAID] The Spiral heat exchanger uses a spiral-shaped tube to separate the two fluids and provide a large surface area for heat transfer.  
+[ASSISTANT_SAID] If the chilled water supply (CWS) is fixed at 100 liters per minute, the profile on the variations of the chilled water return (CWR) and exit air temperatures of both heat exchangers can be calculated using the formula: ΔT1 = (T1 - T2) / (1 + (U x A x NTU)).  
+[ASSISTANT_SAID] ΔT1 is the temperature change of the chilled water return, T1 is the chilled water supply temperature, T2 is the chilled water return temperature, U is the overall heat transfer coefficient, A is the heat transfer area, and NTU is the number of transfer units.  
+[ASSISTANT_SAID] The maximum limit of the NTU for all selected heat exchangers is 3.  
+[ASSISTANT_SAID] The effect of heat exchanger types on the exit air temperature is that the Plate heat exchanger will provide a lower temperature change of the chilled water return and exit air temperature than the Spiral heat exchanger.  
+[ASSISTANT_SAID] The temperature change to the exit air temperature will be calculated using the formula: ΔT2 = ΔT1 x Cp x m.  
+[ASSISTANT_SAID] ΔT2 is the temperature change of the exit air, Cp is the specific heat capacity of air, and m is the mass flow rate of air.  
+[ASSISTANT_SAID] The temperature change to the exit air temperature is directly proportional to the CWS temperature increase; if the CWS temperature increases by 1°C, the temperature change to the exit air temperature will also increase by 1°C.  
+[USER] The chiller system functions to produce chilled water at 2°C. Cooling water at an inlet temperature of 26°C enters the condenser to assist the heat rejection process from the chiller system.  
+[USER] Select 2 working refrigerants for the system (other than R134a) and explain the reasons for selection based on safety and thermal properties. (CO1)  
+[USER] If the refrigerant exits the evaporator as saturated vapor, select the suitable operating pressures for the chiller. Explain the reasons for the selected pressures. Then, compare the COP of the chiller system for both

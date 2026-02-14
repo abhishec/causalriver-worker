@@ -1,0 +1,35 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/20 (Sat) 11:38
+- [FACT] The user is trying to keep track of all the Marvel movies they have watched so far.
+- [PREFERENCE] The user is currently on "Spider-Man: Homecoming" and has a few more Marvel movies to go.
+- [PREFERENCE] The user is interested in recommendations for good crime dramas on Netflix.
+- [EVENT] The user binge-watched the entire second season of "Narcos" over a weekend when they were feeling under the weather.
+- [ASSISTANT_SAID] The assistant provided a chronological order of the Marvel Cinematic Universe (MCU) movies, detailing the phases and specific movies along with their release years and settings.
+- [ASSISTANT_SAID] The assistant recommended several crime dramas on Netflix, including:
+  1. **Ozark**
+  2. **Breaking Bad**
+  3. **Peaky Blinders**
+  4. **Narcos: Mexico**
+  5. **Mindhunter**
+  6. **Killing Eve**
+  7. **True Detective** (Season 1)
+  8. **The Sinner**
+  9. **Luther**
+  10. **The Fall**
+- [ASSISTANT_SAID] The assistant provided details about the number of seasons and episodes for "Ozark" (3 seasons, 44 episodes) and "Breaking Bad" (5 seasons, 62 episodes).
+- [PREFERENCE] The user is interested in learning more about the real-life story of Pablo Escobar and the Medellín cartel after finishing "Narcos."
+- [ASSISTANT_SAID] The assistant recommended several documentaries and books about Pablo Escobar and the Medellín cartel, including:
+  - Documentaries:
+    1. **The True Story of Pablo Escobar**
+    2. **Escobar: The Patron of Evil**
+    3. **Pablo Escobar: El Patrón del Mal**
+    4. **The Ivory Game**
+  - Books:
+    1. **"Killing Pablo: The Hunt for the World's Greatest Outlaw"** by Mark Bowden
+    2. **"Escobar: The Inside Story of Pablo Escobar, the World's Most Powerful Criminal"** by Roberto Escobar
+    3. **"The Accountant's Story: Inside the Secret World of Narco-Terrorism"** by Roberto Escobar and David Fisher
+    4. **"Loving Pablo, Hating Escobar"** by Virginia Vallejo
+- [PREFERENCE] The user has been meaning to explore more documentaries on Netflix.
+- [FACT] The user found "My Octopus Teacher" fascinating.
+- [ASSISTANT_SAID] The assistant recommended several wildlife and nature documentaries on Netflix

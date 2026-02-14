@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [FACT] The user is preparing documents for their green card application.
+- [FACT] The user attended a preparation session at a local refugee center two weeks prior to their asylum interview.
+- [TEMPORAL] The session date is 2023/05/30 (Tue) 06:17.
+- [ASSISTANT_SAID] The green card application process involves steps such as asylum approval, filing Form I-485, attending a biometric services appointment, undergoing a medical examination, and possibly an interview.
+- [ASSISTANT_SAID] The user needs to file Form I-485, Application to Register Permanent Residence or Adjust Status, with USCIS.
+- [ASSISTANT_SAID] The biometric services appointment involves taking fingerprints and verifying identity.
+- [ASSISTANT_SAID] A medical examination by a designated civil surgeon is required to check for health issues that could make the user inadmissible to the U.S.
+- [ASSISTANT_SAID] The user may need to attend an interview as part of the green card application process.
+- [ASSISTANT_SAID] If the application is approved, the user will receive a green card granting lawful permanent resident status.
+- [ASSISTANT_SAID] Required documents for the green card application include Form I-485, a copy of the asylum approval document, passport-style photos, identification documents, medical examination results, proof of name change (if applicable), and other supporting documents.
+- [ASSISTANT_SAID] The user should review the USCIS website for the most up-to-date information on required documents and fees.
+- [ASSISTANT_SAID] The user is advised to consult with an immigration attorney or accredited representative if they have questions or concerns.
+- [ASSISTANT_SAID] The medical examination will include a review of medical history, a physical examination, laboratory tests, and vaccinations.
+- [ASSISTANT_SAID] The civil surgeon will check vital signs, examine the eyes, ears, nose, throat, skin, heart, lungs, and abdomen during the physical examination.
+- [ASSISTANT_SAID] Laboratory tests may include blood tests for syphilis and HIV, a chest X-ray (if over 15 years old), and a urine test for gonorrhea (if between 15 and 50 years old).
+- [ASSISTANT_SAID] Required vaccinations may include MMR, polio, varicella, influenza, Td, Hib, Tdap, MenACWY, HPV, and COVID-19 (if 18 years or older).
+- [ASSISTANT_SAID] The results of the medical examination typically take 1-3 weeks to receive.
+- [ASSISTANT_SAID] The vaccination process can take from a few days to several weeks, depending on the type and number of vaccinations required.
+- [ASS

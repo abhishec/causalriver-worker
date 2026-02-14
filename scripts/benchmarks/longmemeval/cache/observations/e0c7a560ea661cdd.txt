@@ -1,0 +1,25 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/04/14 (Fri) 07:35
+- [PREFERENCE] User is looking for recommendations on new games to play.
+- [PREFERENCE] User is excited about the upcoming Elden Ring game developed by FromSoftware.
+- [ASSISTANT_SAID] Elden Ring is highly anticipated.
+- [ASSISTANT_SAID] Recommended games to hold the user over until Elden Ring's release:
+  1. **Sekiro: Shadows Die Twice** - A challenging action-adventure game set in feudal Japan, focusing on stealth, strategy, and intense combat.
+  2. **Dark Souls Remastered** - A game that started the Soulsborne genre, offering a similar atmosphere and challenging gameplay.
+  3. **Bloodborne** - A fast-paced action RPG with a dark, Victorian-era Gothic setting.
+  4. **Monster Hunter: World** - An action RPG with a sense of scale and exploration in its open world.
+  5. **The Witcher 3: Wild Hunt** - An action RPG with a deep storyline, engaging combat, and a vast open world.
+  6. **Horizon Zero Dawn** - An action RPG with a strong narrative and a unique blend of post-apocalyptic and sci-fi elements.
+  7. **Nioh 2** - An action RPG with a similar Soulsborne feel, offering challenging combat and a dark fantasy setting.
+  8. **Salt and Sanctuary** - A 2D platformer with a similar atmosphere and challenging gameplay to FromSoftware's titles.
+  9. **Death's Gambit** - A 2D action RPG with a similar Soulsborne feel and challenging combat.
+  10. **Remnant: From the Ashes** - A cooperative third-person shooter with a dark fantasy setting and challenging combat.
+- [USER] User expressed interest in Sekiro: Shadows Die Twice and requested more information about its gameplay and story.
+- [ASSISTANT_SAID] Sekiro: Shadows Die Twice is an action-adventure game developed by FromSoftware.
+- [ASSISTANT_SAID] The story is set in feudal Japan during the Sengoku period, where the user plays as Wolf, a shinobi on a quest to rescue his master, Isshin Ashina.
+- [ASSISTANT_SAID] Wolf's master is the Divine Heir, a child with powerful dragon's blood.
+- [ASSISTANT_SAID] The gameplay focuses on three core mechanics: stealth, combat, and the Shinobi Prosthetic.
+- [ASSISTANT_SAID] Key features include resurrection, a posture system for enemies, and upgrades for the prosthetic tool.
+- [ASSISTANT_SAID] The tone is dark and gritty, with a strong focus on character development and emotional depth.
+-

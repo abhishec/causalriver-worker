@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/28 (Sun) 15:45  
+[FACT] User has been attending ESL classes and just got their EAD.  
+[FACT] User has limited work experience in the US.  
+[EVENT] User is hoping to start working soon.  
+[ASSISTANT_SAID] Congratulations on getting your EAD!  
+[ASSISTANT_SAID] Tips for finding a job with limited work experience include updating your resume, using online job boards like Indeed, Glassdoor, and LinkedIn, networking, considering internships or volunteer work, looking for companies that offer language support, focusing on entry-level jobs, targeting smaller companies and startups, exploring job training programs, visiting local American Job Centers, and being prepared for interviews.  
+[ASSISTANT_SAID] Additional resources include USCIS for information on working in the US, career counselors at colleges and universities, and online communities for job search and career development.  
+[ASSISTANT_SAID] Finding a job can take time, so stay positive, persistent, and open to opportunities.  
+[FACT] User has been focusing on getting settled in the US and preparing for their asylum interview, which took 18 months.  
+[CHANGE] User has now received their EAD after the asylum interview.  
+[ASSISTANT_SAID] User should highlight transferable skills on their resume, even if their work experience is mostly from their home country.  
+[ASSISTANT_SAID] Transferable skills include work experience, education, personal projects, language skills, communication skills, problem-solving skills, technical skills, leadership skills, interpersonal skills, and adaptability skills.  
+[ASSISTANT_SAID] User should tailor their resume to the US job market by using a reverse chronological format, incorporating industry-specific keywords, quantifying achievements, focusing on accomplishments, and emphasizing soft skills.  
+[ASSISTANT_SAID] Example of transferable skills on a resume includes a Marketing Coordinator position with achievements like increasing followers by 500% and collaborating on a product launch that resulted in 20% sales growth.  
+[ASSISTANT_SAID] User should consider using a functional or hybrid resume format if they have limited US work experience and include international experience.  
+[ASSISTANT_SAID] User should translate job titles and company names if their international experience is in a language other than English.  
+[FACT] User is thinking about taking additional courses to improve their skills in data analysis.  
+[ASSISTANT_SAID] Data analysis is a highly sought-after skill, and taking courses can enhance job prospects and career growth.  
+[ASSISTANT_SAID] Courses and resources for data analysis include Coursera, edX, DataCamp, Udemy, and Kaggle.  
+[ASSISTANT_SAID] User should start with the basics, focus on practical skills,

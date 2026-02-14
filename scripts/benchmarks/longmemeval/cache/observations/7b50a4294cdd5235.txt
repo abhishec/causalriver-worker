@@ -1,0 +1,26 @@
+**Observation Log:**
+
+- [FACT] The user is interested in exploring cultural traditions of the Punjab region in Pakistan.
+- [PREFERENCE] The user wants to know more about festivals and celebrations unique to the Punjab region.
+- [ASSISTANT_SAID] Punjab is a culturally rich and vibrant region in Pakistan, with festivals integral to its heritage.
+- [ASSISTANT_SAID] Unique festivals in Punjab include:
+  - **Basant Kite Festival** (February/March): Marks the arrival of spring with kite flying, yellow clothing, and traditional food like sarson ka saag and makki di roti.
+  - **Vaisakhi** (April 13th or 14th): Celebrates the harvest season and Punjabi New Year with folk dances, music, and feasting.
+  - **Lohri** (January 13th): A winter folk festival marking the end of the cold season with bonfires, folk songs, and gift exchanges.
+  - **Eid-e-Milad-un-Nabi** (12th Rabi-ul-Awwal): Commemorates the birth of Prophet Muhammad (PBUH) with home decorations and food distribution.
+  - **Festival of Sufi Saints** (Various dates): Celebrates Urs at Sufi shrines with qawwali music, poetry, and traditional food.
+  - **Chhaliya** (40 days after Eid-ul-Fitr): Marks the end of Ramadan fasting with prayers and food distribution.
+  - **Mela Chiraghan** (March/April): Held in Lahore at the shrine of Shah Hussain, featuring music, dance, and food.
+  - **Punjab International Folk Festival** (November): Showcases Punjab's cultural heritage with performances by folk artists.
+  - **Wazir Khan Mosque Festival** (October): Celebrates the mosque's beauty with music, calligraphy, and art exhibitions.
+  - **Lahore Literary Festival** (February): Celebrates literature, poetry, and music from the region, focusing on Punjabi culture.
+- [USER] The user wants to know more about traditional Punjabi cuisine in the Punjab region.
+- [ASSISTANT_SAID] Punjabi cuisine is known for its rich, bold flavors and locally grown ingredients, meats, and dairy products.
+- [ASSISTANT_SAID] Popular Punjabi dishes include:
+  - **Sarson Ka Saag**: Made with mustard greens, served with makki di roti.
+  - **Makki Di Roti**: Flatbread made from corn flour.
+  - **Tandoori Chicken**: Marinated chicken roasted in a tandoor.
+  - **Butter Chicken**: Chicken in a creamy tomato sauce.
+  - **Dal Makhani**: Lentil-based curry with black lentils and kidney beans.
+  - **Kadhai Paneer**: Paneer with bell peppers and spices.
+  - **Samosas**: Fried

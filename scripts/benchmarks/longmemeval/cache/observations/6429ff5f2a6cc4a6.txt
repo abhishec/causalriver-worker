@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[FACT] User is planning a camping trip to Yosemite National Park next month.  
+[EVENT] User is planning a camping trip to Yosemite National Park for 4 days.  
+[TEMPORAL] User's camping trip to Yosemite National Park is planned for next month.  
+[ASSISTANT_SAID] Yosemite National Park is an amazing destination.  
+[ASSISTANT_SAID] Recommended campsites include Upper Pines Campground, Half Dome Village, and Crane Flat Campground.  
+[ASSISTANT_SAID] Upper Pines Campground has 235 sites available on a first-come, first-served basis and is close to Yosemite Valley's amenities.  
+[ASSISTANT_SAID] Half Dome Village has 470 sites with amenities like flush toilets and showers, located in Yosemite Valley.  
+[ASSISTANT_SAID] Crane Flat Campground has 166 sites, located about 30 minutes from Yosemite Valley, and provides access to Tioga Road and Tuolumne Meadows.  
+[ASSISTANT_SAID] Recommended hiking trails include Mist Trail to Vernal Fall, Four Mile Trail to Glacier Point, Mirror Lake Trail, and Tuolumne Meadows to Soda Springs and Parsons Lodge.  
+[ASSISTANT_SAID] Mist Trail to Vernal Fall is 7 miles round-trip with a 1,000 ft elevation gain.  
+[ASSISTANT_SAID] Four Mile Trail to Glacier Point is 9.6 miles round-trip with a 1,000 ft elevation gain.  
+[ASSISTANT_SAID] Mirror Lake Trail is 4 miles round-trip with a 100 ft elevation gain.  
+[ASSISTANT_SAID] Tuolumne Meadows to Soda Springs and Parsons Lodge is 4 miles round-trip with a 200 ft elevation gain.  
+[ASSISTANT_SAID] Additional tips include reserving campsites in advance, checking the park's website for trail information, bringing layers, bear spray, and using the park's shuttle bus system.  
+[USER] User is interested in exploring the park on a bike.  
+[ASSISTANT_SAID] Recommended bike rentals include Yosemite Valley Lodge Bike Rentals, Yosemite Bike Rentals in Groveland, and Half Dome Village Bike Rentals.  
+[ASSISTANT_SAID] Recommended bike trails include Valley Floor Loop Trail, Mirror Lake Trail, and Tioga Road.  
+[ASSISTANT_SAID] Valley Floor Loop Trail is a 13-mile paved path suitable for hybrid or mountain bikes.  
+[ASSISTANT_SAID] Mirror Lake Trail is a 4-mile paved path suitable for hybrid or mountain bikes.  
+[ASSISTANT_SAID] Tioga Road is a scenic route suitable for road bikes or hybrid bikes with skinny tires.  
+[ASSISTANT_SAID] Personal bicycles are not allowed on trails within Yosemite National Park,

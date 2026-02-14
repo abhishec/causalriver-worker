@@ -1,0 +1,24 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/04/15 (Sat) 19:27
+- [ASSISTANT_SAID] To include the source of the order, add a new column for the source and pass in the `source_name` property of the order.
+- [ASSISTANT_CREATED] Provided a JavaScript code snippet to modify a script to include the order source in a Google Sheets integration with Shopify.
+- [ASSISTANT_SAID] The URL for fetching orders is constructed using the shop URL, access token, and date range for orders created in the last month.
+- [ASSISTANT_SAID] The script clears the contents of the active sheet and appends a header row with the following columns: Order ID, Customer Name, Total, Created At, Shipping Address Province, Shipping Line Title, Shipping Cost, Source.
+- [ASSISTANT_SAID] The script iterates through the orders and extracts various properties such as shipping address province, shipping line title, and shipping cost.
+- [ASSISTANT_SAID] The order source is determined using a ternary operator to handle cases where the `source_name` property is empty or null.
+- [USER] I also want to add the location id for pos orders.
+- [ASSISTANT_SAID] To include the location ID for POS orders, add a new column for the location ID and pass in the `location_id` property of the order if the `source_name` property is equal to `pos`.
+- [ASSISTANT_CREATED] Provided an updated JavaScript code snippet to include the location ID for POS orders in the Google Sheets integration with Shopify.
+- [ASSISTANT_SAID] The updated script adds a new column for the location ID and appends it to the sheet if the order source is 'pos'.
+- [USER] I want to add order number, add current subtotal price, add current total price, remove the order id, remove order.total_price, and add current tax, and add financial status. Don't add taxes_included.
+- [ASSISTANT_SAID] The updated script will include the changes requested by the user.
+- [ASSISTANT_CREATED] Provided a further updated JavaScript code snippet that includes the following changes: 
+  - Added a new column for order number and passed in the `order_number` property.
+  - Added a new column for current subtotal price and passed in the `subtotal_price` property.
+  - Added a new column for current total price and passed in the `total_price` property.
+  - Removed the column for order ID.
+  - Removed the column for order total price.
+  - Added a new column for current tax and passed in the `total_tax` property.
+  - Added a new column for financial status and passed in the `financial_status` property.
+  - Removed the `taxes_included`

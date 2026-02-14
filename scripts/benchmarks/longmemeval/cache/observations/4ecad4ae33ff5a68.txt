@@ -1,0 +1,27 @@
+**Observation Log:**
+
+- [FACT] User recently completed a research project on artificial intelligence in education.
+- [FACT] User was recognized with the Graduate Student Research Award in March 2022 for their work.
+- [PREFERENCE] User is particularly interested in exploring applications of artificial intelligence in online learning platforms.
+- [ASSISTANT_SAID] Assistant congratulated the user on receiving the Graduate Student Research Award.
+- [ASSISTANT_SAID] Assistant provided a list of resources on artificial intelligence in education, focusing on online learning platforms.
+- [ASSISTANT_SAID] Resources included research papers, online courses, conferences, online learning platforms with AI integration, blogs, and books.
+- [ASSISTANT_SAID] Specific resources mentioned include:
+  - "Artificial Intelligence in Education: Promises and Implications for Teaching and Learning" by the National Academy of Sciences (2020)
+  - "AI in Education: A Review of the Literature" by the International Journal of Artificial Intelligence in Education (2020)
+  - "Artificial Intelligence in Education: Supporting Learning through Intelligent and Socially Informed Technology" by Chee-Kit Looi and Gerald G. Kulm
+  - "AI in Education: A Guide for Educators" by Wayne Holmes and John F. Rafferty
+  - Online courses: "Artificial Intelligence in Education" by Stanford University, "AI for Everyone" by Andrew Ng on Coursera, "Artificial Intelligence in Learning" by the University of Edinburgh on edX.
+  - Conferences: The International Conference on Artificial Intelligence in Education (AIED), The Workshop on Artificial Intelligence in Education (WAIE), The Conference on Learning Analytics and Knowledge (LAK).
+  - Online learning platforms: Duolingo, Knewton, DreamBox Learning.
+  - Blogs: EdSurge, The AI Alignment Forum, TeachThought.
+- [USER] User expressed interest in the "Artificial Intelligence in Education" course on Stanford Online.
+- [ASSISTANT_SAID] Assistant provided details about the "Artificial Intelligence in Education" course, including:
+  - Duration: 4 weeks (estimated 2-3 hours/week)
+  - Format: Online, self-paced
+  - Level: Intermediate
+  - Prerequisites: None, but a basic understanding of education and/or computer science is helpful.
+- [ASSISTANT_SAID] Course description included topics such as AI in education, adaptive learning systems, Natural Language Processing (NLP), AI-based assessment, educational data mining, and ethics in AI.
+- [ASSISTANT_SAID] Instructors for the course are Dr. Candace Thille and Dr. Mitchell Stevens.
+- [ASSISTANT_SAID] Assistant provided information about the final project, including project options, requirements, and evaluation criteria.
+- [ASSISTANT_SAID] Evaluation criteria included relevance and significance, originality and creativity, methodology and implementation, clarity and

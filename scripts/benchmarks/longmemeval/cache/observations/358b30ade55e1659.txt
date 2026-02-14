@@ -1,0 +1,26 @@
+**Observation Log:**
+
+[FACT] Session Date: 2023/05/23 (Tue) 01:08  
+[EVENT] User has been doing a lot of online shopping lately.  
+[EVENT] User wants to get a better handle on spending habits.  
+[ASSISTANT_SAID] Assistant is happy to help organize online purchases and gain insight into spending habits.  
+[ASSISTANT_SAID] Assistant requests the user to gather receipts or order confirmations, bank or credit card statements, and a list of online shopping accounts.  
+[ASSISTANT_SAID] Assistant outlines steps to categorize purchases, track spending, identify patterns, and set a budget.  
+[EVENT] User has most receipts and order confirmations but is still digging through emails.  
+[EVENT] User recalls spending around $200 on collectible vinyl records on eBay in March, including a rare pressing of The Beatles' Sgt. Pepper's Lonely Hearts Club Band.  
+[ASSISTANT_SAID] Assistant suggests prioritizing tracking the $200 eBay purchase due to its significance.  
+[ASSISTANT_SAID] Assistant notes the importance of tracking spending on hobbies or entertainment.  
+[ASSISTANT_CREATED] Assistant creates a note for the eBay purchase: March - eBay - Vinyl Records - $200, including item details and category.  
+[EVENT] User remembers another purchase from Everlane around the same time, using a 20% off coupon.  
+[ASSISTANT_SAID] Assistant asks for details about the Everlane purchase, including items and original price.  
+[EVENT] User recalls buying three new shirts and a pair of jeans from Everlane, totaling around $150 after the discount.  
+[ASSISTANT_CREATED] Assistant adds the Everlane purchase to the list: March - Everlane - Clothing - $150, including item details and category.  
+[EVENT] User finds receipts in their email inbox, including a purchase from Amazon for a wireless charging pad and phone case for around $40.  
+[EVENT] User also finds a receipt from an online furniture store for a desk lamp costing around $60.  
+[ASSISTANT_SAID] Assistant agrees to categorize the Amazon purchase under Electronics and the desk lamp under Home Goods.  
+[ASSISTANT_CREATED] Assistant updates the list with the new purchases:  
+- April - Amazon - Electronics - $40 (wireless charging pad, phone case)  
+- March - Online Furniture Store - Home Goods - $60 (desk lamp)  
+[ASSISTANT_SAID] Assistant encourages the user to keep searching for receipts and order confirmations to complete the picture of spending habits.  
+[EVENT] User is actively searching for more receipts and order confirmations.  
+[ASSISTANT_SAID] Assistant asks if there are any other purchases that stand out in the user's mind.

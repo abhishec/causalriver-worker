@@ -1,0 +1,19 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/03/26 (Sun) 01:21
+- [ASSISTANT_CREATED] Character sheet for a Halfling Rogue with the Arcane Trickster archetype named Lily Underfoot.
+- [ASSISTANT_SAID] Lily Underfoot's race is Halfling, class is Rogue (Arcane Trickster), background is Criminal, and alignment is Chaotic Neutral.
+- [ASSISTANT_SAID] Lily Underfoot's ability scores: Strength: 8, Dexterity: 16, Constitution: 12, Intelligence: 16, Wisdom: 10, Charisma: 12.
+- [ASSISTANT_SAID] Lily Underfoot's skills include Acrobatics (Dex), Deception (Cha), Sleight of Hand (Dex), Stealth (Dex), Investigation (Int), and Arcana (Int).
+- [ASSISTANT_SAID] Lily Underfoot's equipment includes a shortsword, hand crossbow with 20 bolts, thieves' tools, leather armor, burglar's pack, and 15 gold pieces.
+- [ASSISTANT_SAID] Lily Underfoot's spells known: Cantrips: Mage Hand, Minor Illusion, Prestidigitation; 1st Level Spells: Disguise Self, Sleep.
+- [ASSISTANT_CREATED] Backstory for Lily Underfoot detailing her upbringing in a family of thieves, fascination with magic, and her journey to becoming an Arcane Trickster.
+- [USER] Requested that the character should have 3 cantrips instead of 2 according to the player's handbook.
+- [ASSISTANT_SAID] Acknowledged the mistake and revised Lily Underfoot's character sheet to include 3 cantrips.
+- [ASSISTANT_SAID] Revised spells known for Lily Underfoot: Cantrips: Mage Hand, Minor Illusion, Prestidigitation; 1st Level Spells: Disguise Self, Sleep.
+- [USER] Requested Jasper's AC, hit points, and weapon stats.
+- [ASSISTANT_SAID] Provided Jasper's AC as 14 (studded leather armor), hit points as 23, and weapon stats for rapier and shortbow.
+- [ASSISTANT_SAID] Jasper's rapier stats: +5 to hit, 1d8+3 piercing damage; shortbow stats: +5 to hit, 1d6+3 piercing damage, range 80/320.
+- [USER] Requested to rewrite Jasper as a College of Lore Bard.
+- [ASSISTANT_CREATED] Revised character sheet for Jasper as a level 3 Half-Elf Bard (College of Lore).
+- [ASSISTANT_SAID] Jasper's race is Half-Elf, class is Bard (College of Lore), background is Sage, and alignment is Neutral Good.

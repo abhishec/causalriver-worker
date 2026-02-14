@@ -1,0 +1,25 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/03/27 (Mon) 06:33
+- [FACT] User has spent around 50 hours playing games in the past month.
+- [PREFERENCE] User is looking for gaming keyboards with customizable backlighting and macro keys.
+- [CHANGE] User's current keyboard is showing its age and needs an upgrade.
+- [ASSISTANT_SAID] Recommended gaming keyboards include:
+  1. **Razer BlackWidow Chroma V2**: Customizable backlighting with 16.8 million color options, macro capabilities, mechanical switches, compact tenkeyless design, around $100.
+  2. **Logitech G512 Mechanical Gaming Keyboard**: Romer-G mechanical switches, customizable lighting with 16.8 million colors, macro keys, integrated wrist rest, around $150.
+  3. **Corsair K95 RGB Platinum**: Cherry MX mechanical switches, 18-zone customizable backlighting, 6 programmable macro keys, aluminum construction, around $250.
+  4. **SteelSeries Apex 7 TKL**: SteelSeries QX2 mechanical switches, customizable 16.8 million color backlighting, 12 programmable keys, compact tenkeyless design, around $130.
+  5. **HyperX Alloy Elite**: Kailh Silver Speed mechanical switches, customizable backlighting with 16.8 million colors, 6 programmable macro keys, compact tenkeyless design, around $100.
+- [ASSISTANT_SAID] Suggested factors to consider when choosing a keyboard: switch type, macro key layout, customization software, and budget.
+- [PREFERENCE] User is leaning towards the Razer BlackWidow Chroma V2.
+- [ASSISTANT_SAID] Provided feedback on Razer proprietary switches compared to Cherry MX switches, including:
+  1. **Feel**: Razer switches have a different tactile bump; some find them smoother.
+  2. **Actuation Force**: Razer switches require around 45g, while Cherry MX switches require around 50-60g.
+  3. **Durability**: Both are designed for millions of keystrokes, but Cherry MX has a longer history of reliability.
+  4. **Sound**: Razer switches are generally quieter than Cherry MX clicky switches.
+- [ASSISTANT_SAID] Listed pros and cons of Razer Mechanical Switches compared to Cherry MX switches.
+- [PREFERENCE] User is interested in the customizable backlighting feature of the Razer BlackWidow Chroma V2.
+- [ASSISTANT_SAID] Explained the customizable backlighting feature, including:
+  1. **16.8 million color options**.
+  2. **Customizable zones** for different parts of the keyboard.
+  3. **Effects and animations** available through

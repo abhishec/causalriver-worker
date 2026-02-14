@@ -1,0 +1,35 @@
+**Observation Log:**
+
+[FACT] The user is looking to declutter their digital life.
+
+[FACT] The user has a home office.
+
+[EVENT] The user finished cleaning out their bookshelf on Tuesday evening.
+
+[EVENT] The user plans to sell some old books to Half Price Books this weekend.
+
+[PREFERENCE] The user is excited to start using apps and tools to track personal finance and budgeting.
+
+[PREFERENCE] The user is happy with how their home office is shaping up after decluttering and organizing their bookshelf.
+
+[TEMPORAL] The session date is 2023/08/20 (Sun) 18:00.
+
+[ASSISTANT_SAID] The assistant congratulated the user on decluttering their bookshelf.
+
+[ASSISTANT_SAID] The assistant recommended the following apps and tools for organizing computer files and cloud storage: Evernote, Resilio Sync, Hazel, CloudHQ, MultCloud, Duplicati, Everything (Windows), Alfred (Mac), CCleaner, Disk Cleanup (Windows), Clean My Mac (Mac), Google Drive, Microsoft OneDrive, and pCloud.
+
+[ASSISTANT_SAID] The assistant provided additional tips for digital decluttering, including creating a consistent naming convention, using tags and labels, setting up a regular backup system, and unsubscribing from unwanted emails.
+
+[ASSISTANT_SAID] The assistant recommended the following apps and tools for digitizing paper documents and receipts: Evernote Scannable, Scanbot, CamScanner, Shoeboxed, Expensify, Neat, Google Drive, Microsoft OneDrive, and Dropbox.
+
+[ASSISTANT_SAID] The assistant provided additional tips for managing digital documents, including setting up a regular scanning schedule, shredding or recycling paper documents, creating a backup system, and considering using a password manager.
+
+[ASSISTANT_SAID] The assistant recommended the following apps and tools for automating bill pay and reducing paper mail: Online Bill Pay through banks, BillPay, Prism, Doxo, PaperKarma, OptOutPrescreen, Catalog Choice, DMACHoice, EarthClassMail, Mailstrom, and ScanMyMail.
+
+[ASSISTANT_SAID] The assistant provided additional tips for reducing paper clutter, including switching to digital statements, using email filters, considering a paperless office, and shredding unwanted mail.
+
+[ASSISTANT_SAID] The assistant recommended the following apps and tools for tracking personal finance and budgeting: Mint, Personal Capital, You Need a Budget (YNAB), Spendee, Expensify, Shoeboxed, Wally, Acorns, Digit, Qapital, Credit Karma, and Credit Sesame.
+
+[ASSISTANT_SAID] The assistant provided additional tips for personal finance management, including setting financial goals, tracking expenses, creating a budget, and automating savings.
+
+[ASSISTANT_SAID] The assistant encouraged the user to stay disciplined, patient,

@@ -1,0 +1,30 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/04/11 (Tue) 16:47
+- [EVENT] User is planning to do a live stream on their morning routine.
+- [PREFERENCE] User wants to recommend some coffee brands during the live stream.
+- [ASSISTANT_SAID] Assistant provided a list of popular coffee brands, categorized into Mainstream Brands, Specialty Coffee Brands, Gourmet Coffee Brands, and Online Coffee Subscription Brands.
+- [ASSISTANT_CREATED] Assistant created a list of coffee brands:
+  - Mainstream Brands: Folgers, Maxwell House, Starbucks, Dunkin' Donuts
+  - Specialty Coffee Brands: Blue Bottle Coffee, Intelligentsia Coffee, Stumptown Coffee Roasters, La Colombe Coffee
+  - Gourmet Coffee Brands: Kona coffee, Illy, Lavazza, Peet's Coffee
+  - Online Coffee Subscription Brands: Angels' Cup, Bean Box, Counter Culture Coffee, MistoBox
+- [FACT] User has been recommending Blue Bottle Coffee on their streams.
+- [EVENT] User wants to track their YouTube live stream analytics to see how their streams have been doing over the past few weeks.
+- [ASSISTANT_SAID] Assistant provided steps to track YouTube live stream analytics using YouTube Studio.
+- [ASSISTANT_SAID] Assistant listed metrics available in YouTube Analytics: concurrent viewers, peak concurrent viewers, average view duration, watch time, engagement.
+- [ASSISTANT_SAID] Assistant suggested using third-party tools like TubeBuddy, VidIQ, or Hootsuite for additional insights.
+- [TEMPORAL] User has been doing live streams for exactly 3 weeks.
+- [EVENT] User is considering starting daily live streams.
+- [ASSISTANT_SAID] Assistant discussed the pros and cons of daily live streams, including increased visibility, consistency, burnout, and content fatigue.
+- [ASSISTANT_SAID] Assistant provided alternatives to daily live streams, such as streaming 3-4 times a week or themed streams.
+- [EVENT] User is thinking of doing a live stream on skincare routines for different skin types.
+- [ASSISTANT_SAID] Assistant provided a list of common skin types and tips on how to cater to each type in the stream.
+- [ASSISTANT_CREATED] Assistant created a list of common skin types:
+  - Normal Skin: Balanced skin, recommend gentle products.
+  - Dry Skin: Tight, flaky skin, recommend hydrating products.
+  - Oily Skin: Shiny skin, recommend oil-free products.
+  - Combination Skin: Oily in T-zone, recommend balanced products.
+  - Sensitive Skin: Easily irritated skin, recommend gentle products.
+  - Acne-Prone Skin: Frequent breakouts, recommend salicylic acid or benzoyl peroxide.
+  - Mature Skin: Signs of aging, recommend antioxidants

@@ -1,0 +1,50 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/25 (Thu) 04:42  
+[ASSISTANT_SAID] If you're getting an `ApplicationError: No executable found for solver 'cbc'` when running your Pyomo model in Google Colab, it's likely that the CBC solver is not installed or not properly configured on your system.  
+[ASSISTANT_SAID] To install CBC in Google Colab, you can run the command: `!apt-get install -y -qq coinor-cbc`.  
+[ASSISTANT_SAID] After installing CBC, you may need to add the CBC executable to your system path by running: `import os; os.environ['PATH'] += ':/usr/bin'`.  
+[ASSISTANT_SAID] After running these commands, you should be able to use CBC as a solver in Pyomo by setting the `solver_name` argument to `'cbc'` when calling the `SolverFactory` function.  
+[ASSISTANT_SAID] Provided a code example for using CBC as a solver in Pyomo.  
+[ASSISTANT_CREATED] Code example for using CBC as a solver in Pyomo:  
+```python
+from pyomo.environ import *
+
+model = ConcreteModel()
+
+model.x = Var(within=NonNegativeReals)
+model.y = Var(within=NonNegativeReals)
+
+model.c1 = Constraint(expr=model.x + model.y >= 1)
+
+model.obj = Objective(expr=model.x + model.y)
+
+solver = SolverFactory('cbc')
+results = solver.solve(model)
+
+print(results)
+```  
+[USER] I modified your code a little as follows:  
+```python
+!pip install pyomo
+!apt-get install -y -qq coinor-cbc
+from pyomo.environ import *
+
+model = ConcreteModel()
+
+model.x = Var(within=NonNegativeReals)
+model.y = Var(within=NonNegativeReals)
+def my_constraint_rule(model):
+ return model.x + model.y >= 1
+model.my_constraint = Constraint(rule=my_constraint_rule)
+
+model.obj = Objective(expr=model.x + model.y)
+
+solver = SolverFactory('cbc')
+results = solver.solve(model)
+```  
+[USER] But the last line yields the error `ApplicationError: No executable found for solver 'cbc'`.  
+[ASSISTANT_SAID] Suggested checking if CBC is installed and in the system path, and provided commands to verify and add CBC to the path.  
+[ASSISTANT_SAID] Suggested installing the CBC solver interface in Pyomo with the command: `!pip install pyomo[solvers]`.  
+[ASSISTANT_SAID] Once verified, you should be able to solve your Pyomo model with the CBC solver.  
+[USER] Hmm, still not working. Can you give a discrete example? I.e. with all variables binary.

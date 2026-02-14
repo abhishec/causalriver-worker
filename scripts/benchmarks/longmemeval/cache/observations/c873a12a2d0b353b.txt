@@ -1,0 +1,26 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/29 (Mon) 00:53
+- [EVENT] User received a clothing order from Zara today.
+- [PREFERENCE] User wants to get a better grasp of their online shopping spending habits.
+- [EVENT] User has been thinking about their online shopping habits lately.
+- [ASSISTANT_SAID] Assistant offered to help the user organize their online shopping history and track their spending.
+- [ASSISTANT_SAID] Assistant suggested breaking down the process into smaller steps.
+- [ASSISTANT_SAID] Step 1: Gather information about online shopping platforms (e.g., Amazon, Zara, ASOS, eBay).
+- [ASSISTANT_SAID] Step 2: Collect order history by logging into each platform and noting the date of purchase, item(s) purchased, total cost, and any discounts used.
+- [ASSISTANT_SAID] Step 3: Categorize purchases by category and calculate total amount spent in each category.
+- [ASSISTANT_SAID] Step 4: Set a budget and goals based on analysis.
+- [ASSISTANT_SAID] Step 5: Track future purchases and set reminders to review spending regularly.
+- [ASSISTANT_SAID] Additional tips included using browser extensions like CamelCamelCamel and cashback apps like Rakuten.
+- [USER] User has already started gathering information and collecting their order history.
+- [PREFERENCE] User realizes they tend to shop more during sales or when they receive their paycheck.
+- [USER] User wants to know if there's a way to set reminders for upcoming sales or promotions on their favorite shopping platforms.
+- [ASSISTANT_SAID] Assistant provided several strategies to stay informed about upcoming sales and promotions.
+- [ASSISTANT_SAID] Suggested signing up for newsletters, following brands on social media, using deal-tracking websites and apps, enabling price drop alerts, setting calendar reminders, and using browser extensions.
+- [USER] User has been using some of these methods, especially following brands on social media and using deal-tracking websites.
+- [USER] User is interested in exploring Zara's sales and promotions more closely.
+- [ASSISTANT_SAID] Assistant confirmed that the user can set up price drop alerts and sale reminders specifically for Zara and other fashion retailers.
+- [ASSISTANT_SAID] Suggested using Zara's Wish List feature for price drop alerts, third-party price trackers, browser extensions, and following Zara on social media.
+- [USER] User has been shopping frequently on ASOS, especially during their sales.
+- [USER] User wants to find a way to track ASOS sales and promotions more efficiently.
+- [ASSISTANT_SAID] Assistant provided methods to track ASOS sales and promotions, including signing up for newsletters, using the ASOS app

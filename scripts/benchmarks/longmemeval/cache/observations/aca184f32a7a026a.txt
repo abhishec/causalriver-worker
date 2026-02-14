@@ -1,0 +1,19 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/20 (Sat) 13:28  
+[FACT] User requested ideas for a thesis on the subject of "cloud data pipelines."  
+[PREFERENCE] User prefers thesis ideas that are not too complex and have a practical use case.  
+[ASSISTANT_CREATED] Assistant provided a table format for thesis ideas, including titles, abstracts, pros, and cons.  
+[ASSISTANT_SAID] Title: "Design and Implementation of a Cloud-based Data Pipeline for Real-time Streaming Data"  
+[ASSISTANT_SAID] Abstract for the first thesis: "This thesis will focus on the design and implementation of a cloud-based data pipeline for real-time streaming data. The pipeline will be built using a combination of cloud-based services such as AWS Kinesis, AWS Lambda, and AWS S3. The thesis will cover the design considerations, implementation details, and performance evaluation of the pipeline."  
+[ASSISTANT_SAID] Pros for the first thesis: "Real-time processing of streaming data, Scalability and Flexibility, Cost-effective solution."  
+[ASSISTANT_SAID] Cons for the first thesis: "Limited compatibility with on-premises systems, Complex setup and maintenance."  
+[ASSISTANT_SAID] Title: "Cloud-based Data Pipeline for Batch Processing of Big Data"  
+[ASSISTANT_SAID] Abstract for the second thesis: "This thesis will focus on the design and implementation of a cloud-based data pipeline for batch processing of big data. The pipeline will be built using a combination of cloud-based services such as Google Cloud Dataflow, Google BigQuery, and Google Cloud Storage. The thesis will cover the design considerations, implementation details, and performance evaluation of the pipeline."  
+[ASSISTANT_SAID] Pros for the second thesis: "Cost-effective solution, Scalability and Flexibility, Ability to handle large amounts of data."  
+[ASSISTANT_SAID] Cons for the second thesis: "Limited compatibility with on-premises systems, Complex setup and maintenance."  
+[ASSISTANT_SAID] Title: "A Comparative Study of Cloud-based Data Pipeline Services"  
+[ASSISTANT_SAID] Abstract for the third thesis: "This thesis will conduct a comparative study of different cloud-based data pipeline services such as AWS Glue, Google Cloud Dataflow, and Azure Data Factory. The study will cover the features, performance, and cost of each service. The thesis will also provide recommendations for selecting the right service for different use cases."  
+[ASSISTANT_SAID] Pros for the third thesis: "Comparison of different services available in the market, Practical recommendations for selection of a service."  
+[ASSISTANT_SAID] Cons for the third thesis: "Limited to the services available in the market, Doesn't cover all possible use cases."  
+[ASSISTANT

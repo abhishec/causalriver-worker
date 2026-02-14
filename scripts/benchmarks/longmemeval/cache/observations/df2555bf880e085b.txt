@@ -1,0 +1,30 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/29 (Mon) 15:54  
+[FACT] User is interested in trying out new recipes.  
+[PREFERENCE] User has been obsessed with bulgogi lately.  
+[EVENT] User tried making a decent version of bulgogi at home last weekend.  
+[ASSISTANT_SAID] Bulgogi is an amazing dish.  
+[ASSISTANT_SAID] Recommended Korean BBQ dishes beyond bulgogi:  
+[ASSISTANT_CREATED] 1. Galbi: A classic Korean-style short ribs dish, marinated in a sweet and spicy sauce.  
+[ASSISTANT_CREATED] 2. Dakgalbi: A spicy chicken dish made with marinated chicken thighs or drumsticks.  
+[ASSISTANT_CREATED] 3. Jeyuk bokkeum: A stir-fried pork dish made with marinated pork and vegetables.  
+[ASSISTANT_CREATED] 4. Samgyeopsal: Thick, fatty pork belly slices, often served with kimchi and rice.  
+[ASSISTANT_CREATED] 5. Chadolbaegi: Thinly sliced brisket, marinated in a sweet and savory sauce.  
+[ASSISTANT_CREATED] 6. Jjim: A Korean-style braised beef dish, slow-cooked in a sweet and spicy sauce.  
+[ASSISTANT_CREATED] 7. Gopchang: Grilled beef intestines, marinated in a spicy sauce.  
+[ASSISTANT_CREATED] 8. Tteokgalbi: Korean-style rice cake dish, marinated and grilled or pan-fried.  
+[ASSISTANT_SAID] Suggested pairing Korean BBQ dishes with traditional sides like kimchi, japchae, or bokkeumbap.  
+[PREFERENCE] User is interested in common ingredients used in Korean marinades.  
+[ASSISTANT_SAID] Common ingredients in Korean marinades include:  
+[ASSISTANT_CREATED] 1. Gochujang: Korean chili paste.  
+[ASSISTANT_CREATED] 2. Soy sauce: Provides salty, savory flavor.  
+[ASSISTANT_CREATED] 3. Garlic: Adds pungent flavor.  
+[ASSISTANT_CREATED] 4. Ginger: Adds warm, spicy flavor.  
+[ASSISTANT_CREATED] 5. Sugar: Adds sweetness.  
+[ASSISTANT_CREATED] 6. Sesame oil: Adds nutty flavor.  
+[ASSISTANT_CREATED] 7. Rice vinegar: Balances flavors and tenderizes meat.  
+[ASSISTANT_CREATED] 8. Black pepper: Adds subtle flavor.  
+[ASSISTANT_CREATED] 9. Scallions: Adds fresh flavor.  
+[ASSISTANT_CREATED] 10. Korean chili flakes (gochugaru): Adds heat.  
+[PREFERENCE] User wants tips

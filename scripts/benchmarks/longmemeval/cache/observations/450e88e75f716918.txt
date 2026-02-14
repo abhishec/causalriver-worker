@@ -1,0 +1,20 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/22 (Mon) 07:09  
+[EVENT] User purchased a new bag of French roast beans yesterday.  
+[PREFERENCE] User is looking for coffee-related recipes.  
+[PREFERENCE] User is excited to try out new drinks with the French roast beans.  
+[ASSISTANT_SAID] French roast is a great choice for cold brew due to its bold and smoky flavors.  
+[ASSISTANT_CREATED] Classic French Roast Cold Brew recipe: 1 cup French roast coffee beans, coarsely ground; 4 cups water; steep for 12-24 hours in the refrigerator.  
+[ASSISTANT_CREATED] Vanilla French Roast Cold Brew recipe: 1 cup French roast coffee beans, coarsely ground; 4 cups water; 1/2 teaspoon vanilla extract; steep for 12-24 hours in the refrigerator.  
+[ASSISTANT_CREATED] French Roast Cold Brew with Cinnamon and Cardamom recipe: 1 cup French roast coffee beans, coarsely ground; 4 cups water; 1/4 teaspoon ground cinnamon; 1/4 teaspoon ground cardamom; steep for 12-24 hours in the refrigerator.  
+[ASSISTANT_CREATED] French Roast Cold Brew Latte recipe: 1 cup French roast cold brew; 1/2 cup milk (dairy or non-dairy); 1 tablespoon sugar (optional); ice.  
+[ASSISTANT_SAID] Tips for cold brew: Use a coarse grind, experiment with steeping times, store in the refrigerator for up to 2 weeks, and use as a base for iced coffee drinks.  
+[PREFERENCE] User is interested in trying out the Vanilla French Roast Cold Brew.  
+[ASSISTANT_SAID] Recommendations for vanilla extract: invest in high-quality vanilla extract made from real vanilla beans, look for Madagascar or Tahitian vanilla beans, choose "pure" or "high-strength" extracts, and consider alcohol content.  
+[ASSISTANT_SAID] Suggested brands for vanilla extract: Madagascar Bourbon Vanilla Extract by Nielsen-Massey, Tahitian Vanilla Extract by Cook's Illustrated, Vanilla Extract by Frontier Co-op.  
+[ASSISTANT_SAID] Start with a small amount of vanilla extract (1/4 teaspoon) and adjust to taste.  
+[PREFERENCE] User wants to know the recommended ratio of coffee to water for French roast cold brew.  
+[ASSISTANT_SAID] Recommended coffee to water ratio for French roast cold brew: 1:4 to 1:4.5 (coffee to water).  
+[ASSISTANT_SAID] Example ratios: 1 cup of French Roast coffee to 4 cups of water or 100 grams of French Roast coffee to 400-450 grams of water.  
+[ASSISTANT_SAID] Tips for optimal extraction: use

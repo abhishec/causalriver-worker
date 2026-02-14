@@ -1,0 +1,86 @@
+{
+  "answer_d39b7977_1": [
+    {
+      "fact": "User works in the city of Irvine, California",
+      "type": "personal",
+      "entities": [
+        "Irvine",
+        "California"
+      ]
+    },
+    {
+      "fact": "User is looking for a family-friendly area with good schools and parks",
+      "type": "preference",
+      "entities": [
+        "family-friendly area",
+        "good schools",
+        "parks"
+      ]
+    },
+    {
+      "fact": "User is working with a real estate agent named Rachel",
+      "type": "relationship",
+      "entities": [
+        "Rachel"
+      ]
+    },
+    {
+      "fact": "User has a good sense of what they are looking for in a neighborhood",
+      "type": "opinion",
+      "entities": []
+    }
+  ],
+  "answer_d39b7977_2": [
+    {
+      "fact": "User is looking to buy a home.",
+      "type": "preference",
+      "entities": [
+        "homebuying"
+      ]
+    },
+    {
+      "fact": "User saw a house they love on March 1st.",
+      "type": "event",
+      "entities": [
+        "March 1st",
+        "house"
+      ]
+    },
+    {
+      "fact": "User got pre-approved for a mortgage on February 10th.",
+      "type": "event",
+      "entities": [
+        "February 10th",
+        "mortgage"
+      ]
+    },
+    {
+      "fact": "User's mortgage pre-approval amount is $350,000.",
+      "type": "personal",
+      "entities": [
+        "$350,000"
+      ]
+    },
+    {
+      "fact": "User is working with a real estate agent named Rachel.",
+      "type": "relationship",
+      "entities": [
+        "Rachel"
+      ]
+    },
+    {
+      "fact": "User believes the house they saw checks all the boxes.",
+      "type": "opinion",
+      "entities": [
+        "house"
+      ]
+    },
+    {
+      "fact": "User is considering including an inspection contingency in their offer.",
+      "type": "preference",
+      "entities": [
+        "inspection contingency"
+      ]
+    }
+  ]
+}

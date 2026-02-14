@@ -1,0 +1,22 @@
+**Observation Log:**
+
+- [FACT] User's name is Jawed Karim.
+- [FACT] User sent an email to Chad Hurley and Steve Chen.
+- [TEMPORAL] The email was sent on Sunday, February 13, 2005, at 11:10 PM.
+- [EVENT] User discussed a video idea in the email.
+- [PREFERENCE] User believes the video idea can be "HUGE" if executed correctly.
+- [PREFERENCE] User suggests that the site should be video-only to emphasize its unique aspect.
+- [FACT] User mentions that video digital cameras are "exploding" in popularity.
+- [CHANGE] User indicates that bandwidth costs are high but getting cheaper.
+- [FACT] User wants to convert uploaded AVI files to Flash movies for better compatibility.
+- [FACT] User notes that AVI files have compatibility issues.
+- [FACT] User states that H or N can add their idea in about 10 days.
+- [PREFERENCE] User emphasizes the need for matchmaking functionality to make the site immediately useful.
+- [FACT] User identifies web server scalability as the "BIGGEST ISSUE BY FAR."
+- [FACT] User references issues faced by H or N during their first month, including moving hosting centers and rewriting systems.
+- [RELATIONSHIP] User has a working relationship with Chad Hurley and Steve Chen.
+- [EVENT] User invites Chad and Steve to meet the following night after 8 PM at Chad's house.
+- [ASSISTANT_SAID] Assistant summarizes the email content, stating it discusses an idea for a video-based website.
+- [ASSISTANT_SAID] Assistant mentions that the email outlines several issues that need to be addressed for success.
+- [ASSISTANT_SAID] Assistant notes that the site should have matchmaking functionality built in from the beginning.
+- [ASSISTANT_SAID] Assistant invites Chad and Steve to meet to discuss the idea further.

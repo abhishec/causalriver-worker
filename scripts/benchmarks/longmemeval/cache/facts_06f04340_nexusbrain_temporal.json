@@ -1,0 +1,21 @@
+{
+  "answer_92d5f7cd": [
+    {
+      "fact": "User is looking for new recipe ideas that use fresh basil and mint",
+      "type": "preference",
+      "entities": [
+        "basil",
+        "mint",
+        "recipe ideas"
+      ]
+    },
+    {
+      "fact": "User is interested in companion plants for tomatoes",
+      "type": "preference",
+      "entities": [
+        "companion plants",
+        "tomatoes"
+      ]
+    }
+  ]
+}

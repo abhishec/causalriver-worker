@@ -1,0 +1,42 @@
+{
+  "answer_5ff494b9_abs": [
+    {
+      "fact": "User is planning a trip to Asia and considering visiting Japan.",
+      "type": "event",
+      "entities": [
+        "Asia",
+        "Japan"
+      ]
+    },
+    {
+      "fact": "User visited Fushimi Inari Shrine a few months ago.",
+      "type": "event",
+      "entities": [
+        "Fushimi Inari Shrine",
+        "Japan"
+      ]
+    },
+    {
+      "fact": "User spent two weeks traveling solo around Japan.",
+      "type": "event",
+      "entities": [
+        "Japan"
+      ]
+    },
+    {
+      "fact": "User had an incredible experience traveling in Japan.",
+      "type": "opinion",
+      "entities": [
+        "Japan"
+      ]
+    },
+    {
+      "fact": "User is looking for budget-friendly places to stay in Kyoto.",
+      "type": "preference",
+      "entities": [
+        "Kyoto",
+        "budget-friendly accommodations"
+      ]
+    }
+  ]
+}

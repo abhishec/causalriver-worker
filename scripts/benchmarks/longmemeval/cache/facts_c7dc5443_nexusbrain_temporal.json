@@ -1,0 +1,128 @@
+{
+  "answer_0cdbca92_1": [
+    {
+      "fact": "User is thinking about signing up for a triathlon in the fall.",
+      "type": "event",
+      "entities": [
+        "triathlon",
+        "fall"
+      ]
+    },
+    {
+      "fact": "User has been doing well in a volleyball league with a record of 3-2.",
+      "type": "event",
+      "entities": [
+        "volleyball league",
+        "3-2"
+      ]
+    },
+    {
+      "fact": "User engages in a mix of cardio and strength training at the gym.",
+      "type": "preference",
+      "entities": [
+        "cardio",
+        "strength training",
+        "gym"
+      ]
+    },
+    {
+      "fact": "User plays sports like volleyball and soccer.",
+      "type": "preference",
+      "entities": [
+        "volleyball",
+        "soccer"
+      ]
+    },
+    {
+      "fact": "User is decent at swimming and can do laps, but their pace is slow.",
+      "type": "personal",
+      "entities": [
+        "swimming",
+        "laps",
+        "slow pace"
+      ]
+    },
+    {
+      "fact": "User does not have a bike yet but plans to get one soon.",
+      "type": "personal",
+      "entities": [
+        "bike"
+      ]
+    },
+    {
+      "fact": "User has limited running experience but completed a 5K in 32:15.",
+      "type": "personal",
+      "entities": [
+        "5K",
+        "32:15"
+      ]
+    },
+    {
+      "fact": "User's goal is to do a sprint triathlon.",
+      "type": "event",
+      "entities": [
+        "sprint triathlon"
+      ]
+    },
+    {
+      "fact": "User thinks they have around 12 weeks to prepare for the triathlon.",
+      "type": "personal",
+      "entities": [
+        "12 weeks"
+      ]
+    },
+    {
+      "fact": "User would like to focus on improving their swimming and biking skills.",
+      "type": "preference",
+      "entities": [
+        "swimming",
+        "biking skills"
+      ]
+    }
+  ],
+  "answer_0cdbca92_2": [
+    {
+      "fact": "User is thinking of signing up for a triathlon in the fall",
+      "type": "event",
+      "entities": [
+        "triathlon",
+        "fall"
+      ]
+    },
+    {
+      "fact": "User feels confident about their athletic abilities",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User's volleyball team is called the Net Ninjas",
+      "type": "relationship",
+      "entities": [
+        "Net Ninjas"
+      ]
+    },
+    {
+      "fact": "User's volleyball team has a record of 5-2",
+      "type": "event",
+      "entities": [
+        "5-2 record"
+      ]
+    },
+    {
+      "fact": "User plays volleyball and soccer",
+      "type": "personal",
+      "entities": [
+        "volleyball",
+        "soccer"
+      ]
+    },
+    {
+      "fact": "User is considering improving flexibility and mobility",
+      "type": "preference",
+      "entities": [
+        "flexibility",
+        "mobility"
+      ]
+    }
+  ]
+}

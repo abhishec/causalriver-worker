@@ -1,0 +1,24 @@
+**Observation Log:**
+
+[SESSION DATE] Session Date: 2023/03/28 (Tue) 04:15  
+[FACT] User is experiencing issues with internet speed while working from home.  
+[FACT] User's internet service provider is XYZ Internet.  
+[FACT] User currently has a 500 Mbps internet plan.  
+[FACT] User set up a new router on January 15th, which improved Wi-Fi signal strength.  
+[FACT] User has around 5-6 devices connected to their network, including a laptop, smart TV, and smart speaker.  
+[FACT] User usually works from a home office that is about 10-15 feet away from the router.  
+[FACT] User has an Ethernet cable available for connection if needed.  
+[FACT] User ran a speed test with results: download speed 350 Mbps, upload speed 20 Mbps, ping 25 ms.  
+[FACT] User paid their internet bill on January 25th.  
+[FACT] User needs to call their provider to negotiate a better deal.  
+[CHANGE] User has been experiencing slow speeds lately, especially when family members are using their devices simultaneously.  
+[CHANGE] User has noticed that their smart speaker seems to be consuming some bandwidth in the background.  
+[EVENT] User set up their smart thermostat on February 10th after procrastinating for weeks.  
+[PREFERENCE] User uses their smart speaker frequently.  
+[ASSISTANT] The assistant suggested troubleshooting the internet speed issue by optimizing router configuration, prioritizing devices, and checking for interference.  
+[ASSISTANT] The assistant recommended running a speed test to analyze current internet speeds.  
+[ASSISTANT] The assistant provided general tips for improving internet speed, including restarting the router, moving closer to the router, using a wired Ethernet connection, updating router firmware, and limiting device connections.  
+[ASSISTANT] The assistant suggested checking for firmware updates for the smart speaker and adjusting its settings to limit bandwidth consumption.  
+[ASSISTANT] The assistant recommended configuring Quality of Service (QoS) settings on the router to prioritize high-bandwidth devices during peak usage hours.  
+[ASSISTANT] The assistant advised monitoring network usage to identify devices or applications consuming excessive resources.  
+[ASSISTANT] The assistant suggested scheduling updates for the smart speaker during off-peak hours to minimize impact on internet speeds.

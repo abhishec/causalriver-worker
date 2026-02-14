@@ -1,0 +1,19 @@
+**Observation Log:**
+
+- [EVENT] User is planning their own wedding.
+- [TEMPORAL] Session date is 2023/10/15.
+- [EVENT] User attended a friend's wedding last weekend (2023/10/07).
+- [RELATIONSHIP] User's friend who got married is named Jen.
+- [RELATIONSHIP] Jen's husband is named Tom.
+- [PREFERENCE] User appreciates bohemian-inspired wedding dresses.
+- [PREFERENCE] User prefers a small outdoor ceremony, possibly at a beach or in a park.
+- [PREFERENCE] User likes the idea of using natural elements and soft lighting to create a cozy atmosphere.
+- [PREFERENCE] User is interested in incorporating their love of literature into the ceremony.
+- [RELATIONSHIP] User is a member of a book club.
+- [RELATIONSHIP] User trusts Jen's opinion on literature and plans to ask her for recommendations for poems or literature for the ceremony.
+- [ASSISTANT] Assistant provided tips on how to choose the perfect wedding venue.
+- [ASSISTANT] Assistant suggested ideas for creating an intimate and cozy atmosphere for the outdoor ceremony.
+- [ASSISTANT] Assistant discussed the potential of having a bonfire or fire pit at the beach ceremony.
+- [ASSISTANT] Assistant recommended incorporating music into the ceremony, such as acoustic guitar or a string quartet.
+- [ASSISTANT] Assistant provided suggestions for popular ceremony music options.
+- [ASSISTANT] Assistant advised user to choose music that has special meaning to them and their partner.

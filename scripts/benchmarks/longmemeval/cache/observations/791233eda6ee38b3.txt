@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/02/12 (Sun) 12:09
+- [FACT] User has set up their current tank for about 3 months.
+- [PREFERENCE] User is a beginner in aquarium keeping and is looking for low-maintenance aquatic plants.
+- [EVENT] User is thinking of setting up a new planted tank soon.
+- [ASSISTANT_SAID] Recommended low-maintenance aquatic plants: Java Moss, Anacharis, Water Wisteria (Hygrophila difformis), Hornwort (Ceratophyllum demersum), Amazon Swords (Echinocorys spp.), Cryptocorynes (Cryptocoryne spp.), Duckweed (Lemna minor).
+- [ASSISTANT_SAID] Suggested tips for setting up a new tank: choose suitable substrate and decorations, ensure proper water circulation and aeration, start with hardy plants, monitor water parameters, and be patient.
+- [PREFERENCE] User is concerned about algae growth in their new tank and wants to avoid issues experienced in their current tank.
+- [ASSISTANT_SAID] Suggested ways to prevent and control algae growth: proper lighting (8-10 hours, moderate to low), balanced nutrients, adequate water circulation, regular water changes, live plants, algae-controlling fish, algae-preventing substrate, monitor and adjust CO2, avoid overfeeding, and regular tank maintenance.
+- [EVENT] User is thinking of getting a new water testing kit since their current one is running low.
+- [ASSISTANT_SAID] Recommended water testing kits: API Freshwater Master Test Kit, Seachem Fresh & Saltwater Test Kit, Tetra AquaSafe 6-in-1 Water Test Kit, Hanna Instruments HI-713 pH & Ammonia Test Kit, Salifert Freshwater Aquarium Test Kit.
+- [ASSISTANT_SAID] Suggested factors to consider when choosing a water testing kit: accuracy, ease of use, range of tests, and cost.
+- [EVENT] User is thinking of upgrading their aquarium pump to a more powerful one for their 20-gallon planted tank.
+- [ASSISTANT_SAID] Recommended aquarium pumps: Eheim Compact+ 1000, Tunze Nano Stream 6025, Hydor Koralia Nano 425, Finnex PX-360.
+- [ASSISTANT_SAID] Suggested factors to consider when choosing a pump: flow rate (200-400 GPH), energy efficiency, noise level, and adjustability.
+- [CHANGE] User's current tank is doing great after the pump upgrade on April 20th.
+- [FACT] User has noticed increased water circulation has improved the overall health and appearance of their current tank.
+- [PREFERENCE] User is happy with the pump upgrade and believes it was worth it.
+- [EVENT] User is thinking of

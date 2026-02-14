@@ -1,0 +1,26 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/27 (Sat) 06:26
+- [ASSISTANT_SAID] Suggested app names combining a Korean noun with "Bouncy": Hwalbouncy, Hanbouncy, Dolsobouncy, Hwarangbouncy, Sambobouncy, Chobokyungbouncy, Janchibouncy, Namsanbouncy, Pungryubouncy, Chilgokbouncy.
+- [USER] Expressed that traditional words or proper nouns sound awkward to Koreans and requested everyday language.
+- [ASSISTANT_SAID] Suggested alternative app names: Tteok-bouncy, Bibimbouncy, Hanbouncy, Hwabouncy, Gimbouncy, Bulgobouncy.
+- [USER] Requested to connect the app name with a K-pop word.
+- [ASSISTANT_SAID] Suggested K-pop related app names: Bouncy Saebyeok, Bouncy Haneul, Bouncy Dalgona, Bouncy Dalcom.
+- [USER] Stated "Let's just speak English. let's go to the bouncy."
+- [ASSISTANT_SAID] Responded that "that's a good option" and noted it is simple and easy to remember.
+- [USER] Proposed "bouncy: awaken your soul."
+- [ASSISTANT_SAID] Agreed that it is a catchy name and noted the tagline "awaken your soul" ties in with Eastern philosophy and Korean elements.
+- [USER] Suggested "bouncy: keep your spirit alive."
+- [ASSISTANT_SAID] Responded that it is a good and catchy name that fits well with the app's purpose.
+- [USER] Changed the name to "Bouncy: Keep your soul alive."
+- [ASSISTANT_SAID] Affirmed that it is a catchy and memorable name that captures the spirit and purpose of the app.
+- [USER] Expressed excitement about developing an app.
+- [ASSISTANT_SAID] Wished the user good luck with the app development process.
+- [USER] Provided terminal commands: `cd ~/development` and `unzip ~/Downloads/flutter_macos_arm64_3.7.3-stable.zip`.
+- [ASSISTANT_SAID] Explained the purpose of the commands: changing directory and unzipping the Flutter archive.
+- [USER] Received error messages indicating the directory and file could not be found.
+- [ASSISTANT_SAID] Explained the error messages and suggested checking the existence of the directory and file.
+- [USER] Asked where the home directory is on the MacBook.
+- [ASSISTANT_SAID] Informed the user that the home directory is located at /Users/username.
+- [USER] Inquired how to find the home directory in the file manager.
+- [ASS

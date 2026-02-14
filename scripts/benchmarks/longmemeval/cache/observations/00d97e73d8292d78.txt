@@ -1,0 +1,42 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/20 (Sat) 23:46
+- [PREFERENCE] User is looking for a recipe for a unique Old Fashioned variation.
+- [EVENT] User has been making Old Fashioneds at home every Friday evening.
+- [PREFERENCE] User prefers orange bitters to Angostura, as it gives a nice twist to the classic recipe.
+- [ASSISTANT_SAID] Assistant acknowledges the user as a fellow Old Fashioned enthusiast and offers to help with a unique variation.
+- [ASSISTANT_CREATED] Assistant provides a list of unique Old Fashioned variations, including:
+  - **1. Smoked Cherry Old Fashioned**
+    - 2 oz bourbon or rye whiskey
+    - 1/2 oz cherry liqueur (such as Cherry Heering)
+    - 2 dashes of orange bitters
+    - 1/2 teaspoon smoked simple syrup
+    - Orange peel, cherry, and smoked salt for garnish
+  - **2. Spiced Apple Old Fashioned**
+    - 2 oz bourbon or rye whiskey
+    - 1/2 oz apple cider syrup
+    - 2 dashes of orange bitters
+    - 1/4 teaspoon ground cinnamon
+    - Apple slice and cinnamon stick for garnish
+  - **3. Black Tea Old Fashioned**
+    - 2 oz bourbon or rye whiskey
+    - 1/2 oz black tea-infused simple syrup
+    - 2 dashes of orange bitters
+    - Lemon twist and black tea leaves for garnish
+  - **4. Mexican Mocha Old Fashioned**
+    - 2 oz tequila or mezcal
+    - 1/2 oz Kahlúa or coffee liqueur
+    - 2 dashes of orange bitters
+    - 1/4 teaspoon ground cinnamon
+    - Coffee beans and orange peel for garnish
+- [ASSISTANT_SAID] Assistant encourages the user to experiment with the recipes and adjust to taste.
+- [PREFERENCE] User expresses interest in the Smoked Cherry Old Fashioned recipe but is unsure about the smoked simple syrup.
+- [ASSISTANT_SAID] Assistant explains the process of making smoked simple syrup in detail, including materials and instructions.
+- [ASSISTANT_SAID] Assistant provides alternatives for smoking material, including:
+  - Hickory chips
+  - Cherry wood chips
+  - Lapsang souchong tea leaves
+  - Liquid smoke
+- [ASSISTANT_SAID] Assistant details the steps for making smoked simple syrup, including preparation, combining ingredients, steeping, straining, and storing.
+- [PREFERENCE] User finds the process of making smoked simple syrup to be a lot of work and asks for a store-bought option.
+- [ASSISTANT_SAID] Assistant lists store-bought options for

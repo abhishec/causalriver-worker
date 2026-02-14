@@ -1,0 +1,18 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/27 (Sat) 10:26  
+[ASSISTANT_SAID] To create a new key-value "Flag" at HKLM\Software\Student and assign it a null-terminated value of "Now we're cooking with fire!", use the command: `reg add HKLM\Software\Student /v Flag /t REG_SZ /d "Now we're cooking with fire!" /f`  
+[ASSISTANT_SAID] Then run the binary at C:\Users\Offsec\Desktop\registry-exercises\registry01.exe to obtain the flag.  
+[ASSISTANT_SAID] Note: You may need to run the command prompt as an administrator to make changes to the registry.  
+[USER] How to Export the key value "Flag" at HKLM\Software\Sailing. Name the file exported_key and save it in the C:\Users\Offsec\Desktop\registry-exercises directory.  
+[ASSISTANT_SAID] To export the key value "Flag" at HKLM\Software\Sailing, use the command: `reg export HKLM\Software\Sailing C:\Users\Offsec\Desktop\registry-exercises\exported_key.reg` in the Command Prompt.  
+[ASSISTANT_SAID] This will export the key and save it as a .reg file in the specified directory.  
+[ASSISTANT_SAID] Then, you can run the registry02.exe binary to obtain the flag.  
+[USER] How to The user 'Purple' has a flag in their HKCU hive. Access it at key HKCU\Software\Offsec to retrieve the flag. The user's credentials are "Purple:Password".  
+[ASSISTANT_SAID] To access the flag in the HKCU hive of the user 'Purple', log in to the target machine using the "Purple:Password" credentials.  
+[ASSISTANT_SAID] Open the Registry Editor by searching for "regedit" in the Start menu and pressing enter.  
+[ASSISTANT_SAID] Navigate to the key HKCU\Software\Offsec in the left pane, and the value for the "Flag" should be visible in the right pane.  
+[ASSISTANT_SAID] You can also use the command line tool "reg" with the command: `reg query HKCU\Software\Offsec /v Flag` to retrieve the value of the flag.  
+[USER] can you show me how  
+[ASSISTANT_SAID] Yes, to access the key HKCU\Software\Offsec in the registry hive of the user 'Purple', use the command: `reg.exe save HKCU\Software\Offsec C:\temp\Purple_Offsec.reg`, which exports the key and its values to a file.  
+[ASS

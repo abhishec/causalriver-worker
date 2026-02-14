@@ -1,0 +1,22 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/09/22 (Fri) 09:05
+- [USER] User inquired about generating a knowledge graph from an FAQ.
+- [ASSISTANT_SAID] User requested suggestions for entity classes to use for the knowledge graph based on the provided FAQ.
+- [FACT] FAQ includes questions and answers about the "Pay with Miles/Mix Miles and Cash" project for KrisFlyer (KF) members.
+- [ASSISTANT_SAID] "Pay with Miles" (PwM)/Mix Miles with Cash allows KF members to use their KF miles as payment or partial payment for commercial tickets and selected ancillaries on singaporeair.com (SAA).
+- [ASSISTANT_SAID] Benefits for KF members include access to all commercial booking classes on SAA and control over the number of miles used, as long as it exceeds the minimum required.
+- [ASSISTANT_SAID] Minimum number of miles required per transaction is approximately 1050 KF miles, which may vary based on the SGD to KF miles conversion rate.
+- [ASSISTANT_SAID] Maximum number of miles allowed to be used is 100% of the commercial ticket cost, including airport taxes and surcharges.
+- [ASSISTANT_SAID] Members cannot purchase miles to pay for tickets unless redeeming award tickets or flight upgrades.
+- [ASSISTANT_SAID] Members can use miles to pay for airport taxes and surcharges on commercial tickets bought on SAA.
+- [ASSISTANT_SAID] Members can use miles to pay for the commercial tickets of their nominees (RGN), with a maximum of 5 RGNs.
+- [ASSISTANT_SAID] Members cannot use miles for flights on another airline or for bookings made through a travel agent.
+- [ASSISTANT_SAID] For foreign currency transactions, the cash component will be converted to SGD based on IATA rounding logic before being converted to KF miles.
+- [ASSISTANT_SAID] Current SGD to miles conversion rate is SGD 1 per 105 KF miles, subject to periodic review.
+- [ASSISTANT_SAID] Conversion rate will not be explicitly disclosed to members, but can be shared upon inquiry.
+- [ASSISTANT_SAID] Members will earn KrisFlyer and Elite miles in proportion to the fare paid using credit/debit card, excluding airport taxes.
+- [ASSISTANT_SAID] Members cannot accrue miles for other KF members; accruals are optimized for the principal member.
+- [ASSISTANT_SAID] Miles earned from a commercial ticket paid with KF miles can only be credited to the member's KF account.
+- [ASSISTANT_SAID] Commercial tickets paid for with KF miles are strictly non-endorsable.
+- [ASSISTANT_SAID] Redemption upgrades

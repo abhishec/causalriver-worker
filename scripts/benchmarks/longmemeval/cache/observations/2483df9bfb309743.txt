@@ -1,0 +1,53 @@
+**Observation Log:**
+
+[FACT] User is trying to increase their Twitter engagement.  
+[FACT] User's previous tweet about the new Marvel movie received 20 likes.  
+[PREFERENCE] User is interested in relevant hashtags for their tweets.  
+[PREFERENCE] User is considering using Twitter polls to increase engagement.  
+[PREFERENCE] User is happy with their previous tweet's performance.  
+[EVENT] User plans to create a Twitter poll about the Marvel movie.  
+[ASSISTANT_SAID] Assistant congratulated the user on their previous tweet's success.  
+[ASSISTANT_SAID] Assistant provided a list of relevant hashtags for the user's next tweet about the new Marvel movie, including:  
+- #Marvel  
+- #MCU  
+- #MarvelMovies  
+- #MarvelStudios  
+- #[MovieTitle] (e.g., #SpiderManNoWayHome, #DoctorStrangeInTheMultiverseOfMadness)  
+- #NewMarvelMovie  
+- #MarvelFan  
+- #MCUFan  
+- #MarvelFandom  
+- #GeekCulture  
+[ASSISTANT_SAID] Assistant suggested additional tips to increase engagement, including:  
+1. Use a mix of niche and broad hashtags.  
+2. Keep hashtags relevant.  
+3. Avoid overusing hashtags (2-5 per tweet).  
+4. Time tweets strategically.  
+5. Encourage engagement with questions or requests for feedback.  
+6. Use eye-catching visuals.  
+[ASSISTANT_SAID] Assistant confirmed that Twitter polls are an excellent way to increase engagement and provided benefits, including:  
+1. Increased engagement.  
+2. Encourages interaction.  
+3. Boosts conversation.  
+4. Provides valuable insights.  
+5. Adds variety to content.  
+[ASSISTANT_SAID] Assistant provided tips for creating Twitter polls, including:  
+1. Keep it simple and concise.  
+2. Make it relevant and timely.  
+3. Use attention-grabbing language.  
+4. Keep it visually appealing.  
+5. Promote the poll.  
+[ASSISTANT_SAID] Assistant suggested several poll question ideas related to the Marvel movie, including:  
+1. Favorite Character  
+2. Most Epic Moment  
+3. Best Marvel Movie  
+4. Theories and Speculation  
+5. Ship or No Ship  
+6. Rank the Villain  
+[ASSISTANT_SAID] Assistant recommended including an "Other" option in the poll to allow users to express unique opinions.  
+[ASSISTANT_SAID] Assistant discussed the optimal number of options for a Twitter poll, suggesting 2-4 options for clarity and engagement.  
+[ASSISTANT_SAID] Assistant encouraged the user to promote their poll and provided additional tips for boosting engagement, including:  
+1. Pinning the poll.  
+2. Sharing behind-the-scenes content.  
+3. Collaborating with influencers.  
+4. Encour

@@ -1,0 +1,15 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/23 (Tue) 06:53  
+[USER] User is looking for new BBQ sauce recipes.  
+[ASSISTANT_SAID] Assistant provided five BBQ sauce recipes:  
+[ASSISTANT_CREATED] 1. Sweet and Smoky BBQ Sauce: 1 cup ketchup, 1/2 cup apple cider vinegar, 1/4 cup brown sugar, 2 tablespoons smoked paprika, 1 teaspoon garlic powder, 1 teaspoon onion powder, salt and pepper to taste.  
+[ASSISTANT_CREATED] 2. Spicy Mango BBQ Sauce: 1 cup ketchup, 1/2 cup mango puree, 1/4 cup honey, 2 tablespoons hot sauce, 1 teaspoon ground cumin, 1/2 teaspoon smoked paprika, salt and pepper to taste.  
+[ASSISTANT_CREATED] 3. Kansas City-Style BBQ Sauce: 1 cup ketchup, 1/2 cup molasses, 1/4 cup brown sugar, 2 tablespoons apple cider vinegar, 1 teaspoon ground mustard, 1/2 teaspoon ground cumin, salt and pepper to taste.  
+[ASSISTANT_CREATED] 4. Alabama-Style White BBQ Sauce: 1 cup mayonnaise, 1/2 cup plain Greek yogurt, 1/4 cup apple cider vinegar, 2 tablespoons chopped fresh parsley, 1 teaspoon garlic powder, salt and pepper to taste.  
+[ASSISTANT_CREATED] 5. Chipotle BBQ Sauce: 1 cup ketchup, 1/2 cup chipotle peppers in adobo sauce, 1/4 cup brown sugar, 2 tablespoons apple cider vinegar, 1 teaspoon smoked paprika, salt and pepper to taste.  
+[USER] User is interested in the Spicy Mango BBQ Sauce but is looking for something similar to their friend Mike's sweet and tangy BBQ sauce.  
+[ASSISTANT_SAID] Assistant provided four sweet and tangy BBQ sauce recipes:  
+[ASSISTANT_CREATED] 1. Classic Sweet and Tangy BBQ Sauce: 1 cup ketchup, 1/2 cup brown sugar, 1/4 cup apple cider vinegar, 2 tablespoons honey, 1 teaspoon Dijon mustard, 1/2 teaspoon smoked paprika, salt and pepper to taste.  
+[ASSISTANT_CREATED] 2. Honey and Orange BBQ Sauce: 1 cup ketchup, 1/2 cup honey, 1/4 cup orange juice, 2 tablespoons apple cider vinegar, 1 teaspoon Dijon mustard, 1/2 teaspoon ground cinnamon, salt and pepper to taste.  
+[ASSISTANT_CREATED] 3. Brown Sugar and Balsamic BBQ Sauce: 1 cup ketchup, 1/2 cup brown sugar, 1/4 cup balsamic vinegar, 2 tablespoons Worcestershire sauce, 1 teaspoon smoked paprika, salt

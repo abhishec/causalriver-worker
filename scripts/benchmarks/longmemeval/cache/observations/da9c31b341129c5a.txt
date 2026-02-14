@@ -1,0 +1,31 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/07/14 (Fri) 06:18
+- [FACT] User is located in Moreland.
+- [PREFERENCE] User specializes in seafood dishes and is a big fan of oysters.
+- [ASSISTANT_SAID] Suggested seafood restaurants in Moreland: 
+  1. M seafood restaurant - Known for fresh seafood and generous portions.
+  2. Catch 22 - Offers a variety of seafood dishes, including fish and chips, grilled seafood platters, and sushi.
+  3. The Atlantic - A high-end seafood restaurant focusing on sustainable and locally sourced seafood dishes.
+  4. Trawlers Catch - A family-run seafood restaurant with fresh seafood and affordable prices.
+  5. The Fish Market Seafood Restaurant - Offers a wide variety of seafood dishes, including shellfish, fish and chips, and grilled seafood platters.
+- [ASSISTANT_SAID] Recommended The Atlantic for the best oysters in Moreland, noting they have an extensive oyster menu with varieties from all around Australia.
+- [ASSISTANT_SAID] Suggested popular seafood dishes at The Atlantic:
+  1. Kingfish sashimi with yuzu, soy, and dressing.
+  2. Sautéed blue swimmer crab with garlic butter.
+  3. Grilled swordfish with green sauce.
+  4. Lobster bisque with crème fraîche and chives.
+- [ASSISTANT_SAID] Mentioned that The Atlantic also offers non-seafood options, including vegetarian dishes like cauliflower steak and beef options like Wagyu beef tenderloins.
+- [PREFERENCE] User is intrigued by vegetarian options.
+- [ASSISTANT_SAID] Suggested vegetarian dishes at The Atlantic:
+  1. Salt-baked beetroot with horseradish and macadamia.
+  2. Ricotta gnocchi with zucchini, cherry tomatoes, and basil.
+  3. Grilled cauliflower steak with hummus, toasted almonds, and pomegranate.
+  4. Sautéed greens with garlic and lemon.
+- [PREFERENCE] User is trying to eat more plant-based and is interested in vegan options.
+- [ASSISTANT_SAID] Suggested vegan dishes at The Atlantic:
+  1. Grilled eggplant with spiced lentils, preserved lemon, and tahini.
+  2. Roasted pumpkin with miso and sesame.
+  3. Heirloom tomatoes with basil and olive oil.
+  4. Grilled broccolini with anchovy-free sauce gribiche and pine nuts.
+- [ASSISTANT_SAID] Confirmed that The Atlantic has excellent vegan options on their menu.

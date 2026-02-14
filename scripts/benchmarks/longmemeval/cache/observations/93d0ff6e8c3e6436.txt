@@ -1,0 +1,28 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/20 (Sat) 00:42  
+[FACT] User has an herb garden with basil, mint, and cilantro.  
+[FACT] User has a snake plant named Slinky.  
+[CHANGE] User started treating Slinky with neem oil for pests on the day of the conversation.  
+[PREFERENCE] User's basil and mint are doing great, while cilantro is growing slowly.  
+[ASSISTANT_SAID] Cilantro prefers well-draining soil and can be susceptible to root rot if the soil is too wet.  
+[ASSISTANT_SAID] User should scale back watering cilantro from daily to every other day.  
+[ASSISTANT_SAID] User should provide about 1-2 inches of water per week for cilantro.  
+[ASSISTANT_SAID] User should check if the soil is drying out completely between waterings.  
+[ASSISTANT_SAID] Cilantro needs at least 4-6 hours of direct sunlight.  
+[ASSISTANT_SAID] Cilantro prefers cooler temperatures between 60°F to 75°F (15°C to 24°C).  
+[ASSISTANT_SAID] Neem oil is a natural, gentle, and effective way to control pests like spider mites, mealybugs, and scale.  
+[ASSISTANT_SAID] User should test a small area of Slinky before applying neem oil to ensure no adverse reactions.  
+[FACT] User has been watering cilantro every day but plans to scale back.  
+[FACT] User eyeballs the amount of water given to cilantro.  
+[FACT] User's kitchen windowsill gets plenty of indirect sunlight.  
+[FACT] User's kitchen temperature is usually around 72°F (22°C).  
+[PREFERENCE] User is unsure if general-purpose fertilizer is suitable for herbs.  
+[ASSISTANT_SAID] Herbs like cilantro are heavy feeders and can benefit from regular fertilization.  
+[ASSISTANT_SAID] A balanced, water-soluble fertilizer specifically formulated for herbs (usually 10-10-10 NPK) is recommended.  
+[ASSISTANT_SAID] User should start with a weak solution (half the recommended strength) and apply it once a week.  
+[ASSISTANT_SAID] Cilantro is a fast-growing crop and might be ready to harvest in as little as 2-3 weeks.  
+[ASSISTANT_SAID] User should pinch off flower buds as they appear to encourage leaf growth and prevent the plant from going to seed.  
+[FACT] User plans to start using a fertilizer specifically for herbs.  
+[ASSISTANT_SAID] Basil loves nutrients, especially nitrogen, and can benefit from a balanced fertilizer (10-10-10 NPK).  
+[ASSISTANT_SAID] User can

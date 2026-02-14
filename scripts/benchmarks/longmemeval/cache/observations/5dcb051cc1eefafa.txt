@@ -1,0 +1,16 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/30 (Tue) 12:56
+- [USER] User requested information on the physics of divergence, gradient, curl, surface and volume integrals, Maxwell Equations, continuity equation for current densities, displacement current, electromagnetic wave equation in free space, plane electromagnetic waves in free space, and Hertz’s experiment.
+- [ASSISTANT_SAID] Electromagnetism is the study of electric and magnetic fields and how they interact with matter.
+- [ASSISTANT_SAID] Divergence describes the amount by which a vector field is spreading out or converging at a point, represented mathematically as: ∇.F = ∂Fx/∂x + ∂Fy/∂y + ∂Fz/∂z.
+- [ASSISTANT_SAID] The gradient of a scalar field describes the rate of change of the field in all directions, represented as: ∇f = ∂f/∂x i + ∂f/∂y j + ∂f/∂z k.
+- [ASSISTANT_SAID] Curl describes the rotation of a vector field at a point, represented as: ∇ x F = ∂Fy/∂z - ∂Fz/∂y i + ∂Fz/∂x - ∂Fx/∂z j + ∂Fx/∂y - ∂Fy/∂x k.
+- [ASSISTANT_SAID] Surface integrals calculate the effect of a field over a surface, while volume integrals calculate the effect over a volume.
+- [ASSISTANT_SAID] Maxwell's Equations consist of four equations that describe the behavior of electric and magnetic fields.
+- [ASSISTANT_SAID] The continuity equation states that the total charge in a region is conserved, represented as: ∇.J = ∂ρ/∂t, where ρ is charge density and J is current density.
+- [ASSISTANT_SAID] Displacement current arises in an electric circuit due to changes in the electric field and is described by Maxwell's Equations.
+- [ASSISTANT_SAID] The electromagnetic wave equation in free space is given by: ∇2E = (1/c2) ∂2E/∂t2, where E is the electric field, c is the speed of light, and t is time.
+- [ASSISTANT_SAID] Plane electromagnetic waves propagate through space in a flat, plane-like manner and are described by the electromagnetic wave equation.
+- [ASSISTANT_SAID] Hertz's experiment demonstrated the existence of electromagnetic waves and laid the foundation for modern radio technology.
+- [ASSISTANT_SAID] In simple terms, Electromagnetism includes concepts of

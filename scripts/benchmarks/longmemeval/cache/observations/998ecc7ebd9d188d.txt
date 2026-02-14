@@ -1,0 +1,23 @@
+**Observation Log**
+
+**Session Date:** 2023/02/26 (Sun) 17:08  
+**Session ID:** 05793e59_1
+
+1. [FACT] The user recently attended a workshop on digital marketing at a co-working space downtown.
+2. [FACT] The workshop covered social media advertising and SEO optimization techniques.
+3. [PREFERENCE] The user is trying to create an effective ad campaign on Facebook and Instagram.
+4. [CHANGE] The user is unsure how to track website analytics for their ad campaign.
+5. [ASSISTANT_SAID] The assistant provided a guide on tracking website analytics, including using Google Analytics, Facebook Pixel, and UTM tracking.
+6. [ASSISTANT_SAID] The assistant explained that to set up Google Analytics, the user should create an account and install the tracking code on their website.
+7. [ASSISTANT_SAID] The assistant mentioned that the Facebook Pixel can be found in Facebook Ads Manager under "Pixels" > "Create a Pixel."
+8. [ASSISTANT_SAID] The assistant suggested using UTM tracking parameters to tag ad URLs and provided a link to Google's Campaign URL Builder.
+9. [ASSISTANT_SAID] The assistant outlined steps to set up goals and conversions in Google Analytics, including defining goals like form submissions, purchases, and newsletter sign-ups.
+10. [ASSISTANT_SAID] The assistant provided detailed steps on how to set up a goal in Google Analytics for a form submission, including navigating to "Conversions" > "Goals" and clicking "New Goal."
+11. [ASSISTANT_SAID] The assistant explained how to set up goal details, including goal name, goal type, and goal trigger.
+12. [ASSISTANT_SAID] The assistant provided a method for tracking goal value, including assigning a fixed value to each form submission.
+13. [ASSISTANT_SAID] The assistant clarified how to set up the goal trigger in Google Analytics, specifying the category, action, and label fields for a form submission.
+14. [ASSISTANT_SAID] The assistant suggested using "Forms" as the category, "Submit" as the action, and "Contact Form" as the label for the goal trigger.
+15. [ASSISTANT_SAID] The assistant mentioned that if using Google Tag Manager, the user could set up a trigger for form submissions with specific parameters.
+16. [USER] The user expressed uncertainty about how to set up the goal trigger in Google Analytics, specifically asking for more details on the category, action, and label fields.
+17. [ASSISTANT_SAID] The assistant provided a detailed explanation of how to create a campaign in Google Analytics and track ad performance, including creating a tracking URL and adding it to social media ads.
+18. [ASSISTANT_SAID] The assistant instructed the user to log

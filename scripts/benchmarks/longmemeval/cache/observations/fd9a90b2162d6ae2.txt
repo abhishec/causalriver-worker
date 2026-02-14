@@ -1,0 +1,26 @@
+**Observation Log:**
+
+- [FACT] The user is working on their thesis.
+- [FACT] The user is currently writing the literature review chapter of their thesis.
+- [TEMPORAL] The user finished collecting data for their study on February 15th.
+- [PREFERENCE] The user is investigating the impact of social media marketing on consumer purchasing decisions.
+- [PREFERENCE] The user is specifically looking at how influencer marketing affects brand awareness and customer loyalty.
+- [FACT] The user has searched through Google Scholar and Scopus for relevant studies.
+- [PREFERENCE] The user has used keywords like "influencer marketing," "brand awareness," and "customer loyalty" in their searches.
+- [TEMPORAL] The user would like to focus on studies published in the last 2 years.
+- [ASSISTANT_SAID] The assistant congratulated the user on completing their data collection.
+- [ASSISTANT_SAID] The assistant asked the user for more details about their research topic, key concepts, variables, themes, and databases used.
+- [ASSISTANT_SAID] The assistant suggested additional databases: Web of Science, Business Source Complete, PsycINFO, and ScienceDirect.
+- [ASSISTANT_SAID] The assistant provided keywords for searching: "influencer marketing," "social media influence," "brand awareness," "customer loyalty," and "consumer purchasing decisions."
+- [ASSISTANT_SAID] The assistant recommended filtering search results by publication date.
+- [ASSISTANT_SAID] The assistant listed recent studies relevant to the user's research topic, including:
+  1. "The impact of influencer marketing on consumer purchasing decisions: A meta-analytic review" (2022) by Kim et al.
+  2. "Influencer marketing and brand awareness: An empirical study of fashion brands" (2021) by Lee et al.
+  3. "The effect of social media influencer marketing on customer loyalty: A moderated mediation model" (2020) by Zhang et al.
+  4. "Understanding the role of social influence in consumer purchasing decisions: A study of influencer marketing" (2020) by Wang et al.
+- [PREFERENCE] The user is interested in exploring the role of social media platforms in influencer marketing, specifically Instagram and TikTok.
+- [ASSISTANT_SAID] The assistant provided studies related to Instagram influencer marketing, including:
+  1. "Influencer marketing on Instagram: The role of credibility, similarity, and self-congruity" (2022) by Lee and Kim.
+  2. "Understanding the effectiveness of Instagram influencer marketing: A content analysis of top beauty influencers" (2021) by Kim and Lee.
+  3. "The impact of Instagram influencer marketing on consumer purchase decisions: A study of fashion products" (2020) by Wang et al.
+- [ASSISTANT_S

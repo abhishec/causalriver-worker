@@ -1,0 +1,75 @@
+{
+  "answer_eecb10d9_1": [
+    {
+      "fact": "User is planning a dinner party this weekend",
+      "type": "event",
+      "entities": [
+        "dinner party",
+        "this weekend"
+      ]
+    },
+    {
+      "fact": "User prefers recipes that use chicken breasts and veggies",
+      "type": "preference",
+      "entities": [
+        "chicken breasts",
+        "veggies"
+      ]
+    },
+    {
+      "fact": "User has chosen to make Lemon Garlic Chicken Breast with Roasted Vegetables",
+      "type": "preference",
+      "entities": [
+        "Lemon Garlic Chicken Breast",
+        "Roasted Vegetables"
+      ]
+    },
+    {
+      "fact": "User is looking for a simple roasted vegetable medley recipe",
+      "type": "preference",
+      "entities": [
+        "simple roasted vegetable medley recipe"
+      ]
+    }
+  ],
+  "answer_eecb10d9_2": [
+    {
+      "fact": "User is planning to make chicken fajitas for dinner",
+      "type": "event",
+      "entities": [
+        "chicken fajitas",
+        "dinner"
+      ]
+    },
+    {
+      "fact": "User is adding onions and bell peppers to their grocery list",
+      "type": "preference",
+      "entities": [
+        "onions",
+        "bell peppers"
+      ]
+    },
+    {
+      "fact": "User is running low on olive oil",
+      "type": "personal",
+      "entities": [
+        "olive oil"
+      ]
+    },
+    {
+      "fact": "User's mom is using the same grocery list app",
+      "type": "relationship",
+      "entities": [
+        "mom",
+        "grocery list app"
+      ]
+    },
+    {
+      "fact": "User appreciates the fajita tips provided",
+      "type": "opinion",
+      "entities": [
+        "fajita tips"
+      ]
+    }
+  ]
+}

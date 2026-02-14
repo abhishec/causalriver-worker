@@ -1,0 +1,107 @@
+{
+  "answer_66c23110_2": [
+    {
+      "fact": "User has combination skin",
+      "type": "personal",
+      "entities": [
+        "combination skin"
+      ]
+    },
+    {
+      "fact": "User's main skin concern is dehydration",
+      "type": "personal",
+      "entities": [
+        "dehydration"
+      ]
+    },
+    {
+      "fact": "User prefers a lightweight, non-greasy moisturizer with SPF",
+      "type": "preference",
+      "entities": [
+        "lightweight moisturizer",
+        "non-greasy",
+        "SPF"
+      ]
+    },
+    {
+      "fact": "User is planning to buy a new moisturizer from Sephora",
+      "type": "event",
+      "entities": [
+        "Sephora",
+        "moisturizer"
+      ]
+    },
+    {
+      "fact": "User is close to redeeming a free skincare product from Sephora",
+      "type": "event",
+      "entities": [
+        "free skincare product",
+        "Sephora"
+      ]
+    },
+    {
+      "fact": "User needs a total of 300 points to redeem the free skincare product",
+      "type": "personal",
+      "entities": [
+        "300 points"
+      ]
+    },
+    {
+      "fact": "User is a Beauty Insider at Sephora",
+      "type": "personal",
+      "entities": [
+        "Beauty Insider",
+        "Sephora"
+      ]
+    },
+    {
+      "fact": "User is interested in current promotions or discounts at Sephora",
+      "type": "preference",
+      "entities": [
+        "promotions",
+        "discounts",
+        "Sephora"
+      ]
+    }
+  ],
+  "answer_66c23110_1": [
+    {
+      "fact": "User is looking for advice on skincare products.",
+      "type": "preference",
+      "entities": [
+        "skincare products"
+      ]
+    },
+    {
+      "fact": "User recently bought an eyeshadow palette at Sephora.",
+      "type": "event",
+      "entities": [
+        "eyeshadow palette",
+        "Sephora"
+      ]
+    },
+    {
+      "fact": "User earned 50 points in the Sephora loyalty program.",
+      "type": "event",
+      "entities": [
+        "50 points",
+        "Sephora loyalty program"
+      ]
+    },
+    {
+      "fact": "User has a total of 200 points in the Sephora loyalty program.",
+      "type": "event",
+      "entities": [
+        "200 points",
+        "Sephora loyalty program"
+      ]
+    },
+    {
+      "fact": "User is interested in the Laneige Water Bank Moisturizing Cream.",
+      "type": "preference",
+      "entities": [
+        "Laneige Water Bank Moisturizing Cream"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/23 (Tue) 17:54
+- [PREFERENCE] User likes medium to full body French wine and Napa US wine.
+- [PREFERENCE] User recently enjoys wine from the Rhone Valley.
+- [PREFERENCE] User usually prefers red wine.
+- [EVENT] User is having Chinese food for dinner tonight.
+- [PREFERENCE] User's budget for wine is under US$300 per bottle.
+- [ASSISTANT_SAID] For Chinese food, a good pairing option would be a Syrah or Shiraz from the Rhone Valley in France.
+- [ASSISTANT_SAID] Syrah or Shiraz have a good balance of fruit and spice that can complement the bold flavors of Chinese cuisine.
+- [ASSISTANT_SAID] Specific wine options in the user's budget include Cote Rotie, Hermitage, and Crozes-Hermitage.
+- [ASSISTANT_SAID] Another option would be a Napa Valley Zinfandel or Petite Sirah.
+- [USER] User asked which vintage is good.
+- [ASSISTANT_SAID] Good vintage options for Syrah/Shiraz from the Rhone Valley include 2010, 2016, and 2018.
+- [ASSISTANT_SAID] In Napa Valley, good vintages from the last decade include 2010, 2012, 2013, 2016, and 2017.
+- [ASSISTANT_SAID] Vintage is just one aspect to consider when choosing a wine; personal taste plays a bigger role.
+- [USER] User asked for recommendations of specific bottles from Cote Rotie, Hermitage, and Crozes-Hermitage.
+- [ASSISTANT_SAID] Recommended Cote Rotie wines include:
+  - Guigal Cote Rotie La Landonne: Known for its power and depth.
+  - Jamet Cote Rotie: Known for its elegance and balance.
+  - E. Guigal Cote Rotie La Turque: Known for its complexity and aging potential.
+- [ASSISTANT_SAID] Recommended Hermitage wines include:
+  - Chapoutier Hermitage La Chapelle: Known for its power and elegance.
+  - Delas Freres Hermitage La Landonne: Known for its balance and finesse.
+  - Jaboulet Hermitage La Chapelle: Known for its complexity and aging potential.
+- [ASSISTANT_SAID] Recommended Crozes-Hermitage wines include:
+  - Jean-Luc Colombo Crozes-Hermitage Rouge: Known for its balance and elegance.
+  - Alain Graillot Crozes-Hermitage: Known for its power and complexity.
+  - Paul Jaboulet Aine Crozes-Hermitage Les Jalets: Known for its balance and finesse.
+- [USER] User asked for

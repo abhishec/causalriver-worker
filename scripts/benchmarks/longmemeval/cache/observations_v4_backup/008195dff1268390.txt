@@ -1,0 +1,41 @@
+**Observation Log:**
+
+[SESSION DATE] Session Date: 2023/02/14 (Tue) 10:39
+
+[FACT] User is looking to book a flight from Boston to Miami.
+
+[FACT] User recently had an American Airlines flight from LAX to JFK that was delayed by 2 hours due to bad weather conditions.
+
+[PREFERENCE] User prefers to travel on a weekday, preferably in the morning.
+
+[PREFERENCE] User is open to any airline for their flight from Boston to Miami.
+
+[FACT] User has a Delta SkyMiles card.
+
+[PREFERENCE] User is not sure if the Delta SkyMiles card is the best option for the route from Boston to Miami.
+
+[PREFERENCE] User is not opposed to considering Fort Lauderdale airport (FLL) instead of Miami (MIA).
+
+[EVENT] User is leaning towards booking a JetBlue flight from BOS to FLL.
+
+[ASSISTANT] Assistant provided details about JetBlue's seat selection process, amenities, and in-flight entertainment system.
+
+[ASSISTANT] Assistant informed user about JetBlue's free live TV, free Wi-Fi, and snack options.
+
+[FACT] User had a bad experience with American Airlines' in-flight entertainment system on a previous flight from New York to Los Angeles.
+
+[ASSISTANT] Assistant booked the JetBlue flight from BOS to FLL for the user.
+
+[EVENT] User is planning to book a return flight from FLL to BOS on Delta.
+
+[FACT] Delta flight details for return: DL 1242 (FLL to ATL) + DL 2166 (ATL to BOS), departing FLL at 5:30 PM and arriving BOS at 9:35 PM.
+
+[PREFERENCE] User hopes to upgrade to a higher class on the return flight using Delta SkyMiles.
+
+[ASSISTANT] Assistant provided information about Delta's upgrade options and requirements for using SkyMiles.
+
+[ASSISTANT] Assistant suggested ways for the user to receive notifications for upgrade availability, including using the Delta mobile app and email alerts.
+
+[EVENT] User asked about travel insurance for their trip.
+
+[ASSISTANT] Assistant provided information about different types of travel insurance, including trip cancellation and trip interruption insurance.

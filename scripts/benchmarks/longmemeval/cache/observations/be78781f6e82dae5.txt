@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [FACT] The user is planning a birding trip to a nearby state park.
+- [EVENT] The user recently attended a birding workshop at a local Audubon chapter about a month ago.
+- [PREFERENCE] The user is interested in seeing waterbirds, specifically shorebirds like sandpipers or plovers.
+- [TEMPORAL] The user is planning to visit the state park next Saturday.
+- [FACT] The user has heard that the park has a nice coastal area with a beach and some mudflats.
+- [ASSISTANT_SAID] The assistant confirmed that shorebirds are a delight to spot and that the coastal area with a beach and mudflats is a perfect spot for them.
+- [ASSISTANT_SAID] The assistant recommended checking the tide charts for next Saturday to plan the visit around low tide.
+- [ASSISTANT_SAID] The assistant provided tips for a successful shorebirding trip, including arriving early, scanning mudflats and beaches, bringing a spotting scope, looking for flocks, and being patient and quiet.
+- [ASSISTANT_SAID] The assistant listed common shorebirds that might be seen, including Sanderlings, Killdeer, Least Sandpipers, Semipalmated Plovers, and Piping Plovers.
+- [PREFERENCE] The user is also hoping to spot waterfowl, like ducks or mergansers, during the trip.
+- [ASSISTANT_SAID] The assistant explained that Ospreys are fish-eating birds of prey that typically inhabit areas with access to water.
+- [ASSISTANT_SAID] The assistant provided habitat features to look for to increase chances of spotting Ospreys, including coastal areas, lakes, rivers, nesting platforms, and trees with a view.
+- [ASSISTANT_SAID] The assistant described Ospreys as large, dark brown birds with a distinctive crest and a wingspan of around 5-6 feet.
+- [ASSISTANT_SAID] The assistant suggested looking for Ospreys perched on poles, trees, or rocky outcrops overlooking the water.
+- [ASSISTANT_SAID] The assistant provided information on areas in the park that attract waterfowl, including estuaries, bays, freshwater ponds, marshes, and shorelines.
+- [ASSISTANT_SAID] The assistant recommended looking for vegetation, shallow water, and food sources to increase chances of spotting waterfowl.
+- [ASSISTANT_SAID] The assistant mentioned specific areas in the park to explore for waterfowl, including tidal creeks, freshwater ponds, and beach areas.
+- [ASSISTANT_SAID] The assistant provided details about trails and access points to explore the park's estuaries and bays, including the Estuary Trail, Bayshore Trail, Mudflat Access Point, and Kay

@@ -1,0 +1,94 @@
+{
+  "answer_447052a5_2": [
+    {
+      "fact": "User is planning to meal prep for the week.",
+      "type": "event",
+      "entities": [
+        "meal prep",
+        "week"
+      ]
+    },
+    {
+      "fact": "User is interested in recipes that use chicken breasts and ground beef.",
+      "type": "preference",
+      "entities": [
+        "chicken breasts",
+        "ground beef"
+      ]
+    },
+    {
+      "fact": "User is particularly interested in Grilled Chicken Fajitas and Beef and Veggie Meatballs.",
+      "type": "preference",
+      "entities": [
+        "Grilled Chicken Fajitas",
+        "Beef and Veggie Meatballs"
+      ]
+    },
+    {
+      "fact": "User is looking for healthy and easy-to-make recipe options.",
+      "type": "preference",
+      "entities": [
+        "healthy recipes",
+        "easy-to-make recipes"
+      ]
+    }
+  ],
+  "answer_447052a5_1": [
+    {
+      "fact": "User is planning to make new recipes this week.",
+      "type": "event",
+      "entities": [
+        "new recipes",
+        "this week"
+      ]
+    },
+    {
+      "fact": "User is looking for healthy dinner ideas that incorporate chicken breasts and ground beef.",
+      "type": "preference",
+      "entities": [
+        "healthy dinner ideas",
+        "chicken breasts",
+        "ground beef"
+      ]
+    },
+    {
+      "fact": "User did an online grocery order from Instacart.",
+      "type": "event",
+      "entities": [
+        "online grocery order",
+        "Instacart"
+      ]
+    },
+    {
+      "fact": "User had groceries delivered to their doorstep.",
+      "type": "event",
+      "entities": [
+        "groceries",
+        "delivered",
+        "doorstep"
+      ]
+    },
+    {
+      "fact": "User spent around $60 on groceries.",
+      "type": "event",
+      "entities": [
+        "$60",
+        "groceries"
+      ]
+    },
+    {
+      "fact": "User likes the Chicken and Quinoa Bowl.",
+      "type": "preference",
+      "entities": [
+        "Chicken and Quinoa Bowl"
+      ]
+    },
+    {
+      "fact": "User likes the Korean-Style Ground Beef and Vegetable Stir-Fry.",
+      "type": "preference",
+      "entities": [
+        "Korean-Style Ground Beef and Vegetable Stir-Fry"
+      ]
+    }
+  ]
+}

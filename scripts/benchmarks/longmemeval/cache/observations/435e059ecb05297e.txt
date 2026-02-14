@@ -1,0 +1,26 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/24 (Wed) 15:15  
+[USER] What is a network appliance that checks the state of a packet to determine whether the packet is legitimate?  
+[USER] A. Layer 2 switch  
+[USER] B. LAN controller  
+[USER] C. load balancer  
+[USER] D. firewall  
+[ASSISTANT_SAID] D. firewall is a network appliance that checks the state of a packet to determine whether the packet is legitimate.  
+[ASSISTANT_SAID] A firewall is a security device that monitors incoming and outgoing network traffic and decides whether to allow or block specific traffic based on a defined set of security rules.  
+[ASSISTANT_SAID] The firewall analyzes each packet that passes through it and checks its headers and content against a set of rules or policies to determine whether the packet should be allowed to pass or be blocked.  
+[ASSISTANT_SAID] The firewall can also perform other functions such as NAT (Network Address Translation), VPN (Virtual Private Network) support, and intrusion detection and prevention.  
+[USER] What is a role of access points in an enterprise network?  
+[USER] A. integrate with SNMP in preventing DDoS attacks  
+[USER] B. serve as a first line of defense in an enterprise network  
+[USER] C. connect wireless devices to a wired network  
+[USER] D. support secure user logins to devices on the network  
+[ASSISTANT_SAID] C. Connect wireless devices to a wired network is a role of access points in an enterprise network.  
+[ASSISTANT_SAID] Access points (APs) are devices that allow wireless devices to connect to a wired network.  
+[ASSISTANT_SAID] In an enterprise network, APs are typically used to provide wireless connectivity to devices such as laptops, tablets, and smartphones.  
+[ASSISTANT_SAID] APs can be standalone devices or built into other devices such as routers or switches.  
+[ASSISTANT_SAID] They communicate with wireless devices using radio frequency (RF) signals and with the wired network using Ethernet.  
+[ASSISTANT_SAID] APs play an important role in enterprise networks by providing wireless connectivity to devices that may not be able to connect to the network using a physical Ethernet connection.  
+[ASSISTANT_SAID] They also allow users to roam freely within the network coverage area without losing their connection.  
+[ASSISTANT_SAID] APs can be configured to support various security protocols such as WPA2 (Wi-Fi Protected Access 2) and EAP (Extensible Authentication Protocol) to ensure secure communication between the AP and the wireless devices.  
+[USER] An implementer is preparing hardware for virtualization to create virtual machines on a host

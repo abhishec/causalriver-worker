@@ -1,0 +1,103 @@
+{
+  "answer_d50a8a33_2": [
+    {
+      "fact": "User has a puppy named Luna.",
+      "type": "personal",
+      "entities": [
+        "Luna"
+      ]
+    },
+    {
+      "fact": "User is potty-training Luna.",
+      "type": "event",
+      "entities": [
+        "potty-training",
+        "Luna"
+      ]
+    },
+    {
+      "fact": "User uses eco-friendly training pads from Chewy.com.",
+      "type": "preference",
+      "entities": [
+        "eco-friendly training pads",
+        "Chewy.com"
+      ]
+    },
+    {
+      "fact": "User purchased a set of 10 training pads for $25 about a month ago.",
+      "type": "event",
+      "entities": [
+        "10 training pads",
+        "$25",
+        "month ago"
+      ]
+    },
+    {
+      "fact": "User has a golden retriever named Max.",
+      "type": "personal",
+      "entities": [
+        "Max"
+      ]
+    },
+    {
+      "fact": "User is interested in flea and tick prevention for Luna and Max.",
+      "type": "preference",
+      "entities": [
+        "flea and tick prevention",
+        "Luna",
+        "Max"
+      ]
+    },
+    {
+      "fact": "User ordered a 6-month supply of the generic version of Frontline from Chewy.com last month.",
+      "type": "event",
+      "entities": [
+        "6-month supply",
+        "generic Frontline",
+        "Chewy.com",
+        "last month"
+      ]
+    }
+  ],
+  "answer_d50a8a33_1": [
+    {
+      "fact": "User has a golden retriever named Max",
+      "type": "personal",
+      "entities": [
+        "golden retriever",
+        "Max"
+      ]
+    },
+    {
+      "fact": "User recently got an orthopedic memory foam dog bed for Max",
+      "type": "event",
+      "entities": [
+        "orthopedic memory foam dog bed",
+        "Max"
+      ]
+    },
+    {
+      "fact": "User is trying to help Max lose weight",
+      "type": "preference",
+      "entities": [
+        "Max",
+        "weight loss"
+      ]
+    },
+    {
+      "fact": "User finds it tough to manage Max's weight because he loves treats",
+      "type": "opinion",
+      "entities": [
+        "Max",
+        "treats"
+      ]
+    },
+    {
+      "fact": "User is seeking recommendations for healthy dog treats",
+      "type": "preference",
+      "entities": [
+        "healthy dog treats"
+      ]
+    }
+  ]
+}

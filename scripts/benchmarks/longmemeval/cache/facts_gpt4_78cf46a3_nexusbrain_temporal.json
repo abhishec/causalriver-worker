@@ -1,0 +1,63 @@
+{
+  "answer_5a78688d_2": [
+    {
+      "fact": "User is considering getting a portable power bank.",
+      "type": "preference",
+      "entities": [
+        "portable power bank"
+      ]
+    },
+    {
+      "fact": "User's phone battery life hasn't been the best lately.",
+      "type": "opinion",
+      "entities": [
+        "phone battery life"
+      ]
+    },
+    {
+      "fact": "User has many phone apps and finds it hard to find the ones they need.",
+      "type": "opinion",
+      "entities": [
+        "phone apps"
+      ]
+    },
+    {
+      "fact": "User is considering organizing their phone apps.",
+      "type": "preference",
+      "entities": [
+        "organizing phone apps"
+      ]
+    }
+  ],
+  "answer_5a78688d_1": [
+    {
+      "fact": "User is thinking of backing up their phone data.",
+      "type": "preference",
+      "entities": [
+        "phone data"
+      ]
+    },
+    {
+      "fact": "User recently got a new phone case about a month ago.",
+      "type": "event",
+      "entities": [
+        "new phone case"
+      ]
+    },
+    {
+      "fact": "User's new phone case is doing a great job protecting their phone.",
+      "type": "opinion",
+      "entities": [
+        "phone case",
+        "protection"
+      ]
+    },
+    {
+      "fact": "User is unsure about which backup option to choose.",
+      "type": "preference",
+      "entities": [
+        "backup option"
+      ]
+    }
+  ]
+}

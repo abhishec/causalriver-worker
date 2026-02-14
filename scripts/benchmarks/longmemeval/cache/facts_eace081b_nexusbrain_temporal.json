@@ -1,0 +1,72 @@
+{
+  "answer_8a791264_1": [
+    {
+      "fact": "User is planning a birthday trip to Hawaii",
+      "type": "event",
+      "entities": [
+        "birthday trip",
+        "Hawaii"
+      ]
+    },
+    {
+      "fact": "User is interested in hiking trails on Kauai",
+      "type": "preference",
+      "entities": [
+        "hiking trails",
+        "Kauai"
+      ]
+    },
+    {
+      "fact": "User has heard that Kauai is prone to rain",
+      "type": "opinion",
+      "entities": [
+        "Kauai",
+        "rain"
+      ]
+    },
+    {
+      "fact": "User is looking for waterfalls on Kauai that are accessible via a hike",
+      "type": "preference",
+      "entities": [
+        "waterfalls",
+        "Kauai",
+        "hike"
+      ]
+    }
+  ],
+  "answer_8a791264_2": [
+    {
+      "fact": "User is planning a birthday trip to Hawaii in October",
+      "type": "event",
+      "entities": [
+        "Hawaii",
+        "October",
+        "birthday trip"
+      ]
+    },
+    {
+      "fact": "User is planning to stay on Oahu",
+      "type": "personal",
+      "entities": [
+        "Oahu"
+      ]
+    },
+    {
+      "fact": "User is interested in snorkeling spots",
+      "type": "preference",
+      "entities": [
+        "snorkeling",
+        "Hanauma Bay",
+        "Shark's Cove"
+      ]
+    },
+    {
+      "fact": "User prefers Hanauma Bay and Shark's Cove for snorkeling",
+      "type": "preference",
+      "entities": [
+        "Hanauma Bay",
+        "Shark's Cove"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/07/25 (Tue) 07:56  
+[ASSISTANT_SAID] Implementing report templates is an important step in implementing the features of a web-based commercial appraisal report writing application.  
+[ASSISTANT_SAID] Steps to implement report templates include defining the report structure, creating a template file, and generating the reports.  
+[ASSISTANT_SAID] The report structure should include common elements such as property description, market analysis, and conclusions.  
+[ASSISTANT_SAID] Example of a report template in HTML format includes placeholders for location, size, age, and condition.  
+[ASSISTANT_SAID] PHP code example provided for generating a report using a template file and replacing placeholders with database information.  
+[USER] Requested help to define the structure of the appraisal reports, including common elements such as property description, market analysis, and conclusions.  
+[ASSISTANT_SAID] Suggested a general outline for appraisal reports including Property Description, Market Analysis, and Conclusions.  
+[USER] Requested help to define the structure of a typical commercial appraisal report.  
+[ASSISTANT_SAID] Provided a general outline of a typical commercial appraisal report including Executive Summary, Property Description, Market Analysis, Income Approach, Cost Approach, Sales Comparison Approach, Reconciliation, and Limiting Conditions.  
+[USER] Requested to move on to Step 4 of implementing features and help with calculation tools for key metrics.  
+[ASSISTANT_SAID] Steps to implement calculation tools include defining calculations, implementing them in PHP, customizing based on user preferences, and testing the calculations.  
+[ASSISTANT_SAID] Example of implementing the income approach in PHP provided, including calculation of net operating income and property value.  
+[USER] Requested to move on to Step 5 of implementing features and help with export options for the final appraisal report.  
+[ASSISTANT_SAID] Steps to implement export options include defining export formats, implementing export functions, adding export options to the user interface, generating the export, and testing the exports.  
+[ASSISTANT_SAID] Suggested using PHP libraries such as PHPWord for Word documents and PHPExcel for Excel spreadsheets.  
+[ASSISTANT_SAID] Provided an example of exporting a report to a PDF using the TCPDF library, including code for adding a page and writing HTML content.  
+[ASSISTANT_SAID] Encouraged testing the exports by generating sample reports in different formats to ensure functionality.

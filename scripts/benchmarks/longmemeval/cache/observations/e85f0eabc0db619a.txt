@@ -1,0 +1,18 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/25 (Thu) 00:44
+- [ASSISTANT_SAID] The assistant provided an updated implementation of `s3.py` that raises a `S3OperationException` when an error occurs during the S3 upload or download operations.
+- [ASSISTANT_CREATED] The assistant created a Python code snippet for the `S3Uploader` class, which includes methods for uploading a directory to S3 and handling exceptions.
+- [ASSISTANT_CREATED] The assistant created a Python code snippet for the `S3Downloader` class, which includes methods for downloading a directory from S3 and handling exceptions.
+- [ASSISTANT_SAID] The `S3Uploader` class raises a `S3OperationException` if an error occurs during the S3 upload operation.
+- [ASSISTANT_SAID] The `S3Downloader` class raises a `S3OperationException` if an error occurs during the S3 download operation.
+- [ASSISTANT_SAID] By using custom exception classes, we can provide more detailed and specific error messages that can help with debugging and troubleshooting.
+- [ASSISTANT_SAID] The assistant provided an updated implementation of the `processor.py` module with the main method and imports.
+- [ASSISTANT_CREATED] The assistant created a Python code snippet for the `Processor` class, which includes methods for processing data, including downloading, encrypting, zipping, generating checksums, and uploading to S3.
+- [ASSISTANT_SAID] The `Processor` class constructor takes parameters such as `process_name`, `operation`, `data_source_type`, `data_source_path`, `encryption_needed`, `zipping_needed`, `checksum_needed`, `s3_upload`, `archive_needed`, `process_sub_folder_path`, and `s3_path`.
+- [ASSISTANT_SAID] The `run` method of the `Processor` class creates a working directory and handles various operations based on the provided parameters.
+- [ASSISTANT_SAID] The assistant mentioned that if the operation is "download" and the data source type is "hdfs", it will use the `HdfsDownloader` class.
+- [ASSISTANT_SAID] The assistant mentioned that if the operation is "download" and the data source type is "gpfs", it will use the `GpfsDownloader` class.
+- [ASSISTANT_SAID] The assistant indicated that if `s3_upload` is true, it will create a subfolder path if it does not exist and use the `S3Downloader` class to download files from S3.
+- [ASSISTANT_SAID] The assistant stated that if the checksum file is missing in S3, it will raise a `S3OperationException`.
+- [ASSISTANT_S

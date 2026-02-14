@@ -1,0 +1,24 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/07/10 (Mon) 11:48  
+[FACT] User has a Dell XPS laptop.  
+[FACT] User's laptop is about 2 years old.  
+[FACT] User has had the battery since they bought the laptop.  
+[FACT] User primarily uses the laptop for web browsing, watching videos, and working on documents.  
+[FACT] User does not do much gaming.  
+[CHANGE] User has noticed that the battery life has been getting worse over time.  
+[CHANGE] User has been trying to keep the laptop plugged in as much as possible.  
+[ASSISTANT_SAID] Assistant provided troubleshooting steps and tips to extend laptop battery life, including checking battery health, updating operating system and drivers, adjusting power settings, disabling unnecessary startup programs, turning off unnecessary devices, checking for resource-intensive programs, cleaning dust from vents, calibrating the battery, limiting screen brightness, and considering battery replacement.  
+[ASSISTANT_SAID] Assistant suggested checking battery health using a utility tool from the laptop's manufacturer.  
+[ASSISTANT_SAID] Assistant recommended using Dell's Power Manager software to check battery health.  
+[ASSISTANT_SAID] Assistant advised to keep the battery level between 20% and 80% charged and to avoid letting it drop to 0% regularly.  
+[ASSISTANT_SAID] Assistant mentioned that battery life degradation is a normal process after 2 years.  
+[ASSISTANT_SAID] Assistant provided recommendations for cable organizers, including a cable management box, cable ties, cable clips, cable sleeves, and a desk cable organizer.  
+[ASSISTANT_SAID] Assistant recommended specific products for cable organization, such as Cable Management Box by CableOrganizer, Velcro Cable Ties, 3M Cable Clips, Cable Sleeves by CableSleeve, and Desk Cable Organizer by Poppin.  
+[ASSISTANT_SAID] Assistant suggested using a label maker, pre-made cable labels, and color-coded labels for organizing cables.  
+[ASSISTANT_SAID] Assistant provided tips for maintaining cable organization, including using a "one in, one out" policy, labeling cables, designating a "cable station," routing cables neatly, and considering a cord concealer.  
+[ASSISTANT_SAID] Assistant recommended apps and tools for tracking energy usage at home, including Sense, Neurio, Belkin WeMo, Kill A Watt, and EnergyMeter.  
+[ASSISTANT_SAID] Assistant mentioned that smart meters may be available through the user's utility provider.  
+[ASSISTANT_SAID] Assistant provided specific product recommendations for smart plugs, including TP-Link Smart Plug and Belkin WeMo Insight Smart Plug.  
+[PREFERENCE] User is trying to declutter their desk.  
+[EVENT] User

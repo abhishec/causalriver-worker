@@ -1,0 +1,46 @@
+{
+  "answer_0b4a8adc_1": [
+    {
+      "fact": "User recently acquired a vintage armchair from the 1950s",
+      "type": "event",
+      "entities": [
+        "vintage armchair",
+        "1950s"
+      ]
+    },
+    {
+      "fact": "User received a crystal chandelier from their aunt",
+      "type": "event",
+      "entities": [
+        "crystal chandelier",
+        "aunt"
+      ]
+    },
+    {
+      "fact": "User's great-grandmother owned the crystal chandelier",
+      "type": "relationship",
+      "entities": [
+        "great-grandmother",
+        "crystal chandelier"
+      ]
+    },
+    {
+      "fact": "User is interested in cleaning and maintaining antique furniture",
+      "type": "preference",
+      "entities": [
+        "cleaning",
+        "maintaining",
+        "antique furniture"
+      ]
+    },
+    {
+      "fact": "User is considering researching the history of the crystal chandelier",
+      "type": "preference",
+      "entities": [
+        "research",
+        "history",
+        "crystal chandelier"
+      ]
+    }
+  ]
+}

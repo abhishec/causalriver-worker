@@ -1,0 +1,20 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/28 (Sun) 16:34  
+[EVENT] User is attending a 2-day conference on entrepreneurship today.  
+[EVENT] User attended a workshop on data science and machine learning at Berkeley a few weeks ago.  
+[PREFERENCE] User found the workshop helpful in giving a solid foundation in supervised and unsupervised learning, neural networks, and deep learning.  
+[PREFERENCE] User is particularly interested in exploring applications of deep learning in natural language processing for text classification and sentiment analysis, as well as computer vision for object detection and image segmentation.  
+[ASSISTANT_SAID] Assistant provided general tips on what to expect at the funding strategies panel, including an overview of funding options, pros and cons of each option, when to raise funding, preparing for funding, and alternative funding options.  
+[ASSISTANT_SAID] Assistant suggested questions to ask the speakers at the funding strategies panel, including common mistakes startups make when seeking funding, determining the right valuation, key metrics investors look for, balancing funding needs with control, and more.  
+[ASSISTANT_SAID] Assistant recommended online courses for deep learning, including Andrew Ng's Deep Learning Course, Deep Learning Specialization from Stanford University, and Deep Learning A-Z on Udemy.  
+[ASSISTANT_SAID] Assistant recommended books for deep learning, including "Deep Learning" by Ian Goodfellow, "Deep Learning with Python" by François Chollet, and "Neural Networks and Deep Learning" by Michael A. Nielsen.  
+[ASSISTANT_SAID] Assistant provided tutorials and blogs for deep learning, including KDNuggets, TensorFlow Tutorials, and PyTorch Tutorials.  
+[ASSISTANT_SAID] Assistant suggested podcasts related to AI and machine learning, including The AI Alignment Podcast and The Machine Learning Podcast.  
+[ASSISTANT_SAID] Assistant recommended communities for deep learning, including Kaggle and Reddit (r/MachineLearning and r/DeepLearning).  
+[ASSISTANT_SAID] Assistant suggested videos for deep learning concepts, including 3Blue1Brown and Siraj Raval.  
+[ASSISTANT_SAID] Assistant provided resources for natural language processing (NLP), including courses, books, tutorials, and communities.  
+[ASSISTANT_SAID] Assistant provided resources for computer vision, including courses, books, tutorials, and communities.  
+[ASSISTANT_SAID] Assistant suggested project ideas for text classification and sentiment analysis, including IMDB Sentiment Analysis, 20 Newsgroups Text Classification, and Twitter Sentiment Analysis.  
+[ASSISTANT_SAID] Assistant suggested resources for object detection and image segmentation, including OpenCV and TensorFlow's TensorFlow Hub.  
+[ASSISTANT_SAID] Assistant mentioned that NLP and computer vision have many real-world applications,

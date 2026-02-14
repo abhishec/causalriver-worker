@@ -1,0 +1,23 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/30 (Tue) 12:43
+- [USER] User requested a summary in Italian of a paper titled "Detecting Gravitational Waves with the Moon" by Emma Clarke, published on Feb 8, 2023.
+- [FACT] The paper is authored by Diego Blas and Alexander C. Jenkins.
+- [FACT] The authors are affiliated with the Departament de Física, Universitat Autònoma de Barcelona; Institut de Fisica d’Altes Energies (IFAE) The Barcelona Institute of Science and Technology; Theoretical Particle Physics and Cosmology Group, Physics Department, King’s College London.
+- [FACT] The paper is published in Phys. Rev. D. and is closed access.
+- [FACT] Gravitational waves are produced by various astrophysical and cosmological phenomena.
+- [FACT] Gravitational waves can carry information about massive astrophysical objects, such as colliding black holes and neutron stars.
+- [FACT] A stochastic gravitational wave background is an incoherent sum of signals from unresolved sources.
+- [FACT] The stochastic gravitational wave background may be created by super massive black hole binaries and cosmological events like inflation and early-universe phase transitions.
+- [FACT] Different gravitational wave detectors are sensitive to different frequency bands, similar to telescopes spanning the electromagnetic spectrum.
+- [FACT] Current and planned gravitational wave experiments cover frequencies from nanohertz to tens of kilohertz.
+- [FACT] There are gaps in the frequency ranges covered, particularly in the microhertz region (10^-6 Hz).
+- [FACT] Pulsar timing arrays and future space-based interferometers like LISA have limitations in the microhertz range.
+- [ASSISTANT_SAID] The authors propose a technique to bridge the gap in the microhertz region.
+- [FACT] The frequency sensitivity of pulsar timing arrays is determined by the sampling properties of the data.
+- [FACT] The upper limit of pulsar timing arrays is set by the time between measurements, performed on the order of weeks.
+- [FACT] The lower limit of pulsar timing arrays is set by the total observation time, on the order of nanohertz for observatories operating for about 10 years.
+- [FACT] Ground-based LIGO-VIRGO observatory covers 10 to 1000 hertz.
+- [FACT] Space-based LISA observatory will be most sensitive in the range from 0.1 millihertz to 0.1 hertz.
+- [FACT] To detect signals in the microhertz gap, an interferometer would need to be built on astronomical scales, such as the size of the solar system.
+- [ASSISTANT_SAID] The authors propose using binary systems to detect gravitational waves by considering gravitational wave-induced oscillations between two freely falling masses in a gravitationally

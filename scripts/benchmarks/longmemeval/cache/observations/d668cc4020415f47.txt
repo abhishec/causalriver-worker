@@ -1,0 +1,29 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/01/20 (Fri) 17:14
+- [EVENT] User is trying to keep track of pet expenses.
+- [ASSISTANT_SAID] Assistant offered to help organize user’s pet expenses.
+- [ASSISTANT_SAID] Assistant requested a list of recent purchases including date, item, and cost.
+- [ASSISTANT_SAID] Assistant provided an example format for listing expenses.
+- [EVENT] User provided a list of recent pet expenses.
+- [TEMPORAL] User's expenses include a purchase on 02/25/2023.
+- [FACT] User's pet is a dog named Max.
+- [EVENT] User purchased Dog Food on 02/25/2023 for $60.00.
+- [EVENT] User purchased Dental Chews on 02/25/2023 but was unsure of the exact cost.
+- [TEMPORAL] User's expenses include a purchase on 03/10/2023.
+- [FACT] User purchased a Dog Bed on 03/10/2023 for $80.00.
+- [TEMPORAL] User received a Cat Tree on 03/07/2023 for around $120.00.
+- [ASSISTANT_SAID] Assistant offered to help estimate the cost of the dental chews.
+- [ASSISTANT_SAID] Assistant calculated the discounted price of the dental chews to be $16.00.
+- [ASSISTANT_SAID] Assistant organized the user's expenses by month.
+- [ASSISTANT_SAID] Assistant provided total expenses for February ($76.00) and March ($200.00).
+- [ASSISTANT_SAID] Assistant provided a total of $276.00 for all pet expenses.
+- [EVENT] User mentioned a vet visit for Max on February 15th.
+- [FACT] User's vet visit cost was around $50.00.
+- [ASSISTANT_SAID] Assistant confirmed the addition of the vet visit to the expense list.
+- [ASSISTANT_SAID] Assistant updated the total February expenses to $126.00 and total pet expenses to $326.00.
+- [EVENT] User mentioned tracking cat's medication for Luna.
+- [FACT] User's cat is named Luna and has hyperthyroidism.
+- [ASSISTANT_SAID] Assistant offered to help track Luna's medication refills.
+- [ASSISTANT_SAID] Assistant requested the cost of the first refill and the date it was refilled to start tracking.
+- [ASSISTANT_SAID] Assistant suggested creating a new section for Luna's medication refills in the expense tracker.

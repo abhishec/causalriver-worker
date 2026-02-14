@@ -1,0 +1,31 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/07/10 (Mon) 16:11
+- [EVENT] User is getting ready to plant new flowers in their garden.
+- [ASSISTANT_SAID] Tomatoes are one of the most popular garden vegetables, and choosing the right companion plants can make a big difference in their growth and health.
+- [ASSISTANT_SAID] Suggested companion plants for tomatoes: Basil, Marigold, Borage, Chives, Oregano, Parsley, Comfrey, Nasturtium, Radish, Dill.
+- [ASSISTANT_SAID] Basil repels pests that target tomatoes, such as whiteflies and aphids, and adds flavor to many tomato dishes.
+- [ASSISTANT_SAID] Marigolds repel nematodes, aphids, and other pests.
+- [ASSISTANT_SAID] Borage attracts beneficial insects and improves tomato flavor and texture.
+- [ASSISTANT_SAID] Chives repel aphids and can improve tomato flavor.
+- [ASSISTANT_SAID] Oregano repels pests and adds flavor to tomato dishes.
+- [ASSISTANT_SAID] Parsley repels pests and adds flavor to tomato-based dishes.
+- [ASSISTANT_SAID] Comfrey's deep taproots bring up nutrients from the soil, benefiting tomatoes.
+- [ASSISTANT_SAID] Nasturtium repels aphids and attracts beneficial insects.
+- [ASSISTANT_SAID] Radish can help repel cucumber beetles.
+- [ASSISTANT_SAID] Dill repels aphids and can provide support for indeterminate tomato varieties.
+- [ASSISTANT_SAID] Suggested to plant companion plants according to their growing requirements and space needs.
+- [EVENT] User has already planted marigolds with their tomatoes.
+- [EVENT] User is thinking of adding a trellis for their peas, which they planted a month ago.
+- [ASSISTANT_SAID] Provided tips on how to train peas to climb up the trellis, including:
+  1. Provide a sturdy trellis.
+  2. Place the trellis correctly near the pea plants.
+  3. Guide the tendrils around the trellis.
+  4. Train the stems in a clockwise direction.
+  5. Prune for encouragement.
+  6. Keep the trellis secure.
+  7. Monitor and adjust as needed.
+- [EVENT] User built a new trellis for their peas a month ago.
+- [TEMPORAL] User started planning their garden layout on January 15th.
+- [ASSISTANT_SAID] Assistant does not retain personal knowledge of user's gardening activities or dates.
+- [ASSISTANT_SAID] Suggested checking gardening journal, calendar, notes, or receipts to recall the

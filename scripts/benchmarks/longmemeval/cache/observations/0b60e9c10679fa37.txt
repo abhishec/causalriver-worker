@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[FACT] User is planning a trip to Asia.  
+[FACT] User recently went on a week-long vacation to Hawaii with their immediate family, including their parents and younger sibling.  
+[FACT] User had an amazing experience traveling solo to Japan last year.  
+[PREFERENCE] User is interested in popular destinations for solo travelers in Asia.  
+[PREFERENCE] User is interested in visiting Vietnam and trying all the local cuisine.  
+[PREFERENCE] User enjoyed bonding over food during their family trip to Hawaii.  
+[EVENT] User is thinking of taking a cooking class in Vietnam to learn to make local dishes.  
+[ASSISTANT_SAID] Asia is an amazing continent to travel solo, with many countries and cities that are solo-traveler friendly.  
+[ASSISTANT_SAID] Recommended popular destinations for solo travelers in Asia include Thailand, Vietnam, Cambodia, South Korea, Singapore, Laos, and Taiwan.  
+[ASSISTANT_SAID] Must-try dishes in Vietnam include Pho, Bánh Mì, Gỏi Cuốn (Fresh Spring Rolls), Bánh Xèo, Com Tam (Broken Rice), Bún Chả, and Cha Ca La Vong.  
+[ASSISTANT_SAID] Recommended restaurants in Vietnam include Pho 10, Bánh Mì 37, Highway4, Nhà Hàng Ngon, and Cuc Gach Quan.  
+[ASSISTANT_SAID] Recommended food markets and streets include Old Quarter Night Market in Hanoi, Ben Thanh Market in Ho Chi Minh City, and Street Food Alley in Hoi An.  
+[ASSISTANT_SAID] Cooking schools in Hanoi include Hanoi Cooking Centre and Vietnam Cooking School, which offer hands-on classes and market tours.  
+[ASSISTANT_SAID] Most cooking schools in Vietnam usually provide recipes and notes after the class.  
+[ASSISTANT_SAID] Confirm with the cooking school whether they provide recipes and notes after the class.  
+[ASSISTANT_SAID] Many cooking schools in Hanoi offer a market tour before the class, often called a "Market-to-Table" or "Farm-to-Table" experience.  
+[EVENT] User is thinking of booking a cooking class in Hanoi.  
+[CHANGE] User's interest in cooking classes has evolved to include exploring local markets.  
+[ASSISTANT_SAID] Suggested that user ask questions about recipe availability and market tours when booking a cooking class.  
+[ASSISTANT_SAID] Recommended cooking schools in Hanoi that offer market tours include Hanoi Cooking Centre and Vietnam Cooking School.  
+[TEMPORAL] Session Date: 2023/05/27 (Sat) 10:40.

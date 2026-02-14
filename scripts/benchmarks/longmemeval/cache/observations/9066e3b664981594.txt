@@ -1,0 +1,28 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/23 (Tue) 16:06  
+[FACT] User is interested in BBQ restaurants in San Antonio.  
+[USER_SAID] User asked which restaurant serves the best BBQ in San Antonio and what to order there.  
+[ASSISTANT_SAID] Recommended BBQ restaurants in San Antonio:  
+[ASSISTANT_SAID] 1. Two Bros BBQ Market - must trys: brisket, pork ribs, jalapeno cheese sausage  
+[ASSISTANT_SAID] 2. The Granary 'Cue & Brew - must trys: brisket, pulled pork, spare ribs  
+[ASSISTANT_SAID] 3. Rudy's "Country Store" and Bar-B-Q - must trys: brisket, turkey, creamed corn  
+[ASSISTANT_SAID] 4. Augie's Barbed Wire Smokehouse - must trys: brisket, sausage, ribs  
+[ASSISTANT_SAID] 5. 4-T's Bar-B-Q & Catering - must trys: brisket, pulled pork, smoked chicken  
+[USER_SAID] User requested tips on the best sides to order with BBQ in San Antonio.  
+[ASSISTANT_SAID] Recommended popular BBQ side dishes in San Antonio:  
+[ASSISTANT_SAID] 1. Potato salad  
+[ASSISTANT_SAID] 2. Coleslaw  
+[ASSISTANT_SAID] 3. Baked beans  
+[ASSISTANT_SAID] 4. Mac and cheese  
+[ASSISTANT_SAID] 5. Cornbread  
+[ASSISTANT_SAID] 6. Collard greens  
+[ASSISTANT_SAID] 7. Fried okra  
+[USER_SAID] User asked for the restaurant with the best dessert options to finish off a BBQ meal in San Antonio.  
+[ASSISTANT_SAID] Recommended BBQ restaurants with dessert options:  
+[ASSISTANT_SAID] 1. Two Bros BBQ Market - homemade pies, cobbler, banana pudding  
+[ASSISTANT_SAID] 2. The Granary 'Cue & Brew - whiskey chocolate cake, smoked Texas peach cobbler, buttermilk pie  
+[ASSISTANT_SAID] 3. Rudy's "Country Store" and Bar-B-Q - banana pudding, pecan pie  
+[ASSISTANT_SAID] 4. Augie's Barbed Wire Smokehouse - homemade peach cobbler, bread pudding, sweet potato pie  
+[ASSISTANT_SAID] 5. 4-T's Bar-B-Q & Catering - homemade carrot cake, peach cobbler  
+[USER_SAID] User expressed excitement about the dessert options and asked for a personal favorite.

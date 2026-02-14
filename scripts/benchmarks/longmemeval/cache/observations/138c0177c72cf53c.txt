@@ -1,0 +1,39 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/06/15 (Thu) 18:01  
+[USER] User is thinking of hosting another BBQ party soon.  
+[PREFERENCE] User wants to try out some new recipes for sides that go well with BBQ.  
+[ASSISTANT_SAID] Assistant provided a list of 12 BBQ side dish ideas:  
+[ASSISTANT_CREATED] 1. Coleslaw  
+[ASSISTANT_CREATED] 2. Baked Beans  
+[ASSISTANT_CREATED] 3. Grilled Corn on the Cob  
+[ASSISTANT_CREATED] 4. Potato Salad  
+[ASSISTANT_CREATED] 5. Roasted Vegetables  
+[ASSISTANT_CREATED] 6. Mac and Cheese  
+[ASSISTANT_CREATED] 7. Garlic and Herb Roasted Potatoes  
+[ASSISTANT_CREATED] 8. BBQ Cornbread  
+[ASSISTANT_CREATED] 9. Collard Greens  
+[ASSISTANT_CREATED] 10. Watermelon Salad  
+[ASSISTANT_CREATED] 11. Deviled Eggs  
+[ASSISTANT_CREATED] 12. Fried Okra  
+[USER] User is thinking of doing a rib-centric menu for the BBQ party.  
+[PREFERENCE] User is interested in sides that complement ribs well.  
+[ASSISTANT_SAID] Assistant provided a list of 5 sides that complement ribs:  
+[ASSISTANT_CREATED] 1. Coleslaw  
+[ASSISTANT_CREATED] 2. Baked Beans  
+[ASSISTANT_CREATED] 3. Grilled Corn on the Cob  
+[ASSISTANT_CREATED] 4. Roasted Vegetables  
+[ASSISTANT_CREATED] 5. Cornbread  
+[USER] User has been into BBQ for about 3 weeks and feels like they've learned a lot.  
+[ASSISTANT_SAID] Assistant mentioned that it can take around 66 days to form a new habit, with a range from 18 to 254 days.  
+[ASSISTANT_SAID] Assistant provided tips for continuing the BBQ journey, including experimenting with new recipes, joining online communities, attending workshops, and practicing consistently.  
+[USER] User asked for recommendations for BBQ rubs to try out.  
+[PREFERENCE] User has been using a sweet and smoky rub but wants to experiment with new flavors.  
+[ASSISTANT_SAID] Assistant provided a list of BBQ rubs to try:  
+[ASSISTANT_CREATED] 1. Kansas City-style  
+[ASSISTANT_CREATED] 2. Texas-style  
+[ASSISTANT_CREATED] 3. Memphis-style  
+[ASSISTANT_CREATED] 4. Jamaican Jerk  
+[ASSISTANT_CREATED] 5. Korean BBQ  
+[ASSISTANT_CREATED] 6. Indian-inspired  
+[ASSISTANT_CREATED] 7.

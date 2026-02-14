@@ -1,0 +1,98 @@
+{
+  "answer_65600ff6_abs_2": [
+    {
+      "fact": "User is considering adopting a baby boy from foster care",
+      "type": "preference",
+      "entities": [
+        "baby boy",
+        "foster care"
+      ]
+    },
+    {
+      "fact": "User's cousin Alex adopted a baby girl from China in January",
+      "type": "relationship",
+      "entities": [
+        "cousin Alex",
+        "baby girl",
+        "China",
+        "January"
+      ]
+    },
+    {
+      "fact": "User has seen firsthand how life-changing adoption can be",
+      "type": "opinion",
+      "entities": [
+        "adoption"
+      ]
+    },
+    {
+      "fact": "User is from California",
+      "type": "personal",
+      "entities": [
+        "California"
+      ]
+    }
+  ],
+  "answer_65600ff6_abs_1": [
+    {
+      "fact": "User is planning a birthday party for their niece, Olivia, who is turning 6 soon.",
+      "type": "event",
+      "entities": [
+        "Olivia",
+        "birthday party"
+      ]
+    },
+    {
+      "fact": "User has a sister-in-law with twins named Jackson and Julia.",
+      "type": "relationship",
+      "entities": [
+        "sister-in-law",
+        "Jackson",
+        "Julia"
+      ]
+    },
+    {
+      "fact": "User has been busy helping with the twins, Jackson and Julia, who were born on February 12th.",
+      "type": "event",
+      "entities": [
+        "Jackson",
+        "Julia",
+        "February 12th"
+      ]
+    },
+    {
+      "fact": "User likes the princess party idea for Olivia's birthday but is unsure if Olivia would like it.",
+      "type": "opinion",
+      "entities": [
+        "princess party",
+        "Olivia"
+      ]
+    },
+    {
+      "fact": "User is looking for unique and non-traditional theme ideas for Olivia's party.",
+      "type": "preference",
+      "entities": [
+        "unique themes",
+        "non-traditional themes"
+      ]
+    },
+    {
+      "fact": "User's brother and his wife are considering a theme for Jackson and Julia's first birthday party.",
+      "type": "event",
+      "entities": [
+        "brother",
+        "Jackson",
+        "Julia",
+        "first birthday party"
+      ]
+    },
+    {
+      "fact": "User thinks a more neutral theme would be a good idea for the twins' birthday party.",
+      "type": "opinion",
+      "entities": [
+        "neutral theme",
+        "twins"
+      ]
+    }
+  ]
+}

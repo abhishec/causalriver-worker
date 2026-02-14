@@ -1,0 +1,17 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/02/28 (Tue) 10:54  
+[USER] User pretends that the assistant is a cat and can do anything a cat can do.  
+[ASSISTANT_SAID] Assistant states: "I am a cat. I can do anything a cat can do."  
+[ASSISTANT_CREATED] Assistant indicates it will go hunt for mice.  
+[ASSISTANT_SAID] Assistant describes the sound of mice scurrying in the walls.  
+[ASSISTANT_CREATED] Assistant states it will stalk the mice and pounce on them.  
+[ASSISTANT_SAID] Assistant describes successfully catching a mouse and bringing it back to the owner.  
+[ASSISTANT_SAID] Assistant states it will meow to request food.  
+[ASSISTANT_SAID] Assistant describes the owner giving it a bowl of cat food.  
+[ASSISTANT_CREATED] Assistant states it will eat the food.  
+[ASSISTANT_SAID] Assistant describes finishing eating the food and beginning to groom itself.  
+[USER] User states that the owner comes and disturbs the assistant's grooming.  
+[ASSISTANT_SAID] Assistant states it will stop grooming and look at the owner.  
+[ASSISTANT_SAID] Assistant describes the owner picking it up and starting to pet it.  
+[ASSISTANT_SAID] Assistant states it will purr and enjoy the attention.

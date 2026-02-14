@@ -1,0 +1,26 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2022/11/18 (Fri) 04:21
+- [EVENT] User is trying to plan a doctor's appointment for next week.
+- [FACT] User is still getting used to keeping track of their schedule.
+- [TEMPORAL] User had to take a morning off on Wednesday, February 20th.
+- [TEMPORAL] Current week is February 19-25.
+- [TEMPORAL] Upcoming week is February 26 - March 4.
+- [PREFERENCE] User is open to taking a day off work on Thursday or Friday of next week.
+- [TEMPORAL] Thursday of next week is March 1st and Friday is March 2nd.
+- [ASSISTANT_SAID] Assistant confirms that both Thursday and Friday are good options for the appointment.
+- [ASSISTANT_SAID] Assistant suggests that Thursday is often a good day for appointments because it provides buffer time before the weekend.
+- [ASSISTANT_SAID] Assistant also mentions that Friday appointments can be nice as they allow for a relaxed weekend.
+- [PREFERENCE] User prefers Thursday for the appointment to avoid taking another morning off on a Wednesday.
+- [EVENT] User's doctor's appointment is scheduled for Thursday, March 1st.
+- [RELATIONSHIP] User's mom is recovering from surgery on March 15th.
+- [TEMPORAL] User's mom's surgery is on March 15th.
+- [ASSISTANT_SAID] Assistant clarifies that the mom's surgery has not yet happened and she won't be recovering by March 1st.
+- [PREFERENCE] User considers checking in with their mom about her recovery after her surgery.
+- [EVENT] User is considering asking their mom about their aunt's knee replacement surgery on May 3rd.
+- [TEMPORAL] User's aunt's knee replacement surgery is on May 3rd.
+- [ASSISTANT_SAID] Assistant suggests it might be too early to ask the mom about the aunt's surgery and recommends checking in with the aunt directly.
+- [ASSISTANT_SAID] Assistant advises focusing on the mom's upcoming surgery and offering support.
+- [PREFERENCE] User decides to ask their mom about her surgery and offer support, and to check in with their aunt closer to her surgery date.
+- [ASSISTANT_SAID] Assistant expresses happiness in helping the user clarify their plans and priorities.
+- [ASSISTANT_SAID] Assistant reminds the user to take care of themselves, especially with their own appointment coming up.

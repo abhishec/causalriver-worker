@@ -1,0 +1,29 @@
+**Observation Log:**
+
+**Session Date:** 2023/05/30 (Tue) 04:59  
+**Session ID:** sharegpt_MhyIwuj_11
+
+1. [ASSISTANT_SAID] The assistant provided a structured approach to establish guidelines for determining complexity in appraisal orders, including developing a checklist, assigning scores, determining a threshold score, providing clear instructions, and reviewing and adjusting the guidelines.
+2. [ASSISTANT_SAID] The assistant suggested creating a checklist of characteristics indicative of a complex property, which should be clear, concise, and easy to follow, including objective criteria that can be consistently applied.
+3. [ASSISTANT_CREATED] The assistant created a checklist of characteristics of a complex property, including:
+   - Location: Questions about remoteness, unique features, crime rates, and street layout.
+   - Property type and design: Questions about design complexity, special features, heating/cooling systems, and outbuildings.
+   - Age and condition: Questions about the property's age, repair needs, wear and tear, and alterations.
+   - Zoning and land use: Questions about zoning restrictions, land use regulations, and variances.
+   - Market conditions: Questions about market trends, economic characteristics, and supply/demand factors.
+4. [USER] The user requested another example of a checklist of the characteristics of a complex property.
+5. [ASSISTANT_SAID] The assistant provided a second example of a checklist of characteristics of a complex property, including:
+   - Location: Questions about unique or challenging locations, rapid changes, and crime rates.
+   - Property type and design: Questions about unusual designs, special features, and outbuildings.
+   - Age and condition: Questions about the property's age, repair needs, and alterations.
+   - Zoning and land use: Questions about zoning restrictions and variances.
+   - Market conditions: Questions about market trends and economic characteristics.
+6. [USER] The user requested more questions under each of the five factors of the checklist.
+7. [ASSISTANT_SAID] The assistant provided additional questions under each of the five factors:
+   - Location: Questions about environmental features, crime rates, and street layout.
+   - Property type and design: Questions about heating/cooling systems and outbuildings.
+   - Age and condition: Questions about wear and tear and significant alterations.
+   - Zoning and land use: Questions about land use regulations and zoning variances.
+   - Market conditions: Questions about economic trends and supply/demand factors.
+8. [USER] The user requested the checklist to be formatted in the form of a table.
+9. [ASSISTANT_CREATED] The assistant created a table format for the checklist of characteristics of a complex property, including all the factors and corresponding questions.

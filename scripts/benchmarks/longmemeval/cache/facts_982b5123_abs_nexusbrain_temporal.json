@@ -1,0 +1,123 @@
+{
+  "answer_ab603dd5_abs_1": [
+    {
+      "fact": "User is planning a trip to San Francisco",
+      "type": "event",
+      "entities": [
+        "San Francisco"
+      ]
+    },
+    {
+      "fact": "User had a great experience with Airbnb in the past",
+      "type": "preference",
+      "entities": [
+        "Airbnb"
+      ]
+    },
+    {
+      "fact": "User stayed in Haight-Ashbury for their best friend's wedding",
+      "type": "event",
+      "entities": [
+        "Haight-Ashbury",
+        "best friend's wedding"
+      ]
+    },
+    {
+      "fact": "User had to book three months in advance for their stay",
+      "type": "event",
+      "entities": []
+    },
+    {
+      "fact": "User is looking for good neighborhoods to stay in San Francisco",
+      "type": "preference",
+      "entities": [
+        "neighborhoods",
+        "San Francisco"
+      ]
+    },
+    {
+      "fact": "User is looking for a tailor to get a suit made for an occasion",
+      "type": "preference",
+      "entities": [
+        "tailor",
+        "suit",
+        "occasion"
+      ]
+    }
+  ],
+  "answer_ab603dd5_abs_2": [
+    {
+      "fact": "User is planning a trip to San Francisco next month.",
+      "type": "event",
+      "entities": [
+        "San Francisco",
+        "trip"
+      ]
+    },
+    {
+      "fact": "User has been to San Francisco before, exactly two months ago.",
+      "type": "event",
+      "entities": [
+        "San Francisco",
+        "two months ago"
+      ]
+    },
+    {
+      "fact": "User attended their best friend's wedding during their last trip to San Francisco.",
+      "type": "relationship",
+      "entities": [
+        "best friend",
+        "wedding"
+      ]
+    },
+    {
+      "fact": "User had a 5-day trip to San Francisco for the wedding.",
+      "type": "event",
+      "entities": [
+        "5-day trip",
+        "San Francisco",
+        "wedding"
+      ]
+    },
+    {
+      "fact": "User had an amazing time during their last trip to San Francisco.",
+      "type": "opinion",
+      "entities": [
+        "amazing time",
+        "San Francisco"
+      ]
+    },
+    {
+      "fact": "User is looking for a place to grab breakfast in San Francisco.",
+      "type": "preference",
+      "entities": [
+        "breakfast",
+        "San Francisco"
+      ]
+    },
+    {
+      "fact": "User wore a new navy blue suit to their friend's wedding.",
+      "type": "personal",
+      "entities": [
+        "navy blue suit",
+        "friend's wedding"
+      ]
+    },
+    {
+      "fact": "User bought the navy blue suit from a local tailor in their hometown.",
+      "type": "personal",
+      "entities": [
+        "local tailor",
+        "hometown"
+      ]
+    },
+    {
+      "fact": "User is interested in finding a similar style suit in San Francisco.",
+      "type": "preference",
+      "entities": [
+        "suit",
+        "San Francisco"
+      ]
+    }
+  ]
+}

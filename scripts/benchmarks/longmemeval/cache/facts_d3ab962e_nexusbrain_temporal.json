@@ -1,0 +1,94 @@
+{
+  "answer_5237bb0b_2": [
+    {
+      "fact": "User is looking for yoga classes near their new apartment.",
+      "type": "preference",
+      "entities": [
+        "yoga classes",
+        "new apartment"
+      ]
+    },
+    {
+      "fact": "User enjoys the outdoors.",
+      "type": "preference",
+      "entities": [
+        "outdoors"
+      ]
+    },
+    {
+      "fact": "User completed a 3-mile loop trail at Valley of Fire State Park last weekend.",
+      "type": "event",
+      "entities": [
+        "3-mile loop trail",
+        "Valley of Fire State Park"
+      ]
+    },
+    {
+      "fact": "User is interested in yoga poses or sequences for flexibility and stress relief.",
+      "type": "preference",
+      "entities": [
+        "yoga poses",
+        "flexibility",
+        "stress relief"
+      ]
+    },
+    {
+      "fact": "User commutes by bike three times a week.",
+      "type": "personal",
+      "entities": [
+        "bike",
+        "commuting"
+      ]
+    },
+    {
+      "fact": "User wants to ensure their bike is in good condition.",
+      "type": "preference",
+      "entities": [
+        "bike maintenance"
+      ]
+    }
+  ],
+  "answer_5237bb0b_1": [
+    {
+      "fact": "User is planning a road trip to the Grand Canyon in January",
+      "type": "event",
+      "entities": [
+        "Grand Canyon",
+        "January",
+        "road trip"
+      ]
+    },
+    {
+      "fact": "User is considering driving to Monument Valley and Four Corners",
+      "type": "preference",
+      "entities": [
+        "Monument Valley",
+        "Four Corners"
+      ]
+    },
+    {
+      "fact": "User recently went on a 5-mile hike at Red Rock Canyon",
+      "type": "event",
+      "entities": [
+        "5-mile hike",
+        "Red Rock Canyon"
+      ]
+    },
+    {
+      "fact": "User enjoyed the views from the top of the ridge at Red Rock Canyon",
+      "type": "opinion",
+      "entities": [
+        "views",
+        "Red Rock Canyon"
+      ]
+    },
+    {
+      "fact": "User is looking to get back into volleyball and meet new people",
+      "type": "preference",
+      "entities": [
+        "volleyball",
+        "meeting new people"
+      ]
+    }
+  ]
+}

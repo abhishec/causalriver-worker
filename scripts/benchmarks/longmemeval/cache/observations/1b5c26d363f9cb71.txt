@@ -1,0 +1,19 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/27 (Sat) 15:27
+- [ASSISTANT_SAID] The hybridization state of carbon does not directly correspond to a specific number or type of bonds.
+- [ASSISTANT_SAID] When carbon is in an sp hybridization state, it has two hybrid orbitals and two unhybridized p orbitals. It can form two sigma bonds and one pi bond, or one sigma bond and two pi bonds, depending on the bonding situation.
+- [ASSISTANT_SAID] When carbon is in an sp2 hybridization state, it has three hybrid orbitals and one unhybridized p orbital. It can form three sigma bonds and one pi bond, or two sigma bonds and two pi bonds, depending on the bonding situation.
+- [ASSISTANT_SAID] When carbon is in an sp3 hybridization state, it has four hybrid orbitals and no unhybridized p orbitals. It can form four sigma bonds but cannot form pi bonds.
+- [ASSISTANT_SAID] The number and type of bonds formed by carbon depend on the hybridization state and the bonding situation, which can vary depending on the molecule or compound.
+- [USER] My brain is messed up rn. So then how do you get to know if the orbitals are hybridized or unhybridized?
+- [ASSISTANT_SAID] Determining whether orbitals are hybridized or not usually requires knowledge of the specific molecule and its bonding. General rules include looking at the molecule's geometry, types of bonds, and the number of attached atoms.
+- [USER] Now you are telling when a double bond is formed there is hybridized orbital where prior to this you told there is unhybridized orbital.
+- [ASSISTANT_SAID] In the case of a carbon-carbon double bond, the carbon atoms involved are typically sp2 hybridized. One unhybridized p orbital is used for the pi bond, while the sp2 hybrid orbitals form sigma bonds.
+- [USER] Then sp2 means carbon can form 3 bonds and a double bond.
+- [ASSISTANT_SAID] When carbon is sp2 hybridized, it can form three sigma bonds and one pi bond.
+- [USER] Basically unhybridized orbitals form pi bond?
+- [ASSISTANT_SAID] Yes, pi bonds are formed by the overlap of unhybridized p orbitals.
+- [USER] So when a triple bond is formed there are 3 unhybridized orbitals?
+- [ASSISTANT_SAID] When a carbon atom undergoes sp hybridization to form a triple bond, it uses one unhybridized p orbital and two sp hybridized orbitals.
+- [USER] In a triple bond, one is

@@ -1,0 +1,12 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/07/15 (Sat) 11:42  
+[USER] The user requested the assistant to act as an author and provide bullet points in a specific format.  
+[ASSISTANT_SAID] The assistant provided instructions on how to format the output, including requirements for bullet points and JSON structure.  
+[ASSISTANT_CREATED] The assistant created a JSON array with two bullet points based on the provided transcript.  
+[ASSISTANT_CREATED] The first bullet point states that the car has useful buttons, such as parking cameras that provide a 360-degree view and a top-down view.  
+[ASSISTANT_CREATED] The second bullet point mentions that the car has driving modes such as sport, efficient, or personalized mode that allows the driver to change all settings.  
+[ASSISTANT_SAID] The assistant emphasized that the bullet points must be in the same language as the transcript and must not exceed two points.  
+[ASSISTANT_SAID] The assistant specified that each bullet point must be at least 15 words and sorted by "start_time."  
+[ASSISTANT_SAID] The assistant instructed that bullet points should not start with symbols or numbers and that JSON keys should be wrapped in double quotes.  
+[ASSISTANT_SAID] The assistant noted that the output JSON should not be wrapped in any other JSON structure.

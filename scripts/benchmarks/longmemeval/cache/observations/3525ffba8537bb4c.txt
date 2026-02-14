@@ -1,0 +1,29 @@
+**Observation Log:**
+
+- [FACT] The user is planning a trip to visit their best friend from college who is living abroad.
+- [PREFERENCE] The user is looking for affordable flights to their friend's location.
+- [EVENT] The user had a weekly video call with their best friend from college on the morning of June 19, 2023.
+- [TEMPORAL] The user wants to visit their friend within the next 3-4 months from June 19, 2023.
+- [FACT] The user prefers to fly out of their hometown, which is about an hour's drive from a major international airport.
+- [PREFERENCE] The user is open to both one-way and round-trip flights, whichever is more cost-effective.
+- [FACT] The user's friend is living in Paris, France.
+- [ASSISTANT_SAID] The assistant provided tips for finding affordable flights, including traveling during the off-peak season, flying mid-week, considering red-eye flights, and looking for budget airlines.
+- [ASSISTANT_SAID] The assistant suggested specific flight options, including:
+  - Delta: From $450-$600 with a layover in Amsterdam or Atlanta.
+  - American Airlines: From $480-$650 with a layover in Philadelphia or Charlotte.
+  - TAP Air Portugal: From $500-$700 with a layover in Lisbon.
+  - Norwegian Air: From $200-$350 (one-way) with a layover in Oslo or Copenhagen.
+  - Level: From $250-$400 (one-way) with a layover in Barcelona.
+  - WOW Air: From $250-$450 (one-way) with a layover in Reykjavik.
+  - Ryanair: From $150-$300 (one-way) with a layover in Dublin or another European city.
+- [ASSISTANT_SAID] The assistant provided tips for finding budget-friendly accommodations in Paris, including hostels, budget hotels, and apartments.
+- [ASSISTANT_SAID] The assistant recommended specific accommodations, including:
+  - Les Piaules: Dorms from €20 and private rooms from €60 per night.
+  - Meininger Paris: Dorms from €25 and private rooms from €70 per night.
+  - Generator Paris: Dorms from €20 and private rooms from €60 per night.
+  - Ibis Paris Gare de Lyon Reuilly: Rooms from €60 per night.
+  - Hotel des Archives: Rooms from €70 per night.
+  - Hotel Clairefontaine: Rooms from €80 per night.
+- [ASSISTANT_SAID] The assistant provided tips for booking an Airbnb in Paris, including location, filtering searches, reading reviews, checking amenities, and understanding house rules and cancellation policies.
+- [ASSISTANT_SAID] The assistant suggested specific Airbnb options in the 6th arrondissement, including:
+  - Cozy Studio in the Heart of Saint

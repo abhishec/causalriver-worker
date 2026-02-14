@@ -1,0 +1,27 @@
+**Observation Log**
+
+- [TEMPORAL] Session Date: 2023/05/29 (Mon) 20:38
+- [USER] User asked about the methodology used to derive a list of surface-expressed tumor-associated antigen (TAA) genes.
+- [ASSISTANT_SAID] The methodology involves analyzing publicly available gene expression data from colorectal cancer (CRC) patient samples using bioinformatic tools and methods.
+- [ASSISTANT_SAID] Common approaches include using gene expression microarray or RNA sequencing data from large cohorts of CRC patients available through public databases like The Cancer Genome Atlas (TCGA) or Gene Expression Omnibus (GEO).
+- [ASSISTANT_SAID] Researchers perform gene expression analysis to identify differentially expressed genes (DEGs) that are overexpressed or downregulated in certain CRC subtypes, such as CMS2 and/or CMS4.
+- [ASSISTANT_SAID] Additional bioinformatic tools may be used to analyze gene ontology (GO) annotations or database searches for genes with known or predicted transmembrane domains, extracellular domains, or signal peptides to identify surface-expressed TAAs.
+- [ASSISTANT_SAID] Validation of gene expression at the protein level can be done using techniques like immunohistochemistry (IHC), western blotting, or flow cytometry.
+- [ASSISTANT_SAID] Functional assays can determine the immunogenicity and potential utility of these TAAs as targets for cancer immunotherapy.
+- [USER] User requested a list of databases to access gene expression data.
+- [ASSISTANT_SAID] Databases provided include:
+  1. The Cancer Genome Atlas (TCGA)
+  2. Gene Expression Omnibus (GEO)
+  3. ArrayExpress
+  4. Oncomine
+  5. Cancer Cell Line Encyclopedia (CCLE)
+  6. Cancer Genome Interpreter
+  7. cBioPortal
+- [USER] User asked for the names of papers related to TAAs in colorectal cancer.
+- [ASSISTANT_SAID] Papers listed include:
+  1. "Colorectal cancer: a review of the immunological landscape" by Tosolini et al. (2017).
+  2. "Colorectal cancer subtypes and the evolution of precision medicine: a review" by Dalerba and Sahoo (2018).
+  3. "The colorectal cancer microenvironment: strategies for improving immunotherapy" by Hoggatt J and Singh (2021).
+  4. "Tumor-infiltrating lymphocytes and colorectal cancer: from the basic science to novel immunotherapeutic approaches" by Galon et al. (2016).
+  5. "Immune checkpoint inhibition for colorectal cancer with microsatellite instability or mismatch repair deficiency" by Overman et al. (2018).
+  6. "

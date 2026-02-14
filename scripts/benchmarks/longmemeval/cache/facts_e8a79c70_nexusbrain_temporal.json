@@ -1,0 +1,21 @@
+{
+  "answer_ultrachat_13075": [
+    {
+      "fact": "User is interested in making a classic French omelette.",
+      "type": "preference",
+      "entities": [
+        "French omelette"
+      ]
+    },
+    {
+      "fact": "User is eager to try making a classic French omelette.",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User finds the suggested fillings for the omelette amazing.",
+      "type": "opinion",
+      "entities": []
+    }
+  ]
+}

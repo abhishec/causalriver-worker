@@ -1,0 +1,25 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/03/27 (Mon) 00:55
+- [FACT] User has been dealing with a lingering cough for weeks.
+- [PREFERENCE] User is frustrated with their lingering cough.
+- [EVENT] User had a follow-up appointment with their orthopedic surgeon, Dr. Thompson, on March 20th.
+- [CHANGE] User's knee is healing well according to Dr. Thompson.
+- [ASSISTANT_SAID] Bronchitis is an inflammation of the bronchial tubes, with two main types: acute and chronic.
+- [ASSISTANT_SAID] Acute bronchitis is usually caused by a viral infection, with symptoms lasting for 1-3 weeks.
+- [ASSISTANT_SAID] Common symptoms of acute bronchitis include coughing, chest congestion, fatigue, mild fever, shortness of breath, sore throat, headaches, muscle aches, and loss of appetite.
+- [ASSISTANT_SAID] Chronic bronchitis is long-term inflammation often caused by smoking or air pollution, with symptoms lasting for months or years.
+- [ASSISTANT_SAID] Common symptoms of chronic bronchitis include persistent coughing, shortness of breath, chest tightness, fatigue, recurring respiratory infections, and blue-tinged lips or fingers in severe cases.
+- [ASSISTANT_SAID] User should consult with their primary care physician if experiencing a persistent cough.
+- [ASSISTANT_SAID] General tips to manage cough include staying hydrated, using a humidifier, taking over-the-counter medications, getting plenty of rest, and avoiding irritants.
+- [FACT] User has been taking over-the-counter medications for their cough.
+- [PREFERENCE] User feels the over-the-counter medications are not working as well as they would like.
+- [EVENT] User is seeking more information about expectorants.
+- [ASSISTANT_SAID] Expectorants help loosen and thin out mucus in the airways, making it easier to cough up.
+- [ASSISTANT_SAID] Expectorants stimulate mucous membranes to produce more mucus, which helps thin out thick mucus and clear it from airways.
+- [ASSISTANT_SAID] Guaifenesin is the most commonly used expectorant found in OTC medications like Mucinex and Robitussin.
+- [ASSISTANT_SAID] Acetylcysteine is another type of expectorant often prescribed for chronic conditions.
+- [ASSISTANT_SAID] Tips for using expectorants include following instructions, drinking plenty of fluids, taking it regularly, and combining with other remedies.
+- [FACT] User has been taking guaifenesin.
+- [PREFERENCE] User is unsure if guaifenesin is effective for them.
+- [EVENT] User is experiencing occasional heartburn and

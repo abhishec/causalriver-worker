@@ -1,0 +1,32 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/23 (Tue) 11:17  
+[FACT] User is looking for new soup recipes to try out.  
+[EVENT] About a month ago, user went on a soup kick and made three different types of soup in a span of two weeks.  
+[FACT] The three types of soup user made are creamy broccoli, roasted butternut squash, and classic chicken noodle.  
+[PREFERENCE] User is interested in unique soup recipes they haven't tried before.  
+[ASSISTANT_SAID] Assistant suggested 10 unique soup recipes:  
+[ASSISTANT_CREATED] 1. Spicy Pumpkin Soup  
+[ASSISTANT_CREATED] 2. Korean-Style Doenjang Jjigae (Fermented Soybean Paste Soup)  
+[ASSISTANT_CREATED] 3. Roasted Cauliflower Soup with Turmeric and Crispy Shallots  
+[ASSISTANT_CREATED] 4. Ethiopian Red Lentil Soup (Misir Wot)  
+[ASSISTANT_CREATED] 5. Smoky Black Bean Soup with Sweet Potato and Chipotle  
+[ASSISTANT_CREATED] 6. Creamy Leek and Garlic Soup with Crispy Bacon  
+[ASSISTANT_CREATED] 7. Thai Coconut Soup with Shrimp and Lemongrass  
+[ASSISTANT_CREATED] 8. Peruvian Cilantro Soup (Sopa de Cilantro)  
+[ASSISTANT_CREATED] 9. Butternut Squash and Apple Soup with Curry and Coconut Milk  
+[ASSISTANT_CREATED] 10. Ukrainian Borscht with Sour Cream and Dill  
+[PREFERENCE] User expressed interest in the Korean-Style Doenjang Jjigae and requested a simple recipe.  
+[ASSISTANT_SAID] Assistant provided a simple recipe for Doenjang Jjigae with the following ingredients:  
+[ASSISTANT_CREATED] - 2 tablespoons doenjang (Korean fermented soybean paste)  
+[ASSISTANT_CREATED] - 2 tablespoons gochujang (Korean chili paste)  
+[ASSISTANT_CREATED] - 2 cloves garlic, minced  
+[ASSISTANT_CREATED] - 1 small onion, diced  
+[ASSISTANT_CREATED] - 2 cups vegetable broth (or anchovy broth for added umami)  
+[ASSISTANT_CREATED] - 1/2 cup diced zucchini  
+[ASSISTANT_CREATED] - 1/2 cup diced carrots  
+[ASSISTANT_CREATED] - 1/2 cup diced potatoes  
+[ASSISTANT_CREATED] - 1/4 cup diced Korean chili flakes (gochugaru) or red pepper flakes (optional)  
+[ASSISTANT_CREATED] - 1/4 cup chopped green onions, for garnish  
+[ASSISTANT_CREATED] - Salt and black pepper, to taste  
+[ASSIST

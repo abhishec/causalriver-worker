@@ -1,0 +1,35 @@
+{
+  "answer_e6b6353d": [
+    {
+      "fact": "User is planning a 20-mile bike ride this weekend",
+      "type": "event",
+      "entities": [
+        "20-mile bike ride",
+        "weekend"
+      ]
+    },
+    {
+      "fact": "User wants tips on how to stay hydrated during long rides",
+      "type": "preference",
+      "entities": [
+        "hydration",
+        "long rides"
+      ]
+    },
+    {
+      "fact": "User has a new Garmin bike computer",
+      "type": "personal",
+      "entities": [
+        "Garmin bike computer"
+      ]
+    },
+    {
+      "fact": "User is planning to track their ride with the Garmin bike computer",
+      "type": "event",
+      "entities": [
+        "track ride",
+        "Garmin bike computer"
+      ]
+    }
+  ]
+}

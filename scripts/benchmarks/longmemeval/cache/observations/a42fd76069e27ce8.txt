@@ -1,0 +1,30 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/05 (Fri) 07:17  
+[PREFERENCE] User is looking for new tea recipes to try.  
+[PREFERENCE] User has been getting into making their own tea with leaves from their indoor herb garden almost every morning.  
+[ASSISTANT_SAID] Assistant expressed delight in helping the user explore new flavor combinations for tea.  
+[ASSISTANT_CREATED] Assistant provided a list of tea recipes, categorized into Fruit Infusions, Herbal Delights, Spicy Blends, and Floral Delights.  
+[ASSISTANT_CREATED] Fruit Infusions recipes:  
+1. Strawberry Basil Refresher: Combine dried strawberry leaves with fresh basil leaves and a hint of honey.  
+2. Citrus Sunrise: Blend lemon balm, lemon verbena, and dried orange peel.  
+3. Cranberry Orange Zinger: Mix dried cranberries with orange zest, rose hips, and a touch of cinnamon.  
+[ASSISTANT_CREATED] Herbal Delights recipes:  
+1. Mint to Be: Combine peppermint, spearmint, and a hint of lemon balm.  
+2. Lavender Dream: Blend dried lavender flowers with lemon verbena and a touch of honey.  
+3. Ginger Zinger: Mix fresh ginger with lemon balm and a hint of black pepper.  
+[ASSISTANT_CREATED] Spicy Blends recipes:  
+1. Chai Spice: Combine cinnamon, ginger, cardamom, and a hint of black tea.  
+2. Cayenne Kick: Blend dried cayenne pepper with lemon balm and a touch of honey.  
+3. Gingerbread Spice: Mix ginger, cinnamon, nutmeg, and a hint of cloves.  
+[ASSISTANT_CREATED] Floral Delights recipes:  
+1. Rose Petal Delight: Combine dried rose petals with lemon verbena and a hint of honey.  
+2. Hibiscus Haven: Blend dried hibiscus flowers with lemon balm and a touch of cinnamon.  
+3. Jasmine Dream: Mix dried jasmine flowers with green tea leaves and a hint of honey.  
+[PREFERENCE] User likes the sound of the Citrus Sunrise and Mint to Be recipes.  
+[ASSISTANT_SAID] For the Citrus Sunrise recipe, assistant stated that both fresh and dried lemon balm leaves can be used.  
+[ASSISTANT_SAID] Using fresh lemon balm will give a more delicate flavor; start with 1-2 leaves per 8 oz cup.  
+[ASSISTANT_SAID] Dried lemon balm provides a more concentrated flavor; use 1-2 teaspoons per 8 oz cup.  
+[ASSISTANT_SAID] For the Mint to Be recipe, both fresh and dried mint can be used, with similar measurement recommendations.  
+[PREFERENCE] User has been using fresh leaves from their indoor herb garden for morning tea.  
+[CHANGE] User is considering trying to dry some

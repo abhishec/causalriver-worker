@@ -1,0 +1,39 @@
+{
+  "answer_sharegpt_d6JJiqH_76": [
+    {
+      "fact": "User is playing a game of chess",
+      "type": "event",
+      "entities": [
+        "chess"
+      ]
+    },
+    {
+      "fact": "User is familiar with chess notation",
+      "type": "opinion",
+      "entities": [
+        "chess notation"
+      ]
+    },
+    {
+      "fact": "User prefers to play as Black in chess",
+      "type": "preference",
+      "entities": [
+        "Black"
+      ]
+    },
+    {
+      "fact": "User is engaged in a competitive game",
+      "type": "event",
+      "entities": [
+        "competitive game"
+      ]
+    },
+    {
+      "fact": "User is attentive to the legality of moves",
+      "type": "opinion",
+      "entities": [
+        "legality of moves"
+      ]
+    }
+  ]
+}

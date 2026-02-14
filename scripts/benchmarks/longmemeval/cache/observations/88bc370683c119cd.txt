@@ -1,0 +1,37 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/30 (Tue) 08:05
+- [USER] User is interested in BBQ joints in Austin.
+- [USER] User is curious about the most popular meats at BBQ joints.
+- [ASSISTANT_SAID] Franklin Barbecue - brisket, ribs, pulled pork.
+- [ASSISTANT_SAID] La Barbecue - brisket, beef ribs, pulled pork.
+- [ASSISTANT_SAID] Terry Black’s Barbecue - brisket, sausage, beef ribs.
+- [ASSISTANT_SAID] Valentina's Tex Mex BBQ - brisket, smoked carnitas, queso.
+- [ASSISTANT_SAID] Micklethwait Craft Meats - brisket, beef ribs, pulled pork.
+- [ASSISTANT_SAID] Stiles Switch BBQ & Brew - brisket, sausage, ribs.
+- [ASSISTANT_SAID] Cooper's Old Time Pit Bar-B-Que - brisket, pork chops, beef ribs.
+- [ASSISTANT_SAID] Kerlin BBQ - brisket, pork ribs, beef ribs.
+- [ASSISTANT_SAID] Lambert's Downtown Barbecue - beef ribeye, pork ribs, brisket.
+- [ASSISTANT_SAID] Iron Works BBQ - brisket, ribs, sausage.
+- [USER] User expresses excitement about the BBQ joints and their popular meats.
+- [USER] User inquires if the assistant has personally tried any of the BBQ joints or their popular meats.
+- [ASSISTANT_SAID] Assistant states it does not have the capability to try food or visit places.
+- [ASSISTANT_SAID] Assistant relies on publicly available information and user-generated reviews for insights and recommendations.
+- [USER] User plans to try one of the BBQ joints in Austin next time they are there.
+- [USER] User asks for recommendations for sides or sauces to try with the popular meats.
+- [ASSISTANT_SAID] Popular sides to try with BBQ meats in Austin include:
+  - Potato salad
+  - Coleslaw
+  - Baked beans
+  - Cornbread
+  - Mac and cheese
+  - Sliced onions
+  - Pickles
+  - Mustard sauce
+  - BBQ sauce (sweet, spicy, tangy)
+  - Creamed corn
+- [USER] User has never been to Austin but is willing to travel just for the BBQ.
+- [USER] User asks which BBQ joint is worth the trip.
+- [ASSISTANT_SAID] Assistant states that Franklin Barbecue is highly regarded and worth checking out if willing to travel for BBQ.
+- [ASSISTANT_SAID] Assistant mentions that the lines for Franklin Barbecue can be quite long and suggests planning accordingly.
+- [ASSISTANT_SA

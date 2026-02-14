@@ -1,0 +1,19 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/26 (Fri) 02:05  
+[USER] The user is working on a Machine Learning and Sports Analytics paper.  
+[USER] The user is preparing to submit the paper to a top conference in the area.  
+[ASSISTANT_SAID] The assistant stated that the Related Work section would be approached from both an applied and a theoretical perspective.  
+[ASSISTANT_CREATED] The assistant created a Related Work section that discusses the Soccer Player Action Description Language (SPADL) and its applications in soccer analytics.  
+[ASSISTANT_SAID] The assistant explained that SPADL unifies existing event stream formats into a common vocabulary for data analysis.  
+[ASSISTANT_SAID] The assistant described SPADL as a tabular, action-oriented data format where actions are a subset of events requiring player performance.  
+[ASSISTANT_SAID] The assistant provided an example distinguishing between a passing event (action) and an event signifying the end of the game (not an action).  
+[ASSISTANT_SAID] The assistant detailed Regular SPADL (R-SPADL) as representing a game as a sequence of on-the-ball actions $[a_1, a_2, ... , a_m]$, with $m$ being the total number of actions.  
+[ASSISTANT_SAID] The assistant listed the twelve attributes of R-SPADL actions: game_id, period_id, seconds, player, team, start_x, start_y, end_x, end_y, action_type, result, bodypart.  
+[ASSISTANT_SAID] The assistant described Atomic SPADL (A-SPADL) as an alternative to R-SPADL that removes the result attribute and adds new action types indicating omitted action results.  
+[ASSISTANT_SAID] The assistant provided the eleven attributes of A-SPADL actions: game_id, period_id, seconds, player, team, x, y, dx, dy, action_type, bodypart.  
+[ASSISTANT_SAID] The assistant outlined three main approaches for valuing actions in soccer using event stream data: count-based, expected possession value (EPV), and action-based approaches.  
+[ASSISTANT_SAID] The assistant explained the count-based approach as assigning weights to action types and calculating a weighting sum based on player performance during a match.  
+[ASSISTANT_SAID] The assistant described EPV approaches as separating a match into possessions and valuing actions that progress the ball based on their impact on goal chances.  
+[ASSISTANT_SAID] The assistant noted that action-based approaches consider a broader set of actions and the context of the game.  
+[ASSISTANT_SAID] The assistant mentioned that VAEP is an action-based approach that

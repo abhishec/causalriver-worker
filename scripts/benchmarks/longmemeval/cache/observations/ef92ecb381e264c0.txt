@@ -1,0 +1,34 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2024/02/05 (Mon) 01:13  
+[FACT] User is a service-based business owner.  
+[FACT] User's business made between $500,000 - $3M last year.  
+[FACT] 97% of the user's revenue was from selling "done for you" online services.  
+[FACT] The remainder of the user's revenue was from selling online courses and workshops.  
+[FACT] User's online courses and workshops have price points ranging from $50 – $500.  
+[FACT] User has an existing email list of at least 5,000 subscribers.  
+[FACT] User has sold lower-ticket courses primarily via email.  
+[PREFERENCE] User is seeking help with writing a blog post.  
+[PREFERENCE] User's blog post topic is "How to outline your online course."  
+[ASSISTANT_SAID] The importance of having a well-outlined online course is to ensure organized content and reduce overwhelm.  
+[ASSISTANT_SAID] The target audience for the blog post is service-based business owners with a revenue between $500,000 - $3M.  
+[ASSISTANT_SAID] The purpose of the blog post is to show business owners how to outline their online course effectively.  
+[ASSISTANT_CREATED] Section I of the blog post includes an introduction with three subpoints:  
+- Explanation of the importance of having a well-outlined online course.  
+- Brief overview of the target audience.  
+- The purpose of the blog post.  
+[ASSISTANT_SAID] The first step in planning the course structure is deciding on the course format (video, audio, text-based, etc.).  
+[ASSISTANT_SAID] The second step is breaking down the course into manageable modules or sections.  
+[ASSISTANT_SAID] The third step is creating a detailed outline for each module or section.  
+[ASSISTANT_CREATED] Section III of the blog post includes planning the course structure with three subpoints:  
+- Deciding on the course format.  
+- Breaking down the course into modules or sections.  
+- Creating an outline for each module or section.  
+[ASSISTANT_SAID] Marketing the course to the target audience involves utilizing the existing email list, leveraging social media, offering a free trial or sample lesson, and building partnerships and collaborations.  
+[ASSISTANT_CREATED] Section VI of the blog post includes marketing strategies with four subpoints:  
+- Utilizing your existing email list.  
+- Leveraging social media.  
+- Offering a free trial or sample lesson.  
+- Building partnerships and collaborations.  
+[ASSISTANT_SAID] The conclusion summarizes the key takeaways, encourages action, and thanks the reader.  
+[ASSISTANT_CREATED] Section VIII of the blog post includes a conclusion with three sub

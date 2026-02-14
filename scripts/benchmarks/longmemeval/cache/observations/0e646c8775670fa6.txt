@@ -1,0 +1,19 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/27 (Sat) 03:23
+- [USER] The user wants to check if a given sentence is correct using evidence that consists of titles and corresponding sentences.
+- [USER] The user mentions that the evidence may contain noise or irrelevant information.
+- [USER] The user hopes the assistant can summarize useful information and filter out noisy information in the evidence.
+- [USER] The user specifies that the answer should be a list.
+- [USER] The user provides the sentence: "Adrienne Bailon is an accountant."
+- [USER] The user provides a list of evidence consisting of five sentences related to Adrienne Bailon and accounting.
+- [ASSISTANT_SAID] The assistant summarizes useful information from the evidence, stating that Adrienne Bailon is an American singer, songwriter, recording artist, actress, dancer, and television personality.
+- [ASSISTANT_SAID] The assistant notes that the evidence does not support the claim that Adrienne Bailon is an accountant and concludes that the sentence is not correct.
+- [USER] The user requests that the assistant not choose the evidence but instead summarize the useful information and provide a list.
+- [ASSISTANT_SAID] The assistant provides a list of useful information based on the evidence, reiterating Adrienne Bailon's professions and her reality series.
+- [USER] The user asks the assistant to perform reasoning, filtering, and summarizing simultaneously and to provide only a list.
+- [ASSISTANT_SAID] The assistant provides a concise list of useful information and concludes that the sentence is not correct.
+- [USER] The user requests a polished version of their instruction for the assistant's task.
+- [ASSISTANT_SAID] The assistant revises the instruction to include a conclusion of "SUPPORTS," "REFUTES," or "NOT ENOUGH INFORMATION."
+- [USER] The user requests another edit to the instruction, specifying that the information list should start with the relevant title from the original evidence.
+- [ASSISTANT_SAID] The assistant revises the instruction again to reflect the user's request about the order of the information list.

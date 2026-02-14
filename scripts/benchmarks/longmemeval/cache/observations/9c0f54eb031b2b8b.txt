@@ -1,0 +1,39 @@
+**Observation Log:**
+
+- [FACT] User is looking for affordable and healthy lunch options near their workplace.
+- [FACT] User has started packing their own lunch or opting for affordable options lately.
+- [CHANGE] User's recent choices have been a game-changer for their wallet and diet.
+- [FACT] User works near downtown.
+- [PREFERENCE] User is not too picky with dietary restrictions but tries to avoid heavy carbs and sugars.
+- [EVENT] User is interested in meal prepping to save time and money.
+- [ASSISTANT_SAID] Assistant asked for the user's workplace location or nearby neighborhoods for tailored suggestions.
+- [ASSISTANT_SAID] Assistant inquired about any dietary restrictions or preferences to consider while making recommendations.
+- [ASSISTANT_SAID] Assistant provided recommendations for salad bars: 
+  1. Dig Inn (5-minute walk): Farm-to-table approach with seasonal vegetables and lean proteins.
+  2. Sweetgreen (7-minute walk): Focus on locally sourced ingredients with customizable salads.
+  3. Chopt Creative Salad Co. (10-minute walk): Offers a wide range of ingredients for custom salads.
+- [ASSISTANT_SAID] Assistant provided recommendations for food trucks:
+  1. The Salad Truck (varies): Offers creative salads, wraps, and bowls with locally sourced ingredients.
+  2. Freshii (varies): Healthy, customizable bowls, wraps, and salads focusing on lean proteins and vegetables.
+- [ASSISTANT_SAID] Assistant provided meal prep tips:
+  1. Plan meals (3-5 meals).
+  2. Make a grocery list and stick to it.
+  3. Cook in bulk (rice, quinoa, roasted vegetables).
+  4. Portion control (individual servings in airtight containers).
+  5. Label and date containers.
+  6. Store and reheat meals properly.
+- [ASSISTANT_SAID] Assistant suggested popular meal prep ideas for beginners:
+  - Grilled chicken or turkey breast with roasted vegetables.
+  - Quinoa or brown rice bowls with lean proteins and mixed veggies.
+  - Lentil or black bean salads with lean proteins and whole grain wraps.
+  - Overnight oats with fruit and nuts.
+- [FACT] User plans to try out Dig Inn and Sweetgreen for salads.
+- [FACT] User may check out The Salad Truck when it's near their office.
+- [ASSISTANT_SAID] Assistant provided tips on keeping meals fresh and not dry when reheating:
+  1. Cool and store meals properly.
+  2. Use portion control and packaging.
+  3. Reheat using low to medium heat with added moisture.
+  4. Incorporate moisture-rich ingredients.
+  5. Choose freezer-friendly meals.
+  6. Reheat and refresh with fresh ingredients.
+- [ASSISTANT_SAID] Assistant provided specific reheating tips

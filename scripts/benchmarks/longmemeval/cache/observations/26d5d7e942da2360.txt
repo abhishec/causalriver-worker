@@ -1,0 +1,28 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/06/03 (Sat) 02:11  
+[FACT] User is considering building their own gaming PC.  
+[PREFERENCE] User wants to know more about the best graphics cards for 144Hz monitors.  
+[EVENT] User has been playing a lot of games on their PS5 lately.  
+[RELATIONSHIP] User's brother got them the PS5 as a gift on their birthday.  
+[TEMPORAL] User's birthday is on 10th January.  
+[ASSISTANT_SAID] Happy belated birthday!  
+[ASSISTANT_SAID] Building a gaming PC can offer more customization and flexibility.  
+[ASSISTANT_SAID] For 144Hz monitors, a GPU should produce at least 144 FPS in games at high graphics settings.  
+[ASSISTANT_SAID] Recommended graphics cards for 144Hz monitors:  
+[ASSISTANT_SAID] NVIDIA GeForce RTX 3070: Excellent performance, features like DLSS and ray tracing.  
+[ASSISTANT_SAID] NVIDIA GeForce RTX 3070 Ti: Slightly more powerful than RTX 3070, with 8 GB GDDR6X VRAM.  
+[ASSISTANT_SAID] NVIDIA GeForce RTX 3080: High-end option for 4K gaming, with 12 GB GDDR6X VRAM.  
+[ASSISTANT_SAID] AMD Radeon RX 6700 XT: Strong competitor to RTX 3070, with features like Radeon Image Sharpening.  
+[ASSISTANT_SAID] AMD Radeon RX 6800 XT: More powerful option with 16 GB GDDR6 VRAM, suitable for 1440p and 4K gaming.  
+[ASSISTANT_SAID] Consider other factors like monitor response time, CPU, and system RAM when building a gaming PC.  
+[ASSISTANT_SAID] Hope this helps you in your quest for the perfect gaming PC!  
+[EVENT] User is looking into getting a new gaming mouse.  
+[FACT] User recently got the Razer DeathAdder Elite on 15th February.  
+[PREFERENCE] User finds the Razer DeathAdder Elite has been a game-changer for their Overwatch gameplay.  
+[ASSISTANT_SAID] The Razer DeathAdder Elite is a great mouse.  
+[ASSISTANT_SAID] Logitech G502 Lightspeed is an excellent gaming mouse worth considering.  
+[ASSISTANT_SAID] Key features of Logitech G502 Lightspeed:  
+[ASSISTANT_SAID] Lightspeed Technology: Fast and reliable connectivity with a 1ms report rate.  
+[ASSISTANT_SAID] Hero Sensor: 12,000 CPI optical sensor for accurate tracking.  
+[ASSISTANT_SA

@@ -1,0 +1,32 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/28 (Sun) 07:18
+- [EVENT] User is trying to get a better handle on their spending habits.
+- [EVENT] User has been tracking their online shopping.
+- [EVENT] User spent around $80 on fruits, veggies, and pantry staples from Instacart around the 10th of last month.
+- [ASSISTANT_SAID] Assistant is happy to help the user categorize their expenses.
+- [FACT] The $80 purchase from Instacart falls under the category of "Groceries."
+- [ASSISTANT_SAID] Assistant provided a list of common categories for expenses:
+  1. Housing: Rent/Mortgage, Utilities, Maintenance
+  2. Food: Groceries, Dining out, Takeout, Subscriptions (e.g., meal kits)
+  3. Transportation: Gas, Insurance, Maintenance, Public transportation costs
+  4. Insurance: Health, Life, Disability, Other insurance premiums
+  5. Debt Repayment: Credit cards, Loans, Mortgages
+  6. Entertainment: Streaming services, Hobbies, Travel, Concerts/Events
+  7. Clothing: Apparel, Accessories, Shoes
+  8. Personal Care: Toiletries, Beauty products, Haircuts, Gym memberships
+  9. Healthcare: Medical expenses, Prescriptions, Supplements
+  10. Miscellaneous: Gifts, Subscriptions (e.g., software, music), Pet expenses, Home decor
+  11. Savings: Emergency fund, Retirement savings, Other savings goals
+- [EVENT] User has been buying a mix of both necessities and discretionary items.
+- [EVENT] User bought a new pair of Nike sneakers from Amazon, which was a discretionary purchase.
+- [ASSISTANT_SAID] The Nike sneakers from Amazon would fall under **Clothing**.
+- [ASSISTANT_SAID] Assistant asked the user about their online shopping habits and what kind of items they have been buying online recently.
+- [EVENT] User ordered beauty and skincare products online from Sephora.
+- [ASSISTANT_SAID] The beauty and skincare products from Sephora would fall under **Personal Care**.
+- [ASSISTANT_SAID] Assistant asked the user about their purchasing habits regarding the beauty and skincare products.
+- [EVENT] User ordered a new book on Audible around the 20th of the previous month.
+- [ASSISTANT_SAID] The Audible purchase would fall under **Entertainment**.
+- [ASSISTANT_SAID] Assistant asked the user about their audiobook habits and preferences.
+- [EVENT] User ordered a wireless charging pad from Best Buy's website around the same time as their Sephora haul for $20.
+- [ASSISTANT_SAID] The wireless charging pad from Best Buy would fall

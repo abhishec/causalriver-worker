@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/01/10 (Tue) 00:40
+- [EVENT] User is considering adding new fish to their tank.
+- [PREFERENCE] User is interested in the compatibility of guppies with neon tetras and harlequin rasboras.
+- [ASSISTANT_SAID] Guppies (Poecilia reticulata) are peaceful, active, and curious, requiring soft, slightly acidic water (pH 6.8-7.8, 72-82°F/22-28°C).
+- [ASSISTANT_SAID] Neon tetras (Paracheirodon innesi) are schooling, peaceful, and active, requiring soft, slightly acidic water (pH 6.0-7.0, 72-82°F/22-28°C).
+- [ASSISTANT_SAID] Harlequin rasboras (Trigonostigma heteromorpha) are peaceful, active, and schooling, requiring soft, slightly acidic water (pH 6.5-7.5, 72-82°F/22-28°C).
+- [ASSISTANT_SAID] Guppies and neon tetras can be kept together, but guppies may nip at the fins of neon tetras.
+- [ASSISTANT_SAID] Guppies and harlequin rasboras are compatible as both are peaceful and active swimmers.
+- [ASSISTANT_SAID] Neon tetras and harlequin rasboras are excellent tankmates and thrive in similar water conditions.
+- [ASSISTANT_SAID] Recommendations for a harmonious community tank include providing a tank of at least 10-20 gallons, maintaining good water quality, and monitoring tank dynamics.
+- [EVENT] User is considering getting into shrimp breeding.
+- [ASSISTANT_SAID] Recommended shrimp species for breeding include Neocaridina (Cherry Shrimp, Blue Dream) and Caridina (Amano Shrimp, Crystal Shrimp).
+- [ASSISTANT_SAID] Suggested a minimum breeding tank size of 5-10 gallons, with a preference for 20-30 gallons for stability.
+- [ASSISTANT_SAID] Recommended using a substrate designed for shrimp, providing hiding places, and maintaining specific water parameters (pH 6.5-7.5, temperature 68-78°F).
+- [ASSISTANT_SAID] Suggested regular water changes, a varied diet, and monitoring water parameters for successful shrimp breeding.
+- [PREFERENCE] User has been keeping a log of water tests and tank maintenance.
+- [TEMPORAL] User set up their 55-gallon aquarium about six weeks ago.
+- [PREFERENCE] User has a mix of neon tetras and harlequin rasboras in their aquarium.
+- [

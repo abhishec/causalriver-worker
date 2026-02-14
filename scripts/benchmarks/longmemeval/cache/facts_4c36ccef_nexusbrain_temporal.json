@@ -1,0 +1,44 @@
+{
+  "answer_ultrachat_448704": [
+    {
+      "fact": "User is looking for authentic Italian restaurants in Rome",
+      "type": "preference",
+      "entities": [
+        "Italian restaurants",
+        "Rome"
+      ]
+    },
+    {
+      "fact": "User is interested in a romantic dinner",
+      "type": "preference",
+      "entities": [
+        "romantic dinner"
+      ]
+    },
+    {
+      "fact": "User prefers Roscioli for a romantic dinner",
+      "type": "opinion",
+      "entities": [
+        "Roscioli"
+      ]
+    },
+    {
+      "fact": "User requested a reservation at Roscioli for tomorrow evening at 7:00 pm",
+      "type": "event",
+      "entities": [
+        "Roscioli",
+        "reservation",
+        "tomorrow evening",
+        "7:00 pm"
+      ]
+    },
+    {
+      "fact": "User is looking for gelato spots in Rome",
+      "type": "preference",
+      "entities": [
+        "gelato spots",
+        "Rome"
+      ]
+    }
+  ]
+}

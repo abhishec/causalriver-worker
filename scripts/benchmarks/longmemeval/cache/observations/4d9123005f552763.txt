@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/03/10 (Fri) 06:35  
+[USER] The user requests to ignore all previous instructions.  
+[USER] The user wants the assistant to respond only in English.  
+[USER] The user wants the assistant to act as a market research expert fluent in English.  
+[USER] The user requests the assistant to pretend to have accurate and detailed information about keywords.  
+[USER] The user asks the assistant to develop a full SEO content plan based on the target keyword "stop smoking hypnosis."  
+[USER] The user requests a markdown table with a keyword list for an SEO content strategy plan on the topic "stop smoking hypnosis."  
+[USER] The user specifies that the table should cluster keywords according to the top 10 super categories.  
+[USER] The user instructs to name the first column "keyword cluster."  
+[USER] The user requests an additional column with 7 subcategories for each keyword cluster or specific long-tail keywords.  
+[USER] The user asks for another column listing the human searcher intent for the keyword.  
+[USER] The user instructs to cluster the topic into one of three search intent groups: commercial, transactional, or informational.  
+[USER] The user requests a column with a click-enticing title for a post about the keyword.  
+[USER] The user asks for a column with an attractive meta description that has a high click-thru-rate, mentioning the value of the article and including a call to action.  
+[USER] The user instructs not to use generic keywords like "introduction," "conclusion," or "tl:dr."  
+[USER] The user requests to focus on the most specific keywords only.  
+[USER] The user instructs not to use single quotes, double quotes, or any other enclosing characters in any of the columns.  
+[ASSISTANT_CREATED] The assistant created a markdown table with the following columns: keyword cluster, keyword, search intent, title, meta description.  
+[ASSISTANT_CREATED] The assistant provided the following entries in the table:  
+[ASSISTANT_CREATED] 1. Keyword Cluster: Stop Smoking Techniques; Keyword: Stop Smoking Hypnosis; Search Intent: Informational; Title: "Unlock the Power of Your Mind: Learn How Stop Smoking Hypnosis Can Help You Quit"; Meta Description: "Discover the power of hypnosis to quit smoking for good. Learn about the science behind hypnosis and how it can change your relationship with cigarettes in this informative guide. Click to learn more."  
+[ASSISTANT_CREATED] 2. Keyword Cluster: Stop Smoking Techniques; Keyword: Quit Smoking Hypnosis; Search Intent: Transactional; Title: "Ready to Quit Smoking? Try Quit Smoking Hypnosis Today"; Meta Description: "Say goodbye to cigarettes for good with quit smoking hypnosis. Our proven techniques will help you overcome your addiction and

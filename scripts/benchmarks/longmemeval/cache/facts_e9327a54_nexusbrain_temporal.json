@@ -1,0 +1,27 @@
+{
+  "answer_ultrachat_480665": [
+    {
+      "fact": "User is looking for family-friendly activities in Orlando",
+      "type": "preference",
+      "entities": [
+        "family-friendly activities",
+        "Orlando"
+      ]
+    },
+    {
+      "fact": "User is interested in family-friendly dining options in Orlando",
+      "type": "preference",
+      "entities": [
+        "family-friendly dining",
+        "Orlando"
+      ]
+    },
+    {
+      "fact": "User does not trust buffet restaurants",
+      "type": "opinion",
+      "entities": [
+        "buffet restaurants"
+      ]
+    }
+  ]
+}

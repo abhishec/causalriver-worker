@@ -1,0 +1,20 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/07/22 (Sat) 19:24  
+[ASSISTANT_SAID] The "if" statement is not allowed in the module configuration file, as it is not a valid location for the statement.  
+[ASSISTANT_SAID] Recommended to move the "if" statement outside of the module in a virtual server file located in the "/etc/freeradius/3.0/sites-enabled" directory.  
+[ASSISTANT_CREATED] Provided a configuration example for a new virtual server named "my_virtual_server" with specific logic for successful and failed authentication.  
+[ASSISTANT_SAID] The code in the "default" file located in "/etc/freeradius/3.0/sites-enabled" is the default configuration for the FreeRADIUS server.  
+[ASSISTANT_SAID] You don't need to remove the default file, but you will need to include your new virtual server in the default file.  
+[ASSISTANT_SAID] Suggested adding the line `$INCLUDE sites-enabled/my_virtual_server` at the end of the default file.  
+[ASSISTANT_SAID] The `$INCLUDE` directive should be added to the `radiusd.conf` file, which is the main configuration file for the FreeRADIUS server.  
+[ASSISTANT_SAID] The `radiusd.conf` file is usually located at `/etc/freeradius/3.0/radiusd.conf` or `/etc/raddb/radiusd.conf`.  
+[ASSISTANT_SAID] Suggested adding `$INCLUDE sites-enabled/my_virtual_server` at the end of the `radiusd.conf` file.  
+[ASSISTANT_SAID] Advised to save changes and restart the FreeRADIUS service for the changes to take effect.  
+[USER] Expressed frustration by stating, "we need to start the whole conversation because you have messed up the configuration."  
+[ASSISTANT_SAID] Apologized for the confusion and offered to assist with setting up multifactor authentication for Mikrotik VPN using Radius, OpenLDAP, and MFA.  
+[ASSISTANT_SAID] Provided a general outline for setting up multifactor authentication, including steps for RADIUS server, OpenLDAP, and MFA.  
+[ASSISTANT_CREATED] Provided an example of a post-authentication block for the `/etc/freeradius/3.0/sites-available/default` file.  
+[ASSISTANT_SAID] The post-authentication block checks the user's group membership in OpenLDAP and assigns the group name to the `Fortinet-Group-Name` attribute.  
+[ASSISTANT_SAID] The post-authentication block checks the status of the MFA authentication performed by the "bsa" module and rejects the request if it failed.  
+[ASS

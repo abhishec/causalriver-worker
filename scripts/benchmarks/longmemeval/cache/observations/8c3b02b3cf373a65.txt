@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [EVENT] User got a new smoker last week.
+- [PREFERENCE] User is excited to experiment with different types of wood and meats.
+- [EVENT] User is planning to try out some ribs this weekend.
+- [ASSISTANT_SAID] Assistant congratulated the user on their new smoker and provided recommendations for types of wood to use for smoking meats.
+- [ASSISTANT_SAID] Assistant listed popular types of wood for smoking meats: apple, cherry, peach, hickory, walnut, pecan, oak, maple, ash, alder, and mesquite.
+- [ASSISTANT_SAID] Assistant provided tips for using wood, including using dry, seasoned wood and soaking wood chips or chunks in water for at least 30 minutes before smoking.
+- [ASSISTANT_SAID] Assistant provided a basic BBQ ribs recipe for beginners, including ingredients and instructions.
+- [ASSISTANT_SAID] Assistant recommended using hickory wood for smoking ribs and explained its flavor profile.
+- [PREFERENCE] User is considering using hickory wood for smoking ribs.
+- [ASSISTANT_SAID] Assistant confirmed that hickory wood is a good choice for ribs and provided additional tips for using it.
+- [EVENT] User expressed excitement about trying out hickory wood with their new smoker.
+- [EVENT] User is thinking of trying out brisket next.
+- [ASSISTANT_SAID] Assistant provided tips and recommendations for smoking brisket, including choosing the right brisket, preparation, smoking temperature, wrapping, resting, and wood choice.
+- [ASSISTANT_SAID] Assistant recommended using post oak wood for smoking brisket and explained its flavor profile.
+- [ASSISTANT_SAID] Assistant provided common mistakes to avoid when smoking brisket.
+- [PREFERENCE] User plans to use post oak wood for their brisket.
+- [ASSISTANT_SAID] Assistant confirmed that wrapping the brisket in foil can help keep it moist and tender.
+- [ASSISTANT_SAID] Assistant offered to provide recommendations for a good brisket rub or marinade.

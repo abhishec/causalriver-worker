@@ -1,0 +1,32 @@
+**Observation Log:**
+
+[FACT] User recently got a skincare set from Drunk Elephant.  
+[FACT] User visited the local outlet mall with friends.  
+[FACT] User spent the entire day at the outlet mall.  
+[FACT] User scored amazing deals at the Coach outlet store and Banana Republic outlet.  
+[FACT] User had lunch at the food court at the outlet mall.  
+[FACT] User is looking for a good moisturizer for combination skin.  
+[FACT] User is interested in finding a good foundation that matches their skin tone.  
+[FACT] User recently bought the new Nars foundation at Sephora.  
+[FACT] User is looking for a new pair of jeans for work.  
+[FACT] User recently got a few essentials from H&M.  
+[TEMPORAL] Session date is 2023/05/20 (Sat) 09:51.  
+[EVENT] User visited the Asian fusion place at the food court in the outlet mall last week.  
+[EVENT] User tried the Asian fusion place with friends.  
+[EVENT] User is trying to cook more at home and reduce takeout orders.  
+[ASSISTANT_SAID] Drunk Elephant Protini Polypeptide Cream is a moisturizer recommendation for combination skin.  
+[ASSISTANT_SAID] Neutrogena Hydro Boost Water Gel is a moisturizer recommendation for combination skin.  
+[ASSISTANT_SAID] La Roche-Posay Toleriane Ultra Fluid is a moisturizer recommendation for combination skin.  
+[ASSISTANT_SAID] EltaMD UV Clear Broad-Spectrum SPF 46 is a moisturizer recommendation for combination skin.  
+[ASSISTANT_SAID] Cetaphil Moisturizing Cream is a moisturizer recommendation for combination skin.  
+[ASSISTANT_SAID] Suggested getting a color match at multiple stores for foundation.  
+[ASSISTANT_SAID] Suggested considering skin undertones when choosing foundation.  
+[ASSISTANT_SAID] Suggested looking for foundations with a wide shade range from brands like Fenty Beauty, Huda Beauty, and Make Up For Ever.  
+[ASSISTANT_SAID] Giorgio Armani Maestro Foundation is a foundation recommendation.  
+[ASSISTANT_SAID] Laura Mercier Foundation is a foundation recommendation.  
+[ASSISTANT_SAID] NARS Sheer Glow Foundation is a foundation recommendation.  
+[ASSISTANT_SAID] Make Up For Ever Ultra HD Foundation is a foundation recommendation.  
+[ASSISTANT_SAID] Suggested knowing measurements and considering body type when looking for jeans.  
+[ASSISTANT_SAID] Suggested trying straight-leg jeans, slim-fit jeans, and high-waisted jeans for work.  
+[ASSISTANT_SAID] Suggested a one-pot pasta recipe for an easy meal.  
+[ASSISTANT_SAID] Suggested grilled chicken and veggies as an easy

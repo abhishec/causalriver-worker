@@ -1,0 +1,33 @@
+**Observation Log**
+
+- [TEMPORAL] Session Date: 2023/05/21 (Sun) 13:28
+- [USER] User is trying to organize loyalty programs and rewards.
+- [ASSISTANT_SAID] Assistant is happy to help the user keep track of loyalty programs and rewards.
+- [ASSISTANT_SAID] Assistant provided a template for tracking loyalty programs, including fields for Program Name, Program Type, Account Number/Username, Current Point Balance, Rewards Threshold, and suggested using a rewards tracking app or spreadsheet.
+- [ASSISTANT_SAID] Suggested apps include AwardWallet, TravelBank, Google Sheets, and Microsoft Excel.
+- [USER] User provided information for the Safeway Loyalty Program.
+- [FACT] Program Name: Safeway Loyalty Program
+- [FACT] Program Type: Retail
+- [FACT] Account Number/Username: (not sure, user just signed up in-store)
+- [FACT] Current Point Balance: 700 points ($7 off next purchase)
+- [FACT] Rewards Threshold: 500 points = $5 off next purchase
+- [TEMPORAL] Sign-up Date: January 10th
+- [ASSISTANT_CREATED] Assistant recorded the information for the Safeway Loyalty Program.
+- [ASSISTANT_SAID] Assistant noted that the user is eligible for a $7 discount on the next purchase and encouraged the user to check for an account number or username.
+- [USER] User provided information for the CVS Pharmacy loyalty program.
+- [FACT] Program Name: CVS Pharmacy ExtraBucks Rewards
+- [FACT] Program Type: Retail
+- [FACT] Account Number/Username: (unknown)
+- [FACT] Current Point Balance: 0 points (redeemed 2,000 points for $20 gift card on February 15th)
+- [FACT] Rewards Threshold: varies (typically 2,000 points = $2 reward, but user redeemed for a $20 gift card)
+- [TEMPORAL] Sign-up Date: unknown
+- [ASSISTANT_CREATED] Assistant recorded the information for the CVS Pharmacy loyalty program.
+- [ASSISTANT_SAID] Assistant noted that the user redeemed 2,000 points for a $20 gift card on February 15th, resulting in a current point balance of 0.
+- [USER] User provided information for the Walgreens Balance Rewards program.
+- [FACT] Program Name: Walgreens Balance Rewards
+- [FACT] Program Type: Retail
+- [FACT] Account Number/Username: (not sure)
+- [FACT] Current Point Balance: 0 points (redeemed 5,000 points for $5 off on March 1st)
+- [FACT] Rewards Threshold: 5,000 points = $5 off next purchase
+- [TEMPORAL] Sign-up Date: unknown
+- [ASSISTANT_CREATED] Assistant recorded the information for

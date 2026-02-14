@@ -1,0 +1,27 @@
+**Observation Log:**
+
+- [FACT] The user is looking to improve their photography skills.
+- [EVENT] The user recently took a one-day photography workshop at a local community college and enjoyed it.
+- [EVENT] The user attended a free seminar on real estate investing at a realtor's office, which was interesting but not what they were looking for.
+- [ASSISTANT_SAID] The assistant recommended online resources for advanced composition techniques in photography, including:
+  1. **Udemy**: Courses like "Mastering Composition" and "Advanced Photography Composition Techniques."
+  2. **Skillshare**: Classes like "Advanced Composition: Taking Your Photography to the Next Level" and "The Art of Visual Storytelling: Composition for Photographers."
+  3. **CreativeLive**: Workshops like "Advanced Composition: The Next Level" and "The Art of Composition."
+  4. **Coursera**: Courses like "Photography Basics and Beyond: From Smartphone to DSLR" (University of Michigan) and "Seeing Through Photographs" (Museum of Modern Art).
+  5. **YouTube Channels**: Tony & Chelsea Northrup, Peter McKinnon, and Jared Polin (FroKnowsPhoto).
+  6. **Lynda.com (LinkedIn Learning)**: Courses like "Photography Composition: Finding and Creating the Perfect Shot" and "Advanced Photography Composition."
+  7. **Nikon USA** and **Canon USA**: Online tutorials and workshops on photography techniques.
+  8. **The Art of Photography**: YouTube channel and website with tutorials and articles.
+  9. **Digital Photography School**: Articles and tutorials on photography composition.
+  10. **Photography Life**: Tutorials and articles on photography techniques.
+- [ASSISTANT_SAID] The assistant advised the user to practice regularly and apply what they learn from the resources to their photography projects.
+- [PREFERENCE] The user is considering starting with Udemy and Skillshare for photography courses.
+- [PREFERENCE] The user has some basics under their belt from the community college workshop.
+- [ASSISTANT_SAID] The assistant recommended diving into an intermediate or advanced composition course based on the user's existing knowledge.
+- [ASSISTANT_SAID] The assistant suggested reading course descriptions and reviews, looking for courses with practical exercises, and taking notes during the course.
+- [PREFERENCE] The user is interested in learning more about sustainable living.
+- [EVENT] The user recently attended a lecture series on sustainable living at the library.
+- [ASSISTANT_SAID] The assistant recommended online courses and resources for sustainable living and environmental conservation, including:
+  1. **Coursera**: Sustainability courses from top universities.
+  2. **edX**: Sustainability and environmental science courses from leading institutions.
+  3. **Udemy**: Courses on sustainable living and environmental conservation

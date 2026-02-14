@@ -1,0 +1,37 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/03/15 (Wed) 13:38  
+[USER] User is working on a Laravel project combined with Vue.js as the front-end.  
+[ASSISTANT_SAID] If your Laravel project uses Vue.js as the front-end JavaScript framework, then you will need to install npm, which is the package manager for JavaScript.  
+[ASSISTANT_SAID] npm is used to install and manage the dependencies required by Vue.js, as well as any other front-end libraries or frameworks used in your project.  
+[ASSISTANT_SAID] To install npm on your server, you will need to log in to your server using SSH and run the command: `sudo apt install nodejs`.  
+[ASSISTANT_SAID] To check the version of npm installed, run: `npm -v`.  
+[ASSISTANT_SAID] To install the dependencies for your Laravel project, navigate to your project's root directory and run: `npm install`.  
+[USER] User asked if anything else was missed after discussing npm installation.  
+[ASSISTANT_SAID] To host a Laravel project on your server, you will also need to clone the project from its repository on GitHub using Git.  
+[ASSISTANT_SAID] To clone your Laravel project from GitHub, navigate to the directory where you want to clone your project using: `cd /var/www`.  
+[ASSISTANT_SAID] Clone your project from GitHub using the command: `git clone https://github.com/user/repo.git`.  
+[ASSISTANT_SAID] After cloning, navigate to the project directory and run the command: `composer install` to install the dependencies required by your Laravel project.  
+[USER] User asked if anything else was missed again.  
+[ASSISTANT_SAID] You will need to configure your web server to serve your Laravel project by modifying the virtual host configuration file.  
+[ASSISTANT_SAID] Specify the path to your project's `public` directory in the virtual host configuration file.  
+[ASSISTANT_SAID] Example configuration for Apache:  
+```
+<VirtualHost *:80>
+    ServerName example.com
+    ServerAdmin webmaster@example.com
+    DocumentRoot /var/www/laravel/public
+
+    <Directory /var/www/laravel/public>
+        AllowOverride All
+        Order allow,deny
+        Allow from all
+    </Directory>
+
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+```  
+[ASSISTANT_SAID] Restart your web server to apply the changes using: `sudo systemctl restart apache2`.  
+[USER] User asked if that was all that was needed.  
+[ASSISTANT_S

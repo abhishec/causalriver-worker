@@ -1,0 +1,19 @@
+**Observation Log:**
+
+[FACT] The user is working on a thesis proposal.  
+[FACT] The user attended an academic writing workshop three weeks after starting their thesis proposal.  
+[RELATIONSHIP] The user mentioned Dr. Smith, who is their thesis advisor.  
+[RELATIONSHIP] The user mentioned Dr. Johnson, who shared tips during the academic writing workshop.  
+[TEMPORAL] The session date is 2023/05/25 (Thu) 06:34.  
+[TEMPORAL] The user submitted their thesis proposal exactly three weeks ago.  
+[PREFERENCE] The user is struggling to organize their research journal entries.  
+[ASSISTANT_SAID] The assistant suggested tools and apps for organizing research journal entries, including Evernote, OneNote, Simplenote, Trello, Zotero, Mendeley, Tagcrowd, Coggle, Google Sheets, Microsoft Excel, Airtable, Bullet Journal, and Index Cards.  
+[ASSISTANT_SAID] The assistant provided a list of online courses for data analysis, including Coursera's Data Science Specialization, edX's Data Analysis for Social Sciences, and DataCamp's Social Media Analytics.  
+[ASSISTANT_SAID] The assistant recommended tutorials and guides for data analysis, including Google Analytics Academy's Social Media Analytics Tutorial, DataCamp's Data Analysis for Social Media, and Real Python's Analyzing Social Media Data with Python.  
+[ASSISTANT_SAID] The assistant listed research papers and articles related to social media and mental health, including "Social Media Use and Mental Health: A Systematic Review" and "Analyzing Social Media Data to Understand Mental Health."  
+[ASSISTANT_SAID] The assistant mentioned tools and software for data analysis, including Python libraries (Pandas, Matplotlib, Seaborn, Scikit-learn) and R libraries (Tidyverse, ggplot2, caret).  
+[ASSISTANT_SAID] The assistant suggested checking the university's graduate school website or contacting Dr. Smith for the exact deadline for the thesis defense.  
+[ASSISTANT_SAID] The assistant provided tips for structuring a compelling introduction for the thesis, including starting with a hook, providing context, stating the research question, previewing main arguments, and establishing the research gap.  
+[ASSISTANT_SAID] The assistant recommended resources for writing a thesis introduction, including The Writing Center at UNC Chapel Hill, Purdue Online Writing Lab (OWL), Thesis Whisperer, and the book "How to Write a Thesis" by Rowena Murray.  
+[ASSISTANT_SAID] The assistant provided characteristics of a good research question, including specificity, clarity, relevance, originality, and feasibility.  
+[ASSISTANT_SAID] The assistant suggested tips for crafting a good research question, such as conducting preliminary research, identifying research interests, narrowing down focus, using

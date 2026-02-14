@@ -1,0 +1,24 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/26 (Fri) 20:27
+- [USER] User inquired about the percentage of businesses with subscription-based revenue streams that offer recurring payment options.
+- [ASSISTANT_SAID] 78% of subscription-based businesses offered recurring payment options to their customers, according to a survey conducted by Zuora in 2020.
+- [USER] User expressed interest in knowing which industry has the highest percentage of businesses offering recurring payments.
+- [ASSISTANT_SAID] The software industry has the highest percentage of businesses offering recurring payment options at 91%, followed by media and publishing at 89%, and SaaS companies at 87%.
+- [USER] User noted that it makes sense for software companies to have a high percentage of recurring payments since software is often sold via subscription.
+- [USER] User asked if the survey mentioned anything about the percentage of businesses that offer annual billing.
+- [ASSISTANT_SAID] 66% of subscription-based companies offer annual billing as an option for their customers, according to the Zuora survey.
+- [ASSISTANT_SAID] Annual billing provides a way for subscribers to save money and gives businesses a steady source of revenue, often increasing customer loyalty.
+- [USER] User shared a personal preference for annual billing because it means one less bill to worry about each month.
+- [USER] User inquired if any industries are less likely to offer annual billing.
+- [ASSISTANT_SAID] The media and publishing industry has the highest adoption rate of annual billing at 85%, followed by manufacturing at 72%, and communications and media at 68%.
+- [ASSISTANT_SAID] Healthcare, retail, and education have lower rates of adoption of annual billing, with only 38%, 48%, and 50%, respectively.
+- [USER] User expressed understanding of why healthcare might have a lower rate of adoption of annual billing due to unpredictable medical expenses and was surprised about retail's low adoption rate.
+- [USER] User asked for insight into why retail might have a lower adoption rate of annual billing.
+- [ASSISTANT_SAID] Retailers may offer a wide variety of products that customers do not need to purchase regularly, encourage frequent visits, and prefer monthly billing to track customer behavior and preferences in real time.
+- [USER] User acknowledged the benefits of monthly billing for retailers.
+- [USER] User asked if there are any industries starting to adopt subscription-based models more recently.
+- [ASSISTANT_SAID] New industries adopting subscription-based models include:
+  - [ASSISTANT_SAID] Food and beverage: Meal kit delivery services and snack subscription boxes.
+  - [ASSISTANT_SAID] Automobiles: Car dealerships offering subscription programs for access to various car models.
+  - [ASSISTANT_SAID]

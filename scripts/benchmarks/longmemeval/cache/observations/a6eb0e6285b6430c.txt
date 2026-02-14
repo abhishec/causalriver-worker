@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/20 (Sat) 00:12
+- [USER] The user discusses the design of a predictive control scheme that utilizes an LSTM network as a prediction model for a system.
+- [USER] The objective of the controller is to stabilize the system toward a generic equilibrium point denoted by the triplet (̄u,𝜒,y).
+- [USER] The control input is denoted by u, and Δ is defined as Δ=[||x−x||||𝜉−𝜉||]∈R2.
+- [USER] The MPC scheme involves solving an optimization problem at each sampling time k.
+- [USER] The optimization problem aims to minimize J(U(k)) subject to constraints on u(k+i) and the predicted states 𝜒(k+i).
+- [USER] The future state predictions 𝜒(k+i) are obtained by iterating the model dynamics starting from the current state estimated by the state observer.
+- [USER] The cost function is defined as J(U(k)) = N−1∑i=0(||𝜒(k+i)−𝜒||2Q+||u(k+i)−̄u||2R)+||Δ(k+N)||2P.
+- [USER] Matrices Q, R, and P are tuning parameters, with P satisfying the Lyapunov condition.
+- [USER] The solution to the optimization problem at time step k is termed U(k|k).
+- [USER] Only the first element of U(k|k) is applied to the system according to the Receding Horizon principle.
+- [USER] Theorem 4 states that if the plant behaves according to the model and certain conditions are met, the equilibrium point (̄u,𝜒,y) is asymptotically stable under the proposed control law.
+- [ASSISTANT_SAID] The assistant summarizes the MPC design in simple language, explaining that it uses a model to predict future behavior and solve an optimization problem to stabilize the system.
+- [USER] The user requests to forget everything about the previous paper.
+- [USER] The user provides a link to an article for summarization.
+- [ASSISTANT_SAID] The assistant summarizes the article about using deep reinforcement learning (DRL) to control a building's HVAC system, highlighting the algorithm's effectiveness in optimizing energy consumption while ensuring occupant comfort.
+- [USER] The user provides details about Algorithm 1, a policy gradient algorithm, including its input parameters, steps for collecting trajectories, and updating the policy.
+- [ASSISTANT_SAID] The assistant explains that Algorithm 1 is designed to train an RNN policy network by collecting data from K trajectories and updating the policy weights using a policy gradient estimate.

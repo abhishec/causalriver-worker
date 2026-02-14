@@ -1,0 +1,19 @@
+**Observation Log:**
+
+[FACT] User has a cocktail-making class on Fridays.  
+[PREFERENCE] User is looking for inspiration for a new cocktail recipe that incorporates tequila.  
+[PREFERENCE] User likes the sound of the Watermelon Basil Margarita and has been experimenting with basil in cocktails.  
+[EVENT] User has been using Avion Silver tequila in homemade margaritas, and it always turns out great.  
+[PREFERENCE] User is excited to try out the Watermelon Basil Margarita recipe.  
+[ASSISTANT_SAID] Assistant provided a list of cocktail ideas, including: Cucumber Lime Refresher, Watermelon Basil Margarita, Jalapeño Pineapple Spritz, Grapefruit Ginger Fizz, Cantaloupe Agua Fresca, and Spicy Mango Mule.  
+[ASSISTANT_CREATED] Assistant created a recipe for Watermelon Puree, including ingredients and instructions: 3-4 cups cubed seedless watermelon, 1 tablespoon granulated sugar (optional), 1 tablespoon fresh lime juice; blend watermelon, strain, add sugar and lime juice to taste, store for up to 24 hours.  
+[ASSISTANT_CREATED] Assistant provided a recipe for Watermelon Basil Margarita, including ingredients: 2 ounces tequila, 1 ounce fresh lime juice, 1/2 ounce watermelon puree, 1/2 ounce agave syrup, 1/4 ounce basil syrup, salt for rimming glass, ice, fresh basil leaves for garnish; instructions to mix and serve.  
+[ASSISTANT_SAID] Assistant suggested roasting the watermelon to enhance sweetness.  
+[ASSISTANT_SAID] Assistant recommended several tequilas to pair with watermelon and basil flavors: Avion Silver, Casa Noble Crystal, Espolón Blanco, Don Julio Reposado, Herradura Reposado, and El Jimador Reposado.  
+[PREFERENCE] User decided to go with Avion Silver tequila for the Watermelon Basil Margarita.  
+[ASSISTANT_SAID] Assistant provided additional tequila-based cocktail ideas for user to try in class: Tequila Sunrise, Paloma, Tequila Sour, El Diablo, Cucumber Collins, Tequila Spritz, and Blood Orange Margarita.  
+[PREFERENCE] User plans to try the Paloma and Tequila Sour during the cocktail-making class.  
+[TEMPORAL] User's cocktail-making class is scheduled for Friday.  
+[ASSISTANT_SAID] Assistant noted that the Paloma is a popular Mexican cocktail and suggested experimenting with different types of grapefruit juice.  
+[ASSISTANT_SAID] Assistant mentioned that the Tequila Sour includes egg white for a silky texture and suggested using flavored simple syrup for added depth.  
+[ASSISTANT_SAID] Assistant encouraged user to have fun during the class and offered to assist with any further questions.

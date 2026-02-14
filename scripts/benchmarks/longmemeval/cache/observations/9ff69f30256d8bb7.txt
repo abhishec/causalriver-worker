@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[FACT] User has a labrador named Max.  
+[FACT] User has a cat named Whiskers.  
+[PREFERENCE] User prefers a red collar for Max to match his new leash.  
+[EVENT] User is looking for a new collar for Max.  
+[EVENT] User saw a new water bowl for Max at the pet store downtown last weekend.  
+[FACT] The water bowl user saw was stainless steel and cost around $25.  
+[EVENT] User is considering getting a pet camera to monitor Max and Whiskers when not home.  
+[PREFERENCE] User is looking for a pet camera around $100.  
+[ASSISTANT_SAID] Recommended options for a pet camera include Wyze Cam Pan, Petcube Bites 2, Furbo Dog Camera, Yi Dome Camera, and Canary Flex.  
+[ASSISTANT_SAID] Suggested factors to consider when choosing a pet camera: video quality, night vision, two-way audio, motion detection, cloud storage, and app compatibility.  
+[EVENT] User is thinking of getting a joint supplement for Max to help with his arthritis.  
+[PREFERENCE] User is looking for joint supplements around $30 for a three-month supply.  
+[ASSISTANT_SAID] Recommended joint supplements include Glucosamine Chondroitin by Nutri-Vet, Dasuquin with MSM by Nutramax, Cosequin DS Plus with MSM by Nutramax, Joint MAX Triple Strength by VetriScience, and SynoviG3 by SynoviCare.  
+[ASSISTANT_SAID] Suggested factors to consider when selecting a joint supplement: ingredients, dosage, brand reputation, manufacturer guarantees, and consulting with a veterinarian.  
+[EVENT] User is thinking of getting a new shampoo for Whiskers.  
+[PREFERENCE] User has been using a hypoallergenic shampoo from the vet's office for Whiskers, which has been working well.  
+[FACT] User is looking for a new shampoo for Whiskers around $15.  
+[ASSISTANT_SAID] Recommended options for cat shampoo include Earthbath All-Natural Shampoo, Oatmeal Dog & Cat Shampoo by Nature's Specialties, Virbac Epi-Soothe Oatmeal Shampoo, Groomers Edge Hypoallergenic Shampoo, and Furminator deShedding Ultra Premium Shampoo.  
+[ASSISTANT_SAID] Suggested factors to consider when choosing a shampoo for Whiskers: hypoallergenic ingredients, fragrance-free, pH balance, and moisturizing properties.  
+[EVENT] User decided to check out the Earthbath All-Natural Shampoo.  
+[EVENT] User plans to check Petco and PetSmart for the Earthbath All-Natural Shampoo.  
+[EVENT] User plans to look into online retailers like Chewy.com or Amazon if the shampoo is not available in-store.  
+[EVENT] User still needs to get the new

@@ -1,0 +1,24 @@
+### Observation Log
+
+**Session Date:** 2023/05/24 (Wed) 18:50  
+**Session ID:** sharegpt_wrwD6bG_0
+
+- [ASSISTANT_SAID] The assistant stated that it is good at marketing and helping people market themselves, specifically on LinkedIn.
+- [ASSISTANT_SAID] The assistant mentioned it would interview the user to gather information for a LinkedIn summary.
+- [ASSISTANT_SAID] The assistant instructed to ask 3 questions to gather necessary information for the LinkedIn summary.
+- [ASSISTANT_SAID] The assistant specified that it would ask questions one at a time and wait for the user's answers before proceeding.
+- [ASSISTANT_SAID] The assistant indicated that the first question cannot be skipped.
+- [ASSISTANT_SAID] The assistant stated that it would not answer the questions for the user and would always ask the user to answer the question.
+- [ASSISTANT_SAID] The assistant provided instructions on how to handle the user's responses based on their rating.
+- [ASSISTANT_SAID] The assistant mentioned that if the user's answer is under 10 words, it would ask for more information.
+- [ASSISTANT_SAID] The assistant outlined various topics to cover in the LinkedIn summary, including personal traits, professional excitement, current role, past experiences, successes, character, life outside work, storytelling, and calls to action.
+- [ASSISTANT_SAID] The assistant provided tips for writing an effective LinkedIn summary, such as making the first sentence count, using keywords, avoiding jargon, and creating white space.
+- [ASSISTANT_SAID] The assistant stated it would follow a specific format for asking questions and reviewing answers.
+- [ASSISTANT_SAID] The assistant indicated it would create a table with options for the user's LinkedIn summary purpose and provide advice and benefits for each option.
+- [ASSISTANT_SAID] The assistant mentioned it would analyze the user's answers to create a LinkedIn summary based on their responses.
+- [ASSISTANT_SAID] The assistant concluded with a message about its service and how to support it.
+
+- [USER] The user expressed a desire for help in creating a LinkedIn summary that stands out.
+- [USER] The user did not provide any specific information or answers during this session, as the assistant was in the process of asking questions. 
+
+This log captures all relevant details from the conversation, including the assistant's instructions and the user's initial request for assistance.

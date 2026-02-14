@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[FACT] User is trying to find new healthy recipes to meal prep for the week.  
+[FACT] User has been trying to establish a more consistent daily routine over the past few weeks.  
+[PREFERENCE] User is interested in easy and nutritious meals that can be prepared in advance.  
+[ASSISTANT_SAID] Assistant congratulated the user on taking steps towards establishing a healthier daily routine and mentioned that meal prep can save time and money.  
+[ASSISTANT_SAID] Assistant provided breakfast options:  
+[ASSISTANT_SAID] 1. Overnight Oats: Mix rolled oats, milk, nuts, seeds, and fruits in a jar and refrigerate overnight.  
+[ASSISTANT_SAID] 2. Scrambled Egg Muffins: Whisk eggs, add diced veggies and cheese, pour into muffin tin, and bake.  
+[ASSISTANT_SAID] 3. Avocado Toast: Toast whole-grain bread, mash avocado, and add a fried egg or tomato.  
+[ASSISTANT_SAID] Assistant provided lunch and dinner options:  
+[ASSISTANT_SAID] 1. Salad Jars: Layer mixed greens, veggies, proteins, and vinaigrette in a jar.  
+[ASSISTANT_SAID] 2. Quinoa or Brown Rice Bowls: Cook quinoa or brown rice and top with roasted veggies and lean proteins.  
+[ASSISTANT_SAID] 3. Lentil or Veggie Soup: Cook a large batch and portion into containers.  
+[ASSISTANT_SAID] 4. Grilled Chicken or Fish with Roasted Veggies: Marinate and grill chicken or fish with roasted veggies.  
+[ASSISTANT_SAID] 5. Mason Jar Meals: Layer cooked rice, beans, and veggies in a jar with a protein source.  
+[ASSISTANT_SAID] Assistant provided snack options:  
+[ASSISTANT_SAID] 1. Fresh Fruit and Nuts: Prepare a container with fresh fruit and nuts.  
+[ASSISTANT_SAID] 2. Energy Balls: Mix rolled oats, nuts, seeds, and dried fruits to create energy balls.  
+[ASSISTANT_SAID] 3. Yogurt Parfait: Layer Greek yogurt, fresh berries, and granola in a container.  
+[ASSISTANT_SAID] Assistant provided tips and variations for meal prep.  
+[ASSISTANT_SAID] Assistant encouraged the user to label and date containers and store them according to food safety guidelines.  
+[USER] User expressed gratitude for the meal prep ideas and showed particular interest in quinoa or brown rice bowls.  
+[USER] User requested suggestions for simple sauces or seasonings to add flavor to quinoa or brown rice bowls.  
+[ASSISTANT_SAID] Assistant provided savory sauce options:

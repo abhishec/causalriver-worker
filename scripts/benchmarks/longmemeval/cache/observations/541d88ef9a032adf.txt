@@ -1,0 +1,34 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/30 (Tue) 02:43
+- [FACT] User has a PS4.
+- [EVENT] User recently finished playing The Last of Us Part II.
+- [PREFERENCE] User is trying to decide what to play next on their PS4.
+- [PREFERENCE] User is interested in games similar to The Last of Us Part II.
+- [ASSISTANT_SAID] Recommended games similar to The Last of Us Part II:
+  1. The Last of Us Remastered
+  2. God of War (2018)
+  3. Horizon Zero Dawn
+  4. Days Gone
+  5. Uncharted 4: A Thief's End
+  6. Detroit: Become Human
+  7. What Remains of Edith Finch
+  8. The Walking Dead (Telltale series)
+  9. Death Stranding
+  10. Ghost of Tsushima
+- [PREFERENCE] User has been playing games a lot lately, especially during the past three weeks.
+- [PREFERENCE] User is interested in Ghost of Tsushima and has been meaning to play it for a while.
+- [ASSISTANT_SAID] Congratulated the user on finishing The Last of Us Part II and mentioned that Ghost of Tsushima is an excellent choice to fill the void.
+- [ASSISTANT_SAID] Suggested considering a short break before diving into another game but acknowledged that Ghost of Tsushima is a great choice.
+- [ASSISTANT_SAID] Recommended shorter gaming experiences to tide the user over:
+  1. What Remains of Edith Finch (2-3 hours long)
+  2. Firewatch (4-6 hours long)
+  3. Hyper Light Drifter (6-8 hours long)
+- [PREFERENCE] User is looking for good gaming monitors after upgrading their graphics card to an NVIDIA GeForce RTX 3070.
+- [ASSISTANT_SAID] Recommended gaming monitors to make the most of the NVIDIA GeForce RTX 3070:
+  1. Acer Predator XB273K (27" 4K, 144Hz, 1ms, G-Sync)
+  2. ASUS VG278Q (27" Full HD, 144Hz, 1ms, G-Sync)
+  3. ViewSonic XG240R (24" Full HD, 144Hz, 1ms, FreeSync)
+  4. Acer Predator XB323Q (32" QHD, 240Hz, 1ms, G-Sync)
+  5. ASUS PG278QE (27" 4K, 144Hz, 1ms, G-Sync)
+  6. LG 27GL850-B (27" 4K, 144

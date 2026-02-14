@@ -1,0 +1,35 @@
+**Observation Log:**
+
+- [FACT] User is looking for an instructional designer.
+- [EVENT] User is providing a list of skills and qualifications required for the instructional designer and a job description from LinkedIn.
+- [TEMPORAL] Session date is 2023/03/04 (Sat) 07:40.
+- [USER_SAID] User provided a list of skills and qualifications required for the instructional designer:
+  1. Knowledge of instructional design methodologies and best practices
+  2. Experience designing and developing e-learning and instructor-led training content
+  3. Strong understanding of adult learning principles and how to apply them in course design
+  4. Experience with Learning Management Systems (LMS) and authoring tools such as Articulate Storyline and Adobe Captivate
+  5. Experience with graphic design and multimedia production
+  6. Strong written and verbal communication skills
+  7. Experience with project management and ability to manage multiple projects simultaneously
+  8. Ability to analyze and assess the effectiveness of training programs
+  9. Strong attention to detail and ability to deliver high-quality work on time
+  10. Bachelor's degree in instructional design, education, or related field.
+- [USER_SAID] User provided a job description from LinkedIn for an Instructional Designer position at a prestigious Ivy League university in Boston.
+- [USER_SAID] Job description states that the role is hybrid and requires local candidates.
+- [USER_SAID] Job description mentions it is a 6-month initial contract with the opportunity to extend or convert.
+- [USER_SAID] Responsibilities of the Instructional Designer include:
+  - Working closely with faculty or business subject matter experts to design, create, and deliver online, blended, and instructor-led classroom training courses and documentation.
+  - Developing content for learning or knowledge management systems.
+  - Conducting learning and business needs analysis.
+  - Drafting expected learning outcomes that align with course goals.
+  - Determining scope and sequence of content, identifying impacted or target audiences, and relevant pre-requisites for learner success.
+  - Designing/implementing course evaluation plans.
+  - Devising modes of assessment to measure the effectiveness of the course.
+  - Writing effective copy, instructional materials, and audio/video scripts.
+  - Producing learning materials in various formats including print, graphics, audio, video, and multimedia.
+  - Using e-learning authoring tools to upload instructional content to websites, e-learning platforms, or learning management systems.
+  - May develop and deliver train-the-trainer programs and deliver in-person instruction of complex information to participants.
+  - Providing training on instructional technologies and tools.
+- [USER_SAID] Required skills and experience for the position include:
+  - Master’s degree, formal training, or certification in Instructional Design is preferable.
+  - 3-5 years of professional experience in Instructional Design or

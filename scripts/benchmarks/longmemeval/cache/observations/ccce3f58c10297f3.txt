@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/01 (Mon) 15:45  
+[FACT] User has snake plants named Samantha and Simon.  
+[FACT] User has a fiddle leaf fig tree named Felix.  
+[EVENT] User recently started fertilizing their snake plants once a week.  
+[CHANGE] User repotted their fiddle leaf fig tree about three weeks ago.  
+[ASSISTANT_SAID] Balanced fertilizers contain equal or near-equal amounts of Nitrogen (N), Phosphorus (P), and Potassium (K), represented by the N-P-K ratio.  
+[ASSISTANT_SAID] A balanced fertilizer with a 20-20-20 N-P-K ratio contains 20% nitrogen, 20% phosphorus, and 20% potassium by weight.  
+[ASSISTANT_SAID] Nitrogen promotes leaf growth, phosphorus supports root development and flower production, and potassium helps with overall plant health.  
+[ASSISTANT_SAID] For most houseplants, fertilize every 1-2 weeks during the growing season (spring and summer) and reduce to once a month during the dormant season (fall and winter).  
+[ASSISTANT_SAID] For snake plants, fertilize every 2-3 weeks or once a month, as they have low nutrient demands.  
+[ASSISTANT_SAID] For fiddle leaf figs, fertilize every 2-3 weeks during the growing season, especially after repotting.  
+[ASSISTANT_SAID] Signs of over-fertilization include burned or scorched leaves, yellowing or dropping leaves, weak or spindly growth, root damage, watering issues, salt buildup, pests and diseases, and soil pH imbalance.  
+[ASSISTANT_SAID] If over-fertilization is suspected, stop fertilizing, flush the soil with water, prune damaged tissue, and monitor the plants.  
+[ASSISTANT_SAID] To keep leaves dust-free, use a soft brush, mist with water, use leaf shine products, and regularly prune.  
+[ASSISTANT_SAID] For maintaining dust-free shelves, regularly dust, vacuum or blow dust away, clean decorative rocks, use a shelf liner, reduce dust sources, increase air circulation, group plants thoughtfully, and consider a dehumidifier.  
+[FACT] User cleaned out the shelves in their sunroom about a month ago.  
+[EVENT] User wiped down the shelves with a damp cloth and reused decorative rocks and pebbles for drainage.  
+[ASSISTANT_SAID] To water plants more efficiently, check soil moisture before watering by sticking a finger into the soil up to the first knuckle.  
+[PREFERENCE] User is trying to get into a better routine with watering their plants.  
+[PREFERENCE] User has started setting reminders on their phone to water

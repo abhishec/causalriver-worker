@@ -1,0 +1,38 @@
+**Observation Log:**
+
+[FACT] User is looking for BBQ sauce brand recommendations.  
+[EVENT] User recently used up their favorite BBQ sauce, Sweet Baby Ray's, at a friend's place on June 17, 2023.  
+[ASSISTANT_SAID] Sweet Baby Ray's is a classic BBQ sauce.  
+[ASSISTANT_SAID] Recommended BBQ sauce brands:  
+1. **Sweet Baby Ray's**  
+2. **Kansas City Masterpiece**: A thick, sweet, and tangy BBQ sauce with a rich flavor profile.  
+3. **Franklin Barbecue**: A vinegar-based, slightly spicy sauce from a famous BBQ joint in Austin, Texas.  
+4. **Stubb's BBQ Sauce**: A Texas-style BBQ sauce with a thick, sweet, and smoky flavor.  
+5. **Gates BBQ**: A Kansas City-style BBQ sauce with a thick, sweet, and tangy flavor profile.  
+6. **Bone Suckin' Sauce**: A sweet and tangy BBQ sauce perfect for ribs, chicken, and pork.  
+7. **Dinosaur Bar-B-Que Sauce**: A sweet and tangy BBQ sauce with a slightly spicy kick.  
+8. **Sweet and Smoky BBQ Sauce by Weber**: An all-purpose BBQ sauce with a balanced sweet and smoky flavor profile.  
+[ASSISTANT_SAID] User can find these brands at most grocery stores or online at retailers like Amazon, Walmart, or Target.  
+[ASSISTANT_SAID] Suggested trying to make homemade BBQ sauce from scratch.  
+[EVENT] User has been trying out different marinades and seasoning combinations.  
+[EVENT] User recently made Korean-style BBQ beef short ribs using a recipe found online.  
+[ASSISTANT_SAID] Recommended ingredients for a Korean-style BBQ marinade:  
+1. **Gochujang**: Fermented Korean chili paste.  
+2. **Soy sauce**: Provides umami flavor.  
+3. **Garlic**: Minced and sautéed.  
+4. **Ginger**: Grated and sautéed.  
+5. **Brown sugar**: Adds sweetness.  
+6. **Sesame oil**: Provides a nutty flavor.  
+7. **Crushed black pepper**: Adds a kick.  
+[ASSISTANT_SAID] Optional ingredients for the marinade:  
+1. **Korean chili flakes (gochugaru)**  
+2. **Pineapple juice or Korean pear juice**  
+3. **Green onions**  
+4. **Cumin**  
+[ASSISTANT_CREATED] Provided a basic marinade recipe:  
+- 1/2 cup soy sauce  
+- 1/4 cup gochujang  
+- 2 cloves garlic, minced and sautéed  
+- 1 inch ginger, grated and sautéed  
+- 2 tablespoons brown sugar  
+- 1 tablespoon

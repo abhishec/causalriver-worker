@@ -1,0 +1,48 @@
+**Observation Log:**
+
+- [FACT] User is interested in organizing their film festival schedule.
+- [EVENT] User is planning to attend AFI Fest this year.
+- [EVENT] User has volunteered at the Austin Film Festival for the third year in a row.
+- [PREFERENCE] User is interested in networking with industry professionals at film festivals.
+- [TEMPORAL] User is organizing their film festival schedule for the next few months, specifically November and December.
+- [ASSISTANT_SAID] Assistant recommended notable film festivals happening in November and December, including:
+  - AFI Fest (November 3-10, Los Angeles, USA)
+  - Cannes Film Festival's American Film Market (November 9-13, Santa Monica, USA)
+  - Stockholm International Film Festival (November 10-21, Stockholm, Sweden)
+  - Denver Film Festival (November 3-14, Denver, USA)
+  - Rome Film Festival (November 17-28, Rome, Italy)
+  - Whistler Film Festival (December 1-5, Whistler, Canada)
+  - Dubai International Film Festival (December 6-13, Dubai, UAE)
+  - Les Arcs Film Festival (December 11-18, Les Arcs, France)
+  - Palm Springs International Film Festival (December 2-12, Palm Springs, USA)
+  - Hong Kong International Film Festival (December 2-23, Hong Kong)
+- [ASSISTANT_SAID] Assistant provided recommendations for screenwriting competitions and workshops in LA, including:
+  - Final Draft Big Break Screenwriting Competition
+  - ScreenCraft Screenwriting Competition
+  - Nicholl Fellowship in Screenwriting
+  - Script Pipeline Screenwriting Competition
+  - Tracking Board's Launch Pad
+  - AFI Screenwriting Workshop
+  - UCLA Extension Screenwriting Program
+  - ScreenwritingU
+  - The Screenwriter's Lab
+  - The Writers Guild of America, West (WGAW) Showrunner Training Program
+- [ASSISTANT_SAID] Assistant offered tips for making the most of time at AFI Fest, including:
+  - Researching the festival schedule
+  - Creating a daily schedule
+  - Updating business cards and online profiles
+  - Attending industry events and panels
+  - Networking in lines and lounges
+  - Introducing oneself to filmmakers and industry professionals
+  - Being respectful and considerate
+  - Taking notes and following up
+  - Utilizing the AFI Fest Lounge and attending meet and greets
+- [PREFERENCE] User is considering bringing business cards to AFI Fest.
+- [ASSISTANT_SAID] Assistant suggested including the following information on a business card for a screenwriter:
+  - Name
+  - Contact Information (email and phone number)
+  - Title/Profession
+  - Website or Online Portfolio
+  - Social Media Handles
+  - Genre or Specialty
+  - Representative or Agency

@@ -1,0 +1,30 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/01/24 (Tue) 08:43  
+[FACT] User has a Ring doorbell camera.  
+[FACT] User has a new Wi-Fi router.  
+[PREFERENCE] User is happy with their new Wi-Fi router, stating it has been a huge upgrade for online gaming sessions.  
+[EVENT] User is experiencing issues with their Ring doorbell camera not sending notifications to their phone when someone presses the doorbell or when it detects motion.  
+[ASSISTANT_SAID] Assistant provided troubleshooting steps for the Ring doorbell camera, including:  
+[ASSISTANT_SAID] 1. Check notification settings in the Ring app.  
+[ASSISTANT_SAID] 2. Verify Wi-Fi connection and restart the router and doorbell camera.  
+[ASSISTANT_SAID] 3. Check the doorbell camera's battery level.  
+[ASSISTANT_SAID] 4. Adjust motion detection settings in the Ring app.  
+[ASSISTANT_SAID] 5. Check phone's notification settings for the Ring app.  
+[ASSISTANT_SAID] 6. Ensure doorbell camera's firmware is up-to-date.  
+[ASSISTANT_SAID] 7. Verify physical installation of the doorbell camera.  
+[ASSISTANT_SAID] 8. Reset the doorbell camera if necessary.  
+[ASSISTANT_SAID] If troubleshooting does not resolve the issue, user should contact Ring's customer support.  
+[PREFERENCE] User has tried some of the troubleshooting steps already.  
+[EVENT] User is going to go through the rest of the troubleshooting list for the Ring doorbell camera.  
+[PREFERENCE] User is interested in optimizing their Wi-Fi network for online gaming.  
+[ASSISTANT_SAID] Assistant provided tips for optimizing Wi-Fi for gaming, including setting up a Quality of Service (QoS) rule.  
+[ASSISTANT_SAID] Steps to set up a QoS rule include:  
+[ASSISTANT_SAID] 1. Access the router's web interface.  
+[ASSISTANT_SAID] 2. Find the QoS settings.  
+[ASSISTANT_SAID] 3. Create a new QoS rule.  
+[ASSISTANT_SAID] 4. Select the device or application to prioritize.  
+[ASSISTANT_SAID] 5. Set the priority level.  
+[ASSISTANT_SAID] 6. Specify the traffic type.  
+[ASSISTANT_SAID] 7. Set the bandwidth allocation.  
+[ASSISTANT_SAID] Additional tips for optimizing Wi-Fi include using a wired Ethernet connection, updating router firmware, changing the Wi-Fi channel, reducing latency, and limiting network congestion

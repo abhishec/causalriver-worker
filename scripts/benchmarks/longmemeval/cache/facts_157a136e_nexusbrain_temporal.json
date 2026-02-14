@@ -1,0 +1,73 @@
+{
+  "answer_8de18468_1": [
+    {
+      "fact": "User is planning a trip to Europe",
+      "type": "event",
+      "entities": [
+        "Europe"
+      ]
+    },
+    {
+      "fact": "User is in their 30s",
+      "type": "personal",
+      "entities": [
+        "30s"
+      ]
+    },
+    {
+      "fact": "User feels like they were in their 20s just yesterday",
+      "type": "opinion",
+      "entities": [
+        "20s"
+      ]
+    },
+    {
+      "fact": "User is getting used to being in their 30s",
+      "type": "personal",
+      "entities": [
+        "30s"
+      ]
+    }
+  ],
+  "answer_8de18468_2": [
+    {
+      "fact": "User is planning a family gathering soon.",
+      "type": "event",
+      "entities": [
+        "family gathering"
+      ]
+    },
+    {
+      "fact": "User's grandma recently celebrated her 75th birthday.",
+      "type": "event",
+      "entities": [
+        "grandma",
+        "75th birthday"
+      ]
+    },
+    {
+      "fact": "User's grandma's birthday celebration inspired them to plan a similar gathering.",
+      "type": "opinion",
+      "entities": [
+        "grandma's birthday celebration"
+      ]
+    },
+    {
+      "fact": "User's mom made an amazing chocolate mocha cake for their birthday.",
+      "type": "relationship",
+      "entities": [
+        "mom",
+        "chocolate mocha cake",
+        "user's birthday"
+      ]
+    },
+    {
+      "fact": "User's birthday was just a week after their grandma's celebration.",
+      "type": "event",
+      "entities": [
+        "user's birthday",
+        "grandma's celebration"
+      ]
+    }
+  ]
+}

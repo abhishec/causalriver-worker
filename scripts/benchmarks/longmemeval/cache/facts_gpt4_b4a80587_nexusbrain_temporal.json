@@ -1,0 +1,126 @@
+{
+  "answer_b9d9150e_2": [
+    {
+      "fact": "User is trying to improve their photography skills.",
+      "type": "preference",
+      "entities": [
+        "photography skills"
+      ]
+    },
+    {
+      "fact": "User is experimenting with different angles and lighting setups.",
+      "type": "preference",
+      "entities": [
+        "angles",
+        "lighting setups"
+      ]
+    },
+    {
+      "fact": "User recently got a new 50mm f/1.8 prime lens.",
+      "type": "personal",
+      "entities": [
+        "50mm f/1.8 prime lens"
+      ]
+    },
+    {
+      "fact": "User is still getting used to their new lens.",
+      "type": "opinion",
+      "entities": [
+        "new lens"
+      ]
+    },
+    {
+      "fact": "User is especially interested in mastering their 50mm lens.",
+      "type": "preference",
+      "entities": [
+        "50mm lens"
+      ]
+    }
+  ],
+  "answer_b9d9150e_1": [
+    {
+      "fact": "User recently returned from a road trip to the coast with friends.",
+      "type": "event",
+      "entities": [
+        "road trip",
+        "coast",
+        "friends"
+      ]
+    },
+    {
+      "fact": "User took photos of cliffs and beaches during the road trip.",
+      "type": "event",
+      "entities": [
+        "photos",
+        "cliffs",
+        "beaches"
+      ]
+    },
+    {
+      "fact": "User has been using Lightroom for photo editing.",
+      "type": "preference",
+      "entities": [
+        "Lightroom"
+      ]
+    },
+    {
+      "fact": "User is comfortable with Lightroom.",
+      "type": "opinion",
+      "entities": [
+        "Lightroom"
+      ]
+    },
+    {
+      "fact": "User aims for a natural look that brings out vibrant colors in coastal photos.",
+      "type": "preference",
+      "entities": [
+        "natural look",
+        "vibrant colors",
+        "coastal photos"
+      ]
+    },
+    {
+      "fact": "User visited a nearby park last Sunday and took photos of flowers and trees.",
+      "type": "event",
+      "entities": [
+        "park",
+        "flowers",
+        "trees",
+        "last Sunday"
+      ]
+    },
+    {
+      "fact": "User experimented with different apertures and shutter speeds to achieve bokeh effects.",
+      "type": "event",
+      "entities": [
+        "apertures",
+        "shutter speeds",
+        "bokeh effects"
+      ]
+    },
+    {
+      "fact": "User finds the coastal shots from the previous week more striking than the park photos.",
+      "type": "opinion",
+      "entities": [
+        "coastal shots",
+        "park photos"
+      ]
+    },
+    {
+      "fact": "User spent three days driving along the coastal highway.",
+      "type": "event",
+      "entities": [
+        "three days",
+        "coastal highway"
+      ]
+    },
+    {
+      "fact": "User stopped at all the scenic overlooks during the road trip.",
+      "type": "event",
+      "entities": [
+        "scenic overlooks",
+        "road trip"
+      ]
+    }
+  ]
+}

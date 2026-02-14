@@ -1,0 +1,30 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/30 (Tue) 00:43
+- [EVENT] User is planning a trip to Zion National Park.
+- [PREFERENCE] User wants to capture great landscape shots.
+- [FACT] User has a Canon EOS 80D camera.
+- [EVENT] User has taken the Canon EOS 80D on five trips.
+- [PREFERENCE] User describes the Canon EOS 80D as a "beast."
+- [ASSISTANT_SAID] Recommended shooting during the golden hour (dawn or dusk) for ideal lighting.
+- [ASSISTANT_SAID] Suggested looking for partial cloud cover to diffuse harsh sunlight.
+- [ASSISTANT_SAID] Advised using a polarizing filter to reduce glare and enhance colors.
+- [ASSISTANT_SAID] Recommended shooting in the shade when the sun is high for more even lighting.
+- [ASSISTANT_SAID] Suggested bracketing shots to capture a range of tones in high contrast environments.
+- [ASSISTANT_SAID] Recommended using graduated neutral density (ND) filters to balance exposure.
+- [ASSISTANT_SAID] Advised shooting in RAW format for more editing flexibility.
+- [ASSISTANT_SAID] Suggested exposing for the shadows to recover details in highlights during post-processing.
+- [ASSISTANT_SAID] Recommended paying attention to composition, using a tripod, and being patient for the right light.
+- [ASSISTANT_SAID] Suggested protecting gear with a lens hood, UV filter, and camera rain cover.
+- [ASSISTANT_SAID] Recommended using the built-in HDR mode of the Canon EOS 80D.
+- [ASSISTANT_SAID] Suggested taking advantage of the wide ISO range (100-16000) of the Canon EOS 80D.
+- [ASSISTANT_SAID] Advised utilizing the vari-angle LCD of the Canon EOS 80D for shooting from unusual angles.
+- [EVENT] User is considering using a graduated ND filter.
+- [ASSISTANT_SAID] Recommended starting with a 2-stop (0.6) or 3-stop (0.9) graduated ND filter for a good balance.
+- [ASSISTANT_SAID] Explained the pros and cons of circular filters versus square filters.
+- [ASSISTANT_SAID] Listed popular brands for filters: B+W, Hoya, Lee Filters, and NiSi.
+- [PREFERENCE] User is considering getting a square filter system.
+- [ASSISTANT_SAID] Provided an overview of Lee Filters and their benefits.
+- [ASSISTANT_SAID] Explained the differences between hard and soft gradation filters.
+- [ASSISTANT_SAID] Suggested starting with a soft gradation filter for versatility.
+- [

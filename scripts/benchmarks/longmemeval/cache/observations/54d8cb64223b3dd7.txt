@@ -1,0 +1,19 @@
+**Observation Log:**
+
+- [FACT] User's name is Damian.
+- [FACT] User is a student at Worcester Polytechnic Institute (WPI).
+- [FACT] User is majoring in Biomedical Engineering.
+- [FACT] User has participated in a summer undergraduate research program in Computational Neuroscience hosted by Carnegie Mellon University and the University of Pittsburgh.
+- [FACT] User worked in Dr. Aaron Batista’s lab under the guidance of graduate student Erinn Grigsby.
+- [FACT] User's MQP project was headed by Prof. Dirk Albrecht.
+- [FACT] User's academic goal is to receive a master’s in Neuroscience and a Ph.D. in Biomedical Engineering with a concentration in Neuroscience.
+- [FACT] User plans to start a research company dedicated to designing and building minimally invasive, high-resolution, and bidirectional neural interfaces.
+- [PREFERENCE] User is highly interested in pursuing neural interfaces.
+- [EVENT] User's MQP project involved designing a programmable electrical stimulator to study Deep Brain Stimulation in C. elegans worms.
+- [EVENT] User was accepted into the 2020 summer undergraduate research program.
+- [CHANGE] User's ambitions as a researcher have shifted while at WPI, but the core notion remains the same.
+- [TEMPORAL] Session date is 2023/01/30 (Mon) 18:42.
+- [RELATIONSHIP] User mentions having many wonderful professors at WPI who helped them grow as a researcher and person.
+- [ASSISTANT_SAID] Assistant provided an analysis of the user's fictional and technical writing styles, noting the descriptive language and imagery in fictional writing and the straightforward, concise nature of technical writing.
+- [ASSISTANT_SAID] Assistant expressed willingness to analyze more of the user's writing upon request.
+- [ASSISTANT_CREATED] Assistant created an analysis of the user's application writing, highlighting the structured narrative, specific examples, and command of technical language in the field of biomedical engineering and neuroscience.

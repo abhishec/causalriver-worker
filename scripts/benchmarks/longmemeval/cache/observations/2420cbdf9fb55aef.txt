@@ -1,0 +1,27 @@
+**Observation Log:**
+
+[FACT] User is planning to go to the mall this weekend.  
+[FACT] User has already purchased five tops from H&M.  
+[PREFERENCE] User is thinking of getting a few more tops from H&M.  
+[ASSISTANT_SAID] H&M has a promotion of "Buy One, Get One 50% Off" on select tops and dresses.  
+[ASSISTANT_SAID] H&M has "Up to 60% Off" on sale items.  
+[ASSISTANT_SAID] H&M offers a "Student Discount" of 10% off with a valid student ID.  
+[ASSISTANT_SAID] Sephora has "Weekly Wow Deals" with limited-time discounts on select products every Thursday.  
+[ASSISTANT_SAID] Sephora's "Beauty Insider Sale" offers exclusive discounts for members.  
+[ASSISTANT_SAID] Sephora often has a "Gift with Purchase" promotion.  
+[ASSISTANT_SAID] User should check H&M and Sephora websites and social media for updates on promotions.  
+[EVENT] User is thinking of checking out a new thrift store called The Vault near their work.  
+[ASSISTANT_SAID] Suggested ways to find information about The Vault include checking their website or social media, doing a Google search, calling them directly, and checking online review sites.  
+[FACT] User is considering getting a new pair of sneakers.  
+[ASSISTANT_SAID] ASOS has a promotion of "20% Off Everything" with the code "SAVE20."  
+[ASSISTANT_SAID] ASOS has "Up to 50% Off Sale" on various products, including sneakers.  
+[ASSISTANT_SAID] ASOS offers a "Student Discount" of 10% off with a valid student ID.  
+[ASSISTANT_SAID] ASOS provides free shipping on orders over a certain amount and free next-day delivery on qualifying orders.  
+[EVENT] User is looking for sales or promo codes at Target for household essentials.  
+[ASSISTANT_SAID] Target offers a "RedCard" for 5% off all purchases.  
+[ASSISTANT_SAID] Target has weekly ad deals on household essentials.  
+[ASSISTANT_SAID] Target's Cartwheel app provides exclusive discounts on various products.  
+[ASSISTANT_SAID] Target's Up & Up brand offers competitive pricing on household essentials.  
+[ASSISTANT_SAID] Target's Threshold brand offers stylish home decor and household items.  
+[ASSISTANT_SAID] Current promo codes for Target include "HOME15" for 15% off home decor and "KITCHEN10" for 10% off kitchenware.  
+[EVENT] User is planning to visit their local bookstore this weekend.

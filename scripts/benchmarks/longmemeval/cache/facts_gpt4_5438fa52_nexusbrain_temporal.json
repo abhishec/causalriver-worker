@@ -1,0 +1,108 @@
+{
+  "answer_b10f3828_2": [
+    {
+      "fact": "User is planning a trip to Europe next summer",
+      "type": "event",
+      "entities": [
+        "Europe",
+        "next summer"
+      ]
+    },
+    {
+      "fact": "User plans to visit relatives in Germany, France, and the UK",
+      "type": "relationship",
+      "entities": [
+        "Germany",
+        "France",
+        "UK",
+        "relatives"
+      ]
+    },
+    {
+      "fact": "User is a US citizen",
+      "type": "personal",
+      "entities": [
+        "US citizen"
+      ]
+    },
+    {
+      "fact": "User has been taking Spanish classes",
+      "type": "personal",
+      "entities": [
+        "Spanish classes"
+      ]
+    },
+    {
+      "fact": "User is curious if Spanish will be useful during the trip",
+      "type": "opinion",
+      "entities": [
+        "Spanish",
+        "trip"
+      ]
+    },
+    {
+      "fact": "User is looking for language learning apps or resources for German and French",
+      "type": "preference",
+      "entities": [
+        "language learning apps",
+        "German",
+        "French"
+      ]
+    }
+  ],
+  "answer_b10f3828_1": [
+    {
+      "fact": "User is a US citizen",
+      "type": "personal",
+      "entities": [
+        "US"
+      ]
+    },
+    {
+      "fact": "User plans to visit Germany, France, and the UK",
+      "type": "preference",
+      "entities": [
+        "Germany",
+        "France",
+        "UK"
+      ]
+    },
+    {
+      "fact": "User will be staying for around 2 weeks in each country",
+      "type": "event",
+      "entities": [
+        "2 weeks"
+      ]
+    },
+    {
+      "fact": "User's purpose of visit is to connect with relatives and explore ancestral homeland",
+      "type": "opinion",
+      "entities": [
+        "relatives",
+        "ancestral homeland"
+      ]
+    },
+    {
+      "fact": "User attended a cultural festival in their hometown",
+      "type": "event",
+      "entities": [
+        "cultural festival",
+        "hometown"
+      ]
+    },
+    {
+      "fact": "User met people from various ethnic backgrounds at the festival",
+      "type": "event",
+      "entities": [
+        "ethnic backgrounds"
+      ]
+    },
+    {
+      "fact": "User is interested in their own roots",
+      "type": "opinion",
+      "entities": [
+        "roots"
+      ]
+    }
+  ]
+}

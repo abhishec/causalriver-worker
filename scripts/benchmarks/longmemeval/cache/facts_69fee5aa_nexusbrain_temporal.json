@@ -1,0 +1,87 @@
+{
+  "answer_d6028d6e_1": [
+    {
+      "fact": "User is looking to organize their collections better.",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User collects coins, records, cameras, and books.",
+      "type": "personal",
+      "entities": [
+        "coins",
+        "records",
+        "cameras",
+        "books"
+      ]
+    },
+    {
+      "fact": "User plans to try out Coin Collector's Assistant for their coins.",
+      "type": "preference",
+      "entities": [
+        "Coin Collector's Assistant"
+      ]
+    },
+    {
+      "fact": "User plans to try out Discogs for their records.",
+      "type": "preference",
+      "entities": [
+        "Discogs"
+      ]
+    },
+    {
+      "fact": "User is looking for camera inventory software to track vintage cameras and their specifications.",
+      "type": "preference",
+      "entities": [
+        "camera inventory software",
+        "vintage cameras"
+      ]
+    }
+  ],
+  "answer_d6028d6e_2": [
+    {
+      "fact": "User is looking to learn more about error coins, specifically ones with misprinted dates.",
+      "type": "preference",
+      "entities": [
+        "error coins",
+        "misprinted dates"
+      ]
+    },
+    {
+      "fact": "User has a collection of pre-1920 American coins.",
+      "type": "personal",
+      "entities": [
+        "pre-1920 American coins"
+      ]
+    },
+    {
+      "fact": "User recently added a 1915-S Barber quarter to their collection.",
+      "type": "event",
+      "entities": [
+        "1915-S Barber quarter"
+      ]
+    },
+    {
+      "fact": "User has been meaning to get some of their error coins authenticated.",
+      "type": "preference",
+      "entities": [
+        "error coins"
+      ]
+    },
+    {
+      "fact": "User recently bought a 1972 doubled die cent.",
+      "type": "event",
+      "entities": [
+        "1972 doubled die cent"
+      ]
+    },
+    {
+      "fact": "User is considering whether PCGS or NGC is better for authenticating error coins.",
+      "type": "opinion",
+      "entities": [
+        "PCGS",
+        "NGC"
+      ]
+    }
+  ]
+}

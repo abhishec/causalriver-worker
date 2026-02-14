@@ -1,0 +1,25 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/24 (Wed) 12:14
+- [FACT] The user is working on a feature in Unity.
+- [FACT] The feature is a sandbox to test units against each other.
+- [FACT] The scene is for testing the design of RTS (Real-Time Strategy) units.
+- [FACT] Units can be assembled from prefabs of parts, sensors, and behaviors.
+- [FACT] Part categories include weapons (such as lasers and missiles) and movement systems (like wheels, treads, or propellers).
+- [ASSISTANT_SAID] Suggested additional behaviors include:
+  - [ASSISTANT_SAID] DefendArea.cs: A behavior that makes the unit defend a specific area, engaging enemies that come too close.
+  - [ASSISTANT_SAID] RepairAndSupport.cs: A behavior that enables the unit to repair or support friendly units within a defined radius.
+  - [ASSISTANT_SAID] Flee.cs: A behavior that makes the unit retreat if its health falls below a certain threshold.
+- [ASSISTANT_SAID] Suggested new parts include:
+  - [ASSISTANT_SAID] Shield.cs: A component that provides a regenerating energy shield to the unit, which can absorb a certain amount of damage before the armor or hit points are affected.
+  - [ASSISTANT_SAID] StealthSystem.cs: A part that allows the unit to become invisible or difficult to detect by enemy sensors.
+  - [ASSISTANT_SAID] ArtilleryWeapon.cs: A long-range weapon component with customizable attributes, such as projectile type, range, and splash damage.
+- [ASSISTANT_SAID] Suggested improved sensors include:
+  - [ASSISTANT_SAID] Radar.cs: A component that extends the unit's detection range and allows it to detect enemies beyond its vision cone.
+  - [ASSISTANT_SAID] ProximitySensor.cs: A component that alerts the unit if an enemy is within a certain distance, even if the enemy is not within the vision cone.
+  - [ASSISTANT_SAID] TerrainScanner.cs: A sensor that provides the unit with information about the terrain, such as elevation or obstacles, to improve pathfinding.
+- [ASSISTANT_SAID] Suggested advanced designs include:
+  - [ASSISTANT_SAID] Scout: A fast-moving unit with enhanced sensors for reconnaissance and intel gathering.
+  - [ASSISTANT_SAID] Engineer: A support unit that can repair, build, or upgrade other units and structures.
+  - [ASSISTANT_SAID] HeavyAssault: A heavily armored unit with multiple weapon systems for dealing with various types of enemy units.
+- [ASSISTANT_SAID] Suggested utility classes and features include:

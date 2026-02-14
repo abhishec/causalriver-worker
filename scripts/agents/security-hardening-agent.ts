@@ -40,6 +40,7 @@ import { createClient } from '@supabase/supabase-js';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { execSync } from 'child_process';
+import { SupabaseSecurityScanner } from './supabase-security-scanner';
 
 // ============================================================================
 // TYPES
@@ -356,118 +357,60 @@ export class SecurityHardeningAgent extends ManusNativeAgent {
    */
   private async scanSupabaseSecurity(): Promise<SecurityVulnerability[]> {
     const vulnerabilities: SecurityVulnerability[] = [];
-    const supabase = createClient(this.supabaseUrl, this.supabaseServiceKey);
 
-    // 1. Check for tables without RLS
-    // Query pg_tables directly to check RLS status
-    const { data: allTables, error: tablesError } = await supabase
-      .from('pg_tables')
-      .select('schemaname, tablename, rowsecurity')
-      .eq('schemaname', 'public');
+    this.log('SCAN', '🔍 Starting comprehensive Supabase security scan...');
 
-    // If we can't access pg_tables directly, skip RLS check (likely permission issue)
-    if (tablesError) {
-      this.log('SCAN', `Cannot access pg_tables (skipping RLS check): ${tablesError.message}`);
-      return vulnerabilities;
-    }
+    // Use dedicated Supabase scanner for complete coverage
+    const scanner = new SupabaseSecurityScanner(this.supabaseUrl, this.supabaseServiceKey);
+    const supabaseIssues = await scanner.scan();
 
-    const tablesWithoutRls = (allTables || []).filter((t: any) => !t.rowsecurity);
+    this.log('SCAN', `✓ Supabase scanner found ${supabaseIssues.length} issues`);
 
-    for (const table of tablesWithoutRls) {
+    // Convert SupabaseSecurityIssue[] to SecurityVulnerability[]
+    for (const issue of supabaseIssues) {
+      const cvssMap = {
+        critical: 9.5,
+        high: 7.5,
+        medium: 5.0,
+        low: 3.0,
+      };
+
       vulnerabilities.push({
-        id: `rls_missing_${table.tablename}`,
-        severity: 'high',
+        id: issue.id,
+        severity: issue.severity,
         category: 'database',
-        title: `Table ${table.tablename} missing Row Level Security`,
-        description: `The table "${table.tablename}" does not have RLS enabled, allowing unrestricted access.`,
-        cwe: 'CWE-284',
-        cvss: 7.5,
+        title: issue.title,
+        description: issue.description,
+        cwe: issue.category === 'Row Level Security' ? 'CWE-284' :
+             issue.category === 'SECURITY DEFINER' ? 'CWE-250' :
+             issue.category === 'Public Access' ? 'CWE-732' : 'CWE-863',
+        cvss: cvssMap[issue.severity],
         affected: {
           component: 'Supabase Database',
-          location: `public.${table.tablename}`,
-          details: 'Row Level Security is disabled',
+          location: issue.table ? `public.${issue.table}` : 'Database',
+          details: issue.description,
         },
         remediation: {
-          automated: true,
-          steps: [
-            `Enable RLS on ${table.tablename}`,
-            'Create appropriate RLS policies',
-          ],
-          migrationSql: `
--- Enable RLS on ${table.tablename}
-ALTER TABLE ${table.tablename} ENABLE ROW LEVEL SECURITY;
-
--- Service role bypass (for system operations)
-CREATE POLICY ${table.tablename}_service_all ON ${table.tablename}
-  FOR ALL TO service_role
-  USING (true)
-  WITH CHECK (true);
-
--- Authenticated users can only access their org's data
-CREATE POLICY ${table.tablename}_read_org ON ${table.tablename}
-  FOR SELECT TO authenticated
-  USING (
-    organization_id IN (
-      SELECT organization_id FROM org_members WHERE user_id = auth.uid()
-    )
-  );
-          `.trim(),
+          automated: issue.fix.automated,
+          steps: issue.fix.steps,
+          migrationSql: issue.fix.sql,
         },
-        references: ['https://supabase.com/docs/guides/auth/row-level-security'],
+        references: [
+          'https://supabase.com/docs/guides/auth/row-level-security',
+          'https://supabase.com/docs/guides/database/postgres/row-level-security',
+        ],
         discovered: new Date().toISOString(),
       });
     }
 
-    // 2. Check for SECURITY DEFINER functions without proper checks
-    const { data: functions, error: funcError } = await supabase
-      .from('pg_proc')
-      .select('proname, prosrc')
-      .eq('prosecdef', true);
-
-    if (funcError) {
-      this.log('SCAN', `Cannot access pg_proc (skipping function check): ${funcError.message}`);
-    }
-
-    for (const func of (functions || [])) {
-      // Check if function validates auth.uid() or has security checks
-      const hasSecurityCheck = /auth\.uid\(\)|security|permission|authorize/i.test(func.prosrc);
-
-      if (!hasSecurityCheck) {
-        vulnerabilities.push({
-          id: `sec_definer_${func.proname}`,
-          severity: 'critical',
-          category: 'database',
-          title: `SECURITY DEFINER function ${func.proname} lacks authorization checks`,
-          description: `Function "${func.proname}" runs with elevated privileges but doesn't validate user permissions.`,
-          cwe: 'CWE-250',
-          cvss: 9.1,
-          affected: {
-            component: 'Supabase Database',
-            location: `public.${func.proname}()`,
-            details: 'SECURITY DEFINER without auth checks',
-          },
-          remediation: {
-            automated: false,
-            steps: [
-              'Review function implementation',
-              'Add auth.uid() validation',
-              'Add organization_id checks',
-              'Consider removing SECURITY DEFINER if not needed',
-            ],
-          },
-          references: ['https://www.postgresql.org/docs/current/sql-createfunction.html'],
-          discovered: new Date().toISOString(),
-        });
-      }
-    }
-
     // 3. Check for exposed API keys (anon vs service role usage)
     // This is a heuristic check - look for service role key in client-side code
+    this.log('SCAN', '🔍 Checking for exposed service role keys in client code...');
     try {
       const clientFiles = await this.findFiles('**/*.{ts,tsx,js,jsx}', ['node_modules', '.next', 'dist']);
       for (const file of clientFiles) {
         const content = await fs.readFile(file, 'utf-8');
-        if (content.includes('SUPABASE_SERVICE_ROLE_KEY') && file.includes('/app/') || file.includes('/components/')) {
+        if (content.includes('SUPABASE_SERVICE_ROLE_KEY') && (file.includes('/app/') || file.includes('/components/'))) {
           vulnerabilities.push({
             id: `service_key_exposure_${path.basename(file)}`,
             severity: 'critical',
@@ -501,6 +444,8 @@ CREATE POLICY ${table.tablename}_read_org ON ${table.tablename}
     } catch (err) {
       this.log('SCAN', `File scan error: ${err}`);
     }
+
+    this.log('SCAN', `✓ Supabase security scan complete: ${vulnerabilities.length} total vulnerabilities found`);
 
     return vulnerabilities;
   }

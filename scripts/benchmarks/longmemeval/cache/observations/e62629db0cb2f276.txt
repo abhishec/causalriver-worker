@@ -1,0 +1,20 @@
+**Observation Log:**
+
+[SESSION_DATE] 2022/09/01 (Thu) 02:36  
+[FACT] The user is trying to establish a consistent sleep schedule.  
+[USER_PREFERENCE] The user is looking for relaxing activities to do before bed to help wind down.  
+[ASSISTANT_SAID] The assistant provided a list of 15 relaxing activities to help the user unwind before bed, including reading, meditation, listening to soothing music, taking a warm bath, yoga, journaling, drawing, puzzles, progressive muscle relaxation, enjoying a warm beverage, dimming lights, getting fresh air, and practicing gratitude.  
+[USER_CHANGE] The user has been doing some of the suggested activities already, like reading and yoga stretches.  
+[TEMPORAL] The user has been having a cup of herbal tea around 8-8:30 pm every evening.  
+[USER_PREFERENCE] The user finds that having herbal tea has been really helping them relax.  
+[USER_REQUEST] The user asked for recommendations for calming essential oils to use in their bath.  
+[ASSISTANT_SAID] The assistant recommended six calming essential oils for the bath: lavender oil, chamomile oil, bergamot oil, frankincense oil, ylang-ylang oil, and clary sage oil.  
+[ASSISTANT_SAID] The assistant provided instructions on how to use essential oils in the bath, including diluting them in a carrier oil and suggested blends for relaxation.  
+[USER_EVENT] The user is using an app for language exchange sessions on Tuesdays and Thursdays from 9-10 pm.  
+[USER_CHANGE] The user has found the language exchange app helpful in improving their speaking skills.  
+[USER_EVENT] The user hopes to increase the frequency of their language exchange sessions soon.  
+[USER_REQUEST] The user asked for the name of the language exchange app the assistant is using.  
+[ASSISTANT_SAID] The assistant clarified that it does not use apps and is an AI designed to provide information.  
+[ASSISTANT_SAID] The assistant offered to provide more information on various language exchange apps and platforms.  
+[USER_REQUEST] The user expressed a desire to learn more about the app the assistant is using for language exchange sessions.  
+[ASSISTANT_SAID] The assistant reiterated that it does not use apps and asked the user about their experience with the app they are using.

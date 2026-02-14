@@ -1,0 +1,24 @@
+**Observation Log:**
+
+[FACT] User is planning a trip to the Bay Area soon.  
+[FACT] User is checking into the Ritz-Carlton in Half Moon Bay, California, for a friend's wedding today.  
+[RELATIONSHIP] User's friend is getting married.  
+[ASSISTANT_SAID] Half Moon Bay is a beautiful coastal town, and the Ritz-Carlton is an amazing property.  
+[ASSISTANT_SAID] Recommended restaurants near the Ritz-Carlton include:  
+[ASSISTANT_SAID] 1. Navio (inside the Ritz-Carlton) - serves contemporary California cuisine with a focus on fresh seafood and steak.  
+[ASSISTANT_SAID] 2. The Conservatory & Lounge (inside the Ritz-Carlton) - offers light bites, cocktails, and stunning views of the coastline.  
+[ASSISTANT_SAID] 3. Sam's Chowder House - a casual, waterfront spot serving fresh seafood, including their famous cioppino.  
+[ASSISTANT_SAID] 4. Barbara's Fishtrap - a seafood favorite with a cozy atmosphere and outdoor seating.  
+[ASSISTANT_SAID] 5. La Costanera - offers a wide range of Mexican dishes, including seafood, steak, and vegetarian options.  
+[ASSISTANT_SAID] 6. Cetrella Bistro & Café - French-inspired bistro with a focus on locally sourced ingredients.  
+[ASSISTANT_SAID] 7. Half Moon Bay Brewing Company - a spot for craft beer enthusiasts with a menu of gastropub fare.  
+[ASSISTANT_SAID] 8. It's Italia - family-owned restaurant serving pasta dishes, pizzas, and more.  
+[ASSISTANT_SAID] Reservations are highly recommended for these popular restaurants, especially on weekends or during peak season.  
+[USER] User is thinking of grabbing a quick bite before the wedding ceremony.  
+[ASSISTANT_SAID] Recommended options open for lunch near the Ritz-Carlton include:  
+[ASSISTANT_SAID] 1. The Conservatory & Lounge (inside the Ritz-Carlton) - serves light bites and sandwiches during the day.  
+[ASSISTANT_SAID] 2. Navio (inside the Ritz-Carlton) - offers a lunch menu but may be more upscale and time-consuming.  
+[ASSISTANT_SAID] 3. The Coffee Bar (inside the Ritz-Carlton) - offers quick coffee and pastry options.  
+[ASSISTANT_SAID] 4. Room service - an option for a quick bite in the comfort of the room.  
+[ASSISTANT_SAID] 5. Half Moon Bay Coffee Company - local coffee shop with coffee, pastries, and light bites.  
+[ASSISTANT_SAID

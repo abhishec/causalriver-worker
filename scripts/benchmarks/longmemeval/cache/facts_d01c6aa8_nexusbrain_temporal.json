@@ -1,0 +1,64 @@
+{
+  "answer_991d55e5_1": [
+    {
+      "fact": "User is a 32-year-old male",
+      "type": "personal",
+      "entities": [
+        "32-year-old",
+        "male"
+      ]
+    },
+    {
+      "fact": "User is trying to understand the green card application process",
+      "type": "opinion",
+      "entities": [
+        "green card application process"
+      ]
+    },
+    {
+      "fact": "User is interested in the EB-2 visa category",
+      "type": "preference",
+      "entities": [
+        "EB-2 visa category"
+      ]
+    },
+    {
+      "fact": "User holds an advanced degree",
+      "type": "personal",
+      "entities": [
+        "advanced degree"
+      ]
+    }
+  ],
+  "answer_991d55e5_2": [
+    {
+      "fact": "User has been living in the United States for the past five years on a work visa.",
+      "type": "personal",
+      "entities": [
+        "United States",
+        "work visa"
+      ]
+    },
+    {
+      "fact": "User's work visa is sponsored by their company.",
+      "type": "personal",
+      "entities": [
+        "company"
+      ]
+    },
+    {
+      "fact": "User is planning to apply for a green card.",
+      "type": "event",
+      "entities": [
+        "green card"
+      ]
+    },
+    {
+      "fact": "User is seeking information on the EB-2 visa category.",
+      "type": "preference",
+      "entities": [
+        "EB-2 visa category"
+      ]
+    }
+  ]
+}

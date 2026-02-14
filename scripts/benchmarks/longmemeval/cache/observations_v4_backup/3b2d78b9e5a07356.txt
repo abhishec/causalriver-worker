@@ -1,0 +1,32 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/25 (Thu) 00:05  
+[FACT] User is working on a group project for their Database Systems course.  
+[FACT] User is juggling multiple projects at the moment.  
+[PREFERENCE] User is interested in research papers on AI in medical diagnosis, specifically on image classification.  
+[ASSISTANT] Assistant suggested databases and search engines for finding research papers: PubMed, Google Scholar, arXiv, IEEE Xplore, ScienceDirect, ResearchGate, Academia.edu, Microsoft Academic, Semantic Scholar, and Web of Science.  
+[ASSISTANT] Assistant provided specific keywords to refine the search for research papers: "AI in medical imaging," "Image classification in medical diagnosis," "Deep learning for medical image analysis," "Convolutional neural networks (CNNs) for medical image classification," "Medical image segmentation using AI," "AI-assisted diagnosis in [specific disease or condition]."  
+[PREFERENCE] User is interested in popular open-source datasets for medical image classification, especially for diseases like diabetic retinopathy or breast cancer.  
+[ASSISTANT] Assistant recommended popular open-source datasets for medical image classification:  
+1. Kaggle Diabetic Retinopathy Detection  
+2. Messidor-2  
+3. STARE  
+4. DDR  
+5. Cancer Imaging Archive (TCIA)  
+6. Breast Cancer Histopathology Image Classification (BreakHis)  
+7. Digital Database for Screening Mammography (DDSM)  
+8. InBreast  
+9. MIMIC-CXR  
+10. ChestX-ray8  
+11. LUNA16  
+12. ISIC 2019  
+[ASSISTANT] Assistant advised to review licensing terms and conditions for each dataset before use.  
+[PREFERENCE] User is interested in exploring the use of transfer learning models, especially VGG16, for their diabetic retinopathy image classification task.  
+[ASSISTANT] Assistant provided a step-by-step guide on how to fine-tune a pre-trained VGG16 model for the user's specific dataset.  
+[ASSISTANT] Assistant listed common techniques to prevent overfitting when fine-tuning a pre-trained model:  
+1. Data augmentation  
+2. Regularization  
+3. Early stopping  
+4. Dropout  
+5. Batch normalization  
+6. Learning rate scheduling

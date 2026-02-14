@@ -1,0 +1,25 @@
+**Observation Log:**
+
+- [FACT] The user is looking for yoga classes in their area.
+- [PREFERENCE] The user is interested in beginner yoga classes.
+- [EVENT] The user participated in a charity yoga event in April.
+- [TEMPORAL] The user mentioned feeling motivated from the charity yoga event they did in April.
+- [EVENT] The user participated in the "Walk for Cancer" event on May 15th.
+- [PREFERENCE] The user is interested in participating in more charity events.
+- [ASSISTANT_SAID] The assistant suggested searching online for yoga studios by typing "yoga studios near me" or "beginner yoga classes near me" in a search engine.
+- [ASSISTANT_SAID] The assistant recommended using yoga studio directories like YogaFinder, Yoga International, and DoYouYoga to find studios and classes.
+- [ASSISTANT_SAID] The assistant advised checking social media platforms like Facebook and Instagram for local yoga studios.
+- [ASSISTANT_SAID] The assistant suggested asking friends, family, or coworkers for recommendations on good yoga studios.
+- [ASSISTANT_SAID] The assistant mentioned checking with local gyms for yoga classes, especially beginner classes.
+- [ASSISTANT_SAID] The assistant encouraged the user to check studio websites or call them to confirm schedules, prices, and class levels.
+- [ASSISTANT_SAID] The assistant reminded the user to listen to their body and start slowly, especially if they are new to yoga.
+- [ASSISTANT_SAID] The assistant provided suggestions for finding charity events, including using online event calendars like Eventbrite, Meetup, and Facebook Events.
+- [ASSISTANT_SAID] The assistant recommended checking charity websites for upcoming events and volunteer opportunities.
+- [ASSISTANT_SAID] The assistant suggested following local charities on social media to stay updated on events.
+- [ASSISTANT_SAID] The assistant advised checking local newspapers and community boards for charity events.
+- [ASSISTANT_SAID] The assistant mentioned using volunteer matching platforms like VolunteerMatch and Idealist to find opportunities.
+- [ASSISTANT_SAID] The assistant provided steps to research a charity before donating or participating in events, including checking their website, using charity rating websites, verifying 501(c)(3) status, and reviewing financial reports.
+- [ASSISTANT_SAID] The assistant suggested contacting the charity directly for more information.
+- [ASSISTANT_SAID] The assistant mentioned that the user can check their event registration materials for information about the "Walk for Cancer" event.
+- [ASSISTANT_SAID] The assistant provided a list of websites to track charitable donations and volunteer hours, including GivingGrid, DonorPerfect, Network for Good, VolunteerMatch, Bright Funds, and Charity Navigator's Giving Basket.
+- [ASSISTANT_SA

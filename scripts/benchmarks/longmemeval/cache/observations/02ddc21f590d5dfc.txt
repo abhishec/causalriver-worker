@@ -1,0 +1,17 @@
+**Observation Log:**
+
+- [FACT] User is interested in birdwatching.
+- [FACT] User is considering birdwatching around Inverness.
+- [ASSISTANT_SAID] There are many species of birds that can be seen around Inverness, including: Black-throated Diver, Common Sandpiper, Common Redshank, Arctic Tern, Northern Gannet, Black Guillemot, Great Northern Diver, and Red-throated Diver.
+- [ASSISTANT_SAID] The best locations for birdwatching around Inverness are: Loch Ness, The Black Isle, Udale Bay, The River Ness, The Cromarty Firth, The Moray Firth, and The Cairngorms National Park.
+- [ASSISTANT_SAID] Visitors should observe birds from a safe distance using binoculars or a spotting scope and are recommended to visit early in the morning or late in the evening when birds are most active.
+- [PREFERENCE] User finds Loch Ness and the Cairngorms National Park appealing for birdwatching.
+- [ASSISTANT_SAID] There are many guided birdwatching tours available around Inverness, offered by companies such as Highland Nature, Speyside Wildlife, and RSPB Nature Scotland.
+- [ASSISTANT_SAID] Guided tours are led by experienced wildlife guides who have in-depth knowledge of local birdlife and the best places to observe them.
+- [ASSISTANT_SAID] Guided tours can help visitors identify different bird species and provide interesting facts about their behavior and habitat.
+- [ASSISTANT_SAID] Organized tours can take visitors to more remote locations that may be difficult to access on their own.
+- [PREFERENCE] User is interested in booking a guided tour.
+- [ASSISTANT_SAID] The Osprey and Golden Eagle are notable birds that can be seen in the area, along with the Red Kite and Great Northern Diver.
+- [PREFERENCE] User expresses a desire to see the Red Kite and Golden Eagle in person.
+- [ASSISTANT_SAID] The length of guided birdwatching tours around Inverness typically lasts between 2-4 hours, but some may be shorter or last all day or include an overnight camping experience.
+- [ASSISTANT_SAID] It is advisable to check with the tour company ahead of time for tour duration and to ensure it fits into the user's schedule.

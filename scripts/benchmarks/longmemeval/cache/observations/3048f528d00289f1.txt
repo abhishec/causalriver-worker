@@ -1,0 +1,48 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/28 (Sun) 11:23
+- [EVENT] User has been trying to get into a better habit of flossing every day.
+- [FACT] User has a bathroom and is focused on its overall cleanliness.
+- [EVENT] User spent about an hour cleaning the bathroom mirrors and windows two Saturdays ago.
+- [CHANGE] User has replaced an old bathroom scale with a new digital scale from Target about 3 weeks ago.
+- [FACT] User has lost about 2 pounds since using the new scale.
+- [ASSISTANT_SAID] Assistant congratulated the user on developing a good flossing habit and cleaning the bathroom mirrors and windows.
+- [ASSISTANT_SAID] Assistant provided tips for keeping the bathroom organized and clean on a daily basis, including:
+  - Put things back in their place.
+  - Wipe down surfaces.
+  - Sweep or vacuum the floor.
+- [ASSISTANT_SAID] Assistant provided weekly tasks for bathroom cleaning, including:
+  - Clean the mirrors and windows.
+  - Clean the toilet.
+  - Wipe down surfaces with a disinfectant.
+- [ASSISTANT_SAID] Assistant provided bi-weekly tasks for bathroom cleaning, including:
+  - Deep clean the shower/bathtub.
+  - Clean the bathroom trash.
+- [ASSISTANT_SAID] Assistant provided monthly tasks for bathroom cleaning, including:
+  - Deep clean the toilet.
+  - Clean the bathroom cabinets.
+- [ASSISTANT_SAID] Assistant suggested additional tips for maintaining a clean bathroom, including:
+  - Designate a cleaning caddy.
+  - Use a bathroom cleaning schedule.
+  - Keep clutter under control.
+  - Use a microfiber cloth.
+- [EVENT] User has been weighing themselves every morning since getting the new scale.
+- [ASSISTANT_SAID] Assistant congratulated the user on their weight loss progress and provided advice on keeping the bathroom scale clean and accurate, including:
+  - Wipe it down regularly.
+  - Use a gentle cleaning solution.
+  - Avoid harsh chemicals.
+  - Place the scale on a flat surface.
+  - Avoid placing objects on the scale.
+  - Calibrate the scale if necessary.
+  - Use the scale on a hard floor.
+  - Step on the scale correctly.
+- [EVENT] User organized their bathroom cabinet above the sink last Thursday.
+- [ASSISTANT_SAID] Assistant provided advice on how to best store and organize medications and skincare products in the bathroom cabinet, including:
+  - Purge expired or unused medications.
+  - Store medications in their original packaging.
+  - Use a medication organizer.
+  - Keep medications out of reach of children and pets.
+  - Categorize and group similar skincare products.
+  - Use a skincare organizer or tray.
+  - Store products by expiration date.
+  -

@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[FACT] User is looking for new vegan snack ideas.  
+[FACT] User made a vegan quinoa salad for a potluck dinner a few weeks ago, and it was a huge hit.  
+[FACT] User has been making the quinoa salad for themselves a lot lately.  
+[FACT] User is trying to cut down on sugary snack intake.  
+[FACT] User has been relying on tofu and legumes for protein.  
+[TEMPORAL] Session Date: 2023/04/15 (Sat) 06:25.  
+[PREFERENCE] User adds different spices and herbs to their quinoa salad to boost flavor.  
+[PREFERENCE] User thinks the quinoa itself is what really makes the salad.  
+[PREFERENCE] User has been experimenting with different types of crackers, like ancient grain crackers, which they find amazing with hummus or guacamole.  
+[PREFERENCE] User is craving creamy vegan mac and cheese.  
+[EVENT] User has been getting a lot of food delivery from a new vegan restaurant in town.  
+[CHANGE] User has found a reliable spot for comfort food that is vegan-friendly.  
+[ASSISTANT_SAID] Assistant congratulated the user on the success of their vegan quinoa salad at the potluck dinner.  
+[ASSISTANT_SAID] Assistant provided 10 vegan snack ideas, including spicy roasted chickpeas, vegan energy balls, kale chips, trail mix, vegan granola, cauliflower "wings," vegan hummus and veggies, banana "nice" cream, vegan protein bites, and sweet potato fries.  
+[ASSISTANT_SAID] Assistant asked about the user's favorite ingredient or flavor profile in their quinoa salad.  
+[ASSISTANT_SAID] Assistant provided two recipes for homemade crackers: Simple Whole Grain Crackers and Ancient Grain Crackers with Herbs.  
+[ASSISTANT_CREATED] Recipe 1: Simple Whole Grain Crackers includes ingredients like 2 cups whole grain flour, 1/2 cup rolled oats, 1/4 cup olive oil, 1/4 cup water, and 1/2 teaspoon salt, with instructions for preparation.  
+[ASSISTANT_CREATED] Recipe 2: Ancient Grain Crackers with Herbs includes ingredients like 1 cup ancient grain flour, 1/2 cup whole wheat flour, 1/4 cup olive oil, 1/4 cup water, and 1 tablespoon chopped fresh herbs, with instructions for preparation.  
+[ASSISTANT_SAID] Assistant provided two recipes for vegan mac and cheese: Creamy Vegan Mac and Cheese and Cashew-Based Vegan Mac and Cheese.  
+[ASSISTANT_CREATED] Recipe 1: Creamy Vegan Mac and Cheese includes ingredients like 1 pound macaroni, 2 tablespoons olive oil, 1 onion, 2 cloves garlic, 2 cups vegetable broth, 1 cup non-dairy milk, 1/2 cup vegan margarine,

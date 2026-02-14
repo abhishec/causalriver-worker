@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/26 (Fri) 02:06  
+[USER] User requested an explanation of Document Object Model and Document Source Object in detail with points having headings.  
+[ASSISTANT_SAID] Document Object Model (DOM) is a programming interface for HTML and XML documents.  
+[ASSISTANT_SAID] The DOM represents the structure of a document as a tree of nodes, where each node represents an element or a piece of text.  
+[ASSISTANT_SAID] The DOM allows developers to access and manipulate the elements, attributes, and content of a document.  
+[ASSISTANT_SAID] The DOM can be used to change the layout, style, or content of a webpage in response to user interactions or other events.  
+[ASSISTANT_SAID] Document Source Object (DSO) is a specific type of DOM object that represents a source document, such as an HTML or XML file.  
+[ASSISTANT_SAID] The DSO allows developers to access and manipulate the source code of a document, in addition to its structure and content.  
+[ASSISTANT_SAID] The DSO can be used to dynamically generate or modify the source code of a webpage before it is rendered by the browser.  
+[ASSISTANT_SAID] The DSO is a Microsoft-specific implementation and is not part of any official web standards.  
+[ASSISTANT_SAID] The DSO is available in Internet Explorer but not in any other browser.  
+[ASSISTANT_SAID] Since the DSO is not cross-browser compatible, it is not recommended to use it in production.  
+[USER] User requested an explanation of Cascading Style Sheet in detail in points with each point having headings.  
+[ASSISTANT_SAID] Cascading Style Sheets (CSS) is a stylesheet language used for describing the presentation of a document written in a markup language.  
+[ASSISTANT_SAID] CSS separates the presentation of a document from its structure and content, allowing for greater flexibility and maintainability of webpages.  
+[ASSISTANT_SAID] CSS uses a set of rules, known as styles, to specify how elements in a document should be rendered, including color, font, spacing, and layout.  
+[ASSISTANT_SAID] Styles are applied to elements in a document using selectors, which identify the elements to which the styles should be applied.  
+[ASSISTANT_SAID] Each style consists of a set of properties, which specify the visual characteristics of the elements.  
+[ASSISTANT_SAID] When styles are applied to an element, they are also inherited by its descendants, unless explicitly overridden.  
+[ASSISTANT_SAID] The "cascading" in CSS refers to the way that styles are applied

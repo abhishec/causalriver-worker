@@ -1,0 +1,20 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/28 (Sun) 09:36  
+[EVENT] User has a Financial Management final exam tomorrow.  
+[EVENT] The exam includes calculations related to cost of debt, cost of capital (CAPM method), WACC, NPV, and DCF.  
+[ASSISTANT_SAID] The user provided a sample question regarding pro forma net income calculation for Crissy Field Corporation.  
+[FACT] The income statement for Crissy Field Corporation includes the following amounts (in millions): Total revenue $31,683.5, Cost of revenue $20,947.5, Gross profit $10,736.0, Total operating expenses $8,100.0, Operating income or loss $2,636.0, Other income/(expenses) $11.0, Earnings before interest and taxes $2,647.0, Interest expense $334.7, Income before tax $2,312.3, Income tax expense $809.3, Net income $1,503.0.  
+[ASSISTANT_SAID] The assistant calculated the New Earnings Before Interest and Taxes (EBIT) as approximately $2,831.29 million after applying a 7% growth rate.  
+[ASSISTANT_SAID] The assistant stated that the New Interest Expense remains the same at $334.7 million.  
+[ASSISTANT_SAID] The New Income Before Tax was calculated as approximately $2,496.59 million.  
+[ASSISTANT_SAID] The New Income Tax Expense was calculated as approximately $873.31 million.  
+[ASSISTANT_SAID] The New Net Income was calculated as approximately $1,623.28 million.  
+[ASSISTANT_SAID] The closest amount to the pro forma net income for the next year is c. $1,623.43 million.  
+[USER] User asked why the assistant did not multiply New Income Before Tax by (1 + Sales Growth Rate).  
+[ASSISTANT_SAID] The assistant explained that multiplying New Income Before Tax by (1 + Sales Growth Rate) would be incorrect as it would not properly account for the growth in individual components of the income statement.  
+[USER] User asked if it is wrong to multiply New Income Before Tax by (1 + Sales Growth Rate) at the very beginning of the calculation process.  
+[ASSISTANT_SAID] The assistant confirmed that it would be incorrect to multiply New Income Before Tax by (1 + Sales Growth Rate) at the beginning of the calculation process.  
+[USER] User provided another question related to the Balanced Scorecard approach of performance management.  
+[ASSISTANT_SAID] The assistant identified that the measurement in the Learning and Growth Perspective would be a. Develop employee training programs.  
+[USER] User reiterated a previous statement

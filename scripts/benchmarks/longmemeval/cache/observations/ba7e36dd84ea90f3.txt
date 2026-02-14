@@ -1,0 +1,61 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/25 (Thu) 23:28
+- [ASSISTANT_SAID] The `useEffect()` function may not be called due to an issue with the dependencies array.
+- [ASSISTANT_SAID] The `useEffect()` hook has an empty dependencies array, meaning it will only run once when the component first mounts.
+- [ASSISTANT_SAID] To ensure `useEffect()` re-runs when the component updates, add `template` to the dependencies array.
+- [ASSISTANT_SAID] Suggested code snippet for `useEffect()` with `template` in the dependencies array:
+  ```scss
+  useEffect(() => {
+    axios.get('http://localhost:8080/template')
+      .then(response => {
+        setTemplate(response.data);
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  }, [template]);
+  ```
+- [ASSISTANT_SAID] Mentioned that CORS issues might prevent the server from responding if it's on a different domain or port.
+- [ASSISTANT_SAID] Suggested adding console.log statements to debug the `useEffect()` function.
+- [ASSISTANT_SAID] Provided a code snippet to add console.log statements for debugging:
+  ```scss
+  useEffect(() => {
+    console.log('useEffect called');
+    axios.get('http://localhost:8080/template')
+      .then(response => {
+        console.log(response.data);
+        setTemplate(response.data);
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  }, []);
+  ```
+- [USER] Confirmed that the `useEffect()` function is never called, not even once.
+- [ASSISTANT_SAID] Suggested checking if the component is mounted in the DOM by adding a console.log statement inside the component function.
+- [ASSISTANT_SAID] Provided a code snippet to check if the component is mounted:
+  ```javascript
+  function App() {
+    console.log('App component mounted');
+    // rest of the code
+  }
+  ```
+- [ASSISTANT_SAID] Recommended checking that the component is rendered by the root React element in `index.js`.
+- [ASSISTANT_SAID] Provided a code snippet for `index.js` to ensure the App component is rendered correctly:
+  ```javascript
+  import React from 'react';
+  import ReactDOM from 'react-dom';
+  import App from './App';
+
+  ReactDOM.render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>,
+    document.getElementById('root')
+  );
+  ```
+- [USER] Shared the content of their `index.js` file, which included:
+  ```javascript
+  import React from 'react';
+  import ReactDOM from 'react-dom/client';

@@ -1,0 +1,23 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/28 (Sun) 07:46
+- [RELATIONSHIP] User has a sister who is having a baby boy in April.
+- [EVENT] User is looking for advice on what to get their sister for her baby shower gift.
+- [ASSISTANT_SAID] Assistant congratulated the user’s sister and provided gift suggestions for a baby boy.
+- [ASSISTANT_SAID] Suggested clothing items: onesies or baby bodysuits, footed rompers or sleepers, and baby boy outfits.
+- [ASSISTANT_SAID] Suggested toys and activities: soft toys or plushies, rattles or squeaky toys, and a baby gym or playmat.
+- [ASSISTANT_SAID] Suggested baby essentials: diapering essentials (diapers, wipes, diaper bag), baby blankets, and a baby bath set.
+- [ASSISTANT_SAID] Suggested personalized gifts: engraved baby blanket or onesie, and a personalized baby book.
+- [ASSISTANT_SAID] Suggested practical items: baby carrier or sling, baby monitor, and breast pump or nursing accessories.
+- [ASSISTANT_SAID] Suggested other ideas: gift card to a baby store or online marketplace, meal delivery service gift card, and a self-care gift for the sister.
+- [ASSISTANT_SAID] Advised checking with the sister for specific preferences or needs before the baby shower.
+- [EVENT] User was thinking of making a diaper cake for the baby shower gift.
+- [ASSISTANT_SAID] Assistant provided a simple tutorial for making a diaper cake.
+- [ASSISTANT_CREATED] Diaper cake recipe included materials needed, steps for creating layers, decorating tips, and assembly/display suggestions.
+- [EVENT] User expressed interest in learning more about the adoption process.
+- [ASSISTANT_SAID] Assistant provided information on the average time to get matched with a birth mother, noting factors that influence the timeline.
+- [ASSISTANT_SAID] Average wait time for domestic adoption ranges from a few months to several years, depending on various factors.
+- [ASSISTANT_SAID] Average wait time for international adoption also ranges from 1-5 years, depending on the country and program.
+- [ASSISTANT_SAID] Provided average costs for domestic adoption: $30,000 to $50,000 for agency adoption, $20,000 to $40,000 for private adoption, and $0 to $5,000 for foster care adoption.
+- [ASSISTANT_SAID] Provided average costs for international adoption: $30,000 to $50,000 for agency adoption and $20,000 to $40,000 for independent adoption.
+- [RELATIONSHIP] User's best friend is named Sarah, and her husband is

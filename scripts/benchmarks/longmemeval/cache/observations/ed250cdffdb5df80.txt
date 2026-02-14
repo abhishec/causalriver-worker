@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/03/15 (Wed) 23:38  
+[FACT] User is looking for resources to improve their Python skills.  
+[PREFERENCE] User is interested in online courses or tutorials on machine learning with Python.  
+[ASSISTANT_SAID] Python is an excellent language for machine learning, and there are many fantastic resources available online.  
+[ASSISTANT_SAID] Recommended courses include:  
+[ASSISTANT_SAID] 1. Andrew Ng's Machine Learning Course (Coursera): Covers the basics of ML with Python implementation.  
+[ASSISTANT_SAID] 2. Python Machine Learning (DataCamp): Covers Python basics, data preprocessing, and popular ML libraries like scikit-learn and TensorFlow.  
+[ASSISTANT_SAID] 3. Machine Learning with Python (edX): A 4-course series by Microsoft covering ML fundamentals, regression, classification, and clustering with Python.  
+[ASSISTANT_SAID] 4. Deep Learning with Python (DataCamp): Focuses on deep learning concepts using Keras and TensorFlow.  
+[ASSISTANT_SAID] 5. Python for Data Science and Machine Learning (IBM Data Science Experience): Covers Python basics, data science, and ML with hands-on exercises.  
+[ASSISTANT_SAID] Recommended tutorials and guides include:  
+[ASSISTANT_SAID] 1. Scikit-learn Tutorials: Official tutorials covering various ML algorithms and techniques.  
+[ASSISTANT_SAID] 2. TensorFlow Tutorials: Official tutorials covering deep learning concepts and implementation.  
+[ASSISTANT_SAID] 3. Keras Tutorials: Official tutorials for Keras, a popular deep learning library.  
+[ASSISTANT_SAID] 4. Python Machine Learning Tutorial (Google Developers): A comprehensive tutorial covering ML basics, data preprocessing, and model evaluation.  
+[ASSISTANT_SAID] 5. Machine Learning with Python (Real Python): A free, in-depth tutorial covering ML concepts, data preprocessing, and model deployment.  
+[ASSISTANT_SAID] Recommended practice and projects include:  
+[ASSISTANT_SAID] 1. Kaggle: A platform for ML competitions and hosting datasets.  
+[ASSISTANT_SAID] 2. Python Machine Learning Projects (GitHub): A collection of ML projects to practice and learn from.  
+[ASSISTANT_SAID] 3. Machine Learning with Python (Kaggle dataset): A dataset with various ML problems to practice and solve.  
+[ASSISTANT_SAID] Recommended books include:  
+[ASSISTANT_SAID] 1. Python Machine Learning by Sebastian Raschka: A comprehensive book covering ML concepts and implementation with Python.  
+[ASSIST

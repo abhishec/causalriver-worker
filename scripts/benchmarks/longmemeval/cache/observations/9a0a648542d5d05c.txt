@@ -1,0 +1,28 @@
+**Observation Log:**
+
+[FACT] User is planning a trip to Chicago.  
+[FACT] User loved the MoMA in New York City when they visited last month.  
+[EVENT] User is planning to visit the 360 Chicago Observation Deck for panoramic views of the city.  
+[EVENT] User is also planning to visit the Willis Tower Skydeck.  
+[EVENT] User just got back from a solo trip to New York City last month.  
+[EVENT] User is planning to meet up with a friend from college who now lives in Chicago.  
+[EVENT] User and their friend are going to grab brunch at a trendy spot in SoHo in NYC.  
+[CHANGE] User clarified that SoHo is in NYC, not Chicago.  
+[RELATIONSHIP] User has a friend from college who now lives in Chicago.  
+[PREFERENCE] User enjoys exploring museums.  
+[PREFERENCE] User is interested in brunch spots in Wicker Park or Bucktown.  
+[ASSISTANT_SAID] Chicago has a comprehensive public transportation system, including the 'L' train, buses, ride-hailing services, water taxis, Divvy bikes, and walking.  
+[ASSISTANT_SAID] The 'L' train has eight different lines covering most areas of the city.  
+[ASSISTANT_SAID] User can use the Ventra app or a Ventra card to pay for fares.  
+[ASSISTANT_SAID] Chicago's public transportation system includes options like Uber, Lyft, traditional taxis, and water taxis during summer months.  
+[ASSISTANT_SAID] Divvy is a bike-sharing system with stations throughout the city.  
+[ASSISTANT_SAID] User should download the Ventra app for fare purchases and route planning.  
+[ASSISTANT_SAID] User can check the CTA's website for up-to-date schedules and service alerts.  
+[ASSISTANT_SAID] User can consider purchasing a Visitor Pass for unlimited rides on buses and trains for a set period (1-7 days).  
+[ASSISTANT_SAID] User should be prepared for crowds during rush hour (7-9 am and 4-6 pm, Monday-Friday).  
+[ASSISTANT_SAID] User should validate their Ventra card or ticket before boarding.  
+[ASSISTANT_SAID] User should stand on the right side of escalators and stairs to allow others to pass.  
+[ASSISTANT_SAID] User should be aware of their surroundings, especially in crowded areas.  
+[ASSISTANT_SAID] The 360 Chicago Observation Deck is located on the 94th floor of the John Hancock Center.  
+[ASSISTANT_SAID] The view from 360 Chicago includes 360-degree views of Chicago's skyline, Lake Michigan, and surrounding areas.  
+[ASSISTANT_SAID] The TILT experience

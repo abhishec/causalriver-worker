@@ -1,0 +1,71 @@
+{
+  "answer_fa08bf49_1": [
+    {
+      "fact": "User is looking for tips on increasing engagement on social media platforms.",
+      "type": "opinion",
+      "entities": [
+        "social media",
+        "engagement"
+      ]
+    },
+    {
+      "fact": "User has experimented with different content types.",
+      "type": "preference",
+      "entities": [
+        "content types"
+      ]
+    },
+    {
+      "fact": "User recently hosted a Facebook Live session about cooking vegan recipes.",
+      "type": "event",
+      "entities": [
+        "Facebook Live",
+        "vegan recipes"
+      ]
+    },
+    {
+      "fact": "User received 12 comments on their recent Facebook Live session.",
+      "type": "event",
+      "entities": [
+        "12 comments",
+        "Facebook Live"
+      ]
+    }
+  ],
+  "answer_fa08bf49_2": [
+    {
+      "fact": "User is trying to improve their social media strategy",
+      "type": "opinion",
+      "entities": [
+        "social media strategy"
+      ]
+    },
+    {
+      "fact": "User has a YouTube channel",
+      "type": "personal",
+      "entities": [
+        "YouTube channel"
+      ]
+    },
+    {
+      "fact": "User's most popular video is about social media analytics",
+      "type": "event",
+      "entities": [
+        "social media analytics"
+      ]
+    },
+    {
+      "fact": "User has received quite a few comments on their popular video",
+      "type": "event",
+      "entities": [
+        "comments",
+        "popular video"
+      ]
+    },
+    {
+      "fact": "User wants to keep the momentum going with their content",
+      "type": "opinion",
+      "entities": []
+    }
+  ]
+}

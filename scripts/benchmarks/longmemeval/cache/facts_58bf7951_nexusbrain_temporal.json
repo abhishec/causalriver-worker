@@ -1,0 +1,57 @@
+{
+  "answer_355c48bb": [
+    {
+      "fact": "User recently tried a new Italian restaurant downtown and found it pretty good",
+      "type": "event",
+      "entities": [
+        "Italian restaurant",
+        "downtown"
+      ]
+    },
+    {
+      "fact": "User is looking for recommendations for local Italian restaurants",
+      "type": "preference",
+      "entities": [
+        "Italian restaurants"
+      ]
+    },
+    {
+      "fact": "User recently attended a play at the local community theater",
+      "type": "event",
+      "entities": [
+        "play",
+        "local community theater"
+      ]
+    },
+    {
+      "fact": "User was impressed by the lead actress's performance in the play",
+      "type": "opinion",
+      "entities": [
+        "lead actress",
+        "performance"
+      ]
+    },
+    {
+      "fact": "User has a friend named Emily who is an aspiring actress",
+      "type": "relationship",
+      "entities": [
+        "Emily"
+      ]
+    },
+    {
+      "fact": "User plans to encourage Emily to audition for a role",
+      "type": "opinion",
+      "entities": [
+        "Emily",
+        "audition"
+      ]
+    },
+    {
+      "fact": "User attended a production of The Glass Menagerie",
+      "type": "event",
+      "entities": [
+        "The Glass Menagerie"
+      ]
+    }
+  ]
+}

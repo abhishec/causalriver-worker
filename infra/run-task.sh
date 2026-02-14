@@ -15,22 +15,39 @@ CLUSTER_NAME="nexusbrain-training"
 PROCESS="${1:-}"
 
 if [ -z "${PROCESS}" ]; then
-  echo "Usage: ./infra/run-task.sh <trainer|consolidation|dmn|benchmark|git-trainer|cost-agent|orchestrator|weekly|monthly>"
+  echo "Usage: ./infra/run-task.sh <process>"
+  echo ""
+  echo "Available processes:"
+  echo "  trainer          Autonomous Trainer (every 6h)"
+  echo "  consolidation    Brain Consolidation (daily 2 AM)"
+  echo "  dmn              DMN Scan (every 4h)"
+  echo "  benchmark        LongMemEval Benchmark (Sunday 5 AM)"
+  echo "  benchmark-optimizer  Benchmark Optimizer (Python)"
+  echo "  git-trainer      Git Code Trainer (Sunday 2 AM)"
+  echo "  cost-agent       Cost Agent (daily 3 AM)"
+  echo "  weekly           Weekly Brain Scan (Sunday 4 AM)"
+  echo "  monthly          Monthly Deep Analysis (1st of month)"
+  echo "  federation       Federation Agent (every 6h)"
+  echo "  security         Security Hardening (daily 4 AM)"
+  echo "  orchestrator     Brain Orchestrator (continuous)"
   exit 1
 fi
 
 case "${PROCESS}" in
-  trainer)       TASK_DEF="nexusbrain-trainer" ;;
-  consolidation) TASK_DEF="nexusbrain-consolidation" ;;
-  dmn)           TASK_DEF="nexusbrain-dmn" ;;
-  benchmark)     TASK_DEF="nexusbrain-benchmark" ;;
-  git-trainer)   TASK_DEF="nexusbrain-git-trainer" ;;
-  cost-agent)    TASK_DEF="nexusbrain-cost-agent" ;;
-  orchestrator)  TASK_DEF="nexusbrain-orchestrator" ;;
-  weekly)        TASK_DEF="nexusbrain-weekly" ;;
-  monthly)       TASK_DEF="nexusbrain-monthly" ;;
+  trainer)              TASK_DEF="nexusbrain-trainer" ;;
+  consolidation)        TASK_DEF="nexusbrain-consolidation" ;;
+  dmn)                  TASK_DEF="nexusbrain-dmn" ;;
+  benchmark)            TASK_DEF="nexusbrain-benchmark" ;;
+  benchmark-optimizer)  TASK_DEF="nexusbrain-benchmark-optimizer" ;;
+  git-trainer)          TASK_DEF="nexusbrain-git-trainer" ;;
+  cost-agent)           TASK_DEF="nexusbrain-cost-agent" ;;
+  orchestrator)         TASK_DEF="nexusbrain-orchestrator" ;;
+  weekly)               TASK_DEF="nexusbrain-weekly" ;;
+  monthly)              TASK_DEF="nexusbrain-monthly" ;;
+  federation)           TASK_DEF="nexusbrain-federation" ;;
+  security)             TASK_DEF="nexusbrain-security" ;;
   *)
-    echo "ERROR: Unknown process '${PROCESS}'. Use: trainer, consolidation, dmn, benchmark, git-trainer, cost-agent, orchestrator, weekly, or monthly"
+    echo "ERROR: Unknown process '${PROCESS}'. Run without arguments to see available processes."
     exit 1
     ;;
 esac

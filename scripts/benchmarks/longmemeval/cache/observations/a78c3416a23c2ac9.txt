@@ -1,0 +1,27 @@
+**Observation Log:**
+
+[SESSION_DATE] 2023/03/02 (Thu) 00:53  
+[FACT] User is planning a trip to Atlanta for Easter.  
+[EVENT] User is flying into Atlanta on April 10th.  
+[EVENT] User is looking forward to trying out some restaurants in Atlanta.  
+[CHANGE] User opted to pay an extra $30 to choose their seat for the flight.  
+[FACT] User's flight seat is 14A on the way to Atlanta and 17C on the way back.  
+[ASSISTANT_SAID] Recommended restaurants in Atlanta include:  
+[ASSISTANT_CREATED] Southern Comfort Food: Mary Mac's Tea Room, The Busy Bee Cafe, Paschal's Restaurant.  
+[ASSISTANT_CREATED] Barbecue: Fox Bros. Bar-B-Q, Sweet Auburn Barbecue.  
+[ASSISTANT_CREATED] Global Cuisine: Antico Pizza Napoletana, B's Cracklin' BBQ, Umi.  
+[ASSISTANT_CREATED] Breakfast and Brunch: The Flying Biscuit Cafe, Home Grown GA.  
+[ASSISTANT_CREATED] Fine Dining: The Optimist, St. Cecilia, Empire State South.  
+[ASSISTANT_CREATED] Other Recommendations: The Varsity, Ponce City Market, Krog Street Market.  
+[ASSISTANT_SAID] Suggested activities for Easter weekend in Atlanta include:  
+[ASSISTANT_CREATED] Easter Egg Hunts and Events: Atlanta Easter Egg Hunt, Zoo Atlanta's Easter Eggstravaganza, Children's Museum of Atlanta's Easter Eggstravaganza.  
+[ASSISTANT_CREATED] Other Spring Activities: Cherry Blossom Festival, Piedmont Park, Atlanta Botanical Garden.  
+[ASSISTANT_CREATED] Indoor Activities: World of Coca-Cola, Georgia Aquarium, Fernbank Museum of Natural History.  
+[ASSISTANT_CREATED] Other Ideas: Atlanta BeltLine, Martin Luther King Jr. National Historical Park, exploring neighborhoods like Inman Park, Little Five Points, or Virginia-Highland.  
+[EVENT] User is considering using United miles to book a flight to Hawaii later this year.  
+[ASSISTANT_SAID] Recommended must-see attractions and activities on Maui include:  
+[ASSISTANT_CREATED] Natural Wonders: Haleakala National Park, Road to Hana, Molokini Crater, Iao Valley State Park.  
+[ASSISTANT_CREATED] Beaches and Water Activities: Kaanapali Beach, Honolua Bay, Lahaina, Molokai Ferry.  
+[ASSISTANT_CREATED] Cultural Experiences: Luau, Haleakala Ranch, Bailey House Museum, Old Lahaina Luau.  
+[ASSISTANT_CREATED] Outdoor Adventures: Haleakala Downhill Bike Tour, Ziplining, Horseback Riding, Snorkeling or Scuba Diving.  
+[ASSISTANT_SAID] Suggested tips for Maui include renting a car and trying local cuisine.

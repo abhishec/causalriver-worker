@@ -1,0 +1,24 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/23 (Tue) 00:02
+- [ASSISTANT_SAID] The proposed system includes a novel and non-obvious method of scanning submitted documents and verifying their authenticity.
+- [ASSISTANT_SAID] The system uses advanced optical character recognition (OCR) technology to scan the documents and extract relevant information, such as the business name, tax identification number, and income tax return details.
+- [ASSISTANT_SAID] The extracted information is then cross-referenced with the verifiable credentials stored on the blockchain to verify the authenticity and validity of the documents.
+- [ASSISTANT_SAID] This verification is done through the use of a digital signature and encryption to ensure that the information cannot be tampered with or falsified.
+- [ASSISTANT_SAID] The system includes machine learning algorithms to identify patterns and anomalies in the documents that may indicate fraud or errors.
+- [ASSISTANT_SAID] If any discrepancies are found, the system alerts the appropriate government agency for further investigation.
+- [ASSISTANT_SAID] Once the documents have been verified, they are stored on the blockchain for future reference.
+- [ASSISTANT_SAID] This ensures that the documents are secure and tamper-proof, minimizing the risk of fraud and errors in the issuance process.
+- [ASSISTANT_SAID] The algorithm for scanning and verifying the authenticity of submitted documents includes six steps: 
+  1. Scan the submitted documents using advanced OCR technology to extract relevant information.
+  2. Cross-reference the extracted information with the verifiable credentials stored on the blockchain.
+  3. Use digital signature and encryption to ensure that the information cannot be tampered with or falsified.
+  4. Use machine learning algorithms to identify patterns and anomalies in the documents.
+  5. If any discrepancies are found, alert the appropriate government agency for further investigation.
+  6. Store the verified documents on the blockchain for future reference.
+- [ASSISTANT_SAID] This method of scanning and verifying the authenticity of submitted documents is novel and non-obvious as it uses advanced technology and machine learning.
+- [ASSISTANT_SAID] By storing the documents on the blockchain, the system provides a tamper-proof and secure method of storing and accessing documents, which is not currently available in the traditional paper-based system.
+- [USER] Include options where:
+  1. The documents can be submitted online.
+  2. If the documents to be verified are not yet stored in the blockchain, the request is sent and has to be approved by an authorized government agency such as the BIR for the income tax return or the office of permits and licenses for the business permit document.
+  3. Once approved and verified by the concerned agency, integrate automatic storing of the said verified documents

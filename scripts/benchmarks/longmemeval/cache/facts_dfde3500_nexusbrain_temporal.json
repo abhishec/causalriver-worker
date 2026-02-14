@@ -1,0 +1,60 @@
+{
+  "answer_35d6c0be_1": [
+    {
+      "fact": "User has a language exchange class with Juan",
+      "type": "event",
+      "entities": [
+        "language exchange class",
+        "Juan"
+      ]
+    },
+    {
+      "fact": "User meets with Juan in the evening",
+      "type": "event",
+      "entities": [
+        "Juan"
+      ]
+    },
+    {
+      "fact": "User usually has dinner plans with friends on Thursdays",
+      "type": "preference",
+      "entities": [
+        "dinner plans",
+        "friends",
+        "Thursdays"
+      ]
+    }
+  ],
+  "answer_35d6c0be_2": [
+    {
+      "fact": "User is planning a trip to Colombia",
+      "type": "event",
+      "entities": [
+        "Colombia"
+      ]
+    },
+    {
+      "fact": "User has a language exchange session with their tutor Maria",
+      "type": "event",
+      "entities": [
+        "Maria"
+      ]
+    },
+    {
+      "fact": "User is meeting Maria on Thursday",
+      "type": "event",
+      "entities": [
+        "Thursday",
+        "Maria"
+      ]
+    },
+    {
+      "fact": "User wants to learn common phrases in Spanish for shopping",
+      "type": "preference",
+      "entities": [
+        "Spanish",
+        "shopping"
+      ]
+    }
+  ]
+}

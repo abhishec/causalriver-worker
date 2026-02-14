@@ -1,0 +1,118 @@
+{
+  "answer_8c64ce26_2": [
+    {
+      "fact": "User completed the Spring Sprint Triathlon",
+      "type": "event",
+      "entities": [
+        "Spring Sprint Triathlon"
+      ]
+    },
+    {
+      "fact": "User participated in a triathlon that included a 20K bike ride",
+      "type": "event",
+      "entities": [
+        "20K bike ride"
+      ]
+    },
+    {
+      "fact": "User is looking for new bike routes to try out",
+      "type": "preference",
+      "entities": [
+        "bike routes"
+      ]
+    },
+    {
+      "fact": "User is interested in exploring the waterfront path",
+      "type": "preference",
+      "entities": [
+        "waterfront path"
+      ]
+    },
+    {
+      "fact": "User is eager to get back on their bike after the triathlon",
+      "type": "opinion",
+      "entities": [
+        "bike"
+      ]
+    }
+  ],
+  "answer_8c64ce26_1": [
+    {
+      "fact": "User finished a 5K run with a personal best time of 27 minutes and 42 seconds",
+      "type": "event",
+      "entities": [
+        "5K run",
+        "27 minutes and 42 seconds"
+      ]
+    },
+    {
+      "fact": "User participated in the Midsummer 5K Run",
+      "type": "event",
+      "entities": [
+        "Midsummer 5K Run"
+      ]
+    },
+    {
+      "fact": "User is looking for new running shoes",
+      "type": "preference",
+      "entities": [
+        "running shoes"
+      ]
+    },
+    {
+      "fact": "User is interested in upgrading their running gear",
+      "type": "preference",
+      "entities": [
+        "running gear"
+      ]
+    },
+    {
+      "fact": "User is a serious recreational runner",
+      "type": "personal",
+      "entities": [
+        "recreational runner"
+      ]
+    }
+  ],
+  "answer_8c64ce26_3": [
+    {
+      "fact": "User is participating in the company's annual charity soccer tournament today.",
+      "type": "event",
+      "entities": [
+        "charity soccer tournament"
+      ]
+    },
+    {
+      "fact": "User is looking for tips on injury prevention and recovery strategies for soccer players.",
+      "type": "opinion",
+      "entities": [
+        "injury prevention",
+        "recovery strategies",
+        "soccer players"
+      ]
+    },
+    {
+      "fact": "User is a recreational soccer player.",
+      "type": "personal",
+      "entities": [
+        "recreational soccer player"
+      ]
+    },
+    {
+      "fact": "User wants to take care of themselves during the tournament.",
+      "type": "preference",
+      "entities": [
+        "self-care"
+      ]
+    },
+    {
+      "fact": "User is interested in improving their soccer skills, specifically shooting and dribbling.",
+      "type": "preference",
+      "entities": [
+        "soccer skills",
+        "shooting",
+        "dribbling"
+      ]
+    }
+  ]
+}

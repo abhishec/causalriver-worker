@@ -1,0 +1,53 @@
+{
+  "answer_743f03a1_1": [
+    {
+      "fact": "User is looking for recipe ideas that feature fresh tomatoes as the main ingredient.",
+      "type": "preference",
+      "entities": [
+        "fresh tomatoes",
+        "recipe ideas"
+      ]
+    },
+    {
+      "fact": "User plans to try Bruschetta and Tomato and Mozzarella Salad recipes first.",
+      "type": "preference",
+      "entities": [
+        "Bruschetta",
+        "Tomato and Mozzarella Salad"
+      ]
+    },
+    {
+      "fact": "User is interested in tips on how to store fresh tomatoes to keep them fresh for a longer period.",
+      "type": "preference",
+      "entities": [
+        "fresh tomatoes",
+        "storage tips"
+      ]
+    }
+  ],
+  "answer_743f03a1_2": [
+    {
+      "fact": "User is planning meals for the week.",
+      "type": "event",
+      "entities": [
+        "meal planning"
+      ]
+    },
+    {
+      "fact": "User is growing their own cucumbers in their garden.",
+      "type": "personal",
+      "entities": [
+        "cucumbers",
+        "garden"
+      ]
+    },
+    {
+      "fact": "User has 3 cucumber plants that are producing a lot of cucumbers.",
+      "type": "personal",
+      "entities": [
+        "3 cucumber plants",
+        "cucumbers"
+      ]
+    }
+  ]
+}

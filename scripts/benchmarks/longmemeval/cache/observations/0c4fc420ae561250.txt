@@ -1,0 +1,48 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/29 (Mon) 22:30  
+[USER] User inquired about functions common to ERC-721 and custom functions in a smart contract.  
+[USER] User provided a list of functions in a smart contract.  
+[USER] Functions listed by user:  
+- e4b8c38d => buyAlbum(bytes32[])  
+- 8d0eb9f7 => buySong(bytes32[])  
+- 26092b83 => publicMint()  
+- e64e51dc => destroyPublic(uint256,uint256)  
+- 692b15a3 => claimAlbum(uint256,uint256)  
+- c87b56dd => tokenURI(uint256)  
+- 4f1c3244 => setImportantURIs(string,string)  
+- e0052d7c => reclaimERC20Token(address)  
+- 6b7d2470 => reclaimERC721(address,uint256)  
+- 9ee64d6b => setStartTimes(uint256,uint256,uint256,uint256)  
+- 75edcbe0 => setMerkleRoot(bytes32,bytes32)  
+- fce57fd9 => setArtistWallet(address)  
+- a7ccabdf => setNFTContract(address)  
+- 8f2fc60b => setRoyalty(address,uint96)  
+- c1ba4e59 => setQuorum(uint256)  
+- ac1251e0 => setPricePerToken(uint256,uint256)  
+- 613e9ee4 => setSplitsWallet(address)  
+- 3bb16654 => withdrawToSplits()  
+- 7d48441f => _isContract(address)  
+- 98995f77 => _startTokenId()  
+- 01ffc9a7 => supportsInterface(bytes4)  
+- 280527e8 => isProofValid(address,uint256,bytes32[])  
+- 8e4a8ebf => isProofValid2(address,uint256,bytes32[])  
+[ASSISTANT_SAID] Assistant explained that ERC-721 is a standard for non-fungible tokens (NFTs) on the Ethereum blockchain.  
+[ASSISTANT_SAID] Assistant stated that the functions listed by the user are not part of the ERC-721 standard and are likely custom functions.  
+[ASSISTANT_SAID] Assistant provided a list of required functions defined by the ERC-721 standard:  
+- name  
+- symbol  
+- totalSupply  
+- balanceOf  
+- ownerOf  
+- approve  
+- getApproved  
+- setApprovalForAll  
+- isApprovedForAll  
+- transferFrom  
+[ASSISTANT_SAID] Assistant mentioned optional functions defined by the ERC-721 standard:  
+- mint  
+- burn  
+- metadata  
+- enumerable  
+[USER

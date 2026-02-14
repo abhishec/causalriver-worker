@@ -1,0 +1,89 @@
+{
+  "answer_923c0221_1": [
+    {
+      "fact": "User is looking to improve skills in natural language processing and deep learning.",
+      "type": "preference",
+      "entities": [
+        "natural language processing",
+        "deep learning"
+      ]
+    },
+    {
+      "fact": "User has completed some courses on Coursera.",
+      "type": "personal",
+      "entities": [
+        "Coursera"
+      ]
+    },
+    {
+      "fact": "User has a good foundation in natural language processing and deep learning.",
+      "type": "personal",
+      "entities": []
+    },
+    {
+      "fact": "User is interested in online courses and tutorials focused on deep learning for natural language processing.",
+      "type": "preference",
+      "entities": [
+        "deep learning",
+        "natural language processing"
+      ]
+    },
+    {
+      "fact": "User is particularly interested in text classification and sentiment analysis.",
+      "type": "preference",
+      "entities": [
+        "text classification",
+        "sentiment analysis"
+      ]
+    }
+  ],
+  "answer_923c0221_2": [
+    {
+      "fact": "User is looking to explore more online courses to improve data science skills.",
+      "type": "preference",
+      "entities": [
+        "online courses",
+        "data science skills"
+      ]
+    },
+    {
+      "fact": "User is specifically interested in natural language processing and deep learning.",
+      "type": "preference",
+      "entities": [
+        "natural language processing",
+        "deep learning"
+      ]
+    },
+    {
+      "fact": "User has completed two courses on edX.",
+      "type": "event",
+      "entities": [
+        "edX",
+        "two courses"
+      ]
+    },
+    {
+      "fact": "User finds the courses on edX helpful in their current role.",
+      "type": "opinion",
+      "entities": [
+        "edX",
+        "current role"
+      ]
+    },
+    {
+      "fact": "User works as a software engineer.",
+      "type": "personal",
+      "entities": [
+        "software engineer"
+      ]
+    },
+    {
+      "fact": "User is interested in the Stanford Natural Language Processing with Deep Learning Specialization on Coursera.",
+      "type": "preference",
+      "entities": [
+        "Stanford Natural Language Processing with Deep Learning Specialization",
+        "Coursera"
+      ]
+    }
+  ]
+}

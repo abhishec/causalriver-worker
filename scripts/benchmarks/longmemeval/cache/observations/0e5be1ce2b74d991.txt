@@ -1,0 +1,28 @@
+**Observation Log:**
+
+**Session Date:** 2023/08/13 (Sun) 22:23  
+**Session ID:** sharegpt_AOimCZD_0
+
+1. [FACT] The user is a student in graphic design.
+2. [EVENT] The user is currently in a project period.
+3. [EVENT] The user has created an animation explaining the problems related to cancer.
+4. [EVENT] The animation is intended for doctors to explain how cancer works.
+5. [EVENT] The user has created a fake Kickstarter project to fund the animation project, including materials and salaries.
+6. [EVENT] The user is reproducing the show "Jimmy Kimmel Live" with specific roles assigned to team members.
+7. [FACT] The user’s team includes three members: Benjamin, Celestin, and Julie.
+8. [FACT] Benjamin is the Creation Lead and Animator Lead.
+9. [FACT] Celestin is the Communication Head of the group and an animator.
+10. [FACT] Julie is the Creation Lead Artist, Character Designer, and Storyteller.
+11. [ASSISTANT_SAID] The assistant asked the user to provide more context to better understand the project and generate a detailed script.
+12. [ASSISTANT_SAID] The assistant provided a list of example questions to guide the script development.
+13. [ASSISTANT_CREATED] The assistant created a script for a 14-minute show, starting with an introduction and initial questions.
+14. [ASSISTANT_CREATED] The script includes dialogue for Jimmy Kimmel, Celestin, Julie, and Benjamin.
+15. [ASSISTANT_CREATED] The script features a character named Lily, who is a young girl learning about cancer.
+16. [ASSISTANT_CREATED] The script describes characters that represent different aspects of cancer, such as cells, treatments, and support systems.
+17. [ASSISTANT_SAID] The assistant noted that the team consulted with medical professionals to ensure the accuracy of the information presented in the animation.
+18. [ASSISTANT_SAID] The assistant mentioned that the funds from the Kickstarter campaign would cover production costs, marketing, and collaboration with medical professionals.
+19. [ASSISTANT_SAID] The assistant highlighted that the team is exploring various distribution channels, including online platforms, schools, and hospitals.
+20. [ASSISTANT_SAID] The assistant noted that the team is open to suggestions from backers on how to share the project with the world.
+21. [TEMPORAL] The user plans to create a script that will be approximately 14 minutes long.
+22. [RELATIONSHIP] The user mentioned their team members: Benjamin, Celestin, and Julie, indicating a collaborative relationship.
+23. [PREFERENCE] The user is focused on creating educational content that is engaging and age-appropriate for children.

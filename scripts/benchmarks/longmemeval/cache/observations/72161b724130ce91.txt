@@ -1,0 +1,24 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2021/12/04 (Sat) 09:58  
+[USER] User requested a cocktail with mezcal called “Sancho” and asked for a name.  
+[ASSISTANT_SAID] Assistant provided a cocktail recipe called "Sancho Negroni" made with mezcal.  
+[ASSISTANT_CREATED] Sancho Negroni recipe:  
+- Ingredients: 1 oz mezcal, 1 oz sweet vermouth, 1 oz Campari, orange twist for garnish.  
+- Instructions: Fill a mixing glass with ice, add ingredients, stir, strain into a rocks glass filled with ice, garnish with an orange twist.  
+[USER] User requested another cocktail with Sancho.  
+[ASSISTANT_SAID] Assistant provided another cocktail recipe using Sancho mezcal.  
+[ASSISTANT_CREATED] Sancho Sour recipe:  
+- Ingredients: 2 oz Sancho mezcal, 1 oz freshly squeezed lime juice, 1/2 oz agave syrup, 1 egg white, dash of Angostura bitters, ice cubes, lime wheel for garnish.  
+- Instructions: Fill a cocktail shaker with ice, add ingredients, shake vigorously, strain into a rocks glass filled with ice, add bitters, garnish with a lime wheel.  
+[USER] User asked for a drink that could be found in Nayarit.  
+[ASSISTANT_SAID] Assistant provided information about a popular drink from Nayarit called "Tuba."  
+[ASSISTANT_CREATED] Tuba recipe:  
+- Ingredients: 1 gallon fresh coconut sap, 1 cup dark brown sugar, 1 piece ginger (peeled and sliced), 1 cinnamon stick, 1/4 tsp baking yeast, ice cubes, lime wedges for serving.  
+- Instructions: Combine ingredients in a pot, heat until sugar dissolves, cool, add yeast, let ferment for 24-48 hours, strain, serve over ice with lime.  
+[USER] User requested to integrate Sancho mezcal into the Tuba recipe.  
+[ASSISTANT_SAID] Assistant confirmed the integration of Sancho mezcal into the Tuba recipe.  
+[ASSISTANT_CREATED] Sancho Tuba recipe:  
+- Ingredients: 1 gallon fresh coconut sap, 1 cup dark brown sugar, 1 piece ginger (peeled and sliced), 1 cinnamon stick, 1/4 tsp baking yeast, 4 oz Sancho mezcal, ice cubes, lime wedges for serving.  
+- Instructions: Combine ingredients in a pot, heat until sugar dissolves, cool, add yeast, let ferment for 24-48 hours, strain, add Sancho mezcal, serve over ice with lime.  
+[ASSISTANT_SAID] Assistant encouraged the user to enjoy the unique and flavorful Sancho Tuba, a fusion

@@ -1,0 +1,38 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/23 (Tue) 06:10
+- [USER] User is seeking assistance in creating a cover letter based on their work experience.
+- [USER] User asks for clarification on what specific information about their work experience would be most helpful.
+- [ASSISTANT_SAID] Assistant suggests providing the following specific information about work experience to generate a more effective cover letter:
+  1. Job Titles
+  2. Job Descriptions
+  3. Skills and Qualifications
+  4. Achievements
+  5. Relevant Experience
+- [USER] User inquires about the best way to arrange the information for the assistant.
+- [ASSISTANT_SAID] Assistant recommends listing the information according to the categories provided and suggests adding context or explanations for each category.
+- [USER] User proposes a format for providing information on previous work experience:
+  1. Job title
+  2. Job description (in bullet point form)
+  3. Tasks regularly carried out in the role
+  4. Skills required to carry out the job effectively
+  5. Achievements within the role
+  6. Any other information of note
+- [ASSISTANT_SAID] Assistant agrees that the proposed format looks great and emphasizes that providing detailed information will help generate effective cover letters.
+- [USER] User decides to revise the format by merging points 2 and 3 into one point detailing the job description and tasks carried out.
+- [ASSISTANT_SAID] Assistant confirms that merging points is fine and reiterates that the main goal is to provide relevant information for the cover letter.
+- [USER] User begins to outline their work experience, starting with:
+  - Job title: Freelance Music PR consultant
+  - Job description/tasks carried out: 
+    - Devised and delivered a PR strategy for an artist preparing to release their debut EP.
+    - Liaised with journalists and media outlets (including print and digital) to feature the artist's music on their platforms, either as a review or interview with the artist.
+    - Produced an EP launch event from concept to delivery, including securing a venue, booking support acts, and assisting with promotion and ticket sales.
+    - Provided ad-hoc strategic consultancy to the artist, drawing on insight of the music industry.
+  - Skills required: 
+    - Strong understanding and insight into the actions needed to deliver a successful PR campaign for a music release.
+    - Fluency in Google Suite applications including Drive, Docs, Sheets, Gmail.
+    - Database entry and management.
+    - Financial management (particularly with regards to the EP launch event).
+    - Diary management.
+    - Understanding of social media best practices with regards to maximizing audience engagement.
+    - Ability to prioritize workload and manage deadlines, such as overlapping deadlines for deliverables including press release emails and social

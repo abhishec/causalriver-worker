@@ -1,0 +1,29 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/03/17 (Fri) 20:56
+- [USER] dist = 30, thres = 23
+- [USER] 0 degree: <45 = 10/10, >45 = 0/10
+- [USER] 15 degree: <45 = 10/10, >45 = 0/10
+- [USER] 30 degree: <45 = 7/10, >45 = 3/10
+- [USER] 45 degree: <45 = 10/10, >45 = 0/10
+- [USER] 60 degree: <45 = 10/10, >45 = 0/10
+- [USER] 75 degree: <45 = 6/10, >45 = 4/10
+- [USER] 90 degree: <45 = 4/10, >45 = 6/10
+- [USER] fp num = 33/70
+- [USER] dist = 60, thres = 10
+- [USER] 0 degree: <45 = 8/10, >45 = 2/10
+- [USER] 15 degree: <45 = 6/10, >45 = 4/10
+- [USER] 30 degree: <45 = 2/9, >45 = 7/9
+- [USER] 45 degree: <45 = 2/10, >45 = 8/10
+- [USER] 60 degree: <45 = 0/10, >45 = 10/10
+- [USER] 75 degree: <45 = 0/10, >45 = 10/10
+- [USER] 90 degree: <45 = 0/10, >45 = 10/10
+- [USER] fp num = 15/69
+- [USER] dist = 90, thres = 10
+- [USER] 0 degree: <45 = 10/10, >45 = 0/10
+- [USER] 15 degree: <45 = 3/6, >45 = 3/6
+- [USER] 30 degree: <45 = 5/8, >45 = 3/8
+- [USER] 45 degree: <45 = 5/10, >45 = 5/10
+- [USER] 60 degree: <45 = 1/10, >45 = 9/10
+- [USER] 75 degree: <45 = 0/9, >45 = 9/9
+- [USER] 90 degree: <45 = 0/10, >45 = 10/

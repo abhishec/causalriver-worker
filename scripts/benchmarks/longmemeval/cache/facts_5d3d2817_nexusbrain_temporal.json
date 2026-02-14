@@ -1,0 +1,33 @@
+{
+  "answer_235eb6fb": [
+    {
+      "fact": "User is trying to get more organized with their new role",
+      "type": "event",
+      "entities": [
+        "new role"
+      ]
+    },
+    {
+      "fact": "User is looking for project management tools",
+      "type": "preference",
+      "entities": [
+        "project management tools"
+      ]
+    },
+    {
+      "fact": "User prefers tools that integrate well with Google Drive",
+      "type": "preference",
+      "entities": [
+        "Google Drive"
+      ]
+    },
+    {
+      "fact": "User is interested in tools that have a free version or trial",
+      "type": "preference",
+      "entities": [
+        "free version",
+        "trial"
+      ]
+    }
+  ]
+}

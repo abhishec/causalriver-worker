@@ -1,0 +1,24 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/29 (Mon) 01:05  
+[USER] User asked about the relationship between database and cluster.  
+[ASSISTANT_SAID] A database is a collection of data organized to facilitate easy access, management, and retrieval of information.  
+[ASSISTANT_SAID] A cluster is a group of interconnected computers that work together to provide high availability, fault tolerance, and scalability for applications and services.  
+[ASSISTANT_SAID] A database cluster refers to a group of database servers that work together to provide high availability, scalability, and fault tolerance for a database system.  
+[ASSISTANT_SAID] A database cluster consists of multiple interconnected servers that provide a single, cohesive database environment.  
+[ASSISTANT_SAID] A database cluster can improve performance, availability, and reliability by distributing data across multiple servers and providing redundancy.  
+[ASSISTANT_SAID] A database cluster can scale horizontally by adding more servers to handle increased traffic and data volumes.  
+[USER] User asked about redundancy in the context of a database cluster.  
+[ASSISTANT_SAID] Redundancy in a database cluster refers to duplicating or replicating data across multiple servers to ensure data availability and accessibility during hardware failures or disruptions.  
+[ASSISTANT_SAID] Redundancy can be implemented through replication, where a primary server holds the authoritative copy of the data, and secondary servers replicate the data.  
+[ASSISTANT_SAID] If the primary server fails, a secondary server can take over and continue to serve data to clients.  
+[ASSISTANT_SAID] Another method of redundancy is through mirroring or clustering technologies that replicate data across multiple servers simultaneously.  
+[ASSISTANT_SAID] Redundancy is important in database clustering to ensure data remains available and accessible to users.  
+[USER] User asked about data container.  
+[ASSISTANT_SAID] A data container is a standardized unit of software that encapsulates and packages an application, its dependencies, and configuration settings for easy deployment across different environments.  
+[ASSISTANT_SAID] A data container includes all necessary components and libraries required to run the application, including the operating system and runtime environment.  
+[ASSISTANT_SAID] Data containers are isolated from the underlying host system, allowing for consistent and reliable operation across different environments.  
+[ASSISTANT_SAID] Docker is a popular technology for creating and managing data containers.  
+[ASSISTANT_SAID] A data container is a self-contained package of software that provides a consistent way to deploy and manage applications.  
+[USER] User asked about the difference between data container and data virtual machine.  
+[ASSISTANT_SAID] A data virtual machine (VM) is a software implementation of

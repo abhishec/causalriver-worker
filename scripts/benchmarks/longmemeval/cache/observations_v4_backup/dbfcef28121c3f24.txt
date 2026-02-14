@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/21 (Sun) 17:10  
+[ASSISTANT] Bitcoin is a type of digital money that exists only on computers and the internet.  
+[ASSISTANT] Bitcoin is not controlled by any one person or organization; it is run by a network of computers worldwide.  
+[ASSISTANT] People can "mine" bitcoin by using powerful computers to solve complicated math problems.  
+[ASSISTANT] Miners are rewarded with new bitcoin for solving these problems.  
+[ASSISTANT] The process of maintaining the Bitcoin network is called "mining."  
+[ASSISTANT] Miners help to validate transactions by solving complex math problems.  
+[ASSISTANT] Once a miner solves a problem, the transaction is considered "confirmed" and added to the blockchain.  
+[ASSISTANT] The math problem miners solve is called a "hash function."  
+[ASSISTANT] A hash function produces a unique output of a fixed length from a piece of data.  
+[ASSISTANT] Miners compete to solve the hash function and the first to solve it gets to add a new block of transactions to the blockchain.  
+[ASSISTANT] Solving the hash function requires a lot of computational power and energy.  
+[ASSISTANT] The difficulty of the hash function is adjusted so that it takes an average of 10 minutes to solve.  
+[ASSISTANT] Miners generate a unique output called a "hash" when they solve the hash function.  
+[ASSISTANT] To know they have solved the hash function correctly, miners compare their output hash with the target hash.  
+[ASSISTANT] The target hash is specified by the Bitcoin protocol and is the same for every miner at a given time.  
+[ASSISTANT] The target hash is determined by the network difficulty, which is adjusted every 2016 blocks.  
+[ASSISTANT] The Bitcoin protocol automatically adjusts the network difficulty to maintain a consistent rate of new block production.  
+[ASSISTANT] A valid transaction includes a valid digital signature, a valid source address, a valid destination address, and the correct amount of cryptocurrency.  
+[ASSISTANT] When a transaction is broadcast to the network, nodes verify its validity before adding it to the blockchain.  
+[ASSISTANT] Mining involves validating transactions and adding them to the blockchain.  
+[ASSISTANT] When a miner finds a valid hash, they create a new block that includes the validated transactions and broadcast it to the network.  
+[ASSISTANT] Miners earn newly minted bitcoins as a reward for validating transactions and adding new blocks to the blockchain.

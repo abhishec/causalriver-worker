@@ -1,0 +1,19 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/20 (Sat) 19:24
+- [USER] User requested a distinction between Analytical, Descriptive, and Comparative research with examples.
+- [ASSISTANT_SAID] Analytical research involves breaking down a complex issue into smaller parts and analyzing each part to gain a deeper understanding.
+- [ASSISTANT_SAID] Example of analytical research: A researcher studying factors contributing to employee turnover collects data on employee satisfaction, job stress levels, and compensation packages to identify associations with turnover.
+- [ASSISTANT_SAID] Descriptive research aims to describe a phenomenon or situation without explaining why things are the way they are.
+- [ASSISTANT_SAID] Example of descriptive research: A researcher describing the demographics of attendees at a music festival collects data on age, gender, ethnicity, and other characteristics.
+- [ASSISTANT_SAID] Comparative research involves comparing two or more groups to identify similarities and differences.
+- [ASSISTANT_SAID] Example of comparative research: A researcher comparing academic achievement of students in public versus private schools collects and compares academic performance data.
+- [ASSISTANT_SAID] Summary of research types: Analytical research for deeper understanding, descriptive research for overview, and comparative research for identifying similarities and differences.
+- [USER] User requested research topics on International Commercial Mediation and suggested methods of research suitable for them.
+- [ASSISTANT_CREATED] Research topics on International Commercial Mediation:
+  1. The effectiveness of international commercial mediation in resolving cross-border disputes: a comparative analysis of different mediation models. (Comparative research)
+  2. An analysis of the role of culture in international commercial mediation: the impact of cultural differences on the mediation process and outcomes. (Analytical research)
+  3. A descriptive study of the key challenges faced by international commercial mediators in cross-border disputes: exploring the factors that affect the success of mediation. (Descriptive research)
+  4. The use of technology in international commercial mediation: an examination of the potential benefits and drawbacks of online mediation platforms. (Analytical research)
+  5. A comparative analysis of the legal frameworks governing international commercial mediation in different jurisdictions: assessing the impact on cross-border mediation. (Comparative research)
+- [ASSISTANT_SAID] The first and fifth research topics are best suited for comparative research, the second and fourth for analytical research, and the third for descriptive research.

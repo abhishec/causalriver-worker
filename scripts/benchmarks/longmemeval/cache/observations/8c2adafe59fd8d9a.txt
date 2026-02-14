@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [FACT] User is in the process of buying a new home.
+- [FACT] User got pre-approved for a mortgage and qualified for a $400,000 loan.
+- [PREFERENCE] User wants to understand all the costs involved in buying a new home.
+- [EVENT] User is looking for information on mortgage rates.
+- [ASSISTANT_SAID] Assistant congratulated the user on getting pre-approved for a mortgage and finding a new home.
+- [ASSISTANT_SAID] Assistant explained that mortgage rates can vary depending on loan type, loan term, credit score, lender, and market conditions.
+- [ASSISTANT_SAID] Assistant provided general mortgage rate ranges: 30-year fixed-rate mortgage: 3.75% - 4.25%, 15-year fixed-rate mortgage: 3.25% - 3.75%, 5/1 adjustable-rate mortgage: 3.25% - 4.00%.
+- [ASSISTANT_SAID] Assistant estimated the user's monthly payment for a 30-year fixed-rate mortgage at 4.00% interest, with a loan amount of $400,000, property taxes at 1.25%, and insurance at 0.5%, resulting in an estimated monthly payment of approximately $1,936.
+- [ASSISTANT_SAID] Assistant advised that actual monthly payments may vary and mentioned other costs associated with homeownership, such as PMI, HOA fees, maintenance costs, and potential increases in property taxes and insurance.
+- [USER] User expressed concern about property taxes and asked how they are calculated.
+- [CHANGE] User indicated that their loan amount will likely be lower than $400,000, aiming to put 20% down with a budget of around $320,000.
+- [ASSISTANT_SAID] Assistant explained how property taxes are calculated based on assessed value and tax rate, providing an example calculation.
+- [ASSISTANT_SAID] Assistant recalculated the estimated monthly payment based on a loan amount of $256,000 (80% of $320,000), resulting in an estimated monthly payment of approximately $1,433.
+- [USER] User thanked the assistant for the detailed explanation and asked for more information about private mortgage insurance (PMI).
+- [ASSISTANT_SAID] Assistant explained that PMI is required when a homebuyer makes a down payment of less than 20% and protects the lender in case of default.
+- [ASSISTANT_SAID] Assistant detailed how PMI is calculated, including premium calculation, monthly payment, coverage, and cancellation.
+- [USER] User requested an example of how the PMI premium is calculated for a specific loan scenario.
+- [ASSISTANT_SAID] Assistant provided a detailed example of PMI calculation based on a loan amount of $240,000, an LTV ratio of 80%, and a

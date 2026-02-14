@@ -1,0 +1,18 @@
+**Observation Log:**
+
+[SESSION DATE] Session Date: 2023/05/25 (Thu) 14:48  
+[FACT] User is trying to improve their bird photography skills.  
+[FACT] User is interested in bird identification skills.  
+[FACT] User has spotted 27 different bird species in their local park.  
+[FACT] User is using the eBird app to track their bird sightings and submit data.  
+[PREFERENCE] User finds warblers and sparrows tricky to identify.  
+[PREFERENCE] User enjoys bird photography and bird watching.  
+[ASSISTANT] The assistant provided tips for improving bird photography skills, specifically for photographing skittish birds like the Northern Flicker.  
+[ASSISTANT] The assistant provided tips for identifying warblers and sparrows.  
+[ASSISTANT] The assistant suggested sharing findings with local birding groups, birding clubs, or online platforms like eBird.  
+[ASSISTANT] The assistant recommended checking online resources, consulting local birding groups, visiting local park websites, and asking around for nearby nature reserves or parks known for bird diversity.  
+[EVENT] User is planning to explore more birding spots in their area.  
+[CHANGE] User has been keeping track of bird species they have seen in their local park.  
+[TEMPORAL] User has managed to spot 27 different species so far.  
+[TEMPORAL] User is currently using the eBird app to keep their records organized.  
+[RELATIONSHIP] User is part of the birding community, engaging with other birders through eBird and potentially local groups.

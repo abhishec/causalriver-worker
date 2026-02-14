@@ -1,0 +1,21 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/04/01 (Sat) 06:49  
+[USER] User requested to create all files needed including a docker-compose.yml file and a single eff.org Certbot container to create and renew certificates from LetsEncrypt.  
+[USER] User specified that the DNS is located at Google Domains and they issue an API-Key for each domain.  
+[USER] User requested to allow for subdomains with the same key.  
+[USER] User provided an example structure for the credentials.yml file.  
+[USER] Example structure includes two credentials with API keys, emails, and domains.  
+[USER] User requested a GoLang application to iterate the certbot command and pass all the API-keys and set of domains.  
+[USER] User requested a CRON job to renew certificates once per day.  
+[USER] User asked for all files to be printed out with detailed instructions.  
+[ASSISTANT_SAID] Assistant stated that the task would require creating a docker-compose.yml, credentials.yml, certbot Dockerfile, Go application, and CRON job.  
+[ASSISTANT_CREATED] Assistant provided a docker-compose.yml file with version 3, a certbot service, environment variables, and volume mounts.  
+[ASSISTANT_CREATED] Assistant provided a credentials.yml file structure with two credentials, each containing an API key, email, and domains.  
+[ASSISTANT_CREATED] Assistant provided a certbot Dockerfile based on the official Certbot Docker image, including commands to install necessary packages.  
+[ASSISTANT_CREATED] Assistant provided a GoLang application code that loads credentials, iterates through them, and runs the certbot command for each domain.  
+[ASSISTANT_SAID] Assistant mentioned that the GoLang application sets environment variables for API key and domain before running the certbot command.  
+[ASSISTANT_CREATED] Assistant provided a function to load credentials from the credentials.yml file in the GoLang application.  
+[ASSISTANT_SAID] Assistant acknowledged an oversight regarding the CRON job and provided a crontab entry to run the docker-compose command once per day.  
+[ASSISTANT_SAID] Assistant instructed the user to place all files in the same directory and run the command `docker-compose up` to execute the application.  
+[ASSISTANT_SAID] Assistant expressed willingness to help with any further questions.

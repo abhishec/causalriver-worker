@@ -1,0 +1,25 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/25 (Thu) 00:07
+- [ASSISTANT_SAID] Jupyter Notebooks are widely used for data analysis, visualization, and modeling in many fields, including spatial land-use and land-cover modeling.
+- [ASSISTANT_SAID] Popular Jupyter Notebooks for spatial land-use and land-cover modeling include:
+  1. Geopandas: Provides a comprehensive introduction to working with spatial data in Python using the Geopandas library.
+  2. PySAL: A Python library for spatial data analysis, including spatial data visualization, exploratory spatial data analysis, and spatial econometrics.
+  3. Rasterio: An introduction to working with raster data in Python using the Rasterio library.
+  4. GIS with Python, Shapely and Fiona: A comprehensive introduction to working with spatial data in Python using the Shapely and Fiona libraries.
+  5. Land Change Modeling: An introduction to land change modeling in Python using the LandChangePy library.
+- [ASSISTANT_SAID] Jupyter Notebooks can generate graphical interfaces, such as maps and plots, using libraries like Matplotlib, Plotly, and Folium.
+- [ASSISTANT_SAID] Suggested ways to search for Jupyter Notebooks related to spatial modeling include:
+  1. GitHub: Search using keywords like "spatial modeling," "grid," "cellular automata," etc.
+  2. Jupyter Notebook Viewer: Search for relevant Jupyter Notebooks.
+  3. Kaggle: Search for Jupyter Notebooks related to the problem.
+  4. Google: Use keywords to search for Jupyter Notebooks.
+  5. PyViz: Find Jupyter Notebooks that utilize this library and related libraries.
+- [USER] Specific problem: Observing a grid of 100 by 100 cells change under the application of specific rules, such as "for each plot of trees, let it grow to the east by one column every five time steps."
+- [ASSISTANT_SAID] Provided a Python program to create a 100x100 grid and randomly assign several groups of 250 contiguous cells to Python objects.
+- [ASSISTANT_CREATED] Python program includes:
+  - Function `create_grid()` to create a 100x100 grid.
+  - Function `assign_groups(grid)` to assign 4 groups of 250 contiguous cells.
+- [ASSISTANT_SAID] Suggested assigning features to the objects, such as "color", "soil_type", "humidity", "speed_to_grow", "unique_id", and "unique_id_of_all_neighbors."
+- [ASSISTANT_CREATED] Provided a Python class `Object` to define the objects and their attributes.
+- [ASSISTANT_CREATED] Provided a function `assign_features(groups)` to assign random features

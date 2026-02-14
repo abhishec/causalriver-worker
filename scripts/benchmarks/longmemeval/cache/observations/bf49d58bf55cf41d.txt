@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [FACT] User is starting a new job as a software engineer on July 1st.
+- [FACT] User graduated with a Master's in Computer Science three months ago.
+- [RELATIONSHIP] User's thesis advisor is Dr. Smith, who was supportive throughout the user's research project.
+- [EVENT] User took a photo with Dr. Smith during their graduation ceremony.
+- [ASSISTANT_SAID] Assistant congratulated the user on their new job and Master's degree.
+- [ASSISTANT_SAID] Assistant provided tips for preparing for the new role, including brushing up on basics, familiarizing with the tech stack, practicing coding, learning about the company's products, developing soft skills, reading industry blogs, setting up a development environment, networking, creating a personal project, and being prepared to learn.
+- [ASSISTANT_SAID] Assistant recommended online courses from Coursera, edX, Udemy, Pluralsight, and Skillshare.
+- [ASSISTANT_SAID] Assistant suggested books including "Clean Code" by Robert C. Martin, "The Pragmatic Programmer" by Andrew Hunt and David Thomas, and "Design Patterns" by the Gang of Four.
+- [ASSISTANT_SAID] Assistant mentioned blogs and news sites like Hacker Noon, Medium, FreeCodeCamp, The Verge, TechCrunch, and Wired for industry insights and trends.
+- [USER] User expressed appreciation for the tips and resources provided by the assistant.
+- [USER] User is considering setting up a personal project to demonstrate their skills.
+- [ASSISTANT_SAID] Assistant suggested project ideas related to the user's research project, including extending the research, creating a tool or library, visualizing research data, building a prototype, or creating a tutorial.
+- [ASSISTANT_SAID] Assistant provided specific project ideas based on the user's research, such as building a chatbot for NLP, an image classification model for computer vision, or a predictive model for machine learning.
+- [USER] User decided to build a web application that extends their research project on sentiment analysis of customer reviews.
+- [ASSISTANT_SAID] Assistant provided a detailed outline for starting the web application project, including defining scope and requirements, choosing a sentiment analysis model, designing the user interface, setting up the backend, integrating the sentiment analysis model, and testing and deploying the app.
+- [ASSISTANT_SAID] Assistant suggested libraries and tools for building the sentiment analysis web app, including NLTK, spaCy, scikit-learn, TensorFlow, PyTorch, React, Flask, Django, and Node.js.
+- [USER] User expressed excitement about the project and mentioned wanting to focus on customer reviews for the web app.
+- [USER] User asked for clarification on the type of reviews to focus on and whether to explore different sentiment analysis models.
+- [ASSISTANT_SAID] Assistant

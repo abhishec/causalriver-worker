@@ -1,0 +1,105 @@
+{
+  "answer_e9bb9500_1": [
+    {
+      "fact": "User enjoys the podcast 'How I Built This'",
+      "type": "preference",
+      "entities": [
+        "How I Built This"
+      ]
+    },
+    {
+      "fact": "User is looking for new podcast recommendations with an entrepreneurial vibe",
+      "type": "preference",
+      "entities": [
+        "podcast recommendations",
+        "entrepreneurial vibe"
+      ]
+    },
+    {
+      "fact": "User listens to podcasts during their daily commute",
+      "type": "personal",
+      "entities": [
+        "podcasts",
+        "daily commute"
+      ]
+    },
+    {
+      "fact": "User's daily commute is about 45 minutes each way",
+      "type": "personal",
+      "entities": [
+        "45 minutes",
+        "commute"
+      ]
+    },
+    {
+      "fact": "User has finished around 15 episodes of 'How I Built This'",
+      "type": "event",
+      "entities": [
+        "15 episodes",
+        "How I Built This"
+      ]
+    },
+    {
+      "fact": "User enjoys hearing about founders' journeys and challenges in building their businesses",
+      "type": "opinion",
+      "entities": [
+        "founders' journeys",
+        "challenges",
+        "businesses"
+      ]
+    }
+  ],
+  "answer_e9bb9500_2": [
+    {
+      "fact": "User is into true crime and inspiring stories",
+      "type": "preference",
+      "entities": [
+        "true crime",
+        "inspiring stories"
+      ]
+    },
+    {
+      "fact": "User finished episode 12 of the 'My Favorite Murder' podcast",
+      "type": "event",
+      "entities": [
+        "My Favorite Murder",
+        "episode 12"
+      ]
+    },
+    {
+      "fact": "User tries to listen to at least one podcast episode a week",
+      "type": "preference",
+      "entities": [
+        "podcast episodes"
+      ]
+    },
+    {
+      "fact": "User has heard of the 'Criminal' podcast but hasn't checked it out yet",
+      "type": "opinion",
+      "entities": [
+        "Criminal"
+      ]
+    },
+    {
+      "fact": "User enjoys the storytelling style of 'My Favorite Murder'",
+      "type": "opinion",
+      "entities": [
+        "My Favorite Murder"
+      ]
+    },
+    {
+      "fact": "User is looking for news-related podcast recommendations",
+      "type": "preference",
+      "entities": [
+        "news-related podcasts"
+      ]
+    },
+    {
+      "fact": "User has been listening to 'The Daily'",
+      "type": "event",
+      "entities": [
+        "The Daily"
+      ]
+    }
+  ]
+}

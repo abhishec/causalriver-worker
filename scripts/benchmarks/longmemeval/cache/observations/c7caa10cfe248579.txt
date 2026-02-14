@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/28 (Sun) 19:05
+- [FACT] The user is sending part 16 of multiple messages.
+- [EVENT] The user will continue to send further messages.
+- [ASSISTANT_SAID] The assistant responded with "acknowledged" to indicate understanding.
+- [FACT] The user provided detailed information regarding the culverts and related contractual specifications.
+- [FACT] The user mentioned that there were 13 culverts in the levees constructed by Beckhaus.
+- [FACT] The height of the levees varied, with some parts being 1650 millimeters high made up of compacted 150 millimeter thick layers.
+- [FACT] The culverts were identified as being 600 millimeters deep.
+- [FACT] The user noted that the soil in the immediate vicinity of the culverts could not be compacted using heavy machinery due to the risk of damage to the culverts.
+- [FACT] Clause 3.1 of the specification governed the siting, excavation, supply, installation, and backfill and compaction requirements for reinforced concrete pipe culverts.
+- [FACT] Clause 3.7 specified that all material should be compacted in layers not exceeding 150 mm compacted thickness unless directed otherwise.
+- [FACT] Clause 3.8 provided a minimum frequency of testing for compaction as one per 100 cubic meters with a minimum of one per material type per individual structure.
+- [FACT] Clause 8.9.3 specified that for compaction control, one test per layer (150 millimeters thick) had to be carried out.
+- [FACT] The user indicated that Beckhaus submitted a conflict between clauses 3.8 and 8.9.3, claiming that clause 3.8 was paramount.
+- [FACT] Hodgson JA pointed out that there was no conflict between the clauses; both minimum standards had to be complied with.
+- [FACT] The user reported that no tests were undertaken for five culverts, one or no tests for three culverts, two culverts were tested only once each, and two culverts had seven to eight tests each.
+- [FACT] In August 2003, two tests known as the "Golder tests" were conducted at two culverts, with one passing and the other failing at specified depths.
+- [FACT] The user quoted Master Macready's description of evidence regarding compaction at culvert locations, including testimonies from Komp, daily records from Beckhaus, and Macartney's evidence.
+- [FACT] The user noted that the Master concluded that insufficient tests were taken at the culverts, precluding a conclusion of compliance with the specification requirements for testing frequency, but acknowledged substantial compliance with compaction requirements.

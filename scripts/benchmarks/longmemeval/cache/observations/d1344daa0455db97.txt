@@ -1,0 +1,28 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/23 (Tue) 15:13  
+[USER] User is working with Salesforce.  
+[USER] User is interested in achieving a normalized data model in Salesforce.  
+[USER] User wants to allow arbitrary reports in Salesforce.  
+[ASSISTANT_SAID] To achieve a normalized data model in Salesforce while allowing for arbitrary reports, identify entities (objects) and establish their relationships.  
+[ASSISTANT_SAID] Create custom fields on each object that capture necessary data points with specific data types.  
+[ASSISTANT_SAID] Use validation rules and triggers to enforce data integrity and consistency across objects.  
+[ASSISTANT_SAID] Create custom report types to join data across objects.  
+[ASSISTANT_SAID] Create reports based on custom report types with filters and groupings for data analysis.  
+[ASSISTANT_SAID] Use Salesforce's dashboard feature for visual representations of reports.  
+[ASSISTANT_SAID] Regularly review and refine the data model, custom fields, validation rules, and reports.  
+[USER] User asked how to achieve step 4 of the previous instructions.  
+[ASSISTANT_SAID] To create custom report types in Salesforce, go to the "Setup" menu and click on "Report Types".  
+[ASSISTANT_SAID] Click the "New Custom Report Type" button to start creating a new report type.  
+[ASSISTANT_SAID] Select the primary object for the report type, such as the Account object.  
+[ASSISTANT_SAID] Choose whether to include related objects in the report type, like the Opportunity object.  
+[ASSISTANT_SAID] Select fields to include in the report type from the primary and related objects.  
+[ASSISTANT_SAID] Choose the report type category for where it will appear when creating a new report.  
+[ASSISTANT_SAID] Save the custom report type after completing the setup.  
+[USER] User inquired about including aggregations in the custom report type.  
+[ASSISTANT_SAID] Yes, you can include aggregations in a custom report type using "Cross Filters".  
+[ASSISTANT_SAID] In the "Cross Filters" section, click "Add" to choose the related object and field for filtering.  
+[ASSISTANT_SAID] Choose the operator for the filter, such as "equals" or "not equals".  
+[ASSISTANT_SAID] When creating a report, you can add a "Grouping" to summarize data based on the cross filter.  
+[ASSISTANT_SAID] You can add a "Summary" to aggregate data based on the cross filter, like counting related opportunities.  
+[USER] User asked if it is possible to

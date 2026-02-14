@@ -1,0 +1,121 @@
+{
+  "answer_f56e6152_2": [
+    {
+      "fact": "User has a small farm.",
+      "type": "personal",
+      "entities": [
+        "small farm"
+      ]
+    },
+    {
+      "fact": "User is trying to keep better track of expenses.",
+      "type": "preference",
+      "entities": [
+        "expenses tracking"
+      ]
+    },
+    {
+      "fact": "User has sold a total of 40 dozen eggs this month.",
+      "type": "event",
+      "entities": [
+        "40 dozen eggs",
+        "egg production"
+      ]
+    },
+    {
+      "fact": "User likes the budget template provided.",
+      "type": "opinion",
+      "entities": [
+        "budget template"
+      ]
+    },
+    {
+      "fact": "User wants to add the cost of replacing fencing around the chicken coop to the budget.",
+      "type": "preference",
+      "entities": [
+        "fencing",
+        "chicken coop"
+      ]
+    },
+    {
+      "fact": "User incurred a cost of $200 for replacing the fencing.",
+      "type": "event",
+      "entities": [
+        "$200",
+        "fencing"
+      ]
+    }
+  ],
+  "answer_f56e6152_1": [
+    {
+      "fact": "User has a small farm.",
+      "type": "personal",
+      "entities": [
+        "farm"
+      ]
+    },
+    {
+      "fact": "User is thinking of expanding their farm by getting more chickens.",
+      "type": "event",
+      "entities": [
+        "farm",
+        "chickens"
+      ]
+    },
+    {
+      "fact": "User currently has a flock of chickens.",
+      "type": "personal",
+      "entities": [
+        "chickens"
+      ]
+    },
+    {
+      "fact": "User sells eggs to their neighbor for $3 a dozen.",
+      "type": "event",
+      "entities": [
+        "eggs",
+        "neighbor",
+        "$3"
+      ]
+    },
+    {
+      "fact": "User's current hen is a Leghorn named Luna.",
+      "type": "personal",
+      "entities": [
+        "Leghorn",
+        "Luna"
+      ]
+    },
+    {
+      "fact": "User is interested in the Leghorn breed for egg-laying.",
+      "type": "preference",
+      "entities": [
+        "Leghorn"
+      ]
+    },
+    {
+      "fact": "User is curious about the Rhode Island Red breed.",
+      "type": "preference",
+      "entities": [
+        "Rhode Island Red"
+      ]
+    },
+    {
+      "fact": "User has heard that Rhode Island Reds are friendly and good for beginners.",
+      "type": "opinion",
+      "entities": [
+        "Rhode Island Red",
+        "friendly",
+        "beginners"
+      ]
+    },
+    {
+      "fact": "User is considering whether Rhode Island Reds are suitable for a small farm.",
+      "type": "opinion",
+      "entities": [
+        "Rhode Island Red",
+        "small farm"
+      ]
+    }
+  ]
+}

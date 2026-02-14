@@ -1,0 +1,31 @@
+**Observation Log:**
+
+- [FACT] User is looking for information on upcoming film festivals.
+- [EVENT] User is interested in submitting their own short film to film festivals.
+- [ASSISTANT_SAID] Notable film festivals happening in the next few months include:
+  - **Locarno Film Festival** (August 3-13, Locarno, Switzerland)
+  - **Sundance Film Festival: London** (August 26-29, London, UK)
+  - **Toronto International Film Festival (TIFF)** (September 8-18, Toronto, Canada)
+  - **Venice Film Festival** (September 1-11, Venice, Italy)
+  - **Fantastic Fest** (September 22-29, Austin, Texas, USA)
+  - **New York Film Festival (NYFF)** (September 24 - October 10, New York City, USA)
+  - **London Film Festival** (October 5-16, London, UK)
+  - **Austin Film Festival** (October 20-27, Austin, Texas, USA)
+  - **AFI Fest** (November 3-10, Los Angeles, California, USA)
+  - **Rome Film Festival** (November 8-18, Rome, Italy)
+- [ASSISTANT_SAID] Submission guidelines for Sundance Film Festival:
+  - **Submission Period:** Late August to late September
+  - **Eligibility:** Short films must be 40 minutes or less, completed after January 1, 2022, not publicly screened in the U.S. prior to the festival, student films eligible through a film school.
+  - **Submission Fees:** Early bird: $60, Regular: $80, Late: $100
+  - **Submission Process:** Online platform, account creation, upload film, synopsis, director's statement.
+  - **Selection Process:** Programming team reviews submissions, selections announced in December.
+- [ASSISTANT_SAID] Submission guidelines for Tribeca Film Festival:
+  - **Submission Period:** Late September to early November
+  - **Eligibility:** Short films must be 40 minutes or less, completed after January 1, 2022, not publicly screened in NYC prior to the festival, student films eligible through a film school.
+  - **Submission Fees:** Early bird: $40, Regular: $60
+  - **Submission Process:** Online platform, account creation, upload film, synopsis, director's statement.
+  - **Selection Process:** Programming team reviews submissions, selections announced in March.
+- [ASSISTANT_SAID] Other notable festivals open for submissions around the same time as Sundance and Tribeca include:
+  - **South by Southwest (SXSW)** (Submission period: late August to late October)
+  - **Berlinale (Berlin International Film Festival)** (Submission period: late August to early November)
+  - **Clermont-Ferrand International Short

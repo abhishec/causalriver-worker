@@ -1,0 +1,35 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/30 (Tue) 15:49  
+[ASSISTANT_SAID] To find the product code for a particular software package installed on a Windows system, open the Registry Editor by typing "regedit" in the Run dialog box (Windows key + R).  
+[ASSISTANT_SAID] Navigate to the registry key: HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\.  
+[ASSISTANT_SAID] Look for the key that corresponds to the software package you want to uninstall, searching for the "DisplayName" value or the "UninstallString" value.  
+[ASSISTANT_SAID] In the key for the software package, look for the "ProductCode" value, which is typically a string of letters and numbers enclosed in curly braces.  
+[ASSISTANT_SAID] Copy the product code and use it in the uninstall command-line tool, replacing "{ProductCode}" with the actual product code.  
+[ASSISTANT_SAID] Example PowerShell script provided to find the product code:  
+```perl  
+$softwarename = "software name"  
+$productcode = ""  
+$key = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall"  
+
+Get-ChildItem $key | ForEach-Object {  
+    $name = $_.GetValue("DisplayName")  
+    if ($name -like "*$softwarename*") {  
+        $productcode = $_.GetValue("ProductCode")  
+    }  
+}  
+
+if ($productcode -ne "") {  
+    Write-Output "Product Code: $productcode"  
+} else {  
+    Write-Output "Software not found"  
+}  
+```  
+[ASSISTANT_SAID] Replace "software name" with the name of the software package you want to find the product code for.  
+[ASSISTANT_SAID] Save the script with a .ps1 extension and run it with administrative privileges.  
+[USER] Asked how to access a system from a computer name.  
+[ASSISTANT_SAID] To access a remote system using its computer name, you can use Remote Desktop Connection, PowerShell Remoting, or PsExec.  
+[ASSISTANT_SAID] For Remote Desktop Connection, open the tool by typing "mstsc" in the Run dialog box, enter the computer name, and click "Connect".  
+[ASSISTANT_SAID] For PowerShell Remoting, use the Enter-PSSession cmdlet in PowerShell with administrative privileges.  
+[ASSISTANT_SAID] For PsExec, use the command: psexec \\computername cmd, replacing "computername" with the name of the remote system.  
+[USER] Asked how to access a

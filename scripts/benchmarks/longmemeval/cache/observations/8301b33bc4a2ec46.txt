@@ -1,0 +1,21 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/17 (Wed) 10:19  
+[ASSISTANT_SAID] Certbot is the command line tool used to request, renew, and manage SSL/TLS certificates from Let's Encrypt.  
+[ASSISTANT_SAID] The `certbot` command can be extended with plugins to support different DNS providers for the DNS-01 challenge.  
+[ASSISTANT_SAID] The `certbot-dns-google` plugin is used to support the Google Domains DNS provider.  
+[ASSISTANT_SAID] When running the `certbot` command with the `dns-google` plugin, it automatically configures DNS settings to complete the DNS-01 challenge and obtain a certificate from Let's Encrypt.  
+[ASSISTANT_SAID] `certbot.sh` is a bash script that contains commands to run Certbot with the Google Domains plugin and the YAML credentials file.  
+[ASSISTANT_SAID] The `certbot.sh` script uses the `parse_yaml` function to load the `credentials.yaml` file into Bash variables.  
+[ASSISTANT_SAID] The script iterates through each credential and requests a certificate for each domain using the `certbot` command with the Google Domains plugin.  
+[ASSISTANT_SAID] The `google.ini` file contains Google Domains API credentials in a specific format.  
+[ASSISTANT_SAID] The `google.ini` file should include `dns_google_api_key` and `dns_google_api_secret`.  
+[ASSISTANT_SAID] The `Dockerfile` installs Certbot and the Google Domains plugin using `apt` instead of `apt-get`.  
+[ASSISTANT_SAID] The `Dockerfile` uses `python3-certbot-dns-google` to install the Google Domains plugin.  
+[ASSISTANT_SAID] The `docker-compose.yml` file can be modified to include log files in a host volume for debugging and monitoring.  
+[ASSISTANT_SAID] The `docker-compose.yml` example includes a volume for logs and redirects output to a log file.  
+[ASSISTANT_SAID] The command in the `docker-compose.yml` file runs the `certbot.sh` script and redirects its output to `/app/logs/certbot.log`.  
+[ASSISTANT_SAID] The `./logs` directory on the host machine is mapped to `/app/logs` in the container.  
+[ASSISTANT_SAID] The `certbot` container writes its logs to the `/app/logs/certbot.log` file.  
+[ASSISTANT_SAID] The user can monitor logs in real-time by running `tail -f ./logs/certbot.log` on the host machine.  
+[USER] Asserts that "apt-get install

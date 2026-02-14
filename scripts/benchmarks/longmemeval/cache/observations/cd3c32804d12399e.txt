@@ -1,0 +1,37 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/20 (Sat) 12:20  
+[FACT] User has built a Flask web app.  
+[FACT] The Flask web app opens in the browser at the address "http://127.0.0.1:5000/".  
+[ASSISTANT_SAID] User can change the URL of the Flask web app by specifying different values for the `host` and `port` parameters in the `app.run()` function.  
+[ASSISTANT_SAID] Example code provided for changing the host and port:  
+```python
+from flask import Flask
+
+app = Flask(__name__)
+
+if __name__ == '__main__':
+    app.run(host='localhost', port=8080)
+```  
+[ASSISTANT_SAID] User can change `host='localhost'` to `host='medicalsite'` and `port=8080` to any other number to run the app on a different URL.  
+[ASSISTANT_SAID] User may need to update their `/etc/hosts` file or DNS settings to ensure the new hostname is properly mapped to their local IP address.  
+[USER] User encountered the error "getaddrinfo failed".  
+[ASSISTANT_SAID] Suggested steps to resolve the "getaddrinfo failed" error, including checking hostname and port, firewall settings, and ensuring the virtual environment is activated.  
+[USER] User encountered the error "TypeError: run_simple() got an unexpected keyword argument 'localhost'".  
+[ASSISTANT_SAID] Explained how to properly use the `run_simple()` method with the correct parameters.  
+[ASSISTANT_SAID] Example code provided for using `run_simple()`:
+```javascript
+from werkzeug.serving import run_simple
+from myapp import app
+
+if __name__ == '__main__':
+    run_simple('localhost', 5000, app)
+```  
+[ASSISTANT_SAID] Confirmed that updating the hosts file is necessary for using a custom hostname.  
+[ASSISTANT_SAID] Provided instructions for updating the hosts file on a Unix-based system.  
+[USER] User indicated they are using Windows.  
+[ASSISTANT_SAID] Provided instructions for updating the hosts file on Windows, including running Notepad as an administrator and adding a line to map the hostname.  
+[USER] User successfully ran the application with "app.run(host='aira.aramis.ai', port=8080)" after changing the hosts file.  
+[ASSISTANT_SAID] Suggested that to hide the port number in the URL, the user can run the Flask application on the default HTTP port (80) instead of port 8080.  
+[ASSISTANT_SAID] Provided example code for running the Flask app on port 80:
+```arduino

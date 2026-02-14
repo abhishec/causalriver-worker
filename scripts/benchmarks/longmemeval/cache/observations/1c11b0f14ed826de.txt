@@ -1,0 +1,27 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/09 (Tue) 22:48  
+[FACT] User has a 20-gallon community tank.  
+[FACT] User has platies and neon tetras in their tank.  
+[EVENT] User is experiencing fin nipping issues in their tank.  
+[CHANGE] User recently added new plants to the tank, including java moss and hornwort.  
+[ASSISTANT_SAID] Fin nipping can be a real issue in community tanks.  
+[ASSISTANT_SAID] Adding new tankmates to distract fin-nippers can be a good strategy.  
+[ASSISTANT_SAID] Harlequin rasboras can help distract fin-nippers and are peaceful and gentle.  
+[ASSISTANT_SAID] Harlequin rasboras should be kept in groups of 6-10 individuals.  
+[ASSISTANT_SAID] Lemon tetras are small and peaceful but might be seen as a snack by platies.  
+[ASSISTANT_SAID] Recommended harlequin rasboras over lemon tetras for the user's tank.  
+[ASSISTANT_SAID] Suggested addressing the root cause of fin nipping by ensuring the tank is not overcrowded and providing hiding places.  
+[ASSISTANT_SAID] Recommended monitoring platies' behavior to identify triggers for fin nipping.  
+[ASSISTANT_SAID] Suggested providing plenty of food to reduce competition among fish.  
+[ASSISTANT_SAID] Advised introducing new fish slowly and in small groups.  
+[ASSISTANT_SAID] New plants will help create a more natural environment and provide hiding places.  
+[USER] User is considering adding harlequin rasboras to the tank.  
+[USER] User is monitoring water closely and wants to provide the best environment for harlequin rasboras.  
+[ASSISTANT_SAID] Ideal water temperature for harlequin rasboras is 72°F - 82°F (22°C - 28°C).  
+[ASSISTANT_SAID] Ideal pH range for harlequin rasboras is 6.5 - 7.5.  
+[ASSISTANT_SAID] Ideal water hardness for harlequin rasboras is soft to moderately hard water (dGH 5-15).  
+[ASSISTANT_SAID] Harlequin rasboras prefer gentle to moderate water flow.  
+[ASSISTANT_SAID] Regular water changes (25-50% every 1-2 weeks) are essential for good water quality.  
+[ASSISTANT_SAID] Harlequin rasboras are schooling fish and prefer to be in groups of 6-10 or more.  
+[ASSISTANT_SAID] Suggested adjusting the lighting schedule

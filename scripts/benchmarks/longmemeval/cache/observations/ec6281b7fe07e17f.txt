@@ -1,0 +1,35 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/03/20 (Mon) 02:49
+- [USER] User is curious about BBC2's budget and funding compared to other UK-based broadcast networks.
+- [ASSISTANT_SAID] BBC2's budget was £445 million ($614 million) according to the last publicly available financial data from 2019-2020.
+- [ASSISTANT_SAID] BBC2's funding comes from the UK government's annual budget and the BBC's Television License fee.
+- [ASSISTANT_SAID] BBC2's budget is relatively high compared to other UK-based broadcast networks like Channel 4, ITV, and Sky TV.
+- [USER] User requests more information on how BBC2's budget is allocated across its various programming genres.
+- [ASSISTANT_SAID] BBC2's budget allocation includes: 
+  1. Factual & Entertainment: 47.3%
+  2. Drama & Comedy: 22.6%
+  3. Arts: 7.8%
+  4. Sport: 3.2%
+  5. Children’s Programming: 2.5%
+- [ASSISTANT_SAID] The rest of the budget is allocated to other categories such as Music & Events, Religion, and Science and Technology.
+- [USER] User expresses interest in knowing which specific type of factual programming receives the most funding.
+- [ASSISTANT_SAID] Specific types of factual programming that receive the most funding include:
+  - Current affairs programs (e.g., Newsnight)
+  - Natural history documentaries (e.g., 'Planet Earth II')
+  - History documentaries (e.g., 'The Last Kingdom', 'The Rise of the Nazis')
+- [USER] User expresses enjoyment of natural history documentaries and inquires about other popular documentary series that receive high levels of funding on BBC2.
+- [ASSISTANT_SAID] Other popular documentary series that receive high levels of funding on BBC2 include:
+  1. Horizon
+  2. The Great British Bake Off
+  3. Rick Stein's Food Heroes
+  4. The Blue Planet
+  5. Inside the Factory
+- [USER] User expresses appreciation for the funding of nature documentaries and emphasizes the importance of educating people about the natural world.
+- [USER] User asks if there are other types of programming that should receive more funding on BBC2.
+- [ASSISTANT_SAID] Some types of programming that may deserve more funding include:
+  1. Investigative journalism programs
+  2. Independent films and dramas
+  3. Diversity and inclusivity programs
+  4. Science and technology programs
+- [USER] User agrees with the need for more diversity and inclusivity programs on BBC2 and expresses a desire to see more programming that celebrates underrepresented

@@ -1,0 +1,51 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/04/27 (Thu) 18:09
+- [FACT] User has been having trouble sleeping lately.
+- [PREFERENCE] User is interested in ASMR channels to help relax before bed.
+- [ASSISTANT_SAID] Recommended ASMR channels: 
+  1. GentleWhispering
+  2. ASMR Darling
+  3. Heather Feather
+  4. Ephemeral Rift
+  5. TheASMRnerd
+  6. ASMR Theater
+  7. Whispering Mauricio
+  8. Relaxing ASMR
+  9. ASMR Bakery
+  10. Calm
+- [PREFERENCE] User has been watching Gentle Whispering's videos for a month and finds them helpful.
+- [TEMPORAL] User started watching Gentle Whispering's channel around mid-January.
+- [PREFERENCE] User is looking for educational channels similar to Crash Course.
+- [ASSISTANT_SAID] Recommended educational channels:
+  1. Crash Course's sister channels (Crash Course Kids, Crash Course En Español, Crash Course Studios)
+  2. Vsauce
+  3. CGP Grey
+  4. Kurzgesagt – In a Nutshell
+  5. PBS Space Time
+  6. Deep Look
+  7. It's Okay To Be Smart
+  8. SciShow
+  9. The Backyard Scientist
+  10. Physics Girl
+- [PREFERENCE] User has been enjoying Vsauce and AsapSCIENCE lately.
+- [PREFERENCE] User has recently gotten into watching Fortnite gameplay videos, especially from Ninja.
+- [ASSISTANT_SAID] Recommended gaming channels:
+  1. Dr. Lupo
+  2. TimTheTatman
+  3. Shroud
+  4. Jacksepticeye
+  5. GameGrumps
+  6. ProJared
+  7. Valkyrae
+  8. Pokimane
+- [PREFERENCE] User has been watching gaming content for the past two weeks.
+- [PREFERENCE] User is looking for music video recommendations and has been listening to Billie Eilish's "Bad Guy" on repeat.
+- [ASSISTANT_SAID] Recommended music videos:
+  1. Lana Del Rey - "Video Games"
+  2. Tame Impala - "Let it Happen"
+  3. Halsey - "Without Me"
+  4. The 1975 - "Give Yourself a Try"
+  5. Kali Uchis - "After the Storm" (feat. Tyler, The Creator & Bootsy Collins)
+  6. Panic! At The Disco - "High Hopes"
+  7. Lorde - "Green Light

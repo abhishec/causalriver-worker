@@ -1,0 +1,30 @@
+**Observation Log:**
+
+[FACT] User is located in San Francisco.  
+[EVENT] User is planning a dinner party to celebrate their recent promotion.  
+[FACT] User's group size for the dinner party is 10-12 people.  
+[PREFERENCE] User is open to any cuisine except seafood.  
+[PREFERENCE] User's budget for the dinner party is around $50-75 per person.  
+[PREFERENCE] User prefers a casual atmosphere for the dinner party.  
+[TEMPORAL] User mentioned being busy with their new role.  
+[TEMPORAL] User received an email from their manager on the 15th of last month about their promotion.  
+[ASSISTANT_SAID] Assistant congratulated the user on their promotion.  
+[ASSISTANT_SAID] Assistant requested the city or metropolitan area for restaurant recommendations.  
+[ASSISTANT_SAID] Assistant provided a list of restaurant recommendations in San Francisco:  
+[ASSISTANT_SAID] 1. Foreign Cinema: California-Mediterranean cuisine, $60-$70 per person.  
+[ASSISTANT_SAID] 2. Nopa: California cuisine, $55-$70 per person.  
+[ASSISTANT_SAID] 3. Delarosa: Rustic Italian menu, $50-$65 per person.  
+[ASSISTANT_SAID] 4. Zeitgeist: American comfort food, $45-$60 per person.  
+[ASSISTANT_SAID] 5. The Pork Store Cafe: Creative American comfort food, $40-$55 per person.  
+[ASSISTANT_SAID] Assistant suggested setting a reminder for the user to follow up with a recruiter.  
+[ASSISTANT_SAID] Assistant provided details on how to make a reservation at Foreign Cinema:  
+[ASSISTANT_SAID] 1. Call them directly at (415) 861-8135.  
+[ASSISTANT_SAID] 2. Use online reservation platforms like OpenTable or Yelp.  
+[ASSISTANT_SAID] Assistant mentioned that Foreign Cinema is a popular spot and recommended being flexible with dates and times.  
+[ASSISTANT_SAID] Assistant explained that they cannot send reminders or keep track of the user's schedule.  
+[ASSISTANT_SAID] Assistant provided information on the dress code for Foreign Cinema: casual-chic attire.  
+[ASSISTANT_SAID] Assistant mentioned that Foreign Cinema has private dining options:  
+[ASSISTANT_SAID] 1. The Mezzanine: semi-private area for groups of 10-12.  
+[ASSISTANT_SAID] 2. The Patio: outdoor area for larger groups.  
+[ASSISTANT_SAID] 3. The Red Room: private room for groups of 10-12.  
+[ASSISTANT_S

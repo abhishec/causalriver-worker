@@ -1,0 +1,28 @@
+**Observation Log:**
+
+[FACT] User is trying to establish a consistent morning routine.  
+[FACT] User has been waking up on time by giving themselves a one-hour buffer.  
+[FACT] User woke up 1 hour prior to the scheduled time last week to make it to an appointment on time.  
+[PREFERENCE] User thinks they need 7-8 hours of sleep to feel rested and refreshed.  
+[FACT] User does not have any sleep disorders or concerns.  
+[PREFERENCE] User feels sluggish and tired in the afternoon if they sleep in later than usual.  
+[ASSISTANT_SAID] Most adults need 7-9 hours of sleep per night.  
+[ASSISTANT_SAID] To calculate bedtime, subtract the desired sleep duration from the wake-up time.  
+[ASSISTANT_SAID] If the user wants to wake up at 7:30 AM and sleep for 7 hours, their bedtime would be 12:30 AM.  
+[ASSISTANT_SAID] If the user wants to sleep for 7.5 hours, their bedtime would be 12:00 AM.  
+[ASSISTANT_SAID] If the user wants to sleep for 8 hours, their bedtime would be 11:30 PM.  
+[ASSISTANT_SAID] Recommended bedtime for the user is between 11:30 PM and 12:00 AM.  
+[ASSISTANT_SAID] Consistency is key for maintaining a sleep schedule.  
+[ASSISTANT_SAID] Suggested establishing a relaxing bedtime routine, including reading, taking a warm bath, avoiding screens, and journaling.  
+[FACT] User has been doing 30 minutes of meditation and journaling every morning, followed by a cup of coffee.  
+[PREFERENCE] User sometimes adds a quick 15-minute workout if they have the time.  
+[ASSISTANT_SAID] Meditation can increase energy levels, improve focus, and reduce stress.  
+[ASSISTANT_SAID] Journaling can clarify thoughts and emotions, set goals, and practice mindfulness.  
+[ASSISTANT_SAID] A moderate amount of caffeine can increase alertness and energy.  
+[ASSISTANT_SAID] Physical activity can boost energy levels, improve mood, and prepare the body for the day.  
+[ASSISTANT_SAID] Suggested gradually increasing physical activity and experimenting with different meditation techniques.  
+[ASSISTANT_SAID] Recommended monitoring energy levels and adjusting the routine as needed.  
+[EVENT] User is considering traveling to the beach for a week.  
+[ASSISTANT_SAID] Suggested being flexible with the morning routine while on vacation.  
+[ASSISTANT_SAID] Recommended prioritizing self-care and adjusting the schedule to accommodate relaxation.  
+[ASSISTANT_SAID] Suggested finding alternative activities, such as beach walks or water

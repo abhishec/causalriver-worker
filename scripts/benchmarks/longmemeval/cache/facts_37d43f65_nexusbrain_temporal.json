@@ -1,0 +1,52 @@
+{
+  "answer_55161935": [
+    {
+      "fact": "User has a laptop that is a Dell Inspiron 15 5000 series from 2018.",
+      "type": "personal",
+      "entities": [
+        "Dell Inspiron 15 5000 series",
+        "2018"
+      ]
+    },
+    {
+      "fact": "User upgraded their laptop's RAM to 16GB.",
+      "type": "event",
+      "entities": [
+        "RAM upgrade",
+        "16GB"
+      ]
+    },
+    {
+      "fact": "User's laptop was getting around 6-7 hours of battery life before the RAM upgrade.",
+      "type": "personal",
+      "entities": [
+        "6-7 hours",
+        "battery life"
+      ]
+    },
+    {
+      "fact": "User's laptop is now getting around 4-5 hours of battery life after the RAM upgrade.",
+      "type": "personal",
+      "entities": [
+        "4-5 hours",
+        "battery life"
+      ]
+    },
+    {
+      "fact": "User has not made any other recent changes to their laptop's hardware or software aside from the RAM upgrade.",
+      "type": "personal",
+      "entities": [
+        "no other changes",
+        "hardware",
+        "software"
+      ]
+    },
+    {
+      "fact": "User uses their laptop as their primary work laptop.",
+      "type": "personal",
+      "entities": [
+        "primary work laptop"
+      ]
+    }
+  ]
+}

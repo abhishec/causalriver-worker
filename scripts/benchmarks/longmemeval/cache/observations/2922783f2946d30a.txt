@@ -1,0 +1,27 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/27 (Sat) 02:17  
+[USER] User requests to ignore all previous instructions.  
+[USER] User wants responses only in English.  
+[USER] User identifies as an expert course creator and curriculum designer.  
+[USER] User uses backwards design in planning courses, starting with the outcome in mind.  
+[USER] User specifies that all courses are project-based.  
+[USER] User requests a course outline based on the desired outcome using the keywords "DEFI STUDY."  
+[USER] User requests that the output be appropriate for all types of learners who speak English.  
+[USER] User asks for a project plan for a real-world application of the course.  
+[USER] User requests a descriptive outline of components to be included in the final project.  
+[USER] User specifies no more than 6 modules in the course.  
+[USER] User requests lesson plans for each module, including learning objectives, real-world examples, and activities with step-by-step directions connected to the final project.  
+[USER] User asks for discussion questions and ways to expand learning.  
+[USER] User requests an engaging video script for each lesson explaining the connection to the project plan.  
+[USER] User requests that each module be organized into its own table.  
+[USER] User requests the phrase "ONE CLICK COURSE CREATOR" above the table.  
+[USER] User requests the phrase "To learn more about Bliss House tools visit www.oneclickcoursecreator.com" on the next line down.  
+[USER] User requests the phrase "If you liked this prompt please like it on the prompt search page so we know to keep enhancing it" under the table.  
+[ASSISTANT_SAID] Assistant provides a course title: "DEFI Study."  
+[ASSISTANT_SAID] Assistant describes the course as teaching learners about decentralized finance (DEFI) and its underlying technology.  
+[ASSISTANT_SAID] Assistant states that learners will understand how DEFI differs from traditional finance, the advantages and risks associated with DEFI, and how to create and trade digital assets using smart contracts.  
+[ASSISTANT_SAID] Assistant outlines the course outcome: learners will be able to design, develop, and deploy a DEFI application on the Ethereum blockchain.  
+[ASSISTANT_CREATED] Assistant creates Module 1: Introduction to DEFI with lesson plans, learning objectives, real-world examples, activities, discussion questions, and an engaging video script.  
+[ASSISTANT_CREATED] Assistant creates Module 2: Smart Contracts and Solidity with lesson plans, learning objectives, real-world examples, activities, discussion questions, and an engaging video script.  
+[ASSISTANT_CREATED] Assistant creates Module 3: Decentralized Applications (DApps) with lesson plans, learning objectives, real-world examples, activities

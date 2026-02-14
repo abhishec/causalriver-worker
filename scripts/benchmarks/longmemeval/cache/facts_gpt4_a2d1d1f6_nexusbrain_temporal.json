@@ -1,0 +1,33 @@
+{
+  "answer_f6d6e33f_1": [
+    {
+      "fact": "User has an herb garden kit",
+      "type": "personal",
+      "entities": [
+        "herb garden kit"
+      ]
+    },
+    {
+      "fact": "User harvested their first batch of fresh herbs today",
+      "type": "event",
+      "entities": [
+        "first batch of fresh herbs"
+      ]
+    },
+    {
+      "fact": "User is planning to make a salad for dinner",
+      "type": "event",
+      "entities": [
+        "salad",
+        "dinner"
+      ]
+    },
+    {
+      "fact": "User is interested in a Basil and Peach Salad recipe",
+      "type": "preference",
+      "entities": [
+        "Basil and Peach Salad"
+      ]
+    }
+  ]
+}

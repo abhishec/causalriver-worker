@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/04/04 (Tue) 04:23  
+[FACT] User is located in Kansas City.  
+[EVENT] User is planning a fantasy football draft party with friends.  
+[FACT] There will be about 10 people attending the draft party.  
+[ASSISTANT_SAID] Suggested brunch spots in Kansas City that can accommodate a group of 10:  
+[ASSISTANT_SAID] 1. The Roasterie Café: Located in the Crossroads Arts District, private room for up to 12 people, offers quiche, sandwiches, and salads.  
+[ASSISTANT_SAID] 2. The Farmhouse: Farm-to-table restaurant in the River Market area, private dining room for up to 14 people, seasonal menu with locally sourced ingredients.  
+[ASSISTANT_SAID] 3. Eggtc.: Two locations (Overland Park and Brookside), private room for up to 12 people, offers omelets, pancakes, and sandwiches.  
+[ASSISTANT_SAID] 4. The Campground: Located in the Westport area, private room for up to 15 people, brunch menu includes breakfast tacos, burgers, and a build-your-own Bloody Mary bar.  
+[ASSISTANT_SAID] 5. Urban Table: Restaurant in the Westport area, private room for up to 12 people, brunch menu includes eggs benedict, waffles, and quiche.  
+[ASSISTANT_SAID] Reservations are highly recommended for these spots, especially on weekends.  
+[ASSISTANT_SAID] Tips for planning a successful fantasy football draft party include scheduling it on a Saturday or Sunday, creating a draft order, bringing necessary materials, planning fun activities, and offering a variety of food and drinks.  
+[EVENT] User is considering inviting friends who are not into fantasy football.  
+[ASSISTANT_SAID] Suggested setting up a squares pool for the party, providing a step-by-step guide:  
+[ASSISTANT_SAID] 1. Create a 10x10 grid.  
+[ASSISTANT_SAID] 2. Sell squares for a set amount (e.g., $5-10 per square).  
+[ASSISTANT_SAID] 3. Randomly assign numbers 0-9 to each row and column.  
+[ASSISTANT_SAID] 4. Determine payouts for each quarter (1st Quarter: 20%, 2nd Quarter: 20%, 3rd Quarter: 20%, 4th Quarter: 40%).  
+[ASSISTANT_SAID] 5. Collect money and display the grid.  
+[ASSISTANT_SAID] 6. Update and announce winners after each quarter.  
+[ASSISTANT_SAID]

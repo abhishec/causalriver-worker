@@ -1,0 +1,26 @@
+**Observation Log:**
+
+- [FACT] The user is looking for resources on urban planning and sustainable development.
+- [EVENT] The user recently attended a lecture on sustainable development at the public library on the 10th of April.
+- [ASSISTANT_SAID] The assistant provided recommendations for online courses on sustainable development, including:
+  - **Coursera - Sustainable Development** (University of Michigan): A 4-course specialization covering basics of sustainable development, urban planning, energy, and climate change.
+  - **edX - Urban Planning and Development** (MIT): A 12-week course exploring principles of urban planning, including transportation, housing, and urban design.
+  - **FutureLearn - Sustainable Cities** (University of Leeds): A 6-week course examining challenges and opportunities of creating sustainable cities.
+  - **Udemy - Urban Planning and Sustainable Development** (various instructors): A range of courses on topics like green infrastructure and transportation planning.
+- [ASSISTANT_SAID] The assistant provided book recommendations on sustainable development, including:
+  - **"The Death and Life of Great American Cities" by Jane Jacobs**: Critiques urban planning approaches advocating for human-scale, mixed-use development.
+  - **"Sustainable Urban Planning: A Framework for Sustainable Development" by Dr. Richard W. Judd**: A comprehensive textbook on sustainable urban planning principles and practices.
+  - **"The Sustainable City" by Steven Cohen**: Explores challenges and opportunities in creating sustainable cities.
+  - **"Walkable Urbanism: A Guide to Creating Healthy, Efficient, and Economically Vibrant Cities" by Christopher Leinberger**: Argues for the importance of walkable, mixed-use development.
+- [ASSISTANT_SAID] The assistant provided other resource recommendations, including:
+  - **The Urban Planning and Development subreddit**: A community discussing trends and issues in urban planning.
+  - **The Sustainable Development Goals (SDGs) website**: Information on the UN's 17 Sustainable Development Goals.
+  - **The Urban Institute**: A think tank conducting research on urban planning and sustainable development.
+  - **The International Council for Local Environmental Initiatives (ICLEI)**: A global network working towards sustainable development.
+- [PREFERENCE] The user expressed interest in the Coursera course on Sustainable Development from the University of Michigan.
+- [ASSISTANT_SAID] The assistant provided details about the Coursera course structure, which includes:
+  - **Course 1: Sustainable Development and the Global Goals** (4 weeks)
+  - **Course 2: The Sustainable Development Challenge** (4 weeks)
+  - **Course 3: Sustainable Cities and Communities** (4 weeks)
+  - **Course 4: Leading the Way: Sustainability and Leadership** (4 weeks)
+- [ASSISTANT_SAID] The assistant mentioned that the course is taught by Dr. Jonathan T. Overpeck, a

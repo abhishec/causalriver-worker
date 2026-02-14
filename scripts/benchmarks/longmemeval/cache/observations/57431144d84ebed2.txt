@@ -1,0 +1,24 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/28 (Sun) 04:00  
+[ASSISTANT_SAID] The assistant provided a list of pages useful for both staff and HR manager in the employee leave management system.  
+[ASSISTANT_SAID] For Staff:  
+[ASSISTANT_SAID] 1. Dashboard: Displays current leave balances, pending leave requests, and important notices from HR.  
+[ASSISTANT_SAID] 2. Request Leave: Allows employees to submit a leave request by selecting type, start and end dates, and providing notes or attachments.  
+[ASSISTANT_SAID] 3. View Leave Requests: Allows employees to view past and current leave requests, including type, dates, status, and notes.  
+[ASSISTANT_SAID] 4. Cancel Leave: Allows employees to cancel previously approved leave requests.  
+[ASSISTANT_SAID] 5. View Leave Balances: Allows employees to view remaining leave balances for each type of leave.  
+[ASSISTANT_SAID] 6. Profile: Allows employees to view and edit personal information.  
+[ASSISTANT_SAID] For HR Manager:  
+[ASSISTANT_SAID] 1. Dashboard: Displays analytics and data related to leave usage, trends, and pending leave requests.  
+[ASSISTANT_SAID] 2. View Leave Requests: Allows HR Managers to view all leave requests, filter by status or date, and approve or reject requests.  
+[ASSISTANT_SAID] 3. View Leave Balances: Allows HR Managers to view leave balances of all employees.  
+[ASSISTANT_SAID] 4. Configure Leave Types: Allows HR Managers to create, edit, or delete leave types and parameters.  
+[ASSISTANT_SAID] 5. Reports: Allows HR Managers to generate reports on staff leave usage, trends, and forecasting.  
+[ASSISTANT_SAID] 6. Profile: Allows HR Managers to view and edit their personal information.  
+[ASSISTANT_SAID] The assistant streamlined the information to focus solely on leave management.  
+[ASSISTANT_SAID] The assistant provided a full requirement specification for the employee leave management system.  
+[ASSISTANT_SAID] The purpose of the system is to enable employees to request leave and HR Managers to manage those requests.  
+[ASSISTANT_SAID] Functional requirements include staff being able to request leave, view leave history, cancel requests, and HR Managers being able to approve/reject requests and view leave history.  
+[ASSISTANT_SAID] The system should validate requested leave dates and update employee leave balances upon approval.  
+[ASSISTANT_SAID] Non-functional requirements include system availability, scalability, speed,

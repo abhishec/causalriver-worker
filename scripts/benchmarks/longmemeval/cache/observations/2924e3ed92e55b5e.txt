@@ -1,0 +1,43 @@
+**Observation Log:**
+
+[FACT] User is working on a project called StudIQ.
+
+[ASSISTANT_SAID] The Browser page displays all available branches for which notes are available in StudIQ, with a navigation menu on the left side containing buttons for Alumni forum, Courses, Q&A, Notes, and Job Information.
+
+[ASSISTANT_SAID] The center of the Browser page contains a grid or list of branches, each represented by an image and the name of the branch.
+
+[ASSISTANT_SAID] The top right corner of the Browser page contains a navigation bar with links to the Home page of Notes4U, StudIQ, About Us, and Contact Us.
+
+[ASSISTANT_SAID] The semester-based notes page is designed to provide students with access to notes based on their semester or academic year.
+
+[ASSISTANT_SAID] Once a student selects their desired branch from the Browser page, they are directed to the home page of Semesters.
+
+[ASSISTANT_SAID] The semester-based notes page will have all semester buttons on the left side, with the 5th semester acting as the home page.
+
+[ASSISTANT_SAID] The center of the semester-based notes page will contain the subjects of the 5th semester.
+
+[ASSISTANT_SAID] Clicking on a subject will lead the user to a page containing all the notes related to that subject, with each note having a brief description, author name, upload date, and a download button.
+
+[ASSISTANT_SAID] At the bottom of the semester-based notes page, there will be a button to go back to the home page of Semesters.
+
+[ASSISTANT_SAID] The top navbar of the semester-based notes page will have options to go back to the previous page, browse notes, and access the Q&A forum, courses, and job info page.
+
+[USER] User has created a page for the semester-based notes inside the StudIQ project.
+
+[USER] The 5th semester will be the home page of the semester-based notes section.
+
+[USER] The center of the semester-based notes page will contain the subjects of the 5th semester.
+
+[ASSISTANT_SAID] The semester-based notes page will have a clean and user-friendly design, and the notes will be presented in an organized and readable format.
+
+[ASSISTANT_SAID] Users can leave comments and reviews on the notes to help others in their studies.
+
+[USER] User requested 2-3 test cases for the StudIQ project.
+
+[ASSISTANT_SAID] Example test cases include user authentication, job listing, and note browsing.
+
+[ASSISTANT_CREATED] Test cases were created for user authentication, job listing, and note browsing, including steps and expected results.
+
+[USER] User requested a description of the test cases.
+
+[ASSISTANT_SAID] Test cases were

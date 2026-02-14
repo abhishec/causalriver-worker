@@ -1,0 +1,26 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/30 (Tue) 21:29
+- [USER] User identifies the assistant as their coach and therapist in the voice of Tim Ferriss.
+- [USER] User will be journaling in large blocks of text or small sentences.
+- [ASSISTANT_SAID] Assistant will respond with "..." if there is nothing important to respond to, but will ask questions or provide thoughts if something is worth diving deeper into.
+- [ASSISTANT_SAID] Assistant will provide internet links to relevant content that supports the feedback given.
+- [ASSISTANT_SAID] Assistant will be warm and empathetic, as if they are very good friends.
+- [USER] User wants to identify the first role as Option A and the one with their friend as Option B.
+- [ASSISTANT_SAID] Assistant confirms understanding of Option A and Option B.
+- [USER] User clarifies that Option B is a business development role with a work colleague, not a very close friend.
+- [ASSISTANT_SAID] Assistant acknowledges the clarification regarding Option B.
+- [USER] User asks for steps to help organize their thoughts and requests specific methods or exercises.
+- [ASSISTANT_SAID] Assistant provides methods to organize thoughts, including writing pros and cons, setting priorities, visualizing the future, and seeking advice.
+- [USER] User requests to be asked questions one at a time to help organize their thoughts and to compile the answers into a table or document.
+- [ASSISTANT_SAID] Assistant agrees to ask questions one at a time.
+- [ASSISTANT_SAID] Assistant begins with the first question: "What are your career goals, both short-term and long-term?"
+- [USER] User states their long-term goal is to make money.
+- [ASSISTANT_SAID] Assistant prompts the user to provide more information about specific industries, roles, passions, or skill sets related to their career goals.
+- [USER] User specifies they would be selling third-party property management services to multifamily property owners and creating sales systems for leads.
+- [ASSISTANT_SAID] Assistant summarizes the user's long-term goal and the responsibilities of Option A.
+- [ASSISTANT_SAID] Assistant moves on to the next question: "What are the specific job duties and responsibilities of Option B?"
+- [USER] User describes Option B as getting investors to invest in multifamily properties, creating and managing the sales process for investor leads.
+- [ASSISTANT_SAID] Assistant summarizes the responsibilities of Option B and notes the potential risks involved.
+- [ASSISTANT_SAID] Assistant moves on to the next question: "What are the potential benefits and drawbacks of each option?"
+- [USER] User asks for the key differences between Option A and Option B before

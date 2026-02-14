@@ -1,0 +1,16 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/03/10 (Fri) 07:34
+- [ASSISTANT_SAID] The proposed paperless system allows citizens to create a digital identity and apply for a community tax certificate or other permits and clearances online using mobile phones or web applications.
+- [ASSISTANT_SAID] The current traditional way requires citizens to physically go to the local government office to apply for a community tax certificate or other permits and clearances, which is time-consuming and often requires waiting in long queues.
+- [ASSISTANT_SAID] The proposed system uses verifiable credentials and machine learning algorithms to verify the citizen's identity and other relevant information automatically.
+- [ASSISTANT_SAID] The current traditional verification process is manual and prone to errors, making it time-consuming.
+- [ASSISTANT_SAID] Citizens can make payments for the community tax certificate or other permits and clearances online using a digital wallet, mobile phones, or web applications in the proposed system.
+- [ASSISTANT_SAID] The current traditional payment process requires citizens to pay in cash at the local government office, which can be time-consuming and may require multiple trips.
+- [ASSISTANT_SAID] The proposed system automatically issues the community tax certificate or other permits and clearances once the verification and payment processes are complete.
+- [ASSISTANT_SAID] The certificates in the proposed system are stored on a blockchain to ensure they are secure and tamper-proof.
+- [ASSISTANT_SAID] If a printed hardcopy is required by the government agency, citizens can print the digital certificate anywhere at their convenience using their unique QR code for easy verification.
+- [ASSISTANT_SAID] The proposed paperless system is more efficient, secure, and convenient compared to the current traditional way of using the community tax certificate in local governments.
+- [ASSISTANT_SAID] The proposed system leverages verifiable credentials, digital wallet on a blockchain as payment provision, and machine learning to streamline the issuance process, enhance security, and reduce errors.
+- [ASSISTANT_SAID] By allowing citizens to access and print the digital certificate at their convenience, the proposed system increases the convenience and accessibility of the certification process, benefiting both citizens and government agencies.
+- [CHANGE] The assistant updated the analysis to include the option for citizens to print the digital certificate at their convenience using a unique QR code for easy verification by the requiring agency.

@@ -1,0 +1,32 @@
+**Observation Log:**
+
+- [FACT] User is in the process of buying a house.
+- [FACT] User recently put in an offer on a 3-bedroom townhouse in the Brookside neighborhood.
+- [TEMPORAL] User saw the townhouse on February 22nd.
+- [TEMPORAL] User put in an offer on February 25th.
+- [CHANGE] After negotiations, user agreed on a price of $340,000 for the townhouse.
+- [FACT] User is planning to put 20% down, which amounts to $68,000.
+- [FACT] User is looking at a 30-year mortgage.
+- [FACT] User's interest rate is around 4%.
+- [FACT] User is unsure about Private Mortgage Insurance (PMI).
+- [ASSISTANT_SAID] Congratulations on your offer being accepted!
+- [ASSISTANT_SAID] To estimate monthly mortgage payments, the assistant requested the interest rate, term of the mortgage, down payment amount, PMI information, and points paid upfront.
+- [ASSISTANT_SAID] With 20% down, user will avoid paying PMI.
+- [ASSISTANT_SAID] PMI is an insurance policy required when a homebuyer puts down less than 20% of the purchase price.
+- [ASSISTANT_SAID] Estimated monthly mortgage payment based on provided details: 
+  - Principal and interest (P&I): $1,294
+  - Property taxes (estimated): $400-500
+  - Insurance (estimated): $100-150
+- [ASSISTANT_SAID] Total estimated monthly mortgage payment would be around $1,794 to $1,944.
+- [FACT] User is worried about property taxes and insurance costs.
+- [ASSISTANT_SAID] Explained how property taxes are calculated based on assessed value and millage rate.
+- [ASSISTANT_SAID] Provided an example calculation for property taxes and estimated monthly payment.
+- [ASSISTANT_SAID] Explained how homeowners insurance premiums are calculated based on location, property value, deductible, and coverage.
+- [ASSISTANT_SAID] Provided an example calculation for homeowners insurance and estimated monthly payment.
+- [ASSISTANT_SAID] Updated estimated monthly mortgage payment to $1,737.75 including property taxes and insurance.
+- [FACT] User is glad to have a better understanding of property taxes and insurance calculations.
+- [FACT] User is still worried about the total estimated monthly mortgage payment.
+- [ASSISTANT_SAID] Suggested various ways to reduce mortgage costs, including shopping for insurance, improving credit score, and considering refinancing.
+- [ASSISTANT_SAID] Explained how credit scores affect mortgage rates and provided tips for improving credit scores.
+- [CHANGE] User mentioned they saw the townhouse on February 22nd instead of February 25th.
+- [ASSISTANT

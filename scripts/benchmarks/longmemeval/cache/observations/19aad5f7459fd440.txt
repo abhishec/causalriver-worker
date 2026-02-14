@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/22 (Mon) 02:47  
+[USER] User requested an explanation of a passage regarding embedding-based retrieval models.  
+[ASSISTANT_SAID] The passage discusses recent advances in training embedding-based retrieval models for open-domain questions, noting significant progress with direct supervision or extensive task-specific pretraining.  
+[ASSISTANT_SAID] The author claims that their work demonstrates a way to train dense retrieval models without direct supervision or extensive pretraining using the ELI5 dataset.  
+[ASSISTANT_SAID] The ELI5 dataset provides a diverse set of questions and answers, making dense retrieval models more accessible.  
+[USER] User asked for the meaning of "embedding-based retrieval" models.  
+[ASSISTANT_SAID] "Embedding-based retrieval" models convert words, phrases, or documents into numerical vectors (embeddings) that capture their semantic meaning in a high-dimensional space.  
+[ASSISTANT_SAID] These models enable efficient matching of queries with relevant documents by comparing the similarity between query and document vectors.  
+[ASSISTANT_SAID] Examples of embedding-based retrieval models include BERT, Word2Vec, and Doc2Vec.  
+[USER] User asked for the meaning of dense retrieval models.  
+[ASSISTANT_SAID] Dense retrieval models use dense vector representations (embeddings) to compare the similarity between a query and candidate documents.  
+[ASSISTANT_SAID] They are often used for open-domain question answering tasks and can be contrasted with sparse retrieval models.  
+[ASSISTANT_SAID] Similarity is computed using methods like cosine similarity or dot product, and documents are ranked based on their similarity to the query.  
+[ASSISTANT_SAID] Examples of dense retrieval models include DPR (Dense Passage Retrieval) and SOTA models such as T5, BART, and ELECTRA.  
+[USER] User requested an explanation with examples of the difference between dense and sparse retrieval models.  
+[ASSISTANT_SAID] Sparse retrieval models represent documents and queries as a bag-of-words, which is a sparse vector encoding the presence or absence of each word.  
+[ASSISTANT_SAID] Example of Document 1: "the quick brown fox" represented as [1, 1, 1, 1, 0, 0].  
+[ASSISTANT_SAID] Example of Document 2: "the lazy dog" represented as [1, 0, 1, 0, 1, 1].  
+[ASSISTANT_SAID] Dense retrieval models represent documents and queries as dense vectors capturing semantic meaning, e.g., using BERT embeddings.  
+[ASSISTANT_SAID] Example of Document 1 as a dense vector: [0.28,

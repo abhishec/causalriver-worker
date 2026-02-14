@@ -1,0 +1,27 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/29 (Mon) 02:11
+- [USER] Finding ordonnance with drones
+- [FACT] War has been a scourge for humankind since the dawn of history.
+- [FACT] The first half of the 20th century was extremely violent.
+- [FACT] The second half of the 20th century has seen a steady decrease in war violence.
+- [FACT] War is currently raging in several parts of the world, including Europe due to the Russian invasion of Ukraine.
+- [FACT] After a war has ended, it continues to make victims due to extra mortality caused by diseases and reduced life expectancy from economic hardship and destruction of infrastructure.
+- [FACT] A particularly nasty heritage of war is the large number of mines and unexploded ordnance.
+- [FACT] Unexploded ordnance can continue to make victims long after the war has finished.
+- [EXAMPLE] More than a century after World War I, unexploded ordnance in the “red zone” of the western front continues to make victims, as farmers plow up rusty grenades.
+- [FACT] People, often children, can be maimed for life if they hit on a hidden mine.
+- [FACT] The risk posed by unexploded mines can make large land areas off-limits.
+- [FACT] The denial of land that could be used for habitation, agriculture, or industry has large economic consequences.
+- [FACT] Mine and explosive disposal is one of the first priorities after a war despite the risk and high cost involved.
+- [FACT] A particularly difficult problem in demining and explosive disposal is finding explosives that have buried themselves underground.
+- [FACT] Explosives can become buried due to shock of impact in soft soil, other explosives piling dirt or debris on top, or bomb craters being filled with soil.
+- [FACT] Randomly digging for ordnance in deep soil is both destructive and prohibitively expensive.
+- [FACT] Accidental discovery of ordnance during necessary digging (e.g., for construction) is risky and expensive as all activities must stop to investigate and dispose of the ordnance.
+- [FACT] There is a considerable incentive to find bombs in the subsurface without digging.
+- [FACT] The assignment is based on data from a drone equipped with a magnetic field sensor to detect ordnance in the deep subsurface.
+- [FACT] Magnetic sensors measure static or oscillating magnetic fields in units of fractions of a Tesla (T).
+- [FACT] The magnetic field, traditionally denoted B, is a vector quantity.
+- [FACT] Often only one component of the magnetic field is measured, including for the datasets provided.
+- [FACT] The simplest magnetic sensors work by measuring the change in the local magnetic field of the earth caused by a substantial amount of ferromagnetic material.
+- [FACT] The earth

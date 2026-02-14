@@ -1,0 +1,26 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/08/29 (Tue) 10:31
+- [ASSISTANT_SAID] To find sales agents for Legacy Space, key aspects to consider include experience, local knowledge, communication skills, empathy, tech-savviness, and network.
+- [ASSISTANT_SAID] The profile of an ideal sales agent includes: 
+  1. Experience in sales, particularly in senior care, technology, or consumer electronics.
+  2. Familiarity with the local market and understanding of the target demographic.
+  3. Excellent communication and presentation skills.
+  4. Empathy for the needs of seniors and their families.
+  5. Comfort with VR technology and its benefits.
+  6. Existing connections to businesses serving the senior community.
+- [ASSISTANT_SAID] Recruitment strategies suggested include job postings, networking events, partnerships with local businesses, and collaboration with local retailers.
+- [ASSISTANT_SAID] Requirements for sales agents include a proven track record in sales, strong communication skills, knowledge of the local market, familiarity with VR technology, and a genuine interest in improving seniors' lives.
+- [USER] Our goal is to sell to 2% of the addressable market that we have identified above. How many sales would that be?
+- [ASSISTANT_SAID] To reach 2% of the addressable market (204,000 - 256,625 individuals aged 55 and above), you would need to make between 4,080 and 5,133 sales.
+- [USER] Please now include Winnipeg with the numbers above and then add everything together.
+- [ASSISTANT_SAID] Including Winnipeg, the total addressable market is:
+  - Low estimate: 354,000 (204,000 + 150,000)
+  - High estimate: 444,125 (256,625 + 187,500)
+- [ASSISTANT_SAID] To reach 2% of the total addressable market, you would need to make between 7,080 and 8,883 sales.
+- [USER] Show me this data above starting at achieving 0.25% of addressable market (low end) all the way up to 5% of addressable market (high end). Show me the numbers.
+- [ASSISTANT_SAID] Breakdown of sales needed to achieve various percentages of the total addressable market:
+  - 0.25%: Low estimate (885 sales), High estimate (1,111 sales)
+  - 1%: Low estimate (3,540 sales), High estimate (4,442 sales)
+  - 2%: Low estimate (7,080 sales), High estimate (8,883 sales)
+  - 3%: Low estimate (10,620 sales), High estimate (13

@@ -1,0 +1,16 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/29 (Mon) 12:42
+- [USER] User requested an explanation about the Korean stock market in a table format.
+- [USER] User specified the first table should have column names: perspective, title, summary.
+- [ASSISTANT_CREATED] Assistant provided a table with the following details:
+  - Perspective: Overview, Title: What is the Korean Stock Market?, Summary: The Korean Stock Market, also known as the KOSPI (Korea Composite Stock Price Index), is the main stock market in South Korea. It is operated by the Korea Exchange (KRX) and is home to over 800 publicly traded companies.
+  - Perspective: Market Capitalization, Title: Largest Companies in the KOSPI, Summary: The KOSPI is dominated by a few large companies, with Samsung Electronics being the largest by market capitalization. Other large companies include SK Hynix, Hyundai Motor, and POSCO.
+  - Perspective: Performance, Title: KOSPI Index Performance, Summary: The KOSPI Index tracks the performance of the KOSPI and is a widely used benchmark for the Korean stock market. In recent years, the KOSPI has generally trended upwards, but has experienced some volatility due to global economic conditions and domestic political events.
+  - Perspective: Trading Hours, Title: KOSPI Trading Hours, Summary: The KOSPI is open for trading on weekdays from 9:00 AM to 3:30 PM (Korean Standard Time), with a one-hour break from 11:30 AM to 12:30 PM.
+  - Perspective: Foreign Investment, Title: Foreign Investment in the KOSPI, Summary: Foreign investors are allowed to invest in the KOSPI, subject to certain regulations. As of 2021, foreign investors held around 30% of the market capitalization of the KOSPI.
+  - Perspective: Investment Vehicles, Title: Investing in the KOSPI, Summary: There are a variety of ways to invest in the KOSPI, including purchasing individual stocks, investing in index funds or ETFs, or using mutual funds. Investors can also gain exposure to the Korean stock market through ADRs (American Depository Receipts) listed on US exchanges.
+  - Perspective: Regulatory Bodies, Title: Regulatory Bodies overseeing the KOSPI, Summary: The KOSPI is overseen by a number of regulatory bodies, including the Financial Services Commission, the Financial Supervisory Service, and the Korea Exchange. These bodies are responsible for ensuring that companies listed on the KOSPI comply with relevant regulations and rules.
+- [USER] User requested a second explanation about the Korean stock market in a table format.
+- [USER] User specified the second table should have column names: perspective, summary.
+- [ASSISTANT_CREATED] Assistant provided a second table with the following details:

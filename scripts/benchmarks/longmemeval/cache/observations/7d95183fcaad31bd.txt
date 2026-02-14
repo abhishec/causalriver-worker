@@ -1,0 +1,30 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/24 (Wed) 01:51  
+[USER] User inquired about global full text search.  
+[ASSISTANT_SAID] A global full text search allows users to search for specific words or phrases within an entire collection of documents, regardless of their location or format.  
+[ASSISTANT_SAID] Global full text search is typically implemented using specialized software, such as a search engine, that indexes and searches text quickly and efficiently.  
+[ASSISTANT_SAID] Search results can include a list of documents containing the searched words or phrases, along with relevance or rank information.  
+[USER] User asked for the main reasons to implement global full text search.  
+[ASSISTANT_SAID] Reasons to implement global full text search include:  
+[ASSISTANT_SAID] 1. Improved information access.  
+[ASSISTANT_SAID] 2. Increased productivity.  
+[ASSISTANT_SAID] 3. Better customer service.  
+[ASSISTANT_SAID] 4. Competitive advantage.  
+[ASSISTANT_SAID] 5. Better data analysis.  
+[USER] User requested advantages of full text search versus form search.  
+[ASSISTANT_SAID] Advantages of full text search compared to form search include:  
+[ASSISTANT_SAID] 1. Flexibility in entering natural language queries.  
+[ASSISTANT_SAID] 2. Relevancy ranking of search results.  
+[ASSISTANT_SAID] 3. Comprehensive search through all words in a document.  
+[ASSISTANT_SAID] 4. Handling of misspellings.  
+[ASSISTANT_SAID] 5. Handling of synonyms.  
+[USER] User asked for an explanation of form search.  
+[ASSISTANT_SAID] Form search allows users to search for specific information by filling out a form with predefined fields and options.  
+[ASSISTANT_SAID] Form search is typically used to search structured data, such as databases and spreadsheets.  
+[ASSISTANT_SAID] Form search is useful when the user knows exactly what they are looking for and when the data is structured.  
+[USER] User mentioned needing to build a backoffice for a customer support team that attends to customer calls and searches for information like payment methods, subscriptions, and acquired products.  
+[ASSISTANT_SAID] Recommended designing a form search for the backoffice.  
+[ASSISTANT_SAID] Form search is suitable because the customer support team needs to search for specific information within predefined fields.  
+[ASSISTANT_SAID] Form search can be more efficient than full-text search when searching for specific information in large data sets.  
+[ASSISTANT

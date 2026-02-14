@@ -1,0 +1,41 @@
+{
+  "answer_6fe9fb49": [
+    {
+      "fact": "User is trying to recreate a cucumber-basil gimlet.",
+      "type": "preference",
+      "entities": [
+        "cucumber-basil gimlet"
+      ]
+    },
+    {
+      "fact": "User is having trouble getting the texture right in their gimlet.",
+      "type": "opinion",
+      "entities": [
+        "texture"
+      ]
+    },
+    {
+      "fact": "User has been experimenting with different garnishes for cocktails.",
+      "type": "preference",
+      "entities": [
+        "garnishes",
+        "cocktails"
+      ]
+    },
+    {
+      "fact": "User recently made a batch of pickled onions.",
+      "type": "event",
+      "entities": [
+        "pickled onions"
+      ]
+    },
+    {
+      "fact": "User is looking for suggestions for garnishes that pair well with a classic gin martini.",
+      "type": "preference",
+      "entities": [
+        "garnishes",
+        "classic gin martini"
+      ]
+    }
+  ]
+}

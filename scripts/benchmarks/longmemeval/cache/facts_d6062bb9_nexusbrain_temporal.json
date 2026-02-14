@@ -1,0 +1,95 @@
+{
+  "answer_23f3a657_2": [
+    {
+      "fact": "User is trying to increase their online presence.",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User has a pet named Luna.",
+      "type": "personal",
+      "entities": [
+        "Luna"
+      ]
+    },
+    {
+      "fact": "User's video of Luna chasing a laser pointer has 1,456 views.",
+      "type": "event",
+      "entities": [
+        "Luna",
+        "laser pointer",
+        "1,456 views"
+      ]
+    },
+    {
+      "fact": "User is looking for pet-centric content ideas for TikTok.",
+      "type": "preference",
+      "entities": [
+        "TikTok",
+        "pet-centric content"
+      ]
+    },
+    {
+      "fact": "User has been stuck at 187 followers on Twitter.",
+      "type": "event",
+      "entities": [
+        "Twitter",
+        "187 followers"
+      ]
+    }
+  ],
+  "answer_23f3a657_1": [
+    {
+      "fact": "User is trying to improve their social media presence.",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User participates in a weekly Twitter chat on Thursdays about social media marketing.",
+      "type": "event",
+      "entities": [
+        "Twitter chat",
+        "Thursdays",
+        "social media marketing"
+      ]
+    },
+    {
+      "fact": "User has a tutorial on social media analytics on YouTube.",
+      "type": "personal",
+      "entities": [
+        "YouTube",
+        "social media analytics"
+      ]
+    },
+    {
+      "fact": "User's YouTube tutorial on social media analytics has 542 views.",
+      "type": "personal",
+      "entities": [
+        "542 views"
+      ]
+    },
+    {
+      "fact": "User is thinking of creating more content around social media analytics.",
+      "type": "opinion",
+      "entities": [
+        "social media analytics"
+      ]
+    },
+    {
+      "fact": "User likes the idea of repurposing content from YouTube to Twitter.",
+      "type": "preference",
+      "entities": [
+        "YouTube",
+        "Twitter"
+      ]
+    },
+    {
+      "fact": "User wants to analyze their Twitter performance using tips from their social media analytics tutorial.",
+      "type": "opinion",
+      "entities": [
+        "Twitter performance",
+        "social media analytics tutorial"
+      ]
+    }
+  ]
+}

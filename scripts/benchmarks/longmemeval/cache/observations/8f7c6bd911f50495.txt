@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/26 (Fri) 16:19  
+[ASSISTANT_SAID] To find the words that are common across all labels, you can modify the code to compute the document frequency of each word separately for each label.  
+[ASSISTANT_CREATED] Provided a code snippet using `CountVectorizer` to find common vocabulary across labels.  
+[ASSISTANT_SAID] The code first gets the list of all unique labels in the training data.  
+[ASSISTANT_SAID] It creates a `CountVectorizer` object for each label and fits each vectorizer to the text data for that label.  
+[ASSISTANT_SAID] The code computes the intersection of the vocabulary sets for all labels to find common words.  
+[ASSISTANT_SAID] Finally, it prints the set of common vocabulary.  
+[USER] I want to calculate the percentage of a word in each label and see a word that accounts for more than 3 percent of all labels.  
+[ASSISTANT_SAID] To calculate the percentage of a word in each label, you can use the `CountVectorizer` object for each label and compute the term frequency (TF) of each word in each label.  
+[ASSISTANT_CREATED] Provided a code snippet to calculate the percentage of each word in each label and find words that account for more than 3% of all labels.  
+[ASSISTANT_SAID] The TF of a word is the number of times it appears in a document divided by the total number of words in the document.  
+[ASSISTANT_SAID] The code computes the term frequency of each word in each label and finds words that account for more than 3% of all labels.  
+[USER] I get KeyError. Because there is 'aal' in label 1, but there is no 'aal' in label 2.  
+[ASSISTANT_SAID] The `KeyError` occurs when you try to access the vocabulary of a label that doesn't contain a particular word.  
+[ASSISTANT_SAID] To handle this, you can use the `in` operator to check whether the vocabulary of a label contains a particular word before accessing it.  
+[ASSISTANT_CREATED] Provided an updated code snippet to handle the `KeyError` by checking if the word is in the vocabulary before accessing it.  
+[ASSISTANT_SAID] The updated code checks whether the word is in the vocabulary of each label and skips it if not.  
+[USER] Can you auto tune the percentage to be more than 100 common words?  
+[ASSISTANT_SAID] One way to automatically determine the percentage threshold for finding common words is to use a binary search algorithm.  
+[ASSISTANT_CREATED] Provided a code snippet

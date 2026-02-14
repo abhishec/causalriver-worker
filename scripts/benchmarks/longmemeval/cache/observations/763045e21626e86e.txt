@@ -1,0 +1,28 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/30 (Tue) 17:53
+- [ASSISTANT_SAID] Offering a customer the ability to get a car from any tier for a period of time for an upgrade fee depends on several factors, including cost of the upgrade fee, customer demand, competition, and target demographic.
+- [ASSISTANT_SAID] The upgrade fee needs to be high enough to cover the cost of the more expensive car but low enough to be attractive to customers.
+- [ASSISTANT_SAID] If there is high demand for upgrades, then offering an upgrade fee could be a good idea.
+- [ASSISTANT_SAID] Competition needs to be considered; if other subscription services offer similar options, an upgrade fee could be necessary to remain competitive.
+- [ASSISTANT_SAID] The target demographic's willingness to pay more for upgrades is also a factor in deciding whether to offer an upgrade fee.
+- [ASSISTANT_SAID] The wholesale division of Carvana can provide a steady supply of vehicles for different subscription tiers, help with acquiring and inspecting vehicles, and manage trade-ins or sales of vehicles no longer needed in the subscription fleet.
+- [ASSISTANT_SAID] By partnering with the wholesale division, the subscription service can potentially reduce costs, increase vehicle variety, and improve customer experience.
+- [ASSISTANT_SAID] Carvana utilized technology and streamlined traditional processes to process titles and registrations quickly.
+- [ASSISTANT_SAID] The current process involves checking for title availability, verifying buyer and seller information, and submitting necessary forms and fees to the appropriate state agency.
+- [ASSISTANT_SAID] Carvana leveraged electronic title and registration systems for efficient information transfer and developed partnerships with state agencies for seamless ownership transfer.
+- [ASSISTANT_CREATED] Proposed process workflow for title and registration optimization in dot language:
+```css
+digraph {
+  rankdir=LR;
+  node [shape=rectangle];
+  Check Availability -> Verify Information -> Submit Forms;
+  Check Availability [label="Check Availability of Title"];
+  Verify Information [label="Verify Information\nof Buyer and Seller"];
+  Submit Forms [label="Submit Forms and Fees\nto State Agency"];
+}
+```
+- [ASSISTANT_SAID] For handling cases with a lien, Carvana would verify lien information with the lending institution and ensure it is paid off before proceeding with the sale.
+- [ASSISTANT_SAID] In case of damaged titles or missing/incorrect information, Carvana would need to address those issues as part of the process.
+- [ASSISTANT_SAID] Dot language is a text-based language used to describe graph structures and render them into images, created for use with Graphviz software.
+- [ASSISTANT_SAID] The user requested a workflow to check lien information

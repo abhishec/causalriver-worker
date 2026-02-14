@@ -1,0 +1,67 @@
+{
+  "answer_a25d4a91_1": [
+    {
+      "fact": "User plays soccer with coworkers",
+      "type": "relationship",
+      "entities": [
+        "soccer",
+        "coworkers"
+      ]
+    },
+    {
+      "fact": "User's next soccer game is in two weeks",
+      "type": "event",
+      "entities": [
+        "soccer game",
+        "two weeks"
+      ]
+    },
+    {
+      "fact": "User is working on improving endurance for soccer",
+      "type": "preference",
+      "entities": [
+        "endurance",
+        "soccer"
+      ]
+    },
+    {
+      "fact": "User recently set a personal best time in a charity 5K run with a time of 27:12",
+      "type": "event",
+      "entities": [
+        "charity 5K run",
+        "27:12"
+      ]
+    },
+    {
+      "fact": "User has been doing some running lately",
+      "type": "personal",
+      "entities": [
+        "running"
+      ]
+    }
+  ],
+  "answer_a25d4a91_2": [
+    {
+      "fact": "User is training for a charity 5K run.",
+      "type": "event",
+      "entities": [
+        "charity 5K run"
+      ]
+    },
+    {
+      "fact": "User hopes to beat their personal best time of 25:50.",
+      "type": "preference",
+      "entities": [
+        "personal best time",
+        "25:50"
+      ]
+    },
+    {
+      "fact": "User is focused on improving their endurance.",
+      "type": "preference",
+      "entities": [
+        "endurance"
+      ]
+    }
+  ]
+}

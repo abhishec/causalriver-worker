@@ -1,0 +1,51 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/26 (Fri) 20:25
+- [EVENT] User is thinking of organizing their shoe closet.
+- [EVENT] User got rid of three old pairs of shoes that were no longer wearable last weekend.
+- [PREFERENCE] User is excited to give their remaining shoes some TLC.
+- [ASSISTANT_SAID] Assistant congratulated the user on decluttering their shoe closet.
+- [ASSISTANT_SAID] Assistant provided tips to keep shoes looking their best, including:
+  1. Clean them regularly.
+  2. Condition and protect leather shoes.
+  3. Store them properly.
+  4. Use shoe care products.
+  5. Avoid extreme temperatures.
+  6. Handle with care.
+  7. Use a shoe rack or organizer.
+  8. Protect suede and nubuck shoes.
+  9. Dry wet shoes carefully.
+  10. Take them to a cobbler for repairs.
+- [EVENT] User needs help with the conditioning part for their leather shoes.
+- [ASSISTANT_SAID] Assistant recommended leather conditioners and oils for brown leather loafers:
+  - Chamber's Leather Milk
+  - Bickmore Leather Conditioner
+  - Lexol Leather Conditioner
+  - Neatsfoot Oil
+  - Mink Oil
+  - Bickmore Leather Oil
+- [ASSISTANT_SAID] Assistant provided tips for using leather conditioners and oils, including:
+  1. Always read the instructions.
+  2. Test a small area first.
+  3. Use a soft cloth.
+  4. Apply sparingly.
+  5. Let it absorb.
+  6. Buff to a shine.
+- [EVENT] User is planning to use Chamber's Leather Milk on their brown leather loafers.
+- [EVENT] User is thinking of cleaning and conditioning their other leather shoes, including new black ankle boots.
+- [ASSISTANT_SAID] Assistant provided tips for preventing scratches and scuffs on leather shoes, including:
+  1. Handle with care.
+  2. Use a soft cloth.
+  3. Avoid rough surfaces.
+  4. Use a shoe tree or stuffing.
+  5. Apply a leather protector.
+  6. Avoid exposure to chemicals.
+  7. Use a leather scratch remover.
+  8. Condition regularly.
+  9. Avoid over-conditioning.
+  10. Store them properly.
+- [ASSISTANT_SAID] Assistant recommended using a gentle cleaner for black leather and avoiding harsh chemicals.
+- [ASSISTANT_SAID] Assistant provided additional tips for cleaning and conditioning black ankle boots, including:
+  1. Use a conditioner specifically for black leather.
+  2. Apply sparingly.
+  3. Avoid applying conditioner to toe caps or heels

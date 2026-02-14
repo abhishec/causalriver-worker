@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/19 (Fri) 13:37
+- [ASSISTANT_SAID] A problem can be broken down into several components, including the initial state, goal state, set of actions, set of constraints, performance measure, problem space, search space, solution, cost, and uncertainty.
+- [ASSISTANT_SAID] The initial state is the starting point or current situation that the problem is based on.
+- [ASSISTANT_SAID] The goal state is the desired outcome or end point that the problem is trying to achieve.
+- [ASSISTANT_SAID] The set of actions includes the possible actions that can be taken to move from the initial state to the goal state.
+- [ASSISTANT_SAID] The set of constraints refers to the limitations or rules that must be followed when selecting and executing actions.
+- [ASSISTANT_SAID] The performance measure is a metric used to evaluate the effectiveness of different solutions to the problem.
+- [ASSISTANT_SAID] The problem space is the set of all possible states and actions that are relevant to the problem.
+- [ASSISTANT_SAID] The search space is the subset of the problem space that is considered during the problem-solving process.
+- [ASSISTANT_SAID] The solution is the sequence of actions that leads from the initial state to the goal state, satisfying all the constraints and maximizing the performance measure.
+- [ASSISTANT_SAID] The cost refers to the price, time, effort, or any other measure associated with the solution.
+- [ASSISTANT_SAID] The uncertainty is the degree of uncertainty or imprecision associated with the problem, such as the lack of complete information or the presence of stochastic elements.
+- [ASSISTANT_SAID] The steps involved in problem-solving techniques can include understanding the problem, formulating a plan, implementing the plan, evaluating the solution, refining the solution, checking, learning, storing, and communicating.
+- [ASSISTANT_SAID] Uninformed search strategies are also known as blind search strategies and include breadth-first search (BFS), depth-first search (DFS), depth-limited search (DLS), iterative deepening search (IDS), and uniform-cost search (UCS).
+- [ASSISTANT_SAID] Breadth-first search (BFS) explores all nodes at the current depth level before moving on to the next level, using a queue data structure.
+- [ASSISTANT_SAID] Depth-first search (DFS) explores as far as possible along each branch before backtracking, using a stack data structure.
+- [ASSISTANT_SAID] Depth-limited search (DLS) is a modified version of DFS that limits the depth of the search to a certain level.
+- [ASSISTANT

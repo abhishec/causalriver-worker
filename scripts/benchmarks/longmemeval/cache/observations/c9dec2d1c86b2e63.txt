@@ -1,0 +1,22 @@
+**Observation Log**
+
+**Session Date:** 2023/05/28 (Sun) 06:37  
+**Session ID:** sharegpt_6zw6Ok9_0
+
+1. [FACT] User provided web search results related to Tokenized LLC Formation and Ricardian LLC.
+2. [ASSISTANT_SAID] Ricardian LLC leverages the simple formation offered by Delaware Series LLCs while ensuring separation of concerns and legal validity through the use of NFTs and a tailored Master operating agreement.
+3. [ASSISTANT_SAID] Wrappr LLC NFTs extend the concept with ERC-1155 NFTs to provide flexibility in tracking LLC membership with balances attached to each NFT tokenId.
+4. [ASSISTANT_SAID] Wrappr LLC NFTs serve as the backend for KALI DAO deployments that choose an automated LLC legal structure.
+5. [ASSISTANT_SAID] Users selecting Delaware or Wyoming LLC on the Wrappr app will receive a mint on an ERC-1155 NFT with a Series LLC agreement attached.
+6. [ASSISTANT_SAID] The cost to mint a Wrappr LLC NFT, including gas fees, is roughly $25, which supports maintenance of Series LLC registrations and ensures operating agreements are valid.
+7. [ASSISTANT_SAID] LLCs can operate on behalf of an organization with rules and finances handled by smart contracts, referred to as DAOs.
+8. [ASSISTANT_SAID] A Wrappr user can attach an LLC NFT to their wallet or multi-sig to receive funds from a DAO treasury for purchasing assets or paying expenses.
+9. [ASSISTANT_SAID] The LLC protects users from liability related to the DAO, providing a separate legal personality to manage DAO affairs.
+10. [ASSISTANT_SAID] DAOs may wrap their membership into an LLC, treating tokens as membership units under the LLC operating agreement.
+11. [ASSISTANT_SAID] The creation of an LLC does not centralize DAO membership but provides a legal identity to the DAO's code.
+12. [ASSISTANT_SAID] Using Wrappr LLC NFTs allows DAOs to maintain privacy without hiring representatives for off-chain affairs.
+13. [ASSISTANT_SAID] Opening a bank account and obtaining an EIN for LLCs can be handled by the LexDAO Clinic.
+14. [ASSISTANT_SAID] Users can receive their EIN by filling out a basic form online, ensuring the name applied for denotes that the LLC is a Series LLC.
+15. [ASSISTANT_SAID] Mercury provides a web3-friendly application form for setting up banking for LLC DAOs.
+16. [ASSISTANT_SAID] The KALI team handles maintenance of Wrappr LLC filings, registered agent, and annual State franchise tax for public benefit.
+17. [ASSISTANT_SAID] Users' tax obligations will pertain

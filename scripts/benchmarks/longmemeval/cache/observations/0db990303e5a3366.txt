@@ -1,0 +1,29 @@
+**Observation Log:**
+
+**Session Date:** 2023/05/23 (Tue) 05:20  
+**Session ID:** sharegpt_Ij8JbdT_0
+
+1. [FACT] The user wants to create a Black Community Impact app.
+2. [PREFERENCE] The user desires the app to gamify Black individuals' contributions to their community.
+3. [PREFERENCE] The user emphasizes that the app should not shame anyone for their contributions or lack thereof.
+4. [PREFERENCE] The user wants the app to be strictly positive, uplifting, and promote a culture that advances the Black community.
+5. [PREFERENCE] The user aims to inspire and motivate Black individuals to take positive action contributing to the social advancement of the collective Black community.
+6. [PREFERENCE] The user wants the app to quantify everyday tasks and work that support the Black community.
+7. [EVENT] The app will collect self-reported activity from each user.
+8. [FACT] The app will include features such as study hours, community service hours, money spent with Black businesses, money donated to Black institutions, money invested in local Black businesses, trips to the doctors, daily steps walked, hours spent with family, and local events attended.
+9. [FACT] The app will have user levels based on activity: Citizen, Neighbor, Advocate, Builder, Representative.
+10. [FACT] The app will include a savings account tracker.
+11. [FACT] The app will provide educational content on how to support the community.
+12. [FACT] The app will feature a local Black directory.
+13. [FACT] The app will include receipt capturing.
+14. [FACT] The app will provide inspirational prompts.
+15. [FACT] The app will offer micro lending.
+16. [FACT] The app will host networking events and community gatherings.
+17. [FACT] The app will include a step counter and interactive media.
+18. [FACT] Users will earn reward points for meeting community impact activity goals.
+19. [FACT] The app will have a dashboard to show nearby local users' path level.
+20. [FACT] The app will feature a digital wallet.
+21. [FACT] The "Representative" user level will be a paid level with a $99 monthly subscription.
+22. [PREFERENCE] Perks for being a Representative include invitations to exclusive events, courses, a monthly publication, a produce food box, and emergency micro loans.
+23. [ASSISTANT_SAID] The assistant did not provide any specific information, recommendations, or suggestions in this conversation.
+24. [ASSISTANT_CREATED] The assistant did not create any content in this conversation.

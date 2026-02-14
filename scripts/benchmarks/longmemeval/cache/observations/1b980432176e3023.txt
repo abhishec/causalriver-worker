@@ -1,0 +1,26 @@
+**Observation Log:**
+
+- [FACT] User's name is Carlos Albornoz.
+- [FACT] User's email is albornozmcea@gmail.com.
+- [FACT] User's location is Buenos Aires, Argentina.
+- [FACT] User's job title is Backend Software Developer.
+- [EVENT] User is seeking help to write a cover letter for a job application.
+- [CHANGE] User provided their resume in JSON format.
+- [TEMPORAL] Session date is 2023/05/21 (Sun) 15:30.
+- [ASSISTANT_SAID] Assistant expressed willingness to help with the cover letter and requested the job description.
+- [ASSISTANT_SAID] Assistant acknowledged the user's experience as a backend software developer.
+- [ASSISTANT_SAID] Assistant requested the job description to tailor the cover letter.
+- [FACT] User's work experience includes positions at NarnajaX, Novolabs, and PwC Buenos Aires.
+- [FACT] User has held the position of Sr Software Developer at NarnajaX since November 21, 2021.
+- [FACT] User has held the position of Lead Developer at Novolabs from August 1, 2021, to November 1, 2021.
+- [FACT] User has held the position of Lead Developer at PwC Buenos Aires from July 1, 2020, to August 1, 2021.
+- [FACT] User has held the position of Ssr Software Developer at PwC Buenos Aires from January 1, 2020, to July 1, 2020.
+- [FACT] User has held the position of Software Developer at PwC Buenos Aires from July 1, 2019, to January 1, 2020.
+- [FACT] User has held the position of IAM Analyst at PwC Buenos Aires from May 1, 2018, to July 1, 2019.
+- [FACT] User has held the position of Software Development Intern at Foriety from February 1, 2017, to November 1, 2017.
+- [FACT] User's skills include Microservices, Event Driven Architectures, DevOps, Python, Team Management, CI/CD, Cloud Computing, NestJS, FastAPI, Pandas, and Machine Learning.
+- [FACT] User has certifications in AI & Deep Learning from Digital House and Design of Modern Large Scale Systems from Udemy.
+- [ASSISTANT_SAID] Assistant thanked the user for providing their resume.
+- [ASSISTANT_SAID] Assistant requested the job description to help write the cover letter.
+- [FACT] Job description provided by the user includes a role for a senior backend engineer with strong software and cloud engineering skills.
+- [FACT] Job responsibilities include building new API features, automated test suites, scalable systems, and troubleshooting production issues.

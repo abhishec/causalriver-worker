@@ -1,0 +1,93 @@
+{
+  "answer_2cec623b_1": [
+    {
+      "fact": "User is planning to go to the mall this weekend.",
+      "type": "event",
+      "entities": [
+        "mall",
+        "weekend"
+      ]
+    },
+    {
+      "fact": "User is interested in buying more tops from H&M.",
+      "type": "preference",
+      "entities": [
+        "H&M",
+        "tops"
+      ]
+    },
+    {
+      "fact": "User has already bought three tops from H&M.",
+      "type": "personal",
+      "entities": [
+        "H&M",
+        "three tops"
+      ]
+    },
+    {
+      "fact": "User loves H&M's summer collection.",
+      "type": "opinion",
+      "entities": [
+        "H&M",
+        "summer collection"
+      ]
+    },
+    {
+      "fact": "User is inquiring about H&M's loyalty program or rewards card.",
+      "type": "preference",
+      "entities": [
+        "H&M",
+        "loyalty program",
+        "rewards card"
+      ]
+    }
+  ],
+  "answer_2cec623b_2": [
+    {
+      "fact": "User is planning to go to the mall this weekend.",
+      "type": "event",
+      "entities": [
+        "mall",
+        "weekend"
+      ]
+    },
+    {
+      "fact": "User has already purchased five tops from H&M.",
+      "type": "personal",
+      "entities": [
+        "H&M",
+        "five tops"
+      ]
+    },
+    {
+      "fact": "User is considering buying more tops from H&M.",
+      "type": "preference",
+      "entities": [
+        "H&M",
+        "tops"
+      ]
+    },
+    {
+      "fact": "User is thinking of checking out a new thrift store called The Vault near their work.",
+      "type": "preference",
+      "entities": [
+        "The Vault",
+        "thrift store"
+      ]
+    },
+    {
+      "fact": "User has placed an order with ASOS recently.",
+      "type": "personal",
+      "entities": [
+        "ASOS"
+      ]
+    },
+    {
+      "fact": "User is interested in getting a new pair of sneakers.",
+      "type": "preference",
+      "entities": [
+        "sneakers"
+      ]
+    }
+  ]
+}

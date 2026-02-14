@@ -1,0 +1,18 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2021/06/01 (Tue) 17:11  
+[ASSISTANT_SAID] The assistant apologized and provided an updated version of the code with a fixed wave.  
+[ASSISTANT_CREATED] The assistant created a JavaScript code snippet for a wave animation with a boat. The code includes variables for wave count, length, speed, amplitude, and color, as well as image loading and drawing functions.  
+[ASSISTANT_SAID] The assistant explained that the randomization of the wave height was removed and set back to using `sin` with `waveAmplitude` as the height of the wave.  
+[ASSISTANT_SAID] The assistant mentioned that the `curveOffset` is used to make the wave curve up and down like a real ocean wave.  
+[ASSISTANT_SAID] The assistant stated that the boat image and movement remain the same as in the previous version.  
+[USER] The user requested to make the line a little bit faster and the speed of the boat the same speed as the line.  
+[ASSISTANT_SAID] The assistant provided an updated code snippet with a faster wave and a boat moving at the same speed.  
+[ASSISTANT_CREATED] The assistant changed the `waveSpeed` to 1 and updated the `boatX` movement to match the speed of the wave.  
+[USER] The user requested to make each wave a bit wider.  
+[ASSISTANT_SAID] The assistant provided an updated code snippet with slightly wider waves.  
+[ASSISTANT_CREATED] The assistant increased the `strokeWeight()` to 10 to make the waves wider.  
+[USER] The user requested to put the boat above the line in order for it to move with the wave up and down.  
+[ASSISTANT_SAID] The assistant provided an updated code snippet with the boat above the waves.  
+[ASSISTANT_CREATED] The assistant added code to adjust the boat's position based on the height of the nearest wave, ensuring the boat moves up and down with the waves.  
+[ASSISTANT_SAID] The assistant explained that the boat is now positioned above the waves and moves up and down with them.

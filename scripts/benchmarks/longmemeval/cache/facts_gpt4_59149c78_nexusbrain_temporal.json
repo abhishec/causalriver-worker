@@ -1,0 +1,51 @@
+{
+  "answer_d00ba6d1_1": [
+    {
+      "fact": "User is interested in modern art movements.",
+      "type": "preference",
+      "entities": [
+        "modern art movements"
+      ]
+    },
+    {
+      "fact": "User recently returned from a guided tour at the Museum of Modern Art.",
+      "type": "event",
+      "entities": [
+        "Museum of Modern Art",
+        "guided tour"
+      ]
+    },
+    {
+      "fact": "User's interest in modern art was sparked by the MoMA tour focused on 20th-century modern art movements.",
+      "type": "opinion",
+      "entities": [
+        "MoMA",
+        "20th-century modern art movements"
+      ]
+    },
+    {
+      "fact": "User is curious about Frida Kahlo's works.",
+      "type": "preference",
+      "entities": [
+        "Frida Kahlo"
+      ]
+    }
+  ],
+  "answer_d00ba6d1_2": [
+    {
+      "fact": "User is trying to learn more about ancient cultures.",
+      "type": "preference",
+      "entities": [
+        "ancient cultures"
+      ]
+    },
+    {
+      "fact": "User is particularly fascinated by the sarcophagi at the exhibit.",
+      "type": "opinion",
+      "entities": [
+        "sarcophagi",
+        "exhibit"
+      ]
+    }
+  ]
+}

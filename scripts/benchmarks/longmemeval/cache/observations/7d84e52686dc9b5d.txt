@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [FACT] User is a teacher with 10 years' experience.
+- [CHANGE] User is interested in transitioning to a role in instructional design.
+- [ASSISTANT_SAID] Assistant can help create a resume for an instructional design role.
+- [ASSISTANT_SAID] Assistant needs the user's current contact information, including name, email, and phone number.
+- [ASSISTANT_SAID] Assistant requests a professional summary highlighting the user's teaching experience and interest in instructional design.
+- [ASSISTANT_SAID] Example professional summary provided: "Dedicated and experienced teacher with 10 years of experience in primary education. Seeking to leverage my instructional skills and passion for education to transition to an instructional design role. Proven track record of creating engaging and effective lesson plans, collaborating with colleagues, and incorporating technology to enhance student learning."
+- [ASSISTANT_SAID] Assistant requests the user's education credentials, including degrees or certifications related to education or instructional design.
+- [ASSISTANT_SAID] Assistant requests a list of the user's teaching experience, including names of schools, dates taught, grades, and subjects.
+- [ASSISTANT_SAID] Assistant requests a brief description of the user's responsibilities, accomplishments, and any projects or initiatives led or contributed to for each teaching position.
+- [ASSISTANT_SAID] Assistant requests a list of the user's technical skills, including experience with instructional design software, learning management systems (LMS), or other relevant technology tools.
+- [ASSISTANT_SAID] Assistant requests a list of the user's transferable skills, such as communication, collaboration, project management, and problem-solving.
+- [ASSISTANT_CREATED] Assistant provided an example resume structure, including sections for name, contact information, professional summary, education, teaching experience, technical skills, and transferable skills.
+- [ASSISTANT_CREATED] Example education section provided: "Bachelor of Education, XYZ University; Teaching Certification, ABC Board of Education."
+- [ASSISTANT_CREATED] Example teaching experience section provided with a placeholder for school name, dates, grade, and subject, along with bullet points detailing responsibilities and accomplishments.
+- [ASSISTANT_CREATED] Example technical skills section provided: "Learning Management Systems: Blackboard, Canvas, Moodle; Instructional Design Software: Articulate Storyline, Adobe Captivate, Camtasia; Other Technology Tools: Google Suite, Microsoft Office, Zoom, Kahoot."
+- [ASSISTANT_CREATED] Example transferable skills section provided with descriptions of communication, collaboration, project management, and problem-solving skills.
+- [ASSISTANT_SAID] Assistant expressed hope that the example helps the user create a strong resume that highlights teaching experience and skills while showcasing potential as an instructional designer.
+- [ASSISTANT_SAID] Assistant wished the user good luck with their job search.

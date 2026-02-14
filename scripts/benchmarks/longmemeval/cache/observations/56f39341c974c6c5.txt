@@ -1,0 +1,40 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/28 (Sun) 09:22  
+[FACT] User is looking for new recipe ideas to try out.  
+[PREFERENCE] User recently made an amazing vegetable stir-fry with tofu and is looking to experiment with more Asian-inspired dishes.  
+[ASSISTANT_SAID] Assistant congratulated the user on experimenting with a new cuisine and provided a list of Asian-inspired recipe ideas.  
+[ASSISTANT_CREATED] Assistant provided a list of stir-fry variations, noodle and rice dishes, soups and stews, and other delicious options, including:  
+- Kung Pao Chicken  
+- Thai Basil Stir-Fry  
+- Japanese Teriyaki Stir-Fry  
+- Pad Thai  
+- Korean Japchae  
+- Thai Green Curry Fried Rice  
+- Vietnamese Pho  
+- Thai Tom Yum Soup  
+- Japanese Miso Ramen  
+- Korean Bibimbap  
+- Thai Satay  
+- Japanese Gyoza  
+[PREFERENCE] User expressed interest in trying the Thai Basil Stir-Fry due to the combination of flavors and ingredients.  
+[ASSISTANT_SAID] Assistant provided tips on how to make the flavorful sauce for the Thai Basil Stir-Fry, including a detailed recipe.  
+[ASSISTANT_CREATED] Assistant listed the ingredients for the Thai Basil Stir-Fry sauce:  
+- 2 cloves of garlic, minced  
+- 1 tablespoon grated fresh ginger  
+- 2 tablespoons fish sauce  
+- 1 tablespoon soy sauce  
+- 1 tablespoon brown sugar  
+- 1 tablespoon lime juice  
+- 1/2 teaspoon Thai chili flakes  
+- 1/4 teaspoon ground black pepper  
+- 2 tablespoons vegetable oil  
+[ASSISTANT_SAID] Assistant provided tips for making the sauce, including using high-quality fish sauce, balancing flavors, and tasting and adjusting as needed.  
+[ASSISTANT_SAID] Assistant provided instructions on how to make the sauce, including cooking steps.  
+[PREFERENCE] User expressed excitement to try the recipe and asked for tips on choosing the right type of Thai basil.  
+[ASSISTANT_SAID] Assistant provided tips on choosing the right Thai basil, including looking for the specific variety (Ocimum basilicum var. thyrsiflora), checking the aroma, and avoiding basil with brown or yellow leaves.  
+[ASSISTANT_SAID] Assistant suggested using fresh Thai basil over dried and provided storage tips.  
+[PREFERENCE] User asked for recommendations on what type of protein to use in the Thai Basil Stir-Fry.  
+[ASSISTANT_SAID] Assistant recommended several protein options, including chicken, tofu, shrimp, pork, beef, turkey, lamb, and vegetarian options like mushrooms.  
+[PREFERENCE] User decided to go with chicken breast for the stir-fry and mentioned having chicken breast in the fridge.  
+[ASSISTANT_SAID] Assistant provided

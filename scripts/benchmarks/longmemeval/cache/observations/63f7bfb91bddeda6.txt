@@ -1,0 +1,22 @@
+**Observation Log:**
+
+- [FACT] User is planning a trip to Miami.
+- [FACT] User is considering flying with American Airlines or Delta.
+- [FACT] User had a terrible experience with American Airlines' entertainment system on a flight from New York to Los Angeles.
+- [FACT] User had a 1-hour delay on a United Airlines flight from Boston to Chicago due to air traffic control issues.
+- [EVENT] User is planning a trip to Miami and considering booking a hotel near the Miami airport.
+- [ASSISTANT_SAID] American Airlines offers seat-back screens on most aircraft, personal device entertainment, a wide selection of content, and charging options.
+- [ASSISTANT_SAID] Delta offers Delta Studio with a wide selection of content, seat-back screens, personal device entertainment, and charging options.
+- [ASSISTANT_SAID] Delta's entertainment system is often praised for its extensive content library and user-friendly interface.
+- [ASSISTANT_SAID] User might want to check the specific aircraft and route for entertainment availability.
+- [ASSISTANT_SAID] Recommended hotels near Miami International Airport include Miami International Airport Hotel, Hyatt Regency Miami Airport, Hilton Miami Airport Blue Lagoon, Crowne Plaza Miami Airport, Fairfield Inn & Suites by Marriott Miami Airport South, La Quinta Inn & Suites by Wyndham Miami Airport East, Embassy Suites by Hilton Miami International Airport, Sheraton Miami Airport Hotel & Executive Meeting Center, and DoubleTree by Hilton Hotel Miami Airport & Convention Center.
+- [ASSISTANT_SAID] Hotels with shuttle service to the Port of Miami cruise terminal include Hyatt Regency Miami Airport, Hilton Miami Airport Blue Lagoon, Embassy Suites by Hilton Miami International Airport, Crowne Plaza Miami Airport, and La Quinta Inn & Suites by Wyndham Miami Airport East.
+- [PREFERENCE] User is looking for hotels that are within walking distance of the airport or offer a shuttle service.
+- [EVENT] User is planning to take a cruise after their trip to Miami.
+- [FACT] User is considering booking a round-trip ticket from Boston to Fort Lauderdale for their spring break trip in March.
+- [ASSISTANT_SAID] Spirit Airlines allows one personal item free of charge, with a maximum size of 18 x 14 x 8 inches.
+- [ASSISTANT_SAID] Spirit Airlines charges for carry-on bags and checked bags, with specific fees and size restrictions.
+- [ASSISTANT_SAID] Recommended hotels with free shuttle service to the Port of Miami cruise terminal include Hyatt Regency Miami Airport, Hilton Miami Airport Blue Lagoon, Embassy Suites by Hilton Miami International Airport, Crowne Plaza Miami Airport, and La Quinta Inn & Suites by Wyndham Miami Airport East.
+- [EVENT] User is considering booking a room at the Hyatt Regency Miami Airport.
+- [ASSISTANT_SAID] The Hyatt Regency Miami Airport offers a shuttle service to the Port of Miami cruise terminal on cruise departure days.
+-

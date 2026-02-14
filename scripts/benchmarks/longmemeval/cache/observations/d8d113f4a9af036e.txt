@@ -1,0 +1,82 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/30 (Tue) 02:31  
+[ASSISTANT_SAID] The assistant provided an example configuration for two overlay routers using OSPFv3, BGP, and VXLAN with an optimized route map for performance and control over packet traversal.  
+[ASSISTANT_CREATED] Router 1 Configuration:  
+```kotlin
+hostname overlay1
+!
+interface lo
+ ip address 192.168.1.1/32
+!
+interface ens1f0
+ no ip address
+!
+interface vxlan10
+ vxlan id 10
+ vxlan local-tunnelip 192.168.100.1
+ vxlan remote-tunnelip 192.168.100.2
+ vxlan udp-port 4789
+ vxlan flood vtep
+!
+interface vlan100
+ ip address 10.0.1.1/24
+!
+interface vlan200
+ ip address 10.0.2.1/24
+!
+router ospfv3
+ router-id 192.168.1.1
+ passive-interface default
+ no passive-interface vlan100
+ no passive-interface vlan200
+!
+router bgp 65001
+ bgp router-id 192.168.1.1
+ neighbor 192.168.100.2 remote-as 65002
+ !
+ address-family ipv4 unicast
+  neighbor 192.168.100.2 activate
+  network 10.0.1.0/24
+  network 10.0.2.0/24
+ exit-address-family
+!
+route-map optimize permit 10
+ match ip address prefix-list optimize
+ set local-preference 200
+!
+ip prefix-list optimize seq 10 permit 10.0.1.0/24
+ip prefix-list optimize seq 20 permit 10.0.2.0/24
+```  
+[ASSISTANT_CREATED] Router 2 Configuration:  
+```kotlin
+hostname overlay2
+!
+interface lo
+ ip address 192.168.1.2/32
+!
+interface ens1f0
+ no ip address
+!
+interface vxlan10
+ vxlan id 10
+ vxlan local-tunnelip 192.168.100.2
+ vxlan remote-tunnelip 192.168.100.1
+ vxlan udp-port 4789
+ vxlan flood vtep
+!
+interface vlan100
+ ip address 10.0.1.2/24
+!
+interface vlan200
+ ip address 10.0.2.2/24
+!
+router ospfv3
+ router-id 192.168.1.2
+ passive-interface default
+ no passive-interface vlan100
+ no passive-interface vlan200
+!
+router bgp 65002
+ bgp router-id 192.168.1.2
+ neighbor 192.168.100.1 remote-as

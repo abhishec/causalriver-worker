@@ -1,0 +1,97 @@
+{
+  "answer_6efce493_1": [
+    {
+      "fact": "User completed a 5K charity run on February 20th.",
+      "type": "event",
+      "entities": [
+        "5K charity run",
+        "February 20th"
+      ]
+    },
+    {
+      "fact": "User carb-loaded with spaghetti before the 5K run.",
+      "type": "preference",
+      "entities": [
+        "spaghetti"
+      ]
+    },
+    {
+      "fact": "User is looking for nutrition advice to fuel their body for sports activities.",
+      "type": "opinion",
+      "entities": [
+        "nutrition advice",
+        "sports activities"
+      ]
+    },
+    {
+      "fact": "User plays in a recreational indoor soccer league.",
+      "type": "event",
+      "entities": [
+        "recreational indoor soccer league"
+      ]
+    },
+    {
+      "fact": "User has scored 3 goals in the soccer league.",
+      "type": "event",
+      "entities": [
+        "3 goals"
+      ]
+    }
+  ],
+  "answer_6efce493_2": [
+    {
+      "fact": "User is looking for a new pair of running shoes.",
+      "type": "preference",
+      "entities": [
+        "running shoes"
+      ]
+    },
+    {
+      "fact": "User has been doing a lot of running lately.",
+      "type": "personal",
+      "entities": []
+    },
+    {
+      "fact": "User participated in a 5K charity run last month.",
+      "type": "event",
+      "entities": [
+        "5K charity run"
+      ]
+    },
+    {
+      "fact": "User runs 3 times a week with increasing distances.",
+      "type": "personal",
+      "entities": []
+    },
+    {
+      "fact": "User plays indoor soccer with colleagues from work.",
+      "type": "relationship",
+      "entities": [
+        "indoor soccer",
+        "colleagues",
+        "work"
+      ]
+    },
+    {
+      "fact": "User has scored several goals in the indoor soccer league.",
+      "type": "event",
+      "entities": [
+        "indoor soccer league"
+      ]
+    },
+    {
+      "fact": "User has had issues with shin splints in the past.",
+      "type": "personal",
+      "entities": [
+        "shin splints"
+      ]
+    },
+    {
+      "fact": "User prefers the Brooks Ghost running shoes.",
+      "type": "preference",
+      "entities": [
+        "Brooks Ghost"
+      ]
+    }
+  ]
+}

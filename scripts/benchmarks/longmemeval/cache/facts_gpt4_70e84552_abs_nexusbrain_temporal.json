@@ -1,0 +1,107 @@
+{
+  "answer_b3070ec4_abs_1": [
+    {
+      "fact": "User is thinking of hosting a farm open house event soon.",
+      "type": "event",
+      "entities": [
+        "farm open house event"
+      ]
+    },
+    {
+      "fact": "User fixed a broken fence on the east side of their property three weeks ago.",
+      "type": "event",
+      "entities": [
+        "broken fence",
+        "east side",
+        "property"
+      ]
+    },
+    {
+      "fact": "User has goats that graze near the fixed fence.",
+      "type": "personal",
+      "entities": [
+        "goats"
+      ]
+    },
+    {
+      "fact": "User is concerned about the logistics of keeping animals contained and safe for the petting zoo.",
+      "type": "opinion",
+      "entities": [
+        "petting zoo",
+        "animals"
+      ]
+    },
+    {
+      "fact": "User got their goats vaccinated against parasites last Thursday.",
+      "type": "event",
+      "entities": [
+        "goats",
+        "vaccination",
+        "parasites"
+      ]
+    },
+    {
+      "fact": "User likes the idea of a petting zoo.",
+      "type": "preference",
+      "entities": [
+        "petting zoo"
+      ]
+    }
+  ],
+  "answer_b3070ec4_abs_2": [
+    {
+      "fact": "User is thinking of hosting a farm open house event soon.",
+      "type": "event",
+      "entities": [
+        "farm open house event"
+      ]
+    },
+    {
+      "fact": "User has been keeping up with goat's hoof trimming.",
+      "type": "personal",
+      "entities": [
+        "goat's hoof trimming"
+      ]
+    },
+    {
+      "fact": "User successfully trimmed the goat's hooves two weeks ago.",
+      "type": "event",
+      "entities": [
+        "goat's hooves",
+        "two weeks ago"
+      ]
+    },
+    {
+      "fact": "User likes the idea of a petting zoo for kids.",
+      "type": "preference",
+      "entities": [
+        "petting zoo"
+      ]
+    },
+    {
+      "fact": "User likes the idea of farm-themed crafts for kids.",
+      "type": "preference",
+      "entities": [
+        "farm-themed crafts"
+      ]
+    },
+    {
+      "fact": "User is considering offering fresh produce and eggs for sale.",
+      "type": "event",
+      "entities": [
+        "fresh produce",
+        "eggs"
+      ]
+    },
+    {
+      "fact": "User is thinking of selling quiche or other baked goods made with eggs from their chickens.",
+      "type": "event",
+      "entities": [
+        "quiche",
+        "baked goods",
+        "eggs",
+        "chickens"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2022/01/15 (Sat) 22:19  
+[USER] The user is looking for book recommendations and has been getting into sci-fi lately.  
+[ASSISTANT_SAID] The assistant provided a list of classic and modern sci-fi book recommendations.  
+[ASSISTANT_SAID] Classic Sci-Fi recommendations:  
+[ASSISTANT_SAID] 1. **Dune** by Frank Herbert  
+[ASSISTANT_SAID] 2. **Foundation** by Isaac Asimov  
+[ASSISTANT_SAID] 3. **Neuromancer** by William Gibson  
+[ASSISTANT_SAID] 4. **1984** by George Orwell  
+[ASSISTANT_SAID] 5. **Do Androids Dream of Electric Sheep?** by Philip K. Dick  
+[ASSISTANT_SAID] Modern Sci-Fi recommendations:  
+[ASSISTANT_SAID] 1. **The Three-Body Problem** by Liu Cixin  
+[ASSISTANT_SAID] 2. **The Expanse** series by James S. A. Corey  
+[ASSISTANT_SAID] 3. **Ancillary Justice** by Ann Leckie  
+[ASSISTANT_SAID] 4. **The Long Way to a Small, Angry Planet** by Becky Chambers  
+[ASSISTANT_SAID] 5. **Ready Player One** by Ernest Cline  
+[ASSISTANT_SAID] Sub-genre specific recommendations:  
+[ASSISTANT_SAID] * Space Opera: **The Mote in God's Eye** by Larry Niven and Jerry Pournelle, **Old Man's War** by John Scalzi  
+[ASSISTANT_SAID] * Cyberpunk: **Snow Crash** by Neal Stephenson, **Altered Carbon** by Richard K. Morgan  
+[ASSISTANT_SAID] * Time Travel: **The Time Traveler's Wife** by Audrey Niffenegger, **11/22/63** by Stephen King  
+[ASSISTANT_SAID] * Alien Invasion: **The War of the Worlds** by H.G. Wells, **The Three** by Sarah Lotz  
+[USER] The user has already read **Ready Player One** and is glad they started with that one.  
+[USER] The user got into reading more frequently around February and finds it great for their daily routine.  
+[USER] The user is looking for fantasy book recommendations, specifically with strong female leads.  
+[ASSISTANT_SAID] The assistant provided a list of fantasy book recommendations with strong female leads.  
+[ASSISTANT_SAID] Epic Fantasy recommendations:  
+[ASSISTANT_SAID] 1. **The First Law Trilogy** by Joe

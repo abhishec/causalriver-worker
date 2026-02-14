@@ -1,0 +1,18 @@
+**Observation Log:**
+
+- [FACT] User is interested in finding the best pizza in New Haven, Connecticut.
+- [ASSISTANT_SAID] Frank Pepe Pizzeria Napoletana is known for their brick oven baked thin crust pizza.
+- [ASSISTANT_SAID] Sally's Apizza has been serving coal-fired thin crust pizza since 1938.
+- [ASSISTANT_SAID] Modern Apizza is family-owned since 1930 and serves a variety of specialty pizzas.
+- [ASSISTANT_SAID] BAR is a brewery and pizza restaurant offering unique toppings and sauces on their thin crust pies.
+- [ASSISTANT_SAID] Zuppardi's Apizza offers traditional thin crust pizza with a variety of toppings.
+- [ASSISTANT_SAID] User asked for more information about the pricing and hours of the pizza places in New Haven.
+- [ASSISTANT_SAID] Frank Pepe Pizzeria Napoletana prices: small pizza $12-$20, medium $15-$25, large $20-$30; Hours: Mon-Thu 11am-10pm, Fri-Sat 11am-11pm, Sun 12pm-10pm.
+- [ASSISTANT_SAID] Sally's Apizza prices: small pizza $14-$20, medium $16-$24, large $20-$28; Hours: Tue-Sat 4pm-9pm, Sun 12pm-8pm; Closed on Mondays.
+- [ASSISTANT_SAID] Modern Apizza prices: small pizza $14-$18, medium $17-$22, large $20-$30; Hours: Sun-Thu 11am-10pm, Fri-Sat 11am-11pm.
+- [ASSISTANT_SAID] BAR prices: small pizza $11-$16, medium $16-$21, large $21-$27; Hours: Mon-Thu 11:30am-11pm, Fri-Sat 11:30am-12am, Sun 12pm-11pm.
+- [ASSISTANT_SAID] Zuppardi's Apizza prices: small pizza $12-$16, medium $16-$20, large $20-$28; Hours: Tue-Thu 11am-8pm, Fri-Sat 11am-9pm, Sun 12pm-8pm; Closed on Mondays.
+- [ASSISTANT_SAID] Prices and hours are subject to change; it's best to check the official website or call the restaurant beforehand.
+- [USER] User is vegan and inquired about vegan options at the pizza places in New Haven.
+- [ASSISTANT_SAID] Frank Pepe Pizzeria Napoletana offers vegan toppings like roasted red peppers, artichokes, mushrooms, and olives; cheese-less pizza or vegan cheese available.
+- [ASSISTANT_SA

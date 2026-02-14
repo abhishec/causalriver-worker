@@ -1,0 +1,27 @@
+**Observation Log:**
+
+- [FACT] User is considering pursuing a Master's degree in Computer Science.
+- [FACT] User is from Arcadia, California.
+- [ASSISTANT_SAID] California is home to many top-ranked Computer Science programs.
+- [ASSISTANT_SAID] Top CS programs in California include:
+  1. **Stanford University** (Stanford, CA)
+  2. **University of California, Berkeley** (Berkeley, CA)
+  3. **California Institute of Technology (Caltech)** (Pasadena, CA)
+  4. **University of Southern California (USC)** (Los Angeles, CA)
+  5. **University of California, Los Angeles (UCLA)** (Los Angeles, CA)
+  6. **University of California, San Diego (UCSD)** (La Jolla, CA)
+  7. **Carnegie Mellon University (CMU) - Silicon Valley** (Mountain View, CA)
+- [ASSISTANT_SAID] Stanford is widely considered one of the best CS programs in the world.
+- [ASSISTANT_SAID] UC Berkeley has a strong CS program with a wide range of research areas, including AI, data science, and computer networks.
+- [ASSISTANT_SAID] Caltech is about 20 minutes from Arcadia and focuses on theoretical computer science and machine learning.
+- [ASSISTANT_SAID] USC is about 30 minutes from Arcadia and has research areas in AI, data science, and computer networks.
+- [ASSISTANT_SAID] UCLA is about 45 minutes from Arcadia and has a large and diverse CS program.
+- [ASSISTANT_SAID] UCSD is about a 2-hour drive from Arcadia and has a strong CS program.
+- [ASSISTANT_SAID] CMU has a satellite campus in Silicon Valley, offering a Master's in CS with a focus on software engineering and data science.
+- [ASSISTANT_SAID] User attended UCLA for undergrad after attending Arcadia High School from 2010 to 2014.
+- [PREFERENCE] User is familiar with the UCLA campus and program.
+- [ASSISTANT_SAID] Differences between the CS programs at UCLA and UC Berkeley include:
+  - **Research Focus**: Berkeley is known for theoretical computer science, AI, machine learning, and data science; UCLA has a more diverse focus including AI, data science, computer networks, computer vision, and human-computer interaction.
+  - **Curriculum**: Berkeley has rigorous theoretical coursework; UCLA has a balanced curriculum with both theoretical and practical courses.
+  - **Admission and Selectivity**: Berkeley's acceptance rate is around 10-15% for MS applicants; UCLA's is around 20-25%.
+  - **Location and Industry Connections**: Berkeley is in the Bay Area with

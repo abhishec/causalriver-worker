@@ -1,0 +1,24 @@
+**Observation Log:**
+
+- [FACT] The user is trying to get better at managing their finances.
+- [FACT] The user has completed 5 episodes of "The Dave Ramsey Show."
+- [PREFERENCE] The user finds Dave Ramsey's advice helpful.
+- [ASSISTANT_SAID] The assistant provided tips on creating a budget and tracking expenses.
+- [ASSISTANT_SAID] The assistant suggested identifying income as the first step in creating a budget.
+- [ASSISTANT_SAID] The assistant recommended categorizing expenses into housing, transportation, food, insurance, debt repayment, entertainment, savings, and miscellaneous.
+- [ASSISTANT_SAID] The assistant advised setting financial goals to determine what the user wants to achieve with their budget.
+- [ASSISTANT_SAID] The assistant suggested assigning percentages to each expense category based on general rules of thumb.
+- [ASSISTANT_SAID] The assistant provided a general rule of thumb for budget allocation: Housing: 30%, Transportation: 10-15%, Food: 10-15%, Insurance: 5-10%, Debt repayment: 5-10%, Entertainment: 5-10%, Savings: 10-20%, Miscellaneous: 5%.
+- [ASSISTANT_SAID] The assistant recommended creating a budget plan that outlines projected income and expenses for each month.
+- [ASSISTANT_SAID] The assistant suggested choosing a tracking method for expenses, such as a budgeting app, spreadsheet, or notebook.
+- [ASSISTANT_SAID] The assistant advised monitoring spending by recording every transaction.
+- [ASSISTANT_SAID] The assistant recommended categorizing expenses to see how much is spent in each area.
+- [ASSISTANT_SAID] The assistant suggested setting up alerts to stay on track with the budget.
+- [ASSISTANT_SAID] The assistant emphasized the importance of regularly reviewing and adjusting the budget.
+- [ASSISTANT_SAID] The assistant provided additional tips, including avoiding impulse purchases, prioritizing needs over wants, and automating savings.
+- [PREFERENCE] The user is considering using an app to track expenses.
+- [ASSISTANT_SAID] The assistant recommended several apps for tracking expenses: Mint, Personal Capital, YNAB (You Need a Budget), Spendee, Pocketbook, Wally, and Toshl Finance.
+- [ASSISTANT_SAID] The assistant provided details about Mint, including that it is free and connects to bank accounts, credit cards, and investments.
+- [ASSISTANT_SAID] The assistant mentioned that Personal Capital is also free and offers financial planning tools.
+- [ASSISTANT_SAID] The assistant noted that YNAB is a paid app ($6.99/month or $83.99/year) that helps manage finances by assigning jobs to every dollar.
+- [ASSIST

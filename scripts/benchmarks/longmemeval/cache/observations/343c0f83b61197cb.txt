@@ -1,0 +1,26 @@
+**Observation Log:**
+
+- [FACT] The user is planning a trip to San Francisco.
+- [FACT] The user has had a good experience with Southwest Airlines before.
+- [EVENT] The user took a direct flight from their hometown to Las Vegas for a conference in March.
+- [TEMPORAL] The user's trip to Las Vegas was from March 15th to March 18th.
+- [TEMPORAL] The user is planning to travel to San Francisco from May 10th to May 14th.
+- [FACT] The user will be flying into San Francisco International Airport (SFO).
+- [PREFERENCE] The user prefers a round-trip ticket.
+- [PREFERENCE] The user is open to flying out of their hometown airport at any time of day.
+- [ASSISTANT_SAID] The assistant clarified that it does not have access to personal information or specific travel histories.
+- [ASSISTANT_SAID] The assistant suggested checking the Southwest Airlines website and using their Low Fare Calendar tool to find the cheapest days to fly.
+- [ASSISTANT_SAID] The assistant recommended using fare comparison tools like Google Flights, Skyscanner, or Kayak to compare prices across multiple airlines.
+- [ASSISTANT_SAID] The assistant suggested considering flying into Oakland International Airport (OAK) for potentially cheaper flights.
+- [ASSISTANT_SAID] The assistant advised keeping an eye on Southwest's website and social media for sales or promotions.
+- [ASSISTANT_SAID] The assistant recommended booking flights in advance to secure better prices.
+- [ASSISTANT_SAID] The assistant asked for the user's hometown airport to provide more specific flight options and prices.
+- [FACT] The user's hometown airport is a Southwest Airlines hub.
+- [PREFERENCE] The user hopes to get a good deal on the flight to SFO.
+- [PREFERENCE] The user is loyal to United Airlines and American Airlines.
+- [ASSISTANT_SAID] The assistant clarified that the user won't be able to earn miles on United Airlines or American Airlines for flying with Southwest Airlines.
+- [ASSISTANT_SAID] The assistant explained that Southwest has its own loyalty program, Rapid Rewards.
+- [ASSISTANT_SAID] The assistant mentioned that the user can earn points based on the fare paid for the ticket with Southwest.
+- [ASSISTANT_SAID] The assistant provided information on how to redeem miles for upgrades on United Airlines and American Airlines.
+- [ASSISTANT_SAID] The assistant detailed the types of upgrades available on United Airlines: Complimentary Premier Upgrades (CPU) and Regional Premier Upgrades (RPU).
+- [ASSISTANT_SAID] The assistant provided general guidelines for mileage requirements for upgrades on United Airlines: 15,000-30,000 miles for domestic flights and 30,000-60,000 miles for international flights

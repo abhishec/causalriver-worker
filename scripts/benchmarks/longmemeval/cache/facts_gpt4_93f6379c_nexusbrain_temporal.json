@@ -1,0 +1,130 @@
+{
+  "answer_544fe66c_2": [
+    {
+      "fact": "User joined a new book club group called 'Page Turners' last week",
+      "type": "event",
+      "entities": [
+        "Page Turners",
+        "book club"
+      ]
+    },
+    {
+      "fact": "User is looking for book recommendations for their book club",
+      "type": "preference",
+      "entities": [
+        "book recommendations",
+        "book club"
+      ]
+    },
+    {
+      "fact": "User suggested 'The Seven Husbands of Evelyn Hugo' for their next read",
+      "type": "preference",
+      "entities": [
+        "The Seven Husbands of Evelyn Hugo"
+      ]
+    },
+    {
+      "fact": "User has heard great things about 'The Seven Husbands of Evelyn Hugo'",
+      "type": "opinion",
+      "entities": [
+        "The Seven Husbands of Evelyn Hugo"
+      ]
+    },
+    {
+      "fact": "User is interested in discussing favorite novels and sharing recommendations",
+      "type": "preference",
+      "entities": [
+        "favorite novels",
+        "recommendations"
+      ]
+    }
+  ],
+  "answer_544fe66c_1": [
+    {
+      "fact": "User is thinking of starting a new project focused on language learning and exchange.",
+      "type": "event",
+      "entities": [
+        "language learning",
+        "exchange",
+        "project"
+      ]
+    },
+    {
+      "fact": "User is passionate about language learning and exchange.",
+      "type": "opinion",
+      "entities": [
+        "language learning",
+        "exchange"
+      ]
+    },
+    {
+      "fact": "User plans to create a mix of blog posts, social media posts, and videos.",
+      "type": "preference",
+      "entities": [
+        "blog posts",
+        "social media posts",
+        "videos"
+      ]
+    },
+    {
+      "fact": "User wants to share language learning tips, resources, and cultural insights.",
+      "type": "preference",
+      "entities": [
+        "language learning tips",
+        "resources",
+        "cultural insights"
+      ]
+    },
+    {
+      "fact": "User plans to feature interviews with language learners and native speakers.",
+      "type": "preference",
+      "entities": [
+        "interviews",
+        "language learners",
+        "native speakers"
+      ]
+    },
+    {
+      "fact": "User has been quite active on Facebook groups lately.",
+      "type": "event",
+      "entities": [
+        "Facebook groups"
+      ]
+    },
+    {
+      "fact": "User has been inspired by discussions and connections made in Facebook groups.",
+      "type": "opinion",
+      "entities": [
+        "discussions",
+        "connections",
+        "Facebook groups"
+      ]
+    }
+  ],
+  "answer_544fe66c_3": [
+    {
+      "fact": "User is looking for marketing resources on personal branding.",
+      "type": "preference",
+      "entities": [
+        "marketing resources",
+        "personal branding"
+      ]
+    },
+    {
+      "fact": "User has engaged with a group called 'Marketing Professionals' on LinkedIn since joining it yesterday.",
+      "type": "event",
+      "entities": [
+        "Marketing Professionals",
+        "LinkedIn"
+      ]
+    },
+    {
+      "fact": "User wants to learn more about creating a strong online presence, especially on LinkedIn.",
+      "type": "preference",
+      "entities": [
+        "online presence",
+        "LinkedIn"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/30 (Tue) 00:09  
+[FACT] User has a morning yoga class at 7:00 AM on weekdays.  
+[PREFERENCE] User is trying to plan out their day and is interested in productivity apps to stay organized.  
+[ASSISTANT_SAID] Suggested productivity apps include:  
+[ASSISTANT_SAID] 1. **Todoist**: A task management app that integrates with Google Calendar.  
+[ASSISTANT_SAID] 2. **Any.do**: A versatile app for task management and daily planning.  
+[ASSISTANT_SAID] 3. **RescueTime**: A time management app that tracks how time is spent.  
+[ASSISTANT_SAID] 4. **Evernote**: A note-taking app that integrates with Google Calendar.  
+[ASSISTANT_SAID] 5. **Google Tasks**: A simple task management app that integrates with Google Calendar.  
+[ASSISTANT_SAID] 6. **Fantastical**: A calendar app that integrates with other apps like Todoist and Trello.  
+[ASSISTANT_SAID] 7. **Trello**: A visual project management tool using boards, lists, and cards.  
+[ASSISTANT_SAID] 8. **Strides**: A goal-setting app for tracking progress towards objectives.  
+[ASSISTANT_SAID] All suggested apps are available on both iOS and Android devices, with most offering a free version or trial period.  
+[PREFERENCE] User likes the sound of Todoist and Evernote.  
+[ASSISTANT_SAID] Todoist integrates with Google Calendar by syncing tasks with calendar events, scheduling tasks, setting reminders, and providing a calendar view.  
+[ASSISTANT_SAID] Todoist features for prioritizing tasks based on energy levels include priority levels, labels, task segmentation, focus mode, and daily goals.  
+[ASSISTANT_SAID] Evernote integrates with Google Calendar by turning notes into calendar events, clipping web pages, and organizing tasks.  
+[ASSISTANT_SAID] Evernote features for prioritizing tasks include task lists, notebooks and stacks, tags and filters, daily notes, and context.  
+[PREFERENCE] User is interested in trying out Todoist's focus mode to help concentrate on tasks.  
+[ASSISTANT_SAID] Focus Mode in Todoist hides other tasks and notifications to help concentrate on a single task.  
+[ASSISTANT_SAID] To enable Focus Mode, select a task, click the three dots, and choose "Focus Mode" or use the keyboard shortcut.  
+[ASSISTANT_SAID] Customization options for Focus Mode include customizing focus duration, selecting focus sounds, disabling notifications

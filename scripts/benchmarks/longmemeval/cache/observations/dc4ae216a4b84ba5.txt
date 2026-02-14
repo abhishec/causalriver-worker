@@ -1,0 +1,19 @@
+**Observation Log:**
+
+- [FACT] User is planning a new photography project and has a Nikon D750 camera body, which they have had since 2018.
+- [FACT] User recently bought a Canon 24-70mm f/2.8 lens on February 10th.
+- [EVENT] User attended a photography workshop in San Francisco focused on portrait photography.
+- [RELATIONSHIP] User's instructor at the workshop was named Rachel.
+- [PREFERENCE] User is interested in learning more about ISO settings and how they affect photos.
+- [PREFERENCE] User is particularly interested in using natural light to create flattering portraits.
+- [CHANGE] User clarified that they have the Canon 24-70mm f/2.8 lens but used their Nikon D750 camera body on a recent trip to Yosemite.
+- [TEMPORAL] Session date is 2023/05/21 (Sun) at 11:35.
+- [ASSISTANT_SAID] Assistant congratulated the user on their new lens purchase and provided tips for low-light photography, including understanding the exposure triangle, using the correct ISO, slowing down shutter speed, adjusting white balance, using the lens's sweet spot, experimenting with composition, using a tripod or monopod, bracketing shots, shooting in RAW, and practicing.
+- [ASSISTANT_SAID] Assistant provided guidance on ISO settings for the Nikon D750, detailing the following ranges: 
+  - Base ISO: 100-400 (cleanest images)
+  - Good ISO range: 800-1600 (minimal noise)
+  - High ISO range: 3200-6400 (noticeable noise)
+  - Pushed ISO range: 12800-25600 (significant noise)
+  - Extended ISO range: 51200 and above (best avoided).
+- [ASSISTANT_SAID] Assistant offered additional tips for using natural light in portrait photography, including taking advantage of golden hour, using open shade, experimenting with backlighting, using reflectors, and being mindful of the direction of light.
+- [ASSISTANT_SAID] Assistant acknowledged the user's struggle with adjusting to changing light conditions and provided tips for quickly adapting, such as monitoring surroundings, using the camera's metering mode, and being prepared to adjust settings.

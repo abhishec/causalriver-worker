@@ -1,0 +1,12 @@
+**Observation Log:**
+
+- [FACT] The user is trying a query in Google Sheets.
+- [FACT] The user is encountering issues with looking up postal codes that contain letters or spaces.
+- [FACT] The user provided a formula: `=QUERY('Masterfile 12/1/2022'!A:Q,"Select * Where A contains """&$C$2&"""")`.
+- [FACT] The user provided sample data that includes postal codes, country codes, place names, states, and geometry.
+- [PREFERENCE] The user is open to suggestions for better ways to perform the lookup than using a query.
+- [ASSISTANT_SAID] The assistant suggested modifying the `WHERE` clause of the `QUERY` function to use the `REGEXMATCH` function.
+- [ASSISTANT_CREATED] The assistant provided a modified formula: `=QUERY('Masterfile 12/1/2022'!A:Q,"Select * Where REGEXMATCH(A, """&$C$2&""")")`.
+- [ASSISTANT_SAID] The assistant explained that the modified formula will search for rows where the value in column A matches the regular expression in cell C2.
+- [ASSISTANT_SAID] The assistant mentioned that the regular expression `".*"&$C$2&".*"` will match any string that contains the value in cell C2, regardless of whether it contains letters or spaces.
+- [ASSISTANT_SAID] The assistant offered further assistance if the user has any more questions or needs more information.

@@ -1,0 +1,68 @@
+{
+  "answer_1e2369c9_1": [
+    {
+      "fact": "User has completed an undergraduate degree in computer science",
+      "type": "personal",
+      "entities": [
+        "undergraduate degree",
+        "computer science"
+      ]
+    },
+    {
+      "fact": "User is planning to start learning about deep learning",
+      "type": "preference",
+      "entities": [
+        "deep learning"
+      ]
+    },
+    {
+      "fact": "User is interested in exploring natural language processing",
+      "type": "preference",
+      "entities": [
+        "natural language processing",
+        "NLP"
+      ]
+    },
+    {
+      "fact": "User has recent experience with a research paper on NLP",
+      "type": "personal",
+      "entities": [
+        "research paper",
+        "NLP"
+      ]
+    }
+  ],
+  "answer_1e2369c9_2": [
+    {
+      "fact": "User submitted their master's thesis on computer science today",
+      "type": "event",
+      "entities": [
+        "master's thesis",
+        "computer science"
+      ]
+    },
+    {
+      "fact": "User is looking for recommendations on NLP research papers to read",
+      "type": "preference",
+      "entities": [
+        "NLP research papers"
+      ]
+    },
+    {
+      "fact": "User is interested in staying up-to-date with the latest developments in NLP",
+      "type": "opinion",
+      "entities": [
+        "latest developments",
+        "NLP"
+      ]
+    },
+    {
+      "fact": "User is particularly interested in the Language Models and Transformers section",
+      "type": "preference",
+      "entities": [
+        "Language Models",
+        "Transformers"
+      ]
+    }
+  ]
+}

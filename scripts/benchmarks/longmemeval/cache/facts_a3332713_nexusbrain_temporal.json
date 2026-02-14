@@ -1,0 +1,143 @@
+{
+  "answer_16ece55f_1": [
+    {
+      "fact": "User is planning a budget for their mom's anniversary gift.",
+      "type": "event",
+      "entities": [
+        "mom",
+        "anniversary gift"
+      ]
+    },
+    {
+      "fact": "User is considering spending around $150 to $200 on the gift.",
+      "type": "preference",
+      "entities": [
+        "$150",
+        "$200"
+      ]
+    },
+    {
+      "fact": "User is leaning towards a personalized photo album for the gift.",
+      "type": "preference",
+      "entities": [
+        "personalized photo album"
+      ]
+    },
+    {
+      "fact": "User tends to spend around $500 per month on gifts for friends and family.",
+      "type": "personal",
+      "entities": [
+        "$500",
+        "gifts",
+        "friends",
+        "family"
+      ]
+    },
+    {
+      "fact": "User bought a birthday present for their sister last month.",
+      "type": "event",
+      "entities": [
+        "birthday present",
+        "sister"
+      ]
+    },
+    {
+      "fact": "User bought a housewarming gift for a friend last month.",
+      "type": "event",
+      "entities": [
+        "housewarming gift",
+        "friend"
+      ]
+    },
+    {
+      "fact": "User attended a baby shower and got a gift for a coworker's baby.",
+      "type": "event",
+      "entities": [
+        "baby shower",
+        "coworker",
+        "baby"
+      ]
+    },
+    {
+      "fact": "User is thoughtful and generous in their gift-giving.",
+      "type": "opinion",
+      "entities": [
+        "thoughtful",
+        "generous"
+      ]
+    },
+    {
+      "fact": "User is considering the significance of the occasion when choosing a gift.",
+      "type": "opinion",
+      "entities": [
+        "significance",
+        "occasion"
+      ]
+    }
+  ],
+  "answer_16ece55f_2": [
+    {
+      "fact": "User is trying to stay on top of their finances",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User spent a total of $500 on gifts recently",
+      "type": "personal",
+      "entities": [
+        "$500"
+      ]
+    },
+    {
+      "fact": "User gave their brother a $100 gift card for graduation in May",
+      "type": "event",
+      "entities": [
+        "brother",
+        "$100",
+        "graduation",
+        "May"
+      ]
+    },
+    {
+      "fact": "User bought their sister a $75 pair of earrings for her birthday last month",
+      "type": "event",
+      "entities": [
+        "sister",
+        "$75",
+        "earrings",
+        "birthday"
+      ]
+    },
+    {
+      "fact": "User got their best friend a $20 meme-themed mug for a housewarming party",
+      "type": "event",
+      "entities": [
+        "best friend",
+        "$20",
+        "mug",
+        "housewarming party"
+      ]
+    },
+    {
+      "fact": "User thinks they got a $100 set of baby clothes and toys for a coworker's baby shower",
+      "type": "event",
+      "entities": [
+        "coworker",
+        "$100",
+        "baby clothes",
+        "toys",
+        "baby shower"
+      ]
+    },
+    {
+      "fact": "User is unsure if they got anything for their coworker's baby shower",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User is trying to track their spending on gifts",
+      "type": "opinion",
+      "entities": []
+    }
+  ]
+}

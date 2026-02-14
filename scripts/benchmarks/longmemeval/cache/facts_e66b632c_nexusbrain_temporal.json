@@ -1,0 +1,147 @@
+{
+  "answer_ac0140ce_1": [
+    {
+      "fact": "User is available to train on weekdays from 7-9 am and weekends from 8 am-12 pm.",
+      "type": "preference",
+      "entities": [
+        "weekdays",
+        "7-9 am",
+        "weekends",
+        "8 am-12 pm"
+      ]
+    },
+    {
+      "fact": "User wants to do yoga 2 times a week for 45 minutes.",
+      "type": "preference",
+      "entities": [
+        "yoga",
+        "2 times a week",
+        "45 minutes"
+      ]
+    },
+    {
+      "fact": "User wants to cycle 1 time a week for 2 hours.",
+      "type": "preference",
+      "entities": [
+        "cycling",
+        "1 time a week",
+        "2 hours"
+      ]
+    },
+    {
+      "fact": "User wants to play soccer 1 time a week for 1.5 hours.",
+      "type": "preference",
+      "entities": [
+        "soccer",
+        "1 time a week",
+        "1.5 hours"
+      ]
+    },
+    {
+      "fact": "User wants to prioritize triathlon training on weekends.",
+      "type": "preference",
+      "entities": [
+        "triathlon training",
+        "weekends"
+      ]
+    },
+    {
+      "fact": "User wants to take 1 rest day per week.",
+      "type": "preference",
+      "entities": [
+        "1 rest day"
+      ]
+    },
+    {
+      "fact": "User is training for a sprint triathlon on June 24th.",
+      "type": "event",
+      "entities": [
+        "sprint triathlon",
+        "June 24th"
+      ]
+    },
+    {
+      "fact": "User recently completed a charity 5K run with a personal best time of 27 minutes and 45 seconds.",
+      "type": "event",
+      "entities": [
+        "charity 5K run",
+        "27 minutes and 45 seconds"
+      ]
+    },
+    {
+      "fact": "User's current fitness level is intermediate for yoga and cycling, beginner for swimming, and advanced for running.",
+      "type": "personal",
+      "entities": [
+        "intermediate",
+        "yoga",
+        "cycling",
+        "beginner",
+        "swimming",
+        "advanced",
+        "running"
+      ]
+    }
+  ],
+  "answer_ac0140ce_2": [
+    {
+      "fact": "User is looking for a new route for their Saturday morning cycling group.",
+      "type": "preference",
+      "entities": [
+        "Saturday morning cycling group"
+      ]
+    },
+    {
+      "fact": "User lives in the city of Oakdale.",
+      "type": "personal",
+      "entities": [
+        "Oakdale"
+      ]
+    },
+    {
+      "fact": "User wants to avoid downtown and the highway for the cycling route.",
+      "type": "preference",
+      "entities": [
+        "downtown",
+        "highway"
+      ]
+    },
+    {
+      "fact": "User is familiar with the bike trail along the river.",
+      "type": "personal",
+      "entities": [
+        "bike trail",
+        "river"
+      ]
+    },
+    {
+      "fact": "User's area has generally flat terrain with some small hills.",
+      "type": "personal",
+      "entities": [
+        "flat terrain",
+        "small hills"
+      ]
+    },
+    {
+      "fact": "User recently participated in a charity 5K run.",
+      "type": "event",
+      "entities": [
+        "charity 5K run"
+      ]
+    },
+    {
+      "fact": "User beat their personal best time in the 5K run by about a minute and a half.",
+      "type": "event",
+      "entities": [
+        "personal best time",
+        "5K run"
+      ]
+    },
+    {
+      "fact": "User is considering signing up for a 10K run in a few months.",
+      "type": "preference",
+      "entities": [
+        "10K run"
+      ]
+    }
+  ]
+}

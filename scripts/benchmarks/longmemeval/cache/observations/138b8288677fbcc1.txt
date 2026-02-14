@@ -1,0 +1,32 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/02/28 (Tue) 09:33  
+[EVENT] User is planning a brunch this weekend.  
+[FACT] User purchased heirloom tomatoes from the farmer's market last week for $3 per pound.  
+[PREFERENCE] User is looking for recipes that will highlight the flavor and texture of heirloom tomatoes.  
+[ASSISTANT_SAID] Suggested brunch recipe ideas featuring heirloom tomatoes:  
+[ASSISTANT_CREATED] 1. Heirloom Tomato Salad with Burrata and Basil  
+[ASSISTANT_CREATED] 2. Tomato and Avocado Toast  
+[ASSISTANT_CREATED] 3. Heirloom Tomato Tartine  
+[ASSISTANT_CREATED] 4. Tomato and Mozzarella Frittata  
+[ASSISTANT_CREATED] 5. Heirloom Tomato and Grilled Peach Salad  
+[ASSISTANT_CREATED] 6. Tomato and Basil Quiche  
+[ASSISTANT_CREATED] 7. Heirloom Tomato and Prosciutto Wrap  
+[ASSISTANT_CREATED] 8. Tomato and Corn Salad with Fried Capers  
+[ASSISTANT_CREATED] 9. Heirloom Tomato and Goat Cheese Omelette  
+[ASSISTANT_CREATED] 10. Tomato and Basil Bruschetta  
+[PREFERENCE] User loves the idea of the Heirloom Tomato and Grilled Peach Salad.  
+[FACT] User purchased peaches from the farmer's market for $4 per 3-count bag.  
+[PREFERENCE] User is looking for recipes that feature both peaches and tomatoes, such as salsa or chutney.  
+[ASSISTANT_SAID] Suggested recipes combining peaches and tomatoes:  
+[ASSISTANT_CREATED] 1. Peach and Tomato Salsa  
+[ASSISTANT_CREATED] 2. Peach and Tomato Chutney  
+[ASSISTANT_CREATED] 3. Peach and Tomato Salad with Burrata  
+[ASSISTANT_CREATED] 4. Peach and Tomato Galette  
+[PREFERENCE] User loves the idea of the Peach and Tomato Salsa.  
+[EVENT] User is thinking of making a coffee cake this weekend.  
+[PREFERENCE] User is looking for a recipe suggestion that features a crumb topping made with almond milk.  
+[FACT] User recently tried a new brand of almond milk, Silk, for $2.99 for a half-gallon.  
+[ASSISTANT_SAID] Suggested coffee cake recipe with almond milk:  
+[ASSISTANT_CREATED] Almond Milk Coffee Cake with Crumb Topping  
+[ASSISTANT_CREATED] Ingredients for the cake: 1 1/2 cups all-purpose flour, 1 cup granulated sugar, 2 teaspoons baking powder, 1/2 teaspoon salt, 1/2 cup unsalted butter, 1 cup almond milk, 2 large eggs, 1 teaspoon vanilla extract, 1 tablespoon

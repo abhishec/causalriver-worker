@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[FACT] User has had Disney+ for a few months.  
+[FACT] User is looking for a new show to watch with their family.  
+[FACT] User has already gone through a lot of the Disney+ content.  
+[FACT] User is interested in shows similar to "The Mandalorian."  
+[RELATIONSHIP] User is watching shows with their family.  
+[TEMPORAL] Session Date: 2023/03/15 (Wed) 09:33.  
+[ASSISTANT_SAID] Recommended shows similar to "The Mandalorian":  
+[ASSISTANT_SAID] 1. **The Expanse** (Amazon Prime Video): Sci-fi epic with action, adventure, and politics.  
+[ASSISTANT_SAID] 2. **Stranger Things** (Netflix): Nostalgic feel with action, adventure, and humor.  
+[ASSISTANT_SAID] 3. **Star Trek: Discovery** (CBS All Access): Character-driven sci-fi with moral dilemmas.  
+[ASSISTANT_SAID] 4. **Killjoys** (Syfy, Amazon Prime Video): Intergalactic bounty hunters with action and humor.  
+[ASSISTANT_SAID] 5. **Farscape** (Amazon Prime Video): Astronaut joins misfits on a living ship.  
+[ASSISTANT_SAID] 6. **Travelers** (Netflix): Agents from the future prevent a catastrophic event.  
+[ASSISTANT_SAID] 7. **Colony** (Netflix): Family navigating an occupied Los Angeles.  
+[ASSISTANT_SAID] 8. **Altered Carbon** (Netflix): Cyberpunk murder mystery with body-swapping.  
+[ASSISTANT_SAID] 9. **Dark Matter** (Syfy, Amazon Prime Video): People wake up on a spaceship with no memory.  
+[ASSISTANT_SAID] 10. **Outlander** (Starz, Amazon Prime Video): Time-travel romance set in 18th-century Scotland.  
+[ASSISTANT_SAID] User expressed interest in "The Expanse" after finishing the fifth season.  
+[USER] Asked if they could get into "The Expanse" without having seen previous seasons.  
+[ASSISTANT_SAID] "The Expanse" is complex but can be jumped into without prior seasons; the fifth season has a self-contained storyline.  
+[ASSISTANT_SAID] Basic premise and characters of "The Expanse" provided, including the crew of the Rocinante and key factions.  
+[USER] Inquired about the availability of "Star Trek: Discovery" on current streaming services.  
+[ASSISTANT_SAID] "Star Trek: Discovery" is available exclusively on

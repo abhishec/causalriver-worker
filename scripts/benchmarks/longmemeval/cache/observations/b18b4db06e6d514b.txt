@@ -1,0 +1,20 @@
+**Observation Log:**
+
+[FACT] User is planning a trip with their partner and looking for a new place to live.  
+[FACT] User currently works in San Francisco.  
+[FACT] User has a big family event coming up - their sister's wedding is on June 15th.  
+[FACT] User's budget for housing and living expenses is around $2,000 per month.  
+[PREFERENCE] User is looking for a neighborhood with a mix of urban and suburban vibes, with easy access to parks and public transportation.  
+[CHANGE] User is focusing on Noe Valley for their move.  
+[EVENT] User is trying to finalize their move before their sister's wedding on June 15th.  
+[ASSISTANT_SAID] Assistant congratulated the user on their sister's upcoming wedding and offered to help find a great neighborhood.  
+[ASSISTANT_SAID] Assistant requested more information to provide personalized suggestions, including the city, lifestyle preferences, budget, specific amenities, and housing type.  
+[ASSISTANT_SAID] Assistant provided general tips for researching neighborhoods, including using websites like Walk Score, Redfin, and Zillow, checking public transportation options, visiting neighborhoods in person, and talking to locals.  
+[ASSISTANT_SAID] Assistant suggested neighborhoods in San Francisco and nearby suburbs, including Noe Valley, The Mission, Cole Valley, Oakland, Berkeley, and San Mateo.  
+[ASSISTANT_SAID] Assistant provided median rent prices for suggested neighborhoods: Noe Valley ($2,300/month), The Mission ($2,200/month), Cole Valley ($2,100/month), Oakland ($1,900/month), Berkeley ($2,000/month), and San Mateo ($1,800/month).  
+[ASSISTANT_SAID] Assistant mentioned that prices may vary depending on the time of year, amenities, and specific location within the neighborhood.  
+[ASSISTANT_SAID] Assistant provided transportation options for Noe Valley, including Muni Metro (J-Church Line), Muni Bus (24-Divisadero), and BART (Glen Park Station).  
+[ASSISTANT_SAID] Assistant provided transportation options for Cole Valley, including Muni Metro (N-Judah Line), Muni Bus (6-Haight/Parnassus), and BART (Civic Center Station).  
+[ASSISTANT_SAID] Assistant described Noe Valley as a charming, upscale neighborhood with a small-town feel, known for its Victorian homes and strong sense of community.  
+[ASSISTANT_SAID] Assistant listed popular spots in Noe Valley, including 24th Street, Noe Valley Farmers Market, Dolores Park, and Noe Valley Library.  
+[ASSISTANT_SAID] Assistant provided restaurant recommendations in Noe Valley, including La Taqueria, Contigo, Foreign Cinema, and Just for You Cafe.

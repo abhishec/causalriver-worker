@@ -1,0 +1,39 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/04/27 (Thu) 11:12
+
+[ASSISTANT_SAID] Data warehousing architecture refers to the design and structure of a data warehouse, which is a large, centralized repository of data used for reporting, analysis, and decision-making.
+
+[ASSISTANT_SAID] The architecture of a data warehouse typically consists of several layers: Source Systems, ETL (Extract, Transform, Load) Layer, Data Storage Layer, Data Access Layer, and Metadata Layer.
+
+[ASSISTANT_SAID] Source Systems include transactional databases, flat files, web logs, and other types of data sources.
+
+[ASSISTANT_SAID] The ETL Layer is responsible for the extraction, transformation, and loading of data from the source systems to the data warehouse.
+
+[ASSISTANT_SAID] The Data Storage Layer is organized into a star or snowflake schema, consisting of fact tables and dimension tables.
+
+[ASSISTANT_SAID] The Data Access Layer provides users with access to the data in the data warehouse through tools such as SQL-based reporting tools, OLAP tools, and data visualization tools.
+
+[ASSISTANT_SAID] The Metadata Layer contains information about the data in the data warehouse, such as its source, meaning, and relationships to other data.
+
+[ASSISTANT_SAID] The architecture of a data warehouse can vary depending on the specific needs of the organization.
+
+[USER] Explain Stars, Snowflakes, and Fact Constellations Schemas.
+
+[ASSISTANT_SAID] Star Schema is the simplest and most widely used schema design in data warehousing, with the fact table in the center and dimension tables radiating outwards.
+
+[ASSISTANT_SAID] In a Star Schema, each dimension table is connected to the fact table via a foreign key, and the fact table contains measures that can be aggregated or analyzed.
+
+[ASSISTANT_SAID] Snowflake Schema is a variation of the star schema where dimension tables are normalized into multiple related tables, creating a more complex structure.
+
+[ASSISTANT_SAID] Normalization in Snowflake Schema can improve data consistency and reduce data redundancy but can make querying more complex and slower.
+
+[ASSISTANT_SAID] Fact Constellation Schema, also known as a galaxy schema, is used when a data warehouse needs to store multiple fact tables that share some or all of the same dimension tables.
+
+[ASSISTANT_SAID] In a Fact Constellation Schema, each fact table is connected to the appropriate dimension tables via foreign keys, allowing for flexible querying and analysis.
+
+[USER] (i) Explain methods for attribute subset selection.
+
+[ASSISTANT_SAID] Attribute subset selection, also known as feature selection, is the process of selecting a subset of the most relevant attributes from a dataset.
+
+[ASSISTANT_S

@@ -1,0 +1,24 @@
+**Observation Log:**
+
+- [FACT] User's name is Rosalynn McClenagan.
+- [FACT] User's birthday is 11/20/1939.
+- [FACT] User's birthplace is Gruver, Texas (Hansford County).
+- [FACT] User has 3 living children.
+- [FACT] User has an annuity.
+- [FACT] User owns a home worth $120,000 that is paid for.
+- [FACT] User owns one-third of a section of farmland.
+- [FACT] User has a life insurance policy.
+- [FACT] User owns a car worth $11,000.
+- [RELATIONSHIP] User's eldest son is Warren McClenagan, born on 1/20/1964.
+- [RELATIONSHIP] User's second son is Brian McClenagan, born on 2/12/1964.
+- [RELATIONSHIP] User's youngest son is Benjamen McClenagan, born on 4/26/1974.
+- [CHANGE] User's home address is changed to 305 Chase Ave, Gruver, TX.
+- [ASSISTANT_CREATED] Assistant created a Last Will and Testament for Rosalynn McClenagan.
+- [ASSISTANT_SAID] The will appoints Warren McClenagan as the Executor of the estate.
+- [ASSISTANT_SAID] If Warren McClenagan is unable or unwilling to serve, Brian McClenagan is appointed as the alternate Executor.
+- [ASSISTANT_SAID] The estate includes an annuity, a home located at 305 Chase Ave, Gruver, TX, valued at approximately $120,000, one-third of the Ayres farmland, a life insurance policy, and a car valued at approximately $11,000.
+- [ASSISTANT_SAID] The estate is to be divided equally among the three sons: Warren, Brian, and Benjamen McClenagan.
+- [ASSISTANT_SAID] All household items, keepsakes, and photo albums are to be divided equally among the three sons.
+- [ASSISTANT_SAID] In the event of pets at the time of passing, they are to be given to the sons in the order of Warren, Brian, and Benjamen McClenagan, or to a reputable animal rescue organization if none can care for them.
+- [ASSISTANT_SAID] The will revokes all prior Wills and Codicils.
+- [ASSISTANT_SAID] The will includes a section for signatures of witnesses, with placeholders for their names and addresses.

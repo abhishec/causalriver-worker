@@ -1,0 +1,25 @@
+**Observation Log:**
+
+- [FACT] User is planning a trip to Vancouver.
+- [EVENT] User is moving to Vancouver in September to study at UBC.
+- [FACT] User submitted their application to UBC on January 10th, 2023.
+- [CHANGE] User has sorted accommodation at Totem Park residence.
+- [RELATIONSHIP] User has a roommate from Japan.
+- [TEMPORAL] Session date is 2023/04/26 (Wed) 15:24.
+- [ASSISTANT_SAID] Average high temperature in Vancouver in September is 19°C (66°F).
+- [ASSISTANT_SAID] Average low temperature in Vancouver in September is 10°C (50°F).
+- [ASSISTANT_SAID] September is generally a dry and sunny month in Vancouver with an average of 9 hours of sunshine per day.
+- [ASSISTANT_SAID] User should pack lightweight clothing, comfortable walking shoes, layers for cooler mornings and evenings, and waterproof gear or an umbrella.
+- [ASSISTANT_SAID] Suggested outdoor activities in Vancouver include hiking, biking, or kayaking.
+- [ASSISTANT_SAID] Recommended popular attractions include Stanley Park, Granville Island, and the Capilano Suspension Bridge.
+- [ASSISTANT_SAID] Suggested booking tickets in advance for popular spots like Grouse Mountain or the Vancouver Aquarium.
+- [ASSISTANT_SAID] Taxi from Vancouver International Airport (YVR) to UBC costs approximately $35-$40 CAD and takes around 30-40 minutes.
+- [ASSISTANT_SAID] Uber/Lyft from YVR to UBC costs approximately $25-$35 CAD and takes around 30-40 minutes.
+- [ASSISTANT_SAID] Public transit option from YVR to UBC costs approximately $9-$10 CAD and takes around 45-60 minutes.
+- [ASSISTANT_SAID] Airport shuttle services to UBC cost around $20-$30 CAD per person, one way, and take around 30-40 minutes.
+- [ASSISTANT_SAID] Private car service or chauffeur from YVR to UBC costs around $60-$100 CAD, one way.
+- [ASSISTANT_SAID] Check-in process for UBC student housing takes around 30 minutes to 1 hour.
+- [ASSISTANT_SAID] Unpacking and settling in takes approximately 2-3 hours.
+- [ASSISTANT_SAID] Residence orientation at UBC lasts 1-2 hours and occurs in the days following move-in.
+- [ASSISTANT_SAID] Suggested shopping locations for bedding and kitchenware include Bed Bath & Beyond, Winners, dollar stores, Kitchen Stuff Plus, and Save-On-Foods.
+- [ASSISTANT_SAID] Recommended that user consider shopping with their

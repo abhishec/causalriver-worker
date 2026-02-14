@@ -1,0 +1,20 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/28 (Sun) 20:16  
+[USER] User is a beginner in Next.js 13.2.  
+[ASSISTANT_SAID] The `generateStaticParams` server function can be used in combination with dynamic route segments to define the list of route segment parameters that will be statically generated at build time instead of on-demand.  
+[ASSISTANT_SAID] `generateStaticParams` replaces `getStaticPaths` of Next.js 12 with a simplified API.  
+[ASSISTANT_SAID] `generateStaticParams` does not require any context parameters and runs at build time before the corresponding Layouts or Pages are generated.  
+[ASSISTANT_SAID] `generateStaticParams` will not be called again during revalidation (ISR).  
+[ASSISTANT_SAID] The primary benefit of the `generateStaticParams` function is its smart retrieval of data, where fetch requests are automatically deduplicated.  
+[ASSISTANT_SAID] If content is fetched within the `generateStaticParams` function using a fetch request, the requests are automatically deduped, decreasing build times.  
+[ASSISTANT_SAID] Dynamic Segments can be created by wrapping a folder’s name in square brackets, e.g., `[folderName]`.  
+[ASSISTANT_SAID] Dynamic Segments are passed as the params prop to layout, page, route, and generateMetadata functions.  
+[ASSISTANT_SAID] An example of a dynamic segment is `app/blog/[slug]/page.js` where `[slug]` is the Dynamic Segment for blog posts.  
+[ASSISTANT_SAID] The route example URL params for `app/blog/[slug]/page.js` include `/blog/a` resulting in `{ slug: 'a' }`.  
+[ASSISTANT_SAID] Catch-all Segments can be created by adding an ellipsis inside the brackets, e.g., `app/shop/[...slug]/page.js`.  
+[ASSISTANT_SAID] Optional Catch-all Segments can be made by including the parameter in double square brackets, e.g., `app/shop/[[...slug]]/page.js`.  
+[ASSISTANT_SAID] When using TypeScript, types for params can be added depending on the configured route segment.  
+[ASSISTANT_SAID] The `generateStaticParams` function can be used in combination with dynamic route segments to statically generate routes at build time instead of on-demand at request time.  
+[ASSISTANT_SAID] The `generateStaticParams` function should return an array of objects where each object represents the populated dynamic segments of a single route.  
+[ASSISTANT_SAID] Each property in the object is a dynamic segment to be filled in for

@@ -1,0 +1,33 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/20 (Sat) 13:40
+- [USER] User is trying to recall some movies they have watched recently.
+- [ASSISTANT_SAID] Assistant is happy to help the user keep track of the movies they've watched recently.
+- [ASSISTANT_SAID] User can tell the assistant the titles of the movies they've seen, and the assistant will keep a list.
+- [ASSISTANT_SAID] If the user doesn't remember the exact title, they can provide details (e.g. genre, actors, plot points) to help identify the movie.
+- [ASSISTANT_SAID] Assistant prompts the user to start adding movies to the list.
+- [USER] User watched "Avengers: Endgame" last weekend with family.
+- [USER] User saw "Joker" with friends at the cinema about three weeks ago.
+- [ASSISTANT_CREATED] Assistant added the following movies to the user's list:
+  1. Avengers: Endgame (2019)
+  2. Joker (2019)
+- [ASSISTANT_SAID] Assistant asks if the user remembers anything else they've watched recently or if they would like to stop there.
+- [USER] User watched "Stranger Things" season 3 on Netflix.
+- [USER] User watched "Toy Story 4" at the cinema with niece and nephew last month.
+- [ASSISTANT_CREATED] Assistant added the following to the user's list:
+  3. Stranger Things (Season 3) (2019)
+  4. Toy Story 4 (2019)
+- [ASSISTANT_SAID] Assistant notes that "Stranger Things" is a TV series, not a movie, but included it in the list.
+- [ASSISTANT_SAID] Assistant offers to separate movie and TV show lists in the future.
+- [ASSISTANT_SAID] Assistant encourages the user to continue adding to the list.
+- [USER] User watched "Spider-Man: Far From Home" at home.
+- [USER] User watched "Captain Marvel" with sister a few months ago.
+- [ASSISTANT_CREATED] Assistant added the following to the user's list:
+  5. Spider-Man: Far From Home (2019)
+  6. Captain Marvel (2019)
+- [ASSISTANT_SAID] Assistant comments on the user's recent Marvel-themed viewing.
+- [ASSISTANT_SAID] Assistant invites the user to add more movies or shows to the list.
+- [USER] User watched "When They See Us," the miniseries on Netflix, recently.
+- [ASSISTANT_CREATED] Assistant added the following to the user's list:
+  7. When They See Us (Miniseries) (2019)
+- [ASSISTANT_SAID

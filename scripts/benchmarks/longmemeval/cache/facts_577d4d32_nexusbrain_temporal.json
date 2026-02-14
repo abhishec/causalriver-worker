@@ -1,0 +1,33 @@
+{
+  "answer_0dd4d99a": [
+    {
+      "fact": "User is trying to find new book recommendations.",
+      "type": "preference",
+      "entities": [
+        "book recommendations"
+      ]
+    },
+    {
+      "fact": "User is interested in popular fiction novels released in the past year.",
+      "type": "preference",
+      "entities": [
+        "popular fiction novels",
+        "past year"
+      ]
+    },
+    {
+      "fact": "User is really interested in the literary fiction section.",
+      "type": "preference",
+      "entities": [
+        "literary fiction"
+      ]
+    },
+    {
+      "fact": "User has heard great things about The Seven Husbands of Evelyn Hugo.",
+      "type": "opinion",
+      "entities": [
+        "The Seven Husbands of Evelyn Hugo"
+      ]
+    }
+  ]
+}

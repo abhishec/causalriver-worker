@@ -1,0 +1,25 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/25 (Thu) 20:04
+- [USER] The user tends to overstuff their tacos.
+- [USER] The user plans to be more mindful of portion sizes and add more veggies to their next taco meal.
+- [USER] The user cannot resist adding too much cheese to their tacos.
+- [USER] The user is trying to cut back on carbs.
+- [PREFERENCE] The user loves mashed avocado as a topping for tacos.
+- [ASSISTANT_SAID] A healthy serving size for a taco meal generally consists of a single taco with a 4-ounce portion of protein (such as chicken, beef, or black beans), a variety of vegetables (such as lettuce, tomatoes, and onions), and a small amount of cheese or avocado.
+- [ASSISTANT_SAID] It is recommended to choose whole grain or corn tortillas instead of flour tortillas for added fiber.
+- [ASSISTANT_SAID] Incorporating fresh salsa or guacamole as a condiment can add flavor without adding excessive calories.
+- [ASSISTANT_SAID] Healthier cheese substitutes suggested include:
+  1. Greek yogurt as a high-protein, low-fat option.
+  2. Nutritional yeast as a vegan cheese substitute that adds a cheesy flavor.
+  3. Reduced-fat cheese as a lower-calorie alternative.
+  4. Mashed avocado as a healthy source of fat.
+  5. Queso fresco as a crumbly Mexican cheese with fewer calories and less fat.
+- [ASSISTANT_SAID] Low-carb tortilla options suggested include:
+  1. Lettuce wraps as a low-carb alternative to tortillas.
+  2. Low-carb tortillas made with almond flour or coconut flour.
+  3. Corn tortillas, which generally contain fewer carbs than flour tortillas.
+  4. Cauliflower tortillas using riced cauliflower as a base.
+- [ASSISTANT_SAID] The assistant encouraged the user to experiment with healthier cheese substitutes and different tortilla varieties to make meals more interesting and nutritious.
+- [USER] The user expressed interest in trying Greek yogurt and nutritional yeast as cheese substitutes.
+- [USER] The user expressed interest in trying cauliflower tortillas.

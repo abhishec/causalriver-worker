@@ -1,0 +1,35 @@
+**Observation Log:**
+
+[FACT] User is looking for BBQ sauce recipe recommendations.  
+[FACT] User tried making their own BBQ sauce last weekend.  
+[PREFERENCE] User found their homemade BBQ sauce to be a bit too sweet for their taste.  
+[ASSISTANT_SAID] Homemade BBQ sauce can be a challenge to get right.  
+[ASSISTANT_SAID] Recommended recipes include:  
+[ASSISTANT_CREATED] 1. Kansas City-Style BBQ Sauce: Uses tomato paste, vinegar, Worcestershire sauce, and spices.  
+[ASSISTANT_CREATED] 2. Smoky BBQ Sauce: Uses chipotle peppers in adobo sauce, apple cider vinegar, and Worcestershire sauce.  
+[ASSISTANT_CREATED] 3. Carolina-Style Vinegar BBQ Sauce: Uses apple cider vinegar, water, and spices.  
+[ASSISTANT_CREATED] 4. Sweet and Spicy BBQ Sauce: Uses brown sugar, hot sauce, and spices.  
+[ASSISTANT_SAID] Suggested adjustments to reduce sweetness:  
+[ASSISTANT_SAID] - Reduce sugar content by 1/4 to 1/2 cup.  
+[ASSISTANT_SAID] - Add more acidity with vinegar or lemon juice.  
+[ASSISTANT_SAID] - Use different sweeteners like honey or maple syrup.  
+[ASSISTANT_SAID] - Add more spices like paprika, garlic powder, or onion powder.  
+[ASSISTANT_SAID] BBQ sauce is about balance and personal preference.  
+[ASSISTANT_SAID] Asked if the user has specific preferences or flavor profiles in mind.  
+[EVENT] User attended a barbecue party at their friend Alex's house recently.  
+[FACT] User had amazing slow-cooked ribs at the barbecue party.  
+[FACT] Alex used a dry rub made from a secret recipe from his grandfather.  
+[PREFERENCE] User has been craving the ribs ever since.  
+[ASSISTANT_SAID] A good dry rub can elevate the flavor of ribs.  
+[ASSISTANT_SAID] Provided a basic dry rub recipe:  
+[ASSISTANT_CREATED] - 2 tablespoons brown sugar  
+[ASSISTANT_CREATED] - 2 tablespoons smoked paprika  
+[ASSISTANT_CREATED] - 2 tablespoons chili powder  
+[ASSISTANT_CREATED] - 1 tablespoon ground cumin  
+[ASSISTANT_CREATED] - 1 tablespoon garlic powder  
+[ASSISTANT_CREATED] - 1 tablespoon onion powder  
+[ASSISTANT_CREATED] - 1 teaspoon salt  
+[ASSISTANT_CREATED] - 1/2 teaspoon black pepper  
+[ASSISTANT_CREATED] - 1/2 teaspoon cayenne pepper (optional)  
+[ASSISTANT_SAID] Suggested tips for creating a dry rub:  
+[ASSISTANT_SAID] - Experiment with different spice ratios

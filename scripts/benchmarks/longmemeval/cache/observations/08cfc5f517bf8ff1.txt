@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[FACT] User is planning a birthday party for their niece.  
+[FACT] User is located in New York City.  
+[RELATIONSHIP] User's niece is the person for whom the birthday party is being planned.  
+[PREFERENCE] User is considering hosting the party at a museum.  
+[ASSISTANT_SAID] Assistant suggested that a museum party can be a unique and educational celebration.  
+[ASSISTANT_SAID] Assistant requested the user's city or zip code to provide information on children's museums and their party packages.  
+[ASSISTANT_SAID] Assistant provided a list of children's museums in New York City, including details about their party packages.  
+[ASSISTANT_SAID] Children's Museum of the Arts party package starts at $600 for 10 children (additional children $20 each).  
+[ASSISTANT_SAID] Children's Museum of Manhattan party package starts at $1,200 for 10 children (additional children $30 each).  
+[ASSISTANT_SAID] Brooklyn Children's Museum party package starts at $500 for 10 children (additional children $20 each).  
+[ASSISTANT_SAID] New York Hall of Science party package starts at $600 for 10 children (additional children $25 each).  
+[ASSISTANT_SAID] Staten Island Children's Museum party package starts at $400 for 10 children (additional children $20 each).  
+[ASSISTANT_SAID] Assistant encouraged the user to visit each museum's website or contact them directly for more information.  
+[FACT] User is specifically interested in hosting the party at the Children's Museum of Manhattan.  
+[ASSISTANT_SAID] Assistant provided information about special events and exhibits at the Children's Museum of Manhattan around late March.  
+[TEMPORAL] User's niece's birthday is in late March.  
+[ASSISTANT_SAID] Assistant mentioned Spring Break Programs at CMOM from March 26-31.  
+[ASSISTANT_SAID] Assistant listed current exhibits at CMOM, including Playworks, Superpowered Metropolis, and River Run.  
+[ASSISTANT_SAID] Assistant suggested checking the CMOM website or calling for the most up-to-date information on events.  
+[ASSISTANT_SAID] Assistant provided details about the party packages at the Children's Museum of Manhattan, including pricing and inclusions.  
+[ASSISTANT_SAID] Basic Party Package at CMOM costs $1,200 for up to 10 children, includes a 2-hour private party room rental, museum admission, dedicated party host, and one activity.  
+[ASSISTANT_SAID] Deluxe Party Package at CMOM costs $1,800 for up to 10 children, includes everything in the Basic Package plus additional options.  
+[ASSISTANT_SAID] Premium Party Package at CMOM costs $2

@@ -1,0 +1,103 @@
+{
+  "answer_f762ad8d_1": [
+    {
+      "fact": "User is looking for a new tripod that is sturdy and reliable.",
+      "type": "preference",
+      "entities": [
+        "tripod",
+        "sturdy",
+        "reliable"
+      ]
+    },
+    {
+      "fact": "User is considering the Really Right Stuff tripod.",
+      "type": "preference",
+      "entities": [
+        "Really Right Stuff tripod"
+      ]
+    },
+    {
+      "fact": "User owns a Canon EOS 80D camera.",
+      "type": "personal",
+      "entities": [
+        "Canon EOS 80D"
+      ]
+    },
+    {
+      "fact": "User has taken their camera on three trips to Yellowstone, Yosemite, and the Grand Canyon.",
+      "type": "event",
+      "entities": [
+        "Yellowstone",
+        "Yosemite",
+        "Grand Canyon"
+      ]
+    },
+    {
+      "fact": "User is excited to take their camera on more adventures with a new tripod.",
+      "type": "opinion",
+      "entities": [
+        "camera",
+        "new tripod"
+      ]
+    },
+    {
+      "fact": "User has heard great things about the Really Right Stuff tripod.",
+      "type": "opinion",
+      "entities": [
+        "Really Right Stuff tripod"
+      ]
+    }
+  ],
+  "answer_f762ad8d_2": [
+    {
+      "fact": "User is planning a trip to Zion National Park.",
+      "type": "event",
+      "entities": [
+        "Zion National Park"
+      ]
+    },
+    {
+      "fact": "User wants to capture great landscape shots.",
+      "type": "preference",
+      "entities": [
+        "landscape shots"
+      ]
+    },
+    {
+      "fact": "User has a Canon EOS 80D camera.",
+      "type": "personal",
+      "entities": [
+        "Canon EOS 80D"
+      ]
+    },
+    {
+      "fact": "User has taken their Canon EOS 80D on five trips.",
+      "type": "personal",
+      "entities": [
+        "five trips"
+      ]
+    },
+    {
+      "fact": "User considers their Canon EOS 80D to be a reliable camera.",
+      "type": "opinion",
+      "entities": [
+        "Canon EOS 80D"
+      ]
+    },
+    {
+      "fact": "User is considering using a graduated ND filter.",
+      "type": "preference",
+      "entities": [
+        "graduated ND filter"
+      ]
+    },
+    {
+      "fact": "User is unsure about whether to get a circular or square filter.",
+      "type": "preference",
+      "entities": [
+        "circular filter",
+        "square filter"
+      ]
+    }
+  ]
+}

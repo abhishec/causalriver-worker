@@ -1,0 +1,46 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/21 (Sun) 00:59
+- [FACT] User is trying to learn more about photography.
+- [EVENT] User purchased a vintage Canon QL17 at a thrift store for $50 in mint condition.
+- [ASSISTANT_SAID] Congratulations to the user on scoring a mint condition Canon QL17 for $50.
+- [ASSISTANT_SAID] Recommended online resources for learning about camera models, including vintage ones:
+  1. Camera Wikipedia
+  2. Ken Rockwell
+  3. Cameras.co.uk
+  4. The Camera Site
+  5. Flickr
+  6. eBay
+  7. YouTube channels like Tony Northrup, Peter McKinnon, and Matt Granger
+  8. Vintage Camera Collector
+  9. Canon's Official Website
+  10. Local Photography Communities
+- [ASSISTANT_SAID] Suggested specific resources for the Canon QL17:
+  - Canon QL17 on Wikipedia
+  - Canon QL17 Review on Ken Rockwell
+  - Canon QL17 on Flickr
+- [ASSISTANT_SAID] Advised to practice and experiment with the camera to understand its capabilities and limitations.
+- [FACT] User is looking for tips on how to store and display vintage cameras.
+- [ASSISTANT_SAID] Provided tips for storing and protecting vintage cameras:
+  1. Store in a dry, cool environment (around 60-70°F/15-21°C) and humidity level (around 50-60%).
+  2. Avoid direct sunlight.
+  3. Clean before storing with a soft, dry cloth and mild cleaning solution.
+  4. Use a protective case.
+  5. Place desiccant packets near stored cameras.
+  6. Avoid stacking cameras.
+  7. Handle with care.
+- [ASSISTANT_SAID] Suggested ideas for displaying vintage cameras:
+  1. Glass-front display case
+  2. Soft, padded shelves
+  3. Limit handling
+  4. Group similar cameras together
+  5. Add context with camera-related items
+  6. Consider a rotating display
+  7. Label and date each camera
+- [FACT] User is interested in the history of the Canon QL17.
+- [ASSISTANT_SAID] Provided historical information about the Canon QL17:
+  - First released in 1972.
+  - Part of Canon's QL series with a Quick Load system.
+  - Compact and lightweight design (410 grams, 122 x 75 x 60 mm).
+  - Featured a 40mm f/1.7 lens.
+  - Mechanical shutter with speeds from 1/500 to

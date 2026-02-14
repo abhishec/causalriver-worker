@@ -1,0 +1,22 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/01/22 (Sun) 11:17
+- [USER] User is not feeling well.
+- [ASSISTANT_SAID] The WHO-5 Well-Being Index is a tool used to assess an individual's current level of well-being.
+- [ASSISTANT_SAID] The WHO-5 consists of five questions that ask about an individual's mood, energy level, and overall sense of well-being.
+- [ASSISTANT_SAID] The questions in the WHO-5 ask about the individual's current level of happiness, their level of interest in things, their level of energy, their level of calmness, and their overall level of contentment.
+- [ASSISTANT_SAID] Each question in the WHO-5 is rated on a scale from 0 to 5, with higher scores indicating a higher level of well-being.
+- [ASSISTANT_SAID] The WHO-5 is a quick and easy way to assess an individual's well-being and can be used to monitor changes in well-being over time.
+- [USER] User asked for a list of questions relevant for eNPS.
+- [ASSISTANT_SAID] Employee Net Promoter Score (eNPS) is a measure of employee satisfaction and loyalty.
+- [ASSISTANT_SAID] The eNPS is typically calculated by asking employees a single question: "On a scale of 0 to 10, how likely are you to recommend this company as a place to work to a friend or colleague?"
+- [ASSISTANT_SAID] Responses to the eNPS question are grouped into three categories: Promoters (9-10), Passives (7-8), Detractors (0-6).
+- [ASSISTANT_SAID] The eNPS is calculated by subtracting the percentage of detractors from the percentage of promoters.
+- [ASSISTANT_SAID] A high eNPS score indicates a high level of employee satisfaction and loyalty, while a low eNPS score indicates a need for improvement.
+- [ASSISTANT_SAID] Additional questions that might be asked in an eNPS survey include:
+  - What do you like most about working for this company?
+  - What could the company improve upon to better support your work?
+  - How do you feel about the opportunities for growth and development at this company?
+  - How do you feel about the company's leadership and management?
+  - Do you feel valued and supported by your colleagues and supervisors?
+- [ASSISTANT_SAID] These types of questions can provide valuable insights into the experiences and perceptions of employees, and can help identify areas of strength and areas for improvement within the company.

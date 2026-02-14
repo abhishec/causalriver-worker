@@ -1,0 +1,41 @@
+{
+  "answer_4d3be2ab": [
+    {
+      "fact": "User is having issues with their home network's storage capacity",
+      "type": "opinion",
+      "entities": [
+        "home network",
+        "storage capacity"
+      ]
+    },
+    {
+      "fact": "User is considering getting a NAS device",
+      "type": "preference",
+      "entities": [
+        "NAS device"
+      ]
+    },
+    {
+      "fact": "User is a beginner in using NAS devices",
+      "type": "personal",
+      "entities": [
+        "beginner"
+      ]
+    },
+    {
+      "fact": "User is looking for recommendations for NAS devices",
+      "type": "preference",
+      "entities": [
+        "NAS devices"
+      ]
+    },
+    {
+      "fact": "User is interested in expanding their home network's storage capacity",
+      "type": "opinion",
+      "entities": [
+        "home network",
+        "storage capacity"
+      ]
+    }
+  ]
+}

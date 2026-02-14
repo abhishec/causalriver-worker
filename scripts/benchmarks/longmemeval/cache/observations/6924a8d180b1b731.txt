@@ -1,0 +1,20 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2022/06/25 (Sat) 11:00  
+[USER] The user understands the basic idea of diffusion models for image generation, specifically that a model is trained to remove noise added to an image and later constructs an image from pure noise.  
+[USER] The user understands that this process is done using a Markov model but does not understand Markov models well enough to have a conceptual understanding of how diffusion models work.  
+[ASSISTANT_SAID] The assistant explained that a diffusion model is a type of generative model that uses a Markov process to progressively refine an image by removing noise.  
+[ASSISTANT_SAID] The assistant described a Markov process as a mathematical system that undergoes transitions from one state to another according to certain probabilistic rules.  
+[ASSISTANT_SAID] In the context of diffusion models, the states represent the pixels of an image, and the transitions correspond to the removal of noise from the image.  
+[ASSISTANT_SAID] To train a diffusion model, the model is presented with a collection of images with added noise and uses a Markov process to "diffuse" the noise, gradually refining the images.  
+[ASSISTANT_SAID] The model learns the underlying patterns and structures in the images during training, which it can later use to generate new images from pure noise.  
+[ASSISTANT_SAID] Once trained, the model can generate new images by starting with a completely noisy image and progressively refining it using the trained Markov process.  
+[ASSISTANT_SAID] The assistant expressed hope that this explanation would help the user understand how diffusion models work for image generation.  
+[USER] The user indicated that they understand the explanation at a conceptual level but does not understand how the model refines random noise into a specific image, such as a picture of a cat eating a pickle.  
+[USER] The user has a good background in math.  
+[ASSISTANT_SAID] The assistant explained that the model refines random noise into a specific image by learning the underlying patterns and structures present in the training data.  
+[ASSISTANT_SAID] The model is trained on images of cats eating pickles, each with added noise, and learns to remove the noise to refine the images.  
+[ASSISTANT_SAID] After training, the model can generate new images by starting with random noise and using the trained Markov process to refine it into a realistic image.  
+[ASSISTANT_SAID] The assistant summarized that the model generates a specific image by learning patterns from the training data and using that knowledge to refine noise.  
+[USER] The user pointed out that it is unlikely the training data includes cats eating pickles specifically, but rather images of cats and images of pickles.  
+[ASSIST

@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/21 (Sun) 20:44
+- [ASSISTANT_SAID] The AR software component includes computer vision algorithms that detect, track, and recognize objects in the vehicle's surroundings.
+- [ASSISTANT_SAID] Computer vision algorithms can be based on deep learning models or traditional computer vision techniques such as feature extraction and matching.
+- [ASSISTANT_SAID] The computer vision algorithms identify the position, orientation, and motion of objects in the environment, necessary for generating AR content.
+- [ASSISTANT_SAID] The AR software component includes rendering algorithms that generate 3D graphics superimposed onto the real-world view seen through the HUD display.
+- [ASSISTANT_SAID] Rendering algorithms take into account geometry, lighting, and textures of the real world to create a seamless and realistic AR experience.
+- [ASSISTANT_SAID] Rendering algorithms must be fast and efficient to provide a smooth and responsive AR experience for the driver.
+- [ASSISTANT_SAID] The AR software component processes raw data from various sensors such as cameras, LIDAR, radar, GPS, and IMUs.
+- [ASSISTANT_SAID] The software extracts useful information such as the vehicle's speed, direction, position, and distance to other objects.
+- [ASSISTANT_SAID] The AR software component can include a user interface that allows the driver to interact with the system through voice commands, gestures, or physical controls.
+- [ASSISTANT_SAID] The user interface must be designed to be intuitive and easy to use, without distracting the driver.
+- [ASSISTANT_SAID] The AR software component can be connected to other systems in the vehicle, such as the infotainment system, navigation system, and advanced driver assistance systems (ADAS).
+- [ASSISTANT_SAID] The functions of an AR HUD system can be distributed across multiple electronic control units (ECUs) in a vehicle.
+- [ASSISTANT_SAID] Computer vision algorithms can be implemented in the ADAS ECU, responsible for monitoring the vehicle's surroundings and providing driver assistance functions.
+- [ASSISTANT_SAID] Rendering algorithms can be implemented in the IVI (In-Vehicle Infotainment) ECU, responsible for providing entertainment, communication, and navigation functions.
+- [ASSISTANT_SAID] Sensor data processing functions can be distributed across multiple ECUs depending on the type of sensor and information being processed.
+- [ASSISTANT_SAID] Camera and LIDAR sensors can be connected to the ADAS ECU, while GPS and IMU sensors can be connected to the TBox (Telematics Box) ECU.
+- [ASSISTANT_SAID] The Central Gateway ECU can manage communication between the different ECUs.
+- [ASSISTANT

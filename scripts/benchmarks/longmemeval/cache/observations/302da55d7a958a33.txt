@@ -1,0 +1,29 @@
+**Observation Log**
+
+**Session Date:** 2023/05/25 (Thu) 19:13  
+**Session ID:** 5260c678_2
+
+1. [FACT] User is considering buying a new condo in Oakland.
+2. [FACT] User is a marketing specialist making $65,000 a year.
+3. [PREFERENCE] User wants to factor their income into the calculation of how much condo they can afford.
+4. [EVENT] User is seeking help to determine how much condo they can afford.
+5. [FACT] User has outstanding student loans with monthly payments of $300.
+6. [FACT] User has saved around $20,000 for a down payment.
+7. [FACT] User has a credit score of around 750.
+8. [PREFERENCE] User is thinking of a 30-year fixed-rate mortgage.
+9. [FACT] User does not have any other significant expenses besides daily commute costs.
+10. [PREFERENCE] User is considering spending around $400,000 to $450,000 on a condo.
+11. [ASSISTANT_SAID] Assistant provided a rough estimate of how much condo user might be able to afford based on their income.
+12. [ASSISTANT_SAID] Assistant calculated that user’s monthly housing costs should not exceed $1,950 based on a DTI ratio of 36%.
+13. [ASSISTANT_SAID] Assistant estimated a mortgage amount of $350,000 to $400,000.
+14. [ASSISTANT_SAID] Assistant suggested a down payment of 20% ($70,000 to $80,000) to avoid PMI.
+15. [ASSISTANT_SAID] Assistant estimated a monthly mortgage payment of $1,700 to $2,000.
+16. [ASSISTANT_SAID] Assistant noted that the estimate does not account for other expenses associated with homeownership.
+17. [CHANGE] User decided to reduce their target condo price range to around $380,000.
+18. [PREFERENCE] User is looking for a 1-bedroom or 2-bedroom condo in a safe neighborhood with easy access to public transportation.
+19. [PREFERENCE] User prefers a commute of 30 minutes or less to downtown San Francisco.
+20. [ASSISTANT_SAID] Assistant provided a list of condos in Oakland that fit user’s budget and preferences.
+21. [ASSISTANT_SAID] Assistant listed The Metropolitan and The Uptown Place as options.
+22. [ASSISTANT_SAID] The Metropolitan is located at 2300 Valdez St, Oakland, CA 94612 in the Grand Lake neighborhood.
+23. [ASSISTANT_SAID] The Uptown Place is located at 2247 Broadway, Oakland, CA 94612 in the Uptown Oakland neighborhood.
+24. [ASSISTANT_SAID] The Metropolitan has amenities including

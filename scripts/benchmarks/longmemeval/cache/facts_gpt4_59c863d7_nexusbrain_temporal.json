@@ -1,0 +1,182 @@
+{
+  "answer_593bdffd_1": [
+    {
+      "fact": "User is getting back into model building.",
+      "type": "preference",
+      "entities": [
+        "model building"
+      ]
+    },
+    {
+      "fact": "User recently finished a Revell F-15 Eagle kit.",
+      "type": "event",
+      "entities": [
+        "Revell F-15 Eagle kit"
+      ]
+    },
+    {
+      "fact": "User picked up the F-15 Eagle kit during a trip to the hobby store in late April.",
+      "type": "event",
+      "entities": [
+        "hobby store",
+        "April"
+      ]
+    },
+    {
+      "fact": "User has been experimenting with Vallejo acrylics and AK Interactive weathering products.",
+      "type": "preference",
+      "entities": [
+        "Vallejo acrylics",
+        "AK Interactive weathering products"
+      ]
+    },
+    {
+      "fact": "User is looking for advanced techniques to improve their models.",
+      "type": "preference",
+      "entities": [
+        "advanced techniques"
+      ]
+    },
+    {
+      "fact": "User is interested in learning photo-etching and wire details.",
+      "type": "preference",
+      "entities": [
+        "photo-etching",
+        "wire details"
+      ]
+    }
+  ],
+  "answer_593bdffd_2": [
+    {
+      "fact": "User recently finished a Tamiya 1/48 scale Spitfire Mk.V model kit",
+      "type": "event",
+      "entities": [
+        "Tamiya",
+        "1/48 scale Spitfire Mk.V"
+      ]
+    },
+    {
+      "fact": "User is looking for advice on painting metal surfaces for model kits",
+      "type": "preference",
+      "entities": [
+        "painting metal surfaces",
+        "model kits"
+      ]
+    },
+    {
+      "fact": "User is not entirely happy with the results of their recent model",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User has been using a cheap airbrush",
+      "type": "preference",
+      "entities": [
+        "cheap airbrush"
+      ]
+    },
+    {
+      "fact": "User is thinking of upgrading their airbrush",
+      "type": "preference",
+      "entities": []
+    },
+    {
+      "fact": "User found the tip about using a wet palette to be great",
+      "type": "opinion",
+      "entities": [
+        "wet palette"
+      ]
+    }
+  ],
+  "answer_593bdffd_3": [
+    {
+      "fact": "User is looking for tips on weathering techniques for model tanks.",
+      "type": "preference",
+      "entities": [
+        "weathering techniques",
+        "model tanks"
+      ]
+    },
+    {
+      "fact": "User has been using AK Interactive products for model tanks.",
+      "type": "preference",
+      "entities": [
+        "AK Interactive"
+      ]
+    },
+    {
+      "fact": "User is interested in trying out new weathering methods.",
+      "type": "preference",
+      "entities": [
+        "new weathering methods"
+      ]
+    },
+    {
+      "fact": "User started working on a diorama featuring a 1/16 scale German Tiger I tank.",
+      "type": "event",
+      "entities": [
+        "diorama",
+        "1/16 scale German Tiger I tank"
+      ]
+    },
+    {
+      "fact": "User is trying to make the terrain in their diorama look as realistic as possible.",
+      "type": "opinion",
+      "entities": [
+        "realistic terrain"
+      ]
+    }
+  ],
+  "answer_593bdffd_4": [
+    {
+      "fact": "User is looking for tips on photo-etching for a 1/72 scale B-29 bomber model kit.",
+      "type": "preference",
+      "entities": [
+        "photo-etching",
+        "1/72 scale B-29 bomber model kit"
+      ]
+    },
+    {
+      "fact": "User has never tried photo-etching before.",
+      "type": "personal",
+      "entities": []
+    },
+    {
+      "fact": "User saw amazing results of photo-etching online.",
+      "type": "opinion",
+      "entities": [
+        "photo-etching"
+      ]
+    },
+    {
+      "fact": "User recently got a 1/24 scale '69 Camaro model kit.",
+      "type": "event",
+      "entities": [
+        "1/24 scale '69 Camaro model kit"
+      ]
+    },
+    {
+      "fact": "User acquired the model kits at a model show last weekend.",
+      "type": "event",
+      "entities": [
+        "model show"
+      ]
+    },
+    {
+      "fact": "User plans to use Vallejo acrylics for painting the B-29.",
+      "type": "preference",
+      "entities": [
+        "Vallejo acrylics",
+        "B-29"
+      ]
+    },
+    {
+      "fact": "User is interested in how Vallejo acrylics will work with photo-etching details.",
+      "type": "opinion",
+      "entities": [
+        "Vallejo acrylics",
+        "photo-etching details"
+      ]
+    }
+  ]
+}

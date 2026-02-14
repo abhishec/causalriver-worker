@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/10/16 (Mon) 16:33  
+[FACT] User is trying to get more organized with coupons and savings apps.  
+[PREFERENCE] User likes the idea of using a spreadsheet to track cashback earnings.  
+[EVENT] User used a coupon for $1 off a jar of Skippy peanut butter at Kroger.  
+[PREFERENCE] User is loving the savings from using coupons.  
+[ASSISTANT_SAID] Assistant congratulated the user on the deal for Skippy peanut butter and offered to help track cashback earnings across multiple apps and credit card rewards.  
+[ASSISTANT_SAID] Assistant suggested five methods to track cashback earnings: spreadsheets, budgeting apps, cashback tracking apps, digital note-taking apps, and a physical notebook or binder.  
+[ASSISTANT_SAID] Assistant recommended specific cashback tracking apps: Cashback Tracker, Reward Wallet, and Savvy.  
+[ASSISTANT_SAID] Assistant provided tips for tracking cashback earnings, including setting reminders, taking screenshots, organizing apps and credit cards, and creating a specific email folder for cashback notifications.  
+[ASSISTANT_SAID] Assistant provided a step-by-step guide to setting up a cashback tracking spreadsheet, including suggested columns: App/Credit Card, Date, Category, Amount, Total Earnings, Pending, and Notes.  
+[ASSISTANT_SAID] Assistant suggested optional columns for the spreadsheet: Transaction ID, Store, and Offer.  
+[ASSISTANT_SAID] Assistant advised on formatting and customizing the spreadsheet for better readability and organization.  
+[PREFERENCE] User plans to set up the spreadsheet as suggested by the assistant.  
+[EVENT] User plans to add a separate sheet to track coupons in their spreadsheet.  
+[ASSISTANT_SAID] Assistant provided tips on organizing a coupon binder, including dividing into sections, using pocket pages, labeling and dating coupons, and removing expired coupons.  
+[ASSISTANT_SAID] Assistant suggested creating a coupon tracking sheet to monitor used coupons and savings.  
+[PREFERENCE] User plans to set up their coupon binder with separate sections for grocery coupons, retail store coupons, and expiring soon.  
+[ASSISTANT_SAID] Assistant provided tips on maximizing savings at stores like Kroger, including checking the weekly ad, using online deal sites, signing up for Kroger's loyalty program, and stacking sales with coupons.  
+[ASSISTANT_SAID] Assistant recommended using cashback apps like Ibotta, Fetch Rewards, and Checkout 51 in conjunction with sales and coupons.  
+[ASSISTANT_SAID] Assistant suggested shopping during sales periods, checking for price matches, using digital coupons, and considering store brands for additional savings.  
+[PREFERENCE] User plans to set up a separate section in their coupon binder for digital coupons to keep track of those as well.

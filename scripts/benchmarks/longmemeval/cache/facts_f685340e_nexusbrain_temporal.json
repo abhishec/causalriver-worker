@@ -1,0 +1,89 @@
+{
+  "answer_25df025b_1": [
+    {
+      "fact": "User is considering ordering new athletic socks online.",
+      "type": "preference",
+      "entities": [
+        "athletic socks"
+      ]
+    },
+    {
+      "fact": "User has weekly tennis sessions with friends.",
+      "type": "event",
+      "entities": [
+        "tennis",
+        "friends"
+      ]
+    },
+    {
+      "fact": "User was at the local park last Sunday.",
+      "type": "event",
+      "entities": [
+        "local park",
+        "Sunday"
+      ]
+    },
+    {
+      "fact": "User has heard good things about Nike's athletic socks.",
+      "type": "opinion",
+      "entities": [
+        "Nike",
+        "athletic socks"
+      ]
+    },
+    {
+      "fact": "User owns Nike Air Zoom tennis shoes.",
+      "type": "personal",
+      "entities": [
+        "Nike Air Zoom tennis shoes"
+      ]
+    },
+    {
+      "fact": "User prefers Nike Court Flex Tennis Socks.",
+      "type": "preference",
+      "entities": [
+        "Nike Court Flex Tennis Socks"
+      ]
+    }
+  ],
+  "answer_25df025b_2": [
+    {
+      "fact": "User lives in the 95123 zip code area",
+      "type": "personal",
+      "entities": [
+        "95123"
+      ]
+    },
+    {
+      "fact": "User prefers jogging routes with minimal traffic and nice scenery",
+      "type": "preference",
+      "entities": [
+        "minimal traffic",
+        "nice scenery"
+      ]
+    },
+    {
+      "fact": "User plans to play tennis with friends at the local park every other week",
+      "type": "event",
+      "entities": [
+        "tennis",
+        "local park"
+      ]
+    },
+    {
+      "fact": "User is planning to jog the Almaden Lake Park Loop",
+      "type": "event",
+      "entities": [
+        "Almaden Lake Park Loop"
+      ]
+    },
+    {
+      "fact": "User is interested in yoga studios near Almaden Lake Park",
+      "type": "preference",
+      "entities": [
+        "yoga studios",
+        "Almaden Lake Park"
+      ]
+    }
+  ]
+}

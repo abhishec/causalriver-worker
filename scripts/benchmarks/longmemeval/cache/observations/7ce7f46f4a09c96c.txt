@@ -1,0 +1,38 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/24 (Wed) 22:24
+- [USER] User requested an explanation of the Schelling Coin protocol in simple points and tables.
+- [ASSISTANT_SAID] The Schelling Coin protocol is a method for achieving consensus on a single value among decentralized participants.
+- [ASSISTANT_SAID] Participants submit a secret number (the "commitment") and then reveal their numbers.
+- [ASSISTANT_SAID] The median of all revealed numbers is calculated, and the value closest to the median is chosen as the consensus value.
+- [ASSISTANT_CREATED] Summary of the protocol in simple steps:
+  1. Participants submit a secret number (the "commitment")
+  2. Participants reveal their secret numbers
+  3. The median of all revealed numbers is calculated
+  4. The value closest to the median is chosen as the consensus value
+- [ASSISTANT_CREATED] A table illustrating the process:
+  | Commitment | Revealed Number |
+  | --- | --- |
+  | 5 | 5 |
+  | 6 | 6 |
+  | 7 | 7 |
+  | 8 | 8 |
+  | 9 | 9 |
+- [ASSISTANT_SAID] Median = 7; the closest number to the median is 7, so 7 is chosen as the consensus value.
+- [USER] User asked for a list of applications of the Schelling Coin protocol.
+- [ASSISTANT_SAID] The Schelling Coin protocol can be applied in various ways, including:
+  1. Cryptocurrency
+  2. Distributed decision-making
+  3. Smart contracts
+  4. Decentralized finance
+  5. Random Number Generation
+  6. Auctions
+  7. Game theory
+- [ASSISTANT_SAID] These are just a few examples, and the possibilities can be expanded to many more use cases.
+- [USER] User inquired if the Schelling Coin protocol is related to oracles.
+- [ASSISTANT_SAID] Yes, the Schelling Coin protocol is related to oracles in that both can be used to achieve consensus on a single value among decentralized participants.
+- [ASSISTANT_SAID] An oracle is a third-party service that provides external data to a smart contract.
+- [ASSISTANT_SAID] The Schelling Coin protocol achieves consensus through participant submissions rather than relying on a third-party oracle.
+- [USER] User requested a differentiation between oracles and the Schelling Coin protocol using a table with 10 parameters.
+- [ASSISTANT_CREATED] A comparison table highlighting differences between Oracles and the Schelling Coin protocol:
+  | Parameter | Oracles | Sche

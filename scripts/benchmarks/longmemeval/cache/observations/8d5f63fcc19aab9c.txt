@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/22 (Mon) 14:31  
+[USER] The user requested the assistant to act as a prompt generator for a generative AI called "Midjourney".  
+[USER] The user provided a concept, which is "cat".  
+[USER] The user specified that the assistant must provide prompts for Midjourney AI based on the given concept.  
+[USER] The user outlined specific guidelines for the prompt generation, including formatting and structure.  
+[USER] The user instructed that the assistant should never alter the structure and formatting outlined in the guidelines.  
+[USER] The user emphasized that the assistant should not use the words "description" or ":" in any form.  
+[USER] The user stated that there should never be a comma between [ar] and [v].  
+[USER] The user required that each prompt be written in one line without using return.  
+[USER] The user requested that the prompts be in English.  
+[USER] The user specified that concepts that can't be real should not be described as "Real" or "realistic" or "photo" or a "photograph".  
+[USER] The user mandated that one of the prompts must be in a realistic photographic style, without choosing an artist for those prompts.  
+[USER] The user instructed to separate different prompts with two new lines.  
+
+[ASSISTANT_SAID] The assistant generated a prompt for a close-up view of a cat's fur and whiskers, in a cozy home environment, with a calm and peaceful atmosphere, described as photography (Macro lens) with natural light and a shallow depth of field.  
+[ASSISTANT_SAID] The assistant generated a prompt for a detailed description of a cat's eyes in a cluttered environment, with a playful and mischievous atmosphere, described as a digital illustration with a vibrant color palette and bold brush strokes.  
+[ASSISTANT_SAID] The assistant generated a prompt for a majestic black cat outdoors, with a serene and powerful atmosphere, described as an oil painting with rich, deep colors and bold brush strokes.  
+[ASSISTANT_SAID] The assistant generated a prompt for a surrealistic depiction of a cat floating in mid-air, in an abstract and psychedelic environment, described as 3D digital art with bright, neon colors and fluid, organic shapes.  
+[ASSISTANT_SAID] The assistant generated a prompt for a fluffy white cat in a minimalistic environment, with a calm and tranquil atmosphere, described as realistic photography (Portrait lens) with a soft lighting setup and a neutral color palette.  
+[ASSISTANT_SAID] The assistant generated a prompt for a cat's paw in a natural environment, with a peaceful and soothing atmosphere, described as a watercolor painting with soft, muted colors and delicate brush strokes.  
+[ASSISTANT

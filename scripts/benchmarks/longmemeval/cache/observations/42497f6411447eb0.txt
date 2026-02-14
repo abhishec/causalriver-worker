@@ -1,0 +1,21 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/20 (Sat) 05:03  
+[ASSISTANT_SAID] You can use a Bash script with the AWS CLI to automate the deployment of an EC2 instance and set up Proxmox.  
+[ASSISTANT_SAID] Steps to follow:  
+[ASSISTANT_SAID] 1. Install and configure the AWS CLI: Ensure that the AWS CLI is installed on your system and configured with the necessary credentials to interact with your AWS account.  
+[ASSISTANT_SAID] 2. Create a security group: Create a security group for your Proxmox instance, with the necessary rules to allow traffic between your home cluster and the cloud-based Proxmox node.  
+[ASSISTANT_SAID] 3. Create an IAM role: (Optional) If needed, create an IAM role with the necessary permissions to access other AWS services, such as S3 for backups.  
+[ASSISTANT_SAID] 4. Create a custom Amazon Machine Image (AMI): To automate the Proxmox installation, you can create a custom AMI with Proxmox pre-installed.  
+[ASSISTANT_SAID] 5. Write the Bash script: Create a Bash script that uses the AWS CLI to perform the following actions:  
+[ASSISTANT_SAID] a. Launch an EC2 instance with the custom Proxmox AMI (or with a user-data script to install Proxmox), the appropriate instance type, the security group, and the IAM role.  
+[ASSISTANT_SAID] b. Retrieve the instance ID, public IP, and private IP of the launched instance.  
+[ASSISTANT_SAID] c. Add any additional configurations, such as Elastic IPs, if required.  
+[ASSISTANT_SAID] 6. (Optional) User-data script for Proxmox installation: If you opt for a user-data script to install Proxmox during instance launch, create a script that performs the following actions:  
+[ASSISTANT_SAID] a. Update the base OS (e.g., Debian or Ubuntu).  
+[ASSISTANT_SAID] b. Install the required packages and dependencies.  
+[ASSISTANT_SAID] c. Add the Proxmox repository and install Proxmox.  
+[ASSISTANT_SAID] d. Configure the Proxmox networking and storage as required.  
+[ASSISTANT_SAID] e. Join the instance to your existing Proxmox cluster.  
+[ASSISTANT_SAID] 7. Execute the Bash script: Run the Bash script to launch the EC2 instance and deploy Proxmox.  
+[ASSISTANT_SAID] 8. Verify the setup: Log in to the Proxm

@@ -1,0 +1,42 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/25 (Thu) 18:52
+- [ASSISTANT_SAID] To add transparency to the background color of an element, you can use the `rgba()` function in CSS.
+- [ASSISTANT_SAID] The `rgba()` function stands for "Red Green Blue Alpha", where the `Alpha` value specifies the transparency level of the color.
+- [ASSISTANT_SAID] The Alpha value is a number between 0 and 1, where 0 is completely transparent, and 1 is completely opaque.
+- [ASSISTANT_SAID] Example CSS code for transparency: 
+  ```css
+  .element {
+    background-color: rgba(255, 255, 255, 0.5);
+  }
+  ```
+- [ASSISTANT_SAID] The example sets the `background-color` property of the `.element` class to a light gray color with an alpha value of 0.5, which is 50% transparent.
+- [ASSISTANT_SAID] You can adjust the Red, Green, and Blue values to choose any color you want, and adjust the Alpha value to make the color more or less transparent.
+- [ASSISTANT_SAID] Not all browsers support the `rgba()` function, so you may want to provide a fallback color using the `background-color` property.
+- [ASSISTANT_SAID] Example CSS code for fallback color:
+  ```css
+  .element {
+    background-color: rgba(255, 255, 255, 0.5);
+    background-color: #ffffff; /* Fallback color */
+    opacity: 0.5; /* Fallback for older versions of IE */
+  }
+  ```
+- [USER] Requested to change the code to make the navbar transparent only when not scrolling.
+- [ASSISTANT_SAID] To make the navbar transparent only when not scrolling, remove the `background-color` property from the `.sticky-navbar` and add it to a new class called `.transparent-navbar`.
+- [ASSISTANT_SAID] Example CSS for `.transparent-navbar`:
+  ```css
+  .transparent-navbar {
+    background-color: transparent !important;
+  }
+  ```
+- [ASSISTANT_SAID] JavaScript code to add and remove the `.transparent-navbar` class based on scroll position:
+  ```javascript
+  $(document).ready(function () {
+    $(window).scroll(function () {
+      if ($(this).scrollTop() > 50) {
+        $('.sticky-navbar').addClass('shrink');
+        $('.sticky-navbar').removeClass('navbar-shadows');
+        $('.sticky-navbar').removeClass('transparent-navbar');
+      } else {
+        $('.sticky-navbar').removeClass('shrink');
+        $('.sticky-navbar').addClass('navbar-shadows');

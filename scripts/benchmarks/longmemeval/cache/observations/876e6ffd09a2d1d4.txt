@@ -1,0 +1,20 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/22 (Mon) 19:24  
+[FACT] User spends around $120 per month on transportation.  
+[PREFERENCE] User is thinking of getting a new portable Wi-Fi hotspot with a longer battery life.  
+[ASSISTANT_SAID] Recommended options for portable Wi-Fi hotspots include:  
+[ASSISTANT_SAID] 1. Netgear Nighthawk M2 MR2100: 5040mAh battery, lasts up to 24 hours, supports up to 20 devices, max download speed of 2Gbps.  
+[ASSISTANT_SAID] 2. Verizon MiFi 8800L: 4400mAh battery, lasts up to 24 hours, supports up to 15 devices, max download speed of 1.45Gbps.  
+[ASSISTANT_SAID] 3. AT&T Netgear Nighthawk M1 MR1100: 5040mAh battery, lasts up to 24 hours, supports up to 20 devices, max download speed of 1Gbps.  
+[ASSISTANT_SAID] 4. GlocalMe G4 Pro: 5350mAh battery, lasts up to 15 hours, supports up to 10 devices, max download speed of 150Mbps.  
+[ASSISTANT_SAID] 5. Skyroam Solis X: 4700mAh battery, lasts up to 16 hours, supports up to 10 devices, max download speed of 150Mbps.  
+[ASSISTANT_SAID] Factors to consider when choosing a portable Wi-Fi hotspot include battery life, speed, device support, carrier compatibility, and portability.  
+[ASSISTANT_SAID] Suggested exploring alternative transportation options, such as carpooling, public transportation, or ride-sharing services, to reduce monthly expenses.  
+[PREFERENCE] User is concerned about the coverage of the hotspots.  
+[ASSISTANT_SAID] Coverage details for each hotspot:  
+[ASSISTANT_SAID] 1. Netgear Nighthawk M2 MR2100: Supports 4G LTE Cat 20, works on most major carriers, international roaming capabilities.  
+[ASSISTANT_SAID] 2. Verizon MiFi 8800L: Excellent coverage on Verizon network, supports international roaming in over 200 countries.  
+[ASSISTANT_SAID] 3. AT&T Netgear Nighthawk M1 MR1100: Designed for AT&T's network, supports international roaming in over 200 countries.  
+[ASSISTANT_SAID] 4. GlocalMe G4 Pro: Offers pay-as-you-go data plans in over 140 countries, supports 4G LTE and 3G connections.  
+[ASSISTANT_S

@@ -1,0 +1,29 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/23 (Tue) 15:13  
+[FACT] User has a background in finance.  
+[FACT] User completed a Bachelor's degree in Business Administration from the University of Michigan in 2015.  
+[FACT] User majored in Finance and minored in Economics.  
+[PREFERENCE] User is looking to explore online courses in data science and machine learning.  
+[ASSISTANT_SAID] User is well-equipped to transition into data science and machine learning due to their background.  
+[ASSISTANT_SAID] Recommended foundational courses include:  
+[ASSISTANT_SAID] 1. "Python for Everybody" (Coursera - University of Michigan)  
+[ASSISTANT_SAID] 2. "Introduction to Data Science in Python" (DataCamp)  
+[ASSISTANT_SAID] 3. "Statistics and Data Science" (edX - MIT)  
+[ASSISTANT_SAID] Recommended data science and machine learning courses include:  
+[ASSISTANT_SAID] 1. "Machine Learning" (Coursera - Stanford University)  
+[ASSISTANT_SAID] 2. "Data Science Specialization" (Coursera - Johns Hopkins University)  
+[ASSISTANT_SAID] 3. "Python Machine Learning" (DataCamp)  
+[ASSISTANT_SAID] Recommended finance-specific courses include:  
+[ASSISTANT_SAID] 1. "Financial Data Science with Python" (DataCamp)  
+[ASSISTANT_SAID] 2. "Python for Financial Analysis" (Coursera - University of Michigan)  
+[ASSISTANT_SAID] 3. "Financial Markets and Trading" (edX - MIT)  
+[ASSISTANT_SAID] Suggested starting with foundational courses to build Python and data science skills.  
+[ASSISTANT_SAID] Suggested focusing on courses that offer practical, hands-on experience with Python and machine learning libraries.  
+[ASSISTANT_SAID] Suggested applying new skills to finance-related projects to reinforce learning and build a portfolio.  
+[ASSISTANT_SAID] Suggested considering enrolling in a specialization or certification program to demonstrate expertise to potential employers.  
+[ASSISTANT_SAID] User expressed interest in the Data Science Specialization from Coursera - Johns Hopkins University.  
+[ASSISTANT_SAID] Provided an overview of the Data Science Specialization course structure, which consists of 9 courses.  
+[ASSISTANT_SAID] Course 1: "What is Data Science?" (1 week)  
+[ASSISTANT_SAID] Course 2: "R Programming" (4 weeks)  
+[ASSISTANT_SAID] Course 3: "Getting and Cleaning Data" (4

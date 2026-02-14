@@ -1,0 +1,21 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/02/11 (Sat) 15:07  
+[USER] User requested a summary of the research "The relationship between work engagement and workaholism: a systematic review and meta-analysis."  
+[ASSISTANT_SAID] The study is a comprehensive review of existing research on the relationship between work engagement and workaholism.  
+[ASSISTANT_SAID] The authors conducted a systematic search of relevant studies published in English between January 2000 and August 2018.  
+[ASSISTANT_SAID] A total of 36 studies met the inclusion criteria and included data on both work engagement and workaholism.  
+[ASSISTANT_SAID] The meta-analysis found a moderate, negative relationship between work engagement and workaholism.  
+[ASSISTANT_SAID] As work engagement increases, workaholism decreases and vice versa.  
+[ASSISTANT_SAID] Results were consistent across different samples, including employees from various countries and industries, and across different measures of work engagement and workaholism.  
+[ASSISTANT_SAID] The findings suggest that work engagement and workaholism are distinct constructs that are negatively related.  
+[ASSISTANT_SAID] Promoting work engagement may be an effective way to prevent or reduce workaholism, which is associated with negative outcomes such as burnout and impaired well-being.  
+[USER] User asked about the research method used in the paper "The relationship between work engagement and workaholism: a systematic review and meta-analysis."  
+[ASSISTANT_SAID] The research method is a systematic review and meta-analysis.  
+[ASSISTANT_SAID] A systematic review aims to identify all relevant studies, assess their quality, and synthesize the results for comprehensive understanding.  
+[ASSISTANT_SAID] The meta-analysis involved pooling and analyzing data from the studies included in the systematic review to quantify the strength of the relationship between work engagement and workaholism.  
+[ASSISTANT_SAID] Statistical methods were used to calculate the effect size of the relationship, expressed as a correlation coefficient.  
+[ASSISTANT_SAID] The meta-analysis was conducted using a random-effects model, assuming that the effect size may vary across studies.  
+[ASSISTANT_SAID] The systematic review involved a comprehensive search of relevant databases, including PsycINFO, Scopus, and Web of Science, for studies published in English between January 2000 and August 2018.  
+[ASSISTANT_SAID] Specific inclusion and exclusion criteria were used to identify relevant studies that included data on both work engagement and workaholism.  
+[ASSISTANT_SAID] The quality of the studies was assessed using the Quality Assessment Tool for Quantitative Studies.

@@ -1,0 +1,144 @@
+{
+  "answer_2c637141_1": [
+    {
+      "fact": "User completed their first full marathon on April 10th.",
+      "type": "event",
+      "entities": [
+        "first full marathon",
+        "April 10th"
+      ]
+    },
+    {
+      "fact": "User is feeling sore after the marathon.",
+      "type": "personal",
+      "entities": [
+        "sore"
+      ]
+    },
+    {
+      "fact": "User has been doing yoga twice a week.",
+      "type": "preference",
+      "entities": [
+        "yoga",
+        "twice a week"
+      ]
+    },
+    {
+      "fact": "User has been active in the running community.",
+      "type": "personal",
+      "entities": [
+        "running community"
+      ]
+    },
+    {
+      "fact": "User attended most of the weekly 5K fun runs at the local park.",
+      "type": "event",
+      "entities": [
+        "weekly 5K fun runs",
+        "local park"
+      ]
+    },
+    {
+      "fact": "User missed the run on March 5th due to work commitments.",
+      "type": "event",
+      "entities": [
+        "March 5th",
+        "work commitments"
+      ]
+    },
+    {
+      "fact": "User's soreness level is still pretty high, especially in their quads and calves.",
+      "type": "personal",
+      "entities": [
+        "soreness level",
+        "quads",
+        "calves"
+      ]
+    },
+    {
+      "fact": "User is feeling tight in their hip flexors.",
+      "type": "personal",
+      "entities": [
+        "tight",
+        "hip flexors"
+      ]
+    },
+    {
+      "fact": "User has been trying to stretch their hip flexors.",
+      "type": "preference",
+      "entities": [
+        "stretch",
+        "hip flexors"
+      ]
+    }
+  ],
+  "answer_2c637141_2": [
+    {
+      "fact": "User is training for a local triathlon in July",
+      "type": "event",
+      "entities": [
+        "triathlon",
+        "July"
+      ]
+    },
+    {
+      "fact": "User wants to focus on building endurance for swimming, running, and cycling",
+      "type": "preference",
+      "entities": [
+        "endurance",
+        "swimming",
+        "running",
+        "cycling"
+      ]
+    },
+    {
+      "fact": "User can dedicate around 5-6 days a week for training",
+      "type": "preference",
+      "entities": [
+        "5-6 days",
+        "training"
+      ]
+    },
+    {
+      "fact": "User prefers to run on Saturday mornings and Wednesday evenings",
+      "type": "preference",
+      "entities": [
+        "Saturday mornings",
+        "Wednesday evenings",
+        "running"
+      ]
+    },
+    {
+      "fact": "User would like to stick to yoga classes on Tuesdays and Thursdays",
+      "type": "preference",
+      "entities": [
+        "Tuesdays",
+        "Thursdays",
+        "yoga"
+      ]
+    },
+    {
+      "fact": "User wants to add an extra swimming session on Fridays",
+      "type": "preference",
+      "entities": [
+        "Fridays",
+        "swimming"
+      ]
+    },
+    {
+      "fact": "User missed a 5K fun run on March 26th",
+      "type": "event",
+      "entities": [
+        "5K fun run",
+        "March 26th"
+      ]
+    },
+    {
+      "fact": "User has been busy with work lately",
+      "type": "personal",
+      "entities": [
+        "work"
+      ]
+    }
+  ]
+}

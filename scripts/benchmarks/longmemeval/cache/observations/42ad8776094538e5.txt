@@ -1,0 +1,23 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/03/27 (Mon) 23:08
+- [USER] User provided text from a home page related to a platform called Guild.xyz.
+- [USER] User asked for an explanation of what Guild.xyz does.
+- [FACT] Guild.xyz offers automated membership management for communities.
+- [FACT] Guild creation is free and gasless.
+- [FACT] Guild.xyz supports platform-agnostic communities.
+- [FACT] Users can create exclusive membership levels managed with blockchain assets.
+- [FACT] Guild.xyz allows setting allowlists or guest passes.
+- [FACT] The platform includes a web3 captcha to guard against phishing attacks.
+- [FACT] Guild operates with its own indexer, supporting over 1 million tokens, 100,000 NFT projects, and 10+ chains.
+- [FACT] Guild offers built-in integrations and external APIs for composable membership requirements.
+- [FACT] The platform features trending guilds with specific role counts (e.g., ZetaChain: 243K, Arbitrum: 227K).
+- [FACT] Guild provides dedicated support for users.
+- [FACT] The platform is open-source, with frontend and platform connectors available.
+- [FACT] Guild offers an API/SDK for developers to build on access control strategies.
+- [FACT] Guild is designed to be accessible and user-friendly, described as a no-code tool.
+- [FACT] Over 10,000 users have created or joined 600 guilds on Guild.xyz.
+- [FACT] The developer team has merged 1929 commits on GitHub in response to user feedback.
+- [USER] User inquired about the functionality of the website https://www.collab.land/.
+- [ASSISTANT_SAID] Assistant stated it could not find information about https://www.collab.land/ and suggested the website might not be live or popular enough.
+- [ASSISTANT_SAID] Assistant requested more information about the website from the user.

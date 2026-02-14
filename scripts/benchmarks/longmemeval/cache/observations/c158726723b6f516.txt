@@ -1,0 +1,28 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/20 (Sat) 21:37
+- [USER] User requested relevant information to address during a presentation of a specific chapter.
+- [USER] Chapter title: 2.3. Previous work of Visual Assistive Technology
+- [USER] Subsection 2.3.1: Head wear
+- [USER] Subsection 2.3.1.1: Wearable Travel Aid for Environment Perception and Navigation of Visually Impaired People
+- [FACT] The system uses a consumer Red, Green, Blue, and Depth (RGB-D) camera attached to eyeglasses.
+- [FACT] An inertial measurement unit (IMU) is attached to the camera, smartphone, and earphone for commands/feedback.
+- [FACT] The system operates in both indoor and outdoor settings.
+- [FACT] Computer vision technologies were integrated into the device's routing and detection capabilities.
+- [FACT] The smartphone processes detecting and routing, with feedback sent to the user's ear through an earphone.
+- [FACT] Reference: Bai et al., 2019.
+- [ASSISTANT_SAID] Limitations of the system include weak detection of small-size obstacles and lack of staircase detection.
+- [USER] Subsection 2.3.1.2: Let Blind People See: Real-Time Visual Recognition with Results Converted to 3D Audio
+- [FACT] The system takes video input from a portable camera and streams it to a server for real-time image recognition processing using the YOLO model.
+- [FACT] The 3D location of detected objects is derived from the bounding boxes of the object detection algorithm.
+- [FACT] The Unity game engine sends the information as 3D audio to attached wireless earphones.
+- [FACT] The system can conduct real-time object detection at a pace of 30 frames per second in 1080p resolution.
+- [ASSISTANT_SAID] Limitations include accurate detection only within 2 to 5 meters, blocking of surrounding ambient sound when using earbuds, and excessive information sent to the user when multiple objects are detected.
+- [USER] Subsection 2.3.2: Smart Cane
+- [USER] Subsection 2.3.2.1: Smart Electronic Stick for Visually Impaired using Android Application and Google’s Cloud Vision
+- [FACT] The e-stick module is integrated with a voice-controlled Android application.
+- [FACT] The e-stick is designed to replace the essential navigation stick used by visually impaired individuals.
+- [FACT] The e-stick uses ultrasonic sensors to find low-lying and knee-level obstacles and potholes.
+- [FACT] The stick delivers active input on the presence of barriers using buzzers.
+- [FACT] The user's phone connects via Bluetooth for GPS navigation.
+- [FACT] The live location can

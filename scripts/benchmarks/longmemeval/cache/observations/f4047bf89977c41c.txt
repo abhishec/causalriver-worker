@@ -1,0 +1,18 @@
+**Observation Log:**
+
+- [FACT] The user is seeking information about obtaining a Power of Attorney.
+- [FACT] The user is interested in the procedures at the Egyptian embassy in Berlin and the Egyptian consulate in Frankfurt.
+- [TEMPORAL] The session date is 2023/05/29 (Mon) at 08:49.
+- [ASSISTANT_SAID] To get an appointment at the Egyptian Embassy in Berlin, the user should gather necessary documentation, including personal identification documents for both the German and Egyptian individuals involved.
+- [ASSISTANT_SAID] The user should visit the official website of the Egyptian Embassy in Berlin for information regarding consular services and Power of Attorney procedures, which was <https://www.egyptian-embassy.de/> as of 2021.
+- [ASSISTANT_SAID] The contact information for the Egyptian Embassy in Berlin includes: Phone: +49 (0) 30 477 54 70, Email: [embassy.berlin@mfa.gov.eg](mailto:embassy.berlin@mfa.gov.eg).
+- [ASSISTANT_SAID] The user should contact the embassy to inquire about the process and request an appointment, providing their name, contact information, and a brief description of the purpose of the appointment.
+- [ASSISTANT_SAID] The user should wait for confirmation from the embassy regarding the date and time for the appointment, along with any additional instructions or requirements.
+- [ASSISTANT_SAID] The user should prepare for the appointment by having all required documents ready, which may need to be translated into Arabic.
+- [ASSISTANT_SAID] The user should verify the fees associated with the issuance of the Power of Attorney and bring the necessary payment to the appointment.
+- [ASSISTANT_SAID] The user should attend the appointment at the embassy on the scheduled date and time and follow their instructions to complete the process.
+- [ASSISTANT_SAID] Embassy procedures and requirements may change over time, so the user should verify the information with the embassy directly.
+- [ASSISTANT_SAID] To get an appointment at the Egyptian Consulate General in Frankfurt, the user should also gather necessary documentation, including personal identification documents for both the German and Egyptian individuals involved.
+- [ASSISTANT_SAID] The user should visit the official website of the Egyptian Consulate General in Frankfurt for information regarding consular services and Power of Attorney procedures, which was <https://www.egyptconsulateffm.de/> as of 2021.
+- [ASSISTANT_SAID] The contact information for the Egyptian Consulate General in Frankfurt includes: Phone: +49 (0) 69 660 539 0, Email: [info@egyptconsulateffm.de](mailto:info@egyptconsulateffm.de).
+- [ASSISTANT

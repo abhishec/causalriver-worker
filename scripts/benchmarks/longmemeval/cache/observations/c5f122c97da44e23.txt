@@ -1,0 +1,29 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2021/06/01 (Tue) 09:50
+- [ASSISTANT_SAID] SQL Analytical Functions are used to perform calculations on a set of rows that are related to the current row.
+- [ASSISTANT_SAID] Analytical functions are used with the OVER clause and can be used to perform ranking, windowing, and aggregation operations.
+- [ASSISTANT_SAID] Several analytical functions available in SQL include ROW_NUMBER, RANK, DENSE_RANK, NTILE, LAG, LEAD, SUM, AVG, MIN, MAX, and COUNT.
+- [ASSISTANT_SAID] Example table "Sales" has columns "SaleID", "SaleDate", "Region", "SalesPerson", and "Amount".
+- [ASSISTANT_SAID] To calculate the running total of sales for each salesperson, the SUM() function with the OVER clause can be used.
+- [ASSISTANT_SAID] SQL query example for running total: 
+  ```sql
+  SELECT SaleID, SaleDate, Region, SalesPerson, Amount, SUM(Amount) OVER (PARTITION BY SalesPerson ORDER BY SaleDate) AS RunningTotal
+  FROM Sales;
+  ```
+- [ASSISTANT_SAID] Result set for running total includes columns: SaleID, SaleDate, Region, SalesPerson, Amount, RunningTotal.
+- [ASSISTANT_SAID] Example result set for running total:
+  ```yaml
+  SaleID | SaleDate   | Region | SalesPerson | Amount | RunningTotal
+  ------|------------|--------|-------------|--------|--------------
+  1     | 2022-01-01 | East   | John        | 100    | 100
+  2     | 2022-01-02 | East   | John        | 200    | 300
+  3     | 2022-01-03 | East   | John        | 150    | 450
+  4     | 2022-01-01 | West   | Lisa        | 50     | 50
+  5     | 2022-01-02 | West   | Lisa        | 250    | 300
+  6     | 2022-01-03 | West   | Lisa        | 100    | 400
+  7     | 2022-01-01 | North  | Mark        | 300    | 300
+  8     | 2022-01-02 | North  | Mark        | 200    | 500
+  9     | 2022-01-03 | North  | Mark        | 150    | 650
+  ```
+- [ASSISTANT_SAID] The PARTITION BY clause

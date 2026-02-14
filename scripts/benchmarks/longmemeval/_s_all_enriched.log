@@ -1,0 +1,143 @@
+[12:14:49] Loading S variant dataset...
+[12:14:51] Loaded 500 questions
+[12:14:51] Running federated_observational (ALL_ENRICHED v2) on S variant...
+
+=== Federated Observational Pipeline ===
+  Observer model: gpt-4o-mini-2024-07-18
+  Answer model: gpt-4o-2024-08-06
+  Questions: 500 (58 already done)
+  7-Layer federated with event bus
+Federated Observational:  12%|█▏        | 58/500 [00:00<?, ?it/s]Federated Observational:  12%|█▏        | 59/500 [00:02<20:22,  2.77s/it]Federated Observational:  12%|█▏        | 60/500 [00:44<3:08:00, 25.64s/it]Federated Observational:  12%|█▏        | 61/500 [01:26<4:02:34, 33.15s/it]Federated Observational:  12%|█▏        | 62/500 [02:07<4:24:37, 36.25s/it]Federated Observational:  13%|█▎        | 63/500 [02:49<4:38:00, 38.17s/it]Federated Observational:  13%|█▎        | 64/500 [03:44<5:20:53, 44.16s/it]Federated Observational:  13%|█▎        | 65/500 [04:26<5:13:41, 43.27s/it]Federated Observational:  13%|█▎        | 66/500 [05:07<5:08:20, 42.63s/it]Federated Observational:  13%|█▎        | 67/500 [05:09<3:36:20, 29.98s/it]Federated Observational:  14%|█▎        | 68/500 [07:17<7:12:49, 60.12s/it]Federated Observational:  14%|█▍        | 69/500 [07:58<6:29:22, 54.20s/it]Federated Observational:  14%|█▍        | 70/500 [08:38<5:59:09, 50.11s/it]Federated Observational:  14%|█▍        | 71/500 [09:21<5:41:02, 47.70s/it]Federated Observational:  14%|█▍        | 72/500 [15:39<17:32:22, 147.53s/it]Federated Observational:  15%|█▍        | 73/500 [16:58<15:03:10, 126.91s/it]Federated Observational:  15%|█▍        | 74/500 [17:39<11:58:13, 101.16s/it]Federated Observational:  15%|█▌        | 75/500 [18:04<9:14:32, 78.29s/it]  Federated Observational:  15%|█▌        | 76/500 [22:19<15:27:07, 131.20s/it]Federated Observational:  15%|█▌        | 77/500 [23:00<12:14:49, 104.23s/it]Federated Observational:  16%|█▌        | 78/500 [24:18<11:17:45, 96.36s/it] Federated Observational:  16%|█▌        | 79/500 [26:46<13:04:34, 111.82s/it]Federated Observational:  16%|█▌        | 80/500 [27:27<10:34:15, 90.61s/it] Federated Observational:  16%|█▌        | 81/500 [28:08<8:49:06, 75.77s/it] Federated Observational:  16%|█▋        | 82/500 [28:49<7:35:09, 65.33s/it]Federated Observational:  17%|█▋        | 83/500 [30:04<7:53:01, 68.06s/it]Federated Observational:  17%|█▋        | 84/500 [30:45<6:55:21, 59.91s/it]
+  Retry 1/5 after 2s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 2/5 after 4s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 3/5 after 8s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 4/5 after 16s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 1/5 after 2s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 2/5 after 4s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 3/5 after 8s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 4/5 after 16s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 1/5 after 2s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 2/5 after 4s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 3/5 after 8s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 4/5 after 16s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 1/5 after 2s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 2/5 after 4s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 3/5 after 8s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 4/5 after 16s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 1/5 after 2s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 2/5 after 4s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 3/5 after 8s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 4/5 after 16s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 1/5 after 2s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 2/5 after 4s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 3/5 after 8s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 4/5 after 16s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 1/5 after 2s (RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for gpt-4o in organi)
+
+  Retry 1/5 after 2s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 2/5 after 4s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 3/5 after 8s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 4/5 after 16s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 1/5 after 2s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 2/5 after 4s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 3/5 after 8s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 4/5 after 16s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 1/5 after 2s (RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for gpt-4o in organi)
+
+  Retry 2/5 after 4s (RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for gpt-4o in organi)
+
+  Retry 3/5 after 8s (RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for gpt-4o in organi)
+
+  Retry 1/5 after 2s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 2/5 after 4s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 3/5 after 8s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 4/5 after 16s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 1/5 after 2s (RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for gpt-4o in organi)
+
+  Retry 2/5 after 4s (RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for gpt-4o in organi)
+
+  Retry 3/5 after 8s (RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for gpt-4o in organi)
+
+  Retry 1/5 after 2s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 2/5 after 4s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 3/5 after 8s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 4/5 after 16s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 1/5 after 2s (RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for gpt-4o in organi)
+
+  Retry 1/5 after 2s (RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for gpt-4o in organi)
+
+  Retry 1/5 after 2s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 2/5 after 4s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 3/5 after 8s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 4/5 after 16s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 1/5 after 2s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 2/5 after 4s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 3/5 after 8s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 4/5 after 16s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 1/5 after 2s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 2/5 after 4s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 3/5 after 8s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 4/5 after 16s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 1/5 after 2s (RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for gpt-4o in organi)
+
+  Retry 1/5 after 2s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 2/5 after 4s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 3/5 after 8s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 4/5 after 16s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)
+
+  Retry 1/5 after 2s (RateLimitError: Error code: 429 - {'error': {'message': 'Request too large for gpt-4o in organiz)

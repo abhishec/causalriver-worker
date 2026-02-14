@@ -1,0 +1,99 @@
+{
+  "answer_e184e4c3_2": [
+    {
+      "fact": "User has a daily commute to work that takes about 30 minutes",
+      "type": "personal",
+      "entities": [
+        "commute",
+        "30 minutes"
+      ]
+    },
+    {
+      "fact": "User is looking for advice on how to make the most of their morning commute",
+      "type": "opinion",
+      "entities": [
+        "morning commute",
+        "advice"
+      ]
+    },
+    {
+      "fact": "User is considering listening to audiobooks or podcasts during their commute",
+      "type": "preference",
+      "entities": [
+        "audiobooks",
+        "podcasts"
+      ]
+    },
+    {
+      "fact": "User plans to try a mix of both audiobooks and podcasts",
+      "type": "preference",
+      "entities": [
+        "audiobooks",
+        "podcasts"
+      ]
+    },
+    {
+      "fact": "User is interested in discovering new podcasts and audiobooks",
+      "type": "opinion",
+      "entities": [
+        "podcasts",
+        "audiobooks"
+      ]
+    }
+  ],
+  "answer_e184e4c3_1": [
+    {
+      "fact": "User wakes up at 6:30 AM",
+      "type": "personal",
+      "entities": [
+        "6:30 AM"
+      ]
+    },
+    {
+      "fact": "User takes about an hour to get ready in the morning",
+      "type": "personal",
+      "entities": [
+        "1 hour"
+      ]
+    },
+    {
+      "fact": "User includes a 20-minute meditation session in their morning routine",
+      "type": "preference",
+      "entities": [
+        "meditation",
+        "20 minutes"
+      ]
+    },
+    {
+      "fact": "User includes a 30-minute workout in their morning routine",
+      "type": "preference",
+      "entities": [
+        "workout",
+        "30 minutes"
+      ]
+    },
+    {
+      "fact": "User is looking for high-energy breakfast options",
+      "type": "preference",
+      "entities": [
+        "high-energy breakfast"
+      ]
+    },
+    {
+      "fact": "User has tried oatmeal for breakfast",
+      "type": "preference",
+      "entities": [
+        "oatmeal"
+      ]
+    },
+    {
+      "fact": "User is interested in trying avocado toast with poached eggs and cherry tomatoes",
+      "type": "preference",
+      "entities": [
+        "avocado toast",
+        "poached eggs",
+        "cherry tomatoes"
+      ]
+    }
+  ]
+}

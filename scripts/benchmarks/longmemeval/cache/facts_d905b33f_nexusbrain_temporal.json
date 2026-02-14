@@ -1,0 +1,119 @@
+{
+  "answer_85a77c48_1": [
+    {
+      "fact": "User is looking for a gift for their mom's anniversary.",
+      "type": "event",
+      "entities": [
+        "mom",
+        "anniversary"
+      ]
+    },
+    {
+      "fact": "User is considering personalized photo albums and customized jewelry as gift options.",
+      "type": "preference",
+      "entities": [
+        "personalized photo albums",
+        "customized jewelry"
+      ]
+    },
+    {
+      "fact": "User prefers to shop in-store for more personal gifts.",
+      "type": "preference",
+      "entities": [
+        "in-store shopping",
+        "personal gifts"
+      ]
+    },
+    {
+      "fact": "User has been doing a lot of online shopping lately, especially during sales events.",
+      "type": "preference",
+      "entities": [
+        "online shopping",
+        "sales events"
+      ]
+    },
+    {
+      "fact": "User is trying to cut back on impulse buys.",
+      "type": "opinion",
+      "entities": [
+        "impulse buys"
+      ]
+    },
+    {
+      "fact": "User couldn't resist a sale at their favorite bookstore last week.",
+      "type": "event",
+      "entities": [
+        "sale",
+        "favorite bookstore"
+      ]
+    }
+  ],
+  "answer_85a77c48_2": [
+    {
+      "fact": "User is looking for gift ideas for their mom's anniversary.",
+      "type": "event",
+      "entities": [
+        "mom",
+        "anniversary"
+      ]
+    },
+    {
+      "fact": "User has narrowed down gift options to personalized photo album, customized jewelry, or gourmet food basket.",
+      "type": "preference",
+      "entities": [
+        "personalized photo album",
+        "customized jewelry",
+        "gourmet food basket"
+      ]
+    },
+    {
+      "fact": "User's budget for the gift is $150-$200.",
+      "type": "preference",
+      "entities": [
+        "$150-$200"
+      ]
+    },
+    {
+      "fact": "User has chosen to go with the customized jewelry option.",
+      "type": "preference",
+      "entities": [
+        "customized jewelry"
+      ]
+    },
+    {
+      "fact": "User found a similar necklace for their sister's birthday that cost $75.",
+      "type": "personal",
+      "entities": [
+        "sister",
+        "birthday",
+        "$75"
+      ]
+    },
+    {
+      "fact": "User hopes to find a customized jewelry piece around $75 or a bit higher.",
+      "type": "preference",
+      "entities": [
+        "$75"
+      ]
+    },
+    {
+      "fact": "User has been good about budgeting for gifts lately.",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User made an impulse buy at their favorite bookstore last week.",
+      "type": "event",
+      "entities": [
+        "favorite bookstore"
+      ]
+    },
+    {
+      "fact": "User bought a book for $24 after a discount.",
+      "type": "personal",
+      "entities": [
+        "$24"
+      ]
+    }
+  ]
+}

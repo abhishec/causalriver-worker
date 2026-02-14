@@ -1,0 +1,19 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/26 (Fri) 19:01
+- [USER] User inquired about the percentage of Tyne and Wear's workforce employed in manufacturing.
+- [ASSISTANT_SAID] The manufacturing sector employed around 10% of the workforce in Tyne and Wear according to 2018 data from the Office for National Statistics (ONS).
+- [PREFERENCE] User expressed surprise at the percentage, thinking it would be higher due to the industrial history of the region.
+- [USER] User asked about the most prevalent industries in Tyne and Wear now.
+- [ASSISTANT_SAID] Tyne and Wear's economy has shifted towards service sectors such as health, education, and retail, as well as the creative industries.
+- [ASSISTANT_SAID] The largest private sector employer in Tyne and Wear is the Nissan car factory in Sunderland.
+- [ASSISTANT_SAID] Other significant industries in Tyne and Wear include tourism, digital and technology businesses, and the offshore and renewable energy sectors.
+- [USER] User expressed interest in the digital and technology businesses in Tyne and Wear and asked for notable examples.
+- [ASSISTANT_SAID] Notable digital and technology businesses in Tyne and Wear include:
+  - [ASSISTANT_SAID] Sage Group - a large software company specializing in business and financial management solutions.
+  - [ASSISTANT_SAID] Ubisoft Reflections - a video game development studio known for titles like Watch Dogs, Tom Clancy's The Division, and The Crew.
+  - [ASSISTANT_SAID] Zerolight - a provider of 3D visualization technology for the automotive industry.
+  - [ASSISTANT_SAID] Hedgehog Lab - a software consultancy and app development company.
+  - [ASSISTANT_SAID] Tombola - an online gaming company creating bingo and arcade-style games.
+  - [ASSISTANT_SAID] Atom Bank - a digital-only bank offering mobile banking without physical branches.
+- [ASSISTANT_SAID] There are many other innovative digital and technology businesses thriving in Tyne and Wear.

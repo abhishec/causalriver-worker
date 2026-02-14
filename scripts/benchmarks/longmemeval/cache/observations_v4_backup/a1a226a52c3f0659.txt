@@ -1,0 +1,16 @@
+**Observation Log:**
+
+- [FACT] User is considering applying for a green card.
+- [FACT] User is unsure about the green card process and requirements.
+- [FACT] User has parents living with them in the US.
+- [RELATIONSHIP] User's parents have been living with them for the past six months.
+- [RELATIONSHIP] User's parents have been a big help with household chores, cooking, and taking English language classes.
+- [PREFERENCE] User enjoys spending time with their parents and appreciates their company.
+- [ASSISTANT] The assistant provided a detailed overview of the green card application process, including steps and timelines.
+- [ASSISTANT] The assistant explained the impact of having parents living with the user on their green card application.
+- [ASSISTANT] The assistant listed common mistakes to avoid during the green card application process.
+- [FACT] User is concerned about the financial aspect of their green card application.
+- [ASSISTANT] The assistant clarified that the user needs to demonstrate financial support for their parents if they are included in the application.
+- [ASSISTANT] The assistant explained that the user must account for their parents' expenses as part of their own financial situation if the parents are not working.
+- [ASSISTANT] The assistant provided examples of expenses to consider when calculating financial support for the user's parents.
+- [TEMPORAL] Session date is 2023/07/16 (Sun) 05:22.

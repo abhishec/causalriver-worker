@@ -1,0 +1,73 @@
+{
+  "answer_b28f2c7a_1": [
+    {
+      "fact": "User is trying to plan out their week",
+      "type": "event",
+      "entities": []
+    },
+    {
+      "fact": "User is interested in productivity apps",
+      "type": "preference",
+      "entities": [
+        "productivity apps"
+      ]
+    },
+    {
+      "fact": "User is particularly interested in Todoist and Trello",
+      "type": "preference",
+      "entities": [
+        "Todoist",
+        "Trello"
+      ]
+    }
+  ],
+  "answer_b28f2c7a_2": [
+    {
+      "fact": "User goes to the gym on Mondays, Wednesdays, and Fridays",
+      "type": "personal",
+      "entities": [
+        "gym",
+        "Mondays",
+        "Wednesdays",
+        "Fridays"
+      ]
+    },
+    {
+      "fact": "User prefers to schedule meetings on Tuesday or Thursday",
+      "type": "preference",
+      "entities": [
+        "Tuesday",
+        "Thursday"
+      ]
+    },
+    {
+      "fact": "User is flexible with their schedule but has some commitments",
+      "type": "preference",
+      "entities": []
+    },
+    {
+      "fact": "User prefers to avoid scheduling meetings during gym times",
+      "type": "preference",
+      "entities": [
+        "gym times"
+      ]
+    },
+    {
+      "fact": "User thinks Tuesday afternoon at 2:00 pm could work well for a meeting",
+      "type": "opinion",
+      "entities": [
+        "Tuesday",
+        "2:00 pm"
+      ]
+    },
+    {
+      "fact": "User needs to be done with the meeting before heading to the gym at 6:00 pm",
+      "type": "event",
+      "entities": [
+        "meeting",
+        "gym",
+        "6:00 pm"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/04/22 (Sat) 23:57  
+[FACT] User has been experimenting with different ways to shop, including online delivery.  
+[EVENT] User spent around $80 on Instacart earlier this month.  
+[PREFERENCE] User is trying to get a better grip on grocery spending and wants to plan meals and make a list before going to the store.  
+[ASSISTANT_SAID] The assistant suggested breaking down the process of grocery budgeting into manageable steps.  
+[ASSISTANT_SAID] Step 1: Track Your Spending - Write down every grocery purchase for one month, including online orders.  
+[ASSISTANT_SAID] Step 2: Plan Your Meals - Consider meal preferences, dietary needs, and how many meals to plan for.  
+[ASSISTANT_SAID] Step 3: Make a Grocery List - Include pantry staples, fresh produce, proteins, dairy, and grains.  
+[ASSISTANT_SAID] Step 4: Shop Smart - Stick to the list, check prices, opt for store brands, and consider sales.  
+[ASSISTANT_SAID] Suggested using cashback apps like Ibotta or Fetch Rewards to earn rewards on purchases.  
+[ASSISTANT_SAID] Provided tips for online shopping, including using Instacart's features and setting a budget for online orders.  
+[PREFERENCE] User does not want to use a budgeting app or a notebook to track spending.  
+[EVENT] User is looking for a simple way to keep track of receipts digitally.  
+[ASSISTANT_SAID] Suggested taking photos of receipts and creating a designated album on the phone.  
+[ASSISTANT_SAID] Recommended using scanning apps like Scanbot or Genius Scan to digitize receipts.  
+[ASSISTANT_SAID] Suggested using digital receipts via email and setting up a designated folder for them.  
+[ASSISTANT_SAID] Mentioned receipt tracking apps like Shoeboxed, Receipt Hog, and Fetch Rewards for tracking purposes.  
+[EVENT] User decided to try the digital receipts via email method and will ask other stores to email receipts instead of printing them.  
+[PREFERENCE] User is interested in meal planning and wants to know more about meal planning apps.  
+[ASSISTANT_SAID] Provided information about Plan to Eat and Yummly meal planning apps.  
+[ASSISTANT_SAID] Plan to Eat offers a 30-day free trial, then costs $4.95/month or $39/year.  
+[ASSISTANT_SAID] Plan to Eat features include meal planning, recipe organization, grocery list generation, pantry management, and nutrition information.  
+[ASSISTANT_SAID] Yummly is free with optional premium features for $2.99/month or $29.99/year.

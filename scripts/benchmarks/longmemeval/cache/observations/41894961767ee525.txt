@@ -1,0 +1,18 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/03/01 (Wed) 00:25
+- [USER] User asked for examples of notable research projects conducted at universities in the past 5 years.
+- [ASSISTANT_SAID] 1. CRISPR gene editing: Researchers at the University of California, Berkeley successfully used CRISPR gene editing technology to edit DNA in human embryos in 2017.
+- [ASSISTANT_SAID] 2. Quantum computing: Researchers at the University of New South Wales in Australia created the world's first working qubit (quantum bit) in silicon in 2015, advancing the field of quantum computing.
+- [ASSISTANT_SAID] 3. AI and machine learning: Stanford University's AI Index, launched in 2017, is a groundbreaking report on the state of artificial intelligence, tracking data on trends in the field of AI and machine learning.
+- [ASSISTANT_SAID] 4. Climate change: The University of Copenhagen’s Centre for Ice and Climate played a key role in research published in 2019 that showed the Greenland ice sheet is shrinking more quickly than previously thought.
+- [ASSISTANT_SAID] 5. Space exploration: The University of Arizona's Lunar and Planetary Laboratory helped operate NASA's OSIRIS-REx spacecraft, which successfully landed on an asteroid in 2020 and collected a sample to bring back to Earth.
+- [USER] User requested more details on the CRISPR gene editing research conducted at the University of California, Berkeley, expressing interest in how they were able to edit DNA in human embryos.
+- [ASSISTANT_SAID] In 2017, a team of researchers at UC Berkeley led by Dr. Jennifer Doudna and Dr. Shoukhrat Mitalipov used CRISPR gene editing technology to edit DNA in human embryos.
+- [ASSISTANT_SAID] CRISPR is a tool that allows researchers to precisely edit DNA sequences, with potential to cure genetic diseases and enhance certain desirable traits.
+- [ASSISTANT_SAID] The researchers targeted a specific genetic mutation responsible for a heart condition called hypertrophic cardiomyopathy.
+- [ASSISTANT_SAID] They injected the CRISPR-Cas9 complex into healthy human eggs along with sperm carrying the genetic mutation, successfully correcting the mutation in some embryos.
+- [ASSISTANT_SAID] This was the first time CRISPR had been used to edit genes in human embryos, marking a significant breakthrough in gene editing.
+- [ASSISTANT_SAID] The research raised ethical concerns, and the researchers emphasized it was intended for laboratory studies, not clinical applications.
+- [ASSISTANT_SAID] The study was published in the journal Nature in August 2017, generating significant media attention and controversy.
+- [USER]

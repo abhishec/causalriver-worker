@@ -1,0 +1,27 @@
+**Observation Log:**
+
+- [FACT] User is planning a trip to Hawaii.
+- [FACT] User has had some experience surfing before.
+- [FACT] User has been to Hawaii before with their family.
+- [FACT] User spent 7 days exploring the islands of Oahu and Maui.
+- [FACT] User tried surfing for a few hours while their parents visited the USS Arizona Memorial.
+- [PREFERENCE] User is interested in taking a refresher course in surfing.
+- [EVENT] User is planning to explore local eats in Waikiki.
+- [PREFERENCE] User has had amazing food in Hawaii before, especially on the island of Maui.
+- [ASSISTANT_SAID] Recommended surf schools in Waikiki: Goofy Foot Surf School, Faith Surf School, Hans Hedemann Surf School, Surf N Sea, Aloha Beach Services.
+- [ASSISTANT_SAID] Goofy Foot Surf School offers private and group lessons for all skill levels.
+- [ASSISTANT_SAID] Faith Surf School has been operating for over 15 years and offers private, semi-private, and group lessons.
+- [ASSISTANT_SAID] Hans Hedemann Surf School has been teaching people to surf for over 20 years and offers private and group lessons.
+- [ASSISTANT_SAID] Surf N Sea offers surf lessons, paddleboard rentals, and snorkeling gear.
+- [ASSISTANT_SAID] Aloha Beach Services offers surf lessons and beach amenities.
+- [ASSISTANT_SAID] Recommended local dishes: Poke, Loco Moco, Kalua Pig, Spam Musubi, Shave Ice.
+- [ASSISTANT_SAID] Recommended restaurants in Waikiki: Helena's Hawaiian Food, Ono Seafood, Side Street Inn, Tiki's Grill & Café, Alan Wong's Honolulu, Giovanni's Shrimp Truck.
+- [ASSISTANT_SAID] Zippy's is a popular local chain serving Hawaiian comfort food.
+- [ASSISTANT_SAID] Leonard's Bakery is famous for malasadas.
+- [ASSISTANT_SAID] Waikiki Farmers Market operates every Tuesday, Thursday, and Saturday.
+- [EVENT] User is interested in trying local transportation options in Waikiki.
+- [FACT] User remembers using rental cars with their family when visiting Oahu and Maui.
+- [PREFERENCE] User would like to try something different from rental cars this time.
+- [ASSISTANT_SAID] Recommended public transportation options: TheBus, Waikiki Trolley, Biki Bike Share, walking and biking, taxi and ride-hailing services.
+- [ASSISTANT_SAID] TheBus fare is $3 per ride or $6 for a 1-day pass.
+- [ASSISTANT_SAID] Waikiki Trolley offers a hop-on, hop-off service with a 1-day pass for around $40 or a 4-day

@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/26 (Fri) 01:43  
+[USER] User opened a short position using 10x leverage and $500 of size (totaling $5000 including leverage) when the price of an asset was $1000.  
+[USER] The price of the asset went down to $950, resulting in an unrealized profit of $250.  
+[USER] The price of the asset went down further to $900.  
+[USER] User requested a comparison of unrealized profit between two scenarios: using 10x leverage from the beginning to the end (1st option) and changing leverage from 10x to 15x when the price was $950 (2nd option).  
+[ASSISTANT_SAID] In the 1st option (10x leverage from beginning to end):  
+[ASSISTANT_SAID] Initial investment: $500  
+[ASSISTANT_SAID] Leveraged investment: $500 x 10 = $5000  
+[ASSISTANT_SAID] Initial price: $1000  
+[ASSISTANT_SAID] Current price: $900  
+[ASSISTANT_SAID] Unrealized profit: ($1000 - $900) x ($5000 / $1000) = $500  
+[ASSISTANT_SAID] In the 2nd option (10x leverage to start, changed to 15x when price was $950):  
+[ASSISTANT_SAID] Initial investment: $500  
+[ASSISTANT_SAID] Leveraged investment: $500 x 10 = $5000 (for the first part of the position)  
+[ASSISTANT_SAID] Initial price: $1000  
+[ASSISTANT_SAID] Price after change to 15x leverage: $950  
+[ASSISTANT_SAID] Unrealized profit at change: ($1000 - $950) x ($5000 / $1000) = $250  
+[ASSISTANT_SAID] Leveraged investment after change: $250 x 15 = $3750 (for the second part of the position)  
+[ASSISTANT_SAID] Current price: $900  
+[ASSISTANT_SAID] Unrealized profit from first part of the position: ($1000 - $950) x ($5000 / $1000) = $250  
+[ASSISTANT_SAID] Unrealized profit from second part of the position: ($950 - $900) x ($3750 / $950) = $318.75  
+[ASSISTANT_SAID] Total unrealized profit: $250 + $318.75 = $568.75  
+[ASSISTANT_SAID] The assistant explained that the leveraged investment after change is calculated as the

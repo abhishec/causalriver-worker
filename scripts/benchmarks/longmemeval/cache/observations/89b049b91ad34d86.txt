@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [FACT] The user is planning a trip to Disneyland with their family.
+- [EVENT] The user had a great experience with fireworks at Disney California Adventure Park during the "Summer Nights" event last month.
+- [FACT] The user stayed at the Grand Californian Hotel, which is located within the Disneyland Resort.
+- [ASSISTANT_SAID] The assistant clarified that there is no hotel located within Disney California Adventure Park and mentioned the Grand Californian Hotel is near Disneyland Park.
+- [ASSISTANT_SAID] The assistant provided five popular viewing areas for fireworks at Disneyland: Main Street USA, "it's a small world" Mall, Rivers of America, Mickey's Toontown, and Disneyland Railroad.
+- [ASSISTANT_SAID] The assistant advised the user to arrive early to secure a good spot for the fireworks and suggested considering restaurants or bars with outdoor seating for viewing.
+- [USER] The user acknowledged the assistant's clarification about the hotel and thanked them for the tips on fireworks viewing spots.
+- [USER] The user inquired about special fireworks displays or events during the summer season.
+- [ASSISTANT_SAID] The assistant mentioned that Disneyland usually offers a summer-themed fireworks show, often with a patriotic twist around the 4th of July, and referenced the "Disneyland Forever" fireworks show.
+- [ASSISTANT_SAID] The assistant suggested checking the official Disneyland website or app for the most up-to-date information on summer events and fireworks schedules.
+- [USER] The user asked about special summer events or fireworks displays specifically at Disney California Adventure Park.
+- [ASSISTANT_SAID] The assistant stated there is no "Summer Nights" event at Disney California Adventure Park that they are aware of and suggested the user might be misremembering.
+- [ASSISTANT_SAID] The assistant mentioned that Disney California Adventure Park offers special events throughout the year, including summer-themed parties and character meet-and-greets.
+- [ASSISTANT_SAID] The assistant recommended checking the official Disneyland website or social media for updates on summer events and celebrations.
+- [USER] The user provided details about the "Summer Nights" event, stating it took place on June 15th and 16th and included a special fireworks display at 10 PM for ticket holders.
+- [ASSISTANT_SAID] The assistant expressed that they could not find evidence of the "Summer Nights" event and suggested it might have been a private event.
+- [USER] The user reiterated their interest in finding out about any similar events this summer.
+- [ASSISTANT_SAID] The assistant suggested checking the official Disneyland website, social media, and the Disneyland app for upcoming events and celebrations.
+- [ASSISTANT_SAID] The assistant listed usual summer events and celebrations at Disney California Adventure Park, including Summer of Heroes, 4th of July Celebration,

@@ -1,0 +1,28 @@
+**Observation Log:**
+
+- [FACT] Assistant provided considerations for designing a comprehensive leave management system.
+- [FACT] Assistant mentioned the importance of leave balance calculation for new joiners.
+- [FACT] Assistant suggested starting new joiners with either a full or partial leave balance based on their joined or confirmation date.
+- [FACT] Assistant recommended including provisions for leave rollover in the leave policy.
+- [FACT] Assistant suggested allowing new joiners to roll over up to 10 days of unused leave to the next year.
+- [FACT] Assistant indicated the need for a leave audit table to track unused leave days.
+- [FACT] Assistant proposed including a feature for new joiners to view their leave request history.
+- [FACT] Assistant mentioned that the leave request history should include dates, duration, status, and reasons for rejections.
+- [FACT] Assistant suggested allowing new joiners to delegate leave request approvals to a proxy.
+- [FACT] Assistant recommended integrating the leave management system with Single Sign-On (SSO) for easier access.
+- [FACT] Assistant mentioned using a library like passport-saml for SAML-based SSO integration.
+- [ASSISTANT_SAID] Assistant provided a structured approach to allocate leave days based on joined or confirmation date.
+- [ASSISTANT_SAID] Assistant suggested defining a leave policy that specifies the number of leave days based on the joined or confirmation date.
+- [ASSISTANT_SAID] Assistant recommended storing the joined or confirmation date in the employee's record in the database.
+- [ASSISTANT_SAID] Assistant advised retrieving the joined or confirmation date to calculate the number of leave days entitled to the employee.
+- [ASSISTANT_SAID] Assistant suggested using a leave audit table to track leave days taken and remaining.
+- [ASSISTANT_SAID] Assistant emphasized that the specific details of the leave management system will depend on the requirements and constraints of the use case.
+- [ASSISTANT_CREATED] Assistant created a user persona bio for a leave management system user named Rachel.
+- [FACT] Rachel is a 32-year-old human resources manager living in Los Angeles.
+- [FACT] Rachel has a master's degree in Human Resources Management.
+- [PREFERENCE] Rachel is passionate about travel and yoga.
+- [PREFERENCE] Rachel enjoys cooking and trying new recipes.
+- [FACT] Rachel is responsible for managing leave and time off requests for employees at her company.
+- [ASSISTANT_CREATED] Assistant provided a user story for Rachel, indicating her need to view and approve leave requests quickly and easily.
+- [ASSISTANT_SAID] Assistant noted that Rachel wants to track leave balances and see the status of leave requests in real-time.
+- [ASSISTANT_SAID] Assistant mentioned that Rachel wants to delegate leave request approvals to other HR staff if necessary.

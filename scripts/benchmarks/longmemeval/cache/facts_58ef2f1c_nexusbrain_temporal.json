@@ -1,0 +1,44 @@
+{
+  "answer_59547700": [
+    {
+      "fact": "User is passionate about animal welfare and children's health",
+      "type": "preference",
+      "entities": [
+        "animal welfare",
+        "children's health"
+      ]
+    },
+    {
+      "fact": "User is open to attending different types of charity events",
+      "type": "preference",
+      "entities": [
+        "charity events"
+      ]
+    },
+    {
+      "fact": "User enjoyed the 'Love is in the Air' fundraising dinner they volunteered at in February",
+      "type": "event",
+      "entities": [
+        "Love is in the Air",
+        "fundraising dinner",
+        "February"
+      ]
+    },
+    {
+      "fact": "User is trying to organize their calendar for the rest of the year",
+      "type": "personal",
+      "entities": [
+        "calendar",
+        "2023"
+      ]
+    },
+    {
+      "fact": "User is looking for upcoming charity events in Los Angeles",
+      "type": "preference",
+      "entities": [
+        "charity events",
+        "Los Angeles"
+      ]
+    }
+  ]
+}

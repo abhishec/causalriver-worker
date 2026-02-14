@@ -1,0 +1,15 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/03/15 (Wed) 00:55  
+[USER] User inquired about the best free tool for converting text to vocals for a song.  
+[ASSISTANT_SAID] Recommended tools for text-to-speech (TTS) conversion:  
+[ASSISTANT_SAID] 1. NaturalReader: Free TTS software available for Windows and Mac, allows adjustment of voice speed, pitch, and volume.  
+[ASSISTANT_SAID] 2. Balabolka: Free TTS software for Windows, allows conversion of text to speech with different voices and languages, can save audio files.  
+[ASSISTANT_SAID] 3. Google Text-to-Speech: Free service by Google, converts text into natural-sounding speech, usable in various Google apps, cannot save audio files.  
+[ASSISTANT_SAID] 4. Amazon Polly: Cloud-based TTS service by Amazon, offers a free tier with limited monthly usage, lifelike speech generation.  
+[ASSISTANT_SAID] Suggested that the best tool depends on user’s specific needs and preferences, and encouraged trying out a few options.  
+[USER] Asked if any of the mentioned tools have options for the voice to sing the text.  
+[ASSISTANT_SAID] Clarified that the mentioned tools focus on spoken words rather than singing.  
+[ASSISTANT_SAID] Recommended "Vocaloid," a voice synthesis software that generates singing voices based on input text, noted it is not free.  
+[ASSISTANT_SAID] Suggested using a digital audio workstation (DAW) like FL Studio or Ableton Live, which can generate singing voices based on input notes and MIDI data, and often includes pre-made vocal samples.  
+[ASSISTANT_SAID] Concluded that for converting text to singing voices, user may need to explore options beyond the initial TTS tools mentioned.

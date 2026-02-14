@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [FACT] The user has been working on a short story since attending a writing workshop in November at a literary festival.
+- [FACT] The user paid $200 to attend the writing workshop.
+- [FACT] The instructor of the writing workshop was a published author.
+- [PREFERENCE] The user is looking for resources on character development and editing.
+- [ASSISTANT_SAID] The assistant provided resources on character development, including articles on character arcs, character interviews, character profiles, and character-driven plotting.
+- [ASSISTANT_SAID] The assistant recommended a self-editing checklist, using beta readers, revising multiple times, and resources like Grammar Girl, ProWritingAid, and AutoCrit for editing.
+- [ASSISTANT_SAID] The assistant suggested writing books such as "The Writer's Journey: Mythic Structure for Writers" by Christopher Vogler, "Character & Viewpoint" by Orson Scott Card, and "Self-Editing for Fiction Writers" by Renni Browne and Dave King.
+- [ASSISTANT_SAID] The assistant recommended online writing communities like Writing.com, NaNoWriMo, and Reddit's r/writingcommunity.
+- [ASSISTANT_SAID] The assistant mentioned writing podcasts like "The Creative Penn," "I Should Be Writing," and "The Portfolio Life."
+- [PREFERENCE] The user is interested in learning more about writing workshops and events in their area.
+- [ASSISTANT_SAID] The assistant provided a list of websites and platforms that list writing workshops, conferences, and festivals, including Writing Conferences & Writing Workshops, Shaw Guides, Poets & Writers, Writer's Digest, Meetup, Facebook Groups, and local literary organizations.
+- [ASSISTANT_SAID] The assistant suggested using Google search with keywords like "writing workshops near me" or "writing conferences in [your state/city]."
+- [PREFERENCE] The user is interested in finding writing workshops and events that fit their budget and duration preferences.
+- [ASSISTANT_SAID] The assistant mentioned that Shaw Guides, Writing Conferences & Writing Workshops, and Poets & Writers allow filtering by cost and provided a strategy for searching.
+- [ASSISTANT_SAID] The assistant suggested using Eventbrite and Lanyrd for finding writing workshops and conferences.
+- [FACT] The user recently attended a two-day digital marketing workshop at the city convention center.
+- [PREFERENCE] The user found the digital marketing workshop informative and learned about social media advertising and SEO.
+- [ASSISTANT_SAID] The assistant provided a list of resources and websites for digital marketing workshops and online courses, including HubSpot Academy, Digital Marketing Institute, Udemy, Coursera, Skillshare, General Assembly, MarketingProfs University, Moz, Social Media Examiner, and Google Analytics Academy.
+- [PREFERENCE] The user is particularly interested in SEO

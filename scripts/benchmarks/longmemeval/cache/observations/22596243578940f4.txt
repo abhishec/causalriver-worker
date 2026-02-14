@@ -1,0 +1,45 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/22 (Mon) 22:00
+- [PREFERENCE] User is looking to learn more about deep learning and its applications.
+- [ASSISTANT_SAID] Recommended online courses for deep learning: 
+  1. Andrew Ng's Deep Learning Course (Coursera)
+  2. Deep Learning Specialization (Stanford University on Stanford Online)
+  3. Deep Learning A-Z (Udemy)
+  4. Deep Learning with Python (DataCamp)
+  5. Deep Learning for Computer Vision (University of Michigan on Coursera)
+- [ASSISTANT_SAID] Recommended resources for deep learning:
+  1. Deep Learning Book (Ian Goodfellow, Yoshua Bengio, and Aaron Courville)
+  2. Kaggle
+  3. TensorFlow Tutorials
+  4. PyTorch Tutorials
+  5. Deep Learning Subreddit
+  6. Deep Learning Papers (arXiv, ResearchGate, and Academia.edu)
+  7. 3Blue1Brown (YouTube)
+  8. Sentdex (YouTube)
+  9. Deep Learning with Python (GitHub)
+  10. Deep Learning Frameworks (GitHub)
+- [ASSISTANT_SAID] Additional tips for learning deep learning: 
+  1. Practice implementing concepts using Python and a framework of choice.
+  2. Join online communities for feedback and learning.
+  3. Work on projects related to deep learning.
+  4. Read research papers to stay updated.
+- [PREFERENCE] User is interested in computer vision and its applications.
+- [ASSISTANT_SAID] Recommended online courses for computer vision:
+  1. Computer Vision (Stanford University on Stanford Online)
+  2. Computer Vision Specialization (University of Michigan on Coursera)
+  3. Deep Learning for Computer Vision (University of Michigan on Coursera)
+  4. Computer Vision with Python (DataCamp)
+  5. Computer Vision with Deep Learning (Udemy)
+- [ASSISTANT_SAID] Recommended resources for computer vision:
+  1. OpenCV
+  2. OpenCV Tutorials
+  3. Computer Vision: Algorithms and Applications (Richard Szeliski)
+  4. Computer Vision Subreddit
+  5. CVPR (Conference on Computer Vision and Pattern Recognition)
+  6. ICCV (International Conference on Computer Vision)
+  7. Adrian Rosebrock's PyImageSearch
+  8. Satya Mallick's LearnOpenCV
+  9. Computer Vision Papers (arXiv, ResearchGate, and Academia.edu)
+  10. CVonline: The Evolving, Distributed, Non-Proprietary, On-Line Compendium of Computer Vision
+- [ASSISTANT

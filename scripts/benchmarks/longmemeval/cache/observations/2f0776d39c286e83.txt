@@ -1,0 +1,18 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2024/01/05 (Fri) 03:13
+- [ASSISTANT_SAID] Using the refined hypothetical model and the assumptions from historical data and case studies, we can estimate the economic impact of raising the minimum wage to $18/hour in Idaho.
+- [ASSISTANT_SAID] We previously estimated a wage increase of $955.5 million for minimum-wage earners.
+- [ASSISTANT_SAID] With the refined employment elasticity of -0.15 and a 147% increase in the minimum wage (from $7.25 to $18), we estimated a 22.05% decrease in employment for minimum-wage earners, resulting in a job loss of 11,025 workers.
+- [ASSISTANT_SAID] Assuming these workers were previously working an average of 30 hours per week and 52 weeks per year: Annual hours lost: 11,025 workers * 30 hours/week * 52 weeks = 17,199,000 hours.
+- [ASSISTANT_SAID] Total wage loss for these workers: 17,199,000 hours * $7.25 (old minimum wage) = $124,693,250.
+- [ASSISTANT_SAID] Assuming a 50% pass-through rate of labor costs to prices, businesses would pass on half of their increased labor costs to consumers through higher prices, leading to inflationary pressures.
+- [ASSISTANT_SAID] With an MPC of 0.75, workers would spend 75% of their additional income due to the higher minimum wage.
+- [ASSISTANT_SAID] The net gain in purchasing power for workers is the wage increase ($955.5 million) minus the wage loss due to job loss ($124,693,250) = $830,806,750.
+- [ASSISTANT_SAID] Consumer spending would increase by 75% of this amount: Increased consumer spending: $830,806,750 * 0.75 = $623,105,063.
+- [ASSISTANT_SAID] Total annual wage increase: $955,500,000.
+- [ASSISTANT_SAID] Total annual wage loss due to job loss: -$124,693,250.
+- [ASSISTANT_SAID] Increased consumer spending: +$623,105,063.
+- [ASSISTANT_SAID] Net Economic Impact: $955,500,000 - $124,693,250 + $623,105,063 = $1,453,911,813.
+- [ASSISTANT_SAID] The net economic impact of raising the minimum wage to $18/hour in Idaho is estimated to be an increase of approximately $1.45 billion in economic activity.
+- [USER] Can you also estimate

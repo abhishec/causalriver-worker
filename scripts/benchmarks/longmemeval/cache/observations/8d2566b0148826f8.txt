@@ -1,0 +1,30 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/28 (Sun) 08:16  
+[FACT] User wakes up at 7:30 AM every day.  
+[CHANGE] User is trying to get into a meditation habit.  
+[EVENT] User has been fitting in a quick 10-minute meditation session before getting ready for work.  
+[ASSISTANT_SAID] Suggested quick and easy breakfast ideas that can be prepared in 30 minutes or less.  
+[ASSISTANT_SAID] Suggested breakfast options under 10 minutes:  
+[ASSISTANT_CREATED] 1. Overnight oats: Prepare a jar or container the night before with rolled oats, milk, and toppings.  
+[ASSISTANT_CREATED] 2. Yogurt parfait: Layer Greek yogurt, granola, and fruit in a bowl.  
+[ASSISTANT_CREATED] 3. Avocado toast: Toast whole grain bread, mash avocado, sprinkle with salt and pepper, and optionally add a fried egg or cheese.  
+[ASSISTANT_SAID] Suggested breakfast options for 10-20 minutes:  
+[ASSISTANT_CREATED] 1. Scrambled eggs: Whip up 2-3 eggs with milk, cook in a microwave-safe bowl for 30-45 seconds.  
+[ASSISTANT_CREATED] 2. Peanut butter banana toast: Toast whole grain bread, spread with peanut butter, and top with sliced banana.  
+[ASSISTANT_CREATED] 3. Smoothie: Blend fruits, yogurt, and milk.  
+[ASSISTANT_SAID] Suggested breakfast options for 20-30 minutes:  
+[ASSISTANT_CREATED] 1. Breakfast burrito: Scramble eggs, add cheese, salsa, and fillings, wrap in a tortilla, and microwave.  
+[ASSISTANT_CREATED] 2. Toast with almond butter and banana slices.  
+[ASSISTANT_CREATED] 3. Muffin tin frittatas: Whisk eggs, milk, and veggies, pour into muffin tins, and bake at 375°F (190°C) for 15-20 minutes.  
+[ASSISTANT_SAID] Suggested tips for making the most of a 10-minute meditation session:  
+[ASSISTANT_CREATED] 1. Create a conducive environment.  
+[ASSISTANT_CREATED] 2. Set a timer.  
+[ASSISTANT_CREATED] 3. Focus on your breath.  
+[ASSISTANT_CREATED] 4. Be gentle with yourself.  
+[ASSISTANT_CREATED] 5. Start small.  
+[ASSISTANT_CREATED] 6. Posture matters.  
+[ASSISTANT_CREATED] 7. Make it a ritual.  
+[ASSISTANT_CREATED] 8. Be consistent.  
+[ASSISTANT_CREATED] 9. Use guided meditations.  
+[ASSIST

@@ -1,0 +1,47 @@
+{
+  "answer_530960c1": [
+    {
+      "fact": "User is trying to find a permanent place to live.",
+      "type": "event",
+      "entities": []
+    },
+    {
+      "fact": "User has a maximum monthly rent budget of $800.",
+      "type": "personal",
+      "entities": [
+        "$800"
+      ]
+    },
+    {
+      "fact": "User has some savings for a security deposit and first month's rent.",
+      "type": "personal",
+      "entities": []
+    },
+    {
+      "fact": "User is not eligible for any government assistance programs.",
+      "type": "personal",
+      "entities": []
+    },
+    {
+      "fact": "User needs to be close to public transportation and their volunteer job.",
+      "type": "preference",
+      "entities": [
+        "public transportation",
+        "volunteer job"
+      ]
+    },
+    {
+      "fact": "User is open to any type of accommodation as long as it's safe and clean.",
+      "type": "preference",
+      "entities": [
+        "safe",
+        "clean"
+      ]
+    },
+    {
+      "fact": "User finds looking at apartments online overwhelming.",
+      "type": "opinion",
+      "entities": []
+    }
+  ]
+}

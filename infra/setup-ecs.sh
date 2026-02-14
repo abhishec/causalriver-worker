@@ -546,6 +546,135 @@ TASKDEF
 aws ecs register-task-definition --cli-input-json file:///tmp/task-monthly.json --region "${REGION}" > /dev/null
 echo "    Registered: nexusbrain-monthly (2 vCPU, 8GB)"
 
+# --- Federation Agent Task Definition ---
+# Bidirectional Core ↔ Org brain knowledge federation
+# 1 vCPU, 4GB RAM — cross-brain queries + knowledge syncing
+# Every 6h schedule — also supports manual trigger via: ./infra/run-task.sh federation
+cat > /tmp/task-federation.json << TASKDEF
+{
+  "family": "nexusbrain-federation",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "1024",
+  "memory": "4096",
+  "executionRoleArn": "${EXEC_ROLE_ARN}",
+  "taskRoleArn": "${EXEC_ROLE_ARN}",
+  "containerDefinitions": [
+    {
+      "name": "brain-federation",
+      "image": "${ECR_IMAGE}",
+      "essential": true,
+      "environment": [
+        { "name": "BRAIN_PROCESS", "value": "federation" }
+      ],
+      "secrets": [
+        { "name": "SUPABASE_URL", "valueFrom": "arn:aws:ssm:${REGION}:${ACCOUNT_ID}:parameter/nexusbrain/SUPABASE_URL" },
+        { "name": "SUPABASE_SERVICE_ROLE_KEY", "valueFrom": "arn:aws:ssm:${REGION}:${ACCOUNT_ID}:parameter/nexusbrain/SUPABASE_SERVICE_ROLE_KEY" }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "${LOG_GROUP}",
+          "awslogs-region": "${REGION}",
+          "awslogs-stream-prefix": "federation"
+        }
+      },
+      "stopTimeout": 120
+    }
+  ]
+}
+TASKDEF
+
+aws ecs register-task-definition --cli-input-json file:///tmp/task-federation.json --region "${REGION}" > /dev/null
+echo "    Registered: nexusbrain-federation (1 vCPU, 4GB)"
+
+# --- Security Hardening Agent Task Definition ---
+# Continuous security vulnerability detection and automated patching
+# 2 vCPU, 8GB RAM — scans dependencies, configs, and code patterns
+# Daily schedule (4 AM UTC) — also supports manual trigger via: ./infra/run-task.sh security
+cat > /tmp/task-security.json << TASKDEF
+{
+  "family": "nexusbrain-security",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "2048",
+  "memory": "8192",
+  "executionRoleArn": "${EXEC_ROLE_ARN}",
+  "taskRoleArn": "${EXEC_ROLE_ARN}",
+  "containerDefinitions": [
+    {
+      "name": "brain-security",
+      "image": "${ECR_IMAGE}",
+      "essential": true,
+      "environment": [
+        { "name": "BRAIN_PROCESS", "value": "security" }
+      ],
+      "secrets": [
+        { "name": "SUPABASE_URL", "valueFrom": "arn:aws:ssm:${REGION}:${ACCOUNT_ID}:parameter/nexusbrain/SUPABASE_URL" },
+        { "name": "SUPABASE_SERVICE_ROLE_KEY", "valueFrom": "arn:aws:ssm:${REGION}:${ACCOUNT_ID}:parameter/nexusbrain/SUPABASE_SERVICE_ROLE_KEY" },
+        { "name": "GITHUB_TOKEN", "valueFrom": "arn:aws:ssm:${REGION}:${ACCOUNT_ID}:parameter/nexusbrain/GITHUB_TOKEN" }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "${LOG_GROUP}",
+          "awslogs-region": "${REGION}",
+          "awslogs-stream-prefix": "security"
+        }
+      },
+      "stopTimeout": 300
+    }
+  ]
+}
+TASKDEF
+
+aws ecs register-task-definition --cli-input-json file:///tmp/task-security.json --region "${REGION}" > /dev/null
+echo "    Registered: nexusbrain-security (2 vCPU, 8GB)"
+
+# --- Benchmark Optimizer Task Definition ---
+# Python-based benchmark optimization (tunes hyperparameters for causal discovery)
+# 1 vCPU, 4GB RAM — runs Python optimization loops
+# Manual trigger only — run via: ./infra/run-task.sh benchmark-optimizer
+cat > /tmp/task-benchmark-optimizer.json << TASKDEF
+{
+  "family": "nexusbrain-benchmark-optimizer",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "1024",
+  "memory": "4096",
+  "executionRoleArn": "${EXEC_ROLE_ARN}",
+  "taskRoleArn": "${EXEC_ROLE_ARN}",
+  "containerDefinitions": [
+    {
+      "name": "brain-benchmark-optimizer",
+      "image": "${ECR_IMAGE}",
+      "essential": true,
+      "environment": [
+        { "name": "BRAIN_PROCESS", "value": "benchmark-optimizer" },
+        { "name": "OPTIMIZER_MODE", "value": "quick" },
+        { "name": "OPTIMIZER_SAMPLE", "value": "50" }
+      ],
+      "secrets": [
+        { "name": "SUPABASE_URL", "valueFrom": "arn:aws:ssm:${REGION}:${ACCOUNT_ID}:parameter/nexusbrain/SUPABASE_URL" },
+        { "name": "SUPABASE_SERVICE_ROLE_KEY", "valueFrom": "arn:aws:ssm:${REGION}:${ACCOUNT_ID}:parameter/nexusbrain/SUPABASE_SERVICE_ROLE_KEY" }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "${LOG_GROUP}",
+          "awslogs-region": "${REGION}",
+          "awslogs-stream-prefix": "benchmark-optimizer"
+        }
+      },
+      "stopTimeout": 300
+    }
+  ]
+}
+TASKDEF
+
+aws ecs register-task-definition --cli-input-json file:///tmp/task-benchmark-optimizer.json --region "${REGION}" > /dev/null
+echo "    Registered: nexusbrain-benchmark-optimizer (1 vCPU, 4GB)"
+
 # ─── Step 8: Create EventBridge Scheduled Rules ──────────────────
 echo ""
 echo ">>> Step 8: Creating EventBridge Scheduled Rules..."
@@ -852,6 +981,80 @@ aws events put-targets \
   --region "${REGION}" > /dev/null
 echo "    Monthly Analysis: 1st of each month at 3:00 AM UTC"
 
+# --- Federation Agent: Every 6 hours (offset from trainer) ---
+aws events put-rule \
+  --name "nexusbrain-federation-schedule" \
+  --schedule-expression "cron(0 1,7,13,19 * * ? *)" \
+  --state ENABLED \
+  --description "Run NexusBrain Federation Agent every 6 hours (Core ↔ Org knowledge sync)" \
+  --region "${REGION}" > /dev/null
+
+cat > /tmp/target-federation.json << TARGET
+[
+  {
+    "Id": "nexusbrain-federation-target",
+    "Arn": "arn:aws:ecs:${REGION}:${ACCOUNT_ID}:cluster/${CLUSTER_NAME}",
+    "RoleArn": "${EVENTS_ROLE_ARN}",
+    "EcsParameters": {
+      "TaskDefinitionArn": "arn:aws:ecs:${REGION}:${ACCOUNT_ID}:task-definition/nexusbrain-federation",
+      "TaskCount": 1,
+      "LaunchType": "FARGATE",
+      "NetworkConfiguration": {
+        "awsvpcConfiguration": {
+          "Subnets": ["${SUBNET1}", "${SUBNET2}"],
+          "SecurityGroups": ["${SG_ID}"],
+          "AssignPublicIp": "ENABLED"
+        }
+      },
+      "PlatformVersion": "LATEST"
+    }
+  }
+]
+TARGET
+
+aws events put-targets \
+  --rule "nexusbrain-federation-schedule" \
+  --targets file:///tmp/target-federation.json \
+  --region "${REGION}" > /dev/null
+echo "    Federation: Every 6 hours (01:00, 07:00, 13:00, 19:00 UTC)"
+
+# --- Security Hardening Agent: Daily at 4 AM UTC ---
+aws events put-rule \
+  --name "nexusbrain-security-schedule" \
+  --schedule-expression "cron(0 4 * * ? *)" \
+  --state ENABLED \
+  --description "Run NexusBrain Security Hardening Agent daily at 4 AM UTC" \
+  --region "${REGION}" > /dev/null
+
+cat > /tmp/target-security.json << TARGET
+[
+  {
+    "Id": "nexusbrain-security-target",
+    "Arn": "arn:aws:ecs:${REGION}:${ACCOUNT_ID}:cluster/${CLUSTER_NAME}",
+    "RoleArn": "${EVENTS_ROLE_ARN}",
+    "EcsParameters": {
+      "TaskDefinitionArn": "arn:aws:ecs:${REGION}:${ACCOUNT_ID}:task-definition/nexusbrain-security",
+      "TaskCount": 1,
+      "LaunchType": "FARGATE",
+      "NetworkConfiguration": {
+        "awsvpcConfiguration": {
+          "Subnets": ["${SUBNET1}", "${SUBNET2}"],
+          "SecurityGroups": ["${SG_ID}"],
+          "AssignPublicIp": "ENABLED"
+        }
+      },
+      "PlatformVersion": "LATEST"
+    }
+  }
+]
+TARGET
+
+aws events put-targets \
+  --rule "nexusbrain-security-schedule" \
+  --targets file:///tmp/target-security.json \
+  --region "${REGION}" > /dev/null
+echo "    Security: Daily at 4:00 AM UTC"
+
 # ─── Done ─────────────────────────────────────────────────────────
 echo ""
 echo "============================================"
@@ -861,29 +1064,25 @@ echo ""
 echo "Next steps:"
 echo "  1. Store secrets:      ./infra/store-secrets.sh"
 echo "  2. Build & push:       ./infra/push-image.sh"
-echo "  3. Test trainer:       ./infra/run-task.sh trainer"
-echo "  4. Test consolidation: ./infra/run-task.sh consolidation"
-echo "  5. Test DMN scan:      ./infra/run-task.sh dmn"
-echo "  6. Run benchmark:      ./infra/run-task.sh benchmark"
-echo "  7. Run git trainer:    ./infra/run-task.sh git-trainer"
-echo "  8. Run cost agent:     ./infra/run-task.sh cost-agent"
-echo "  9. Run weekly scan:    ./infra/run-task.sh weekly"
-echo " 10. Run monthly deep:   ./infra/run-task.sh monthly"
+echo "  3. Run any agent:      ./infra/run-task.sh <process>"
 echo ""
-echo "Agent Schedule (9 agents, 8 ECS tasks):"
-echo "  ┌─────────────────────────┬────────────────────────────────────┬──────────┐"
-echo "  │ Agent                   │ Schedule                           │ CPU/Mem  │"
-echo "  ├─────────────────────────┼────────────────────────────────────┼──────────┤"
-echo "  │ Autonomous Trainer      │ Every 6h (0,6,12,18 UTC)           │ 1/4 GB   │"
-echo "  │ DMN Scan                │ Every 4h (0,4,8,12,16,20 UTC)      │ 0.5/2 GB │"
-echo "  │ Brain Consolidation     │ Daily 2 AM UTC                     │ 1/4 GB   │"
-echo "  │ Cost Agent              │ Daily 3 AM UTC                     │ 0.5/1 GB │"
-echo "  │ Git Code Trainer        │ Sunday 2 AM UTC                    │ 2/8 GB   │"
-echo "  │ Weekly Brain Scan       │ Sunday 4 AM UTC                    │ 1/4 GB   │"
-echo "  │ Benchmark               │ Sunday 5 AM UTC                    │ 2/8 GB   │"
-echo "  │ Monthly Deep Analysis   │ 1st of month 3 AM UTC              │ 2/8 GB   │"
-echo "  │ Proactive Intelligence  │ Every 4h offset (in-process w/DMN) │ —        │"
-echo "  └─────────────────────────┴────────────────────────────────────┴──────────┘"
+echo "Full Agent Schedule (11 agents + 1 optimizer, 12 ECS task defs):"
+echo "  ┌──────────────────────────┬────────────────────────────────────────┬──────────┐"
+echo "  │ Agent                    │ Schedule                               │ CPU/Mem  │"
+echo "  ├──────────────────────────┼────────────────────────────────────────┼──────────┤"
+echo "  │ Autonomous Trainer       │ Every 6h (0,6,12,18 UTC)               │ 1/4 GB   │"
+echo "  │ Federation Agent         │ Every 6h offset (1,7,13,19 UTC)        │ 1/4 GB   │"
+echo "  │ DMN Scan                 │ Every 4h (0,4,8,12,16,20 UTC)          │ 0.5/2 GB │"
+echo "  │ Proactive Intelligence   │ Every 4h offset (1,5,9,13,17,21 UTC)   │ 0.5/1 GB │"
+echo "  │ Brain Consolidation      │ Daily 2 AM UTC                         │ 2/8 GB   │"
+echo "  │ Cost Agent               │ Daily 3 AM UTC                         │ 0.5/1 GB │"
+echo "  │ Security Hardening       │ Daily 4 AM UTC                         │ 2/8 GB   │"
+echo "  │ Git Code Trainer         │ Sunday 2 AM UTC                        │ 2/8 GB   │"
+echo "  │ Weekly Brain Scan        │ Sunday 4 AM UTC                        │ 1/4 GB   │"
+echo "  │ Benchmark                │ Sunday 5 AM UTC                        │ 2/8 GB   │"
+echo "  │ Monthly Deep Analysis    │ 1st of month 3 AM UTC                  │ 2/8 GB   │"
+echo "  │ Benchmark Optimizer      │ Manual only (Python)                   │ 1/4 GB   │"
+echo "  └──────────────────────────┴────────────────────────────────────────┴──────────┘"
 echo ""
 echo "View logs:"
 echo "  aws logs tail ${LOG_GROUP} --follow --region ${REGION}"

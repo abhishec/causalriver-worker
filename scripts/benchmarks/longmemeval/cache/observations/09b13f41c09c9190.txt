@@ -1,0 +1,23 @@
+**Observation Log:**
+
+- [FACT] The user is planning their own wedding.
+- [EVENT] The user recently attended a friend's wedding last weekend.
+- [RELATIONSHIP] The user's friend, Jen, recently got married.
+- [RELATIONSHIP] The user's friend's husband is named Tom.
+- [PREFERENCE] The user appreciates bohemian-inspired wedding dresses.
+- [PREFERENCE] The user prefers a cozy and relaxed wedding atmosphere.
+- [PREFERENCE] The user is considering a small outdoor ceremony, possibly at a beach or in a park.
+- [ASSISTANT_SAID] The assistant congratulated the user on their upcoming wedding and offered tips for choosing a venue.
+- [ASSISTANT_SAID] The assistant provided a list of tips for selecting a wedding venue, including guest list, budget, style, location, amenities, flexibility, personal connection, site visits, asking questions, and trusting instincts.
+- [ASSISTANT_SAID] The assistant suggested additional questions to consider when choosing a venue, such as noise restrictions, vendor policies, backup plans, and hidden fees.
+- [ASSISTANT_SAID] The assistant provided ideas for creating a cozy atmosphere for a beach or park ceremony, including using natural elements, soft lighting, intimate seating, and defining the space.
+- [ASSISTANT_SAID] The assistant recommended using acoustic music or a solo musician for a more intimate feel.
+- [ASSISTANT_SAID] The assistant suggested incorporating personal elements into the ceremony, such as personalized vows and literary readings.
+- [ASSISTANT_SAID] The assistant advised the user to check local regulations regarding bonfires or fire pits at the beach.
+- [PREFERENCE] The user is interested in using natural elements and soft lighting for the ceremony.
+- [EVENT] The user plans to ask Jen to read a poem during the ceremony.
+- [PREFERENCE] The user trusts Jen's opinion on literature and plans to ask her for recommendations for fitting poems or literature for the ceremony.
+- [ASSISTANT_SAID] The assistant affirmed that asking Jen to read a poem is a good idea and highlighted the benefits of involving her in the ceremony.
+- [PREFERENCE] The user is considering incorporating music into the ceremony, specifically acoustic guitar or a string quartet.
+- [ASSISTANT_SAID] The assistant provided tips for incorporating music into the ceremony, including choosing meaningful songs, considering the tone, keeping it simple, and coordinating with the musician.
+- [ASSISTANT_SAID] The assistant suggested popular music options for the ceremony, including artists like Jack Johnson, Jason Mraz, Ed Sheeran, and classical pieces by Mozart, Chopin, or Bach.

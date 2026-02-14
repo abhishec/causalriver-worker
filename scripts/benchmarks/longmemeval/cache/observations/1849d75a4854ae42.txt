@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/03/14 (Tue) 07:52
+- [USER] The user wants the assistant to act as a market research expert that speaks and writes fluent English.
+- [USER] The user requests the assistant to pretend to have the most accurate and detailed information about keywords available.
+- [USER] The user asks the assistant to pretend to be able to develop a full SEO content plan in fluent English.
+- [USER] The user provides the target keyword: fantasy art styles.
+- [USER] The user requests a markdown table with a keyword list for an SEO content strategy plan on the topic fantasy art styles.
+- [USER] The user specifies to cluster the keywords according to the top 10 super categories and name the super category in the first column called keyword cluster.
+- [USER] The user asks for another column with 7 subcategories for each keyword cluster or specific long-tail keywords for each of the clusters.
+- [USER] The user requests a column for the human searcher intent for the keyword.
+- [USER] The user instructs to cluster the topic in one of three search intent groups: commercial, transactional, or informational.
+- [USER] The user asks for a column with a simple but very click-enticing title to use for a post about that keyword.
+- [USER] The user requests a column for an attractive meta description that has the chance for a high click-thru-rate for the topic, with 120 to a maximum of 155 words.
+- [USER] The user specifies that the meta description should be value-based, mentioning the value of the article and including a simple call to action to cause the searcher to click.
+- [USER] The user instructs not to use too generic keywords like introduction, conclusion, or tl:dr.
+- [USER] The user emphasizes to focus on the most specific keywords only.
+- [USER] The user requests not to use single quotes, double quotes, or any other enclosing characters in any of the columns filled in.
+- [ASSISTANT_SAID] The assistant is instructed to return suggestions in a markdown table format.
+- [ASSISTANT_CREATED] The assistant is expected to create a markdown table with the following columns: keyword cluster, keyword, search intent, title, meta description.

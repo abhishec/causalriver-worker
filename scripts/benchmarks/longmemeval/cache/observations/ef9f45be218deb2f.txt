@@ -1,0 +1,19 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/04/20 (Thu) 16:29
+- [EVENT] User is trying to plan a healthy meal prep for the week.
+- [PREFERENCE] User is looking for recipe ideas that are high in protein and low in carbs.
+- [ASSISTANT_SAID] Breakfast options provided include:
+  - Scrambled Eggs with Spinach and Feta: 2 eggs, 1/4 cup spinach, 1/4 cup crumbled feta cheese, 1/4 cup cherry tomatoes. (Protein: 24g, Carbs: 4g)
+  - Greek Yogurt with Berries and Nuts: 1 cup Greek yogurt, 1/2 cup mixed berries, 1 tablespoon almond butter, 1 ounce chopped nuts. (Protein: 20g, Carbs: 10g)
+  - Cottage Cheese with Peaches and Cinnamon: 1/2 cup cottage cheese, 1/2 cup sliced peaches, 1/4 teaspoon cinnamon, chopped nuts. (Protein: 28g, Carbs: 5g)
+- [ASSISTANT_SAID] Lunch and dinner options provided include:
+  - Grilled Chicken Breast with Roasted Veggies: 4 ounces chicken breast, 1 cup roasted veggies. (Protein: 35g, Carbs: 5g)
+  - Salmon with Avocado Salsa: 4 ounces salmon, 1/2 avocado, 1/2 cup diced tomatoes, 1/4 cup red onion, 1 tablespoon lime juice. (Protein: 35g, Carbs: 5g)
+  - Turkey Lettuce Wraps: 2 ounces sliced turkey breast, 1/4 cup avocado, 1/4 cup tomato, 1/4 cup bacon. (Protein: 30g, Carbs: 5g)
+  - Zucchini Boats with Turkey and Cheese: 2 medium zucchinis, 2 ounces ground turkey, 1/4 cup shredded mozzarella, 1/4 cup chopped spinach. (Protein: 30g, Carbs: 5g)
+  - Cauliflower Fried Rice with Chicken: 1 cup cauliflower "rice", 2 ounces cooked chicken breast, 1 tablespoon coconut oil, 1 egg. (Protein: 30g, Carbs: 5g)
+- [ASSISTANT_SAID] Snack options provided include:
+  - Hard-Boiled Eggs: 6 eggs. (Protein: 6g per egg, Carbs: 1g)
+  - Cottage Cheese with Raspberries: 1/2 cup cottage cheese, 1/2 cup raspberries, chopped nuts. (Protein: 28g, Carbs: 5g)
+  - Protein Smoothie: 1 scoop protein powder, 1/2 cup Greek yogurt,

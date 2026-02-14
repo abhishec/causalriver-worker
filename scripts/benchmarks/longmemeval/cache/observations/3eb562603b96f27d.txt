@@ -1,0 +1,26 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/04 (Thu) 08:22  
+[FACT] User is inquiring about graduation requirements for engineering majors at Texas A&M University.  
+[ASSISTANT_SAID] Graduation requirements for engineering majors at Texas A&M University include:  
+[ASSISTANT_SAID] 1. Complete all core curriculum requirements.  
+[ASSISTANT_SAID] 2. Complete all degree requirements for the chosen engineering major.  
+[ASSISTANT_SAID] 3. Maintain a minimum cumulative GPA of at least 2.0.  
+[ASSISTANT_SAID] 4. Complete a minimum of 128 semester credit hours of coursework.  
+[ASSISTANT_SAID] 5. Complete at least 36 upper-level credit hours beyond the core curriculum.  
+[ASSISTANT_SAID] 6. Complete a capstone design experience.  
+[ASSISTANT_SAID] 7. Pass the Engineering Ethics exam.  
+[ASSISTANT_SAID] 8. Complete the Texas A&M University Exit Survey.  
+[ASSISTANT_SAID] 9. Satisfy any additional requirements specified by the major department or college.  
+[ASSISTANT_SAID] Note that these requirements may vary depending on the specific engineering major and any additional certifications, minors, or co-op/internship programs pursued by the student.  
+[PREFERENCE] User feels that taking an Engineering Ethics exam takes away from the technical focus of engineering.  
+[PREFERENCE] User questions the necessity of having an entire exam dedicated to ethics, suggesting that a couple of lectures would suffice.  
+[ASSISTANT_SAID] Ethics is an important aspect of engineering that cannot be ignored, as engineers have the responsibility to ensure their work contributes to the greater good and does not cause harm.  
+[ASSISTANT_SAID] The engineering ethics exam helps students understand their responsibilities and provides a framework for making ethical decisions in their professional careers.  
+[PREFERENCE] User expresses a belief that ethics could be left to lawyers and policymakers.  
+[ASSISTANT_SAID] Engineers are often responsible for designing and implementing solutions that directly impact people and society, making it important for them to have a strong ethical foundation.  
+[ASSISTANT_SAID] Incorporating ethics into engineering education adds an important dimension rather than detracting from the technical focus.  
+[PREFERENCE] User reiterates that they feel an entire exam on ethics is unnecessary.  
+[ASSISTANT_SAID] A dedicated ethics exam ensures a deeper understanding of ethical considerations and their application in real-world situations.  
+[ASSISTANT_SAID] Ethics is a complex subject that requires critical thinking, reflection, and application, which cannot be adequately covered in just a few lectures.  
+[PREFERENCE] User suggests that relying on common

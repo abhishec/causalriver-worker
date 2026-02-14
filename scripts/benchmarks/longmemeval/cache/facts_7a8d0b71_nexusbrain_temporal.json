@@ -1,0 +1,63 @@
+{
+  "answer_sharegpt_i0tMT9q_9": [
+    {
+      "fact": "User is interested in wellness experiences",
+      "type": "preference",
+      "entities": [
+        "wellness experiences"
+      ]
+    },
+    {
+      "fact": "User is a yoga enthusiast",
+      "type": "preference",
+      "entities": [
+        "yoga"
+      ]
+    },
+    {
+      "fact": "User is looking for unique wellness experiences",
+      "type": "preference",
+      "entities": [
+        "unique wellness experiences"
+      ]
+    },
+    {
+      "fact": "User is health-conscious",
+      "type": "preference",
+      "entities": [
+        "health-conscious"
+      ]
+    },
+    {
+      "fact": "User is interested in connecting with like-minded individuals",
+      "type": "preference",
+      "entities": [
+        "like-minded individuals"
+      ]
+    },
+    {
+      "fact": "User is involved in planning an email marketing campaign for wellness retreats",
+      "type": "event",
+      "entities": [
+        "email marketing campaign",
+        "wellness retreats"
+      ]
+    },
+    {
+      "fact": "User is seeking to build relationships with potential attendees",
+      "type": "event",
+      "entities": [
+        "relationships",
+        "potential attendees"
+      ]
+    },
+    {
+      "fact": "User wants to provide valuable information about the retreats",
+      "type": "opinion",
+      "entities": [
+        "valuable information",
+        "retreats"
+      ]
+    }
+  ]
+}

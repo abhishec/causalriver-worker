@@ -1,0 +1,268 @@
+{
+  "answer_7093d898_1": [
+    {
+      "fact": "User is planning a day out with a colleague.",
+      "type": "event",
+      "entities": [
+        "day out",
+        "colleague"
+      ]
+    },
+    {
+      "fact": "User visited the Science Museum's 'Space Exploration' exhibition.",
+      "type": "event",
+      "entities": [
+        "Science Museum",
+        "Space Exploration exhibition"
+      ]
+    },
+    {
+      "fact": "User spent two hours exploring the interactive exhibits at the exhibition.",
+      "type": "event",
+      "entities": [
+        "two hours",
+        "interactive exhibits"
+      ]
+    },
+    {
+      "fact": "User marveled at the actual moon rocks on display.",
+      "type": "event",
+      "entities": [
+        "moon rocks"
+      ]
+    },
+    {
+      "fact": "User's colleague is named David.",
+      "type": "relationship",
+      "entities": [
+        "David"
+      ]
+    },
+    {
+      "fact": "User is interested in science-related exhibitions.",
+      "type": "preference",
+      "entities": [
+        "science-related exhibitions"
+      ]
+    },
+    {
+      "fact": "User is interested in learning more about the history of space exploration.",
+      "type": "preference",
+      "entities": [
+        "history of space exploration"
+      ]
+    }
+  ],
+  "answer_7093d898_2": [
+    {
+      "fact": "User is planning to attend an art-related event soon",
+      "type": "event",
+      "entities": [
+        "art-related event"
+      ]
+    },
+    {
+      "fact": "User is interested in learning more about feminist art",
+      "type": "preference",
+      "entities": [
+        "feminist art"
+      ]
+    },
+    {
+      "fact": "User is seeking recommendations for books and documentaries on feminist art",
+      "type": "preference",
+      "entities": [
+        "books",
+        "documentaries",
+        "feminist art"
+      ]
+    }
+  ],
+  "answer_7093d898_3": [
+    {
+      "fact": "User is planning to write an essay about ancient civilizations",
+      "type": "event",
+      "entities": [
+        "essay",
+        "ancient civilizations"
+      ]
+    },
+    {
+      "fact": "User saw Pharaoh Tutankhamun's golden mask in person at the Metropolitan Museum of Art",
+      "type": "event",
+      "entities": [
+        "Pharaoh Tutankhamun",
+        "golden mask",
+        "Metropolitan Museum of Art"
+      ]
+    },
+    {
+      "fact": "User found the experience of seeing the golden mask breathtaking",
+      "type": "opinion",
+      "entities": [
+        "golden mask"
+      ]
+    },
+    {
+      "fact": "User took photos of other artifacts at the 'Ancient Egyptian Artifacts' exhibition",
+      "type": "event",
+      "entities": [
+        "photos",
+        "Ancient Egyptian Artifacts",
+        "exhibition"
+      ]
+    },
+    {
+      "fact": "User is interested in learning more about the significance of the ankh symbol in ancient Egyptian culture",
+      "type": "preference",
+      "entities": [
+        "ankh symbol",
+        "ancient Egyptian culture"
+      ]
+    }
+  ],
+  "answer_7093d898_4": [
+    {
+      "fact": "User participated in a behind-the-scenes tour of the Museum of History's conservation lab",
+      "type": "event",
+      "entities": [
+        "Museum of History",
+        "conservation lab"
+      ]
+    },
+    {
+      "fact": "User saw the meticulous process of preserving historical artifacts",
+      "type": "event",
+      "entities": [
+        "historical artifacts"
+      ]
+    },
+    {
+      "fact": "User tried basic conservation techniques during the tour",
+      "type": "event",
+      "entities": [
+        "basic conservation techniques"
+      ]
+    },
+    {
+      "fact": "User is looking for information on art conservation techniques",
+      "type": "preference",
+      "entities": [
+        "art conservation techniques"
+      ]
+    },
+    {
+      "fact": "User is interested in starting art conservation as a hobby",
+      "type": "preference",
+      "entities": [
+        "art conservation",
+        "hobby"
+      ]
+    }
+  ],
+  "answer_7093d898_5": [
+    {
+      "fact": "User is planning to visit the Modern Art Museum again soon.",
+      "type": "event",
+      "entities": [
+        "Modern Art Museum"
+      ]
+    },
+    {
+      "fact": "User attended a guided tour of 'The Evolution of Abstract Expressionism' led by Dr. Patel.",
+      "type": "event",
+      "entities": [
+        "The Evolution of Abstract Expressionism",
+        "Dr. Patel"
+      ]
+    },
+    {
+      "fact": "User is particularly interested in abstract expressionism.",
+      "type": "preference",
+      "entities": [
+        "abstract expressionism"
+      ]
+    },
+    {
+      "fact": "User hopes to see more exhibitions featuring artists like Pollock and Rothko.",
+      "type": "preference",
+      "entities": [
+        "Pollock",
+        "Rothko"
+      ]
+    },
+    {
+      "fact": "User found Dr. Patel's tour enlightening and it helped them appreciate abstract art more.",
+      "type": "opinion",
+      "entities": [
+        "Dr. Patel",
+        "abstract art"
+      ]
+    },
+    {
+      "fact": "User is interested in learning more about the museum's permanent collection.",
+      "type": "preference",
+      "entities": [
+        "permanent collection"
+      ]
+    },
+    {
+      "fact": "User has had a great experience with guided tours in the past.",
+      "type": "opinion",
+      "entities": [
+        "guided tours"
+      ]
+    }
+  ],
+  "answer_7093d898_6": [
+    {
+      "fact": "User is planning a family outing to a museum.",
+      "type": "event",
+      "entities": [
+        "family outing",
+        "museum"
+      ]
+    },
+    {
+      "fact": "User took their niece to the Natural History Museum to see the 'Dinosaur Fossils' exhibition.",
+      "type": "event",
+      "entities": [
+        "Natural History Museum",
+        "Dinosaur Fossils exhibition",
+        "niece"
+      ]
+    },
+    {
+      "fact": "User's niece loved the life-sized T-Rex replica.",
+      "type": "opinion",
+      "entities": [
+        "niece",
+        "T-Rex replica"
+      ]
+    },
+    {
+      "fact": "User is looking for kid-friendly exhibitions or museums.",
+      "type": "preference",
+      "entities": [
+        "kid-friendly exhibitions",
+        "museums"
+      ]
+    },
+    {
+      "fact": "User has recently visited the Metropolitan Museum of Art.",
+      "type": "event",
+      "entities": [
+        "Metropolitan Museum of Art"
+      ]
+    },
+    {
+      "fact": "User was impressed by the golden mask of Pharaoh Tutankhamun at the Metropolitan Museum of Art.",
+      "type": "opinion",
+      "entities": [
+        "golden mask",
+        "Pharaoh Tutankhamun",
+        "Metropolitan Museum of Art"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,94 @@
+{
+  "answer_67be2c38_1": [
+    {
+      "fact": "User is getting back into fishing and hunting.",
+      "type": "preference",
+      "entities": [
+        "fishing",
+        "hunting"
+      ]
+    },
+    {
+      "fact": "User is trying to keep track of their gear and experiences.",
+      "type": "preference",
+      "entities": [
+        "gear",
+        "experiences"
+      ]
+    },
+    {
+      "fact": "User caught 7 largemouth bass on a trip to Lake Michigan.",
+      "type": "event",
+      "entities": [
+        "7 largemouth bass",
+        "Lake Michigan"
+      ]
+    },
+    {
+      "fact": "User went fishing with Alex.",
+      "type": "relationship",
+      "entities": [
+        "Alex"
+      ]
+    },
+    {
+      "fact": "User is considering getting a tree stand for deer hunting this season.",
+      "type": "preference",
+      "entities": [
+        "tree stand",
+        "deer hunting"
+      ]
+    },
+    {
+      "fact": "User had a great day fishing on 7/10.",
+      "type": "opinion",
+      "entities": [
+        "7/10"
+      ]
+    }
+  ],
+  "answer_67be2c38_2": [
+    {
+      "fact": "User is planning a fishing trip to Lake Michigan.",
+      "type": "event",
+      "entities": [
+        "Lake Michigan",
+        "fishing trip"
+      ]
+    },
+    {
+      "fact": "User plans to fish from Illinois, around the Waukegan harbor area.",
+      "type": "personal",
+      "entities": [
+        "Illinois",
+        "Waukegan harbor"
+      ]
+    },
+    {
+      "fact": "User intends to use spinnerbaits and plastic worms as lures.",
+      "type": "preference",
+      "entities": [
+        "spinnerbaits",
+        "plastic worms"
+      ]
+    },
+    {
+      "fact": "User previously fished with Alex on July 22 and caught 9 largemouth bass.",
+      "type": "event",
+      "entities": [
+        "Alex",
+        "July 22",
+        "largemouth bass"
+      ]
+    },
+    {
+      "fact": "User believes spinnerbaits and plastic worms worked well for catching bass.",
+      "type": "opinion",
+      "entities": [
+        "spinnerbaits",
+        "plastic worms",
+        "bass"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+**Observation Log:**
+
+- [FACT] User is planning a trip to Orlando.
+- [EVENT] User is thinking of visiting Magic Kingdom.
+- [TEMPORAL] User is inquiring about special events happening around October.
+- [ASSISTANT_SAID] October is a great time to visit Magic Kingdom with mild weather and special events.
+- [ASSISTANT_SAID] Mickey's Not-So-Scary Halloween Party takes place on select nights from mid-August to November 1st.
+- [ASSISTANT_SAID] Mickey's Not-So-Scary Halloween Party features trick-or-treating, character costumes, exclusive entertainment, "Hocus Pocus Villain Spelltacular," and "Mickey's Boo-to-You Halloween Parade."
+- [ASSISTANT_SAID] Fall decorations and atmosphere are present in Magic Kingdom during the fall season.
+- [ASSISTANT_SAID] Epcot International Food & Wine Festival usually takes place from late August to mid-November.
+- [ASSISTANT_SAID] Many Disney characters will be dressed in Halloween costumes for photo opportunities.
+- [ASSISTANT_SAID] Seasonal treats and drinks, such as pumpkin-flavored items and Halloween-themed cupcakes, are available throughout the park.
+- [TEMPORAL] Specific dates to keep in mind include October 1st for the start of Mickey's Not-So-Scary Halloween Party and October 31st for Halloween night.
+- [TEMPORAL] User is thinking of visiting Magic Kingdom around October 15th.
+- [EVENT] User attended a Halloween-themed event last year called Screamfest.
+- [ASSISTANT_SAID] Disney After Dark: Boo Bash is returning on select nights from August 10th to October 31st, including October 15th.
+- [ASSISTANT_SAID] Disney After Dark: Boo Bash features trick-or-treating, character meet-and-greets, exclusive entertainment, and takes place from 9:00 PM to 1:00 AM.
+- [ASSISTANT_SAID] Disney After Dark: Boo Bash has a more laid-back atmosphere compared to Mickey's Not-So-Scary Halloween Party.
+- [ASSISTANT_SAID] Tickets for Disney After Dark: Boo Bash are limited and should be purchased in advance.
+- [ASSISTANT_SAID] Benefits of attending Disney After Dark: Boo Bash on October 15th include smaller crowds and cooler weather.
+- [CHANGE] User believes the event they attended last year was called Screamfest, not Boo Bash.
+- [ASSISTANT_SAID] Assistant is not familiar with an event called "Screamfest" at Magic Kingdom and suggests it may have been a one-time or private event.
+- [FACT] User attended the event with friends Emma and Ryan.
+- [EVENT] User dressed up as zombies, rode

@@ -1,0 +1,30 @@
+**Observation Log:**
+
+[FACT] User is looking for advice on what to wear to a wedding next month.  
+[FACT] User has a pair of black high-waisted jeans from Zara.  
+[FACT] User purchased the black high-waisted jeans with a 20% discount code.  
+[TEMPORAL] The wedding is scheduled for next month (June 2023).  
+[PREFERENCE] User is considering dressing up the black high-waisted jeans with a nice top and heels.  
+[ASSISTANT_SAID] Suggested options for tops include:  
+[ASSISTANT_SAID] 1. Silk or cotton blouse with subtle details like ruffles, bell sleeves, or a soft pattern.  
+[ASSISTANT_SAID] 2. Peplum top paired with a fitted blazer or cardigan.  
+[ASSISTANT_SAID] 3. Lace or crochet top for a romantic touch.  
+[ASSISTANT_SAID] 4. Tailored button-down shirt for a chic look.  
+[ASSISTANT_SAID] Suggested accessories include:  
+[ASSISTANT_SAID] 1. Statement jewelry like bold necklaces or earrings.  
+[ASSISTANT_SAID] 2. A small, elegant clutch or crossbody bag.  
+[ASSISTANT_SAID] 3. Heels that complement the color and style of the top.  
+[ASSISTANT_SAID] Additional tips include dressing for the venue, balancing the look, and considering the time of day for the wedding.  
+[ASSISTANT_SAID] Provided an example outfit idea:  
+[ASSISTANT_SAID] * Black high-waisted jeans from Zara  
+[ASSISTANT_SAID] * A light blue silk blouse with subtle ruffles and a fitted silhouette  
+[ASSISTANT_SAID] * A pair of strappy heels in a neutral color (e.g., nude, black, or metallic)  
+[ASSISTANT_SAID] * A simple clutch or small crossbody bag in a neutral color  
+[ASSISTANT_SAID] * A statement necklace or earrings with pearls or crystals  
+[PREFERENCE] User finds the suggestions helpful and decides to go with a silk blouse and heels.  
+[FACT] User is considering adding a blazer or cardigan to dress up the outfit further.  
+[ASSISTANT_SAID] Suggested tips for blazers include:  
+[ASSISTANT_SAID] 1. Look for a fitted blazer that skims the body.  
+[ASSISTANT_SAID] 2. Choose lightweight, smooth fabrics like wool, cashmere, or cotton.  
+[ASSISTANT_SAID] 3. Neutral colors like navy, beige, or gray can complement black jeans.  
+[ASSISTANT_SAID] 4. Styles like classic two-button, double

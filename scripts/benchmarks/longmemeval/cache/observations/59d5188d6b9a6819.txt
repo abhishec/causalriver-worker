@@ -1,0 +1,21 @@
+**Observation Log:**
+
+[FACT] User has been living in the United States for the past five years on a work visa, sponsored by their company.  
+[FACT] User is planning to apply for a green card.  
+[FACT] User has a master's degree in data science from New York University.  
+[FACT] User is originally from India.  
+[TEMPORAL] Session Date: 2023/05/27 (Sat) 22:00.  
+[ASSISTANT_SAID] The EB-2 visa category is an employment-based, second-preference visa category for foreign nationals who possess advanced degrees or exceptional abilities in their field.  
+[ASSISTANT_SAID] There are three subcategories within EB-2: Advanced Degree Holders, Exceptional Ability, and National Interest Waiver (NIW).  
+[ASSISTANT_SAID] To be eligible for an EB-2 visa, one must hold a U.S. master's degree or higher, or a foreign equivalent degree, in a field related to the job they're seeking (for Advanced Degree Holders).  
+[ASSISTANT_SAID] Required documents for EB-2 include Form I-140, Form ETA-9089, degree and transcripts, proof of exceptional ability, job offer letter, labor certification, passport-style photos, medical examination, and police certificates.  
+[ASSISTANT_SAID] The medical examination is required to ensure that the applicant doesn't have any health issues that would make them inadmissible to the United States.  
+[ASSISTANT_SAID] The medical examination must be conducted by a civil surgeon designated by U.S. Citizenship and Immigration Services (USCIS).  
+[ASSISTANT_SAID] The medical examination typically includes a medical history review, physical examination, vaccination review, TB testing, blood tests, and mental health evaluation.  
+[ASSISTANT_SAID] Applicants should bring a valid government-issued ID, completed Form I-693, vaccination records, and relevant medical records to the medical examination.  
+[ASSISTANT_SAID] Vaccination requirements for green card applicants include MMR, polio, influenza, Td, and varicella.  
+[ASSISTANT_SAID] If the user is 18 years old or younger, they may need additional vaccinations such as hepatitis A, hepatitis B, and HPV.  
+[ASSISTANT_SAID] If the user has already had the required vaccinations, they need to provide proof of vaccination or serology test results.  
+[ASSISTANT_SAID] If the user is not vaccinated or doesn't have proof of vaccination, they may need to receive the required vaccinations or undergo serology testing during the medical examination.  
+[ASSISTANT_SAID] The CDC recommends that individuals from India, as well as other high-risk countries, be aware of additional vaccination considerations.  
+[USER] User expressed uncertainty about needing

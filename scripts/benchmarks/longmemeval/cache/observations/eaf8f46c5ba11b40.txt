@@ -1,0 +1,22 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/29 (Mon) 06:39
+- [USER] User is working on a Next.js 13 project using TypeScript and Tailwind CSS.
+- [USER] User wants to connect their Next.js project to an existing WordPress website using WordPress Headless CMS.
+- [ASSISTANT_SAID] To connect a Next.js 13 project with TypeScript and Tailwind CSS to an existing WordPress website using WordPress Headless CMS, the assistant provided a series of steps.
+- [ASSISTANT_SAID] Step 1: Set up WordPress as a headless CMS by installing and configuring the REST API plugin.
+- [ASSISTANT_SAID] Step 2: Create a new Next.js 13 project using the TypeScript template by running `npx create-next-app --ts`.
+- [ASSISTANT_SAID] Step 3: Install necessary dependencies for integrating with WordPress, such as `axios` and `swr`.
+- [ASSISTANT_SAID] Step 4: Set up Tailwind CSS in the Next.js project by installing necessary dependencies and configuring `tailwind.config.js`.
+- [ASSISTANT_SAID] Step 5: Create an `api` folder in the project and add an `index.ts` file for API requests to WordPress.
+- [ASSISTANT_SAID] Step 6: Use the `useSWR` hook to fetch data from the WordPress API endpoint and render it in the app.
+- [ASSISTANT_SAID] Step 7: Provide authentication credentials for API requests to WordPress.
+- [ASSISTANT_SAID] Step 8: Use fetched data to populate the Next.js app's pages and components.
+- [USER] User requested a high-level overview of the project scope, including data storage, user accounts, authentication, and payment systems.
+- [ASSISTANT_SAID] Data for the Next.js app will be stored in WordPress, which acts as a headless CMS.
+- [ASSISTANT_SAID] User accounts can be managed in WordPress, allowing for the creation of new accounts or the use of existing ones.
+- [ASSISTANT_SAID] Authentication can be implemented in the Next.js app by making API requests to WordPress.
+- [ASSISTANT_SAID] The payment system can be implemented using a third-party payment gateway service such as Stripe or PayPal.
+- [ASSISTANT_SAID] Deployment can be done separately on different servers or platforms or together using services like Vercel or Netlify.
+- [USER] User requested detailed step-by-step explanations with examples for each step.
+- [ASSISTANT_SAID] Step 1 detailed: Install and activate the WordPress REST API plugin, create custom post

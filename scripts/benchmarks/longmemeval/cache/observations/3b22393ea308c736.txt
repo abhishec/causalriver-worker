@@ -1,0 +1,28 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/21 (Sun) 12:23  
+[USER] User requested a course to learn bot trading week by week.  
+[ASSISTANT_SAID] Assistant confirmed the creation of a course on bot trading.  
+[ASSISTANT_CREATED] Week 1: Introduction to Bot Trading - Topics include basics of bot trading, benefits and risks, and types of bots and strategies.  
+[ASSISTANT_CREATED] Week 2: Setting up Your Bot Trading System - Topics include creating a trading account, choosing a bot platform, and setting trading parameters.  
+[ASSISTANT_CREATED] Week 3: Backtesting and Optimization - Topics include importance of backtesting, how to backtest performance, and optimization techniques.  
+[ASSISTANT_CREATED] Week 4: Live Trading with Your Bot - Topics include differences between backtesting and live trading, setting up for live trading, and managing trades.  
+[ASSISTANT_CREATED] Week 5: Advanced Bot Trading Strategies - Topics include advanced strategies like scalping, arbitrage, and market making.  
+[ASSISTANT_SAID] Assistant prompted the user to type "go" for the next five weeks of the course.  
+[USER] User typed "go" to continue with the course.  
+[ASSISTANT_CREATED] Week 6: Risk Management for Bot Trading - Topics include understanding risks, risk management techniques, and diversifying trades.  
+[ASSISTANT_CREATED] Week 7: Advanced Technical Analysis for Bot Trading - Topics include advanced techniques for identifying opportunities, indicators, and chart patterns.  
+[ASSISTANT_CREATED] Week 8: Advanced Trading Psychology for Bot Trading - Topics include psychological aspects of trading, overcoming pitfalls, and developing a disciplined mindset.  
+[ASSISTANT_CREATED] Week 9: Advanced Trading Strategies for Bot Trading - Topics include hedging, mean reversion, and combining strategies.  
+[ASSISTANT_CREATED] Week 10: Advanced Bot Platforms and Tools - Topics include advanced platforms, tools, and latest developments in bot trading technology.  
+[ASSISTANT_SAID] Assistant concluded the course and prompted the user to type "go" for the next five weeks.  
+[USER] User requested an example of a bot that would trade bitcoin.  
+[ASSISTANT_SAID] Assistant provided an example of a simple bot for trading bitcoin using the ccxt library.  
+[ASSISTANT_CREATED] The bot's trading parameters include:  
+- Exchange: Bitmex  
+- Symbol: BTC/USD  
+- Amount: 1.0  
+- Stop Loss: 100  
+- Take Profit: 200  
+[ASSISTANT_SAID] The bot checks the current price of bitcoin and sets initial stop loss and take profit levels.  
+[ASSISTANT_SAID] The bot includes a loop to check the current price,

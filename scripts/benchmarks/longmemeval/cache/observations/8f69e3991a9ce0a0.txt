@@ -1,0 +1,33 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/06/20 (Tue) 11:14
+
+[ASSISTANT_SAID] Alpaca is a commission-free stock trading API that allows developers to build and run algorithmic trading strategies.
+
+[ASSISTANT_SAID] Key components and tech stack for building an algorithmic trading platform using the Alpaca API include programming language, development framework, data management, trading algorithms, risk management, and deployment.
+
+[ASSISTANT_SAID] Programming Language: Alpaca API supports multiple programming languages, including Python, JavaScript, and Ruby. Python is a popular choice for algorithmic trading due to its ease of use, flexibility, and wide range of data analysis libraries.
+
+[ASSISTANT_SAID] Development Framework: Popular frameworks for building trading platforms include Flask, Django, and FastAPI.
+
+[ASSISTANT_SAID] Data Management: Alpaca API provides real-time market data, requiring a data management system to handle and process this data, potentially using databases such as PostgreSQL or MongoDB.
+
+[ASSISTANT_SAID] Trading Algorithms: Development of trading algorithms using the Alpaca API to execute trades, utilizing libraries such as NumPy, Pandas, and Scikit-Learn for strategy development and market data analysis.
+
+[ASSISTANT_SAID] Risk Management: Critical in algorithmic trading, requiring tools to manage risk, such as stop-loss limits or position-sizing algorithms, with libraries like Pyfolio and Zipline for portfolio performance analysis and risk management optimization.
+
+[ASSISTANT_SAID] Deployment: After development and testing, deployment to a production environment is necessary, using cloud services like Amazon Web Services (AWS) or Microsoft Azure.
+
+[ASSISTANT_SAID] CEP (Complex Event Processing) Engine and OMS (Order Management System) are key components of an algorithmic trading platform.
+
+[ASSISTANT_SAID] A CEP engine enables real-time analysis of high-volume, streaming data from various sources to identify trading opportunities and generate trading signals.
+
+[ASSISTANT_SAID] An OMS manages the entire trade lifecycle, from order generation to settlement, handling tasks like risk management, compliance monitoring, and reporting.
+
+[ASSISTANT_SAID] In an algorithmic trading platform, the CEP engine and OMS work together to enable real-time trading, with the CEP engine processing market data to generate signals sent to the OMS for execution.
+
+[ASSISTANT_SAID] An algorithmic trading system consists of several key components: data sources, market data storage, algorithms, risk management, execution platform, and backtesting and simulation.
+
+[ASSISTANT_SAID] Data Sources provide real-time market data for analysis and trading, including stock exchanges, market data providers, and news feeds.
+
+[ASSISTANT_SAID] Market Data Storage involves using databases or data warehouses to store and manage market data for accessibility in

@@ -1,0 +1,28 @@
+**Observation Log:**
+
+[FACT] User recently started using a new blood pressure monitor.  
+[EVENT] User's blood pressure monitor arrived on a Tuesday afternoon.  
+[TEMPORAL] User has been using the blood pressure monitor daily since it arrived.  
+[ASSISTANT_SAID] A blood pressure reading consists of two numbers: systolic pressure (top number) and diastolic pressure (bottom number).  
+[ASSISTANT_SAID] Normal blood pressure range is typically considered less than 120/80 mmHg.  
+[ASSISTANT_SAID] Elevated blood pressure is defined as 120-129/80 mmHg.  
+[ASSISTANT_SAID] Stage 1 hypertension is defined as 130-139/80-89 mmHg.  
+[ASSISTANT_SAID] Stage 2 hypertension is defined as 140 or higher/90 or higher mmHg.  
+[ASSISTANT_SAID] Tips for taking accurate morning readings include:  
+[ASSISTANT_CREATED] 1. Consistency is key: Take readings at the same time every morning.  
+[ASSISTANT_CREATED] 2. Follow the same routine: Take readings while sitting in the same chair, with back supported and feet on the floor.  
+[ASSISTANT_CREATED] 3. Avoid caffeine and exercise at least 30 minutes before taking readings.  
+[ASSISTANT_CREATED] 4. Sit comfortably with back supported, feet flat on the floor, and arm at heart level.  
+[ASSISTANT_CREATED] 5. Use the correct cuff size for accurate readings.  
+[ASSISTANT_CREATED] 6. Take multiple readings, one minute apart, and record the average value.  
+[ASSISTANT_CREATED] 7. Monitor your posture while taking readings.  
+[ASSISTANT_CREATED] 8. Avoid talking or moving during the reading.  
+[ASSISTANT_CREATED] 9. Keep the monitor at room temperature.  
+[ASSISTANT_CREATED] 10. Record your readings to track patterns and trends.  
+[ASSISTANT_SAID] It's essential to consult with your healthcare provider to discuss specific blood pressure goals and concerns.  
+[FACT] User has been noticing higher morning blood pressure readings.  
+[FACT] User attributes higher readings to coffee consumption before taking medications.  
+[ASSISTANT_SAID] Caffeine can cause a temporary increase in blood pressure due to vasoconstriction, increased heart rate, and adrenaline release.  
+[ASSISTANT_SAID] A moderate amount of caffeine (200-300 mg) can increase systolic blood pressure by 3-10 mmHg and diastolic blood pressure by 2-5 mmHg.  
+[ASSISTANT_SAID] Suggestions for caffeine consumption include:  
+[ASSISTANT_CREATED] 1. Limit caffeine intake to 100-200 mg (about

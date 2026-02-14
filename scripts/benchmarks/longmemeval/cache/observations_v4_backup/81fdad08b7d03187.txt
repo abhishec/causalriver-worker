@@ -1,0 +1,14 @@
+**Observation Log:**
+
+[FACT] User is preparing for a semester abroad at the University of California, Berkeley.  
+[EVENT] User submitted their application to the exchange program on February 10th and got accepted on March 20th.  
+[EVENT] User has already booked their flight to San Francisco on April 1st, scheduled to depart on August 15th.  
+[EVENT] User had an interview at the US embassy for their visa on April 25th.  
+[CHANGE] User has been taking an intensive English language course on weekends since March to improve their language skills.  
+[RELATIONSHIP] User's language instructor is Ms. Johnson, who has been very helpful.  
+[TEMPORAL] The session date is April 19, 2023.  
+[ASSISTANT] The assistant provided tips on what to expect during the first few weeks on campus, including arrival and move-in, getting settled, academic preparation, campus resources, socializing, logistics, and dealing with homesickness.  
+[ASSISTANT] The assistant provided tips on preparing for the flight and arrival in the US, including travel documents, flight details, packing, immigration and customs, transportation from SFO to Berkeley, and accommodation.  
+[ASSISTANT] The assistant explained health insurance requirements for exchange students at UC Berkeley, including the need for medical expenses coverage, repatriation, and medical evacuation.  
+[ASSISTANT] The assistant detailed English language support services available at UC Berkeley, including English Language Support Services (ELSS), Berkeley English Language Proficiency Requirement (BEPR), language exchange programs, conversation partners, and academic language support.  
+[PREFERENCE] User has seen significant progress in their English language skills.

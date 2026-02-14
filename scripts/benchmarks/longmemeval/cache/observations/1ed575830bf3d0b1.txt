@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [FACT] The user’s father recently died from a heart attack.
+- [FACT] The user has a brother.
+- [FACT] The user’s mother is alive and was mentioned as being in tears at the funeral.
+- [FACT] The user attended their father's funeral and delivered a eulogy.
+- [FACT] The user described their father as strict, abusive, and old-fashioned, who physically and verbally abused the user and their brother and mother.
+- [FACT] The user lives in an apartment and initially sat on the edge of the roof contemplating suicide.
+- [FACT] The user spent three hours writing the eulogy.
+- [FACT] The user woke up at 8:00 AM on the day of the funeral.
+- [FACT] The user drove to the cemetery for the funeral.
+- [FACT] The user’s commute to their job from their mother’s apartment would take over an hour, compared to 15 minutes from their own house.
+- [CHANGE] The user decided to move in with their mother after the funeral to support her.
+- [EVENT] The user delivered a eulogy at their father's funeral.
+- [EVENT] The user helped their mother with household chores and tasks after moving in with her.
+- [EVENT] The user found a new job closer to their mother’s apartment.
+- [TEMPORAL] The conversation took place on May 22, 2023.
+- [RELATIONSHIP] The user has a complicated relationship with their father, feeling both anger and sadness about his death.
+- [RELATIONSHIP] The user has a close relationship with their mother, who expressed gratitude for the user’s support.
+- [ASSISTANT_SAID] The assistant did not provide any specific information, recommendations, or suggestions in this conversation.
+- [ASSISTANT_CREATED] The assistant did not create any content in this conversation.

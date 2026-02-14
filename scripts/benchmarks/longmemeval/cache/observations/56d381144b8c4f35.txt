@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/08/21 (Mon) 15:57  
+[FACT] The user has a student who performs agility tasks with a 95% success rate on various obstacles.  
+[FACT] The student gets the A-frame correct 95% of the time.  
+[FACT] The student gets the Dogwalk correct 95% of the time.  
+[FACT] The student gets the Teeter correct 95% of the time.  
+[FACT] The student gets Weaves correct 95% of the time.  
+[FACT] The student gets Backside obstacles correct 95% of the time.  
+[FACT] The student keeps all the bars up 95% of the time.  
+[FACT] The course consists of 1 A-frame, 1 Dogwalk, 1 Teeter, 1 Weaves, and 2 Backside obstacles.  
+[ASSISTANT_SAID] The probability of completing the course without making a mistake is approximately 73.51%.  
+[FACT] The user requested to include the 95% chance of keeping all the bars up in the probability calculation.  
+[ASSISTANT_SAID] The probability of running the course without making a mistake and keeping all the bars up is approximately 69.83%.  
+[USER_SAID] The user asked if the chances of making at least one mistake is about 30%.  
+[ASSISTANT_SAID] The chance of making at least one mistake in the course is approximately 26.49%, or about 30% when rounded.  
+[USER_SAID] The user inquired about the chances of making at least one mistake in 4 consecutive runs.  
+[ASSISTANT_SAID] The chance of making at least one mistake in 4 consecutive runs is approximately 73.83%.  
+[USER_SAID] The user stated that if the chance of not making any mistake is 70%, they wanted to know the chances of running 4 consecutive runs without making any mistakes.  
+[ASSISTANT_SAID] The chance of running 4 consecutive runs without making any mistakes is approximately 24.01%.  
+[USER_SAID] The user asked for the chances of not making any mistakes over 10 runs.  
+[ASSISTANT_SAID] The chance of not making any mistakes over 10 runs is approximately 2.82%.

@@ -1,0 +1,19 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/30 (Tue) 23:04
+- [FACT] User is interested in the South Australian National Football League (SANFL).
+- [ASSISTANT_SAID] Teams in the SANFL advance from lower divisions to the top division through a promotion and relegation system.
+- [ASSISTANT_SAID] The bottom-placed team in the top division (League) at the end of the regular season is automatically relegated to the second division (Reserves).
+- [ASSISTANT_SAID] The top-placed team in the second division is promoted to the top division for the following season.
+- [ASSISTANT_SAID] The bottom-placed team in the Reserves division is relegated to the third division (Under-18s) for the following season.
+- [ASSISTANT_SAID] The top-placed team in the Under-18s division is promoted to the Reserves division.
+- [ASSISTANT_SAID] Teams can advance from lower divisions to the top division of the SANFL by winning their respective division championships.
+- [ASSISTANT_SAID] The promotion and relegation system in the SANFL operates at the end of each season after the regular season has concluded.
+- [ASSISTANT_SAID] Promotion and relegation occur every year at the end of the regular season.
+- [PREFERENCE] User finds the promotion and relegation system exciting for both players and fans.
+- [ASSISTANT_SAID] The promotion and relegation system adds an extra level of competitiveness, making for thrilling games and moments throughout the season.
+- [PREFERENCE] User is eager to see which teams will make it to the top division this year.
+- [ASSISTANT_SAID] As an AI, the assistant does not have personal preferences or favorites.
+- [ASSISTANT_SAID] Port Adelaide and Norwood are the most successful teams in the SANFL with 36 and 30 premierships, respectively.
+- [ASSISTANT_SAID] Port Adelaide and Norwood have won numerous grand finals over the years and are likely to be strong contenders for the top division.
+- [ASSISTANT_SAID] Other teams such as Adelaide, Glenelg, and South Adelaide have also been performing well and have won premierships in recent years.

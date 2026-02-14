@@ -1,0 +1,106 @@
+{
+  "answer_70dc7d08_abs_2": [
+    {
+      "fact": "User has an iPhone 13 Pro",
+      "type": "personal",
+      "entities": [
+        "iPhone 13 Pro"
+      ]
+    },
+    {
+      "fact": "User purchased their iPhone 13 Pro for $800 from Best Buy on Black Friday",
+      "type": "event",
+      "entities": [
+        "$800",
+        "Best Buy",
+        "Black Friday"
+      ]
+    },
+    {
+      "fact": "User considers the $800 price a great deal compared to the regular price of $1,000",
+      "type": "opinion",
+      "entities": [
+        "$800",
+        "$1,000"
+      ]
+    },
+    {
+      "fact": "User is looking to upgrade their phone case and screen protector",
+      "type": "preference",
+      "entities": [
+        "phone case",
+        "screen protector"
+      ]
+    },
+    {
+      "fact": "User plans to use their phone more outdoors",
+      "type": "preference",
+      "entities": [
+        "outdoors"
+      ]
+    },
+    {
+      "fact": "User wants to protect their phone from water and dust",
+      "type": "preference",
+      "entities": [
+        "water",
+        "dust"
+      ]
+    }
+  ],
+  "answer_70dc7d08_abs_1": [
+    {
+      "fact": "User is looking for gift ideas for their sister's birthday.",
+      "type": "event",
+      "entities": [
+        "sister's birthday"
+      ]
+    },
+    {
+      "fact": "User is on a budget for the gift.",
+      "type": "preference",
+      "entities": [
+        "budget"
+      ]
+    },
+    {
+      "fact": "User attended the annual Holiday Market at the local mall a week before Black Friday.",
+      "type": "event",
+      "entities": [
+        "Holiday Market",
+        "local mall",
+        "Black Friday"
+      ]
+    },
+    {
+      "fact": "User saw unique handmade jewelry at the Holiday Market.",
+      "type": "opinion",
+      "entities": [
+        "handmade jewelry"
+      ]
+    },
+    {
+      "fact": "User is unsure if handmade jewelry is their sister's style.",
+      "type": "opinion",
+      "entities": [
+        "handmade jewelry",
+        "sister's style"
+      ]
+    },
+    {
+      "fact": "User likes the idea of a personalized item as a gift.",
+      "type": "preference",
+      "entities": [
+        "personalized item"
+      ]
+    },
+    {
+      "fact": "User is unsure what type of personalized item would be suitable for their sister.",
+      "type": "opinion",
+      "entities": [
+        "personalized item",
+        "sister"
+      ]
+    }
+  ]
+}

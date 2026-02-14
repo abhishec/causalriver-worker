@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/01/14 (Sat) 16:13  
+[FACT] User has been learning about data science recently.  
+[EVENT] User started watching a course on Coursera last month that covers topics like data visualization, statistical inference, and regression analysis.  
+[PREFERENCE] User is particularly interested in exploring deep reinforcement learning.  
+[ASSISTANT_SAID] Recommended resources for reinforcement learning include:  
+[ASSISTANT_SAID] **Online Courses:**  
+[ASSISTANT_SAID] 1. **Deep Reinforcement Learning by Sutton & Barto** (Coursera) - Comprehensive introduction to RL covering Markov decision processes, Q-learning, and policy gradients.  
+[ASSISTANT_SAID] 2. **Reinforcement Learning Specialization by University of Alberta** (Coursera) - Consists of 5 courses covering basics of RL, temporal difference learning, and deep RL.  
+[ASSISTANT_SAID] 3. **Reinforcement Learning by David Silver** (DeepMind, YouTube) - Series of video lectures covering advanced topics like policy gradients, actor-critic methods, and deep RL.  
+[ASSISTANT_SAID] **Books:**  
+[ASSISTANT_SAID] 1. **Reinforcement Learning: An Introduction** by Richard Sutton and Andrew Barto - Classic book covering foundational concepts and algorithms.  
+[ASSISTANT_SAID] 2. **Deep Reinforcement Learning** by Mnih et al. (Morgan & Claypool Publishers) - Focuses on deep RL covering deep Q-networks, policy gradients, and actor-critic methods.  
+[ASSISTANT_SAID] 3. **Reinforcement Learning with Python** byuden (Packt Publishing) - Hands-on introduction to RL using Python covering Q-learning, SARSA, and deep RL.  
+[ASSISTANT_SAID] **Research Papers:**  
+[ASSISTANT_SAID] 1. **Deep Q-Networks (DQN)** by Mnih et al. (2015) - Introduced deep Q-networks.  
+[ASSISTANT_SAID] 2. **Actor-Critic Methods** by Lillicrap et al. (2016) - Introduced actor-critic methods.  
+[ASSISTANT_SAID] 3. **Proximal Policy Optimization (PPO)** by Schulman et al. (2017) - Introduced PPO, a popular algorithm for policy gradient methods.  
+[ASSISTANT_SAID] **Practice and Projects:**  
+[ASSISTANT_SAID] 1. **Gym** (OpenAI) - Open-source library for RL research with various environments.  
+[ASSISTANT_SAID] 2. **RLlib** (Ray) - Library

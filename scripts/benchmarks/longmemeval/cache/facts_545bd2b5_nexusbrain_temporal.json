@@ -1,0 +1,36 @@
+{
+  "answer_47ffab4c": [
+    {
+      "fact": "User is trying to cut down on social media usage",
+      "type": "preference",
+      "entities": [
+        "social media"
+      ]
+    },
+    {
+      "fact": "User uses WhatsApp and Facebook Messenger to communicate with friends and family",
+      "type": "relationship",
+      "entities": [
+        "WhatsApp",
+        "Facebook Messenger"
+      ]
+    },
+    {
+      "fact": "User is looking for ways to stay connected without mindless scrolling",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User likes the idea of designating specific check-in times for social media",
+      "type": "preference",
+      "entities": []
+    },
+    {
+      "fact": "User is interested in setting a time limit for social media apps like Instagram",
+      "type": "preference",
+      "entities": [
+        "Instagram"
+      ]
+    }
+  ]
+}

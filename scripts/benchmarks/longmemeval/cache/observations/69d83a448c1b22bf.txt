@@ -1,0 +1,16 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/22 (Mon) 11:27
+- [ASSISTANT_SAID] Kingsman's Cost of Finance Comparison table provided with the following details: 
+  - Provider: My Organization, Loan Amount: S$100,000, Interest Rate: 10% p.a., Interest Paid: S$12,776, Cost of Finance: S$12,776
+  - Provider: Local Bank, Loan Amount: S$3,758,059.16, Interest Rate: 10% p.a., Interest Paid: S$375,805.92, Cost of Finance: S$375,805.92
+- [ASSISTANT_SAID] Note on interest charged for my organization: Interest charged = 90% * S$90,000 * (14/365) * 10% = S$12,776 (for 52 invoices).
+- [ASSISTANT_SAID] Note on interest charged for local bank: Interest charged = S$3,758,059.16 * 10% = S$375,805.92.
+- [USER] The calculation of the interest charge by your organization is wrong. 
+- [USER] The correct answer and workings of it is as follows: 90% * S$90,000 * (14/365) * 10% = S$310.68.
+- [USER] For 52 invoices, that would mean S$310.68 * 52 = S$16,155.62.
+- [ASSISTANT_SAID] Yes, I can replicate this calculation logically. The interest charge for one invoice is calculated as: 90% * S$90,000 * (14/365) * 10% = S$310.68. And for 52 invoices, it becomes: S$310.68 * 52 = S$16,155.62.
+- [USER] Replace your interest charge and re-generate the Kingsman's Cost of Finance Comparison table.
+- [ASSISTANT_CREATED] Kingsman's Cost of Finance Comparison Table generated with updated interest charge:
+  - Source of Finance: My organization, Interest rate: 10% p.a., Interest charge: S$16,155.62, Total Repayment: S$116,155.62
+  - Source of Finance: Local bank, Interest rate: 10% p.a., Interest charge: S$375,805.92, Total Repayment: S$4,133,865.08.

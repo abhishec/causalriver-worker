@@ -1,0 +1,27 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/27 (Sat) 16:43
+- [EVENT] User got a new smoker and is excited to experiment with different types of wood and meats.
+- [PREFERENCE] User is looking for recommendations on different types of wood for smoking meats.
+- [ASSISTANT_SAID] Assistant congratulated the user on their new smoker and provided a list of popular types of wood for smoking, including characteristics and recommended meat pairings.
+- [ASSISTANT_SAID] Types of wood recommended by the assistant:
+  1. **Hickory**: Strong, sweet, and smoky flavor; pairs well with ribs, bacon, ham, and pork shoulder; can overpower delicate meats.
+  2. **Oak**: Mellow, earthy flavor; pairs well with brisket, sausages, and pork belly; good for longer smokes.
+  3. **Mesquite**: Strong, earthy, and slightly sweet flavor; pairs well with beef, lamb, and game meats; use sparingly.
+  4. **Apple**: Fruity, sweet, and mild flavor; pairs well with poultry, pork, and beef.
+  5. **Cherry**: Mild, fruity, and slightly sweet flavor; pairs well with pork, beef, and poultry.
+  6. **Maple**: Mild, sweet, and subtle flavor; pairs well with poultry, pork, and beef.
+  7. **Pecan**: Mild, nutty, and slightly sweet flavor; pairs well with beef, pork, and poultry.
+  8. **Post Oak**: Mellow, earthy flavor; pairs well with brisket, sausages, and pork belly.
+- [ASSISTANT_SAID] General tips for smoking meats provided by the assistant:
+  - Use dry, seasoned wood.
+  - Soak wood chips or chunks in water for at least 30 minutes before smoking.
+  - Mix and match different types of wood.
+  - Experiment with different wood ratios.
+  - Follow proper food safety guidelines.
+- [EVENT] User is thinking of trying out a brisket recipe this weekend.
+- [ASSISTANT_SAID] Assistant provided recommendations for seasoning brisket before smoking, including:
+  1. **Dry Brining**: Mixture of kosher salt, brown sugar, and black pepper; let sit in the refrigerator for 2-3 days.
+  2. **Rub**: Classic Texas-style rub with chili powder, ground cumin, paprika, brown sugar, smoked paprika, garlic powder, onion powder, salt, and pepper.
+  3. **Marinade**: Liquid mixture with beef broth, apple cider vinegar, olive oil, garlic, thyme, salt, and pepper; refrigerate for 2-3 days.
+  4. **Injection**: Using a meat

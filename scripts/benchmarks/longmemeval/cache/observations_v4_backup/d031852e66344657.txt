@@ -1,0 +1,19 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/24 (Wed) 16:21
+- [FACT] User requested a shift rotation sheet for GM social media agents.
+- [FACT] There are 7 agents in total.
+- [CHANGE] User specified the need for 4 shifts: "8 am till 4 pm - 12 pm till 8 pm - 4 pm till 12 am - 12 am till 8 am."
+- [CHANGE] User requested 2 days off for every agent.
+- [TEMPORAL] User requested a shift rotation for only a week.
+- [FACT] User specified the week should run from Sunday to Saturday.
+- [FACT] User provided the names of the agents: Admon, Magdy, Ehab, Sara, Mostafa, Nemr, Adam.
+- [ASSISTANT] Assistant created a shift rotation sheet for GM social media agents for one week, starting on Sunday and ending on Saturday, with the following shifts:
+  - Sunday: Admon (8 am - 4 pm), Magdy (12 pm - 8 pm), Ehab (4 pm - 12 am), Sara (12 am - 8 am)
+  - Monday: Mostafa (8 am - 4 pm), Nemr (12 pm - 8 pm), Adam (4 pm - 12 am), Admon (12 am - 8 am)
+  - Tuesday: Magdy (8 am - 4 pm), Ehab (12 pm - 8 pm), Sara (4 pm - 12 am), Mostafa (12 am - 8 am)
+  - Wednesday: Nemr (8 am - 4 pm), Adam (12 pm - 8 pm), Admon (4 pm - 12 am), Magdy (12 am - 8 am)
+  - Thursday: Ehab (8 am - 4 pm), Sara (12 pm - 8 pm), Mostafa (4 pm - 12 am), Nemr (12 am - 8 am)
+  - Friday: Admon (8 am - 4 pm), Magdy (12 pm - 8 pm), Ehab (4 pm - 12 am), Sara (12 am - 8 am)
+  - Saturday: Adam (8 am - 4 pm), Mostafa (12 pm - 8 pm), Nemr (4 pm - 12 am), Admon (12 am - 8 am)
+- [ASSISTANT] Assistant noted that the rotation is for a 1-week period, with each agent working one shift per day and having two days off during the week.

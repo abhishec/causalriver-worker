@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/24 (Wed) 00:48
+- [FACT] User's current CPU is an Intel Core i5-11600K.
+- [FACT] User's current motherboard is an ASRock B460M Steel Legend Micro ATX.
+- [FACT] User has 16 GB of DDR4 RAM at 3200MHz.
+- [FACT] User's current graphics card is an NVIDIA GeForce RTX 2060.
+- [FACT] User's budget for the upgrade/new build is around $1,500.
+- [PREFERENCE] User is trying to decide between building a new gaming PC or buying a new graphics card for their current one to play "Cyberpunk 2077" at its highest settings.
+- [ASSISTANT_SAID] Upgrading for Cyberpunk 2077 is a great idea.
+- [ASSISTANT_SAID] User's current system's CPU (Intel Core i5-11600K) is strong enough for the game.
+- [ASSISTANT_SAID] User's ASRock B460M Steel Legend Micro ATX motherboard has a PCIe 3.0 x16 slot.
+- [ASSISTANT_SAID] User's 16 GB of DDR4 RAM at 3200MHz is sufficient for most modern games.
+- [ASSISTANT_SAID] Recommended graphics cards for upgrade: NVIDIA GeForce RTX 3070 (around $500), NVIDIA GeForce RTX 3070 Ti (around $600), AMD Radeon RX 6800 XT (around $400).
+- [ASSISTANT_SAID] Suggested power supply unit (PSU) upgrade to 650W or 750W 80+ Gold certified PSU for new graphics cards.
+- [ASSISTANT_SAID] Suggested building a new gaming PC with components including AMD Ryzen 5 5600X (around $300) or Intel Core i7-11700K (around $350), a compatible motherboard (around $150-$200), 16 GB or 32 GB of DDR4 RAM (around $60-$100), and a 1 TB NVMe SSD (around $100-$150).
+- [ASSISTANT_SAID] Recommended a mid-tower case (around $50-$70) and a PSU (around $80-$120) for a new build.
+- [PREFERENCE] User has been watching a lot of videos on IGN and GameSpot to catch up on the latest gaming news and updates.
+- [EVENT] User completed "The Last of Us Part II" on their PlayStation 5 after a month of playing it on and off.
+- [PREFERENCE] User was invested in the story and characters of "The Last of Us Part II," especially Ellie and Abby.
+- [PREFERENCE] User resonated with the game's themes of revenge, trauma

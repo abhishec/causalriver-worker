@@ -1,0 +1,31 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/26 (Fri) 23:05  
+[EVENT] User is planning to make a fresh salad for dinner tonight.  
+[PREFERENCE] User wants to add basil to the salad.  
+[EVENT] User remembers spending the entire first weekend of April preparing the soil for their garden, removing weeds, and marking out sections for each type of plant.  
+[ASSISTANT_SAID] Basil is a wonderful addition to any salad!  
+[ASSISTANT_SAID] Tips for harvesting basil without damaging the plant:  
+[ASSISTANT_SAID] 1. Pinch or cut, don't pull.  
+[ASSISTANT_SAID] 2. Harvest in the morning.  
+[ASSISTANT_SAID] 3. Take the top sets of leaves.  
+[ASSISTANT_SAID] 4. Leave at least two sets of leaves.  
+[ASSISTANT_SAID] 5. Harvest regularly every 7-10 days.  
+[ASSISTANT_SAID] 6. Don't harvest too much.  
+[ASSISTANT_SAID] 7. Use clean scissors or pinchers.  
+[ASSISTANT_SAID] Following these tips will help enjoy a bountiful harvest of basil.  
+[ASSISTANT_SAID] User put in great prep work in early April getting their garden ready.  
+[EVENT] User is planning to make pesto sauce this weekend.  
+[ASSISTANT_SAID] Simple recipe for Classic Basil Pesto:  
+[ASSISTANT_SAID] Ingredients: 2 cups fresh basil leaves, 1/3 cup pine nuts (or walnuts or almonds), 1/2 cup grated Parmesan cheese, 1/2 cup extra virgin olive oil, 2 cloves garlic, peeled and minced, salt to taste.  
+[ASSISTANT_SAID] Instructions for making pesto:  
+[ASSISTANT_SAID] 1. Rinse and dry the basil.  
+[ASSISTANT_SAID] 2. Combine basil, garlic, and nuts in a food processor.  
+[ASSISTANT_SAID] 3. Add Parmesan cheese and process.  
+[ASSISTANT_SAID] 4. Add olive oil while processing.  
+[ASSISTANT_SAID] 5. Season with salt.  
+[ASSISTANT_SAID] 6. Taste and adjust seasoning.  
+[ASSISTANT_SAID] 7. Store in an airtight container.  
+[ASSISTANT_SAID] Tips for pesto: Use fresh ingredients, don't overprocess, and add lemon juice if needed.  
+[EVENT] User has a lot of basil and plans to make a bigger batch of pesto and freeze some for later.  
+[ASSISTANT

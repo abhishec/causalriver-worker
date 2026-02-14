@@ -1,0 +1,21 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/30 (Tue) 12:50  
+[USER] The user is looking to order skincare products online.  
+[USER] The user has used a coupon to get free shipping on an order yesterday, which saved them $10 in shipping costs.  
+[USER] The user is looking for a specific skincare product, a facial moisturizer from a brand called "NourishMe."  
+[ASSISTANT_SAID] The assistant provided recommendations for beauty supply websites that often offer discounts or coupons, including Sephora, Ulta, Skinstore, Beauty.com, Dermstore, Glossier, Allure Beauty Box, and brand websites.  
+[ASSISTANT_SAID] The assistant mentioned that Skinstore and Dermstore carry the NourishMe brand.  
+[ASSISTANT_SAID] The assistant provided details on the availability and potential discounts for NourishMe products on Skinstore and Dermstore.  
+[ASSISTANT_SAID] Skinstore has a "Buy One, Get One 50% Off" offer on all NourishMe products.  
+[ASSISTANT_SAID] Dermstore is offering a 15% discount on all NourishMe products with the code NOURISH15 at checkout.  
+[ASSISTANT_SAID] The assistant provided a rough price range for NourishMe facial moisturizers on Skinstore ($25 - $45) and Dermstore ($28 - $40).  
+[ASSISTANT_SAID] The assistant provided specific examples of NourishMe facial moisturizers and their prices on Skinstore and Dermstore.  
+[ASSISTANT_SAID] The assistant confirmed the availability and current prices of the "NourishMe Intensive Repair Moisturizer" on both Skinstore ($42) and Dermstore ($45).  
+[ASSISTANT_SAID] The assistant confirmed that the discounts mentioned earlier would apply to the "NourishMe Intensive Repair Moisturizer."  
+[ASSISTANT_SAID] The assistant provided additional discounts and promo codes available on Skinstore and Dermstore, including student discounts, military discounts, loyalty rewards, and birthday offers.  
+[ASSISTANT_SAID] Skinstore offers a 10% student discount through UNiDAYS.  
+[ASSISTANT_SAID] Dermstore offers a 10% military discount for active and retired military personnel.  
+[ASSISTANT_SAID] Both Skinstore and Dermstore have loyalty programs that offer 5% back in rewards points for every purchase.  
+[USER] The user plans to take advantage of the student discount on Skinstore and ask a friend in the military for help with the military discount on Dermstore.  
+[USER] The user decided to go with Dermstore's offer since it seems like a better deal with the 15% discount code.

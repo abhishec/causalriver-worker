@@ -1,0 +1,39 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/27 (Sat) 02:19  
+[USER] User requested to format input data into table form.  
+[USER] User provided movie data with the following details:  
+[FACT] Title: Avatar: The Way of Water  
+[FACT] Rating: 7.8  
+[FACT] Year: 2022  
+[FACT] Month: December  
+[FACT] Certificate: PG-13  
+[FACT] Runtime: 192  
+[FACT] Directors: James Cameron  
+[FACT] Stars: Sam Worthington, Zoe Saldana, Sigourney Weaver, Stephen Lang  
+[FACT] Genre: Action, Adventure, Fantasy  
+[FACT] Filming_location: New Zealand  
+[FACT] Budget: 350000000  
+[FACT] Income: 2267946983  
+[FACT] Country_of_origin: United States  
+[ASSISTANT_CREATED] Assistant formatted the provided movie data into a table:  
+[ASSISTANT_SAID] | Title | Avatar: The Way of Water |  
+[ASSISTANT_SAID] | --- | --- |  
+[ASSISTANT_SAID] | Rating | 7.8 |  
+[ASSISTANT_SAID] | Year | 2022 |  
+[ASSISTANT_SAID] | Month | December |  
+[ASSISTANT_SAID] | Certificate | PG-13 |  
+[ASSISTANT_SAID] | Runtime | 192 |  
+[ASSISTANT_SAID] | Directors | James Cameron |  
+[ASSISTANT_SAID] | Stars | Sam Worthington, Zoe Saldana, Sigourney Weaver, Stephen Lang |  
+[ASSISTANT_SAID] | Genre | Action, Adventure, Fantasy |  
+[ASSISTANT_SAID] | Filming_location | New Zealand |  
+[ASSISTANT_SAID] | Budget | 350000000 |  
+[ASSISTANT_SAID] | Income | 2267946983 |  
+[ASSISTANT_SAID] | Country_of_origin | United States |  
+[USER] User mentioned dealing with data related to Top 100 popular movies from 2003 to 2022 (iMDB).  
+[USER] User requested a list of good visualizations for PowerBI based on the provided movie data.  
+[ASSISTANT_SAID] Assistant suggested several visualizations:  
+[ASSISTANT_SAID] 1. Bar chart of Top 10 movies by income: Columns: Title, Income; Visualization Type: Bar chart.  
+[ASSISTANT_SAID] 2. Stacked column chart of movie genre by year: Columns: Year, Genre; Visualization Type: Stacked column chart.  
+[ASSISTANT_SAID] 3. Scatter plot of runtime vs

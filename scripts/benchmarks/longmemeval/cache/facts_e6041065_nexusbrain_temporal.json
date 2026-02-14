@@ -1,0 +1,106 @@
+{
+  "answer_4eb6d671_2": [
+    {
+      "fact": "User is planning a 5-day trip.",
+      "type": "event",
+      "entities": [
+        "5-day trip"
+      ]
+    },
+    {
+      "fact": "User prefers to pack light.",
+      "type": "preference",
+      "entities": [
+        "packing light"
+      ]
+    },
+    {
+      "fact": "User packed a lot of shoes for their last trip but only wore two pairs.",
+      "type": "personal",
+      "entities": [
+        "last trip",
+        "two pairs of shoes"
+      ]
+    },
+    {
+      "fact": "User will not pack extra shoes for the upcoming trip.",
+      "type": "preference",
+      "entities": [
+        "extra shoes"
+      ]
+    },
+    {
+      "fact": "User tends to stick to their favorite pieces when packing.",
+      "type": "preference",
+      "entities": [
+        "favorite pieces"
+      ]
+    },
+    {
+      "fact": "User considers activities and weather when choosing what to pack.",
+      "type": "opinion",
+      "entities": [
+        "activities",
+        "weather"
+      ]
+    }
+  ],
+  "answer_4eb6d671_1": [
+    {
+      "fact": "User is planning a 5-day trip to the city.",
+      "type": "event",
+      "entities": [
+        "5-day trip",
+        "city"
+      ]
+    },
+    {
+      "fact": "User tends to overpack.",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User wants to pack lightly.",
+      "type": "preference",
+      "entities": []
+    },
+    {
+      "fact": "User is concerned about packing enough undergarments and socks.",
+      "type": "preference",
+      "entities": [
+        "undergarments",
+        "socks"
+      ]
+    },
+    {
+      "fact": "User often forgets to pack enough undergarments and socks.",
+      "type": "opinion",
+      "entities": [
+        "undergarments",
+        "socks"
+      ]
+    },
+    {
+      "fact": "User prioritizes packing versatile clothing items.",
+      "type": "preference",
+      "entities": [
+        "versatile clothing items"
+      ]
+    },
+    {
+      "fact": "User is trying to pack more scarves and jackets.",
+      "type": "preference",
+      "entities": [
+        "scarves",
+        "jackets"
+      ]
+    },
+    {
+      "fact": "User tends to overpack toiletries.",
+      "type": "opinion",
+      "entities": [
+        "toiletries"
+      ]
+    }
+  ]
+}

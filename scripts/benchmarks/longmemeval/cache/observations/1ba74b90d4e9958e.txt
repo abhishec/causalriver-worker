@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/27 (Sat) 20:29  
+[USER] User is looking for resources to improve skills in deep learning.  
+[USER] User is interested in online courses or tutorials on TensorFlow.  
+[ASSISTANT_SAID] Recommended resources for TensorFlow include:  
+[ASSISTANT_SAID] 1. Official TensorFlow Tutorials (official): Covers basics to advanced topics like TensorFlow.js and TensorFlow Lite.  
+[ASSISTANT_SAID] 2. TensorFlow for Beginners (official): A gentle introduction to TensorFlow, covering basics of machine learning and building simple models.  
+[ASSISTANT_SAID] 3. DeepLearning.ai - TensorFlow Specialization (Coursera): A 5-course specialization by Andrew Ng covering basics of TensorFlow, CNNs, RNNs, and more.  
+[ASSISTANT_SAID] 4. TensorFlow for Deep Learning (edX): A 4-course series by IBM covering TensorFlow basics, CNNs, RNNs, and deep learning applications.  
+[ASSISTANT_SAID] 5. Deep Learning with Python and TensorFlow (DataCamp): An interactive course covering TensorFlow, Keras, and deep learning concepts.  
+[ASSISTANT_SAID] 6. TensorFlow Developer Certificate (edX): A professional certificate program by Google covering advanced TensorFlow topics and a final project.  
+[ASSISTANT_SAID] 7. TensorFlow Tutorial (Machine Learning Mastery): A comprehensive tutorial covering TensorFlow basics, including installation, tensors, and neural networks.  
+[ASSISTANT_SAID] 8. TensorFlow for Computer Vision (PyImageSearch): A tutorial series focused on computer vision applications using TensorFlow.  
+[ASSISTANT_SAID] 9. TensorFlow Tutorial for Beginners (KDNuggets): A beginner-friendly tutorial covering TensorFlow basics, including installation, data preprocessing, and model building.  
+[ASSISTANT_SAID] 10. TensorFlow Style Transfer Tutorial (TensorFlow Blog): A tutorial on style transfer using TensorFlow.  
+[ASSISTANT_SAID] 11. YouTube Channels:  
+[ASSISTANT_SAID] - TensorFlow: The official TensorFlow YouTube channel featuring tutorials, explainers, and conference talks.  
+[ASSISTANT_SAID] - Sentdex: A popular channel with in-depth TensorFlow tutorials and machine learning explanations.  
+[ASSISTANT_SAID] - Machine Learning Mastery: A channel covering various machine learning topics, including TensorFlow and deep learning.  
+[ASSISTANT_SAID] 12. Books:  
+[ASSISTANT_SAID] - TensorFlow for Machine Intelligence (O'Reilly): A comprehensive book covering TensorFlow and

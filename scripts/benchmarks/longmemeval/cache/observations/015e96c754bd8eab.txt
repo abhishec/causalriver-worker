@@ -1,0 +1,27 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/03/15 (Wed) 12:35
+- [USER] User inquired about notable alumni from Georgia Tech's artificial intelligence program and their impact in the industry.
+- [ASSISTANT_SAID] Georgia Tech's AI program has notable alumni including:
+  - Sebastian Thrun: Co-founded Google X, worked on self-driving cars, Google Glass, and founded Udacity.
+  - Pin Pin Tea-makorn: Co-founder of Grab, a ride-hailing and logistics services provider in Southeast Asia.
+  - Thomas G. Dietterich: Professor at Oregon State University, pioneer in machine learning, co-founded the Journal of Machine Learning Research.
+  - Daphne Koller: Co-founded Coursera, contributed to Bayesian networks and probabilistic models.
+- [ASSISTANT_SAID] Georgia Tech's AI program has produced many talented individuals who have significantly contributed to the industry.
+- [USER] User asked for more information about Georgia Tech's curriculum for their AI program.
+- [ASSISTANT_SAID] Georgia Tech's AI program offers a structured curriculum covering topics in AI, machine learning, natural language processing, computer vision, and robotics.
+- [ASSISTANT_SAID] The curriculum includes core courses, electives, and specialization courses, emphasizing hands-on training and project-based courses.
+- [ASSISTANT_SAID] Core courses include:
+  - Introduction to Machine Learning
+  - Artificial Intelligence
+  - Robotics
+  - Natural Language Processing
+- [ASSISTANT_SAID] The program offers numerous electives and specialization courses in areas like deep learning, computer vision, reinforcement learning, and data mining.
+- [USER] User inquired about how Georgia Tech's AI program compares to other top AI programs in the country.
+- [ASSISTANT_SAID] Georgia Tech's AI program is consistently ranked in the top ten AI programs in the U.S. by sources like US News & World Report, Niche, and QS World University Rankings.
+- [ASSISTANT_SAID] The program has a strong curriculum, world-class faculty, and industry partnerships with companies like Google, IBM, and Microsoft.
+- [USER] User expressed interest in the accessibility of Georgia Tech's AI program and whether it is selective.
+- [ASSISTANT_SAID] Georgia Tech's AI program is competitive but accessible to a wide range of students, requiring a strong background in computer science, mathematics, and statistics.
+- [ASSISTANT_SAID] The program has an acceptance rate of around 16% and actively seeks to attract a diverse pool of applicants.
+- [ASSISTANT_SAID] Georgia Tech offers several pathways for students to pursue a graduate degree in AI, including a traditional Master's, a professional Master's, and a Ph.D. program.
+- [USER] User asked for more information about the hands-on training

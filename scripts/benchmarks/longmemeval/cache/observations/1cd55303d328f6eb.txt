@@ -1,0 +1,43 @@
+**Observation Log:**
+
+- [FACT] The user has been listening to the Dear Evan Hansen soundtrack nonstop since they saw the movie adaptation.
+- [TEMPORAL] The user saw the movie adaptation of Dear Evan Hansen on November 25th, 2021.
+- [PREFERENCE] The user is looking for musical recommendations similar to Dear Evan Hansen.
+- [ASSISTANT_SAID] The assistant recommended the following musicals similar to Dear Evan Hansen: 
+  1. The Perks of Being a Wallflower
+  2. Next to Normal
+  3. Spring Awakening
+  4. Be More Chill
+  5. The Lightning Thief: The Percy Jackson Musical
+  6. Everybody's Talking About Jamie
+  7. The Band's Visit
+  8. If/Then
+- [FACT] The user is interested in exploring musicals with a similar grandness to Hadestown.
+- [TEMPORAL] The user saw Hadestown on Broadway in 2019 and still listens to the soundtrack every week.
+- [ASSISTANT_SAID] The assistant recommended the following musicals with a similar grandness to Hadestown:
+  1. Les Misérables
+  2. Ragtime
+  3. Natasha, Pierre & The Great Comet of 1812
+  4. The Light in the Piazza
+  5. The Hunchback of Notre Dame
+  6. Once On This Island
+  7. The Wild Party
+  8. Sweeney Todd: The Demon Barber of Fleet Street
+- [PREFERENCE] The user has been enjoying the PBS Great Performances series.
+- [EVENT] The user watched the 2020 capture of Hamilton on January 2nd, 2022.
+- [EVENT] The user watched the 2019 capture of The King and I on February 20th, 2022.
+- [ASSISTANT_SAID] The assistant recommended the following filmed productions or live streams of musicals:
+  1. She Loves Me (2016 Broadway Cast)
+  2. The Sound of Music (2013 UK Tour)
+  3. Newsies (2017 Filmed Stage Production)
+  4. Kinky Boots (2016 West End Cast)
+  5. Jesus Christ Superstar Live in Concert (2018)
+  6. The Phantom of the Opera (2015 Royal Albert Hall)
+  7. Les Misérables: The Staged Concert (2020)
+  8. Anastasia (2020 Filmed Stage Production)
+- [ASSISTANT_SAID] The assistant mentioned platforms for live streams:
+  1. BroadwayHD
+  2. Lincoln Center Theater Live
+  3. National Theatre Live
+  4. Digital Theatre
+- [PREFERENCE] The user is interested in musicals with a similar blend of drama

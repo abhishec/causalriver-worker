@@ -1,0 +1,46 @@
+**Observation Log:**
+
+**Session Date:** 2023/05/21 (Sun) 08:40  
+**Session ID:** sharegpt_P5L3sLZ_0  
+
+1. [USER] User requested features of a modern website for a residential, commercial, and industrial real estate appraisal company.
+2. [ASSISTANT_SAID] Assistant provided a list of features for a modern website for a real estate appraisal company, including:
+   - Clean and modern design
+   - Responsive design
+   - Services page
+   - About us page
+   - Testimonials
+   - Contact us page
+   - Online ordering system
+   - Blog
+   - Property search tools
+   - Industry news and updates
+3. [USER] User asked for questions that could be asked of a residential property appraiser regarding the value of their property.
+4. [ASSISTANT_SAID] Assistant provided a list of questions for a residential property appraiser, including:
+   - What is the current market value of the property?
+   - How did you determine the market value of the property?
+   - What factors were considered in determining the market value of the property?
+   - What are the comparable properties that were used in determining the market value of the property?
+   - How does the condition of the property impact its value?
+   - How does the location of the property impact its value?
+   - How does the size of the property impact its value?
+   - How does the age of the property impact its value?
+   - How does the type of property (single-family home, townhouse, condo, etc.) impact its value?
+   - Are there any unique features or characteristics of the property that impact its value?
+   - How does the current real estate market impact the value of the property?
+   - What are the current trends in the real estate market, and how do they impact the value of the property?
+   - Are there any external factors, such as zoning or environmental issues, that impact the value of the property?
+   - Are there any improvements or renovations that could be made to the property to increase its value?
+   - How often should a property be appraised to ensure that its value is accurate and up-to-date?
+5. [USER] User inquired about the factors that go into determining property values from a professional appraiser's perspective.
+6. [ASSISTANT_SAID] Assistant provided a list of factors considered by professional appraisers when determining property values, including:
+   - Location
+   - Size and layout
+   - Condition
+   - Comparable sales
+   - Income potential
+   - Zoning
+   - Environmental factors
+   - Market trends
+   - Unique features
+   - Legal issues

@@ -1,0 +1,65 @@
+{
+  "answer_124f5dc3_2": [
+    {
+      "fact": "User is looking for gift ideas for a friend who is into fashion",
+      "type": "preference",
+      "entities": [
+        "gift ideas",
+        "friend",
+        "fashion"
+      ]
+    },
+    {
+      "fact": "User recently bought a silver necklace with a tiny pendant for another friend",
+      "type": "event",
+      "entities": [
+        "silver necklace",
+        "tiny pendant",
+        "friend"
+      ]
+    },
+    {
+      "fact": "User is particularly interested in minimalist chic earrings",
+      "type": "preference",
+      "entities": [
+        "minimalist chic earrings"
+      ]
+    }
+  ],
+  "answer_124f5dc3_1": [
+    {
+      "fact": "User is looking for gift recommendations for a friend who is into music",
+      "type": "preference",
+      "entities": [
+        "gift recommendations",
+        "friend",
+        "music"
+      ]
+    },
+    {
+      "fact": "User recently bought a wireless headphone for their brother as a graduation gift",
+      "type": "event",
+      "entities": [
+        "wireless headphone",
+        "brother",
+        "graduation gift"
+      ]
+    },
+    {
+      "fact": "User's brother loved the wireless headphones",
+      "type": "opinion",
+      "entities": [
+        "brother",
+        "wireless headphones"
+      ]
+    },
+    {
+      "fact": "User thinks a portable speaker or music subscription would be great gift options",
+      "type": "preference",
+      "entities": [
+        "portable speaker",
+        "music subscription"
+      ]
+    }
+  ]
+}

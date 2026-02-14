@@ -1,0 +1,36 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/03/01 (Wed) 18:59
+- [EVENT] User is in the process of buying a home.
+- [EVENT] User is trying to estimate monthly expenses related to the home purchase.
+- [FACT] User is interested in calculating mortgage payment based on a $325,000 loan.
+- [ASSISTANT_SAID] The assistant provided an estimate for the mortgage payment based on the following assumptions:
+  - Loan amount: $325,000
+  - Interest rate: 4% (fixed rate)
+  - Loan term: 30 years
+- [ASSISTANT_SAID] Estimated monthly mortgage payment:
+  - Principal and interest (P&I): $1,542
+  - Property taxes (estimated): $400
+  - Insurance (estimated): $100
+  - Total monthly payment: $2,042
+- [ASSISTANT_SAID] The assistant mentioned factors that could affect the actual mortgage payment, including credit score, loan terms, property taxes, insurance, and other costs.
+- [EVENT] User asked for guidance on understanding how property taxes are calculated and how to estimate them.
+- [ASSISTANT_SAID] The assistant explained property taxes, including:
+  - Purpose of property taxes (funding public services)
+  - Components of property tax calculation: assessed value and millage rate
+  - Formula for calculating property taxes: Property Tax = (Assessed Value x Millage Rate) / 1,000
+- [ASSISTANT_SAID] The assistant provided an example of property tax calculation:
+  - Assessed value: $250,000
+  - Millage rate: 12.5 mills
+  - Property Tax: $3,125 per year
+- [ASSISTANT_SAID] The assistant outlined steps to estimate property taxes, including researching the millage rate, determining the assessed value, using online calculators, and consulting with a real estate agent.
+- [EVENT] User requested help on negotiating with the seller to fix minor issues found by the home inspector or lower the price accordingly.
+- [ASSISTANT_SAID] The assistant provided negotiation strategies, including:
+  - Requesting repairs
+  - Requesting a credit at closing
+  - Requesting a price reduction
+  - Bundling requests for multiple issues
+- [ASSISTANT_SAID] The assistant provided a negotiation script for communicating with the seller's agent.
+- [ASSISTANT_SAID] The assistant offered tips for effective negotiation, such as staying calm, being respectful, being prepared to walk away, and communicating clearly.
+- [EVENT] User asked for guidance on finalizing the homeowner's insurance policy with State Farm and setting up automatic payments.
+- [ASSISTANT_SAID] The assistant provided a step-by-step guide for finalizing the policy, including

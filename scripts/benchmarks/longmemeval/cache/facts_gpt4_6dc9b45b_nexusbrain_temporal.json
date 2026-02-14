@@ -1,0 +1,51 @@
+{
+  "answer_c4df007f_1": [
+    {
+      "fact": "User attended the Seattle International Film Festival (SIFF) for a week.",
+      "type": "event",
+      "entities": [
+        "Seattle International Film Festival",
+        "SIFF"
+      ]
+    },
+    {
+      "fact": "User watched 8 films at SIFF.",
+      "type": "event",
+      "entities": [
+        "8 films",
+        "SIFF"
+      ]
+    },
+    {
+      "fact": "User sat in on a panel discussion about film distribution and marketing.",
+      "type": "event",
+      "entities": [
+        "panel discussion",
+        "film distribution",
+        "film marketing"
+      ]
+    },
+    {
+      "fact": "User loved the film 'Coda'.",
+      "type": "opinion",
+      "entities": [
+        "Coda"
+      ]
+    },
+    {
+      "fact": "User is looking for recommendations for romantic comedies.",
+      "type": "preference",
+      "entities": [
+        "romantic comedies"
+      ]
+    },
+    {
+      "fact": "User is interested in learning more about film distribution and marketing.",
+      "type": "preference",
+      "entities": [
+        "film distribution",
+        "film marketing"
+      ]
+    }
+  ]
+}

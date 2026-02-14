@@ -1,0 +1,67 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/24 (Wed) 00:46
+- [USER] User is setting up a Docker Compose server.
+- [USER] User is interested in using Nginx, Let's Encrypt Certbot, PHP 8.1, and MariaDB.
+- [ASSISTANT_SAID] To set up a Docker Compose server, the user needs to create several files and configure them appropriately.
+- [ASSISTANT_SAID] The user should create a directory for the Docker Compose project and navigate to it.
+- [ASSISTANT_SAID] The user should create a `docker-compose.yml` file to define the services for Nginx, Certbot, PHP, and MariaDB.
+- [ASSISTANT_CREATED] Example `docker-compose.yml` file provided:
+  ```
+  version: '3'
+
+  services:
+    nginx:
+      image: nginx:latest
+      ports:
+        - "80:80"
+        - "443:443"
+      volumes:
+        - ./nginx/conf.d:/etc/nginx/conf.d
+        - ./nginx/ssl:/etc/nginx/ssl
+        - ./app:/app
+      depends_on:
+        - certbot
+        - php
+      environment:
+        - NGINX_HOST=example.com
+        - NGINX_EMAIL=webmaster@example.com
+      command: /bin/bash -c "envsubst '$$NGINX_HOST $$NGINX_EMAIL' < /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf && exec nginx -g 'daemon off;'"
+
+    certbot:
+      image: certbot/certbot:latest
+      volumes:
+        - ./nginx/ssl:/etc/letsencrypt
+      environment:
+        - CERTBOT_EMAIL=webmaster@example.com
+        - CERTBOT_DOMAINS=example.com
+      entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+
+    php:
+      image: php:8.1-fpm
+      volumes:
+        - ./app:/app
+      depends_on:
+        - mariadb
+      environment:
+        - DB_HOST=mariadb
+        - DB_DATABASE=app
+        - DB_USERNAME=app
+        - DB_PASSWORD=secret
+        - UPLOAD_MAX_FILESIZE=10M
+        - POST_MAX_SIZE=10M
+
+    mariadb:
+      image: mariadb:latest
+      volumes:
+        - mariadb:/var/lib/mysql
+      environment:
+        - MYSQL_ROOT_PASSWORD=secret
+        - MYSQL_DATABASE=app
+        - MYSQL_USER=app
+        - MYSQL_PASSWORD=secret
+
+  volumes:
+    mariadb:
+  ```
+- [ASSISTANT_SAID] The user should create a

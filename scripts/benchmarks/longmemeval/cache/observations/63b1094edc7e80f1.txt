@@ -1,0 +1,28 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/23 (Tue) 06:32
+- [USER] User inquired about how the selection of beans and the roasting process affect the taste of coffee.
+- [ASSISTANT_SAID] The selection of beans and the roasting process are critical factors that significantly impact the taste of coffee.
+- [ASSISTANT_SAID] The taste of coffee depends on the origin, species, and variety of coffee beans.
+- [ASSISTANT_SAID] Coffee beans from Ethiopia are known for their fruity and floral notes.
+- [ASSISTANT_SAID] Coffee beans from Colombia offer a fruity, chocolatey taste.
+- [ASSISTANT_SAID] Arabica beans have a sweeter and more acidic taste, while Robusta beans are more bitter.
+- [ASSISTANT_SAID] Roasting transforms the internal structure of coffee beans to create flavor and aroma.
+- [ASSISTANT_SAID] The longer a bean is roasted, the darker it becomes, resulting in a stronger and bolder flavor.
+- [ASSISTANT_SAID] Light Roast produces lighter colored beans with a mild flavor, higher acidity, and subtler aroma.
+- [ASSISTANT_SAID] Medium Roast yields a darker bean with less acidity and finer flavor while maintaining body and aroma.
+- [ASSISTANT_SAID] Dark Roast results in oil on the bean's surface, low acidity, heavy body, and a stronger flavor.
+- [ASSISTANT_SAID] The selection of beans determines the base flavor, which is refined by the roasting process.
+- [USER] User expressed excitement about the variety of coffee options available.
+- [USER] User requested recommendations for a coffee blend with a mild flavor and fruity notes.
+- [ASSISTANT_SAID] Recommended coffee blends include:
+  - [ASSISTANT_SAID] Ethiopian Yirgacheffe - light body, floral and citrusy flavor.
+  - [ASSISTANT_SAID] Ethiopian Sidamo - subtle berry flavor and smooth finish.
+  - [ASSISTANT_SAID] Yemen Mocha Matari - notes of chocolate, fruit, and spice.
+- [USER] User asked for recommendations for specific roasters or coffee shops to find these blends.
+- [ASSISTANT_SAID] Suggested coffee roasters and shops include:
+  - [ASSISTANT_SAID] Blue Bottle Coffee - offers a range of single-origin and blended coffees.
+  - [ASSISTANT_SAID] Intelligentsia Coffee - several blends and single-origin coffees available.
+  - [ASSISTANT_SAID] Stumptown Coffee Roasters - variety of blends and single-origin coffees.
+  - [ASSISTANT_SAID] Verve Coffee Roasters - unique blends and single-origin coffees.
+  - [ASS

@@ -1,0 +1,10 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/23 (Tue) 04:39
+- [FACT] User conducted a web search regarding Spot VMs.
+- [ASSISTANT_SAID] A Spot VM is a type of virtual machine (VM) that is made up of excess computing capacity offered by cloud service providers such as Microsoft Azure and Google Cloud Compute Engine.
+- [ASSISTANT_SAID] Spot VMs are designed to handle specific types of workloads such as dev/test environments, high-performance computing scenarios, batch processing jobs, big data, analytics, container-based and large-scale stateless applications.
+- [ASSISTANT_SAID] The use of a Spot VM is subject to capacity availability and can be evicted at any time by the cloud provider with a 30-second notice when more capacity is needed.
+- [ASSISTANT_SAID] Using a Spot VM can provide significant discounts compared to other virtual machine instances.
+- [FACT] User provided three web search results related to Spot VMs, including URLs for Microsoft Azure and Google Cloud Compute Engine.
+- [ASSISTANT_SAID] Cited results using [[1](https://azure.microsoft.com/en-us/products/virtual-machines/spot/)], [[2](https://learn.microsoft.com/en-us/azure/virtual-machines/spot-vms)], and [[3](https://cloud.google.com/compute/docs/instances/spot)] notation.

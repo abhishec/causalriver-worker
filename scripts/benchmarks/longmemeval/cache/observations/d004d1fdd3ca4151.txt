@@ -1,0 +1,17 @@
+**Observation Log:**
+
+- [FACT] User's name is Elsie.
+- [FACT] Elsie previously interned at ByteDance.
+- [FACT] At ByteDance, Elsie was responsible for hiring algorithm engineers.
+- [FACT] Elsie also interned as a consultant at Mercer Consulting, a human resources management consulting firm.
+- [FACT] Elsie is currently in a master's program in Human Resource Management and Organizational Analysis.
+- [FACT] Elsie's GPA is around 3.5.
+- [FACT] Elsie is familiar with MS Office.
+- [PREFERENCE] Elsie is more interested in performance management and compensation management within HR.
+- [EVENT] Elsie participated in the recruitment process at ByteDance, which included screening resumes, calling candidates, arranging interviews, and onboarding.
+- [CHANGE] Elsie's master's program is set to end in April 2023.
+- [ASSISTANT_SAID] The HR Intern position includes responsibilities such as filing documents, answering inquiries, scheduling interviews, collecting job applications, writing employee communications, and checking compliance with labor regulations.
+- [ASSISTANT_SAID] The job requirements for the HR Intern position include being enrolled in a junior or senior program at a university or college, having a minimum GPA of 3.0, knowledge of US labor law preferred, proficiency in MS Office, and excellent communication and organizational skills.
+- [ASSISTANT_SAID] The HR Intern position is a paid internship with a competitive compensation package and additional benefits such as hands-on HR experience and participation in company events.
+- [ASSISTANT_SAID] The assistant believes Elsie would be a good fit for the HR Intern position based on her experience, qualifications, and interests.
+- [TEMPORAL] The session date is 2023/07/01 (Sat) at 05:19.

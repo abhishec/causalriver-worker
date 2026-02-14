@@ -1,0 +1,30 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/04/18 (Tue) 21:56  
+[USER] User inquired about the `SystemMaxFiles` setting in journalctl and its application scope.  
+[ASSISTANT_SAID] If `SystemMaxFiles` is set in a specific `.service` file, it applies only to that particular service.  
+[ASSISTANT_SAID] `SystemMaxFiles` controls the maximum number of journal files that can be stored on disk.  
+[ASSISTANT_SAID] Setting `SystemMaxFiles` in a specific `.service` file overrides the default value in `/etc/systemd/journald.conf`.  
+[ASSISTANT_SAID] To set `SystemMaxFiles` for all services, modify the default value in `/etc/systemd/journald.conf`.  
+[USER] User asked about the `MaxFileSec=` option.  
+[ASSISTANT_SAID] The `MaxFileSec` option sets the maximum time for which the current journal file will be kept before rotation.  
+[ASSISTANT_SAID] By default, `MaxFileSec` is set to one month (28 days).  
+[ASSISTANT_SAID] After 28 days, the current journal file will be rotated, and a new file will be created.  
+[ASSISTANT_SAID] `MaxFileSec` can be set in `journald.conf` or a specific `.service` file.  
+[ASSISTANT_SAID] Example to set `MaxFileSec` to 2 weeks: `MaxFileSec=2w`.  
+[ASSISTANT_SAID] To set `MaxFileSec` in a specific `.service` file:  
+```csharp
+[Service]
+MaxFileSec=2w
+```  
+[ASSISTANT_SAID] `MaxFileSec` helps manage disk space and prevents journal files from becoming too large.  
+[USER] User asked how else to control log rotation for their service.  
+[ASSISTANT_SAID] Other options for controlling log rotation include:  
+[ASSISTANT_SAID] 1. `SystemMaxUse`: Sets maximum disk space for all journal files.  
+[ASSISTANT_SAID] 2. `SystemKeepFree`: Sets minimum free disk space to be maintained.  
+[ASSISTANT_SAID] 3. `SystemMaxFileSize`: Sets maximum size of an individual journal file.  
+[ASSISTANT_SAID] 4. `SystemMaxFiles`: Sets maximum number of journal files stored on disk.  
+[ASSISTANT_SAID] When limits are reached, the oldest files will be rotated and deleted to make space.  
+[ASSISTANT_SAID] Example configuration for a specific service:  
+```makefile
+[Service

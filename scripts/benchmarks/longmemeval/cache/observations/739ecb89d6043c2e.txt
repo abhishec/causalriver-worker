@@ -1,0 +1,25 @@
+**Observation Log:**
+
+- [FACT] User is planning to upgrade their car's exhaust system.
+- [FACT] User owns a 2015 Ford Mustang GT.
+- [PREFERENCE] User is interested in popular brands and models for exhaust systems.
+- [ASSISTANT_SAID] Borla S-Type Axle-Back Exhaust System (Part #140349) is recommended for the 2015 Mustang GT.
+- [ASSISTANT_SAID] Roush Axle-Back Exhaust System (Part #421346) is recommended for the 2015 Mustang GT.
+- [ASSISTANT_SAID] MBRP Axle-Back Exhaust System (Part #S5417AL) is recommended for the 2015 Mustang GT.
+- [ASSISTANT_SAID] Flowmaster Cat-Back Exhaust System (Part #717841) is recommended for the 2015 Mustang GT.
+- [ASSISTANT_SAID] Gibson Cat-Back Exhaust System (Part #615541) is recommended for the 2015 Mustang GT.
+- [ASSISTANT_SAID] Corsa Cat-Back Exhaust System (Part #14833) is recommended for the 2015 Mustang GT.
+- [ASSISTANT_SAID] American Racing Headers 1-7/8" Headers (Part #941115) and X-Pipe (Part #941117) are recommended for the 2015 Mustang GT.
+- [ASSISTANT_SAID] JBA 1-7/8" Headers (Part #1810S) and X-Pipe (Part #1810X) are recommended for the 2015 Mustang GT.
+- [ASSISTANT_SAID] User should check compatibility of any exhaust system with their vehicle's trim, engine, and transmission.
+- [ASSISTANT_SAID] User should research sound level and tone of the exhaust system.
+- [ASSISTANT_SAID] User should consider material used in the exhaust system and warranty offered by the manufacturer.
+- [ASSISTANT_SAID] User should consult with a professional mechanic or exhaust specialist for installation.
+- [EVENT] User is thinking of attending more auto racing events.
+- [FACT] User is located in the Los Angeles area.
+- [PREFERENCE] User is interested in drag racing events.
+- [ASSISTANT_SAID] User should provide location details, type of events, specific tracks, and travel preferences for accurate event recommendations.
+- [ASSISTANT_SAID] Resources for finding events include national racing organizations' websites, track websites, Facebook events, online event calendars, and local car clubs.
+- [EVENT] User participated in the Turbocharged Tuesdays auto racing event on June 14th.
+- [FACT] User broke their personal best time of 12.5 seconds in the quarter-mile drag race.
+- [ASSISTANT_SAID] Irwindale

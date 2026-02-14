@@ -1,0 +1,25 @@
+**Observation Log:**
+
+- [FACT] The user is planning a trip to visit their paternal grandparents.
+- [TEMPORAL] The trip is planned for August.
+- [FACT] The user's grandparents live in Orlando, Florida.
+- [PREFERENCE] The user's grandparents love outdoor activities, especially walks and picnics.
+- [FACT] The user is 20 years old.
+- [PREFERENCE] The user is interested in a mix of relaxation and cultural activities.
+- [FACT] The user plans to spend a week with their grandparents in Orlando.
+- [EVENT] The user recently went through old family photos and found ones from their maternal grandparents' 50th wedding anniversary celebration, which was on June 17th.
+- [ASSISTANT_SAID] Recommended outdoor activities in Orlando include Wekiwa Springs State Park, Lake Eola, and Winter Park Chain of Lakes.
+- [ASSISTANT_SAID] Recommended cultural attractions in Orlando include Orlando Museum of Art, Albin Polasek Museum & Sculpture Gardens, and Cornell Fine Arts Museum.
+- [ASSISTANT_SAID] Suggested taking an airboat tour, visiting East End Market, and enjoying dinner at a local restaurant.
+- [ASSISTANT_SAID] Suggested checking the City of Orlando's events calendar, following local event pages on Facebook, and downloading the Eventbrite app for outdoor movie nights and concerts.
+- [ASSISTANT_SAID] Recommended Cuban restaurants in Orlando include Café Cuba, Tropical Café, Pio Pio, and Havana Grill.
+- [ASSISTANT_SAID] Suggested outdoor movie nights in Orlando, including Movie Night in the Park and Winter Park Outdoor Movie Series.
+- [ASSISTANT_SAID] Suggested outdoor concerts, including Orlando Philharmonic Orchestra's Outdoor Concerts and Dr. Phillips Center's Outdoor Concert Series.
+- [ASSISTANT_SAID] Recommended picnic spots in Winter Park include Central Park, Lake Osceola Park, Ward Park, Kraft Azalea Park, and Winter Park Chain of Lakes.
+- [PREFERENCE] The user is looking for good brunch spots for their mom's birthday in July.
+- [EVENT] The user is planning a surprise brunch for their mom's birthday in July.
+- [FACT] The user is familiar with local restaurants in the area where their maternal grandparents live.
+- [PREFERENCE] The user is considering booking a table at a new bistro downtown that has a good brunch menu and atmosphere.
+- [ASSISTANT_SAID] Suggested checking the brunch hours, making a reservation, checking the menu, and planning ahead for the surprise brunch.
+- [RELATIONSHIP] The user's mom is mentioned as the person for whom the surprise brunch is being planned.
+- [RELATIONSHIP] The user's siblings are mentioned as potential helpers in planning the surprise brunch.

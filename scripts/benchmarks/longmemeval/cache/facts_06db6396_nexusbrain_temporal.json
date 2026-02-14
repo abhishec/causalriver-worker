@@ -1,0 +1,84 @@
+{
+  "answer_da72b1b4_1": [
+    {
+      "fact": "User is considering setting up a small art studio in their spare bedroom.",
+      "type": "preference",
+      "entities": [
+        "art studio",
+        "spare bedroom"
+      ]
+    },
+    {
+      "fact": "User is looking for tips on organizing a small space for painting and storing supplies.",
+      "type": "preference",
+      "entities": [
+        "organizing",
+        "painting",
+        "storing supplies"
+      ]
+    },
+    {
+      "fact": "User is thinking of working on gift ideas for their sister's birthday next month.",
+      "type": "event",
+      "entities": [
+        "sister's birthday"
+      ]
+    },
+    {
+      "fact": "User is considering custom paintings as gifts for their sister.",
+      "type": "preference",
+      "entities": [
+        "custom paintings",
+        "gifts",
+        "sister"
+      ]
+    },
+    {
+      "fact": "User has a sister.",
+      "type": "relationship",
+      "entities": [
+        "sister"
+      ]
+    },
+    {
+      "fact": "User is thoughtful about giving gifts.",
+      "type": "opinion",
+      "entities": [
+        "thoughtful"
+      ]
+    }
+  ],
+  "answer_da72b1b4_2": [
+    {
+      "fact": "User has completed 5 painting projects since starting painting classes",
+      "type": "event",
+      "entities": [
+        "5 painting projects",
+        "painting classes"
+      ]
+    },
+    {
+      "fact": "User is looking for inspiration for their next painting project",
+      "type": "preference",
+      "entities": [
+        "inspiration",
+        "painting project"
+      ]
+    },
+    {
+      "fact": "User likes the idea of exploring abstract expressions in their art",
+      "type": "preference",
+      "entities": [
+        "abstract expressions"
+      ]
+    },
+    {
+      "fact": "User feels accomplished after finishing their 5th project",
+      "type": "opinion",
+      "entities": [
+        "accomplished",
+        "5th project"
+      ]
+    }
+  ]
+}

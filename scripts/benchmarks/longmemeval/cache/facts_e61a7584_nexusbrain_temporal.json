@@ -1,0 +1,49 @@
+{
+  "answer_f25c32f5_1": [
+    {
+      "fact": "User has a cat named Luna",
+      "type": "personal",
+      "entities": [
+        "Luna"
+      ]
+    },
+    {
+      "fact": "User is trying to keep Luna healthy and happy",
+      "type": "opinion",
+      "entities": [
+        "Luna"
+      ]
+    },
+    {
+      "fact": "User is trying to reduce the amount of hair Luna sheds",
+      "type": "opinion",
+      "entities": [
+        "Luna"
+      ]
+    }
+  ],
+  "answer_f25c32f5_2": [
+    {
+      "fact": "User has a pet named Luna",
+      "type": "relationship",
+      "entities": [
+        "Luna"
+      ]
+    },
+    {
+      "fact": "User is considering getting interactive toys for Luna",
+      "type": "preference",
+      "entities": [
+        "interactive toys",
+        "Luna"
+      ]
+    },
+    {
+      "fact": "User is thinking of getting a pet camera",
+      "type": "preference",
+      "entities": [
+        "pet camera"
+      ]
+    }
+  ]
+}

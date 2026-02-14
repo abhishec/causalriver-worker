@@ -1,0 +1,29 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/30 (Tue) 12:22  
+[FACT] User has a research paper due soon.  
+[ASSISTANT_SAID] Suggested reliable databases related to statistics and data analysis:  
+[ASSISTANT_SAID] 1. JSTOR (www.jstor.org)  
+[ASSISTANT_SAID] 2. ScienceDirect (www.sciencedirect.com)  
+[ASSISTANT_SAID] 3. Scopus (www.scopus.com)  
+[ASSISTANT_SAID] 4. Web of Science (wokinfo.com)  
+[ASSISTANT_SAID] 5. arXiv (arxiv.org)  
+[ASSISTANT_SAID] Suggested journals related to statistics and data analysis:  
+[ASSISTANT_SAID] 1. Journal of the American Statistical Association (JASA) (www.tandfonline.com/loi/uasa20)  
+[ASSISTANT_SAID] 2. Annals of Statistics (www.projecteuclid.org/annalsofstatistics)  
+[ASSISTANT_SAID] 3. Journal of Machine Learning Research (JMLR) (jmlr.org)  
+[ASSISTANT_SAID] 4. Biometrika (biomet.oxfordjournals.org)  
+[ASSISTANT_SAID] 5. Computational Statistics & Data Analysis (www.journals.elsevier.com/computational-statistics-and-data-analysis)  
+[ASSISTANT_SAID] 6. Statistical Science (projecteuclid.org/statisticalscience)  
+[ASSISTANT_SAID] 7. Journal of Computational and Graphical Statistics (www.tandfonline.com/loi/ucgs20)  
+[ASSISTANT_SAID] Suggested additional resources:  
+[ASSISTANT_SAID] 1. Google Scholar (scholar.google.com)  
+[ASSISTANT_SAID] 2. ResearchGate (www.researchgate.net)  
+[ASSISTANT_SAID] 3. Academic Search Engines (e.g., Microsoft Academic, Semantic Scholar, CORE)  
+[ASSISTANT_SAID] Advised to evaluate the credibility and reliability of sources.  
+[ASSISTANT_SAID] Wished user good luck with their research paper.  
+[USER] Needs help organizing references and asks for citation management tools.  
+[ASSISTANT_SAID] Suggested citation management tools for formatting references in APA style:  
+[ASSISTANT_SAID] 1. Mendeley (www.mendeley.com)  
+[ASSISTANT_SAID] 2. Zotero (www.zotero.org)  
+[ASSISTANT_SAID] 3. EndNote (

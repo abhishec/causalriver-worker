@@ -1,0 +1,41 @@
+**Observation Log:**
+
+- [FACT] The user is planning to build a sustainable home on their new property.
+- [PREFERENCE] The user is interested in exploring eco-friendly building materials.
+- [ASSISTANT_SAID] The assistant congratulated the user on their decision to build a sustainable home.
+- [ASSISTANT_SAID] The assistant recommended several eco-friendly building materials, including:
+  - Reclaimed or recycled wood
+  - Sustainably sourced wood (FSC or PEFC certified)
+  - Bamboo
+  - Low-carbon concrete
+  - Insulated concrete forms (ICFs)
+  - Straw bales
+  - Earthbags
+  - Recycled plastics
+  - Natural fibers (hemp, jute, sisal)
+  - Living roofs
+  - Cork
+  - Rammed earth
+  - Low-VOC paints
+  - Sustainable insulation (wool, cellulose, recycled denim)
+  - Repurposed materials (old pallets, shipping containers, repurposed glass)
+- [ASSISTANT_SAID] The assistant advised the user to consider factors like durability, maintenance, and local availability when selecting eco-friendly building materials.
+- [ASSISTANT_SAID] The assistant suggested consulting with architects, builders, and suppliers to ensure chosen materials align with project needs and regulations.
+- [TEMPORAL] The session date is 2023/04/25 (Tue) 02:01.
+- [USER] The user inquired about the typical ROI on solar panels and certifications to look for when selecting a solar panel company.
+- [ASSISTANT_SAID] The assistant provided information on the typical ROI on solar panels, stating it varies based on factors like location, system size, installation cost, incentives, and system lifespan.
+- [ASSISTANT_SAID] The assistant mentioned that the average ROI on solar panels in the U.S. is around 8-12% per year.
+- [ASSISTANT_SAID] The assistant provided a rough estimate of ROI based on system size:
+  - Small system (2-3 kW): 8-10% ROI
+  - Medium system (5-7 kW): 10-12% ROI
+  - Large system (10-15 kW): 12-15% ROI
+- [ASSISTANT_SAID] The assistant listed certifications to look for in a solar panel company, including:
+  - NABCEP Certification
+  - UL Certification
+  - ISO 9001 Certification
+  - OSEI Certification
+  - SEIA Membership
+  - Local licenses and permits
+  - Insurance and bonding
+- [ASSISTANT_SAID] The assistant advised researching customer reviews, experience, warranty offerings, and compliance with local building codes when evaluating solar panel companies.
+- [USER] The user asked about sustainable options for water conservation in their new home and any available rebates or

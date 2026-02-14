@@ -1,0 +1,17 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/29 (Mon) 13:49  
+[ASSISTANT_SAID] The assistant suggested updating the `FigureCanvasTkAgg`'s `figure` property with the newly generated plot each time the `update_graph` function is called.  
+[ASSISTANT_CREATED] The assistant provided an updated `update_graph` function in Python code that includes logic for handling different graph types: "pairplot", "histogram", and "boxplot".  
+[ASSISTANT_SAID] The assistant explained that a new `ax` object is created when generating a histogram or a boxplot and added to the `fig`.  
+[ASSISTANT_SAID] The assistant mentioned calling the `draw_idle` method of the `FigureCanvasTkAgg` object to update the plot.  
+[USER] The user stated that the previous solution did not work and that they had already tried it.  
+[ASSISTANT_SAID] The assistant suggested setting the size of the canvas and figure to be relative to the size of the window in an updated `visualize` function.  
+[ASSISTANT_CREATED] The assistant provided a new version of the `visualize` function in Python code that adjusts the figure size based on the window dimensions.  
+[USER] The user requested that the graph figures should be in `canvas_widget`, with a minimum height and a scrollbar linked to it for scrolling.  
+[ASSISTANT_SAID] The assistant acknowledged the user's request and provided an updated version of the `visualize` function that sets the figure size relative to the window size.  
+[ASSISTANT_CREATED] The assistant provided a new `visualize` function in Python code that creates a `FigureCanvasTkAgg` object with a fixed figure size of 10x6 inches and uses seaborn plotting functions.  
+[USER] The user expressed frustration about not making progress and suggested trying another approach to save the figures and show them in the Tkinter window.  
+[ASSISTANT_SAID] The assistant agreed to the new approach of saving figures and displaying them in the Tkinter window.  
+[ASSISTANT_CREATED] The assistant provided a new `visualize` function in Python code that saves figures as PNG files and displays them in a `Canvas` widget in the Tkinter window.  
+[ASSISTANT_SAID] The assistant mentioned resizing the images to fit the dimensions of the `Canvas` widget and storing them as attributes of the `Canvas` widget to prevent garbage collection.

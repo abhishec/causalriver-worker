@@ -1,0 +1,17 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/03/15 (Wed) 06:57  
+[USER] User mentioned feeding 90,000-100,000 documents with very little structured data.  
+[USER] User specified that the documents would be reports 1 to 5 pages long.  
+[USER] User indicated that the subjects of the documents include international crime, terrorism, and politics.  
+[ASSISTANT_SAID] Assistant suggested starting with text cleaning by removing irrelevant characters, special characters, punctuation, and stop words, and normalizing the text to lowercase.  
+[ASSISTANT_SAID] Assistant mentioned the next step would be document parsing to separate each document into title, author, date, and body text.  
+[ASSISTANT_SAID] Assistant stated that entity extraction would be performed to identify and extract relevant information such as names, organizations, and locations mentioned in the text.  
+[ASSISTANT_SAID] Assistant described using techniques like named entity recognition, part-of-speech tagging, and dependency parsing for entity extraction.  
+[ASSISTANT_SAID] Assistant proposed using topic modeling techniques to identify main topics and themes present in the documents.  
+[ASSISTANT_SAID] Assistant indicated that topic modeling would help organize documents based on common themes and identify patterns and trends.  
+[ASSISTANT_SAID] Assistant suggested performing sentiment analysis to understand the tone and emotions expressed in the text.  
+[ASSISTANT_SAID] Assistant noted that sentiment analysis would help track changes in public opinion or political sentiments.  
+[ASSISTANT_SAID] Assistant mentioned classifying the documents based on their content, such as international crime, terrorism, and politics.  
+[ASSISTANT_SAID] Assistant concluded that the process of organizing and analyzing unstructured data involves several steps, and the exact approach would depend on specific requirements and the nature of the data.  
+[ASSISTANT_SAID] Assistant stated that the techniques mentioned are commonly used in text analysis tasks and that it can perform them quickly and accurately, even with large amounts of data.

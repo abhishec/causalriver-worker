@@ -1,0 +1,30 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/21 (Sun) 02:29
+- [FACT] User is interested in food trucks in Austin, Texas.
+- [PREFERENCE] User is looking for top-rated food trucks.
+- [ASSISTANT_SAID] Suggested finding top-rated food trucks in Austin by visiting websites such as Yelp, Zomato, or TripAdvisor and filtering by rating.
+- [ASSISTANT_SAID] Recommended following Austin food bloggers or social media accounts like Austin Foodstagram or Austin Food Truck Parks on Instagram for recommendations.
+- [ASSISTANT_SAID] Advised checking out food truck parks in Austin such as the South Austin Trailer Park & Eatery, The Picnic, or The Vortex to sample various food trucks in one location.
+- [PREFERENCE] User hoped for more specific recommendations for food trucks.
+- [ASSISTANT_SAID] Provided a list of top-rated food trucks in Austin:
+  1. Veracruz All Natural - known for breakfast tacos and homemade salsa.
+  2. East Side King - a fusion food truck offering Japanese and Thai flavors.
+  3. Peached Tortilla - modern Asian and Southern cuisine with a twist.
+  4. Little Lucy's - miniature donuts and coffee.
+  5. Chi'lantro BBQ - Korean-Mexican fusion, especially famous for kimchi fries.
+  6. Hey Cupcake! - serving delicious, creative cupcakes in various flavors.
+  7. Dee Dee - authentic Thai street food with an ever-changing menu.
+- [PREFERENCE] User expressed interest in knowing which food truck has the longest line or wait time in Austin.
+- [ASSISTANT_SAID] Explained that the assistant cannot provide live information on wait times or queue lengths.
+- [ASSISTANT_SAID] Mentioned that popular food trucks like Veracruz All Natural and Franklin Barbecue can have long lines.
+- [ASSISTANT_SAID] Suggested checking local social media accounts, websites, or review sites for wait times and visiting during off-peak hours to avoid crowds.
+- [PREFERENCE] User requested recommendations for vegetarian or vegan food trucks in Austin.
+- [ASSISTANT_SAID] Provided a list of vegetarian and vegan-friendly food trucks in Austin:
+  1. Arlo's - vegan comfort food such as the "Bac'n Cheeze Burger" and tacos.
+  2. Conscious Cravings - vegetarian wraps and sandwiches with gluten-free options.
+  3. The Vegan Nom - vegan tacos and quesadillas.
+  4. Bananarchy - frozen bananas dipped in chocolate and toppings.
+  5. Bistro Vonish - upscale vegan cuisine including mac & cheese, burgers, and salads.
+  6. Unity Vegan Kitchen - vegan soul food such as jackfruit BBQ and fried okra.
+  7. Cool

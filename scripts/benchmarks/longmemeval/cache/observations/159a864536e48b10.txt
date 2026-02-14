@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[FACT] User is planning a trip to Miami later in the year.  
+[FACT] User earned 10,000 miles on their Delta SkyMiles card after taking a round-trip flight from Boston to Atlanta on January 15, 2023.  
+[PREFERENCE] User is flexible with their travel dates.  
+[EVENT] User is considering redeeming their Delta SkyMiles for a free trip to Miami.  
+[ASSISTANT_SAID] One-way economy flights within the continental United States typically require 5,000-10,000 miles.  
+[ASSISTANT_SAID] Round-trip economy flights within the continental United States typically require 10,000-20,000 miles.  
+[ASSISTANT_SAID] User might be able to redeem a one-way economy flight or a round-trip economy flight with some flexibility in travel dates.  
+[ASSISTANT_SAID] Recommended checking Delta's award chart and using their award calendar tool to find the best redemption options.  
+[ASSISTANT_SAID] Suggested logging into Delta SkyMiles account, selecting "Shop with Miles," entering travel dates and route (BOS to MIA), and using the "Award Calendar" button to see available award flights.  
+[ASSISTANT_SAID] Advised looking for flights with the lowest mileage requirements and considering off-peak days or seasons for travel.  
+[ASSISTANT_SAID] Mentioned setting up price alerts on Delta's website or using third-party tools like ExpertFlyer or Google Flights to track prices.  
+[ASSISTANT_SAID] Noted that miles can also be used to book flights on Delta's partner airlines, such as American Airlines or LATAM.  
+[EVENT] User had a recent experience with American Airlines, mentioning a terrible in-flight entertainment system on a flight from New York to Los Angeles on February 10th.  
+[ASSISTANT_SAID] Informed user that Delta and American Airlines are not airline partners, so Delta SkyMiles cannot be redeemed on American Airlines flights.  
+[ASSISTANT_SAID] Suggested exploring American Airlines' AAdvantage program for earning miles if interested in flying with them.  
+[ASSISTANT_SAID] Expressed sympathy regarding the user's disappointing experience with American Airlines' in-flight entertainment system.  
+[FACT] User recently got approved for the Citi AAdvantage Executive credit card, which comes with a 50,000-mile bonus after spending $5,000 in the first 3 months.  
+[PREFERENCE] User is considering whether to focus on earning more miles with American Airlines or diversify miles across different airlines.  
+[ASSISTANT_SAID] Provided pros and cons for focusing on American Airlines versus diversifying miles across different airlines.  
+[ASSISTANT_SAID] Suggested considering airline alliances, such as Oneworld, and transferable points from credit cards for more flexibility

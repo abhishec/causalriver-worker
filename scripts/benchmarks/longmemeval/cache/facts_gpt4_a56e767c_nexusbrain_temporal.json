@@ -1,0 +1,177 @@
+{
+  "answer_cf9e3940_1": [
+    {
+      "fact": "User is looking for film recommendations that explore themes of social justice and identity.",
+      "type": "preference",
+      "entities": [
+        "film recommendations",
+        "social justice",
+        "identity"
+      ]
+    },
+    {
+      "fact": "User has recently been drawn to films like 'Parasite' and 'The Farewell'.",
+      "type": "preference",
+      "entities": [
+        "Parasite",
+        "The Farewell"
+      ]
+    },
+    {
+      "fact": "User has been active in the film festival scene.",
+      "type": "event",
+      "entities": [
+        "film festival scene"
+      ]
+    },
+    {
+      "fact": "User volunteered at the Portland Film Festival.",
+      "type": "event",
+      "entities": [
+        "Portland Film Festival"
+      ]
+    },
+    {
+      "fact": "User helped with event coordination at the Portland Film Festival.",
+      "type": "event",
+      "entities": [
+        "event coordination",
+        "Portland Film Festival"
+      ]
+    },
+    {
+      "fact": "User got to meet some industry professionals at the Portland Film Festival.",
+      "type": "event",
+      "entities": [
+        "industry professionals",
+        "Portland Film Festival"
+      ]
+    }
+  ],
+  "answer_cf9e3940_2": [
+    {
+      "fact": "User is looking for recommendations for independent films that explore themes of social justice and identity.",
+      "type": "preference",
+      "entities": [
+        "independent films",
+        "social justice",
+        "identity"
+      ]
+    },
+    {
+      "fact": "User has been drawn to films like 'Parasite' and 'The Farewell'.",
+      "type": "preference",
+      "entities": [
+        "Parasite",
+        "The Farewell"
+      ]
+    },
+    {
+      "fact": "User recently participated in the 48-hour film challenge at the Austin Film Festival.",
+      "type": "event",
+      "entities": [
+        "48-hour film challenge",
+        "Austin Film Festival"
+      ]
+    },
+    {
+      "fact": "User's team had to write, shoot, and edit a short film within 48 hours.",
+      "type": "event",
+      "entities": [
+        "short film",
+        "48 hours"
+      ]
+    },
+    {
+      "fact": "User found the experience of the film challenge to be a wild ride.",
+      "type": "opinion",
+      "entities": [
+        "film challenge"
+      ]
+    },
+    {
+      "fact": "User was impressed by how quickly their team came together to create something cohesive.",
+      "type": "opinion",
+      "entities": [
+        "team",
+        "cohesive creation"
+      ]
+    },
+    {
+      "fact": "User is particularly interested in films that tackle social justice issues.",
+      "type": "preference",
+      "entities": [
+        "social justice issues"
+      ]
+    }
+  ],
+  "answer_cf9e3940_3": [
+    {
+      "fact": "User is interested in learning more about the film industry, especially independent films and documentaries.",
+      "type": "preference",
+      "entities": [
+        "film industry",
+        "independent films",
+        "documentaries"
+      ]
+    },
+    {
+      "fact": "User prefers films that explore themes of social justice and identity.",
+      "type": "preference",
+      "entities": [
+        "social justice",
+        "identity"
+      ]
+    },
+    {
+      "fact": "User attended AFI Fest in LA.",
+      "type": "event",
+      "entities": [
+        "AFI Fest",
+        "LA"
+      ]
+    },
+    {
+      "fact": "User attended a screening of 'Joker' at AFI Fest.",
+      "type": "event",
+      "entities": [
+        "Joker",
+        "AFI Fest"
+      ]
+    },
+    {
+      "fact": "User saw Todd Phillips and Joaquin Phoenix during the Q&A session at AFI Fest.",
+      "type": "event",
+      "entities": [
+        "Todd Phillips",
+        "Joaquin Phoenix",
+        "Q&A session",
+        "AFI Fest"
+      ]
+    },
+    {
+      "fact": "User found the Q&A session with Todd Phillips and Joaquin Phoenix thought-provoking.",
+      "type": "opinion",
+      "entities": [
+        "Todd Phillips",
+        "Joaquin Phoenix",
+        "Q&A session"
+      ]
+    },
+    {
+      "fact": "User is particularly interested in 'Moonlight' and 'The Florida Project'.",
+      "type": "preference",
+      "entities": [
+        "Moonlight",
+        "The Florida Project"
+      ]
+    },
+    {
+      "fact": "User is taking a cinematography workshop online.",
+      "type": "personal",
+      "entities": [
+        "cinematography workshop"
+      ]
+    }
+  ]
+}

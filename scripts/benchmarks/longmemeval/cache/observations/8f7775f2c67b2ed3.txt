@@ -1,0 +1,37 @@
+**Observation Log:**
+
+[SESSION_DATE] 2023/05/25 (Thu) 08:29  
+[SESSION_ID] 6cf1848e_1  
+
+[FACT] User wakes up at 6:30 AM on weekdays.  
+[PREFERENCE] User is looking to plan out daily routines better.  
+[PREFERENCE] User wants to prioritize morning tasks around their wake-up time.  
+[ASSISTANT_SAID] Assistant offered to help set up a daily schedule template.  
+[ASSISTANT_CREATED] Assistant provided a basic daily schedule template with sections for Morning Routine, Work/School Routine, Evening Routine, and Wind Down Routine.  
+[ASSISTANT_CREATED] Morning Routine template includes:  
+- 6:30 AM - Wake Up  
+- 6:45 AM - [Insert Morning Stretching/Exercise Routine]  
+- 7:00 AM - [Insert Hygiene Routine (shower, brush teeth, etc.)]  
+- 7:20 AM - [Insert Breakfast Routine]  
+- 7:40 AM - [Insert Morning Task 1 (e.g., meditation, journaling, reading)]  
+- 8:00 AM - [Insert Morning Task 2 (e.g., check emails, plan out day)]  
+[ASSISTANT_CREATED] Work/School Routine template includes:  
+- 8:30 AM - Start Work/School  
+- [Insert Break Times (e.g., lunch, coffee breaks)]  
+- 5:00 PM - Finish Work/School  
+[ASSISTANT_CREATED] Evening Routine template includes:  
+- 5:00 PM - [Insert Commute/Travel Time]  
+- 5:30 PM - [Insert Relaxation Time (e.g., walk, listen to music)]  
+- 6:00 PM - [Insert Dinner Routine]  
+- 7:00 PM - [Insert Evening Task 1 (e.g., exercise, hobby)]  
+- 8:00 PM - [Insert Evening Task 2 (e.g., spend time with family/friends, learn a new skill)]  
+[ASSISTANT_CREATED] Wind Down Routine template includes:  
+- 9:00 PM - [Insert Wind Down Activity (e.g., reading, relaxation techniques)]  
+- 10:00 PM - Prepare for Bed  
+[ASSISTANT_SAID] Assistant suggested setting reminders for morning tasks, work/school tasks, evening tasks, and the wind down routine.  
+[ASSISTANT_SAID] Assistant advised to be realistic about time for tasks and to leave buffer time for unexpected tasks or breaks.  
+[ASSISTANT_SAID] Assistant recommended prioritizing important tasks for the morning.  
+[ASSISTANT_SAID] Assistant encouraged regular review and adjustment of the schedule.  
+[PREFERENCE] User liked the template and planned to customize it.  
+[FACT] User has a fixed morning yoga class.  
+[

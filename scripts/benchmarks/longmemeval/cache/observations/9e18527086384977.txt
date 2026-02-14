@@ -1,0 +1,27 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/28 (Sun) 11:22  
+[USER] User is interested in how LISP handles immutability in functional programming and its impact on software development.  
+[ASSISTANT_SAID] LISP has a unique approach to immutability; all data structures are mutable by default, but programmers can create immutable values through closures.  
+[ASSISTANT_SAID] Closures in LISP allow for the creation of immutable data structures, which enhance safety, reliability, parallelism, concurrency, and performance optimization in software development.  
+[USER] User finds the benefits of immutability in LISP to be cool.  
+[ASSISTANT_SAID] Downsides to using immutable data structures in LISP include inefficiency in copying large structures, unsuitability for applications requiring frequent updates, and challenges in debugging.  
+[USER] User plans to keep the benefits of immutability in mind for future projects.  
+[ASSISTANT_SAID] It is suggested to consider different approaches to data handling and that immutability can offer many benefits in the right circumstances.  
+[USER] User acknowledges understanding the benefits of immutability but finds it could be confusing to work with initially.  
+[USER] User asks for tips on getting started with immutability in functional programming.  
+[ASSISTANT_SAID] Tips provided for getting started include:  
+[ASSISTANT_CREATED] 1. Start with simple examples using immutable data structures.  
+[ASSISTANT_CREATED] 2. Use functional programming languages like LISP or Haskell.  
+[ASSISTANT_CREATED] 3. Use functional programming libraries in imperative languages.  
+[ASSISTANT_CREATED] 4. Use pure functions to avoid side effects.  
+[ASSISTANT_CREATED] 5. Utilize debugging tools and techniques to manage immutable data structures.  
+[USER] User expresses intent to start with simple examples using LISP and to use pure functions as much as possible.  
+[USER] User is excited to get started with immutability in coding.  
+[USER] User inquires about other programming languages that use immutable data structures.  
+[ASSISTANT_SAID] Other programming languages that support immutable data structures include: Haskell, Scala, Clojure, Rust, Elixir, and Kotlin.  
+[USER] User expresses interest in trying out Haskell next, as it requires all data structures to be immutable.  
+[USER] User asks if the assistant has used Haskell before.  
+[ASSISTANT_SAID] The assistant states it has not used any programming language but is familiar with programming concepts and features.  
+[ASSISTANT_SAID] Haskell is described as a powerful functional programming language that enforces immutability by default and is suitable for high-performance concurrent systems.  
+[ASS

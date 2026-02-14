@@ -1,0 +1,43 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/23 (Tue) 10:04
+- [EVENT] User is thinking of getting their coffee table refinished.
+- [FACT] User has a mid-century modern coffee table that they got at a garage sale.
+- [CHANGE] The finish of the user's coffee table is scratched and faded.
+- [EVENT] User recently visited an antique store in a nearby town with their friend Rachel.
+- [EVENT] User scored a gorgeous Art Deco brooch from the 1920s for $50.
+- [ASSISTANT_SAID] Congratulations on the user's great find of the Art Deco brooch.
+- [ASSISTANT_SAID] Recommended resources for finding a reliable furniture restorer, including:
+  - Angie's List (paid subscription)
+  - Yelp
+  - Google My Business
+  - National Furniture Repair and Refinishers Association (NFRRA)
+  - Antique Furniture Restoration Guild (AFRG)
+  - Craigslist
+  - Facebook Marketplace
+- [ASSISTANT_SAID] Suggested checking credentials of restorers, including certifications like Master Furniture Restorer (MFR) or Certified Furniture Restorer (CFR).
+- [ASSISTANT_SAID] Advised the user to get multiple quotes, ask for examples of previous work, and ensure the restorer has insurance and licenses.
+- [EVENT] User is researching local appraisers for their great-grandmother's antique locket.
+- [ASSISTANT_SAID] Provided tips for selecting a reputable appraiser, including:
+  - Professional affiliations (e.g., Appraisers Association of America, International Society of Appraisers)
+  - Qualifications and credentials
+  - Expertise in antique jewelry
+  - Reviews and referrals
+  - Insurance and bonding
+  - Fees and services
+- [ASSISTANT_SAID] Suggested asking specific questions when meeting with an appraiser.
+- [EVENT] User is interested in learning more about the history behind their antique pieces.
+- [ASSISTANT_SAID] Recommended books and documentaries on antiques and collecting, including:
+  - "The Antique Hunter's Guide" by Judith Miller
+  - "The Art of Antiques" by Judith Miller and Martin Miller
+  - "Antiques Roadshow: Behind the Scenes" by Marsha Bemko
+  - "Antiques Roadshow" (PBS)
+  - "American Pickers" (History Channel)
+  - "Pawn Stars" (History Channel)
+- [EVENT] User is researching local antique dealers who specialize in vintage cameras and photography equipment.
+- [ASSISTANT_SAID] Provided resources for finding reputable dealers, including:
+  - Photography Dealers Association (PDA)
+  - Antique Camera Dealers Association (ACDA)
+  - eBay, Etsy, Ruby Lane
+  - Local camera stores and antique malls
+- [ASSISTANT_SAID]

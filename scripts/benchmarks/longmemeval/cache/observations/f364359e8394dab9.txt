@@ -1,0 +1,24 @@
+**Observation Log:**
+
+[FACT] User is planning a fishing trip.  
+[FACT] User has had success with spinner baits in the past.  
+[FACT] User's father gave them a silver spinner bait that caught a 22-inch trout.  
+[FACT] User is considering trying out fly fishing.  
+[EVENT] User is planning to go to Lake Michigan again for fishing.  
+[EVENT] User is targeting trout during their trip.  
+[TEMPORAL] The session date is 2023/05/25 (Thu) 16:44.  
+[PREFERENCE] User is unsure about what type of flies to use for fly fishing.  
+[PREFERENCE] User is thinking of trying a smaller sized Woolly Bugger, around 2-3 inches in length, with a natural color like white or silver.  
+[PREFERENCE] User has heard that smaller streamers can be more effective in the spring when the water is still a bit chilly.  
+[RELATIONSHIP] User's father is mentioned in relation to the silver spinner bait.  
+[ASSISTANT_SAID] Fly fishing involves casting a lightweight lure called a fly that imitates natural food sources of fish.  
+[ASSISTANT_SAID] Spinner baits create a spinning motion to attract fish.  
+[ASSISTANT_SAID] Factors to consider for choosing the right fly include target species, water type, time of year, and water conditions.  
+[ASSISTANT_SAID] Popular fly types for beginners include dry flies (e.g., Elk Hair Caddis, Stimulator, Blue Wing Olive), nymphs (e.g., Hare's Ear, Pheasant Tail, Gold-Ribbed Hare's Ear), and streamers (e.g., Woolly Bugger, Muddler Minnow).  
+[ASSISTANT_SAID] For Lake Michigan trout in the spring, expect hatches of midges, black stoneflies, and early mayflies like the Hendrickson and March Brown.  
+[ASSISTANT_SAID] Trout in Lake Michigan tend to move into shallower waters (10-20 feet) during spring as the water warms up.  
+[ASSISTANT_SAID] Recommended dry flies for Lake Michigan trout include Midges and Mayflies (Hendrickson, March Brown).  
+[ASSISTANT_SAID] Recommended nymphs for Lake Michigan trout include stonefly nymphs and mayfly nymphs.  
+[ASSISTANT_SAID] Streamers can be effective for trout, especially in spring when they are aggressive and baitfish are active.  
+[ASSISTANT_SAID] Suggested streamer patterns include Woolly Bugger and Muddler Minnow.  
+[ASSISTANT_SAID] Tips for using a streamer include choosing a baitfish-imitating pattern, using a sink-tip or sinking line, varying the retrieve, and fishing

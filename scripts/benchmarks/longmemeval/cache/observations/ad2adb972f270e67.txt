@@ -1,0 +1,17 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/26 (Fri) 19:26
+- [FACT] User is onboarding a new user with MFA enabled on Google Workspace.
+- [ASSISTANT_SAID] Administrator steps to onboard a new user with MFA enabled on Google Workspace include:
+  - Log in to the Google Workspace Admin console.
+  - Click on "Users" and then "Add a new user."
+  - Fill in the user's basic information, such as their name and email address.
+  - In the "Security" section, select "Enable multi-factor authentication."
+  - Assign the user to any groups or organizational units that they will need access to.
+  - Click "Create."
+- [ASSISTANT_SAID] Once the user is created, they will receive an email with instructions on how to set up their account, including MFA.
+- [ASSISTANT_SAID] User steps to set up their account and MFA include:
+  - Click on the link in the email to set up their account.
+  - Follow the prompts to set up MFA, which may include downloading an authenticator app or receiving a verification code via text or phone call.
+  - Complete the account setup process by creating a password and agreeing to the terms of service.
+- [ASSISTANT_SAID] Once the user has set up their account and MFA, they should be able to log in and start using Google Workspace.

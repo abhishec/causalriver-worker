@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[FACT] User is currently leading a team of engineers on a new product feature.  
+[FACT] User is a senior engineer, having been promoted three months ago.  
+[EVENT] User submitted an application for a senior engineer position on April 1, 2023.  
+[CHANGE] User's job title changed to senior engineer three months ago.  
+[TEMPORAL] Session date is April 1, 2023.  
+[PREFERENCE] User is looking for advice on project management tools to improve project management skills.  
+[ASSISTANT_SAID] Assistant congratulated the user on submitting their application for the senior engineer position.  
+[ASSISTANT_SAID] Assistant provided a list of popular project management tools: Trello, Asana, Jira, Microsoft Planner, Basecamp, Wrike, Notion, ClickUp.  
+[ASSISTANT_SAID] Assistant suggested evaluating tools based on ease of use, customization, scalability, integration, cost, and reporting/analytics.  
+[ASSISTANT_SAID] Assistant recommended conducting a trial, surveying the team, and assessing workflow before choosing a tool.  
+[ASSISTANT_SAID] Assistant wished the user good luck with the new product feature and the senior engineer role.  
+[ASSISTANT_SAID] Assistant congratulated the user on their recent promotion to senior engineer.  
+[PREFERENCE] User wants to improve project management skills and find the best tools for their team.  
+[ASSISTANT_SAID] Assistant provided a step-by-step guide on how to set up a Kanban board in Trello.  
+[ASSISTANT_CREATED] Assistant outlined steps to create a new board, define columns, add lists and cards, set up WIP limits, add team members, and customize the board.  
+[ASSISTANT_SAID] Assistant listed common columns for a Kanban board: Backlog, Ready for Development, In Progress, In Review, Done.  
+[ASSISTANT_SAID] Assistant suggested using WIP limits to manage the number of tasks in progress.  
+[ASSISTANT_SAID] Assistant recommended using Trello Power-Ups for enhanced functionality, including time tracking.  
+[PREFERENCE] User is looking for a way to track the progress of each task in terms of time spent.  
+[ASSISTANT_SAID] Assistant provided options for time tracking in Trello, including Trello Timer, Harvest, Toggl, and Clockify.  
+[ASSISTANT_SAID] Assistant explained how to enable and use the Trello Timer Power-Up for time tracking.  
+[ASSISTANT_CREATED] Assistant provided a step-by-step guide on how to set up and use the Trello Timer Power-Up.  
+[ASSISTANT_SAID] Assistant mentioned that the Trello Timer allows users to start, pause, and stop timers on tasks, and view time logs

@@ -1,0 +1,27 @@
+**Observation Log:**
+
+[FACT] User is planning to participate in another charity run soon.  
+[FACT] User has been active lately, including playing squash with a colleague named Ryan every Thursday lunchtime since February.  
+[FACT] User has had 9 squash games with Ryan so far.  
+[FACT] User is an intermediate runner.  
+[FACT] User's current 5K personal best (PB) is 27 minutes and 15 seconds.  
+[FACT] User has about 8 weeks until the charity run.  
+[FACT] User can dedicate 3-4 days per week to running, with a mix of morning and lunch break sessions.  
+[FACT] User's goal is to shave off at least 1 minute from their current PB.  
+[ASSISTANT_SAID] Assistant confirmed that with the user's current 5K PB and dedication to training, they can achieve their goal of shaving off at least 1 minute from their current time.  
+[ASSISTANT_CREATED] Assistant provided a tailored 8-week 5K training plan with specific workouts for each week.  
+[ASSISTANT_SAID] Weeks 1-2 of the training plan include:  
+- Monday (morning): Easy 3K run at a conversational pace  
+- Wednesday (lunch break): 2K warm-up, 4x800m at a moderate pace (around 3:30-3:45 min per 800m), 1K cool-down  
+- Friday (morning): Easy 3K run at a conversational pace  
+[ASSISTANT_SAID] Weeks 3-4 of the training plan include:  
+- Monday (morning): Easy 3.5K run at a conversational pace  
+- Wednesday (lunch break): 2K warm-up, 5x600m at a fast pace (around 2:45-3:00 min per 600m), 1K cool-down  
+- Friday (morning): Easy 3.5K run at a conversational pace  
+- Sunday (morning): Long run (4-5K) at a moderate pace  
+[ASSISTANT_SAID] Weeks 5-6 of the training plan include:  
+- Monday (morning): Easy 4K run at a conversational pace  
+- Tuesday (lunch break): Hill repeats - 2K warm-up, 6x200m at a high intensity (around 45-50 seconds per 200m), 1K cool-down  
+- Wednesday (lunch break): 2K warm-up, 3x1200m at a fast pace (around 4:30-4:45 min per 1200m), 1K cool-down  
+- Friday (morning): Easy 4K run at a conversational pace  
+[ASSISTANT_SAID] Weeks 7-8 of the training plan include

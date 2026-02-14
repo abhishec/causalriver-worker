@@ -1,0 +1,27 @@
+**Observation Log:**
+
+[EVENT] User is planning a trip to Miami.
+
+[EVENT] User had a terrible experience with American Airlines' in-flight entertainment system on a flight from New York to Los Angeles on February 20, 2023.
+
+[PREFERENCE] User is unsure about flying with American Airlines after their recent experience.
+
+[ASSISTANT] The assistant provided information about American Airlines' in-flight entertainment system, including seat-back screens, tablet-based entertainment, and personal device entertainment.
+
+[ASSISTANT] The assistant provided details about American Airlines' customer service, including rebooking, compensation, proactive communication, and customer service channels.
+
+[PREFERENCE] User is concerned about American Airlines' customer service, especially regarding flight disruptions.
+
+[EVENT] User received a voucher for a free drink on their next flight from a flight attendant due to their in-flight entertainment issue.
+
+[ASSISTANT] The assistant suggested that the user provide feedback to American Airlines about their experience, including being specific, calm, and objective.
+
+[EVENT] User is considering booking a flight to Miami with American Airlines but is unsure about trusting their customer service.
+
+[ASSISTANT] The assistant provided information about American Airlines' baggage policy, including checked bag fees, size and weight restrictions, and carry-on bag rules.
+
+[EVENT] User is planning a week-long trip to Miami and will likely need to check a bag.
+
+[ASSISTANT] The assistant explained American Airlines' Baggage Delivery Guarantee, including what constitutes delayed baggage and the compensation provided for delayed or lost bags.
+
+[ASSISTANT] The assistant advised the user to report any delayed or lost bags to an American Airlines representative and fill out a report.

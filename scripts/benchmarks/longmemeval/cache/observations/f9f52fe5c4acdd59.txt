@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/22 (Mon) 18:10  
+[FACT] The user has recently gotten back into knitting.  
+[FACT] The user found an old unfinished scarf project in their closet that they started last winter.  
+[EVENT] The user is thinking of starting a new knitting project, specifically a hat or a pair of gloves to match their finished scarf.  
+[PREFERENCE] The user is a beginner knitter.  
+[PREFERENCE] The user likes the idea of a slouchy hat with ribbing.  
+[ASSISTANT_SAID] The assistant welcomed the user back to knitting and offered to help with pattern recommendations and tips for beginners.  
+[ASSISTANT_SAID] The assistant recommended easy patterns for a hat: beanies, newsboy caps, and slouchy hats with ribbing.  
+[ASSISTANT_SAID] The assistant recommended easy patterns for gloves: fingerless gloves and mittens.  
+[ASSISTANT_SAID] The assistant provided tips for beginners, including choosing the right yarn, swatching, starting with simple patterns, watching tutorials, joining a knitting community, and not being afraid to make mistakes.  
+[ASSISTANT_SAID] The assistant suggested tips for matching the scarf, such as using the same yarn, matching the stitch pattern, or considering a complementary color.  
+[FACT] The user is unsure of the yarn weight and fiber content used for their scarf.  
+[ASSISTANT_SAID] The assistant provided methods to determine yarn weight and fiber content from the scarf, including visual inspection, burn test, and water test.  
+[ASSISTANT_SAID] The assistant listed characteristics of different fibers: wool, acrylic, and blends.  
+[ASSISTANT_SAID] The assistant recommended yarn brands: Malabrigo, Cascade Yarns, Rowan, Bernat, and Plymouth Yarn Company.  
+[ASSISTANT_SAID] The assistant listed online stores for yarn: Amazon, Michaels, Hobby Lobby, Lion Brand Yarn, Craftsy, Jimmy Beans Wool, and KnitPicks.  
+[ASSISTANT_SAID] The assistant provided tips for online yarn shopping, including reading reviews, checking the yarn label, ordering a swatch, and comparing prices.  
+[PREFERENCE] The user plans to start by searching for worsted weight yarns with wool or wool blend fiber content.  
+[ASSISTANT_SAID] The assistant provided tips for searching for yarns online, including using specific keywords, adding additional keywords, using quotes, and filtering results.  
+[ASSISTANT_SAID] The assistant suggested checking the color description, looking for color swatches, and checking the yarn label to match yarn colors online.  
+[ASSISTANT_SAID] The assistant emphasized the importance of using color filters and reading color descriptions when searching for yarns

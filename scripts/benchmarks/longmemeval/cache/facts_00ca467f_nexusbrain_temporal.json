@@ -1,0 +1,140 @@
+{
+  "answer_39900a0a_1": [
+    {
+      "fact": "User has been dealing with a lingering cough for six weeks.",
+      "type": "personal",
+      "entities": [
+        "cough",
+        "six weeks"
+      ]
+    },
+    {
+      "fact": "User was diagnosed with bronchitis by Dr. Smith on March 3rd.",
+      "type": "event",
+      "entities": [
+        "bronchitis",
+        "Dr. Smith",
+        "March 3rd"
+      ]
+    },
+    {
+      "fact": "User has been trying natural remedies for bronchitis, including steam inhalation and honey.",
+      "type": "preference",
+      "entities": [
+        "natural remedies",
+        "steam inhalation",
+        "honey"
+      ]
+    },
+    {
+      "fact": "User is experiencing discomfort at night due to bronchitis.",
+      "type": "personal",
+      "entities": [
+        "discomfort",
+        "night",
+        "bronchitis"
+      ]
+    }
+  ],
+  "answer_39900a0a_2": [
+    {
+      "fact": "User has been dealing with a lingering cough for weeks.",
+      "type": "personal",
+      "entities": [
+        "cough"
+      ]
+    },
+    {
+      "fact": "User had an appointment with their primary care physician.",
+      "type": "event",
+      "entities": [
+        "primary care physician"
+      ]
+    },
+    {
+      "fact": "User was prescribed an antibiotic that didn't fully clear up their cough.",
+      "type": "personal",
+      "entities": [
+        "antibiotic"
+      ]
+    },
+    {
+      "fact": "User is experiencing weird numbness in their left hand.",
+      "type": "personal",
+      "entities": [
+        "numbness",
+        "left hand"
+      ]
+    },
+    {
+      "fact": "User has an EMG test scheduled with their neurologist, Dr. Johnson, on April 1st.",
+      "type": "event",
+      "entities": [
+        "EMG test",
+        "Dr. Johnson",
+        "April 1st"
+      ]
+    },
+    {
+      "fact": "User is experiencing heartburn and acid reflux symptoms.",
+      "type": "personal",
+      "entities": [
+        "heartburn",
+        "acid reflux"
+      ]
+    },
+    {
+      "fact": "User started experiencing heartburn and acid reflux symptoms around late January.",
+      "type": "event",
+      "entities": [
+        "late January"
+      ]
+    },
+    {
+      "fact": "User is trying to adjust their diet and taking antacids as needed.",
+      "type": "preference",
+      "entities": [
+        "diet",
+        "antacids"
+      ]
+    }
+  ],
+  "answer_39900a0a_3": [
+    {
+      "fact": "User has been dealing with a lingering cough for weeks.",
+      "type": "personal",
+      "entities": [
+        "cough"
+      ]
+    },
+    {
+      "fact": "User recently had a follow-up appointment with orthopedic surgeon Dr. Thompson on March 20th.",
+      "type": "event",
+      "entities": [
+        "Dr. Thompson",
+        "March 20th"
+      ]
+    },
+    {
+      "fact": "User's knee is healing well.",
+      "type": "personal",
+      "entities": [
+        "knee"
+      ]
+    },
+    {
+      "fact": "User has been taking over-the-counter medications for their cough.",
+      "type": "personal",
+      "entities": [
+        "over-the-counter medications"
+      ]
+    },
+    {
+      "fact": "User is frustrated with the effectiveness of their current cough medications.",
+      "type": "opinion",
+      "entities": [
+        "cough medications"
+      ]
+    }
+  ]
+}

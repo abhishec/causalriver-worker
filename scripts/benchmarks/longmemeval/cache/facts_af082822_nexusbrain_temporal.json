@@ -1,0 +1,54 @@
+{
+  "answer_b51b6115_1": [
+    {
+      "fact": "User recently got a new 4K TV during Black Friday",
+      "type": "event",
+      "entities": [
+        "4K TV",
+        "Black Friday"
+      ]
+    },
+    {
+      "fact": "User is looking for a full-motion TV mount for their living room",
+      "type": "preference",
+      "entities": [
+        "full-motion TV mount",
+        "living room"
+      ]
+    },
+    {
+      "fact": "User attended a friends and family sale at Nordstrom",
+      "type": "event",
+      "entities": [
+        "friends and family sale",
+        "Nordstrom"
+      ]
+    },
+    {
+      "fact": "User purchased dresses and tops for 20% off at Nordstrom",
+      "type": "event",
+      "entities": [
+        "dresses",
+        "tops",
+        "20% off",
+        "Nordstrom"
+      ]
+    },
+    {
+      "fact": "User received a $20 gift card for making a purchase over $100",
+      "type": "event",
+      "entities": [
+        "$20 gift card",
+        "purchase over $100"
+      ]
+    },
+    {
+      "fact": "User thinks the Sanus VMF408 is a good option for their living room",
+      "type": "opinion",
+      "entities": [
+        "Sanus VMF408",
+        "living room"
+      ]
+    }
+  ]
+}

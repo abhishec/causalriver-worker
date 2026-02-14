@@ -1,0 +1,38 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/27 (Sat) 23:53
+- [EVENT] User is planning to write a review of the films seen at the Portland International Film Festival.
+- [PREFERENCE] User found attending the Portland International Film Festival to be a lot of fun.
+- [EVENT] User attended a workshop on film criticism at the Portland International Film Festival.
+- [ASSISTANT_SAID] Eric Rohmer was a French film director, screenwriter, and film critic who was a key figure in the French New Wave movement.
+- [ASSISTANT_SAID] Notable works of Eric Rohmer include:
+  1. **The Sign of Leo** (1962)
+  2. **La Collectionneuse** (1967)
+  3. **My Night at Maud's** (1969)
+  4. **Claire's Knee** (1970)
+  5. **Chloe in the Afternoon** (1972)
+  6. **Perceval le Gallois** (1978)
+  7. **Pauline at the Beach** (1983)
+- [ASSISTANT_SAID] Influences on Eric Rohmer include:
+  1. French New Wave
+  2. Literary influences (Marcel Proust, André Gide, Fyodor Dostoevsky)
+  3. Catholicism
+  4. Philosophy (existentialism and phenomenology)
+  5. Visual style (long takes, natural lighting)
+- [ASSISTANT_SAID] Other interesting facts about Eric Rohmer include:
+  1. He was a film critic for Cahiers du Cinéma.
+  2. Known for meticulous attention to detail and emphasis on scriptwriting.
+  3. Often featured non-professional actors and shot on location.
+- [PREFERENCE] User is thinking of writing a comparative analysis of Eric Rohmer's style with newer directors influenced by the French New Wave.
+- [ASSISTANT_SAID] Recommended films for comparative analysis include:
+  1. **Frances Ha** (2012) by Noah Baumbach
+  2. **The Dreamers** (2003) by Bernardo Bertolucci
+  3. **Amour Fou** (2014) by Jessica Hausner
+  4. **Mistress America** (2015) by Noah Baumbach
+- [ASSISTANT_SAID] Recommended directors for comparative analysis include:
+  1. Noah Baumbach
+  2. Whit Stillman
+  3. Hong Sang-soo
+  4. Mia Hansen-Løve
+- [ASSISTANT_SAID] Other influences include the films of Richard Linklater and Claire Denis.
+- [EVENT] User is curious about tips on writing a good film

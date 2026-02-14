@@ -1,0 +1,84 @@
+{
+  "answer_3e11e0ae_2": [
+    {
+      "fact": "User has finished reading three fiction novels recently.",
+      "type": "event",
+      "entities": [
+        "The Seven Husbands of Evelyn Hugo",
+        "The Silent Patient",
+        "The Nightingale"
+      ]
+    },
+    {
+      "fact": "User enjoyed 'Daisy Jones and The Six' as an audiobook.",
+      "type": "opinion",
+      "entities": [
+        "Daisy Jones and The Six"
+      ]
+    },
+    {
+      "fact": "User is trying to mix up their reading genres and authors.",
+      "type": "preference",
+      "entities": []
+    },
+    {
+      "fact": "User is looking for non-fiction book recommendations, especially in the self-help category.",
+      "type": "preference",
+      "entities": [
+        "non-fiction",
+        "self-help"
+      ]
+    }
+  ],
+  "answer_3e11e0ae_1": [
+    {
+      "fact": "User is trying to read more diversely.",
+      "type": "preference",
+      "entities": [
+        "diverse reading"
+      ]
+    },
+    {
+      "fact": "User finished reading 'The Hate U Give' by Angie Thomas.",
+      "type": "event",
+      "entities": [
+        "The Hate U Give",
+        "Angie Thomas"
+      ]
+    },
+    {
+      "fact": "User was the only one in their book club who hadn't finished 'The Hate U Give' on time.",
+      "type": "event",
+      "entities": [
+        "book club",
+        "The Hate U Give"
+      ]
+    },
+    {
+      "fact": "User finished three fiction novels last weekend: 'The Seven Husbands of Evelyn Hugo', 'The Silent Patient', and 'The Nightingale'.",
+      "type": "event",
+      "entities": [
+        "The Seven Husbands of Evelyn Hugo",
+        "The Silent Patient",
+        "The Nightingale"
+      ]
+    },
+    {
+      "fact": "User loved the three fiction novels they finished.",
+      "type": "opinion",
+      "entities": [
+        "The Seven Husbands of Evelyn Hugo",
+        "The Silent Patient",
+        "The Nightingale"
+      ]
+    },
+    {
+      "fact": "User enjoys a mix of genres and styles in their reading.",
+      "type": "preference",
+      "entities": [
+        "mix of genres",
+        "mix of styles"
+      ]
+    }
+  ]
+}

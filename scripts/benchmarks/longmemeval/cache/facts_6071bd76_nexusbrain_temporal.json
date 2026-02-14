@@ -1,0 +1,89 @@
+{
+  "answer_4dac77cb_1": [
+    {
+      "fact": "User is experimenting with coffee recipes.",
+      "type": "preference",
+      "entities": [
+        "coffee recipes"
+      ]
+    },
+    {
+      "fact": "User has found that 1 tablespoon of coffee for every 6 ounces of water is the perfect ratio for their French press.",
+      "type": "preference",
+      "entities": [
+        "French press",
+        "coffee ratio"
+      ]
+    },
+    {
+      "fact": "User is considering trying Kenyan coffee first.",
+      "type": "preference",
+      "entities": [
+        "Kenyan coffee"
+      ]
+    },
+    {
+      "fact": "User is looking for tea recommendations to pair with citrus flavors.",
+      "type": "preference",
+      "entities": [
+        "tea",
+        "citrus flavors"
+      ]
+    }
+  ],
+  "answer_4dac77cb_2": [
+    {
+      "fact": "User is thinking of trying out a new tea blend this weekend.",
+      "type": "event",
+      "entities": [
+        "tea blend",
+        "weekend"
+      ]
+    },
+    {
+      "fact": "User prefers relaxing teas similar to chamomile.",
+      "type": "preference",
+      "entities": [
+        "relaxing tea",
+        "chamomile"
+      ]
+    },
+    {
+      "fact": "User plans to brew a fresh pot of coffee in the morning.",
+      "type": "event",
+      "entities": [
+        "coffee",
+        "morning"
+      ]
+    },
+    {
+      "fact": "User is excited to use new coffee beans.",
+      "type": "opinion",
+      "entities": [
+        "new coffee beans"
+      ]
+    },
+    {
+      "fact": "User has a French press coffee ratio of 1 tablespoon of coffee for every 5 ounces of water.",
+      "type": "personal",
+      "entities": [
+        "French press",
+        "coffee ratio"
+      ]
+    },
+    {
+      "fact": "User has been meaning to organize their tea cabinet.",
+      "type": "event",
+      "entities": [
+        "tea cabinet"
+      ]
+    },
+    {
+      "fact": "User is considering trying out a new tea subscription service.",
+      "type": "preference",
+      "entities": [
+        "tea subscription service"
+      ]
+    }
+  ]
+}

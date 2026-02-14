@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/24 (Wed) 10:57  
+[FACT] User has a Canon EOS 80D camera.  
+[EVENT] User bought the Canon EOS 80D camera from B&H Photo in New York City during a trip with friends in August 2018.  
+[PREFERENCE] User is considering buying a new lens for their Canon EOS 80D camera.  
+[PREFERENCE] User is looking for a good prime lens for portraits.  
+[ASSISTANT_SAID] Canon EOS 80D is a fantastic camera.  
+[ASSISTANT_SAID] Ideal focal length for portraits is between 50mm and 135mm.  
+[ASSISTANT_SAID] A wide aperture (like f/1.4 or f/1.8) helps create a shallow depth of field for portraits.  
+[ASSISTANT_SAID] Recommendations for prime lenses for portraits include:  
+[ASSISTANT_SAID] 1. Canon EF 50mm f/1.8 STM: budget-friendly, compact, lightweight, great image quality.  
+[ASSISTANT_SAID] 2. Canon EF 85mm f/1.8 USM: classic portrait lens, medium telephoto, excellent image quality.  
+[ASSISTANT_SAID] 3. Sigma 50mm f/1.4 DG HSM Art: high-end lens, exceptional image quality, robust build.  
+[ASSISTANT_SAID] 4. Tamron 45mm f/1.8 Di VC USD: versatile lens, unique focal length, wide aperture, image stabilization.  
+[PREFERENCE] User is looking for a lens wider than 50mm.  
+[FACT] User has been using the EF 50mm f/1.8 STM lens that came with their camera.  
+[PREFERENCE] User wants a lens that can capture more of the scene.  
+[PREFERENCE] User is looking for a wide-angle prime lens priced around $300-$500.  
+[ASSISTANT_SAID] Recommendations for wide-angle prime lenses in the $300-$500 range include:  
+[ASSISTANT_SAID] 1. Canon EF 35mm f/2 IS USM: great all-around lens, image stabilization.  
+[ASSISTANT_SAID] 2. Sigma 30mm f/1.4 DC DN Contemporary: fast, compact, ideal for capturing more of the scene.  
+[ASSISTANT_SAID] 3. Rokinon 35mm f/1.4 AS UMC: budget-friendly, manual focus lens.  
+[ASSISTANT_SAID] 4. Samyang 35mm f/2.8 AF: compact, lightweight, autofocus.  
+[ASSISTANT_SAID] Canon EF 24

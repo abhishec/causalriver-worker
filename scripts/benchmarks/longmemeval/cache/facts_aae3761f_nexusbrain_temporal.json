@@ -1,0 +1,174 @@
+{
+  "answer_526354c8_1": [
+    {
+      "fact": "User is planning a road trip to a coastal town.",
+      "type": "event",
+      "entities": [
+        "road trip",
+        "coastal town"
+      ]
+    },
+    {
+      "fact": "User has had great experiences with coastal trips.",
+      "type": "opinion",
+      "entities": [
+        "coastal trips"
+      ]
+    },
+    {
+      "fact": "User recently visited the Outer Banks in North Carolina.",
+      "type": "event",
+      "entities": [
+        "Outer Banks",
+        "North Carolina"
+      ]
+    },
+    {
+      "fact": "User's recent trip to the Outer Banks took four hours to drive.",
+      "type": "personal",
+      "entities": [
+        "four hours",
+        "Outer Banks"
+      ]
+    },
+    {
+      "fact": "User prefers a relaxed, laid-back vibe for their trip.",
+      "type": "preference",
+      "entities": [
+        "relaxed vibe",
+        "laid-back vibe"
+      ]
+    },
+    {
+      "fact": "User would like to focus on beach activities and water sports.",
+      "type": "preference",
+      "entities": [
+        "beach activities",
+        "water sports"
+      ]
+    },
+    {
+      "fact": "User is considering between Chincoteague Island and Tybee Island for their trip.",
+      "type": "event",
+      "entities": [
+        "Chincoteague Island",
+        "Tybee Island"
+      ]
+    }
+  ],
+  "answer_526354c8_2": [
+    {
+      "fact": "User is planning a new road trip",
+      "type": "event",
+      "entities": [
+        "road trip"
+      ]
+    },
+    {
+      "fact": "User recently drove for six hours to Washington D.C.",
+      "type": "event",
+      "entities": [
+        "Washington D.C."
+      ]
+    },
+    {
+      "fact": "User is starting from their hometown",
+      "type": "personal",
+      "entities": [
+        "hometown"
+      ]
+    },
+    {
+      "fact": "User is thinking of heading out west to visit some national parks",
+      "type": "preference",
+      "entities": [
+        "national parks",
+        "west"
+      ]
+    },
+    {
+      "fact": "User is open to suggestions for their exact destination",
+      "type": "preference",
+      "entities": []
+    },
+    {
+      "fact": "User prefers scenic routes, especially through national parks",
+      "type": "preference",
+      "entities": [
+        "scenic routes",
+        "national parks"
+      ]
+    },
+    {
+      "fact": "User is planning a trip length of around 7-10 days",
+      "type": "preference",
+      "entities": [
+        "7-10 days"
+      ]
+    },
+    {
+      "fact": "User does not have any specific road conditions or restrictions to consider",
+      "type": "personal",
+      "entities": []
+    },
+    {
+      "fact": "User is open to suggestions for stops or activities along the way",
+      "type": "preference",
+      "entities": []
+    }
+  ],
+  "answer_526354c8_3": [
+    {
+      "fact": "User is planning a camping trip.",
+      "type": "event",
+      "entities": [
+        "camping trip"
+      ]
+    },
+    {
+      "fact": "User has experience with camping.",
+      "type": "personal",
+      "entities": [
+        "camping"
+      ]
+    },
+    {
+      "fact": "User recently went camping in the mountains of Tennessee.",
+      "type": "event",
+      "entities": [
+        "Tennessee",
+        "mountains"
+      ]
+    },
+    {
+      "fact": "User drove for five hours to get to Tennessee.",
+      "type": "event",
+      "entities": [
+        "five hours",
+        "Tennessee"
+      ]
+    },
+    {
+      "fact": "User found the trip to Tennessee totally worth it.",
+      "type": "opinion",
+      "entities": [
+        "Tennessee trip"
+      ]
+    },
+    {
+      "fact": "User is considering getting a portable grill for their next trip.",
+      "type": "preference",
+      "entities": [
+        "portable grill"
+      ]
+    },
+    {
+      "fact": "User tried out a portable grill in Tennessee.",
+      "type": "event",
+      "entities": [
+        "portable grill",
+        "Tennessee"
+      ]
+    }
+  ]
+}

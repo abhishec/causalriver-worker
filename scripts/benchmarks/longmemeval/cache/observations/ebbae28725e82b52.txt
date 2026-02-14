@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [FACT] User has been using Instacart for grocery shopping and has spent around $400 total so far.
+- [PREFERENCE] User is interested in trying out new meal kit services besides HelloFresh.
+- [EVENT] User is considering trying out Sun Basket.
+- [ASSISTANT_SAID] Sun Basket offers a Classic Menu for 2 people at $11.49 per serving, totaling $68.94 per week.
+- [ASSISTANT_SAID] Sun Basket's Vegetarian Menu for 2 people costs $10.99 per serving, totaling $65.94 per week.
+- [ASSISTANT_SAID] Sun Basket's Family Menu (2 meals for 4 people) costs $9.99 per serving, totaling $79.92 per week.
+- [ASSISTANT_SAID] Sun Basket's Lean & Clean Menu for 2 people costs $12.99 per serving, totaling $77.94 per week.
+- [ASSISTANT_SAID] Sun Basket offers a promo code "SUN35" for $35 off the first order.
+- [ASSISTANT_SAID] Sun Basket offers snacks and desserts as add-ons for an additional $5-$10 per week.
+- [ASSISTANT_SAID] Sun Basket allows for meal preferences and ingredient swaps based on dietary restrictions.
+- [ASSISTANT_SAID] Sun Basket provides high-quality, sustainable ingredients, including organic produce and responsibly sourced proteins.
+- [ASSISTANT_SAID] Sun Basket offers a flexible subscription plan that allows users to skip or cancel deliveries at any time.
+- [ASSISTANT_SAID] User can sign up for Sun Basket by visiting their website and following the steps to create an account.
+- [ASSISTANT_SAID] User can use Sun Basket to mix things up and potentially save time and money compared to using Instacart alone.
+- [PREFERENCE] User is interested in using the Classic Menu for 2 people from Sun Basket.
+- [ASSISTANT_SAID] User can designate specific days of the week for Sun Basket meals and use Instacart for the rest of their grocery needs.
+- [ASSISTANT_SAID] User can plan around sales and promotions on Instacart when incorporating Sun Basket into their routine.
+- [TEMPORAL] Session Date: 2023/05/21 (Sun) 05:45.

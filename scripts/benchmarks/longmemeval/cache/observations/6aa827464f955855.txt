@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/21 (Sun) 15:45  
+[FACT] User has been experiencing issues with their internet connection.  
+[FACT] User recently upgraded their router to a TP-Link Archer AX50.  
+[FACT] User purchased the TP-Link Archer AX50 online from Amazon for around $150.  
+[CHANGE] User reports that the new router has been a huge improvement so far.  
+[EVENT] User is currently troubleshooting their internet connection issues.  
+[PREFERENCE] User is experiencing slow internet speeds, especially in the evening when multiple devices are connected.  
+[TEMPORAL] User states that the issues started a few days ago.  
+[FACT] User reports that the slow internet issues are affecting all devices connected to the router.  
+[FACT] User has restarted the router a few times, which temporarily fixed the issue.  
+[ASSISTANT_SAID] Assistant congratulated the user on the new router upgrade and acknowledged its reliable performance.  
+[ASSISTANT_SAID] Assistant asked the user to describe the problems in more detail, including types of issues, when they started, device specifics, patterns, and ISP status.  
+[ASSISTANT_SAID] Assistant provided potential causes and troubleshooting steps, including checking ISP status, router configuration, channel congestion, device interference, network congestion, firmware issues, and physical obstructions.  
+[FACT] User has not checked their ISP's status page yet but plans to do so.  
+[ASSISTANT_SAID] Assistant suggested checking the ISP's status page for outages or maintenance.  
+[FACT] User checked their ISP's status page and found no reported outages or maintenance in their area.  
+[ASSISTANT_SAID] Assistant acknowledged the absence of ISP issues and provided guidance on router configuration and firmware updates.  
+[ASSISTANT_SAID] Assistant detailed steps for router configuration, including logging in, checking wireless settings, and saving changes.  
+[ASSISTANT_SAID] Assistant outlined steps for checking and updating the router's firmware, including downloading the firmware from TP-Link's website, preparing the firmware file, uploading it to the router, and rebooting the router.  
+[ASSISTANT_SAID] Assistant emphasized the importance of not interrupting the update process and ensuring the router remains powered on during the update.  
+[PREFERENCE] User expressed that they are not very tech-savvy and appreciated the step-by-step guide provided by the assistant.  
+[ASSISTANT_SAID] Assistant confirmed the user's understanding of the firmware update process and reiterated the key steps involved.  
+[ASSISTANT_SAID] Assistant encouraged the user to reach out to TP-Link's customer support if they felt uncomfortable with the process.

@@ -1,0 +1,21 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/06/17 (Sat) 19:51  
+[USER] User requested a simple tutorial about how to use iptables in Linux.  
+[ASSISTANT_SAID] To check the current rules, run the command `sudo iptables -L -n -v`.  
+[ASSISTANT_SAID] To allow traffic on a specific port, use the command: `sudo iptables -A INPUT -p tcp --dport <port_number> -j ACCEPT`.  
+[ASSISTANT_SAID] To block traffic on a specific port, use the command: `sudo iptables -A INPUT -p tcp --dport <port_number> -j DROP`.  
+[ASSISTANT_SAID] To allow traffic from a specific IP address, use the command: `sudo iptables -A INPUT -s <IP_address> -j ACCEPT`.  
+[ASSISTANT_SAID] To block traffic from a specific IP address, use the command: `sudo iptables -A INPUT -s <IP_address> -j DROP`.  
+[ASSISTANT_SAID] To save the rules so that they persist after a reboot, use the command: `sudo iptables-save > /etc/iptables/rules.v4`.  
+[ASSISTANT_SAID] To load the saved rules after a reboot, use the command: `sudo iptables-restore < /etc/iptables/rules.v4`.  
+[ASSISTANT_SAID] Iptables can be complex, and the tutorial only scratches the surface; consult the official documentation for more information.  
+[USER] User asked how to observe whether the rules are applied.  
+[ASSISTANT_SAID] To observe whether the rules are applied, use the command `sudo iptables -L -n -v`.  
+[ASSISTANT_SAID] The output will show the number of packets and bytes that have matched each rule, as well as the target action of the rule (ACCEPT or DROP).  
+[ASSISTANT_SAID] To test a specific rule, access the service that the rule is intended to allow or block.  
+[ASSISTANT_SAID] Use the command `sudo iptables -L --line-numbers` to see the order in which your rules are being applied.  
+[USER] User asked how to view only the iptables debug messages in dmesg.  
+[ASSISTANT_SAID] To view only the iptables debug messages in dmesg, use the command: `sudo dmesg -T | grep "iptables:"`.  
+[ASSISTANT_SAID] The `-T` option displays timestamps in a human-readable format.  
+[ASSISTANT_SAID] To save the iptables messages to a file, use the command:

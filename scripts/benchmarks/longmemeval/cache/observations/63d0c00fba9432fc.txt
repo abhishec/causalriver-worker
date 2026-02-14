@@ -1,0 +1,19 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/25 (Thu) 08:55  
+[ASSISTANT_SAID] The bonus retries resource should include a reference to the game or games that the bonus retries were used in.  
+[ASSISTANT_SAID] The updated snippet for the bonus retries resource includes a field `game_id`, which is a reference to the game resource.  
+[ASSISTANT_SAID] The fields in the bonus retries resource include: player_id, num_retries, earned_by_referral, earned_by_purchase, used_in_game, used_date, and game_id.  
+[ASSISTANT_SAID] The `used_in_game` field can be updated to `true` when a player uses bonus retries to play a game.  
+[USER] Asked if the overall formula is dynamic and what data points it uses to change odds.  
+[ASSISTANT_SAID] The overall formula is dynamic and can be adjusted based on various inputs such as face value of the win, gross profit margin, desired odds of winning, number of games played, and number of bonus retries earned by the player.  
+[ASSISTANT_SAID] The odds of winning with bonus retries can be adjusted based on the value of the bonus retries, which is calculated using the cost of the win and the odds of winning.  
+[ASSISTANT_SAID] Data points used to adjust the odds include: face value of the win, gross profit margin, desired odds of winning, number of games played, number of bonus retries earned, cost of the win, value of bonus retries, odds with bonus retries, and number of games won.  
+[USER] Asked if the odds are dynamic.  
+[ASSISTANT_SAID] Yes, the odds of winning on the Win'it platform can be dynamic and can change based on various factors such as face value of the win, cost of the win, and number of bonus retries used.  
+[ASSISTANT_SAID] The odds can change based on the number of bonus retries used by the player and can be adjusted based on factors like gross profit margin or historical transaction value of the merchant.  
+[USER] Asked about players not playing and taking the credit before a game.  
+[ASSISTANT_SAID] Players have the option to "bank" their credit before playing a game, which means they can take the credit instead of using it to play.  
+[ASSISTANT_SAID] When a player banks their credit, they forfeit their chance to win the prize but receive a discount on their purchase.  
+[ASSISTANT_SAID] The discount is based on the cost of the win and the gross profit margin of the merchant.  
+[ASSISTANT_SAID] Banking credit does not directly affect the odds of winning but can reduce the number of games played

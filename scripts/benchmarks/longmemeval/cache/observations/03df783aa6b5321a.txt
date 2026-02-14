@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/21 (Sun) 02:16
+- [FACT] User is trying to manage their sleep schedule.
+- [FACT] User tends to stay up late on Tuesdays and Thursdays until 11:45 PM.
+- [FACT] User gets caught up watching TV shows on Netflix.
+- [PREFERENCE] User likes the idea of creating a pre-bedtime routine.
+- [ASSISTANT_SAID] Suggested strategies to help the user wind down earlier include setting a specific bedtime goal, creating a pre-bedtime routine, scheduling TV time, using Netflix's features, replacing TV time with relaxing activities, gradually adjusting the sleep schedule, making the sleep environment conducive to sleep, getting morning accountability, rewarding oneself, and being kind to oneself.
+- [ASSISTANT_SAID] Recommended herbal teas for relaxation include chamomile tea, lavender tea, valerian root tea, peppermint tea, tart cherry tea, passionflower tea, lemon balm tea, rooibos tea, hops tea, and GABA tea.
+- [ASSISTANT_SAID] Provided tips for preparing herbal tea, including using 1 teaspoon of dried herbs per 8 oz of boiling water and steeping for 5-7 minutes.
+- [FACT] User already makes a cup of herbal tea, usually chamomile or peppermint, as part of their unwinding routine.
+- [CHANGE] User plans to try out other herbal tea options.
+- [PREFERENCE] User is concerned about phone usage before bed.
+- [ASSISTANT_SAID] Suggested strategies to minimize phone usage before bedtime include setting a "no phone zone," establishing a "screen-free" period, using blue light filtering glasses or apps, implementing a "phone bedtime," replacing phone time with relaxing activities, using apps that promote sleep, setting up phone-free routines, removing temptations, creating a bedtime routine checklist, and making it a habit.
+- [FACT] User has set reminders to put their phone on silent mode and charge it in the kitchen, which has helped avoid temptation.
+- [CHANGE] User plans to set a specific "phone bedtime" and charge their phone in a separate room away from their bed.
+- [FACT] User has been doing a 30-minute yoga routine or following along with a workout video on YouTube around 8:30 PM to help relax and prepare for bed.
+- [PREFERENCE] User has found that their yoga routine helps them wind down better than scrolling through their phone.
+- [FACT] User is trying to figure out why they have been getting less sleep than they would like.
+- [ASSISTANT_SAID] Recommended keeping a sleep diary to track patterns and identify areas for improvement.
+- [ASSISTANT_SAID] Suggested that a sleep diary should include bedtime and wake-up time, time spent in bed, quality of sleep, factors affecting sleep, naps or

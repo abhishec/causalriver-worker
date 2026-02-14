@@ -1,0 +1,41 @@
+{
+  "answer_83c13ff9": [
+    {
+      "fact": "User is considering getting a passport",
+      "type": "preference",
+      "entities": [
+        "passport"
+      ]
+    },
+    {
+      "fact": "User is unsure which nationality to apply for",
+      "type": "preference",
+      "entities": [
+        "nationality"
+      ]
+    },
+    {
+      "fact": "User has a mixed ethnicity of Irish and Italian",
+      "type": "personal",
+      "entities": [
+        "Irish",
+        "Italian"
+      ]
+    },
+    {
+      "fact": "User has been thinking about their family tree and cultural heritage",
+      "type": "opinion",
+      "entities": [
+        "family tree",
+        "cultural heritage"
+      ]
+    },
+    {
+      "fact": "User finds the ability to live and work in any EU country appealing",
+      "type": "opinion",
+      "entities": [
+        "EU country"
+      ]
+    }
+  ]
+}

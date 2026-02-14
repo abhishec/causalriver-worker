@@ -1,0 +1,19 @@
+**Observation Log:**
+
+- [FACT] The user completed a coding boot camp in December.
+- [EVENT] The user attended a business networking workshop from February 10th to 12th.
+- [EVENT] The user attended a photography workshop on January 28th.
+- [EVENT] The user attended a mindfulness workshop on November 15th.
+- [PREFERENCE] The user is trying to organize notes and materials from workshops attended recently.
+- [PREFERENCE] The user is interested in reviewing projects worked on during the coding boot camp, including a simple chatbot and a web scraper.
+- [ASSISTANT_SAID] The assistant suggested using Evernote or Bear for note-taking.
+- [ASSISTANT_SAID] The assistant suggested using Trello for project management.
+- [ASSISTANT_SAID] The assistant recommended several CRM tools for organizing business contacts, including HubSpot CRM, Contactually, Pipedrive, Airtable, and Copper.
+- [ASSISTANT_SAID] The assistant suggested using Google Contacts or Microsoft Outlook as simpler options for organizing business contacts.
+- [ASSISTANT_SAID] The assistant recommended Adobe Lightroom for organizing photos.
+- [ASSISTANT_SAID] The assistant provided a list of habit-tracking apps, including Habitica, HabitBull, Strides, Loop Habit Tracker, and Moodfit.
+- [ASSISTANT_SAID] The assistant mentioned mindfulness-specific apps like Headspace, Calm, Insight Timer, and Mindfulness Studio.
+- [PREFERENCE] The user plans to start with Evernote or Bear for note-taking and Trello for project management.
+- [PREFERENCE] The user intends to start with HubSpot CRM for managing business contacts.
+- [PREFERENCE] The user plans to start with HabitBull for tracking mindfulness habits.
+- [ASSISTANT_SAID] The assistant suggested creating a system for staying in touch with entrepreneurs met during the business networking workshop and potentially collaborating on future projects.

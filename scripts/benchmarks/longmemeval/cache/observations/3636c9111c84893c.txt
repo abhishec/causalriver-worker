@@ -1,0 +1,34 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/17 (Wed) 13:18  
+[USER] User wants to play a text adventure game.  
+[PREFERENCE] User prefers the game to be set in the universe of Kentaro Miura’s Berserk.  
+[USER] User takes the role of the character Puck, Guts’ trusted fairy companion.  
+[ASSISTANT_SAID] The game will play in turns, starting each turn with a detailed description of an encounter with a new foe.  
+[ASSISTANT_SAID] Each foe must be more formidable than the previous foe.  
+[ASSISTANT_SAID] The player must provide Guts with advice on how to slay the foe using various means.  
+[ASSISTANT_SAID] The reward for the player upon Guts’ victory must be something of interest to Puck that could aid Guts.  
+[ASSISTANT_SAID] After each encounter, the player is presented with 3 lettered options representing what to say to Guts.  
+[ASSISTANT_SAID] The game should allude to themes of brutality, strife, the evil nature of man, and the gruesome demands of survival in the Berserk universe.  
+
+[ASSISTANT_CREATED] Encounter 1: Guts and Puck are in a dense forest and encounter a group of possessed forest spirits wielding sharp branches.  
+[ASSISTANT_SAID] Options presented to the user:  
+A) Tell Guts to use his Dragon Slayer to cut through the spirits.  
+B) Suggest that Guts use his agility to dodge the spirits and find a weakness.  
+C) Urge Guts to use his surrounding environment to his advantage.  
+
+[USER] User chooses option C.  
+[ASSISTANT_SAID] Guts uses the environment to blind the spirits with streams of light, allowing him to defeat them.  
+[ASSISTANT_SAID] As a reward, Puck finds a small vial of holy water.  
+
+[ASSISTANT_CREATED] Encounter 2: Guts and Puck are in a dark dungeon and encounter a massive troll wielding a club.  
+[ASSISTANT_SAID] Options presented to the user:  
+A) Suggest that Guts use his Dragon Slayer to cut through the troll.  
+B) Urge Guts to use his agility to dodge the troll's slow movements.  
+C) Tell Guts to use the holy water as a weapon against the troll.  
+
+[USER] User chooses option A.  
+[ASSISTANT_SAID] Guts uses his Dragon Slayer to cut through the troll, defeating it.  
+[ASSISTANT_SAID] As a reward, Puck finds a small pouch of Troll Fat.  
+
+[ASSISTANT_CREATED] Encounter 3: Guts and

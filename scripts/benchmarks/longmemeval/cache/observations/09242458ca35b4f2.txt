@@ -1,0 +1,28 @@
+**Observation Log:**
+
+**Session Date:** 2022/10/13 (Thu) 20:58  
+**Session ID:** sharegpt_U9Sujf2_9
+
+1. [ASSISTANT_SAID] The assistant suggested adding a new collection called `classic_websites` and updating the `websites` collection schema to accommodate the user's challenge.
+2. [ASSISTANT_SAID] The assistant provided an updated schema for the `websites` collection, including a new field `classic_referrer_websites` (array of ObjectId, references to `classic_websites._id`).
+3. [ASSISTANT_SAID] The assistant detailed the fields for the new `classic_websites` collection, which includes: 
+   - \_id (ObjectId)
+   - url (string)
+   - title (string)
+   - description (string)
+   - keywords (array of strings)
+   - crawl_id (ObjectId, reference to `web_crawls._id`)
+   - linked_immersive_websites (array of ObjectId, references to `websites._id`)
+4. [ASSISTANT_SAID] The assistant explained that the `classic_websites` collection would help track relationships between classic and immersive websites, aiding in the discovery of WebXR-supported sites.
+5. [ASSISTANT_SAID] The assistant recommended that as the web crawler visits classic websites, it can store information about them in the `classic_websites` collection and update the `classic_referrer_websites` field in the `websites` collection.
+6. [USER] The user requested a direct answer to their question and asked for schema updates only if necessary.
+7. [USER] The user inquired about how to store a list of websites to be crawled, expressing a desire to prime it with a single URL and allow for recursive crawling without scanning a website twice, while also being able to add websites on demand.
+8. [ASSISTANT_SAID] The assistant proposed creating a new collection called `crawl_queue` to manage the list of websites to be crawled.
+9. [ASSISTANT_SAID] The assistant outlined the fields for the `crawl_queue` collection, which includes:
+   - \_id (ObjectId)
+   - website_id (ObjectId, reference to `websites._id` or `classic_websites._id`)
+   - website_type (string, either "immersive" or "classic")
+   - crawl_status (string, e.g., "pending", "crawling", "crawled")
+   - assigned_crawler_id (string, optional, identifier of the assigned crawler)
+   - timestamp (Date, time when the website was added to the queue)
+10. [ASSISTANT_SAID] The assistant explained the process for starting a crawl, managing multiple crawlers, and adding new websites on demand

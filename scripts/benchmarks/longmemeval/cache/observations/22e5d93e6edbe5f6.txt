@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/30 (Tue) 09:16  
+[USER] User asked about the difference between a Master's and PhD student.  
+[ASSISTANT_SAID] A Master's degree is typically a two-year program focused on a specific field of study and requires the completion of a thesis or final project.  
+[ASSISTANT_SAID] A Ph.D. (Doctor of Philosophy) is a more advanced degree that typically takes several years to complete and requires original research and the submission of a dissertation.  
+[ASSISTANT_SAID] Master's students are generally not required to conduct original research, while Ph.D. students are expected to make significant contributions to their field through original research.  
+[USER] User asked how to ask a good research question.  
+[ASSISTANT_SAID] Asking a good research question is an important step in the research process as it helps to guide the research and define the scope of the study.  
+[ASSISTANT_SAID] Tips for asking a good research question include:  
+[ASSISTANT_SAID] 1. Be specific: A good research question should be specific and clearly defined.  
+[ASSISTANT_SAID] 2. Be relevant: A good research question should be relevant to your field of study and contribute to the existing body of knowledge.  
+[ASSISTANT_SAID] 3. Be feasible: A good research question should be feasible to investigate given the resources and time available.  
+[ASSISTANT_SAID] 4. Be original: A good research question should be original and not simply repeat existing research.  
+[ASSISTANT_SAID] 5. Be precise: A good research question should be precise and not too broad or too narrow.  
+[ASSISTANT_SAID] 6. Be relevant for the target audience: A good research question should be relevant for the target audience and address an issue that is of interest to them.  
+[ASSISTANT_SAID] 7. Be answerable: A good research question should be answerable with the methods and data available to you.  
+[ASSISTANT_SAID] 8. Be actionable: A good research question should provide actionable insights that can be used to solve problems or improve practices.  
+[ASSISTANT_SAID] When formulating your research question, it can be helpful to start with a broad topic and then narrow it down to a specific question.  
+[ASSISTANT_SAID] It's also important to review the existing literature to ensure that your question is original and addresses a gap in current knowledge.  
+[USER] User asked for interesting domains to combine with Multi-agent reinforcement learning (MARL).  
+[ASSISTANT_SAID] MARL can be applied to a wide variety of domains, including:

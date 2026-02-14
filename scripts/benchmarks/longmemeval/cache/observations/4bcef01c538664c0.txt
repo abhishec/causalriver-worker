@@ -1,0 +1,14 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/22 (Mon) 13:16  
+[USER] The user is trying to plan a healthy meal prep for the week.  
+[PREFERENCE] The user is looking for recipe ideas that are high in protein and low in carbs.  
+[ASSISTANT_SAID] Breakfast options provided:  
+[ASSISTANT_SAID] 1. Scrambled Eggs with Spinach and Feta: Scramble 2 eggs with 1/4 cup spinach, 1/4 cup crumbled feta cheese, and 1/4 cup cherry tomatoes. Serve with a side of avocado or a low-carb veggie. (Protein: 24g, Carbs: 4g)  
+[ASSISTANT_SAID] 2. Greek Yogurt with Berries and Nuts: Mix 1 cup Greek yogurt with 1/2 cup mixed berries, 1 tablespoon almond butter, and 1 ounce chopped nuts (e.g., almonds or walnuts). (Protein: 20g, Carbs: 10g)  
+[ASSISTANT_SAID] 3. Cottage Cheese with Peaches and Cinnamon: Mix 1/2 cup cottage cheese with 1/2 cup sliced peaches, 1/4 teaspoon cinnamon, and a sprinkle of chopped nuts. (Protein: 28g, Carbs: 5g)  
+[ASSISTANT_SAID] Lunch and dinner options provided:  
+[ASSISTANT_SAID] 1. Grilled Chicken Breast with Roasted Veggies: Grill 4 ounces chicken breast and serve with 1 cup roasted veggies (e.g., broccoli, cauliflower, bell peppers) seasoned with olive oil, salt, and pepper. (Protein: 35g, Carbs: 5g)  
+[ASSISTANT_SAID] 2. Salmon with Avocado Salsa: Grill 4 ounces salmon and top with a salsa made from 1/2 avocado, 1/2 cup diced tomatoes, 1/4 cup red onion, and 1 tablespoon lime juice. (Protein: 35g, Carbs: 5g)  
+[ASSISTANT_SAID] 3. Turkey Lettuce Wraps: Fill large lettuce leaves with 2 ounces sliced turkey breast, 1/4 cup avocado, 1/4 cup tomato, and 1/4 cup bacon. (Protein: 30g, Carbs: 5g)  
+[ASSISTANT_SAID] 4. Zucchini Boats with Turkey and Cheese: Hollow out 2 medium zucchinis and fill with 2 ounces ground turkey, 1/4 cup shredded mozzarella, and 1/4 cup chopped spinach. Bake at 375°F for 20-25 minutes. (Protein: 30g, Carbs: 5g)

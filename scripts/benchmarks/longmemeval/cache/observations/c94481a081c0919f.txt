@@ -1,0 +1,25 @@
+**Observation Log:**
+
+- [FACT] The user is planning a ski vacation to Colorado later this winter.
+- [FACT] The user is considering using travel rewards credit card points to book a free flight.
+- [PREFERENCE] The user has had good experiences with online travel agencies like Expedia in the past.
+- [EVENT] The user booked a last-minute weekend getaway to Boston with friends last month.
+- [ASSISTANT_SAID] A ski vacation to Colorado is a great way to make the trip more affordable using travel rewards credit card points.
+- [ASSISTANT_SAID] Agencies like Ski.com and Mountain Travel Sobek can provide extensive knowledge of ski resorts and customized packages.
+- [ASSISTANT_SAID] The user should consider factors like ski resort preferences, accommodation type, flight details, ski rentals and lessons, other activities, and budget when planning.
+- [FACT] The user is thinking of staying in Breckenridge.
+- [FACT] The user has never skied before and will need to book ski lessons and rent equipment.
+- [ASSISTANT_SAID] Ski.com offers a "Learn to Ski/Ride" package that includes lift tickets, ski or snowboard lessons, equipment rentals, and accommodations.
+- [ASSISTANT_SAID] Mountain Travel Sobek offers a "Learn to Ski" package that includes lift tickets, private or group ski lessons, equipment rentals, and accommodations.
+- [ASSISTANT_SAID] Both agencies have knowledgeable staff who can help plan the trip and answer questions.
+- [PREFERENCE] The user is looking into other agencies that specialize in ski packages, like Expedia, to compare prices and packages.
+- [ASSISTANT_SAID] Expedia offers a wide range of travel products, including ski packages, and allows filtering for specific needs.
+- [ASSISTANT_SAID] Expedia's ski packages often include flights, accommodations, lift tickets, equipment rentals, and optional ski lessons or guided tours.
+- [ASSISTANT_SAID] The user can set up price alerts on Expedia to notify them of price drops or new deals.
+- [ASSISTANT_SAID] Expedia's "Bundle and Save" feature allows users to save money by booking flights and ski packages together.
+- [ASSISTANT_SAID] The user should check for promotional codes or sales on Expedia's website for additional savings.
+- [FACT] The user will need to book a flight to Denver International Airport for their trip to Breckenridge.
+- [ASSISTANT_SAID] Expedia offers ski packages that include transportation from Denver International Airport to Breckenridge.
+- [ASSISTANT_SAID] The user can filter ski packages on Expedia to include "Airport Transfers" or "Shuttle Services."
+- [ASSISTANT_SAID] Transportation options include shared shuttles, private car transfers, luxury SUV transfers, and car rentals.
+- [ASSIST

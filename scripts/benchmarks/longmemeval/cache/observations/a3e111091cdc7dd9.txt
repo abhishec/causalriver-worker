@@ -1,0 +1,33 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/01/05 (Thu) 08:43
+- [FACT] User's name is Madi.
+- [RELATIONSHIP] Clarke is a close companion of Madi.
+- [RELATIONSHIP] Lexa is a significant figure from Clarke's past.
+- [RELATIONSHIP] Bellamy and Raven are part of Madi's new family.
+- [EVENT] Madi woke up on the dropship after being in cryo for 20 years.
+- [FACT] Madi felt tired and worn out after waking up.
+- [ASSISTANT_CREATED] The assistant created a narrative where Clarke comforts Madi by singing a lullaby that Lexa used to sing.
+- [FACT] Madi recognized the lullaby as the same one Lexa had sung to Clarke.
+- [RELATIONSHIP] Clarke has kept the lullaby with her for years.
+- [PREFERENCE] Madi finds the lullaby beautiful and it brings back memories.
+- [EVENT] Madi and Clarke are on the bridge of the dropship.
+- [FACT] Madi is trying to comprehend the advanced technology on the bridge.
+- [FACT] Madi sees a few people working on different stations on the bridge.
+- [ASSISTANT_CREATED] The assistant created a narrative where Clarke reassures Madi not to stress too much about adjusting after being in cryo.
+- [PREFERENCE] Madi expresses eagerness to help on the bridge.
+- [ASSISTANT_SAID] Clarke encourages Madi to help navigate and find a new home.
+- [EVENT] Clarke and Bellamy are having a loud argument on the dropship.
+- [FACT] Raven blocks Madi from leaving the soundproof room to see the argument.
+- [PREFERENCE] Madi is confused and wants to know why she can't see the argument.
+- [ASSISTANT_SAID] Raven explains to Madi that Clarke and Bellamy need to work things out themselves.
+- [EVENT] Raven takes Madi to a soundproof room to explain the situation.
+- [FACT] Raven reassures Madi that it's normal for Clarke and Bellamy to argue.
+- [FACT] Madi can still hear the argument from the soundproof room.
+- [FACT] Octavia opens the door to the soundproof room.
+- [RELATIONSHIP] Octavia needs Raven's help regarding the argument between Clarke and Bellamy.
+- [ASSISTANT_SAID] Raven asks Madi if she will be okay if she steps out to help Octavia.
+- [FACT] Madi nods in agreement, indicating she will be okay alone.
+- [EVENT] Raven and Octavia leave the soundproof room to resolve the situation.
+- [EVENT] Raven and Octavia return to the soundproof room after resolving the situation.
+- [FACT] Octavia has a look

@@ -1,0 +1,25 @@
+**Observation Log:**
+
+- [FACT] The user is planning a trip to Disneyland soon.
+- [EVENT] The user attended Mickey's Halloween Party event on October 10th.
+- [PREFERENCE] The user thinks "Snow White's Enchanted Wish" is cute and fun.
+- [CHANGE] The user got the name of the ride mixed up and acknowledged the confusion.
+- [ASSISTANT_SAID] The assistant clarified that "Snow White's Enchanted Wish" is the updated name of the ride that was previously called "Snow White's Scary Adventures."
+- [ASSISTANT_SAID] The assistant mentioned that "Snow White's Enchanted Wish" reopened in May 2021 after a major refurbishment.
+- [ASSISTANT_SAID] The assistant provided details about Halloween decorations and events at Disneyland during Mickey's Halloween Party, including:
+  - [ASSISTANT_SAID] The event is a separately ticketed event that takes place on select nights in September and October.
+  - [ASSISTANT_SAID] The event typically runs from 6:00 PM to 11:00 PM.
+  - [ASSISTANT_SAID] The park is transformed with spooky decorations, including jack-o'-lanterns and themed lighting.
+  - [ASSISTANT_SAID] Guests are encouraged to dress up in Halloween costumes, with costume contests for kids and adults.
+  - [ASSISTANT_SAID] Trick-or-treat stations are available throughout the park for collecting candy and treats.
+  - [ASSISTANT_SAID] Exclusive entertainment includes the "Frightfully Fun Parade," "Mickey's Trick & Treat" stage show, and "Cadaver Dans" performances.
+  - [ASSISTANT_SAID] Special food and beverages are offered, including pumpkin beignets and "Witch's Brew" punch.
+  - [ASSISTANT_SAID] Character meet and greets feature Disney characters in Halloween costumes.
+  - [ASSISTANT_SAID] Some attractions receive special Halloween-themed overlays, like "Haunted Mansion Holiday" and "Guardians of the Galaxy - Monsters After Dark."
+  - [ASSISTANT_SAID] Photopass opportunities are available for Halloween-themed photos.
+- [USER] The user expressed excitement about returning to Mickey's Halloween Party this year.
+- [ASSISTANT_SAID] The assistant provided details about the "Haunted Mansion Holiday" ride overlay, including:
+  - [ASSISTANT_SAID] The attraction features Jack Skellington and his friends from "The Nightmare Before Christmas."
+  - [ASSISTANT_SAID] The queue and interior are decorated with Halloween and Christmas themes.
+- [ASSISTANT_SAID] The assistant provided details about the "Guardians of the Galaxy - Monsters After Dark" ride overlay, including:
+  - [ASSISTANT_S

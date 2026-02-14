@@ -1,0 +1,15 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2022/03/02 (Wed) 04:59
+- [EVENT] User recently saw a house they love on 3/1 and is considering making an offer.
+- [CHANGE] User has already gotten pre-approved for a mortgage on February 10th.
+- [FACT] The amount of the mortgage pre-approval is $350,000.
+- [PREFERENCE] User finds the house they saw on March 1st to check all the boxes for their criteria.
+- [RELATIONSHIP] User is working with an agent named Rachel, who is helping them find homes.
+- [PREFERENCE] User is considering making an offer of around $320,000.
+- [FACT] The asking price of the house is $335,000.
+- [ASSISTANT] The assistant suggested including an inspection contingency in the offer.
+- [ASSISTANT] The assistant provided a list of key factors to consider before making an offer on a house.
+- [PREFERENCE] User feels good about the offer of $320,000 and believes it is a fair price considering the market value of the property.
+- [PREFERENCE] User is confident that the inspection contingency will protect them in case any issues are found.
+- [PREFERENCE] User is prepared to negotiate and hopes to come to a mutually beneficial agreement with the seller.

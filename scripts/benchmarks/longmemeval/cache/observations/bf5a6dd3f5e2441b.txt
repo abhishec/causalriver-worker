@@ -1,0 +1,26 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/28 (Sun) 22:14
+- [FACT] Tommy is a character who has a father named Davey.
+- [FACT] Mark is Tommy's friend.
+- [EVENT] Tommy and Mark discover that Davey is Tommy's dad from the future.
+- [CHANGE] Tommy feels a connection with his dad after seeing him as a kid.
+- [RELATIONSHIP] Davey is Tommy's father.
+- [PREFERENCE] Tommy feels there was always something missing in his relationship with his dad.
+- [EVENT] Tommy and Mark decide to help Davey with bullying.
+- [ASSISTANT_SAID] Tommy suggests standing up for Davey to show him he is not alone.
+- [ASSISTANT_SAID] Mark agrees with Tommy's idea to help Davey.
+- [EVENT] Tommy and Mark confront bullies blocking Davey's path at school.
+- [FACT] Tommy and Mark successfully stand up to the bullies, allowing Davey to pass.
+- [RELATIONSHIP] Davey expresses gratitude to Tommy and Mark for their help.
+- [EVENT] Tommy and Mark keep a watchful eye on Davey throughout the school day.
+- [PREFERENCE] Tommy feels nervous about revealing his identity to Davey.
+- [EVENT] Tommy and Mark plan to talk to Davey at the diner the next morning.
+- [TEMPORAL] The next morning, Tommy and Mark go to the diner for breakfast.
+- [FACT] Davey works at the diner and is seen taking orders and serving coffee.
+- [RELATIONSHIP] Tommy feels a sense of awe when he sees Davey at the diner.
+- [EVENT] Tommy and Mark order breakfast and prepare to talk to Davey.
+- [ASSISTANT_SAID] Tommy expresses to Davey that he feels like he doesn't fit in and that it can be hard to feel alone.
+- [RELATIONSHIP] Davey responds to Tommy's feelings with understanding, indicating he has experienced similar feelings.
+- [PREFERENCE] Tommy struggles with the decision of whether to reveal his identity to Davey.
+- [EVENT] Tommy and Mark plan to approach Davey to learn more about his life without revealing Tommy's true identity.

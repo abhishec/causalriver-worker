@@ -1,0 +1,14 @@
+**Observation Log:**
+
+- [FACT] User is located in zip code 12345.
+- [FACT] User needs to see their primary care doctor.
+- [PREFERENCE] User prefers morning slots for appointments.
+- [PREFERENCE] User would like to find a clinic within an hour's drive from home.
+- [TEMPORAL] User is available anytime on weekdays for the follow-up appointment.
+- [EVENT] User is planning to contact Family Care Medical Center first for their follow-up appointment.
+- [ASSISTANT] The assistant provided a list of nearby clinics with available slots, including Family Care Medical Center, Urgent Care and Primary Care, and Community Health Clinic.
+- [ASSISTANT] The assistant suggested specific questions to ask when contacting Family Care Medical Center, including inquiries about wait times, insurance, and appointment details.
+- [ASSISTANT] The assistant recommended asking about the doctor's experience with the user's specific condition and whether requesting a specific doctor would affect wait time or availability.
+- [RELATIONSHIP] User has a primary care doctor but did not specify their name.
+- [EVENT] User mentioned it took them two hours to get to the clinic last time.
+- [ASSISTANT] The assistant advised the user to take notes during the call, including the name of the person they spoke with and any important details provided.

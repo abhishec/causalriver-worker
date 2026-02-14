@@ -1,0 +1,30 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/03/26 (Sun) 18:55  
+[USER] User's images are displaying larger than they would like.  
+[USER] User has tried adding a max-height percentage in a few places, but it's not working.  
+[USER] User is seeking advice on where to add the max-height.  
+[USER] User provided a CSS code snippet related to the layout and styling of images and cards.  
+[ASSISTANT_SAID] Assistant suggested adding the `max-height` property directly to the `img` selector within the `.card` class.  
+[ASSISTANT_SAID] Assistant provided an example code snippet:  
+```css  
+.card img {  
+  border-radius: 2em;  
+  max-width: 90%;  
+  max-height: 200px; /* set your desired max-height here */  
+  padding: 0.5em;  
+}  
+```  
+[ASSISTANT_SAID] Assistant advised adjusting the value of `max-height` to the user's desired height.  
+[USER] User expressed confusion about already having max-height set in the provided code.  
+[ASSISTANT_SAID] Assistant acknowledged the user's existing `max-height` setting but noted that the value was only 10%, which is quite low.  
+[ASSISTANT_SAID] Assistant explained that a low `max-height` percentage could lead to larger images if the parent element is tall.  
+[USER] User asked if they need to use percentages to keep designs responsive.  
+[ASSISTANT_SAID] Assistant confirmed that using percentage values is a good approach for responsive designs.  
+[ASSISTANT_SAID] Assistant suggested increasing the percentage value of `max-height` to achieve the desired size for images.  
+[USER] User inquired about the minimum max-height percentage to avoid being ignored by CSS.  
+[ASSISTANT_SAID] Assistant clarified that there is no minimum value for `max-height` to prevent CSS from being ignored.  
+[ASSISTANT_SAID] Assistant reiterated that a low percentage could lead to larger images if the parent element is large.  
+[USER] User expressed confusion about the counterintuitive nature of using a higher percentage (50%) when it is larger than 10%.  
+[ASSISTANT_SAID] Assistant explained that the percentage value for `max-height` is relative to the height of the parent element and that increasing the percentage limits the image height more effectively.  
+[ASSISTANT_SAID] Assistant noted that `max-height` is a maximum limit and that the actual height of the image depends on the aspect ratio and available space in the parent element.

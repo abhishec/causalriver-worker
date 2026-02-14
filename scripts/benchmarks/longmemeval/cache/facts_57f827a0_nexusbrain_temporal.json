@@ -1,0 +1,20 @@
+{
+  "answer_1bde8d3b": [
+    {
+      "fact": "User is looking for mid-century modern design inspiration for a new bedroom dresser.",
+      "type": "preference",
+      "entities": [
+        "mid-century modern design",
+        "bedroom dresser"
+      ]
+    },
+    {
+      "fact": "User wants to incorporate key elements of mid-century modern design into their dresser.",
+      "type": "preference",
+      "entities": [
+        "mid-century modern design",
+        "dresser"
+      ]
+    }
+  ]
+}

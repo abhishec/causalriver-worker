@@ -1,0 +1,19 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/19 (Fri) 01:21  
+[USER] User is setting up a Docker Compose server.  
+[ASSISTANT_SAID] User needs to set up a Docker Compose server with Nginx, Letsencrypt certbot, vhost, PHP 8.1, and MariaDB.  
+[ASSISTANT_CREATED] User needs the following files: `Dockerfile`, `docker-compose.yml`, `default.conf`, `entrypoint.sh`, and optionally a `.env` file.  
+[ASSISTANT_CREATED] Example `Dockerfile` provided for building the PHP 8.1 image.  
+[ASSISTANT_CREATED] Example `docker-compose.yml` file provided for defining the services and their dependencies.  
+[ASSISTANT_CREATED] Example `default.conf` file provided for the Nginx vhost configuration.  
+[ASSISTANT_CREATED] Example `entrypoint.sh` script provided to handle the Nginx and certbot configuration.  
+[ASSISTANT_CREATED] Example `.env` file provided for storing environment variables.  
+[ASSISTANT_SAID] User can build and start the server using the commands: `docker-compose build` and `docker-compose up -d`.  
+[USER] User requested to see a directory tree.  
+[ASSISTANT_CREATED] Example directory tree provided for the Docker Compose server setup.  
+[USER] User asked how to add multiple hosts from one config file.  
+[ASSISTANT_SAID] User can add multiple hosts in a single Nginx configuration file using multiple `server` blocks.  
+[ASSISTANT_CREATED] Example `default.conf` file provided that includes configurations for two hosts: `example.com` and `example2.com`.  
+[ASSISTANT_SAID] Each `server` block can contain its own unique configuration, including a different `server_name` and `root` directory.  
+[ASSISTANT_CREATED] The example `default.conf` includes SSL certificate paths and configurations for both hosts.

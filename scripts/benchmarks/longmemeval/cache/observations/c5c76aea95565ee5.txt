@@ -1,0 +1,36 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2022/09/01 (Thu) 22:21
+- [FACT] User has been reading The New Yorker for the past three months.
+- [PREFERENCE] User is looking for recommendations on documentaries about climate change.
+- [EVENT] User plans to watch a documentary with a group of friends who are also interested in climate change.
+- [FACT] User follows coverage of climate change in various news outlets, including CNN and The Huffington Post.
+- [FACT] User is subscribed to news aggregators like Apple News and Google News.
+- [ASSISTANT_SAID] Recommended documentaries about climate change include:
+  1. **An Inconvenient Truth (2006)**
+  2. **Before the Flood (2016)**
+  3. **Chasing Coral (2017)**
+  4. **Racing Extinction (2015)**
+  5. **The Human Element (2018)**
+  6. **Ice on Fire (2019)**
+  7. **The True Cost of Climate Change (2020)**
+  8. **Climate Change: The Facts (2019)**
+  9. **The Devil We Know (2018)**
+  10. **To the Ends of the Earth (2016)**
+- [ASSISTANT_SAID] Suggested that any of the recommended documentaries would be suitable for a group watch, particularly:
+  1. **Before the Flood (2016)**
+  2. **Chasing Coral (2017)**
+  3. **Ice on Fire (2019)**
+- [ASSISTANT_SAID] Provided tips for a successful group watch, including:
+  - Choose a documentary that's around 1-2 hours long.
+  - Set the mood with refreshments and comfortable seating.
+  - Encourage open-mindedness and respect for differing opinions.
+  - Pause at key points for discussion.
+  - Have a follow-up discussion about potential actions to take.
+- [ASSISTANT_SAID] Confirmed that **Before the Flood** is available to stream for free on YouTube and also available for purchase or rent on Amazon Prime Video, Google Play, iTunes, and Vudu.
+- [ASSISTANT_SAID] Suggested preparing discussion questions for after the documentary, such as:
+  - What did you find most surprising or disturbing about the documentary?
+  - How do you think climate change affects your daily life, and what changes can you make to reduce your impact?
+  - What do you think is the most pressing issue related to climate change, and how can we work together to address it?
+- [FACT] User plans to send out the YouTube link to friends to plan a time to watch **Before the Flood** together.
+- [ASSISTANT_SAID] Suggested that user

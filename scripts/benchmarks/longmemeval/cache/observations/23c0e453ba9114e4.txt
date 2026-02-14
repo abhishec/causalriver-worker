@@ -1,0 +1,20 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2022/04/10 (Sun) 20:56  
+[FACT] User has a few Linux machines and a domain from Google Domains.  
+[FACT] User's domain is mo0han3d.dev.  
+[FACT] User has made a wildcard SSL certificate for the domain and all subdomains on one of their Linux machines.  
+[FACT] User has installed Kubernetes using k3s, and it is working.  
+[FACT] User has installed Nginx on their Kubernetes setup.  
+[PREFERENCE] User prefers precise answers that work with their configurations.  
+[PREFERENCE] User wants the assistant to remember the conversation.  
+[ASSISTANT_SAID] Assistant offered to help with the user's DevOps problem and requested more information about the user's configurations and setup.  
+[ASSISTANT_SAID] Assistant provided steps to enable SSL on the user's domain and subdomains, including copying the SSL certificate to the Kubernetes Nginx ingress controller, creating a Kubernetes secret, and configuring the Nginx ingress controller to use the SSL certificate.  
+[ASSISTANT_SAID] Assistant included a YAML configuration for the Ingress resource to manage external access to services in the cluster.  
+[USER] User expressed dissatisfaction with the assistant's response, stating they did not ask for the SSL setup and requested a description of what Ingress is in Kubernetes and how to use it for reverse proxy with Nginx.  
+[ASSISTANT_SAID] Assistant explained that Ingress is an API object in Kubernetes that manages external access to services, typically HTTP, and described how to set up a reverse proxy with Nginx using Ingress.  
+[ASSISTANT_SAID] Assistant provided steps to install the Nginx Ingress controller, create a Deployment and Service for Nginx, and create an Ingress resource for routing rules.  
+[USER] User requested information on how to add more nodes to their cluster, specifically mentioning they have another machine to use as a slave node.  
+[ASSISTANT_SAID] Assistant provided steps to add a new node to the existing Kubernetes cluster, including installing k3s on the new machine and joining it to the existing k3s server using a specific command with the server's IP and token.  
+[ASSISTANT_SAID] Assistant advised verifying the new node's addition to the cluster by running a command to list all nodes.  
+[ASSISTANT_SAID] Assistant noted that k3s uses a server-agent architecture, allowing the new node to deploy workloads and manage the cluster.

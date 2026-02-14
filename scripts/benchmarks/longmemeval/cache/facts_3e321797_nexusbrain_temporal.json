@@ -1,0 +1,28 @@
+{
+  "answer_ultrachat_94624": [
+    {
+      "fact": "User is excited to try natural remedies for dark circles under the eyes",
+      "type": "preference",
+      "entities": [
+        "natural remedies",
+        "dark circles"
+      ]
+    },
+    {
+      "fact": "User plans to consult with their doctor before trying any new remedies",
+      "type": "opinion",
+      "entities": [
+        "doctor",
+        "new remedies"
+      ]
+    },
+    {
+      "fact": "User intends to book an appointment with their doctor next week",
+      "type": "event",
+      "entities": [
+        "doctor appointment",
+        "next week"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+**Observation Log:**
+
+[FACT] User has been dealing with a lingering cough for weeks.  
+[FACT] User had an appointment with their primary care physician.  
+[FACT] User was prescribed an antibiotic that didn't fully clear up their cough.  
+[FACT] User is experiencing weird numbness in their left hand.  
+[FACT] User has an EMG test scheduled with their neurologist, Dr. Johnson, on April 1st.  
+[EVENT] User is seeking information on potential causes of their symptoms.  
+[ASSISTANT_SAID] A lingering cough can have various causes, including postnasal drip, asthma, GERD, allergies, chronic bronchitis, pneumonia, and environmental factors.  
+[ASSISTANT_SAID] Numbness in the left hand can be caused by nerve compression or damage, carpal tunnel syndrome, peripheral neuropathy, vitamin deficiencies, or systemic diseases.  
+[ASSISTANT_SAID] User should follow up with their primary care physician regarding the antibiotic results and further testing.  
+[ASSISTANT_SAID] User should keep a symptom journal to track their cough and numbness, including occurrences, frequency, and potential triggers.  
+[ASSISTANT_SAID] User should prepare for their EMG test by avoiding caffeine and nicotine for 24-48 hours beforehand and wearing loose, comfortable clothing.  
+[FACT] User is experiencing heartburn and acid reflux symptoms that started around late January.  
+[FACT] User has been trying to adjust their diet and taking antacids as needed.  
+[ASSISTANT_SAID] Foods that can trigger acid reflux include citrus fruits, tomatoes, fried foods, spicy foods, chocolate, caffeine, and carbonated drinks.  
+[ASSISTANT_SAID] Foods that can help alleviate acid reflux include alkaline foods, ginger, oatmeal, fiber-rich foods, and lean proteins.  
+[ASSISTANT_SAID] Lifestyle changes to help with acid reflux include eating smaller meals, avoiding lying down after eating, raising the head of the bed, managing stress, and losing weight.  
+[ASSISTANT_SAID] Antacids and acid reducers can provide relief from heartburn and acid reflux symptoms.  
+[ASSISTANT_SAID] User should talk to their healthcare provider before making significant changes to their diet or medication regimen.  
+[ASSISTANT_SAID] An EMG test measures the electrical activity of muscles and is used to diagnose muscle and nerve disorders.  
+[ASSISTANT_SAID] The EMG test typically takes 30-60 minutes and may involve placing electrodes on the skin or using needle electrodes for more detailed testing.  
+[ASSISTANT_SAID] User should avoid caffeine and nicotine before the EMG test and wear loose clothing.  
+[ASSISTANT_SAID] After the EMG test, results will be interpreted by a healthcare professional, and user may

@@ -1,0 +1,25 @@
+**Observation Log:**
+
+- [FACT] The user is planning a trip to visit their mom's best friend who has been diagnosed with terminal cancer.
+- [FACT] The user lives in New York.
+- [FACT] The user received a text from their ex-boyfriend informing them that his mother has passed away.
+- [PREFERENCE] The user prefers to fly out of JFK or LaGuardia airports.
+- [PREFERENCE] The user is looking to spend around $500 for flights and $100-200 per night for accommodations.
+- [PREFERENCE] The user prefers to stay in a hotel near their mom's best friend's place.
+- [EVENT] The user is planning to visit their mom's best friend in San Francisco.
+- [EVENT] The user has booked a flight with American Airlines from JFK to SFO on the earliest available date.
+- [EVENT] The user has booked a stay at Hotel Zeppelin for 3 nights starting from the day they arrive.
+- [TEMPORAL] The session date is 2023/05/23 (Tue) 11:11.
+- [RELATIONSHIP] The user's mom has a best friend who is currently ill.
+- [RELATIONSHIP] The user has an ex-boyfriend whose mother has recently passed away.
+- [ASSISTANT_SAID] The assistant expressed sympathy for the user's ex-boyfriend's loss and acknowledged the emotional difficulty of the situation.
+- [ASSISTANT_SAID] The assistant provided a list of questions to gather more details about the user's trip.
+- [ASSISTANT_SAID] The assistant recommended several flights from JFK/LGA to SFO, including American Airlines, United Airlines, and Delta Air Lines.
+- [ASSISTANT_SAID] The assistant recommended accommodations including Hotel Zeppelin, Hotel Kabuki, and Hotel Vertigo.
+- [ASSISTANT_SAID] The assistant suggested comforting books such as "The Nightingale" by Kristin Hannah and "A Man Called Ove" by Fredrik Backman.
+- [ASSISTANT_SAID] The assistant recommended podcasts like "How I Built This" and "Stuff You Should Know."
+- [ASSISTANT_SAID] The assistant provided suggestions for care package items, including cozy blankets, favorite books, and soothing teas.
+- [ASSISTANT_SAID] The assistant recommended online stores for care package items, including Amazon, Zappos, Barnes & Noble, Teavana, and Harry & David.
+- [ASSISTANT_SAID] The assistant suggested specific cozy blankets, including Boll & Branch Soft Fleece Blanket, UGG Sherpa Blanket, and L.L.Bean Wicked Plush Blanket.
+- [ASSISTANT_SAID] The assistant suggested the book "When Breath Becomes Air" by Paul Kalanithi as a comforting read.
+- [ASSISTANT_SAID] The assistant encouraged the user to consider including a gift certificate for a massage

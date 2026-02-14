@@ -1,0 +1,15 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/25 (Thu) 20:31  
+[ASSISTANT_SAID] The assistant apologized for confusion regarding the API key and provided a solution for passing the correct API key to the certbot command.  
+[ASSISTANT_CREATED] The assistant provided an updated version of the `certbot_loop.sh` script, which includes reading a JSON file, extracting API key, email, and domains, creating a temporary credentials file, and running the certbot command for each domain.  
+[ASSISTANT_SAID] The assistant mentioned the need to modify the `docker-compose.yml` file to pass the `credentials.json` file to the `certbot_loop.sh` script as an environment variable.  
+[ASSISTANT_CREATED] The assistant provided an updated version of the `docker-compose.yml` file, including the certbot service configuration with environment variables and command details.  
+[ASSISTANT_SAID] The assistant confirmed that to install jq in the certbot container, a line should be added to the Dockerfile: `RUN apt-get update && apt-get install -y jq`.  
+[ASSISTANT_CREATED] The assistant provided an updated Dockerfile for the certbot image that includes the installation of jq.  
+[ASSISTANT_SAID] The assistant explained how to rebuild the certbot image with the updated Dockerfile using the command: `docker build -t certbot/dns-google:latest .`  
+[ASSISTANT_SAID] The assistant provided a command to set up a cron job to run the certbot command once a day at midnight.  
+[ASSISTANT_CREATED] The assistant updated the `docker-compose.yml` file to include the cron job setup in the command section of the certbot service.  
+[ASSISTANT_SAID] The assistant confirmed that the updated `docker-compose.yml` file should include the cron job and jq installation without using a Dockerfile.  
+[ASSISTANT_CREATED] The assistant provided a final version of the `docker-compose.yml` file that includes the installation of jq and the cron job setup in a single command.  
+[ASSISTANT_SAID] The assistant mentioned that the command section of the certbot service combines multiple commands into a single `sh -c` command for simplicity.

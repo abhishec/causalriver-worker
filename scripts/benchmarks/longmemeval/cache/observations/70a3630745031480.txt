@@ -1,0 +1,24 @@
+**Observation Log:**
+
+- [FACT] User is moving to Berkeley soon.
+- [FACT] User received their visa approval on April 15th.
+- [TEMPORAL] User plans to move in on August 15th.
+- [PREFERENCE] User is looking for affordable furniture for their new apartment.
+- [ASSISTANT_SAID] Recommendations for second-hand stores in Berkeley include Goodwill, Salvation Army, Habitat for Humanity ReStore, Berkeley Flea Market, and The ReUse People.
+- [ASSISTANT_SAID] Recommendations for online marketplaces include Craigslist, Facebook Marketplace, Letgo, OfferUp, and Nextdoor.
+- [ASSISTANT_SAID] Additional resources for finding free items include Berkeley Free, UC Berkeley's Free & For Sale, and Berkeley Buy Nothing.
+- [ASSISTANT_SAID] User should inspect items before purchasing and consider negotiating prices or bundling deals.
+- [ASSISTANT_SAID] Some stores may offer delivery and assembly services for larger items like beds or couches.
+- [ASSISTANT_SAID] Goodwill, Salvation Army, and Habitat for Humanity ReStore may offer delivery services, but it's best to confirm with each store.
+- [ASSISTANT_SAID] Goodwill and Salvation Army typically do not offer assembly services, but may provide recommendations for local assembly services.
+- [FACT] User is thinking of buying a bike to get around campus.
+- [ASSISTANT_SAID] Recommendations for bike shops in Berkeley include The Berkeley Bike Church, BikeLink, Missing Link Bicycle Cooperative, REI Berkeley, and The Pedal Revolution.
+- [ASSISTANT_SAID] User should inspect the bike thoroughly, test ride it, and compare prices when buying a used bike.
+- [ASSISTANT_SAID] To register a bike with the City of Berkeley, user needs proof of identity, proof of Berkeley residency, and bike information (make, model, serial number).
+- [ASSISTANT_SAID] Registration is free and can be done at the Berkeley Police Department's Bike Registration Office.
+- [ASSISTANT_SAID] User should consider registering their bike with the National Bike Registry for added security.
+- [FACT] User wants to ensure they have health insurance coverage as an international student.
+- [ASSISTANT_SAID] UC Berkeley requires international students to have health insurance that meets specific medical benefits, including coverage for hospitalization, prescription medications, maternity care, and mental health services.
+- [ASSISTANT_SAID] User can enroll in UC Berkeley's Student Health Insurance Plan (SHIP) or purchase a private insurance plan that meets the university's requirements.
+- [ASSISTANT_SAID] User should research and compare different insurance plans to find one that meets their needs and budget.
+- [FACT] User is thinking of opening a US bank account to receive scholarship funds and set up direct deposit for their part

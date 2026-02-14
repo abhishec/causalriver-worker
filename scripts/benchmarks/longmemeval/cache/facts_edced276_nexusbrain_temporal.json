@@ -1,0 +1,90 @@
+{
+  "answer_60e8941a_2": [
+    {
+      "fact": "User recently returned from a solo trip to New York City for five days",
+      "type": "event",
+      "entities": [
+        "New York City",
+        "solo trip"
+      ]
+    },
+    {
+      "fact": "User saved money by staying at a hostel and eating at local cafes during their trip",
+      "type": "opinion",
+      "entities": [
+        "hostel",
+        "local cafes"
+      ]
+    },
+    {
+      "fact": "User is thinking of planning another trip soon",
+      "type": "event",
+      "entities": []
+    },
+    {
+      "fact": "User is considering traveling to Europe, probably Paris or Rome",
+      "type": "preference",
+      "entities": [
+        "Europe",
+        "Paris",
+        "Rome"
+      ]
+    },
+    {
+      "fact": "User has always wanted to visit the Louvre",
+      "type": "preference",
+      "entities": [
+        "Louvre"
+      ]
+    },
+    {
+      "fact": "User wants to try authentic Italian food",
+      "type": "preference",
+      "entities": [
+        "Italian food"
+      ]
+    },
+    {
+      "fact": "User is unsure if hostels are a good option in Europe",
+      "type": "opinion",
+      "entities": [
+        "hostels",
+        "Europe"
+      ]
+    }
+  ],
+  "answer_60e8941a_1": [
+    {
+      "fact": "User is trying to plan their next trip.",
+      "type": "event",
+      "entities": []
+    },
+    {
+      "fact": "User is considering whether to travel solo or with family.",
+      "type": "preference",
+      "entities": [
+        "solo travel",
+        "family travel"
+      ]
+    },
+    {
+      "fact": "User recently returned from an island-hopping trip to Hawaii with family.",
+      "type": "event",
+      "entities": [
+        "Hawaii",
+        "island-hopping trip",
+        "family"
+      ]
+    },
+    {
+      "fact": "User values flexibility in travel.",
+      "type": "preference",
+      "entities": []
+    },
+    {
+      "fact": "User found it hard to make changes to their itinerary while traveling with family.",
+      "type": "opinion",
+      "entities": []
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/25 (Thu) 02:44  
+[USER] User is interested in traditional markets in Seoul.  
+[ASSISTANT_SAID] Gwangjang Market is known for street food and traditional Korean textiles.  
+[ASSISTANT_SAID] Namdaemun Market sells clothing to electronics and is one of the largest traditional markets in Korea.  
+[ASSISTANT_SAID] Noryangjin Fish Market is one of the best places to try fresh seafood in Seoul.  
+[ASSISTANT_SAID] Myeong-dong Market is known for cosmetics and beauty products.  
+[ASSISTANT_SAID] Insadong Market is famous for traditional Korean crafts and souvenirs.  
+[ASSISTANT_SAID] Tongin Market allows you to enjoy an old-fashioned Korean lunch using traditional coins called "tongin."  
+[ASSISTANT_SAID] Garak Market is Korea's largest wholesale market for fresh produce.  
+[ASSISTANT_SAID] Seocho Flea Market is a place to find second-hand goods and vintage items.  
+[ASSISTANT_SAID] Yangnyeong Market is famous for traditional Korean medicine and health products.  
+[ASSISTANT_SAID] Bangsan Market is popular for baking and cooking ingredients, including rice cake molds and tea leaves.  
+[USER] User expresses excitement about the markets and asks for a recommendation on which to visit first.  
+[ASSISTANT_SAID] Assistant states that the choice depends on user interests, recommending Gwangjang Market for street food, Insadong Market for crafts, and Noryangjin Fish Market for seafood.  
+[USER] User decides to start with Gwangjang Market for street food and asks for must-try dishes.  
+[ASSISTANT_SAID] Must-try dishes at Gwangjang Market include:  
+1. Bindae-tteok: Pancake made with ground mung beans and vegetables.  
+2. Mayak Kimbap: Bite-sized rice and seaweed rolls with various fillings.  
+3. Tteokbokki: Spicy rice cakes served with fish cakes and vegetables.  
+4. Yachae Mandu: Vegetarian dumplings filled with vegetables.  
+5. Gimbap: Korean-style sushi with various fillings.  
+6. Eomuk: Fish cake made of fish paste.  
+7. Sundae: Traditional Korean sausage made with pig's intestines, noodles, and various ingredients.  
+[USER] User loves spicy food and asks for must-try spicy dishes at Gwangjang Market.  
+[ASSISTANT_SAID] Must-try spicy dishes at Gwangjang Market include:  
+1. Tteokbokki: Spicy rice cakes with gochujang.  
+2. Bibimbap: Mixed rice dish with go

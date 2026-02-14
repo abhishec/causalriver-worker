@@ -1,0 +1,96 @@
+{
+  "answer_d7de9a6a_1": [
+    {
+      "fact": "User wakes up at 7:30 AM and goes to bed at 11:30 PM",
+      "type": "personal",
+      "entities": [
+        "7:30 AM",
+        "11:30 PM"
+      ]
+    },
+    {
+      "fact": "User works from 9:00 AM to 5:30 PM",
+      "type": "personal",
+      "entities": [
+        "9:00 AM",
+        "5:30 PM"
+      ]
+    },
+    {
+      "fact": "User has a 1-hour lunch break",
+      "type": "personal",
+      "entities": [
+        "1-hour lunch break"
+      ]
+    },
+    {
+      "fact": "User wants to watch 1 Crash Course episode daily",
+      "type": "preference",
+      "entities": [
+        "1 Crash Course episode"
+      ]
+    },
+    {
+      "fact": "User wants to prioritize reading and exercise in their daily routine",
+      "type": "preference",
+      "entities": [
+        "reading",
+        "exercise"
+      ]
+    },
+    {
+      "fact": "User has no fixed appointments or commitments to schedule around",
+      "type": "personal",
+      "entities": []
+    },
+    {
+      "fact": "User has finished reading 'Sapiens' and is currently reading 'The Power of Habit'",
+      "type": "personal",
+      "entities": [
+        "Sapiens",
+        "The Power of Habit"
+      ]
+    },
+    {
+      "fact": "User is interested in books related to science, history, or self-improvement",
+      "type": "preference",
+      "entities": [
+        "science",
+        "history",
+        "self-improvement"
+      ]
+    }
+  ],
+  "answer_d7de9a6a_2": [
+    {
+      "fact": "User is looking for book recommendations on data science and machine learning.",
+      "type": "preference",
+      "entities": [
+        "data science",
+        "machine learning"
+      ]
+    },
+    {
+      "fact": "User is taking a course on Coursera.",
+      "type": "event",
+      "entities": [
+        "Coursera"
+      ]
+    },
+    {
+      "fact": "User is interested in the book 'Data Science for Dummies'.",
+      "type": "preference",
+      "entities": [
+        "Data Science for Dummies"
+      ]
+    },
+    {
+      "fact": "User has heard that 'Data Science for Dummies' is a great resource for beginners.",
+      "type": "opinion",
+      "entities": [
+        "Data Science for Dummies",
+        "beginners"
+      ]
+    }
+  ]
+}

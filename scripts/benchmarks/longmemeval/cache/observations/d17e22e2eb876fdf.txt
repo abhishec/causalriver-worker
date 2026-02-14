@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/29 (Mon) 03:29  
+[FACT] User is practicing making pasta from scratch at home.  
+[EVENT] User has made spaghetti and fettuccine for dinner twice this week.  
+[PREFERENCE] User is looking for new recipe ideas for homemade pasta dishes.  
+[ASSISTANT_SAID] Suggested pasta types: Pappardelle, Tortellini, Ravioli, Linguine, Orzo, Gnocchi, Farfalle, Cannelloni, Shells (Conchiglie), Cavatelli.  
+[ASSISTANT_SAID] Pappardelle: A wide, flat noodle with a rough texture, pairs well with rich meat ragùs or creamy mushroom sauces.  
+[ASSISTANT_SAID] Tortellini: Stuffed pasta rings typically filled with meat, cheese, or vegetables.  
+[ASSISTANT_SAID] Ravioli: Stuffed pasta, can be filled with ricotta and parmesan cheese or seasonal ingredients like pumpkin.  
+[ASSISTANT_SAID] Linguine: Long, flat, and narrow noodle, perfect for light, oily sauces.  
+[ASSISTANT_SAID] Orzo: Small, grain-like pasta great for salads or soups.  
+[ASSISTANT_SAID] Gnocchi: Dumpling-like pasta typically made with potatoes and flour.  
+[ASSISTANT_SAID] Farfalle: Bow-tie shaped pasta that pairs well with light sauces.  
+[ASSISTANT_SAID] Cannelloni: Wide noodles used for baked pasta dishes.  
+[ASSISTANT_SAID] Shells (Conchiglie): Large pasta perfect for stuffing and baking.  
+[ASSISTANT_SAID] Cavatelli: Small, irregularly shaped pasta similar to gnocchi.  
+[ASSISTANT_SAID] Suggested sauces for Pappardelle: Wild boar ragù, creamy mushroom sauce, Bolognese.  
+[ASSISTANT_SAID] Suggested sauces for Tortellini: Cream sauce, light broth, pesto cream sauce.  
+[ASSISTANT_SAID] Suggested sauces for Ravioli: Brown butter and sage, creamy mushroom sauce, tomato sauce with basil.  
+[ASSISTANT_SAID] Suggested sauces for Linguine: Seafood sauce, pesto, Aglio e olio.  
+[ASSISTANT_SAID] Suggested sauces for Orzo: Greek salad sauce, lemon-herb sauce, tomato and basil sauce.  
+[ASSISTANT_SAID] Suggested sauces for Gnocchi: Brown butter and sage, creamy tomato sauce, pesto cream sauce.  
+[ASSISTANT_SAID] Suggested sauces for Farfalle: Pesto, creamy mushroom sauce, seafood sauce.  
+[ASSISTANT_SAID

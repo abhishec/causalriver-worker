@@ -1,0 +1,49 @@
+**Observation Log:**
+
+[FACT] The user is hosting a dinner party this weekend.
+
+[EVENT] The user recently attended a bridal shower.
+
+[EVENT] The user helped the bride-to-be pick out gifts from her registry at Bed Bath & Beyond.
+
+[EVENT] The user took advantage of a 20% off entire purchase sale at Bed Bath & Beyond.
+
+[ASSISTANT_SAID] The assistant congratulated the user on helping the bride-to-be with her registry shopping and mentioned that the 20% off sale at Bed Bath & Beyond is a great deal.
+
+[ASSISTANT_SAID] The assistant suggested three chicken recipes: Lemon Garlic Chicken, Chicken Fajitas, and Chicken Parmesan.
+
+[ASSISTANT_SAID] The assistant suggested three other protein options: Grilled Salmon, Beef or Vegetable Kabobs, and Vegetarian Stuffed Portobello Mushrooms.
+
+[ASSISTANT_SAID] The assistant provided additional tips for planning the dinner party, including considering dietary restrictions, planning ahead, and enjoying the company of guests.
+
+[USER] The user chose to go with the Chicken Fajitas recipe.
+
+[ASSISTANT_SAID] The assistant provided a detailed Chicken Fajitas recipe with ingredient quantities and cooking instructions.
+
+[ASSISTANT_SAID] The assistant suggested side dishes to serve with Chicken Fajitas, including Mexican Street Corn, Spanish Rice, Roasted Vegetables, Mixed Greens Salad, and Warm Black Beans.
+
+[USER] The user selected Mexican Street Corn as a side dish.
+
+[EVENT] The user has been doing holiday shopping and using the cashback app Rakuten.
+
+[FACT] The user has earned over $100 in cashback this quarter.
+
+[USER] The user asked for gift ideas for a nephew who loves video games.
+
+[ASSISTANT_SAID] The assistant suggested several gift ideas for the user's nephew, including a new game release, gaming accessories, gaming subscriptions, gaming headsets, gift cards, gaming books or guides, and gaming event experiences.
+
+[USER] The user expressed interest in gifting a gaming headset or a new game release.
+
+[EVENT] The user recently scored a great deal on a designer handbag at the Nordstrom Rack private sale event.
+
+[EVENT] The user found a great pair of boots on sale for 50% off and wore them to a friend's wedding the following weekend.
+
+[USER] The user asked for fashion tips on how to style a winter coat.
+
+[ASSISTANT_SAID] The assistant provided several fashion tips for styling a winter coat, including layering, accessorizing, dressing it up or down, color blocking, belting the coat, playing with textures, and considering footwear.
+
+[USER] The user thanked the assistant for the fashion tips and expressed intent to try out the ideas.
+
+[USER] The user asked for ideas for a centerpiece or decorations for the dinner party to create a warm and inviting atmosphere.
+
+[ASSISTANT_SAID] The

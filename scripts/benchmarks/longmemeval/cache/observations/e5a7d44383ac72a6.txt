@@ -1,0 +1,29 @@
+**Observation Log:**
+
+**Session Date:** 2023/05/21 (Sun) 03:29  
+**Session ID:** 3c11dc79
+
+1. [FACT] User is planning a trip to Chicago from New York.
+2. [EVENT] User is considering flying to Chicago and asked for flight options.
+3. [ASSISTANT_SAID] Chicago is described as an amazing city.
+4. [ASSISTANT_SAID] Flight options from John F. Kennedy International Airport (JFK) include:
+   - American Airlines: Multiple daily flights, ~2.5 hours, from $150-$300
+   - Delta Air Lines: Multiple daily flights, ~2.5 hours, from $150-$300
+   - JetBlue Airways: Multiple daily flights, ~2.5 hours, from $100-$250
+5. [ASSISTANT_SAID] Flight options from LaGuardia Airport (LGA) include:
+   - American Airlines: Multiple daily flights, ~2.5 hours, from $150-$300
+   - Delta Air Lines: Multiple daily flights, ~2.5 hours, from $150-$300
+   - United Airlines: Multiple daily flights, ~2.5 hours, from $150-$300
+6. [ASSISTANT_SAID] Flight options from Newark Liberty International Airport (EWR) include:
+   - United Airlines: Multiple daily flights, ~2.5 hours, from $100-$250
+   - American Airlines: Multiple daily flights, ~2.5 hours, from $150-$300
+7. [ASSISTANT_SAID] All options are non-stop flights, and prices may vary depending on the time of year, demand, and how far in advance booked.
+8. [ASSISTANT_SAID] User is advised to check with airlines for the most up-to-date prices and schedules.
+9. [ASSISTANT_SAID] User is informed about flying into Midway International Airport (MDW) as an alternative to O'Hare International Airport (ORD).
+10. [ASSISTANT_SAID] User is advised to consider off-peak seasons (usually November to March) or off-peak days (Tuesdays, Wednesdays, and Saturdays) for better deals.
+11. [ASSISTANT_SAID] User is reminded to factor in transportation costs to and from the airport.
+12. [PREFERENCE] User is flexible with travel dates and is considering flying during off-peak seasons.
+13. [EVENT] User recently returned from a trip to LA and San Diego last month.
+14. [ASSISTANT_SAID] User is described as a travel enthusiast.
+15. [ASSISTANT_SAID] User is asked about their vacation preferences, including type, duration, budget, and specific activities.
+16. [PREFERENCE] User is looking for a quick weekend getaway of

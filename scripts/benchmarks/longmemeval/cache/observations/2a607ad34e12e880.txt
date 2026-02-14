@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/29 (Mon) 03:11
+- [USER] Example #1
+- [USER] Focus Area: Health Science Futures
+- [USER] Title: Custom Body Parts In-vivo
+- [USER] Proposed transformation: Minimally invasive 3D printing in patients of functional tissues and organs on demand.
+- [USER] How is it done today, and what are the limits of current practice: 3D bio-constructs can be printed, cultured ex-vivo, and successfully transplanted.
+- [USER] What is new, and why do you think it will be successful and transformational: Printing tissues (and possibly organs) on demand in-vivo enables the just-in-time mass customization of body parts on demand.
+- [USER] Evidence Citation: Adib, A Asghari, et al. “Direct-Write 3D Printing and Characterization of a Gelma-Based Biomaterial for Intracorporeal Tissue Engineering.” Biofabrication, vol. 12, no. 4, 2020, p. 045006., https://doi.org/10.1088/1758-5090/ab97a1.
+- [USER] Evidence Summary: Demonstrated robotically controlled bio-fabrication of anchored 3D crosslinked tissue engineering scaffold and bio-ink for spatially accurate minimally invasive printing inside of a living patient.
+- [USER] Example #2
+- [USER] Focus Area: Health Science Futures
+- [USER] Title: Mind Meld
+- [USER] Proposed transformation: Restoration of voluntary muscle movement via minimally invasive untethered brain motor neuroprosthesis to provide functional independence of impaired individuals.
+- [USER] How is it done today, and what are the limits of current practice: Implanted brain-computer interfaces utilizing either penetrating or subdural arrays have demonstrated high-fidelity device control but require burr hole craniotomy for implantation.
+- [USER] What is new, and why do you think it will be successful and transformational: Functional high-fidelity wireless motor cortex communication without penetrating the skull enables robust untethered digital device control and greater individual independence.
+- [USER] Evidence Citation: Oxley, Thomas J, et al. “Motor Neuroprostheses Implanted with Neurointerventional Surgery Improves Capacity for Activities of Daily Living Tasks in Severe Paralysis: First in-Human Experience.” Journal of NeuroInterventional Surgery, vol. 13, no. 2, 2020, pp. 102–108., https://doi.org/10.1136/neurintsurg-2020-016862.
+- [USER] Evidence Summary: Demonstrated minimally invasive fully implanted wireless electrode array to transmit signals from the motor cortex for control of digital devices in humans with flaccid upper limb paralysis.
+- [USER] Example #3
+-

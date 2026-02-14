@@ -1,0 +1,29 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/27 (Sat) 19:30
+- [ASSISTANT_SAID] The `/notify` route is implemented in the websub-hub code to handle notifications when new content is published.
+- [ASSISTANT_SAID] The route is triggered by a webhook when new content is published on the website.
+- [ASSISTANT_SAID] The route retrieves the URL and summary of the updated content from the request body.
+- [ASSISTANT_SAID] The `hub.publish()` method is called with the URL and summary as arguments to notify the hub of the updated content.
+- [ASSISTANT_SAID] Upon successful notification, the route returns a success response: "Notification sent to hub."
+- [ASSISTANT_SAID] If an error occurs, the route returns a 500 status code with the message: "Error sending notification to hub."
+- [ASSISTANT_SAID] The `/subscribe` route is accessed by users who want to subscribe to the website.
+- [ASSISTANT_SAID] The `/subscribe` route retrieves the URL of the website from the `url` query parameter in the request.
+- [ASSISTANT_SAID] The `hub.subscribe()` method is called with the URL and request headers to subscribe the user to the website.
+- [ASSISTANT_SAID] Upon successful subscription, the route redirects the user to the subscribed website.
+- [ASSISTANT_SAID] If an error occurs during the subscription process, the route renders an error page with the error message.
+- [ASSISTANT_SAID] An example of how the `/subscribe` route might be accessed is provided: `https://www.mywebsite.com/subscribe?url=https://www.`
+- [ASSISTANT_SAID] To use the `/notify` route, a webhook must be set up on the website to send an HTTP POST request when new content is published.
+- [ASSISTANT_SAID] The webhook should be configured to send a request to the `/notify` route on the websub-hub server with the URL and summary of the updated content in the request body.
+- [ASSISTANT_SAID] An example request format for the `/notify` route is provided:
+  ```
+  POST /notify
+
+  {
+    "url": "https://www.mywebsite.com/about",
+    "summary": "Updated 'About Me' page"
+  }
+  ```
+- [ASSISTANT_SAID] The `/notify` route extracts the URL and summary from the request body and calls the `hub.publish()` method.
+- [ASSISTANT_SAID] The `/notify` route returns a success response to the webhook upon successful notification.
+- [ASSISTANT_SAID] If an error occurs during the notification process

@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [FACT] User is a 30-year-old male with a sedentary job.
+- [FACT] User has some experience with weightlifting and moderate cardio exercises.
+- [CHANGE] User has not been consistent with workouts for the past year.
+- [PREFERENCE] User prefers plant-based meals and has a slight lactose intolerance.
+- [FACT] User's goal is to lose 10 kg to improve health and overall wellbeing.
+- [FACT] User has a solid foundation in high school mathematics, including algebra and basic calculus.
+- [PREFERENCE] User's goal for learning linear algebra is for personal enrichment and to potentially pursue higher education in a STEM field.
+- [PREFERENCE] User is a visual learner and prefers a combination of lectures, practice problems, and interactive resources for learning.
+- [TEMPORAL] The session date is 2023/05/30 (Tue) 03:57.
+- [ASSISTANT_SAID] Assistant suggested revising the prompt to make it clearer, concise, and easy to follow.
+- [ASSISTANT_SAID] Assistant recommended specifying the role of the AI at the beginning of the prompt.
+- [ASSISTANT_SAID] Assistant suggested using consistent formatting for the two main goals.
+- [ASSISTANT_SAID] Assistant provided a revised prompt that included a detailed routine for the user’s goals.
+- [ASSISTANT_CREATED] Assistant created a revised prompt that includes background context about the user and detailed goals for weight loss and learning linear algebra.
+- [ASSISTANT_SAID] Assistant suggested combining sub-points for clarity in the revised prompt.
+- [ASSISTANT_SAID] Assistant emphasized the need to consider the user's workout history and food preferences in the weight loss plan.
+- [ASSISTANT_SAID] Assistant highlighted the importance of the user's prior knowledge of math and learning style in the study plan for linear algebra.
+- [ASSISTANT_CREATED] Assistant provided a structured outline for the user's goals, including daily workout and diet plans, as well as a study plan for linear algebra with detailed homework assignments.

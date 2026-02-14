@@ -1,0 +1,22 @@
+**Observation Log:**
+
+- [FACT] User is a product sales coach for Sutton's Inc., a small full-service contractor in Springfield, Illinois.
+- [FACT] Sutton's Inc. has been in business for over 75 years.
+- [FACT] Primary products sold by Sutton's Inc. include roofing systems by GAF, vinyl siding from Royal Building Products, and windows and doors by ProVia.
+- [FACT] The user’s team uses the Sandler Selling System.
+- [FACT] Sutton's Inc. focuses on uncovering pain, discussing budget, and understanding a customer's decision-making process before offering solutions.
+- [FACT] The user mentioned that their clientele includes traditional families, older retirees, and rural homeowners.
+- [PREFERENCE] User differentiates Sutton's Inc. as a full-service remodeler and does not claim to be the cheapest.
+- [PREFERENCE] User emphasizes that Sutton's Inc. competes on value and offers high-quality products.
+- [EVENT] User requested an onboarding outline for a new sales representative.
+- [ASSISTANT_CREATED] Onboarding outline provided by the assistant includes subject lines: Company Introduction & Values, Product Overview, Sandler Selling System, Target Clientele, Sales Techniques & Best Practices, Competitor Analysis, Territory & Local Market Knowledge, Performance Metrics & Goals, Sales Support & Resources, Q&A and Role-Playing.
+- [ASSISTANT_SAID] Assistant provided a description of Sutton's Inc. as a small, full-service contractor committed to quality products and exceptional customer service.
+- [ASSISTANT_SAID] Assistant explained the importance of understanding products and their unique selling points for new sales representatives.
+- [ASSISTANT_SAID] Assistant highlighted the need for sales representatives to research local market trends and monitor competitors' strategies.
+- [ASSISTANT_SAID] Assistant emphasized the importance of communication, active listening, and empathy in building client relationships.
+- [TEMPORAL] Session date is 2023/04/30 (Sun) 18:51.
+- [FACT] User requested a refined customer profile based on broader demographics, income levels, and census data in Sangamon County.
+- [ASSISTANT_SAID] Assistant provided a refined customer profile for home remodeling projects in Sangamon County, identifying target clientele segments: middle-income families, aging homeowners, first-time homebuyers, environmentally conscious homeowners, and real estate investors.
+- [CHANGE] User added context about Sutton's Inc. differentiating itself as a full-service remodeler with a full team across departments to support customers.
+- [ASSISTANT_SAID] Assistant provided summaries of ProVia, Royal Building Products, and GAF, highlighting their superior qualities compared to other products on the market.
+- [ASSISTANT_CREATED] Assistant created summaries for ProVia, Royal Building Products, and GAF, detailing their craftsmanship, durability, energy efficiency, and warranty support.

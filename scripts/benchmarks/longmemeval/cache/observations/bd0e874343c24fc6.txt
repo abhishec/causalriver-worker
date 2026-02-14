@@ -1,0 +1,16 @@
+**Observation Log:**
+
+- [FACT] The user is an international student enrolled in a graduate program in marriage and family therapy.
+- [FACT] The user has a student visa.
+- [PREFERENCE] The user is seeking job opportunities as a Licensed Marriage and Family Therapist (LMFT) in the US.
+- [EVENT] The user is looking for jobs that offer H1B visa sponsorship for international students as a therapist.
+- [ASSISTANT_SAID] To work as an LMFT in the US, the user needs to obtain a student visa, enroll in a COAMFTE-accredited graduate program, complete a clinical internship, pass the licensure exam, and find a job.
+- [ASSISTANT_SAID] The licensure exam is administered by the Association of Marital and Family Therapy Regulatory Boards (AMFTRB).
+- [ASSISTANT_SAID] The user can look for job openings at companies that have sponsored H1B visas in the past, such as Kaiser Permanente, Partners HealthCare, Mayo Clinic, Cleveland Clinic, University of California, San Francisco, HCA Healthcare, and Universal Health Services.
+- [ASSISTANT_SAID] The user can check the Department of Labor's H1B Disclosure Data website to see which employers have sponsored H1B visas in the past.
+- [ASSISTANT_SAID] The assistant provided tips for increasing the chances of finding a job that will sponsor an H1B visa, including networking, considering smaller companies, and being proactive in the job search.
+- [ASSISTANT_SAID] The assistant suggested joining LinkedIn groups related to the user's field to connect with other professionals.
+- [ASSISTANT_SAID] The assistant recommended connecting with classmates and colleagues on LinkedIn to expand the user's network.
+- [CHANGE] The user expressed difficulty in finding companies that sponsor H1B visas for therapists.
+- [PREFERENCE] The user noted that there are not many people on LinkedIn with a similar background as theirs. 
+- [TEMPORAL] The session date is 2023/05/02 (Tue) at 11:03.

@@ -1,0 +1,20 @@
+**Observation Log**
+
+**Session Date:** 2023/11/23 (Thu) 08:38  
+**Session ID:** sharegpt_V2j1zkI_1
+
+1. [FACT] Matt Brown is an account executive from Fellow.
+2. [FACT] Eric Cameron is the VP of People Operations at the client's company.
+3. [FACT] Nick Sarkesian is the Director of Business Applications.
+4. [FACT] Trina Berks is a Technical Program Manager.
+5. [FACT] Lucas Cooper is a Business Applications Manager.
+6. [EVENT] The sales call involved a discussion about Fellow as a potential platform for organization-wide one-on-ones.
+7. [PREFERENCE] The client's team is interested in understanding more about security aspects and integrations, particularly with Okta and Workday.
+8. [ASSISTANT_SAID] Matt explained the differences between the Pro and Enterprise plans of Fellow.
+9. [ASSISTANT_SAID] The Enterprise plan is designed for company-wide deployments and has more robust security and integrations.
+10. [ASSISTANT_SAID] The Enterprise plan offers additional features such as analytics and OKR tracking.
+11. [ASSISTANT_SAID] Fellow can be a single source of truth for tracking OKRs and other important information.
+12. [EVENT] Nick inquired about the process for uploading and managing OKRs within Fellow.
+13. [ASSISTANT_SAID] Matt responded that Fellow's analytics can be tailored for the entire organization or individual teams.
+14. [ASSISTANT_SAID] Matt mentioned they will work with the senior leadership team to import objectives within the platform.
+15. [EVENT] At the end of this section of the call, Matt agreed to send over the necessary security documentation, integration information, and an NDA as a follow-up to the conversation.

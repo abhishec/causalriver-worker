@@ -1,0 +1,21 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/29 (Mon) 11:32  
+[FACT] User has been taking cooking classes at a local culinary school on Saturday mornings for the past three months.  
+[PREFERENCE] User is looking for new recipe ideas for dinner that can be prepared quickly on a weeknight.  
+[PREFERENCE] User likes the idea of one-pan wonders, especially the shrimp and vegetable stir-fry.  
+[ASSISTANT_SAID] Assistant suggested two one-pan wonder recipes: Chicken Fajitas and Shrimp and Vegetable Stir-Fry.  
+[ASSISTANT_SAID] Assistant provided vegetable suggestions for shrimp stir-fry: Bell Peppers, Broccoli, Carrots, Snow Peas, Mushrooms, Bok Choy, and Onions.  
+[PREFERENCE] User prefers to use frozen shrimp for convenience.  
+[ASSISTANT_SAID] Assistant advised that both frozen and fresh shrimp can work well, but suggested thawing frozen shrimp properly and patting them dry before cooking.  
+[ASSISTANT_SAID] Assistant provided suggestions for seasonings and sauces for shrimp stir-fry, including Soy Sauce, Oyster Sauce, Sesame Oil, Ginger, Garlic, Lime Juice, Chili Flakes, Hoisin Sauce, and Fish Sauce.  
+[ASSISTANT_SAID] Assistant suggested sauce combinations: Simple Soy Sauce and Ginger, Spicy Hoisin Sauce, and Sesame Oil and Soy Sauce.  
+[PREFERENCE] User decided to go with the simple soy sauce and ginger combination for the stir-fry.  
+[ASSISTANT_SAID] Assistant provided rice options to serve with shrimp stir-fry: Jasmine Rice, Japanese Short-Grain Rice, Calrose Rice, Coconut Rice, and Fried Rice.  
+[PREFERENCE] User chose to try jasmine rice to serve with the shrimp stir-fry.  
+[FACT] User has been making homemade pasta from scratch at least once a week since learning how to make it in cooking classes.  
+[PREFERENCE] User is excited to try out the shrimp stir-fry recipe and serve it with jasmine rice.  
+[PREFERENCE] User is thinking of making garlic bread to accompany the shrimp stir-fry and jasmine rice.  
+[ASSISTANT_SAID] Assistant provided tips for making good garlic bread, including using high-quality ingredients, roasting garlic, using the right bread, and not overdoing the garlic.  
+[ASSISTANT_SAID] Assistant suggested using crusty bread such as baguette or ciabatta for garlic bread.  
+[ASSISTANT_SAID] Assistant recommended starting with a moderate amount of garlic to avoid overpowering the bread.

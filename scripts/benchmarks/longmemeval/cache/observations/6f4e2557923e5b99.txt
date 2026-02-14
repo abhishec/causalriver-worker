@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[FACT] User has been dancing salsa for about 9 weeks.  
+[EVENT] User took their first salsa class on a Thursday evening in February at Rhythm and Soul.  
+[FACT] User is located in the city where Rhythm and Soul is.  
+[PREFERENCE] User is interested in learning traditional bachata.  
+[EVENT] User attended a bachata workshop at Dance Fusion last weekend and enjoyed it.  
+[ASSISTANT_SAID] Assistant provided recommendations for salsa artists and songs, including Celia Cruz, Tito Puente, Héctor Lavoe, Willie Colón, Marc Anthony, Gilberto Santa Rosa, Romeo Santos, and Maluma.  
+[ASSISTANT_SAID] Assistant listed popular salsa songs, including "Guantanamera" by Celia Cruz and Johnny Pacheco, "Mi Gente" by J Balvin and Willy William, "Devuélveme el Corazón" by Víctor Manuelle, "Ay Vamos" by J Balvin, and "La Gozadera" by Gente de Zona ft. Marc Anthony.  
+[ASSISTANT_SAID] Assistant described salsa sub-genres: Salsa Cubana, Salsa Puertorriqueña, Salsa Colombiana, and Bachata.  
+[ASSISTANT_SAID] Assistant suggested asking salsa instructors or fellow dancers about bachata classes or workshops.  
+[ASSISTANT_SAID] Assistant recommended searching online for "traditional bachata classes near me" and checking social media for local dance communities.  
+[ASSISTANT_SAID] Assistant advised asking the instructor from Dance Fusion about regular traditional bachata classes or other instructors.  
+[ASSISTANT_SAID] Assistant suggested checking local Latin dance studios for traditional bachata classes.  
+[ASSISTANT_SAID] Assistant provided tips for finding hip hop classes, including online searches, social media, and local dance communities.  
+[EVENT] User took a hip hop class at The Dance Loft with their friend Rachel a few weeks ago.  
+[PREFERENCE] User had a blast in the hip hop class at The Dance Loft.  
+[RELATIONSHIP] User's friend is named Rachel.  
+[ASSISTANT_SAID] Assistant expressed interest in hearing more about the user's experience at The Dance Loft and acknowledged the recommendation of the studio.  
+[ASSISTANT_SAID] Assistant noted that they do not have personal experiences or preferences but appreciated the user's recommendation.  
+[ASSISTANT_SAID] Assistant encouraged the user to continue enjoying dancing and exploring different styles.  
+[ASSISTANT_SAID] Assistant asked the user what they liked most about the hip hop class.  
+[TEMPORAL] Session Date: 2023/03/15 (Wed) 08:52.  
+[CHANGE] User is eager to learn more about bachata after taking a workshop.  
+[ASSISTANT_SAID

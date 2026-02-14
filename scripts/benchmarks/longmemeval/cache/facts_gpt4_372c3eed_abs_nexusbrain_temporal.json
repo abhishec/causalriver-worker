@@ -1,0 +1,145 @@
+{
+  "answer_35c5419d_abs_3": [
+    {
+      "fact": "User graduated with a Bachelor's in Computer Science from UCLA in 2020",
+      "type": "personal",
+      "entities": [
+        "Bachelor's in Computer Science",
+        "UCLA",
+        "2020"
+      ]
+    },
+    {
+      "fact": "User is looking to learn more about the latest developments in AI and machine learning",
+      "type": "preference",
+      "entities": [
+        "AI",
+        "machine learning"
+      ]
+    },
+    {
+      "fact": "User has been taking online courses to improve their skills",
+      "type": "preference",
+      "entities": [
+        "online courses"
+      ]
+    },
+    {
+      "fact": "User is particularly interested in the applications of AI in robotics",
+      "type": "preference",
+      "entities": [
+        "AI",
+        "robotics"
+      ]
+    },
+    {
+      "fact": "User was part of the robotics team in high school and enjoyed it",
+      "type": "personal",
+      "entities": [
+        "robotics team",
+        "high school"
+      ]
+    }
+  ],
+  "answer_35c5419d_abs_1": [
+    {
+      "fact": "User is considering pursuing a Master's degree in Computer Science",
+      "type": "preference",
+      "entities": [
+        "Master's degree",
+        "Computer Science"
+      ]
+    },
+    {
+      "fact": "User is from Arcadia, California",
+      "type": "personal",
+      "entities": [
+        "Arcadia",
+        "California"
+      ]
+    },
+    {
+      "fact": "User attended UCLA for undergraduate studies",
+      "type": "personal",
+      "entities": [
+        "UCLA"
+      ]
+    },
+    {
+      "fact": "User attended Arcadia High School from 2010 to 2014",
+      "type": "event",
+      "entities": [
+        "Arcadia High School",
+        "2010",
+        "2014"
+      ]
+    },
+    {
+      "fact": "User is familiar with the UCLA campus and program",
+      "type": "opinion",
+      "entities": [
+        "UCLA",
+        "campus",
+        "program"
+      ]
+    }
+  ],
+  "answer_35c5419d_abs_2": [
+    {
+      "fact": "User is looking to improve skills in machine learning and artificial intelligence.",
+      "type": "preference",
+      "entities": [
+        "machine learning",
+        "artificial intelligence"
+      ]
+    },
+    {
+      "fact": "User has taken courses on Python programming, data structures, and algorithms.",
+      "type": "personal",
+      "entities": [
+        "Python programming",
+        "data structures",
+        "algorithms"
+      ]
+    },
+    {
+      "fact": "User has a specialization in Data Science from Johns Hopkins University.",
+      "type": "personal",
+      "entities": [
+        "Data Science",
+        "Johns Hopkins University"
+      ]
+    },
+    {
+      "fact": "User has a strong foundation in computer science.",
+      "type": "personal",
+      "entities": [
+        "computer science"
+      ]
+    },
+    {
+      "fact": "User earned an Associate's degree in Computer Science from Pasadena City College in May 2016.",
+      "type": "personal",
+      "entities": [
+        "Associate's degree",
+        "Computer Science",
+        "Pasadena City College",
+        "May 2016"
+      ]
+    },
+    {
+      "fact": "User is currently studying at UCLA.",
+      "type": "personal",
+      "entities": [
+        "UCLA"
+      ]
+    },
+    {
+      "fact": "User is interested in exploring computer vision.",
+      "type": "preference",
+      "entities": [
+        "computer vision"
+      ]
+    }
+  ]
+}

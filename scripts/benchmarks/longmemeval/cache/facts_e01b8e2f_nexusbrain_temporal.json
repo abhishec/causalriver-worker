@@ -1,0 +1,28 @@
+{
+  "answer_5ca6cd28": [
+    {
+      "fact": "User is planning a new trip",
+      "type": "event",
+      "entities": [
+        "trip"
+      ]
+    },
+    {
+      "fact": "User is considering traveling solo or with family",
+      "type": "preference",
+      "entities": [
+        "solo travel",
+        "family travel"
+      ]
+    },
+    {
+      "fact": "User is interested in destinations that cater to both solo travelers and families",
+      "type": "preference",
+      "entities": [
+        "destinations",
+        "solo travelers",
+        "families"
+      ]
+    }
+  ]
+}

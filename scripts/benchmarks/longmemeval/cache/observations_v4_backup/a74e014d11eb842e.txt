@@ -1,0 +1,17 @@
+**Observation Log:**
+
+- [FACT] The user is trying to cook more at home.
+- [FACT] The user has attended a cooking class.
+- [FACT] The user has access to an online recipe library.
+- [PREFERENCE] The user enjoys Korean cuisine, specifically mentioned trying a recipe for Korean bibimbap.
+- [PREFERENCE] The user is interested in meal prep to use up all the ingredients they buy.
+- [PREFERENCE] The user is considering adding kimchi to their stir-fry for extra flavor.
+- [EVENT] The user is planning to make a big batch of kimchi this weekend.
+- [EVENT] The user has previously made kimchi from a fermentation workshop they attended.
+- [ASSISTANT] The assistant provided suggestions for meal prep containers, including glass containers, stainless steel containers, BPA-free plastic containers, mason jars, and reusable silicone bags.
+- [ASSISTANT] The assistant suggested meal prep ideas, including grilled chicken or salmon with roasted vegetables, quinoa or brown rice bowls, lentil or vegetable soups, overnight oats, and stir-fries.
+- [ASSISTANT] The assistant provided marinade suggestions for chicken stir-fry, including soy sauce and ginger, Korean-style gochujang, lime and cilantro, and simple sesame.
+- [ASSISTANT] The assistant provided a basic kimchi recipe, including ingredients and instructions for making kimchi at home.
+- [ASSISTANT] The assistant suggested variations for kimchi, including adding seafood, garlic scapes, and other vegetables.
+- [ASSISTANT] The assistant suggested other fermented foods to pair with kimchi, including miso, sourdough bread, sauerkraut, kefir, pickles, natto, and kombucha.
+- [TEMPORAL] The session date is 2023/05/25 (Thu) 04:12.

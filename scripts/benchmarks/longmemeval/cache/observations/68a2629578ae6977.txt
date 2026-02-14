@@ -1,0 +1,28 @@
+**Observation Log**
+
+**Session Date:** 2023/05/29 (Mon) 19:18  
+**Session ID:** 231eb65c
+
+1. [TEMPORAL] User started a week-long social media break in mid-January.
+2. [FACT] User realized they were wasting too much time on Instagram and Facebook.
+3. [CHANGE] During the mid-January break, user started journaling and reading more.
+4. [CHANGE] After the mid-January break, user set a daily time limit on Instagram.
+5. [CHANGE] After the mid-January break, user unfollowed accounts that made them feel bad about themselves.
+6. [TEMPORAL] User attended a digital detox workshop in early February.
+7. [RELATIONSHIP] User met like-minded people at the digital detox workshop and joined a WhatsApp group with them.
+8. [EVENT] User took a 2-week social media break from Instagram in late February.
+9. [CHANGE] During the late February break, user started a new hobby, painting.
+10. [PREFERENCE] User found painting helpful for relaxation and self-expression.
+11. [CHANGE] After the late February break, user deleted the Facebook app from their phone.
+12. [PREFERENCE] User felt liberated from constant notifications and comparisons after deleting the Facebook app.
+13. [PREFERENCE] User is on the fence about deleting Instagram but believes it's possible to maintain a healthy relationship with it.
+14. [PREFERENCE] User thinks maintaining a healthy relationship with Instagram requires self-awareness and discipline.
+15. [ASSISTANT_SAID] Assistant suggested curating the user's Instagram feed by unfollowing or muting accounts that trigger negative feelings.
+16. [ASSISTANT_SAID] Assistant recommended setting a specific purpose before opening Instagram.
+17. [ASSISTANT_SAID] Assistant advised using the website version of Instagram instead of the app to avoid mindless scrolling.
+18. [ASSISTANT_SAID] Assistant suggested scheduling specific times to check Instagram to prevent excessive use.
+19. [ASSISTANT_SAID] Assistant recommended taking regular short breaks from Instagram to reset the user's relationship with the platform.
+20. [ASSISTANT_CREATED] Assistant created a timeline of the user's social media breaks and habits, including the following details:
+    - **Mid-January**: 1-week break, journaling, reading, set daily time limit, unfollowed negative accounts.
+    - **Early February**: Attended digital detox workshop, joined WhatsApp group.
+    - **Late February**: 2-week break, started painting, deleted Facebook app.

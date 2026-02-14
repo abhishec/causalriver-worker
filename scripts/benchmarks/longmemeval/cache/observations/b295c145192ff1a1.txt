@@ -1,0 +1,15 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/07/13 (Thu) 10:05  
+[ASSISTANT_SAID] The assistant provided an updated `update_graph` function for updating the `FigureCanvasTkAgg`'s `figure` property with newly generated plots.  
+[ASSISTANT_CREATED] The assistant created a Python code snippet for the `update_graph` function that includes handling for "pairplot", "histogram", and "boxplot" graph types.  
+[ASSISTANT_SAID] The assistant suggested using `fig.clf()` to clear the figure before updating it with new plots.  
+[ASSISTANT_SAID] The assistant mentioned calling the `draw_idle` method of the `FigureCanvasTkAgg` object to update the plot.  
+[USER] The user stated that the previous solution did not work, indicating they had already tried it.  
+[ASSISTANT_SAID] The assistant proposed setting the size of the canvas and figure to be relative to the size of the window in an updated `visualize` function.  
+[ASSISTANT_CREATED] The assistant provided a new version of the `visualize` function that adjusts the figure size based on the window dimensions.  
+[USER] The user requested that the graph figures should be in `canvas_widget`, with a minimum height to the `canvas_widget` height, and to link the scrollbar to it for scrolling.  
+[ASSISTANT_SAID] The assistant acknowledged the user's request and provided an updated `visualize` function that saves figures as PNG files and displays them in a Tkinter window.  
+[ASSISTANT_CREATED] The assistant created a new version of the `visualize` function that saves figures as PNG files and resizes them to fit the `Canvas` widget dimensions.  
+[ASSISTANT_SAID] The assistant mentioned using `Image.open` and `ImageTk.PhotoImage` to display the saved images in the Tkinter `Canvas`.  
+[ASSISTANT_SAID] The assistant noted that the images are stored as attributes of the `Canvas` widget to prevent them from being garbage collected.

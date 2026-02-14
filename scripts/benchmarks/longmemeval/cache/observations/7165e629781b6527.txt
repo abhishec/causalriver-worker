@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/26 (Fri) 10:34  
+[PREFERENCE] User is looking for new TED Talks to watch.  
+[PREFERENCE] User re-watched some TED Talks they had bookmarked recently, including two talks on climate change and sleep.  
+[PREFERENCE] User is interested in recommendations for talks about AI and machine learning.  
+[ASSISTANT_SAID] Recommended TED Talks on AI and machine learning:  
+[ASSISTANT_SAID] 1. "How AI is changing the way we live and work" by Kai-Fu Lee: Discusses the impact of AI on jobs, economies, and society.  
+[ASSISTANT_SAID] 2. "How to prepare for the AI-driven job market" by Matt Beane: Offers practical advice on future-proofing careers in automation and AI.  
+[ASSISTANT_SAID] 3. "The future of artificial intelligence" by Nick Bostrom: Philosophical discussion on the risks and benefits of advanced AI.  
+[ASSISTANT_SAID] 4. "Machine learning's amazing capabilities and terrifying possibilities" by Jeremy Howard: Engaging talk on the capabilities and limitations of machine learning.  
+[ASSISTANT_SAID] 5. "What AI reveals about humans" by Shyam Sankar: Discusses how AI can help understand human behavior and decision-making.  
+[ASSISTANT_SAID] 6. "The AI that learns like a child" by Josh Tenenbaum: Talks about AI learning and reasoning like humans.  
+[ASSISTANT_SAID] 7. "How AI can enhance our humanity" by Fei-Fei Li: Discusses how AI can augment human capabilities.  
+[ASSISTANT_SAID] 8. "The dark side of AI" by Zeynep Tufekci: Discusses potential risks and consequences of AI, including bias and surveillance.  
+[ASSISTANT_SAID] 9. "The AI that beats humans at games" by Demis Hassabis: Discusses the development of AlphaGo.  
+[ASSISTANT_SAID] 10. "The future of work: Robots, AI and automation" by Andrew Ng: Discusses the impact of AI and automation on the job market.  
+[PREFERENCE] User expressed interest in watching the talks on the future of work and the dark side of AI.  
+[USER] User asked for more information about the AI-driven job market and in-demand skills.  
+[ASSISTANT_SAID] Key points regarding the AI-driven job market:  
+[ASSISTANT_SAID] - Job displacement: AI and automation may displace up to 800 million jobs worldwide by 2030.  
+[ASSISTANT_SAID] - New job creation: 75 million

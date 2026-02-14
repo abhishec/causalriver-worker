@@ -1,0 +1,31 @@
+{
+  "answer_ultrachat_289157": [
+    {
+      "fact": "User is interested in the role of private sector businesses in reducing poverty and unemployment in Chaudhary.",
+      "type": "preference",
+      "entities": [
+        "private sector businesses",
+        "poverty",
+        "unemployment",
+        "Chaudhary"
+      ]
+    },
+    {
+      "fact": "User finds it amazing to see the positive impact of private companies in Chaudhary.",
+      "type": "opinion",
+      "entities": [
+        "private companies",
+        "Chaudhary"
+      ]
+    },
+    {
+      "fact": "User is curious about government support for private sector initiatives in Chaudhary.",
+      "type": "preference",
+      "entities": [
+        "government",
+        "private sector initiatives",
+        "Chaudhary"
+      ]
+    }
+  ]
+}

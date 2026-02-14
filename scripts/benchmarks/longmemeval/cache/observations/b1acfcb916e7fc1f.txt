@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[FACT] User has been getting into a good morning routine lately.  
+[FACT] User's green tea is always ready by 7:30 am.  
+[EVENT] User is looking for new recipe ideas for meal prep.  
+[ASSISTANT_SAID] Assistant congratulated the user on establishing a consistent morning routine.  
+[ASSISTANT_SAID] Assistant provided meal prep ideas including:  
+[ASSISTANT_CREATED] 1. Grilled Chicken and Veggies: Marinate chicken breast in favorite seasonings and grill with roasted veggies like broccoli, bell peppers, and carrots.  
+[ASSISTANT_CREATED] 2. Lentil or Quinoa Salads: Cook lentils or quinoa and mix with diced veggies, lean proteins like chicken or tofu, and a simple vinaigrette.  
+[ASSISTANT_CREATED] 3. Turkey or Veggie Meatballs: Prepare a batch of meatballs and serve with brown rice, roasted veggies, or a side salad.  
+[ASSISTANT_CREATED] 4. Roasted Veggie Bowls: Roast a variety of veggies like sweet potatoes, Brussels sprouts, and cauliflower, and serve over brown rice or quinoa.  
+[ASSISTANT_CREATED] 5. Stuffed Bell Peppers: Fill bell peppers with a mix of cooked rice, black beans, and diced veggies, and bake until tender.  
+[ASSISTANT_CREATED] 6. Spinach and Feta Stuffed Portobellos: Fill portobello mushrooms with a mix of sautéed spinach, feta cheese, and lemon juice, and bake until golden.  
+[ASSISTANT_CREATED] 7. Korean-Style Chicken and Rice: Marinate chicken in a Korean-inspired sauce and serve with steamed rice and roasted kimchi.  
+[ASSISTANT_CREATED] 8. Indian-Style Lentil Curry: Cook lentils and mix with a flavorful curry sauce, served with brown rice or naan bread.  
+[ASSISTANT_CREATED] 9. Mexican-Style Chicken and Veggies: Grill chicken and serve with roasted veggies, black beans, and a sprinkle of avocado salsa.  
+[ASSISTANT_CREATED] 10. Overnight Oats: Prepare individual jars of oats with rolled oats, milk, and choice of nuts, seeds, or fruit.  
+[ASSISTANT_CREATED] 11. Muffin Tin Frittatas: Whisk eggs with diced veggies and cheese, pour into muffin tins, and bake until set.  
+[ASSISTANT_CREATED] 12. Greek Yogurt Parfaits: Layer Greek yogurt with granola, fresh berries, and a drizzle of honey.  
+[PREFERENCE] User usually makes a big batch of quinoa salad on Sundays and portions it out for the week.  
+[PREFERENCE] User does not need any special containers or apps for meal prep.  
+[FACT] User has a favorite tea shop near their office for herbal tea in the

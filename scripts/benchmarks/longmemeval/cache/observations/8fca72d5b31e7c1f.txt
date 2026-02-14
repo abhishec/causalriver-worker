@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/03/08 (Wed) 20:22
+- [USER] User has one table with columns: code, punchdatetime.
+- [USER] User has another table with columns: code, calendardate, start time, end time.
+- [USER] The second table has null values for start time and end time for weekly offs.
+- [USER] Punches can be picked before 4 hours of start time and after 4 hours of end time.
+- [USER] For weekly offs, punches can be picked from the previous day's end time after 4 hours to the next day.
+- [USER] User requested an SQL Server statement to pair punches with shift details.
+- [ASSISTANT_SAID] Assistant provided an initial SQL Server query using a common table expression (CTE) to join the two tables based on code and punchdatetime.
+- [ASSISTANT_CREATED] The initial SQL query included logic to check if punchdatetime falls between starttime and endtime shifted by 4 hours.
+- [USER] User requested that if punches are not available in the first table (t1), the result should display as null.
+- [ASSISTANT_SAID] Assistant updated the query to use a right join to ensure that if there are no matches in the punches table, the resulting rows will have NULL values for the columns from the punches table.
+- [USER] User noted that the OR condition in the query was taking time and producing many records, leading to incorrect data.
+- [ASSISTANT_SAID] Assistant provided an updated query that checks for NULL values in the shifts table instead of using an OR condition in the join.
+- [USER] User requested that if punchdatetime does not exist, it should return null.
+- [ASSISTANT_SAID] Assistant provided a new query using a left join to include all rows from the shifts table, returning NULL for punches if there are no matches.
+- [USER] User specified that if punches are not available, it should show null.
+- [ASSISTANT_SAID] Assistant provided a query using subqueries to check for the existence of punchdatetime in the punches table, returning NULL if no matches are found.
+- [ASSISTANT_CREATED] The final SQL query included COALESCE to ensure that NULL values are returned if there are no matching punches in the first table.

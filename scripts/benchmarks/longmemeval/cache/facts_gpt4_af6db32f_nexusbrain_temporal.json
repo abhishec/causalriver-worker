@@ -1,0 +1,57 @@
+{
+  "answer_184c8f56_1": [
+    {
+      "fact": "User is planning a fantasy football draft party.",
+      "type": "event",
+      "entities": [
+        "fantasy football draft party"
+      ]
+    },
+    {
+      "fact": "User enjoyed pizza and wings at a friend's house while watching the Super Bowl.",
+      "type": "event",
+      "entities": [
+        "pizza",
+        "wings",
+        "Super Bowl"
+      ]
+    },
+    {
+      "fact": "User is a fan of the Kansas City Chiefs.",
+      "type": "opinion",
+      "entities": [
+        "Kansas City Chiefs"
+      ]
+    },
+    {
+      "fact": "User is considering serving pizza and wings at the party.",
+      "type": "preference",
+      "entities": [
+        "pizza",
+        "wings"
+      ]
+    },
+    {
+      "fact": "User is thinking of having the party on a Sunday.",
+      "type": "event",
+      "entities": [
+        "Sunday"
+      ]
+    },
+    {
+      "fact": "User wants to catch up on NFL games before the draft.",
+      "type": "preference",
+      "entities": [
+        "NFL games"
+      ]
+    },
+    {
+      "fact": "User is looking for recommendations for sports bars that show NFL games.",
+      "type": "preference",
+      "entities": [
+        "sports bars",
+        "NFL games"
+      ]
+    }
+  ]
+}

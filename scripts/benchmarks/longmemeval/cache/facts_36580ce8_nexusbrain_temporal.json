@@ -1,0 +1,24 @@
+{
+  "answer_93e1bd22": [
+    {
+      "fact": "User is trying to get back on track with their fitness routine.",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User has been dealing with health issues.",
+      "type": "personal",
+      "entities": []
+    },
+    {
+      "fact": "User wants to ensure they don't overexert themselves.",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User is looking for suggestions to boost their immune system.",
+      "type": "preference",
+      "entities": []
+    }
+  ]
+}

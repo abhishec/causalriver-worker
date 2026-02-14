@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/24 (Wed) 23:47  
+[FACT] User is interested in cooking classes or workshops in Pomerania that focus on traditional dishes.  
+[ASSISTANT_SAID] The Ethnographic Museum in Pomerania offers workshops on traditional Pomeranian cuisine, such as making pierogi, kaszanka, and smoked meat.  
+[ASSISTANT_SAID] Polish Cuisine Gdansk offers cooking classes on Polish cuisine, including traditional Pomeranian dishes, conducted in English and suitable for beginners.  
+[ASSISTANT_SAID] CookUp in Gdansk offers cooking classes on traditional Polish cuisine, with options to customize menus to include specific Pomeranian dishes.  
+[ASSISTANT_SAID] Slow Food Pomerania promotes traditional and sustainable food practices and occasionally organizes workshops and events on Pomeranian cuisine.  
+[ASSISTANT_SAID] Local culinary festivals, such as the Gdansk Pierogi Festival, may provide opportunities to learn about and taste traditional Pomeranian dishes.  
+[USER] Asks about the cost of cooking classes and affordable options.  
+[ASSISTANT_SAID] The cost of cooking classes can range from around 50 to 150 PLN per person, depending on class duration, complexity of dishes, and instructor reputation.  
+[ASSISTANT_SAID] There may be affordable options available at community centers or cooking schools that offer lower prices or discounts for groups.  
+[ASSISTANT_SAID] Many cooking classes include ingredients and equipment, which can affect the cost.  
+[USER] Requests a specific cooking class in Pomerania that focuses on making pierogi from scratch.  
+[ASSISTANT_SAID] Polish Cuisine Gdansk offers a 3-hour pierogi workshop for around 150 PLN per person, including an introduction to traditional Polish cooking and a tasting of the pierogi made.  
+[USER] Asks for a cooking class that focuses on making kaszanka.  
+[ASSISTANT_SAID] The Ethnographic Museum in Pomerania offers a kaszanka-making workshop that lasts about 3.5 hours and costs around 160 PLN per person.  
+[USER] Expresses excitement about trying the pierogi-making class and kaszanka workshop and asks for suggestions for other traditional Pomeranian dishes to learn.  
+[ASSISTANT_SAID] Suggested traditional Pomeranian dishes include:  
+1. Bigos - A hearty stew made with sauerkraut, meat, and various vegetables.  
+2. Zrazy - Thin slices of beef stuffed with vegetables, bacon, and spices, rolled up and slow-cooked.  
+3. Kopytka - Small potato dumplings similar to gnocchi, often served with sautéed onions and bacon.  
+4. Kiszka -

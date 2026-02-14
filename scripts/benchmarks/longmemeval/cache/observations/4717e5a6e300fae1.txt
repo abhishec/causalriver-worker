@@ -1,0 +1,26 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/25 (Thu) 06:51
+- [FACT] User is planning a birthday gift for their mom.
+- [PREFERENCE] User is considering online shopping for the gift.
+- [EVENT] User had a good experience with online shopping recently.
+- [EVENT] User purchased a customized photo album for a colleague's going-away party for around $30.
+- [RELATIONSHIP] User's colleague had a going-away party.
+- [PREFERENCE] User is considering gifting an experience to their mom, such as a cooking class or a spa day.
+- [ASSISTANT_SAID] Assistant recommended cashback apps: Rakuten, Ibotta, Fetch Rewards, TopCashback.
+- [ASSISTANT_SAID] Assistant recommended cashback websites: BeFrugal, MyPoints, Swagbucks, InboxDollars.
+- [ASSISTANT_SAID] Assistant suggested other rewards programs: Credit Card Rewards, Store Loyalty Programs.
+- [ASSISTANT_SAID] Assistant provided steps to follow before shopping: sign up for cashback apps, read terms and conditions, browse offers, click on offers.
+- [ASSISTANT_SAID] Assistant recommended websites for experience gift certificates: Groupon, LivingSocial, Goldstar, Cloud 9 Living, Experience Gift.
+- [ASSISTANT_SAID] Assistant recommended spa and wellness websites: Spafinder, Massage Envy, Zeel.
+- [ASSISTANT_SAID] Assistant recommended cooking class websites: Cookly, Sur La Table, The Cooking Academy.
+- [ASSISTANT_SAID] Assistant recommended other experience-based websites: Viator, IfOnly, Xperience Days.
+- [ASSISTANT_SAID] Assistant provided tips for purchasing gift certificates: read reviews, understand terms and conditions, choose a secure redemption process.
+- [PREFERENCE] User is considering getting their mom a physical gift, like a personalized item or a luxury candle.
+- [ASSISTANT_SAID] Assistant recommended online stores for personalized gifts: Etsy, Personalization Mall, Things Remembered, CafePress.
+- [ASSISTANT_SAID] Assistant recommended luxury candle stores: Diptyque, Jo Malone London, Voluspa, Illume.
+- [ASSISTANT_SAID] Assistant recommended online gift stores: Amazon, UncommonGoods, Zibbet, Harry & David, Nordstrom.
+- [ASSISTANT_SAID] Assistant provided tips for online shopping: read reviews, understand return policies, look for free shipping, check for promotions.
+- [PREFERENCE] User has had good experiences with online shopping, especially for personalized gifts.
+- [EVENT] User spent around $30 on a customized photo album for their colleague's going-away party, which was well-received.
+- [PREFERENCE] User is considering gifting their mom a personalized photo

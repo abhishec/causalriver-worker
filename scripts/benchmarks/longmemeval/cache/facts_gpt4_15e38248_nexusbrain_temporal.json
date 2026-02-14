@@ -1,0 +1,191 @@
+{
+  "answer_8858d9dc_3": [
+    {
+      "fact": "User recently got a new coffee table and rearranged their living room.",
+      "type": "event",
+      "entities": [
+        "new coffee table",
+        "living room"
+      ]
+    },
+    {
+      "fact": "User's old pillows are looking worn out.",
+      "type": "opinion",
+      "entities": [
+        "old pillows"
+      ]
+    },
+    {
+      "fact": "User ordered a new mattress from Casper.",
+      "type": "event",
+      "entities": [
+        "new mattress",
+        "Casper"
+      ]
+    },
+    {
+      "fact": "User is looking forward to getting a good night's sleep.",
+      "type": "opinion",
+      "entities": [
+        "good night's sleep"
+      ]
+    },
+    {
+      "fact": "User is considering light gray or beige pillows for their future sectional sofa.",
+      "type": "preference",
+      "entities": [
+        "light gray pillows",
+        "beige pillows",
+        "sectional sofa"
+      ]
+    },
+    {
+      "fact": "User is interested in brands that offer gray or beige throw pillows with wooden or metal accents.",
+      "type": "preference",
+      "entities": [
+        "gray throw pillows",
+        "beige throw pillows",
+        "wooden accents",
+        "metal accents"
+      ]
+    }
+  ],
+  "answer_8858d9dc_2": [
+    {
+      "fact": "User is considering getting new throw pillows for their couch.",
+      "type": "preference",
+      "entities": [
+        "throw pillows",
+        "couch"
+      ]
+    },
+    {
+      "fact": "User has had a good experience with West Elm when buying a coffee table.",
+      "type": "opinion",
+      "entities": [
+        "West Elm",
+        "coffee table"
+      ]
+    },
+    {
+      "fact": "User assembled an IKEA bookshelf for their home office about two months ago.",
+      "type": "event",
+      "entities": [
+        "IKEA",
+        "bookshelf",
+        "home office"
+      ]
+    },
+    {
+      "fact": "User finds the IKEA bookshelf has positively impacted their productivity.",
+      "type": "opinion",
+      "entities": [
+        "IKEA",
+        "bookshelf",
+        "productivity"
+      ]
+    }
+  ],
+  "answer_8858d9dc_1": [
+    {
+      "fact": "User recently purchased a coffee table from West Elm.",
+      "type": "event",
+      "entities": [
+        "coffee table",
+        "West Elm"
+      ]
+    },
+    {
+      "fact": "User spent hours browsing West Elm's website to find the perfect coffee table.",
+      "type": "opinion",
+      "entities": [
+        "West Elm",
+        "coffee table"
+      ]
+    },
+    {
+      "fact": "User's coffee table has a wooden top with metal legs.",
+      "type": "personal",
+      "entities": [
+        "wooden coffee table",
+        "metal legs"
+      ]
+    },
+    {
+      "fact": "User's coffee table was delivered last Thursday.",
+      "type": "event",
+      "entities": [
+        "delivery",
+        "last Thursday"
+      ]
+    },
+    {
+      "fact": "User is looking for throw pillows with a modern aesthetic to match the coffee table.",
+      "type": "preference",
+      "entities": [
+        "throw pillows",
+        "modern aesthetic"
+      ]
+    },
+    {
+      "fact": "User likes the idea of checking out West Elm's throw pillow selection.",
+      "type": "preference",
+      "entities": [
+        "West Elm",
+        "throw pillow selection"
+      ]
+    }
+  ],
+  "answer_8858d9dc_4": [
+    {
+      "fact": "User's living room has a modern feel.",
+      "type": "preference",
+      "entities": [
+        "modern feel"
+      ]
+    },
+    {
+      "fact": "User's living room has a dominant color scheme of neutral tones like beige, gray, and white.",
+      "type": "preference",
+      "entities": [
+        "beige",
+        "gray",
+        "white"
+      ]
+    },
+    {
+      "fact": "User's new coffee table is wooden with metal legs.",
+      "type": "personal",
+      "entities": [
+        "wooden coffee table",
+        "metal legs"
+      ]
+    },
+    {
+      "fact": "User fixed the wobbly leg on their kitchen table last weekend.",
+      "type": "event",
+      "entities": [
+        "kitchen table",
+        "wobbly leg",
+        "last weekend"
+      ]
+    },
+    {
+      "fact": "User prefers throw pillows that complement the modern feel and add a pop of color.",
+      "type": "preference",
+      "entities": [
+        "throw pillows",
+        "modern feel",
+        "pop of color"
+      ]
+    },
+    {
+      "fact": "User likes the idea of velvet pillows in rich hues.",
+      "type": "preference",
+      "entities": [
+        "velvet pillows",
+        "rich hues"
+      ]
+    }
+  ]
+}

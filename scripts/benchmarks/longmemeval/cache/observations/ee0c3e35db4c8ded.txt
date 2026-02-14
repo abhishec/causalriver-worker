@@ -1,0 +1,16 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/27 (Sat) 08:58  
+[USER] User inquired about enabling dual screen on Ubuntu 22.04 via HDMI cable.  
+[ASSISTANT_SAID] Ubuntu 22.04 is not yet released as of the assistant's knowledge cutoff in September 2021.  
+[ASSISTANT_SAID] General steps to enable dual screens on Ubuntu via HDMI cable were provided.  
+[ASSISTANT_CREATED] Step 1: Connect your second monitor to your computer using an HDMI cable.  
+[ASSISTANT_CREATED] Step 2: Once your computer detects the monitor, click on the Activities tab on the top left corner of your screen.  
+[ASSISTANT_CREATED] Step 3: Type "Displays" in the search bar and click on it to open the Displays settings.  
+[ASSISTANT_CREATED] Step 4: In the Displays settings, you should see two screens labeled as "1" and "2".  
+[ASSISTANT_CREATED] Step 5: Click and drag the screens to position them according to your preference.  
+[ASSISTANT_CREATED] Step 6: Under "Scale," choose the resolution that matches your monitor's native resolution.  
+[ASSISTANT_CREATED] Step 7: Under "Orientation," choose whether you want the monitor to be in landscape or portrait mode.  
+[ASSISTANT_CREATED] Step 8: Under "Rotation," choose the degree of rotation if you want to rotate the screen.  
+[ASSISTANT_CREATED] Step 9: Once you have made your changes, click on "Apply" and your dual screens should be enabled.  
+[ASSISTANT_SAID] Note that the steps may vary depending on your system and version of Ubuntu, but the general process should be similar.

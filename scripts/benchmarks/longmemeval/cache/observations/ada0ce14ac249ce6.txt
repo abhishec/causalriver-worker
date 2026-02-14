@@ -1,0 +1,41 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/03/20 (Mon) 14:31
+- [PREFERENCE] User is trying to get more into reading.
+- [PREFERENCE] User enjoys "The Nightingale" and "The Seven Husbands of Evelyn Hugo."
+- [CHANGE] User has recently swapped the sofa and armchair in their living room three weeks ago.
+- [FACT] User has a cozy and modern living room vibe.
+- [FACT] User has a smaller coffee table from IKEA.
+- [PREFERENCE] User is interested in travel, art, and nature.
+- [PREFERENCE] User prefers coffee table books with a lot of images.
+- [EVENT] User is considering purchasing new coffee table books.
+- [ASSISTANT_SAID] Recommended books similar to "The Nightingale":
+  1. "All the Light We Cannot See" by Anthony Doerr
+  2. "The Alice Network" by Kate Quinn
+  3. "The Lost Girls of Paris" by Pam Jenoff
+  4. "The Women in the Castle" by Jessica Shattuck
+  5. "Those Who Save Us" by Jenna Blum
+  6. "The Soldier's Wife" by Pam Jenoff
+  7. "The Postmistress" by Sarah Blake
+  8. "The Invisible Bridge" by Julie Orringer
+  9. "The Tattooist of Auschwitz" by Heather Morris
+- [ASSISTANT_SAID] Recommended coffee table books:
+  1. "The New York Times: 36 Hours" series
+  2. "Lonely Planet's Best of Travel Photography"
+  3. "The World's Most Beautiful Places" by Lonely Planet
+  4. "The Art Book" by Phaidon
+  5. "The Museum of Modern Art: The Collection"
+  6. "Art & Place" by Phaidon
+  7. "Planet Earth" by Alastair Fothergill and David Attenborough
+  8. "National Geographic: The Photo Ark" by Joel Sartore
+  9. "Wild: The Natural Beauty of the American West" by Michael Nichols
+  10. "The Kinfolk Home" by Nathan Williams
+  11. "The New Bohemians" by Justina Blakeney
+  12. "Hygge: The Danish Art of Contentment, Comfort, and Connection" by Meik Wiking
+- [ASSISTANT_SAID] Described photography style in "The Kinfolk Home":
+  - Natural light
+  - Minimalist aesthetic
+  - Intimate and personal
+  - Detailed close-ups
+- [ASSISTANT_SAID] Described photography style in "The New Bohemians":
+  - Rich colors

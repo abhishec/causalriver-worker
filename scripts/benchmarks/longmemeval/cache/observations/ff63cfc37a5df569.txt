@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/02/13 (Mon) 21:02  
+[FACT] User's annual salary is $73,000.  
+[EVENT] User is considering buying a new apartment.  
+[ASSISTANT_SAID] The assistant offered to help determine how much mortgage the user can afford.  
+[ASSISTANT_SAID] The assistant asked for the user's current credit score, down payment amount, debt-to-income ratio, desired monthly mortgage payment, expected interest rate, and other sources of income or assets.  
+[ASSISTANT_SAID] Lenders recommend that housing costs shouldn't exceed 30% of gross income.  
+[ASSISTANT_SAID] Based on the user's salary, monthly housing costs should be around $1,825.  
+[ASSISTANT_SAID] Assuming a 20% down payment of $40,000 on a $200,000 home, the user could afford a $160,000 mortgage.  
+[ASSISTANT_SAID] A $160,000 mortgage at a 4% interest rate would result in a monthly payment of around $763.  
+[ASSISTANT_SAID] The assistant advised that the estimate does not include maintenance, utilities, and homeowners association fees.  
+[ASSISTANT_SAID] The assistant recommended checking the credit score, gathering information on debts and income, researching mortgage rates, and consulting with a financial advisor or mortgage broker for personalized advice.  
+[USER] User expressed uncertainty about whether $160,000 is enough to buy an apartment in the city center.  
+[ASSISTANT_SAID] The assistant stated that it does not have access to real-time data on specific city centers or local real estate markets.  
+[ASSISTANT_SAID] The assistant suggested using online real estate portals, local real estate agents, property listings, neighborhood guides, and government websites to find average apartment prices.  
+[USER] User plans to check online real estate portals and local real estate agents for current market prices.  
+[USER] User asked about expected closing costs and other fees when buying an apartment.  
+[ASSISTANT_SAID] Closing costs typically range from 2% to 5% of the purchase price.  
+[ASSISTANT_SAID] For a $200,000 apartment, closing costs would be approximately $6,000 to $12,000.  
+[ASSISTANT_SAID] The assistant listed potential closing costs, including loan origination fees, title insurance, appraisal fees, credit report fees, and more.  
+[ASSISTANT_SAID] The assistant advised to factor in additional costs like closing costs, property taxes, and insurance when calculating how much mortgage can be afforded.  
+[USER] User calculated needing to save around $46,000 to $52,000 for the down payment and closing costs

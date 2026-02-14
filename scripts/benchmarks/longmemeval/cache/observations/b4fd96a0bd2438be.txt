@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/30 (Tue) 05:18  
+[FACT] User is looking for tips on grilling steaks.  
+[EVENT] User recently attended a family gathering where their cousin had a massive gas grill setup.  
+[PREFERENCE] User was impressed by the gas grill setup and the variety of food grilled (steaks, chicken breasts, vegetables).  
+[ASSISTANT_SAID] Grilling the perfect steak can be achieved with guidelines and practice.  
+[ASSISTANT_SAID] Recommended steak cuts: ribeye, strip loin, porterhouse; thickness of at least 1.5-2 inches.  
+[ASSISTANT_SAID] Suggested bringing steak to room temperature for 30-45 minutes before grilling.  
+[ASSISTANT_SAID] Recommended seasoning steak with salt, pepper, and other seasonings 30 minutes before grilling.  
+[ASSISTANT_SAID] Advised to oil the grill grates to prevent sticking.  
+[ASSISTANT_SAID] Preheat grill to high heat (450°F to 500°F) for searing.  
+[ASSISTANT_SAID] Suggested searing steak for 3-4 minutes per side, then reducing heat to medium-low (300°F to 350°F) for desired doneness.  
+[ASSISTANT_SAID] Provided internal temperature guidelines for steak doneness: Rare (130°F - 135°F), Medium-rare (135°F - 140°F), Medium (140°F - 145°F), Medium-well (145°F - 150°F), Well-done (150°F - 155°F).  
+[ASSISTANT_SAID] Recommended resting steak for 5-10 minutes after cooking.  
+[ASSISTANT_SAID] Advised against pressing down on the steak while grilling.  
+[ASSISTANT_SAID] Suggested using cast-iron or stainless steel grills for better heat retention.  
+[ASSISTANT_SAID] Recommended not overcrowding the grill for even cooking.  
+[ASSISTANT_SAID] Encouraged practice to improve grilling skills.  
+[PREFERENCE] User noted that the cousin's gas grill setup makes a difference in cooking time.  
+[EVENT] User inquired about adjusting grilling time for a charcoal grill.  
+[ASSISTANT_SAID] Charcoal grills require adjustments for temperature control and cooking time.  
+[ASSISTANT_SAID] Suggested monitoring temperature and adjusting airflow for consistent heat.  
+[ASSISTANT_SAID] Recommended adding 1-2 minutes to grilling time per side when using a charcoal grill.  
+[ASSISTANT_SAID] Provided rough grilling time guidelines for charcoal grill: Rare (5-6 minutes per side), Medium-rare (6-7 minutes per side), Medium (7-8 minutes per

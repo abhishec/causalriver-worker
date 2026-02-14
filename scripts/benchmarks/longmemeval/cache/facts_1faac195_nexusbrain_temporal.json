@@ -1,0 +1,27 @@
+{
+  "answer_d01949bf": [
+    {
+      "fact": "User is planning a road trip with their family",
+      "type": "event",
+      "entities": [
+        "road trip",
+        "family"
+      ]
+    },
+    {
+      "fact": "User has a sister named Emily",
+      "type": "relationship",
+      "entities": [
+        "Emily"
+      ]
+    },
+    {
+      "fact": "User is thinking of visiting their sister in Denver",
+      "type": "event",
+      "entities": [
+        "Denver",
+        "sister"
+      ]
+    }
+  ]
+}

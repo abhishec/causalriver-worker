@@ -1,0 +1,38 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/23 (Tue) 07:41
+- [EVENT] User is thinking of trying watercolor painting soon.
+- [EVENT] User is considering a still-life setup for painting.
+- [EVENT] User spent time organizing painting supplies and cleaning workspace yesterday.
+- [PREFERENCE] User is looking for tips on getting started with watercolor painting.
+- [ASSISTANT_SAID] Recommended tips for getting started with watercolor painting:
+  1. Choose the right paper: Look for "hot press" or "cold press" watercolor paper.
+  2. Select your paints: Tubes are convenient for traveling; start with primary colors and black.
+  3. Invest in good brushes: Natural hair brushes (like sable or mongoose) are ideal, but synthetic brushes can work well.
+  4. Understand the basics of color theory: Familiarize with the color wheel and mixing colors.
+  5. Start with simple exercises: Wet-on-wet, wet-on-dry, and glazing.
+  6. Use reference images: Gather images of still-life setups, flowers, or landscapes.
+  7. Practice, practice, practice: Watercolor requires patience and practice.
+  8. Work from light to dark: Start with light washes and build up to darker colors.
+  9. Use the white of the paper: Leave areas unpainted for contrast and highlights.
+  10. Have fun: Enjoy the process and don't be too hard on yourself.
+- [EVENT] User is looking for a specific brand of watercolor paper suitable for beginners.
+- [ASSISTANT_SAID] Recommended popular and affordable brands of watercolor paper for beginners:
+  1. Winsor & Newton Cotman series
+  2. Arches 140lb (300gsm) cold press paper
+  3. Strathmore 500 Series Watercolor Paper
+  4. Canson Mi-Teintes watercolor paper and XL series
+- [ASSISTANT_SAID] Suggested characteristics to look for in watercolor paper:
+  - Weight: 140lb (300gsm) or heavier
+  - Surface: Cold press or hot press
+  - Size: Comfortable size like 9x12 inches or 11x15 inches
+  - Acid-free: To prevent yellowing or degradation over time
+- [EVENT] User is considering buying a new palette with built-in cups.
+- [ASSISTANT_SAID] Recommended popular palettes with built-in cups:
+  1. Winsor & Newton Cotman Watercolor Palette
+  2. Daniel Smith Watercolor Palette
+  3. Schmincke Horadam Watercolor Palette
+  4. Holbein Watercolor Palette
+- [ASSISTANT_SAID] Suggested factors to consider when choosing a palette:
+  - Number of cups
+  - Size

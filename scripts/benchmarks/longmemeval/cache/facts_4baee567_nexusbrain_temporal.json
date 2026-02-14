@@ -1,0 +1,36 @@
+{
+  "answer_sharegpt_i9adwQn_0": [
+    {
+      "fact": "User is interested in stock discussions on hotcopper.com.au",
+      "type": "preference",
+      "entities": [
+        "hotcopper.com.au"
+      ]
+    },
+    {
+      "fact": "User is interested in property investment strategies in Australia",
+      "type": "preference",
+      "entities": [
+        "negatively geared property",
+        "positively geared property",
+        "Australia"
+      ]
+    },
+    {
+      "fact": "User is interested in NFL historical results",
+      "type": "preference",
+      "entities": [
+        "NFL",
+        "historical results"
+      ]
+    },
+    {
+      "fact": "User is interested in the match history between the Kansas City Chiefs and the Jacksonville Jaguars",
+      "type": "preference",
+      "entities": [
+        "Kansas City Chiefs",
+        "Jacksonville Jaguars"
+      ]
+    }
+  ]
+}

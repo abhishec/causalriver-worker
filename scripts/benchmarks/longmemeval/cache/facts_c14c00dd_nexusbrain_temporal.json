@@ -1,0 +1,26 @@
+{
+  "answer_304511ce": [
+    {
+      "fact": "User is trying to get more organized with their bathroom cleaning routine.",
+      "type": "preference",
+      "entities": [
+        "bathroom cleaning routine"
+      ]
+    },
+    {
+      "fact": "User is considering using Habitica to gamify their tasks.",
+      "type": "preference",
+      "entities": [
+        "Habitica"
+      ]
+    },
+    {
+      "fact": "User has been using a loofah for exfoliation but is open to trying something new.",
+      "type": "preference",
+      "entities": [
+        "loofah",
+        "exfoliation"
+      ]
+    }
+  ]
+}

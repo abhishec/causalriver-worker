@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [FACT] The user is going to build a full stack website.
+- [PREFERENCE] The user prefers to use React.js for the front end and Express.js for the backend.
+- [EVENT] The user wants to add functionality to send a file on multiple social media platforms.
+- [EVENT] The user mentioned specific platforms: LinkedIn, WhatsApp, and email.
+- [ASSISTANT_SAID] To implement the feature, the user should obtain API keys for the social media platforms.
+- [ASSISTANT_SAID] LinkedIn has the LinkedIn Marketing Developer Platform.
+- [ASSISTANT_SAID] WhatsApp has the WhatsApp Business API.
+- [ASSISTANT_SAID] Email services have various APIs, such as the Gmail API.
+- [ASSISTANT_SAID] The user should set up API clients in the backend using Express.js.
+- [ASSISTANT_SAID] The user can use libraries like `node-linkedin` for LinkedIn.
+- [ASSISTANT_SAID] The user can use `whatsapp-web.js` for WhatsApp.
+- [ASSISTANT_SAID] The user can use `nodemailer` for email services.
+- [ASSISTANT_SAID] The user should create a route in the backend to handle file uploads and sending to social media platforms.
+- [ASSISTANT_SAID] The user can use `multer` middleware to handle file uploads.
+- [ASSISTANT_SAID] In the frontend using React.js, the user should create a form for file uploads and platform selection.
+- [ASSISTANT_SAID] When the user submits the form, a request should be sent to the backend route created for handling file uploads.
+- [ASSISTANT_SAID] The backend will handle sending the file to the selected social media platforms using their respective APIs.
+- [ASSISTANT_SAID] The user should handle any errors or exceptions that may occur during the file upload or sending process.
+- [ASSISTANT_SAID] Each social media platform may have different requirements and limitations for sending files through their APIs, so the user should check their documentation for specific details.

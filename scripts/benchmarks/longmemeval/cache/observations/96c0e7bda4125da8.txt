@@ -1,0 +1,23 @@
+**Observation Log:**
+
+- [FACT] The user is feeling anxious about an upcoming colonoscopy.
+- [TEMPORAL] The colonoscopy is scheduled for April 15th.
+- [ASSISTANT_SAID] The assistant provided a rundown of preparation steps for the colonoscopy.
+- [ASSISTANT_SAID] The assistant listed diet restrictions for the colonoscopy preparation, including foods to avoid and foods to stick to.
+- [ASSISTANT_SAID] The assistant mentioned that the user should start a low-fiber diet 3-4 days before the procedure.
+- [ASSISTANT_SAID] The assistant advised avoiding beans, peas, legumes, broccoli, cauliflower, nuts, seeds, popcorn, whole grains, raw fruits and vegetables with skins or seeds, and dairy products with seeds.
+- [ASSISTANT_SAID] The assistant recommended sticking to lean proteins like chicken, fish, and eggs, refined grains like white rice and plain crackers, cooked fruits and vegetables without seeds or skins, and clear soups.
+- [ASSISTANT_SAID] The assistant explained that the doctor may prescribe a bowel prep medication to take the day before the procedure.
+- [ASSISTANT_SAID] The assistant advised drinking plenty of water to stay hydrated during the bowel prep.
+- [ASSISTANT_SAID] The assistant listed clear fluids to drink, including water, clear broths, electrolyte-rich drinks, and clear juices, while advising to avoid red or purple drinks and carbonated drinks.
+- [ASSISTANT_SAID] The assistant emphasized the importance of informing the doctor about all medications, supplements, and vitamins the user is taking.
+- [ASSISTANT_SAID] The assistant mentioned that the user would need to fast for 6-8 hours before the procedure.
+- [ASSISTANT_SAID] The assistant advised arranging for someone to drive the user home after the procedure.
+- [ASSISTANT_SAID] The assistant suggested double-checking with the doctor for any specific instructions tailored to the user's needs.
+- [FACT] The user had a bad experience with antibiotics recently.
+- [EVENT] The user went to urgent care on January 20th to get antibiotics for a sinus infection.
+- [ASSISTANT_SAID] The assistant acknowledged the user's concerns about the bowel prep medication and its unpredictability.
+- [ASSISTANT_SAID] The assistant explained that bowel prep medication is designed to cleanse the colon and rectum of stool and fluids.
+- [ASSISTANT_SAID] The assistant listed common types of bowel prep medications: Osprey, MoviPrep, and Suprep.
+- [ASSISTANT_SAID] The assistant provided possible side effects of bowel prep medications, including nausea, vomiting, abdominal cramps, bloating, gas, diarrhea, dizziness, headache, and fatigue.
+- [ASSISTANT_SAID] The assistant highlighted

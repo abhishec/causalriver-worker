@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[FACT] User has been listening to a lot of Billie Eilish lately.  
+[FACT] User downloaded Billie Eilish's new album "Happier Than Ever" on Spotify.  
+[PREFERENCE] User is looking for music recommendations similar to Billie Eilish.  
+[ASSISTANT_SAID] Recommended similar artists: Lorde, Tove Lo, Halsey, Lana Del Rey, Tame Impala's Kevin Parker (as a solo artist).  
+[ASSISTANT_SAID] Recommended similar albums: Lorde - "Melodrama", Halsey - "Manic", Tove Lo - "Sunshine Kitty", Charli XCX - "Charli", Banks - "III".  
+[ASSISTANT_SAID] Recommended other artists: Rina Sawayama, Kali Uchis, Shura.  
+[ASSISTANT_SAID] Suggested playlists: Today's Top Hits, RapCaviar, New Music Friday, Discover Weekly, Release Radar.  
+[ASSISTANT_SAID] Suggested radio stations: Today's Top Hits Radio, Alternative Radio, RapCaviar Radio, Indie Radio, ElectroNOW Radio.  
+[ASSISTANT_SAID] Suggested genre-specific playlists: Indie Pop, Alternative Anthems, Electronic Rising, New Wave, Lo-Fi Beats.  
+[ASSISTANT_SAID] Suggested user-generated playlists: Billie Eilish Radio, Lorde's Favorites, Halsey's Favorites.  
+[PREFERENCE] User is particularly interested in Lorde and Halsey.  
+[FACT] User has been listening to Billie Eilish's "Happier Than Ever" album and loves the song "NDA".  
+[PREFERENCE] User is looking for songs or artists with a similar vibe to "NDA", specifically with a catchy beat and unique vocal style.  
+[ASSISTANT_SAID] Recommended similar songs: Tove Lo - "Glad He's Gone", Halsey - "Nightmare", Lana Del Rey - "High by the Beach", Charli XCX - "Click", Banks - "Gemini Feed".  
+[ASSISTANT_SAID] Recommended similar artists: Tove Styrke, MØ, Kali Uchis, Shura, Lykke Li.  
+[ASSISTANT_SAID] Suggested playlists: Dark Pop, Electro Pop, Indie Pop.  
+[PREFERENCE] User has been listening to music podcasts like "All Songs Considered" and "Pitchfork".  
+[ASSISTANT_SAID] Recommended music podcasts: The Needle Drop, KCRW's Morning Becomes Eclectic, NPR Music, Song Exploder.  
+[ASSISTANT_SAID] Recommended YouTube channels: The Needle Drop, KEXP, La Blogothèque, Discogs.  
+[EVENT] User attended a music festival last weekend.  
+[PREFERENCE] User discovered a band called "The Whiskey Wanderers" at the

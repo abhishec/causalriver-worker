@@ -1,0 +1,65 @@
+{
+  "answer_e5131a1b_abs_2": [
+    {
+      "fact": "User is working on a project at NovaTech",
+      "type": "personal",
+      "entities": [
+        "NovaTech"
+      ]
+    },
+    {
+      "fact": "User needs help with optimizing API performance",
+      "type": "event",
+      "entities": [
+        "API performance"
+      ]
+    },
+    {
+      "fact": "User is struggling with profiling and benchmarking their API",
+      "type": "event",
+      "entities": [
+        "profiling",
+        "benchmarking",
+        "API"
+      ]
+    }
+  ],
+  "answer_e5131a1b_abs_1": [
+    {
+      "fact": "User has been working professionally for 9 years",
+      "type": "personal",
+      "entities": [
+        "9 years"
+      ]
+    },
+    {
+      "fact": "User is currently using a physical notebook to jot down notes and reminders",
+      "type": "preference",
+      "entities": [
+        "physical notebook"
+      ]
+    },
+    {
+      "fact": "User is looking for advice on managing time more efficiently",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User is working long hours on a high-priority project",
+      "type": "event",
+      "entities": [
+        "high-priority project"
+      ]
+    },
+    {
+      "fact": "User's commute has increased, leaving little time for personal life",
+      "type": "event",
+      "entities": []
+    },
+    {
+      "fact": "User is struggling with keeping track of tasks and projects",
+      "type": "opinion",
+      "entities": []
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/09/17 (Sun) 03:13
+- [FACT] User is inquiring about Maxwell's menu and offerings.
+- [ASSISTANT_SAID] Assistant does not have access to current information about Maxwell's menu and suggests checking their website or calling them directly.
+- [USER] User asks for Maxwell's website and phone number.
+- [ASSISTANT_SAID] Assistant provides Maxwell's website: www.maxwellsnj.com and phone number: (973) 743-3900.
+- [EVENT] User plans to check out Maxwell's website and give them a call.
+- [USER] User asks for personal recommendations for dishes to try at Maxwell's.
+- [ASSISTANT_SAID] Assistant states they cannot make personal recommendations but mentions that Maxwell's offers a variety of dishes including pizza, sandwiches, salads, and pasta.
+- [PREFERENCE] User expresses interest in trying a good slice of pizza.
+- [ASSISTANT_SAID] Assistant states that Maxwell's is known for their delicious pizza, offering both traditional and signature pizzas with a variety of toppings.
+- [ASSISTANT_SAID] Assistant mentions that reviewers praise Maxwell's pizza crust for being crispy and flavorful and their sauce for having a balance of sweet and tangy flavors.
+- [ASSISTANT_SAID] Assistant recommends trying the "Bianca" pizza topped with mozzarella, ricotta, garlic, and olive oil, or the "Maxwell's Special" pizza loaded with sausage, pepperoni, mushrooms, onions, peppers, and mozzarella cheese.
+- [PREFERENCE] User expresses enthusiasm about trying one of Maxwell's signature pizzas.
+- [ASSISTANT_SAID] Assistant wishes the user to enjoy their meal at Maxwell's and invites them to ask more questions if needed.
+- [USER] User inquires if Maxwell's has outdoor seating.
+- [ASSISTANT_SAID] Assistant confirms that Maxwell's has outdoor seating available and describes it as a lovely patio area decorated with string lights and a relaxed ambiance.
+- [ASSISTANT_SAID] Assistant notes that the availability of outdoor seating may depend on the weather and suggests calling ahead to check with the restaurant.

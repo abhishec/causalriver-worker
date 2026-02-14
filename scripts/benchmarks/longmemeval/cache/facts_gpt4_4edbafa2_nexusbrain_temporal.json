@@ -1,0 +1,89 @@
+{
+  "answer_0a00c163_1": [
+    {
+      "fact": "User's favorite BBQ sauce is Sweet Baby Ray's",
+      "type": "preference",
+      "entities": [
+        "Sweet Baby Ray's"
+      ]
+    },
+    {
+      "fact": "User used up their favorite BBQ sauce at a friend's place on June 17th, 2023",
+      "type": "event",
+      "entities": [
+        "June 17th, 2023",
+        "friend's place"
+      ]
+    },
+    {
+      "fact": "User is looking for recommendations on BBQ sauce brands",
+      "type": "preference",
+      "entities": [
+        "BBQ sauce brands"
+      ]
+    },
+    {
+      "fact": "User has been trying out different marinades and seasoning combinations",
+      "type": "preference",
+      "entities": [
+        "marinades",
+        "seasoning combinations"
+      ]
+    },
+    {
+      "fact": "User recently made Korean-style BBQ beef short ribs using a recipe found online",
+      "type": "event",
+      "entities": [
+        "Korean-style BBQ beef short ribs",
+        "recipe"
+      ]
+    },
+    {
+      "fact": "User is interested in trying out new flavors for Korean-style BBQ",
+      "type": "preference",
+      "entities": [
+        "Korean-style BBQ",
+        "new flavors"
+      ]
+    }
+  ],
+  "answer_0a00c163_2": [
+    {
+      "fact": "User loves Sweet Baby Ray's BBQ sauce",
+      "type": "preference",
+      "entities": [
+        "Sweet Baby Ray's"
+      ]
+    },
+    {
+      "fact": "User attended a backyard BBQ party at a colleague's house on June 3rd",
+      "type": "event",
+      "entities": [
+        "backyard BBQ party",
+        "June 3rd"
+      ]
+    },
+    {
+      "fact": "User is looking for new BBQ sauce recommendations",
+      "type": "preference",
+      "entities": [
+        "BBQ sauce"
+      ]
+    },
+    {
+      "fact": "User is interested in trying different BBQ sauce brands",
+      "type": "preference",
+      "entities": [
+        "BBQ sauce brands"
+      ]
+    },
+    {
+      "fact": "User is familiar with Kansas City Masterpiece and Gates BBQ Sauce",
+      "type": "preference",
+      "entities": [
+        "Kansas City Masterpiece",
+        "Gates BBQ Sauce"
+      ]
+    }
+  ]
+}

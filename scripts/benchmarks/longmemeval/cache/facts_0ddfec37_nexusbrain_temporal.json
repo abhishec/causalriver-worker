@@ -1,0 +1,98 @@
+{
+  "answer_a22b654d_1": [
+    {
+      "fact": "User has a collection of autographed baseballs.",
+      "type": "personal",
+      "entities": [
+        "autographed baseballs"
+      ]
+    },
+    {
+      "fact": "User has 15 autographed baseballs in their collection.",
+      "type": "personal",
+      "entities": [
+        "15 autographed baseballs"
+      ]
+    },
+    {
+      "fact": "User started collecting baseballs three months ago.",
+      "type": "event",
+      "entities": [
+        "three months ago"
+      ]
+    },
+    {
+      "fact": "User is interested in error coins.",
+      "type": "preference",
+      "entities": [
+        "error coins"
+      ]
+    },
+    {
+      "fact": "User is looking for upcoming coin shows in their area.",
+      "type": "preference",
+      "entities": [
+        "coin shows"
+      ]
+    },
+    {
+      "fact": "User is thinking of expanding their vinyl record collection.",
+      "type": "preference",
+      "entities": [
+        "vinyl record collection"
+      ]
+    },
+    {
+      "fact": "User wants to include more international pressings in their vinyl collection.",
+      "type": "preference",
+      "entities": [
+        "international pressings"
+      ]
+    },
+    {
+      "fact": "User is looking for resources to find rare records from Japan.",
+      "type": "preference",
+      "entities": [
+        "rare records",
+        "Japan"
+      ]
+    }
+  ],
+  "answer_a22b654d_2": [
+    {
+      "fact": "User has a collection of sports memorabilia.",
+      "type": "personal",
+      "entities": [
+        "sports memorabilia"
+      ]
+    },
+    {
+      "fact": "User added 20 autographed baseballs to their collection in the past few months.",
+      "type": "event",
+      "entities": [
+        "20 autographed baseballs"
+      ]
+    },
+    {
+      "fact": "User is looking for information on upcoming sports memorabilia auctions in their city.",
+      "type": "preference",
+      "entities": [
+        "sports memorabilia auctions"
+      ]
+    },
+    {
+      "fact": "User is considering selling some of their vinyl records to make space in their collection.",
+      "type": "preference",
+      "entities": [
+        "vinyl records"
+      ]
+    },
+    {
+      "fact": "User is interested in determining the value of their vinyl records.",
+      "type": "preference",
+      "entities": [
+        "vinyl records"
+      ]
+    }
+  ]
+}

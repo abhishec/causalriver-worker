@@ -1,0 +1,27 @@
+**Observation Log**
+
+- [TEMPORAL] Session Date: 2023/03/02 (Thu) 12:22
+- [EVENT] User is thinking of restocking their candle inventory.
+- [FACT] User earned around $150 from the Handmade and Local Market at the brewery downtown on April 16th.
+- [ASSISTANT_SAID] Assistant congratulated the user on a successful day at the market and offered to help calculate how many candles to restock based on recent sales.
+- [ASSISTANT_SAID] Assistant requested information on average daily sales, average sale per candle, desired inventory level, and lead time for restocking.
+- [FACT] User's candles are usually priced around $15 each.
+- [PREFERENCE] User would like to keep around 100 candles in stock.
+- [FACT] It usually takes the user about 2 weeks to restock candles.
+- [ASSISTANT_SAID] Assistant calculated that the user sold 10 candles on April 16th based on the $150 sales figure.
+- [ASSISTANT_SAID] Assistant calculated total sales for the lead time (2 weeks) as 140 candles (10 candles/day × 14 days).
+- [ASSISTANT_SAID] Assistant added the desired inventory level to the total sales for the lead time, resulting in a total of 240 candles needed to restock.
+- [ASSISTANT_SAID] Assistant recommended making approximately 240 candles to restock the inventory.
+- [EVENT] User sold 15 candles at the Downtown Farmers Market on May 14th.
+- [ASSISTANT_SAID] Assistant suggested considering the May 14th sale when calculating production and discussed whether the April 16th sale was a better representation of average daily sales.
+- [FACT] User sold 15 candles at a bigger event (Downtown Farmers Market).
+- [ASSISTANT_SAID] Assistant calculated a new average daily sales figure of 12.5 candles based on both sales events.
+- [ASSISTANT_SAID] Assistant suggested adjusting production upward by 10-20% based on the potential for higher sales at bigger events.
+- [ASSISTANT_SAID] Assistant provided a new production target of 264-288 candles to account for potential increased sales.
+- [EVENT] User is thinking of restocking their soap inventory.
+- [ASSISTANT_SAID] Assistant requested information on average daily soap sales, soap price, desired soap inventory level, and lead time to restock.
+- [FACT] User sold 8 soaps at the St. Patrick's Day Market in March.
+- [FACT] User sells soaps for $8 each.
+- [PREFERENCE] User would like to keep around 50 soaps in stock.
+- [FACT] It usually takes the user about 1.5 weeks to restock soaps.
+- [ASSISTANT_SA

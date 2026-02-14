@@ -1,0 +1,21 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/25 (Thu) 14:02  
+[ASSISTANT_SAID] The modeling methodology employed included the use of 20% of the dataset for the testing phase.  
+[ASSISTANT_SAID] The initial model created for simulating the Irrigation Water Quality Index (IWQI) utilized 6 parameters as inputs.  
+[ASSISTANT_SAID] Based on the results of the mutual information (MI), the number of inputs was reduced to 3 parameters.  
+[ASSISTANT_SAID] Cross-validation was carried out using cv=RepeatedKFold(n_splits=10, n_repeats=3, random_state=1).  
+[ASSISTANT_SAID] The target variable in the model represented the classes of the IWQI.  
+[ASSISTANT_SAID] The methodology aimed to create an accurate and efficient model for predicting the IWQI classes based on a reduced number of inputs.  
+[USER] Requested another description paragraph of their modeling methodology with more details, specifically to add gridsearch as a hyperparameter tuning method.  
+[ASSISTANT_SAID] In the modeling methodology, 20% of the dataset was reserved for the testing phase.  
+[ASSISTANT_SAID] Initially, six parameters were used as inputs to create an ML model simulating the IWQI.  
+[ASSISTANT_SAID] The number of input parameters was reduced to three based on Mutual Information (MI) results.  
+[ASSISTANT_SAID] Cross-validation with cv=RepeatedKFold(n_splits=10, n_repeats=3, random_state=1) was used.  
+[ASSISTANT_SAID] GridSearch was employed as a hyperparameter tuning method to optimize model performance.  
+[ASSISTANT_SAID] The target variable represented the classes of IWQI, and the final model was evaluated based on accuracy, precision, recall, and F1-score.  
+[USER] Asked for an explanation of the false positive rate as if explaining to a 5-year-old.  
+[ASSISTANT_SAID] Explained false positive rate using a game of catch analogy, where a false positive is when someone thinks a ball is thrown to them, but it wasn't.  
+[USER] Mentioned employing several ML models on their dataset and asked for the best way to represent findings in the results and discussion section, requesting details and best plots.  
+[ASSISTANT_SAID] Suggested creating a table or figure summarizing the results, including model names and evaluation metrics like accuracy, precision, recall, F1-score, and ROC curve values.  
+[ASSISTANT_SAID] Recommended using a bar chart or heatmap to visualize performance and a ROC curve to show the tradeoff between true positive rate and false positive rate.

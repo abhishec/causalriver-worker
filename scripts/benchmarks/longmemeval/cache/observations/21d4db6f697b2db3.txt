@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[FACT] The user is interested in teaching cooking classes to middle school students aged 12-16.
+
+[PREFERENCE] The user prefers not to use quizzes for assessing foundational knowledge, as they believe quizzes only enable short-term recall rather than long-term memorization.
+
+[ASSISTANT_SAID] The assistant provided an explanation of the Undoing instructional strategy, stating that it helps learners learn better by challenging commonly mistaken foundational ideas and assumptions.
+
+[ASSISTANT_CREATED] The assistant created an undoing activity scenario involving Sarah making a healthy sandwich, with options regarding bread choices.
+
+[ASSISTANT_SAID] The assistant provided feedback for each potential response in the undoing activity, explaining misconceptions and the correct understanding of healthy bread choices.
+
+[ASSISTANT_SAID] The assistant suggested a resource titled "How to Make Healthy Sandwiches" on the American Heart Association website.
+
+[USER] The user requested another similar activity and asked for a link or proper citation information for the resource.
+
+[ASSISTANT_CREATED] The assistant created a second undoing activity scenario involving Liam choosing between olive oil and butter for cooking vegetables.
+
+[ASSISTANT_SAID] The assistant provided feedback for each potential response in the second undoing activity, clarifying misconceptions and the correct understanding of healthy cooking oils.
+
+[ASSISTANT_SAID] The assistant suggested a resource titled "Healthy Cooking Oils" on Healthline, providing a specific URL: <https://www.healthline.com/nutrition/healthy-cooking-oils>.
+
+[TEMPORAL] The session date is 2023/05/28 (Sun) 19:33.

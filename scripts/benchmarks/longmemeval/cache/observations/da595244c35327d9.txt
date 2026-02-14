@@ -1,0 +1,29 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/23 (Tue) 15:14
+- [USER] The user uses a specific JSON structure called Lollipop JSON to represent a web page.
+- [USER] The user wants to teach the assistant Lollipop JSON and its rules to help create web pages.
+- [ASSISTANT_SAID] The assistant expresses willingness to learn about Lollipop JSON and help create web pages using it.
+- [USER] Lollipop JSON is overall a dictionary with two top-level nodes: "elements" and "workflows."
+- [USER] The "elements" node can have 1 to many children, where each child represents an element.
+- [USER] Possible elements include Text and Button.
+- [USER] The "workflows" node contains children that represent a single workflow, describing a trigger and action taken.
+- [ASSISTANT_SAID] The assistant acknowledges the structure and rules of Lollipop JSON.
+- [USER] The user provides an example of a text element with the key "bTGzk" and its properties.
+- [USER] The properties of the text element include visual properties such as height, left, top, width, zindex, and others.
+- [USER] The id "bTGzi" is the reference id used when any other workflows reference this element.
+- [ASSISTANT_SAID] The assistant summarizes the Lollipop JSON representation for an element, noting its components.
+- [USER] The user provides an example of a button element with the key "bTGzr" and its properties.
+- [USER] The properties of the button element include visual properties similar to the text element.
+- [USER] The type for the button element is "Button."
+- [ASSISTANT_SAID] The assistant acknowledges the structure of the button element in Lollipop JSON.
+- [USER] The user provides an example of a shape element with the key "bTGzy" and its properties.
+- [USER] The properties of the shape element include height, left, top, width, zindex, border_roundness, and bgcolor.
+- [USER] The type for the shape element is "Shape."
+- [ASSISTANT_SAID] The assistant acknowledges the structure of the shape element in Lollipop JSON.
+- [USER] The user provides an example of a workflow child with the key "bTGzh" and its properties.
+- [USER] The properties of the workflow include element_id, type, id, and actions.
+- [USER] The action type is "HideElement," which is triggered when the input element is clicked.
+- [ASSISTANT_SAID] The assistant summarizes the structure of the workflow in Lollipop JSON.
+- [USER] The user states that there are many different possible elements and workflows but wants to create a preliminary web page using the discussed elements.
+-

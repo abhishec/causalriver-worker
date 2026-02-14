@@ -1,0 +1,182 @@
+{
+  "answer_fa526fc0_3": [
+    {
+      "fact": "User is planning a baby gift for their aunt's twins, Ava and Lily.",
+      "type": "event",
+      "entities": [
+        "baby gift",
+        "aunt",
+        "twins",
+        "Ava",
+        "Lily"
+      ]
+    },
+    {
+      "fact": "User's aunt has twins who were born in April.",
+      "type": "personal",
+      "entities": [
+        "aunt",
+        "twins",
+        "April"
+      ]
+    },
+    {
+      "fact": "User has chosen to buy twin baby carriers and a diaper cake as gifts.",
+      "type": "preference",
+      "entities": [
+        "twin baby carriers",
+        "diaper cake"
+      ]
+    }
+  ],
+  "answer_fa526fc0_4": [
+    {
+      "fact": "User is trying to get organized and keep track of birthdays and milestones.",
+      "type": "preference",
+      "entities": [
+        "organization",
+        "birthdays",
+        "milestones"
+      ]
+    },
+    {
+      "fact": "User has a friend from college named David.",
+      "type": "relationship",
+      "entities": [
+        "David"
+      ]
+    },
+    {
+      "fact": "User's friend David had a baby boy named Jasper a few weeks ago.",
+      "type": "event",
+      "entities": [
+        "Jasper",
+        "David"
+      ]
+    },
+    {
+      "fact": "User prefers to use Google Calendar for work and personal appointments.",
+      "type": "preference",
+      "entities": [
+        "Google Calendar"
+      ]
+    },
+    {
+      "fact": "User plans to add a separate calendar for friends and family birthdays in Google Calendar.",
+      "type": "preference",
+      "entities": [
+        "friends and family birthdays",
+        "Google Calendar"
+      ]
+    }
+  ],
+  "answer_fa526fc0_1": [
+    {
+      "fact": "User is planning a baby gift for a friend's upcoming baby shower.",
+      "type": "event",
+      "entities": [
+        "baby gift",
+        "friend",
+        "baby shower"
+      ]
+    },
+    {
+      "fact": "User is considering a personalized blanket as a gift.",
+      "type": "preference",
+      "entities": [
+        "personalized blanket"
+      ]
+    },
+    {
+      "fact": "User's cousin Rachel just had a baby boy named Max in March.",
+      "type": "relationship",
+      "entities": [
+        "cousin Rachel",
+        "baby boy Max"
+      ]
+    },
+    {
+      "fact": "User attended Rachel's baby shower in February.",
+      "type": "event",
+      "entities": [
+        "baby shower",
+        "February"
+      ]
+    },
+    {
+      "fact": "User finds it exciting to receive thoughtful gifts.",
+      "type": "opinion",
+      "entities": [
+        "thoughtful gifts"
+      ]
+    },
+    {
+      "fact": "User thinks a custom design with the baby's name and initials would be a great idea.",
+      "type": "preference",
+      "entities": [
+        "custom design",
+        "baby's name",
+        "initials"
+      ]
+    }
+  ],
+  "answer_fa526fc0_2": [
+    {
+      "fact": "User is planning a get-together with friends.",
+      "type": "event",
+      "entities": [
+        "get-together",
+        "friends"
+      ]
+    },
+    {
+      "fact": "User wants to have the latest updates on their friends' kids.",
+      "type": "preference",
+      "entities": [
+        "friends",
+        "kids"
+      ]
+    },
+    {
+      "fact": "User knows that Mike and Emma welcomed their first baby, a girl named Charlotte.",
+      "type": "relationship",
+      "entities": [
+        "Mike",
+        "Emma",
+        "Charlotte"
+      ]
+    },
+    {
+      "fact": "User is considering hosting a potluck dinner.",
+      "type": "event",
+      "entities": [
+        "potluck dinner"
+      ]
+    },
+    {
+      "fact": "User is thinking about having a 'kids' corner' or play area for the little ones.",
+      "type": "preference",
+      "entities": [
+        "kids' corner",
+        "play area"
+      ]
+    },
+    {
+      "fact": "User plans to ask friends about their preferences for the kids' area in the invitation.",
+      "type": "opinion",
+      "entities": [
+        "friends",
+        "invitation"
+      ]
+    },
+    {
+      "fact": "User intends to invite David and his wife, who just had their third child, a baby boy named Jasper.",
+      "type": "relationship",
+      "entities": [
+        "David",
+        "wife",
+        "Jasper"
+      ]
+    }
+  ]
+}

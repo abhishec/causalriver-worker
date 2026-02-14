@@ -1,0 +1,23 @@
+**Observation Log:**
+
+- [FACT] User is planning a trip to New Zealand and Australia next year.
+- [PREFERENCE] User is interested in guided hikes and outdoor adventures.
+- [TEMPORAL] User is thinking of spending at least two weeks in each country.
+- [EVENT] User recently returned from a family vacation in Cancun, Mexico.
+- [EVENT] User went on a solo trip to Portland, Oregon from May 28th to 31st to attend a friend's wedding.
+- [PREFERENCE] User had an amazing time exploring Portland.
+- [ASSISTANT_SAID] Recommended tour companies for guided hikes in New Zealand: Macpac Adventures, Ultimate Hikes, Hiking New Zealand, Kiwi Wilderness Walks, Active Adventures.
+- [ASSISTANT_SAID] Recommended tour companies for guided hikes in Australia: Australian Walking Holidays, Trek Tours Australia, Aurora Expeditions, World Expeditions, Intrepid Travel.
+- [ASSISTANT_SAID] Suggested spending at least two weeks in each country to experience the outdoors and local culture.
+- [ASSISTANT_SAID] Recommended visiting during the shoulder season (March to May or September to November) to avoid crowds and enjoy comfortable weather.
+- [PREFERENCE] User is looking for recommendations on must-try food and drinks in New Zealand and Australia.
+- [EVENT] User tried Voodoo Doughnut for the first time in Portland and had the famous Voodoo Doll doughnut.
+- [ASSISTANT_SAID] Recommended must-try foods and drinks in New Zealand: Pavlova, Fish and Chips, Lamb, Hangi, Kiwifruit, Hokey Pokey Ice Cream, Flat White Coffee.
+- [ASSISTANT_SAID] Recommended must-try foods and drinks in Australia: Meat Pie, Flat White Coffee, Vegemite on Toast, Lamington, Chiko Rolls, Tim Tams, Barbie Snags.
+- [ASSISTANT_SAID] Suggested unique food experiences in New Zealand: Rotorua Night Markets, The Fishbone Bar in Napier, The Crab Shack in Auckland.
+- [ASSISTANT_SAID] Suggested unique food experiences in Australia: Melbourne's Queen Victoria Market, The Boathouse in Melbourne.
+- [PREFERENCE] User is interested in visiting local markets and trying street food.
+- [FACT] User stayed in the Hawthorne neighborhood in Portland, which had cool cafes and vintage shops.
+- [ASSISTANT_SAID] Recommended neighborhoods in New Zealand: Wellington's Cuba Street, Auckland's Ponsonby Road, Christchurch's Riccarton Market, Queenstown's Lakefront Market.
+- [ASSISTANT_SAID] Recommended neighborhoods in Australia: Melbourne's Fitzroy, Sydney's Newtown, Brisbane's West End, Perth's Fremantle Markets.
+- [ASSISTANT_SAID] Suggested popular markets to visit: Auckland's La Cigale French Market, Melbourne

@@ -1,0 +1,18 @@
+{
+  "answer_sharegpt_CaxTGYP_0": [
+    {
+      "fact": "User is interested in making a wide variety of cocktails",
+      "type": "preference",
+      "entities": [
+        "cocktails"
+      ]
+    },
+    {
+      "fact": "User is interested in making a wide variety of gin-based cocktails",
+      "type": "preference",
+      "entities": [
+        "gin-based cocktails"
+      ]
+    }
+  ]
+}

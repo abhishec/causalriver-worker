@@ -38,6 +38,13 @@ import type { AgentConfig, FetchResult, ConvertResult, TrainResult, AgentRunResu
 import type { TrainingPack } from '../../packages/memory-stack/src/learning/brain-trainer';
 import type { ConnectorSignal } from '../../packages/memory-stack/src/connectors/connector-framework';
 
+// ── Comprehensive Brain Initialization (ALL 93+ systems) ────────────────────
+import {
+  ComprehensiveBrainInitializer,
+  type ComprehensiveBrainConfig,
+  type ComprehensiveBrainInitResult,
+} from './comprehensive-brain-init';
+
 // ── Manus Imports (Motor Command Engine + Calibration Loop) ────────────────
 import {
   createMotorCommandEngine,
@@ -132,7 +139,7 @@ export interface AgentCalibrationMetrics {
 }
 
 /**
- * Extended run result with Manus + OpenClaw capabilities
+ * Extended run result with Manus + OpenClaw + Comprehensive Brain capabilities
  */
 export interface ManusAgentRunResult extends AgentRunResult {
   /** Motor command execution results */
@@ -150,6 +157,15 @@ export interface ManusAgentRunResult extends AgentRunResult {
     registered: boolean;
     agentName: string;
     capabilities: string[];
+  } | null;
+  /** Comprehensive brain initialization stats (93+ systems) */
+  comprehensiveBrainStats: {
+    totalSystems: number;
+    initialized: number;
+    skipped: number;
+    failed: number;
+    initTimeMs: number;
+    categoriesEnabled: string[];
   } | null;
 }
 
@@ -224,6 +240,10 @@ export abstract class ManusNativeAgent extends BrainNativeAgent {
   // ── Manus configuration ──
   protected manusConfig: ManusCapabilitiesConfig;
 
+  // ── Comprehensive Brain Initializer (93+ systems) ──
+  protected brainInitializer: ComprehensiveBrainInitializer;
+  protected comprehensiveBrain?: ComprehensiveBrainInitResult;
+
   // ── Manus subsystem instances (lazy-initialized) ──
   protected motorCommandEngine?: MotorCommandEngine;
   protected calibrationLoop?: CalibrationFeedbackLoop;
@@ -248,6 +268,9 @@ export abstract class ManusNativeAgent extends BrainNativeAgent {
       maxMotorCommandsPerBatch: config.maxMotorCommandsPerBatch ?? 10,
       logMotorCommandsToSignals: config.logMotorCommandsToSignals ?? true,
     };
+
+    // Initialize comprehensive brain initializer
+    this.brainInitializer = new ComprehensiveBrainInitializer();
   }
 
   // ============================================================================
@@ -255,82 +278,122 @@ export abstract class ManusNativeAgent extends BrainNativeAgent {
   // ============================================================================
 
   /**
-   * Initialize Manus subsystems before brain regions.
-   * This is called automatically before initializeBrainRegions().
+   * Initialize ALL brain systems using ComprehensiveBrainInitializer.
+   * This replaces the old 11-region manual init with 93+ system auto-discovery.
+   * Called automatically before initializeBrainRegions().
    */
   protected async initializeManusSubsystems(): Promise<void> {
-    this.divider('INITIALIZING MANUS SUBSYSTEMS');
+    this.divider('INITIALIZING COMPREHENSIVE BRAIN (93+ SYSTEMS)');
 
-    // Motor Command Engine (brain can ACT)
-    if (this.manusConfig.enableMotorCommands) {
-      this.motorCommandEngine = createMotorCommandEngine({
-        autoExecuteThreshold: this.manusConfig.motorCommandAutoExecuteThreshold,
-        maxCommandsPerBatch: this.manusConfig.maxMotorCommandsPerBatch,
-        defaultTimeoutMs: 30000,
-        logToSignals: this.manusConfig.logMotorCommandsToSignals,
-        verbose: this.brainConfig.verbose || false,
-      });
-      this.log('MANUS', 'Motor Command Engine initialized (brain can ACT)');
+    // Build comprehensive brain config
+    const comprehensiveConfig: ComprehensiveBrainConfig = {
+      supabase: this.supabase,
+      organizationId: this.organizationId,
+      verbose: this.brainConfig.verbose || false,
+
+      // Enable all categories by default
+      enableAll: true,
+      enableAllLearning: true,
+      enableAllOrchestration: true,
+      enableAllCausality: true,
+      enableAllPersistence: true,
+      enableAllBridges: true,
+      enableAllCoreInfra: true,
+      enableAllCodeIntelligence: true,
+      enableAllIntelligence: true,
+      enableAllObservability: true,
+      enableAllInfrastructure: true,
+
+      // Opt-in categories (require credentials or specific config)
+      enableAllConnectors: false, // Requires API keys
+      enableAllFederation: false, // Opt-in
+      enableAllBenchmarks: false, // Opt-in
+
+      // LLM config (if available)
+      llmProvider: process.env.ANTHROPIC_API_KEY ? 'anthropic' : 'openai',
+      llmApiKey: process.env.ANTHROPIC_API_KEY || process.env.OPENAI_API_KEY,
+
+      // Connector credentials (if available)
+      slackToken: process.env.SLACK_TOKEN,
+      githubToken: process.env.GITHUB_TOKEN,
+      hubspotApiKey: process.env.HUBSPOT_API_KEY,
+      stripeApiKey: process.env.STRIPE_API_KEY,
+      fredApiKey: process.env.FRED_API_KEY,
+
+      // Performance tuning
+      maxConcurrentInitializations: 10,
+      initializationTimeoutMs: 30000,
+      dependencyMode: 'lenient', // Continue on failures
+
+      // Granular opt-out (if needed)
+      disabledSystems: [],
+    };
+
+    // Initialize ALL brain systems
+    const startTime = Date.now();
+    this.comprehensiveBrain = await this.brainInitializer.initializeAll(comprehensiveConfig);
+    const initTimeMs = Date.now() - startTime;
+
+    // Log comprehensive initialization results
+    this.log('BRAIN', `Initialized ${this.comprehensiveBrain.initialized}/${this.comprehensiveBrain.totalSystems} systems in ${initTimeMs}ms`);
+
+    if (this.comprehensiveBrain.skipped > 0) {
+      this.log('BRAIN', `Skipped: ${this.comprehensiveBrain.skipped} systems`);
     }
 
-    // Calibration Feedback Loop (learn from outcomes)
-    if (this.manusConfig.enableCalibration) {
-      this.calibrationLoop = createCalibrationFeedbackLoop({
-        supabase: this.supabase,
-        organizationId: this.organizationId,
-        lookbackDays: 30,
-        verbose: this.brainConfig.verbose || false,
-      });
-      this.log('MANUS', 'Calibration Feedback Loop initialized (self-improving)');
+    if (this.comprehensiveBrain.failed > 0) {
+      this.log('BRAIN', `Failed: ${this.comprehensiveBrain.failed} systems`);
+      if (this.brainConfig.verbose) {
+        const failures = this.comprehensiveBrain.systems.filter(s => s.status === 'failed');
+        for (const failure of failures) {
+          this.log('BRAIN', `  ✗ ${failure.name}: ${failure.error}`);
+        }
+      }
     }
 
-    // Agent Registry (Manus workforce composition)
-    if (this.manusConfig.enableAgentRegistry) {
-      this.agentRegistry = createAgentRegistry({
-        supabase: this.supabase,
-        organizationId: this.organizationId,
-      });
-      // Register this agent
-      await this.agentRegistry.registerAgent({
-        agentId: this.name,
-        agentType: 'training_agent',
-        capabilities: this.getCapabilities(),
-        status: 'active',
-        metadata: {
-          version: this.version,
-          description: this.description,
-          brainRegion: this.brainRegion,
-          neurologicalFunction: this.neurologicalFunction,
-        },
-      });
-      this.log('MANUS', `Agent registered in workforce: ${this.name}`);
+    // Extract key Manus subsystems from comprehensive brain
+    this.motorCommandEngine = this.brainInitializer.getSystem('motorCommandEngine');
+    this.calibrationLoop = this.brainInitializer.getSystem('calibrationFeedbackLoop');
+    this.agentRegistry = this.brainInitializer.getSystem('agentRegistry');
+    this.brainPipeline = this.brainInitializer.getSystem('brainPipeline');
+    this.domainActionEngine = this.brainInitializer.getSystem('domainActionEngine');
+
+    // Register this agent in the agent registry (if it has the right interface)
+    if (this.agentRegistry && this.manusConfig.enableAgentRegistry) {
+      try {
+        if (typeof (this.agentRegistry as any).registerAgent === 'function') {
+          await (this.agentRegistry as any).registerAgent({
+            agentId: this.name,
+            agentType: 'training_agent',
+            capabilities: this.getCapabilities(),
+            status: 'active',
+            metadata: {
+              version: this.version,
+              description: this.description,
+              brainRegion: this.brainRegion,
+              neurologicalFunction: this.neurologicalFunction,
+            },
+          });
+          this.log('MANUS', `Agent registered in workforce: ${this.name}`);
+        } else {
+          this.log('MANUS', `Agent registry doesn't support registerAgent() - skipping`);
+        }
+      } catch (err) {
+        this.log('MANUS', `Failed to register agent: ${err}`);
+      }
     }
 
-    // Brain Pipeline Integration (agent is a brain subsystem)
-    if (this.manusConfig.enableBrainPipeline) {
-      this.brainPipeline = createBrainPipeline({
-        supabase: this.supabase,
-        organizationId: this.organizationId,
-        verbose: this.brainConfig.verbose || false,
-      });
-      this.log('MANUS', 'Brain Pipeline integrated (agent is brain subsystem)');
+    // Log category breakdown
+    if (this.brainConfig.verbose) {
+      this.log('BRAIN', 'Category breakdown:');
+      const stats = this.brainInitializer.getStats();
+      for (const [category, count] of Object.entries(stats.byCategory)) {
+        const categoryInitialized = Object.keys(this.brainInitializer.getCategory(category)).length;
+        this.log('BRAIN', `  ${category}: ${categoryInitialized}/${count} initialized`);
+      }
     }
 
-    // OpenClaw (execute playbooks)
-    if (this.manusConfig.enableOpenClaw) {
-      this.domainActionEngine = createDomainActionEngine({
-        supabase: this.supabase,
-        organizationId: this.organizationId,
-        llmConfig: this.llmAmplifier ? {
-          provider: process.env.ANTHROPIC_API_KEY ? 'anthropic' : 'openai',
-          apiKey: process.env.ANTHROPIC_API_KEY || process.env.OPENAI_API_KEY || '',
-        } : undefined,
-        verbose: this.brainConfig.verbose || false,
-      });
-      this.log('MANUS', 'OpenClaw initialized (can execute playbooks)');
-    }
-
-    this.log('MANUS', 'All Manus subsystems initialized ✓');
+    this.log('BRAIN', 'Comprehensive brain initialization complete ✓');
   }
 
   /**
@@ -452,7 +515,7 @@ export abstract class ManusNativeAgent extends BrainNativeAgent {
     await this.initializeManusSubsystems();
     const baseResult = await super.run();
 
-    // Build Manus-extended result
+    // Build Manus-extended result with comprehensive brain stats
     const manusResult: ManusAgentRunResult = {
       ...baseResult,
       motorCommands: this.motorCommandResults,
@@ -467,18 +530,32 @@ export abstract class ManusNativeAgent extends BrainNativeAgent {
         agentName: this.name,
         capabilities: this.getCapabilities(),
       } : null,
+      comprehensiveBrainStats: this.comprehensiveBrain ? {
+        totalSystems: this.comprehensiveBrain.totalSystems,
+        initialized: this.comprehensiveBrain.initialized,
+        skipped: this.comprehensiveBrain.skipped,
+        failed: this.comprehensiveBrain.failed,
+        initTimeMs: this.comprehensiveBrain.initTimeMs,
+        categoriesEnabled: Object.keys(this.brainInitializer.getStats().byCategory),
+      } : null,
     };
 
-    // Report to brain pipeline
+    // Report to brain pipeline (if it has the right interface)
     if (this.brainPipeline) {
-      await this.brainPipeline.recordAgentRun({
-        agentId: this.name,
-        status: manusResult.errorsEncountered.length === 0 ? 'success' : 'partial',
-        durationMs: manusResult.completedAt.getTime() - manusResult.startedAt.getTime(),
-        signalsGenerated: manusResult.signalsGenerated,
-        packsProcessed: manusResult.packsProcessed,
-        errors: manusResult.errorsEncountered,
-      });
+      try {
+        if (typeof (this.brainPipeline as any).recordAgentRun === 'function') {
+          await (this.brainPipeline as any).recordAgentRun({
+            agentId: this.name,
+            status: manusResult.errorsEncountered.length === 0 ? 'success' : 'partial',
+            durationMs: manusResult.completedAt.getTime() - manusResult.startedAt.getTime(),
+            signalsGenerated: manusResult.signalsGenerated,
+            packsProcessed: manusResult.packsProcessed,
+            errors: manusResult.errorsEncountered,
+          });
+        }
+      } catch (err) {
+        this.log('BRAIN', `Failed to record agent run: ${err}`);
+      }
     }
 
     return manusResult;
@@ -514,7 +591,54 @@ export abstract class ManusNativeAgent extends BrainNativeAgent {
     if (this.manusConfig.enableOpenClaw) capabilities.push('openclaw');
     if (this.brainRegion) capabilities.push(`brain_region:${this.brainRegion}`);
 
+    // Add comprehensive brain capabilities
+    if (this.comprehensiveBrain) {
+      capabilities.push(`brain_systems:${this.comprehensiveBrain.initialized}`);
+    }
+
     return capabilities;
+  }
+
+  // ============================================================================
+  // BRAIN SYSTEM ACCESS (for subclasses)
+  // ============================================================================
+
+  /**
+   * Get any initialized brain system by name.
+   * Provides access to ALL 93+ brain systems initialized by ComprehensiveBrainInitializer.
+   *
+   * @example
+   * ```typescript
+   * // Access any brain system
+   * const eventBus = this.getBrainSystem('eventBus');
+   * const causalGraph = this.getBrainSystem('causalGraphBuilder');
+   * const semanticSearch = this.getBrainSystem('semanticSearch');
+   * ```
+   */
+  protected getBrainSystem<T = any>(systemName: string): T | null {
+    return this.brainInitializer.getSystem<T>(systemName);
+  }
+
+  /**
+   * Get all systems in a category.
+   *
+   * @example
+   * ```typescript
+   * // Access all learning systems
+   * const learningSystems = this.getBrainCategory('learning');
+   * // Access all causality systems
+   * const causalitySystems = this.getBrainCategory('causality');
+   * ```
+   */
+  protected getBrainCategory<T = any>(category: string): Record<string, T> {
+    return this.brainInitializer.getCategory<T>(category);
+  }
+
+  /**
+   * Get comprehensive brain statistics.
+   */
+  protected getBrainStats() {
+    return this.brainInitializer.getStats();
   }
 
   // ============================================================================

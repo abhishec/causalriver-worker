@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [CHANGE] User is updating their last name to Thompson.
+- [EVENT] User is trying to update their social media profiles.
+- [ASSISTANT_SAID] To update Facebook, user should log in, click on the downward arrow, go to "Settings," then "Account Settings," click "Edit" next to "Name," enter "Thompson," confirm with password, and click "Save Changes."
+- [ASSISTANT_SAID] To update Instagram, user should open the app, tap the profile icon, tap the three horizontal lines, select "Account," tap "Edit Profile," edit the "Name" field to "Thompson," and tap "Done."
+- [ASSISTANT_SAID] User should ensure they are logged into the correct accounts on both platforms before making changes.
+- [ASSISTANT_SAID] If having trouble updating Facebook, user might need to wait a few days due to Facebook's name change policy.
+- [ASSISTANT_SAID] User can update their Instagram username separately from their display name.
+- [EVENT] User also needs to update their LinkedIn profile.
+- [ASSISTANT_SAID] To update LinkedIn, user should log in, click on their profile picture, select "View profile," click "Edit public profile & URL," scroll to "Name," click the pencil icon, enter "Thompson," and click "Save."
+- [ASSISTANT_SAID] User should consider updating their LinkedIn headline and summary to reflect their new last name.
+- [ASSISTANT_SAID] User should send a message or post an update on LinkedIn to inform connections about their name change.
+- [EVENT] User wants to update their email address associated with their accounts.
+- [ASSISTANT_SAID] To update Facebook email, user should log in, go to "Settings," click "Account Settings," then "Contact," click "Edit" next to "Email," enter the new email, confirm with password, and click "Save Changes."
+- [ASSISTANT_SAID] To update Instagram email, user should open the app, tap the profile icon, tap the three horizontal lines, select "Account," tap "Edit Profile," enter the new email, and tap "Done."
+- [ASSISTANT_SAID] To update LinkedIn email, user should log in, click on their profile picture, select "Settings & Privacy," click "Account," then "Email & password," click the pencil icon next to "Email address," enter the new email, and click "Save."
+- [ASSISTANT_SAID] User should ensure they have access to the new email address for verification.
+- [ASSISTANT_SAID] User should update their email address on other online accounts to ensure they receive important notifications.
+- [ASSISTANT_SAID] User should set up

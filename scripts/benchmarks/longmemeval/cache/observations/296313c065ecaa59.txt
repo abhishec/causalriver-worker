@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/21 (Sun) 15:26  
+[FACT] User is participating in a role-playing game as a character named Samuel O'zu.  
+[FACT] Samuel O'zu is a 30-year-old human Jedi.  
+[EVENT] The game scenario takes place inside the Jedi Temple during the enactment of Order 66.  
+[ASSISTANT_SAID] The assistant described a sudden shock through the Force, indicating something is very wrong.  
+[ASSISTANT_SAID] The assistant mentioned that several other Jedi, including younglings, are panicking in the temple.  
+[ASSISTANT_SAID] The sound of blasters can be heard echoing through the halls, indicating grave danger.  
+[FACT] Samuel O'zu carries a lightsaber with him.  
+[ASSISTANT_SAID] The assistant provided five options for actions Samuel O'zu could take:  
+1. Look for other Jedi to team up with and try to escape together  
+2. Fight off the clone troopers and try to hold out until reinforcements arrive  
+3. Sneak out of the temple undetected and try to find a way to warn other Jedi  
+4. (Risky) Try to reason with the clone troopers and convince them not to follow Order 66  
+5. (Risky) Surrender to the clone troopers and try to reason with them from a position of captivity  
+[FACT] User chose option "D," which is not a valid option.  
+[ASSISTANT_SAID] The assistant described the scene after the user's choice, stating that Samuel O'zu looks around the room to find a way out without being detected.  
+[ASSISTANT_SAID] The assistant mentioned that the younglings are huddled together, crying and trembling with fear.  
+[ASSISTANT_SAID] The assistant noted that the door to the room is locked from the outside and the window is too high to reach.  
+[ASSISTANT_SAID] The assistant indicated that a group of clone troopers is approaching, searching the temple for surviving Jedi.  
+[ASSISTANT_SAID] The assistant prompted the user again with three new options for actions:  
+1. Try to force open the locked door  
+2. Use your lightsaber to cut through the window bars and escape through the window  
+3. Use the Force to levitate the younglings up to the window and escape that way

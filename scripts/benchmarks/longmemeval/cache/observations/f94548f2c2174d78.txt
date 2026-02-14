@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/26 (Fri) 06:50  
+[EVENT] User is thinking of buying a new gaming keyboard.  
+[PREFERENCE] User is looking for a keyboard with customizable lighting and macro capabilities.  
+[ASSISTANT_SAID] Recommended mid-range gaming keyboards include:  
+[ASSISTANT_SAID] 1. Logitech G512 Mechanical Gaming Keyboard: $99, Romer-G switches, customizable lighting, built-in wrist rest.  
+[ASSISTANT_SAID] 2. HyperX Alloy Elite: $99, Kailh Silver Speed switches, customizable lighting, durable aluminum frame.  
+[ASSISTANT_SAID] 3. Corsair K68 RGB Rapidfire: $99, Cherry MX Speed switches, customizable lighting, macro keys.  
+[ASSISTANT_SAID] 4. Razer BlackWidow Lite: $99, Razer's Orange switches, customizable backlighting, macro capabilities.  
+[ASSISTANT_SAID] 5. SteelSeries Apex 7 TKL: $99, SteelSeries' proprietary switches, customizable lighting, durable aluminum frame.  
+[ASSISTANT_SAID] 6. Anne Pro 2: $129, Cherry MX Brown switches, customizable lighting, long-lasting battery life.  
+[ASSISTANT_SAID] 7. Corsair K95 RGB Platinum: $139, Cherry MX Brown switches, customizable lighting, macro keys.  
+[ASSISTANT_SAID] 8. Logitech G Pro X: $149, Romer-G switches, customizable lighting, compact design.  
+[ASSISTANT_SAID] Factors to consider when choosing a keyboard: switch type, customizable lighting, macro capabilities, build quality, and wired/wireless options.  
+[ASSISTANT_SAID] Recommended top 2 keyboards based on user's requirements:  
+[ASSISTANT_SAID] 1. Corsair K68 RGB Rapidfire: $99, customizable RGB lighting, macro capabilities, Cherry MX Speed switches.  
+[ASSISTANT_SAID] 2. Corsair K95 RGB Platinum: $139, customizable RGB lighting, macro capabilities, Cherry MX Brown switches.  
+[PREFERENCE] User is currently using Romer-G switches on their Logitech G512.  
+[ASSISTANT_SAID] Differences between Cherry MX Brown and Cherry MX Speed switches include:  
+[ASSISTANT_SAID] Cherry MX Brown: tactile and clicky, medium actuation force (55g), total travel distance 4mm, suitable for touch typists.  
+[ASSISTANT_SAID] Cherry MX Speed: linear and silent, light actuation force (45g), total travel distance 3.4mm, ideal for fast-paced games.  
+[PREFERENCE] User is curious about the performance difference between the RTX

@@ -1,0 +1,43 @@
+**Observation Log:**
+
+**Session Date:** 2023/05/29 (Mon) 03:22  
+**Session ID:** sharegpt_FQi5DlJ_48
+
+- [ASSISTANT_SAID] The user can add a check before the AJAX call to verify if the `dvdTitle` and `category` variables are empty or null, and use JavaScript's `alert()` method to display an error message.
+- [ASSISTANT_CREATED] The assistant provided a code snippet to check for empty `dvdTitle` and null `category`:
+  ```javascript
+  if(dvdTitle === "" || category === null){
+    alert("Please enter a DVD title and select a category");
+    return;
+  }
+  ```
+- [ASSISTANT_SAID] The user can modify the "View Film Details" button's `href` attribute to point to "filmDetails.html" and pass the `searchResults` data as a query parameter.
+- [ASSISTANT_CREATED] The assistant provided a code snippet to change the `href` attribute:
+  ```javascript
+  <a href="filmDetails.html?searchResults=" + JSON.stringify(searchResults) + `" class="btn btn-primary" class="View">View Film Details</a>
+  ```
+- [ASSISTANT_SAID] The user can access the query parameter in `filmDetails.html` using JavaScript's `URLSearchParams` API and parse the JSON data.
+- [ASSISTANT_CREATED] The assistant provided a code snippet to access the query parameter:
+  ```javascript
+  const urlParams = new URLSearchParams(window.location.search);
+  const searchResults = JSON.parse(urlParams.get("searchResults"));
+  ```
+- [ASSISTANT_SAID] The user can save the data stored in `var user` into session storage when the "View Film Details" button is pressed.
+- [ASSISTANT_CREATED] The assistant provided a code snippet to save `user` into session storage:
+  ```javascript
+  $(".View").on("click", function() {
+      sessionStorage.setItem("selectedFilm", JSON.stringify(user));
+  });
+  ```
+- [ASSISTANT_SAID] The user should insert the click event listener inside the for loop where the cards are appended to ensure the correct `user` data is saved.
+- [ASSISTANT_CREATED] The assistant provided a code snippet to insert the click event listener:
+  ```javascript
+  for (var i = 0; i < searchResults.length; i++) {
+      var user = searchResults[i];
+      // ... card creation code ...
+      $(".View").on("click", function() {
+          sessionStorage.setItem("selectedFilm", JSON.stringify(user));
+      });
+  }
+  ```
+- [ASSISTANT_SAID] The user is experiencing an issue where clicking the "View Film Details" button on different cards results in the same index being saved

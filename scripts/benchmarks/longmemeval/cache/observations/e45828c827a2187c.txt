@@ -1,0 +1,41 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/03/19 (Sun) 16:48
+- [FACT] User has been trying to get into a consistent sleep schedule.
+- [CHANGE] User has been skipping yoga on Fridays and Mondays.
+- [PREFERENCE] User is considering whether to do yoga in the morning instead of the evening.
+- [ASSISTANT_SAID] Establishing a consistent sleep schedule can be challenging; tips provided to help create a bedtime routine.
+- [ASSISTANT_SAID] Tips for a bedtime routine include: 
+  1. Set a consistent sleep schedule.
+  2. Gradually adjust bedtime by 15-30 minutes.
+  3. Create a relaxing bedtime routine (reading, warm bath, meditation, etc.).
+  4. Make the sleep environment comfortable (dark, quiet, cool, clutter-free).
+  5. Limit screen time before bed (at least an hour).
+  6. Avoid stimulating activities before bed (exercise, video games).
+  7. Get morning sunlight.
+  8. Avoid caffeine and heavy meals before bed (4-6 hours).
+  9. Wear comfortable sleepwear.
+  10. Make mornings enjoyable with a positive routine.
+- [ASSISTANT_SAID] User might consider switching to morning yoga if evening practice is inconsistent.
+- [ASSISTANT_SAID] Healthy dinner recipes provided include:
+  1. Quinoa and Black Bean Bowl.
+  2. Baked Salmon with Roasted Vegetables.
+  3. Lentil Soup.
+  4. Veggie Stir-Fry with Tofu.
+  5. Roasted Chicken and Vegetables.
+- [PREFERENCE] User has been watching TV around 8 PM every evening after finishing dinner.
+- [ASSISTANT_SAID] Watching TV before bed can impact sleep quality due to blue light emission, stimulating content, and disrupting bedtime routine.
+- [ASSISTANT_SAID] Suggestions to improve sleep quality include:
+  1. Set a TV curfew (avoid TV at least an hour before bed).
+  2. Use blue light filtering options.
+  3. Choose calming content if watching TV before bed.
+  4. Establish a bedtime routine.
+- [PREFERENCE] User finds it hard to reduce screen time before bed when in the middle of a good show.
+- [ASSISTANT_SAID] User can set reminders on their phone to start winding down for bed.
+- [ASSISTANT_SAID] Suggestions for reminders include:
+  1. Set a specific reminder to wind down.
+  2. Use a bedtime mode on the phone.
+  3. Use apps to track and limit screen time.
+  4. Create a bedtime routine with reminders.
+- [USER] User expressed a desire to ask something else.
+- [ASSIST

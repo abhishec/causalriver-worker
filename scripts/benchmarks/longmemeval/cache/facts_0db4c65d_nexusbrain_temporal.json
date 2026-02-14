@@ -1,0 +1,94 @@
+{
+  "answer_b9e32ff8_1": [
+    {
+      "fact": "User recently finished reading 'The Seven Husbands of Evelyn Hugo' by Taylor Jenkins Reid",
+      "type": "event",
+      "entities": [
+        "The Seven Husbands of Evelyn Hugo",
+        "Taylor Jenkins Reid"
+      ]
+    },
+    {
+      "fact": "User participates in an online book club on Facebook",
+      "type": "relationship",
+      "entities": [
+        "online book club",
+        "Facebook"
+      ]
+    },
+    {
+      "fact": "User is looking for book recommendations similar to 'The Seven Husbands of Evelyn Hugo'",
+      "type": "preference",
+      "entities": [
+        "book recommendations",
+        "The Seven Husbands of Evelyn Hugo"
+      ]
+    },
+    {
+      "fact": "User has been reading a lot lately",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User started a book journal to keep track of what they've read and their thoughts",
+      "type": "personal",
+      "entities": [
+        "book journal"
+      ]
+    },
+    {
+      "fact": "User is always looking to discover new authors and genres",
+      "type": "preference",
+      "entities": [
+        "new authors",
+        "new genres"
+      ]
+    }
+  ],
+  "answer_b9e32ff8_2": [
+    {
+      "fact": "User attended a book reading event at the local library",
+      "type": "event",
+      "entities": [
+        "book reading event",
+        "local library"
+      ]
+    },
+    {
+      "fact": "User is interested in thriller novels",
+      "type": "preference",
+      "entities": [
+        "thriller novels"
+      ]
+    },
+    {
+      "fact": "User has been reading a lot of thrillers lately",
+      "type": "preference",
+      "entities": [
+        "thrillers"
+      ]
+    },
+    {
+      "fact": "User started a book journal in early January",
+      "type": "event",
+      "entities": [
+        "book journal",
+        "January"
+      ]
+    },
+    {
+      "fact": "User is enjoying their book journal",
+      "type": "opinion",
+      "entities": [
+        "book journal"
+      ]
+    },
+    {
+      "fact": "User is looking for new authors to try",
+      "type": "preference",
+      "entities": [
+        "new authors"
+      ]
+    }
+  ]
+}

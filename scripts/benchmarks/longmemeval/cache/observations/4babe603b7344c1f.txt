@@ -1,0 +1,32 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/06/29 (Thu) 17:39  
+[FACT] User has recently started taking a weekly cooking class at a local culinary school that focuses on vegetarian cuisine.  
+[CHANGE] User has been getting into cooking lately and started the cooking class about a month ago.  
+[PREFERENCE] User is looking for new vegetarian recipes to try out.  
+[PREFERENCE] User is particularly interested in exploring Indian-inspired dishes.  
+[EVENT] User made an Indian-inspired feast in their cooking class last week.  
+[ASSISTANT_SAID] Assistant congratulated the user on exploring culinary skills and passion for vegetarian cuisine.  
+[ASSISTANT_SAID] Assistant provided a list of Indian-inspired vegetarian recipes, including:  
+[ASSISTANT_CREATED] 1. Chana Masala  
+[ASSISTANT_CREATED] 2. Saag Aloo  
+[ASSISTANT_CREATED] 3. Vegetable Korma  
+[ASSISTANT_CREATED] 4. Dal Makhani  
+[ASSISTANT_CREATED] 5. Baingan Bharta  
+[ASSISTANT_CREATED] 6. Gobhi Aloo Tikka  
+[ASSISTANT_CREATED] 7. Mattar Paneer  
+[ASSISTANT_CREATED] 8. Vegetable Biryani  
+[ASSISTANT_CREATED] 9. Rajma Masala  
+[ASSISTANT_CREATED] 10. Dosa  
+[PREFERENCE] User is a big fan of coconut milk-based sauces.  
+[ASSISTANT_SAID] Assistant provided a simple recipe for Vegetable Korma, including ingredients and instructions.  
+[ASSISTANT_CREATED] The recipe for Vegetable Korma includes:  
+[ASSISTANT_CREATED] - Ingredients: onions, garlic, ginger, ground cumin, curry powder, ground cinnamon, ground cardamom, cayenne pepper, diced tomatoes, coconut milk, salt, bell pepper, zucchini, carrot, potato, cauliflower, green beans, fresh cilantro.  
+[ASSISTANT_CREATED] - Instructions: Prepare the sauce, add diced tomatoes and coconut milk, prepare the vegetables, combine sauce and vegetables, serve and enjoy.  
+[PREFERENCE] User is interested in adding tofu to the Vegetable Korma recipe to make it more substantial.  
+[ASSISTANT_SAID] Assistant confirmed that adding tofu would work well in the recipe and provided preparation tips for the tofu.  
+[ASSISTANT_SAID] Assistant suggested using extra-firm tofu, coating it in cornstarch, and frying it until golden brown.  
+[ASSISTANT_SAID] Assistant provided tips for incorporating tofu into the korma recipe.  
+[PREFERENCE] User plans to use coconut oil for cooking the tofu and vegetables.  
+[ASSISTANT_SAID] Assistant confirmed that using coconut oil is a good idea and provided pros and cons of using it.  
+[ASSIST

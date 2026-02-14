@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [FACT] User is planning a trip to Legoland Windsor with their family.
+- [EVENT] User attended Legoland Windsor on August 5th with their niece.
+- [PREFERENCE] User had a blast at the park during their previous visit.
+- [EVENT] User is interested in the LEGO Friends Live Show at the LEGO City Stage.
+- [ASSISTANT_SAID] Assistant stated there is no LEGO Friends Live Show at the LEGO City Stage at Legoland Windsor.
+- [ASSISTANT_SAID] Assistant suggested checking the park's website or mobile app for up-to-date information on shows and attractions.
+- [ASSISTANT_SAID] Assistant provided a list of recent attractions at Legoland Windsor, including LEGO Mythica, Duplo Valley, Miniland, and LEGO NINJAGO World.
+- [EVENT] User is considering booking a Q-bot to minimize wait times during their visit.
+- [ASSISTANT_SAID] Assistant explained how the Q-bot system works, including collection, booking, reservation, and return processes.
+- [ASSISTANT_SAID] Assistant listed different types of Q-bots: Q-bot Standard, Q-bot Express, and Q-bot Ultimate.
+- [PREFERENCE] User is interested in whether the Q-bot system would be worth the extra cost for their family, considering they will have kids with them.
+- [ASSISTANT_SAID] Assistant provided pros and cons of using the Q-bot system for families with kids.
+- [EVENT] User is asking about the LEGO Creative Workshop at Legoland Windsor.
+- [ASSISTANT_SAID] Assistant stated there is no specific "LEGO Creative Workshop" at Legoland Windsor and mentioned various LEGO building activities available.
+- [ASSISTANT_SAID] Assistant recommended checking the Legoland Windsor website or mobile app for the most up-to-date information on building activities.
+- [EVENT] User is planning to book a character dining experience at Legoland Windsor.
+- [ASSISTANT_SAID] Assistant described character dining options available at the park, including Character Breakfast, Character Lunch, and LEGO NINJAGO Character Dining.
+- [ASSISTANT_SAID] Assistant advised that character dining experiences are popular and may sell out quickly, recommending to book in advance.
+- [ASSISTANT_SAID] Assistant suggested checking the park's website or social media for updates on new characters or themes in character dining experiences.

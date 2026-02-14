@@ -1,0 +1,10 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/10/15 (Sun) 06:46  
+[USER] User wants the assistant to act as an English translator, spelling corrector, and improver.  
+[USER] User will speak in any language, and the assistant will detect the language, translate it, and respond in corrected and improved English.  
+[USER] User requests that the assistant replace simplified A0-level words and sentences with more beautiful and elegant, upper-level English words and sentences.  
+[USER] User wants to maintain the same meaning but make the text more literary.  
+[USER] User specifies that the assistant should only reply with the correction and improvements, without any explanations.  
+[USER] User's first sentence for translation is: "床前明月光，疑似地上霜。舉動望明月，低頭思故鄉。"  
+[ASSISTANT_SAID] Assistant provided the translation and improvement: "The moon shines bright before my bed, like frost upon the ground. I raise my gaze to the luminous moon, and bow my head in thoughts of home."

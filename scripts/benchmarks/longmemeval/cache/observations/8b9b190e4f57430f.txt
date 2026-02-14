@@ -1,0 +1,18 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/27 (Sat) 02:00  
+[USER] User wants the assistant to act as a market research expert fluent in English.  
+[USER] User requests the assistant to create a full SEO content plan based on the target keyword "art styles."  
+[ASSISTANT_SAID] Assistant is to create a markdown table with a keyword list for an SEO content strategy plan on the topic "art styles."  
+[ASSISTANT_SAID] Assistant is instructed to cluster keywords according to the top 10 super categories and name the super category in the first column called "keyword cluster."  
+[ASSISTANT_SAID] Assistant is to add another column with 7 subcategories for each keyword cluster or specific long-tail keywords for each of the clusters.  
+[ASSISTANT_SAID] Assistant is to list in another column the human searcher intent for the keyword.  
+[ASSISTANT_SAID] Assistant is to cluster the topic in one of three search intent groups: commercial, transactional, or informational.  
+[ASSISTANT_SAID] Assistant is to write a simple but very click-enticing title for a post about that keyword in another column.  
+[ASSISTANT_SAID] Assistant is to write an attractive meta description with a chance for a high click-thru-rate for the topic, with 120 to a maximum of 155 words.  
+[ASSISTANT_SAID] Assistant is instructed to ensure the meta description is value-based, mentioning the value of the article and including a simple call to action.  
+[ASSISTANT_SAID] Assistant is to avoid using generic keywords like "introduction," "conclusion," or "tl:dr."  
+[ASSISTANT_CREATED] Assistant created a markdown table with the following details:  
+[ASSISTANT_CREATED] The first row of the table includes the keyword cluster "Abstract Art," with the keyword "abstract art," search intent "Informational," title "Exploring the World of Abstract Art: Techniques, History, and Famous Artists," and meta description "Discover the fascinating world of abstract art and learn about the different techniques, historical context, and famous artists who have made it their own. This in-depth guide offers valuable insights and inspiration for art lovers of all levels."  
+[ASSISTANT_CREATED] The second row of the table includes the keyword cluster "Figurative Art," with the keyword "figurative art," search intent "Informational," title "The Power of Figurative Art: A Study of Human Figures in Art," and meta description "Dive into the world of figurative art and explore the powerful use of human figures in art. This guide covers the history, techniques, and famous artists who have mastered the art of depicting the human form."  
+[ASSISTANT_CREATED] The third row of the table includes the keyword

@@ -1,0 +1,22 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/27 (Sat) 17:49
+- [FACT] The mock census dataset contains randomly generated data using the Faker package in Python.
+- [FACT] The dataset is designed to emulate the format of the 1881 census of the UK.
+- [FACT] The fields recorded in the dataset include: Street Number, Street Name, First Name of occupant, Surname of occupant, Age of occupant, Relationship to the “Head” of the household, Marital status, Gender, Occupation, Infirmity, and Religion.
+- [FACT] The town from the census is modestly sized and sandwiched between two larger cities connected by motorways.
+- [FACT] The town does not have a university, but students commute to nearby cities.
+- [ASSISTANT_SAID] The first task is to clean the dataset, which includes addressing missing entries and incorrect information.
+- [ASSISTANT_SAID] Steps to clean the dataset include:
+  1. Check for missing values and replace them with appropriate values (e.g., median or mean age).
+  2. Check for incorrect entries and remove them (e.g., ages above 110).
+  3. Check for inconsistencies in the data (e.g., single occupants listed with spouses or children).
+  4. Check for duplicates in the dataset and remove them.
+- [ASSISTANT_SAID] After cleaning, the analysis will determine what should be built on an unoccupied plot of land.
+- [ASSISTANT_SAID] Key factors to consider for development include:
+  1. Population growth: High-density housing if the population is expanding.
+  2. Affluence: Low-density housing if the population is affluent and demands large family housing.
+  3. Commuters: Building a train station if there are many commuters; identify commuters by their occupations.
+  4. Religious diversity: Identify demand for a second religious building and the underserved religion.
+  5. Medical needs: Build an emergency medical building if there are many injuries or future pregnancies likely in the population.
+- [ASSISTANT_SAID] Recommendations will be made based on the analysis of the cleaned dataset.

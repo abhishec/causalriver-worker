@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/20 (Sat) 02:52
+- [EVENT] User is trying to get a gift for their mom's anniversary.
+- [PREFERENCE] User is considering personalized photo albums or customized jewelry as gift options.
+- [ASSISTANT] Recommended Shutterfly, Mixbook, and Blurb for personalized photo albums.
+- [ASSISTANT] Recommended Etsy, Personalization Mall, and James Allen for customized jewelry.
+- [PREFERENCE] User prefers to shop in-store for a more personal gift rather than online shopping.
+- [EVENT] User has been doing a lot of online shopping lately, especially during sales events.
+- [CHANGE] User is trying to cut back on impulse buys.
+- [EVENT] User couldn't resist a sale at their favorite bookstore last week.
+- [FACT] User's favorite bookstore had a sale on a new release from their favorite author, originally priced at $30.
+- [PREFERENCE] User enjoys getting lost in stories from books.
+- [PREFERENCE] User thinks a customized message or birthstone would be a nice touch for their mom's gift.
+- [RELATIONSHIP] User's mom loves sentimental gifts.
+- [ASSISTANT] Suggested asking local jewelers about customization options, including engraving and sourcing birthstones.
+- [EVENT] User is considering checking out a new jewelry store that just opened downtown.
+- [EVENT] User previously purchased a birthday present for their sister at the same jewelry store.
+- [PREFERENCE] User found unique pieces at the jewelry store where they got their sister's birthday present.
+- [ASSISTANT] Suggested calling ahead to confirm the jewelry store offers custom design services and to inquire about their design process, materials, pricing, and turnaround time.
+- [PREFERENCE] User is open to checking out the jewelry store again for their mom's gift.

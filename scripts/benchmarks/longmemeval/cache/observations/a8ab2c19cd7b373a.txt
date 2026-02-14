@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[FACT] User is planning a fishing trip to Lake Michigan.  
+[RELATIONSHIP] User is going with friends Tom and Alex.  
+[EVENT] User is renting a boat from Mike's Marina.  
+[TEMPORAL] Session Date: 2023/05/28 (Sun) 01:41.  
+[PREFERENCE] User is excited to try out their new Shimano Stradic Ci4+ rod.  
+[EVENT] User is planning to target both salmon and trout during the fishing trip.  
+[ASSISTANT_SAID] Lake Michigan's salmon fishing is generally best in the southern part of the lake, particularly around the harbors and piers.  
+[ASSISTANT_SAID] Salmon are most active during dawn and dusk when the water is usually calmer and there's less boat traffic.  
+[ASSISTANT_SAID] Recommended tackle for salmon includes medium to heavy action rods and reels with a minimum of 15-20 lb test line.  
+[ASSISTANT_SAID] Suggested lures for salmon include Luhr-Jensen Kokanee King, Acme Kastmaster, Hopkins Shorty (spoons), Blue Fox Vibrax, Mepps Aglia, Rooster Tail (spinners), and Rapala Deep Tail Dancer, Storm Thunderstick, Rebel Deep Wee-R (plugs).  
+[ASSISTANT_SAID] Trolling is a popular method for catching salmon in Lake Michigan, with speeds between 2-4 mph.  
+[ASSISTANT_SAID] Recommended depths for salmon are 50-100 ft deep for chinook salmon and 10-20 ft deep for coho salmon.  
+[ASSISTANT_SAID] User should be prepared to adjust presentation and location based on fish activity and changing conditions.  
+[ASSISTANT_SAID] User should ensure familiarity with the boat's operation and safety equipment before heading out.  
+[ASSISTANT_SAID] User should always wear life jackets and keep a first aid kit on board.  
+[ASSISTANT_SAID] Trout can be found around structures such as rocky shorelines, weed beds, and drop-offs.  
+[ASSISTANT_SAID] Recommended tackle for trout includes lighter tackle than for salmon, with suitable lures like small spoons, spinners, soft plastics, and dry flies.  
+[ASSISTANT_SAID] Suggested trolling speed for trout is 1-2 mph, and depths are generally 10-30 ft for rainbow trout and 20-40 ft for brown trout.  
+[ASSISTANT_SAID] User should pay attention to water temperature, as trout are more active in certain ranges (usually between 40-55°F).  
+[ASSISTANT_SAID] User should be prepared to move around and try different locations, as trout can be scattered throughout the lake.  
+[ASSISTANT_S

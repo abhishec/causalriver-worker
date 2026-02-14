@@ -1,0 +1,19 @@
+**Observation Log:**
+
+- [FACT] User's name is Avery.
+- [EVENT] User submitted paperwork for a name change on August 10th.
+- [TEMPORAL] Session date is 2023/05/20 (Sat) 21:41.
+- [CHANGE] User updated their LinkedIn profile to reflect their new name.
+- [EVENT] User is planning to update their Twitter profile.
+- [ASSISTANT_SAID] Assistant provided steps to update the LinkedIn profile, including clicking on the profile picture, selecting "View profile," and editing the name section.
+- [ASSISTANT_SAID] Assistant recommended verifying the name change on LinkedIn by uploading a document.
+- [ASSISTANT_SAID] Assistant provided steps to update the Twitter profile, including tapping on the profile picture, selecting "Profile," and editing the name field.
+- [ASSISTANT_SAID] Assistant mentioned that if the user wants to change their Twitter handle, they should enter a new username in the "Username" field.
+- [EVENT] User plans to update their email address to match their new name.
+- [ASSISTANT_SAID] Assistant provided steps to update the Gmail account, including clicking on the gear icon, selecting "See all settings," and editing the account information.
+- [ASSISTANT_SAID] Assistant advised the user to gather required documents for updating their bank account information, including a valid government-issued ID and a legal name change document.
+- [ASSISTANT_SAID] Assistant suggested contacting the bank to confirm specific requirements for updating account information.
+- [EVENT] User plans to visit the bank next week to update their account information.
+- [ASSISTANT_SAID] Assistant recommended bringing specific documents to the bank, including a court order or legal name change document, updated government-issued ID, current identification, account information, and proof of address.
+- [PREFERENCE] User expressed a need to get their bank account information updated and mentioned they have been putting it off.
+- [ASSISTANT_SAID] Assistant encouraged the user to stay calm and patient during the bank update process and to prepare by bringing necessary documents.

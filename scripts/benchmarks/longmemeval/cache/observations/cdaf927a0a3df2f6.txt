@@ -1,0 +1,23 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/25 (Thu) 23:47
+- [USER] User expressed interest in cultural events or festivals in Guizhou province.
+- [ASSISTANT_SAID] Guizhou province has several cultural events and festivals throughout the year, including:
+  - [ASSISTANT_SAID] Miao New Year: Celebrated annually by the Miao ethnic minority in January or February, featuring colorful costumes, traditional music and dance, firecrackers, and various cultural activities.
+  - [ASSISTANT_SAID] Sister's Meal Festival: Celebrated by the Miao ethnic minority in April, where young men and women express love through singing, dancing, and exchanging colorful glutinous rice.
+  - [ASSISTANT_SAID] Dragon Boat Festival: Celebrated country-wide in June, particularly lively in Guiyang, with dragon boat races and traditional food.
+  - [ASSISTANT_SAID] Huangguoshu Waterfall Festival: Celebrated in September in Anshun, featuring cultural performances including traditional dance, music, and opera.
+  - [ASSISTANT_SAID] Guizhou International Folk Song Festival: Held annually in August, showcasing traditional music and dance from Guizhou and other regions of China.
+- [USER] User found the events interesting and asked which one is the most unique to Guizhou province.
+- [ASSISTANT_SAID] The Sister's Meal Festival is considered one of the most unique events to Guizhou province, celebrated only by the Miao ethnic minority.
+- [USER] User expressed a desire to attend the Sister's Meal Festival and inquired about its location.
+- [ASSISTANT_SAID] The Sister's Meal Festival is held in April in various locations throughout Guizhou province, with the biggest celebration in Taijiang County, known for its colorful Miao culture and customs.
+- [USER] User planned to visit Taijiang County during the Sister's Meal Festival.
+- [ASSISTANT_SAID] Recommended planning ahead for accommodations due to the festival's popularity and advised bringing warm clothing for chilly nights in April.
+- [USER] User asked for recommendations for local foods to try at the Sister's Meal Festival.
+- [ASSISTANT_SAID] Recommended local foods include:
+  - [ASSISTANT_SAID] Sour Fish Soup: A famous dish with a sour and spicy flavor.
+  - [ASSISTANT_SAID] Miao-style pickled vegetables: A healthy side dish made with local vegetables.
+  - [ASSISTANT_SAID] Shanren tofu: Tofu served with a savory and spicy sauce.
+  - [ASSISTANT_SAID] Dim Sum: Unique varieties made using traditional Miao recipes.
+  - [ASSISTANT_SAID] Sticky rice with meat

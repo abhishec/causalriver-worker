@@ -1,0 +1,17 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/21 (Sun) 17:01
+- [USER] Figure 4 provides an overview of findings on SAV deployment for packets both outbound from and inbound to the measured network, for the year ending 1 August 2019.
+- [USER] We present deployment statistics by IPv4/24 and IPv6/40 prefixes, and by AS.
+- [USER] An AS with partial deployment originates some prefixes from which the Spoofer system did not receive spoofed packets, and originates other prefixes from which the Spoofer system did.
+- [USER] This data indicates that while most networks block packets with spoofed source IP addresses, deployment is far from universal.
+- [USER] In particular, 25.2% and 32.1% of tested IPv4 and IPv6 ASes, respectively, had at least one prefix where operators had not deployed SAV to block outbound spoofed packets.
+- [USER] The comparatively small fraction of prefixes from which we received spoofed IPv4 packets is primarily due to the presence of Network Address Translation (NAT) routers that rewrite spoofed packets with the router’s publicly routable address.
+- [USER] When a NAT router was not present, 14.9% of IPv4 prefixes had no filtering; filtering was better deployed at prefix-level granularity in IPv6, with 12.3% of tested prefixes not filtering.
+- [USER] The lower panels of figure 4 (c and d) summarize the observed state of filtering of packets inbound to the client’s network, claiming to be from within the same subnet as the client.
+- [USER] For IPv4 we toggle the last (31st) bit of the address, and for IPv6 we toggle the 120th bit.
+- [USER] Surprisingly, inbound filtering of spoofed packets is even less deployed than outbound filtering, despite these packets being a threat to the receiving network.
+- [USER] In our data, 67.0% and 74.2% of IPv4 and IPv6 ASes, respectively, had at least one prefix where they were not filtering inbound packets.
+- [USER] We compare the IPv4 tests we received for the year ending August 2019 where the client was not behind a NAT, to the same class of tests from 1 May 2006 to 7 May 2006.
+- [USER] For the first week of May 2006, 18.3% of IPv4/24 prefixes and 20.4% of ASes tested did not block spoofed-source packets from leaving their networks.
+- [USER] Figure 4 shows that for the year ending August 2019, 14.9% of IPv4/24 prefixes and 30.5% of ASes tested did not block spoofed-source packets, implying that SAV deployment has

@@ -1,0 +1,42 @@
+{
+  "answer_e05e4612": [
+    {
+      "fact": "User enjoys music similar to Tameca Jones",
+      "type": "preference",
+      "entities": [
+        "Tameca Jones"
+      ]
+    },
+    {
+      "fact": "User has been listening to Lo-Fi hip hop beats and Tameca Jones' album on repeat",
+      "type": "preference",
+      "entities": [
+        "Lo-Fi hip hop",
+        "Tameca Jones"
+      ]
+    },
+    {
+      "fact": "User wants to create a new playlist for relaxing music",
+      "type": "preference",
+      "entities": [
+        "relaxing music",
+        "playlist"
+      ]
+    },
+    {
+      "fact": "User has 20 playlists on Spotify",
+      "type": "personal",
+      "entities": [
+        "Spotify",
+        "20 playlists"
+      ]
+    },
+    {
+      "fact": "User is looking to organize their playlists better",
+      "type": "preference",
+      "entities": [
+        "organize playlists"
+      ]
+    }
+  ]
+}

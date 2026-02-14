@@ -1,0 +1,106 @@
+{
+  "answer_35e36341_1": [
+    {
+      "fact": "User is looking for new recipe ideas to use up leftover vegetables.",
+      "type": "preference",
+      "entities": [
+        "recipe ideas",
+        "leftover vegetables"
+      ]
+    },
+    {
+      "fact": "User is trying to reduce food waste.",
+      "type": "opinion",
+      "entities": [
+        "food waste"
+      ]
+    },
+    {
+      "fact": "User had chicken fajitas for lunch.",
+      "type": "event",
+      "entities": [
+        "chicken fajitas",
+        "lunch"
+      ]
+    },
+    {
+      "fact": "User finished off the last of their chicken fajitas with saut\u00e9ed onions and bell peppers.",
+      "type": "event",
+      "entities": [
+        "chicken fajitas",
+        "saut\u00e9ed onions",
+        "bell peppers"
+      ]
+    },
+    {
+      "fact": "User has made three meals from their chicken fajitas.",
+      "type": "event",
+      "entities": [
+        "chicken fajitas",
+        "meals"
+      ]
+    },
+    {
+      "fact": "User likes the sound of veggie frittata.",
+      "type": "preference",
+      "entities": [
+        "veggie frittata"
+      ]
+    },
+    {
+      "fact": "User has been meaning to try making a frittata with roasted vegetables.",
+      "type": "preference",
+      "entities": [
+        "frittata",
+        "roasted vegetables"
+      ]
+    }
+  ],
+  "answer_35e36341_2": [
+    {
+      "fact": "User is looking for new recipes to try out, particularly for lunch.",
+      "type": "preference",
+      "entities": [
+        "recipes",
+        "lunch"
+      ]
+    },
+    {
+      "fact": "User has been meal prepping a lot lately.",
+      "type": "opinion",
+      "entities": [
+        "meal prepping"
+      ]
+    },
+    {
+      "fact": "User finds meal prepping to be a huge time saver.",
+      "type": "opinion",
+      "entities": [
+        "time saver"
+      ]
+    },
+    {
+      "fact": "User has been really into soups lately.",
+      "type": "preference",
+      "entities": [
+        "soups"
+      ]
+    },
+    {
+      "fact": "User made a big batch of lentil soup that lasted for 5 lunches.",
+      "type": "event",
+      "entities": [
+        "lentil soup",
+        "5 lunches"
+      ]
+    },
+    {
+      "fact": "User is looking for hearty soup recipes that would be good for meal prep.",
+      "type": "preference",
+      "entities": [
+        "hearty soup recipes",
+        "meal prep"
+      ]
+    }
+  ]
+}

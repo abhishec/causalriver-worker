@@ -1,0 +1,21 @@
+**Observation Log:**
+
+**Session Date:** 2023/05/27 (Sat) 08:22  
+**Session ID:** sharegpt_U9Sujf2_9
+
+1. [ASSISTANT_SAID] The assistant suggested adding a new collection called `classic_websites` and updating the `websites` collection schema to store information about classic websites and their relationships with immersive websites.
+2. [ASSISTANT_SAID] The updated schema includes a new collection `classic_websites` and an updated `websites` collection with a new field `classic_referrer_websites`.
+3. [ASSISTANT_SAID] The `classic_websites` collection will help track relationships between classic websites and immersive websites, making it easier to discover WebXR-supported sites.
+4. [ASSISTANT_SAID] The `websites` collection now includes a `classic_referrer_websites` field to understand how users can discover immersive websites through classic websites.
+5. [ASSISTANT_SAID] The assistant explained that the updated schema would help handle the challenge of discovering immersive websites through classic websites more effectively.
+6. [USER] The user requested to continue the conversation.
+7. [ASSISTANT_SAID] The assistant elaborated on how to store the list of websites to be crawled with the schema, suggesting the creation of a new collection called `crawl_queue`.
+8. [ASSISTANT_SAID] The `crawl_queue` collection will include fields such as `website_id`, `website_type`, `crawl_status`, `assigned_crawler_id`, and `timestamp`.
+9. [ASSISTANT_SAID] The assistant provided a step-by-step approach for managing the crawl queue, including how to add websites, assign crawlers, and update statuses.
+10. [ASSISTANT_SAID] The assistant emphasized that the schema allows for multiple crawlers to work in parallel without conflicts.
+11. [USER] The user requested to synthesize the final schema and documentation.
+12. [ASSISTANT_SAID] The assistant provided a comprehensive schema including collections for `websites`, `classic_websites`, `game_engines`, `platforms`, `web_crawls`, `crawl_errors`, and `crawl_queue`.
+13. [ASSISTANT_SAID] The `websites` collection includes fields for URL, title, description, keywords, graphics, world, immersion type, game engine ID, platform ID, related websites, classic referrer websites, and crawl ID.
+14. [ASSISTANT_SAID] The `classic_websites` collection includes fields for URL, title, description, keywords, crawl ID, and linked immersive websites.
+15. [ASSISTANT_SAID] The `game_engines` collection includes fields for name, version, and website.
+16. [ASSISTANT_SAID] The `platforms` collection

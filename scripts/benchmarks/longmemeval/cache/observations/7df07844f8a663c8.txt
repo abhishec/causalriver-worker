@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/23 (Tue) 09:43
+- [FACT] The user has a background in computer science and completed their degree with distinction.
+- [FACT] The user has over 8 years of hands-on experience in developing AI solutions.
+- [FACT] The user has worked at IBM and Quinnox as an AI engineer.
+- [FACT] The user was granted a patent in 2021 for an AI algorithm (US11205041B2).
+- [FACT] The user has developed more than 30 deep learning models in production involving computer vision, NLP, and reinforcement learning.
+- [FACT] The user has contributed to open source software and maintains a blog.
+- [FACT] The user is a verified expert in Python and Pytorch as certified by Pluralsight.
+- [FACT] The user has experience in Android apps using Flutter.
+- [FACT] The user has developed a multimodal RL agent that can navigate through apps on its own taking visual and textual inputs.
+- [PREFERENCE] The user has a passion for environmental sustainability and AI.
+- [PREFERENCE] The user believes that AI and robotics can be powerful tools in addressing pressing environmental issues.
+- [EVENT] The user attended a 20-day study camp at the MS Swaminathan Research Foundation.
+- [CHANGE] The user quit their job at IBM to fully concentrate on deep learning.
+- [CHANGE] The user’s objective became more refined when developing an autonomous agent, Rover.
+- [RELATIONSHIP] The user mentions Dr. MS Swaminathan as the main architect of the green revolution in India.
+- [RELATIONSHIP] The user mentions Dr. Stefano V Aldrich from the University of Edinburgh in relation to their research interests.
+- [ASSISTANT_SAID] The assistant provided a rewrite of the user's statement of purpose to increase their odds of admission to the University of Edinburgh.
+- [ASSISTANT_CREATED] The assistant created a structured rewrite of the user's statement of purpose, emphasizing the user's passion for AI and environmental sustainability, their academic and professional background, and their future goals related to pursuing a Master's and PhD in AI.

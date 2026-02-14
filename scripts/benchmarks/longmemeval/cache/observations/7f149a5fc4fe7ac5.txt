@@ -1,0 +1,9 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/07/08 (Sat) 07:43
+- [USER] User requested the assistant to read a text and respond with "OK" before answering questions based on the content of the article.
+- [ASSISTANT_SAID] Assistant responded with "OK" after reading the provided text.
+- [USER] User asked three questions (Q1, Q2, Q3) regarding adding an authorized user, receiving a new credit card, and checking the status of a credit card application.
+- [ASSISTANT_SAID] A1: To add an authorized user to the card, the user can do so online after signing in or by calling the number on the back of the card. The user must be the primary cardholder, secondary cardholder, power of attorney, or account manager.
+- [ASSISTANT_SAID] A2: If approved for a credit card, the user should receive it, along with credit limit information and welcome materials, by mail within approximately 7 to 10 business days. For a Secured Mastercard, the card will ship approximately 7 to 10 business days after the deposit is paid in full.
+- [ASSISTANT_SAID] A3: The user can check the status of their credit card application by calling 1-800-903-9177. If applied by phone or online, a response is often received in 60 seconds, but additional information may be needed in some cases. Capital One will notify the user in writing of their decision within 7 to 10 days of the application.

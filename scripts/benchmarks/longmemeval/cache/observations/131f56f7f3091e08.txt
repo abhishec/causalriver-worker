@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/27 (Sat) 22:02  
+[EVENT] User is trying to get a better handle on online spending and seeks help to track recent purchases and receive budgeting advice.  
+[ASSISTANT_SAID] Assistant expresses willingness to help track recent purchases and offer budgeting advice.  
+[ASSISTANT_SAID] Assistant requests information about the user's online spending habits, including platforms, subscription services, monthly budget, categories of interest, and preferred tracking methods.  
+[FACT] User frequently shops on Amazon, eBay, ASOS, and online thrift stores like ThredUp.  
+[EVENT] User recently got into online thrift shopping and bought a pair of jeans from ThredUp on February 12th for $30.  
+[ASSISTANT_SAID] Assistant acknowledges the user's purchase and begins to organize spending into categories.  
+[ASSISTANT_SAID] Assistant categorizes spending into Clothing, Electronics, and Miscellaneous.  
+[ASSISTANT_SAID] Assistant asks additional questions about the user's shopping frequency, impulsive purchases, triggers for shopping, average monthly spending, and financial goals.  
+[FACT] User shops online around 2-3 times a week and admits to making impulsive purchases sometimes.  
+[ASSISTANT_SAID] Assistant suggests strategies to avoid impulsive purchases, including the 30-Day Rule, creating a wishlist, and using budgeting apps.  
+[ASSISTANT_SAID] Assistant challenges the user to limit online shopping to once a week for the next 4 weeks.  
+[EVENT] User mentions buying something from ASOS during their mid-season sale on February 15th.  
+[FACT] User spent around $120 on ASOS during the mid-season sale on February 15th, purchasing a few tops and a skirt.  
+[ASSISTANT_SAID] Assistant updates the tracking log with the ASOS purchase details.  
+[ASSISTANT_SAID] Assistant notes that the user has spent a total of $150 on clothing in the past few days and suggests setting a clothing budget.  
+[ASSISTANT_SAID] Assistant proposes a clothing budget of $100 per month for the next 4 weeks.  
+[FACT] User agrees that the $100 clothing budget is a good starting point.  
+[EVENT] User reveals spending around $1,500 on luxury items from Net-a-Porter in mid-January after receiving a holiday bonus.  
+[ASSISTANT_SAID] Assistant requests details about the luxury items purchased from Net-a-Porter.  
+[FACT] User has not specified the items bought from Net-a-Porter.  
+[ASSISTANT_SAID] Assistant discusses the impact of the luxury purchase on the user's budget and suggests reassessing financial goals.  
+[ASSISTANT_SAID] Assistant asks the user about high-pr

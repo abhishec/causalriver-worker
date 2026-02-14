@@ -1,0 +1,20 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/24 (Wed) 00:07  
+[ASSISTANT_SAID] The product ads can be modified independently of the keywords and have a custom text field for book vendors.  
+[ASSISTANT_SAID] Suggested structure for the Excel file includes columns: Object Type, Campaign ID, Campaign Name, Campaign Budget, Ad Group ID, Ad Group Name, Ad Group Default Bid, Keyword, Match Type, ASIN, SKU, Custom Text.  
+[ASSISTANT_SAID] Example structure provided with rows for Keyword and Product Ad types, including specific keywords (keywordA1, keywordA2, etc.) and product ads (B00001A001, SKU123A, Custom Text A, etc.).  
+[ASSISTANT_SAID] The first column represents the object type (Keyword or Product Ad).  
+[ASSISTANT_SAID] ASIN, SKU, and Custom Text columns are used only for product ads.  
+[ASSISTANT_SAID] Campaign ID, Campaign Name, and Campaign Budget columns are repeated for each keyword or product ad belonging to the same campaign.  
+[ASSISTANT_SAID] Assuming that the campaign state can be modified independently of ad groups and keywords within, an additional column for the campaign state is suggested.  
+[ASSISTANT_SAID] Modified structure includes Campaign State column.  
+[ASSISTANT_SAID] Suggested structure includes: Campaign, Ad Group, Keyword, and Product Ad types separated into their own rows for better organization.  
+[ASSISTANT_SAID] The structure allows for better management of campaign-level information independently of ad groups, keywords, and product ads.  
+[ASSISTANT_SAID] In the case where a customer needs to update an existing campaign and create a new one in the same import, an additional column for the action (Create or Update) is suggested.  
+[ASSISTANT_SAID] Modified structure includes an Action column to indicate whether to create or update an object.  
+[ASSISTANT_SAID] Example provided for the modified structure includes rows for Create and Update actions for Campaigns, Ad Groups, Keywords, and Product Ads.  
+[ASSISTANT_SAID] The Bulksheet system should check the Action column to determine whether to create a new object or update an existing one.  
+[ASSISTANT_SAID] For updating existing objects, the user should provide the appropriate object IDs (e.g., Campaign ID, Ad Group ID) to match the object they want to update.  
+[ASSISTANT_CREATED] Suggested Excel file structure with columns: Action, Object Type, Campaign ID, Campaign Name, Campaign State, Campaign Budget, Ad Group ID, Ad Group Name, Ad Group Default Bid, Keyword, Match Type, ASIN, SKU, Custom Text.  
+[

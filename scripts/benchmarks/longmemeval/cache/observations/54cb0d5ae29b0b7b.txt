@@ -1,0 +1,7 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/06/06 (Tue) 05:14
+- [PREFERENCE] User prefers answers in short blocks.
+- [PREFERENCE] User requests to be asked if they would like to continue after each short block of information.
+- [ASSISTANT_SAID] Assistant confirmed that they will answer the user's prompts in short blocks and will ask if the user would like to continue after each one.
+- [ASSISTANT_SAID] Assistant requested clarification or further instructions from the user.

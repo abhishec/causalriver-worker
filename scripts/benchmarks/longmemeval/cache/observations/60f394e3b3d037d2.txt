@@ -1,0 +1,17 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/29 (Mon) 05:31
+- [ASSISTANT_SAID] The assistant suggested performing normalization on the asset management schema to remove redundancies and dependencies.
+- [ASSISTANT_SAID] The assistant identified functional dependencies in each table of the asset management schema.
+- [ASSISTANT_SAID] The functional dependencies for the Asset Table are: AssetID -> AssetType, AssetName, AssetDescription, PurchaseDate, PurchaseCost, CurrentValue, DepreciationRate, DispositionDate.
+- [ASSISTANT_SAID] The functional dependencies for the Location Table are: LocationID -> LocationName, Address, City, State, ZipCode.
+- [ASSISTANT_SAID] The functional dependencies for the Maintenance Table are: MaintenanceID -> AssetID, MaintenanceDate, MaintenanceType, MaintenanceDescription, MaintenanceCost and AssetID -> AssetType, AssetName, AssetDescription, PurchaseDate, PurchaseCost, CurrentValue, DepreciationRate, DispositionDate.
+- [ASSISTANT_SAID] The functional dependencies for the Risk Table are: RiskID -> AssetID, RiskDescription, RiskProbability, RiskImpact and AssetID -> AssetType, AssetName, AssetDescription, PurchaseDate, PurchaseCost, CurrentValue, DepreciationRate, DispositionDate.
+- [ASSISTANT_SAID] The functional dependencies for the Compliance Table are: ComplianceID -> AssetID, ComplianceDescription, ComplianceDate, ComplianceStatus and AssetID -> AssetType, AssetName, AssetDescription, PurchaseDate, PurchaseCost, CurrentValue, DepreciationRate, DispositionDate.
+- [ASSISTANT_SAID] The functional dependencies for the Financials Table are: FinancialsID -> AssetID, PurchaseDate, PurchaseCost, CurrentValue, DepreciationRate, DispositionDate and AssetID -> AssetType, AssetName, AssetDescription, PurchaseDate, PurchaseCost, CurrentValue, DepreciationRate, DispositionDate.
+- [ASSISTANT_SAID] The assistant proposed splitting the Asset table into two tables: one for asset information and another for financial information.
+- [ASSISTANT_CREATED] The assistant created a new Asset Table with the following structure: AssetID -> AssetType, AssetName, AssetDescription, PurchaseDate.
+- [ASSISTANT_CREATED] The assistant created a Financials Table with the following structure: FinancialsID -> AssetID, PurchaseCost, CurrentValue, DepreciationRate, DispositionDate.
+- [ASSISTANT_CREATED] The assistant confirmed the structure of the Location Table: LocationID -> LocationName, Address, City, State, ZipCode.
+- [ASSISTANT_CREATED] The assistant confirmed the structure of the Maintenance Table: MaintenanceID -> AssetID, MaintenanceDate, MaintenanceType, MaintenanceDescription, MaintenanceCost.
+- [ASS

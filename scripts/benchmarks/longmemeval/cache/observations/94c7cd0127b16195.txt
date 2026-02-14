@@ -1,0 +1,29 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2022/09/01 (Thu) 23:28  
+[FACT] User is located in New York City.  
+[FACT] User is a stand-up comedian.  
+[EVENT] User has been taking a stand-up comedy class for 6 weeks.  
+[PREFERENCE] User is looking for open mics and showcases, mostly on weeknights.  
+[PREFERENCE] User is open to performing at non-traditional venues such as bars and coffee shops.  
+[ASSISTANT_SAID] Assistant offered to help find more comedy clubs in the user's area where they can perform.  
+[ASSISTANT_SAID] Assistant requested additional information: city or region, type of comedy, type of gigs (open mics, showcases, paid gigs), preferred days/times, and openness to non-traditional venues.  
+[ASSISTANT_SAID] Assistant provided online resources for finding comedy clubs and open mics: Google search, ComedyClubList.com, ComedyOpenMic.com, Meetup.com, and social media.  
+[ASSISTANT_SAID] Assistant congratulated the user on taking stand-up comedy classes and expressed enthusiasm for their desire to get more stage time.  
+[ASSISTANT_SAID] Assistant requested the user's city and state to provide a list of potential open mics and showcases.  
+[ASSISTANT_SAID] Assistant provided a list of open mics in New York City, including:  
+1. The Comedy Cellar (Greenwich Village) - open mics on Mondays and Tuesdays.  
+2. New York Comedy Club (East Village) - open mics on Sundays, Mondays, and Tuesdays.  
+3. The Village Underground (Greenwich Village) - open mics on Wednesdays and Thursdays.  
+4. The Creek and The Cave (Long Island City, Queens) - open mics on Mondays, Tuesdays, and Wednesdays.  
+5. The Stand (Gramercy) - open mics on Sundays and Mondays.  
+6. Gotham Comedy Club (Chelsea) - open mics on Tuesdays and Wednesdays.  
+7. QED (Astoria, Queens) - open mics on Mondays and Tuesdays.  
+8. The PIT (Flatiron) - open mics on Mondays and Tuesdays.  
+[ASSISTANT_SAID] Assistant provided a list of showcases in New York City, including:  
+1. Comedy at the Knitting Factory (Williamsburg, Brooklyn) - showcase on Sundays.  
+2. The Laugh Lounge (Lower East Side) - showcase on Wednesdays.  
+3. The Comedy Village (East Village) - showcase on Thursdays.  
+4. The Bell House (Gowanus, Brooklyn) - showcase on Sundays.  
+5. Union Hall (Park Slope, Brooklyn) - showcase on Wednesdays.  
+[ASSISTANT_SAID] Assistant provided a list of non-traditional

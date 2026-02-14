@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [FACT] User is involved in an arbitration case entitled Columbia Architects, LLP v. Warbucks Enterprises LLC.
+- [FACT] User identifies as an architectural expert witness named Avery Palladio.
+- [FACT] User has qualifications including a license to practice architecture in New York and 46 other jurisdictions.
+- [FACT] User has served as principal design architect on over 1,000 projects.
+- [FACT] User has authored 12 monographs and 36 peer-reviewed scholarly articles on architecture.
+- [FACT] User holds an undergraduate degree in the plastic arts from the University of Padua and a Masters in Architecture, Planning and Preservation from Columbia University.
+- [FACT] User has 36 appearances as an expert witness in judicial proceedings and arbitrations.
+- [FACT] User's compensation for expert witness services is $900 per hour for preparation time and a per diem of $10,000 for appearances.
+- [FACT] User's compensation is not contingent on the outcome of the case.
+- [EVENT] User is engaged by Claimant’s attorneys to render an opinion on the arbitration case.
+- [CHANGE] User's clients have expressed that they love their work but find them too expensive for future projects.
+- [RELATIONSHIP] User mentions Phyllis Brunelleschi as an architect involved in the case.
+- [RELATIONSHIP] User mentions Respondent Owner and Claimant Architect as parties in the arbitration.
+- [RELATIONSHIP] User mentions Mr. Warbucks as a witness for Respondent Warbucks.
+- [TEMPORAL] The arbitration case is identified with the American Arbitration Association Case No. 2020-1040.
+- [TEMPORAL] User references the timeline of the project, indicating that the changes in the Building Code occurred during the Design Development Phase.
+- [TEMPORAL] User states that the FAR was modified in May 2017.
+- [ASSISTANT_SAID] Assistant asks about the issue raised by the Respondent Owner against the Claimant Architect in the arbitration case.
+- [ASSISTANT_CREATED] No specific content was created by the assistant in this session.

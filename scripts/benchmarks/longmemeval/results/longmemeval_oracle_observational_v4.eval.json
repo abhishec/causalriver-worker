@@ -1,0 +1,16 @@
+{
+  "overall_accuracy": 0.774,
+  "task_averaged_accuracy": 0.7757,
+  "abstention_accuracy": 0.9,
+  "type_accuracies": {
+    "temporal-reasoning": 0.7669,
+    "multi-session": 0.797,
+    "knowledge-update": 0.7821,
+    "single-session-preference": 0.8333,
+    "single-session-assistant": 0.7321,
+    "single-session-user": 0.7429
+  },
+  "total_questions": 500,
+  "total_correct": 387,
+  "version": "v4_balanced_observer"
+}

@@ -1,0 +1,30 @@
+**Observation Log:**
+
+[FACT] User is trying to get their sleep schedule back on track.  
+[FACT] User used to wake up at 8:30 am on weekdays before starting a new job.  
+[TEMPORAL] Session Date: 2023/05/27 (Sat) 11:42  
+[ASSISTANT_SAID] Assistant cannot set reminders or access the user's device but can help the user set up a reminder on their own device.  
+[ASSISTANT_SAID] Steps to set a reminder on the user's phone:  
+[ASSISTANT_SAID] 1. Open the clock or alarm app.  
+[ASSISTANT_SAID] 2. Tap the "+" or "Create" button to create a new alarm.  
+[ASSISTANT_SAID] 3. Set the alarm time to 11:00 pm.  
+[ASSISTANT_SAID] 4. Choose a recurring frequency, such as "Every Day" or "Weekdays."  
+[ASSISTANT_SAID] 5. Give the alarm a label, like "Bedtime Reminder" or "Sleep Time."  
+[ASSISTANT_SAID] 6. Choose a gentle and non-jarring alarm sound.  
+[ASSISTANT_SAID] 7. Save the alarm.  
+[ASSISTANT_SAID] User can also use digital assistants like Siri, Google Assistant, or Alexa to set a reminder.  
+[ASSISTANT_SAID] Suggested to set a wake-up alarm for 8:30 am as well.  
+[ASSISTANT_SAID] Recommended establishing a relaxing bedtime routine to signal to the brain that it's time to sleep.  
+[ASSISTANT_SAID] Suggested that it might take time for the body to adjust to the new sleep schedule.  
+[USER] Asked for a good bedtime routine to help wind down and prepare for sleep.  
+[ASSISTANT_SAID] Suggested activities for a bedtime routine:  
+[ASSISTANT_SAID] 1. Dim the lights.  
+[ASSISTANT_SAID] 2. Take a warm bath or shower.  
+[ASSISTANT_SAID] 3. Practice gentle stretches or yoga.  
+[ASSISTANT_SAID] 4. Read a book (preferably a physical book).  
+[ASSISTANT_SAID] 5. Listen to calming music or nature sounds.  
+[ASSISTANT_SAID] 6. Write in a journal.  
+[ASSISTANT_SAID] 7. Practice relaxation techniques.  
+[ASSISTANT_SAID] 8. Enjoy a warm beverage.  
+[ASSISTANT_SAID] 9. Get ready for bed (brush teeth, change into PJs).  
+[ASSISTANT_SAID]

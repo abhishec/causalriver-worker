@@ -1,0 +1,33 @@
+**Observation Log:**
+
+**Session Date:** 2023/05/25 (Thu) 14:07  
+**Session ID:** sharegpt_hRCFRol_0
+
+1. [FACT] Test Engineer / Responsible: Eng. D. Zaglia
+2. [FACT] Business Unit Test Center: Off Highway
+3. [FACT] Location: Arco, Italy
+4. [FACT] Completion Date: June 7th, 2021
+5. [FACT] Requestor name: Mr. L. Fornoli
+6. [FACT] Service Request ID: n.a.
+7. [FACT] Part Name: 755 Front Agri Axle
+8. [FACT] Part Number: 10145957
+9. [FACT] Revision Level: Proto
+10. [FACT] Model Series: M2 21V CVT
+11. [FACT] Samples N°: 1
+12. [FACT] Test start date: April 7th, 2021
+13. [FACT] Test end date: April 8th, 2021
+14. [EVENT] A new test was required for 755/10145957 MF Front Agri axle with reduced oil level (-0.5 lt.)
+15. [EVENT] Test completed without any issues, particularly no lubrication issues and no oil leak.
+16. [ASSISTANT_SAID] The test report is for the P&T + Lube test of the 755 Front Agri Axle with reduced oil level (-0.5 lt.) and ELF SF3 oil.
+17. [ASSISTANT_SAID] The test measures power loss, temperature raise, and lubrication performance.
+18. [ASSISTANT_SAID] The test results show that the axle partially passed the test, with significantly lower power loss values compared to reference tests.
+19. [ASSISTANT_SAID] There were issues with the P&T test as the temperature curves became irregular after 1h:6', with no stabilization, and power loss step-up.
+20. [ASSISTANT_SAID] The lubrication test showed no signs of lubrication problems, and the oil level was always above the minimum oil level in all compartments.
+21. [ASSISTANT_SAID] It is advised not to further reduce the oil level unless the power loss step-up issue is solved.
+22. [ASSISTANT_CREATED] A table was created with the following measures:
+    - Power Loss @ 90°C: 3.60 kW
+    - Power Loss @ 60°C: 4.2 kW
+    - Power Loss @ ambient temperature: 8.1 kW
+    - Power Loss (reverse): < 3.60 kW
+    - Temperature @ 1h 6' (P&T test): 85 °C
+    - Power @ 1h 6' (

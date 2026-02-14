@@ -1,0 +1,48 @@
+**Observation Log:**
+
+- [FACT] User is preparing for a big interview for a Senior Marketing Manager role in the New York office.
+- [TEMPORAL] The interview is scheduled for next Thursday, which is May 25, 2023.
+- [EVENT] User is reviewing job requirements and skills for the interview.
+- [ASSISTANT_SAID] Assistant congratulated the user on the interview and offered to help with preparation.
+- [ASSISTANT_SAID] Assistant provided a list of online resources for data analytics, including:
+  1. Google Analytics Academy
+  2. HubSpot Academy
+  3. DataCamp
+  4. Khan Academy
+  5. Microsoft Power BI
+- [ASSISTANT_SAID] Assistant provided a list of online resources for digital marketing, including:
+  1. Digital Marketing Institute
+  2. HubSpot Blog
+  3. Moz
+  4. Facebook Blueprint
+  5. Hootsuite Academy
+- [ASSISTANT_SAID] Assistant provided additional resources for marketing topics, including:
+  1. MarketingProfs University
+  2. Coursera
+  3. LinkedIn Learning
+- [ASSISTANT_SAID] Assistant suggested practice and case study resources, including:
+  1. Kaggle
+  2. Google Analytics Demo Account
+  3. Marketing case studies from HubSpot, Moz, or MarketingProfs.
+- [FACT] User has been taking online courses in data analytics and digital marketing to improve skills.
+- [EVENT] User had a performance review with Rachel earlier in May 2023.
+- [RELATIONSHIP] Rachel is a colleague of the user.
+- [ASSISTANT_SAID] Assistant recommended resources for leadership and management skills, including:
+  1. Coursera - Leadership and Management courses
+  2. edX - Leadership and Management courses
+  3. LinkedIn Learning - Leadership and Management courses
+  4. Harvard Business Publishing - Online Courses
+  5. Center for Creative Leadership
+- [ASSISTANT_SAID] Assistant provided resources for professional development, including:
+  1. TED Talks - Leadership and Management
+  2. Forbes - Leadership and Management articles
+  3. HBR - Harvard Business Review
+  4. MindTools - Leadership and Management resources
+  5. AMA - American Management Association
+- [ASSISTANT_SAID] Assistant suggested resources for visibility and personal branding, including:
+  1. LinkedIn Learning - Personal Branding courses
+  2. Hootsuite Academy - Social Media Marketing courses
+  3. Gary Vaynerchuk's YouTube channel
+  4. Canva Design School - Personal Branding resources
+  5. Networking events and conferences
+- [FACT] User discussed salary expectations during

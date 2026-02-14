@@ -1,0 +1,34 @@
+{
+  "answer_2fc6aabb": [
+    {
+      "fact": "User recently figured out how to use a slow cooker.",
+      "type": "event",
+      "entities": [
+        "slow cooker"
+      ]
+    },
+    {
+      "fact": "User made a delicious beef stew using the slow cooker.",
+      "type": "event",
+      "entities": [
+        "beef stew",
+        "slow cooker"
+      ]
+    },
+    {
+      "fact": "User wants to try more recipes with the slow cooker.",
+      "type": "preference",
+      "entities": [
+        "slow cooker recipes"
+      ]
+    },
+    {
+      "fact": "User is interested in making yogurt in a slow cooker.",
+      "type": "preference",
+      "entities": [
+        "yogurt",
+        "slow cooker"
+      ]
+    }
+  ]
+}

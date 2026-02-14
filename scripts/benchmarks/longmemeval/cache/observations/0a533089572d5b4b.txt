@@ -1,0 +1,26 @@
+**Observation Log:**
+
+[FACT] User is having trouble sleeping lately.  
+[FACT] User has been stressed and anxious since their aunt's husband passed away in a car accident three weeks ago.  
+[FACT] User attended the memorial service for their aunt's husband last week.  
+[FACT] User's grandmother passed away five months ago.  
+[PREFERENCE] User is looking for good sleep apps or techniques to help with sleep issues.  
+[ASSISTANT_SAID] Recommended sleep apps: Calm, Insight Timer, Headspace, Pzizz, Sleep Cycle.  
+[ASSISTANT_SAID] Suggested techniques for better sleep: Progressive Muscle Relaxation (PMR), Deep Breathing Exercises, Mindfulness Meditation, Gratitude Journaling, Cool-Down Routine, Limit Screen Time Before Bed, Write Down Your Thoughts.  
+[ASSISTANT_SAID] Additional tips for better sleep: Maintain a consistent sleep schedule, create a sleep-conducive environment, avoid caffeine, nicotine, and heavy meals close to bedtime, exercise regularly, and consider talking to a therapist or counselor.  
+[FACT] User has been trying some meditation and deep breathing exercises already.  
+[PREFERENCE] User is interested in specific guided meditations or resources that deal with grief and loss.  
+[ASSISTANT_SAID] Recommended guided meditations/resources for grief and loss:  
+1. Insight Timer - "Grief and Loss" section.  
+2. Calm - "Grief and Loss" series within their "Sleep" section.  
+3. Headspace - "Coping with Loss" pack.  
+4. Guided Meditation by Andrew Weil for coping with grief and loss.  
+5. Grief Relief Meditation by Rachel Naomi Remen.  
+[ASSISTANT_SAID] Suggested online resources: The Grief Toolbox, What's Your Grief, The National Alliance for Grieving Children, GriefNet.  
+[ASSISTANT_SAID] Suggested books and audio resources: "A Year of Magical Thinking" by Joan Didion, "When Things Fall Apart" by Pema Chödrön, "Grief One Day at a Time" by Dr. Joshua M. Black, "The Grief Recovery Handbook" by John W. James and Russell Friedman.  
+[PREFERENCE] User plans to start with the guided meditations on Insight Timer and Calm.  
+[FACT] User is considering talking to a therapist or counselor about their grief.  
+[PREFERENCE] User is interested in talking to someone who has experience working with people who have lost loved ones to Alzheimer's disease.  
+[ASSISTANT_SAID] Benefits of talking to a therapist or counselor about grief: emotional support, guided processing, personalized guidance, grief education, and support system.  
+[ASSISTANT_SAID] Suggested questions to ask potential therapists or counselors: experience with Alzheimer's-related grief, approach to grief counseling, strategies used to help clients cope.  
+[FACT

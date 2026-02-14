@@ -1,0 +1,52 @@
+**Observation Log:**
+
+[FACT] User is planning a trip to New York City next month.
+
+[EVENT] User will be seeing "Wicked" on Broadway during their visit.
+
+[ASSISTANT_SAID] The Gershwin Theatre is located in the heart of Midtown Manhattan.
+
+[ASSISTANT_SAID] Recommended restaurants near the Gershwin Theatre include:
+1. Carbone (Italian-American, 0.2 miles from Gershwin Theatre)
+2. The Lambs Club (American, 0.2 miles)
+3. Bubba Gump Shrimp Co. (Seafood, 0.3 miles)
+4. Virgil's Real Barbecue (Barbecue, 0.3 miles)
+5. Carmine's (Italian, 0.4 miles)
+6. Junior's Diner (Diner, 0.4 miles)
+7. Hakkasan (Chinese, 0.5 miles)
+8. The Smith (American, 0.5 miles)
+
+[ASSISTANT_SAID] Reservations are highly recommended, especially if planning to dine before or after a show.
+
+[ASSISTANT_SAID] Carbone offers a pre-theater menu available from 5:00 PM to 6:30 PM, Monday through Friday, for $59 per person.
+
+[ASSISTANT_SAID] Carbone provides a 10% discount on the total bill with a ticket stub from the Gershwin Theatre.
+
+[ASSISTANT_SAID] The Lambs Club offers a pre-theater menu available from 5:00 PM to 6:30 PM, Monday through Friday, for $65 per person.
+
+[ASSISTANT_SAID] The Lambs Club has a "Theater Package" that includes a 3-course meal, a glass of champagne, and a ticket to the show starting at $150 per person.
+
+[ASSISTANT_SAID] Recommended popular songs from "Wicked" include:
+1. "Defying Gravity"
+2. "Popular"
+3. "For Good"
+4. "I'm Not That Girl"
+5. "One Short Day"
+
+[ASSISTANT_SAID] "Wicked" is a prequel to "The Wizard of Oz," focusing on the lives of Elphaba and Galinda.
+
+[ASSISTANT_SAID] Themes of "Wicked" include the nature of good and evil, friendship and loyalty, prejudice and acceptance, and self-acceptance and empowerment.
+
+[ASSISTANT_SAID] Recommended musicals with strong female leads or complex female characters include:
+1. Les Misérables
+2. The Phantom of the Opera
+3. Evita
+4. Chicago
+5. Sister Act
+6. Matilda
+7. Waitress
+8. Hamilton
+9. Hadestown
+10. Six
+
+[PREFERENCE] User is excited to see more powerful women take center stage in musicals

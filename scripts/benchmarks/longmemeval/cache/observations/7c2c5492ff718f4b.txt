@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [FACT] The user is trying to learn more about the birds that visit their yard.
+- [FACT] The user has noticed some new species of birds, including the Ruby-throated Hummingbird.
+- [FACT] The user has seen a Ruby-throated Hummingbird in their yard only twice.
+- [PREFERENCE] The user is interested in knowing what types of flowers or plants are most attractive to hummingbirds.
+- [ASSISTANT_SAID] Hummingbirds are attracted to flowers that provide nectar, particularly those with long, tube-shaped blooms.
+- [ASSISTANT_SAID] Types of flowers attractive to hummingbirds include trumpet-shaped flowers, honeysuckles, fuchsia, and lantana.
+- [ASSISTANT_SAID] Hummingbirds are particularly drawn to flowers with bright colors, especially red, orange, and purple.
+- [ASSISTANT_SAID] Specific plants known to attract hummingbirds include trumpet vine (Campsis radicans), honeysuckle (Lonicera spp.), fuchsia (Fuchsia spp.), lantana (Lantana camara), salvias (Salvia spp.), bee balm (Monarda didyma), cardinal flower (Lobelia cardinalis), coral bells (Heuchera spp.), coneflower (Echinacea spp.), black-eyed susan (Rudbeckia hirta), and zinnias (Zinnia spp.).
+- [ASSISTANT_SAID] The user should plant a variety of flowers that bloom at different times to provide a constant nectar source throughout the growing season.
+- [ASSISTANT_SAID] Hummingbirds are diurnal and most active during the day, with specific activity patterns.
+- [ASSISTANT_SAID] Hummingbirds tend to be most active in the morning between 6:00 a.m. and 10:00 a.m.
+- [ASSISTANT_SAID] There is usually a lull in hummingbird activity from 11:00 a.m. to 1:00 p.m.
+- [ASSISTANT_SAID] Afternoon activity for hummingbirds typically occurs from 2:00 p.m. to 5:00 p.m.
+- [ASSISTANT_SAID] In the late afternoon and early evening, hummingbirds may engage in social behavior from 5:00 p.m. to 7:00 p.m.
+- [ASSISTANT_SAID] Hummingbirds need to eat frequently and can consume up to twice their body weight in nectar and insects daily.
+- [PREFERENCE] The user is trying to learn more about bird calls using an app on their phone.
+- [ASSISTANT_SAID] The Ruby-throated Hummingbird's call is often described as a short, sharp, high-pitched "zik" or "chip."
+- [ASSISTANT_SAID

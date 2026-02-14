@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/26 (Fri) 08:22  
+[ASSISTANT_SAID] The product ads can be modified independently of the keywords and have a custom text field for book vendors.  
+[ASSISTANT_SAID] Suggested structure for the Excel file includes columns: Object Type, Campaign ID, Campaign Name, Campaign Budget, Ad Group ID, Ad Group Name, Ad Group Default Bid, Keyword, Match Type, ASIN, SKU, Custom Text.  
+[ASSISTANT_SAID] Example structure provided with rows for Keyword and Product Ad types, including specific keywords and ASINs.  
+[ASSISTANT_SAID] The first column represents the object type (Keyword or Product Ad).  
+[ASSISTANT_SAID] ASIN, SKU, and Custom Text columns are used only for product ads.  
+[ASSISTANT_SAID] Campaign ID, Campaign Name, and Campaign Budget columns are repeated for each keyword or product ad belonging to the same campaign.  
+[ASSISTANT_SAID] Assuming that the campaign state can be modified independently of ad groups and keywords within, an additional column for the campaign state is suggested.  
+[ASSISTANT_SAID] Modified structure includes a column for Campaign State with values like "Enabled."  
+[USER] Asked if it would make sense to separate the campaign into its own row.  
+[ASSISTANT_SAID] Confirmed that separating the campaign into its own row would make it easier to manage campaign-level information independently of ad groups, keywords, and product ads.  
+[ASSISTANT_SAID] Provided a modified Excel file structure with Campaign, Ad Group, Keyword, and Product Ad types separated into their own rows.  
+[USER] Inquired if this is the most optimal structure.  
+[ASSISTANT_SAID] Stated that the structure is more optimal as it separates different object types into their own rows, allowing for better organization and easier management.  
+[ASSISTANT_SAID] Mentioned trade-offs in terms of data redundancy and complexity of processing this structure during import.  
+[USER] Suggested that there could be a case where a customer needs to update an existing campaign and create a new campaign in the same import.  
+[ASSISTANT_SAID] Recommended adding an additional column to indicate the action to be performed (e.g., "Create" or "Update").  
+[ASSISTANT_SAID] Provided a modified structure that includes an Action column for Create or Update operations.  
+[ASSISTANT_SAID] Example structure includes rows for Create and Update actions for Campaigns, Ad Groups, Keywords, and Product Ads, with specific details for each.  
+[ASSISTANT_SAID] Stated that the Bulksheet system should check the Action column to determine whether to create a new object

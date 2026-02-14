@@ -1,0 +1,35 @@
+{
+  "answer_ultrachat_563222": [
+    {
+      "fact": "User has a lot of wine corks and bottle caps lying around",
+      "type": "personal",
+      "entities": [
+        "wine corks",
+        "bottle caps"
+      ]
+    },
+    {
+      "fact": "User loves the idea of incorporating sustainable and eco-friendly elements into home decor",
+      "type": "preference",
+      "entities": [
+        "sustainable elements",
+        "eco-friendly elements",
+        "home decor"
+      ]
+    },
+    {
+      "fact": "User is interested in finding eco-friendly furniture",
+      "type": "preference",
+      "entities": [
+        "eco-friendly furniture"
+      ]
+    },
+    {
+      "fact": "User did not realize there were many ways to make home decor more sustainable",
+      "type": "opinion",
+      "entities": [
+        "sustainable home decor"
+      ]
+    }
+  ]
+}

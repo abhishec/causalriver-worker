@@ -1,0 +1,17 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/07/01
+- [EVENT] User is looking for BBQ sauce brand recommendations.
+- [PREFERENCE] User's favorite BBQ sauce is Sweet Baby Ray's.
+- [TEMPORAL] User used up their favorite Sweet Baby Ray's BBQ sauce on June 17, 2023, at a friend's place.
+- [EVENT] User has been trying out different marinades and seasoning combinations.
+- [EVENT] User recently made Korean-style BBQ beef short ribs using a recipe found online.
+- [ASSISTANT] Assistant provided a recipe for a Korean-style BBQ marinade, including essential and optional ingredients.
+- [PREFERENCE] User is experimenting with different types of wood chips to add smoky flavors to BBQ dishes.
+- [EVENT] User recently tried using apple wood chips for the first time, which added a fruity flavor to grilled chicken.
+- [ASSISTANT] Assistant recommended various wood chips that would pair well with Korean-style BBQ, including Korean Oak, Post Oak, Mesquite, Pecan, and Cherry.
+- [EVENT] User is thinking of hosting a BBQ party soon.
+- [PREFERENCE] User is planning to invest in a new patio set that can accommodate a large group of people.
+- [ASSISTANT] Assistant provided recommendations for outdoor furniture that is durable, comfortable, and easy to clean, including wicker, recycled plastic, and metal patio sets.
+- [EVENT] User is considering having a variety of BBQ dishes at their party, including vegetarian options for non-meat-eating friends.
+- [ASSISTANT] Assistant provided recommendations for delicious vegetarian BBQ dishes, including Grilled Portobello Mushroom Burgers, Roasted Vegetable Skewers, Smoky Grilled Eggplant, BBQ Jackfruit Sandwiches, Grilled Vegetable Quesadillas, Stuffed Bell Peppers, and Grilled Tofu Satay.

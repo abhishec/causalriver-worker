@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[FACT] User is updating their LinkedIn profile.  
+[FACT] User has a certification section on their LinkedIn profile.  
+[FACT] User has completed a course related to a certification on May 25th.  
+[FACT] User has a niece who graduated last month.  
+[RELATIONSHIP] User's niece graduated with honors.  
+[PREFERENCE] User is considering entering May 25th as the issue date for their certification.  
+[PREFERENCE] User is thinking about reconnecting with old friends from college.  
+[ASSISTANT_SAID] The assistant provided a step-by-step guide for adding a new certification to the user's LinkedIn profile.  
+[ASSISTANT_SAID] The assistant explained the difference between issue date and completion date for certifications.  
+[ASSISTANT_SAID] The assistant suggested that the user can enter May 25th as the issue date for now and update it later if needed.  
+[ASSISTANT_SAID] The assistant recommended adding relevant skills to the user's LinkedIn profile, such as data visualization and statistical analysis.  
+[ASSISTANT_SAID] The assistant provided steps for adding skills to the user's LinkedIn profile.  
+[ASSISTANT_SAID] The assistant explained how to get endorsements from connections on LinkedIn.  
+[ASSISTANT_SAID] The assistant discussed the pros and cons of using LinkedIn versus other social media platforms for reconnecting with old friends.  
+[ASSISTANT_SAID] The assistant suggested that mentioning the user's niece's graduation ceremony could be a good conversation starter when reaching out to old friends.  
+[ASSISTANT_CREATED] The assistant provided an example message for the user to send to their old friends on Facebook, including a personal update about the niece's graduation.  
+[TEMPORAL] Session date is 2022/03/02 (Wed) 19:57.  
+[CHANGE] User plans to reach out to old friends on Facebook first before connecting with them on LinkedIn.  
+[EVENT] User attended their niece's graduation ceremony last month.  
+[PREFERENCE] User prefers to reconnect with old friends on Facebook for a more personal approach.

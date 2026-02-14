@@ -1,0 +1,85 @@
+{
+  "answer_5fcca8bc_2": [
+    {
+      "fact": "User is heading to the US soon for a semester abroad",
+      "type": "event",
+      "entities": [
+        "US",
+        "semester abroad"
+      ]
+    },
+    {
+      "fact": "User has been attending pre-departure orientation sessions at their home university every Friday since 3/27",
+      "type": "event",
+      "entities": [
+        "pre-departure orientation",
+        "home university",
+        "3/27"
+      ]
+    },
+    {
+      "fact": "User has a laptop and a portable Wi-Fi hotspot",
+      "type": "personal",
+      "entities": [
+        "laptop",
+        "portable Wi-Fi hotspot"
+      ]
+    },
+    {
+      "fact": "User is seeking advice on packing clothing for the US climate",
+      "type": "preference",
+      "entities": [
+        "packing clothing",
+        "US climate"
+      ]
+    }
+  ],
+  "answer_5fcca8bc_1": [
+    {
+      "fact": "User is preparing for a semester abroad at the University of California, Berkeley",
+      "type": "event",
+      "entities": [
+        "University of California, Berkeley",
+        "semester abroad"
+      ]
+    },
+    {
+      "fact": "User submitted their application to the exchange program on February 10th",
+      "type": "event",
+      "entities": [
+        "February 10th",
+        "exchange program"
+      ]
+    },
+    {
+      "fact": "User got accepted into the exchange program on March 20th",
+      "type": "event",
+      "entities": [
+        "March 20th",
+        "exchange program"
+      ]
+    },
+    {
+      "fact": "User is excited about going to UC Berkeley",
+      "type": "opinion",
+      "entities": [
+        "UC Berkeley"
+      ]
+    },
+    {
+      "fact": "User has booked a flight to San Francisco on April 1st",
+      "type": "event",
+      "entities": [
+        "San Francisco",
+        "April 1st"
+      ]
+    },
+    {
+      "fact": "User's flight is scheduled to depart on August 15th",
+      "type": "event",
+      "entities": [
+        "August 15th"
+      ]
+    }
+  ]
+}

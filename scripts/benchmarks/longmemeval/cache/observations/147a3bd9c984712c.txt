@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/11/04 (Sat) 12:58  
+[ASSISTANT_SAID] Kubernetes is an open-source container orchestration system for automating the deployment, scaling, and management of containerized applications.  
+[ASSISTANT_SAID] Kubernetes was developed by Google and is now maintained by the Cloud Native Computing Foundation (CNCF).  
+[ASSISTANT_SAID] Benefits of Kubernetes include automation, scalability, high availability, and a large ecosystem of tools and integrations.  
+[ASSISTANT_SAID] Kubernetes automates the process of deploying, scaling, and managing containerized applications.  
+[ASSISTANT_SAID] Kubernetes is designed to be highly scalable, managing thousands of nodes and hundreds of thousands of containers.  
+[ASSISTANT_SAID] Kubernetes includes features such as self-healing, auto-scaling, and rolling updates for high availability.  
+[ASSISTANT_SAID] Kubernetes has a large and active ecosystem, making it easier for organizations to find resources and support.  
+[ASSISTANT_SAID] Key features of Kubernetes include deployment, scaling, self-healing, service discovery, and networking.  
+[ASSISTANT_SAID] Kubernetes objects are persistent entities in the cluster that represent the desired state of the system.  
+[ASSISTANT_SAID] Common Kubernetes objects include Pods, Services, Deployments, ReplicaSets, StatefulSets, DaemonSets, and Jobs.  
+[ASSISTANT_SAID] Mandatory fields for any Kubernetes object include `apiVersion`, `kind`, `metadata`, `spec`, and `status`.  
+[ASSISTANT_SAID] `kubectl` is a command-line tool for interacting with a Kubernetes cluster, allowing deployment and management of applications.  
+[ASSISTANT_SAID] `kubectl` provides commands for deploying applications, scaling replicas, updating configurations, and troubleshooting resources.  
+[ASSISTANT_SAID] Common Kubernetes objects used when deploying applications include Pods, Deployments, Services, and Ingress.  
+[ASSISTANT_SAID] There is no `kubectl get containers` command; to list containers in a pod, use `kubectl describe pod` or `kubectl get pods -o wide`.  
+[ASSISTANT_SAID] Best practices for Kubernetes include using declarative configuration, labels and annotations, namespaces, resource limits and quotas, rolling updates, and liveness/readiness probes.  
+[ASSISTANT_SAID] Use declarative configuration files to define the desired state of resources in Kubernetes.  
+[ASSISTANT_SAID] Use labels to group and select resources, and annotations to store additional metadata about resources.  
+[ASSISTANT_SAID] Use namespaces to isolate resources and limit the scope of resource management.  
+[ASSISTANT_SA

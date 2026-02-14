@@ -1,0 +1,21 @@
+**Observation Log**
+
+[FACT] User is a student at the University of California, Berkeley.  
+[EVENT] User is moving to the US in August.  
+[EVENT] User is planning to take a few days to travel to San Francisco before moving to Berkeley.  
+[ASSISTANT_SAID] Assistant congratulated the user on their move to Berkeley.  
+[ASSISTANT_SAID] Assistant provided a list of online retailers for affordable furniture: IKEA, Amazon, Wayfair.  
+[ASSISTANT_SAID] Assistant provided a list of local stores for affordable furniture: Target, TJ Maxx/Marshalls/Homesense, Furniture Outlet Stores, Second-Hand Stores.  
+[ASSISTANT_SAID] Assistant provided other options for finding furniture: Craigslist, Facebook Marketplace, Berkeley-specific online groups, Garage Sales and Estate Sales.  
+[ASSISTANT_SAID] Assistant offered tips for buying furniture: measure space, inspect before buying, negotiate, consider buying in bulk.  
+[ASSISTANT_SAID] Assistant recommended must-see attractions in San Francisco: Golden Gate Bridge, Alcatraz Island, The Painted Ladies, Fisherman's Wharf, Chinatown, Haight-Ashbury, de Young Museum, SFMOMA, The Exploratorium, Lombard Street, Cable Cars, Ferry Building Marketplace.  
+[ASSISTANT_SAID] Assistant provided insider tips for visiting San Francisco: take a guided tour, use public transportation, be prepared for fog.  
+[FACT] User is interested in the tech industry in Berkeley.  
+[FACT] User is a psychology major.  
+[ASSISTANT_SAID] Assistant explained that Berkeley is a hub for the tech industry with top companies and startups.  
+[ASSISTANT_SAID] Assistant listed ways psychology majors can get involved in tech: User Experience (UX) Design, Human-Computer Interaction (HCI), Data Analysis and Science, Product Management, Research and Development, Communication and Project Management.  
+[ASSISTANT_SAID] Assistant provided steps for getting started in the tech industry: take relevant courses, join tech-related clubs or organizations, attend industry events and conferences, network and build connections, gain experience through internships or projects.  
+[ASSISTANT_SAID] Assistant recommended online resources and courses for learning UX design: Coursera - User Experience (UX) Design, Udemy - User Experience (UX) Design Fundamentals, Skillshare - User Experience (UX) Design, edX - Human-Centered Design.  
+[ASSISTANT_SAID] Assistant listed online resources for UX design: UX Collective, Smashing Magazine, UX Design subreddit, Nielsen Norman Group.  
+[ASSISTANT_SAID] Assistant provided portfolio building resources: UX Design Challenge, Dribbble, Behance, UX Design Portfolio Template.  
+[ASSISTANT_SAID] Assistant advised user to practice by working on personal projects or volunteering and to join

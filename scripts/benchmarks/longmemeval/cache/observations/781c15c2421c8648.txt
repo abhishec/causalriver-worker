@@ -1,0 +1,35 @@
+**Observation Log:**
+
+- [FACT] The user is performing in a play, specifically Les Misérables.
+- [EVENT] The user had a costume fitting on Thursday.
+- [TEMPORAL] The session date is 2023/05/28 (Sun) 02:52.
+- [TEMPORAL] The user auditioned for the role three weeks ago.
+- [TEMPORAL] The user has been rehearsing nonstop since auditioning.
+- [EVENT] The user needs to pick up their script from the theater office today.
+- [ASSISTANT_SAID] The assistant congratulated the user on their costume fitting and asked about the occasion.
+- [ASSISTANT_SAID] The assistant suggested breaking down the user's tasks and creating a schedule for the next few days.
+- [ASSISTANT_CREATED] The assistant created a suggested schedule for the user:
+  - **Day 1:** 
+    - Set aside 1-2 hours to review the script, focusing on scenes and lines.
+    - Allocate 30 minutes to 1 hour to practice songs, focusing on pitch, tone, and emotion.
+  - **Day 2:** 
+    - Continue reviewing the script, focusing on stage directions and blocking.
+    - Practice songs again, focusing on harmonies and blending with the cast.
+  - **Day 3:** 
+    - Review choreography or dance moves.
+    - Run through scenes and songs with a friend or record for comfort.
+  - **Rehearsal Days:** 
+    - Arrive early to get settled before rehearsals.
+    - Take notes during rehearsals and review them afterwards.
+- [ASSISTANT_SAID] The assistant reminded the user to take breaks, eat well, and get enough sleep.
+- [ASSISTANT_SAID] The assistant provided tips for writing a good bio for the program:
+  1. Keep it brief (1-2 sentences or 50-75 words).
+  2. Focus on theater experience.
+  3. Mention relevant awards or achievements.
+  4. Add a personal touch.
+  5. Proofread and edit.
+- [ASSISTANT_CREATED] The assistant provided an example bio for a Les Misérables program:
+  - "[Your Name] is thrilled to play the role of [Character] in Les Misérables. A [city] native, [he/she] has appeared in numerous productions, including [previous shows]. [He/She] is a [degree] graduate of [college/university] and is grateful for the opportunity to bring this iconic character to life."
+- [CHANGE] The user acknowledged that they got carried away with the timeline regarding rehearsals and confirmed they are still in the midst of rehearsals.
+- [PREFERENCE] The user expressed a desire to focus on their previous theater experience and training for their bio.
+- [ASSISTANT_SAID] The assistant encouraged

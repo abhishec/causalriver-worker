@@ -1,0 +1,127 @@
+{
+  "answer_c008e5df_3": [
+    {
+      "fact": "User is looking for healthy recipe ideas for lunch.",
+      "type": "preference",
+      "entities": [
+        "healthy recipe ideas",
+        "lunch"
+      ]
+    },
+    {
+      "fact": "User has been busy lately.",
+      "type": "personal",
+      "entities": [
+        "busy"
+      ]
+    },
+    {
+      "fact": "User has been relying on food delivery services.",
+      "type": "preference",
+      "entities": [
+        "food delivery services"
+      ]
+    },
+    {
+      "fact": "User found a food delivery service called Fresh Fusion.",
+      "type": "personal",
+      "entities": [
+        "Fresh Fusion"
+      ]
+    },
+    {
+      "fact": "User likes the Quinoa and Black Bean Salad idea.",
+      "type": "preference",
+      "entities": [
+        "Quinoa and Black Bean Salad"
+      ]
+    },
+    {
+      "fact": "User made something similar to Quinoa and Black Bean Salad recently.",
+      "type": "event",
+      "entities": [
+        "Quinoa and Black Bean Salad"
+      ]
+    },
+    {
+      "fact": "User is looking for a healthy dinner option that's quick to make and doesn't require a lot of ingredients.",
+      "type": "preference",
+      "entities": [
+        "healthy dinner option",
+        "quick to make",
+        "few ingredients"
+      ]
+    }
+  ],
+  "answer_c008e5df_1": [
+    {
+      "fact": "User is looking for healthy meal ideas for busy weekdays",
+      "type": "preference",
+      "entities": [
+        "healthy meal ideas",
+        "busy weekdays"
+      ]
+    },
+    {
+      "fact": "User has been relying on food delivery services a lot lately",
+      "type": "opinion",
+      "entities": [
+        "food delivery services"
+      ]
+    },
+    {
+      "fact": "User had Domino's Pizza three times last week",
+      "type": "event",
+      "entities": [
+        "Domino's Pizza"
+      ]
+    },
+    {
+      "fact": "User likes the overnight oats idea",
+      "type": "preference",
+      "entities": [
+        "overnight oats"
+      ]
+    },
+    {
+      "fact": "User is not a big fan of nuts",
+      "type": "preference",
+      "entities": [
+        "nuts"
+      ]
+    }
+  ],
+  "answer_c008e5df_2": [
+    {
+      "fact": "User is looking for quick and easy recipe ideas for weeknights.",
+      "type": "preference",
+      "entities": [
+        "quick recipes",
+        "easy recipes",
+        "weeknights"
+      ]
+    },
+    {
+      "fact": "User has been relying on Uber Eats for convenience on weekends.",
+      "type": "opinion",
+      "entities": [
+        "Uber Eats",
+        "weekends"
+      ]
+    },
+    {
+      "fact": "User wants to make healthier choices for snacks.",
+      "type": "preference",
+      "entities": [
+        "healthy snacks"
+      ]
+    },
+    {
+      "fact": "User is interested in trying Chicken Fajita Pasta.",
+      "type": "preference",
+      "entities": [
+        "Chicken Fajita Pasta"
+      ]
+    }
+  ]
+}

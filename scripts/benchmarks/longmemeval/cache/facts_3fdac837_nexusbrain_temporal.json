@@ -1,0 +1,94 @@
+{
+  "answer_419d21d5_2": [
+    {
+      "fact": "User is planning a trip to Chicago",
+      "type": "event",
+      "entities": [
+        "Chicago"
+      ]
+    },
+    {
+      "fact": "User has been to Chicago before",
+      "type": "event",
+      "entities": [
+        "Chicago"
+      ]
+    },
+    {
+      "fact": "User loved the city of Chicago",
+      "type": "opinion",
+      "entities": [
+        "Chicago"
+      ]
+    },
+    {
+      "fact": "User is looking for good Italian restaurants",
+      "type": "preference",
+      "entities": [
+        "Italian restaurants"
+      ]
+    },
+    {
+      "fact": "User had great Italian food during their last 4-day trip to Chicago",
+      "type": "event",
+      "entities": [
+        "Italian food",
+        "Chicago"
+      ]
+    },
+    {
+      "fact": "User has heard good things about Carmine's",
+      "type": "opinion",
+      "entities": [
+        "Carmine's"
+      ]
+    }
+  ],
+  "answer_419d21d5_1": [
+    {
+      "fact": "User is planning a trip to Asia",
+      "type": "event",
+      "entities": [
+        "Asia"
+      ]
+    },
+    {
+      "fact": "User is interested in must-visit places in Tokyo",
+      "type": "preference",
+      "entities": [
+        "Tokyo"
+      ]
+    },
+    {
+      "fact": "User previously visited Japan from April 15th to 22nd",
+      "type": "event",
+      "entities": [
+        "Japan",
+        "April 15th to 22nd"
+      ]
+    },
+    {
+      "fact": "User fell in love with Tokyo",
+      "type": "opinion",
+      "entities": [
+        "Tokyo"
+      ]
+    },
+    {
+      "fact": "User is planning to visit other cities in Asia besides Tokyo",
+      "type": "event",
+      "entities": [
+        "Asia",
+        "Tokyo"
+      ]
+    },
+    {
+      "fact": "User is looking for popular destinations in Asia within a 5-hour flight radius from Tokyo",
+      "type": "preference",
+      "entities": [
+        "Asia",
+        "Tokyo"
+      ]
+    }
+  ]
+}

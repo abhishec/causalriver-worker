@@ -1,0 +1,20 @@
+**Observation Log:**
+
+[FACT] User needs help tracking expenses related to gift-giving.  
+[FACT] User has been buying gifts for friends and family.  
+[FACT] User is unsure where their money is going.  
+[EVENT] User has spent around $400 on gifts in the past month.  
+[EVENT] User bought gifts for specific occasions: birthdays, a baby shower, and a wedding.  
+[EVENT] User received two gift cards worth $20 each from a baby store and for a couple getting married.  
+[PREFERENCE] User tends to buy gifts for specific occasions (birthdays, weddings, baby showers).  
+[PREFERENCE] User does not have a specific price range in mind but tries to be thoughtful with gifts.  
+[PREFERENCE] User buys gifts both in-store and online, depending on the occasion and store.  
+[ASSISTANT_SAID] Assistant suggested breaking down gift-giving expenses into categories: Occasional Gifts and Impulse Gifts.  
+[ASSISTANT_SAID] Assistant recommended setting a budget for gifts in the future, suggesting $150 for Occasional Gifts and $50 for Impulse Gifts over the next 3 months.  
+[ASSISTANT_SAID] Assistant suggested setting reminders for upcoming occasions to plan gifts in advance and stay within budget.  
+[ASSISTANT_SAID] Assistant provided methods for setting reminders: calendar reminders, a gift-giving planner, mobile apps, and alerts from online stores.  
+[ASSISTANT_SAID] Assistant recommended creating a digital gift planner template with columns for Occasion, Date, Budget, Gift Idea, Purchase Date, Amount Spent, and Remaining Budget.  
+[ASSISTANT_SAID] Assistant suggested tracking gift card balances separately or subtracting them from the total budget.  
+[ASSISTANT_SAID] Assistant outlined the pros and cons of treating gift cards as a separate fund versus subtracting them from the total budget.  
+[ASSISTANT_CREATED] Assistant created a digital gift planner template structure with specific columns for tracking gift-giving expenses.  
+[TEMPORAL] Session date is 2023/05/28 (Sun) 19:26.

@@ -1,0 +1,44 @@
+{
+  "answer_1e6d4567": [
+    {
+      "fact": "User is planning a fishing trip to Lake Michigan with friends",
+      "type": "event",
+      "entities": [
+        "Lake Michigan",
+        "friends"
+      ]
+    },
+    {
+      "fact": "User has experience fishing in Lake Michigan",
+      "type": "personal",
+      "entities": [
+        "Lake Michigan"
+      ]
+    },
+    {
+      "fact": "User found that spinner lures worked better for trout than live bait",
+      "type": "opinion",
+      "entities": [
+        "spinner lures",
+        "trout",
+        "live bait"
+      ]
+    },
+    {
+      "fact": "User caught 12 largemouth bass on their last trip to Lake Michigan",
+      "type": "event",
+      "entities": [
+        "12 largemouth bass",
+        "Lake Michigan"
+      ]
+    },
+    {
+      "fact": "User is interested in targeting trout in Lake Michigan",
+      "type": "preference",
+      "entities": [
+        "trout",
+        "Lake Michigan"
+      ]
+    }
+  ]
+}

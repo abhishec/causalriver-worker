@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[FACT] User is located in Oakland, California.  
+[PREFERENCE] User is looking for birding spots known for spotting warblers during their migration.  
+[EVENT] User is planning to go birding during the spring migration, which they think is around April-May.  
+[PREFERENCE] User is open to traveling up to an hour for a good birding spot.  
+[ASSISTANT_SAID] Assistant provided recommendations for birding hotspots within an hour's drive from Oakland, including:  
+[ASSISTANT_SAID] 1. Point Reyes National Seashore (45 minutes from Oakland) - Notable for Orange-crowned, Yellow, Nashville, Townsend's, and Hermit Warblers.  
+[ASSISTANT_SAID] 2. Mount Tamalpais State Park (30 minutes from Oakland) - Notable for Wilson's, Yellow, and Orange-crowned Warblers.  
+[ASSISTANT_SAID] 3. Briones Regional Park (20 minutes from Oakland) - Notable for Orange-crowned, Yellow, Nashville Warblers, and Common Yellowthroat.  
+[ASSISTANT_SAID] 4. Tilden Regional Park (20 minutes from Oakland) - Notable for Orange-crowned, Yellow, and Nashville Warblers.  
+[ASSISTANT_SAID] 5. Coyote Lake-Harvey Bear Ranch County Park (45 minutes from Oakland) - Notable for Orange-crowned, Yellow, Nashville Warblers, and MacGillivray's Warbler.  
+[ASSISTANT_SAID] 6. Ed Levin County Park (30 minutes from Oakland) - Notable for Orange-crowned, Yellow, Nashville Warblers, and Common Yellowthroat.  
+[ASSISTANT_SAID] Assistant provided tips for warbler spotting, including arriving early in the morning, being prepared for variable weather, and listening for distinctive songs and calls.  
+[EVENT] User asked for specific tips for identifying warblers by their calls and songs.  
+[ASSISTANT_SAID] Assistant explained the difference between songs and calls, emphasizing the importance of learning songs first.  
+[ASSISTANT_SAID] Assistant provided tips for learning warbler vocalizations, including starting with common species, using audio recordings, and practicing.  
+[ASSISTANT_SAID] Assistant mentioned challenging warblers to identify, such as Empidonax Flycatchers and Sylvia Warblers, and provided tips for distinguishing them.  
+[EVENT] User inquired about native plants that attract warblers and other birds to their yard.  
+[ASSISTANT_SAID] Assistant listed native California plants known to attract warblers and other birds, including:  
+[ASSISTANT_SAID] - California Bay Laurel (Umbellularia californica)  
+[ASSISTANT_SAID] - Coast Live Oak (Quercus agr

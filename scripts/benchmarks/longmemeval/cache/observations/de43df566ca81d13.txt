@@ -1,0 +1,19 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/24 (Wed) 15:13  
+[USER] User wants the assistant to act as a Kindle that simulates digital book reading.  
+[PREFERENCE] User prefers to type in the name of the book and receive the first page.  
+[PREFERENCE] User may request specific page numbers, chapter titles, table of contents, preface, or navigation to the next or previous page.  
+[PREFERENCE] User may change books entirely and expects the assistant to follow that command.  
+[PREFERENCE] User may ask for meaningful commentary on a section or specific excerpt, and the assistant is expected to oblige.  
+[PREFERENCE] User may request specific scenes or descriptions of specific parts of the book without commentary.  
+[PREFERENCE] User specifies that original commentary should only be provided if the token 'commentary' is included.  
+[ASSISTANT_SAID] Assistant generated the first page of "Brave New World" as requested by the user.  
+[ASSISTANT_CREATED] Assistant provided the text of the first page of "Brave New World," including the title, chapter, and page number.  
+[USER] User requested to find the scene where they describe the drug SOMA.  
+[ASSISTANT_SAID] Assistant generated the scene discussing SOMA from "Brave New World," including the title, chapter, and page number.  
+[USER] User requested to find the scene in the book where they talk about how people are made in tubes in factories.  
+[ASSISTANT_SAID] Assistant generated the scene discussing how people are made in tubes in factories from "Brave New World," including the title, chapter, and page number.  
+[USER] User requested a summary of chapter 1.  
+[ASSISTANT_SAID] Assistant provided a summary of chapter 1 of "Brave New World," including the title, chapter, and page number.  
+[ASSISTANT_CREATED] Assistant created a summary of chapter 1, detailing the introduction of the World State and the process of human creation and conditioning.

@@ -1,0 +1,32 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/22 (Mon) 02:17
+- [FACT] User loves snapper.
+- [PREFERENCE] User expressed interest in trying Caribbean dishes that feature snapper.
+- [ASSISTANT] Recommended popular Caribbean dishes featuring snapper: 
+  1. Escovitch Fish - a Jamaican dish with fried snapper and spicy pickled vegetable sauce.
+  2. Fish Curry - a Trinidadian dish with snapper in curry sauce.
+  3. Conch & Snapper Stew - a Bahamian dish with conch and snapper in tomato-based stew.
+  4. Grilled Snapper with Mango Salsa - grilled snapper topped with fruity and spicy salsa.
+  5. Fish and Fungi - a Virgin Islands dish with snapper and a cornmeal-like dish.
+- [PREFERENCE] User found the recommended dishes amazing.
+- [ASSISTANT] Suggested escovitch fish as a good dish for the user to try first.
+- [ASSISTANT] Described escovitch fish as crispy fried snapper topped with a spicy and tangy pickled vegetable sauce made with carrots, onion, bell peppers, and vinegar.
+- [ASSISTANT] Provided methods to find escovitch fish in the user's area:
+  1. Check review websites and apps like Yelp, Google Reviews, or Zomato for Jamaican cuisine.
+  2. Call or visit Jamaican restaurants to inquire about escovitch fish.
+  3. Ask friends or family for recommendations on Caribbean cuisine.
+- [PREFERENCE] User plans to try escovitch fish and check out Jamaican restaurants.
+- [ASSISTANT] Listed other popular Caribbean dishes:
+  1. Jerk Chicken - spicy Jamaican chicken dish.
+  2. Arroz con Pollo - Puerto Rican dish of rice with chicken.
+  3. Callaloo - Trinidadian soup with leafy greens and coconut milk.
+  4. Cubano Sandwich - Cuban sandwich with roast pork, ham, and cheese.
+  5. Tostones - fried plantains.
+- [PREFERENCE] User has tried jerk chicken before and loved it.
+- [ASSISTANT] Recommended additional Jamaican dishes to try:
+  1. Ackee and Saltfish - Jamaica's national dish with ackee fruit and salted codfish.
+  2. Curry Goat - curry made with tender goat meat.
+  3. Festival and Fried Fish - festival is a fried cornbread-like dish served with fried fish.
+  4. Brown Stew Chicken - chicken marinated in a sweet and savory sauce with vegetables.
+  5. Oxtail Stew - slow-cooked oxtail in a rich stew with vegetables and beans.

@@ -1,0 +1,20 @@
+**Observation Log:**
+
+[SESSION DATE] 2023/05/20 (Sat) 05:58  
+[EVENT] User is planning a road trip from Denver to Mount Rushmore.  
+[EVENT] User just got back from a 4-day trip to Yellowstone National Park with their family last month.  
+[FACT] User covered a total of 1,200 miles during their Yellowstone trip.  
+[EVENT] User drove around 300 miles on the first day to reach Jackson, Wyoming, during the Yellowstone trip.  
+[PREFERENCE] User enjoys scenic views during road trips.  
+[ASSISTANT] The assistant provided a recommended route from Denver to Mount Rushmore, approximately 570 miles and taking around 8-9 hours of driving time.  
+[ASSISTANT] The assistant suggested scenic stops along the way, including Cheyenne, WY; Wall, SD; and Badlands National Park, SD.  
+[ASSISTANT] The assistant provided tips and recommendations for the road trip, including checking for road closures and trying local cuisine.  
+[EVENT] User is considering camping instead of staying in a hotel near Mount Rushmore.  
+[ASSISTANT] The assistant recommended several camping sites near Mount Rushmore, including Mount Rushmore National Memorial KOA and Custer State Park.  
+[ASSISTANT] The assistant provided details about amenities and activities at Mount Rushmore National Memorial KOA, including a pool, playground, and shuttle service to Mount Rushmore.  
+[ASSISTANT] The assistant confirmed that the shuttle service to Mount Rushmore is free for KOA guests and runs every 30 minutes.  
+[EVENT] User decided to go with the deluxe cabin rental at Mount Rushmore National Memorial KOA.  
+[ASSISTANT] The assistant provided information about the shuttle service schedule and tips for using it.  
+[EVENT] User is thinking about food options near Mount Rushmore.  
+[ASSISTANT] The assistant recommended several restaurants and cafes in the area, including The Keystone Café, The Ruby House Restaurant, and The Independent Ale House.  
+[ASSISTANT] The assistant mentioned that the recommended restaurants focus on local ingredients and offer a variety of American and German cuisine.

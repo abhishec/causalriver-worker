@@ -1,0 +1,19 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/27 (Sat) 10:11  
+[FACT] User has a 20-gallon tank.  
+[FACT] User upgraded from an old 10-gallon tank.  
+[FACT] User has a betta fish named Bubbles.  
+[FACT] User has some gouramis in their 20-gallon tank.  
+[PREFERENCE] User is considering adding live aquatic plants to their freshwater tank.  
+[PREFERENCE] User is interested in adding schooling fish like lemon tetras or zebra danios to their 20-gallon tank.  
+[PREFERENCE] User has been trying to distract their gouramis with extra food or tank decorations during feeding times.  
+[PREFERENCE] User is considering feeding frozen bloodworms to their betta fish, Bubbles.  
+[EVENT] User is planning to add schooling fish to their 20-gallon tank.  
+[CHANGE] User has noticed aggression among their gouramis during feeding times.  
+[ASSISTANT] The assistant provided tips on how to get started with adding live aquatic plants, including choosing the right plants, preparing the tank, and monitoring plant health.  
+[ASSISTANT] The assistant provided methods to anchor plants in the substrate to prevent them from floating away.  
+[ASSISTANT] The assistant provided information about the behavior and tank requirements of lemon tetras and zebra danios.  
+[ASSISTANT] The assistant suggested that adding schooling fish could help distract the gouramis and reduce aggression.  
+[ASSISTANT] The assistant provided tips for feeding frozen bloodworms to the betta fish, Bubbles, including how to thaw and serve them.  
+[ASSISTANT] The assistant recommended monitoring the tank dynamics closely after adding new fish.

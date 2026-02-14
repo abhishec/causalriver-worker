@@ -1,0 +1,31 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/21 (Sun) 03:27
+- [USER] User is interested in housing prices in Arcadia and neighboring cities.
+- [ASSISTANT_SAID] Arcadia is known for its high-end homes and luxurious estates, generally having higher housing prices than neighboring cities like Monrovia, Pasadena, and Temple City.
+- [USER] User expresses surprise at Arcadia's reputation for high-end homes and asks if it is worth looking into buying a house there or if they should focus on neighboring cities instead.
+- [ASSISTANT_SAID] The decision to buy a house in Arcadia or a neighboring city depends on personal needs and circumstances; Arcadia has well-regarded schools, varied dining and shopping options, and proximity to Santa Anita Park and the Los Angeles Arboretum, but higher prices may not be feasible for everyone.
+- [USER] User inquires about up-and-coming neighborhoods in the San Gabriel Valley that may offer more affordable housing options compared to Arcadia.
+- [ASSISTANT_SAID] Suggested neighborhoods include:
+  1. El Monte - experiencing redevelopment and new housing developments.
+  2. Alhambra - known for its diverse community and range of housing options.
+  3. Baldwin Park - investing in new development and infrastructure.
+  4. Rosemead - home to several new housing developments.
+- [USER] User asks for websites or resources to find the latest real estate data and compare housing prices in different neighborhoods.
+- [ASSISTANT_SAID] Recommended websites include:
+  1. Zillow - provides home listings and "Zestimate" for home values.
+  2. Redfin - offers home listings and "Redfin Estimate" for home values.
+  3. Realtor.com - provides home listings and local housing market trends.
+  4. Trulia - similar to Zillow and Redfin with home listings and value estimates.
+  5. MLS - suggested to consult a real estate agent for access to local MLS data.
+- [USER] User expresses gratitude for the information and asks for recommendations for good real estate agents in the San Gabriel Valley area.
+- [ASSISTANT_SAID] Suggested tips for finding a good real estate agent:
+  1. Referrals from friends or family.
+  2. Online reviews on platforms like Zillow, Yelp, or Google.
+  3. Conducting agent interviews to assess experience and communication style.
+  4. Finding an agent who specializes in desired neighborhoods or property types.
+- [USER] User requests advice on negotiating for a better deal on a house.
+- [ASSISTANT_SAID] Provided negotiation tips:
+  1. Get pre-approved for a mortgage to show seriousness.
+  2. Research the market to understand fair property values.
+  3. Be willing to walk away if the price

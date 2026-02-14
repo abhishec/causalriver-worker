@@ -1,0 +1,29 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/06/21 (Wed) 11:31  
+[USER] User is building a blog about room service experiences.  
+[ASSISTANT_SAID] Suggested a normalized schema for a single-user blog about room service experiences in PostgreSQL.  
+[ASSISTANT_CREATED] Provided SQL code for creating tables: `hotels`, `users`, `room_service_reviews`, and `user_hotel`.  
+[ASSISTANT_SAID] Explained the purpose of each table in the schema.  
+[USER] Requested to include details about the amount of time it takes from ordering to receiving room service.  
+[ASSISTANT_SAID] Suggested adding a `time_to_deliver` column in the `room_service_reviews` table.  
+[ASSISTANT_CREATED] Provided updated SQL code for the `room_service_reviews` table including the `time_to_deliver` column of type `interval`.  
+[USER] Asked for a web interface design using Angular to expose the reviews.  
+[ASSISTANT_SAID] Provided a step-by-step guide to create an Angular project and component for displaying room service reviews.  
+[ASSISTANT_CREATED] Included code snippets for `room-service-reviews.component.ts`, `room-service-reviews.component.html`, and `AppModule`.  
+[USER] Requested free or low-cost recommendations to host the PostgreSQL database.  
+[ASSISTANT_SAID] Listed options for hosting PostgreSQL databases:  
+1. Heroku - free tier available.  
+2. Google Cloud SQL - free tier available.  
+3. Amazon RDS - free tier available.  
+4. ElephantSQL - free tier available.  
+5. DigitalOcean - free tier available.  
+[USER] Asked if Railway can be used to host a PostgreSQL database for free.  
+[ASSISTANT_SAID] Incorrectly stated that Railway does not provide a free tier for PostgreSQL.  
+[USER] Corrected the assistant, stating that Railway does offer a free tier for hosting PostgreSQL.  
+[ASSISTANT_SAID] Acknowledged the correction and confirmed that Railway does offer a free tier for PostgreSQL databases.  
+[USER] Requested a connection string for a Railway PostgreSQL database for use in DataGrip or DBeaver.  
+[ASSISTANT_SAID] Provided a general format for a PostgreSQL connection string:  
+`jdbc:postgresql://host:port/database?user=user&password=password`  
+[ASSISTANT_SAID] Explained the components of the connection string: host, port, database, user, and password.  
+[ASSISTANT_SAID] Advised to consult the documentation for specific tools for more information on creating a connection string.

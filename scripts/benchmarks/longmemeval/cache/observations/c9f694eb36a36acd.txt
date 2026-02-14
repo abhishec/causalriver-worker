@@ -1,0 +1,26 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/24 (Wed) 17:32
+- [FACT] User is communicating with a customer named Eng. Khaled.
+- [FACT] User is involved in app development and support.
+- [EVENT] User received an email from a customer expressing appreciation for the app team's efforts.
+- [CHANGE] User noted that most issues with the app have been resolved.
+- [PREFERENCE] Customer believes that the support period should begin after the full delivery of the app, code, and documentation.
+- [ASSISTANT_SAID] Assistant acknowledged the customer's appreciation and noted the team's efforts in resolving issues.
+- [ASSISTANT_SAID] Assistant stated that the standard practice is to begin the support period upon delivery of the app, code, and documentation.
+- [ASSISTANT_SAID] Assistant provided responses to specific issues raised by the customer regarding the app.
+- [ASSISTANT_SAID] Assistant confirmed that the app will now only display products that are available in stock.
+- [ASSISTANT_SAID] Assistant clarified that the search and filter functionality is for category names only and not for products.
+- [ASSISTANT_SAID] Assistant confirmed that the banners are now working and that the issue with the links in the backend app image section has been fixed.
+- [ASSISTANT_SAID] Assistant stated that the cart will now function correctly even if the client is not logged in.
+- [ASSISTANT_SAID] Assistant acknowledged the change of the label from "أستمارة التواصل" to "نموذج التواصل".
+- [ASSISTANT_SAID] Assistant confirmed that the small gray space issue on top of every screen has been reviewed and fixed.
+- [CHANGE] User mentioned that the support period started from 16-2-2023.
+- [EVENT] User requested to arrange a delivery meeting and mentioned the need to migrate the plugin and prepare the production environment.
+- [FACT] User indicated that they delivered the documentation and the Android version two months ago.
+- [FACT] User stated that they have been providing support since the delivery of the documentation and Android version.
+- [FACT] User mentioned that they requested designs for iOS two months ago and only received them a week ago.
+- [ASSISTANT_CREATED] Assistant provided a WordPress API endpoint code for logging in with Apple ID.
+- [ASSISTANT_CREATED] Assistant included specific details in the code such as the endpoint URL `/wp-json/myplugin/v1/apple-login`, the method `POST`, and the callback function `apple_login_callback`.
+- [ASSISTANT_SAID] Assistant explained the process of verifying the Apple ID token using Apple's API and handling user login or creation.
+- [ASSISTANT_SAID] Assistant mentioned the need to replace `APPLE_CLIENT_ID`, `APPLE_CLIENT_SECRET`, and `APPLE

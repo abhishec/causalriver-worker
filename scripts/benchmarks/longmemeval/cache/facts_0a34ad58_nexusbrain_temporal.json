@@ -1,0 +1,33 @@
+{
+  "answer_cebb7159": [
+    {
+      "fact": "User is heading to Tokyo soon",
+      "type": "event",
+      "entities": [
+        "Tokyo"
+      ]
+    },
+    {
+      "fact": "User is looking for good restaurants near the Park Hyatt Tokyo",
+      "type": "preference",
+      "entities": [
+        "Park Hyatt Tokyo",
+        "restaurants"
+      ]
+    },
+    {
+      "fact": "User plans to visit the Tsukiji Fish Market",
+      "type": "event",
+      "entities": [
+        "Tsukiji Fish Market"
+      ]
+    },
+    {
+      "fact": "User has a Suica card",
+      "type": "personal",
+      "entities": [
+        "Suica card"
+      ]
+    }
+  ]
+}

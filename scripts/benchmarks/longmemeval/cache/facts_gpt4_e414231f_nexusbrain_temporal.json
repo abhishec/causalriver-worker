@@ -1,0 +1,115 @@
+{
+  "answer_e28c1f0e_1": [
+    {
+      "fact": "User is planning a longer bike ride this weekend, around 60 miles.",
+      "type": "event",
+      "entities": [
+        "bike ride",
+        "60 miles",
+        "weekend"
+      ]
+    },
+    {
+      "fact": "User has a road bike.",
+      "type": "personal",
+      "entities": [
+        "road bike"
+      ]
+    },
+    {
+      "fact": "User has a mountain bike.",
+      "type": "personal",
+      "entities": [
+        "mountain bike"
+      ]
+    },
+    {
+      "fact": "User fixed a flat tire on their mountain bike.",
+      "type": "event",
+      "entities": [
+        "flat tire",
+        "mountain bike"
+      ]
+    },
+    {
+      "fact": "User replaced the inner tube and cleaned the chain on their mountain bike.",
+      "type": "event",
+      "entities": [
+        "inner tube",
+        "chain",
+        "mountain bike"
+      ]
+    },
+    {
+      "fact": "User's mountain bike is running smoothly after maintenance.",
+      "type": "opinion",
+      "entities": [
+        "mountain bike",
+        "maintenance"
+      ]
+    },
+    {
+      "fact": "User is considering taking their road bike in for a maintenance check.",
+      "type": "event",
+      "entities": [
+        "road bike",
+        "maintenance check"
+      ]
+    },
+    {
+      "fact": "User's road bike brakes feel spongy.",
+      "type": "opinion",
+      "entities": [
+        "road bike",
+        "brakes"
+      ]
+    },
+    {
+      "fact": "User plans to use MapMyRide to find a suitable route for their bike ride.",
+      "type": "preference",
+      "entities": [
+        "MapMyRide",
+        "route"
+      ]
+    }
+  ],
+  "answer_e28c1f0e_2": [
+    {
+      "fact": "User owns a road bike",
+      "type": "personal",
+      "entities": [
+        "road bike"
+      ]
+    },
+    {
+      "fact": "User is considering upgrading to clipless pedals",
+      "type": "preference",
+      "entities": [
+        "clipless pedals"
+      ]
+    },
+    {
+      "fact": "User decided to upgrade to Shimano Ultegra pedals",
+      "type": "event",
+      "entities": [
+        "Shimano Ultegra pedals"
+      ]
+    },
+    {
+      "fact": "User is concerned about the brakes on their road bike feeling spongy",
+      "type": "opinion",
+      "entities": [
+        "brakes",
+        "spongy"
+      ]
+    },
+    {
+      "fact": "User is considering getting the brakes adjusted or replaced during the maintenance check",
+      "type": "preference",
+      "entities": [
+        "brakes",
+        "maintenance check"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "answer_ultrachat_294807": [
+    {
+      "fact": "User has never tried a lamb stew before.",
+      "type": "personal",
+      "entities": [
+        "lamb stew"
+      ]
+    },
+    {
+      "fact": "User plans to try the recipe with a Pilsner.",
+      "type": "preference",
+      "entities": [
+        "Pilsner"
+      ]
+    },
+    {
+      "fact": "User is excited to try the recipe this weekend.",
+      "type": "event",
+      "entities": [
+        "recipe",
+        "weekend"
+      ]
+    },
+    {
+      "fact": "User is interested in dessert suggestions that pair well with Seco de Cordero.",
+      "type": "preference",
+      "entities": [
+        "dessert",
+        "Seco de Cordero"
+      ]
+    }
+  ]
+}

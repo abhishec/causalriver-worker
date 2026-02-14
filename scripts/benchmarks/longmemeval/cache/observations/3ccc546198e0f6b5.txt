@@ -1,0 +1,26 @@
+**Observation Log:**
+
+- [FACT] The user is looking for dance studios in their area that offer contemporary classes.
+- [FACT] The user is located in the city.
+- [EVENT] The user has been taking salsa lessons for three weeks.
+- [CHANGE] The user has improved in salsa dancing since starting lessons three weeks ago.
+- [PREFERENCE] The user is starting to get the hang of the tricky cross-body lead step in salsa.
+- [EVENT] The user is working on a hip hop routine for a showcase at their dance studio.
+- [PREFERENCE] The user is excited to perform the hip hop routine on stage.
+- [FACT] The user is performing to a popular song by Ariana Grande.
+- [EVENT] The user has been rehearsing the hip hop routine for weeks.
+- [PREFERENCE] The user feels confident about the choreography and the overall routine.
+- [PREFERENCE] The user is looking forward to the finale of the routine, which includes a big, energetic dance break.
+- [FACT] There are about 10 people in the user's group performing the routine.
+- [RELATIONSHIP] The user and their group members have become really close while rehearsing together.
+- [EVENT] The user is planning to invite friends and family to watch the showcase.
+- [EVENT] The studio is opening the showcase up to the public, allowing anyone to come and watch.
+- [PREFERENCE] The user feels a bit nervous about performing in front of an audience but knows it will be a great experience.
+- [ASSISTANT_SAID] The assistant offered to help find dance studios in the user's area that offer contemporary classes.
+- [ASSISTANT_SAID] The assistant suggested using Google Search, online directories, social media, and local dance organizations to find dance studios.
+- [ASSISTANT_SAID] The assistant encouraged the user to research the studio's reputation, read reviews, and observe a class before committing.
+- [ASSISTANT_SAID] The assistant congratulated the user on their progress in salsa dancing and emphasized the importance of enjoying the learning process.
+- [ASSISTANT_SAID] The assistant encouraged the user to focus on having fun and enjoying the music, rhythm, and connection with their partner in salsa.
+- [ASSISTANT_SAID] The assistant expressed excitement about the user's upcoming performance and encouraged them to own the stage and enjoy the experience.
+- [ASSISTANT_SAID] The assistant suggested that having friends and family in the audience could help ease the user's nerves.
+- [ASSISTANT_SAID] The assistant asked if the user was planning anything special to prepare for the showcase, like a final rehearsal or visualization of the performance.

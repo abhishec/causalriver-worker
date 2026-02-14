@@ -1,0 +1,25 @@
+**Observation Log:**
+
+- [FACT] User is trying to update their bank account information.
+- [FACT] User submitted an application to change their surname at the Social Security Administration office on February 1st.
+- [FACT] User is waiting for their new Social Security card to arrive.
+- [ASSISTANT_SAID] Banks typically require documentation to verify identity and confirm name change.
+- [ASSISTANT_SAID] User will need to provide the following documents to their bank: 
+  1. New Social Security card
+  2. Government-issued ID reflecting the new name
+  3. Certified copy of name change documentation (marriage certificate, divorce decree, or court order)
+  4. Additional proof of identity (passport or birth certificate)
+- [ASSISTANT_SAID] User should call their bank ahead of time to confirm specific requirements for updating their account information.
+- [ASSISTANT_SAID] User should also update their name with other relevant institutions, including credit card companies, loan providers, utility services, subscription services, and their employer.
+- [CHANGE] User plans to gather all necessary documents before heading to the bank.
+- [EVENT] User is planning to update their credit card accounts this week.
+- [ASSISTANT_SAID] User should update their credit card information to ensure accuracy in credit reports and avoid issues with transactions.
+- [ASSISTANT_SAID] User should contact each credit card issuer's customer service department to report the name change and provide required documents.
+- [ASSISTANT_SAID] User should also update their online shopping accounts, including Amazon and eBay, to ensure accurate shipping and billing information.
+- [EVENT] User plans to update their online shopping accounts this week.
+- [ASSISTANT_SAID] User should update their email signature to reflect their new surname for professionalism and consistency.
+- [ASSISTANT_SAID] User should include their new name, contact information, and any relevant professional information in their email signature.
+- [CHANGE] User has started using their new email address with their new last name.
+- [ASSISTANT_SAID] User should update their social media profiles to ensure consistency across all platforms.
+- [ASSISTANT_SAID] User should update their name, username, and profile information on social media platforms, including Facebook, Twitter, Instagram, and LinkedIn.
+- [ASSISTANT_SAID] User should review their bio and about sections on social media to ensure they are consistent with their new surname.

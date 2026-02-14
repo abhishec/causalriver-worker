@@ -1,0 +1,22 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/07/28 (Fri) 18:25
+- [USER] User inquired about the Intrinsic Motivation Inventory.
+- [ASSISTANT_SAID] The Intrinsic Motivation Inventory (IMI) is a self-report measure of intrinsic motivation developed by Richard M. Ryan and Edward L. Deci in 1985.
+- [ASSISTANT_SAID] The IMI assesses the degree to which people are motivated to engage in an activity for inherent enjoyment, interest, or satisfaction, rather than for external reasons.
+- [ASSISTANT_SAID] The IMI consists of a set of Likert-type items that assess six different dimensions of intrinsic motivation: interest/enjoyment, perceived competence, effort/importance, perceived choice, value/usefulness, and relatedness.
+- [ASSISTANT_SAID] Respondents rate the degree to which they agree or disagree with each item on a 7-point scale.
+- [ASSISTANT_SAID] The IMI has been widely used in research on motivation across various domains, including education, sports, and work.
+- [ASSISTANT_SAID] The IMI has been shown to have good reliability and validity and has been used to investigate research questions related to intrinsic motivation, such as its relationship to performance, creativity, and well-being.
+- [USER] User thought the IMI has 7 dimensions.
+- [ASSISTANT_SAID] The IMI actually consists of seven dimensions, not six.
+- [ASSISTANT_SAID] The seven dimensions of the IMI are:
+  1. Interest/Enjoyment: The degree to which the activity is perceived as enjoyable, interesting, and fun.
+  2. Perceived Competence: The degree to which one feels competent and effective in performing the activity.
+  3. Effort/Importance: The degree to which one feels that the activity is important and worth the effort.
+  4. Perceived Choice: The degree to which one feels that they have choice and autonomy in engaging in the activity.
+  5. Value/Usefulness: The degree to which one perceives the activity as meaningful and valuable.
+  6. Relatedness: The degree to which the activity is related to one's values and goals.
+  7. Pressure/Tension: The degree to which one feels pressured or tense while engaging in the activity.
+- [ASSISTANT_SAID] Each dimension is measured using a set of Likert-type items, and respondents rate the degree to which they agree or disagree with each item on a 7-point scale.
+- [ASSISTANT_SAID] The IMI has been widely used in research to assess intrinsic motivation across a range of domains.

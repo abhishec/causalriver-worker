@@ -1,0 +1,68 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/28 (Sun) 16:19
+- [USER] User inquired about how to get top pools by total volume locked (TVL) and 24Hr volume using Uniswap V3 Subgraph.
+- [ASSISTANT_SAID] To get the top pools by TVL, the assistant provided a GraphQL query that retrieves the top 10 pools ordered by `totalValueLockedUSD` in descending order, including pool ID, token symbols, and `totalValueLockedUSD`.
+- [ASSISTANT_CREATED] The assistant provided the following GraphQL query for top pools by TVL:
+  ```typescript
+  {
+    pools(first: 10, orderBy: totalValueLockedUSD, orderDirection: desc) {
+      id
+      token0 {
+        symbol
+      }
+      token1 {
+        symbol
+      }
+      totalValueLockedUSD
+    }
+  }
+  ```
+- [ASSISTANT_SAID] To get the top pools by 24Hr volume, the assistant provided another GraphQL query that retrieves the top 10 pools ordered by `volumeUSD` in descending order, including pool ID, token symbols, and `volumeUSD`.
+- [ASSISTANT_CREATED] The assistant provided the following GraphQL query for top pools by 24Hr volume:
+  ```php
+  {
+    pools(first: 10, orderBy: volumeUSD, orderDirection: desc, where: {volumeUSD_gt: 0}) {
+      id
+      token0 {
+        symbol
+      }
+      token1 {
+        symbol
+      }
+      volumeUSD
+    }
+  }
+  ```
+- [USER] User asked for more information on how to query additional details in top pools.
+- [ASSISTANT_SAID] The assistant suggested adding more fields to the GraphQL query to retrieve additional information about the top pools.
+- [ASSISTANT_CREATED] The assistant provided an enhanced GraphQL query that retrieves detailed information about the top 10 pools, including token names, decimals, total supply, fee tier, tick, liquidity, sqrt price, fee growth values, and both TVL and volume:
+  ```typescript
+  {
+    pools(first: 10, orderBy: totalValueLockedUSD, orderDirection: desc) {
+      id
+      token0 {
+        symbol
+        name
+        decimals
+        totalSupply
+      }
+      token1 {
+        symbol
+        name
+        decimals
+        totalSupply
+      }
+      feeTier
+      tick
+      liquidity
+      sqrtPrice
+      feeGrowthGlobal0X128
+      feeGrowthGlobal1X128
+      totalValueLockedUSD
+      volumeUSD
+    }
+  }
+  ```
+- [USER] User inquired if the network is Ethereum.
+- [ASSISTANT_SAID] The assistant confirmed that Uniswap V3 is built on

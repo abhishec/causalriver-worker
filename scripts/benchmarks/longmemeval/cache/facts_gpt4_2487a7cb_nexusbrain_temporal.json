@@ -1,0 +1,66 @@
+{
+  "answer_1c6b85ea_1": [
+    {
+      "fact": "User is trying to get more organized and stay on top of tasks.",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User is looking for apps or tools to help prioritize tasks and avoid procrastination.",
+      "type": "preference",
+      "entities": []
+    },
+    {
+      "fact": "User has been implementing strategies like prioritizing tasks and breaking them down into smaller chunks.",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User has found that these strategies have been helping them stay on top of their work.",
+      "type": "opinion",
+      "entities": []
+    }
+  ],
+  "answer_1c6b85ea_2": [
+    {
+      "fact": "User is working on a project that involves data analysis.",
+      "type": "personal",
+      "entities": [
+        "data analysis",
+        "project"
+      ]
+    },
+    {
+      "fact": "User is familiar with some resources for data visualization.",
+      "type": "preference",
+      "entities": [
+        "data visualization",
+        "resources"
+      ]
+    },
+    {
+      "fact": "User participated in a webinar on 'Data Analysis using Python' two months ago.",
+      "type": "event",
+      "entities": [
+        "webinar",
+        "Data Analysis using Python"
+      ]
+    },
+    {
+      "fact": "User is hoping to dive deeper into data visualization.",
+      "type": "opinion",
+      "entities": [
+        "data visualization"
+      ]
+    },
+    {
+      "fact": "User is considering whether to start with Matplotlib or Seaborn for creating statistical graphics.",
+      "type": "preference",
+      "entities": [
+        "Matplotlib",
+        "Seaborn",
+        "statistical graphics"
+      ]
+    }
+  ]
+}

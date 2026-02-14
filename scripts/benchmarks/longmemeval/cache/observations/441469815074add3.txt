@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/25 (Thu) 04:55  
+[FACT] User is moving to Edinburgh for a master's program in Computer Science at the University of Edinburgh.  
+[FACT] User found a flat share in the Marchmont area.  
+[ASSISTANT_SAID] Recommended taxi services: Edinburgh Airport Taxis, Central Taxis, and private transfer services like Edinburgh Airport Transfers or Airport Taxis Edinburgh.  
+[ASSISTANT_SAID] Estimated taxi fare to Marchmont is around £25-30, depending on traffic.  
+[ASSISTANT_SAID] Recommended public transportation options: Airlink 100 Bus and Tram.  
+[ASSISTANT_SAID] Airlink 100 Bus fare is £4.50 single or £7.50 return; tram fare is £6.50 single or £8.50 return.  
+[ASSISTANT_SAID] Suggested that if the user has a lot of luggage, a taxi might be more convenient.  
+[ASSISTANT_SAID] Advised to check taxi or bus services' websites for updates on prices, schedules, or roadworks.  
+[ASSISTANT_SAID] Suggested considering purchasing a Ridacard for prepaid travel on buses, trams, and some taxis in Edinburgh.  
+[ASSISTANT_SAID] Ridacard costs £3 for the card, with various travel costs: single bus fare £1.70 (peak) or £1.40 (off-peak), daily pass £4.50, weekly pass £20.50, monthly pass £82.50.  
+[ASSISTANT_SAID] Ridacard can be purchased at Travelshops, newsagents, online, or on the Airlink 100 Bus.  
+[ASSISTANT_SAID] Travelshop at Haymarket Station is open Monday to Saturday 9:00 am to 5:30 pm and Sunday 10:00 am to 5:00 pm.  
+[ASSISTANT_SAID] Travelshop accepts cash, credit cards (Visa, Mastercard, American Express), and debit cards.  
+[ASSISTANT_SAID] Travelshop services include Ridacard sales, bus and tram tickets, travel information, and brochures for attractions.  
+[USER] User decided to take the Airlink 100 Bus to Haymarket Station.  
+[ASSISTANT_SAID] Recommended taking the Airlink 100 Bus all the way to Haymarket Station for convenience.  
+[ASSISTANT_SAID] Suggested that if the user is concerned about traffic, they could get off at Inglis Green Road and walk or get off at Princes Street and take a taxi.  
+[ASSISTANT_SAID] Provided information about purchasing a SIM card or portable Wi-Fi hotspot for data and calls in the UK.  
+[ASS

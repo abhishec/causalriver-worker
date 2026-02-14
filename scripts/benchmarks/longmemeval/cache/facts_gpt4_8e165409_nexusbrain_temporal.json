@@ -1,0 +1,93 @@
+{
+  "answer_d97db962_1": [
+    {
+      "fact": "User is planning to create a new succulent arrangement on their dining table.",
+      "type": "event",
+      "entities": [
+        "succulent arrangement",
+        "dining table"
+      ]
+    },
+    {
+      "fact": "User repotted their previous spider plant today.",
+      "type": "event",
+      "entities": [
+        "spider plant"
+      ]
+    },
+    {
+      "fact": "User uses a mix of potting soil and compost for their plants.",
+      "type": "preference",
+      "entities": [
+        "potting soil",
+        "compost"
+      ]
+    },
+    {
+      "fact": "User is interested in tips for caring for succulents.",
+      "type": "preference",
+      "entities": [
+        "succulents",
+        "care tips"
+      ]
+    },
+    {
+      "fact": "User is looking for recommendations for decorative rocks for their succulent arrangement.",
+      "type": "preference",
+      "entities": [
+        "decorative rocks",
+        "succulent arrangement"
+      ]
+    },
+    {
+      "fact": "User is seeking suggestions for a shallow planter that would complement the succulents.",
+      "type": "preference",
+      "entities": [
+        "shallow planter",
+        "succulents"
+      ]
+    }
+  ],
+  "answer_d97db962_2": [
+    {
+      "fact": "User is thinking of starting a succulent arrangement on their dining table",
+      "type": "preference",
+      "entities": [
+        "succulent arrangement",
+        "dining table"
+      ]
+    },
+    {
+      "fact": "User plans to get succulents online",
+      "type": "preference",
+      "entities": [
+        "succulents",
+        "online"
+      ]
+    },
+    {
+      "fact": "User is unsure about the condition of the succulents when they arrive",
+      "type": "opinion",
+      "entities": [
+        "condition of succulents"
+      ]
+    },
+    {
+      "fact": "User is considering what type of potting mix to use for their succulents",
+      "type": "preference",
+      "entities": [
+        "potting mix",
+        "succulents"
+      ]
+    },
+    {
+      "fact": "User is open to using a general-purpose potting soil with added perlite or sand for drainage",
+      "type": "opinion",
+      "entities": [
+        "general-purpose potting soil",
+        "perlite",
+        "sand"
+      ]
+    }
+  ]
+}

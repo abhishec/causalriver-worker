@@ -1,0 +1,22 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2022/03/09 (Wed) 18:20
+- [EVENT] User is thinking of organizing online purchases.
+- [EVENT] User bought handmade jewelry from Etsy today.
+- [ASSISTANT_SAID] Congratulations on your new handmade jewelry purchase from Etsy!
+- [ASSISTANT_SAID] Suggestions for organizing online purchases include creating a spreadsheet, using a purchase tracker app, taking screenshots or saving confirmations, using a browser extension, designating a folder or label in email, setting reminders, and keeping a digital receipt folder.
+- [ASSISTANT_SAID] Suggested apps for tracking purchases: Slice (iOS, Android), Package Guard (iOS, Android), Order Tracker (iOS, Android).
+- [ASSISTANT_SAID] For the Etsy purchase, check the Etsy account for order updates and tracking information, save the order confirmation email, and take a screenshot of the order summary or product details.
+- [PREFERENCE] User prefers to create a spreadsheet to keep track of purchases.
+- [ASSISTANT_SAID] Tracking total spending each month is an excellent idea to stay within budget and make intentional purchasing decisions.
+- [ASSISTANT_SAID] Suggested tips for tracking monthly spending include creating a budget category, setting a budget target, updating regularly, analyzing and adjusting, using formulas, and keeping it realistic.
+- [ASSISTANT_SAID] Suggested columns for the spreadsheet: Date, Category, Item/Description, Price, Total Spent (for the month), Budget Target (for the month), Difference (between total spent and budget target).
+- [PREFERENCE] User wants to track the reason for each purchase to see if they are buying out of impulse or necessity.
+- [ASSISTANT_SAID] Tracking the reason for each purchase can help identify impulse buying habits, understand gift-giving habits, distinguish between needs and wants, recognize triggers or patterns, and make more intentional purchasing decisions.
+- [ASSISTANT_SAID] Suggested reason categories for purchases: gift, impulse, needed, wanted, replacement, investment, experience, subscription.
+- [PREFERENCE] User wants to track shipping information, including estimated delivery date and actual delivery date.
+- [ASSISTANT_SAID] Tracking shipping information can help manage expectations, identify shipping issues, evaluate seller performance, plan ahead, and improve the shopping experience.
+- [ASSISTANT_SAID] Suggested additional columns for tracking shipping: Shipping carrier, Shipping method, Tracking number.
+- [PREFERENCE] User has had issues with packages being delayed or lost in the past.
+- [ASSISTANT_SAID] By tracking shipping carrier and method, user can identify patterns or issues and make informed decisions about future purchases.
+- [PREFERENCE] User plans to be more mindful of the shipping carrier and method when making purchases and allow extra time for

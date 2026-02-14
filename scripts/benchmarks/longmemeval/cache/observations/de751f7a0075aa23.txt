@@ -1,0 +1,18 @@
+**Observation Log:**
+
+[FACT] User's new last name is Thompson.  
+[CHANGE] User is trying to update their social media profiles with their new last name.  
+[EVENT] User is updating their social media profiles on Facebook, Instagram, and LinkedIn.  
+[ASSISTANT_SAID] To update Facebook, the user should log in, click on the downward arrow, go to "Settings," then "Account Settings," click "Edit" next to "Name," enter "Thompson," confirm with their password, and click "Save Changes."  
+[ASSISTANT_SAID] To update Instagram, the user should open the app, tap the profile icon, go to "Settings," tap "Account," then "Edit Profile," edit the "Name" field to "Thompson," and tap "Done" to save changes.  
+[ASSISTANT_SAID] User should ensure they are logged into the correct accounts on both platforms before making changes.  
+[ASSISTANT_SAID] If the user has trouble updating their name on Facebook, they might need to wait a few days due to Facebook's name change policy.  
+[ASSISTANT_SAID] User can update their Instagram username separately from their display name by going to "Edit Profile" and tapping "Username."  
+[ASSISTANT_SAID] To update LinkedIn, the user should log in, click on their profile picture, select "View profile," click "Edit public profile & URL," scroll to the "Name" section, click the pencil icon, enter "Thompson," and click "Save."  
+[ASSISTANT_SAID] User should consider updating their LinkedIn headline and summary to reflect their new last name.  
+[ASSISTANT_SAID] User should inform colleagues, clients, or friends about their name change on LinkedIn.  
+[EVENT] User is also trying to update their email address associated with their social media accounts.  
+[ASSISTANT_SAID] To update Facebook email, the user should log in, go to "Settings," click "Account Settings," then "Contact," click "Edit" next to "Email," enter the new email, confirm with their password, and click "Save Changes."  
+[ASSISTANT_SAID] To update Instagram email, the user should open the app, tap the profile icon, go to "Settings," tap "Account," then "Edit Profile," enter the new email, and tap "Done."  
+[ASSISTANT_SAID] To update LinkedIn email, the user should log in, click on their profile picture, go to "Settings & Privacy," click "Account," then "Email & password," click the pencil icon next to "Email address," enter the new email, and click "Save."  
+[ASSISTANT_SAID] User should ensure they have access to the new email address for verification

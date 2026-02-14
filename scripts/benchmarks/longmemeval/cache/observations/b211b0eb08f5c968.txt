@@ -1,0 +1,16 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/04/03 (Mon) 22:37  
+[USER] The user is new to machine learning.  
+[ASSISTANT_SAID] Data analysts ensure that machine learning algorithms have been trained appropriately and produce accurate results by following several steps, including defining the problem, data preparation, feature selection, choosing the right algorithm, training the model, testing the model, tuning the model, and deployment.  
+[ASSISTANT_SAID] Hyperparameters are parameters that cannot be learned from the data and define the architecture and training procedure of the model, such as learning rate, number of layers, and regularization constants.  
+[ASSISTANT_SAID] Hyperparameter tuning is the process of selecting the best set of hyperparameters that maximizes the model's performance on a validation set.  
+[ASSISTANT_SAID] Hyperparameter tuning improves model performance, avoids overfitting, increases efficiency, and adapts to changing data.  
+[ASSISTANT_SAID] Hyperparameter tuning can be performed manually or automated using techniques like grid search, randomized search, Bayesian optimization, genetic algorithms, and gradient-based optimization.  
+[ASSISTANT_SAID] An example of hyperparameter tuning improving a CNN model's performance on the CIFAR10 dataset is provided, where accuracy increased from 75% to 93% after tuning.  
+[ASSISTANT_SAID] Choosing hyperparameters for a neural network model can be a manual process or automated using various techniques, each with its own advantages and disadvantages.  
+[ASSISTANT_SAID] Grid search is simple but time-consuming, while Bayesian optimization can find better hyperparameters but requires more resources. Random search and genetic algorithms require less resources but may be less optimized or harder to understand.  
+[ASSISTANT_SAID] Cross-validation is a technique used to evaluate model performance and tune hyperparameters by dividing the dataset into multiple subsets or folds.  
+[ASSISTANT_SAID] In k-fold cross-validation, the dataset is split into k folds, and the model is trained and evaluated k times, each time using a different fold as the validation set.  
+[ASSISTANT_SAID] Cross-validation helps avoid overfitting and provides a more accurate estimate of the model's true performance.  
+[ASSISTANT_SAID] Variations of cross-validation include leave-one-out cross-validation, stratified cross-validation, and nested cross-validation.

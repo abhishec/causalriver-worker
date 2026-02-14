@@ -1,0 +1,24 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2022/11/17 (Thu) 09:25  
+[FACT] User completed their undergraduate degree in computer science.  
+[PREFERENCE] User is planning to start learning about deep learning.  
+[ASSISTANT_SAID] Recommended online courses for deep learning:  
+[ASSISTANT_SAID] 1. Andrew Ng's Deep Learning Specialization (Coursera) - A 5-course specialization covering basics of deep learning, neural networks, and applications.  
+[ASSISTANT_SAID] 2. Deep Learning by Google (Coursera) - A 3-course specialization covering basics of deep learning, TensorFlow, and applications.  
+[ASSISTANT_SAID] 3. Deep Learning A-Z (Udemy) - A comprehensive course covering basics of deep learning, neural networks, and applications in computer vision, NLP, and more.  
+[ASSISTANT_SAID] 4. Deep Learning with Python (DataCamp) - A hands-on course teaching deep learning using Python and libraries like TensorFlow and Keras.  
+[ASSISTANT_SAID] Recommended online resources for deep learning:  
+[ASSISTANT_SAID] 1. Kaggle - A platform for machine learning competitions and hosting datasets with tutorials and resources.  
+[ASSISTANT_SAID] 2. TensorFlow Tutorials (TensorFlow.org) - Official tutorials and guides for TensorFlow.  
+[ASSISTANT_SAID] 3. Deep Learning Book (online book) - A free online book by Ian Goodfellow, Yoshua Bengio, and Aaron Courville.  
+[ASSISTANT_SAID] 4. deeplearning.ai (blog) - Andrew Ng's blog offering tutorials, articles, and resources on deep learning.  
+[ASSISTANT_SAID] Additional tips for learning deep learning:  
+[ASSISTANT_SAID] 1. Start with the basics, focusing on neural networks, backpropagation, and optimization techniques.  
+[ASSISTANT_SAID] 2. Practice with projects like image classification, object detection, or natural language processing.  
+[ASSISTANT_SAID] 3. Join online communities like Kaggle, Reddit (r/MachineLearning and r/DeepLearning), and GitHub.  
+[ASSISTANT_SAID] 4. Read research papers to stay current with advancements in deep learning.  
+[PREFERENCE] User is interested in exploring natural language processing (NLP).  
+[ASSISTANT_SAID] Recommended online courses for NLP:  
+[ASSISTANT_SAID] 1. Natural Language Processing with Deep Learning (Stanford University on Stanford Online) - Covers NLP fundamentals and deep learning techniques.  
+[ASSISTANT_SAID] 2. Natural Language Processing (University of Colorado Boulder on

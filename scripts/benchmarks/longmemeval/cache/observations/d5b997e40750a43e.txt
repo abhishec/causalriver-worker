@@ -1,0 +1,22 @@
+**Observation Log:**
+
+- [FACT] The user is looking for new Korean recipes to try out.
+- [EVENT] The user bought a cookbook on Korean cuisine today.
+- [PREFERENCE] The user is excited to dive into Korean cuisine.
+- [ASSISTANT_SAID] The assistant congratulated the user on their new cookbook and expressed confidence that they would enjoy exploring Korean cuisine.
+- [ASSISTANT_SAID] The assistant recommended ten popular Korean dishes for beginners: Bibimbap, Bulgogi, Japchae, Kimchi Stew, Tteokbokki, Kimchi Fried Rice, Mandu, Doenjang Jjigae, Naengmyeon, and Galbi.
+- [ASSISTANT_SAID] The assistant noted that these dishes are relatively easy to make and require minimal ingredients.
+- [FACT] The user has tried making bibimbap before and it is one of their favorite Korean dishes.
+- [FACT] The user has been making kimchi at home, and it has become a staple in their fridge.
+- [PREFERENCE] The user wants to know the difference between Korean chili flakes (gochugaru) and regular chili flakes.
+- [ASSISTANT_SAID] The assistant explained that gochugaru is generally hotter than regular chili flakes, with a Scoville heat unit (SHU) rating of 10,000-20,000.
+- [ASSISTANT_SAID] The assistant described gochugaru's flavor profile as distinct, smoky, slightly sweet, and nutty.
+- [ASSISTANT_SAID] The assistant mentioned that gochugaru is made from a specific type of Korean pepper called "gochu."
+- [ASSISTANT_SAID] The assistant explained the production process of gochugaru and how it differs from regular chili flakes.
+- [ASSISTANT_SAID] The assistant provided tips on using gochugaru in recipes, including starting with a small amount and mixing it with other ingredients.
+- [ASSISTANT_SAID] The assistant suggested a substitute for gochugaru if it cannot be found: a combination of cayenne pepper and paprika.
+- [USER] The user expressed interest in learning about different types of kimchi.
+- [ASSISTANT_SAID] The assistant listed various types of kimchi, including Baechu Kimchi, Radish Kimchi, Cucumber Kimchi, Kkakdugi, Oi-kimchi, Gat Kimchi, Bok Choy Kimchi, and regional variations.
+- [ASSISTANT_SAID] The assistant mentioned seasonal kimchi types and specialty kimchi options.
+- [ASSISTANT_SAID] The assistant encouraged the user to experiment with different ingredients, seasonings, and fermentation times.
+- [USER] The user requested beginner-friendly kimchi recipes that are different from traditional baechu kim

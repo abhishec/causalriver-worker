@@ -1,0 +1,75 @@
+{
+  "answer_2952aee4": [
+    {
+      "fact": "User is planning their summer concert schedule.",
+      "type": "preference",
+      "entities": [
+        "summer concert schedule"
+      ]
+    },
+    {
+      "fact": "User has tickets to see the Jonas Brothers on July 17th.",
+      "type": "event",
+      "entities": [
+        "Jonas Brothers",
+        "July 17th"
+      ]
+    },
+    {
+      "fact": "User has tickets to see The Lumineers on August 20th.",
+      "type": "event",
+      "entities": [
+        "The Lumineers",
+        "August 20th"
+      ]
+    },
+    {
+      "fact": "User is considering attending a music festival in Rhode Island.",
+      "type": "event",
+      "entities": [
+        "music festival",
+        "Rhode Island"
+      ]
+    },
+    {
+      "fact": "User attended an Imagine Dragons concert on June 15th.",
+      "type": "event",
+      "entities": [
+        "Imagine Dragons",
+        "June 15th"
+      ]
+    },
+    {
+      "fact": "User enjoyed the Imagine Dragons concert and liked the songs 'Radioactive' and 'Demons'.",
+      "type": "opinion",
+      "entities": [
+        "Imagine Dragons",
+        "Radioactive",
+        "Demons"
+      ]
+    },
+    {
+      "fact": "User is open to volunteering at music festivals within a few hours of Boston.",
+      "type": "preference",
+      "entities": [
+        "volunteering",
+        "music festivals",
+        "Boston"
+      ]
+    },
+    {
+      "fact": "User had a great experience volunteering at the Harvard Athletic Complex last month.",
+      "type": "event",
+      "entities": [
+        "Harvard Athletic Complex"
+      ]
+    },
+    {
+      "fact": "User is not picky about the type of music festival.",
+      "type": "preference",
+      "entities": [
+        "music festival type"
+      ]
+    }
+  ]
+}

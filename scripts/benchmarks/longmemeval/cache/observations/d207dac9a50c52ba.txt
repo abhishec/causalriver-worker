@@ -1,0 +1,31 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/30 (Tue) 11:34  
+[USER] User is practicing English and is interested in improving their translation skills.  
+[PREFERENCE] User's goal is to come up with sentences that approximate the closest to what a native would make.  
+[ASSISTANT_SAID] Assistant agreed to act as an English tutor and asked the user to choose a level from 1 to 10 for sentence generation.  
+[USER] User chose level 2 for the first sentence.  
+[ASSISTANT_CREATED] Assistant generated the sentence: "Eu gosto de sorvete de morango."  
+[ASSISTANT_SAID] Assistant provided the English translation: "I like strawberry ice cream."  
+[USER] User confirmed the translation was correct and had no doubts.  
+[ASSISTANT_SAID] Assistant asked for the next level of difficulty.  
+[USER] User chose level 2 again.  
+[ASSISTANT_CREATED] Assistant generated the sentence: "Meu cachorro é branco."  
+[ASSISTANT_SAID] Assistant provided the English translation: "My dog is white."  
+[USER] User confirmed the translation was correct.  
+[ASSISTANT_SAID] Assistant apologized for translating the sentences themselves and asked the user to translate the next sentence.  
+[USER] User requested the assistant to choose the sentence according to the level chosen.  
+[ASSISTANT_SAID] Assistant asked for the chosen level again.  
+[USER] User chose level 2.  
+[ASSISTANT_CREATED] Assistant generated the sentence: "Eu estou com fome."  
+[ASSISTANT_SAID] Assistant asked the user to translate it into English.  
+[USER] User translated it as: "I am hungry."  
+[ASSISTANT_SAID] Assistant confirmed the translation was correct.  
+[USER] User expressed a desire to try level 8.  
+[ASSISTANT_SAID] Assistant confirmed and provided a level 8 sentence: "O filósofo francês René Descartes é conhecido pela frase 'Penso, logo existo'."  
+[ASSISTANT_SAID] Assistant asked the user to translate it into English.  
+[USER] User translated it as: "The french philosopher René Descartes is known for the phrase 'I think therefore I exist'."  
+[ASSISTANT_SAID] Assistant confirmed the translation was correct but noted a slight difference in phrasing.  
+[USER] User requested the assistant to provide the exact translation.  
+[ASSISTANT_SAID] Assistant provided the translation: "The book 'Grande Sertão: Veredas', by the Brazilian author João Guimarães Rosa, is considered one of the major masterpieces of Brazilian literature."  
+[USER] User asked for clarification on the use of "by" vs. "from

@@ -1,0 +1,60 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/03/10 (Fri) 16:03
+- [USER] User requested conversion of a function to SuiteScript 2.0.
+- [ASSISTANT_SAID] User provided the following code to convert:
+  ```
+  function getPromoPrices(){
+   var column = [new nlobjSearchColumn("custrecord_parent_promo",null,"GROUP")];
+   var ppm = nlapiSearchRecord("customrecord_special_pricing_detail",null, [
+   ["custrecord_detail_customer","anyof","@NONE@"], 
+   "AND", 
+   ["custrecord_parent_promo","noneof","@NONE@"]
+   ],column);
+   
+   var promoprices = [];
+   for(var i = 0; i < ppm.length; i++){
+   promoprices.push({ type: "customrecord_promo_header", id: ppm[i].getValue(column[0]) });
+   }
+   return promoprices;
+  }
+  
+  function scheduled(type){ 
+   var context = nlapiGetContext();
+   var recordType = context.getSetting('SCRIPT', 'custscript_uc_rectype');
+   var recordId = context.getSetting('SCRIPT', 'custscript_uc_recid');
+   
+   if(recordId){
+   run(recordId, recordType, context);
+   } else {
+   var ppm = getPromoPrices() || [];
+   nlapiLogExecution('DEBUG', 'Promo Prices', ppm.length);
+   
+   for(var i = 0; i < ppm.length; i++){
+   run(ppm[i].id, ppm[i].type, context);
+   context = nlapiGetContext();
+   nlapiLogExecution('debug', 'remaining usage', context.getRemainingUsage());
+   if (context.getRemainingUsage() <= 500) {
+   var status = nlapiScheduleScript(context.getScriptId())
+   if ( status == 'QUEUED' )
+   break;
+   }
+   }
+   }
+  }
+  
+  /**
+   * @param {String} type Context Types: scheduled, ondemand, userinterface, aborted, skipped
+   * @returns {Void}
+   */
+  function run(recordId, recordType, context) {
+   try {
+   
+   var record = nlapiLoadRecord(recordType, recordId);
+   if (recordType == 'customrecord_promo_header') {
+   var recordStatus = record.getFieldValue('custrecord_promohead_status');
+   var startDate = record.getFieldValue('custrecord_promohead_startdate');
+   var endDate = record.getFieldValue('custrecord_promohead_enddate');
+   if (recordStatus == 8) {
+   var copiedFrom = record.getFieldValue('custrecord_promohead_copiedfrom');
+   var filter = new nlobjSearchFilter('custrecord_parent_promo', null, 'anyof', copiedFrom);

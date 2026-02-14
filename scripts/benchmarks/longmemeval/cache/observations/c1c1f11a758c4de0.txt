@@ -1,0 +1,15 @@
+**Observation Log**
+
+**Session Date:** 2023/06/13 (Tue) 12:42  
+**Session ID:** sharegpt_qqD89KE_35
+
+1. [ASSISTANT_SAID] The assistant provided a list of references for different chapters using the Harvard referencing method.
+2. [ASSISTANT_CREATED] Chapter 1 references: Smith, J. (2019). The Psychology of Decision Making. New York: Routledge; Brown, K., & Dutton, K. (2011). The Social Psychology of Power. Psychology Press.
+3. [ASSISTANT_CREATED] Chapter 2 references: James, W. (1890). The Principles of Psychology. New York: Holt; Csikszentmihalyi, M. (1990). Flow: The psychology of optimal experience. Harper & Row.
+4. [ASSISTANT_CREATED] Chapter 3 references: Heisenberg, W. (1958). Physics and Philosophy: The Revolution in Modern Science. New York: Harper; Nietzsche, F. (1886). Beyond Good and Evil. Cambridge: Cambridge University Press.
+5. [ASSISTANT_CREATED] Chapter 4 references: Popper, K. (1959). The Logic of Scientific Discovery. London: Routledge; Feyerabend, P. (1975). Against Method: Outline of an Anarchistic Theory of Knowledge. London: Verso.
+6. [ASSISTANT_CREATED] Chapter 5 references: Taleb, N. (2007). The Black Swan: The Impact of the Highly Improbable. New York: Random House; Gleick, J. (1987). Chaos: Making a New Science. New York: Penguin.
+7. [ASSISTANT_CREATED] Chapter 6 references: Maslow, A. (1943). A Theory of Human Motivation. Psychological Review, 50(4), 370-396; Neisser, U. (1988). Five Kinds of Self-Knowledge. Philosophical Psychology, 1(1), 35-59.
+8. [ASSISTANT_CREATED] Chapter 7 references: Goleman, D. (1995). Emotional Intelligence: Why It Can Matter More Than IQ. New York: Bantam Books; Bar-On, R. (1997). Bar-On Emotional Quotient Inventory (EQ-i): Technical manual. Toronto: Multi-Health Systems.
+9. [ASSISTANT_CREATED] Chapter 8 references: Duhigg, C. (2012). The Power of Habit: Why We Do What We Do in Life and Business. New York: Random House; Prochaska, J., & Norcross, J. (2010). Changing for Good: The Revolutionary Program that Explains the Six Stages of Change and Teaches You How to Free Yourself from Bad Habits.
+10. [USER] The user requested to continue

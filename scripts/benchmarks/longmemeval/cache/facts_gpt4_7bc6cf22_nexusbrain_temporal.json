@@ -1,0 +1,43 @@
+{
+  "answer_e22d6aef_1": [
+    {
+      "fact": "User is interested in climate change.",
+      "type": "preference",
+      "entities": [
+        "climate change"
+      ]
+    },
+    {
+      "fact": "User read the March 15th issue of The New Yorker.",
+      "type": "event",
+      "entities": [
+        "The New Yorker",
+        "March 15th issue"
+      ]
+    },
+    {
+      "fact": "User has been trying to keep up with The Economist's coverage of global news and politics.",
+      "type": "preference",
+      "entities": [
+        "The Economist",
+        "global news",
+        "politics"
+      ]
+    },
+    {
+      "fact": "User read an article about US-China trade tensions in The Economist last month.",
+      "type": "event",
+      "entities": [
+        "The Economist",
+        "US-China trade tensions"
+      ]
+    },
+    {
+      "fact": "User wants to learn more about the current situation of US-China trade tensions.",
+      "type": "preference",
+      "entities": [
+        "US-China trade tensions"
+      ]
+    }
+  ]
+}

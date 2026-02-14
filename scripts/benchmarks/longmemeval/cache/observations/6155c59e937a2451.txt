@@ -1,0 +1,23 @@
+**Observation Log:**
+
+- [FACT] User is moving to Edinburgh for a master's program in Computer Science at the University of Edinburgh.
+- [FACT] User found a flat share in the Marchmont area of Edinburgh.
+- [PREFERENCE] User prefers budget-friendly options for transportation.
+- [EVENT] User is planning to travel from Edinburgh Airport to their accommodation in Marchmont.
+- [ASSISTANT_SAID] The Airlink 100 Bus is a recommended option for transportation from the airport to Marchmont.
+- [ASSISTANT_SAID] The fare for the Airlink 100 Bus is £4.50 single or £7.50 return.
+- [ASSISTANT_SAID] The Airlink 100 Bus takes approximately 30-40 minutes to reach Haymarket Station.
+- [ASSISTANT_SAID] Taxi services like Edinburgh Airport Taxis and Central Taxis are available, with fares around £25-30 to Marchmont.
+- [ASSISTANT_SAID] Ridacard is a prepaid card for travel on buses, trams, and some taxis in Edinburgh.
+- [ASSISTANT_SAID] The cost of a Ridacard is £3 for the card itself, with various travel fare options.
+- [ASSISTANT_SAID] Single bus fare is £1.70 (peak) or £1.40 (off-peak), and a daily pass is £4.50.
+- [ASSISTANT_SAID] Ridacards can be purchased at Travelshops, newsagents, online, or on the Airlink 100 Bus.
+- [ASSISTANT_SAID] The Travelshop at Haymarket Station is open Monday to Saturday from 9:00 am to 5:30 pm and Sunday from 10:00 am to 5:00 pm.
+- [ASSISTANT_SAID] The Travelshop accepts cash, credit cards, and debit cards.
+- [ASSISTANT_SAID] User can purchase a SIM card or portable Wi-Fi hotspot for data and calls in the UK.
+- [ASSISTANT_SAID] Recommended mobile network providers include EE, O2, Vodafone, Three, Giffgaff, and Lebara.
+- [ASSISTANT_SAID] Lebara offers discounted rates for international calls and is suitable for international students.
+- [ASSISTANT_SAID] Giffgaff is an online-only provider that offers competitive pricing and student-specific plans.
+- [ASSISTANT_SAID] Lebara has physical stores in Edinburgh, including locations on Princes Street, South Bridge, and Leith Walk.
+- [ASSISTANT_SAID] Giffgaff does not have physical stores but offers free SIM cards that can be ordered online.
+- [PREFERENCE] User is considering Lebara and Giffgaff for their mobile needs.

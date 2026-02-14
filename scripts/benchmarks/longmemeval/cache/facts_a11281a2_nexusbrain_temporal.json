@@ -1,0 +1,70 @@
+{
+  "answer_c69ee1f9_1": [
+    {
+      "fact": "User has been analyzing their social media performance.",
+      "type": "opinion",
+      "entities": [
+        "social media performance"
+      ]
+    },
+    {
+      "fact": "User has grown their followers on Instagram significantly since the start of the year.",
+      "type": "event",
+      "entities": [
+        "Instagram",
+        "followers",
+        "start of the year"
+      ]
+    },
+    {
+      "fact": "User has been experimenting with Instagram stories and reels.",
+      "type": "preference",
+      "entities": [
+        "Instagram stories",
+        "reels"
+      ]
+    },
+    {
+      "fact": "User has seen a good engagement rate on their Instagram content.",
+      "type": "opinion",
+      "entities": [
+        "engagement rate",
+        "Instagram"
+      ]
+    },
+    {
+      "fact": "User has been using hashtags more frequently in their stories.",
+      "type": "preference",
+      "entities": [
+        "hashtags",
+        "Instagram stories"
+      ]
+    }
+  ],
+  "answer_c69ee1f9_2": [
+    {
+      "fact": "User has around 350 followers on Instagram after two weeks of posting regularly.",
+      "type": "event",
+      "entities": [
+        "Instagram",
+        "350 followers",
+        "two weeks"
+      ]
+    },
+    {
+      "fact": "User is analyzing their social media performance.",
+      "type": "opinion",
+      "entities": [
+        "social media performance"
+      ]
+    },
+    {
+      "fact": "User is curious about how to effectively use hashtags in Instagram Stories.",
+      "type": "preference",
+      "entities": [
+        "hashtags",
+        "Instagram Stories"
+      ]
+    }
+  ]
+}

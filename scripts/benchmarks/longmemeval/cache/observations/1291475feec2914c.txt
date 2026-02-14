@@ -1,0 +1,36 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/06/08 (Thu) 19:09
+- [FACT] User is upgrading their home network to Wi-Fi 6.
+- [PREFERENCE] User has smart home devices, including a thermostat.
+- [ASSISTANT_SAID] Wi-Fi 6 is also known as 802.11ax and offers faster speeds, better performance, and improved capacity.
+- [ASSISTANT_SAID] Recommended routers: 
+  1. ASUS RT-AX88U: Compatible with smart home devices from Nest, Ecobee, and Honeywell.
+  2. Netgear Nighthawk RAX80: Supports devices from Samsung SmartThings, Wink, and IFTTT.
+  3. TP-Link Archer AX6000: Compatible with Philips Hue, LIFX, and Belkin Wemo.
+- [ASSISTANT_SAID] Recommended access points:
+  1. Ubiquiti UniFi 6 Lite: Compact and affordable, compatible with a wide range of smart home devices.
+  2. Linksys Velop MX10: Tri-band access point designed for whole-home coverage, compatible with August, Nest, and Philips Hue.
+  3. Netgear EX7300: Wi-Fi 6 range extender that can be used as an access point, supports Samsung SmartThings and Wink.
+- [ASSISTANT_SAID] Key features to look for in routers and access points:
+  1. Dual-band or tri-band support.
+  2. MU-MIMO technology.
+  3. Smart home device support.
+  4. Mesh networking.
+- [USER] User is setting up automations with their smart thermostat and Google Home.
+- [ASSISTANT_SAID] Steps to set up routines in Google Home:
+  1. Open the Google Home app.
+  2. Tap on the "+" icon to create a new routine.
+  3. Choose a trigger (voice command, time of day, etc.).
+  4. Add actions, including configuring the thermostat settings.
+  5. Save the routine.
+- [ASSISTANT_SAID] Steps to set up custom commands in Google Home:
+  1. Open the Google Home app and navigate to the "Routines" tab.
+  2. Tap on "Custom commands."
+  3. Create a new custom command and enter the command.
+  4. Choose the action and configure thermostat settings.
+  5. Save the custom command.
+- [ASSISTANT_SAID] Examples of routines and custom commands:
+  - Routine: "Good morning" -> Turns on lights, sets thermostat to 72°F, plays morning playlist.
+  - Custom command: "Set my thermostat to 72 degrees" -> Sets thermostat to 72°F.
+  - Custom command: "Make it cozy

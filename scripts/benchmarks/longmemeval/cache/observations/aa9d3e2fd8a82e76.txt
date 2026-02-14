@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/23 (Tue) 01:18  
+[FACT] The user is trying to get back into a consistent exercise routine.  
+[EVENT] The user has been going to a new yoga studio near their apartment on Wednesday evenings.  
+[EVENT] The user just got back from a week-long trip to their parents' house during the Christmas holidays.  
+[CHANGE] The user has been doing yoga for three weeks and has noticed a significant improvement in flexibility.  
+[CHANGE] The user is trying to incorporate more exercise into their daily routine and is thinking of starting jogging again.  
+[FACT] The user has been using the park nearby their apartment for jogging.  
+[FACT] The weather has been cooperative for jogging lately.  
+[PREFERENCE] The user is trying to do at least 3 miles, three times a week while jogging.  
+[EVENT] The user is thinking of setting a goal to run a 5K in a few months.  
+[ASSISTANT_SAID] The assistant clarified that it cannot recommend specific yoga classes or studios due to lack of access to the user's location.  
+[ASSISTANT_SAID] The assistant suggested searching for "yoga studios near me" or "yoga classes near my location" on Google or preferred search engines.  
+[ASSISTANT_SAID] The assistant recommended downloading yoga apps like YogaGlo, Yoga Studio, or Down Dog to find local classes.  
+[ASSISTANT_SAID] The assistant advised checking social media platforms for recommendations on yoga studios or classes.  
+[ASSISTANT_SAID] The assistant suggested asking friends, family, or coworkers for recommendations on yoga studios or classes.  
+[ASSISTANT_SAID] The assistant mentioned ClassPass as a fitness membership program to try different studios and classes.  
+[ASSISTANT_SAID] The assistant provided tips for getting back into jogging, including starting with walk-jog intervals, easing into it, getting proper gear, warming up and cooling down, creating a schedule, listening to the body, finding a jogging buddy, tracking progress, staying hydrated, and being patient and consistent.  
+[ASSISTANT_SAID] The assistant encouraged the user to focus on how exercise improves mood, energy levels, and overall well-being.  
+[ASSISTANT_SAID] The assistant provided tips for staying motivated and avoiding burnout, including setting specific goals, varying the routine, creating a schedule, tracking progress, making it social, rewarding oneself, and being kind to oneself.  
+[ASSISTANT_SAID] The assistant congratulated the user on their progress and encouraged them to keep up the great work.  
+[ASSISTANT_SAID] The assistant provided a structured training schedule for a 5K, suggesting a duration of 8-12 weeks, with specific weekly goals and types of

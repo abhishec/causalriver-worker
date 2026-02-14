@@ -1,0 +1,110 @@
+{
+  "answer_a68db5db_2": [
+    {
+      "fact": "User is planning a trip to Australia soon",
+      "type": "event",
+      "entities": [
+        "Australia",
+        "trip"
+      ]
+    },
+    {
+      "fact": "User is looking for travel recommendations for Sydney",
+      "type": "preference",
+      "entities": [
+        "Sydney",
+        "travel recommendations"
+      ]
+    },
+    {
+      "fact": "User met a tourist from Australia last Thursday on the subway",
+      "type": "event",
+      "entities": [
+        "tourist",
+        "Australia",
+        "subway",
+        "Thursday"
+      ]
+    },
+    {
+      "fact": "User helped the tourist navigate the subway map",
+      "type": "relationship",
+      "entities": [
+        "tourist",
+        "subway map"
+      ]
+    },
+    {
+      "fact": "User chatted with the tourist about their jobs and hobbies",
+      "type": "relationship",
+      "entities": [
+        "tourist",
+        "jobs",
+        "hobbies"
+      ]
+    },
+    {
+      "fact": "User received a photo of the Sydney Opera House from the tourist",
+      "type": "relationship",
+      "entities": [
+        "Sydney Opera House",
+        "tourist"
+      ]
+    },
+    {
+      "fact": "User is interested in recommendations for must-try food or drinks in Sydney",
+      "type": "preference",
+      "entities": [
+        "Sydney",
+        "food",
+        "drinks"
+      ]
+    }
+  ],
+  "answer_a68db5db_1": [
+    {
+      "fact": "User is looking for new recipe ideas that incorporate fresh berries.",
+      "type": "preference",
+      "entities": [
+        "recipe ideas",
+        "fresh berries"
+      ]
+    },
+    {
+      "fact": "User had a lovely conversation with a jam maker at the farmer's market two weeks ago on a Saturday morning.",
+      "type": "event",
+      "entities": [
+        "jam maker",
+        "farmer's market",
+        "two weeks ago",
+        "Saturday morning"
+      ]
+    },
+    {
+      "fact": "User is inspired to try out new dishes based on the conversation with the jam maker.",
+      "type": "opinion",
+      "entities": [
+        "new dishes",
+        "jam maker"
+      ]
+    },
+    {
+      "fact": "User wants to try out flavor combinations recommended by the jam maker.",
+      "type": "preference",
+      "entities": [
+        "flavor combinations",
+        "jam maker"
+      ]
+    },
+    {
+      "fact": "User is interested in pairing different types of jam with cheeses and crackers.",
+      "type": "preference",
+      "entities": [
+        "pairing",
+        "jam",
+        "cheeses",
+        "crackers"
+      ]
+    }
+  ]
+}

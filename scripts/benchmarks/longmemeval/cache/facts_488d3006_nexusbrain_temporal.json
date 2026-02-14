@@ -1,0 +1,36 @@
+{
+  "answer_ultrachat_275993": [
+    {
+      "fact": "User is interested in activities and attractions in the Natural Park of the Moncayo mountain in Arag\u00f3n",
+      "type": "preference",
+      "entities": [
+        "Natural Park of the Moncayo",
+        "Arag\u00f3n"
+      ]
+    },
+    {
+      "fact": "User finds the suggested activities in the park amazing",
+      "type": "opinion",
+      "entities": [
+        "activities",
+        "Natural Park of the Moncayo"
+      ]
+    },
+    {
+      "fact": "User is interested in hiking trails with amazing views",
+      "type": "preference",
+      "entities": [
+        "hiking trails",
+        "views"
+      ]
+    },
+    {
+      "fact": "User is considering the best time of year to go hiking",
+      "type": "preference",
+      "entities": [
+        "hiking",
+        "time of year"
+      ]
+    }
+  ]
+}

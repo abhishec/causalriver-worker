@@ -1,0 +1,21 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/28 (Sun) 11:59  
+[FACT] User is considering upgrading their home Wi-Fi router.  
+[PREFERENCE] User is looking for good options for a Wi-Fi router.  
+[FACT] User has been looking at the Netgear Nighthawk RAX80.  
+[ASSISTANT_SAID] The Netgear Nighthawk RAX80 is a Wi-Fi 6 (802.11ax) router with dual-band support (2.4GHz and 5GHz).  
+[ASSISTANT_SAID] The Netgear Nighthawk RAX80 has an 8-stream architecture for increased capacity and performance.  
+[ASSISTANT_SAID] The Netgear Nighthawk RAX80 offers up to 6Gbps combined wireless speeds (1.2Gbps on the 2.4GHz band and 4.8Gbps on the 5GHz band).  
+[ASSISTANT_SAID] The Netgear Nighthawk RAX80 includes 5 Gigabit Ethernet ports and 2 USB 3.0 ports for wired connections.  
+[ASSISTANT_SAID] The Netgear Nighthawk RAX80 supports MU-MIMO (Multi-User Multiple Input Multiple Output) for simultaneous transmission to multiple devices.  
+[ASSISTANT_SAID] The Netgear Nighthawk RAX80 is compatible with Amazon Alexa and Google Assistant.  
+[ASSISTANT_SAID] The Netgear Nighthawk RAX80 has advanced security features, including Netgear's Armor cybersecurity software.  
+[ASSISTANT_SAID] Pros of the Netgear Nighthawk RAX80 include fast speeds, good range, and good security features.  
+[ASSISTANT_SAID] Cons of the Netgear Nighthawk RAX80 include its expensive price (around $400) and lack of built-in mesh networking capabilities.  
+[ASSISTANT_SAID] Alternatives to consider include Asus RT-AX88U (around $300), TP-Link Archer AX90 (around $250), Linksys Velop MX10 (around $500), Google Wifi (around $300 for a 3-pack), and Netgear Orbi RBK852 (around $400 for a 2-pack).  
+[ASSISTANT_SAID] Factors to consider when choosing a router include internet plan speed, number of devices, home layout and size, security features, and budget.  
+[PREFERENCE] User plans to use their new phone to stream videos and online content.  
+[FACT] User recently got a new phone, which is a Samsung Galaxy S22 Ultra.  
+[CHANGE] User's new phone is a big upgrade from their old iPhone 12.  
+[ASSISTANT_SAID] The Samsung Galaxy S22 Ultra has Wi-Fi 6

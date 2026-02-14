@@ -1,0 +1,26 @@
+**Observation Log:**
+
+- [FACT] User is planning a trip to Miami in April for a friend's wedding.
+- [EVENT] User is considering using credit card points to book a domestic round-trip ticket to Miami.
+- [EVENT] User recently returned from a trip to Los Angeles.
+- [TEMPORAL] User flew from New York to Los Angeles on February 10th.
+- [FACT] User flew with American Airlines on the trip to Los Angeles.
+- [FACT] User's flight from New York to Los Angeles was delayed by an hour due to air traffic control issues.
+- [PREFERENCE] User is looking for a good deal on a ticket to Miami in April.
+- [ASSISTANT_SAID] April is a great time to visit Miami, and booking in advance can help snag a better deal.
+- [ASSISTANT_SAID] Airline prices tend to increase as the flight approaches.
+- [ASSISTANT_SAID] April is considered part of the shoulder season for Miami travel, which may mean slightly lower prices.
+- [ASSISTANT_SAID] Weekend flights tend to be more expensive than weekday flights; user should consider flying on Tuesday, Wednesday, or Thursday.
+- [ASSISTANT_SAID] User should book their ticket as soon as possible to ensure availability, especially when using credit card points.
+- [ASSISTANT_SAID] User should check their credit card points portal for available redemption options and prices.
+- [ASSISTANT_SAID] User should compare prices across airlines using online travel agencies like Expedia, Kayak, or Skyscanner.
+- [ASSISTANT_SAID] User should set up price alerts on preferred airline or travel booking websites.
+- [ASSISTANT_SAID] User should consider alternative airports, such as Fort Lauderdale-Hollywood International Airport (FLL), for better deals.
+- [FACT] User was seated in economy class, row 17, seat C on the American Airlines flight to Los Angeles.
+- [FACT] User watched the movie "La La Land" during the flight to Los Angeles.
+- [ASSISTANT_SAID] Several airlines operate direct flights from JFK to MIA, including American Airlines, Delta Air Lines, and JetBlue Airways.
+- [ASSISTANT_SAID] American Airlines offers a buy-on-board meal service on domestic flights, including snacks and light meals.
+- [ASSISTANT_SAID] Delta offers complimentary snacks and drinks on all flights, including economy class, and a buy-on-board meal service on longer flights.
+- [ASSISTANT_SAID] JetBlue offers a buy-on-board menu with snacks and meals, including options like sandwiches and salads.
+- [ASSISTANT_SAID] Delta's premium cabin, Delta One, offers a more extensive meal service.
+- [ASSISTANT_SAID] The average flight duration from JFK to MIA is approximately 3

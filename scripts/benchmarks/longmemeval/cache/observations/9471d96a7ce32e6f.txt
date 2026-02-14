@@ -1,0 +1,47 @@
+**Observation Log:**
+
+[FACT] User is experiencing issues with their internet connection at home.
+
+[FACT] User's internet connection has been slow lately.
+
+[FACT] User recently fixed their laptop's Wi-Fi adapter issue.
+
+[FACT] User has a cable internet connection with XYZ Communications as their ISP.
+
+[FACT] User has around 5 devices connected to their network, including a laptop, tablet, smart TV, and two smartphones.
+
+[FACT] User has noticed that the slowness is consistent throughout the day but more noticeable when multiple devices are connected at the same time.
+
+[FACT] User ran a speed test on Speedtest.net and got results of around 20 Mbps download and 5 Mbps upload.
+
+[FACT] User's internet speed is slower than what they are supposed to get according to their plan.
+
+[FACT] User is using a router that is about 2 years old.
+
+[FACT] User has not made any recent changes to their network setup.
+
+[CHANGE] User fixed their laptop's Wi-Fi adapter issue by updating the network drivers.
+
+[ASSISTANT_SAID] Assistant is happy to help troubleshoot the user's slow internet connection.
+
+[ASSISTANT_SAID] Assistant provided a list of questions to help identify the cause of the slow internet connection.
+
+[ASSISTANT_SAID] Assistant suggested potential causes for the slow internet connection, including insufficient bandwidth, router limitations, interference from other devices, distance from the router, and ISP throttling.
+
+[ASSISTANT_SAID] Assistant recommended restarting the router, moving devices closer to the router, using Quality of Service (QoS) settings, checking for firmware updates, and contacting the ISP for further assistance.
+
+[ASSISTANT_SAID] Assistant explained how to set up QoS settings on the user's router, including logging into the router's web interface, finding the QoS settings, identifying devices or applications to prioritize, setting up QoS rules, and saving the changes.
+
+[ASSISTANT_SAID] Assistant provided an example scenario for setting up QoS rules for an Xbox and Zoom.
+
+[ASSISTANT_SAID] Assistant suggested that upgrading the router to a newer model could be beneficial, especially if the current router is outdated.
+
+[ASSISTANT_SAID] Assistant recommended looking for routers that support Wi-Fi 6, MU-MIMO technology, dual-band or tri-band capabilities, and Gigabit Ethernet ports.
+
+[ASSISTANT_SAID] Assistant confirmed that upgrading the router can be a good investment, especially for households with many devices.
+
+[ASSISTANT_SAID] Assistant stated that a mesh network system could be a good option for the user, considering they have a lot of devices and a decent-sized home.
+
+[ASSISTANT_SAID] Assistant explained the benefits of a mesh network system, including whole-home coverage, seamless handoff, self-healing capabilities, and easy setup and management.
+
+[ASSISTANT_SAID

@@ -1,0 +1,40 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/06/04 (Sun) 05:55  
+[USER] User requested to create an answer key for a final exam.  
+[USER] User specified the topic for Week 1: Introduction to UX.  
+[USER] User provided the following content for Week 1:  
+[FACT] Introduction to UX design principles and processes  
+[FACT] Overview of UX design tools and software  
+[FACT] Reading: "Don't Make Me Think" by Steve Krug  
+
+[USER] User outlined action items for Week 1:  
+[ASSISTANT_CREATED] Action item: Read "Don't Make Me Think" by Steve Krug  
+[ASSISTANT_CREATED] Action item: Research and explore UX design principles and processes  
+[ASSISTANT_CREATED] Action item: Familiarize yourself with UX design tools and software  
+
+[USER] User listed resources for Week 1:  
+[ASSISTANT_CREATED] Resource: "Don't Make Me Think" by Steve Krug (book)  
+[ASSISTANT_CREATED] Resource: "A Comprehensive Guide to UX Design" by Adobe (article)  
+[ASSISTANT_CREATED] Resource: "The Beginner's Guide to UX Design" by UX Design (article)  
+[ASSISTANT_CREATED] Resource: "The Ultimate Guide to UX Design" by CareerFoundry (article)  
+[ASSISTANT_CREATED] Resource: "UX Design Fundamentals" by Springboard (course)  
+[ASSISTANT_CREATED] Resource: "UX Design for Beginners" by Udemy (course)  
+
+[USER] User specified requirements for Week 1:  
+[ASSISTANT_CREATED] Requirement: Access to the internet and a computer/laptop  
+[ASSISTANT_CREATED] Requirement: Willingness to learn and explore new concepts  
+[ASSISTANT_CREATED] Requirement: Time commitment to read, research, and familiarize oneself with UX design principles and processes  
+
+[USER] User requested final exam questions for Week 1:  
+[ASSISTANT_CREATED] Final exam question: What are some key principles of UX design?  
+[ASSISTANT_CREATED] Final exam question: Name at least three UX design tools and software.  
+[ASSISTANT_CREATED] Final exam question: What is the main takeaway from "Don't Make Me Think" by Steve Krug?  
+[ASSISTANT_CREATED] Final exam question: Describe the UX design process and the key stages involved.  
+[ASSISTANT_CREATED] Final exam question: How would you apply UX design principles to improve the user experience of a website or mobile app?  
+
+[ASSISTANT_SAID] Answer Key:  
+[ASSISTANT_SAID] 1. What are some key principles of UX design?  
+[ASSISTANT_SAID] - Usability  
+[ASSISTANT_SAID] - User-centered design  
+[ASSISTANT_S

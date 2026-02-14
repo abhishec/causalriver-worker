@@ -1,0 +1,30 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/03/10 (Fri) 14:38
+- [EVENT] User is planning to try out a new recipe for chicken parmesan this weekend.
+- [USER] User accidentally bumped into Alex, a software engineer, on the escalator at the train station and talked about the morning commute.
+- [ASSISTANT_SAID] To achieve crispy chicken parmesan, the assistant provided the following tips:
+  1. **Panko breadcrumbs**: Use Panko breadcrumbs instead of regular breadcrumbs for a crunchier exterior.
+  2. **Double-dredge**: Double-dredge chicken in flour, eggs, and breadcrumbs for a thick coating.
+  3. **Dry the chicken**: Pat the chicken dry with paper towels before dredging to remove excess moisture.
+  4. **Use the right cheese**: Use high-quality, dry mozzarella cheese that melts well.
+  5. **Don't over-bread**: Be gentle when coating the chicken to avoid dense breading.
+  6. **Fry at the right temperature**: Fry chicken at around 350°F/175°C for a crispy exterior.
+  7. **Don't overcrowd**: Fry chicken in batches to ensure even cooking.
+  8. **Drain excess oil**: Place fried chicken on a paper towel-lined plate to drain excess oil.
+  9. **Broil for extra crispiness**: Broil chicken for 1-2 minutes after frying for extra crispiness.
+  10. **Experiment with different breading mixtures**: Add different seasonings, herbs, or spices to the breadcrumb mixture.
+- [USER] User plans to try the tips for crispy chicken parmesan.
+- [USER] User is thinking of learning some basic coding skills.
+- [ASSISTANT_SAID] The assistant recommended the following online resources and courses for beginners:
+  1. **Codecademy**: Interactive platform for hands-on coding lessons.
+  2. **FreeCodeCamp**: Comprehensive curriculum in web development with projects and certifications.
+  3. **Coursera**: Online courses from top universities with certificates.
+  4. **Udemy**: Affordable courses on various topics, including programming.
+  5. **W3Schools**: Tutorials and reference materials for web development.
+  6. **edX**: Courses from top universities on computer science and programming.
+  7. **Pluralsight**: Courses and tutorials on a wide range of programming topics.
+  8. **The Odin Project**: Free, open-source curriculum for learning web development.
+  9. **Google's CS First**: Free program with resources and tutorials for beginners.
+  10. **GitHub's Learning Lab**: Interactive coding lessons and exercises.
+- [USER] User thinks they will start with Codecademy

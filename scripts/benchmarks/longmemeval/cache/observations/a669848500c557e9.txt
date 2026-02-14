@@ -1,0 +1,22 @@
+**Observation Log:**
+
+- [FACT] The user is recovering from a flu that kept them out of commission for over a week.
+- [PREFERENCE] The user is seeking help with managing their medication schedule.
+- [EVENT] The user is looking for a digital tool or app to keep track of doctor's appointments and test results.
+- [ASSISTANT_SAID] The assistant suggested consulting a doctor or pharmacist for personalized medication advice.
+- [ASSISTANT_SAID] The assistant recommended using a pill reminder app to manage medication schedules.
+- [ASSISTANT_SAID] The assistant suggested creating a medication calendar to track medications and dosages.
+- [ASSISTANT_SAID] The assistant advised enlisting a caregiver or family member to help remember medication schedules.
+- [ASSISTANT_SAID] The assistant encouraged the user to follow their doctor's instructions and take prescribed medication as directed.
+- [ASSISTANT_SAID] The assistant provided a list of digital tools and apps for tracking doctor's appointments and test results, including MyChart, Apple Health, Google Fit, Medisafe, HealthVault, CareZone, Patient IO, and MyMedical.
+- [ASSISTANT_SAID] The assistant listed factors to consider when choosing a digital tool or app, such as ease of use, integration, security, customization, and reminders.
+- [ASSISTANT_SAID] The assistant explained the features and benefits of MyChart, including secure access to medical records, appointment scheduling, secure messaging, medication management, test results access, billing, health reminders, and health tracking.
+- [ASSISTANT_SAID] The assistant provided instructions on how to access MyChart, including checking with the healthcare provider, registering for an account, verifying identity, and logging in.
+- [ASSISTANT_SAID] The assistant explained how to share medical records through MyChart, including granting proxy access, direct messaging, CCDA sharing, and other sharing options.
+- [ASSISTANT_SAID] The assistant clarified that proxy access allows viewing medical records and messaging but may not allow scheduling appointments on behalf of the user.
+- [ASSISTANT_SAID] The assistant advised the user to check with their healthcare provider about proxy access policies and to discuss responsibilities with the proxy.
+- [ASSISTANT_SAID] The assistant confirmed that proxy access can be granted to a family member or caregiver to view medical records and communicate with the healthcare team.
+- [ASSISTANT_SAID] The assistant provided information on how to request prescription refills through MyChart, although the details were not included in the last message.
+- [RELATIONSHIP] The user mentioned their sister, who has been helping them out a lot lately.
+- [CHANGE] The user decided to grant their sister proxy access to their MyChart account for better management of their healthcare. 
+- [TEMPORAL] The session date is 2023/

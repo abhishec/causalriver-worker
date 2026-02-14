@@ -1,0 +1,41 @@
+{
+  "answer_f6168136": [
+    {
+      "fact": "User recently changed their last name from Johnson to Winters",
+      "type": "personal",
+      "entities": [
+        "Johnson",
+        "Winters"
+      ]
+    },
+    {
+      "fact": "User is still getting used to their new last name, Winters",
+      "type": "opinion",
+      "entities": [
+        "Winters"
+      ]
+    },
+    {
+      "fact": "User prefers to call their health insurance provider to update their address",
+      "type": "preference",
+      "entities": [
+        "health insurance provider"
+      ]
+    },
+    {
+      "fact": "User is inquiring about the processing time for updating their address with their health insurance provider",
+      "type": "event",
+      "entities": [
+        "health insurance provider"
+      ]
+    },
+    {
+      "fact": "User is considering notifying the DMV about their name change",
+      "type": "event",
+      "entities": [
+        "DMV",
+        "name change"
+      ]
+    }
+  ]
+}

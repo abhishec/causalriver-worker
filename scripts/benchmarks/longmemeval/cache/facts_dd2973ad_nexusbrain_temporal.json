@@ -1,0 +1,97 @@
+{
+  "answer_f9de4602_1": [
+    {
+      "fact": "User feels sluggish due to lack of sleep",
+      "type": "opinion",
+      "entities": [
+        "sluggish",
+        "lack of sleep"
+      ]
+    },
+    {
+      "fact": "User went to bed at 2 AM last Wednesday",
+      "type": "event",
+      "entities": [
+        "2 AM",
+        "last Wednesday"
+      ]
+    },
+    {
+      "fact": "User struggles on Thursday mornings due to late bedtime",
+      "type": "opinion",
+      "entities": [
+        "Thursday mornings",
+        "late bedtime"
+      ]
+    },
+    {
+      "fact": "User is interested in healthy breakfast recipes",
+      "type": "preference",
+      "entities": [
+        "healthy breakfast recipes"
+      ]
+    },
+    {
+      "fact": "User plans to try Avocado Toast with Poached Eggs for breakfast",
+      "type": "preference",
+      "entities": [
+        "Avocado Toast with Poached Eggs"
+      ]
+    },
+    {
+      "fact": "User is looking for a quick and easy lunch to prepare in advance",
+      "type": "preference",
+      "entities": [
+        "quick and easy lunch",
+        "prepare in advance"
+      ]
+    },
+    {
+      "fact": "User wants lunch to keep them full until yoga class on Tuesday evening",
+      "type": "event",
+      "entities": [
+        "yoga class",
+        "Tuesday evening"
+      ]
+    }
+  ],
+  "answer_f9de4602_2": [
+    {
+      "fact": "User's cholesterol levels are a bit high",
+      "type": "personal",
+      "entities": [
+        "cholesterol levels"
+      ]
+    },
+    {
+      "fact": "User had a doctor's appointment at 10 AM last Thursday",
+      "type": "event",
+      "entities": [
+        "doctor's appointment",
+        "10 AM",
+        "last Thursday"
+      ]
+    },
+    {
+      "fact": "User is looking to make changes to their diet",
+      "type": "opinion",
+      "entities": [
+        "diet changes"
+      ]
+    },
+    {
+      "fact": "User is trying out the MyFitnessPal app",
+      "type": "preference",
+      "entities": [
+        "MyFitnessPal"
+      ]
+    },
+    {
+      "fact": "User is interested in healthy recipe ideas",
+      "type": "preference",
+      "entities": [
+        "healthy recipe ideas"
+      ]
+    }
+  ]
+}

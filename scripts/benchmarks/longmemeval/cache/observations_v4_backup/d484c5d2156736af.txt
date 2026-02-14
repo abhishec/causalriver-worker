@@ -1,0 +1,37 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/20 (Sat) 16:21  
+[CHANGE] User's new last name is Thompson.  
+[EVENT] User is trying to update their social media profiles with their new last name.  
+[ASSISTANT] Provided a step-by-step guide for updating the last name on Facebook:  
+[ASSISTANT] 1. Log in to Facebook.  
+[ASSISTANT] 2. Click on the downward arrow in the top-right corner.  
+[ASSISTANT] 3. Click on "Settings."  
+[ASSISTANT] 4. Click on "Account Settings."  
+[ASSISTANT] 5. Click on "Edit" next to "Name."  
+[ASSISTANT] 6. Enter "Thompson" in the "Last Name" field.  
+[ASSISTANT] 7. Enter Facebook password to confirm.  
+[ASSISTANT] 8. Click "Save Changes."  
+[ASSISTANT] Provided a step-by-step guide for updating the last name on Instagram:  
+[ASSISTANT] 1. Open Instagram app.  
+[ASSISTANT] 2. Tap the profile icon in the bottom-right corner.  
+[ASSISTANT] 3. Tap the three horizontal lines (Settings) on the top-right corner.  
+[ASSISTANT] 4. Tap "Account."  
+[ASSISTANT] 5. Tap "Edit Profile."  
+[ASSISTANT] 6. Edit last name to "Thompson."  
+[ASSISTANT] 7. Tap "Done" to save changes.  
+[ASSISTANT] Provided additional tips for Facebook and Instagram name changes.  
+[EVENT] User also needs to update their LinkedIn profile with their new last name.  
+[ASSISTANT] Provided a step-by-step guide for updating the last name on LinkedIn:  
+[ASSISTANT] 1. Log in to LinkedIn.  
+[ASSISTANT] 2. Click on profile picture in the top-right corner.  
+[ASSISTANT] 3. Click on "View profile."  
+[ASSISTANT] 4. Click on "Edit public profile & URL."  
+[ASSISTANT] 5. Click on the pencil icon next to the current last name.  
+[ASSISTANT] 6. Enter "Thompson" in the "Last name" field.  
+[ASSISTANT] 7. Click "Save."  
+[ASSISTANT] Provided additional tips for LinkedIn updates.  
+[EVENT] User wants to update their email address associated with their social media accounts.  
+[ASSISTANT] Provided a step-by-step guide for updating the email address on Facebook:  
+[ASSISTANT] 1. Log in to Facebook.  
+[ASSISTANT

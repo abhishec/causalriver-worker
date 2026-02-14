@@ -1,0 +1,18 @@
+**Observation Log:**
+
+- [FACT] The user is looking for yoga classes in their area.
+- [PREFERENCE] The user is interested in beginner yoga classes.
+- [EVENT] The user participated in a charity yoga event in April.
+- [TEMPORAL] The user mentioned feeling motivated from the charity yoga event they attended in April.
+- [EVENT] The user participated in the "Walk for Cancer" event on May 15th.
+- [PREFERENCE] The user has been quite active in charity events lately.
+- [ASSISTANT_SAID] The assistant provided options for finding yoga studios, including online search, yoga studio directories, social media, asking around, and checking with local gyms.
+- [ASSISTANT_SAID] The assistant advised the user to check websites like YogaFinder, Yoga International, and DoYouYoga for yoga studios.
+- [ASSISTANT_SAID] The assistant suggested checking online event calendars, charity websites, social media, local newspapers, and volunteer matching platforms to find charity events.
+- [ASSISTANT_SAID] The assistant provided a list of ways to research a charity before donating or participating in their events, including checking the charity's website, using charity rating websites, verifying 501(c)(3) status, reviewing financial reports, and contacting the charity directly.
+- [ASSISTANT_SAID] The assistant mentioned specific charity rating websites: Charity Navigator, GuideStar, BBB Wise Giving Alliance, GreatNonprofits, and Charity Watch.
+- [ASSISTANT_SAID] The assistant suggested checking for accreditation from organizations like the Better Business Bureau's Wise Giving Alliance.
+- [ASSISTANT_SAID] The assistant provided a list of websites and platforms to track charitable donations and volunteer hours, including GivingGrid, DonorPerfect, Network for Good, VolunteerMatch, Bright Funds, and Charity Navigator's Giving Basket.
+- [ASSISTANT_SAID] The assistant encouraged the user to research the platform's security measures before creating an account.
+- [EVENT] The user is considering organizing a charity event at their office.
+- [ASSISTANT_SAID] The assistant provided steps to organize a charity event, including choosing a cause, getting management approval, and providing details about the charity and event concept to management.

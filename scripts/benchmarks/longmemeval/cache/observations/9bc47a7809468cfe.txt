@@ -1,0 +1,15 @@
+**Observation Log:**
+
+- [FACT] User is based in Los Angeles.
+- [PREFERENCE] User is concerned about the lack of female representation in STEM fields.
+- [ASSISTANT_SAID] Assistant provided a list of global organizations supporting women in STEM: Girls Who Code, STEM to Stern, Women Who Code, National Science Foundation (NSF) - STEM Resources, UN Women - STEM.
+- [ASSISTANT_SAID] Assistant requested the user's location to provide local organizations supporting women in STEM.
+- [ASSISTANT_SAID] Assistant provided a list of local organizations in Los Angeles supporting women in STEM: Girls Who Code LA, LA Makerspace, STEM Advantage, Women in STEM Leadership Alliance (WSLA), California Science Center - Women in STEM, Women Who Code LA, Los Angeles Council of Black Women in Technology (LACBWIT), Society of Women Engineers (SWE) - LA Section, National Association of Women in Technology (NAWIT) - LA Chapter, UCLA - Women in Engineering, USC - Women in Science and Engineering (WiSE), Caltech - Women in STEM, Women in STEM Meetup, LA Women in Tech Meetup, STEM Women in LA Meetup.
+- [ASSISTANT_SAID] Assistant provided information on the gender demographics of leadership positions in various organizations, including Girls Who Code LA (60% women), LA Makerspace (57% women), STEM Advantage (at least 71% women), WSLA (100% women), California Science Center - Women in STEM (67% women), Women Who Code LA (83% women), SWE - LA Section (85% women), and NAWIT - LA Chapter (75% women).
+- [ASSISTANT_SAID] Assistant provided demographic data for universities: UCLA (34% women faculty), USC (32% women faculty), Caltech (26% women faculty).
+- [ASSISTANT_SAID] Assistant provided information on mentorship opportunities, scholarships, and job training programs offered by various organizations, including Girls Who Code LA, LA Makerspace, STEM Advantage, WSLA, California Science Center - Women in STEM, Women Who Code LA, LACBWIT, SWE - LA Section, and NAWIT - LA Chapter.
+- [ASSISTANT_SAID] Assistant mentioned that Girls Who Code LA offers mentorship through their Club Program, scholarships for their Summer Immersion Program, and job training through their Alumni Network.
+- [ASSISTANT_SAID] Assistant noted that LA Makerspace offers mentorship, scholarships for workshops, and job training in CAD design, 3D printing, and laser cutting.
+- [ASSISTANT_SAID] Assistant stated that STEM Advantage provides mentorship, scholarships for STEM programs, and job training through Industry Partnerships.
+- [ASSISTANT_SAID] Assistant indicated that WSLA offers mentorship, scholarships for women pursuing STEM degrees, and job training through their Leadership Academy.
+- [ASSIST

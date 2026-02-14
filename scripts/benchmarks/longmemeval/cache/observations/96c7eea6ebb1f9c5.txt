@@ -1,0 +1,21 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/01 (Mon) 20:24  
+[USER] The user is trying to implement a machine learning model for a project.  
+[USER] The user is having trouble with feature scaling.  
+[USER] The user attended a 2-day workshop on the 17th and 18th of April.  
+[USER] The workshop covered topics including supervised learning and deep learning.  
+[USER] The user did not get a chance to ask about the specific question regarding feature scaling during the workshop.  
+[ASSISTANT_SAID] Feature scaling is a crucial step in machine learning.  
+[ASSISTANT_SAID] Standardization (Z-scoring) rescales features to have a mean of 0 and a standard deviation of 1.  
+[ASSISTANT_SAID] The formula for standardization is: `z = (x - μ) / σ` where `z` is the standardized value, `x` is the original value, `μ` is the mean of the feature, and `σ` is the standard deviation of the feature.  
+[ASSISTANT_SAID] Standardization helps to reduce the effect of features with large ranges on the model, prevent features with large ranges from dominating the model, and improve the stability of the model.  
+[ASSISTANT_SAID] Normalization rescales features to a common range, usually between 0 and 1.  
+[ASSISTANT_SAID] The formula for min-max scaling is: `x' = (x - min) / (max - min)` where `x'` is the normalized value, `x` is the original value, `min` is the minimum value of the feature, and `max` is the maximum value of the feature.  
+[ASSISTANT_SAID] Normalization helps to reduce the effect of features with large ranges on the model, improve the interpretability of the model, and enhance the performance of some algorithms, such as k-NN and k-means clustering.  
+[ASSISTANT_SAID] Key differences between standardization and normalization include purpose, range, and method.  
+[ASSISTANT_SAID] Use standardization when you want to reduce the effect of features with large ranges and improve model stability.  
+[ASSISTANT_SAID] Use normalization when you want to rescale features to a common range and improve interpretability.  
+[ASSISTANT_SAID] Provided an example of a regression problem predicting house prices based on features like number of bedrooms, square footage, distance to city center, and age of the house.  
+[ASSISTANT_SAID] Explained that standardization is useful in regression problems to reduce the effect of large ranges and improve model stability.  
+[ASSISTANT_SAID] Standardization helps improve model

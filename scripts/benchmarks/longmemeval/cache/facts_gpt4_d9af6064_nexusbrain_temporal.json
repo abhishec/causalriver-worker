@@ -1,0 +1,151 @@
+{
+  "answer_da704e79_1": [
+    {
+      "fact": "User is experiencing issues with internet speed while working from home.",
+      "type": "opinion",
+      "entities": [
+        "internet speed",
+        "working from home"
+      ]
+    },
+    {
+      "fact": "User is with XYZ Internet.",
+      "type": "personal",
+      "entities": [
+        "XYZ Internet"
+      ]
+    },
+    {
+      "fact": "User has a 500 Mbps internet plan.",
+      "type": "personal",
+      "entities": [
+        "500 Mbps"
+      ]
+    },
+    {
+      "fact": "User set up a new router on January 15th.",
+      "type": "event",
+      "entities": [
+        "new router",
+        "January 15th"
+      ]
+    },
+    {
+      "fact": "User has around 5-6 devices connected to their network.",
+      "type": "personal",
+      "entities": [
+        "5-6 devices"
+      ]
+    },
+    {
+      "fact": "User's devices include a laptop, smart TV, and smart speaker.",
+      "type": "personal",
+      "entities": [
+        "laptop",
+        "smart TV",
+        "smart speaker"
+      ]
+    },
+    {
+      "fact": "User works from a home office that is about 10-15 feet away from the router.",
+      "type": "personal",
+      "entities": [
+        "home office",
+        "10-15 feet",
+        "router"
+      ]
+    },
+    {
+      "fact": "User usually uses Wi-Fi but has an Ethernet cable available.",
+      "type": "preference",
+      "entities": [
+        "Wi-Fi",
+        "Ethernet cable"
+      ]
+    },
+    {
+      "fact": "User has not run a speed test recently.",
+      "type": "opinion",
+      "entities": [
+        "speed test"
+      ]
+    },
+    {
+      "fact": "User finds the new router has improved Wi-Fi signal strength significantly.",
+      "type": "opinion",
+      "entities": [
+        "new router",
+        "Wi-Fi signal strength"
+      ]
+    },
+    {
+      "fact": "User needs to figure out how to set up the guest network feature on their router.",
+      "type": "opinion",
+      "entities": [
+        "guest network feature"
+      ]
+    }
+  ],
+  "answer_da704e79_2": [
+    {
+      "fact": "User is experiencing slow internet speeds while working from home.",
+      "type": "opinion",
+      "entities": [
+        "internet speeds",
+        "working from home"
+      ]
+    },
+    {
+      "fact": "User recently got a new router on January 15th.",
+      "type": "event",
+      "entities": [
+        "new router",
+        "January 15th"
+      ]
+    },
+    {
+      "fact": "User's new router has improved Wi-Fi signal strength significantly.",
+      "type": "opinion",
+      "entities": [
+        "Wi-Fi signal strength"
+      ]
+    },
+    {
+      "fact": "User is considering calling their internet provider to negotiate a better deal.",
+      "type": "preference",
+      "entities": [
+        "internet provider",
+        "better deal"
+      ]
+    },
+    {
+      "fact": "User has tried restarting their router to resolve slow speeds.",
+      "type": "event",
+      "entities": [
+        "restarting router"
+      ]
+    },
+    {
+      "fact": "User has checked for outages and found none reported in their area.",
+      "type": "event",
+      "entities": [
+        "outages",
+        "area"
+      ]
+    },
+    {
+      "fact": "User is considering optimizing their router's placement.",
+      "type": "preference",
+      "entities": [
+        "router's placement"
+      ]
+    },
+    {
+      "fact": "User is contemplating switching to a different internet service provider if not satisfied.",
+      "type": "opinion",
+      "entities": [
+        "different internet service provider"
+      ]
+    }
+  ]
+}

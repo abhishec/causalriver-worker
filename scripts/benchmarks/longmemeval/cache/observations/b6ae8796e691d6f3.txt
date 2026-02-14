@@ -1,0 +1,18 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/04/15 (Sat) 06:57
+- [ASSISTANT_SAID] If your company's annual turnover is below the GST registration threshold of INR 40 lakhs, your company is not required to register for GST or charge GST on its taxable supplies.
+- [ASSISTANT_SAID] You may still be required to pay GST on your business inputs (e.g., the goods and services you purchase for your business).
+- [ASSISTANT_SAID] You may be able to claim GST credits for the taxes paid on your business inputs if you are registered for GST.
+- [ASSISTANT_SAID] As a partner in the business, you will also be required to pay income tax on your share of the profits at the applicable tax rates.
+- [ASSISTANT_SAID] You will need to file an income tax return each year to report your income and pay any taxes due.
+- [USER] "upto 5L all of us have to pay no tax, currect ?"
+- [ASSISTANT_SAID] The income tax rate for the financial year 2021-2022 is as follows: Up to INR 2.5 lakhs: Nil, INR 2.5 lakhs to INR 5 lakhs: 5%, INR 5 lakhs to INR 7.5 lakhs: 10%, INR 7.5 lakhs to INR 10 lakhs: 15%, INR 10 lakhs to INR 12.5 lakhs: 20%, INR 12.5 lakhs to INR 15 lakhs: 25%, Above INR 15 lakhs: 30%.
+- [ASSISTANT_SAID] Therefore, if your share of the profits is up to INR 5 lakhs, you would not be required to pay any income tax.
+- [ASSISTANT_SAID] If your share of the profits is above INR 5 lakhs, you would be required to pay income tax at the applicable tax rate.
+- [USER] "what about old tax regiem"
+- [ASSISTANT_SAID] The old tax regime refers to the tax system that was in place in India prior to the implementation of the new tax regime in the financial year 2020-2021.
+- [ASSISTANT_SAID] Under the old tax regime, individuals had the option to pay tax at the applicable tax rates or claim deductions and exemptions to reduce their tax liability.
+- [ASSISTANT_SAID] The new tax regime does not offer deductions and exemptions, but instead provides a lower tax rate for individuals who forego these deductions and exemptions.
+- [ASSISTANT_SAID] The new tax regime also introduces a higher tax rate for individuals with a higher income.
+- [ASSISTANT

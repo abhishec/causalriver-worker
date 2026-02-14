@@ -1,0 +1,18 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/11 (Thu) 01:11  
+[USER] User requested the default MIDI mappings of popular electronic drums.  
+[ASSISTANT_SAID] Assistant provided common default MIDI mappings for popular electronic drum kits, including:  
+[ASSISTANT_SAID] Roland V-Drums: Kick drum: MIDI note 36, Snare drum: MIDI note 38, Hi-hat: MIDI note 42 (closed), MIDI note 46 (open), Tom 1: MIDI note 43, Tom 2: MIDI note 45, Tom 3: MIDI note 47, Crash cymbal: MIDI note 49, Ride cymbal: MIDI note 51.  
+[ASSISTANT_SAID] Alesis Nitro Mesh Kit: Kick drum: MIDI note 36, Snare drum: MIDI note 38, Hi-hat: MIDI note 42 (closed), MIDI note 46 (open), Tom 1: MIDI note 48, Tom 2: MIDI note 45, Tom 3: MIDI note 43, Crash cymbal: MIDI note 49, Ride cymbal: MIDI note 51.  
+[ASSISTANT_SAID] Yamaha DTX400: (incomplete information provided).  
+[USER] User requested to go by manufacturer and asked for the top 5 kits from Roland.  
+[ASSISTANT_SAID] Assistant provided a list of the top 5 electronic drum kits from Roland, starting with Roland TD-50KVX, described as Roland's flagship electronic drum kit.  
+[USER] User requested the information in a common JSON format, specifying the need for manufacturer, model name, and possible versions to recognize them in web MIDI.  
+[ASSISTANT_CREATED] Assistant created an example JSON format including:  
+[ASSISTANT_CREATED] Manufacturer: "Roland", Model: "TD-50KVX", Versions: ["TD-50KVX-S", "TD-50KVX-WL", "TD-50KVX-EXP", "TD-50KVX-ECOM"].  
+[ASSISTANT_CREATED] MIDI mappings for Roland TD-50KVX: Kick: 36, Snare: 38, Hi-hat closed: 42, Hi-hat open: 46, Tom 1: 43, Tom 2: 45, Tom 3: 47, Crash cymbal: 49, Ride cymbal: 51.  
+[USER] User requested to add MIDI mapping to the JSON format.  
+[ASSISTANT_CREATED] Assistant updated the JSON format to include MIDI mappings for additional kits, including:  
+[ASSISTANT_CREATED] Roland TD-17KVX with versions and MIDI mappings.  
+[ASSISTANT_CREATED] Yamaha DTX532K with versions and MIDI mappings.

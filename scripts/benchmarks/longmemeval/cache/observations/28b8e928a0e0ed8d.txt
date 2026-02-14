@@ -1,0 +1,20 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/01/15 (Sun) 11:59  
+[USER] User is looking for new BBQ sauce recipes to try out.  
+[ASSISTANT_SAID] Assistant provided several BBQ sauce recipes, including:  
+[ASSISTANT_CREATED] 1. **Sweet and Smoky BBQ Sauce**: Ingredients include ketchup, brown sugar, honey, apple cider vinegar, Worcestershire sauce, chipotle peppers, garlic, onion powder, smoked paprika, salt, and black pepper.  
+[ASSISTANT_CREATED] 2. **Korean BBQ Sauce (Gochujang BBQ Sauce)**: Ingredients include gochujang, soy sauce, brown sugar, garlic, ginger, rice vinegar, sesame oil, and black pepper.  
+[ASSISTANT_CREATED] 3. **Alabama-Style White BBQ Sauce**: Ingredients include mayonnaise, apple cider vinegar, hot sauce, garlic powder, onion powder, salt, black pepper, and paprika.  
+[ASSISTANT_CREATED] 4. **Jamaican Jerk BBQ Sauce**: Ingredients include ketchup, jerk seasoning, allspice, thyme, brown sugar, soy sauce, lime juice, garlic, and scotch bonnet peppers (optional).  
+[ASSISTANT_CREATED] 5. **Bourbon BBQ Sauce**: Ingredients include ketchup, bourbon, brown sugar, apple cider vinegar, Worcestershire sauce, smoked paprika, garlic powder, onion powder, and black pepper.  
+[ASSISTANT_CREATED] 6. **Spicy Mango BBQ Sauce**: Ingredients include ketchup, mango puree, brown sugar, jalapeño peppers, apple cider vinegar, soy sauce, garlic, and cumin.  
+[ASSISTANT_CREATED] 7. **Memphis-Style BBQ Sauce**: Ingredients include ketchup, brown sugar, apple cider vinegar, Worcestershire sauce, garlic, onion powder, paprika, salt, and black pepper.  
+[ASSISTANT_SAID] Assistant asked which recipe catches the user's eye (or taste buds).  
+[USER] User expressed intrigue in the Korean BBQ Sauce recipe and requested tips on how to use gochujang.  
+[ASSISTANT_SAID] Assistant provided information about gochujang, describing it as a Korean chili paste made from fermented soybeans, rice, and red chili peppers, with a thick consistency and sweet, savory, slightly smoky flavor.  
+[ASSISTANT_SAID] Assistant provided tips for using gochujang:  
+[ASSISTANT_SAID] 1. Start with a small amount and adjust to taste.  
+[ASSISTANT_SAID] 2. Mix with other ingredients to balance flavor.  
+[ASSISTANT_SAID] 3. Use as a marinade for meats.  
+[ASSISTANT_SAID] 4. Add depth to soups and stews

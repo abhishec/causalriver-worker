@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/22 (Mon) 01:38  
+[EVENT] User is planning to host another backyard BBQ soon.  
+[PREFERENCE] User is thinking of trying out some new recipes for the BBQ.  
+[EVENT] User had a huge success with a Korean-inspired BBQ sauce used on chicken breasts at the last gathering with college friends.  
+[PREFERENCE] User is looking for unique BBQ sauce flavors to try out next.  
+[ASSISTANT_SAID] Recommended BBQ sauce flavors include:  
+[ASSISTANT_SAID] 1. Jamaican Jerk BBQ Sauce: Combines allspice, thyme, scotch bonnet peppers, and lime juice.  
+[ASSISTANT_SAID] 2. Kung Pao BBQ Sauce: Made with soy sauce, hoisin sauce, rice vinegar, garlic, and Szechuan peppercorns.  
+[ASSISTANT_SAID] 3. Indian-Style Tandoori BBQ Sauce: Blends yogurt, garam masala, cumin, coriander, cayenne pepper, and lemon juice.  
+[ASSISTANT_SAID] 4. Mango Habanero BBQ Sauce: Combines mango with habanero peppers, cinnamon, and allspice.  
+[ASSISTANT_SAID] 5. Chimichurri BBQ Sauce: Mixes parsley, oregano, garlic, red pepper flakes, red wine vinegar, and olive oil.  
+[ASSISTANT_SAID] 6. Sriracha Honey BBQ Sauce: A combination of sriracha sauce, honey, soy sauce, and rice vinegar.  
+[ASSISTANT_SAID] 7. Cajun BBQ Sauce: Blends paprika, cayenne pepper, thyme, oregano, garlic, and Worcestershire sauce.  
+[ASSISTANT_SAID] 8. Pineapple-Bourbon BBQ Sauce: Combines pineapple juice, bourbon whiskey, brown sugar, and Dijon mustard.  
+[ASSISTANT_SAID] 9. Chipotle Lime BBQ Sauce: Made with chipotle peppers in adobo sauce, lime juice, and cumin.  
+[ASSISTANT_SAID] 10. Gochujang BBQ Sauce: Mixes gochujang, soy sauce, brown sugar, garlic, and rice vinegar.  
+[PREFERENCE] User is particularly intrigued by the Kung Pao BBQ Sauce and the Mango Habanero BBQ Sauce.  
+[EVENT] User had grilled asparagus at the last BBQ, which was a big hit.  
+[ASSISTANT_SAID] Both Kung Pao BBQ Sauce and Mango Habanero BBQ Sauce would pair well with grilled asparagus.  
+[ASSISTANT_SAID] Kung Pao BBQ Sauce adds a numbing and slightly spicy kick, while Mango Habanero BBQ Sauce adds sweetness and heat.  
+[ASSISTANT_S

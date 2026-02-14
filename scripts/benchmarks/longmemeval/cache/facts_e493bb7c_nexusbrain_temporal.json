@@ -1,0 +1,78 @@
+{
+  "answer_1a374afa_1": [
+    {
+      "fact": "User is looking for art supply storage ideas.",
+      "type": "preference",
+      "entities": [
+        "art supply storage",
+        "art box"
+      ]
+    },
+    {
+      "fact": "User enjoys the new painting above their living room sofa.",
+      "type": "opinion",
+      "entities": [
+        "painting",
+        "living room",
+        "sofa"
+      ]
+    },
+    {
+      "fact": "User is thinking of hosting an art-themed party.",
+      "type": "event",
+      "entities": [
+        "art-themed party"
+      ]
+    },
+    {
+      "fact": "User wants to set up art stations for guests to create their own art pieces.",
+      "type": "preference",
+      "entities": [
+        "art stations",
+        "guests",
+        "art pieces"
+      ]
+    }
+  ],
+  "answer_1a374afa_2": [
+    {
+      "fact": "User is looking for inspiration for their next art project.",
+      "type": "event",
+      "entities": [
+        "art project",
+        "inspiration"
+      ]
+    },
+    {
+      "fact": "User recently rearranged their bedroom.",
+      "type": "event",
+      "entities": [
+        "bedroom",
+        "rearrangement"
+      ]
+    },
+    {
+      "fact": "User loves how the 'Moonlit Ocean' print looks on their wall.",
+      "type": "opinion",
+      "entities": [
+        "Moonlit Ocean print"
+      ]
+    },
+    {
+      "fact": "User moved the 'Ethereal Dreams' painting to their bedroom.",
+      "type": "event",
+      "entities": [
+        "Ethereal Dreams painting",
+        "bedroom"
+      ]
+    },
+    {
+      "fact": "User is particularly interested in exploring surrealism and lowbrow art.",
+      "type": "preference",
+      "entities": [
+        "surrealism",
+        "lowbrow art"
+      ]
+    }
+  ]
+}

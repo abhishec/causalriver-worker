@@ -1,0 +1,32 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/21 (Sun) 05:04
+- [PREFERENCE] User is trying to find a new herbal tea to try this weekend.
+- [PREFERENCE] User has been really into their morning coffee routine lately.
+- [ASSISTANT_SAID] Assistant offered to help with herbal tea recommendations.
+- [ASSISTANT_SAID] Assistant asked if the user has a preferred flavor profile or specific benefits they are looking for in an herbal tea (e.g., calming, energizing, fruity, spicy, etc.).
+- [ASSISTANT_SAID] Assistant provided a list of popular herbal tea options: 
+  1. Peppermint: Refreshing, calming, and great for digestion.
+  2. Rooibos: Caffeine-free, nutty-flavored, rich in antioxidants.
+  3. Hibiscus: Fruity, packed with vitamins, may help lower blood pressure.
+  4. Lemon Balm: Light, citrusy, promotes relaxation and good sleep.
+  5. Ginger: Spicy, invigorating, aids digestion, reduces nausea.
+- [PREFERENCE] User is looking for something calming, considering chamomile or lemon balm.
+- [FACT] User has been using a new coffee blend from a coffee shop in Chicago.
+- [PREFERENCE] User has been having their cold brew coffee black, with no sugar or creamer.
+- [ASSISTANT_SAID] Assistant confirmed that chamomile or lemon balm are excellent choices for calming herbal teas.
+- [ASSISTANT_SAID] Assistant suggested additional calming herbal tea options:
+  1. Lavender: Promotes relaxation and reduces anxiety.
+  2. Passionflower: Natural sedative, helps with anxiety and insomnia.
+  3. Tulsi (Holy Basil): Reduces stress and promotes relaxation.
+- [ASSISTANT_SAID] Assistant noted that all suggested herbal teas are caffeine-free.
+- [ASSISTANT_SAID] Assistant encouraged the user to experiment with herbal teas and mentioned the benefits of cold brew for herbal teas.
+- [ASSISTANT_SAID] Assistant provided a cold brew herbal tea brewing method:
+  1. Use a large container with a lid.
+  2. Add 1-2 tablespoons of loose-leaf herbal tea per 8 oz of cold water.
+  3. Steep in the refrigerator for 8-12 hours.
+  4. Strain the tea and enjoy.
+- [ASSISTANT_SAID] Assistant suggested herbal teas that pair well with cold brew: peppermint, hibiscus, lemon balm, and rosehip.
+- [PREFERENCE] User is excited to try cold brew herbal tea to complement their morning routine.
+- [CHANGE] User has been having their morning coffee for three weeks and feels more energized throughout the day.
+- [ASSIST

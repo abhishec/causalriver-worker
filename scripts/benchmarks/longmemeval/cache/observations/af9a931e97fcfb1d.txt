@@ -1,0 +1,20 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/23 (Tue) 23:43  
+[ASSISTANT_SAID] MLS listings or pending sales are not mandatory. If included, please follow these guidelines:  
+[ASSISTANT_SAID] Adjust active listings to reflect the list-to-sale price ratio based on data from the 1004MC, if statistically relevant.  
+[ASSISTANT_SAID] Adjust pending sales to reflect the contract price whenever possible.  
+[ASSISTANT_SAID] In some markets, compliance with these guidelines may not be possible due to a lack of data. In such cases, an explanation is required. (Do not include listings or pendings that are not truly comparable to the subject property.)  
+[ASSISTANT_CREATED] MLS/Pendings: not mandatory, adjust active to list-to-sale ratio (if relevant), adjust pendings to contract price, explanation required if data lacking, exclude non-comparable.  
+[USER] Revise, as ideally each sentence should have word(s) emphasized to help drive clarity or understanding.  
+[ASSISTANT_SAID] MLS listings and pending sales are optional. If included, please follow these steps:  
+[ASSISTANT_SAID] Adjust active listings to reflect the market's list-to-sale price ratio using 1004MC data, if statistically relevant.  
+[ASSISTANT_SAID] Reflect the pending sale's contract price in your adjustment, if possible.  
+[ASSISTANT_SAID] In some cases, it may not be possible to follow these steps due to a lack of data. In such instances, please provide an explanation. (Do not include listings or pendings that are not truly comparable to the subject property.)  
+[ASSISTANT_CREATED] MLS/Pendings: optional, adjust active to market's list-to-sale ratio (if relevant), adjust pendings to contract price, provide explanation if data lacking, exclude non-comparable.  
+[USER] Revise again, so that each sentence contains a bolded word or set of words that help the reader understand what the sentence is about quicker and with more clarity.  
+[ASSISTANT_SAID] MLS listings or pending sales are optional. If included, please follow these steps:  
+[ASSISTANT_SAID] Adjust active listings to reflect the market's list-to-sale price ratio using 1004MC data, if statistically relevant.  
+[ASSISTANT_SAID] Reflect the pending sale's contract price in your adjustment, if possible.  
+[ASSISTANT_SAID] In some cases, it may not be possible to follow these steps due to a lack of data. In such instances, please provide an explanation. (Do not include listings or pendings that are not truly comparable to the subject property.)  
+[ASSISTANT_CREATED] MLS/Pendings: optional,

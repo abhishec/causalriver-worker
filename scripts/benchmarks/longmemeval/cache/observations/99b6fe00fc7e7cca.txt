@@ -1,0 +1,17 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2022/04/10 (Sun) 23:46
+- [USER] User inquired about hardware requirements for livestreaming.
+- [ASSISTANT_SAID] The hardware requirements for livestreaming on YouTube depend on whether streaming from a computer or a mobile device.
+- [ASSISTANT_SAID] For computer streaming, the requirements include:
+  - A webcam or a camera that supports video input.
+  - A computer with an encoder software or hardware encoder.
+  - A stable internet connection with a minimum upload speed of 3 Mbps.
+  - A microphone, if audio is desired for the stream.
+- [ASSISTANT_SAID] For mobile streaming, the requirements include:
+  - A mobile device with a front or rear-facing camera.
+  - The YouTube app installed on the device.
+  - A stable internet connection, either via Wi-Fi or mobile data with a minimum upload speed of 3 Mbps.
+  - A microphone, if audio is desired for the stream.
+- [ASSISTANT_SAID] The specific hardware requirements may vary depending on the quality and complexity of the stream.
+- [ASSISTANT_SAID] For higher-quality streams, additional equipment may be needed, such as lighting, a green screen, or a higher-end camera and microphone.

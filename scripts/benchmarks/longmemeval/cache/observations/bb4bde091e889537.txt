@@ -1,0 +1,26 @@
+**Observation Log:**
+
+- [FACT] User's name is Stephen Donohoe.
+- [FACT] User is part of a call discussing Clari and its offerings.
+- [FACT] User does not have children.
+- [FACT] Curt Weaver has three children aged four, eight, and nine.
+- [FACT] Lizy Thomson has two children aged 18 and 16.
+- [FACT] Lizy Thomson is recovering from the flu.
+- [FACT] Stephen Donohoe is a part of the Clari team.
+- [FACT] Nathan Seldon is also part of the call and is involved with a product called Martrus.
+- [PREFERENCE] Lizy Thomson loves the analytics and AI elements of Clari's offerings.
+- [PREFERENCE] Lizy Thomson is excited about the dashboards offered by Clari.
+- [EVENT] The call is taking place on 2023/08/30.
+- [EVENT] Stephen Donohoe mentioned that he put together an introduction for Nathan and Johnny from compliance.
+- [CHANGE] Lizy Thomson's daughter recently turned 18.
+- [TEMPORAL] The conversation mentions that the flu has been ongoing since November for Curt Weaver's family.
+- [TEMPORAL] The call is scheduled for 35 minutes.
+- [RELATIONSHIP] Stephen Donohoe is a colleague of Curt Weaver and Nathan Seldon.
+- [RELATIONSHIP] Lizy Thomson is a colleague of Stephen Donohoe and Curt Weaver.
+- [ASSISTANT_SAID] Stephen Donohoe mentioned that they can dive into details around the consumption piece of Clari's offerings.
+- [ASSISTANT_SAID] Stephen Donohoe stated that they can get a mutual NDA in place to understand the KPIs being tracked.
+- [ASSISTANT_SAID] Curt Weaver noted that Clari is not limited to one view of the forecast and can support various KPI tracking.
+- [ASSISTANT_SAID] Stephen Donohoe indicated that they can potentially show elements of Clari during the call.
+- [ASSISTANT_SAID] Nathan Seldon described the Martrus product as a payments business similar to fintech solutions like Revolut or Monzo.
+- [ASSISTANT_SAID] Nathan Seldon explained that the go-to-market approach for Martrus is within shipping, targeting transportation companies that move products by sea.
+- [ASSISTANT_SAID] Nathan Seldon mentioned that the Crew Payment solution charges $12 flat on each transaction for seafarers.

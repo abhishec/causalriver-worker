@@ -1,0 +1,16 @@
+**Observation Log:**
+
+- [FACT] The user has inherited a plot of land.
+- [PREFERENCE] The user is considering building a vacation home for their family instead of selling the land to a developer.
+- [EVENT] The user has been thinking about building a vacation home.
+- [ASSISTANT_SAID] The assistant congratulated the user on their inheritance.
+- [ASSISTANT_SAID] The assistant provided a list of resources and websites to find reliable contractors, including Angie's List, HomeAdvisor, Better Business Bureau, Houzz, Thumbtack, National Association of the Remodeling Industry, National Kitchen and Bath Association, local online classifieds, word of mouth, local trade organizations, state licensing board, and local consumer protection agencies.
+- [ASSISTANT_SAID] The assistant advised the user to get multiple bids, check licenses, insurance, and certifications, read reviews, ask for references, verify contact information, and clearly outline the scope of work, timeline, and payment terms before hiring a contractor.
+- [ASSISTANT_SAID] The assistant recommended consulting local authorities, a lawyer, or a professional for information on local zoning laws and regulations regarding single-family homes.
+- [ASSISTANT_SAID] The assistant provided general steps to research local zoning laws, including contacting the local government, obtaining zoning ordinances and maps, researching land-use regulations, familiarizing with building codes and permits, and consulting local professionals.
+- [FACT] The user has already researched local zoning laws and found that they can build a single-family home without needing special permits.
+- [EVENT] The user has spoken to a friend who is an architect and received rough estimates for construction costs.
+- [PREFERENCE] The user is weighing options between selling the land to a developer and building a vacation home.
+- [ASSISTANT_SAID] The assistant provided resources for finding architects who specialize in designing rural homes, including the American Institute of Architects, Houzz, Architectural Digest, local architectural associations, word of mouth, online design platforms, local design schools, rural architecture blogs, and local builders and contractors.
+- [ASSISTANT_SAID] The assistant advised the user to consider experience with rural projects, familiarity with local building codes, understanding of climate conditions, ability to incorporate sustainable design principles, communication style, and portfolio when researching architects.
+- [ASSISTANT_SAID] The assistant provided considerations for designing a home near a pond, including water table and soil conditions, flood zone and water level fluctuations, water quality and treatment, wildlife and habitat preservation, aesthetics and views, moisture and humidity, pest control and maintenance, local regulations and permits, drainage and stormwater management, and environmental impact.

@@ -1,0 +1,17 @@
+**Observation Log:**
+
+- [FACT] The user did not provide any personal information such as name, location, job, or family.
+- [PREFERENCE] The user did not express any likes, dislikes, opinions, or tastes.
+- [EVENT] The user did not mention any specific events that happened or are planned.
+- [CHANGE] The user did not provide any updates to previously known information.
+- [TEMPORAL] The session date is 2023/05/21 (Sun) at 08:11.
+- [RELATIONSHIP] The user did not mention any people or their relations.
+- [ASSISTANT_SAID] VFX workflows involve processes and techniques used to create, manipulate, and integrate digital imagery into live-action footage.
+- [ASSISTANT_SAID] The pre-production phase involves planning where VFX artists work with directors, producers, and cinematographers to determine the VFX needs for the project.
+- [ASSISTANT_SAID] Asset creation involves creating digital assets such as characters, props, and environments using 3D modeling and texturing software.
+- [ASSISTANT_SAID] Animation includes animating digital characters, objects, and environments through keyframe animation, motion capture, and simulations.
+- [ASSISTANT_SAID] Compositing is the process of combining different visual elements, such as live-action footage, CG elements, and visual effects, into a single cohesive image.
+- [ASSISTANT_SAID] Rendering is the process of generating the final output of the visual effects, involving rendering individual elements and compositing them together.
+- [ASSISTANT_SAID] Review and approval is the process of reviewing the visual effects work with the director and other stakeholders to ensure it meets the creative vision of the project.
+- [ASSISTANT_SAID] Delivery is the final stage of the VFX workflow where the finished visual effects are delivered to the client or integrated into the final project.
+- [ASSISTANT_CREATED] The assistant created a list of important concepts to know about VFX workflows, including pre-production, asset creation, animation, compositing, rendering, review and approval, and delivery.

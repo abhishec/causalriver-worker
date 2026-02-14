@@ -1,0 +1,37 @@
+{
+  "answer_9b182436": [
+    {
+      "fact": "User is looking for language learning resources, specifically podcasts in French.",
+      "type": "preference",
+      "entities": [
+        "language learning",
+        "podcasts",
+        "French"
+      ]
+    },
+    {
+      "fact": "User wants to improve their listening skills in French.",
+      "type": "preference",
+      "entities": [
+        "listening skills",
+        "French"
+      ]
+    },
+    {
+      "fact": "User volunteered at a cultural festival last month.",
+      "type": "event",
+      "entities": [
+        "cultural festival"
+      ]
+    },
+    {
+      "fact": "User is interested in cultural events or festivals that celebrate language diversity and cultural exchange.",
+      "type": "preference",
+      "entities": [
+        "cultural events",
+        "language diversity",
+        "cultural exchange"
+      ]
+    }
+  ]
+}

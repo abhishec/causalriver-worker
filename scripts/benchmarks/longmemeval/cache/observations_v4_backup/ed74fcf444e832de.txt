@@ -1,0 +1,14 @@
+**Observation Log:**
+
+- [FACT] User works in the city of Irvine, California.
+- [PREFERENCE] User is looking for a family-friendly area with good schools and parks.
+- [EVENT] User is currently working with a real estate agent named Rachel to find a place that fits their needs.
+- [TEMPORAL] User started working with Rachel on February 15, 2022.
+- [FACT] User is pre-approved for a mortgage up to $350,000.
+- [PREFERENCE] User has a good sense of what they are looking for in a neighborhood, thanks to Rachel's help.
+- [ASSISTANT] The assistant provided a list of neighborhoods (Tustin, Lake Forest, Mission Viejo, Rancho Santa Margarita, Ladera Ranch) that fit the user's criteria.
+- [ASSISTANT] The assistant suggested that user ask Rachel about her thoughts on the areas they are interested in.
+- [ASSISTANT] The assistant provided insights on the types of properties available in each neighborhood, including the mix of new constructions and resale homes.
+- [ASSISTANT] The assistant recommended that user ask Rachel about upcoming developments or projects in the pipeline.
+- [RELATIONSHIP] User mentioned Rachel as their real estate agent.
+- [ASSISTANT] The assistant advised user to consider factors like property taxes, HOA fees, and commute time when evaluating different neighborhoods and homes.

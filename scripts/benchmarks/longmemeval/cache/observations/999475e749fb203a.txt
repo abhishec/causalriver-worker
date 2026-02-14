@@ -1,0 +1,23 @@
+**Observation Log:**
+
+**Session Date:** 2023/05/22 (Mon) 01:15  
+**Session ID:** sharegpt_BWMyoNr_0
+
+1. [FACT] The user is involved in a clinic and is communicating with a service provider called Yezza.
+2. [EVENT] The user is inquiring about the clinic appointment system and its pricing.
+3. [PREFERENCE] The user prefers clarity on whether the RM197 per month is solely for the clinic appointment system or part of a larger plan.
+4. [FACT] The user is interested in the maximum number of users allowed to access the system for RM197 per month.
+5. [CHANGE] The user indicates that the doctor's work schedule is subject to daily changes.
+6. [TEMPORAL] The user provides specific dates for Doctor A's work schedule: March 1, 2022, and March 8, 2022.
+7. [ASSISTANT_SAID] The assistant provided a corrected version of the user's inquiry regarding the RM197 payment.
+8. [ASSISTANT_SAID] The assistant provided a corrected version of the user's inquiry about the maximum number of users.
+9. [ASSISTANT_SAID] The assistant provided a corrected version of the user's inquiry about changing the timetable daily.
+10. [ASSISTANT_SAID] The assistant provided a corrected version of the user's inquiry about user capabilities to cancel and reschedule appointments.
+11. [ASSISTANT_SAID] The assistant provided a corrected version of the user's inquiry regarding SMS services and costs.
+12. [ASSISTANT_SAID] The assistant provided a corrected version of the user's inquiry about disabling SMS features and enabling their SMS gateway.
+13. [ASSISTANT_SAID] The assistant provided a corrected version of the user's inquiry about API or Webhooks documentation.
+14. [ASSISTANT_SAID] The assistant provided a corrected version of the user's inquiry about setting conditional rules in the appointment system.
+15. [ASSISTANT_CREATED] The assistant created a structured and grammatically correct version of the user's message to the service provider, including specific inquiries about the appointment system and its features.
+16. [PREFERENCE] The user is interested in having conditional rules based on the number of doctors on duty and the time of day for service offerings.
+17. [FACT] The user specifies two services: "Screening" and "Checkup" for the appointment system.
+18. [TEMPORAL] The user specifies time frames for service offerings: "Screening" from 9:00 AM - 12:00 PM and both services from 12:00 PM - 10:30 PM.

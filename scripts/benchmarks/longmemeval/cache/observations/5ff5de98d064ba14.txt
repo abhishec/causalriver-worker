@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[FACT] User wakes up at 7 am and goes to bed at 10 pm.  
+[FACT] User has work from 9 am to 5 pm.  
+[EVENT] User wants to set reminders for their lunch break at 12 pm and for morning and evening social media checks.  
+[EVENT] User wants to allocate time for exercise at 7:30 am and focused work from 2 pm to 4 pm.  
+[PREFERENCE] User is open to using a digital calendar or task management app.  
+[PREFERENCE] User prefers Google Calendar for organizing their tasks and appointments.  
+[ASSISTANT_SAID] Assistant recommends using Google Calendar or Apple Calendar for setting reminders and notifications.  
+[ASSISTANT_SAID] Assistant suggests creating recurring events for the following:  
+- Morning Social Media Check: 7:15 am - 7:45 am (30 minutes)  
+- Exercise: 7:30 am - 8:00 am (30 minutes)  
+- Lunch Break: 12:00 pm - 1:00 pm (1 hour)  
+- Focused Work: 2:00 pm - 4:00 pm (2 hours)  
+- Evening Social Media Check: 9:00 pm - 9:30 pm (30 minutes)  
+[ASSISTANT_SAID] Assistant advises setting reminders 15-30 minutes before each event.  
+[ASSISTANT_SAID] Assistant provides additional tips for productivity, including using a "Do Not Disturb" mode and website blockers.  
+[ASSISTANT_SAID] Assistant recommends website blockers such as Freedom, StayFocusd, Cold Turkey, SelfControl, BlockSite, and LeechBlock.  
+[PREFERENCE] User expresses interest in trying Freedom as a website blocker.  
+[EVENT] User is considering taking a social media break for a month due to feeling overwhelmed by information and news on social media.  
+[PREFERENCE] User thinks taking a break would help them clear their head and focus on their priorities.  
+[ASSISTANT_SAID] Assistant supports the idea of taking social media breaks and provides benefits, including reduced information overload, increased focus, improved mental health, and enhanced creativity.  
+[ASSISTANT_SAID] Assistant offers tips for making the most of social media breaks, including setting clear goals, scheduling the break, using website blockers, finding alternative activities, reflecting and journaling, setting boundaries, and planning for re-entry.  
+[ASSISTANT_SAID] Assistant emphasizes the importance of establishing new boundaries and unfollowing accounts that drain energy before returning to social media.  
+[TEMPORAL] Session date is 2023/05/20 (Sat) 09:37.

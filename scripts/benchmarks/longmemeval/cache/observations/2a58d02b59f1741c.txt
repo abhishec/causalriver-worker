@@ -1,0 +1,35 @@
+**Observation Log:**
+
+[FACT] The conversation takes place on 2023/04/26 (Wed) at 14:47.
+
+[RELATIONSHIP] The mother is referred to as "Mama" by the daughter.
+
+[EVENT] The mother is in the process of changing her daughter's soiled diaper and clothes.
+
+[EVENT] The mother is cleaning up the bathroom after changing her daughter.
+
+[CHANGE] The daughter is transitioning from wearing a soiled shirt and overalls to a fresh outfit.
+
+[PREFERENCE] The daughter expresses that her shirt and overalls are her favorite clothes.
+
+[ASSISTANT_SAID] The mother explains to the daughter that the soiled shirt must be flushed away because it is covered in "yucky stuff" from the diaper.
+
+[ASSISTANT_SAID] The mother reassures the daughter that they need to flush the dirty clothes away to clean up and get her into fresh clothes.
+
+[EVENT] The daughter protests when her mother puts her shirt in the toilet.
+
+[EVENT] The daughter waves goodbye to her shirt before it is flushed.
+
+[ASSISTANT_SAID] The mother expresses relief that everything was successfully flushed away without any problems.
+
+[ASSISTANT_SAID] The mother expresses gratitude for having an extra set of clothes packed in the diaper bag.
+
+[FACT] The daughter receives a new yellow sundress with white flowers and matching sandals after being cleaned up.
+
+[PREFERENCE] The daughter expresses excitement and love for her new dress.
+
+[EVENT] The daughter feels much better after being cleaned up and changed into fresh clothes.
+
+[ASSISTANT_SAID] The mother suggests that they should not have any more diaper blowouts for a while. 
+
+[RELATIONSHIP] The daughter agrees to be more careful in the future, indicating a cooperative relationship with her mother.

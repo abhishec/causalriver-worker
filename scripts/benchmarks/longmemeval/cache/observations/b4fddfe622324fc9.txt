@@ -1,0 +1,24 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/28 (Sun) 09:51  
+[FACT] User attended a vegan cooking class at a local culinary school today.  
+[PREFERENCE] User is looking for new vegan recipes to try out.  
+[PREFERENCE] User wants to experiment with different flavors and ingredients.  
+[PREFERENCE] User is interested in vegan dinner recipes that use cashew cream and nutritional yeast.  
+[ASSISTANT_SAID] Cashew cream and nutritional yeast can add richness, creaminess, and cheesy flavors to vegan dishes.  
+[ASSISTANT_CREATED] Suggested recipes using cashew cream: Vegan Mac and Cheese, Cashew Cream Indian Korma, Vegan Lasagna.  
+[ASSISTANT_CREATED] Suggested recipes using nutritional yeast: Vegan Cheesy Broccoli Soup, Nutritional Yeast "Cheese" Sauce, Vegan Quesadillas.  
+[ASSISTANT_CREATED] Suggested recipes combining cashew cream and nutritional yeast: Vegan Creamy Mushroom Pasta, Vegan Cauliflower Gnocchi with Creamy Sauce, Vegan Stuffed Bell Peppers.  
+[PREFERENCE] User is interested in trying out the vegan lasagna recipe mentioned.  
+[PREFERENCE] User has been experimenting with different types of vegan protein sources, including tofu, tempeh, and seitan.  
+[PREFERENCE] User has never made meatballs before.  
+[ASSISTANT_SAID] Tofu meatballs can be made using extra-firm tofu, breadcrumbs, nutritional yeast, garlic powder, onion powder, Italian seasonings, and a flax egg.  
+[ASSISTANT_SAID] Tempeh meatballs can be made by crumbling tempeh and mixing it with nutritional yeast, garlic powder, onion powder, and breadcrumbs.  
+[ASSISTANT_SAID] Seitan meatballs can be made using store-bought or homemade seitan mixed with nutritional yeast, garlic powder, onion powder, and tomato paste.  
+[ASSISTANT_SAID] Other options for meatballs include lentil meatballs, mushroom meatballs, and jackfruit meatballs.  
+[ASSISTANT_CREATED] Provided a simple recipe for tofu meatballs with ingredients and instructions.  
+[PREFERENCE] User is excited to try making the tofu meatballs first.  
+[ASSISTANT_SAID] Recommended a homemade marinara sauce recipe with ingredients and instructions.  
+[PREFERENCE] User is looking for a good vegan mozzarella cheese alternative to use in the lasagna.  
+[ASSISTANT_SAID] Suggested vegan mozzarella options: Daiya Vegan Mozzarella Shreds, Follow Your Heart Vegan Mozzarella, Kite Hill Vegan Mozzarella, Miyoko's Kitchen Cultured Nutritional Yeast, and homemade mozzarella using cashew cream and tapioca starch.  
+[ASSISTANT_SAID] Provided tips for using vegan mozzarella, including not overheating it and experimenting with different brands.

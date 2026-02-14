@@ -1,0 +1,26 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/26 (Fri) 07:17
+- [USER] User asked how to create a custom WordPress block with a heading, paragraph, and image.
+- [ASSISTANT_SAID] Creating a custom WordPress block requires knowledge of HTML, CSS, and JavaScript.
+- [ASSISTANT_SAID] Steps to create a custom block:
+  1. Create a new directory in WordPress theme or plugin, e.g., `my-custom-block`.
+  2. Create a new file `index.js` in the directory and add specific JavaScript code.
+- [ASSISTANT_CREATED] JavaScript code provided for the custom block includes:
+  - Importing components: `registerBlockType`, `RichText`, `MediaUpload`, `BlockControls`, `AlignmentToolbar`, `Button`.
+  - Block registration with title 'Custom Block', icon 'format-image', category 'common', and attributes for heading, paragraph, image URL, image ID, image alt text, and alignment.
+  - Edit function with handlers for image selection, heading change, paragraph change, and alignment change.
+  - Save function that returns the block's HTML structure.
+- [ASSISTANT_SAID] The code includes a default image URL: 'https://via.placeholder.com/150'.
+- [USER] User inquired about CSS for the custom block.
+- [ASSISTANT_SAID] To style the custom block, a `style.css` file should be added in the same directory as `index.js`.
+- [ASSISTANT_CREATED] CSS code provided for styling the custom block includes:
+  - Margin for the block: `margin: 20px 0;`
+  - Max-width for the image: `max-width: 100%;`
+  - Font size and margin for the heading: `font-size: 24px; margin-bottom: 10px;`
+  - Font size and line height for the paragraph: `font-size: 16px; line-height: 1.5;`
+- [ASSISTANT_SAID] To include the CSS in WordPress, enqueue the stylesheet in `functions.php` using `wp_enqueue_style()`.
+- [ASSISTANT_CREATED] Example code provided for enqueuing the stylesheet:
+  - Function name: `my_custom_block_enqueue`
+  - Enqueue style: `wp_enqueue_style('my-custom-block-style', plugins_url('my-custom-block/style.css'));`
+  - Hooking function to `enqueue_block_editor_assets` action.

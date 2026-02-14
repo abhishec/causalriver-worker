@@ -1,0 +1,18 @@
+**Observation Log:**
+
+[FACT] The conversation took place on 2023/05/22 (Mon) at 14:06.  
+[RELATIONSHIP] The mother is referred to as "Mama" by the daughter.  
+[RELATIONSHIP] The daughter is the child of the mother.  
+[PREFERENCE] The daughter has a favorite shirt and overalls that she does not want to take off.  
+[EVENT] The mother is in the process of changing the daughter's soiled diaper and clothes.  
+[EVENT] The mother is cleaning up the bathroom after changing the daughter.  
+[EVENT] The mother is grateful for the extra set of clothes she had packed in the diaper bag.  
+[CHANGE] The daughter is now wearing a new yellow sundress with white flowers and matching sandals.  
+[PREFERENCE] The daughter expresses excitement about her new dress, saying, "Yay, I love this dress!"  
+[TEMPORAL] The mother expresses relief that everything had been successfully flushed away without any problems.  
+[ASSISTANT_SAID] The mother explains to the daughter that the shirt and overalls are covered in "yucky stuff" from the diaper and need to be flushed away.  
+[ASSISTANT_SAID] The daughter protests mildly about her shirt and overalls being flushed down the toilet.  
+[ASSISTANT_CREATED] The mother and daughter go through separate goodbyes for the shirt and overalls as they are flushed down the toilet.  
+[ASSISTANT_SAID] The daughter expresses that she feels "so much better now" after being changed into clean clothes.  
+[ASSISTANT_SAID] The mother suggests to the daughter that they should not have any more diaper blowouts for a while.  
+[RELATIONSHIP] The daughter responds to the mother by nodding and saying, "Okay, Mama. I'll be more careful."

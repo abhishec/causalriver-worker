@@ -1,0 +1,18 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/08/15 (Tue) 22:12  
+[ASSISTANT_SAID] Implementing report templates is an important step in implementing the features of a web-based commercial appraisal report writing application.  
+[ASSISTANT_SAID] Steps to implement report templates include defining the report structure, creating a template file, and generating the reports.  
+[ASSISTANT_SAID] The report structure should include common elements such as property description, market analysis, and conclusions.  
+[ASSISTANT_SAID] Example of a report template in HTML format includes sections for Appraisal Report, Property Description, Market Analysis, and Conclusions with placeholders for location, size, age, and condition.  
+[ASSISTANT_SAID] PHP code example provided for generating a report using a template file and replacing placeholders with actual data from the database.  
+[ASSISTANT_SAID] The structure of appraisal reports typically includes sections like Executive Summary, Property Description, Market Analysis, Income Approach, Cost Approach, Sales Comparison Approach, Reconciliation, and Limiting Conditions.  
+[ASSISTANT_SAID] The Income Approach calculation example provided in PHP includes net operating income calculation and property value calculation based on capitalization rate.  
+[ASSISTANT_SAID] Steps to implement calculation tools include defining calculations, implementing them in PHP, customizing based on user preferences, and testing the calculations.  
+[ASSISTANT_SAID] Steps to implement export options include defining export formats (PDF, Word, Excel), implementing export functions using PHP libraries, adding export options to the user interface, generating the export, and testing the exports.  
+[ASSISTANT_SAID] Example of exporting a report to a PDF using the TCPDF library provided, including code snippet for adding a page and writing HTML content to the PDF.  
+[ASSISTANT_SAID] If further assistance is needed, the assistant is available to help.  
+[USER] Requested help to define the structure of the appraisal reports, including common elements such as property description, market analysis, and conclusions.  
+[USER] Requested help to define the structure of a typical commercial appraisal report.  
+[USER] Requested assistance to implement calculation tools for key metrics in the web-based commercial appraisal report writing application.  
+[USER] Requested assistance to implement export options for exporting the final appraisal report in various formats.

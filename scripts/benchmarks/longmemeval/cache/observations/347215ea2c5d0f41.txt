@@ -1,0 +1,12 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/09/05 (Tue) 13:39
+- [ASSISTANT_SAID] The assistant provided a list of 10 questions related to Linux, including: "What is a shell in Linux?" and "How do you terminate a running process in Linux?"
+- [USER] The user requested a Linux lab exercise of 30 questions where students try each command and state its function.
+- [ASSISTANT_SAID] The assistant provided a Linux lab exercise with 30 questions, including commands like "pwd," "cd," "ls," and "mkdir."
+- [ASSISTANT_CREATED] The assistant created a lab exercise with specific commands and their functions, such as "Type 'pwd' to display the current working directory."
+- [USER] The user requested a Linux lab exercise that asks students what the commands do, specifying more than 30 commands.
+- [ASSISTANT_SAID] The assistant provided another Linux lab exercise with more than 30 commands, including "mkdir," "cd," "ls," and "touch."
+- [ASSISTANT_CREATED] The assistant created a detailed lab exercise with commands and their functions, such as "Type 'mkdir foldername' to create a new folder called 'foldername'." 
+- [ASSISTANT_SAID] The assistant listed additional commands in the lab exercise, including "nano," "cat," "grep," and "ping."
+- [ASSISTANT_CREATED] The assistant included specific command examples in the lab exercise, such as "Type 'tar -cvzf filename.tar.gz foldername/' to create a compressed tar archive of the 'foldername' directory."

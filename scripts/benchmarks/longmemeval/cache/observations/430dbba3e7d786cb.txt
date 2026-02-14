@@ -1,0 +1,27 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/29 (Mon) 08:24  
+[FACT] User has a Canon EOS 80D camera.  
+[EVENT] User bought the Canon EOS 80D camera from B&H Photo in New York City during a trip with friends in August 2018.  
+[PREFERENCE] User is considering buying a new lens for their Canon EOS 80D camera.  
+[PREFERENCE] User is looking for a good prime lens for portraits.  
+[ASSISTANT_SAID] Canon EOS 80D is a fantastic camera.  
+[ASSISTANT_SAID] Ideal focal length for portraits is between 50mm and 135mm.  
+[ASSISTANT_SAID] A wide aperture (like f/1.4 or f/1.8) helps create a shallow depth of field for portraits.  
+[ASSISTANT_SAID] Recommended lenses for portraits include:  
+1. Canon EF 50mm f/1.8 STM: Budget-friendly, compact, lightweight, great image quality.  
+2. Canon EF 85mm f/1.8 USM: Classic portrait lens, medium telephoto, excellent image quality.  
+3. Sigma 50mm f/1.4 DG HSM Art: High-end lens, exceptional image quality, robust build.  
+4. Tamron 45mm f/1.8 Di VC USD: Versatile lens, unique focal length, wide aperture, image stabilization.  
+[FACT] User has been using the EF 50mm f/1.8 STM lens that came with their camera.  
+[PREFERENCE] User is looking for a lens that is a bit wider than 50mm to capture more of the scene.  
+[PREFERENCE] User's budget for a new lens is $300-$500.  
+[ASSISTANT_SAID] Recommended wide-angle prime lenses in the $300-$500 range include:  
+1. Canon EF 35mm f/2 IS USM: Great all-around lens, image stabilization.  
+2. Sigma 30mm f/1.4 DC DN Contemporary: Fast, compact, ideal for capturing more of the scene.  
+3. Rokinon 35mm f/1.4 AS UMC: Budget-friendly, manual focus lens, great value.  
+4. Samyang 35mm f/2.8 AF: Compact, lightweight, autofocus.  
+[ASSISTANT_SAID] Canon EF 24mm f/2.8 STM is a great wide-angle prime lens, priced at $549.  
+[FACT] User has a Rokinon 14mm f/2.8 ED AS IF UMC lens, which they use for astrophotography.  
+[PREFERENCE] User is looking for a more versatile lens for everyday shooting.  
+[ASSISTANT_SAID] Recommended versatile

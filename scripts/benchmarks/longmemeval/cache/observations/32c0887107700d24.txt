@@ -1,0 +1,16 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/20 (Sat) 10:45
+- [EVENT] The user had a call with their client, Hopper, regarding issues with creating ads on a global level.
+- [FACT] The user mentioned three user acquisition managers who independently manage their regions: APAC, LatAM + Canada, and Europe.
+- [EVENT] The user is meeting with their ops team tomorrow to discuss structuring the project.
+- [PREFERENCE] The user expressed a need to identify a process for creating high-quality content for all regions.
+- [RELATIONSHIP] Jes is the Head of Ops and owns the process and the ClickUp instance, ensuring timely delivery with the right quality standard.
+- [RELATIONSHIP] Etienne is a Creative Strategist who researches and scopes different ad concepts, creates briefs, and defines discovery criteria.
+- [RELATIONSHIP] Ali is the Paid Media Director responsible for account growth.
+- [ASSISTANT_CREATED] The assistant created a meeting agenda for the call, including the objective and attendees.
+- [ASSISTANT_CREATED] The assistant outlined the agenda with specific topics, including welcome and introductions, overview of content needs, casting creators, operational process, identifying challenges, establishing timeline, open discussion, and closing remarks.
+- [CHANGE] The user added Daniel, the Content Production Manager, as a stakeholder who will contribute to voiceover and content operations.
+- [CHANGE] The user added Kat as the Creator Community Manager and a Senior Project Manager for Europe.
+- [CHANGE] The user added Flor as a Senior Project Manager for LatAm and Canada.
+- [ASSISTANT_SAID] The assistant confirmed the goal of the call is to identify a process for creating high-quality content for all regions to address Hopper's global ad creation needs.

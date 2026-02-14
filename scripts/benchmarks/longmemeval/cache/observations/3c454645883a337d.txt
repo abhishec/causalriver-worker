@@ -1,0 +1,28 @@
+**Observation Log:**
+
+[FACT] User is helping friends and family with meal prep and errands.  
+[RELATIONSHIP] User's friend is named Rachel, who just gave birth last week.  
+[RELATIONSHIP] User's cousin is named Emma, who is preparing for twins.  
+[RELATIONSHIP] User's aunt and uncle are preparing for their adopted child.  
+[TEMPORAL] Session Date: 2023/05/27 (Sat) 04:23.  
+[EVENT] User is planning a meal prep for Rachel.  
+[EVENT] User is helping Emma with tasks as she prepares for her twins.  
+[EVENT] User is planning to help their aunt and uncle prepare the nursery for their adopted child.  
+[ASSISTANT_SAID] Assistant congratulated Rachel on her new baby and praised the user's supportive gesture.  
+[ASSISTANT_SAID] Assistant provided meal prep ideas for Rachel, including:  
+[ASSISTANT_CREATED] **Comforting and Nourishing Options**:  
+[ASSISTANT_SAID] 1. Chicken and Rice Casserole: A classic comfort food with added veggies.  
+[ASSISTANT_SAID] 2. Lentil Soup: A warm bowl of lentils with vegetables, easy to puree.  
+[ASSISTANT_SAID] 3. Mac and Cheese with Veggies: Creamy pasta with added broccoli, bell peppers, or spinach.  
+[ASSISTANT_SAID] **Easy-to-Grab Snacks**:  
+[ASSISTANT_SAID] 1. Overnight Oats: Individual jars with rolled oats, milk, and toppings.  
+[ASSISTANT_SAID] 2. Fresh Fruit and Cheese Platter: A light snack with fruits, cheese, and crackers.  
+[ASSISTANT_SAID] 3. Energy Balls: No-bake bites made with oats, nuts, and dried fruits.  
+[ASSISTANT_SAID] **Postpartum Recovery-Friendly Meals**:  
+[ASSISTANT_SAID] 1. Iron-Rich Meals: Beef and Vegetable Stir-Fry, Lentil Curry, Grilled Chicken with Spinach.  
+[ASSISTANT_SAID] 2. Easy-to-Digest Proteins: Turkey and Avocado Wraps, Chicken and Rice Bowls, Greek Yogurt Parfaits.  
+[ASSISTANT_SAID] 3. Warm and Soothing Drinks: Herbal Teas like peppermint, chamomile, or raspberry leaf tea.  
+[ASSISTANT_SAID] **Breastfeeding-Friendly Foods**:  
+[ASSISTANT_SAID] 1. Oatmeal with Banana and Honey: A galactagogue to help increase milk supply.  
+[ASSISTANT_SAID] 2. Leafy Greens like Spinach and Kale: Rich in iron and calcium.  
+[

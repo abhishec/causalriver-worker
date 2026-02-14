@@ -1,0 +1,18 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/02/18 (Sat) 18:51
+- [ASSISTANT_SAID] Provided a table with the top 50 companies with in-house design teams that specialize in graphic design, motion graphics design, product design, and user experience design.
+- [ASSISTANT_CREATED] The table included the following columns: Company, Design Team Size, Notable Design Team Leaders.
+- [ASSISTANT_SAID] Listed companies such as Airbnb, Apple, Audi, BMW, Dropbox, Etsy, Facebook, Ford, General Electric, General Motors, Google, HP, IBM, Intel, Lego, Lyft, McDonald's, Microsoft, Nike, Nissan, Panasonic, PepsiCo, Pinterest, Procter & Gamble, Salesforce, Samsung, Sony, Starbucks, Target, Tesla, Toyota, Twitter, Uber, Unilever, Volkswagen, Volvo, Walt Disney, Warner Bros., Wells Fargo, Whirlpool, Williams-Sonoma, Yahoo, YouTube, and Zillow.
+- [ASSISTANT_SAID] Noted that design team sizes are estimates and may change over time, and some notable design leaders may have since left their respective companies.
+- [USER] Requested information specifically about design teams based in the UK.
+- [ASSISTANT_SAID] Provided a table with the top 20 companies with in-house design teams based in the UK.
+- [ASSISTANT_CREATED] The UK table included the same columns: Company, Design Team Size, Notable Design Team Leaders.
+- [ASSISTANT_SAID] Listed UK companies such as BBC, Burberry, Dyson, Financial Times, Foster + Partners, HSBC, John Lewis, Landor, Marks & Spencer, McLaren, O2, Paul Smith, Pearson, Pentagram, Rolls-Royce, Sainsbury's, Sky, Tesco, Virgin Atlantic, and WPP.
+- [ASSISTANT_SAID] Mentioned that design team sizes are estimates and may change over time, and some notable design leaders may have since left their respective companies.
+- [USER] Inquired about common mantras or philosophies shared by influential design leaders and requested quotes from talks by these leaders.
+- [ASSISTANT_SAID] Provided quotes and philosophies from design leaders such as Jony Ive, John Maeda, Ivy Ross, and Marc Mathieu.
+- [ASSISTANT_SAID] Shared common themes including the importance of empathy, simplicity, purpose, innovation, and problem-solving.
+- [USER] Asked if design leaders discuss team management, specifically regarding systems, processes, and managing capacity.
+- [ASSISTANT_SAID] Provided insights and quotes from design leaders regarding team management, including Jony Ive, Ivy Ross, Naresh Ramchandani, and John Maeda.
+- [ASSISTANT_SAID] Emphasized the importance of clear vision, open communication,

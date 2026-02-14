@@ -1,0 +1,22 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/10/15 (Sun) 18:19
+- [USER] User is tasked with creating a social media post generator.
+- [USER] The generator should generate posts for Facebook, Twitter, LinkedIn, and Instagram.
+- [USER] The generator should take input on a topic and relevant keywords.
+- [USER] The generator should create hashtags for each platform based on the input.
+- [USER] Hashtag requirements: 15 hashtags for Facebook, 15 hashtags for Instagram, 5 hashtags for Twitter, 15 hashtags for LinkedIn.
+- [USER] The generated posts and hashtags should be engaging and relevant to the topic and keywords provided.
+- [USER] Topic provided: "Finance: Leading the charge in DeFi innovation."
+- [USER] Additional content provided includes a press release about Acta Finance and its ecosystem.
+- [USER] Acta Finance is developing its ecosystem minimum viable product (MVP) and marketing its products on the Avalanche testnet.
+- [USER] Acta Finance emphasizes a people-first mindset and a philosophy of "Acta Non Verba (Acts Not Words)."
+- [USER] Acta Finance aims to help users optimize their financial strategy and achieve long-term goals.
+- [USER] The ActaFi ecosystem includes products like staking, farming, wNFTs, referral program, address milestones, swap, liquidity aggregator, and DAO program.
+- [USER] Acta Finance is the first project utilizing a DAO to decide go-to-market strategies.
+- [USER] The first DAO vote occurred on Feb. 6, 2023, with an 80.95% vote in favor of going to market.
+- [USER] The Grow The ActaFam engagement airdrop competition started on Feb. 27, 2023, with a rewards pool of 292,500 ACTA.
+- [USER] The competition aims to grow the ActaFam community and reward its members.
+- [USER] Acta Finance's initial dex offerings are scheduled for near the end of March and into April.
+- [ASSISTANT_CREATED] Facebook post generated: "🚀 Acta Finance is revolutionizing the #DeFi world with its innovative ecosystem, now on testnet! With a DAO vote for its go-to-market decision, they're empowering users for a brighter financial future. Don't miss their massive 'Grow the ActaFam' airdrop competition on Crew3. 💰💡 #ActaFinance #cryptocurrency #Avalanche #blockchain #finance #staking #farming #NFTs #liquidity #DAO #ACTA"
+- [ASSISTANT_CREATED] Hashtags for Facebook: #DeFi #ActaFinance #cryptocurrency #Avalanche #blockchain #finance #staking #farming #NFTs #liquidity #DAO #ACTA #ActaFam #Crew3

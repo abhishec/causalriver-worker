@@ -1,0 +1,32 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/30 (Tue) 19:36  
+[USER] The user is looking for recipe ideas to practice Indian cooking skills.  
+[EVENT] The user attended their second cooking class on Indian cuisine.  
+[FACT] The user learned to make a decent chicken tikka masala in the cooking class.  
+[PREFERENCE] The user is feeling inspired to try more Indian dishes.  
+[ASSISTANT_SAID] The assistant congratulated the user on their cooking class and provided a list of Indian dishes to try.  
+[ASSISTANT_SAID] Vegetarian options suggested by the assistant include:  
+- Palak Paneer: A creamy spinach curry with paneer, spinach puree, and spices.  
+- Chana Masala: A flavorful North Indian dish made with chickpeas in a rich tomato-based gravy.  
+- Sag Aloo: A spicy mustard green curry with potatoes, onions, and garlic.  
+- Baingan Bharta: Roasted eggplant mash with onions, garlic, and spices.  
+- Mattar Paneer: Peas and paneer in a creamy tomato-based curry.  
+[ASSISTANT_SAID] Non-vegetarian options suggested by the assistant include:  
+- Butter Chicken: A popular Indian dish with marinated chicken cooked in a rich, buttery tomato sauce.  
+- Biryani: A flavorful rice dish made with aromatic spices, basmati rice, and choice of protein.  
+- Fish Tikka: Marinated fish cooked in a creamy tomato sauce.  
+- Lamb Korma: A mild and creamy lamb curry with nuts, spices, and yogurt.  
+- Murgh Makhani: A rich and creamy butter chicken variant.  
+[ASSISTANT_SAID] Snacks and street food options suggested by the assistant include:  
+- Samosas: Crunchy fried or baked pastries filled with spiced potatoes and peas.  
+- Pakora: Fried fritters made with chickpea flour, onions, and spices.  
+- Vada Pav: A popular street food consisting of a fried doughnut-like snack served in a bread bun.  
+- Raj Kachori: A spicy, crispy bread puffed up with a flavorful potato and onion filling.  
+- Misal Pav: A popular Maharashtrian street food featuring a spicy curry made with sprouted lentils.  
+[ASSISTANT_SAID] Dessert options suggested by the assistant include:  
+- Gulab Jamun: Deep-fried dumplings soaked in a sweet, rose-water syrup.  
+- Jalebi: Crunchy, fermented batter fried and soaked in syrup.  
+- Kulfi: Indian-style ice cream flavored with cardamom, saffron, or other spices.  
+- Ras Malai: A creamy dessert with paneer soaked in a sweet, saffron-infused milk syrup.  
+- Barfi: A dense, sweet

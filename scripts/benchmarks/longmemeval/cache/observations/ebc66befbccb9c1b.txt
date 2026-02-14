@@ -1,0 +1,38 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/24 (Wed) 23:33  
+[USER] User is configuring logrotate in Tomcat.  
+[ASSISTANT_SAID] To configure logrotate in Tomcat with a maximum of 30 days and a size limit of 50 MB, create a configuration file for logrotate.  
+[ASSISTANT_SAID] Example configuration file path: `/etc/logrotate.d/tomcat`.  
+[ASSISTANT_SAID] Open the configuration file with a text editor and add the following content:  
+[ASSISTANT_CREATED] Configuration content:  
+```bash  
+/var/log/tomcat/*.log {  
+    daily  
+    rotate 30  
+    size 50M  
+    compress  
+    delaycompress  
+    missingok  
+    notifempty  
+}  
+```  
+[ASSISTANT_SAID] This configuration will rotate the logs daily, keep a maximum of 30 rotated logs, compress the rotated logs, delay the compression until the next rotation, and not generate an error if the log file is missing.  
+[ASSISTANT_SAID] Save the file and exit the text editor.  
+[ASSISTANT_SAID] Test the logrotate configuration by running the command:  
+```bash  
+logrotate -d /etc/logrotate.d/tomcat  
+```  
+[ASSISTANT_SAID] This command will simulate the log rotation and display the actions that logrotate would perform.  
+[ASSISTANT_SAID] Add a cron job to run the logrotate command daily by running:  
+```
+crontab -e  
+```  
+[ASSISTANT_SAID] This command will open the cron table in your default text editor.  
+[ASSISTANT_SAID] Add the following line to the end of the file:  
+```javascript  
+0 0 * * * /usr/sbin/logrotate /etc/logrotate.d/tomcat >/dev/null 2>&1  
+```  
+[ASSISTANT_SAID] This line will run the logrotate command daily at midnight and redirect any output to /dev/null to prevent cron from sending emails.  
+[ASSISTANT_SAID] Save the file and exit the text editor.  
+[ASSISTANT_SAID] Your log files should now be rotated daily and kept for a maximum of 30 days, with each rotated log file compressed and a maximum size of 50 MB.

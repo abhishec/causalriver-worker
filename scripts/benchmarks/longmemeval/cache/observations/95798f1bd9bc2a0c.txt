@@ -1,0 +1,29 @@
+**Observation Log:**
+
+- [FACT] User is considering getting a newer car and is researching the new hybrid model of their current Toyota Corolla.
+- [EVENT] User washed their current Corolla on Monday, February 27th, after not doing so for over a month.
+- [EVENT] User's current Corolla was getting dirty after a snowstorm a few weeks prior to the conversation.
+- [ASSISTANT_SAID] The 2022 Toyota Corolla Hybrid has an estimated EPA rating of up to 53 mpg in the city, 52 mpg on the highway, and 52 mpg combined.
+- [ASSISTANT_SAID] Toyota offers various incentives and deals on their hybrid models, including:
+  1. Up to $500 in bonus cash on select hybrid models.
+  2. 2.49% APR financing for 60 months on the 2022 Corolla Hybrid.
+  3. Lease deals for around $229 per month for 36 months with $2,999 due at signing.
+- [ASSISTANT_SAID] Maintenance costs for the Corolla Hybrid include:
+  1. Oil changes costing around $75-$100 every 5,000 to 7,500 miles.
+  2. Tire rotation costing around $20-$30 every 5,000 to 8,000 miles.
+  3. Battery maintenance costing around $20-$50.
+  4. Hybrid battery coolant replacement every 30,000 miles costing around $100-$150.
+  5. Brake pads replacement every 30,000 to 50,000 miles costing around $200-$300 per axle.
+- [ASSISTANT_SAID] The Corolla Hybrid's maintenance requirements for washing, vacuuming, and cleaning wheels and tires are similar to the user's current Corolla.
+- [ASSISTANT_SAID] The Toyota Corolla Hybrid comes with advanced safety features, including:
+  1. Toyota Safety Sense 2.0 (TSS 2.0) as standard.
+  2. Blind Spot Monitor (BSM) with Rear Cross Traffic Alert available on LE and above trims.
+  3. Rearview Camera.
+  4. Seven Airbags.
+  5. Electronic Stability Control.
+  6. Anti-lock Brake System (ABS).
+- [ASSISTANT_SAID] Some advanced safety features are only available on higher trims or as part of optional packages, such as Adaptive Headlights and 360-Degree Camera System.
+- [ASSISTANT_SAID] The decision to trade in the current Corolla for a hybrid model should consider fuel savings, costs, depreciation, and personal needs.
+- [CHANGE] User is considering trading in their current Corolla for the hybrid model.
+- [EVENT] User had to take their current Corolla to the dealership for a routine checkup because the "check engine" light came on when a friend borrowed it.
+- [RELATIONSHIP] User

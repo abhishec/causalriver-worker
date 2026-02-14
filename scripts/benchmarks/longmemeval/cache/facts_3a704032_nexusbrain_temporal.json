@@ -1,0 +1,125 @@
+{
+  "answer_c2204106_2": [
+    {
+      "fact": "User has a peace lily and a succulent plant.",
+      "type": "personal",
+      "entities": [
+        "peace lily",
+        "succulent plant"
+      ]
+    },
+    {
+      "fact": "User got the peace lily and succulent from a nursery two weeks ago.",
+      "type": "event",
+      "entities": [
+        "nursery",
+        "two weeks ago"
+      ]
+    },
+    {
+      "fact": "User's peace lily has been losing some leaves.",
+      "type": "personal",
+      "entities": [
+        "peace lily",
+        "leaves"
+      ]
+    },
+    {
+      "fact": "User uses a mixture of water and fertilizer when watering their plants.",
+      "type": "preference",
+      "entities": [
+        "water",
+        "fertilizer"
+      ]
+    },
+    {
+      "fact": "User is concerned about the suitability of the fertilizer for their peace lily.",
+      "type": "opinion",
+      "entities": [
+        "fertilizer",
+        "peace lily"
+      ]
+    }
+  ],
+  "answer_c2204106_3": [
+    {
+      "fact": "User has a peace lily that is losing leaves",
+      "type": "personal",
+      "entities": [
+        "peace lily"
+      ]
+    },
+    {
+      "fact": "User is seeking advice on how to help their peace lily adjust to its new environment",
+      "type": "opinion",
+      "entities": [
+        "peace lily",
+        "new environment"
+      ]
+    },
+    {
+      "fact": "User has a snake plant",
+      "type": "personal",
+      "entities": [
+        "snake plant"
+      ]
+    },
+    {
+      "fact": "User has succulents",
+      "type": "personal",
+      "entities": [
+        "succulent"
+      ]
+    },
+    {
+      "fact": "User has been using a general-purpose fertilizer for their plants",
+      "type": "opinion",
+      "entities": [
+        "general-purpose fertilizer"
+      ]
+    },
+    {
+      "fact": "User is unsure if their snake plant and succulent need a more specific fertilizer",
+      "type": "opinion",
+      "entities": [
+        "snake plant",
+        "succulent"
+      ]
+    }
+  ],
+  "answer_c2204106_1": [
+    {
+      "fact": "User has a basil plant on the balcony.",
+      "type": "personal",
+      "entities": [
+        "basil plant",
+        "balcony"
+      ]
+    },
+    {
+      "fact": "User's basil plant is struggling with too much direct sunlight.",
+      "type": "opinion",
+      "entities": [
+        "basil plant",
+        "direct sunlight"
+      ]
+    },
+    {
+      "fact": "User's snake plant is doing great with their current watering and fertilizer routine.",
+      "type": "opinion",
+      "entities": [
+        "snake plant",
+        "watering",
+        "fertilizer routine"
+      ]
+    },
+    {
+      "fact": "User is using a general-purpose potting mix for their basil plant.",
+      "type": "preference",
+      "entities": [
+        "general-purpose potting mix",
+        "basil plant"
+      ]
+    }
+  ]
+}

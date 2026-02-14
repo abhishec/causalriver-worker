@@ -1,0 +1,21 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/28 (Sun) 11:38  
+[USER] User requested answers to questions based on a specific document.  
+[USER] User provided a link to the document: https://cdn.australianretirementtrust.com.au/library/media/pdfs/reports/sustainable-investment-report-21-22.pdf?rev=7f803132a1524c66a5cbc1b421bf6cf7  
+[USER] User asked if the fund clearly states its vision, mission, or mandate on sustainable investment and requested details if yes.  
+[USER] User inquired if the fund sets any overall targets/goals on sustainable investment or asset allocation in its vision/mission statement on ESG and requested details if yes.  
+[USER] User asked if there is a dedicated team established to coordinate ESG/SDG investments and where the team/head of ESG reports to, requesting details if yes.  
+[ASSISTANT_SAID] The Australian Retirement Trust (ART) clearly states its vision, mission, and mandate on sustainable investment, aiming to create long-term value for its members and society.  
+[ASSISTANT_SAID] ART's mission is to help members achieve retirement goals by considering ESG factors in investments.  
+[ASSISTANT_SAID] ART's sustainable investment mandate incorporates ESG factors into investment decisions to manage risks and identify opportunities for sustainable long-term returns.  
+[ASSISTANT_SAID] ART aims for a 100% sustainable investment portfolio by 2023 and had achieved 75% as of June 2021.  
+[ASSISTANT_SAID] ART aims for net-zero emissions across its investment portfolio by 2050 and will assess and report on the carbon footprint of its investments.  
+[ASSISTANT_SAID] ART has established a Responsible Investment Team to coordinate ESG/SDG investments.  
+[ASSISTANT_SAID] The head of ESG/SDG investments, the Responsible Investment Manager, reports directly to the Chief Investment Officer.  
+[ASSISTANT_SAID] The Responsible Investment Team integrates ESG considerations into investment processes, engages with companies on ESG issues, and monitors ESG/SDG investments.  
+[USER] User asked if the fund has put in place internal policies or guidelines regarding ESG/SDG integration and requested details if yes.  
+[USER] User inquired if any international ESG/SDG-related standard, taxonomy, or benchmark is employed in the investment decision-making process and requested specifics.  
+[USER] User asked if the fund provides clarity on efforts made to meet relevant national/regional/international ESG-related regulations and which ones.  
+[ASSISTANT_SAID] ART has internal policies and guidelines for ESG/SDG integration, including a Responsible Investment Policy that outlines its sustainable investing approach.  
+[ASSISTANT_SAID] ART requires investment managers

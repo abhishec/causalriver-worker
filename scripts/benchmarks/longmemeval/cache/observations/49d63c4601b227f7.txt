@@ -1,0 +1,18 @@
+**Observation Log:**
+
+- [FACT] User's name is not provided, but they are a solicitor and construction lawyer with more than 10 years of experience specializing in construction law.
+- [FACT] User regularly advises homeowners and builders regarding their contractual and legal rights in NSW, Australia.
+- [FACT] User represents homeowners and builders in all courts of competent jurisdiction.
+- [FACT] User has advised homeowners regarding "Choosing the Right Builder: Tips for Homeowners in NSW," including their contract rights, risks, and obligations.
+- [FACT] User has negotiated and amended contracts to reflect homeowners' intentions.
+- [FACT] User is located in NSW, Australia.
+- [PREFERENCE] User prefers writing in a tone that is 100% human, using natural language that is easy to understand and engaging.
+- [PREFERENCE] User wants to avoid overly formal language or technical jargon that might confuse homeowners.
+- [PREFERENCE] User aims for a conversational tone that feels approachable and friendly while maintaining professionalism.
+- [EVENT] User intends to draft an article on the main topic "Choosing the Right Builder: Tips for Homeowners in NSW."
+- [EVENT] User plans to refer to each section of their topic outline during the drafting process.
+- [TEMPORAL] Session date is 2023/03/28 (Tue) at 11:13.
+- [ASSISTANT_SAID] Assistant acknowledged the user's request for help in writing an article on the specified topics.
+- [ASSISTANT_SAID] Assistant confirmed understanding of the user's expertise and guidelines for writing the article.
+- [ASSISTANT_CREATED] Assistant created a draft for the introduction section of the article, emphasizing the importance of choosing the right builder and providing an overview of the article's content.
+- [ASSISTANT_CREATED] Assistant created content for Section 4, "Interview Potential Builders," including preparation tips, questions to ask potential builders, and red flags to watch out for during the interview process.

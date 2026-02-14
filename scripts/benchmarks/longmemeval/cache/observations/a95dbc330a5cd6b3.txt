@@ -1,0 +1,24 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/26 (Fri) 14:42
+- [USER] The user has successfully downloaded files but is having issues saving them in a specified directory.
+- [USER] The user mentioned that if they download from "nothidden," it replaces their hidden files.
+- [USER] The user provided a directory listing from an FTP server, including files named "passwd" and "shadow."
+- [USER] The user executed FTP commands such as `cd ..`, `ls`, `cd nothidden`, and `get` for files "flag3," "passwd," and "shadow."
+- [USER] The user stated, "i think it's 500 instead of 1800," referring to a hash type.
+- [USER] The user asked how the hashed file needs to look and mentioned they have successfully completed a task.
+- [USER] The user moved on to Task 5, specifically Task 5.2, which involves performing a brute force attack.
+- [USER] The user specified that the largest password size for the brute force attack is six characters and that passwords may contain lowercase, uppercase, numbers, and special characters.
+- [USER] The user mentioned using John the Ripper for the brute force attack and requested screenshots and descriptions of configuration files changed.
+- [USER] The user provided additional information about the password cracking task, including details about the users and their password characteristics.
+- [USER] The user noted that they should remove unnecessary accounts from the unshadowed file and specified which lines to remove.
+- [USER] The user provided details about the password lengths and character types for different users.
+- [USER] The user asked for alternatives to "Incremental Alphanum" in John the Ripper, stating it is used as an example.
+- [ASSISTANT_SAID] The assistant confirmed that the hash type should be 500 for the Unix DES-based crypt.
+- [ASSISTANT_SAID] The assistant provided instructions on how to change the local directory using the `lcd` command before downloading files.
+- [ASSISTANT_SAID] The assistant suggested using the `john` command with specific configuration options for different users.
+- [ASSISTANT_SAID] The assistant provided configuration examples for User1 and User2, including details about character counts and lengths.
+- [ASSISTANT_SAID] The assistant advised on how to demonstrate the method for cracking passwords for "frustratedemployee" and "user3" without fully cracking them.
+- [ASSISTANT_SAID] The assistant mentioned creating a custom incremental mode in John the Ripper as an alternative to "Incremental Alphanum."
+- [ASSISTANT_CREATED] The assistant created configuration examples for John the Ripper, including sections for User1, User2, and a strong password mode.
+- [ASSISTANT_CREATED

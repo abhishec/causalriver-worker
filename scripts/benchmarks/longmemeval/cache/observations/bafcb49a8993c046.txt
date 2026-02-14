@@ -1,0 +1,26 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/28 (Sun) 23:13
+- [EVENT] User is trying to plan out meals for the week.
+- [PREFERENCE] User has been making a lot of salads lately.
+- [EVENT] User purchased a 4-pack of reusable containers at Target for $10.
+- [ASSISTANT_SAID] Assistant congratulated the user on their new reusable containers.
+- [ASSISTANT_SAID] Assistant provided healthy lunch ideas beyond salads.
+- [ASSISTANT_CREATED] Assistant listed healthy lunch ideas including:
+  - Korean-Style Rice Bowl: Grilled chicken, brown rice, roasted veggies (e.g., broccoli, carrots), and a fried egg.
+  - Mexican Fiesta: Black beans, quinoa, diced chicken, avocado, salsa, and shredded cheese.
+  - Indian-Style Lentil Bowl: Cooked lentils, brown rice, roasted veggies (e.g., cauliflower, bell peppers), and a dollop of raita.
+  - Turkey and Avocado Wrap: Whole wheat wrap, sliced turkey breast, avocado, lettuce, and tomato.
+  - Grilled Chicken and Hummus Sandwich: Whole wheat bread, grilled chicken, hummus, cucumber, and mixed greens.
+  - Veggie Delight: Whole wheat bread, roasted veggies (e.g., zucchini, eggplant, red bell pepper), goat cheese, and pesto.
+  - Lentil Soup: Cooked lentils, diced veggies, and whole grain bread croutons.
+  - Quinoa and Black Bean Bowl: Cooked quinoa, black beans, diced tomatoes, and a sprinkle of feta cheese.
+  - Tomato and Mozzarella Soup: Fresh tomatoes, mozzarella cheese, and whole wheat croutons.
+  - Mason Jar Meal: Layered ingredients like cooked chicken, quinoa, roasted veggies, and a fried egg.
+  - Stuffed Bell Peppers: Roasted bell peppers filled with quinoa, black beans, and shredded cheese.
+  - Fruit and Cheese Plate: A mix of fresh fruits (e.g., grapes, berries, apple slices) paired with a small block of cheese and whole grain crackers.
+- [PREFERENCE] User is interested in trying the Korean-Style Rice Bowl and the Veggie Delight sandwich.
+- [ASSISTANT_SAID] Assistant provided marinade suggestions for the grilled chicken in the Korean-Style Rice Bowl.
+- [ASSISTANT_CREATED] Assistant listed marinade options:
+  - Classic Korean-Style Marinade: 2 tablespoons Gochujang, 2 tablespoons soy sauce, 2 tablespoons brown sugar, 2 cloves garlic (minced), 1 tablespoon grated ginger, 1 tablespoon sesame oil, 1 teaspoon black pepper.
+  - Simplified Marinade: 2 tablespoons soy sauce, 1 tablespoon honey, 1 tablespoon rice vinegar, 1 teaspoon Gochujang (optional), 1 cl

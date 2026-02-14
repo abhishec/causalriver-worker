@@ -1,0 +1,90 @@
+{
+  "answer_c9f5693c_1": [
+    {
+      "fact": "User is trying to keep track of sales and expenses for their small business.",
+      "type": "personal",
+      "entities": [
+        "small business"
+      ]
+    },
+    {
+      "fact": "User has participated in several markets and events this year.",
+      "type": "event",
+      "entities": [
+        "Downtown Farmers Market",
+        "Arts and Crafts Fair",
+        "Earth Day Market",
+        "Mother's Day Market",
+        "Foodie Festival"
+      ]
+    },
+    {
+      "fact": "User's total earnings from markets and events so far this year are $1280.",
+      "type": "personal",
+      "entities": [
+        "$1280"
+      ]
+    },
+    {
+      "fact": "User is considering ordering 100 or 200 business cards.",
+      "type": "preference",
+      "entities": [
+        "100 business cards",
+        "200 business cards"
+      ]
+    },
+    {
+      "fact": "User thinks 100 business cards is a good starting point.",
+      "type": "opinion",
+      "entities": [
+        "100 business cards"
+      ]
+    },
+    {
+      "fact": "User sells artisanal soaps.",
+      "type": "personal",
+      "entities": [
+        "artisanal soaps"
+      ]
+    }
+  ],
+  "answer_c9f5693c_2": [
+    {
+      "fact": "User sells homemade jams, candles, and soaps.",
+      "type": "personal",
+      "entities": [
+        "homemade jams",
+        "candles",
+        "soaps"
+      ]
+    },
+    {
+      "fact": "User recently attended the Foodie Festival.",
+      "type": "event",
+      "entities": [
+        "Foodie Festival"
+      ]
+    },
+    {
+      "fact": "User had a great experience at the Foodie Festival.",
+      "type": "opinion",
+      "entities": [
+        "Foodie Festival"
+      ]
+    },
+    {
+      "fact": "User has almost sold out of their current candle stock.",
+      "type": "personal",
+      "entities": [
+        "candle stock"
+      ]
+    },
+    {
+      "fact": "User's strawberry jam is one of their best-selling flavors.",
+      "type": "preference",
+      "entities": [
+        "strawberry jam"
+      ]
+    }
+  ]
+}

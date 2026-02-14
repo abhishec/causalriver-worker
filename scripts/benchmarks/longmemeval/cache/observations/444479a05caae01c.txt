@@ -1,0 +1,28 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/02/08 (Wed) 07:43
+- [USER] User inquired about universities with programs studying the ethical and social implications of emerging technologies.
+- [ASSISTANT_SAID] Massachusetts Institute of Technology (MIT) has the Ethics and Governance of AI Initiative at the MIT Media Lab.
+- [ASSISTANT_SAID] Stanford University has the Stanford Center for Ethics in Society offering courses and research opportunities.
+- [ASSISTANT_SAID] Georgetown University has the Kennedy Institute of Ethics with a program called Ethics Lab.
+- [ASSISTANT_SAID] Carnegie Mellon University has the Robotics, Ethics, and Society program at the Robotics Institute.
+- [ASSISTANT_SAID] University of Cambridge has the Centre for the Study of Existential Risk.
+- [ASSISTANT_SAID] New York University has The GovLab at the NYU Tandon School of Engineering.
+- [USER] User expressed appreciation for universities taking ethical implications of emerging technologies seriously.
+- [USER] User asked if any of these programs offer online courses or resources for remote learners.
+- [ASSISTANT_SAID] MIT offers free online courses on ethical and social implications of emerging technologies through edX.
+- [ASSISTANT_SAID] Stanford offers an online course called "Ethics and Society."
+- [ASSISTANT_SAID] Georgetown University has a podcast series called "Tech Ethics Talks."
+- [ASSISTANT_SAID] Carnegie Mellon offers a free online course called "Roboethics."
+- [ASSISTANT_SAID] University of Cambridge has an online course called "AI Ethics: Global Perspectives."
+- [USER] User inquired about collaboration opportunities for individuals outside of academia in these programs.
+- [ASSISTANT_SAID] MIT's Media Lab has an "Open Agriculture" program for collaboration.
+- [ASSISTANT_SAID] Georgetown's Ethics Lab invites collaboration with external partners.
+- [ASSISTANT_SAID] Carnegie Mellon's program has a speaker series inviting experts from various sectors.
+- [ASSISTANT_SAID] University of Cambridge has a public lectures series on existential risks.
+- [ASSISTANT_SAID] NYU's The GovLab has a Collaborative Network for research and development projects.
+- [USER] User expressed enthusiasm about collaboration opportunities with individuals and organizations outside of academia.
+- [USER] User asked about attending or watching the speaker series at Carnegie Mellon.
+- [ASSISTANT_SAID] Most speaker series events at Carnegie Mellon are open to the public and can be attended in person.
+- [ASSISTANT_SAID] Due to COVID-19, some events may be held virtually.
+- [ASSISTANT_SAID] Upcoming events can be found on the program's website: https://responsible-robotics.org/.

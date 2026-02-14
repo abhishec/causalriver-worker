@@ -1,0 +1,18 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/08/20 (Sun) 13:28
+- [ASSISTANT_SAID] To determine if your data is normally distributed, you can use a combination of graphical methods and statistical tests, including visual inspection, Q-Q plot, box plot, skewness and kurtosis calculations, and statistical tests like Shapiro-Wilk, Kolmogorov-Smirnov, Anderson-Darling, and D'Agostino-Pearson tests.
+- [ASSISTANT_SAID] For a normal distribution, skewness should be close to 0 and kurtosis should be close to 3.
+- [ASSISTANT_SAID] A non-significant result (p-value > α) indicates that you fail to reject the null hypothesis, suggesting your data may be normally distributed.
+- [USER] The standard deviation (STD) of the 'asylum application' column after the second method of manipulation is 6590.878187.
+- [ASSISTANT_SAID] Just having the standard deviation does not provide enough information to determine if the data is normally distributed; you should apply the techniques mentioned earlier.
+- [ASSISTANT_SAID] Suggested steps to analyze the 'asylum application' column using Python and libraries like pandas, seaborn, and scipy, including creating a histogram, Q-Q plot, box plot, calculating skewness and kurtosis, and performing a normality test.
+- [USER] The box plot shows many outliers and most entries are located in the far right of the graph.
+- [ASSISTANT_SAID] The presence of many outliers and a significant positive skew indicates a non-normal distribution.
+- [ASSISTANT_SAID] Suggested using Spearman's correlation method, which is more robust to outliers and does not assume normality.
+- [USER] Skewness of the 'rejection rate' column is 1.821810350836957 and kurtosis is 4.923385055185659.
+- [ASSISTANT_SAID] A skewness value of 1.82 indicates a positive skew, and a kurtosis value of 4.92 suggests a shape that deviates from normal distribution.
+- [ASSISTANT_SAID] Concluded that the 'rejection rate' column is not normally distributed and recommended using Spearman's correlation.
+- [USER] Spearman correlation coefficient is 0.5279774779169797 and the p-value is 4.723444400024076e-157.
+- [ASSISTANT_SAID] The Spearman correlation coefficient of approximately 0.528 indicates a moderate positive correlation between the 'asylum application' and 'rejection rate' columns.
+- [ASSISTANT_SAID] The p-value of 4.723444400024076e-157 implies that

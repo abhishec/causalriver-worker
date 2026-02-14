@@ -1,0 +1,23 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/03/27 (Mon) 18:36
+- [ASSISTANT_SAID] The European Blockchain Service Infrastructure (EBSI) is a decentralized platform facilitating secure cross-border digital public services.
+- [ASSISTANT_SAID] Verifiable credentials play a pivotal role in establishing trust and preserving users' privacy.
+- [ASSISTANT_SAID] The challenge of securely archiving verifiable credentials for the long term has become more critical.
+- [ASSISTANT_SAID] This paper introduces a decentralized application designed for the long-term storage of EBSI-issued verifiable credentials.
+- [ASSISTANT_SAID] The application utilizes the TR-ESOR middleware, which provides comprehensive recommendations for digital document preservation.
+- [ASSISTANT_SAID] The integration of TR-ESOR with various storage systems enhances the flexibility and adaptability of the solution.
+- [ASSISTANT_SAID] The paper complies with ACM and IEEE guidelines for influential computer science research papers.
+- [ASSISTANT_SAID] The paper offers a concise yet informative introduction to the EBSI framework and verifiable credentials.
+- [ASSISTANT_SAID] The paper delves into the challenges associated with archiving verifiable credentials and demonstrates the practicality of the proposed decentralized application.
+- [ASSISTANT_SAID] The paper employs state-of-the-art scientific research methodologies to contribute to the advancement of digital credential management and the establishment of trust in decentralized systems.
+- [USER] Requested to include the W3C VC standard and provided a link to the standard.
+- [USER] Requested to study the TR-ESOR website for reformulating the introduction and provided a link to the TR-ESOR document.
+- [ASSISTANT_SAID] The introduction was reformulated to include the W3C Verifiable Credentials Data Model standard and the TR-ESOR recommendations.
+- [USER] Requested to reformulate again and include a short description of verifiable credentials and at least three challenges in decentralized systems.
+- [ASSISTANT_SAID] Verifiable credentials (VCs) are digital credentials that can be cryptographically verified and authenticated.
+- [ASSISTANT_SAID] VCs enable issuers to grant credentials to holders, who can then present them to verifiers as proof of identity, qualification, or other attributes.
+- [ASSISTANT_SAID] The W3C Verifiable Credentials Data Model standard provides a foundation for creating and managing VCs in a privacy-preserving and secure manner.
+- [ASSISTANT_SAID] The paper addresses the challenge of long-term storage for EBSI-issued verifiable credentials.
+- [ASSISTANT_SAID] The paper identifies three challenges in decentralized systems: long-term storage, privacy preservation, and integration with TR-ESOR.
+- [ASS

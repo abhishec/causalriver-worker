@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/30 (Tue) 04:51  
+[USER] User imports libraries: pandas, numpy, re, nltk, sklearn, tqdm.  
+[USER] User downloads NLTK resources: 'omw' and 'wordnet'.  
+[USER] User sets a random seed value of 42.  
+[USER] User loads training data from 'train.csv' and test data from 'test.csv'.  
+[USER] User computes class weights using `compute_class_weight` with balanced class weights based on the labels in the training data.  
+[USER] User defines a function `preprocess_text` for text pre-processing, which includes removing non-alphabetic characters, converting text to lowercase, tokenizing, removing stopwords, and lemmatizing.  
+[USER] User applies the `preprocess_text` function to the 'text' column of both training and test data.  
+[USER] User defines KFold cross-validation with 5 splits, shuffling, and a random state of 42.  
+[USER] User initializes a TF-IDF vectorizer.  
+[USER] User initializes an empty list `f1_scores` to store F1 scores.  
+[USER] User trains and evaluates a model for each fold of the KFold cross-validation.  
+[USER] User retrieves training and validation data for each fold and computes TF-IDF features.  
+[USER] User trains an SVM model with class weights using a linear kernel and a random state of 42.  
+[USER] User evaluates the model on the validation set and computes the F1 score, appending it to `f1_scores`.  
+[USER] User prints the F1 score for each fold.  
+[USER] User saves predictions on the test set for each fold in the test DataFrame.  
+[USER] User computes the average F1 score and prints it.  
+[USER] User ensembles predictions from all folds by taking the mode of the predictions and assigns it to the 'label' column of the test DataFrame.  
+[USER] User saves the predictions to a CSV file named './0316_test.csv', including 'id' and 'label' columns.  
+[USER] User encounters a LookupError indicating that the resource 'omw-1.4' is not found.  
+[ASSISTANT_SAID] Assistant suggests downloading the 'omw-1.4' corpus using `nltk.download('omw-1.4')` to resolve the error.  
+[ASSISTANT_SAID] Assistant provides the command to download the missing resource and mentions that it should be run before rerunning the user's code.

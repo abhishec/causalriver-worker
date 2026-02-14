@@ -1,0 +1,20 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/03/15 (Wed) 17:53  
+[USER] User is interested in strategies for Terran players in Starcraft II.  
+[ASSISTANT_SAID] In TvZ, Terran players typically start with a fast expand build, building a Command Center after a Supply Depot, followed by barracks and gas.  
+[ASSISTANT_SAID] In TvZ, some Terran players may opt for a 1-1-1 build (one barracks, one factory, one starport) for early aggression with Hellions, Banshees, or a Raven.  
+[ASSISTANT_SAID] In TvP, Terran players usually start with a fast expand build, similar to TvZ.  
+[ASSISTANT_SAID] In TvP, some players may opt for a proxy Reaper or proxy Widow Mine build to deal early damage.  
+[ASSISTANT_SAID] In TvT, players typically start with a defensive build, building Marines and Siege Tanks before expanding.  
+[ASSISTANT_SAID] In TvT, some players may opt for a Reaper or Proxy Factory build for an early-game advantage.  
+[ASSISTANT_SAID] The fast expand build is popular among Terran players because it allows for a strong economy and production in the mid and late game.  
+[ASSISTANT_SAID] Terran players can win against Zerg or Protoss without the fast expand build, but it can be challenging against early aggression or all-in rush builds.  
+[ASSISTANT_SAID] Terran players can opt for aggressive early builds to catch opponents off-guard or disrupt their economy.  
+[USER] User has heard that some Terran players go for a more defensive approach against Zerg with a bioball build.  
+[ASSISTANT_SAID] The bioball build involves starting with a fast expand, focusing on building barracks, factories, and upgrades for Marine and Marauder units.  
+[ASSISTANT_SAID] The bioball composition is designed to be mobile and flexible, allowing quick responses to Zerg attacks.  
+[ASSISTANT_SAID] Defensive structures like bunkers, missile turrets, and sensor towers are important for securing bases against Zerg.  
+[ASSISTANT_SAID] The goal of the bioball build is to gradually push out and control more of the map while overpowering the Zerg with a strong, well-upgraded army.  
+[USER] User asks if the bioball build works against Protoss or is best reserved for Zerg.  
+[ASSISTANT_SAID] The bioball build can work against Protoss but requires adjustments in army composition to counter Protoss AOE units like Colossi and High Templars

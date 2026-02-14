@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/26 (Fri) 21:29  
+[USER] 1. h1n1_concern - Level of concern about the H1N1 flu: 2 (Somewhat concerned)  
+[USER] 2. h1n1_knowledge - Level of knowledge about H1N1 flu: 0 (No knowledge)  
+[USER] 3. behavioral_antiviral_meds - Has taken antiviral medications: No  
+[USER] 4. behavioral_avoidance - Has avoided close contact with others with flu-like symptoms: No  
+[USER] 5. behavioral_face_mask - Has bought a face mask: No  
+[USER] 6. behavioral_wash_hands - Has frequently washed hands or used hand sanitizer: No  
+[USER] 7. behavioral_large_gatherings - Has reduced time at large gatherings: No  
+[USER] 8. behavioral_outside_home - Has reduced contact with people outside of own household: No  
+[USER] 9. behavioral_touch_face - Has avoided touching eyes, nose, or mouth: No  
+[USER] 10. doctor_recc_h1n1 - H1N1 flu vaccine was recommended by doctor: No  
+[USER] 11. doctor_recc_seasonal - Seasonal flu vaccine was recommended by doctor: No  
+[USER] 12. chronic_med_condition - Has any chronic medical conditions: No  
+[USER] 13. child_under_6_months - Has regular close contact with a child under the age of six months: No  
+[USER] 14. health_worker - Is a healthcare worker: No  
+[USER] 15. health_insurance - Has health insurance: No  
+[USER] 16. opinion_h1n1_vacc_effective - Respondent's opinion about H1N1 vaccine effectiveness: 4 (Somewhat effective)  
+[USER] 17. opinion_h1n1_risk - Respondent's opinion about risk of getting sick with H1N1 flu without vaccine: 4 (Somewhat high)  
+[USER] 18. opinion_h1n1_sick_from_vacc - Respondent's worry of getting sick from taking H1N1 vaccine: 2 (Not very worried)  
+[USER] 19. opinion_seas_vacc_effective - Respondent's opinion about seasonal flu vaccine effectiveness: 4 (Somewhat effective)  
+[USER] 20. opinion_seas_risk - Respondent's opinion about risk of getting sick with seasonal flu without vaccine: 4 (Somewhat high)  
+[USER] 21. opinion_seas_sick_from_vacc - Respondent's worry of getting sick from taking seasonal flu vaccine: 2 (Not very worried)  
+[USER] 22. age_group - Age group

@@ -1,0 +1,111 @@
+{
+  "answer_fb793c87_2": [
+    {
+      "fact": "User is looking for new shows to watch on HBO Max.",
+      "type": "preference",
+      "entities": [
+        "HBO Max",
+        "shows"
+      ]
+    },
+    {
+      "fact": "User started watching 'Game of Thrones' about a month ago.",
+      "type": "event",
+      "entities": [
+        "Game of Thrones"
+      ]
+    },
+    {
+      "fact": "User has finished the first four seasons of 'Game of Thrones'.",
+      "type": "event",
+      "entities": [
+        "Game of Thrones",
+        "four seasons"
+      ]
+    },
+    {
+      "fact": "User is really enjoying 'Game of Thrones'.",
+      "type": "opinion",
+      "entities": [
+        "Game of Thrones"
+      ]
+    },
+    {
+      "fact": "User has been watching documentaries on Hulu, particularly on true crime and science.",
+      "type": "preference",
+      "entities": [
+        "Hulu",
+        "documentaries",
+        "true crime",
+        "science"
+      ]
+    },
+    {
+      "fact": "User is interested in recommendations for documentaries on HBO Max.",
+      "type": "preference",
+      "entities": [
+        "HBO Max",
+        "documentaries"
+      ]
+    }
+  ],
+  "answer_fb793c87_1": [
+    {
+      "fact": "User binge-watched the third season of 'The Crown' on Netflix",
+      "type": "event",
+      "entities": [
+        "The Crown",
+        "Netflix"
+      ]
+    },
+    {
+      "fact": "User finished the entire season in 14 days",
+      "type": "event",
+      "entities": [
+        "14 days"
+      ]
+    },
+    {
+      "fact": "User watched at least 2-3 episodes of 'The Crown' every day",
+      "type": "event",
+      "entities": [
+        "2-3 episodes",
+        "The Crown"
+      ]
+    },
+    {
+      "fact": "User has been subscribed to HBO Max for about six months",
+      "type": "personal",
+      "entities": [
+        "HBO Max",
+        "six months"
+      ]
+    },
+    {
+      "fact": "User is re-watching favorite episodes from 'Friends'",
+      "type": "event",
+      "entities": [
+        "Friends"
+      ]
+    },
+    {
+      "fact": "User is looking for recommendations for shows similar to 'The Crown'",
+      "type": "preference",
+      "entities": [
+        "The Crown"
+      ]
+    },
+    {
+      "fact": "User is looking for recommendations for sitcoms or comedies similar to 'Friends'",
+      "type": "preference",
+      "entities": [
+        "Friends"
+      ]
+    },
+    {
+      "fact": "User has seen some of the recommended shows but not all of them",
+      "type": "opinion",
+      "entities": []
+    }
+  ]
+}

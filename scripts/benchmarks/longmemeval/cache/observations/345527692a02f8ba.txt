@@ -1,0 +1,19 @@
+**Observation Log:**
+
+- [FACT] User is located in zip code 30309, Atlanta, GA.
+- [EVENT] User attended a gardening workshop where they met someone who recommended a local nursery.
+- [EVENT] User has been organizing their gardening notes.
+- [EVENT] User needs to order more compost and fertilizer for their garden beds.
+- [TEMPORAL] User thinks they started planning their garden around mid-January.
+- [TEMPORAL] User found the email where they ordered the seed catalogs on January 15th.
+- [ASSISTANT_SAID] Assistant offered to help find a local nursery that sells native plants and requested the user's location.
+- [ASSISTANT_SAID] Assistant provided keywords for searching online for native plant nurseries.
+- [ASSISTANT_SAID] Assistant recommended checking online directories like the National Audubon Society's Native Plant Database and PlantNative.
+- [ASSISTANT_SAID] Assistant provided a list of four local nurseries in Atlanta, GA, that sell native plants, including Piedmont Nurseries, Native Gardens, Cumberland Nurseries, and the Georgia Native Plant Society.
+- [ASSISTANT_SAID] Assistant recommended five online retailers for organic gardening supplies, including Gardener's Supply Company, Burpee, Amazon, E.B. Stone Organics, and Seeds of Change.
+- [ASSISTANT_SAID] Assistant suggested reading reviews and checking for certifications like OMRI or USDA Organic when purchasing organic gardening supplies.
+- [ASSISTANT_SAID] Assistant provided a list of gardening apps and online tools to help the user track their gardening progress, including Gardening Knowledge, Garden Plan Pro, Blossom, Garden Journal, GrowIt!, Gardening Notebook, FarmLogs, and Gardener's Companion.
+- [ASSISTANT_SAID] Assistant provided tips for effectively composting and fertilizing soil, including starting with a mix of green and brown materials, adding water, turning the compost regularly, and using organic fertilizers.
+- [ASSISTANT_SAID] Assistant explained the benefits of marigolds in the garden, including nematode control, pest repellent, attracting beneficial insects, and improving soil health.
+- [ASSISTANT_SAID] Assistant provided tips on how to use marigolds effectively, including planting them as a trap crop, using marigold compost tea, interplanting with crops, and combining with other nematode control methods.
+- [ASSISTANT_CREATED] Assistant created a list of marigold benefits and effective usage tips for the user's garden.

@@ -1,0 +1,43 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/20 (Sat) 17:03
+
+[ASSISTANT_SAID] Modern block ciphers have been inspired by the principles of older cipher machines and cryptographic systems.
+
+[ASSISTANT_SAID] The design principles and techniques used in older systems, such as the Enigma and the SIGABA, have been adapted and improved upon to create modern block ciphers.
+
+[ASSISTANT_SAID] The concept of a "substitution-permutation network" was first introduced in the design of the Feistel cipher in the 1970s, inspired by the Enigma machine.
+
+[ASSISTANT_SAID] Modern block ciphers often use a large number of rounds of encryption to increase the difficulty of breaking the cipher.
+
+[ASSISTANT_SAID] Modern block ciphers use advanced key scheduling algorithms to generate and distribute secure keys for each encryption session.
+
+[ASSISTANT_SAID] Studying older ciphers can provide valuable insights into the strengths and weaknesses of different encryption techniques.
+
+[ASSISTANT_SAID] Studying older ciphers provides historical context for understanding the evolution of cryptography.
+
+[ASSISTANT_SAID] The concept of public key cryptography is attributed to Whitfield Diffie and Martin Hellman in the 1970s.
+
+[ASSISTANT_SAID] Early examples of cryptographic systems with similarities to public key cryptography include the Scytale used by the Spartans.
+
+[ASSISTANT_SAID] The RSA cipher, developed in the 1970s, is a public key cryptography system.
+
+[ASSISTANT_SAID] Traditional cipher machines are no longer used for modern communication systems but have niche applications.
+
+[ASSISTANT_SAID] Some government agencies and military organizations still use analog cipher machines for highly sensitive communications.
+
+[ASSISTANT_SAID] Traditional cipher machines are of interest to hobbyists, collectors, and history enthusiasts.
+
+[ASSISTANT_SAID] The U.S. military employed Native American code talkers during World War II to secure communication.
+
+[ASSISTANT_SAID] The use of Native American code talkers was highly effective in protecting communication during World War II.
+
+[ASSISTANT_SAID] Modern linguists may find it difficult to decipher codes used by Native American code talkers due to the specialized terminology.
+
+[ASSISTANT_SAID] The most widely deployed model of the Enigma machine during World War II was the Enigma I, also known as the Wehrmacht Enigma.
+
+[ASSISTANT_SAID] The Enigma I used three or four rotors depending on the specific model and time period.
+
+[ASSISTANT_SAID] The Enigma M3 was fully compatible with the Enigma I, allowing messages encrypted on one to be decrypted on the other.
+
+[ASSISTANT

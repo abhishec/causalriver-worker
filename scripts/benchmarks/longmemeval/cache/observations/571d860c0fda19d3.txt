@@ -1,0 +1,22 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/20 (Sat) 18:05
+- [FACT] User has been having issues with their arm.
+- [EVENT] User is trying to keep track of doctor's appointments and medication schedule.
+- [RELATIONSHIP] User has a doctor named Dr. Lee.
+- [ASSISTANT_SAID] The assistant cannot access personal information or keep track of appointments.
+- [ASSISTANT_SAID] Suggested options to help track appointments and medication schedule: check calendar, contact Dr. Lee's office, use a digital calendar, and use a pill reminder app.
+- [TEMPORAL] User thinks their next appointment with Dr. Lee is on June 1st.
+- [FACT] User was recently diagnosed with thoracic outlet syndrome (TOS).
+- [ASSISTANT_SAID] Provided information about thoracic outlet syndrome (TOS) including symptoms: pain or numbness in the neck, shoulder, arm, or hand; weakness or fatigue in the arm or hand; tingling or burning sensations; swelling or discoloration; headaches or facial pain.
+- [ASSISTANT_SAID] Explained the three main types of TOS: neurogenic TOS, vascular TOS, and mixed TOS.
+- [ASSISTANT_SAID] Discussed potential causes of TOS, including anatomical abnormalities, muscle imbalances, poor posture, trauma, and pregnancy.
+- [ASSISTANT_SAID] Outlined treatment options for TOS, including physical therapy, exercises, pain management, lifestyle changes, and possible surgery.
+- [ASSISTANT_SAID] Encouraged user to discuss questions or concerns with their healthcare provider.
+- [FACT] User's symptoms started getting worse around April 10th.
+- [FACT] User's arm felt like it was asleep around the time symptoms worsened.
+- [RELATIONSHIP] User is helping their mom with her knee replacement surgery recovery.
+- [FACT] User's mom is doing physical therapy at home with a visiting therapist.
+- [ASSISTANT_SAID] Provided general advice on how to support a loved one during recovery, including encouraging and motivating, helping with daily tasks, being patient, managing medication, supporting therapy routines, and taking care of oneself.
+- [ASSISTANT_SAID] Suggested ways to help user’s mom stay motivated during recovery, including celebrating small victories, setting realistic goals, focusing on function, making it meaningful, getting her involved, providing positive reinforcement, making it a team effort, finding ways to make it fun, reminding her of her why, and taking breaks together.
+- [ASSISTANT_SAID] Emphasized the importance of tailoring support to the mom's specific needs and preferences.

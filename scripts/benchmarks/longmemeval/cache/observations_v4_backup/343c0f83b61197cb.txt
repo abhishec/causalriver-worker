@@ -1,0 +1,23 @@
+**Observation Log:**
+
+- [EVENT] User is planning a trip to San Francisco next month.
+- [TEMPORAL] User's travel dates to San Francisco are from the 10th to the 14th of next month.
+- [FACT] User's hometown airport is a Southwest Airlines hub.
+- [PREFERENCE] User prefers a round-trip ticket for their flight to San Francisco.
+- [FACT] User is open to flying out of their hometown airport at any time of day.
+- [EVENT] User took a direct flight with Southwest Airlines from their hometown to Las Vegas for a conference in March, from the 15th to the 18th.
+- [PREFERENCE] User has had a good experience with Southwest Airlines before.
+- [ASSISTANT] Assistant provided tips on how to find the best deals on Southwest flights to San Francisco.
+- [ASSISTANT] Assistant suggested checking the Southwest Airlines website and using their Low Fare Calendar tool.
+- [ASSISTANT] Assistant recommended using fare comparison tools like Google Flights, Skyscanner, or Kayak.
+- [ASSISTANT] Assistant mentioned considering flying into Oakland International Airport (OAK) for potentially cheaper flights.
+- [ASSISTANT] Assistant advised looking for Southwest Airlines sales and booking in advance.
+- [FACT] User has accumulated a decent amount of miles on United Airlines and American Airlines.
+- [PREFERENCE] User is hoping to use their miles for an upgrade on their next long-haul flight.
+- [ASSISTANT] Assistant provided information on how to redeem miles for upgrades on United Airlines and American Airlines.
+- [ASSISTANT] Assistant explained the types of upgrades available on United Airlines (CPU and RPU).
+- [ASSISTANT] Assistant provided general guidelines for mileage requirements for upgrades on United Airlines and American Airlines.
+- [ASSISTANT] Assistant noted that some fare classes (like Basic Economy) are not eligible for upgrades.
+- [ASSISTANT] Assistant suggested being flexible with travel dates to increase upgrade availability.
+- [ASSISTANT] Assistant recommended booking upgrades as early as possible due to limited availability.
+- [ASSISTANT] Assistant mentioned that user could redeem miles for other rewards if unable to upgrade.

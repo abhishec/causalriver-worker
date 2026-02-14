@@ -1,0 +1,23 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/21 (Sun) 11:48
+- [ASSISTANT_SAID] Breach of contract occurs when one party fails to perform or fulfill its obligations under a contract.
+- [ASSISTANT_SAID] The Indian Contract Act, 1872 recognizes two types of breaches of contract: Actual Breach and Anticipatory Breach.
+- [ASSISTANT_SAID] An actual breach of contract occurs when a party fails to perform its obligations at the time specified in the contract.
+- [ASSISTANT_SAID] An anticipatory breach occurs when one party indicates that it will not be able to fulfill its obligations before the time for performance arrives.
+- [ASSISTANT_SAID] Types of Breach of Contract include Material Breach, Minor Breach, Fundamental Breach, and Repudiatory Breach.
+- [ASSISTANT_SAID] A material breach occurs when one party fails to perform a significant or essential part of the contract.
+- [ASSISTANT_SAID] A minor breach occurs when one party fails to perform a non-essential or minor part of the contract.
+- [ASSISTANT_SAID] A fundamental breach occurs when one party fails to perform a vital part of the contract that goes to the root of the agreement.
+- [ASSISTANT_SAID] A repudiatory breach occurs when one party refuses to perform its obligations under the contract or indicates that it will not perform them in the future.
+- [ASSISTANT_SAID] In conclusion, breach of contract occurs when one party fails to perform its obligations under the contract.
+- [USER] Asked for the difference between Indemnity and Guarantee.
+- [ASSISTANT_SAID] Indemnity is a contractual agreement in which one party agrees to compensate the other party for any loss or damage incurred.
+- [ASSISTANT_SAID] Guarantee is an agreement in which one party agrees to pay or discharge the debt or obligation of another party in case of default.
+- [USER] Requested the difference between Indemnity and Guarantee in tabular format.
+- [ASSISTANT_CREATED] Provided a table comparing Indemnity and Guarantee, including criteria such as Definition, Nature, Parties Involved, Purpose, Triggering Event, Nature of Liability, Requirement of Consideration, Notice of Claim, and Termination.
+- [USER] Asked for the difference between Bailment and Pledge.
+- [ASSISTANT_SAID] Bailment is a legal relationship in which one party transfers possession of goods to another party for a specific purpose.
+- [ASSISTANT_SAID] Pledge is a special kind of bailment where goods are given as security for a debt or obligation.
+- [USER] Requested the difference between Bailment and Pledge in tabular format.
+- [ASSISTANT

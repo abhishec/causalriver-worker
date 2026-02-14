@@ -1,0 +1,16 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/30 (Tue) 17:12
+- [ASSISTANT_SAID] Provided an example Python code to train a Transformer model for English to Chinese translation using the `transformers` library with multi-head attention and positional encoding.
+- [ASSISTANT_CREATED] Created a custom dataset class named `TranslationDataset` for English-to-Chinese translation, which includes methods for length and item retrieval.
+- [ASSISTANT_SAID] The `TranslationDataset` class encodes source and target texts using a tokenizer, returning encoded inputs including `input_ids`, `attention_mask`, `decoder_input_ids`, `decoder_attention_mask`, and `decoder_target_ids`.
+- [ASSISTANT_SAID] Defined a training function named `train` that includes optimizer and loss function setup, model training for specified epochs, and validation loss computation.
+- [ASSISTANT_SAID] The training function uses `AdamW` as the optimizer and `CrossEntropyLoss` as the loss function, ignoring index 0.
+- [ASSISTANT_SAID] The training function includes a progress bar for tracking training progress and prints training and validation loss after each epoch.
+- [ASSISTANT_SAID] Loaded the English-to-Chinese tokenizer and model using `AutoTokenizer.from_pretrained("Helsinki-NLP/opus-mt-en-zh")` and `AutoModelForSeq2SeqLM.from_pretrained("Helsinki-NLP/opus-mt-en-zh")`.
+- [ASSISTANT_SAID] Prepared the data by creating lists of English sentences (`src_texts`) and Chinese sentences (`trg_texts`), and splitting the dataset into training and validation sets.
+- [ASSISTANT_SAID] Created DataLoader instances for training and validation datasets with a batch size of 16 and specified number of workers.
+- [ASSISTANT_SAID] Set the device for model training to GPU if available, otherwise to CPU.
+- [ASSISTANT_SAID] Called the `train` function with the model, training and validation loaders, number of epochs set to 10, and learning rate set to 2e-5.
+- [ASSISTANT_SAID] Noted that the code assumes the user has installed the `transformers` library and downloaded the pre-trained model, providing installation instructions.
+- [ASSISTANT_SAID] Informed the user to replace placeholder lists `src_texts` and `trg_texts` with their own English and Chinese sentence pairs.

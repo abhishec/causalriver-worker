@@ -1,0 +1,160 @@
+{
+  "answer_901a6763_3": [
+    {
+      "fact": "User is interested in art museums",
+      "type": "preference",
+      "entities": [
+        "art museums"
+      ]
+    },
+    {
+      "fact": "User recently went on a guided tour at the History Museum on February 24th",
+      "type": "event",
+      "entities": [
+        "History Museum",
+        "February 24th"
+      ]
+    },
+    {
+      "fact": "User is interested in ancient history and art",
+      "type": "preference",
+      "entities": [
+        "ancient history",
+        "art"
+      ]
+    },
+    {
+      "fact": "User is particularly interested in The Metropolitan Museum of Art",
+      "type": "preference",
+      "entities": [
+        "The Metropolitan Museum of Art"
+      ]
+    },
+    {
+      "fact": "User was fascinated by the ancient pottery section during their guided tour",
+      "type": "opinion",
+      "entities": [
+        "ancient pottery",
+        "guided tour"
+      ]
+    }
+  ],
+  "answer_901a6763_4": [
+    {
+      "fact": "User is interested in learning more about street art",
+      "type": "preference",
+      "entities": [
+        "street art"
+      ]
+    },
+    {
+      "fact": "User attended a lecture on 'The Evolution of Street Art' on March 3rd",
+      "type": "event",
+      "entities": [
+        "lecture",
+        "The Evolution of Street Art",
+        "March 3rd"
+      ]
+    },
+    {
+      "fact": "User is particularly interested in stencil art",
+      "type": "preference",
+      "entities": [
+        "stencil art"
+      ]
+    }
+  ],
+  "answer_901a6763_1": [
+    {
+      "fact": "User is interested in local art events and exhibitions",
+      "type": "preference",
+      "entities": [
+        "local art events",
+        "exhibitions"
+      ]
+    },
+    {
+      "fact": "User attended the 'Women in Art' exhibition on February 10th",
+      "type": "event",
+      "entities": [
+        "Women in Art",
+        "February 10th"
+      ]
+    },
+    {
+      "fact": "User was particularly drawn to the works of local artist Rachel Lee",
+      "type": "relationship",
+      "entities": [
+        "Rachel Lee"
+      ]
+    },
+    {
+      "fact": "User found the 'Women in Art' exhibition amazing",
+      "type": "opinion",
+      "entities": [
+        "Women in Art",
+        "amazing"
+      ]
+    },
+    {
+      "fact": "User is looking for online resources that feature local artists and their work",
+      "type": "preference",
+      "entities": [
+        "online resources",
+        "local artists"
+      ]
+    }
+  ],
+  "answer_901a6763_2": [
+    {
+      "fact": "User is looking for art supplies for a project.",
+      "type": "preference",
+      "entities": [
+        "art supplies",
+        "project"
+      ]
+    },
+    {
+      "fact": "User recently volunteered at the Children's Museum for the 'Art Afternoon' event on February 17th.",
+      "type": "event",
+      "entities": [
+        "Children's Museum",
+        "Art Afternoon",
+        "February 17th"
+      ]
+    },
+    {
+      "fact": "User found the experience of volunteering at the Children's Museum amazing.",
+      "type": "opinion",
+      "entities": [
+        "Children's Museum",
+        "volunteering",
+        "experience"
+      ]
+    },
+    {
+      "fact": "User is looking for art inspiration.",
+      "type": "preference",
+      "entities": [
+        "art inspiration"
+      ]
+    },
+    {
+      "fact": "User is interested in local artists or exhibitions that focus on mixed media or feminist art.",
+      "type": "preference",
+      "entities": [
+        "local artists",
+        "exhibitions",
+        "mixed media",
+        "feminist art"
+      ]
+    },
+    {
+      "fact": "User is drawn to Rachel Lee's work.",
+      "type": "preference",
+      "entities": [
+        "Rachel Lee"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/25 (Thu) 19:02  
+[FACT] User's current computer is about 5 years old.  
+[FACT] User thinks their current computer is running a Windows operating system.  
+[FACT] User primarily uses their computer for web browsing, office work, and some light video editing.  
+[CHANGE] User has been trying to reduce their energy bills and set up a new smart thermostat.  
+[EVENT] User has noticed that the smart thermostat has been learning their schedule and preferences, adjusting the temperature when they are not home or when they are sleeping.  
+[PREFERENCE] User is not entirely sure about the exact specs of their current computer.  
+[PREFERENCE] User is not sure what kind of features they need in a new computer.  
+[PREFERENCE] User prefers a pre-built computer over building their own.  
+[PREFERENCE] User has had good experiences with Dell and HP in the past and is leaning towards them.  
+[PREFERENCE] User is open to exploring Lenovo or Acer but prefers Dell and HP.  
+[PREFERENCE] User does not need a DVD/CD drive since they mostly stream content online.  
+[PREFERENCE] User is not too particular about the keyboard and mouse as long as they are comfortable to use.  
+[PREFERENCE] User thinks a 24-inch screen would be a good size for their desktop computer.  
+[PREFERENCE] User would like to have at least a 1-year warranty with dedicated customer support.  
+[ASSISTANT_SAID] Assistant offered to help with upgrading the user's desktop computer and asked for more information about the current computer and usage.  
+[ASSISTANT_SAID] Assistant recommended a mid-range to high-end processor (Intel Core i5 or i7, AMD Ryzen 5 or 7), 16 GB of RAM, and a 512 GB or 1 TB SSD for the new computer.  
+[ASSISTANT_SAID] Assistant suggested integrated graphics for the user's needs but mentioned a dedicated graphics card for more advanced tasks.  
+[ASSISTANT_SAID] Assistant provided a budget estimate of around $800-$1,500 for a well-rounded desktop computer.  
+[ASSISTANT_SAID] Assistant recommended looking at Dell Inspiron and HP Pavilion lines for pre-built options.  
+[ASSISTANT_SAID] Assistant provided specific model recommendations:  
+- Dell Inspiron 24 3000 Series AIO: 24-inch Full HD display, 10th Gen Intel Core i5, 16 GB RAM, 512 GB SSD, Integrated Intel UHD Graphics, Wi-Fi 6, Price: Around $900.  
+- HP Pavilion 24-inch All-in-One Desktop: 24-inch Full HD display, 10th Gen Intel Core i5, 16 GB RAM, 1 TB SSD, Integrated Intel Iris Xe Graphics, Wi-Fi 6, Price

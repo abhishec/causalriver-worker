@@ -1,0 +1,124 @@
+{
+  "answer_fcff2dc4_1": [
+    {
+      "fact": "User has a jewelry collection.",
+      "type": "personal",
+      "entities": [
+        "jewelry collection"
+      ]
+    },
+    {
+      "fact": "User recently got a new silver necklace with a small pendant on April 15th.",
+      "type": "event",
+      "entities": [
+        "silver necklace",
+        "small pendant",
+        "April 15th"
+      ]
+    },
+    {
+      "fact": "User wants to take good care of their new silver necklace.",
+      "type": "preference",
+      "entities": [
+        "silver necklace"
+      ]
+    },
+    {
+      "fact": "User is thinking of cleaning their jewelry collection.",
+      "type": "opinion",
+      "entities": [
+        "jewelry collection"
+      ]
+    },
+    {
+      "fact": "User is considering taking photos of each piece of jewelry to keep a record.",
+      "type": "preference",
+      "entities": [
+        "photos",
+        "jewelry collection"
+      ]
+    }
+  ],
+  "answer_fcff2dc4_3": [
+    {
+      "fact": "User got their engagement ring a month ago",
+      "type": "event",
+      "entities": [
+        "engagement ring",
+        "month ago"
+      ]
+    },
+    {
+      "fact": "User needs to get their engagement ring resized because it is too loose",
+      "type": "opinion",
+      "entities": [
+        "engagement ring",
+        "resized",
+        "too loose"
+      ]
+    },
+    {
+      "fact": "User is thinking of taking inventory of their jewelry collection",
+      "type": "preference",
+      "entities": [
+        "jewelry collection",
+        "inventory"
+      ]
+    },
+    {
+      "fact": "User wants to take photos of each piece of jewelry to keep a record",
+      "type": "preference",
+      "entities": [
+        "photos",
+        "jewelry",
+        "record"
+      ]
+    }
+  ],
+  "answer_fcff2dc4_2": [
+    {
+      "fact": "User has a jewelry collection.",
+      "type": "personal",
+      "entities": [
+        "jewelry collection"
+      ]
+    },
+    {
+      "fact": "User is cleaning their jewelry collection this weekend.",
+      "type": "event",
+      "entities": [
+        "cleaning",
+        "jewelry collection",
+        "weekend"
+      ]
+    },
+    {
+      "fact": "User recently got a new pair of emerald earrings.",
+      "type": "event",
+      "entities": [
+        "emerald earrings"
+      ]
+    },
+    {
+      "fact": "User loves their new emerald earrings.",
+      "type": "opinion",
+      "entities": [
+        "emerald earrings"
+      ]
+    },
+    {
+      "fact": "User wants to take good care of their emerald earrings.",
+      "type": "preference",
+      "entities": [
+        "emerald earrings"
+      ]
+    },
+    {
+      "fact": "User is seeking recommendations for storing their earrings.",
+      "type": "preference",
+      "entities": [
+        "storing earrings"
+      ]
+    }
+  ]
+}

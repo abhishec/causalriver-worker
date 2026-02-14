@@ -1,0 +1,241 @@
+{
+  "answer_6a3b5c13_2": [
+    {
+      "fact": "User is planning meals for the upcoming week.",
+      "type": "event",
+      "entities": [
+        "meals",
+        "upcoming week"
+      ]
+    },
+    {
+      "fact": "User is making a grocery list.",
+      "type": "event",
+      "entities": [
+        "grocery list"
+      ]
+    },
+    {
+      "fact": "User prefers recipes using chicken breast and ground beef.",
+      "type": "preference",
+      "entities": [
+        "chicken breast",
+        "ground beef"
+      ]
+    },
+    {
+      "fact": "User went grocery shopping with their sister.",
+      "type": "relationship",
+      "entities": [
+        "sister"
+      ]
+    },
+    {
+      "fact": "User spent around $80 at Trader Joe's on pre-packaged meals and snacks.",
+      "type": "event",
+      "entities": [
+        "Trader Joe's",
+        "$80",
+        "pre-packaged meals",
+        "snacks"
+      ]
+    },
+    {
+      "fact": "User bought chicken breast and ground beef at Walmart last week.",
+      "type": "event",
+      "entities": [
+        "Walmart",
+        "chicken breast",
+        "ground beef"
+      ]
+    },
+    {
+      "fact": "User plans to try Chicken Fajitas and Spaghetti Bolognese recipes.",
+      "type": "preference",
+      "entities": [
+        "Chicken Fajitas",
+        "Spaghetti Bolognese"
+      ]
+    }
+  ],
+  "answer_6a3b5c13_1": [
+    {
+      "fact": "User went grocery shopping last Saturday and spent around $120 at Walmart.",
+      "type": "event",
+      "entities": [
+        "grocery shopping",
+        "Saturday",
+        "$120",
+        "Walmart"
+      ]
+    },
+    {
+      "fact": "User used a 10% off coupon on dairy products.",
+      "type": "event",
+      "entities": [
+        "10% off coupon",
+        "dairy products"
+      ]
+    },
+    {
+      "fact": "User is trying to plan meals for the upcoming week.",
+      "type": "event",
+      "entities": [
+        "meal planning",
+        "upcoming week"
+      ]
+    },
+    {
+      "fact": "User usually makes simple American-style meals like pasta, chicken, and veggies.",
+      "type": "preference",
+      "entities": [
+        "American-style meals",
+        "pasta",
+        "chicken",
+        "veggies"
+      ]
+    },
+    {
+      "fact": "User does not have any food allergies.",
+      "type": "personal",
+      "entities": []
+    },
+    {
+      "fact": "User is trying to reduce meat consumption.",
+      "type": "preference",
+      "entities": [
+        "meat consumption"
+      ]
+    },
+    {
+      "fact": "User is planning to prep meals for 5-6 days with some leftovers for lunch.",
+      "type": "event",
+      "entities": [
+        "meal prep",
+        "5-6 days",
+        "leftovers",
+        "lunch"
+      ]
+    },
+    {
+      "fact": "User is open to trying out different cuisines.",
+      "type": "preference",
+      "entities": [
+        "different cuisines"
+      ]
+    }
+  ],
+  "answer_6a3b5c13_3": [
+    {
+      "fact": "User is planning meals for the week.",
+      "type": "event",
+      "entities": [
+        "meal planning"
+      ]
+    },
+    {
+      "fact": "User has chicken breast and ground beef.",
+      "type": "personal",
+      "entities": [
+        "chicken breast",
+        "ground beef"
+      ]
+    },
+    {
+      "fact": "User is trying to shop more sustainably.",
+      "type": "preference",
+      "entities": [
+        "sustainable shopping"
+      ]
+    },
+    {
+      "fact": "User placed an online order with Thrive Market last month.",
+      "type": "event",
+      "entities": [
+        "Thrive Market"
+      ]
+    },
+    {
+      "fact": "User spent around $150 on organic and sustainable products.",
+      "type": "personal",
+      "entities": [
+        "$150",
+        "organic products",
+        "sustainable products"
+      ]
+    },
+    {
+      "fact": "User is excited to try Chicken Fajitas and Spaghetti Bolognese.",
+      "type": "preference",
+      "entities": [
+        "Chicken Fajitas",
+        "Spaghetti Bolognese"
+      ]
+    },
+    {
+      "fact": "User is considering ordering reusable containers and bags from Thrive Market.",
+      "type": "event",
+      "entities": [
+        "reusable containers",
+        "reusable bags",
+        "Thrive Market"
+      ]
+    },
+    {
+      "fact": "User wants to reduce household waste.",
+      "type": "opinion",
+      "entities": [
+        "household waste"
+      ]
+    }
+  ],
+  "answer_6a3b5c13_4": [
+    {
+      "fact": "User is planning meals for the next week.",
+      "type": "event",
+      "entities": [
+        "meal planning",
+        "next week"
+      ]
+    },
+    {
+      "fact": "User has been relying on Instacart for groceries.",
+      "type": "preference",
+      "entities": [
+        "Instacart"
+      ]
+    },
+    {
+      "fact": "User is open to any cuisine.",
+      "type": "preference",
+      "entities": [
+        "cuisine"
+      ]
+    },
+    {
+      "fact": "User is trying to cook more meals at home to reduce food waste.",
+      "type": "opinion",
+      "entities": [
+        "cooking",
+        "food waste"
+      ]
+    },
+    {
+      "fact": "User plans to cook 5 dinners and a few lunch ideas.",
+      "type": "event",
+      "entities": [
+        "5 dinners",
+        "lunch ideas"
+      ]
+    },
+    {
+      "fact": "User has staples like rice, pasta, and canned goods.",
+      "type": "personal",
+      "entities": [
+        "rice",
+        "pasta",
+        "canned goods"
+      ]
+    }
+  ]
+}

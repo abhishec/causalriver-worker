@@ -1,0 +1,12 @@
+**Observation Log**
+
+**Session Date:** 2023/05/22 (Mon) 18:02  
+**Session ID:** sharegpt_rnG0ZuV_0
+
+1. [FACT] User's name is Michael.
+2. [FACT] User's job title is Sales Manager.
+3. [TEMPORAL] User sent a previous email to support HexaChem two days prior to this conversation.
+4. [RELATIONSHIP] User is communicating with a client regarding price offers for HexaChem.
+5. [PREFERENCE] User is seeking a prompt response from the client.
+6. [ASSISTANT_CREATED] Assistant was requested to draft a follow-up email to the client.
+7. [ASSISTANT_SAID] Assistant was instructed to ensure the follow-up email includes high complexity and burstiness while remaining brief.

@@ -1,0 +1,26 @@
+**Observation Log:**
+
+[FACT] User's name is Emily Anne Rodriguez.  
+[FACT] User was previously named Emily Anne Thompson before marriage.  
+[FACT] User recently got married.  
+[EVENT] User is planning a trip to Europe.  
+[CHANGE] User changed her last name after marriage.  
+[TEMPORAL] Session date is 2023/02/08 (Wed) 16:27.  
+[ASSISTANT_SAID] User needs to update her passport after a name change.  
+[ASSISTANT_SAID] To update her passport, user needs to submit Form DS-82 to the U.S. Department of State.  
+[ASSISTANT_SAID] User must gather required documents: current valid passport, certified copy of marriage certificate, photocopy of government-issued photo ID, and one recent color photograph.  
+[ASSISTANT_SAID] User must fill out Form DS-82 and sign it in front of a notary public.  
+[ASSISTANT_SAID] The application fee for a passport book is currently $110, and the execution fee is $35.  
+[ASSISTANT_SAID] Processing times for a passport typically take 6-8 weeks for routine service.  
+[ASSISTANT_SAID] User should ensure her new passport is valid for at least six months beyond her planned departure date from Europe.  
+[ASSISTANT_SAID] User should update her airline, travel insurance, and other travel-related documents with her new name.  
+[ASSISTANT_SAID] User can consider applying for a passport card for land and sea travel to Canada, Mexico, the Caribbean, and Bermuda.  
+[ASSISTANT_SAID] User needs to update her Social Security card to reflect her new name.  
+[ASSISTANT_SAID] To update her Social Security card, user must gather required documents: current Social Security card, certified copy of marriage certificate, and proof of identity.  
+[ASSISTANT_SAID] User must complete Form SS-5 to update her Social Security card.  
+[ASSISTANT_SAID] User can take or mail the application and supporting documents to her local SSA office.  
+[ASSISTANT_SAID] The SSA will process the application and mail the new Social Security card, typically taking 2-4 weeks.  
+[ASSISTANT_SAID] User should also update her driver's license with her new name.  
+[ASSISTANT_SAID] To update her driver's license, user must gather required documents: current driver's license, certified copy of marriage certificate, proof of identity, and proof of residency.  
+[ASSISTANT_SAID] User should check her state's DMV website for specific requirements and fill out the application form to update her driver's license.  
+[ASSISTANT_SAID] User will need to take a new photo for

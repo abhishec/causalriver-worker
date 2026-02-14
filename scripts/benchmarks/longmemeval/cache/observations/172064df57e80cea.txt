@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [FACT] User is located in the northeastern United States.
+- [EVENT] User is planning to go on a birding trip to a nearby nature reserve soon.
+- [TEMPORAL] The trip is planned for early May, which is spring migration season.
+- [ASSISTANT_SAID] Early May is a fantastic time for warbler spotting in the northeastern United States, as many species are migrating through the region during this period.
+- [ASSISTANT_SAID] Warbler species the user might expect to see include: Yellow Warbler, Yellow-rumped Warbler, Black-and-white Warbler, Common Yellowthroat, American Goldfinch, Northern Parula, Magnolia Warbler, Blackburnian Warbler, Chestnut-sided Warbler, and Palm Warbler.
+- [ASSISTANT_SAID] User should look for Yellow Warblers near slow-moving streams, ponds, and marshes, especially areas with dense vegetation like cattails, willows, or alders.
+- [ASSISTANT_SAID] Common Yellowthroats often inhabit wetlands, including marshes, swamps, and edges of ponds.
+- [ASSISTANT_SAID] Northern Parulas are found near slow-moving water, such as streams, rivers, and lake edges, particularly with nearby trees or shrubs.
+- [ASSISTANT_SAID] Yellow-rumped Warblers can be seen in coniferous forests, particularly spruce, fir, and pine trees.
+- [ASSISTANT_SAID] Black-and-white Warblers are found in deciduous forests, especially oak, maple, and birch trees.
+- [ASSISTANT_SAID] Magnolia Warblers frequent mature deciduous forests with dense canopies, often near oak, maple, or beech trees.
+- [ASSISTANT_SAID] Blackburnian Warblers are found in mature deciduous forests, particularly those with hemlock, birch, or beech trees.
+- [ASSISTANT_SAID] Chestnut-sided Warblers inhabit deciduous forests, especially those with oak, maple, and birch trees.
+- [ASSISTANT_SAID] American Goldfinches can be seen in areas with dense shrubs, weeds, and small trees, particularly near wetlands.
+- [ASSISTANT_SAID] Palm Warblers are found in areas with dense, low-lying vegetation, such as shrubs, bushes, and small trees.
+- [ASSISTANT_SAID] Magnolia Warblers are often seen in edge habitats, where forests meet fields or clearings.
+- [ASSISTANT_SAID] User should look for movement and listen for songs to help locate warblers.
+- [ASSISTANT_SAID] User should be patient, as warblers can be skittish and may take time to emerge from dense vegetation.
+- [EVENT] User is interested in learning bird calls to improve

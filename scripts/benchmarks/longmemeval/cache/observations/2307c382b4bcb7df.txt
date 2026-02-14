@@ -1,0 +1,27 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/29 (Mon) 23:16  
+[FACT] User is working on a thesis.  
+[EVENT] User has been reading a lot of papers lately.  
+[EVENT] User started working on the literature review chapter after submitting their proposal.  
+[ASSISTANT_SAID] Recommended tools for managing citations and bibliographies:  
+[ASSISTANT_SAID] 1. Mendeley: A free reference manager and academic social network.  
+[ASSISTANT_SAID] 2. Zotero: A free, open-source citation manager that integrates with web browsers.  
+[ASSISTANT_SAID] 3. EndNote: A commercial reference manager widely used in academia.  
+[ASSISTANT_SAID] 4. Citation Style Guides: Websites providing guidelines for formatting citations.  
+[ASSISTANT_SAID] 5. Paperpile: A web-based reference manager that integrates with Google Drive and Google Docs.  
+[ASSISTANT_SAID] 6. Citavi: A comprehensive reference manager with knowledge management tools.  
+[ASSISTANT_SAID] 7. ReadCube: A reference manager for organizing papers and annotating PDFs.  
+[ASSISTANT_SAID] 8. Papers: A commercial reference manager for Mac and iOS devices.  
+[ASSISTANT_SAID] 9. BibTeX: A plain text format for managing bibliographies, often used in LaTeX documents.  
+[ASSISTANT_SAID] 10. Cite This For Me: A free online citation generator supporting various styles.  
+[ASSISTANT_SAID] Suggested factors to consider when choosing a tool: citation style, collaboration, integration, cost, and ease of use.  
+[FACT] User has heard of Mendeley and Zotero but hasn't tried the others.  
+[USER_SAID] User is interested in tools that can help with note-taking and summarizing papers.  
+[ASSISTANT_SAID] Mendeley has a built-in note-taking feature for annotating PDFs and adding notes.  
+[ASSISTANT_SAID] Zotero has a robust note-taking system, allowing standalone notes and tagging.  
+[ASSISTANT_SAID] Paperpile has a simple note-taking feature for adding comments to papers.  
+[ASSISTANT_SAID] Citavi includes features for note-taking, summarizing, and organizing ideas.  
+[ASSISTANT_SAID] ReadCube allows highlighting and annotating PDFs and has a "Paper Summary" feature.  
+[ASSISTANT_SAID] Suggested dedicated note-taking tools: Evernote, OneNote, Bear, and Simplenote.  
+[USER_SAID] User plans to try Zotero and Citavi to see which fits their needs better

@@ -1,0 +1,29 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/02/15 (Wed) 13:05  
+[FACT] User has been reading a lot more since taking a social media break.  
+[PREFERENCE] User is looking for book recommendations in the self-help or fiction genres that focus on mindfulness and personal growth.  
+[ASSISTANT_SAID] Recommended self-help books:  
+[ASSISTANT_SAID] 1. "The 7 Habits of Highly Effective People" by Stephen Covey  
+[ASSISTANT_SAID] 2. "Mindset: The New Psychology of Success" by Carol S. Dweck  
+[ASSISTANT_SAID] 3. "The Power of Now" by Eckhart Tolle  
+[ASSISTANT_SAID] 4. "Daring Greatly: How the Courage to Be Vulnerable Transforms the Way We Live, Love, Parent, and Lead" by Brené Brown  
+[ASSISTANT_SAID] 5. "The Miracle Morning" by Hal Elrod  
+[ASSISTANT_SAID] 6. "Presence: Bringing Your Boldest Self to Your Biggest Challenges" by Amy Cuddy  
+[ASSISTANT_SAID] 7. "The Happiness Project" by Gretchen Rubin  
+[ASSISTANT_SAID] Recommended fiction books:  
+[ASSISTANT_SAID] 1. "The Alchemist" by Paulo Coelho  
+[ASSISTANT_SAID] 2. "The Little Paris Bookshop" by Nina George  
+[ASSISTANT_SAID] 3. "Eleanor Oliphant is Completely Fine" by Gail Honeyman  
+[ASSISTANT_SAID] 4. "The Particular Sadness of Lemon Cake" by Aimee Bender  
+[ASSISTANT_SAID] 5. "The Nightingale" by Kristin Hannah  
+[ASSISTANT_SAID] 6. "The First Fifteen Lives of Harry August" by Claire North  
+[ASSISTANT_SAID] 7. "The Rosie Project" by Graeme Simsion  
+[ASSISTANT_SAID] Bonus recommendations:  
+[ASSISTANT_SAID] * "The Mind Illuminated" by Culadasa (John Yates)  
+[ASSISTANT_SAID] * "The Mindful Way Workbook" by John D. Teasdale, J. Mark G. Williams, and Zindel V. Segal  
+[PREFERENCE] User is looking for guided meditation apps or websites to improve their meditation practice.  
+[ASSISTANT_SAID] Recommended guided meditation apps:  
+[ASSISTANT_SAID] 1. Headspace  
+[ASSISTANT_SAID] 2. Calm  
+[ASSISTANT_SAID]

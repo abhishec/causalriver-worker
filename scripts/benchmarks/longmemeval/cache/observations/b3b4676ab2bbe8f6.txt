@@ -1,0 +1,18 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/23 (Tue) 12:31  
+[FACT] User is trying to cut down on sugar.  
+[PREFERENCE] User is looking for healthy toppings for morning oatmeal besides nuts.  
+[EVENT] User is grabbing a coffee and a granola bar to-go right now, which they'll eat during their meeting.  
+[FACT] User has been trying to eat more fish, specifically salmon or tilapia, for dinner at least twice a week.  
+[PREFERENCE] User is looking for easy and healthy marinades or seasonings for chicken fajitas.  
+[ASSISTANT_SAID] Suggested healthy toppings for oatmeal: fresh or dried fruits, seeds, coconut flakes, cinnamon or spices, Greek yogurt, honey or maple syrup alternatives, cocoa powder, jam or preserves, avocado, protein powder.  
+[ASSISTANT_SAID] Suggested coffee and granola bar tips: opt for low-sugar coffee creamer or plant-based milk, choose granola bars with wholesome ingredients and minimal added sugars.  
+[ASSISTANT_SAID] Suggested marinades for chicken: lemon-herb marinade, Asian-glazed marinade, Mediterranean marinade.  
+[ASSISTANT_SAID] Suggested seasonings for chicken: simple salt and pepper, citrus and herbs, spicy Cajun, Indian-style, Italian-style.  
+[PREFERENCE] User has discovered a new curry powder from a local spice shop that they really like.  
+[ASSISTANT_SAID] Suggested popular curry powder brands: McCormick Madras Curry Powder, Penzeys Spices, The Spice House, Steenbergs Sri Lankan Curry Powder, Burlap & Barrel Garam Masala Curry Powder.  
+[PREFERENCE] User is looking for healthy snacks that are easy to take on the go, besides granola bars and nuts.  
+[ASSISTANT_SAID] Suggested healthy snacks: fresh fruit, veggie sticks with hummus, trail mix, energy balls, hard-boiled eggs, cottage cheese, air-popped popcorn, protein smoothie packs, cut veggies with guacamole, whole grain crackers with avocado or peanut butter.  
+[PREFERENCE] User is interested in making their own trail mix with nuts, seeds, and dried fruits.  
+[ASSISTANT_CREATED] Suggested basic trail mix recipe: 2 cups of nuts (almonds, cashews, walnuts), 1 cup of seeds (pumpkin seeds, sunflower seeds), 1 cup of dried fruits (cranberries, raisins, apricots), and optional 1/2 cup of dark chocolate chips or M&M's.

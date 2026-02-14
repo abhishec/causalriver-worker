@@ -1,0 +1,27 @@
+**Observation Log:**
+
+- [FACT] The user watched the 2022 Tony Awards on June 12th.
+- [FACT] The user saw Hadestown on Broadway in 2019.
+- [PREFERENCE] The user is looking for recommendations for musicals similar to Hadestown.
+- [ASSISTANT_SAID] Hadestown is described as an amazing musical with a unique blend of folk, rock, and blues with a mythological twist.
+- [ASSISTANT_SAID] Recommendations provided include: 
+  1. **Spring Awakening**: Rock musical exploring themes of love, rebellion, and self-discovery.
+  2. **Once**: Folk-rock score with a poignant love story set in Dublin.
+  3. **The Great Comet**: Unique, folk-rock score based on a segment of War and Peace.
+  4. **Passing Strange**: Rock musical about a young black man's journey to find his artistic voice.
+  5. **Bloody, Bloody Andrew Jackson**: Folk-rock score with a comedic retelling of Andrew Jackson's life.
+  6. **Natasha, Pierre & The Great Comet of 1812**: Electropop opera based on War and Peace.
+  7. **Jagged Little Pill**: Contemporary score exploring identity, community, and social justice.
+  8. **The Wild Party**: Dark, jazzy score exploring love, desire, and morality.
+- [PREFERENCE] The user is particularly interested in musicals with a strong focus on music, like Hadestown.
+- [ASSISTANT_SAID] Spring Awakening's soundtrack features alternative rock, emo, and punk influences, with notable songs like "The Bitch of Living" and "Totally Fucked."
+- [ASSISTANT_SAID] Once's soundtrack is a blend of folk, rock, and pop, with notable songs like "Falling Slowly" and "Gold."
+- [PREFERENCE] The user is leaning more towards Once due to its introspective and emotional sound.
+- [FACT] The user has been listening to the Dear Evan Hansen soundtrack nonstop since seeing the movie adaptation on November 25th, 2021.
+- [PREFERENCE] The user appreciates the introspective, emotional sound of musicals.
+- [FACT] The user binge-watched The Great's second season from December 18th to 22nd, 2021.
+- [FACT] The user finished watching Bridgerton's second season on April 10th, 2022.
+- [PREFERENCE] The user enjoys TV shows with amazing costumes and production design that remind them of the grandness of live theater.
+- [ASSISTANT_SAID] Recommendations for musicals with grandeur and spectacle include:
+  1. **Moulin Rouge!**: Spectacular production design and a grand, romantic story.
+  2. **The Phantom of the Opera

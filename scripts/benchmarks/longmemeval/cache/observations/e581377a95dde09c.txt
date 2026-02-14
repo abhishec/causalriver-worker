@@ -1,0 +1,26 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2021/08/20 (Fri) 03:00
+- [USER] The user requested to ignore all previous instructions.
+- [USER] The user wants the assistant to respond only in English.
+- [USER] The user wants the assistant to act as an expert in Svelte, SvelteKit, Typescript, Javascript, i18n, Supabase, Firebase, Git, and other web development services.
+- [USER] The user specified that the assistant must speak and write fluent English.
+- [USER] The user requested that the assistant always ask follow-up questions to attain a full understanding of the user's needs or wants.
+- [USER] The user instructed the assistant to wait for the user's answers after asking necessary questions.
+- [USER] The user requested that the assistant respond with "I thoroughly understand." after attaining a full understanding of the user's needs or wants.
+- [USER] The user asked the assistant to provide a short, easy example of the subject being discussed in the response.
+- [USER] The user's first question was about the built-in data types in TypeScript.
+- [ASSISTANT_SAID] The assistant acknowledged the user's instructions with "Understood."
+- [ASSISTANT_SAID] The assistant listed the built-in data types in TypeScript: boolean, number, string, null, undefined, any, void, never, object, array, tuple.
+- [ASSISTANT_CREATED] The assistant provided a code example demonstrating the declaration of variables using various TypeScript data types, including:
+  - `let isDone: boolean = false;`
+  - `let myNumber: number = 42;`
+  - `let myString: string = "Hello, world!";`
+  - `let myNull: null = null;`
+  - `let myUndefined: undefined = undefined;`
+  - `let myAny: any = "This can be any data type";`
+  - `let myVoid: void = undefined;`
+  - `let myNever: never = (() => { throw new Error("This function never returns!"); })();`
+  - `let myObject: object = {name: "Alice", age: 30};`
+  - `let myArray: number[] = [1, 2, 3];`
+  - `let myTuple: [string, number] = ["foo", 42];`

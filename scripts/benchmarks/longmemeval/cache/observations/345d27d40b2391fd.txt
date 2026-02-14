@@ -1,0 +1,32 @@
+**Observation Log:**
+
+- [FACT] The user is trying to set a goal to reduce their daily social media usage.
+- [FACT] The user has experience with taking breaks from social media.
+- [EVENT] The user took a 10-day break from Instagram in early February.
+- [EVENT] The user took the break right after returning from a family vacation.
+- [CHANGE] The user found that the 10-day break helped them detox and focus on their own life.
+- [ASSISTANT_SAID] The assistant congratulated the user on their 10-day break from Instagram and acknowledged the benefits of a social media detox.
+- [ASSISTANT_SAID] The assistant provided strategies to help the user reduce their daily social media usage, including:
+  1. Set a specific goal (e.g., limit daily usage to 30 minutes).
+  2. Track usage with apps like Screen Time (iOS) or Digital Wellbeing (Android).
+  3. Schedule specific times for social media usage.
+  4. Remove temptations by deleting apps from the home screen.
+  5. Find alternative activities (e.g., reading, exercising).
+  6. Use website blockers or app blockers (e.g., Freedom, SelfControl, Cold Turkey).
+  7. Create a social media-free zone.
+  8. Find accountability (e.g., share goals with friends or join a detox group).
+  9. Reward progress with non-social media-related rewards.
+  10. Be kind to oneself and learn from slip-ups.
+- [USER_PREFERENCE] The user plans to track their usage and set a specific goal to limit daily social media usage to under 30 minutes.
+- [USER_PREFERENCE] The user has found website blockers helpful in the past.
+- [USER_PREFERENCE] The user intends to schedule social media time and remove temptations by deleting apps from their home screen.
+- [USER_PREFERENCE] The user enjoys reading and exercising as alternative activities to social media.
+- [ASSISTANT_SAID] The assistant encouraged the user to reflect on their motivations for reducing social media usage and suggested questions to consider.
+- [USER_PREFERENCE] The user plans to use a habit tracker app to monitor their social media usage.
+- [USER_PREFERENCE] The user has used a habit tracker app before to track exercise and sleep habits.
+- [ASSISTANT_SAID] The assistant suggested setting reminders on the phone to check progress and adjust strategies as needed.
+- [USER_PREFERENCE] The user prefers self-help and personal development books.
+- [USER_PREFERENCE] The user finds self-help and personal development books inspiring and motivating.
+- [EVENT] The user recently finished reading "The 7 Habits of Highly Effective People" by Stephen Covey.
+- [EVENT] The user is currently reading "Daring Greatly" by Brené Brown.
+- [USER_PREFERENCE] The

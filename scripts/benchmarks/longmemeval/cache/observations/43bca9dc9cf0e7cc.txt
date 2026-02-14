@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/04/06 (Thu) 17:57
+- [USER] User is attempting to install Pi-hole to block ads on their router.
+- [ASSISTANT_SAID] To install Pi-hole, the user needs a Raspberry Pi board and power supply.
+- [ASSISTANT_SAID] The user should install the Raspbian operating system on the Raspberry Pi by downloading the image from the official Raspberry Pi website and using a tool like "Etcher" to burn the image to an SD card.
+- [ASSISTANT_SAID] After installing Raspbian, the user should connect the Raspberry Pi to the router via Ethernet cable and power on the device.
+- [ASSISTANT_SAID] The user should open a terminal window on the Raspberry Pi and run the command "curl -sSL <https://install.pi-hole.net> | bash" to install the Pi-hole software.
+- [ASSISTANT_SAID] The user should follow the prompts during the installation process to configure network settings and select ad-blocking lists.
+- [ASSISTANT_SAID] After installation, the user can access the Pi-hole web interface by entering the IP address of the Raspberry Pi into a web browser.
+- [ASSISTANT_SAID] The user needs to log into their router's web interface to update the DNS settings to use Pi-hole as its DNS server.
+- [USER] User reports receiving the error message "static IP needed."
+- [ASSISTANT_SAID] To resolve the "static IP needed" error, the user should manually configure a static IP address for the Raspberry Pi by editing the "dhcpcd.conf" file.
+- [ASSISTANT_SAID] The user should open a terminal and enter "sudo nano /etc/dhcpcd.conf" to edit the file.
+- [ASSISTANT_SAID] The user should add specific lines to the "dhcpcd.conf" file to set a static IP address, routers, and domain name servers.
+- [ASSISTANT_SAID] The user should restart the dhcpcd service with the command "sudo service dhcpcd restart."
+- [USER] User mentions being prompted to "Select a privacy mode for FTL" during installation.
+- [ASSISTANT_SAID] The assistant explains the three privacy modes for FTL: Basic, Intermediate, and Advanced, detailing what data each mode collects.
+- [USER] User states they have completed the installation of Pi-hole.
+- [ASSISTANT_SAID] The assistant provides steps for further configuration after installation, including configuring the router to use Pi-hole as its DNS server, customizing ad-blocking lists, creating custom blacklists or whitelists, monitoring network performance, and keeping Pi-hole updated.
+- [USER] User provides detailed information

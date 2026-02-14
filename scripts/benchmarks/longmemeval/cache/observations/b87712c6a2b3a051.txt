@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/26 (Fri) 09:43
+- [FACT] User is interested in learning more about the film industry, especially independent films and documentaries.
+- [PREFERENCE] User is particularly interested in films that explore themes of social justice and identity.
+- [PREFERENCE] User likes the films "Parasite" and "The Farewell."
+- [EVENT] User attended AFI Fest in LA, where they saw a screening of "Joker."
+- [EVENT] User attended a Q&A session with Todd Phillips and Joaquin Phoenix at AFI Fest.
+- [ASSISTANT_SAID] Assistant recommended the following narrative films: "Moonlight" (2016), "The Florida Project" (2017), "Mudbound" (2017), "The Killing of a Sacred Deer" (2017), and "American Factory" (2019).
+- [ASSISTANT_SAID] Assistant recommended the following documentaries: "13th" (2016), "The Look of Silence" (2014), "The Prison in Twelve Landscapes" (2016), "The Blood Is at the Doorstep" (2017), and "For Sama" (2019).
+- [ASSISTANT_SAID] Assistant provided additional recommendations: "The Act of Killing" (2012), "Roma" (2018), and "Sorry to Bother You" (2018).
+- [PREFERENCE] User is particularly interested in "Moonlight" and "The Florida Project."
+- [EVENT] User is taking a cinematography workshop online.
+- [ASSISTANT_SAID] Assistant provided insights on the cinematography of "Moonlight," mentioning James Laxton as the cinematographer and discussing visual style, color palette, and camera techniques.
+- [ASSISTANT_SAID] Assistant detailed the use of natural light in "Moonlight," including the use of available light and practical sources to create a naturalistic feel.
+- [ASSISTANT_SAID] Assistant provided insights on the cinematography of "The Florida Project," mentioning Alexis Zabe as the cinematographer and discussing visual style, color palette, and camera techniques.
+- [ASSISTANT_SAID] Assistant detailed the use of natural light in "The Florida Project," including the use of practical light sources and the vibrant color scheme.
+- [ASSISTANT_SAID] Assistant emphasized the importance of balancing natural and artificial light in both films.
+- [EVENT] User is planning to start working on their own short film project soon.
+- [PREFERENCE] User is thinking of exploring themes of social justice and identity in their short film project.
+- [ASSISTANT_SAID] Assistant provided advice on creating a compelling narrative with a strong message without being preachy or heavy-handed, including tips such as starting with a strong story, showing rather than telling, making

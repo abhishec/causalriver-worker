@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/03/22 (Wed) 10:09  
+[ASSISTANT_SAID] Ion implantation involves bombarding the surface of the semiconductor material with ions of the desired impurity.  
+[ASSISTANT_SAID] Diffusion involves heating the semiconductor material in the presence of a gas or solid containing the desired impurity.  
+[ASSISTANT_SAID] Epitaxy involves growing a thin layer of semiconductor material on top of a substrate using chemical vapor deposition (CVD).  
+[ASSISTANT_SAID] Most methods of adding impurities to a semiconductor require specialized equipment and are typically carried out in a laboratory or manufacturing facility.  
+[ASSISTANT_SAID] Some methods of adding impurities can be done at a lower scale without much specialized equipment, such as chemical reactions or coating the surface with a thin film.  
+[ASSISTANT_SAID] An electric field is a region around an electrically charged particle where a force would be exerted on other charged particles.  
+[ASSISTANT_SAID] The strength of an electric field is represented by the symbol E and measured in volts per meter (V/m).  
+[ASSISTANT_SAID] Positive electric charges create an electric field that points away from the charge, while negative charges create an electric field that points towards the charge.  
+[ASSISTANT_SAID] In a capacitor, an electric field is created between two conductive plates separated by a dielectric.  
+[ASSISTANT_SAID] The strength of the electric field in a capacitor is determined by the voltage applied to it.  
+[ASSISTANT_SAID] The direction of the electric field in a capacitor is determined by the polarity of the voltage applied.  
+[ASSISTANT_SAID] A capacitor releases electrical energy when a circuit is connected across its plates that allows the stored charge to flow.  
+[ASSISTANT_SAID] The stored charge on a capacitor is measured in coulombs (C).  
+[ASSISTANT_SAID] Discharging a capacitor can be accomplished by connecting a resistor or a load across its plates.  
+[ASSISTANT_SAID] The resistor does not replace the dielectric in a capacitor; the dielectric is an insulating material that increases capacitance.  
+[ASSISTANT_SAID] If no circuit is connected across the plates of a capacitor, it will not discharge on its own.  
+[ASSISTANT_SAID] A battery is charged by the flow of electrical current from an external source, with positive and negative terminals denoting polarity.  
+[ASSISTANT_SAID] The charging process continues until the battery is fully charged, allowing it to deliver electrical energy to a circuit.  
+[ASSISTANT_SAID] The amount of electricity required to power a filament depends on the type of filament, voltage,

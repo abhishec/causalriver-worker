@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[FACT] User is helping their mom with her new tablet.  
+[FACT] User's mom received the tablet as a gift from the user's dad.  
+[RELATIONSHIP] User's mom is the user’s mother.  
+[RELATIONSHIP] User's dad is the user's father.  
+[TEMPORAL] User helped their mom set up the tablet on Tuesday, March 22nd.  
+[PREFERENCE] User's mom is not very tech-savvy.  
+[ASSISTANT_SAID] The assistant provided tips for teaching the user's mom how to use her tablet more efficiently, including starting with the basics, using relatable analogies, focusing on her interests, breaking down sessions, practicing together, using visual aids, encouraging exploration, being patient, creating a cheat sheet, and celebrating small victories.  
+[ASSISTANT_SAID] The assistant suggested that video calling can be explained as a phone call with video, using relatable analogies like a virtual visit.  
+[ASSISTANT_SAID] The assistant provided a step-by-step breakdown of how to make a video call, including opening the app, finding the contact, initiating the call, answering the call, and ending the call.  
+[ASSISTANT_SAID] The assistant emphasized the importance of being patient and encouraging throughout the learning process.  
+[ASSISTANT_SAID] The assistant confirmed that many video calling apps offer a preview feature that allows users to see the person they're calling before answering.  
+[ASSISTANT_SAID] The assistant mentioned that FaceTime is a user-friendly app that allows users to see a preview of the caller before answering.  
+[PREFERENCE] User thinks FaceTime is a good choice for their mom because it is user-friendly and has a preview feature.  
+[ASSISTANT_SAID] The assistant highlighted the benefits of using FaceTime, including familiarity, ease of use, high-quality video, and integration with Apple devices.  
+[ASSISTANT_SAID] The assistant suggested that the user should ensure their mom is comfortable with volume controls and remind her about muting the microphone or turning off the camera if needed.  
+[PREFERENCE] User is considering showing their mom how to make a voice call using FaceTime in case she is not comfortable with video calls right away.  
+[ASSISTANT_SAID] The assistant confirmed that showing the user’s mom how to make a voice call using FaceTime is a good idea and explained the benefits of using FaceTime Audio.  
+[ASSISTANT_SAID] The assistant provided steps for making a voice call using FaceTime, including how to initiate, answer, and end a voice call.  
+[ASSISTANT_SAID] The assistant encouraged the user to practice these steps with their mom to help her feel more comfortable.  
+[TEMPORAL] Session date is 2022/07/13 (Wed) 17:

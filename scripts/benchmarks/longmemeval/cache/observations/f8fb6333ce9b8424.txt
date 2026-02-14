@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/28 (Sun) 23:06
+- [USER] User wants the assistant to act as a market research expert that speaks and writes fluent English.
+- [USER] User requests the assistant to pretend to have the most accurate and detailed information about keywords available.
+- [USER] User asks the assistant to develop a full SEO content plan in fluent English.
+- [USER] User provides the target keyword: fantasy art styles.
+- [USER] User requests a markdown table with a keyword list for an SEO content strategy plan on the topic fantasy art styles.
+- [USER] User instructs to cluster the keywords according to the top 10 super categories and name the super category in the first column called keyword cluster.
+- [USER] User asks for another column with 7 subcategories for each keyword cluster or specific long-tail keywords for each of the clusters.
+- [USER] User requests a column for the human searcher intent for the keyword.
+- [USER] User specifies to cluster the topic in one of three search intent groups: commercial, transactional, or informational.
+- [USER] User asks for a column with a simple but very click-enticing title to use for a post about that keyword.
+- [USER] User requests another column for an attractive meta description that has a chance for a high click-thru-rate for the topic, with 120 to a maximum of 155 words.
+- [USER] User instructs that the meta description shall be value-based, mentioning the value of the article and including a simple call to action to cause the searcher to click.
+- [USER] User emphasizes not to use too generic keywords like introduction, conclusion, or tl:dr.
+- [USER] User requests to focus on the most specific keywords only.
+- [USER] User instructs not to use single quotes, double quotes, or any other enclosing characters in any of the columns filled in.
+- [ASSISTANT_SAID] Assistant acknowledges the user's request and prepares to create the markdown table.
+- [ASSISTANT_CREATED] Assistant begins to create a markdown table with the following columns: keyword cluster, keyword, search intent, title, meta description.

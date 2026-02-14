@@ -1,0 +1,25 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/26 (Fri) 08:08
+- [USER] User expressed interest in unique ingredients used in Brazilian cuisine.
+- [ASSISTANT_SAID] Cassava: A starchy root vegetable used to make farofa, a toasted cassava flour.
+- [ASSISTANT_SAID] Acai: A superfood berry from the Amazon used in smoothie bowls and drinks.
+- [ASSISTANT_SAID] Palm oil: Extracted from the fruit of the palm tree, used in traditional Brazilian dishes.
+- [ASSISTANT_SAID] Guarana: A fruit native to the Amazon, used to make guarana soda.
+- [ASSISTANT_SAID] Coconut milk: Common in Brazilian curries and stews, adds a tropical flavor.
+- [ASSISTANT_SAID] Feijao: A type of bean used in feijoada, a hearty stew of beans, meat, and vegetables.
+- [ASSISTANT_SAID] Catupiry: A creamy cheese spread used as a topping for pizza and fillings for pastries.
+- [ASSISTANT_SAID] Picanha: A cut of beef popular in Brazilian churrasco, seasoned with rock salt and grilled.
+- [ASSISTANT_SAID] Tucupi: A yellow liquid made from cassava juice, used as a souring agent in Amazonian dishes.
+- [ASSISTANT_SAID] Dende oil: A red palm oil used in dishes like moqueca, giving a unique flavor and color.
+- [USER] User plans to try unique ingredients in Brazilian cuisine at a restaurant.
+- [ASSISTANT_SAID] Suggested popular Brazilian dishes to try:
+  - [ASSISTANT_SAID] Feijoada: A hearty stew of black beans, meat, and vegetables, served with rice, farofa, and orange slices.
+  - [ASSISTANT_SAID] Pão de queijo: Cheese bread rolls made with tapioca flour and queijo minas.
+  - [ASSISTANT_SAID] Moqueca: A fish stew from Bahia made with coconut milk, palm oil, and dende oil.
+  - [ASSISTANT_SAID] Coxinhas: Crispy, deep-fried pastries filled with shredded chicken and catupiry cheese.
+  - [ASSISTANT_SAID] Brigadeiros: Chocolate truffles made with condensed milk and cocoa powder, served at celebrations.
+- [USER] User has never tried Guarana before and inquired about its taste.
+- [ASSISTANT_SAID] Guarana has a unique flavor compared to berries, with a slightly bitter and tangy aftertaste, and contains natural caffeine.
+- [USER] User expressed interest in Brazilian street food.
+- [ASSISTANT_SAID] Suggested popular Brazilian street food

@@ -1,0 +1,29 @@
+{
+  "answer_9cddca88": [
+    {
+      "fact": "User is planning to start a small herb garden in their kitchen window.",
+      "type": "event",
+      "entities": [
+        "herb garden",
+        "kitchen window"
+      ]
+    },
+    {
+      "fact": "User is interested in growing basil and mint.",
+      "type": "preference",
+      "entities": [
+        "basil",
+        "mint"
+      ]
+    },
+    {
+      "fact": "User is looking for simple recipes that use basil and mint.",
+      "type": "preference",
+      "entities": [
+        "recipes",
+        "basil",
+        "mint"
+      ]
+    }
+  ]
+}

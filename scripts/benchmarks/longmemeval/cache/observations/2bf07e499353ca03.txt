@@ -1,0 +1,13 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/28 (Sun) 03:17
+- [USER] User asked for an explanation of quantum computing in simple terms.
+- [ASSISTANT_SAID] Quantum computing is a type of computing that uses the principles of quantum mechanics to perform calculations.
+- [ASSISTANT_SAID] In traditional computing, data is represented using bits that can be either 0 or 1.
+- [ASSISTANT_SAID] In quantum computing, data is represented using quantum bits or qubits, which can be in multiple states at the same time.
+- [ASSISTANT_SAID] The ability of qubits to exist in multiple states simultaneously is known as superposition.
+- [ASSISTANT_SAID] Superposition allows quantum computers to perform certain types of calculations much faster than traditional computers.
+- [ASSISTANT_SAID] Quantum computers can use a process called entanglement to perform calculations on multiple qubits at the same time.
+- [ASSISTANT_SAID] Entanglement can further increase the computational power of quantum computers.
+- [ASSISTANT_SAID] Quantum computing is still a relatively new field and is mostly used for research purposes.
+- [ASSISTANT_SAID] Quantum computing has the potential to revolutionize industries such as cryptography, drug discovery, and artificial intelligence.

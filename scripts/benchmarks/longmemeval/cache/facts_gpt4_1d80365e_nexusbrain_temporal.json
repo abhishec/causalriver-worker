@@ -1,0 +1,75 @@
+{
+  "answer_661b711f_1": [
+    {
+      "fact": "User is planning a trip to the Eastern Sierra in July or August.",
+      "type": "event",
+      "entities": [
+        "Eastern Sierra",
+        "July",
+        "August"
+      ]
+    },
+    {
+      "fact": "User has started a solo camping trip to Yosemite National Park.",
+      "type": "event",
+      "entities": [
+        "Yosemite National Park"
+      ]
+    },
+    {
+      "fact": "User is excited to explore Yosemite National Park.",
+      "type": "opinion",
+      "entities": [
+        "Yosemite National Park"
+      ]
+    },
+    {
+      "fact": "User is particularly interested in the Mount Whitney Trail.",
+      "type": "preference",
+      "entities": [
+        "Mount Whitney Trail"
+      ]
+    },
+    {
+      "fact": "User is aware that the Mount Whitney Trail is a challenging hike.",
+      "type": "opinion",
+      "entities": [
+        "Mount Whitney Trail"
+      ]
+    }
+  ],
+  "answer_661b711f_2": [
+    {
+      "fact": "User is planning a trip to the Eastern Sierra in July or August",
+      "type": "event",
+      "entities": [
+        "Eastern Sierra",
+        "July",
+        "August"
+      ]
+    },
+    {
+      "fact": "User recently returned from a solo camping trip to Yosemite National Park",
+      "type": "event",
+      "entities": [
+        "Yosemite National Park"
+      ]
+    },
+    {
+      "fact": "User enjoys camping and hiking in the mountains",
+      "type": "preference",
+      "entities": [
+        "camping",
+        "hiking",
+        "mountains"
+      ]
+    },
+    {
+      "fact": "User is interested in the Ancient Bristlecone Pine Forest Trail",
+      "type": "preference",
+      "entities": [
+        "Ancient Bristlecone Pine Forest Trail"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/30 (Tue) 08:18  
+[USER] User requested to create all files needed including a docker-compose.yml file and a single eff.org Certbot container to create and renew certificates from LetsEncrypt.  
+[USER] User specified that the DNS is located at Google Domains and they issue an API-Key for each domain.  
+[USER] User requested to allow for subdomains with the same key.  
+[USER] User requested to use a credentials.yml file as the only data source for API-key, email, and domains.  
+[USER] User provided an example structure for credentials.yml with two credentials, each containing an API key, email, and a list of domains.  
+[USER] User requested to create a GoLang application to iterate the certbot command and pass all the API-keys and set of domains.  
+[USER] User requested to create a CRON job to renew certificates once per day.  
+[USER] User asked for all files to be printed out with detailed instructions.  
+[ASSISTANT_SAID] Assistant outlined the files needed: docker-compose.yml, credentials.yml, certbot Dockerfile, Go application to run certbot, and CRON job.  
+[ASSISTANT_CREATED] Assistant provided a docker-compose.yml file with version "3", a service called "certbot", environment variables, and volume mounts.  
+[ASSISTANT_CREATED] Assistant provided a credentials.yml file structure with two credentials, each containing an API key, email, and domains.  
+[ASSISTANT_CREATED] Assistant provided a certbot Dockerfile based on the official Certbot Docker image, including commands to install required packages.  
+[ASSISTANT_CREATED] Assistant provided a GoLang application code that loads credentials, iterates through them, and runs the certbot command for each domain.  
+[ASSISTANT_SAID] Assistant apologized for the oversight regarding the CRON job.  
+[ASSISTANT_CREATED] Assistant provided a crontab entry to run the docker-compose command once per day to renew certificates.  
+[ASSISTANT_SAID] Assistant instructed the user to place all files in the same directory and run the command `docker-compose up`.  
+[ASSISTANT_SAID] Assistant expressed willingness to help further if the user had any questions.

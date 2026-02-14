@@ -1,0 +1,28 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/24 (Wed) 12:54
+- [FACT] User is looking for vegan recipes for a dinner party.
+- [PREFERENCE] User is interested in a good vegan ricotta cheese substitute.
+- [EVENT] User recently took a cooking class where they learned to make a vegan lasagna with a cashew-based ricotta cheese substitute.
+- [CHANGE] User's vegan lasagna with cashew-based ricotta cheese substitute was a hit at the cooking class.
+- [ASSISTANT_SAID] Assistant confirmed that vegan lasagna with cashew-based ricotta is a classic and a great choice for a dinner party.
+- [ASSISTANT_SAID] Assistant provided several options for vegan ricotta substitutes: 
+  1. Tofu-based ricotta: Extra-firm tofu blended with nutritional yeast, garlic powder, and lemon juice.
+  2. Soy-based ricotta: Soy creamer or yogurt blended with lemon juice, vinegar, and spices.
+  3. Nutritional yeast-based ricotta: Blended with garlic powder, lemon juice, and olive oil.
+  4. Vegan cream cheese: Store-bought alternative for ricotta.
+  5. Mushroom-based ricotta: Sautéed mushrooms blended with cashews or tofu.
+  6. Kite Hill's vegan ricotta: Store-bought option made from almond milk and cashew cream.
+- [ASSISTANT_SAID] Assistant suggested making different types of vegan ricotta to offer variety and provided flavor profile ideas: garlic and herb, spinach and sun-dried tomato, roasted red pepper, lemon and basil.
+- [PREFERENCE] User is looking for good bread options to pair with vegan ricotta flavors.
+- [EVENT] User started making their own bread from scratch as a result of the cooking class.
+- [ASSISTANT_SAID] Assistant provided several bread options to pair with different vegan ricotta flavors:
+  - For Garlic and Herb Ricotta: Focaccia and Ciabatta.
+  - For Spinach and Sun-Dried Tomato Ricotta: Grilled bread and Fougasse.
+  - For Roasted Red Pepper Ricotta: Crusty bread and grilled bread with olive oil and garlic.
+  - For Lemon and Basil Ricotta: Focaccia with olive oil and lemon zest and Ciabatta with lemon and rosemary.
+  - Other options: Baguette, Sourdough, and Crostini.
+- [ASSISTANT_SAID] Assistant encouraged experimenting with different bread options to find the perfect pairing for vegan ricotta flavors.
+- [PREFERENCE] User is interested in tips for maintaining a sourdough starter.
+- [ASSISTANT_SAID] Assistant provided tips for creating and maintaining a sourdough starter:
+  - Start with a clean environment and use unbleached, all-purpose flour

@@ -1,0 +1,26 @@
+**Observation Log:**
+
+- [FACT] User is planning a trip to Miami in April for a friend's wedding.
+- [FACT] User recently returned from Los Angeles, where they flew from New York to Los Angeles on American Airlines on February 10th.
+- [FACT] User's flight from New York to Los Angeles was delayed by an hour due to air traffic control issues.
+- [PREFERENCE] User is considering using credit card points to book a domestic round-trip ticket to Miami.
+- [EVENT] User is planning to book a morning flight from JFK to MIA.
+- [TEMPORAL] The session date is 2023/05/26 (Fri) 15:57.
+- [RELATIONSHIP] User is attending a friend's wedding in Miami.
+- [ASSISTANT_SAID] April is a great time to visit Miami, and booking in advance can help secure a better deal.
+- [ASSISTANT_SAID] Airline prices tend to increase as the flight approaches.
+- [ASSISTANT_SAID] April is considered part of the shoulder season for Miami travel, which may mean lower prices.
+- [ASSISTANT_SAID] Weekend flights tend to be more expensive than weekday flights.
+- [ASSISTANT_SAID] User should check their credit card points portal for available redemption options and prices.
+- [ASSISTANT_SAID] User should compare prices across airlines using online travel agencies like Expedia, Kayak, or Skyscanner.
+- [ASSISTANT_SAID] User should set up price alerts on preferred airline or travel booking websites.
+- [ASSISTANT_SAID] User should consider alternative airports, such as Fort Lauderdale-Hollywood International Airport (FLL).
+- [ASSISTANT_SAID] American Airlines operates direct flights from JFK to MIA and offers a buy-on-board meal service.
+- [ASSISTANT_SAID] Delta Air Lines operates direct flights from JFK to MIA and offers complimentary snacks and drinks in economy class.
+- [ASSISTANT_SAID] JetBlue Airways operates direct flights from JFK to MIA and offers a buy-on-board menu.
+- [ASSISTANT_SAID] The average flight duration from JFK to MIA is approximately 3 hours and 30 minutes to 3 hours and 45 minutes.
+- [ASSISTANT_SAID] American Airlines offers free checked bags for primary cardholders and companions with certain credit cards.
+- [ASSISTANT_SAID] Delta Air Lines offers one free checked bag for cardholders and companions with certain credit cards.
+- [ASSISTANT_SAID] JetBlue Airways offers one free checked bag for cardholders and companions with certain credit cards.
+- [ASSISTANT_SAID] American Airlines typically offers a complimentary breakfast snack box on morning flights.
+- [ASSISTANT_SAID] Delta Air Lines offers a complimentary snack box on morning flights

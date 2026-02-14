@@ -1,0 +1,22 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/28 (Sun) 08:15
+- [USER] User is interested in bourbon produced in Frankfort, Kentucky.
+- [PREFERENCE] User is looking for information on how different types of bourbon differ in taste and production process.
+- [ASSISTANT_SAID] Buffalo Trace Distillery produces a range of bourbons, including Buffalo Trace Bourbon, Eagle Rare, Blanton's, and W.L. Weller, with a mash bill that includes both rye and wheat.
+- [ASSISTANT_SAID] Buffalo Trace bourbon has a spicy and sweet flavor profile and is aged for several years in charred oak barrels.
+- [ASSISTANT_SAID] Woodford Reserve Distillery produces a premium bourbon that is triple distilled, with a higher amount of rye in its mash bill, resulting in a spicy and peppery flavor.
+- [ASSISTANT_SAID] Woodford Reserve bourbon is aged for six to seven years in charred oak barrels, giving it a deep amber color and woody undertone.
+- [ASSISTANT_SAID] Four Roses Distillery uses a unique blending process with ten different recipes, resulting in distinct flavor profiles.
+- [ASSISTANT_SAID] Four Roses bourbon has a higher percentage of corn in its mash bill, making it sweeter than most others, and is aged for several years in charred oak barrels.
+- [ASSISTANT_SAID] Wild Turkey Distillery has a bold and robust flavor profile with a high amount of rye in its mash bill, aged for six to eight years in charred oak barrels.
+- [ASSISTANT_SAID] The main differences in taste and production process across different bourbons include the mash bill, aging time, and blending process.
+- [PREFERENCE] User prefers sweeter bourbon.
+- [ASSISTANT_SAID] Four Roses Distillery is recommended for someone who likes a sweeter bourbon due to its higher percentage of corn in the mash bill.
+- [EVENT] User plans to check out Four Roses Distillery.
+- [ASSISTANT_SAID] Four Roses Distillery offers tours and tastings, including a standard tour and a more in-depth tour with a tasting lab visit.
+- [ASSISTANT_SAID] During the tour at Four Roses, visitors can learn about the blending process and try different bourbons, including limited edition releases.
+- [EVENT] User is planning to book a tour at Four Roses Distillery.
+- [ASSISTANT_SAID] Four Roses Distillery has a gift shop where visitors can purchase bourbons and branded merchandise.
+- [ASSISTANT_SAID] The gift shop offers standard bourbons and limited edition releases, with staff available to assist in selection.
+- [ASSISTANT_SAID] User should check rules and regulations regarding bringing bottles of alcohol onto a flight or

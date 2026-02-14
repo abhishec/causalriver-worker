@@ -1,0 +1,104 @@
+{
+  "answer_aed8cf17_1": [
+    {
+      "fact": "User is trying to optimize their car's performance for an auto racing event.",
+      "type": "event",
+      "entities": [
+        "auto racing event"
+      ]
+    },
+    {
+      "fact": "User replaced their spark plugs with new ones from NGK.",
+      "type": "personal",
+      "entities": [
+        "spark plugs",
+        "NGK"
+      ]
+    },
+    {
+      "fact": "User noticed a slight misfire during their daily commute.",
+      "type": "personal",
+      "entities": [
+        "misfire",
+        "daily commute"
+      ]
+    },
+    {
+      "fact": "User is interested in suspension upgrades to improve their car's handling.",
+      "type": "preference",
+      "entities": [
+        "suspension upgrades",
+        "car handling"
+      ]
+    },
+    {
+      "fact": "User is looking for affordable options for suspension upgrades.",
+      "type": "preference",
+      "entities": [
+        "affordable options",
+        "suspension upgrades"
+      ]
+    }
+  ],
+  "answer_aed8cf17_2": [
+    {
+      "fact": "User is planning to participate in another auto racking event soon.",
+      "type": "event",
+      "entities": [
+        "auto racking event"
+      ]
+    },
+    {
+      "fact": "User completed 10 laps at the Speed Demon Racing Track.",
+      "type": "event",
+      "entities": [
+        "Speed Demon Racing Track"
+      ]
+    },
+    {
+      "fact": "User had an average speed of 85mph during the Turbocharged Tuesdays event.",
+      "type": "event",
+      "entities": [
+        "Turbocharged Tuesdays",
+        "85mph"
+      ]
+    },
+    {
+      "fact": "User is looking for tips on how to improve their car's handling.",
+      "type": "preference",
+      "entities": [
+        "car handling"
+      ]
+    },
+    {
+      "fact": "User is considering upgrading their brake pads.",
+      "type": "preference",
+      "entities": [
+        "brake pads"
+      ]
+    },
+    {
+      "fact": "User received a discount on a set of new brake pads during the Winter Tune-Up event at the Speed Shop earlier this year.",
+      "type": "event",
+      "entities": [
+        "Winter Tune-Up",
+        "Speed Shop",
+        "brake pads"
+      ]
+    },
+    {
+      "fact": "User has not installed the new brake pads yet.",
+      "type": "personal",
+      "entities": [
+        "brake pads"
+      ]
+    },
+    {
+      "fact": "User is considering whether to upgrade their brake fluid.",
+      "type": "opinion",
+      "entities": [
+        "brake fluid"
+      ]
+    }
+  ]
+}

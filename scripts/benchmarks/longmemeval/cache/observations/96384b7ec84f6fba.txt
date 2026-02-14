@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/07/12 (Wed) 02:43  
+[USER] User inquired about using SharePoint to refer to content available on a network share without ingesting it into SharePoint.  
+[ASSISTANT_SAID] To refer to content on a network share in SharePoint without ingesting it, create a link or "Shortcut" in a SharePoint library or page.  
+[ASSISTANT_SAID] Users can access the content from the SharePoint interface while it remains stored on the network share.  
+[ASSISTANT_SAID] Configure SharePoint to index the content on the network share for searchability by creating a content source in the SharePoint Search service application and setting a crawl schedule.  
+[USER] User asked how to create a link to a network share location in a SharePoint library or page.  
+[ASSISTANT_SAID] To create a link to a network share location in SharePoint:  
+[ASSISTANT_SAID] 1. Navigate to the library or page where you want to add the link.  
+[ASSISTANT_SAID] 2. Click on the "New" button and select "Link" or "Shortcut."  
+[ASSISTANT_SAID] 3. In the dialog box, enter the name for the link and the URL in the format of `\\server_name\folder_name`.  
+[ASSISTANT_SAID] 4. Click "OK" to save the link.  
+[ASSISTANT_SAID] The link will appear in the library or page, allowing users to access the content on the network share.  
+[ASSISTANT_SAID] Note: Permissions may be required to create links and ensure the network share is accessible.  
+[USER] User asked how to create a content source in SharePoint.  
+[ASSISTANT_SAID] To create a content source in SharePoint:  
+[ASSISTANT_SAID] 1. Open the SharePoint Central Administration website.  
+[ASSISTANT_SAID] 2. Click on "Manage service applications" under "Application Management."  
+[ASSISTANT_SAID] 3. Click on "Search Service Application."  
+[ASSISTANT_SAID] 4. Click on "Content Sources" under "Crawling."  
+[ASSISTANT_SAID] 5. Click on "New Content Source."  
+[ASSISTANT_SAID] 6. In the dialog box, enter a name for the content source.  
+[ASSISTANT_SAID] 7. Select the type of content to crawl (e.g., "SharePoint sites" or "Web sites").  
+[ASSISTANT_SAID] 8. In the "Start Addresses" field, enter the URL

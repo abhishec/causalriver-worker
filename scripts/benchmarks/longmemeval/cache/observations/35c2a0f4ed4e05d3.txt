@@ -1,0 +1,34 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/22 (Mon) 02:01  
+[USER] User inquired about passing UTM parameters via a website form and sending the data to an internal database maintained on Excel.  
+[ASSISTANT_SAID] To pass UTM parameters through a website form, create a form that includes fields for UTM parameters such as source, medium, campaign, content, and term.  
+[ASSISTANT_SAID] Use HTML or a form builder tool to create the form.  
+[ASSISTANT_SAID] Add hidden fields to the form for each UTM parameter with the following code:  
+```html
+<input type="hidden" name="utm_source" value="[source]">
+<input type="hidden" name="utm_medium" value="[medium]">
+<input type="hidden" name="utm_campaign" value="[campaign]">
+<input type="hidden" name="utm_content" value="[content]">
+<input type="hidden" name="utm_term" value="[term]">
+```  
+[ASSISTANT_SAID] Replace `[source]`, `[medium]`, `[campaign]`, `[content]`, and `[term]` with the corresponding UTM parameter values.  
+[ASSISTANT_SAID] When the form is submitted, the data will be sent to a server-side script that can extract UTM parameter values and save them to an Excel database.  
+[ASSISTANT_SAID] Use a scripting language like PHP, Python, or JavaScript to create the server-side script.  
+[ASSISTANT_SAID] In PHP, extract UTM parameter values using the `$_POST` variable. Example code to extract UTM source value:  
+```php
+$utm_source = $_POST['utm_source'];
+```  
+[ASSISTANT_SAID] Save UTM parameter values to an Excel database using a library like PHPExcel, OpenPyXL, or SheetJS.  
+[ASSISTANT_SAID] Example code in PHPExcel to save UTM source value to an Excel file:  
+```php
+require_once 'PHPExcel.php';
+$excel = PHPExcel_IOFactory::load('database.xlsx');
+$sheet = $excel->getActiveSheet();
+$row = $sheet->getHighestRow() + 1;
+$sheet->setCellValue('A'.$row, $utm_source);
+$writer = PHPExcel_IOFactory::createWriter($excel, 'Excel2007');
+$writer->save('database.xlsx');
+```  
+[ASSISTANT_SAID] This code loads an existing Excel file called `database.xlsx`, gets the highest row number in the first sheet, sets the value of cell A[row] to the UTM source value, and saves the updated file.  
+[ASSISTANT_SAID] Modify the code to save other UTM parameter values to the appropriate columns

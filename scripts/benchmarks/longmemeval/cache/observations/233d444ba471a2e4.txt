@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/03/03 (Fri) 16:27  
+[USER] User requests the assistant to act as a prompt generator for a generative AI called "Midjourney".  
+[USER] User specifies that Midjourney AI generates images based on given prompts.  
+[USER] User provides a concept and requests the assistant to provide the prompt for Midjourney AI.  
+[USER] User outlines specific guidelines for the prompt generation, including structure and formatting.  
+[USER] User instructs the assistant to never alter the structure and formatting outlined in the guidelines.  
+[USER] User specifies that the assistant will not write the words "description" or use ":" in any form.  
+[USER] User instructs the assistant to never place a comma between [ar] and [v].  
+[USER] User requests that each prompt be written in one line without using return.  
+[USER] User provides a detailed structure for the prompts, including elements [1] through [6], [ar], and [v].  
+[USER] User emphasizes that the prompts must be in English (US).  
+[USER] User requests that one of the prompts generated must be in a realistic photographic style, specifying the choice of lens type and size.  
+[USER] User instructs the assistant to separate different prompts with two new lines.  
+[USER] User requests the assistant to write in an empathetic tone and creative writing style.  
+[ASSISTANT_SAID] Assistant generates the first prompt based on the user's structure: "/imagine prompt: With the vintage camera positioned just right, capture the warm glow of the cabin in the forest, nestled amongst the trees. The sepia tones and monochrome style enhance the rustic atmosphere, creating a nostalgic feeling of simpler times. The composition is carefully crafted to lead your eye to the cabin, making you feel as though you are there, standing in front of it. The Ansel Adams-inspired art style accentuates the detail of the cabin's rustic charm, from the shingles on the roof to the texture of the logs. Technical specifications include a 4:3 aspect ratio and enhanced super-res detail, with soft ambient lighting to enhance the mood."  
+[ASSISTANT_CREATED] Assistant creates a detailed description for the first prompt, including imagery details, environment, atmosphere, style, and realization.  
+[ASSISTANT_SAID] Assistant describes the environment of the scene, noting the sounds of birds and leaves, the presence of a brook, and the lush green foliage.  
+[ASSISTANT_SAID] Assistant describes the mood and atmosphere of the scene as peaceful and serene, inviting the viewer to relax in the cabin's cozy embrace.  
+[ASSISTANT_SAID] Assistant specifies the style as "Painting" and describes how it will be realized using acrylics on canvas.  
+[ASSISTANT_S

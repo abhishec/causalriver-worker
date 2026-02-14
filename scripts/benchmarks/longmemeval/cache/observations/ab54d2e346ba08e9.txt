@@ -1,0 +1,26 @@
+**Observation Log:**
+
+[FACT] User has been doing yoga for about 3 months.  
+[FACT] User has started using a new yoga app that sends reminders to practice and has various classes and tutorials.  
+[PREFERENCE] User wants to challenge themselves in yoga practice but not push too hard.  
+[ASSISTANT_SAID] Congratulations on your 3-month milestone in yoga practice!  
+[ASSISTANT_SAID] Setting goals is an excellent way to stay motivated, track progress, and ensure you're challenging yourself in a safe and sustainable manner.  
+[ASSISTANT_SAID] Suggested strategies for setting realistic goals include reflecting on current practice, setting SMART goals, creating a balanced goal mix, focusing on progress, making it challenging but not overwhelming, using app tracking features, breaking goals into smaller steps, listening to the body, seeking guidance, and regularly reviewing and adjusting goals.  
+[ASSISTANT_CREATED] Provided example goals:  
+- Practice yoga for 20 minutes, 4 times a week, for the next 2 months.  
+- Master a specific sequence of 5 poses within the next 6 weeks.  
+- Increase practice frequency by one day per week within the next month.  
+- Focus on improving balance and core strength in the next 3 months.  
+[PREFERENCE] User likes the idea of setting SMART goals.  
+[USER] User is unsure how to quantify their progress.  
+[ASSISTANT_SAID] Suggested using the yoga app's tracking features to quantify progress, including practice frequency and duration, pose mastery, class completion, heart rate and calorie burn, and progress photos or videos.  
+[ASSISTANT_SAID] Suggested additional ways to measure progress include journaling, self-assessment, body awareness, breath and mindfulness, mental and emotional state, physical measurements, attending workshops or classes with a teacher, and taking progress photos or videos with a friend.  
+[ASSISTANT_SAID] Provided examples of SMART goals that incorporate tracking methods.  
+[PREFERENCE] User likes the idea of tracking progress through journaling and self-assessment.  
+[FACT] User has been doing simple stretches and sun salutations every morning.  
+[FACT] User has noticed a big difference in their energy levels throughout the day.  
+[ASSISTANT_SAID] Suggested a framework for morning practice journaling, including date, practice details, pre- and post-practice energy levels, notable observations, daily reflection, and additional notes.  
+[ASSISTANT_CREATED] Provided a structured journaling framework to track morning practice and its impact on energy levels and well-being.  
+[PREFERENCE] User has been enjoying restorative classes at a studio near their work.  
+[USER] User is thinking about incorporating more restorative yoga into their routine, especially after a long week.  
+[ASSISTANT_SAID] Suggested tips for setting up a restorative practice at home, including dedicating a quiet space,

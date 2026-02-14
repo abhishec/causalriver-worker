@@ -1,0 +1,45 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/30 (Tue) 11:29  
+[FACT] User is considering making a veggie burger for lunch.  
+[EVENT] User sent their sister-in-law the recipe for chicken parmesan today.  
+[PREFERENCE] User is looking for tips on how to make a good veggie burger.  
+[RELATIONSHIP] User's sister-in-law is mentioned.  
+[ASSISTANT_SAID] Veggie burger tips provided:  
+1. Choose the right ingredients (beans, grains, vegetables, spices).  
+2. Don't overprocess the mixture.  
+3. Use binding agents like egg, breadcrumbs, or oats.  
+4. Incorporate umami flavors (mushrooms, soy sauce, miso paste).  
+5. Add different textures (crunchy vegetables, creamy avocado).  
+6. Season liberally with salt, pepper, and herbs.  
+7. Cook by grilling, pan-frying, or baking.  
+[ASSISTANT_SAID] Assistant hopes user’s sister-in-law enjoys the chicken parmesan recipe and asks if it’s a specific recipe or a family favorite.  
+[PREFERENCE] User got inspiration for the veggie burger from a vegan menu at a new restaurant downtown.  
+[EVENT] User tried a great veggie burger at the restaurant last Friday and enjoyed it.  
+[PREFERENCE] User is looking for vegan mayo or ketchup alternatives to go with the veggie burger.  
+[ASSISTANT_SAID] Recommendations for vegan mayo alternatives:  
+1. Vegenaise  
+2. Just Mayo  
+3. Homemade vegan mayo (soy milk or aquafaba, apple cider vinegar, Dijon mustard, salt).  
+4. Avocado-based mayo.  
+[ASSISTANT_SAID] Recommendations for ketchup alternatives:  
+1. Annie's Naturals Organic Ketchup  
+2. Sir Kensington's Vegan Ketchup  
+3. Homemade vegan ketchup (canned crushed tomatoes, apple cider vinegar, water, maple syrup, smoked paprika).  
+4. Tomato sauce as a ketchup alternative.  
+[ASSISTANT_SAID] Other vegan condiments suggested:  
+- Vegan relish  
+- Mustard  
+- Guacamole  
+[PREFERENCE] User is thinking of meal prepping on the weekend to save time during the week.  
+[ASSISTANT_SAID] Tips for storing cooked quinoa and roasted vegetables:  
+1. Cool down before storing.  
+2. Use airtight containers.  
+3. Refrigerate within 2 hours.  
+4. Quinoa can be frozen for up to 3 months.  
+5. Roasted vegetables can be frozen for up to 8-12 months.  
+6. Label and date containers.  
+7. Portion control for easy reheating.  
+8. Keep containers and utensils clean.  
+[FACT] User meal prepped quinoa and roasted vegetables last Sunday.  
+[EVENT] User used meal prepped quinoa

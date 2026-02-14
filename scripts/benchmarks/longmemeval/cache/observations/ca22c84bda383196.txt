@@ -1,0 +1,16 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/03/14 (Tue) 12:13  
+[FACT] User is considering a research position in a professor's lab.  
+[FACT] User's background is in Computer Science.  
+[FACT] User took courses like Advanced Machine Learning, Computer Vision, and Human-Computer Interaction during their master's.  
+[PREFERENCE] User is particularly interested in the Multimodal Language Processing area.  
+[ASSISTANT_SAID] Assistant suggested potential research areas and projects in NLP, including Multimodal Language Processing, Explainable AI in NLP, Conversational AI and Dialogue Systems, Language Understanding and Representation, Low-Resource Language Processing, Adversarial Attacks and Robustness in NLP, Human-Computer Interaction and NLP, and Specialized NLP Tasks.  
+[ASSISTANT_SAID] Assistant provided a list of potential research topics to discuss with the professor, including showing understanding of the research area, highlighting relevant coursework and skills, asking questions about the professor's research interests, and expressing enthusiasm for exploring new research directions.  
+[ASSISTANT_SAID] Assistant suggested resources and papers for Multimodal Language Processing, including surveys like "Multimodal Fusion with Deep Neural Networks" by Ngiam et al. (2011), "Multimodal Language Processing: A Survey" by Baltrušaitis et al. (2019), and "Vision-and-Language: A Survey of Tasks, Architectures, and Datasets" by Mogadala et al. (2020).  
+[ASSISTANT_SAID] Assistant recommended specific papers on vision-language tasks, such as "Show and Tell: A Neural Image Caption Generator" by Vinyals et al. (2015) and "VQA: Visual Question Answering" by Antol et al. (2015).  
+[ASSISTANT_SAID] Assistant listed datasets and benchmarks for Multimodal Language Processing, including MSCOCO, VQA, and Visual Genome.  
+[ASSISTANT_SAID] Assistant mentioned conferences and workshops relevant to Multimodal Language Processing, including CVPR, ACL, and EMNLP.  
+[ASSISTANT_SAID] Assistant suggested online courses and resources, including CS231n: Convolutional Neural Networks for Visual Recognition and Natural Language Processing with Deep Learning Specialization.  
+[PREFERENCE] User expressed interest in exploring the Multimodal Language Processing area further, especially in the context of Computer Vision and NLP.  
+[ASSISTANT_SAID] Assistant provided additional paper suggestions for Multimodal Language Processing, including "ViLBERT: Pretraining Task-Agnostic Visiolinguistic Representations for Vision-and-Language Tasks" by Lu et al. (2020) and "Oscar: Object-Semantics Aligned Pre-training for Vision-and-Language Tasks" by Li et al. (2020).

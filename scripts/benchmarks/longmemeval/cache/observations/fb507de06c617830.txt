@@ -1,0 +1,34 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2024/02/05 (Mon) 15:11  
+[FACT] User has a background in music and used to play the ukulele before switching to guitar.  
+[FACT] User has had about a year of experience playing ukulele before starting guitar lessons.  
+[FACT] User has mastered "Sweet Child O' Mine" on guitar.  
+[PREFERENCE] User is looking for new song suggestions to learn on guitar that are similar to "Sweet Child O' Mine."  
+[PREFERENCE] User is a fan of classic rock and blues.  
+[ASSISTANT_SAID] Assistant congratulated the user on mastering "Sweet Child O' Mine."  
+[ASSISTANT_SAID] Assistant recommended the following songs:  
+[ASSISTANT_CREATED] 1. "Hotel California" by the Eagles  
+[ASSISTANT_CREATED] 2. "Black Dog" by Led Zeppelin  
+[ASSISTANT_CREATED] 3. "Barracuda" by Heart  
+[ASSISTANT_CREATED] 4. "Crazy Train" by Ozzy Osbourne  
+[ASSISTANT_CREATED] 5. "Sunshine of Your Love" by Cream  
+[ASSISTANT_CREATED] 6. "Layla" by Derek and the Dominos  
+[ASSISTANT_CREATED] 7. "Brown Eyed Girl" by Van Morrison  
+[ASSISTANT_SAID] Assistant provided tips for practicing "Hotel California" and "Layla," focusing on rhythm, chord shapes, and techniques like bending and vibrato.  
+[PREFERENCE] User likes the suggestions of "Hotel California" and "Layla."  
+[FACT] User is comfortable with fingerpicking techniques due to their ukulele background.  
+[ASSISTANT_SAID] Assistant noted that the transition from ukulele to guitar can be relatively smooth, especially for fingerpicking and chord shapes.  
+[ASSISTANT_SAID] Assistant provided additional tips for "Hotel California" and "Layla," including focusing on rhythm and practicing chord changes.  
+[PREFERENCE] User is interested in learning harmonica to complement their guitar playing.  
+[ASSISTANT_SAID] Assistant recommended resources for harmonica lessons and tutorials, including:  
+[ASSISTANT_CREATED] 1. Harmonica Lessons 365  
+[ASSISTANT_CREATED] 2. Harmonica.com  
+[ASSISTANT_CREATED] 3. HarmonicaLessons.com  
+[ASSISTANT_CREATED] 4. Justin Guitar  
+[ASSISTANT_SAID] Assistant suggested YouTube channels:  
+[ASSISTANT_CREATED] 1. Adam Gussow  
+[ASSISTANT_CREATED] 2. Harmonica Lessons with Dave  
+[ASSISTANT_CREATED] 3. Harmonica Tutorials 360  
+[ASSISTANT_SAID] Assistant recommended books and DVDs:  
+[

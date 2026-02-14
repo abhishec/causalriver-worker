@@ -1,0 +1,16 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/23 (Tue) 19:28  
+[USER] User wants the assistant to act as a prompt generator for Midjourney’s artificial intelligence program.  
+[PREFERENCE] User prefers detailed and creative descriptions that inspire unique and interesting images.  
+[ASSISTANT_SAID] Assistant provided a prompt: "A majestic dragon soaring through a mystical forest, its scales glistening in the sunlight filtering through the trees. The dragon's wings beat fiercely as it searches for its next prey, its fiery breath illuminating the dark underbrush. In the distance, a group of brave warriors prepare to confront the beast, their weapons at the ready. Will they be able to defeat the dragon and save the village, or will they fall to its powerful jaws?"  
+[ASSISTANT_CREATED] Assistant created a prompt with the following details: Dragon, mystical forest, scales glistening, sunlight filtering through trees, wings beating fiercely, fiery breath, brave warriors, weapons ready, village, powerful jaws.  
+[USER] User requested to make the prompt less like a story and to separate descriptions with commas.  
+[ASSISTANT_SAID] Assistant provided a revised prompt: Dragon, mystical forest, scales glistening, sunlight filtering through trees, wings beating fiercely, fiery breath, brave warriors, weapons ready, village, powerful jaws.  
+[USER] User requested another prompt following the same rules.  
+[ASSISTANT_CREATED] Assistant created a new prompt: An underwater city, glowing lights, futuristic technology, submarines, sea creatures, schools of fish, divers, deep sea exploration, ancient ruins.  
+[USER] User requested to add camera prompts and 4K descriptions to the prompt.  
+[ASSISTANT_SAID] Assistant provided a detailed prompt: "A futuristic battle between droids and humans. Explosions and ships can be seen at a distance. The camera should be positioned high above the battle, giving an aerial view of the chaos below. The lens should be set to capture 4K resolution, highlighting the intricate details of the droids and ships, as well as the smoke and fire from the explosions. As the camera pans and tilts, it should reveal the full scale of the battle and the destruction it is causing. The final shot should be a close-up of a droid and a human locked in an intense fight, their expressions full of determination and intensity."  
+[USER] User requested to rewrite the prompt using commas and to make it less like a story.  
+[ASSISTANT_CREATED] Assistant created a revised prompt: Futuristic battle, droids and humans, explosions, ships, aerial view, 4K resolution, intricate details, smoke and fire, pan and tilt, full scale, destruction, close-up, droid and human, intense fight, determination, intensity.  
+[USER] User requested another prompt.

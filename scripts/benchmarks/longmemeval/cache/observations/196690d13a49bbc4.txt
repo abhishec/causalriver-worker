@@ -1,0 +1,35 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/26 (Fri) 19:07
+- [USER] User asked to describe cognitive functions.
+- [ASSISTANT_SAID] Cognitive functions are the mental processes that allow us to perceive, process, and respond to information from our environment.
+- [ASSISTANT_SAID] Key cognitive functions include: 
+  1. Attention: The ability to selectively focus on specific stimuli or tasks while ignoring irrelevant information.
+  2. Perception: The process of receiving and interpreting sensory information from our environment.
+  3. Memory: The ability to store, retain, and retrieve information, including short-term and long-term memory.
+  4. Learning: The process of acquiring new knowledge, skills, and behaviors through experience, practice, or instruction.
+  5. Language: The ability to understand, produce, and use verbal and nonverbal symbols to communicate.
+  6. Executive Functions: High-level cognitive processes that enable planning, organizing, initiating, monitoring, and adjusting behavior to achieve goals.
+  7. Reasoning: The ability to draw conclusions, make inferences, and solve problems based on available information.
+  8. Emotional Processing: The ability to recognize, understand, and regulate emotions, as well as empathize with others.
+  9. Social Cognition: The ability to understand and interpret the behaviors, intentions, and emotions of others.
+  10. Creativity: The ability to generate novel, original, and valuable ideas or solutions to problems.
+- [USER] User stated that, according to Jung, there are 8 cognitive functions and asked for a correlation between the assistant's previous responses and Jung's functions.
+- [ASSISTANT_SAID] The assistant provided a mapping between general cognitive functions and Jung's cognitive functions:
+  1. Attention: 
+     - Sensing (S): Focusing on specific, concrete details.
+     - Intuition (N): Picking up on abstract patterns and meanings.
+  2. Perception: 
+     - Sensing (S): Perceiving information through the senses.
+     - Intuition (N): Perceiving connections and possibilities.
+  3. Memory: 
+     - Introverted Sensing (Si): Storing and recalling past experiences.
+     - Introverted Intuition (Ni): Generating insights from past experiences.
+  4. Learning: 
+     - Extraverted Sensing (Se): Learning through direct experience.
+     - Extraverted Intuition (Ne): Learning through exploring ideas and possibilities.
+  5. Language: 
+     - Extraverted Thinking (Te): Communicating logically and precisely.
+     - Extraverted Feeling (Fe): Communicating with sensitivity to emotions.
+  6. Executive Functions: 
+     - Thinking (T): Planning and decision-making based on logic.

@@ -1,0 +1,35 @@
+{
+  "answer_b10dce5e": [
+    {
+      "fact": "User is looking for advice on organizing tech accessories while traveling.",
+      "type": "preference",
+      "entities": [
+        "tech accessories",
+        "traveling"
+      ]
+    },
+    {
+      "fact": "User has a portable power bank.",
+      "type": "personal",
+      "entities": [
+        "portable power bank"
+      ]
+    },
+    {
+      "fact": "User has a wireless charging pad.",
+      "type": "personal",
+      "entities": [
+        "wireless charging pad"
+      ]
+    },
+    {
+      "fact": "User is interested in travel cases or pouches that can fit an Apple Watch, portable power bank, and wireless charging pad.",
+      "type": "preference",
+      "entities": [
+        "Apple Watch",
+        "portable power bank",
+        "wireless charging pad"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/28 (Sun) 02:37
+- [ASSISTANT_SAID] Suggested creating a separate table for "Mall" and changing the name to "Marketplaces".
+- [ASSISTANT_SAID] Recommended including the name of the marketplace, whether it's online or offline, and any other relevant information in the "Marketplaces" table.
+- [ASSISTANT_SAID] Advised adding a new column called "Type" in the "Marketplaces" table with a dropdown to select either "Online" or "Offline".
+- [ASSISTANT_SAID] Suggested adding a new column in the "Vendors" table called "Marketplace" to indicate where the vendor sells their products, linking it to the "Marketplaces" table.
+- [ASSISTANT_SAID] Recommended adding a new column in the "Marketplaces" table called "Vendor Type" with a dropdown to select either "Single Vendor" or "Multiple Vendors".
+- [ASSISTANT_CREATED] Provided an updated version of the ERD for the "Product Wishlist" and "Marketplaces" tables.
+- [ASSISTANT_SAID] Suggested keeping track of vendors and marketplaces to identify the best options for purchasing multiple items based on location and type.
+- [USER] Expressed interest in expanding the "products" to catalog everything owned in the house.
+- [USER] Mentioned that some items might have expiration dates (like food or skincare), some need maintenance, and some can contain many other items (like pouches, shelves, etc.).
+- [ASSISTANT_SAID] Suggested creating a separate database called "Inventory" or "Home Inventory" linked to the "Product Wishlist" database.
+- [ASSISTANT_SAID] Recommended using existing columns from the "Product Wishlist" database and adding new columns for the "Inventory" database, such as "Expiration Date", "Maintenance", "Location", "Quantity", and "Serial Number".
+- [ASSISTANT_SAID] Suggested creating a new table "Category" to categorize items by type (e.g., Electronics, Clothing, Furniture).
+- [ASSISTANT_CREATED] Provided an example of an ERD for the "Inventory" and "Product Wishlist" databases.
+- [ASSISTANT_SAID] Explained that the "Inventory" table will have all items owned and can link to the "Product Wishlist" table.
+- [ASSISTANT_SAID] Suggested using both databases together or a single database with an "In Stock" column to indicate whether an item is owned or not.
+- [ASSISTANT_SAID] Stated that the choice of which database to use as the main one depends on the user's needs.

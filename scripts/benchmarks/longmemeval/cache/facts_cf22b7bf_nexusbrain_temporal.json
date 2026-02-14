@@ -1,0 +1,126 @@
+{
+  "answer_ae3a122b_1": [
+    {
+      "fact": "User is trying to plan a workout routine for the next month.",
+      "type": "event",
+      "entities": [
+        "workout routine",
+        "next month"
+      ]
+    },
+    {
+      "fact": "User is setting a goal to run a 10K by the end of the summer.",
+      "type": "event",
+      "entities": [
+        "10K",
+        "end of summer"
+      ]
+    },
+    {
+      "fact": "User is a complete beginner when it comes to running.",
+      "type": "personal",
+      "entities": [
+        "beginner",
+        "running"
+      ]
+    },
+    {
+      "fact": "User has been doing a lot of cardio at the gym.",
+      "type": "personal",
+      "entities": [
+        "cardio",
+        "gym"
+      ]
+    },
+    {
+      "fact": "User has been trying to incorporate more outdoor activities.",
+      "type": "preference",
+      "entities": [
+        "outdoor activities"
+      ]
+    },
+    {
+      "fact": "User does 30-minute walks during lunch break, 3 times a week.",
+      "type": "personal",
+      "entities": [
+        "30-minute walks",
+        "lunch break",
+        "3 times a week"
+      ]
+    },
+    {
+      "fact": "User can dedicate about 4-5 hours a week to training.",
+      "type": "preference",
+      "entities": [
+        "4-5 hours",
+        "training"
+      ]
+    },
+    {
+      "fact": "User tracks progress using a fitness app.",
+      "type": "personal",
+      "entities": [
+        "fitness app"
+      ]
+    },
+    {
+      "fact": "User burns an average of 2500 calories per week.",
+      "type": "personal",
+      "entities": [
+        "2500 calories",
+        "per week"
+      ]
+    },
+    {
+      "fact": "User has lost about 5 pounds in the past month.",
+      "type": "personal",
+      "entities": [
+        "5 pounds",
+        "past month"
+      ]
+    },
+    {
+      "fact": "User thinks the weight loss progress is slow but is okay with it.",
+      "type": "opinion",
+      "entities": [
+        "slow progress",
+        "okay"
+      ]
+    },
+    {
+      "fact": "User likes the Pallof Press and Bird Dog exercises.",
+      "type": "preference",
+      "entities": [
+        "Pallof Press",
+        "Bird Dog"
+      ]
+    }
+  ],
+  "answer_ae3a122b_2": [
+    {
+      "fact": "User is looking for high-energy workout playlists for cardio days",
+      "type": "preference",
+      "entities": [
+        "high-energy workout playlists",
+        "cardio days"
+      ]
+    },
+    {
+      "fact": "User has lost 10 pounds since starting to go to the gym consistently 3 months ago",
+      "type": "personal",
+      "entities": [
+        "10 pounds",
+        "3 months",
+        "gym"
+      ]
+    },
+    {
+      "fact": "User is interested in tips to keep energy levels up during workouts",
+      "type": "preference",
+      "entities": [
+        "energy levels",
+        "workouts"
+      ]
+    }
+  ]
+}

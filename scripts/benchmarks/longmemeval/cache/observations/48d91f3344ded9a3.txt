@@ -1,0 +1,32 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/21 (Sun) 13:15
+- [EVENT] User needs to log in to their frequent flyer account to check if their miles have been credited.
+- [ASSISTANT_SAID] Assistant cannot access the user's frequent flyer account or personal information but can guide them through the login process.
+- [ASSISTANT_SAID] Steps to log in to the frequent flyer account: 
+  1. Go to the airline's frequent flyer program website.
+  2. Click on the "Log in" or "Sign in" button.
+  3. Enter frequent flyer membership number or username and password.
+  4. Click on the "Log in" or "Sign in" button.
+  5. Navigate to the "My Account" or "Dashboard" section to view account activity.
+- [ASSISTANT_SAID] If the user has trouble logging in, they can contact the airline's customer service for assistance.
+- [PREFERENCE] User had a "meh" experience flying with American Airlines recently.
+- [EVENT] User is interested in tracking flight prices for a business class ticket to London.
+- [ASSISTANT_SAID] Recommendations for tracking flight prices include:
+  1. Google Flights - set up price alerts.
+  2. Skyscanner - set up price alerts and use the "Everywhere" feature.
+  3. Scott's Cheap Flights - offers error fares and sale prices.
+  4. Airfarewatchdog - fare comparison and price tracking.
+  5. The Flight Deal - fare sale alerts and error fares.
+  6. Award availability tools for redeeming miles.
+- [ASSISTANT_SAID] User should be flexible with travel dates and consider flying during off-peak seasons or on less popular days.
+- [EVENT] User has already set up price alerts on Google Flights.
+- [ASSISTANT_SAID] User cannot use their United Airlines credit card to book a business class ticket on British Airways directly.
+- [ASSISTANT_SAID] Explanation of why United Airlines credit card points cannot be used for British Airways:
+  - Chase Ultimate Rewards points can be transferred to several airline loyalty programs, but not British Airways Executive Club.
+  - United MileagePlus miles can be used for Star Alliance partners, but British Airways is not part of that alliance.
+- [ASSISTANT_SAID] Potential workarounds for booking with points:
+  1. Transfer Chase Ultimate Rewards points to Iberia Plus to redeem for British Airways flights.
+  2. Use a transferable points currency to book with British Airways.
+  3. Book through third-party booking platforms that allow point redemptions.
+- [ASSISTANT_SAID] User should check transfer partners, award charts, and redemption rules for the best value for points or miles

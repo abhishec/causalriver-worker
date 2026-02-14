@@ -1,0 +1,43 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/27 (Sat) 03:23
+- [FACT] The user is trying to improve their English skills.
+- [EVENT] The user is taking ESL classes at a local community center three times a week.
+- [CHANGE] The user mentioned that their ESL classes have been really helpful so far.
+- [PREFERENCE] The user is interested in practicing their listening skills.
+- [ASSISTANT_SAID] The assistant recommended several English language podcasts that are easy to understand and discuss everyday topics, including:
+  1. The Daily Step
+  2. Coffee Break English
+  3. Luke's English Podcast
+  4. 6 Minute English (BBC)
+  5. The English We Speak (BBC)
+  6. ESL Podcast
+  7. News in Slow
+  8. Easy Stories in English
+- [PREFERENCE] The user is interested in improving their speaking skills.
+- [ASSISTANT_SAID] The assistant recommended language exchange websites and apps for practicing speaking with native speakers, including:
+  1. italki
+  2. Conversation Exchange
+  3. Tandem
+  4. HelloTalk
+  5. SpeakPipe
+  6. Lingbe
+  7. TalkAbroad
+  8. Verbling
+- [PREFERENCE] The user is interested in watching English TV shows with subtitles to improve their listening and reading skills.
+- [ASSISTANT_SAID] The assistant recommended websites and apps for streaming English TV shows with subtitles, including:
+  1. Netflix
+  2. Amazon Prime Video
+  3. Hulu
+  4. BBC iPlayer
+  5. Viki
+  6. TED
+  7. Kanopy
+  8. PBS Video
+  9. Crunchyroll
+  10. Yidio
+- [FACT] The user has been watching some TV shows with subtitles on Netflix.
+- [CHANGE] The user stated that watching TV shows with subtitles has really helped them improve their listening and reading skills.
+- [RELATIONSHIP] The user's ESL teacher is named Mrs. Johnson.
+- [EVENT] Mrs. Johnson recommended some English language learning apps to the user.
+- [FACT] The user has been using the recommended apps to supplement their learning.

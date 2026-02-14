@@ -1,0 +1,29 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/24 (Wed) 19:26  
+[USER] User wants the assistant to respond only in English.  
+[USER] User provided a phrase in Korean: "화창한 봄날 공원에서 커피먹고 있는 사자" (Translation: "A lion drinking coffee in a sunny spring park").  
+[USER] User is interested in learning about Stable Diffusion Prompting.  
+[USER] User mentioned that Stable Diffusion is an AI art generation model similar to DALLE-2.  
+[USER] User explained that Stable Diffusion can create impressive artwork using positive and negative prompts.  
+[USER] User provided a detailed structure for creating positive prompts, including categories like Subject, Action, Context, Environment, Lighting, Artist, Style, Medium, Type, Color Scheme, Computer Graphics, and Quality.  
+[USER] User listed examples of positive prompts, showcasing various themes and styles.  
+[USER] User emphasized the importance of using an artist that matches the art style or omitting the artist for realistic styles in prompts.  
+[USER] User requested the assistant to write one full detailed prompt based on their idea, following the provided structure.  
+[ASSISTANT_SAID] Assistant created a full detailed prompt with the following details:  
+- Subject: Lion  
+- Action: Drinking coffee  
+- Context: Sunny park  
+- Environment: Green grass, trees, flowers, benches  
+- Lightning: Warm, soft, natural  
+- Artist: Henri Rousseau  
+- Style: Jungle, naive, folk  
+- Medium: Oil on canvas  
+- Type: Painting  
+- Color Scheme: Earthy tones, green, brown, yellow  
+- Computer Graphics: None  
+- Quality: High definition, 4K  
+[ASSISTANT_CREATED] Assistant provided a Positive Prompt:  
+"A majestic lion drinking coffee from a cup on a sunny day in a green park. The scene is warm and inviting, with soft natural lighting that illuminates the lush grass, trees, and flowers. The painting is done in a naive folk style reminiscent of Henri Rousseau's jungle paintings. The lion is the main focus of the painting, and its regal demeanor is captured perfectly. Earthy tones dominate the color scheme, with shades of green, brown, and yellow adding depth and warmth to the painting. The overall effect is a delightful and charming image that captures the beauty of nature."  
+[ASSISTANT_CREATED] Assistant provided a Negative Prompt:  
+"No humans, no clutter, no loud noises, no darkness."

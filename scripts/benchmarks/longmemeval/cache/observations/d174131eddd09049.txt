@@ -1,0 +1,43 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/13 (Sat) 09:39
+- [EVENT] User is thinking of planning a fishing trip with friends soon.
+- [ASSISTANT_SAID] Recommended fishing spots for bass and walleye across the United States and Canada.
+- [ASSISTANT_SAID] Bass Fishing Spots: 
+  1. Lake Guntersville, Alabama
+  2. Clear Lake, California
+  3. Lake Erie, Ohio/Pennsylvania/New York
+  4. Lake Fork, Texas
+  5. St. Johns River, Florida
+- [ASSISTANT_SAID] Walleye Fishing Spots:
+  1. Lake Winnipeg, Manitoba, Canada
+  2. Lake Sakakawea, North Dakota
+  3. Lake of the Woods, Minnesota/Ontario, Canada
+  4. Bay de Noc, Michigan
+  5. Devils Lake, North Dakota
+- [ASSISTANT_SAID] Multi-Species Lakes:
+  1. Lake Oahe, South Dakota/North Dakota
+  2. Lake Vermilion, Minnesota
+  3. Lake Mille Lacs, Minnesota
+- [ASSISTANT_SAID] Suggested checking local fishing regulations, obtaining necessary permits, and practicing catch-and-release fishing.
+- [EVENT] User is thinking of going back to a fishing spot where they went last weekend.
+- [ASSISTANT_SAID] Provided general information about fishing in Lake Michigan.
+- [ASSISTANT_SAID] Species in Lake Michigan include:
+  - Salmon (Chinook, coho, pink)
+  - Trout (Lake, brown, rainbow)
+  - Walleye
+  - Bass (Largemouth, smallmouth)
+  - Panfish (Yellow perch, bluegill, rock bass)
+- [ASSISTANT_SAID] Suggested fishing spots in Lake Michigan:
+  - Harbors and Bays
+  - Piers
+  - Shoreline
+  - Open Water
+- [ASSISTANT_SAID] Suggested tactics and tips for fishing in Lake Michigan:
+  - Trolling with spoons, plugs, or flies for salmon and trout
+  - Casting with jigs, crankbaits, or spinners for bass, walleye, and panfish
+  - Using live bait like nightcrawlers, minnows, or leeches for walleye, bass, and panfish
+  - Fishing near structure like reefs, drop-offs, and weed beds
+- [ASSISTANT_SAID] Suggested checking for licenses, bag limits, and size limits for fishing in Lake Michigan.
+- [ASSISTANT_SAID] Best fishing times in Lake Michigan are from spring to fall, with peak seasons varying by species.
+- [EVENT] User

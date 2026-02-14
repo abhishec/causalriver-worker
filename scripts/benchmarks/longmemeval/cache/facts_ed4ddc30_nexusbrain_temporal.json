@@ -1,0 +1,59 @@
+{
+  "answer_babbaccb_1": [
+    {
+      "fact": "User has a lot of eggs stocked up in the fridge, specifically 30 dozen.",
+      "type": "personal",
+      "entities": [
+        "30 dozen eggs"
+      ]
+    },
+    {
+      "fact": "User is thinking of trying out new recipes with fresh eggs and goat milk.",
+      "type": "preference",
+      "entities": [
+        "fresh eggs",
+        "goat milk"
+      ]
+    },
+    {
+      "fact": "User is considering making egg salad for a quick lunch.",
+      "type": "preference",
+      "entities": [
+        "egg salad",
+        "lunch"
+      ]
+    }
+  ],
+  "answer_babbaccb_2": [
+    {
+      "fact": "User is thinking of making quiche for dinner.",
+      "type": "event",
+      "entities": [
+        "quiche",
+        "dinner"
+      ]
+    },
+    {
+      "fact": "User plans to try the spinach and feta variation of quiche.",
+      "type": "preference",
+      "entities": [
+        "spinach and feta quiche"
+      ]
+    },
+    {
+      "fact": "User has a chicken coop with 20 dozen eggs stocked up in the fridge.",
+      "type": "personal",
+      "entities": [
+        "chicken coop",
+        "20 dozen eggs"
+      ]
+    },
+    {
+      "fact": "User is interested in tips for storing eggs properly.",
+      "type": "opinion",
+      "entities": [
+        "storing eggs"
+      ]
+    }
+  ]
+}

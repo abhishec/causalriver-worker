@@ -1,0 +1,26 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2022/03/02 (Wed) 04:42
+- [EVENT] User is looking to get advice on homebuying.
+- [EVENT] User saw a house they love on 3/1 and is considering making an offer.
+- [ASSISTANT_SAID] Assistant congratulated the user on finding a house they love and provided advice on making an offer.
+- [ASSISTANT_SAID] Assistant suggested getting pre-approved for a mortgage to know how much the user can afford.
+- [ASSISTANT_SAID] Assistant recommended researching the local market to determine the fair market value of the property.
+- [ASSISTANT_SAID] Assistant advised hiring a home inspector to identify potential issues with the property.
+- [ASSISTANT_SAID] Assistant suggested reviewing the property's history, checking the neighborhood, and identifying must-haves.
+- [ASSISTANT_SAID] Assistant mentioned considering contingencies in the offer to protect the user.
+- [ASSISTANT_SAID] Assistant emphasized determining the budget, working with a reputable real estate agent, and being prepared to negotiate.
+- [ASSISTANT_SAID] Assistant advised reviewing the seller's disclosure and checking for outstanding issues.
+- [ASSISTANT_SAID] Assistant suggested considering the property's potential resale value and taking time to think carefully about the decision.
+- [CHANGE] User has already gotten pre-approved for a mortgage on February 10th.
+- [FACT] User's mortgage pre-approval amount is $350,000, which is slightly higher than expected.
+- [RELATIONSHIP] User is working with an agent named Rachel, who is helping them find homes that fit their criteria.
+- [EVENT] User is hoping to make a strong offer on the house they saw on March 1st.
+- [ASSISTANT_SAID] Assistant agreed that including an inspection contingency in the offer is a smart move and explained its benefits.
+- [ASSISTANT_SAID] Assistant listed the benefits of an inspection contingency, including peace of mind, negotiating power, and protection from costly surprises.
+- [ASSISTANT_SAID] Assistant advised specifying the type of inspections, timeframe, and conditions for terminating the contract in the offer.
+- [EVENT] User is thinking of offering around $320,000 for the house.
+- [FACT] The asking price for the house is $335,000.
+- [ASSISTANT_SAID] Assistant stated that the offer of $320,000 is a good starting point and discussed factors to consider regarding the offer.
+- [ASSISTANT_SAID] Assistant mentioned the importance of understanding market conditions, property condition, and the seller's motivation.
+- [ASSISTANT_SAID] Assistant provided tips for strengthening the offer, including including a strong pre-approval letter and writing a personal letter to

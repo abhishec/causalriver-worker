@@ -1,0 +1,35 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/03/12 (Sun) 00:27  
+[FACT] User is working on a thesis about AI in healthcare.  
+[EVENT] User sent out 50 survey requests to medical professionals to gather their opinions on the current state of AI in healthcare.  
+[PREFERENCE] User is excited to dive deeper into the results of the survey.  
+[ASSISTANT_SAID] Assistant provided a list of top sources and databases for finding relevant articles on deep learning applications in cancer diagnosis, including:  
+[ASSISTANT_SAID] 1. PubMed  
+[ASSISTANT_SAID] 2. arXiv  
+[ASSISTANT_SAID] 3. ResearchGate  
+[ASSISTANT_SAID] 4. ScienceDirect  
+[ASSISTANT_SAID] 5. Nature Medicine  
+[ASSISTANT_SAID] 6. NeurIPS Proceedings  
+[ASSISTANT_SAID] 7. IEEE Transactions on Medical Imaging  
+[ASSISTANT_SAID] 8. Cancer Research  
+[ASSISTANT_SAID] 9. Bioinformatics  
+[ASSISTANT_SAID] 10. Google Scholar  
+[ASSISTANT_SAID] Assistant suggested exploring online repositories of AI-related datasets and projects, including:  
+[ASSISTANT_SAID] 1. Kaggle  
+[ASSISTANT_SAID] 2. Cancer Imaging Archive (TCIA)  
+[ASSISTANT_SAID] 3. Medical Imaging Data Repository (MIDR)  
+[ASSISTANT_SAID] Assistant congratulated the user on sending out the survey requests and suggested using tools like Excel, R, or Python libraries like Pandas and NumPy to analyze and visualize the data.  
+[ASSISTANT_SAID] Assistant provided an overview of the current state of deep learning in medical imaging for cancer diagnosis, including:  
+[ASSISTANT_SAID] 1. Image analysis  
+[ASSISTANT_SAID] 2. Image segmentation  
+[ASSISTANT_SAID] 3. Disease detection  
+[ASSISTANT_SAID] 4. Computer-aided detection (CAD) systems  
+[ASSISTANT_SAID] Assistant listed successful applications of deep learning in cancer diagnosis, including:  
+[ASSISTANT_SAID] 1. Lung nodule detection  
+[ASSISTANT_SAID] 2. Breast cancer detection  
+[ASSISTANT_SAID] 3. Skin cancer diagnosis  
+[ASSISTANT_SAID] 4. Colorectal cancer detection  
+[ASSISTANT_SAID] Assistant mentioned promising research areas, including:  
+[ASSISTANT_SAID] 1. Multi-modal imaging  
+[ASSISTANT_SA

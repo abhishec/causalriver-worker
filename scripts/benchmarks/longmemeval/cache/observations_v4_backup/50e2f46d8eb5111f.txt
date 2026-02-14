@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/23 (Tue) 01:23
+- [FACT] User is trying to establish a consistent wake-up routine.
+- [FACT] User had a big project at work that disrupted their routine.
+- [FACT] User recently started taking a morning yoga class on Tuesdays and Thursdays.
+- [FACT] User wakes up at 6:45 AM on yoga days (Tuesdays and Thursdays).
+- [FACT] User currently wakes up around 8:30 AM on non-yoga days.
+- [PREFERENCE] User finds morning yoga classes helpful and has noticed an energy boost on those days.
+- [PREFERENCE] User tends to have more productive mornings when waking up earlier.
+- [EVENT] User is using extra time in the morning to catch up on news, respond to emails, or do light stretching.
+- [CHANGE] User aims to adjust their wake-up time on non-yoga days to get closer to a goal of 7:45 AM.
+- [ASSISTANT] Suggested starting small by waking up 15-30 minutes earlier each day to gradually reach the desired wake-up time.
+- [ASSISTANT] Recommended using yoga days as anchors for wake-up time consistency.
+- [ASSISTANT] Advised creating a bedtime routine to support a consistent wake-up time.
+- [ASSISTANT] Suggested experimenting with different morning activities like meditating, journaling, or reading.
+- [ASSISTANT] Recommended using technology (reminders, alarms, apps) to stay on track with the new routine.
+- [ASSISTANT] Encouraged celebrating small wins to maintain motivation.
+- [ASSISTANT] Provided a sample schedule for gradually adjusting wake-up time on non-yoga days.
+- [ASSISTANT] Suggested avoiding snoozing and getting morning sunlight to help with waking up.
+- [ASSISTANT] Emphasized the importance of a consistent sleep schedule for regulating the body's internal clock.

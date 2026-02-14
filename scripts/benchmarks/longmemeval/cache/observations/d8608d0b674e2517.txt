@@ -1,0 +1,16 @@
+**Observation Log:**
+
+- [FACT] The user is working on a Master's thesis related to AI in medical diagnosis.
+- [PREFERENCE] The user is particularly interested in papers that explore the application of deep learning algorithms in medical imaging.
+- [ASSISTANT_SAID] The assistant provided a list of academic databases and search engines for finding research papers, including PubMed, Scopus, IEEE Xplore, ScienceDirect, Web of Science, Google Scholar, Microsoft Academic, Semantic Scholar, arXiv, bioRxiv, MedRxiv, ResearchGate, and AI in Healthcare publications.
+- [ASSISTANT_SAID] The assistant suggested using specific keywords related to the user's research topic, such as "AI in medical diagnosis," "Machine learning in healthcare," "Deep learning for disease detection," "Natural language processing in medical imaging," and "Computer-aided diagnosis systems."
+- [ASSISTANT_SAID] The assistant provided tips on filtering search results to prioritize papers focusing on deep learning in medical imaging, including keyword selection, search query examples, advanced search features, and database-specific tips.
+- [ASSISTANT_SAID] The assistant recommended using specific deep learning keywords like "deep learning," "convolutional neural networks," "recurrent neural networks," "generative adversarial networks," "transfer learning," and "image segmentation."
+- [ASSISTANT_SAID] The assistant provided search query examples, such as `(deep learning OR CNN OR RNN) AND (medical imaging OR computer-aided diagnosis) AND (MRI OR CT)`.
+- [ASSISTANT_SAID] The assistant suggested using Mendeley as a reference management tool to keep track of sources and generate citations correctly.
+- [ASSISTANT_SAID] The assistant highlighted the benefits of using Mendeley for organizing search results and annotations, including centralized storage, tagging and filtering, annotation and note-taking, collaboration, and search functionality.
+- [ASSISTANT_SAID] The assistant provided tips for organizing search results in Mendeley, such as creating folders and subfolders, using tags and keywords, adding notes and annotations, prioritizing papers, and regularly reviewing and updating.
+- [ASSISTANT_SAID] The assistant confirmed that integrating Mendeley with Trello could create a more seamless workflow for managing the user's thesis project.
+- [ASSISTANT_SAID] The assistant suggested adding Mendeley papers to Trello cards, using Trello lists for organization, adding annotations and notes to Trello cards, creating a "To-Read" list in Trello, using Trello's calendar feature, and utilizing Mendeley's citation plugin.
+- [ASSISTANT_SAID] The assistant emphasized the benefits of integrating Mendeley and Trello, including streamlined workflow, improved organization, and enhanced collaboration.
+- [TEMPORAL] The session date is 2023/05/25 (Thu) at

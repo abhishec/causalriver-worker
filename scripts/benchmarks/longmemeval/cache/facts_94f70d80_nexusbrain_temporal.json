@@ -1,0 +1,53 @@
+{
+  "answer_c63c0458": [
+    {
+      "fact": "User is looking for recommendations on coffee tables with storage space.",
+      "type": "preference",
+      "entities": [
+        "coffee tables",
+        "storage space"
+      ]
+    },
+    {
+      "fact": "User is considering a wooden top for the coffee table.",
+      "type": "preference",
+      "entities": [
+        "wooden top"
+      ]
+    },
+    {
+      "fact": "User is also considering a glass top option for the coffee table.",
+      "type": "preference",
+      "entities": [
+        "glass top"
+      ]
+    },
+    {
+      "fact": "User assembled an IKEA bookshelf recently.",
+      "type": "event",
+      "entities": [
+        "IKEA",
+        "bookshelf"
+      ]
+    },
+    {
+      "fact": "User took 4 hours to assemble the IKEA bookshelf.",
+      "type": "event",
+      "entities": [
+        "4 hours",
+        "IKEA",
+        "bookshelf"
+      ]
+    },
+    {
+      "fact": "User thinks a glass top may be more prone to scratches or fingerprints compared to wood.",
+      "type": "opinion",
+      "entities": [
+        "glass top",
+        "wood",
+        "scratches",
+        "fingerprints"
+      ]
+    }
+  ]
+}

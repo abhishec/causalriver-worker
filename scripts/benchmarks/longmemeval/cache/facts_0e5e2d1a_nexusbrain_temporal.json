@@ -1,0 +1,32 @@
+{
+  "answer_ultrachat_113156": [
+    {
+      "fact": "User is interested in the effectiveness of binaural beats for alleviating symptoms of anxiety and depression.",
+      "type": "opinion",
+      "entities": [
+        "binaural beats",
+        "anxiety",
+        "depression"
+      ]
+    },
+    {
+      "fact": "User seeks specific examples of studies on binaural beats and their effects on anxiety and depression.",
+      "type": "opinion",
+      "entities": [
+        "binaural beats",
+        "anxiety",
+        "depression",
+        "studies"
+      ]
+    },
+    {
+      "fact": "User is looking for recommendations on specific binaural beats for reducing symptoms of anxiety and depression.",
+      "type": "preference",
+      "entities": [
+        "binaural beats",
+        "anxiety",
+        "depression"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "answer_645b0329": [
+    {
+      "fact": "User is thinking of taking an art history course to learn more about art movements.",
+      "type": "preference",
+      "entities": [
+        "art history course",
+        "art movements"
+      ]
+    },
+    {
+      "fact": "User has been lucky with a flea market find.",
+      "type": "opinion",
+      "entities": [
+        "flea market find"
+      ]
+    },
+    {
+      "fact": "User is interested in the trends of the art market.",
+      "type": "preference",
+      "entities": [
+        "art market trends"
+      ]
+    }
+  ]
+}

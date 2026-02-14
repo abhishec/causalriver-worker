@@ -1,0 +1,15 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2022/09/01 (Thu) 00:46
+- [USER] User requested information about organizations.
+- [ASSISTANT_SAID] Assistant provided a table of information for 25 youth organizations in Montgomery County, Pennsylvania.
+- [ASSISTANT_CREATED] Assistant created a table with the following columns: Organization Name, Website, Address, Phone Number.
+- [ASSISTANT_SAID] Organization Name: Boys & Girls Club of Philadelphia, Website: <https://www.bgcphila.org/>, Address: 1518 Walnut St, Philadelphia, PA 19102, Phone Number: (215) 735-8818.
+- [ASSISTANT_SAID] Organization Name: Girls on the Run Montgomery and Delaware Counties, Website: <https://www.gotrpa.org/>, Address: 1042 W Bridge St, Phoenixville, PA 19460, Phone Number: (610) 564-4767.
+- [ASSISTANT_SAID] Organization Name: Keystone Opportunity Center, Website: <https://www.keystoneopportunity.org/>, Address: 104 N Main St, Souderton, PA 18964, Phone Number: (215) 723-5430.
+- [ASSISTANT_SAID] Organization Name: Norristown PAL, Website: <http://www.norristownpal.org/>, Address: 340 Harding Blvd, Norristown, PA 19401, Phone Number: (610) 278-8040.
+- [ASSISTANT_SAID] Organization Name: Play for Change, Website: <https://www.playforchange.us/>, Address: 520 E Butler Ave, Ambler, PA 19002, Phone Number: (215) 646-4947.
+- [ASSISTANT_SAID] Organization Name: Proyecto Nueva Vida, Website: <https://www.proyectonuevavida.org/>, Address: 410 E Hector St, Conshohocken, PA 19428, Phone Number: (610) 940-0556.
+- [ASSISTANT_SAID] Organization Name: Saint Miriam Parish & Friary, Website: <https://www.mysaintmiriam.org/>, Address: 654 Bethlehem Pike, Flourtown, PA 19031, Phone Number: (215) 836-9800.
+- [ASSISTANT_SAID] Organization Name: Children's Village, Website: <https://www.childrensvillagephila.org/>, Address: 3200 Henry Ave, Philadelphia, PA 19129, Phone Number: (215) 482-1423.
+- [ASSISTANT_SAID] Organization Name: YMCA of Greater Brandywine - Upper Main Line, Website: <https://www.ymcagbw.org

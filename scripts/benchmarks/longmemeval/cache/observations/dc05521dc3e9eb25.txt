@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/07/17 (Mon) 19:40
+- [EVENT] User is trying to decide which stamp albums to buy for their collection.
+- [EVENT] User organized their stamp collection last week, which had been sitting in boxes for years.
+- [FACT] User has accumulated many rare and valuable stamps.
+- [ASSISTANT_SAID] Recommended brands for stamp albums: Scott, Harris, Michel, Linn's.
+- [ASSISTANT_SAID] Recommended types of albums: country-specific albums, topic-specific albums, general albums, stockbooks, hingeless albums.
+- [ASSISTANT_SAID] Suggested features to consider when choosing a stamp album: page quality, mounting options, illustrations and descriptions, binding, customization.
+- [ASSISTANT_SAID] Provided tips for starting a stamp collection: start with a smaller album, choose albums that fit collecting style, consider digital albums.
+- [EVENT] User plans to start with a country-specific album for their US stamps.
+- [ASSISTANT_SAID] Recommended resources for learning about US postal history: American Philatelic Society (APS), US Postal Service (USPS) History, National Postal Museum, Stamp Collecting Forum.
+- [ASSISTANT_SAID] Suggested books for learning about US postal history: "The United States Postal Service: An American History" by Leonard Shatzkin, "The Postal History of the United States" by John R. B. Dale, "The Titanic Postal History" by Richard F. Winter, "The Philatelic Gazette."
+- [ASSISTANT_SAID] Recommended organizations for postal history: American Philatelic Society (APS), United States Philatelic Classics Society, Titanic Philatelic Society.
+- [ASSISTANT_SAID] Suggested actions for the user's Titanic cover: get it expertized, research postal history of the Titanic, consult with collectors and experts.
+- [EVENT] User has a letter sent from the Titanic's maiden voyage and wants to learn more about it.
+- [ASSISTANT_SAID] Recommended online archives and libraries for digitized collections of historical documents and newspapers: Library of Congress: Chronicling America, Newspapers.com, Google News Archive, National Archives and Records Administration (NARA), Library of Congress: Manuscript Division, British Library: Digitised Manuscripts, Internet Archive.
+- [ASSISTANT_SAID] Suggested specific collections for Titanic-related documents: The Titanic Collection at the Library of Congress, The Titanic Archive at the National Museum of the Maritime.
+- [EVENT] User is getting back into coin collecting.
+- [EVENT] User is thinking about starting a new collection of error coins.
+- [ASSISTANT_SAID] Recommended online communities and forums for error coin collectors: CoinWeek, Coin Collecting Forum, NGC Collectors Society, PCGS Forum

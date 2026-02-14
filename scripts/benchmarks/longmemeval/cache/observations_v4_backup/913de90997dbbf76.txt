@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [FACT] User is located in Los Angeles (LA).
+- [PREFERENCE] User is a big fan of buffalo wings.
+- [EVENT] User is planning to order food for the next game.
+- [EVENT] User watched the Kansas City Chiefs defeat the Buffalo Bills in the Divisional Round of the NFL playoffs last weekend.
+- [RELATIONSHIP] User watched the game at their friend Mike's place.
+- [PREFERENCE] User is craving more buffalo wings after having them at Mike's place.
+- [EVENT] User is looking to order for about 5 people.
+- [ASSISTANT] Assistant recommended several wing spots in LA, including Wingstop, Buffalo Wild Wings, Pizza Studio, The Counter, Danny's Deli, Howlin' Ray's Hot Chicken, and The Attic on Broadway.
+- [PREFERENCE] User has been to Buffalo Wild Wings before and their wings are always a hit.
+- [EVENT] User is planning to order online and pick it up to avoid waiting for delivery.
+- [ASSISTANT] Assistant confirmed that Buffalo Wild Wings has an online ordering system that allows customization and payment ahead of time.
+- [ASSISTANT] Assistant provided information about current deals and promotions at Buffalo Wild Wings, including Wing Tuesdays, Blazin' Rewards, Party Packs, Delivery Deals, and Limited Time Offers.
+- [PREFERENCE] User is thinking of having pizza with their wings.
+- [ASSISTANT] Assistant mentioned that Buffalo Wild Wings offers pizza options and combos that can be added to the order.
+- [EVENT] User decided to go with the Pizza and Wings Combo and chose the medium "Blazin' BBQ" pizza.
+- [ASSISTANT] Assistant confirmed that user can add an order of potato wedges to their combo.
+- [PREFERENCE] User chose potato wedges as a side to their Pizza and Wings Combo. 
+
+**Session Date:** 2023/01/22 (Sun) 16:17

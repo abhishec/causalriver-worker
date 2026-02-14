@@ -7,7 +7,12 @@
     "test": "turbo test",
     "test:coverage": "turbo test:coverage",
     "lint": "turbo lint",
-    "clean": "turbo clean"
+    "clean": "turbo clean",
+    "security:scan": "tsx scripts/run-security-agent.ts",
+    "security:scan:dry": "tsx scripts/run-security-agent.ts --dry-run",
+    "security:scan:verbose": "tsx scripts/run-security-agent.ts --verbose",
+    "security:daily": "bash scripts/daily-security-scan.sh",
+    "security:setup:cron": "bash scripts/setup-daily-cron.sh"
   },
   "devDependencies": {
     "tsx": "^4.0.0",

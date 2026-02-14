@@ -1,0 +1,191 @@
+{
+  "answer_733e443a_abs_1": [
+    {
+      "fact": "User is hosting a dinner party next weekend.",
+      "type": "event",
+      "entities": [
+        "dinner party",
+        "next weekend"
+      ]
+    },
+    {
+      "fact": "User baked a chocolate cake for their sister's birthday party last weekend.",
+      "type": "event",
+      "entities": [
+        "chocolate cake",
+        "sister",
+        "birthday party",
+        "last weekend"
+      ]
+    },
+    {
+      "fact": "User's chocolate cake turned out amazing.",
+      "type": "opinion",
+      "entities": [
+        "chocolate cake"
+      ]
+    },
+    {
+      "fact": "User likes the idea of a fruit tart.",
+      "type": "preference",
+      "entities": [
+        "fruit tart"
+      ]
+    },
+    {
+      "fact": "User is unsure about what type of fruit to use for the tart.",
+      "type": "opinion",
+      "entities": [
+        "fruit"
+      ]
+    }
+  ],
+  "answer_733e443a_abs_2": [
+    {
+      "fact": "User is thinking of baking chicken wings for dinner.",
+      "type": "event",
+      "entities": [
+        "chicken wings",
+        "dinner"
+      ]
+    },
+    {
+      "fact": "User is experimenting with different types of flour for baking.",
+      "type": "preference",
+      "entities": [
+        "flour",
+        "baking"
+      ]
+    },
+    {
+      "fact": "User used their oven's convection setting for the first time last Thursday.",
+      "type": "event",
+      "entities": [
+        "oven",
+        "convection setting",
+        "Thursday"
+      ]
+    },
+    {
+      "fact": "User had success baking cookies using the convection setting.",
+      "type": "opinion",
+      "entities": [
+        "cookies",
+        "convection setting"
+      ]
+    },
+    {
+      "fact": "User is interested in achieving crispy chicken wings.",
+      "type": "preference",
+      "entities": [
+        "crispy chicken wings"
+      ]
+    }
+  ],
+  "answer_733e443a_abs_4": [
+    {
+      "fact": "User is thinking of trying out a new recipe for rustic Italian bread this weekend.",
+      "type": "event",
+      "entities": [
+        "rustic Italian bread",
+        "weekend"
+      ]
+    },
+    {
+      "fact": "User made a delicious whole wheat baguette last Saturday.",
+      "type": "event",
+      "entities": [
+        "whole wheat baguette",
+        "last Saturday"
+      ]
+    },
+    {
+      "fact": "User is considering using whole wheat flour for the rustic Italian bread recipe.",
+      "type": "preference",
+      "entities": [
+        "whole wheat flour",
+        "rustic Italian bread"
+      ]
+    },
+    {
+      "fact": "User is open to using a higher protein flour for the rustic Italian bread recipe.",
+      "type": "preference",
+      "entities": [
+        "higher protein flour",
+        "rustic Italian bread"
+      ]
+    },
+    {
+      "fact": "User is inquiring about the convection setting on their oven for browning and crisping the crust.",
+      "type": "preference",
+      "entities": [
+        "convection setting",
+        "oven",
+        "browning",
+        "crusting"
+      ]
+    }
+  ],
+  "answer_733e443a_abs_3": [
+    {
+      "fact": "User created their sourdough starter about a month ago",
+      "type": "event",
+      "entities": [
+        "sourdough starter",
+        "month ago"
+      ]
+    },
+    {
+      "fact": "User feeds their sourdough starter once a day",
+      "type": "preference",
+      "entities": [
+        "sourdough starter",
+        "once a day"
+      ]
+    },
+    {
+      "fact": "User uses all-purpose flour and water to feed their starter",
+      "type": "preference",
+      "entities": [
+        "all-purpose flour",
+        "water"
+      ]
+    },
+    {
+      "fact": "User uses a 1:1:1 ratio of flour to water to starter",
+      "type": "preference",
+      "entities": [
+        "1:1:1 ratio",
+        "flour",
+        "water",
+        "starter"
+      ]
+    },
+    {
+      "fact": "User's bread came out dense and heavy when using the starter in a recipe",
+      "type": "event",
+      "entities": [
+        "bread",
+        "dense",
+        "heavy",
+        "recipe"
+      ]
+    },
+    {
+      "fact": "User is unsure if the issue is with the starter or the recipe",
+      "type": "opinion",
+      "entities": [
+        "starter",
+        "recipe"
+      ]
+    },
+    {
+      "fact": "User is open to suggestions for improving their sourdough starter",
+      "type": "opinion",
+      "entities": [
+        "sourdough starter",
+        "suggestions"
+      ]
+    }
+  ]
+}

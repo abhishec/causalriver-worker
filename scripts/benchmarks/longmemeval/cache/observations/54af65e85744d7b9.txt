@@ -1,0 +1,15 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/04/10 (Mon) 00:54  
+[USER] User needs help to write an article about a contract clause in the NSW HIA Lump Sum contract.  
+[ASSISTANT_SAID] Assistant acknowledged the user's request by saying "acknowledged."  
+[USER] User repeated the request for help to write an article about a contract clause in the NSW HIA Lump Sum contract.  
+[ASSISTANT_SAID] Assistant acknowledged the repeated request and asked for more details about the specific clause to focus on in the article.  
+[USER] User provided an extract of Clause 17 of the NSW HIA Lump Sum contract regarding progress payments and instructed the assistant to remember this information for later.  
+[ASSISTANT_SAID] Assistant acknowledged the information about Clause 17 and summarized its key points regarding progress payments and the owner's rights.  
+[USER] User stated that the NSW HIA Lump Sum contract is subject to the Home Building Act 1989 (NSW) and provided an extract of Section 8A of the Home Building Act 1989 (NSW) for the assistant to remember.  
+[ASSISTANT_SAID] Assistant acknowledged the information about the Home Building Act 1989 (NSW) and summarized the key points of Section 8A regarding maximum progress payments.  
+[USER] User provided Clause 35 (Dispute Resolution) of the NSW HIA Lump Sum contract and instructed the assistant to acknowledge this information.  
+[ASSISTANT_SAID] Assistant acknowledged the information about Clause 35.  
+[USER] User stated that the NSW HIA Lump Sum contract is subject to Section 13 of the Building and Construction Industry Security of Payment Act 1999 (NSW) and provided an extract of Section 13 for the assistant to remember.  
+[ASSISTANT_SAID] Assistant acknowledged the information about Section 13 of the Building and Construction Industry Security of Payment Act 1999 (NSW).

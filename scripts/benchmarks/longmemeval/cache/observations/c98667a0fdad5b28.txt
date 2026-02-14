@@ -1,0 +1,35 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/26 (Fri) 09:49  
+[ASSISTANT_SAID] The path should be `$key` instead of `/secrets/google/key.json`.  
+[ASSISTANT_SAID] The `$key` variable will contain the path to the JSON key file for the Google DNS API.  
+[ASSISTANT_SAID] The Certbot image uses Alpine, so the shell script should reference `/bin/sh` instead of `/bin/bash`.  
+[ASSISTANT_CREATED] An updated version of the `renew-cert.sh` script was provided, which includes the following code:
+```bash
+#!/bin/sh
+
+# Load credentials
+eval "$(yq e '.credentials[] | "export CREDENTIAL_\(.email | ascii_upcase)=\(.api_key) # \(.domains)"' credential.yml)"
+
+# Renew certificates for each set of credentials
+for EMAIL in $(yq e '.credentials[].email' credential.yml); do
+  DOMAINS=$(yq e ".credentials[] | select(.email == \"$EMAIL\") | .domains | join(\",\")" credential.yml)
+  GOOGLE_APPLICATION_CREDENTIALS=$key certbot certonly --dns-google --dns-google-propagation-seconds 30 --dns-google-credentials $key -m $EMAIL -d $DOMAINS --agree-tos -n
+done
+
+# Reload Nginx to use new certificates
+docker-compose exec nginx nginx -s reload
+```  
+[USER] Asked where `GOOGLE_APPLICATION_CREDENTIALS` is used and if it is needed.  
+[USER] Requested to set the CRON in the `renew-cert.sh` file to renew at 3:15 am every day.  
+[ASSISTANT_SAID] The `GOOGLE_APPLICATION_CREDENTIALS` environment variable is necessary for the Certbot command to authenticate with the Google DNS API.  
+[ASSISTANT_SAID] Suggested adding the following line to the `renew-cert.sh` script to schedule the renewal:
+```javascript
+15 3 * * * /path/to/renew-cert.sh >> /var/log/certbot-renew.log 2>&1
+```  
+[ASSISTANT_SAID] Mentioned to replace `/path/to/renew-cert.sh` with the actual path to the script on the server.  
+[ASSISTANT_SAID] Noted that the script should be made executable by running `chmod +x /path/to/renew-cert.sh`, and to add the line to the crontab file by running `crontab -e`.  
+[USER] Requested to include the last part regarding the CRON process in the `renew-cert.sh` file.  
+[ASSISTANT_CREATED] An updated version of the `renew-cert.sh` script was provided, which included the CRON scheduling:
+```bash
+#!/bin

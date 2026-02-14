@@ -1,0 +1,28 @@
+**Observation Log:**
+
+- [FACT] The user has a collection of 15 Funko Pops displayed on a shelf from IKEA that cost $30.
+- [FACT] The user has a new figurine of Master Chief from Halo.
+- [PREFERENCE] The user is proud of their Funko Pop collection.
+- [EVENT] The user is looking for advice on how to protect their collectibles from dust.
+- [ASSISTANT_SAID] The assistant congratulated the user on their new addition and impressive display shelf.
+- [ASSISTANT_SAID] The assistant provided tips for protecting collectibles from dust, including:
+  - [ASSISTANT_SAID] Consider investing in display cases specifically designed for figurines or collectible items.
+  - [ASSISTANT_SAID] Look for dust-proof shelves with a lip or overhang to prevent dust from settling.
+  - [ASSISTANT_SAID] Use gentle dusting sprays or wipes specifically designed for collectibles.
+  - [ASSISTANT_SAID] Use a soft, dry cloth, like microfiber, to wipe down the surface when dusting.
+  - [ASSISTANT_SAID] Avoid direct sunlight to prevent fading and damage.
+  - [ASSISTANT_SAID] Maintain a stable room humidity level between 40% to 50%.
+  - [ASSISTANT_SAID] Schedule regular cleaning sessions every 2-3 months.
+  - [ASSISTANT_SAID] Consider investing in a dehumidifying cabinet or climate-controlled display case.
+- [ASSISTANT_SAID] The assistant suggested using individual dust covers or soft pouches for the Funko Pop figures when not on display.
+- [EVENT] The user is thinking about getting their vintage 1995 Pokémon Trading Card, the Charizard, graded and authenticated.
+- [ASSISTANT_SAID] The assistant provided a list of reputable companies for grading and authentication services:
+  - [ASSISTANT_SAID] Professional Sports Authenticator (PSA)
+  - [ASSISTANT_SAID] Beckett Grading Services (BGS)
+  - [ASSISTANT_SAID] Sportscard Guaranty (SGC)
+  - [ASSISTANT_SAID] Wata Games
+- [ASSISTANT_SAID] The assistant advised the user to consider factors like reputation, fees, turnaround time, authentication process, and slabbing options when choosing a company.
+- [ASSISTANT_SAID] The assistant recommended carefully packaging the card for shipping and following submission guidelines.
+- [EVENT] The user is planning to get their figurine and Funko Pops appraised for insurance purposes.
+- [ASSISTANT_SAID] The assistant confirmed that getting collectibles appraised for insurance is a wise decision and provided options for appraisal:
+  - [ASSISTANT_SAID] Professional appraisers specializing in collectibles.

@@ -1,0 +1,29 @@
+{
+  "answer_f6502d0f": [
+    {
+      "fact": "User is looking for art supply recommendations.",
+      "type": "preference",
+      "entities": [
+        "art supplies",
+        "acrylic paints",
+        "brushes"
+      ]
+    },
+    {
+      "fact": "User has been looking at a lot of flower paintings on Instagram.",
+      "type": "preference",
+      "entities": [
+        "flower paintings",
+        "Instagram"
+      ]
+    },
+    {
+      "fact": "User is interested in painting realistic flowers.",
+      "type": "preference",
+      "entities": [
+        "realistic flowers",
+        "painting"
+      ]
+    }
+  ]
+}

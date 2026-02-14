@@ -1,0 +1,28 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/07/01 (Sat) 06:18  
+[EVENT] User is looking for recipe ideas for their new Instant Pot.  
+[ASSISTANT_SAID] Assistant congratulated the user on their new Instant Pot.  
+[ASSISTANT_SAID] Assistant provided beginner-friendly soup recipes:  
+[ASSISTANT_CREATED] 1. Chicken Noodle Soup: made with chicken breast, carrots, celery, onion, and noodles.  
+[ASSISTANT_CREATED] 2. Butternut Squash Soup: made with roasted butternut squash, onion, garlic, and chicken broth.  
+[ASSISTANT_CREATED] 3. Tomato Soup: made with canned tomatoes, onion, garlic, and vegetable broth.  
+[ASSISTANT_CREATED] 4. Creamy Broccoli Soup: made with broccoli, onion, garlic, and chicken broth, blended with Greek yogurt.  
+[ASSISTANT_CREATED] 5. Minestrone Soup: made with beans, vegetables, tomatoes, and pasta.  
+[ASSISTANT_SAID] Assistant provided beginner-friendly stew recipes:  
+[ASSISTANT_CREATED] 1. Beef Stew: made with beef cubes, potatoes, carrots, onion, and red wine.  
+[ASSISTANT_CREATED] 2. Chili: made with ground beef, beans, tomatoes, and bell peppers.  
+[ASSISTANT_CREATED] 3. Lentil Stew: made with red or green lentils, onion, garlic, and vegetable broth.  
+[ASSISTANT_CREATED] 4. Chicken and Rice Stew: made with chicken breast, rice, carrot, and onion.  
+[ASSISTANT_CREATED] 5. Vegetable Stew: made with a variety of vegetables, such as carrots, zucchini, bell peppers, and potatoes.  
+[ASSISTANT_SAID] Assistant provided tips for beginners using the Instant Pot:  
+[ASSISTANT_CREATED] 1. Always sauté onions and garlic before adding other ingredients.  
+[ASSISTANT_CREATED] 2. Use a natural release (NR) after cooking.  
+[ASSISTANT_CREATED] 3. Adjust cooking times based on personal preference for tenderness.  
+[ASSISTANT_CREATED] 4. Don't overcrowd the Instant Pot.  
+[ASSISTANT_CREATED] 5. Experiment with different spices and seasonings.  
+[ASSISTANT_SAID] Assistant provided a basic template for Instant Pot soup/stew recipes:  
+[ASSISTANT_CREATED] * 1-2 pounds protein (chicken, beef, or lentils)  
+[ASSISTANT_CREATED] * 1-2 cups vegetables (onion, garlic, carrots, celery, etc.)  
+[ASSISTANT_CREATED] * 2-4 cups broth (chicken, beef, or vegetable)  
+[ASS

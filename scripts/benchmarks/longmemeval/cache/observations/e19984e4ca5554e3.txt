@@ -1,0 +1,30 @@
+**Observation Log:**
+
+[FACT] User is considering flying to San Diego again soon.  
+[FACT] User flew back from San Diego to New York on United Airlines last time.  
+[FACT] User had a smooth trip on their last flight with United Airlines.  
+[PREFERENCE] User prefers to fly out of JFK or LGA.  
+[PREFERENCE] User is open to flying with any airline as long as the price is reasonable.  
+[PREFERENCE] User does not mind layovers.  
+[TEMPORAL] User is flexible with their travel schedule.  
+[EVENT] User is looking for good deals on flights from New York to San Diego.  
+[ASSISTANT_SAID] Assistant is happy to help find good deals on flights from New York to San Diego.  
+[ASSISTANT_SAID] Assistant will include United Airlines in the search but will also explore other airlines for the best options.  
+[ASSISTANT_SAID] Assistant requested additional details: travel dates, airport preferences, preferred airlines, non-stop or layover preference, and budget.  
+[FACT] User provided that they are flexible with travel dates.  
+[FACT] User prefers to fly out of JFK or LGA.  
+[FACT] User is open to any airline as long as the price is reasonable.  
+[FACT] User does not mind layovers, as their last United Airlines flight had a layover.  
+[ASSISTANT_SAID] Assistant searched for affordable flights from JFK and LGA to San Diego International Airport (SAN) and provided options.  
+[ASSISTANT_SAID] Assistant listed flight options from JFK to SAN and LGA to SAN with prices and layover information.  
+[ASSISTANT_SAID] Prices for JFK to SAN options ranged from $258 to $298.  
+[ASSISTANT_SAID] Prices for LGA to SAN options ranged from $248 to $298.  
+[ASSISTANT_SAID] Assistant advised that prices are subject to change and recommended booking as soon as possible.  
+[EVENT] User expressed interest in more options for United Airlines flights from JFK or LGA to San Diego.  
+[ASSISTANT_SAID] Assistant provided additional options for United Airlines flights from JFK and LGA to San Diego.  
+[ASSISTANT_SAID] Assistant listed United Airlines flight options from JFK and LGA with prices and layover information.  
+[ASSISTANT_SAID] Prices for United Airlines flights from JFK to SAN ranged from $288 to $328.  
+[ASSISTANT_SAID] Prices for United Airlines flights from LGA to SAN ranged from $288 to $328.  
+[ASSISTANT_SAID] Assistant noted that prices may fluctuate and recommended booking quickly.  
+[EVENT] User expressed interest in the non-stop flight from JFK on April 19th, returning on April 26th.  
+[ASS

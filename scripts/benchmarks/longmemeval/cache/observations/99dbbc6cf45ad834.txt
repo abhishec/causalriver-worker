@@ -1,0 +1,9 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/07/20 (Thu) 07:36
+- [USER] User mentioned a "src" folder in a front-end app containing an "api" folder.
+- [USER] User requested a description of the "api" folder.
+- [ASSISTANT_SAID] The "api" folder in the "src" folder of a front-end application is likely used to store code related to making API (Application Programming Interface) calls.
+- [ASSISTANT_SAID] The code in the "api" folder may handle tasks such as sending and receiving data, handling errors, and formatting data for use within the front-end application.
+- [USER] User requested a description of the "auth" folder, specifying that it should be suitable for documentation content.
+- [USER] User mentioned that Firebase is used as the provider for the "auth" folder.

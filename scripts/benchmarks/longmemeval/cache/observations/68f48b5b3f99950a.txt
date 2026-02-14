@@ -1,0 +1,13 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/23 (Tue) 21:02  
+[USER] User requested a policy statement for Access Control as per the NIST CSF framework.  
+[ASSISTANT_SAID] The organization is committed to protecting the confidentiality, integrity, and availability of information assets through an access control system based on the NIST Cybersecurity Framework (CSF).  
+[ASSISTANT_SAID] The access control system ensures that only authorized individuals are granted access to systems and data, appropriate to their role and responsibilities.  
+[ASSISTANT_SAID] A multi-factor authentication system will be implemented, requiring users to provide at least two forms of identification before access is granted.  
+[ASSISTANT_SAID] The organization will enforce least privilege principles, ensuring users are given only the access and privileges needed to perform their job functions.  
+[ASSISTANT_SAID] Access control policies and procedures will be regularly reviewed and updated to ensure they are current and effective in protecting assets from unauthorized access, use, disclosure, disruption, modification, or destruction.  
+[ASSISTANT_SAID] All users and employees will be required to comply with the access control policies and procedures.  
+[ASSISTANT_SAID] Regular audits and monitoring will be conducted to ensure compliance with the access control policy, with appropriate disciplinary action for any violations.  
+[ASSISTANT_SAID] The ultimate goal is to maintain the highest levels of security while providing authorized users with the access needed to perform their jobs effectively.  
+[ASSISTANT_CREATED] A sample policy statement was created, which should be updated and customized to suit the specific needs of an organization based on its complexity.

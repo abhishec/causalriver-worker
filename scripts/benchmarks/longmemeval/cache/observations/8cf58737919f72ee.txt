@@ -1,0 +1,27 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/24 (Wed) 14:21
+- [EVENT] User is planning a road trip to Yosemite National Park.
+- [EVENT] User is wondering about good hiking trails and campsites in Yosemite National Park.
+- [ASSISTANT_SAID] Yosemite is an amazing destination and the assistant is happy to help plan the trip.
+- [ASSISTANT_SAID] Recommended hiking trails include:
+  1. **Half Dome Day Hike**: 17-mile round-trip, challenging, breathtaking views, requires a permit.
+  2. **Mist Trail to Vernal Fall**: 7-mile round-trip, steep, stunning views, can be slippery.
+  3. **Four Mile Trail**: 9.6-mile round-trip, moderate to strenuous, scenic views, takes 5-6 hours.
+  4. **Lower Yosemite Fall Trail**: 1-mile loop, easy, accessible for families, scenic views of Yosemite Falls.
+  5. **Tioga Road to Tuolumne Meadows**: 2-mile round-trip, beautiful meadow, stunning mountain views.
+- [ASSISTANT_SAID] Recommended campsites include:
+  1. **Upper Pines Campground**: 234 sites, first-come, first-served.
+  2. **Crane Flat Campground**: 166 sites, near Big Oak Flat Entrance.
+  3. **Tuolumne Meadows Campground**: 304 sites, high-elevation, accessible July-October.
+  4. **Wawona Campground**: 93 sites, first-come, first-served, near Wawona Hotel.
+  5. **Backcountry Campsites**: Requires a backcountry permit for remote camping.
+- [ASSISTANT_SAID] Tips and reminders include checking the park's website for updates, bringing water and snacks, respecting wildlife, and being prepared for changing weather.
+- [ASSISTANT_SAID] Additional resources include the official Yosemite National Park website, the Yosemite National Park App, and guidebooks like Yosemite National Park Day Hikes.
+- [EVENT] User is also planning to do wildlife watching in Yosemite.
+- [ASSISTANT_SAID] Common animals to spot in Yosemite include:
+  - **Mammals**: Black bears, mule deer, coyotes, bighorn sheep, mountain lions.
+  - **Birds**: Great gray owls, peregrine falcons, ospreys, Steller's jays, Clark's nutcrackers.
+  - **Other Wildlife**: Squirrels, raptors, reptiles, and amphibians.
+- [ASSISTANT_SAID] Tips for wildlife watching include being patient and quiet, bringing binoculars, knowing habitats, respecting wildlife, and reporting sightings.
+- [EVENT

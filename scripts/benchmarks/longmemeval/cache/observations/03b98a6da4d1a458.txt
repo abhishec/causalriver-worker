@@ -1,0 +1,16 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/28 (Sun) 22:20
+- [ASSISTANT_SAID] Structural semantics emerged as a direct response to Saussure's structural linguistics, with Leonard Bloomfield's "Language" (1933) and Zellig Harris's "Methods in Structural Linguistics" (1951) playing pivotal roles in its development.
+- [ASSISTANT_SAID] Bloomfield and Harris focused on the distributional properties of words in a language, positing that meaning arises from the relationships between words within the linguistic system.
+- [ASSISTANT_SAID] Leonard Bloomfield's work in "Language" (1933) expanded upon Saussure's ideas by emphasizing the importance of distributional properties in understanding language structure.
+- [ASSISTANT_SAID] Bloomfield argued that the structure of a language could be systematically analyzed by observing the ways in which linguistic elements co-occur and relate to one another.
+- [ASSISTANT_SAID] Bloomfield discussed the relationship between nouns and verbs, highlighting how their distribution in sentences reveals patterns of grammatical organization (Bloomfield, 1933, pp. 160-163).
+- [ASSISTANT_SAID] Bloomfield's primary focus was on syntax and morphology, and his attention to distributional properties laid the groundwork for a more focused examination of word meaning in the context of structural semantics.
+- [ASSISTANT_SAID] Zellig Harris built on Bloomfield's ideas and further developed the concept of distributional analysis in his work "Methods in Structural Linguistics" (1951).
+- [ASSISTANT_SAID] Harris's approach to lexical semantics relied on the principle that words with similar meanings tend to have similar distributional properties in a language.
+- [ASSISTANT_SAID] According to Harris, the meaning of a word can be determined by analyzing the linguistic contexts in which it occurs and comparing it to other words with similar distributional patterns (Harris, 1951, pp. 218-222).
+- [ASSISTANT_SAID] Harris's distributional analysis offered a systematic method for studying word meaning by examining the patterns of co-occurrence among linguistic elements.
+- [ASSISTANT_SAID] Harris demonstrated that synonyms such as "big" and "large" share similar distributional properties, as they can both appear in the same contexts and modify the same nouns (e.g., "big house" and "large house") (Harris, 1951, p. 220).
+- [ASSISTANT_SAID] The contributions of Bloomfield and Harris to structural semantics have had lasting impacts on the field of lexical semantics.
+- [ASSISTANT_SAID] Their focus on distributional properties has influenced subsequent approaches to meaning, such as distributional semantics in computational linguistics, which employs statistical methods

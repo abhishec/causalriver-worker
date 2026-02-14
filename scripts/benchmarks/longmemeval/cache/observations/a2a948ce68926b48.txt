@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/20 (Sat) 17:06  
+[EVENT] User is trying to get a better handle on their spending habits.  
+[ASSISTANT_SAID] Assistant is happy to help the user track their expenses and suggests gathering information about spending over the past month.  
+[ASSISTANT_SAID] Assistant recommends collecting receipts, bank statements, credit card statements, and any other records of spending from the past month.  
+[ASSISTANT_SAID] Assistant suggests writing down every single transaction, including small purchases like coffee or snacks.  
+[ASSISTANT_SAID] Assistant provides categories to group expenses: Housing, Food, Transportation, Insurance, Debt Repayment, Entertainment, Clothing, Health and Wellness, Gifts, Miscellaneous.  
+[ASSISTANT_SAID] Assistant requests the user to provide details for each transaction: Date, Category, Description, Amount.  
+[ASSISTANT_SAID] Assistant offers options for sharing data: a list of transactions, a screenshot of a bank statement, or a spreadsheet.  
+[EVENT] User has been doing a lot of shopping lately and tried to take advantage of sales and discounts.  
+[EVENT] User received an email from H&M about 3 weeks ago that kicked off their shopping spree.  
+[ASSISTANT_SAID] Assistant encourages the user to share transaction details and acknowledges their mindfulness about spending.  
+[ASSISTANT_SAID] Assistant highlights the importance of being aware of marketing tactics that can trigger impulse purchases.  
+[EVENT] User shares spending data: $70 at H&M for distressed denim jeans and a white linen shirt, $120 at Sephora for skincare products, $80 on Adidas sneakers, $20 on kitchen gadgets, $220 on clothing at ASOS, $50 on candles and soaps at the farmer's market, and $15 on a vintage denim jacket at a garage sale.  
+[ASSISTANT_SAID] Assistant organizes the user's spending data into categories:  
+[ASSISTANT_CREATED] Clothing: Total $305 (H&M: $70, ASOS: $220, Vintage denim jacket: $15)  
+[ASSISTANT_CREATED] Beauty and Personal Care: Total $120 (Sephora: $120)  
+[ASSISTANT_CREATED] Home and Decor: Total $50 (Candles and soaps: $50)  
+[ASSISTANT_CREATED] Miscellaneous: Total $100 (Adidas sneakers: $80, Kitchen gadgets: $20)  
+[ASSISTANT_SAID] Assistant prompts the user to consider areas for improvement in their spending habits.  
+[ASSISTANT_SAID] Assistant lists common mistakes people make when tracking expenses: not tracking small purchases, not categorizing expenses, not accounting for irregular expenses, not tracking cash expenses, not reviewing and adjusting regularly, not being honest

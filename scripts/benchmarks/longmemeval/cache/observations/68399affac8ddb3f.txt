@@ -1,0 +1,12 @@
+**Observation Log:**
+
+- [FACT] User interviewed a candidate named Tommy for a position.
+- [FACT] Tommy is currently employed by the state at a school district.
+- [FACT] Tommy has a wife.
+- [PREFERENCE] Tommy feels that the salary offered by UNG would be a step back from his current employment.
+- [EVENT] User emailed Tommy an offer letter for the position.
+- [CHANGE] Tommy's current employment includes more PTO and better insurance benefits than the offer from UNG.
+- [ASSISTANT_SAID] UNG feels that the salary offered to Tommy is on par for his experience and knowledge.
+- [ASSISTANT_SAID] UNG is not able to increase the salary offered to Tommy.
+- [ASSISTANT_SAID] UNG cannot compete with the state regarding PTO and insurance benefits.
+- [ASSISTANT_CREATED] The assistant composed a reply to Tommy, explaining the salary situation and expressing hope that he will still consider the opportunity at UNG.

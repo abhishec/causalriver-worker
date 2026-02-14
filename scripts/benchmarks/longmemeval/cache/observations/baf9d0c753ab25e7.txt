@@ -1,0 +1,31 @@
+**Observation Log:**
+
+[FACT] User is looking for information on auto racking tracks in California.  
+[FACT] User will be heading to California for an event in August.  
+[FACT] User has been getting into the sport of AutoX for a few months.  
+[FACT] User is staying in LA for the event.  
+[FACT] User drives a modified Honda Civic.  
+[CHANGE] User has made adjustments to their Honda Civic, including a new suspension and weight reduction.  
+[PREFERENCE] User enjoys the sport of AutoX and has had a great experience so far.  
+[EVENT] User is planning to check out Buttonwillow and Willow Springs tracks.  
+[ASSISTANT_SAID] AutoX is an amazing sport, and California has plenty of excellent tracks to offer.  
+[ASSISTANT_SAID] Recommended tracks in California include:  
+[ASSISTANT_CREATED] 1. Willow Springs International Raceway (Rosamond) - offers a variety of courses, including a dedicated AutoX track.  
+[ASSISTANT_CREATED] 2. Buttonwillow Raceway Park (Buttonwillow) - known for high-speed corners and technical sections.  
+[ASSISTANT_CREATED] 3. Thunderhill Raceway Park (Willows) - offers a range of configurations to test driving abilities.  
+[ASSISTANT_CREATED] 4. Sonoma Raceway (Sonoma) - hosts several AutoX events throughout the year.  
+[ASSISTANT_CREATED] 5. Marina Airport AutoX (Marina) - offers an airfield-based AutoX experience.  
+[ASSISTANT_SAID] Buttonwillow and Willow Springs have specific safety requirements and restrictions.  
+[ASSISTANT_SAID] Buttonwillow Raceway Park safety requirements include:  
+[ASSISTANT_CREATED] 1. Snell-rated helmet (SA2015 or newer) is mandatory.  
+[ASSISTANT_CREATED] 2. Vehicle must meet SCCA safety requirements, including valid registration and proof of insurance.  
+[ASSISTANT_CREATED] 3. Specific tire restrictions may apply.  
+[ASSISTANT_CREATED] 4. 103 dB sound limit.  
+[ASSISTANT_SAID] Willow Springs International Raceway safety requirements include:  
+[ASSISTANT_CREATED] 1. Snell-rated helmet (SA2015 or newer) is required.  
+[ASSISTANT_CREATED] 2. Vehicle must meet SCCA safety requirements, including valid registration and proof of insurance.  
+[ASSISTANT_CREATED] 3. No specific tire restrictions, but high-speed corners may require robust tire compounds.  
+[ASSISTANT_CREATED] 4. 101 dB sound limit.  
+[ASSISTANT_SAID] General tips for track preparation include:  
+[ASSISTANT_CREATED] 1. Ensure vehicle passes a tech inspection.  
+[ASSISTANT_CREATED] 2

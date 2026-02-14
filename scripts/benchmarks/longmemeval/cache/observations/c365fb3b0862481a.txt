@@ -1,0 +1,28 @@
+**Observation Log:**
+
+[FACT] User is planning a weekend getaway to Santa Monica.  
+[EVENT] User is trying to plan a weekend getaway to Santa Monica.  
+[ASSISTANT_SAID] Santa Monica is a wonderful destination for a weekend getaway with plenty of delicious restaurants and great hotels.  
+[ASSISTANT_SAID] Recommended restaurants in Santa Monica:  
+[ASSISTANT_SAID] 1. The Lobster: Fresh seafood and stunning ocean views.  
+[ASSISTANT_SAID] 2. The Strand House: California-inspired cuisine with seasonal ingredients and ocean views.  
+[ASSISTANT_SAID] 3. Blue Plate Oysterette: Casual seafood-focused meal with oysters and fish 'n' chips.  
+[ASSISTANT_SAID] 4. The Albright: Beachy eatery with farm-to-table cuisine and popular brunch dishes.  
+[ASSISTANT_SAID] 5. Giorgio Baldi: Cozy Italian spot with house-made pasta and wood-fired pizzas.  
+[ASSISTANT_SAID] Recommended hotels in Santa Monica:  
+[ASSISTANT_SAID] 1. Shutters on the Beach: Luxurious beachfront hotel with stunning ocean views.  
+[ASSISTANT_SAID] 2. The Fairmont Miramar Hotel & Bungalows: Iconic hotel with elegant rooms and beautiful gardens.  
+[ASSISTANT_SAID] 3. Hotel Casa del Mar: Stylish beachfront hotel with a rooftop pool.  
+[ASSISTANT_SAID] 4. The Ambrose Hotel: Eco-friendly hotel with comfortable rooms and a rooftop pool.  
+[ASSISTANT_SAID] 5. Loews Santa Monica Beach Hotel: Family-friendly hotel with spacious rooms and a pool.  
+[ASSISTANT_SAID] Additional tips for Santa Monica:  
+[ASSISTANT_SAID] - Check out the Santa Monica Pier for amusement park and ocean views.  
+[ASSISTANT_SAID] - Stroll along the Third Street Promenade for shops and street performers.  
+[ASSISTANT_SAID] - Visit the Santa Monica Farmers Market on Sundays for fresh produce.  
+[ASSISTANT_SAID] - Bike ride or walk along the Marvin Braude Bike Trail from Santa Monica to Torrance.  
+[FACT] User has been to The Wharf before.  
+[RELATIONSHIP] User's brother proposed to his girlfriend at The Wharf on September 20th.  
+[EVENT] User is looking for recommendations for activities or attractions in Santa Monica for a solo traveler or a couple.  
+[ASSISTANT_SAID] Recommendations for solo travelers in Santa Monica:  
+[ASSISTANT_SAID] 1. Santa Monica Pier Aquarium: Small, free aquarium with marine life.  
+[ASSISTANT_SAID] 2. Third Street Promenade: Ped

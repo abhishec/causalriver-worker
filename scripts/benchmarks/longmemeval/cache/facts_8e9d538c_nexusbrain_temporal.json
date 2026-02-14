@@ -1,0 +1,35 @@
+{
+  "answer_7bdcbd23": [
+    {
+      "fact": "User is making amigurumi toys for their niece and nephew.",
+      "type": "relationship",
+      "entities": [
+        "niece",
+        "nephew"
+      ]
+    },
+    {
+      "fact": "User has a stash of 17 skeins of worsted weight yarn.",
+      "type": "personal",
+      "entities": [
+        "17 skeins",
+        "worsted weight yarn"
+      ]
+    },
+    {
+      "fact": "User prefers to use up their yarn stash.",
+      "type": "preference",
+      "entities": [
+        "yarn stash"
+      ]
+    },
+    {
+      "fact": "User is interested in the sizing of amigurumi toys.",
+      "type": "opinion",
+      "entities": [
+        "amigurumi toys",
+        "sizing"
+      ]
+    }
+  ]
+}

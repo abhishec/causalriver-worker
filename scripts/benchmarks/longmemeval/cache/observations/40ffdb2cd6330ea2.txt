@@ -1,0 +1,37 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/25 (Thu) 19:35  
+[FACT] User is trying to plan out their day.  
+[PREFERENCE] User is available between 8:30 AM and 12:00 PM on weekdays, which is when they are most productive.  
+[EVENT] User wants to schedule a 30-minute appointment on a weekday morning.  
+[ASSISTANT_SAID] Assistant offered to help schedule a 30-minute appointment and provided available time slots:  
+- **Option 1:** 9:00 AM - 9:30 AM  
+- **Option 2:** 9:30 AM - 10:00 AM  
+- **Option 3:** 10:00 AM - 10:30 AM  
+- **Option 4:** 10:30 AM - 11:00 AM  
+- **Option 5:** 11:00 AM - 11:30 AM  
+- **Option 6:** 11:30 AM - 12:00 PM  
+[PREFERENCE] User selected **Option 3:** 10:00 AM - 10:30 AM for the appointment.  
+[ASSISTANT_SAID] Assistant confirmed the selected time and calculated the total hours available between 8:30 AM and 12:00 PM as 3 hours and 30 minutes (3.5 hours).  
+[EVENT] User requested help to set a reminder for upcoming online meetings on Tuesdays and Thursdays.  
+[ASSISTANT_SAID] Assistant provided suggestions for setting reminders:  
+1. **Digital Calendars:** Add meetings to a digital calendar and set reminders.  
+2. **Reminder Apps:** Use apps like Any.do, Todoist, or Reminders (on iOS).  
+3. **Alarms:** Set alarms on phone or watch.  
+4. **Physical Planner:** Write down meetings in a physical planner.  
+[ASSISTANT_SAID] Assistant reminded user to include meeting details like time, topic, and login information.  
+[EVENT] User expressed interest in switching from a physical planner to a digital calendar for better organization and accessibility.  
+[ASSISTANT_SAID] Assistant recommended several digital calendars:  
+1. **Google Calendar (Web, iOS, Android)**  
+2. **Apple Calendar (iOS, macOS)**  
+3. **Microsoft Outlook (Web, iOS, Android)**  
+4. **Any.do (Web, iOS, Android)**  
+5. **Fantastical (iOS, macOS)**  
+6. **Microsoft To Do (Web, iOS, Android)**  
+[ASSISTANT_SAID] Assistant provided factors to consider when choosing a digital calendar:  
+- Cross-platform compatibility  
+- Syncing  
+- Reminders and notifications  
+- Integration  
+- User interface  
+[FACT] User is leaning towards Google Calendar since

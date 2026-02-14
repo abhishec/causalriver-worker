@@ -1,0 +1,11 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/25 (Thu) 15:59
+- [USER] User requested an explanation of blockchain suitable for a child, using examples and similes.
+- [ASSISTANT_SAID] A blockchain is like a big notebook that lots of people can write in, but nobody can rip pages out or change what's already been written.
+- [ASSISTANT_SAID] Think of it like a group project where everyone writes one sentence and passes it on to the next person, and you can never go back and change what you wrote.
+- [ASSISTANT_SAID] For example, imagine you and your friends start a chain story on a notebook, each one of you adds one sentence to the story and then passes it to the next person in the circle.
+- [ASSISTANT_SAID] At the end, you have a story with many sentences from different people and nobody can change what has been written before. 
+- [ASSISTANT_SAID] That's kind of like a blockchain!
+- [ASSISTANT_SAID] Another example would be, a blockchain is like a digital lego tower, where each block is a lego brick, and they all stack on top of each other in a certain order.
+- [ASSISTANT_SAID] You can add a new brick at the top but you can never change or remove bricks that are already in the tower.

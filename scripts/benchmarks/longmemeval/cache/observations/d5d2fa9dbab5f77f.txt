@@ -1,0 +1,27 @@
+**Observation Log:**
+
+- [FACT] User is planning a trip to Maui.
+- [FACT] User wants to use United miles to book a flight.
+- [EVENT] User is estimating how many miles are needed for a round-trip economy ticket.
+- [FACT] User paid $25 for extra legroom on the return flight.
+- [PREFERENCE] User found the extra legroom on the return flight to be totally worth it.
+- [ASSISTANT_SAID] Assistant asked for the user's departure city, travel dates, and Premier status to provide a more accurate estimate of miles required.
+- [FACT] User is flying out of Chicago.
+- [TEMPORAL] User is thinking of traveling in late August or early September.
+- [FACT] User does not have any Premier status with United.
+- [FACT] User just got the United credit card with a 50,000 mile bonus.
+- [ASSISTANT_SAID] Assistant provided the award chart for United: 40,000 miles for peak season (August 15 - September 15) and 35,000 miles for off-peak season (September 1 - November 14, and November 28 - December 14).
+- [ASSISTANT_SAID] Assistant noted that award availability can vary depending on specific flights and dates.
+- [ASSISTANT_SAID] Assistant suggested flying into OGG on a weekday (Monday to Thursday) to increase chances of finding available award seats.
+- [ASSISTANT_SAID] Assistant recommended booking flights well in advance and being flexible with travel dates.
+- [EVENT] User is considering flying out on a Thursday.
+- [ASSISTANT_SAID] Assistant provided educated guesses for the best Thursdays to fly: August 25th, August 31st, and September 7th.
+- [ASSISTANT_SAID] Assistant suggested checking for award availability on multiple Thursdays and being flexible with the return date.
+- [ASSISTANT_SAID] Assistant explained the booking process for an award ticket on United's website, including seat selection.
+- [ASSISTANT_SAID] Assistant noted that Basic Economy seats are not eligible for seat selection until check-in.
+- [ASSISTANT_SAID] Assistant mentioned that some seats may be restricted for passengers with higher elite status or those willing to pay extra.
+- [ASSISTANT_SAID] Assistant advised that seat availability might be limited depending on the aircraft type and configuration.
+- [PREFERENCE] User has had good experiences with seat selection on United.
+- [FACT] User paid $25 for extra legroom on the return flight again, emphasizing it was worth it.
+- [ASSISTANT_SAID] Assistant clarified that credit card miles cannot be used to upgrade to a higher tier in United's loyalty program.
+- [ASSISTANT_SAID] Assistant explained that to upgrade to Premier Gold, the user needs to

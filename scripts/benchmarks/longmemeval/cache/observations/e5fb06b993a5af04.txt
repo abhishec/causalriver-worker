@@ -1,0 +1,22 @@
+**Observation Log:**
+
+**Session Date:** 2023/05/24 (Wed) 09:56  
+**Session ID:** sharegpt_afCogMg_13
+
+1. [FACT] The user is inquiring about the H1B application process.
+2. [FACT] The user provided a letter addressed to "UGNE KARALIUTE" regarding her eligibility under the EU Settlement Scheme.
+3. [FACT] The letter states that Ugne Karaliute has been granted Indefinite Leave in the United Kingdom under Appendix EU to the Immigration Rules.
+4. [FACT] The letter mentions that if Ugne was within the UK on the date of her application, she has been granted Indefinite Leave to Remain; if outside, she has been granted Indefinite Leave to Enter.
+5. [FACT] The letter indicates that Ugne has secure status under UK law with no time limit on her stay in the UK.
+6. [FACT] The letter outlines rights and benefits for Ugne, including the ability to work, use the NHS, enroll in education, access public funds, and travel in and out of the UK.
+7. [FACT] The letter states that Ugne's status takes effect from the date of the letter.
+8. [FACT] The letter provides a link to further information about rights under EU law: www.gov.uk/right-to-reside.
+9. [FACT] The letter advises Ugne to keep it for personal records but states it is not proof of her status.
+10. [FACT] The letter provides a link to the Home Office online status service: www.gov.uk/view-your-settled-status.
+11. [FACT] The letter includes contact information for the EU Settlement Resolution Centre, with phone numbers for calling from inside and outside the UK.
+12. [ASSISTANT_SAID] The assistant summarized the letter, stating it informs Ugne Karaliute of her successful application under the EU Settlement Scheme and her granted Indefinite Leave in the UK.
+13. [ASSISTANT_SAID] The assistant explained that the H1B form cannot be submitted to it as it cannot receive or process forms, and that the application must be submitted to USCIS through proper channels.
+14. [ASSISTANT_SAID] The assistant provided the USCIS website link ([www.uscis.gov](http://www.uscis.gov)) for information on the H1B visa application process.
+15. [ASSISTANT_SAID] The assistant mentioned that forms and supporting documentation can be submitted electronically or by mail and that an account on the USCIS website is needed for electronic submission.
+16. [CHANGE] The user provided an alert regarding changes to the H-1B and H-1B1 petition fee payment process effective April 1, 2022.
+17. [EVENT] The user shared that USCIS will no longer accept a single, combined fee payment for

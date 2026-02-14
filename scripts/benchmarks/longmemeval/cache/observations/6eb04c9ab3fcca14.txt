@@ -1,0 +1,23 @@
+**Observation Log:**
+
+- [FACT] User's username is abdullamubharak.
+- [FACT] User is using a MacBook Pro.
+- [FACT] User's current directory is "startup" within the "Downloads" folder.
+- [FACT] User has various files in the "startup" directory, including "NODECLOUD.pem" and "NODEJS.pem".
+- [FACT] User attempted to change permissions on "NODEJS.pem" but received an error indicating the file does not exist in the current directory.
+- [FACT] User successfully changed permissions on "NODEJS.pem" after navigating to the "Codes" directory.
+- [FACT] User is connecting to an Amazon EC2 instance with the IP address ec2-3-109-174-93.ap-south-1.compute.amazonaws.com.
+- [TEMPORAL] User's last login to the console was on Fri Feb 17 at 14:28:57.
+- [TEMPORAL] The system information displayed is as of Fri Feb 17 at 10:09:00 UTC 2023.
+- [FACT] User is using Ubuntu 22.04.1 LTS on the EC2 instance.
+- [FACT] User is installing NGINX on the EC2 instance.
+- [FACT] The installation of NGINX includes additional packages such as libjpeg-turbo8, libgd3, and others.
+- [FACT] User confirmed the installation of NGINX by typing 'y' when prompted.
+- [ASSISTANT_SAID] The assistant noted that the user is installing NGINX on an Amazon EC2 instance running Ubuntu 22.04.1 LTS.
+- [ASSISTANT_SAID] NGINX is described as a popular web server that can serve static content, reverse proxy dynamic content, and load balance traffic.
+- [CHANGE] User's action of changing directory from "startup" to "Codes" indicates a change in their working context.
+- [EVENT] User executed a command to switch to the root user on the EC2 instance using "sudo su -".
+- [EVENT] User executed a command to install NGINX using "sudo apt-get install nginx".
+- [FACT] The installation process fetched 2689 kB of archives and required 8335 kB of additional disk space.
+- [FACT] The installation process included setting up various libraries and modules related to NGINX.
+- [ASSISTANT_CREATED] The assistant did not create any specific content in this session.

@@ -1,0 +1,43 @@
+{
+  "answer_30f63ddb": [
+    {
+      "fact": "User has been watching a lot of documentaries lately.",
+      "type": "preference",
+      "entities": [
+        "documentaries"
+      ]
+    },
+    {
+      "fact": "User enjoys nature and wildlife documentaries.",
+      "type": "preference",
+      "entities": [
+        "nature documentaries",
+        "wildlife documentaries"
+      ]
+    },
+    {
+      "fact": "User has recently finished watching 'Tiger King'.",
+      "type": "event",
+      "entities": [
+        "Tiger King"
+      ]
+    },
+    {
+      "fact": "User is interested in recommendations for documentary series similar to 'Our Planet', 'Free Solo', and 'Tiger King'.",
+      "type": "preference",
+      "entities": [
+        "Our Planet",
+        "Free Solo",
+        "Tiger King"
+      ]
+    },
+    {
+      "fact": "User is specifically interested in learning more about 'Dynasties' and 'Chasing Coral'.",
+      "type": "preference",
+      "entities": [
+        "Dynasties",
+        "Chasing Coral"
+      ]
+    }
+  ]
+}

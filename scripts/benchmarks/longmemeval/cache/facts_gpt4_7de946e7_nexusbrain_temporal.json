@@ -1,0 +1,136 @@
+{
+  "answer_6a78e959_1": [
+    {
+      "fact": "User has been experiencing stomach issues.",
+      "type": "personal",
+      "entities": []
+    },
+    {
+      "fact": "User has been keeping a food diary to track symptoms.",
+      "type": "personal",
+      "entities": []
+    },
+    {
+      "fact": "User has been tracking food intake, eating times, and symptoms.",
+      "type": "personal",
+      "entities": []
+    },
+    {
+      "fact": "User's symptoms include bloating and gassiness.",
+      "type": "personal",
+      "entities": []
+    },
+    {
+      "fact": "User has noticed that dairy products worsen their symptoms.",
+      "type": "opinion",
+      "entities": [
+        "dairy products"
+      ]
+    },
+    {
+      "fact": "User has been tracking their food diary for about a month.",
+      "type": "personal",
+      "entities": []
+    },
+    {
+      "fact": "User was diagnosed with bronchitis by Dr. Smith.",
+      "type": "event",
+      "entities": [
+        "Dr. Smith",
+        "bronchitis"
+      ]
+    },
+    {
+      "fact": "User was prescribed antibiotics for bronchitis.",
+      "type": "event",
+      "entities": [
+        "antibiotics"
+      ]
+    },
+    {
+      "fact": "User finished antibiotics on February 20th.",
+      "type": "event",
+      "entities": [
+        "February 20th"
+      ]
+    },
+    {
+      "fact": "User had a follow-up appointment with Dr. Smith on March 1st.",
+      "type": "event",
+      "entities": [
+        "Dr. Smith",
+        "March 1st"
+      ]
+    },
+    {
+      "fact": "User has a severity rating of 7 or 8 for bloating and gassiness.",
+      "type": "personal",
+      "entities": []
+    },
+    {
+      "fact": "User has experienced some abdominal pain, mostly in the morning.",
+      "type": "personal",
+      "entities": []
+    },
+    {
+      "fact": "User saw a pulmonologist, Dr. Johnson, on March 10th.",
+      "type": "event",
+      "entities": [
+        "Dr. Johnson",
+        "March 10th"
+      ]
+    },
+    {
+      "fact": "User was diagnosed with pneumonia after a chest X-ray.",
+      "type": "event",
+      "entities": [
+        "pneumonia"
+      ]
+    }
+  ],
+  "answer_6a78e959_2": [
+    {
+      "fact": "User is trying to get their health back on track after setbacks.",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User recently had a skin tag removed from their neck.",
+      "type": "personal",
+      "entities": [
+        "skin tag",
+        "neck"
+      ]
+    },
+    {
+      "fact": "User is still taking antibiotics for pneumonia.",
+      "type": "personal",
+      "entities": [
+        "antibiotics",
+        "pneumonia"
+      ]
+    },
+    {
+      "fact": "User is looking for healthy recipes that are easy on the stomach.",
+      "type": "preference",
+      "entities": [
+        "healthy recipes",
+        "stomach"
+      ]
+    },
+    {
+      "fact": "User has been trying to track their food intake.",
+      "type": "preference",
+      "entities": [
+        "food intake"
+      ]
+    },
+    {
+      "fact": "User is interested in keeping a food diary.",
+      "type": "preference",
+      "entities": [
+        "food diary"
+      ]
+    }
+  ]
+}

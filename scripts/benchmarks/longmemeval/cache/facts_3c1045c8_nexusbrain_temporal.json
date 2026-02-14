@@ -1,0 +1,88 @@
+{
+  "answer_c8cc60d6_2": [
+    {
+      "fact": "User is considering going back to school for a master's degree",
+      "type": "event",
+      "entities": [
+        "master's degree"
+      ]
+    },
+    {
+      "fact": "User is interested in pursuing a master's degree in marketing",
+      "type": "preference",
+      "entities": [
+        "marketing"
+      ]
+    },
+    {
+      "fact": "User has been working in the marketing industry for five years",
+      "type": "personal",
+      "entities": [
+        "marketing industry",
+        "five years"
+      ]
+    },
+    {
+      "fact": "User feels the need to upgrade their skills to stay competitive",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User's career goal is to move into a leadership role",
+      "type": "goal",
+      "entities": [
+        "leadership role"
+      ]
+    },
+    {
+      "fact": "User is open to full-time or part-time programs with a mix of online and on-campus classes",
+      "type": "preference",
+      "entities": [
+        "full-time",
+        "part-time",
+        "online",
+        "on-campus"
+      ]
+    },
+    {
+      "fact": "User's department has an average employee age of 29.5 years old",
+      "type": "personal",
+      "entities": [
+        "department",
+        "29.5 years old"
+      ]
+    }
+  ],
+  "answer_c8cc60d6_1": [
+    {
+      "fact": "User is currently 32 years old",
+      "type": "personal",
+      "entities": [
+        "32 years old"
+      ]
+    },
+    {
+      "fact": "User is considering getting into a skincare routine",
+      "type": "preference",
+      "entities": [
+        "skincare routine"
+      ]
+    },
+    {
+      "fact": "User is interested in anti-aging creams and moisturizers suitable for their age",
+      "type": "preference",
+      "entities": [
+        "anti-aging creams",
+        "moisturizers"
+      ]
+    },
+    {
+      "fact": "User is interested in learning more about the Retinol 0.5% Night Cream by Dermalogica",
+      "type": "preference",
+      "entities": [
+        "Retinol 0.5% Night Cream",
+        "Dermalogica"
+      ]
+    }
+  ]
+}

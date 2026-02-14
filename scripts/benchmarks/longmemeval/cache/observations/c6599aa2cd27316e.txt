@@ -1,0 +1,18 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/29 (Mon) 10:40  
+[USER] User provided answers to a series of questions numbered 249 to 260.  
+[ASSISTANT_SAID] The answer to question 249 is D. A method paper (also called an application paper) describes a novel technique or procedure.  
+[ASSISTANT_SAID] The answer to question 250 is A. CDS has shown benefits in diagnosis, treatment guidelines, clinical pathway adherence.  
+[ASSISTANT_SAID] The answer to question 251 is C. An outcome measure describes a real-world patient benefit. Using an appropriate drug-drug interaction checker, maintaining an accurate active medication list would be expected to reduce the number of drug-drug interactions.  
+[ASSISTANT_SAID] The answer to question 252 is A. A milestone is a zero-length task meant to signify completion of some part of a project.  
+[ASSISTANT_SAID] The answer to question 253 is D. Distributive bargaining is encountered when there is a fixed amount of resources that must be split among all parties, such as when buyer and seller haggle over a price.  
+[ASSISTANT_SAID] The answer to question 254 is D. Real time communication, such as interactive video, is a form of synchronous communication.  
+[ASSISTANT_SAID] The answer to question 255 is A. Sensitivity. Sensitivity is the probability of a test giving a true positive if we know a patient has a disease.  
+[ASSISTANT_SAID] The answer to question 256 is D. This represents a finish-to-finish dependency. Task B can not be finished until task A is finished.  
+[ASSISTANT_SAID] The answer to question 257 is A. Data stewardship includes many processes, including those that ensure that the right data is stored in the right place in the database so that users can get to it easily.  
+[ASSISTANT_SAID] The answer to question 258 is A. ICD-10 supplanted ICD-9 as the most commonly used method of encoding diagnoses in 2016.  
+[ASSISTANT_SAID] The answer to question 259 is D. Telepresence, which is the simulation of a remote environment, requires immediate feedback to be successful.  
+[ASSISTANT_SAID] The answer to question 260 is C. User centered design should consider user goals, motivations, and environment throughout the design and development phases.  
+
+[ASSISTANT_CREATED] The assistant created a structured observation log capturing the user's answers and the assistant's responses in a tabular format, including question numbers, answer letters, and the first ten words of each explanation.

@@ -1,0 +1,24 @@
+**Observation Log:**
+
+[FACT] User is looking for a recipe for Korean BBQ tacos.  
+[EVENT] User attended a food festival last weekend.  
+[ASSISTANT_SAID] Korean BBQ tacos are a fusion of Korean and Mexican flavors and are popular in food festivals and trendy restaurants.  
+[ASSISTANT_CREATED] Provided a recipe for Korean BBQ tacos, including ingredients and instructions.  
+[ASSISTANT_SAID] Recommended using different types of protein like chicken, pork, or tofu for a vegetarian option in the Korean BBQ tacos recipe.  
+[ASSISTANT_SAID] Suggested adding crispy kimchi bits on top of the tacos for extra crunch and experimenting with different types of kimchi.  
+[FACT] User is looking for a good Korean chili flake brand for the recipe.  
+[ASSISTANT_SAID] Recommended several brands of Korean chili flakes: Sempio, Koko, Chongga, Samyang, and Jongga.  
+[ASSISTANT_SAID] Advised on factors to consider when choosing Korean chili flakes, such as heat level, flavor profile, and quality.  
+[ASSISTANT_SAID] Suggested that Korean chili flakes can be found at Asian markets, online retailers, or well-stocked grocery stores.  
+[ASSISTANT_SAID] Mentioned that if Korean chili flakes are unavailable, substitutes like cayenne pepper or red pepper flakes could be used, but the flavor and heat level may differ.  
+[ASSISTANT_SAID] Recommended storing Korean chili flakes in an airtight container away from direct sunlight.  
+[FACT] User has been obsessed with the Pho Ga at a new Vietnamese restaurant near their office.  
+[EVENT] User has been going to the Vietnamese restaurant at least three times a week for the past three weeks.  
+[ASSISTANT_SAID] Provided tips on making a rich and flavorful Pho Ga broth, including using high-quality bones, roasting the bones, using aromatics, simmering slowly, and adding spices and herbs.  
+[ASSISTANT_CREATED] Provided a simple Pho Ga broth recipe with ingredients and instructions.  
+[FACT] User has not yet asked the restaurant owner for their secret recipe but is considering asking about their technique for making the broth from scratch.  
+[EVENT] User is taking a cooking class on Saturdays and is enjoying it.  
+[FACT] User is looking for recommendations for a good Thai cooking class or instructor in their area.  
+[ASSISTANT_SAID] Suggested several ways to find a good Thai cooking class or instructor, including online searches, cooking schools, Meetup.com, word of mouth, social media, and local colleges or community centers.  
+[ASSISTANT_SAID] Mentioned that they do not have personal experiences or direct knowledge of specific cooking classes or instructors in the user's area.  
+[TEMPORAL] Session date is 2023/05/28 (Sun) at

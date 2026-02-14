@@ -1,0 +1,28 @@
+**Observation Log:**
+
+- [FACT] The user lives in the same area as the school they have been supporting.
+- [PREFERENCE] The user is looking for local art exhibitions or events.
+- [PREFERENCE] The user is especially interested in exhibitions that feature emerging artists.
+- [EVENT] The user attended an art fair in Brooklyn last October.
+- [TEMPORAL] The session date is 2023/04/01.
+- [EVENT] The user has been taking art classes at a nearby studio on Tuesday evenings.
+- [PREFERENCE] The user is enjoying watercolor and mixed media classes.
+- [ASSISTANT_SAID] The assistant suggested checking local art council or tourism websites for a calendar of events.
+- [ASSISTANT_SAID] The assistant recommended following local art galleries, museums, and event organizers on social media.
+- [ASSISTANT_SAID] The assistant advised checking local newspapers or online event calendars like Eventbrite, Meetup, or Lanyrd.
+- [ASSISTANT_SAID] The assistant suggested keeping an eye on community boards at local coffee shops, libraries, or bookstores for event posters and flyers.
+- [ASSISTANT_SAID] The assistant encouraged asking friends, family, and colleagues about upcoming art events.
+- [ASSISTANT_SAID] The assistant provided tips for finding emerging artist exhibitions, including looking for open studios or artist collective events.
+- [ASSISTANT_SAID] The assistant mentioned checking out university or college art departments for student exhibitions.
+- [ASSISTANT_SAID] The assistant suggested searching for "emerging artist" or "new talent" exhibitions online.
+- [ASSISTANT_SAID] The assistant recommended attending artist talks or panel discussions for insights into emerging artists.
+- [ASSISTANT_SAID] The assistant provided a list of online resources and tutorials for improving art skills, including YouTube, Skillshare, Craftsy, Drawing Co., New Masters Academy, Ctrl+Paint, Artists Network, DeviantArt, Proko, and Tuts+.
+- [PREFERENCE] The user is interested in online resources or tutorials to supplement their learning and improve their skills.
+- [ASSISTANT_SAID] The assistant emphasized the importance of practice in improving art skills.
+- [PREFERENCE] The user is thinking about displaying their artwork in a local exhibition later this year.
+- [EVENT] The user has been inspired by attending art events to showcase their art.
+- [PREFERENCE] The user plans to showcase mixed media pieces that incorporate natural elements in the exhibition.
+- [FACT] The user created a piece using shells and sand from a recent beach trip.
+- [ASSISTANT_SAID] The assistant encouraged the user to prepare well in advance for the exhibition and research guidelines.
+- [ASSISTANT_SAID] The assistant advised taking high-quality photos of the artwork and preparing an artist statement.
+-

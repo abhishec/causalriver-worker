@@ -1,0 +1,24 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/28 (Sun) 23:52
+- [ASSISTANT_SAID] The mobile app developed by the team does not have the functionality to update the first and last name fields.
+- [ASSISTANT_SAID] The WordPress platform creates a user's username based on their first and last name, which means those fields cannot be edited.
+- [ASSISTANT_SAID] Users are able to update their password and the email and mobile number fields are editable.
+- [USER] Requested to make the pop message (تمت أضافة ١ منتج الي عربة التسوق) RTL in Arabic.
+- [ASSISTANT_SAID] Asked the user to provide an image to show the issue with the pop-up message.
+- [ASSISTANT_SAID] Suggested a rephrased answer regarding the pop-up message issue, asking for an image or screenshot to illustrate the RTL formatting issue.
+- [USER] Reported that the problem on the locations page still exists and mentioned a misunderstanding regarding previous requests.
+- [USER] Provided a link to a screenshot for what is needed and requested to hide the open time.
+- [ASSISTANT_SAID] Stated that the location page was developed according to the agreed-upon design and scope, similar to the Extra app.
+- [USER] Mentioned that the links for all banners are not working and that they cannot put a link in any banner.
+- [ASSISTANT_SAID] Instructed the user to choose a referral type (product or category) and then select the desired product or category to redirect users to.
+- [USER] Wrote in Arabic: "نرفع واحدة مبدأية" (We are raising a preliminary one).
+- [ASSISTANT_SAID] Responded in Arabic, asking for more context to better assist the user.
+- [USER] Requested a rephrased email regarding marketing material and support for the IOS version.
+- [ASSISTANT_SAID] Provided a rephrased email confirming support, mentioning the delivery of the complete Android solution, and requesting the marketing materials for the IOS version.
+- [USER] Shared an email received from a customer regarding the marketing material and support period.
+- [ASSISTANT_SAID] Suggested confirming support, mentioning the complete Android solution, and requesting feedback on the latest APK.
+- [USER] Stated that they are developing an eCommerce app using WordPress and WooCommerce and want to apply a global API filter to retrieve only items in stock.
+- [ASSISTANT_SAID] Provided the WooCommerce API endpoint to retrieve only items in stock: `/wp-json/wc/v3/products?stock_status=instock`.
+- [ASSISTANT_SAID] Explained how to modify the endpoint to retrieve specific products or categories in stock.
+- [USER

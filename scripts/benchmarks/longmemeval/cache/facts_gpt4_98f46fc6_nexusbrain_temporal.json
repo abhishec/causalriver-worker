@@ -1,0 +1,71 @@
+{
+  "answer_5850de18_2": [
+    {
+      "fact": "User is looking for healthy snack ideas for their office.",
+      "type": "preference",
+      "entities": [
+        "healthy snack ideas",
+        "office"
+      ]
+    },
+    {
+      "fact": "User helps organize a charity bake sale at their office.",
+      "type": "event",
+      "entities": [
+        "charity bake sale",
+        "office"
+      ]
+    },
+    {
+      "fact": "User wants to balance sweet treats with savory options.",
+      "type": "opinion",
+      "entities": [
+        "sweet treats",
+        "savory options"
+      ]
+    },
+    {
+      "fact": "User is particularly interested in Spicy Roasted Chickpeas.",
+      "type": "preference",
+      "entities": [
+        "Spicy Roasted Chickpeas"
+      ]
+    }
+  ],
+  "answer_5850de18_1": [
+    {
+      "fact": "User participates in charity events",
+      "type": "event",
+      "entities": [
+        "charity events"
+      ]
+    },
+    {
+      "fact": "User wants to stay motivated in charity work",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User is considering participating in a charity run",
+      "type": "event",
+      "entities": [
+        "charity run"
+      ]
+    },
+    {
+      "fact": "User likes the tip about setting goals and challenges",
+      "type": "preference",
+      "entities": [
+        "setting goals",
+        "challenges"
+      ]
+    },
+    {
+      "fact": "User is looking for a training plan for a 5K run",
+      "type": "event",
+      "entities": [
+        "5K run"
+      ]
+    }
+  ]
+}

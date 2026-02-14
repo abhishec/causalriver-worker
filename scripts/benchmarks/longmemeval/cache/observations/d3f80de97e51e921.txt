@@ -1,0 +1,27 @@
+**Observation Log:**
+
+**Session Date:** 2023/05/20 (Sat) 02:12  
+**Session ID:** sharegpt_yRAXvt2_0
+
+1. [FACT] User's name is Tzu-li Liu.
+2. [EVENT] User is interested in a potential review research topic related to biochemical sensors and neuromodulation systems.
+3. [ASSISTANT_SAID] Suggested title for the review: "A Systematic Review of Biochemical Sensors for Monitoring Biomarkers in Closed-loop Neuromodulation Systems."
+4. [ASSISTANT_SAID] Proposed research question: "What are the recent advances in the development of biochemical sensors for monitoring biomarkers in closed-loop neuromodulation systems, and how do they impact the clinical applications of neuromodulation?"
+5. [ASSISTANT_SAID] Objective of the review: To provide a comprehensive analysis of recent advances in biochemical sensors for monitoring biomarkers in closed-loop neuromodulation systems.
+6. [ASSISTANT_SAID] Methodology includes a systematic approach with a comprehensive literature search of relevant databases such as PubMed, Scopus, and Web of Science.
+7. [ASSISTANT_SAID] Inclusion criteria for the review: publication year (2018 to present) and relevance to the topic.
+8. [ASSISTANT_SAID] Data extraction will include the type of sensor, biomarker monitored, and clinical application.
+9. [ASSISTANT_SAID] Data analysis will use a qualitative synthesis approach, with findings presented in a narrative format.
+10. [ASSISTANT_SAID] Significance of the review: It will provide an overview of recent advances in biochemical sensors for monitoring biomarkers in closed-loop neuromodulation systems, important for researchers, clinicians, and medical device manufacturers.
+11. [ASSISTANT_CREATED] Detailed description of each section of the systematic review, including objectives for each chapter.
+12. [ASSISTANT_CREATED] List of paragraphs/chapters with objectives:
+    - I. Introduction: Overview of the topic and research question.
+    - II. Methodology: Description of methods used for the systematic review.
+    - III. Results: Presentation of results from the systematic review.
+    - IV. Discussion: Discussion of findings and implications.
+    - V. Conclusion: Summary of findings and concluding remarks.
+    - VI. References: Comprehensive list of references cited in the review.
+13. [EVENT] User mentioned a research journal calling for review papers.
+14. [ASSISTANT_SAID] Provided a summary of the journal's call for papers, emphasizing the exploration of the brain and the development of advanced technologies for brain-machine interfaces.
+15. [ASSISTANT_SAID] Topics of interest for the journal include novel materials, devices, circuit systems, and modalities for modulating and detecting neural activities.
+16. [USER] Requested a brainstorming topic related

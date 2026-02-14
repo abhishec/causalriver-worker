@@ -1,0 +1,19 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/27 (Sat) 14:59
+- [USER] The user provided a table of critical values (percentiles) for the $t$ distribution.
+- [USER] The table includes columns labeled "Percent", "One-sided", and "Two-sided".
+- [USER] The "Percent" column represents $100 \times \mbox{cumulative}$ distribution function.
+- [USER] The "One-sided" column indicates the significance level for the one-sided upper critical value.
+- [USER] The "Two-sided" column gives the two-sided significance level.
+- [USER] The user listed specific percentiles: 75, 90, 95, 97.5, 99, 99.5, 99.75, 99.9, 99.95, 99.975, 99.99, 99.995.
+- [USER] The user provided significance levels for one-sided $\alpha$: .25, .10, .05, .025, .01, .005, .0025, .001, .0005, .00025, .0001, .00005.
+- [USER] The user provided significance levels for two-sided $\alpha$: .50, .20, .10, .05, .02, .01, .005, .002, .001, .0005, .0002, .0001.
+- [USER] The user provided degrees of freedom (df) values ranging from 1 to $\infty$ with corresponding critical values.
+- [ASSISTANT_SAID] The assistant explained that the $t$ distribution is a probability distribution used to make inferences about the population mean when the sample size is small and/or the population standard deviation is unknown.
+- [ASSISTANT_SAID] The assistant described the $t$ distribution as a bell-shaped distribution similar to the standard normal distribution but with heavier tails.
+- [ASSISTANT_SAID] The assistant noted that the shape of the $t$ distribution depends on the degrees of freedom, which is equal to the sample size minus one.
+- [ASSISTANT_SAID] The assistant mentioned that the $t$ distribution is often used in hypothesis testing to test whether the sample mean is significantly different from a known or hypothesized population mean.
+- [ASSISTANT_SAID] The assistant stated that a $t$-test is used to calculate a test statistic, which is then compared to critical values from the $t$ distribution to determine the p-value and make a decision about the null hypothesis.
+- [ASSISTANT_SAID] The assistant explained that the $t$ distribution is also used in confidence interval estimation.
+- [ASSISTANT_SAID] The assistant defined a confidence interval as a range of values likely to contain the

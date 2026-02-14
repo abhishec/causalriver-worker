@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/22 (Mon) 08:46  
+[USER] Question 8: What is Herstatt risk?  
+[USER] Option 1: Herstatt risk is the risk that a counterpart fails to deliver a security or its value in cash as per agreement.  
+[USER] Option 2: Herstatt risk is the risk that a counterpart fails to deliver the correct documents as per agreement.  
+[ASSISTANT_SAID] Herstatt risk is the risk that a counterpart fails to deliver a security or its value in cash as per agreement when the security was traded after the other counterparties or counterpart have already delivered security or cash value as per the trade agreement.  
+[ASSISTANT_SAID] Therefore, the correct option is: Herstatt risk is the risk that a counterpart fails to deliver a security or its value in cash as per agreement when the security was traded after the other counterparties or counterpart have already delivered security or cash value as per the trade agreement.  
+[USER] Question 9: How many banks are involved in “correspondent banking arrangements”?  
+[USER] Option 1: One  
+[USER] Option 2: Two  
+[USER] Option 3: Three or more  
+[ASSISTANT_SAID] "Correspondent banking arrangements" involve at least two banks, where one bank (the correspondent bank) provides services on behalf of another bank (the respondent bank) in a different location, typically in a different country.  
+[ASSISTANT_SAID] The correspondent bank may provide services such as payment processing, foreign exchange, and cash management to the respondent bank's customers, in order to facilitate cross-border transactions.  
+[ASSISTANT_SAID] Therefore, the correct option is: Two or more (at least two).  
+[USER] Do both Swift network and Western Union transfer money?  
+[USER] Option 1: Yes both transfer money  
+[USER] Option 2: No only Western Union transfer money  
+[USER] Option 3: No only Swift transfer money  
+[ASSISTANT_SAID] Both Swift network and Western Union transfer money, but they operate in different ways.  
+[ASSISTANT_SAID] The SWIFT network is a messaging system that enables banks and financial institutions around the world to securely exchange information and instructions relating to financial transactions.  
+[ASSISTANT_SAID] It does not transfer money directly, but it facilitates the transfer of funds between banks by transmitting payment instructions and settlement messages.  
+[ASSISTANT_SAID] Western Union, on the other hand, is a financial services company that specializes in person-to-person money transfers and other payment services, such as bill payments and money orders.  
+[ASSISTANT_SAID] Therefore, the correct option is: Yes, both transfer money.  
+[

@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/28 (Sun) 08:21  
+[EVENT] User is trying to track online spending and seeks help to set up a budgeting tool.  
+[EVENT] User purchased a pair of boots from Zappos on January 15th and wants to include it in the tracking.  
+[ASSISTANT_SAID] Assistant offered to help set up a budgeting tool to track online spending.  
+[ASSISTANT_SAID] Assistant suggested four budgeting options: Spreadsheets, Mint, Personal Capital, and YNAB (You Need a Budget).  
+[ASSISTANT_CREATED] Assistant provided a template for an Online Spending Tracker with columns for Date, Category, Description, and Amount.  
+[ASSISTANT_CREATED] Assistant included an initial entry for the Zappos boots in the Online Spending Tracker.  
+[EVENT] User decided to go with the spreadsheet method for tracking spending.  
+[EVENT] User mentioned another online purchase of a pair of sneakers from Nike on January 20th and asked to add it to the table.  
+[ASSISTANT_SAID] Assistant confirmed that the Nike sneakers purchase could be added to the table and provided an updated version of the Online Spending Tracker.  
+[EVENT] User purchased a few sweaters from Uniqlo on January 25th and asked to add that to the table as well.  
+[ASSISTANT_SAID] Assistant confirmed that the Uniqlo purchase could be added and provided an updated version of the Online Spending Tracker.  
+[ASSISTANT_SAID] Assistant suggested adding more columns to the tracker for Total, Category Total, and Month to help analyze spending.  
+[ASSISTANT_SAID] Assistant encouraged the user to consider using formulas to calculate totals automatically.  
+[EVENT] User inquired about setting up a reminder or alert for when approaching a spending limit in a specific category, specifically limiting clothing purchases to $500 per month.  
+[ASSISTANT_SAID] Assistant provided three methods to set up reminders: using conditional formatting in Google Sheets, using Google Sheets Scripts, and using third-party budgeting tools.  
+[EVENT] User decided to try the first method using conditional formatting in Google Sheets and asked for help setting it up.  
+[ASSISTANT_SAID] Assistant provided step-by-step instructions for setting up conditional formatting in Google Sheets to alert the user when they approach their spending limit.  
+[EVENT] User suggested adjusting the formula to account for the month, wanting to limit clothing purchases to $500 per month and asked if a specific formula would work.  
+[ASSISTANT_SAID] Assistant confirmed the user's formula was close and provided a corrected version to account for the current month using `SUMIFS`.  
+[ASSISTANT_SAID] Assistant explained the components of the corrected formula for tracking clothing purchases in the current month.

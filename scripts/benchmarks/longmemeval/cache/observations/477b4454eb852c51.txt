@@ -1,0 +1,7 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/29 (Mon) 23:17
+- [FACT] User requested information regarding Microsoft Teams meeting policies.
+- [ASSISTANT_SAID] Policy name: "Teams Meeting Policy"
+- [ASSISTANT_SAID] Setting to turn off: "Allow dial-out to phone numbers from within a meeting"
+- [ASSISTANT_SAID] To turn off this setting, navigate to the Teams Admin Center > Meetings > Meeting policies > Select the policy you want to modify > Edit the policy > Expand the "Calling" section > Toggle off the "Allow dial-out to phone numbers from within a meeting" setting.

@@ -1,0 +1,40 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/27 (Sat) 12:24
+- [FACT] User is traveling to Costa Rica.
+- [ASSISTANT_SAID] There are several dangerous animals and insects in Costa Rica, including: 
+  - Snakes: fer-de-lance, coral snake, bushmaster, eyelash viper.
+  - Crocodiles: live in rivers and near beaches.
+  - Poison dart frogs: secrete a toxin that can be dangerous.
+  - Spiders: black widow and brown recluse spider.
+  - Mosquitoes: can carry diseases such as dengue fever, chikungunya, and zika virus.
+  - Sharks: have been involved in attacks near the Nicoya Peninsula.
+- [ASSISTANT_SAID] Precautions to protect from dangerous animals and insects in Costa Rica include:
+  - Wear long-sleeved shirts, long pants, and closed-toe shoes.
+  - Use insect repellent containing DEET, picaridin, or lemon eucalyptus oil.
+  - Stay on designated paths.
+  - Don't approach wild animals.
+  - Be cautious near bodies of water.
+  - Seek medical attention if bitten or stung.
+- [ASSISTANT_SAID] Additional things to be aware of when traveling to Costa Rica include:
+  - Road conditions: challenging with potholes, narrow bridges, and steep hills.
+  - Weather: varies by region; June through November is the rainy season.
+  - Natural disasters: prone to earthquakes and volcanic eruptions.
+  - Safety: generally safe but take basic precautions.
+  - Language: Spanish is the official language; many speak some English.
+- [USER] Expressed concern about dangerous animals and insects in Costa Rica, stating "Yikes, that sounds scary!"
+- [USER] Asked for recommendations on must-see attractions in Costa Rica.
+- [ASSISTANT_SAID] Must-see attractions in Costa Rica include:
+  - Arenal Volcano: popular for hiking and hot springs.
+  - Monteverde Cloud Forest Reserve: diverse plant and animal species.
+  - Manuel Antonio National Park: known for beaches and wildlife.
+  - Tortuguero National Park: accessible by boat or plane, known for wildlife.
+  - Osa Peninsula: pristine rainforests and beautiful beaches.
+- [USER] Expressed excitement about exploring the natural beauty of Costa Rica.
+- [USER] Asked for recommendations for local food to try, stating "I'm a big foodie!"
+- [ASSISTANT_SAID] Must-try local foods in Costa Rica include:
+  - Gallo Pinto: traditional breakfast dish with rice and beans.
+  - Casado: meal with beans, rice, plantains, salad, and choice of meat.
+  - Arroz con Pollo: chicken and rice dish.
+  - Ceviche: seafood marinated in lime juice.
+  - Tamales

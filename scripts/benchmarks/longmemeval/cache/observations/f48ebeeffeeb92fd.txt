@@ -1,0 +1,17 @@
+**Observation Log:**
+
+[SESSION_DATE] 2023/06/18 (Sun) 16:33  
+[FACT] User is looking for BBQ sauce recipes that use apple cider vinegar.  
+[ASSISTANT_SAID] Apple cider vinegar adds a wonderful depth of flavor to BBQ sauce.  
+[ASSISTANT_CREATED] Recipe 1: Classic Apple Cider BBQ Sauce - 1 cup ketchup, 1/2 cup apple cider vinegar, 2 tablespoons brown sugar, 2 tablespoons Worcestershire sauce, 1 teaspoon smoked paprika, 1 teaspoon garlic powder, salt and pepper, to taste.  
+[ASSISTANT_CREATED] Recipe 2: Sweet and Tangy Apple Cider BBQ Sauce - 1 cup ketchup, 1/2 cup apple cider vinegar, 1/4 cup honey, 2 tablespoons Dijon mustard, 1 teaspoon ground cinnamon, 1/2 teaspoon cayenne pepper (optional).  
+[ASSISTANT_CREATED] Recipe 3: Spicy Apple Cider BBQ Sauce - 1 cup ketchup, 1/2 cup apple cider vinegar, 2 tablespoons hot sauce, 2 tablespoons brown sugar, 1 teaspoon ground cumin, 1/2 teaspoon smoked paprika.  
+[ASSISTANT_CREATED] Recipe 4: Apple Cider BBQ Sauce with a Twist - 1 cup ketchup, 1/2 cup apple cider vinegar, 1/4 cup apple butter, 2 tablespoons Dijon mustard, 1 teaspoon ground ginger, 1/2 teaspoon cinnamon.  
+[ASSISTANT_CREATED] Recipe 5: Kansas City-Style Apple Cider BBQ Sauce - 1 cup ketchup, 1/2 cup apple cider vinegar, 2 tablespoons molasses, 2 tablespoons brown sugar, 1 teaspoon ground cumin, 1/2 teaspoon paprika.  
+[ASSISTANT_SAID] These recipes make about 2 cups of BBQ sauce each.  
+[ASSISTANT_SAID] Tips: Use high-quality apple cider vinegar, adjust the amount to taste, and add other ingredients like diced onions, garlic, or bell peppers.  
+[ASSISTANT_SAID] Sauces will thicken as they cool; simmer for 10-15 minutes to reduce liquid.  
+[EVENT] User is planning to try out a new BBQ sauce recipe this weekend.  
+[EVENT] User is thinking of experimenting with different types of wood chips for smoking.  
+[FACT] User had amazing slow-cooked ribs at Alex's house a few weeks back and has been craving them ever since.  
+[ASSISTANT_SAID] Tips for achieving perfect smoky flavor: cook low and slow (225-250°F) for 4-6 hours, choose the right wood chips, soak wood chips for 30 minutes, use a water pan, monitor temperature, let ribs rest for 10-15 minutes, and apply BBQ sauce during the last 10-15 minutes of

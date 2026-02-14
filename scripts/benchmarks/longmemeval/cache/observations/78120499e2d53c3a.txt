@@ -1,0 +1,27 @@
+**Observation Log:**
+
+[FACT] User is looking to create a contract for their startup.  
+[EVENT] User attended a speed networking event organized by the local Chamber of Commerce on 2023/05/21.  
+[EVENT] User met a dozen people in 5-minute intervals at the speed networking event.  
+[RELATIONSHIP] User met a lawyer at the speed networking event who offered to review their startup's contracts for free.  
+[ASSISTANT_SAID] Assistant congratulated the user on taking the initiative to create a contract for their startup.  
+[ASSISTANT_SAID] Assistant provided resources for contract templates, including:  
+[ASSISTANT_SAID] 1. **Startup Law 101** by Y Combinator.  
+[ASSISTANT_SAID] 2. **Docracy** - a platform for open-source legal documents.  
+[ASSISTANT_SAID] 3. **LegalZoom** - offers a range of contract templates and a free trial.  
+[ASSISTANT_SAID] 4. **Rocket Lawyer** - another online legal services provider with contract templates.  
+[ASSISTANT_SAID] Assistant provided resources for startup-related resources, including:  
+[ASSISTANT_SAID] 1. **Startup Foundry** - offers contract templates and guides.  
+[ASSISTANT_SAID] 2. **Founder's Workbench** - free online resource with contract templates.  
+[ASSISTANT_SAID] 3. **Nolo** - provides legal guides and contract templates for small businesses.  
+[ASSISTANT_SAID] Assistant provided tips for creating contracts, including customizing templates, consulting with a lawyer, and regularly reviewing contracts.  
+[EVENT] User is looking to finalize the contract for their marketing services.  
+[USER] User needs help with clauses related to intellectual property and confidentiality.  
+[ASSISTANT_SAID] Assistant provided tips for the intellectual property (IP) clause, including defining IP ownership, specifying IP license, exclusions, and warranties.  
+[ASSISTANT_SAID] Assistant provided a sample IP clause for the user.  
+[ASSISTANT_SAID] Assistant provided tips for the confidentiality clause, including defining confidential information, obligations, exceptions, and duration.  
+[ASSISTANT_SAID] Assistant provided a sample confidentiality clause for the user.  
+[ASSISTANT_SAID] Assistant recommended resources for IP and confidentiality clauses, including the American Bar Association (ABA) Model Contract and International Trademark Association (INTA) Model Contract.  
+[ASSISTANT_SAID] Assistant suggested using LegalZoom for contract templates.  
+[ASSISTANT_SAID] Assistant provided tips for writing specific clauses, including being specific, using definitions, seeking legal review, and being prepared to negotiate.  
+[USER] User plans to review the contracts received

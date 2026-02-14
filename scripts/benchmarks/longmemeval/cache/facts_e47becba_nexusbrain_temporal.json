@@ -1,0 +1,50 @@
+{
+  "answer_280352e9": [
+    {
+      "fact": "User is trying to organize their life better.",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User has been using a planner.",
+      "type": "personal",
+      "entities": [
+        "planner"
+      ]
+    },
+    {
+      "fact": "User is looking for digital task management apps.",
+      "type": "preference",
+      "entities": [
+        "digital task management apps"
+      ]
+    },
+    {
+      "fact": "User is considering trying out Todoist and Trello.",
+      "type": "preference",
+      "entities": [
+        "Todoist",
+        "Trello"
+      ]
+    },
+    {
+      "fact": "User has a new job.",
+      "type": "personal",
+      "entities": [
+        "new job"
+      ]
+    },
+    {
+      "fact": "User is still getting used to the 9-to-5 schedule.",
+      "type": "personal",
+      "entities": [
+        "9-to-5 schedule"
+      ]
+    },
+    {
+      "fact": "User wants to stay on top of their tasks and responsibilities.",
+      "type": "opinion",
+      "entities": []
+    }
+  ]
+}

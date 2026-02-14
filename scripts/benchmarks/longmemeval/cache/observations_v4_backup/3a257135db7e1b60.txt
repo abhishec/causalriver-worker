@@ -1,0 +1,17 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/23 (Tue) 10:58  
+[FACT] User has a master's thesis in natural language processing (NLP).  
+[FACT] User has worked on a research paper on sentiment analysis submitted to ACL.  
+[FACT] User is working with product reviews for sentiment analysis.  
+[FACT] User's dataset consists of around 5000 samples with about 10 features each.  
+[PREFERENCE] User wants to classify product reviews as either positive or negative.  
+[FACT] User has used supervised learning before and is open to exploring that approach again.  
+[FACT] Class balance in the user's dataset is relatively even, with around 55% positive reviews and 45% negative reviews.  
+[PREFERENCE] User is mostly interested in accuracy and F1-score as evaluation metrics.  
+[ASSISTANT] Assistant provided a structured approach for preprocessing, feature extraction, and model evaluation.  
+[ASSISTANT] Assistant recommended using NLTK for tokenization, stopword removal, and stemming/lemmatization.  
+[ASSISTANT] Assistant suggested using TF-IDF for feature extraction.  
+[ASSISTANT] Assistant mentioned several machine learning algorithms: Logistic Regression, Random Forest, and Support Vector Machines (SVMs).  
+[ASSISTANT] Assistant recommended using WordNetLemmatizer for lemmatization over Porter Stemmer for better accuracy in sentiment analysis.  
+[ASSISTANT] Assistant provided sample code for the preprocessing step, including tokenization, stopword removal, and lemmatization.

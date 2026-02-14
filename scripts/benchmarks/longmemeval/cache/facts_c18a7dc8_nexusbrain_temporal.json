@@ -1,0 +1,94 @@
+{
+  "answer_2e2085fa_1": [
+    {
+      "fact": "User is looking to explore online courses to improve marketing skills, particularly in content creation and strategy.",
+      "type": "preference",
+      "entities": [
+        "online courses",
+        "marketing skills",
+        "content creation",
+        "strategy"
+      ]
+    },
+    {
+      "fact": "User has been working in digital marketing for a while.",
+      "type": "personal",
+      "entities": [
+        "digital marketing"
+      ]
+    },
+    {
+      "fact": "User believes it's essential to stay updated on the latest marketing trends.",
+      "type": "opinion",
+      "entities": [
+        "marketing trends"
+      ]
+    },
+    {
+      "fact": "User has a Bachelor's degree in Business Administration with a concentration in Marketing.",
+      "type": "personal",
+      "entities": [
+        "Bachelor's degree",
+        "Business Administration",
+        "Marketing"
+      ]
+    },
+    {
+      "fact": "User completed their degree at the University of California, Berkeley, at the age of 25.",
+      "type": "personal",
+      "entities": [
+        "University of California, Berkeley",
+        "25"
+      ]
+    },
+    {
+      "fact": "User typically works 40 hours a week and sometimes up to 50 hours during peak campaign seasons.",
+      "type": "personal",
+      "entities": [
+        "40 hours",
+        "50 hours",
+        "peak campaign seasons"
+      ]
+    },
+    {
+      "fact": "User is particularly interested in the HubSpot Content Marketing Certification and Coursera's Digital Marketing Specialization.",
+      "type": "preference",
+      "entities": [
+        "HubSpot Content Marketing Certification",
+        "Coursera's Digital Marketing Specialization"
+      ]
+    }
+  ],
+  "answer_2e2085fa_2": [
+    {
+      "fact": "User is looking to advance their career in marketing",
+      "type": "opinion",
+      "entities": [
+        "career",
+        "marketing"
+      ]
+    },
+    {
+      "fact": "User has been in the marketing industry for a while",
+      "type": "personal",
+      "entities": [
+        "marketing industry"
+      ]
+    },
+    {
+      "fact": "User is a Digital Marketing Specialist",
+      "type": "personal",
+      "entities": [
+        "Digital Marketing Specialist"
+      ]
+    },
+    {
+      "fact": "User is interested in the Certified Digital Marketing Professional (CDMP) certification",
+      "type": "preference",
+      "entities": [
+        "Certified Digital Marketing Professional",
+        "CDMP"
+      ]
+    }
+  ]
+}

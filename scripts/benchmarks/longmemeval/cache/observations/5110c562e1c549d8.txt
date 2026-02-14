@@ -1,0 +1,24 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/23 (Tue) 20:03  
+[FACT] User's church uses the Midas M32R digital mixer.  
+[PREFERENCE] User wants to hear the drums better in their recording or live stream.  
+[ASSISTANT_SAID] Suggested checking mic placement to ensure drum microphones are positioned correctly and aimed at the right parts of the drum kit.  
+[ASSISTANT_SAID] Recommended checking EQ settings on the drum channels and the drum group channel in the mixer to emphasize the desired frequency range for the drums.  
+[ASSISTANT_SAID] Advised checking compressor settings on the drum channels and the drum group channel to help balance the level of the drums.  
+[ASSISTANT_SAID] Suggested checking volume levels of each drum channel and the drum group channel in the mixer, and increasing the gain on the drum microphones or using a dedicated drum amplifier if necessary.  
+[ASSISTANT_SAID] Mentioned that room acoustics can affect the sound of the drums and suggested using acoustic treatments like sound absorption panels to improve room acoustics.  
+[ASSISTANT_SAID] Recommended ensuring monitor speakers are positioned correctly and aimed at the right parts of the room.  
+[USER] Asked for recommended EQ settings for the drum channels.  
+[ASSISTANT_SAID] Provided general EQ guidelines for kick drum, snare drum, toms, and overhead/room mics, including specific frequency ranges to boost or cut.  
+[USER] Asked for recommended compressor settings for the drum channels.  
+[ASSISTANT_SAID] Provided general compressor settings for kick drum, snare drum, toms, and overhead/room mics, including attack time, release time, and ratio suggestions.  
+[USER] Inquired about what to do if the previous suggestions do not work.  
+[ASSISTANT_SAID] Suggested checking microphone placement, room acoustics, drum tuning, drummer technique, and upgrading equipment if necessary.  
+[USER] Stated that the drums sound good in the auditorium but are not loud enough in the live stream or USB recording.  
+[ASSISTANT_SAID] Recommended checking mix balance to ensure drums are not buried by other instruments.  
+[ASSISTANT_SAID] Suggested checking individual track levels for the drum channels to ensure they are set appropriately for the live stream or recording.  
+[ASSISTANT_SAID] Advised checking bus levels sending the drum mix to the live stream or recording and raising the level of the drum bus if necessary.  
+[ASSISTANT_SAID] Recommended adjusting compressor settings on the drum channels or drum bus to help the drums come through more prominently.  
+[ASSISTANT_SAID] Suggested ensuring the audio interface is set up correctly and that levels are appropriate for recording.  
+[ASSISTANT

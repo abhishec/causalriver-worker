@@ -1,0 +1,32 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/21 (Sun) 07:48
+- [ASSISTANT_CREATED] List of the top 20 international film festivals, including a maximum of 5 from the US.
+- [ASSISTANT_SAID] 1. Cannes Film Festival (France)
+- [ASSISTANT_SAID] 2. Berlin International Film Festival (Germany)
+- [ASSISTANT_SAID] 3. Venice Film Festival (Italy)
+- [ASSISTANT_SAID] 4. Toronto International Film Festival (Canada)
+- [ASSISTANT_SAID] 5. Sundance Film Festival (US)
+- [ASSISTANT_SAID] 6. BFI London Film Festival (UK)
+- [ASSISTANT_SAID] 7. Rotterdam International Film Festival (Netherlands)
+- [ASSISTANT_SAID] 8. San Sebastián International Film Festival (Spain)
+- [ASSISTANT_SAID] 9. Hong Kong International Film Festival (China)
+- [ASSISTANT_SAID] 10. Busan International Film Festival (South Korea)
+- [ASSISTANT_SAID] 11. Locarno International Film Festival (Switzerland)
+- [ASSISTANT_SAID] 12. Sydney Film Festival (Australia)
+- [ASSISTANT_SAID] 13. Moscow International Film Festival (Russia)
+- [ASSISTANT_SAID] 14. Shanghai International Film Festival (China)
+- [ASSISTANT_SAID] 15. Dubai International Film Festival (United Arab Emirates)
+- [ASSISTANT_SAID] 16. Karlovy Vary International Film Festival (Czech Republic)
+- [ASSISTANT_SAID] 17. Jerusalem Film Festival (Israel)
+- [ASSISTANT_SAID] 18. Vienna International Film Festival (Austria)
+- [ASSISTANT_SAID] 19. Sarajevo Film Festival (Bosnia and Herzegovina)
+- [ASSISTANT_SAID] 20. Marrakech International Film Festival (Morocco)
+- [USER] Requested a list of the next 100 most well-known film festivals in the US, not including any of the festivals listed above.
+- [ASSISTANT_CREATED] List of the next 100 most well-known film festivals in the US, not including any of the previously mentioned festivals.
+- [ASSISTANT_SAID] 1. Slamdance Film Festival
+- [ASSISTANT_SAID] 2. Tribeca Film Festival
+- [ASSISTANT_SAID] 3. Los Angeles Film Festival
+- [ASSISTANT_SAID] 4. Seattle International Film Festival
+- [ASSISTANT_SAID] 5. Miami International Film Festival
+-

@@ -1,0 +1,28 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/25 (Thu) 05:06
+- [EVENT] User is planning a trip to Tokyo, Japan.
+- [EVENT] User needs to apply for a visa soon.
+- [ASSISTANT_SAID] Citizens of many countries don't need a visa to enter Japan as a tourist or for business stays of up to 90 days.
+- [ASSISTANT_SAID] If you're a citizen of a country that requires a visa or if you plan to stay in Japan for more than 90 days, you'll need to apply for a visa.
+- [ASSISTANT_SAID] To determine if you need a visa, check the Japanese government's official website or consult with the Japanese embassy or consulate in your home country.
+- [ASSISTANT_SAID] Common documents required for a Japanese visa application include:
+  - [ASSISTANT_SAID] Valid passport: Your passport should be valid for at least six months beyond your planned departure date from Japan.
+  - [ASSISTANT_SAID] Completed visa application form: Downloadable from the Japanese embassy or consulate's website or available in person.
+  - [ASSISTANT_SAID] One recent passport-sized photo: 2x2 inch (45x45 mm) photo with a white background.
+- [ASSISTANT_SAID] Additional documents for a tourist visa include:
+  - [ASSISTANT_SAID] Flight itinerary or travel plans: Proof of travel arrangements.
+  - [ASSISTANT_SAID] Hotel reservation or accommodation proof: Confirmation letter or booking copy.
+  - [ASSISTANT_SAID] Proof of sufficient funds: Bank statements, traveler's checks, or cash.
+- [ASSISTANT_SAID] Additional documents for a business visa include:
+  - [ASSISTANT_SAID] Invitation letter from a Japanese business partner or host company.
+  - [ASSISTANT_SAID] Company documents: Registration, business license, and relevant documents.
+  - [ASSISTANT_SAID] Proof of business activities: Contracts, invoices, or certificates.
+- [ASSISTANT_SAID] Additional documents for a student visa include:
+  - [ASSISTANT_SAID] Admission letter from a Japanese university or language school.
+  - [ASSISTANT_SAID] Certificate of enrollment from the current school or university.
+  - [ASSISTANT_SAID] Proof of financial resources: Bank statements or scholarship award letters.
+- [ASSISTANT_SAID] Other documents (if applicable) include:
+  - [ASSISTANT_SAID] Guarantee letter from a sponsor.
+  - [ASSISTANT_SAID] Birth certificate and marriage certificate (if applicable).
+- [ASSISTANT_SAID] Ensure all documents are original and not photocop

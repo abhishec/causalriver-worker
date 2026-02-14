@@ -1,0 +1,34 @@
+{
+  "answer_8414cc57": [
+    {
+      "fact": "User is looking for new ideas for meal prep.",
+      "type": "preference",
+      "entities": [
+        "meal prep"
+      ]
+    },
+    {
+      "fact": "User has had grilled chicken and turkey breast before.",
+      "type": "personal",
+      "entities": [
+        "grilled chicken",
+        "turkey breast"
+      ]
+    },
+    {
+      "fact": "User has never tried lentil or mushroom bolognese.",
+      "type": "personal",
+      "entities": [
+        "lentil bolognese",
+        "mushroom bolognese"
+      ]
+    },
+    {
+      "fact": "User is interested in plant-based protein sources.",
+      "type": "preference",
+      "entities": [
+        "plant-based protein"
+      ]
+    }
+  ]
+}

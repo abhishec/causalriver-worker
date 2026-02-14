@@ -1,0 +1,97 @@
+{
+  "answer_d8454588_2": [
+    {
+      "fact": "User is looking for budget-friendly fashion options.",
+      "type": "preference",
+      "entities": [
+        "budget-friendly fashion"
+      ]
+    },
+    {
+      "fact": "User recently bought a pair of boots that they love.",
+      "type": "personal",
+      "entities": [
+        "boots"
+      ]
+    },
+    {
+      "fact": "User thinks they could have found similar boots for much cheaper.",
+      "type": "opinion",
+      "entities": [
+        "boots",
+        "cheaper options"
+      ]
+    },
+    {
+      "fact": "User found similar boots at a budget store for $50.",
+      "type": "personal",
+      "entities": [
+        "budget store",
+        "$50"
+      ]
+    },
+    {
+      "fact": "User is reflecting on their spending habits.",
+      "type": "opinion",
+      "entities": [
+        "spending habits"
+      ]
+    },
+    {
+      "fact": "User is interested in tips to avoid impulse purchases and stay on track with budgeting.",
+      "type": "preference",
+      "entities": [
+        "impulse purchases",
+        "budgeting"
+      ]
+    }
+  ],
+  "answer_d8454588_1": [
+    {
+      "fact": "User is looking for budget-friendly fashion advice.",
+      "type": "preference",
+      "entities": [
+        "budget-friendly fashion advice"
+      ]
+    },
+    {
+      "fact": "User is trying to cut back on luxury shopping.",
+      "type": "preference",
+      "entities": [
+        "luxury shopping"
+      ]
+    },
+    {
+      "fact": "User wants to look great while being budget-conscious.",
+      "type": "preference",
+      "entities": [
+        "looking great",
+        "budget-conscious"
+      ]
+    },
+    {
+      "fact": "User recently splurged on a pair of boots for $800.",
+      "type": "event",
+      "entities": [
+        "boots",
+        "$800"
+      ]
+    },
+    {
+      "fact": "User learned a tough lesson in overspending from the $800 boots purchase.",
+      "type": "opinion",
+      "entities": [
+        "overspending",
+        "$800 boots"
+      ]
+    },
+    {
+      "fact": "User is interested in renting clothes for special occasions.",
+      "type": "preference",
+      "entities": [
+        "renting clothes",
+        "special occasions"
+      ]
+    }
+  ]
+}

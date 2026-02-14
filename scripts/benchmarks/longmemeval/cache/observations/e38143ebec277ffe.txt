@@ -1,0 +1,28 @@
+**Observation Log:**
+
+[FACT] User is looking for comedy recommendations.  
+[FACT] User has been into stand-up comedy for about 3 months.  
+[FACT] User started watching stand-up comedy after watching a Netflix special by John Mulaney.  
+[PREFERENCE] User enjoys John Mulaney's comedy style.  
+[ASSISTANT_SAID] John Mulaney is a fantastic comedian.  
+[ASSISTANT_SAID] Recommended comedians similar to John Mulaney include:  
+[ASSISTANT_SAID] 1. Mike Birbiglia - Netflix special "My Girlfriend's Boyfriend" or "Thank God for Jokes".  
+[ASSISTANT_SAID] 2. Demetri Martin - Netflix special "Live (At the Time)".  
+[ASSISTANT_SAID] 3. Brian Regan - Netflix special "Nunchucks and Flamethrowers".  
+[ASSISTANT_SAID] Other great comedians recommended include:  
+[ASSISTANT_SAID] 1. Hasan Minhaj - Netflix special "Homecoming King" or "Patriot Act".  
+[ASSISTANT_SAID] 2. Ali Wong - Netflix special "Baby Cobra" or "Hard Knock Wife".  
+[ASSISTANT_SAID] 3. W. Kamau Bell - Netflix special "Private School Negro".  
+[ASSISTANT_SAID] 4. Trevor Noah - Netflix special "Son of Patricia" or "Afraid of the Dark".  
+[ASSISTANT_SAID] 5. Sarah Silverman - Netflix special "A Speck of Dust".  
+[ASSISTANT_SAID] 6. Hannah Gadsby - Netflix special "Nanette" (warning: not for the faint of heart!).  
+[ASSISTANT_SAID] Newer voices recommended include:  
+[ASSISTANT_SAID] 1. Taylor Tomlinson - Netflix special "Quarter-Life Crisis".  
+[ASSISTANT_SAID] 2. Sam Morril - Netflix special "I Got This".  
+[ASSISTANT_SAID] 3. Mark Normand - Netflix special "Don't Be Yourself".  
+[USER] User is interested in attending live comedy and possibly trying stand-up.  
+[ASSISTANT_SAID] Suggested ways to find live comedy events and open mics:  
+[ASSISTANT_SAID] 1. Google Search: "comedy clubs near me" or "open mics near me" with city or zip code.  
+[ASSISTANT_SAID] 2. Comedy Club Websites: Look up well-known clubs and their event calendars.  
+[ASSISTANT_SAID] 3. Facebook Events: Search for comedy events in the area.  
+[ASSISTANT_SAID] 4. Meetup.com:

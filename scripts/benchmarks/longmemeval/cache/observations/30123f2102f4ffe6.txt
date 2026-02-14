@@ -1,0 +1,25 @@
+**Observation Log:**
+
+- [FACT] The user is looking for new dance studios in the city that offer Salsa classes.
+- [FACT] The user has been really into Salsa lately.
+- [EVENT] The user just got back from an amazing dance workshop last weekend.
+- [PREFERENCE] The user is open to trying out different styles of Salsa but prefers On1 since that's what they've been learning so far.
+- [PREFERENCE] The user is flexible with location but prefers somewhere close to the city center.
+- [EVENT] The user attended a contemporary dance workshop last weekend.
+- [PREFERENCE] The user enjoyed how the instructor broke down the moves into smaller parts during the workshop.
+- [ASSISTANT_SAID] The assistant offered to help find Salsa dance studios in the city.
+- [ASSISTANT_SAID] The assistant asked the user about their preferences for studio style, level, and location.
+- [ASSISTANT_SAID] The assistant provided a list of four Salsa studios in the city center: Salsa Fusion Studio, Rhythm & Motion, Salsa Academy, and DanceSpace.
+- [ASSISTANT_SAID] The assistant mentioned that Salsa Fusion Studio offers On1 classes for all levels and has a clear teaching style.
+- [ASSISTANT_SAID] The assistant noted that Rhythm & Motion offers a variety of instructors and classes, including On1.
+- [ASSISTANT_SAID] The assistant stated that Salsa Academy has a strong focus on musicality and expression.
+- [ASSISTANT_SAID] The assistant described DanceSpace as a smaller studio with a range of Salsa classes, including On1.
+- [ASSISTANT_SAID] The assistant provided pricing and special offers for each studio, including trial classes and introductory packages.
+- [ASSISTANT_SAID] Salsa Fusion Studio offers a New Student Special of 3 classes for $30.
+- [ASSISTANT_SAID] Rhythm & Motion has a Beginner's Package of 4 classes for $40 and a free trial class for new students.
+- [ASSISTANT_SAID] Salsa Academy offers a Trial Class for $10 and a New Student Package of 4 classes for $50.
+- [ASSISTANT_SAID] DanceSpace has a New Student Special of 2 classes for $20 and a free trial class for new students.
+- [ASSISTANT_SAID] The assistant provided tips for preparing for a dance recital, including practicing regularly, getting comfortable with the music, and working on stage presence.
+- [ASSISTANT_SAID] The assistant suggested that the user take extra classes or workshops focused on performance technique and stage presence to build confidence.
+- [PREFERENCE] The user expressed concern about their lack of experience performing on stage.
+- [ASSISTANT_SAID] The assistant encouraged the user to take advantage of workshops or classes to improve performance skills and build confidence.

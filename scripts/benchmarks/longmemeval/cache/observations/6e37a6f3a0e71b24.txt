@@ -1,0 +1,32 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/23 (Tue) 03:27  
+[USER] User requested an in-depth outline using McKinsey's MECE framework based on a blog post title.  
+[PREFERENCE] User specified to avoid mentioning brands and not to include a section for frequently asked questions.  
+[ASSISTANT_CREATED] Assistant created an outline titled "Best Ceramic Cookware Set for a Healthier Kitchen" with the following structure:  
+[ASSISTANT_CREATED] 1. Benefits of Ceramic Cookware (200-250 words)  
+[ASSISTANT_CREATED] 1.1. Non-Toxic Material  
+[ASSISTANT_CREATED] 1.2. Even Heat Distribution  
+[ASSISTANT_CREATED] 1.3. Versatility in Cooking  
+[ASSISTANT_CREATED] 2. Factors to Consider Before Buying a Ceramic Cookware Set (200-250 words)  
+[ASSISTANT_CREATED] 2.1. Price Range  
+[ASSISTANT_CREATED] 2.2. Type of Ceramic Coating  
+[ASSISTANT_CREATED] 2.3. Durability and Longevity  
+[ASSISTANT_CREATED] 3. Top Ceramic Cookware Sets on the Market (200-250 words)  
+[ASSISTANT_CREATED] 3.1. Ceramic Cookware Set A  
+[ASSISTANT_CREATED] 3.2. Ceramic Cookware Set B  
+[ASSISTANT_CREATED] 3.3. Ceramic Cookware Set C  
+[ASSISTANT_CREATED] 4. How to Clean and Maintain Your Ceramic Cookware (200-250 words)  
+[ASSISTANT_CREATED] 4.1. Proper Cleaning Techniques  
+[ASSISTANT_CREATED] 4.2. Avoiding Common Mistakes  
+[ASSISTANT_CREATED] 4.3. Storing Your Ceramic Cookware Set  
+[ASSISTANT_CREATED] 5. Cooking Tips for Ceramic Cookware (200-250 words)  
+[ASSISTANT_CREATED] 5.1. Adjusting to Ceramic Cookware  
+[ASSISTANT_CREATED] 5.2. Best Practices for Cooking  
+[ASSISTANT_CREATED] 5.3. Recipes to Try with Your Ceramic Cookware Set  
+[USER] User requested the assistant to resubmit the answer in a code block.  
+[ASSISTANT_SAID] Assistant confirmed the request and provided the outline in a code block format.  
+[ASSISTANT_CREATED] The outline in code block format included the same structure as before but with a new title: "Best Ceramic Cookware Set: How to Choose the Perfect Set for Your Kitchen."  
+[ASSISTANT_CREATED] 1. Factors to Consider When Choosing Ceramic Cookware (200-250 words)  
+[ASSISTANT_CREATED] 1.1. Material and Construction  
+[ASSISTANT_CREATED

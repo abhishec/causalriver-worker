@@ -1,0 +1,18 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/23 (Tue) 00:24
+- [USER] User requested to split SG&A costs into Sales & Marketing (S&M) and General & Administrative (G&A).
+- [ASSISTANT_SAID] Assistant provided a breakdown of SG&A costs for diagnostic companies, stating that S&M expenses typically range from 10% to 25% of sales.
+- [ASSISTANT_SAID] Assistant noted that G&A expenses generally range from 10% to 20% of sales for diagnostic companies.
+- [ASSISTANT_SAID] Assistant emphasized that the figures provided are approximate and may not apply to all diagnostic companies, suggesting to review financial statements or industry reports for specific companies.
+- [USER] User asked for specific examples of companies from the assistant's training window.
+- [ASSISTANT_SAID] Assistant provided examples of diagnostic companies and their SG&A costs as a percentage of sales during the training window (up to September 2021):
+  - [ASSISTANT_SAID] Abbott Laboratories (ABT) reported SG&A expenses of approximately $8.56 billion, around 31.5% of net sales of $27.2 billion in 2020.
+  - [ASSISTANT_SAID] Thermo Fisher Scientific (TMO) had SG&A expenses of about $4.4 billion, approximately 19.1% of net sales of $22.9 billion in 2020.
+  - [ASSISTANT_SAID] Becton, Dickinson and Company (BDX) reported SG&A expenses of approximately $3.1 billion, around 22.8% of net sales of $13.6 billion in 2020.
+- [USER] User inquired about small and mid-cap companies such as Exact Sciences or Guardant.
+- [ASSISTANT_SAID] Assistant provided SG&A costs as a percentage of sales for Exact Sciences and Guardant Health:
+  - [ASSISTANT_SAID] Exact Sciences Corporation (EXAS) reported SG&A expenses of approximately $1.03 billion, around 81.2% of net sales of $1.27 billion in 2020.
+  - [ASSISTANT_SAID] Guardant Health, Inc. (GH) had SG&A expenses of about $227 million, approximately 66.1% of net sales of $343 million in 2020.
+- [ASSISTANT_SAID] Assistant noted that the high SG&A percentages for Exact Sciences and Guardant Health reflect their significant investments in sales and marketing.
+- [ASSISTANT_SAID] Assistant advised that these percentages are based on historical data and may have changed since then, recommending to consult the latest financial statements or annual reports for the most accurate information.

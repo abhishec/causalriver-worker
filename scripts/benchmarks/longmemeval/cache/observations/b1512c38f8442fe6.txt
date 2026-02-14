@@ -1,0 +1,43 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/21 (Sun) 22:49
+- [FACT] User has been practicing guitar for 30 minutes daily.
+- [PREFERENCE] User is looking to improve their guitar playing.
+- [EVENT] User is interested in learning more about music theory and fingerpicking techniques.
+- [ASSISTANT_SAID] Recommended online resources for music theory:
+  1. Justin Guitar
+  2. Guitar Tricks
+  3. MusicTheory.net
+  4. The Music Theory Academy (YouTube channel)
+- [ASSISTANT_SAID] Recommended online resources for fingerpicking techniques:
+  1. Fingerstyle Guitar
+  2. Guitar Fingerstyle
+  3. Andy Guitar (YouTube channel)
+  4. James Taylor's Guitar Lessons
+- [ASSISTANT_SAID] Suggested additional resources:
+  1. YouTube Channels: Marty Music, GuitarLessons365, GuitarJamz
+  2. Online Forums: Reddit's r/guitar and r/musictheory, Guitar Forum, Music Theory Forum
+  3. Apps: Fender Play, Guitar Tricks, Yousician
+- [ASSISTANT_SAID] Encouraged user to maintain consistent practice and dedication to improve guitar playing.
+- [PREFERENCE] User is interested in learning more about jazz music, especially saxophone.
+- [EVENT] User is looking for online resources for learning jazz theory and improvisation.
+- [ASSISTANT_SAID] Recommended online resources for jazz theory:
+  1. Jazz at Lincoln Center
+  2. Jazz Theory 101
+  3. The Jazz Piano Site
+  4. Berklee College of Music Online
+- [ASSISTANT_SAID] Recommended saxophone-specific resources:
+  1. Sax on the Web
+  2. Saxophone Lessons 365 (YouTube channel)
+  3. Neff Music
+- [ASSISTANT_SAID] Recommended improvisation resources:
+  1. Improvisation for Saxophone
+  2. Jazz Improvisation (Coursera course)
+  3. ii-V-I Progression website
+- [ASSISTANT_SAID] Suggested additional resources:
+  1. Transcription of favorite saxophonists' solos
+  2. Jazz Radio and Podcasts: WBGO, The Jazz Podcast, Jazz at 100
+  3. Online Communities: Reddit's r/jazz and r/saxophone, Facebook groups
+- [ASSISTANT_SAID] Encouraged user to practice regularly and explore resources to develop skills in jazz.
+- [EVENT] User is thinking of getting a digital audio workstation (DAW) to record jam sessions with a friend named Alex.
+- [ASSISTANT_SAID] Recommended popular DAWs

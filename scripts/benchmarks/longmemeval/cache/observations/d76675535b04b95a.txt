@@ -1,0 +1,28 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/30 (Tue) 23:23
+- [USER] User requested relevant information for a presentation on a specific chapter.
+- [USER] Chapter title: 2.3. Previous work of Visual Assistive Technology
+- [USER] Subsection 2.3.1: Head wear
+- [USER] Subsection 2.3.1.1: Wearable Travel Aid for Environment Perception and Navigation of Visually Impaired People
+- [USER] Description of the project: A consumer RGB-D camera attached to eyeglasses, an IMU, a smartphone, and an earphone for commands/feedback.
+- [USER] System operability: Both indoor and outdoor settings.
+- [USER] Advantages: Lightweight nature and low cost compared to ultrasonic and LiDAR sensors; integration of computer vision technologies for routing and detection.
+- [USER] Processing device: Smartphone detects and routes, feedback sent to user's ear through earphone.
+- [USER] Citation: Bai et al., 2019.
+- [USER] Limitation of the system: Weak in detecting small-size obstacles; staircase detection not implemented.
+- [USER] Subsection 2.3.1.2: Let Blind People See: Real-Time Visual Recognition with Results Converted to 3D Audio
+- [USER] Description of the system: Video input from a portable camera streamed to a server for real-time image recognition using the YOLO model.
+- [USER] Object location derived from: Size and location of bounding boxes from the detection algorithm.
+- [USER] Audio output: 3D audio sent to attached wireless earphones.
+- [USER] Performance: Conducts precise real-time object detection at 30 frames per second in 1080p resolution.
+- [USER] Citation: Jiang et al., 2016.
+- [USER] Limitation of the system: Accurate detection only within 2 to 5 meters; surrounding ambient sound blocked when using earbuds; excessive information sent to user when multiple objects detected.
+- [USER] Subsection 2.3.2: Smart Cane
+- [USER] Subsection 2.3.2.1: Smart Electronic Stick for Visually Impaired using Android Application and Google’s Cloud Vision
+- [USER] Description: E-stick module integrated with a voice-controlled Android application.
+- [USER] Features: Thin, lightweight, and easy to handle; uses NLP for functionalities; ultrasonic sensors for detecting low-lying and knee-level obstacles.
+- [USER] Feedback mechanism: Buzzers for presence of barriers.
+- [USER] GPS navigation: User's phone Bluetooth-connected to stick's circuit; live location transmitted to nearest help center or family.
+- [USER] Additional features: Face detection, traffic light and roadside sign translation, text recognition from photos.
+- [USER] Limitation of the system: Short

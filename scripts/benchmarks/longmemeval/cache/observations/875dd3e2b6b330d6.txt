@@ -1,0 +1,27 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/25 (Thu) 12:49
+- [FACT] The user is currently in the Lord Justice building in the UK.
+- [EVENT] The user is experiencing hunger and is looking for food options.
+- [ASSISTANT_SAID] The Lord Justice building houses the Court of Session, which is the supreme civil court in Scotland.
+- [ASSISTANT_SAID] Legal proceedings in the Lord Justice building include civil cases such as contract disputes, personal injury claims, property disputes, and family law matters.
+- [ASSISTANT_SAID] The Court of Session hears appeals from lower courts and tribunals in Scotland.
+- [ASSISTANT_SAID] The assistant does not have information about whether the Lord Justice building has a cafeteria.
+- [ASSISTANT_SAID] It is common for large government and court buildings to have a cafeteria or canteen.
+- [ASSISTANT_SAID] The user can check with the building's reception or security desk for food facilities.
+- [USER] The user expresses frustration about the assistant's inability to find food options.
+- [ASSISTANT_SAID] The assistant apologizes and explains it cannot access the user's device location.
+- [ASSISTANT_SAID] The user needs to enable location services for their web browser or map application to find local restaurants or cafes.
+- [ASSISTANT_SAID] The assistant suggests using a food delivery app like Uber Eats, Deliveroo, or Just Eat to order food.
+- [USER] The user expresses frustration again, asking the assistant to pretend to be helpful.
+- [ASSISTANT_SAID] The assistant provides a list of sandwich places: 
+  - Social Bite (cafe)
+  - Rocket Cafe (cafe)
+  - Oink (sandwich shop)
+  - The Pastry Section (cafe)
+  - Pep & Fodder (cafe)
+- [USER] The user acknowledges the assistant's suggestions and expresses frustration about the delay in receiving helpful information.
+- [USER] The user decides to try Oink for a sandwich.
+- [ASSISTANT_SAID] The assistant expresses gladness for providing helpful options and apologizes for earlier misunderstandings.
+- [ASSISTANT_SAID] The assistant mentions that Oink is known for delicious hog roast sandwiches.
+- [ASSISTANT_SAID] The assistant invites the user to ask further questions or for assistance if needed.

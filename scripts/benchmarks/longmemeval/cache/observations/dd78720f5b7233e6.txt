@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/07/04 (Tue) 09:29
+- [EVENT] User is planning a dinner party next weekend.
+- [PREFERENCE] User wants to impress guests with a new recipe.
+- [ASSISTANT_SAID] Korean cuisine is known for its bold flavors, vibrant colors, and variety of dishes.
+- [ASSISTANT_SAID] Suggested popular Korean dishes: Bibimbap, Bulgogi, Jeyuk bokkeum, Japchae, Kimchi Stew, Galbi, Tteokbokki, Doenjang Jjigae.
+- [ASSISTANT_SAID] Recommended serving a variety of banchan (small side dishes) to complement the main course.
+- [ASSISTANT_SAID] Provided tips for ensuring success in cooking Korean dishes: plan ahead, use authentic Korean ingredients, and follow recipes carefully.
+- [PREFERENCE] User decided to try making Japchae and Bulgogi for the dinner party.
+- [ASSISTANT_SAID] Provided tips for cooking the perfect steak, including choosing the right cut, bringing it to room temperature, seasoning, preheating the grill, oiling the grates, searing, finishing cooking, letting it rest, and slicing against the grain.
+- [ASSISTANT_SAID] Suggested serving the steak as an appetizer with a Korean-style dipping sauce.
+- [EVENT] User has been cooking a lot lately since starting cooking classes three months ago.
+- [ASSISTANT_SAID] Encouraged user about their cooking journey and asked what inspired them to take cooking classes.
+- [PREFERENCE] User has always been interested in cooking and wanted to impress friends and family with more than simple dishes.
+- [PREFERENCE] User enjoys trying new foods and experimenting with different flavors.
+- [PREFERENCE] User has enjoyed cooking Indian food, especially rich and creamy curries.
+- [PREFERENCE] User has had fun making pasta from scratch and noticed a difference in flavor and texture.
+- [PREFERENCE] User has discovered the joy of using different types of mushrooms, especially shiitake and oyster mushrooms, for added depth and umami flavor.
+- [ASSISTANT_SAID] Asked if the user has tried making Indian flatbreads like naan or roti.
+- [ASSISTANT_SAID] Inquired if the user has experimented with different pasta shapes and flavors, like adding herbs or spices to the dough.

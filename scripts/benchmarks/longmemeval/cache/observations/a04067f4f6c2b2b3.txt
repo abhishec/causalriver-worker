@@ -1,0 +1,25 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/19 (Fri) 16:54
+- [USER] User requests to copy a case for analysis and asks if the assistant can identify the main issues in the case.
+- [ASSISTANT_SAID] Assistant confirms with "Yes" that it can identify the main issues in the case.
+- [USER] User informs that the case is long and will be sent in multiple messages, stating they will indicate completion with "I have completed sending you the case."
+- [ASSISTANT_SAID] Assistant acknowledges the user's instructions and confirms understanding.
+- [USER] User sends part 1 of the case and requests the assistant to respond with "acknowledged" if understood.
+- [FACT] Medium Neutral Citation: Boulus Constructions Pty Ltd v Warrumbungle Shire Council (No 2) [2022] NSWSC 1368
+- [TEMPORAL] Hearing dates: 30 September 2022; further written submissions 5 October 2022
+- [TEMPORAL] Date of orders: 12 October 2022
+- [TEMPORAL] Decision date: 12 October 2022
+- [FACT] Jurisdiction: Equity - Technology and Construction List
+- [FACT] Before: Stevenson J
+- [ASSISTANT_SAID] Assistant acknowledges receipt of part 1 and requests the user to continue sending the case.
+- [USER] User sends part 2 of the case and requests the assistant to respond with "acknowledged" if understood.
+- [FACT] Judgment context: The proceedings arise from the construction of a retirement village known as the Three Rivers Regional Retirement Community by Boulus Constructions Pty Limited (“the Builder”) on behalf of Warrumbungle Shire Council (“the Council”).
+- [TEMPORAL] The Builder commenced proceedings on 6 November 2018.
+- [FACT] The Builder seeks payment for construction work, while the Council has brought a Cross-Claim alleging defective works with approximately 300 defects.
+- [FACT] The defects comprise around 30 different kinds of defect in multiple locations within the retirement village.
+- [EVENT] A complex range of factual, legal, and procedural issues has arisen, with no current hearing date set.
+- [TEMPORAL] On 20 April 2022, the Builder served a Second Further Amended Technology and Construction List Statement and a Third Further Amended Technology and Construction Cross-Claim List Response.
+- [FACT] The Builder alleges the Council is not entitled to remedy for defective works due to the lack of a valid Development Consent and Construction Certificate.
+- [ASSISTANT_SAID] Assistant acknowledges receipt of part 2 and requests the user to continue sending the case.
+- [FACT] The Council seeks to amend its Cross-Claim to include a claim under s 37 of the Design

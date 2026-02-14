@@ -1,0 +1,27 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/10/01 (Sun) 16:16  
+[FACT] User is training for a 5K run.  
+[EVENT] User is trying to create a training plan for the 5K run.  
+[ASSISTANT_SAID] Creating a training plan for a 5K run can help you stay motivated, track your progress, and ensure you're adequately prepared for the big day.  
+[ASSISTANT_CREATED] General 8-week training plan for a 5K run provided, with the following details:  
+[ASSISTANT_CREATED] **Weeks 1-2: Building a Base (3 runs/week)**  
+[ASSISTANT_CREATED] Monday: 10-15 minute easy run  
+[ASSISTANT_CREATED] Wednesday: 15-20 minute easy run  
+[ASSISTANT_CREATED] Saturday: 20-25 minute easy run  
+[ASSISTANT_CREATED] **Weeks 3-4: Building Endurance (3 runs/week)**  
+[ASSISTANT_CREATED] Monday: 20-25 minute easy run  
+[ASSISTANT_CREATED] Wednesday: 25-30 minute easy run with 5-10 minutes of brisk walking  
+[ASSISTANT_CREATED] Saturday: 30-35 minute easy run  
+[ASSISTANT_CREATED] **Weeks 5-6: Building Speed and Endurance (3 runs/week)**  
+[ASSISTANT_CREATED] Monday: 25-30 minute easy run with 10-15 minutes of brisk walking  
+[ASSISTANT_CREATED] Wednesday: Interval training (20-30 minutes): Warm-up: 5 minutes easy run, 4-6 x 400m at a moderate pace (about 1-2 minutes), Cool-down: 5 minutes easy run  
+[ASSISTANT_CREATED] Saturday: 35-40 minute easy run  
+[ASSISTANT_CREATED] **Weeks 7-8: Taper and Rest (2-3 runs/week)**  
+[ASSISTANT_CREATED] Monday: 20-25 minute easy run  
+[ASSISTANT_CREATED] Wednesday: Rest or cross-train (e.g., walk, bike, or swim)  
+[ASSISTANT_CREATED] Saturday: 20-25 minute easy run (reduce intensity and distance to rest your legs)  
+[ASSISTANT_SAID] Additional tips provided for training:  
+[ASSISTANT_SAID] 1. Listen to your body: Rest when you need to, and don't push yourself too hard.  
+[ASSISTANT_SAID] 2. Gradually increase your mileage: Aim to increase your weekly mileage by no more than 10% each week.  
+[ASSISTANT_SAID] 3. Incorporate proper warm-ups and cool-downs: Always warm up with 5-10 minutes of easy running or walking

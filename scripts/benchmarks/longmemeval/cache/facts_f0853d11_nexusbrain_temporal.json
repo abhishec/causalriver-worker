@@ -1,0 +1,84 @@
+{
+  "answer_932ea3bf_2": [
+    {
+      "fact": "User is planning a beach trip to Santa Monica soon",
+      "type": "event",
+      "entities": [
+        "Santa Monica",
+        "beach trip"
+      ]
+    },
+    {
+      "fact": "User recently volunteered at the Coastal Cleanup event on March 7th",
+      "type": "event",
+      "entities": [
+        "Coastal Cleanup",
+        "March 7th"
+      ]
+    },
+    {
+      "fact": "User found the Coastal Cleanup event amazing and impactful",
+      "type": "opinion",
+      "entities": [
+        "Coastal Cleanup",
+        "impact"
+      ]
+    },
+    {
+      "fact": "User is interested in learning more about the impact of sunscreen on coral reefs",
+      "type": "preference",
+      "entities": [
+        "sunscreen",
+        "coral reefs"
+      ]
+    }
+  ],
+  "answer_932ea3bf_1": [
+    {
+      "fact": "User is looking for charity events to participate in.",
+      "type": "preference",
+      "entities": [
+        "charity events"
+      ]
+    },
+    {
+      "fact": "User prefers events that involve walking or running.",
+      "type": "preference",
+      "entities": [
+        "walking",
+        "running"
+      ]
+    },
+    {
+      "fact": "User participated in the 'Walk for Hunger' 5K walk on February 21st.",
+      "type": "event",
+      "entities": [
+        "Walk for Hunger",
+        "5K walk",
+        "February 21st"
+      ]
+    },
+    {
+      "fact": "User had a great time at the 'Walk for Hunger' event.",
+      "type": "opinion",
+      "entities": [
+        "Walk for Hunger"
+      ]
+    },
+    {
+      "fact": "User is particularly interested in charity events that take place during the summer months.",
+      "type": "preference",
+      "entities": [
+        "summer months"
+      ]
+    },
+    {
+      "fact": "User is looking for charity events that take place in July or August.",
+      "type": "preference",
+      "entities": [
+        "July",
+        "August"
+      ]
+    }
+  ]
+}

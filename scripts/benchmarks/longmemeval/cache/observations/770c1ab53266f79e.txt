@@ -1,0 +1,34 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/23 (Tue) 12:58
+- [FACT] User has a basil plant on the balcony that is struggling with too much direct sunlight.
+- [PREFERENCE] User is looking for tips on how to care for the basil plant in a shadier spot.
+- [FACT] User's snake plant has been doing great with their current watering and fertilizer routine.
+- [ASSISTANT_SAID] Basil typically thrives in partial shade, especially in warmer climates.
+- [ASSISTANT_SAID] Tips for caring for basil in a shadier spot include:
+  1. Provide filtered sunlight by moving the plant to a spot that receives indirect sunlight or using a sheer curtain or shade cloth.
+  2. Adjust the watering schedule, checking soil moisture and watering only when the soil feels dry to the touch.
+  3. Maintain humidity by placing the pot on a tray filled with water and pebbles or using a humidifier.
+  4. Fertilize sparingly with a balanced, water-soluble fertilizer at half the recommended strength.
+  5. Prune regularly by pinching off flower buds and trimming leggy stems.
+  6. Monitor temperature, keeping it between 65°F to 75°F (18°C to 24°C).
+- [ASSISTANT_SAID] User should observe the basil plant's response to the new shadier spot and adjust care accordingly.
+- [FACT] User has been using a general-purpose potting mix for their basil plant.
+- [ASSISTANT_SAID] Ideal soil conditions for basil plants include:
+  1. Well-draining soil to prevent waterlogging.
+  2. Soil pH between 6.0 to 7.0.
+  3. Rich in organic matter, such as compost or peat moss.
+  4. Good aeration to allow roots to breathe.
+  5. Nutrient-rich soil with a balanced fertilizer.
+- [ASSISTANT_SAID] Suggested creating a basil-friendly potting mix using:
+  * 2 parts peat moss or coconut coir
+  * 1 part perlite or vermiculite
+  * 1 part compost or worm castings
+  * 1 part general-purpose potting soil
+- [FACT] User received a snake plant from their sister last month.
+- [USER_SAID] User is considering whether to repot their snake plant.
+- [ASSISTANT_SAID] Factors to consider for repotting a snake plant include:
+  1. If the roots are root-bound or circling the pot.
+  2. If the potting mix is depleted of nutrients.
+  3. If the plant has visible growth needing more room.
+- [ASSISTANT_SAID] Tips for repotting a snake plant include:

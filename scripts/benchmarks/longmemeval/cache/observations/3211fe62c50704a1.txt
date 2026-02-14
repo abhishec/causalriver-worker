@@ -1,0 +1,15 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/24 (Wed) 15:05  
+[USER] User mentioned data redundancy and its elimination.  
+[USER] User stated that eliminating data redundancy would be an upper bound for compression.  
+[ASSISTANT_SAID] Assistant defined data redundancy as the presence of duplicate or unnecessary data in a file or database.  
+[ASSISTANT_SAID] Assistant stated that eliminating data redundancy can increase storage efficiency and reduce data size.  
+[ASSISTANT_SAID] Assistant confirmed that achieving 100% elimination of data redundancy is often difficult or impossible in practice.  
+[ASSISTANT_SAID] Assistant noted that perfect knowledge of the data and its relationships is required for 100% elimination of redundancy.  
+[ASSISTANT_SAID] Assistant mentioned that some level of data redundancy is desirable to ensure data integrity and availability.  
+[USER] User suggested that reusing the 256 permutations of 8-bits can help achieve data compression.  
+[ASSISTANT_SAID] Assistant explained that reusing the 256 permutations of 8-bits can reduce the number of unique values that need to be stored.  
+[ASSISTANT_SAID] Assistant stated that this technique is often used in lossless data compression, where original data must be exactly recoverable.  
+[ASSISTANT_SAID] Assistant mentioned Huffman coding as a technique that assigns shorter bit codes to more frequently occurring values and longer codes to less frequently occurring values.  
+[ASSISTANT_SAID] Assistant concluded that reusing the 256 permutations of 8-bits can significantly reduce the amount of data stored while maintaining the integrity of the original data.

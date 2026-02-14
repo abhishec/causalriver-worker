@@ -1,0 +1,65 @@
+{
+  "answer_43ba3965_1": [
+    {
+      "fact": "User is planning a trip to a nearby wildlife refuge this weekend.",
+      "type": "event",
+      "entities": [
+        "wildlife refuge",
+        "weekend"
+      ]
+    },
+    {
+      "fact": "User recently attended a bird watching workshop at the local Audubon society.",
+      "type": "event",
+      "entities": [
+        "bird watching workshop",
+        "Audubon society"
+      ]
+    },
+    {
+      "fact": "User is interested in bird watching.",
+      "type": "preference",
+      "entities": [
+        "bird watching"
+      ]
+    },
+    {
+      "fact": "User is located in the southeast region.",
+      "type": "personal",
+      "entities": [
+        "southeast region"
+      ]
+    },
+    {
+      "fact": "User is planning to explore wetlands and forests at the wildlife refuge.",
+      "type": "preference",
+      "entities": [
+        "wetlands",
+        "forests"
+      ]
+    },
+    {
+      "fact": "User hopes to spot warblers during their trip.",
+      "type": "preference",
+      "entities": [
+        "warblers"
+      ]
+    },
+    {
+      "fact": "User is trying to add more warblers to their life list.",
+      "type": "preference",
+      "entities": [
+        "life list",
+        "warblers"
+      ]
+    },
+    {
+      "fact": "User saw Yellow Warblers on a guided bird walk a month and a half ago.",
+      "type": "event",
+      "entities": [
+        "Yellow Warblers",
+        "guided bird walk"
+      ]
+    }
+  ]
+}

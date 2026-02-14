@@ -1,0 +1,17 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/27 (Sat) 11:48
+- [FACT] User is working on a project located at /Users/duffles/Documents/GitHub/mehr-capital-redesign/mehr-capital-redesign.
+- [FACT] User is encountering issues with npm install commands.
+- [EVENT] User attempted to run `npm install --force`.
+- [ASSISTANT_SAID] The assistant noted that using the `--force` flag disables recommended protections and may lead to incompatible versions being installed.
+- [ASSISTANT_SAID] The assistant suggested trying the `--legacy-peer-deps` flag as a workaround for dependency conflicts.
+- [ASSISTANT_SAID] The assistant provided the command: `npm install --legacy-peer-deps`.
+- [ASSISTANT_SAID] The assistant warned that using `--legacy-peer-deps` might not completely resolve the issue and that it is better to use compatible versions of packages for project stability.
+- [FACT] User's project involves the package `next@10.0.6`.
+- [FACT] User's project involves the package `node-sass@6.0.1`.
+- [FACT] User received multiple warnings about deprecated packages, including `har-validator@5.1.5`, `querystring@0.2.1`, `uuid@3.4.0`, `request@2.88.2`, `@material-ui/styles@4.11.5`, and `@material-ui/core@4.12.4`.
+- [FACT] User's environment includes Node version 19.7.0 and node-gyp version 7.1.2.
+- [FACT] User's Python version is 3.9.7, found at "/Library/Frameworks/Python.framework/Versions/3.9/bin/python3".
+- [FACT] User encountered an error related to `node-gyp` failing to build the package with an error code: 7.
+- [ASSISTANT_SAID] The assistant advised that if the issue persists after trying the suggested command, the user should consider updating npm and/or node-gyp or filing an issue with the package author.

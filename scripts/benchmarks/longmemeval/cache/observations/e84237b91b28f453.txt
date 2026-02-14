@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [FACT] User attended a jazz concert at the Blue Note Jazz Club.
+- [FACT] User saw Kamasi Washington perform live on May 21, 2023.
+- [PREFERENCE] User is looking for music recommendations similar to Kamasi Washington's style.
+- [ASSISTANT_SAID] Recommended artists similar to Kamasi Washington: Robert Glasper, Thundercat, Christian Scott aTunde Adjuah, Cécile McLorin Salvant, Esperanza Spalding.
+- [ASSISTANT_SAID] Recommended albums: "Bitches Brew" by Miles Davis, "A Love Supreme" by John Coltrane, "Head Hunters" by Herbie Hancock, "The Art of the Trio" by Brad Mehldau, "Los Angeles" by Flying Lotus.
+- [ASSISTANT_SAID] Recommended playlists: "Jazz Today" by Blue Note Records, "The Next Step" playlist by Kamasi Washington.
+- [EVENT] User expressed interest in exploring more of Robert Glasper's music.
+- [ASSISTANT_SAID] Recommended Robert Glasper's album "Black Radio" as a starting point.
+- [ASSISTANT_SAID] Suggested the track "Ah Yeah" (feat. Musiq Soulchild and Chrisette Michele) as a specific track to start with.
+- [ASSISTANT_SAID] Listed other essential tracks by Robert Glasper: "Always Shine" (feat. Ledisi), "Gonna Be Alright" (feat. Ledisi), "Calls" (feat. Jill Scott).
+- [ASSISTANT_SAID] Mentioned more albums to explore: "Black Radio 2," "Everything's Beautiful," "Fuck Yo Feelings."
+- [EVENT] User inquired about Robert Glasper's collaborations with Kendrick Lamar.
+- [ASSISTANT_SAID] Highlighted collaborations between Robert Glasper and Kendrick Lamar, including "Sing About Me, I'm Dying of Thirst," "These Walls," and "Untitled 06 | 06.30.2014."
+- [ASSISTANT_SAID] Mentioned Robert Glasper's contributions to Kendrick Lamar's "Black Panther" soundtrack and "DAMN." album.
+- [ASSISTANT_SAID] Noted live performances by Robert Glasper and Kendrick Lamar, including a performance at the 2016 Grammy Awards.
+- [EVENT] User asked for recommendations on famous jazz clubs around the world.
+- [ASSISTANT_SAID] Listed famous jazz clubs: Village Vanguard, Birdland, Jazz at Lincoln Center (New York City), Ronnie Scott's Jazz Club, Vortex Jazz Club (London), Duc des Lombards, New Morning (Paris), Blue Note Tokyo, Cotton Club (Tokyo), The Jazz Showcase, Tonic Room (Chicago), Umbria Jazz Club (Italy), Montmartre (Copenhagen).
+- [

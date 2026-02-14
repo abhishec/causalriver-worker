@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/27 (Sat) 00:03  
+[FACT] User has made at least 10 purchases in the past month, mostly from Amazon.  
+[PREFERENCE] User is looking for help organizing online shopping habits.  
+[ASSISTANT_SAID] Recommended apps and tools to track spending:  
+[ASSISTANT_SAID] 1. CamelCamelCamel (Web, Chrome Extension): A price tracker for Amazon purchases.  
+[ASSISTANT_SAID] 2. Rakuten (formerly known as Ebates) (Web, Mobile App): A cashback and tracking platform for online purchases.  
+[ASSISTANT_SAID] 3. Mint (Web, Mobile App): A personal finance app for tracking spending and creating budgets.  
+[ASSISTANT_SAID] 4. Personal Capital (Web, Mobile App): A financial management app for tracking income and expenses.  
+[ASSISTANT_SAID] 5. Digit (Mobile App): A budgeting app that tracks spending and helps save money.  
+[ASSISTANT_SAID] 6. Amazon's Order History (Web): A built-in feature to track purchases on Amazon.  
+[ASSISTANT_SAID] 7. Spent (Mobile App): An app for tracking daily expenses, including online purchases.  
+[ASSISTANT_SAID] 8. Wally (Mobile App): A budgeting app that tracks spending and offers recommendations.  
+[ASSISTANT_SAID] 9. Clarity Money (Mobile App): A free app for tracking spending and budgeting.  
+[ASSISTANT_SAID] 10. Spreadsheet or Budgeting Template: A manual approach to track online purchases.  
+[PREFERENCE] User is worried about impulse buying, especially on weekends when bored.  
+[ASSISTANT_SAID] Tips to avoid impulse buying online:  
+[ASSISTANT_SAID] 1. 30-day rule: Wait 30 days before making a purchase.  
+[ASSISTANT_SAID] 2. Remove temptation: Avoid browsing shopping sites and remove apps from the home screen.  
+[ASSISTANT_SAID] 3. Use website blockers: Tools like Freedom, SelfControl, or Cold Turkey can block shopping sites.  
+[ASSISTANT_SAID] 4. Use cashback and rewards strategically: Set a budget for rewards and plan purchases.  
+[ASSISTANT_SAID] 5. Unsubscribe from promotional emails: Reduce temptation by unsubscribing from newsletters.  
+[ASSISTANT_SAID] 6. Use the 10-minute rule: Wait 10 minutes before making a purchase.  
+[ASSISTANT_SAID] 7. Ask yourself questions before buying: Do I really need this? Can I afford it?

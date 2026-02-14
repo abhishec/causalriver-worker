@@ -1,0 +1,17 @@
+**Observation Log:**
+
+[FACT] User did not provide any personal information such as name, location, job, or family.
+
+[PREFERENCE] User prefers responses in Markdown format without quotes and without using a code block.
+
+[EVENT] User requested the generation of three prompts exploring the climate crisis.
+
+[TEMPORAL] Session date is 2022/10/13 (Thu) at 06:18.
+
+[ASSISTANT_SAID] Assistant provided a description of a polar bear standing on a melting glacier.
+
+[ASSISTANT_SAID] Assistant provided a description of a city skyline on fire due to extreme heat and drought.
+
+[ASSISTANT_SAID] Assistant provided a description of a group of people standing in front of a flooded beach, holding signs with climate change messages.
+
+[ASSISTANT_CREATED] Assistant created three prompts exploring the climate crisis, each with a specific image description and italicized text below each image.

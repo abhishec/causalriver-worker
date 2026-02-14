@@ -1,0 +1,20 @@
+**Observation Log:**
+
+[FACT] User is looking for new vegan recipes.  
+[FACT] User has invested in a spiralizer.  
+[FACT] User has started making zucchini noodles with vegan pesto sauce.  
+[PREFERENCE] User loves zucchini noodles with vegan pesto sauce.  
+[EVENT] User is experimenting with different types of tofu and tempeh.  
+[EVENT] User is looking for vegan Korean-inspired desserts.  
+[EVENT] User is looking for vegan Korean-inspired breakfast dishes.  
+[TEMPORAL] Session Date: 2023/05/21 (Sun) 13:35  
+[ASSISTANT_SAID] Assistant congratulated the user on their new spiralizer and expressed excitement about their enjoyment of vegan pesto sauce with zucchini noodles.  
+[ASSISTANT_SAID] Assistant provided a recipe for **Creamy Zucchini Noodle Pesto Pasta**: blend cooked zucchini noodles with vegan pesto, oat milk, garlic, and lemon juice; add sautéed cherry tomatoes and basil.  
+[ASSISTANT_SAID] Assistant provided a recipe for **Oat Milk Carbonara Zoodles**: create a creamy sauce with oat milk, cashew cream, lemon juice, and nutritional yeast; toss with spiralized zucchini, cherry tomatoes, and vegan bacon bits.  
+[ASSISTANT_SAID] Assistant provided a recipe for **Oat Milk Creamy Tomato Soup**: blend cooked tomatoes, oat milk, and spices; serve with olive oil and crusty bread.  
+[ASSISTANT_SAID] Assistant provided a recipe for **Vegan Mac 'n Cheese**: use oat milk to create a cheesy sauce with vegan cheese shreds, nutritional yeast, and spices; combine with macaroni and steamed broccoli.  
+[ASSISTANT_SAID] Assistant provided a recipe for **Oat Milk Pancakes with Fresh Berries**: use oat milk, flour, and sweetener; top with fresh berries and maple syrup.  
+[ASSISTANT_SAID] Assistant provided a recipe for **Zoodle Stir-Fry with Turmeric Oat Milk Sauce**: sauté spiralized zucchini with turmeric, garlic, and ginger; serve with a creamy oat milk-based sauce.  
+[ASSISTANT_SAID] Assistant provided a recipe for **Zucchini Noodle Salad with Oat Milk Ranch**: combine zoodles, cherry tomatoes, cucumber, and a creamy oat milk-based ranch dressing.  
+[ASSISTANT_SAID] Assistant provided a recipe for **Gochujang Pesto**: blend fresh basil leaves, gochujang, olive oil, garlic, soy sauce, lemon juice, salt, and pepper; pair with zoodles and cherry tomatoes.  
+[ASSISTANT_SAID] Assistant provided a recipe for **Roasted Red Pepper Pesto**: blend fresh basil leaves, roasted red pepper, olive oil, garlic, lemon juice, salt, and pepper

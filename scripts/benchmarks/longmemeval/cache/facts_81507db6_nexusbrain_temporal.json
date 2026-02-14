@@ -1,0 +1,262 @@
+{
+  "answer_da3c1266_3": [
+    {
+      "fact": "User is considering pursuing a certification in digital marketing.",
+      "type": "preference",
+      "entities": [
+        "digital marketing certification"
+      ]
+    },
+    {
+      "fact": "User has narrowed down their options to two programs.",
+      "type": "preference",
+      "entities": [
+        "two programs"
+      ]
+    },
+    {
+      "fact": "One program is focused on SEO and content marketing.",
+      "type": "preference",
+      "entities": [
+        "SEO",
+        "content marketing"
+      ]
+    },
+    {
+      "fact": "The other program is more comprehensive and covers a broader range of topics.",
+      "type": "preference",
+      "entities": [
+        "comprehensive program"
+      ]
+    },
+    {
+      "fact": "User's goal is to enhance their skills and become more competitive in the job market.",
+      "type": "opinion",
+      "entities": [
+        "enhance skills",
+        "competitive in job market"
+      ]
+    },
+    {
+      "fact": "User has some experience in social media marketing.",
+      "type": "personal",
+      "entities": [
+        "social media marketing"
+      ]
+    },
+    {
+      "fact": "User is considering attending their alma mater's annual alumni reunion.",
+      "type": "event",
+      "entities": [
+        "alma mater",
+        "annual alumni reunion"
+      ]
+    },
+    {
+      "fact": "User is unsure about attending the alumni reunion.",
+      "type": "opinion",
+      "entities": [
+        "alumni reunion"
+      ]
+    },
+    {
+      "fact": "User needs to consider their budget for the program.",
+      "type": "preference",
+      "entities": [
+        "budget"
+      ]
+    }
+  ],
+  "answer_da3c1266_5": [
+    {
+      "fact": "User is considering pursuing a certification in digital marketing.",
+      "type": "preference",
+      "entities": [
+        "digital marketing certification"
+      ]
+    },
+    {
+      "fact": "User has narrowed down their options to two programs.",
+      "type": "preference",
+      "entities": [
+        "two programs"
+      ]
+    },
+    {
+      "fact": "User attended their colleague Alex's graduation from a leadership development program.",
+      "type": "event",
+      "entities": [
+        "Alex",
+        "graduation",
+        "leadership development program"
+      ]
+    },
+    {
+      "fact": "User is inspired by Alex's graduation to think about their own educational goals.",
+      "type": "opinion",
+      "entities": [
+        "educational goals"
+      ]
+    },
+    {
+      "fact": "User is considering a program offered by HubSpot.",
+      "type": "preference",
+      "entities": [
+        "HubSpot"
+      ]
+    },
+    {
+      "fact": "User is considering a program offered by the Digital Marketing Institute.",
+      "type": "preference",
+      "entities": [
+        "Digital Marketing Institute"
+      ]
+    },
+    {
+      "fact": "User prefers online and self-paced programs.",
+      "type": "preference",
+      "entities": [
+        "online",
+        "self-paced"
+      ]
+    },
+    {
+      "fact": "User notes that the HubSpot program is free.",
+      "type": "preference",
+      "entities": [
+        "HubSpot program",
+        "free"
+      ]
+    },
+    {
+      "fact": "User notes that the Digital Marketing Institute program costs around $5,000.",
+      "type": "preference",
+      "entities": [
+        "Digital Marketing Institute program",
+        "$5,000"
+      ]
+    },
+    {
+      "fact": "User mentions that both programs cover similar topics like SEO, social media, and email marketing.",
+      "type": "preference",
+      "entities": [
+        "SEO",
+        "social media",
+        "email marketing"
+      ]
+    }
+  ],
+  "answer_da3c1266_1": [
+    {
+      "fact": "User is looking into certification programs in digital marketing",
+      "type": "preference",
+      "entities": [
+        "certification programs",
+        "digital marketing"
+      ]
+    },
+    {
+      "fact": "User attended their little cousin Emma's preschool graduation about two months ago",
+      "type": "event",
+      "entities": [
+        "Emma",
+        "preschool graduation"
+      ]
+    },
+    {
+      "fact": "User thinks kids grow up fast",
+      "type": "opinion",
+      "entities": [
+        "kids"
+      ]
+    }
+  ],
+  "answer_da3c1266_2": [
+    {
+      "fact": "User is considering pursuing a certification in digital marketing",
+      "type": "preference",
+      "entities": [
+        "digital marketing certification"
+      ]
+    },
+    {
+      "fact": "User is interested in the Digital Marketing Certified Associate program from Digital Marketing Institute",
+      "type": "preference",
+      "entities": [
+        "Digital Marketing Certified Associate",
+        "Digital Marketing Institute"
+      ]
+    },
+    {
+      "fact": "User is interested in the Certified Digital Marketing Professional program from American Marketing Association",
+      "type": "preference",
+      "entities": [
+        "Certified Digital Marketing Professional",
+        "American Marketing Association"
+      ]
+    },
+    {
+      "fact": "User's goal is to enhance their current role and possibly move into a more senior position in the future",
+      "type": "opinion",
+      "entities": [
+        "enhance current role",
+        "senior position"
+      ]
+    },
+    {
+      "fact": "User attended their best friend Rachel's master's degree graduation ceremony a couple of weeks ago",
+      "type": "event",
+      "entities": [
+        "Rachel",
+        "graduation ceremony"
+      ]
+    },
+    {
+      "fact": "User finds Rachel's graduation inspiring",
+      "type": "opinion",
+      "entities": [
+        "Rachel",
+        "graduation"
+      ]
+    }
+  ],
+  "answer_da3c1266_4": [
+    {
+      "fact": "User is researching digital marketing certification programs",
+      "type": "preference",
+      "entities": [
+        "digital marketing certification programs"
+      ]
+    },
+    {
+      "fact": "User is considering the pros and cons of online vs in-person programs",
+      "type": "preference",
+      "entities": [
+        "online programs",
+        "in-person programs"
+      ]
+    },
+    {
+      "fact": "User has been thinking about family a lot lately",
+      "type": "personal",
+      "entities": [
+        "family"
+      ]
+    },
+    {
+      "fact": "User feels guilty about missing their nephew Jack's eighth grade graduation ceremony",
+      "type": "event",
+      "entities": [
+        "nephew Jack",
+        "eighth grade graduation ceremony"
+      ]
+    },
+    {
+      "fact": "User believes their nephew will understand their absence at the graduation",
+      "type": "opinion",
+      "entities": [
+        "nephew Jack"
+      ]
+    }
+  ]
+}

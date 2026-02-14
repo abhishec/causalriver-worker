@@ -1,0 +1,23 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/23 (Tue) 23:05
+- [PREFERENCE] User is looking for new TV show recommendations, specifically sci-fi shows similar to "The Expanse."
+- [ASSISTANT_SAID] Assistant suggested the following sci-fi TV shows similar to "The Expanse":
+  1. **Battlestar Galactica** (2004-2009): Explores the human condition, politics, and war in a sci-fi setting.
+  2. **Dark Matter** (2015-2017): Follows a group of people who wake up on a spaceship with no memory of who they are.
+  3. **Killjoys** (2015-2019): About a team of bounty hunters in a distant planetary system.
+  4. **Altered Carbon** (2018-2020): Explores themes of identity, power, and corruption in a future where consciousness can be transferred.
+  5. **Colony** (2016-2018): A family drama set in a dystopian near-future in occupied Los Angeles.
+  6. **Travelers** (2016-2018): A team from the future travels back in time to prevent a global catastrophe.
+  7. **Westworld** (2016-present): Explores the intersection of humanity and artificial intelligence in a futuristic theme park.
+  8. **Farscape** (1999-2003): An astronaut becomes embroiled in alien politics and adventure after being flung across the galaxy.
+  9. **Stargate SG-1** (1997-2007): Follows a team of explorers traveling through a network of ancient alien transportation systems.
+  10. **3%** (2016-2019): A Brazilian dystopian thriller about a small percentage of the population chosen to live in a utopia.
+- [CHANGE] User has already seen "Battlestar Galactica" and "Stargate SG-1."
+- [PREFERENCE] User is looking for newer sci-fi shows that have aired in the past few years.
+- [ASSISTANT_SAID] Assistant suggested the following newer sci-fi TV shows:
+  1. **Raised by Wolves** (2020-present): About two androids raising human children on a distant planet.
+  2. **The Mandalorian** (2019-present): A live-action Star Wars series following a bounty hunter and "Baby Yoda."
+  3. **For All Mankind** (2019-present): An alternate history series about the space race.
+  4. **Another Life** (2019-present): A team of astronauts investigates an alien artifact.
+  5. **Nightflyers** (2018): A horror-sci-fi series based on a George R.R

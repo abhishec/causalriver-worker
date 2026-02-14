@@ -1,0 +1,76 @@
+{
+  "answer_79c395a9_1": [
+    {
+      "fact": "User is trying to increase their social media presence, especially on Instagram.",
+      "type": "preference",
+      "entities": [
+        "social media",
+        "Instagram"
+      ]
+    },
+    {
+      "fact": "User reached 500 followers on Instagram last week.",
+      "type": "event",
+      "entities": [
+        "500 followers",
+        "Instagram"
+      ]
+    },
+    {
+      "fact": "User's cat is named Luna.",
+      "type": "personal",
+      "entities": [
+        "Luna"
+      ]
+    },
+    {
+      "fact": "User's followers love seeing photos of their cat.",
+      "type": "opinion",
+      "entities": [
+        "followers",
+        "cat"
+      ]
+    },
+    {
+      "fact": "User is considering incorporating their cat into behind-the-scenes content.",
+      "type": "preference",
+      "entities": [
+        "behind-the-scenes content",
+        "cat"
+      ]
+    },
+    {
+      "fact": "User is interested in sharing snippets of their writing process on Instagram Stories.",
+      "type": "preference",
+      "entities": [
+        "writing process",
+        "Instagram Stories"
+      ]
+    }
+  ],
+  "answer_79c395a9_2": [
+    {
+      "fact": "User is trying to increase their social media presence.",
+      "type": "preference",
+      "entities": [
+        "social media presence"
+      ]
+    },
+    {
+      "fact": "User has 600 followers on Instagram.",
+      "type": "event",
+      "entities": [
+        "600 followers",
+        "Instagram"
+      ]
+    },
+    {
+      "fact": "User wants to try out the Q&A session idea on Instagram.",
+      "type": "preference",
+      "entities": [
+        "Q&A session",
+        "Instagram"
+      ]
+    }
+  ]
+}

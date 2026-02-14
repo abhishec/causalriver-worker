@@ -1,0 +1,16 @@
+**Observation Log:**
+
+- [FACT] User is planning to move into a new home.
+- [FACT] User is located in the 78749 zip code.
+- [FACT] User was pre-approved for a mortgage of $400,000 from Wells Fargo.
+- [EVENT] User is in the process of closing on their new home.
+- [EVENT] User rented a storage unit on March 1st to store belongings while closing on the house.
+- [PREFERENCE] User is looking forward to owning a home and having a backyard.
+- [ASSISTANT] The assistant provided a list of cable and TV service providers available in the 78749 area, including Spectrum, AT&T, Google Fiber, Suddenlink, and Grande Communications, along with their starting prices.
+- [ASSISTANT] The assistant provided a list of electricity providers available in the 78749 area, including TXU Energy, Reliant Energy, Direct Energy, Just Energy, and Pulse Power.
+- [ASSISTANT] The assistant mentioned Texas Gas Service as the local gas provider for the user.
+- [ASSISTANT] The assistant recommended several time-tracking tools/apps for organizing moving tasks, including Trello, Todoist, Google Keep, AnyList, Moving Day, Cozi, and Google Calendar.
+- [PREFERENCE] User decided to try out Trello for organizing moving tasks.
+- [ASSISTANT] The assistant provided tips for reviewing home insurance policy documents, including coverage limits, deductibles, exclusions, replacement cost vs. actual cash value, liability coverage, personal property coverage, additional living expenses, discounts, policy duration, and claims process.
+- [EVENT] User needs to confirm moving details with the storage unit company, including moving date, truck size, and labor assistance.
+- [ASSISTANT] The assistant suggested contacting the storage unit company to confirm moving details and provided a list of questions to ask, such as confirming the moving date, truck size, labor assistance, additional fees, and access process.

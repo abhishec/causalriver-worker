@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[FACT] User has combination skin.  
+[FACT] User's main skin concerns are acne and hyperpigmentation.  
+[FACT] User prefers a lightweight, non-greasy moisturizer.  
+[FACT] User is looking for a moisturizer in the price range of $15-$25.  
+[EVENT] User is currently using Neutrogena face wash at night before going to bed.  
+[ASSISTANT_SAID] Recommended Neutrogena Hydrating Facial Moisturizer with Hyaluronic Acid ($17) for hydration and soothing.  
+[ASSISTANT_SAID] Suggested Paula's Choice 2% BHA Liquid Acid ($19) for acne and skin texture improvement.  
+[ASSISTANT_SAID] Suggested La Roche-Posay Toleriane Ultra Fluid ($20) for sensitive, acne-prone skin.  
+[ASSISTANT_SAID] Suggested Dermalogica Daily Moisturizing Cream ($22) for hyperpigmentation and dryness.  
+[ASSISTANT_SAID] Suggested EltaMD UV Clear Broad-Spectrum SPF 46 ($25) for sun protection and inflammation reduction.  
+[ASSISTANT_SAID] Advised to patch test a new moisturizer on a small area of skin before full use.  
+[EVENT] User decided to try the Neutrogena Hydrating Facial Moisturizer with Hyaluronic Acid.  
+[ASSISTANT_SAID] Provided a skincare routine for using the moisturizer: cleanse, pat dry, apply moisturizer, and massage in.  
+[ASSISTANT_SAID] Explained benefits of hyaluronic acid for combination skin, including hydration and reducing fine lines.  
+[EVENT] User is thinking of rearranging their bathroom cabinet to make more space for skincare products.  
+[ASSISTANT_SAID] Suggested categorizing products into groups: cleansers, toners, exfoliants, essences, serums, moisturizers, eye care, masks, and tools.  
+[ASSISTANT_SAID] Recommended using vertical space with stackable shelves, baskets, or turntables.  
+[ASSISTANT_SAID] Advised to store frequently used products front and center and keep similar products together.  
+[ASSISTANT_SAID] Suggested labeling categories and using drawer dividers or inserts for organization.  
+[ASSISTANT_SAID] Recommended cleaning the bathroom mirrors with a microfiber cloth and using a good glass cleaner.  
+[ASSISTANT_SAID] Suggested Windex Original Glass Cleaner, Method Squirt + Mop Glass Cleaner, Seventh Generation Glass & Surface Cleaner, and Ecover Glass & Surface Cleaner as options.  
+[ASSISTANT_SAID] Provided tips for cleaning mirrors: spray cleaner on cloth, clean in circular motion, and use a lint-free cloth for drying.  
+[EVENT] User plans to pick up a glass cleaner and clean the mirrors over the weekend.

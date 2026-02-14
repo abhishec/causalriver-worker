@@ -1,0 +1,27 @@
+### Observation Log
+
+**Session Date:** 2023/05/26 (Fri) 22:41  
+**Session ID:** sharegpt_E9Egq9q_0
+
+- [FACT] The user is seeking assistance in generating prompts for a UI process.
+- [PREFERENCE] The user prefers a structured format, specifically a markdown table.
+- [EVENT] The user requested the assistant to act as a prompt generator.
+- [CHANGE] The user is looking for a comprehensive approach to product development, including various aspects like branding and website creation.
+- [TEMPORAL] The conversation took place on May 26, 2023.
+- [ASSISTANT_SAID] The assistant provided a markdown table with automated formular prompts for the UI process, including steps, prompts, keywords, and keyword seeds.
+- [ASSISTANT_CREATED] The assistant created a markdown table with the following details:
+  - **Product Characteristics**: What is your product? (Keywords: Product; Keyword Seeds: Software, App, Service, Gadget)
+  - **Description**: What is your product description? (Keywords: Description; Keyword Seeds: Overview, Explanation, Summary)
+  - **Product Name**: What is your product name? (Keywords: Product Name; Keyword Seeds: Label, Title, Naming)
+  - **Brand Name**: What is your brand name? (Keywords: Brand Name; Keyword Seeds: Identity, Image, Reputation)
+  - **Logo Guideline**: Do you want a guideline for logo? (Keywords: Logo, Guideline; Keyword Seeds: Symbol, Icon, Mark)
+  - **Choose style for logo**: (Keywords: Logo, Style; Keyword Seeds: Modern, Classic, Minimalistic)
+  - **Pick some logos you like (examples)**: (Keywords: Logo, Examples; Keyword Seeds: Inspiration, Preferences, Samples)
+  - **Cl Guideline**: Do you want a guideline for Cl? (Keywords: Cl, Guideline; Keyword Seeds: Layout, Color, Typography)
+  - **Choose Cl style**: (Keywords: Cl, Style; Keyword Seeds: Bold, Simple, Eye-catching)
+  - **Pick some Cl banners you like (examples)**: (Keywords: Cl, Examples; Keyword Seeds: Inspiration, Preferences, Samples)
+  - **Banner Guideline**: Do you want a guideline for banner? (Keywords: Banner, Guideline; Keyword Seeds: Size, Shape, Content)
+  - **Choose banner style**: (Keywords: Banner, Style; Keyword Seeds: Dynamic, Static, Animated)
+  - **Pick some banners you like (examples)**: (Keywords: Banner, Examples; Keyword Seeds: Inspiration, Preferences, Samples)
+  - **Create Website**: Do you want to create a website? (Keywords: Website, Create; Keyword Seeds: Online, Presence, Platform)
+  - **Choose domain name**: (Keywords: Domain, Name

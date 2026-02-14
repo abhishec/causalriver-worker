@@ -1,0 +1,127 @@
+{
+  "answer_e3aa84c4_2": [
+    {
+      "fact": "User is planning a trip to Japan in May",
+      "type": "event",
+      "entities": [
+        "Japan",
+        "May"
+      ]
+    },
+    {
+      "fact": "User is looking for eco-friendly accommodations in Tokyo and Osaka",
+      "type": "preference",
+      "entities": [
+        "eco-friendly accommodations",
+        "Tokyo",
+        "Osaka"
+      ]
+    },
+    {
+      "fact": "User recently attended a friend's wedding",
+      "type": "event",
+      "entities": [
+        "friend's wedding"
+      ]
+    },
+    {
+      "fact": "User is tired from a bus ride",
+      "type": "personal",
+      "entities": []
+    },
+    {
+      "fact": "User is excited to start planning their next trip",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User plans to take the train to Narita airport for their Japan trip",
+      "type": "preference",
+      "entities": [
+        "Narita airport",
+        "train"
+      ]
+    }
+  ],
+  "answer_e3aa84c4_1": [
+    {
+      "fact": "User is planning a trip to the mountains on April 15th.",
+      "type": "event",
+      "entities": [
+        "mountains",
+        "April 15th"
+      ]
+    },
+    {
+      "fact": "User is considering taking a detour to visit family in the countryside.",
+      "type": "event",
+      "entities": [
+        "family",
+        "countryside"
+      ]
+    },
+    {
+      "fact": "User took a train ride to visit family today, which was a 2-hour journey.",
+      "type": "event",
+      "entities": [
+        "train ride",
+        "family",
+        "2-hour journey"
+      ]
+    },
+    {
+      "fact": "User's family lives on the way to the mountains.",
+      "type": "relationship",
+      "entities": [
+        "family",
+        "mountains"
+      ]
+    },
+    {
+      "fact": "User's starting point for the road trip is the city where they live.",
+      "type": "personal",
+      "entities": [
+        "city"
+      ]
+    },
+    {
+      "fact": "User is flexible with the route as long as it's not too far out of the way.",
+      "type": "preference",
+      "entities": []
+    },
+    {
+      "fact": "User has been tracking travel expenses and modes of transport.",
+      "type": "personal",
+      "entities": [
+        "travel expenses",
+        "modes of transport"
+      ]
+    },
+    {
+      "fact": "User has reduced their carbon emissions by around 20% in the past quarter.",
+      "type": "opinion",
+      "entities": [
+        "carbon emissions",
+        "20%",
+        "past quarter"
+      ]
+    },
+    {
+      "fact": "User is trying to reduce their carbon footprint.",
+      "type": "opinion",
+      "entities": [
+        "carbon footprint"
+      ]
+    },
+    {
+      "fact": "User has been taking more trains and buses instead of driving or taking taxis.",
+      "type": "preference",
+      "entities": [
+        "trains",
+        "buses",
+        "driving",
+        "taxis"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/22 (Mon) 17:21  
+[ASSISTANT_SAID] Scheduling criteria are used to evaluate the performance of a scheduling algorithm.  
+[ASSISTANT_SAID] Common scheduling criteria include:  
+[ASSISTANT_SAID] 1. CPU utilization: The percentage of time the CPU is busy executing a process.  
+[ASSISTANT_SAID] 2. Throughput: The number of processes or threads completed per unit of time.  
+[ASSISTANT_SAID] 3. Turnaround time: The amount of time it takes for a process or thread to complete its execution from submission.  
+[ASSISTANT_SAID] 4. Waiting time: The amount of time a process or thread spends in the ready queue waiting for the CPU.  
+[ASSISTANT_SAID] 5. Response time: The time it takes for a process or thread to start responding to a request.  
+[ASSISTANT_SAID] 6. Fairness: The degree to which the scheduler allocates resources fairly among competing processes or threads.  
+[ASSISTANT_SAID] The choice of scheduling criteria depends on the requirements of the system and the characteristics of the workload.  
+[ASSISTANT_SAID] A real-time system may prioritize response time and fairness over CPU utilization, while a batch processing system may prioritize throughput and CPU utilization over response time.  
+[user: scheduling algorithms]  
+[ASSISTANT_SAID] There are several scheduling algorithms used by operating systems to determine which process or thread to execute next.  
+[ASSISTANT_SAID] Common scheduling algorithms include:  
+[ASSISTANT_SAID] 1. First-Come, First-Served (FCFS): Executes processes in the order they arrive in the ready queue.  
+[ASSISTANT_SAID] 2. Shortest Job First (SJF): Executes the process with the shortest burst time first.  
+[ASSISTANT_SAID] 3. Priority Scheduling: Executes the highest priority process first, can be preemptive or non-preemptive.  
+[ASSISTANT_SAID] 4. Round Robin (RR): Executes processes for a fixed time slice or quantum.  
+[ASSISTANT_SAID] 5. Multilevel Queue (MLQ): Divides the ready queue into several separate queues with different priority levels.  
+[ASSISTANT_SAID] 6. Multilevel Feedback Queue (MLFQ): Combines features of MLQ and RR, adjusting priority based on behavior.  
+[ASSISTANT_SAID] The choice of algorithm depends on the requirements of the system and the characteristics of the workload.  
+[user: Process coordination]  
+[ASSISTANT_SAID] Process coordination refers

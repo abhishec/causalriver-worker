@@ -1,0 +1,10 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/06/02 (Fri) 15:11
+- [USER] User inquired about the best use of live video versus animation for training.
+- [ASSISTANT_SAID] It is generally best to use live video for training when the subject matter is best demonstrated through real-world examples or when a high level of realism is required.
+- [ASSISTANT_SAID] Live video is more appropriate for training in fields such as medicine, cooking, or construction where hands-on, real-world examples are necessary for understanding.
+- [ASSISTANT_SAID] Animation is generally best used over live video for training when the subject matter is best demonstrated through visual aids and when a high level of control over the visual representation is required.
+- [ASSISTANT_SAID] Animation is more appropriate for training in fields such as software development, science, and math, where it is necessary to clearly demonstrate technical concepts.
+- [ASSISTANT_SAID] Animation is useful for showing simulations that would be difficult or impossible to demonstrate with live video, such as complex mechanical or chemical processes.
+- [ASSISTANT_SAID] Animation allows for greater control over the pacing and presentation of the material, making it easier to explain complex concepts in a step-by-step manner.

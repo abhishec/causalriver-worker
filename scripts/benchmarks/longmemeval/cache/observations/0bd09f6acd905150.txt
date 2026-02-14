@@ -1,0 +1,31 @@
+**Observation Log:**
+
+[FACT] User is planning a birthday dinner tonight.  
+[FACT] User is turning 30 today.  
+[PREFERENCE] User is open to any cuisine but prefers Italian food.  
+[FACT] There are about 8 people joining the user for dinner.  
+[PREFERENCE] User's budget for the meal is around $50-75 per person.  
+[PREFERENCE] User is looking for a lively atmosphere for the dinner.  
+[FACT] No one in the user's group has any dietary restrictions.  
+[ASSISTANT_SAID] Assistant wished the user a happy 30th birthday and offered to help find a restaurant.  
+[ASSISTANT_SAID] Assistant provided a list of Italian restaurant recommendations:  
+[ASSISTANT_SAID] 1. Carbone - Average price: $60-$70 per person.  
+[ASSISTANT_SAID] 2. Scarpetta - Average price: $55-$65 per person.  
+[ASSISTANT_SAID] 3. L'Artusi - Average price: $70-$80 per person.  
+[ASSISTANT_SAID] 4. Porsena - Average price: $50-$60 per person.  
+[ASSISTANT_SAID] 5. Bacaro - Average price: $50-$60 per person.  
+[ASSISTANT_SAID] Assistant recommended making reservations in advance for any of the restaurants.  
+[ASSISTANT_SAID] Assistant suggested asking about private dining rooms or special birthday packages when making the reservation.  
+[ASSISTANT_SAID] Assistant provided dessert recommendations at Scarpetta:  
+[ASSISTANT_SAID] 1. Torta di Ricotta.  
+[ASSISTANT_SAID] 2. Panna Cotta.  
+[ASSISTANT_SAID] 3. Scarpetta's Signature Tiramisu.  
+[ASSISTANT_SAID] Assistant suggested ordering a bottle of Prosecco or a special cocktail for the birthday toast.  
+[FACT] User thinks Scarpetta sounds like a great choice.  
+[ASSISTANT_SAID] Assistant informed the user that Scarpetta has private dining options and areas for special occasions.  
+[ASSISTANT_SAID] Assistant mentioned that Scarpetta has a private dining room for up to 12 guests.  
+[ASSISTANT_SAID] Assistant mentioned a semi-private wine room for up to 10 guests.  
+[ASSISTANT_SAID] Assistant mentioned banquette seating areas for larger groups.  
+[ASSISTANT_SAID] Assistant advised the user to ask about private dining options when making the reservation.  
+[ASSISTANT_SAID] Assistant provided dress code guidelines for Scarpetta:  
+[ASSISTANT_SAID] Men: Collared shirt and dress pants or

@@ -1,0 +1,38 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/04/16 (Sun) 02:28  
+[EVENT] User is planning to host another backyard BBQ soon.  
+[PREFERENCE] User needs help with menu planning for the BBQ.  
+[ASSISTANT_SAID] Assistant suggested side dishes that go well with ribs and brisket, including:  
+[ASSISTANT_SAID] 1. Coleslaw  
+[ASSISTANT_SAID] 2. Baked Beans  
+[ASSISTANT_SAID] 3. Grilled Corn on the Cob  
+[ASSISTANT_SAID] 4. Potato Salad  
+[ASSISTANT_SAID] 5. Collard Greens  
+[ASSISTANT_SAID] 6. Mac and Cheese  
+[ASSISTANT_SAID] 7. Hushpuppies  
+[ASSISTANT_SAID] 8. Fried Okra  
+[ASSISTANT_SAID] 9. Cucumber Salad  
+[ASSISTANT_SAID] 10. Grilled Vegetables  
+[ASSISTANT_SAID] 11. Cornbread  
+[ASSISTANT_SAID] 12. Fresh Fruit Salad  
+[ASSISTANT_SAID] 13. Garlic Bread  
+[ASSISTANT_SAID] 14. Roasted Sweet Potatoes  
+[ASSISTANT_SAID] 15. Green Salad  
+[PREFERENCE] User loves the suggested side dishes.  
+[PREFERENCE] User is definitely going to make mac and cheese for the BBQ.  
+[PREFERENCE] User's favorite BBQ sauce is Sweet Baby Ray's.  
+[EVENT] User needs to stock up on Sweet Baby Ray's BBQ sauce to serve with the ribs.  
+[ASSISTANT_SAID] Assistant provided recipes for smoked brisket, including:  
+[ASSISTANT_SAID] 1. Low and Slow Smoked Brisket  
+[ASSISTANT_SAID] 2. Texas-Style Smoked Brisket  
+[ASSISTANT_SAID] 3. Competition-Style Smoked Brisket  
+[ASSISTANT_SAID] Assistant included ingredients and instructions for each brisket recipe.  
+[PREFERENCE] User thinks they will try the Low and Slow Smoked Brisket recipe first.  
+[ASSISTANT_SAID] Assistant explained the types of wood chips for smoking brisket, including:  
+[ASSISTANT_SAID] 1. Post Oak  
+[ASSISTANT_SAID] 2. Mesquite  
+[ASSISTANT_SAID] 3. Hickory  
+[ASSISTANT_SAID] 4. Apple Wood  
+[ASSISTANT_SAID] 5. Pecan  
+[ASSISTANT_SAID] Assistant provided tips for using

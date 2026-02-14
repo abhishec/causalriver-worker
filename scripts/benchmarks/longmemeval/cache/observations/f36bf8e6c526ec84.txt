@@ -1,0 +1,27 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/06/05 (Mon) 21:09
+- [USER] User expressed interest in the timeline of the development of the computer science department at Carnegie Mellon University and its influence on the tech industry.
+- [ASSISTANT_SAID] Carnegie Mellon University (CMU) established the School of Computer Science (SCS) in 1965.
+- [ASSISTANT_SAID] CMU's Artificial Intelligence (AI) program was formed in 1972.
+- [ASSISTANT_SAID] The Robotics Institute was founded in 1982.
+- [ASSISTANT_SAID] The Human-Computer Interaction Institute was created in 1991.
+- [ASSISTANT_SAID] The Institute for Software Research was established in 1996.
+- [ASSISTANT_SAID] The Language Technologies Institute was formed in 2004.
+- [ASSISTANT_SAID] CMU began offering a Bachelor of Science degree in artificial intelligence in 2018.
+- [ASSISTANT_SAID] The impact of SCS includes the production of companies like Siri, Nuance, and Mosaic.
+- [ASSISTANT_SAID] The Robotics Institute has contributed to autonomous systems and robotics in manufacturing and medical applications.
+- [ASSISTANT_SAID] The Human-Computer Interaction Institute has influenced user-friendly technology design.
+- [ASSISTANT_SAID] The Institute for Software Research has contributed to agile software development methodologies.
+- [ASSISTANT_SAID] Notable alumni from CMU include founders of Google, LinkedIn, and MongoDB.
+- [USER] User expressed amazement at the contributions of CMU's computer science department to the tech industry.
+- [USER] User inquired about how CMU became a leader in computer science education and research.
+- [ASSISTANT_SAID] Early investment in computer science and establishing one of the first departments in 1965 contributed to CMU's leadership.
+- [ASSISTANT_SAID] CMU's interdisciplinary research approach has led to groundbreaking advancements.
+- [ASSISTANT_SAID] Strong partnerships with tech companies like Google, Microsoft, and Apple have provided real-world project opportunities.
+- [ASSISTANT_SAID] Exceptional faculty members, including Raj Reddy, Manuela Veloso, and Justine Cassell, have significantly contributed to the field.
+- [USER] User expressed curiosity about current research projects or initiatives at CMU's computer science department.
+- [ASSISTANT_SAID] Current research includes:
+  - [ASSISTANT_SAID] AI and robotics focusing on autonomous vehicles and advanced robots.
+  - [ASSISTANT_SAID] Human-computer interaction research aimed at helping people with disabilities.
+  - [ASSISTANT_SAID] Software engineering research applying AI

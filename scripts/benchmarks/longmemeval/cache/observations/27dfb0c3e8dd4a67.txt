@@ -1,0 +1,24 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/29 (Mon) 04:47
+- [EVENT] The user requested a scene for an episode of "It's Always Sunny In Philadelphia."
+- [ASSISTANT_CREATED] The assistant created a scene where the gang thinks Frank has died and left all his money to Charlie.
+- [FACT] Frank is a character in "It's Always Sunny In Philadelphia."
+- [FACT] Charlie is a character in "It's Always Sunny In Philadelphia."
+- [RELATIONSHIP] Frank is a father figure to Charlie.
+- [PREFERENCE] Charlie reminisces about the wonderful things Frank has done for him.
+- [EVENT] The gang discovers that Frank is going to be canonized by the church.
+- [RELATIONSHIP] Rickety Cricket is a character who has rejoined the church and is sober.
+- [ASSISTANT_SAID] Rickety Cricket reveals that Frank is being made a saint because Charlie donated all of Frank's money to the church.
+- [ASSISTANT_SAID] Rickety Cricket disrupts the mass by revealing that Frank is only getting sainted because of Charlie's donation.
+- [FACT] Charlie only remembers Frank's actions as good due to being high on paint fumes and glue.
+- [EVENT] The gang goes to church for Frank's canonization.
+- [CHANGE] It is revealed that Frank is not actually dead; he faked his death to see who would be sad.
+- [PREFERENCE] Frank thought Charlie would be a safe person to leave his money to because he believed Charlie would be too stupid to get it out of the bank account.
+- [ASSISTANT_CREATED] The assistant created a script for an episode of "It's Always Sunny In Philadelphia" with detailed dialogue and actions.
+- [FACT] The gang includes Dennis, Dee, Mac, and Charlie.
+- [EVENT] The gang reacts to Frank's supposed death with sadness and anger.
+- [ASSISTANT_SAID] Dennis and Dee express their anger that Frank left all his money to Charlie.
+- [ASSISTANT_SAID] The assistant included specific actions and dialogue for each character in the script.
+- [EVENT] The gang stands outside the church, looking stunned and bewildered as Frank walks up to them, laughing.
+- [ASSISTANT_SAID] Frank reveals to the gang that he faked his death as part of an experiment.

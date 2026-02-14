@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/03/15 (Wed) 17:55  
+[FACT] User has started taking a hip hop class at a dance studio near their work three weeks ago.  
+[PREFERENCE] User loves the energy of the hip hop class and wants to explore more of the music.  
+[EVENT] User is looking for hip hop music recommendations.  
+[ASSISTANT_SAID] Assistant provided a list of hip hop music recommendations categorized into Classic Hip Hop, Modern Hip Hop, Hip Hop Sub-Genres, and Hip Hop Influenced Pop.  
+[ASSISTANT_SAID] Classic Hip Hop recommendations include:  
+- Old School: Run-DMC - "Walk This Way" (feat. Aerosmith), Beastie Boys - "Fight for Your Right", LL Cool J - "Mama Said Knock You Out"  
+- Golden Age: Nas - "N.Y. State of Mind" (feat. Jay-Z), The Notorious B.I.G. - "Juicy", Tupac Shakur - "California Love" (feat. Dr. Dre)  
+[ASSISTANT_SAID] Modern Hip Hop recommendations include:  
+- Mainstream: Kendrick Lamar - "Humble.", Cardi B - "Bodak Yellow", Travis Scott - "Sicko Mode"  
+- Underground: J. Cole - "Middle Child", Logic - "1-800-273-8255" (feat. Alessia Cara, KAYTRANADA), Joey Bada$$ - "Devastated"  
+[ASSISTANT_SAID] Hip Hop Sub-Genres recommendations include:  
+- Trap: Migos - "Bad and Boujee" (feat. Lil Uzi Vert), Lil Baby - "Yes Indeed" (feat. Drake), Gunna - "Sold Out Dates" (feat. Lil Baby)  
+- West Coast: N.W.A - "Straight Outta Compton", Game - "Hate It or Love It" (feat. 50 Cent), G-Eazy - "Me, Myself & I" (feat. Bebe Rexha)  
+[ASSISTANT_SAID] Hip Hop Influenced Pop recommendations include:  
+- Pop-Rap: Post Malone - "Psycho" (feat. Ty Dolla Sign), Nicki Minaj - "Chun-Li", Iggy Azalea - "Fancy" (feat. Charli XCX)  
+- R&B-Hip Hop Fusion: The Weeknd - "The Hills", Drake - "One Dance" (feat. WizKid, Kyla), Bryson Tiller - "Don't"  
+[ASSISTANT_SAID] Assistant suggested checking out playlists on music streaming platforms like Spotify, Apple Music, or Tidal for curated hip hop playlists.  
+[EVENT] User is thinking of making a playlist for their hip hop class to practice at home.  
+[

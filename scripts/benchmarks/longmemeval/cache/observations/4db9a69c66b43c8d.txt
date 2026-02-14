@@ -1,0 +1,59 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/20 (Sat) 03:20  
+[ASSISTANT_SAID] To compute the marginal probability of the party of the tweet, we can count the number of tweets from each party and divide by the total number of tweets.  
+[ASSISTANT_CREATED] Code snippet to compute marginal probability of tweets by party:  
+```python
+# count number of tweets from each party
+party_counts = tweets['party'].value_counts()
+
+# divide by total number of tweets to get marginal probability
+party_marg = party_counts / tweets.shape[0]
+
+# display result
+print(party_marg)
+```
+[ASSISTANT_SAID] Output of marginal probabilities:  
+```yaml
+Republican      0.583054  
+Democrat        0.412697  
+Independent     0.004249  
+Name: party, dtype: float64
+```  
+[ASSISTANT_SAID] It looks like Republicans are responsible for the majority of the retweets.  
+[ASSISTANT_SAID] To create a new column indicating if the retweet is coming from a MoC, we can first get the set of unique "user_id_str" values using the .unique() method.  
+[ASSISTANT_CREATED] Code snippet to create a boolean column "is_congress_retweet":  
+```python
+# get set of unique user ids
+congress_ids = tweets['user_id_str'].unique()
+
+# create boolean column indicating if retweet is from a MoC
+tweets['is_congress_retweet'] = tweets['rt_user_id'].isin(congress_ids)
+
+# compute marginal probability of retweeting a MoC
+congress_retweet_marg = tweets['is_congress_retweet'].mean()
+
+# display result
+print(congress_retweet_marg)
+```
+[ASSISTANT_SAID] Output of marginal probability of retweeting a MoC:  
+```
+0.1216318378616838
+```  
+[ASSISTANT_SAID] It is more common to retweet from outside of Congress.  
+[ASSISTANT_SAID] To calculate the counts of retweets by each party, we can use the .crosstab() method.  
+[ASSISTANT_CREATED] Code snippet to compute counts of retweets by each party:  
+```python
+# compute counts of retweets by each party
+party_cong_retweet_counts = pd.crosstab(tweets['party'], tweets['is_congress_retweet'])
+
+# display result
+print(party_cong_retweet_counts)
+```
+[ASSISTANT_SAID] Output of counts of retweets by each party:  
+```yaml
+is_congress_retweet  False  True 
+party                            
+Democrat            56805   4164  
+Independent           788      4  
+Republic

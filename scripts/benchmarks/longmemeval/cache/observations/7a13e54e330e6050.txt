@@ -1,0 +1,26 @@
+**Observation Log:**
+
+- [FACT] User's name is Jennifer Correa.
+- [FACT] Jennifer Correa has a Bachelor of Arts (BA) in Psychology.
+- [FACT] Jennifer Correa is currently working on her master's degree in Social Work.
+- [FACT] Jennifer Correa has experience working in the non-profit organization's management industry, mental health, and with at-risk youth.
+- [FACT] Jennifer Correa does not have the qualifications for an LCSW (Licensed Clinical Social Worker) or psychiatry work.
+- [FACT] Jennifer Correa has not completed a Master's in Social Work and the necessary licensure and supervision requirements for LCSW.
+- [FACT] Psychiatry requires a medical degree (M.D. or D.O.), which Jennifer does not possess.
+- [FACT] User's name is Prince Oreoluwa Abidakun.
+- [FACT] Prince Oreoluwa Abidakun is a Program Therapist.
+- [FACT] Prince Oreoluwa Abidakun has a Master's degree in Clinical Social Work (MSSW) from the University of Tennessee-Knoxville.
+- [FACT] Prince Oreoluwa Abidakun is a Licensed Master Social Worker (LMSW).
+- [FACT] Prince Oreoluwa Abidakun has experience as a therapist and a psychiatric social worker.
+- [FACT] Prince Oreoluwa Abidakun worked at Child & Family Tennessee from March 2011 to January 2012.
+- [FACT] Prince Oreoluwa Abidakun worked at Lakeshore Mental Health Institute from June 2009 to January 2012.
+- [FACT] Prince Oreoluwa Abidakun worked at Florence Crittenton Agency from August 2010 to March 2011.
+- [PREFERENCE] Jennifer Correa aspires to obtain a doctorate degree in the future.
+- [EVENT] Bailey Baker reached out to Jennifer Correa to discuss counseling and psychiatric work at Televero Health.
+- [EVENT] Bailey Baker reached out to Prince Oreoluwa Abidakun to discuss counseling and psychiatric work at Televero Health.
+- [CHANGE] Jennifer Correa clarified that she is not a doctor and is currently working on her master's in social work.
+- [TEMPORAL] The conversation took place on May 29, 2023.
+- [RELATIONSHIP] Bailey Baker is a recruiter reaching out to both Jennifer Correa and Prince Oreoluwa Abidakun.
+- [ASSISTANT_SAID] Jennifer's experience in mental health and social work may qualify her for positions related to case management, program coordination, or other roles within the mental health and social services fields.
+- [ASSISTANT_SAID] Bailey Baker apologized for any confusion regarding Jennifer's qualifications and stated that only LCSW and psychiatry positions are available at Televero Health.
+- [ASSISTANT_SAID] Bailey Baker expressed interest in scheduling a call with both Jennifer Correa and Prince Ore

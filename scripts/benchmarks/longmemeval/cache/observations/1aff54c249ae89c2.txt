@@ -1,0 +1,22 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/01/03 (Tue) 05:48
+- [FACT] User is trying to get organized with their family's properties.
+- [EVENT] User is discussing the steps to sell a house.
+- [ASSISTANT_SAID] Selling a house can be a complex process, but breaking it down into smaller steps can make it more manageable.
+- [ASSISTANT_SAID] Step 1: Prepare the Property - Declutter and depersonalize the home, make necessary repairs, consider staging, and take high-quality photos.
+- [ASSISTANT_SAID] Step 2: Determine the Asking Price - Research local real estate market, consider property condition, location, and consult with a real estate agent or appraiser.
+- [ASSISTANT_SAID] Step 3: Choose a Sales Method - Decide to sell FSBO or with a real estate agent, consider pros and cons, and interview candidates if using an agent.
+- [ASSISTANT_SAID] Step 4: Prepare the Necessary Documents - Gather deed, title report, property survey, permits, and known defects.
+- [ASSISTANT_SAID] Step 5: Market the Property - Create a listing, advertise on various platforms, and consider offering incentives.
+- [ASSISTANT_SAID] Step 6: Receive and Review Offers - Review offers based on price, financing terms, and negotiate terms.
+- [ASSISTANT_SAID] Step 7: Inspections and Due Diligence - Allow buyer inspections and address any issues.
+- [ASSISTANT_SAID] Step 8: Finalize the Sale - Sign purchase agreement, transfer ownership, complete paperwork, and close the sale.
+- [ASSISTANT_SAID] Step 9: Post-Sale Tasks - Update property records, finalize paperwork, and celebrate the sale.
+- [ASSISTANT_SAID] Specific steps and timeline may vary depending on location and property type; consult with a real estate professional or attorney.
+- [FACT] User needs to discuss the steps to sell a house with their siblings regarding their parents' old house.
+- [EVENT] User rented a 10x10 storage unit last weekend.
+- [ASSISTANT_SAID] A storage unit can be a great solution to temporarily store items from the house.
+- [ASSISTANT_SAID] Tips for using a storage unit: sort and purge items, pack carefully, label and inventory, store by category, keep valuable items separate, check facility rules, and set a deadline for reviewing items.
+- [PREFERENCE] User is looking for information on zoning laws and building regulations before deciding on buying a plot of land for a vacation home.
+- [ASSISTANT_SAID] Step-by-step guide to researching zoning laws and building regulations: Identify relevant authorities, gather information

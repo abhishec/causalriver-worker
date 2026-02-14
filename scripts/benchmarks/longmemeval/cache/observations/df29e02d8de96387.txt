@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [FACT] The user is taking sculpting classes.
+- [EVENT] The user just finished their second wood carving class on 2023/05/24.
+- [EVENT] The user has a sculpting class scheduled for Saturday, which is the day after the current date (2023/05/27).
+- [PREFERENCE] The user is looking for advice on finding good online resources for learning wood carving.
+- [PREFERENCE] The user is interested in trying out stone carving next.
+- [PREFERENCE] The user is specifically interested in learning alabaster carving, as they have heard it is a good starting point for beginners.
+- [ASSISTANT_SAID] The assistant congratulated the user on completing their second wood carving class and creating a wooden bird.
+- [ASSISTANT_SAID] The assistant provided a list of online resources for wood carving, including YouTube channels, websites, online courses, forums, and books.
+- [ASSISTANT_SAID] The assistant recommended specific YouTube channels for wood carving: The King of Random, Woodworking Adventures, The Wood Whisperer, David J. Marks.
+- [ASSISTANT_SAID] The assistant recommended websites and blogs for wood carving: The Wood Carver's Guide, Woodworking Tips, The Spruce Crafts, Woodcarving Illustrated.
+- [ASSISTANT_SAID] The assistant suggested online courses and tutorials for wood carving from Craftsy, Woodcraft, and Udemy.
+- [ASSISTANT_SAID] The assistant mentioned forums and communities for wood carving, including Woodcarving Forum and Reddit's r/woodcarving.
+- [ASSISTANT_SAID] The assistant recommended books for wood carving: "The Complete Book of Wood Carving" by Chris Pye and "Wood Carving: A Complete Guide" by Peter Korn.
+- [ASSISTANT_SAID] The assistant provided a list of online resources for learning stone carving, including Stone Carving Academy, Craftsy, Udemy, and Skillshare.
+- [ASSISTANT_SAID] The assistant recommended websites and blogs for stone carving: The Stone Carver's Guild, Stone Sculpture, Carving Stone, The Sculpture Academy.
+- [ASSISTANT_SAID] The assistant suggested YouTube channels for stone carving: Stone Carving with Tom, The Stone Carver, Sculpture by Design.
+- [ASSISTANT_SAID] The assistant mentioned communities and forums for stone carving, including Stone Carving Forum and Reddit's r/stonecarving.
+- [ASSISTANT_SAID] The assistant recommended books for stone carving: "The Art of Stone Carving" by Alec Tiranti and "Stone Carving: A Complete Guide" by Peter V. Fodera.
+- [ASSISTANT_SAID] The assistant emphasized the importance of safety goggles when carving alabaster and provided tips for

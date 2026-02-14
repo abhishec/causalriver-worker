@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/21 (Sun) 11:28  
+[FACT] User is a software developer.  
+[FACT] User graduated with a degree in Computer Science.  
+[PREFERENCE] User is considering using Trello for task management.  
+[PREFERENCE] User has used both Trello and Asana in previous projects.  
+[ASSISTANT_SAID] Trello is a visual, Kanban-style board that's great for organizing tasks into boards, lists, and cards.  
+[ASSISTANT_SAID] Todoist is a task list app known for its simplicity, flexibility, and customizable workflows.  
+[ASSISTANT_SAID] Asana is a comprehensive project management tool ideal for teams and complex projects.  
+[ASSISTANT_SAID] Evernote is a note-taking app that can be used for task management.  
+[ASSISTANT_SAID] Any.do is a task management app known for its clean design and collaboration features.  
+[ASSISTANT_SAID] Tips for staying on top of work projects include setting clear goals, breaking tasks into smaller chunks, creating a schedule, and using reminders.  
+[ASSISTANT_SAID] Trello is widely used in the tech industry, with 44% of software development respondents using it according to a 2020 survey.  
+[ASSISTANT_SAID] Asana is used by 34% of software development respondents according to the same survey.  
+[ASSISTANT_SAID] Trello is often preferred for flexibility and simplicity, while Asana is preferred for structure and automation.  
+[ASSISTANT_SAID] Tips for setting up a Trello board for web development include creating lists for different stages, using cards for tasks, and utilizing custom fields.  
+[ASSISTANT_SAID] The Trello GitHub Power-Up allows integration with GitHub to create cards for new issues and link cards to GitHub issues.  
+[ASSISTANT_SAID] The Trello Slack integration allows for automatic notifications and custom notifications for card updates.  
+[ASSISTANT_SAID] Suggested directory structure for a GitHub repository includes `src`, `docs`, `tests`, `examples`, and `config`.  
+[ASSISTANT_SAID] Recommended branching strategy includes `main`, `dev`, `feature/*`, `release/*`, and `hotfix/*`.  
+[ASSISTANT_SAID] Suggested to modularize code and follow a consistent naming convention for files and variables.  
+[CHANGE] User is leaning towards using Trello for managing high-level tasks and deadlines in their current project.  
+[ASSISTANT_CREATED] Provided a list of tips for setting up a Trello board for a web development project and integrating it with GitHub and Slack.  
+[ASSISTANT_CREATED] Provided a structured approach for organizing

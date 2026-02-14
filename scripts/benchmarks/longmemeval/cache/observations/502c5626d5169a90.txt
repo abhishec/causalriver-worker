@@ -1,0 +1,40 @@
+**Observation Log:**
+
+- [FACT] User is pursuing a Master's program and has completed a Bachelor's degree in Business Administration at the University of Michigan in 2018.
+- [PREFERENCE] User is interested in improving skills in Data Visualization and is considering taking a break from Data Science courses to learn about personal finance and investing.
+- [EVENT] User is thinking of pursuing a Ph.D. in the future, possibly in the next 2-3 years.
+- [CHANGE] User is shifting focus from Data Science courses to personal finance and investing.
+- [TEMPORAL] Session date is 2023/05/20.
+- [RELATIONSHIP] User mentioned Dr. Johnson as a favorite professor from their finance class at the University of Michigan.
+- [ASSISTANT_SAID] Assistant provided a list of online courses for Data Visualization, including:
+  1. Data Visualization Specialization by University of California, Berkeley on edX
+  2. Data Visualization by Coursera (University of Illinois at Urbana-Champaign)
+  3. Data Visualization with Python by DataCamp
+  4. Information Visualization by University of California, San Diego on Coursera
+  5. Data Visualization with Tableau by Pluralsight
+  6. Visual Analytics by Georgia Tech on Coursera
+  7. Data Visualization with Power BI by Microsoft Learn
+  8. Data Visualization by edX (Microsoft Professional Program in Data Science)
+  9. Interactive Data Visualization by University of Edinburgh on edX
+  10. Data Visualization for Everyone by DataCamp
+- [ASSISTANT_SAID] Assistant provided additional resources for personal finance and investing, including:
+  1. Personal Finance Specialization by University of Michigan on Coursera
+  2. Investing by University of Geneva on Coursera
+  3. Financial Markets by Yale University on Coursera
+  4. Personal Finance 101 by The Open University on FutureLearn
+  5. Investing in Stock Markets by Indian School of Business on edX
+- [ASSISTANT_SAID] Assistant recommended resources for personal finance, including:
+  1. The Balance
+  2. Investopedia
+  3. NerdWallet
+  4. The Financial Diet
+  5. Dave Ramsey
+- [ASSISTANT_SAID] Assistant provided book recommendations for personal finance and investing, including:
+  1. "A Random Walk Down Wall Street" by Burton G. Malkiel
+  2. "The Little Book of Common Sense Investing" by John C. Bogle
+  3. "The Simple Path to Wealth" by JL Collins
+- [ASSISTANT_SAID] Assistant suggested podcasts related to personal finance and investing, including:
+  1. The Dave Ramsey Show
+  2. The Motley Fool's Money Podcast
+  3. Planet Money
+- [ASS

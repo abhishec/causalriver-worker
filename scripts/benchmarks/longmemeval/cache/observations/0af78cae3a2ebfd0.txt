@@ -1,0 +1,18 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/27 (Sat) 14:20  
+[ASSISTANT_SAID] To convert a date string in cell B3 to epoch time and then to GMT-5, use the formula: `=(((B3-(5/24))-DATE(1899,12,30))*86400)`  
+[ASSISTANT_SAID] The formula will give the number of seconds elapsed since the epoch (12/30/1899 12:00 AM) in GMT-5.  
+[ASSISTANT_SAID] To convert this number back to a date string in GMT-5, use the formula: `=TEXT((((B3-(5/24))-DATE(1899,12,30))*86400)/86400+DATE(1899,12,30),"MM/DD/YYYY hh:mm:ss AM/PM")`  
+[ASSISTANT_SAID] The result of the second formula should be: `01/17/2023 12:26:31 PM`.  
+[USER] Asked why the number of seconds is calculated since December 30, 1899, and not January 1, 1970.  
+[ASSISTANT_SAID] Explained that January 1, 1970, is the epoch time used in modern computer systems, while Excel uses December 30, 1899, as its reference point for computing time.  
+[USER] Asked if the two formulas can be combined into one.  
+[ASSISTANT_SAID] Confirmed that they can be combined into a single formula: `=TEXT((((B3-(5/24))-DATE(1899,12,30))*86400)/86400+DATE(1899,12,30),"MM/DD/YYYY hh:mm:ss AM/PM")`  
+[ASSISTANT_SAID] The result of the combined formula should be: `01/17/2023 12:26:31 PM`.  
+[USER] Reported that the formula was giving `8:26` instead of `12:26`.  
+[USER] Provided an example with cell B2 showing `1/17/2023 1:26:31 PM` and the formula result as `01/17/2023 08:26:31 AM`.  
+[ASSISTANT_SAID] Suggested using the formula: `=TEXT((B2-(4/24)-(5/24)),"MM/DD/YYYY hh:mm:ss AM/PM")` to account for GMT-4.  
+[USER] Confirmed that cell B2 was in the right format but still getting `8:26`.  
+[USER] Stated that subtracting `1` from the formula gave `12:26`.  
+[USER] Requested the Unix epoch of `01/17/2023 1

@@ -1,0 +1,55 @@
+{
+  "answer_f5b33470_abs": [
+    {
+      "fact": "User has been experimenting with different baking recipes.",
+      "type": "preference",
+      "entities": [
+        "baking recipes"
+      ]
+    },
+    {
+      "fact": "User is interested in making pastries that feature caramel.",
+      "type": "preference",
+      "entities": [
+        "caramel",
+        "pastries"
+      ]
+    },
+    {
+      "fact": "User recently made a caramel apple tart for their family's Sunday dinner.",
+      "type": "event",
+      "entities": [
+        "caramel apple tart",
+        "Sunday dinner",
+        "family"
+      ]
+    },
+    {
+      "fact": "User received a stand mixer as a birthday gift from their sister last month.",
+      "type": "relationship",
+      "entities": [
+        "stand mixer",
+        "sister",
+        "birthday gift"
+      ]
+    },
+    {
+      "fact": "User finds the stand mixer to be a game-changer for making caramel.",
+      "type": "opinion",
+      "entities": [
+        "stand mixer",
+        "caramel"
+      ]
+    },
+    {
+      "fact": "User uses a recipe that involves melting sugar and butter together, then adding heavy cream to create caramel.",
+      "type": "preference",
+      "entities": [
+        "sugar",
+        "butter",
+        "heavy cream",
+        "caramel"
+      ]
+    }
+  ]
+}

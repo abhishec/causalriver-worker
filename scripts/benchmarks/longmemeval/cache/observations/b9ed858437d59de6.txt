@@ -1,0 +1,8 @@
+**Observation Log:**
+
+- [FACT] User has an iPhone 11 Pro Max.
+- [FACT] User's iPhone is running iOS 13.2.
+- [EVENT] User wants to move some files from their iPhone.
+- [PREFERENCE] User is considering using an OTG and a flash memory to transfer files.
+- [ASSISTANT_SAID] User inquired if using an OTG to connect a flash memory to their iPhone would work for moving files.
+- [ASSISTANT_SAID] User did not receive a response from the assistant in this session.

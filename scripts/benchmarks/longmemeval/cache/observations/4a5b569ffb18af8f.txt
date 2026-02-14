@@ -1,0 +1,20 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/27 (Sat) 22:15  
+[ASSISTANT_SAID] To save your model after each epoch, you can add a callback function to the `Trainer` class provided by the Hugging Face library.  
+[ASSISTANT_SAID] The `Trainer` class provides a `TrainingArguments` object that allows you to set the path to the directory where you want to save the model.  
+[ASSISTANT_SAID] You can also set the frequency at which you want to save the model using the `save_strategy` argument.  
+[ASSISTANT_SAID] Example code provided to save the model after each epoch includes importing necessary libraries, loading datasets, tokenizing, setting training arguments, and defining a callback function.  
+[ASSISTANT_CREATED] Example code snippet provided for saving the model after each epoch, including the following key details:  
+- Importing `BertTokenizer`, `BertForSequenceClassification`, `TrainingArguments`, `Trainer`, and `load_dataset`.  
+- Tokenization function defined as `tokenize(batch)`.  
+- Training arguments set with `output_dir='./checkpoints'`, `save_strategy='epoch'`, `save_total_limit=5`, `num_train_epochs=5`, and other parameters.  
+- Callback function `save_model_after_epoch` defined to save the model after each epoch.  
+[USER] User thinks the provided code is good but requests to add Accelerator process to the code.  
+[ASSISTANT_SAID] Updated code provided with Accelerator added, including the following key details:  
+- Importing `Accelerator` from `accelerate`.  
+- Initializing the `Accelerator` before the Trainer.  
+- Using `with accelerator.start_training(trainer):` to train the model.  
+[ASSISTANT_SAID] User inquired about how to use Accelerator and whether it requires installation.  
+[ASSISTANT_SAID] Confirmed that the `accelerate` package needs to be installed using `pip install accelerate`.  
+[ASSISTANT_SAID] Informed the user to import it in the code using `from accelerate import Accelerator`.

@@ -1,0 +1,18 @@
+**Observation Log:**
+
+[FACT] User is looking for music recommendations.  
+[FACT] User has a daily commute that usually takes around 2 hours.  
+[PREFERENCE] User enjoys music similar to Alina Baraz.  
+[PREFERENCE] User is interested in lo-fi hip hop/jazzhop artists similar to Jinsang and Yung Gud.  
+[PREFERENCE] User is interested in exploring music from different cultures and languages, specifically Brazilian artists similar to Marisa Monte.  
+[PREFERENCE] User wants to learn more about music production and songwriting.  
+[ASSISTANT_SAID] Alina Baraz is known for her dreamy, atmospheric soundscapes and sultry vocals.  
+[ASSISTANT_SAID] Recommended artists similar to Alina Baraz: Jhené Aiko, Tove Lo, Banks, Låpsley, Kali Uchis, MØ, Shura, Lykke Li, Kilo Kish, Mansionair.  
+[ASSISTANT_SAID] Recommended lo-fi hip hop/jazzhop artists similar to Jinsang and Yung Gud: Mndsgn, Nujabes, J Dilla, L'indècis, Yusuke Yamamoto, Kiefer, Eevee, Ahwlee, FloFilz, Kupla.  
+[ASSISTANT_SAID] Suggested playlists for lo-fi hip hop/jazzhop: Lo-Fi Hip Hop Radio (YouTube Music), Jazzhop Essentials (Spotify), Lofi Hip Hop Beats (Apple Music), Chillhop Music (YouTube Music).  
+[ASSISTANT_SAID] Recommended Brazilian artists similar to Marisa Monte: Gal Costa, Milton Nascimento, Djavan, Ivete Sangalo, Ana Carolina, Seu Jorge, Céu, Maria Gadú, Luiza Sonza, Aline Frazão.  
+[ASSISTANT_SAID] Suggested Brazilian music genres to explore: MPB (Brazilian Popular Music), Samba, Bossa Nova, Axé.  
+[ASSISTANT_SAID] Recommended podcasts about music production: The Pro Audio Files, The Mix Bus, Music Production Tutorials, The Producer's Guide, SonicScoop.  
+[ASSISTANT_SAID] Recommended podcasts about songwriting: The Songwriting Podcast, Songwriters on Songwriting, The Writing Room, And The Writer Is..., The Composer's Guide to Doing Business.  
+[ASSISTANT_SAID] Suggested online resources for music production and songwriting: YouTube channels (The Pro Audio Files, Music Production Tutorials, The Mixing Engineer), websites (Soundfly, Music Production Tutorials, Songwriting.net), blogs (The Pro Audio Files Blog, Music Production Tutorials Blog, Songwriting.net Blog).  
+[ASSISTANT_SAID] Recommended online courses: Udemy (Music Production in Ableton Live, Songwriting: The Basics), Coursera (Introduction to Music Production in Ableton Live, Songwriting), Skillshare (

@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/22 (Mon) 23:23  
+[FACT] User runs a new nanny service.  
+[FACT] User previously hired someone to nanny their own kids.  
+[RELATIONSHIP] User's kids did not like the nanny they previously hired.  
+[RELATIONSHIP] User has heard from other people that they would not hire the previous nanny again.  
+[PREFERENCE] User is looking for a polite and professional way to decline the nanny's application.  
+[ASSISTANT_CREATED] Assistant created a formal email template to inform the nanny about the application status.  
+[ASSISTANT_SAID] The formal email template includes a subject line: "Nanny Application Status Update."  
+[ASSISTANT_SAID] The email thanks the nanny for her interest and acknowledges her application.  
+[ASSISTANT_SAID] The email states that the user has decided not to move forward with the nanny's application at this time.  
+[ASSISTANT_SAID] The email explains that the user is focusing on building a team with a diverse range of skills, experiences, and backgrounds.  
+[ASSISTANT_SAID] The email mentions that the decision was not made lightly and wishes the nanny luck in her future endeavors.  
+[ASSISTANT_SAID] The email encourages the nanny to reach out if she has any questions or concerns.  
+[ASSISTANT_CREATED] Assistant created a less formal version of the email to inform the nanny about the application status.  
+[ASSISTANT_SAID] The less formal email template includes a subject line: "Update on Your Application."  
+[ASSISTANT_SAID] The less formal email starts with a friendly greeting: "Hi [Nanny's Name]."  
+[ASSISTANT_SAID] The less formal email expresses hope that the nanny is doing well and thanks her for her interest.  
+[ASSISTANT_SAID] The less formal email states that the user has decided not to move forward with the nanny's application right now.  
+[ASSISTANT_SAID] The less formal email mentions that the user is looking for a mix of different skills, experiences, and backgrounds.  
+[ASSISTANT_SAID] The less formal email reassures the nanny that the decision was not easy and expresses gratitude for her interest.  
+[ASSISTANT_SAID] The less formal email wishes the nanny luck in finding a great opportunity that matches her skills.  
+[ASSISTANT_SAID] The less formal email encourages the nanny to reach out with any questions or concerns.  
+[FACT] User's name, title, and company name are placeholders in the email templates.

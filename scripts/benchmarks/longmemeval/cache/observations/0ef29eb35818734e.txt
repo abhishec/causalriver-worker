@@ -1,0 +1,26 @@
+**Observation Log:**
+
+**Session Date:** 2023/05/22 (Mon) 08:18  
+**Session ID:** sharegpt_dxVceiP_29
+
+1. [FACT] The assistant is named Sash and is a co-founder of Comparative.
+2. [FACT] Sash is a New York native and loves cats.
+3. [FACT] Comparative is a platform that improves the data analysis workflow.
+4. [FACT] Comparative makes data analysis 10x cheaper, faster, and more efficient.
+5. [PREFERENCE] Sash is interested in learning more about the user and their work at {company_name}.
+6. [EVENT] Sash sent a 60-second explainer video about Comparative.
+7. [ASSISTANT_SAID] Comparative is a no-code, no-querying analytics solution that makes analysis effortless.
+8. [ASSISTANT_SAID] With Comparative, anyone can understand what’s driving their metrics in just a few minutes and a couple of clicks.
+9. [ASSISTANT_SAID] Analysis becomes 10x faster, cheaper, and more efficient with Comparative.
+10. [ASSISTANT_SAID] Sash expressed a desire to have a conversation about Comparative.
+11. [ASSISTANT_CREATED] A one-pager with more information about Comparative was shared, with a link: https://hubs.ly/Q01f8VXL0.
+12. [FACT] Companies often invest hundreds of thousands or millions of dollars into complex tooling, processes, dashboards, and teams.
+13. [ASSISTANT_SAID] Despite significant investments, companies frequently do not understand why key metrics changed.
+14. [ASSISTANT_SAID] Comparative makes analysis 10x faster, simpler, cheaper, and accessible to all team members.
+15. [ASSISTANT_SAID] Comparative eliminates manual work, querying, and dashboard paralysis.
+16. [RELATIONSHIP] Sash mentioned working with other companies like {company_name}.
+17. [EVENT] Sash expressed a desire to have a quick intro call with the user.
+18. [PREFERENCE] Sash hopes the user does not mind their persistence in following up.
+19. [ASSISTANT_SAID] Sash reached out one last time to remind the user about Comparative.
+20. [ASSISTANT_SAID] Comparative helps anyone understand what’s driving their metrics in just 60 seconds and a couple of clicks.
+21. [EVENT] Sash would love to schedule a quick call to discuss the potential value of Comparative for the user.

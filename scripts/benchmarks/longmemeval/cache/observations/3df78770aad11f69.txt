@@ -1,0 +1,27 @@
+**Observation Log:**
+
+[FACT] User recently updated to Windows 11.  
+[FACT] User has a 1TB Western Digital external hard drive purchased from Costco for $50 on February 22nd.  
+[PREFERENCE] User is looking for help with organizing files on their laptop.  
+[ASSISTANT_SAID] Assistant congratulated the user on backing up their data and offered suggestions for organizing files.  
+[ASSISTANT_SAID] Suggested creating a clear folder structure with categories: Personal, Work, Downloads, Media, and Pictures.  
+[ASSISTANT_SAID] Recommended using subfolders to break down large categories into smaller ones.  
+[ASSISTANT_SAID] Advised labeling and dating files for quick identification.  
+[ASSISTANT_SAID] Suggested using tags and keywords in Windows 11 for easier searching.  
+[ASSISTANT_SAID] Recommended creating a "Someday" or "Archive" folder for files not needed immediately.  
+[ASSISTANT_SAID] Suggested a "To-File" folder for files that need to be organized later.  
+[ASSISTANT_SAID] Advised keeping frequently used files in easy-to-reach locations.  
+[ASSISTANT_SAID] Suggested setting reminders to maintain organization and reviewing folder structure periodically.  
+[ASSISTANT_SAID] Encouraged the user to explore Windows 11's built-in features for organization.  
+[ASSISTANT_SAID] Emphasized the importance of creating a system that works for the user.  
+[PREFERENCE] User plans to create a "Personal" folder with subfolders for "Finances", "Photos", and "Videos".  
+[ASSISTANT_SAID] Provided suggestions for organizing videos, including creating a "Videos" folder with subfolders for Movies, TV Shows, Home Videos, and Tutorials/Guides.  
+[ASSISTANT_SAID] Recommended using a consistent naming convention for video files, including title, season/episode, year, resolution/quality, and format.  
+[ASSISTANT_SAID] Suggested organizing TV shows by season and using tags or metadata for easier searching.  
+[ASSISTANT_SAID] Recommended considering media management tools like Plex, Kodi, or Emby for organizing video collections.  
+[PREFERENCE] User is considering using a media management tool like Plex or Kodi.  
+[ASSISTANT_SAID] Discussed options for keeping the external hard drive up to date, including automatic backup systems and manual backups.  
+[ASSISTANT_SAID] Suggested using Windows Backup, third-party backup software, or cloud backup services for automatic backups.  
+[ASSISTANT_SAID] Recommended following the 3-2-1 rule for data protection and regularly testing backups.  
+[PREFERENCE] User plans to set up an automatic backup system using the built-in Windows Backup feature.  
+[

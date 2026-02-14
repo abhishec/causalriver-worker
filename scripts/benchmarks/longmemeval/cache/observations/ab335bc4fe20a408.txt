@@ -1,0 +1,26 @@
+**Observation Log:**
+
+[FACT] User is planning a trip to NYC.  
+[FACT] User just arrived in NYC from San Francisco.  
+[FACT] User traveled on a United Airlines flight.  
+[FACT] User's flight was delayed due to bad weather.  
+[FACT] User had an exit row seat on the flight.  
+[FACT] User is staying in Manhattan.  
+[EVENT] User is looking for restaurant recommendations near JFK airport.  
+[EVENT] User is looking for Italian restaurant recommendations in Midtown Manhattan.  
+[EVENT] User has made a reservation for 7 pm tonight at Carmine's Theater District location.  
+[ASSISTANT_SAID] Assistant welcomed the user to New York City and expressed sympathy for the flight delay.  
+[ASSISTANT_SAID] Assistant provided restaurant recommendations near JFK airport, including The Parlor, Terminal 4 restaurants, Federal Circle Restaurants, The Queensboro, La Casa della Mozzarella, and Jamaica Market.  
+[ASSISTANT_SAID] Assistant recommended several Italian restaurants in Midtown Manhattan: Carbone, Porsena, Brio Tuscan Grille, Carmine's, Ilili, Scarpetta, and Basta Pasta.  
+[ASSISTANT_SAID] Assistant suggested that Carmine's would be a good choice for classic spaghetti Bolognese.  
+[ASSISTANT_SAID] Assistant mentioned that Carmine's serves large family-style portions.  
+[ASSISTANT_SAID] Assistant recommended making a reservation at Carmine's, especially during peak hours.  
+[ASSISTANT_SAID] Assistant advised the user to take a ride-hail service like Uber or Lyft for transportation from JFK to Midtown Manhattan.  
+[ASSISTANT_SAID] Assistant provided information about yellow cabs, including the flat rate of $52 to Midtown Manhattan plus tolls and tip.  
+[ASSISTANT_SAID] Assistant suggested attractions in Midtown Manhattan, including Times Square, Broadway theaters, and The New York Times Building.  
+[ASSISTANT_SAID] Assistant encouraged the user to take it easy after the long flight and enjoy dinner at Carmine's.  
+[ASSISTANT_CREATED] Assistant created a list of Italian restaurant recommendations in Midtown Manhattan.  
+[ASSISTANT_CREATED] Assistant created a list of attractions to see in Midtown Manhattan.  
+[TEMPORAL] Session date is 2023/03/17 (Fri) at 00:49.  
+[CHANGE] User has settled in after arriving in NYC.  
+[RELATIONSHIP] User mentioned their flight from San Francisco to New York on United Airlines.

@@ -1,0 +1,27 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/27 (Sat) 02:15
+- [EVENT] User is thinking of getting a new fragrance.
+- [PREFERENCE] User is looking for popular fragrances similar to Tom Ford's perfumes.
+- [EVENT] User recently bought a limited edition Tom Ford perfume and loves it.
+- [ASSISTANT_SAID] Tom Ford is a renowned luxury fragrance brand known for its sophisticated and opulent scents.
+- [ASSISTANT_SAID] Recommended fragrances similar to Tom Ford's perfumes include:
+  1. **Jo Malone London**: "Blackberry & Bay" or "Grapefruit"
+  2. **By Kilian**: "Good Girl Gone Bad" and "Love, Don't Be Shy"
+  3. **Dior**: "J'Adore" and "Sauvage"
+  4. **Gucci**: "Bloom" and "Guilty"
+  5. **Maison Francis Kurkdjian**: "Baccarat Rouge 540" and "Grand Soir"
+  6. **Ormonde Jayne**: "Ta'if" and "Tiaré"
+- [ASSISTANT_SAID] Specific fragrances similar to Tom Ford's perfumes include:
+  - "Oud Wood" by Dior (similar to Tom Ford's "Oud Wood")
+  - "Cuir Ottoman" by Parfum d'Empire (similar to Tom Ford's "Café Rose")
+  - "Cologne du 68" by Editions de Parfums Frédéric Malle (similar to Tom Ford's "Grey Vetiver")
+- [USER] User is looking for a new fragrance for everyday use that is not as expensive as their Tom Ford perfume.
+- [ASSISTANT_SAID] Suggested more affordable options from previously mentioned brands:
+  1. **Jo Malone London**: "Grapefruit" or "Lemon & Blossom" (starting at $50-$60 for 30ml)
+  2. **Dior**: "Addict Eau Fraîche" or "Addict Florale" (starting at $60-$70 for 30ml)
+  3. **Gucci**: "Bamboo Eau de Parfum" or "Bamboo Maroc" (starting at $40-$50 for 30ml)
+  4. **Maison Francis Kurkdjian**: "À La Rose" or "Au Thé Rouge" (starting at $60-$70 for 30ml)
+- [ASSISTANT_SAID] Suggested additional affordable fragrance brands:
+  1. **Viktor & Rolf**: "Flowerbomb" (starting at $30-$40 for 30ml)
+  2. **Calvin Klein**: "Eternity" (starting at $30-$40 for

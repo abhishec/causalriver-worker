@@ -1,0 +1,32 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/01/25 (Wed) 17:04  
+[USER] User is interested in ensuring keyboard-only navigation on their website for people with mobility impairments.  
+[ASSISTANT_SAID] Web developers can ensure keyboard-only navigation by using semantic HTML tags, providing visible focus indicators, implementing keyboard shortcuts, avoiding mouse-based events, testing for keyboard accessibility, and providing documentation.  
+[ASSISTANT_SAID] Specific semantic HTML tags to use include "nav", "header", "main", "footer", and "aside".  
+[ASSISTANT_SAID] Focus indicators should be visible and move smoothly and predictably.  
+[ASSISTANT_SAID] Avoid using mouse-based events like “mouseenter” and “mouseleave” for functionality.  
+[ASSISTANT_SAID] Testing for keyboard accessibility should be done using a keyboard-only interface.  
+[ASSISTANT_SAID] Documentation should be provided on how to use the website with a keyboard, especially for custom-built features.  
+[USER] User requested specific examples of websites that have successfully implemented keyboard-only navigation.  
+[ASSISTANT_SAID] Examples of websites with good keyboard-only accessibility include:  
+[ASSISTANT_SAID] 1. BBC website  
+[ASSISTANT_SAID] 2. Gmail  
+[ASSISTANT_SAID] 3. Amazon  
+[ASSISTANT_SAID] 4. Twitter  
+[ASSISTANT_SAID] 5. Microsoft  
+[ASSISTANT_SAID] These websites support various keyboard shortcuts, focus indicators, and semantic HTML tags.  
+[USER] User asked for tools or software to test keyboard accessibility on their website.  
+[ASSISTANT_SAID] Recommended tools for testing keyboard accessibility include:  
+[ASSISTANT_SAID] 1. Accessibility Inspector (Mac only)  
+[ASSISTANT_SAID] 2. Axe DevTools (Chrome, Firefox, and Edge)  
+[ASSISTANT_SAID] 3. AChecker (Web-based)  
+[ASSISTANT_SAID] 4. WAVE Web Accessibility Evaluation Tool (Web-based)  
+[ASSISTANT_SAID] 5. Keyboard Accessibility Checker (Web-based)  
+[USER] User expressed intent to check out the tools to ensure website accessibility for all users.  
+[USER] User asked for additional tips for ensuring web accessibility.  
+[ASSISTANT_SAID] Additional tips for web accessibility include:  
+[ASSISTANT_SAID] 1. Use semantic HTML  
+[ASSISTANT_SAID] 2. Use alt tags for images  
+[ASSISTANT_SAID] 3. Ensure sufficient color contrast  
+[ASSISTANT_SAID] 4. Provide transcripts and captions for

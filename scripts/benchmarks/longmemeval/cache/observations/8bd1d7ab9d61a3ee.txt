@@ -1,0 +1,38 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/22 (Mon) 05:50
+- [FACT] User has a PS4.
+- [EVENT] User just finished playing The Last of Us Part II, which took around 25 hours to complete.
+- [PREFERENCE] User is looking for new action-adventure games similar to The Last of Us Part II.
+- [ASSISTANT_SAID] Recommended games include: 
+  1. God of War (2018) - 20-30 hours to complete.
+  2. Horizon Zero Dawn - 20-30 hours to complete.
+  3. Uncharted 4: A Thief's End - 15-20 hours to complete.
+  4. Days Gone - 20-30 hours to complete.
+  5. The Witcher 3: Wild Hunt - 50-100 hours to complete.
+  6. Bloodborne - 20-30 hours to complete.
+  7. Darksiders Genesis - 15-20 hours to complete.
+  8. Sea of Solitude - 10-15 hours to complete.
+- [PREFERENCE] User is interested in starting with God of War.
+- [EVENT] User has pre-ordered the Xbox Series X.
+- [PREFERENCE] User is curious about the differences between the PS4 and Xbox Series X, specifically regarding the controller and exclusive games like Halo Infinite.
+- [ASSISTANT_SAID] Differences in the controller include:
+  1. Share Button for easy capturing and sharing.
+  2. Hybrid D-pad for precise control.
+  3. Textured Triggers for better grip and control.
+  4. Impulse Triggers with haptic feedback for immersion.
+  5. Rechargeable Battery via USB-C.
+- [ASSISTANT_SAID] Xbox Series X exclusive games include:
+  1. Halo Infinite.
+  2. Senua's Saga: Hellblade II.
+  3. Forza Horizon 4.
+  4. Sea of Thieves.
+  5. Grounded.
+- [ASSISTANT_SAID] Xbox Series X features include:
+  1. Ray Tracing for realistic lighting and shadows.
+  2. Quick Resume for switching between games.
+  3. Smart Delivery for free upgrades to the best version of games.
+  4. Backward Compatibility with thousands of Xbox One games.
+- [ASSISTANT_SAID] Xbox Series X has 12 TFLOPs of GPU power, 40 CUs at 1.825 GHz, and 16 GB of GDDR6 RAM.
+- [ASSISTANT_SAID] Load time comparisons show Xbox Series X loading games significantly faster than PS4.
+- [PREFERENCE] User is interested in trying out the new Xbox Series X controller, especially the

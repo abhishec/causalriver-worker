@@ -1,0 +1,88 @@
+{
+  "answer_8748f791_1": [
+    {
+      "fact": "User is planning a team outing for their engineers",
+      "type": "event",
+      "entities": [
+        "team outing",
+        "engineers"
+      ]
+    },
+    {
+      "fact": "User likes the idea of outdoor games",
+      "type": "preference",
+      "entities": [
+        "outdoor games"
+      ]
+    },
+    {
+      "fact": "User is considering a giant Jenga game for the outing",
+      "type": "preference",
+      "entities": [
+        "giant Jenga"
+      ]
+    },
+    {
+      "fact": "User is looking for rooftop spaces in the city that can accommodate a group of 5 people",
+      "type": "event",
+      "entities": [
+        "rooftop spaces",
+        "group of 5"
+      ]
+    }
+  ],
+  "answer_8748f791_2": [
+    {
+      "fact": "User is planning a team outing for 6 people",
+      "type": "event",
+      "entities": [
+        "team outing",
+        "6 people"
+      ]
+    },
+    {
+      "fact": "User prefers a group hike for the team outing",
+      "type": "preference",
+      "entities": [
+        "group hike"
+      ]
+    },
+    {
+      "fact": "User is based in the San Francisco Bay Area",
+      "type": "personal",
+      "entities": [
+        "San Francisco Bay Area"
+      ]
+    },
+    {
+      "fact": "User is a Senior Software Engineer",
+      "type": "personal",
+      "entities": [
+        "Senior Software Engineer"
+      ]
+    },
+    {
+      "fact": "User leads a team of five engineers",
+      "type": "relationship",
+      "entities": [
+        "team",
+        "five engineers"
+      ]
+    },
+    {
+      "fact": "User enjoys their role as a Senior Software Engineer",
+      "type": "opinion",
+      "entities": [
+        "Senior Software Engineer"
+      ]
+    },
+    {
+      "fact": "User is excited to see their team grow under their guidance",
+      "type": "opinion",
+      "entities": [
+        "team",
+        "guidance"
+      ]
+    }
+  ]
+}

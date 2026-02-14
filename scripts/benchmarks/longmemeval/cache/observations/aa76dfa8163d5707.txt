@@ -1,0 +1,26 @@
+**Observation Log:**
+
+[FACT] User is considering buying a new keyboard to replace their current Yamaha P-125.  
+[EVENT] User has been looking at newer models from Korg and Roland but is unsure what to get yet.  
+[ASSISTANT_SAID] Korg and Roland are excellent brands with amazing features in their newer models.  
+[ASSISTANT_SAID] Suggested questions for the user to consider when choosing a keyboard:  
+[ASSISTANT_SAID] 1. What's your budget for the new keyboard?  
+[ASSISTANT_SAID] 2. What kind of music do you play or want to play? (e.g., piano, synth, organ, orchestral, etc.)  
+[ASSISTANT_SAID] 3. Do you need weighted keys or are non-weighted keys okay?  
+[ASSISTANT_SAID] 4. Are you looking for specific features like built-in lessons, recording capabilities, or connectivity options (e.g., MIDI, USB, Bluetooth)?  
+[ASSISTANT_SAID] 5. How important is portability to you? Do you need a keyboard that's easy to transport?  
+[ASSISTANT_SAID] 6. Are there any particular sounds or features from the Korg and Roland models that have caught your attention?  
+[FACT] User is thinking of spending around $500-$1000 on the new keyboard.  
+[FACT] User mostly plays piano and some synth sounds.  
+[FACT] User prefers weighted keys.  
+[FACT] User wants a keyboard with recording capabilities and USB connectivity.  
+[FACT] Portability is not a big deal for the user.  
+[ASSISTANT_SAID] Suggested Korg options:  
+[ASSISTANT_SAID] 1. Korg B1: Digital piano with weighted hammer action keys, built-in lessons, recording capabilities. Price: $499.  
+[ASSISTANT_SAID] 2. Korg Grandstage: Stage piano with weighted keys, wide range of sounds, recording capabilities. Price: $799.  
+[ASSISTANT_SAID] 3. Korg D1: Compact digital piano with weighted keys, focus on piano sounds, recording capabilities. Price: $699.  
+[ASSISTANT_SAID] Suggested Roland options:  
+[ASSISTANT_SAID] 1. Roland FP-10: Digital piano with weighted keys, wide range of sounds, recording capabilities. Price: $799.  
+[ASSISTANT_SAID] 2. Roland FP-30: Digital piano with weighted keys, extensive sound library, recording capabilities. Price: $999.  
+[ASSISTANT_SAID] 3. Roland GO:KEYS: Compact keyboard with weighted keys, focus on synth sounds, recording capabilities. Price: $499.  
+[ASSISTANT_S

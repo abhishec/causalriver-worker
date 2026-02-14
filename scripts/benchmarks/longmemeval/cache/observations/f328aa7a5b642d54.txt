@@ -1,0 +1,13 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/26 (Fri) 07:07  
+[ASSISTANT_SAID] The assistant provided a SQL table creation script for `crm_account` with various fields including `CustomerID`, `CustomerName`, `Industry`, `Region`, `CreateTime`, `UpdateTime`, `LighthouseLogo`, `Segmentation`, `IsTiDBCloudTenant`, `CloudTenantID`, `CloudTenantCreateTime`, and `CloudTenantType`.  
+[ASSISTANT_SAID] The assistant provided a SQL table creation script for `salesforce_order` with various fields including `OrderID`, `CustomerID`, `ACVAmount`, `ExchangeRate`, `OrderNumberC`, `Salesperson`, `OrderType`, `OrderStartDate`, `OrderEndDate`, `Tax`, `TCVAmount`, `TermMonths`, `ProductFamily`, `FiscalPeriod`, and `SigningDate`.  
+[ASSISTANT_SAID] The assistant mentioned a function named `fill_later({description})` that can be called inside SQL when more information is needed.  
+[ASSISTANT_SAID] The assistant generated a JSON format answer template for the question "How many closed won deals in 2022?" with specific sections for RQ, unclear concepts, definitions, executions, and SQL.  
+[ASSISTANT_SAID] The assistant defined "closed won deals" as an order with the `OrderType` column marked as 'New' and with the `SigningDate` in 2022.  
+[ASSISTANT_SAID] The assistant disassembled the question into sub-questions, including "How many deals were signed in 2022?" and "How many of the deals signed in 2022 were 'New'?"  
+[ASSISTANT_SAID] The assistant provided SQL pseudocode for the sub-questions, detailing the execution process and required columns from the `salesforce_order` table.  
+[ASSISTANT_SAID] The assistant wrote a final SQL query: "SELECT COUNT(*) FROM salesforce_order WHERE OrderType = 'New' AND SigningDate BETWEEN '2022-01-01' AND '2022-12-31'".  
+[ASSISTANT_SAID] The assistant confirmed that the SQL can answer the revised question and marked `sqlCanAnswer` as true.  
+[USER] The user said "ignore".

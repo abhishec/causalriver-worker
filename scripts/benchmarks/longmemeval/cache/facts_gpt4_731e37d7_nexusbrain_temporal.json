@@ -1,0 +1,215 @@
+{
+  "answer_826d51da_3": [
+    {
+      "fact": "User is looking to improve their portrait photography skills.",
+      "type": "preference",
+      "entities": [
+        "portrait photography"
+      ]
+    },
+    {
+      "fact": "User attended a one-day photography workshop on February 22.",
+      "type": "event",
+      "entities": [
+        "photography workshop",
+        "February 22"
+      ]
+    },
+    {
+      "fact": "User found the photography workshop helpful.",
+      "type": "opinion",
+      "entities": [
+        "photography workshop"
+      ]
+    },
+    {
+      "fact": "User had to register online in advance for the workshop.",
+      "type": "event",
+      "entities": [
+        "registration",
+        "photography workshop"
+      ]
+    },
+    {
+      "fact": "User is thinking of attending more workshops to learn from experienced photographers.",
+      "type": "preference",
+      "entities": [
+        "workshops",
+        "experienced photographers"
+      ]
+    }
+  ],
+  "answer_826d51da_4": [
+    {
+      "fact": "User attended a writing workshop in November at a literary festival.",
+      "type": "event",
+      "entities": [
+        "writing workshop",
+        "November",
+        "literary festival"
+      ]
+    },
+    {
+      "fact": "User paid $200 to attend the writing workshop.",
+      "type": "personal",
+      "entities": [
+        "$200",
+        "writing workshop"
+      ]
+    },
+    {
+      "fact": "User received feedback on their work from a published author.",
+      "type": "relationship",
+      "entities": [
+        "published author",
+        "feedback"
+      ]
+    },
+    {
+      "fact": "User is looking for writing tips.",
+      "type": "preference",
+      "entities": [
+        "writing tips"
+      ]
+    },
+    {
+      "fact": "User is interested in character development and editing resources.",
+      "type": "preference",
+      "entities": [
+        "character development",
+        "editing resources"
+      ]
+    },
+    {
+      "fact": "User wants to learn more about writing workshops and events in their area.",
+      "type": "preference",
+      "entities": [
+        "writing workshops",
+        "events"
+      ]
+    },
+    {
+      "fact": "User would love to attend more events like the one they attended in November.",
+      "type": "opinion",
+      "entities": [
+        "events",
+        "November"
+      ]
+    }
+  ],
+  "answer_826d51da_2": [
+    {
+      "fact": "User is looking to improve their business's online presence",
+      "type": "preference",
+      "entities": [
+        "online presence",
+        "business"
+      ]
+    },
+    {
+      "fact": "User attended a digital marketing workshop on March 15-16",
+      "type": "event",
+      "entities": [
+        "digital marketing workshop",
+        "March 15-16"
+      ]
+    },
+    {
+      "fact": "User found the digital marketing workshop helpful in understanding online engagement",
+      "type": "opinion",
+      "entities": [
+        "digital marketing workshop",
+        "online engagement"
+      ]
+    },
+    {
+      "fact": "User paid $500 to attend the digital marketing workshop",
+      "type": "personal",
+      "entities": [
+        "$500",
+        "digital marketing workshop"
+      ]
+    },
+    {
+      "fact": "User learned about the importance of tracking online engagement at the workshop",
+      "type": "opinion",
+      "entities": [
+        "tracking online engagement",
+        "workshop"
+      ]
+    },
+    {
+      "fact": "User is looking for tools to help with SEO",
+      "type": "preference",
+      "entities": [
+        "SEO tools"
+      ]
+    },
+    {
+      "fact": "User learned about the importance of optimizing their website for search engines at the workshop",
+      "type": "opinion",
+      "entities": [
+        "optimizing website",
+        "search engines",
+        "workshop"
+      ]
+    },
+    {
+      "fact": "User learned a lot from a well-known industry expert at the workshop",
+      "type": "opinion",
+      "entities": [
+        "industry expert",
+        "workshop"
+      ]
+    }
+  ],
+  "answer_826d51da_1": [
+    {
+      "fact": "User is looking to improve their marketing strategy for their business.",
+      "type": "opinion",
+      "entities": [
+        "marketing strategy",
+        "business"
+      ]
+    },
+    {
+      "fact": "User has attended five workshops in the last three months.",
+      "type": "event",
+      "entities": [
+        "workshops"
+      ]
+    },
+    {
+      "fact": "User is focusing on social media advertising, especially Facebook Ads.",
+      "type": "preference",
+      "entities": [
+        "social media advertising",
+        "Facebook Ads"
+      ]
+    },
+    {
+      "fact": "User is trying to optimize their ad campaigns using tips learned from a digital marketing workshop.",
+      "type": "opinion",
+      "entities": [
+        "ad campaigns",
+        "digital marketing workshop"
+      ]
+    },
+    {
+      "fact": "User is targeting people interested in photography and entrepreneurship.",
+      "type": "preference",
+      "entities": [
+        "photography",
+        "entrepreneurship"
+      ]
+    },
+    {
+      "fact": "User has set a daily budget of $20 for their ad campaign.",
+      "type": "preference",
+      "entities": [
+        "$20",
+        "ad campaign"
+      ]
+    }
+  ]
+}

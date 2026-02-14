@@ -1,0 +1,35 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/28 (Sun) 18:09
+- [EVENT] User is trying to keep track of expenses for the past few months.
+- [EVENT] User is categorizing spending on gifts.
+- [ASSISTANT_SAID] Assistant offered to help categorize gift expenses.
+- [ASSISTANT_SAID] Assistant asked for details about the gifts purchased, including who they were for, type of gifts, what the gifts were, and how much was spent on each gift.
+- [ASSISTANT_SAID] Assistant suggested subcategories for gift expenses: Birthday gifts, Holiday gifts, Wedding gifts, Anniversary gifts, Charitable donations, Other gifts.
+- [ASSISTANT_SAID] Assistant mentioned discussing how to categorize gifts within the overall budget.
+- [EVENT] User bought a birthday gift for sister-in-law, a silver necklace from a boutique on Main Street.
+- [FACT] User spent around $50 on the silver necklace plus $5 for wrapping.
+- [ASSISTANT_CREATED] Assistant categorized the gift as a "Birthday Gift" under "Gifts" and provided a breakdown:
+  - **Gifts**
+    - **Birthday Gifts**
+      - Silver necklace for sister-in-law: $50
+      - Gift wrapping: $5
+      - Total: $55
+- [EVENT] User mentioned buying gifts for nephew's birthday, including a gift card to his favorite gaming store.
+- [FACT] User spent $20 on the gift card.
+- [ASSISTANT_CREATED] Assistant added the gift to the list under "Nephew's Birthday Gifts":
+  - **Nephew's Birthday Gifts**
+    - Gift card to gaming store: $20
+    - Total: $20
+- [ASSISTANT_SAID] Assistant calculated the total amount spent on gifts so far as $75.
+- [EVENT] User went to the mall with friends for shopping for best friend's baby shower.
+- [ASSISTANT_SAID] Assistant suggested creating a new subcategory for "Baby Shower Gifts" under "Gifts."
+- [FACT] User spent around $70 in total for the baby shower gifts.
+- [ASSISTANT_CREATED] Assistant updated the list with the baby shower gifts:
+  - **Baby Shower Gifts**
+    - Onesies, baby books, and soft toy: $70
+    - Total: $70
+- [ASSISTANT_SAID] Assistant calculated the total amount spent on gifts as $145.
+- [EVENT] User remembered buying gifts for colleagues for the office's Secret Santa gift exchange.
+- [ASSISTANT_SAID] Assistant suggested creating a new subcategory for "Office Gifts" under "Gifts."
+- [ASSISTANT_SAID] Assistant asked how much the user spent on the Secret Santa gifts and whether it was a single item or multiple items.

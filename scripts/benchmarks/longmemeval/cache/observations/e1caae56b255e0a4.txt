@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/20 (Sat) 00:11  
+[USER] The user is interested in alternative deep learning architectures to MobileNet for image classification on microcontrollers with no GPU and very limited CPU.  
+[ASSISTANT_SAID] MobileNet is a popular choice for resource-constrained devices, but alternatives include:  
+[ASSISTANT_SAID] 1. SqueezeNet: Achieves comparable accuracy to AlexNet with fewer parameters, using a "fire module."  
+[ASSISTANT_SAID] 2. ShuffleNet: Uses channel shuffle operations and group convolutions to reduce computational complexity.  
+[ASSISTANT_SAID] 3. Tiny-YOLO: A smaller version of YOLO suitable for resource-constrained devices, adaptable for image classification.  
+[ASSISTANT_SAID] 4. EfficientNet: A family of models that scale up the baseline model; EfficientNet-Lite is optimized for on-device tasks.  
+[ASSISTANT_SAID] 5. ESPNet: Utilizes efficient spatial pyramid dilated convolutions, designed for edge devices.  
+[ASSISTANT_SAID] 6. GhostNet: Based on the Ghost module, generating more feature maps from cheap operations.  
+[ASSISTANT_SAID] Performance may vary based on specific constraints of the microcontroller and target application.  
+[USER] The user is interested in using pre-trained weights to increase performance for their application.  
+[USER] The user is considering creating a modified version of MobileNet and wants to know about downloading training data and training their modified architecture.  
+[ASSISTANT_SAID] MobileNet models are typically pre-trained on the ImageNet dataset, which consists of 1.2 million images and 1000 classes.  
+[ASSISTANT_SAID] Steps to train a modified MobileNet on ImageNet include:  
+[ASSISTANT_SAID] 1. Obtain the ImageNet dataset from the official ImageNet website.  
+[ASSISTANT_SAID] 2. Prepare the dataset by preprocessing images and splitting them into training and validation sets.  
+[ASSISTANT_SAID] 3. Modify the MobileNet architecture using frameworks like TensorFlow or PyTorch.  
+[ASSISTANT_SAID] 4. Train the model with appropriate optimizers and hyperparameters.  
+[ASSISTANT_SAID] 5. Evaluate and fine-tune the model based on validation performance.  
+[USER] The user has downloaded pre-trained weights for MobileNet from both TensorFlow Hub and the Keras website.  
+[USER] The user observes a performance difference between the two models, with TensorFlow Hub performing better in real-world conditions.  
+[USER] The user wants to know if both models used ImageNet for training.  
+[

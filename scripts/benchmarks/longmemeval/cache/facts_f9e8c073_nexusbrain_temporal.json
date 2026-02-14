@@ -1,0 +1,63 @@
+{
+  "answer_b191df5b_1": [
+    {
+      "fact": "User attended family gatherings in the past year",
+      "type": "event",
+      "entities": [
+        "family gatherings"
+      ]
+    },
+    {
+      "fact": "User attended funerals in the past year",
+      "type": "event",
+      "entities": [
+        "funerals"
+      ]
+    },
+    {
+      "fact": "User was going through a tough time",
+      "type": "personal",
+      "entities": []
+    },
+    {
+      "fact": "User attended a bereavement support group",
+      "type": "event",
+      "entities": [
+        "bereavement support group"
+      ]
+    },
+    {
+      "fact": "User is seeking information on how to cope with grief or loss",
+      "type": "opinion",
+      "entities": [
+        "grief",
+        "loss"
+      ]
+    }
+  ],
+  "answer_b191df5b_2": [
+    {
+      "fact": "User is trying to get back into their routine after a tough few months",
+      "type": "event",
+      "entities": [
+        "routine",
+        "tough months"
+      ]
+    },
+    {
+      "fact": "User prefers bodyweight exercises for their workout routine",
+      "type": "preference",
+      "entities": [
+        "bodyweight exercises"
+      ]
+    },
+    {
+      "fact": "User is looking for tips on how to stay motivated when feeling down",
+      "type": "opinion",
+      "entities": [
+        "motivation",
+        "feeling down"
+      ]
+    }
+  ]
+}

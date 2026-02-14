@@ -1,0 +1,35 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/28 (Sun) 10:24
+- [EVENT] User is trying to organize their social media life.
+- [EVENT] User is planning to schedule Instagram posts in advance.
+- [ASSISTANT_SAID] Instagram allows scheduling posts in advance using its built-in feature for business accounts, allowing scheduling up to 75 days in advance.
+- [ASSISTANT_SAID] Steps to schedule posts on Instagram: 
+  1. Make sure the account is a business account.
+  2. Go to the post composer.
+  3. Tap "Advanced."
+  4. Tap "Schedule" and select the date and time.
+  5. Tap "Schedule" again to confirm.
+- [ASSISTANT_SAID] Hootsuite allows scheduling Instagram posts up to 30 days in advance and offers a free plan.
+- [ASSISTANT_SAID] Buffer allows scheduling Instagram posts up to 2,000 posts in advance and offers a free plan.
+- [ASSISTANT_SAID] Later allows scheduling Instagram posts up to 30 days in advance and offers a free plan.
+- [ASSISTANT_SAID] Sprout Social allows scheduling Instagram posts up to 30 days in advance and offers a free trial.
+- [ASSISTANT_SAID] Planoly allows scheduling Instagram posts up to 30 days in advance and offers a free plan.
+- [ASSISTANT_SAID] Sked Social allows scheduling Instagram posts up to 30 days in advance and offers a free trial.
+- [EVENT] User is thinking of cleaning up their WhatsApp chat list.
+- [ASSISTANT_SAID] Archiving a chat on WhatsApp removes it from the main chat list but does not delete it. Steps to archive a chat:
+  1. Open WhatsApp and go to the Chats tab.
+  2. Long-press on the chat.
+  3. Tap the "Archive" icon.
+  4. Confirm archiving.
+- [ASSISTANT_SAID] Deleting a chat on WhatsApp permanently removes it. Steps to delete a chat:
+  1. Open WhatsApp and go to the Chats tab.
+  2. Long-press on the chat.
+  3. Tap the "Delete" icon.
+  4. Confirm deletion.
+- [ASSISTANT_SAID] Steps to delete specific messages within a chat:
+  1. Open the chat and find the message.
+  2. Long-press on the message.
+  3. Tap the "Delete" icon.
+  4. Confirm deletion.
+- [ASSISTANT_SAID] Tips for managing WhatsApp chats include regularly cleaning up the chat list, using the "Mute" feature, and using the "Star" feature for important messages

@@ -1,0 +1,31 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/28 (Sun) 19:12
+- [EVENT] User is planning a dinner party this weekend.
+- [PREFERENCE] User has been focused on nurturing friendships lately.
+- [ASSISTANT_SAID] Assistant suggested a step-by-step approach to create a comprehensive guest list.
+- [ASSISTANT_SAID] Step 1: Brainstorming - Write down names of people to invite, including close friends, acquaintances, and anyone the user has been meaning to catch up with.
+- [ASSISTANT_SAID] Step 2: Categorize contacts into groups: Close friends, Social friends, Acquaintances, Significant others, Out-of-town friends.
+- [ASSISTANT_SAID] Step 3: Review contacts from phone, social media, and email to ensure no one is forgotten.
+- [ASSISTANT_SAID] Step 4: Prioritize guest list based on importance and relationships.
+- [ASSISTANT_SAID] Step 5: Finalize guest list, including dietary restrictions or special requests.
+- [ASSISTANT_SAID] Recommendations to ensure no one important is forgotten: Create a digital note or document, set reminders, and regularly review contacts.
+- [PREFERENCE] User likes the idea of categorizing contacts.
+- [EVENT] User plans to start by making a list of close friends, including Rachel, Emily, and Olivia.
+- [ASSISTANT_SAID] Assistant recommended note-taking apps and tools for organizing contacts and events, including:
+  - Evernote (Web, iOS, Android)
+  - OneNote (Web, iOS, Android)
+  - Simplenote (Web, iOS, Android)
+  - Contacts+ (iOS, Android)
+  - FullContact (Web, iOS, Android)
+  - AnyList (iOS, Android)
+  - Trello (Web, iOS, Android)
+  - Google Keep (Web, iOS, Android)
+- [ASSISTANT_SAID] Factors to consider when choosing an app: Ease of use, features, platform, syncing.
+- [ASSISTANT_SAID] Assistant provided tips for using Evernote effectively, including:
+  - Create a "Contacts" notebook and sub-notebooks for different categories.
+  - Use tags for categorization, such as Close Friend, Social Friend, Local, Out-of-Town, and event-specific tags.
+  - Use note links, reminders, checklists, and attach photos or audio.
+- [ASSISTANT_SAID] Example of a well-organized Evernote setup provided by the assistant.
+- [PREFERENCE] User plans to create a notebook for contacts and sub-notebooks for close friends, social friends, and acquaintances, as well as separate notebooks for specific events.
+- [ASSISTANT_SA

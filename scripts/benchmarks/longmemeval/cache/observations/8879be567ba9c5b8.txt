@@ -1,0 +1,14 @@
+**Observation Log:**
+
+- [FACT] User has been feeling really exhausted lately.
+- [FACT] User recently had a UTI and was prescribed antibiotics by their primary care physician, Dr. Smith.
+- [CHANGE] User is still recovering from the UTI.
+- [PREFERENCE] User is trying to stay hydrated and get enough sleep.
+- [EVENT] User has been diagnosed with chronic sinusitis by an ENT specialist.
+- [RELATIONSHIP] User's primary care physician is Dr. Smith.
+- [ASSISTANT_SAID] The assistant provided general tips to boost energy levels, including staying hydrated, getting enough sleep, eating a balanced diet, exercising regularly, managing stress, considering probiotics, getting fresh air, prioritizing self-care, limiting caffeine and sugar, and consulting with a doctor.
+- [ASSISTANT_SAID] The assistant mentioned that fatigue could be caused by antibiotic side effects, underlying infections or conditions, vitamin deficiencies, hormonal changes, medication side effects, chronic stress, gut health issues, thyroid issues, and adrenal fatigue.
+- [ASSISTANT_SAID] The assistant suggested discussing concerns about fatigue with Dr. Smith and keeping a symptom journal.
+- [ASSISTANT_SAID] The assistant provided tips for managing chronic sinusitis, including nasal saline irrigation, using humidifiers, staying hydrated, avoiding irritants, managing allergies, considering steam inhalation, getting enough rest, elevating the head while sleeping, trying over-the-counter medications, and following up with the ENT specialist.
+- [ASSISTANT_SAID] The assistant explained nasal saline irrigation, including how often to do it (1-2 times a week for maintenance, 2-3 times a week for mild symptoms, daily for moderate to severe symptoms) and techniques to follow.
+- [ASSISTANT_CREATED] The assistant created a list of steps for nasal saline irrigation, including preparing the saline solution, standing over a sink, inserting the spout or tip, allowing the solution to flow, repeating on the other side, blowing the nose, and cleaning the device.

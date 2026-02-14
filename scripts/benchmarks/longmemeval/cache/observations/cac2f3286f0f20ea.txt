@@ -1,0 +1,48 @@
+**Observation Log:**
+
+[EVENT] User is planning a trip to Europe.
+
+[CHANGE] User has started the process of changing their name.
+
+[ASSISTANT_SAID] Assistant congratulated the user on taking the step to change their name.
+
+[ASSISTANT_SAID] Assistant provided a step-by-step guide to update the user's passport with their new name.
+
+[ASSISTANT_SAID] Required documents for passport update include:
+1. Proof of name change (certified copy of court order, marriage certificate, or divorce decree).
+2. Current valid passport.
+3. Completed Form DS-82.
+
+[ASSISTANT_SAID] User should mail their application, supporting documents, and payment to the address listed on the form using a secure and trackable delivery method.
+
+[ASSISTANT_SAID] Routine passport processing typically takes 6-8 weeks; expedited service takes 2-3 weeks.
+
+[ASSISTANT_SAID] If traveling within the next 14 days, user may need to expedite the process or make an appointment at a Regional Passport Agency.
+
+[ASSISTANT_SAID] User should ensure their new passport has at least six months' validity from their planned departure date from Europe.
+
+[ASSISTANT_SAID] User should update their airline, travel agency, and travel insurance provider with their new passport information.
+
+[ASSISTANT_SAID] Recommended resources include:
+- U.S. Department of State's Bureau of Consular Affairs: [travel.state.gov](http://travel.state.gov)
+- National Passport Information Center: 1-877-487-2778 or [npic@state.gov](mailto:npic@state.gov)
+- Passport Acceptance Facility: [iafdb.travel.state.gov](http://iafdb.travel.state.gov)
+
+[EVENT] User is considering opening a new bank account in their new name.
+
+[ASSISTANT_SAID] Assistant congratulated the user on updating their financial records with their new name.
+
+[ASSISTANT_SAID] Required documents to open a new bank account include:
+1. Government-issued ID with new name (certified copy of name change document, new driver's license, or passport).
+2. Proof of address (utility bill, lease agreement, or bank statement).
+3. Social Security card or ITIN with new name.
+
+[ASSISTANT_SAID] User should choose a bank, gather documents, fill out the application, and verify their identity.
+
+[ASSISTANT_SAID] The bank will review the application and verify identity, which may take a few minutes to a few days.
+
+[ASSISTANT_SAID] User will need to fund their new account with an initial deposit.
+
+[ASSISTANT_SAID] User should update existing accounts with their new name.
+
+[ASSISTANT_SAID] Tips for opening a new bank account include checking for fees, understanding credit report implications, and keeping

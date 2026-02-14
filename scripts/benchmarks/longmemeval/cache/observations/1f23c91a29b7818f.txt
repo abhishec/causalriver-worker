@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [FACT] The user is interested in taking more theater classes to improve their skills.
+- [FACT] The user is located in the city.
+- [PREFERENCE] The user is looking for classes that focus on singing, acting, and dancing.
+- [PREFERENCE] The user wants to find a program that teaches how to combine singing, acting, and dancing to bring a character to life.
+- [EVENT] The user attended a workshop recently with an instructor named Sarah.
+- [PREFERENCE] The user is open to regular classes or workshops as long as they focus on comprehensive training.
+- [ASSISTANT_SAID] The assistant suggested looking into the City Theater Academy and the Performing Arts Conservatory for musical theater programs.
+- [ASSISTANT_SAID] The City Theater Academy offers a Certificate Program, a Diploma Program, and workshops and masterclasses.
+- [ASSISTANT_SAID] The Performing Arts Conservatory offers a Bachelor of Fine Arts (BFA) in Musical Theater, a Certificate Program, and workshops and masterclasses.
+- [ASSISTANT_SAID] The City Theater Academy's Certificate Program includes core classes in singing, acting, and dancing, musical theater workshops, scene study, script analysis, character development, and performance opportunities.
+- [ASSISTANT_SAID] The Performing Arts Conservatory's program includes triple threat training, musical theater history, scene study, choreography, and performance opportunities.
+- [PREFERENCE] The user expressed interest in the City Theater Academy's Certificate Program.
+- [ASSISTANT_SAID] The application process for the City Theater Academy's Certificate Program includes an online application, headshot and resume submission, audition video, and personal statement.
+- [ASSISTANT_SAID] The audition video for the City Theater Academy should include a 1-2 minute song, a 1-2 minute monologue, and a 1-2 minute dance piece.
+- [ASSISTANT_SAID] The audition video should be recorded in a single take with good lighting and sound quality.
+- [ASSISTANT_SAID] The City Theater Academy typically has two audition deadlines: one in the fall and one in the spring.
+- [ASSISTANT_SAID] If selected, the user will be invited to a callback audition, which typically takes place in-person at the academy.
+- [ASSISTANT_SAID] The callback audition will include a series of exercises and scenes, as well as an interview with the faculty.
+- [TEMPORAL] The session date is 2023/05/23 (Tue) 13:37.

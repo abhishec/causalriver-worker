@@ -1,0 +1,72 @@
+{
+  "answer_73540165_1": [
+    {
+      "fact": "User is planning a dinner party",
+      "type": "event",
+      "entities": [
+        "dinner party"
+      ]
+    },
+    {
+      "fact": "User enjoys spicy mango margaritas",
+      "type": "preference",
+      "entities": [
+        "spicy mango margaritas"
+      ]
+    },
+    {
+      "fact": "User loves grilled pineapple and prosciutto skewers",
+      "type": "preference",
+      "entities": [
+        "grilled pineapple and prosciutto skewers"
+      ]
+    },
+    {
+      "fact": "User loves spicy shrimp ceviche",
+      "type": "preference",
+      "entities": [
+        "spicy shrimp ceviche"
+      ]
+    }
+  ],
+  "answer_73540165_2": [
+    {
+      "fact": "User is looking for inspiration for a new cocktail recipe.",
+      "type": "preference",
+      "entities": [
+        "cocktail recipe"
+      ]
+    },
+    {
+      "fact": "User prefers refreshing summer drinks that incorporate tequila.",
+      "type": "preference",
+      "entities": [
+        "tequila",
+        "refreshing summer drinks"
+      ]
+    },
+    {
+      "fact": "User has a cocktail-making class on Fridays.",
+      "type": "event",
+      "entities": [
+        "cocktail-making class",
+        "Fridays"
+      ]
+    },
+    {
+      "fact": "User likes the sound of the Watermelon Basil Margarita.",
+      "type": "opinion",
+      "entities": [
+        "Watermelon Basil Margarita"
+      ]
+    },
+    {
+      "fact": "User has been experimenting with basil in cocktails.",
+      "type": "preference",
+      "entities": [
+        "basil",
+        "cocktails"
+      ]
+    }
+  ]
+}

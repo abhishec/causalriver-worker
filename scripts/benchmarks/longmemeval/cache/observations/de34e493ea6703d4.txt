@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [FACT] User is traveling from Ireland to New York.
+- [EVENT] User requested a checklist of things to remember before leaving for their trip.
+- [ASSISTANT_SAID] User should check the validity of their passport, ensuring it is valid for at least six months beyond their intended stay in the US.
+- [ASSISTANT_SAID] User needs to apply for an Electronic System for Travel Authorization (ESTA) before their trip to the US.
+- [ASSISTANT_SAID] User should research and book flights in advance to get the best deals.
+- [ASSISTANT_SAID] User should arrange for accommodation in New York in advance.
+- [ASSISTANT_SAID] User should check visa requirements based on their citizenship status.
+- [ASSISTANT_SAID] User is advised to obtain travel insurance to cover unexpected expenses.
+- [ASSISTANT_SAID] User should pack appropriate clothing based on the weather forecast for New York.
+- [ASSISTANT_SAID] User should check for any travel alerts or advisories on official government websites.
+- [ASSISTANT_SAID] User should exchange currency before leaving Ireland if they plan on using cash.
+- [ASSISTANT_SAID] User should notify their bank of their travel plans to avoid flagged transactions.
+- [ASSISTANT_SAID] User should bring necessary documents such as their passport, ESTA approval, and travel insurance documents.
+- [ASSISTANT_SAID] User should charge their devices before the trip.
+- [ASSISTANT_SAID] User should bring necessary adapters for their devices.
+- [ASSISTANT_SAID] User should bring any prescription medications in their original packaging.
+- [ASSISTANT_SAID] User should secure their home while away, such as asking a neighbor to keep an eye on it. 
+- [ASSISTANT_CREATED] Assistant created a checklist of 15 items for the user to remember before leaving for their trip.

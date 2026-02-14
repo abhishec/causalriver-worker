@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/25 (Thu) 00:35
+- [EVENT] User is planning a family reunion next year.
+- [ASSISTANT_SAID] Suggested websites and tools for finding a large house or resort for the family reunion: VRBO, Airbnb, HomeAway, RedAwning, Expedia, Booking.com, FamilyReunionResorts.com, ReunionResorts.com, GroupAccommodation.com, BigHouses.com, local property management companies, and travel agents.
+- [ASSISTANT_SAID] Suggested factors to consider when searching for a venue: capacity, amenities, location, and budget.
+- [ASSISTANT_SAID] Recommended reading reviews, asking questions, and reviewing contracts before booking the venue.
+- [PREFERENCE] User is thinking of having the reunion during the summer holidays.
+- [ASSISTANT_SAID] Suggested that a family talent show is a fantastic idea for the reunion, providing reasons such as bonding, discovering hidden talents, inclusivity, creative expression, and creating memories.
+- [ASSISTANT_SAID] Provided tips for making the family talent show a success: encourage participation, set a variety of categories, keep it light-hearted, plan a judging system, prepare a playlist, and capture the moment.
+- [RELATIONSHIP] User mentioned their aunt, who is good at planning events.
+- [EVENT] User is considering asking their aunt to help organize the talent show.
+- [ASSISTANT_SAID] Provided ideas and tools for digitizing old family photos, including scanning methods (flatbed scanners, photo scanning apps), digitization methods (bulk scanning services, taking digital photos), and software/tools (Adobe Photoshop, Google Photos, FamilySearch, Ancestry.com).
+- [ASSISTANT_SAID] Suggested organizing and categorizing digitized photos, adding metadata, backing up and storing photos, and sharing and collaborating with family members.
+- [PREFERENCE] User is thinking of asking cousins to contribute old photos to the digitization project.
+- [ASSISTANT_SAID] Discussed the pros and cons of creating a private Facebook group versus a shared Google Drive folder for collecting and sharing photos.
+- [ASSISTANT_SAID] Recommended a hybrid approach using both a private Facebook group and a shared Google Drive folder.
+- [USER_SAID] User decided to create a private Facebook group and a shared Google Drive folder for the digitization project.
+- [USER_SAID] User plans to create a clear guide and designate a point person to help with uploading and organizing the photos.
+- [ASSISTANT_SAID] Suggested that involving cousins in the digitization project would foster a sense of community and shared ownership.

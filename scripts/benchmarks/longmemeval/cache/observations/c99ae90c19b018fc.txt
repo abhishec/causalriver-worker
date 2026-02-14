@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [FACT] The user is planning a trip to Miami.
+- [EVENT] The user is considering flying with American Airlines.
+- [EVENT] The user had a terrible experience with American Airlines' in-flight entertainment system on a flight from New York to Los Angeles on April 10, 2023.
+- [ASSISTANT_SAID] American Airlines offers a range of in-flight entertainment options, including seat-back screens, tablet-based entertainment, and personal device entertainment.
+- [ASSISTANT_SAID] Seat-back screens are available on most aircraft, including Boeing 737-800, 777-200, and Airbus A321T, offering movies, TV shows, music, games, and live TV on some flights.
+- [ASSISTANT_SAID] Tablet-based entertainment is provided on some aircraft, like the Boeing 737 MAX and Airbus A321, with pre-loaded content.
+- [ASSISTANT_SAID] Personal device entertainment allows streaming content to a laptop, tablet, or smartphone using the American Airlines app on select aircraft.
+- [ASSISTANT_SAID] The content selection includes a wide range of movies, TV shows, music playlists, games, and live TV on some flights.
+- [ASSISTANT_SAID] To access the in-flight entertainment system, users need to download the American Airlines app or use the seat-back screen/tablet provided.
+- [ASSISTANT_SAID] The user expressed uncertainty about flying with American Airlines after their bad experience.
+- [ASSISTANT_SAID] American Airlines has a mixed reputation for customer service but has made efforts to improve.
+- [ASSISTANT_SAID] In case of flight disruptions, American Airlines will try to rebook passengers on the next available flight and may offer compensation depending on the circumstances.
+- [ASSISTANT_SAID] American Airlines provides proactive communication about flight disruptions via email, text, or mobile app notifications.
+- [ASSISTANT_SAID] Customer service channels include phone support, online support through their website, and social media platforms like Twitter and Facebook.
+- [ASSISTANT_SAID] American Airlines' customer service ratings include 3/5 stars from Skytrax, 3.5/5 stars from TripAdvisor, and 64/100 from Consumer Reports.
+- [ASSISTANT_SAID] Tips for a smoother experience include downloading the American Airlines app, signing up for flight alerts, knowing passenger rights, and being prepared.
+- [EVENT] The user is planning a week-long trip to Miami and is likely to need to check a bag.
+- [ASSISTANT_SAID] American Airlines charges a fee for the first checked bag, which is $30 online and $40 at the airport for Main Cabin tickets.
+- [ASSISTANT_SAID] The second checked bag fee is $40 online and $50 at the airport, regardless of

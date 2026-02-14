@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [FACT] The user is planning a bird watching trip to the coastal area next weekend.
+- [EVENT] The user just got back from a trip to the nature reserve last Saturday.
+- [TEMPORAL] The user saw a pair of American Goldfinches for the first time this year on May 20, 2023.
+- [TEMPORAL] The user had a great sighting of a Blue Jay at their birdbath on March 5, 2023.
+- [ASSISTANT_SAID] The assistant congratulated the user on spotting American Goldfinches and the Blue Jay.
+- [ASSISTANT_SAID] The assistant provided an overview of common shorebirds and waterfowl the user might encounter on their trip.
+- [ASSISTANT_CREATED] The assistant listed common shorebirds: Sanderlings, Killdeer, Dunlins, Ruddy Turnstones, Willets, and various Sandpipers.
+- [ASSISTANT_CREATED] The assistant listed common waterfowl: Canada Geese, Mallards, American Black Ducks, Harlequin Ducks, and Mergansers (Common, Red-breasted, or Hooded).
+- [ASSISTANT_SAID] The assistant mentioned other birds the user might see: Gulls (Herring, Ring-billed, or Laughing), Ospreys, and Terns (Forster's or Least).
+- [ASSISTANT_SAID] The assistant recommended bringing binoculars (7x or 8x magnification), a field guide or app (e.g., Merlin Bird ID or iBird Pro), comfortable walking shoes or boots, sunscreen, a hat, and water.
+- [PREFERENCE] The user is especially interested in identifying waterfowl.
+- [ASSISTANT_SAID] The assistant provided detailed differences between Canada Geese and American Black Ducks, including size, plumage, beak, legs, habitat, behavior, and calls.
+- [ASSISTANT_SAID] The assistant described Harlequin Ducks, including their appearance, habitat, behavior, and tips for spotting them.
+- [ASSISTANT_CREATED] The assistant listed tips for spotting Harlequin Ducks, including looking for coastal areas with rocky shores and scanning the surf zone.
+- [ASSISTANT_SAID] The assistant provided additional duck species the user might see at the coastal area: Mergansers, Surf Scoters, and Black Scoters.
+- [EVENT] The user attended a bird watching workshop at the local library on February 18, 2023.
+- [ASSISTANT_SAID] The assistant provided information about common hawk species in the user's area, including Red-tailed Hawk, Cooper's Hawk, Sharp-shinned Hawk, American Kestrel, and Osprey.
+- [ASSISTANT_SAID] The assistant offered tips for identifying hawks, including observing

@@ -1,0 +1,74 @@
+{
+  "answer_e2f4f947_1": [
+    {
+      "fact": "User is trying to learn more about AI-powered medical diagnosis.",
+      "type": "preference",
+      "entities": [
+        "AI-powered medical diagnosis"
+      ]
+    },
+    {
+      "fact": "User is reading 'A Short History of Nearly Everything' and is currently on page 200.",
+      "type": "personal",
+      "entities": [
+        "A Short History of Nearly Everything",
+        "page 200"
+      ]
+    },
+    {
+      "fact": "User finds insights on the history of medicine interesting.",
+      "type": "opinion",
+      "entities": [
+        "history of medicine"
+      ]
+    },
+    {
+      "fact": "User would like to learn more about the applications of AI in medical imaging.",
+      "type": "preference",
+      "entities": [
+        "AI",
+        "medical imaging"
+      ]
+    }
+  ],
+  "answer_e2f4f947_2": [
+    {
+      "fact": "User is interested in learning more about renewable energy.",
+      "type": "preference",
+      "entities": [
+        "renewable energy"
+      ]
+    },
+    {
+      "fact": "User recently finished reading about the discovery of DNA structure in 'A Short History of Nearly Everything'.",
+      "type": "event",
+      "entities": [
+        "A Short History of Nearly Everything",
+        "DNA structure"
+      ]
+    },
+    {
+      "fact": "User is currently on page 220 of 'A Short History of Nearly Everything'.",
+      "type": "event",
+      "entities": [
+        "A Short History of Nearly Everything",
+        "page 220"
+      ]
+    },
+    {
+      "fact": "User finds 'A Short History of Nearly Everything' amazing and has learned a lot from it.",
+      "type": "opinion",
+      "entities": [
+        "A Short History of Nearly Everything"
+      ]
+    },
+    {
+      "fact": "User would like to know more about the current state of artificial intelligence in medical diagnosis.",
+      "type": "preference",
+      "entities": [
+        "artificial intelligence",
+        "medical diagnosis"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "answer_sharegpt_GYqnAhC_190": [
+    {
+      "fact": "User is trying to find a specific file number in a facility.",
+      "type": "event",
+      "entities": [
+        "file number",
+        "facility"
+      ]
+    },
+    {
+      "fact": "User recalls a conversation with a Red facilities employee.",
+      "type": "event",
+      "entities": [
+        "Red facilities employee",
+        "conversation"
+      ]
+    },
+    {
+      "fact": "User remembers the designation 'LIV' on their jumpsuit.",
+      "type": "personal",
+      "entities": [
+        "LIV",
+        "jumpsuit"
+      ]
+    },
+    {
+      "fact": "User is looking for a file related to the designation 'LIV'.",
+      "type": "event",
+      "entities": [
+        "LIV",
+        "file"
+      ]
+    },
+    {
+      "fact": "User associates 'LIV' with the number 54.",
+      "type": "opinion",
+      "entities": [
+        "LIV",
+        "54"
+      ]
+    },
+    {
+      "fact": "User finds record 54 which states 'EXPERIMENT IN PROGRESS'.",
+      "type": "event",
+      "entities": [
+        "record 54",
+        "EXPERIMENT IN PROGRESS"
+      ]
+    },
+    {
+      "fact": "User is confused about the meaning of 'ABERRATION IN PREVIOUS ITERATION'.",
+      "type": "opinion",
+      "entities": [
+        "ABERRATION",
+        "PREVIOUS ITERATION"
+      ]
+    }
+  ]
+}

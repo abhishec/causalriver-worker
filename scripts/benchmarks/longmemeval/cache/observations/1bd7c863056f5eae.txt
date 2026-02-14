@@ -1,0 +1,24 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/25 (Thu) 17:38  
+[EVENT] User is planning a trip to Asia.  
+[PREFERENCE] User wants to know must-try dishes in Japan and Korea.  
+[ASSISTANT_SAID] Japan must-try dishes: Sushi, Ramen, Tonkatsu, Yakitori, Udon, Tempura, Okonomiyaki, Bento.  
+[ASSISTANT_SAID] Korea must-try dishes: Bibimbap, Bulgogi, Jeyuk bokkeum, Naengmyeon, Kimchi Stew (Kimchi Jjigae), Tteokbokki, Galbi, Mandu.  
+[ASSISTANT_SAID] User should try popular Korean street foods like hotteok and bungeo-ppang.  
+[PREFERENCE] User has tried some of the recommended dishes before.  
+[PREFERENCE] User is excited to try more authentic versions of the dishes while in Japan and Korea.  
+[EVENT] User has been perfecting their homemade ramen recipe.  
+[ASSISTANT_SAID] Ramen is a popular dish with rich broth, springy noodles, and various toppings.  
+[ASSISTANT_SAID] User might want to try different regional variations of ramen in Japan: Tonkotsu Ramen, Shio Ramen, Shoyu Ramen, Miso Ramen.  
+[ASSISTANT_SAID] User could consider making their own ramen from scratch in Japan, using local ingredients and techniques.  
+[PREFERENCE] User's go-to ramen recipe includes extra pork belly and boiled eggs.  
+[ASSISTANT_SAID] Pork belly is called "chashu" in Japanese, and boiled eggs are called "ajitama."  
+[ASSISTANT_SAID] Chashu is typically braised in a sweet soy sauce-based sauce, and ajitama is marinated in a sweet soy sauce-based sauce.  
+[PREFERENCE] User is obsessed with bulgogi and galbi.  
+[ASSISTANT_SAID] Korean BBQ is a social and flavorful experience, with marinated meats and banchan.  
+[ASSISTANT_SAID] Bulgogi means "fire meat" and is made with thinly sliced beef marinated in a sweet and savory sauce.  
+[ASSISTANT_SAID] Galbi refers to marinated short ribs, grilled to perfection.  
+[ASSISTANT_SAID] User should try other popular BBQ dishes like Samgyeopsal, Dakgalbi, and Jeyuk bokkeum.  
+[ASSISTANT_SAID] User should explore all-you-can-eat BBQ options and table-top grilling experiences.  
+[ASSISTANT_SAID] User should try various banchan like kimchi, japchae, and bok

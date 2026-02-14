@@ -1,0 +1,27 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/09/10 (Sun) 19:56  
+[FACT] User has leftover veggies: broccoli, sweet potatoes, and Brussels sprouts.  
+[EVENT] User roasted the veggies last Sunday.  
+[EVENT] User got a veggie burger from Burger King on Monday for around $10.  
+[EVENT] User ordered spaghetti Bolognese from Bella Vita on Wednesday for around $15.  
+[PREFERENCE] User is looking for recipe ideas to use up leftover veggies.  
+[ASSISTANT_SAID] Suggested recipe ideas for leftover veggies:  
+[ASSISTANT_CREATED] 1. Veggie Wrap: Whole wheat wrap with roasted broccoli, sweet potato, Brussels sprouts, hummus or tzatziki.  
+[ASSISTANT_CREATED] 2. Veggie Soup: Blend roasted veggies with broth, add noodles or rice.  
+[ASSISTANT_CREATED] 3. Roasted Veggie Salad: Toss with mixed greens, cherry tomatoes, citrus vinaigrette.  
+[ASSISTANT_CREATED] 4. Stuffed Sweet Potatoes: Fill baked sweet potatoes with roasted veggies and feta or black beans.  
+[ASSISTANT_CREATED] 5. Veggie Omelette: Diced roasted veggies in an omelette with eggs, cheese, herbs.  
+[ASSISTANT_CREATED] 6. Veggie Quesadilla: Tortillas filled with roasted veggies, cheese, beans.  
+[ASSISTANT_CREATED] 7. Veggie Frittata: Bake eggs, cheese, and herbs with roasted veggies in a skillet.  
+[PREFERENCE] User is especially interested in the veggie wrap and veggie quesadilla options.  
+[ASSISTANT_SAID] Suggested homemade seasonings and sauces to add flavor:  
+[ASSISTANT_CREATED] 1. Spicy Roasted Veggie Blend: Paprika, garlic powder, onion powder, cumin, chili powder, cayenne pepper.  
+[ASSISTANT_CREATED] 2. Herby Delight: Dried oregano, thyme, basil, parsley, salt, pepper.  
+[ASSISTANT_CREATED] 3. Lemon Pepper: Lemon zest, black pepper, salt.  
+[ASSISTANT_CREATED] 4. Roasted Red Pepper Hummus: Blend roasted red peppers, chickpeas, lemon juice, garlic, olive oil.  
+[ASSISTANT_CREATED] 5. Avocado Crema: Diced avocado, sour cream or Greek yogurt, lime juice, salt.  
+[ASSISTANT_CREATED] 6. Chimichurri: Parsley, oregano, garlic, red pepper flakes, red wine vinegar, olive oil.  
+[ASSISTANT_CREATED] 7. Sriracha Mayo: Mayonnaise, sriracha, lime juice.  
+[ASSISTANT_SAID] Suggested other ideas: pesto, salsa, guacamole.  
+[EVENT]

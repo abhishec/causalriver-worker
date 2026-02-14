@@ -1,0 +1,23 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/22 (Mon) 15:12
+- [FACT] User plays a lot of FPS games, specifically Overwatch and Apex Legends.
+- [EVENT] User has started playing Apex Legends and has managed to win a few games.
+- [PREFERENCE] User is looking to improve their gaming setup and is interested in comparing gaming mice.
+- [PREFERENCE] User prefers a palm grip style for their mouse.
+- [PREFERENCE] User prefers a wired mouse for reliability.
+- [PREFERENCE] User is looking to spend around $100 on a gaming mouse.
+- [PREFERENCE] User is not sure about the DPI they need but has heard that 12000 is a good range.
+- [PREFERENCE] User would like customizable buttons and RGB lighting on their gaming mouse, but these features are not must-haves.
+- [PREFERENCE] User has heard good things about the Logitech G502 but is open to other suggestions.
+- [ASSISTANT_SAID] The Logitech G502 is a popular choice with a 12,000 CPI optical sensor, customizable buttons, and RGB lighting, priced at $99.99.
+- [ASSISTANT_SAID] The SteelSeries Rival 600 features a 12,000 CPI TrueMove3 optical sensor, customizable weight system, and is priced at $99.99.
+- [ASSISTANT_SAID] The Corsair M65 RGB Ultra Wireless has a 15,000 CPI optical sensor, customizable RGB lighting, and is priced at $99.99.
+- [ASSISTANT_SAID] The HyperX Pulsefire Raid features a 16,000 CPI Pixart 3389 sensor, customizable RGB lighting, and is priced at $99.99.
+- [ASSISTANT_SAID] The Logitech G502 has 11 programmable buttons, including a sniper button, and uses Logitech Gaming Software (LGS) for programming.
+- [ASSISTANT_SAID] The SteelSeries Rival 600 has 6 programmable buttons and uses SteelSeries Engine software for programming.
+- [ASSISTANT_SAID] Both mice have user-friendly software for programming buttons and creating custom profiles.
+- [ASSISTANT_SAID] CPI stands for Counts Per Inch, measuring mouse sensitivity and accuracy.
+- [ASSISTANT_SAID] A lower CPI setting (400-800) is suitable for precise movements, while a higher CPI setting (3200-12000) is suitable for fast, aggressive gameplay.
+- [ASSISTANT_SAID] For Apex Legends, a higher CPI can be beneficial for fast-paced gameplay, but it depends on the user's playstyle.
+- [ASSISTANT_SAID] Suggested CPI ranges for different playstyles in Apex Legends: 2400-3200 for aggressive players, 1600-2400 for medium-range engagements

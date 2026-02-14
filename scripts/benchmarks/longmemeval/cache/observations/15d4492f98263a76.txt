@@ -1,0 +1,20 @@
+**Observation Log:**
+
+[FACT] User is thinking of starting a small music group with friends to jam together and learn from each other.  
+[EVENT] User is considering starting a small music group.  
+[ASSISTANT_SAID] Suggested apps and websites for collaboration and sharing music files: SoundBetter, Bandhub, MusicCollaboration, Dropbox, Google Drive, WeTransfer, Ableton Live, Logic Pro X, Soundtrap, Slack, Trello, Google Groups, Transcribe!, ChordPro.  
+[ASSISTANT_SAID] Suggested factors to consider when choosing an app or platform: ease of use, file format compatibility, real-time collaboration, storage space.  
+[FACT] User has been getting back into playing guitar lately.  
+[EVENT] User has been taking guitar lessons with Alex for three weeks.  
+[ASSISTANT_SAID] Recommended instrumental music and lo-fi channels on Spotify: Film Scores, Jazz and Fusion, Acoustic Guitar, Electronic/Ambient, Lo-Fi Girl, Jinsang, Yung Gud, Mndsgn, Focus playlist, Lo-Fi Beats playlist, Relaxing Guitar Music playlist.  
+[FACT] User is interested in finding good instrumental music or lo-fi channels on Spotify to listen to while working.  
+[ASSISTANT_SAID] Suggested YouTube channels for piano lessons: Piano Nanny, HDpiano, Piano Lessons On The Web, Piano Guy, Keyflow.  
+[ASSISTANT_SAID] Suggested YouTube channels for guitar lessons: Justin Guitar, GuitarLessons365, Marty Music, GuitarJamz, Andy Guitar.  
+[ASSISTANT_SAID] Suggested YouTube channels for music theory: The Music Theory Academy, Music Theory Fundamentals, Adam Neely, The Pro Audio Files, 12tone.  
+[FACT] User is looking for YouTube channels for piano and guitar lessons, as well as music theory channels.  
+[EVENT] User is thinking of getting back into playing the drums, which they used to do in high school.  
+[ASSISTANT_SAID] Suggested resources for finding drum lessons in the user's area: TakeLessons, Lessons.com, Thumbtack, local music stores, music schools, Google search, Facebook, word of mouth, drumming communities, Drumeo, Yousician.  
+[FACT] User is considering getting back into drumming.  
+[ASSISTANT_SAID] Suggested questions to ask when inquiring about drum lessons or meeting with a potential instructor: teaching style, experience, genres taught, availability, pricing, approach to teaching beginners, tailoring lessons to goals, teaching philosophy, observing a lesson or taking a trial lesson, policy on makeup lessons or cancellations.  
+[ASSISTANT_SAID] Suggested to clarify the instructor's qualifications or certifications.  
+[TEMPORAL] Session Date: 2023/02/08 (Wed) 06:04.

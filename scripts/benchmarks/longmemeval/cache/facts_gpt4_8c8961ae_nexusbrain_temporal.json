@@ -1,0 +1,90 @@
+{
+  "answer_72d9aa58_2": [
+    {
+      "fact": "User is planning a solo trip to South America",
+      "type": "event",
+      "entities": [
+        "South America",
+        "solo trip"
+      ]
+    },
+    {
+      "fact": "User has experience traveling solo",
+      "type": "personal",
+      "entities": []
+    },
+    {
+      "fact": "User traveled solo to Thailand last year",
+      "type": "event",
+      "entities": [
+        "Thailand"
+      ]
+    },
+    {
+      "fact": "User is considering visiting Machu Picchu",
+      "type": "preference",
+      "entities": [
+        "Machu Picchu"
+      ]
+    },
+    {
+      "fact": "User is concerned about Machu Picchu being touristy",
+      "type": "opinion",
+      "entities": [
+        "Machu Picchu"
+      ]
+    }
+  ],
+  "answer_72d9aa58_1": [
+    {
+      "fact": "User is considering planning a solo trip to South America",
+      "type": "event",
+      "entities": [
+        "South America",
+        "solo trip"
+      ]
+    },
+    {
+      "fact": "User went on a two-week trip to Europe with their parents and younger brother last month",
+      "type": "event",
+      "entities": [
+        "Europe",
+        "parents",
+        "younger brother"
+      ]
+    },
+    {
+      "fact": "User values flexibility and autonomy in their travel plans",
+      "type": "preference",
+      "entities": [
+        "flexibility",
+        "autonomy"
+      ]
+    },
+    {
+      "fact": "User had to compromise on the itinerary during their trip to Europe",
+      "type": "opinion",
+      "entities": [
+        "itinerary",
+        "Europe"
+      ]
+    },
+    {
+      "fact": "User had to consider everyone's opinions and energy levels during the trip with family",
+      "type": "opinion",
+      "entities": [
+        "family",
+        "opinions",
+        "energy levels"
+      ]
+    },
+    {
+      "fact": "User looks forward to making their own decisions and changes while traveling solo",
+      "type": "opinion",
+      "entities": [
+        "decisions",
+        "traveling solo"
+      ]
+    }
+  ]
+}

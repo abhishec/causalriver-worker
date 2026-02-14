@@ -1,0 +1,24 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/25 (Thu) 17:18
+- [USER] User inquired about the ranking system for PvP matches.
+- [ASSISTANT_SAID] The ranking systems for PvP matches are typically based on the Elo rating system.
+- [ASSISTANT_SAID] Players start with a certain rating, which changes based on match outcomes (win or lose).
+- [ASSISTANT_SAID] The number of points earned or lost is based on factors like player rating compared to opponents, margin of victory, and number of games played.
+- [ASSISTANT_SAID] Players are placed into different tiers based on their Elo rating, with higher ratings corresponding to higher tiers.
+- [ASSISTANT_SAID] Some ranking systems incorporate player behavior or contribution to team objectives.
+- [ASSISTANT_SAID] The goal of the ranking system is to provide a fair, competitive environment for players to understand and improve their skill level.
+- [USER] User asked if there are any rewards for reaching higher tiers.
+- [ASSISTANT_SAID] Many games offer rewards for reaching higher tiers, which can include cosmetic items, in-game currency, or game-changing perks.
+- [ASSISTANT_SAID] Rewards may be given at the end of a competitive season or as players progress to higher ranks.
+- [ASSISTANT_SAID] The exact rewards vary by game and competitive mode.
+- [USER] User inquired about games with particularly fun ranking systems.
+- [ASSISTANT_SAID] Rocket League is known for its fun ranking system, featuring seasonal rankings and unique cosmetic rewards.
+- [ASSISTANT_SAID] Overwatch has a tiered ranking system from Bronze to Grandmaster, with unique sprays and icons as rewards.
+- [ASSISTANT_SAID] League of Legends and Valorant also have engaging ranking systems with rewards for higher ranks.
+- [USER] User mentioned they have played Overwatch and enjoyed climbing the ranks.
+- [USER] User asked for other FPS games with similar ranking systems.
+- [ASSISTANT_SAID] Rainbow Six Siege features a skill rating system from Copper to Champion, with seasonal competition rewards.
+- [ASSISTANT_SAID] Counter-Strike: Global Offensive (CS:GO) has a tiered ranking system from Silver to Global Elite, with unique medals and coins as rewards.
+- [ASSISTANT_SAID] Apex Legends has a ranking system from Bronze to Apex Predator, offering badges and gun charms as rewards.
+- [ASSISTANT_SAID] Call of Duty: Modern Warfare (and Warzone) features a ranking system from Rookie to Master, with seasonal competition rewards including cosmetic items.

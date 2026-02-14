@@ -1,0 +1,131 @@
+{
+  "answer_9282283d_abs_1": [
+    {
+      "fact": "User has been having trouble falling asleep some nights.",
+      "type": "personal",
+      "entities": []
+    },
+    {
+      "fact": "User has tried journaling and a consistent sleep schedule.",
+      "type": "preference",
+      "entities": [
+        "journaling",
+        "consistent sleep schedule"
+      ]
+    },
+    {
+      "fact": "User is trying to prioritize self-care activities like yoga and meditation.",
+      "type": "preference",
+      "entities": [
+        "yoga",
+        "meditation"
+      ]
+    },
+    {
+      "fact": "User believes that yoga and meditation can help with sleep quality.",
+      "type": "opinion",
+      "entities": [
+        "yoga",
+        "meditation",
+        "sleep quality"
+      ]
+    },
+    {
+      "fact": "User has a therapy session with Dr. Smith coming up soon.",
+      "type": "event",
+      "entities": [
+        "therapy session",
+        "Dr. Smith"
+      ]
+    },
+    {
+      "fact": "User attends therapy sessions every two weeks.",
+      "type": "relationship",
+      "entities": [
+        "therapy sessions"
+      ]
+    },
+    {
+      "fact": "User is looking forward to discussing their progress with Dr. Smith.",
+      "type": "opinion",
+      "entities": [
+        "progress",
+        "Dr. Smith"
+      ]
+    },
+    {
+      "fact": "User has been experiencing anxiety levels.",
+      "type": "personal",
+      "entities": [
+        "anxiety"
+      ]
+    }
+  ],
+  "answer_9282283d_abs_2": [
+    {
+      "fact": "User works from 9 AM to 5 PM, Monday to Friday",
+      "type": "personal",
+      "entities": [
+        "work hours",
+        "Monday",
+        "Friday"
+      ]
+    },
+    {
+      "fact": "User has a weekly yoga class",
+      "type": "event",
+      "entities": [
+        "yoga class"
+      ]
+    },
+    {
+      "fact": "User has bi-weekly dinners with friends",
+      "type": "event",
+      "entities": [
+        "dinner",
+        "friends"
+      ]
+    },
+    {
+      "fact": "User prioritizes self-care activities like meditation and journaling",
+      "type": "preference",
+      "entities": [
+        "self-care",
+        "meditation",
+        "journaling"
+      ]
+    },
+    {
+      "fact": "User's top priority is to manage workload and meet deadlines without burning out",
+      "type": "opinion",
+      "entities": [
+        "workload",
+        "deadlines",
+        "burnout"
+      ]
+    },
+    {
+      "fact": "User struggles to say no to requests from colleagues and friends",
+      "type": "opinion",
+      "entities": [
+        "requests",
+        "colleagues",
+        "friends"
+      ]
+    },
+    {
+      "fact": "User is focusing on setting healthy boundaries",
+      "type": "opinion",
+      "entities": [
+        "healthy boundaries"
+      ]
+    },
+    {
+      "fact": "User had a session with Dr. Smith this week",
+      "type": "event",
+      "entities": [
+        "Dr. Smith"
+      ]
+    }
+  ]
+}

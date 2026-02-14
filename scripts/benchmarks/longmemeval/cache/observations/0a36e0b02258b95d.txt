@@ -1,0 +1,26 @@
+**Observation Log:**
+
+[FACT] User is looking for advice on organizing their kitchen cabinets.  
+[FACT] User has been wiping down the counters and sink after every meal.  
+[CHANGE] User's kitchen cabinets are still a mess despite maintaining cleanliness on counters and sink.  
+[TEMPORAL] Session date is 2023/05/25 (Thu) 12:46.  
+[EVENT] User is about to dedicate 30 minutes to deep cleaning a specific area of their apartment.  
+[ASSISTANT_SAID] Saturday morning decluttering sessions are the best!  
+[ASSISTANT_SAID] Tips provided to maximize kitchen cabinet space include:  
+[ASSISTANT_CREATED] 1. Purge and categorize: Remove everything from cabinets and sort items into categories (e.g., baking supplies, cooking utensils, dinnerware).  
+[ASSISTANT_CREATED] 2. Assign a home: Assign a specific cabinet or shelf for each group of items.  
+[ASSISTANT_CREATED] 3. Use vertical space: Install shelves, baskets, or stackable containers and label them.  
+[ASSISTANT_CREATED] 4. Utilize the back of doors: Use adhesive hooks, baskets, or a pegboard for spices and utensils.  
+[ASSISTANT_CREATED] 5. Store heavy items below: Store heavy items like pots and pans in lower cabinets.  
+[ASSISTANT_CREATED] 6. Keep frequently used items front and center: Store frequently used items in easy-to-reach locations.  
+[ASSISTANT_CREATED] 7. Implement a "first in, first out" system: Store new items behind existing ones.  
+[ASSISTANT_CREATED] 8. Use dividers and inserts: Use dividers to separate items within a cabinet.  
+[ASSISTANT_CREATED] 9. Keep it tidy as you go: Set aside time each day to wipe down shelves.  
+[ASSISTANT_CREATED] 10. Maintain your space: Schedule regular deep cleaning sessions.  
+[ASSISTANT_SAID] Suggested focusing on one cabinet or specific area for the 30-minute deep cleaning session, such as cleaning and organizing the spice cabinet or tackling the "junk drawer."  
+[USER] User is thinking of focusing on reorganizing their utensil drawer today.  
+[USER] User finds their utensil drawer messy and difficult to navigate.  
+[ASSISTANT_SAID] Tips provided for organizing the utensil drawer include:  
+[ASSISTANT_CREATED] 1. Purge and categorize: Sort items into categories (cooking utensils, baking utensils, kitchen gadgets, serving utensils, miscellaneous).  
+[ASSISTANT_CREATED] 2. Use a divider system: Divide the drawer into sections using inserts or dividers.  
+[ASSISTANT_CREATED] 3. Store frequently used items front and center: Place frequently used utensils in easy-to-reach locations.

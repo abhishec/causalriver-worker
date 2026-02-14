@@ -1,0 +1,28 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/28 (Sun) 03:18
+- [EVENT] User is looking for advice on organizing coupons and discounts.
+- [EVENT] User signed up for the loyalty program at CVS and received a $5 off $25 coupon.
+- [EVENT] User used the $5 off $25 coupon on May 25th when purchasing shampoo, conditioner, and a magazine, saving $5.
+- [ASSISTANT_SAID] Suggested creating a coupon binder to organize coupons and discounts.
+- [ASSISTANT_SAID] Recommended categorizing coupons by expiration date, store, or category (e.g., beauty, household).
+- [ASSISTANT_SAID] Advised using a coupon app like RetailMeNot, Coupons.com, or Fetch Rewards to store digital coupons.
+- [ASSISTANT_SAID] Suggested creating a coupon calendar or spreadsheet to track coupons and expiration dates.
+- [ASSISTANT_SAID] Recommended storing digital coupons in a digital file or note-taking app with clear labels and expiration dates.
+- [ASSISTANT_SAID] Advised regularly purging expired or used coupons to prevent clutter.
+- [ASSISTANT_SAID] Suggested keeping receipts for purchases made with coupons in a separate folder or envelope.
+- [ASSISTANT_SAID] Recommended setting reminders for upcoming expiration dates or special deals.
+- [ASSISTANT_SAID] Suggested using a coupon tracking spreadsheet to analyze savings and identify patterns.
+- [ASSISTANT_SAID] Recommended considering a coupon organizer system like a coupon wallet or specialized binder.
+- [PREFERENCE] User likes the idea of creating a coupon binder and categorizing coupons by expiration date and store.
+- [EVENT] User received a 20% off coupon from H&M in April.
+- [ASSISTANT_SAID] Suggested including other discounts, like the 20% off coupon from H&M, in the coupon binder.
+- [ASSISTANT_SAID] Recommended printing out digital discounts or taking screenshots to include in the binder.
+- [ASSISTANT_SAID] Suggested writing down discount codes on index cards or paper to add to the binder.
+- [PREFERENCE] User is considering creating a section in the binder for loyalty program rewards.
+- [EVENT] User has been earning cashback from Ibotta.
+- [ASSISTANT_SAID] Advised including loyalty program rewards in the binder to track earnings and rewards.
+- [ASSISTANT_SAID] Suggested storing receipts in a designated section of the binder, only keeping relevant receipts.
+- [ASSISTANT_SAID] Recommended using a separate folder or envelope for receipts to keep them organized.
+- [ASSISTANT_SAID] Suggested regularly reviewing and purging receipts to avoid clutter.
+- [PREFERENCE] User thinks it's a good idea to store receipts

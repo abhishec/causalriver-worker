@@ -1,0 +1,17 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/24 (Wed) 08:11  
+[ASSISTANT_SAID] The assistant clarified that when using Google Domains as the DNS provider with Certbot, a JSON key file for authentication and a list of domains is needed.  
+[ASSISTANT_SAID] An example format for the `google-config.json` file was provided, including two sets of credentials with their respective domains.  
+[ASSISTANT_SAID] An updated version of the `docker-compose.yml` file was provided, detailing the configuration for the Certbot and Nginx services.  
+[ASSISTANT_SAID] The assistant explained that the `GOOGLE_APPLICATION_CREDENTIALS` environment variable is used by the Certbot container to locate the Google Cloud Platform (GCP) credentials file.  
+[ASSISTANT_SAID] The assistant specified that the `GOOGLE_APPLICATION_CREDENTIALS` environment variable is set to `/etc/letsencrypt/credentials.json` in the `certbot` service definition.  
+[ASSISTANT_SAID] The assistant stated that when Certbot needs to authenticate with GCP to manage DNS records for the DNS-01 challenge, it will use the credentials provided in the specified file.  
+[USER] The user mentioned they are not running GCP, just Google Domains.  
+[ASSISTANT_SAID] The assistant apologized for the confusion and clarified that when using Google Domains, the `GOOGLE_APPLICATION_CREDENTIALS` environment variable does not need to be set.  
+[ASSISTANT_SAID] An updated version of the `docker-compose.yml` file was provided, which mounts the JSON key file for the Google Domains API as a read-only volume in the Certbot container.  
+[ASSISTANT_SAID] The assistant explained that the files served by Nginx are stored in the `/usr/share/nginx/html` directory inside the Nginx container.  
+[ASSISTANT_SAID] The assistant noted that a volume for Nginx's document root was not explicitly mounted in the provided example.  
+[ASSISTANT_SAID] The assistant provided an updated version of the `docker-compose.yml` file that includes a volume for serving custom files through Nginx.  
+[ASSISTANT_SAID] The assistant explained that the new volume mounts the `./html` directory on the host machine to the Nginx container's `/usr/share/nginx/html` directory.  
+[ASSISTANT_SAID] The assistant stated that once the volume is mounted, files can be referenced in the Nginx configuration file using the path `/usr/share/nginx/html` as the document root.

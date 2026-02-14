@@ -1,0 +1,32 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2022/03/02 (Wed) 15:30  
+[EVENT] User is looking for advice on building a fence for their backyard.  
+[EVENT] User is planning to bring Luna home once the fencing and shelter are set up.  
+[PREFERENCE] User wants to ensure the fencing is safe and secure for Luna.  
+[ASSISTANT_SAID] Assistant congratulated the user on preparing their backyard for Luna's arrival.  
+[ASSISTANT_SAID] Assistant recommended looking for fencing materials that are durable and strong to withstand Luna's energy and potential escape attempts.  
+[ASSISTANT_SAID] Assistant suggested a minimum fence height of 6 feet, and 8-10 feet if Luna is a jumper.  
+[ASSISTANT_SAID] Assistant provided material options:  
+- Wooden Fencing: Durable but requires maintenance.  
+- Vinyl Fencing: Low-maintenance, durable, and chew-resistant.  
+- Metal Fencing: Sturdy but may not be aesthetically pleasing.  
+- Composite Fencing: Combines benefits of wood and vinyl.  
+[ASSISTANT_SAID] Assistant advised ensuring gates are sturdy and securely attached, and suggested self-latching gates.  
+[ASSISTANT_SAID] Assistant recommended a mesh size of 2 inches or smaller for mesh-style fences to prevent Luna from slipping through.  
+[ASSISTANT_SAID] Assistant suggested burying the fence 1-2 feet underground to prevent digging.  
+[ASSISTANT_SAID] Assistant mentioned considering an electrical fencing system if concerned about Luna escaping or digging under the fence.  
+[ASSISTANT_SAID] Assistant advised checking local regulations for restrictions on fence types, heights, and materials.  
+[ASSISTANT_SAID] Assistant recommended hiring a professional for fence installation if the user is not experienced.  
+[ASSISTANT_SAID] Assistant emphasized the importance of regular inspection and maintenance of the fence for Luna's safety.  
+[EVENT] User is planning to build a shelter for Luna in their backyard.  
+[PREFERENCE] User wants recommendations on the type of shelter and features it should have.  
+[ASSISTANT_SAID] Assistant stated that a well-designed shelter will provide Luna with a comfortable and safe space.  
+[ASSISTANT_SAID] Assistant recommended the following types of shelters:  
+- Dog House: Traditional option, climate-specific design recommended.  
+- Kennel: Provides additional protection from elements.  
+- Insulated Shelter: Keeps Luna warm in winter and cool in summer.  
+[ASSISTANT_SAID] Assistant provided features to consider for the shelter:  
+1. Size: At least 2-3 square feet of floor space per 10 pounds of body weight.  
+2. Insulation: Use foam insulation, straw, or hay.  
+3. Ventilation

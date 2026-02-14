@@ -1,0 +1,19 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/06/01 (Thu) 11:52
+- [ASSISTANT_SAID] The assistant provided a modified `ManageAPIAccessPage` component example in React that includes a toggle for enabling or disabling sync.
+- [ASSISTANT_SAID] The assistant explained that the `handleToggleSync` function calls the `updateSquareIntegration` API endpoint to update the `syncEnabled` property of the Square integration.
+- [ASSISTANT_SAID] The assistant mentioned that the checkbox for sync is checked if `syncEnabled` is true and unchecked if `syncEnabled` is false.
+- [USER] The user asked if they need to update the MongoDB schema or any other files with the changes.
+- [ASSISTANT_SAID] The assistant confirmed that the `syncEnabled` property needs to be added to the `SquareIntegration` model schema in MongoDB.
+- [ASSISTANT_SAID] The assistant stated that the `createSquareIntegration` and `updateSquareIntegration` API endpoints need to be updated to include the `syncEnabled` property.
+- [ASSISTANT_SAID] The assistant indicated that client-side code interacting with these API endpoints must also be updated to include the `syncEnabled` property in the request payload.
+- [USER] The user requested the assistant to perform the updates.
+- [ASSISTANT_CREATED] The assistant provided an updated `SquareIntegration` schema that includes the `syncEnabled` property with a default value of `true`.
+- [ASSISTANT_CREATED] The assistant provided updated `createSquareIntegration` and `updateSquareIntegration` controller methods to include the `syncEnabled` property in the request body.
+- [ASSISTANT_SAID] The assistant mentioned that the client-side code should be updated to include the `syncEnabled` property in the `SquareIntegration` object.
+- [ASSISTANT_CREATED] The assistant provided an updated `squareIntegrationService.js` file that includes the `syncEnabled` property in the `createSquareIntegration` and `updateSquareIntegration` functions.
+- [ASSISTANT_CREATED] The assistant provided an updated `ManageAPIAccessPage` component that includes the `syncEnabled` property in the `integration` state object and renders a toggle for it.
+- [ASSISTANT_SAID] The assistant explained that the `getSquareIntegration` function fetches the `syncEnabled` property and includes it in the `integration` state object.
+- [ASSISTANT_SAID] The assistant described how the `handleChange` function updates the `syncEnabled` property in the `integration` state object when the user toggles the checkbox.
+- [ASSISTANT_SAID] The assistant noted that the `handleSubmit` function sends an API request to update the Square integration document with the new `syncEnabled` value

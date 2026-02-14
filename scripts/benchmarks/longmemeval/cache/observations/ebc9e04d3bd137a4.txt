@@ -1,0 +1,29 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/24 (Wed) 22:15
+- [FACT] User has been tracking their expenses.
+- [FACT] User has been splurging on luxury brands.
+- [EVENT] User purchased a Drunk Elephant skincare set for $300 at the mall with friends.
+- [ASSISTANT_SAID] The assistant congratulated the user on tracking expenses and recognizing spending patterns.
+- [ASSISTANT_SAID] The assistant provided 10 tips to help the user stay on track with budgeting goals.
+- [ASSISTANT_SAID] Tip 1: Set clear financial goals.
+- [ASSISTANT_SAID] Tip 2: Create a budget based on income and expenses.
+- [ASSISTANT_SAID] Tip 3: Prioritize needs over wants.
+- [ASSISTANT_SAID] Tip 4: Implement the 50/30/20 rule (50% necessities, 30% discretionary spending, 20% savings and debt repayment).
+- [ASSISTANT_SAID] Tip 5: Use the 30-day rule for purchases.
+- [ASSISTANT_SAID] Tip 6: Find affordable alternatives to luxury brands.
+- [ASSISTANT_SAID] Tip 7: Avoid temptation by limiting exposure to overspending situations.
+- [ASSISTANT_SAID] Tip 8: Practice mindful spending by asking specific questions.
+- [ASSISTANT_SAID] Tip 9: Review and adjust budget regularly.
+- [ASSISTANT_SAID] Tip 10: Automate savings with automatic transfers.
+- [USER] User expressed interest in the 50/30/20 rule as a starting point for budgeting.
+- [USER] User asked how to determine what counts as a necessity versus a want.
+- [ASSISTANT_SAID] The assistant provided guidelines to distinguish between necessities and wants.
+- [ASSISTANT_SAID] Necessities include essential expenses like housing, food, transportation, minimum debt payments, insurance, essential household items, and personal care items.
+- [ASSISTANT_SAID] Wants include discretionary expenses like hobbies, travel, luxury items, and entertainment.
+- [USER] User provided examples of necessities (toothpaste and shampoo from Aldi) and a want (Drunk Elephant skincare set).
+- [ASSISTANT_SAID] The assistant categorized the Drunk Elephant skincare set as a want.
+- [USER] User asked about a designer handbag purchased from Gucci a month ago and whether it was a need or a want.
+- [USER] User justified the Gucci purchase as a reward for landing a promotion.
+- [ASSISTANT_SAID] The assistant categorized the Gucci handbag as a want.
+- [ASSISTANT_SAID] The assistant explained that a handbag is not a

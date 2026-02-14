@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/30 (Tue) 05:20
+- [FACT] User lives in an area with low seismic activity.
+- [PREFERENCE] User is interested in building a home and is considering safety measures.
+- [EVENT] User plans to consult with a qualified engineer before building their home.
+- [ASSISTANT_SAID] There are different types of seismic-resistant building designs, including Base Isolation, Damping Systems, Structural Walls, Moment-Resisting Frame, and Buckling-Restrained Braced Frames.
+- [ASSISTANT_SAID] Base Isolation involves placing building foundations on flexible bearings or isolators to reduce seismic forces.
+- [ASSISTANT_SAID] Damping Systems use devices like shock absorbers and viscoelastic dampers to dissipate seismic energy.
+- [ASSISTANT_SAID] Structural Walls are designed with reinforced concrete or steel walls to withstand earthquake forces.
+- [ASSISTANT_SAID] Moment-Resisting Frame consists of rigid frames made of reinforced concrete or steel to resist lateral forces.
+- [ASSISTANT_SAID] Buckling-Restrained Braced Frames use braces made of a special steel alloy to support lateral loads during an earthquake.
+- [ASSISTANT_SAID] Seismic-resistant designs prevent damage during earthquakes by reducing or diverting seismic forces and improving structural integrity.
+- [ASSISTANT_SAID] Some countries have building codes that require new buildings to follow seismic-resistant designs, especially in earthquake-prone areas like California.
+- [ASSISTANT_SAID] Not all countries have mandatory seismic-resistant building codes, leaving it up to owners or designers to choose whether to use these designs.
+- [ASSISTANT_SAID] Incorporating seismic-resistant designs may increase construction costs, which could lead some owners or builders to opt out if not required by regulations.
+- [ASSISTANT_SAID] Seismic-resistant designs can improve safety during earthquakes and other natural disasters.
+- [ASSISTANT_SAID] It is advisable to incorporate seismic-resistant designs even in low seismic activity areas due to the potential for unexpected earthquakes.
+- [ASSISTANT_SAID] Seismic-resistant designs can also increase the resale value of a building and provide peace of mind to occupants.
+- [ASSISTANT_SAID] Consulting with a qualified engineer is recommended to determine the necessity of seismic-resistant designs for a specific location.

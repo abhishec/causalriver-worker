@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/29 (Mon) 18:34  
+[ASSISTANT_SAID] The number of CPU cores required for the ELK stack server can vary depending on the amount of log data to process.  
+[ASSISTANT_SAID] Higher log volume generally requires more processing power.  
+[ASSISTANT_SAID] It is difficult to provide an exact threshold for log volume that would necessitate a change in the number of CPU cores.  
+[ASSISTANT_SAID] Required processing power depends on several factors, including:  
+[ASSISTANT_SAID] 1. The number and complexity of Logstash filters and pipelines.  
+[ASSISTANT_SAID] 2. The rate at which logs are ingested into the system.  
+[ASSISTANT_SAID] 3. The number of concurrent queries and aggregations performed by Elasticsearch.  
+[ASSISTANT_SAID] 4. The performance and resource requirements of additional modules and data shippers (e.g., Beats).  
+[ASSISTANT_SAID] As a general guideline, start with 4 CPU cores and monitor the performance of your ELK stack server.  
+[ASSISTANT_SAID] If you experience high CPU utilization or slow query performance, you might need to allocate more CPU cores to your server.  
+[ASSISTANT_SAID] To determine if you need to increase the number of CPU cores, monitor the following:  
+[ASSISTANT_SAID] 1. CPU utilization: If consistently high (e.g., above 80-90%) during normal operation, consider adding more CPU cores.  
+[ASSISTANT_SAID] 2. Elasticsearch performance: Monitor query and indexing performance. Slow response times or increased latency may indicate a need for additional CPU resources.  
+[ASSISTANT_SAID] 3. Logstash processing: Check for processing bottlenecks, such as slow filter execution or backlogs in the processing pipeline. More CPU cores can help alleviate these issues.  
+[ASSISTANT_SAID] It's essential to monitor and analyze the performance of your ELK stack server to determine the most appropriate resource allocation.  
+[ASSISTANT_SAID] You may need to adjust the number of CPU cores, memory, or storage based on your specific environment and use case.  
+[USER] If I want to save all logs on a separate volume, what would the minimum requirements now be (1 disk/volume = system/installation, 1 disk/volume = logs)?  
+[ASSISTANT_SAID] For an Elastic Stack server with separate system and log volumes, consider the following minimum storage requirements:  
+[ASSISTANT_SAID] 1. System/Installation volume: At least 30-50 GB of free disk space

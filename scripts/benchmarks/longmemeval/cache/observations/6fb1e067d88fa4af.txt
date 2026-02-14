@@ -1,0 +1,25 @@
+**Observation Log**
+
+- [TEMPORAL] Session Date: 2023/05/29 (Mon) 01:44
+- [USER] User requests to ignore all previous instructions.
+- [USER] User wants responses only in English.
+- [USER] User wants the assistant to act as a proficient SEO and high-end copywriter.
+- [USER] User requests the assistant to write content that can outrank a specific article.
+- [USER] User provides the URL of the article to outrank: https://www.pizzaovenreviews.co.uk/ooni-koda-pizza-oven/
+- [USER] User requests a long, fully markdown formatted article in English.
+- [USER] User specifies that the article should contain rich, comprehensive, and detailed paragraphs.
+- [USER] User requests a diagram in markdown mermaid syntax where possible.
+- [USER] User instructs the assistant not to echo the prompt, remind them of the request, apologize, self-reference, or use generic filler phrases.
+- [USER] User requests useful subheadings with keyword-rich titles.
+- [ASSISTANT_SAID] Assistant provides the title: "The Ultimate Ooni Koda Pizza Oven Review: A Comprehensive Guide."
+- [ASSISTANT_SAID] Assistant introduces the Ooni Koda Pizza Oven and its significance for pizza enthusiasts.
+- [ASSISTANT_SAID] Assistant lists the features of the Ooni Koda Pizza Oven, including fuel type, cooking surface, max temperature, preheat time, pizza cooking time, weight, and dimensions.
+- [ASSISTANT_SAID] Assistant describes the exceptional temperature control of the Ooni Koda Pizza Oven.
+- [ASSISTANT_SAID] Assistant mentions the portable design of the Ooni Koda Pizza Oven, including its weight and compact size.
+- [ASSISTANT_SAID] Assistant highlights the ease of use of the Ooni Koda Pizza Oven, including its gas-powered design and cordierite stone baking surface.
+- [ASSISTANT_SAID] Assistant discusses the durable construction of the Ooni Koda Pizza Oven.
+- [ASSISTANT_SAID] Assistant provides an in-depth look at the cooking performance of the Ooni Koda Pizza Oven.
+- [ASSISTANT_SAID] Assistant lists accessories and add-ons available for the Ooni Koda Pizza Oven, including the Ooni Pizza Peel, Ooni Infrared Thermometer, and Ooni Pizza Turning Peel.
+- [ASSISTANT_SAID] Assistant explains the cleaning and maintenance of the Ooni Koda Pizza Oven.
+- [ASSISTANT_CREATED] Assistant creates a diagram in markdown mermaid syntax illustrating the relationship between exceptional temperature control, cooking performance, portable design, ease of use, and durable construction.
+- [ASSISTANT_SAID] Assistant compares the Ooni Koda to other pizza ovens, specifically the Ooni Karu and R

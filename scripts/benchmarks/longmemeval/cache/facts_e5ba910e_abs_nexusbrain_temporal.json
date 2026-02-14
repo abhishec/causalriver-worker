@@ -1,0 +1,111 @@
+{
+  "answer_e49ed9d3_abs_2": [
+    {
+      "fact": "User is considering getting a new laptop.",
+      "type": "preference",
+      "entities": [
+        "laptop",
+        "Dell XPS 13"
+      ]
+    },
+    {
+      "fact": "User recently purchased a new phone case.",
+      "type": "event",
+      "entities": [
+        "phone case",
+        "Samsung Galaxy S22",
+        "Case-Mate",
+        "$30"
+      ]
+    },
+    {
+      "fact": "User is satisfied with the performance of the new phone case.",
+      "type": "opinion",
+      "entities": [
+        "phone case",
+        "Samsung Galaxy S22"
+      ]
+    },
+    {
+      "fact": "User recently got a Samsung Galaxy Watch Active2.",
+      "type": "event",
+      "entities": [
+        "Samsung Galaxy Watch Active2"
+      ]
+    },
+    {
+      "fact": "User is exploring the features of the Samsung Galaxy Watch Active2.",
+      "type": "preference",
+      "entities": [
+        "Samsung Galaxy Watch Active2"
+      ]
+    }
+  ],
+  "answer_e49ed9d3_abs_1": [
+    {
+      "fact": "User is considering buying a new laptop.",
+      "type": "preference",
+      "entities": [
+        "laptop"
+      ]
+    },
+    {
+      "fact": "User is eyeing the Dell XPS 13.",
+      "type": "preference",
+      "entities": [
+        "Dell XPS 13"
+      ]
+    },
+    {
+      "fact": "User recently got a new pair of Sony WH-1000XM4 headphones.",
+      "type": "personal",
+      "entities": [
+        "Sony WH-1000XM4 headphones"
+      ]
+    },
+    {
+      "fact": "User uses the headphones for their daily commute.",
+      "type": "personal",
+      "entities": [
+        "daily commute"
+      ]
+    },
+    {
+      "fact": "User spent $378 on the headphones.",
+      "type": "personal",
+      "entities": [
+        "$378"
+      ]
+    },
+    {
+      "fact": "User believes the headphones have been a game-changer.",
+      "type": "opinion",
+      "entities": [
+        "headphones"
+      ]
+    },
+    {
+      "fact": "User is looking for a laptop that can handle video editing software.",
+      "type": "preference",
+      "entities": [
+        "video editing software"
+      ]
+    },
+    {
+      "fact": "User is concerned about the limited ports on the Dell XPS 13.",
+      "type": "opinion",
+      "entities": [
+        "limited ports",
+        "Dell XPS 13"
+      ]
+    },
+    {
+      "fact": "User is considering a laptop with more ports, even if it means sacrificing some portability.",
+      "type": "preference",
+      "entities": [
+        "more ports",
+        "portability"
+      ]
+    }
+  ]
+}

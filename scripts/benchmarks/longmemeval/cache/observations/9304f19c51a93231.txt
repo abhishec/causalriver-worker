@@ -1,0 +1,45 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/25 (Thu) 11:55
+
+[ASSISTANT_SAID] The first validation check when entering an order item is to check that the item is available on the menu.
+
+[ASSISTANT_SAID] A validation check on the total cost of a lunch order includes ensuring the cost does not exceed the daily spending limit set by the parent.
+
+[ASSISTANT_SAID] Another validation check on the total cost is to check if the credit balance of the account is sufficient for payment.
+
+[FACT] The data structure for IszCool Solutions will initially store parent and student details before parents create their first order.
+
+[ASSISTANT_SAID] The data structure that IszCool Solutions should use is a hash table.
+
+[ASSISTANT_SAID] A hash table allows for fast and efficient storage and retrieval of data, using key-value pairs.
+
+[ASSISTANT_SAID] Keys in the hash table would be unique identifiers like StudentID or parent's email, while values would be associated data like parent's name or credit card number.
+
+[ASSISTANT_SAID] Hash tables have a data manipulation time complexity of O(1), making them fast for real-time applications.
+
+[ASSISTANT_SAID] The other two control structures are selection control structure and iteration control structure.
+
+[ASSISTANT_SAID] The selection control structure allows the software to make decisions based on conditions, such as rejecting an order that exceeds the daily limit.
+
+[ASSISTANT_SAID] The iteration control structure allows the software to repeat instructions, such as checking each item in an order.
+
+[ASSISTANT_SAID] The selection control structure is most appropriate for editing a student's order because it allows staff to make decisions based on conditions.
+
+[ASSISTANT_SAID] Soula's approach to internal documentation is more acceptable because it makes code more readable and maintainable.
+
+[ASSISTANT_SAID] Two characteristics of internal documentation are clarity and completeness.
+
+[ASSISTANT_SAID] Clarity means the documentation should be clear and easy to understand, while completeness means it should cover all aspects of the code.
+
+[ASSISTANT_SAID] The test table for the 'User purchase' feature includes various scenarios for accountBalance, dailyLimit, and totalPurchase.
+
+[ASSISTANT_CREATED] The test table includes the following entries:
+| accountBalance | dailyLimit | totalPurchase | Output |
+| --- | --- | --- | --- |
+| 20 | 15 | 20 | You have exceeded your daily limit. |
+| 20 | 15 | 10 | 10 |
+| 20 | 15 | 5 | 15 |
+| 20 | 15 | 15 | 5 |
+
+[ASSISTANT_SAID] A physical security control is to limit access to the development

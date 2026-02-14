@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/21 (Sun) 21:37  
+[FACT] User is planning to set up a budget for their stay in Munich.  
+[FACT] User is paying €800 per month for rent.  
+[PREFERENCE] User thinks €800 for rent is a bit steep but worth it for the location in the city center.  
+[ASSISTANT_SAID] Rent should be categorized under "Housing" rather than "Living Expenses."  
+[ASSISTANT_SAID] "Housing" includes costs related to accommodation, such as rent, utilities, and other expenses like internet or furniture.  
+[ASSISTANT_SAID] "Living Expenses" cover day-to-day costs like food, transportation, entertainment, and miscellaneous expenses.  
+[ASSISTANT_SAID] User should allocate around 30-40% of their monthly budget for food, which would be around €240-320 per month based on their rent.  
+[ASSISTANT_SAID] Numbeo estimates that a meal at a mid-range restaurant costs around €15-20, and a liter of milk costs around €0.80.  
+[ASSISTANT_SAID] Expatistan suggests that a monthly grocery basket for one person could cost around €300-400.  
+[ASSISTANT_SAID] Suggested food budget breakdown: Groceries: €200-300, Eating out: €100-200, Snacks and incidentals: €50-100.  
+[ASSISTANT_SAID] User should allocate around 10-20% of their monthly budget for transportation, which would be around €80-160 per month based on their rent.  
+[ASSISTANT_SAID] MVV (Munich Transportation Association) provides information on public transportation costs; a monthly pass can cost around €68-130.  
+[ASSISTANT_SAID] Numbeo estimates that a one-way ticket costs around €2.90, and a monthly pass costs around €76.  
+[ASSISTANT_SAID] Suggested transportation budget breakdown: Monthly pass: €68-130, Occasional taxis or ride-hailing: €20-50, Bike rental or maintenance: €20-50.  
+[PREFERENCE] User is considering getting a semester ticket for public transportation, which costs around €130 per semester.  
+[ASSISTANT_SAID] Pros of a semester ticket include cost-effectiveness, convenience, and flexibility.  
+[ASSISTANT_SAID] Semester ticket costs €130 per semester, which is around €65 per month.  
+[ASSISTANT_SAID] User might not need to use public transportation frequently but having a semester ticket can be useful for occasional longer trips, late-night travel, and bad weather.  
+[ASSISTANT_SAID] User should check the valid zones for the semester

@@ -1,0 +1,36 @@
+{
+  "answer_986de8c3": [
+    {
+      "fact": "User is considering pursuing a Master's degree in Data Science",
+      "type": "preference",
+      "entities": [
+        "Master's degree",
+        "Data Science"
+      ]
+    },
+    {
+      "fact": "User has narrowed down their options to Stanford, Berkeley, and Carnegie Mellon",
+      "type": "preference",
+      "entities": [
+        "Stanford",
+        "Berkeley",
+        "Carnegie Mellon"
+      ]
+    },
+    {
+      "fact": "User is leaning towards Stanford for their Master's degree",
+      "type": "preference",
+      "entities": [
+        "Stanford"
+      ]
+    },
+    {
+      "fact": "User is concerned about the cost of attending Stanford",
+      "type": "opinion",
+      "entities": [
+        "cost",
+        "Stanford"
+      ]
+    }
+  ]
+}

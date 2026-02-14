@@ -1,0 +1,34 @@
+**Observation Log:**
+
+[FACT] User is trying to organize coupons and receipts.  
+[FACT] User shops at Target pretty frequently, approximately every other week.  
+[FACT] User buys household items, toiletries, and sometimes clothes for their kids.  
+[FACT] User has been using the Cartwheel app from Target for a few weeks.  
+[FACT] User has saved around $20 total on various household items using the Cartwheel app.  
+[FACT] User redeemed a $5 coupon on coffee creamer last Sunday.  
+[FACT] User prefers to keep store loyalty cards in a separate section of their binder.  
+[FACT] User has an email inbox where they receive coupons and offers.  
+
+[PREFERENCE] User likes the idea of using a binder with labeled sections for organizing coupons and receipts.  
+[PREFERENCE] User finds the Cartwheel app user-friendly and easy to navigate.  
+[PREFERENCE] User appreciates the organization of offers by category in the Cartwheel app.  
+[PREFERENCE] User wishes the Cartwheel app would add a feature to sort offers by expiration date.  
+[PREFERENCE] User feels overwhelmed by the number of notifications from the Cartwheel app and prefers customizable notification options.  
+[PREFERENCE] User would like to receive notifications only for offers that are expiring soon or for specific categories.  
+[PREFERENCE] User thinks customizable notifications would enhance the Cartwheel app's user experience.  
+
+[EVENT] User has been using the Cartwheel app for a few weeks.  
+[EVENT] User redeemed a $5 coupon on coffee creamer last Sunday.  
+[EVENT] User shops at Target every other week.  
+
+[CHANGE] User has saved around $20 total on various household items using the Cartwheel app.  
+
+[TEMPORAL] Session date is 2023/05/29 (Mon) at 13:28.  
+[TEMPORAL] User redeemed a $5 coupon last Sunday, which would be on 2023/05/28.  
+
+[ASSISTANT] Assistant provided tips for coupon organization, including using a binder with labeled sections, color-coding sections, using clear plastic sleeves, keeping a "To-Use" section, and regularly reviewing and purging expired items.  
+[ASSISTANT] Assistant suggested stacking Cartwheel offers with other discounts for additional savings.  
+[ASSISTANT] Assistant recommended signing up for the Target RedCard for 5% off all purchases.  
+[ASSISTANT] Assistant suggested creating a specific email folder for coupons and offers to stay organized.  
+[ASSISTANT] Assistant noted the potential for Cartwheel to implement customizable notification options based on user feedback.  
+[ASSISTANT] Assistant mentioned the "Expiration Date" filter available on the Cartwheel website for planning shopping trips.

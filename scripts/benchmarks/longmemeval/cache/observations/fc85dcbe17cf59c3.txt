@@ -1,0 +1,14 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/23 (Tue) 05:19
+- [FACT] User is interested in Hong Kong/Cantonese style home cooked meals.
+- [PREFERENCE] User is looking for home-style meals specifically, not restaurant meals.
+- [ASSISTANT_SAID] Assistant provided a list of 10 home-style Cantonese dishes: 蠔油菜心, 蒸水蛋, 蒸魚, 柱侯牛腩, 豉油雞, 腐乳通菜, 鹹蛋蒸肉餅, 炒蛋炆蝦仁, 煎釀茄子, 蒜蓉粉絲蒸扇貝, 酥炸雞翼, 紅燒牛腩, 清炒芥蘭, 炆排骨, 煮豆腐, 炒青菜, 煲仔飯.
+- [FACT] User is familiar with meal kit delivery services like Blue Apron and Hello Fresh.
+- [PREFERENCE] User is interested in understanding why meal kit services are popular and what their popular dishes are.
+- [ASSISTANT_SAID] Assistant explained that meal kit services are popular for their convenience, pre-portioned ingredients, and time-saving aspects.
+- [ASSISTANT_SAID] Assistant provided a list of 10 popular dishes from Blue Apron and Hello Fresh: Harissa Shrimp & Carrot Tagine with Couscous, Chickpea-Powered Mediterranean Couscous Bowl, Chicken Tinga Tacos with Avocado & Radish Salsa, Garlic-Parmesan Crusted Salmon with Roasted Potatoes and Green Beans, Korean-Style Pork & Rice Cakes with Baby Bok Choy & Carrots, Creamy Lemon Butter Chicken with Garlic and Herb Rice, Seared Cod & Miso Udon Noodles with Baby Bok Choy & Soft-Boiled Eggs, Balsamic Fig Chicken with Roasted Green Beans and Couscous, Pan-Seared Steaks & Garlic Mashed Potatoes with Roasted Broccoli, Sizzling Prawn & Chorizo Spaghetti with Tomato Sauce.
+- [EVENT] User is launching a meal kit service for the Hong Kong market.
+- [PREFERENCE] User notes that Hong Kongers are primarily used to Cantonese style home cooked meals but can also be adventurous eaters due to international influences.
+- [PREFERENCE] User wants the service to focus on quick and easy meals with simplified versions of everyday staples and encourage exploration of new techniques, flavors, ingredients, and twists.
+- [ASSISTANT_CREATED] Assistant created a list of 15 Cantonese-style home cooked meal kit dishes with creative twists: 蒜茸牛油炒蝦仁 (Garlic Butter Shrimp), 金沙脆皮雞 (Crispy Salted Egg Chicken), 豉汁蒸魚 (

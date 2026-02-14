@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/25 (Thu) 07:04  
+[USER] User is working on a software development project.  
+[USER] User feels overwhelmed with managing data for their software development project.  
+[ASSISTANT_SAID] DOORS allows the creation of custom attributes that match specific data elements required for a particular project.  
+[ASSISTANT_SAID] DOORS allows the creation of custom views to display and edit data in different ways to suit specific project needs.  
+[ASSISTANT_SAID] DOORS provides an open API that allows the creation of plug-ins to enhance its functionality or integrate with other tools.  
+[ASSISTANT_SAID] DOORS allows the creation of customized workflows that follow specific processes required for a particular project.  
+[ASSISTANT_SAID] DOORS allows the creation of customized reports with specific data filters and sorting options.  
+[ASSISTANT_SAID] DOORS allows the customization of its user interface to match the specific needs of a particular project.  
+[ASSISTANT_SAID] DOORS allows the customization of permissions and access controls to suit the specific security requirements of a particular project.  
+[ASSISTANT_SAID] Custom attributes and views are great starting points for improving organization and efficiency in managing software development project data.  
+[ASSISTANT_SAID] Custom attributes can help in organizing and managing project-specific information.  
+[ASSISTANT_SAID] Custom views can help team members focus on important information and increase productivity.  
+[ASSISTANT_SAID] Adding plug-ins to DOORS can extend its functionality for software development-specific needs like version control and requirement traceability.  
+[ASSISTANT_SAID] Customized workflows can improve team collaboration and streamline workflows.  
+[ASSISTANT_SAID] Customized reports can provide an overview of software development project status and process, helping with monitoring progress and identifying potential issues.  
+[ASSISTANT_SAID] Customizing the user interface can simplify and tailor user navigation and interaction with DOORS for software development project-specific requirements.  
+[ASSISTANT_SAID] Customizing permissions and access controls can ensure that only authorized team members have access to sensitive software development project information.  
+[USER] User plans to start with creating some custom attributes and views to better organize their software development project data.  
+[ASSISTANT_SAID] DOORS allows you to create baselines, which are snapshots of the project at a specific point in time, to track changes in requirements and their status over time.  
+[ASSISTANT_SAID] Integrating DOORS with version control tools like Git or SVN can enhance tracking of changes.  
+[ASSISTANT_SAID] DOORS allows tracing links between requirements, design artifacts, and code to track specific changes.  
+[ASSIST

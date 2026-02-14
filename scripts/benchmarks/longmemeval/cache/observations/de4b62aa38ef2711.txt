@@ -1,0 +1,82 @@
+**Observation Log:**
+
+[FACT] User recently graduated.
+
+[PREFERENCE] User is looking for a job that matches their skills and interests.
+
+[ASSISTANT_SAID] Assistant congratulated the user on their recent graduation and offered to help with tailoring their resume and cover letter.
+
+[ASSISTANT_CREATED] Assistant provided a list of resume tips, including:
+1. Targeted keywords
+2. Tailor your objective
+3. Emphasize achievements
+4. Quantify your experience
+5. Highlight transferable skills
+6. Keep it concise
+7. Customize your sections
+
+[ASSISTANT_CREATED] Assistant provided a list of cover letter tips, including:
+1. Address the hiring manager
+2. Start with a strong opening
+3. Show, don't tell
+4. Demonstrate your enthusiasm
+5. Keep it concise
+6. Use active language
+7. Proofread
+
+[ASSISTANT_SAID] Assistant suggested additional tips for job searching, including researching the company, using action verbs, getting feedback, and tailoring application materials for each job.
+
+[PREFERENCE] User is trying to get a sense of what kinds of jobs are available in their field.
+
+[ASSISTANT_SAID] Assistant provided information on common job titles and industries for Business Administration graduates, including:
+- Management Trainee
+- Business Analyst
+- Operations Manager
+- Marketing Coordinator
+- Financial Analyst
+- Human Resources Generalist
+- Project Manager
+- Supply Chain Manager
+- Business Development Representative
+- Management Consultant
+
+[ASSISTANT_SAID] Assistant listed industries for Business Administration graduates, including:
+- Finance and Banking
+- Healthcare
+- Retail and E-commerce
+- Manufacturing and Logistics
+- Technology and IT
+- Hospitality and Tourism
+- Non-Profit and Government
+- Real Estate
+- Energy and Utilities
+- Consulting
+
+[PREFERENCE] User is particularly interested in the finance and banking industry.
+
+[ASSISTANT_SAID] Assistant provided information on types of roles available in finance and banking, including:
+- Investment Banking
+- Commercial Banking
+- Asset Management
+- Wealth Management
+- Risk Management
+- Financial Planning and Analysis (FP&A)
+- Operations and Technology
+
+[ASSISTANT_SAID] Assistant described typical career progression in finance and banking, including:
+1. Entry-Level Roles
+2. Mid-Level Roles
+3. Senior Roles
+4. Executive Roles
+
+[ASSISTANT_SAID] Assistant listed skills and qualifications for finance and banking roles, including a Bachelor's degree in Finance, professional certifications, strong analytical skills, and proficiency in financial modeling.
+
+[PREFERENCE] User is interested in the Financial Planning and Analysis (FP&A) role.
+
+[ASSISTANT_SAID] Assistant provided information on daily responsibilities of a Financial Analyst in FP&A, including:
+1. Financial Modeling
+2. Data Analysis
+3. Reporting and Dashboards
+4. Forecasting and Budgeting
+
+[TEMPORAL] Session Date:

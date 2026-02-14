@@ -1,0 +1,44 @@
+**Observation Log:**
+
+- [FACT] User is planning a move to Vancouver for their master's program.
+- [FACT] User is looking for affordable health insurance options.
+- [TEMPORAL] Session Date: 2023/03/06 (Mon) 02:30
+- [ASSISTANT_SAID] User is eligible for MSP (Medical Services Plan) as an international student in British Columbia, which covers basic medical services for around $75 CAD per month.
+- [ASSISTANT_SAID] User might be eligible for a reduced rate or exemption from the MSP premium.
+- [ASSISTANT_SAID] Recommended private health insurance options include:
+  - **Guard.me:** Offers a range of plans with varying levels of coverage.
+  - **Allianz Global Assistance:** Offers a student plan with flexible coverage options and a 24/7 emergency hotline.
+  - **Ingle International:** Offers a student plan with coverage for medical, dental, and vision care.
+  - **Student.com:** Offers a health insurance plan specifically designed for international students.
+- [ASSISTANT_SAID] Suggested considerations for health insurance:
+  - Coverage duration
+  - Pre-existing conditions
+  - Deductible and co-pay amounts
+  - Network providers
+  - Additional coverage options
+- [ASSISTANT_SAID] Recommended tips for finding health insurance:
+  - Compare policies
+  - Read reviews
+  - Seek advice from the university's international student office or a licensed insurance broker.
+- [FACT] User is concerned about finding a place to live in Vancouver.
+- [ASSISTANT_SAID] Suggested options for finding a shared apartment include:
+  - **Craigslist:** Popular but requires caution for scams.
+  - **Facebook Groups:** Such as "Vancouver Room Rentals" or "UBC Student Housing."
+  - **Kijiji:** A Canadian online classifieds site.
+  - **PadMapper:** A map-based apartment finder.
+  - **Student.com:** Offers accommodation booking for students.
+- [ASSISTANT_SAID] Suggested options for homestay include:
+  - **Homestay Network:** Connects international students with local families.
+  - **Canada Homestay Network:** Offers a homestay program for international students.
+  - **UBC Homestay:** A program offered by the University of British Columbia.
+- [ASSISTANT_SAID] Recommended tips for finding a place to live:
+  - Start early
+  - Be prepared with necessary documents
+  - Visit in person if possible
+  - Read reviews
+  - Budget accordingly
+- [TEMPORAL] User submitted their application to UBC on February 10th.
+- [ASSISTANT_SAID] Suggested actions while waiting for UBC application results:
+  - Track application status using the UBC online portal.
+  - Prepare for next steps if accepted.
+  - Research UBC resources.

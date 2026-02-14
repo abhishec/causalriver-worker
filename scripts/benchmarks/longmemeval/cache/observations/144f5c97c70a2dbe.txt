@@ -1,0 +1,24 @@
+**Observation Log:**
+
+- [EVENT] User is planning a trip to visit family for the holidays.
+- [EVENT] User needs to get their passport renewed.
+- [PREFERENCE] User has been loving their new apartment.
+- [CHANGE] User has moved into a new apartment three weeks ago.
+- [TEMPORAL] User has been enjoying a shorter commute, which has given them extra time in the morning.
+- [TEMPORAL] User has been getting into a regular exercise routine since rejoining their old gym last month.
+- [EVENT] User is trying to incorporate more walking into their daily routine.
+- [EVENT] User is thinking about taking a road trip next spring to visit some national parks in the western US.
+- [PREFERENCE] User has always wanted to see the Grand Canyon and Yellowstone.
+- [ASSISTANT_SAID] The process of renewing a U.S. passport typically takes 6-8 weeks, with expedited service available for an additional fee, taking 2-3 weeks.
+- [ASSISTANT_SAID] User can renew their passport if it's valid for 9 years or less or if it's been expired for less than 15 years.
+- [ASSISTANT_SAID] User needs to fill out Form DS-82, which is available on the U.S. Department of State's website.
+- [ASSISTANT_SAID] Required documents for passport renewal include: current passport, completed Form DS-82, a photocopy of ID, and one recent color photograph.
+- [ASSISTANT_SAID] The application fee for a U.S. passport book is currently $110 for adults and $80 for children.
+- [ASSISTANT_SAID] User can track their application status online or by calling the National Passport Information Center at 1-877-487-2778.
+- [ASSISTANT_SAID] Tips for staying motivated in exercise include setting specific goals, creating a routine, finding enjoyable activities, varying the routine, tracking progress, rewarding oneself, and getting accountability.
+- [ASSISTANT_SAID] Tips for avoiding burnout in exercise include listening to the body, starting slow, prioritizing recovery, taking rest days, staying hydrated, getting enough sleep, and seeking professional guidance.
+- [ASSISTANT_SAID] Recommendations for walking routes include exploring local parks, neighborhood exploration, waterfront walks, and historic tours.
+- [ASSISTANT_SAID] Walking apps recommended include MapMyWalk, Walkmeter, AllTrails, Google Maps, Walkify, and Charity Miles.
+- [ASSISTANT_SAID] Tips for planning a road trip include determining the itinerary, using mapping tools, considering the season, and looking for scenic loops.
+- [ASSISTANT_SAID] Recommendations for accommodations include booking early, mixing and matching types of stays, looking for alternative accommodations, and packing a portable camping setup.
+- [ASSIST

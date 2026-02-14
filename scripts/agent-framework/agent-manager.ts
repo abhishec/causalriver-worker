@@ -126,7 +126,10 @@ export class AgentManager {
   async recordRun(result: AgentRunResult): Promise<void> {
     try {
       await this.supabase.from('ai_agent_activity').insert({
-        organization_id: this.defaultConfig.organizationId || '00000000-0000-4000-a000-000000000001',
+        organization_id: this.defaultConfig.organizationId || (() => {
+          console.warn('[AgentManager] No organizationId in config, using CORE_ORG_ID fallback');
+          return '00000000-0000-4000-a000-000000000001';
+        })(),
         agent_type: result.agentName,
         action_type: 'training_run',
         input_summary: `v${result.agentVersion}: ${result.stages.map(s => s.name).join(' → ')}`,

@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/23 (Tue) 12:35
+- [PREFERENCE] User is craving Japanese food and is experimenting with making their own ramen at home.
+- [EVENT] User recently tried an amazing Dragon Roll at a new sushi spot downtown.
+- [FACT] The Dragon Roll contains tempura shrimp, avocado, and eel sauce.
+- [ASSISTANT_SAID] Eel sauce is a sweet soy sauce-based sauce commonly used in Japanese cuisine.
+- [ASSISTANT_SAID] Suggested ramen variations: Tonkotsu Ramen, Shio Ramen, Miso Ramen, Spicy Miso Ramen, Vegan Ramen.
+- [ASSISTANT_CREATED] Provided a basic ramen broth recipe with the following ingredients: 4 cups chicken or pork bones (or a combination), 2 cups water, 2 tablespoons soy sauce, 2 tablespoons sake (optional), 2 tablespoons mirin, 1 onion (sliced), 2 cloves garlic (minced), 1 piece ginger (sliced), scallions (for garnish).
+- [ASSISTANT_SAID] Instructions for the ramen broth recipe include roasting bones, combining ingredients, simmering, and straining the broth.
+- [PREFERENCE] User is interested in trying Tonkotsu Ramen and loves the idea of a rich, creamy pork bone broth.
+- [ASSISTANT_SAID] Tips to make the Tonkotsu broth richer and creamier: longer simmering time (12-24 hours), using a variety of pork bones, roasting bones, using aromatics, adding umami (kombu or shiitake), straining and clarifying, and adding richness with fat.
+- [PREFERENCE] User is curious about Japanese cooking classes in their area to learn more about Japanese cuisine and cooking techniques.
+- [ASSISTANT_SAID] Suggested options for finding Japanese cooking classes: online search, cooking schools, Japanese cultural centers, Meetup groups, and online resources like YouTube.
+- [PREFERENCE] User has been experimenting with making their own ramen and thinks the Tonkotsu Ramen recipe is a great starting point.
+- [ASSISTANT_SAID] Recommendations for good quality ramen noodles include Hakata-style noodles, Japanese brands like Nong Shim, Sapporo Ichiban, and Indomie, fresh noodles from Asian markets, artisanal noodles, and making homemade noodles.
+- [ASSISTANT_SAID] Characteristics of good Tonkotsu Ramen noodles: thickness, texture, and flavor.
+- [PREFERENCE] User is open to trying different brands and options for ramen noodles.
+- [PREFERENCE] User recently tried the Dragon Roll and discovered it as their new favorite roll.
+- [ASSISTANT_SAID] The Dragon Roll is a popular roll that features tempura shrimp, avocado, and eel

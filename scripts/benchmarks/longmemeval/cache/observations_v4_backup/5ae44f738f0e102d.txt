@@ -1,0 +1,25 @@
+**Observation Log:**
+
+- [FACT] User is considering pursuing a Master's degree in Data Science.
+- [FACT] User has narrowed down their options to Stanford, Berkeley, and Carnegie Mellon.
+- [TEMPORAL] Session date is 2023/05/20 (Sat) at 05:42.
+- [PREFERENCE] User is leaning towards Stanford for their Master's degree.
+- [FACT] User has been working in the tech industry for a while.
+- [FACT] User completed their undergraduate degree in Computer Science from UCLA.
+- [PREFERENCE] User is concerned about the cost of attending Stanford.
+- [ASSISTANT] Stanford University offers a Master of Science in Data Science (MS-DS) with a program duration of 12-18 months, interdisciplinary curriculum, and strong emphasis on practical applications and collaboration with industry partners.
+- [ASSISTANT] Stanford's strengths include its location in Silicon Valley, renowned faculty, and entrepreneurial resources.
+- [ASSISTANT] Stanford's admissions are highly competitive with an acceptance rate around 5-6%.
+- [ASSISTANT] Stanford is one of the most expensive universities in the US.
+- [ASSISTANT] University of California, Berkeley offers a Master of Science in Data Science (MS-DS) with a program duration of 12-24 months and a strong reputation in computer science, statistics, and engineering.
+- [ASSISTANT] Berkeley's strengths include diverse student body, research opportunities, and more affordable tuition compared to Stanford.
+- [ASSISTANT] Berkeley's admissions are competitive with an acceptance rate around 10-12%.
+- [ASSISTANT] Carnegie Mellon University offers a Master of Science in Data Science (MS-DS) with a program duration of 16-24 months and a strong focus on AI and machine learning research.
+- [ASSISTANT] Carnegie Mellon's strengths include strong industry connections and an interdisciplinary approach integrating technical skills with policy and management.
+- [ASSISTANT] Carnegie Mellon’s location may be less desirable for those seeking a West Coast experience.
+- [ASSISTANT] Average salary for a software engineer in San Francisco is around $144,000 - $164,000 per year, with ranges from $110,000 to over $200,000 depending on experience and role.
+- [ASSISTANT] Stanford offers limited merit-based scholarships, teaching assistantships (TA), and research assistantships (RA) that are highly competitive.
+- [ASSISTANT] Berkeley offers merit-based scholarships, teaching assistantships (GSI), and research assistantships (GSR) that are competitive.
+- [ASSISTANT] Carnegie Mellon offers limited merit-based scholarships, teaching assistantships (TA), and research assistantships (RA) that are competitive.
+- [PREFERENCE] User is considering taking out loans to finance their education.
+- [ASSISTANT] Suggested factors to consider when deciding to take out loans include increased earning potential, investment in oneself

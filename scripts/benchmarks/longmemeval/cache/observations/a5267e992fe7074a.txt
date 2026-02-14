@@ -1,0 +1,35 @@
+**Observation Log:**
+
+[FACT] User is looking for gift ideas for a friend's birthday.
+
+[PREFERENCE] User prefers personalized gifts, similar to a customized photo album.
+
+[EVENT] User's friend's birthday is next month.
+
+[ASSISTANT_SAID] Personalized gifts show extra effort and thought; suggested ideas include customized phone case, monogrammed jewelry, personalized mug, customized wall art, photo blanket or pillow, engraved accessories, customized book, personalized home decor, customized stationery, and memory box.
+
+[ASSISTANT_SAID] Suggested websites for customized mugs include Zazzle, CafePress, Shutterfly, Vistaprint, Etsy.
+
+[ASSISTANT_SAID] Suggested websites for customized phone cases include Zazzle, Society6, Case-Mate, Skinit, Redbubble.
+
+[ASSISTANT_SAID] Other options for customized gifts include Personalization Mall, Things Remembered, and Gifts.com.
+
+[PREFERENCE] User likes the idea of a customized mug or phone case.
+
+[ASSISTANT_SAID] Shutterfly is a good option for customized mugs; they offer ceramic mugs, travel mugs, and photo mugs.
+
+[ASSISTANT_SAID] Shutterfly's customization process includes uploading photos, choosing templates, and adding text.
+
+[ASSISTANT_SAID] Shutterfly's prices for customized mugs range from $15-$25.
+
+[ASSISTANT_SAID] Shutterfly offers first-time customer discounts, bulk order discounts, daily deals, weekly sales, seasonal promotions, referral programs, and a clearance section.
+
+[PREFERENCE] User has used Shutterfly before for a customized photo album and was happy with the quality.
+
+[ASSISTANT_SAID] Shutterfly's mugs are made from ceramic, which is durable and long-lasting.
+
+[ASSISTANT_SAID] Eco-friendly aspects of Shutterfly's mugs include being made in the USA, being dishwasher and microwave safe, and being recyclable.
+
+[PREFERENCE] User is considering the eco-friendliness of the mug and is trying to make more sustainable purchasing decisions.
+
+[ASSISTANT_SAID] Suggested ways to minimize environmental impact include choosing a mug with minimal packaging, using eco-friendly shipping options, and caring for the mug to extend its lifespan.

@@ -1,0 +1,29 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/07/11 (Tue) 13:35
+- [USER] The user is looking for book recommendations.
+- [USER] The user talked to a woman on the bus last week who suggested checking out the latest novel by Celeste Ng.
+- [ASSISTANT_SAID] The assistant confirmed familiarity with Celeste Ng's work and mentioned her latest novel, "Our Missing Hearts," published in 2022.
+- [ASSISTANT_SAID] "Our Missing Hearts" is a dystopian novel exploring themes of family, identity, art, and resistance in an authoritarian society.
+- [ASSISTANT_SAID] The story follows a young boy named Bird, whose mother, a poet, has gone missing, and his journey to find her.
+- [ASSISTANT_SAID] The assistant recommended Celeste Ng's previous novels: 
+  1. "Everything I Never Told You" (2014) - A family drama about secrets and lies.
+  2. "Little Fires Everywhere" (2017) - A novel about motherhood, identity, and human relationships.
+- [ASSISTANT_SAID] The assistant suggested authors similar to Celeste Ng: 
+  - Emily St. John Mandel (e.g., "Station Eleven")
+  - Laura Lippman (e.g., "What the Dead Know")
+  - Paula Hawkins (e.g., "The Girl on the Train")
+  - Liane Moriarty (e.g., "Big Little Lies")
+- [USER] The user decided to start with "Our Missing Hearts" since it's Celeste Ng's latest novel.
+- [USER] The user mentioned thinking of trying out new restaurants in the area and recalled a guy who helped them at the grocery store last weekend, who works at a nearby restaurant.
+- [ASSISTANT_SAID] The assistant provided tips for finding good restaurants and reading reviews, including:
+  1. Online review sites like Yelp, TripAdvisor, and Google Reviews.
+  2. Following local food bloggers and influencers on social media.
+  3. Asking locals and friends for recommendations.
+  4. Using food delivery apps for local restaurant insights.
+- [ASSISTANT_SAID] The assistant advised on reading reviews by looking for consistency, reading beyond star ratings, checking for red flags, and ensuring reviews are recent.
+- [ASSISTANT_SAID] The assistant suggested checking the menu before visiting a restaurant and making reservations if necessary.
+- [USER] The user asked about reading reviews on social media and how to find reliable sources or influencers on platforms like Instagram or Facebook.
+- [ASSISTANT_SAID] The assistant provided tips for finding reliable sources on social media, including:
+  1. Looking for verified accounts and checking content quality.
+  2. Evaluating engagement on posts.

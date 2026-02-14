@@ -1,0 +1,23 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/29 (Mon) 23:24
+- [PREFERENCE] User is looking for new ideas for using up leftovers.
+- [EVENT] User tried out a new recipe for chicken parmesan last weekend.
+- [FACT] User has leftover chicken and pasta sauce from the chicken parmesan recipe.
+- [ASSISTANT_SAID] Assistant congratulated the user on their culinary success and provided suggestions to repurpose chicken parmesan leftovers.
+- [ASSISTANT_CREATED] Assistant listed chicken-based ideas: Chicken Caesar Wraps, Chicken Quesadillas, Chicken Salad, Chicken Tacos.
+- [ASSISTANT_CREATED] Assistant listed pasta sauce-based ideas: Lasagna, Stuffed Peppers, Egg Breakfast Skillet, French Bread Pizza.
+- [ASSISTANT_CREATED] Assistant listed combination ideas: Chicken Parmesan Subs, Chicken and Rice Bowl, Chicken and Vegetable Soup.
+- [PREFERENCE] User likes the idea of Chicken Caesar Wraps and Stuffed Peppers.
+- [PREFERENCE] User has been trying to meal prep on the weekends.
+- [ASSISTANT_SAID] Assistant provided suggestions for incorporating Chicken Caesar Wraps and Stuffed Peppers into the meal prep routine.
+- [ASSISTANT_CREATED] Assistant detailed steps for Chicken Caesar Wraps meal prep: shred and store chicken, prepare Caesar dressing, assemble wraps, portion control.
+- [ASSISTANT_CREATED] Assistant detailed steps for Stuffed Peppers meal prep: prepare filling, portion filling, prep peppers, assemble and bake.
+- [ASSISTANT_SAID] Assistant offered tips for meal prep: label and date containers, store in a visible spot, freeze for later, mix and match.
+- [PREFERENCE] User is interested in exploring new spices and seasonings to add more flavor to meals.
+- [EVENT] User recently picked up Korean chili flakes, gochugaru, and has been using them to add heat to different dishes.
+- [ASSISTANT_SAID] Assistant provided recommendations for other spices and seasonings to try, including Ras el hanout, Berbere, Shichimi togarashi, Sambal oelek, Harissa, Scotch bonnet peppers, Sumac, Za'atar, and Garam masala.
+- [ASSISTANT_SAID] Assistant suggested mixing and matching spices, starting with small amounts, and experimenting with different cuisines.
+- [PREFERENCE] User has been meaning to try out new Indian recipes.
+- [EVENT] User recently got a new cookbook that focuses on vegetarian Indian cooking.
+- [ASSISTANT_SAID] Assistant recommended essential spices and seasonings for Indian cooking, including turmeric, coriander, cumin, red chili powder, garam masala, ginger, cinnamon, cardamom, cilantro, fenugreek leaves, mustard seeds, fennel seeds, asafoetida, and amchur powder

@@ -1,0 +1,87 @@
+{
+  "answer_86c505e7_1": [
+    {
+      "fact": "User is trying to organize their movie watching history.",
+      "type": "preference",
+      "entities": [
+        "movie watching history"
+      ]
+    },
+    {
+      "fact": "User has watched all 22 Marvel Cinematic Universe movies in two weeks.",
+      "type": "event",
+      "entities": [
+        "Marvel Cinematic Universe",
+        "22 movies"
+      ]
+    },
+    {
+      "fact": "User prefers using a spreadsheet to track their movie watching.",
+      "type": "preference",
+      "entities": [
+        "spreadsheet"
+      ]
+    },
+    {
+      "fact": "User is not super comfortable with spreadsheets.",
+      "type": "personal",
+      "entities": []
+    },
+    {
+      "fact": "User plans to add a column for the type of movie.",
+      "type": "preference",
+      "entities": [
+        "type of movie"
+      ]
+    },
+    {
+      "fact": "User wants to add a column for the platform they watched the movie on.",
+      "type": "preference",
+      "entities": [
+        "platform"
+      ]
+    }
+  ],
+  "answer_86c505e7_2": [
+    {
+      "fact": "User is trying to keep track of all the movies they've watched recently.",
+      "type": "event",
+      "entities": []
+    },
+    {
+      "fact": "User just finished a Star Wars marathon, watching all the main films in a week and a half.",
+      "type": "event",
+      "entities": [
+        "Star Wars"
+      ]
+    },
+    {
+      "fact": "User prefers a simple list format to organize their movie list.",
+      "type": "preference",
+      "entities": [
+        "simple list"
+      ]
+    },
+    {
+      "fact": "User watched Rogue One and Solo as part of their movie list.",
+      "type": "event",
+      "entities": [
+        "Rogue One",
+        "Solo"
+      ]
+    },
+    {
+      "fact": "User watched all 22 MCU movies in about two weeks.",
+      "type": "event",
+      "entities": [
+        "MCU",
+        "22 movies"
+      ]
+    },
+    {
+      "fact": "User found watching all MCU movies worth it.",
+      "type": "opinion",
+      "entities": []
+    }
+  ]
+}

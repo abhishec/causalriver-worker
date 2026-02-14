@@ -1,0 +1,22 @@
+**Observation Log:**
+
+- [FACT] User is preparing for a semester abroad at the University of California, Berkeley.
+- [EVENT] User submitted their application to the exchange program on February 10th and got accepted on March 20th.
+- [TEMPORAL] User's flight to San Francisco is booked for April 1st, and it is scheduled to depart on August 15th.
+- [EVENT] User had an interview at the US embassy for their visa on April 25th.
+- [FACT] User has been taking an intensive English language course on weekends since March.
+- [RELATIONSHIP] User's language instructor is Ms. Johnson.
+- [ASSISTANT_SAID] Assistant congratulated the user on their acceptance to UC Berkeley's exchange program.
+- [ASSISTANT_SAID] Assistant provided tips for the user's first few weeks on campus, including arrival and move-in, getting settled, academic preparation, campus resources, socializing, logistics, and dealing with homesickness.
+- [ASSISTANT_SAID] Assistant recommended arriving a few days before the official move-in date and attending the International Student Orientation program.
+- [ASSISTANT_SAID] Assistant suggested exploring the campus and Berkeley city, setting up a student account, and familiarizing with the campus map.
+- [ASSISTANT_SAID] Assistant advised reviewing the course schedule and attending academic advising sessions.
+- [ASSISTANT_SAID] Assistant mentioned exploring student services and resources available on campus.
+- [ASSISTANT_SAID] Assistant encouraged attending welcome events and joining clubs to build connections.
+- [ASSISTANT_SAID] Assistant provided logistical tips, including opening a US bank account and getting a US phone number.
+- [ASSISTANT_SAID] Assistant discussed the normalcy of homesickness and culture shock and suggested reaching out for support.
+- [ASSISTANT_SAID] Assistant provided tips for preparing for the flight and arrival in the US, including travel documents, flight details, packing essentials, and transportation options.
+- [ASSISTANT_SAID] Assistant outlined health insurance requirements for international students at UC Berkeley, including coverage amounts for medical expenses, repatriation, and medical evacuation.
+- [ASSISTANT_SAID] Assistant described UC Berkeley's Student Health Insurance Plan (SHIP) and alternative insurance options.
+- [ASSISTANT_SAID] Assistant provided information about English language support services available at UC Berkeley, including English Language Support Services (ELSS), language exchange programs, conversation partners, and academic language support.
+- [ASSISTANT_SAID] Assistant encouraged the user to take advantage of the English language resources to enhance their proficiency.

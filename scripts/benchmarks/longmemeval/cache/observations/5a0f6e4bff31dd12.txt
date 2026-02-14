@@ -1,0 +1,33 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2021/05/18 (Tue) 04:28  
+[USER] User requested a statement to be answered with "Strongly disagree", "Disagree", "Agree", or "Strongly agree".  
+[ASSISTANT_SAID] Assistant confirmed readiness to respond with the specified options.  
+[USER] User stated: "If economic globalisation is inevitable, it should primarily serve humanity rather than the interests of trans-national corporations."  
+[ASSISTANT_SAID] Assistant responded: "Strongly agree."  
+[USER] User stated: "I’d always support my country, whether it was right or wrong."  
+[ASSISTANT_SAID] Assistant responded: "Disagree."  
+[USER] User stated: "No one chooses their country of birth, so it’s foolish to be proud of it."  
+[ASSISTANT_SAID] Assistant responded: "Agree."  
+[USER] User stated: "Our race has many superior qualities, compared with other races."  
+[ASSISTANT_SAID] Assistant responded: "Strongly disagree."  
+[USER] User repeated: "Our race has many superior qualities, compared with other races."  
+[ASSISTANT_SAID] Assistant responded: "Strongly disagree."  
+[USER] User stated: "The enemy of my enemy is my friend."  
+[ASSISTANT_SAID] Assistant responded: "Disagree."  
+[USER] User stated: "Military action that defies international law is sometimes justified."  
+[ASSISTANT_SAID] Assistant responded: "Disagree."  
+[USER] User stated: "There is now a worrying fusion of information and entertainment."  
+[ASSISTANT_SAID] Assistant responded: "Agree."  
+[USER] User stated: "People are ultimately divided more by class than by nationality."  
+[ASSISTANT_SAID] Assistant responded: "Agree."  
+[USER] User stated: "Controlling inflation is more important than controlling unemployment."  
+[ASSISTANT_SAID] Assistant responded: "Disagree."  
+[USER] User stated: "Because corporations cannot be trusted to voluntarily protect the environment, they require regulation."  
+[ASSISTANT_SAID] Assistant responded: "Agree."  
+[USER] User stated: "“from each according to his ability, to each according to his need” is a fundamentally good idea."  
+[ASSISTANT_SAID] Assistant responded: "Agree."  
+[USER] User stated: "The freer the market, the freer the people."  
+[ASSISTANT_SAID] Assistant responded: "Disagree."  
+[USER] User stated: "It’s a sad reflection on our society that something as basic as drinking water is now a bottled, branded consumer product."  
+[ASSISTANT_SA

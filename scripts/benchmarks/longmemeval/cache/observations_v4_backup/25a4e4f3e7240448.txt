@@ -1,0 +1,16 @@
+**Observation Log:**
+
+- [FACT] User has been in marketing for a while, starting as a Marketing Coordinator and working up to Senior Marketing Specialist after 2 years and 4 months.
+- [FACT] User is responsible for creating marketing materials, including email campaigns, social media content, and sales enablement tools.
+- [FACT] User is working on launching a new product.
+- [RELATIONSHIP] User works closely with Tom, who is the point of contact on the sales team.
+- [RELATIONSHIP] Tom is responsible for developing the sales playbook and training the sales team on the new product.
+- [EVENT] User and Tom are developing a go-to-market strategy for the new product.
+- [EVENT] User and Tom are planning to roll out a series of targeted campaigns to generate buzz and drive leads.
+- [EVENT] User and Tom meet bi-weekly to discuss progress, share feedback, and make adjustments to their strategy.
+- [TEMPORAL] Session date is 2023/05/26 (Fri) 19:50.
+- [PREFERENCE] User values effective communication and has found that the sales team responds well to data presented in a clear and actionable way.
+- [ASSISTANT] Assistant provided design tips for creating effective presentation slides, including keeping it simple, using high-quality images, and avoiding too much text.
+- [ASSISTANT] Assistant suggested common mistakes to avoid when designing slides, such as poor font choices, inconsistent design, and cluttered slides.
+- [ASSISTANT] Assistant offered advice on effectively communicating complex data to a non-technical audience, emphasizing simplification, visualization, and storytelling techniques.
+- [ASSISTANT] Assistant recommended using Canva for presentation design and highlighted its user-friendly features.

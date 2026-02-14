@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/30 (Tue) 06:57  
+[USER] User inquired about how to download the Rain100L dataset.  
+[ASSISTANT_SAID] The Rain100L dataset is a benchmark dataset for image rain removal, consisting of 100 pairs of rainy and corresponding clean images.  
+[ASSISTANT_SAID] To download the Rain100L dataset, follow these steps:  
+[ASSISTANT_SAID] 1. Go to the official website of the Rain100L dataset: <http://www.icst.pku.edu.cn/struct/Projects/joint_rain_removal.html>  
+[ASSISTANT_SAID] 2. Scroll down to the "Download" section and click on the link "Rain100L.zip" to download the dataset.  
+[ASSISTANT_SAID] 3. Extract the downloaded zip file to a local folder.  
+[ASSISTANT_SAID] 4. Access the dataset, which contains two folders: "rainy_image" and "ground_truth".  
+[ASSISTANT_SAID] The "rainy_image" folder contains 100 rainy images, and the "ground_truth" folder contains their corresponding clean images.  
+[ASSISTANT_SAID] The Rain100L dataset is for research purposes only, and users should cite the original paper if they use the dataset in their research.  
+[USER] User inquired about how to download the Rain100H dataset.  
+[ASSISTANT_SAID] The Rain100H dataset is another benchmark dataset for image rain removal, consisting of 100 high-quality pairs of rainy and corresponding clean images.  
+[ASSISTANT_SAID] To download the Rain100H dataset, follow these steps:  
+[ASSISTANT_SAID] 1. Go to the official website of the Rain100H dataset: <http://www.icst.pku.edu.cn/struct/Projects/joint_rain_removal.html>  
+[ASSISTANT_SAID] 2. Scroll down to the "Download" section and click on the link "Rain100H.zip" to download the dataset.  
+[ASSISTANT_SAID] 3. Extract the downloaded zip file to a local folder.  
+[ASSISTANT_SAID] 4. Access the dataset, which contains two folders: "rainy_image" and "ground_truth".  
+[ASSISTANT_SAID] The "rainy_image" folder contains 100 rainy images, and the "ground_truth" folder contains their corresponding clean images.  
+[ASSISTANT_SAID] The Rain100H dataset is for research purposes only, and users should cite the original paper if they use the dataset in their research.  
+[USER] User inquired about the difference between the Rain

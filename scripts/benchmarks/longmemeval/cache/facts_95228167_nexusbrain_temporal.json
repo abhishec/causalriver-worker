@@ -1,0 +1,27 @@
+{
+  "answer_5e613445": [
+    {
+      "fact": "User is considering upgrading from a Fender Stratocaster to a Gibson Les Paul",
+      "type": "preference",
+      "entities": [
+        "Fender Stratocaster",
+        "Gibson Les Paul"
+      ]
+    },
+    {
+      "fact": "User is interested in the differences between Fender Stratocaster and Gibson Les Paul guitars",
+      "type": "opinion",
+      "entities": [
+        "Fender Stratocaster",
+        "Gibson Les Paul"
+      ]
+    },
+    {
+      "fact": "User is exploring the types of music commonly played on a Les Paul",
+      "type": "preference",
+      "entities": [
+        "Les Paul"
+      ]
+    }
+  ]
+}

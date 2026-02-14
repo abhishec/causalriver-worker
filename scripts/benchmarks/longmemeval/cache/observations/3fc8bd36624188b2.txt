@@ -1,0 +1,26 @@
+**Observation Log**
+
+**Session Date:** 2023/05/27 (Sat) 21:24  
+**Session ID:** sharegpt_I900U0S_0
+
+1. [FACT] User works in marketing as the head of a communications team for GVI.
+2. [FACT] User is responsible for the creative brand strategy at GVI.
+3. [FACT] User is responsible for the social media marketing strategy at GVI.
+4. [FACT] User's CEO expects rapid growth via social media.
+5. [EVENT] User needs to present a new social media strategy for 2023.
+6. [ASSISTANT_SAID] Suggested strategists to study for social media strategy: Gary Vaynerchuk, Neil Patel, Jay Baer, Mari Smith, Matt Navarra, Andrew Hutchinson, Amy Porterfield.
+7. [ASSISTANT_SAID] Gary Vaynerchuk is known for creating engaging content that speaks directly to the target audience.
+8. [ASSISTANT_SAID] Neil Patel is recognized for his extensive knowledge of SEO, content marketing, and social media marketing.
+9. [ASSISTANT_SAID] Jay Baer is known for his expertise in creating customer-centric social media strategies.
+10. [ASSISTANT_SAID] Mari Smith is an expert in Facebook marketing and has been named one of Forbes' Top Social Media Power Influencers.
+11. [ASSISTANT_SAID] Matt Navarra provides valuable insights into the latest social media trends and best practices.
+12. [ASSISTANT_SAID] Andrew Hutchinson provides insights on the latest social media trends and best practices.
+13. [ASSISTANT_SAID] Amy Porterfield specializes in helping small business owners and entrepreneurs create successful social media marketing campaigns.
+14. [USER] Suggested adding Julian Cole to the list of strategists.
+15. [ASSISTANT_SAID] Julian Cole is a digital strategist known for his expertise in social media and content strategy.
+16. [ASSISTANT_SAID] Julian Cole is the co-founder of Communications Strategy Group and has worked at major advertising agencies.
+17. [ASSISTANT_SAID] Julian Cole created the Planning Dirty Academy, offering courses and resources for digital strategists.
+18. [ASSISTANT_CREATED] Provided a prioritized list of strategists: 1. Gary Vaynerchuk, 2. Neil Patel, 3. Jay Baer, 4. Mari Smith, 5. Julian Cole, 6. Matt Navarra, 7. Andrew Hutchinson, 8. Amy Porterfield.
+19. [ASSISTANT_SAID] Recommended starting with Gary Vaynerchuk, Neil Patel, and Jay Baer for their influence and experience.
+20. [USER] Asked what information is needed to design a social media strategy.
+21. [ASSISTANT_SAID]

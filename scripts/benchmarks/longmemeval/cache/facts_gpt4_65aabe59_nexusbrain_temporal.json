@@ -1,0 +1,132 @@
+{
+  "answer_30dfe889_2": [
+    {
+      "fact": "User's current computer is about 5 years old",
+      "type": "personal",
+      "entities": [
+        "computer",
+        "5 years old"
+      ]
+    },
+    {
+      "fact": "User thinks their current computer runs a Windows operating system",
+      "type": "personal",
+      "entities": [
+        "Windows"
+      ]
+    },
+    {
+      "fact": "User mainly uses their computer for web browsing, office work, and some light video editing",
+      "type": "preference",
+      "entities": [
+        "web browsing",
+        "office work",
+        "light video editing"
+      ]
+    },
+    {
+      "fact": "User is considering upgrading their desktop computer",
+      "type": "preference",
+      "entities": [
+        "desktop computer",
+        "upgrade"
+      ]
+    },
+    {
+      "fact": "User has been trying to reduce their energy bills",
+      "type": "preference",
+      "entities": [
+        "energy bills"
+      ]
+    },
+    {
+      "fact": "User has set up a new smart thermostat",
+      "type": "event",
+      "entities": [
+        "smart thermostat"
+      ]
+    },
+    {
+      "fact": "User finds the smart thermostat helpful in reducing energy bills",
+      "type": "opinion",
+      "entities": [
+        "smart thermostat",
+        "energy bills"
+      ]
+    },
+    {
+      "fact": "User has been doing some research online about computer specs",
+      "type": "preference",
+      "entities": [
+        "computer specs",
+        "research"
+      ]
+    }
+  ],
+  "answer_30dfe889_1": [
+    {
+      "fact": "User's desktop computer is around 5 years old",
+      "type": "personal",
+      "entities": [
+        "desktop computer",
+        "5 years old"
+      ]
+    },
+    {
+      "fact": "User is experiencing random freezing issues with their desktop computer",
+      "type": "event",
+      "entities": [
+        "random freezing",
+        "desktop computer"
+      ]
+    },
+    {
+      "fact": "User recently upgraded their home Wi-Fi router to a new mesh network system",
+      "type": "event",
+      "entities": [
+        "home Wi-Fi router",
+        "mesh network system"
+      ]
+    },
+    {
+      "fact": "User's internet connection has significantly improved after upgrading the router",
+      "type": "opinion",
+      "entities": [
+        "internet connection",
+        "router upgrade"
+      ]
+    },
+    {
+      "fact": "User is considering upgrading their desktop computer",
+      "type": "preference",
+      "entities": [
+        "desktop computer",
+        "upgrade"
+      ]
+    },
+    {
+      "fact": "User is unsure about the exact specifications of their current desktop computer",
+      "type": "personal",
+      "entities": [
+        "desktop computer",
+        "specifications"
+      ]
+    },
+    {
+      "fact": "User has been doing research online about computer upgrades",
+      "type": "event",
+      "entities": [
+        "research",
+        "computer upgrades"
+      ]
+    },
+    {
+      "fact": "User has not had a chance to go to the store yet for computer upgrades",
+      "type": "event",
+      "entities": [
+        "store",
+        "computer upgrades"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/23 (Tue) 06:44  
+[EVENT] User is preparing for a green card interview next Wednesday.  
+[FACT] User has been preparing for the green card interview for a while.  
+[CHANGE] User has waited almost 6 months for the green card interview appointment.  
+[ASSISTANT_SAID] The green card interview is also known as the Adjustment of Status (AOS) interview.  
+[ASSISTANT_SAID] User should review their application and be familiar with the information provided in Form I-485.  
+[ASSISTANT_SAID] User should gather required documents including passport, birth certificate, marriage certificate (if applicable), divorce or death certificate (if applicable), police certificates (if required), medical examination report (Form I-693), and any other documents requested by USCIS.  
+[ASSISTANT_SAID] User should dress professionally in business attire for the interview.  
+[ASSISTANT_SAID] User should arrive 30 minutes early for the interview.  
+[ASSISTANT_SAID] User should be prepared to answer questions about their background, relationship with their petitioner (if applicable), immigration history, reasons for seeking a green card, and future plans.  
+[ASSISTANT_SAID] User should bring evidence to support their application, such as photos, letters from friends and family, and documents showing joint financial responsibilities (if applicable).  
+[ASSISTANT_SAID] User may bring an interpreter if they don't speak English fluently.  
+[ASSISTANT_SAID] User may be required to provide biometric data, such as fingerprints.  
+[ASSISTANT_SAID] User should be honest and transparent in their answers, respectful and courteous to the interviewer, listen carefully, and ask for clarification if needed.  
+[ASSISTANT_SAID] After the interview, the user should wait for the decision and can check the status of their application online or contact USCIS if they haven't received a decision after a few weeks.  
+[ASSISTANT_SAID] Typical processing times for interview results can vary, with immediate approval possible, or 1-2 weeks for straightforward cases, 2-6 weeks for most cases, and several months for complex cases.  
+[ASSISTANT_SAID] Factors affecting processing times include USCIS workload, complexity of the case, security checks, and RFEs (Requests for Evidence).  
+[ASSISTANT_SAID] User should check their case status online, be patient, and follow up with USCIS if they've waited an unusually long time.  
+[USER] User is relieved that the interview is finally happening.  
+[USER] User is still worried about the interview but feels more prepared after receiving tips.  
+[ASSISTANT_SAID] User should be prepared to answer behavioral questions

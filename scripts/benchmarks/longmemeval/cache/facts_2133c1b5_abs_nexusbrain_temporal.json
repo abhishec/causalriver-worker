@@ -1,0 +1,107 @@
+{
+  "answer_52382508_abs_1": [
+    {
+      "fact": "User is planning a trip to the Japanese Alps in November",
+      "type": "event",
+      "entities": [
+        "Japanese Alps",
+        "November"
+      ]
+    },
+    {
+      "fact": "User is interested in scenic routes and accommodations in the Nagano prefecture",
+      "type": "preference",
+      "entities": [
+        "scenic routes",
+        "accommodations",
+        "Nagano prefecture"
+      ]
+    },
+    {
+      "fact": "User is considering inviting friends from Tokyo to join the trip",
+      "type": "relationship",
+      "entities": [
+        "friends",
+        "Tokyo"
+      ]
+    },
+    {
+      "fact": "User's friends live in Tokyo",
+      "type": "personal",
+      "entities": [
+        "friends",
+        "Tokyo"
+      ]
+    },
+    {
+      "fact": "User is looking for convenient public transportation options for friends to get to Nagano from Tokyo",
+      "type": "preference",
+      "entities": [
+        "public transportation",
+        "Nagano",
+        "Tokyo"
+      ]
+    }
+  ],
+  "answer_52382508_abs_2": [
+    {
+      "fact": "User is planning a day trip to Yokohama.",
+      "type": "event",
+      "entities": [
+        "Yokohama"
+      ]
+    },
+    {
+      "fact": "User has been enjoying the fall foliage in Tokyo.",
+      "type": "opinion",
+      "entities": [
+        "fall foliage",
+        "Tokyo"
+      ]
+    },
+    {
+      "fact": "User explores a new neighborhood every Sunday.",
+      "type": "event",
+      "entities": [
+        "neighborhood",
+        "Sunday"
+      ]
+    },
+    {
+      "fact": "User discovered a great coffee shop in Daikanyama last weekend.",
+      "type": "event",
+      "entities": [
+        "coffee shop",
+        "Daikanyama"
+      ]
+    },
+    {
+      "fact": "User has been living in Harajuku for 3 months.",
+      "type": "personal",
+      "entities": [
+        "Harajuku"
+      ]
+    },
+    {
+      "fact": "User is still discovering new hidden gems in Harajuku.",
+      "type": "opinion",
+      "entities": [
+        "Harajuku"
+      ]
+    },
+    {
+      "fact": "User has not explored much of the historical side of Harajuku yet.",
+      "type": "opinion",
+      "entities": [
+        "Harajuku"
+      ]
+    },
+    {
+      "fact": "User has been meaning to check out the Meiji Shrine.",
+      "type": "preference",
+      "entities": [
+        "Meiji Shrine"
+      ]
+    }
+  ]
+}

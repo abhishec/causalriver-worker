@@ -1,0 +1,26 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/06/20 (Tue) 16:07
+- [FACT] User is trying to organize their shopping budget for the rest of the year.
+- [EVENT] User attended a friends and family sale at Bloomingdale's and got a designer handbag and a pair of shoes.
+- [FACT] User spent around $500 at Bloomingdale's.
+- [FACT] User's monthly shopping budget is around $200.
+- [EVENT] User has a few more shopping trips planned, including buying gifts for family and friends, but is unsure of the total spending for those.
+- [PREFERENCE] User prefers to track clothing and accessories specifically, as those are usually their biggest expenses.
+- [ASSISTANT_SAID] Assistant offered to help track the user's shopping expenses.
+- [ASSISTANT_SAID] Assistant requested information on the amount spent at Bloomingdale's, the monthly budget, other planned purchases, and specific categories to track.
+- [ASSISTANT_CREATED] Assistant created a tracking plan that includes a breakdown of expenses and a monthly budget allocation for clothing and accessories.
+- [ASSISTANT_SAID] Assistant suggested dividing the monthly budget into two categories: Clothing ($100) and Accessories ($100).
+- [ASSISTANT_SAID] Assistant provided tracking tips, including setting reminders, using a spreadsheet or app, categorizing purchases, and reviewing expenses monthly.
+- [ASSISTANT_SAID] Assistant suggested setting aside a separate amount for gifts and provided an example calculation for budgeting gift expenses.
+- [ASSISTANT_SAID] Assistant offered tips on how to cut back on spending and stay within the budget.
+- [PREFERENCE] User expressed interest in implementing the 30-day rule to avoid impulse buys.
+- [ASSISTANT_SAID] Assistant explained the benefits of the 30-day rule, including separating wants from needs and avoiding buyer's remorse.
+- [ASSISTANT_SAID] Assistant provided additional strategies to implement the 30-day rule effectively.
+- [EVENT] User identified a pattern of shopping more when with their sister and expressed concern about impulse buying during those trips.
+- [ASSISTANT_SAID] Assistant provided tips on how to shop with a friend or family member without getting caught up in impulse buying.
+- [ASSISTANT_SAID] Assistant suggested setting boundaries, making a plan, taking breaks, and focusing on experiences rather than purchases.
+- [PREFERENCE] User plans to set boundaries and make a plan with their sister before shopping.
+- [PREFERENCE] User intends to focus on experiences, such as taking photos and trying on outfits, rather than just buying things.
+- [RELATIONSHIP] User's sister is mentioned as someone who may not be as on board with the user's budgeting goals.
+- [ASSISTANT_SAID] Assistant provided tips on how to approach

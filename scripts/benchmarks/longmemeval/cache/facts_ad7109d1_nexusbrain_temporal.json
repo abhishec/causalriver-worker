@@ -1,0 +1,19 @@
+{
+  "answer_679840f8": [
+    {
+      "fact": "User is having issues with their laptop's battery life.",
+      "type": "event",
+      "entities": [
+        "laptop",
+        "battery life"
+      ]
+    },
+    {
+      "fact": "User has already tried some tips to extend battery life.",
+      "type": "opinion",
+      "entities": [
+        "battery life tips"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "answer_sharegpt_SS141vi_0": [
+    {
+      "fact": "User prefers sad songs",
+      "type": "preference",
+      "entities": [
+        "sad songs"
+      ]
+    },
+    {
+      "fact": "User requested a more romantic and heart-felt song",
+      "type": "preference",
+      "entities": [
+        "romantic song",
+        "heart-felt song"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,84 @@
+{
+  "answer_7e9ad7b4_1": [
+    {
+      "fact": "User is looking for good quality sandals with sturdy straps.",
+      "type": "preference",
+      "entities": [
+        "sandals",
+        "sturdy straps"
+      ]
+    },
+    {
+      "fact": "User has heard of Teva and Merrell and thinks they are great brands.",
+      "type": "opinion",
+      "entities": [
+        "Teva",
+        "Merrell"
+      ]
+    },
+    {
+      "fact": "User needs to take care of their old sneakers.",
+      "type": "personal",
+      "entities": [
+        "old sneakers"
+      ]
+    },
+    {
+      "fact": "User has been storing their sneakers under the bed.",
+      "type": "personal",
+      "entities": [
+        "sneakers",
+        "bed"
+      ]
+    },
+    {
+      "fact": "User's sneakers are starting to smell.",
+      "type": "personal",
+      "entities": [
+        "sneakers",
+        "smell"
+      ]
+    }
+  ],
+  "answer_7e9ad7b4_2": [
+    {
+      "fact": "User is thinking of buying a new pair of sandals with better quality straps.",
+      "type": "preference",
+      "entities": [
+        "sandals",
+        "quality straps"
+      ]
+    },
+    {
+      "fact": "User needs to organize their closet this weekend.",
+      "type": "event",
+      "entities": [
+        "organizing closet",
+        "weekend"
+      ]
+    },
+    {
+      "fact": "User is looking forward to getting rid of some old sneakers.",
+      "type": "opinion",
+      "entities": [
+        "old sneakers"
+      ]
+    },
+    {
+      "fact": "User currently has old sneakers taking up space in their closet.",
+      "type": "personal",
+      "entities": [
+        "old sneakers",
+        "closet"
+      ]
+    },
+    {
+      "fact": "User is interested in finding a good cobbler to polish and condition their old sneakers.",
+      "type": "preference",
+      "entities": [
+        "cobbler",
+        "old sneakers"
+      ]
+    }
+  ]
+}

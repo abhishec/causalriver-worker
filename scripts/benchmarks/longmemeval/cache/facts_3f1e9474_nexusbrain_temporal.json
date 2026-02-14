@@ -1,0 +1,41 @@
+{
+  "answer_57fc1954": [
+    {
+      "fact": "User is trying to focus on the positive aspects of their life.",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User is struggling to stay motivated.",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User recently talked to their friend Sarah.",
+      "type": "relationship",
+      "entities": [
+        "Sarah"
+      ]
+    },
+    {
+      "fact": "User is considering their beliefs on destiny.",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User likes the idea of reframing negative thoughts.",
+      "type": "preference",
+      "entities": []
+    },
+    {
+      "fact": "User likes the idea of focusing on the present.",
+      "type": "preference",
+      "entities": []
+    },
+    {
+      "fact": "User is struggling with feelings of uncertainty about their career path.",
+      "type": "opinion",
+      "entities": []
+    }
+  ]
+}

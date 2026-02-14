@@ -1,0 +1,19 @@
+**Observation Log:**
+
+[FACT] User is planning a new road trip to explore wine country getaways in California.  
+[FACT] User recently returned from a trip to Santa Barbara where they spent two nights and went wine tasting in the nearby Santa Ynez Valley with friends.  
+[PREFERENCE] User is interested in scenic routes and stops along the way for their road trip.  
+[PREFERENCE] User is particularly interested in hot air balloon rides during their trip.  
+[EVENT] User is considering attending the Paso Robles Wine Festival in June.  
+[EVENT] User is looking into booking a hot air balloon ride with Paso Robles Balloon Rides.  
+[CHANGE] User has already been to Carmel-by-the-Sea and may skip that part of the trip to head straight to Paso Robles.  
+[TEMPORAL] Session date is 2023/05/28 (Sun) 07:50.  
+[ASSISTANT_SAID] Santa Barbara and the Santa Ynez Valley are recommended wine country destinations.  
+[ASSISTANT_SAID] Other recommended wine regions include Napa Valley, Sonoma County, Paso Robles, Livermore Valley, Mendocino County, Lodi, and Monterey County.  
+[ASSISTANT_SAID] Suggested itinerary includes Monterey County and Carmel Valley, Paso Robles, Napa Valley, and Sonoma County with specific activities and scenic routes.  
+[ASSISTANT_SAID] Events in Paso Robles include the Paso Robles Wine Festival (June), Paso Robles Lavender Festival (June), Concerts in the Vineyard (June to September), and Wine and Fire (August).  
+[ASSISTANT_SAID] Events in Napa Valley include the Napa Valley Festival (June), Napa Valley Wine and Food Festival (July), BottleRock Napa Valley (May), and Napa Valley Hot Air Balloon Festival (July).  
+[ASSISTANT_SAID] Recommended accommodations in Paso Robles include Allegretto Vineyard Resort, Paso Robles Inn, Hotel Cheval, Justin Winery's Just Inn, and Adelaida Vineyards & Winery's Vineyard House.  
+[ASSISTANT_SAID] Recommended restaurants in Paso Robles include Artisan, Il Cortile, The Hatch Rotisserie & Bar, Thomas Hill Organics, and Villa Creek Bar & Grill.  
+[ASSISTANT_CREATED] Suggested itinerary for a road trip covering Monterey County, Paso Robles, Napa Valley, and Sonoma County with specific activities and scenic routes.  
+[ASSISTANT_CREATED] List of recommended accommodations and restaurants in Paso Robles with descriptions and focus on wine country feel.

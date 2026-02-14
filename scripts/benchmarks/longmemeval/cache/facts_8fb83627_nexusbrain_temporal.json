@@ -1,0 +1,111 @@
+{
+  "answer_966cecbb_1": [
+    {
+      "fact": "User usually reads news, science, and entertainment magazines.",
+      "type": "preference",
+      "entities": [
+        "news magazines",
+        "science magazines",
+        "entertainment magazines"
+      ]
+    },
+    {
+      "fact": "User regularly reads The New York Times and The Daily News.",
+      "type": "preference",
+      "entities": [
+        "The New York Times",
+        "The Daily News"
+      ]
+    },
+    {
+      "fact": "User enjoys The New Yorker for fiction.",
+      "type": "preference",
+      "entities": [
+        "The New Yorker",
+        "fiction"
+      ]
+    },
+    {
+      "fact": "User enjoys National Geographic for in-depth articles on science and nature.",
+      "type": "preference",
+      "entities": [
+        "National Geographic",
+        "science",
+        "nature"
+      ]
+    },
+    {
+      "fact": "User has finished three issues of National Geographic and is currently on the fourth.",
+      "type": "event",
+      "entities": [
+        "National Geographic",
+        "issues 1-3",
+        "issue 4"
+      ]
+    },
+    {
+      "fact": "User has been reading Rolling Stone, especially their online content.",
+      "type": "preference",
+      "entities": [
+        "Rolling Stone",
+        "online content"
+      ]
+    },
+    {
+      "fact": "User regularly reads The Atlantic and Medium online.",
+      "type": "preference",
+      "entities": [
+        "The Atlantic",
+        "Medium"
+      ]
+    },
+    {
+      "fact": "User prefers online versions of magazines and newspapers.",
+      "type": "preference",
+      "entities": [
+        "online versions"
+      ]
+    }
+  ],
+  "answer_966cecbb_2": [
+    {
+      "fact": "User is planning a trip to the Amazon rainforest",
+      "type": "event",
+      "entities": [
+        "Amazon rainforest"
+      ]
+    },
+    {
+      "fact": "User is interested in learning about the Amazon rainforest's ecosystem and conservation efforts",
+      "type": "preference",
+      "entities": [
+        "Amazon rainforest",
+        "ecosystem",
+        "conservation efforts"
+      ]
+    },
+    {
+      "fact": "User has been reading a lot about the Amazon rainforest lately",
+      "type": "preference",
+      "entities": [
+        "Amazon rainforest"
+      ]
+    },
+    {
+      "fact": "User has finished five issues of National Geographic focused on the Amazon rainforest",
+      "type": "event",
+      "entities": [
+        "National Geographic",
+        "Amazon rainforest"
+      ]
+    },
+    {
+      "fact": "User finds National Geographic to be a great resource for articles on the Amazon rainforest",
+      "type": "opinion",
+      "entities": [
+        "National Geographic",
+        "Amazon rainforest"
+      ]
+    }
+  ]
+}

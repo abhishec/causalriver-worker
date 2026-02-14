@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [FACT] The user is planning a summer trip to the Rocky Mountains.
+- [EVENT] The user just got back from a surfing trip in San Diego.
+- [PREFERENCE] The user enjoys outdoor adventures and is excited about planning another trip.
+- [ASSISTANT_SAID] July is a great time to visit the Rockies, with warm weather and long days.
+- [ASSISTANT_SAID] Daytime temperatures in July usually range from the mid-70s to mid-80s Fahrenheit (23-30°C) in lower elevations (below 8,000 ft).
+- [ASSISTANT_SAID] At higher elevations (above 8,000 ft), daytime temperatures can be 10-15°F (5-8°C) cooler.
+- [ASSISTANT_SAID] Nighttime temperatures can drop significantly, ranging from 50°F to 60°F (10-15°C).
+- [ASSISTANT_SAID] July is typically a dry month in the Rocky Mountains, with an average of 1-2 inches (2.5-5 cm) of precipitation.
+- [ASSISTANT_SAID] Afternoon thunderstorms are common in the Rockies during the summer.
+- [ASSISTANT_SAID] Humidity is usually relatively low in the Rockies, ranging from 30-50%.
+- [ASSISTANT_SAID] UV radiation is high at high elevations, so sunscreen, sunglasses, and a hat are recommended.
+- [ASSISTANT_SAID] Wind can be a factor, especially in the afternoons, so packing layers is advised.
+- [ASSISTANT_SAID] The weather can vary depending on the specific location within the Rocky Mountains.
+- [ASSISTANT_SAID] The southern Rockies (e.g., Colorado, New Mexico) tend to be warmer and drier than the northern Rockies (e.g., Montana, Wyoming).
+- [ASSISTANT_SAID] Higher elevations (e.g., above 10,000 ft) will be cooler and potentially snowier than lower elevations.
+- [ASSISTANT_SAID] Recommended websites for specific weather forecasts include National Weather Service (NWS), OpenSnow, and Mountain-forecast.com.
+- [EVENT] The user is planning to do some backpacking and camping in the Rockies.
+- [ASSISTANT_SAID] Essential items for backpacking and camping include layered clothing, a warm hat and gloves, moisture-wicking socks, rain gear, a backpack, a tent, a sleeping bag and pad, a ground cloth or tarp, a backpack stove and fuel, a water bottle or hydration bladder, water purification tablets or filter, food storage containers, a first aid kit, a headlamp or flashlight, a map and compass, sunscreen, insect repellent, and emergency shelter.
+- [ASSISTANT_SAID] For high elevations, it's important to bring

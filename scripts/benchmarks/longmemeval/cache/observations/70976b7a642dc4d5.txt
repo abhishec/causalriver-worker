@@ -1,0 +1,16 @@
+**Observation Log:**
+
+- [FACT] Interviewee is a 36 year old male.
+- [FACT] Interviewee works in IT as a project manager.
+- [FACT] Interviewee enjoys playing basketball, hiking, and watching movies in his free time.
+- [EVENT] Interviewee purchased a laptop from an offline retail medium.
+- [PREFERENCE] Interviewee values reliability and speed in a laptop.
+- [PREFERENCE] Interviewee looks for laptops with at least an Intel Core i5 processor or better.
+- [PREFERENCE] Interviewee prefers laptops with at least 8GB of RAM.
+- [PREFERENCE] Interviewee prefers a lightweight design for portability.
+- [PREFERENCE] Interviewee values long battery life in a laptop.
+- [CHANGE] Interviewee's need for a laptop is influenced by his role as a project manager.
+- [TEMPORAL] The session date is 2022/03/21 (Mon) 10:59.
+- [ASSISTANT_SAID] Assistant asked the interviewee to walk through his decision-making process when buying a laptop.
+- [ASSISTANT_SAID] Assistant confirmed the interviewee's assessment of his preferences regarding laptop features.
+- [ASSISTANT_CREATED] Assistant created a structured interview format for the hypothetical interview.

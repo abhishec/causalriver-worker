@@ -1,0 +1,19 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/25 (Thu) 19:38  
+[FACT] User submitted their thesis proposal last month.  
+[FACT] User's thesis title is "Exploring the Impact of Artificial Intelligence on Modern Education."  
+[PREFERENCE] User is excited to dive into research on their thesis topic.  
+[USER_SAID] User is looking for resources on artificial intelligence in education.  
+[ASSISTANT_SAID] Assistant congratulated the user on submitting their thesis proposal.  
+[ASSISTANT_SAID] Assistant provided a list of resources for AI in education, including academic journals, books, online courses, organizations, and blogs.  
+[ASSISTANT_SAID] Suggested journals include: Journal of Educational Data Mining, IEEE Transactions on Learning Technologies, British Journal of Educational Technology, and arXiv for research papers.  
+[ASSISTANT_SAID] Suggested books include: "Artificial Intelligence in Education: Promises and Implications for Teaching and Learning" by Wayne Holmes, "AI in Education: A Review of the Literature" by National Center for Education Statistics, "Intelligent Tutoring Systems: Lessons Learned" by Beverly Park Woolf, and "Educational Data Mining: Applications and Trends" by Romero, C., Ventura, S., & Pechenizkiy, M.  
+[ASSISTANT_SAID] Suggested online courses include: "Artificial Intelligence in Education" by Microsoft on edX, "AI in Education" by IBM on Coursera, "Intelligent Tutoring Systems" by University of Edinburgh on FutureLearn, and "Educational Data Mining" by University of Illinois at Urbana-Champaign on Coursera.  
+[ASSISTANT_SAID] Suggested organizations include: The Artificial Intelligence in Education (AI-ED) Research Centre at UCLA, The National Center for Education Statistics (NCES), The International Educational Data Mining Society (IEDMS), and The AI in Education community on GitHub.  
+[ASSISTANT_SAID] Suggested blogs and news outlets include: EdSurge, The AI Alignment Forum, TeachThought, and Education Week.  
+[ASSISTANT_SAID] Advised the user to stay organized, take notes, and critically evaluate sources for their thesis.  
+[USER_SAID] User expressed interest in exploring the potential applications of AI in enhancing student engagement, especially in online learning environments.  
+[ASSISTANT_SAID] Assistant provided resources and research papers on AI's role in enhancing student engagement in online learning environments.  
+[ASSISTANT_SAID] Suggested research papers include: "Using Artificial Intelligence to Enhance Student Engagement in Online Learning" by R. Z. Khanna, "AI-based Student Engagement Analytics in Online Learning" by S. K. Singh, and "Personalized Learning Paths using Artificial Intelligence in Online Education" by A. K. Singh.  
+[ASS

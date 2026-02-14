@@ -1,0 +1,15 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2022/01/15 (Sat) 05:00
+- [USER] User requested a list of 10 Mexican dish recipes.
+- [ASSISTANT_SAID] Assistant provided a list of 10 Mexican dish recipes with links to their original recipes.
+- [ASSISTANT_CREATED] 1. Tacos al Pastor - Recipe: <https://www.mexicoinmykitchen.com/tacos-al-pastor-recipe/>
+- [ASSISTANT_CREATED] 2. Chiles Rellenos - Recipe: <https://www.isabeleats.com/chiles-rellenos-recipe/>
+- [ASSISTANT_CREATED] 3. Enchiladas Rojas - Recipe: <https://www.themediterraneandish.com/enchiladas-rojas-recipe/>
+- [ASSISTANT_CREATED] 4. Guacamole - Recipe: <https://www.simplyrecipes.com/recipes/perfect_guacamole/>
+- [ASSISTANT_CREATED] 5. Pozole - Recipe: <https://www.bonappetit.com/recipe/pozole-rojo>
+- [ASSISTANT_CREATED] 6. Quesadillas - Recipe: <https://www.delish.com/cooking/recipe-ideas/a22565432/quesadilla-recipe/>
+- [ASSISTANT_CREATED] 7. Tamales - Recipe: <https://www.mexicoinmykitchen.com/how-to-make-tamales/>
+- [ASSISTANT_CREATED] 8. Sopaipillas - Recipe: <https://www.allrecipes.com/recipe/20590/sopaipillas/>
+- [ASSISTANT_CREATED] 9. Carne Asada - Recipe: <https://www.food.com/recipe/authentic-mexican-carne-asada-159141>
+- [ASSISTANT_CREATED] 10. Churros - Recipe: <https://www.biggerbolderbaking.com/homemade-churros/>

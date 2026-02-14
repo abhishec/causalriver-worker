@@ -1,0 +1,26 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/24 (Wed) 06:24  
+[USER] User is interested in Korean cuisine and its unique features.  
+[PREFERENCE] User is curious about trying fermented dishes for the first time.  
+[PREFERENCE] User loves spicy food.  
+[ASSISTANT_SAID] Unique features of Korean cuisine include the emphasis on fermentation, the use of a wide variety of vegetables, and the balance of flavors including sweet, sour, salty, and spicy.  
+[ASSISTANT_SAID] Recommended Korean dishes to try:  
+[ASSISTANT_SAID] 1. Kimchi: A fermented cabbage dish that is a staple in Korean cuisine.  
+[ASSISTANT_SAID] 2. Korean BBQ: Grilled marinated meats, such as bulgogi (beef) or dak galbi (chicken).  
+[ASSISTANT_SAID] 3. Bibimbap: A rice dish topped with sautéed vegetables, beef, and a fried egg served with gochujang.  
+[ASSISTANT_SAID] 4. Japchae: A noodle dish made with sweet potato noodles, stir-fried with vegetables and meat or seafood.  
+[ASSISTANT_SAID] 5. Tteokbokki: Spicy rice cakes served in a hot sauce made with gochujang.  
+[ASSISTANT_SAID] 6. Samgyetang: A chicken soup made with a whole young chicken stuffed with rice, ginseng, and other herbs.  
+[ASSISTANT_SAID] 7. Haemul Pajeon: A savory pancake made with scallions and seafood.  
+[USER] User is interested in popular drinks to complement Korean dishes.  
+[ASSISTANT_SAID] Recommended popular Korean drinks:  
+[ASSISTANT_SAID] 1. Soju: A clear liquor often consumed with meals.  
+[ASSISTANT_SAID] 2. Makgeolli: A traditional Korean rice wine with a slightly sweet and sour taste.  
+[ASSISTANT_SAID] 3. Bokbunja Ju: A black raspberry wine with a slightly sweet taste.  
+[ASSISTANT_SAID] 4. Green Tea: A slightly sweet beverage often served after meals.  
+[USER] User has never tried fermented dishes before and seeks recommendations for a good introduction to Korean cuisine.  
+[ASSISTANT_SAID] Recommended fermented dishes for introduction:  
+[ASSISTANT_SAID] 1. Kimchi: A staple made from fermented cabbage or other vegetables.  
+[ASSISTANT_SAID] 2. Gochujang: A fermented chili paste used in many dishes.  
+[ASSISTANT_SAID] 3. Doenjang: A

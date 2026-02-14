@@ -1,0 +1,29 @@
+**Observation Log:**
+
+- [FACT] The user is working on a Master's thesis.
+- [FACT] The user has been working on their Master's thesis for the past six months.
+- [PREFERENCE] The user is struggling to find relevant sources on instructional design and language acquisition.
+- [EVENT] The user is conducting research for their Master's thesis.
+- [ASSISTANT_SAID] The assistant congratulated the user on working on their Master's thesis and offered to help find relevant sources.
+- [ASSISTANT_SAID] The assistant provided a list of books, including:
+  1. "Theories of Language Acquisition" by Julia H. Hirsch
+  2. "Instructional Design: The ADDIE Approach" by Robert D. Tennyson
+  3. "Language Acquisition and Development: An Introduction" by Patricia A. Duff
+  4. "Designing Language Courses: A Guide for Teachers" by Kathleen Graves
+- [ASSISTANT_SAID] The assistant provided a list of academic papers, including:
+  1. "The Effect of Instructional Design on Language Learning Outcomes: A Meta-Analysis" by Hsin-Yi Chang and Yi-Chun Chen (2018)
+  2. "Cognitive Load Management in Language Instruction: A Review of the Literature" by Preeti Singh and Sushil K. Sharma (2020)
+  3. "The Role of Task-Based Instruction in Language Acquisition: A Systematic Review" by Ali Shehadeh and Christine M. Tardy (2016)
+  4. "Computer-Assisted Language Learning: A Review of the Literature" by Mark Warschauer and Shelia R. Cotten (2017)
+- [ASSISTANT_SAID] The assistant provided a list of journals, including:
+  1. The Modern Language Journal
+  2. ReCALL
+  3. Instructional Science
+- [ASSISTANT_SAID] The assistant provided a list of online resources, including:
+  1. The International Journal of Instructional Technology and Distance Learning
+  2. The Language Learning Journal
+- [ASSISTANT_SAID] The assistant suggested exploring academic databases such as Google Scholar, JSTOR, and ERIC for more relevant sources.
+- [ASSISTANT_CREATED] The assistant created a suggested table to help the user visualize the relationships between the sources, titled "Source Matrix," with columns for Source, Topic, Focus, Methodology, Findings/Recommendations, and Relationship to Thesis.
+- [ASSISTANT_CREATED] The assistant suggested a mind map structure with a center node "Instructional Design and Language Acquisition" and branches for various topics related to the user's research.
+- [USER] The user requested help organizing the sources by theme or category.
+- [ASSISTANT_SAID] The assistant grouped the sources into categories: Language Acquisition Theories, Instructional

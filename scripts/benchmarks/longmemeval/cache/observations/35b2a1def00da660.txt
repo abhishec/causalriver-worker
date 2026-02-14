@@ -1,0 +1,28 @@
+**Observation Log:**
+
+- [FACT] User's name is Ryan Mioduski.
+- [FACT] User's phone number is (703) 965 6785.
+- [FACT] User's email is ryan@mioduski.us.
+- [FACT] User's LinkedIn profile is linkedin.com/in/ryan-mioduski.
+- [FACT] User is located in Washington, D.C.
+- [FACT] User graduated from Virginia Polytechnic Institute and State University (Virginia Tech) with a B.A. in Political Science and Government from 2012 to 2016.
+- [FACT] User has worked as a Senior Advertising Strategist at Middle Seat Consulting since 2021.
+- [FACT] User has worked as a Digital Advertising Strategist at Middle Seat Consulting from 2020 to 2021.
+- [FACT] User has worked as a Digital Campaigns Associate at Blueprint Interactive from 2018 to 2020.
+- [FACT] User has served as a Digital Intern in the U.S. House of Representatives in a non-consecutive role.
+- [FACT] User has proficiencies in ActionKit, Action Network, Data Studio, Datorama, Supermetrics, and Tag Manager.
+- [PREFERENCE] User seeks to help clients exceed online fundraising goals and reach persuadable audiences with data-proven messaging and strategy.
+- [EVENT] User is currently leading strategy and execution on major accounts at Middle Seat Consulting.
+- [CHANGE] User has been promoted to Senior Advertising Strategist at Middle Seat Consulting.
+- [TEMPORAL] Session date is 2023/05/28 (Sun) 08:10.
+- [RELATIONSHIP] User's boss provided feedback on his performance.
+- [RELATIONSHIP] User's coworkers provided feedback on his performance.
+- [ASSISTANT_SAID] Assistant is ready for feedback from the user's boss and requested comments from performance evaluations to help polish the LinkedIn profile.
+- [ASSISTANT_CREATED] Assistant created an updated LinkedIn profile for the user, including a summary, experience, education, skills, and certifications.
+- [ASSISTANT_CREATED] Assistant included specific details in the LinkedIn profile such as:
+  - User's role as Senior Digital Advertising Strategist at Middle Seat Digital.
+  - User's achievements, including helping raise $100MM in 100 days for the Biden Victory Fund.
+  - User's mentorship skills and contributions to team Fetterman.
+  - User's educational background at Virginia Tech.
+  - User's skills in time management, creative solutions, writing, data analysis, and teamwork & mentorship.
+  - User's licenses and certifications, including Edge Academy Certified: Trading Essentials, Commercial Drone Operator, and Datorama Specialist Certification.

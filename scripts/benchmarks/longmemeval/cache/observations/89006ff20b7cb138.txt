@@ -1,0 +1,21 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/17 (Wed) 14:35  
+[EVENT] User is looking for a BBQ sauce recipe similar to one had at Smokey's BBQ joint.  
+[RELATIONSHIP] User mentioned a cousin who is having a housewarming party.  
+[PREFERENCE] User is looking for BBQ sauce recipes that combine sweet and tangy flavors.  
+[ASSISTANT_SAID] Assistant stated that it cannot access specific recipes from restaurants like Smokey's but can provide a general BBQ sauce recipe.  
+[ASSISTANT_CREATED] Assistant provided a Sweet and Tangy BBQ Sauce Recipe with the following ingredients: 1 cup ketchup, 1/2 cup apple cider vinegar, 1/4 cup brown sugar, 2 tablespoons Worcestershire sauce, 2 tablespoons honey, 1 teaspoon smoked paprika, 1 teaspoon garlic powder, 1 teaspoon onion powder, salt and pepper to taste, and 1/4 cup water.  
+[ASSISTANT_SAID] Assistant provided instructions for making the BBQ sauce, including combining ingredients, simmering, and adjusting flavors.  
+[ASSISTANT_SAID] Assistant suggested experimenting with different types of vinegar, sweeteners, and smoky flavors to replicate Smokey's BBQ sauce.  
+[PREFERENCE] User expressed interest in trying different types of wood chips for a smokier flavor for BBQ ribs.  
+[ASSISTANT_SAID] Assistant recommended hickory, applewood, mesquite, cherry, and pecan wood chips for beginners.  
+[ASSISTANT_SAID] Assistant provided tips for using wood chips, including soaking them in water and starting with a single type.  
+[PREFERENCE] User decided to try hickory wood chips first.  
+[ASSISTANT_SAID] Assistant provided guidelines for setting up a smoker for BBQ ribs, recommending a temperature range of 225°F to 250°F (110°C to 120°C) and cooking times of 4-5 hours for baby back ribs and 5-6 hours for St. Louis-style ribs.  
+[ASSISTANT_SAID] Assistant outlined the setup process for the smoker, including preheating, seasoning ribs, adding wood chips, and monitoring temperature.  
+[ASSISTANT_SAID] Assistant suggested wrapping the ribs in foil after a few hours to promote tenderness.  
+[PREFERENCE] User is interested in making side dishes to accompany BBQ ribs.  
+[ASSISTANT_SAID] Assistant recommended classic BBQ sides including coleslaw, baked beans, grilled corn on the cob, collard greens, potato salad, garlic bread, mac and cheese, and fried okra.  
+[ASSISTANT_SAID] Assistant provided tips for preparing BBQ sides, emphasizing simplicity and fresh ingredients.  
+[PREFERENCE] User is thinking of making a side dish similar to the baked bean and coleslaw mix from

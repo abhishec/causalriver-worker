@@ -1,0 +1,29 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/24 (Wed) 13:28
+- [FACT] The user is looking for recommendations on new musicals to check out.
+- [FACT] The user has been on a theater kick lately.
+- [FACT] The user watched the 2020 Tony Awards ceremony online.
+- [FACT] The user has been listening to show tunes from *Dear Evan Hansen* on Spotify.
+- [EVENT] The user discussed *Dear Evan Hansen* with friends at a viewing party.
+- [ASSISTANT_SAID] The assistant recommended the following musicals: 
+  1. **Hadestown**
+  2. **The Inheritance**
+  3. **Ain't Too Proud**
+  4. **To Kill a Mockingbird**
+  5. **The Lehman Trilogy**
+  6. **Six**
+  7. **Moulin Rouge! The Musical**
+  8. **Jagged Little Pill**
+  9. **The Book of Mormon**
+  10. **Flying Over Sunset**
+- [ASSISTANT_SAID] The assistant described *Hadestown* as a folk-opera musical retelling of the Orpheus and Eurydice myth that won 8 Tony Awards in 2019.
+- [ASSISTANT_SAID] The assistant described *The Inheritance* as a two-part play-turned-musical exploring the lives of gay men in modern-day New York City, inspired by E.M. Forster's *Howards End*.
+- [ASSISTANT_SAID] The assistant described *Ain't Too Proud* as a jukebox musical telling the story of The Temptations.
+- [ASSISTANT_SAID] The assistant described *To Kill a Mockingbird* as Aaron Sorkin's adaptation of Harper Lee's classic novel.
+- [ASSISTANT_SAID] The assistant described *The Lehman Trilogy* as an epic play spanning three generations of the Lehman family.
+- [ASSISTANT_SAID] The assistant described *Six* as a high-energy musical about Henry VIII's six wives.
+- [ASSISTANT_SAID] The assistant described *Moulin Rouge! The Musical* as based on the Baz Luhrmann film with a stunning set and lavish costumes.
+- [ASSISTANT_SAID] The assistant described *Jagged Little Pill* as inspired by Alanis Morissette's iconic album.
+- [ASSISTANT_SAID] The assistant described *The Book of Mormon* as an irreverent comedy from the creators of South Park.
+- [ASSISTANT_SAID] The assistant described *Flying Over Sunset* as a new musical exploring the lives of Aldous Huxley, Clare Boothe Luce, and Cary Grant in the 1950s

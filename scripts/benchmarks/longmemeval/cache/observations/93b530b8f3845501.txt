@@ -1,0 +1,25 @@
+**Observation Log:**
+
+- [FACT] User is a big fan of oysters.
+- [FACT] User is trying to eat more plant-based.
+- [PREFERENCE] User is interested in seafood dishes.
+- [PREFERENCE] User is intrigued by vegetarian options.
+- [EVENT] User plans to check out The Atlantic for oysters.
+- [ASSISTANT_SAID] The Atlantic is known for providing some of the best oysters in Moreland, with an extensive oyster menu that includes varieties from all around Australia.
+- [ASSISTANT_SAID] The Atlantic offers a variety of seafood dishes, including:
+  1. Kingfish sashimi with yuzu, soy, and dressing.
+  2. Sautéed blue swimmer crab with garlic butter.
+  3. Grilled swordfish with green sauce.
+  4. Lobster bisque with crème fraîche and chives.
+- [ASSISTANT_SAID] The Atlantic also offers non-seafood options, including vegetarian dishes like cauliflower steak and beef options like Wagyu beef tenderloins.
+- [ASSISTANT_SAID] Suggested vegetarian dishes at The Atlantic include:
+  1. Salt-baked beetroot with horseradish and macadamia.
+  2. Ricotta gnocchi with zucchini, cherry tomatoes, and basil.
+  3. Grilled cauliflower steak with hummus, toasted almonds, and pomegranate.
+  4. Sautéed greens with garlic and lemon.
+- [ASSISTANT_SAID] Suggested vegan options at The Atlantic include:
+  1. Grilled eggplant with spiced lentils, preserved lemon, and tahini.
+  2. Roasted pumpkin with miso and sesame.
+  3. Heirloom tomatoes with basil and olive oil.
+  4. Grilled broccolini with anchovy-free sauce gribiche and pine nuts.
+- [ASSISTANT_CREATED] Provided a list of seafood dishes, vegetarian dishes, and vegan options available at The Atlantic.

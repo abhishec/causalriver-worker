@@ -1,0 +1,57 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/26 (Fri) 11:43  
+[USER] User asked how to run a SELECT statement using the Snowflake API.  
+[ASSISTANT_SAID] To run a SELECT statement using the Snowflake API, the user should:  
+[ASSISTANT_SAID] 1. Establish a connection to Snowflake using one of the available Snowflake clients (such as Python or Java).  
+[ASSISTANT_SAID] 2. Create a cursor object to execute SQL statements.  
+[ASSISTANT_SAID] 3. Use the execute() method on the cursor object to execute the SELECT statement.  
+[ASSISTANT_SAID] 4. Fetch the results of the SELECT statement using the fetchone() or fetchall() method on the cursor object.  
+[ASSISTANT_SAID] Provided a Python code snippet demonstrating how to run a SELECT statement using the Snowflake API.  
+[ASSISTANT_CREATED] Python code snippet includes connection parameters:  
+[ASSISTANT_CREATED] ```python  
+import snowflake.connector  
+
+# Connect to Snowflake  
+conn = snowflake.connector.connect(  
+    user='<USERNAME>',  
+    password='<PASSWORD>',  
+    account='<ACCOUNT_NAME>'  
+)  
+
+# Create a cursor object  
+cursor = conn.cursor()  
+
+# Execute a SELECT statement  
+cursor.execute('SELECT * FROM <TABLE_NAME>')  
+
+# Fetch the results  
+results = cursor.fetchall()  
+
+# Print the results  
+print(results)  
+
+# Close the cursor and connection  
+cursor.close()  
+conn.close()  
+```  
+[USER] User clarified they meant the web API, not using a client.  
+[ASSISTANT_SAID] To run a SELECT statement using the Snowflake Web API, the user can use the Snowflake REST API to execute a SQL statement and retrieve the results.  
+[ASSISTANT_SAID] Provided a cURL command demonstrating how to run a SELECT statement using the Snowflake Web API.  
+[ASSISTANT_CREATED] cURL command includes:  
+[ASSISTANT_CREATED] ```vbnet  
+curl -X POST \  
+  'https://<ACCOUNT_NAME>.snowflakecomputing.com/rest/v1/query/executing' \  
+  -H 'Authorization: Bearer <TOKEN>' \  
+  -H 'Content-Type: application/json' \  
+  -d '{  
+        "sqlText": "SELECT * FROM <TABLE_NAME>",  
+        "sequenceId": 0,  
+        "isInternal": false,  
+        "binds": [],  
+        "describeOnly": false,  
+        "parameters": [],  
+        "clientData": {  
+            "APP_ID": "my_app_id",  
+            "APP_VERSION": "1.0.0",  
+            "APP_NAME": "my_app_name

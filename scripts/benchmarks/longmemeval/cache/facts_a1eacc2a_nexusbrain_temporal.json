@@ -1,0 +1,72 @@
+{
+  "answer_0eb23770_1": [
+    {
+      "fact": "User is looking for tips on how to stay organized with writing projects.",
+      "type": "preference",
+      "entities": [
+        "writing projects",
+        "organization tips"
+      ]
+    },
+    {
+      "fact": "User has multiple writing projects including short stories, a journal, and a memoir.",
+      "type": "personal",
+      "entities": [
+        "short stories",
+        "journal",
+        "memoir"
+      ]
+    },
+    {
+      "fact": "User enjoys writing short stories.",
+      "type": "preference",
+      "entities": [
+        "short stories"
+      ]
+    },
+    {
+      "fact": "User has written four short stories since starting to write regularly.",
+      "type": "personal",
+      "entities": [
+        "four short stories"
+      ]
+    },
+    {
+      "fact": "User hopes to keep the momentum going with their writing.",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User is considering setting a goal for a certain number of short stories per month.",
+      "type": "preference",
+      "entities": [
+        "short stories",
+        "monthly goal"
+      ]
+    }
+  ],
+  "answer_0eb23770_2": [
+    {
+      "fact": "User has been writing regularly for three months",
+      "type": "event",
+      "entities": [
+        "writing",
+        "three months"
+      ]
+    },
+    {
+      "fact": "User has completed 7 short stories since they started writing",
+      "type": "event",
+      "entities": [
+        "7 short stories"
+      ]
+    },
+    {
+      "fact": "User is interested in experimenting with non-linear narrative structures in writing",
+      "type": "preference",
+      "entities": [
+        "non-linear narrative structures"
+      ]
+    }
+  ]
+}

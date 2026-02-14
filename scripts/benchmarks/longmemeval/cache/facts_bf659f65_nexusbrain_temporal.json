@@ -1,0 +1,132 @@
+{
+  "answer_7726e7e9_2": [
+    {
+      "fact": "User is into indie and folk-rock music.",
+      "type": "preference",
+      "entities": [
+        "indie music",
+        "folk-rock music"
+      ]
+    },
+    {
+      "fact": "User discovered The Whiskey Wanderers at a music festival last weekend.",
+      "type": "event",
+      "entities": [
+        "The Whiskey Wanderers",
+        "music festival"
+      ]
+    },
+    {
+      "fact": "User bought The Whiskey Wanderers' EP 'Midnight Sky' at the festival merchandise booth.",
+      "type": "event",
+      "entities": [
+        "The Whiskey Wanderers",
+        "Midnight Sky",
+        "festival merchandise booth"
+      ]
+    },
+    {
+      "fact": "User is looking for new music recommendations.",
+      "type": "preference",
+      "entities": []
+    },
+    {
+      "fact": "User is curious about discovering more local indie bands.",
+      "type": "preference",
+      "entities": [
+        "local indie bands"
+      ]
+    }
+  ],
+  "answer_7726e7e9_1": [
+    {
+      "fact": "User listens to Billie Eilish, especially her album 'Happier Than Ever'",
+      "type": "preference",
+      "entities": [
+        "Billie Eilish",
+        "Happier Than Ever"
+      ]
+    },
+    {
+      "fact": "User is interested in music recommendations similar to Billie Eilish",
+      "type": "preference",
+      "entities": [
+        "music recommendations",
+        "Billie Eilish"
+      ]
+    },
+    {
+      "fact": "User is particularly interested in Lorde and Halsey",
+      "type": "preference",
+      "entities": [
+        "Lorde",
+        "Halsey"
+      ]
+    },
+    {
+      "fact": "User uses Spotify to listen to music",
+      "type": "personal",
+      "entities": [
+        "Spotify"
+      ]
+    },
+    {
+      "fact": "User is looking for playlists or radio stations on Spotify for discovering new music",
+      "type": "preference",
+      "entities": [
+        "playlists",
+        "radio stations",
+        "Spotify"
+      ]
+    }
+  ],
+  "answer_7726e7e9_3": [
+    {
+      "fact": "User is looking for music festival recommendations in Colorado",
+      "type": "preference",
+      "entities": [
+        "music festival",
+        "Colorado"
+      ]
+    },
+    {
+      "fact": "User had an amazing time at the Red Rocks Amphitheatre when they saw Tame Impala live",
+      "type": "event",
+      "entities": [
+        "Red Rocks Amphitheatre",
+        "Tame Impala"
+      ]
+    },
+    {
+      "fact": "User got their vinyl signed after the Tame Impala show",
+      "type": "event",
+      "entities": [
+        "vinyl",
+        "Tame Impala"
+      ]
+    },
+    {
+      "fact": "User is a big fan of indie and folk music",
+      "type": "preference",
+      "entities": [
+        "indie music",
+        "folk music"
+      ]
+    },
+    {
+      "fact": "User is interested in the Telluride Bluegrass Festival",
+      "type": "event",
+      "entities": [
+        "Telluride Bluegrass Festival"
+      ]
+    },
+    {
+      "fact": "User wants to know if the Telluride Bluegrass Festival features smaller, up-and-coming acts",
+      "type": "opinion",
+      "entities": [
+        "Telluride Bluegrass Festival",
+        "up-and-coming acts"
+      ]
+    }
+  ]
+}

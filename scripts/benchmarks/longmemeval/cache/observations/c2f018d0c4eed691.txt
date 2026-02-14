@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [FACT] The user is interested in creating a basic website for personal viewing.
+- [PREFERENCE] The user wants to store links in a database format.
+- [PREFERENCE] The user desires a website similar to a Notion webpage with a gallery view set.
+- [PREFERENCE] The user would like options for gallery, table, and list views of the links.
+- [PREFERENCE] The user prefers to have multiple properties to organize and categorize links, ideally with color-coded tags.
+- [PREFERENCE] The user wants the webpage to blend features of Raindrop.io and Notion gallery-view database.
+- [ASSISTANT_SAID] The assistant stated that creating a website with a database and various views can be complicated.
+- [ASSISTANT_SAID] The assistant recommended choosing a programming language, suggesting PHP, Python, or Ruby, and decided to use PHP for the example.
+- [ASSISTANT_SAID] The assistant advised setting up a web server like Apache or Nginx to run PHP code.
+- [ASSISTANT_SAID] The assistant suggested creating a database using MySQL or PostgreSQL and using phpMyAdmin to manage it.
+- [ASSISTANT_SAID] The assistant mentioned designing a database schema and creating a table called "links" with columns for title, URL, description, tags, and category.
+- [ASSISTANT_SAID] The assistant recommended creating a form using HTML and CSS to input data into the database.
+- [ASSISTANT_SAID] The assistant stated that PHP should be used to handle form submissions and insert data into the database.
+- [ASSISTANT_SAID] The assistant suggested creating multiple views using HTML, CSS, and JavaScript.
+- [ASSISTANT_SAID] The assistant recommended using JavaScript (specifically jQuery) to switch between views.
+- [ASSISTANT_SAID] The assistant advised using CSS to style the website and implement color-coded tags for organization.
+- [ASSISTANT_CREATED] The assistant provided a sample HTML code snippet for the website, including a structure for the header, content, view selector, and view containers.
+- [ASSISTANT_CREATED] The assistant provided a sample CSS code snippet for styling the website, including styles for the header, content, view selector, buttons, and link display.

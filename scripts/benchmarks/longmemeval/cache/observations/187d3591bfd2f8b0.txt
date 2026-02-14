@@ -1,0 +1,32 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/08/28 (Mon) 17:35  
+[FACT] User is seeking advice from a professor regarding project implementation steps.  
+[EVENT] User mentions they have recent papers relevant to their project.  
+[ASSISTANT_SAID] Assistant confirms the user’s request and proposes a step-by-step plan to combine ideas from two papers to improve LLM's ability to use tools.  
+[ASSISTANT_CREATED] Assistant outlines a 10-step plan:  
+1. Review both papers.  
+2. Identify synergies.  
+3. Define goals.  
+4. Develop a framework.  
+5. Create a dataset.  
+6. Apply the framework.  
+7. Train the LLM.  
+8. Evaluate performance.  
+9. Iterate and refine.  
+10. Publish and share findings.  
+[FACT] User references two papers: "Context-faithful prompt" by Zhou et al., 2023, and "ReAct" by Yao et al., 2023.  
+[ASSISTANT_SAID] Assistant elaborates on item 4, "Develop a framework," and provides a detailed explanation of how to create a framework.  
+[ASSISTANT_CREATED] Assistant provides a structured framework example for enhancing LLM's ability to use a software tool:  
+A. Formulate an opinionated question.  
+B. Include counterfactual examples.  
+C. Select action items.  
+D. Add thoughts as natural language instructions.  
+E. Integrate API access.  
+[ASSISTANT_SAID] Assistant gives an example opinionated question: "What are the most crucial steps to effectively use software X for data analysis?"  
+[ASSISTANT_SAID] Assistant provides a counterfactual example: "What if someone skips the data preprocessing step while using software X?"  
+[ASSISTANT_SAID] Assistant suggests selecting relevant action items, such as providing a concise example of using the software for data preprocessing, analysis, and visualization.  
+[ASSISTANT_SAID] Assistant advises to provide thoughts in natural language instructions, e.g., "First, preprocess the data to remove any inconsistencies, then use the analysis module to identify trends, and finally, create visualizations to illustrate the results."  
+[ASSISTANT_SAID] Assistant mentions incorporating API access to tools or resources like Wikipedia for more accurate information.  
+[CHANGE] User indicates they do not have the resources to train the LLM.  
+[ASSISTANT_SAID] Assistant emphasizes that the framework can be used without the need for additional training.

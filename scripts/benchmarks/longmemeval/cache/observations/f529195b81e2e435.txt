@@ -1,0 +1,19 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/03/15 (Wed) 11:56  
+[EVENT] User just got a smoker today.  
+[PREFERENCE] User is looking for new BBQ sauce recipes to try out.  
+[PREFERENCE] User has been experimenting with making their own BBQ sauce from scratch and is always looking to improve.  
+[EVENT] User is excited to experiment with different types of wood and meats today.  
+[ASSISTANT_SAID] Assistant congratulated the user on getting a smoker and offered to help with BBQ sauce recipes.  
+[ASSISTANT_SAID] Assistant asked what type of wood the user is planning to experiment with today.  
+[ASSISTANT_CREATED] Assistant provided five BBQ sauce recipes:  
+[ASSISTANT_CREATED] **Recipe 1: Spicy Pineapple BBQ Sauce** - 1 cup ketchup, 1/2 cup pineapple juice, 1/4 cup brown sugar, 2 tablespoons apple cider vinegar, 1 teaspoon smoked paprika, 1/2 teaspoon ground cumin, 1/4 teaspoon cayenne pepper, salt and pepper to taste.  
+[ASSISTANT_CREATED] **Recipe 2: Kansas City-Style BBQ Sauce** - 1 cup ketchup, 1/2 cup molasses, 1/4 cup brown sugar, 2 tablespoons apple cider vinegar, 2 tablespoons Worcestershire sauce, 1 teaspoon smoked paprika, 1 teaspoon garlic powder, salt and pepper to taste.  
+[ASSISTANT_CREATED] **Recipe 3: Alabama-Style White BBQ Sauce** - 1 cup mayonnaise, 1/2 cup plain Greek yogurt, 1/4 cup chopped fresh dill, 2 tablespoons apple cider vinegar, 1 tablespoon Dijon mustard, 1/2 teaspoon garlic powder, salt and pepper to taste.  
+[ASSISTANT_CREATED] **Recipe 4: Chipotle BBQ Sauce** - 1 cup ketchup, 1/2 cup chipotle peppers in adobo sauce, 1/4 cup brown sugar, 2 tablespoons apple cider vinegar, 1 teaspoon smoked paprika, 1/2 teaspoon ground cumin, salt and pepper to taste.  
+[ASSISTANT_CREATED] **Recipe 5: Sweet and Smoky BBQ Sauce** - 1 cup ketchup, 1/2 cup honey, 1/4 cup apple cider vinegar, 2 tablespoons Dijon mustard, 1 teaspoon smoked paprika, 1/2 teaspoon ground cinnamon, salt and pepper to taste.  
+[ASSISTANT_SAID] Assistant encouraged the user to experiment with different woods and meats to find the perfect combination.  
+[PREFERENCE] User is thinking of trying out a mix of hickory and apple wood today.  
+[PREFERENCE] User has heard that hickory and apple wood pair well with pork and beef.  
+[ASSISTANT_SAID] Assistant provided recommended meat and

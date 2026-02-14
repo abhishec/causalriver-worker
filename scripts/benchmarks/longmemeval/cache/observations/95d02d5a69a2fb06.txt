@@ -1,0 +1,29 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/06/13 (Tue) 21:14
+- [PREFERENCE] User is looking for eco-friendly all-purpose cleaning sprays and prefers natural products.
+- [PREFERENCE] User is not a fan of the smell of their current cleaning spray.
+- [EVENT] User dusted the living room furniture today after not doing it for two weeks.
+- [ASSISTANT_SAID] The assistant praised the user for dusting the living room furniture and noted how quickly dust can accumulate.
+- [ASSISTANT_SAID] The assistant provided recommendations for eco-friendly all-purpose cleaning sprays, including:
+  1. Seventh Generation All-Purpose Cleaner: Plant-based, biodegradable, non-toxic, gentle citrusy scent.
+  2. Ecover All-Purpose Cleaner: Made with natural ingredients, mild fresh fragrance, cruelty-free, vegan-friendly.
+  3. Dr. Bronner's Sal Suds All-Purpose Cleaner: Made with coconut oil and olive oil, mild sweet scent.
+  4. Method Squirt + Mop All-Purpose Cleaner: Pleasant non-overpowering scent, biodegradable.
+  5. Branch Basics All-Purpose Cleaner: Fragrance-free, made with natural ingredients, free of harsh chemicals.
+  6. Mrs. Meyer's Clean Day All-Purpose Cleaner: Lovely gentle scent, made with natural ingredients, biodegradable, non-toxic.
+- [ASSISTANT_SAID] The assistant advised the user to read labels and check ingredients when switching to eco-friendly products.
+- [ASSISTANT_SAID] The assistant emphasized considering packaging and the company's sustainability practices when choosing eco-friendly products.
+- [PREFERENCE] User is considering making their own all-purpose cleaning spray using natural ingredients like baking soda and vinegar.
+- [ASSISTANT_SAID] The assistant provided a basic all-purpose cleaning spray recipe, including:
+  - 1 cup water
+  - 1/2 cup white vinegar
+  - 2 tablespoons castile soap
+  - 1 teaspoon baking soda
+  - 10 drops of essential oil (optional)
+- [ASSISTANT_SAID] The assistant provided instructions for the cleaning spray recipe and additional tips for DIY cleaning products.
+- [ASSISTANT_SAID] The assistant shared other DIY cleaning recipes, including:
+  1. Glass Cleaner: 1 cup water, 1/2 cup white vinegar, 1 tablespoon cornstarch.
+  2. Scouring Powder: 1 cup baking soda, 1/2 cup washing soda, 1 tablespoon castile soap.
+  3. Carpet Deodorizer: 1 cup baking soda, 1/2 cup cornstarch, 10 drops of essential oil.
+- [ASSISTANT_SAID] The assistant provided general tips for making DIY cleaning products, including starting small, labeling, storing safely,

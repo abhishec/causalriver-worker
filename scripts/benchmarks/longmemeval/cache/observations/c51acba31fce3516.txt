@@ -1,0 +1,39 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/26 (Fri) 13:37
+- [PREFERENCE] User is interested in learning more about the film industry, especially independent films and documentaries.
+- [PREFERENCE] User is particularly interested in films that explore themes of social justice and identity.
+- [PREFERENCE] User mentioned a preference for films similar to "Parasite" and "The Farewell."
+- [EVENT] User attended AFI Fest in LA, where they saw a screening of "Joker."
+- [EVENT] User attended a Q&A session with Todd Phillips and Joaquin Phoenix at AFI Fest.
+- [ASSISTANT_SAID] Assistant recommended the following narrative films: 
+  1. **Moonlight** (2016)
+  2. **The Florida Project** (2017)
+  3. **Mudbound** (2017)
+  4. **The Killing of a Sacred Deer** (2017)
+  5. **American Factory** (2019)
+- [ASSISTANT_SAID] Assistant recommended the following documentaries:
+  1. **13th** (2016)
+  2. **The Look of Silence** (2014)
+  3. **The Prison in Twelve Landscapes** (2016)
+  4. **The Blood Is at the Doorstep** (2017)
+  5. **For Sama** (2019)
+- [ASSISTANT_SAID] Assistant provided additional recommendations:
+  1. **The Act of Killing** (2012)
+  2. **Roma** (2018)
+  3. **Sorry to Bother You** (2018)
+- [PREFERENCE] User expressed particular interest in "Moonlight" and "The Florida Project."
+- [EVENT] User is taking a cinematography workshop online.
+- [ASSISTANT_SAID] Assistant provided insights on the cinematography of "Moonlight":
+  - Cinematographer: James Laxton
+  - Visual style characterized by lyrical, poetic, and introspective approach.
+  - Muted color palette with blues, greens, and yellows.
+  - Techniques include 1.85:1 aspect ratio, close-ups, available light, and slow dolly movements.
+- [ASSISTANT_SAID] Assistant provided insights on the cinematography of "The Florida Project":
+  - Cinematographer: Alexis Zabe
+  - Visual style characterized by vibrant, energetic, and playful approach.
+  - Bold, vibrant color scheme with pastels and neons.
+  - Techniques include 2.39:1 aspect ratio, natural light, and dynamic camerawork.
+- [ASSISTANT_SAID] Assistant discussed the use of natural light in "Moonlight":
+  - Extensive use of natural light during golden hour or overcast days.
+  - Practical light

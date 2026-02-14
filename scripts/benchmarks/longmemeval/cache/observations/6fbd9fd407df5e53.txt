@@ -1,0 +1,30 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/28 (Sun) 01:35
+- [EVENT] User is trying to get a sense of their online shopping habits.
+- [ASSISTANT_SAID] Assistant offered to help track online shopping habits and provided methods to estimate the number of times the user shopped online in the past month.
+- [ASSISTANT_SAID] Method 1: Check email for keywords like "order confirmation," "shipping update," or "receipt" from online retailers.
+- [ASSISTANT_SAID] Method 2: Review bank statements for transactions from online retailers.
+- [ASSISTANT_SAID] Method 3: Check browser history for visits to online retailers.
+- [ASSISTANT_SAID] Method 4: Use a password manager or browser extension to check online retailer login credentials.
+- [ASSISTANT_SAID] Method 5: Reflect on online shopping habits and recall the number of purchases made.
+- [EVENT] User has been keeping track of their purchases.
+- [TEMPORAL] User made a purchase on March 20th.
+- [TEMPORAL] User made a purchase on March 15th, which was a Sunday.
+- [EVENT] User was watching TV and decided to order something during a commercial break on March 15th.
+- [EVENT] User bought a pair of sneakers from Amazon on March 20th.
+- [EVENT] User bought a wireless charging pad from Best Buy's website on March 15th.
+- [TEMPORAL] User made a purchase on March 3rd from ASOS.
+- [EVENT] User has made three online purchases in March so far.
+- [ASSISTANT_SAID] Assistant asked if the user could think of any other purchases made in March.
+- [ASSISTANT_SAID] Assistant inquired about the trigger for the purchase on March 15th and the user's general shopping habits.
+- [PREFERENCE] User mentioned that they sometimes make impulse buys but also plan purchases in advance.
+- [EVENT] User had been eyeing a specific pair of jeans from ASOS for a while before purchasing on March 3rd.
+- [EVENT] User was waiting for a sale on denim before purchasing the jeans.
+- [PREFERENCE] User is trying to be mindful of their spending.
+- [CHANGE] User is trying to cut back on subscription services and has been canceling them.
+- [CHANGE] User is trying to reduce spending on eating out and takeout by cooking more at home and meal prepping.
+- [PREFERENCE] User struggles with impulse buys, especially with tech gadgets or accessories.
+- [ASSISTANT_SAID] Assistant offered general tips on managing spending habits and avoiding impulse buys.
+- [ASSISTANT_SAID] Assistant suggested implementing a 30-day rule for impulse purchases.
+-

@@ -1,0 +1,29 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/24 (Wed) 23:45  
+[USER] User wants to create a Twitter card image size in HTML.  
+[ASSISTANT_SAID] The recommended size for a Twitter card image is 1200x628 pixels.  
+[ASSISTANT_SAID] To include the image in HTML, use the `<meta>` tag with `name` attribute set to `twitter:image`.  
+[ASSISTANT_CREATED] Example HTML code provided:  
+```php
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.example.com/image.jpg">
+```  
+[ASSISTANT_SAID] The `twitter:card` property is set to `summary_large_image`, which tells Twitter to display the image as a large summary card.  
+[ASSISTANT_SAID] Additional `<meta>` tags are needed for title, description, and Twitter handle.  
+[ASSISTANT_SAID] More information can be found in Twitter's documentation: <https://developer.twitter.com/en/docs/twitter-for-websites/cards/guides/getting-started>.  
+[USER] User has used `og:image` in their HTML, sized at 1200x628 pixels, but Twitter shows a default preview image of 360x360 pixels when tweeting a link.  
+[USER] Asks if they need to add something to ensure Twitter shows the link preview image at 1200x628 pixels.  
+[ASSISTANT_SAID] Yes, they need to include `twitter:card` and `twitter:image` meta tags.  
+[ASSISTANT_CREATED] Complete example provided:  
+```php
+<meta property="og:image" content="https://www.example.com/image.jpg" />
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.example.com/image.jpg">
+```  
+[USER] Confirms that the `twitter:image` can be the same URL as the `og:image` and asks if 1200x628 pixels is the correct size for `twitter:image`.  
+[ASSISTANT_SAID] Yes, 1200x628 pixels is the correct size for `twitter:image`.  
+[ASSISTANT_SAID] The recommended aspect ratio for Twitter card images is 1.91:1.  
+[ASSISTANT_SAID] The image should be served with the correct content type and file size should be less than 5 MB.  
+[ASSISTANT_SAID] More information can be found in Twitter's documentation: <https://developer.twitter.com/en/docs/twitter-for-websites/cards/guides/getting-started>.  
+[USER] User mentions they have `og:image` parameters in their code and asks if they can remove them and add something else.

@@ -1,0 +1,35 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/20 (Sat) 12:38
+
+[ASSISTANT_SAID] The assistant provided a step-by-step simulation of the A* algorithm from Lugoj to Bucharest using the straight line distance heuristic (H1) for the Romanian problem.
+
+[ASSISTANT_SAID] The initial cost g(Lugoj) is set to 0.
+
+[ASSISTANT_SAID] The frontier is initialized with [(Lugoj, 244)] and the explored set is [].
+
+[ASSISTANT_SAID] The node with the lowest estimated cost f(n) is popped from the frontier, added to the explored set, and its neighbors are generated.
+
+[ASSISTANT_SAID] After the first step, the frontier is [] and the explored set is [Lugoj], with generated neighbors [Timisoara, Mehadia].
+
+[ASSISTANT_SAID] For each neighbor, the estimated cost f(n) is calculated, and the frontier is updated to [(Mehadia, 241), (Timisoara, 329)].
+
+[ASSISTANT_SAID] The node Mehadia is popped from the frontier, added to the explored set, and its neighbors are generated.
+
+[ASSISTANT_SAID] After the second step, the frontier is [(Timisoara, 329)] and the explored set is [Lugoj, Mehadia], with generated neighbors [Drobeta, Lugoj].
+
+[ASSISTANT_SAID] The process is repeated until the goal node, Bucharest, is reached and added to the explored set.
+
+[ASSISTANT_SAID] The final frontier is [(Timisoara, 329), (Drobeta, 242), (Lugoj, 504), (Craiova, 265)] and the explored set is [Lugoj, Mehadia, Drobeta, Craiova, Pitesti, Bucharest].
+
+[ASSISTANT_SAID] The path found by the A* algorithm is [Bucharest, Pitesti, Craiova, Drobeta, Mehadia, Lugoj].
+
+[ASSISTANT_SAID] The assistant explained that a heuristic function that never overestimates the number of steps to the goal is called an admissible heuristic function.
+
+[ASSISTANT_SAID] An admissible heuristic function satisfies the condition h(n) ≤ h*(n), where h*(n) is the true cost of the cheapest path from node n to the goal node g.
+
+[ASSISTANT_SAID] The assistant stated that the A* search algorithm guarantees finding the shortest path if an admissible heuristic function is used.
+
+[USER] Asked for an example of an overestimation of the number of steps to the goal.
+
+[ASSISTANT_SAID

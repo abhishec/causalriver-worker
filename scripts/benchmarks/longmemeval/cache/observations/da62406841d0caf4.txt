@@ -1,0 +1,28 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/03/29 (Wed) 09:43  
+[FACT] User has been waking up every Monday, Wednesday, and Friday at 6:30 am to go for a 30-minute jog.  
+[FACT] User has been doing strength training exercises.  
+[PREFERENCE] User is trying to plan out their workout routine for the week.  
+[CHANGE] User has been doing yoga on Tuesdays and Thursdays to improve flexibility.  
+[PREFERENCE] User finds yoga helpful for flexibility.  
+[ASSISTANT_SAID] Suggested core exercises include:  
+[ASSISTANT_SAID] 1. Plank: Hold for 30-60 seconds, rest for 30 seconds, repeat for 3-5 sets.  
+[ASSISTANT_SAID] 2. Russian twists: 3 sets of 15-20 reps.  
+[ASSISTANT_SAID] 3. Leg raises: 3 sets of 15-20 reps.  
+[ASSISTANT_SAID] 4. Bicycle crunches: 3 sets of 15-20 reps.  
+[ASSISTANT_SAID] 5. Banded crunches: 3 sets of 12-15 reps.  
+[ASSISTANT_SAID] 6. Banded rotations: 3 sets of 12-15 reps.  
+[ASSISTANT_SAID] 7. Weighted crunches: 3 sets of 12-15 reps.  
+[ASSISTANT_SAID] 8. Russian twists with weight: 3 sets of 12-15 reps.  
+[ASSISTANT_SAID] 9. Pallof press: 3 sets of 12-15 reps.  
+[ASSISTANT_SAID] 10. Side plank: 3 sets on each side for 30-60 seconds.  
+[ASSISTANT_SAID] Recommended to start with lower reps and sets, gradually increase, warm up before workouts, focus on proper form, and rest for 1-2 days between core workouts.  
+[PREFERENCE] User is considering adding yoga to their routine to improve flexibility.  
+[ASSISTANT_SAID] Discussed pros and cons of doing yoga on the same day as jogging versus different days.  
+[ASSISTANT_SAID] Suggested experimenting with both approaches to see what works best for the user.  
+[FACT] User has been using a fitness app to track progress.  
+[PREFERENCE] User finds tracking progress helpful for staying motivated.  
+[PREFERENCE] User tries to remind themselves of their goals and how far they've come to push through when they don't feel like exercising.  
+[ASSISTANT_SAID] Provided tips to stay motivated, including:  
+[ASSISTANT_SAID] 1. Set specific and achievable goals

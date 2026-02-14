@@ -1,0 +1,24 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/02/17 (Fri) 14:52
+- [ASSISTANT_SAID] The assistant offered to translate something for the user.
+- [USER] The user described a toy car and explained how it moves, using it as an analogy to introduce the concept of quantum physics.
+- [ASSISTANT_SAID] The assistant translated the user's explanation about the toy car and quantum physics into Spanish.
+- [USER] The user asked for an explanation of how to form the present simple in English.
+- [ASSISTANT_SAID] The assistant explained the formation of the present simple in English, providing examples for all subject pronouns and noting exceptions for some irregular verbs.
+- [USER] The user inquired about the difference between "going to" and "will."
+- [ASSISTANT_SAID] The assistant explained the differences between "going to" and "will," providing examples for each usage.
+- [USER] The user requested to interact in English using a basic level.
+- [ASSISTANT_SAID] The assistant agreed and initiated a basic conversation by asking how the user was doing.
+- [USER] The user responded that their day was "very good."
+- [ASSISTANT_SAID] The assistant expressed gladness about the user's good day and asked if there was anything else the user wanted to practice or talk about in English.
+- [USER] The user stated they would share something another time.
+- [ASSISTANT_SAID] The assistant acknowledged the user's statement and encouraged them to reach out in the future.
+- [USER] The user asked if the assistant could correct their errors in an English text.
+- [ASSISTANT_SAID] The assistant confirmed they could correct the user's text and requested the text to be sent.
+- [USER] The user provided a text about their previous day, stating they "waked up" and "taked a shower."
+- [ASSISTANT_SAID] The assistant corrected the user's text to: "Yesterday, I woke up at 6 and then I took a shower. I went to work by bus."
+- [USER] The user requested to practice a job interview in English related to a digital marketing position.
+- [ASSISTANT_SAID] The assistant agreed to practice a job interview and asked if the user wanted to be the interviewer or the interviewee.
+- [USER] The user chose to be the interviewer.
+- [ASSISTANT_SAID] The assistant provided a detailed prompt for the interview, including questions about the user's background in digital marketing, strengths and weaknesses, successful campaigns, thoughts on the future of digital marketing, and availability for the role.

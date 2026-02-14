@@ -1,0 +1,21 @@
+**Observation Log:**
+
+[FACT] The user is looking for dance classes in their area.  
+[ASSISTANT_SAID] The assistant cannot access the user's location and needs the city or zip code to recommend dance studios or instructors.  
+[ASSISTANT_SAID] The assistant suggested five ways to find dance classes: online search, dance studio directories, social media, community centers, and word of mouth.  
+[ASSISTANT_SAID] The assistant provided tips for evaluating potential studios or instructors, including checking schedules, prices, reviews, teaching style, and asking about beginner classes.  
+[USER] The user asked for the best way to practice dance at home and for online resources to improve their technique.  
+[ASSISTANT_SAID] The assistant provided tips for practicing dance at home, including creating a safe space, warming up, practicing technique, and using online resources.  
+[ASSISTANT_SAID] The assistant listed specific online resources, including YouTube channels and apps, for practicing dance at home.  
+[ASSISTANT_SAID] The assistant recommended YouTube channels such as DanceWithMe, Salsa Addiction, and MattSteffanina for dance tutorials.  
+[USER] The user mentioned listening to a lot of Latin music on Spotify and asked for playlists or radio stations focusing on salsa or Zumba music.  
+[ASSISTANT_SAID] The assistant provided a list of Spotify playlists for salsa and Zumba, including "Salsa Essentials," "Zumba Fitness," and "Latin Hits."  
+[ASSISTANT_SAID] The assistant also mentioned specific radio stations like Salsa 95.7 FM and La Mega 97.9 FM that focus on Latin music.  
+[USER] The user expressed interest in finding Bollywood dance classes or instructors in their area after enjoying a workshop.  
+[ASSISTANT_SAID] The assistant stated that it cannot access the user's location and suggested ways to find Bollywood dance classes, including online search, social media, community centers, and word of mouth.  
+[ASSISTANT_SAID] The assistant advised the user to consider the instructor's experience, style, level, and reviews when searching for a Bollywood dance class.  
+[USER] The user requested online resources or YouTube channels for Bollywood dance tutorials or classes to practice at home.  
+[ASSISTANT_SAID] The assistant provided a list of YouTube channels for Bollywood dance tutorials, including DanceWithNadia, Bollywood Dance Tutorials Live, and The Bollywood Dance Academy.  
+[ASSISTANT_SAID] The assistant mentioned online dance platforms like DanceClass.com and MasterClass for Bollywood dance classes.  
+[ASSISTANT_SAID] The assistant listed websites and blogs such as BollywoodDanceGuide.com and TheBollywoodDancer.com for additional resources.  
+[TEMPORAL] The session date is 2023/05/28 (Sun) at

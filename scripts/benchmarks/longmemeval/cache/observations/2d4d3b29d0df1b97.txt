@@ -1,0 +1,17 @@
+**Observation Log:**
+
+- [FACT] The user is looking to find a Recruitment Manager for their BPO company.
+- [FACT] The user is inquiring about questions to ask a recruiting company in the Philippines.
+- [ASSISTANT_SAID] The assistant provided a list of questions to ask a recruiting company.
+- [ASSISTANT_CREATED] The assistant created a list of 10 questions for the user to ask a recruiting company:
+  1. What is your recruitment process for hiring a Recruitment Manager for a BPO company?
+  2. How do you source potential candidates for this position?
+  3. What is your experience in recruiting for similar roles in the BPO industry?
+  4. Can you provide us with some examples of successful placements you have made for similar positions in the past?
+  5. What is your understanding of the BPO industry and its recruitment challenges?
+  6. What is your strategy for attracting and retaining top talent for our company?
+  7. What is your approach to conducting interviews and assessing candidate fit for our company culture?
+  8. Can you provide us with a timeline for the recruitment process and an estimated timeframe for filling the position?
+  9. What is your fee structure for this service?
+  10. What ongoing support do you provide for successful candidates after they are hired?
+- [TEMPORAL] The session date is 2023/05/27 (Sat) 05:33.

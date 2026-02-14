@@ -1,0 +1,26 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/21 (Sun) 18:33  
+[FACT] User wants the assistant to act as a software developer.  
+[PREFERENCE] User wants to develop a web app for trading cryptocurrency named All2Trade.  
+[FACT] User specifies that the programming language to be used is Python 3, along with Flask and MySQL.  
+[ASSISTANT_SAID] The purpose of the application is to make money using the condensed knowledge of the user base.  
+[ASSISTANT_SAID] The users of the application are everyone who wants to help the system make the right decisions and wants a portion of the revenues.  
+[ASSISTANT_SAID] The application features will be completely automated and minimal.  
+[ASSISTANT_SAID] Users will provide their opinions on the future trend of the currency through a simple interface.  
+[FACT] The use of the platform will be completely free for users.  
+[ASSISTANT_SAID] The business will generate revenue by trading using users' opinions, paying them a small percentage of the payout, and taking the difference.  
+[ASSISTANT_SAID] Recommended architecture includes using Flask for the frontend, MySQL for the database, and Python for the backend.  
+[ASSISTANT_SAID] Suggested libraries include Pandas for data manipulation and ccxt for interacting with cryptocurrency exchanges.  
+[ASSISTANT_SAID] Suggested implementing user authentication and authorization using Flask-Login and Flask-JWT.  
+[ASSISTANT_SAID] Suggested automating the trading process by regularly fetching market data and making trades based on users' opinions.  
+[USER] Asks how to expand the architecture by adding a deep learning system that learns and evolves over time.  
+[ASSISTANT_SAID] Suggested defining the input and output of the deep learning model, with input being users' opinions and market data, and output being a prediction of future trends.  
+[ASSISTANT_SAID] Recommended choosing a deep learning framework such as TensorFlow, PyTorch, or Keras for model architecture.  
+[ASSISTANT_SAID] Suggested training the model using a dataset of past market data and users' opinions.  
+[ASSISTANT_SAID] Recommended integrating the model into the web application by adding a new endpoint to the backend.  
+[ASSISTANT_SAID] Suggested periodically retraining the model using the latest data to improve accuracy.  
+[USER] Requests the structure the database might have.  
+[ASSISTANT_SAID] Provided a database structure with the following tables: Users, Opinions, Trades, and Payouts.  
+[ASSISTANT_CREATED] Users table includes fields: id, username, password, email, first_name, last_name.  
+[ASSISTANT_CREATED] Opinions table includes fields: id

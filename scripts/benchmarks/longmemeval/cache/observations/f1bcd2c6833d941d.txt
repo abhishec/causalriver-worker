@@ -1,0 +1,18 @@
+**Observation Log**
+
+**Session Date:** 2023/03/02 (Thu) 12:45  
+**Session ID:** sharegpt_yEBEhhw_0
+
+1. [FACT] The user has a website about an AI tool called PromptAI.
+2. [ASSISTANT_CREATED] The assistant created a Privacy Policy for PromptAI.
+3. [ASSISTANT_SAID] The Privacy Policy states that PromptAI respects user privacy and is committed to protecting personal information.
+4. [ASSISTANT_SAID] The Privacy Policy explains how information is collected, used, and disclosed when using PromptAI.
+5. [ASSISTANT_SAID] Users consent to the collection, use, and disclosure of personal information by using PromptAI.
+6. [ASSISTANT_SAID] Information collected includes personal information (name, email), usage information (IP address, browser type, device type, operating system), and feedback (writing prompts and responses).
+7. [ASSISTANT_SAID] The information is used to provide and improve PromptAI, communicate with users, and comply with legal obligations.
+8. [ASSISTANT_SAID] Information may be shared with third parties such as service providers, during business transfers, and for legal purposes.
+9. [ASSISTANT_SAID] The Privacy Policy states that information is retained as long as necessary to provide PromptAI and comply with legal obligations.
+10. [ASSISTANT_SAID] Reasonable measures are taken to protect user information from unauthorized access, but absolute security cannot be guaranteed.
+11. [ASSISTANT_SAID] Users have rights regarding their personal information, including access, correction, deletion, and the right to object to or restrict processing.
+12. [ASSISTANT_SAID] Users can contact PromptAI at support@promptai.com for questions or concerns about the Privacy Policy.
+13. [ASSISTANT_SAID] The Privacy Policy may be updated, and users will be notified of material changes via email or website notice.

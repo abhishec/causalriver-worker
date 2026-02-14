@@ -1,0 +1,20 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/06/03 (Sat) 12:17  
+[EVENT] User is trying to plan out meals for the week.  
+[EVENT] User bought ground beef at Trader Joe's.  
+[PREFERENCE] User is looking for meal inspiration, specifically for tacos.  
+[ASSISTANT_SAID] Tacos are a great idea and the assistant is happy to help with recipes.  
+[ASSISTANT_SAID] Suggested recipe: Classic Beef Tacos - brown ground beef with onion, garlic, and taco seasoning, served in taco shells with toppings like shredded lettuce, diced tomatoes, shredded cheese, sour cream, and salsa.  
+[ASSISTANT_SAID] Suggested recipe: Korean BBQ Tacos - add Korean chili flakes to ground beef, serve with kimchi slaw, cilantro, and sriracha.  
+[ASSISTANT_SAID] Suggested recipe: Southwestern Tacos - mix in diced bell peppers and onions, top with black beans, diced tomatoes, avocado, sour cream, and queso fresco.  
+[ASSISTANT_SAID] Suggested recipe: Mexican Street Corn Tacos - add frozen corn kernels to ground beef, serve with grilled corn, cotija cheese, cilantro, and lime juice.  
+[ASSISTANT_SAID] Suggested other ideas: Taco Salad, Stuffed Bell Peppers, Beef and Bean Chili.  
+[ASSISTANT_SAID] Suggested sides for Korean BBQ Tacos: Kimchi Coleslaw, Cilantro Lime Rice, Roasted Gochujang Broccoli, Pickled Carrots and Daikon, Cucumber Kimchi Salad, Fried Wonton Chips.  
+[PREFERENCE] User decided to try the Korean BBQ Tacos.  
+[ASSISTANT_SAID] Recommended Kimchi Coleslaw recipe: 2 cups shredded cabbage, 1/2 cup chopped kimchi, 2 tablespoons mayonnaise (optional), 1 tablespoon rice vinegar, 1 teaspoon honey, salt and pepper to taste.  
+[ASSISTANT_SAID] Suggested a 2:1 or 3:1 ratio of cabbage to kimchi for the slaw.  
+[ASSISTANT_SAID] Suggested Cilantro Lime Rice recipe: cook rice, mix with cilantro, lime juice, and olive oil.  
+[ASSISTANT_SAID] Suggested drinks to pair with the meal: Soju Spritz, Cucumber Lime Refresher, Iced Tea with Ginger and Honey, Korean Iced Coffee, Sparkling Water with Lime and Mint, Beer.  
+[PREFERENCE] User chose to try the Cucumber Lime Refresher.  
+[ASSISTANT_SAID] Provided a recipe for Korean chili flake-infused simple syrup: 1 cup sugar, 1 cup water, 1-2 teaspoons Korean chili flakes, heat until sugar dissolves, steep for 30

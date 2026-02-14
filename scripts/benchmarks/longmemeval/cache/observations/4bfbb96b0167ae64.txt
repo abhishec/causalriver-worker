@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [FACT] The user is looking to order skincare products online.
+- [PREFERENCE] The user is interested in finding good deals or discounts on skincare products.
+- [EVENT] The user used a buy one get one free coupon on the Glowing Skin website on the 22nd.
+- [PREFERENCE] The user is interested in the brand "Glowing Skin."
+- [PREFERENCE] The user is looking for a good deal on facial moisturizer or serum products from Glowing Skin.
+- [ASSISTANT_SAID] The assistant found a 20% off sitewide deal for Glowing Skin, using the code GLOW20 at checkout.
+- [ASSISTANT_SAID] The assistant mentioned a buy one get 50% off promotion for facial moisturizers or serums, where the second item of equal or lesser value is 50% off.
+- [ASSISTANT_SAID] The assistant noted that Glowing Skin is offering free standard shipping on all orders over $50.
+- [ASSISTANT_SAID] The assistant described Glowing Skin's loyalty program, which rewards customers with points for every purchase.
+- [ASSISTANT_SAID] The assistant checked deal sites like RetailMeNot, Coupons.com, and Groupon but found no additional promo codes or discounts for Glowing Skin.
+- [ASSISTANT_SAID] The assistant provided information about Glowing Skin's welcome series, birthday offer, tiered loyalty program, refer-a-friend program, and exclusive offers.
+- [ASSISTANT_SAID] The assistant explained how to stack the 20% off sitewide deal with the buy one get 50% off deal, providing an example of how the savings would work.
+- [PREFERENCE] The user expressed interest in finding more deals like the buy one get one free coupon in the future.
+- [ASSISTANT_SAID] The assistant recommended signing up for Glowing Skin's email newsletter and following them on social media to stay informed about upcoming promotions.
+- [ASSISTANT_SAID] The assistant provided details about Glowing Skin's price matching and price adjustment policy, including the time frames and requirements for each.
+- [ASSISTANT_SAID] The assistant noted that the price match guarantee is valid within 7 days of purchase and requires proof of the lower price.
+- [ASSISTANT_SAID] The assistant mentioned that the price adjustment policy is valid within 14 days of purchase and requires contacting customer service.
+- [ASSISTANT_SAID] The assistant highlighted exclusions to the price matching and price adjustment policies, such as auction sites and products that are part of a bundle.
+- [TEMPORAL] The session date is 2023/04/11 (Tue) 23:24.

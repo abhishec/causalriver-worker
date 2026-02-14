@@ -1,0 +1,24 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/21 (Sun) 20:43  
+[ASSISTANT_SAID] Project Idea: Smart Reservation System for Hotels  
+[ASSISTANT_SAID] Description: Develop a reservation system for hotels that allows users to search for available rooms, make bookings, and manage their reservations.  
+[ASSISTANT_SAID] Tech Stack: Microservices architecture, API Gateway, GraphQL, Distributed Database, Web Portal, Machine Learning.  
+[ASSISTANT_SAID] Microservices: Each microservice can be responsible for a specific feature or functionality.  
+[ASSISTANT_SAID] API Gateway: Use an API gateway to provide a single entry point for clients, responsible for authentication, rate limiting, and routing requests.  
+[ASSISTANT_SAID] GraphQL: Create a flexible API that allows clients to specify the data they need, improving performance.  
+[ASSISTANT_SAID] Distributed Database: Use Apache Cassandra or MongoDB for scalability and high availability.  
+[ASSISTANT_SAID] Web Portal: Use Angular for a user-friendly interface, with Angular Universal for server-side rendering, ngrx for state management, and rxjs for reactive programming.  
+[ASSISTANT_SAID] Machine Learning: Use TensorFlow.js in a microservice to develop a recommendation engine based on user preferences and booking history.  
+[ASSISTANT_SAID] Additional Features: Payment Gateway, Room Upgrades, Cancellation Policies.  
+[ASSISTANT_SAID] Deployment: Use Docker for containerization, Kubernetes for orchestration, and CI/CD tools like Jenkins for automation.  
+[USER] Requested integration of TensorFlow.js as a microservice and mentioned using Spring Cloud API Gateway, Eureka, and Netflix.  
+[USER] Indicated the reservation website should cater to multiple venues, not just hotels.  
+[ASSISTANT_SAID] Upgraded Project Idea: Smart Reservation System for Multiple Venues, including hotels, restaurants, and entertainment venues.  
+[ASSISTANT_SAID] Description: Allows users to search for available spaces, make bookings, and manage reservations.  
+[ASSISTANT_SAID] Additional Features: Event Scheduling, User Feedback.  
+[ASSISTANT_SAID] Middleware: Suggested using logging, authentication, rate limiting, caching, load balancing, and API gateway middleware.  
+[ASSISTANT_SAID] Middleware Purpose: Improve debugging, security, performance, and scalability of the system.  
+[ASSISTANT_SAID] Sprint 1 Task 3: Implement GraphQL API for hotels search with a time estimation of 3-4 days and 5 story points.  
+[ASSISTANT_SAID] Deliverables for Task 3: A working GraphQL API and documentation of the API and testing process.  
+[ASSISTANT

@@ -1,0 +1,35 @@
+{
+  "answer_ultrachat_234453": [
+    {
+      "fact": "User is interested in unique shopping experiences in Bandung.",
+      "type": "preference",
+      "entities": [
+        "shopping experiences",
+        "Bandung"
+      ]
+    },
+    {
+      "fact": "User plans to start their shopping at Cihampelas Walk.",
+      "type": "preference",
+      "entities": [
+        "Cihampelas Walk"
+      ]
+    },
+    {
+      "fact": "User intends to try Miss Bee Providore for food.",
+      "type": "preference",
+      "entities": [
+        "Miss Bee Providore"
+      ]
+    },
+    {
+      "fact": "User is looking for good restaurants or cafes in the Cihampelas Walk area.",
+      "type": "preference",
+      "entities": [
+        "restaurants",
+        "cafes",
+        "Cihampelas Walk"
+      ]
+    }
+  ]
+}

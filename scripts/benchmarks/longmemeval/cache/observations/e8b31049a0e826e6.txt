@@ -1,0 +1,19 @@
+### Observation Log
+
+[TEMPORAL] Session Date: 2023/05/25 (Thu) 02:07  
+[ASSISTANT_SAID] The assistant provided an outline for ME2.4, which covers how to use groupby and pivot tables to summarize data.  
+[ASSISTANT_SAID] The background for ME2.4 states that as a data analyst at a bank, one often needs to summarize large amounts of transactional data to understand customer behavior, trends, and patterns.  
+[ASSISTANT_SAID] The objective of ME2.4 is to learn how to use the groupby and pivot table functions in Pandas to summarize transactional data.  
+[ASSISTANT_SAID] The steps for ME2.4 include loading data from a CSV file, grouping data by customer ID and transaction type, aggregating data, generating summary statistics using pivot tables, and outputting the summary statistics to new CSV files.  
+[ASSISTANT_CREATED] Example code for ME2.4 was provided, demonstrating how to use Pandas to load, group, aggregate, and output banking transaction data.  
+[ASSISTANT_SAID] The expected output for ME2.4 includes two new CSV files: `transaction_summary.csv` and `pivot_summary.csv`, containing summarized data.  
+[USER] Requested to continue working on practical examples with Python code.  
+[USER] Suggested naming the exercises for Module 1 as ME1.1, ME1.2, ME1.3, ME1.4, etc.  
+[USER] Requested to start with Module 1 exercises and specifically asked for ME1.1, focusing on control flow statements to process banking data.  
+[ASSISTANT_SAID] The assistant provided an outline for ME3.1, which is an exercise on reading and cleaning data from a CSV file using Python.  
+[ASSISTANT_SAID] The background for ME3.1 states that data analysts at banks often process large amounts of banking data to identify trends and insights.  
+[ASSISTANT_SAID] The objective of ME3.1 is to demonstrate how to read in a CSV file containing banking data and clean it by removing null values and converting data types.  
+[ASSISTANT_SAID] The steps for ME3.1 include importing necessary libraries, reading the CSV file, removing null values, converting data types, and saving the cleaned data to a new CSV file.  
+[ASSISTANT_CREATED] Example code for ME3.1 was provided, demonstrating how to read, clean, and save banking data using Pandas.  
+[ASSISTANT_SAID] The expected output for ME3.1 is a cleaned banking data CSV file named `cleaned_banking_data.csv`.  
+[ASSISTANT_SAID] The assistant provided an outline for ME3.2, which covers manipulating Excel files

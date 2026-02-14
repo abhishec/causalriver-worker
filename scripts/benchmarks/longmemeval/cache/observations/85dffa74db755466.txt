@@ -1,0 +1,26 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/25 (Thu) 16:38
+- [FACT] User is a student studying environmental science.
+- [ASSISTANT_SAID] Faculty members and research centers at the University of Exeter provide guidance, training, and resources for student research.
+- [ASSISTANT_SAID] Faculty members act as mentors and supervisors for student research projects, providing guidance and feedback.
+- [ASSISTANT_SAID] Faculty members help students identify research opportunities, secure funding, and develop research proposals.
+- [ASSISTANT_SAID] Research centers provide access to research facilities, equipment, and databases.
+- [ASSISTANT_SAID] Research centers organize workshops, conferences, and seminars for students to present research findings and network.
+- [ASSISTANT_SAID] Students develop research skills and gain experience through collaboration with faculty and research centers.
+- [ASSISTANT_SAID] Recommended research centers for environmental science: 
+  1. Centre for Ecology and Conservation
+  2. Environment and Sustainability Institute
+  3. Global Systems Institute
+  4. Land, Environment, Economics and Policy Institute
+- [PREFERENCE] User finds the Environment and Sustainability Institute interesting.
+- [ASSISTANT_SAID] To get involved with research projects at the ESI, user should:
+  1. Explore the ESI website for ongoing research projects.
+  2. Reach out to faculty members or researchers at the ESI.
+  3. Attend seminars and events hosted by the ESI.
+  4. Apply for research opportunities available for students.
+- [ASSISTANT_SAID] Most seminars and events at the ESI are open to all students, regardless of their field of study.
+- [ASSISTANT_SAID] ESI events are designed to bring together researchers, students, and professionals from various fields.
+- [ASSISTANT_SAID] Attending ESI events can help user learn about research, network, and discover new areas of interest.
+- [EVENT] User plans to check out upcoming ESI events.
+- [ASSISTANT_SAID] Encouragement for user to attend ESI events to explore opportunities at the University of Exeter.

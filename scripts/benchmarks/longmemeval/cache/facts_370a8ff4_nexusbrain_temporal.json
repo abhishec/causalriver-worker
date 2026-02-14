@@ -1,0 +1,82 @@
+{
+  "answer_61d1be50_1": [
+    {
+      "fact": "User has recovered from the flu",
+      "type": "event",
+      "entities": [
+        "flu"
+      ]
+    },
+    {
+      "fact": "User is thinking about getting back into their exercise routine",
+      "type": "preference",
+      "entities": [
+        "exercise routine"
+      ]
+    },
+    {
+      "fact": "User has been doing outdoor activities like gardening",
+      "type": "personal",
+      "entities": [
+        "gardening"
+      ]
+    },
+    {
+      "fact": "User is considering skipping walking and going straight to jogging with short intervals",
+      "type": "preference",
+      "entities": [
+        "jogging",
+        "walking"
+      ]
+    },
+    {
+      "fact": "User appreciates detailed tips on easing into jogging",
+      "type": "opinion",
+      "entities": [
+        "tips",
+        "jogging"
+      ]
+    }
+  ],
+  "answer_61d1be50_2": [
+    {
+      "fact": "User is planning a summer vacation.",
+      "type": "event",
+      "entities": [
+        "summer vacation"
+      ]
+    },
+    {
+      "fact": "User enjoys outdoor activities at the beach.",
+      "type": "preference",
+      "entities": [
+        "outdoor activities",
+        "beach"
+      ]
+    },
+    {
+      "fact": "User has gone on their 10th jog outdoors.",
+      "type": "event",
+      "entities": [
+        "10th jog",
+        "outdoors"
+      ]
+    },
+    {
+      "fact": "User feels great to be back in shape after a harsh winter.",
+      "type": "opinion",
+      "entities": [
+        "back in shape",
+        "harsh winter"
+      ]
+    },
+    {
+      "fact": "User is considering trying kayaking or paddleboarding for the first time.",
+      "type": "preference",
+      "entities": [
+        "kayaking",
+        "paddleboarding"
+      ]
+    }
+  ]
+}

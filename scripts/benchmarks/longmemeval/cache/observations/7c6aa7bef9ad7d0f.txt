@@ -1,0 +1,48 @@
+**Observation Log:**
+
+[FACT] User has team meetings on Tuesdays and Thursdays that start at 8:30 AM.  
+[FACT] User is planning their day for April 2, 2023.  
+[FACT] User is considering trying out a new coffee shop on their way to work.  
+[FACT] User wakes up at 6:30 AM.  
+[PREFERENCE] User prefers oatmeal with fruit and nuts for breakfast.  
+[EVENT] User is planning to wake up 30 minutes earlier to fit in a workout before heading to the office.  
+[CHANGE] User will now wake up at 6:00 AM on Tuesdays and Thursdays to leave the house earlier for team meetings.  
+[TEMPORAL] Session date is April 1, 2023.  
+[ASSISTANT_SAID] Assistant suggested a morning routine to leave the house by 8:15 AM for the 8:30 AM meeting.  
+[ASSISTANT_SAID] Assistant provided a rough outline of the user's morning routine:  
+- 7:00 AM - Wake up  
+- 7:15 AM - Get ready (shower, dress, etc.)  
+- 7:45 AM - Breakfast  
+- 8:00 AM - Finish getting ready  
+- 8:15 AM - Head out the door  
+[ASSISTANT_SAID] Assistant suggested four breakfast options for sustained energy:  
+1. Oatmeal with fruit and nuts  
+2. Avocado toast with scrambled eggs  
+3. Greek yogurt with berries and granola  
+4. Smoothie bowl  
+[ASSISTANT_SAID] Assistant recommended adjusting the morning schedule for Tuesdays and Thursdays to:  
+- 6:45 AM - Wake up  
+- 7:00 AM - Get ready  
+- 7:30 AM - Breakfast (oatmeal with fruit and nuts)  
+- 7:50 AM - Finish getting ready  
+- 8:00 AM - Double-check everything  
+- 8:15 AM - Head out the door  
+[ASSISTANT_SAID] Assistant suggested searching for the coffee shop using mapping services or review websites.  
+[ASSISTANT_SAID] Assistant provided a sample 30-minute HIIT workout:  
+**Warm-up (5 minutes)**  
+- Jumping jacks: 30 seconds  
+- Dynamic stretching: 20 seconds  
+**Circuit 1 (10 minutes)**  
+- Burpees: 30 seconds  
+- Mountain climbers: 30 seconds  
+- Plank hold: 30 seconds  
+- Rest: 30 seconds  
+- Repeat for 10 minutes  
+**Circuit 2 (10 minutes)**  
+- Squat jumps: 30 seconds  
+- Push-ups: 30 seconds  
+- Lunges: 30 seconds (per leg)  
+- Rest: 30 seconds  
+- Repeat for 10 minutes  
+**Cool-down (5 minutes)**  
+- Static

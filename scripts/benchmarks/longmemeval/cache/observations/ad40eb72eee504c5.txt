@@ -1,0 +1,39 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/06/15 (Thu) 02:07
+- [EVENT] User is trying to keep track of online shopping habits.
+- [ASSISTANT_SAID] Suggested cashback apps and websites: TopCashback, BeFrugal, Ibotta, Fetch Rewards, Dosh, Drop, Checkout 51, RetailMeNot, Mr. Rebates, Extrabux.
+- [ASSISTANT_SAID] TopCashback offers cashback rates of up to 25% at over 3,000 online retailers.
+- [ASSISTANT_SAID] BeFrugal offers cashback rates of up to 40% at over 5,000 online retailers.
+- [ASSISTANT_SAID] Ibotta partners with over 300 retailers, including Walmart, Amazon, and eBay.
+- [ASSISTANT_SAID] Fetch Rewards focuses on grocery and household items.
+- [ASSISTANT_SAID] Dosh partners with over 10,000 retailers.
+- [ASSISTANT_SAID] Drop focuses on fashion, beauty, and lifestyle brands.
+- [ASSISTANT_SAID] Checkout 51 focuses on grocery and household items.
+- [ASSISTANT_SAID] RetailMeNot partners with over 15,000 retailers.
+- [ASSISTANT_SAID] Mr. Rebates offers cashback rates of up to 30% at over 2,500 online retailers.
+- [ASSISTANT_SAID] Extrabux offers cashback rates of up to 30% at over 2,000 online retailers.
+- [USER] User has already used Rakuten and Ebates.
+- [EVENT] User recalls making four online purchases last month: 
+  - A wireless headphone on Amazon on the 10th.
+  - A kitchen appliance on Amazon on the 20th.
+  - Three dresses and a pair of boots on ASOS on the 15th.
+  - A vintage watch on eBay on the 25th.
+- [CHANGE] User's total online purchases last month: four.
+- [ASSISTANT_SAID] Suggested ways to keep track of online shopping history: 
+  - Browser extensions like camelcamelcamel or Keepa.
+  - Cashback apps providing account history.
+  - Reviewing bank or credit card statements.
+  - Creating a spreadsheet to track purchases.
+  - Accessing digital receipts from retailers.
+  - Using shopping apps like ShopSavvy or ScanLife.
+- [ASSISTANT_SAID] Suggested strategies to stay mindful of spending habits: 
+  - Set a budget.
+  - Track spending.
+  - Ask yourself questions before purchases.
+  - Implement the 30-day rule.
+  - Use cashback apps strategically.
+  - Avoid temptation.
+  - Practice mindfulness.
+  - Set shopping goals.
+  - Use technology to limit access

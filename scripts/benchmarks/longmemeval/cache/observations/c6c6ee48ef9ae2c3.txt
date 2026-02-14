@@ -1,0 +1,15 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/22 (Mon) 04:32  
+[USER] User needs two input fields called MID and Descriptor in HTML.  
+[ASSISTANT_SAID] Assistant provided an HTML and CSS example to create two input fields side by side using flexbox.  
+[ASSISTANT_CREATED] Assistant created HTML code with a form containing two input fields labeled "MID" and "Descriptor".  
+[USER] User requested a button to clone the two input fields for adding more rows.  
+[ASSISTANT_SAID] Assistant suggested using JavaScript to add a button that clones the input fields.  
+[ASSISTANT_CREATED] Assistant provided an updated HTML code example that includes a button to clone the input fields.  
+[USER] User asked how to paste two columns from Excel into the first input fields and auto-create more inputs based on the pasted data.  
+[ASSISTANT_SAID] Assistant explained how to use JavaScript to parse pasted data from Excel and create new input fields.  
+[ASSISTANT_CREATED] Assistant provided an HTML code example that allows pasting data from Excel into the input fields.  
+[USER] User requested to use jQuery instead of JavaScript for the functionality.  
+[ASSISTANT_SAID] Assistant confirmed the request to use jQuery for the implementation.  
+[ASSISTANT_CREATED] Assistant provided an updated HTML code example using jQuery to handle the cloning of input fields and pasting data from Excel.

@@ -1,0 +1,33 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/24 (Wed) 00:57
+- [ASSISTANT_SAID] The assistant provided an example scenario illustrating how progressive profiling works in practice for a subscription-based e-commerce company.
+- [ASSISTANT_SAID] The assistant described the steps of progressive profiling: 
+  1. Asking for basic information (name and email) upon user sign-up.
+  2. Collecting additional information based on user actions (e.g., shipping address after a purchase).
+  3. Gradually collecting more information over time based on user interactions (e.g., occupation or interests).
+  4. Using collected data to provide personalized experiences and improve marketing campaigns.
+- [ASSISTANT_SAID] The assistant explained that progressive profiling helps build accurate customer profiles without overwhelming users with requests for information.
+- [USER] The user asked for popular tools or platforms for progressive profiling.
+- [ASSISTANT_SAID] The assistant confirmed that Adobe offers progressive profiling as part of its Experience Cloud suite, specifically mentioning Adobe Target.
+- [ASSISTANT_SAID] The assistant described features of Adobe Target, including "Automated Personalization" and "Profile Attributes," which help collect and store user data over time.
+- [USER] The user inquired how progressive profiling is implemented in Adobe Target.
+- [ASSISTANT_SAID] The assistant outlined the implementation of progressive profiling in Adobe Target:
+  1. Defining the target audience.
+  2. Creating a baseline experience.
+  3. Gradually introducing new content based on user behavior.
+  4. Collecting more data over time.
+  5. Refining personalized experiences using collected data.
+- [USER] The user asked for a scenario example of how Uber ID works in practice.
+- [ASSISTANT_SAID] The assistant provided a scenario illustrating how Uber ID works for a ride-sharing company:
+  1. A user signs up and is assigned a unique Uber ID.
+  2. Data about the user's ride is collected and associated with their Uber ID.
+  3. User interactions across channels are tracked using the Uber ID.
+  4. Personalized experiences are created based on collected data.
+  5. Marketing campaigns are optimized using insights from Uber ID data.
+- [USER] The user asked how to tie Uber ID to data from other sources and data stores, using examples like Adobe martech, Snowflake, and operational data stores.
+- [ASSISTANT_SAID] The assistant provided a scenario on tying Uber ID to data from other sources:
+  1. A user signs up and is assigned a unique Uber ID.
+  2. Transaction data is collected and stored in an operational data store like Snowflake.
+  3. User interactions across channels are tracked using the Uber ID.
+  4. Customer

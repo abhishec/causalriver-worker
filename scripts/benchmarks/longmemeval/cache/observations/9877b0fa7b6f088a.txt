@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[FACT] User is preparing for an upcoming Ph.D. program.  
+[FACT] User received feedback from their advisor on April 10th.  
+[CHANGE] User clarified that they received feedback on their master's thesis, not a research proposal or concept paper.  
+[FACT] User mentioned that incorporating feedback improved their master's thesis.  
+[FACT] User's research topic for their Ph.D. program is focused on deep learning applications in computer vision.  
+[FACT] User is interested in exploring the use of convolutional neural networks for image classification tasks.  
+[ASSISTANT_SAID] Assistant congratulated the user on their master's thesis feedback and clarified the distinction between a thesis and a research proposal.  
+[ASSISTANT_SAID] Assistant offered to help create a timeline for the user's Ph.D. project and asked for more information about the project.  
+[ASSISTANT_SAID] Assistant provided a structured timeline for the user's Ph.D. project, breaking it down into four years with specific milestones and tasks.  
+[ASSISTANT_CREATED] Assistant outlined a timeline for Year 1: Literature Review and Research Design (Months 1-12), Year 2: Data Collection and Preprocessing (Months 13-24), Year 3: Experiments and Results (Months 24-36), and Year 4: Writing and Defense (Months 37-48).  
+[ASSISTANT_SAID] Assistant suggested specific tasks for each year, including conducting a literature review, identifying research gaps, developing a research design, collecting datasets, conducting experiments, and writing the dissertation.  
+[FACT] User has taken an online course on deep learning.  
+[ASSISTANT_SAID] Assistant recommended popular deep learning frameworks and tools, including TensorFlow, PyTorch, Keras, OpenCV, MATLAB, CNTK, and MXNet.  
+[ASSISTANT_SAID] Assistant highlighted the strengths of TensorFlow and PyTorch, noting that PyTorch is more flexible and easier to use, while TensorFlow has better support for large-scale models.  
+[FACT] User plans to start with PyTorch for their research.  
+[FACT] User has used OpenCV before and might use it for image preprocessing and data augmentation.  
+[ASSISTANT_SAID] Assistant advised the user to focus on learning one framework thoroughly before exploring others, suggesting starting with PyTorch.  
+[ASSISTANT_SAID] Assistant explained the concept of tensors in PyTorch and how they differ from NumPy arrays, emphasizing GPU support and additional features.  
+[ASSISTANT_SAID] Assistant noted that PyTorch tensors are similar to NumPy arrays but are designed for deep learning applications.  
+[TEMPORAL] Session date is 2023/05/28 (Sun) 17:15.  
+[RELATIONSHIP] User mentioned their advisor in relation to receiving feedback on their master's thesis

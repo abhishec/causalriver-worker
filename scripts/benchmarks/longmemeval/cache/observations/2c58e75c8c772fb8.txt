@@ -1,0 +1,11 @@
+**Observation Log:**
+
+- [FACT] The user is an Airbnb host.
+- [PREFERENCE] The user wants to focus on upselling clients based on their reasons for visiting the area.
+- [EVENT] The user is interested in upselling guests who are in town for weddings.
+- [ASSISTANT_SAID] Offer transportation services to guests attending weddings by partnering with a local transportation company or providing a shuttle service to the wedding venue.
+- [ASSISTANT_SAID] Provide pre-wedding services such as hair and makeup services, or have a stylist come to the Airbnb to offer these services to guests.
+- [ASSISTANT_SAID] Stock the Airbnb with wedding essentials like extra hangers, garment steamers, ironing boards, and a wedding emergency kit that includes safety pins, stain remover, and fashion tape.
+- [ASSISTANT_SAID] Recommend local activities such as winery tours, spa services, or other local attractions for guests to enjoy during their stay.
+- [ASSISTANT_SAID] Provide welcome baskets with local goodies, including a bottle of wine, chocolates, and a list of local restaurants for guests to try.
+- [ASSISTANT_SAID] Offer to host a post-wedding brunch for guests if the wedding venue is nearby, providing an extra special touch for relaxation after the wedding festivities.

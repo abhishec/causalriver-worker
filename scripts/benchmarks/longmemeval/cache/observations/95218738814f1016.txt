@@ -1,0 +1,19 @@
+**Observation Log:**
+
+- [FACT] User's name is Matt.
+- [FACT] User is starting a podcast with a co-host.
+- [FACT] The tentative name of the podcast is "After the Wire."
+- [EVENT] User and co-host will interview early-stage founders.
+- [EVENT] User plans to initially use founders they have invested in as guests.
+- [EVENT] User intends to expand to other founders to build relationships.
+- [PREFERENCE] User emphasizes substance and building in the podcast rather than the hype of investing.
+- [TEMPORAL] Session date is 2023/07/06 (Thu) 07:34.
+- [RELATIONSHIP] User's co-host is also involved in the podcast.
+- [ASSISTANT_SAID] The podcast will target people in early-stage tech, venture investors, and those interested in startups.
+- [ASSISTANT_CREATED] Show outline includes sections: Introduction, Guest's Background, The Company's Journey, The Startup Ecosystem, Building for the Future, Lightning Round, and Outro.
+- [ASSISTANT_CREATED] Intro script emphasizes authentic conversations with founders and the podcast's goal to provide insights into the challenges of building a company.
+- [ASSISTANT_CREATED] Outro script includes thanking the guest, encouraging audience engagement, and teasing the next episode.
+- [ASSISTANT_CREATED] Show description highlights the podcast's focus on real challenges faced by early-stage founders and the insights shared by entrepreneurs.
+- [ASSISTANT_SAID] Suggested unique questions for founders include advice to their pre-founder self, significant moments that changed their perspective, and misconceptions about their industry.
+- [ASSISTANT_SAID] Suggested segment ideas include "Pivot Point," "The One That Got Away," "Elevator Pitch Remix," "Founder's Toolbox," "Rapid Fire Round," "The Crystal Ball," and "Under the Radar."
+- [ASSISTANT_CREATED] Each segment is designed to provide unique insights and engage the audience in different ways.

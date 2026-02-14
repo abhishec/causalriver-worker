@@ -1,0 +1,16 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/08/11 (Fri) 20:45  
+[FACT] User is trying to learn more about cloud computing and AWS.  
+[EVENT] User has been keeping track of their educational activities.  
+[FACT] User has watched a lot of Crash Course videos lately.  
+[CHANGE] User has finished 10 Crash Course videos in the past few weeks.  
+[PREFERENCE] User is inspired by the stories of entrepreneurs from the "How I Built This" podcast.  
+[EVENT] User is planning to start a project on AWS soon.  
+[PREFERENCE] User is interested in learning more about machine learning.  
+[FACT] User has already taken a Python programming course on edX.  
+[ASSISTANT] Recommended online courses and tutorials on AWS, including AWS Free Tier, AWS Tutorial Center, AWS Certification Courses, and AWS Well-Architected Framework.  
+[ASSISTANT] Recommended online courses and tutorials on machine learning using Python, including Python Machine Learning by University of Michigan, Machine Learning with Python by DataCamp, and Deep Learning with Python by IBM.  
+[ASSISTANT] Suggested practice resources like Kaggle and UCI Machine Learning Repository for machine learning projects.  
+[CHANGE] User has finished their 12th Crash Course video on computer science.  
+[CHANGE] User is making good progress on their AWS and machine learning journey.

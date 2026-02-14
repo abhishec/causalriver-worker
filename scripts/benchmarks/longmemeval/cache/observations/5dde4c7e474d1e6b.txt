@@ -1,0 +1,28 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/22 (Mon) 18:23
+- [USER] User requested 100 prompt parameters to influence the assistant's output.
+- [ASSISTANT_SAID] Assistant provided a list of 100 prompt parameters that can influence output.
+- [ASSISTANT_CREATED] 1. Voice (e.g., male or female)
+- [ASSISTANT_CREATED] 2. Tone (e.g., serious, sarcastic, humorous, etc.)
+- [ASSISTANT_CREATED] 3. Register (e.g., formal, informal, academic, conversational, etc.)
+- [ASSISTANT_CREATED] 4. Style (e.g., narrative, descriptive, expository, persuasive, etc.)
+- [ASSISTANT_CREATED] 5. Audience (e.g., children, adults, experts, non-experts, etc.)
+- [ASSISTANT_CREATED] 6. Genre (e.g., fiction, non-fiction, poetry, drama, etc.)
+- [ASSISTANT_CREATED] 7. Language (e.g., English, French, Spanish, etc.)
+- [ASSISTANT_CREATED] 8. Dialect (e.g., American English, British English, etc.)
+- [ASSISTANT_CREATED] 9. Purpose (e.g., informative, instructive, entertaining, etc.)
+- [ASSISTANT_CREATED] 10. Mood (e.g., happy, sad, angry, etc.)
+- [ASSISTANT_CREATED] 11. Point of view (e.g., first person, third person, etc.)
+- [ASSISTANT_CREATED] 12. Setting (e.g., time period, location, etc.)
+- [ASSISTANT_CREATED] 13. Characterization (e.g., flat, round, static, dynamic, etc.)
+- [ASSISTANT_CREATED] 14. Conflict (e.g., internal, external, etc.)
+- [ASSISTANT_CREATED] 15. Plot (e.g., exposition, rising action, climax, etc.)
+- [ASSISTANT_CREATED] 16. Theme (e.g., love, friendship, betrayal, etc.)
+- [ASSISTANT_CREATED] 17. Symbolism (e.g., colors, objects, etc.)
+- [ASSISTANT_CREATED] 18. Imagery (e.g., visual, auditory, olfactory, etc.)
+- [ASSISTANT_CREATED] 19. Figurative language (e.g., simile, metaphor, hyperbole, etc.)
+- [ASSISTANT_CREATED] 20. Allusion (e.g., historical, cultural, literary, etc.)
+- [ASSISTANT_CREATED] 21. Irony (e.g., verbal, situational, dramatic, etc.)
+- [ASSISTANT_CREATED] 22. Foreshadowing (e.g., subtle, explicit, etc.)
+- [

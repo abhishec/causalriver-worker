@@ -1,0 +1,24 @@
+**Observation Log:**
+
+[FACT] The user is looking to find new yoga classes to try out.  
+[FACT] The user recently tried a Yin Yoga class.  
+[FACT] The user mastered tree pose last week.  
+[CHANGE] The user is feeling more confident in their yoga practice overall.  
+[TEMPORAL] The session date is 2023/05/30 (Tue) 09:18.  
+[PREFERENCE] The user is interested in classes that focus on deep stretches and relaxation.  
+[ASSISTANT_SAID] The assistant congratulated the user on mastering tree pose and provided recommendations for yoga classes.  
+[ASSISTANT_SAID] The assistant recommended Restorative Yoga, Hatha Yoga, Yoga Nidra, Slow Flow or Gentle Flow Yoga, Anusara-Inspired Yoga, Svaroopa Yoga, and Kundalini Yoga.  
+[ASSISTANT_SAID] The assistant suggested looking for keywords like "relaxation," "gentle," "restorative," or "deep stretch" when searching for classes.  
+[ASSISTANT_SAID] The assistant advised the user to listen to their body and honor its limitations when trying new classes or styles.  
+[EVENT] The user expressed interest in trying out Restorative Yoga.  
+[ASSISTANT_SAID] The assistant provided detailed information about Restorative Yoga, including its focus on relaxation and rejuvenation.  
+[ASSISTANT_SAID] The assistant listed common props used in Restorative Yoga: bolsters, blankets, blocks, straps, pillows, and weighted blankets.  
+[ASSISTANT_SAID] The assistant explained how Restorative Yoga differs from Yoga Nidra, highlighting differences in physical postures, level of consciousness, duration, and focus.  
+[ASSISTANT_SAID] The assistant described the calming effects of weighted blankets and their benefits for relaxation and sleep.  
+[ASSISTANT_SAID] The assistant mentioned that weighted blankets can be used at home for sleep and relaxation, as well as in therapy.  
+[PREFERENCE] The user is curious about trying a weighted blanket during a Restorative Yoga class.  
+[ASSISTANT_SAID] The assistant encouraged the user to communicate with their instructor about using a weighted blanket and provided tips for using it effectively.  
+[EVENT] The user plans to ask their instructor about the weighted blanket beforehand in their next Restorative Yoga class.  
+[PREFERENCE] The user is excited to try the weighted blanket and see how it enhances their relaxation experience.  
+[ASSISTANT_SAID] The assistant expressed enthusiasm for the user's upcoming experience and encouraged them to share their experience afterwards.  
+[EVENT] The user expressed their intention to follow their instructor's guidance regarding the weighted blanket.

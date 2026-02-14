@@ -1,0 +1,18 @@
+**Observation Log:**
+
+- [FACT] The user is planning a trip to Seoul.
+- [EVENT] The user is asking for recommendations for popular tourist attractions and restaurants in Seoul.
+- [ASSISTANT_SAID] The assistant recommended the following popular tourist attractions in Seoul: Gyeongbokgung Palace, Bukchon Hanok Village, Myeong-dong Shopping District, N Seoul Tower (Namsan Tower), BTS Army Base, Hongdae Neighborhood, National Museum of Korea, Itaewon Global Village Center, Lotte World, and Nami Island.
+- [ASSISTANT_SAID] The assistant recommended the following restaurants in Seoul: Jinju Hoegwan (samgyetang), Gwangjang Market (street food), Myeong-dong Kyoja (noodles and dumplings), Tosokchon Samgyetang, Hanilkwan (bibimbap and bulgogi), Jjukkumi Alley (spicy stir-fried baby octopus), Bicena (modern Korean), and Starfield COEX Mall (international restaurants).
+- [ASSISTANT_SAID] The assistant provided additional tips for traveling in Seoul, including learning basic Korean phrases, downloading the Naver Maps app, purchasing a T-Money card or a Korea SIM card, being prepared for crowds, and avoiding summer months if uncomfortable with heat and humidity.
+- [EVENT] The user is considering taking a cooking class in Seoul to learn more about Korean cuisine.
+- [ASSISTANT_SAID] The assistant recommended the following cooking schools and classes in Seoul: O'ngo Cooking School, Korean Cooking Class by Food and Culture Academy, Seoul Cooking Class, Korea House Cooking Class, and Cookly Cooking Class.
+- [ASSISTANT_SAID] The assistant provided details about each cooking school, including addresses, class types, and price ranges (₩40,000 - ₩150,000).
+- [EVENT] The user is thinking about trying new Japanese recipes and is asking for recommendations for cooking classes or schools in Tokyo.
+- [ASSISTANT_SAID] The assistant recommended the following cooking schools in Tokyo: Tokyo Cooking Studio, Cooking Sun, Yumi's Cooking Class, Tsukiji Cooking School, and ABC Cooking Studio.
+- [ASSISTANT_SAID] The assistant provided details about each cooking school, including addresses, class types, and price ranges (¥4,000 - ¥12,000).
+- [EVENT] The user has been taking Japanese classes for about 6 months since moving to Tokyo on February 10th.
+- [CHANGE] The user moved to Tokyo about 6 months ago on February 10th.
+- [TEMPORAL] The session date is 2023/02/18 (Sat) 22:53.
+- [RELATIONSHIP] The user's Japanese teacher is named Yumi-sensei.
+- [FACT] The user attends Japanese classes three times

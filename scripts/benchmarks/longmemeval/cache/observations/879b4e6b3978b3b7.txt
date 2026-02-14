@@ -1,0 +1,45 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/04/28 (Fri) 11:44
+
+[ASSISTANT_SAID] A process is an instance of a running program that has a unique process identifier (PID), a current state (running, waiting, or terminated), and an execution context.
+
+[ASSISTANT_SAID] A program is a set of instructions stored on disk, while a process is a running instance of a program in memory.
+
+[ASSISTANT_SAID] A program can exist without being executed, but a process cannot exist without being executed.
+
+[ASSISTANT_SAID] The life cycle of a process includes the stages: New, Ready, Running, Blocked, and Terminated.
+
+[ASSISTANT_SAID] In the New stage, a process is created and initialized, and resources are allocated.
+
+[ASSISTANT_SAID] In the Ready stage, a process is waiting to be assigned to a processor for execution.
+
+[ASSISTANT_SAID] In the Running stage, a process is assigned to a processor and is executing.
+
+[ASSISTANT_SAID] In the Blocked stage, a process is waiting for an event to occur, such as the completion of an I/O operation.
+
+[ASSISTANT_SAID] In the Terminated stage, a process has completed its execution, and the operating system frees up the resources allocated to it.
+
+[ASSISTANT_SAID] Binary semaphore has two states: locked (1) or unlocked (0).
+
+[ASSISTANT_SAID] Advantages of binary semaphore include mutual exclusion, efficiency, and inter-process communication.
+
+[ASSISTANT_SAID] Disadvantages of binary semaphore include the potential for deadlock, priority inversion, and unsuitability for managing multiple resources.
+
+[ASSISTANT_SAID] When a page fault occurs, the operating system generates a page fault interrupt and checks the page fault address.
+
+[ASSISTANT_SAID] The operating system checks if the page is in memory; if not, it initiates a page replacement algorithm.
+
+[ASSISTANT_SAID] The operating system identifies a victim page to replace and writes it back to the disk if modified.
+
+[ASSISTANT_SAID] The page is read from the disk and loaded into main memory, and the page table is updated.
+
+[ASSISTANT_SAID] The processor is restarted at the point of interruption, and the instruction causing the page fault is executed again.
+
+[ASSISTANT_SAID] Multiprogramming is the technique of running multiple programs on a single processor by partitioning the main memory.
+
+[ASSISTANT_SAID] The goal of multiprogramming is to maximize CPU utilization and minimize idle time.
+
+[ASSISTANT_SAID] Multiprocessing uses multiple processors to perform multiple tasks simultaneously, improving overall system performance.
+
+[ASS

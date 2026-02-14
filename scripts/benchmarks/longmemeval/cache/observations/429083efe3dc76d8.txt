@@ -1,0 +1,37 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/25 (Thu) 20:42
+
+[ASSISTANT_SAID] Open Grid Services Architecture (OGSA) provides a set of security and resource management requirements to ensure that grid computing systems are secure and resources are used efficiently.
+
+[ASSISTANT_SAID] OGSA security mechanisms include: Authentication, Authorization, Data confidentiality, Data integrity, Non-repudiation, and Trust management.
+
+[ASSISTANT_SAID] OGSA resource management requirements include: Resource discovery, Resource allocation, Resource scheduling, Resource monitoring, Resource optimization, and Resource accounting.
+
+[ASSISTANT_SAID] The security functionality and resource management requirements of OGSA ensure that grid computing systems are secure, efficient, and effective.
+
+[USER] 15. What are the requirements of Resource Sharing in a Grid.
+
+[ASSISTANT_SAID] Requirements of resource sharing in a grid include: Resource discovery, Resource allocation, Resource scheduling, Resource monitoring, Resource accounting, Resource management, Resource security, Resource interoperability, and Resource scalability.
+
+[ASSISTANT_SAID] Resource sharing enables users and applications to access and use computing resources in a flexible, scalable, and efficient manner.
+
+[USER] 16. What are the Security Concerns associated with grid computing.
+
+[ASSISTANT_SAID] Key security concerns associated with grid computing include: Access control, Authentication, Authorization, Data confidentiality, Data integrity, Data privacy, Network security, System security, Incident response, and Compliance.
+
+[ASSISTANT_SAID] Security mechanisms for grid computing include encryption, authentication and authorization protocols, access control policies, firewalls, intrusion detection and prevention systems, and security audits and monitoring.
+
+[USER] 17. The components of a sustainable MIS infrastructure include Grid and Cloud computing, and Virtualization. Describe each in details as related to MIS.
+
+[ASSISTANT_SAID] Grid computing enables sharing of computing resources across different organizations and locations, providing cost-effective and efficient processing of large-scale data.
+
+[ASSISTANT_SAID] Cloud computing delivers computing services over the internet, allowing on-demand access to resources and enabling scalability based on needs.
+
+[ASSISTANT_SAID] Virtualization creates virtual versions of hardware, operating systems, and applications, providing cost-effective management of resources and enhancing data security.
+
+[ASSISTANT_SAID] A sustainable MIS infrastructure can reduce environmental impact, optimize resource usage, and enhance MIS capabilities.
+
+[USER] 18. An increasing number of institutions and organizations in industry and business sectors adopt cloud systems. i. List and describe the main characteristics of cloud computing systems.
+
+[ASSISTANT_SAID] Main characteristics of cloud computing systems include: On-demand self-service, Broad network access, Resource pooling, Rapid elasticity, Measured service, Service models (IaaS, PaaS, SaaS), and Deployment models

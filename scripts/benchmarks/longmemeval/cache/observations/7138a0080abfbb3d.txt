@@ -1,0 +1,17 @@
+**Observation Log:**
+
+- [FACT] The user has a nonprofit organization that was recently approved in Texas.
+- [TEMPORAL] The nonprofit was approved two days prior to the conversation on 2023/05/21.
+- [ASSISTANT_SAID] The Texas Secretary of State requires all Texas nonprofits to file an annual report each year.
+- [ASSISTANT_SAID] The annual report is due based on the anniversary date of the entity's formation, usually on the last day of the month in which the anniversary falls.
+- [ASSISTANT_SAID] If the nonprofit was incorporated on January 15th, the annual report would be due on January 31st of each subsequent year.
+- [ASSISTANT_SAID] It is recommended to file the annual report early to avoid potential delays or issues.
+- [ASSISTANT_SAID] If the annual report is not filed by the deadline, the nonprofit may become delinquent and subject to late fees or administrative dissolution.
+- [ASSISTANT_SAID] The annual report is the primary method for updating the Secretary of State with changes to the nonprofit's Board of Directors and officers.
+- [ASSISTANT_SAID] An Amended Certificate of Formation can be filed to make changes to the nonprofit's governing documents or to add or remove directors or officers.
+- [ASSISTANT_SAID] To file an Amended Certificate of Formation, a completed and signed form must be submitted to the Secretary of State along with any required fees.
+- [ASSISTANT_SAID] Filing an Amended Certificate of Formation can be more time-consuming and expensive than filing an annual report.
+- [ASSISTANT_SAID] It is generally recommended to file an Amended Certificate of Formation only if significant changes to the nonprofit's governance structure are needed.
+- [ASSISTANT_SAID] The user can submit an annual report if they want to update any information that may have changed since incorporation.
+- [ASSISTANT_SAID] If the user files an annual report early, they will still need to file an additional annual report in the future based on their anniversary date.
+- [ASSISTANT_SAID] The annual report can be filed online through the Texas Secretary of State website or by mail.

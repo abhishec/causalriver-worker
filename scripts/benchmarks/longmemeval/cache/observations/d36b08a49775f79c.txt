@@ -1,0 +1,43 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/04/22 (Sat) 11:01
+- [USER] User has newly planted Cabomba Furcatas that are eroding away at the stem and floating to the surface.
+- [ASSISTANT_SAID] Cabomba furcata is a delicate stem plant that can be challenging to keep in an aquarium, especially for novice aquarists.
+- [ASSISTANT_SAID] Reasons for Cabomba furcata erosion include poor lighting, insufficient nutrients, high water flow, and incompatible water parameters.
+- [ASSISTANT_SAID] Suggested checking aquarium's lighting, nutrient levels, water flow, and water parameters to ensure suitability for Cabomba furcata.
+- [USER] Asked if nitrites present from a not fully cycled tank would harm plants in this manner.
+- [ASSISTANT_SAID] Yes, high levels of nitrites can harm plants, including Cabomba furcata, and cause damage.
+- [ASSISTANT_SAID] Suggested testing nitrite levels in the tank and performing partial water changes if levels are high.
+- [USER] Provided a list of plants in their tank for future reference, excluding quantities and identification letters.
+- [ASSISTANT_CREATED] Remembered the list of plants: 
+  - Eleocharis Pusilla Tissue Culture
+  - Amazon Sword - Bunched Plants
+  - Alternanthera Lilacina - Fresh-cut Plants
+  - Red Tiger Lotus - Tiger Lotus Bulb Only
+  - Anacharis - Fresh-cut Plants
+  - Cabomba Furcata - Fresh-cut Plants
+  - Hygrophila Difformis - Fresh-cut Plants
+  - Java Moss - Loose Portion
+  - Anubias Nana - Bare-root Plant
+- [USER] Requested to revise the list of plants.
+- [ASSISTANT_CREATED] Revised list of plants:
+  - Eleocharis Pusilla
+  - Amazon Sword
+  - Alternanthera Lilacina
+  - Red Tiger Lotus
+  - Anacharis
+  - Cabomba Furcata
+  - Hygrophila Difformis
+  - Java Moss
+  - Anubias Nana
+- [USER] Asked for a list of plants in the future to reference.
+- [ASSISTANT_SAID] Confirmed understanding to list the plants when requested.
+- [USER] Requested easy ID numbers for the list of plants.
+- [ASSISTANT_CREATED] Provided easy ID numbers for reference:
+  - 1. Eleocharis Pusilla
+  - 2. Amazon Sword
+  - 3. Alternanthera Lilacina
+  - 4. Red Tiger Lotus
+  - 5. Anacharis
+  - 6. Cabomba Furcata
+  - 7. Hyg

@@ -1,0 +1,23 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/07 (Sun) 00:43
+- [USER] The user asked about an old rock song with the main adlib being "hey."
+- [ASSISTANT_SAID] The assistant mentioned that many old rock songs feature the adlib "hey" and suggested "Hey Jude" by The Beatles as a classic example.
+- [USER] The user provided additional context that the song is used in the movie "Happy Gilmore."
+- [ASSISTANT_SAID] The assistant identified the song as "Werewolves of London" by Warren Zevon, which features a distinctive "Hey, werewolves of London" chorus.
+- [USER] The user mentioned a musician named Redfoo who remixed the song and asked for details about the version he remixed.
+- [ASSISTANT_SAID] The assistant stated that Redfoo's version is called "New Thang," released in 2014, and features a sample of the "ahh-ooo" howling chorus from "Werewolves of London."
+- [USER] The user referenced a specific video titled "Party Rock Mondays 4" on YouTube.
+- [ASSISTANT_SAID] The assistant could not find a video titled "Party Rock Mondays 4" but mentioned that Redfoo performed a live DJ set in 2010 that included a remix of "Werewolves of London."
+- [USER] The user provided a link to a YouTube video: https://www.youtube.com/watch?v=l9TA9MpsQm0&ab_channel=redfoo.
+- [ASSISTANT_SAID] The assistant confirmed that Redfoo was remixing "Werewolves of London" in the video and noted differences in the drums and bass compared to the original track.
+- [ASSISTANT_SAID] The assistant mentioned that it could be a remastered or re-recorded version but could not find specific information on the version used.
+- [USER] The user asked for a list of all the remixed or raw songs in the video.
+- [ASSISTANT_SAID] The assistant initially misunderstood and asked for clarification.
+- [USER] The user clarified by providing a new link: https://www.youtube.com/watch?v=tL4tde6uZ_Q&ab_channel=redfoo.
+- [ASSISTANT_SAID] The assistant provided a list of songs and remixes identified in the DJ set, including:
+  1. "Party Rock Anthem" by LMFAO (feat. Lauren Bennett & GoonRock)
+  2. "Yeah!" by Usher (feat. Lil Jon & Ludacris)
+  3. "Bojangles" by Pitbull
+  4. "Cupid Shuffle" by Cupid
+  5. "Cha Cha Slide" by DJ Casper

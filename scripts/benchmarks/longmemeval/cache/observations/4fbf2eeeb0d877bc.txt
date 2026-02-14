@@ -1,0 +1,21 @@
+**Observation Log:**
+
+[FACT] User completed their MBA degree a month ago.  
+[FACT] User is located in New York City.  
+[FACT] User is planning a celebratory dinner for approximately 10 people.  
+[PREFERENCE] User is open to any type of cuisine for the dinner.  
+[PREFERENCE] User is looking to spend around $50-75 per person for the dinner.  
+[PREFERENCE] User prefers a restaurant with a private room if possible.  
+[TEMPORAL] User is thinking of having dinner on a Saturday evening, around 7 pm.  
+[ASSISTANT_SAID] Assistant congratulated the user on their MBA achievement.  
+[ASSISTANT_SAID] Assistant provided a list of restaurant recommendations in New York City:  
+[ASSISTANT_SAID] 1. Carbone (Greenwich Village) - Upscale Italian-American restaurant with a private room for up to 12 guests. Menu features veal parmesan, lobster fra diavolo, and linguine with clams. ($60-$75 per person)  
+[ASSISTANT_SAID] 2. L'Artusi (Chelsea) - Two-Michelin-starred Italian restaurant with a private dining room for up to 12 guests. Menu features handmade pasta, seafood risotto, and dry-aged steaks. ($65-$80 per person)  
+[ASSISTANT_SAID] 3. The Dead Rabbit (Lower Manhattan) - Irish-American restaurant with a private room for up to 12 guests. Menu features seafood towers, lamb chops, and roasted duck. ($60-$75 per person)  
+[ASSISTANT_SAID] 4. Morton's The Steakhouse (Multiple locations) - Classic American steakhouse with a private room for up to 12 guests. Menu features high-quality steaks and seafood. ($55-$70 per person)  
+[ASSISTANT_SAID] 5. Hwa Yuan (Chinatown) - Szechuan Chinese restaurant with a private room for up to 12 guests. Menu features spicy dishes like Kung Pao chicken and mapo tofu. ($45-$65 per person)  
+[ASSISTANT_SAID] 6. The Lambs Club (The Chatwal Hotel, Midtown West) - Luxurious American restaurant with a private room for up to 12 guests. Menu features foie gras and dry-aged steaks. ($70-$90 per person)  
+[ASSISTANT_SAID] 7. Abe & Arthur's (Meatpacking District) - Contemporary American restaurant with a private room for up to 12 guests. Menu features burgers, salads, and grilled salmon. ($55-$70 per person)  
+[ASSISTANT_SAID] Assistant recommended making a reservation as soon as possible for Saturday evening.  
+[FACT] User expressed interest in L'Artusi.  
+[ASSISTANT_SAID] Assistant

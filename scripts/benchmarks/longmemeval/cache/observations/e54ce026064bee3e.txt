@@ -1,0 +1,37 @@
+**Observation Log:**
+
+- [FACT] User is moving to Melbourne soon.
+- [FACT] User needs help finding good coffee shops near the University of Melbourne campus.
+- [ASSISTANT_SAID] Recommended coffee shops near the University of Melbourne campus: 
+  1. Pellegrini's Espresso Bar (66 Bourke St, Melbourne)
+  2. Manchester Press (8 Rankins Lane, Melbourne)
+  3. Higher Ground (650 Little Bourke St, Melbourne)
+  4. Market Lane Coffee (109-111 Therry St, Melbourne)
+  5. The League of Honest Coffee (553 Little Bourke St, Melbourne)
+  6. ST. ALi (12-18 Yarra Place, South Melbourne)
+- [ASSISTANT_SAID] Suggested exploring surrounding neighborhoods like Carlton and Fitzroy for vibrant coffee culture.
+- [TEMPORAL] Session date is 2023/05/24 (Wed) 22:46.
+- [FACT] User is inquiring about the semester start dates at the University of Melbourne.
+- [ASSISTANT_SAID] Provided typical semester dates for the University of Melbourne:
+  - Semester 1: Late February to late May (classes start in early March)
+  - Semester 2: Late July to late October (classes start in early August)
+- [ASSISTANT_SAID] Recommended checking the University of Melbourne's website for the most up-to-date information on semester dates.
+- [FACT] User received their acceptance letter from UniMelb on February 10th.
+- [FACT] User is looking for places to buy winter clothing in Melbourne.
+- [ASSISTANT_SAID] Recommended places for winter clothing:
+  1. Uniqlo
+  2. Cotton On
+  3. Target
+  4. Myer
+  5. Op Shops (e.g., Savers, Vinnies, Salvation Army)
+  6. Markets (e.g., Queen Victoria Market, South Melbourne Market, Docklands Sunday Market)
+- [ASSISTANT_SAID] Suggested investing in a good umbrella and waterproof jacket for Melbourne's winter.
+- [EVENT] User went shopping with family last weekend and bought thermal tops, a warm coat, and waterproof boots.
+- [FACT] User is inquiring about the public transportation system in Melbourne.
+- [ASSISTANT_SAID] Provided an overview of Melbourne's public transportation system:
+  - Myki card for fares on trams, buses, and trains.
+  - Trams are a popular mode of transportation.
+  - Buses cover areas not serviced by trams and trains.
+  - Trains connect suburbs to the city center.
+- [ASSISTANT_SAID] Explained options for Myki cards: Myki Explorer, Myki Money, and Myki Pass.
+- [ASSISTANT_SAID] Mentioned the possibility

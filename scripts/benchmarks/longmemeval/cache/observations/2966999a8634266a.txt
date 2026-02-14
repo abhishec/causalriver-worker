@@ -1,0 +1,18 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2022/03/02 (Wed) 14:11  
+[USER] User is inquiring about options in `hdiutil` on macOS.  
+[ASSISTANT_SAID] `hdiutil` is a command-line utility on macOS for working with disk images (`.dmg` files).  
+[ASSISTANT_SAID] The `-srcimagekey` option specifies the encryption algorithm and password for the source image.  
+[ASSISTANT_SAID] The `-tgtimagekey` option specifies the encryption algorithm and password for the target image.  
+[ASSISTANT_SAID] Example command to encrypt a disk image: `hdiutil convert -format UDRW -encryption AES-256 -srcimagekey password=secret -tgtimagekey password=secret -o myencrypteddisk.dmg mydisk.dmg`  
+[ASSISTANT_SAID] The `-cacert` option is used to specify the path to a file containing one or more CA certificates to use when creating a signed disk image.  
+[ASSISTANT_SAID] Example command using `-cacert`: `hdiutil create -srcfolder myfolder -format UDBZ -cacert myCAcert.pem -o mySignedDisk.dmg`  
+[ASSISTANT_SAID] The examples provided are for illustrative purposes and may not work as-is.  
+[USER] User asks about the difference between `-cacert` and `-certificate` options in `hdiutil`.  
+[ASSISTANT_SAID] The `-cacert` option specifies the root CA certificate that the image should be signed with.  
+[ASSISTANT_SAID] The `-certificate` option specifies the path to a file containing a certificate that is used to sign the disk image.  
+[ASSISTANT_SAID] The certificate specified with `-certificate` must be signed by one of the CA certificates specified with the `-cacert` option.  
+[ASSISTANT_SAID] Summary: `-cacert` specifies the root CA certificate, while `-certificate` specifies the certificate used to sign the disk image.  
+[ASSISTANT_SAID] Example command using both options: `hdiutil create -srcfolder myfolder -format UDBZ -cacert myCAcert.pem -certificate myCert.pem -o mySignedDisk.dmg`  
+[ASSISTANT_SAID] This command uses `myCAcert.pem` as the root certificate and `myCert.pem` as the certificate used to sign the disk image.

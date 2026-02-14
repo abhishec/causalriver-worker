@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/28 (Sun) 23:33
+- [EVENT] User is trying to get organized with spending habits and wants to track expenses from the past month.
+- [EVENT] User has been doing a lot of shopping for others and wants to ensure they are staying on top of their spending.
+- [ASSISTANT_SAID] Assistant offered to help track expenses from the past month and requested information about the user's expenses.
+- [ASSISTANT_SAID] Assistant provided questions to consider for tracking expenses, including timeframe, types of expenses, receipts, specific areas of concern, and budget goals.
+- [TEMPORAL] User wants to track expenses from the past month, around 30 days.
+- [EVENT] User has spent around $30 on school supplies for neighbor's kids, including pens, pencils, notebooks, highlighters, and a lunchbox.
+- [ASSISTANT_CREATED] Assistant started tracking user’s expenses and categorized the school supplies under "Gifts."
+- [EVENT] User is considering a Mother's Day gift for their mom, browsing options like a luxurious candle set or a personalized photo album.
+- [ASSISTANT_SAID] Assistant acknowledged the user's thoughtful approach to selecting a special gift for their mom.
+- [EVENT] User went to the mall with their sister to pick out a wedding gift for their cousin's upcoming wedding.
+- [EVENT] User and their sister settled on a KitchenAid stand mixer that their cousin had registered for.
+- [ASSISTANT_SAID] Assistant added the wedding gift to the expense list and asked for the cost of the KitchenAid stand mixer.
+- [EVENT] User clarified that the total cost of the KitchenAid stand mixer was $200, and they paid $100.
+- [ASSISTANT_CREATED] Assistant updated the expense list to reflect the $100 paid for the KitchenAid stand mixer.
+- [EVENT] User helped their roommate pick out household essentials for her new apartment at IKEA, including a kitchen trash can, storage bins, and a cozy throw blanket.
+- [EVENT] The total cost for the household essentials was around $100.
+- [ASSISTANT_SAID] Assistant added the household essentials expense to the list.
+- [ASSISTANT_SAID] Assistant encouraged the user to think about any other expenses they might have had in the past 30 days, including bills, personal care items, and outings with friends.

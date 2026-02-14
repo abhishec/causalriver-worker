@@ -1,0 +1,37 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/29 (Mon) 14:35
+- [FACT] User is planning a family tree project to preserve family history and memories.
+- [PREFERENCE] User is motivated to leave a lasting legacy.
+- [TEMPORAL] User's 40th birthday was in April.
+- [ASSISTANT_SAID] Creating a family tree project is a great way to preserve family history and memories.
+- [ASSISTANT_SAID] Recommended online tools and resources for building a family tree:
+  1. Ancestry.com (Subscription-based)
+  2. FamilySearch.org (Free)
+  3. MyHeritage (Subscription-based)
+  4. Findmypast (Subscription-based)
+  5. Legacy Family Tree (One-time purchase or subscription)
+  6. FamilyTreeMaker (One-time purchase or subscription)
+  7. WikiTree (Free)
+  8. Google Sheets or Microsoft Excel (Spreadsheet programs)
+- [ASSISTANT_SAID] Suggested additional resources:
+  - Local libraries and archives
+  - Family history centers operated by The Church of Jesus Christ of Latter-day Saints
+  - DNA testing services (AncestryDNA, 23andMe, FamilyTreeDNA)
+  - Scanning and digitization tools for old family photos and documents
+- [ASSISTANT_SAID] Recommended steps before starting the project:
+  - Gather information from living relatives
+  - Organize existing family documents, photos, and heirlooms
+  - Set clear goals for the project
+- [ASSISTANT_SAID] It's normal to think about mortality around milestone birthdays.
+- [FACT] User has heard about Ancestry.com and MyHeritage.
+- [ASSISTANT_SAID] MyHeritage has a "Family Recipes" feature for organizing family recipes.
+- [ASSISTANT_SAID] Ancestry.com allows adding stories, photos, and documents to individual profiles.
+- [ASSISTANT_SAID] MyHeritage allows uploading and organizing family recipes, along with photos and stories.
+- [ASSISTANT_SAID] Suggested dedicated recipe management platforms: RecipeLion, Paprika Recipe Manager, BigOven.
+- [FACT] User plans to start with MyHeritage for the family tree project.
+- [ASSISTANT_SAID] MyHeritage allows importing family trees from other platforms, including Ancestry.com.
+- [ASSISTANT_SAID] MyHeritage supports GEDCOM file imports.
+- [ASSISTANT_SAID] MyHeritage has a direct import feature for Ancestry.com family trees.
+- [ASSISTANT_SAID] MyHeritage allows adding stories and photos to recipes.
+- [ASSISTANT_SAID] User can include a story about grandma making the soup

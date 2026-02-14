@@ -1,0 +1,30 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/28 (Sun) 23:20
+- [FACT] User inquired about monthly distribution locations in Berkshire County.
+- [EVENT] User provided a list of locations, addresses, dates, times, and contacts for distribution events.
+- [FACT] Adams Visitor Center: 3 Hoosac St. Adams
+- [TEMPORAL] Adams Visitor Center distribution: 4th Fri, 12:30 – 1:30 p.m.
+- [FACT] Contact for Adams Visitor Center: (413)743-8333
+- [FACT] Claire Teague Senior Center: 917 South Main St. Great Barrington
+- [TEMPORAL] Claire Teague Senior Center distribution: 2nd Weds, 1 – 3 p.m.
+- [FACT] Contact for Claire Teague Senior Center: (413)528-1881
+- [FACT] Lee Council on Aging: 21 Crossway St. Lee
+- [TEMPORAL] Lee Council on Aging distribution: 2nd Weds, 12 p.m.
+- [FACT] Contact for Lee Council on Aging: (413)247-9738
+- [FACT] Lenox Community Center: 65 Walker St. Lenox
+- [TEMPORAL] Lenox Community Center distribution: 2nd Weds, 11:30 a.m. – 12:30 p.m.
+- [FACT] Contact for Lenox Community Center: (413)637-5535
+- [FACT] Mary Spitzer Center: 116 Ashland St. North Adams
+- [TEMPORAL] Mary Spitzer Center distribution: 4th Fri, 12:30 – 1:30 p.m.
+- [FACT] Contact for Mary Spitzer Center: (413)662-3125
+- [FACT] Otis Town Hall: 1 N Main Rd. Otis
+- [TEMPORAL] Otis Town Hall distribution: 3rd Fri, 11 a.m. – 12 p.m.
+- [FACT] Ralph J. Froio Senior Center: 330 North St. Pittsfield
+- [TEMPORAL] Ralph J. Froio Senior Center distribution: 4th Fri, 10:30 – 11:30 a.m.
+- [FACT] Contact for Ralph J. Froio Senior Center: (413)499-9346
+- [FACT] Heaton Court: 5 Pine St. Stockbridge
+- [TEMPORAL] Heaton Court distribution: 2nd Weds, 11 a.m. – 12 p.m.
+- [FACT] Contact for Heaton Court: (413)298-4170
+- [ASSISTANT_SAID] The assistant provided the open hours of the pantries in Berkshire County.
+- [ASSIST

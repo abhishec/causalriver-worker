@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/29 (Mon) 22:47
+- [FACT] User is a lawyer, copywriter, doctor, music producer, personal trainer, software engineer, DJ, graphic designer, therapist, stand-up comedian, news anchor, bartender, screenwriter, journalist, circus artist, copywriter, personal trainer, DJ, voice actor, and influencer.
+- [PREFERENCE] User believes AI cannot fully replace their job in most cases, expressing skepticism about AI's capabilities in various professions.
+- [ASSISTANT_SAID] User asked for a summary of a video titled "(2) A.I. Tries 20 Jobs | WIRED - YouTube."
+- [ASSISTANT_CREATED] User provided a transcript of various professionals discussing AI's ability to perform their jobs, including their opinions and experiences.
+- [ASSISTANT_SAID] A software engineer requested code for a website using HTML, CSS, and Flask to find craft beer nearby.
+- [ASSISTANT_CREATED] The assistant provided raw code that generates a website, which the user found impressive.
+- [ASSISTANT_SAID] A doctor input a prompt about symptoms and received a response indicating it was unlikely to have monkey pox, suggesting it was more likely an STI.
+- [ASSISTANT_SAID] A graphic designer asked to rebrand the McDonald's logo as vegan and received four image variations, noting that AI struggled with text.
+- [ASSISTANT_SAID] A therapist asked about conflict styles in relationships and received general information but found it not actionable.
+- [ASSISTANT_SAID] A stand-up comedian requested a joke about online dating and received a joke that the user found had the right cadence but was slightly creepy.
+- [ASSISTANT_SAID] A lawyer asked for a legal memorandum about selling health information and found the AI's response lacking in detail and trustworthiness.
+- [ASSISTANT_SAID] A news anchor tested AI's ability to read a news script and found it sounded unnatural and lacked body language.
+- [ASSISTANT_SAID] A bartender requested a twist on a Negroni and received a recipe but found it lacking creativity and personalization.
+- [ASSISTANT_SAID] A screenwriter provided a scene prompt and found the AI's dialogue too on-the-nose and lacking depth.
+- [ASSISTANT_SAID] A music producer asked for a song influenced by Lana Del Rey and received a basic chord structure and lyrics, which the user found corny.
+- [ASSISTANT_SAID] A journalist asked for a product review in their writing style and found the AI's output generic and lacking personality.
+- [ASSISTANT_SAID] A circus artist did not have a specific task for the AI.
+- [ASSISTANT_SAID] A copywriter requested

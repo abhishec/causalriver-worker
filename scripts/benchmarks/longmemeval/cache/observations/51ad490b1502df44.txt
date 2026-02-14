@@ -1,0 +1,48 @@
+**Observation Log**
+
+**Session Date:** 2023/05/25 (Thu) 20:52  
+**Session ID:** a5a3ea1e
+
+1. [PREFERENCE] User is looking for new restaurants to try in LA, specifically interested in international cuisine.
+2. [ASSISTANT_SAID] LA is described as a melting pot of cuisines with a diverse range of international restaurants.
+3. [ASSISTANT_SAID] Recommended Asian restaurants include:
+   - Night + Market Song (Thai)
+   - Sqirl (Southeast Asian-inspired)
+   - Tsujita LA (Japanese)
+   - Koko's Boba & Cafe (Korean)
+4. [ASSISTANT_SAID] Recommended Latin American restaurants include:
+   - Guelaguetza (Oaxacan Mexican)
+   - Carmelo (Cuban)
+   - Coni'Seafood (Mexican seafood)
+5. [ASSISTANT_SAID] Recommended European restaurants include:
+   - Bestia (Italian)
+   - Spago Beverly Hills (Austrian-inspired)
+   - Bäco Mercat (Mediterranean)
+6. [ASSISTANT_SAID] Recommended Middle Eastern/North African restaurants include:
+   - Madcapra (Middle Eastern)
+   - Kismet (Middle Eastern-inspired)
+   - Berbere (Ethiopian)
+7. [ASSISTANT_SAID] Recommended other international options include:
+   - Rice Bowl Cafe (Filipino)
+   - Taste of Tehran (Iranian)
+   - B Sweet (Vietnamese dessert cafe)
+8. [PREFERENCE] User expresses interest in trying Japanese food, specifically ramen or okonomiyaki.
+9. [ASSISTANT_SAID] Recommended ramen spots include:
+   - Tsujita LA (Little Tokyo)
+   - Rakkan Ramen (Little Tokyo)
+   - Daikokuya (Little Tokyo)
+   - Totto Ramen (Sawtelle)
+   - Shin-Sen-Gumi (Gardena)
+10. [ASSISTANT_SAID] Recommended okonomiyaki spots include:
+    - Okonomiyaki Tanaka (Little Tokyo)
+    - Chinchikurin (Sawtelle)
+    - Botejyu (Gardena)
+11. [ASSISTANT_SAID] Other Japanese recommendations include:
+    - Sushi Nozawa (Beverly Hills)
+    - Soba Noodle House (Little Tokyo)
+    - Mitsuru Cafe (Sawtelle)
+12. [PREFERENCE] User decides to try Tsujita LA for ramen.
+13. [ASSISTANT_SAID] Tsujita LA has two locations:
+    - Little Tokyo: 2050 W 2nd St, Los Angeles, CA 90057
+    - Sawtelle: 2131 Sawtelle Blvd, Los Angeles, CA 90025
+14. [ASSIST

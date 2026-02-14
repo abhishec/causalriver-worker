@@ -1,0 +1,126 @@
+{
+  "answer_b535969f_2": [
+    {
+      "fact": "User is thinking of getting a new bike rack for their car.",
+      "type": "preference",
+      "entities": [
+        "bike rack",
+        "car"
+      ]
+    },
+    {
+      "fact": "User has been having issues with their bike.",
+      "type": "event",
+      "entities": [
+        "bike"
+      ]
+    },
+    {
+      "fact": "User took their bike in for repairs in mid-February.",
+      "type": "event",
+      "entities": [
+        "February",
+        "repairs"
+      ]
+    },
+    {
+      "fact": "User has a hybrid bike.",
+      "type": "personal",
+      "entities": [
+        "hybrid bike"
+      ]
+    },
+    {
+      "fact": "User wants to carry just one bike.",
+      "type": "preference",
+      "entities": [
+        "one bike"
+      ]
+    },
+    {
+      "fact": "User's car is a Toyota Corolla.",
+      "type": "personal",
+      "entities": [
+        "Toyota Corolla"
+      ]
+    },
+    {
+      "fact": "User prefers a hitch-mounted bike rack.",
+      "type": "preference",
+      "entities": [
+        "hitch-mounted bike rack"
+      ]
+    },
+    {
+      "fact": "User wants a bike rack that is easy to install and remove.",
+      "type": "preference",
+      "entities": [
+        "easy to install",
+        "easy to remove"
+      ]
+    },
+    {
+      "fact": "User is open to different price ranges for the bike rack.",
+      "type": "preference",
+      "entities": [
+        "price ranges"
+      ]
+    },
+    {
+      "fact": "User wants to know what they are getting for their money.",
+      "type": "opinion",
+      "entities": [
+        "value for money"
+      ]
+    }
+  ],
+  "answer_b535969f_1": [
+    {
+      "fact": "User is considering getting a newer hybrid model of their current Toyota Corolla.",
+      "type": "preference",
+      "entities": [
+        "Toyota Corolla",
+        "hybrid model"
+      ]
+    },
+    {
+      "fact": "User washed their current Corolla on February 27th after not doing so for over a month.",
+      "type": "event",
+      "entities": [
+        "February 27th",
+        "Corolla"
+      ]
+    },
+    {
+      "fact": "User's Corolla was getting dirty after a snowstorm.",
+      "type": "event",
+      "entities": [
+        "snowstorm"
+      ]
+    },
+    {
+      "fact": "User has been doing some maintenance on their current car themselves, like washing and vacuuming.",
+      "type": "preference",
+      "entities": [
+        "maintenance",
+        "washing",
+        "vacuuming"
+      ]
+    },
+    {
+      "fact": "User took their car to the dealership for a routine checkup because the 'check engine' light came on.",
+      "type": "event",
+      "entities": [
+        "check engine light",
+        "dealership"
+      ]
+    },
+    {
+      "fact": "User's friend borrowed their car and noticed the 'check engine' light.",
+      "type": "relationship",
+      "entities": [
+        "friend"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+**Observation Log:**
+
+[FACT] User is considering pursuing a Master's degree in Data Science.  
+[FACT] User completed a Bachelor's degree in Computer Science from XYZ University in May 2020.  
+[TEMPORAL] User's Bachelor's degree was completed around 2 years and 3 months ago from the session date (March 3, 2023).  
+[PREFERENCE] User is looking to build on existing skills through a Master's program.  
+[ASSISTANT_SAID] Stanford University offers a Master of Science in Data Science (MS-DS) with a curriculum covering machine learning, statistics, data visualization, and data engineering.  
+[ASSISTANT_SAID] The duration of Stanford's MS-DS program is designed to be completed in 2-3 years, with classes held on weeknights and occasional weekends.  
+[ASSISTANT_SAID] Admission requirements for Stanford's MS-DS include a Bachelor's degree in a quantitative field, a recommended GPA of 3.5 or higher, and prerequisite courses in Linear Algebra, Calculus, Probability, and Programming (Python or R).  
+[ASSISTANT_SAID] Massachusetts Institute of Technology (MIT) offers a Master of Business Analytics (MBAn) focusing on applying data science to business problems.  
+[ASSISTANT_SAID] The duration of MIT's MBAn program is designed to be completed in 18-24 months, with classes held on weeknights and occasional weekends.  
+[ASSISTANT_SAID] Admission requirements for MIT's MBAn include a Bachelor's degree in a quantitative field, a recommended GPA of 3.5 or higher, and prerequisite courses in Calculus, Probability, and Statistics.  
+[ASSISTANT_SAID] University of California, Berkeley offers a Master of Science in Data Science (MS-DS) with a curriculum covering machine learning, data engineering, and data visualization.  
+[ASSISTANT_SAID] The duration of UC Berkeley's MS-DS program is designed to be completed in 2-3 years, with classes held on weeknights and occasional weekends.  
+[ASSISTANT_SAID] Admission requirements for UC Berkeley's MS-DS include a Bachelor's degree in a quantitative field, a recommended GPA of 3.0 or higher, and prerequisite courses in Linear Algebra, Calculus, Probability, and Programming (Python or R).  
+[ASSISTANT_SAID] GRE scores are recommended for Stanford's MS-DS but not required; for MIT's MBAn, GRE scores are required; and for UC Berkeley's MS-DS, GRE scores are also required.  
+[ASSISTANT_SAID] For Stanford's MS-DS, if GRE scores are submitted, focus on the Quantitative Reasoning section.  
+[ASSISTANT_SAID] For MIT's MBAn, the middle 80% of admitted students typically score 164-170

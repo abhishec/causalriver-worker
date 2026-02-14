@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[FACT] User recently took a 10-day social media break.  
+[FACT] Before the break, user was spending at least an hour a day on Facebook and Instagram.  
+[PREFERENCE] User is looking to manage screen time better.  
+[PREFERENCE] User is particularly interested in the apps Freedom and Moment for tracking and limiting screen time.  
+[ASSISTANT_SAID] Freedom (iOS, Android): Blocks distracting apps and websites across all devices; offers a free trial, then subscription-based.  
+[ASSISTANT_SAID] Moment (iOS, Android): Tracks screen time, sets daily limits, and provides insights into app usage; offers a free version with limited features or a premium subscription.  
+[ASSISTANT_SAID] iOS has a built-in feature called Screen Time (Settings > Screen Time) that provides detailed reports on app usage, sets app limits, and allows scheduling downtime.  
+[ASSISTANT_SAID] Android has a built-in feature called Digital Wellbeing (Settings > Digital Wellbeing) that offers app timers, wind down mode, and screen time goals.  
+[ASSISTANT_SAID] StayFocused (Chrome extension): Blocks distracting websites on computers or laptops.  
+[ASSISTANT_SAID] RescueTime (iOS, Android, desktop): Tracks how time is spent on devices, providing detailed reports on app and website usage; offers a free version or a premium subscription.  
+[ASSISTANT_SAID] Forest (iOS, Android): Gamifies productivity by growing a virtual forest as the user stays focused on tasks.  
+[ASSISTANT_SAID] Screen Time Parental Control (iOS, Android): Can be used by individuals to set app limits, block distracting websites, and track screen time.  
+[ASSISTANT_SAID] Cold Turkey (Windows, macOS): Blocks distracting websites and apps on computers or laptops.  
+[ASSISTANT_SAID] uBlock Origin (Chrome, Firefox): Blocks distracting websites and trackers.  
+[ASSISTANT_SAID] LeechBlock (Firefox): Blocks distracting websites during certain times of the day or for a set period.  
+[ASSISTANT_SAID] Tips to help user stay on track include setting realistic goals, identifying distracting apps, scheduling screen-free time, finding alternative activities, and making it a habit.  
+[PREFERENCE] User is considering setting a specific schedule for social media usage or a daily time limit.  
+[ASSISTANT_SAID] Scheduling social media usage can provide a structured approach, better time estimation, and reduced impulsivity.  
+[ASSISTANT_SAID] Daily time limits offer flexibility, adaptability, and less restriction.  
+[ASSISTANT_SAID] A hybrid approach of combining both scheduling and daily limits is suggested.  
+[PREFERENCE] User is thinking of setting a daily time limit of

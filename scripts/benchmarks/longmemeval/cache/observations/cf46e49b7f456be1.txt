@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/28 (Sun) 13:53
+- [USER] User requested a WordPress function to create a shortcode for displaying a list of custom posts.
+- [USER] User specified that the shortcode should allow for specifying the number of posts, a category, and a taxonomy.
+- [ASSISTANT_SAID] Assistant provided a PHP function to create a shortcode for displaying a list of custom posts with specified attributes.
+- [ASSISTANT_CREATED] Assistant created a WordPress shortcode function named `custom_post_list_shortcode` that accepts attributes for `number_of_posts`, `category`, and `taxonomy`.
+- [ASSISTANT_SAID] The shortcode can be used as `[custom_post_list number_of_posts="5" category="category-slug" taxonomy="taxonomy-slug"]`.
+- [USER] User requested to update the code to display a custom post type named "policy" instead of generic posts.
+- [ASSISTANT_SAID] Assistant updated the function to change the post type to "policy".
+- [ASSISTANT_CREATED] The updated function still uses the shortcode `[custom_post_list number_of_posts="5" category="category-slug" taxonomy="taxonomy-slug"]`.
+- [USER] User requested to update the code to use a taxonomy's category instead of WordPress post category, specifically for the "policy" custom post type with a taxonomy called "Topic".
+- [ASSISTANT_SAID] Assistant updated the function to use a taxonomy called "topic" instead of the WordPress post category.
+- [ASSISTANT_CREATED] The updated function now accepts a `topic` attribute and can be used as `[custom_post_list number_of_posts="5" topic="academic-affairs"]`.
+- [USER] User requested a WordPress shortcode to display the first 5 policies of each topic, with topics displayed as `<h2>` and policies as a hyperlinked list.
+- [ASSISTANT_SAID] Assistant provided a new function that retrieves all terms in the "topic" taxonomy and lists the first 5 policies for each topic.
+- [ASSISTANT_CREATED] The shortcode function displays topics as `<h2>` and policies as a hyperlinked list.
+- [USER] User requested a WordPress PHP single template for a custom post type called "Policy" that displays associated Advanced Custom Fields.
+- [ASSISTANT_SAID] Assistant provided a single template for the "Policy" custom post type.
+- [ASSISTANT_CREATED] The template includes fields for Title, Published Date, Unit (a custom taxonomy), Topic (a custom taxonomy), Body content, Additional Resources (collapsible), and History (collapsible).

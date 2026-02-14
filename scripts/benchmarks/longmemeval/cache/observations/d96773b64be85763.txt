@@ -1,0 +1,32 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/28 (Sun) 17:03  
+[FACT] User has a laptop that is a Dell Inspiron 15 5000 series from 2018.  
+[FACT] User upgraded their laptop's RAM to 16GB.  
+[FACT] User was getting around 6-7 hours of battery life before the RAM upgrade.  
+[FACT] User is currently getting around 4-5 hours of battery life after the RAM upgrade.  
+[FACT] User has been using their laptop as their primary work laptop.  
+[CHANGE] User has not made any other recent changes to their laptop's hardware or software aside from the RAM upgrade.  
+[ASSISTANT_SAID] Upgrading the RAM can improve performance but is unlikely to affect battery life.  
+[ASSISTANT_SAID] Suggested troubleshooting steps for battery life issues include:  
+[ASSISTANT_SAID] 1. Battery calibration by draining to 0% and charging to 100% 2-3 times.  
+[ASSISTANT_SAID] 2. Checking for power-hungry RAM consumption.  
+[ASSISTANT_SAID] 3. Monitoring system resource usage using Task Manager.  
+[ASSISTANT_SAID] 4. Adjusting power management settings in Windows.  
+[ASSISTANT_SAID] 5. Checking for BIOS updates.  
+[ASSISTANT_SAID] Suggested general tips to optimize battery life:  
+[ASSISTANT_SAID] * Adjust screen brightness.  
+[ASSISTANT_SAID] * Turn off unnecessary devices like Bluetooth and Wi-Fi.  
+[ASSISTANT_SAID] * Use power-saving features.  
+[ASSISTANT_SAID] * Update the operating system.  
+[ASSISTANT_SAID] * Monitor system resource usage.  
+[FACT] User has a 1TB Western Digital portable external hard drive.  
+[FACT] User bought the external hard drive from Best Buy for around $50.  
+[FACT] User has been using the external hard drive to back up their files regularly.  
+[FACT] User feels peace of mind knowing their files are safe due to regular backups.  
+[ASSISTANT_SAID] Recommended portable external hard drives include:  
+[ASSISTANT_SAID] 1. Western Digital My Passport (up to 5TB).  
+[ASSISTANT_SAID] 2. Seagate Backup Plus (up to 5TB).  
+[ASSISTANT_SAID] 3. LaCie Rugged (up to 5TB).  
+[ASSISTANT_SAID] 4. Samsung Portable SSD (up to 2TB).  
+[ASSISTANT_SAID] 5. G-Technology G-Drive Mobile (

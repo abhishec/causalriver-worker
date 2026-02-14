@@ -1,0 +1,73 @@
+{
+  "answer_dba89488_2": [
+    {
+      "fact": "User has been really into baking lately",
+      "type": "preference",
+      "entities": [
+        "baking"
+      ]
+    },
+    {
+      "fact": "User took an amazing baking class at a local culinary school yesterday",
+      "type": "event",
+      "entities": [
+        "baking class",
+        "culinary school"
+      ]
+    },
+    {
+      "fact": "User has been obsessed with strawberries lately",
+      "type": "preference",
+      "entities": [
+        "strawberries"
+      ]
+    },
+    {
+      "fact": "User is thinking of making a strawberry shortcake",
+      "type": "preference",
+      "entities": [
+        "strawberry shortcake"
+      ]
+    }
+  ],
+  "answer_dba89488_1": [
+    {
+      "fact": "User is hosting a dinner party next weekend.",
+      "type": "event",
+      "entities": [
+        "dinner party",
+        "next weekend"
+      ]
+    },
+    {
+      "fact": "User has been really into baking lately.",
+      "type": "preference",
+      "entities": [
+        "baking"
+      ]
+    },
+    {
+      "fact": "User loves matcha tiramisu and salted caramel chocolate tart.",
+      "type": "preference",
+      "entities": [
+        "matcha tiramisu",
+        "salted caramel chocolate tart"
+      ]
+    },
+    {
+      "fact": "User has been experimenting with different flavors, like strawberries.",
+      "type": "preference",
+      "entities": [
+        "strawberries"
+      ]
+    },
+    {
+      "fact": "User made a strawberry rhubarb crisp a few weeks ago.",
+      "type": "event",
+      "entities": [
+        "strawberry rhubarb crisp",
+        "a few weeks ago"
+      ]
+    }
+  ]
+}

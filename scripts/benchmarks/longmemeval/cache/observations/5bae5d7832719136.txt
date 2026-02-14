@@ -1,0 +1,22 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/25 (Thu) 12:32
+- [ASSISTANT_SAID] The second challenge of action recognition using skeleton keypoints in computer vision based deep learning is the variability in body shape and appearance of individuals.
+- [ASSISTANT_SAID] Body shape and appearance can vary widely across individuals, making it difficult for the model to accurately recognize actions.
+- [ASSISTANT_SAID] Deep learning models typically rely on learning features that are invariant to variations in body shape and appearance.
+- [ASSISTANT_SAID] Variations in body shape and appearance can be challenging when the model needs to generalize across different populations.
+- [ASSISTANT_SAID] The model may need to recognize the same action performed by individuals with different heights, weights, and body proportions.
+- [ASSISTANT_SAID] Researchers have developed various techniques to make the action recognition model more robust to variations in body shape and appearance.
+- [ASSISTANT_SAID] Some researchers have used data normalization techniques, such as standardization or normalization of the joint positions.
+- [ASSISTANT_SAID] Other researchers have used attention mechanisms or feature pooling techniques to focus on the most relevant joints or features for action recognition.
+- [ASSISTANT_SAID] Some researchers have used domain adaptation techniques to adapt the action recognition model to new populations.
+- [ASSISTANT_SAID] Domain adaptation involves transferring the knowledge learned from one population to another by minimizing the differences between the feature distributions of the source and target populations.
+- [ASSISTANT_SAID] In summary, variability in body shape and appearance is a significant challenge in action recognition using skeleton keypoints in computer vision based deep learning.
+- [USER] Please elaborate on the third point.
+- [ASSISTANT_SAID] The third challenge of action recognition using skeleton keypoints in computer vision based deep learning is the temporal dynamics of actions.
+- [ASSISTANT_SAID] Actions are inherently dynamic and occur over time, requiring the model to capture the temporal dynamics of actions, such as speed and direction of movements.
+- [ASSISTANT_SAID] One approach to address this challenge is to use recurrent neural networks (RNNs) designed to process sequential data.
+- [ASSISTANT_SAID] RNNs can capture the temporal dependencies in the skeleton data and use them to recognize actions.
+- [ASSISTANT_SAID] Another approach is to use convolutional neural networks (CNNs) with 3D convolutions to capture spatiotemporal features in the skeleton data.
+- [ASSISTANT_SAID] 3D convolutions extend traditional 2D convolutions to the temporal dimension and can capture motion information of actions.
+- [ASSISTANT_SAID] Some researchers have used attention mechanisms

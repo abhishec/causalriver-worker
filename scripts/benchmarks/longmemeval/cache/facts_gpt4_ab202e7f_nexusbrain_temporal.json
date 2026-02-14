@@ -1,0 +1,208 @@
+{
+  "answer_728deb4d_3": [
+    {
+      "fact": "User has a new toaster oven",
+      "type": "personal",
+      "entities": [
+        "toaster oven"
+      ]
+    },
+    {
+      "fact": "User got rid of their old toaster",
+      "type": "event",
+      "entities": [
+        "old toaster"
+      ]
+    },
+    {
+      "fact": "User is excited to explore the capabilities of their toaster oven",
+      "type": "opinion",
+      "entities": [
+        "toaster oven capabilities"
+      ]
+    },
+    {
+      "fact": "User is interested in trying breakfast quesadilla and roasted veggies",
+      "type": "preference",
+      "entities": [
+        "breakfast quesadilla",
+        "roasted veggies"
+      ]
+    }
+  ],
+  "answer_728deb4d_1": [
+    {
+      "fact": "User is looking for recipe ideas for ripe tomatoes.",
+      "type": "preference",
+      "entities": [
+        "recipe ideas",
+        "ripe tomatoes"
+      ]
+    },
+    {
+      "fact": "User has been cooking more at home lately.",
+      "type": "preference",
+      "entities": [
+        "cooking at home"
+      ]
+    },
+    {
+      "fact": "User bought fresh tomatoes from the farmer's market.",
+      "type": "event",
+      "entities": [
+        "fresh tomatoes",
+        "farmer's market"
+      ]
+    },
+    {
+      "fact": "User replaced their old kitchen faucet with a new Moen one.",
+      "type": "event",
+      "entities": [
+        "kitchen faucet",
+        "Moen"
+      ]
+    },
+    {
+      "fact": "User finds the touchless sensor on the faucet convenient.",
+      "type": "opinion",
+      "entities": [
+        "touchless sensor",
+        "convenient"
+      ]
+    },
+    {
+      "fact": "User loves the sound of tomato and mozzarella salad.",
+      "type": "preference",
+      "entities": [
+        "tomato and mozzarella salad"
+      ]
+    },
+    {
+      "fact": "User is planning a dinner party.",
+      "type": "event",
+      "entities": [
+        "dinner party"
+      ]
+    }
+  ],
+  "answer_728deb4d_2": [
+    {
+      "fact": "User is looking for new recipe ideas for stir-fries.",
+      "type": "preference",
+      "entities": [
+        "stir-fries",
+        "recipe ideas"
+      ]
+    },
+    {
+      "fact": "User's kitchen has been feeling more functional lately.",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User has a new kitchen mat from IKEA.",
+      "type": "personal",
+      "entities": [
+        "IKEA",
+        "kitchen mat"
+      ]
+    },
+    {
+      "fact": "User finds the kitchen mat has a nice grip and is easy to clean.",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User plans to try the Korean-Style Beef and Kimchi Stir-Fry first.",
+      "type": "preference",
+      "entities": [
+        "Korean-Style Beef and Kimchi Stir-Fry"
+      ]
+    },
+    {
+      "fact": "User has been loving their new faucet.",
+      "type": "opinion",
+      "entities": [
+        "faucet"
+      ]
+    },
+    {
+      "fact": "User finds the new faucet has been a game-changer for washing veggies.",
+      "type": "opinion",
+      "entities": []
+    }
+  ],
+  "answer_728deb4d_5": [
+    {
+      "fact": "User is looking for new recipes, especially those that use a lot of veggies.",
+      "type": "preference",
+      "entities": [
+        "recipes",
+        "veggies"
+      ]
+    },
+    {
+      "fact": "User fixed the kitchen shelves last weekend.",
+      "type": "event",
+      "entities": [
+        "kitchen shelves",
+        "last weekend"
+      ]
+    },
+    {
+      "fact": "User feels that the kitchen feels more spacious after fixing the shelves.",
+      "type": "opinion",
+      "entities": [
+        "kitchen",
+        "spacious"
+      ]
+    },
+    {
+      "fact": "User is interested in trying out the veggie stir-fry recipe.",
+      "type": "preference",
+      "entities": [
+        "veggie stir-fry recipe"
+      ]
+    }
+  ],
+  "answer_728deb4d_4": [
+    {
+      "fact": "User is looking for new breakfast recipes.",
+      "type": "preference",
+      "entities": [
+        "breakfast recipes"
+      ]
+    },
+    {
+      "fact": "User recently got a fancy espresso machine from their sister as a gift.",
+      "type": "personal",
+      "entities": [
+        "espresso machine",
+        "sister"
+      ]
+    },
+    {
+      "fact": "User donated their old coffee maker to Goodwill.",
+      "type": "event",
+      "entities": [
+        "old coffee maker",
+        "Goodwill"
+      ]
+    },
+    {
+      "fact": "User is enjoying the upgrade to the new espresso machine.",
+      "type": "opinion",
+      "entities": [
+        "espresso machine"
+      ]
+    },
+    {
+      "fact": "User especially likes the sound of Espresso Granola Parfait and Cappuccino Crepes.",
+      "type": "preference",
+      "entities": [
+        "Espresso Granola Parfait",
+        "Cappuccino Crepes"
+      ]
+    }
+  ]
+}

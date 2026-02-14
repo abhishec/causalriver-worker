@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/27 (Sat) 06:22  
+[USER] User inquired about researchers active in the field.  
+[ASSISTANT_SAID] There are many researchers who are active in the field of metaethics.  
+[ASSISTANT_SAID] Notable philosophers in metaethics include Plato, Aristotle, Immanuel Kant, John Rawls, and Judith Jarvis Thomson.  
+[ASSISTANT_SAID] Recent philosophers contributing to metaethics include Derek Parfit, Christine Korsgaard, and T.M. Scanlon.  
+[ASSISTANT_SAID] Many other philosophers are currently working on research in the field of metaethics.  
+[USER] User asked how to learn about causal fairness theory.  
+[ASSISTANT_SAID] Causal fairness theory focuses on using causal reasoning to evaluate the fairness of algorithms and automated decision-making systems.  
+[ASSISTANT_SAID] To learn about causal fairness theory, one can start by reading introductory texts on the subject.  
+[ASSISTANT_SAID] Taking a college course in computer science, statistics, or philosophy may include coverage of causal fairness theory.  
+[ASSISTANT_SAID] Attending workshops or conferences on the subject is recommended.  
+[ASSISTANT_SAID] Participating in online forums or discussions about causal fairness is also suggested.  
+[ASSISTANT_SAID] Engaging with the work of researchers in causal fairness theory, such as Judea Pearl, Ilya Shpitser, and Zhiwei Steven Wu, is beneficial.  
+[USER] User asked if causal fairness theory is related to Simpson's paradox.  
+[ASSISTANT_SAID] Yes, causal fairness theory is related to Simpson's paradox.  
+[ASSISTANT_SAID] Simpson's paradox is a phenomenon where a trend in different groups of data can disappear or reverse when combined.  
+[ASSISTANT_SAID] Causal fairness theory emphasizes the importance of considering causal relationships when analyzing data.  
+[ASSISTANT_SAID] Failing to consider causal relationships can lead to incorrect or misleading conclusions.  
+[ASSISTANT_SAID] Causal fairness theory is based on the idea that algorithms can have causal effects on different groups of people.  
+[ASSISTANT_SAID] The tools and techniques used in causal fairness theory, such as causal graphs and counterfactual analysis, help understand and address issues related to Simpson's paradox.

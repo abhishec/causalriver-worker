@@ -1,0 +1,17 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2022/03/21 (Mon) 01:22  
+[FACT] User has been really into baking lately.  
+[EVENT] User took an amazing baking class at a local culinary school yesterday.  
+[PREFERENCE] User has been obsessed with strawberries lately.  
+[PREFERENCE] User is thinking of making a strawberry shortcake.  
+[ASSISTANT] Assistant provided tips on how to make the perfect shortcake.  
+[PREFERENCE] User is thinking of using fresh strawberries from the farmer's market for their shortcake.  
+[FACT] User has been buying strawberries by the container lately and snacking on them all day.  
+[PREFERENCE] User wants the whipped cream for the shortcake to be light and fluffy, but still hold its shape.  
+[ASSISTANT] Assistant provided tips for whipping cream to achieve the desired consistency.  
+[FACT] User has been experimenting with sourdough bread lately.  
+[PREFERENCE] User is thinking of using some of their sourdough starter to make a sourdough shortcake instead of regular shortcake.  
+[ASSISTANT] Assistant provided tips on how to create a successful sourdough shortcake.  
+[PREFERENCE] User has been experimenting with different types of flour lately.  
+[FACT] User is thinking of trying a different type of flour for their sourdough shortcake.

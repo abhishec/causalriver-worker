@@ -1,0 +1,19 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/09/18 (Mon) 14:17  
+[FACT] User is a software engineer with 30 years of experience.  
+[ASSISTANT_SAID] The assistant provided a PHP function to perform a registration ceremony in a WebAuthn system.  
+[ASSISTANT_SAID] The code is not meant to be a complete implementation but rather a starting point to help understand the flow and structure of the registration process.  
+[ASSISTANT_SAID] The assistant mentioned that additional dependencies are required for the implementation, specifically the "web-auth/webauthn-lib" library.  
+[ASSISTANT_SAID] The assistant provided a command to install the library via Composer: `composer require web-auth/webauthn-lib`.  
+[ASSISTANT_CREATED] The assistant created a PHP function named `performRegistrationCeremony`.  
+[ASSISTANT_CREATED] The function takes three parameters: `Server $server`, `PublicKeyCredentialCreationOptions $creationOptions`, and `PublicKeyCredentialSourceRepository $credentialRepository`.  
+[ASSISTANT_SAID] The assistant stated that the `PublicKeyCredentialCreationOptions` should be configured according to the Relying Party's needs.  
+[ASSISTANT_SAID] The assistant explained that the function calls `$server->createAndCheckAttestation($_POST, $creationOptions)` to create and check the attestation.  
+[ASSISTANT_SAID] The assistant mentioned that the attestation object can be retrieved using `$publicKeyCredential->getResponse()->getAttestationObject()`.  
+[ASSISTANT_SAID] The assistant noted that the trust path can be obtained from the attestation statement using `$attestationObject->getAttStmt()->getTrustPath()`.  
+[ASSISTANT_SAID] The assistant indicated that if the trust path is an instance of `CertificateTrustPath`, the Relying Party should verify the attestation trustworthiness using a trusted source or policy.  
+[ASSISTANT_SAID] The assistant provided a conditional check for the trustworthiness of the attestation: `if (!$trusted) { throw new RuntimeException('The attestation is not trustworthy.'); }`.  
+[ASSISTANT_SAID] The assistant explained that a new credential record should be created and stored using `PublicKeyCredentialSource::createFromPublicKeyCredential(...)`.  
+[ASSISTANT_SAID] The assistant mentioned that the credential ID should be verified to ensure it is not already registered for any user.  
+[ASSISTANT_SAID] The assistant provided a partial code snippet that includes the line `$existingSource = $credentialRepository->findOneByCredentialId($p`.

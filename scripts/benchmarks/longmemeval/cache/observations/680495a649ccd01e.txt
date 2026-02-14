@@ -1,0 +1,21 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/08/15 (Tue) 17:19  
+[USER] User wants to act as a text-based adventure game.  
+[USER] User will type commands and expects replies with descriptions of what the character sees.  
+[USER] User specifies not to write explanations or type commands unless instructed.  
+[USER] User will communicate in English using curly brackets {like this}.  
+[USER] User's first command is to create a fantasy adventure game where cats are trying to take over the world.  
+[ASSISTANT_CREATED] Assistant describes a world where cats are the dominant species and are organizing to take over.  
+[ASSISTANT_CREATED] Assistant describes the setting as a bustling city with towering buildings and busy streets filled with cats.  
+[ASSISTANT_SAID] Assistant mentions that there is a sense of urgency in the air and asks what the user wants to do.  
+[USER] User commands to look for a weapon.  
+[ASSISTANT_SAID] Assistant provides options for finding a weapon: a nearby pet store, a construction site, or an abandoned alleyway.  
+[USER] User decides to go to the construction site.  
+[ASSISTANT_SAID] Assistant describes the construction site as abandoned with rusty equipment and a pile of tools.  
+[ASSISTANT_SAID] Assistant notes that the streets are chaotic with cats attacking humans.  
+[USER] User commands to pick up hammers.  
+[ASSISTANT_SAID] Assistant describes the user picking up a hammer and feeling its weight, noting it could be used as a weapon.  
+[ASSISTANT_SAID] Assistant mentions that there are a few other hammers scattered around the site.  
+[ASSISTANT_SAID] Assistant describes a loud meowing noise coming from outside and a group of cats approaching the construction site, indicating they are not happy about the user's presence.  
+[ASSISTANT_SAID] Assistant asks what the user wants to do next.

@@ -1,0 +1,24 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2021/08/20 (Fri) 20:56
+- [EVENT] User is planning a road trip to the East Coast.
+- [PREFERENCE] User is interested in history, architecture, and trying out local food.
+- [EVENT] User just got back from a road trip to Yellowstone National Park last month.
+- [FACT] User's road trip to Yellowstone was their longest one yet, in terms of time, not distance.
+- [EVENT] User drove a total of 2,500 miles and stopped at 5 different hotels during the Yellowstone trip.
+- [PREFERENCE] User's favorite part of the Yellowstone trip was the scenic drives through the Rocky Mountains and seeing geysers and hot springs.
+- [EVENT] User took 7 days to complete the Yellowstone trip.
+- [ASSISTANT_SAID] Recommended must-see attractions in Boston: Freedom Trail, Fenway Park, Museum of Fine Arts, Quincy Market, New England Aquarium.
+- [ASSISTANT_SAID] Recommended must-see attractions in New York City: Statue of Liberty and Ellis Island, Central Park, The Metropolitan Museum of Art, 9/11 Memorial & Museum, Times Square.
+- [ASSISTANT_SAID] Suggested additional attractions in Boston: Bostonian Society Museum, Old State House, Beacon Hill, Boston Public Library, and local cuisine like clam chowder, lobster rolls, and Boston cream pie.
+- [ASSISTANT_SAID] Suggested additional attractions in New York City: New-York Historical Society, Tenement Museum, Midtown Manhattan, High Line, and local cuisine like pizza, bagels, and knish.
+- [EVENT] User is thinking of spending about 3-4 days in each city.
+- [ASSISTANT_SAID] Suggested visiting the Institute of Contemporary Art and Harborwalk Trail in Boston.
+- [ASSISTANT_SAID] Suggested exploring Greenwich Village and Brooklyn Museum in New York City.
+- [PREFERENCE] User is thinking of visiting famous markets in both cities, like Quincy Market in Boston and Smorgasburg in Brooklyn.
+- [ASSISTANT_SAID] Recommended must-try foods at Quincy Market: fresh seafood (clam chowder, lobster rolls), cannoli, fresh fruit and veggies.
+- [ASSISTANT_SAID] Recommended must-try foods at Smorgasburg: artisanal grilled cheese, lobster rolls, Korean BBQ tacos.
+- [ASSISTANT_SAID] Suggested trying a Boston cream pie from a local bakery or café in Boston.
+- [ASSISTANT_SAID] Suggested trying a classic NYC bagel with cream cheese from Russ & Daughters Cafe or Ess-a-Bagel.
+- [ASSISTANT_SAID] Suggested trying a NYC-style slice of pizza from Lombardi's or Joe's Pizza.
+- [EVENT] User is thinking of visiting

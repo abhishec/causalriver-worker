@@ -1,0 +1,20 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/30 (Tue) 18:19  
+[FACT] User is looking for new music recommendations.  
+[PREFERENCE] User enjoys music by Tame Impala and Phoebe Bridgers.  
+[ASSISTANT] Recommended similar artists to Tame Impala: Pond, Unknown Mortal Orchestra, King Gizzard & the Lizard Wizard, Foxygen, Temples.  
+[ASSISTANT] Recommended similar artists to Phoebe Bridgers: Julien Baker, Lucy Dacus, Vagabon, Soccer Mommy, Snail Mail.  
+[ASSISTANT] Recommended crossover artists for fans of both Tame Impala and Phoebe Bridgers: Mild High Club, Homeshake, Yellow Days.  
+[PREFERENCE] User enjoys music by Fleet Foxes and Joni Mitchell.  
+[ASSISTANT] Recommended similar artists to Fleet Foxes: Bon Iver, Sufjan Stevens, The Lumineers, First Aid Kit, The Avett Brothers.  
+[ASSISTANT] Recommended similar artists to Joni Mitchell: Judee Sill, Cat Power, Regina Spektor, Joanna Newsom, Laura Marling.  
+[ASSISTANT] Recommended crossover artists for fans of both Fleet Foxes and Joni Mitchell: Feist, St. Vincent, Fleetwood Mac, The Milk Carton Kids, Brandi Carlile.  
+[PREFERENCE] User has been into vinyl collecting lately.  
+[ASSISTANT] Recommended record stores in San Francisco: Amoeba Music, Rasputin Music, Groove Merchant Records, RSVP Records, The Last Record Store, Vinyl Dreams, Aquarius Records, Noise Records, 1-2-3-4 Go! Records, B-side Records.  
+[PREFERENCE] User is looking for good music podcasts that focus on indie and alternative music.  
+[ASSISTANT] Recommended music podcasts: All Songs Considered (NPR), Pitchfork, KCRW's Morning Becomes Eclectic, The Needle Drop, Indiecast, The Indie Mixtape, Stereogum's The Chat, NME's The Big Read, Under the Radar's Podcast, The Alternative.  
+[PREFERENCE] User is looking for the best way to discover new music on Apple Music.  
+[ASSISTANT] Suggested ways to discover new music on Apple Music: For You section, Recommendations, New Music Mix, Friends Mix, Replay, Browse, Apple Music 1, Search, Apple Music's Discovery Playlist, Experiment with Playlists.  
+[PREFERENCE] User has enjoyed attending Outside Lands music festival.  
+[ASSISTANT] Recommended music festivals in the Bay Area: BottleRock Napa Valley, Noise Pop Festival.

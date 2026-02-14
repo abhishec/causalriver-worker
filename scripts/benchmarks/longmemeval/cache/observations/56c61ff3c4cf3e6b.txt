@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/24 (Wed) 16:31  
+[USER] User requested information about the flow, process, and system of OCR on the app, both frontend and backend.  
+[ASSISTANT_SAID] The flow of OCR integration includes:  
+[ASSISTANT_SAID] a. User captures or uploads an image containing text.  
+[ASSISTANT_SAID] b. The image is sent to the backend for OCR processing.  
+[ASSISTANT_SAID] c. The backend performs OCR on the image and extracts the text.  
+[ASSISTANT_SAID] d. The extracted text is sent back to the frontend.  
+[ASSISTANT_SAID] e. The frontend displays the extracted text to the user.  
+[ASSISTANT_SAID] The frontend process includes:  
+[ASSISTANT_SAID] a. Image capture/upload: The app provides an interface for users to either capture an image using the device's camera or upload an existing image from their device.  
+[ASSISTANT_SAID] b. Display extracted text: Once the text is extracted and sent back from the backend, the frontend displays the text to the user in a readable format. The user may have options to edit, save, or share the extracted text.  
+[ASSISTANT_SAID] The backend process includes:  
+[ASSISTANT_SAID] a. Receive image: The backend receives the image from the frontend, typically as a base64 encoded string or a binary file.  
+[ASSISTANT_SAID] b. Pre-process image (optional): Depending on the quality of the image, some pre-processing steps may be necessary, such as resizing, rotating, or enhancing the image to improve OCR accuracy.  
+[ASSISTANT_SAID] c. OCR processing: The OCR engine (e.g., Tesseract, Google Cloud Vision API, or Amazon Textract) processes the image and extracts the text.  
+[ASSISTANT_SAID] d. Post-process extracted text (optional): The backend may perform additional processing on the extracted text, such as spell-checking, formatting, or natural language processing (NLP) tasks like entity recognition or sentiment analysis.  
+[ASSISTANT_SAID] e. Send extracted text to frontend: The backend sends the extracted text back to the frontend in a suitable format (e.g., JSON).  
+[ASSISTANT_SAID] The system components include:  
+[ASSISTANT_SAID] a. Frontend: Typically built using a web or mobile app development framework (e.g., React, Angular, Swift, or Kotlin) and communicates with the backend via RESTful APIs or GraphQL.  
+[ASSISTANT_SAID] b. Backend: Usually developed using a server-side

@@ -1,0 +1,47 @@
+{
+  "answer_c18d480b_1": [
+    {
+      "fact": "User is looking for photography inspiration and tips.",
+      "type": "preference",
+      "entities": [
+        "photography inspiration",
+        "tips"
+      ]
+    },
+    {
+      "fact": "User is interested in night photography.",
+      "type": "preference",
+      "entities": [
+        "night photography"
+      ]
+    },
+    {
+      "fact": "User is interested in astrophotography.",
+      "type": "preference",
+      "entities": [
+        "astrophotography"
+      ]
+    },
+    {
+      "fact": "User is seeking apps or software for editing and processing astrophotography images.",
+      "type": "preference",
+      "entities": [
+        "apps",
+        "software",
+        "editing",
+        "processing",
+        "astrophotography images"
+      ]
+    },
+    {
+      "fact": "User is looking for online communities or forums to share astrophotography work and get feedback.",
+      "type": "preference",
+      "entities": [
+        "online communities",
+        "forums",
+        "astrophotography work",
+        "feedback"
+      ]
+    }
+  ]
+}

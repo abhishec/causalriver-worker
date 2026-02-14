@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/30 (Tue) 09:28  
+[USER] User prefers a specific file structure for their application.  
+[USER] User provided a file structure for their application, including directories for authentication, case management, image review, logging, utils, and main.py.  
+[ASSISTANT_SAID] Assistant praised the user's file structure for separating functionality into logical components and following standard Python package conventions.  
+[ASSISTANT_CREATED] Assistant provided an updated file structure that includes an `api` directory for React Native mobile app endpoints, with modules for auth, case, shared_case, image, and prediction.  
+[ASSISTANT_SAID] Assistant explained how to import API endpoints in `main.py` and register them with the app object.  
+[ASSISTANT_SAID] Assistant listed the available URLs for the API endpoints: `/api/auth`, `/api/case`, `/api/shared_case`, `/api/image`, `/api/prediction`.  
+[USER] User inquired about the datastore model of a case.  
+[ASSISTANT_CREATED] Assistant provided a datastore model for the `Case` class, including properties such as `created_by`, `created_on`, `updated_on`, `name`, `description`, `images`, and `status`.  
+[USER] User requested changes to the existing design to collect correct labels of the implant system predicted by the app.  
+[ASSISTANT_CREATED] Assistant suggested modifying the `Case` model to include a new field `predicted_label` and provided an updated version of the `Case` model with additional properties.  
+[USER] User mentioned the need for the case to have the ability to be archived.  
+[ASSISTANT_CREATED] Assistant proposed adding an `archived` Boolean property to the `Case` model and suggested creating new API endpoints for archiving and unarchiving cases.  
+[ASSISTANT_SAID] Assistant provided example API requests for archiving and unarchiving cases, including request and response bodies.  
+[ASSISTANT_SAID] Assistant suggested creating an endpoint to retrieve all archived cases.  
+[USER] User requested an example of the comments property in the case.  
+[ASSISTANT_CREATED] Assistant provided a model for the `Comment` class, including properties such as `created_at`, `author`, and `content`, and explained how the `comments` property in the `Case` model would be structured.  
+[USER] User asked for properties that could be associated with a comment.  
+[ASSISTANT_SAID] Assistant listed potential properties for a comment, including Comment ID, Comment text, Comment author, Timestamp, Attachment, Replies, Status, Related case, Mentioned users, and Reaction.  
+[ASSISTANT_CREATED] Assistant provided a datastore model for the `Comment` entity, including properties for `author

@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/02/14 (Tue) 12:45  
+[EVENT] User is trying to optimize their car's performance for the next auto racking event.  
+[EVENT] User replaced their spark plugs with new ones from NGK today.  
+[FACT] User noticed a slight misfire during their daily commute before replacing the spark plugs.  
+[PREFERENCE] User is interested in tips on suspension upgrades to improve their car's handling.  
+[ASSISTANT] Assistant recommended upgrading to adjustable coilovers for better body control, reduced body roll, and improved handling.  
+[ASSISTANT] Assistant suggested upgrading sway bars to reduce body roll and improve cornering stability.  
+[ASSISTANT] Assistant advised inspecting and replacing worn-out bushings with high-performance options like polyurethane or spherical bearings.  
+[ASSISTANT] Assistant recommended upgrading to stiffer springs to improve handling and reduce body roll.  
+[ASSISTANT] Assistant mentioned adjusting camber and toe angles to optimize tire wear and handling.  
+[ASSISTANT] Assistant suggested upgrading to high-performance shock absorbers for better handling and stability.  
+[ASSISTANT] Assistant noted that lowering the ride height can improve handling but cautioned about potential risks.  
+[ASSISTANT] Assistant emphasized the importance of proper alignment for track use.  
+[ASSISTANT] Assistant reminded the user to consider tire upgrades to high-performance, track-specific tires.  
+[ASSISTANT] Assistant suggested consulting a professional mechanic or tuning shop for suspension upgrades.  
+[PREFERENCE] User expressed concern about the cost of coilovers and asked for more affordable options.  
+[ASSISTANT] Assistant provided alternatives to coilovers, including sway bar upgrades, spring upgrades, shock absorber upgrades, lowering springs, and performance strut mounts.  
+[ASSISTANT] Assistant advised considering budget, driving style, car make and model, and goals when choosing suspension upgrades.  
+[EVENT] User plans to inspect and replace the bushings on their car soon.  
+[ASSISTANT] Assistant provided steps for inspecting and replacing bushings, including tools needed and techniques.  
+[ASSISTANT] Assistant recommended brands for bushings, including Energy Suspension and Prothane for polyurethane bushings, and QA1 and Aurora Bearing Company for spherical bearings.  
+[PREFERENCE] User is considering upgrading their brake pads for the auto racking event.  
+[ASSISTANT] Assistant confirmed that upgrading brake pads is a good idea for improved stopping power during racing events.

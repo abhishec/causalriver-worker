@@ -1,0 +1,24 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/26 (Fri) 12:57  
+[FACT] User is trying to keep track of their plant care routine.  
+[PREFERENCE] User prefers to set reminders for watering their plants.  
+[FACT] User waters Felix, their fiddle leaf fig, on Sundays.  
+[ASSISTANT_SAID] Suggested setting a recurring event on a digital calendar for every Sunday to remind the user to water Felix.  
+[ASSISTANT_SAID] Recommended downloading a plant care app like Waterlogged, Happy Plant, or PlantSnap to track watering schedules and set reminders.  
+[ASSISTANT_SAID] Suggested placing a sticky note or reminder in a visible spot as a physical reminder.  
+[ASSISTANT_SAID] Advised using a smart speaker or virtual assistant to set a voice reminder for watering Felix every Sunday.  
+[PREFERENCE] User chose to go with the digital calendar reminder.  
+[FACT] User had an issue with over-fertilizing their peace lily.  
+[ASSISTANT_SAID] Provided tips to prevent over-fertilizing plants, including reading the label, fertilizing sparingly, soil testing, starting with a weak solution, monitoring plant response, not fertilizing when stressed, and flushing the soil if over-fertilization is suspected.  
+[ASSISTANT_SAID] Suggested pruning damaged leaves from the peace lily and monitoring its response to fertilization.  
+[FACT] User has a snake plant that has been doing well since being repotted into a larger pot with fresh soil.  
+[ASSISTANT_SAID] Provided a step-by-step guide on how to propagate a snake plant using leaf cuttings and rhizome division.  
+[ASSISTANT_SAID] Gave tips for caring for the snake plant in a bigger pot, including watering, fertilization, pruning, and lighting.  
+[FACT] User has been experimenting with different fertilizers for their African violets.  
+[ASSISTANT_SAID] Explained neem oil as a natural pesticide, its effectiveness against pests like whiteflies, and how to use it.  
+[PREFERENCE] User expressed satisfaction with using neem oil to get rid of whiteflies on their orchid.  
+[ASSISTANT_SAID] Provided tips for keeping plants looking their best during the winter months, including humidifying, reducing watering, increasing misting, grouping plants, avoiding drafts, monitoring temperature, providing bright indirect light, fertilizing sparingly, pruning, and checking for pests.  
+[ASSISTANT_SAID] Suggested using a humidifier or placing pots on trays with water and pebbles to increase humidity around plants.  
+[ASSISTANT_SAID] Recommended checking soil moisture frequently and watering only when necessary during winter.  
+[ASSISTANT_SAID] Advised to keep plants away from cold drafts and windows to prevent

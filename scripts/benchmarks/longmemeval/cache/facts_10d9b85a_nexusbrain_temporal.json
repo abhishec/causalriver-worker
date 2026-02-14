@@ -1,0 +1,84 @@
+{
+  "answer_e0585cb5_1": [
+    {
+      "fact": "User is trying to implement a machine learning model for a project.",
+      "type": "personal",
+      "entities": [
+        "machine learning model",
+        "project"
+      ]
+    },
+    {
+      "fact": "User attended a 2-day workshop on April 17th and 18th.",
+      "type": "event",
+      "entities": [
+        "workshop",
+        "April 17th",
+        "April 18th"
+      ]
+    },
+    {
+      "fact": "User learned about standardization and normalization in the workshop.",
+      "type": "personal",
+      "entities": [
+        "standardization",
+        "normalization",
+        "workshop"
+      ]
+    },
+    {
+      "fact": "User is unclear on when to use standardization versus normalization.",
+      "type": "opinion",
+      "entities": [
+        "standardization",
+        "normalization"
+      ]
+    },
+    {
+      "fact": "User did not get a chance to ask about specific questions during the workshop.",
+      "type": "opinion",
+      "entities": [
+        "workshop",
+        "specific questions"
+      ]
+    }
+  ],
+  "answer_e0585cb5_2": [
+    {
+      "fact": "User is interested in urban planning and sustainable development.",
+      "type": "preference",
+      "entities": [
+        "urban planning",
+        "sustainable development"
+      ]
+    },
+    {
+      "fact": "User attended a lecture on sustainable development at the public library on April 10th.",
+      "type": "event",
+      "entities": [
+        "lecture",
+        "sustainable development",
+        "public library",
+        "April 10th"
+      ]
+    },
+    {
+      "fact": "User is looking for resources on urban planning and sustainable development.",
+      "type": "preference",
+      "entities": [
+        "resources",
+        "urban planning",
+        "sustainable development"
+      ]
+    },
+    {
+      "fact": "User is interested in the Coursera course on Sustainable Development from the University of Michigan.",
+      "type": "preference",
+      "entities": [
+        "Coursera",
+        "Sustainable Development",
+        "University of Michigan"
+      ]
+    }
+  ]
+}

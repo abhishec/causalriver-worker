@@ -1,0 +1,21 @@
+**Observation Log:**
+
+[FACT] User is planning to go live on Instagram Reels.
+
+[EVENT] User's Instagram Reels live session is scheduled for tomorrow.
+
+[ASSISTANT_SAID] Assistant offered to help the user come up with a promotional post idea for their upcoming Instagram Reels live session.
+
+[ASSISTANT_CREATED] Assistant provided five promotional post ideas: Sneak Peek, Countdown, Q&A, Exclusive Content, and Personal Invitation.
+
+[ASSISTANT_SAID] Assistant suggested a caption for the countdown post idea for 24 hours to go.
+
+[ASSISTANT_SAID] Assistant provided three caption ideas for the 12-hour countdown post, encouraging viewers to share what they want to see in the live stream.
+
+[ASSISTANT_SAID] Assistant suggested a post idea for a sneak peek of what the user will be talking about in the live stream, including a specific caption.
+
+[ASSISTANT_SAID] Assistant provided three caption ideas for the 1-hour countdown post, emphasizing urgency and encouraging viewers to set a reminder.
+
+[EVENT] User needs to go live on Instagram Reels in one hour.
+
+[ASSISTANT_SAID] Assistant provided a quick equipment check list for the user to prepare for their live stream, including checks for camera, lighting, audio, internet connection, battery life, app and account, content and script, and background.

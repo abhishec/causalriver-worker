@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[FACT] User is planning a trip to Austin, Texas.  
+[EVENT] User stayed at the Omni Barton Creek Resort & Spa last week for a friend's wedding.  
+[ASSISTANT_SAID] The Omni Barton Creek Resort & Spa is located in a beautiful area surrounded by hills and nature, but it's still relatively close to downtown Austin.  
+[ASSISTANT_SAID] Recommended restaurants near the Omni Barton Creek Resort & Spa include:  
+[ASSISTANT_SAID] 1. Uchi: Acclaimed restaurant offering fresh, creative sushi and Japanese-inspired dishes. (10-minute drive)  
+[ASSISTANT_SAID] 2. Home Slice Pizza: Popular spot serving giant New York-style pies with a Texas twist. (10-minute drive)  
+[ASSISTANT_SAID] 3. Olamaie: Farm-to-table cuisine with seasonal American dishes made with locally sourced ingredients. (12-minute drive)  
+[ASSISTANT_SAID] 4. Contigo: Farm-to-table restaurant with creative, globally inspired dishes and outdoor seating. (12-minute drive)  
+[ASSISTANT_SAID] 5. The Grove Wine Bar & Kitchen: Casual, wine-focused spot with a great selection of wines and small plates. (10-minute drive)  
+[ASSISTANT_SAID] 6. Barton Creek Café: Located within the Omni Barton Creek Resort & Spa, offering breakfast, lunch, and snacks with a focus on locally sourced ingredients.  
+[ASSISTANT_SAID] 7. Hillside Farmacy: Farm-to-table café serving breakfast and lunch options, including sandwiches, salads, and baked goods. (12-minute drive)  
+[ASSISTANT_SAID] Recommended dining options in downtown Austin (20-25 minutes from the resort) include:  
+[ASSISTANT_SAID] 1. Franklin Barbecue: World-famous BBQ joint. (20-minute drive)  
+[ASSISTANT_SAID] 2. La Condesa: Contemporary Mexican cuisine and creative cocktails. (20-minute drive)  
+[ASSISTANT_SAID] 3. Perla's Seafood & Oyster Bar: Seafood and oysters in a lively atmosphere. (20-minute drive)  
+[EVENT] User is planning a day trip to nearby Hill Country.  
+[ASSISTANT_SAID] Recommended scenic drives in Hill Country include:  
+[ASSISTANT_SAID] 1. Willow City Loop: A 13-mile scenic drive through rolling hills and wildflower fields.  
+[ASSISTANT_SAID] 2. Devil's Backbone: A 20-mile stretch of FM 32 with breathtaking views of the countryside.  
+[ASSISTANT_SAID] Recommended wineries in Hill Country include:  
+[ASSISTANT_SAID] 1. Driftwood Estate Winery: Known for award-winning wines and

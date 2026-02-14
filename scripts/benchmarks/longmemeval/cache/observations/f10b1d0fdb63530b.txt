@@ -1,0 +1,15 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/28 (Sun) 16:17  
+[USER] User requested a comprehensive summary of "The Bitter Lesson" by Rich Sutton.  
+[ASSISTANT_SAID] The assistant summarized the key points of "The Bitter Lesson" in a structured format.  
+[ASSISTANT_CREATED] The assistant created a summary with the following points:  
+[ASSISTANT_CREATED] 1. General methods that leverage computation are more effective in AI research, due to the exponential fall in cost per unit of computation (Moore's law).  
+[ASSISTANT_CREATED] 2. Most AI research has focused on using human knowledge to improve performance, but the long-term success depends on leveraging computation.  
+[ASSISTANT_CREATED] 3. The use of search and learning, which utilize massive amounts of computation, have been key in the success of AI in various domains such as chess, Go, and speech recognition.  
+[ASSISTANT_CREATED] 4. There have been instances where human-knowledge based approaches have initially been favored, but have ultimately been outperformed by computational methods.  
+[ASSISTANT_CREATED] 5. The psychological commitment to certain approaches and the tendency to complicate methods with human knowledge can hinder the effectiveness of AI.  
+[USER] User requested a summary in the style of @dril.  
+[ASSISTANT_SAID] The assistant provided a humorous summary in the style of @dril: "ok so get this: turns out all that human knowledge stuff ain't worth squat in the long run. what really matters is all that fancy computation. it's like, we were all trying to be smart and use our brains to improve AI, but really we shoulda just been using computers to do the work for us. lesson learned: always trust the computers. they never let us down."  
+[USER] User requested a more funny and short version of the summary.  
+[ASSISTANT_SAID] The assistant provided a shorter, funnier summary: "Lesson learned: human brains are pointless in AI. Just let the computers do all the work. Trust the machine, not your puny human knowledge."

@@ -1,0 +1,26 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/20 (Sat) 09:11
+- [FACT] User has a 20-gallon freshwater community tank named "Amazonia."
+- [EVENT] User is experiencing issues with nitrite levels in their tank.
+- [PREFERENCE] User is unsure if they are performing partial water changes correctly.
+- [ASSISTANT_SAID] Nitrite (NO2) is a toxic compound that can harm fish, and it's essential to keep its levels under control.
+- [ASSISTANT_SAID] Recommended performing regular water changes of 10-15% every week to help dilute nitrite concentration.
+- [ASSISTANT_SAID] Suggested monitoring nitrite levels using a reliable test kit.
+- [ASSISTANT_SAID] Advised checking the biological cycle and considering adding a biological supplement or more biological media.
+- [ASSISTANT_SAID] Recommended increasing water circulation to distribute oxygen and beneficial bacteria.
+- [ASSISTANT_SAID] Suggested avoiding overfeeding and feeding fish only what they can consume within a few minutes.
+- [ASSISTANT_SAID] Recommended adding nitrite-absorbing media, performing larger water changes if nitrite levels are high, and considering a water conditioner with nitrite-removing agents.
+- [ASSISTANT_SAID] Emphasized the importance of monitoring water parameters, including ammonia, nitrite, and nitrate levels.
+- [EVENT] User has been experimenting with different fish foods.
+- [PREFERENCE] User is looking for recommendations for fish food brands suitable for a community tank with neon tetras, harlequin rasboras, and platies.
+- [ASSISTANT_SAID] Recommended TetraMin, API, New Life Spectrum, Omega One, and Hikari as suitable fish food brands.
+- [ASSISTANT_SAID] Suggested considering flake or pellet options, protein content, vitamin and mineral content, and color enhancers when selecting fish food.
+- [ASSISTANT_SAID] Advised rotating fish foods every few months and supplementing with live or frozen foods for variety.
+- [EVENT] User has noticed algae growth on the glass walls of Amazonia.
+- [PREFERENCE] User is seeking tips on how to control algae growth in their freshwater community tank.
+- [ASSISTANT_SAID] Recommended regular water changes of 10-15% every week to remove excess nutrients.
+- [ASSISTANT_SAID] Suggested monitoring lighting and reducing duration or intensity to control algae growth.
+- [ASSISTANT_SAID] Advised adjusting nutrient levels and increasing water circulation to prevent stagnation.
+- [ASSISTANT_SAID] Recommended cleaning the glass regularly with a magnetic algae scraper or soft-bristled brush.
+- [ASSISTANT_SAID] Suggested introducing algae-controlling fish like algae

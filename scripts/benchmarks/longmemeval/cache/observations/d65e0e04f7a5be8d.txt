@@ -1,0 +1,27 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/24 (Wed) 11:14  
+[FACT] User feels overwhelmed with work and social commitments.  
+[RELATIONSHIP] User had a session with Dr. Smith this week.  
+[ASSISTANT_SAID] Assistant expressed gladness that the user reached out and offered to help organize the schedule and prioritize tasks.  
+[ASSISTANT_SAID] Assistant acknowledged the user's focus on setting healthy boundaries.  
+[ASSISTANT_SAID] Assistant requested more information about the user's current schedule and commitments, including work hours, social commitments, recurring tasks, and top priorities.  
+[FACT] User's work hours are 9 AM to 5 PM, Monday to Friday.  
+[FACT] User has regular social commitments, including a weekly yoga class and a bi-weekly dinner with friends.  
+[FACT] User needs to fit in time for self-care activities like meditation and journaling.  
+[FACT] User's top priority is to manage workload and meet deadlines without burning out.  
+[CHANGE] User has been struggling to say no to requests from colleagues and friends.  
+[ASSISTANT_SAID] Assistant suggested breaking down the user's schedule and tasks to manage time effectively and set healthy boundaries.  
+[ASSISTANT_SAID] Assistant provided a sample weekly schedule outline, including work hours, yoga class, meditation, journaling, and free time.  
+[ASSISTANT_SAID] Assistant emphasized the importance of setting clear boundaries at work and scheduling self-care activities.  
+[ASSISTANT_SAID] Assistant provided boundary-setting strategies, including learning to say no, communicating workload, and scheduling self-care.  
+[ASSISTANT_SAID] Assistant suggested batching similar tasks and leaving room for spontaneity.  
+[ASSISTANT_SAID] Assistant encouraged regular review and adjustment of priorities and tasks.  
+[RELATIONSHIP] User sees Dr. Smith every week for guidance on setting healthy boundaries.  
+[ASSISTANT_SAID] Assistant acknowledged the user's need for flexibility in their schedule and offered a prioritization framework.  
+[ASSISTANT_SAID] Assistant provided a prioritization framework consisting of Must-Dos, Should-Dos, and Nice-To-Dos.  
+[ASSISTANT_SAID] Assistant reiterated the importance of self-care and communication of priorities.  
+[ASSISTANT_CREATED] Assistant created a simple checklist for the user to remind them of their priorities and boundaries, including daily priorities, boundary reminders, and a weekly review.  
+[ASSISTANT_SAID] Assistant suggested posting the checklist in a visible spot and making it a habit to review it daily.  
+[ASSISTANT_SAID] Assistant encouraged the user to be kind to themselves during the process of setting boundaries and prioritizing tasks.  
+[FACT] User expressed satisfaction with the checklist and its

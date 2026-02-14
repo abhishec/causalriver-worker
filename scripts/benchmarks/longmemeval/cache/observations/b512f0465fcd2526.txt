@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2024/01/10 (Wed) 01:56  
+[USER] The user has a set of car damage images they want to create a model for.  
+[USER] The user wants to use Python and OpenCV for the model.  
+[USER] The model should check if an image exists in the set and compare its damage.  
+[USER] The user wants the model to account for image angle and size when comparing.  
+[USER] The user wants the model to provide a percentage of equality between images.  
+[ASSISTANT_SAID] To create the model, the assistant suggested preparing a dataset of images with car damages and labeling each image with the type of damage.  
+[ASSISTANT_SAID] The assistant recommended using a pre-trained CNN model to extract features from the car images in the dataset.  
+[ASSISTANT_SAID] The assistant suggested building a search index using the features extracted, potentially using a KDTree algorithm.  
+[ASSISTANT_SAID] The assistant advised detecting and extracting features from the query image using the same CNN model used for training.  
+[ASSISTANT_SAID] The assistant mentioned querying the search index to find the most similar images to the query image using cosine similarity.  
+[ASSISTANT_SAID] The assistant recommended using OpenCV to ensure both images have the same orientation and size before comparing.  
+[ASSISTANT_SAID] The assistant suggested using the ORB feature detector in OpenCV to find keypoints in both images and align them.  
+[ASSISTANT_SAID] The assistant provided methods for comparing images using OpenCV's template matching or histogram comparison functions.  
+[ASSISTANT_SAID] The assistant explained how to calculate the percentage of equality between the two images using the difference in pixels or other metrics.  
+[ASSISTANT_CREATED] The assistant provided example code to get started, including loading a pre-trained CNN model, extracting features, building a KDTree index, and finding similar images.  
+[ASSISTANT_CREATED] The assistant provided a function `find_similar_images` to extract features from a query image, query the index, align images, and calculate percentage of equality.  
+[ASSISTANT_CREATED] The assistant provided a function `align_images` to detect keypoints, find corresponding keypoints, and align images using a homography matrix.  
+[ASSISTANT_CREATED] The assistant provided a function `compare_images` to convert images to grayscale and compute the normalized correlation coefficient for similarity.  
+[ASSISTANT_SAID] The assistant noted that the user would need to customize the code to fit their specific requirements and optimize it for their use case.

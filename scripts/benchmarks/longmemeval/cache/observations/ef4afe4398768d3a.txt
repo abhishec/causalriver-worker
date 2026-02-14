@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[FACT] User is planning to buy groceries online from ShopRite this week.  
+[EVENT] User stocked up on non-perishable items last Wednesday and earned 500 points in a single transaction.  
+[ASSISTANT_SAID] Congratulations on earning 500 points last Wednesday!  
+[ASSISTANT_SAID] You can earn points on online purchases made through ShopRite's website or mobile app, as long as you're logged in to your loyalty account or enter your loyalty card number during checkout.  
+[ASSISTANT_SAID] To ensure you earn points on your online purchase, make sure to sign in to your ShopRite account, enter your loyalty card number during checkout, and ensure your loyalty card is linked to your online account.  
+[ASSISTANT_SAID] Points may not be awarded immediately and may take some time to appear in your account.  
+[ASSISTANT_SAID] If you have any issues or concerns, you can contact ShopRite's customer service for assistance.  
+[ASSISTANT_SAID] Happy shopping, and I hope you continue to rack up those points!  
+[EVENT] User is wondering if there are any digital coupons available on the ShopRite app that can be used for online purchases.  
+[ASSISTANT_SAID] ShopRite does offer digital coupons through their app, and many of them are applicable to online orders.  
+[ASSISTANT_SAID] To access digital coupons on the ShopRite app, open the app, log in, tap on the "Deals" or "Digital Coupons" section, browse available coupons, and add them to your loyalty card.  
+[ASSISTANT_SAID] Coupons will be applied to your online purchase during checkout if you're logged in and have entered your loyalty card number.  
+[ASSISTANT_SAID] Not all digital coupons may be eligible for online use, so check the terms and conditions of each coupon.  
+[ASSISTANT_SAID] Look out for ShopRite's online exclusive offers for additional savings.  
+[EVENT] User is asking if digital coupons stack with manufacturer coupons and if both can be used on the same item.  
+[ASSISTANT_SAID] According to ShopRite's coupon policy, digital coupons and manufacturer coupons can be combined on the same item, as long as the terms allow it.  
+[ASSISTANT_SAID] Digital coupons are loaded onto the loyalty card and applied automatically, while manufacturer coupons need to be presented at checkout.  
+[ASSISTANT_SAID] The digital coupon will be applied first, followed by the manufacturer coupon, allowing for stacking.  
+[ASSISTANT_SAID] There may be exceptions and limitations, so check the terms of each coupon before shopping.  
+[EVENT] User is inquiring about any double points days coming up at ShopRite

@@ -1,0 +1,18 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/28 (Sun) 20:37  
+[USER] User requested a "carnivore lunch."  
+[ASSISTANT_SAID] Assistant provided a structured output format including: recipe name, fancy recipe name, recipe, related tags, social media posts, Midjourney prompt, and a dish intro paragraph.  
+[ASSISTANT_CREATED] Recipe Name: Steak Fajita Salad Bowl  
+[ASSISTANT_CREATED] Fancy Recipe Name: Grilled Steak Fajita Salad Bowl with Spicy Cilantro Lime Dressing  
+[ASSISTANT_CREATED] Recipe Ingredients for Steak: 1 pound flank steak, 2 tablespoons olive oil, 2 cloves garlic (minced), 1 tablespoon chili powder, 1 teaspoon ground cumin, 1/2 teaspoon paprika, 1/4 teaspoon cayenne pepper, 1/2 teaspoon salt, 1/4 teaspoon black pepper.  
+[ASSISTANT_CREATED] Recipe Ingredients for Salad: 2 tablespoons olive oil, 1 red bell pepper (sliced), 1 green bell pepper (sliced), 1 onion (sliced), salt and pepper to taste, 1 head of lettuce (chopped), 1 avocado (sliced), 1/4 cup fresh cilantro (chopped).  
+[ASSISTANT_CREATED] Recipe Ingredients for Dressing: 1/2 cup plain Greek yogurt, 1/4 cup fresh cilantro (chopped), 1 jalapeño pepper (seeded and chopped), 1 garlic clove (minced), 1 lime (juiced), 1 tablespoon honey, salt and pepper to taste.  
+[ASSISTANT_CREATED] Recipe Directions: 15 steps detailing the preparation and cooking process for the Steak Fajita Salad Bowl.  
+[ASSISTANT_CREATED] Prep Time: 20 minutes  
+[ASSISTANT_CREATED] Cooking Time: 20 minutes  
+[ASSISTANT_CREATED] Total Time: 40 minutes  
+[ASSISTANT_CREATED] Kcal: 480 kcal  
+[ASSISTANT_CREATED] Servings: 4 servings  
+[ASSISTANT_CREATED] Related tags: #steakfajitasalad, #saladbowl, #grilledsteak, #carnivoremeal, #meatlovers, #healthyfood, #fitnessmeal, #lowcarb, #proteinpacked, #mealprepideas, #eatclean, #delicious, #yum, #foodie, #instafood, #foodstagram, #recipeoftheday, #homemade.  
+[ASSISTANT_CREATED] Social Media Post 1: "Spice up your lunch with this Grilled Steak Fajita Salad Bowl with Spicy Cilantro Lime Dressing! 🥬🥩🌶️ #steakfajitasalad #carnivoremeal #fitfood #

@@ -1,0 +1,34 @@
+**Observation Log:**
+
+[FACT] User has been taking salsa classes for about 6 weeks.  
+[FACT] User has been listening to a lot of Latin music lately, especially salsa and bachata.  
+[FACT] User's salsa classes are on Tuesday evenings.  
+[FACT] User's instructor is named Maria.  
+[FACT] User has a cat named Luna.  
+
+[PREFERENCE] User enjoys Latin music and is looking for music recommendations.  
+[PREFERENCE] User appreciates instructors who break down steps clearly and have good energy.  
+[PREFERENCE] User enjoys watching dance videos on YouTube to improve technique.  
+[PREFERENCE] User likes the teaching style of Salsa With Silvia and Edie, The Salsa FREAK.  
+
+[EVENT] User attended a salsa social at a club downtown last weekend.  
+[EVENT] User is thinking of attending a bachata festival next month.  
+
+[TEMPORAL] Session date is 2023/02/02 (Thu) 16:14.  
+[TEMPORAL] User has been taking salsa classes for about 6 weeks.  
+
+[RELATIONSHIP] User's salsa instructor is named Maria.  
+[RELATIONSHIP] User's cat is named Luna.  
+
+[ASSISTANT_SAID] Recommended classic salsa artists: Celia Cruz, Tito Puente, Gilberto Santa Rosa, Willie Colón.  
+[ASSISTANT_SAID] Recommended modern salsa artists: Marc Anthony, Victor Manuelle, Jerry Rivera, Bobby Valentín.  
+[ASSISTANT_SAID] Recommended bachata artists: Romeo Santos, Prince Royce, Juan Luis Guerra, Monchy & Alexandra.  
+[ASSISTANT_SAID] Suggested newer artists and songs: Christian Nodal - "Adiós Amor," J Álvarez - "Hasta El Amanecer," Maluma - "Felices los 4," Gianluca Vacchi - "Sigamos Bailando."  
+[ASSISTANT_SAID] Suggested ways to find dance events and festivals: Google Search, Facebook Events, Meetup.com, local dance studios, dance communities.  
+[ASSISTANT_SAID] Provided tips for attending dance events: arrive early, be respectful, ask others to dance, bring water and snacks, take breaks.  
+[ASSISTANT_SAID] Recommended YouTube channels for salsa: Salsa Addiction, Salsa With Silvia, Salsa Dance Academy, Tito Ortos, Edie, The Salsa FREAK.  
+[ASSISTANT_SAID] Recommended YouTube channels for bachata: Bachata Addiction, Bachata Class, Korke & Judith, Ataka & Alemana, Bachata Fusion.  
+[ASSISTANT_SAID] Suggested practicing in front of a mirror to improve technique, timing, and body awareness.  
+
+[ASSISTANT_CREATED] Provided a list of music recommendations for salsa and bachata, including classic, modern, and newer artists and songs.  
+[

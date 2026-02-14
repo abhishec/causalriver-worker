@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[FACT] User has been into stand-up comedy for about 3 months.  
+[FACT] User started watching stand-up comedy after watching a Netflix special by John Mulaney.  
+[FACT] User is looking for comedy recommendations.  
+[PREFERENCE] User enjoys John Mulaney's comedy style.  
+[ASSISTANT_SAID] Recommended comedians similar to John Mulaney: Mike Birbiglia, Demetri Martin, Brian Regan.  
+[ASSISTANT_SAID] Suggested Netflix specials: "My Girlfriend's Boyfriend" and "Thank God for Jokes" by Mike Birbiglia; "Live (At the Time)" by Demetri Martin; "Nunchucks and Flamethrowers" by Brian Regan.  
+[ASSISTANT_SAID] Recommended other great comedians: Hasan Minhaj, Ali Wong, W. Kamau Bell, Trevor Noah, Sarah Silverman, Hannah Gadsby.  
+[ASSISTANT_SAID] Suggested Netflix specials for other comedians: "Homecoming King" and "Patriot Act" by Hasan Minhaj; "Baby Cobra" and "Hard Knock Wife" by Ali Wong; "Private School Negro" by W. Kamau Bell; "Son of Patricia" and "Afraid of the Dark" by Trevor Noah; "A Speck of Dust" by Sarah Silverman; "Nanette" by Hannah Gadsby.  
+[ASSISTANT_SAID] Recommended newer voices: Taylor Tomlinson, Sam Morril, Mark Normand.  
+[ASSISTANT_SAID] Suggested Netflix specials for newer comedians: "Quarter-Life Crisis" by Taylor Tomlinson; "I Got This" by Sam Morril; "Don't Be Yourself" by Mark Normand.  
+[USER] User is interested in finding comedy clubs or open mics in their area.  
+[ASSISTANT_SAID] Suggested methods to find live comedy events: Google search, comedy club websites, Facebook events, Meetup.com, local comedy communities.  
+[ASSISTANT_SAID] Provided tips for trying stand-up: Start with open mics, consider taking a comedy class, watch and learn from live shows, and be patient.  
+[USER] User plans to check out methods to find live comedy events.  
+[USER] User is considering whether to attend open mics before taking a comedy class or to dive right into a class.  
+[ASSISTANT_SAID] Suggested attending a few open mics first to get a feel for the scene and then consider taking a class.  
+[USER] User plans to try attending a few open mics first.  
+[USER] User is considering whether to come up with new material for each open mic or focus on refining a few jokes.  
+[ASSISTANT_SAID] Recommended a balance between trying new material and refining existing jokes.  
+[ASS

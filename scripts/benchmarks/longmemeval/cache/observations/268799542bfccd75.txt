@@ -1,0 +1,19 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/06/28 (Wed) 20:24  
+[ASSISTANT_SAID] The subscript notation indicates that the second variable x2 is being squared in the objective function, so the correct notation is f(x1,x2) = (x1)^2 − x1*x^2 + (x2)^2 − 2x2.  
+[ASSISTANT_SAID] The use of subscript notation does not affect how we solve the optimization problem in Excel.  
+[ASSISTANT_SAID] We can enter the objective function f(x1,x2) in cell B1 as "=A1^2-A1*A2^2+B1^2-2*B1^2".  
+[ASSISTANT_SAID] We can enter the constraint function g(x1,x2) in cell C1 as "=A1+A2-1".  
+[ASSISTANT_SAID] We can enter the Lagrange multiplier λ in cell D1 as a constant.  
+[ASSISTANT_SAID] We can then use the Solver add-in in Excel to find the optimal solution, following the same steps as described earlier.  
+[ASSISTANT_SAID] Once we have found the optimal solution, we can use Excel to verify the solution by calculating the values of the objective function and the constraint function for different values of x1 and x2, and plotting the function and the constraint using a scatter plot.  
+[USER] When you say A1^2-A1A2+B1^2-2A2, some of the letters were italicized, What do they italicized characters mean?  
+[ASSISTANT_SAID] The italicized characters were a formatting issue and do not affect the meaning of the formula.  
+[ASSISTANT_SAID] In the expression f(x1,x2) = (x1)^2 − x1*x^2 + (x2)^2 − 2x2, the variables x1 and x2 should be represented by regular non-italicized characters.  
+[ASSISTANT_SAID] When entering the formula into Excel, you can use cell references to represent the variables.  
+[ASSISTANT_SAID] For example, you can enter the formula in cell B1 as "=A1^2-A1*A2^2+A2^2-2*A2".  
+[USER] You just italicized A2 again.  
+[ASSISTANT_SAID] I apologize for the confusion once again.  
+[ASSISTANT_SAID] The correct formula for the objective function is: `=A1^2 - A1*A2^2 + A2^2 - 2*A2`.  
+[USER] In cell B1, A1A2^2 means

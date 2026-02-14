@@ -1,0 +1,17 @@
+**Observation Log:**
+
+- [FACT] The user has inherited a plot of land.
+- [PREFERENCE] The user is considering building a small cabin on the inherited land.
+- [ASSISTANT_SAID] The assistant congratulated the user on their inherited land and provided an overview of the general process for obtaining a building permit.
+- [ASSISTANT_SAID] The assistant outlined the steps for obtaining a building permit, including determining if a permit is required, gathering necessary information, identifying the permitting authority, submitting the application, waiting for review and approval, addressing any issues or revisions, receiving the permit, posting the permit, and undergoing inspections.
+- [ASSISTANT_SAID] The assistant provided additional tips for the permitting process, such as being prepared to provide additional information, considering hiring a professional, keeping records, and being patient.
+- [PREFERENCE] The user expressed gratitude for the general process provided by the assistant.
+- [FACT] The user mentioned that the plot of land is situated in a rural area.
+- [ASSISTANT_SAID] The assistant explained that rural areas often have different requirements and regulations for building permits compared to urban areas, detailing key differences such as zoning regulations, building codes, environmental regulations, water and sewage requirements, road access, local ordinances, permitted uses, distance requirements, inspections, and special permits.
+- [ASSISTANT_SAID] The assistant advised the user to research local ordinances, consult with local authorities, hire professionals familiar with rural building projects, and plan carefully.
+- [ASSISTANT_SAID] The assistant provided a list of online resources to help the user find information on zoning regulations and building codes, including the county or local government website, Municode, the American Planning Association, the International Code Council, the National Association of Counties, local libraries, online mapping tools, and state-specific resources.
+- [PREFERENCE] The user indicated they would start with their county's website to find information on zoning regulations and building codes.
+- [RELATIONSHIP] The user mentioned they would check with their lawyer who specializes in property law for insight or recommendations.
+- [ASSISTANT_SAID] The assistant encouraged the user to consult their lawyer for guidance on zoning regulations, building codes, and navigating the permitting process, as well as to review their property deed.
+- [ASSISTANT_SAID] The assistant highlighted the importance of keeping records of interactions with local authorities and professionals involved in the process.
+- [EVENT] The user plans to ask their lawyer about specific zoning regulations and building codes that apply to their property and to review their property deed for necessary rights and permissions to build on the land.

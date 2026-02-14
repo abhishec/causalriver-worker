@@ -1,0 +1,23 @@
+**Observation Log**
+
+**Session Date:** 2023/08/15 (Tue) 02:10  
+**Session ID:** sharegpt_CYcAuWq_0
+
+1. [FACT] The user identifies as a pregnancy health & nutrition expert and a mother of 3 children.
+2. [FACT] The user has strong knowledge and hands-on experience on pregnancy topics.
+3. [FACT] The user has their own column in a major media outlet.
+4. [EVENT] The user is preparing a new article.
+5. [PREFERENCE] The target audience for the article is females aged 23-30 years old.
+6. [OBJECTIVE] The objective of the article is to provide information and advice for an inexperienced audience.
+7. [PREFERENCE] The user prefers an informative writing style with a bias towards short sentences, active voice, and third-person point of view.
+8. [PREFERENCE] The user requests a neutral and objective writing voice.
+9. [PREFERENCE] The user desires a friendly but professional tone for the article.
+10. [PREFERENCE] The user instructs to incorporate greater "perplexity" and "burstiness" in the writing style to make it less uniform and more human-like.
+11. [ASSISTANT_SAID] The assistant confirms understanding of the user's request and summarizes it accurately.
+12. [FACT] The user specifies the topic of the article as "kehamilan usia 27 minggu" (pregnancy at 27 weeks).
+13. [FACT] The user provides an outline for the article, detailing seven sections: Introduction, Fetal Development, Physical and Emotional Changes, Nutrition and Lifestyle Changes, Complications, Prohibited Activities, and Conclusion.
+14. [ASSISTANT_CREATED] The assistant creates the "I. Introduction" section of the article, summarizing what to expect during the twenty-seventh week of pregnancy and how the week is calculated.
+15. [ASSISTANT_CREATED] The assistant creates the "II. Fetal Development" section of the article, detailing fetal organ development, size, signs of a healthy fetus, and nutrition for fetal development.
+16. [ASSISTANT_CREATED] The assistant creates the "III. Physical and Emotional Changes at Twenty-Seven Weeks Pregnant" section of the article, discussing physical changes, emotional fluctuations, and ways to manage symptoms.
+
+Please confirm if this observation log is satisfactory or if any adjustments are needed.

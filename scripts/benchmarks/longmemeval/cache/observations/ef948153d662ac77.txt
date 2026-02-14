@@ -1,0 +1,27 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/30 (Tue) 11:00
+- [FACT] User has a snake plant.
+- [CHANGE] User recently repotted their snake plant, which had been needing it for months.
+- [EVENT] User repotted their snake plant three weeks ago.
+- [PREFERENCE] User is trying to learn more about caring for their plants.
+- [ASSISTANT_SAID] Snake plants (Sansevieria Trifasciata) are known for their low-maintenance requirements but appreciate care to thrive.
+- [ASSISTANT_SAID] Tips for keeping a snake plant happy and healthy include:
+  1. **Lighting**: Tolerates low to bright indirect light; best in medium to bright indirect light.
+  2. **Watering**: Allow soil to dry slightly between waterings; check soil moisture by sticking a finger into the soil.
+  3. **Humidity**: Prefers 40-50% humidity; can increase humidity with a tray of water and pebbles.
+  4. **Temperature**: Keep between 65°F (18°C) and 75°F (24°C); avoid heating/cooling vents and drafty windows.
+  5. **Fertilization**: Use a balanced, water-soluble fertilizer during the growing season, diluted to half strength.
+  6. **Pruning**: Remove dead or damaged leaves and trim brown/yellow tips.
+  7. **Soil**: Use a well-draining potting mix with perlite, vermiculite, or sand.
+  8. **Pot size**: Prefer to be slightly root-bound; avoid larger containers.
+  9. **Pest control**: Check for pests like spider mites, mealybugs, or scale; treat with insecticidal soap or neem oil.
+  10. **Propagation**: Easy to propagate through leaf cuttings or division.
+- [ASSISTANT_SAID] It's better to err on the side of caution and underwater than to overwater your plant.
+- [FACT] User spent about an hour repotting their snake plant.
+- [PREFERENCE] User was surprised by how much the roots had grown and how badly the plant needed the upgrade.
+- [ASSISTANT_SAID] It's common for snake plants to outgrow their containers quickly, especially with sufficient light and nutrients.
+- [ASSISTANT_SAID] New watering schedule of every 4-5 days seems appropriate for the user's snake plant.
+- [CHANGE] User has started watering their snake plant more regularly, about every 4-5 days.
+- [ASSISTANT_SAID] New shoots and vibrant leaves are signs of the plant's health improving after repotting.
+- [PREFERENCE] User is considering establishing a routine to water all their

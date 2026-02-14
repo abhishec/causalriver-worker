@@ -1,0 +1,19 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/20 (Sat) 12:46
+- [ASSISTANT_SAID] To prompt users to log in or sign up only when they attempt to send a message, follow someone, or like a post, create a function to check if the user is logged in.
+- [ASSISTANT_SAID] Create a utility function to check if a user is logged in by creating a new file in the `src/lib` directory called `auth.js`.
+- [ASSISTANT_SAID] The code for the `isLoggedIn` function checks if the user is logged in by verifying if `supabase.auth.user()` returns a user object or `null`.
+- [ASSISTANT_SAID] Use the `isLoggedIn` function to check the user's authentication status in each component where there is a like button, follow button, or message sending functionality.
+- [ASSISTANT_SAID] In `VideoPlayer.svelte`, update the `likeVideo` function to show a login/signup modal or redirect to the login/signup page if the user is not logged in.
+- [ASSISTANT_SAID] Implement a login/signup modal or redirection using Svelte's built-in routing or a Svelte store to manage the modal's state.
+- [ASSISTANT_SAID] Create a reusable `LoginSignupModal.svelte` component in the `src/components` folder to show the login/signup options.
+- [ASSISTANT_SAID] The `LoginSignupModal.svelte` component includes a modal that appears when `showModal` is true, with a close button and a placeholder for the login/signup form.
+- [ASSISTANT_SAID] In `VideoPlayer.svelte`, import the `LoginSignupModal` component and create a reactive variable `showLoginSignupModal` to control the modal's visibility.
+- [ASSISTANT_SAID] When a user tries to like a video without being logged in, the `LoginSignupModal` will appear.
+- [USER] How would we do that with a modal instead of rerouting?
+- [ASSISTANT_SAID] To add the profile picture overlay in the `VideoPlayer.svelte` component, add an `img` element to display the video poster's profile picture below the like button.
+- [ASSISTANT_SAID] Wrap the profile picture in an `a` element to make it clickable and navigate to the user's profile page using `svelte-routing`.
+- [ASSISTANT_SAID] The profile picture link is styled to be positioned absolutely at the bottom left of the video container.
+- [ASSISTANT_SAID] Create a new component called `Profile.svelte` to display the user's profile and include a back button to return to the previous page.
+- [ASSISTANT_SAID] The

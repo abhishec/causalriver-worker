@@ -1,0 +1,35 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/27 (Sat) 02:52  
+[ASSISTANT_SAID] Suggested spell names for Bonus Cards:  
+1. Enchantment of Greed - allows the player to steal a card from another player's hand.  
+2. Charm of Swiftness - allows the player to take an extra turn immediately after their current turn.  
+3. Conjuring of Protection - allows the player to protect their hand from being stolen or discarded by another player for one round.  
+4. Illusion of Confusion - forces all other players to swap hands with another player at random.  
+5. Hex of Misfortune - forces another player to draw three cards from the draw pile.  
+6. Curse of the Witch - allows the player to discard all of one suit from their hand.  
+7. Transformation of the Joker - turns a Joker card into any other card of the player's choice.  
+8. Spell of Multiplication - allows the player to duplicate a card in their hand.  
+9. Incantation of Revelation - allows the player to see all of another player's cards.  
+10. Mystic Moonstone - allows the player to draw two cards from the draw pile and discard one.  
+[USER] Requested more spell names for Bonus Cards.  
+[ASSISTANT_SAID] Suggested additional spell-themed Bonus Card names:  
+1. Enchanted Draw - Draw extra cards.  
+2. Charm of Stealing - Steal a card from another player.  
+3. Time Warp - Take an extra turn after this one.  
+4. Resurrect - Retrieve a previously played card.  
+5. Disintegrate - Force an opponent to discard a card of their choice.  
+6. Hex - Prevent an opponent from using a certain card or suit for one turn.  
+7. Conjuring - Draw a card from the draw pile without looking.  
+8. Levitate - Play a card out of turn.  
+9. Shield - Protect one of your cards from being stolen or discarded.  
+10. Maelstrom - Force all players to discard one card.  
+[USER] Requested Bonus Card titles based on familiars.  
+[ASSISTANT_SAID] Suggested Bonus Card titles based on familiars:  
+1. Cat's Eye - Allows you to look at another player's hand.  
+2. Rat's Escape - Allows you to discard all of your cards and draw a new hand.  
+3. Owl's Wisdom - Allows you to draw two extra cards and discard two cards.  
+4. Toad's Tongue - Allows you to swap one of your cards with a card from the discard pile.  
+5. Bat's Flight - Allows you to take an extra turn after this one.  
+6. Snake's Venom - Allows you to choose a player to skip their next turn.  
+7. Crow's Eyes -

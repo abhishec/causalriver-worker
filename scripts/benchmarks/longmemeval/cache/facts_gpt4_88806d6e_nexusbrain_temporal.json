@@ -1,0 +1,130 @@
+{
+  "answer_e60a93ff_2": [
+    {
+      "fact": "User is planning to volunteer at a charity event this weekend.",
+      "type": "event",
+      "entities": [
+        "charity event",
+        "weekend"
+      ]
+    },
+    {
+      "fact": "User volunteered at a charity event a few months ago.",
+      "type": "event",
+      "entities": [
+        "charity event"
+      ]
+    },
+    {
+      "fact": "User met a guy named Tom at a previous charity event.",
+      "type": "relationship",
+      "entities": [
+        "Tom"
+      ]
+    },
+    {
+      "fact": "User is looking for conversation starters to break the ice with other volunteers.",
+      "type": "preference",
+      "entities": [
+        "conversation starters",
+        "volunteers"
+      ]
+    },
+    {
+      "fact": "User wants to find good coffee shops near the event location.",
+      "type": "preference",
+      "entities": [
+        "coffee shops",
+        "event location"
+      ]
+    },
+    {
+      "fact": "User met a freelance writer at a coffee shop near their office last week.",
+      "type": "relationship",
+      "entities": [
+        "freelance writer",
+        "coffee shop",
+        "office"
+      ]
+    },
+    {
+      "fact": "User exchanged numbers with the freelance writer to grab lunch sometime.",
+      "type": "relationship",
+      "entities": [
+        "freelance writer"
+      ]
+    },
+    {
+      "fact": "User is considering inviting the freelance writer to meet up for coffee before their volunteer shift.",
+      "type": "opinion",
+      "entities": [
+        "freelance writer",
+        "coffee",
+        "volunteer shift"
+      ]
+    }
+  ],
+  "answer_e60a93ff_1": [
+    {
+      "fact": "User is planning a trip to visit friends Mark and Sarah.",
+      "type": "relationship",
+      "entities": [
+        "Mark",
+        "Sarah"
+      ]
+    },
+    {
+      "fact": "User met Mark and Sarah on a beach trip about a month ago.",
+      "type": "event",
+      "entities": [
+        "beach trip"
+      ]
+    },
+    {
+      "fact": "User is looking for good restaurants in Mark and Sarah's hometown.",
+      "type": "preference",
+      "entities": [
+        "restaurants"
+      ]
+    },
+    {
+      "fact": "User had dinner with Mark and Sarah at a seafood place near the beach.",
+      "type": "event",
+      "entities": [
+        "seafood place"
+      ]
+    },
+    {
+      "fact": "User prefers seafood restaurants.",
+      "type": "preference",
+      "entities": [
+        "seafood"
+      ]
+    },
+    {
+      "fact": "User is interested in planning outdoor activities during the visit.",
+      "type": "preference",
+      "entities": [
+        "outdoor activities"
+      ]
+    },
+    {
+      "fact": "User is trying to reach out to Mark and Sarah to get the exact name of their hometown.",
+      "type": "event",
+      "entities": [
+        "Mark",
+        "Sarah",
+        "hometown"
+      ]
+    },
+    {
+      "fact": "User is considering popular outdoor activities commonly found in small towns near the mountains.",
+      "type": "opinion",
+      "entities": [
+        "outdoor activities",
+        "small towns",
+        "mountains"
+      ]
+    }
+  ]
+}

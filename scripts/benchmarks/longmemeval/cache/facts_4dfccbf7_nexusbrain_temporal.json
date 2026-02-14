@@ -1,0 +1,135 @@
+{
+  "answer_4bebc782_1": [
+    {
+      "fact": "User is considering buying a new keyboard with more features and sounds than their current Yamaha P-125.",
+      "type": "preference",
+      "entities": [
+        "keyboard",
+        "Yamaha P-125"
+      ]
+    },
+    {
+      "fact": "User is looking at newer models from Korg and Roland.",
+      "type": "preference",
+      "entities": [
+        "Korg",
+        "Roland"
+      ]
+    },
+    {
+      "fact": "User's budget for the new keyboard is around $500-$1000.",
+      "type": "preference",
+      "entities": [
+        "$500-$1000"
+      ]
+    },
+    {
+      "fact": "User mostly plays piano and some synth sounds.",
+      "type": "preference",
+      "entities": [
+        "piano",
+        "synth sounds"
+      ]
+    },
+    {
+      "fact": "User prefers weighted keys for their keyboard.",
+      "type": "preference",
+      "entities": [
+        "weighted keys"
+      ]
+    },
+    {
+      "fact": "User wants a keyboard with recording capabilities and USB connectivity.",
+      "type": "preference",
+      "entities": [
+        "recording capabilities",
+        "USB connectivity"
+      ]
+    },
+    {
+      "fact": "Portability is not a big deal for the user.",
+      "type": "preference",
+      "entities": []
+    },
+    {
+      "fact": "User has started taking ukulele lessons with their friend Rachel.",
+      "type": "relationship",
+      "entities": [
+        "Rachel"
+      ]
+    },
+    {
+      "fact": "User finds their ukulele lessons really fun so far.",
+      "type": "opinion",
+      "entities": []
+    }
+  ],
+  "answer_4bebc782_2": [
+    {
+      "fact": "User is considering buying a new keyboard.",
+      "type": "preference",
+      "entities": [
+        "keyboard"
+      ]
+    },
+    {
+      "fact": "User currently owns a Yamaha P-125 keyboard.",
+      "type": "personal",
+      "entities": [
+        "Yamaha P-125"
+      ]
+    },
+    {
+      "fact": "User's budget for the new keyboard is around $1,000.",
+      "type": "preference",
+      "entities": [
+        "$1,000"
+      ]
+    },
+    {
+      "fact": "User mostly plays classical and jazz music.",
+      "type": "preference",
+      "entities": [
+        "classical",
+        "jazz"
+      ]
+    },
+    {
+      "fact": "User is looking for a keyboard with a good piano sound.",
+      "type": "preference",
+      "entities": [
+        "piano sound"
+      ]
+    },
+    {
+      "fact": "User is considering a keyboard with weighted keys.",
+      "type": "preference",
+      "entities": [
+        "weighted keys"
+      ]
+    },
+    {
+      "fact": "User is thinking about trying out the Korg B1 and Roland FP-10 keyboards.",
+      "type": "preference",
+      "entities": [
+        "Korg B1",
+        "Roland FP-10"
+      ]
+    },
+    {
+      "fact": "User has been using a Fender Mustang I V2 guitar amp for practice.",
+      "type": "personal",
+      "entities": [
+        "Fender Mustang I V2"
+      ]
+    },
+    {
+      "fact": "User wants a guitar amp with more power than their current amp.",
+      "type": "preference",
+      "entities": [
+        "guitar amp",
+        "power"
+      ]
+    }
+  ]
+}

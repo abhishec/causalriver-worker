@@ -1,0 +1,44 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/11 (Thu) 12:57
+- [ASSISTANT_SAID] The hierarchy of grammatical units includes: Sentence, Clause (Independent or Dependent), Subject, Predicate, Object, Complement, and Modifier.
+- [ASSISTANT_SAID] The structure of a Sentence includes: 
+  - Clause (Independent or Dependent)
+    - Subject (if present)
+      - Word (Noun, Pronoun, if present)
+        - Letter
+      - Phrase (Noun, if present)
+    - Predicate
+      - Verb Phrase (Main Verb, Auxiliary Verb, if present)
+        - Word (Verb, if present)
+          - Letter
+        - Phrase (Verb, if present)
+    - Object (if present)
+      - Word (Noun, Pronoun, if present)
+        - Letter
+      - Phrase (Noun, if present)
+    - Complement (if present)
+      - Word (Noun, Pronoun, Adjective, if present)
+        - Letter
+      - Phrase (Adjective, if present)
+    - Modifier (Adjective, Adverb, if present)
+      - Word (Adjective, Adverb, if present)
+        - Letter
+      - Phrase (Adjective, Adverb, if present)
+  - Phrase (Noun, Verb, Adjective, Adverb, Prepositional, Gerund, Infinitive, if present)
+    - Word (Noun, Verb, Adjective, Adverb, if present)
+      - Letter
+- [USER] Suggested to represent grammatical units as layers rather than a hierarchy, with sentences at the top, followed by clauses and phrases, then words, and finally letters at the bottom.
+- [USER] Proposed a separate layer cake for subject, predicate, object, and complement, questioning how they could fit into the main layer cake.
+- [ASSISTANT_SAID] The layer cake model includes:
+  - Top level: Sentences
+  - Next level: Clauses (Independent and Dependent) and Phrases
+  - Next level: Phrases
+  - Bottom level: Words
+  - Bottom level: Letters
+- [ASSISTANT_SAID] Subject, predicate, object, and complement can be added as separate layers to the main layer cake, depending on context and language structure.
+- [USER] Asked how words in English differ from words in Chinese in terms of construction.
+- [ASSISTANT_SAID] Differences between English and Chinese words include:
+  - Orthography: English uses the Roman alphabet; Chinese uses characters (Hanzi).
+  - Word formation: English uses morphemes (prefixes, suffixes); Chinese words are often monosyllabic and can be compounds.
+  - Word meaning: Chinese characters can have multiple meanings and functions; English words typically have one specific

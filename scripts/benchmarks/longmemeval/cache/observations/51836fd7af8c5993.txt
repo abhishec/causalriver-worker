@@ -1,0 +1,25 @@
+**Observation Log:**
+
+[FACT] User is planning a trip to Hawaii.  
+[EVENT] User needs to pack the right adapters for their devices.  
+[FACT] User has a new laptop, Dell XPS 13.  
+[FACT] User has a new smartphone, Samsung Galaxy S22.  
+[TEMPORAL] User pre-ordered the laptop on January 28th.  
+[TEMPORAL] User's laptop arrived on February 25th after a delay from the original expected arrival date of February 11th.  
+[ASSISTANT_SAID] Hawaii uses Type A and Type B power sockets, operating at a standard voltage of 120V and a frequency of 60Hz.  
+[ASSISTANT_SAID] User's Dell XPS 13 likely comes with a USB-C power adapter, which is compatible with Hawaii's power standards.  
+[ASSISTANT_SAID] User's Samsung Galaxy S22 also uses a USB-C charging port.  
+[ASSISTANT_SAID] User should consider packing a portable power bank to keep devices charged on-the-go.  
+[ASSISTANT_SAID] User should pack a travel adapter with multiple USB ports to charge multiple devices at once.  
+[ASSISTANT_SAID] User should consider a compact USB-C charging adapter for convenience.  
+[ASSISTANT_SAID] User's Anker PowerCore 20000 has a capacity of 20,000mAh and is a well-reviewed product.  
+[FACT] User bought the Anker PowerCore 20000 from Amazon on February 13th.  
+[ASSISTANT_SAID] The Anker PowerCore 20000 can deliver around 14,000-16,000mAh of usable power due to its efficiency rate of 70-80%.  
+[ASSISTANT_SAID] User can expect to get around 3-4 full charges for their Galaxy S22 or 1-2 partial charges for their laptop from the Anker PowerCore 20000 if used moderately.  
+[ASSISTANT_SAID] If user is a heavy user, they might get 2-3 full charges for their phone or 1 partial charge for their laptop.  
+[FACT] User plans to use their devices moderately during the trip.  
+[EVENT] User is planning to pack a travel adapter with multiple USB ports.  
+[FACT] User has a wireless charging pad, Belkin Boost Up, that they use to charge their phone and smartwatch at home.  
+[ASSISTANT_SAID] User should consider the convenience of bringing the wireless charging pad against the added bulk and weight in their luggage.  
+[ASSISTANT_SAID] If user decides to leave the wireless charging pad at home, they can use their travel adapter with multiple USB ports to charge their devices via cable.  
+[FACT] User decided to leave the wireless

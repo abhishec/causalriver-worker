@@ -1,0 +1,205 @@
+{
+  "answer_2bd23659_3": [
+    {
+      "fact": "User is trying to reduce their carbon footprint.",
+      "type": "opinion",
+      "entities": [
+        "carbon footprint"
+      ]
+    },
+    {
+      "fact": "User is looking for eco-friendly product recommendations.",
+      "type": "preference",
+      "entities": [
+        "eco-friendly products"
+      ]
+    },
+    {
+      "fact": "User is in the market for a reusable water bottle.",
+      "type": "preference",
+      "entities": [
+        "reusable water bottle"
+      ]
+    },
+    {
+      "fact": "User canceled their Forbes magazine subscription in early March.",
+      "type": "event",
+      "entities": [
+        "Forbes magazine",
+        "March"
+      ]
+    },
+    {
+      "fact": "User was not finding Forbes articles interesting.",
+      "type": "opinion",
+      "entities": [
+        "Forbes articles"
+      ]
+    },
+    {
+      "fact": "User subscribed to The New Yorker in early February.",
+      "type": "event",
+      "entities": [
+        "The New Yorker",
+        "February"
+      ]
+    },
+    {
+      "fact": "User is enjoying The New Yorker.",
+      "type": "opinion",
+      "entities": [
+        "The New Yorker"
+      ]
+    },
+    {
+      "fact": "User prefers a bottle that can keep drinks hot for at least 6 hours.",
+      "type": "preference",
+      "entities": [
+        "6 hours",
+        "hot drinks"
+      ]
+    },
+    {
+      "fact": "User is considering a 32 oz bottle with a matte finish.",
+      "type": "preference",
+      "entities": [
+        "32 oz bottle",
+        "matte finish"
+      ]
+    }
+  ],
+  "answer_2bd23659_1": [
+    {
+      "fact": "User is trying to reduce plastic usage",
+      "type": "opinion",
+      "entities": [
+        "plastic usage"
+      ]
+    },
+    {
+      "fact": "User has a subscription to The New Yorker magazine",
+      "type": "personal",
+      "entities": [
+        "The New Yorker"
+      ]
+    },
+    {
+      "fact": "User subscribed to The New Yorker in early February",
+      "type": "event",
+      "entities": [
+        "February"
+      ]
+    },
+    {
+      "fact": "User enjoys the weekly issues of The New Yorker",
+      "type": "opinion",
+      "entities": [
+        "The New Yorker"
+      ]
+    },
+    {
+      "fact": "User received a New Yorker issue on April 10th",
+      "type": "event",
+      "entities": [
+        "April 10th"
+      ]
+    },
+    {
+      "fact": "User found an article on the intersection of technology and art fantastic",
+      "type": "opinion",
+      "entities": [
+        "technology",
+        "art"
+      ]
+    },
+    {
+      "fact": "User is looking into reusable water bottles",
+      "type": "preference",
+      "entities": [
+        "reusable water bottles"
+      ]
+    }
+  ],
+  "answer_2bd23659_2": [
+    {
+      "fact": "User is looking to redecorate their living room",
+      "type": "event",
+      "entities": [
+        "living room",
+        "redecorate"
+      ]
+    },
+    {
+      "fact": "User loves Architectural Digest for home decor inspiration",
+      "type": "preference",
+      "entities": [
+        "Architectural Digest",
+        "home decor"
+      ]
+    },
+    {
+      "fact": "User is particularly drawn to the Mid-Century Modern style",
+      "type": "preference",
+      "entities": [
+        "Mid-Century Modern"
+      ]
+    },
+    {
+      "fact": "User is worried that Mid-Century Modern style might look outdated in a few years",
+      "type": "opinion",
+      "entities": [
+        "Mid-Century Modern",
+        "outdated"
+      ]
+    }
+  ],
+  "answer_2bd23659_4": [
+    {
+      "fact": "User is trying to reduce their carbon footprint",
+      "type": "opinion",
+      "entities": [
+        "carbon footprint"
+      ]
+    },
+    {
+      "fact": "User is looking for eco-friendly alternatives to single-use plastics",
+      "type": "preference",
+      "entities": [
+        "eco-friendly alternatives",
+        "single-use plastics"
+      ]
+    },
+    {
+      "fact": "User is thinking of reducing plastic usage in the kitchen",
+      "type": "opinion",
+      "entities": [
+        "plastic usage",
+        "kitchen"
+      ]
+    },
+    {
+      "fact": "User bought their last National Geographic issue on March 15th",
+      "type": "event",
+      "entities": [
+        "National Geographic",
+        "March 15th"
+      ]
+    },
+    {
+      "fact": "User remembers buying the magazine on their way back from the gym",
+      "type": "event",
+      "entities": [
+        "gym"
+      ]
+    },
+    {
+      "fact": "User is considering alternatives to plastic containers and ziplock bags for food storage",
+      "type": "preference",
+      "entities": [
+        "plastic containers",
+        "ziplock bags",
+        "food storage"
+      ]
+    }
+  ]
+}

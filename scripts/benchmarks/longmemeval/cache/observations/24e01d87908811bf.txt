@@ -1,0 +1,28 @@
+**Observation Log:**
+
+- [FACT] The user is planning their own wedding.
+- [FACT] The user attended their cousin's wedding last weekend.
+- [FACT] The user was a bridesmaid at their cousin's wedding.
+- [FACT] The cousin's wedding was an outdoor ceremony at the Grand Hyatt in downtown LA.
+- [RELATIONSHIP] The user's cousin is getting married.
+- [RELATIONSHIP] The user's boyfriend's name is Alex.
+- [PREFERENCE] The user liked the mix of flowers and greenery used for the aisle and altar decorations at the cousin's wedding.
+- [PREFERENCE] The user is considering a small, intimate ceremony with close friends and family.
+- [PREFERENCE] The user is thinking of a relaxed and casual vibe for their wedding, possibly with coastal elements.
+- [TEMPORAL] The session date is 2023/05/26 (Fri) 13:13.
+- [EVENT] The user is planning their wedding in the San Diego area where Alex's family lives.
+- [EVENT] The user and Alex have been looking at a few wedding venues online but have not visited them in person yet.
+- [ASSISTANT_SAID] The assistant congratulated the user on being part of their cousin's wedding and encouraged them to share what stood out about the decorations.
+- [ASSISTANT_SAID] The assistant suggested using delicate or whimsical elements like baby's breath, wildflowers, or pampas grass for a smaller ceremony.
+- [ASSISTANT_SAID] The assistant recommended incorporating personal or sentimental elements in the decor, such as family heirlooms or meaningful objects.
+- [ASSISTANT_SAID] The assistant suggested considering venues with natural beauty, like beachside parks or gardens with ocean views.
+- [ASSISTANT_SAID] The assistant advised using natural elements like succulents, eucalyptus, or ferns to enhance the coastal feel.
+- [ASSISTANT_SAID] The assistant asked about the user's favorite part of planning the wedding and if there were any specific moments they were looking forward to.
+- [ASSISTANT_SAID] The assistant inquired about how Alex proposed and if it was a romantic or low-key moment.
+- [PREFERENCE] The user is unsure if they will write their own vows or use traditional ones but thinks it would make the ceremony more personal.
+- [EVENT] Alex proposed to the user on a romantic getaway to Big Sur last year.
+- [CHANGE] The user was caught off guard by Alex's proposal.
+- [PREFERENCE] The user found Alex's gesture of redesigning their grandmother's engagement ring to be very thoughtful and meaningful.
+- [ASSISTANT_SAID] The assistant suggested that if the user writes their own vows, they could mention the story behind the ring and its significance.
+- [RELATIONSHIP] The user's grandmother's engagement ring was used in the proposal.
+- [

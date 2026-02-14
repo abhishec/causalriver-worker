@@ -1,0 +1,37 @@
+**Observation Log:**
+
+[FACT] User identifies as part of UMG, the Universal Music Group, the world’s leading music company.
+
+[FACT] UMG operates in more than 60 countries and is engaged in recorded music, music publishing, merchandising, and audiovisual content.
+
+[FACT] Interscope Geffen A&M Records (IGA) is mentioned as a division of UMG.
+
+[FACT] IGA is home to artists including U2, Eminem, Kendrick Lamar, J Cole, and Lady Gaga.
+
+[TEMPORAL] The 2023 Summer Internship Opportunities are scheduled from June 5th, 2023 to August 11th, 2023.
+
+[FACT] The internship position is for an Analytics Intern based in Santa Monica, CA (onsite).
+
+[ASSISTANT_SAID] The IGA Analytics Team provides reporting, analytics, strategy, and recommendations on various topics.
+
+[ASSISTANT_SAID] The intern will work on a custom project analyzing the value of playlisting.
+
+[ASSISTANT_SAID] The project will contrast the effect of a song getting on the largest playlists versus smaller but numerous playlists.
+
+[ASSISTANT_SAID] The intern will analyze the value of Mood/Genre based playlists.
+
+[ASSISTANT_SAID] Additional tasks include Hi Level Playlisting tracking, TikTok tracking, social listening, label copy research for RIAA certifications, and other TBD projects.
+
+[ASSISTANT_SAID] Required skills include SQL, Python, Tableau, organizational skills, API experience, Excel, data visualization, and a passion for music.
+
+[ASSISTANT_SAID] Possible problems to solve for the internship include understanding the value of playlisting, determining long-term benefits of playlisting strategies, and tracking TikTok's impact on new releases.
+
+[ASSISTANT_SAID] Possible solutions to the problems include analyzing data from playlisting platforms, creating detailed analyses of playlisting benefits, and conducting social listening.
+
+[ASSISTANT_SAID] Suggested datasets include playlisting data, song performance data, social media data, roster data, industry trends data, and additional datasets for fan demographics and competitive landscape.
+
+[ASSISTANT_SAID] SQL application examples include a descriptive query to count songs added to playlists and an exploratory query to analyze the relationship between playlist size and song streams.
+
+[ASSISTANT_CREATED] Resume bullets for the job description were created, highlighting skills and experiences relevant to the internship.
+
+[ASSISTANT_CREATED] Quantifiable resume bullets were generated, including metrics such as increasing department revenue by 20%, 25%, and 30% through various analyses and projects.

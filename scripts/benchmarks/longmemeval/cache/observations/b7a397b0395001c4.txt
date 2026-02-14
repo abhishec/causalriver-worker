@@ -1,0 +1,36 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/07/01 (Sat) 14:57
+- [EVENT] User is looking for recommendations on BBQ sauce brands.
+- [FACT] User recently used up their favorite BBQ sauce, Sweet Baby Ray's, at a friend's place.
+- [TEMPORAL] User used Sweet Baby Ray's on Saturday, June 17th.
+- [ASSISTANT_SAID] Recommended BBQ sauce brands: 
+  1. Sweet Baby Ray's
+  2. Kansas City Masterpiece
+  3. Franklin Barbecue
+  4. Stubb's BBQ Sauce
+  5. Gates BBQ
+  6. Bone Suckin' Sauce
+  7. Dinosaur Bar-B-Que Sauce
+  8. Sweet and Smoky BBQ Sauce by Weber
+- [ASSISTANT_SAID] Suggested finding these brands at most grocery stores or online at retailers like Amazon, Walmart, or Target.
+- [ASSISTANT_SAID] Suggested trying to make homemade BBQ sauce from scratch.
+- [EVENT] User has been trying out different marinades and seasoning combinations.
+- [ASSISTANT_SAID] Recommended ingredients and tips for a Korean-style BBQ marinade:
+  - Essential Ingredients: Gochujang, soy sauce, garlic, ginger, brown sugar, sesame oil, crushed black pepper.
+  - Optional Ingredients: Korean chili flakes, pineapple juice or Korean pear juice, green onions, cumin.
+- [ASSISTANT_CREATED] Provided a basic marinade recipe:
+  - Ingredients: 1/2 cup soy sauce, 1/4 cup gochujang, 2 cloves garlic (minced and sautéed), 1 inch ginger (grated and sautéed), 2 tablespoons brown sugar, 1 tablespoon sesame oil, 1 teaspoon crushed black pepper, 1/4 teaspoon Korean chili flakes (optional).
+- [ASSISTANT_SAID] Instructions for the marinade: Blend ingredients until smooth, taste and adjust, add optional ingredients if desired.
+- [ASSISTANT_SAID] Suggested marinating time: at least 2 hours or overnight (8-12 hours).
+- [EVENT] User has been experimenting with different types of wood chips for BBQ.
+- [ASSISTANT_SAID] Recommended wood chips for Korean-style BBQ:
+  1. Korean Oak
+  2. Post Oak
+  3. Mesquite
+  4. Pecan
+  5. Cherry
+- [ASSISTANT_SAID] Tips for using wood chips: soak them, use the right amount, mix and match, monitor temperature.
+- [EVENT] User is thinking of hosting a BBQ party soon.
+- [ASSISTANT_SAID] Recommended factors to consider for outdoor furniture: durability, comfort, easy cleaning, space, style.
+- [ASSISTANT_S

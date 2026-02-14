@@ -1,0 +1,26 @@
+**Observation Log:**
+
+- [FACT] User is planning a trip to France in May.
+- [EVENT] User is looking for recommendations for places to stay in Cannes.
+- [ASSISTANT_SAID] Recommended luxury hotels in Cannes: Hôtel Barrière Le Majestic Cannes, InterContinental Carlton Cannes, Hôtel Martinez Cannes.
+- [ASSISTANT_SAID] Recommended mid-range hotels in Cannes: Hôtel Le Cavendish, Hôtel Splendid Cannes, Hôtel Amarante Cannes.
+- [ASSISTANT_SAID] Recommended budget-friendly accommodations in Cannes: Ibis Cannes Centre, Hôtel Le Fouquet's, Cannes Hostel.
+- [ASSISTANT_SAID] Suggested options for apartments and vacation rentals: Airbnb and VRBO.
+- [ASSISTANT_SAID] Provided tips for booking accommodation in Cannes, including booking in advance, considering location, and checking for air conditioning and parking options.
+- [FACT] User has attended a few film festivals recently.
+- [PREFERENCE] User understands the importance of having a good place to stay at film festivals.
+- [EVENT] User has already booked accommodation for Cannes.
+- [EVENT] User is seeking tips on how to get accredited for the Cannes Film Festival.
+- [ASSISTANT_SAID] Provided steps for getting accredited for the Cannes Film Festival, including creating an account, choosing the correct accreditation type, gathering required documents, filling out the application form, paying the fee, waiting for approval, and picking up the badge.
+- [ASSISTANT_SAID] Mentioned the types of accreditation: Professional Accreditation and Festival Accreditation.
+- [ASSISTANT_SAID] Suggested that the accreditation fee for professional accreditation is typically around €200-€300, while festival accreditation is around €100-€200.
+- [TEMPORAL] User is planning to attend the Cannes Film Festival in May.
+- [ASSISTANT_SAID] Recommended applying early for accreditation and being thorough and accurate in the application.
+- [FACT] User has attended Sundance Film Festival in Utah back in January.
+- [PREFERENCE] User is interested in attending industry events and panels at Cannes, particularly those focused on film criticism and journalism.
+- [ASSISTANT_SAID] Confirmed that the Cannes Film Festival usually releases a schedule of events and screenings in advance.
+- [ASSISTANT_SAID] Mentioned that the official selection announcement occurs about 2-3 weeks before the festival.
+- [ASSISTANT_SAID] Stated that the full schedule of screenings is usually released 1-2 weeks before the festival.
+- [ASSISTANT_SAID] Provided information about FIPRESCI events, Cannes Critics' Week, masterclasses, workshops, and networking opportunities for film critics and writers.
+- [ASSISTANT_SAID] Suggested that user can expect to engage with fellow critics and learn from industry experts at the festival.
+- [ASSISTANT

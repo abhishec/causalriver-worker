@@ -1,0 +1,31 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/03/04 (Sat) 17:23  
+[FACT] User has been experiencing issues with their internet connection.  
+[FACT] User upgraded their router to a TP-Link Archer AX50.  
+[FACT] User purchased the TP-Link Archer AX50 online from Amazon for around $150.  
+[CHANGE] User reports that the new router has been a huge improvement so far.  
+[EVENT] User is seeking help to troubleshoot their internet connection issues.  
+[ASSISTANT_SAID] The TP-Link Archer AX50 is known for its reliable performance and strong Wi-Fi signals.  
+[ASSISTANT_SAID] User should describe the problems in more detail, including:  
+[ASSISTANT_SAID] 1. What kind of issues are being seen (e.g., slow speeds, dropped connections, unable to connect, etc.)?  
+[ASSISTANT_SAID] 2. When did the issues start? Was it after the router upgrade or before?  
+[ASSISTANT_SAID] 3. Are all devices connected to the router experiencing the same issues, or is it specific to one or two devices?  
+[ASSISTANT_SAID] 4. Have any patterns or triggers been noticed that make the issues worse or better?  
+[ASSISTANT_SAID] 5. Have they checked their ISP's status page for any outages or maintenance in their area?  
+[FACT] User is experiencing slow internet speeds, especially in the evening when multiple devices are connected.  
+[FACT] The issues started a few days ago and are affecting all devices connected to the router.  
+[FACT] User has restarted the router a few times, which temporarily fixed the issue, but the problem persists.  
+[FACT] User has not checked their ISP's status page yet but plans to do so.  
+[ASSISTANT_SAID] User should check their ISP's status page to determine if the issue is on their end or specific to their local network.  
+[ASSISTANT_SAID] Potential causes and troubleshooting steps provided include:  
+[ASSISTANT_SAID] 1. ISP Outage or Maintenance  
+[ASSISTANT_SAID] 2. Router Configuration  
+[ASSISTANT_SAID] 3. Channel Congestion  
+[ASSISTANT_SAID] 4. Device Interference  
+[ASSISTANT_SAID] 5. Network Congestion  
+[ASSISTANT_SAID] 6. Firmware Issues  
+[ASSISTANT_SAID] 7. Physical Obstructions  
+[FACT] User checked their ISP's status page and found no reported outages or maintenance in their area.  
+[ASSISTANT_SAID] User is unsure about the router configuration or firmware updates and may need guidance.  
+[ASS

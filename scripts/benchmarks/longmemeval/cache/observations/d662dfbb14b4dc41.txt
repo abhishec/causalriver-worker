@@ -1,0 +1,37 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/03/10 (Fri) 21:18
+- [FACT] User has a 10-gallon freshwater tank.
+- [FACT] User has a school of neon tetras in their tank.
+- [EVENT] User is thinking of getting a new fish to add to their tank.
+- [ASSISTANT_SAID] User successfully introduced neon tetras once the nitrogen cycle was established in their tank.
+- [ASSISTANT_SAID] Neon tetras are native to soft, slightly acidic waters in South America (pH 6.5-7.5, soft to moderate water hardness).
+- [ASSISTANT_SAID] Recommended compatible fish species with neon tetras: 
+  1. Harlequin rasboras (Trigonostigma heteromorpha)
+  2. White cloud mountain minnows (Tanichthys albonubes)
+  3. Dwarf gouramis (Colisa lalia)
+  4. Corydoras catfish (Corydoras spp.)
+  5. Honey gouramis (Colisa chuna)
+- [USER] User is thinking of getting a few Corydoras catfish.
+- [ASSISTANT_SAID] Corydoras catfish are good for cleaning up food debris and are low maintenance.
+- [ASSISTANT_SAID] Corydoras catfish are peaceful, small (1-2 inches), and prefer to school in groups.
+- [ASSISTANT_SAID] Recommended popular species of Corydoras catfish: 
+  1. Corydoras paleatus (Peppered Cory)
+  2. Corydoras hastatus (Dwarf Cory)
+  3. Corydoras trilineatus (Three-lined Cory)
+- [ASSISTANT_SAID] Suggested stocking scenario for a 10-gallon tank: 
+  - 6-8 Corydoras catfish
+  - 15-20 neon tetras
+- [ASSISTANT_SAID] Recommended feeding habits for Corydoras catfish: 
+  - Sinking foods like pellets or tablets
+  - Supplement with live or frozen foods (brine shrimp, bloodworms, daphnia)
+- [ASSISTANT_SAID] Suggested feeding schedule: 
+  - Feed Corydoras catfish at night
+  - Monitor behavior and adjust feeding amounts
+- [USER] User is curious about tank decorations and plants for accommodating Corydoras catfish.
+- [ASSISTANT_SAID] Recommended adjustments for tank decorations for Corydoras catfish: 
+  - Use soft, smooth substrate (sand or fine gravel)
+  - Securely anchor plants to prevent uprooting
+  - Add rocks, driftwood, or decorations with hiding places
+  - Leave open swimming areas
+  - Adjust water flow to

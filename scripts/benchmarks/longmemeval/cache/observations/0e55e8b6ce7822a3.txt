@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[FACT] User is planning a birding trip to Costa Rica.  
+[EVENT] User is looking for recommendations on guided tours that focus on spotting raptors.  
+[ASSISTANT_SAID] Costa Rica has over 850 species of birds.  
+[ASSISTANT_SAID] Recommended operators for raptor-focused tours in Costa Rica include Tropical Birding, Birdquest, Wings Birding Tours, Costa Rica Birding, and Rockjumper Birding Tours.  
+[ASSISTANT_SAID] Tropical Birding offers a 10-day "Raptors of Costa Rica" tour focusing on species like the King Vulture, Ornate Hawk-Eagle, and White Hawk.  
+[ASSISTANT_SAID] Birdquest offers a 14-day "Costa Rica: Raptors and Endemics" tour targeting species like the Crested Eagle, Solitary Eagle, and Gray-lined Hawk.  
+[ASSISTANT_SAID] Wings Birding Tours offers a 10-day "Costa Rica: Raptors and More" tour focusing on species like the Hook-billed Kite, White-tailed Kite, and Broad-winged Hawk.  
+[ASSISTANT_SAID] Costa Rica Birding offers a 7-day "Raptor Tour" focusing on species like the Swallow-tailed Kite, Short-tailed Hawk, and Zone-tailed Hawk.  
+[ASSISTANT_SAID] Rockjumper Birding Tours offers a 14-day "Costa Rica Mega Birding Tour" that includes many raptor species.  
+[ASSISTANT_SAID] All recommended operators have experienced guides, good reputations, and a focus on responsible birding practices.  
+[EVENT] User attended a workshop at the local Audubon Society that included a guided walk.  
+[ASSISTANT_SAID] Guided walks are an excellent way to learn about local bird species.  
+[ASSISTANT_SAID] User should consider factors like tour size, accommodations, and transportation when choosing a tour operator.  
+[EVENT] User is interested in the Tropical Birding tour.  
+[ASSISTANT_SAID] Tropical Birding's tour includes accommodations in eco-lodges, hotels, and birding-focused resorts.  
+[ASSISTANT_SAID] Accommodations include Savegre Mountain Lodge, Hotel Casa Conde, and Arenal Observatory Lodge.  
+[ASSISTANT_SAID] Transportation during the tour is in comfortable, air-conditioned vehicles with large windows and expert drivers.  
+[ASSISTANT_SAID] Guides will provide tips for photography opportunities, including using a telephoto lens and considering low-light performance.  
+[ASSISTANT_SAID] User has a new Nikon camera and lenses specifically for bird watching.  
+[ASSISTANT_SAID] Tropical Birding's guides have extensive experience with raptor identification and photography.  
+[ASSISTANT_SAID] Guides

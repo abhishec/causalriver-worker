@@ -1,0 +1,19 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/29 (Mon) 12:58
+- [EVENT] User is planning a trip to Orlando.
+- [PREFERENCE] User is interested in theme parks and must-ride attractions.
+- [ASSISTANT_SAID] Orlando is home to several world-class theme parks, including Walt Disney World, Universal Orlando Resort, SeaWorld Orlando, and LEGOLAND Florida.
+- [ASSISTANT_SAID] Walt Disney World comprises four theme parks: Magic Kingdom, Epcot, Hollywood Studios, and Animal Kingdom.
+- [ASSISTANT_SAID] Universal Orlando Resort consists of two theme parks: Universal Studios Florida and Universal's Islands of Adventure.
+- [ASSISTANT_SAID] SeaWorld Orlando is a marine-life themed park with roller coasters, water rides, and animal exhibits.
+- [ASSISTANT_SAID] LEGOLAND Florida is designed for kids aged 2-12, with rides, shows, and LEGO-themed attractions.
+- [ASSISTANT_SAID] Must-ride attractions at Walt Disney World include Space Mountain, Splash Mountain, Seven Dwarfs Mine Train, and Haunted Mansion at Magic Kingdom; Soarin', Test Track, and Frozen Ever After at Epcot; Rock 'n' Roller Coaster, Tower of Terror, and Star Wars: Rise of the Resistance at Hollywood Studios; and Avatar Flight of Passage, Expedition Everest, and Kilimanjaro Safaris at Animal Kingdom.
+- [ASSISTANT_SAID] Must-ride attractions at Universal Studios Florida include The Revenge of the Mummy, The Incredible Hulk Coaster, and Harry Potter and the Escape from Gringotts; at Universal's Islands of Adventure include The Wizarding World of Harry Potter - Hogsmeade, The Amazing Adventures of Spider-Man, and Jurassic Park River Adventure.
+- [ASSISTANT_SAID] Must-ride attractions at SeaWorld Orlando include Mako, Kraken, Manta, One Ocean, and Antarctica: Empire of the Penguin.
+- [ASSISTANT_SAID] Must-ride attractions at LEGOLAND Florida include The Dragon Coaster, LEGO NINJAGO World, and Miniland USA.
+- [ASSISTANT_SAID] Tips for visiting theme parks include planning ahead, arriving early, using park hoppers, taking breaks, and downloading the official park apps.
+- [EVENT] User expresses interest in thrill rides at Universal Orlando Resort.
+- [ASSISTANT_SAID] Universal Orlando Resort has roller coasters like The Revenge of the Mummy, Hollywood Rip Ride Rockit, The Incredible Hulk Coaster, and Dragon Challenge (now closed).
+- [ASSISTANT_SAID] Other thrill rides include Harry Potter and the Forbidden Journey and Jurassic Park River Adventure.
+- [ASSISTANT_SAID] Tips for Universal Orlando include riding during off-

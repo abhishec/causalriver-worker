@@ -1,0 +1,50 @@
+{
+  "answer_69811d4a": [
+    {
+      "fact": "User is trying to organize their jewelry collection.",
+      "type": "preference",
+      "entities": [
+        "jewelry collection"
+      ]
+    },
+    {
+      "fact": "User prefers using a spreadsheet to keep track of their jewelry.",
+      "type": "preference",
+      "entities": [
+        "spreadsheet"
+      ]
+    },
+    {
+      "fact": "User wants to include the story behind each piece of jewelry.",
+      "type": "preference",
+      "entities": [
+        "story",
+        "jewelry"
+      ]
+    },
+    {
+      "fact": "User values the sentimental value of their jewelry pieces.",
+      "type": "opinion",
+      "entities": [
+        "sentimental value"
+      ]
+    },
+    {
+      "fact": "User is interested in tracking who gave them each piece of jewelry.",
+      "type": "preference",
+      "entities": [
+        "who gave it to me",
+        "jewelry"
+      ]
+    },
+    {
+      "fact": "User is considering adding a column for the provenance or story of each piece.",
+      "type": "preference",
+      "entities": [
+        "provenance",
+        "story",
+        "jewelry"
+      ]
+    }
+  ]
+}

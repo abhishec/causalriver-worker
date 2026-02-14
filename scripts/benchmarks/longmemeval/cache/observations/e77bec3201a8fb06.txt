@@ -1,0 +1,19 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/30 (Tue) 16:37
+- [USER] The user is conducting a financial analysis report on an airline of their choice.
+- [USER] The user requires the research to be based on the published annual reports of the airline found on the company’s website.
+- [USER] The user specifies that the research report will outline the financial performance of the chosen airline for the past two financial years: 2020-21 and 2021-22.
+- [USER] The user states that the research report will comprise two sections: Ratio Calculation and Ratio Analysis.
+- [USER] The user lists the required liquidity ratios: Current ratio, Acid-test ratio, Accounts receivables turnover ratio, and Inventory turnover ratio.
+- [USER] The user lists the required profitability ratios: Operating profit margin, Gross Profit Margin Ratio, Return on Assets, and Return on Capital Employed Ratio.
+- [USER] The user lists the required financial ratios: Debt to Equity Ratio, Return on Equity Ratio, and Interest Coverage Ratio.
+- [USER] The user requests that the combined analysis be submitted in the form of a report, including computed ratios for each of the past two financial years, trend analysis with commentary, and overall conclusions.
+- [USER] The user instructs to attach the financial statements used as an appendix.
+- [USER] The user provides additional guidelines for the report format: Introduction, Section 1 – Financial Ratio Calculations, Section 2- Ratio Analysis Report, Section 4 – Conclusion, References, Appendix 1- Individual Ratio Analysis calculations, Appendix – Financial statements of the 2 years (Income statement and Balance sheet only).
+- [ASSISTANT_SAID] The assistant introduces the report by stating that the aviation industry was hit hard by the COVID-19 pandemic, causing a significant decline in air travel demand and revenue for airlines globally.
+- [ASSISTANT_SAID] The assistant specifies that the report will analyze the financial performance of Emirates Airlines for the financial years 2020-21 and 2021-22.
+- [ASSISTANT_SAID] The assistant describes Emirates Airlines as a major airline based in Dubai, United Arab Emirates, known for its extensive global network and luxurious amenities.
+- [ASSISTANT_SAID] The assistant outlines the liquidity ratios calculated for Emirates Airlines, including the Current Ratio, Acid-test Ratio, Accounts Receivables Turnover Ratio, and Inventory Turnover Ratio, along with their values for FY20-21 and FY21-22.
+- [ASSISTANT_SAID] The assistant provides the Current Ratio values: 1.13 for FY20-21 and 1.15 for FY21-22.
+- [ASSISTANT_SAID] The assistant provides the Acid-test Ratio values: 0.87 for FY20-21 and 0.89 for

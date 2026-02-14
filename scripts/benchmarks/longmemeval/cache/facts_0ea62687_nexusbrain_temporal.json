@@ -1,0 +1,76 @@
+{
+  "answer_dc5e537d_1": [
+    {
+      "fact": "User is thinking of getting a tune-up for their car soon.",
+      "type": "event",
+      "entities": [
+        "tune-up",
+        "car"
+      ]
+    },
+    {
+      "fact": "User's car was getting 30 miles per gallon in the city a few months ago.",
+      "type": "personal",
+      "entities": [
+        "30 miles per gallon",
+        "city"
+      ]
+    },
+    {
+      "fact": "User plans to check the air filter, spark plugs, and tire pressure.",
+      "type": "preference",
+      "entities": [
+        "air filter",
+        "spark plugs",
+        "tire pressure"
+      ]
+    },
+    {
+      "fact": "User's oil change is overdue by about 1000 miles.",
+      "type": "personal",
+      "entities": [
+        "oil change",
+        "1000 miles"
+      ]
+    },
+    {
+      "fact": "User believes that the overdue oil change could be a contributing factor to the decrease in fuel efficiency.",
+      "type": "opinion",
+      "entities": [
+        "oil change",
+        "fuel efficiency"
+      ]
+    }
+  ],
+  "answer_dc5e537d_2": [
+    {
+      "fact": "User is considering getting a new air filter for their car.",
+      "type": "preference",
+      "entities": [
+        "air filter"
+      ]
+    },
+    {
+      "fact": "User has been getting around 28 miles per gallon in the city.",
+      "type": "personal",
+      "entities": [
+        "28 miles per gallon",
+        "city"
+      ]
+    },
+    {
+      "fact": "User is interested in the Wix 51348 air filter.",
+      "type": "preference",
+      "entities": [
+        "Wix 51348"
+      ]
+    },
+    {
+      "fact": "User owns a 2018 Honda Civic.",
+      "type": "personal",
+      "entities": [
+        "2018 Honda Civic"
+      ]
+    }
+  ]
+}

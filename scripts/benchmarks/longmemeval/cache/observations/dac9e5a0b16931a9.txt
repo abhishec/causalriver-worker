@@ -1,0 +1,9 @@
+**Observation Log:**
+
+- [FACT] User's name is Jacob.
+- [FACT] Jacob has $30.
+- [RELATIONSHIP] Jacob has a grandfather and a sister.
+- [EVENT] Jacob's grandfather and sister each split $10 between him.
+- [FACT] After receiving money from his grandfather and sister, Jacob's total amount of money is $30.
+- [ASSISTANT_SAID] The assistant stated that it is unclear how much money Jacob needs to buy his new house.
+- [ASSISTANT_SAID] The assistant noted that to determine how much money Jacob needs for the house, the price of the house and any associated costs (like closing costs or financing fees) would need to be known.

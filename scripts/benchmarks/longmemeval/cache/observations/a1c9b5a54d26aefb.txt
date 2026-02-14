@@ -1,0 +1,27 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/24 (Wed) 06:02
+- [FACT] User is planning to fertilize heirloom tomatoes and basil.
+- [EVENT] User did a major pruning of their apple tree last weekend.
+- [ASSISTANT_SAID] Recommended organic fertilizers for heirloom tomatoes: Bone meal, Fish bone meal, Compost tea, Alfalfa meal.
+- [ASSISTANT_SAID] Recommended organic fertilizers for basil: Blood meal, Feather meal, Compost.
+- [ASSISTANT_SAID] Advised to follow packaging instructions and start with a small amount to avoid over-fertilizing.
+- [ASSISTANT_SAID] Congratulated user on pruning their apple tree and acknowledged the effort involved.
+- [FACT] User has been composting for a while.
+- [ASSISTANT_SAID] Confirmed that using homemade compost as fertilizer is an excellent idea.
+- [ASSISTANT_SAID] Explained several ways to use compost: Compost tea, Compost top-dressing, Compost mixing, Compost side-dressing.
+- [ASSISTANT_SAID] Listed benefits of using homemade compost: Customized nutrients, Microbe-rich, Slow release, Cost-effective.
+- [ASSISTANT_SAID] Advised to use mature, finished compost and avoid immature compost.
+- [FACT] User is tracking the progress of their plants using a gardening app on their phone.
+- [ASSISTANT_SAID] Recommended composting apps: Compost Mate, Compost Calculator, Worm composting app.
+- [ASSISTANT_SAID] Recommended gardening apps with composting features: Gardening Knowledge, Garden Plan Pro, Homegrown, Yardbook, Garden Journal.
+- [FACT] User is thinking about building a trellis for climbing roses.
+- [ASSISTANT_SAID] Encouraged the idea of using pruned branches from the apple tree for the trellis.
+- [ASSISTANT_SAID] Provided considerations for using pruned branches: Dry the branches, Clean and disinfect, Choose sturdy branches, Design and construction, Weather resistance.
+- [FACT] User built a trellis for climbing roses a couple of weeks ago using old wooden stakes and twine.
+- [EVENT] User spent a few hours building the trellis.
+- [ASSISTANT_SAID] Affirmed that using pruned branches from the apple tree could work well for the trellis.
+- [FACT] User is thinking about creating a more inviting atmosphere in their garden.
+- [ASSISTANT_SAID] Suggested adding features like a birdbath or sundial to create a more inviting atmosphere.
+- [ASSISTANT_SAID] Provided tips for attracting beneficial insects: Plant bee-friendly flowers, Provide a source of water, Avoid pesticides, Create a bee hotel.
+- [ASSISTANT_SAID] Provided tips for

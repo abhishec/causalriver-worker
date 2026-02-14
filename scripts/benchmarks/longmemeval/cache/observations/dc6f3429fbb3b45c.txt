@@ -1,0 +1,28 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/04/21 (Fri) 18:28  
+[FACT] User is trying to brush up on statistics skills.  
+[EVENT] User started watching a series of video lectures by Professor Andrew Ng on MIT OpenCourseWare.  
+[PREFERENCE] User is particularly interested in understanding how Bayes' theorem can be applied to machine learning models, especially in natural language processing.  
+[ASSISTANT_SAID] Recommended resources for probability theory and Bayes' theorem, including:  
+[ASSISTANT_SAID] Khan Academy for video lectures on probability.  
+[ASSISTANT_SAID] MIT OpenCourseWare's course on Probability and Statistics (6.041x) with detailed lecture notes, assignments, and exams.  
+[ASSISTANT_SAID] Wolfram Alpha for an interactive calculator for Bayes' theorem.  
+[ASSISTANT_SAID] Stat Trek as a comprehensive online statistics textbook covering probability and Bayes' theorem.  
+[ASSISTANT_SAID] Suggested books:  
+[ASSISTANT_SAID] "Probability and Statistics for Dummies" by Deborah Rumsey.  
+[ASSISTANT_SAID] "Probability: The Science of Uncertainty" by Jim Henley.  
+[ASSISTANT_SAID] "Bayesian Methods for Hackers" by Cam Davidson-Pilon.  
+[ASSISTANT_SAID] Recommended practice problems from Khan Academy, Stat Trek, and MIT OpenCourseWare.  
+[ASSISTANT_SAID] Suggested interactive tools like a Bayes' Theorem Calculator and Probability Simulator.  
+[ASSISTANT_SAID] Advised to start with the basics of probability concepts before diving into Bayes' theorem.  
+[ASSISTANT_SAID] Suggested working through examples and visualizing concepts with diagrams and graphs.  
+[ASSISTANT_SAID] Recommended online courses focusing on Bayesian methods in NLP, including:  
+[ASSISTANT_SAID] Stanford Natural Language Processing with Deep Learning Specialization on Coursera.  
+[ASSISTANT_SAID] Bayesian Methods for Machine Learning course on edX by Professor David Blei.  
+[ASSISTANT_SAID] Suggested research papers related to Bayesian methods in NLP, including:  
+[ASSISTANT_SAID] "A Bayesian Approach to Unsupervised Part-of-Speech Tagging" by David M. Blei and Michael I. Jordan.  
+[ASSISTANT_SAID] "Bayesian Inference for Latent Dirichlet Allocation" by David M. Blei, Andrew Y. Ng, and Michael I. Jordan.  
+[ASSISTANT_SAID] "Bayesian Neural Networks for NLP" by Andrew Gelman, et al.  
+[ASSISTANT_SAID] Recommended books:  
+[ASSISTANT_SAID

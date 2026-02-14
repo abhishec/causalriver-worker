@@ -1,0 +1,20 @@
+**Observation Log:**
+
+[FACT] User is planning a trip to Colorado.  
+[EVENT] User is considering visiting their sister's family in Denver before heading to Rocky Mountain National Park (RMNP).  
+[ASSISTANT_SAID] Rocky Mountain National Park (RMNP) has over 60 mountain peaks above 12,000 feet, abundant wildlife, and stunning scenery.  
+[ASSISTANT_SAID] Recommended easy to moderate hiking trails in RMNP include:  
+[ASSISTANT_SAID] 1. Bear Lake Trail: A 0.8-mile loop around Bear Lake, accessible and scenic, with minimal elevation gain.  
+[ASSISTANT_SAID] 2. Alberta Falls Trail: A 3.8-mile out-and-back hike to a waterfall with moderate elevation gain (1,000 ft).  
+[ASSISTANT_SAID] 3. Dream Lake Trail: A 2.4-mile out-and-back hike to a lake with reflections of Hallett Peak, moderate elevation gain (425 ft).  
+[ASSISTANT_SAID] 4. Gem Lake Trail: A 3.5-mile out-and-back hike to a secluded lake, moderate elevation gain (1,000 ft).  
+[ASSISTANT_SAID] Recommended moderate to challenging hiking trails in RMNP include:  
+[ASSISTANT_SAID] 1. Deer Mountain Trail: A 6.2-mile out-and-back hike with spectacular views, moderate to challenging elevation gain (1,700 ft).  
+[ASSISTANT_SAID] 2. Flattop Mountain Trail: An 8.8-mile out-and-back hike to the highest point on the park's east side, challenging elevation gain (2,900 ft).  
+[ASSISTANT_SAID] 3. Hallett Peak Trail: A 10.3-mile out-and-back hike to the summit of Hallett Peak, challenging elevation gain (3,300 ft).  
+[ASSISTANT_SAID] 4. The Loch Trail: A 5.7-mile out-and-back hike to a serene lake, moderate to challenging elevation gain (1,500 ft).  
+[ASSISTANT_SAID] Recommended longer and more challenging hiking trails in RMNP include:  
+[ASSISTANT_SAID] 1. Glacier Gorge Trail: A 10.5-mile out-and-back hike to Black Lake, challenging elevation gain (2,500 ft).  
+[ASSISTANT_SAID] 2. The Tonahutu Trail: A 13.5-mile out-and-back hike to Granite Falls, challenging elevation gain (2,500 ft).  
+[ASSISTANT_SAID] Important reminders for hiking in RMNP include checking trail conditions, being prepared for changing weather, bringing water and snacks, respecting wildlife, and considering hiring a guide.  
+[EVENT] User is considering

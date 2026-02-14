@@ -1,0 +1,32 @@
+{
+  "answer_ultrachat_399000": [
+    {
+      "fact": "User loves snapper.",
+      "type": "preference",
+      "entities": [
+        "snapper"
+      ]
+    },
+    {
+      "fact": "User has tried Jerk Chicken and loved it.",
+      "type": "preference",
+      "entities": [
+        "Jerk Chicken"
+      ]
+    },
+    {
+      "fact": "User is interested in trying Escovitch Fish.",
+      "type": "preference",
+      "entities": [
+        "Escovitch Fish"
+      ]
+    },
+    {
+      "fact": "User is looking for Jamaican restaurants in their area.",
+      "type": "event",
+      "entities": [
+        "Jamaican restaurants"
+      ]
+    }
+  ]
+}

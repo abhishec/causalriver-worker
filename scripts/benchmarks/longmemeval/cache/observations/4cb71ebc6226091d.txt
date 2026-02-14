@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/23 (Tue) 05:20
+- [ASSISTANT_SAID] System memory corruption can be a potential cause of a system exception.
+- [ASSISTANT_SAID] It's generally not feasible for developers to handle exceptions specifically related to memory corruption around every function call.
+- [ASSISTANT_SAID] Memory corruption is often a result of low-level issues, such as bugs in the operating system, hardware problems, or issues in the underlying memory management system.
+- [ASSISTANT_SAID] In many cases, these types of issues can only be resolved by fixing the underlying cause, rather than by adding exception handling to your application code.
+- [ASSISTANT_SAID] It's still important to handle exceptions that may occur in your application code and log them appropriately.
+- [ASSISTANT_SAID] Handling exceptions can help detect and diagnose issues that may be caused by memory corruption or other low-level problems.
+- [ASSISTANT_SAID] Proper exception handling can provide a better user experience by gracefully handling errors and allowing the application to continue running, if possible.
+- [USER] Where do you draw the line?
+- [ASSISTANT_SAID] Drawing the line on where and when to handle exceptions in your application code depends on various factors, including the nature of the exception, the context in which it occurs, the criticality of the operation, and the desired user experience.
+- [ASSISTANT_SAID] Exceptions related to user input or data validation should generally be handled immediately to provide a better user experience.
+- [ASSISTANT_SAID] Exceptions related to critical operations, such as database transactions or file I/O, should also be handled to ensure data consistency.
+- [ASSISTANT_SAID] Some exceptions, such as those related to memory corruption, may be more difficult to handle and may require a more systemic solution.
+- [ASSISTANT_SAID] The goal is to balance the need to handle exceptions and provide a good user experience with minimizing the amount of exception handling code.
+- [USER] Do these languages have compilers which check for unhandled exceptions?
+- [ASSISTANT_SAID] Yes, some specialized programming languages used in critical systems, such as Ada, do have compilers that check for unhandled exceptions.
+- [ASSISTANT_SAID] The purpose of these checks is to help ensure that the code is reliable and that any unexpected exceptions are handled properly.
+- [ASSISTANT_SAID] In Ada, exceptions can be declared and raised explicitly within the code, and the compiler checks that any exceptions raised are handled by the appropriate exception handler.
+- [ASSISTANT_SAID] Other critical systems may use similar approaches, including specific language features and compiler checks, to help ensure the reliability and robustness of the

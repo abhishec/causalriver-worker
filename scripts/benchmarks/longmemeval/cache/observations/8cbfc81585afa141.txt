@@ -1,0 +1,37 @@
+**Observation Log:**
+
+[FACT] User is considering buying a new perfume.  
+[FACT] User recently spent $200 on a perfume that is out of their budget.  
+[FACT] User justified the $200 perfume purchase as a special treat.  
+[PREFERENCE] User is unsure about splurging on a luxury brand again.  
+[PREFERENCE] User is looking for affordable perfumes that are similar in quality to luxury brands.  
+[EVENT] User plans to check out Target's Market Pantry perfumes.  
+[EVENT] User intends to ask the sales associate for recommendations.  
+[EVENT] User plans to mention their recent $200 perfume purchase to the sales associate.  
+[CHANGE] User's budget for perfume has been established as under $30.  
+[TEMPORAL] Session date is 2023/02/04 (Sat) 15:53.  
+[ASSISTANT_SAID] Assistant acknowledged the user's dilemma and offered to help find affordable alternatives.  
+[ASSISTANT_SAID] Assistant suggested breaking down the user's perfume preferences into quality of ingredients, longevity and projection, and unique scent profile.  
+[ASSISTANT_SAID] Assistant provided a list of affordable floral perfumes, including:  
+- Mugler Alien Eau de Parfum (~ $60)  
+- Gucci Bamboo Eau de Parfum (~ $50)  
+- Calvin Klein Euphoria Eau de Parfum (~ $55)  
+[ASSISTANT_SAID] Assistant provided a list of affordable oriental perfumes, including:  
+- Prada Candy Eau de Parfum (~ $60)  
+- Tom Ford Black Orchid Eau de Parfum (~ $70)  
+- Dolce & Gabbana The One Eau de Parfum (~ $50)  
+[ASSISTANT_SAID] Assistant provided a list of affordable citrus perfumes, including:  
+- Jo Malone London Grapefruit Eau de Parfum (~ $50)  
+- Viktor & Rolf Flowerbomb Eau de Parfum (~ $60)  
+- Dior J'Adore in Joy Eau de Parfum (~ $60)  
+[ASSISTANT_SAID] Assistant provided a list of niche brand perfumes under $70, including:  
+- Byredo Gypsy Water Eau de Parfum (~ $65)  
+- Diptyque L'Eau Eau de Parfum (~ $60)  
+[ASSISTANT_SAID] Assistant noted that perfume preferences are subjective and suggested trying before buying.  
+[ASSISTANT_SAID] Assistant provided a list of perfumes under $30, including:  
+- Ariana Grande Cloud Eau de Parfum (~ $18)  
+- Britney Spears Fantasy Eau de Parfum (~ $18)  
+- Paris Hilton Heiress Eau de Parfum (~ $15)  
+- Vera Wang Princess Eau de Parfum (~ $25)  
+- Hanae Mori No. 4 Eau de Parfum (~ $25)  
+- Calvin Klein Eternity Summer Eau de Parfum (~ $25

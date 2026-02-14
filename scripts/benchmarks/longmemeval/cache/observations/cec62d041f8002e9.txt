@@ -1,0 +1,23 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/20 (Sat) 01:43
+- [FACT] User is interested in must-visit markets in Marrakech, Morocco.
+- [ASSISTANT_SAID] Jemaa el-Fnaa is an iconic square in the heart of the Old City, known for its vibrant marketplace selling Moroccan handicrafts, spices, and traditional street food.
+- [ASSISTANT_SAID] Souk Semmarine is located in the heart of Marrakech's Medina and offers clothes, shoes, handbags, and Moroccan souvenirs.
+- [ASSISTANT_SAID] Souk El Khemis is famous for antique and vintage items, including carpets, textiles, and jewelry, and visitors should come early for the best deals.
+- [ASSISTANT_SAID] Babouche Souk is dedicated to traditional Moroccan slippers called babouche, with a wide range of styles and colors handcrafted by local artisans.
+- [ASSISTANT_SAID] Rahba Kedima, known as the "Spice Square," sells a variety of Moroccan spices, herbs, and essential oils.
+- [ASSISTANT_SAID] Souk Smarine Leather Market is near Jemaa el-Fnaa and features leather goods like bags, belts, shoes, and jackets at reasonable prices.
+- [ASSISTANT_SAID] Marché Atiq is popular for authentic Moroccan pottery, ceramics, and kitchenware.
+- [ASSISTANT_SAID] Ensemble Artisanal is a government-run complex showcasing Moroccan artisanal crafts and souvenirs, ideal for high-quality items made by artisans.
+- [USER] User expresses excitement about the markets and asks which one to visit first.
+- [ASSISTANT_SAID] Jemaa el-Fnaa is recommended as the first market to visit for its vibrant atmosphere and central location in Marrakech.
+- [USER] User expresses eagerness to explore Jemaa el-Fnaa and try street food.
+- [ASSISTANT_SAID] Recommendations for street food in Jemaa el-Fnaa include:
+  - Tagine: A traditional Moroccan dish of slow-cooked meat or vegetables with spices served with bread.
+  - Harira: A spicy and hearty soup made with lentils, chickpeas, and lamb.
+  - Tanjia: A meat dish cooked in a clay pot, traditionally prepared by men for special occasions.
+  - Moroccan tea: Mint tea served in small glasses with sugar cubes.
+  - Grilled meats: Kebabs, merguez sausages, and lamb chops available in the market.
+  - Moroccan pastries: Sweet treats like baklava, almond cookies, and honey-soaked pastries.
+- [ASSISTANT_SAID] User is encouraged to enjoy their exploration of Jemaa el-Fnaa and the delicious food.

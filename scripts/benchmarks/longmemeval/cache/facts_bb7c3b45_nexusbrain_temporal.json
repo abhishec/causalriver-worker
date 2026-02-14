@@ -1,0 +1,85 @@
+{
+  "answer_de64539a_1": [
+    {
+      "fact": "User is planning a night out with friends this weekend",
+      "type": "event",
+      "entities": [
+        "night out",
+        "friends",
+        "weekend"
+      ]
+    },
+    {
+      "fact": "User has new Jimmy Choo heels",
+      "type": "personal",
+      "entities": [
+        "Jimmy Choo heels"
+      ]
+    },
+    {
+      "fact": "User purchased the Jimmy Choo heels for $200 at the outlet mall",
+      "type": "personal",
+      "entities": [
+        "$200",
+        "outlet mall"
+      ]
+    },
+    {
+      "fact": "User is considering wearing a little black dress",
+      "type": "preference",
+      "entities": [
+        "little black dress"
+      ]
+    },
+    {
+      "fact": "User is looking for fashion advice",
+      "type": "preference",
+      "entities": [
+        "fashion advice"
+      ]
+    }
+  ],
+  "answer_de64539a_2": [
+    {
+      "fact": "User is looking for affordable fashion brands that offer high-quality clothing.",
+      "type": "preference",
+      "entities": [
+        "affordable fashion brands",
+        "high-quality clothing"
+      ]
+    },
+    {
+      "fact": "User is trying to cut back on fast fashion and opt for more sustainable options.",
+      "type": "preference",
+      "entities": [
+        "fast fashion",
+        "sustainable options"
+      ]
+    },
+    {
+      "fact": "User has noticed that some designer brands can be really pricey, like Jimmy Choo heels.",
+      "type": "opinion",
+      "entities": [
+        "designer brands",
+        "Jimmy Choo heels"
+      ]
+    },
+    {
+      "fact": "User is interested in checking out Everlane and Cuyana for high-quality basics.",
+      "type": "preference",
+      "entities": [
+        "Everlane",
+        "Cuyana",
+        "high-quality basics"
+      ]
+    },
+    {
+      "fact": "User is looking for advice on the best way to shop during sales tax holidays or Black Friday.",
+      "type": "preference",
+      "entities": [
+        "sales tax holidays",
+        "Black Friday"
+      ]
+    }
+  ]
+}

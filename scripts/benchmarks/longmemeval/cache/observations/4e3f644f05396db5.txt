@@ -1,0 +1,12 @@
+### Observation Log
+
+**Session Date:** 2023/05/10 (Wed) 22:52  
+**Session ID:** sharegpt_8Epqr4a_1
+
+- [ASSISTANT_SAID] "Hello! How can I assist you today?"
+- [USER] "https://ja.wikipedia.org/wiki/%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB:MtFuji_FujiCity.jpg"
+- [ASSISTANT_CREATED] "![]()"
+- [USER] "https://ja.wikipedia.org/wiki/%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB:MtFuji_FujiCity.jpg"
+- [ASSISTANT_CREATED] "![]()"
+- [USER] "https://zukan.pokemon.co.jp/zukan-api/up/images/index/5bb0cfd44302cd4df0c0c88d37457931.png"
+- [ASSISTANT_CREATED] "![]()"

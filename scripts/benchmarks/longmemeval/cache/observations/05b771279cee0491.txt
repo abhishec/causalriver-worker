@@ -1,0 +1,23 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/21 (Sun) 07:28  
+[FACT] User runs a new nanny service.  
+[FACT] User has children.  
+[RELATIONSHIP] User hired someone in the past to nanny their own kids.  
+[RELATIONSHIP] The nanny user hired in the past is asking to work for the user's new company.  
+[PREFERENCE] User's kids did not like the nanny they hired in the past.  
+[PREFERENCE] User has heard from other people that they would not hire the past nanny again.  
+[ASSISTANT_SAID] Assistant provided a subject line for the email: "Nanny Application Status Update."  
+[ASSISTANT_SAID] Assistant suggested a greeting: "Dear [Nanny's Name]."  
+[ASSISTANT_SAID] Assistant expressed appreciation for the nanny's interest in the company.  
+[ASSISTANT_SAID] Assistant stated that the user's decision was not to move forward with the nanny's application at this time.  
+[ASSISTANT_SAID] Assistant mentioned that the new business is focusing on building a team with a diverse range of skills, experiences, and backgrounds.  
+[ASSISTANT_SAID] Assistant acknowledged the nanny's previous experience as valuable but indicated the need to explore other options.  
+[ASSISTANT_SAID] Assistant emphasized that the decision was not made lightly and wished the nanny luck in future endeavors.  
+[ASSISTANT_SAID] Assistant encouraged the nanny to reach out with any questions or concerns.  
+[ASSISTANT_CREATED] Assistant created a less formal version of the email with the subject line: "Update on Your Application."  
+[ASSISTANT_CREATED] Assistant suggested a greeting: "Hi [Nanny's Name]."  
+[ASSISTANT_CREATED] Assistant expressed appreciation for the nanny's interest in working with the company in a more casual tone.  
+[ASSISTANT_CREATED] Assistant reiterated the decision not to move forward with the application and explained the reasoning in a less formal manner.  
+[ASSISTANT_CREATED] Assistant wished the nanny luck in finding a suitable opportunity and encouraged her to reach out with questions.  
+[ASSISTANT_CREATED] Assistant included a closing: "Take care," followed by placeholders for the user's name, title, and company name.

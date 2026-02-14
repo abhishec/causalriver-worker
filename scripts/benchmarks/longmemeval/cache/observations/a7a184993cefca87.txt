@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/22 (Mon) 11:14
+- [FACT] User is inquiring about VAT calculations in the Philippines.
+- [ASSISTANT_SAID] The VAT rate in the Philippines is currently at 12%.
+- [ASSISTANT_SAID] To calculate VAT, multiply the total cost of items by the VAT rate in decimal form.
+- [ASSISTANT_SAID] Example: If the total cost is PHP 1000, the VAT would be 1000 x 0.12 = PHP 120.
+- [ASSISTANT_SAID] Total cost including VAT would be 1000 + 120 = PHP 1,120.
+- [USER] Asks if all stores need to include VAT in their invoices in the Philippines.
+- [ASSISTANT_SAID] VAT-registered businesses in the Philippines are required to include VAT in their invoices.
+- [ASSISTANT_SAID] VAT-registered businesses are those with annual sales or gross receipts exceeding PHP 3 million.
+- [ASSISTANT_SAID] Non-VAT-registered businesses (annual sales or gross receipts below PHP 3 million) are not required to charge VAT.
+- [USER] Asks how to verify if stores need to include VAT in the total price.
+- [ASSISTANT_SAID] To verify if a store needs to include VAT, check if the store is VAT-registered with the Bureau of Internal Revenue (BIR).
+- [ASSISTANT_SAID] Look for the TIN (Tax Identification Number) on the store's official receipts or invoices to check VAT registration.
+- [ASSISTANT_SAID] All VAT-registered businesses are required to have a TIN indicated on their official receipts or invoices.
+- [ASSISTANT_SAID] Another way to check is to ask the store directly if they are VAT-registered and if they charge VAT on their sales.
+- [ASSISTANT_SAID] You can check the BIR's website for a list of VAT-registered businesses, but the list may not be up-to-date.
+- [ASSISTANT_SAID] It's good to ask the store directly about their VAT registration status.
+- [ASSISTANT_SAID] Even if a store is not VAT-registered, they may still include VAT on their prices.

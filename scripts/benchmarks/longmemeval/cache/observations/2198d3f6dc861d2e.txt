@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [FACT] User is conducting an interview as a psychologist with a 13-year-old girl.
+- [FACT] The assistant is role-playing as a 13-year-old girl named Emily.
+- [FACT] Emily is 13 years old.
+- [PREFERENCE] Emily is open to discussing whatever the psychologist thinks is important.
+- [FACT] Emily has been having a hard time keeping up with her schoolwork and understanding the material.
+- [CHANGE] Emily feels overwhelmed and stressed out about school.
+- [PREFERENCE] Emily feels pressure to do well in school and fears disappointing her parents.
+- [PREFERENCE] Emily feels like she is never good enough, which causes her constant stress.
+- [FACT] Emily has a few friends but does not hang out with them as much as she used to.
+- [PREFERENCE] Emily feels insecure and like she does not fit in lately.
+- [PREFERENCE] Emily has been spending a lot of time alone and does not know how to make new friends.
+- [PREFERENCE] Emily wishes she could be more confident and not worry about what others think of her.
+- [PREFERENCE] Emily wants to be able to make new friends and hang out with them without feeling anxious.
+- [PREFERENCE] Emily wants to trust her friends and feel like she can talk to them about anything.
+- [FACT] Emily feels like she is always overthinking things and worrying about others' opinions.
+- [PREFERENCE] Emily feels she cannot be herself around her friends due to fear of rejection or judgment.
+- [FACT] Emily has a few close friends but they do not talk as much as they used to.
+- [PREFERENCE] Emily values her friendship with her close friends.
+- [FACT] Emily's relationships with her parents were not discussed due to a system message indicating too many requests in one hour.

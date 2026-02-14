@@ -1,0 +1,16 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2021/06/01 (Tue) 01:03
+- [ASSISTANT_SAID] The two possible heat exchangers that can be used in the AHU are Plate heat exchanger and Spiral heat exchanger.
+- [ASSISTANT_SAID] A Plate heat exchanger uses a series of thin plates to separate the two fluids and provide a large surface area for heat transfer.
+- [ASSISTANT_SAID] A Spiral heat exchanger uses a spiral-shaped tube to separate the two fluids and provide a large surface area for heat transfer.
+- [ASSISTANT_SAID] If the chilled water supply (CWS) is fixed at 100 liters per minute, the profile on the variations of the chilled water return (CWR) and exit air temperatures of both heat exchangers can be calculated using the formula: ΔT1 = (T1 - T2) / (1 + (U x A x NTU)).
+- [ASSISTANT_SAID] ΔT1 is the temperature change of the chilled water return, T1 is the chilled water supply temperature, T2 is the chilled water return temperature, U is the overall heat transfer coefficient, A is the heat transfer area, and NTU is the number of transfer units.
+- [ASSISTANT_SAID] The maximum limit of the NTU for all selected heat exchangers is 3.
+- [ASSISTANT_SAID] The effect of heat exchanger types on the exit air temperature is that the Plate heat exchanger will provide a lower temperature change of the chilled water return and exit air temperature than the Spiral heat exchanger.
+- [ASSISTANT_SAID] The temperature change to the exit air temperature will be calculated using the formula: ΔT2 = ΔT1 x Cp x m.
+- [ASSISTANT_SAID] ΔT2 is the temperature change of the exit air, Cp is the specific heat capacity of air, and m is the mass flow rate of air.
+- [ASSISTANT_SAID] The temperature change to the exit air temperature is directly proportional to the CWS temperature increase; if the CWS temperature increases by 1oC, the temperature change to the exit air temperature will also increase by 1oC.
+- [ASSISTANT_SAID] Two working refrigerants that can be used for the chiller system are R410A and R407C.
+- [ASSISTANT_SAID] R410A is a blend of hydrofluorocarbons (HFCs) and has a higher cooling capacity and a lower pressure than R134a.
+- [ASSISTANT_SAID] R407C is a blend of HFCs and hydrochlorofluorocarbons (HCFCs) and is similar to R22 in terms of thermodynamic properties but has a lower global

@@ -1,0 +1,32 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/30 (Tue) 11:35  
+[USER] The user knows the game called 'characters' and explains the rules.  
+[USER] The user chooses a famous character that can be alive or dead, real or from a movie.  
+[ASSISTANT_SAID] The assistant understands the rules of the game "20 Questions" and is ready to play.  
+[USER] The user chooses a character but does not specify who it is.  
+[ASSISTANT_SAID] The assistant starts asking questions to guess the character.  
+[ASSISTANT_SAID] The assistant asks if the character is male.  
+[USER] The user confirms that the character is male.  
+[ASSISTANT_SAID] The assistant asks if the character is a historical figure.  
+[USER] The user confirms that the character is a historical figure.  
+[ASSISTANT_SAID] The assistant asks if the character has ever been a political leader.  
+[USER] The user confirms that the character has not been a political leader.  
+[ASSISTANT_SAID] The assistant asks if the character is known for work in the field of science.  
+[USER] The user confirms that the character is not known for work in science.  
+[ASSISTANT_SAID] The assistant asks if the character is an artist or known for creative works.  
+[USER] The user confirms that the character is not an artist or known for creative works.  
+[ASSISTANT_SAID] The assistant asks if the character has been in any movies or TV shows.  
+[USER] The user confirms that the character has not been in any movies or TV shows.  
+[ASSISTANT_SAID] The assistant asks if the character is known for any specific invention or discovery.  
+[USER] The user confirms that the character is not known for any specific invention or discovery.  
+[ASSISTANT_SAID] The assistant apologizes for having difficulty guessing the character and asks for more clues.  
+[USER] The user provides a clue that the character is really ancient, several thousand years ago.  
+[ASSISTANT_SAID] The assistant asks if the character is from ancient Greece or ancient Rome.  
+[USER] The user confirms that the character is not from ancient Greece or ancient Rome.  
+[ASSISTANT_SAID] The assistant asks if the character is from ancient Egypt.  
+[USER] The user responds humorously and says 'almost'.  
+[ASSISTANT_SAID] The assistant asks if the character is from Mesopotamia.  
+[USER] The user confirms that the character is not from Mesopotamia.  
+[ASSISTANT_SAID] The assistant apologizes again for having difficulty guessing and asks for more clues.  
+[USER] The

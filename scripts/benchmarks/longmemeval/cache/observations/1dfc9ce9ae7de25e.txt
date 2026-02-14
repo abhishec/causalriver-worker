@@ -1,0 +1,32 @@
+**Observation Log:**
+
+**Session Date:** 2023/05/24 (Wed) 20:27  
+**Session ID:** 27d9e492_2
+
+1. [FACT] User is trying to get organized with upcoming birthdays and events in their family.
+2. [FACT] User has experienced a whirlwind of life events related to births and adoptions over the past few months.
+3. [RELATIONSHIP] User's sister-in-law just had a baby named Emma.
+4. [RELATIONSHIP] User's friend Rachel is adopting a baby boy named Aiden.
+5. [RELATIONSHIP] User's cousin is finalizing the adoption of two foster kids.
+6. [RELATIONSHIP] User's colleague Sarah is pregnant and due in late September.
+7. [ASSISTANT_SAID] Assistant congratulated the user on the recent additions to their family and offered to help create a calendar of important dates.
+8. [ASSISTANT_SAID] Assistant requested information about family composition, important dates, and preferred calendar format.
+9. [FACT] User has a pretty big family.
+10. [FACT] User's husband is named Michael.
+11. [TEMPORAL] Michael's date of birth is August 12th.
+12. [FACT] User's brother is named Alex.
+13. [TEMPORAL] Alex's date of birth is November 25th.
+14. [FACT] User's parents are named John and Emily.
+15. [TEMPORAL] John's date of birth is January 1st.
+16. [TEMPORAL] Emily's date of birth is March 17th.
+17. [RELATIONSHIP] User's brother Alex is the father of Emma.
+18. [TEMPORAL] Emma's date of birth is February 10th.
+19. [RELATIONSHIP] User's cousin is named Olivia.
+20. [TEMPORAL] Olivia's date of birth is October 5th.
+21. [RELATIONSHIP] Olivia is adopting two foster kids named Jackson and Lily.
+22. [TEMPORAL] Jackson and Lily's adoption will be finalized on April 20th.
+23. [TEMPORAL] Rachel's adopted son Aiden is expected to arrive in early April.
+24. [TEMPORAL] Sarah's baby is due in late September.
+25. [ASSISTANT_SAID] Assistant asked for additional information about other important dates, including anniversaries, holidays, milestone events, and family gatherings.
+26. [ASSISTANT_SAID] Assistant offered to help create a comprehensive calendar to keep track of all the special dates.
+27. [ASSISTANT_SAID] Assistant inquired about the user's preferred format for the calendar (digital, physical, or hybrid).

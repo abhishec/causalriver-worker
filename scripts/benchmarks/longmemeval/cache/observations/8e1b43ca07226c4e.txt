@@ -1,0 +1,22 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2022/05/15 (Sun) 09:56
+- [FACT] User uses Facebook, Instagram, Twitter, LinkedIn, and WhatsApp regularly.
+- [FACT] User has access to login credentials for each social media platform.
+- [FACT] User does not use any third-party apps or browser extensions to track screen time or social media usage.
+- [FACT] User has set daily time limits on their social media apps.
+- [CHANGE] User's WhatsApp usage has increased significantly due to a new project at work.
+- [EVENT] User sent around 50 messages per day on WhatsApp during a 3-day period last week when finalizing a project plan with their team.
+- [CHANGE] User's Facebook usage increased slightly during the same period due to joining new groups related to hobbies and engaging more with people in those groups.
+- [EVENT] User posted a photo of their recent hike to Mount Everest Base Camp on Facebook and received around 20 likes and 5 comments within a day.
+- [FACT] User follows around 150 accounts on Instagram.
+- [PREFERENCE] User uses Instagram to keep up with friends and family who live abroad.
+- [TEMPORAL] User tries to scroll through their Instagram feed at least once a day.
+- [EVENT] User posted a story about their birthday celebration on Instagram and received around 30 replies from friends and family.
+- [CHANGE] User recalls responding to most of the replies individually, thanking friends and family for their wishes.
+- [ASSISTANT_SAID] Assistant offered to help analyze the user's social media usage over the past month.
+- [ASSISTANT_SAID] Assistant requested information about which social media platforms the user uses, access to login credentials, and whether the user uses any third-party apps to track usage.
+- [ASSISTANT_SAID] Assistant provided steps to retrieve usage data from Facebook, Instagram, Twitter, LinkedIn, and WhatsApp.
+- [ASSISTANT_SAID] Assistant suggested reflecting on usage habits and provided questions for the user to consider regarding their social media usage.
+- [ASSISTANT_SAID] Assistant encouraged the user to analyze their usage data for patterns, peak usage times, and correlations with specific events or activities.
+- [ASSISTANT_SAID] Assistant asked the user to consider their engagement metrics and how they feel about their overall social media usage.

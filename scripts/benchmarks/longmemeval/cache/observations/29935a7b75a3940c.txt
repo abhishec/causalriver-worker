@@ -1,0 +1,79 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/01/24 (Tue) 10:22
+
+[ASSISTANT_SAID] To put your controller behind an API Gateway, you need to configure your application to work with the API Gateway.
+
+[ASSISTANT_SAID] Step 1: Configure HTTPS using the `ConfigureWebHostDefaults` method of the `Program` class by adding the `UseHttps` method.
+
+[ASSISTANT_SAID] Example code for configuring HTTPS:
+```csharp
+public static void Main(string[] args)
+{
+    CreateHostBuilder(args).Build().Run();
+}
+
+public static IHostBuilder CreateHostBuilder(string[] args) =>
+    Host.CreateDefaultBuilder(args)
+        .ConfigureWebHostDefaults(webBuilder =>
+        {
+            webBuilder.UseStartup<Startup>()
+                .UseUrls("https://localhost:5001")
+                .UseHttps();
+        });
+```
+
+[ASSISTANT_SAID] Step 2: Configure the API Gateway to forward requests to your application, specifying the hostname, port, and path to your controller.
+
+[ASSISTANT_SAID] Step 3: Configure routing in the `Configure` method of the `Startup` class to handle modified paths.
+
+[ASSISTANT_SAID] Example code for configuring routing:
+```csharp
+public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+{
+    // ...
+
+    app.UseRouting();
+
+    app.UseEndpoints(endpoints =>
+    {
+        endpoints.MapControllerRoute(
+            name: "default",
+            pattern: "{controller}/{action}/{id?}");
+    });
+}
+```
+
+[ASSISTANT_SAID] By default, ASP.NET Core applications listen on `localhost` and are not accessible from outside the host machine. You need to listen on a publicly accessible IP address and configure your firewall to allow traffic.
+
+[USER] Please generate the complete Program.cs.
+
+[ASSISTANT_SAID] Example of a complete `Program.cs` file for a .NET 6.0 web API project:
+```csharp
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
+
+namespace YourProjectName
+{
+    public class Program
+    {
+        public static void Main(string[] args)
+        {
+            CreateHostBuilder(args).Build().Run();
+        }
+
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseStartup<Startup>();
+                });
+    }
+}
+```
+
+[ASSISTANT_SAID] This file sets up the `Main` method to create a web host builder using the `CreateDefaultBuilder` method.
+
+[USER] If I want to use Keycloak for authentication, what need to be modified?
+
+[ASSISTANT_SAID] Step 1: Install the `Microsoft.AspNetCore.Authentication.OpenIdConnect` package.

@@ -1,0 +1,22 @@
+**Observation Log:**
+
+- [FACT] User is moving to Edinburgh for university.
+- [TEMPORAL] User's layover in London is on August 15th.
+- [EVENT] User is looking for good places to explore in London during their layover.
+- [ASSISTANT_SAID] Recommended attractions in London include Buckingham Palace, The London Eye, Big Ben and the Houses of Parliament, The British Museum, and The National Gallery.
+- [ASSISTANT_SAID] Suggested areas to explore in London include Covent Garden, Soho, and Camden Market.
+- [ASSISTANT_SAID] Provided time-saving tips for traveling in London, including using the London Underground and purchasing a Visitor Oyster Card.
+- [FACT] User received their acceptance letter for university on February 10th.
+- [PREFERENCE] User is excited about moving to Edinburgh.
+- [EVENT] User is packing for their move and has started with non-essential items like winter clothes and books.
+- [ASSISTANT_SAID] Provided tips on how to pack light for a long-haul flight, including planning ahead, choosing the right luggage, packing multipurpose items, rolling clothes, limiting toiletries, and wearing bulky items.
+- [ASSISTANT_SAID] Suggested packing essentials for Scottish weather, including waterproof gear, warm and layered clothing, versatile footwear, and accessories.
+- [FACT] User has booked a viewing for a shared flat in the Marchmont area.
+- [RELATIONSHIP] User has flatmates and is in touch with them through a WhatsApp group.
+- [RELATIONSHIP] One of the flatmates is named Rachel.
+- [EVENT] Rachel suggested planning a flat-warming party for the weekend of August 20th.
+- [ASSISTANT_SAID] Provided advice on how to make the flat-warming party a success, including creating a guest list, setting a budget, planning the menu, and sending out invitations.
+- [ASSISTANT_SAID] Suggested cleaning and decluttering the flat before the party and planning games and activities.
+- [ASSISTANT_SAID] Recommended labeling food and drinks and being prepared for noise during the party.
+- [ASSISTANT_SAID] Suggested creating a playlist and decorating the flat for the party.
+- [ASSISTANT_SAID] Advised to relax and have fun during the party, emphasizing the goal of creating a welcoming atmosphere.

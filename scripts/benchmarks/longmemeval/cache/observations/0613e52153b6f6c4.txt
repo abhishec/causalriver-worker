@@ -1,0 +1,15 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/04/01 (Sat) 10:22
+- [USER] User requested guidelines on when to use paragraphs in technical documentation versus when to use numbered steps.
+- [ASSISTANT_SAID] Use paragraphs to provide an introduction or overview of a topic, to describe a concept, or to provide background information.
+- [ASSISTANT_SAID] Use numbered steps when you need to provide a clear sequence of actions or instructions that the reader needs to follow in a specific order.
+- [ASSISTANT_SAID] Use paragraphs to describe the purpose or functionality of a system or process.
+- [ASSISTANT_SAID] Use numbered steps to provide a step-by-step guide for performing a task or completing a process.
+- [ASSISTANT_SAID] Use paragraphs to provide explanations, definitions, or details about a topic.
+- [ASSISTANT_SAID] Use numbered steps to break down complex processes into simple, manageable tasks.
+- [ASSISTANT_SAID] Use paragraphs to provide context, background information, or to explain the reasoning behind a particular decision or recommendation.
+- [ASSISTANT_SAID] Use numbered steps when the actions or instructions you are providing are time-sensitive or critical to the success of a project.
+- [ASSISTANT_SAID] Use paragraphs to provide an overview of a topic or to summarize important points.
+- [ASSISTANT_SAID] Use numbered steps to provide a clear, concise set of instructions that the reader can follow to complete a specific task or process.
+- [ASSISTANT_SAID] The main goal of technical documentation is to provide clear and concise instructions or information to the reader, emphasizing the importance of choosing the appropriate format based on context, purpose, and audience.

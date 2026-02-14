@@ -1,0 +1,26 @@
+**Observation Log:**
+
+[FACT] User is trying to get more organized with their social life.  
+[RELATIONSHIP] User has a friend named Emily who is going through a tough time with her mom's illness.  
+[RELATIONSHIP] User has a coworker named Rachel with whom they have a weekly lunch date to discuss true crime podcasts.  
+[PREFERENCE] User prefers to set weekly reminders to check in with friends.  
+[TEMPORAL] User wants to check in with Emily every Wednesday.  
+[PREFERENCE] User prefers weekdays for checking in with friends.  
+[PREFERENCE] User prefers receiving reminders via phone notifications.  
+[EVENT] User wants to set reminders for checking in with Emily and Rachel.  
+[ASSISTANT_SAID] Assistant suggested using a reminder app like Apple Reminders, Google Keep, or Any.do to set a recurring reminder for checking in with Emily.  
+[ASSISTANT_SAID] Assistant recommended titling the reminder for Emily as "Check in with Emily" or "Wednesday Emily Check-in" and adding a note to send a supportive message or make a quick call.  
+[ASSISTANT_SAID] Assistant suggested setting a weekly reminder for confirming lunch with Rachel and titling it "True Crime Lunch with Rachel" or "Weekly Lunch with Rachel."  
+[ASSISTANT_SAID] Assistant advised creating a separate contact or group in the user's phone for close friends, including Emily and Rachel.  
+[ASSISTANT_SAID] Assistant suggested setting a recurring event in the user's calendar for the lunch date with Rachel to avoid scheduling conflicts.  
+[EVENT] User wants to reconnect with an old friend named Mike.  
+[RELATIONSHIP] User and Mike used to be inseparable in college but have lost touch over the years.  
+[ASSISTANT_SAID] Assistant provided a list of ideas to help the user reconnect with Mike, including sending a message, sharing a nostalgic memory, and planning a meetup.  
+[PREFERENCE] User decided to start by sending Mike a message to catch up and ask about his conference.  
+[EVENT] User mentioned having a fallout with Emily last month but that they have made up since then.  
+[CHANGE] User realized they need to work on their communication skills and not let their emotions get the better of them.  
+[EVENT] User wants to revive their weekly game night with friends.  
+[RELATIONSHIP] User's friend group includes Sarah, who has been busy with her new job.  
+[ASSISTANT_SAID] Assistant suggested touching base with Sarah to discuss game nights and polling the group for availability.  
+[ASSISTANT_SAID] Assistant recommended starting with a consistent location and host for game nights before considering a rotating host or location.  
+[ASSISTANT_CREATED] Assistant created a plan for reviving game nights, including steps to touch base with Sarah, poll the group, find a flexible schedule, choose

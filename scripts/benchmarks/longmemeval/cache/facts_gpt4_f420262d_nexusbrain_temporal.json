@@ -1,0 +1,290 @@
+{
+  "answer_d8a1af6c_1": [
+    {
+      "fact": "User is planning a trip to Miami.",
+      "type": "event",
+      "entities": [
+        "Miami"
+      ]
+    },
+    {
+      "fact": "User wants to redeem Delta SkyMiles for a free trip.",
+      "type": "preference",
+      "entities": [
+        "Delta SkyMiles"
+      ]
+    },
+    {
+      "fact": "User recently took a red-eye flight on JetBlue from San Francisco to Boston.",
+      "type": "event",
+      "entities": [
+        "JetBlue",
+        "San Francisco",
+        "Boston"
+      ]
+    },
+    {
+      "fact": "User managed to sleep for almost the entire flight on JetBlue.",
+      "type": "opinion",
+      "entities": [
+        "JetBlue"
+      ]
+    },
+    {
+      "fact": "User is flexible with travel dates but prefers to travel in the summer.",
+      "type": "preference",
+      "entities": [
+        "summer"
+      ]
+    },
+    {
+      "fact": "User has a SkyMiles balance of 10,000 miles.",
+      "type": "personal",
+      "entities": [
+        "10,000 miles"
+      ]
+    },
+    {
+      "fact": "User is looking to redeem for a round-trip economy ticket.",
+      "type": "preference",
+      "entities": [
+        "round-trip",
+        "economy ticket"
+      ]
+    },
+    {
+      "fact": "User prefers to fly out of Boston.",
+      "type": "preference",
+      "entities": [
+        "Boston"
+      ]
+    },
+    {
+      "fact": "User prefers non-stop flights.",
+      "type": "preference",
+      "entities": [
+        "non-stop flights"
+      ]
+    },
+    {
+      "fact": "User is considering applying for the Citi AAdvantage Executive credit card.",
+      "type": "preference",
+      "entities": [
+        "Citi AAdvantage Executive credit card"
+      ]
+    }
+  ],
+  "answer_d8a1af6c_2": [
+    {
+      "fact": "User is planning a trip to Miami later this year.",
+      "type": "event",
+      "entities": [
+        "Miami"
+      ]
+    },
+    {
+      "fact": "User has earned 10,000 Delta SkyMiles.",
+      "type": "personal",
+      "entities": [
+        "Delta SkyMiles",
+        "10,000 miles"
+      ]
+    },
+    {
+      "fact": "User took a round-trip flight from Boston to Atlanta today.",
+      "type": "event",
+      "entities": [
+        "Boston",
+        "Atlanta"
+      ]
+    },
+    {
+      "fact": "User is flexible with travel dates.",
+      "type": "preference",
+      "entities": []
+    },
+    {
+      "fact": "User has had recent experience with American Airlines.",
+      "type": "relationship",
+      "entities": [
+        "American Airlines"
+      ]
+    },
+    {
+      "fact": "User had a terrible in-flight entertainment system on a flight from New York to Los Angeles on February 10th.",
+      "type": "event",
+      "entities": [
+        "New York",
+        "Los Angeles",
+        "February 10th"
+      ]
+    },
+    {
+      "fact": "User is considering redeeming miles for a free trip to Miami.",
+      "type": "preference",
+      "entities": [
+        "Miami"
+      ]
+    }
+  ],
+  "answer_d8a1af6c_5": [
+    {
+      "fact": "User is looking to book a flight from Boston to Miami",
+      "type": "event",
+      "entities": [
+        "Boston",
+        "Miami"
+      ]
+    },
+    {
+      "fact": "User is recovering from a delayed American Airlines flight from LAX to JFK",
+      "type": "event",
+      "entities": [
+        "American Airlines",
+        "LAX",
+        "JFK"
+      ]
+    },
+    {
+      "fact": "User prefers to travel on a weekday",
+      "type": "preference",
+      "entities": [
+        "weekday"
+      ]
+    },
+    {
+      "fact": "User prefers to fly in the morning",
+      "type": "preference",
+      "entities": [
+        "morning"
+      ]
+    },
+    {
+      "fact": "User is open to any airline",
+      "type": "preference",
+      "entities": []
+    },
+    {
+      "fact": "User has a Delta SkyMiles card",
+      "type": "personal",
+      "entities": [
+        "Delta SkyMiles"
+      ]
+    },
+    {
+      "fact": "User is not opposed to considering Fort Lauderdale airport instead of Miami",
+      "type": "preference",
+      "entities": [
+        "Fort Lauderdale",
+        "Miami"
+      ]
+    },
+    {
+      "fact": "User is leaning towards the JetBlue option from BOS to FLL",
+      "type": "preference",
+      "entities": [
+        "JetBlue",
+        "BOS",
+        "FLL"
+      ]
+    },
+    {
+      "fact": "User is worried about the lack of seat selection and limited amenities on JetBlue",
+      "type": "opinion",
+      "entities": [
+        "JetBlue"
+      ]
+    }
+  ],
+  "answer_d8a1af6c_4": [
+    {
+      "fact": "User is planning a trip to Miami",
+      "type": "event",
+      "entities": [
+        "Miami"
+      ]
+    },
+    {
+      "fact": "User is considering flying with American Airlines",
+      "type": "preference",
+      "entities": [
+        "American Airlines"
+      ]
+    },
+    {
+      "fact": "User had a terrible experience with American Airlines' in-flight entertainment system on a flight from New York to Los Angeles",
+      "type": "opinion",
+      "entities": [
+        "American Airlines",
+        "in-flight entertainment",
+        "New York",
+        "Los Angeles"
+      ]
+    },
+    {
+      "fact": "User is unsure about flying with American Airlines after their recent experience",
+      "type": "opinion",
+      "entities": [
+        "American Airlines"
+      ]
+    }
+  ],
+  "answer_d8a1af6c_3": [
+    {
+      "fact": "User is planning a trip to Miami",
+      "type": "event",
+      "entities": [
+        "Miami"
+      ]
+    },
+    {
+      "fact": "User is considering flying with American Airlines or Delta",
+      "type": "preference",
+      "entities": [
+        "American Airlines",
+        "Delta"
+      ]
+    },
+    {
+      "fact": "User had a terrible experience with American Airlines' entertainment system on a flight from New York to Los Angeles",
+      "type": "event",
+      "entities": [
+        "American Airlines",
+        "New York",
+        "Los Angeles"
+      ]
+    },
+    {
+      "fact": "User is willing to give American Airlines another chance",
+      "type": "opinion",
+      "entities": [
+        "American Airlines"
+      ]
+    },
+    {
+      "fact": "User had a 1-hour delay on a United Airlines flight from Boston to Chicago due to air traffic control issues",
+      "type": "event",
+      "entities": [
+        "United Airlines",
+        "Boston",
+        "Chicago"
+      ]
+    },
+    {
+      "fact": "User is considering booking a hotel near Miami airport",
+      "type": "preference",
+      "entities": [
+        "Miami airport"
+      ]
+    },
+    {
+      "fact": "User prefers hotels within walking distance of the airport or those that offer a shuttle service",
+      "type": "preference",
+      "entities": [
+        "hotels",
+        "airport",
+        "shuttle service"
+      ]
+    }
+  ]
+}

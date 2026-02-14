@@ -1,0 +1,43 @@
+{
+  "answer_sharegpt_2BSXlAr_0": [
+    {
+      "fact": "User is interested in buying a unique engagement ring",
+      "type": "preference",
+      "entities": [
+        "unique engagement ring"
+      ]
+    },
+    {
+      "fact": "User prefers to buy engagement rings directly from the designer",
+      "type": "preference",
+      "entities": [
+        "designer",
+        "engagement rings"
+      ]
+    },
+    {
+      "fact": "User values custom pieces that reflect personal style",
+      "type": "opinion",
+      "entities": [
+        "custom pieces",
+        "personal style"
+      ]
+    },
+    {
+      "fact": "User is interested in sustainable and ethically sourced materials",
+      "type": "preference",
+      "entities": [
+        "sustainable materials",
+        "ethically sourced materials"
+      ]
+    },
+    {
+      "fact": "User is looking for a ring that stands out",
+      "type": "preference",
+      "entities": [
+        "ring",
+        "stands out"
+      ]
+    }
+  ]
+}

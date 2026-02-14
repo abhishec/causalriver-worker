@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2021/05/03 (Mon) 09:02
+- [EVENT] User is looking into getting a new fishing kayak.
+- [PREFERENCE] User is interested in pros and cons of the Old Town Predator vs the Perception Spark.
+- [ASSISTANT_SAID] Old Town Predator pros: exceptional stability, customization options, comfortable ergonomic seat, ample storage space.
+- [ASSISTANT_SAID] Old Town Predator cons: heavier weight (around 85 pounds), longer length (13 feet 2 inches), generally more expensive than the Perception Spark.
+- [ASSISTANT_SAID] Perception Spark pros: lightweight (around 62 pounds), more maneuverable (11 feet 6 inches), budget-friendly, easy to handle for beginners.
+- [ASSISTANT_SAID] Perception Spark cons: less stability compared to the Predator, fewer customization options, less storage space.
+- [ASSISTANT_SAID] Ultimate decision factors: prioritize stability and customization (choose Predator), prefer lightweight and affordability (choose Spark), beginner or fishing in smaller waters (choose Spark), willing to invest in higher-end kayak (choose Predator).
+- [ASSISTANT_SAID] Recommendation to test paddle both kayaks for personal preference.
+- [EVENT] User is considering taking their kayak to Lake Tahoe for fishing.
+- [TEMPORAL] User went on a fishing trip to Lake Tahoe with friends a few weeks ago.
+- [ASSISTANT_SAID] General fishing regulations for Lake Tahoe: bi-state waterbody (California and Nevada), need a fishing license from the respective state.
+- [ASSISTANT_SAID] California regulations: sport fishing license required, bag limit of 5 trout per day (minimum size 14 inches), single barbless hooks allowed, general season from last Saturday in April to November 15th.
+- [ASSISTANT_SAID] Nevada regulations: fishing license required, bag limit of 5 trout per day (minimum size 14 inches), single barbless hooks allowed, general season from second Saturday in June to October 31st.
+- [ASSISTANT_SAID] Lake Tahoe-specific regulations: daily creel limit of 5 fish, minimum size limit of 14 inches for trout, no trolling allowed, practice catch-and-release.
+- [ASSISTANT_SAID] Additional tips for fishing in Lake Tahoe: check for closed areas, respect the environment, check weather conditions, consider hiring a guide.
+- [EVENT] User is thinking about planning a fly fishing trip to Montana.
+- [ASSISTANT_SAID] Montana fishing license required for residents and non-residents, with specific age requirements for youth and seniors.
+- [ASSISTANT_SAID] General fishing season in Montana runs from the third Saturday in May to November 30th, with some rivers

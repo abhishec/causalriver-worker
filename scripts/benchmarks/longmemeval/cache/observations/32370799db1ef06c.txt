@@ -1,0 +1,13 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/04/27 (Thu) 14:42
+- [PREFERENCE] User thinks one of the main features of the game is that with the Rule Cards every game is different.
+- [PREFERENCE] User wants to emphasize the unpredictability of the game.
+- [PREFERENCE] User does not think it is necessary to talk about the Winner Tokens in the pitch.
+- [ASSISTANT_SAID] Assistant confirmed the user's request to emphasize the unpredictability of the game.
+- [ASSISTANT_CREATED] Assistant created a pitch for the game "Crinklewitch" with the following details:
+  - Description: "Crinklewitch is the hilarious and unpredictable card game for 2-8 players!"
+  - Features: Each round changes as players draw and play Rule Cards that add unexpected twists and turns.
+  - Examples of twists: Talking like a pirate, skipping opponents' turns.
+  - Number of Rule Cards: Over 50 Rule Cards to choose from.
+  - Invitation: "Gather your friends and family for a night of laughter and entertainment with Crinklewitch!"

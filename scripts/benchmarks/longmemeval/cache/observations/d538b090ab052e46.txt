@@ -1,0 +1,26 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/30 (Tue) 18:56  
+[FACT] User is having trouble adjusting to a new wake-up time since the clocks fell back.  
+[CHANGE] User used to wake up at 7:00 am before the clocks fell back.  
+[ASSISTANT_SAID] Setting a smart alarm on a phone can help wake up feeling more refreshed and energized.  
+[ASSISTANT_SAID] For Android Devices:  
+[ASSISTANT_SAID] 1. Download and install a sleep tracking app (e.g., Google Fit, Sleep Cycle, or Pillow).  
+[ASSISTANT_SAID] 2. Open Google Fit and enable sleep tracking by tapping the "+" icon and selecting "Sleep."  
+[ASSISTANT_SAID] 3. Set up sleep tracking by granting permission to access the phone's accelerometer and microphone.  
+[ASSISTANT_SAID] 4. Set a smart alarm by tapping the "Alarms" tab and creating a new alarm, choosing "Smart Alarm."  
+[ASSISTANT_SAID] 5. Configure the smart alarm to wake up during a light sleep phase and set a time window (e.g., 30 minutes).  
+[ASSISTANT_SAID] For iOS Devices:  
+[ASSISTANT_SAID] 1. Download and install a sleep tracking app (e.g., Sleep Cycle, Pillow, or AutoSleep).  
+[ASSISTANT_SAID] 2. Open Sleep Cycle and create an account or log in.  
+[ASSISTANT_SAID] 3. Set up sleep tracking by following in-app instructions and granting necessary permissions.  
+[ASSISTANT_SAID] 4. Set a smart alarm by tapping the "Alarm" tab and creating a new alarm, choosing "Smart Alarm."  
+[ASSISTANT_SAID] 5. Configure the smart alarm to wake up during light sleep and set a time window (e.g., 30 minutes).  
+[ASSISTANT_SAID] Tips for using sleep tracking apps:  
+[ASSISTANT_SAID] - Place your phone on your bed near your pillow for accurate tracking.  
+[ASSISTANT_SAID] - Use the app consistently for a few days before setting a smart alarm.  
+[ASSISTANT_SAID] - Adjust alarm window and sensitivity settings to your liking.  
+[ASSISTANT_SAID] - Consider a gentle, gradual wake-up sequence.  
+[USER] User has tried a few sleep tracking apps but is unsure which one is the most accurate.  
+[USER] User inquired about studies comparing the accuracy of popular sleep tracking apps like Fitbit, Apple Watch, or Garmin.  
+[ASSISTANT_SAID] Studies have compared the accuracy of popular

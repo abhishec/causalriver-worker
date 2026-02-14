@@ -1,0 +1,13 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/24 (Wed) 09:20
+- [ASSISTANT_SAID] The assistant provided an updated version of C# code implementing an authorization filter using OPA (Open Policy Agent).
+- [ASSISTANT_CREATED] The assistant created a C# code snippet that includes classes `OPAAuthAttribute` and `OPAAuthFilter`, which handle authorization based on rights and resource types.
+- [ASSISTANT_SAID] The assistant explained that the code checks if a user is authenticated and validates resource access based on a provided resource ID and method.
+- [ASSISTANT_SAID] The assistant mentioned that if the resource ID is not provided, it returns a BadRequestObjectResult.
+- [ASSISTANT_SAID] The assistant described how the code checks the response from the OPA endpoint and handles authorization results.
+- [ASSISTANT_SAID] The assistant provided additional C# code to complete the authorization logic, including checking constraints for user access.
+- [ASSISTANT_CREATED] The assistant created a JavaScript code snippet using the Fetch API to demonstrate how to make an HTTP request to the ASP.NET Core MVC application for authorization checks.
+- [ASSISTANT_SAID] The assistant suggested replacing the URL in the Fetch API example with the actual endpoint of the ASP.NET Core MVC application.
+- [ASSISTANT_SAID] The assistant recommended using Axios as an alternative to the Fetch API for making HTTP requests in a React application.
+- [ASSISTANT_SAID] The assistant provided several suggestions for improving the C# code, including using dependency injection, creating custom middleware, implementing claims-based authorization, using a caching mechanism, employing a logging framework, using custom exceptions, and utilizing an OpenAPI specification.

@@ -1,0 +1,172 @@
+{
+  "answer_cf021b36_1": [
+    {
+      "fact": "User's niece, Emma, just graduated from high school.",
+      "type": "relationship",
+      "entities": [
+        "Emma",
+        "niece",
+        "high school graduation"
+      ]
+    },
+    {
+      "fact": "User attended Emma's graduation ceremony.",
+      "type": "event",
+      "entities": [
+        "Emma",
+        "graduation ceremony"
+      ]
+    },
+    {
+      "fact": "User found the graduation ceremony to be an emotional experience.",
+      "type": "opinion",
+      "entities": [
+        "graduation ceremony",
+        "emotional experience"
+      ]
+    },
+    {
+      "fact": "User is looking for a gift for Emma to commemorate her graduation.",
+      "type": "preference",
+      "entities": [
+        "gift",
+        "Emma",
+        "graduation"
+      ]
+    },
+    {
+      "fact": "User prefers to give a personalized necklace with Emma's name and graduation year as a gift.",
+      "type": "preference",
+      "entities": [
+        "personalized necklace",
+        "Emma",
+        "graduation year"
+      ]
+    },
+    {
+      "fact": "User attended the graduation ceremony on a sunny Saturday in late May.",
+      "type": "event",
+      "entities": [
+        "sunny Saturday",
+        "late May",
+        "graduation ceremony"
+      ]
+    }
+  ],
+  "answer_cf021b36_2": [
+    {
+      "fact": "User is planning a trip to visit family soon",
+      "type": "event",
+      "entities": [
+        "trip",
+        "family"
+      ]
+    },
+    {
+      "fact": "User's cousin John graduated from college with a degree in engineering",
+      "type": "event",
+      "entities": [
+        "John",
+        "college graduation",
+        "engineering"
+      ]
+    },
+    {
+      "fact": "User is considering a personalized gift for John",
+      "type": "preference",
+      "entities": [
+        "personalized gift",
+        "John"
+      ]
+    },
+    {
+      "fact": "User recently attended a friend's graduation ceremony",
+      "type": "event",
+      "entities": [
+        "friend",
+        "graduation ceremony"
+      ]
+    },
+    {
+      "fact": "User's friend Rachel graduated with a master's degree",
+      "type": "event",
+      "entities": [
+        "Rachel",
+        "master's degree"
+      ]
+    },
+    {
+      "fact": "User thinks a congratulatory card would be a good addition to the gift",
+      "type": "opinion",
+      "entities": [
+        "congratulatory card"
+      ]
+    },
+    {
+      "fact": "User likes the idea of a customized briefcase or laptop bag for John",
+      "type": "preference",
+      "entities": [
+        "customized briefcase",
+        "laptop bag",
+        "John"
+      ]
+    },
+    {
+      "fact": "User is considering including a small gift card to a tech store",
+      "type": "preference",
+      "entities": [
+        "gift card",
+        "tech store"
+      ]
+    }
+  ],
+  "answer_cf021b36_3": [
+    {
+      "fact": "User's cousin is named Alex",
+      "type": "relationship",
+      "entities": [
+        "Alex"
+      ]
+    },
+    {
+      "fact": "Alex graduated with a degree in engineering",
+      "type": "event",
+      "entities": [
+        "engineering",
+        "graduation"
+      ]
+    },
+    {
+      "fact": "Alex graduated about two weeks ago",
+      "type": "event",
+      "entities": [
+        "graduation"
+      ]
+    },
+    {
+      "fact": "User is looking for gift ideas for Alex",
+      "type": "preference",
+      "entities": [
+        "gift ideas",
+        "Alex"
+      ]
+    },
+    {
+      "fact": "User prefers a professional online course or certification as a gift",
+      "type": "preference",
+      "entities": [
+        "professional online course",
+        "certification"
+      ]
+    },
+    {
+      "fact": "User is interested in recommendations for specific courses or platforms in engineering",
+      "type": "preference",
+      "entities": [
+        "courses",
+        "platforms",
+        "engineering"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/24 (Wed) 02:02  
+[EVENT] User is planning to cook chicken stir-fry for dinner tonight.  
+[PREFERENCE] User wants tips on how to make the chicken stir-fry taste more authentic, like the Chinese food ordered as takeout in the past month.  
+[ASSISTANT_SAID] Assistant provided tips for making chicken stir-fry taste more authentic, including using a wok or large skillet with high heat, choosing the right oil (peanut or avocado oil), selecting boneless, skinless chicken breast or thighs, marinating the chicken, using aromatics (onions, garlic, ginger), adding a variety of vegetables, stir-frying quickly and constantly, using the right sauces, not overcooking, adding scallions and sesame oil at the end, and tasting and adjusting.  
+[ASSISTANT_CREATED] Assistant provided an authentic chicken stir-fry recipe with the following ingredients: 1 lb boneless, skinless chicken breast or thighs, 2 tablespoons vegetable oil, 2 cloves garlic (minced), 1-inch piece of ginger (minced), 1 small onion (sliced), 2 cups mixed vegetables (bell peppers, carrots, broccoli, snap peas), 2 tablespoons soy sauce, 1 tablespoon oyster sauce (optional), 1 tablespoon cornstarch, salt and pepper to taste, scallions and sesame oil for garnish.  
+[PREFERENCE] User is unsure about using oyster sauce in the recipe.  
+[ASSISTANT_SAID] Assistant explained what oyster sauce is, its flavor profile, and that it is not necessary for the recipe.  
+[ASSISTANT_SAID] Assistant provided alternatives to oyster sauce, including using more soy sauce, hoisin sauce, teriyaki sauce, mushroom-based sauces, or omitting it altogether.  
+[PREFERENCE] User decided to omit the oyster sauce this time.  
+[EVENT] User has been experimenting with new cooking techniques and tools, including an Instant Pot and spiralizer.  
+[ASSISTANT_SAID] Assistant suggested using the Instant Pot to cook chicken and vegetables before stir-frying and mentioned using the spiralizer for zucchini or sweet potato noodles.  
+[PREFERENCE] User wants to mix things up and try new vegetable combinations in the stir-fry.  
+[ASSISTANT_SAID] Assistant provided a list of vegetables that pair well with chicken in a stir-fry, including bok choy, mushrooms, snow peas, baby corn, zucchini, yellow squash, eggplant, green beans, water chestnuts, kale, red bell pepper, pineapple, celery, and carrots.  
+[PREFERENCE] User plans to add mushrooms and snow peas to the stir-fry.  
+[ASSISTANT_SAID] Assistant provided tips on how to cook mushrooms in a stir-fry to avoid them turning out rubbery, including

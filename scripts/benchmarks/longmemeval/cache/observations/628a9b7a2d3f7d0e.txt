@@ -1,0 +1,20 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/24 (Wed) 02:42  
+[USER] User is looking for a recipe for a natural face toner.  
+[USER] User has been using a store-bought face toner but wants to try making their own.  
+[ASSISTANT_SAID] Suggested Recipe 1: Witch Hazel and Aloe Vera Toner - 1/2 cup witch hazel, 1/2 cup aloe vera gel, 10 drops of tea tree oil (optional).  
+[ASSISTANT_SAID] Instructions for Recipe 1: Combine witch hazel and aloe vera gel in a bowl, add tea tree oil if desired, stir well, and store in a clean glass bottle.  
+[ASSISTANT_SAID] Suggested Recipe 2: Rosewater and Glycerin Toner - 1 cup rosewater, 1 tablespoon glycerin, 10 drops of lavender oil (optional).  
+[ASSISTANT_SAID] Instructions for Recipe 2: Mix rosewater and glycerin in a bowl, add lavender oil if desired, store in a clean glass bottle.  
+[ASSISTANT_SAID] Suggested Recipe 3: Apple Cider Vinegar Toner - 1 cup water, 1/2 cup apple cider vinegar, 10 drops of lemon oil (optional).  
+[ASSISTANT_SAID] Instructions for Recipe 3: Combine water and apple cider vinegar in a bowl, add lemon oil if desired, store in a clean glass bottle.  
+[ASSISTANT_SAID] Suggested Recipe 4: Green Tea Toner - 1 cup cooled green tea, 1 tablespoon witch hazel, 10 drops of chamomile oil (optional).  
+[ASSISTANT_SAID] Instructions for Recipe 4: Mix cooled green tea and witch hazel in a bowl, add chamomile oil if desired, store in a clean glass bottle.  
+[ASSISTANT_SAID] Provided tips: Do a patch test, adjust proportions based on skin type, add essential oils for scent, and shelf life of toners.  
+[USER] User will try out the Witch Hazel and Aloe Vera Toner recipe.  
+[USER] User is looking for a natural cleaning product for the shower curtain.  
+[USER] User cleaned the shower curtain three weeks ago with baking soda and vinegar.  
+[ASSISTANT_SAID] Suggested Method 1: Hydrogen Peroxide and Essential Oils - 1 cup hydrogen peroxide (3%), 1 tablespoon castile soap, 10 drops of tea tree oil, 10 drops of lemon oil.  
+[ASSISTANT_SAID] Instructions for Method 1: Mix ingredients in a spray bottle, spray on shower curtain, let sit for 10-15 minutes, rinse with warm water.  
+[ASSISTANT_SAID]

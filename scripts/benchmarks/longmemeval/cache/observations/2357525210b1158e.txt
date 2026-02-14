@@ -1,0 +1,27 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/07/30 (Sun) 22:59  
+[FACT] User is working on a big project with a Tokyo-based startup.  
+[FACT] User has been busy with this project for the past few weeks.  
+[PREFERENCE] User is looking for recommendations on productivity tools to manage time more efficiently.  
+[ASSISTANT_SAID] Assistant congratulated the user on landing the project with the Tokyo-based startup.  
+[ASSISTANT_SAID] Assistant recommended Trello, Asana, ClickUp for task management.  
+[ASSISTANT_SAID] Assistant recommended Toggl, RescueTime, Harvest for time tracking.  
+[ASSISTANT_SAID] Assistant recommended Freedom, Pomodoro Timer, StayFocusd for focus and productivity.  
+[ASSISTANT_SAID] Assistant recommended Slack, Google Workspace, Notion for communication and collaboration.  
+[ASSISTANT_SAID] Assistant provided additional tips: prioritize tasks, set realistic goals, and take breaks.  
+[FACT] User has been struggling to find a good tool to track time spent on tasks while working on multiple projects.  
+[ASSISTANT_SAID] Assistant recommended Toggl, Harvest, Clockify, Timely, Hubstaff, and Tick for time tracking across multiple projects and clients.  
+[PREFERENCE] User is currently using a spreadsheet to track time but finds it inefficient.  
+[ASSISTANT_SAID] Assistant confirmed Toggl has a feature to track time offline.  
+[ASSISTANT_SAID] Assistant explained how Toggl's offline tracking works for both the browser extension and mobile apps.  
+[ASSISTANT_SAID] Assistant mentioned Toggl's features: auto-track, Pomodoro timer, integrations, reporting, and analytics.  
+[PREFERENCE] User expressed interest in trying Toggl due to its browser extension, mobile apps, and offline tracking feature.  
+[ASSISTANT_SAID] Assistant confirmed Toggl has a feature to generate invoices based on tracked time.  
+[ASSISTANT_SAID] Assistant detailed Toggl's invoicing features: automated invoicing, customizable invoices, multi-currency support, and export options.  
+[ASSISTANT_SAID] Assistant mentioned that the invoicing feature requires Toggl's Premium or Enterprise plan.  
+[ASSISTANT_SAID] Assistant listed Toggl's integrations with Asana, Trello, Basecamp, Jira, and GitHub.  
+[ASSISTANT_SAID] Assistant explained how Toggl integrates with Asana, allowing time tracking directly from Asana tasks.  
+[ASSISTANT_SAID] Assistant provided details on how to set up the Toggl-Asana integration.  
+[PREFERENCE] User is currently using Asana to manage their project with the Tokyo-based startup.  
+[ASSISTANT_SAID] Assistant encouraged

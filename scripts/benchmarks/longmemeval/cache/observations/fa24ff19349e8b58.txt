@@ -1,0 +1,47 @@
+**Observation Log:**
+
+- [FACT] User represents Floating Solar, an EPC company and sometimes a system supplier for floating PV plants.
+- [FACT] User has completed reference projects in the Netherlands.
+- [FACT] User's company is currently a scale-up looking for opportunities in Germany and Italy.
+- [PREFERENCE] User wants the sales document to be a roadmap for salespeople to bring projects to a successful conclusion.
+- [PREFERENCE] User prefers the document to be visual and not too long.
+- [EVENT] User mentioned that more people are performing sales activities, such as following up on leads.
+- [CHANGE] User clarified that the document will be used internally only and is not meant to be shared with clients.
+- [ASSISTANT_SAID] Assistant provided a suggested table of contents for the sales document, including sections on introduction, sales process, project execution, conclusion, and appendix.
+- [ASSISTANT_CREATED] Assistant created a detailed table of contents for the sales document, which includes:
+  1. Introduction
+     - Overview of Floating Solar as a company
+     - Description of floating PV technology
+     - Overview of reference projects in the Netherlands
+  2. Sales Process
+     - Lead generation and qualification
+     - Site assessment and project evaluation
+     - Proposal and negotiation
+     - Contract signing and project kick-off
+  3. Project Execution
+     - Engineering and design
+     - Procurement and logistics
+     - Construction and installation
+     - Commissioning and handover
+  4. Conclusion
+     - Benefits of floating PV technology
+     - Why choose Floating Solar as your EPC or system supplier
+     - Contact information for further inquiries
+  - Appendix:
+     - Technical specifications and data sheets
+     - Case studies and reference projects
+     - Regulatory and permitting information for target countries (Germany and Italy)
+     - Checklist and guidelines for each step of the process.
+- [ASSISTANT_SAID] Assistant noted that the document should be comprehensive and provide clear guidelines and best practices for each step of the process.
+- [ASSISTANT_SAID] Assistant provided a list of at least 10 stages/phases of a project, including:
+  1. Lead generation and qualification
+  2. Site assessment and project evaluation
+  3. Proposal and negotiation
+  4. Contract signing and project kick-off
+  5. Engineering and design
+  6. Procurement and logistics
+  7. Construction and installation
+  8. Commissioning and testing
+  9. Handover and maintenance
+  10. Monitoring and performance analysis
+- [ASSISTANT_SAID] Assistant mentioned that the phases may vary depending on the specific project and the type of EPC services provided.

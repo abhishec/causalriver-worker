@@ -1,0 +1,36 @@
+**Observation Log:**
+
+- [FACT] The user has a vintage camera collection.
+- [FACT] The user owns a rare Olympus OM-1 camera.
+- [EVENT] The user had their Olympus OM-1 serviced and cleaned by a local camera repair shop on the same day as the conversation (2023/05/20).
+- [PREFERENCE] The user is interested in tips on how to properly store and maintain their vintage camera collection.
+- [ASSISTANT_SAID] The assistant provided tips for storing vintage cameras, including: 
+  1. Store in a dry, cool environment (60°F to 70°F / 15°C to 21°C, relative humidity below 60%).
+  2. Protect from direct sunlight.
+  3. Use camera bags or cases.
+  4. Store cameras upright.
+- [ASSISTANT_SAID] The assistant provided maintenance tips for vintage cameras, including:
+  1. Regular cleaning with a soft, dry brush or blower bulb.
+  2. Lens cleaning with a microfiber cloth and gentle cleaning solution.
+  3. Checking for fungus and mold.
+  4. Battery maintenance by removing batteries when not in use.
+- [ASSISTANT_SAID] The assistant suggested documenting the camera collection, handling with care, avoiding extreme temperatures, considering climate control, and establishing a service and maintenance schedule.
+- [PREFERENCE] The user is interested in learning more about the history of photography and cameras.
+- [ASSISTANT_SAID] The assistant recommended several books for learning about the history of photography, including:
+  1. "A History of Photography" by Beaumont Newhall.
+  2. "The Camera: A History" by Michael Pritchard.
+  3. "The Oxford Handbook of the History of Photography" edited by Michael Pritchard.
+  4. "Collecting Cameras" by Jason Schneider.
+  5. "The Leica: A History" by James L. Lager.
+- [ASSISTANT_SAID] The assistant provided online resources for learning about photography history, including:
+  1. Photography-on-the-Net (POTN).
+  2. Camera Collector's Forum.
+  3. The Metropolitan Museum of Art's Heilbrunn Timeline of Art History.
+  4. The George Eastman Museum.
+  5. The Photography Museum.
+- [PREFERENCE] The user has books by Ansel Adams and Henri Cartier-Bresson and wants to discover more photographers and their styles.
+- [ASSISTANT_SAID] The assistant recommended books for exploring famous photographers, including:
+  1. "The Photography Book" by Ian Jeffrey.
+  2. "The Ongoing Moment" by Geoff Dyer.
+  3. "The Photographer's Eye" by John Szarkowski.
+  4. "Looking at Photographs" by John Sz

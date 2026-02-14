@@ -1,0 +1,111 @@
+{
+  "answer_33c251f0_1": [
+    {
+      "fact": "User is planning a trip to Japan",
+      "type": "event",
+      "entities": [
+        "Japan"
+      ]
+    },
+    {
+      "fact": "User needs to pay the outstanding balance for their hotel booking by March 1st",
+      "type": "event",
+      "entities": [
+        "hotel booking",
+        "March 1st"
+      ]
+    },
+    {
+      "fact": "User is trying to finalize the payment for their flight tickets with Sakura Travel Agency",
+      "type": "event",
+      "entities": [
+        "Sakura Travel Agency",
+        "flight tickets"
+      ]
+    },
+    {
+      "fact": "User received a quote of $2,500 for the entire trip from Sakura Travel Agency",
+      "type": "event",
+      "entities": [
+        "$2,500",
+        "Sakura Travel Agency"
+      ]
+    },
+    {
+      "fact": "User is waiting for confirmation of their tickets from Sakura Travel Agency",
+      "type": "event",
+      "entities": [
+        "Sakura Travel Agency"
+      ]
+    },
+    {
+      "fact": "User is seeking tips on how to follow up with travel agencies",
+      "type": "opinion",
+      "entities": [
+        "travel agencies"
+      ]
+    },
+    {
+      "fact": "User got a quote from AXA for travel insurance",
+      "type": "event",
+      "entities": [
+        "AXA",
+        "travel insurance"
+      ]
+    }
+  ],
+  "answer_33c251f0_2": [
+    {
+      "fact": "User is planning a trip to Japan",
+      "type": "event",
+      "entities": [
+        "Japan"
+      ]
+    },
+    {
+      "fact": "User has booked a trip with Sakura Travel Agency",
+      "type": "event",
+      "entities": [
+        "Sakura Travel Agency"
+      ]
+    },
+    {
+      "fact": "User is waiting to hear back about flight tickets",
+      "type": "event",
+      "entities": [
+        "flight tickets"
+      ]
+    },
+    {
+      "fact": "User paid $2,800 for the entire trip",
+      "type": "personal",
+      "entities": [
+        "$2,800"
+      ]
+    },
+    {
+      "fact": "User paid for the trip by bank transfer",
+      "type": "personal",
+      "entities": [
+        "bank transfer"
+      ]
+    },
+    {
+      "fact": "User is unsure if they can dispute the charge",
+      "type": "opinion",
+      "entities": []
+    },
+    {
+      "fact": "User is considering contacting Sakura Travel Agency for an update",
+      "type": "opinion",
+      "entities": [
+        "Sakura Travel Agency"
+      ]
+    },
+    {
+      "fact": "User is cautious about proceeding with the payment",
+      "type": "opinion",
+      "entities": []
+    }
+  ]
+}

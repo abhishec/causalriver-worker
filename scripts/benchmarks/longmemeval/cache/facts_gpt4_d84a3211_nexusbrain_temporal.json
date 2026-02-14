@@ -1,0 +1,176 @@
+{
+  "answer_2880eb6c_3": [
+    {
+      "fact": "User is planning a road trip to the mountains in June",
+      "type": "event",
+      "entities": [
+        "road trip",
+        "mountains",
+        "June"
+      ]
+    },
+    {
+      "fact": "User wants to ensure their bike is ready for the trip",
+      "type": "preference",
+      "entities": [
+        "bike",
+        "trip"
+      ]
+    },
+    {
+      "fact": "User has been keeping track of their bike mileage",
+      "type": "personal",
+      "entities": [
+        "bike mileage"
+      ]
+    },
+    {
+      "fact": "User's current bike mileage is 347 miles since the start of the year",
+      "type": "personal",
+      "entities": [
+        "347 miles",
+        "year"
+      ]
+    }
+  ],
+  "answer_2880eb6c_1": [
+    {
+      "fact": "User has been keeping track of their bike mileage.",
+      "type": "personal",
+      "entities": [
+        "bike mileage"
+      ]
+    },
+    {
+      "fact": "User has clocked 347 miles since the start of the year.",
+      "type": "personal",
+      "entities": [
+        "347 miles",
+        "start of the year"
+      ]
+    },
+    {
+      "fact": "User's goal is to reach 1000 miles by the end of summer.",
+      "type": "event",
+      "entities": [
+        "1000 miles",
+        "end of summer"
+      ]
+    },
+    {
+      "fact": "User is looking for tips to stay motivated to keep riding.",
+      "type": "opinion",
+      "entities": [
+        "stay motivated",
+        "keep riding"
+      ]
+    }
+  ],
+  "answer_2880eb6c_4": [
+    {
+      "fact": "User is planning a road trip to the mountains in June.",
+      "type": "event",
+      "entities": [
+        "road trip",
+        "mountains",
+        "June"
+      ]
+    },
+    {
+      "fact": "User wants to ensure they have everything needed for their bike.",
+      "type": "preference",
+      "entities": [
+        "bike"
+      ]
+    },
+    {
+      "fact": "User is considering getting a bike rack for their car.",
+      "type": "preference",
+      "entities": [
+        "bike rack",
+        "car"
+      ]
+    },
+    {
+      "fact": "User found a good deal on a Saris Bones 2-Bike Trunk Rack.",
+      "type": "preference",
+      "entities": [
+        "Saris Bones 2-Bike Trunk Rack"
+      ]
+    },
+    {
+      "fact": "User has clocked 347 miles on their bike since the start of the year.",
+      "type": "personal",
+      "entities": [
+        "347 miles",
+        "year"
+      ]
+    },
+    {
+      "fact": "User's goal is to reach 1000 miles by the end of summer.",
+      "type": "goal",
+      "entities": [
+        "1000 miles",
+        "end of summer"
+      ]
+    }
+  ],
+  "answer_2880eb6c_2": [
+    {
+      "fact": "User is planning a road trip to the mountains in June",
+      "type": "event",
+      "entities": [
+        "road trip",
+        "mountains",
+        "June"
+      ]
+    },
+    {
+      "fact": "User last had their bike serviced on April 20th",
+      "type": "event",
+      "entities": [
+        "April 20th"
+      ]
+    },
+    {
+      "fact": "User had a tune-up for their bike because the gears were getting stuck",
+      "type": "event",
+      "entities": [
+        "tune-up",
+        "gears"
+      ]
+    },
+    {
+      "fact": "User replaced the bike chain during the last service for $25",
+      "type": "event",
+      "entities": [
+        "bike chain",
+        "$25"
+      ]
+    },
+    {
+      "fact": "User installed a new set of bike lights for $40",
+      "type": "event",
+      "entities": [
+        "bike lights",
+        "$40"
+      ]
+    },
+    {
+      "fact": "User has clocked 347 miles on their bike since the start of the year",
+      "type": "personal",
+      "entities": [
+        "347 miles",
+        "start of the year"
+      ]
+    },
+    {
+      "fact": "User's goal is to reach 1000 miles by the end of summer",
+      "type": "preference",
+      "entities": [
+        "1000 miles",
+        "end of summer"
+      ]
+    }
+  ]
+}

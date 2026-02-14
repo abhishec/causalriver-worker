@@ -1,0 +1,22 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/20 (Sat) 13:13  
+[ASSISTANT_SAID] SaaS (Software-as-a-Service) provides users access to a fully functional software application that is centrally hosted and managed by a third-party provider.  
+[ASSISTANT_SAID] Examples of SaaS include Gmail, Salesforce, and Dropbox.  
+[ASSISTANT_SAID] PaaS (Platform-as-a-Service) provides a platform for developers to build and deploy applications without worrying about the underlying infrastructure.  
+[ASSISTANT_SAID] Examples of PaaS include Microsoft Azure, Google App Engine, and Heroku.  
+[ASSISTANT_SAID] The main difference between SaaS and PaaS is the level of control that the user has over the underlying infrastructure.  
+[ASSISTANT_SAID] SaaS is more suitable for end-users who need to use software applications, while PaaS is more suitable for developers who need a platform to build and deploy their applications.  
+[ASSISTANT_SAID] Azure DevOps is a cloud-based set of development tools and services offered by Microsoft that provides a complete DevOps platform for software development teams.  
+[ASSISTANT_SAID] Azure DevOps includes features such as source code management, continuous integration/continuous delivery (CI/CD), project tracking and management, testing, artifact management, and collaboration tools.  
+[ASSISTANT_SAID] Azure DevOps supports various programming languages, platforms, and tools, making it a versatile solution for software development teams of any size.  
+[ASSISTANT_SAID] Azure DevOps is a SaaS (Software as a Service) offering from Microsoft.  
+[ASSISTANT_SAID] Azure DevOps is not a PaaS because it does not provide a complete runtime environment for developing, running, and managing applications.  
+[ASSISTANT_SAID] Azure Boards provides agile planning, work item tracking, visualization, and reporting tools.  
+[ASSISTANT_SAID] Azure Pipelines is a cloud-agnostic CI/CD platform supporting containers or Kubernetes.  
+[ASSISTANT_SAID] Azure Repos provides cloud-hosted private Git repositories.  
+[ASSISTANT_SAID] Azure Artifacts provides integrated package management with support for Maven, npm, Python, and NuGet package feeds.  
+[ASSISTANT_SAID] Azure Test Plans provides an integrated planned and exploratory testing solution.  
+[ASSISTANT_SAID] Azure DevOps can orchestrate third-party tools.  
+[ASSISTANT_SAID] Azure Artifacts is a service that enables teams to create, host, and share packages with support for various package types.  
+[ASSISTANT_SAID] GitHub provides a range of services for software development and deployment, including Codes

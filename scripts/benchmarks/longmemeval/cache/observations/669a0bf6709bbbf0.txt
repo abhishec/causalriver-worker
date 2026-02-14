@@ -1,0 +1,24 @@
+**Observation Log:**
+
+- [FACT] User's name is Ken Gu.
+- [EVENT] User is focusing on the Yelp business dataset for exploratory analysis.
+- [FACT] The Yelp business dataset includes information about businesses, user reviews, and more.
+- [FACT] The dataset is split into separate files: business, checkin, photos, review, tip, and user.
+- [FACT] The dataset is available in either JSON or SQL format.
+- [ASSISTANT_SAID] The user might investigate distributions of scores on Yelp, how many reviews users typically leave, or regional trends about restaurants.
+- [FACT] The dataset is large and structured, and not all data needs to be analyzed to answer interesting questions.
+- [EVENT] User is required to write down an initial set of at least three questions to investigate prior to analysis.
+- [ASSISTANT_SAID] The exploratory analysis should use a visualization tool such as Vega-Lite/Altair or Tableau.
+- [ASSISTANT_SAID] The analysis consists of two phases: gaining an overview of the dataset and investigating initial questions.
+- [ASSISTANT_SAID] In the first phase, the user should check the shape and structure of the dataset, variable distributions, data quality issues, and relationships among variables.
+- [ASSISTANT_SAID] The user should perform "sanity checks" for expected patterns in the data.
+- [ASSISTANT_SAID] In the second phase, the user should create visualizations for each question and refine them based on findings.
+- [ASSISTANT_SAID] The final deliverable should be a sequence of images (8 or more visualizations) detailing important observations.
+- [ASSISTANT_SAID] Observations can include surprises or issues, as well as responses to analysis questions.
+- [ASSISTANT_SAID] Annotated visualizations are encouraged to guide viewers' attention and provide context.
+- [FACT] The user provided a code snippet that imports pandas and reads the Yelp business dataset.
+- [ASSISTANT_SAID] The code reads the JSON file and stores it in a variable called "df_business".
+- [ASSISTANT_SAID] The "lines=True" parameter specifies that the file is in JSON format with each line as a separate entry.
+- [ASSISTANT_SAID] The "df_business.info()" function displays information about the dataframe, including entries, data types, and non-null values.
+- [USER] User requested additional comments to be added to the code for clarity.
+- [ASSISTANT_CREATED] The assistant provided a revised version of the code with short, helpful comments explaining each step.

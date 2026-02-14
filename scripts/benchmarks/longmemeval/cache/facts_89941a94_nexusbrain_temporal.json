@@ -1,0 +1,90 @@
+{
+  "answer_e1403127_1": [
+    {
+      "fact": "User is planning a 50-mile ride this weekend",
+      "type": "event",
+      "entities": [
+        "50-mile ride",
+        "this weekend"
+      ]
+    },
+    {
+      "fact": "User wants to ensure their road bike is in top condition",
+      "type": "preference",
+      "entities": [
+        "road bike",
+        "top condition"
+      ]
+    },
+    {
+      "fact": "User is located in the San Francisco Bay Area",
+      "type": "personal",
+      "entities": [
+        "San Francisco Bay Area"
+      ]
+    },
+    {
+      "fact": "User is considering upgrading their road bike's wheels to carbon fiber wheels",
+      "type": "preference",
+      "entities": [
+        "road bike",
+        "carbon fiber wheels"
+      ]
+    },
+    {
+      "fact": "User is seeking advice on whether upgrading to carbon fiber wheels is worth the investment",
+      "type": "opinion",
+      "entities": [
+        "carbon fiber wheels",
+        "investment"
+      ]
+    }
+  ],
+  "answer_e1403127_2": [
+    {
+      "fact": "User is planning a long road trip from San Francisco to New York City.",
+      "type": "event",
+      "entities": [
+        "San Francisco",
+        "New York City"
+      ]
+    },
+    {
+      "fact": "User has about 10 days for the trip.",
+      "type": "event",
+      "entities": []
+    },
+    {
+      "fact": "User would love to cycle for at least 3-4 days during the trip.",
+      "type": "preference",
+      "entities": []
+    },
+    {
+      "fact": "User prefers routes with low traffic and scenic views.",
+      "type": "preference",
+      "entities": []
+    },
+    {
+      "fact": "User is comfortable with longer cycling distances.",
+      "type": "preference",
+      "entities": []
+    },
+    {
+      "fact": "User wants to stop at bike shops along the way to check out local cycling scenes.",
+      "type": "preference",
+      "entities": []
+    },
+    {
+      "fact": "User will have their road bike and plans to bring all their bikes.",
+      "type": "personal",
+      "entities": [
+        "road bike"
+      ]
+    },
+    {
+      "fact": "User needs to find accommodations with bike storage.",
+      "type": "preference",
+      "entities": []
+    }
+  ]
+}

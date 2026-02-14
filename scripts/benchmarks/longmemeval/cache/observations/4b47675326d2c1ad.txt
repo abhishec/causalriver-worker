@@ -1,0 +1,23 @@
+**Observation Log:**
+
+- [FACT] The user is looking for recommendations for live music events in their area.
+- [EVENT] The user is interested in upcoming concerts in the next few months.
+- [ASSISTANT_SAID] The assistant provided a list of resources to find upcoming concerts: Songkick, Ticketmaster, Eventbrite, local venue websites, Facebook Events, local music blogs or newspapers, and Google Search.
+- [ASSISTANT_SAID] Songkick allows users to track favorite artists and receive notifications when they come to the area.
+- [ASSISTANT_SAID] Ticketmaster is a popular ticketing website that lists upcoming events, including concerts, in various locations.
+- [ASSISTANT_SAID] Eventbrite lists a wide range of events, including concerts, and allows searching by location, event type, and date.
+- [ASSISTANT_SAID] Local venue websites can provide upcoming event schedules for music halls, theaters, or stadiums.
+- [ASSISTANT_SAID] Facebook Events allows users to search for events by location and shows a list of upcoming events, including concerts.
+- [ASSISTANT_SAID] Local music blogs or newspapers often list upcoming concerts and events in the area.
+- [ASSISTANT_SAID] A Google search for "upcoming concerts in [your city]" can yield relevant results.
+- [PREFERENCE] The user is especially interested in outdoor concerts and music festivals.
+- [ASSISTANT_SAID] The assistant confirmed that many resources allow filtering by outdoor events or festivals, including Songkick, Ticketmaster, Eventbrite, Facebook Events, local venue websites, Festicket, and Everfest.
+- [ASSISTANT_SAID] On Songkick, users can filter events by "Outdoor" or "Festival" under the "Event Type" dropdown menu.
+- [ASSISTANT_SAID] The user can track specific artists on Songkick and receive notifications when they come to the area.
+- [TEMPORAL] The user is specifically looking for outdoor concerts and music festivals in the next few months.
+- [ASSISTANT_SAID] The assistant provided steps to track specific artists on Songkick, including signing up, tracking artists, setting location, filtering for outdoor events, and customizing notifications.
+- [FACT] The user has tracked their favorite jazz pianist, Emma Thompson, on Songkick.
+- [ASSISTANT_SAID] The assistant clarified that Emma Thompson is a renowned actress, not a jazz pianist, and provided steps to track specific venues on Songkick.
+- [ASSISTANT_SAID] Users can track specific venues on Songkick by searching for the venue and clicking the "Track" button.
+- [ASSISTANT_SAID] The assistant explained that users will receive notifications for events at tracked venues.
+- [EVENT] The user is thinking of attending a music festival in the park on May

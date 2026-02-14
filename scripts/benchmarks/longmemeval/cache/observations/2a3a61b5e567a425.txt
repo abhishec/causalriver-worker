@@ -1,0 +1,22 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/28 (Sun) 06:56
+- [USER] User wants to copy only files that have changed since a particular date on Windows.
+- [ASSISTANT_SAID] The best way to copy only files that have changed since a particular date on Windows is to use the built-in command line tool `robocopy`.
+- [ASSISTANT_SAID] The `/MAXAGE` option can be used to specify the date and only copy files that have been modified after that date.
+- [ASSISTANT_CREATED] Example command: `robocopy source_directory destination_directory /MAXAGE:YYYY-MM-DD`
+- [USER] User's source directory will be `\\lightspeed\data` and the destination will be `d:\serverfolders\nasbackup`.
+- [ASSISTANT_CREATED] Example command for user: `robocopy \\lightspeed\data d:\serverfolders\nasbackup /MAXAGE:2022-01-01`
+- [USER] User states that the new data started on January 30, 2023.
+- [ASSISTANT_CREATED] Updated example command for user: `robocopy \\lightspeed\data d:\serverfolders\nasbackup /MAXAGE:2023-01-30`
+- [USER] User asks if the command will copy files modified after and including January 30, 2023.
+- [ASSISTANT_SAID] Yes, the `/MAXAGE` option specifies that files modified on or after the specified date will be copied.
+- [USER] User wants to run the command every day at 7:00 PM.
+- [ASSISTANT_SAID] User can create a scheduled task to run the `robocopy` command every day at 7:00 PM.
+- [ASSISTANT_SAID] Steps to create a scheduled task include opening Task Scheduler, creating a new task, configuring general settings, triggers, and actions.
+- [ASSISTANT_CREATED] Example command for scheduled task: `cmd.exe /c robocopy \\lightspeed\data d:\serverfolders\nasbackup /MAXAGE:2023-01-30`
+- [USER] User expresses concern about copying and overwriting the same data unnecessarily.
+- [ASSISTANT_SAID] Using the `/MIR` option would create a mirror of the source directory and copy all files, including unchanged files.
+- [ASSISTANT_SAID] To avoid unnecessary copying, user should use the `/MAXAGE` option to only copy files modified on or after a specific date.
+- [ASSISTANT_CREATED] Updated command suggestion: `robocopy \\lightspeed\data d:\serverfolders\nasbackup /MAXAGE:2023-01-30 /DCOPY:T`
+- [USER] User explains that they recently switched all data from a Windows

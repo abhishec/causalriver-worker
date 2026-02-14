@@ -1,0 +1,27 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/30 (Tue) 04:02  
+[ASSISTANT_SAID] Prototype models of categorization have demonstrated that category prototypes can be learned by processing every instance in the category.  
+[ASSISTANT_SAID] The correct answer is (d) can be learned by processing every instance in the category.  
+[USER] The relationship between similarity and the triangle inequality is (2 pts.)  
+[USER] a) The triangle inequality violates similarity  
+[USER] b) Similarity violates the triangle inequality  
+[USER] c) The triangle inequality does not require similarity  
+[USER] d) The triangle inequality demonstrates that models of similarity judgements require constraints (e.g., attentional weighting as in Tversky’s contrast model).  
+[ASSISTANT_SAID] The relationship between similarity and the triangle inequality is that the triangle inequality demonstrates that models of similarity judgements require constraints, such as attentional weighting as in Tversky’s contrast model.  
+[ASSISTANT_SAID] Therefore, the correct answer is (d) The triangle inequality demonstrates that models of similarity judgements require constraints (e.g., attentional weighting as in Tversky’s contrast model).  
+[USER] Andrew tells Christina that the meaning of life, the universe and everything is the number 42. After hearing this, Christina says that the ideal number of children she would like to have is 38. What is this probably an example of? (3 pts.)  
+[USER] a) Framing effects  
+[USER] b) Anchoring effects  
+[USER] c) Numerosity effects  
+[USER] d) Very odd flirting in a conversation unrelated to human cognition  
+[ASSISTANT_SAID] This is probably an example of anchoring effects.  
+[ASSISTANT_SAID] Anchoring effects refer to the tendency to rely too heavily on the first piece of information encountered (the "anchor") when making subsequent judgments or decisions.  
+[ASSISTANT_SAID] In this case, Andrew's mention of the number 42 may have served as an anchor for Christina's subsequent response about the number of children she would like to have.  
+[USER] Exemplar models of categorization hold that (2 pts.)  
+[USER] a) Instances are better categorized when a prototype is calculated  
+[USER] b) Instances are better categorized when a prototype is presented  
+[USER] c) Instances are less important than prototypes  
+[USER] d) Instances are more important than prototypes  
+[ASSISTANT_SAID] Exemplar models of categorization hold that instances are more important than prototypes.  
+[ASSISTANT_SAID] In these models, category membership is determined by the similarity of an instance to previously encountered examples, or exemplars, of the category rather than a prototypical representation.

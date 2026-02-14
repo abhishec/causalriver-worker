@@ -1,0 +1,26 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/23 (Tue) 10:43  
+[EVENT] User is planning a fishing trip to Lake Michigan soon.  
+[FACT] User will be using a Shimano rod and reel combo.  
+[PREFERENCE] User's Shimano rod and reel combo performed well on their last trip.  
+[EVENT] User is fishing in the southern part of Lake Michigan, near the Indiana border.  
+[PREFERENCE] User prefers fishing around weed beds and drop-offs.  
+[EVENT] On the last trip, user was using soft plastic lures, mainly curly tail grubs.  
+[ASSISTANT_SAID] Lake Michigan is an excellent spot for largemouth bass fishing.  
+[ASSISTANT_SAID] Recommendations for fishing spots include:  
+[ASSISTANT_SAID] 1. Portage Lake: Known for abundant weed growth, especially in the northern part.  
+[ASSISTANT_SAID] 2. East Chicago Marina: Offers various structures, including weed beds, rocks, and drop-offs.  
+[ASSISTANT_SAID] 3. Wolf Lake: Connected to Lake Michigan via a channel, with plenty of weed beds and submerged logs.  
+[ASSISTANT_SAID] 4. Lake Michigan shoreline near Indiana Dunes National Park: Ideal for largemouth bass with structural features.  
+[ASSISTANT_SAID] Tips for fishing include using soft plastics, weedless presentations, paying attention to water conditions, fishing edges, and being prepared for changing conditions.  
+[ASSISTANT_SAID] Daily catch limit for largemouth bass on Lake Michigan is 5 bass per angler, with a minimum size limit of 14 inches.  
+[ASSISTANT_SAID] There is no maximum size limit for largemouth bass on Lake Michigan.  
+[ASSISTANT_SAID] From April 1 to June 15, largemouth bass fishing is catch-and-immediate-release only.  
+[ASSISTANT_SAID] Anglers need a valid fishing license from Illinois, Indiana, Michigan, or Wisconsin to fish on Lake Michigan.  
+[ASSISTANT_SAID] Fishing regulations are subject to change, and it's advisable to check with relevant authorities for updates.  
+[EVENT] User attended a fly-fishing workshop recently.  
+[ASSISTANT_SAID] Recommendations for practicing tying knots effectively include: starting with basics, using the right materials, practicing under different conditions, using a knot-tying tool, and testing knots.  
+[ASSISTANT_SAID] Tips for maintaining and cleaning fishing gear include inspecting for damage, cleaning rods and reels with mild soap, lubricating reels, and storing gear properly.  
+[EVENT] User plans to check their Shimano rod and reel combo for any damage and clean it before their trip.  
+[ASSISTANT_SAID

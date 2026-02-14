@@ -1,0 +1,28 @@
+**Observation Log:**
+
+[FACT] User is planning a trip to Maui.  
+[FACT] User has booked a luxurious resort in Maui that costs over $300 per night.  
+[PREFERENCE] User is looking for free or affordable activities to balance out the cost of their resort stay.  
+[EVENT] User is seeking recommendations for outdoor activities and hiking trails in Maui.  
+[ASSISTANT_SAID] Maui is a wonderful destination and the assistant is happy to recommend outdoor activities and hiking trails.  
+[ASSISTANT_SAID] Recommended hiking trails include:  
+[ASSISTANT_SAID] 1. Haleakala National Park - Entrance fee: $30 per vehicle (valid for 3 days).  
+[ASSISTANT_SAID] 2. Waihee Ridge Trail - Free admission.  
+[ASSISTANT_SAID] 3. Iao Valley State Park - Entrance fee: $5 per person.  
+[ASSISTANT_SAID] 4. Kapalua Coastal Trail - Free admission.  
+[ASSISTANT_SAID] Recommended outdoor activities include:  
+[ASSISTANT_SAID] 1. Snorkeling at Honolua Bay - Free admission, parking costs $5.  
+[ASSISTANT_SAID] 2. Watch the Sunset at Ho'okipa Beach - Free admission.  
+[ASSISTANT_SAID] 3. Drive the Road to Hana - Free admission.  
+[ASSISTANT_SAID] 4. Kayaking or Paddleboarding - Rentals typically cost between $20-$50 per hour.  
+[ASSISTANT_SAID] Additional tips include checking current conditions, packing water and snacks, and considering a Maui Gold Card for discounts.  
+[EVENT] User expresses interest in Haleakala National Park and Waihee Ridge Trail.  
+[ASSISTANT_SAID] Sliding Sands Trail: 10 miles round-trip, elevation change: 3,000 feet, difficulty: moderate to challenging, time: 5-7 hours.  
+[ASSISTANT_SAID] Halemau'u Trail: 7.4 miles round-trip, elevation change: 1,400 feet, difficulty: moderate, time: 4-6 hours.  
+[ASSISTANT_SAID] Recommended Halemau'u Trail for a moderate hiker due to its gradual elevation change and shorter distance.  
+[ASSISTANT_SAID] Tips for hiking include checking the park's website for updates, bringing water and snacks, and considering guided hikes.  
+[EVENT] User decides to go with the Halemau'u Trail.  
+[ASSISTANT_SAID] Scenic lookout points near Haleakala National Park include:  
+[ASSISTANT_SAID] 1. Haleakala Visitor Center.  
+[ASSISTANT_SAID] 2. Leleiwi Overlook.  
+[ASSISTANT

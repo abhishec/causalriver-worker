@@ -1,0 +1,71 @@
+{
+  "answer_c6a0c6c2_1": [
+    {
+      "fact": "User is thinking of getting a new gaming mouse to pair with their new keyboard.",
+      "type": "preference",
+      "entities": [
+        "gaming mouse",
+        "keyboard"
+      ]
+    },
+    {
+      "fact": "User has been playing a lot of Apex Legends.",
+      "type": "event",
+      "entities": [
+        "Apex Legends"
+      ]
+    },
+    {
+      "fact": "User is determined to reach level 100 in Apex Legends before the end of the year.",
+      "type": "opinion",
+      "entities": [
+        "level 100",
+        "Apex Legends"
+      ]
+    },
+    {
+      "fact": "User is interested in the SteelSeries Rival 600 gaming mouse.",
+      "type": "preference",
+      "entities": [
+        "SteelSeries Rival 600"
+      ]
+    }
+  ],
+  "answer_c6a0c6c2_2": [
+    {
+      "fact": "User is thinking of organizing a gaming session with friends this weekend",
+      "type": "event",
+      "entities": [
+        "gaming session",
+        "friends",
+        "weekend"
+      ]
+    },
+    {
+      "fact": "User is interested in playing Apex Legends with friends this weekend",
+      "type": "preference",
+      "entities": [
+        "Apex Legends",
+        "friends",
+        "weekend"
+      ]
+    },
+    {
+      "fact": "User is considering whether to focus on ranking up to level 150 in Apex Legends",
+      "type": "opinion",
+      "entities": [
+        "ranking up",
+        "level 150",
+        "Apex Legends"
+      ]
+    },
+    {
+      "fact": "User is weighing the pros and cons of focusing on ranking up versus playing for fun",
+      "type": "opinion",
+      "entities": [
+        "ranking up",
+        "playing for fun"
+      ]
+    }
+  ]
+}

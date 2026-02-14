@@ -1,0 +1,159 @@
+{
+  "answer_203bf3fa_2": [
+    {
+      "fact": "User is looking to improve social media engagement.",
+      "type": "preference",
+      "entities": [
+        "social media engagement"
+      ]
+    },
+    {
+      "fact": "User has been doing well on Instagram.",
+      "type": "opinion",
+      "entities": [
+        "Instagram"
+      ]
+    },
+    {
+      "fact": "User's Facebook follower count is around 800.",
+      "type": "personal",
+      "entities": [
+        "Facebook",
+        "800"
+      ]
+    },
+    {
+      "fact": "User's Facebook posts have been getting more shares and comments than usual.",
+      "type": "opinion",
+      "entities": [
+        "Facebook",
+        "shares",
+        "comments"
+      ]
+    },
+    {
+      "fact": "User is curious about the type of content that performs well on Facebook.",
+      "type": "preference",
+      "entities": [
+        "Facebook",
+        "content"
+      ]
+    }
+  ],
+  "answer_203bf3fa_1": [
+    {
+      "fact": "User's Twitter follower count increased from 420 to 540 in the past month",
+      "type": "event",
+      "entities": [
+        "Twitter",
+        "420",
+        "540"
+      ]
+    },
+    {
+      "fact": "User is trying to optimize their social media strategy",
+      "type": "opinion",
+      "entities": [
+        "social media strategy"
+      ]
+    },
+    {
+      "fact": "User aims to increase their online presence and drive traffic to their website",
+      "type": "preference",
+      "entities": [
+        "online presence",
+        "website traffic"
+      ]
+    },
+    {
+      "fact": "User posts a mix of educational and personal content on Twitter",
+      "type": "preference",
+      "entities": [
+        "educational content",
+        "personal content",
+        "Twitter"
+      ]
+    },
+    {
+      "fact": "User tries to post at least 5-7 tweets per day",
+      "type": "preference",
+      "entities": [
+        "5-7 tweets",
+        "Twitter"
+      ]
+    },
+    {
+      "fact": "User does not have a specific content calendar but tries to stay consistent",
+      "type": "personal",
+      "entities": [
+        "content calendar",
+        "consistency"
+      ]
+    },
+    {
+      "fact": "User engages with followers by responding to comments and direct messages",
+      "type": "relationship",
+      "entities": [
+        "followers",
+        "comments",
+        "direct messages"
+      ]
+    }
+  ],
+  "answer_203bf3fa_3": [
+    {
+      "fact": "User is looking to create a content calendar for their social media platforms.",
+      "type": "preference",
+      "entities": [
+        "content calendar",
+        "social media platforms"
+      ]
+    },
+    {
+      "fact": "User has been posting regularly on social media.",
+      "type": "preference",
+      "entities": [
+        "social media"
+      ]
+    },
+    {
+      "fact": "User has gained around 200 followers on TikTok over the past three weeks.",
+      "type": "event",
+      "entities": [
+        "TikTok",
+        "200 followers",
+        "three weeks"
+      ]
+    },
+    {
+      "fact": "User wants to drive engagement and increase follower count on all platforms.",
+      "type": "preference",
+      "entities": [
+        "engagement",
+        "follower count",
+        "all platforms"
+      ]
+    },
+    {
+      "fact": "User is currently active on Instagram, Facebook, Twitter, and TikTok.",
+      "type": "personal",
+      "entities": [
+        "Instagram",
+        "Facebook",
+        "Twitter",
+        "TikTok"
+      ]
+    },
+    {
+      "fact": "User's content themes include hobbies, interests, daily life, and updates about favorite TV shows and movies.",
+      "type": "preference",
+      "entities": [
+        "hobbies",
+        "interests",
+        "daily life",
+        "TV shows",
+        "movies"
+      ]
+    }
+  ]
+}

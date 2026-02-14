@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/10/15 (Sun) 16:48
+- [EVENT] User is trying to track daily expenses and set up a budgeting system.
+- [EVENT] User mentioned that last week was rough due to oversleeping and missing the bus by 2 minutes on Tuesday, resulting in taking an Uber to work costing an extra $15.
+- [ASSISTANT_SAID] Assistant expressed sympathy for the user's situation regarding missing the bus and the extra Uber cost.
+- [ASSISTANT_SAID] Assistant offered to help set up a budgeting system to track daily expenses.
+- [ASSISTANT_SAID] Assistant outlined steps to create a budgeting system: identify income, categorize expenses, assign budget amounts, and track expenses.
+- [FACT] User's income is around $4,000 per month.
+- [FACT] User's fixed expenses are around $2,500 per month, which includes rent, utilities, and minimum debt payments.
+- [FACT] User usually spends around $200 on transportation, $500 on food, and $200 on entertainment.
+- [PREFERENCE] User would like to cut back on transportation costs, especially after the Uber ride last week.
+- [ASSISTANT_SAID] Assistant summarized the user's budget: Income: $4,000; Fixed Expenses: $2,500; Variable Expenses: Transportation: $200, Food: $500, Entertainment: $200; Total Expenses: $2,900; Remaining: $1,100.
+- [ASSISTANT_SAID] Assistant suggested allocating the remaining $1,100 as follows: Savings: 50% ($550), Debt Repayment: 20% ($220), Miscellaneous: 30% ($330).
+- [ASSISTANT_SAID] Assistant provided suggestions to reduce transportation costs: consider public transportation, carpooling, walking/biking, and using ride-sharing services like UberPool or Lyft Line.
+- [ASSISTANT_SAID] Assistant outlined methods for tracking daily expenses: spreadsheets, budgeting apps, pocket notebooks, and digital notes.
+- [ASSISTANT_SAID] Assistant recommended popular budgeting apps, including Mint, Personal Capital, YNAB, and Spendee.
+- [ASSISTANT_SAID] Assistant provided a step-by-step guide to setting up Mint, including downloading the app, signing up, linking accounts, categorizing transactions, and setting a budget.
+- [ASSISTANT_SAID] Assistant suggested budgeting categories: Housing, Transportation, Food, Insurance, Debt, Entertainment, Savings, Clothing, Health and Wellness, and Miscellaneous.
+- [ASSISTANT_SAID] Assistant advised on how to account for the Uber ride in Mint by adding it to the transportation category and tagging it as a one-time expense.
+- [PREFERENCE] User expressed interest in trying the budgeting app route,

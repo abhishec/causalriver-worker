@@ -1,0 +1,42 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/20 (Sat) 08:00  
+[FACT] User wakes up at 7:30 AM and goes to bed at 11:30 PM.  
+[FACT] User's work hours are from 9:00 AM to 5:30 PM.  
+[FACT] User's lunch break is 1 hour long.  
+[PREFERENCE] User wants to watch 1 Crash Course episode daily.  
+[PREFERENCE] User would like to prioritize reading and exercise in their daily routine.  
+[FACT] User does not have any fixed appointments or commitments that they need to schedule around.  
+[FACT] User has finished reading "Sapiens" and is currently reading "The Power of Habit."  
+[PREFERENCE] User is interested in books related to science, history, or self-improvement.  
+[ASSISTANT] Recommended books for user include:  
+- "A Short History of Nearly Everything" by Bill Bryson  
+- "The Selfish Gene" by Richard Dawkins  
+- "Cosmos" by Carl Sagan  
+- "The Emperor of All Maladies: A Biography of Cancer" by Siddhartha Mukherjee  
+- "The Uninhabitable Earth: Life After Warming" by David Wallace-Wells  
+- "Guns, Germs, and Steel" by Jared Diamond  
+- "The Sixth Extinction: An Unnatural History" by Elizabeth Kolbert  
+- "A History of the World in 100 Objects" by Neil MacGregor  
+- "The Silk Roads: A New History of the World" by Peter Frankopan  
+- "Salt: A World History" by Mark Kurlansky  
+- "Mindset: The New Psychology of Success" by Carol S. Dweck  
+- "The 7 Habits of Highly Effective People" by Stephen Covey  
+- "Flow: The Psychology of Optimal Experience" by Mihaly Csikszentmihalyi  
+- "The Happiness Project" by Gretchen Rubin  
+- "Deep Work: Rules for Focused Success in a Distracted World" by Cal Newport  
+[FACT] User expressed interest in "A Short History of Nearly Everything" by Bill Bryson.  
+[ASSISTANT] Provided an overview of "A Short History of Nearly Everything," including its structure and writing style.  
+[PREFERENCE] User is looking for online courses or resources to improve skills in Adobe Photoshop and Illustrator.  
+[ASSISTANT] Recommended online resources for learning Adobe Photoshop and Illustrator include:  
+- Udemy  
+- Skillshare  
+- Coursera  
+- Pluralsight  
+- Adobe Creative Cloud tutorials  
+- Phlearn  
+- Tutvid  
+- Creative Bloq  
+- YouTube channels (Tutvid, Phlearn, Nathaniel Dodson)  
+[FACT] User is considering taking an online course on Data Science with Python.  
+[ASSIST

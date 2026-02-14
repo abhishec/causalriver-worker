@@ -1,0 +1,24 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/26 (Fri) 21:10  
+[USER] The project is about an excavation area, where researchers found fossils.  
+[USER] We want to develop an App with the goal to augment these excavation spots.  
+[USER] Basically, the user points his smartphone at a specific excavation spot and the app shows the fossil in 3D.  
+[ASSISTANT_SAID] Suggested a rough outline of a project plan for developing an augmented reality app for an excavation site.  
+[ASSISTANT_CREATED] Project plan outline includes:  
+[ASSISTANT_SAID] 1. Research and gather information: Understand the excavation site, the types of fossils found, and the target audience for the app.  
+[ASSISTANT_SAID] 2. Define project scope: Clearly define the goals and requirements for the app, including the features it should have and any constraints on development.  
+[ASSISTANT_SAID] 3. Build a team: Assemble a team with the necessary skills to develop the app, including programmers, 3D artists, and archaeologists.  
+[ASSISTANT_SAID] 4. Create a prototype: Develop a basic version of the app to test and validate the concept.  
+[ASSISTANT_SAID] 5. Test and refine: Test the prototype with a small group of users and gather feedback. Use this feedback to refine and improve the app.  
+[ASSISTANT_SAID] 6. Develop the final product: Using the feedback from the testing phase, develop the final version of the app.  
+[ASSISTANT_SAID] 7. Launch and market: Launch the app and market it to the target audience.  
+[ASSISTANT_SAID] 8. Monitor and maintain: Monitor the app's performance and make updates as needed to fix bugs and add new features.  
+[USER] How can we implement the AR part?  
+[ASSISTANT_SAID] Suggested several ways to implement augmented reality (AR) in an app, including:  
+[ASSISTANT_SAID] 1. Using ARKit or ARCore: SDKs provided by Apple and Google for creating AR experiences on iOS and Android devices.  
+[ASSISTANT_SAID] 2. Vuforia: A popular AR SDK for creating AR experiences on both iOS and Android devices.  
+[ASSISTANT_SAID] 3. Unity: A game engine that supports AR development through the Unity AR Foundation package.  
+[ASSISTANT_SAID] 4. Unreal Engine: A game engine that also supports AR development.  
+[ASSISTANT_SAID] All methods need to be tested and optimized for best results and compatibility with target devices.  
+[USER] How accurate is GPS location tracking

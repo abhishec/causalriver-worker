@@ -1,0 +1,21 @@
+**Observation Log:**
+
+- [FACT] User is a sole trader trading as "Pause for Pilates."
+- [FACT] User fills in for fellow instructors and conducts hour-long pilates sessions.
+- [ASSISTANT_SAID] Assistant offered to help create an accounting system for the user's pilates business.
+- [ASSISTANT_SAID] Suggested categories for expenses: 
+  - Rent or lease payments for studio or equipment
+  - Utilities (e.g. electricity, water, gas)
+  - Insurance (e.g. liability insurance, equipment insurance)
+  - Marketing and advertising expenses
+  - Professional fees (e.g. legal or accounting services)
+  - Travel expenses (e.g. for training or workshops)
+  - Supplies (e.g. exercise mats, props)
+  - Taxes (e.g. sales tax, VAT)
+- [ASSISTANT_SAID] Suggested categories for invoicing:
+  - Hourly pilates sessions
+  - Substitute instructor fees
+  - Packages or bundles of sessions
+  - Additional services (e.g. private sessions, small group sessions)
+- [ASSISTANT_SAID] Assistant expressed hope that the suggestions would help the user get started on setting up their accounting system.
+- [ASSISTANT_SAID] Assistant invited the user to ask questions or request further assistance.

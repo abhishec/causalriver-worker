@@ -1,0 +1,23 @@
+**Observation Log:**
+
+- [FACT] User is considering getting a newer car and is researching the new hybrid model of their current Toyota Corolla.
+- [EVENT] User washed their current Corolla on Monday, February 27th, after not doing so for over a month.
+- [EVENT] User's current Corolla was getting dirty after a snowstorm a few weeks prior to the conversation.
+- [ASSISTANT_SAID] The 2022 Toyota Corolla Hybrid has an estimated EPA rating of up to 53 mpg in the city, 52 mpg on the highway, and 52 mpg combined.
+- [ASSISTANT_SAID] Toyota offers various incentives and deals on their hybrid models, including:
+  1. **Toyota's Hybrid Bonus Cash**: Up to $500 in bonus cash on select hybrid models, including the Corolla Hybrid.
+  2. **Low APR Financing**: 2.49% APR financing for 60 months on the 2022 Corolla Hybrid.
+  3. **Lease Deals**: Lease a 2022 Corolla Hybrid for around $229 per month for 36 months, with $2,999 due at signing.
+- [ASSISTANT_SAID] User is commended for washing their current Corolla and taking good care of their vehicle.
+- [FACT] User has been doing some maintenance on their current car themselves, like washing and vacuuming.
+- [EVENT] User took their current Corolla to the dealership for a routine checkup on Friday because the "check engine" light came on when a friend borrowed it.
+- [ASSISTANT_SAID] Maintenance costs for the Corolla Hybrid include:
+  1. **Oil changes**: Synthetic oil changes cost around $75-$100 every 5,000 to 7,500 miles.
+  2. **Tire rotation**: Costs around $20-$30 every 5,000 to 8,000 miles.
+  3. **Battery maintenance**: Costs around $20-$50 for a battery maintenance check.
+  4. **Hybrid system maintenance**: Replace hybrid battery coolant every 30,000 miles, costing around $100-$150.
+  5. **Brake pads**: Replace every 30,000 to 50,000 miles, costing $200-$300 per axle.
+- [ASSISTANT_SAID] The Corolla Hybrid's exterior and interior maintenance requirements are similar to the user's current Corolla.
+- [ASSISTANT_SAID] The Corolla Hybrid's advanced safety features include:
+  1. **Toyota Safety Sense 2.0 (TSS 2.0)**: Includes Pre-Collision System with Pedestrian Detection, Full-Speed Dynamic Radar Cruise Control, Lane Departure Alert with Steering Assist, Automatic High Beams, and Lane Tracing Assist.
+  2. **Blind Spot Monitor (BSM) with Rear Cross Traffic Alert (RCTA)**: Available on the LE

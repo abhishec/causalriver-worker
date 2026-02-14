@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/26 (Fri) 17:12
+- [USER] User asked if financial ratios can be calculated from a financial statement.
+- [USER] User provided a list of financial ratios to calculate: current ratio, quick ratio, case ratio, inventory turnover, receivables turnover, days' sales in inventory, days' sales in receivables, total debt ratio, time interest earned ratio, cash coverage ratio, profit margin, return on assets, and return on equity.
+- [ASSISTANT_SAID] Assistant confirmed that it can help calculate financial ratios from a financial statement.
+- [ASSISTANT_SAID] Assistant provided the formula for Current Ratio: Current Ratio = Current Assets / Current Liabilities.
+- [ASSISTANT_SAID] Assistant provided the formula for Quick Ratio: Quick Ratio = (Current Assets - Inventory) / Current Liabilities.
+- [ASSISTANT_SAID] Assistant provided the formula for Debt Ratio: Debt Ratio = Total Debt / Total Assets.
+- [ASSISTANT_SAID] Assistant provided the formula for Inventory Turnover: Inventory Turnover = Cost of Goods Sold / Average Inventory.
+- [ASSISTANT_SAID] Assistant provided the formula for Receivables Turnover: Receivables Turnover = Net Sales / Average Accounts Receivable.
+- [ASSISTANT_SAID] Assistant provided the formula for Days' Sales in Inventory: Days' Sales in Inventory = 365 / Inventory Turnover.
+- [ASSISTANT_SAID] Assistant provided the formula for Days' Sales in Receivables: Days' Sales in Receivables = 365 / Receivables Turnover.
+- [ASSISTANT_SAID] Assistant provided the formula for Total Debt to Equity Ratio: Total Debt to Equity Ratio = Total Debt / Total Equity.
+- [ASSISTANT_SAID] Assistant provided the formula for Time Interest Earned Ratio: Time Interest Earned Ratio = Earnings Before Interest and Taxes / Interest Expense.
+- [ASSISTANT_SAID] Assistant provided the formula for Cash Coverage Ratio: Cash Coverage Ratio = (Cash + Cash Equivalents + Short-term Investments) / Total Current Liabilities.
+- [ASSISTANT_SAID] Assistant provided the formula for Profit Margin: Profit Margin = Net Income / Net Sales.
+- [ASSISTANT_SAID] Assistant provided the formula for Return on Assets (ROA): ROA = Net Income / Total Assets.
+- [ASSISTANT_SAID] Assistant provided the formula for Return on Equity (ROE): ROE = Net Income / Total Equity.
+- [ASSISTANT_SAID] Assistant noted that the formulas are based on generally accepted accounting principles (GAAP) and that the financial statement must follow GAAP standards for the ratios to be meaningful.

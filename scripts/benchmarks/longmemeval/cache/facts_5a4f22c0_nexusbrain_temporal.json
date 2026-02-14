@@ -1,0 +1,84 @@
+{
+  "answer_b0f3dfff_1": [
+    {
+      "fact": "User is trying to organize their contacts.",
+      "type": "preference",
+      "entities": []
+    },
+    {
+      "fact": "User met Rachel, an old colleague, at the TechConnect conference.",
+      "type": "relationship",
+      "entities": [
+        "Rachel",
+        "TechConnect conference"
+      ]
+    },
+    {
+      "fact": "User attended the TechConnect conference on February 10th and 11th.",
+      "type": "event",
+      "entities": [
+        "TechConnect conference",
+        "February 10th",
+        "February 11th"
+      ]
+    },
+    {
+      "fact": "User thinks adding a 'Company' column to their contact tracker is a good idea.",
+      "type": "opinion",
+      "entities": [
+        "Company column"
+      ]
+    },
+    {
+      "fact": "User wants to catch up with Rachel soon.",
+      "type": "relationship",
+      "entities": [
+        "Rachel"
+      ]
+    }
+  ],
+  "answer_b0f3dfff_2": [
+    {
+      "fact": "User is looking for marketing strategies for their startup",
+      "type": "preference",
+      "entities": [
+        "marketing strategies",
+        "startup"
+      ]
+    },
+    {
+      "fact": "User recently met Tom, a marketing expert",
+      "type": "relationship",
+      "entities": [
+        "Tom",
+        "marketing expert"
+      ]
+    },
+    {
+      "fact": "User is considering catching up with Rachel, an old colleague from their previous company",
+      "type": "relationship",
+      "entities": [
+        "Rachel",
+        "old colleague",
+        "previous company"
+      ]
+    },
+    {
+      "fact": "User attended a webinar hosted by Women in Tech with Dr. Maria Hernandez",
+      "type": "event",
+      "entities": [
+        "Women in Tech",
+        "Dr. Maria Hernandez"
+      ]
+    },
+    {
+      "fact": "User would love to learn more about the latest trends in AI and machine learning",
+      "type": "preference",
+      "entities": [
+        "AI",
+        "machine learning",
+        "latest trends"
+      ]
+    }
+  ]
+}

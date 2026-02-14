@@ -1,0 +1,150 @@
+{
+  "answer_6350aa4f_4": [
+    {
+      "fact": "User is planning a trip to San Diego",
+      "type": "event",
+      "entities": [
+        "San Diego"
+      ]
+    },
+    {
+      "fact": "User is a huge rollercoaster fan",
+      "type": "preference",
+      "entities": [
+        "rollercoaster"
+      ]
+    },
+    {
+      "fact": "User rode the Mako, Kraken, and Manta rollercoasters all in one night at SeaWorld San Diego in July",
+      "type": "event",
+      "entities": [
+        "Mako",
+        "Kraken",
+        "Manta",
+        "SeaWorld San Diego",
+        "July"
+      ]
+    },
+    {
+      "fact": "User is interested in visiting the San Diego Zoo",
+      "type": "preference",
+      "entities": [
+        "San Diego Zoo"
+      ]
+    },
+    {
+      "fact": "User heard that the Nighttime Zoo event is a lot of fun",
+      "type": "opinion",
+      "entities": [
+        "Nighttime Zoo"
+      ]
+    }
+  ],
+  "answer_6350aa4f_3": [
+    {
+      "fact": "User is planning a trip to Disneyland.",
+      "type": "event",
+      "entities": [
+        "Disneyland"
+      ]
+    },
+    {
+      "fact": "User rode Space Mountain: Ghost Galaxy three times at Disneyland on September 24th during Mickey's Halloween Party.",
+      "type": "event",
+      "entities": [
+        "Space Mountain: Ghost Galaxy",
+        "September 24th",
+        "Mickey's Halloween Party"
+      ]
+    },
+    {
+      "fact": "User enjoyed the experience of riding Space Mountain: Ghost Galaxy.",
+      "type": "opinion",
+      "entities": [
+        "Space Mountain: Ghost Galaxy"
+      ]
+    },
+    {
+      "fact": "User is considering attending Mickey's Halloween Party on a weekday instead of a weekend.",
+      "type": "preference",
+      "entities": [
+        "Mickey's Halloween Party",
+        "weekday",
+        "weekend"
+      ]
+    },
+    {
+      "fact": "User believes that crowds will be smaller on weekdays.",
+      "type": "opinion",
+      "entities": [
+        "weekdays",
+        "crowds"
+      ]
+    }
+  ],
+  "answer_6350aa4f_2": [
+    {
+      "fact": "User is planning a trip to Knott's Berry Farm soon.",
+      "type": "event",
+      "entities": [
+        "Knott's Berry Farm"
+      ]
+    },
+    {
+      "fact": "User rode the Xcelerator rollercoaster at Knott's Berry Farm on October 8th.",
+      "type": "event",
+      "entities": [
+        "Xcelerator",
+        "Knott's Berry Farm",
+        "October 8th"
+      ]
+    },
+    {
+      "fact": "User considers the Xcelerator rollercoaster one of their favorite thrill rides.",
+      "type": "opinion",
+      "entities": [
+        "Xcelerator"
+      ]
+    },
+    {
+      "fact": "User is interested in tips for rides to prioritize during the Knott's Spooky Farm event.",
+      "type": "preference",
+      "entities": [
+        "Knott's Spooky Farm"
+      ]
+    }
+  ],
+  "answer_6350aa4f_1": [
+    {
+      "fact": "User is looking for Halloween-themed snacks for an upcoming party",
+      "type": "event",
+      "entities": [
+        "Halloween-themed snacks",
+        "party"
+      ]
+    },
+    {
+      "fact": "User recently experienced Halloween Horror Nights at Universal Studios Hollywood",
+      "type": "event",
+      "entities": [
+        "Halloween Horror Nights",
+        "Universal Studios Hollywood"
+      ]
+    },
+    {
+      "fact": "User is interested in Witches' Brew Punch and Graveyard Dirt Cups",
+      "type": "preference",
+      "entities": [
+        "Witches' Brew Punch",
+        "Graveyard Dirt Cups"
+      ]
+    },
+    {
+      "fact": "User appreciates creative snack ideas",
+      "type": "opinion",
+      "entities": [
+        "creative snack ideas"
+      ]
+    }
+  ]
+}

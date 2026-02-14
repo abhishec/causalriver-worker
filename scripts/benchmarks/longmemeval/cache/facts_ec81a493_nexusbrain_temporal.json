@@ -1,0 +1,39 @@
+{
+  "answer_ed1982fc": [
+    {
+      "fact": "User has a vinyl collection",
+      "type": "personal",
+      "entities": [
+        "vinyl collection"
+      ]
+    },
+    {
+      "fact": "User is looking for record storage solutions to protect albums from scratches and damage",
+      "type": "preference",
+      "entities": [
+        "record storage solutions",
+        "albums",
+        "scratches",
+        "damage"
+      ]
+    },
+    {
+      "fact": "User has a signed poster from their favorite artist's debut album",
+      "type": "personal",
+      "entities": [
+        "signed poster",
+        "favorite artist",
+        "debut album"
+      ]
+    },
+    {
+      "fact": "User wants to showcase their rare items without damaging them",
+      "type": "preference",
+      "entities": [
+        "showcase",
+        "rare items",
+        "damage"
+      ]
+    }
+  ]
+}

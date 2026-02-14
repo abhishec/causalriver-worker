@@ -1,0 +1,58 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/22 (Mon) 16:06
+
+[ASSISTANT_SAID] Test Case: Tracking Customer Transaction History
+
+[ASSISTANT_SAID] Preconditions: Test customer account created with multiple transactions
+
+[ASSISTANT_SAID] Steps for Tracking Customer Transaction History: 
+- Login to loyalty platform as merchant customer
+- Navigate to customer account page
+- Verify that customer transaction history is accurately displayed
+- Manually add a new transaction to the customer account
+- Refresh the page and verify that the new transaction is displayed
+
+[ASSISTANT_SAID] Expected Result for Tracking Customer Transaction History: Loyalty platform accurately displays customer transaction history and new transactions are promptly updated in the system.
+
+[ASSISTANT_SAID] Test Case: Assigning Rewards to Customers
+
+[ASSISTANT_SAID] Preconditions: Test customer account created
+
+[ASSISTANT_SAID] Steps for Assigning Rewards to Customers: 
+- Login to loyalty platform as merchant customer
+- Navigate to customer account page
+- Select a customer to assign a reward to
+- Create a new reward or select an existing reward to assign
+- Save the changes to the customer account
+- Verify that the reward is correctly applied to the customer's account
+
+[ASSISTANT_SAID] Expected Result for Assigning Rewards to Customers: Loyalty platform allows merchant customers to easily assign rewards to customers and rewards are correctly applied to customer accounts.
+
+[ASSISTANT_SAID] Test Case: Customer Data Tracking
+
+[ASSISTANT_SAID] Preconditions: Test customer accounts with different behaviors and preferences created
+
+[ASSISTANT_SAID] Steps for Customer Data Tracking: 
+- Login to loyalty platform as merchant customer
+- Navigate to customer data page
+- Verify that customer data is accurately displayed, including transaction history, preferences, and behavior patterns
+- Manually add a new customer behavior or preference to a test customer account
+- Refresh the page and verify that the new data is displayed
+
+[ASSISTANT_SAID] Expected Result for Customer Data Tracking: Loyalty platform accurately tracks customer data and updates in real-time.
+
+[ASSISTANT_SAID] Test Case: Customizing Loyalty Program
+
+[ASSISTANT_SAID] Preconditions: Test customer accounts created
+
+[ASSISTANT_SAID] Steps for Customizing Loyalty Program: 
+- Login to loyalty platform as merchant customer
+- Navigate to loyalty program settings
+- Change reward structure, earning rules, or redemption options
+- Save the changes to the loyalty program
+- Verify that the changes are correctly applied to customer accounts
+
+[ASSISTANT_SAID] Expected Result for Customizing Loyalty Program: Loyalty platform allows merchant customers to easily customize the loyalty program to suit their individual needs and changes are correctly applied to customer accounts.
+
+[ASSISTANT_SAID] Test Case: Dashboard Us

@@ -1,0 +1,26 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2022/02/08 (Tue) 02:30  
+[RELATIONSHIP] Mother and daughter are the two main participants in the conversation.  
+[EVENT] The mother is changing the daughter's soiled diaper and clothes.  
+[FACT] The daughter has a favorite shirt and overalls that are now dirty.  
+[FACT] The daughter is wearing a new yellow sundress with white flowers and matching sandals after the change.  
+[PREFERENCE] The daughter expresses a dislike for taking off her favorite clothes.  
+[PREFERENCE] The daughter expresses a fondness for her new dress, saying "Yay, I love this dress!"  
+[ASSISTANT_SAID] The mother explains to the daughter that the dirty clothes need to be flushed because they are covered in yucky stuff from the diaper.  
+[EVENT] The mother flushes the dirty shirt and overalls down the toilet separately.  
+[CHANGE] The daughter transitions from wearing dirty clothes to wearing a fresh outfit.  
+[ASSISTANT_SAID] The mother expresses relief that everything had been successfully flushed away without any problems.  
+[ASSISTANT_SAID] The mother expresses gratitude for having an extra set of clothes packed in the diaper bag.  
+[PREFERENCE] The daughter states she feels much better after being cleaned up.  
+[EVENT] The mother and daughter discuss avoiding future diaper blowouts.  
+[RELATIONSHIP] The daughter refers to the mother as "Mama."  
+[FACT] The mother is responsible for cleaning and changing the daughter.  
+[EVENT] The mother uses wipes to clean the daughter during the diaper change.  
+[EVENT] The mother carefully removes the soiled diaper, overalls, and shirt from the daughter.  
+[ASSISTANT_SAID] The mother reassures the daughter that she will be more careful in the future.  
+[EVENT] The daughter watches her clothes disappear down the drain and says goodbye to them.  
+[ASSISTANT_SAID] The mother acknowledges the daughter's feelings about losing her favorite clothes.  
+[EVENT] The mother finishes cleaning up the bathroom after the change.  
+[FACT] The mother is relieved after the diaper change process.  
+[ASSISTANT_SAID] The mother expresses a desire to avoid future diaper blowouts.

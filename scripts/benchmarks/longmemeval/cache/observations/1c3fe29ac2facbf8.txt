@@ -1,0 +1,14 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/28 (Sun) 00:47  
+[USER] The user requested the creation of an AWS Internal FAQ with specific topics and answers.  
+[ASSISTANT_SAID] The assistant provided a detailed FAQ structure based on the user's request, including questions and answers about Amazon S3, Amazon API Gateway, Amazon Lambda, Amazon Cognito, and Amazon CloudWatch.  
+[USER] The user asked to reframe the questions to be less about "What is (service)" and more about internal application context, such as "How can we store contents in AWS?"  
+[ASSISTANT_CREATED] The assistant revised the FAQ to include internal context questions and provided corresponding answers for each AWS service mentioned.  
+[USER] The user requested a question and answer for AWS Amplify Studio, focusing on its application to the current app, potentially replacing some functions of Amazon CloudFront.  
+[ASSISTANT_SAID] The assistant provided a question about using AWS Amplify Studio to create a personalized user experience in the application and explained its benefits in the context of the Amazon Cockatoo app.  
+[USER] The user requested a narrative for the application in the style of AWS, focusing on the background and inception of the app, including the impact of the pandemic on children's reading comprehension.  
+[ASSISTANT_CREATED] The assistant wrote a paragraph explaining the inception of the Amazon Cockatoo application, citing a study by the National Assessment of Educational Progress regarding the decline in reading comprehension during the pandemic.  
+[USER] The user requested an explanation of the "approach," detailing the complications, data, and proposed initiative for the reading comprehension app.  
+[ASSISTANT_CREATED] The assistant provided a structured approach narrative, outlining the problem of declining reading comprehension due to the pandemic and proposing the development of a reading comprehension app tailored to children's needs, leveraging AWS services for personalized learning experiences.  
+[ASSISTANT_SAID] The assistant included evidence from a study by the National Bureau of Economic Research regarding the loss of reading skills during the pandemic and emphasized the app's goal to improve literacy skills through engagement and accessibility.

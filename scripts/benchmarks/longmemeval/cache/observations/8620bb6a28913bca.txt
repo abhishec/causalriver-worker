@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [FACT] The team consists of a Product Manager (PM), ML Engineer, Software Engineers, and a UX Researcher.
+- [EVENT] The team is preparing to pitch their product to investors.
+- [EVENT] The team has developed an automatic UX evaluation tool designed for the financial services industry.
+- [ASSISTANT_SAID] The product uses deep learning models to simulate real user behavior and preferences based on CNN, attention maps, and other deep learning models.
+- [PREFERENCE] The investor is interested in the market potential for the product.
+- [ASSISTANT_SAID] The financial services industry has a huge demand for user-friendly and efficient digital channels.
+- [ASSISTANT_SAID] The product can help financial institutions improve their digital channels' UX design by providing an accurate evaluation of user experience.
+- [PREFERENCE] The investor asks about the business model for the product.
+- [ASSISTANT_SAID] The product will be offered as a subscription-based service.
+- [ASSISTANT_SAID] Clients will have access to the tool through a user-friendly dashboard to monitor and analyze UX performance.
+- [PREFERENCE] The investor inquires about the team's qualifications.
+- [ASSISTANT_SAID] The team consists of experienced product managers, software engineers, machine learning engineers, and UX researchers with a proven track record of success.
+- [EVENT] The team anticipates generating $5 million in revenue within the first year, with a 20% growth rate each subsequent year.
+- [EVENT] The team plans to use a multi-channel marketing approach, including online advertising, email marketing, and industry-specific events.
+- [ASSISTANT_SAID] The team plans to partner with industry influencers and publications to increase brand awareness.
+- [EVENT] The investor requests more detailed financial projections and a demo of the product.
+- [EVENT] The team agrees to schedule a follow-up meeting to provide additional details and arrange a product demo.
+- [TEMPORAL] The follow-up meeting is planned for a later date after the initial pitch.

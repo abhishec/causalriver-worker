@@ -1,0 +1,27 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/24 (Wed) 09:25  
+[FACT] User has a 1997 Jeep Wrangler with a 4.0 V6 engine.  
+[EVENT] User is troubleshooting an engine that turns over but does not fire.  
+[FACT] User reports that there are no codes presenting in the OBD-2 port.  
+[ASSISTANT_SAID] If the engine turns over but does not fire, several troubleshooting steps can be taken:  
+[ASSISTANT_SAID] 1. Check the battery: Ensure it is fully charged and in good condition.  
+[ASSISTANT_SAID] 2. Check the fuel system: Verify that the fuel pump is working and providing fuel.  
+[ASSISTANT_SAID] 3. Check the ignition system: Inspect the ignition coil, spark plugs, and spark plug wires.  
+[ASSISTANT_SAID] 4. Check the crankshaft position sensor: It tells the engine computer when to fire the spark plugs.  
+[ASSISTANT_SAID] 5. Check the camshaft position sensor: It helps determine when to inject fuel.  
+[ASSISTANT_SAID] 6. Check the timing: Use a timing light to check and adjust as needed.  
+[ASSISTANT_SAID] 7. Check the PCM: If other steps fail, it may require professional diagnostics.  
+[FACT] User has checked the battery and confirmed it is fully charged and in good condition.  
+[FACT] User can hear the fuel pump running when the key is turned on and assumes it is working properly.  
+[ASSISTANT_SAID] Next steps include checking the ignition system:  
+[ASSISTANT_SAID] 1. Check the ignition coil: Use a multimeter to check resistance.  
+[ASSISTANT_SAID] 2. Check the spark plugs: Ensure they are in good condition and properly gapped.  
+[ASSISTANT_SAID] 3. Check the spark plug wires: Ensure they are in good condition and properly connected.  
+[ASSISTANT_SAID] 4. Check the distributor cap and rotor: Ensure they are in good condition and aligned.  
+[ASSISTANT_SAID] 5. Check the crankshaft position sensor: A faulty sensor may prevent starting.  
+[FACT] User has tested the ignition coil and confirmed it is okay.  
+[FACT] User has new spark plug wires that are connected properly.  
+[ASSISTANT_SAID] Next steps include checking the spark plugs:  
+[ASSISTANT_SAID] 1. Remove a spark plug to check if it is wet or dry.  
+[ASSISTANT_SAID] 2. Check the spark plug gap: Ensure it is within the

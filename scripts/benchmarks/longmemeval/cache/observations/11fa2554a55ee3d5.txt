@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/24 (Wed) 05:57
+- [EVENT] User is planning a trip to a coastal state park.
+- [EVENT] User visited a coastal state park with friends last weekend on April 16th.
+- [FACT] User has been keeping a birding journal.
+- [PREFERENCE] User is trying to remember when they started getting into bird watching seriously.
+- [TEMPORAL] User's birthday was last month.
+- [EVENT] User got new binoculars around their birthday.
+- [CHANGE] User corrected the name of the park from "Sea Breeze State Park" to "Coastal Cove State Park."
+- [FACT] Coastal Cove State Park is about an hour and a half from the user's home.
+- [EVENT] User went on a bird watching trip to a nearby nature reserve on Saturday, March 12th, and first used their new binoculars then.
+- [ASSISTANT_SAID] Assistant expressed happiness about the user's trip and offered to help with information about spotting ospreys and bald eagles.
+- [ASSISTANT_SAID] Assistant requested the name of the coastal state park to provide tailored advice.
+- [ASSISTANT_SAID] Assistant mentioned that April 16th is a great time to spot ospreys and bald eagles as it's during their breeding season in many coastal areas.
+- [ASSISTANT_SAID] Assistant provided general information about ospreys and bald eagles, including their breeding and nesting times.
+- [ASSISTANT_SAID] Assistant suggested looking for high vantage points, fish-rich waters, and nesting sites for bird watching.
+- [ASSISTANT_SAID] Assistant clarified that it does not retain information about previous conversations or personal experiences.
+- [ASSISTANT_SAID] Assistant offered to help with general questions about birding or wildlife.
+- [ASSISTANT_SAID] Assistant requested the name of the park or its location to provide information on habitat and terrain.

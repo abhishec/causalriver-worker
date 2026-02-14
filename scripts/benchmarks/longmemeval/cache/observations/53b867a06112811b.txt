@@ -1,0 +1,27 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/27 (Sat) 05:56  
+[ASSISTANT_SAID] Definition of a non-deterministic logical matrix: a tuple $(X, Y, V, C, \cdot)$, where $X$ is a set of truth-values, $Y \subseteq X$ is a set of designated truth-values, $V$ is a set of propositions, $C$ is a set of logical connectives, and $\cdot: V \cup C \rightarrow \mathcal{P}(X)$ assigns a set of truth-values in $X$ to each proposition in $V$ and logical connective in $C$.  
+[ASSISTANT_SAID] Example of a non-deterministic matrix:  
+* $X = {1, 2, 3}$  
+* $Y = {2, 3}$  
+* $V = {\text{p}, \text{q}}$  
+* $C = {\neg}$  
+* $\cdot(\text{p}) = {2, 3}$  
+* $\cdot(\text{q}) = {2, 3}$  
+* $\cdot(\neg\text{p}) = {1, 2, 3}$  
+* $\cdot(\neg\text{q}) = {1, 2, 3}$  
+[USER] Requested an example of a Non-Deterministic Matrix using 3 values (1,2,3) with (2,3) designated, and the only connectives being \neg with paraconsistent behavior.  
+[ASSISTANT_SAID] Revised definition of a non-deterministic logical matrix: a tuple $(X, Y, V, C, \cdot)$, where $\cdot: C \times X^{arity} \rightarrow \mathcal{P}(X)$ assigns a set of truth-values to each logical connective in $C$ and a tuple of truth-values in $X$.  
+[ASSISTANT_SAID] Revised non-deterministic matrix example:  
+* $X = {1, 2, 3}$  
+* $Y = {2, 3}$  
+* $V = {\text{p}, \text{q}}$  
+* $C = {\neg, \text{and}}$  
+* $arity(\neg) = 1$  
+* $arity(\text{and}) = 2$  
+* $\cdot(\neg, 1) = {2, 3}$  
+* $\cdot(\neg, 2) = {1, 3}$  
+* $\cdot(\neg, 3) = {1, 2}$  
+* $\cdot(\text{and}, 1, 1) = {1}$  
+* $\cd

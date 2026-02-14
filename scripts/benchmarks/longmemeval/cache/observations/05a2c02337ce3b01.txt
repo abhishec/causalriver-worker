@@ -1,0 +1,38 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/25 (Thu) 08:29
+- [EVENT] User is looking to plan out their yoga practice for the week.
+- [PREFERENCE] User wants a routine that incorporates different styles and focuses on breathwork and meditation.
+- [EVENT] User attended a yoga workshop at a local studio last Saturday, which counts as one practice.
+- [ASSISTANT_SAID] Assistant is happy to help the user plan out their yoga practice for the week.
+- [ASSISTANT_CREATED] Assistant suggests a mix of different styles for 4-5 practices this week, including:
+  - **Monday:** Hatha Yoga with Breathwork Focus
+    - Gentle Hatha practice, linking movement with breath, incorporating pranayama techniques, and ending with seated meditation.
+  - **Tuesday:** Vinyasa Flow with Core Strengthening
+    - Dynamic Vinyasa practice targeting core strength and flexibility, incorporating sun salutations and ending with Savasana.
+  - **Wednesday:** Restorative Yoga with Meditation
+    - Relaxing Restorative practice with props, guided meditation, and silent meditation.
+  - **Thursday:** Yin Yoga with Breath Awareness
+    - Yin practice focusing on deeper tissue release, holding postures for 3-5 minutes, and ending with seated meditation.
+  - **Friday:** Kundalini Yoga with Meditation
+    - Dynamic Kundalini practice incorporating postures, breathwork, and a 10-15 minute meditation.
+- [ASSISTANT_SAID] Assistant reminds the user to listen to their body and modify or rest when needed.
+- [ASSISTANT_SAID] Assistant provides tips on incorporating breathwork and meditation into the user's daily routine, especially on busy days.
+- [ASSISTANT_SAID] Breathwork tips include:
+  1. Start small with 2-3 minutes of conscious breathing.
+  2. Use a reminder on the phone or sticky notes.
+  3. Incorporate breath awareness into daily activities.
+  4. Use a breathing app like Headspace, Calm, or Insight Timer.
+  5. Practice diaphragmatic breathing.
+- [ASSISTANT_SAID] Meditation tips include:
+  1. Start with 2-5 minute sessions.
+  2. Find a quiet space for meditation.
+  3. Use a meditation app for guided sessions.
+  4. Focus on a mantra or sensation.
+  5. Establish a pre-meditation routine.
+- [ASSISTANT_SAID] Tips for busy days include:
+  1. Take short breaks for deep breathing or meditation.
+  2. Utilize waiting time for breathwork.
+  3. Prioritize breathwork and meditation over full yoga practices.
+  4. Make it a habit by practicing at the same time daily.
+- [EVENT] User is

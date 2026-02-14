@@ -1,0 +1,19 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/24 (Wed) 21:39
+- [ASSISTANT_SAID] The system allows for multiple users to be created, with different roles including Admin, Tagger, and Checker.
+- [ASSISTANT_SAID] Admins have full control over the system, while Tagers and Checkers have specific permissions to tag and verify annotations respectively.
+- [ASSISTANT_SAID] Admins can create tasks, assign them to specific users, set due dates, and view the progress of the task.
+- [ASSISTANT_SAID] The task management screen shows a list of all documents assigned to the task, and information about who is the Tagger, Checker, assigned date, due date, and description.
+- [ASSISTANT_SAID] The system includes a tool for Tagers to annotate documents, allowing them to view the document and add annotations using different labels and classifications.
+- [ASSISTANT_SAID] Data Scientists can access annotated data through an API, which provides access to a dataset of completed documents and detailed information about the data.
+- [ASSISTANT_SAID] Common error messages include "Data not found" and "Data already downloaded".
+- [ASSISTANT_SAID] Users can contact support through the help page for assistance.
+- [ASSISTANT_SAID] Suggested flows for actions for each role include creating a dataset, task management, changing task status, and assigning users for Admins; viewing tasks, annotating documents, and changing document status for Tagers; and viewing tasks, verifying annotations, and changing document status for Checkers.
+- [ASSISTANT_SAID] Suggested videos to create include: "Creating a Task," "Annotating Documents," "Verifying Annotations," and "Changing Document Status."
+- [ASSISTANT_SAID] Emphasized the importance of accurately annotating and verifying the annotations.
+- [ASSISTANT_SAID] Provided tips for efficiently using the product and mentioned any limitations or restrictions of the product.
+- [ASSISTANT_SAID] Encouraged users to provide feedback for future improvements.
+- [ASSISTANT_CREATED] Created a structured outline for a video tutorial including an introduction, getting started guide, and detailed flows for each user role.
+- [ASSISTANT_CREATED] Provided a step-by-step guide on how to log in to the product and explained the different screens available in the product.
+- [ASSISTANT_CREATED] Listed specific actions for Admins, Tagers, and Checkers, detailing how to manage tasks and documents.

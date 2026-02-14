@@ -1,0 +1,18 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/24 (Wed) 17:34  
+[USER] User requested a summary of provided texts in bullet point sentences.  
+[ASSISTANT_SAID] Major shared techniques with Data2vec include predicting contextualized target representations.  
+[ASSISTANT_SAID] Encoding non-masked portions of a sample and using a convolutional decoder to predict target representations for masked portions.  
+[ASSISTANT_SAID] Amortizing computational overhead by reusing each target for multiple masked versions of a training sample.  
+[ASSISTANT_SAID] Inverse block masking strategy preserves contiguous regions of the sample to provide more context for student predictions.  
+[ASSISTANT_SAID] Training targets are based on averaging top K FFN blocks of the teacher.  
+[ASSISTANT_SAID] Teacher weights are an exponentially moving average of student encoder weights.  
+[ASSISTANT_SAID] Model architecture includes modality-specific feature encoders and a Transformer architecture.  
+[ASSISTANT_SAID] Asymmetric encoder/decoder architecture with student encoder only encoding unmasked patches or time-steps.  
+[ASSISTANT_SAID] Random Gaussian noise used to represent masked tokens.  
+[ASSISTANT_SAID] Student network trained to reconstruct contextualized target representation of teacher network.  
+[ASSISTANT_SAID] Predictions of student network used to update teacher network.  
+[ASSISTANT_SAID] Data2vec 2.0 trained on a wide range of tasks including image classification, machine translation, and language modeling.  
+[ASSISTANT_SAID] Training process involves optimizing the parameters of the model using meta learning to improve performance on a particular task.  
+[ASSISTANT_SAID] Data preparation, model selection, meta learning, training, and validation steps in training process.

@@ -1,0 +1,15 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/03/22 (Wed) 17:47
+- [FACT] The user is discussing the topic of finding unexploded ordnance with drones.
+- [FACT] The user provided a detailed background on the impact of war on human life and the economy.
+- [FACT] The user mentioned the ongoing war in Europe due to the Russian invasion of Ukraine.
+- [FACT] The user highlighted the dangers of unexploded ordnance, including mines and grenades, which can cause injuries long after a conflict has ended.
+- [FACT] The user stated that demining and explosive disposal is a priority after a war.
+- [FACT] The user provided data for a drone equipped with a magnetic field sensor to detect ordnance in the subsurface.
+- [FACT] The user explained that magnetic sensors measure static or oscillating magnetic fields in units of fractions of a Tesla (T).
+- [FACT] The user noted that the earth's magnetic field is about 5µT and is much stronger than the magnetic field produced by ordnance.
+- [FACT] The user described the method of measuring the difference in magnetic fields between two magnetometers to detect ordnance.
+- [FACT] The user mentioned that the data for the assignment consists of magnetic field measurements at different locations from a drone flying over a field.
+- [FACT] The user provided a dataset of magnetic field measurements with coordinates and values in nano-Tesla.
+- [ASSISTANT_SAID] The assistant did not provide any responses in this session as the user only presented information and data.

@@ -1,0 +1,22 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/25 (Thu) 20:35
+- [EVENT] User recently tried a new BBQ sauce at their neighbor's backyard BBQ last weekend.
+- [PREFERENCE] User found the BBQ sauce at the neighbor's BBQ amazing and is looking for BBQ sauce recipes.
+- [ASSISTANT_SAID] Assistant provided four BBQ sauce recipes: 
+  - **Recipe 1: Classic Kansas City-Style BBQ Sauce**: 1 cup ketchup, 1/2 cup apple cider vinegar, 2 tablespoons brown sugar, 2 tablespoons Worcestershire sauce, 1 teaspoon smoked paprika, 1 teaspoon garlic powder, 1 teaspoon onion powder, salt and pepper to taste.
+  - **Recipe 2: Sweet and Smoky BBQ Sauce**: 1 cup ketchup, 1/2 cup honey, 2 tablespoons apple cider vinegar, 2 tablespoons Dijon mustard, 1 teaspoon smoked paprika, 1 teaspoon chili powder, 1/2 teaspoon cayenne pepper (optional), salt and pepper to taste.
+  - **Recipe 3: Spicy Texas-Style BBQ Sauce**: 1 cup ketchup, 1/2 cup beef broth, 2 tablespoons hot sauce, 2 tablespoons brown sugar, 1 teaspoon chili powder, 1 teaspoon ground cumin, 1/2 teaspoon smoked paprika, salt and pepper to taste.
+  - **Recipe 4: Carolina-Style Vinegar-Based BBQ Sauce**: 1 cup apple cider vinegar, 1/2 cup water, 2 tablespoons brown sugar, 1 teaspoon salt, 1/2 teaspoon black pepper, 1/4 teaspoon cayenne pepper (optional).
+- [ASSISTANT_SAID] Assistant provided general tips and variations for BBQ sauce, including using a combination of ketchup and tomato paste, adding bourbon or whiskey, and simmering the sauce.
+- [PREFERENCE] User expressed interest in trying the Sweet and Smoky BBQ Sauce recipe and mentioned liking the combination of honey and smoked paprika.
+- [EVENT] User is thinking of recreating grilled pineapple with a brown sugar and cinnamon crust that they had at their neighbor's BBQ.
+- [ASSISTANT_SAID] Assistant provided tips for grilling pineapple with a brown sugar and cinnamon crust:
+  - Choose a ripe but firm pineapple.
+  - Cut into wedges or slices and remove tough parts.
+  - Mix 2-3 tablespoons of brown sugar, 1-2 teaspoons of ground cinnamon, and a pinch of salt.
+  - Coat the pineapple with the mixture and drizzle with honey or maple syrup.
+  - Preheat grill to medium-high heat and oil the grates.
+  - Grill for 2-3 minutes per side for caramelization.
+  - Optionally brush with honey or syrup during the last minute of grilling.
+- [EVENT] User is thinking of trying smoking meats for their birthday next month

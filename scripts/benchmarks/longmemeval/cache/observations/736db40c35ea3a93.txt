@@ -1,0 +1,17 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/27 (Sat) 11:01  
+[USER] User is exploring the process of writing a scientific paper.  
+[USER] User is simulating an actual workflow of using an AI language model to write a scientific paper.  
+[USER] User is focusing on the impacts of climate change on biodiversity.  
+[USER] User is moving on from Step 6 of the workflow.  
+[USER] User is interested in Step 7: Literature Review, which includes search term generation, selection, summarization, and comparison.  
+[ASSISTANT_SAID] The assistant explained that a literature review is important for identifying and summarizing existing research and assessing how the user's research contributes to the current understanding of the topic.  
+[ASSISTANT_SAID] The assistant provided a sample prompt for conducting a literature review: "I need to conduct a literature review for my study on the impacts of climate change on biodiversity. Can you explain the steps involved in conducting a literature review, and how a literature review can be used to inform the research process?"  
+[ASSISTANT_SAID] The assistant stated that one of the first steps in conducting a literature review is to generate search terms, and the model can assist by suggesting appropriate search terms based on the research question.  
+[ASSISTANT_SAID] The assistant provided a sample prompt for generating search terms: "I am having trouble generating search terms for my literature review on the impacts of climate change on biodiversity. Can you suggest some specific search terms or phrases that I might use to find relevant literature?"  
+[ASSISTANT_SAID] The assistant mentioned that after generating search terms, the next step is to search for relevant literature, and the model can suggest appropriate databases or sources to search.  
+[ASSISTANT_SAID] The assistant provided a sample prompt for searching literature: "I have generated some search terms for my literature review on the impacts of climate change on biodiversity, and I am ready to start searching for relevant literature. Can you suggest any specific databases or sources that I should consider searching, and any best practices for effectively searching and filtering the results?"  
+[ASSISTANT_SAID] The assistant explained that after identifying relevant literature, the next step is to select the most relevant and high-quality studies for inclusion in the review, and the model can assist by suggesting criteria for selection.  
+[ASSISTANT_SAID] The assistant provided a sample prompt for selecting studies: "I have identified a large number of studies for my literature review on the impacts of climate change on biodiversity, and I need to select the most relevant and high-quality studies for inclusion in the review. Can you suggest any criteria for selection and any best practices for assessing the quality and relevance of the studies?"  
+[ASSISTANT_SAID] The assistant stated that after selecting studies, the next

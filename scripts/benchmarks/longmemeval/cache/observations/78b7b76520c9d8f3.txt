@@ -1,0 +1,16 @@
+**Observation Log:**
+
+- [FACT] The user has been having issues with their bus app, which keeps crashing.
+- [PREFERENCE] The user prefers to find an alternative way to plan their route due to the bus app issues.
+- [TEMPORAL] The user has been walking in around 8:45 AM because of bus delays.
+- [ASSISTANT_SAID] The assistant acknowledged the user's bus app issues and offered to help find alternative route planning methods.
+- [ASSISTANT_SAID] The assistant suggested using Google Maps, a transit agency website, Moovit, Rome2rio, or a public transportation website/app as alternatives for route planning.
+- [PREFERENCE] The user thinks Google Maps is user-friendly and plans to try it.
+- [ASSISTANT_SAID] The assistant confirmed that Google Maps can provide information on bus delays or disruptions and explained how it does so.
+- [ASSISTANT_SAID] The assistant listed features of Google Maps, including real-time updates, transit alerts, live bus tracking, crowdsourced information, and tips for getting the most out of the app.
+- [PREFERENCE] The user is considering taking the train on Wednesdays because it is more reliable than the bus.
+- [ASSISTANT_SAID] The assistant explained how Google Maps can help compare bus and train options, including entering routes, selecting transportation modes, and checking schedules.
+- [EVENT] The user has a meeting at 9 AM on Wednesdays.
+- [ASSISTANT_SAID] The assistant encouraged the user to reflect on their thought process regarding the decision to take the train on Wednesdays.
+- [CHANGE] The user identified a specific reason for considering the train on Wednesdays, which is the reliability of the train compared to the bus for their 9 AM meeting.
+- [ASSISTANT_SAID] The assistant emphasized the importance of reliable transportation for important commitments and encouraged the user to weigh the pros and cons of their commute options.

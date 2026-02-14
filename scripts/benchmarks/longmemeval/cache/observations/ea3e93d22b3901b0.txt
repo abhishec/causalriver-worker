@@ -1,0 +1,24 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/29 (Mon) 21:37  
+[FACT] User is organizing old photos.  
+[EVENT] User is trying to scan old photos to share graduation photos with their nephew.  
+[RELATIONSHIP] User has a nephew.  
+[FACT] User's family took them out to dinner at a fancy restaurant to celebrate their graduation.  
+[FACT] User wore a brand new suit that their parents got them as a gift for graduation.  
+[ASSISTANT_SAID] Recommended photo scanning services: ScanMyPhotos, DigMyPics, PhotoScanning.  
+[ASSISTANT_SAID] Recommended photo scanning apps: Google PhotoScan, Photomyne, Heirloom.  
+[ASSISTANT_SAID] Suggested considering local photo labs and personal scanners for photo scanning.  
+[ASSISTANT_SAID] Suggested factors to consider when choosing a scanning service or app: cost, quality, ease of use, and storage options.  
+[ASSISTANT_SAID] Recommended photo management software/apps: Adobe Lightroom, Apple Photos, Google Photos, PicsArt, Flickr, Amazon Prime Photos, Microsoft OneDrive, SmugMug.  
+[ASSISTANT_SAID] Suggested features to consider in photo management software: tagging and keywording, albums and collections, search function, face recognition, syncing.  
+[ASSISTANT_SAID] Provided tips for organizing graduation photos: create albums or collections, use tags and keywords, add descriptions, use star or favorite ratings.  
+[ASSISTANT_SAID] Confirmed that user can create a shared album in Google Photos to share graduation photos with their nephew.  
+[ASSISTANT_SAID] Provided steps to create a shared album in Google Photos.  
+[ASSISTANT_SAID] Suggested that shared albums are private and only accessible to invited people.  
+[ASSISTANT_SAID] Confirmed that user can create a timeline of their graduation day in Google Photos with photos and notes.  
+[ASSISTANT_SAID] Provided steps to create a timeline in Google Photos.  
+[ASSISTANT_SAID] Suggested adding context to the story by including notes about people, places, and events in the photos.  
+[ASSISTANT_SAID] Encouraged user to include photos from other family members or friends who attended the graduation to enhance the story.  
+[PREFERENCE] User wants to add notes about their thoughts and feelings on graduation day, including pride in their accomplishment and gratitude for their supportive family.  
+[ASSISTANT_SAID] Suggested creating separate sections or "chapters" in the story to avoid clutter when adding photos from other family members or friends.

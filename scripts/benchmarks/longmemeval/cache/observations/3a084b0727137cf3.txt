@@ -1,0 +1,41 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/08/15 (Tue) 21:22
+- [ASSISTANT_SAID] Provided an example of a CloudFormation template that creates an AWS Managed Blockchain network with specified parameters.
+- [ASSISTANT_CREATED] Created a CloudFormation template in YAML format for AWS Managed Blockchain with the following details:
+  - [ASSISTANT_CREATED] AWSTemplateFormatVersion: "2010-09-09"
+  - [ASSISTANT_CREATED] Resources:
+    - [ASSISTANT_CREATED] BlockchainNetwork:
+      - [ASSISTANT_CREATED] Type: "AWS::ManagedBlockchain::Network"
+      - [ASSISTANT_CREATED] Properties:
+        - [ASSISTANT_CREATED] Framework: "Hyperledger Fabric"
+        - [ASSISTANT_CREATED] FrameworkVersion: "2.2"
+        - [ASSISTANT_CREATED] Name: "test-SAT"
+        - [ASSISTANT_CREATED] Description: "Test Network for Sensor Audit Trail"
+        - [ASSISTANT_CREATED] VotingPolicy:
+          - [ASSISTANT_CREATED] ApprovalThresholdPolicy:
+            - [ASSISTANT_CREATED] ThresholdPercentage: 50
+          - [ASSISTANT_CREATED] ProposalDurationInHours: 24
+        - [ASSISTANT_CREATED] Edition: "STARTER"
+        - [ASSISTANT_CREATED] MemberConfiguration:
+          - [ASSISTANT_CREATED] Name: "test-SAT-msuhas-smartaedev"
+          - [ASSISTANT_CREATED] Description: "Member Identifier : Network Name-UserName-Instance"
+        - [ASSISTANT_CREATED] LogPublishingConfiguration:
+          - [ASSISTANT_CREATED] CloudWatch:
+            - [ASSISTANT_CREATED] State: "ENABLED"
+    - [ASSISTANT_CREATED] CertificateAuthority:
+      - [ASSISTANT_CREATED] Type: "AWS::ManagedBlockchain::CertificateAuthority"
+      - [ASSISTANT_CREATED] Properties:
+        - [ASSISTANT_CREATED] NetworkId: !Ref BlockchainNetwork
+        - [ASSISTANT_CREATED] MemberId: !Ref BlockchainNetwork
+        - [ASSISTANT_CREATED] LogPublishingConfiguration:
+          - [ASSISTANT_CREATED] CloudWatch:
+            - [ASSISTANT_CREATED] State: "ENABLED"
+    - [ASSISTANT_CREATED] BlockchainMember:
+      - [ASSISTANT_CREATED] Type: "AWS::ManagedBlockchain::Member"
+      - [ASSISTANT_CREATED] Properties:
+        - [ASSISTANT_CREATED] NetworkId: !Ref BlockchainNetwork
+        - [ASSISTANT_CREATED] MemberName: "test-SAT-msuhas-smartaedev"
+        - [ASSISTANT_CREATED] Description: "Member Identifier : Network Name-UserName-Instance"
+        - [ASSISTANT_CREATED] FrameworkAttributes:
+          - [ASSISTANT_CREATED

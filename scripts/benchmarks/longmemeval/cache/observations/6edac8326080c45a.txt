@@ -1,0 +1,23 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/23 (Tue) 15:40
+- [ASSISTANT_SAID] When a booking is made on Expedia.com, you will need to update the property availability on other OTAs and your PMS.
+- [ASSISTANT_SAID] Step 1: Receive the booking notification: Expedia.com will send a notification to your server when a booking is made. You will need to implement a webhook to receive this notification.
+- [ASSISTANT_SAID] Step 2: Retrieve the booking details: Extract the booking details from the notification, including the property ID, booking dates, and other relevant information.
+- [ASSISTANT_SAID] Step 3: Update the property availability on other OTAs: Use the worker pool approach described earlier to update the property availability on other OTAs.
+- [ASSISTANT_SAID] Step 4: Update the property availability in your PMS: Update the property availability in your PMS using your PMS API.
+- [ASSISTANT_SAID] Example code snippet provided for implementing the webhook to receive the booking notification and update the property availability.
+- [ASSISTANT_CREATED] Code snippet includes the use of Express.js, async library, and request library to handle API requests.
+- [ASSISTANT_SAID] The worker pool is defined with a concurrency limit of 2 workers.
+- [ASSISTANT_SAID] The webhook endpoint is defined as '/expedia-booking-notification'.
+- [ASSISTANT_SAID] The booking details extracted include propertyId, startDate, and endDate.
+- [ASSISTANT_SAID] Tasks for each OTA API endpoint are defined for updating property availability.
+- [ASSISTANT_SAID] The tasks include URLs for Booking.com and VRBO APIs.
+- [ASSISTANT_SAID] The assistant logs the success or error of updating property availability on OTAs.
+- [ASSISTANT_SAID] The assistant mentions that the PMS API function for updating availability may vary.
+- [ASSISTANT_SAID] The assistant provides a continuation of the code snippet for the PMS API function for updating property availability.
+- [ASSISTANT_CREATED] The continuation code snippet includes a Promise-based function for updating property availability in the PMS.
+- [ASSISTANT_SAID] The PMS API function is a placeholder and should be replaced with the actual implementation.
+- [ASSISTANT_SAID] The example assumes JSON as the payload format for API requests.
+- [ASSISTANT_SAID] The assistant advises that additional error handling and retry logic may be needed in a real-world scenario.
+- [USER] User requests to "continue please."

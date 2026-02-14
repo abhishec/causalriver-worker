@@ -1,0 +1,25 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/26 (Fri) 16:52
+- [ASSISTANT_SAID] The COVID-19 pandemic has significantly impacted the education sector, leading to disruptions in children's learning and a negative impact on reading comprehension skills.
+- [ASSISTANT_SAID] Research shows that students in the United States have lost an average of one-third of a year's worth of reading skills due to school closures during the pandemic.
+- [ASSISTANT_SAID] The proposed solution is to develop a reading comprehension app tailored to children's needs and learning styles, leveraging AWS services for an engaging learning experience.
+- [ASSISTANT_SAID] The app will use advanced AI/ML algorithms to personalize content based on each child's interests, abilities, and progress.
+- [ASSISTANT_SAID] The app will be designed to be accessible and user-friendly for children.
+- [ASSISTANT_SAID] Specific AWS AI/ML services proposed include Amazon Comprehend, Amazon Polly, Amazon Rekognition, and Amazon Translate.
+- [ASSISTANT_SAID] Amazon Comprehend will analyze text to provide personalized recommendations based on reading level and interests.
+- [ASSISTANT_SAID] Amazon Polly will convert written text to spoken words to help improve children's pronunciation and fluency.
+- [ASSISTANT_SAID] Amazon Rekognition will analyze images for visual literacy feedback.
+- [ASSISTANT_SAID] Amazon Translate will make content accessible in multiple languages.
+- [ASSISTANT_SAID] For content storage and delivery, Amazon S3 and Amazon CloudFront will be used.
+- [ASSISTANT_SAID] Amazon Transcribe will transcribe audio content into text for closed captioning and searchable content.
+- [ASSISTANT_SAID] Amazon Personalize will be used to recommend personalized content based on user behavior.
+- [ASSISTANT_SAID] Amazon Cognito will manage user authentication and authorization.
+- [ASSISTANT_SAID] Amazon API Gateway will handle API requests from the application.
+- [ASSISTANT_SAID] AWS Lambda will be used for backend processing in a serverless environment.
+- [ASSISTANT_SAID] Amazon CloudWatch will monitor and analyze application performance.
+- [ASSISTANT_SAID] Amazon S3 is chosen for its scalability, durability, and cost-effectiveness compared to traditional file storage systems.
+- [ASSISTANT_SAID] Amazon Cognito integrates with other AWS services for user management.
+- [ASSISTANT_SAID] Amazon CloudWatch provides metrics and logs for monitoring application health and performance.
+- [ASSISTANT_SAID] AWS Amplify will simplify the deployment and management of the application.
+- [ASSISTANT_SAID] DynamoDB is chosen over RDS and Aurora for its single-digit millisecond

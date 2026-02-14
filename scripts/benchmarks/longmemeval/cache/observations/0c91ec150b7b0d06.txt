@@ -1,0 +1,28 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/26 (Fri) 01:29
+- [USER] User expressed interest in gene splicing and its applications in agriculture and medicine.
+- [ASSISTANT_SAID] Gene splicing is the process of cutting and recombining DNA molecules from different organisms to create a new genetic combination.
+- [ASSISTANT_SAID] The process of gene splicing involves the following steps: 
+  1. Isolation of the target gene: The specific gene sequence is identified from the DNA of a donor organism.
+  2. Cutting the DNA sequence: The DNA sequence is then isolated and cut using a restriction enzyme.
+  3. Insertion of the target gene: The DNA sequence is then inserted into the recipient organism's DNA using a vector such as a plasmid or a virus.
+  4. Incorporation of the gene: The recipient organism then incorporates the target gene into its own genetic makeup.
+- [ASSISTANT_SAID] Applications of gene splicing in agriculture include:
+  1. Crop improvement: Creating crops with enhanced traits such as higher yield, disease resistance, and tolerance to environmental stress.
+  2. Pest and disease control: Creating crops that are resistant to pests and diseases, reducing the need for harmful pesticides.
+  3. Production of genetically modified (GM) crops: Enhancing nutritional content or improving storage capacity.
+- [ASSISTANT_SAID] Applications of gene splicing in medicine include:
+  1. Genetic therapy: Replacing defective genes or introducing new functional genes to treat genetic disorders.
+  2. Vaccine development: Creating vaccines against infectious diseases by introducing antigens into the body.
+  3. Production of therapeutic proteins: Producing therapeutic proteins such as insulin and human growth hormone for use in medicine.
+- [USER] User expressed that gene splicing sounds like a game-changer and inquired about potential risks or drawbacks.
+- [ASSISTANT_SAID] Potential risks and drawbacks of gene splicing technology in agriculture include:
+  1. Environmental risks: GM crops may harm surrounding ecosystems and cause unintended consequences.
+  2. Resistant pests and diseases: Overuse of GM crops can lead to the development of resistant pests and diseases.
+  3. Ethical concerns: Issues regarding patenting and monopolizing the food supply, leading to unequal distribution of food.
+- [ASSISTANT_SAID] Potential risks and drawbacks of gene splicing in medicine include:
+  1. Unexpected side effects: Introducing new genes may have unpredictable consequences.
+  2. Ethical concerns: Risk of unequal distribution of gene therapy due to cost and access.
+  3. Inaccurate targeting: Gene splicing technology is not 100% effective and can lead to unexpected mutations.
+- [USER] User emphasized the importance of weighing risks and benefits of gene splicing technology and

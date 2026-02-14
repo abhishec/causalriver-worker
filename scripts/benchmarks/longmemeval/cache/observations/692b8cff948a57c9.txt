@@ -1,0 +1,18 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/10/08 (Sun) 13:45
+- [ASSISTANT_SAID] The paper "DeepThings: An Efficient and Flexible Framework for Deploying Deep Neural Networks on Internet of Things Devices" aims to improve the efficiency and flexibility of deep neural network deployment on IoT devices.
+- [ASSISTANT_SAID] The paper "DEFER: A Flexible Framework for Deep Neural Network Execution on Edge Devices" focuses on improving the flexibility and efficiency of deep neural network execution on edge devices.
+- [ASSISTANT_SAID] The paper "DeepX: A Resource-Efficient Framework for Deep Neural Network Execution on Mobile and IoT Devices" emphasizes improving resource efficiency for deep neural networks on mobile and IoT devices.
+- [ASSISTANT_SAID] The paper "EdgeDNN: Efficient Deep Neural Network Execution on Resource-Constrained Edge Devices" aims to improve efficiency for executing deep neural networks on resource-constrained edge devices.
+- [ASSISTANT_SAID] The paper "FogDNN: A Framework for Efficient and Scalable Deployment of Deep Neural Networks on Fog Computing Infrastructures" focuses on improving the efficiency and scalability of deep neural network deployment on fog computing infrastructures.
+- [ASSISTANT_SAID] The paper "DeepEdge: A Resource-Efficient Framework for Deep Neural Network Execution on Edge Devices" aims to improve resource efficiency for executing deep neural networks on edge devices.
+- [ASSISTANT_SAID] The paper "Efficient Deployment of Deep Neural Networks on Heterogeneous Edge Devices" discusses techniques for deploying deep neural networks on devices with different hardware and software capabilities.
+- [ASSISTANT_SAID] The paper "Transformers for Edge Devices" discusses the use of transformers for edge devices and presents techniques for deploying them.
+- [ASSISTANT_SAID] The paper "Compressing Transformer Models for Deployment on Edge Devices" focuses on techniques for compressing transformer models for easier deployment on edge devices.
+- [ASSISTANT_SAID] The FogDNN framework innovates through model partitioning, data partitioning, resource allocation, and load balancing to improve the efficiency and scalability of deep neural network deployment on fog computing infrastructures.
+- [ASSISTANT_SAID] Model partitioning involves dividing the deep neural network into smaller models for deployment on different edge devices.
+- [ASSISTANT_SAID] Data partitioning involves dividing the data used to train the deep neural network into smaller chunks for processing by different edge devices.
+- [ASSISTANT_SAID] Resource allocation optimally allocates resources (CPU, memory, network bandwidth) to edge devices for efficient deployment.
+- [ASSISTANT_SAID] Load balancing distributes the workload of deploying the deep neural network across different edge devices to prevent overload on any single device.
+- [ASSISTANT_SAID] The

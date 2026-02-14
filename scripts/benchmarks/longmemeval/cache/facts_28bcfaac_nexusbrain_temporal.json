@@ -1,0 +1,27 @@
+{
+  "answer_ultrachat_446979": [
+    {
+      "fact": "User has always been intimidated by music theory",
+      "type": "opinion",
+      "entities": [
+        "music theory"
+      ]
+    },
+    {
+      "fact": "User is interested in learning music theory to improve their playing",
+      "type": "preference",
+      "entities": [
+        "music theory",
+        "playing"
+      ]
+    },
+    {
+      "fact": "User plans to start learning music theory with MusicTheory.net and YouTube channels",
+      "type": "event",
+      "entities": [
+        "MusicTheory.net",
+        "YouTube"
+      ]
+    }
+  ]
+}

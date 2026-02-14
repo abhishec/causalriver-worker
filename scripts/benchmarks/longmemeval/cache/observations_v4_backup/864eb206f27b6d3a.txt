@@ -1,0 +1,18 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/27 (Sat) 10:23
+- [FACT] The user is learning music theory, specifically chord progressions.
+- [EVENT] The user has been taking weekly guitar lessons with a new instructor named Alex for six weeks.
+- [CHANGE] The user has noticed significant improvement in their fingerpicking and chord changes since starting lessons with Alex.
+- [FACT] The user has been practicing guitar for at least 30 minutes every day since starting lessons.
+- [FACT] The user has started learning basic music theory, which has helped them understand notes and rhythm better.
+- [ASSISTANT] The assistant provided resources for learning chord progressions, including The Music Theory Academy, ChordPro, Hooktheory, Guitar Tricks, and YouTube channels.
+- [ASSISTANT] The assistant provided tips for incorporating chord progressions into the user's daily practice routine.
+- [ASSISTANT] The assistant provided tips for effectively practicing with a metronome.
+- [EVENT] The user recently bought a new guitar amp two weeks ago, which has improved their sound quality.
+- [EVENT] The user attended a music workshop focused on blues guitar.
+- [RELATIONSHIP] The user met other musicians at the workshop and jammed together for a few hours.
+- [EVENT] The user played classic blues songs like "Sweet Home Chicago" and "Pride and Joy" during the jam session.
+- [RELATIONSHIP] One of the instructors at the workshop was a professional blues guitarist who gave the user tips on bending strings and playing with more feel.
+- [PREFERENCE] The user wants to improve their timing and rhythm in their blues playing.
+- [PREFERENCE] The user is interested in trying out polyrhythmic practice and subdivision practice techniques.

@@ -1,0 +1,23 @@
+**Observation Log:**
+
+- [FACT] User is acting as a lead product manager for a startup company.
+- [ASSISTANT_SAID] Product Name: StressXpress.
+- [ASSISTANT_SAID] Product Version: 1.0.
+- [ASSISTANT_SAID] Release Date: November 8th, 2022.
+- [ASSISTANT_SAID] The goal of StressXpress is to allow management to monitor the stress levels of each employee on a monthly basis and generate management reports based on a triage of status.
+- [ASSISTANT_SAID] The triage status includes red (burnout), amber (stressed), or green (acceptable).
+- [ASSISTANT_SAID] The application aims to help companies reduce costs associated with recruiting, training, and replacing employees by identifying and addressing stress early on.
+- [ASSISTANT_SAID] The application will use a combination of psychological questions and facial and voice analysis to determine an employee's stress levels.
+- [ASSISTANT_SAID] The server will be loaded with three combinations of questions to set the background of the employee.
+- [ASSISTANT_SAID] The server will analyze the detail and provide an onboarding report and a current triage status for the employee, as well as a similar report to the employer.
+- [ASSISTANT_SAID] The employee's triage status will be monitored and additional checks will be conducted as needed: 30 periods for green, 14-day periods for amber, and 7 days for red.
+- [ASSISTANT_SAID] Additional checks will include repetitive facial analysis and voice algorithm analysis.
+- [ASSISTANT_SAID] If an employee is found to be in the red sector, a gamification process will be implemented to measure their ability to respond under stress.
+- [ASSISTANT_SAID] The company will upload the employee's details and control who is actively being managed.
+- [ASSISTANT_SAID] The company will be billed for the number of employees being managed each month.
+- [ASSISTANT_SAID] The company is responsible for issuing the employee's email address and password for access to the application.
+- [ASSISTANT_SAID] The company will control access to the application by invoicing for the number of active employees.
+- [ASSISTANT_SAID] If an employee migrates to another participating employer, the company will be responsible for initiating the password process for the new employer.
+- [ASSISTANT_SAID] The employee will open the mobile app and enter the identifying email address, which does not have to be a real email address.
+- [ASSISTANT_SAID] The employee will enter their individual password, which will be dispatched to the server for validation.
+- [ASSISTANT_SAID] The server will identify the parent company

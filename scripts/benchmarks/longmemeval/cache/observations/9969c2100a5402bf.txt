@@ -1,0 +1,32 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/27 (Sat) 03:04
+- [FACT] User has a 20-gallon saltwater tank named Ocean Breeze.
+- [PREFERENCE] User is interested in adding a new fish species to their tank.
+- [ASSISTANT_SAID] Ocellaris clownfish are relatively peaceful and can be a great addition to a community tank.
+- [ASSISTANT_SAID] Recommended reef-safe fish compatible with ocellaris clownfish include:
+  1. Neon Gobies (Eviota spp.)
+  2. Royal Grammas (Gramma loreto)
+  3. Green Chromis (Chromis viridis)
+  4. Six-Line Wrasse (Pseudocheilinus hexataenia)
+  5. Dottyback (Pseudochromis spp.)
+  6. Filefish (Oxymonacanthus longirostris)
+  7. Anthias (Anthias spp.)
+- [ASSISTANT_SAID] Suggested to avoid adding fish similar in shape or size to clownfish to prevent territorial behavior.
+- [ASSISTANT_SAID] Recommended to introduce new fish slowly and under close observation.
+- [ASSISTANT_SAID] Suggested to research each species' specific care requirements, including diet, water parameters, and tank size.
+- [USER] Asked for specific care requirements for Green Chromis, including water temperature, pH, and diet.
+- [ASSISTANT_SAID] Green Chromis (Chromis viridis) care requirements:
+  - Water Temperature: 72°F - 82°F (22°C - 28°C), ideal range 75°F - 78°F (24°C - 25°C)
+  - pH: 8.1 - 8.4, ideal range 8.2 - 8.3
+  - Ammonia and Nitrite: 0 ppm (undetectable)
+  - Nitrate: < 20 ppm
+  - Salinity: 1.020 - 1.025 (specific gravity)
+- [ASSISTANT_SAID] Green Chromis diet:
+  - Omnivorous, with a tendency towards carnivory
+  - High-quality commercial flake or pellet food
+  - Frozen or live foods like brine shrimp, mysis shrimp, or plankton
+  - Meaty foods like krill, squid, or fish flesh
+  - Feed 2-3 times a day, only as much as they can consume within 1-2 minutes
+- [ASSISTANT_SAID] Minimum tank size for Green Chromis: 20 gallons (75 liters) for a small school (6-8 individuals).
+- [ASSISTANT_SAID] Recommended tank type: FOWLR (Fish-Only with Live Rock)

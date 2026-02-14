@@ -1,0 +1,25 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/27 (Sat) 17:29
+- [ASSISTANT_SAID] The passage discusses different modes for retrieving water quality parameters using remote sensing: empirical mode, analytical mode, semi-empirical mode, and artificial intelligence mode.
+- [ASSISTANT_SAID] The empirical mode uses a statistical regression formula to establish a relationship between water quality parameters and reflectance.
+- [ASSISTANT_SAID] The analytical mode uses bio-optical and radiation transmission models to simulate the propagation of light in the atmosphere and water bodies.
+- [ASSISTANT_SAID] The semi-empirical mode combines the empirical and analytical modes and uses a small amount of in situ data and reflectance or radiance values to calculate water quality variables.
+- [ASSISTANT_SAID] The artificial intelligence mode uses neural networks and support vector machines to capture both linear and nonlinear relationships between water quality parameters and sediment deposits.
+- [USER] Request for drawbacks of each mode.
+- [ASSISTANT_SAID] Drawbacks of the Empirical Mode (EM): 
+  - Hard for simple empirical models to meet the accuracy requirements of water quality parameters concentration estimation.
+  - Poor generalities due to regional and temporal constraints.
+  - Requires a lot of field water quality sampling data as the basis to assure relatively higher accuracy.
+- [ASSISTANT_SAID] Drawbacks of the Analytical Mode (AM):
+  - Composition of water body and radiation transmission procedure is rather complex because many factors need to be measured for the model to be established.
+  - Spectral resolution of most satellite sensors and those measured near the ground are inconsistent, leading to difficulties in model research.
+  - Quantitative remote sensing inversion based on the analytical mode is difficult to achieve and is limited in practical applications.
+- [ASSISTANT_SAID] Drawbacks of the Semi-Empirical Mode (SEM): None mentioned in the paragraph.
+- [ASSISTANT_SAID] Drawbacks of the Artificial Intelligence (AI) Mode:
+  - Establishing a neural network for water quality retrieval requires a large number of samples to be trained with extensive experiences, otherwise there may be under-learning or over-learning situations, which greatly limit the neural network model inversion accuracy.
+  - Increase in the number of training samples will make SVM algorithms difficult to implement and run slowly.
+- [USER] Request for the research question and findings of two specific studies.
+- [ASSISTANT_SAID] Research question and finding of Tian et al. (2022):
+  - Research question: Can Sentinel-2 satellite data combined with multiple machine learning algorithms be used to accurately retrieve inland water quality parameters?
+  - Finding: The study found that machine learning algorithms, specifically random forest and support vector regression, combined with Sentinel-2 data can provide accurate retrieval of inland water quality parameters such as chlor

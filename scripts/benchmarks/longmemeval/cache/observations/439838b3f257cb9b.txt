@@ -1,0 +1,24 @@
+**Observation Log:**
+
+- [TEMPORAL] Session Date: 2023/05/26 (Fri) 00:37
+- [ASSISTANT_SAID] "This Instructional Designer will be responsible for working closely with faculty or business subject matter experts to design, create, and deliver online, blended and instructor-led classroom training courses and documentation using principles and practices of instructional design and adult learning theory." (Item 1 and 2)
+- [ASSISTANT_SAID] "Conduct learning and business needs analysis" (Item 3)
+- [ASSISTANT_SAID] "Devise modes of assessment to measure the effectiveness of the course" (Item 8)
+- [ASSISTANT_SAID] "Write effective copy, instructional materials, and audio/video scripts to help participants meet learning objectives" (Item 12)
+- [ASSISTANT_SAID] "Use e-learning authoring tools to upload instructional content to websites, e-learning platforms, or learning management systems" (Item 47)
+- [ASSISTANT_SAID] "Note: Items 3, 4, 6, 9-11, 13-15, 16, 18-22, 25-26, 28-29, 31-36, 38-41, 44-50, 52-54 and 56 were not found in the job description."
+- [USER] "Why you write in the note that item 3 were not found in the job description while you find it as a 'MATCH' item in the 2nd item in the report?"
+- [ASSISTANT_SAID] "I apologize for the confusion. It looks like there was a mistake in the report. The third item should be marked as 'MATCH' as it was found in the job description. Thank you for bringing this to my attention, I will make sure to update the report."
+- [USER] "update the report"
+- [ASSISTANT_SAID] "I apologize for the mistake in the report. Allow me to correct it."
+- [ASSISTANT_SAID] "Report:"
+- [ASSISTANT_SAID] "1. Job Title: Data Scientist"
+- [ASSISTANT_SAID] "Matched Requirements:"
+- [ASSISTANT_SAID] "1. Experience with Python programming language."
+- [ASSISTANT_SAID] "2. Knowledge of machine learning techniques and algorithms."
+- [ASSISTANT_SAID] "3. Ability to work with large data sets and databases."
+- [ASSISTANT_SAID] "Not Found in Job Description:"
+- [ASSISTANT_SAID] "N/A"
+- [ASSISTANT_SAID] "2. Job Title: Data Engineer"
+- [ASSISTANT_SAID] "Matched Requirements:"
+- [ASS

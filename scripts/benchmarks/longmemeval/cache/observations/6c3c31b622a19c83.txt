@@ -1,0 +1,21 @@
+**Observation Log:**
+
+[FACT] The user is planning a trip to Asia.  
+[EVENT] The user wants to know must-try dishes in Japan and Korea.  
+[ASSISTANT_SAID] The assistant provided a list of must-try dishes in Japan: Sushi, Ramen, Tonkatsu, Yakitori, Udon, Tempura, Okonomiyaki, and Bento.  
+[ASSISTANT_SAID] The assistant provided a list of must-try dishes in Korea: Bibimbap, Bulgogi, Jeyuk bokkeum, Naengmyeon, Kimchi Stew (Kimchi Jjigae), Tteokbokki, Galbi, and Mandu.  
+[ASSISTANT_SAID] The assistant suggested trying popular Korean street foods like hotteok and bungeo-ppang.  
+[FACT] The user has tried some of the recommended dishes before.  
+[CHANGE] The user is excited to try more authentic versions of the dishes while in Japan and Korea.  
+[FACT] The user has been perfecting their homemade ramen recipe, which has become a staple in their household.  
+[ASSISTANT_SAID] The assistant praised the user's homemade ramen and suggested trying different regional variations of ramen in Japan: Tonkotsu Ramen, Shio Ramen, Shoyu Ramen, and Miso Ramen.  
+[ASSISTANT_SAID] The assistant recommended trying local specialties and possibly taking a ramen-making class in Japan.  
+[FACT] The user added extra pork belly and boiled eggs to their homemade ramen to make it more authentic.  
+[ASSISTANT_SAID] The assistant complimented the user's additions of pork belly (chashu) and boiled eggs (ajitama) to their ramen, explaining their significance in traditional Japanese ramen.  
+[FACT] The user has been watching a lot of Korean cooking videos on YouTube for inspiration for their marinades.  
+[ASSISTANT_SAID] The assistant recommended several Korean cooking channels: Maangchi, Korean Bapsang, Seonkyoung Longest, and My Korean Kitchen.  
+[ASSISTANT_SAID] The assistant suggested specific recipes to check out, including Bulgogi, Galbi, Jeyuk Bokkeum, and Kimchi Stew (Kimchi Jjigae).  
+[ASSISTANT_SAID] The assistant provided a basic kimchi recipe and tips for making kimchi from scratch, including ingredients and fermentation advice.  
+[ASSISTANT_SAID] The assistant mentioned the importance of using napa cabbage, salting the cabbage, balancing flavors, and storing kimchi properly.  
+[ASSISTANT_SAID] The assistant suggested checking out Maangchi's YouTube video for a kimchi recipe.  
+[TEMPORAL] The session date is 2023/08/09 (

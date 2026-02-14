@@ -1,0 +1,77 @@
+{
+  "answer_4cb841a8_1": [
+    {
+      "fact": "User is considering getting a detailing kit for their car",
+      "type": "preference",
+      "entities": [
+        "detailing kit",
+        "car"
+      ]
+    },
+    {
+      "fact": "User recently purchased a waterproof car cover for their car",
+      "type": "event",
+      "entities": [
+        "waterproof car cover",
+        "car"
+      ]
+    },
+    {
+      "fact": "User's car's paint is pretty sensitive",
+      "type": "personal",
+      "entities": [
+        "car's paint"
+      ]
+    },
+    {
+      "fact": "User is looking for a detailing kit for general cleaning and maintenance, and some interior detailing",
+      "type": "preference",
+      "entities": [
+        "detailing kit",
+        "general cleaning",
+        "maintenance",
+        "interior detailing"
+      ]
+    },
+    {
+      "fact": "User prefers a detailing kit that is gentle on sensitive paint",
+      "type": "preference",
+      "entities": [
+        "detailing kit",
+        "sensitive paint"
+      ]
+    }
+  ],
+  "answer_4cb841a8_2": [
+    {
+      "fact": "User is looking for tips on cleaning their car's interior, specifically the center console.",
+      "type": "preference",
+      "entities": [
+        "car interior",
+        "center console"
+      ]
+    },
+    {
+      "fact": "User's center console is getting dusty and dirty.",
+      "type": "personal",
+      "entities": [
+        "center console"
+      ]
+    },
+    {
+      "fact": "User is interested in recommendations for a good interior cleaning product.",
+      "type": "preference",
+      "entities": [
+        "interior cleaning product"
+      ]
+    },
+    {
+      "fact": "User is considering using a microfiber cloth with a slightly abrasive side to remove stubborn stains.",
+      "type": "opinion",
+      "entities": [
+        "microfiber cloth",
+        "stubborn stains"
+      ]
+    }
+  ]
+}

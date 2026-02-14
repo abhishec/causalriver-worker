@@ -1,0 +1,16 @@
+**Observation Log:**
+
+- [FACT] User's name is Ava Elizabeth Thompson.
+- [CHANGE] User is updating online accounts with their new name.
+- [EVENT] User updated their driver's license on February 24th at the DMV.
+- [ASSISTANT_SAID] To update the Netflix account, the user should sign in, click on their profile picture, select "Account," click on "Account settings," update their name, verify their email address, and review the changes.
+- [ASSISTANT_SAID] User should also update their billing information on Netflix to ensure payments are processed correctly.
+- [ASSISTANT_SAID] To update their bank account, the user should gather required documents, contact their bank, inform them of the name change, verify their identity, provide documentation, and request new cards if necessary.
+- [ASSISTANT_SAID] User should monitor their bank account activity after the name change to ensure everything is correct.
+- [ASSISTANT_SAID] To change their name on Facebook, the user should log in, click on the down arrow next to their profile picture, select "Settings," click on "Account Settings," edit their name, enter their password, and save changes.
+- [ASSISTANT_SAID] Facebook may ask for verification of the name change through a government-issued ID.
+- [ASSISTANT_SAID] To update their LinkedIn profile, the user should log in, click on their profile picture, select "View profile," edit their name, and save changes.
+- [ASSISTANT_SAID] User should ensure consistency across all sections of their LinkedIn profile after the name change.
+- [ASSISTANT_SAID] To update credit card information, the user should gather required documents, contact their credit card issuer, inform them of the name change, verify their identity, provide documentation, and update account information.
+- [ASSISTANT_SAID] User should be prepared to answer security questions when contacting their credit card issuer.
+- [TEMPORAL] Session date is 2023/05/27 (Sat) 15:01.
