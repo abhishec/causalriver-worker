@@ -18,5 +18,13 @@ export default defineConfig({
   clean: true,
   splitting: true,
   treeshake: true,
-  external: ['react', '@supabase/supabase-js', '@tanstack/react-query'],
+  external: [
+    'react',
+    '@supabase/supabase-js',
+    '@tanstack/react-query',
+    'tree-sitter',
+    'tree-sitter-go',
+    'tree-sitter-python',
+    'tree-sitter-scala',
+  ],
 });

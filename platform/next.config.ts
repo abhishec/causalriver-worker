@@ -8,12 +8,22 @@ const nextConfig: NextConfig = {
     // Types are validated locally and in CI via `tsc --noEmit`.
     ignoreBuildErrors: true,
   },
+  // Native Node.js modules — resolved at runtime, not bundled by webpack
   serverExternalPackages: [
     'tree-sitter',
     'tree-sitter-go',
     'tree-sitter-python',
     'tree-sitter-scala',
   ],
+  outputFileTracingRoot: undefined,
+  webpack: (config) => {
+    // Handle native .node binary files (tree-sitter prebuilds)
+    config.module.rules.push({
+      test: /\.node$/,
+      loader: 'node-loader',
+    });
+    return config;
+  },
 };
 
 export default nextConfig;
