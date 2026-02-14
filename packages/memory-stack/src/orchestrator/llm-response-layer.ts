@@ -385,7 +385,7 @@ export function createLLMResponseLayer(config: LLMResponseConfig) {
           'anthropic-version': '2023-06-01',
         },
         body: JSON.stringify({
-          model: model || 'claude-sonnet-4-20250514',
+          model: model || 'claude-3-5-haiku-20241022', // Cost optimization: Haiku for conversational responses
           max_tokens: maxTokens,
           system: systemPrompt,
           messages: messages.map((m) => ({
@@ -429,7 +429,7 @@ export function createLLMResponseLayer(config: LLMResponseConfig) {
           Authorization: `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          model: model || 'gpt-4o',
+          model: model || 'gpt-4o-mini', // Cost optimization: 15x cheaper than gpt-4o
           max_tokens: maxTokens,
           messages: [
             { role: 'system', content: systemPrompt },
@@ -575,7 +575,7 @@ ${nexusContext.assembledContext}
           contextSections: Object.entries(contextUsed)
             .filter(([, v]) => v > 0)
             .map(([k]) => k),
-          model: model || (provider === 'anthropic' ? 'claude-sonnet-4-20250514' : 'gpt-4o'),
+          model: model || (provider === 'anthropic' ? 'claude-3-5-haiku-20241022' : 'gpt-4o-mini'),
         },
       });
 

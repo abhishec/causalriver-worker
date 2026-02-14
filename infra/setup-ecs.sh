@@ -688,9 +688,9 @@ SUBNET2=$(echo "${SUBNETS}" | awk '{print $2}')
 # --- Trainer: Every 6 hours ---
 aws events put-rule \
   --name "nexusbrain-trainer-schedule" \
-  --schedule-expression "cron(0 0,6,12,18 * * ? *)" \
+  --schedule-expression "cron(0 0,12 * * ? *)" \
   --state ENABLED \
-  --description "Run NexusBrain autonomous trainer every 6 hours" \
+  --description "Run NexusBrain autonomous trainer every 12 hours (cost-optimized from 6h)" \
   --region "${REGION}" > /dev/null
 
 cat > /tmp/target-trainer.json << TARGET
@@ -720,7 +720,7 @@ aws events put-targets \
   --rule "nexusbrain-trainer-schedule" \
   --targets file:///tmp/target-trainer.json \
   --region "${REGION}" > /dev/null
-echo "    Trainer: Every 6 hours (00:00, 06:00, 12:00, 18:00 UTC)"
+echo "    Trainer: Every 12 hours (00:00, 12:00 UTC) [cost-optimized]"
 
 # --- Consolidation: Daily at 2 AM UTC ---
 aws events put-rule \
@@ -762,9 +762,9 @@ echo "    Consolidation: Daily at 2:00 AM UTC"
 # --- DMN Scan: Every 4 hours ---
 aws events put-rule \
   --name "nexusbrain-dmn-schedule" \
-  --schedule-expression "cron(0 0,4,8,12,16,20 * * ? *)" \
+  --schedule-expression "cron(0 0,8,16 * * ? *)" \
   --state ENABLED \
-  --description "Run NexusBrain DMN scan every 4 hours" \
+  --description "Run NexusBrain DMN scan every 8 hours (cost-optimized from 4h)" \
   --region "${REGION}" > /dev/null
 
 cat > /tmp/target-dmn.json << TARGET
@@ -794,7 +794,7 @@ aws events put-targets \
   --rule "nexusbrain-dmn-schedule" \
   --targets file:///tmp/target-dmn.json \
   --region "${REGION}" > /dev/null
-echo "    DMN Scan: Every 4 hours (00:00, 04:00, 08:00, 12:00, 16:00, 20:00 UTC)"
+echo "    DMN Scan: Every 8 hours (00:00, 08:00, 16:00 UTC) [cost-optimized]"
 
 # --- Git Code Trainer: Weekly Sunday 2 AM UTC ---
 aws events put-rule \
@@ -984,9 +984,9 @@ echo "    Monthly Analysis: 1st of each month at 3:00 AM UTC"
 # --- Federation Agent: Every 6 hours (offset from trainer) ---
 aws events put-rule \
   --name "nexusbrain-federation-schedule" \
-  --schedule-expression "cron(0 1,7,13,19 * * ? *)" \
+  --schedule-expression "cron(0 1,13 * * ? *)" \
   --state ENABLED \
-  --description "Run NexusBrain Federation Agent every 6 hours (Core ↔ Org knowledge sync)" \
+  --description "Run NexusBrain Federation Agent every 12 hours (cost-optimized from 6h)" \
   --region "${REGION}" > /dev/null
 
 cat > /tmp/target-federation.json << TARGET
@@ -1016,7 +1016,7 @@ aws events put-targets \
   --rule "nexusbrain-federation-schedule" \
   --targets file:///tmp/target-federation.json \
   --region "${REGION}" > /dev/null
-echo "    Federation: Every 6 hours (01:00, 07:00, 13:00, 19:00 UTC)"
+echo "    Federation: Every 12 hours (01:00, 13:00 UTC) [cost-optimized]"
 
 # --- Security Hardening Agent: Daily at 4 AM UTC ---
 aws events put-rule \
@@ -1070,9 +1070,9 @@ echo "Full Agent Schedule (11 agents + 1 optimizer, 12 ECS task defs):"
 echo "  ┌──────────────────────────┬────────────────────────────────────────┬──────────┐"
 echo "  │ Agent                    │ Schedule                               │ CPU/Mem  │"
 echo "  ├──────────────────────────┼────────────────────────────────────────┼──────────┤"
-echo "  │ Autonomous Trainer       │ Every 6h (0,6,12,18 UTC)               │ 1/4 GB   │"
-echo "  │ Federation Agent         │ Every 6h offset (1,7,13,19 UTC)        │ 1/4 GB   │"
-echo "  │ DMN Scan                 │ Every 4h (0,4,8,12,16,20 UTC)          │ 0.5/2 GB │"
+echo "  │ Autonomous Trainer       │ Every 12h (0,12 UTC)                    │ 1/4 GB   │"
+echo "  │ Federation Agent         │ Every 12h offset (1,13 UTC)             │ 1/4 GB   │"
+echo "  │ DMN Scan                 │ Every 8h (0,8,16 UTC)                   │ 0.5/2 GB │"
 echo "  │ Proactive Intelligence   │ Every 4h offset (1,5,9,13,17,21 UTC)   │ 0.5/1 GB │"
 echo "  │ Brain Consolidation      │ Daily 2 AM UTC                         │ 2/8 GB   │"
 echo "  │ Cost Agent               │ Daily 3 AM UTC                         │ 0.5/1 GB │"

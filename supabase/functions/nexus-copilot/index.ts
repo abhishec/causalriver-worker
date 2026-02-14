@@ -51,14 +51,21 @@ const corsHeaders = {
 
 const CORE_BRAIN_ORG_ID = '00000000-0000-4000-a000-000000000001';
 
-/** Maximum agentic loop iterations to prevent runaway */
-const MAX_TOOL_ROUNDS = 8;
+/** Maximum agentic loop iterations to prevent runaway (reduced from 8 → 5 for cost control) */
+const MAX_TOOL_ROUNDS = 5;
 
-/** Maximum tokens for agentic responses */
-const MAX_TOKENS_AGENTIC = 4096;
+/** Maximum tokens for agentic responses (reduced from 4096 → 2048 for cost control) */
+const MAX_TOKENS_AGENTIC = 2048;
 
 /** Maximum tokens for fast-path responses */
 const MAX_TOKENS_FAST = 1024;
+
+// ── COST-OPTIMIZED MODEL SELECTION ──
+// Sonnet for agentic reasoning (tool selection needs intelligence)
+// Haiku for fast-path, cerebellum cache, and self-correction (structured/simple tasks)
+const MODEL_AGENTIC = 'claude-sonnet-4-20250514';    // Complex reasoning + tool use
+const MODEL_FAST    = 'claude-3-5-haiku-20241022';    // Simple Q&A with context (10x cheaper)
+const MODEL_VERIFY  = 'claude-3-5-haiku-20241022';    // Self-correction checks (10x cheaper)
 
 /** Fast-path cache TTL (24 hours) */
 const FAST_PATH_CACHE_TTL_HOURS = 24;
@@ -1197,7 +1204,7 @@ async function handleFastPath(
       'anthropic-version': '2023-06-01',
     },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
+      model: MODEL_FAST,
       max_tokens: MAX_TOKENS_FAST,
       system: sections.join('\n\n'),
       messages: [{ role: 'user', content: query }],
@@ -1219,7 +1226,7 @@ async function handleFastPath(
         memories: [...orgMemsList.map((m: any) => ({ ...m, _source: 'org' })), ...uniqueCoreMems.map((m: any) => ({ ...m, _source: 'core' }))],
       },
       meta: {
-        model: 'claude-sonnet-4-20250514',
+        model: MODEL_FAST,
         tokensUsed,
         complexity: 'simple',
         federated: !isCoreBrain,
@@ -1322,9 +1329,9 @@ Complexity assessment: ${complexity.level} (score: ${complexity.score}, signals:
                 'anthropic-version': '2023-06-01',
               },
               body: JSON.stringify({
-                model: 'claude-sonnet-4-20250514',
+                model: MODEL_AGENTIC,
                 max_tokens: MAX_TOKENS_AGENTIC,
-                system: systemPrompt,
+                system: [{ type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }],
                 tools: COPILOT_TOOLS,
                 messages,
               }),
@@ -1419,7 +1426,7 @@ Complexity assessment: ${complexity.level} (score: ${complexity.score}, signals:
                     'anthropic-version': '2023-06-01',
                   },
                   body: JSON.stringify({
-                    model: 'claude-sonnet-4-20250514',
+                    model: MODEL_VERIFY,
                     max_tokens: 512,
                     messages: [{ role: 'user', content: correctionPrompt }],
                   }),
@@ -1481,9 +1488,9 @@ Complexity assessment: ${complexity.level} (score: ${complexity.score}, signals:
           'anthropic-version': '2023-06-01',
         },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
+          model: MODEL_AGENTIC,
           max_tokens: MAX_TOKENS_AGENTIC,
-          system: systemPrompt,
+          system: [{ type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }],
           tools: COPILOT_TOOLS,
           messages,
         }),
@@ -1563,7 +1570,7 @@ Complexity assessment: ${complexity.level} (score: ${complexity.score}, signals:
               'anthropic-version': '2023-06-01',
             },
             body: JSON.stringify({
-              model: 'claude-sonnet-4-20250514',
+              model: MODEL_VERIFY,
               max_tokens: 512,
               messages: [{ role: 'user', content: correctionPrompt }],
             }),
@@ -1618,7 +1625,7 @@ Complexity assessment: ${complexity.level} (score: ${complexity.score}, signals:
         })),
         selfCorrection: selfCorrectionResult,
         meta: {
-          model: 'claude-sonnet-4-20250514',
+          model: MODEL_AGENTIC,
           tokensUsed: totalTokens,
           toolCallsCount: allToolCalls.length,
           toolsUsed: [...new Set(allToolCalls.map(tc => tc.tool))],
@@ -1727,7 +1734,7 @@ serve(async (req: Request) => {
           'anthropic-version': '2023-06-01',
         },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
+          model: MODEL_FAST,
           max_tokens: MAX_TOKENS_FAST,
           system: cached.compiledContext,
           messages: [{ role: 'user', content: query }],
@@ -1745,7 +1752,7 @@ serve(async (req: Request) => {
           toolCalls: [],
           context: { cachedEdges: cached.relevantEdges },
           meta: {
-            model: 'claude-sonnet-4-20250514',
+            model: MODEL_FAST,
             tokensUsed,
             complexity: 'cached',
             fingerprint: fingerprint.hash,

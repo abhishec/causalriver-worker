@@ -269,7 +269,7 @@ serve(async (req: Request) => {
 
     if (anthropicKey) {
       // Primary: Anthropic Claude
-      modelUsed = 'claude-sonnet-4-20250514';
+      modelUsed = 'claude-3-5-haiku-20241022'; // Cost optimization: Haiku is 10x cheaper for simple Q&A queries
       const llmResponse = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: {
@@ -290,7 +290,7 @@ serve(async (req: Request) => {
       tokensUsed = (llmData.usage?.input_tokens || 0) + (llmData.usage?.output_tokens || 0);
     } else {
       // Fallback: OpenAI
-      modelUsed = 'gpt-4o';
+      modelUsed = 'gpt-4o-mini'; // Cost optimization: gpt-4o-mini is 15x cheaper than gpt-4o for simple queries
       const llmResponse = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {

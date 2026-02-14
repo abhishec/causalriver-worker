@@ -627,7 +627,8 @@ export function createBrainAmplifier(config: BrainAmplifierConfig) {
           body: JSON.stringify({
             model,
             max_tokens: callMaxTokens,
-            system: systemPrompt,
+            // Enable prompt caching for system prompts — saves ~90% on repeated prompts
+            system: [{ type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }],
             messages: [{ role: 'user', content: userMessage }],
           }),
         }

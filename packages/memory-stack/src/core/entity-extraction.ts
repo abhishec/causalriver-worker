@@ -358,7 +358,7 @@ Return ONLY the JSON array, no other text.`;
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: config?.model || 'claude-sonnet-4-20250514',
+        model: config?.model || 'claude-3-5-haiku-20241022', // Cost optimization: Haiku for structured JSON extraction
         max_tokens: 1024,
         messages: [{ role: 'user', content: prompt }],
       }),

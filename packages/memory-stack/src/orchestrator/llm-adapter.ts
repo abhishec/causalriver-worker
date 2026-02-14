@@ -82,13 +82,13 @@ ${nexusContext.assembledContext}
     if (provider === 'anthropic') {
       return callAnthropic(systemPrompt, userMessage, {
         apiKey,
-        model: model || 'claude-sonnet-4-20250514',
+        model: model || 'claude-3-5-haiku-20241022', // Cost optimization: Haiku for basic copilot chat
         maxTokens,
       });
     } else {
       return callOpenAI(systemPrompt, userMessage, {
         apiKey,
-        model: model || 'gpt-4o',
+        model: model || 'gpt-4o-mini', // Cost optimization: 15x cheaper than gpt-4o
         maxTokens,
       });
     }
