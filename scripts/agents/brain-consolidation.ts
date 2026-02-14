@@ -30,6 +30,9 @@ export interface BrainConsolidationConfig {
 }
 
 export class BrainConsolidationAgent extends ManusNativeAgent {
+  readonly name = 'brain-consolidation';
+  readonly version = '6.0.0';
+  readonly description = '10-step brain sleep cycle: causal discovery, anomaly detection, pattern mining, pruning, strengthening';
   readonly brainRegion = 'Default Mode Network (DMN / Region #8)';
   readonly neurologicalFunction = 'Brain Sleep & Memory Consolidation';
 
@@ -216,3 +219,20 @@ export class BrainConsolidationAgent extends ManusNativeAgent {
     return commands;
   }
 }
+
+// ── Self-Registration: Auto-register to globalRegistry on import ──────────
+import { createClient } from '@supabase/supabase-js';
+import { globalRegistry } from '../agent-framework/agent-registry';
+
+globalRegistry.register({
+  name: 'brain-consolidation',
+  description: '10-step brain sleep cycle: causal discovery, anomaly detection, pattern mining, pruning, strengthening',
+  version: '6.0.0',
+  factory: (config) => {
+    const supabase = createClient(config.supabaseUrl, config.supabaseKey);
+    return new BrainConsolidationAgent(supabase, config.organizationId || '00000000-0000-4000-a000-000000000001', { verbose: config.verbose }) as any;
+  },
+  schedule: '0 2 * * *',  // Daily at 2 AM UTC
+  resourceRequirements: { cpu: '2048', memory: '8192' },
+  tags: ['training', 'dmn', 'consolidation', 'brain-sleep'],
+});

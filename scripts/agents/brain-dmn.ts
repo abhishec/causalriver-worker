@@ -33,6 +33,9 @@ export interface DMNConfig {
 }
 
 export class DMNAgent extends ManusNativeAgent {
+  readonly name = 'brain-dmn';
+  readonly version = '6.0.0';
+  readonly description = 'Background insight scanning: unexpected correlations, emerging cascades, what-changed analysis, knowledge gaps';
   readonly brainRegion = 'Default Mode Network (DMN)';
   readonly neurologicalFunction = 'Background Insight Scanning';
 
@@ -241,3 +244,20 @@ export class DMNAgent extends ManusNativeAgent {
     return commands;
   }
 }
+
+// ── Self-Registration: Auto-register to globalRegistry on import ──────────
+import { createClient } from '@supabase/supabase-js';
+import { globalRegistry } from '../agent-framework/agent-registry';
+
+globalRegistry.register({
+  name: 'brain-dmn',
+  description: 'Background insight scanning: unexpected correlations, emerging cascades, what-changed analysis, knowledge gaps',
+  version: '6.0.0',
+  factory: (config) => {
+    const supabase = createClient(config.supabaseUrl, config.supabaseKey);
+    return new DMNAgent(supabase, config.organizationId || '00000000-0000-4000-a000-000000000001', { verbose: config.verbose }) as any;
+  },
+  schedule: '0 0,4,8,12,16,20 * * *',  // Every 4 hours
+  resourceRequirements: { cpu: '1024', memory: '4096' },
+  tags: ['training', 'dmn', 'insight', 'background-scanning'],
+});
