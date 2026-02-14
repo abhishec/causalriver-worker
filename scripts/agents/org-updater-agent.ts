@@ -1,479 +1,403 @@
 /**
- * Org Updater Agent — Continuous Learning from ALL Connections & Integrations
+ * Org Updater Agent — Organization Brain Heartbeat
  * ═══════════════════════════════════════════════════════════════════════════
  *
- * Brain Region: Thalamus (Sensory Gateway & Integration Hub)
- * Neurological Function: Multi-Source Data Integration & Continuous Learning
+ * Brain Region: **Thalamus** (Sensory Relay Station)
+ * Neurological Function: Routes external data from ALL connected integrations
+ * into the organization's brain, then triggers learning cycles to process it.
  *
- * **THE KEY PART OF ORG BRAIN LEARNING**
+ * This agent is the **heartbeat** of each org's brain. Without it, an org's
+ * brain would be alive (bootstrapped by org-creation-agent) but dormant —
+ * no new data flowing in, no learning happening, no patterns discovered.
  *
- * This agent is the HEART of org-specific learning. It:
+ * What It Does:
+ * ─────────────
+ * 1. **FETCH**: Reads org_connectors → instantiates active connectors → syncs ALL
+ *    via the existing SyncManager (incremental if cursor exists, full otherwise)
+ * 2. **CONVERT**: Aggregates sync stats into an org heartbeat signal
+ * 3. **TRAIN**: If enough new signals, triggers autonomous learning cycle
+ *    + mini-consolidation for heavy signal volumes
+ * 4. **VALIDATE**: Checks brain health (training logs, causal edge integrity)
+ * 5. **REPORT**: Summary of connectors synced, signals generated, patterns discovered
  *
- * 1. **Discovers ALL Connections**
- *    - Scans organization for all active connectors (HubSpot, Slack, GitHub, etc.)
- *    - Identifies data sources, credentials, sync status
- *    - Maps connection health and last sync time
+ * Schedule: Every 4 hours (staggered per org by the orchestrator)
+ * Trigger: Also callable via the orchestrator's per-org scheduling
  *
- * 2. **Pulls Data from ALL Sources** (Delta Updates)
- *    - HubSpot: Deals, contacts, companies, activities (last 12h)
- *    - Slack: Messages, threads, reactions (last 12h)
- *    - GitHub: Commits, PRs, issues, reviews (last 12h)
- *    - Stripe: Charges, customers, subscriptions (last 12h)
- *    - Jira: Issues, sprints, board updates (last 12h)
- *    - Linear: Issues, projects, cycles (last 12h)
- *    - Google Docs: Document changes, comments (last 12h)
- *    - Notion: Page updates, database changes (last 12h)
- *    - ... and ALL other configured connectors
- *
- * 3. **Converts to Signals** (Cross-Domain Intelligence)
- *    - Transforms raw data into ConnectorSignals
- *    - Extracts entities, events, metrics, relationships
- *    - Normalizes timestamps, values, metadata
- *    - Deduplicates and merges overlapping signals
- *
- * 4. **Trains EVERY Part of Brain**
- *    - Bayesian Causal Discovery (causal_relationships)
- *    - Embedding Learning (entity_embeddings)
- *    - Contrastive Learning (positive/negative pairs)
- *    - Impact Scoring (business metrics)
- *    - Anomaly Detection (outlier monitoring)
- *    - Pattern Recognition (recurring sequences)
- *    - Prediction Models (future state forecasting)
- *
- * 5. **Delta Updates** (Incremental Learning)
- *    - Only fetches NEW data since last sync (last 12h)
- *    - Avoids re-processing old data (efficient)
- *    - Maintains sync cursors per connector
- *    - Updates brain incrementally (no full retrain)
- *
- * 6. **Health Monitoring**
- *    - Tracks connector health (success rate, latency)
- *    - Detects stale connections (>24h without sync)
- *    - Alerts on sync failures or data gaps
- *    - Motor commands for remediation
- *
- * **Schedule**: Every 12 hours (continuous learning)
- *
- * **Motor Commands**:
- *   - Slack: Sync status, data insights, alerts
- *   - GitHub: Issues for connection failures
- *   - Email: Weekly learning summary (CTO-level)
+ * Reuses:
+ * - connector-framework.ts → NexusConnector interface
+ * - sync-manager.ts → createSyncManager() for cursor-tracked sync
+ * - All 13 createXxxConnector() factories
+ * - autonomous-learner.ts → runLearningCycle() for pattern discovery
+ * - consolidation-engine.ts → consolidate() for sleep-cycle learning
  *
  * @packageDocumentation
  */
 
-import type { FetchResult, ConvertResult, TrainResult } from '../agent-framework/brain-native-agent-v5-manus';
-import { ManusNativeAgent } from '../agent-framework/brain-native-agent-v5-manus';
-import type { MotorCommand } from '../../packages/memory-stack/src/orchestrator/motor-command-engine';
-import type { ConnectorSignal } from '../../packages/memory-stack/src/connectors/connector-framework';
+import {
+  BaseTrainingAgent,
+  type AgentConfig,
+  type FetchResult,
+  type ConvertResult,
+  type TrainResult,
+} from '../agent-framework/base-training-agent';
+import { createSyncManager } from '../../packages/memory-stack/src/connectors/sync-manager';
+import {
+  storeConnectorSignals,
+  type NexusConnector,
+  type ConnectorSignal,
+  type ConnectorSyncResult,
+} from '../../packages/memory-stack/src/connectors/connector-framework';
 import type { TrainingPack } from '../../packages/memory-stack/src/learning/brain-trainer';
 
-// Import ALL connector types
-import { createHubSpotConnector } from '../../packages/memory-stack/src/connectors/hubspot-connector';
-import { createSlackConnector } from '../../packages/memory-stack/src/connectors/slack-connector';
-import { createGitHubConnector } from '../../packages/memory-stack/src/connectors/github-connector';
-import { createStripeConnector } from '../../packages/memory-stack/src/connectors/stripe-connector';
+// ── Connector Factories ─────────────────────────────────────────────────────
+import { createHubSpotConnector } from '../../packages/memory-stack/src/connectors/hubspot';
+import { createStripeConnector } from '../../packages/memory-stack/src/connectors/stripe';
+import { createGitHubConnector, type GitHubConnectorConfig } from '../../packages/memory-stack/src/connectors/github';
+import { createJiraConnector, type JiraConnectorConfig } from '../../packages/memory-stack/src/connectors/jira';
+import { createSlackConnector, type SlackConnectorConfig } from '../../packages/memory-stack/src/connectors/slack';
+import { createPagerDutyConnector, type PagerDutyConnectorConfig } from '../../packages/memory-stack/src/connectors/pagerduty';
+import { createGoogleCalendarConnector, type GoogleCalendarConnectorConfig } from '../../packages/memory-stack/src/connectors/google-calendar';
+import { createGoogleChatConnector, type GoogleChatConnectorConfig } from '../../packages/memory-stack/src/connectors/google-chat';
+import { createVoiceConnector, type VoiceConnectorConfig } from '../../packages/memory-stack/src/connectors/voice';
+import { createSupportConnector } from '../../packages/memory-stack/src/connectors/support';
+import { createDocumentConnector, type DocumentConnectorConfig } from '../../packages/memory-stack/src/connectors/document';
+import { createGenericAppConnector, type GenericAppConnectorConfig } from '../../packages/memory-stack/src/connectors/generic-app';
 
-// ────────────────────────────────────────────────────────────────────────────
-// Types
-// ────────────────────────────────────────────────────────────────────────────
+// ── Learning Systems ─────────────────────────────────────────────────────────
+import { createSupabaseRepository } from '../../packages/memory-stack/src/persistence/supabase-repository';
+import { createAutonomousLearner } from '../../packages/memory-stack/src/learning/autonomous-learner';
+import { createConsolidationEngine } from '../../packages/memory-stack/src/orchestrator/consolidation-engine';
 
-interface OrgConnection {
-  id: string;
-  type: 'hubspot' | 'slack' | 'github' | 'stripe' | 'jira' | 'linear' | 'notion' | 'google-docs' | string;
-  name: string;
-  credentials: Record<string, any>;
-  lastSyncAt: Date | null;
-  nextSyncAt: Date | null;
-  isHealthy: boolean;
-  syncCursor?: string;
-  metadata?: Record<string, any>;
-}
+// ============================================================================
+// CONFIGURATION
+// ============================================================================
 
-interface ConnectionSyncResult {
-  connectionId: string;
-  connectionType: string;
-  signalsFetched: number;
-  recordsProcessed: number;
-  errors: string[];
-  duration: number;
-  newCursor?: string;
-}
+/** Minimum signals in last cycle to trigger autonomous learning */
+const LEARNING_SIGNAL_THRESHOLD = 50;
 
-interface OrgUpdaterConfig {
-  /** Look back window in hours (default: 12) */
-  deltaHours?: number;
-  /** Max signals per connection (default: 1000) */
-  maxSignalsPerConnection?: number;
-  /** Enable full retrain instead of delta (default: false) */
-  fullRetrain?: boolean;
-  /** Connections to skip (for debugging) */
-  skipConnections?: string[];
-}
+/** Minimum signals in last cycle to trigger mini-consolidation */
+const CONSOLIDATION_SIGNAL_THRESHOLD = 500;
 
-// ────────────────────────────────────────────────────────────────────────────
-// Org Updater Agent (V7 Manus)
-// ────────────────────────────────────────────────────────────────────────────
+/** Hours to look back for recent signals */
+const SIGNAL_LOOKBACK_HOURS = 4;
 
-export class OrgUpdaterAgent extends ManusNativeAgent {
-  readonly name = 'org-updater-agent';
-  readonly version = '7.0.0';
-  readonly description = 'Continuous learning from ALL org connections: pulls delta data every 12h, trains every part of brain';
-  readonly brainRegion = 'Thalamus (Sensory Gateway & Integration Hub)';
-  readonly neurologicalFunction = 'Multi-Source Data Integration & Continuous Learning';
+// ============================================================================
+// CONNECTOR FACTORY
+// ============================================================================
 
-  private config: Required<OrgUpdaterConfig>;
-  private connections: OrgConnection[] = [];
-  private syncResults: ConnectionSyncResult[] = [];
-
-  constructor(
-    supabase: any,
-    organizationId: string,
-    config: OrgUpdaterConfig & { verbose?: boolean } = {}
-  ) {
-    super(supabase, organizationId, { verbose: config.verbose });
-    this.config = {
-      deltaHours: config.deltaHours || 12,
-      maxSignalsPerConnection: config.maxSignalsPerConnection || 1000,
-      fullRetrain: config.fullRetrain || false,
-      skipConnections: config.skipConnections || [],
-    };
-  }
-
-  // ── Fetch: Discover ALL connections and pull delta data ──
-  async fetch(): Promise<FetchResult> {
-    this.log('Discovering organization connections...');
-
-    // Step 1: Fetch all configured connections for this org
-    const { data: connectionsData, error: connectionsError } = await this.supabase
-      .from('connector_configurations')
-      .select('*')
-      .eq('organization_id', this.organizationId)
-      .eq('is_active', true);
-
-    if (connectionsError) {
-      this.log(`Error fetching connections: ${connectionsError.message}`);
-      return { success: false, data: null };
-    }
-
-    if (!connectionsData || connectionsData.length === 0) {
-      this.log('No active connections found for this organization');
-      return { success: false, data: null };
-    }
-
-    this.connections = connectionsData.map((conn: any) => ({
-      id: conn.id,
-      type: conn.connector_type,
-      name: conn.name || conn.connector_type,
-      credentials: conn.credentials || {},
-      lastSyncAt: conn.last_sync_at ? new Date(conn.last_sync_at) : null,
-      nextSyncAt: conn.next_sync_at ? new Date(conn.next_sync_at) : null,
-      isHealthy: conn.sync_status === 'success',
-      syncCursor: conn.sync_cursor,
-      metadata: conn.metadata || {},
-    }));
-
-    this.log(`Found ${this.connections.length} active connection(s)`);
-
-    // Step 2: Pull delta data from each connection
-    const allSignals: ConnectorSignal[] = [];
-    const deltaStartTime = new Date(Date.now() - this.config.deltaHours * 60 * 60 * 1000);
-
-    for (const connection of this.connections) {
-      // Skip if in skip list
-      if (this.config.skipConnections.includes(connection.type)) {
-        this.log(`Skipping ${connection.type} (in skip list)`);
-        continue;
-      }
-
-      const startTime = Date.now();
-      this.log(`Syncing ${connection.type} (${connection.name})...`);
-
-      try {
-        const signals = await this.syncConnection(connection, deltaStartTime);
-        allSignals.push(...signals);
-
-        const duration = Date.now() - startTime;
-        this.syncResults.push({
-          connectionId: connection.id,
-          connectionType: connection.type,
-          signalsFetched: signals.length,
-          recordsProcessed: signals.length,
-          errors: [],
-          duration,
-        });
-
-        this.log(`  ✓ ${connection.type}: ${signals.length} signals (${(duration / 1000).toFixed(1)}s)`);
-      } catch (err) {
-        const duration = Date.now() - startTime;
-        const errorMsg = err instanceof Error ? err.message : String(err);
-        this.log(`  ✗ ${connection.type}: ${errorMsg}`);
-
-        this.syncResults.push({
-          connectionId: connection.id,
-          connectionType: connection.type,
-          signalsFetched: 0,
-          recordsProcessed: 0,
-          errors: [errorMsg],
-          duration,
-        });
-      }
-    }
-
-    this.log(`Total signals fetched: ${allSignals.length}`);
-
-    return {
-      success: true,
-      data: { signals: allSignals, connections: this.connections },
-    };
-  }
-
-  // ── Convert: Transform signals into training packs ──
-  async convert(fetchResult: FetchResult): Promise<ConvertResult> {
-    if (!fetchResult.success || !fetchResult.data) {
-      return { success: false, signals: [], trainingPacks: [] };
-    }
-
-    const { signals } = fetchResult.data as { signals: ConnectorSignal[]; connections: OrgConnection[] };
-
-    this.log(`Converting ${signals.length} signals to training packs...`);
-
-    // Group signals by domain for training pack creation
-    const signalsByDomain = new Map<string, ConnectorSignal[]>();
-    for (const signal of signals) {
-      const domain = signal.domain || 'general';
-      if (!signalsByDomain.has(domain)) {
-        signalsByDomain.set(domain, []);
-      }
-      signalsByDomain.get(domain)!.push(signal);
-    }
-
-    // Create training packs per domain
-    const trainingPacks: TrainingPack[] = [];
-    for (const [domain, domainSignals] of signalsByDomain.entries()) {
-      trainingPacks.push({
-        id: `org-updater-${domain}-${Date.now()}`,
-        organizationId: this.organizationId,
-        name: `Org Updater: ${domain} (delta ${this.config.deltaHours}h)`,
-        description: `Delta update from ${domainSignals.length} signals in ${domain} domain`,
-        signals: domainSignals,
-        targetMetrics: ['all'], // Train ALL brain subsystems
-        priority: 'normal',
-        metadata: {
-          agentName: this.name,
-          agentVersion: this.version,
-          domain,
-          deltaHours: this.config.deltaHours,
-          signalCount: domainSignals.length,
-          createdAt: new Date().toISOString(),
-        },
-      });
-    }
-
-    this.log(`Created ${trainingPacks.length} training pack(s) across ${signalsByDomain.size} domain(s)`);
-
-    return {
-      success: true,
-      signals,
-      trainingPacks,
-    };
-  }
-
-  // ── Helper: Sync a single connection ──
-  private async syncConnection(
-    connection: OrgConnection,
-    deltaStartTime: Date
-  ): Promise<ConnectorSignal[]> {
-    const signals: ConnectorSignal[] = [];
-
-    // Route to appropriate connector based on type
-    switch (connection.type) {
+/**
+ * Create a NexusConnector instance from an org_connectors row.
+ * Maps connector_type to the appropriate factory function.
+ *
+ * Returns null if the connector type is unknown or creation fails.
+ */
+function createConnectorFromConfig(
+  connectorType: string,
+  config: Record<string, unknown>,
+): NexusConnector | null {
+  try {
+    switch (connectorType) {
       case 'hubspot':
-        return await this.syncHubSpot(connection, deltaStartTime);
-      case 'slack':
-        return await this.syncSlack(connection, deltaStartTime);
-      case 'github':
-        return await this.syncGitHub(connection, deltaStartTime);
+        return createHubSpotConnector(config.apiKey as string);
       case 'stripe':
-        return await this.syncStripe(connection, deltaStartTime);
+        return createStripeConnector(config.apiKey as string);
+      case 'github':
+        return createGitHubConnector(config as unknown as GitHubConnectorConfig);
+      case 'jira':
+        return createJiraConnector(config as unknown as JiraConnectorConfig);
+      case 'slack':
+        return createSlackConnector(config as unknown as SlackConnectorConfig) as unknown as NexusConnector;
+      case 'pagerduty':
+        return createPagerDutyConnector(config as unknown as PagerDutyConnectorConfig);
+      case 'google-calendar':
+        return createGoogleCalendarConnector(config as unknown as GoogleCalendarConnectorConfig) as unknown as NexusConnector;
+      case 'google-chat':
+        return createGoogleChatConnector(config as unknown as GoogleChatConnectorConfig) as unknown as NexusConnector;
+      case 'voice':
+        return createVoiceConnector(config as unknown as VoiceConnectorConfig) as unknown as NexusConnector;
+      case 'support':
+        return createSupportConnector(config as any);
+      case 'document':
+        return createDocumentConnector(config as unknown as DocumentConnectorConfig);
+      case 'generic-app':
+        return createGenericAppConnector(config as unknown as GenericAppConnectorConfig) as unknown as NexusConnector;
       default:
-        this.log(`  ⚠️  No connector implementation for ${connection.type}`);
-        return signals;
+        return null;
     }
-  }
-
-  // ── Connector: HubSpot ──
-  private async syncHubSpot(connection: OrgConnection, since: Date): Promise<ConnectorSignal[]> {
-    if (!connection.credentials.apiKey) {
-      throw new Error('HubSpot API key not configured');
-    }
-
-    const connector = createHubSpotConnector({
-      apiKey: connection.credentials.apiKey,
-      organizationId: this.organizationId,
-    });
-
-    // Fetch deals, contacts, companies updated since deltaStartTime
-    const signals = await connector.fetchRecentActivities(since);
-
-    // Update sync cursor
-    await this.updateSyncCursor(connection.id, new Date().toISOString());
-
-    return signals.slice(0, this.config.maxSignalsPerConnection);
-  }
-
-  // ── Connector: Slack ──
-  private async syncSlack(connection: OrgConnection, since: Date): Promise<ConnectorSignal[]> {
-    if (!connection.credentials.botToken) {
-      throw new Error('Slack bot token not configured');
-    }
-
-    const connector = createSlackConnector({
-      botToken: connection.credentials.botToken,
-      organizationId: this.organizationId,
-    });
-
-    // Fetch messages, threads, reactions since deltaStartTime
-    const signals = await connector.fetchRecentMessages(since);
-
-    await this.updateSyncCursor(connection.id, new Date().toISOString());
-
-    return signals.slice(0, this.config.maxSignalsPerConnection);
-  }
-
-  // ── Connector: GitHub ──
-  private async syncGitHub(connection: OrgConnection, since: Date): Promise<ConnectorSignal[]> {
-    if (!connection.credentials.token) {
-      throw new Error('GitHub token not configured');
-    }
-
-    const connector = createGitHubConnector({
-      token: connection.credentials.token,
-      organizationId: this.organizationId,
-      repos: connection.metadata?.repos || [],
-    });
-
-    // Fetch commits, PRs, issues since deltaStartTime
-    const signals = await connector.fetchRecentActivity(since);
-
-    await this.updateSyncCursor(connection.id, new Date().toISOString());
-
-    return signals.slice(0, this.config.maxSignalsPerConnection);
-  }
-
-  // ── Connector: Stripe ──
-  private async syncStripe(connection: OrgConnection, since: Date): Promise<ConnectorSignal[]> {
-    if (!connection.credentials.secretKey) {
-      throw new Error('Stripe secret key not configured');
-    }
-
-    const connector = createStripeConnector({
-      secretKey: connection.credentials.secretKey,
-      organizationId: this.organizationId,
-    });
-
-    // Fetch charges, customers, subscriptions since deltaStartTime
-    const signals = await connector.fetchRecentTransactions(since);
-
-    await this.updateSyncCursor(connection.id, new Date().toISOString());
-
-    return signals.slice(0, this.config.maxSignalsPerConnection);
-  }
-
-  // ── Helper: Update sync cursor ──
-  private async updateSyncCursor(connectionId: string, cursor: string): Promise<void> {
-    await this.supabase
-      .from('connector_configurations')
-      .update({
-        sync_cursor: cursor,
-        last_sync_at: new Date().toISOString(),
-        sync_status: 'success',
-      })
-      .eq('id', connectionId);
-  }
-
-  // ── Motor Commands: Alerts and insights ──
-  protected async generateMotorCommands(trainResult: TrainResult): Promise<MotorCommand[]> {
-    const commands: MotorCommand[] = [];
-
-    const totalSignals = this.syncResults.reduce((sum, r) => sum + r.signalsFetched, 0);
-    const failedConnections = this.syncResults.filter(r => r.errors.length > 0);
-    const successfulConnections = this.syncResults.filter(r => r.errors.length === 0);
-
-    // Slack: Sync summary
-    if (process.env.SLACK_BOT_TOKEN && process.env.SLACK_CHANNEL_ID) {
-      let statusEmoji = '🧠';
-      let statusText = 'HEALTHY';
-      if (failedConnections.length > this.connections.length * 0.5) {
-        statusEmoji = '⚠️';
-        statusText = 'DEGRADED';
-      } else if (failedConnections.length > 0) {
-        statusEmoji = '⚡';
-        statusText = 'PARTIAL';
-      }
-
-      const topConnections = successfulConnections
-        .sort((a, b) => b.signalsFetched - a.signalsFetched)
-        .slice(0, 5);
-
-      const topConnectionsText = topConnections.length > 0
-        ? topConnections.map(c => `• ${c.connectionType}: ${c.signalsFetched} signals`).join('\n')
-        : '• No successful syncs';
-
-      commands.push({
-        commandId: `slack-org-updater-${Date.now()}`,
-        organizationId: this.organizationId,
-        actionType: 'slack_send_message',
-        target: process.env.SLACK_CHANNEL_ID,
-        payload: {
-          text: `${statusEmoji} *Org Brain Update: ${statusText}*\n\n*Delta Sync (${this.config.deltaHours}h):*\n• Total signals: ${totalSignals}\n• Successful: ${successfulConnections.length}/${this.connections.length}\n• Failed: ${failedConnections.length}\n\n*Top Sources:*\n${topConnectionsText}\n\n*Training:*\n• Packs: ${trainResult.packsTrainedCount}\n• Brain Region: ${this.brainRegion}`,
-        },
-        priority: 'normal',
-        requiresApproval: false,
-        createdAt: new Date(),
-      });
-
-      // Alert for failed connections
-      if (failedConnections.length > 0) {
-        const failuresList = failedConnections
-          .slice(0, 5)
-          .map(c => `• ${c.connectionType}: ${c.errors[0]}`)
-          .join('\n');
-
-        commands.push({
-          commandId: `slack-org-updater-alert-${Date.now()}`,
-          organizationId: this.organizationId,
-          actionType: 'slack_send_message',
-          target: process.env.SLACK_CHANNEL_ID,
-          payload: {
-            text: `⚠️ *Connection Sync Failures*\n\n${failedConnections.length} connection(s) failed to sync:\n\n${failuresList}\n\n${failedConnections.length > 5 ? `... and ${failedConnections.length - 5} more` : ''}`,
-          },
-          priority: 'high',
-          requiresApproval: false,
-          createdAt: new Date(),
-        });
-      }
-    }
-
-    return commands;
+  } catch (err) {
+    console.warn(`[OrgUpdater] Failed to create connector "${connectorType}":`, err instanceof Error ? err.message : String(err));
+    return null;
   }
 }
 
-// ── Self-Registration: Auto-register to globalRegistry on import ──────────
-import { createClient } from '@supabase/supabase-js';
+// ============================================================================
+// FETCH DATA SHAPE
+// ============================================================================
+
+interface OrgUpdaterFetchData {
+  syncResults: ConnectorSyncResult[];
+  activeConnectors: number;
+  connectorTypes: string[];
+  domainsCovered: string[];
+}
+
+// ============================================================================
+// ORG UPDATER AGENT
+// ============================================================================
+
+class OrgUpdaterAgent extends BaseTrainingAgent {
+  readonly name = 'org-updater';
+  readonly version = '8.0.0';
+  readonly description = 'Org Heartbeat — Syncs connected integrations, triggers learning cycles, ensures per-org brain health';
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // FETCH: Read org_connectors → create connectors → sync all via SyncManager
+  // ──────────────────────────────────────────────────────────────────────────
+  async fetch(): Promise<FetchResult> {
+    this._log('FETCH', `Fetching connectors for org ${this.organizationId}`);
+
+    // 1. Get active connectors for this org
+    const { data: connectorRows, error } = await this.supabase
+      .from('org_connectors')
+      .select('id, connector_type, config, status, signals_count')
+      .eq('organization_id', this.organizationId)
+      .eq('status', 'active');
+
+    if (error) {
+      this.errors.push(`Failed to fetch org_connectors: ${error.message}`);
+      const emptyData: OrgUpdaterFetchData = { syncResults: [], activeConnectors: 0, connectorTypes: [], domainsCovered: [] };
+      return { data: emptyData, sources: [], recordCount: 0 };
+    }
+
+    if (!connectorRows || connectorRows.length === 0) {
+      this._log('FETCH', 'No active connectors configured for this org');
+      const emptyData: OrgUpdaterFetchData = { syncResults: [], activeConnectors: 0, connectorTypes: [], domainsCovered: [] };
+      return { data: emptyData, sources: ['org_connectors'], recordCount: 0 };
+    }
+
+    this._log('FETCH', `Found ${connectorRows.length} active connector(s): ${connectorRows.map((c: any) => c.connector_type).join(', ')}`);
+
+    // 2. Create connector instances
+    const connectors: NexusConnector[] = [];
+    const connectorTypes: string[] = [];
+    const domainsCovered = new Set<string>();
+
+    for (const row of connectorRows) {
+      const connector = createConnectorFromConfig(row.connector_type, row.config || {});
+      if (connector) {
+        connectors.push(connector);
+        connectorTypes.push(row.connector_type);
+        domainsCovered.add(connector.domain);
+      } else {
+        this._log('FETCH', `  - Skipped "${row.connector_type}" — factory returned null or failed`);
+      }
+    }
+
+    if (connectors.length === 0) {
+      this._log('FETCH', 'No connectors could be instantiated (check configs)');
+      const emptyData: OrgUpdaterFetchData = { syncResults: [], activeConnectors: 0, connectorTypes, domainsCovered: [...domainsCovered] };
+      return { data: emptyData, sources: ['org_connectors'], recordCount: 0 };
+    }
+
+    // 3. Create sync manager and run sync for all connectors
+    // SyncManager handles cursor tracking: uses incremental sync if cursor exists, full sync otherwise
+    const syncManager = createSyncManager({ connectors });
+    this._log('FETCH', `Syncing ${connectors.length} connector(s) via SyncManager...`);
+
+    const syncResults = await syncManager.syncAll(this.supabase, this.organizationId);
+
+    // 4. Update org_connectors with sync results
+    let totalSignals = 0;
+    for (let i = 0; i < connectorRows.length && i < syncResults.length; i++) {
+      const row = connectorRows[i];
+      const result = syncResults[i];
+      if (result) {
+        totalSignals += result.signalsGenerated;
+        try {
+          await this.supabase
+            .from('org_connectors')
+            .update({
+              last_sync_at: new Date().toISOString(),
+              signals_count: (row.signals_count || 0) + result.signalsGenerated,
+              status: result.success ? 'active' : 'error',
+            })
+            .eq('id', row.id);
+        } catch {
+          // Non-fatal: continue even if update fails
+        }
+      }
+    }
+
+    this._log('FETCH', `Sync complete: ${totalSignals} total signals generated across ${connectors.length} connectors`);
+
+    const fetchData: OrgUpdaterFetchData = {
+      syncResults,
+      activeConnectors: connectors.length,
+      connectorTypes,
+      domainsCovered: [...domainsCovered],
+    };
+
+    return {
+      data: fetchData,
+      sources: connectorTypes.map(t => `connector:${t}`),
+      recordCount: totalSignals,
+    };
+  }
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // CONVERT: Signals already stored by connectors — emit heartbeat signal
+  // ──────────────────────────────────────────────────────────────────────────
+  async convert(fetchResult: FetchResult): Promise<ConvertResult> {
+    const data = fetchResult.data as OrgUpdaterFetchData;
+    const signals: ConnectorSignal[] = [];
+    const packs: TrainingPack[] = [];
+
+    // Calculate success rate
+    const successCount = data.syncResults.filter(r => r.success).length;
+    const successRate = data.activeConnectors > 0 ? successCount / data.activeConnectors : 0;
+
+    // Total signals generated
+    const totalSignals = data.syncResults.reduce((sum, r) => sum + r.signalsGenerated, 0);
+    const totalErrors = data.syncResults.reduce((sum, r) => sum + r.errors.length, 0);
+
+    // Emit org heartbeat signal (tracks org brain vitality over time)
+    signals.push({
+      organization_id: this.organizationId,
+      source_domain: 'system',
+      signal_type: 'org_heartbeat',
+      signal_value: successRate,
+      entity_type: 'organization',
+      entity_id: this.organizationId,
+      metadata: {
+        connectorsSynced: data.activeConnectors,
+        totalSignals,
+        totalErrors,
+        domainsCovered: data.domainsCovered,
+        connectorTypes: data.connectorTypes,
+        timestamp: new Date().toISOString(),
+      },
+    });
+
+    // If we had errors, emit an error signal for monitoring
+    if (totalErrors > 0) {
+      signals.push({
+        organization_id: this.organizationId,
+        source_domain: 'system',
+        signal_type: 'connector_sync_errors',
+        signal_value: totalErrors,
+        entity_type: 'organization',
+        entity_id: this.organizationId,
+        metadata: {
+          errors: data.syncResults
+            .filter(r => r.errors.length > 0)
+            .flatMap(r => r.errors),
+        },
+      });
+    }
+
+    this._log('CONVERT', `Generated ${signals.length} system signals (heartbeat${totalErrors > 0 ? ' + error alerts' : ''})`);
+    return { signals, packs };
+  }
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // TRAIN: Trigger autonomous learning if enough new signals
+  // ──────────────────────────────────────────────────────────────────────────
+  async train(signals: ConnectorSignal[], packs: TrainingPack[]): Promise<TrainResult> {
+    // First, store the heartbeat signals via the base class
+    const baseResult = await super.train(signals, packs);
+
+    // Now check if we should trigger autonomous learning
+    const lookbackTime = new Date(Date.now() - SIGNAL_LOOKBACK_HOURS * 60 * 60 * 1000);
+
+    const { count, error: countError } = await this.supabase
+      .from('cross_domain_signals')
+      .select('id', { count: 'exact', head: true })
+      .eq('organization_id', this.organizationId)
+      .gte('created_at', lookbackTime.toISOString());
+
+    const recentSignalCount = count || 0;
+
+    if (countError) {
+      this._log('TRAIN', `Warning: Could not count recent signals: ${countError.message}`);
+      return baseResult;
+    }
+
+    this._log('TRAIN', `Recent signals (last ${SIGNAL_LOOKBACK_HOURS}h): ${recentSignalCount}`);
+
+    // Trigger autonomous learning if we have enough signals
+    if (recentSignalCount >= LEARNING_SIGNAL_THRESHOLD) {
+      this._log('TRAIN', `Signal count ${recentSignalCount} >= ${LEARNING_SIGNAL_THRESHOLD} — triggering autonomous learning cycle`);
+      try {
+        const repo = createSupabaseRepository(this.supabase);
+        const learner = createAutonomousLearner({
+          repository: repo,
+          organizationId: this.organizationId,
+          config: {
+            minPatternObservations: 5,
+            anomalyThreshold: 2.5,
+            maxPatternsPerCycle: 50,
+          },
+        });
+
+        const learningResult = await learner.runLearningCycle();
+        baseResult.discoveries += learningResult?.memoriesCreated ?? 0;
+        this._log('TRAIN', `Learning cycle complete: ${learningResult?.memoriesCreated ?? 0} memories, ${learningResult?.patternsRegistered ?? 0} patterns`);
+      } catch (err) {
+        this._logError('TRAIN', 'Autonomous learning cycle failed', err);
+        this.errors.push(`Learning cycle failed: ${err instanceof Error ? err.message : String(err)}`);
+      }
+    } else {
+      this._log('TRAIN', `Signal count ${recentSignalCount} < ${LEARNING_SIGNAL_THRESHOLD} — skipping learning cycle`);
+    }
+
+    // Trigger mini-consolidation if we have lots of signals
+    if (recentSignalCount >= CONSOLIDATION_SIGNAL_THRESHOLD) {
+      this._log('TRAIN', `Signal count ${recentSignalCount} >= ${CONSOLIDATION_SIGNAL_THRESHOLD} — triggering mini-consolidation`);
+      try {
+        const repo = createSupabaseRepository(this.supabase);
+        const engine = createConsolidationEngine(repo, this.organizationId);
+        const consolidationResult = await engine.consolidate();
+        this._log('TRAIN', `Mini-consolidation complete: ${consolidationResult?.report?.summary ?? 'OK'}`);
+      } catch (err) {
+        this._logError('TRAIN', 'Mini-consolidation failed', err);
+        this.errors.push(`Consolidation failed: ${err instanceof Error ? err.message : String(err)}`);
+      }
+    }
+
+    return baseResult;
+  }
+
+  // ── Logging helpers ─────────────────────────────────────────────────────
+  private _log(stage: string, message: string): void {
+    const time = new Date().toISOString().substring(11, 19);
+    const orgLabel = this.organizationId.substring(0, 8);
+    console.log(`[${time}] [OrgUpdater:${orgLabel}] [${stage}] ${message}`);
+  }
+
+  private _logError(stage: string, message: string, err?: unknown): void {
+    const time = new Date().toISOString().substring(11, 19);
+    const orgLabel = this.organizationId.substring(0, 8);
+    console.error(`[${time}] [OrgUpdater:${orgLabel}] [${stage}] ERROR: ${message}`);
+    if (err instanceof Error) {
+      console.error(`  ${err.message}`);
+    }
+  }
+}
+
+// ============================================================================
+// SELF-REGISTRATION: Auto-register to globalRegistry on import
+// ============================================================================
+
 import { globalRegistry } from '../agent-framework/agent-registry';
 
 globalRegistry.register({
-  name: 'org-updater-agent',
-  description: 'Continuous learning from ALL org connections: pulls delta data every 12h, trains every part of brain',
-  version: '7.0.0',
+  name: 'org-updater',
+  description: 'Org Heartbeat — Syncs all connected integrations, triggers learning cycles, ensures per-org brain health',
+  version: '8.0.0',
   factory: (config) => {
-    const supabase = createClient(config.supabaseUrl, config.supabaseKey);
-    return new OrgUpdaterAgent(supabase, config.organizationId || '00000000-0000-4000-a000-000000000001', {
-      verbose: config.verbose,
-    }) as any;
+    return new OrgUpdaterAgent(config) as any;
   },
-  schedule: '0 */12 * * *',  // Every 12 hours
-  resourceRequirements: { cpu: '2048', memory: '8192' },
-  tags: ['training', 'connectors', 'delta-sync', 'org-learning', 'thalamus'],
+  schedule: '0 */4 * * *',  // Every 4 hours
+  resourceRequirements: { cpu: '1024', memory: '4096' },
+  tags: ['org-maintenance', 'thalamus', 'connector-sync', 'learning-trigger', 'heartbeat'],
 });

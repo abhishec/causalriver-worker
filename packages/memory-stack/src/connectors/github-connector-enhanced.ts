@@ -443,7 +443,7 @@ export class GitHubConnectorEnhanced {
         per_page: 100,
       });
 
-      return response.data.map((pr) => ({
+      return response.data.map((pr: any) => ({
         number: pr.number,
         title: pr.title,
         description: pr.body || '',
@@ -457,7 +457,7 @@ export class GitHubConnectorEnhanced {
         createdAt: pr.created_at,
         updatedAt: pr.updated_at,
         mergeable: null, // Not available in list endpoint
-        labels: pr.labels.map((label) => label.name),
+        labels: pr.labels?.map((label: any) => label.name) || [],
       }));
     } catch (error: any) {
       throw new Error(`Failed to list PRs: ${error.message}`);

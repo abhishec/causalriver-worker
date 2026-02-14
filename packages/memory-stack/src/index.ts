@@ -776,6 +776,14 @@ export {
   jarvisMonitorAgent,
   ALL_JARVIS_AGENTS,
   registerJarvisAgents,
+  // V8 — Connector Sync Agents (Thalamus Relay Nuclei)
+  brainRevenueSyncAgent,
+  brainEngineeringSyncAgent,
+  brainCommunicationSyncAgent,
+  brainOperationsSyncAgent,
+  brainProductivitySyncAgent,
+  ALL_CONNECTOR_SYNC_AGENTS,
+  registerConnectorSyncAgents,
   ALL_BRAIN_AGENTS,
   registerBrainAgents,
   type BrainExecutionInterface,
@@ -785,6 +793,8 @@ export {
   type JarvisFinding,
   type JarvisAction,
   type JarvisMonitorResult,
+  type ConnectorSyncInput,
+  type ConnectorSyncOutput,
 } from './orchestrator/brain-agent-fusion';
 
 // Software Engineering Agents ("SE-aaS Workforce") — 4 agents orchestrating 7 SE domains
@@ -796,6 +806,46 @@ export {
   ALL_SOFTWARE_ENGINEERING_AGENTS,
   registerSoftwareEngineeringAgents,
 } from './orchestrator/agents-software-engineering';
+
+// Software Engineering Enhanced Domains (Phase 2) — Real AST parsing, Claude generation, GitHub API
+export {
+  codebaseComprehendEnhancedDomain,
+  codeGenerateEnhancedDomain,
+  ALL_ENHANCED_SE_DOMAINS,
+  registerEnhancedSoftwareEngineeringDomains,
+} from './orchestrator/action-domains-software-engineering-enhanced';
+
+// GitHub Connector Enhanced (Phase 2) — Real GitHub API integration for PR automation
+export {
+  GitHubConnectorEnhanced,
+  createGitHubConnector as createGitHubConnectorEnhanced,
+  type GitHubConfig,
+  type PullRequestInfo,
+  type PRFile,
+  type PRComment,
+  type ReviewComment,
+} from './connectors/github-connector-enhanced';
+
+// AST Parser (Phase 2) — Multi-language code structure analysis
+export {
+  ASTParser,
+  createASTParser,
+  parseCode,
+  type CodeStructure,
+  type FunctionInfo,
+  type ClassInfo,
+  type ImportInfo,
+  type ExportInfo,
+} from './parsers/ast-parser';
+
+// Claude Code Generator (Phase 2) — AI-powered code generation using Claude API
+export {
+  ClaudeCodeGenerator,
+  createClaudeCodeGenerator,
+  type GenerationContext,
+  type GeneratedArtifact,
+  type GenerationResult,
+} from './generators/claude-code-generator';
 
 // Brain Context Builder — Universal Prefrontal Cortex ("Working Memory Assembly")
 // Assembles context from ALL brain regions + trained knowledge into LLM-ready prompts.

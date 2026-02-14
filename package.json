@@ -12,7 +12,9 @@
     "security:scan:dry": "tsx scripts/run-security-agent.ts --dry-run",
     "security:scan:verbose": "tsx scripts/run-security-agent.ts --verbose",
     "security:daily": "bash scripts/daily-security-scan.sh",
-    "security:setup:cron": "bash scripts/setup-daily-cron.sh"
+    "security:setup:cron": "bash scripts/setup-daily-cron.sh",
+    "security:deps:check": "tsx scripts/audit-all-packages.ts",
+    "security:deps:fix": "cd packages/memory-stack && npm audit fix && cd ../.. && cd platform && npm audit fix && cd .."
   },
   "devDependencies": {
     "tsx": "^4.0.0",

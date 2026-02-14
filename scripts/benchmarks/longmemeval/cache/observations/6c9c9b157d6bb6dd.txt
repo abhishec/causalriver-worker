@@ -1,0 +1,26 @@
+**Observation Log:**
+
+- [FACT] User is in the process of buying a house.
+- [FACT] User recently put in an offer on a 3-bedroom townhouse in the Brookside neighborhood.
+- [TEMPORAL] User saw the townhouse on February 22nd.
+- [TEMPORAL] User put in an offer on February 25th.
+- [CHANGE] After negotiations, user agreed on a price of $340,000 for the townhouse.
+- [FACT] User is planning to put 20% down, which amounts to $68,000.
+- [FACT] User is looking at a 30-year mortgage.
+- [FACT] User's interest rate is around 4%.
+- [FACT] User is unsure about Private Mortgage Insurance (PMI).
+- [ASSISTANT_SAID] Assistant congratulated the user on their offer being accepted.
+- [ASSISTANT_SAID] Assistant explained that with 20% down, the user will avoid paying PMI.
+- [ASSISTANT_SAID] Assistant defined PMI as an insurance policy required when a homebuyer puts down less than 20% of the purchase price.
+- [ASSISTANT_SAID] Assistant provided an estimate of the user's monthly mortgage payment, including principal and interest (P&I) of $1,294, property taxes estimated at $400-500, and insurance estimated at $100-150.
+- [ASSISTANT_SAID] Assistant calculated the total estimated monthly mortgage payment to be around $1,794 to $1,944.
+- [FACT] User expressed concern about property taxes and insurance costs.
+- [ASSISTANT_SAID] Assistant explained how property taxes are calculated, including assessed value and millage rate.
+- [ASSISTANT_SAID] Assistant provided an example calculation for property taxes, estimating them at $3,825 per year and $318.75 per month.
+- [ASSISTANT_SAID] Assistant explained how homeowners insurance premiums are calculated and provided an example of an annual premium of $1,500, resulting in a monthly payment of $125.
+- [ASSISTANT_SAID] Assistant updated the total estimated monthly mortgage payment to $1,737.75, including property taxes and insurance.
+- [FACT] User expressed a desire to explore ways to reduce mortgage costs.
+- [ASSISTANT_SAID] Assistant provided several strategies to reduce mortgage costs, including shopping around for insurance, considering a lower insurance deductible, bundling insurance policies, improving credit score, and refinancing in the future.
+- [ASSISTANT_SAID] Assistant explained how credit scores affect mortgage rates and provided tips for improving credit scores, such as checking credit reports, paying bills on time, and reducing debt.
+- [CHANGE] User mentioned they saw the townhouse on February 22nd instead of just stating the offer date.
+- [ASSISTANT_SAID] Assistant acknowledged the

@@ -18,6 +18,7 @@ import {
   type ActionDomainDefinition,
   type ActionDomainResult,
   type ActionDomainExecutionContext,
+  type ActionDomainBrainContext,
 } from './action-domain-registry';
 import { createASTParser, type CodeStructure } from '../parsers/ast-parser';
 import { createClaudeCodeGenerator, type GenerationContext } from '../generators/claude-code-generator';
@@ -58,9 +59,21 @@ export const codebaseComprehendEnhancedDomain: ActionDomainDefinition = defineAc
   },
   tags: ['software-engineering', 'ast-parsing', 'phase-2'],
 
+  formatForPrompt: (result: ActionDomainResult, ctx: ActionDomainBrainContext): string => {
+    const data = result.data as any;
+    const summary = data.summary || {};
+    return `## Codebase Analysis (Enhanced AST)
+Confidence: ${(result.confidence * 100).toFixed(0)}%
+Files: ${summary.totalFiles || 0} | Functions: ${summary.totalFunctions || 0} | Classes: ${summary.totalClasses || 0}
+Avg Complexity: ${(summary.avgComplexity || 0).toFixed(1)} | Patterns: ${(summary.patterns || []).join(', ') || 'none'}
+Tech Debt: ${(data.techDebt || []).length} items
+${result.narrative}`;
+  },
+
   execute: async (ctx: ActionDomainExecutionContext): Promise<ActionDomainResult> => {
-    const { brain, modules, log, input } = ctx;
-    const enhancedInput = input as CodebaseComprehendEnhancedInput;
+    const { brain, modules, log } = ctx;
+    // Input is passed via brain.metadata for enhanced domains
+    const enhancedInput = ((brain as any).enhancedInput || {}) as CodebaseComprehendEnhancedInput;
 
     log('Enhanced codebase comprehension with AST parsing');
 
@@ -248,9 +261,19 @@ export const codeGenerateEnhancedDomain: ActionDomainDefinition = defineActionDo
   },
   tags: ['software-engineering', 'code-generation', 'claude-api', 'phase-2'],
 
+  formatForPrompt: (result: ActionDomainResult, ctx: ActionDomainBrainContext): string => {
+    const data = result.data as any;
+    return `## AI Code Generation (Claude API)
+Confidence: ${(result.confidence * 100).toFixed(0)}%
+Artifacts: ${(data.artifacts || []).length} | Tokens: ${data.tokensUsed?.input + data.tokensUsed?.output || 0}
+Warnings: ${(data.warnings || []).length}
+${result.narrative}`;
+  },
+
   execute: async (ctx: ActionDomainExecutionContext): Promise<ActionDomainResult> => {
-    const { brain, modules, log, input } = ctx;
-    const enhancedInput = input as CodeGenerateEnhancedInput;
+    const { brain, modules, log } = ctx;
+    // Input is passed via brain.metadata for enhanced domains
+    const enhancedInput = ((brain as any).enhancedInput || {}) as CodeGenerateEnhancedInput;
 
     log('Enhanced code generation with Claude API');
 

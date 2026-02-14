@@ -30,6 +30,16 @@ import {
   registerJarvisAgents,
 } from './agents-jarvis';
 
+import {
+  brainRevenueSyncAgent,
+  brainEngineeringSyncAgent,
+  brainCommunicationSyncAgent,
+  brainOperationsSyncAgent,
+  brainProductivitySyncAgent,
+  ALL_CONNECTOR_SYNC_AGENTS,
+  registerConnectorSyncAgents,
+} from './agents-connector-sync';
+
 // Re-export Jarvis for convenience
 export {
   jarvisOrchestratorAgent,
@@ -46,6 +56,19 @@ export type {
   JarvisAction,
   JarvisMonitorResult,
 } from './agents-jarvis';
+
+// Re-export Connector Sync agents
+export {
+  brainRevenueSyncAgent,
+  brainEngineeringSyncAgent,
+  brainCommunicationSyncAgent,
+  brainOperationsSyncAgent,
+  brainProductivitySyncAgent,
+  ALL_CONNECTOR_SYNC_AGENTS,
+  registerConnectorSyncAgents,
+  type ConnectorSyncInput,
+  type ConnectorSyncOutput,
+} from './agents-connector-sync';
 
 // ============================================================================
 // TYPES
@@ -786,7 +809,7 @@ export const financialAuditorAgent: AgentDefinition = defineAgent({
 // ALL PRE-BUILT AGENTS
 // ============================================================================
 
-/** All 19 pre-built brain-native agents (V6 + V6.1 + V7 + V8 Jarvis) */
+/** All 24 pre-built brain-native agents (V6 + V6.1 + V7 + V8 Jarvis + V8 Connector Sync) */
 export const ALL_BRAIN_AGENTS: AgentDefinition[] = [
   // V6 — Core Brain Agents
   revenueWatcherAgent,
@@ -809,17 +832,20 @@ export const ALL_BRAIN_AGENTS: AgentDefinition[] = [
   financialAuditorAgent,
   // V8 — Jarvis Executive Intelligence
   ...ALL_JARVIS_AGENTS,
+  // V8 — Connector Sync (Thalamus Relay Nuclei)
+  ...ALL_CONNECTOR_SYNC_AGENTS,
 ];
 
 /**
- * Register all 19 brain-native agents into an agent registry.
- * Includes V6 core (5), V6.1 advanced (5), V7 accounting (6), V8 Jarvis executive (3).
+ * Register all 24 brain-native agents into an agent registry.
+ * Includes V6 core (5), V6.1 advanced (5), V7 accounting (6),
+ * V8 Jarvis executive (3), V8 connector sync (5).
  *
  * @example
  * ```typescript
  * const agentRegistry = createAgentRegistry({ verbose: true });
  * registerBrainAgents(agentRegistry);
- * // 19 brain-native agents now registered (including Jarvis executive layer)
+ * // 24 brain-native agents now registered (including Jarvis + connector sync)
  * ```
  */
 export function registerBrainAgents(

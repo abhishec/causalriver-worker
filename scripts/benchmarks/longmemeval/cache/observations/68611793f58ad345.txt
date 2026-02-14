@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [FACT] The user is looking to get advice on condo living.
+- [PREFERENCE] The user is interested in minimizing noise pollution in a condo.
+- [ASSISTANT_SAID] The assistant provided tips to minimize noise pollution in a condo, including checking the building's soundproofing, inspecting the unit for noise levels, and using soundproofing products.
+- [ASSISTANT_SAID] The assistant suggested considering window treatments like thick curtains or acoustic window inserts to reduce outside noise.
+- [ASSISTANT_SAID] The assistant recommended researching the condo board's policies and local noise bylaws.
+- [ASSISTANT_SAID] The assistant advised visiting the condo at different times to assess noise levels.
+- [PREFERENCE] The user appreciates detailed tips and finds them handy for their condo search.
+- [ASSISTANT_SAID] The assistant provided recommendations on how to evaluate a condo's neighborhood and community amenities, including assessing walkability, safety, noise levels, and available amenities.
+- [ASSISTANT_SAID] The assistant suggested checking the condo's management and maintenance, understanding condo fees, and evaluating community engagement.
+- [ASSISTANT_SAID] The assistant recommended talking to residents and reviewing online resources for insights on the condo and neighborhood.
+- [TEMPORAL] The user is currently looking for a condo in the downtown area.
+- [EVENT] The user viewed a 1-bedroom condo on February 10th.
+- [CHANGE] The noise from the highway was a deal-breaker for the user regarding the 1-bedroom condo viewed on February 10th.
+- [PREFERENCE] The user is looking for a condo with modern appliances and a community pool.
+- [ASSISTANT_SAID] The assistant provided tips on evaluating a condo's appliances, including checking the age, condition, brand, and energy efficiency of the appliances.
+- [ASSISTANT_SAID] The assistant suggested evaluating community amenities such as the condition of the community pool, fitness center, party room, and parking options.
+- [ASSISTANT_SAID] The assistant recommended asking questions about appliances and amenities, taking photos and notes, and comparing options.
+- [ASSISTANT_SAID] The assistant advised reviewing the condo's budget to ensure sufficient funds for maintenance and repairs.

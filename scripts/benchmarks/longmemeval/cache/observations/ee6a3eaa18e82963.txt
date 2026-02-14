@@ -1,0 +1,20 @@
+**Observation Log:**
+
+- [FACT] The user has been doing meal prep.
+- [FACT] The user has been preparing a lot of rice and roasted veggies lately.
+- [EVENT] The user tried out a new Ethiopian restaurant in town last week and loved it.
+- [PREFERENCE] The user wants to mix up their meal prep ideas.
+- [ASSISTANT_SAID] Ethiopian food is amazing and the assistant is glad the user discovered a new favorite spot.
+- [ASSISTANT_SAID] The assistant provided meal prep ideas that go beyond rice and roasted veggies.
+- [ASSISTANT_CREATED] The assistant listed meal prep ideas under six categories: Global Inspirations, Protein-Packed Options, Veggie-Centric, Hearty Soups, Mason Jar Marvels, and Breakfast for Lunch (or Dinner).
+- [ASSISTANT_SAID] The assistant suggested trying Ethiopian-inspired dishes like misir wot (red lentil stew), tibs (stir-fried meat), or gomen be sega (collard greens with beef).
+- [ASSISTANT_SAID] The assistant provided a simple recipe for misir wot, including ingredients and instructions.
+- [ASSISTANT_CREATED] The misir wot recipe includes: 1 cup dried red lentils, 2 medium onions, 2 cloves garlic, 1 tablespoon grated fresh ginger, 1 teaspoon ground cumin, 1 teaspoon ground coriander, 1/2 teaspoon turmeric, 1/2 teaspoon paprika, 1/4 teaspoon cayenne pepper (optional), 1 can (14.5 oz) diced tomatoes, 2 cups vegetable broth, salt and black pepper to taste, 2 tablespoons niter kibbeh or vegetable oil, and fresh cilantro (optional).
+- [ASSISTANT_SAID] The assistant provided cooking instructions for misir wot, including sautéing onions, adding spices, and simmering lentils.
+- [USER] The user expressed excitement about trying out the Ethiopian-inspired dishes, especially the misir wot.
+- [USER] The user requested a simple recipe for misir wot.
+- [ASSISTANT_SAID] The assistant provided tips and variations for the misir wot recipe, including using red or brown lentils, adjusting spiciness, and adding vegetables.
+- [USER] The user asked for a recipe for injera bread to go with the misir wot.
+- [ASSISTANT_SAID] The assistant provided a recipe for injera bread, including ingredients and instructions.
+- [ASSISTANT_CREATED] The injera bread recipe includes: 2 cups teff flour, 2 cups all-purpose flour, 1/2 cup active dry yeast, 1 1/2 cups water, and 1/2 teaspoon salt.
+- [ASSISTANT_SAID] The assistant explained the process of creating a sourdough starter for injera,

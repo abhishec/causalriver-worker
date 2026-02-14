@@ -1,0 +1,47 @@
+{
+  "workspaces": [
+    {
+      "workspace": "packages/memory-stack",
+      "vulnerabilities": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 0,
+        "critical": 0,
+        "total": 0
+      },
+      "dependencies": {
+        "prod": 103,
+        "dev": 12,
+        "optional": 1,
+        "peer": 90,
+        "peerOptional": 0,
+        "total": 203
+      },
+      "success": true
+    },
+    {
+      "workspace": "platform",
+      "vulnerabilities": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 0,
+        "critical": 0,
+        "total": 0
+      },
+      "dependencies": 0,
+      "success": true
+    }
+  ],
+  "total": {
+    "info": 0,
+    "low": 0,
+    "moderate": 0,
+    "high": 0,
+    "critical": 0,
+    "total": 0
+  },
+  "timestamp": "2026-02-14T04:50:40.098Z",
+  "scanDurationMs": 756
+}
