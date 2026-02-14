@@ -1,13 +1,24 @@
 /**
- * Brain Tool Definitions API — For MCP / OpenAI Function Calling / Claude Tools
+ * Brain Tool Definitions + Execution API — MCP / OpenAI Function Calling / Claude Tools
  *
- * GET /api/brain/tools — Returns tool schemas that any agent framework can use.
+ * GET  /api/brain/tools — Returns tool schemas for any agent framework
+ * POST /api/brain/tools — Execute a tool by name (MCP-compatible tool invocation)
  *
  * These tool definitions follow the OpenAI function calling format, which is
  * compatible with Claude's tool_use, LangChain, CrewAI, and other frameworks.
+ *
+ * The POST endpoint uses the NexusBrain MCP Server from @nexus-ai/memory-stack
+ * to actually execute tools — connecting the previously orphaned MCP server to
+ * a live API endpoint.
+ *
+ * Auth: Supabase session OR API key (Bearer nxb_...)
  */
 
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+import { validateApiKey } from "@/lib/api-key-auth";
+import { checkRateLimit, hashKey, setRateLimitHeaders } from "@/lib/rate-limiter";
+import { corsHeaders, checkSessionRateLimit, parseAndValidateBody } from "@/lib/security-middleware";
 
 const NEXUS_BRAIN_TOOLS = [
   {
@@ -141,19 +152,130 @@ export async function GET() {
       "Trained on cross-domain signals with 15 statistical causal discovery methods. " +
       "Query, forecast, simulate, diagnose, and explain any business question.",
     tools: NEXUS_BRAIN_TOOLS,
-    endpoint: "/api/brain/query",
+    endpoint: "/api/brain/tools",
     auth: {
       type: "bearer",
       description: "Use API key: Authorization: Bearer nxb_...",
     },
     usage: {
-      note: "All tools call the same /api/brain/query endpoint with different 'action' values.",
+      note: "POST to /api/brain/tools with { toolName, arguments } to execute a tool.",
       example: {
         method: "POST",
-        url: "/api/brain/query",
+        url: "/api/brain/tools",
         headers: { Authorization: "Bearer nxb_your_key_here", "Content-Type": "application/json" },
-        body: { question: "What drives customer churn?", action: "query" },
+        body: { toolName: "brain_query", arguments: { question: "What drives customer churn?" } },
       },
     },
   });
+}
+
+/**
+ * POST /api/brain/tools — Execute a brain tool via the MCP Server
+ *
+ * Body: {
+ *   toolName: string,        // e.g., "brain_query", "brain_causal_graph", "brain_patterns"
+ *   arguments: object,       // Tool-specific arguments
+ *   organizationId?: string, // Optional org override
+ * }
+ *
+ * Returns the MCP tool result.
+ */
+export async function POST(request: NextRequest) {
+  try {
+    // ── Auth ──────────────────────────────────────────────────────────
+    let orgId: string | null = null;
+    let userId: string | null = null;
+
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (user) {
+      userId = user.id;
+      const sessionRL = checkSessionRateLimit(user.id, "/api/brain/tools");
+      if (!sessionRL.allowed) {
+        return NextResponse.json(
+          { error: "Too many requests. Please slow down." },
+          { status: 429, headers: { ...corsHeaders(request), "Retry-After": "60" } }
+        );
+      }
+    } else {
+      const authHeader = request.headers.get("authorization");
+      const apiKeyResult = await validateApiKey(authHeader);
+      if (apiKeyResult) {
+        if (!apiKeyResult.permissions.includes("read")) {
+          return NextResponse.json({ error: "API key lacks read permission" }, { status: 403 });
+        }
+        orgId = apiKeyResult.organizationId;
+
+        const rawKey = authHeader!.replace("Bearer ", "");
+        const rateLimitResult = await checkRateLimit(
+          hashKey(rawKey),
+          apiKeyResult.rateLimitPerMinute
+        );
+        if (!rateLimitResult.allowed) {
+          const res = NextResponse.json(
+            { error: rateLimitResult.error, retryAfter: rateLimitResult.resetAt.toISOString() },
+            { status: 429 }
+          );
+          setRateLimitHeaders(res.headers, rateLimitResult, apiKeyResult.rateLimitPerMinute);
+          return res;
+        }
+      } else {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+    }
+
+    // ── Parse body ───────────────────────────────────────────────────
+    const bodyResult = await parseAndValidateBody(request);
+    if ("error" in bodyResult) {
+      return NextResponse.json({ error: bodyResult.error }, { status: 400, headers: corsHeaders(request) });
+    }
+
+    const { toolName, arguments: toolArgs, organizationId } = bodyResult.data as {
+      toolName: string;
+      arguments: Record<string, unknown>;
+      organizationId?: string;
+    };
+
+    if (!toolName || typeof toolName !== "string") {
+      return NextResponse.json({ error: "toolName is required" }, { status: 400 });
+    }
+
+    // Resolve org
+    if (!orgId) {
+      orgId = organizationId || null;
+      if (!orgId && userId) {
+        const { data: membership } = await supabase
+          .from("org_members")
+          .select("organization_id")
+          .eq("user_id", userId)
+          .order("joined_at", { ascending: true })
+          .limit(1)
+          .single();
+        orgId = membership?.organization_id || "00000000-0000-4000-a000-000000000001";
+      }
+    }
+
+    if (!orgId) {
+      return NextResponse.json({ error: "organizationId is required" }, { status: 400 });
+    }
+
+    // ── MCP Server: Execute tool ─────────────────────────────────────
+    const { createNexusMcpServer } = await import("@nexus-ai/memory-stack");
+    const mcpServer = createNexusMcpServer({
+      supabase,
+      organizationId: orgId,
+    });
+
+    const result = await mcpServer.callTool(toolName, toolArgs || {});
+
+    return NextResponse.json({
+      toolName,
+      result,
+      organizationId: orgId,
+    });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Internal server error";
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
 }

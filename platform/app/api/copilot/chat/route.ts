@@ -246,72 +246,35 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // ── Org filter: query across user org + core (shared brain data) ───
-    const orgIds = [
-      ...new Set([orgId, CORE_ORG_ID]),
-    ];
-    const orgFilter = orgIds.map((id) => `organization_id.eq.${id}`).join(",");
+    // ── Brain Commander: Unified intelligence pipeline ──────────────────
+    // Replace manual DB queries with Commander — single source of truth
+    // for intelligence gathering, dispatch assessment, and permission filtering.
+    const { createBrainCommander } = await import("@nexus-ai/memory-stack");
+    const commander = createBrainCommander({
+      supabase,
+      organizationId: orgId,
+      anthropicApiKey: process.env.ANTHROPIC_API_KEY,
+      enableActions: false, // We handle action engine separately below for copilot
+      enableMotorCommands: false,
+    });
 
-    // ── Gather brain knowledge from DB in parallel ─────────────────────
-    const [causalResult, rulesResult, cascadeResult, patternsResult, insightsResult] = await Promise.all([
-      // Full causal graph
-      supabase
-        .from("causal_relationships_statistical")
-        .select(
-          "source_domain, target_domain, effect_size, granger_p_value, optimal_lag_days, granger_f_statistic, sample_size, confidence_interval_lower, confidence_interval_upper, natural_language, is_significant"
-        )
-        .or(orgFilter)
-        .eq("is_significant", true)
-        .order("effect_size", { ascending: false })
-        .limit(300),
+    const commandResult = await commander.command(message, {
+      userId: user.id,
+      entityState,
+    });
 
-      // Business rules
-      supabase
-        .from("ai_memory")
-        .select("content, importance, domain, metadata")
-        .or(orgFilter)
-        .eq("memory_type", "rule")
-        .order("importance", { ascending: false })
-        .limit(100),
+    const { intelligence } = commandResult;
 
-      // Cascade rules
-      supabase
-        .from("org_cascade_rules")
-        .select(
-          "rule_name, trigger_domain, trigger_signal_type, propagation_chain, is_active"
-        )
-        .or(orgFilter)
-        .eq("is_active", true)
-        .limit(50),
-
-      // Patterns
-      supabase
-        .from("ai_memory")
-        .select("content, domain, importance, llm_pattern_name, llm_pattern_description, metadata")
-        .or(orgFilter)
-        .eq("memory_type", "pattern")
-        .order("importance", { ascending: false })
-        .limit(100),
-
-      // Insights (finance insights, anomalies, alerts from connectors like Xero/Volopay)
-      supabase
-        .from("ai_memory")
-        .select("content, importance, domain, metadata")
-        .or(orgFilter)
-        .eq("memory_type", "insight")
-        .order("importance", { ascending: false })
-        .limit(100),
-    ]);
-
-    const causalEdges: TrainedCausalEdge[] = (causalResult.data || []) as TrainedCausalEdge[];
-    const rules: TrainedRule[] = (rulesResult.data || []) as TrainedRule[];
-    const cascadeRules: TrainedCascadeRule[] = (cascadeResult.data || []) as TrainedCascadeRule[];
+    // Map Commander intelligence to the typed formats the copilot pipeline expects
+    const causalEdges: TrainedCausalEdge[] = intelligence.causalEdges as unknown as TrainedCausalEdge[];
+    const rules: TrainedRule[] = intelligence.rules as unknown as TrainedRule[];
+    const cascadeRules: TrainedCascadeRule[] = intelligence.cascadeRules as unknown as TrainedCascadeRule[];
 
     // Merge insights into patterns — insights are org-level findings from connectors
     // (Xero, Volopay, etc.) that have the same shape as patterns. By including them
     // in the patterns array, the brain context builder naturally surfaces them to the LLM.
-    const dbPatterns: TrainedPattern[] = (patternsResult.data || []) as TrainedPattern[];
-    const dbInsights = (insightsResult.data || []).map((row: { content: string; importance?: number; domain?: string; metadata?: Record<string, unknown> | null }) => ({
+    const dbPatterns: TrainedPattern[] = intelligence.patterns as unknown as TrainedPattern[];
+    const dbInsights = intelligence.insights.map((row) => ({
       content: row.content,
       domain: row.domain || "general",
       importance: row.importance,
@@ -704,6 +667,24 @@ DO NOT invent any data. Instead:
               confidence: brainContext.confidence,
               regionsUsed: brainContext.regionsUsed,
               uncertainAreas: brainContext.uncertainAreas,
+            },
+          }));
+        }
+
+        // Send Commander dispatch metadata
+        if (commandResult?.dispatch) {
+          send(JSON.stringify({
+            commanderMeta: {
+              route: commandResult.dispatch.route,
+              intent: commandResult.dispatch.intent,
+              domains: commandResult.dispatch.domains,
+              complexity: commandResult.dispatch.complexityScore,
+              confidence: commandResult.dispatch.confidence,
+              timing: commandResult.timing,
+              userContext: commandResult.userContext ? {
+                role: commandResult.userContext.role,
+                persona: commandResult.userContext.persona.name,
+              } : undefined,
             },
           }));
         }

@@ -170,89 +170,35 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // ── Extract intelligence ─────────────────────────────────────────
-    const domains = extractDomains(question);
-    const intent = detectIntent(question);
-    const orgIds = [...new Set([orgId!, CORE_ORG_ID])];
-    const orgFilter = orgIds.map((id) => `organization_id.eq.${id}`).join(",");
+    // ── Brain Commander: Single unified intelligence pipeline ─────────
+    const { createBrainCommander } = await import("@nexus-ai/memory-stack");
+    const commander = createBrainCommander({
+      supabase,
+      organizationId: orgId!,
+      anthropicApiKey: process.env.ANTHROPIC_API_KEY,
+      enableActions: true,
+      enableMotorCommands: false,
+    });
 
-    // Parallel DB queries
-    const [causalResult, rulesResult, patternsResult, cascadeResult] = await Promise.all([
-      supabase
-        .from("causal_relationships_statistical")
-        .select("source_domain, target_domain, effect_size, granger_p_value, optimal_lag_days, natural_language, is_significant")
-        .or(orgFilter)
-        .eq("is_significant", true)
-        .order("effect_size", { ascending: false })
-        .limit(200),
+    const result = await commander.command(question, {
+      userId: userId || undefined,
+      action,
+      entityState,
+      format,
+    });
 
-      supabase
-        .from("ai_memory")
-        .select("content, importance, domain, metadata")
-        .or(orgFilter)
-        .eq("memory_type", "rule")
-        .order("importance", { ascending: false })
-        .limit(50),
-
-      supabase
-        .from("ai_memory")
-        .select("content, domain, importance, llm_pattern_name, llm_pattern_description")
-        .or(orgFilter)
-        .eq("memory_type", "pattern")
-        .order("importance", { ascending: false })
-        .limit(50),
-
-      supabase
-        .from("org_cascade_rules")
-        .select("rule_name, trigger_domain, trigger_signal_type, propagation_chain, is_active")
-        .or(orgFilter)
-        .eq("is_active", true)
-        .limit(30),
-    ]);
-
-    const edges = causalResult.data || [];
-    const rules = rulesResult.data || [];
-    const patterns = patternsResult.data || [];
-    const cascadeRules = cascadeResult.data || [];
-
-    // ── Build causal graph context ───────────────────────────────────
-    const directCauses: Record<string, Array<{ source: string; target: string; effectSize: number; lagDays: number; description: string | null }>> = {};
-    const directEffects: Record<string, Array<{ source: string; target: string; effectSize: number; lagDays: number; description: string | null }>> = {};
-
-    for (const e of edges) {
-      const entry = {
-        source: e.source_domain,
-        target: e.target_domain,
-        effectSize: e.effect_size,
-        lagDays: e.optimal_lag_days,
-        description: e.natural_language,
-      };
-      if (!directCauses[e.target_domain]) directCauses[e.target_domain] = [];
-      directCauses[e.target_domain].push(entry);
-      if (!directEffects[e.source_domain]) directEffects[e.source_domain] = [];
-      directEffects[e.source_domain].push(entry);
+    if (!result.success) {
+      return NextResponse.json({ error: result.error || "Brain command failed" }, { status: 500 });
     }
 
-    // Sort by effect size
-    for (const d of Object.keys(directCauses)) {
-      directCauses[d].sort((a, b) => Math.abs(b.effectSize) - Math.abs(a.effectSize));
-    }
-    for (const d of Object.keys(directEffects)) {
-      directEffects[d].sort((a, b) => Math.abs(b.effectSize) - Math.abs(a.effectSize));
-    }
+    // ── Build response (backwards-compatible with existing API contract) ──
+    const compact = format === "compact";
+    const { intelligence, dispatch, artifact } = result;
 
-    // Filter to relevant domains
-    const relevantCauses: Record<string, typeof directCauses[string]> = {};
-    const relevantEffects: Record<string, typeof directEffects[string]> = {};
-    for (const d of domains) {
-      if (directCauses[d]) relevantCauses[d] = directCauses[d].slice(0, 10);
-      if (directEffects[d]) relevantEffects[d] = directEffects[d].slice(0, 10);
-    }
-
-    // Filter patterns
-    const relevantPatterns = patterns
-      .filter((p) => domains.includes(p.domain) || domains.some((d) => (p.content || "").toLowerCase().includes(d)))
-      .slice(0, 15)
+    // Filter patterns to relevant domains
+    const relevantPatterns = intelligence.patterns
+      .filter((p) => dispatch.domains.includes(p.domain as any) || dispatch.domains.some((d) => (p.content || "").toLowerCase().includes(d)))
+      .slice(0, compact ? 5 : 15)
       .map((p) => ({
         domain: p.domain,
         name: p.llm_pattern_name || p.domain,
@@ -260,123 +206,43 @@ export async function POST(request: NextRequest) {
         importance: p.importance,
       }));
 
-    // Impact analysis per domain
-    const impactAnalysis: Record<string, { affectedDomains: string[]; maxCascadeDepth: number; riskLevel: string }> = {};
-    for (const domain of domains) {
-      const adjacency: Record<string, string[]> = {};
-      for (const e of edges) {
-        if (!adjacency[e.source_domain]) adjacency[e.source_domain] = [];
-        adjacency[e.source_domain].push(e.target_domain);
-      }
-      const visited = new Set<string>();
-      const queue = [{ node: domain, depth: 0 }];
-      let maxDepth = 0;
-      while (queue.length > 0) {
-        const { node, depth } = queue.shift()!;
-        if (visited.has(node) || depth > 4) continue;
-        visited.add(node);
-        maxDepth = Math.max(maxDepth, depth);
-        for (const n of adjacency[node] || []) {
-          if (!visited.has(n)) queue.push({ node: n, depth: depth + 1 });
-        }
-      }
-      const affected = [...visited].filter((d) => d !== domain);
-      impactAnalysis[domain] = {
-        affectedDomains: affected,
-        maxCascadeDepth: maxDepth,
-        riskLevel: affected.length >= 10 ? "critical" : affected.length >= 6 ? "high" : affected.length >= 3 ? "medium" : "low",
-      };
-    }
-
-    // Brain stats
-    const allDomains = new Set([
-      ...edges.map((e) => e.source_domain),
-      ...edges.map((e) => e.target_domain),
-    ]);
-
-    const brainStats = {
-      totalDomains: allDomains.size,
-      totalCausalEdges: edges.length,
-      totalPatterns: patterns.length,
-      totalRules: rules.length,
-      totalCascadeRules: cascadeRules.length,
-      domainsDetected: domains,
-      intentDetected: intent,
-    };
-
-    // ── Run action engine if requested ───────────────────────────────
-    let artifact = null;
-    const actionType = action || (intent === "build" ? "forecast" : intent === "predict" ? "simulate" : intent === "diagnose" ? "diagnose" : intent === "explain" ? "explain" : null);
-
-    if (actionType && actionType !== "query") {
-      try {
-        const { createDomainActionEngine } = await import("@nexus-ai/memory-stack");
-        const engine = createDomainActionEngine({
-          supabase,
-          organizationId: orgId!,
-          amplifierConfig: process.env.ANTHROPIC_API_KEY
-            ? { provider: "anthropic" as const, apiKey: process.env.ANTHROPIC_API_KEY }
-            : undefined,
-        });
-
-        const knowledgeCtx = {
-          question,
-          intent: intent as any,
-          extractedDomains: domains,
-          primaryDomain: domains[0] || "finance",
-          directCauses: Object.fromEntries(
-            Object.entries(directCauses).map(([k, v]) => [k, v.map(e => ({ source: e.source, target: e.target, effectSize: e.effectSize, lagDays: e.lagDays }))])
-          ),
-          directEffects: Object.fromEntries(
-            Object.entries(directEffects).map(([k, v]) => [k, v.map(e => ({ source: e.source, target: e.target, effectSize: e.effectSize, lagDays: e.lagDays }))])
-          ),
-          matchedRules: rules.slice(0, 15).map((r) => {
-            try {
-              const parsed = JSON.parse(r.content);
-              return {
-                title: parsed.title || "Rule",
-                naturalLanguage: parsed.natural_language || parsed.description || "",
-                conditions: (parsed.when?.conditions || []).map((c: any) => `${c.field} ${c.operator} ${c.value}`),
-                triggered: false,
-              };
-            } catch {
-              return { title: "Rule", naturalLanguage: r.content?.substring(0, 100) || "", conditions: [], triggered: false };
-            }
-          }),
-        };
-
-        artifact = await engine.execute(question, knowledgeCtx);
-      } catch (err) {
-        // Non-fatal: return brain intelligence without action artifact
-        console.warn("[Brain API] Action engine error (non-fatal):", err);
-      }
-    }
-
-    // ── Build response ───────────────────────────────────────────────
-    const compact = format === "compact";
-
     const response: Record<string, unknown> = {
       question,
-      intent,
-      domains,
+      intent: dispatch.intent,
+      domains: dispatch.domains,
       organizationId: orgId,
-      brainStats,
-      causalGraph: {
-        causes: compact ? Object.fromEntries(Object.entries(relevantCauses).map(([k, v]) => [k, v.slice(0, 5)])) : relevantCauses,
-        effects: compact ? Object.fromEntries(Object.entries(relevantEffects).map(([k, v]) => [k, v.slice(0, 5)])) : relevantEffects,
+      brainStats: {
+        ...intelligence.stats,
+        domainsDetected: dispatch.domains,
+        intentDetected: dispatch.intent,
       },
-      patterns: compact ? relevantPatterns.slice(0, 5) : relevantPatterns,
-      impactAnalysis,
-      cascadeRules: cascadeRules.map((r) => ({
+      causalGraph: {
+        causes: compact
+          ? Object.fromEntries(Object.entries(intelligence.causalGraph.causes).map(([k, v]) => [k, v.slice(0, 5)]))
+          : intelligence.causalGraph.causes,
+        effects: compact
+          ? Object.fromEntries(Object.entries(intelligence.causalGraph.effects).map(([k, v]) => [k, v.slice(0, 5)]))
+          : intelligence.causalGraph.effects,
+      },
+      patterns: relevantPatterns,
+      impactAnalysis: intelligence.impactAnalysis,
+      cascadeRules: intelligence.cascadeRules.map((r) => ({
         name: r.rule_name,
         triggerDomain: r.trigger_domain,
         signalType: r.trigger_signal_type,
         chainLength: r.propagation_chain?.length || 0,
       })),
+      // Commander metadata
+      dispatch: {
+        route: dispatch.route,
+        complexity: dispatch.complexityScore,
+        confidence: dispatch.confidence,
+        latencyMs: dispatch.latencyMs,
+      },
+      timing: result.timing,
     };
 
     if (artifact) {
-      // Strip internal fields for API response
       const { __promptText, ...cleanArtifact } = artifact as any;
       response.artifact = cleanArtifact;
     }

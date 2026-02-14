@@ -1,0 +1,714 @@
+/**
+ * Brain Commander V1 — Unified Entry Point for ALL Brain Queries
+ * ===============================================================
+ *
+ * Brain Analog: Prefrontal Cortex (PFC) — the executive controller
+ *   — receives all inputs, decides strategy, delegates to specialists,
+ *     integrates results, and returns a unified response.
+ *
+ * THIS IS THE MISSING PIECE.
+ *
+ * Before Brain Commander:
+ *   - /api/brain/query → manual DB queries + optional DomainActionEngine
+ *   - /api/copilot/chat → manual DB queries + BrainContextBuilder + DomainActionEngine
+ *   - /api/brain/execute → switch statement + direct handlers
+ *   - nexus-copilot edge fn → own complexity router + own tool system
+ *   All four paths duplicated domain detection, intent classification,
+ *   DB queries, causal graph building, and action routing.
+ *
+ * After Brain Commander:
+ *   - ALL paths call: BrainCommander.command(question, userContext)
+ *   - Commander uses DispatchAssessor to route
+ *   - Commander delegates to the right engine(s)
+ *   - Commander returns a unified CommandResult
+ *   - API routes just handle auth + serialization
+ *
+ * Design:
+ *   - Never throws (returns errors in result)
+ *   - Graceful degradation at every step
+ *   - Full audit trail
+ *   - Sub-100ms for fast queries, full pipeline for complex ones
+ *
+ * @packageDocumentation
+ */
+
+import type { SupabaseClient } from '@supabase/supabase-js';
+import {
+  createDispatchAssessor,
+  type DispatchAssessment,
+  type DispatchRoute,
+} from './dispatch-assessor';
+import {
+  createUserContextResolver,
+  type UserContext,
+  type OrgRole,
+} from './user-context-resolver';
+
+// ============================================================================
+// TYPES
+// ============================================================================
+
+export interface BrainCommanderConfig {
+  /** Supabase client */
+  supabase: SupabaseClient;
+  /** Organization ID */
+  organizationId: string;
+  /** Core org ID for shared brain data */
+  coreOrgId?: string;
+  /** Anthropic API key for LLM calls */
+  anthropicApiKey?: string;
+  /** Whether to enable action engine (forecasting, simulation, etc.) */
+  enableActions?: boolean;
+  /** Whether to enable motor commands (Slack, Jira, etc.) */
+  enableMotorCommands?: boolean;
+  /** Maximum action engine timeout in ms */
+  actionTimeoutMs?: number;
+}
+
+/** The unified result of any brain command */
+export interface CommandResult {
+  /** Whether the command succeeded */
+  success: boolean;
+  /** The dispatch assessment that determined routing */
+  dispatch: DispatchAssessment;
+  /** User context (if resolved) */
+  userContext?: UserContext;
+  /** Brain intelligence context */
+  intelligence: BrainIntelligence;
+  /** Action artifact (if action engine was invoked) */
+  artifact?: Record<string, unknown>;
+  /** Motor commands (if motor engine produced them) */
+  motorCommands?: unknown[];
+  /** Error message (if any) */
+  error?: string;
+  /** Total execution time in ms */
+  totalMs: number;
+  /** Per-step timing breakdown */
+  timing: Record<string, number>;
+}
+
+/** Brain intelligence gathered from DB */
+export interface BrainIntelligence {
+  /** Causal edges */
+  causalEdges: CausalEdge[];
+  /** Business rules */
+  rules: BrainRule[];
+  /** Discovered patterns */
+  patterns: BrainPattern[];
+  /** Cascade rules */
+  cascadeRules: CascadeRule[];
+  /** Insights from connectors */
+  insights: BrainInsight[];
+  /** Causal graph (causes/effects per domain) */
+  causalGraph: {
+    causes: Record<string, CausalEdge[]>;
+    effects: Record<string, CausalEdge[]>;
+  };
+  /** Impact analysis per domain */
+  impactAnalysis: Record<string, {
+    affectedDomains: string[];
+    maxCascadeDepth: number;
+    riskLevel: string;
+  }>;
+  /** Brain stats */
+  stats: {
+    totalDomains: number;
+    totalCausalEdges: number;
+    totalPatterns: number;
+    totalRules: number;
+    totalCascadeRules: number;
+  };
+}
+
+export interface CausalEdge {
+  source_domain: string;
+  target_domain: string;
+  effect_size: number;
+  granger_p_value: number;
+  optimal_lag_days: number;
+  natural_language: string | null;
+  is_significant: boolean;
+  granger_f_statistic?: number;
+  sample_size?: number;
+  confidence_interval_lower?: number;
+  confidence_interval_upper?: number;
+}
+
+export interface BrainRule {
+  content: string;
+  importance: number;
+  domain: string;
+  metadata: Record<string, unknown> | null;
+}
+
+export interface BrainPattern {
+  content: string;
+  domain: string;
+  importance: number;
+  llm_pattern_name: string | null;
+  llm_pattern_description: string | null;
+  metadata: Record<string, unknown> | null;
+}
+
+export interface CascadeRule {
+  rule_name: string;
+  trigger_domain: string;
+  trigger_signal_type: string;
+  propagation_chain: unknown[];
+  is_active: boolean;
+}
+
+export interface BrainInsight {
+  content: string;
+  importance: number;
+  domain: string;
+  metadata: Record<string, unknown> | null;
+}
+
+// ============================================================================
+// FACTORY
+// ============================================================================
+
+const CORE_ORG_ID_DEFAULT = '00000000-0000-4000-a000-000000000001';
+
+/**
+ * Create the Brain Commander — the unified entry point for ALL brain queries.
+ *
+ * @example
+ * ```typescript
+ * const commander = createBrainCommander({
+ *   supabase,
+ *   organizationId: orgId,
+ *   anthropicApiKey: process.env.ANTHROPIC_API_KEY,
+ * });
+ *
+ * const result = await commander.command("What drives customer churn?");
+ * // → { success: true, dispatch: { route: 'action_domain', intent: 'diagnose' }, ... }
+ *
+ * const result2 = await commander.command("What if we increase marketing spend by 20%?", {
+ *   userId: user.id,
+ * });
+ * // → { success: true, dispatch: { route: 'action_domain', intent: 'simulate' }, artifact: { ... } }
+ * ```
+ */
+export function createBrainCommander(config: BrainCommanderConfig) {
+  const {
+    supabase,
+    organizationId,
+    coreOrgId = CORE_ORG_ID_DEFAULT,
+    anthropicApiKey,
+    enableActions = true,
+    enableMotorCommands = false,
+    actionTimeoutMs = 15000,
+  } = config;
+
+  // Internal subsystems
+  const assessor = createDispatchAssessor();
+  const contextResolver = createUserContextResolver({ supabase });
+
+  // ── Main Command Entry Point ────────────────────────────────────────
+
+  /**
+   * Execute a brain command.
+   *
+   * This is THE entry point for all brain queries. It:
+   * 1. Assesses dispatch route (fast_query, action_domain, agent_orchestration)
+   * 2. Resolves user context (if userId provided)
+   * 3. Gathers brain intelligence from DB
+   * 4. Optionally invokes the action engine
+   * 5. Returns unified CommandResult
+   */
+  async function command(
+    question: string,
+    options?: {
+      userId?: string;
+      action?: string;
+      entityState?: Record<string, unknown>;
+      format?: 'full' | 'compact';
+      domains?: string[];
+    }
+  ): Promise<CommandResult> {
+    const totalStart = performance.now();
+    const timing: Record<string, number> = {};
+
+    try {
+      // ── Step 1: Dispatch Assessment ─────────────────────────────────
+      const dispatchStart = performance.now();
+      const dispatch = assessor.assess(question);
+      timing.dispatch = performance.now() - dispatchStart;
+
+      // Use provided domains if available, otherwise use detected
+      const effectiveDomains = options?.domains || dispatch.domains;
+
+      // ── Step 2: User Context Resolution ─────────────────────────────
+      let userContext: UserContext | undefined;
+      if (options?.userId) {
+        const contextStart = performance.now();
+        userContext = await contextResolver.resolve(options.userId, organizationId);
+        timing.userContext = performance.now() - contextStart;
+      }
+
+      // ── Step 3: Gather Brain Intelligence ───────────────────────────
+      const intelligenceStart = performance.now();
+      const intelligence = await gatherIntelligence(
+        effectiveDomains as string[],
+        userContext
+      );
+      timing.intelligence = performance.now() - intelligenceStart;
+
+      // ── Step 4: Action Engine (if needed) ───────────────────────────
+      let artifact: Record<string, unknown> | undefined;
+      let motorCommands: unknown[] | undefined;
+
+      const shouldRunAction = enableActions && (
+        dispatch.needsAction ||
+        options?.action ||
+        dispatch.route === 'action_domain' ||
+        dispatch.route === 'agent_orchestration'
+      );
+
+      if (shouldRunAction) {
+        const actionStart = performance.now();
+        try {
+          const actionResult = await runActionEngine(
+            question,
+            dispatch,
+            intelligence,
+            options?.entityState
+          );
+          artifact = actionResult.artifact;
+          motorCommands = actionResult.motorCommands;
+        } catch (err) {
+          // Non-fatal: return intelligence without artifact
+          console.warn('[BrainCommander] Action engine error (non-fatal):', err);
+        }
+        timing.action = performance.now() - actionStart;
+      }
+
+      // ── Step 5: Filter by user permissions ──────────────────────────
+      if (userContext) {
+        const filterStart = performance.now();
+        filterByPermissions(intelligence, userContext);
+        timing.filter = performance.now() - filterStart;
+      }
+
+      return {
+        success: true,
+        dispatch,
+        userContext,
+        intelligence,
+        artifact,
+        motorCommands,
+        totalMs: performance.now() - totalStart,
+        timing,
+      };
+    } catch (err) {
+      return {
+        success: false,
+        dispatch: assessor.assess(question),
+        intelligence: emptyIntelligence(),
+        error: err instanceof Error ? err.message : 'Unknown error',
+        totalMs: performance.now() - totalStart,
+        timing,
+      };
+    }
+  }
+
+  // ── Intelligence Gathering ──────────────────────────────────────────
+
+  async function gatherIntelligence(
+    domains: string[],
+    userContext?: UserContext
+  ): Promise<BrainIntelligence> {
+    const orgIds = [...new Set([organizationId, coreOrgId])];
+    const orgFilter = orgIds.map(id => `organization_id.eq.${id}`).join(',');
+
+    // Parallel DB queries (same pattern as existing routes)
+    const [causalResult, rulesResult, patternsResult, cascadeResult, insightsResult] = await Promise.all([
+      supabase
+        .from('causal_relationships_statistical')
+        .select('source_domain, target_domain, effect_size, granger_p_value, optimal_lag_days, granger_f_statistic, sample_size, confidence_interval_lower, confidence_interval_upper, natural_language, is_significant')
+        .or(orgFilter)
+        .eq('is_significant', true)
+        .order('effect_size', { ascending: false })
+        .limit(300),
+
+      supabase
+        .from('ai_memory')
+        .select('content, importance, domain, metadata')
+        .or(orgFilter)
+        .eq('memory_type', 'rule')
+        .order('importance', { ascending: false })
+        .limit(100),
+
+      supabase
+        .from('ai_memory')
+        .select('content, domain, importance, llm_pattern_name, llm_pattern_description, metadata')
+        .or(orgFilter)
+        .eq('memory_type', 'pattern')
+        .order('importance', { ascending: false })
+        .limit(100),
+
+      supabase
+        .from('org_cascade_rules')
+        .select('rule_name, trigger_domain, trigger_signal_type, propagation_chain, is_active')
+        .or(orgFilter)
+        .eq('is_active', true)
+        .limit(50),
+
+      supabase
+        .from('ai_memory')
+        .select('content, importance, domain, metadata')
+        .or(orgFilter)
+        .eq('memory_type', 'insight')
+        .order('importance', { ascending: false })
+        .limit(100),
+    ]);
+
+    const edges = (causalResult.data || []) as CausalEdge[];
+    const rules = (rulesResult.data || []) as BrainRule[];
+    const patterns = (patternsResult.data || []) as BrainPattern[];
+    const cascadeRules = (cascadeResult.data || []) as CascadeRule[];
+    const insights = (insightsResult.data || []) as BrainInsight[];
+
+    // Build causal graph
+    const causalGraph = buildCausalGraph(edges, domains);
+
+    // Build impact analysis
+    const impactAnalysis = buildImpactAnalysis(edges, domains);
+
+    // Stats
+    const allDomains = new Set([
+      ...edges.map(e => e.source_domain),
+      ...edges.map(e => e.target_domain),
+    ]);
+
+    return {
+      causalEdges: edges,
+      rules,
+      patterns,
+      cascadeRules,
+      insights,
+      causalGraph,
+      impactAnalysis,
+      stats: {
+        totalDomains: allDomains.size,
+        totalCausalEdges: edges.length,
+        totalPatterns: patterns.length,
+        totalRules: rules.length,
+        totalCascadeRules: cascadeRules.length,
+      },
+    };
+  }
+
+  // ── Causal Graph Builder ────────────────────────────────────────────
+
+  function buildCausalGraph(
+    edges: CausalEdge[],
+    domains: string[]
+  ): BrainIntelligence['causalGraph'] {
+    const causes: Record<string, CausalEdge[]> = {};
+    const effects: Record<string, CausalEdge[]> = {};
+
+    for (const e of edges) {
+      if (!causes[e.target_domain]) causes[e.target_domain] = [];
+      causes[e.target_domain].push(e);
+      if (!effects[e.source_domain]) effects[e.source_domain] = [];
+      effects[e.source_domain].push(e);
+    }
+
+    // Sort by effect size
+    for (const d of Object.keys(causes)) {
+      causes[d].sort((a, b) => Math.abs(b.effect_size) - Math.abs(a.effect_size));
+    }
+    for (const d of Object.keys(effects)) {
+      effects[d].sort((a, b) => Math.abs(b.effect_size) - Math.abs(a.effect_size));
+    }
+
+    // Filter to relevant domains (top 10 per domain)
+    const filteredCauses: Record<string, CausalEdge[]> = {};
+    const filteredEffects: Record<string, CausalEdge[]> = {};
+    for (const d of domains) {
+      if (causes[d]) filteredCauses[d] = causes[d].slice(0, 10);
+      if (effects[d]) filteredEffects[d] = effects[d].slice(0, 10);
+    }
+
+    return { causes: filteredCauses, effects: filteredEffects };
+  }
+
+  // ── Impact Analysis ─────────────────────────────────────────────────
+
+  function buildImpactAnalysis(
+    edges: CausalEdge[],
+    domains: string[]
+  ): BrainIntelligence['impactAnalysis'] {
+    const analysis: BrainIntelligence['impactAnalysis'] = {};
+    const adjacency: Record<string, string[]> = {};
+
+    for (const e of edges) {
+      if (!adjacency[e.source_domain]) adjacency[e.source_domain] = [];
+      adjacency[e.source_domain].push(e.target_domain);
+    }
+
+    for (const domain of domains) {
+      const visited = new Set<string>();
+      const queue = [{ node: domain, depth: 0 }];
+      let maxDepth = 0;
+
+      while (queue.length > 0) {
+        const { node, depth } = queue.shift()!;
+        if (visited.has(node) || depth > 4) continue;
+        visited.add(node);
+        maxDepth = Math.max(maxDepth, depth);
+        for (const n of adjacency[node] || []) {
+          if (!visited.has(n)) queue.push({ node: n, depth: depth + 1 });
+        }
+      }
+
+      const affected = [...visited].filter(d => d !== domain);
+      analysis[domain] = {
+        affectedDomains: affected,
+        maxCascadeDepth: maxDepth,
+        riskLevel: affected.length >= 10 ? 'critical' : affected.length >= 6 ? 'high' : affected.length >= 3 ? 'medium' : 'low',
+      };
+    }
+
+    return analysis;
+  }
+
+  // ── Action Engine ───────────────────────────────────────────────────
+
+  async function runActionEngine(
+    question: string,
+    dispatch: DispatchAssessment,
+    intelligence: BrainIntelligence,
+    entityState?: Record<string, unknown>
+  ): Promise<{ artifact?: Record<string, unknown>; motorCommands?: unknown[] }> {
+    // Dynamic import to avoid circular deps and keep bundle tree-shakeable
+    const { createDomainActionEngine } = await import('./domain-action-engine');
+
+    const engine = createDomainActionEngine({
+      supabase,
+      organizationId,
+      amplifierConfig: anthropicApiKey
+        ? { provider: 'anthropic' as const, apiKey: anthropicApiKey }
+        : undefined,
+    });
+
+    // Build knowledge context for the action engine
+    const knowledgeCtx = buildActionKnowledgeContext(
+      question,
+      dispatch,
+      intelligence,
+      entityState
+    );
+
+    // Execute with timeout
+    const artifactPromise = engine.execute(question, knowledgeCtx);
+    const timeoutPromise = new Promise<null>((resolve) =>
+      setTimeout(() => resolve(null), actionTimeoutMs)
+    );
+
+    const artifact = await Promise.race([artifactPromise, timeoutPromise]);
+    if (!artifact) return {};
+
+    // Extract motor commands if present
+    const motorCommands = (artifact as any)?.motorCommands || undefined;
+
+    return {
+      artifact: artifact as unknown as Record<string, unknown>,
+      motorCommands,
+    };
+  }
+
+  // ── Action Knowledge Context Builder ────────────────────────────────
+
+  function buildActionKnowledgeContext(
+    question: string,
+    dispatch: DispatchAssessment,
+    intelligence: BrainIntelligence,
+    entityState?: Record<string, unknown>
+  ) {
+    type UserActionIntent = 'build' | 'explain' | 'diagnose' | 'predict' | 'general';
+    const intentMap: Record<string, UserActionIntent> = {
+      predict: 'predict', simulate: 'predict', build: 'build',
+      explain: 'explain', diagnose: 'diagnose', compare: 'explain',
+      optimize: 'build', recommend: 'build', audit: 'diagnose',
+      monitor: 'general', lookup: 'general', general: 'general',
+    };
+
+    const actionIntent = intentMap[dispatch.intent] || 'general';
+
+    // Build directCauses / directEffects for ActionEngine
+    const directCauses: Record<string, Array<{ source: string; target: string; effectSize: number; lagDays: number }>> = {};
+    const directEffects: Record<string, Array<{ source: string; target: string; effectSize: number; lagDays: number }>> = {};
+
+    for (const e of intelligence.causalEdges) {
+      const entry = {
+        source: e.source_domain,
+        target: e.target_domain,
+        effectSize: e.effect_size,
+        lagDays: e.optimal_lag_days,
+      };
+      if (!directCauses[e.target_domain]) directCauses[e.target_domain] = [];
+      directCauses[e.target_domain].push(entry);
+      if (!directEffects[e.source_domain]) directEffects[e.source_domain] = [];
+      directEffects[e.source_domain].push(entry);
+    }
+
+    // Parse rules for ActionEngine
+    const matchedRules: Array<{ title: string; naturalLanguage: string; conditions: string[]; triggered: boolean }> = [];
+
+    for (const r of intelligence.rules.slice(0, 15)) {
+      try {
+        const parsed = JSON.parse(r.content);
+        if (parsed && parsed.when) {
+          const conditionStrs = (parsed.when.conditions || []).map(
+            (c: { field: string; operator: string; value: unknown }) =>
+              `${c.field} ${c.operator} ${c.value}`
+          );
+
+          let triggered = false;
+          if (entityState && parsed.when.conditions?.length > 0) {
+            triggered = parsed.when.conditions.some((c: { field: string; operator: string; value: unknown }) => {
+              const parts = c.field.split('.');
+              let val: unknown = entityState;
+              for (const part of parts) {
+                if (val == null || typeof val !== 'object') return false;
+                val = (val as Record<string, unknown>)[part];
+              }
+              return val !== undefined;
+            });
+          }
+
+          matchedRules.push({
+            title: parsed.title || 'Rule',
+            naturalLanguage: parsed.natural_language || parsed.description || '',
+            conditions: conditionStrs,
+            triggered,
+          });
+        }
+      } catch {
+        // Skip malformed rules
+      }
+    }
+
+    return {
+      question,
+      intent: actionIntent,
+      extractedDomains: dispatch.domains as string[],
+      primaryDomain: dispatch.primaryDomain as string,
+      directCauses,
+      directEffects,
+      matchedRules,
+    };
+  }
+
+  // ── Permission Filter ───────────────────────────────────────────────
+
+  function filterByPermissions(intelligence: BrainIntelligence, userContext: UserContext): void {
+    const { permissions } = userContext;
+    if (permissions.canViewCrossOrg) return; // Platform admin — no filtering
+
+    const allowed = new Set(permissions.allowedDomains);
+
+    // Filter causal edges
+    intelligence.causalEdges = intelligence.causalEdges.filter(
+      e => allowed.has(e.source_domain) && allowed.has(e.target_domain)
+    );
+
+    // Filter patterns
+    intelligence.patterns = intelligence.patterns.filter(
+      p => allowed.has(p.domain)
+    );
+
+    // Filter rules
+    intelligence.rules = intelligence.rules.filter(
+      r => allowed.has(r.domain)
+    );
+
+    // Filter insights
+    intelligence.insights = intelligence.insights.filter(
+      i => allowed.has(i.domain)
+    );
+
+    // Rebuild causal graph
+    const allDomains = [...allowed];
+    intelligence.causalGraph = buildCausalGraph(intelligence.causalEdges, allDomains);
+    intelligence.impactAnalysis = buildImpactAnalysis(intelligence.causalEdges, allDomains);
+
+    // Recalculate stats
+    const allEdgeDomains = new Set([
+      ...intelligence.causalEdges.map(e => e.source_domain),
+      ...intelligence.causalEdges.map(e => e.target_domain),
+    ]);
+    intelligence.stats = {
+      totalDomains: allEdgeDomains.size,
+      totalCausalEdges: intelligence.causalEdges.length,
+      totalPatterns: intelligence.patterns.length,
+      totalRules: intelligence.rules.length,
+      totalCascadeRules: intelligence.cascadeRules.length,
+    };
+  }
+
+  // ── Empty Intelligence ──────────────────────────────────────────────
+
+  function emptyIntelligence(): BrainIntelligence {
+    return {
+      causalEdges: [],
+      rules: [],
+      patterns: [],
+      cascadeRules: [],
+      insights: [],
+      causalGraph: { causes: {}, effects: {} },
+      impactAnalysis: {},
+      stats: { totalDomains: 0, totalCausalEdges: 0, totalPatterns: 0, totalRules: 0, totalCascadeRules: 0 },
+    };
+  }
+
+  // ── Public API ──────────────────────────────────────────────────────
+
+  return {
+    /**
+     * Execute a brain command.
+     * This is THE entry point for all brain queries.
+     */
+    command,
+
+    /**
+     * Assess how a query would be dispatched (without executing).
+     * Useful for debugging and UI hint generation.
+     */
+    assessDispatch(question: string): DispatchAssessment {
+      return assessor.assess(question);
+    },
+
+    /**
+     * Resolve user context for a given user.
+     * Useful for pre-resolving context before a command.
+     */
+    resolveUser(userId: string): Promise<UserContext> {
+      return contextResolver.resolve(userId, organizationId);
+    },
+
+    /**
+     * Get commander stats.
+     */
+    getConfig() {
+      return {
+        organizationId,
+        coreOrgId,
+        enableActions,
+        enableMotorCommands,
+        actionTimeoutMs,
+        hasAnthropicKey: !!anthropicApiKey,
+      };
+    },
+  };
+}
+
+// ============================================================================
+// TYPE EXPORTS
+// ============================================================================
+
+export type BrainCommanderInstance = ReturnType<typeof createBrainCommander>;

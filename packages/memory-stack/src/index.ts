@@ -619,6 +619,45 @@ export {
   type AgentRegistry as AgentRegistryInstance,
 } from './orchestrator/agent-registry';
 
+// Brain Commander V1 ("Prefrontal Cortex Executive") — unified entry point for ALL brain queries
+// Routes through DispatchAssessor → ActionEngine/Orchestrator → Permission Filter → CommandResult
+export {
+  createBrainCommander,
+  type BrainCommanderConfig,
+  type BrainCommanderInstance,
+  type CommandResult,
+  type BrainIntelligence,
+  type CausalEdge as CommanderCausalEdge,
+  type BrainRule,
+  type BrainPattern,
+  type CascadeRule as CommanderCascadeRule,
+  type BrainInsight as CommanderBrainInsight,
+} from './orchestrator/brain-commander';
+
+// Dispatch Assessor V1 ("Anterior Cingulate Cortex") — complexity + intent scoring + routing
+// Pure function. No I/O. Sub-1ms. Determines fast_query vs action_domain vs agent_orchestration
+export {
+  createDispatchAssessor,
+  type DispatchAssessment,
+  type DispatchRoute,
+  type DispatchAssessorInstance,
+  type UserIntent as DispatchUserIntent,
+  type BusinessDomain,
+  type ComplexityFactors,
+} from './orchestrator/dispatch-assessor';
+
+// User Context Resolver V1 ("Social Cognition Network") — per-user role, persona, permissions
+// Resolves user identity → org membership → role → persona → data access permissions
+export {
+  createUserContextResolver,
+  type UserContext as CommanderUserContext,
+  type UserPersona,
+  type OrgRole,
+  type DataAccessPermissions,
+  type UserContextResolverConfig,
+  type UserContextResolverInstance,
+} from './orchestrator/user-context-resolver';
+
 // Calibration Feedback Loop V1 ("Cerebellum") — prediction→outcome→recalibration
 // Tracks brain predictions, compares to outcomes, computes calibration metrics
 export {
@@ -658,7 +697,7 @@ export {
   type DomainOutputSchema,
 } from './orchestrator/action-domain-registry';
 
-// Action Domains V2 ("21 Brodmann Areas") — specialized brain functions
+// Action Domains V2 ("28 Brodmann Areas") — specialized brain functions
 export {
   // Core (V2-V5)
   forecastDomain,
@@ -684,6 +723,16 @@ export {
   goalDecomposeDomain,
   causalInterveneDomain,
   patternMemoryDomain,
+  // V7 — Accounting Intelligence (Multi-Jurisdiction)
+  documentComprehendDomain,
+  completenessCheckDomain,
+  ruleApplyDomain,
+  crossValidateDomain,
+  statementSynthesizeDomain,
+  jurisdictionComplyDomain,
+  confidenceTriageDomain,
+  JURISDICTION_CONFIG,
+  type JurisdictionProfile,
   ALL_ACTION_DOMAINS,
   registerAllActionDomains,
 } from './orchestrator/action-domains';
@@ -714,6 +763,13 @@ export {
   patternReconAgent,
   orgHealthAgent,
   interventionTrackerAgent,
+  // V7 — Accounting Intelligence Agents
+  balanceSheetBuilderAgent,
+  pnlBuilderAgent,
+  cashflowBuilderAgent,
+  taxPreparerAgent,
+  multiJurisdictionMonitorAgent,
+  financialAuditorAgent,
   ALL_BRAIN_AGENTS,
   registerBrainAgents,
   type BrainExecutionInterface,
