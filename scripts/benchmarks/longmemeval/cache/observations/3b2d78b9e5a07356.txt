@@ -1,0 +1,32 @@
+**Observation Log:**
+
+[TEMPORAL] Session Date: 2023/05/25 (Thu) 00:05  
+[FACT] User is working on a group project for their Database Systems course.  
+[PREFERENCE] User is interested in research papers on AI in medical diagnosis, specifically on image classification.  
+[ASSISTANT_SAID] Assistant suggested databases and search engines for finding research papers:  
+[ASSISTANT_SAID] 1. PubMed (National Library of Medicine)  
+[ASSISTANT_SAID] 2. Google Scholar (scholar.google.com)  
+[ASSISTANT_SAID] 3. arXiv (arxiv.org)  
+[ASSISTANT_SAID] 4. IEEE Xplore (ieeexplore.ieee.org)  
+[ASSISTANT_SAID] 5. ScienceDirect (sciencedirect.com)  
+[ASSISTANT_SAID] 6. ResearchGate (researchgate.net)  
+[ASSISTANT_SAID] 7. Academia.edu (academia.edu)  
+[ASSISTANT_SAID] 8. Microsoft Academic (academic.microsoft.com)  
+[ASSISTANT_SAID] 9. Semantic Scholar (semanticscholar.org)  
+[ASSISTANT_SAID] 10. Web of Science (wokinfo.com)  
+[ASSISTANT_SAID] Assistant provided keywords to refine the search:  
+[ASSISTANT_SAID] * "AI in medical imaging"  
+[ASSISTANT_SAID] * "Image classification in medical diagnosis"  
+[ASSISTANT_SAID] * "Deep learning for medical image analysis"  
+[ASSISTANT_SAID] * "Convolutional neural networks (CNNs) for medical image classification"  
+[ASSISTANT_SAID] * "Medical image segmentation using AI"  
+[ASSISTANT_SAID] * "AI-assisted diagnosis in [specific disease or condition]"  
+[ASSISTANT_SAID] Assistant wished user good luck with their research paper search and their Database Systems project.  
+[PREFERENCE] User requested popular open-source datasets for medical image classification, especially for diseases like diabetic retinopathy or breast cancer.  
+[ASSISTANT_SAID] Assistant provided popular open-source datasets for medical image classification:  
+[ASSISTANT_SAID] **Diabetic Retinopathy:**  
+[ASSISTANT_SAID] 1. Kaggle Diabetic Retinopathy Detection (88,702 retinal images)  
+[ASSISTANT_SAID] 2. Messidor-2 (1,748 retinal images)  
+[ASSISTANT_SAID] 3. STARE (397 retinal images)  
+[ASSISTANT_SAID] 4. DDR (1,200 retinal images)  
+[ASSIST

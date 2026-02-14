@@ -34,12 +34,16 @@
  */
 
 import {
-  BaseTrainingAgent,
-  type AgentConfig,
-  type FetchResult,
-  type ConvertResult,
-  type TrainResult,
+  ManusNativeAgent,
+  type ManusCapabilitiesConfig,
+} from '../agent-framework/brain-native-agent-v5-manus';
+import type { BrainNativeAgentConfig } from '../agent-framework/brain-native-agent-template';
+import type {
+  FetchResult,
+  ConvertResult,
+  TrainResult,
 } from '../agent-framework/base-training-agent';
+import type { MotorCommand } from '../../packages/memory-stack/src/orchestrator/motor-command-engine';
 import { createSyncManager } from '../../packages/memory-stack/src/connectors/sync-manager';
 import {
   storeConnectorSignals,
@@ -145,10 +149,22 @@ interface OrgUpdaterFetchData {
 // ORG UPDATER AGENT
 // ============================================================================
 
-class OrgUpdaterAgent extends BaseTrainingAgent {
+class OrgUpdaterAgent extends ManusNativeAgent {
   readonly name = 'org-updater';
-  readonly version = '8.0.0';
+  readonly version = '7.0.0';
   readonly description = 'Org Heartbeat — Syncs connected integrations, triggers learning cycles, ensures per-org brain health';
+  readonly brainRegion = 'Thalamus';
+  readonly neurologicalFunction = 'Sensory relay — routes integration data into org brain, triggers learning cycles';
+
+  constructor(config: BrainNativeAgentConfig & ManusCapabilitiesConfig) {
+    super({
+      ...config,
+      enableMotorCommands: true,
+      enableCalibration: true,
+      enableAgentRegistry: true,
+      motorCommandAutoExecuteThreshold: 0.95,  // High confidence for org heartbeat notifications
+    });
+  }
 
   // ──────────────────────────────────────────────────────────────────────────
   // FETCH: Read org_connectors → create connectors → sync all via SyncManager
@@ -237,11 +253,16 @@ class OrgUpdaterAgent extends BaseTrainingAgent {
       domainsCovered: [...domainsCovered],
     };
 
-    return {
+    const result = {
       data: fetchData,
       sources: connectorTypes.map(t => `connector:${t}`),
       recordCount: totalSignals,
     };
+
+    // Store for motor command generation
+    this.lastFetchResult = result;
+
+    return result;
   }
 
   // ──────────────────────────────────────────────────────────────────────────
@@ -366,6 +387,57 @@ class OrgUpdaterAgent extends BaseTrainingAgent {
 
     return baseResult;
   }
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // MOTOR COMMANDS: Notify via Slack when org heartbeat completes
+  // ──────────────────────────────────────────────────────────────────────────
+  protected async generateMotorCommands(trainResult: TrainResult): Promise<MotorCommand[]> {
+    const commands: MotorCommand[] = [];
+
+    // Get sync summary from last fetch
+    const fetchData = this.lastFetchResult?.data as OrgUpdaterFetchData | undefined;
+
+    if (!fetchData) {
+      return commands;
+    }
+
+    const totalSignals = fetchData.syncResults.reduce((sum, r) => sum + r.signalsGenerated, 0);
+    const totalErrors = fetchData.syncResults.reduce((sum, r) => sum + r.errors.length, 0);
+    const successCount = fetchData.syncResults.filter(r => r.success).length;
+
+    // Only notify if we have significant activity or errors
+    if (totalSignals > 0 || totalErrors > 0) {
+      // Slack notification
+      if (process.env.SLACK_BOT_TOKEN && process.env.SLACK_CHANNEL_ID) {
+        const message = totalErrors > 0
+          ? `🔄 Org Heartbeat: Synced ${fetchData.activeConnectors} connectors, ${totalSignals} signals, ⚠️ ${totalErrors} errors`
+          : `✅ Org Heartbeat: Synced ${fetchData.activeConnectors} connectors, ${totalSignals} new signals across ${fetchData.domainsCovered.length} domains`;
+
+        commands.push({
+          commandId: `org-heartbeat-slack-${Date.now()}`,
+          organizationId: this.organizationId,
+          actionType: 'slack_send_message',
+          target: process.env.SLACK_CHANNEL_ID,
+          payload: {
+            text: message,
+            metadata: {
+              connectorTypes: fetchData.connectorTypes,
+              domainsCovered: fetchData.domainsCovered,
+              discoveries: trainResult.discoveries,
+            },
+          },
+          priority: totalErrors > 0 ? 'high' : 'normal',
+          requiresApproval: false,
+          createdAt: new Date(),
+        });
+      }
+    }
+
+    return commands;
+  }
+
+  // Store last fetch result for motor command generation
+  private lastFetchResult?: FetchResult;
 
   // ── Logging helpers ─────────────────────────────────────────────────────
   private _log(stage: string, message: string): void {

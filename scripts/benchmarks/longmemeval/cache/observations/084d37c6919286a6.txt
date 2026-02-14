@@ -1,0 +1,39 @@
+**Observation Log:**
+
+**Session Date:** 2023/05/23 (Tue) 00:56  
+**Session ID:** answer_e7fe8c8b_1
+
+1. [FACT] The user is working on a Master's thesis related to AI in medical diagnosis.
+2. [EVENT] The user is looking for help with finding research papers to support their thesis arguments.
+3. [ASSISTANT_SAID] The assistant provided a list of academic databases and search engines to find research papers related to AI in medical diagnosis, including:
+   - PubMed
+   - Scopus
+   - IEEE Xplore
+   - ScienceDirect
+   - Web of Science
+   - Google Scholar
+   - Microsoft Academic
+   - Semantic Scholar
+   - arXiv
+   - bioRxiv
+   - MedRxiv
+   - ResearchGate
+   - AI in Healthcare publications from institutions like MIT, Stanford, Harvard, AMA, and NIH.
+4. [ASSISTANT_SAID] The assistant suggested using specific keywords related to the research topic, such as:
+   - "AI in medical diagnosis"
+   - "Machine learning in healthcare"
+   - "Deep learning for disease detection"
+   - "Natural language processing in medical imaging"
+   - "Computer-aided diagnosis systems"
+5. [ASSISTANT_SAID] The assistant recommended using Boolean operators, quotes, and parentheses to refine search queries and setting up alerts on platforms to stay updated on new publications.
+6. [EVENT] The user expressed interest in papers that explore the application of deep learning algorithms in medical imaging.
+7. [ASSISTANT_SAID] The assistant provided tips on filtering search results to prioritize papers focusing on deep learning in medical imaging, including:
+   - Using specific deep learning keywords like "deep learning," "CNNs," "RNNs," "GANs," "transfer learning," and "image segmentation."
+   - Combining with medical imaging keywords like "MRI," "CT," "PET," "X-ray," "ultrasound," and "mammography."
+   - Specifying applications like "tumor detection," "disease diagnosis," and "image classification."
+8. [ASSISTANT_SAID] The assistant provided search query examples, such as:
+   - `(deep learning OR CNN OR RNN) AND (medical imaging OR computer-aided diagnosis) AND (MRI OR CT)`
+   - `(image segmentation OR object detection) AND (deep learning OR transfer learning) AND (medical imaging OR radiology)`
+   - `(GANs OR generative models) AND (medical imaging OR image synthesis) AND (disease diagnosis OR image classification)`
+9. [ASSISTANT_SAID] The assistant suggested using advanced search features like quotes, Boolean operators, field-specific searches, date ranges, and journal/conference filters.
+10. [ASSISTANT_SAID] The assistant provided database-specific tips for Pub

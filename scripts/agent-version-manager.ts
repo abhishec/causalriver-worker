@@ -61,6 +61,8 @@ const UTILITY_FILES = [
   'git-code-trainer-fetcher',
   'git-signal-converter',
   'org-creation-agent',
+  'aws-security-scanner',  // Utility class used by security-hardening-agent
+  'supabase-security-scanner',  // Utility class used by security-hardening-agent
 ];
 
 // ────────────────────────────────────────────────────────────────────────────
