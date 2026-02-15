@@ -2,8 +2,9 @@ import type { NextConfig } from "next";
 import path from "path";
 
 const nextConfig: NextConfig = {
-  // SSR mode — NOT static export (platform needs API routes + middleware)
-  // Note: Removed 'standalone' output - using Vercel's default SSR deployment
+  // Standalone output for Docker deployment (ECS/Fargate)
+  // Bundles server.js + vendored node_modules for minimal container image.
+  output: 'standalone',
   typescript: {
     // Skip type checking during build — monorepo workspace links
     // (e.g. @nexus-ai/memory-stack) don't resolve in Amplify CI.
