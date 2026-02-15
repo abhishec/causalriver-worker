@@ -126,5 +126,6 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
   CMD curl -f http://localhost:3000/api/health || exit 1
 
-# Next.js standalone server.js runs from the standalone root
-CMD ["node", "server.js"]
+# Next.js standalone in a monorepo places server.js inside the package dir.
+# The standalone output structure is: .next/standalone/{monorepo-root}/platform/server.js
+CMD ["node", "platform/server.js"]
