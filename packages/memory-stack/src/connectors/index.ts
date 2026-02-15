@@ -36,5 +36,12 @@ export { createGoogleCalendarConnector, type GoogleCalendarConnectorConfig, type
 export { createVoiceConnector, type VoiceConnectorConfig, type VoiceConnector, type CallRecord } from './voice';
 export { createGenericAppConnector, type GenericAppConnectorConfig, type GenericAppConnector, type PullEndpoint, type PushEndpoint } from './generic-app';
 
+// Finance Connectors (Design Partner 2: Xero + Volopay)
+export { createXeroConnector, type XeroConnectorConfig } from './xero';
+export { createVolopayConnector, type VolopayConnectorConfig } from './volopay';
+
+// HR Connectors (Design Partner 3: BambooHR, Workday, custom)
+export { createHRConnector, type HRConnectorConfig, type HRProvider } from './hr-system';
+
 // Sync Manager
 export * from './sync-manager';
