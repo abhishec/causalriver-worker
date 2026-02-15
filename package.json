@@ -48,8 +48,22 @@
     "test:load": "tsx scripts/load-test-10m.ts",
     "test:load:light": "tsx scripts/load-test-10m.ts --mode light",
     "test:load:medium": "tsx scripts/load-test-10m.ts --mode medium",
+    "demo:memory-genesis": "tsx competition/memory-genesis/demo-script.ts",
+    "demo:memory-genesis:quick": "DEMO_DAYS=30 tsx competition/memory-genesis/demo-script.ts",
+    "demo:memory-genesis:verbose": "VERBOSE=true tsx competition/memory-genesis/demo-script.ts",
+    "demo:memory-genesis:test": "tsx competition/memory-genesis/test-supabase.ts",
+    "demo:memory-genesis:realistic": "tsx competition/memory-genesis/demo-realistic.ts",
+    "demo:memory-genesis:realistic:quick": "DEMO_DAYS=30 tsx competition/memory-genesis/demo-realistic.ts",
+    "demo:memory-genesis:realistic:verbose": "DEMO_DAYS=90 VERBOSE=true tsx competition/memory-genesis/demo-realistic.ts",
+    "demo:setup": "tsx scripts/setup-demo-org.ts",
+    "demo:setup:quick": "DATA_DAYS=90 tsx scripts/setup-demo-org.ts",
+    "demo:setup:full": "DATA_DAYS=180 tsx scripts/setup-demo-org.ts",
     "test:load:full": "tsx scripts/load-test-10m.ts --mode full",
-    "sim:design-partner": "tsx scripts/simulate-design-partner.ts"
+    "sim:design-partner": "tsx scripts/simulate-design-partner.ts",
+    "ci:heal": "tsx scripts/run-ci-healer.ts",
+    "ci:heal:diagnose": "tsx scripts/run-ci-healer.ts --mode diagnose",
+    "ci:heal:retry": "tsx scripts/run-ci-healer.ts --mode retry",
+    "ci:heal:dry": "tsx scripts/run-ci-healer.ts --dry-run"
   },
   "devDependencies": {
     "@types/cron": "^2.4.3",

@@ -92,6 +92,7 @@ import './agents/federation-agent';         // Corpus Callosum — Core ↔ Org 
 import './agents/security-hardening-agent'; // Amygdala — Security vulnerability detection & auto-patching (daily 4 AM)
 import './agents/org-updater-agent';        // Thalamus — Org heartbeat: connector sync + learning cycle (every 4h)
 import './agents/outcome-resolver-agent';   // Cerebellum — Calibration loop closure: predictions → outcomes (daily 3 AM)
+import './agents/ci-healer-agent';          // Cerebellum — CI/CD pipeline self-healing & error correction (on-demand)
 
 // ── Brain Subsystem Imports ─────────────────────────────────────────────────
 import { globalRegistry, type AgentRegistration } from './agent-framework/agent-registry';

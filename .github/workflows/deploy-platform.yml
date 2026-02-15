@@ -1,135 +1,43 @@
-name: Deploy Platform to AWS
+# ============================================================================
+# DEPRECATED — Use "Deploy to Production" workflow instead
+# ============================================================================
+#
+# This workflow has been replaced by the unified deploy.yml workflow which:
+#   - Combines platform + orchestrator deployment
+#   - Has dropdown target selection (platform, orchestrator, both)
+#   - Has environment approval gates
+#   - Has deployment confirmation safety
+#   - Has rollback information
+#
+# To deploy platform:
+#   Actions → "Deploy to Production" → Run workflow → target: "platform"
+#
+# This file is kept for reference but will redirect to the new workflow.
+# ============================================================================
+
+name: "[DEPRECATED] Deploy Platform to AWS"
 
 on:
   workflow_dispatch:
 
-env:
-  AWS_REGION: us-east-1
-  ECR_REPOSITORY: nexusbrain-platform
-  ECS_CLUSTER: nexusbrain-training
-  ECS_SERVICE: nexusbrain-platform-service
-
 jobs:
-  # ---------------------------------------------------------------
-  # Build and Push Platform Docker Image
-  # ---------------------------------------------------------------
-  build:
-    name: Build & Push Platform Image
+  redirect:
+    name: Redirected to Unified Deploy
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Run tests
-        run: pnpm test
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build and push platform Docker image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: ./platform/Dockerfile
-          push: true
-          tags: |
-            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
-            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
-          build-args: |
-            NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-            NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          platforms: linux/amd64
-
-  # ---------------------------------------------------------------
-  # Deploy to ECS
-  # ---------------------------------------------------------------
-  deploy:
-    name: Deploy Platform to ECS
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Force new deployment
+      - name: Redirect notice
         run: |
-          echo "Forcing new deployment of platform service..."
-          aws ecs update-service \
-            --cluster ${{ env.ECS_CLUSTER }} \
-            --service ${{ env.ECS_SERVICE }} \
-            --force-new-deployment \
-            --region ${{ env.AWS_REGION }}
-
-      - name: Wait for service stability
-        run: |
-          echo "Waiting for service to stabilize (up to 5 min)..."
-          aws ecs wait services-stable \
-            --cluster ${{ env.ECS_CLUSTER }} \
-            --services ${{ env.ECS_SERVICE }} \
-            --region ${{ env.AWS_REGION }} || \
-          echo "Service did not stabilize in time — check ECS console"
-
-      - name: Verify image in ECR
-        run: |
-          aws ecr describe-images \
-            --repository-name ${{ env.ECR_REPOSITORY }} \
-            --image-ids imageTag=latest \
-            --query 'imageDetails[0].{pushed: imagePushedAt, size: imageSizeInBytes}' \
-            --output table
-
-      - name: Deployment summary
-        run: |
-          echo "## Platform Deployment Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- **Image:** ${{ env.ECR_REPOSITORY }}:latest (${{ github.sha }})" >> $GITHUB_STEP_SUMMARY
-          echo "- **Cluster:** ${{ env.ECS_CLUSTER }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Service:** ${{ env.ECS_SERVICE }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Region:** ${{ env.AWS_REGION }}" >> $GITHUB_STEP_SUMMARY
-
-  # ---------------------------------------------------------------
-  # Notification
-  # ---------------------------------------------------------------
-  notify:
-    name: Notify
-    runs-on: ubuntu-latest
-    needs: [build, deploy]
-    if: always()
-    steps:
-      - name: Send Slack notification (if configured)
-        if: env.SLACK_WEBHOOK_URL != ''
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        run: |
-          STATUS=${{ needs.deploy.result == 'success' && 'SUCCESS' || 'FAILED' }}
-          curl -s -X POST "$SLACK_WEBHOOK_URL" \
-            -H 'Content-Type: application/json' \
-            -d "{\"text\": \"NexusBrain Platform Deploy: ${STATUS} | Commit: ${{ github.sha }} | By: ${{ github.actor }}\"}"
+          echo "::warning::This workflow is deprecated."
+          echo ""
+          echo "Please use the unified 'Deploy to Production' workflow instead:"
+          echo "  Actions → 'Deploy to Production' → Run workflow → target: 'platform'"
+          echo ""
+          echo "The unified workflow provides:"
+          echo "  - Dropdown target selection (platform, orchestrator, both)"
+          echo "  - Environment approval gates"
+          echo "  - Deployment confirmation safety"
+          echo "  - Pre-flight validation"
+          echo "  - Rollback information"
+          echo ""
+          echo "See: .github/workflows/deploy.yml"
+          exit 1

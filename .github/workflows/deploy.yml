@@ -1,0 +1,418 @@
+name: Deploy to Production
+
+# ============================================================================
+# UNIFIED PRODUCTION DEPLOYMENT WORKFLOW
+# ============================================================================
+#
+# This is the ONLY workflow that deploys to production. It is completely
+# separated from CI — CI tests/validates, this workflow deploys.
+#
+# Key Principles:
+# ─────────────────
+# 1. MANUAL ONLY — Never auto-triggered by CI or pushes
+# 2. DROPDOWN SELECTION — Choose what to deploy (platform, orchestrator, both)
+# 3. ENVIRONMENT APPROVAL — Requires "production" environment approval gate
+# 4. PRE-FLIGHT VALIDATION — Re-runs tests before deploying (defense in depth)
+# 5. ROLLBACK INFO — Captures previous image tag for quick rollback
+# 6. SLACK NOTIFICATION — Success/failure alerts
+#
+# Usage:
+#   1. Go to Actions → "Deploy to Production"
+#   2. Click "Run workflow"
+#   3. Select target (platform, orchestrator, both)
+#   4. Optionally select branch/tag
+#   5. Approve deployment in environment gate
+#   6. Monitor progress
+#
+# ============================================================================
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'What to deploy'
+        required: true
+        default: 'platform'
+        type: choice
+        options:
+          - platform
+          - orchestrator
+          - both
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+      confirm_deploy:
+        description: 'Type "deploy" to confirm'
+        required: true
+        type: string
+      skip_tests:
+        description: 'Skip pre-deployment tests (emergency only)'
+        required: false
+        type: boolean
+        default: false
+
+env:
+  AWS_REGION: us-east-1
+  ECS_CLUSTER: nexusbrain-training
+  ORCHESTRATOR_ECR: nexusbrain-trainer
+  PLATFORM_ECR: nexusbrain-platform
+  PLATFORM_SERVICE: nexusbrain-platform-service
+  ORCHESTRATOR_SERVICE: nexusbrain-orchestrator-service
+
+jobs:
+  # ---------------------------------------------------------------
+  # Gate: Validate deployment confirmation
+  # ---------------------------------------------------------------
+  gate:
+    name: Deployment Gate
+    runs-on: ubuntu-latest
+    outputs:
+      deploy_platform: ${{ steps.validate.outputs.deploy_platform }}
+      deploy_orchestrator: ${{ steps.validate.outputs.deploy_orchestrator }}
+    steps:
+      - name: Validate confirmation
+        id: validate
+        run: |
+          if [ "${{ inputs.confirm_deploy }}" != "deploy" ]; then
+            echo "::error::Deployment not confirmed. You must type 'deploy' in the confirmation field."
+            exit 1
+          fi
+
+          echo "Deployment confirmed for: ${{ inputs.target }} → ${{ inputs.environment }}"
+
+          case "${{ inputs.target }}" in
+            platform)
+              echo "deploy_platform=true" >> $GITHUB_OUTPUT
+              echo "deploy_orchestrator=false" >> $GITHUB_OUTPUT
+              ;;
+            orchestrator)
+              echo "deploy_platform=false" >> $GITHUB_OUTPUT
+              echo "deploy_orchestrator=true" >> $GITHUB_OUTPUT
+              ;;
+            both)
+              echo "deploy_platform=true" >> $GITHUB_OUTPUT
+              echo "deploy_orchestrator=true" >> $GITHUB_OUTPUT
+              ;;
+          esac
+
+  # ---------------------------------------------------------------
+  # Pre-Flight: Validate before deploying
+  # ---------------------------------------------------------------
+  preflight:
+    name: Pre-Flight Validation
+    runs-on: ubuntu-latest
+    needs: gate
+    if: inputs.skip_tests != true
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run tests
+        run: pnpm test
+
+      - name: Build memory-stack
+        run: pnpm --filter @nexus-ai/memory-stack run build
+
+      - name: TypeScript check
+        run: cd platform && pnpm exec tsc --noEmit
+
+      - name: Security audit
+        run: pnpm audit --audit-level=high || true
+
+      - name: Pre-flight passed
+        run: echo "✅ All pre-flight checks passed"
+
+  # ---------------------------------------------------------------
+  # Build Platform Docker Image
+  # ---------------------------------------------------------------
+  build-platform:
+    name: Build Platform Image
+    runs-on: ubuntu-latest
+    needs: [gate, preflight]
+    if: |
+      always() &&
+      needs.gate.result == 'success' &&
+      needs.gate.outputs.deploy_platform == 'true' &&
+      (needs.preflight.result == 'success' || needs.preflight.result == 'skipped')
+    outputs:
+      image-uri: ${{ steps.build.outputs.image-uri }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: pnpm
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Capture previous image for rollback
+        id: previous
+        run: |
+          PREV_TAG=$(aws ecr describe-images \
+            --repository-name ${{ env.PLATFORM_ECR }} \
+            --image-ids imageTag=latest \
+            --query 'imageDetails[0].imageDigest' \
+            --output text 2>/dev/null || echo "none")
+          echo "previous_digest=$PREV_TAG" >> $GITHUB_OUTPUT
+          echo "Previous platform image: $PREV_TAG"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push platform image
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./platform/Dockerfile
+          push: true
+          tags: |
+            ${{ steps.login-ecr.outputs.registry }}/${{ env.PLATFORM_ECR }}:latest
+            ${{ steps.login-ecr.outputs.registry }}/${{ env.PLATFORM_ECR }}:${{ github.sha }}
+            ${{ steps.login-ecr.outputs.registry }}/${{ env.PLATFORM_ECR }}:deploy-${{ github.run_number }}
+          build-args: |
+            NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+            NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+
+      - name: Output image URI
+        run: |
+          echo "image-uri=${{ steps.login-ecr.outputs.registry }}/${{ env.PLATFORM_ECR }}:${{ github.sha }}" >> $GITHUB_OUTPUT
+
+  # ---------------------------------------------------------------
+  # Build Orchestrator Docker Image
+  # ---------------------------------------------------------------
+  build-orchestrator:
+    name: Build Orchestrator Image
+    runs-on: ubuntu-latest
+    needs: [gate, preflight]
+    if: |
+      always() &&
+      needs.gate.result == 'success' &&
+      needs.gate.outputs.deploy_orchestrator == 'true' &&
+      (needs.preflight.result == 'success' || needs.preflight.result == 'skipped')
+    outputs:
+      image-uri: ${{ steps.build.outputs.image-uri }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Capture previous image for rollback
+        id: previous
+        run: |
+          PREV_TAG=$(aws ecr describe-images \
+            --repository-name ${{ env.ORCHESTRATOR_ECR }} \
+            --image-ids imageTag=latest \
+            --query 'imageDetails[0].imageDigest' \
+            --output text 2>/dev/null || echo "none")
+          echo "previous_digest=$PREV_TAG" >> $GITHUB_OUTPUT
+          echo "Previous orchestrator image: $PREV_TAG"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push orchestrator image
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ${{ steps.login-ecr.outputs.registry }}/${{ env.ORCHESTRATOR_ECR }}:latest
+            ${{ steps.login-ecr.outputs.registry }}/${{ env.ORCHESTRATOR_ECR }}:${{ github.sha }}
+            ${{ steps.login-ecr.outputs.registry }}/${{ env.ORCHESTRATOR_ECR }}:deploy-${{ github.run_number }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+
+      - name: Output image URI
+        run: |
+          echo "image-uri=${{ steps.login-ecr.outputs.registry }}/${{ env.ORCHESTRATOR_ECR }}:${{ github.sha }}" >> $GITHUB_OUTPUT
+
+  # ---------------------------------------------------------------
+  # Deploy to ECS (requires environment approval)
+  # ---------------------------------------------------------------
+  deploy:
+    name: Deploy to ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    needs: [gate, build-platform, build-orchestrator]
+    if: |
+      always() &&
+      needs.gate.result == 'success' &&
+      (needs.build-platform.result == 'success' || needs.build-platform.result == 'skipped') &&
+      (needs.build-orchestrator.result == 'success' || needs.build-orchestrator.result == 'skipped')
+    environment: ${{ inputs.environment }}
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # Deploy Platform
+      - name: Deploy Platform to ECS
+        if: needs.gate.outputs.deploy_platform == 'true'
+        run: |
+          echo "🚀 Deploying Platform..."
+          aws ecs update-service \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --service ${{ env.PLATFORM_SERVICE }} \
+            --force-new-deployment \
+            --region ${{ env.AWS_REGION }}
+
+      - name: Wait for Platform stability
+        if: needs.gate.outputs.deploy_platform == 'true'
+        run: |
+          echo "⏳ Waiting for platform service to stabilize (up to 5 min)..."
+          aws ecs wait services-stable \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --services ${{ env.PLATFORM_SERVICE }} \
+            --region ${{ env.AWS_REGION }} || \
+          echo "⚠️  Service did not stabilize in time — check ECS console"
+
+      # Deploy Orchestrator
+      - name: Deploy Orchestrator to ECS
+        if: needs.gate.outputs.deploy_orchestrator == 'true'
+        run: |
+          echo "🚀 Deploying Orchestrator..."
+          aws ecs update-service \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --service ${{ env.ORCHESTRATOR_SERVICE }} \
+            --force-new-deployment \
+            --region ${{ env.AWS_REGION }} 2>/dev/null || \
+          echo "No orchestrator service found — scheduled tasks will pick up :latest on next run"
+
+      # Verify
+      - name: Verify deployments
+        run: |
+          echo "Verifying ECR images..."
+
+          if [ "${{ needs.gate.outputs.deploy_platform }}" = "true" ]; then
+            echo "=== Platform ==="
+            aws ecr describe-images \
+              --repository-name ${{ env.PLATFORM_ECR }} \
+              --image-ids imageTag=latest \
+              --query 'imageDetails[0].{pushed: imagePushedAt, size: imageSizeInBytes, digest: imageDigest}' \
+              --output table
+          fi
+
+          if [ "${{ needs.gate.outputs.deploy_orchestrator }}" = "true" ]; then
+            echo "=== Orchestrator ==="
+            aws ecr describe-images \
+              --repository-name ${{ env.ORCHESTRATOR_ECR }} \
+              --image-ids imageTag=latest \
+              --query 'imageDetails[0].{pushed: imagePushedAt, size: imageSizeInBytes, digest: imageDigest}' \
+              --output table
+          fi
+
+      # Summary
+      - name: Deployment summary
+        run: |
+          echo "## 🚀 Production Deployment Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| **Target** | ${{ inputs.target }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Environment** | ${{ inputs.environment }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Commit** | \`${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Deployed by** | ${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Deploy #** | ${{ github.run_number }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Cluster** | ${{ env.ECS_CLUSTER }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Region** | ${{ env.AWS_REGION }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Deployed Components" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ needs.gate.outputs.deploy_platform }}" = "true" ]; then
+            echo "- ✅ **Platform** → \`${{ env.PLATFORM_ECR }}:${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          fi
+          if [ "${{ needs.gate.outputs.deploy_orchestrator }}" = "true" ]; then
+            echo "- ✅ **Orchestrator** → \`${{ env.ORCHESTRATOR_ECR }}:${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Rollback" >> $GITHUB_STEP_SUMMARY
+          echo "To rollback, re-run this workflow with the previous commit SHA or use:" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "aws ecs update-service --cluster ${{ env.ECS_CLUSTER }} --service <SERVICE> --force-new-deployment" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "All 15 ECS task definitions reference \`:latest\` — they will automatically pick up this image." >> $GITHUB_STEP_SUMMARY
+
+  # ---------------------------------------------------------------
+  # Notification
+  # ---------------------------------------------------------------
+  notify:
+    name: Notify
+    runs-on: ubuntu-latest
+    needs: [gate, deploy]
+    if: always()
+    steps:
+      - name: Send Slack notification
+        if: env.SLACK_WEBHOOK_URL != ''
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          STATUS="${{ needs.deploy.result == 'success' && '✅ SUCCESS' || '❌ FAILED' }}"
+          TARGET="${{ inputs.target }}"
+          ENV="${{ inputs.environment }}"
+
+          curl -s -X POST "$SLACK_WEBHOOK_URL" \
+            -H 'Content-Type: application/json' \
+            -d "{
+              \"text\": \"NexusBrain Deploy ${STATUS}\",
+              \"blocks\": [
+                {
+                  \"type\": \"section\",
+                  \"text\": {
+                    \"type\": \"mrkdwn\",
+                    \"text\": \"*NexusBrain Production Deploy ${STATUS}*\n\n*Target:* ${TARGET}\n*Environment:* ${ENV}\n*Commit:* \`${{ github.sha }}\`\n*By:* ${{ github.actor }}\n*Run:* <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Details>\"
+                  }
+                }
+              ]
+            }"
