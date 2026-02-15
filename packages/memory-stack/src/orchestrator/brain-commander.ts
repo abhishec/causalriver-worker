@@ -119,12 +119,16 @@ export interface CommandResult {
 
 /** Brain intelligence gathered from DB */
 export interface BrainIntelligence {
-  /** Causal edges */
+  /** Causal edges (merged ORG + CORE) */
   causalEdges: CausalEdge[];
+  /** CORE-only causal edges (for separate 0.7x weighting in cognitive stack) */
+  coreCausalEdges: CausalEdge[];
   /** Business rules */
   rules: BrainRule[];
-  /** Discovered patterns */
+  /** Discovered patterns (merged ORG + CORE) */
   patterns: BrainPattern[];
+  /** CORE-only patterns (for separate 0.35 confidence in cognitive stack) */
+  corePatterns: BrainPattern[];
   /** Cascade rules */
   cascadeRules: CascadeRule[];
   /** Insights from connectors */
@@ -147,6 +151,27 @@ export interface BrainIntelligence {
     totalPatterns: number;
     totalRules: number;
     totalCascadeRules: number;
+  };
+  /** LEAP layer stored intelligence — deep brain state from sleep cycles */
+  leapContext?: {
+    /** L5 curiosity hypotheses + knowledge gaps */
+    curiosity?: { content: string; metadata: Record<string, unknown> } | null;
+    /** L6 self-model calibration */
+    selfModel?: { content: string; metadata: Record<string, unknown> } | null;
+    /** L7 mesh collective patterns */
+    meshPatterns?: { content: string; metadata: Record<string, unknown> } | null;
+    /** L8 imagination hypotheses */
+    imagination?: { content: string; metadata: Record<string, unknown> } | null;
+    /** L11 red-team vulnerabilities */
+    redTeam?: { content: string; metadata: Record<string, unknown> } | null;
+    /** L13 immune quality audit */
+    immune?: { content: string; metadata: Record<string, unknown> } | null;
+    /** L12 experiment suggestions */
+    experiments?: { content: string; metadata: Record<string, unknown> } | null;
+    /** L14 goal plans */
+    goalPlans?: { content: string; metadata: Record<string, unknown> } | null;
+    /** L15 narratives (most recent) */
+    narrative?: { content: string; metadata: Record<string, unknown> } | null;
   };
 }
 
@@ -373,14 +398,40 @@ export function createBrainCommander(config: BrainCommanderConfig) {
             p.llm_pattern_name || p.content
           );
 
+          // Enrich cognitive stack input with LEAP context from previous sleep cycles
+          // This means the cognitive stack on queries benefits from prior dreaming, curiosity, etc.
+          const leapPatterns: string[] = [];
+          if (intelligence.leapContext) {
+            const lc = intelligence.leapContext;
+            if (lc.narrative) leapPatterns.push(`[Prior Narrative] ${lc.narrative.content}`);
+            if (lc.curiosity) leapPatterns.push(`[Curiosity] ${lc.curiosity.content}`);
+            if (lc.imagination) leapPatterns.push(`[Imagination] ${lc.imagination.content}`);
+            if (lc.meshPatterns) leapPatterns.push(`[Collective] ${lc.meshPatterns.content}`);
+          }
+
+          // Disconnection #3 FIX (Query Path): Pass CORE-only edges/patterns
+          // separately for proper 0.7x weighting inside cognitive stack layers.
+          const federatedEdges = intelligence.coreCausalEdges.slice(0, 50).map(e => ({
+            source: e.source_domain,
+            target: e.target_domain,
+            weight: e.effect_size,
+            confidence: 1 - (e.granger_p_value || 0.3),
+            domain: e.source_domain,
+          }));
+          const federatedPatterns = intelligence.corePatterns.map(p =>
+            p.llm_pattern_name || p.content
+          );
+
           cognitiveResult = cognitiveStack.runCycle({
             signals: cogSignals,
             causalEdges: cogEdges,
-            patterns: cogPatterns,
+            patterns: [...cogPatterns, ...leapPatterns], // Merge stored LEAP context into patterns
             predictions: [],
             metrics: [],
             userId: options?.userId,
             userQuery: question,
+            federatedEdges,      // CORE brain edges (0.7x weighted inside cognitive stack)
+            federatedPatterns,   // CORE brain patterns
           });
         } catch (cogErr) {
           console.warn('[BrainCommander] Cognitive stack error (non-fatal):', cogErr instanceof Error ? cogErr.message : cogErr);
@@ -406,7 +457,8 @@ export function createBrainCommander(config: BrainCommanderConfig) {
             question,
             dispatch,
             intelligence,
-            options?.entityState
+            options?.entityState,
+            cognitiveResult
           );
           artifact = actionResult.artifact;
           motorCommands = actionResult.motorCommands;
@@ -541,11 +593,11 @@ export function createBrainCommander(config: BrainCommanderConfig) {
     // Disconnection #3 FIX: Use federated queries for causal edges, patterns, and insights
     // This merges ORG + CORE brain data with deduplication (ORG wins over CORE)
     // Keep direct SQL for: rules (no federated function) and cascade rules (different table)
-    const [causalFederated, rulesResult, patternsFederated, cascadeResult, insightsFederated] = await Promise.all([
-      // Federated: causal relationships (ORG + CORE merged, deduplicated)
+    // IMPORTANT: Preserve CORE-only results separately for cognitive stack 0.7x weighting
+    const [causalFederatedResult, rulesResult, patternsFederatedResult, cascadeResult, insightsFederated] = await Promise.all([
+      // Federated: causal relationships (ORG + CORE, preserve both merged and CORE-only)
       getFederatedCausalRelationships(organizationId, { limit: maxCausalEdges })
-        .then(r => r.merged.map(m => m.data))
-        .catch(() => [] as any[]),
+        .catch(() => ({ orgResults: [], coreResults: [], merged: [], stats: { orgCount: 0, coreCount: 0, duplicatesRemoved: 0, federatedAt: '' } })),
 
       // Direct SQL: rules (no federated function exists for ai_memory type=rule)
       supabase
@@ -556,10 +608,9 @@ export function createBrainCommander(config: BrainCommanderConfig) {
         .order('importance', { ascending: false })
         .limit(maxMemoryItems),
 
-      // Federated: patterns (ORG + CORE merged, deduplicated by title)
+      // Federated: patterns (ORG + CORE, preserve both merged and CORE-only)
       getFederatedPatterns(organizationId, { memoryType: 'pattern', limit: maxMemoryItems })
-        .then(r => r.merged.map(m => m.data))
-        .catch(() => [] as any[]),
+        .catch(() => ({ orgResults: [], coreResults: [], merged: [], stats: { orgCount: 0, coreCount: 0, duplicatesRemoved: 0, federatedAt: '' } })),
 
       // Direct SQL: cascade rules (separate table, no federated function)
       supabase
@@ -575,11 +626,54 @@ export function createBrainCommander(config: BrainCommanderConfig) {
         .catch(() => [] as any[]),
     ]);
 
-    const edges = (causalFederated || []) as CausalEdge[];
+    const edges = (causalFederatedResult.merged.map(m => m.data) || []) as CausalEdge[];
+    const coreCausalEdges = (causalFederatedResult.coreResults || []) as CausalEdge[];
     const rules = (rulesResult.data || []) as BrainRule[];
-    const patterns = (patternsFederated || []) as BrainPattern[];
+    const patterns = (patternsFederatedResult.merged.map(m => m.data) || []) as BrainPattern[];
+    const corePatterns = (patternsFederatedResult.coreResults || []) as BrainPattern[];
     const cascadeRules = (cascadeResult.data || []) as CascadeRule[];
     const insights = (insightsFederated || []) as BrainInsight[];
+
+    // Query LEAP layer stored intelligence — deep brain state from sleep cycles
+    // These are the outputs from L5-L15 that were previously "dead output" (computed but never recalled)
+    // Now the copilot can access the full richness of what the sleeping brain discovered
+    let leapContext: BrainIntelligence['leapContext'];
+    try {
+      const leapTypes = [
+        'curiosity_hypothesis', 'self_model', 'mesh_pattern', 'imagination_hypothesis',
+        'red_team_audit', 'immune_audit', 'experiment', 'goal_plan', 'narrative',
+      ];
+      const { data: leapRows } = await supabase
+        .from('ai_memory')
+        .select('memory_type, content, metadata')
+        .eq('organization_id', organizationId)
+        .in('memory_type', leapTypes)
+        .eq('is_active', true)
+        .order('updated_at', { ascending: false });
+
+      if (leapRows && leapRows.length > 0) {
+        const byType = new Map<string, { content: string; metadata: Record<string, unknown> }>();
+        for (const row of leapRows) {
+          // Take the most recent per type (already ordered by updated_at desc)
+          if (!byType.has(row.memory_type)) {
+            byType.set(row.memory_type, { content: row.content, metadata: row.metadata || {} });
+          }
+        }
+        leapContext = {
+          curiosity: byType.get('curiosity_hypothesis') || null,
+          selfModel: byType.get('self_model') || null,
+          meshPatterns: byType.get('mesh_pattern') || null,
+          imagination: byType.get('imagination_hypothesis') || null,
+          redTeam: byType.get('red_team_audit') || null,
+          immune: byType.get('immune_audit') || null,
+          experiments: byType.get('experiment') || null,
+          goalPlans: byType.get('goal_plan') || null,
+          narrative: byType.get('narrative') || null,
+        };
+      }
+    } catch {
+      // Non-fatal: copilot works without LEAP context, just less rich
+    }
 
     // Build causal graph
     const causalGraph = buildCausalGraph(edges, domains);
@@ -595,8 +689,10 @@ export function createBrainCommander(config: BrainCommanderConfig) {
 
     return {
       causalEdges: edges,
+      coreCausalEdges,
       rules,
       patterns,
+      corePatterns,
       cascadeRules,
       insights,
       causalGraph,
@@ -608,6 +704,7 @@ export function createBrainCommander(config: BrainCommanderConfig) {
         totalRules: rules.length,
         totalCascadeRules: cascadeRules.length,
       },
+      leapContext,
     };
   }
 
@@ -692,7 +789,8 @@ export function createBrainCommander(config: BrainCommanderConfig) {
     question: string,
     dispatch: DispatchAssessment,
     intelligence: BrainIntelligence,
-    entityState?: Record<string, unknown>
+    entityState?: Record<string, unknown>,
+    cognitiveResult?: CognitiveCycleResult
   ): Promise<{ artifact?: Record<string, unknown>; motorCommands?: unknown[] }> {
     // Dynamic import to avoid circular deps and keep bundle tree-shakeable
     const { createDomainActionEngine } = await import('./domain-action-engine');
@@ -712,6 +810,30 @@ export function createBrainCommander(config: BrainCommanderConfig) {
       intelligence,
       entityState
     );
+
+    // Enrich with cognitive stack insights if available
+    // This gives the action engine access to live L3-L15 reasoning output
+    if (cognitiveResult) {
+      const cogInsights: string[] = [];
+      if (cognitiveResult.narrative) {
+        cogInsights.push(`[Live Narrative] ${cognitiveResult.narrative.summary || cognitiveResult.narrative.title}`);
+      }
+      if (cognitiveResult.redTeam.criticalWeaknesses.length > 0) {
+        cogInsights.push(`[Red Team Warning] ${cognitiveResult.redTeam.criticalWeaknesses.length} critical weaknesses: ${cognitiveResult.redTeam.criticalWeaknesses.slice(0, 3).join(', ')}. Robustness: ${(cognitiveResult.redTeam.robustnessAvg * 100).toFixed(0)}%`);
+      }
+      if (cognitiveResult.imagination.topInsight) {
+        cogInsights.push(`[Imagination] ${cognitiveResult.imagination.topInsight}`);
+      }
+      if (cognitiveResult.planning.topRecommendation) {
+        cogInsights.push(`[Goal Planning] ${cognitiveResult.planning.topRecommendation}`);
+      }
+      if (cognitiveResult.experimentation.topExperiment) {
+        cogInsights.push(`[Experiment Suggested] ${cognitiveResult.experimentation.topExperiment}`);
+      }
+      if (cogInsights.length > 0) {
+        (knowledgeCtx as any).cognitiveInsights = cogInsights;
+      }
+    }
 
     // Execute with timeout
     const artifactPromise = engine.execute(question, knowledgeCtx);
@@ -843,6 +965,23 @@ export function createBrainCommander(config: BrainCommanderConfig) {
       }
     }
 
+    // Enrich with LEAP context — the deep brain state from sleep cycles
+    // This gives the action engine access to curiosity hypotheses, red-team
+    // vulnerabilities, immune quality, imagination insights, etc.
+    const leapInsights: string[] = [];
+    if (intelligence.leapContext) {
+      const lc = intelligence.leapContext;
+      if (lc.curiosity) leapInsights.push(`[Curiosity] ${lc.curiosity.content}`);
+      if (lc.imagination) leapInsights.push(`[Imagination] ${lc.imagination.content}`);
+      if (lc.redTeam) leapInsights.push(`[Red Team] ${lc.redTeam.content}`);
+      if (lc.selfModel) leapInsights.push(`[Self-Model] ${lc.selfModel.content}`);
+      if (lc.meshPatterns) leapInsights.push(`[Collective] ${lc.meshPatterns.content}`);
+      if (lc.immune) leapInsights.push(`[Data Quality] ${lc.immune.content}`);
+      if (lc.narrative) leapInsights.push(`[Narrative] ${lc.narrative.content}`);
+      if (lc.goalPlans) leapInsights.push(`[Goals] ${lc.goalPlans.content}`);
+      if (lc.experiments) leapInsights.push(`[Experiments] ${lc.experiments.content}`);
+    }
+
     return {
       question,
       intent: actionIntent,
@@ -851,6 +990,8 @@ export function createBrainCommander(config: BrainCommanderConfig) {
       directCauses,
       directEffects,
       matchedRules,
+      // Deep brain context from L5-L15 sleep cycle outputs
+      leapInsights: leapInsights.length > 0 ? leapInsights : undefined,
     };
   }
 
@@ -906,13 +1047,16 @@ export function createBrainCommander(config: BrainCommanderConfig) {
   function emptyIntelligence(): BrainIntelligence {
     return {
       causalEdges: [],
+      coreCausalEdges: [],
       rules: [],
       patterns: [],
+      corePatterns: [],
       cascadeRules: [],
       insights: [],
       causalGraph: { causes: {}, effects: {} },
       impactAnalysis: {},
       stats: { totalDomains: 0, totalCausalEdges: 0, totalPatterns: 0, totalRules: 0, totalCascadeRules: 0 },
+      leapContext: undefined,
     };
   }
 

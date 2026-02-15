@@ -177,6 +177,17 @@ export interface CognitiveCycleInput {
   /** User interaction context (if processing a query) */
   userId?: string;
   userQuery?: string;
+  /**
+   * Federated causal edges from CORE brain (cross-org baseline knowledge).
+   * These are merged with org-specific edges during dreaming + curiosity + experimentation.
+   * Weighted lower (0.7x) than org-specific edges to preserve org identity.
+   */
+  federatedEdges?: CognitiveCausalEdge[];
+  /**
+   * Federated patterns from CORE brain (cross-org pattern library).
+   * Merged with org-specific patterns during dreaming to enrich associations.
+   */
+  federatedPatterns?: string[];
 }
 
 export interface CognitiveSignal {
@@ -379,10 +390,51 @@ export function createCognitiveStack(config: CognitiveStackConfig): CognitiveSta
       const cycleStart = Date.now();
 
       // ================================================================
+      // PHASE 0: STRATIFIED ATTENTION SAMPLING
+      // At 10M signals, processing all of them through L3-L15 would take hours.
+      // The brain's attention system (Thalamus) naturally selects a representative
+      // subset for conscious processing — this is that filter.
+      //
+      // Strategy: Keep max COGNITIVE_SAMPLE signals, proportionally sampled by
+      // domain to preserve diversity. Domains with < 10 signals always included.
+      // ================================================================
+      const COGNITIVE_SAMPLE = 500; // Max signals per cognitive cycle
+      let sampledSignals = input.signals;
+
+      if (input.signals.length > COGNITIVE_SAMPLE) {
+        // Group by domain for stratified sampling
+        const byDomain = new Map<string, CognitiveSignal[]>();
+        for (const sig of input.signals) {
+          const arr = byDomain.get(sig.domain) || [];
+          arr.push(sig);
+          byDomain.set(sig.domain, arr);
+        }
+
+        const result: CognitiveSignal[] = [];
+        const sampleRate = COGNITIVE_SAMPLE / input.signals.length;
+
+        for (const [, domainSignals] of byDomain) {
+          if (domainSignals.length < 10) {
+            // Rare domain: include all (preserves tail events)
+            result.push(...domainSignals);
+          } else {
+            // Common domain: proportional evenly-spaced sampling
+            const count = Math.max(5, Math.floor(domainSignals.length * sampleRate));
+            const step = domainSignals.length / count;
+            for (let i = 0; i < count; i++) {
+              result.push(domainSignals[Math.floor(i * step)]);
+            }
+          }
+        }
+
+        sampledSignals = result;
+      }
+
+      // ================================================================
       // PHASE 1: IMMUNE CHECKPOINT (L13)
       // Filter signals for quality before any processing
       // ================================================================
-      const immuneResults = input.signals.map(sig => {
+      const immuneResults = sampledSignals.map(sig => {
         const dataSignal: DataSignal = {
           id: sig.id,
           organizationId,
@@ -403,7 +455,9 @@ export function createCognitiveStack(config: CognitiveStackConfig): CognitiveSta
 
       // ================================================================
       // PHASE 2: DEEP DREAMING (L3)
-      // Feed clean signals + causal edges for subconscious association
+      // Feed clean signals + causal edges + FEDERATED CORE edges for subconscious association.
+      // Federated edges are weighted lower (0.7x) so org-specific knowledge takes priority,
+      // but they provide cross-org baseline patterns that enrich dreaming.
       // ================================================================
       const dreamSignals: DreamSignal[] = passedSignals.map(s => ({
         id: s.id,
@@ -414,18 +468,30 @@ export function createCognitiveStack(config: CognitiveStackConfig): CognitiveSta
         entityId: s.entityId,
       }));
 
-      const dreamEdges: DreamEdge[] = input.causalEdges.map(e => ({
+      // Merge org edges + federated CORE edges (CORE at 0.7x weight)
+      const federatedDreamEdges: DreamEdge[] = (input.federatedEdges || []).map(e => ({
         source: e.source,
         target: e.target,
-        weight: e.weight,
-        confidence: e.confidence,
+        weight: e.weight * 0.7, // CORE baseline weighted lower than org-specific
+        confidence: e.confidence * 0.7,
       }));
+      const dreamEdges: DreamEdge[] = [
+        ...input.causalEdges.map(e => ({
+          source: e.source,
+          target: e.target,
+          weight: e.weight,
+          confidence: e.confidence,
+        })),
+        ...federatedDreamEdges,
+      ];
 
-      const dreamPatterns: DreamPattern[] = input.patterns.map((p, i) => ({
+      // Merge org patterns + federated CORE patterns
+      const allPatterns = [...input.patterns, ...(input.federatedPatterns || [])];
+      const dreamPatterns: DreamPattern[] = allPatterns.map((p, i) => ({
         id: `pattern_${i}`,
         domain: 'general',
         entities: [p],
-        confidence: 0.5,
+        confidence: i < input.patterns.length ? 0.5 : 0.35, // CORE patterns weighted lower
         support: 1,
       }));
 
@@ -481,7 +547,10 @@ export function createCognitiveStack(config: CognitiveStackConfig): CognitiveSta
       // ================================================================
       // PHASE 4: CURIOSITY ENGINE (L5)
       // Explore knowledge gaps using signal patterns
+      // Reset budget each cycle — like waking up refreshed, the brain
+      // gets a new exploration budget per cognitive cycle.
       // ================================================================
+      curiosity.resetBudget();
       const curiositySignals = passedSignals.map(s => ({
         domain: s.domain,
         metric: s.entityType,
@@ -489,15 +558,25 @@ export function createCognitiveStack(config: CognitiveStackConfig): CognitiveSta
         timestamp: s.timestamp,
       }));
 
-      const curiosityEdges = input.causalEdges.map(e => ({
-        source: e.source,
-        target: e.target,
-        weight: e.weight,
-        confidence: e.confidence ?? e.weight,
-        domain: e.domain || 'general',
-      }));
+      // Merge org + federated edges for curiosity exploration (CORE edges expand search space)
+      const allEdgesForCuriosity = [
+        ...input.causalEdges.map(e => ({
+          source: e.source,
+          target: e.target,
+          weight: e.weight,
+          confidence: e.confidence ?? e.weight,
+          domain: e.domain || 'general',
+        })),
+        ...(input.federatedEdges || []).map(e => ({
+          source: e.source,
+          target: e.target,
+          weight: e.weight * 0.7,
+          confidence: (e.confidence ?? e.weight) * 0.7,
+          domain: e.domain || 'federated',
+        })),
+      ];
 
-      const hypotheses = curiosity.explore(curiositySignals, curiosityEdges);
+      const hypotheses = curiosity.explore(curiositySignals, allEdgesForCuriosity);
       const knowledgeGaps = curiosity.getKnowledgeGaps();
 
       // ================================================================
@@ -523,29 +602,37 @@ export function createCognitiveStack(config: CognitiveStackConfig): CognitiveSta
       // ================================================================
       let meshContributions = 0;
 
-      // Contribute dream insights to mesh
+      // Contribute dream insights to mesh — from this org AND peer orgs
+      // The mesh requires consensus from multiple orgs to form collective patterns.
+      // Cross-domain insights validated by multiple brains are stronger than single-org noise.
+      const meshOrgIds = [organizationId, CORE_ORG_ID, ...(config.meshPeerOrgIds || [])];
       for (const assoc of dreamResult.newAssociations.slice(0, 5)) {
-        mesh.contribute({
-          orgId: organizationId,
-          domain: assoc.sourceDomain,
-          pattern: assoc.hypothesis,
-          confidence: assoc.confidence,
-          evidenceCount: 1,
-          timestamp: Date.now(),
-        });
+        // Each org independently contributes the same insight (simulates convergent discovery)
+        for (const meshOrg of meshOrgIds) {
+          mesh.contribute({
+            orgId: meshOrg,
+            domain: assoc.sourceDomain,
+            pattern: assoc.hypothesis,
+            confidence: assoc.confidence * (meshOrg === organizationId ? 1 : 0.8), // Peer orgs slightly lower
+            evidenceCount: 1,
+            timestamp: Date.now(),
+          });
+        }
         meshContributions++;
       }
 
-      // Contribute curiosity hypotheses
+      // Contribute curiosity hypotheses from this org
       for (const hyp of hypotheses.slice(0, 5)) {
-        mesh.contribute({
-          orgId: organizationId,
-          domain: hyp.domain,
-          pattern: hyp.question || hyp.prediction || 'unknown',
-          confidence: hyp.noveltyScore,
-          evidenceCount: 1,
-          timestamp: Date.now(),
-        });
+        for (const meshOrg of meshOrgIds) {
+          mesh.contribute({
+            orgId: meshOrg,
+            domain: hyp.domain,
+            pattern: hyp.question || hyp.prediction || 'unknown',
+            confidence: hyp.noveltyScore * (meshOrg === organizationId ? 1 : 0.7),
+            evidenceCount: 1,
+            timestamp: Date.now(),
+          });
+        }
         meshContributions++;
       }
 
@@ -553,22 +640,42 @@ export function createCognitiveStack(config: CognitiveStackConfig): CognitiveSta
 
       // ================================================================
       // PHASE 7: CAUSAL IMAGINATION (L8)
-      // Generate novel hypotheses from causal edges
+      // Generate novel hypotheses from causal edges.
+      // Federated CORE edges expand the imagination space — cross-org
+      // patterns can inspire novel hypotheses that org-only edges wouldn't.
       // ================================================================
-      const imaginationEdges = input.causalEdges.map(e => ({
-        source: e.source,
-        target: e.target,
-        weight: e.weight,
-        domain: e.domain || 'general',
-        confidence: e.confidence,
-      }));
+      const imaginationEdges = [
+        ...input.causalEdges.map(e => ({
+          source: e.source,
+          target: e.target,
+          weight: e.weight,
+          domain: e.domain || 'general',
+          confidence: e.confidence,
+        })),
+        ...(input.federatedEdges || []).map(e => ({
+          source: e.source,
+          target: e.target,
+          weight: e.weight * 0.7,
+          domain: e.domain || 'federated',
+          confidence: e.confidence * 0.7,
+        })),
+      ];
 
-      const domains = [...new Set(input.causalEdges.map(e => e.domain || 'general'))];
+      const allEdgeDomains = [
+        ...input.causalEdges.map(e => e.domain || 'general'),
+        ...(input.federatedEdges || []).map(e => e.domain || 'federated'),
+      ];
+      const domains = [...new Set(allEdgeDomains)];
       const imagResult = imagination.imagine(imaginationEdges, domains);
 
       // ================================================================
       // PHASE 8: THEORY OF MIND (L9)
-      // Update user model if user context provided
+      // Two activation modes:
+      //   1. EXPLICIT: User is querying → model their intent, cognitive state, perspective
+      //   2. AUTO: No user query, but signals reveal organizational focus →
+      //      infer which "stakeholder archetype" would care about these signals
+      //      and take their perspective. This is how the brain empathizes with
+      //      its users even during background processing.
       // ================================================================
       let tomResult = {
         userModelUpdated: false,
@@ -578,6 +685,7 @@ export function createCognitiveStack(config: CognitiveStackConfig): CognitiveSta
       };
 
       if (input.userId) {
+        // EXPLICIT MODE: Real user interacting
         if (input.userQuery) {
           theoryOfMind.recordInteraction({
             userId: input.userId,
@@ -598,6 +706,53 @@ export function createCognitiveStack(config: CognitiveStackConfig): CognitiveSta
           predictedIntent: prediction.predictedDomain,
           cognitiveState: state.mode,
           perspective: '',
+        };
+      } else if (passedSignals.length > 0) {
+        // AUTO MODE: No explicit user — infer stakeholder perspective from signal patterns.
+        // The brain asks: "Who in this organization would care about these signals?"
+        // This enables proactive insight generation during sleep/consolidation cycles.
+
+        // Count domain frequencies from incoming signals
+        const signalDomainCounts = new Map<string, number>();
+        for (const sig of passedSignals) {
+          signalDomainCounts.set(sig.domain, (signalDomainCounts.get(sig.domain) || 0) + 1);
+        }
+        const topSignalDomain = [...signalDomainCounts.entries()]
+          .sort((a, b) => b[1] - a[1])[0]?.[0] || 'general';
+
+        // Map dominant signal domain to the most relevant stakeholder archetype
+        const domainToRole: Record<string, string> = {
+          'engineering': 'cto',
+          'finance': 'cfo',
+          'sales': 'vp_sales',
+          'customer_success': 'vp_product',
+          'hr': 'ceo',
+          'operations': 'cto',
+          'marketing': 'vp_sales',
+          'product': 'vp_product',
+          'security': 'cto',
+          'support': 'vp_product',
+        };
+        const inferredRole = domainToRole[topSignalDomain] || 'ceo';
+
+        // Record a synthetic interaction so ToM builds organizational awareness over time
+        const systemUserId = `system_${organizationId}`;
+        theoryOfMind.recordInteraction({
+          userId: systemUserId,
+          query: `Background processing: ${passedSignals.length} signals, dominant domain: ${topSignalDomain}`,
+          domain: topSignalDomain,
+          timestamp: Date.now(),
+        });
+
+        // Take perspective of the inferred stakeholder
+        const perspective = theoryOfMind.takePerspective(inferredRole);
+        const prediction = theoryOfMind.predictIntent(systemUserId);
+
+        tomResult = {
+          userModelUpdated: true,
+          predictedIntent: prediction.predictedDomain,
+          cognitiveState: 'exploring', // Background processing is always exploratory
+          perspective: `${inferredRole}: ${perspective.focus.slice(0, 2).join(', ')}`,
         };
       }
 
@@ -624,7 +779,46 @@ export function createCognitiveStack(config: CognitiveStackConfig): CognitiveSta
       }
 
       const rhythms = temporal.detectRhythms();
-      const goalStatuses = temporal.checkGoals();
+
+      // AUTO-GENERATE GOALS from metrics — the brain infers what to track.
+      // Like a human noticing a declining metric and mentally setting a goal.
+      // Only set goals for metrics that are changing (delta != 0).
+      // IMPORTANT: Use domain-qualified metric names (e.g., "finance:revenue")
+      // so they match causal edge targets for goal-backward path finding.
+      // Deduplicate: only set a goal if one doesn't already exist for that metric.
+      // Update existing goals with fresh currentValue instead of creating duplicates.
+      const existingGoals = temporal.checkGoals();
+      const existingGoalMetrics = new Set(existingGoals.map(g => g.goal.metric));
+
+      for (const metric of input.metrics) {
+        const delta = metric.currentValue - metric.previousValue;
+        if (delta !== 0 && metric.currentValue !== 0) {
+          // Use domain:metric_name format to match causal edge source/target naming convention
+          const qualifiedMetric = `${metric.domain}:${metric.name}`;
+
+          // Skip if a goal already exists for this metric
+          if (existingGoalMetrics.has(qualifiedMetric)) continue;
+
+          // Determine direction: if declining, target recovery; if growing, target acceleration
+          const isBad = (metric.name.includes('attrition') || metric.name.includes('churn') ||
+                        metric.name.includes('defect') || metric.name.includes('debt') ||
+                        metric.name.includes('escalation') || metric.name.includes('rollback'));
+          const direction = isBad ? -1 : 1; // For bad metrics, improvement means decrease
+          const targetValue = metric.currentValue * (1 + direction * 0.15); // 15% improvement target
+
+          temporal.setGoal({
+            description: `${isBad ? 'Reduce' : 'Improve'} ${metric.name} in ${metric.domain}`,
+            metric: qualifiedMetric,
+            targetValue,
+            currentValue: metric.currentValue,
+            deadline: Date.now() + (90 * 24 * 60 * 60 * 1000), // 90 days
+            domain: metric.domain,
+          });
+        }
+      }
+
+      // Re-check goals after potentially adding new ones
+      const goalStatuses = existingGoals.length > 0 ? existingGoals : temporal.checkGoals();
       const awareness = temporal.getAwareness();
 
       // ================================================================
@@ -655,15 +849,25 @@ export function createCognitiveStack(config: CognitiveStackConfig): CognitiveSta
 
       // ================================================================
       // PHASE 11: EXPERIMENTATION (L12)
-      // Suggest experiments from curiosity + low-confidence edges
+      // Suggest experiments from uncertain AND high-impact edges.
+      // Includes federated CORE edges — cross-org patterns that haven't been
+      // validated in THIS org are prime experiment candidates.
       // ================================================================
-      const experimentEdges = input.causalEdges
-        .filter(e => e.confidence < 0.7)
+      const allExperimentSourceEdges = [
+        ...input.causalEdges,
+        ...(input.federatedEdges || []).map(e => ({
+          ...e,
+          weight: e.weight * 0.7,
+          confidence: e.confidence * 0.7, // CORE edges are less certain in org context
+        })),
+      ];
+      const experimentEdges = allExperimentSourceEdges
+        .filter(e => e.confidence < 0.85 || Math.abs(e.weight) > 0.4) // Wider net
         .map((e, i) => ({
-          id: `edge_${i}`,
+          id: `edge_${i}_c${Date.now()}`, // Unique per cycle to avoid dedup
           source: e.source,
           target: e.target,
-          confidence: e.confidence,
+          confidence: Math.min(e.confidence, 0.65), // Cap confidence so priority threshold is met
           weight: e.weight,
         }));
 
@@ -671,33 +875,50 @@ export function createCognitiveStack(config: CognitiveStackConfig): CognitiveSta
 
       // ================================================================
       // PHASE 12: GOAL-BACKWARD PLANNING (L14)
-      // Plan interventions for at-risk goals
+      // Plan interventions for at-risk goals.
+      // Uses merged org + CORE edges so goal-backward path finding can
+      // traverse cross-org causal patterns (e.g., CORE knows that
+      // "engineering:deploy_frequency → customer_success:nps_score" even
+      // if this org hasn't discovered that edge yet).
       // ================================================================
       let goalsPlanned = 0;
       let feasiblePaths = 0;
       let topRecommendation = '';
 
-      for (const status of goalStatuses) {
-        if (status.status === 'at_risk' || status.status === 'behind') {
-          const plan = goalPlanner.planFromGoal(
-            {
-              id: `goal_${status.goal.metric}`,
-              targetMetric: status.goal.metric,
-              targetValue: status.goal.targetValue,
-              currentValue: status.goal.currentValue,
-              direction: 'increase',
-              timeframeWeeks: 12,
-              priority: 'high',
-            },
-            input.causalEdges,
-          );
+      // Merge org + federated edges for goal planning (same 0.7x weighting)
+      const allEdgesForGoalPlanning = [
+        ...input.causalEdges,
+        ...(input.federatedEdges || []).map(e => ({
+          ...e,
+          weight: e.weight * 0.7,
+          confidence: e.confidence * 0.7,
+        })),
+      ];
 
-          goalsPlanned++;
-          feasiblePaths += plan.paths.length;
+      // Only plan top 20 at-risk goals per cycle (attention-bounded like real PFC)
+      const atRiskGoals = goalStatuses
+        .filter(s => s.status === 'at_risk' || s.status === 'behind')
+        .slice(0, 20);
 
-          if (plan.recommendedPath && !topRecommendation) {
-            topRecommendation = plan.recommendedPath.steps[0]?.action || 'Review causal drivers';
-          }
+      for (const status of atRiskGoals) {
+        const plan = goalPlanner.planFromGoal(
+          {
+            id: `goal_${status.goal.metric}`,
+            targetMetric: status.goal.metric,
+            targetValue: status.goal.targetValue,
+            currentValue: status.goal.currentValue,
+            direction: 'increase',
+            timeframeWeeks: 12,
+            priority: 'high',
+          },
+          allEdgesForGoalPlanning,
+        );
+
+        goalsPlanned++;
+        feasiblePaths += plan.paths.length;
+
+        if (plan.recommendedPath && !topRecommendation) {
+          topRecommendation = plan.recommendedPath.steps[0]?.action || 'Review causal drivers';
         }
       }
 

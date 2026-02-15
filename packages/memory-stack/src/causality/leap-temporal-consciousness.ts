@@ -140,6 +140,16 @@ export interface TemporalStats {
   temporalCoverage: number; // days of data
 }
 
+export interface TemporalConsciousnessState {
+  goals: Array<[string, TemporalGoal]>;
+  rhythms: Array<[string, OrganizationalRhythm]>;
+  timeline: TimelineEvent[];
+  goalCounter: number;
+  rhythmCounter: number;
+  /** Only persist recent signals (last 5000) to keep state size manageable */
+  recentSignals: TemporalSignal[];
+}
+
 export interface TemporalConsciousnessInstance {
   /** Get current temporal awareness (the "now" snapshot) */
   getAwareness: () => TemporalAwareness;
@@ -157,6 +167,10 @@ export interface TemporalConsciousnessInstance {
   abstractPeriod: (startTime: number, endTime: number) => string;
   /** Get stats */
   getStats: () => TemporalStats;
+  /** Get serializable state for persistence across cycles */
+  getState: () => TemporalConsciousnessState;
+  /** Load previously persisted state (goals, rhythms, timeline survive restarts) */
+  loadState: (state: TemporalConsciousnessState) => void;
 }
 
 // ============================================================================
@@ -587,6 +601,59 @@ export function createTemporalConsciousness(config?: TemporalConsciousnessConfig
     };
   }
 
+  function getState(): TemporalConsciousnessState {
+    // Persist only the most recent signals to keep state compact
+    const recentSignals = signals.slice(-5000);
+    return {
+      goals: [...goals.entries()],
+      rhythms: [...rhythms.entries()],
+      timeline: timeline.slice(-500), // Keep last 500 timeline events
+      goalCounter,
+      rhythmCounter,
+      recentSignals,
+    };
+  }
+
+  function loadState(state: TemporalConsciousnessState): void {
+    // Restore goals
+    goals.clear();
+    for (const [id, goal] of state.goals || []) {
+      goals.set(id, goal);
+    }
+
+    // Restore rhythms
+    rhythms.clear();
+    for (const [id, rhythm] of state.rhythms || []) {
+      rhythms.set(id, rhythm);
+    }
+
+    // Restore timeline (append to avoid losing new events)
+    if (state.timeline?.length > 0) {
+      const existingTimestamps = new Set(timeline.map(e => `${e.timestamp}_${e.description}`));
+      for (const event of state.timeline) {
+        const key = `${event.timestamp}_${event.description}`;
+        if (!existingTimestamps.has(key)) {
+          timeline.push(event);
+        }
+      }
+    }
+
+    // Restore counters
+    goalCounter = state.goalCounter || goalCounter;
+    rhythmCounter = state.rhythmCounter || rhythmCounter;
+
+    // Restore signals
+    if (state.recentSignals?.length > 0) {
+      const existingTimestamps = new Set(signals.map(s => `${s.timestamp}_${s.domain}_${s.metric}`));
+      for (const sig of state.recentSignals) {
+        const key = `${sig.timestamp}_${sig.domain}_${sig.metric}`;
+        if (!existingTimestamps.has(key)) {
+          signals.push(sig);
+        }
+      }
+    }
+  }
+
   return {
     getAwareness,
     recordSignal,
@@ -596,5 +663,7 @@ export function createTemporalConsciousness(config?: TemporalConsciousnessConfig
     buildTimeline,
     abstractPeriod,
     getStats,
+    getState,
+    loadState,
   };
 }

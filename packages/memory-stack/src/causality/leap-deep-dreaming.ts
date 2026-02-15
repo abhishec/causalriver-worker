@@ -378,7 +378,10 @@ export function createDeepDreaming(config?: DeepDreamingConfig): DeepDreamingIns
     // 4. Generate associations from all three sources
     // Temporal co-occurrences
     for (const coOcc of coOccurrences.slice(0, 10)) {
-      const existingKey = `${coOcc.domain1}→${coOcc.domain2}`;
+      // Cycle-versioned key: each dream cycle can discover NEW depth in the
+      // same domain pair. A brain revisiting a topic finds deeper connections.
+      // Dedup is within the same cycle (avoid duplicates), not across cycles.
+      const existingKey = `${coOcc.domain1}→${coOcc.domain2}_c${cycleCount}`;
       if (!associations.has(existingKey)) {
         const evidence: DreamEvidence[] = [{
           sourceId: `cooccurrence_${coOcc.domain1}_${coOcc.domain2}`,
@@ -405,7 +408,7 @@ export function createDeepDreaming(config?: DeepDreamingConfig): DeepDreamingIns
 
     // Structural similarities
     for (const pair of structuralPairs.slice(0, 10)) {
-      const existingKey = `struct_${pair.d1}→${pair.d2}`;
+      const existingKey = `struct_${pair.d1}→${pair.d2}_c${cycleCount}`;
       if (!associations.has(existingKey)) {
         newAssociations.push({
           id: existingKey,

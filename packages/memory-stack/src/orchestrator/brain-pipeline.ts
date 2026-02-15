@@ -177,6 +177,11 @@ import {
 } from './cognitive-stack';
 
 import {
+  getFederatedCausalRelationships,
+  getFederatedPatterns,
+} from '../federation/federated-brain';
+
+import {
   createKnowledgeDependencyGraph,
   type KnowledgeDependencyGraphInstance,
 } from '../core/knowledge-dependency-graph';
@@ -596,6 +601,32 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
                   pValue: result.pValue,
                   discoveredAt: Date.now(),
                 });
+
+                // Persist real-time causal edge to DB — prevents data loss on restart
+                // Uses upsert so repeated discoveries update rather than duplicate
+                // Fire-and-forget: non-blocking async persistence
+                void (async () => {
+                  try {
+                    await supabase.from('causal_relationships_statistical').upsert({
+                      organization_id: organizationId,
+                      source_domain: domains[i],
+                      target_domain: domains[j],
+                      granger_f_statistic: result.fStatistic,
+                      granger_p_value: result.pValue,
+                      effect_size: Math.min(1, result.fStatistic / 10), // Normalize F-stat to 0-1
+                      optimal_lag_days: 1,
+                      is_significant: true,
+                      sample_size: state.totalUpdates || 0,
+                      discovery_method: 'realtime_incremental_granger',
+                      last_computed_at: new Date().toISOString(),
+                      natural_language: `Real-time: ${domains[i]} → ${domains[j]} (F=${result.fStatistic.toFixed(2)}, p=${result.pValue.toFixed(4)})`,
+                    }, { onConflict: 'organization_id,source_domain,target_domain' });
+                    if (verbose) log(`Real-time Granger edge persisted: ${domains[i]}→${domains[j]}`);
+                  } catch {
+                    /* Non-critical: edge already exists or write failed */
+                  }
+                })();
+
                 if (verbose) {
                   log(`Real-time Granger: discovered ${domains[i]}→${domains[j]} (F=${result.fStatistic.toFixed(2)}, p=${result.pValue.toFixed(4)})`);
                 }
@@ -719,6 +750,50 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
     const decision = await attentionManager.process(event, score);
 
     log(`Thalamus decision: ${decision.delivery} (score: ${score.compositeScore}, tier: ${score.alertTier || 'none'})`);
+
+    // Cognitive Light Mode: L13 (Immune) + L4 (Memory Encode) + L9 (ToM)
+    // Brain Analog: During waking (conscious thought), the brain doesn't run
+    // the full sleep cycle — but it DOES perform rapid pattern matching,
+    // memory encoding, and perspective-taking on each incoming signal.
+    // This is the "System 1" fast path: <50ms, non-blocking, enriches the decision.
+    try {
+      const cogLayers = cognitiveStack.layers;
+
+      // L13: Quick immune check — is this signal trustworthy?
+      const immuneCheck = cogLayers.immune.check({
+        id: event.id,
+        organizationId,
+        source: event.type,
+        domain: event.domains?.[0] || 'general',
+        entityType: event.type,
+        entityId: event.id,
+        value: event.rawSeverity || 0.5,
+        timestamp: new Date(),
+        metadata: event.metadata,
+      });
+
+      if (immuneCheck.action === 'reject') {
+        log(`Immune System rejected real-time event: quality=${immuneCheck.qualityScore.overall.toFixed(2)}`);
+      }
+
+      // L4: Encode this event into working memory (for future pattern matching)
+      cogLayers.memory.encode({
+        id: `rt_${event.id}`,
+        content: `${event.type}: ${event.title} (severity: ${event.rawSeverity})`,
+        domain: event.domains?.[0] || 'general',
+        importance: score.compositeScore,
+      });
+
+      // L10: Record as temporal signal for rhythm detection
+      cogLayers.temporal.recordSignal({
+        domain: event.domains?.[0] || 'general',
+        metric: event.type,
+        value: score.compositeScore,
+        timestamp: Date.now(),
+      });
+    } catch {
+      // Non-fatal: cognitive light mode is enrichment, not critical path
+    }
 
     // Fire alert callback if immediate
     if (decision.delivery === 'immediate' && onAlert) {
@@ -994,6 +1069,8 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
             leaps.memory.loadState(s.state_data as any);
           } else if (s.leap_type === 'theory_of_mind' && leaps.theoryOfMind.loadState) {
             leaps.theoryOfMind.loadState(s.state_data as any);
+          } else if (s.leap_type === 'temporal_consciousness' && leaps.temporal.loadState) {
+            leaps.temporal.loadState(s.state_data as any);
           }
         } catch { /* skip individual load failures — start that LEAP fresh */ }
       }
@@ -1091,6 +1168,89 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
           errors.push(`Scoring insight ${insight.id} failed: ${(err as Error).message}`);
         }
       }
+    }
+
+    // Step 4b: Outcome Feedback Loop — verify past predictions against reality
+    // Brain Analog: Dopaminergic prediction error signal. The brain compares
+    // what it PREDICTED would happen with what ACTUALLY happened. Prediction
+    // errors drive synaptic weight updates (LTP/LTD) — this is how the brain learns.
+    let predictionsVerified = 0;
+    let predictionsCorrect = 0;
+    try {
+      // Find unverified predictions past their review window
+      const reviewCutoff = new Date();
+      const { data: pendingPredictions } = await supabase
+        .from('prediction_records')
+        .select('id, domain, prediction_type, entity_type, entity_id, predicted_value, confidence, created_at')
+        .eq('organization_id', organizationId)
+        .is('was_correct', null)
+        .lt('created_at', new Date(reviewCutoff.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()) // At least 7 days old
+        .limit(50);
+
+      if (pendingPredictions && pendingPredictions.length > 0) {
+        for (const pred of pendingPredictions) {
+          try {
+            // Look for the most recent actual signal matching this prediction's entity
+            const { data: actualSignals } = await supabase
+              .from('cross_domain_signals')
+              .select('signal_value')
+              .eq('organization_id', organizationId)
+              .eq('source_domain', pred.domain)
+              .eq('entity_id', pred.entity_id)
+              .order('signal_timestamp', { ascending: false })
+              .limit(1);
+
+            if (actualSignals && actualSignals.length > 0) {
+              const actualValue = actualSignals[0].signal_value;
+              const predictedValue = pred.predicted_value || 0;
+              const error = Math.abs(actualValue - predictedValue);
+              const isCorrect = error < Math.abs(predictedValue) * 0.3; // Within 30% is "correct"
+
+              // Update the prediction record with the outcome
+              await supabase
+                .from('prediction_records')
+                .update({
+                  actual_value: actualValue,
+                  was_correct: isCorrect,
+                  verified_at: new Date().toISOString(),
+                  actual_outcome: `Actual: ${actualValue.toFixed(3)}, Predicted: ${predictedValue.toFixed(3)}, Error: ${(error * 100).toFixed(1)}%`,
+                })
+                .eq('id', pred.id);
+
+              predictionsVerified++;
+              if (isCorrect) predictionsCorrect++;
+
+              // Feed back into Bayesian updater — strengthen/weaken edge posteriors
+              // This is the critical learning signal: prediction error → synaptic update
+              try {
+                const sourceDomain = pred.domain;
+                const targetDomain = pred.entity_id || pred.domain;
+
+                // Update Bayesian prior: correct predictions strengthen, incorrect weaken
+                bayesianUpdater.update({
+                  sourceDomain,
+                  targetDomain,
+                  wasCorrect: isCorrect,
+                  predictionConfidence: pred.confidence || 0.5,
+                  ageDays: Math.floor((Date.now() - new Date(pred.created_at).getTime()) / (24 * 60 * 60 * 1000)),
+                });
+              } catch {
+                // Non-fatal: Bayesian feedback is enrichment
+              }
+            }
+          } catch {
+            // Individual prediction verification failure is non-fatal
+          }
+        }
+
+        if (predictionsVerified > 0) {
+          log(`Outcome Feedback: ${predictionsVerified} predictions verified, ${predictionsCorrect} correct (${((predictionsCorrect / predictionsVerified) * 100).toFixed(0)}% accuracy)`);
+        }
+      }
+    } catch (err) {
+      const msg = `Outcome feedback loop failed (non-critical): ${(err as Error).message}`;
+      errors.push(msg);
+      log(msg);
     }
 
     // Step 5: Learning cycle (Long-Term Potentiation)
@@ -1196,19 +1356,96 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
         });
       }
 
+      // Disconnection #3 FIX (Sleep Path): Fetch CORE brain data from federation.
+      // During the sleep cycle, the brain should absorb cross-org baseline knowledge
+      // so L3-L15 can compare org-specific patterns against industry baselines.
+      // CORE edges are passed SEPARATELY (at 0.7x weight inside cognitive-stack)
+      // rather than pre-merged, so org identity is preserved.
+      let federatedEdges: Array<{ source: string; target: string; weight: number; confidence: number; domain?: string }> = [];
+      let federatedPatterns: string[] = [];
+      try {
+        const [fedCausalResult, fedPatternsResult] = await Promise.all([
+          getFederatedCausalRelationships(organizationId, { limit: 100, includeCoreData: true })
+            .catch(() => null),
+          getFederatedPatterns(organizationId, { memoryType: 'pattern', limit: 50, includeCoreData: true })
+            .catch(() => null),
+        ]);
+
+        // Extract CORE-only edges (exclude org-specific — those are already in cogEdges)
+        if (fedCausalResult?.coreResults) {
+          federatedEdges = fedCausalResult.coreResults.map((e: any) => ({
+            source: e.source_domain || e.source || 'unknown',
+            target: e.target_domain || e.target || 'unknown',
+            weight: e.effect_size || e.weight || 0.5,
+            confidence: 1 - (e.granger_p_value || 0.3),
+            domain: e.source_domain || 'core',
+          }));
+        }
+
+        // Extract CORE-only patterns
+        if (fedPatternsResult?.coreResults) {
+          federatedPatterns = fedPatternsResult.coreResults.map((p: any) =>
+            p.llm_pattern_name || p.content || p.title || 'CORE pattern'
+          );
+        }
+
+        if (federatedEdges.length > 0 || federatedPatterns.length > 0) {
+          log(`Federation: ${federatedEdges.length} CORE edges + ${federatedPatterns.length} CORE patterns fetched for cognitive stack`);
+        }
+      } catch (fedErr) {
+        // Non-fatal: if federation fails, cognitive stack runs with org-only data
+        log(`Federation fetch failed (non-fatal): ${(fedErr as Error).message}`);
+      }
+
+      // Long-Term Narrative Accumulation: Load previous narrative from ai_memory
+      // so L15 can build on prior insights rather than starting fresh each cycle.
+      // Brain Analog: Autobiographical memory — the brain recalls its own past
+      // narratives to maintain coherent multi-day storylines.
+      let previousNarrativeContext: string[] = [];
+      try {
+        const { data: prevNarratives } = await supabase
+          .from('ai_memory')
+          .select('content, metadata')
+          .eq('organization_id', organizationId)
+          .eq('memory_type', 'narrative')
+          .order('updated_at', { ascending: false })
+          .limit(3);
+
+        if (prevNarratives && prevNarratives.length > 0) {
+          previousNarrativeContext = prevNarratives.map(n => {
+            const meta = n.metadata as Record<string, unknown> | null;
+            const title = meta?.title as string || '';
+            const keyInsights = (meta?.keyInsights as number) || 0;
+            return `Prior: ${title || n.content} (${keyInsights} insights)`;
+          });
+          log(`Narrative Accumulation: loaded ${prevNarratives.length} previous narrative(s) for continuity`);
+        }
+      } catch {
+        // Non-fatal: narrative generation still works without prior context
+      }
+
+      // Merge prior narrative context into patterns so L3/L15 can reference them
+      const patternsWithNarrativeContext = [
+        ...cogPatterns,
+        ...previousNarrativeContext,
+      ];
+
       cognitiveStackResult = cognitiveStack.runCycle({
         signals: cogSignals,
         causalEdges: cogEdges,
-        patterns: cogPatterns,
+        patterns: patternsWithNarrativeContext,
         predictions: cogPredictions,
         metrics: cogMetrics,
+        federatedEdges,      // CORE brain causal edges (0.7x weighted inside cognitive stack)
+        federatedPatterns,   // CORE brain pattern library
       });
 
       log(`Cognitive Stack complete: ${cognitiveStackResult.immune.signalsChecked} signals checked, ` +
           `${cognitiveStackResult.dreaming.associationsFound} dream associations, ` +
           `${cognitiveStackResult.curiosity.hypothesesGenerated} hypotheses, ` +
           `${cognitiveStackResult.redTeam.predictionsTested} red-team tests, ` +
-          `patterns fed: ${cogPatterns.length}, predictions fed: ${cogPredictions.length}, metrics fed: ${cogMetrics.length}`);
+          `patterns fed: ${cogPatterns.length}, predictions fed: ${cogPredictions.length}, metrics fed: ${cogMetrics.length}, ` +
+          `CORE edges: ${federatedEdges.length}, CORE patterns: ${federatedPatterns.length}`);
     } catch (err) {
       const msg = `Cognitive Stack cycle failed: ${(err as Error).message}`;
       errors.push(msg);
@@ -1224,10 +1461,176 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
           repository.persistLeapState('deep_dreaming', leaps.dreaming.getState()),
           repository.persistLeapState('hierarchical_memory', leaps.memory.getState()),
           repository.persistLeapState('theory_of_mind', leaps.theoryOfMind.getState()),
+          repository.persistLeapState('temporal_consciousness', leaps.temporal.getState()),
         ]);
-        log('Cognitive Stack: LEAP states persisted to Supabase (deep_dreaming, hierarchical_memory, theory_of_mind)');
+        log('Cognitive Stack: LEAP states persisted to Supabase (deep_dreaming, hierarchical_memory, theory_of_mind, temporal_consciousness)');
       } catch (err) {
         const msg = `LEAP state persistence failed (non-critical): ${(err as Error).message}`;
+        errors.push(msg);
+        log(msg);
+      }
+    }
+
+    // Step 6d: Persist L12 experiment suggestions + L14 goal plans + L15 narratives to Supabase
+    // Without this, experiments are suggested but never tracked, goals vanish on restart,
+    // and narratives are lost after logging.
+    if (cognitiveStackResult) {
+      try {
+        const upsertMemory = async (memoryType: string, content: string, importance: number, confidence: number, metadata: Record<string, unknown>) => {
+          await supabase.from('ai_memory').upsert({
+            organization_id: organizationId,
+            memory_type: memoryType,
+            domain: 'brain',
+            content,
+            importance,
+            confidence,
+            is_active: true,
+            metadata,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          }, { onConflict: 'organization_id,memory_type,content' }).select();
+        };
+
+        const persistPromises: Promise<any>[] = [];
+
+        // L12: Persist experiment suggestions
+        if (cognitiveStackResult.experimentation.experimentsSuggested > 0) {
+          const topExperiment = cognitiveStackResult.experimentation.topExperiment;
+          if (topExperiment) {
+            persistPromises.push(upsertMemory('experiment', topExperiment, 0.8, 0.6, {
+              source: 'L12_experimentation',
+              experimentsSuggested: cognitiveStackResult.experimentation.experimentsSuggested,
+              generatedAt: new Date().toISOString(),
+            }));
+          }
+        }
+
+        // L14: Persist goal plans
+        if (cognitiveStackResult.planning.goalsPlanned > 0) {
+          const goalRecommendation = cognitiveStackResult.planning.topRecommendation;
+          if (goalRecommendation) {
+            persistPromises.push(upsertMemory('goal_plan', goalRecommendation, 0.9, 0.7, {
+              source: 'L14_goal_planning',
+              goalsPlanned: cognitiveStackResult.planning.goalsPlanned,
+              feasiblePaths: cognitiveStackResult.planning.feasiblePaths,
+              generatedAt: new Date().toISOString(),
+            }));
+          }
+        }
+
+        // L15: Persist narrative
+        if (cognitiveStackResult.narrative) {
+          const narrative = cognitiveStackResult.narrative;
+          persistPromises.push(upsertMemory('narrative', narrative.summary || narrative.title, 0.85, 0.8, {
+            source: 'L15_narrative',
+            title: narrative.title,
+            sections: narrative.sections?.length || 0,
+            keyInsights: narrative.keyInsights?.length || 0,
+            generatedAt: new Date().toISOString(),
+          }));
+        }
+
+        // L5: Persist curiosity hypotheses — knowledge gaps the brain identified
+        if (cognitiveStackResult.curiosity.hypothesesGenerated > 0) {
+          const topHypotheses = cognitiveStackResult.curiosity.knowledgeGaps;
+          if (topHypotheses > 0) {
+            persistPromises.push(upsertMemory('curiosity_hypothesis',
+              `Curiosity cycle: ${cognitiveStackResult.curiosity.hypothesesGenerated} hypotheses, ` +
+              `${topHypotheses} knowledge gaps, budget used: ${cognitiveStackResult.curiosity.explorationBudgetUsed}%`,
+              0.7, 0.5, {
+                source: 'L5_curiosity',
+                hypothesesGenerated: cognitiveStackResult.curiosity.hypothesesGenerated,
+                knowledgeGaps: topHypotheses,
+                budgetUsed: cognitiveStackResult.curiosity.explorationBudgetUsed,
+                generatedAt: new Date().toISOString(),
+              }));
+          }
+        }
+
+        // L6: Persist self-model calibration — tracks brain's self-awareness
+        if (cognitiveStackResult.selfModel.calibrationScore > 0) {
+          persistPromises.push(upsertMemory('self_model',
+            `Self-model: calibration=${(cognitiveStackResult.selfModel.calibrationScore * 100).toFixed(0)}%, ` +
+            `weaknesses=${cognitiveStackResult.selfModel.weaknesses}, ` +
+            `modifications=${cognitiveStackResult.selfModel.suggestedModifications}`,
+            0.75, cognitiveStackResult.selfModel.calibrationScore, {
+              source: 'L6_self_model',
+              calibrationScore: cognitiveStackResult.selfModel.calibrationScore,
+              weaknesses: cognitiveStackResult.selfModel.weaknesses,
+              suggestedModifications: cognitiveStackResult.selfModel.suggestedModifications,
+              generatedAt: new Date().toISOString(),
+            }));
+        }
+
+        // L7: Persist mesh collective patterns — multi-agent consensus
+        if (cognitiveStackResult.mesh.collectivePatterns > 0) {
+          persistPromises.push(upsertMemory('mesh_pattern',
+            `Intelligence Mesh: ${cognitiveStackResult.mesh.patternsContributed} contributed, ` +
+            `${cognitiveStackResult.mesh.collectivePatterns} collective patterns, ` +
+            `${cognitiveStackResult.mesh.conflicts} conflicts`,
+            0.7, 0.6, {
+              source: 'L7_mesh',
+              patternsContributed: cognitiveStackResult.mesh.patternsContributed,
+              collectivePatterns: cognitiveStackResult.mesh.collectivePatterns,
+              conflicts: cognitiveStackResult.mesh.conflicts,
+              generatedAt: new Date().toISOString(),
+            }));
+        }
+
+        // L8: Persist imagination hypotheses — counterfactual reasoning
+        if (cognitiveStackResult.imagination.hypothesesGenerated > 0) {
+          const topInsight = cognitiveStackResult.imagination.topInsight;
+          persistPromises.push(upsertMemory('imagination_hypothesis',
+            topInsight || `Imagination: ${cognitiveStackResult.imagination.hypothesesGenerated} hypotheses generated`,
+            0.75, 0.5, {
+              source: 'L8_imagination',
+              hypothesesGenerated: cognitiveStackResult.imagination.hypothesesGenerated,
+              scenariosPlanned: cognitiveStackResult.imagination.scenariosPlanned,
+              topInsight,
+              generatedAt: new Date().toISOString(),
+            }));
+        }
+
+        // L11: Persist red-team vulnerabilities — CRITICAL for safety audit trail
+        if (cognitiveStackResult.redTeam.predictionsTested > 0) {
+          persistPromises.push(upsertMemory('red_team_audit',
+            `Red Team: ${cognitiveStackResult.redTeam.predictionsTested} predictions tested, ` +
+            `avg robustness=${(cognitiveStackResult.redTeam.robustnessAvg * 100).toFixed(0)}%, ` +
+            `${cognitiveStackResult.redTeam.criticalWeaknesses.length} critical weaknesses: ${cognitiveStackResult.redTeam.criticalWeaknesses.slice(0, 5).join('; ')}`,
+            0.9, cognitiveStackResult.redTeam.robustnessAvg, {
+              source: 'L11_red_team',
+              predictionsTested: cognitiveStackResult.redTeam.predictionsTested,
+              robustnessAvg: cognitiveStackResult.redTeam.robustnessAvg,
+              criticalWeaknesses: cognitiveStackResult.redTeam.criticalWeaknesses,
+              generatedAt: new Date().toISOString(),
+            }));
+        }
+
+        // L13: Persist immune quality scores — compliance/audit trail
+        if (cognitiveStackResult.immune.signalsChecked > 0) {
+          persistPromises.push(upsertMemory('immune_audit',
+            `Immune: ${cognitiveStackResult.immune.signalsChecked} checked, ` +
+            `${cognitiveStackResult.immune.signalsPassed} passed, ` +
+            `${cognitiveStackResult.immune.signalsRejected} rejected, ` +
+            `${cognitiveStackResult.immune.signalsQuarantined} quarantined, ` +
+            `avg quality=${(cognitiveStackResult.immune.avgQuality * 100).toFixed(0)}%`,
+            0.8, cognitiveStackResult.immune.avgQuality, {
+              source: 'L13_immune',
+              signalsChecked: cognitiveStackResult.immune.signalsChecked,
+              signalsPassed: cognitiveStackResult.immune.signalsPassed,
+              signalsRejected: cognitiveStackResult.immune.signalsRejected,
+              signalsQuarantined: cognitiveStackResult.immune.signalsQuarantined,
+              avgQuality: cognitiveStackResult.immune.avgQuality,
+              generatedAt: new Date().toISOString(),
+            }));
+        }
+
+        if (persistPromises.length > 0) {
+          await Promise.allSettled(persistPromises);
+          log(`Cognitive Stack: persisted ${persistPromises.length} layer outputs (L5,L6,L7,L8,L11,L12,L13,L14,L15) to ai_memory`);
+        }
+      } catch (err) {
+        const msg = `Cognitive layer persistence failed (non-critical): ${(err as Error).message}`;
         errors.push(msg);
         log(msg);
       }
@@ -1307,6 +1710,12 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
         `${cognitiveStackResult.curiosity.hypothesesGenerated} curiosity hypotheses, ` +
         `${cognitiveStackResult.imagination.hypothesesGenerated} imagination hypotheses, ` +
         `${cognitiveStackResult.redTeam.predictionsTested} red-team tests (avg robustness: ${(cognitiveStackResult.redTeam.robustnessAvg * 100).toFixed(0)}%).`
+      );
+    }
+    if (predictionsVerified > 0) {
+      narrativeParts.push(
+        `Outcome Feedback: ${predictionsVerified} predictions verified, ${predictionsCorrect} correct ` +
+        `(${((predictionsCorrect / predictionsVerified) * 100).toFixed(0)}% accuracy). Prediction errors fed back to Bayesian updater.`
       );
     }
     if (fastPathInvalidated) {

@@ -371,12 +371,23 @@ export function createRedTeam(config: RedTeamConfig = {}): RedTeamInstance {
         ...ADVERSARIAL_TEMPLATES[type].generate(prediction),
       }));
 
-      // Calculate robustness score
-      const totalPlausibility = scenarios.reduce((sum, s) => sum + s.plausibility, 0);
-      const avgPlausibility = scenarios.length > 0 ? totalPlausibility / scenarios.length : 0;
-      const criticalThreats = scenarios.filter(s => s.impact_if_true === 'critical' && s.plausibility > 0.3);
+      // Calculate robustness score with ADAPTIVE threat calibration.
+      // Like the amygdala habituating to proven stimuli: as the brain sees
+      // more evidence (high confidence + strong evidence list), threat
+      // plausibilities are dampened. The brain learns to trust its validated predictions.
+      const evidenceStrength = Math.min(1, (prediction.evidence?.length || 0) / 5); // 5+ evidence = max
+      const maturityFactor = Math.max(0.3, 1 - prediction.confidence * evidenceStrength * 0.6);
+      // Dampen plausibility: proven predictions face reduced threat penalties
+      const adjustedScenarios = scenarios.map(s => ({
+        ...s,
+        plausibility: s.plausibility * maturityFactor,
+      }));
 
-      // Robustness = base confidence - threat penalty
+      const totalPlausibility = adjustedScenarios.reduce((sum, s) => sum + s.plausibility, 0);
+      const avgPlausibility = adjustedScenarios.length > 0 ? totalPlausibility / adjustedScenarios.length : 0;
+      const criticalThreats = adjustedScenarios.filter(s => s.impact_if_true === 'critical' && s.plausibility > 0.3 * maturityFactor);
+
+      // Robustness = base confidence - threat penalty (reduced by maturity)
       const threatPenalty = avgPlausibility * 0.4 + criticalThreats.length * 0.1;
       const robustnessScore = Math.max(0, Math.min(1, prediction.confidence - threatPenalty));
 
