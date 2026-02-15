@@ -23,6 +23,8 @@
     "job:retention": "tsx scripts/run-scheduled-job.ts retention",
     "job:federation": "tsx scripts/run-scheduled-job.ts federation",
     "job:consolidation": "tsx scripts/run-scheduled-job.ts consolidation",
+    "job:full-consolidation": "tsx scripts/run-full-consolidation.ts",
+    "job:full-consolidation:via-runner": "tsx scripts/run-scheduled-job.ts full_consolidation",
     "job:all-daily": "tsx scripts/run-scheduled-job.ts all_daily",
     "verify:wiring": "tsx scripts/verify-brain-wiring.ts",
     "verify:db": "tsx scripts/validate-database-schema.ts",

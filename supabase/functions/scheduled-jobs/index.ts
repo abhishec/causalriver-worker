@@ -627,10 +627,32 @@ async function runConsolidationJob(supabase: any, orgId: string) {
     results.federation = { error: err.message };
   }
 
+  // Step 4: Signal that full consolidation is needed (Node.js cognitive stack L3-L15)
+  // This inserts a queue record so external systems (GitHub Actions, monitoring)
+  // can detect that light consolidation ran and the full pipeline should follow.
+  try {
+    await supabase.from('scheduled_job_runs').insert({
+      organization_id: orgId,
+      job_name: 'full_consolidation_trigger',
+      job_type: 'full_consolidation_trigger',
+      started_at: new Date().toISOString(),
+      completed_at: new Date().toISOString(),
+      status: 'pending',
+      result: JSON.stringify({
+        trigger: 'edge_function_consolidation_complete',
+        note: 'Full brain pipeline (cognitive stack L3-L15) should run via Node.js',
+        light_consolidation_results: results,
+      }),
+      duration_ms: 0,
+    });
+  } catch {
+    // Non-critical — the GitHub Actions cron will still run at 2 AM UTC regardless
+  }
+
   return {
     status: 'success',
     mode: 'light_consolidation',
-    note: 'Full 10-step consolidation runs via Node.js: scripts/brain-consolidation-runner.ts',
+    note: 'Light consolidation complete. Full brain pipeline (cognitive stack L3-L15) runs via: (1) GitHub Actions cron at 2 AM UTC, (2) pnpm job:full-consolidation, or (3) scripts/brain-consolidation-runner.ts',
     ...results,
   };
 }

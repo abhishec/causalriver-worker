@@ -8,7 +8,11 @@ name: Brain Consolidation (Nightly Sleep)
 # automated scheduling. Without this, the brain never "sleeps" unless
 # manually triggered. This workflow ensures the brain consolidates
 # knowledge nightly — pruning weak edges, strengthening validated ones,
-# running all 15 cognitive layers, and generating executive briefings.
+# AND running the full brain pipeline including cognitive stack L3-L15
+# (Deep Dreaming, Curiosity, Self-Modifying Cognition, Intelligence Mesh,
+# Causal Imagination, Theory of Mind, Temporal Consciousness, Red Team,
+# Experimentation, Immune System, Goal Planning, Narrative Intelligence),
+# then generating executive briefings.
 #
 # Architecture:
 #   GitHub Actions (scheduler) → brain-consolidation-runner.ts (Node.js)

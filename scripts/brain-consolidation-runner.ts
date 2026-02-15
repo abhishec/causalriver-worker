@@ -300,6 +300,69 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
     }
   }
 
+  // ══════════════════════════════════════════════════════════════════════════
+  // CRITICAL FIX: Run Brain Pipeline Full Cycle (Cognitive Stack L3-L15)
+  // ══════════════════════════════════════════════════════════════════════════
+  // The consolidation engine above runs the 10-step "brain sleep" cycle, but
+  // it does NOT fire the cognitive stack (layers 3-15: Deep Dreaming, Curiosity,
+  // Self-Modifying Cognition, Intelligence Mesh, Causal Imagination, Theory of
+  // Mind, Temporal Consciousness, Red Team, Experimentation, Immune System,
+  // Goal-Backward Planning, and Narrative Intelligence).
+  //
+  // Only brain-pipeline.runFullCycle() → cognitiveStack.runCycle() populates L3-L15.
+  // Without this, LEAP states are never generated, and the cognitive layers remain
+  // empty in both `ai_memory` and `cognitive_leap_state` tables.
+  //
+  // This was the CTO audit finding: layers 8-15 were never populated in production
+  // because nothing called runFullCycle(). Fixed by invoking it here after the
+  // consolidation engine completes, so the cognitive stack gets real data.
+  // ══════════════════════════════════════════════════════════════════════════
+  divider('COGNITIVE STACK: LAYERS 3-15 (Brain Pipeline Full Cycle)');
+  try {
+    log('COGNITIVE', 'Running brain pipeline full cycle for cognitive stack L3-L15...');
+    const pipelineStartTime = Date.now();
+
+    const fullPipeline = createBrainPipeline({
+      supabase,
+      organizationId: ORGANIZATION_ID,
+      verbose: VERBOSE,
+    });
+
+    const fullCycleReport = await fullPipeline.runFullCycle();
+
+    const pipelineDuration = ((Date.now() - pipelineStartTime) / 1000).toFixed(1);
+    log('COGNITIVE', `Brain Pipeline Full Cycle complete in ${pipelineDuration}s`);
+    log('COGNITIVE', `  Status: ${fullCycleReport.status}`);
+    log('COGNITIVE', `  Cognitive Stack Ran: ${fullCycleReport.cognitiveStack !== null}`);
+
+    if (fullCycleReport.cognitiveStack) {
+      const cs = fullCycleReport.cognitiveStack;
+      log('COGNITIVE', `  L3  Deep Dreaming:       ${cs.dreaming?.associationsFound ?? 0} associations, ${cs.dreaming?.crossDomainConnections ?? 0} cross-domain`);
+      log('COGNITIVE', `  L4  Hierarchical Memory: ${cs.memory?.itemsEncoded ?? 0} items encoded, ${cs.memory?.episodesRecorded ?? 0} episodes`);
+      log('COGNITIVE', `  L5  Curiosity:           ${cs.curiosity?.hypothesesGenerated ?? 0} hypotheses, ${cs.curiosity?.knowledgeGaps ?? 0} gaps`);
+      log('COGNITIVE', `  L6  Self-Modifying:      ${cs.selfModel?.suggestedModifications ?? 0} modifications, calibration=${(cs.selfModel?.calibrationScore ?? 0).toFixed(2)}`);
+      log('COGNITIVE', `  L7  Intelligence Mesh:   ${cs.mesh?.patternsContributed ?? 0} patterns, ${cs.mesh?.collectivePatterns ?? 0} collective`);
+      log('COGNITIVE', `  L8  Causal Imagination:  ${cs.imagination?.scenariosPlanned ?? 0} scenarios, ${cs.imagination?.analogiesFound ?? 0} analogies`);
+      log('COGNITIVE', `  L9  Theory of Mind:      updated=${cs.theoryOfMind?.userModelUpdated ?? false}, intent="${cs.theoryOfMind?.predictedIntent ?? 'unknown'}"`);
+      log('COGNITIVE', `  L10 Temporal:            ${cs.temporal?.rhythmsDetected ?? 0} rhythms, ${cs.temporal?.goalsTracked ?? 0} goals tracked`);
+      log('COGNITIVE', `  L11 Red Team:            ${cs.redTeam?.predictionsTested ?? 0} tests, robustness=${(cs.redTeam?.robustnessAvg ?? 0).toFixed(2)}`);
+      log('COGNITIVE', `  L12 Experimentation:     ${cs.experimentation?.experimentsSuggested ?? 0} experiments suggested`);
+      log('COGNITIVE', `  L13 Immune System:       ${cs.immune?.signalsChecked ?? 0} checked, ${cs.immune?.signalsQuarantined ?? 0} quarantined`);
+      log('COGNITIVE', `  L14 Goal Planning:       ${cs.planning?.goalsPlanned ?? 0} goals, ${cs.planning?.feasiblePaths ?? 0} feasible paths`);
+      log('COGNITIVE', `  L15 Narrative:           ${cs.narrative ? `"${cs.narrative.title}" (${cs.narrative.keyInsights?.length ?? 0} insights)` : 'none generated'}`);
+    }
+
+    if (fullCycleReport.errors.length > 0) {
+      log('COGNITIVE', `  Warnings: ${fullCycleReport.errors.length}`);
+      for (const e of fullCycleReport.errors.slice(0, 5)) {
+        log('COGNITIVE', `    ⚠ ${e}`);
+      }
+    }
+  } catch (err) {
+    logError('COGNITIVE', 'Brain Pipeline Full Cycle failed (cognitive stack L3-L15 not populated)', err);
+    logError('COGNITIVE', 'Continuing with learning steps — consolidation data is still valid', undefined);
+  }
+
   // ── POST-CONSOLIDATION: Real Learning Steps ──
   divider('REAL LEARNING (Bayesian + Embeddings + Contrastive)');
 

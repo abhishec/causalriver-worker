@@ -24,6 +24,7 @@ if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
 
 type JobType =
   | 'consolidation'
+  | 'full_consolidation'
   | 'verification'
   | 'weights'
   | 'decay'
@@ -33,7 +34,8 @@ type JobType =
   | 'all_daily';
 
 const JOB_DESCRIPTIONS: Record<JobType, string> = {
-  consolidation: 'Full brain consolidation',
+  consolidation: 'Light brain consolidation (Edge Function — maintenance + health snapshot)',
+  full_consolidation: 'Full brain pipeline (Node.js — consolidation + cognitive stack L3-L15)',
   verification: 'Process pending prediction verifications',
   weights: 'Update causal edge weights',
   decay: 'Apply evidence decay',
@@ -73,6 +75,32 @@ async function main() {
 
   try {
     const startTime = Date.now();
+
+    // ── Full Consolidation: runs locally via Node.js (NOT Edge Function) ──
+    // This is the ONLY path to populate cognitive stack layers L3-L15.
+    // The Edge Function runs Deno and can't import Node.js brain-pipeline modules.
+    if (jobType === 'full_consolidation') {
+      console.log(`🧬 Running full brain pipeline locally (Node.js)...\n`);
+      const { execSync } = await import('child_process');
+      const envVars = [
+        organizationId ? `ORGANIZATION_ID=${organizationId}` : '',
+        'VERBOSE=true',
+      ].filter(Boolean).join(' ');
+
+      try {
+        execSync(
+          `${envVars} tsx scripts/run-full-consolidation.ts`,
+          { stdio: 'inherit', cwd: resolve(__dirname, '..'), timeout: 7200000 } // 2hr timeout
+        );
+        const duration = Date.now() - startTime;
+        console.log(`\n✅ Full consolidation completed in ${(duration / 1000).toFixed(1)}s`);
+        console.log('🧬 Cognitive stack L3-L15 populated');
+      } catch (execError: any) {
+        console.error('❌ Full consolidation failed:', execError.message || execError);
+        process.exit(1);
+      }
+      return;
+    }
 
     // Call Edge Function
     const url = `${SUPABASE_URL}/functions/v1/scheduled-jobs`;
