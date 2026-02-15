@@ -35,6 +35,7 @@ COPY platform/ ./platform/
 COPY pnpm-workspace.yaml ./
 COPY package.json ./
 COPY turbo.json ./
+COPY tsconfig.base.json ./
 
 # Build workspace packages first
 WORKDIR /app/packages/memory-stack
