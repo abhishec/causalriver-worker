@@ -28,6 +28,34 @@ export { createJiraConnector, type JiraConnectorConfig } from './jira';
 export { createPagerDutyConnector, type PagerDutyConnectorConfig } from './pagerduty';
 export * from './cicd-ingestor';
 
+// Project Management Connectors (CRITICAL - Design Partner Requirements)
+export {
+  ingestLinearData,
+  getLinearMetadata,
+  validateLinearConfig,
+  type LinearConfig,
+  type LinearIssue,
+  type LinearProject,
+  type LinearCycle,
+} from './linear';
+
+export {
+  ingestAsanaData,
+  getAsanaMetadata,
+  validateAsanaConfig,
+  type AsanaConfig,
+  type AsanaTask,
+  type AsanaProject,
+} from './asana';
+
+// Customer Support Connectors
+export {
+  ingestFreshdeskData,
+  getFreshdeskMetadata,
+  validateFreshdeskConfig,
+  type FreshdeskConfig,
+} from './freshdesk';
+
 // Communication Connectors
 /** @deprecated Use `createNexusSlackConnector` from `@nexus-ai/slack-connector` instead */
 export { createSlackConnector, type SlackConnectorConfig, type SlackConnector } from './slack';
