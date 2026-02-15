@@ -81,51 +81,122 @@ export const TARGET_REPOS = [
 
 export class GitCodeTrainerAgent extends BaseTrainingAgent {
   readonly name = 'git-code-trainer';
-  readonly version = '1.0.0';
-  readonly description = 'Trains the core brain on engineering patterns from 27 major open-source GitHub repos (100k+ stars)';
+  readonly version = '2.0.0';
+  readonly description = 'Nightly progressive trainer: learns engineering patterns from 27 major open-source GitHub repos, getting smarter every day';
 
   private repos: string[];
   private fetchedData: RepoData[] = [];
+  private runMode: 'full' | 'incremental' = 'incremental';
+  private sinceDate: string | undefined;
 
   constructor(config: AgentConfig, repos?: string[]) {
     super(config);
     this.repos = repos || TARGET_REPOS;
+    // Force full run on first run or when env says so
+    this.runMode = process.env.GIT_TRAINER_MODE === 'full' ? 'full' : 'incremental';
   }
 
-  // ── FETCH: Pull data from GitHub ──
+  // ── PROGRESSIVE LEARNING: Track last successful run ──
+  private async getLastRunDate(): Promise<string | undefined> {
+    try {
+      const { data } = await this.supabase
+        .from('agent_run_history')
+        .select('completed_at')
+        .eq('agent_name', this.name)
+        .eq('status', 'success')
+        .order('completed_at', { ascending: false })
+        .limit(1);
+      if (data && data.length > 0) {
+        return data[0].completed_at;
+      }
+    } catch {
+      // Table may not exist yet — fall back to full run
+    }
+    return undefined;
+  }
+
+  private async recordRunCompletion(result: TrainResult): Promise<void> {
+    try {
+      await this.supabase.from('agent_run_history').insert({
+        agent_name: this.name,
+        agent_version: this.version,
+        organization_id: this.organizationId,
+        status: 'success',
+        signals_stored: result.signalsStored,
+        packs_processed: result.packsProcessed,
+        discoveries: result.discoveries,
+        run_mode: this.runMode,
+        completed_at: new Date().toISOString(),
+      });
+    } catch {
+      // Non-critical — logging only
+      this.log('TRAIN', 'Could not record run history (table may not exist)');
+    }
+  }
+
+  // ── FETCH: Pull data from GitHub (incremental or full) ──
   async fetch(): Promise<FetchResult> {
-    const maxPRsPerRepo = parseInt(process.env.GIT_TRAINER_MAX_PRS || '200', 10);
-    const maxIssuesPerRepo = parseInt(process.env.GIT_TRAINER_MAX_ISSUES || '200', 10);
-    const maxCommitsPerRepo = parseInt(process.env.GIT_TRAINER_MAX_COMMITS || '200', 10);
+    // ── Aggressive data limits for maximum brain training ──
+    // Full runs: Pull as much data as GitHub API allows (~1000/repo × 27 repos = ~27,000 PRs)
+    // Incremental runs: Pull only new data since last run (~100-500/repo on active days)
+    // Over time, nightly incremental runs accumulate 100k+ data points in the brain
+    const isIncremental = this.runMode !== 'full';
+    const maxPRsPerRepo = parseInt(process.env.GIT_TRAINER_MAX_PRS || (isIncremental ? '500' : '1000'), 10);
+    const maxIssuesPerRepo = parseInt(process.env.GIT_TRAINER_MAX_ISSUES || (isIncremental ? '500' : '1000'), 10);
+    const maxCommitsPerRepo = parseInt(process.env.GIT_TRAINER_MAX_COMMITS || (isIncremental ? '500' : '1000'), 10);
+    const maxWorkflowRuns = parseInt(process.env.GIT_TRAINER_MAX_WORKFLOWS || (isIncremental ? '200' : '500'), 10);
+    const maxReviewPRs = parseInt(process.env.GIT_TRAINER_MAX_REVIEW_PRS || (isIncremental ? '100' : '200'), 10);
+    const maxFileChangePRs = parseInt(process.env.GIT_TRAINER_MAX_FILE_CHANGE_PRS || (isIncremental ? '100' : '200'), 10);
+
+    // Progressive learning: only fetch new data since last successful run
+    if (this.runMode === 'incremental') {
+      this.sinceDate = await this.getLastRunDate();
+      if (this.sinceDate) {
+        this.log('FETCH', `📈 INCREMENTAL MODE: Fetching only data since ${this.sinceDate}`);
+      } else {
+        this.log('FETCH', '🆕 FIRST RUN: No previous run found — doing full fetch');
+        this.runMode = 'full';
+      }
+    } else {
+      this.log('FETCH', '🔄 FULL MODE: Fetching ALL available data (max throughput)');
+    }
 
     // In dry-run mode, only fetch from first repo
     const targetRepos = this.config.dryRun ? this.repos.slice(0, 1) : this.repos;
 
     this.log('FETCH', `Targeting ${targetRepos.length} repositories`);
-    this.log('FETCH', `Max per repo: ${maxPRsPerRepo} PRs, ${maxIssuesPerRepo} issues, ${maxCommitsPerRepo} commits`);
+    this.log('FETCH', `Max per repo: ${maxPRsPerRepo} PRs, ${maxIssuesPerRepo} issues, ${maxCommitsPerRepo} commits, ${maxWorkflowRuns} workflows`);
+    this.log('FETCH', `Reviews for ${maxReviewPRs} PRs, file changes for ${maxFileChangePRs} PRs`);
+    this.log('FETCH', `Estimated total capacity: ${targetRepos.length * (maxPRsPerRepo + maxIssuesPerRepo + maxCommitsPerRepo + maxWorkflowRuns)} records across ${targetRepos.length} repos`);
 
     if (process.env.GITHUB_TOKEN) {
       this.log('FETCH', 'GITHUB_TOKEN found — using authenticated API (5000 req/hr)');
     } else {
-      this.log('FETCH', 'No GITHUB_TOKEN — using unauthenticated API (60 req/hr). Set GITHUB_TOKEN for faster fetching.');
+      this.log('FETCH', '⚠️  No GITHUB_TOKEN — using unauthenticated API (60 req/hr). Set GITHUB_TOKEN for faster fetching!');
     }
 
     this.fetchedData = await fetchAllRepos(targetRepos, {
       maxPRs: maxPRsPerRepo,
       maxIssues: maxIssuesPerRepo,
       maxCommits: maxCommitsPerRepo,
-      maxWorkflowRuns: 100,
+      maxWorkflowRuns,
       fetchReviews: true,
-      maxReviewPRs: 50,
+      maxReviewPRs,
       fetchFileChanges: true,
-      maxFileChangePRs: 50,
+      maxFileChangePRs,
       rateLimitDelay: process.env.GITHUB_TOKEN ? 50 : 500, // Slower without token
+      since: this.sinceDate, // Only fetch data newer than last run
     });
 
     const totalRecords = this.fetchedData.reduce(
       (sum, repo) => sum + repo.pulls.length + repo.issues.length + repo.commits.length + repo.workflowRuns.length,
       0,
     );
+
+    // Log per-signal-type breakdown for visibility
+    const signalEstimate = totalRecords * 2; // Rough: each record generates ~2 signals on average
+    this.log('FETCH', `Mode: ${this.runMode} | Records: ${totalRecords} | Repos: ${this.fetchedData.length}/${targetRepos.length}`);
+    this.log('FETCH', `Estimated signals: ~${signalEstimate} | Cumulative brain training grows every night`);
 
     return {
       data: this.fetchedData,
@@ -206,6 +277,10 @@ export class GitCodeTrainerAgent extends BaseTrainingAgent {
       this.logError('TRAIN', 'Causal discovery failed (non-fatal)', err);
     }
 
+    // Record this run for progressive learning (next run will use this timestamp)
+    await this.recordRunCompletion(result);
+    this.log('TRAIN', `Progressive learning: Run recorded (mode=${this.runMode}). Next run will fetch only newer data.`);
+
     return result;
   }
 
@@ -213,8 +288,23 @@ export class GitCodeTrainerAgent extends BaseTrainingAgent {
   async validate(result: TrainResult): Promise<ValidationResult> {
     const issues: string[] = [];
 
-    // In dry-run mode, relax validation (we intentionally only fetch 1 repo)
-    if (!this.config.dryRun) {
+    if (this.config.dryRun) {
+      this.log('VALIDATE', `[DRY RUN] Relaxed validation: ${this.fetchedData.length} repos fetched, ${result.signalsStored} signals`);
+    } else if (this.runMode === 'incremental') {
+      // Incremental runs may have fewer signals (only new data) — that's OK
+      if (result.packsProcessed === 0) {
+        issues.push('No training packs were processed');
+      }
+      if (this.fetchedData.length < this.repos.length * 0.3) {
+        issues.push(`Only ${this.fetchedData.length}/${this.repos.length} repos returned data — possible API rate limiting`);
+      }
+      // It's valid for an incremental run to have 0 new signals (quiet day)
+      if (result.signalsStored === 0) {
+        this.log('VALIDATE', 'No new signals — repos may not have had activity since last run (OK for incremental)');
+      }
+      this.log('VALIDATE', `Incremental: ${result.signalsStored} new signals, ${result.packsProcessed} packs, ${this.fetchedData.length} repos`);
+    } else {
+      // Full run — strict validation
       if (result.signalsStored === 0) {
         issues.push('No signals were stored — check GitHub API access');
       }
@@ -224,11 +314,12 @@ export class GitCodeTrainerAgent extends BaseTrainingAgent {
       if (this.fetchedData.length < this.repos.length * 0.5) {
         issues.push(`Only ${this.fetchedData.length}/${this.repos.length} repos were fetched — possible API rate limiting`);
       }
-    } else {
-      this.log('VALIDATE', `[DRY RUN] Relaxed validation: ${this.fetchedData.length} repos fetched, ${result.signalsStored} signals`);
     }
 
-    const score = Math.min(1, (result.signalsStored / 500) * 0.5 + (result.packsProcessed / 8) * 0.5);
+    // Score: incremental runs get a boost since fewer signals is expected
+    const signalTarget = this.runMode === 'incremental' ? 100 : 500;
+    const packTarget = 13; // Updated: now 13 training packs (8 original + 5 new)
+    const score = Math.min(1, (result.signalsStored / signalTarget) * 0.5 + (result.packsProcessed / packTarget) * 0.5);
 
     return {
       passed: issues.length === 0,

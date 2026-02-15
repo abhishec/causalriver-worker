@@ -979,12 +979,14 @@ aws events put-targets \
   --region "${REGION}" > /dev/null
 echo "    DMN Scan: Every 8 hours (00:00, 08:00, 16:00 UTC) [cost-optimized]"
 
-# --- Git Code Trainer: Weekly Sunday 2 AM UTC ---
+# --- Git Code Trainer: Nightly at 1 AM UTC ---
+# Changed from weekly (Sunday) to nightly — progressive learning needs daily fresh data
+# Runs incremental fetch (only new PRs/issues since last run) to stay within GitHub rate limits
 aws events put-rule \
   --name "nexusbrain-git-trainer-schedule" \
-  --schedule-expression "cron(0 2 ? * SUN *)" \
+  --schedule-expression "cron(0 1 * * ? *)" \
   --state ENABLED \
-  --description "Run NexusBrain Git Code Trainer weekly on Sunday at 2 AM UTC" \
+  --description "Run NexusBrain Git Code Trainer nightly at 1 AM UTC (incremental fetch)" \
   --region "${REGION}" > /dev/null
 
 cat > /tmp/target-git-trainer.json << TARGET
@@ -1014,7 +1016,7 @@ aws events put-targets \
   --rule "nexusbrain-git-trainer-schedule" \
   --targets file:///tmp/target-git-trainer.json \
   --region "${REGION}" > /dev/null
-echo "    Git Trainer: Weekly Sunday at 2:00 AM UTC"
+echo "    Git Trainer: Nightly at 1:00 AM UTC (incremental)"
 
 # --- Cost Agent: Daily at 3 AM UTC (after consolidation at 2 AM) ---
 aws events put-rule \
@@ -1375,7 +1377,7 @@ echo "  │ Brain Consolidation        │ Daily 2 AM UTC                       
 echo "  │ Cost Agent                 │ Daily 3 AM UTC                            │ 0.5/1 GB │"
 echo "  │ Outcome Resolver           │ Daily 3:30 AM UTC                         │ 0.5/2 GB │"
 echo "  │ Security Hardening         │ Daily 4 AM UTC                            │ 2/8 GB   │"
-echo "  │ Git Code Trainer           │ Sunday 2 AM UTC                           │ 2/8 GB   │"
+echo "  │ Git Code Trainer           │ Nightly 1 AM UTC (incremental)            │ 2/8 GB   │"
 echo "  │ Weekly Brain Scan          │ Sunday 4 AM UTC                           │ 1/4 GB   │"
 echo "  │ Benchmark                  │ Sunday 5 AM UTC                           │ 2/8 GB   │"
 echo "  │ Monthly Deep Analysis      │ 1st of month 3 AM UTC                    │ 2/8 GB   │"

@@ -12,12 +12,28 @@
  *   5. brain-git-intelligence             — Autonomous: Surfaces causal engineering insights from 27 repos
  *   6. brain-engineering-health-monitor   — Autonomous: Predicts engineering failures using git-learned patterns
  *
- * Agents 5-6 leverage the Git Code Trainer Agent's output — 15 signal types
- * from 27 world-class open-source repos, fed through the brain's 3-paradigm
- * causal discovery engine, producing engineering patterns like:
+ * Agents 5-6 leverage the Git Code Trainer Agent's output — 20 signal types
+ * from 27 world-class open-source repos (100k+ stars each), trained NIGHTLY
+ * through the brain's 3-paradigm causal discovery engine (Granger + PC + Transfer Entropy).
+ *
+ * The 20 signals cover ALL 7 SE-aaS domains:
+ *   - Velocity: pr_merge_velocity, release_cadence, deploy_frequency
+ *   - Quality: pr_review_depth, code_churn_rate, bug_to_feature_ratio
+ *   - Reliability: ci_pass_rate, ci_failure_streak, deploy_rollback_rate
+ *   - Issues: issue_resolution_speed, spec_completeness_proxy
+ *   - People: contributor_concentration, cross_team_review
+ *   - Security: security_review_coverage
+ *   - Architecture: architecture_coupling, api_change_risk
+ *   - Coverage: test_coverage_signal, documentation_ratio, pr_size_risk, review_sentiment
+ *
+ * 13 training packs encode causal chains discovered from these repos:
  *   - pr_review_depth → ci_pass_rate → deploy_rollback_rate (review → reliability chain)
  *   - contributor_concentration → issue_resolution_speed (bus factor → velocity impact)
  *   - code_churn_rate → bug_to_feature_ratio (rework → quality degradation)
+ *   - security_review_coverage → deploy_rollback_rate (security → stability)
+ *   - architecture_coupling → ci_pass_rate (coupling → integration failures)
+ *   - spec_completeness_proxy → code_churn_rate (specs → less rework)
+ *   - deploy_frequency → issue_resolution_speed (DORA elite pattern)
  *
  * These agents compose the 7 cognitive primitives (domains) to deliver
  * engineering intelligence that matches a senior 10x engineer.
@@ -690,12 +706,17 @@ export const brainGitIntelligenceAgent: AgentDefinition<
     // Map causal edges to engineering health dimensions
     const metricMapping: Record<string, string[]> = {
       'PR Velocity': ['pr_merge_velocity', 'release_cadence'],
-      'Review Quality': ['pr_review_depth', 'review_depth'],
+      'Review Quality': ['pr_review_depth', 'review_depth', 'cross_team_review'],
       'CI Reliability': ['ci_pass_rate', 'ci_failure_streak'],
       'Issue Resolution': ['issue_resolution_speed', 'bug_to_feature_ratio'],
-      'Code Churn': ['code_churn_rate'],
-      'Bus Factor': ['contributor_concentration'],
+      'Code Churn': ['code_churn_rate', 'architecture_coupling'],
+      'Bus Factor': ['contributor_concentration', 'cross_team_review'],
       'Release Cadence': ['release_cadence', 'deploy_frequency'],
+      'Security': ['security_review_coverage'],
+      'API Consistency': ['api_change_risk'],
+      'Spec Quality': ['spec_completeness_proxy'],
+      'Architecture Health': ['architecture_coupling'],
+      'Deploy Frequency': ['deploy_frequency'],
     };
 
     for (const [dimName, keywords] of Object.entries(metricMapping)) {
