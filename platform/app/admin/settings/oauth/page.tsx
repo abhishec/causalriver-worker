@@ -2,7 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { getCurrentOrgId } from '@/lib/org-helpers';
+
+const CORE_ORG_ID = '00000000-0000-4000-a000-000000000001';
+const STORAGE_KEY = 'nexus_current_org';
+
+/** Client-safe org ID reader (reads cookie directly, no next/headers) */
+function getClientOrgId(): string {
+  if (typeof document === 'undefined') return CORE_ORG_ID;
+  const match = document.cookie.match(new RegExp(`(?:^|;\\s*)${STORAGE_KEY}=([^;]*)`));
+  return match?.[1] || CORE_ORG_ID;
+}
 
 interface OAuthApp {
   connector_type: string;
@@ -66,7 +75,7 @@ export default function OAuthSettingsPage() {
     try {
       setLoading(true);
       const supabase = createClient();
-      const currentOrgId = await getCurrentOrgId();
+      const currentOrgId = getClientOrgId();
       setOrgId(currentOrgId);
 
       if (!currentOrgId) return;
