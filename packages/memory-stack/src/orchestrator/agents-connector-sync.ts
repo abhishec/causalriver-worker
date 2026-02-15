@@ -81,13 +81,9 @@ export interface ConnectorSyncOutput {
  * Each domain agent uses this to resolve connector types it cares about.
  */
 /**
- * Lazy-load @nexus-ai/slack-connector at runtime to break circular dependency.
- * (slack-connector depends on memory-stack → can't be a static import here)
+ * Slack connector cannot be imported here (circular dep: slack-connector → memory-stack).
+ * Consumers should wire Slack sync externally via @nexus-ai/slack-connector directly.
  */
-async function createSlackConnectorLazy(config: SlackConnectorConfig): Promise<NexusConnector> {
-  const { createNexusSlackConnector } = await import('@nexus-ai/slack-connector');
-  return createNexusSlackConnector(config) as unknown as NexusConnector;
-}
 
 const CONNECTOR_FACTORIES: Record<
   string,
@@ -103,7 +99,7 @@ const CONNECTOR_FACTORIES: Record<
   },
   github: (config) => createGitHubConnector(config as unknown as GitHubConnectorConfig),
   jira: (config) => createJiraConnector(config as unknown as JiraConnectorConfig),
-  slack: () => null, // Slack uses async lazy-load — handled separately in loadOrgConnectors
+  slack: () => null, // Slack connector must be wired externally (circular dep with memory-stack)
   pagerduty: (config) => createPagerDutyConnector(config as unknown as PagerDutyConnectorConfig),
   'google-calendar': (config) => createGoogleCalendarConnector(config as unknown as GoogleCalendarConnectorConfig),
   'google-chat': (config) => createGoogleChatConnector(config as unknown as GoogleChatConnectorConfig),
@@ -137,13 +133,6 @@ async function loadOrgConnectors(
   const connectors: NexusConnector[] = [];
   for (const row of rows) {
     try {
-      // Slack uses async lazy-load to avoid circular dependency
-      if (row.connector_type === 'slack') {
-        const connector = await createSlackConnectorLazy(row.config as unknown as SlackConnectorConfig);
-        if (connector) connectors.push(connector);
-        continue;
-      }
-
       const factory = CONNECTOR_FACTORIES[row.connector_type];
       if (!factory) continue;
       const connector = factory(row.config || {});
