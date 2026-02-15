@@ -3,12 +3,7 @@ import path from "path";
 
 const nextConfig: NextConfig = {
   // SSR mode — NOT static export (platform needs API routes + middleware)
-  output: 'standalone', // For Docker/AWS ECS deployment
-  experimental: {
-    // Optimize build performance
-    workerThreads: false,
-    cpus: 1,
-  },
+  // Note: Removed 'standalone' output - using Vercel's default SSR deployment
   typescript: {
     // Skip type checking during build — monorepo workspace links
     // (e.g. @nexus-ai/memory-stack) don't resolve in Amplify CI.
