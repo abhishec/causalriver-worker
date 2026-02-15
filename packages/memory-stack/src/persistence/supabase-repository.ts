@@ -88,6 +88,39 @@ export interface ConversationEntry {
   metadata?: Record<string, unknown>;
 }
 
+export interface PredictionEntry {
+  domain: string;
+  actionType: string;
+  prediction: string;
+  confidence: number;
+  reviewDate: Date;
+  metadata?: Record<string, unknown>;
+}
+
+export interface PredictionOutcome {
+  predictionId: string;
+  actuallyHappened: boolean;
+  brierScore: number;
+  resolvedAt: Date;
+}
+
+export interface BrainHealthSnapshot {
+  totalSignals?: number;
+  totalRelationships?: number;
+  totalMemories?: number;
+  activeAgents?: number;
+  learningCyclesCompleted?: number;
+  lastLearningCycleAt?: Date;
+  averageBrierScore?: number;
+  predictionAccuracy?: number;
+  totalPredictions?: number;
+  resolvedPredictions?: number;
+  errorCount?: number;
+  warningCount?: number;
+  snapshotType?: string;
+  metadata?: Record<string, unknown>;
+}
+
 /**
  * Central persistence interface for NexusBrain.
  * All database operations flow through this interface.
@@ -149,6 +182,22 @@ export interface NexusRepository {
   // ── Activity Logging ─────────────────────────────────────────────
   /** Log an activity (agent action, LLM call, etc.) */
   logActivity(entry: ActivityLogEntry): Promise<void>;
+
+  // ── Calibration Loop ─────────────────────────────────────────────
+  /** Record a prediction for future outcome resolution */
+  upsertPrediction(prediction: PredictionEntry): Promise<string>;
+  /** Record the outcome of a prediction */
+  recordPredictionOutcome(outcome: PredictionOutcome): Promise<void>;
+  /** Get pending predictions that need outcome resolution */
+  getPendingPredictions(beforeDate?: Date): Promise<any[]>;
+  /** Get calibration metrics by domain */
+  getCalibrationMetrics(domain?: string): Promise<any[]>;
+
+  // ── Brain Health History ─────────────────────────────────────────
+  /** Save a brain health snapshot */
+  saveBrainHealthSnapshot(snapshot: BrainHealthSnapshot): Promise<void>;
+  /** Get recent brain health history */
+  getBrainHealthHistory(limit?: number, snapshotType?: string): Promise<any[]>;
 
   // ── Federated Queries (org + core brain) ───────────────────────
   /** Get significant relationships merged with core brain knowledge */
@@ -622,6 +671,119 @@ export function createSupabaseRepository(
         );
 
       if (error) throw new Error(`Failed to upsert federation settings: ${error.message}`);
+    },
+
+    // ── Calibration Loop ───────────────────────────────────────────
+
+    async upsertPrediction(prediction: PredictionEntry): Promise<string> {
+      const row = {
+        organization_id: organizationId,
+        domain: prediction.domain,
+        action_type: prediction.actionType,
+        prediction: prediction.prediction,
+        confidence: prediction.confidence,
+        review_date: prediction.reviewDate.toISOString(),
+        metadata: prediction.metadata || {},
+        created_at: new Date().toISOString(),
+      };
+
+      const { data, error } = await supabase
+        .from('prediction_tracker')
+        .insert(row)
+        .select('id')
+        .single();
+
+      if (error) throw new Error(`Failed to upsert prediction: ${error.message}`);
+      return data.id;
+    },
+
+    async recordPredictionOutcome(outcome: PredictionOutcome): Promise<void> {
+      const { error } = await supabase
+        .from('prediction_tracker')
+        .update({
+          resolved: true,
+          actual_outcome: outcome.actuallyHappened,
+          brier_score: outcome.brierScore,
+          resolved_at: outcome.resolvedAt.toISOString(),
+        })
+        .eq('id', outcome.predictionId);
+
+      if (error) throw new Error(`Failed to record prediction outcome: ${error.message}`);
+    },
+
+    async getPendingPredictions(beforeDate?: Date): Promise<any[]> {
+      const cutoff = beforeDate || new Date();
+
+      const { data, error } = await supabase
+        .from('prediction_tracker')
+        .select('*')
+        .eq('organization_id', organizationId)
+        .eq('resolved', false)
+        .lte('review_date', cutoff.toISOString())
+        .order('created_at', { ascending: true })
+        .limit(100);
+
+      if (error) throw new Error(`Failed to get pending predictions: ${error.message}`);
+      return data || [];
+    },
+
+    async getCalibrationMetrics(domain?: string): Promise<any[]> {
+      let query = supabase
+        .from('calibration_metrics_by_domain')
+        .select('*')
+        .eq('organization_id', organizationId);
+
+      if (domain) {
+        query = query.eq('domain', domain);
+      }
+
+      const { data, error } = await query;
+      if (error) throw new Error(`Failed to get calibration metrics: ${error.message}`);
+      return data || [];
+    },
+
+    // ── Brain Health History ───────────────────────────────────────
+
+    async saveBrainHealthSnapshot(snapshot: BrainHealthSnapshot): Promise<void> {
+      const row: Record<string, unknown> = {
+        organization_id: organizationId,
+        created_at: new Date().toISOString(),
+      };
+
+      if (snapshot.totalSignals !== undefined) row.total_signals = snapshot.totalSignals;
+      if (snapshot.totalRelationships !== undefined) row.total_relationships = snapshot.totalRelationships;
+      if (snapshot.totalMemories !== undefined) row.total_memories = snapshot.totalMemories;
+      if (snapshot.activeAgents !== undefined) row.active_agents = snapshot.activeAgents;
+      if (snapshot.learningCyclesCompleted !== undefined) row.learning_cycles_completed = snapshot.learningCyclesCompleted;
+      if (snapshot.lastLearningCycleAt !== undefined) row.last_learning_cycle_at = snapshot.lastLearningCycleAt.toISOString();
+      if (snapshot.averageBrierScore !== undefined) row.average_brier_score = snapshot.averageBrierScore;
+      if (snapshot.predictionAccuracy !== undefined) row.prediction_accuracy = snapshot.predictionAccuracy;
+      if (snapshot.totalPredictions !== undefined) row.total_predictions = snapshot.totalPredictions;
+      if (snapshot.resolvedPredictions !== undefined) row.resolved_predictions = snapshot.resolvedPredictions;
+      if (snapshot.errorCount !== undefined) row.error_count = snapshot.errorCount;
+      if (snapshot.warningCount !== undefined) row.warning_count = snapshot.warningCount;
+      if (snapshot.snapshotType !== undefined) row.snapshot_type = snapshot.snapshotType;
+      if (snapshot.metadata !== undefined) row.metadata = snapshot.metadata;
+
+      const { error } = await supabase.from('brain_health_history').insert(row);
+      if (error) throw new Error(`Failed to save brain health snapshot: ${error.message}`);
+    },
+
+    async getBrainHealthHistory(limit: number = 30, snapshotType?: string): Promise<any[]> {
+      let query = supabase
+        .from('brain_health_history')
+        .select('*')
+        .eq('organization_id', organizationId)
+        .order('created_at', { ascending: false })
+        .limit(limit);
+
+      if (snapshotType) {
+        query = query.eq('snapshot_type', snapshotType);
+      }
+
+      const { data, error } = await query;
+      if (error) throw new Error(`Failed to get brain health history: ${error.message}`);
+      return data || [];
     },
 
     // ── Organization Info ──────────────────────────────────────────

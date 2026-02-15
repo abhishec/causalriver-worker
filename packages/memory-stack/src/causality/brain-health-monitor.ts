@@ -27,6 +27,7 @@
 
 import type { CausalDAG } from './continuous-learner';
 import { createUncertaintyQuantifier } from './uncertainty-quantifier';
+import type { NexusRepository } from '../persistence/supabase-repository';
 
 // ============================================================================
 // TYPES
@@ -155,6 +156,8 @@ export interface BrainHealthConfig {
   forecastTrackingWindowDays: number;
   /** Half-life for edge staleness computation in days (default: 30) */
   stalenessHalfLifeDays: number;
+  /** Optional repository for persisting health snapshots to database */
+  repository?: NexusRepository;
 }
 
 /**
@@ -262,6 +265,7 @@ export function createBrainHealthMonitor(config: Partial<BrainHealthConfig> = {}
     cognitiveLoadThreshold: config.cognitiveLoadThreshold ?? 0.7,
     forecastTrackingWindowDays: config.forecastTrackingWindowDays ?? 30,
     stalenessHalfLifeDays: config.stalenessHalfLifeDays ?? 30,
+    repository: config.repository,
   };
 
   // Shared uncertainty quantifier — single source of truth for edge uncertainty
@@ -922,6 +926,39 @@ export function createBrainHealthMonitor(config: Partial<BrainHealthConfig> = {}
     // Keep max 365 snapshots (1 year of daily snapshots)
     while (healthHistory.length > 365) {
       healthHistory.shift();
+    }
+
+    // Persist to database if repository is configured
+    if (resolvedConfig.repository) {
+      resolvedConfig.repository
+        .saveBrainHealthSnapshot({
+          totalSignals: undefined, // Not tracked by health monitor
+          totalRelationships: undefined, // Not tracked by health monitor
+          totalMemories: undefined, // Not tracked by health monitor
+          activeAgents: undefined, // Not tracked by health monitor
+          learningCyclesCompleted: undefined, // Not tracked by health monitor
+          lastLearningCycleAt: undefined, // Not tracked by health monitor
+          averageBrierScore: report.calibration.expectedCalibrationError,
+          predictionAccuracy: report.calibration.buckets.length > 0
+            ? report.calibration.buckets.reduce((sum, b) => sum + b.avgAccuracy * b.count, 0) /
+              report.calibration.buckets.reduce((sum, b) => sum + b.count, 0)
+            : undefined,
+          totalPredictions: report.calibration.buckets.reduce((sum, b) => sum + b.count, 0),
+          resolvedPredictions: report.calibration.buckets.reduce((sum, b) => sum + b.count, 0),
+          errorCount: 0, // Not tracked by health monitor
+          warningCount: report.degradingDomains.length,
+          snapshotType: 'on_demand',
+          metadata: {
+            overallHealth: report.overallHealth,
+            cognitiveLoad: report.cognitiveLoad.load,
+            degradingDomains: report.degradingDomains,
+            calibrationBias: report.calibration.overconfidenceBias,
+            narrative: report.narrative,
+          },
+        })
+        .catch((err) => {
+          console.error('[BrainHealthMonitor] Failed to persist health snapshot:', err);
+        });
     }
   }
 

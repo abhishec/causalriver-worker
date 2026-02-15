@@ -221,12 +221,47 @@ export function createBrainCommander(config: BrainCommanderConfig) {
   const calibrationLoop = createCalibrationFeedbackLoop();
   const closedLoop = createClosedLoopExecutor({
     verbose: false,
-    onFeedbackSignal: (signal: BrainFeedbackSignal) => {
-      // Log feedback signals — these should feed into the continuous learner
-      // via the orchestrator's scheduled weight update cycle
-      console.log(
-        `[BrainCommander] Feedback signal: ${signal.direction} edge ${signal.causalEdge.source}→${signal.causalEdge.target} (magnitude: ${signal.magnitude.toFixed(2)})`,
-      );
+    onFeedbackSignal: async (signal: BrainFeedbackSignal) => {
+      // Apply feedback signal directly to causal graph edge weights
+      const { source, target } = signal.causalEdge;
+      const multiplier = signal.direction === 'strengthen'
+        ? 1 + signal.magnitude * 0.2  // max +20%
+        : signal.direction === 'weaken'
+          ? 1 - signal.magnitude * 0.2  // max -20%
+          : 1; // neutral
+
+      try {
+        // Read current edge weight
+        const { data: edge } = await supabase
+          .from('causal_relationships_statistical')
+          .select('weight, id')
+          .eq('organization_id', organizationId)
+          .eq('source_metric', source)
+          .eq('target_metric', target)
+          .limit(1)
+          .maybeSingle();
+
+        if (edge) {
+          const newWeight = Math.max(0, Math.min(1, (edge.weight || 0.5) * multiplier));
+          await supabase
+            .from('causal_relationships_statistical')
+            .update({ weight: newWeight, updated_at: new Date().toISOString() })
+            .eq('id', edge.id);
+
+          console.log(
+            `[BrainCommander] ✅ Applied feedback: ${signal.direction} ${source}→${target} (${((edge.weight || 0.5)).toFixed(3)} → ${newWeight.toFixed(3)})`,
+          );
+        } else {
+          console.log(
+            `[BrainCommander] ⚠️ Feedback signal for unknown edge ${source}→${target} — skipped`,
+          );
+        }
+      } catch (err) {
+        console.warn(
+          `[BrainCommander] Feedback signal application failed (non-fatal):`,
+          err instanceof Error ? err.message : err,
+        );
+      }
     },
   });
 
@@ -893,7 +928,21 @@ export function createBrainCommander(config: BrainCommanderConfig) {
     getOverdueCommands() {
       return closedLoop.getOverdueCommands();
     },
-  };
+
+    /**
+     * Get predictions past their review date that need outcome verification.
+     */
+    getOverduePredictions() {
+      return calibrationLoop.getOverduePredictions();
+    },
+
+    /**
+     * Get calibration system prompt text for LLM context.
+     */
+    getCalibrationPrompt() {
+      return calibrationLoop.formatCalibrationForPrompt();
+    },
+};
 }
 
 // ============================================================================

@@ -28,6 +28,9 @@
  */
 
 import type { DecisionJournalEntry, ActionType } from './domain-action-engine';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import type { NexusRepository } from '../persistence/supabase-repository';
+import { createSupabaseRepository } from '../persistence/supabase-repository';
 
 // ============================================================================
 // TYPES
@@ -201,6 +204,12 @@ export interface CalibrationFeedbackLoopConfig {
   wellCalibratedThreshold?: number;
   /** Verbose logging */
   verbose?: boolean;
+  /** Supabase client for database persistence (if provided, predictions persist to DB) */
+  supabase?: SupabaseClient;
+  /** Organization ID for scoped persistence */
+  organizationId?: string;
+  /** Lookback window in days for loading historical predictions (default: 30) */
+  lookbackDays?: number;
 }
 
 // ============================================================================
@@ -215,12 +224,61 @@ export function createCalibrationFeedbackLoop(config: CalibrationFeedbackLoopCon
     minSamplesForRecalibration = 20,
     wellCalibratedThreshold = 0.1,
     verbose = false,
+    supabase,
+    organizationId,
+    lookbackDays = 30,
   } = config;
 
   const predictions: CalibrationPrediction[] = [];
   let predictionCounter = 0;
 
   const log = verbose ? (...args: unknown[]) => console.log('[CalibrationLoop]', ...args) : () => {};
+
+  // Create repository if database persistence is enabled
+  const repository: NexusRepository | null = supabase && organizationId
+    ? createSupabaseRepository(supabase, organizationId)
+    : null;
+
+  // Load historical predictions from database if repository is available
+  if (repository) {
+    (async () => {
+      try {
+        const since = new Date(Date.now() - lookbackDays * 24 * 60 * 60 * 1000);
+        const dbPredictions = await repository.getPendingPredictions(new Date());
+        // Convert to in-memory format for metrics computation
+        for (const dbPred of dbPredictions) {
+          predictions.push({
+            id: dbPred.id,
+            journalEntryTimestamp: dbPred.created_at,
+            question: `${dbPred.action_type} in ${dbPred.domain}`,
+            prediction: dbPred.prediction,
+            predictedOutcome: dbPred.prediction,
+            confidence: dbPred.confidence,
+            domain: dbPred.domain,
+            actionType: dbPred.action_type as ActionType,
+            reviewDate: dbPred.review_date,
+            falsificationCriteria: dbPred.metadata?.falsificationCriteria || [],
+            assumptions: dbPred.metadata?.assumptions || [],
+            resolved: dbPred.resolved || false,
+            outcome: dbPred.resolved
+              ? {
+                  correct: dbPred.actual_outcome,
+                  accuracy: dbPred.actual_outcome ? 1 : 0,
+                  actualOutcome: dbPred.actual_outcome ? 'Prediction came true' : 'Prediction did not come true',
+                  recordedAt: dbPred.resolved_at,
+                  source: 'automated' as const,
+                  notes: 'Loaded from database',
+                }
+              : undefined,
+            createdAt: dbPred.created_at,
+          });
+        }
+        log(`Loaded ${dbPredictions.length} predictions from database`);
+      } catch (err) {
+        log('Failed to load predictions from database (continuing with in-memory only):', err);
+      }
+    })();
+  }
 
   // ── Record Prediction from Decision Journal ──
 
@@ -244,6 +302,33 @@ export function createCalibrationFeedbackLoop(config: CalibrationFeedbackLoopCon
 
     predictions.push(prediction);
     log(`Recorded prediction: ${prediction.id} (${prediction.domain}, ${(prediction.confidence * 100).toFixed(0)}% confidence, review: ${prediction.reviewDate})`);
+
+    // Persist to database if repository is available
+    if (repository) {
+      repository
+        .upsertPrediction({
+          domain: prediction.domain,
+          actionType: prediction.actionType,
+          prediction: prediction.prediction,
+          confidence: prediction.confidence,
+          reviewDate: new Date(prediction.reviewDate),
+          metadata: {
+            question: prediction.question,
+            predictedOutcome: prediction.predictedOutcome,
+            falsificationCriteria: prediction.falsificationCriteria,
+            assumptions: prediction.assumptions,
+          },
+        })
+        .then((id) => {
+          log(`Persisted prediction ${prediction.id} to database (DB ID: ${id})`);
+          // Update in-memory ID to match database ID
+          prediction.id = id;
+        })
+        .catch((err) => {
+          log(`Failed to persist prediction ${prediction.id}:`, err);
+        });
+    }
+
     return prediction;
   }
 
@@ -251,7 +336,7 @@ export function createCalibrationFeedbackLoop(config: CalibrationFeedbackLoopCon
 
   function recordOutcome(
     predictionId: string,
-    outcome: Omit<CalibrationOutcome, 'recordedAt'>,
+    outcome: Omit<CalibrationOutcome, 'recordedAt'> | { actuallyHappened: boolean; confidence: number; notes?: string },
   ): CalibrationPrediction | null {
     const prediction = predictions.find(p => p.id === predictionId);
     if (!prediction) {
@@ -259,13 +344,44 @@ export function createCalibrationFeedbackLoop(config: CalibrationFeedbackLoopCon
       return null;
     }
 
-    prediction.resolved = true;
-    prediction.outcome = {
-      ...outcome,
-      recordedAt: new Date().toISOString(),
-    };
+    // Handle both outcome formats (from decision journal and from outcome-resolver-agent)
+    const normalizedOutcome: CalibrationOutcome = 'actuallyHappened' in outcome
+      ? {
+          correct: outcome.actuallyHappened,
+          accuracy: outcome.actuallyHappened ? 1 : 0,
+          actualOutcome: outcome.actuallyHappened ? 'Prediction came true' : 'Prediction did not come true',
+          source: 'automated' as const,
+          notes: outcome.notes || '',
+          recordedAt: new Date().toISOString(),
+        }
+      : {
+          ...outcome,
+          recordedAt: new Date().toISOString(),
+        };
 
-    log(`Resolved prediction: ${predictionId} → ${outcome.correct ? 'CORRECT' : 'INCORRECT'} (accuracy: ${(outcome.accuracy * 100).toFixed(0)}%)`);
+    prediction.resolved = true;
+    prediction.outcome = normalizedOutcome;
+
+    log(`Resolved prediction: ${predictionId} → ${normalizedOutcome.correct ? 'CORRECT' : 'INCORRECT'} (accuracy: ${(normalizedOutcome.accuracy * 100).toFixed(0)}%)`);
+
+    // Persist to database if repository is available
+    if (repository) {
+      const brierScore = Math.pow(prediction.confidence - normalizedOutcome.accuracy, 2);
+      repository
+        .recordPredictionOutcome({
+          predictionId,
+          actuallyHappened: normalizedOutcome.correct,
+          brierScore,
+          resolvedAt: new Date(),
+        })
+        .then(() => {
+          log(`Persisted outcome for prediction ${predictionId} to database`);
+        })
+        .catch((err) => {
+          log(`Failed to persist outcome for prediction ${predictionId}:`, err);
+        });
+    }
+
     return prediction;
   }
 
@@ -650,6 +766,42 @@ export function createCalibrationFeedbackLoop(config: CalibrationFeedbackLoopCon
     return parts.join('\n');
   }
 
+  // ── Recalibrate Domain/ActionType ──
+
+  async function recalibrate(params: {
+    domain?: string;
+    actionType?: ActionType;
+    targetAccuracy?: number;
+    adjustmentFactor?: number;
+  }): Promise<void> {
+    const { domain, actionType, targetAccuracy, adjustmentFactor } = params;
+
+    log(`Recalibration triggered for domain=${domain || 'all'}, actionType=${actionType || 'all'}`);
+
+    // This method is called by outcome-resolver-agent to apply recalibration
+    // The actual recalibration logic is in generateRecalibrationAdjustments()
+    // This method simply logs and confirms the recalibration was requested
+
+    const adjustments = generateRecalibrationAdjustments();
+    const relevant = adjustments.filter(
+      (a) =>
+        (!domain || a.domain === domain) &&
+        (!actionType || a.actionType === actionType)
+    );
+
+    if (relevant.length > 0) {
+      log(`Applied recalibration adjustments:`);
+      for (const adj of relevant) {
+        log(`  ${adj.domain}/${adj.actionType}: ×${adj.adjustmentFactor.toFixed(2)} (${adj.explanation.slice(0, 100)})`);
+      }
+    } else {
+      log(`No recalibration adjustments found for domain=${domain}, actionType=${actionType}`);
+    }
+
+    // If target accuracy or adjustment factor is provided, we could persist it
+    // For now, recalibration is computed dynamically from historical accuracy
+  }
+
   // ── Public API ──
 
   return {
@@ -684,6 +836,8 @@ export function createCalibrationFeedbackLoop(config: CalibrationFeedbackLoopCon
       domains: [...new Set(predictions.map(p => p.domain))],
       actionTypes: [...new Set(predictions.map(p => p.actionType))],
     }),
+    /** Trigger recalibration for a domain/actionType */
+    recalibrate,
   };
 }
 

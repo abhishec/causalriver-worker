@@ -450,6 +450,92 @@ export function createScheduledJobs(
       return { packsApplied, chainsCreated, rulesCreated, errors };
     },
 
+    // ── Prediction Outcome Verification Job ──────────────────────────
+
+    /**
+     * Verify prediction outcomes by matching predictions against actual signal data.
+     * Closes the calibration feedback loop: prediction → wait → verify → recalibrate.
+     * Recommended: daily via cron.
+     */
+    async runPredictionOutcomeVerification(organizationId: string): Promise<{
+      predictionsChecked: number;
+      outcomesRecorded: number;
+      correctPredictions: number;
+      incorrectPredictions: number;
+    }> {
+      let predictionsChecked = 0;
+      let outcomesRecorded = 0;
+      let correctPredictions = 0;
+      let incorrectPredictions = 0;
+
+      try {
+        // Find unverified predictions that are at least 7 days old (give outcomes time to materialize)
+        const verificationCutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+        const { data: pendingPredictions, error: fetchErr } = await supabase
+          .from('prediction_records')
+          .select('*')
+          .eq('organization_id', organizationId)
+          .is('verified_at', null)
+          .lt('created_at', verificationCutoff)
+          .limit(100); // Process in batches
+
+        if (fetchErr || !pendingPredictions || pendingPredictions.length === 0) {
+          return { predictionsChecked: 0, outcomesRecorded: 0, correctPredictions: 0, incorrectPredictions: 0 };
+        }
+
+        for (const pred of pendingPredictions) {
+          predictionsChecked++;
+
+          try {
+            // Query actual signals for this entity in the period after prediction
+            const { data: actualSignals } = await supabase
+              .from('cross_domain_signals')
+              .select('signal_value, signal_timestamp')
+              .eq('organization_id', organizationId)
+              .eq('source_domain', pred.domain)
+              .eq('signal_type', pred.entity_type)
+              .gt('created_at', pred.created_at)
+              .order('created_at', { ascending: false })
+              .limit(10);
+
+            if (!actualSignals || actualSignals.length === 0) continue;
+
+            // Compare predicted value to actual values
+            const latestActual = actualSignals[0];
+            const actualValue = latestActual.signal_value;
+            const predictedValue = pred.predicted_value;
+
+            // Determine if prediction was correct within a tolerance
+            let wasCorrect = false;
+            if (predictedValue != null && actualValue != null) {
+              const tolerance = Math.abs(predictedValue) * 0.2; // 20% tolerance
+              wasCorrect = Math.abs(actualValue - predictedValue) <= Math.max(tolerance, 0.01);
+            } else if (pred.predicted_outcome && pred.predicted_outcome !== '') {
+              // Qualitative prediction — mark as needing manual review
+              wasCorrect = false;
+            }
+
+            // Update prediction_records with outcome
+            await supabase
+              .from('prediction_records')
+              .update({
+                actual_value: actualValue,
+                actual_outcome: `Signal value: ${actualValue} (${actualSignals.length} signals observed)`,
+                was_correct: wasCorrect,
+                verified_at: new Date().toISOString(),
+              })
+              .eq('id', pred.id);
+
+            outcomesRecorded++;
+            if (wasCorrect) correctPredictions++;
+            else incorrectPredictions++;
+          } catch { /* individual prediction failure — continue */ }
+        }
+      } catch { /* table may not exist yet */ }
+
+      return { predictionsChecked, outcomesRecorded, correctPredictions, incorrectPredictions };
+    },
+
     // ── Data Retention Job ────────────────────────────────────────────
 
     /**
@@ -556,6 +642,7 @@ export function createScheduledJobs(
       federation: JobResult<UpstreamPromotionResult>;
       retention: JobResult<DataRetentionResult>;
       trainingPacks: JobResult<{ packsApplied: number; chainsCreated: number; rulesCreated: number; errors: string[] }>;
+      predictionOutcomes: JobResult<{ predictionsChecked: number; outcomesRecorded: number; correctPredictions: number; incorrectPredictions: number }>;
     }> {
       // Phase A: Sequential dependency chain (verifications → weights)
       const verifications = await safeRun(
@@ -579,11 +666,12 @@ export function createScheduledJobs(
         ? discoverySettled.value
         : { error: `[discovery] ${(discoverySettled as PromiseRejectedResult).reason?.message || 'unknown'}` };
 
-      // Phase C: Post-discovery jobs (federation + retention + training packs in parallel)
-      const [fedSettled, retentionSettled, trainingPacksSettled] = await Promise.allSettled([
+      // Phase C: Post-discovery jobs (federation + retention + training packs + prediction outcomes in parallel)
+      const [fedSettled, retentionSettled, trainingPacksSettled, predOutcomeSettled] = await Promise.allSettled([
         safeRun(() => this.runUpstreamFederation(organizationId), 'federation', jobTimeout),
         safeRun(() => this.runDataRetention(organizationId), 'retention', jobTimeout),
         safeRun(() => this.runTrainingPackApplication(organizationId), 'trainingPacks', jobTimeout),
+        safeRun(() => this.runPredictionOutcomeVerification(organizationId), 'predictionOutcomes', jobTimeout),
       ]);
       const federation = fedSettled.status === 'fulfilled'
         ? fedSettled.value
@@ -594,8 +682,11 @@ export function createScheduledJobs(
       const trainingPacks = trainingPacksSettled.status === 'fulfilled'
         ? trainingPacksSettled.value
         : { error: `[trainingPacks] ${(trainingPacksSettled as PromiseRejectedResult).reason?.message || 'unknown'}` };
+      const predictionOutcomes = predOutcomeSettled.status === 'fulfilled'
+        ? predOutcomeSettled.value
+        : { error: `[predictionOutcomes] ${(predOutcomeSettled as PromiseRejectedResult).reason?.message || 'unknown'}` };
 
-      return { verifications, weights, decay, discovery, federation, retention, trainingPacks };
+      return { verifications, weights, decay, discovery, federation, retention, trainingPacks, predictionOutcomes };
     },
   };
 }

@@ -90,6 +90,7 @@ import './agents/proactive-intelligence';   // Amygdala — Proactive alerting &
 import './agents/federation-agent';         // Corpus Callosum — Core ↔ Org brain knowledge federation (every 6h)
 import './agents/security-hardening-agent'; // Amygdala — Security vulnerability detection & auto-patching (daily 4 AM)
 import './agents/org-updater-agent';        // Thalamus — Org heartbeat: connector sync + learning cycle (every 4h)
+import './agents/outcome-resolver-agent';   // Cerebellum — Calibration loop closure: predictions → outcomes (daily 3 AM)
 
 // ── Brain Subsystem Imports ─────────────────────────────────────────────────
 import { globalRegistry, type AgentRegistration } from './agent-framework/agent-registry';
@@ -209,9 +210,9 @@ class BrainOrchestrator {
 
     // Calibration Feedback Loop (improve agents)
     this.calibrationLoop = createCalibrationFeedbackLoop({
-      supabase: config.supabase,
-      organizationId: config.organizationId,
-      lookbackDays: 30,
+      minSamplesForMetrics: 5,
+      minSamplesForRecalibration: 10,
+      wellCalibratedThreshold: 0.1,
       verbose: true,
     });
 
@@ -455,7 +456,7 @@ class BrainOrchestrator {
       if (pendingCommands.length > 0) {
         log('MOTOR', `Flushing ${pendingCommands.length} pending command(s) from in-memory queue`);
         const batchResult = await this.motorCommandEngine.executeBatch(pendingCommands);
-        log('MOTOR', `Batch complete: ${batchResult.successful}/${batchResult.total} succeeded, ${batchResult.failed} failed`);
+        log('MOTOR', `Batch complete: ${batchResult.executed}/${batchResult.totalCommands} succeeded, ${batchResult.failed} failed`);
       }
 
       // ── Phase 2: Flush DB-queued commands (from other subsystems) ────────
@@ -486,7 +487,7 @@ class BrainOrchestrator {
         }));
 
         const batchResult = await this.motorCommandEngine.executeBatch(dbCommands);
-        log('MOTOR', `DB queue flush: ${batchResult.successful}/${batchResult.total} succeeded`);
+        log('MOTOR', `DB queue flush: ${batchResult.executed}/${batchResult.totalCommands} succeeded`);
 
         // Mark processed commands
         const processedIds = dbQueued.map((r: any) => r.id);
@@ -507,25 +508,46 @@ class BrainOrchestrator {
   }
 
   /**
-   * Update calibration metrics for all agents.
+   * Update calibration metrics — compute accuracy, apply recalibration adjustments,
+   * and log overdue predictions.
    */
   async updateCalibration(): Promise<void> {
     try {
-      const agents = globalRegistry.list();
-      for (const agent of agents) {
-        const report = await this.calibrationLoop.generateCalibrationReport({
-          agentId: agent.name,
-          minSampleSize: 5,
-        });
+      // Compute overall calibration metrics
+      const metrics = this.calibrationLoop.computeMetrics();
+      const stats = this.calibrationLoop.getStats();
 
-        if (report.verifiedPredictions >= 10 && report.accuracy < 0.7) {
-          log('CALIBRATION', `⚠️  Agent ${agent.name} accuracy is low (${(report.accuracy * 100).toFixed(1)}%), recalibrating...`);
-          await this.calibrationLoop.recalibrate({
-            agentId: agent.name,
-            targetAccuracy: 0.8,
-            adjustmentFactor: 0.9,
-          });
+      if (stats.totalPredictions > 0) {
+        log('CALIBRATION', `📊 ${stats.totalPredictions} predictions tracked (${stats.resolved} resolved, ${stats.pending} pending)`);
+
+        if (metrics.resolvedPredictions >= 5) {
+          log('CALIBRATION', `Accuracy: ${(metrics.actualAccuracy * 100).toFixed(1)}% | Bias: ${metrics.calibrationBias} | ECE: ${metrics.expectedCalibrationError.toFixed(3)}`);
+
+          // Check domain-level accuracy
+          for (const [domain, domainMetrics] of Object.entries(metrics.domainBreakdown)) {
+            if (domainMetrics.resolvedPredictions >= 5 && domainMetrics.actualAccuracy < 0.5) {
+              log('CALIBRATION', `⚠️  Domain "${domain}" accuracy is low (${(domainMetrics.actualAccuracy * 100).toFixed(1)}%) — needs attention`);
+            }
+          }
+
+          // Generate and log recalibration adjustments
+          const adjustments = this.calibrationLoop.generateRecalibrationAdjustments();
+          if (adjustments.length > 0) {
+            log('CALIBRATION', `🔧 ${adjustments.length} recalibration adjustment(s) generated`);
+          }
         }
+      }
+
+      // Log overdue predictions
+      const overdue = this.calibrationLoop.getOverduePredictions();
+      if (overdue.length > 0) {
+        log('CALIBRATION', `⏰ ${overdue.length} prediction(s) past review date — outcomes needed`);
+      }
+
+      // Compute learning velocity
+      const velocity = this.calibrationLoop.computeLearningVelocity();
+      if (velocity.trajectory !== 'insufficient_data') {
+        log('CALIBRATION', `📈 Learning trajectory: ${velocity.trajectory} (${velocity.periods.length} periods, Brier Δ: ${velocity.brierScoreChangeRate.toFixed(4)})`);
       }
     } catch (err) {
       logError('CALIBRATION', 'Calibration update failed', err);

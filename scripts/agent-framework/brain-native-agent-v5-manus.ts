@@ -458,37 +458,42 @@ export abstract class ManusNativeAgent extends BrainNativeAgent {
 
     this.divider('UPDATING CALIBRATION METRICS');
 
-    // Get calibration report for this agent's predictions
-    const report = await this.calibrationLoop.generateCalibrationReport({
-      agentId: this.name,
-      minSampleSize: 5,
-    });
+    // Compute calibration metrics using the actual API
+    const metrics = this.calibrationLoop.computeMetrics();
+    const stats = this.calibrationLoop.getStats();
 
     this.calibrationMetrics = {
-      totalPredictions: report.totalPredictions,
-      verifiedPredictions: report.verifiedPredictions,
-      correctPredictions: report.correctPredictions,
-      accuracy: report.accuracy,
-      calibrationCurve: report.calibrationCurve,
+      totalPredictions: metrics.totalPredictions,
+      verifiedPredictions: metrics.resolvedPredictions,
+      correctPredictions: Math.round(metrics.actualAccuracy * metrics.resolvedPredictions),
+      accuracy: metrics.actualAccuracy,
+      calibrationCurve: metrics.calibrationBuckets.map(b => ({
+        confidenceBucket: b.range,
+        predictedProbability: b.avgConfidence,
+        actualFrequency: b.actualAccuracy,
+        count: b.count,
+      })),
     };
 
-    this.log('CALIBRATION', `Accuracy: ${(report.accuracy * 100).toFixed(1)}% (${report.verifiedPredictions}/${report.totalPredictions} verified)`);
+    this.log('CALIBRATION', `Accuracy: ${(metrics.actualAccuracy * 100).toFixed(1)}% (${metrics.resolvedPredictions}/${metrics.totalPredictions} verified)`);
 
-    if (report.calibrationCurve.length > 0) {
+    if (metrics.calibrationBuckets.length > 0) {
       this.log('CALIBRATION', 'Calibration curve:');
-      for (const bucket of report.calibrationCurve) {
-        this.log('CALIBRATION', `  ${bucket.confidenceBucket}: predicted=${(bucket.predictedProbability * 100).toFixed(0)}%, actual=${(bucket.actualFrequency * 100).toFixed(0)}% (n=${bucket.count})`);
+      for (const bucket of metrics.calibrationBuckets) {
+        this.log('CALIBRATION', `  ${bucket.range}: predicted=${(bucket.avgConfidence * 100).toFixed(0)}%, actual=${(bucket.actualAccuracy * 100).toFixed(0)}% (n=${bucket.count})`);
       }
     }
 
-    // Recalibrate future predictions if accuracy is poor
-    if (report.accuracy < 0.7 && report.verifiedPredictions >= 10) {
-      await this.calibrationLoop.recalibrate({
-        agentId: this.name,
-        targetAccuracy: 0.8,
-        adjustmentFactor: 0.9,
-      });
-      this.log('CALIBRATION', 'Recalibrated agent confidence (accuracy was below 70%)');
+    // Generate recalibration adjustments if accuracy is poor
+    if (metrics.actualAccuracy < 0.7 && metrics.resolvedPredictions >= 10) {
+      const adjustments = this.calibrationLoop.generateRecalibrationAdjustments();
+      this.log('CALIBRATION', `Generated ${adjustments.length} recalibration adjustment(s) — accuracy was below 70%`);
+    }
+
+    // Log overdue predictions
+    const overdue = this.calibrationLoop.getOverduePredictions();
+    if (overdue.length > 0) {
+      this.log('CALIBRATION', `⏰ ${overdue.length} prediction(s) past review date`);
     }
   }
 
