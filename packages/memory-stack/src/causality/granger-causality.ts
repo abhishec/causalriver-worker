@@ -506,21 +506,38 @@ function generateNaturalLanguage(
 
 /**
  * Test Granger causality across all domain pairs
+ *
+ * 10M SCALE FIX: Caps at 30 domains to prevent O(d²×n×p²) explosion.
+ * At 30 domains, we get 30×29 = 870 pair tests — manageable.
+ * At 50+ domains, 2,450+ pair tests each running VAR estimation → minutes.
+ * Domains are ranked by signal count — highest-volume domains tested first.
  */
 export function testAllDomainPairs(
   signals: Map<string, number[]>,
   config: GrangerTestConfig = {}
 ): GrangerResult[] {
-  const domains = Array.from(signals.keys());
+  // Cap domains to prevent quadratic blowup at 10M scale
+  const MAX_DOMAINS = 30;
+  let domains = Array.from(signals.keys());
+
+  if (domains.length > MAX_DOMAINS) {
+    // Prioritize domains with the most observations (most statistical power)
+    domains = domains
+      .map(d => ({ domain: d, length: signals.get(d)!.length }))
+      .sort((a, b) => b.length - a.length)
+      .slice(0, MAX_DOMAINS)
+      .map(d => d.domain);
+  }
+
   const results: GrangerResult[] = [];
-  
+
   for (const source of domains) {
     for (const target of domains) {
       if (source === target) continue;
-      
+
       const signalA = signals.get(source)!;
       const signalB = signals.get(target)!;
-      
+
       try {
         const result = computeGrangerCausality(signalA, signalB, config.maxLag, config);
         results.push({
@@ -534,7 +551,7 @@ export function testAllDomainPairs(
       }
     }
   }
-  
+
   // Sort by significance and effect size
   return results.sort((a, b) => {
     if (a.isSignificant !== b.isSignificant) {

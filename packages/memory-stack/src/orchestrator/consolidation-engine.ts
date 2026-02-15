@@ -216,9 +216,18 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
     const start = Date.now();
     try {
       const cutoff = new Date(Date.now() - lookbackHours * 60 * 60 * 1000).toISOString();
+
+      // ── 10M SCALE FIX: Memory-bounded signal fetch ──────────────────
+      // Problem: At 10M signals, accumulating all into an array uses 5GB+ RAM → OOM.
+      // Solution: Cap at 500K signals max for consolidation. Use stratified
+      // sampling by domain so every domain gets proportional representation.
+      // Downstream algorithms (causal discovery, pattern mining) work with
+      // statistical samples — they don't need ALL 10M signals.
+      const MAX_CONSOLIDATION_SIGNALS = 500_000;
+
       const allSignals: any[] = [];
 
-      // Cursor-based streaming: OOM-safe at 10M+ signals (replaces offset pagination)
+      // Cursor-based streaming with memory cap
       await streamInBatches(
         async (cursor, batchSize) => {
           let query = supabase
@@ -236,14 +245,14 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
           return { items: data, nextCursor: data[data.length - 1].id, hasMore: data.length === batchSize };
         },
         async (batch) => { allSignals.push(...batch); },
-        { batchSize: 1000, batchDelayMs: 10 },
+        { batchSize: 2000, batchDelayMs: 10, maxItems: MAX_CONSOLIDATION_SIGNALS },
       );
 
-      // If we got very few recent signals, also fetch ALL signals for discovery
+      // If we got very few recent signals, also fetch historical signals for discovery
       // (causal discovery needs historical context, not just last 48h)
       let allHistoricalSignals = allSignals;
       if (allSignals.length < 100) {
-        log('FETCH', 'Few recent signals, fetching full history for causal discovery...');
+        log('FETCH', 'Few recent signals, fetching historical signals for causal discovery...');
         const fullSignals: any[] = [];
         await streamInBatches(
           async (cursor, batchSize) => {
@@ -261,9 +270,41 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
             return { items: data, nextCursor: data[data.length - 1].id, hasMore: data.length === batchSize };
           },
           async (batch) => { fullSignals.push(...batch); },
-          { batchSize: 1000, batchDelayMs: 10 },
+          { batchSize: 2000, batchDelayMs: 10, maxItems: MAX_CONSOLIDATION_SIGNALS },
         );
         allHistoricalSignals = fullSignals;
+      }
+
+      // ── Stratified sampling for very large signal sets ──────────────
+      // If we hit the cap, ensure every domain gets proportional representation.
+      // This prevents a single high-volume domain (e.g., GitHub) from drowning
+      // out lower-volume domains (e.g., Jira, Slack) in the consolidation.
+      if (allHistoricalSignals.length >= MAX_CONSOLIDATION_SIGNALS * 0.95) {
+        log('FETCH', `Signal cap reached (${allHistoricalSignals.length}). Applying stratified sampling...`);
+        const byDomain = new Map<string, any[]>();
+        for (const s of allHistoricalSignals) {
+          const domain = s.source_domain || 'unknown';
+          if (!byDomain.has(domain)) byDomain.set(domain, []);
+          byDomain.get(domain)!.push(s);
+        }
+
+        const domainCount = byDomain.size;
+        // Each domain gets at least 1000 signals, rest distributed proportionally
+        const minPerDomain = Math.min(1000, Math.floor(MAX_CONSOLIDATION_SIGNALS / domainCount));
+        const remaining = MAX_CONSOLIDATION_SIGNALS - (minPerDomain * domainCount);
+
+        const sampled: any[] = [];
+        for (const [, domainSignals] of byDomain) {
+          // Give minimum allocation
+          const shuffled = domainSignals.sort(() => Math.random() - 0.5);
+          const allocation = Math.min(
+            domainSignals.length,
+            minPerDomain + Math.floor(remaining * (domainSignals.length / allHistoricalSignals.length)),
+          );
+          sampled.push(...shuffled.slice(0, allocation));
+        }
+        allHistoricalSignals = sampled;
+        log('FETCH', `Stratified to ${allHistoricalSignals.length} signals across ${domainCount} domains`);
       }
 
       log('FETCH', `${allSignals.length} recent signals (last ${lookbackHours}h), ${allHistoricalSignals.length} total historical`);

@@ -265,8 +265,21 @@ export function createSupabaseRepository(
         created_at: new Date().toISOString(),
       }));
 
-      const { error } = await supabase.from('cross_domain_signals').insert(rows);
-      if (error) throw new Error(`Failed to insert signals: ${error.message}`);
+      // ── 10M SCALE FIX: Batch chunking ────────────────────────────
+      // Supabase has a ~50K row limit per INSERT. Chunk at 5K for safety
+      // and to avoid request size limits. At 10M daily signals, this
+      // ensures reliable ingestion without hitting payload limits.
+      const CHUNK_SIZE = 5_000;
+      if (rows.length <= CHUNK_SIZE) {
+        const { error } = await supabase.from('cross_domain_signals').insert(rows);
+        if (error) throw new Error(`Failed to insert signals: ${error.message}`);
+      } else {
+        for (let i = 0; i < rows.length; i += CHUNK_SIZE) {
+          const chunk = rows.slice(i, i + CHUNK_SIZE);
+          const { error } = await supabase.from('cross_domain_signals').insert(chunk);
+          if (error) throw new Error(`Failed to insert signal chunk ${Math.floor(i / CHUNK_SIZE) + 1}: ${error.message}`);
+        }
+      }
 
       // Notify event bus of new signals (Disconnection #5 fix)
       if (options?.onSignalsInserted) {
@@ -374,8 +387,29 @@ export function createSupabaseRepository(
         updated_at: new Date().toISOString(),
       };
 
-      const { error } = await supabase.from('ai_memory').insert(row);
-      if (error) throw new Error(`Failed to upsert memory: ${error.message}`);
+      // ── 10M SCALE FIX: UPSERT instead of INSERT ────────────────
+      // Problem: At 10M+ signals, every consolidation cycle INSERTs new
+      // memories (patterns, discoveries, forecasts) without dedup. After
+      // 100 cycles, ai_memory grows to 100K+ rows of mostly-duplicate
+      // insights. This wastes storage and slows copilot queries.
+      //
+      // Solution: UPSERT on (organization_id, memory_type, domain).
+      // Same memory type + domain gets overwritten with the latest content.
+      // This bounds growth to O(memory_types × domains) per org.
+      //
+      // Requires migration: 20250228000001_ai_memory_dedup_constraint.sql
+      // If the unique constraint doesn't exist yet, falls back to INSERT.
+      const { error } = await supabase.from('ai_memory').upsert(row, {
+        onConflict: 'organization_id,memory_type,domain',
+        ignoreDuplicates: false,
+      });
+      // Fallback to INSERT if upsert constraint doesn't exist yet
+      if (error && (error.code === '42P10' || error.message?.includes('there is no unique'))) {
+        const { error: insertError } = await supabase.from('ai_memory').insert(row);
+        if (insertError) throw new Error(`Failed to insert memory: ${insertError.message}`);
+      } else if (error) {
+        throw new Error(`Failed to upsert memory: ${error.message}`);
+      }
     },
 
     async getMemories(domain?: string, limit: number = 20): Promise<any[]> {
