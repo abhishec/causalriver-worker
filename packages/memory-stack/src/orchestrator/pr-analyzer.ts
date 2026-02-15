@@ -136,11 +136,11 @@ export function createPRAnalyzer(config: PRAnalysisConfig) {
   const { supabase, organizationId, anthropicApiKey, repository } = config;
 
   // Initialize brain commander for deep analysis
+  // Note: Cognitive stack is always enabled as of v2.0
   const brainCommander = createBrainCommander({
     supabase,
     organizationId,
     anthropicApiKey,
-    enableCognitiveStack: true, // Always use full reasoning
     enableActions: true,
     enableQualityGate: true,
   });
