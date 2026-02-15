@@ -1201,7 +1201,7 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
           {
             signalsProcessed: totalSignals,
             edgesDiscovered: totalEdges,
-            edgesStrengthed: totalStrengthened,
+            edgesStrengthened: totalStrengthened,
             edgesPruned: totalPruned,
             edgesDecayed: totalDecayed,
             anomaliesDetected: totalAnomalies,

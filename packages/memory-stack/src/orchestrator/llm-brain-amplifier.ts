@@ -984,7 +984,7 @@ Why might changes in ${edge.sourceDomain} cause changes in ${edge.targetDomain}?
   }, consolidationStats?: {
     signalsProcessed?: number;
     edgesDiscovered?: number;
-    edgesStrengthed?: number;
+    edgesStrengthened?: number;
     edgesPruned?: number;
     edgesDecayed?: number;
     anomaliesDetected?: number;

@@ -67,7 +67,7 @@ Successfully migrated ALL 7 NexusBrain agents from monolithic scripts to the V6 
 
 **Files**:
 - `scripts/agents/brain-consolidation.ts` (218 lines)
-- `scripts/brain-consolidation-runner-v6.ts` (208 lines)
+- `scripts/brain-consolidation-runner-v6.ts` (deleted — merged into brain-consolidation-runner.ts)
 
 **Brain Region**: Default Mode Network (DMN / Region #8)
 **Neurological Function**: Brain Sleep & Memory Consolidation

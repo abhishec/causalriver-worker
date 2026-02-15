@@ -58,7 +58,7 @@ ALL AGENTS MIGRATED TO V6 MANUS TEMPLATE
 
 **Files**:
 - `scripts/agents/brain-consolidation.ts` (218 lines) — Agent implementation
-- `scripts/brain-consolidation-runner-v6.ts` (208 lines) — Runner with auto-registration
+- `scripts/brain-consolidation-runner-v6.ts` (deleted — merged into brain-consolidation-runner.ts)
 
 **Reduction**:
 - Old: 1,123 lines (monolithic)
