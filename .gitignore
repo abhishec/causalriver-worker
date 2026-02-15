@@ -68,6 +68,12 @@ pnpm-debug.log*
 *.swp
 *.swo
 
+# CDK lock files
+infrastructure/cdk/cdk.out/*.lock
+
+# Backup files
+*.bak
+
 # IDE configs (may contain paths/secrets)
 .idea/
 .vscode/settings.json
