@@ -6,7 +6,12 @@
  * and provides a detailed report of execution status.
  */
 
+import { config as loadEnv } from 'dotenv';
+import { resolve } from 'path';
 import { createClient } from '@supabase/supabase-js';
+
+// Load environment variables
+loadEnv({ path: resolve(__dirname, '../.env') });
 
 const supabaseUrl = process.env.SUPABASE_URL || 'https://zmlqvuzoodcgmkgkivfw.supabase.co';
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;

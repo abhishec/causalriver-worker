@@ -438,19 +438,119 @@ async function runRetentionJob(supabase: any, orgId: string) {
 }
 
 /**
- * Federation: Promote knowledge to core brain (placeholder)
+ * Federation: Promote org knowledge to core brain.
+ *
+ * Lightweight Deno-compatible version that promotes high-confidence
+ * org discoveries to the core brain via SQL queries (no Node.js needed).
+ * Full federation runs in consolidation-engine.ts via Node.js.
  */
 async function runFederationJob(supabase: any, orgId: string) {
-  // Placeholder for federation logic
-  return { status: 'federation_not_yet_implemented' };
+  const CORE_BRAIN_ORG_ID = '00000000-0000-4000-a000-000000000001';
+  if (orgId === CORE_BRAIN_ORG_ID) {
+    return { status: 'skipped', reason: 'Core brain does not federate upstream' };
+  }
+
+  // Promote high-confidence causal relationships to core brain
+  const { data: orgEdges } = await supabase
+    .from('causal_relationships_statistical')
+    .select('source_domain, target_domain, effect_size, granger_p_value, optimal_lag_days, natural_language, sample_size, discovery_method')
+    .eq('organization_id', orgId)
+    .eq('is_significant', true)
+    .gte('effect_size', 0.15)
+    .gte('sample_size', 30)
+    .limit(20);
+
+  let promoted = 0;
+  for (const edge of (orgEdges || [])) {
+    try {
+      await supabase.from('causal_relationships_statistical').upsert({
+        organization_id: CORE_BRAIN_ORG_ID,
+        source_domain: edge.source_domain,
+        target_domain: edge.target_domain,
+        effect_size: edge.effect_size * 0.7, // 0.7x weight for cross-org
+        granger_p_value: edge.granger_p_value,
+        optimal_lag_days: edge.optimal_lag_days,
+        natural_language: `[Federated] ${edge.natural_language || ''}`,
+        sample_size: edge.sample_size,
+        is_significant: true,
+        discovery_method: `federated_from_${orgId.substring(0, 8)}`,
+        last_computed_at: new Date().toISOString(),
+      }, { onConflict: 'organization_id,source_domain,target_domain' });
+      promoted++;
+    } catch {
+      // Non-critical — skip this edge
+    }
+  }
+
+  return { status: 'success', edgesPromoted: promoted, totalCandidates: (orgEdges || []).length };
 }
 
 /**
- * Consolidation: Full brain consolidation (placeholder)
+ * Consolidation: Brain consolidation via Edge Function.
+ *
+ * This is the Deno-compatible "light sleep" consolidation that handles:
+ * 1. Run all maintenance jobs (prune, decay, verify, strengthen)
+ * 2. Compute basic signal statistics and store as brain health snapshot
+ * 3. Run federation to core brain
+ *
+ * The FULL 10-step consolidation (causal discovery, pattern mining,
+ * cognitive analysis, etc.) runs via Node.js: scripts/brain-consolidation-runner.ts
+ * This is by design — those algorithms require Node.js modules (not Deno).
+ *
+ * Deployment options for full consolidation:
+ * - Cron job: `node scripts/brain-consolidation-runner.ts`
+ * - GitHub Action: Schedule nightly
+ * - Supabase Database Webhooks: Trigger on signal count threshold
  */
 async function runConsolidationJob(supabase: any, orgId: string) {
-  // Placeholder for consolidation logic
-  return { status: 'consolidation_not_yet_implemented' };
+  const results: Record<string, any> = {};
+
+  // Step 1: Run all maintenance jobs (verification, weights, decay, thresholds, retention)
+  try {
+    results.maintenance = await runAllDailyJobs(supabase, orgId);
+  } catch (err: any) {
+    results.maintenance = { error: err.message };
+  }
+
+  // Step 2: Compute and store brain health snapshot
+  try {
+    const [signalCount, relCount, memCount, predCount] = await Promise.all([
+      supabase.from('cross_domain_signals').select('id', { count: 'exact', head: true }).eq('organization_id', orgId),
+      supabase.from('causal_relationships_statistical').select('id', { count: 'exact', head: true }).eq('organization_id', orgId).eq('is_significant', true),
+      supabase.from('ai_memory').select('id', { count: 'exact', head: true }).eq('organization_id', orgId),
+      supabase.from('prediction_tracker').select('id', { count: 'exact', head: true }).eq('organization_id', orgId).eq('resolved', true),
+    ]);
+
+    const snapshot = {
+      organization_id: orgId,
+      total_signals: signalCount.count || 0,
+      total_relationships: relCount.count || 0,
+      total_memories: memCount.count || 0,
+      resolved_predictions: predCount.count || 0,
+      snapshot_type: 'edge_function_consolidation',
+      metadata: { source: 'scheduled-jobs', timestamp: new Date().toISOString() },
+      created_at: new Date().toISOString(),
+    };
+
+    await supabase.from('brain_health_history').insert(snapshot);
+    results.healthSnapshot = snapshot;
+  } catch (err: any) {
+    results.healthSnapshot = { error: err.message };
+  }
+
+  // Step 3: Federation (promote to core brain)
+  try {
+    results.federation = await runFederationJob(supabase, orgId);
+  } catch (err: any) {
+    results.federation = { error: err.message };
+  }
+
+  return {
+    status: 'success',
+    mode: 'light_consolidation',
+    note: 'Full 10-step consolidation runs via Node.js: scripts/brain-consolidation-runner.ts',
+    ...results,
+  };
 }
 
 /**
