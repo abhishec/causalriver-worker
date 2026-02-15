@@ -53,6 +53,14 @@ RUN mkdir -p public
 # Increase Node memory for build and disable static page generation timeout
 RUN NODE_OPTIONS="--max-old-space-size=4096" NEXT_PRIVATE_STANDALONE=true pnpm build
 
+# Debug: List standalone output structure
+RUN echo "=== Standalone output structure ===" && \
+    ls -la .next/standalone/ && \
+    echo "=== Platform directory ===" && \
+    ls -la .next/standalone/platform/ 2>/dev/null || echo "No platform directory" && \
+    echo "=== Node modules ===" && \
+    ls -la .next/standalone/node_modules/ 2>/dev/null | head -20 || echo "No node_modules"
+
 # Stage 3: Production image
 FROM base AS runner
 WORKDIR /app
@@ -66,7 +74,10 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
 # Copy necessary files from build stage
-# Standalone mode includes the full app in .next/standalone
+# Standalone mode output structure:
+# - .next/standalone/ contains server.js at root and platform/ subdirectory
+# - .next/static needs to go into platform/.next/static
+# - public needs to go into platform/public
 COPY --from=builder /app/platform/.next/standalone ./
 COPY --from=builder /app/platform/.next/static ./platform/.next/static
 COPY --from=builder /app/platform/public ./platform/public
@@ -78,4 +89,6 @@ USER nextjs
 
 EXPOSE 3000
 
+# The standalone server.js expects to be run from the standalone root
+# and will look for platform/ subdirectory
 CMD ["node", "server.js"]
