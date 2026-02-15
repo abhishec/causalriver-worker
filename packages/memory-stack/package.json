@@ -8,36 +8,44 @@
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "default": "./dist/index.js"
     },
     "./causality": {
+      "types": "./dist/causality/index.d.ts",
       "import": "./dist/causality/index.js",
-      "types": "./dist/causality/index.d.ts"
+      "default": "./dist/causality/index.js"
     },
     "./learning": {
+      "types": "./dist/learning/index.d.ts",
       "import": "./dist/learning/index.js",
-      "types": "./dist/learning/index.d.ts"
+      "default": "./dist/learning/index.js"
     },
     "./embeddings": {
+      "types": "./dist/core/embeddings/index.d.ts",
       "import": "./dist/core/embeddings/index.js",
-      "types": "./dist/core/embeddings/index.d.ts"
+      "default": "./dist/core/embeddings/index.js"
     },
     "./intelligence": {
+      "types": "./dist/intelligence/index.d.ts",
       "import": "./dist/intelligence/index.js",
-      "types": "./dist/intelligence/index.d.ts"
+      "default": "./dist/intelligence/index.js"
     },
     "./hooks": {
+      "types": "./dist/hooks/index.d.ts",
       "import": "./dist/hooks/index.js",
-      "types": "./dist/hooks/index.d.ts"
+      "default": "./dist/hooks/index.js"
     },
     "./persistence": {
+      "types": "./dist/persistence/index.d.ts",
       "import": "./dist/persistence/index.js",
-      "types": "./dist/persistence/index.d.ts"
+      "default": "./dist/persistence/index.js"
     },
     "./code-indexing": {
+      "types": "./dist/code-indexing/index.d.ts",
       "import": "./dist/code-indexing/index.js",
-      "types": "./dist/code-indexing/index.d.ts"
+      "default": "./dist/code-indexing/index.js"
     }
   },
   "files": [

@@ -1034,6 +1034,11 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
   // ── Write daily brain snapshot for website dashboard ──────────
   // Powers the live brain dashboard at usebrainos.com
   // One row per org per day — upserts so re-runs overwrite gracefully
+  // IMPORTANT: Skip writing if consolidation produced zero data (e.g. lock failures)
+  // to avoid overwriting a good earlier snapshot with zeros
+  if (totalSignals === 0 && totalNew === 0 && totalEdges === 0) {
+    log('SNAPSHOT', 'Skipping snapshot write — consolidation produced zero data (would overwrite good data)');
+  } else
   try {
     const totalPatterns = results.reduce((sum, r) => sum + r.report.stats.patternsFound, 0);
     const totalMemories = results.reduce((sum, r) => sum + r.report.stats.memoriesCreated, 0);
