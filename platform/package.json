@@ -9,12 +9,14 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@nexus-ai/memory-stack": "workspace:*",
     "@anthropic-ai/sdk": "^0.74.0",
+    "@nexus-ai/memory-stack": "workspace:*",
     "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.95.3",
+    "@types/jsonwebtoken": "^9.0.10",
     "clsx": "^2.1.1",
     "framer-motion": "^12.34.0",
+    "jsonwebtoken": "^9.0.3",
     "next": "15.5.12",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

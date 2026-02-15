@@ -649,6 +649,16 @@ export {
   type BrainInsight as CommanderBrainInsight,
 } from './orchestrator/brain-commander';
 
+// PR Analyzer V1 ("Code Review Specialist") — automated PR analysis with cognitive stack
+// Analyzes pull requests for risk, impact, suggests reviewers, detects issues
+export {
+  createPRAnalyzer,
+  type PRAnalysisConfig,
+  type PRMetadata,
+  type PRFileChange,
+  type PRAnalysisResult,
+} from './orchestrator/pr-analyzer';
+
 // Dispatch Assessor V1 ("Anterior Cingulate Cortex") — complexity + intent scoring + routing
 // Pure function. No I/O. Sub-1ms. Determines fast_query vs action_domain vs agent_orchestration
 export {
