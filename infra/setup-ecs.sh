@@ -1238,6 +1238,117 @@ aws events put-targets \
   --region "${REGION}" > /dev/null
 echo "    Security: Daily at 4:00 AM UTC"
 
+# --- Proactive Intelligence: Every 4 hours (offset from DMN) ---
+aws events put-rule \
+  --name "nexusbrain-proactive-schedule" \
+  --schedule-expression "cron(0 1,5,9,13,17,21 * * ? *)" \
+  --state ENABLED \
+  --description "Run NexusBrain Proactive Intelligence every 4 hours (offset from DMN)" \
+  --region "${REGION}" > /dev/null
+
+cat > /tmp/target-proactive.json << TARGET
+[
+  {
+    "Id": "nexusbrain-proactive-target",
+    "Arn": "arn:aws:ecs:${REGION}:${ACCOUNT_ID}:cluster/${CLUSTER_NAME}",
+    "RoleArn": "${EVENTS_ROLE_ARN}",
+    "EcsParameters": {
+      "TaskDefinitionArn": "arn:aws:ecs:${REGION}:${ACCOUNT_ID}:task-definition/nexusbrain-proactive",
+      "TaskCount": 1,
+      "LaunchType": "FARGATE",
+      "NetworkConfiguration": {
+        "awsvpcConfiguration": {
+          "Subnets": ["${SUBNET1}", "${SUBNET2}"],
+          "SecurityGroups": ["${SG_ID}"],
+          "AssignPublicIp": "ENABLED"
+        }
+      },
+      "PlatformVersion": "LATEST"
+    }
+  }
+]
+TARGET
+
+aws events put-targets \
+  --rule "nexusbrain-proactive-schedule" \
+  --targets file:///tmp/target-proactive.json \
+  --region "${REGION}" > /dev/null
+echo "    Proactive Intelligence: Every 4 hours (01:00, 05:00, 09:00, 13:00, 17:00, 21:00 UTC)"
+
+# --- Org Updater: Every 4 hours ---
+aws events put-rule \
+  --name "nexusbrain-org-updater-schedule" \
+  --schedule-expression "cron(0 2,6,10,14,18,22 * * ? *)" \
+  --state ENABLED \
+  --description "Run NexusBrain Org Updater every 4 hours (staggered)" \
+  --region "${REGION}" > /dev/null
+
+cat > /tmp/target-org-updater.json << TARGET
+[
+  {
+    "Id": "nexusbrain-org-updater-target",
+    "Arn": "arn:aws:ecs:${REGION}:${ACCOUNT_ID}:cluster/${CLUSTER_NAME}",
+    "RoleArn": "${EVENTS_ROLE_ARN}",
+    "EcsParameters": {
+      "TaskDefinitionArn": "arn:aws:ecs:${REGION}:${ACCOUNT_ID}:task-definition/nexusbrain-org-updater",
+      "TaskCount": 1,
+      "LaunchType": "FARGATE",
+      "NetworkConfiguration": {
+        "awsvpcConfiguration": {
+          "Subnets": ["${SUBNET1}", "${SUBNET2}"],
+          "SecurityGroups": ["${SG_ID}"],
+          "AssignPublicIp": "ENABLED"
+        }
+      },
+      "PlatformVersion": "LATEST"
+    }
+  }
+]
+TARGET
+
+aws events put-targets \
+  --rule "nexusbrain-org-updater-schedule" \
+  --targets file:///tmp/target-org-updater.json \
+  --region "${REGION}" > /dev/null
+echo "    Org Updater: Every 4 hours (02:00, 06:00, 10:00, 14:00, 18:00, 22:00 UTC)"
+
+# --- Outcome Resolver: Daily at 3:30 AM UTC (staggered from cost-agent) ---
+aws events put-rule \
+  --name "nexusbrain-outcome-resolver-schedule" \
+  --schedule-expression "cron(30 3 * * ? *)" \
+  --state ENABLED \
+  --description "Run NexusBrain Outcome Resolver daily at 3:30 AM UTC" \
+  --region "${REGION}" > /dev/null
+
+cat > /tmp/target-outcome-resolver.json << TARGET
+[
+  {
+    "Id": "nexusbrain-outcome-resolver-target",
+    "Arn": "arn:aws:ecs:${REGION}:${ACCOUNT_ID}:cluster/${CLUSTER_NAME}",
+    "RoleArn": "${EVENTS_ROLE_ARN}",
+    "EcsParameters": {
+      "TaskDefinitionArn": "arn:aws:ecs:${REGION}:${ACCOUNT_ID}:task-definition/nexusbrain-outcome-resolver",
+      "TaskCount": 1,
+      "LaunchType": "FARGATE",
+      "NetworkConfiguration": {
+        "awsvpcConfiguration": {
+          "Subnets": ["${SUBNET1}", "${SUBNET2}"],
+          "SecurityGroups": ["${SG_ID}"],
+          "AssignPublicIp": "ENABLED"
+        }
+      },
+      "PlatformVersion": "LATEST"
+    }
+  }
+]
+TARGET
+
+aws events put-targets \
+  --rule "nexusbrain-outcome-resolver-schedule" \
+  --targets file:///tmp/target-outcome-resolver.json \
+  --region "${REGION}" > /dev/null
+echo "    Outcome Resolver: Daily at 3:30 AM UTC"
+
 # ─── Done ─────────────────────────────────────────────────────────
 echo ""
 echo "============================================"
@@ -1249,26 +1360,27 @@ echo "  1. Store secrets:      ./infra/store-secrets.sh"
 echo "  2. Build & push:       ./infra/push-image.sh"
 echo "  3. Run any agent:      ./infra/run-task.sh <process>"
 echo ""
-echo "Full Agent Schedule (10 scheduled + 1 manual + 3 orchestrator-only = 14 agents):"
-echo "  ┌──────────────────────────┬────────────────────────────────────────┬──────────┐"
-echo "  │ Agent                    │ Schedule                               │ CPU/Mem  │"
-echo "  ├──────────────────────────┼────────────────────────────────────────┼──────────┤"
-echo "  │ Autonomous Trainer       │ Every 12h (0,12 UTC) [cost-optimized]  │ 1/4 GB   │"
-echo "  │ Federation Agent         │ Every 6h (3,9,15,21 UTC)               │ 1/4 GB   │"
-echo "  │ DMN Scan                 │ Every 8h (0,8,16 UTC) [cost-optimized] │ 1/4 GB   │"
-echo "  │ Brain Consolidation      │ Daily 2 AM UTC                         │ 2/8 GB   │"
-echo "  │ Cost Agent               │ Daily 3 AM UTC                         │ 0.5/1 GB │"
-echo "  │ Security Hardening       │ Daily 4 AM UTC                         │ 2/8 GB   │"
-echo "  │ Git Code Trainer         │ Sunday 2 AM UTC                        │ 2/8 GB   │"
-echo "  │ Weekly Brain Scan        │ Sunday 4 AM UTC                        │ 1/4 GB   │"
-echo "  │ Benchmark                │ Sunday 5 AM UTC                        │ 2/8 GB   │"
-echo "  │ Monthly Deep Analysis    │ 1st of month 3 AM UTC                  │ 2/8 GB   │"
-echo "  │ Benchmark Optimizer      │ Manual only (Python)                   │ 1/4 GB   │"
-echo "  ├──────────────────────────┼────────────────────────────────────────┼──────────┤"
-echo "  │ Proactive Intelligence   │ Orchestrator-managed (every 4h offset) │ —        │"
-echo "  │ Outcome Resolver         │ Orchestrator-managed (daily 3:30 AM)   │ —        │"
-echo "  │ Org Updater              │ Orchestrator-managed (every 4h)        │ —        │"
-echo "  └──────────────────────────┴────────────────────────────────────────┴──────────┘"
+echo "Full Agent Schedule (13 scheduled + 1 manual + 1 long-running = 15 task defs):"
+echo "  ┌────────────────────────────┬────────────────────────────────────────────┬──────────┐"
+echo "  │ Agent                      │ Schedule                                   │ CPU/Mem  │"
+echo "  ├────────────────────────────┼────────────────────────────────────────────┼──────────┤"
+echo "  │ Orchestrator               │ Long-running service (24/7)                │ 4/16 GB  │"
+echo "  ├────────────────────────────┼────────────────────────────────────────────┼──────────┤"
+echo "  │ Autonomous Trainer         │ Every 12h (0,12 UTC) [cost-optimized]      │ 1/4 GB   │"
+echo "  │ Proactive Intelligence     │ Every 4h (1,5,9,13,17,21 UTC)             │ 0.5/1 GB │"
+echo "  │ Org Updater                │ Every 4h (2,6,10,14,18,22 UTC)            │ 1/4 GB   │"
+echo "  │ Federation Agent           │ Every 6h (3,9,15,21 UTC)                  │ 1/4 GB   │"
+echo "  │ DMN Scan                   │ Every 8h (0,8,16 UTC) [cost-optimized]    │ 1/4 GB   │"
+echo "  │ Brain Consolidation        │ Daily 2 AM UTC                            │ 2/8 GB   │"
+echo "  │ Cost Agent                 │ Daily 3 AM UTC                            │ 0.5/1 GB │"
+echo "  │ Outcome Resolver           │ Daily 3:30 AM UTC                         │ 0.5/2 GB │"
+echo "  │ Security Hardening         │ Daily 4 AM UTC                            │ 2/8 GB   │"
+echo "  │ Git Code Trainer           │ Sunday 2 AM UTC                           │ 2/8 GB   │"
+echo "  │ Weekly Brain Scan          │ Sunday 4 AM UTC                           │ 1/4 GB   │"
+echo "  │ Benchmark                  │ Sunday 5 AM UTC                           │ 2/8 GB   │"
+echo "  │ Monthly Deep Analysis      │ 1st of month 3 AM UTC                    │ 2/8 GB   │"
+echo "  │ Benchmark Optimizer        │ Manual only (Python)                      │ 1/4 GB   │"
+echo "  └────────────────────────────┴────────────────────────────────────────────┴──────────┘"
 echo ""
 echo "View logs:"
 echo "  aws logs tail ${LOG_GROUP} --follow --region ${REGION}"

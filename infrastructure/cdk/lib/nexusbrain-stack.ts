@@ -148,7 +148,7 @@ export class NexusBrainStack extends cdk.Stack {
     const ecrRepo = ecr.Repository.fromRepositoryName(
       this,
       'ECRRepository',
-      'nexusbrain'
+      'nexusbrain-trainer'  // Matches infra/setup-ecs.sh and infra/push-image.sh
     );
 
     // ═════════════════════════════════════════════════════════════
