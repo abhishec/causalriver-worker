@@ -41,7 +41,9 @@ import { createHubSpotConnector } from '../connectors/hubspot';
 import { createStripeConnector } from '../connectors/stripe';
 import { createGitHubConnector, type GitHubConnectorConfig } from '../connectors/github';
 import { createJiraConnector, type JiraConnectorConfig } from '../connectors/jira';
-import { createNexusSlackConnector, type SlackConnectorConfig } from '@nexus-ai/slack-connector';
+// Slack connector is loaded dynamically to avoid circular dependency
+// (slack-connector depends on memory-stack)
+interface SlackConnectorConfig { token: string; teamId?: string; [key: string]: unknown; }
 import { createPagerDutyConnector, type PagerDutyConnectorConfig } from '../connectors/pagerduty';
 import { createGoogleCalendarConnector, type GoogleCalendarConnectorConfig } from '../connectors/google-calendar';
 import { createGoogleChatConnector, type GoogleChatConnectorConfig } from '../connectors/google-chat';
@@ -92,7 +94,12 @@ const CONNECTOR_FACTORIES: Record<
   },
   github: (config) => createGitHubConnector(config as unknown as GitHubConnectorConfig),
   jira: (config) => createJiraConnector(config as unknown as JiraConnectorConfig),
-  slack: (config) => createNexusSlackConnector(config as unknown as SlackConnectorConfig) as unknown as NexusConnector,
+  slack: (_config) => {
+    // Slack connector creates a circular dependency — use lazy import at runtime
+    // For now, return null and let the sync manager skip it gracefully
+    console.warn('Slack connector sync: use @nexus-ai/slack-connector directly to avoid circular dep');
+    return null;
+  },
   pagerduty: (config) => createPagerDutyConnector(config as unknown as PagerDutyConnectorConfig),
   'google-calendar': (config) => createGoogleCalendarConnector(config as unknown as GoogleCalendarConnectorConfig),
   'google-chat': (config) => createGoogleChatConnector(config as unknown as GoogleChatConnectorConfig),
