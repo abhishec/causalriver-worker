@@ -104,6 +104,10 @@ WORKDIR /app
 #   - workspace config files (for module resolution)
 COPY --from=builder --chown=nexusbrain:nodejs /app ./
 
+# Copy docker entrypoint script (routes BRAIN_PROCESS to correct agent)
+COPY --chown=nexusbrain:nodejs docker-entrypoint.sh ./
+RUN chmod +x docker-entrypoint.sh
+
 # Set ownership
 RUN chown -R nexusbrain:nodejs /app
 
@@ -115,9 +119,13 @@ ENV PORT=3000
 
 EXPOSE 3000
 
-# Health check
+# Health check (only applies when running as orchestrator)
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
   CMD curl -f http://localhost:3000/api/health || exit 1
 
-# Start brain orchestrator
-CMD ["tsx", "scripts/brain-orchestrator.ts"]
+# Entrypoint routes BRAIN_PROCESS env var to the correct agent script.
+# Default: runs brain-orchestrator.ts (the central nervous system).
+# Override BRAIN_PROCESS to run a specific agent:
+#   docker run -e BRAIN_PROCESS=trainer nexusbrain
+#   docker run -e BRAIN_PROCESS=consolidation nexusbrain
+ENTRYPOINT ["./docker-entrypoint.sh"]

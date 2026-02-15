@@ -285,7 +285,7 @@ cat > /tmp/task-consolidation.json << TASKDEF
 TASKDEF
 
 aws ecs register-task-definition --cli-input-json file:///tmp/task-consolidation.json --region "${REGION}" > /dev/null
-echo "    Registered: nexusbrain-consolidation (1 vCPU, 4GB)"
+echo "    Registered: nexusbrain-consolidation (2 vCPU, 8GB)"
 
 # --- DMN Scan Task Definition ---
 cat > /tmp/task-dmn.json << TASKDEF
@@ -674,6 +674,189 @@ TASKDEF
 
 aws ecs register-task-definition --cli-input-json file:///tmp/task-benchmark-optimizer.json --region "${REGION}" > /dev/null
 echo "    Registered: nexusbrain-benchmark-optimizer (1 vCPU, 4GB)"
+
+# --- Orchestrator Task Definition ---
+# The central nervous system — long-running Fargate service that coordinates all agents.
+# 4 vCPU, 16GB RAM — runs continuously with internal CronJob scheduling.
+cat > /tmp/task-orchestrator.json << TASKDEF
+{
+  "family": "nexusbrain-orchestrator",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "4096",
+  "memory": "16384",
+  "executionRoleArn": "${EXEC_ROLE_ARN}",
+  "taskRoleArn": "${EXEC_ROLE_ARN}",
+  "containerDefinitions": [
+    {
+      "name": "brain-orchestrator",
+      "image": "${ECR_IMAGE}",
+      "essential": true,
+      "environment": [
+        { "name": "BRAIN_PROCESS", "value": "orchestrator" },
+        { "name": "ORCHESTRATOR_MODE", "value": "continuous" },
+        { "name": "PORT", "value": "3000" }
+      ],
+      "secrets": [
+        { "name": "SUPABASE_URL", "valueFrom": "arn:aws:ssm:${REGION}:${ACCOUNT_ID}:parameter/nexusbrain/SUPABASE_URL" },
+        { "name": "SUPABASE_SERVICE_ROLE_KEY", "valueFrom": "arn:aws:ssm:${REGION}:${ACCOUNT_ID}:parameter/nexusbrain/SUPABASE_SERVICE_ROLE_KEY" },
+        { "name": "ANTHROPIC_API_KEY", "valueFrom": "arn:aws:ssm:${REGION}:${ACCOUNT_ID}:parameter/nexusbrain/ANTHROPIC_API_KEY" },
+        { "name": "OPENAI_API_KEY", "valueFrom": "arn:aws:ssm:${REGION}:${ACCOUNT_ID}:parameter/nexusbrain/OPENAI_API_KEY" },
+        { "name": "FRED_API_KEY", "valueFrom": "arn:aws:ssm:${REGION}:${ACCOUNT_ID}:parameter/nexusbrain/FRED_API_KEY" },
+        { "name": "GITHUB_TOKEN", "valueFrom": "arn:aws:ssm:${REGION}:${ACCOUNT_ID}:parameter/nexusbrain/GITHUB_TOKEN" },
+        { "name": "SLACK_BOT_TOKEN", "valueFrom": "arn:aws:ssm:${REGION}:${ACCOUNT_ID}:parameter/nexusbrain/SLACK_BOT_TOKEN" }
+      ],
+      "portMappings": [
+        { "containerPort": 3000, "protocol": "tcp" }
+      ],
+      "healthCheck": {
+        "command": ["CMD-SHELL", "curl -f http://localhost:3000/api/health || exit 1"],
+        "interval": 30,
+        "timeout": 5,
+        "retries": 3,
+        "startPeriod": 60
+      },
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "${LOG_GROUP}",
+          "awslogs-region": "${REGION}",
+          "awslogs-stream-prefix": "orchestrator"
+        }
+      },
+      "stopTimeout": 120
+    }
+  ]
+}
+TASKDEF
+
+aws ecs register-task-definition --cli-input-json file:///tmp/task-orchestrator.json --region "${REGION}" > /dev/null
+echo "    Registered: nexusbrain-orchestrator (4 vCPU, 16GB) [long-running service]"
+
+# --- Proactive Intelligence Task Definition ---
+# Amygdala — proactive alerting & threat detection (every 4h offset from DMN)
+# 0.5 vCPU, 1GB RAM — lightweight anomaly detection
+cat > /tmp/task-proactive.json << TASKDEF
+{
+  "family": "nexusbrain-proactive",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "512",
+  "memory": "1024",
+  "executionRoleArn": "${EXEC_ROLE_ARN}",
+  "taskRoleArn": "${EXEC_ROLE_ARN}",
+  "containerDefinitions": [
+    {
+      "name": "brain-proactive",
+      "image": "${ECR_IMAGE}",
+      "essential": true,
+      "environment": [
+        { "name": "BRAIN_PROCESS", "value": "proactive-intelligence" }
+      ],
+      "secrets": [
+        { "name": "SUPABASE_URL", "valueFrom": "arn:aws:ssm:${REGION}:${ACCOUNT_ID}:parameter/nexusbrain/SUPABASE_URL" },
+        { "name": "SUPABASE_SERVICE_ROLE_KEY", "valueFrom": "arn:aws:ssm:${REGION}:${ACCOUNT_ID}:parameter/nexusbrain/SUPABASE_SERVICE_ROLE_KEY" },
+        { "name": "ANTHROPIC_API_KEY", "valueFrom": "arn:aws:ssm:${REGION}:${ACCOUNT_ID}:parameter/nexusbrain/ANTHROPIC_API_KEY" }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "${LOG_GROUP}",
+          "awslogs-region": "${REGION}",
+          "awslogs-stream-prefix": "proactive"
+        }
+      },
+      "stopTimeout": 120
+    }
+  ]
+}
+TASKDEF
+
+aws ecs register-task-definition --cli-input-json file:///tmp/task-proactive.json --region "${REGION}" > /dev/null
+echo "    Registered: nexusbrain-proactive (0.5 vCPU, 1GB)"
+
+# --- Org Updater Task Definition ---
+# Thalamus — org heartbeat: connector sync + learning cycle (every 4h)
+# 1 vCPU, 4GB RAM — handles connector API calls + signal processing
+cat > /tmp/task-org-updater.json << TASKDEF
+{
+  "family": "nexusbrain-org-updater",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "1024",
+  "memory": "4096",
+  "executionRoleArn": "${EXEC_ROLE_ARN}",
+  "taskRoleArn": "${EXEC_ROLE_ARN}",
+  "containerDefinitions": [
+    {
+      "name": "brain-org-updater",
+      "image": "${ECR_IMAGE}",
+      "essential": true,
+      "environment": [
+        { "name": "BRAIN_PROCESS", "value": "org-updater" }
+      ],
+      "secrets": [
+        { "name": "SUPABASE_URL", "valueFrom": "arn:aws:ssm:${REGION}:${ACCOUNT_ID}:parameter/nexusbrain/SUPABASE_URL" },
+        { "name": "SUPABASE_SERVICE_ROLE_KEY", "valueFrom": "arn:aws:ssm:${REGION}:${ACCOUNT_ID}:parameter/nexusbrain/SUPABASE_SERVICE_ROLE_KEY" },
+        { "name": "ANTHROPIC_API_KEY", "valueFrom": "arn:aws:ssm:${REGION}:${ACCOUNT_ID}:parameter/nexusbrain/ANTHROPIC_API_KEY" }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "${LOG_GROUP}",
+          "awslogs-region": "${REGION}",
+          "awslogs-stream-prefix": "org-updater"
+        }
+      },
+      "stopTimeout": 120
+    }
+  ]
+}
+TASKDEF
+
+aws ecs register-task-definition --cli-input-json file:///tmp/task-org-updater.json --region "${REGION}" > /dev/null
+echo "    Registered: nexusbrain-org-updater (1 vCPU, 4GB)"
+
+# --- Outcome Resolver Task Definition ---
+# Cerebellum — calibration loop closure: predictions -> outcomes (daily 3:30 AM)
+# 0.5 vCPU, 2GB RAM — lightweight DB queries + calibration math
+cat > /tmp/task-outcome-resolver.json << TASKDEF
+{
+  "family": "nexusbrain-outcome-resolver",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "512",
+  "memory": "2048",
+  "executionRoleArn": "${EXEC_ROLE_ARN}",
+  "taskRoleArn": "${EXEC_ROLE_ARN}",
+  "containerDefinitions": [
+    {
+      "name": "brain-outcome-resolver",
+      "image": "${ECR_IMAGE}",
+      "essential": true,
+      "environment": [
+        { "name": "BRAIN_PROCESS", "value": "outcome-resolver" }
+      ],
+      "secrets": [
+        { "name": "SUPABASE_URL", "valueFrom": "arn:aws:ssm:${REGION}:${ACCOUNT_ID}:parameter/nexusbrain/SUPABASE_URL" },
+        { "name": "SUPABASE_SERVICE_ROLE_KEY", "valueFrom": "arn:aws:ssm:${REGION}:${ACCOUNT_ID}:parameter/nexusbrain/SUPABASE_SERVICE_ROLE_KEY" }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "${LOG_GROUP}",
+          "awslogs-region": "${REGION}",
+          "awslogs-stream-prefix": "outcome-resolver"
+        }
+      },
+      "stopTimeout": 120
+    }
+  ]
+}
+TASKDEF
+
+aws ecs register-task-definition --cli-input-json file:///tmp/task-outcome-resolver.json --region "${REGION}" > /dev/null
+echo "    Registered: nexusbrain-outcome-resolver (0.5 vCPU, 2GB)"
 
 # ─── Step 8: Create EventBridge Scheduled Rules ──────────────────
 echo ""

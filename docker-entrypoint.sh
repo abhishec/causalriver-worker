@@ -1,9 +1,12 @@
 #!/bin/sh
 set -e
 
+# Default to orchestrator if no BRAIN_PROCESS specified
+BRAIN_PROCESS="${BRAIN_PROCESS:-orchestrator}"
+
 echo "========================================"
 echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] NexusBrain Brain Training"
-echo "Process: ${BRAIN_PROCESS:-trainer}"
+echo "Process: ${BRAIN_PROCESS}"
 echo "========================================"
 
 case "${BRAIN_PROCESS}" in
@@ -61,16 +64,44 @@ case "${BRAIN_PROCESS}" in
     exec pnpm exec tsx scripts/brain-monthly-runner.ts
     ;;
   federation)
-    echo "Starting Federation Agent (Core ↔ Org brain knowledge flow)..."
+    echo "Starting Federation Agent (Core <> Org brain knowledge flow)..."
     exec pnpm exec tsx scripts/brain-orchestrator.ts --agent federation-agent
     ;;
   security)
     echo "Starting Security Hardening Agent (vulnerability scanning + auto-patching)..."
     exec pnpm exec tsx scripts/brain-orchestrator.ts --agent security-hardening-agent
     ;;
+  proactive-intelligence)
+    echo "Starting Proactive Intelligence Agent (threshold breaches + trend detection)..."
+    exec pnpm exec tsx scripts/brain-orchestrator.ts --agent proactive-intelligence
+    ;;
+  org-updater)
+    echo "Starting Org Updater Agent (connector sync + learning trigger)..."
+    exec pnpm exec tsx scripts/brain-orchestrator.ts --agent org-updater
+    ;;
+  outcome-resolver)
+    echo "Starting Outcome Resolver Agent (prediction calibration loop)..."
+    exec pnpm exec tsx scripts/brain-orchestrator.ts --agent outcome-resolver
+    ;;
   *)
     echo "ERROR: Unknown BRAIN_PROCESS '${BRAIN_PROCESS}'"
-    echo "Valid values: trainer, consolidation, dmn, benchmark, benchmark-optimizer, git-trainer, cost-agent, orchestrator, weekly, monthly, federation, security"
+    echo ""
+    echo "Valid values:"
+    echo "  orchestrator          Central nervous system (default, long-running)"
+    echo "  trainer               Autonomous data learning (one-shot)"
+    echo "  consolidation         Memory consolidation / sleep cycle (one-shot)"
+    echo "  dmn                   Default Mode Network scanning (one-shot)"
+    echo "  benchmark             LongMemEval benchmark suite (one-shot)"
+    echo "  benchmark-optimizer   Python benchmark tuning (one-shot)"
+    echo "  git-trainer           GitHub engineering patterns (one-shot)"
+    echo "  cost-agent            Cost monitoring & anomaly detection (one-shot)"
+    echo "  weekly                11-region brain scan + pruning (one-shot)"
+    echo "  monthly               Full historical causal discovery (one-shot)"
+    echo "  federation            Core <> Org knowledge federation (one-shot)"
+    echo "  security              Security vulnerability scanning (one-shot)"
+    echo "  proactive-intelligence  Proactive alerting & threat detection (one-shot)"
+    echo "  org-updater           Org heartbeat: connector sync + learning (one-shot)"
+    echo "  outcome-resolver      Prediction calibration loop closure (one-shot)"
     exit 1
     ;;
 esac

@@ -66,14 +66,18 @@ RUN apk add --no-cache curl python3 py3-pip github-cli && \
 # Install tsx globally
 RUN npm install -g tsx
 
-# Security: non-root user
-RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 nexusbrain
+# Security: non-root user (Alpine-compatible syntax)
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nexusbrain -u 1001 -G nodejs
 
 WORKDIR /app
 
 # Copy entire built workspace (preserves hoisted symlinks)
 COPY --from=builder --chown=nexusbrain:nodejs /app ./
+
+# Copy docker entrypoint script (routes BRAIN_PROCESS to correct agent)
+COPY --chown=nexusbrain:nodejs docker-entrypoint.sh ./
+RUN chmod +x docker-entrypoint.sh
 
 USER nexusbrain
 
@@ -85,4 +89,6 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
   CMD curl -f http://localhost:3000/api/health || exit 1
 
-CMD ["tsx", "scripts/brain-orchestrator.ts"]
+# Entrypoint routes BRAIN_PROCESS env var to the correct agent script.
+# Default: runs brain-orchestrator.ts (the central nervous system).
+ENTRYPOINT ["./docker-entrypoint.sh"]
