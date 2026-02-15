@@ -8,9 +8,12 @@ echo "════════════════════════�
 
 # Configuration
 PROJECT_NAME="nexusbrain-image-builder"
-ECR_URI="848269696611.dkr.ecr.us-east-1.amazonaws.com/nexusbrain"
-REGION="us-east-1"
-SOURCE_LOCATION=$(pwd)
+REGION="${AWS_DEFAULT_REGION:-us-east-1}"
+AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text 2>/dev/null)
+ECR_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/nexusbrain"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+SOURCE_LOCATION="$PROJECT_ROOT"
 
 echo ""
 echo "📋 Configuration:"
@@ -112,7 +115,7 @@ echo "🚀 Starting CodeBuild to build Docker image..."
 
 # Zip source code for upload
 echo "📦 Preparing source code..."
-cd /Users/abhishek/Library/CloudStorage/GoogleDrive-abhishek@monetiz3.com/My\ Drive/Workspace\ -\ Monetize\ Organisation/02\ -\ Product/NexusBrain
+cd "$PROJECT_ROOT"
 
 # Create temporary directory for source
 TEMP_DIR=$(mktemp -d)
@@ -128,7 +131,7 @@ cp pnpm-workspace.yaml "$TEMP_DIR/" 2>/dev/null || true
 cp pnpm-lock.yaml "$TEMP_DIR/" 2>/dev/null || true
 cp .npmrc "$TEMP_DIR/" 2>/dev/null || true
 cp turbo.json "$TEMP_DIR/" 2>/dev/null || true
-cp tsconfig.json "$TEMP_DIR/" 2>/dev/null || true
+cp tsconfig.base.json "$TEMP_DIR/" 2>/dev/null || true
 
 # Create zip
 cd "$TEMP_DIR"

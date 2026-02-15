@@ -50,6 +50,7 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { createServer, type Server } from 'node:http';
 import { CronJob } from 'cron';
 
 // ── Load .env ───────────────────────────────────────────────────────────────
@@ -182,6 +183,7 @@ class BrainOrchestrator {
   private shutdownRequested = false;
   private healthCheckJob?: CronJob;
   private scheduleCheckJob?: CronJob;
+  private httpServer?: Server;
 
   constructor(config: BrainOrchestratorConfig) {
     this.config = config;
@@ -259,7 +261,7 @@ class BrainOrchestrator {
     // Slack connector (if configured)
     if (process.env.SLACK_BOT_TOKEN) {
       const { createProductionSlackConnector } = await import(
-        '../packages/memory-stack/src/connectors/slack-connector-production.js'
+        '../packages/memory-stack/src/connectors/slack-connector-production'
       );
 
       const slackConnector = createProductionSlackConnector({
@@ -277,7 +279,7 @@ class BrainOrchestrator {
     // Jira connector (if configured)
     if (process.env.JIRA_API_TOKEN && process.env.JIRA_HOST && process.env.JIRA_EMAIL) {
       const { createProductionJiraConnector } = await import(
-        '../packages/memory-stack/src/connectors/jira-connector-production.js'
+        '../packages/memory-stack/src/connectors/jira-connector-production'
       );
 
       const jiraConnector = createProductionJiraConnector({
@@ -297,7 +299,7 @@ class BrainOrchestrator {
     // GitHub connector (if configured)
     if (process.env.GITHUB_TOKEN) {
       const { createProductionGitHubConnector } = await import(
-        '../packages/memory-stack/src/connectors/github-connector-production.js'
+        '../packages/memory-stack/src/connectors/github-connector-production'
       );
 
       const githubConnector = createProductionGitHubConnector({
@@ -464,28 +466,40 @@ class BrainOrchestrator {
       const duration = ((Date.now() - startTime) / 1000).toFixed(1);
       log('EXECUTE', `Agent ${agent.name} [org:${orgLabel}] completed in ${duration}s (${result.signalsGenerated} signals, ${result.packsProcessed} packs, ${result.errorsEncountered.length} errors)`);
 
-      // Update brain health
-      await this.brainPipeline.recordAgentRun({
-        agentId: agent.name,
-        status: result.errorsEncountered.length === 0 ? 'success' : 'partial',
-        durationMs: Date.now() - startTime,
-        signalsGenerated: result.signalsGenerated,
-        packsProcessed: result.packsProcessed,
-        errors: result.errorsEncountered,
-      });
+      // Record agent run to Supabase for health tracking
+      try {
+        await this.config.supabase.from('agent_run_log').insert({
+          agent_id: agent.name,
+          organization_id: orgId,
+          status: result.errorsEncountered.length === 0 ? 'success' : 'partial',
+          duration_ms: Date.now() - startTime,
+          signals_generated: result.signalsGenerated,
+          packs_processed: result.packsProcessed,
+          errors: result.errorsEncountered,
+          ran_at: new Date().toISOString(),
+        });
+      } catch (logErr) {
+        log('EXECUTE', `Failed to log agent run (non-fatal): ${logErr}`);
+      }
     } catch (err) {
       const duration = ((Date.now() - startTime) / 1000).toFixed(1);
       logError('EXECUTE', `Agent ${agent.name} [org:${orgLabel}] failed after ${duration}s`, err);
 
-      // Log failure to brain health
-      await this.brainPipeline.recordAgentRun({
-        agentId: agent.name,
-        status: 'failed',
-        durationMs: Date.now() - startTime,
-        signalsGenerated: 0,
-        packsProcessed: 0,
-        errors: [err instanceof Error ? err.message : String(err)],
-      });
+      // Log failure to Supabase for health tracking
+      try {
+        await this.config.supabase.from('agent_run_log').insert({
+          agent_id: agent.name,
+          organization_id: orgId,
+          status: 'failed',
+          duration_ms: Date.now() - startTime,
+          signals_generated: 0,
+          packs_processed: 0,
+          errors: [err instanceof Error ? err.message : String(err)],
+          ran_at: new Date().toISOString(),
+        });
+      } catch (logErr) {
+        log('EXECUTE', `Failed to log agent run (non-fatal): ${logErr}`);
+      }
     }
   }
 
@@ -679,14 +693,39 @@ class BrainOrchestrator {
     // Continuous mode: Set up periodic jobs
     log('INIT', 'Starting continuous orchestration...');
 
+    // Start lightweight HTTP health server for Docker/ECS health checks
+    const port = parseInt(process.env.PORT || '3000', 10);
+    this.httpServer = createServer((req, res) => {
+      if (req.url === '/api/health' && req.method === 'GET') {
+        const health = {
+          status: 'ok',
+          service: 'nexusbrain-orchestrator',
+          version: '1.0.0',
+          timestamp: new Date().toISOString(),
+          uptime: process.uptime(),
+          shutdownRequested: this.shutdownRequested,
+        };
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(health));
+      } else {
+        res.writeHead(404);
+        res.end('Not Found');
+      }
+    });
+    this.httpServer.listen(port, () => {
+      log('INIT', `Health check HTTP server listening on port ${port}`);
+    });
+
     // Health check job (every 5 min)
-    this.healthCheckJob = new CronJob(`*/${this.config.healthCheckIntervalMs / 60000} * * * *`, async () => {
+    const healthMinutes = Math.max(1, Math.round(this.config.healthCheckIntervalMs / 60000));
+    this.healthCheckJob = new CronJob(`*/${healthMinutes} * * * *`, async () => {
       await this.healthCheck();
     });
     this.healthCheckJob.start();
 
     // Agent schedule check job (every 1 hour)
-    this.scheduleCheckJob = new CronJob(`*/${this.config.agentScheduleCheckIntervalMs / 3600000} * * * *`, async () => {
+    const scheduleMinutes = Math.max(1, Math.round(this.config.agentScheduleCheckIntervalMs / 60000));
+    this.scheduleCheckJob = new CronJob(`*/${scheduleMinutes} * * * *`, async () => {
       await this.runScheduledAgents();
     });
     this.scheduleCheckJob.start();
@@ -701,6 +740,7 @@ class BrainOrchestrator {
       console.log('\nShutdown requested. Finishing current operations...');
       this.healthCheckJob?.stop();
       this.scheduleCheckJob?.stop();
+      this.httpServer?.close();
       process.exit(0);
     });
 
@@ -709,6 +749,7 @@ class BrainOrchestrator {
       console.log('\nSIGTERM received. Shutting down...');
       this.healthCheckJob?.stop();
       this.scheduleCheckJob?.stop();
+      this.httpServer?.close();
       process.exit(0);
     });
 
