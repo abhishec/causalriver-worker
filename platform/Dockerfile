@@ -83,13 +83,19 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 ENV SKIP_ENV_VALIDATION=1
 
+# NEXT_PUBLIC_ vars must be available at build time (baked into client JS bundle).
+# Pass these via --build-arg when building the image, OR set as env vars in CI.
+# At runtime, server-side code reads them from process.env normally.
+ARG NEXT_PUBLIC_SUPABASE_URL
+ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
+ENV NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+
 # Create public directory if it doesn't exist
 RUN mkdir -p public
 
-# Build with standalone mode enabled + increased memory
-RUN NODE_OPTIONS="--max-old-space-size=4096" \
-    NEXT_PRIVATE_STANDALONE=true \
-    pnpm build
+# Build Next.js (standalone output is set in next.config.ts)
+RUN NODE_OPTIONS="--max-old-space-size=4096" pnpm build
 
 # ─────────────────────────────────────────────────────────────
 # Stage 3: Production runtime (minimal)
