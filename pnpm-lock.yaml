@@ -14,6 +14,9 @@ importers:
       cron:
         specifier: ^4.4.0
         version: 4.4.0
+      dotenv:
+        specifier: ^16.0.0
+        version: 16.6.1
       tsx:
         specifier: ^4.0.0
         version: 4.21.0

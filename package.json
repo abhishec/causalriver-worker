@@ -35,11 +35,19 @@
     "ingest:jira": "tsx scripts/run-batch-ingestion.ts --mode initial --sources jira --verbose",
     "ingest:github": "tsx scripts/run-batch-ingestion.ts --mode initial --sources github --verbose",
     "ingest:incremental": "tsx scripts/run-batch-ingestion.ts --mode incremental --sources slack,jira,github --verbose",
-    "ingest:resume": "tsx scripts/run-batch-ingestion.ts --resume"
+    "ingest:resume": "tsx scripts/run-batch-ingestion.ts --resume",
+    "monitor": "tsx scripts/monitor-and-heal.ts",
+    "monitor:once": "tsx scripts/monitor-and-heal.ts --once",
+    "monitor:verbose": "tsx scripts/monitor-and-heal.ts --verbose",
+    "reload:schema": "tsx scripts/reload-supabase-schema.ts",
+    "verify:schema": "tsx scripts/verify-supabase-schema.ts",
+    "verify:functions": "tsx scripts/test-all-edge-functions.ts",
+    "verify:complete": "tsx scripts/verify-supabase-schema.ts && tsx scripts/test-all-edge-functions.ts"
   },
   "devDependencies": {
     "@types/cron": "^2.4.3",
     "cron": "^4.4.0",
+    "dotenv": "^16.0.0",
     "tsx": "^4.0.0",
     "turbo": "^2.0.0",
     "typescript": "^5.5.0"

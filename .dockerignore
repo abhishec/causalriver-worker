@@ -1,50 +1,70 @@
-# Dependencies (reinstalled in container)
+# ═══════════════════════════════════════════════════════════════
+# Docker Build Context Exclusions
+# ═══════════════════════════════════════════════════════════════
+# These files/dirs are NEVER sent to the Docker daemon.
+# The Dockerfile builds everything from source inside the container.
+# ═══════════════════════════════════════════════════════════════
+
+# ── Node Modules (Docker installs its own via pnpm install) ──
 node_modules
 **/node_modules
 
-# Website (not needed for training)
-website/
-
-# Git
-.git
-.gitignore
-
-# IDE
-.vscode
-.idea
-
-# Build artifacts
+# ── Build Artifacts (Docker builds from source) ──
 **/dist
 **/.next
 **/out
 **/.turbo
+*.tsbuildinfo
 
-# Supabase (edge functions run on Supabase, not in container)
-supabase/
+# ── Environment & Secrets ──
+.env
+.env.*
+!.env.example
 
-# Documentation
+# ── Git ──
+.git
+.gitignore
+
+# ── IDE ──
+.vscode
+.idea
+*.swp
+*.swo
+
+# ── OS ──
+.DS_Store
+Thumbs.db
+
+# ── Logs ──
+*.log
+logs/
+
+# ── Test Files (not needed in production image) ──
+**/__tests__
+**/*.test.ts
+**/*.spec.ts
+**/coverage
+**/.nyc_output
+
+# ── Documentation ──
 docs/
 *.md
-!packages/**/README.md
+!README.md
 
-# Examples
+# ── Examples & Benchmarks (not needed in image) ──
 examples/
-
-# macOS launchd (replaced by EventBridge)
-launchd/
-
-# Test data and benchmarks (exclude data/cache, keep Python scripts)
 scripts/benchmarks/causeme/
 scripts/benchmarks/longmemeval/cache/
 scripts/benchmarks/longmemeval/data/
-scripts/benchmarks/longmemeval/results/
-scripts/benchmarks/longmemeval/nen/cache/
-scripts/benchmarks/longmemeval/nen/checkpoints/
-scripts/tests/
 
-# Environment files (secrets come from SSM)
-.env
-.env.*
+# ── Infrastructure (CDK, Terraform, etc.) ──
+infrastructure/
+supabase/
 
-# Logs
-*.log
+# ── Website (separate deployment) ──
+website/
+
+# ── Docker files themselves ──
+Dockerfile*
+docker-compose*
+.dockerignore

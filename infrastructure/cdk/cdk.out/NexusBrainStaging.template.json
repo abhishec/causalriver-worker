@@ -601,23 +601,6 @@
     "aws:cdk:path": "NexusBrainStaging/RedisCluster"
    }
   },
-  "ECRRepositoryF3A3832E": {
-   "Type": "AWS::ECR::Repository",
-   "Properties": {
-    "ImageScanningConfiguration": {
-     "ScanOnPush": true
-    },
-    "LifecyclePolicy": {
-     "LifecyclePolicyText": "{\"rules\":[{\"rulePriority\":1,\"description\":\"Keep last 10 images\",\"selection\":{\"tagStatus\":\"any\",\"countType\":\"imageCountMoreThan\",\"countNumber\":10},\"action\":{\"type\":\"expire\"}}]}"
-    },
-    "RepositoryName": "nexusbrain"
-   },
-   "UpdateReplacePolicy": "Retain",
-   "DeletionPolicy": "Retain",
-   "Metadata": {
-    "aws:cdk:path": "NexusBrainStaging/ECRRepository/Resource"
-   }
-  },
   "ClusterEB0386A7": {
    "Type": "AWS::ECS::Cluster",
    "Properties": {
@@ -723,12 +706,7 @@
         "ecr:GetDownloadUrlForLayer"
        ],
        "Effect": "Allow",
-       "Resource": {
-        "Fn::GetAtt": [
-         "ECRRepositoryF3A3832E",
-         "Arn"
-        ]
-       }
+       "Resource": "arn:aws:ecr:us-east-1:848269696611:repository/nexusbrain"
       },
       {
        "Action": "ecr:GetAuthorizationToken",
@@ -824,48 +802,11 @@
        "Fn::Join": [
         "",
         [
-         {
-          "Fn::Select": [
-           4,
-           {
-            "Fn::Split": [
-             ":",
-             {
-              "Fn::GetAtt": [
-               "ECRRepositoryF3A3832E",
-               "Arn"
-              ]
-             }
-            ]
-           }
-          ]
-         },
-         ".dkr.ecr.",
-         {
-          "Fn::Select": [
-           3,
-           {
-            "Fn::Split": [
-             ":",
-             {
-              "Fn::GetAtt": [
-               "ECRRepositoryF3A3832E",
-               "Arn"
-              ]
-             }
-            ]
-           }
-          ]
-         },
-         ".",
+         "848269696611.dkr.ecr.us-east-1.",
          {
           "Ref": "AWS::URLSuffix"
          },
-         "/",
-         {
-          "Ref": "ECRRepositoryF3A3832E"
-         },
-         ":latest"
+         "/nexusbrain:latest"
         ]
        ]
       },
@@ -1477,12 +1418,7 @@
         "ecr:UploadLayerPart"
        ],
        "Effect": "Allow",
-       "Resource": {
-        "Fn::GetAtt": [
-         "ECRRepositoryF3A3832E",
-         "Arn"
-        ]
-       }
+       "Resource": "arn:aws:ecr:us-east-1:848269696611:repository/nexusbrain"
       },
       {
        "Action": "ecr:GetAuthorizationToken",
@@ -1523,47 +1459,11 @@
         "Fn::Join": [
          "",
          [
-          {
-           "Fn::Select": [
-            4,
-            {
-             "Fn::Split": [
-              ":",
-              {
-               "Fn::GetAtt": [
-                "ECRRepositoryF3A3832E",
-                "Arn"
-               ]
-              }
-             ]
-            }
-           ]
-          },
-          ".dkr.ecr.",
-          {
-           "Fn::Select": [
-            3,
-            {
-             "Fn::Split": [
-              ":",
-              {
-               "Fn::GetAtt": [
-                "ECRRepositoryF3A3832E",
-                "Arn"
-               ]
-              }
-             ]
-            }
-           ]
-          },
-          ".",
+          "848269696611.dkr.ecr.us-east-1.",
           {
            "Ref": "AWS::URLSuffix"
           },
-          "/",
-          {
-           "Ref": "ECRRepositoryF3A3832E"
-          }
+          "/nexusbrain"
          ]
         ]
        }
@@ -1597,7 +1497,7 @@
   "CDKMetadata": {
    "Type": "AWS::CDK::Metadata",
    "Properties": {
-    "Analytics": "v2:deflate64:H4sIAAAAAAAA/31T227bMAz9lr4r3pB1QF9TtysCFKsRB30daJl1mdiSoYuLwvC/j5Id29mGPenw8CKSR9om2293ydcb+LAbWZ43NRVJnzuQZ8HUrx7lNulfWynSN/WapSLzRU0y94VCF7gFHbR3eISixoVfuJ21WhI40moODuBxn4XjJ7gncPgBnyIz1DFcCu+VQ8P4EjB2Mlk7x72+N6icyFF6Q+7zyWjfxh7+S+xVZdDav/jHSA/CojTobAMKKjS8lGhP4YwGgTVYR5Lvx6SfZ55vS4Mjrb3l9jlYco0DttqS0yZOsVjBbbnGGByTJ/gDTAVhh/b8gG+k6LLBPxmtHJBCs+Km3BxNR3JUZYK5hDqoEoqk2isehqDh/vSoXjwzzUrHRkc0iFpX3OWzruYZL3heRq2hLLi4kqSqjt/Orm05OQr/zL776BtnvLLXccSjqynmglf+I8+12vPKHAQsYeCdtjwoN8LqzROH4LiLa2Y8joZfPifkY96ygitiEFKXWHiqy6TPqEV2YWb0CWUsPcFhEAe02puwfJZTN4sZ1P+ni3M7KtHcg0XBvwYd/8aKrw45L961nsVSfH1ysl+67W3ynX/vyRJtDOtIDSaH8fwNX0xEY9oDAAA="
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/31T247TMBD9Ft5dgwpIvHbDsqq0giip9hU5zmyY1rEjX7Kqovw7YydNUkA8+cyZi2fO2Hu+//iFf3gn3txO1pedwooPpRfywoj6OYDc8+Glkyx71S95xvJQKZRlqDT4yK2oMMHDSVQKVn7lDs4ZicKj0UtwBI/HPB7fhX8SHt7EleUWe4Jr4aP2YAnfAqZOZuvgqddfLWjPSpDBor8+WRO61MN/iaNuLDj3F/+Y6JE5kBa8a4UWDVgSJdlzOKGRgRLOo6T7gQ/LzMttWXRkKjhqn4Kl5QV0xqE39vogHBDlKG8KSAkz/CZsI6Ju7vIVXlHjTbU/GaO9QA12w825Jdge5bSJGZZSqLiJWCQzQdMAKFo+FGbaWDpzQ9tNEk9oZMo01OWzaZa5bngRQBlRV1RcS9RNT+/l0HWUnJb9TL6H5JtmvLO3cUij6znmhjf+E8210XZjjkysYSJ442hQaoQ2tkwcg5MW98x0nCy9dkoop7xVgjtiZNLUUAVUNR9y7IBckFtzBplKz3AcWQHOBBvFp3WadjVJ43+7KLfHGmx6FfRTwNMPbOjqmPMj+C7QsjRdz8/ufb//xD/Tjz07xJ2lPWILvJjO3wgyYJXOAwAA"
    },
    "Metadata": {
     "aws:cdk:path": "NexusBrainStaging/CDKMetadata/Default"
@@ -1650,47 +1550,11 @@
     "Fn::Join": [
      "",
      [
-      {
-       "Fn::Select": [
-        4,
-        {
-         "Fn::Split": [
-          ":",
-          {
-           "Fn::GetAtt": [
-            "ECRRepositoryF3A3832E",
-            "Arn"
-           ]
-          }
-         ]
-        }
-       ]
-      },
-      ".dkr.ecr.",
-      {
-       "Fn::Select": [
-        3,
-        {
-         "Fn::Split": [
-          ":",
-          {
-           "Fn::GetAtt": [
-            "ECRRepositoryF3A3832E",
-            "Arn"
-           ]
-          }
-         ]
-        }
-       ]
-      },
-      ".",
+      "848269696611.dkr.ecr.us-east-1.",
       {
        "Ref": "AWS::URLSuffix"
       },
-      "/",
-      {
-       "Ref": "ECRRepositoryF3A3832E"
-      }
+      "/nexusbrain"
      ]
     ]
    },

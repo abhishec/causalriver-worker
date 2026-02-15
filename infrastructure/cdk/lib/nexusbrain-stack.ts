@@ -141,17 +141,15 @@ export class NexusBrainStack extends cdk.Stack {
     // ECR REPOSITORY
     // ═════════════════════════════════════════════════════════════
 
-    const ecrRepo = new ecr.Repository(this, 'ECRRepository', {
-      repositoryName: 'nexusbrain',
-      imageScanOnPush: true,
-      lifecycleRules: [
-        {
-          maxImageCount: 10,
-          description: 'Keep last 10 images',
-        },
-      ],
-      removalPolicy: cdk.RemovalPolicy.RETAIN,
-    });
+    // ═════════════════════════════════════════════════════════════
+    // ECR REPOSITORY (Use existing)
+    // ═════════════════════════════════════════════════════════════
+
+    const ecrRepo = ecr.Repository.fromRepositoryName(
+      this,
+      'ECRRepository',
+      'nexusbrain'
+    );
 
     // ═════════════════════════════════════════════════════════════
     // ECS CLUSTER

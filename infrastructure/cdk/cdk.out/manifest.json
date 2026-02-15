@@ -23,7 +23,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::848269696611:role/cdk-hnb659fds-deploy-role-848269696611-us-east-1",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::848269696611:role/cdk-hnb659fds-cfn-exec-role-848269696611-us-east-1",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-848269696611-us-east-1/fb964a57b84fc9c3717b911ae3b13c2965d0579313ab076deb1751bfd9130c8c.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-848269696611-us-east-1/d8d201dbaaae8fd1a58fa539508d0240c7e33966c60736eabaf3195345e478dd.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
@@ -239,12 +239,6 @@
             "data": "RedisCluster"
           }
         ],
-        "/NexusBrainProduction/ECRRepository/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "ECRRepositoryF3A3832E"
-          }
-        ],
         "/NexusBrainProduction/Cluster/Resource": [
           {
             "type": "aws:cdk:logicalId",
@@ -321,7 +315,7 @@
               "new BaseService2 (/Users/abhishek/Library/CloudStorage/GoogleDrive-abhishek@monetiz3.com/My Drive/Workspace - Monetize Organisation/02 - Product/NexusBrain/infrastructure/cdk/node_modules/aws-cdk-lib/aws-ecs/lib/base/base-service.js:1:12364)",
               "new FargateService2 (/Users/abhishek/Library/CloudStorage/GoogleDrive-abhishek@monetiz3.com/My Drive/Workspace - Monetize Organisation/02 - Product/NexusBrain/infrastructure/cdk/node_modules/aws-cdk-lib/aws-ecs/lib/fargate/fargate-service.js:1:6371)",
               "new FargateService2 (/Users/abhishek/Library/CloudStorage/GoogleDrive-abhishek@monetiz3.com/My Drive/Workspace - Monetize Organisation/02 - Product/NexusBrain/infrastructure/cdk/node_modules/aws-cdk-lib/core/lib/prop-injectable.js:1:681)",
-              "new NexusBrainStack (/Users/abhishek/Library/CloudStorage/GoogleDrive-abhishek@monetiz3.com/My Drive/Workspace - Monetize Organisation/02 - Product/NexusBrain/infrastructure/cdk/lib/nexusbrain-stack.ts:256:21)",
+              "new NexusBrainStack (/Users/abhishek/Library/CloudStorage/GoogleDrive-abhishek@monetiz3.com/My Drive/Workspace - Monetize Organisation/02 - Product/NexusBrain/infrastructure/cdk/lib/nexusbrain-stack.ts:254:21)",
               "Object.<anonymous> (/Users/abhishek/Library/CloudStorage/GoogleDrive-abhishek@monetiz3.com/My Drive/Workspace - Monetize Organisation/02 - Product/NexusBrain/infrastructure/cdk/bin/nexusbrain.ts:17:1)",
               "Module._compile (node:internal/modules/cjs/loader:1738:14)",
               "Module.m._compile (/Users/abhishek/Library/CloudStorage/GoogleDrive-abhishek@monetiz3.com/My Drive/Workspace - Monetize Organisation/02 - Product/NexusBrain/infrastructure/cdk/node_modules/ts-node/src/index.ts:1618:23)",
@@ -367,7 +361,7 @@
               "/Users/abhishek/Library/CloudStorage/GoogleDrive-abhishek@monetiz3.com/My Drive/Workspace - Monetize Organisation/02 - Product/NexusBrain/infrastructure/cdk/node_modules/aws-cdk-lib/aws-ec2/lib/connections.js:1:1972",
               "ReactiveList.forEachAndForever (/Users/abhishek/Library/CloudStorage/GoogleDrive-abhishek@monetiz3.com/My Drive/Workspace - Monetize Organisation/02 - Product/NexusBrain/infrastructure/cdk/node_modules/aws-cdk-lib/aws-ec2/lib/connections.js:1:6094)",
               "Connections.allowTo (/Users/abhishek/Library/CloudStorage/GoogleDrive-abhishek@monetiz3.com/My Drive/Workspace - Monetize Organisation/02 - Product/NexusBrain/infrastructure/cdk/node_modules/aws-cdk-lib/aws-ec2/lib/connections.js:1:1900)",
-              "new NexusBrainStack (/Users/abhishek/Library/CloudStorage/GoogleDrive-abhishek@monetiz3.com/My Drive/Workspace - Monetize Organisation/02 - Product/NexusBrain/infrastructure/cdk/lib/nexusbrain-stack.ts:301:25)",
+              "new NexusBrainStack (/Users/abhishek/Library/CloudStorage/GoogleDrive-abhishek@monetiz3.com/My Drive/Workspace - Monetize Organisation/02 - Product/NexusBrain/infrastructure/cdk/lib/nexusbrain-stack.ts:299:25)",
               "Object.<anonymous> (/Users/abhishek/Library/CloudStorage/GoogleDrive-abhishek@monetiz3.com/My Drive/Workspace - Monetize Organisation/02 - Product/NexusBrain/infrastructure/cdk/bin/nexusbrain.ts:17:1)",
               "Module._compile (node:internal/modules/cjs/loader:1738:14)",
               "Module.m._compile (/Users/abhishek/Library/CloudStorage/GoogleDrive-abhishek@monetiz3.com/My Drive/Workspace - Monetize Organisation/02 - Product/NexusBrain/infrastructure/cdk/node_modules/ts-node/src/index.ts:1618:23)",
@@ -508,7 +502,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::848269696611:role/cdk-hnb659fds-deploy-role-848269696611-us-east-1",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::848269696611:role/cdk-hnb659fds-cfn-exec-role-848269696611-us-east-1",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-848269696611-us-east-1/0d2697ef4d929ef57076c02531e5fca1cda94a7db30df09f3559e5ba7e546249.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-848269696611-us-east-1/43c773dc982b22e30a3a0ab55fce02af627f54041446b1eaae1137c1dca30870.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
@@ -724,12 +718,6 @@
             "data": "RedisCluster"
           }
         ],
-        "/NexusBrainStaging/ECRRepository/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "ECRRepositoryF3A3832E"
-          }
-        ],
         "/NexusBrainStaging/Cluster/Resource": [
           {
             "type": "aws:cdk:logicalId",
@@ -806,7 +794,7 @@
               "new BaseService2 (/Users/abhishek/Library/CloudStorage/GoogleDrive-abhishek@monetiz3.com/My Drive/Workspace - Monetize Organisation/02 - Product/NexusBrain/infrastructure/cdk/node_modules/aws-cdk-lib/aws-ecs/lib/base/base-service.js:1:12364)",
               "new FargateService2 (/Users/abhishek/Library/CloudStorage/GoogleDrive-abhishek@monetiz3.com/My Drive/Workspace - Monetize Organisation/02 - Product/NexusBrain/infrastructure/cdk/node_modules/aws-cdk-lib/aws-ecs/lib/fargate/fargate-service.js:1:6371)",
               "new FargateService2 (/Users/abhishek/Library/CloudStorage/GoogleDrive-abhishek@monetiz3.com/My Drive/Workspace - Monetize Organisation/02 - Product/NexusBrain/infrastructure/cdk/node_modules/aws-cdk-lib/core/lib/prop-injectable.js:1:681)",
-              "new NexusBrainStack (/Users/abhishek/Library/CloudStorage/GoogleDrive-abhishek@monetiz3.com/My Drive/Workspace - Monetize Organisation/02 - Product/NexusBrain/infrastructure/cdk/lib/nexusbrain-stack.ts:256:21)",
+              "new NexusBrainStack (/Users/abhishek/Library/CloudStorage/GoogleDrive-abhishek@monetiz3.com/My Drive/Workspace - Monetize Organisation/02 - Product/NexusBrain/infrastructure/cdk/lib/nexusbrain-stack.ts:254:21)",
               "Object.<anonymous> (/Users/abhishek/Library/CloudStorage/GoogleDrive-abhishek@monetiz3.com/My Drive/Workspace - Monetize Organisation/02 - Product/NexusBrain/infrastructure/cdk/bin/nexusbrain.ts:44:1)",
               "Module._compile (node:internal/modules/cjs/loader:1738:14)",
               "Module.m._compile (/Users/abhishek/Library/CloudStorage/GoogleDrive-abhishek@monetiz3.com/My Drive/Workspace - Monetize Organisation/02 - Product/NexusBrain/infrastructure/cdk/node_modules/ts-node/src/index.ts:1618:23)",
@@ -852,7 +840,7 @@
               "/Users/abhishek/Library/CloudStorage/GoogleDrive-abhishek@monetiz3.com/My Drive/Workspace - Monetize Organisation/02 - Product/NexusBrain/infrastructure/cdk/node_modules/aws-cdk-lib/aws-ec2/lib/connections.js:1:1972",
               "ReactiveList.forEachAndForever (/Users/abhishek/Library/CloudStorage/GoogleDrive-abhishek@monetiz3.com/My Drive/Workspace - Monetize Organisation/02 - Product/NexusBrain/infrastructure/cdk/node_modules/aws-cdk-lib/aws-ec2/lib/connections.js:1:6094)",
               "Connections.allowTo (/Users/abhishek/Library/CloudStorage/GoogleDrive-abhishek@monetiz3.com/My Drive/Workspace - Monetize Organisation/02 - Product/NexusBrain/infrastructure/cdk/node_modules/aws-cdk-lib/aws-ec2/lib/connections.js:1:1900)",
-              "new NexusBrainStack (/Users/abhishek/Library/CloudStorage/GoogleDrive-abhishek@monetiz3.com/My Drive/Workspace - Monetize Organisation/02 - Product/NexusBrain/infrastructure/cdk/lib/nexusbrain-stack.ts:301:25)",
+              "new NexusBrainStack (/Users/abhishek/Library/CloudStorage/GoogleDrive-abhishek@monetiz3.com/My Drive/Workspace - Monetize Organisation/02 - Product/NexusBrain/infrastructure/cdk/lib/nexusbrain-stack.ts:299:25)",
               "Object.<anonymous> (/Users/abhishek/Library/CloudStorage/GoogleDrive-abhishek@monetiz3.com/My Drive/Workspace - Monetize Organisation/02 - Product/NexusBrain/infrastructure/cdk/bin/nexusbrain.ts:44:1)",
               "Module._compile (node:internal/modules/cjs/loader:1738:14)",
               "Module.m._compile (/Users/abhishek/Library/CloudStorage/GoogleDrive-abhishek@monetiz3.com/My Drive/Workspace - Monetize Organisation/02 - Product/NexusBrain/infrastructure/cdk/node_modules/ts-node/src/index.ts:1618:23)",

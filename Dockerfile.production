@@ -1,78 +1,88 @@
-# NexusBrain Production Dockerfile
-# Multi-stage build for optimized image size
+# ═══════════════════════════════════════════════════════════════
+# NexusBrain Brain Orchestrator — AWS Production Image
+# ═══════════════════════════════════════════════════════════════
+#
+# Same as Dockerfile but optimized for AWS ECR/ECS deployment.
+# Referenced by: infrastructure/buildspec.yml, DEPLOY.sh, deploy-aws.sh
+#
+# Multi-stage build for pnpm monorepo with workspace links.
+# Scripts import from memory-stack/src (TypeScript source) via tsx.
 # ═══════════════════════════════════════════════════════════════
 
-# ═════════════════════════════════════════════════════════════
-# Stage 1: Dependencies
-# ═════════════════════════════════════════════════════════════
-FROM node:20-alpine AS deps
-
-# Install pnpm
-RUN corepack enable && corepack prepare pnpm@9.0.0 --activate
-
-WORKDIR /app
-
-# Copy package files
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY packages/memory-stack/package.json ./packages/memory-stack/
-COPY platform/package.json ./platform/
-
-# Install dependencies
-RUN pnpm install --frozen-lockfile --prod
-
-# ═════════════════════════════════════════════════════════════
-# Stage 2: Builder
-# ═════════════════════════════════════════════════════════════
+# ─────────────────────────────────────────────────────────────
+# Stage 1: Install dependencies + build
+# ─────────────────────────────────────────────────────────────
 FROM node:20-alpine AS builder
 
-RUN corepack enable && corepack prepare pnpm@9.0.0 --activate
+# Native module build tools (tree-sitter needs python3, make, g++)
+RUN apk add --no-cache python3 py3-pip make g++ curl github-cli && \
+    pip3 install --break-system-packages openai tqdm requests
+
+# Install pnpm (use npm — corepack can be flaky in CI/CodeBuild)
+RUN npm install -g pnpm@9
 
 WORKDIR /app
 
-# Copy dependencies from deps stage
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/packages/memory-stack/node_modules ./packages/memory-stack/node_modules
+# ── Layer 1: Workspace config (cached aggressively) ──
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml .npmrc tsconfig.base.json turbo.json ./
 
-# Copy source code
-COPY . .
+# ── Layer 2: All package.json files for workspace resolution ──
+COPY packages/memory-stack/package.json ./packages/memory-stack/
+COPY packages/memory-stack/tsconfig.json ./packages/memory-stack/
+COPY packages/domain-agents/package.json ./packages/domain-agents/
+COPY packages/client/package.json ./packages/client/
+COPY packages/mcp-server/package.json ./packages/mcp-server/
+COPY packages/slack-connector/package.json ./packages/slack-connector/
+COPY platform/package.json ./platform/
 
-# Build packages
-RUN pnpm build
+# ── Layer 3: Install ALL dependencies (not --prod!) ──
+# tsx needs TypeScript + type definitions at runtime.
+RUN pnpm install --frozen-lockfile
 
-# ═════════════════════════════════════════════════════════════
-# Stage 3: Runner
-# ═════════════════════════════════════════════════════════════
+# ── Layer 4: Copy source code ──
+COPY packages/memory-stack/src ./packages/memory-stack/src
+COPY packages/memory-stack/tsup.config.ts ./packages/memory-stack/
+COPY packages/domain-agents/ ./packages/domain-agents/
+COPY packages/client/ ./packages/client/
+COPY packages/mcp-server/ ./packages/mcp-server/
+COPY packages/slack-connector/ ./packages/slack-connector/
+COPY scripts/ ./scripts/
+
+# ── Layer 5: Build memory-stack ──
+RUN cd packages/memory-stack && pnpm build
+
+# Install tsx globally
+RUN npm install -g tsx
+
+# ─────────────────────────────────────────────────────────────
+# Stage 2: Production runtime
+# ─────────────────────────────────────────────────────────────
 FROM node:20-alpine AS runner
 
-# Install curl for health checks
-RUN apk add --no-cache curl
+# Runtime system dependencies
+RUN apk add --no-cache curl python3 py3-pip github-cli && \
+    pip3 install --break-system-packages openai tqdm requests
 
-# Create app user
+# Install tsx globally
+RUN npm install -g tsx
+
+# Security: non-root user
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nexusbrain
 
 WORKDIR /app
 
-# Copy built application
-COPY --from=builder --chown=nexusbrain:nodejs /app/packages/memory-stack/dist ./packages/memory-stack/dist
-COPY --from=builder --chown=nexusbrain:nodejs /app/scripts ./scripts
-COPY --from=builder --chown=nexusbrain:nodejs /app/node_modules ./node_modules
-COPY --from=builder --chown=nexusbrain:nodejs /app/packages/memory-stack/node_modules ./packages/memory-stack/node_modules
-COPY --from=builder --chown=nexusbrain:nodejs /app/package.json ./
-COPY --from=builder --chown=nexusbrain:nodejs /app/packages/memory-stack/package.json ./packages/memory-stack/
-
-# Install tsx for running TypeScript
-RUN corepack enable && corepack prepare pnpm@9.0.0 --activate && \
-    pnpm add -g tsx
+# Copy entire built workspace (preserves hoisted symlinks)
+COPY --from=builder --chown=nexusbrain:nodejs /app ./
 
 USER nexusbrain
 
-# Expose port
+ENV NODE_ENV=production
+ENV PORT=3000
+
 EXPOSE 3000
 
-# Health check
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
   CMD curl -f http://localhost:3000/api/health || exit 1
 
-# Start application
 CMD ["tsx", "scripts/brain-orchestrator.ts"]
