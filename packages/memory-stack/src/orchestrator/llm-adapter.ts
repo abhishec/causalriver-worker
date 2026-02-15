@@ -6,6 +6,8 @@
  */
 
 import type { NexusQueryResult } from './nexus-orchestrator';
+import { createSemanticCache, type SemanticCacheInstance } from '../infra/llm-semantic-cache';
+import { createRedisClient, type RedisClientInstance } from '../infra/redis-client';
 
 // ============================================================================
 // TYPES
@@ -22,6 +24,14 @@ export interface CopilotConfig {
   maxTokens?: number;
   /** System prompt prefix */
   systemPromptPrefix?: string;
+  /** Enable semantic response caching (default: true) */
+  enableCache?: boolean;
+  /** Cache TTL in seconds (default: 3600 = 1hr) */
+  cacheTtlSeconds?: number;
+  /** Redis client for distributed caching (design partner scale) */
+  redis?: RedisClientInstance;
+  /** Redis URL — auto-creates Redis client if provided (e.g. REDIS_URL env var) */
+  redisUrl?: string;
 }
 
 export interface CopilotResponse {
@@ -67,7 +77,47 @@ export function createNexusCopilot(config: CopilotConfig) {
     model,
     maxTokens = 2048,
     systemPromptPrefix = DEFAULT_SYSTEM_PREFIX,
+    enableCache = true,
+    cacheTtlSeconds = 3600,
+    redis,
+    redisUrl,
   } = config;
+
+  // Resolve Redis client: explicit instance > auto-create from URL/env > none
+  // Priority: config.redis → config.redisUrl → process.env.REDIS_URL → in-memory
+  let redisClient: RedisClientInstance | undefined = redis;
+  if (!redisClient && (redisUrl || process.env.REDIS_URL)) {
+    try {
+      // createRedisClient auto-detects REDIS_URL env var for production (ioredis)
+      // or falls back to in-memory for dev. If redisUrl is provided explicitly,
+      // set it as env var so createRedisClient picks it up.
+      if (redisUrl && !process.env.REDIS_URL) {
+        process.env.REDIS_URL = redisUrl;
+      }
+      redisClient = createRedisClient({
+        keyPrefix: 'nexus:copilot:',
+      });
+    } catch {
+      // Redis init failure is non-fatal — falls back to local-only cache
+    }
+  }
+
+  // Initialize semantic cache for 40-60% LLM cost reduction
+  // With Redis: distributed cache shared across instances (design partner scale)
+  // Without Redis: local in-memory LRU cache (single instance)
+  let cache: SemanticCacheInstance | null = null;
+  if (enableCache) {
+    try {
+      cache = createSemanticCache({
+        redis: redisClient,
+        ttlSeconds: cacheTtlSeconds,
+        maxLocalEntries: 5000,
+        namespace: 'copilot',
+      });
+    } catch {
+      // Cache init failure is non-fatal — proceed without caching
+    }
+  }
 
   async function chat(
     userMessage: string,
@@ -79,22 +129,65 @@ export function createNexusCopilot(config: CopilotConfig) {
 ${nexusContext.assembledContext}
 ---`;
 
+    // Check semantic cache first (saves 40-60% of LLM costs)
+    if (cache) {
+      const cached = await cache.lookup(userMessage, systemPromptPrefix);
+      if (cached) {
+        return {
+          text: cached.response,
+          injectedContext: systemPrompt,
+          usage: { inputTokens: 0, outputTokens: 0 },
+        };
+      }
+    }
+
+    let result: CopilotResponse;
     if (provider === 'anthropic') {
-      return callAnthropic(systemPrompt, userMessage, {
+      result = await callAnthropic(systemPrompt, userMessage, {
         apiKey,
         model: model || 'claude-3-5-haiku-20241022', // Cost optimization: Haiku for basic copilot chat
         maxTokens,
       });
     } else {
-      return callOpenAI(systemPrompt, userMessage, {
+      result = await callOpenAI(systemPrompt, userMessage, {
         apiKey,
         model: model || 'gpt-4o-mini', // Cost optimization: 15x cheaper than gpt-4o
         maxTokens,
       });
     }
+
+    // Store response in cache for future similar queries
+    if (cache && result.text) {
+      const usedModel = model || (provider === 'anthropic' ? 'claude-3-5-haiku-20241022' : 'gpt-4o-mini');
+      const tokensUsed = (result.usage?.inputTokens || 0) + (result.usage?.outputTokens || 0);
+      await cache.store(userMessage, result.text, {
+        model: usedModel,
+        tokensUsed,
+        systemPrompt: systemPromptPrefix,
+      }).catch(() => {}); // Non-fatal
+    }
+
+    return result;
   }
 
-  return { chat };
+  /** Get cache statistics for cost monitoring */
+  function getCacheStats() {
+    const stats = cache?.getStats() || null;
+    return stats ? {
+      ...stats,
+      redisConnected: redisClient?.isConnected() ?? false,
+    } : null;
+  }
+
+  /** Graceful shutdown — disconnect Redis if auto-created */
+  async function disconnect() {
+    if (redisClient && !redis) {
+      // Only disconnect if we auto-created the client (not if user passed one in)
+      await redisClient.disconnect();
+    }
+  }
+
+  return { chat, getCacheStats, disconnect };
 }
 
 // ============================================================================

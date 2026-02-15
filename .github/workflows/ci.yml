@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [18, 20, 22]
+        node-version: [20, 22]  # Node 18 EOL — dropped for security
 
     steps:
       - uses: actions/checkout@v4
@@ -41,6 +41,16 @@ jobs:
       - name: Check coverage
         run: pnpm test:coverage
         if: matrix.node-version == 20
+
+      - name: TypeScript type check (platform)
+        run: cd platform && pnpm exec tsc --noEmit
+        if: matrix.node-version == 20
+        continue-on-error: true  # Report but don't block until existing errors are fixed
+
+      - name: Lint platform
+        run: cd platform && pnpm lint
+        if: matrix.node-version == 20
+        continue-on-error: true  # Report but don't block until existing warnings are fixed
 
   # Week 2: Platform build verification
   platform-build:
