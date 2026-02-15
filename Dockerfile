@@ -34,9 +34,11 @@ RUN pnpm install --frozen-lockfile
 COPY packages/ packages/
 COPY scripts/ scripts/
 
-# Copy entrypoint
-COPY docker-entrypoint.sh /app/docker-entrypoint.sh
-RUN chmod +x /app/docker-entrypoint.sh
+# Install tsx for running TypeScript
+RUN npm install -g tsx
+
+# Install curl for health checks
+RUN apk add --no-cache curl
 
 # Security: Set ownership and switch to non-root user
 RUN chown -R nexusbrain:nodejs /app
@@ -44,6 +46,14 @@ USER nexusbrain
 
 # Default environment
 ENV NODE_ENV=production
-ENV BRAIN_PROCESS=trainer
+ENV PORT=3000
 
-ENTRYPOINT ["/app/docker-entrypoint.sh"]
+# Expose port
+EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
+  CMD curl -f http://localhost:3000/api/health || exit 1
+
+# Start brain orchestrator
+CMD ["tsx", "scripts/brain-orchestrator.ts"]
