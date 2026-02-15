@@ -269,7 +269,7 @@ export async function POST(request: NextRequest) {
       organizationId: orgId,
     });
 
-    const result = await mcpServer.callTool(toolName, toolArgs || {});
+    const result = await mcpServer.callTool(toolName, (toolArgs || {}) as Record<string, string>);
 
     return NextResponse.json({
       toolName,

@@ -253,7 +253,7 @@ export async function POST(request: NextRequest) {
     // Without this, SDK users get richer output than API clients, which is
     // an information asymmetry that breaks dashboard and integration use cases.
     if (result.cognitiveStack) {
-      const cs = result.cognitiveStack as Record<string, unknown>;
+      const cs = result.cognitiveStack as unknown as Record<string, unknown>;
       response.cognitiveStack = compact
         ? {
             // Compact mode: key summaries only
