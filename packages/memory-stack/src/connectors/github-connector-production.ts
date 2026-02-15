@@ -16,8 +16,8 @@
 
 import { Octokit } from '@octokit/rest';
 import PQueue from 'p-queue';
-import { retry } from 'exponential-backoff';
-import type { MotorCommandConnector } from '../orchestrator/motor-command-engine';
+import { backOff } from 'exponential-backoff';
+import type { ConnectorCapability, MotorCommand } from '../orchestrator/motor-command-engine';
 
 // ============================================================================
 // TYPES
@@ -91,7 +91,7 @@ interface CircuitBreakerState {
  * });
  * ```
  */
-export function createProductionGitHubConnector(config: GitHubConnectorConfig): MotorCommandConnector {
+export function createProductionGitHubConnector(config: GitHubConnectorConfig): ConnectorCapability {
   const {
     token,
     redis,
@@ -219,7 +219,7 @@ export function createProductionGitHubConnector(config: GitHubConnectorConfig): 
   // ──────────────────────────────────────────────────────────────────────
 
   async function createIssueWithRetry(payload: GitHubIssuePayload): Promise<any> {
-    return retry(
+    return backOff(
       async () => {
         checkCircuitBreaker();
 
@@ -264,7 +264,7 @@ export function createProductionGitHubConnector(config: GitHubConnectorConfig): 
           return true; // Retry other errors
         },
       }
-    ).catch((err) => {
+    ).catch((err: any) => {
       recordFailure();
       throw err;
     });
@@ -311,7 +311,7 @@ export function createProductionGitHubConnector(config: GitHubConnectorConfig): 
       'github_create_batch',
     ],
 
-    async execute(command): Promise<any> {
+    async execute(command: MotorCommand): Promise<any> {
       try {
         const { actionType, target, payload, commandId } = command;
 
@@ -354,7 +354,7 @@ export function createProductionGitHubConnector(config: GitHubConnectorConfig): 
             const { owner, repo } = parseRepoTarget(target);
 
             const result = await queue.add(() =>
-              retry(
+              backOff(
                 async () => {
                   checkCircuitBreaker();
                   const updateResult = await octokit.issues.update({
@@ -371,7 +371,7 @@ export function createProductionGitHubConnector(config: GitHubConnectorConfig): 
                   return updateResult;
                 },
                 { numOfAttempts: 3, startingDelay: 1000, timeMultiple: 2 }
-              ).catch((err) => {
+              ).catch((err: any) => {
                 recordFailure();
                 throw err;
               })
@@ -392,7 +392,7 @@ export function createProductionGitHubConnector(config: GitHubConnectorConfig): 
             const { owner, repo } = parseRepoTarget(target);
 
             const result = await queue.add(() =>
-              retry(
+              backOff(
                 async () => {
                   checkCircuitBreaker();
                   const commentResult = await octokit.issues.createComment({
@@ -405,7 +405,7 @@ export function createProductionGitHubConnector(config: GitHubConnectorConfig): 
                   return commentResult;
                 },
                 { numOfAttempts: 3, startingDelay: 1000, timeMultiple: 2 }
-              ).catch((err) => {
+              ).catch((err: any) => {
                 recordFailure();
                 throw err;
               })
@@ -430,7 +430,7 @@ export function createProductionGitHubConnector(config: GitHubConnectorConfig): 
             const { owner, repo } = parseRepoTarget(target);
 
             const result = await queue.add(() =>
-              retry(
+              backOff(
                 async () => {
                   checkCircuitBreaker();
                   const prResult = await octokit.pulls.create({
@@ -446,7 +446,7 @@ export function createProductionGitHubConnector(config: GitHubConnectorConfig): 
                   return prResult;
                 },
                 { numOfAttempts: 3, startingDelay: 1000, timeMultiple: 2 }
-              ).catch((err) => {
+              ).catch((err: any) => {
                 recordFailure();
                 throw err;
               })
@@ -472,7 +472,7 @@ export function createProductionGitHubConnector(config: GitHubConnectorConfig): 
             const { owner, repo } = parseRepoTarget(target);
 
             const result = await queue.add(() =>
-              retry(
+              backOff(
                 async () => {
                   checkCircuitBreaker();
                   const labelResult = await octokit.issues.addLabels({
@@ -485,7 +485,7 @@ export function createProductionGitHubConnector(config: GitHubConnectorConfig): 
                   return labelResult;
                 },
                 { numOfAttempts: 3, startingDelay: 1000, timeMultiple: 2 }
-              ).catch((err) => {
+              ).catch((err: any) => {
                 recordFailure();
                 throw err;
               })

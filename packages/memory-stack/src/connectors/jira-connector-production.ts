@@ -16,8 +16,8 @@
 
 import { Version3Client } from 'jira.js';
 import PQueue from 'p-queue';
-import { retry } from 'exponential-backoff';
-import type { MotorCommandConnector } from '../orchestrator/motor-command-engine';
+import { backOff } from 'exponential-backoff';
+import type { ConnectorCapability, MotorCommand } from '../orchestrator/motor-command-engine';
 
 // ============================================================================
 // TYPES
@@ -99,7 +99,7 @@ interface CircuitBreakerState {
  * });
  * ```
  */
-export function createProductionJiraConnector(config: JiraConnectorConfig): MotorCommandConnector {
+export function createProductionJiraConnector(config: JiraConnectorConfig): ConnectorCapability {
   const {
     host,
     email,
@@ -213,7 +213,7 @@ export function createProductionJiraConnector(config: JiraConnectorConfig): Moto
   // ──────────────────────────────────────────────────────────────────────
 
   async function createIssueWithRetry(payload: JiraIssuePayload): Promise<any> {
-    return retry(
+    return backOff(
       async () => {
         checkCircuitBreaker();
 
@@ -269,7 +269,7 @@ export function createProductionJiraConnector(config: JiraConnectorConfig): Moto
           return true; // Retry other errors
         },
       }
-    ).catch((err) => {
+    ).catch((err: any) => {
       recordFailure();
       throw err;
     });
@@ -315,7 +315,7 @@ export function createProductionJiraConnector(config: JiraConnectorConfig): Moto
       'jira_create_batch',
     ],
 
-    async execute(command): Promise<any> {
+    async execute(command: MotorCommand): Promise<any> {
       try {
         const { actionType, target, payload, commandId } = command;
 
@@ -357,7 +357,7 @@ export function createProductionJiraConnector(config: JiraConnectorConfig): Moto
             const { summary, description, priority, assignee, labels } = payload;
 
             const result = await queue.add(() =>
-              retry(
+              backOff(
                 async () => {
                   checkCircuitBreaker();
                   const updateResult = await client.issues.editIssue({
@@ -385,7 +385,7 @@ export function createProductionJiraConnector(config: JiraConnectorConfig): Moto
                   return updateResult;
                 },
                 { numOfAttempts: 3, startingDelay: 1000, timeMultiple: 2 }
-              ).catch((err) => {
+              ).catch((err: any) => {
                 recordFailure();
                 throw err;
               })
@@ -405,12 +405,12 @@ export function createProductionJiraConnector(config: JiraConnectorConfig): Moto
             const { comment } = payload;
 
             const result = await queue.add(() =>
-              retry(
+              backOff(
                 async () => {
                   checkCircuitBreaker();
                   const commentResult = await client.issueComments.addComment({
                     issueIdOrKey: target,
-                    body: {
+                    comment: {
                       type: 'doc',
                       version: 1,
                       content: [
@@ -420,12 +420,12 @@ export function createProductionJiraConnector(config: JiraConnectorConfig): Moto
                         },
                       ],
                     },
-                  });
+                  } as any);
                   recordSuccess();
                   return commentResult;
                 },
                 { numOfAttempts: 3, startingDelay: 1000, timeMultiple: 2 }
-              ).catch((err) => {
+              ).catch((err: any) => {
                 recordFailure();
                 throw err;
               })
@@ -445,7 +445,7 @@ export function createProductionJiraConnector(config: JiraConnectorConfig): Moto
             const { transitionId, transitionName } = payload;
 
             const result = await queue.add(() =>
-              retry(
+              backOff(
                 async () => {
                   checkCircuitBreaker();
 
@@ -470,7 +470,7 @@ export function createProductionJiraConnector(config: JiraConnectorConfig): Moto
                   return transitionResult;
                 },
                 { numOfAttempts: 3, startingDelay: 1000, timeMultiple: 2 }
-              ).catch((err) => {
+              ).catch((err: any) => {
                 recordFailure();
                 throw err;
               })

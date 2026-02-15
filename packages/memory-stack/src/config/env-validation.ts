@@ -20,11 +20,16 @@ import { z } from 'zod';
 const RequiredEnvSchema = z.object({
   // Supabase (required)
   SUPABASE_URL: z.string().url('SUPABASE_URL must be a valid URL'),
-  SUPABASE_KEY: z.string().min(32, 'SUPABASE_KEY must be at least 32 characters'),
+  // Accept either SUPABASE_KEY or SUPABASE_SERVICE_ROLE_KEY
+  SUPABASE_KEY: z.string().min(32, 'SUPABASE_KEY must be at least 32 characters').optional(),
+  SUPABASE_SERVICE_ROLE_KEY: z.string().min(32).optional(),
 
   // Organization ID (required)
   ORGANIZATION_ID: z.string().min(1, 'ORGANIZATION_ID is required'),
-});
+}).refine(
+  (data) => data.SUPABASE_KEY || data.SUPABASE_SERVICE_ROLE_KEY,
+  { message: 'Either SUPABASE_KEY or SUPABASE_SERVICE_ROLE_KEY is required', path: ['SUPABASE_KEY'] }
+);
 
 /**
  * Optional but recommended environment variables

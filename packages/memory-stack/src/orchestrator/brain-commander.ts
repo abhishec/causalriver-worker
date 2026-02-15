@@ -85,6 +85,10 @@ export interface BrainCommanderConfig {
   enableQualityGate?: boolean;
   /** Whether to run cognitive stack (L3-L15) on queries (default: true) */
   enableCognitiveStack?: boolean;
+  /** Max causal edges to fetch per query (default: 500). Increase for 10M+ signal orgs. */
+  maxCausalEdges?: number;
+  /** Max patterns/insights/rules to fetch per query (default: 200). */
+  maxMemoryItems?: number;
 }
 
 /** The unified result of any brain command */
@@ -226,6 +230,8 @@ export function createBrainCommander(config: BrainCommanderConfig) {
     enableActions = true,
     enableMotorCommands = false,
     actionTimeoutMs = 15000,
+    maxCausalEdges = 500,
+    maxMemoryItems = 200,
   } = config;
 
   // Internal subsystems
@@ -506,7 +512,7 @@ export function createBrainCommander(config: BrainCommanderConfig) {
     // Keep direct SQL for: rules (no federated function) and cascade rules (different table)
     const [causalFederated, rulesResult, patternsFederated, cascadeResult, insightsFederated] = await Promise.all([
       // Federated: causal relationships (ORG + CORE merged, deduplicated)
-      getFederatedCausalRelationships(organizationId, { limit: 300 })
+      getFederatedCausalRelationships(organizationId, { limit: maxCausalEdges })
         .then(r => r.merged.map(m => m.data))
         .catch(() => [] as any[]),
 
@@ -517,10 +523,10 @@ export function createBrainCommander(config: BrainCommanderConfig) {
         .or(orgFilter)
         .eq('memory_type', 'rule')
         .order('importance', { ascending: false })
-        .limit(100),
+        .limit(maxMemoryItems),
 
       // Federated: patterns (ORG + CORE merged, deduplicated by title)
-      getFederatedPatterns(organizationId, { memoryType: 'pattern', limit: 100 })
+      getFederatedPatterns(organizationId, { memoryType: 'pattern', limit: maxMemoryItems })
         .then(r => r.merged.map(m => m.data))
         .catch(() => [] as any[]),
 
@@ -530,10 +536,10 @@ export function createBrainCommander(config: BrainCommanderConfig) {
         .select('rule_name, trigger_domain, trigger_signal_type, propagation_chain, is_active')
         .or(orgFilter)
         .eq('is_active', true)
-        .limit(50),
+        .limit(maxMemoryItems),
 
       // Federated: insights (ORG + CORE merged, deduplicated by title)
-      getFederatedPatterns(organizationId, { memoryType: 'insight', limit: 100 })
+      getFederatedPatterns(organizationId, { memoryType: 'insight', limit: maxMemoryItems })
         .then(r => r.merged.map(m => m.data))
         .catch(() => [] as any[]),
     ]);

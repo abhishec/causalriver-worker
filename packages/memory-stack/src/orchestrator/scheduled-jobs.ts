@@ -31,6 +31,8 @@ import { createContinuousLearner, createEmptyDAG, loadDAGFromDatabase } from '..
 import { createThresholdOptimizer, type ThresholdOptimizerConfig, type ThresholdOptimizationResult } from '../causality/threshold-optimizer';
 import type { WeightUpdate, RelationshipAccuracyMetrics } from '../causality/feedback-loop';
 import { createUpstreamPromoter, type UpstreamPromotionResult } from '../federation/upstream-promoter';
+import { streamInBatches } from '../infra/streaming-batcher';
+import { createBrainPipeline, type BrainCycleReport } from './brain-pipeline';
 
 // ============================================================================
 // TYPES
@@ -116,28 +118,35 @@ export function createScheduledJobs(
       lostRelationships: CausalRelationship[];
       totalDiscovered: number;
     }> {
-      // Fetch ALL signals with pagination — Supabase default limit is 1000 rows
+      // Cursor-based streaming: OOM-safe at 10M+ signals
+      // Uses id-based cursor instead of offset (O(1) vs O(n) per page)
       const allSignals: any[] = [];
-      const PAGE_SIZE = 1000; // Supabase default max per request
-      let offset = 0;
-      let hasMore = true;
+      await streamInBatches(
+        async (cursor, batchSize) => {
+          let query = supabase
+            .from('cross_domain_signals')
+            .select('id, source_domain, signal_type, signal_value, signal_timestamp, created_at')
+            .eq('organization_id', organizationId)
+            .order('id', { ascending: true })
+            .limit(batchSize);
 
-      while (hasMore) {
-        const { data, error: fetchError } = await supabase
-          .from('cross_domain_signals')
-          .select('source_domain, signal_type, signal_value, signal_timestamp, created_at')
-          .eq('organization_id', organizationId)
-          .order('signal_timestamp', { ascending: true })
-          .range(offset, offset + PAGE_SIZE - 1);
+          if (cursor) {
+            query = query.gt('id', cursor);
+          }
 
-        if (fetchError || !data || data.length === 0) {
-          hasMore = false;
-        } else {
-          allSignals.push(...data);
-          offset += data.length;
-          if (data.length < PAGE_SIZE) hasMore = false;
-        }
-      }
+          const { data, error: fetchError } = await query;
+          if (fetchError || !data || data.length === 0) {
+            return { items: [], nextCursor: null, hasMore: false };
+          }
+          return {
+            items: data,
+            nextCursor: data[data.length - 1].id,
+            hasMore: data.length === batchSize,
+          };
+        },
+        async (batch) => { allSignals.push(...batch); },
+        { batchSize: 1000, batchDelayMs: 10 },
+      );
 
       const signals = allSignals;
       if (signals.length === 0) {
@@ -618,6 +627,47 @@ export function createScheduledJobs(
       return { signalsDeleted, predictionsDeleted, weightsDeleted, memoriesDeleted, eventsDeleted };
     },
 
+    // ── Brain Consolidation Cycle Job ────────────────────────────────
+
+    /**
+     * Run a full brain consolidation cycle (sleep + dream + learn + cognitive stack).
+     *
+     * This is THE missing link: scheduled jobs ran causal discovery but never
+     * triggered the full brain pipeline. This job instantiates the pipeline,
+     * runs a full cycle (consolidation → DMN → learning → cognitive stack L3-L15),
+     * persists LEAP states, and returns the cycle report.
+     *
+     * Recommended: daily via cron (after connector sync completes).
+     * For design partners with 500K+ codebase + 1M+ Slack: run every 6 hours.
+     */
+    async runConsolidationCycle(organizationId: string): Promise<{
+      status: string;
+      totalDurationMs: number;
+      signalsProcessed: number;
+      causalEdgesDiscovered: number;
+      cognitiveStackRan: boolean;
+      leapStatesPersisted: boolean;
+      errors: string[];
+    }> {
+      const pipeline = createBrainPipeline({
+        supabase,
+        organizationId,
+        verbose: true,
+      });
+
+      const report: BrainCycleReport = await pipeline.runFullCycle();
+
+      return {
+        status: report.status,
+        totalDurationMs: report.totalDurationMs,
+        signalsProcessed: report.consolidation?.report.stats.signalsProcessed ?? 0,
+        causalEdgesDiscovered: report.consolidation?.report.stats.causalEdgesDiscovered ?? 0,
+        cognitiveStackRan: report.cognitiveStack !== null,
+        leapStatesPersisted: report.cognitiveStack !== null, // persisted if cognitive stack ran
+        errors: report.errors,
+      };
+    },
+
     // ── Combined Daily Job ───────────────────────────────────────────
 
     /**
@@ -639,6 +689,7 @@ export function createScheduledJobs(
       weights: JobResult<{ weightsUpdated: WeightUpdate[]; degradingRelationships: RelationshipAccuracyMetrics[] }>;
       decay: JobResult<{ edgesDecayed: number; edgesRemoved: number }>;
       discovery: JobResult<{ newRelationships: CausalRelationship[]; lostRelationships: CausalRelationship[]; totalDiscovered: number }>;
+      consolidation: JobResult<{ status: string; totalDurationMs: number; signalsProcessed: number; causalEdgesDiscovered: number; cognitiveStackRan: boolean; leapStatesPersisted: boolean; errors: string[] }>;
       federation: JobResult<UpstreamPromotionResult>;
       retention: JobResult<DataRetentionResult>;
       trainingPacks: JobResult<{ packsApplied: number; chainsCreated: number; rulesCreated: number; errors: string[] }>;
@@ -654,10 +705,14 @@ export function createScheduledJobs(
         'weights', jobTimeout
       );
 
-      // Phase B: Independent jobs (decay + discovery in parallel)
-      const [decaySettled, discoverySettled] = await Promise.allSettled([
+      // Phase B: Independent jobs (decay + discovery + consolidation in parallel)
+      // Consolidation runs the full brain pipeline: consolidation → DMN → learning → L3-L15 cognitive stack
+      // Uses longer timeout (10 min) since it's the heaviest job
+      const consolidationTimeout = Math.max(jobTimeout, 600_000); // At least 10 min for large datasets
+      const [decaySettled, discoverySettled, consolidationSettled] = await Promise.allSettled([
         safeRun(() => this.runEvidenceDecay(organizationId), 'decay', jobTimeout),
         safeRun(() => this.runDailyCausalDiscovery(organizationId), 'discovery', jobTimeout),
+        safeRun(() => this.runConsolidationCycle(organizationId), 'consolidation', consolidationTimeout),
       ]);
       const decay = decaySettled.status === 'fulfilled'
         ? decaySettled.value
@@ -665,6 +720,9 @@ export function createScheduledJobs(
       const discovery = discoverySettled.status === 'fulfilled'
         ? discoverySettled.value
         : { error: `[discovery] ${(discoverySettled as PromiseRejectedResult).reason?.message || 'unknown'}` };
+      const consolidation = consolidationSettled.status === 'fulfilled'
+        ? consolidationSettled.value
+        : { error: `[consolidation] ${(consolidationSettled as PromiseRejectedResult).reason?.message || 'unknown'}` };
 
       // Phase C: Post-discovery jobs (federation + retention + training packs + prediction outcomes in parallel)
       const [fedSettled, retentionSettled, trainingPacksSettled, predOutcomeSettled] = await Promise.allSettled([
@@ -686,7 +744,7 @@ export function createScheduledJobs(
         ? predOutcomeSettled.value
         : { error: `[predictionOutcomes] ${(predOutcomeSettled as PromiseRejectedResult).reason?.message || 'unknown'}` };
 
-      return { verifications, weights, decay, discovery, federation, retention, trainingPacks, predictionOutcomes };
+      return { verifications, weights, decay, discovery, consolidation, federation, retention, trainingPacks, predictionOutcomes };
     },
   };
 }

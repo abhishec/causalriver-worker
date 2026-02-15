@@ -16,8 +16,8 @@
 
 import { WebClient, LogLevel, type ChatPostMessageArguments } from '@slack/web-api';
 import PQueue from 'p-queue';
-import { retry } from 'exponential-backoff';
-import type { MotorCommandConnector } from '../orchestrator/motor-command-engine';
+import { backOff } from 'exponential-backoff';
+import type { ConnectorCapability, MotorCommand } from '../orchestrator/motor-command-engine';
 
 // ============================================================================
 // TYPES
@@ -85,7 +85,7 @@ interface CircuitBreakerState {
  * });
  * ```
  */
-export function createProductionSlackConnector(config: SlackConnectorConfig): MotorCommandConnector {
+export function createProductionSlackConnector(config: SlackConnectorConfig): ConnectorCapability {
   const {
     token,
     redis,
@@ -188,7 +188,7 @@ export function createProductionSlackConnector(config: SlackConnectorConfig): Mo
   // ──────────────────────────────────────────────────────────────────────
 
   async function sendMessageWithRetry(payload: SlackMessagePayload): Promise<any> {
-    return retry(
+    return backOff(
       async () => {
         checkCircuitBreaker();
 
@@ -223,7 +223,7 @@ export function createProductionSlackConnector(config: SlackConnectorConfig): Mo
           return true; // Retry other errors
         },
       }
-    ).catch((err) => {
+    ).catch((err: any) => {
       recordFailure();
       throw err;
     });
@@ -269,7 +269,7 @@ export function createProductionSlackConnector(config: SlackConnectorConfig): Mo
       'slack_send_batch',
     ],
 
-    async execute(command): Promise<any> {
+    async execute(command: MotorCommand): Promise<any> {
       try {
         const { actionType, target, payload, commandId } = command;
 

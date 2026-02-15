@@ -731,7 +731,7 @@ function handleKnowledge(state: JarvisState, q: string, lines: string[]): string
         lines.push(`  ${C.bold}Works closely with:${C.reset}`);
         for (const c of collabs.slice(0, 5)) {
           const other = c.contributorA !== name ? c.contributorA : c.contributorB;
-          lines.push(`    @${other} — ${c.interactionCount} interactions`);
+          lines.push(`    @${other} — ${c.count} interactions`);
         }
       }
       return lines.join('\n');
