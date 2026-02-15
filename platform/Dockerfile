@@ -45,8 +45,10 @@ RUN pnpm build
 WORKDIR /app/platform
 ENV NEXT_TELEMETRY_DISABLED 1
 ENV NODE_ENV production
+ENV SKIP_ENV_VALIDATION 1
 
-RUN pnpm build
+# Increase Node memory for build and disable static page generation timeout
+RUN NODE_OPTIONS="--max-old-space-size=4096" NEXT_PRIVATE_STANDALONE=true pnpm build
 
 # Stage 3: Production image
 FROM base AS runner
