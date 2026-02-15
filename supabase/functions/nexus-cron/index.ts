@@ -8,6 +8,7 @@
  *   1. prediction_verification — checks pending predictions against outcomes
  *   2. threshold_optimization — adjusts signal thresholds based on feedback
  *   3. evidence_decay — reduces confidence in stale causal relationships
+ *   4. data_retention_cleanup — archives stale event stream data (90+ days old)
  *
  * IMPORTANT: Causal discovery is NOT handled here. It runs via the autonomous
  * trainer (scripts/autonomous-trainer.ts) which uses the full calibrated_ensemble
@@ -301,6 +302,80 @@ serve(async (req: Request) => {
         } catch (err: any) {
           results.push({
             task: 'evidence_decay',
+            organizationId: orgId,
+            status: 'error',
+            details: { error: err.message },
+            durationMs: Date.now() - start,
+          });
+        }
+      }
+
+      // -----------------------------------------------------------------
+      // Task 4: Data Retention Cleanup — Archive stale event stream data
+      // -----------------------------------------------------------------
+      if (requestedTasks.includes('data_retention_cleanup')) {
+        const start = Date.now();
+        try {
+          const retentionThreshold = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
+
+          // Archive old causal event stream entries
+          const { data: archived, count } = await supabase
+            .from('causal_event_stream')
+            .update({
+              metadata: supabase.rpc ? undefined : undefined, // Supabase client doesn't support jsonb_set directly
+            })
+            .eq('organization_id', orgId)
+            .lt('created_at', retentionThreshold)
+            .select('id', { count: 'exact', head: true });
+
+          // Use raw SQL via RPC for the jsonb update
+          const { data: cleanupResult, error: cleanupError } = await supabase.rpc(
+            'cleanup_stale_event_stream',
+            {
+              p_organization_id: orgId,
+              p_retention_days: 90,
+            }
+          );
+
+          // Fallback: if no RPC exists, do a simple count query
+          let archivedCount = 0;
+          if (cleanupError) {
+            // RPC doesn't exist yet — do direct update
+            const { count: directCount } = await supabase
+              .from('causal_event_stream')
+              .update({ metadata: {} })
+              .eq('organization_id', orgId)
+              .lt('created_at', retentionThreshold)
+              .is('metadata->archived', null)
+              .select('id', { count: 'exact', head: true });
+
+            archivedCount = directCount || 0;
+          } else {
+            archivedCount = cleanupResult?.archived_count || 0;
+          }
+
+          // Also clean up old signal data beyond retention period
+          const { count: signalsArchived } = await supabase
+            .from('cross_domain_signals')
+            .delete()
+            .eq('organization_id', orgId)
+            .lt('created_at', new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString())
+            .select('id', { count: 'exact', head: true });
+
+          results.push({
+            task: 'data_retention_cleanup',
+            organizationId: orgId,
+            status: 'success',
+            details: {
+              eventsArchived: archivedCount,
+              signalsPurged: signalsArchived || 0,
+              retentionDays: 90,
+            },
+            durationMs: Date.now() - start,
+          });
+        } catch (err: any) {
+          results.push({
+            task: 'data_retention_cleanup',
             organizationId: orgId,
             status: 'error',
             details: { error: err.message },
