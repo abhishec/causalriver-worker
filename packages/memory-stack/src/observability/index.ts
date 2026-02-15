@@ -26,3 +26,15 @@ export {
   type HistogramMetric,
   type Metric,
 } from './metrics';
+
+export {
+  createSEMetrics,
+  getDefaultSEMetrics,
+  type SEMetricsConfig,
+  type PRAnalysisMetrics,
+  type FeatureBuildMetrics,
+  type TechDebtMetrics,
+  type CodebaseHealthMetrics,
+  type PredictionAccuracyMetrics,
+  type SEMetricsSummary,
+} from './se-metrics';

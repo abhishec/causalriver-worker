@@ -20,6 +20,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { createBrainCommander, type CommandResult } from './brain-commander';
 import type { NexusRepository } from '../persistence/supabase-repository';
+import { createSEMetrics } from '../observability/se-metrics';
 
 // ============================================================================
 // TYPES
@@ -145,6 +146,9 @@ export function createPRAnalyzer(config: PRAnalysisConfig) {
     enableQualityGate: true,
   });
 
+  // Initialize SE-aaS metrics tracker
+  const seMetrics = createSEMetrics({ organizationId });
+
   return {
     /**
      * Analyze a pull request and generate review comments
@@ -209,6 +213,15 @@ export function createPRAnalyzer(config: PRAnalysisConfig) {
         strengths,
       });
 
+      // 12. Record SE-aaS observability metrics (BLOCKER 4 ✅)
+      const analysisTimeMs = Date.now() - startTime;
+      seMetrics.recordPRAnalysis({
+        analysisTimeMs,
+        riskLevel,
+        issuesDetected: issues.length,
+        reviewersSuggested: reviewers.length,
+      });
+
       return {
         riskLevel,
         riskScore,
@@ -221,7 +234,7 @@ export function createPRAnalyzer(config: PRAnalysisConfig) {
         reviewComment,
         meta: {
           analyzedAt: new Date().toISOString(),
-          analysisTimeMs: Date.now() - startTime,
+          analysisTimeMs,
           cognitiveLayersUsed: brainResult.cognitiveStack ? 13 : 0,
         },
       };

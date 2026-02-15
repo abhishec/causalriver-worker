@@ -1519,12 +1519,21 @@ export {
   getDefaultLogger,
   createMetrics,
   getDefaultMetrics,
+  createSEMetrics,
+  getDefaultSEMetrics,
   type NexusLogger,
   type LoggerConfig,
   type LogLevel,
   type NexusMetrics,
   type MetricsSnapshot,
   type MetricLabels,
+  type SEMetricsConfig,
+  type PRAnalysisMetrics,
+  type FeatureBuildMetrics,
+  type TechDebtMetrics,
+  type CodebaseHealthMetrics,
+  type PredictionAccuracyMetrics,
+  type SEMetricsSummary,
 } from './observability';
 
 // ============================================================================
