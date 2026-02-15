@@ -918,6 +918,21 @@ export {
   type AuditLog,
 } from './orchestrator/se-aas-security';
 
+// Agent Result Processor — Wires Agent Discoveries into the Brain Learning Loop
+// Extracts predictions, causal discoveries, and signals from agent results
+// and feeds them into the brain's learning systems.
+export {
+  extractAgentFindings,
+  processAgentFindings,
+  type ExtractedAgentFindings,
+  type AgentPrediction,
+  type AgentDiscovery,
+  type AgentSignal,
+  type AgentMotorCommand,
+  type LearningLoopReceivers,
+  type ProcessingResult,
+} from './orchestrator/agent-result-processor';
+
 // Brain Context Builder — Universal Prefrontal Cortex ("Working Memory Assembly")
 // Assembles context from ALL brain regions + trained knowledge into LLM-ready prompts.
 // Works for any domain: code, finance, research, legal, operations.

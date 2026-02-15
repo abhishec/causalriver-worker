@@ -39,6 +39,17 @@ import {
   handleImpactAnalysis,
 } from './handlers.js';
 
+import {
+  handleJarvisReadTicket,
+  handleJarvisGetContext,
+  handleJarvisSubmitAnalysis,
+  handleJarvisListRuns,
+  buildJarvisAnalyzePrompt,
+  type SupabaseConfig,
+} from './jarvis-handlers.js';
+
+import { getJiraConfig } from './jira-client.js';
+
 // ============================================================================
 // CONFIG
 // ============================================================================
@@ -276,6 +287,90 @@ async function main(): Promise<void> {
       domain: z.string().optional().describe('Filter analysis to a specific knowledge domain'),
     },
     async (args) => handleImpactAnalysis(client, args),
+  );
+
+  // ── DEVELOPER JARVIS TOOLS ───────────────────────────────────────────
+  // Brain-powered root cause analysis via Jira + codebase exploration.
+  // Requires: JIRA_BASE_URL, JIRA_EMAIL, JIRA_API_TOKEN (optional — tools
+  // degrade gracefully if not set).
+
+  const supabaseConfig: SupabaseConfig = {
+    supabaseUrl: config.supabaseUrl,
+    supabaseKey: config.supabaseKey,
+    orgId: config.orgId,
+  };
+
+  const jiraConfig = getJiraConfig();
+  if (!jiraConfig) {
+    console.error(
+      'Jira credentials not found (JIRA_BASE_URL, JIRA_EMAIL, JIRA_API_TOKEN). ' +
+      'Jarvis tools will prompt for configuration when called. Other tools work normally.',
+    );
+  }
+
+  server.tool(
+    'nexus_dev_read_ticket',
+    'Fetch a Jira ticket\'s full details — summary, description, status, assignee, components, recent comments, linked issues. Use this to understand a bug report before codebase exploration.',
+    {
+      jira_key: z.string().describe('Jira issue key (e.g. FIN-9800, ENG-1234)'),
+    },
+    async (args) => handleJarvisReadTicket(args),
+  );
+
+  server.tool(
+    'nexus_dev_get_context',
+    'Get brain-augmented context for a Jira ticket — past analyses for the same project, causal patterns, organizational memory. Call this before starting your root cause analysis.',
+    {
+      jira_key: z.string().describe('Jira issue key'),
+      components: z.string().optional().describe('Comma-separated component/area names for more targeted brain context'),
+    },
+    async (args) => handleJarvisGetContext(client, supabaseConfig, args),
+  );
+
+  server.tool(
+    'nexus_dev_submit_analysis',
+    'Record a completed root cause analysis. Saves to the brain database, posts a formatted comment to Jira, and emits a brain signal for learning. Call this after you\'ve finished investigating.',
+    {
+      jira_key: z.string().describe('Jira issue key that was analyzed'),
+      analysis_brief: z.string().describe('Markdown analysis with ## Issue Summary, ## Root Cause, ## Recommended Fix sections'),
+      root_cause: z.object({
+        file: z.string().optional().describe('File path of the root cause'),
+        function: z.string().optional().describe('Function or method name'),
+        line: z.number().optional().describe('Line number'),
+        description: z.string().describe('Root cause description'),
+      }).describe('Root cause location and description'),
+      key_files: z.array(z.object({
+        path: z.string().describe('File path'),
+        lines: z.string().optional().describe('Relevant line range (e.g. "42-58")'),
+        reason: z.string().describe('Why this file is relevant'),
+      })).describe('Key files examined during analysis'),
+      confidence: z.number().min(0).max(1).describe('Confidence score (0.0–1.0)'),
+      suggested_fix: z.string().optional().describe('One-liner fix suggestion'),
+      post_to_jira: z.boolean().optional().describe('Post analysis as Jira comment (default: true)'),
+    },
+    async (args) => handleJarvisSubmitAnalysis(client, supabaseConfig, args),
+  );
+
+  server.tool(
+    'nexus_dev_list_runs',
+    'List past Developer Jarvis analysis runs. Filter by Jira key or status. Shows confidence scores, root cause files, and timestamps.',
+    {
+      jira_key: z.string().optional().describe('Filter by specific Jira key'),
+      limit: z.number().optional().describe('Max results (default: 10)'),
+      status: z.string().optional().describe('Filter by status: completed, failed, verified'),
+    },
+    async (args) => handleJarvisListRuns(supabaseConfig, args),
+  );
+
+  // ── PROMPT: nexus-dev-analyze ──────────────────────────────────────────
+
+  server.prompt(
+    'nexus-dev-analyze',
+    'Analyze a Jira ticket for root cause. Pre-fetches ticket details and brain context, then provides a structured analysis prompt. Use this to start a Developer Jarvis investigation session.',
+    {
+      jira_key: z.string().describe('Jira issue key to analyze (e.g. FIN-9800)'),
+    },
+    async ({ jira_key }) => buildJarvisAnalyzePrompt(client, supabaseConfig, { jira_key }),
   );
 
   // ── RESOURCE: nexusbrain://relationships ───────────────────────────────
