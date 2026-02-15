@@ -3,6 +3,10 @@ import { TopBar } from "@/components/layout/TopBar";
 import { CopilotOverlay } from "@/components/copilot/CopilotOverlay";
 import { OrgProvider } from "@/lib/org-context";
 
+// Force dynamic rendering for all dashboard pages (require Supabase at runtime)
+export const dynamic = 'force-dynamic';
+export const dynamicParams = true;
+
 export default function DashboardLayout({
   children,
 }: {
