@@ -1,0 +1,482 @@
+openapi: 3.0.3
+info:
+  title: NexusBrain API
+  description: |
+    **NexusBrain Causal Intelligence Platform API**
+
+    Production-ready API for querying causal insights, executing motor commands,
+    and managing the autonomous learning brain.
+
+    **Features:**
+    - 10M+ signal scale
+    - Real-time causal discovery
+    - Multi-domain forecasting
+    - Motor command execution (Slack, Jira, GitHub)
+    - Prediction calibration loop
+
+    **Authentication:** API Key (X-API-Key header) or Supabase JWT
+  version: 1.0.0
+  contact:
+    name: NexusBrain Support
+    email: support@nexusbrain.ai
+    url: https://nexusbrain.ai
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.nexusbrain.ai/v1
+    description: Production
+  - url: https://staging-api.nexusbrain.ai/v1
+    description: Staging
+  - url: http://localhost:3000/v1
+    description: Local Development
+
+tags:
+  - name: Health
+    description: System health and status
+  - name: Brain
+    description: Brain intelligence and queries
+  - name: Motor
+    description: Motor command execution
+  - name: Signals
+    description: Signal ingestion and management
+  - name: Predictions
+    description: Prediction tracking and calibration
+
+security:
+  - ApiKeyAuth: []
+  - BearerAuth: []
+
+paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: Health check
+      description: Returns system health status including database and Redis connectivity
+      operationId: getHealth
+      security: []  # Public endpoint
+      responses:
+        '200':
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '503':
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /brain/status:
+    get:
+      tags: [Brain]
+      summary: Brain status
+      description: Get current brain health, signal counts, and learning status
+      operationId: getBrainStatus
+      parameters:
+        - name: organizationId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Brain status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrainStatus'
+
+  /brain/query:
+    post:
+      tags: [Brain]
+      summary: Query causal insights
+      description: Query the causal graph for relationships between domains
+      operationId: queryCausalInsights
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CausalQueryRequest'
+      responses:
+        '200':
+          description: Causal insights
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CausalQueryResponse'
+
+  /brain/forecast:
+    post:
+      tags: [Brain]
+      summary: Generate forecast
+      description: Forecast future outcomes based on domain scenario
+      operationId: generateForecast
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForecastRequest'
+      responses:
+        '200':
+          description: Forecast results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForecastResponse'
+
+  /motor/execute:
+    post:
+      tags: [Motor]
+      summary: Execute motor command
+      description: Execute action via registered connectors (Slack, Jira, GitHub)
+      operationId: executeMotorCommand
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MotorCommandRequest'
+      responses:
+        '200':
+          description: Command executed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MotorCommandResponse'
+        '400':
+          description: Invalid request
+        '500':
+          description: Execution failed
+
+  /signals/ingest:
+    post:
+      tags: [Signals]
+      summary: Ingest signals
+      description: Batch ingest signals into the system
+      operationId: ingestSignals
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignalIngestionRequest'
+      responses:
+        '201':
+          description: Signals ingested
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignalIngestionResponse'
+
+  /predictions:
+    get:
+      tags: [Predictions]
+      summary: List predictions
+      description: Get all predictions with optional filters
+      operationId: listPredictions
+      parameters:
+        - name: organizationId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: domain
+          in: query
+          schema:
+            type: string
+        - name: resolved
+          in: query
+          schema:
+            type: boolean
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+            maximum: 100
+      responses:
+        '200':
+          description: Predictions list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PredictionListResponse'
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    HealthResponse:
+      type: object
+      required: [status, checks]
+      properties:
+        status:
+          type: string
+          enum: [pass, warn, fail]
+        checks:
+          type: object
+          properties:
+            database:
+              $ref: '#/components/schemas/HealthCheck'
+            redis:
+              $ref: '#/components/schemas/HealthCheck'
+
+    HealthCheck:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [pass, fail]
+        message:
+          type: string
+        latencyMs:
+          type: number
+
+    BrainStatus:
+      type: object
+      required: [organizationId, health, stats]
+      properties:
+        organizationId:
+          type: string
+        health:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+        stats:
+          type: object
+          properties:
+            totalSignals:
+              type: integer
+            totalEdges:
+              type: integer
+            totalMemories:
+              type: integer
+            activeAgents:
+              type: integer
+            lastConsolidation:
+              type: string
+              format: date-time
+
+    CausalQueryRequest:
+      type: object
+      required: [organizationId]
+      properties:
+        organizationId:
+          type: string
+        sourceDomain:
+          type: string
+        targetDomain:
+          type: string
+        minScore:
+          type: number
+          minimum: 0
+          maximum: 1
+          default: 0.7
+        limit:
+          type: integer
+          default: 20
+          maximum: 100
+
+    CausalQueryResponse:
+      type: object
+      required: [edges, metadata]
+      properties:
+        edges:
+          type: array
+          items:
+            $ref: '#/components/schemas/CausalEdge'
+        metadata:
+          type: object
+          properties:
+            totalCount:
+              type: integer
+            filteredCount:
+              type: integer
+
+    CausalEdge:
+      type: object
+      required: [fromDomain, toDomain, causalityScore]
+      properties:
+        fromDomain:
+          type: string
+        toDomain:
+          type: string
+        causalityScore:
+          type: number
+          minimum: 0
+          maximum: 1
+        timelag:
+          type: integer
+        uncertainty:
+          type: number
+        pValue:
+          type: number
+
+    ForecastRequest:
+      type: object
+      required: [organizationId, domain, scenario]
+      properties:
+        organizationId:
+          type: string
+        domain:
+          type: string
+        scenario:
+          type: object
+          properties:
+            sourceDomain:
+              type: string
+            direction:
+              type: string
+              enum: [increase, decrease]
+            magnitudePercent:
+              type: number
+
+    ForecastResponse:
+      type: object
+      properties:
+        predictions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Prediction'
+        confidence:
+          type: number
+
+    Prediction:
+      type: object
+      properties:
+        domain:
+          type: string
+        probability:
+          type: number
+        timeframe:
+          type: string
+        confidence:
+          type: object
+          properties:
+            lower:
+              type: number
+            upper:
+              type: number
+
+    MotorCommandRequest:
+      type: object
+      required: [organizationId, actionType, target, payload]
+      properties:
+        organizationId:
+          type: string
+        actionType:
+          type: string
+          enum:
+            - slack_send_message
+            - slack_create_channel
+            - jira_create_issue
+            - jira_update_issue
+            - github_create_issue
+            - github_create_pr
+        target:
+          type: string
+          description: Channel ID (Slack), Project Key (Jira), or Repo (GitHub)
+        payload:
+          type: object
+          description: Action-specific payload
+        priority:
+          type: string
+          enum: [low, medium, high, critical]
+          default: medium
+
+    MotorCommandResponse:
+      type: object
+      required: [success, commandId]
+      properties:
+        success:
+          type: boolean
+        commandId:
+          type: string
+        message:
+          type: string
+        metadata:
+          type: object
+
+    SignalIngestionRequest:
+      type: object
+      required: [organizationId, signals]
+      properties:
+        organizationId:
+          type: string
+        signals:
+          type: array
+          items:
+            $ref: '#/components/schemas/Signal'
+          maxItems: 1000
+
+    Signal:
+      type: object
+      required: [sourceDomain, signalType, signalValue, entityType, entityId]
+      properties:
+        sourceDomain:
+          type: string
+        signalType:
+          type: string
+        signalValue:
+          type: number
+        entityType:
+          type: string
+        entityId:
+          type: string
+        metadata:
+          type: object
+        timestamp:
+          type: string
+          format: date-time
+
+    SignalIngestionResponse:
+      type: object
+      properties:
+        inserted:
+          type: integer
+        failed:
+          type: integer
+        duplicates:
+          type: integer
+
+    PredictionListResponse:
+      type: object
+      properties:
+        predictions:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              domain:
+                type: string
+              actionType:
+                type: string
+              prediction:
+                type: string
+              confidence:
+                type: number
+              reviewDate:
+                type: string
+                format: date-time
+              resolved:
+                type: boolean
+              brierScore:
+                type: number
+        total:
+          type: integer
