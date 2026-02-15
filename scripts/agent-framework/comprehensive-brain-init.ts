@@ -234,7 +234,7 @@ import { createCollaborationGraph } from '../../packages/memory-stack/src/core/c
 // ============================================================================
 // CONNECTORS (19 systems)
 // ============================================================================
-import { createSlackConnector } from '../../packages/memory-stack/src/connectors/slack';
+import { createNexusSlackConnector } from '../../packages/slack-connector/src/index';
 import { createGitHubConnector } from '../../packages/memory-stack/src/connectors/github';
 import { createJiraConnector } from '../../packages/memory-stack/src/connectors/jira';
 import { createPagerDutyConnector } from '../../packages/memory-stack/src/connectors/pagerduty';
@@ -1370,7 +1370,7 @@ export class ComprehensiveBrainInitializer {
       name: 'slackConnector',
       category: 'connectors',
       factory: (config) => config.slackToken
-        ? createSlackConnector({ token: config.slackToken })
+        ? createNexusSlackConnector({ token: config.slackToken })
         : null,
     });
 

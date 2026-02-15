@@ -41,7 +41,7 @@ import { createHubSpotConnector } from '../connectors/hubspot';
 import { createStripeConnector } from '../connectors/stripe';
 import { createGitHubConnector, type GitHubConnectorConfig } from '../connectors/github';
 import { createJiraConnector, type JiraConnectorConfig } from '../connectors/jira';
-import { createSlackConnector, type SlackConnectorConfig } from '../connectors/slack';
+import { createNexusSlackConnector, type SlackConnectorConfig } from '@nexus-ai/slack-connector';
 import { createPagerDutyConnector, type PagerDutyConnectorConfig } from '../connectors/pagerduty';
 import { createGoogleCalendarConnector, type GoogleCalendarConnectorConfig } from '../connectors/google-calendar';
 import { createGoogleChatConnector, type GoogleChatConnectorConfig } from '../connectors/google-chat';
@@ -92,7 +92,7 @@ const CONNECTOR_FACTORIES: Record<
   },
   github: (config) => createGitHubConnector(config as unknown as GitHubConnectorConfig),
   jira: (config) => createJiraConnector(config as unknown as JiraConnectorConfig),
-  slack: (config) => createSlackConnector(config as unknown as SlackConnectorConfig),
+  slack: (config) => createNexusSlackConnector(config as unknown as SlackConnectorConfig),
   pagerduty: (config) => createPagerDutyConnector(config as unknown as PagerDutyConnectorConfig),
   'google-calendar': (config) => createGoogleCalendarConnector(config as unknown as GoogleCalendarConnectorConfig),
   'google-chat': (config) => createGoogleChatConnector(config as unknown as GoogleChatConnectorConfig),

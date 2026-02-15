@@ -58,7 +58,7 @@ import { createHubSpotConnector } from '../../packages/memory-stack/src/connecto
 import { createStripeConnector } from '../../packages/memory-stack/src/connectors/stripe';
 import { createGitHubConnector, type GitHubConnectorConfig } from '../../packages/memory-stack/src/connectors/github';
 import { createJiraConnector, type JiraConnectorConfig } from '../../packages/memory-stack/src/connectors/jira';
-import { createSlackConnector, type SlackConnectorConfig } from '../../packages/memory-stack/src/connectors/slack';
+import { createNexusSlackConnector, type SlackConnectorConfig } from '../../packages/slack-connector/src/index';
 import { createPagerDutyConnector, type PagerDutyConnectorConfig } from '../../packages/memory-stack/src/connectors/pagerduty';
 import { createGoogleCalendarConnector, type GoogleCalendarConnectorConfig } from '../../packages/memory-stack/src/connectors/google-calendar';
 import { createGoogleChatConnector, type GoogleChatConnectorConfig } from '../../packages/memory-stack/src/connectors/google-chat';
@@ -110,7 +110,7 @@ function createConnectorFromConfig(
       case 'jira':
         return createJiraConnector(config as unknown as JiraConnectorConfig);
       case 'slack':
-        return createSlackConnector(config as unknown as SlackConnectorConfig) as unknown as NexusConnector;
+        return createNexusSlackConnector(config as unknown as SlackConnectorConfig) as unknown as NexusConnector;
       case 'pagerduty':
         return createPagerDutyConnector(config as unknown as PagerDutyConnectorConfig);
       case 'google-calendar':
