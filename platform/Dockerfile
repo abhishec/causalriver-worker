@@ -47,6 +47,9 @@ ENV NEXT_TELEMETRY_DISABLED 1
 ENV NODE_ENV production
 ENV SKIP_ENV_VALIDATION 1
 
+# Create public directory if it doesn't exist
+RUN mkdir -p public
+
 # Increase Node memory for build and disable static page generation timeout
 RUN NODE_OPTIONS="--max-old-space-size=4096" NEXT_PRIVATE_STANDALONE=true pnpm build
 
@@ -62,7 +65,7 @@ ENV PORT 3000
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Copy necessary files
+# Copy necessary files from build stage
 COPY --from=builder /app/platform/public ./public
 COPY --from=builder /app/platform/.next/standalone ./
 COPY --from=builder /app/platform/.next/static ./.next/static
