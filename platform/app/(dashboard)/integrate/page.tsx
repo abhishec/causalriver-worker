@@ -8,7 +8,7 @@ const QUICK_STEPS = [
   },
   {
     step: 2,
-    title: "Connect your brain",
+    title: "Connect NexusBrain",
     code: `import { NexusBrain } from '@nexusbrain/sdk';
 
 const brain = new NexusBrain({
@@ -19,7 +19,7 @@ const brain = new NexusBrain({
   },
   {
     step: 3,
-    title: "Feed signals and query",
+    title: "Ingest signals and query",
     code: `// Feed a signal
 await brain.signal({
   type: 'customer.churned',

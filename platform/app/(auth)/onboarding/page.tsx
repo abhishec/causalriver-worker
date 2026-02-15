@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 const STEPS = [
   { id: 1, label: "Organization" },
   { id: 2, label: "Connect Data" },
-  { id: 3, label: "Brain Waking" },
+  { id: 3, label: "Initializing" },
   { id: 4, label: "First Question" },
 ];
 
@@ -221,7 +221,7 @@ export default function OnboardingPage() {
         <div className="space-y-6">
           <div>
             <h2 className="text-2xl font-bold mb-1">Connect Your Data</h2>
-            <p className="text-muted">Choose data sources to feed the brain. You can add more later.</p>
+            <p className="text-muted">Choose data sources to feed the causal memory. You can add more later.</p>
           </div>
           <div className="grid grid-cols-2 gap-3">
             {CONNECTORS.map((conn) => (
@@ -253,8 +253,8 @@ export default function OnboardingPage() {
             <div className="absolute bottom-2 -left-1 w-2 h-2 rounded-full bg-warning animate-ping" style={{ animationDuration: "3s" }} />
           </div>
           <div>
-            <h2 className="text-2xl font-bold mb-1">Your Brain is Waking Up</h2>
-            <p className="text-muted">Initializing brain regions and establishing connections...</p>
+            <h2 className="text-2xl font-bold mb-1">Your Causal Memory is Initializing</h2>
+            <p className="text-muted">Activating brain regions and establishing causal connections...</p>
           </div>
           <div className="w-full max-w-xs mx-auto">
             <div className="h-2 rounded-full bg-surface overflow-hidden">
@@ -266,7 +266,7 @@ export default function OnboardingPage() {
             </div>
           </div>
           {brainProgress >= 100 && (
-            <button onClick={() => setStep(4)} className="px-6 py-2.5 rounded-lg bg-success text-white font-medium transition-colors hover:bg-success/90">Brain is ready!</button>
+            <button onClick={() => setStep(4)} className="px-6 py-2.5 rounded-lg bg-success text-white font-medium transition-colors hover:bg-success/90">Causal memory is ready!</button>
           )}
         </div>
       )}
@@ -276,7 +276,7 @@ export default function OnboardingPage() {
         <div className="space-y-6">
           <div>
             <h2 className="text-2xl font-bold mb-1">Ask Your First Question</h2>
-            <p className="text-muted">Try asking the brain something. You can always explore more later.</p>
+            <p className="text-muted">Try asking NexusBrain something. You can always explore more later.</p>
           </div>
           <div className="space-y-2">
             {SUGGESTED_QUESTIONS.map((q) => (
@@ -287,14 +287,14 @@ export default function OnboardingPage() {
             <div className="p-4 rounded-lg bg-surface border border-border/30">
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
-                <span className="text-xs text-success font-medium">Brain thinking...</span>
+                <span className="text-xs text-success font-medium">NexusBrain thinking...</span>
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Great question! Once your data sources are connected and signals start flowing, the brain will analyze causal relationships. Head to the Copilot to explore.
+                Great question! Once your data sources are connected and signals start flowing, the causal memory will discover cause-and-effect relationships. Head to the Copilot to explore.
               </p>
             </div>
           )}
-          <button onClick={handleFinish} disabled={loading} className="w-full py-2.5 rounded-lg bg-accent hover:bg-accent-dark text-accent-foreground font-medium transition-colors disabled:opacity-50">{loading ? "Launching..." : "Launch My Brain"}</button>
+          <button onClick={handleFinish} disabled={loading} className="w-full py-2.5 rounded-lg bg-accent hover:bg-accent-dark text-accent-foreground font-medium transition-colors disabled:opacity-50">{loading ? "Launching..." : "Launch NexusBrain"}</button>
         </div>
       )}
     </div>

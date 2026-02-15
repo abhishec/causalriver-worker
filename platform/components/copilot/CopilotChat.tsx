@@ -547,7 +547,7 @@ export function CopilotChat({
               </svg>
             </div>
             <h2 className="text-xl font-semibold mb-2">
-              Ask your brain anything
+              Ask NexusBrain anything
             </h2>
             <p className="text-sm text-muted max-w-md mb-8">
               {persona.description}. All answers are grounded in statistical
@@ -638,7 +638,7 @@ export function CopilotChat({
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Ask your brain anything..."
+            placeholder="Ask NexusBrain anything..."
             rows={1}
             disabled={isLoading}
             className={cn(

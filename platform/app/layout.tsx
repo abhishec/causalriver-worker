@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     default: "NexusBrain Platform",
     template: "%s | NexusBrain Platform",
   },
-  description: "The brain's control center — monitor, configure, and interact with your living intelligence engine.",
+  description: "Your organisation's causal memory — monitor, configure, and interact with NexusBrain's deep knowledge system.",
 };
 
 export default function RootLayout({

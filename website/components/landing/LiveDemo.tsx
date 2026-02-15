@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
+import { useBrainHealth } from "@/lib/brain-data-context";
 
-const DEMO_CONVERSATIONS = [
+const STATIC_CONVERSATIONS = [
   {
     question: "Why did churn spike last month?",
     answer:
@@ -15,12 +16,6 @@ const DEMO_CONVERSATIONS = [
       "Simulating +20% marketing spend cascade: Lead volume increases ~12% (confidence: 85%, lag: 14d). Pipeline value grows ~8% (confidence: 72%, lag: 30d). Monthly revenue impact: +5.2% (confidence: 58%, lag: 60d). Note: NexusBrain detects diminishing returns above 15% increase based on historical patterns.",
     domain: "financial",
   },
-  {
-    question: "What did NexusBrain learn today?",
-    answer:
-      "Today NexusBrain discovered 3 new causal edges: (1) GitHub PR merge velocity correlates with deployment frequency at 0.82 strength. (2) Slack #support channel sentiment is a leading indicator of NPS score changes with 5-day lag. (3) Marketing email open rates predict demo bookings with 0.71 confidence. System health: 94%.",
-    domain: "intelligence",
-  },
 ];
 
 const DOMAIN_COLORS: Record<string, string> = {
@@ -30,10 +25,65 @@ const DOMAIN_COLORS: Record<string, string> = {
 };
 
 export function LiveDemo() {
+  const { latest, history, isLive } = useBrainHealth();
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [displayedText, setDisplayedText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Build dynamic "What did NexusBrain learn today?" from real data
+  const dynamicAnswer = useMemo(() => {
+    if (!latest) {
+      return "Today NexusBrain discovered 3 new causal edges: (1) GitHub PR merge velocity correlates with deployment frequency at 0.82 strength. (2) Slack #support channel sentiment is a leading indicator of NPS score changes with 5-day lag. (3) Marketing email open rates predict demo bookings with 0.71 confidence. System health: 94%.";
+    }
+
+    const discoveries = (latest.top_discoveries || []).filter(Boolean);
+    const accuracy = latest.prediction_accuracy ? `${Math.round(latest.prediction_accuracy)}%` : "active";
+    const newConns = latest.new_connections;
+    const patterns = latest.patterns_found;
+    const regions = (latest.regions_active || []).length;
+    const strengthened = latest.edges_strengthened;
+    const pruned = latest.edges_pruned;
+
+    const parts: string[] = [];
+
+    if (discoveries.length > 0) {
+      const numbered = discoveries.slice(0, 3).map((d, i) => `(${i + 1}) ${d}`).join(". ");
+      parts.push(`Today NexusBrain discovered ${discoveries.length} new insight${discoveries.length !== 1 ? "s" : ""}: ${numbered}.`);
+    } else {
+      parts.push(`Today NexusBrain processed signals across ${regions} active brain regions.`);
+    }
+
+    if (newConns > 0 || patterns > 0) {
+      parts.push(`It formed ${newConns} new causal connections and found ${patterns} patterns.`);
+    }
+
+    if (strengthened > 0 || pruned > 0) {
+      const actions: string[] = [];
+      if (strengthened > 0) actions.push(`strengthened ${strengthened} edges`);
+      if (pruned > 0) actions.push(`pruned ${pruned} weak edges`);
+      parts.push(`During the sleep cycle it ${actions.join(" and ")}.`);
+    }
+
+    parts.push(`System accuracy: ${accuracy}.`);
+
+    return parts.join(" ");
+  }, [latest]);
+
+  // Compute live confidence from brain data
+  const liveConfidence = useMemo(() => {
+    if (!latest?.prediction_accuracy) return "87%";
+    return `${Math.round(latest.prediction_accuracy)}%`;
+  }, [latest]);
+
+  const conversations = useMemo(() => [
+    ...STATIC_CONVERSATIONS,
+    {
+      question: "What did NexusBrain learn today?",
+      answer: dynamicAnswer,
+      domain: "intelligence",
+    },
+  ], [dynamicAnswer]);
 
   function handleQuestionClick(index: number) {
     // Reset
@@ -42,7 +92,7 @@ export function LiveDemo() {
     setActiveIndex(index);
     setIsTyping(true);
 
-    const fullText = DEMO_CONVERSATIONS[index].answer;
+    const fullText = conversations[index].answer;
     let charIndex = 0;
 
     intervalRef.current = setInterval(() => {
@@ -68,14 +118,17 @@ export function LiveDemo() {
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 mb-6">
             <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-xs text-white/60 font-medium">Live Causal Memory Output</span>
+            <span className="text-xs text-white/60 font-medium">
+              {isLive ? "Live Causal Memory Output" : "Causal Memory Demo"}
+            </span>
           </div>
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
             See the causal memory in action
           </h2>
           <p className="text-lg text-white/50 max-w-2xl mx-auto">
-            These are real outputs from NexusBrain&apos;s causal reasoning engine.
-            Click a question to see how the causal memory responds.
+            {isLive
+              ? "These are real outputs from NexusBrain\u2019s causal reasoning engine. Click a question to see how the causal memory responds."
+              : "Click a question to see how NexusBrain\u2019s causal reasoning engine responds."}
           </p>
         </div>
 
@@ -83,7 +136,7 @@ export function LiveDemo() {
         <div className="max-w-3xl mx-auto">
           {/* Question pills */}
           <div className="flex flex-wrap gap-3 justify-center mb-8">
-            {DEMO_CONVERSATIONS.map((conv, i) => (
+            {conversations.map((conv, i) => (
               <button
                 key={i}
                 onClick={() => handleQuestionClick(i)}
@@ -94,6 +147,11 @@ export function LiveDemo() {
                 }`}
               >
                 {conv.question}
+                {i === 2 && isLive && (
+                  <span className="ml-2 inline-flex items-center">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  </span>
+                )}
               </button>
             ))}
           </div>
@@ -108,6 +166,12 @@ export function LiveDemo() {
                 <div className="w-3 h-3 rounded-full bg-green-500/60" />
               </div>
               <span className="text-xs text-white/40 ml-2 font-mono">NexusBrain Copilot</span>
+              {isLive && (
+                <span className="ml-auto flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="text-[9px] text-emerald-400/60">live</span>
+                </span>
+              )}
             </div>
 
             {/* Chat content */}
@@ -126,18 +190,18 @@ export function LiveDemo() {
                   {/* User question */}
                   <div className="flex justify-end">
                     <div className="max-w-[80%] px-4 py-2.5 rounded-2xl rounded-br-md bg-blue-600/20 border border-blue-500/20">
-                      <p className="text-sm text-white">{DEMO_CONVERSATIONS[activeIndex].question}</p>
+                      <p className="text-sm text-white">{conversations[activeIndex].question}</p>
                     </div>
                   </div>
 
-                  {/* Brain response */}
+                  {/* NexusBrain response */}
                   <div className="flex gap-3">
                     <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center shrink-0 mt-0.5">
                       <span className="text-sm font-bold text-white/60">N</span>
                     </div>
                     <div className="flex-1">
                       <div className="px-4 py-3 rounded-2xl rounded-bl-md bg-white/[0.04] border border-white/[0.06]">
-                        <p className={`text-sm leading-relaxed ${DOMAIN_COLORS[DEMO_CONVERSATIONS[activeIndex].domain] || "text-white/80"}`}>
+                        <p className={`text-sm leading-relaxed ${DOMAIN_COLORS[conversations[activeIndex].domain] || "text-white/80"}`}>
                           {displayedText}
                           {isTyping && (
                             <span className="inline-block w-0.5 h-4 bg-current ml-0.5 animate-pulse" />
@@ -148,7 +212,13 @@ export function LiveDemo() {
                         <div className="flex items-center gap-3 mt-2 ml-1">
                           <span className="text-[10px] text-white/30">Powered by causal reasoning</span>
                           <span className="text-[10px] text-white/20">|</span>
-                          <span className="text-[10px] text-emerald-400/60">87% confidence</span>
+                          <span className="text-[10px] text-emerald-400/60">{liveConfidence} confidence</span>
+                          {isLive && activeIndex === 2 && (
+                            <>
+                              <span className="text-[10px] text-white/20">|</span>
+                              <span className="text-[10px] text-cyan-400/60">live data</span>
+                            </>
+                          )}
                         </div>
                       )}
                     </div>

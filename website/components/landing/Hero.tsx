@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { SITE, BRAIN_STATS, BENCHMARK_RESULTS } from "@/lib/constants";
+import { SITE, BRAIN_STATS } from "@/lib/constants";
+import { useBrainHealth } from "@/lib/brain-data-context";
 
-const BRAIN_THOUGHTS = [
+const FALLBACK_THOUGHTS = [
   "Discovered new causal edge: deploy frequency \u2192 satisfaction (14d lag, p<0.01)",
   "Anomaly detected: signal volume spike +340% \u2014 tracing root cause across 3 domains",
   "Prediction validated: forecast was within 3% of actual outcome \u2014 confidence 0.89",
@@ -13,14 +14,46 @@ const BRAIN_THOUGHTS = [
   "Simulation complete: modeled 3 counterfactual cascade paths with p-value evidence",
 ];
 
+function formatNumber(n: number): string {
+  if (n >= 10000) return `${(n / 1000).toFixed(1)}k`;
+  if (n >= 1000) return n.toLocaleString();
+  return n.toString();
+}
+
 export function Hero() {
+  const { latest, history, isLive, ageDays } = useBrainHealth();
   const [thoughtIndex, setThoughtIndex] = useState(0);
   const [displayText, setDisplayText] = useState("");
   const [isTyping, setIsTyping] = useState(true);
 
+  // Use real discoveries when available, fallback otherwise
+  const thoughts = useMemo(() => {
+    if (!isLive || !history.length) return FALLBACK_THOUGHTS;
+
+    const realDiscoveries = history
+      .slice(-5)
+      .flatMap((s) => s.top_discoveries || [])
+      .filter(Boolean);
+
+    // Need at least 3 real discoveries to replace fallback
+    if (realDiscoveries.length < 3) return FALLBACK_THOUGHTS;
+
+    return realDiscoveries.slice(0, 8);
+  }, [isLive, history]);
+
+  // Live stats from brain
+  const liveStats = useMemo(() => {
+    if (!latest) return null;
+    return {
+      connections: latest.total_connections,
+      accuracy: latest.prediction_accuracy ? Math.round(latest.prediction_accuracy) : null,
+      newToday: latest.new_connections,
+    };
+  }, [latest]);
+
   // Typewriter effect
   useEffect(() => {
-    const thought = BRAIN_THOUGHTS[thoughtIndex];
+    const thought = thoughts[thoughtIndex];
     let charIndex = 0;
     setIsTyping(true);
     setDisplayText("");
@@ -34,13 +67,13 @@ export function Hero() {
         setIsTyping(false);
         // Move to next thought after pause
         setTimeout(() => {
-          setThoughtIndex((prev) => (prev + 1) % BRAIN_THOUGHTS.length);
+          setThoughtIndex((prev) => (prev + 1) % thoughts.length);
         }, 3000);
       }
     }, 30);
 
     return () => clearInterval(typeInterval);
-  }, [thoughtIndex]);
+  }, [thoughtIndex, thoughts]);
 
   return (
     <section className="relative overflow-hidden pt-32 pb-20">
@@ -54,7 +87,9 @@ export function Hero() {
         >
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5">
             <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse-glow" />
-            <span className="text-sm text-emerald-400">Causal memory is active</span>
+            <span className="text-sm text-emerald-400">
+              {isLive ? "Causal memory is active" : "Causal memory demo"}
+            </span>
           </div>
 
           <h1 className="mb-6 text-4xl font-bold leading-tight tracking-tight md:text-6xl lg:text-7xl">
@@ -115,9 +150,32 @@ export function Hero() {
           className="mx-auto max-w-3xl"
         >
           <div className="rounded-xl border border-emerald-500/20 bg-surface p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse-glow" />
-              <span className="text-xs font-medium text-emerald-400">NexusBrain is thinking...</span>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse-glow" />
+                <span className="text-xs font-medium text-emerald-400">NexusBrain is thinking...</span>
+                {isLive && (
+                  <span className="text-[9px] text-emerald-400/50 bg-emerald-400/5 px-1.5 py-0.5 rounded-full border border-emerald-400/20">
+                    live
+                  </span>
+                )}
+              </div>
+              {/* Live mini stats */}
+              {liveStats && (
+                <div className="hidden sm:flex items-center gap-4 text-[10px] text-muted">
+                  <span>
+                    <span className="text-emerald-400 font-medium">{formatNumber(liveStats.connections)}</span> connections
+                  </span>
+                  {liveStats.accuracy && (
+                    <span>
+                      <span className="text-violet-400 font-medium">{liveStats.accuracy}%</span> accuracy
+                    </span>
+                  )}
+                  <span>
+                    <span className="text-cyan-400 font-medium">+{liveStats.newToday}</span> today
+                  </span>
+                </div>
+              )}
             </div>
             <div className="font-mono text-sm text-zinc-300 min-h-[1.5rem]">
               <span>{displayText}</span>

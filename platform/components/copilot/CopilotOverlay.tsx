@@ -181,7 +181,7 @@ export function CopilotOverlay() {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask your brain anything..."
+              placeholder="Ask NexusBrain anything..."
               disabled={isLoading}
               className="flex-1 bg-transparent px-3 py-4 text-sm text-foreground placeholder:text-muted focus:outline-none disabled:opacity-50"
             />

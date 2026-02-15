@@ -103,7 +103,7 @@ function LoginForm() {
       <p className="text-muted mb-8">
         {nextUrl?.startsWith("/invite/")
           ? "Sign in to accept your invitation"
-          : "Sign in to your brain's control center"}
+          : "Sign in to your organisation's causal memory"}
       </p>
 
       {error && (

@@ -72,7 +72,7 @@ function SignupForm() {
         <p className="text-sm text-muted">
           {isInviteFlow
             ? "Click the link to activate your account and join the organization."
-            : "Click the link to activate your account and access your brain."}
+            : "Click the link to activate your account and access your causal memory."}
         </p>
       </div>
     );
@@ -89,7 +89,7 @@ function SignupForm() {
       </div>
 
       <h2 className="text-2xl font-bold mb-1">
-        {isInviteFlow ? "Create your account" : "Create your brain"}
+        {isInviteFlow ? "Create your account" : "Create your causal memory"}
       </h2>
       <p className="text-muted mb-8">
         {isInviteFlow
@@ -159,7 +159,7 @@ function SignupForm() {
           {loading
             ? isInviteFlow
               ? "Creating account..."
-              : "Creating your brain..."
+              : "Setting up..."
             : isInviteFlow
               ? "Create Account & Accept Invite"
               : "Create Account"}
