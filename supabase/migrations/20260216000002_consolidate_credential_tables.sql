@@ -10,14 +10,22 @@
 -- and creates a compatibility wrapper for get_system_credential().
 -- ============================================================================
 
--- Step 1: Ensure nexus_system_config has all values from system_credentials
-INSERT INTO public.nexus_system_config (key, value, description)
-SELECT credential_type, credential_value, description
-FROM public.system_credentials
-WHERE credential_type NOT IN (
-  SELECT key FROM public.nexus_system_config
-)
-ON CONFLICT (key) DO NOTHING;
+-- Step 1: Migrate values from system_credentials → nexus_system_config (if the old table exists)
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'system_credentials') THEN
+    INSERT INTO public.nexus_system_config (key, value, description)
+    SELECT credential_type, credential_value, description
+    FROM public.system_credentials
+    WHERE credential_type NOT IN (
+      SELECT key FROM public.nexus_system_config
+    )
+    ON CONFLICT (key) DO NOTHING;
+    RAISE NOTICE 'Migrated values from system_credentials → nexus_system_config';
+  ELSE
+    RAISE NOTICE 'system_credentials table does not exist — nothing to migrate';
+  END IF;
+END $$;
 
 -- Step 2: Replace get_system_credential() with a wrapper that reads from nexus_system_config
 CREATE OR REPLACE FUNCTION public.get_system_credential(cred_type TEXT)

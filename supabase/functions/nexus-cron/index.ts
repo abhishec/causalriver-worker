@@ -317,18 +317,9 @@ serve(async (req: Request) => {
         const start = Date.now();
         try {
           const retentionThreshold = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
+          let archivedCount = 0;
 
-          // Archive old causal event stream entries
-          const { data: archived, count } = await supabase
-            .from('causal_event_stream')
-            .update({
-              metadata: supabase.rpc ? undefined : undefined, // Supabase client doesn't support jsonb_set directly
-            })
-            .eq('organization_id', orgId)
-            .lt('created_at', retentionThreshold)
-            .select('id', { count: 'exact', head: true });
-
-          // Use raw SQL via RPC for the jsonb update
+          // Try RPC first (if cleanup_stale_event_stream function exists)
           const { data: cleanupResult, error: cleanupError } = await supabase.rpc(
             'cleanup_stale_event_stream',
             {
@@ -337,24 +328,22 @@ serve(async (req: Request) => {
             }
           );
 
-          // Fallback: if no RPC exists, do a simple count query
-          let archivedCount = 0;
           if (cleanupError) {
-            // RPC doesn't exist yet — do direct update
-            const { count: directCount } = await supabase
+            // RPC doesn't exist — fall back to counting stale records
+            // (The cron SQL job in migration 20250226000002 handles the actual
+            //  archiving via direct UPDATE; we just report how many are stale.)
+            const { count: staleCount } = await supabase
               .from('causal_event_stream')
-              .update({ metadata: {} })
+              .select('id', { count: 'exact', head: true })
               .eq('organization_id', orgId)
-              .lt('created_at', retentionThreshold)
-              .is('metadata->archived', null)
-              .select('id', { count: 'exact', head: true });
+              .lt('created_at', retentionThreshold);
 
-            archivedCount = directCount || 0;
+            archivedCount = staleCount || 0;
           } else {
             archivedCount = cleanupResult?.archived_count || 0;
           }
 
-          // Also clean up old signal data beyond retention period
+          // Also clean up old signal data beyond extended retention period (180 days)
           const { count: signalsArchived } = await supabase
             .from('cross_domain_signals')
             .delete()
@@ -370,6 +359,7 @@ serve(async (req: Request) => {
               eventsArchived: archivedCount,
               signalsPurged: signalsArchived || 0,
               retentionDays: 90,
+              signalRetentionDays: 180,
             },
             durationMs: Date.now() - start,
           });
