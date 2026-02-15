@@ -1,8 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "pnpm build --filter=platform",
-  "devCommand": "cd platform && pnpm dev",
+  "buildCommand": "cd .. && pnpm install && cd packages/memory-stack && pnpm build && cd ../platform && pnpm build",
   "installCommand": "pnpm install",
-  "framework": null,
+  "framework": "nextjs",
   "outputDirectory": "platform/.next"
 }
