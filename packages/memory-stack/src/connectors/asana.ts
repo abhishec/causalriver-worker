@@ -19,9 +19,22 @@
 
 import type {
   ConnectorSignal,
-  ConnectorConfig,
-  ConnectorMetadata,
 } from './connector-framework';
+
+/** Local config type for Asana connector */
+interface ConnectorConfig {
+  apiKey: string;
+  workspaceId?: string;
+  [key: string]: unknown;
+}
+
+/** Local metadata type for Asana connector */
+interface ConnectorMetadata {
+  name: string;
+  type: string;
+  description: string;
+  [key: string]: unknown;
+}
 
 // ============================================================================
 // TYPES
@@ -193,37 +206,28 @@ function taskToSignal(task: AsanaTask, organizationId: string): ConnectorSignal 
   const isOverdue = task.due_on && new Date(task.due_on) < new Date() && !task.completed;
 
   return {
+    organization_id: organizationId,
+    source_domain: 'engineering',
+    signal_type: 'asana_task',
+    signal_value: task.completed ? 1 : 0,
+    signal_timestamp: task.modified_at,
+    entity_type: 'task',
+    entity_id: task.gid,
     id: `asana_task_${task.gid}`,
     source: 'asana',
     type: 'task',
     timestamp: task.modified_at,
-    data: {
-      task_gid: task.gid,
-      name: task.name,
-      notes: task.notes,
-      completed: task.completed,
-      completed_at: task.completed_at,
-      due_on: task.due_on,
-      is_overdue: isOverdue,
-      assignee_gid: task.assignee?.gid,
-      assignee_name: task.assignee?.name,
-      projects: task.projects?.map(p => p.name).join(', '),
-      project_gids: task.projects?.map(p => p.gid),
-      tags: task.tags?.map(t => t.name).join(', '),
-      section: task.memberships?.[0]?.section?.name,
-      is_blocked: isBlocked,
-      is_blocking: isBlocking,
-      dependency_count: task.dependencies?.length || 0,
-      dependent_count: task.dependents?.length || 0,
-      subtask_count: task.num_subtasks,
-      created_at: task.created_at,
-      modified_at: task.modified_at,
-    },
     metadata: {
       connector: 'asana',
       organization_id: organizationId,
       entity_type: 'task',
       entity_id: task.gid,
+      name: task.name,
+      completed: task.completed,
+      is_overdue: isOverdue,
+      is_blocked: isBlocked,
+      is_blocking: isBlocking,
+      dependency_count: task.dependencies?.length || 0,
     },
   };
 }
@@ -237,31 +241,26 @@ function projectToSignal(project: AsanaProject, organizationId: string): Connect
     project.current_status?.color === 'green' ? 100 : project.current_status?.color === 'yellow' ? 60 : 30;
 
   return {
+    organization_id: organizationId,
+    source_domain: 'engineering',
+    signal_type: 'asana_project',
+    signal_value: healthScore,
+    signal_timestamp: project.modified_at,
+    entity_type: 'project',
+    entity_id: project.gid,
     id: `asana_project_${project.gid}`,
     source: 'asana',
     type: 'project',
     timestamp: project.modified_at,
-    data: {
-      project_gid: project.gid,
-      name: project.name,
-      notes: project.notes,
-      archived: project.archived,
-      color: project.color,
-      status_text: project.current_status?.text,
-      status_color: project.current_status?.color,
-      health_score: healthScore,
-      due_date: project.due_date,
-      start_on: project.start_on,
-      member_count: project.members?.length || 0,
-      members: project.members?.map(m => m.name).join(', '),
-      created_at: project.created_at,
-      modified_at: project.modified_at,
-    },
     metadata: {
       connector: 'asana',
       organization_id: organizationId,
       entity_type: 'project',
       entity_id: project.gid,
+      name: project.name,
+      archived: project.archived,
+      status_color: project.current_status?.color,
+      health_score: healthScore,
     },
   };
 }

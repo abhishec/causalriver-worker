@@ -16,7 +16,20 @@
  * @packageDocumentation
  */
 
-import type { ConnectorSignal, ConnectorConfig, ConnectorMetadata } from './connector-framework';
+import type { ConnectorSignal } from './connector-framework';
+
+/** Local base config type for Freshdesk connector */
+interface ConnectorConfig {
+  [key: string]: unknown;
+}
+
+/** Local metadata type for Freshdesk connector */
+interface ConnectorMetadata {
+  name: string;
+  type: string;
+  description: string;
+  [key: string]: unknown;
+}
 
 export interface FreshdeskConfig extends ConnectorConfig {
   /** Freshdesk domain (e.g., 'yourcompany.freshdesk.com') */
@@ -78,36 +91,27 @@ function ticketToSignal(ticket: FreshdeskTicket, organizationId: string): Connec
   const priorityNames = ['', 'low', 'medium', 'high', 'urgent'];
   
   return {
+    organization_id: organizationId,
+    source_domain: 'cs',
+    signal_type: 'freshdesk_ticket',
+    signal_value: ticket.priority,
+    signal_timestamp: ticket.updated_at,
+    entity_type: 'ticket',
+    entity_id: String(ticket.id),
     id: `freshdesk_ticket_${ticket.id}`,
     source: 'freshdesk',
     type: 'ticket',
     timestamp: ticket.updated_at,
-    data: {
-      ticket_id: ticket.id,
-      subject: ticket.subject,
-      description: ticket.description_text,
-      status: statusNames[ticket.status],
-      status_code: ticket.status,
-      priority: priorityNames[ticket.priority],
-      priority_code: ticket.priority,
-      type: ticket.type,
-      requester_id: ticket.requester_id,
-      responder_id: ticket.responder_id,
-      group_id: ticket.group_id,
-      tags: ticket.tags?.join(', '),
-      is_escalated: ticket.is_escalated,
-      fr_escalated: ticket.fr_escalated,
-      due_by: ticket.due_by,
-      first_response_due_by: ticket.fr_due_by,
-      created_at: ticket.created_at,
-      updated_at: ticket.updated_at,
-      ...ticket.custom_fields,
-    },
     metadata: {
       connector: 'freshdesk',
       organization_id: organizationId,
       entity_type: 'ticket',
       entity_id: String(ticket.id),
+      subject: ticket.subject,
+      status: statusNames[ticket.status],
+      priority: priorityNames[ticket.priority],
+      is_escalated: ticket.is_escalated,
+      tags: ticket.tags?.join(', '),
     },
   };
 }

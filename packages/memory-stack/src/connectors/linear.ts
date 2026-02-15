@@ -20,9 +20,22 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type {
   ConnectorSignal,
-  ConnectorConfig,
-  ConnectorMetadata,
 } from './connector-framework';
+
+/** Local config type for Linear connector */
+interface ConnectorConfig {
+  apiKey: string;
+  teamId?: string;
+  [key: string]: unknown;
+}
+
+/** Local metadata type for Linear connector */
+interface ConnectorMetadata {
+  name: string;
+  type: string;
+  description: string;
+  [key: string]: unknown;
+}
 
 // ============================================================================
 // TYPES
@@ -363,12 +376,23 @@ async function fetchLinearCycles(
  */
 function issueToSignal(issue: LinearIssue, organizationId: string): ConnectorSignal {
   const signal: ConnectorSignal = {
+    organization_id: organizationId,
+    source_domain: 'engineering',
+    signal_type: 'linear_issue',
+    signal_value: issue.priority, // Priority as numeric value
+    signal_timestamp: issue.updatedAt,
+    entity_type: 'issue',
+    entity_id: issue.id,
+    // Extended data via index signature
     id: `linear_issue_${issue.id}`,
     source: 'linear',
     type: 'issue',
     timestamp: issue.updatedAt,
-    data: {
-      issue_id: issue.id,
+    metadata: {
+      connector: 'linear',
+      organization_id: organizationId,
+      entity_type: 'issue',
+      entity_id: issue.id,
       issue_key: issue.identifier,
       title: issue.title,
       description: issue.description,
@@ -378,32 +402,13 @@ function issueToSignal(issue: LinearIssue, organizationId: string): ConnectorSig
       status_type: issue.state.type,
       assignee_id: issue.assignee?.id,
       assignee_name: issue.assignee?.name,
-      assignee_email: issue.assignee?.email,
       team_id: issue.team.id,
       team_name: issue.team.name,
-      team_key: issue.team.key,
       project_id: issue.project?.id,
-      project_name: issue.project?.name,
-      cycle_id: issue.cycle?.id,
-      cycle_name: issue.cycle?.name,
-      cycle_starts_at: issue.cycle?.startsAt,
-      cycle_ends_at: issue.cycle?.endsAt,
       labels: issue.labels?.map(l => l.name).join(', '),
       estimate: issue.estimate,
       created_at: issue.createdAt,
-      updated_at: issue.updatedAt,
       completed_at: issue.completedAt,
-      canceled_at: issue.canceledAt,
-      parent_id: issue.parent?.id,
-      parent_key: issue.parent?.identifier,
-      has_children: issue.children && issue.children.length > 0,
-      child_count: issue.children?.length || 0,
-    },
-    metadata: {
-      connector: 'linear',
-      organization_id: organizationId,
-      entity_type: 'issue',
-      entity_id: issue.id,
     },
   };
 
@@ -415,27 +420,28 @@ function issueToSignal(issue: LinearIssue, organizationId: string): ConnectorSig
  */
 function projectToSignal(project: LinearProject, organizationId: string): ConnectorSignal {
   return {
+    organization_id: organizationId,
+    source_domain: 'engineering',
+    signal_type: 'linear_project',
+    signal_value: project.progress,
+    signal_timestamp: project.updatedAt,
+    entity_type: 'project',
+    entity_id: project.id,
     id: `linear_project_${project.id}`,
     source: 'linear',
     type: 'project',
     timestamp: project.updatedAt,
-    data: {
-      project_id: project.id,
+    metadata: {
+      connector: 'linear',
+      organization_id: organizationId,
+      entity_type: 'project',
+      entity_id: project.id,
       name: project.name,
       description: project.description,
       state: project.state,
       priority: project.priority,
       progress: project.progress,
       target_date: project.targetDate,
-      created_at: project.createdAt,
-      updated_at: project.updatedAt,
-      completed_at: project.completedAt,
-    },
-    metadata: {
-      connector: 'linear',
-      organization_id: organizationId,
-      entity_type: 'project',
-      entity_id: project.id,
     },
   };
 }
@@ -454,12 +460,22 @@ function cycleToSignal(cycle: LinearCycle, organizationId: string): ConnectorSig
   const scopeChangePercent = cycle.issueCount > 0 ? (totalScopeAdded / cycle.issueCount) * 100 : 0;
 
   return {
+    organization_id: organizationId,
+    source_domain: 'engineering',
+    signal_type: 'linear_cycle',
+    signal_value: velocity,
+    signal_timestamp: cycle.completedAt || cycle.endsAt,
+    entity_type: 'cycle',
+    entity_id: cycle.id,
     id: `linear_cycle_${cycle.id}`,
     source: 'linear',
     type: 'cycle',
     timestamp: cycle.completedAt || cycle.endsAt,
-    data: {
-      cycle_id: cycle.id,
+    metadata: {
+      connector: 'linear',
+      organization_id: organizationId,
+      entity_type: 'cycle',
+      entity_id: cycle.id,
       cycle_number: cycle.number,
       name: cycle.name,
       starts_at: cycle.startsAt,
@@ -470,14 +486,6 @@ function cycleToSignal(cycle: LinearCycle, organizationId: string): ConnectorSig
       total_issues: cycle.issueCount,
       velocity_issues_per_day: velocity,
       scope_change_percent: scopeChangePercent,
-      scope_added: totalScopeAdded,
-      is_completed: !!cycle.completedAt,
-    },
-    metadata: {
-      connector: 'linear',
-      organization_id: organizationId,
-      entity_type: 'cycle',
-      entity_id: cycle.id,
     },
   };
 }

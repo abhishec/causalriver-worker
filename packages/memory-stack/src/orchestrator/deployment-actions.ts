@@ -80,7 +80,7 @@ export async function deployToStaging(
   command: MotorCommand,
   config: DeploymentConfig
 ): Promise<MotorCommandResult> {
-  const payload = command.payload as DeploymentPayload;
+  const payload = command.parameters as unknown as DeploymentPayload;
   const { owner, repo, githubToken, platform = 'github-actions' } = config;
 
   try {
@@ -112,13 +112,16 @@ export async function deployToStaging(
       return {
         commandId: command.id,
         success: true,
-        result: {
+        status: 'executed' as const,
+        response: {
           environment: 'staging',
           ref,
           workflow: workflow_id,
           message: `Triggered staging deployment for ${ref}`,
         },
         executedAt: new Date().toISOString(),
+        durationMs: 0,
+        retriesUsed: 0,
       };
     }
 
@@ -128,8 +131,11 @@ export async function deployToStaging(
     return {
       commandId: command.id,
       success: false,
+      status: 'failed' as const,
       error: error instanceof Error ? error.message : String(error),
       executedAt: new Date().toISOString(),
+      durationMs: 0,
+      retriesUsed: 0,
     };
   }
 }
@@ -141,7 +147,7 @@ export async function deployToProduction(
   command: MotorCommand,
   config: DeploymentConfig
 ): Promise<MotorCommandResult> {
-  const payload = command.payload as DeploymentPayload;
+  const payload = command.parameters as unknown as DeploymentPayload;
   const { owner, repo, githubToken, platform = 'github-actions' } = config;
 
   try {
@@ -173,13 +179,16 @@ export async function deployToProduction(
       return {
         commandId: command.id,
         success: true,
-        result: {
+        status: 'executed' as const,
+        response: {
           environment: 'production',
           ref,
           workflow: workflow_id,
           message: `Triggered production deployment for ${ref}`,
         },
         executedAt: new Date().toISOString(),
+        durationMs: 0,
+        retriesUsed: 0,
       };
     }
 
@@ -188,8 +197,11 @@ export async function deployToProduction(
     return {
       commandId: command.id,
       success: false,
+      status: 'failed' as const,
       error: error instanceof Error ? error.message : String(error),
       executedAt: new Date().toISOString(),
+      durationMs: 0,
+      retriesUsed: 0,
     };
   }
 }
@@ -201,7 +213,7 @@ export async function rollbackDeployment(
   command: MotorCommand,
   config: DeploymentConfig
 ): Promise<MotorCommandResult> {
-  const payload = command.payload as RollbackPayload;
+  const payload = command.parameters as unknown as RollbackPayload;
   const { owner, repo, githubToken } = config;
 
   try {
@@ -236,20 +248,26 @@ export async function rollbackDeployment(
     return {
       commandId: command.id,
       success: true,
-      result: {
+      status: 'executed' as const,
+      response: {
         environment: payload.environment,
         deploymentId: payload.deploymentId,
         commitSha: payload.commitSha,
         message: `Triggered rollback for ${payload.environment}`,
       },
       executedAt: new Date().toISOString(),
+      durationMs: 0,
+      retriesUsed: 0,
     };
   } catch (error) {
     return {
       commandId: command.id,
       success: false,
+      status: 'failed' as const,
       error: error instanceof Error ? error.message : String(error),
       executedAt: new Date().toISOString(),
+      durationMs: 0,
+      retriesUsed: 0,
     };
   }
 }
@@ -261,7 +279,7 @@ export async function createFeatureBranch(
   command: MotorCommand,
   config: DeploymentConfig
 ): Promise<MotorCommandResult> {
-  const payload = command.payload as FeatureBranchPayload;
+  const payload = command.parameters as unknown as FeatureBranchPayload;
   const { owner, repo, githubToken } = config;
 
   try {
@@ -309,7 +327,8 @@ export async function createFeatureBranch(
     return {
       commandId: command.id,
       success: true,
-      result: {
+      status: 'executed' as const,
+      response: {
         branchName: payload.branchName,
         baseBranch: payload.baseBranch,
         sha: baseSha,
@@ -317,13 +336,18 @@ export async function createFeatureBranch(
         message: `Created feature branch ${payload.branchName} from ${payload.baseBranch}`,
       },
       executedAt: new Date().toISOString(),
+      durationMs: 0,
+      retriesUsed: 0,
     };
   } catch (error) {
     return {
       commandId: command.id,
       success: false,
+      status: 'failed' as const,
       error: error instanceof Error ? error.message : String(error),
       executedAt: new Date().toISOString(),
+      durationMs: 0,
+      retriesUsed: 0,
     };
   }
 }
@@ -335,7 +359,7 @@ export async function runTestSuite(
   command: MotorCommand,
   config: DeploymentConfig
 ): Promise<MotorCommandResult> {
-  const payload = command.payload as TestSuitePayload;
+  const payload = command.parameters as unknown as TestSuitePayload;
   const { owner, repo, githubToken } = config;
 
   try {
@@ -369,20 +393,26 @@ export async function runTestSuite(
     return {
       commandId: command.id,
       success: true,
-      result: {
+      status: 'executed' as const,
+      response: {
         branch: ref,
         suite: payload.suite || 'all',
         workflow: workflow_id,
         message: `Triggered test suite for ${ref}`,
       },
       executedAt: new Date().toISOString(),
+      durationMs: 0,
+      retriesUsed: 0,
     };
   } catch (error) {
     return {
       commandId: command.id,
       success: false,
+      status: 'failed' as const,
       error: error instanceof Error ? error.message : String(error),
       executedAt: new Date().toISOString(),
+      durationMs: 0,
+      retriesUsed: 0,
     };
   }
 }
@@ -394,7 +424,7 @@ export async function triggerCIBuild(
   command: MotorCommand,
   config: DeploymentConfig
 ): Promise<MotorCommandResult> {
-  const payload = command.payload as { branch?: string; workflow?: string };
+  const payload = command.parameters as { branch?: string; workflow?: string };
   const { owner, repo, githubToken } = config;
 
   try {
@@ -421,19 +451,25 @@ export async function triggerCIBuild(
     return {
       commandId: command.id,
       success: true,
-      result: {
+      status: 'executed' as const,
+      response: {
         branch: ref,
         workflow: workflow_id,
         message: `Triggered CI build for ${ref}`,
       },
       executedAt: new Date().toISOString(),
+      durationMs: 0,
+      retriesUsed: 0,
     };
   } catch (error) {
     return {
       commandId: command.id,
       success: false,
+      status: 'failed' as const,
       error: error instanceof Error ? error.message : String(error),
       executedAt: new Date().toISOString(),
+      durationMs: 0,
+      retriesUsed: 0,
     };
   }
 }
