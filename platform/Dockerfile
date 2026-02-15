@@ -66,9 +66,10 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
 # Copy necessary files from build stage
-COPY --from=builder /app/platform/public ./public
+# Standalone mode includes the full app in .next/standalone
 COPY --from=builder /app/platform/.next/standalone ./
-COPY --from=builder /app/platform/.next/static ./.next/static
+COPY --from=builder /app/platform/.next/static ./platform/.next/static
+COPY --from=builder /app/platform/public ./platform/public
 
 # Set correct permissions
 RUN chown -R nextjs:nodejs /app
@@ -77,4 +78,4 @@ USER nextjs
 
 EXPOSE 3000
 
-CMD ["node", "server.js"]
+CMD ["node", "platform/server.js"]
