@@ -129,7 +129,8 @@ export interface PCAlgorithmConfig {
 export function runPCAlgorithm(
   data: Map<string, number[]>,
   alpha: number = 0.05,
-  maxConditioningSetSize?: number
+  maxConditioningSetSize?: number,
+  minObservations: number = 30
 ): PCAlgorithmResult {
   const nodes = Array.from(data.keys());
   const n = nodes.length;
@@ -144,8 +145,8 @@ export function runPCAlgorithm(
     if (values.length !== sampleSize) {
       throw new Error(`Variable ${node} has different sample size`);
     }
-    if (values.length < 30) {
-      throw new Error(`Insufficient observations: ${values.length} < 30`);
+    if (values.length < minObservations) {
+      throw new Error(`Insufficient observations: ${values.length} < ${minObservations}`);
     }
   }
 

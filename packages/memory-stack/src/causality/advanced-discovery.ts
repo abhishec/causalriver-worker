@@ -1434,7 +1434,7 @@ function pcStructuralScoring(
   for (const [k, v] of Object.entries(data)) {
     pcData.set(k, v);
   }
-  const pcResult = runPCAlgorithm(pcData, config.alpha);
+  const pcResult = runPCAlgorithm(pcData, config.alpha, undefined, config.minObservations);
 
   // Build adjacency from PC result (both skeleton and oriented edges)
   const pcAdjacency: boolean[][] = Array.from({ length: n }, () => Array(n).fill(false));
