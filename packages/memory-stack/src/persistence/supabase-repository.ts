@@ -220,6 +220,34 @@ export interface NexusRepository {
   loadLeapState(leapType: string): Promise<unknown | null>;
   /** Load all LEAP states for this organization */
   loadAllLeapStates(): Promise<Array<{ leap_type: string; state_data: unknown }>>;
+  /**
+   * Gap #4 Fix: Compact LEAP state JSONB to prevent unbounded growth.
+   *
+   * LEAP layers accumulate data over time (associations, episodes, user models).
+   * Without compaction, state_data JSONB can grow unboundedly:
+   *   - Deep Dreaming: associations Map grows with every dream cycle
+   *   - Hierarchical Memory: episodes + working memory items accumulate
+   *   - Theory of Mind: user model interactions grow per user
+   *   - Temporal Consciousness: timeline events + recent signals accumulate
+   *
+   * Compaction strategy per LEAP type:
+   *   - Deep Dreaming: Keep top-N associations by confidence, discard low-confidence
+   *   - Hierarchical Memory: Keep last N episodes, prune working memory older than 7 days
+   *   - Theory of Mind: Keep last N interactions per user model
+   *   - Temporal Consciousness: Trim recentSignals to last 2000, compact timeline
+   *
+   * @param maxAssociations - Max dream associations to keep (default: 500)
+   * @param maxEpisodes - Max episodes to keep (default: 1000)
+   * @param maxTimelineEvents - Max timeline events to keep (default: 5000)
+   * @param maxRecentSignals - Max recent signals in temporal (default: 2000)
+   * @returns Compaction summary
+   */
+  compactLeapStates(options?: {
+    maxAssociations?: number;
+    maxEpisodes?: number;
+    maxTimelineEvents?: number;
+    maxRecentSignals?: number;
+  }): Promise<{ compacted: number; bytesReclaimed: number; details: string[] }>;
 
   // ── Organization Info ────────────────────────────────────────────
   /** Get the organization ID this repository is scoped to */
@@ -906,6 +934,176 @@ export function createSupabaseRepository(
         leap_type: row.leap_type as string,
         state_data: row.state_data,
       }));
+    },
+
+    // ── LEAP State Compaction (Gap #4 Fix) ──────────────────────────
+    //
+    // Prevents unbounded JSONB growth in cognitive_leap_state by trimming
+    // accumulated data structures to bounded sizes after each consolidation.
+
+    async compactLeapStates(options?: {
+      maxAssociations?: number;
+      maxEpisodes?: number;
+      maxTimelineEvents?: number;
+      maxRecentSignals?: number;
+    }): Promise<{ compacted: number; bytesReclaimed: number; details: string[] }> {
+      const maxAssociations = options?.maxAssociations ?? 500;
+      const maxEpisodes = options?.maxEpisodes ?? 1000;
+      const maxTimelineEvents = options?.maxTimelineEvents ?? 5000;
+      const maxRecentSignals = options?.maxRecentSignals ?? 2000;
+
+      const details: string[] = [];
+      let compacted = 0;
+      let bytesReclaimed = 0;
+
+      // Load all LEAP states
+      const { data: allStates, error: loadErr } = await supabase
+        .from('cognitive_leap_state')
+        .select('leap_type, state_data')
+        .eq('organization_id', organizationId);
+
+      if (loadErr || !allStates) {
+        return { compacted: 0, bytesReclaimed: 0, details: ['No LEAP states found or load error'] };
+      }
+
+      for (const row of allStates) {
+        const leapType = row.leap_type as string;
+        const stateData = row.state_data as any;
+        if (!stateData || typeof stateData !== 'object') continue;
+
+        const originalSize = JSON.stringify(stateData).length;
+        let modified = false;
+
+        // ── Deep Dreaming: trim associations by confidence ──
+        if (leapType === 'deep_dreaming' && Array.isArray(stateData.associations)) {
+          const before = stateData.associations.length;
+          if (before > maxAssociations) {
+            // Sort by confidence desc, keep top N
+            stateData.associations = stateData.associations
+              .sort((a: any, b: any) => (b.confidence || 0) - (a.confidence || 0))
+              .slice(0, maxAssociations);
+            details.push(`deep_dreaming: trimmed associations ${before} → ${maxAssociations}`);
+            modified = true;
+          }
+        }
+
+        // ── Hierarchical Memory: trim episodes and working memory ──
+        if (leapType === 'hierarchical_memory') {
+          if (Array.isArray(stateData.episodes)) {
+            const before = stateData.episodes.length;
+            if (before > maxEpisodes) {
+              // Keep most recent episodes
+              stateData.episodes = stateData.episodes.slice(-maxEpisodes);
+              details.push(`hierarchical_memory: trimmed episodes ${before} → ${maxEpisodes}`);
+              modified = true;
+            }
+          }
+          if (Array.isArray(stateData.workingMemory)) {
+            const before = stateData.workingMemory.length;
+            // Working memory should be bounded — keep last 200 items
+            const wmLimit = 200;
+            if (before > wmLimit) {
+              stateData.workingMemory = stateData.workingMemory.slice(-wmLimit);
+              details.push(`hierarchical_memory: trimmed workingMemory ${before} → ${wmLimit}`);
+              modified = true;
+            }
+          }
+          if (Array.isArray(stateData.semanticFacts)) {
+            const before = stateData.semanticFacts.length;
+            const sfLimit = 500;
+            if (before > sfLimit) {
+              stateData.semanticFacts = stateData.semanticFacts
+                .sort((a: any, b: any) => (b.confidence || 0) - (a.confidence || 0))
+                .slice(0, sfLimit);
+              details.push(`hierarchical_memory: trimmed semanticFacts ${before} → ${sfLimit}`);
+              modified = true;
+            }
+          }
+        }
+
+        // ── Theory of Mind: trim per-user interaction history ──
+        if (leapType === 'theory_of_mind' && Array.isArray(stateData.userModels)) {
+          let trimCount = 0;
+          for (const [, model] of stateData.userModels) {
+            if (model && Array.isArray(model.interactions)) {
+              const before = model.interactions.length;
+              const interactionLimit = 100;
+              if (before > interactionLimit) {
+                model.interactions = model.interactions.slice(-interactionLimit);
+                trimCount += before - interactionLimit;
+              }
+            }
+            // Trim intent history
+            if (model && Array.isArray(model.intentHistory)) {
+              const before = model.intentHistory.length;
+              const intentLimit = 50;
+              if (before > intentLimit) {
+                model.intentHistory = model.intentHistory.slice(-intentLimit);
+                trimCount += before - intentLimit;
+              }
+            }
+          }
+          if (trimCount > 0) {
+            details.push(`theory_of_mind: trimmed ${trimCount} interaction/intent entries`);
+            modified = true;
+          }
+        }
+
+        // ── Temporal Consciousness: trim timeline + recent signals ──
+        if (leapType === 'temporal_consciousness') {
+          if (Array.isArray(stateData.recentSignals)) {
+            const before = stateData.recentSignals.length;
+            if (before > maxRecentSignals) {
+              stateData.recentSignals = stateData.recentSignals.slice(-maxRecentSignals);
+              details.push(`temporal_consciousness: trimmed recentSignals ${before} → ${maxRecentSignals}`);
+              modified = true;
+            }
+          }
+          if (Array.isArray(stateData.timeline)) {
+            const before = stateData.timeline.length;
+            if (before > maxTimelineEvents) {
+              stateData.timeline = stateData.timeline.slice(-maxTimelineEvents);
+              details.push(`temporal_consciousness: trimmed timeline ${before} → ${maxTimelineEvents}`);
+              modified = true;
+            }
+          }
+          // Compact rhythms — remove low-confidence detected rhythms
+          if (Array.isArray(stateData.rhythms)) {
+            const before = stateData.rhythms.length;
+            const rhythmLimit = 50;
+            if (before > rhythmLimit) {
+              stateData.rhythms = stateData.rhythms
+                .sort((a: any, b: any) => (b.confidence || 0) - (a.confidence || 0))
+                .slice(0, rhythmLimit);
+              details.push(`temporal_consciousness: trimmed rhythms ${before} → ${rhythmLimit}`);
+              modified = true;
+            }
+          }
+        }
+
+        // Persist compacted state
+        if (modified) {
+          const newSize = JSON.stringify(stateData).length;
+          bytesReclaimed += Math.max(0, originalSize - newSize);
+          compacted++;
+
+          const { error: updateErr } = await supabase
+            .from('cognitive_leap_state')
+            .update({
+              state_data: stateData,
+              state_version: (stateData.state_version || 1) + 1,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('organization_id', organizationId)
+            .eq('leap_type', leapType);
+
+          if (updateErr) {
+            details.push(`${leapType}: compaction update failed: ${updateErr.message}`);
+          }
+        }
+      }
+
+      return { compacted, bytesReclaimed, details };
     },
 
     // ── Organization Info ──────────────────────────────────────────

@@ -1,0 +1,167 @@
+name: Brain Consolidation (Nightly Sleep)
+
+# ============================================================================
+# AUTOMATED BRAIN SLEEP CYCLE
+# ============================================================================
+#
+# Gap #1 Fix: The brain has a full 10-step consolidation runner but no
+# automated scheduling. Without this, the brain never "sleeps" unless
+# manually triggered. This workflow ensures the brain consolidates
+# knowledge nightly — pruning weak edges, strengthening validated ones,
+# running all 15 cognitive layers, and generating executive briefings.
+#
+# Architecture:
+#   GitHub Actions (scheduler) → brain-consolidation-runner.ts (Node.js)
+#   - Runs outside Deno/Edge Functions (needs Node.js modules)
+#   - Consolidates all active orgs, then core brain
+#   - Generates daily brain snapshot for website dashboard
+#   - Produces executive briefing via LLM amplifier
+#
+# Schedule: Nightly at 2 AM UTC (matches brain-consolidation agent schedule)
+# Fallback: Manual trigger via workflow_dispatch
+# ============================================================================
+
+on:
+  # Nightly at 2 AM UTC
+  schedule:
+    - cron: '0 2 * * *'
+
+  # Manual trigger with options
+  workflow_dispatch:
+    inputs:
+      consolidate_all_orgs:
+        description: 'Consolidate all active organizations'
+        required: false
+        type: boolean
+        default: true
+      verbose:
+        description: 'Enable verbose logging'
+        required: false
+        type: boolean
+        default: true
+      lookback_hours:
+        description: 'Hours to look back for signals (default: 48)'
+        required: false
+        type: string
+        default: '48'
+
+jobs:
+  consolidation:
+    name: Brain Sleep Cycle
+    runs-on: ubuntu-latest
+    timeout-minutes: 120  # 2-hour max (large orgs with 10M signals)
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build memory-stack
+        run: pnpm --filter @nexus-ai/memory-stack run build
+
+      - name: Run Brain Consolidation
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+          CONSOLIDATE_ALL_ORGS: ${{ github.event.inputs.consolidate_all_orgs || 'true' }}
+          VERBOSE: ${{ github.event.inputs.verbose || 'true' }}
+          LOOKBACK_HOURS: ${{ github.event.inputs.lookback_hours || '48' }}
+          CONSOLIDATION_MODE: 'once'
+          PRUNE_AFTER_DAYS: '30'
+        run: |
+          # Validate required secrets
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_SERVICE_ROLE_KEY" ]; then
+            echo "::error::SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be configured in repository secrets."
+            echo ""
+            echo "To configure:"
+            echo "  1. Go to Settings > Secrets and variables > Actions"
+            echo "  2. Add SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY"
+            echo ""
+            echo "Optional secrets for enhanced consolidation:"
+            echo "  - ANTHROPIC_API_KEY (executive briefing generation)"
+            echo "  - FRED_API_KEY (public economic data ingestion)"
+            exit 1
+          fi
+
+          echo "=== Brain Consolidation Starting ==="
+          echo "Time: $(date -u)"
+          echo "Consolidate All Orgs: $CONSOLIDATE_ALL_ORGS"
+          echo "Lookback: ${LOOKBACK_HOURS}h"
+          echo "Prune Threshold: ${PRUNE_AFTER_DAYS} days"
+          echo ""
+
+          pnpm exec tsx scripts/brain-consolidation-runner.ts
+
+      - name: Upload Consolidation Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: brain-consolidation-${{ github.run_number }}
+          path: |
+            consolidation-report-*.json
+            brain-health-*.json
+          retention-days: 30
+          if-no-files-found: ignore
+
+      - name: Notify on Failure
+        if: failure() && github.event_name == 'schedule'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = 'Brain Consolidation Failed (Nightly Sleep)';
+            const body = `
+            ## Brain Sleep Cycle Failed
+
+            The nightly brain consolidation (sleep cycle) failed.
+            This means knowledge is not being pruned, strengthened, or federated.
+
+            **Run:** [View Details](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            **Time:** ${new Date().toISOString()}
+
+            ### Impact
+            - Weak causal edges are not being pruned
+            - Validated predictions are not strengthening edges
+            - Cognitive stack layers 3-15 did not fire
+            - Daily brain snapshot was not generated
+
+            ### Next Steps
+            1. Check the [workflow logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            2. Verify Supabase connectivity
+            3. Run manually: \`pnpm exec tsx scripts/brain-consolidation-runner.ts\`
+
+            _Automated alert from Brain Orchestrator._
+            `;
+
+            // Check if issue already exists
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'brain-health,automated'
+            });
+
+            const existingIssue = issues.data.find(issue => issue.title === title);
+
+            if (!existingIssue) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body,
+                labels: ['brain-health', 'automated', 'consolidation']
+              });
+            }

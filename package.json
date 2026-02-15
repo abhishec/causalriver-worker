@@ -42,7 +42,11 @@
     "reload:schema": "tsx scripts/reload-supabase-schema.ts",
     "verify:schema": "tsx scripts/verify-supabase-schema.ts",
     "verify:functions": "tsx scripts/test-all-edge-functions.ts",
-    "verify:complete": "tsx scripts/verify-supabase-schema.ts && tsx scripts/test-all-edge-functions.ts"
+    "verify:complete": "tsx scripts/verify-supabase-schema.ts && tsx scripts/test-all-edge-functions.ts",
+    "test:load": "tsx scripts/load-test-10m.ts",
+    "test:load:light": "tsx scripts/load-test-10m.ts --mode light",
+    "test:load:medium": "tsx scripts/load-test-10m.ts --mode medium",
+    "test:load:full": "tsx scripts/load-test-10m.ts --mode full"
   },
   "devDependencies": {
     "@types/cron": "^2.4.3",

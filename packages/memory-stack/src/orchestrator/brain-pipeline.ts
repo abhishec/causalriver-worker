@@ -537,6 +537,17 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
   const realtimeCausalStates = new Map<string, IncrementalGrangerState>();
   const realtimeCausalEdges: Array<{ source: string; target: string; fStat: number; pValue: number; discoveredAt: number }> = [];
 
+  // Gap #2 Fix: Attention-based domain pair selection for real-time Granger.
+  // Instead of a naive 10-domain cap that misses 860/870 pairs, we track:
+  //   1. Domain signal frequency (more signals = higher priority)
+  //   2. Pair uncertainty (new/low-sample pairs get priority)
+  //   3. Rotate coverage to ensure ALL pairs get tracked over time
+  // Cap raised to 30 domains (matching batch Granger) with 50 pair budget per ingestion.
+  const REALTIME_GRANGER_MAX_DOMAINS = 30;
+  const REALTIME_GRANGER_PAIR_BUDGET = 50; // Max pairs to process per signal batch
+  const domainSignalCounts = new Map<string, number>(); // Track frequency for priority
+  let realtimeGrangerRotation = 0; // Round-robin offset for coverage rotation
+
   // Persistence Repository: Central nervous system data store
   // Brain Analog: The brain's ability to consolidate and persist learned knowledge
   // across sleep cycles. Without this, predictions and health snapshots are lost.
@@ -576,62 +587,115 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
         }
 
         const domains = [...byDomain.keys()];
+
+        // Track domain frequency for attention priority
+        for (const d of domains) {
+          domainSignalCounts.set(d, (domainSignalCounts.get(d) || 0) + 1);
+        }
+
         if (domains.length >= 2) {
-          // For each domain pair, feed the average signal value into the incremental tracker
-          for (let i = 0; i < Math.min(domains.length, 10); i++) {
-            for (let j = i + 1; j < Math.min(domains.length, 10); j++) {
-              const key = `${domains[i]}→${domains[j]}`;
-              let state = realtimeCausalStates.get(key);
-              if (!state) {
-                state = createIncrementalGranger({ lag: 5, windowSize: 500 });
-                realtimeCausalStates.set(key, state);
-              }
+          // Gap #2 Fix: Attention-based pair selection (replaces naive 10-domain cap)
+          // 1. Cap to REALTIME_GRANGER_MAX_DOMAINS (30), sorted by signal frequency
+          // 2. Build all candidate pairs, score by uncertainty + novelty
+          // 3. Process top PAIR_BUDGET pairs per batch, rotating to ensure full coverage
+          const cappedDomains = domains.length <= REALTIME_GRANGER_MAX_DOMAINS
+            ? domains
+            : domains
+                .sort((a, b) => (domainSignalCounts.get(b) || 0) - (domainSignalCounts.get(a) || 0))
+                .slice(0, REALTIME_GRANGER_MAX_DOMAINS);
 
-              const xVals = byDomain.get(domains[i])!;
-              const yVals = byDomain.get(domains[j])!;
-              const xAvg = xVals.reduce((a, b) => a + b, 0) / xVals.length;
-              const yAvg = yVals.reduce((a, b) => a + b, 0) / yVals.length;
+          // Build candidate pairs with attention scores
+          const candidatePairs: Array<{ i: number; j: number; key: string; priority: number }> = [];
+          for (let i = 0; i < cappedDomains.length; i++) {
+            for (let j = i + 1; j < cappedDomains.length; j++) {
+              const key = `${cappedDomains[i]}→${cappedDomains[j]}`;
+              const existingState = realtimeCausalStates.get(key);
+              // Priority scoring:
+              //   - New pairs (no state yet) get highest priority (1.0)
+              //   - Low-sample pairs get medium priority (proportional to inverse updates)
+              //   - Well-established pairs get lower priority (already confident)
+              const updates = existingState?.totalUpdates || 0;
+              const noveltyScore = updates === 0 ? 1.0 : Math.min(1.0, 50 / (updates + 1));
+              // Boost pairs involving high-frequency domains
+              const freqBoost = Math.min(0.3,
+                ((domainSignalCounts.get(cappedDomains[i]) || 0) +
+                 (domainSignalCounts.get(cappedDomains[j]) || 0)) / 200);
+              candidatePairs.push({ i, j, key, priority: noveltyScore + freqBoost });
+            }
+          }
 
-              const result = incrementalGrangerUpdate(state, xAvg, yAvg);
-              if (result && result.isSignificant) {
-                realtimeCausalEdges.push({
-                  source: domains[i],
-                  target: domains[j],
-                  fStat: result.fStatistic,
-                  pValue: result.pValue,
-                  discoveredAt: Date.now(),
-                });
+          // Sort by priority (highest first), then apply rotation for coverage
+          candidatePairs.sort((a, b) => b.priority - a.priority);
 
-                // Persist real-time causal edge to DB — prevents data loss on restart
-                // Uses upsert so repeated discoveries update rather than duplicate
-                // Fire-and-forget: non-blocking async persistence
-                void (async () => {
-                  try {
-                    await supabase.from('causal_relationships_statistical').upsert({
-                      organization_id: organizationId,
-                      source_domain: domains[i],
-                      target_domain: domains[j],
-                      granger_f_statistic: result.fStatistic,
-                      granger_p_value: result.pValue,
-                      effect_size: Math.min(1, result.fStatistic / 10), // Normalize F-stat to 0-1
-                      optimal_lag_days: 1,
-                      is_significant: true,
-                      sample_size: state.totalUpdates || 0,
-                      discovery_method: 'realtime_incremental_granger',
-                      last_computed_at: new Date().toISOString(),
-                      natural_language: `Real-time: ${domains[i]} → ${domains[j]} (F=${result.fStatistic.toFixed(2)}, p=${result.pValue.toFixed(4)})`,
-                    }, { onConflict: 'organization_id,source_domain,target_domain' });
-                    if (verbose) log(`Real-time Granger edge persisted: ${domains[i]}→${domains[j]}`);
-                  } catch {
-                    /* Non-critical: edge already exists or write failed */
-                  }
-                })();
+          // Rotate: shift the starting index each batch to cover all pairs over time
+          const budget = Math.min(candidatePairs.length, REALTIME_GRANGER_PAIR_BUDGET);
+          const startIdx = realtimeGrangerRotation % Math.max(1, candidatePairs.length);
+          realtimeGrangerRotation += budget;
 
-                if (verbose) {
-                  log(`Real-time Granger: discovered ${domains[i]}→${domains[j]} (F=${result.fStatistic.toFixed(2)}, p=${result.pValue.toFixed(4)})`);
+          // Select pairs: take budget from rotated position, wrapping around
+          const selectedPairs: typeof candidatePairs = [];
+          for (let k = 0; k < budget; k++) {
+            selectedPairs.push(candidatePairs[(startIdx + k) % candidatePairs.length]);
+          }
+
+          // Process selected pairs
+          for (const pair of selectedPairs) {
+            const { i, j, key } = pair;
+            let state = realtimeCausalStates.get(key);
+            if (!state) {
+              state = createIncrementalGranger({ lag: 5, windowSize: 500 });
+              realtimeCausalStates.set(key, state);
+            }
+
+            const xVals = byDomain.get(cappedDomains[i])!;
+            const yVals = byDomain.get(cappedDomains[j])!;
+            const xAvg = xVals.reduce((a, b) => a + b, 0) / xVals.length;
+            const yAvg = yVals.reduce((a, b) => a + b, 0) / yVals.length;
+
+            const result = incrementalGrangerUpdate(state, xAvg, yAvg);
+            if (result && result.isSignificant) {
+              realtimeCausalEdges.push({
+                source: cappedDomains[i],
+                target: cappedDomains[j],
+                fStat: result.fStatistic,
+                pValue: result.pValue,
+                discoveredAt: Date.now(),
+              });
+
+              // Persist real-time causal edge to DB — prevents data loss on restart
+              const srcDomain = cappedDomains[i];
+              const tgtDomain = cappedDomains[j];
+              const totalUpdates = state.totalUpdates || 0;
+              void (async () => {
+                try {
+                  await supabase.from('causal_relationships_statistical').upsert({
+                    organization_id: organizationId,
+                    source_domain: srcDomain,
+                    target_domain: tgtDomain,
+                    granger_f_statistic: result.fStatistic,
+                    granger_p_value: result.pValue,
+                    effect_size: Math.min(1, result.fStatistic / 10),
+                    optimal_lag_days: 1,
+                    is_significant: true,
+                    sample_size: totalUpdates,
+                    discovery_method: 'realtime_incremental_granger',
+                    last_computed_at: new Date().toISOString(),
+                    natural_language: `Real-time: ${srcDomain} → ${tgtDomain} (F=${result.fStatistic.toFixed(2)}, p=${result.pValue.toFixed(4)})`,
+                  }, { onConflict: 'organization_id,source_domain,target_domain' });
+                  if (verbose) log(`Real-time Granger edge persisted: ${srcDomain}→${tgtDomain}`);
+                } catch {
+                  /* Non-critical */
                 }
+              })();
+
+              if (verbose) {
+                log(`Real-time Granger: discovered ${srcDomain}→${tgtDomain} (F=${result.fStatistic.toFixed(2)}, p=${result.pValue.toFixed(4)})`);
               }
             }
+          }
+
+          if (verbose && candidatePairs.length > budget) {
+            log(`Real-time Granger: processed ${budget}/${candidatePairs.length} pairs (${cappedDomains.length} domains, rotation=${realtimeGrangerRotation})`);
           }
         }
       } catch {
@@ -1464,6 +1528,21 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
           repository.persistLeapState('temporal_consciousness', leaps.temporal.getState()),
         ]);
         log('Cognitive Stack: LEAP states persisted to Supabase (deep_dreaming, hierarchical_memory, theory_of_mind, temporal_consciousness)');
+
+        // Gap #4 Fix: Compact LEAP states to prevent unbounded JSONB growth
+        // After persisting, trim accumulated data structures to bounded sizes.
+        // This runs every sleep cycle, so JSONB stays O(bounded) not O(total_signals).
+        try {
+          const compaction = await repository.compactLeapStates();
+          if (compaction.compacted > 0) {
+            log(`LEAP Compaction: ${compaction.compacted} state(s) compacted, ${(compaction.bytesReclaimed / 1024).toFixed(1)}KB reclaimed`);
+            for (const detail of compaction.details) {
+              log(`  └─ ${detail}`);
+            }
+          }
+        } catch (compactErr) {
+          log(`LEAP compaction failed (non-critical): ${(compactErr as Error).message}`);
+        }
       } catch (err) {
         const msg = `LEAP state persistence failed (non-critical): ${(err as Error).message}`;
         errors.push(msg);
