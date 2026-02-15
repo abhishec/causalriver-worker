@@ -230,9 +230,18 @@ export default function ConnectorsPageV2() {
                 <span className="font-semibold text-gray-900">{orgName || 'your organization'}</span>'s data.
               </p>
             </div>
-            <div className="text-right">
-              <div className="text-sm text-gray-500">Organization</div>
-              <div className="text-lg font-semibold text-gray-900">{orgName}</div>
+            <div className="flex items-center gap-4">
+              <a
+                href="/admin/settings/oauth"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium shadow-sm"
+              >
+                <span>⚙️</span>
+                OAuth Settings
+              </a>
+              <div className="text-right">
+                <div className="text-sm text-gray-500">Organization</div>
+                <div className="text-lg font-semibold text-gray-900">{orgName}</div>
+              </div>
             </div>
           </div>
         </div>
