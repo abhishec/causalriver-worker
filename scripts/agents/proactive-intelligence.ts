@@ -194,6 +194,37 @@ export class ProactiveIntelligenceAgent extends ManusNativeAgent {
       enabled: true,
     });
 
+    // Load previous alert timestamps from DB for throttling continuity across restarts.
+    // Without this, every agent restart resets the cooldown and sends duplicate alerts.
+    try {
+      const cooldownMs = 4 * 60 * 60 * 1000; // Must match alertCooldownMs above
+      const { data: recentAlerts } = await this.supabase
+        .from('ai_memory')
+        .select('metadata, created_at')
+        .eq('organization_id', this.organizationId)
+        .eq('memory_type', 'alert')
+        .gte('created_at', new Date(Date.now() - cooldownMs).toISOString())
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      if (recentAlerts && recentAlerts.length > 0) {
+        const restoredMonitorIds = new Set<string>();
+        for (const alert of recentAlerts) {
+          const monitorId = (alert.metadata as Record<string, unknown>)?.monitor_id as string;
+          if (monitorId && !restoredMonitorIds.has(monitorId)) {
+            const firedAt = new Date(alert.created_at).getTime();
+            proactive.setLastFired?.(monitorId, firedAt);
+            restoredMonitorIds.add(monitorId);
+          }
+        }
+        if (restoredMonitorIds.size > 0) {
+          this.log(`Restored throttling state for ${restoredMonitorIds.size} monitor(s) from DB`);
+        }
+      }
+    } catch {
+      // Non-fatal — worst case is duplicate alerts (same as before this fix)
+    }
+
     // Run the scan
     const scanResult = await proactive.scan(state);
 

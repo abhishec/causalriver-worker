@@ -249,6 +249,23 @@ export async function POST(request: NextRequest) {
       response.artifact = cleanArtifact;
     }
 
+    // Cognitive Stack — expose L3-L15 reasoning output to API clients
+    // Without this, SDK users get richer output than API clients, which is
+    // an information asymmetry that breaks dashboard and integration use cases.
+    if (result.cognitiveStack) {
+      const cs = result.cognitiveStack as Record<string, unknown>;
+      response.cognitiveStack = compact
+        ? {
+            // Compact mode: key summaries only
+            narrative: cs.narrative,
+            redTeam: cs.redTeam ? { predictionsTested: (cs.redTeam as any).predictionsTested, challengesRaised: (cs.redTeam as any).challengesRaised } : null,
+            imagination: cs.imagination ? { hypothesesGenerated: (cs.imagination as any).hypothesesGenerated } : null,
+            curiosity: cs.curiosity ? { questionsGenerated: (cs.curiosity as any).questionsGenerated } : null,
+            healthSummary: cs.healthSummary,
+          }
+        : cs;
+    }
+
     return NextResponse.json(response);
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Internal server error";

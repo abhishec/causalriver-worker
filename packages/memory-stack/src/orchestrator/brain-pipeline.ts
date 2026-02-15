@@ -317,6 +317,8 @@ export interface BrainCycleReport {
   bookIngestion: BookIngestionResult | null;
   /** Cognitive Stack: Layers 3-15 (Deep Dreaming → Narrative Intelligence) */
   cognitiveStack: CognitiveCycleResult | null;
+  /** CTO Performance Report: Executive meta-cognition snapshot */
+  ctoReport: unknown;
 
   /** Overall cycle status */
   status: 'success' | 'partial' | 'failed';
@@ -949,6 +951,40 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
           };
         });
         await supabase.from('prediction_records').insert(predictionRows);
+
+        // Also write to prediction_tracker for calibration loop closure
+        // prediction_records = legacy simulation outcomes (schema: predicted_value, predicted_outcome)
+        // prediction_tracker = calibration loop (schema: prediction, review_date, resolved, brier_score)
+        // Without this dual-write, outcome-resolver-agent can never find cascade predictions
+        const trackerRows = predictions.map((pred) => {
+          const reviewDate = new Date(pred.predictedAt);
+          reviewDate.setDate(reviewDate.getDate() + pred.predictionWindowDays);
+          return {
+            organization_id: organizationId,
+            domain: pred.entityId,
+            action_type: 'cascade_prediction',
+            prediction: `${scenario.direction} ${scenario.magnitudePercent}% in ${scenario.sourceDomain} → ${pred.predictedProbability.toFixed(2)} probability impact on ${pred.entityId}`,
+            confidence: pred.predictedProbability,
+            review_date: reviewDate.toISOString(),
+            resolved: false,
+            metadata: {
+              source: 'brain-pipeline',
+              prediction_type: pred.predictionType,
+              entity_id: pred.entityId,
+              source_domain: scenario.sourceDomain,
+              direction: scenario.direction,
+              magnitude_percent: scenario.magnitudePercent,
+              window_days: pred.predictionWindowDays,
+            },
+          };
+        });
+        try {
+          await supabase.from('prediction_tracker').insert(trackerRows);
+          log(`Mirrored ${predictions.length} prediction(s) to prediction_tracker for calibration loop`);
+        } catch (trackerErr) {
+          log(`prediction_tracker mirror failed (non-critical): ${(trackerErr as Error).message}`);
+        }
+
         log(`Persisted ${predictions.length} prediction(s) to database for outcome tracking`);
       } catch (persistErr) {
         log(`Failed to persist predictions (non-critical): ${(persistErr as Error).message}`);
@@ -1834,6 +1870,20 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
       log(`Failed to save brain health snapshot (non-critical): ${(snapshotErr as Error).message}`);
     }
 
+    // CTO Performance Report — Executive meta-cognition at end of every cycle
+    // Without this, the brain runs but never introspects its own performance trajectory
+    let ctoReport: unknown = null;
+    try {
+      ctoReport = await ctoTracker.generateReport();
+      if (ctoReport && typeof ctoReport === 'object' && 'maturity' in ctoReport) {
+        const maturity = (ctoReport as { maturity: { overall: number } }).maturity;
+        narrativeParts.push(`CTO Tracker: brain maturity ${(maturity.overall * 100).toFixed(0)}%.`);
+        log(`CTO Performance Report generated — maturity: ${(maturity.overall * 100).toFixed(0)}%`);
+      }
+    } catch (ctoErr) {
+      log(`CTO report generation failed (non-critical): ${(ctoErr as Error).message}`);
+    }
+
     return {
       organizationId,
       startedAt,
@@ -1849,6 +1899,7 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
       publicDataTraining: publicDataResult,
       bookIngestion: bookIngestionResult,
       cognitiveStack: cognitiveStackResult,
+      ctoReport,
       status,
       errors,
       narrative: narrativeParts.join(' '),
@@ -1997,6 +2048,31 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
           status: l.status === 'healthy' ? 'ok' as const : l.status === 'degraded' ? 'degraded' as const : 'error' as const,
           details: Object.entries(l.stats).map(([k, v]) => `${k}: ${v}`).join(', ') || 'Active',
         }));
+      })(),
+      // CTO Performance Tracker — Executive Meta-Cognition Region
+      ...(() => {
+        try {
+          const quickCheck = ctoTracker.quickCheck();
+          const health = quickCheck && typeof quickCheck === 'object' && 'health' in quickCheck
+            ? (quickCheck as { health: string }).health
+            : 'unknown';
+          const summary = quickCheck && typeof quickCheck === 'object' && 'summary' in quickCheck
+            ? String((quickCheck as { summary: string }).summary)
+            : 'CTO tracker active';
+          return [{
+            name: 'CTO Performance Tracker',
+            brainAnalog: 'Prefrontal Cortex (Executive Function Monitoring)',
+            status: health === 'healthy' ? 'ok' as const : health === 'degraded' ? 'degraded' as const : 'not_initialized' as const,
+            details: summary,
+          }];
+        } catch {
+          return [{
+            name: 'CTO Performance Tracker',
+            brainAnalog: 'Prefrontal Cortex (Executive Function Monitoring)',
+            status: 'not_initialized' as const,
+            details: 'CTO tracker not yet initialized',
+          }];
+        }
       })(),
     ];
 

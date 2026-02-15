@@ -408,6 +408,14 @@ export function createProactiveIntelligence(config: ProactiveIntelligenceConfig 
     },
 
     /**
+     * Restore the last-fired timestamp for a monitor (for throttling continuity across restarts).
+     * Call this before scan() to prevent duplicate alerts after agent restart.
+     */
+    setLastFired(monitorId: string, timestamp: number): void {
+      lastFired.set(monitorId, timestamp);
+    },
+
+    /**
      * Get all registered monitors.
      */
     getMonitors(): ProactiveMonitor[] {

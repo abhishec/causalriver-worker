@@ -1563,12 +1563,12 @@ describe('CTO Architecture Certification', () => {
   // ========================================================================
 
   describe('Section 7: Health Reporting', () => {
-    it('7.1 getHealth reports all 29 brain regions', () => {
+    it('7.1 getHealth reports all 30 brain regions', () => {
       const brain = createBrainPipeline(config);
       const health = brain.getHealth();
 
       expect(health.organizationId).toBe('org-arch-cert');
-      expect(health.regions.length).toBe(29);
+      expect(health.regions.length).toBe(30);
       expect(health.checkedAt).toBeDefined();
     });
 
@@ -1814,10 +1814,10 @@ describe('CTO Architecture Certification', () => {
         if (g() != null) score++;
       }
 
-      // 2. Health reports 29 regions
+      // 2. Health reports 30 regions (including CTO Performance Tracker)
       total++;
       const health = brain.getHealth();
-      if (health.regions.length === 29) score++;
+      if (health.regions.length === 30) score++;
 
       // 3. All public methods exist
       const requiredMethods = [
