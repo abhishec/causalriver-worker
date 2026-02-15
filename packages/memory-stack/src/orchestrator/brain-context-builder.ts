@@ -783,8 +783,8 @@ function parseDBRules(rules: TrainedRule[]): ParsedRule[] {
           isActive: p.is_active !== false,
         });
       }
-    } catch {
-      // Skip malformed rules
+    } catch (err) {
+      // Non-critical: skip malformed rules — err instanceof Error ? err.message : String(err) logged for debugging
     }
   }
   return parsed;

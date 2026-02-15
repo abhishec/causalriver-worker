@@ -288,8 +288,8 @@ export function createAgentContextManager(options: {
               };
             }
           }
-        } catch {
-          // Causal enrichment failure is non-fatal
+        } catch (err) {
+          // Non-critical: causal context enrichment failed — errors here don't block the main flow
         }
 
         return {

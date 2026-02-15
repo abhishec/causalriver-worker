@@ -221,8 +221,8 @@ export class ProactiveIntelligenceAgent extends ManusNativeAgent {
           this.log(`Restored throttling state for ${restoredMonitorIds.size} monitor(s) from DB`);
         }
       }
-    } catch {
-      // Non-fatal — worst case is duplicate alerts (same as before this fix)
+    } catch (err) {
+      // Non-critical: throttling state restoration from DB failed — errors here don't block the main flow
     }
 
     // Run the scan
@@ -255,8 +255,8 @@ export class ProactiveIntelligenceAgent extends ManusNativeAgent {
             related_domains: alert.relatedDomains,
           },
         });
-      } catch {
-        // Non-fatal
+      } catch (err) {
+        // Non-critical: alert persistence to ai_memory failed — errors here don't block the main flow
       }
     }
 

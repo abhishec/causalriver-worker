@@ -1179,8 +1179,8 @@ export async function enhancePatternsWithLLM(
         if (enhanced.naturalLanguage && enhanced.naturalLanguage.length > 10) {
           pattern.naturalLanguage = enhanced.naturalLanguage;
         }
-      } catch {
-        // Graceful degradation — original pattern name/description stands
+      } catch (err) {
+        // Non-critical: LLM pattern enhancement — graceful degradation, original pattern name/description stands
       }
     })
   );

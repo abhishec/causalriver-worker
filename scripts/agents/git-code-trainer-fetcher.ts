@@ -314,8 +314,8 @@ export async function fetchRepoData(
           reviewCount += prReviews.length;
         }
         if (rateLimitDelay > 0) await sleep(rateLimitDelay);
-      } catch {
-        // Skip individual PR review failures
+      } catch (err) {
+        // Non-critical: PR review fetch failed — errors here don't block the main flow
       }
     }
     log(`  Reviews: ${reviewCount} across ${reviews.size} PRs`);
@@ -338,8 +338,8 @@ export async function fetchRepoData(
           fileCount += files.length;
         }
         if (rateLimitDelay > 0) await sleep(rateLimitDelay);
-      } catch {
-        // Skip individual PR file failures
+      } catch (err) {
+        // Non-critical: PR file changes fetch failed — errors here don't block the main flow
       }
     }
     log(`  File changes: ${fileCount} across ${fileChanges.size} PRs`);

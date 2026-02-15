@@ -241,8 +241,8 @@ class OrgUpdaterAgent extends ManusNativeAgent {
               status: result.success ? 'active' : 'error',
             })
             .eq('id', row.id);
-        } catch {
-          // Non-fatal: continue even if update fails
+        } catch (err) {
+          // Non-critical: org connector status update failed — errors here don't block the main flow
         }
       }
     }

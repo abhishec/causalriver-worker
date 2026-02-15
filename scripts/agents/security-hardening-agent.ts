@@ -1291,7 +1291,14 @@ export default function Error({
     // Log to monitoring service (server-side only)
     if (process.env.NODE_ENV === 'production') {
       console.error('Production error:', { digest: error.digest });
-      // TODO: Send to Sentry/DataDog
+      // Error tracking: send to external monitoring service if configured
+      if (typeof window !== 'undefined' && (window as any).__ERROR_TRACKER__) {
+        (window as any).__ERROR_TRACKER__.captureError(error, {
+          component: 'error-boundary',
+          operation: 'unhandled-error',
+          extra: { digest: error.digest },
+        });
+      }
     } else {
       console.error('Development error:', error);
     }
@@ -1506,7 +1513,7 @@ export default function Error({
           }
         }
       } catch (err) {
-        // Skip files that can't be read
+        // Non-critical: file reading for secret scanning failed — errors here don't block the main flow
       }
     }
 

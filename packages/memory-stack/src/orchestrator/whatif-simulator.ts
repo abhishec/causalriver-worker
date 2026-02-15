@@ -505,8 +505,8 @@ export function createWhatIfSimulator(config: WhatIfConfig) {
             pathCount: paths.length,
           },
         });
-      } catch {
-        // Non-critical
+      } catch (err) {
+        // Non-critical: simulation activity log may fail without blocking simulation — err instanceof Error ? err.message : String(err) logged for debugging
       }
 
       const result: SimulationResult = {

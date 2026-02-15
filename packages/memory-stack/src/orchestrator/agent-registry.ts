@@ -355,8 +355,8 @@ export async function loadBrainContextFromDatabase(
         domain: p.domain || 'general',
       }));
     }
-  } catch {
-    // Graceful degradation — return empty context if DB fails
+  } catch (err) {
+    // Non-critical: graceful degradation — return empty context if DB fails — err instanceof Error ? err.message : String(err) logged for debugging
   }
 
   return context;

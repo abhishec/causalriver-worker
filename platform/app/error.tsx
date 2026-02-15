@@ -26,8 +26,14 @@ export default function Error({
         // DO NOT log stack trace in production
       });
 
-      // TODO: Send to error tracking service
-      // Sentry.captureException(error);
+      // Send to error tracking service if configured
+      if (typeof window !== 'undefined' && (window as any).__ERROR_TRACKER__) {
+        (window as any).__ERROR_TRACKER__.captureError(error, {
+          component: 'global-error-boundary',
+          operation: 'unhandled-error',
+          extra: { digest: error.digest },
+        });
+      }
     } else {
       // Development - log full details
       console.error('Development error:', error);

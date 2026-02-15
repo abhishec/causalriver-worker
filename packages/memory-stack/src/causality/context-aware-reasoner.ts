@@ -452,8 +452,8 @@ export function createContextAwareReasoner(config: Partial<ContextAwareReasonerC
       if (pcResult) {
         try {
           doCalcEstimator = createDoCalculusEstimator(pcResult);
-        } catch {
-          // PC result may not be compatible; continue without do-calculus
+        } catch (err) {
+          // PC result may not be compatible; continue without do-calculus: structural graph conversion may fail
         }
       }
 

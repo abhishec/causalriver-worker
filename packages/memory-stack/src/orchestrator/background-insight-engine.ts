@@ -633,8 +633,8 @@ export function createBackgroundInsightEngine(config: DMNConfig) {
             log(`Dedup: filtered ${beforeCount - allInsights.length} duplicate insights (${allInsights.length} remaining)`);
           }
         }
-      } catch {
-        // Dedup is non-critical — continue with all insights
+      } catch (err) {
+        // Non-critical: insight deduplication is non-critical — continue with all insights — err instanceof Error ? err.message : String(err) logged for debugging
       }
 
       // Persist insights as memories
@@ -653,8 +653,8 @@ export function createBackgroundInsightEngine(config: DMNConfig) {
               evidence: insight.evidence,
             },
           });
-        } catch {
-          // Non-critical
+        } catch (err) {
+          // Non-critical: insight memory upsert may fail without blocking discovery — err instanceof Error ? err.message : String(err) logged for debugging
         }
 
         // Deliver via callback if configured
@@ -662,8 +662,8 @@ export function createBackgroundInsightEngine(config: DMNConfig) {
           try {
             await onInsight(insight);
             insight.delivered = true;
-          } catch {
-            // Delivery failed — insight is still stored
+          } catch (err) {
+            // Non-critical: insight delivery failed — insight is still stored — err instanceof Error ? err.message : String(err) logged for debugging
           }
         }
       }

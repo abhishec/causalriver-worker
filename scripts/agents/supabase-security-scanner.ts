@@ -126,8 +126,8 @@ export class SupabaseSecurityScanner {
       if (data) {
         this.knownTables.push(...data);
       }
-    } catch {
-      // Fallback to hardcoded list
+    } catch (err) {
+      // Non-critical: get_tables RPC failed — falling back to hardcoded list, errors here don't block the main flow
     }
   }
 
@@ -254,8 +254,8 @@ ALTER TABLE public.${tableName} ENABLE ROW LEVEL SECURITY;
           }
         }
       }
-    } catch {
-      // Can't check functions without special grants - skip
+    } catch (err) {
+      // Non-critical: SECURITY DEFINER function check failed (requires special grants) — errors here don't block the main flow
     }
 
     return issues;
@@ -291,8 +291,8 @@ ALTER TABLE public.${tableName} ENABLE ROW LEVEL SECURITY;
           }
         }
       }
-    } catch {
-      // Can't check storage - skip
+    } catch (err) {
+      // Non-critical: storage bucket security check failed — errors here don't block the main flow
     }
 
     return issues;

@@ -141,7 +141,9 @@ export function createResilientConnector(
     tripCircuit() {
       // Force failures to trip the circuit
       for (let i = 0; i < 10; i++) {
-        try { cb.execute(() => { throw new Error("manual trip"); }); } catch {}
+        try { cb.execute(() => { throw new Error("manual trip"); }); } catch (err) {
+          // Non-critical: manual circuit breaker trip error — errors here don't block the main flow
+        }
       }
     },
 

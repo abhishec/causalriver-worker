@@ -150,8 +150,8 @@ export function createPublicDataLearner(config: PublicDataLearnerConfig) {
             source: 'fred',
           });
         }
-      } catch {
-        // Individual series failure — continue
+      } catch (err) {
+        // Non-critical: FRED series fetch for single indicator — continue with next series
       }
     }
 
@@ -191,8 +191,8 @@ export function createPublicDataLearner(config: PublicDataLearnerConfig) {
               source: 'worldbank',
             });
           }
-        } catch {
-          // Continue
+        } catch (err) {
+          // Non-critical: World Bank indicator fetch for country/indicator pair — continue with next
         }
       }
     }
@@ -247,8 +247,8 @@ export function createPublicDataLearner(config: PublicDataLearnerConfig) {
           }
         }
       }
-    } catch {
-      // BLS API failure
+    } catch (err) {
+      // Non-critical: BLS API call failure — entire source may be unavailable
     }
 
     return signals;
@@ -300,8 +300,8 @@ export function createPublicDataLearner(config: PublicDataLearnerConfig) {
             source: 'wikipedia',
           });
         }
-      } catch {
-        // Continue
+      } catch (err) {
+        // Non-critical: Wikipedia pageview fetch for single article — continue with next article
       }
     }
 
@@ -329,8 +329,8 @@ export function createPublicDataLearner(config: PublicDataLearnerConfig) {
           { domain: 'open_source', metricName: `github_forks_${name}`, value: data.forks_count, timestamp: new Date().toISOString().substring(0, 10), source: 'github' },
           { domain: 'open_source', metricName: `github_issues_${name}`, value: data.open_issues_count, timestamp: new Date().toISOString().substring(0, 10), source: 'github' },
         );
-      } catch {
-        // Rate limit or not found
+      } catch (err) {
+        // Non-critical: GitHub repo stats fetch — may be rate limited or not found
       }
     }
 
@@ -356,8 +356,8 @@ export function createPublicDataLearner(config: PublicDataLearnerConfig) {
             totalScore += story.score || 0;
             totalComments += story.descendants || 0;
           }
-        } catch {
-          // Individual story failure
+        } catch (err) {
+          // Non-critical: Hacker News story fetch for single item — continue aggregating stats
         }
       }
 
@@ -367,8 +367,8 @@ export function createPublicDataLearner(config: PublicDataLearnerConfig) {
         { domain: 'tech_sentiment', metricName: 'hn_avg_comments', value: totalComments / Math.max(top20.length, 1), timestamp: today, source: 'hackernews' },
         { domain: 'tech_sentiment', metricName: 'hn_total_engagement', value: totalScore + totalComments, timestamp: today, source: 'hackernews' },
       );
-    } catch {
-      // API failure
+    } catch (err) {
+      // Non-critical: Hacker News API call failure — entire source may be unavailable
     }
 
     return signals;

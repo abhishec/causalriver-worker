@@ -538,8 +538,8 @@ export function calculateBidirectionalTE(
         maxTExy = te;
         bestLagXY = lag;
       }
-    } catch {
-      // Skip invalid lags
+    } catch (err) {
+      // Skip invalid lags: transfer entropy calculation may fail for lags exceeding series length
     }
   }
 
@@ -554,8 +554,8 @@ export function calculateBidirectionalTE(
         maxTEyx = te;
         bestLagYX = lag;
       }
-    } catch {
-      // Skip invalid lags
+    } catch (err) {
+      // Skip invalid lags: transfer entropy calculation may fail for lags exceeding series length
     }
   }
 
@@ -567,8 +567,8 @@ export function calculateBidirectionalTE(
       bootstrapTExy.push(
         calculateTransferEntropy(shuffledSource, targetTimeSeries, bestLagXY, k)
       );
-    } catch {
-      // Skip failed iterations
+    } catch (err) {
+      // Skip failed iterations: shuffled series may not have valid TE at this lag
     }
   }
 

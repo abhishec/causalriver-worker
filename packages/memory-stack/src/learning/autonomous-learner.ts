@@ -361,8 +361,8 @@ export function createAutonomousLearner(config: AutonomousLearnerConfig) {
                   pValue: significance.pValue,
                 },
               });
-            } catch {
-              // Non-critical: network failure during memory upsert
+            } catch (err) {
+              // Non-critical: memory upsert for promoted patterns — errors here don't block the main flow
             }
           }
 
@@ -521,8 +521,8 @@ export function createAutonomousLearner(config: AutonomousLearnerConfig) {
           for (const a of detected) {
             anomalies.push(a);
           }
-        } catch {
-          // Anomaly detection can fail on small datasets
+        } catch (err) {
+          // Non-critical: anomaly detection on domain group — can fail on small datasets without blocking cycle
         }
       }
       log(`Detected ${anomalies.length} anomalies`);
@@ -602,7 +602,9 @@ export function createAutonomousLearner(config: AutonomousLearnerConfig) {
                     avgLagMs: rule.avgLag,
                     direction: rule.direction,
                   },
-                }).catch(() => {});
+                }).catch((err) => {
+                  // Fire-and-forget: temporal rule memory upsert may fail without blocking main flow
+                });
               }
             }
           }
@@ -659,8 +661,8 @@ export function createAutonomousLearner(config: AutonomousLearnerConfig) {
             });
             causalEdgesUpdated++;
           }
-        } catch {
-          // Non-critical
+        } catch (err) {
+          // Non-critical: causal relationship upsert — persistence failure doesn't block learning cycle
         }
       }
 
@@ -689,8 +691,8 @@ export function createAutonomousLearner(config: AutonomousLearnerConfig) {
           };
           maturity = maturityEvaluator.evaluateMaturity(scores);
           log(`Brain maturity: ${maturity.overallLevel} (score: ${maturity.overallScore})`);
-        } catch {
-          // Non-critical
+        } catch (err) {
+          // Non-critical: maturity evaluation — failure here doesn't block learning cycle completion
         }
       }
 
@@ -711,7 +713,9 @@ export function createAutonomousLearner(config: AutonomousLearnerConfig) {
             memoriesCreated,
             maturityLevel: maturity?.overallLevel,
           },
-        }).catch(() => {});
+        }).catch((err) => {
+          // Fire-and-forget: activity log persistence may fail without blocking learning cycle
+        });
       }
 
       const result: LearningCycleResult = {

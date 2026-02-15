@@ -218,8 +218,8 @@ export function takeBrainSnapshot(modules: {
     if (graph && Array.isArray(graph.edges)) {
       graphEdgeCount = graph.edges.length;
     }
-  } catch {
-    // Graph not available
+  } catch (err) {
+    // Non-critical: brain trainer graph snapshot — graph not available doesn't block validation
   }
 
   return {

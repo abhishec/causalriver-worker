@@ -408,8 +408,8 @@ export function createFederationApprovalManager(
           org_id: organizationId,
           increment_by: 1,
         });
-      } catch {
-        // Non-critical — RPC may not exist yet
+      } catch (err) {
+        // Non-critical: increment_federation_counter RPC failed (may not exist yet) — errors here don't block the main flow
       }
     }
 

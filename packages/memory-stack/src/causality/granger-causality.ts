@@ -727,8 +727,8 @@ export function testAllPairsConditional(
           sourceDomain: domains[j],
           targetDomain: domains[i],
         });
-      } catch {
-        // Skip pairs with insufficient data
+      } catch (err) {
+        // Skip pairs with insufficient data: conditional Granger test requires sufficient sample size
       }
     }
   }

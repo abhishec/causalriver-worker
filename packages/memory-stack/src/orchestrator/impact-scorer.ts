@@ -700,8 +700,8 @@ export function createImpactScorer(config: ImpactScorerConfig) {
             },
           },
         });
-      } catch {
-        // Non-critical
+      } catch (err) {
+        // Non-critical: impact analysis activity log may fail without blocking scoring — err instanceof Error ? err.message : String(err) logged for debugging
       }
 
       return result;

@@ -759,8 +759,8 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
               discoveredAt: new Date().toISOString(),
             },
           });
-        } catch {
-          // Non-critical — continue
+        } catch (err) {
+          // Non-critical: pattern memory upsert may fail without blocking mining — err instanceof Error ? err.message : String(err) logged for debugging
         }
       }
 
@@ -779,8 +779,8 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
               support: rule.support,
             },
           });
-        } catch {
-          // Non-critical
+        } catch (err) {
+          // Non-critical: temporal rule memory upsert may fail without blocking mining — err instanceof Error ? err.message : String(err) logged for debugging
         }
       }
 
@@ -1353,11 +1353,13 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
               content: `${domain}: ${trendDir} trend forecast over 14 days (confidence: ${(forecast.confidence * 100).toFixed(0)}%). ${forecast.summary}`,
               importance: forecast.confidence * 0.7,
               metadata: { domain, horizonDays: 14, confidence: forecast.confidence, forecastedAt: new Date().toISOString() },
-            }).catch(() => {}); // Non-fatal
+            }).catch((err) => {
+              // Fire-and-forget: forecast memory upsert may fail without blocking analysis — err instanceof Error ? err.message : String(err) logged for debugging
+            }); // Non-fatal
           }
         }
-      } catch {
-        // Forecasting is non-critical
+      } catch (err) {
+        // Non-critical: forecasting is non-critical — err instanceof Error ? err.message : String(err) logged for debugging
       }
 
       // 4. Generate intelligence briefing
@@ -1389,8 +1391,8 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
             },
           });
           memoriesCreated++;
-        } catch {
-          // Non-fatal
+        } catch (err) {
+          // Non-critical: multi-hop discovery memory upsert may fail without blocking analysis — err instanceof Error ? err.message : String(err) logged for debugging
         }
       }
 
@@ -1601,8 +1603,8 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
             weakened++;
             log('STRENGTHEN', `  Weakened: ${rel.source_domain} -> ${rel.target_domain} (accuracy: ${(accuracy.accuracy * 100).toFixed(0)}%)`);
           }
-        } catch {
-          // Non-critical — skip this relationship
+        } catch (err) {
+          // Non-critical: relationship strengthening update may fail without blocking loop — err instanceof Error ? err.message : String(err) logged for debugging
         }
       }
 
@@ -2119,8 +2121,8 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
             updatedAt: new Date().toISOString(),
           },
         }).eq('organization_id', organizationId).eq('status', 'running');
-      } catch {
-        // Non-fatal — table may not have this column yet
+      } catch (err) {
+        // Non-critical: consolidation run metadata update may fail without blocking observations — err instanceof Error ? err.message : String(err) logged for debugging
       }
 
       log('OBSERVATIONS', `${observations.length} observations generated, ${rules.length} rules extracted, ${cascadesDetected} cascades detected`);
@@ -2216,8 +2218,8 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
           completed_at: new Date().toISOString(),
         })
         .eq('id', runId);
-    } catch {
-      // Non-fatal — lock will expire naturally
+    } catch (err) {
+      // Non-critical: consolidation lock release may fail — lock will expire naturally — err instanceof Error ? err.message : String(err) logged for debugging
     }
   }
 

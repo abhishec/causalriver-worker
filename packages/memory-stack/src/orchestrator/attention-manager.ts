@@ -332,8 +332,8 @@ export function createAttentionManager(config: AttentionManagerConfig) {
           importance: 0.3,
           metadata: digest as unknown as Record<string, unknown>,
         });
-      } catch {
-        // Non-critical
+      } catch (err) {
+        // Non-critical: daily digest memory upsert may fail without blocking digest generation — err instanceof Error ? err.message : String(err) logged for debugging
       }
 
       // Flush the batch queue

@@ -720,7 +720,9 @@ export function createBrainAmplifier(config: BrainAmplifierConfig) {
           durationMs,
           contentTitle: label,
           success: true,
-        }).catch(() => {});
+        }).catch((err) => {
+          // Fire-and-forget: cost tracking may fail without blocking LLM call — err instanceof Error ? err.message : String(err) logged for debugging
+        });
       }
 
       return parseJSONResponse<T>(result.response, fallback);
@@ -740,7 +742,9 @@ export function createBrainAmplifier(config: BrainAmplifierConfig) {
           outputTokens: 0,
           contentTitle: label,
           success: false,
-        }).catch(() => {});
+        }).catch((err) => {
+          // Fire-and-forget: cost tracking may fail without blocking error handling — err instanceof Error ? err.message : String(err) logged for debugging
+        });
       }
 
       return fallback;

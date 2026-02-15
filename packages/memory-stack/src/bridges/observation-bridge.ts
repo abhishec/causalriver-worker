@@ -738,8 +738,8 @@ export function createObservationBridge(eventBus: EventBusInstance) {
               timestamp: new Date(),
               vectorClock: 0,
             });
-          } catch {
-            // Non-fatal
+          } catch (err) {
+            // Non-critical: observation_rules_extracted event emission failed — errors here don't block the main flow
           }
         }
 
@@ -775,8 +775,8 @@ export function createObservationBridge(eventBus: EventBusInstance) {
               timestamp: new Date(),
               vectorClock: 0,
             });
-          } catch {
-            // Non-fatal
+          } catch (err) {
+            // Non-critical: observation_cascades_analyzed event emission failed — errors here don't block the main flow
           }
         }
 
@@ -797,8 +797,8 @@ export function createObservationBridge(eventBus: EventBusInstance) {
             timestamp: new Date(),
             vectorClock: 0,
           });
-        } catch {
-          // Non-fatal
+        } catch (err) {
+          // Non-critical: observation event emission failed — errors here don't block the main flow
         }
       }
     },

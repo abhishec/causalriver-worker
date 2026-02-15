@@ -52,10 +52,24 @@ export interface QueryResult {
   };
 }
 
+/** Agent registry interface for brain-agent-fusion dispatch */
+interface AgentRegistryInterface {
+  dispatch: (agentName: string, input: unknown) => Promise<unknown>;
+}
+
+/** Conversation manager interface for copilot-framework history */
+interface ConversationManagerInterface {
+  getRecentHistory: (conversationId: string, maxMessages?: number) => Array<{ role: 'user' | 'assistant'; content: string }>;
+}
+
 export interface QueryRouterConfig {
   brainContextBuilder: BrainContextBuilder;
   actionDomainRegistry: ActionDomainRegistry;
   copilotInstance: CopilotInstance;
+  /** Optional: brain-agent-fusion registry for autonomous agent dispatch */
+  agentRegistry?: AgentRegistryInterface;
+  /** Optional: copilot-framework conversation manager for history continuity */
+  conversationManager?: ConversationManagerInterface;
   dispatchThresholds?: {
     fastQueryComplexity: number; // Max complexity for fast path
     agentComplexity: number; // Min complexity for agent orchestration
@@ -71,6 +85,8 @@ export class NaturalLanguageQueryRouter {
   private brainContext: BrainContextBuilder;
   private actionDomains: ActionDomainRegistry;
   private copilot: CopilotInstance;
+  private agentRegistry: AgentRegistryInterface | null;
+  private conversationManager: ConversationManagerInterface | null;
   private thresholds: {
     fastQueryComplexity: number;
     agentComplexity: number;
@@ -80,6 +96,8 @@ export class NaturalLanguageQueryRouter {
     this.brainContext = config.brainContextBuilder;
     this.actionDomains = config.actionDomainRegistry;
     this.copilot = config.copilotInstance;
+    this.agentRegistry = config.agentRegistry ?? null;
+    this.conversationManager = config.conversationManager ?? null;
     this.thresholds = config.dispatchThresholds || {
       fastQueryComplexity: 3,
       agentComplexity: 8,
@@ -231,9 +249,55 @@ Provide a concise, direct answer.`;
     intent: BrainIntent,
     domains: string[]
   ): Promise<QueryResult> {
-    // For now, agent path delegates to action domain
-    // TODO: Implement brain-agent-fusion integration
+    // Agent path: attempt brain-agent-fusion dispatch for autonomous execution,
+    // falling back to action domain if no agent registry is available.
+    if (this.agentRegistry) {
+      try {
+        const agentName = this.selectAgentForIntent(intent, domains);
+        const agentResult = await this.agentRegistry.dispatch(agentName, {
+          query: query.question,
+          intent,
+          domains,
+          scope: query.scope,
+          conversationId: query.conversationId,
+        });
+
+        // Build natural language answer from agent result via copilot
+        const result = this.copilot.chat(
+          `Summarize this agent execution result for the user who asked: "${query.question}"\n\nAgent result: ${JSON.stringify(agentResult, null, 2)}`,
+          { conversationId: query.conversationId }
+        );
+        const answer = await this.collectStream(result.stream);
+
+        return {
+          answer,
+          confidence: (agentResult as any)?.confidence ?? 0.85,
+          processingTime: 0,
+          route: 'agent',
+          data: agentResult,
+        };
+      } catch {
+        // Agent dispatch failed — gracefully fall back to action domain path
+      }
+    }
+
+    // Fallback: delegate to action domain when agent registry unavailable
     return this.executeActionDomain(query, intent, domains);
+  }
+
+  /**
+   * Select the best agent for a given intent and domain set
+   */
+  private selectAgentForIntent(intent: BrainIntent, domains: string[]): string {
+    const intentToAgent: Record<string, string> = {
+      forecast: 'brain-revenue-watcher',
+      diagnose: 'brain-diagnostician',
+      optimize: 'brain-optimizer',
+      monitor: 'brain-revenue-watcher',
+      analyze: 'jarvis-analyst',
+      investigate: 'jarvis-orchestrator',
+    };
+    return intentToAgent[intent as string] || 'jarvis-orchestrator';
   }
 
   /**
@@ -354,10 +418,17 @@ Provide a concise, direct answer.`;
   }
 
   /**
-   * Get conversation history from conversation manager
+   * Get conversation history from conversation manager (copilot-framework integration)
    */
   private async getConversationHistory(conversationId: string): Promise<string[]> {
-    // TODO: Integrate with ConversationManager from copilot-framework
+    if (this.conversationManager && conversationId) {
+      try {
+        const history = this.conversationManager.getRecentHistory(conversationId, 8);
+        return history.map((msg) => `${msg.role}: ${msg.content}`);
+      } catch {
+        // Non-critical: conversation history lookup failed — continue without history
+      }
+    }
     return [];
   }
 

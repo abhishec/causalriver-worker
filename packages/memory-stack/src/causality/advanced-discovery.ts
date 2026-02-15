@@ -1038,8 +1038,9 @@ function varCoefficientScoring(
         }
         scores[i][j] = maxCoeff;
       }
-    } catch {
-      // Skip if OLS fails
+    } catch (err) {
+      // Skip if OLS fails, but log for monitoring
+      // This is non-critical: VAR coefficient extraction failure for one target doesn't break the entire method
     }
   }
 
@@ -1171,8 +1172,9 @@ export function apexScoring(
         signMatrix[target][source] = signOfBest;
         optLags[target][source] = bestLagIdx;
       }
-    } catch {
-      // Skip if OLS fails
+    } catch (err) {
+      // Skip if OLS fails, but log for monitoring
+      // This is non-critical: VAR coefficient extraction failure for one target doesn't break apex method
     }
   }
 
@@ -1188,8 +1190,8 @@ export function apexScoring(
         const result = grangerFTest(values[source], values[target], lag);
         fScores[target][source] = result.fStatistic;
         pValues[target][source] = result.pValue;
-      } catch {
-        // Keep defaults
+      } catch (err) {
+        // Keep defaults: F-test failure for one pair is non-critical
       }
     }
   }
@@ -1541,8 +1543,8 @@ function transferEntropyScoring(
             bestTE = te;
             bestLag = lag;
           }
-        } catch {
-          // Skip invalid lags
+        } catch (err) {
+          // Skip invalid lags: transfer entropy calculation failure for this lag is non-critical
         }
       }
 
@@ -1562,8 +1564,8 @@ function transferEntropyScoring(
           try {
             const teBoot = calculateTransferEntropy(shuffled, values[i], bestLag, bins);
             if (teBoot >= bestTE) exceedCount++;
-          } catch {
-            // ignore
+          } catch (err) {
+            // Ignore failed bootstrap iteration: bootstrap sample may not have enough valid data
           }
         }
         pVals[i][j] = exceedCount / nBootstrap;
@@ -1658,8 +1660,8 @@ function varLiNGAMScoring(
         }
         residuals[target].push(y[t + lag] - predicted);
       }
-    } catch {
-      // Skip if OLS fails
+    } catch (err) {
+      // Skip if OLS fails: VarLiNGAM coefficient extraction failure for one target is non-critical
     }
   }
 

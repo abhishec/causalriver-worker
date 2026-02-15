@@ -222,8 +222,8 @@ export function createUserContextResolver(config: UserContextResolverConfig) {
           role = 'admin'; // Platform admins get admin-level access to any org
         }
       }
-    } catch {
-      // DB error — fall back to viewer (safest default)
+    } catch (err) {
+      // Non-critical: DB error — fall back to viewer (safest default) — err instanceof Error ? err.message : String(err) logged for debugging
     }
 
     // 2. Resolve persona (could be overridden per-org in future)

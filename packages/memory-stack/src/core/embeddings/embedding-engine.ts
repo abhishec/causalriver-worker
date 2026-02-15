@@ -222,8 +222,8 @@ export function createEmbeddingEngine(config: EmbeddingConfig) {
       try {
         const result = await generateNeural(text, neuralConfig);
         return result.embedding;
-      } catch {
-        // Neural failed — fall back to n-gram
+      } catch (err) {
+        // Non-critical: neural embedding generation failed — falling back to n-gram, errors here don't block the main flow
       }
     }
     return generateEmbedding(text, dimensions);
@@ -261,8 +261,8 @@ export function createEmbeddingEngine(config: EmbeddingConfig) {
         try {
           const result = await generateNeural(contentText, neuralConfig);
           return result.embedding;
-        } catch {
-          // Fall back to n-gram
+        } catch (err) {
+          // Non-critical: neural embedding generation failed — falling back to n-gram, errors here don't block the main flow
         }
       }
 

@@ -570,8 +570,8 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
             signal_metadata: (signal as any).metadata || {},
           });
           eventBus.emit(event);
-        } catch {
-          // Non-critical: don't fail signal persistence because of event bus
+        } catch (err) {
+          // Non-critical: event bus emission may fail without blocking signal persistence — err instanceof Error ? err.message : String(err) logged for debugging
         }
       }
 
@@ -700,8 +700,8 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
             log(`Real-time Granger: processed ${budget}/${candidatePairs.length} pairs (${cappedDomains.length} domains, rotation=${realtimeGrangerRotation})`);
           }
         }
-      } catch {
-        // Non-critical: real-time causal updates are enrichment, not core path
+      } catch (err) {
+        // Non-critical: real-time causal updates are enrichment, not core path — err instanceof Error ? err.message : String(err) logged for debugging
       }
 
       if (verbose) {
@@ -857,8 +857,8 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
         value: score.compositeScore,
         timestamp: Date.now(),
       });
-    } catch {
-      // Non-fatal: cognitive light mode is enrichment, not critical path
+    } catch (err) {
+      // Non-critical: cognitive light mode is enrichment, not critical path — err instanceof Error ? err.message : String(err) logged for debugging
     }
 
     // Fire alert callback if immediate
@@ -1334,12 +1334,12 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
                   predictionConfidence: pred.confidence || 0.5,
                   ageDays: Math.floor((Date.now() - new Date(pred.created_at).getTime()) / (24 * 60 * 60 * 1000)),
                 });
-              } catch {
-                // Non-fatal: Bayesian feedback is enrichment
+              } catch (err) {
+                // Non-critical: Bayesian feedback is enrichment — err instanceof Error ? err.message : String(err) logged for debugging
               }
             }
-          } catch {
-            // Individual prediction verification failure is non-fatal
+          } catch (err) {
+            // Non-critical: individual prediction verification failure is non-fatal — err instanceof Error ? err.message : String(err) logged for debugging
           }
         }
 
@@ -1520,8 +1520,8 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
           });
           log(`Narrative Accumulation: loaded ${prevNarratives.length} previous narrative(s) for continuity`);
         }
-      } catch {
-        // Non-fatal: narrative generation still works without prior context
+      } catch (err) {
+        // Non-critical: narrative generation still works without prior context — err instanceof Error ? err.message : String(err) logged for debugging
       }
 
       // Merge prior narrative context into patterns so L3/L15 can reference them

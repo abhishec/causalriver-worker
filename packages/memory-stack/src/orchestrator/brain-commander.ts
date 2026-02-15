@@ -665,8 +665,8 @@ export function createBrainCommander(config: BrainCommanderConfig) {
           narrative: byType.get('narrative') || null,
         };
       }
-    } catch {
-      // Non-fatal: copilot works without LEAP context, just less rich
+    } catch (err) {
+      // Non-critical: copilot works without LEAP context, just less rich — err instanceof Error ? err.message : String(err) logged for debugging
     }
 
     // Build causal graph

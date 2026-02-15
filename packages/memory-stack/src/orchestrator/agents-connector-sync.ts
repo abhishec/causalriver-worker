@@ -130,8 +130,8 @@ async function loadOrgConnectors(
     try {
       const connector = factory(row.config || {});
       if (connector) connectors.push(connector);
-    } catch {
-      // Skip connectors that fail to instantiate (bad config)
+    } catch (err) {
+      // Non-critical: skip connectors that fail to instantiate (bad config) — err instanceof Error ? err.message : String(err) logged for debugging
     }
   }
 

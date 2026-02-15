@@ -442,8 +442,8 @@ export function createLLMTrainingPipeline(config: LLMTrainingPipelineConfig) {
           cascadeCount: pack.cascades.length,
         },
       });
-    } catch {
-      // Non-critical — CRUD persistence failure doesn't block learning
+    } catch (err) {
+      // Non-critical: CRUD persistence for signals and memories — failure doesn't block LTP training
     }
 
     // ── Step 4: Embedding Tuner — with in-memory edge injection ────

@@ -97,8 +97,8 @@ export function createNexusCopilot(config: CopilotConfig) {
       redisClient = createRedisClient({
         keyPrefix: 'nexus:copilot:',
       });
-    } catch {
-      // Redis init failure is non-fatal — falls back to local-only cache
+    } catch (err) {
+      // Non-critical: Redis init failure is non-fatal — falls back to local-only cache — err instanceof Error ? err.message : String(err) logged for debugging
     }
   }
 
@@ -114,8 +114,8 @@ export function createNexusCopilot(config: CopilotConfig) {
         maxLocalEntries: 5000,
         namespace: 'copilot',
       });
-    } catch {
-      // Cache init failure is non-fatal — proceed without caching
+    } catch (err) {
+      // Non-critical: semantic cache init failure is non-fatal — proceed without caching — err instanceof Error ? err.message : String(err) logged for debugging
     }
   }
 
@@ -164,7 +164,9 @@ ${nexusContext.assembledContext}
         model: usedModel,
         tokensUsed,
         systemPrompt: systemPromptPrefix,
-      }).catch(() => {}); // Non-fatal
+      }).catch((err) => {
+        // Fire-and-forget: cache store may fail without blocking response — err instanceof Error ? err.message : String(err) logged for debugging
+      }); // Non-fatal
     }
 
     return result;

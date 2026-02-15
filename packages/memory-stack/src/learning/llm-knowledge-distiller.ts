@@ -282,7 +282,9 @@ export function createLLMKnowledgeDistiller(config: KnowledgeDistillerConfig) {
           log(`⚠️ Daily budget exceeded — skipping "${title}"`);
           return { response: '{}', tokensUsed: { input: 0, output: 0 } };
         }
-      } catch { /* non-critical */ }
+      } catch (err) {
+        // Non-critical: cost tracker throttling check — failure doesn't prevent LLM distillation
+      }
     }
 
     const callStart = Date.now();
@@ -327,7 +329,9 @@ ${text.slice(0, 12000)}`;
           durationMs: Date.now() - callStart,
           contentTitle: title,
           success: !!data.content?.[0]?.text,
-        }).catch(() => {});
+        }).catch((err) => {
+          // Fire-and-forget: LLM cost tracking for Anthropic calls may fail without blocking distillation
+        });
       }
 
       return { response: data.content?.[0]?.text || '{}', tokensUsed: tokens };
@@ -365,7 +369,9 @@ ${text.slice(0, 12000)}`;
           durationMs: Date.now() - callStart,
           contentTitle: title,
           success: !!data.choices?.[0]?.message?.content,
-        }).catch(() => {});
+        }).catch((err) => {
+          // Fire-and-forget: LLM cost tracking for OpenAI calls may fail without blocking distillation
+        });
       }
 
       return { response: data.choices?.[0]?.message?.content || '{}', tokensUsed: tokens };
@@ -419,8 +425,8 @@ ${text.slice(0, 12000)}`;
         domainsFound: Array.isArray(parsed.domains_found) ? parsed.domains_found.map(String) : [],
         extractionConfidence: Math.min(1, Math.max(0, Number(parsed.extraction_confidence) || 0.5)),
       };
-    } catch {
-      // LLM returned unparseable response — empty extraction
+    } catch (err) {
+      // Non-critical: LLM JSON parsing failure — empty extraction on unparseable response
       return {
         causalPatterns: [],
         rules: [],

@@ -143,8 +143,8 @@ export function createCausalSubscriber(
                 priority: 2,
               });
             }
-          } catch {
-            // Not enough data for discovery yet
+          } catch (err) {
+            // Non-critical: Granger causality discovery failed — errors here don't block the main flow
           }
 
           // Clear buffer after processing

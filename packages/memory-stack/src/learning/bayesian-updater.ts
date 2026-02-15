@@ -362,8 +362,8 @@ export function createBayesianUpdater(config: BayesianUpdaterConfig) {
             .eq('target_domain', posterior.targetDomain);
 
           persisted++;
-        } catch {
-          // Non-critical — continue with next edge
+        } catch (err) {
+          // Non-critical: Bayesian posterior persistence for single edge — continue with next edge
         }
       }
 

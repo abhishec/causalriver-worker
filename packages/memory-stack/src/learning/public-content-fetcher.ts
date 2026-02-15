@@ -172,8 +172,8 @@ export function createPublicContentFetcher(config: ContentFetcherConfig = {}) {
             domainHint: categoryName,
           });
         }
-      } catch {
-        // Individual article failure — continue
+      } catch (err) {
+        // Non-critical: Wikipedia article fetch for single title — continue with next article
       }
     }
 
@@ -217,12 +217,12 @@ export function createPublicContentFetcher(config: ContentFetcherConfig = {}) {
               domainHint: 'technology',
             });
           }
-        } catch {
-          // Individual story failure
+        } catch (err) {
+          // Non-critical: Hacker News story fetch for single item — continue with next story
         }
       }
-    } catch {
-      // API failure
+    } catch (err) {
+      // Non-critical: Hacker News API call failure — entire source may be unavailable
     }
 
     return contents;
@@ -275,8 +275,8 @@ export function createPublicContentFetcher(config: ContentFetcherConfig = {}) {
             });
           }
         }
-      } catch {
-        // Continue
+      } catch (err) {
+        // Non-critical: FRED release commentary fetch for single release — continue with next release
       }
     }
 
@@ -319,8 +319,8 @@ export function createPublicContentFetcher(config: ContentFetcherConfig = {}) {
             domainHint: 'technology',
           });
         }
-      } catch {
-        // Rate limited or not found
+      } catch (err) {
+        // Non-critical: GitHub README fetch for single repo — may be rate limited or not found
       }
     }
 

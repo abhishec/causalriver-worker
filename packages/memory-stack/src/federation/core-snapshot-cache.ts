@@ -203,8 +203,8 @@ export function createCoreSnapshotCache(config: CoreSnapshotConfig): CoreSnapsho
       // Atomic: only delete if we still own the lock (Lua script for safety)
       const script = `if redis.call("get", KEYS[1]) == ARGV[1] then return redis.call("del", KEYS[1]) else return 0 end`;
       await redis.eval(script, { keys: [lockKey], arguments: [lockValue] });
-    } catch {
-      // Lock expired or already released — safe to ignore
+    } catch (err) {
+      // Non-critical: Redis lock release failed (lock expired or already released) — errors here don't block the main flow
     }
   };
 

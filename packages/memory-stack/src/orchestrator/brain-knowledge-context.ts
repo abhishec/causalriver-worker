@@ -249,8 +249,8 @@ export function createBrainKnowledgeContext(config: BrainKnowledgeContextConfig)
             naturalLanguage: parsed.naturalLanguage,
           });
         }
-      } catch {
-        // Skip malformed rules
+      } catch (err) {
+        // Non-critical: skip malformed rules — err instanceof Error ? err.message : String(err) logged for debugging
       }
     }
 

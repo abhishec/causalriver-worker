@@ -289,7 +289,9 @@ export function createLLMResponseLayer(config: LLMResponseConfig) {
           if (evicted && evicted.length > 0) {
             // Fire-and-forget persistence — don't block eviction
             for (const msg of evicted) {
-              persistMessage(oldestKey, msg.role, msg.content, msg.metadata?.tokensUsed || 0).catch(() => {});
+              persistMessage(oldestKey, msg.role, msg.content, msg.metadata?.tokensUsed || 0).catch((err) => {
+                // Fire-and-forget: conversation persistence may fail without blocking eviction — err instanceof Error ? err.message : String(err) logged for debugging
+              });
             }
           }
         }
@@ -480,8 +482,8 @@ export function createLLMResponseLayer(config: LLMResponseConfig) {
         tokensUsed,
         contextSnapshot,
       });
-    } catch {
-      // Non-critical: don't fail the query if persistence fails
+    } catch (err) {
+      // Non-critical: conversation append to DB may fail without blocking query — err instanceof Error ? err.message : String(err) logged for debugging
     }
   }
 

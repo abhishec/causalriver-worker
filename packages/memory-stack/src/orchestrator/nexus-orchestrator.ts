@@ -319,8 +319,8 @@ export function createNexusOrchestrator(config: NexusOrchestratorConfig) {
               cacheKeys.add(key);
             }
           }
-        } catch {
-          // Non-critical: fall back to cache-only
+        } catch (err) {
+          // Non-critical: federated relationships fetch failure — fall back to cache-only — err instanceof Error ? err.message : String(err) logged for debugging
         }
       }
 
@@ -350,8 +350,8 @@ export function createNexusOrchestrator(config: NexusOrchestratorConfig) {
               patternKeys.add(key);
             }
           }
-        } catch {
-          // Non-critical: fall back to cache-only patterns
+        } catch (err) {
+          // Non-critical: federated patterns fetch failure — fall back to cache-only patterns — err instanceof Error ? err.message : String(err) logged for debugging
         }
       }
 
@@ -369,8 +369,8 @@ export function createNexusOrchestrator(config: NexusOrchestratorConfig) {
               });
             }
           }
-        } catch {
-          // Non-critical: fall back to search-only results
+        } catch (err) {
+          // Non-critical: federated memories fetch failure — fall back to search-only results — err instanceof Error ? err.message : String(err) logged for debugging
         }
       }
 
@@ -390,8 +390,8 @@ export function createNexusOrchestrator(config: NexusOrchestratorConfig) {
         try {
           brainKnowledge = config.brainKnowledgeProvider.queryBrainKnowledge(queryText);
           brainKnowledgeText = config.brainKnowledgeProvider.formatBrainKnowledgeForPrompt(brainKnowledge);
-        } catch {
-          // Non-critical: fall back to standard context
+        } catch (err) {
+          // Non-critical: brain knowledge query failure — fall back to standard context — err instanceof Error ? err.message : String(err) logged for debugging
         }
       }
 

@@ -146,7 +146,9 @@ serve(async (req: Request) => {
       input_summary: `${signalRecords.length} signals`,
       output_summary: `${insertedSignals?.length || 0} inserted`,
       created_at: new Date().toISOString(),
-    }).then(() => {}).catch(() => {}); // Fire-and-forget
+    }).then(() => {}).catch((err) => {
+      // Fire-and-forget: ai_agent_activity insert may fail without blocking main flow
+    }); // Fire-and-forget
 
     return new Response(
       JSON.stringify({

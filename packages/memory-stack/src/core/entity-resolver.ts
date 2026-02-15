@@ -290,8 +290,8 @@ export function createEntityResolver(config: EntityResolverConfig) {
             return resolved;
           }
         }
-      } catch {
-        // Core brain lookup failure is non-fatal
+      } catch (err) {
+        // Non-critical: core brain lookup for entity resolution failed — errors here don't block the main flow
       }
     }
 

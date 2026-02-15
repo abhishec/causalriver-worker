@@ -113,8 +113,8 @@ export function createLearningBridge(
                   priority: rule.lift > 3 ? 1 : rule.lift > 2 ? 2 : 3,
                 });
               }
-            } catch {
-              // Not enough data for meaningful mining yet
+            } catch (err) {
+              // Non-critical: association rule mining failed — errors here don't block the main flow
             }
           }
         }

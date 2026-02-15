@@ -423,8 +423,8 @@ export function createActiveExplorer(config: ActiveExplorerConfig) {
               expectedImprovement: req.expectedImprovement,
             },
           });
-        } catch {
-          // Non-critical
+        } catch (err) {
+          // Non-critical: exploration request memory upsert may fail without blocking discovery — err instanceof Error ? err.message : String(err) logged for debugging
         }
       }
 
@@ -446,8 +446,8 @@ export function createActiveExplorer(config: ActiveExplorerConfig) {
             graphHealth,
           },
         });
-      } catch {
-        // Non-critical
+      } catch (err) {
+        // Non-critical: exploration scan activity log may fail without blocking scan — err instanceof Error ? err.message : String(err) logged for debugging
       }
 
       // Build summary

@@ -427,7 +427,9 @@ export function createRedisStreamsBus(config: RedisStreamsBusConfig): RedisStrea
       subscriptions.clear();
       retryCountMap.clear();
       if (consumeLoopPromise) {
-        await consumeLoopPromise.catch(() => {});
+        await consumeLoopPromise.catch((err) => {
+          // Fire-and-forget: consume loop termination may fail without blocking main flow
+        });
       }
       logger.info('Redis Streams bus destroyed');
     },

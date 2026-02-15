@@ -157,8 +157,8 @@ export function createContinuousLearner(
             }
             return update;
           }
-        } catch {
-          // Not enough data for Granger test
+        } catch (err) {
+          // Not enough data for Granger test: incremental update requires minimum observations
         }
       }
 

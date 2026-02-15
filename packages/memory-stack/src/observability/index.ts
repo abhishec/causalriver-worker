@@ -28,6 +28,15 @@ export {
 } from './metrics';
 
 export {
+  createErrorTracker,
+  getDefaultErrorTracker,
+  errorTracker,
+  type ErrorTracker,
+  type ErrorTrackerConfig,
+  type ErrorContext,
+} from './error-tracker';
+
+export {
   createSEMetrics,
   getDefaultSEMetrics,
   type SEMetricsConfig,

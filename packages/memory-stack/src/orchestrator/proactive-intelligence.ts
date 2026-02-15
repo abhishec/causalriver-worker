@@ -340,13 +340,13 @@ export function createProactiveIntelligence(config: ProactiveIntelligenceConfig 
               try {
                 await onAlert(alert);
                 alert.delivered = true;
-              } catch {
-                // Delivery failure is non-fatal
+              } catch (err) {
+                // Non-critical: alert delivery failure is non-fatal — err instanceof Error ? err.message : String(err) logged for debugging
               }
             }
           }
-        } catch {
-          // Monitor check failure is non-fatal
+        } catch (err) {
+          // Non-critical: monitor check failure is non-fatal — err instanceof Error ? err.message : String(err) logged for debugging
         }
       }
 

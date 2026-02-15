@@ -200,8 +200,8 @@ async function runDiscoveryAsync(
 
       totalPairsTested += chunkResult.pairs_tested;
       allWarnings.push(...chunkResult.warnings);
-    } catch {
-      // Individual chunk failure is non-fatal
+    } catch (err) {
+      // Individual chunk failure is non-fatal: one domain group failing doesn't stop the overall discovery
     }
 
     // Update progress
@@ -232,8 +232,8 @@ async function runDiscoveryAsync(
 
       totalPairsTested = Math.max(totalPairsTested, fullResult.pairs_tested);
       allWarnings.push(...fullResult.warnings);
-    } catch {
-      // Use chunked results if full pass fails
+    } catch (err) {
+      // Use chunked results if full pass fails: full-dataset discovery may fail due to memory/time constraints
     }
   }
 

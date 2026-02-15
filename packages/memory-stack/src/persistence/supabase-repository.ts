@@ -315,8 +315,8 @@ export function createSupabaseRepository(
       if (options?.onSignalsInserted) {
         try {
           options.onSignalsInserted(signals);
-        } catch {
-          // Non-critical: don't fail persistence because of event bus errors
+        } catch (err) {
+          // Non-critical: event bus notification failed after signal insertion — errors here don't block the main flow
         }
       }
     },

@@ -406,8 +406,8 @@ export function createCostTracker(
           dailyMap[dateKey].awsCost += Number(a.total_aws_cost || 0);
         }
       }
-    } catch {
-      // AWS cost table might not exist
+    } catch (err) {
+      // Non-critical: AWS cost snapshot query failed (table might not exist) — errors here don't block the main flow
     }
 
     // Get budget
@@ -421,8 +421,8 @@ export function createCostTracker(
       if (budgetData) {
         monthlyBudget = (budgetData.monthly_llm_budget || 50) + (budgetData.monthly_aws_budget || 20);
       }
-    } catch {
-      // Budget table might not exist
+    } catch (err) {
+      // Non-critical: cost budget config query failed (table might not exist) — errors here don't block the main flow
     }
 
     const dailyTrend = Object.entries(dailyMap)

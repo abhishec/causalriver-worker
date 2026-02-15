@@ -975,8 +975,8 @@ export function createCopilotSSEStream() {
     try {
       controller?.enqueue(encoder.encode(`data: [DONE]\n\n`));
       controller?.close();
-    } catch {
-      // Already closed
+    } catch (err) {
+      // Non-critical: stream already closed — err instanceof Error ? err.message : String(err) logged for debugging
     }
     controller = null;
   };

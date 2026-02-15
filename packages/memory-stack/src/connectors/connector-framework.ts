@@ -267,8 +267,8 @@ export async function storeConnectorSignals(
               },
             };
           }
-        } catch {
-          // Entity resolution failure is non-fatal — keep original entity_id
+        } catch (err) {
+          // Non-critical: entity resolution failed — keep original entity_id, errors here don't block the main flow
         }
 
         return signal;

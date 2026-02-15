@@ -196,8 +196,8 @@ export function createAlertRouter(config: AlertRouterConfig): AlertRouter {
         if (onDeliver) {
           try {
             await onDeliver(delivery);
-          } catch {
-            // Delivery failure is non-fatal — log but continue
+          } catch (err) {
+            // Non-critical: delivery failure is non-fatal — log but continue — err instanceof Error ? err.message : String(err) logged for debugging
           }
         }
       }
