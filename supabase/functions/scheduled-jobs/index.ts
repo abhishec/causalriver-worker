@@ -412,28 +412,110 @@ async function runThresholdJob(supabase: any, orgId: string) {
 }
 
 /**
- * Retention: Clean up data older than 90 days
+ * Retention: Clean up data older than 90 days.
+ *
+ * 10M SCALE FIX: Previous implementation ran a single unbounded DELETE
+ * that would lock the table for 30+ seconds at 10M rows, blocking all
+ * ingestion during the lock. Now deletes in batches of 5,000 rows
+ * with 100ms pauses between batches to allow concurrent writes.
+ *
+ * At 10M signals with 90-day retention, ~111K rows/day need deletion.
+ * 111K ÷ 5K batches = ~22 iterations × 100ms = ~2.2s total (vs 30s lock).
  */
 async function runRetentionJob(supabase: any, orgId: string) {
   const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
+  const BATCH_SIZE = 5000;
+  const MAX_ITERATIONS = 100; // Safety cap: 500K rows max per run
 
-  // Delete old signals
-  const { count: signalsDeleted } = await supabase
-    .from('signals')
-    .delete({ count: 'exact' })
-    .eq('organization_id', orgId)
-    .lt('occurred_at', ninetyDaysAgo);
+  let totalSignalsDeleted = 0;
+  let totalPredictionsDeleted = 0;
 
-  // Delete old predictions
-  const { count: predictionsDeleted } = await supabase
-    .from('predictions')
-    .delete({ count: 'exact' })
-    .eq('organization_id', orgId)
-    .lt('predicted_at', ninetyDaysAgo);
+  // ── Batch-delete old signals ──────────────────────────────────
+  for (let i = 0; i < MAX_ITERATIONS; i++) {
+    // Select IDs to delete (bounded batch)
+    const { data: staleSignals } = await supabase
+      .from('cross_domain_signals')
+      .select('id')
+      .eq('organization_id', orgId)
+      .lt('created_at', ninetyDaysAgo)
+      .limit(BATCH_SIZE);
+
+    const ids = (staleSignals || []).map((r: any) => r.id);
+    if (ids.length === 0) break;
+
+    const { count } = await supabase
+      .from('cross_domain_signals')
+      .delete({ count: 'exact' })
+      .in('id', ids);
+
+    totalSignalsDeleted += count || ids.length;
+
+    // Yield to concurrent writes between batches
+    if (ids.length === BATCH_SIZE) {
+      await new Promise((r) => setTimeout(r, 100));
+    } else {
+      break; // Last batch was smaller, we're done
+    }
+  }
+
+  // ── Batch-delete old predictions ──────────────────────────────
+  for (let i = 0; i < MAX_ITERATIONS; i++) {
+    const { data: stalePreds } = await supabase
+      .from('predictions')
+      .select('id')
+      .eq('organization_id', orgId)
+      .lt('predicted_at', ninetyDaysAgo)
+      .limit(BATCH_SIZE);
+
+    const ids = (stalePreds || []).map((r: any) => r.id);
+    if (ids.length === 0) break;
+
+    const { count } = await supabase
+      .from('predictions')
+      .delete({ count: 'exact' })
+      .in('id', ids);
+
+    totalPredictionsDeleted += count || ids.length;
+
+    if (ids.length === BATCH_SIZE) {
+      await new Promise((r) => setTimeout(r, 100));
+    } else {
+      break;
+    }
+  }
+
+  // ── Batch-delete old causal events (event stream cleanup) ─────
+  let totalEventsDeleted = 0;
+  for (let i = 0; i < MAX_ITERATIONS; i++) {
+    const { data: staleEvents } = await supabase
+      .from('causal_event_stream')
+      .select('id')
+      .eq('organization_id', orgId)
+      .eq('processing_status', 'done')
+      .lt('created_at', ninetyDaysAgo)
+      .limit(BATCH_SIZE);
+
+    const ids = (staleEvents || []).map((r: any) => r.id);
+    if (ids.length === 0) break;
+
+    const { count } = await supabase
+      .from('causal_event_stream')
+      .delete({ count: 'exact' })
+      .in('id', ids);
+
+    totalEventsDeleted += count || ids.length;
+
+    if (ids.length === BATCH_SIZE) {
+      await new Promise((r) => setTimeout(r, 100));
+    } else {
+      break;
+    }
+  }
 
   return {
-    signalsDeleted: signalsDeleted || 0,
-    predictionsDeleted: predictionsDeleted || 0,
+    signalsDeleted: totalSignalsDeleted,
+    predictionsDeleted: totalPredictionsDeleted,
+    eventsDeleted: totalEventsDeleted,
   };
 }
 

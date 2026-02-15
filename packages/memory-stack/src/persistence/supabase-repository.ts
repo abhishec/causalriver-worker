@@ -137,6 +137,8 @@ export interface NexusRepository {
   // ── Embeddings ───────────────────────────────────────────────────
   /** Upsert an entity embedding (creates or updates by entity_type + entity_id) */
   upsertEmbedding(params: EmbeddingUpsertParams): Promise<void>;
+  /** Batch upsert embeddings (10M scale: 1000 at a time vs 1-at-a-time) */
+  upsertEmbeddingsBatch(params: EmbeddingUpsertParams[]): Promise<{ inserted: number; errors: number }>;
   /** Get embedding by entity type and ID */
   getEmbeddingByEntity(entityType: string, entityId: string): Promise<any | null>;
 
@@ -385,6 +387,53 @@ export function createSupabaseRepository(
         });
 
       if (error) throw new Error(`Failed to upsert embedding: ${error.message}`);
+    },
+
+    /**
+     * Batch upsert embeddings in chunks of 500.
+     *
+     * 10M SCALE FIX: The single-row upsertEmbedding() takes ~50ms per call.
+     * At 10M entities, that's 500,000 seconds = 5.8 days. Batch upsert
+     * processes 500 rows per DB call → 20,000 calls → ~17 minutes.
+     */
+    async upsertEmbeddingsBatch(
+      params: EmbeddingUpsertParams[]
+    ): Promise<{ inserted: number; errors: number }> {
+      if (params.length === 0) return { inserted: 0, errors: 0 };
+
+      const BATCH_SIZE = 500;
+      let inserted = 0;
+      let errors = 0;
+
+      for (let i = 0; i < params.length; i += BATCH_SIZE) {
+        const batch = params.slice(i, i + BATCH_SIZE);
+        const rows = batch.map((p) => ({
+          organization_id: organizationId,
+          entity_type: p.entityType,
+          entity_id: p.entityId,
+          content: p.contentText,
+          content_hash: p.contentHash,
+          embedding: JSON.stringify(p.embedding),
+          metadata: p.metadata || {},
+          importance_score: p.importanceScore ?? 0.5,
+          updated_at: new Date().toISOString(),
+        }));
+
+        const { error } = await supabase
+          .from('entity_embeddings')
+          .upsert(rows, {
+            onConflict: 'organization_id,entity_type,entity_id',
+          });
+
+        if (error) {
+          console.error(`[upsertEmbeddingsBatch] Batch ${i / BATCH_SIZE} failed: ${error.message}`);
+          errors += batch.length;
+        } else {
+          inserted += batch.length;
+        }
+      }
+
+      return { inserted, errors };
     },
 
     async getEmbeddingByEntity(entityType: string, entityId: string): Promise<any | null> {

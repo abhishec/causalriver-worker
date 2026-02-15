@@ -43,6 +43,10 @@ export interface SyncManagerConfig {
   defaultIntervalMinutes?: number;
   /** Per-connector intervals (minutes) */
   intervals?: Record<string, number>;
+  /** Max connectors to sync in parallel (default: 5) */
+  concurrency?: number;
+  /** Global rate limit: max API calls per minute across all connectors (default: unlimited) */
+  globalRateLimitPerMinute?: number;
 }
 
 export interface SyncStatus {
@@ -65,6 +69,50 @@ export function createSyncManager(config: SyncManagerConfig) {
   const connectorMap = new Map<string, NexusConnector>();
   for (const connector of config.connectors) {
     connectorMap.set(connector.id, connector);
+  }
+
+  const CONCURRENCY = config.concurrency ?? 5;
+  const GLOBAL_RATE_LIMIT = config.globalRateLimitPerMinute ?? 0; // 0 = unlimited
+
+  // ── Global Rate Limiter (Token Bucket) ────────────────────────
+  // Prevents thundering herd when multiple connectors sync in parallel.
+  // Each connector can call `acquireToken()` before making API requests.
+  let _tokenBucket = GLOBAL_RATE_LIMIT;
+  let _lastRefill = Date.now();
+
+  function _refillBucket(): void {
+    const now = Date.now();
+    const elapsed = now - _lastRefill;
+    if (elapsed > 0 && GLOBAL_RATE_LIMIT > 0) {
+      const tokensToAdd = Math.floor((elapsed / 60_000) * GLOBAL_RATE_LIMIT);
+      _tokenBucket = Math.min(GLOBAL_RATE_LIMIT, _tokenBucket + tokensToAdd);
+      _lastRefill = now;
+    }
+  }
+
+  /**
+   * Acquire a rate-limit token. Returns immediately if tokens available,
+   * or waits up to `timeoutMs` for a token to become available.
+   * When GLOBAL_RATE_LIMIT is 0 (unlimited), always returns true immediately.
+   */
+  async function acquireToken(timeoutMs: number = 5000): Promise<boolean> {
+    if (GLOBAL_RATE_LIMIT <= 0) return true; // unlimited
+    _refillBucket();
+    if (_tokenBucket > 0) {
+      _tokenBucket--;
+      return true;
+    }
+    // Wait for a token
+    const start = Date.now();
+    while (Date.now() - start < timeoutMs) {
+      await new Promise((r) => setTimeout(r, 100));
+      _refillBucket();
+      if (_tokenBucket > 0) {
+        _tokenBucket--;
+        return true;
+      }
+    }
+    return false; // timeout
   }
 
   /**
@@ -123,7 +171,13 @@ export function createSyncManager(config: SyncManagerConfig) {
 
   return {
     /**
-     * Sync all registered connectors.
+     * Sync all registered connectors in PARALLEL batches.
+     *
+     * 10M SCALE FIX: Previous implementation was sequential (for...of loop),
+     * meaning 5 connectors with 5h sync each = 25h total wall-clock.
+     * Now runs up to CONCURRENCY connectors in parallel using Promise.allSettled,
+     * reducing wall-clock to max(individual sync times) per batch.
+     *
      * Uses incremental sync if a cursor exists, full sync otherwise.
      */
     async syncAll(
@@ -131,20 +185,34 @@ export function createSyncManager(config: SyncManagerConfig) {
       orgId: string
     ): Promise<ConnectorSyncResult[]> {
       const results: ConnectorSyncResult[] = [];
+      const connectors = Array.from(connectorMap.values());
 
-      for (const connector of connectorMap.values()) {
-        try {
-          const result = await this.syncOne(connector.id, supabase, orgId);
-          results.push(result);
-        } catch (err: any) {
-          results.push({
-            success: false,
-            signalsGenerated: 0,
-            recordsProcessed: 0,
-            errors: [`${connector.id}: ${err.message}`],
-            duration_ms: 0,
-            lastSyncedAt: new Date(),
-          });
+      // Process connectors in parallel batches
+      for (let i = 0; i < connectors.length; i += CONCURRENCY) {
+        const batch = connectors.slice(i, i + CONCURRENCY);
+
+        const batchResults = await Promise.allSettled(
+          batch.map(async (connector) => {
+            // Acquire global rate-limit token before starting
+            await acquireToken(10_000);
+            return this.syncOne(connector.id, supabase, orgId);
+          })
+        );
+
+        for (let j = 0; j < batchResults.length; j++) {
+          const settled = batchResults[j];
+          if (settled.status === 'fulfilled') {
+            results.push(settled.value);
+          } else {
+            results.push({
+              success: false,
+              signalsGenerated: 0,
+              recordsProcessed: 0,
+              errors: [`${batch[j].id}: ${settled.reason?.message || 'Unknown error'}`],
+              duration_ms: 0,
+              lastSyncedAt: new Date(),
+            });
+          }
         }
       }
 
@@ -252,5 +320,13 @@ export function createSyncManager(config: SyncManagerConfig) {
     getRegisteredConnectors(): string[] {
       return Array.from(connectorMap.keys());
     },
+
+    /**
+     * Acquire a global rate-limit token.
+     * Connectors should call this before each API request when
+     * globalRateLimitPerMinute is configured.
+     * Returns true if token acquired, false if timeout.
+     */
+    acquireToken,
   };
 }
