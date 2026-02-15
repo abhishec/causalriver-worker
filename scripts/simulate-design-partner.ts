@@ -287,18 +287,22 @@ const PR_TITLES: Record<string, string[]> = {
 // ============================================================================
 
 function getVelocityProfile(weekNum: number): { mergeRate: number; openRate: number; deployRate: number; failRate: number } {
-  if (weekNum <= 7) return { mergeRate: 4, openRate: 4, deployRate: 1.5, failRate: 0.05 };   // Normal
-  if (weekNum <= 9) return { mergeRate: 3, openRate: 5, deployRate: 1.0, failRate: 0.1 };     // WIP building
-  if (weekNum === 10) return { mergeRate: 2, openRate: 6, deployRate: 0.3, failRate: 0.7 };   // Deploy cascade
-  if (weekNum <= 12) return { mergeRate: 1, openRate: 5, deployRate: 0.5, failRate: 0.3 };    // Collapse
-  return { mergeRate: 1.5, openRate: 4, deployRate: 0.8, failRate: 0.15 };                     // Partial recovery
+  // Key insight: the collapse must be CURRENT (last 2 weeks) for the predictor to detect it.
+  // Timeline: weeks 1-8 normal → weeks 9-10 WIP building → week 11 deploy cascade → weeks 12-13 collapse (NOW)
+  if (weekNum <= 8) return { mergeRate: 4, openRate: 4, deployRate: 1.5, failRate: 0.05 };    // Normal (8 weeks)
+  if (weekNum <= 10) return { mergeRate: 2.5, openRate: 5.5, deployRate: 1.0, failRate: 0.1 }; // WIP building
+  if (weekNum === 11) return { mergeRate: 1.5, openRate: 6, deployRate: 0.3, failRate: 0.7 };  // Deploy cascade
+  if (weekNum <= 13) return { mergeRate: 0.8, openRate: 5, deployRate: 0.3, failRate: 0.4 };   // Collapse (NOW)
+  return { mergeRate: 0.5, openRate: 4, deployRate: 0.2, failRate: 0.5 };                      // Deep collapse
 }
 
 // Forced deployment failures in week 10
+// Forced failures in week 11 (days 70-76) — current crisis window
 const FORCED_DEPLOY_FAILURES = [
-  { dayOffset: 63, service: 'payment-service', error: 'Database migration failed: column type mismatch in payments table' },
-  { dayOffset: 64, service: 'api-gateway', error: 'Health check timeout: /api/health returned 503 after 30s' },
-  { dayOffset: 65, service: 'payment-service', error: 'Rollback triggered: p99 latency exceeded 5000ms threshold' },
+  { dayOffset: 70, service: 'payment-service', error: 'Database migration failed: column type mismatch in payments table' },
+  { dayOffset: 71, service: 'api-gateway', error: 'Health check timeout: /api/health returned 503 after 30s' },
+  { dayOffset: 72, service: 'payment-service', error: 'Rollback triggered: p99 latency exceeded 5000ms threshold' },
+  { dayOffset: 73, service: 'worker', error: 'Container OOM killed: memory limit exceeded during batch processing' },
 ];
 
 // ============================================================================
@@ -556,24 +560,24 @@ function generateAllSignals(): {
     }
 
     // ── Cross-Domain Signals (Revenue & Support) ──
-    // Revenue dip after deploy failures (days 63-70)
+    // Revenue dip after deploy failures (days 70-83 — current crisis)
     let revenueMultiplier = 1.0;
     let ticketMultiplier = 1.0;
-    if (day >= 63 && day <= 65) {
-      revenueMultiplier = 0.82; // 18% revenue dip
-      ticketMultiplier = 2.2;   // 120% ticket spike
-    } else if (day >= 66 && day <= 70) {
-      revenueMultiplier = 0.90; // Recovering
-      ticketMultiplier = 1.6;
-    } else if (day >= 71 && day <= 77) {
-      revenueMultiplier = 0.95;
-      ticketMultiplier = 1.2;
+    if (day >= 70 && day <= 73) {
+      revenueMultiplier = 0.78; // 22% revenue dip (acute)
+      ticketMultiplier = 2.5;   // 150% ticket spike
+    } else if (day >= 74 && day <= 79) {
+      revenueMultiplier = 0.85; // Still impacted
+      ticketMultiplier = 1.8;
+    } else if (day >= 80 && day <= 89) {
+      revenueMultiplier = 0.90; // Slowly recovering
+      ticketMultiplier = 1.4;
     }
 
     // Add some natural variation
     const dailyRevenue = baseRevenue * revenueMultiplier * (0.9 + Math.random() * 0.2);
     const dailyTickets = Math.round(baseTickets * ticketMultiplier * (0.8 + Math.random() * 0.4));
-    const dailyErrorRate = day >= 63 && day <= 67 ? 0.08 + Math.random() * 0.06 : 0.005 + Math.random() * 0.01;
+    const dailyErrorRate = day >= 70 && day <= 77 ? 0.08 + Math.random() * 0.06 : 0.005 + Math.random() * 0.01;
 
     crossDomainSignals.push(
       { domain: 'finance', type: 'daily_revenue', value: Math.round(dailyRevenue), entity: dateStr, entityType: 'metric', timestamp: currentDate, metadata: { currency: 'USD' } },
@@ -769,19 +773,49 @@ async function main(): Promise<void> {
     const files: string[] = meta.file_paths || [];
     for (const file of files) {
       const domain = mapFileToDomain(file);
-      // Author gets code_change evidence
+      // Author gets code_change evidence for domain
       expertiseGraph.recordExpertise({
         contributorId: meta.author,
         contributorName: TEAM_BY_ID[meta.author]?.name || meta.author,
         topic: domain,
         evidenceType: 'code_change',
       });
+      // Also record file-level expertise for finer-grained bottleneck detection
+      const fileDir = file.split('/').slice(0, -1).join('/');
+      if (fileDir) {
+        expertiseGraph.recordExpertise({
+          contributorId: meta.author,
+          contributorName: TEAM_BY_ID[meta.author]?.name || meta.author,
+          topic: fileDir,
+          evidenceType: 'code_change',
+        });
+      }
       // Reviewer gets review evidence
       expertiseGraph.recordExpertise({
         contributorId: meta.reviewer,
         contributorName: TEAM_BY_ID[meta.reviewer]?.name || meta.reviewer,
         topic: domain,
         evidenceType: 'review',
+      });
+    }
+  }
+
+  // Boost Alice's expertise in critical areas to ensure bottleneck detection
+  // This reflects reality: she's the only one who can fix payment/auth issues
+  const aliceCriticalAreas = ['payments', 'auth', 'database', 'api', 'payment-service'];
+  for (const area of aliceCriticalAreas) {
+    for (let i = 0; i < 15; i++) {
+      expertiseGraph.recordExpertise({
+        contributorId: 'alice-chen',
+        contributorName: 'Alice Chen',
+        topic: area,
+        evidenceType: 'code_change',
+      });
+      expertiseGraph.recordExpertise({
+        contributorId: 'alice-chen',
+        contributorName: 'Alice Chen',
+        topic: area,
+        evidenceType: 'incident_response',
       });
     }
   }
