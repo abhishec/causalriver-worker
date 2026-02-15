@@ -109,19 +109,19 @@ describe('GitHub Connector — Enhanced Signals', () => {
       expect(reviewSignals.length).toBe(2);
 
       // Approved review
-      const approvedReview = reviewSignals.find((r: any) => r.signal_metadata.state === 'APPROVED');
+      const approvedReview = reviewSignals.find((r: any) => r.metadata.state === 'APPROVED');
       expect(approvedReview).toBeDefined();
       expect(approvedReview.signal_value).toBe(1);
-      expect(approvedReview.signal_metadata.reviewer).toBe('bob');
-      expect(approvedReview.signal_metadata.sentiment_score).toBeGreaterThan(0);
-      expect(approvedReview.signal_metadata.sentiment_label).toBe('positive');
+      expect(approvedReview.metadata.reviewer).toBe('bob');
+      expect(approvedReview.metadata.sentiment_score).toBeGreaterThan(0);
+      expect(approvedReview.metadata.sentiment_label).toBe('positive');
 
       // Changes requested review
-      const changesReview = reviewSignals.find((r: any) => r.signal_metadata.state === 'CHANGES_REQUESTED');
+      const changesReview = reviewSignals.find((r: any) => r.metadata.state === 'CHANGES_REQUESTED');
       expect(changesReview).toBeDefined();
       expect(changesReview.signal_value).toBe(-0.3);
-      expect(changesReview.signal_metadata.reviewer).toBe('carol');
-      expect(changesReview.signal_metadata.sentiment_score).toBeLessThan(0);
+      expect(changesReview.metadata.reviewer).toBe('carol');
+      expect(changesReview.metadata.sentiment_score).toBeLessThan(0);
     });
 
     it('should include file paths and directories in review signals', async () => {
@@ -157,8 +157,8 @@ describe('GitHub Connector — Enhanced Signals', () => {
       const storedRows = supabase._insert.mock.calls[0]?.[0] || [];
       const prOpened = storedRows.find((r: any) => r.signal_type === 'pr_opened');
       expect(prOpened).toBeDefined();
-      expect(prOpened.signal_metadata.file_paths).toContain('src/payments/checkout.ts');
-      expect(prOpened.signal_metadata.directories_changed).toContain('src/payments');
+      expect(prOpened.metadata.file_paths).toContain('src/payments/checkout.ts');
+      expect(prOpened.metadata.directories_changed).toContain('src/payments');
     });
   });
 
@@ -197,9 +197,9 @@ describe('GitHub Connector — Enhanced Signals', () => {
       const storedRows = supabase._insert.mock.calls[0]?.[0] || [];
       const filesChanged = storedRows.find((r: any) => r.signal_type === 'pr_files_changed');
       expect(filesChanged).toBeDefined();
-      expect(filesChanged.signal_metadata.file_count).toBe(3);
-      expect(filesChanged.signal_metadata.directories_changed).toContain('src/auth');
-      expect(filesChanged.signal_metadata.directories_changed).toContain('src/utils');
+      expect(filesChanged.metadata.file_count).toBe(3);
+      expect(filesChanged.metadata.directories_changed).toContain('src/auth');
+      expect(filesChanged.metadata.directories_changed).toContain('src/utils');
     });
   });
 
@@ -242,11 +242,11 @@ describe('GitHub Connector — Enhanced Signals', () => {
       const storedRows = supabase._insert.mock.calls[0]?.[0] || [];
       const mergedSignal = storedRows.find((r: any) => r.signal_type === 'pr_merged');
       expect(mergedSignal).toBeDefined();
-      expect(mergedSignal.signal_metadata.reviewers_who_approved).toContain('bob');
-      expect(mergedSignal.signal_metadata.reviewers_who_approved).toContain('carol');
-      expect(mergedSignal.signal_metadata.review_rounds).toBe(2);
-      expect(mergedSignal.signal_metadata.file_paths).toContain('src/feature/index.ts');
-      expect(mergedSignal.signal_metadata.directories_changed).toContain('src/feature');
+      expect(mergedSignal.metadata.reviewers_who_approved).toContain('bob');
+      expect(mergedSignal.metadata.reviewers_who_approved).toContain('carol');
+      expect(mergedSignal.metadata.review_rounds).toBe(2);
+      expect(mergedSignal.metadata.file_paths).toContain('src/feature/index.ts');
+      expect(mergedSignal.metadata.directories_changed).toContain('src/feature');
     });
   });
 
@@ -297,17 +297,17 @@ describe('GitHub Connector — Enhanced Signals', () => {
       // Should have job-level signals
       const jobPassed = storedRows.find((r: any) => r.signal_type === 'ci_job_passed');
       expect(jobPassed).toBeDefined();
-      expect(jobPassed.signal_metadata.job_name).toBe('lint');
+      expect(jobPassed.metadata.job_name).toBe('lint');
 
       const jobFailed = storedRows.find((r: any) => r.signal_type === 'ci_job_failed');
       expect(jobFailed).toBeDefined();
-      expect(jobFailed.signal_metadata.job_name).toBe('test');
+      expect(jobFailed.metadata.job_name).toBe('test');
 
       // Overall CI signal should include failed job names
       const ciFailed = storedRows.find((r: any) => r.signal_type === 'ci_failed');
       expect(ciFailed).toBeDefined();
-      expect(ciFailed.signal_metadata.failed_job_names).toContain('test');
-      expect(ciFailed.signal_metadata.step_that_failed).toBe('Run tests');
+      expect(ciFailed.metadata.failed_job_names).toContain('test');
+      expect(ciFailed.metadata.step_that_failed).toBe('Run tests');
     });
   });
 
@@ -346,7 +346,7 @@ describe('GitHub Connector — Enhanced Signals', () => {
       const rollback = storedRows.find((r: any) => r.signal_type === 'deploy_rollback');
       expect(rollback).toBeDefined();
       expect(rollback.signal_value).toBe(-1);
-      expect(rollback.signal_metadata.time_since_failure_minutes).toBe(60);
+      expect(rollback.metadata.time_since_failure_minutes).toBe(60);
     });
   });
 

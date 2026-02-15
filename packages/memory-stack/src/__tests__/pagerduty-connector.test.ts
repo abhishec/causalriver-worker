@@ -103,20 +103,20 @@ describe('PagerDuty Connector', () => {
       const triggered = storedRows.find((r: any) => r.signal_type === 'incident_triggered');
       expect(triggered).toBeDefined();
       expect(triggered.signal_value).toBe(-0.7); // P2 = -0.7
-      expect(triggered.signal_metadata.service).toBe('API Gateway');
+      expect(triggered.metadata.service).toBe('API Gateway');
 
       // Acknowledged
       const acked = storedRows.find((r: any) => r.signal_type === 'incident_acknowledged');
       expect(acked).toBeDefined();
       expect(acked.signal_value).toBe(0.3);
-      expect(acked.signal_metadata.time_to_ack_minutes).toBe(5);
+      expect(acked.metadata.time_to_ack_minutes).toBe(5);
 
       // Resolved
       const resolved = storedRows.find((r: any) => r.signal_type === 'incident_resolved');
       expect(resolved).toBeDefined();
       expect(resolved.signal_value).toBe(1);
-      expect(resolved.signal_metadata.mttr_minutes).toBe(60);
-      expect(resolved.signal_metadata.service_name).toBe('API Gateway');
+      expect(resolved.metadata.mttr_minutes).toBe(60);
+      expect(resolved.metadata.service_name).toBe('API Gateway');
     });
 
     it('should map P1/critical priority to -1', async () => {
@@ -165,7 +165,7 @@ describe('PagerDuty Connector', () => {
       const escalated = storedRows.find((r: any) => r.signal_type === 'oncall_escalated');
       expect(escalated).toBeDefined();
       expect(escalated.signal_value).toBe(-0.5);
-      expect(escalated.signal_metadata.escalation_level).toBe(2);
+      expect(escalated.metadata.escalation_level).toBe(2);
     });
   });
 

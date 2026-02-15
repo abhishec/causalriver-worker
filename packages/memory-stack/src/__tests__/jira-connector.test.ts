@@ -110,7 +110,7 @@ describe('Jira Connector', () => {
       const created = storedRows.find((r: any) => r.signal_type === 'issue_created');
       expect(created).toBeDefined();
       expect(created.signal_value).toBe(0.5); // Feature = positive
-      expect(created.signal_metadata.is_bug).toBe(false);
+      expect(created.metadata.is_bug).toBe(false);
     });
 
     it('should emit negative signal for bug creation', async () => {
@@ -134,7 +134,7 @@ describe('Jira Connector', () => {
       const storedRows = supabase._insert.mock.calls[0]?.[0] || [];
       const created = storedRows.find((r: any) => r.signal_type === 'issue_created');
       expect(created.signal_value).toBe(-0.5);
-      expect(created.signal_metadata.is_bug).toBe(true);
+      expect(created.metadata.is_bug).toBe(true);
     });
 
     it('should emit issue_resolved when status is done', async () => {
@@ -163,8 +163,8 @@ describe('Jira Connector', () => {
       const resolved = storedRows.find((r: any) => r.signal_type === 'issue_resolved');
       expect(resolved).toBeDefined();
       expect(resolved.signal_value).toBe(1);
-      expect(resolved.signal_metadata.resolution).toBe('Fixed');
-      expect(resolved.signal_metadata.resolution_time_days).toBe(9);
+      expect(resolved.metadata.resolution).toBe('Fixed');
+      expect(resolved.metadata.resolution_time_days).toBe(9);
     });
 
     it('should emit issue_blocked when status includes blocked', async () => {
