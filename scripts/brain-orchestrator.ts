@@ -121,8 +121,9 @@ const CORE_ONLY_AGENT_NAMES = new Set([
   'weekly-brain-scan',        // Core brain health assessment
   'monthly-deep-analysis',    // Core historical causal discovery
   'cost-agent',               // Infra cost monitoring (platform-wide)
-  'git-code-trainer-v6',      // Public repo training data
+  'git-code-trainer',         // Public repo training data (registered as 'git-code-trainer' by git-code-trainer-v6.ts)
   'security-hardening-agent', // Platform security scanning
+  'outcome-resolver',         // Calibration loop closure: predictions → outcomes
 ]);
 
 // Org-Applicable: Run per active organization (org-specific brain maintenance)
@@ -208,8 +209,8 @@ class BrainOrchestrator {
       verbose: true,
     });
 
-    // Register motor command connectors (Slack, Jira, GitHub)
-    this.registerMotorConnectors();
+    // NOTE: Motor connectors will be registered asynchronously in start() method
+    // to support async import of production connectors
 
     // Calibration Feedback Loop (improve agents)
     this.calibrationLoop = createCalibrationFeedbackLoop({
@@ -231,61 +232,89 @@ class BrainOrchestrator {
 
   /**
    * Register motor command connectors (Slack, Jira, GitHub).
-   * Enables motor command execution through registered connectors.
+   * Enables production-grade motor command execution with enterprise reliability.
+   *
+   * Production connectors include:
+   * - Exponential backoff retry (3 attempts)
+   * - Rate limiting (50/sec Slack, 10/sec Jira, ~1.4/sec GitHub)
+   * - Circuit breakers (5 failure threshold, 60s reset)
+   * - Redis caching for deduplication and lookups
+   * - Batch operations for high-volume scenarios
    */
-  private registerMotorConnectors(): void {
+  private async registerMotorConnectors(): Promise<void> {
     const registry = this.motorCommandEngine.getConnectorRegistry();
+
+    // Initialize Redis client if available
+    let redis: any;
+    if (process.env.REDIS_URL) {
+      try {
+        const Redis = (await import('ioredis')).default;
+        redis = new Redis(process.env.REDIS_URL);
+        log('MOTOR', '✓ Redis client initialized for connector caching');
+      } catch (err) {
+        log('MOTOR', 'Redis initialization failed (continuing without cache):', err);
+      }
+    }
 
     // Slack connector (if configured)
     if (process.env.SLACK_BOT_TOKEN) {
-      registry.register({
-        name: 'slack',
-        enabled: true,
-        supportedActions: ['slack_send_message', 'slack_create_channel', 'slack_invite_user', 'slack_post_to_channel'],
-        execute: async (command) => {
-          const { text, channel } = command.payload;
-          log('MOTOR', `[Slack] Sending message to ${channel || command.target}: ${text?.substring(0, 50)}...`);
-          // Actual Slack API call would go here
-          return { success: true, message: 'Slack message sent', metadata: { channel, timestamp: new Date().toISOString() } };
-        },
+      const { createProductionSlackConnector } = await import(
+        '../packages/memory-stack/src/connectors/slack-connector-production.js'
+      );
+
+      const slackConnector = createProductionSlackConnector({
+        token: process.env.SLACK_BOT_TOKEN,
+        redis,
+        maxConcurrent: 50, // Slack Tier 2 limit
+        rateLimit: 50,
+        verbose: false,
       });
-      log('MOTOR', '✓ Registered Slack connector');
+
+      registry.register(slackConnector);
+      log('MOTOR', '✓ Registered production Slack connector (50 req/sec, circuit breaker, Redis cache)');
     }
 
     // Jira connector (if configured)
-    if (process.env.JIRA_API_TOKEN) {
-      registry.register({
-        name: 'jira',
-        enabled: true,
-        supportedActions: ['jira_create_issue', 'jira_update_issue', 'jira_add_comment'],
-        execute: async (command) => {
-          const { project, summary, description } = command.payload;
-          log('MOTOR', `[Jira] Creating issue in ${project}: ${summary}`);
-          // Actual Jira API call would go here
-          return { success: true, message: 'Jira issue created', metadata: { project, issueKey: 'MOCK-123' } };
-        },
+    if (process.env.JIRA_API_TOKEN && process.env.JIRA_HOST && process.env.JIRA_EMAIL) {
+      const { createProductionJiraConnector } = await import(
+        '../packages/memory-stack/src/connectors/jira-connector-production.js'
+      );
+
+      const jiraConnector = createProductionJiraConnector({
+        host: process.env.JIRA_HOST,
+        email: process.env.JIRA_EMAIL,
+        apiToken: process.env.JIRA_API_TOKEN,
+        redis,
+        maxConcurrent: 10, // Jira Cloud limit
+        rateLimit: 10,
+        verbose: false,
       });
-      log('MOTOR', '✓ Registered Jira connector');
+
+      registry.register(jiraConnector);
+      log('MOTOR', '✓ Registered production Jira connector (10 req/sec, circuit breaker, Redis cache)');
     }
 
     // GitHub connector (if configured)
     if (process.env.GITHUB_TOKEN) {
-      registry.register({
-        name: 'github',
-        enabled: true,
-        supportedActions: ['github_create_issue', 'github_create_pr', 'github_add_comment'],
-        execute: async (command) => {
-          const { repo, title, body } = command.payload;
-          log('MOTOR', `[GitHub] Creating issue in ${repo}: ${title}`);
-          // Actual GitHub API call would go here
-          return { success: true, message: 'GitHub issue created', metadata: { repo, issueNumber: 42 } };
-        },
+      const { createProductionGitHubConnector } = await import(
+        '../packages/memory-stack/src/connectors/github-connector-production.js'
+      );
+
+      const githubConnector = createProductionGitHubConnector({
+        token: process.env.GITHUB_TOKEN,
+        redis,
+        maxConcurrent: 30,
+        rateLimit: 5000, // 5000/hour authenticated
+        verbose: false,
       });
-      log('MOTOR', '✓ Registered GitHub connector');
+
+      registry.register(githubConnector);
+      log('MOTOR', '✓ Registered production GitHub connector (5000 req/hour, circuit breaker, Redis cache)');
     }
 
     const connectors = registry.list();
-    log('MOTOR', `Motor command engine initialized with ${connectors.length} connector(s)`);
+    log('MOTOR', `Motor command engine initialized with ${connectors.length} production connector(s)`);
+    log('MOTOR', '  Features: Exponential retry, rate limiting, circuit breakers, Redis caching, batch ops');
   }
 
   /**
@@ -631,6 +660,9 @@ class BrainOrchestrator {
     log('INIT', `Agent Schedule Check Interval: ${this.config.agentScheduleCheckIntervalMs / 1000}s`);
     log('INIT', `Core-Only Agents: ${CORE_ONLY_AGENT_NAMES.size} | Org-Applicable Agents: ${ORG_APPLICABLE_AGENT_NAMES.size}`);
 
+    // Register production motor connectors (async import)
+    await this.registerMotorConnectors();
+
     // Discover agents
     await this.discoverAgents();
 
@@ -784,6 +816,14 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
+  // ── Parse --agent flag (used by docker-entrypoint.sh for single-agent ECS tasks) ──
+  const agentFlagIndex = process.argv.indexOf('--agent');
+  const singleAgentName = agentFlagIndex !== -1 ? process.argv[agentFlagIndex + 1] : null;
+
+  if (singleAgentName) {
+    log('INIT', `Single-agent mode: running only "${singleAgentName}"`);
+  }
+
   const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
   // Test connection
@@ -802,6 +842,45 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
+  // ── Single-agent mode: run one agent and exit ──────────────────────────────
+  if (singleAgentName) {
+    const agents = globalRegistry.list();
+    const agent = agents.find(a => a.name === singleAgentName);
+
+    if (!agent) {
+      console.error(`ERROR: Agent "${singleAgentName}" not found in registry.`);
+      console.error(`Available agents: ${agents.map(a => a.name).join(', ')}`);
+      process.exit(1);
+    }
+
+    const manager = new AgentManager(globalRegistry, {
+      supabaseUrl: SUPABASE_URL,
+      supabaseKey: SUPABASE_KEY,
+      organizationId: CORE_ORG_ID,
+    });
+
+    log('EXECUTE', `Running single agent: ${agent.name} v${agent.version}`);
+    const startTime = Date.now();
+
+    try {
+      const result = await manager.runWithRetry(agent.name, 2, {
+        organizationId: CORE_ORG_ID,
+        verbose: true,
+        enableMotorCommands: true,
+        enableCalibration: true,
+      });
+
+      const duration = ((Date.now() - startTime) / 1000).toFixed(1);
+      log('EXECUTE', `Agent ${agent.name} completed in ${duration}s (${result.signalsGenerated} signals, ${result.errorsEncountered.length} errors)`);
+      process.exit(result.errorsEncountered.length > 0 ? 1 : 0);
+    } catch (err) {
+      const duration = ((Date.now() - startTime) / 1000).toFixed(1);
+      logError('EXECUTE', `Agent ${agent.name} failed after ${duration}s`, err);
+      process.exit(1);
+    }
+  }
+
+  // ── Full orchestrator mode (continuous or once) ────────────────────────────
   const orchestrator = new BrainOrchestrator({
     supabase,
     organizationId: CORE_ORG_ID,

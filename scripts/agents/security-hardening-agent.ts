@@ -951,12 +951,12 @@ export class SecurityHardeningAgent extends ManusNativeAgent {
         const extensions = findPattern.split('.{')[1]?.split('}')[0]?.split(',') || [];
         const patterns = extensions.map(ext => `*.${ext}`).join(' -o -name ');
         findPattern = patterns;
-        const cmd = `find ${this.projectRoot} -type f \\( -name ${patterns} \\) ${excludePattern} 2>/dev/null | head -100`;
+        const cmd = `find "${this.projectRoot}" -type f \\( -name ${patterns} \\) ${excludePattern} 2>/dev/null | head -100`;
         const output = execSync(cmd, { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'ignore'] });
         return output.trim().split('\n').filter(Boolean);
       }
 
-      const cmd = `find ${this.projectRoot} -type f -name "${findPattern}" ${excludePattern} 2>/dev/null | head -100`;
+      const cmd = `find "${this.projectRoot}" -type f -name "${findPattern}" ${excludePattern} 2>/dev/null | head -100`;
       const output = execSync(cmd, { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'ignore'] });
       return output.trim().split('\n').filter(Boolean);
     } catch {

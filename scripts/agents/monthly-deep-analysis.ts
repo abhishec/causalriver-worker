@@ -227,7 +227,7 @@ import { globalRegistry } from '../agent-framework/agent-registry';
 globalRegistry.register({
   name: 'monthly-deep-analysis',
   description: 'Full historical causal discovery on ALL data + monthly growth report',
-  version: '6.0.0',
+  version: '7.0.0',
   factory: (config) => {
     const supabase = createClient(config.supabaseUrl, config.supabaseKey);
     return new MonthlyDeepAnalysisAgent(supabase, config.organizationId || '00000000-0000-4000-a000-000000000001', { verbose: config.verbose }) as any;

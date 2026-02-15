@@ -227,7 +227,7 @@ import { globalRegistry } from '../agent-framework/agent-registry';
 globalRegistry.register({
   name: 'brain-consolidation',
   description: '10-step brain sleep cycle: causal discovery, anomaly detection, pattern mining, pruning, strengthening',
-  version: '6.0.0',
+  version: '7.0.0',
   factory: (config) => {
     const supabase = createClient(config.supabaseUrl, config.supabaseKey);
     return new BrainConsolidationAgent(supabase, config.organizationId || '00000000-0000-4000-a000-000000000001', { verbose: config.verbose }) as any;

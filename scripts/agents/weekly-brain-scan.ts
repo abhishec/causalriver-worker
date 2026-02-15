@@ -203,7 +203,7 @@ import { globalRegistry } from '../agent-framework/agent-registry';
 globalRegistry.register({
   name: 'weekly-brain-scan',
   description: '11-region brain scan + benchmarks + stale edge pruning + health summary',
-  version: '6.0.0',
+  version: '7.0.0',
   factory: (config) => {
     const supabase = createClient(config.supabaseUrl, config.supabaseKey);
     return new WeeklyBrainScanAgent(supabase, config.organizationId || '00000000-0000-4000-a000-000000000001', { verbose: config.verbose }) as any;

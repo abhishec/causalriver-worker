@@ -251,8 +251,8 @@ cat > /tmp/task-consolidation.json << TASKDEF
   "family": "nexusbrain-consolidation",
   "networkMode": "awsvpc",
   "requiresCompatibilities": ["FARGATE"],
-  "cpu": "1024",
-  "memory": "4096",
+  "cpu": "2048",
+  "memory": "8192",
   "executionRoleArn": "${EXEC_ROLE_ARN}",
   "taskRoleArn": "${EXEC_ROLE_ARN}",
   "containerDefinitions": [
@@ -293,8 +293,8 @@ cat > /tmp/task-dmn.json << TASKDEF
   "family": "nexusbrain-dmn",
   "networkMode": "awsvpc",
   "requiresCompatibilities": ["FARGATE"],
-  "cpu": "512",
-  "memory": "2048",
+  "cpu": "1024",
+  "memory": "4096",
   "executionRoleArn": "${EXEC_ROLE_ARN}",
   "taskRoleArn": "${EXEC_ROLE_ARN}",
   "containerDefinitions": [
@@ -981,12 +981,12 @@ aws events put-targets \
   --region "${REGION}" > /dev/null
 echo "    Monthly Analysis: 1st of each month at 3:00 AM UTC"
 
-# --- Federation Agent: Every 6 hours (offset from trainer) ---
+# --- Federation Agent: Every 6 hours (offset from trainer at 0,6,12,18) ---
 aws events put-rule \
   --name "nexusbrain-federation-schedule" \
-  --schedule-expression "cron(0 1,13 * * ? *)" \
+  --schedule-expression "cron(0 3,9,15,21 * * ? *)" \
   --state ENABLED \
-  --description "Run NexusBrain Federation Agent every 12 hours (cost-optimized from 6h)" \
+  --description "Run NexusBrain Federation Agent every 6 hours (staggered from trainer)" \
   --region "${REGION}" > /dev/null
 
 cat > /tmp/target-federation.json << TARGET
@@ -1016,7 +1016,7 @@ aws events put-targets \
   --rule "nexusbrain-federation-schedule" \
   --targets file:///tmp/target-federation.json \
   --region "${REGION}" > /dev/null
-echo "    Federation: Every 12 hours (01:00, 13:00 UTC) [cost-optimized]"
+echo "    Federation: Every 6 hours (03:00, 09:00, 15:00, 21:00 UTC)"
 
 # --- Security Hardening Agent: Daily at 4 AM UTC ---
 aws events put-rule \
@@ -1066,14 +1066,13 @@ echo "  1. Store secrets:      ./infra/store-secrets.sh"
 echo "  2. Build & push:       ./infra/push-image.sh"
 echo "  3. Run any agent:      ./infra/run-task.sh <process>"
 echo ""
-echo "Full Agent Schedule (11 agents + 1 optimizer, 12 ECS task defs):"
+echo "Full Agent Schedule (10 scheduled + 1 manual + 3 orchestrator-only = 14 agents):"
 echo "  ┌──────────────────────────┬────────────────────────────────────────┬──────────┐"
 echo "  │ Agent                    │ Schedule                               │ CPU/Mem  │"
 echo "  ├──────────────────────────┼────────────────────────────────────────┼──────────┤"
-echo "  │ Autonomous Trainer       │ Every 12h (0,12 UTC)                    │ 1/4 GB   │"
-echo "  │ Federation Agent         │ Every 12h offset (1,13 UTC)             │ 1/4 GB   │"
-echo "  │ DMN Scan                 │ Every 8h (0,8,16 UTC)                   │ 0.5/2 GB │"
-echo "  │ Proactive Intelligence   │ Every 4h offset (1,5,9,13,17,21 UTC)   │ 0.5/1 GB │"
+echo "  │ Autonomous Trainer       │ Every 12h (0,12 UTC) [cost-optimized]  │ 1/4 GB   │"
+echo "  │ Federation Agent         │ Every 6h (3,9,15,21 UTC)               │ 1/4 GB   │"
+echo "  │ DMN Scan                 │ Every 8h (0,8,16 UTC) [cost-optimized] │ 1/4 GB   │"
 echo "  │ Brain Consolidation      │ Daily 2 AM UTC                         │ 2/8 GB   │"
 echo "  │ Cost Agent               │ Daily 3 AM UTC                         │ 0.5/1 GB │"
 echo "  │ Security Hardening       │ Daily 4 AM UTC                         │ 2/8 GB   │"
@@ -1082,6 +1081,10 @@ echo "  │ Weekly Brain Scan        │ Sunday 4 AM UTC                        
 echo "  │ Benchmark                │ Sunday 5 AM UTC                        │ 2/8 GB   │"
 echo "  │ Monthly Deep Analysis    │ 1st of month 3 AM UTC                  │ 2/8 GB   │"
 echo "  │ Benchmark Optimizer      │ Manual only (Python)                   │ 1/4 GB   │"
+echo "  ├──────────────────────────┼────────────────────────────────────────┼──────────┤"
+echo "  │ Proactive Intelligence   │ Orchestrator-managed (every 4h offset) │ —        │"
+echo "  │ Outcome Resolver         │ Orchestrator-managed (daily 3:30 AM)   │ —        │"
+echo "  │ Org Updater              │ Orchestrator-managed (every 4h)        │ —        │"
 echo "  └──────────────────────────┴────────────────────────────────────────┴──────────┘"
 echo ""
 echo "View logs:"

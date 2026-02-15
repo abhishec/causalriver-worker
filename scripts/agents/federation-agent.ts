@@ -431,14 +431,14 @@ import { globalRegistry } from '../agent-framework/agent-registry';
 globalRegistry.register({
   name: 'federation-agent',
   description: 'Bidirectional Core ↔ Org brain knowledge federation: ensures every part of the brain improves continuously',
-  version: '1.0.0',
+  version: '7.0.0',
   factory: (config) => {
     const supabase = createClient(config.supabaseUrl, config.supabaseKey);
     return new FederationAgent(supabase, config.organizationId || CORE_BRAIN_ORG_ID, {
       verbose: config.verbose,
     }) as any;
   },
-  schedule: '0 */6 * * *',  // Every 6 hours
+  schedule: '0 3,9,15,21 * * *',  // Every 6 hours offset (staggered from autonomous-trainer at 0,6,12,18)
   resourceRequirements: { cpu: '1024', memory: '4096' },
   tags: ['federation', 'core-brain', 'org-brain', 'knowledge-flow', 'corpus-callosum'],
 });

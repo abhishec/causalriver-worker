@@ -276,7 +276,7 @@ import { globalRegistry } from '../agent-framework/agent-registry';
 globalRegistry.register({
   name: 'proactive-intelligence',
   description: 'Proactive alerting: threshold breaches, trend changes, cascade warnings, knowledge decay, opportunities',
-  version: '6.0.0',
+  version: '7.0.0',
   factory: (config) => {
     const supabase = createClient(config.supabaseUrl, config.supabaseKey);
     return new ProactiveIntelligenceAgent(supabase, config.organizationId || '00000000-0000-4000-a000-000000000001', { verbose: config.verbose }) as any;

@@ -191,7 +191,7 @@ import { globalRegistry } from '../agent-framework/agent-registry';
 globalRegistry.register({
   name: 'git-code-trainer',
   description: 'Trains NexusBrain on engineering patterns from 27 major open-source GitHub repos (100k+ stars)',
-  version: '6.0.0',
+  version: '7.0.0',
   factory: (config) => {
     const supabase = createClient(config.supabaseUrl, config.supabaseKey);
     return new GitCodeTrainerAgent(supabase, config.organizationId || '00000000-0000-4000-a000-000000000001', {

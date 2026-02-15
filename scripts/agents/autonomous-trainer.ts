@@ -282,7 +282,7 @@ import { globalRegistry } from '../agent-framework/agent-registry';
 globalRegistry.register({
   name: 'autonomous-trainer',
   description: 'Trains the core brain on public data from 10 sources (FRED, GitHub, World Bank, HN, BLS, SO, Wikipedia, IMF, USPTO)',
-  version: '6.0.0',
+  version: '7.0.0',
   factory: (config) => {
     const supabase = createClient(config.supabaseUrl, config.supabaseKey);
     const agent = new AutonomousTrainerAgent(supabase, config.organizationId || '00000000-0000-4000-a000-000000000001', { verbose: config.verbose });

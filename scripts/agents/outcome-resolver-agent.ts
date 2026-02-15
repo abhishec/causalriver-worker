@@ -373,7 +373,7 @@ globalRegistry.register({
   factory: (config) => {
     return new OutcomeResolverAgent(config) as any;
   },
-  schedule: '0 3 * * *',  // Daily at 3 AM
+  schedule: '30 3 * * *',  // Daily at 3:30 AM (staggered from cost-agent at 3:00 AM)
   resourceRequirements: { cpu: '512', memory: '2048' },
   tags: ['calibration', 'cerebellum', 'outcome-resolution', 'feedback-loop'],
 });
