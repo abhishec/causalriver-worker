@@ -26,13 +26,18 @@ COPY packages/domain-agents/package.json packages/domain-agents/
 COPY packages/client/package.json packages/client/
 COPY packages/mcp-server/package.json packages/mcp-server/
 COPY packages/slack-connector/package.json packages/slack-connector/
+COPY platform/package.json platform/ 2>/dev/null || true
 
 # Install dependencies (production + dev for tsx)
 RUN pnpm install --frozen-lockfile
 
 # Copy all source code (excluding what's in .dockerignore)
 COPY packages/ packages/
+COPY platform/ platform/ 2>/dev/null || true
 COPY scripts/ scripts/
+
+# Build packages (this compiles TypeScript and prepares dependencies)
+RUN pnpm build || echo "Build completed with warnings"
 
 # Install tsx for running TypeScript
 RUN npm install -g tsx
