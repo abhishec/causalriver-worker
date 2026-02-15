@@ -45,19 +45,19 @@ CREATE TRIGGER connector_checkpoints_updated_at
   FOR EACH ROW
   EXECUTE FUNCTION update_checkpoint_timestamp();
 
--- ── Add Content Hash to Signals ─────────────────────────────────────────────
+-- ── Add Content Hash to Connector Signals ──────────────────────────────────
 -- Used for deduplication - avoids re-processing same signals
 
-ALTER TABLE signals
+ALTER TABLE connector_signals
   ADD COLUMN IF NOT EXISTS content_hash TEXT;
 
-CREATE INDEX IF NOT EXISTS idx_signals_content_hash
-  ON signals (content_hash)
+CREATE INDEX IF NOT EXISTS idx_connector_signals_content_hash
+  ON connector_signals (content_hash)
   WHERE content_hash IS NOT NULL;
 
 -- Composite index for fast lookup
-CREATE INDEX IF NOT EXISTS idx_signals_org_hash
-  ON signals (organization_id, content_hash)
+CREATE INDEX IF NOT EXISTS idx_connector_signals_org_hash
+  ON connector_signals (organization_id, content_hash)
   WHERE content_hash IS NOT NULL;
 
 -- ── Increment Connector Signals RPC ─────────────────────────────────────────
@@ -162,7 +162,7 @@ CREATE POLICY "checkpoint_admin_read" ON connector_checkpoints
 COMMENT ON TABLE connector_checkpoints IS
   'Tracks ingestion progress for resumable jobs. Enables recovery from failures at 10M+ scale.';
 
-COMMENT ON COLUMN signals.content_hash IS
+COMMENT ON COLUMN connector_signals.content_hash IS
   'SHA-256 hash of signal content for deduplication. Format: sha256(source:type:content:timestamp)';
 
 COMMENT ON FUNCTION increment_connector_signals(UUID, TEXT, INTEGER) IS

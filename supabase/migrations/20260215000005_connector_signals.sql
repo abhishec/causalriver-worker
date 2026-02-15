@@ -34,7 +34,7 @@ ALTER TABLE public.connector_signals ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "connector_signals_select_own_org" ON public.connector_signals
   FOR SELECT USING (
     organization_id IN (
-      SELECT organization_id FROM organization_members WHERE user_id = auth.uid()
+      SELECT organization_id FROM org_members WHERE user_id = auth.uid()
     )
   );
 

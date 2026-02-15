@@ -186,6 +186,10 @@ COMMENT ON FUNCTION delete_old_signals IS
 ALTER TABLE connector_signals_partitioned ENABLE ROW LEVEL SECURITY;
 ALTER TABLE agent_activity_log_partitioned ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist (for idempotency)
+DROP POLICY IF EXISTS org_isolation_signals ON connector_signals_partitioned;
+DROP POLICY IF EXISTS org_isolation_activity ON agent_activity_log_partitioned;
+
 -- Policies will be inherited by partitions
 CREATE POLICY org_isolation_signals ON connector_signals_partitioned
   FOR ALL
