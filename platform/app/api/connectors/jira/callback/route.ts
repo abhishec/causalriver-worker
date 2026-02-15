@@ -42,9 +42,26 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(new URL('/login', request.url));
     }
 
-    // Exchange code for token
-    const clientId = process.env.JIRA_CLIENT_ID;
-    const clientSecret = process.env.JIRA_CLIENT_SECRET;
+    // Get OAuth credentials (org-level or platform-level)
+    const service = await createServiceClient();
+    const { data: orgOAuthData } = await service.rpc('get_org_oauth_credentials', {
+      p_organization_id: orgId,
+      p_connector_type: 'jira',
+    });
+
+    let clientId: string;
+    let clientSecret: string;
+
+    if (orgOAuthData) {
+      // Use org-level credentials
+      clientId = orgOAuthData.client_id;
+      clientSecret = orgOAuthData.client_secret;
+    } else {
+      // Use platform credentials
+      clientId = process.env.JIRA_CLIENT_ID || '';
+      clientSecret = process.env.JIRA_CLIENT_SECRET || '';
+    }
+
     const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin}/api/connectors/jira/callback`;
 
     if (!clientId || !clientSecret) {

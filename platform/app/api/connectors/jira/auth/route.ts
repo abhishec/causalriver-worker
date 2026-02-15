@@ -28,20 +28,35 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // 3. Build Atlassian OAuth URL
-    const clientId = process.env.JIRA_CLIENT_ID;
+    // 3. Get OAuth credentials (org-level or platform-level)
+    const { data: orgOAuthData } = await supabase.rpc('get_org_oauth_credentials', {
+      p_organization_id: orgId,
+      p_connector_type: 'jira',
+    });
+
+    let clientId: string;
+    let scopes: string;
+
+    if (orgOAuthData) {
+      // Org has custom OAuth app
+      clientId = orgOAuthData.client_id;
+      scopes = (orgOAuthData.scopes || []).join(' ');
+    } else {
+      // Use platform credentials
+      clientId = process.env.JIRA_CLIENT_ID || '';
+      scopes = [
+        'read:jira-work',
+        'read:jira-user',
+        'offline_access', // for refresh token
+      ].join(' ');
+    }
+
     if (!clientId) {
       return NextResponse.json(
-        { error: 'Jira OAuth not configured' },
+        { error: 'Jira OAuth not configured (no platform or org credentials)' },
         { status: 500 }
       );
     }
-
-    const scopes = [
-      'read:jira-work',
-      'read:jira-user',
-      'offline_access', // for refresh token
-    ].join(' ');
 
     const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin}/api/connectors/jira/callback`;
 

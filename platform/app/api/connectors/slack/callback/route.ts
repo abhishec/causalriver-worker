@@ -50,16 +50,33 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // 4. Exchange code for access token
-    const clientId = process.env.SLACK_CLIENT_ID;
-    const clientSecret = process.env.SLACK_CLIENT_SECRET;
-    const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin}/api/connectors/slack/callback`;
+    // 4. Get OAuth credentials (org-level or platform-level)
+    const service = await createServiceClient();
+    const { data: orgOAuthData } = await service.rpc('get_org_oauth_credentials', {
+      p_organization_id: orgId,
+      p_connector_type: 'slack',
+    });
+
+    let clientId: string;
+    let clientSecret: string;
+
+    if (orgOAuthData) {
+      // Use org-level credentials
+      clientId = orgOAuthData.client_id;
+      clientSecret = orgOAuthData.client_secret;
+    } else {
+      // Use platform credentials
+      clientId = process.env.SLACK_CLIENT_ID || '';
+      clientSecret = process.env.SLACK_CLIENT_SECRET || '';
+    }
 
     if (!clientId || !clientSecret) {
       return NextResponse.redirect(
         new URL('/admin/connectors?error=oauth_not_configured', request.url)
       );
     }
+
+    const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin}/api/connectors/slack/callback`;
 
     const tokenResponse = await fetch('https://slack.com/api/oauth.v2.access', {
       method: 'POST',
@@ -84,7 +101,6 @@ export async function GET(request: NextRequest) {
     }
 
     // 5. Store credentials in database
-    const service = await createServiceClient();
 
     const credentials = {
       access_token: tokenData.access_token,

@@ -42,9 +42,25 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(new URL('/login', request.url));
     }
 
-    // Exchange code for token
-    const clientId = process.env.GITHUB_CLIENT_ID;
-    const clientSecret = process.env.GITHUB_CLIENT_SECRET;
+    // Get OAuth credentials (org-level or platform-level)
+    const service = await createServiceClient();
+    const { data: orgOAuthData } = await service.rpc('get_org_oauth_credentials', {
+      p_organization_id: orgId,
+      p_connector_type: 'github',
+    });
+
+    let clientId: string;
+    let clientSecret: string;
+
+    if (orgOAuthData) {
+      // Use org-level credentials
+      clientId = orgOAuthData.client_id;
+      clientSecret = orgOAuthData.client_secret;
+    } else {
+      // Use platform credentials
+      clientId = process.env.GITHUB_CLIENT_ID || '';
+      clientSecret = process.env.GITHUB_CLIENT_SECRET || '';
+    }
 
     if (!clientId || !clientSecret) {
       return NextResponse.redirect(
