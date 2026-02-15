@@ -108,7 +108,7 @@ export async function GET(request: NextRequest) {
     const primarySite = resources[0]; // Use first available site
 
     // Store credentials
-    const service = await createServiceClient();
+    const serviceForStore = await createServiceClient();
 
     const credentials = {
       access_token: tokenData.access_token,
@@ -127,7 +127,7 @@ export async function GET(request: NextRequest) {
       connected_by: user.id,
     };
 
-    const { error: storeError } = await service
+    const { error: storeError } = await serviceForStore
       .from('org_connectors')
       .upsert({
         organization_id: orgId,
