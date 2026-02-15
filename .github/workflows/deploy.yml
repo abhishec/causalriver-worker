@@ -20,9 +20,10 @@ name: Deploy to Production
 #   1. Go to Actions → "Deploy to Production"
 #   2. Click "Run workflow"
 #   3. Select target (platform, orchestrator, both)
-#   4. Optionally select branch/tag
-#   5. Approve deployment in environment gate
-#   6. Monitor progress
+#   4. Select environment (production, staging)
+#   5. Confirm: select "yes - deploy" from dropdown
+#   6. Approve deployment in environment gate
+#   7. Monitor progress
 #
 # ============================================================================
 
@@ -47,9 +48,13 @@ on:
           - production
           - staging
       confirm_deploy:
-        description: 'Type "deploy" to confirm'
+        description: 'Confirm deployment'
         required: true
-        type: string
+        default: 'no'
+        type: choice
+        options:
+          - 'no'
+          - 'yes - deploy'
       skip_tests:
         description: 'Skip pre-deployment tests (emergency only)'
         required: false
@@ -78,8 +83,8 @@ jobs:
       - name: Validate confirmation
         id: validate
         run: |
-          if [ "${{ inputs.confirm_deploy }}" != "deploy" ]; then
-            echo "::error::Deployment not confirmed. You must type 'deploy' in the confirmation field."
+          if [ "${{ inputs.confirm_deploy }}" != "yes - deploy" ]; then
+            echo "::error::Deployment not confirmed. Select 'yes - deploy' in the confirmation dropdown."
             exit 1
           fi
 
