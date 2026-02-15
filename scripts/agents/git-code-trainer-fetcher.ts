@@ -212,6 +212,46 @@ function sleep(ms: number): Promise<void> {
 }
 
 // ============================================================================
+// WORKFLOW RUNS FETCHER (handles wrapped response format)
+// ============================================================================
+
+/**
+ * Fetch workflow runs from GitHub Actions API.
+ * This endpoint returns { total_count, workflow_runs: [...] } — NOT a flat array.
+ * So we can't use paginatedFetch directly.
+ */
+async function fetchWorkflowRuns(
+  owner: string,
+  repo: string,
+  maxItems: number,
+  token?: string,
+  delay: number = 100,
+): Promise<GitHubWorkflowRun[]> {
+  const results: GitHubWorkflowRun[] = [];
+  let page = 1;
+  const perPage = Math.min(100, maxItems);
+
+  while (results.length < maxItems) {
+    const data = await githubFetch(
+      `/repos/${owner}/${repo}/actions/runs?per_page=${perPage}&page=${page}`,
+      token,
+    );
+
+    // GitHub Actions API wraps results: { total_count: N, workflow_runs: [...] }
+    const runs = data?.workflow_runs;
+    if (!Array.isArray(runs) || runs.length === 0) break;
+
+    results.push(...runs);
+    page++;
+
+    if (runs.length < perPage) break; // Last page
+    if (delay > 0) await sleep(delay);
+  }
+
+  return results.slice(0, maxItems);
+}
+
+// ============================================================================
 // MAIN FETCH FUNCTION
 // ============================================================================
 
@@ -280,18 +320,16 @@ export async function fetchRepoData(
       return [] as GitHubCommit[];
     }),
 
-    paginatedFetch<any>(
-      `/repos/${owner}/${repo}/actions/runs?per_page=100`,
-      maxWorkflowRuns, token, rateLimitDelay,
-    ).then(data => {
-      // Workflow runs are nested under .workflow_runs
-      const runs = Array.isArray(data) ? data : [];
-      log(`  Workflow runs: ${runs.length}`);
-      return runs as GitHubWorkflowRun[];
-    }).catch(err => {
-      log(`  Workflow runs: FAILED (${err.message})`);
-      return [] as GitHubWorkflowRun[];
-    }),
+    // GitHub Actions API returns { total_count, workflow_runs: [...] } — NOT a flat array
+    // So we fetch directly instead of using paginatedFetch
+    fetchWorkflowRuns(owner, repo, maxWorkflowRuns, token, rateLimitDelay)
+      .then(runs => {
+        log(`  Workflow runs: ${runs.length}`);
+        return runs;
+      }).catch(err => {
+        log(`  Workflow runs: FAILED (${err.message})`);
+        return [] as GitHubWorkflowRun[];
+      }),
   ]);
 
   // Issues are already filtered above
