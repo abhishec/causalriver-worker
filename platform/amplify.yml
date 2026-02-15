@@ -1,23 +1,22 @@
 version: 1
-frontend:
-  phases:
-    preBuild:
-      commands:
-        - npm install -g pnpm@9
-        # Install from monorepo root (workspace links must resolve)
-        - cd .. && pnpm install --frozen-lockfile
-        # Build the memory-stack dependency first
-        - cd .. && pnpm --filter @nexus-ai/memory-stack run build
-    build:
-      commands:
-        - pnpm build
-  artifacts:
-    baseDirectory: .next
-    files:
-      - "**/*"
-  cache:
-    paths:
-      - ../node_modules/**/*
-      - node_modules/**/*
-      - ../.turbo/**/*
-      - .next/cache/**/*
+applications:
+  - appRoot: platform
+    frontend:
+      phases:
+        preBuild:
+          commands:
+            - npm install -g pnpm@9
+            - pushd .. && pnpm install --frozen-lockfile && pnpm --filter @nexus-ai/memory-stack run build && popd
+        build:
+          commands:
+            - pnpm build
+      artifacts:
+        baseDirectory: .next
+        files:
+          - '**/*'
+      cache:
+        paths:
+          - .next/cache/**/*
+          - node_modules/**/*
+          - ../node_modules/**/*
+          - ../packages/memory-stack/dist/**/*
