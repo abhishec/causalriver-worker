@@ -29,6 +29,10 @@ export interface RedTeamConfig {
   learningWindowDays?: number;
   /** Logger */
   logger?: NexusLogger;
+  /** Anthropic API key — when provided, generates LLM-powered adversarial scenarios */
+  anthropicApiKey?: string;
+  /** LLM model for red-teaming (default: 'claude-3-5-haiku-20241022') */
+  llmModel?: string;
 }
 
 export interface Prediction {
@@ -75,8 +79,10 @@ export interface RedTeamResult {
 }
 
 export interface RedTeamInstance {
-  /** Run adversarial testing on a single prediction */
+  /** Run adversarial testing on a single prediction (template-based, sync) */
   testPrediction(prediction: Prediction): RedTeamResult;
+  /** Run LLM-powered adversarial testing (async — falls back to template if no API key) */
+  testPredictionLLM(prediction: Prediction): Promise<RedTeamResult>;
   /** Batch test multiple predictions */
   testBatch(predictions: Prediction[]): RedTeamResult[];
   /** Get historical attack patterns that were effective */
@@ -197,6 +203,119 @@ const ADVERSARIAL_TEMPLATES: Record<AdversarialType, {
 };
 
 // ============================================================================
+// LLM RED-TEAM SYSTEM PROMPT
+// ============================================================================
+
+const RED_TEAM_SYSTEM_PROMPT = `You are the Adversarial Red Team layer (L11) of NexusBrain — the brain's "amygdala" that stress-tests every prediction before it reaches users.
+
+Your job: Given a prediction, generate REALISTIC adversarial scenarios that could invalidate it. Think like a hostile critic, a skeptical analyst, and a chaos engineer combined.
+
+For each scenario, assess:
+1. How plausible is this threat? (0.0-1.0)
+2. What assumption does it challenge?
+3. What evidence would support this counter-argument?
+4. How severe would the impact be if this scenario were true?
+
+Focus on scenarios specific to the prediction's domain and claim. Avoid generic threats.
+
+Respond in JSON format:
+{
+  "scenarios": [
+    {
+      "type": "data_quality|confounding_variable|selection_bias|temporal_shift|regime_change|survivorship_bias|reverse_causality|simpson_paradox|ecological_fallacy|black_swan",
+      "description": "A specific, contextual adversarial scenario (2-3 sentences)",
+      "assumption_challenged": "The specific assumption this attacks",
+      "counter_evidence": ["Specific evidence 1", "Specific evidence 2"],
+      "plausibility": 0.0-1.0,
+      "impact_if_true": "low|medium|high|critical"
+    }
+  ],
+  "overallAssessment": "1-2 sentence assessment of prediction robustness",
+  "blindSpots": ["Specific blind spot 1", "Specific blind spot 2"]
+}`;
+
+// ============================================================================
+// LLM CALL HELPERS
+// ============================================================================
+
+const RT_LLM_TIMEOUT_MS = 10_000;
+const RT_LLM_MAX_RETRIES = 1;
+
+async function callAnthropicRedTeam(
+  systemPrompt: string,
+  userMessage: string,
+  opts: { apiKey: string; model: string; maxTokens: number },
+): Promise<string> {
+  let lastError: Error | null = null;
+
+  for (let attempt = 0; attempt <= RT_LLM_MAX_RETRIES; attempt++) {
+    try {
+      const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+      const timeoutId = controller ? setTimeout(() => controller.abort(), RT_LLM_TIMEOUT_MS) : null;
+
+      try {
+        const response = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': opts.apiKey,
+            'anthropic-version': '2023-06-01',
+          },
+          body: JSON.stringify({
+            model: opts.model,
+            max_tokens: opts.maxTokens,
+            system: systemPrompt,
+            messages: [{ role: 'user', content: userMessage }],
+          }),
+          ...(controller ? { signal: controller.signal } : {}),
+        });
+
+        if (!response.ok) {
+          const errText = await response.text().catch(() => `HTTP ${response.status}`);
+          throw new Error(`Anthropic API ${response.status}: ${errText}`);
+        }
+
+        const data = (await response.json()) as any;
+        return data.content?.[0]?.text || '';
+      } finally {
+        if (timeoutId) clearTimeout(timeoutId);
+      }
+    } catch (error: any) {
+      lastError = error;
+      if (error?.message?.includes('401') || error?.message?.includes('403')) throw error;
+      if (attempt < RT_LLM_MAX_RETRIES) {
+        await new Promise(r => setTimeout(r, 1000 * Math.pow(2, attempt)));
+      }
+    }
+  }
+
+  throw lastError || new Error('Red Team LLM call failed');
+}
+
+function parseRedTeamJSON(raw: string): any | null {
+  try {
+    let cleaned = raw.trim();
+    if (cleaned.startsWith('```json')) cleaned = cleaned.slice(7);
+    else if (cleaned.startsWith('```')) cleaned = cleaned.slice(3);
+    if (cleaned.endsWith('```')) cleaned = cleaned.slice(0, -3);
+    cleaned = cleaned.trim();
+    return JSON.parse(cleaned);
+  } catch {
+    const match = raw.match(/\{[\s\S]*\}/);
+    if (match) {
+      try { return JSON.parse(match[0]); } catch { return null; }
+    }
+    return null;
+  }
+}
+
+const VALID_ADVERSARIAL_TYPES: Set<string> = new Set([
+  'data_quality', 'confounding_variable', 'selection_bias', 'temporal_shift',
+  'regime_change', 'survivorship_bias', 'reverse_causality', 'simpson_paradox',
+  'ecological_fallacy', 'black_swan',
+]);
+
+// ============================================================================
 // IMPLEMENTATION
 // ============================================================================
 
@@ -205,6 +324,9 @@ export function createRedTeam(config: RedTeamConfig = {}): RedTeamInstance {
     minRobustnessScore = 0.6,
     maxScenariosPerPrediction = 5,
   } = config;
+
+  const anthropicApiKey = config.anthropicApiKey;
+  const llmModel = config.llmModel || 'claude-3-5-haiku-20241022';
 
   const logger = config.logger ?? getDefaultLogger().child({ module: 'red-team' });
 
@@ -296,6 +418,106 @@ export function createRedTeam(config: RedTeamConfig = {}): RedTeamInstance {
       }
 
       return result;
+    },
+
+    async testPredictionLLM(prediction) {
+      if (!anthropicApiKey) {
+        return this.testPrediction(prediction);
+      }
+
+      const start = Date.now();
+      totalTested++;
+
+      const userPrompt = [
+        `## Prediction to Attack`,
+        `- **Claim**: "${prediction.claim}"`,
+        `- **Domain**: ${prediction.domain}`,
+        `- **Confidence**: ${(prediction.confidence * 100).toFixed(0)}%`,
+        `- **Method**: ${prediction.method}`,
+        `- **Evidence**: ${prediction.evidence.join('; ') || 'None specified'}`,
+        ``,
+        `Generate ${maxScenariosPerPrediction} adversarial scenarios specific to this prediction.`,
+      ].join('\n');
+
+      try {
+        const raw = await callAnthropicRedTeam(
+          RED_TEAM_SYSTEM_PROMPT,
+          userPrompt,
+          { apiKey: anthropicApiKey, model: llmModel, maxTokens: 1024 },
+        );
+
+        const parsed = parseRedTeamJSON(raw);
+        if (!parsed || !Array.isArray(parsed.scenarios)) {
+          logger.warn('LLM red-team JSON parse failed — falling back to template');
+          return this.testPrediction(prediction);
+        }
+
+        const scenarios: AdversarialScenario[] = parsed.scenarios
+          .slice(0, maxScenariosPerPrediction)
+          .map((s: any, i: number) => ({
+            id: `adv_llm_${prediction.id}_${i}`,
+            type: (VALID_ADVERSARIAL_TYPES.has(s.type) ? s.type : 'confounding_variable') as AdversarialType,
+            description: s.description || '',
+            assumption_challenged: s.assumption_challenged || '',
+            counter_evidence: Array.isArray(s.counter_evidence) ? s.counter_evidence : [],
+            plausibility: typeof s.plausibility === 'number' ? Math.max(0, Math.min(1, s.plausibility)) : 0.4,
+            impact_if_true: (['low', 'medium', 'high', 'critical'].includes(s.impact_if_true) ? s.impact_if_true : 'medium') as 'low' | 'medium' | 'high' | 'critical',
+          }));
+
+        // Calculate robustness score (same logic as template-based)
+        const totalPlausibility = scenarios.reduce((sum, s) => sum + s.plausibility, 0);
+        const avgPlausibility = scenarios.length > 0 ? totalPlausibility / scenarios.length : 0;
+        const criticalThreats = scenarios.filter(s => s.impact_if_true === 'critical' && s.plausibility > 0.3);
+
+        const threatPenalty = avgPlausibility * 0.4 + criticalThreats.length * 0.1;
+        const robustnessScore = Math.max(0, Math.min(1, prediction.confidence - threatPenalty));
+
+        const passed = robustnessScore >= minRobustnessScore;
+        if (!passed) totalFailed++;
+        totalRobustness += robustnessScore;
+
+        const weaknesses = scenarios
+          .filter(s => s.plausibility > 0.3)
+          .map(s => s.assumption_challenged);
+
+        const recommendations: string[] = [];
+        if (criticalThreats.length > 0) {
+          recommendations.push('Gather additional evidence before acting on this prediction');
+        }
+        if (parsed.blindSpots && Array.isArray(parsed.blindSpots)) {
+          for (const bs of parsed.blindSpots.slice(0, 2)) {
+            recommendations.push(`Address blind spot: ${bs}`);
+          }
+        }
+        if (!passed) {
+          recommendations.push('Flag for human review before deployment');
+        }
+
+        const result: RedTeamResult = {
+          predictionId: prediction.id,
+          robustnessScore,
+          passed,
+          scenarios,
+          weaknesses,
+          recommendations,
+          testDurationMs: Date.now() - start,
+        };
+
+        if (!passed) {
+          logger.warn('Prediction failed LLM red team', {
+            predictionId: prediction.id,
+            robustness: robustnessScore,
+            criticalThreats: criticalThreats.length,
+          });
+        }
+
+        return result;
+      } catch (err) {
+        logger.warn('LLM red-team failed — falling back to template', {
+          error: err instanceof Error ? err.message : String(err),
+        });
+        return this.testPrediction(prediction);
+      }
     },
 
     testBatch(predictions) {

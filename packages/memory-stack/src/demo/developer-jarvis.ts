@@ -1387,7 +1387,7 @@ async function main() {
     // ── Phase 4: Train Brain ─────────────────────────────────────
     logHeader('Phase 4: Training Brain');
 
-    const brainTrainer = createBrainTrainer({ verbose: false, defaultSampleSize: 200, defaultFStatistic: 12.0, autoActivateRules: true });
+    const brainTrainer = createBrainTrainer({ defaultSampleSize: 200, defaultFStatistic: 12.0, autoActivateRules: true });
     for (const pack of TRAINING_LIBRARY) {
       brainTrainer.trainInMemory(pack);
     }

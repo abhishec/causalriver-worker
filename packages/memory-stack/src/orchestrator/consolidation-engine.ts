@@ -43,6 +43,7 @@ import {
 } from '../causality/continuous-learner';
 import { createThresholdOptimizer } from '../causality/threshold-optimizer';
 import { createUpstreamPromoter } from '../federation/upstream-promoter';
+import { streamInBatches } from '../infra/streaming-batcher';
 import { detectAnomalies, type AnomalyEvent } from '../learning/anomaly-detector';
 import {
   discoverPatterns,
@@ -211,27 +212,27 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
     try {
       const cutoff = new Date(Date.now() - lookbackHours * 60 * 60 * 1000).toISOString();
       const allSignals: any[] = [];
-      const PAGE_SIZE = 1000;
-      let offset = 0;
-      let hasMore = true;
 
-      while (hasMore) {
-        const { data, error } = await supabase
-          .from('cross_domain_signals')
-          .select('source_domain, signal_type, signal_value, signal_timestamp, created_at, entity_type, entity_id')
-          .eq('organization_id', organizationId)
-          .gte('created_at', cutoff)
-          .order('signal_timestamp', { ascending: true })
-          .range(offset, offset + PAGE_SIZE - 1);
-
-        if (error || !data || data.length === 0) {
-          hasMore = false;
-        } else {
-          allSignals.push(...data);
-          offset += data.length;
-          if (data.length < PAGE_SIZE) hasMore = false;
-        }
-      }
+      // Cursor-based streaming: OOM-safe at 10M+ signals (replaces offset pagination)
+      await streamInBatches(
+        async (cursor, batchSize) => {
+          let query = supabase
+            .from('cross_domain_signals')
+            .select('id, source_domain, signal_type, signal_value, signal_timestamp, created_at, entity_type, entity_id')
+            .eq('organization_id', organizationId)
+            .gte('created_at', cutoff)
+            .order('id', { ascending: true })
+            .limit(batchSize);
+          if (cursor) query = query.gt('id', cursor);
+          const { data, error } = await query;
+          if (error || !data || data.length === 0) {
+            return { items: [], nextCursor: null, hasMore: false };
+          }
+          return { items: data, nextCursor: data[data.length - 1].id, hasMore: data.length === batchSize };
+        },
+        async (batch) => { allSignals.push(...batch); },
+        { batchSize: 1000, batchDelayMs: 10 },
+      );
 
       // If we got very few recent signals, also fetch ALL signals for discovery
       // (causal discovery needs historical context, not just last 48h)
@@ -239,25 +240,24 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
       if (allSignals.length < 100) {
         log('FETCH', 'Few recent signals, fetching full history for causal discovery...');
         const fullSignals: any[] = [];
-        offset = 0;
-        hasMore = true;
-
-        while (hasMore) {
-          const { data, error } = await supabase
-            .from('cross_domain_signals')
-            .select('source_domain, signal_type, signal_value, signal_timestamp, created_at')
-            .eq('organization_id', organizationId)
-            .order('signal_timestamp', { ascending: true })
-            .range(offset, offset + PAGE_SIZE - 1);
-
-          if (error || !data || data.length === 0) {
-            hasMore = false;
-          } else {
-            fullSignals.push(...data);
-            offset += data.length;
-            if (data.length < PAGE_SIZE) hasMore = false;
-          }
-        }
+        await streamInBatches(
+          async (cursor, batchSize) => {
+            let query = supabase
+              .from('cross_domain_signals')
+              .select('id, source_domain, signal_type, signal_value, signal_timestamp, created_at')
+              .eq('organization_id', organizationId)
+              .order('id', { ascending: true })
+              .limit(batchSize);
+            if (cursor) query = query.gt('id', cursor);
+            const { data, error } = await query;
+            if (error || !data || data.length === 0) {
+              return { items: [], nextCursor: null, hasMore: false };
+            }
+            return { items: data, nextCursor: data[data.length - 1].id, hasMore: data.length === batchSize };
+          },
+          async (batch) => { fullSignals.push(...batch); },
+          { batchSize: 1000, batchDelayMs: 10 },
+        );
         allHistoricalSignals = fullSignals;
       }
 

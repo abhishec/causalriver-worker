@@ -140,6 +140,12 @@ import {
 export interface CognitiveStackConfig {
   organizationId: string;
 
+  /** Anthropic API key — enables LLM-powered L15 Narrative and L11 Red-Team */
+  anthropicApiKey?: string;
+
+  /** Additional org IDs to register in the Intelligence Mesh for multi-org collective sensing */
+  meshPeerOrgIds?: string[];
+
   // Layer configs (all optional — defaults used if omitted)
   deepDreaming?: Partial<DeepDreamingConfig>;
   hierarchicalMemory?: Partial<HierarchicalMemoryConfig>;
@@ -337,13 +343,30 @@ export function createCognitiveStack(config: CognitiveStackConfig): CognitiveSta
   const imagination = createCausalImagination(config.causalImagination);
   const theoryOfMind = createTheoryOfMind(config.theoryOfMind);
   const temporal = createTemporalConsciousness(config.temporalConsciousness);
-  const redTeam = createRedTeam(config.redTeam);
+  const redTeam = createRedTeam({
+    ...config.redTeam,
+    ...(config.anthropicApiKey ? { anthropicApiKey: config.anthropicApiKey } : {}),
+  });
   const experimentation = createExperimentEngine(config.experimentation);
   const goalPlanner = createGoalBackwardPlanner(config.goalBackward);
-  const narrative = createNarrativeIntelligence(config.narrative);
+  const narrative = createNarrativeIntelligence({
+    ...config.narrative,
+    ...(config.anthropicApiKey ? { anthropicApiKey: config.anthropicApiKey } : {}),
+  });
 
   // Register this org in the intelligence mesh
   mesh.registerOrg(organizationId);
+
+  // L7 FIX: Register CORE org + any configured peer orgs for multi-org collective sensing
+  const CORE_ORG_ID = '00000000-0000-0000-0000-000000000000';
+  if (organizationId !== CORE_ORG_ID) {
+    mesh.registerOrg(CORE_ORG_ID);
+  }
+  if (config.meshPeerOrgIds) {
+    for (const peerId of config.meshPeerOrgIds) {
+      mesh.registerOrg(peerId);
+    }
+  }
 
   return {
     layers: {

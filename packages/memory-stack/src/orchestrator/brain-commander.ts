@@ -288,7 +288,10 @@ export function createBrainCommander(config: BrainCommanderConfig) {
   // Disconnection #2 FIX: Run cognitive layers on user queries, not just sleep cycles
   const enableCognitive = config.enableCognitiveStack !== false;
   const cognitiveStack: CognitiveStackInstance | null = enableCognitive
-    ? createCognitiveStack({ organizationId })
+    ? createCognitiveStack({
+        organizationId,
+        anthropicApiKey: config.anthropicApiKey,
+      })
     : null;
 
   // ── Main Command Entry Point ────────────────────────────────────────
@@ -438,10 +441,38 @@ export function createBrainCommander(config: BrainCommanderConfig) {
       }
 
       // ── Step 5: Record prediction for calibration feedback loop ─────
-      if (artifact) {
+      // L6 FIX: Record predictions for ALL queries, not just artifact queries.
+      // This ensures Self-Modifying Cognition (L6) sees every brain query's
+      // confidence, enabling real calibration tracking and recalibration.
+      {
         const calibrationStart = performance.now();
         try {
-          recordForCalibration(question, dispatch, artifact);
+          if (artifact) {
+            recordForCalibration(question, dispatch, artifact);
+          } else {
+            // Non-action queries still generate a confidence prediction
+            // that should be tracked for calibration (dispatch.confidence)
+            const syntheticJournal: DecisionJournalEntry = {
+              timestamp: new Date().toISOString(),
+              question,
+              recommendation: `Intelligence retrieval for ${dispatch.domains.join(', ') || 'general'}`,
+              mondayMorningAction: 'Verify intelligence accuracy in 7 days',
+              predictedOutcome: `Relevant intelligence for: ${question.slice(0, 100)}`,
+              confidenceAtDecision: dispatch.confidence,
+              domain: dispatch.primaryDomain,
+              actionType: 'explain',
+              assumptions: [],
+              falsificationCriteria: [],
+              reviewDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+              confidenceBreakdown: {
+                dataQuality: intelligence.stats.totalCausalEdges > 0 ? 0.7 : 0.3,
+                modelFit: dispatch.confidence,
+                domainCoverage: intelligence.stats.totalDomains > 0 ? Math.min(1, intelligence.stats.totalDomains / 5) : 0.2,
+                overall: dispatch.confidence,
+              },
+            };
+            calibrationLoop.recordPrediction(syntheticJournal);
+          }
         } catch (calErr) {
           console.warn('[BrainCommander] Calibration recording error (non-fatal):', calErr instanceof Error ? calErr.message : calErr);
         }

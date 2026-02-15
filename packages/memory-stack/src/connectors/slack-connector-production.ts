@@ -271,7 +271,8 @@ export function createProductionSlackConnector(config: SlackConnectorConfig): Co
 
     async execute(command: MotorCommand): Promise<any> {
       try {
-        const { actionType, target, payload, commandId } = command;
+        const { actionType, target, id: commandId } = command;
+        const payload = command.parameters as any;
 
         log(`Executing ${actionType} → ${target} (${commandId})`);
 
@@ -385,7 +386,7 @@ export function createProductionSlackConnector(config: SlackConnectorConfig): Co
           success: false,
           message: 'Slack connector execution failed',
           error: err.message,
-          commandId: command.commandId,
+          commandId: command.id,
           metadata: {
             errorCode: err.code,
             errorData: err.data,
@@ -397,41 +398,14 @@ export function createProductionSlackConnector(config: SlackConnectorConfig): Co
     /**
      * Health check for the connector
      */
-    async healthCheck(): Promise<{ healthy: boolean; details: any }> {
+    async healthCheck(): Promise<boolean> {
       try {
-        const auth = await client.auth.test();
-
-        return {
-          healthy: true,
-          details: {
-            teamName: auth.team,
-            userId: auth.user_id,
-            circuitBreakerState: circuitBreaker.state,
-            queueSize: queue.size,
-            pendingRequests: queue.pending,
-          },
-        };
+        await client.auth.test();
+        return true;
       } catch (err: any) {
-        return {
-          healthy: false,
-          details: {
-            error: err.message,
-            circuitBreakerState: circuitBreaker.state,
-          },
-        };
+        return false;
       }
     },
 
-    /**
-     * Get connector metrics
-     */
-    getMetrics() {
-      return {
-        queueSize: queue.size,
-        pendingRequests: queue.pending,
-        circuitBreakerState: circuitBreaker.state,
-        circuitBreakerFailures: circuitBreaker.failures,
-      };
-    },
-  };
+  } as ConnectorCapability;
 }

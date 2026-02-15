@@ -155,7 +155,7 @@ function loadOrg() {
   }
 
   // 5. Brain training
-  const brainTrainer = createBrainTrainer({ verbose: false, defaultSampleSize: 200, defaultFStatistic: 12.0, autoActivateRules: true });
+  const brainTrainer = createBrainTrainer({ defaultSampleSize: 200, defaultFStatistic: 12.0, autoActivateRules: true });
   for (const pack of TRAINING_LIBRARY) brainTrainer.trainInMemory(pack);
 
   // 6. Enrich PRs

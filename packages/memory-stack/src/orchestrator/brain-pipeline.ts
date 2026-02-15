@@ -512,8 +512,10 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
   // curiosity, self-modification, intelligence mesh, imagination, theory of mind,
   // temporal consciousness, red teaming, experimentation, immune filtering,
   // goal-backward planning, and narrative intelligence.
+  const anthropicApiKey = config.llmTraining?.provider === 'anthropic' ? config.llmTraining.apiKey : undefined;
   const cognitiveStack: CognitiveStackInstance = createCognitiveStack({
     organizationId,
+    anthropicApiKey,
     ...config.cognitiveStack,
   });
 

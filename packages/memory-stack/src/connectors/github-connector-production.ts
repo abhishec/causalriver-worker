@@ -313,7 +313,8 @@ export function createProductionGitHubConnector(config: GitHubConnectorConfig): 
 
     async execute(command: MotorCommand): Promise<any> {
       try {
-        const { actionType, target, payload, commandId } = command;
+        const { actionType, target, id: commandId } = command;
+        const payload = command.parameters as any;
 
         log(`Executing ${actionType} → ${target} (${commandId})`);
 
@@ -528,7 +529,7 @@ export function createProductionGitHubConnector(config: GitHubConnectorConfig): 
           success: false,
           message: 'GitHub connector execution failed',
           error: err.message,
-          commandId: command.commandId,
+          commandId: command.id,
           metadata: {
             errorStatus: err.status,
             errorResponse: err.response?.data,
@@ -540,45 +541,14 @@ export function createProductionGitHubConnector(config: GitHubConnectorConfig): 
     /**
      * Health check for the connector
      */
-    async healthCheck(): Promise<{ healthy: boolean; details: any }> {
+    async healthCheck(): Promise<boolean> {
       try {
-        const { data: user } = await octokit.users.getAuthenticated();
-        const { data: rateLimit } = await octokit.rateLimit.get();
-
-        return {
-          healthy: true,
-          details: {
-            username: user.login,
-            userId: user.id,
-            rateLimitRemaining: rateLimit.rate.remaining,
-            rateLimitLimit: rateLimit.rate.limit,
-            rateLimitResetAt: new Date(rateLimit.rate.reset * 1000).toISOString(),
-            circuitBreakerState: circuitBreaker.state,
-            queueSize: queue.size,
-            pendingRequests: queue.pending,
-          },
-        };
+        await octokit.users.getAuthenticated();
+        return true;
       } catch (err: any) {
-        return {
-          healthy: false,
-          details: {
-            error: err.message,
-            circuitBreakerState: circuitBreaker.state,
-          },
-        };
+        return false;
       }
     },
 
-    /**
-     * Get connector metrics
-     */
-    getMetrics() {
-      return {
-        queueSize: queue.size,
-        pendingRequests: queue.pending,
-        circuitBreakerState: circuitBreaker.state,
-        circuitBreakerFailures: circuitBreaker.failures,
-      };
-    },
-  };
+  } as ConnectorCapability;
 }

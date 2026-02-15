@@ -1,0 +1,556 @@
+# NexusBrain AWS Production Deployment
+# CloudFormation Template for Complete Infrastructure
+# ═══════════════════════════════════════════════════════════════
+
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'NexusBrain Production Infrastructure - 10M+ Signal Scale'
+
+Parameters:
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - production
+      - staging
+    Description: Deployment environment
+
+  SupabaseURL:
+    Type: String
+    Description: Supabase project URL
+    Default: https://zmlqvuzoodcgmkgkivfw.supabase.co
+
+  SupabaseServiceRoleKey:
+    Type: String
+    NoEcho: true
+    Description: Supabase service role key
+
+  OrganizationID:
+    Type: String
+    Default: org-nexusbrain-core
+    Description: Organization identifier
+
+  AnthropicAPIKey:
+    Type: String
+    NoEcho: true
+    Description: Anthropic API key for AI features
+
+  OpenAIAPIKey:
+    Type: String
+    NoEcho: true
+    Description: OpenAI API key for AI features
+
+  SlackBotToken:
+    Type: String
+    NoEcho: true
+    Description: Slack bot token (optional)
+    Default: ''
+
+  JiraHost:
+    Type: String
+    Description: Jira host URL (optional)
+    Default: ''
+
+  JiraEmail:
+    Type: String
+    Description: Jira user email (optional)
+    Default: ''
+
+  JiraAPIToken:
+    Type: String
+    NoEcho: true
+    Description: Jira API token (optional)
+    Default: ''
+
+  GitHubToken:
+    Type: String
+    NoEcho: true
+    Description: GitHub personal access token
+    Default: ''
+
+  GitHubRepos:
+    Type: String
+    Description: Comma-separated GitHub repos (owner/repo1,owner/repo2)
+    Default: ''
+
+Conditions:
+  IsProduction: !Equals [!Ref Environment, production]
+  HasSlack: !Not [!Equals [!Ref SlackBotToken, '']]
+  HasJira: !Not [!Equals [!Ref JiraAPIToken, '']]
+  HasGitHub: !Not [!Equals [!Ref GitHubToken, '']]
+
+Resources:
+  # ═════════════════════════════════════════════════════════════
+  # VPC NETWORKING
+  # ═════════════════════════════════════════════════════════════
+
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-nexusbrain-vpc'
+
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.1.0/24
+      AvailabilityZone: !Select [0, !GetAZs '']
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-nexusbrain-public-1'
+
+  PublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.2.0/24
+      AvailabilityZone: !Select [1, !GetAZs '']
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-nexusbrain-public-2'
+
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.10.0/24
+      AvailabilityZone: !Select [0, !GetAZs '']
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-nexusbrain-private-1'
+
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.11.0/24
+      AvailabilityZone: !Select [1, !GetAZs '']
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-nexusbrain-private-2'
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-nexusbrain-igw'
+
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-nexusbrain-public-rt'
+
+  PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: AttachGateway
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  SubnetRouteTableAssociation1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet1
+      RouteTableId: !Ref PublicRouteTable
+
+  SubnetRouteTableAssociation2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet2
+      RouteTableId: !Ref PublicRouteTable
+
+  # ═════════════════════════════════════════════════════════════
+  # REDIS ELASTICACHE (Critical for 10M+ Scale)
+  # ═════════════════════════════════════════════════════════════
+
+  RedisSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for Redis cluster
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 6379
+          ToPort: 6379
+          SourceSecurityGroupId: !Ref AppSecurityGroup
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-nexusbrain-redis-sg'
+
+  RedisSubnetGroup:
+    Type: AWS::ElastiCache::SubnetGroup
+    Properties:
+      Description: Subnet group for Redis cluster
+      SubnetIds:
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+
+  RedisCluster:
+    Type: AWS::ElastiCache::CacheCluster
+    Properties:
+      CacheNodeType: cache.t3.medium  # 3.09 GB memory
+      Engine: redis
+      NumCacheNodes: 1
+      Port: 6379
+      VpcSecurityGroupIds:
+        - !Ref RedisSecurityGroup
+      CacheSubnetGroupName: !Ref RedisSubnetGroup
+      EngineVersion: 7.0
+      AutoMinorVersionUpgrade: true
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-nexusbrain-redis'
+
+  # ═════════════════════════════════════════════════════════════
+  # ECS CLUSTER & SERVICES
+  # ═════════════════════════════════════════════════════════════
+
+  ECSCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: !Sub '${Environment}-nexusbrain-cluster'
+      CapacityProviders:
+        - FARGATE
+        - FARGATE_SPOT
+      DefaultCapacityProviderStrategy:
+        - CapacityProvider: FARGATE
+          Weight: 1
+        - CapacityProvider: FARGATE_SPOT
+          Weight: 4
+
+  AppSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for NexusBrain app
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 3000
+          ToPort: 3000
+          SourceSecurityGroupId: !Ref ALBSecurityGroup
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-nexusbrain-app-sg'
+
+  TaskExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+      Policies:
+        - PolicyName: SecretsManagerAccess
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource: !Ref AppSecrets
+
+  TaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: CloudWatchLogs
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: '*'
+
+  AppSecrets:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub '${Environment}/nexusbrain/app-secrets'
+      Description: NexusBrain application secrets
+      SecretString: !Sub |
+        {
+          "SUPABASE_URL": "${SupabaseURL}",
+          "SUPABASE_SERVICE_ROLE_KEY": "${SupabaseServiceRoleKey}",
+          "ORGANIZATION_ID": "${OrganizationID}",
+          "ANTHROPIC_API_KEY": "${AnthropicAPIKey}",
+          "OPENAI_API_KEY": "${OpenAIAPIKey}",
+          "SLACK_BOT_TOKEN": "${SlackBotToken}",
+          "JIRA_HOST": "${JiraHost}",
+          "JIRA_EMAIL": "${JiraEmail}",
+          "JIRA_API_TOKEN": "${JiraAPIToken}",
+          "GITHUB_TOKEN": "${GitHubToken}",
+          "GITHUB_REPOS": "${GitHubRepos}",
+          "REDIS_URL": "redis://${RedisCluster.RedisEndpoint.Address}:6379",
+          "NODE_ENV": "production"
+        }
+
+  LogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/ecs/${Environment}-nexusbrain'
+      RetentionInDays: 30
+
+  TaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Sub '${Environment}-nexusbrain'
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      Cpu: '2048'  # 2 vCPU
+      Memory: '4096'  # 4 GB
+      ExecutionRoleArn: !GetAtt TaskExecutionRole.Arn
+      TaskRoleArn: !GetAtt TaskRole.Arn
+      ContainerDefinitions:
+        - Name: nexusbrain
+          Image: !Sub '${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/nexusbrain:latest'
+          Essential: true
+          PortMappings:
+            - ContainerPort: 3000
+              Protocol: tcp
+          Environment:
+            - Name: PORT
+              Value: '3000'
+          Secrets:
+            - Name: SUPABASE_URL
+              ValueFrom: !Sub '${AppSecrets}:SUPABASE_URL::'
+            - Name: SUPABASE_SERVICE_ROLE_KEY
+              ValueFrom: !Sub '${AppSecrets}:SUPABASE_SERVICE_ROLE_KEY::'
+            - Name: ORGANIZATION_ID
+              ValueFrom: !Sub '${AppSecrets}:ORGANIZATION_ID::'
+            - Name: ANTHROPIC_API_KEY
+              ValueFrom: !Sub '${AppSecrets}:ANTHROPIC_API_KEY::'
+            - Name: OPENAI_API_KEY
+              ValueFrom: !Sub '${AppSecrets}:OPENAI_API_KEY::'
+            - Name: SLACK_BOT_TOKEN
+              ValueFrom: !Sub '${AppSecrets}:SLACK_BOT_TOKEN::'
+            - Name: JIRA_HOST
+              ValueFrom: !Sub '${AppSecrets}:JIRA_HOST::'
+            - Name: JIRA_EMAIL
+              ValueFrom: !Sub '${AppSecrets}:JIRA_EMAIL::'
+            - Name: JIRA_API_TOKEN
+              ValueFrom: !Sub '${AppSecrets}:JIRA_API_TOKEN::'
+            - Name: GITHUB_TOKEN
+              ValueFrom: !Sub '${AppSecrets}:GITHUB_TOKEN::'
+            - Name: GITHUB_REPOS
+              ValueFrom: !Sub '${AppSecrets}:GITHUB_REPOS::'
+            - Name: REDIS_URL
+              ValueFrom: !Sub '${AppSecrets}:REDIS_URL::'
+            - Name: NODE_ENV
+              ValueFrom: !Sub '${AppSecrets}:NODE_ENV::'
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref LogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: nexusbrain
+          HealthCheck:
+            Command:
+              - CMD-SHELL
+              - curl -f http://localhost:3000/api/health || exit 1
+            Interval: 30
+            Timeout: 5
+            Retries: 3
+            StartPeriod: 60
+
+  # ═════════════════════════════════════════════════════════════
+  # APPLICATION LOAD BALANCER
+  # ═════════════════════════════════════════════════════════════
+
+  ALBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for ALB
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-nexusbrain-alb-sg'
+
+  ApplicationLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: !Sub '${Environment}-nexusbrain-alb'
+      Scheme: internet-facing
+      Type: application
+      Subnets:
+        - !Ref PublicSubnet1
+        - !Ref PublicSubnet2
+      SecurityGroups:
+        - !Ref ALBSecurityGroup
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-nexusbrain-alb'
+
+  TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Sub '${Environment}-nexusbrain-tg'
+      Port: 3000
+      Protocol: HTTP
+      VpcId: !Ref VPC
+      TargetType: ip
+      HealthCheckEnabled: true
+      HealthCheckPath: /api/health
+      HealthCheckProtocol: HTTP
+      HealthCheckIntervalSeconds: 30
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      UnhealthyThresholdCount: 3
+      Matcher:
+        HttpCode: '200'
+
+  HTTPListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref ApplicationLoadBalancer
+      Port: 80
+      Protocol: HTTP
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref TargetGroup
+
+  ECSService:
+    Type: AWS::ECS::Service
+    DependsOn: HTTPListener
+    Properties:
+      ServiceName: !Sub '${Environment}-nexusbrain-service'
+      Cluster: !Ref ECSCluster
+      TaskDefinition: !Ref TaskDefinition
+      DesiredCount: 2
+      LaunchType: FARGATE
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          Subnets:
+            - !Ref PublicSubnet1
+            - !Ref PublicSubnet2
+          SecurityGroups:
+            - !Ref AppSecurityGroup
+      LoadBalancers:
+        - ContainerName: nexusbrain
+          ContainerPort: 3000
+          TargetGroupArn: !Ref TargetGroup
+      HealthCheckGracePeriodSeconds: 120
+
+  # ═════════════════════════════════════════════════════════════
+  # AUTO SCALING
+  # ═════════════════════════════════════════════════════════════
+
+  ServiceScalingTarget:
+    Type: AWS::ApplicationAutoScaling::ScalableTarget
+    Properties:
+      MaxCapacity: 10
+      MinCapacity: 2
+      ResourceId: !Sub 'service/${ECSCluster}/${ECSService.Name}'
+      RoleARN: !Sub 'arn:aws:iam::${AWS::AccountId}:role/aws-service-role/ecs.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_ECSService'
+      ScalableDimension: ecs:service:DesiredCount
+      ServiceNamespace: ecs
+
+  ServiceScalingPolicy:
+    Type: AWS::ApplicationAutoScaling::ScalingPolicy
+    Properties:
+      PolicyName: !Sub '${Environment}-nexusbrain-cpu-scaling'
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId: !Ref ServiceScalingTarget
+      TargetTrackingScalingPolicyConfiguration:
+        PredefinedMetricSpecification:
+          PredefinedMetricType: ECSServiceAverageCPUUtilization
+        TargetValue: 70.0
+        ScaleInCooldown: 300
+        ScaleOutCooldown: 60
+
+  # ═════════════════════════════════════════════════════════════
+  # ECR REPOSITORY
+  # ═════════════════════════════════════════════════════════════
+
+  ECRRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: nexusbrain
+      ImageScanningConfiguration:
+        ScanOnPush: true
+      LifecyclePolicy:
+        LifecyclePolicyText: |
+          {
+            "rules": [
+              {
+                "rulePriority": 1,
+                "description": "Keep last 10 images",
+                "selection": {
+                  "tagStatus": "any",
+                  "countType": "imageCountMoreThan",
+                  "countNumber": 10
+                },
+                "action": {
+                  "type": "expire"
+                }
+              }
+            ]
+          }
+
+Outputs:
+  LoadBalancerDNS:
+    Description: DNS name of the load balancer
+    Value: !GetAtt ApplicationLoadBalancer.DNSName
+    Export:
+      Name: !Sub '${Environment}-nexusbrain-alb-dns'
+
+  RedisEndpoint:
+    Description: Redis cluster endpoint
+    Value: !GetAtt RedisCluster.RedisEndpoint.Address
+    Export:
+      Name: !Sub '${Environment}-nexusbrain-redis-endpoint'
+
+  ECRRepositoryURI:
+    Description: ECR repository URI
+    Value: !Sub '${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/nexusbrain'
+    Export:
+      Name: !Sub '${Environment}-nexusbrain-ecr-uri'
+
+  ECSClusterName:
+    Description: ECS cluster name
+    Value: !Ref ECSCluster
+    Export:
+      Name: !Sub '${Environment}-nexusbrain-cluster-name'
+
+  SecretsManagerARN:
+    Description: Secrets Manager ARN
+    Value: !Ref AppSecrets
+    Export:
+      Name: !Sub '${Environment}-nexusbrain-secrets-arn'

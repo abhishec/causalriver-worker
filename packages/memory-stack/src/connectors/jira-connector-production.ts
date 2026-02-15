@@ -317,7 +317,8 @@ export function createProductionJiraConnector(config: JiraConnectorConfig): Conn
 
     async execute(command: MotorCommand): Promise<any> {
       try {
-        const { actionType, target, payload, commandId } = command;
+        const { actionType, target, id: commandId } = command;
+        const payload = command.parameters as any;
 
         log(`Executing ${actionType} → ${target} (${commandId})`);
 
@@ -513,7 +514,7 @@ export function createProductionJiraConnector(config: JiraConnectorConfig): Conn
           success: false,
           message: 'Jira connector execution failed',
           error: err.message,
-          commandId: command.commandId,
+          commandId: command.id,
           metadata: {
             errorCode: err.statusCode,
             errorData: err.response?.data,
@@ -525,41 +526,14 @@ export function createProductionJiraConnector(config: JiraConnectorConfig): Conn
     /**
      * Health check for the connector
      */
-    async healthCheck(): Promise<{ healthy: boolean; details: any }> {
+    async healthCheck(): Promise<boolean> {
       try {
-        const myself = await client.myself.getCurrentUser();
-
-        return {
-          healthy: true,
-          details: {
-            userEmail: myself.emailAddress,
-            displayName: myself.displayName,
-            circuitBreakerState: circuitBreaker.state,
-            queueSize: queue.size,
-            pendingRequests: queue.pending,
-          },
-        };
+        await client.myself.getCurrentUser();
+        return true;
       } catch (err: any) {
-        return {
-          healthy: false,
-          details: {
-            error: err.message,
-            circuitBreakerState: circuitBreaker.state,
-          },
-        };
+        return false;
       }
     },
 
-    /**
-     * Get connector metrics
-     */
-    getMetrics() {
-      return {
-        queueSize: queue.size,
-        pendingRequests: queue.pending,
-        circuitBreakerState: circuitBreaker.state,
-        circuitBreakerFailures: circuitBreaker.failures,
-      };
-    },
-  };
+  } as ConnectorCapability;
 }

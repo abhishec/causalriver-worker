@@ -405,7 +405,7 @@ export class BatchIngestionEngine {
     const signals: Signal[] = [];
 
     // Get all projects
-    const projects = await jira.projects.getAllProjects();
+    const projects = await jira.projects.searchProjects() as any;
 
     this.log(`Job ${job.jobId}: Found ${projects.length} Jira projects`);
 
