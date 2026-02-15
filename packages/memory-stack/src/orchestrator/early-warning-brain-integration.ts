@@ -272,7 +272,6 @@ Perform comprehensive early warning analysis for organization ${organizationId}.
   const brainResult = await brainCommander.command(query, {
     userId: 'system:early-warning',
     domains,
-    enableCognitiveStack: true, // CRITICAL: Enable full L3-L15 reasoning
   });
 
   // Extract bottleneck risks from Brain intelligence
@@ -291,9 +290,13 @@ Perform comprehensive early warning analysis for organization ${organizationId}.
   const stressTestResults = extractStressTests(brainResult);
 
   // Get AI-generated narrative from L15
-  const narrative =
-    brainResult.cognitiveStack?.narrative?.summary ||
-    brainResult.artifact?.summary ||
+  const narrative: string =
+    (typeof brainResult.cognitiveStack?.narrative?.summary === 'string'
+      ? brainResult.cognitiveStack.narrative.summary
+      : null) ||
+    (typeof brainResult.artifact?.summary === 'string'
+      ? brainResult.artifact.summary
+      : null) ||
     'Early warning analysis completed. See details below.';
 
   // Get calibrated confidence from L6 (Self-Modifying Cognition)

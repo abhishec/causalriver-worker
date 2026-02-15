@@ -19,6 +19,9 @@ export interface ConnectorCredentials {
 
   // GitHub
   token_type?: string;
+
+  // Freshdesk
+  api_key?: string;
 }
 
 export interface ConnectorMetadata {
@@ -35,6 +38,9 @@ export interface ConnectorMetadata {
   // GitHub
   github_user_id?: number;
   github_login?: string;
+
+  // Freshdesk
+  domain?: string;
 }
 
 export class CredentialManager {
@@ -45,7 +51,7 @@ export class CredentialManager {
    */
   async getCredentials(
     organizationId: string,
-    connectorType: 'slack' | 'jira' | 'github'
+    connectorType: 'slack' | 'jira' | 'github' | 'freshdesk'
   ): Promise<{ credentials: ConnectorCredentials; metadata: ConnectorMetadata } | null> {
     try {
       // Try to use the RPC function if it exists
