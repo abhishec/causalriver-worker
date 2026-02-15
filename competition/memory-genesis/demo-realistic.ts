@@ -80,6 +80,10 @@ async function runPhase1_DataGeneration(
         // Look back over all historical data so far (day + 1 days)
         lookbackHours: (day + 1) * 24,
         discoveryLookbackDays: Math.max(30, day + 1),
+        // DEMO: Lower thresholds for easier discovery
+        minObservations: 5,        // Down from 30
+        minEdgeWeight: 0.10,       // Down from 0.20
+        autoPromoteConfidence: 0.55, // Down from 0.75
         verbose: false,
       });
 

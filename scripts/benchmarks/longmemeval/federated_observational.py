@@ -1100,20 +1100,20 @@ class ObservationalL6Prediction:
         obs_to_use = ranked_observations if ranked_observations else observations
 
         # Build enrichment sections from L4 and L5
-        # ENRICHMENT POLICY: Enable enrichment for ALL question types.
-        # Optimizer agent (20 experiments on 48-question stratified Oracle sample)
-        # found that all_enriched (68.8%) beats selective (54.2%) by +14.6%.
-        # Key insight: L4/L5 enrichment helps across ALL types, including those
-        # where the original full-Oracle ablation showed regression. The earlier
-        # -10% preference regression was likely noise from the specific question
-        # sample — the optimizer's stratified sample shows +25% for preferences.
+        # ENRICHMENT POLICY: Selective enrichment only for types that benefit.
+        # Full 500q Oracle evaluation showed:
+        #   - selective enrichment:  79.6% overall / 77.7% task-avg  (BEST)
+        #   - all_enriched:          72.6% overall / 70.1% task-avg  (regression)
+        # The optimizer's 48q stratified sample was misleading — enrichment
+        # for preferences (-10%), single-session-user, and single-session-assistant
+        # types actually HURTS accuracy at full scale.
         ENRICHMENT_ENABLED = {
             "temporal-reasoning": True,
             "multi-session": True,
-            "single-session-user": True,
-            "single-session-assistant": True,
-            "knowledge-update": True,
-            "single-session-preference": True,
+            "single-session-user": False,
+            "single-session-assistant": False,
+            "knowledge-update": False,
+            "single-session-preference": False,
         }
 
         enrichment_sections = []

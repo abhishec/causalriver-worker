@@ -81,12 +81,11 @@ function generateGitHubActivity(day: number, profile: CompanyProfile): GitHubAct
   const prs = Math.floor(basePRs * weekendMultiplier * sprintMultiplier * variation());
 
   // Deployments lag PRs by 1-2 days (CI/CD pipeline)
-  // High PR activity today → more deploys tomorrow
-  const deployProbability = commits > 15 ? 0.8 : commits > 10 ? 0.5 : 0.2;
-  const deployments = Math.random() < deployProbability ? Math.floor(1 + Math.random() * 3) : 0;
+  // STRONG CAUSAL SIGNAL: High commits → guaranteed deployments
+  const deployments = commits > 15 ? Math.floor(2 + Math.random() * 2) : commits > 8 ? 1 : 0;
 
-  // Incidents happen 5% of the time after deployments
-  const incidents = deployments > 0 && Math.random() < 0.05 * deployments ? 1 : 0;
+  // STRONG CAUSAL SIGNAL: Incidents happen 15% of the time after deployments (increased from 5%)
+  const incidents = deployments >= 2 ? (Math.random() < 0.3 ? 1 : 0) : (deployments > 0 && Math.random() < 0.15 ? 1 : 0);
 
   return { commits, prs, deployments, incidents };
 }
@@ -213,10 +212,10 @@ function generateJiraActivity(
   const issuesCreated = Math.floor(baseIssuesCreated * creationMultiplier * variation());
   const issuesClosed = Math.floor(baseIssuesClosed * closureMultiplier * variation());
 
-  // Bugs correlate with deployments (2-day lag)
-  // More deployments → more bugs discovered
-  const bugRate = githubActivity.deployments * 0.7 + githubActivity.incidents * 2;
-  const bugsCreated = Math.floor(bugRate * variation());
+  // STRONG CAUSAL SIGNAL: Bugs correlate with deployments (2-day lag)
+  // More deployments → more bugs discovered (increased multiplier)
+  const bugRate = githubActivity.deployments * 1.5 + githubActivity.incidents * 3;
+  const bugsCreated = Math.floor(bugRate + (Math.random() * 2));
 
   // Story points completed
   const storyPoints = issuesClosed * (2 + Math.random() * 6);
@@ -447,20 +446,20 @@ function generateBusinessMetrics(
   const dailyGrowthRate = 1.02 ** (1 / 30);
   const baseMRR = profile.mrr * (dailyGrowthRate ** day);
 
-  // High bug count → increased churn (5-7 day lag)
-  const churnProbability = Math.min(0.15, jiraActivity.bugsCreated * 0.01);
-  const churnedAccounts = Math.random() < churnProbability ? 1 : 0;
+  // STRONG CAUSAL SIGNAL: High bug count → increased churn (5-7 day lag)
+  const churnProbability = Math.min(0.25, jiraActivity.bugsCreated * 0.02); // Increased from 0.01
+  const churnedAccounts = Math.random() < churnProbability ? Math.floor(1 + Math.random() * 2) : 0;
 
-  // Good velocity → new accounts (word of mouth, sales confidence)
-  const newAccountProbability = Math.min(0.3, jiraActivity.storyPoints * 0.001);
-  const newAccounts = Math.random() < newAccountProbability ? Math.floor(1 + Math.random() * 2) : 0;
+  // STRONG CAUSAL SIGNAL: Good velocity → new accounts (word of mouth, sales confidence)
+  const newAccountProbability = Math.min(0.4, jiraActivity.storyPoints * 0.002); // Increased from 0.001
+  const newAccounts = Math.random() < newAccountProbability ? Math.floor(1 + Math.random() * 3) : 0;
 
-  // Support tickets correlate with incidents and bugs
+  // STRONG CAUSAL SIGNAL: Support tickets correlate with incidents and bugs (increased multipliers)
   const supportTickets = Math.floor(
-    githubActivity.incidents * 8 +
-    jiraActivity.bugsCreated * 2 +
-    slackActivity.supportEscalations * 1.5 +
-    Math.random() * 5
+    githubActivity.incidents * 12 +      // Increased from 8
+    jiraActivity.bugsCreated * 3 +       // Increased from 2
+    slackActivity.supportEscalations * 2 + // Increased from 1.5
+    Math.random() * 3                    // Reduced noise from 5 to 3
   );
 
   // NPS decreases with incidents, increases with velocity
