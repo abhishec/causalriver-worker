@@ -26,7 +26,7 @@ WORKDIR /app
 
 # Copy dependencies from deps stage
 COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/packages ./packages
+COPY --from=deps /app/packages/memory-stack/node_modules ./packages/memory-stack/node_modules
 COPY --from=deps /app/platform/node_modules ./platform/node_modules
 
 # Copy source code
@@ -35,6 +35,10 @@ COPY platform/ ./platform/
 COPY pnpm-workspace.yaml ./
 COPY package.json ./
 COPY turbo.json ./
+
+# Build workspace packages first
+WORKDIR /app/packages/memory-stack
+RUN pnpm build
 
 # Build the platform
 WORKDIR /app/platform
