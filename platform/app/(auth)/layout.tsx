@@ -1,3 +1,7 @@
+// Force dynamic rendering - don't pre-render at build time
+export const dynamic = 'force-dynamic';
+export const dynamicParams = true;
+
 const CORE_ORG_ID = "00000000-0000-4000-a000-000000000001";
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -47,6 +51,17 @@ interface BrainSnapshot {
 }
 
 async function getBrainStats() {
+  // Return defaults if env vars not available (e.g., during build)
+  if (!SUPABASE_URL || !SERVICE_KEY) {
+    return {
+      accuracy: null,
+      connections: null,
+      brainAge: null,
+      signals: null,
+      isLive: false,
+    };
+  }
+
   try {
     const [snapshots, totalSnapshots, signalsCount] = await Promise.all([
       supabaseGet<BrainSnapshot[]>(

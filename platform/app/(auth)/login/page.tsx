@@ -5,6 +5,10 @@ import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
+// Force dynamic rendering - don't pre-render at build time
+export const dynamic = 'force-dynamic';
+export const dynamicParams = true;
+
 function LoginForm() {
   const searchParams = useSearchParams();
   const nextUrl = searchParams.get("next");
