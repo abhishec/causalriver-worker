@@ -33,6 +33,8 @@ import type { WeightUpdate, RelationshipAccuracyMetrics } from '../causality/fee
 import { createUpstreamPromoter, type UpstreamPromotionResult } from '../federation/upstream-promoter';
 import { streamInBatches } from '../infra/streaming-batcher';
 import { createBrainPipeline, type BrainCycleReport } from './brain-pipeline';
+import { createSyncManager, type SyncManagerConfig } from '../connectors/sync-manager';
+import type { NexusConnector, ConnectorSyncResult } from '../connectors/connector-framework';
 
 // ============================================================================
 // TYPES
@@ -666,6 +668,49 @@ export function createScheduledJobs(
         leapStatesPersisted: report.cognitiveStack !== null, // persisted if cognitive stack ran
         errors: report.errors,
       };
+    },
+
+    // ── Connector Sync Job ─────────────────────────────────────────
+    /**
+     * Run incremental sync for all registered connectors.
+     * Uses cursor-based tracking: first run = full sync, subsequent = incremental.
+     *
+     * This is the entry point for the ingestion pipeline:
+     *   connectorSync → signals in DB → consolidation → cognitive stack
+     *
+     * For design partners: 500K+ codebase, 1-10M Slack, 500K+ Jira
+     * Recommended: every 15 minutes for incremental, daily for full.
+     */
+    async runConnectorSync(
+      organizationId: string,
+      connectors: NexusConnector[],
+    ): Promise<{
+      totalSignals: number;
+      connectorsSucceeded: number;
+      connectorsFailed: number;
+      results: ConnectorSyncResult[];
+    }> {
+      if (connectors.length === 0) {
+        return { totalSignals: 0, connectorsSucceeded: 0, connectorsFailed: 0, results: [] };
+      }
+
+      const syncManager = createSyncManager({ connectors });
+      const results = await syncManager.syncAll(supabase, organizationId);
+
+      let totalSignals = 0;
+      let connectorsSucceeded = 0;
+      let connectorsFailed = 0;
+
+      for (const result of results) {
+        totalSignals += result.signalsGenerated;
+        if (result.success) {
+          connectorsSucceeded++;
+        } else {
+          connectorsFailed++;
+        }
+      }
+
+      return { totalSignals, connectorsSucceeded, connectorsFailed, results };
     },
 
     // ── Combined Daily Job ───────────────────────────────────────────

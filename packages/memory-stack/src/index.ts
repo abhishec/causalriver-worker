@@ -1895,6 +1895,30 @@ export {
 } from './causality/leap-narrative';
 
 // ============================================================================
+// INCREMENTAL GRANGER CAUSALITY (Streaming Causal Discovery at Scale)
+// ============================================================================
+
+// IncrementalGranger — O(p²) per signal instead of O(n·p²) full recomputation.
+// Enables real-time causal discovery as signals stream in (100-1000x speedup at 10M+).
+export {
+  createIncrementalGranger,
+  getIncrementalResult,
+  resetIncrementalGranger,
+  type IncrementalGrangerConfig,
+  type IncrementalGrangerState,
+} from './causality/granger-causality';
+
+// ============================================================================
+// BATCH INGESTION ENGINE (10M+ Signal Scale)
+// ============================================================================
+
+// BatchIngestionEngine — 500K codebase, 1-10M Slack, 500K+ Jira ingestion
+// with chunked processing, checkpoint/resume, dedup, and rate limiting.
+export {
+  BatchIngestionEngine,
+} from './ingestion/batch-ingestion-engine';
+
+// ============================================================================
 // CLAUDE-ASPIRATIONAL CAPABILITIES (8 Advanced Brain Regions)
 // ============================================================================
 
