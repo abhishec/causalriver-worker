@@ -292,6 +292,7 @@ export function createSupabaseRepository(
         entity_id: s.entity_id || `auto_${Date.now()}`,
         client_id: s.client_id || null,
         signal_metadata: s.metadata || {},
+        signal_timestamp: s.signal_timestamp || new Date().toISOString(),
         created_at: new Date().toISOString(),
       }));
 
