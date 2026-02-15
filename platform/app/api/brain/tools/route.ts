@@ -151,7 +151,7 @@ export async function GET() {
     version: "1.0.0",
     description:
       "Causal intelligence engine that understands organizations as living systems. " +
-      "Trained on cross-domain signals with 15 statistical causal discovery methods. " +
+      "Trained on cross-domain signals with 3-paradigm causal discovery (APEX + PC/VarLiNGAM + Transfer Entropy). " +
       "Query, forecast, simulate, diagnose, and explain any business question.",
     tools: NEXUS_BRAIN_TOOLS,
     endpoint: "/api/brain/tools",

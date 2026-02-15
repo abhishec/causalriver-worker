@@ -8,7 +8,7 @@ const REGIONS = [
     status: "active" as const,
     icon: "\u{1F9E0}",
     description:
-      "Discovers cause-and-effect relationships using 15 ensemble methods including conditional Granger causality, cascade-aware scoring, and multi-resolution analysis.",
+      "Discovers cause-and-effect relationships using 3-paradigm causal discovery (APEX + PC/VarLiNGAM + Transfer Entropy) with Bayesian Judge arbitration.",
     color: "border-info/30",
     dotColor: "bg-info",
     badgeClass: "bg-info/10 text-info",
@@ -127,6 +127,150 @@ const REGIONS = [
     dotColor: "bg-cyan-400",
     badgeClass: "bg-cyan-400/10 text-cyan-400",
   },
+  // Cognitive Stack — LEAP Layers (rose/orange)
+  {
+    name: "Deep Dreaming (L3)",
+    category: "Cognitive Stack",
+    status: "sleeping" as const,
+    icon: "\u{1F4AD}",
+    description:
+      "Cross-domain associative dreaming. Finds non-obvious connections between distant domains by replaying signal patterns during consolidation sleep cycles.",
+    color: "border-rose-400/30",
+    dotColor: "bg-rose-400",
+    badgeClass: "bg-rose-400/10 text-rose-400",
+  },
+  {
+    name: "Hierarchical Memory (L4)",
+    category: "Cognitive Stack",
+    status: "sleeping" as const,
+    icon: "\u{1F4DA}",
+    description:
+      "Multi-level memory encoding. Organizes knowledge into hierarchical clusters — episodes, concepts, and schemas — enabling retrieval at different levels of abstraction.",
+    color: "border-rose-400/30",
+    dotColor: "bg-rose-400",
+    badgeClass: "bg-rose-400/10 text-rose-400",
+  },
+  {
+    name: "Curiosity Engine (L5)",
+    category: "Cognitive Stack",
+    status: "sleeping" as const,
+    icon: "\u{2753}",
+    description:
+      "Generates hypotheses about unexplored causal relationships. Identifies knowledge gaps in the graph and proposes specific questions the brain should investigate.",
+    color: "border-rose-400/30",
+    dotColor: "bg-rose-400",
+    badgeClass: "bg-rose-400/10 text-rose-400",
+  },
+  {
+    name: "Self-Modifying Cognition (L6)",
+    category: "Cognitive Stack",
+    status: "sleeping" as const,
+    icon: "\u{1F527}",
+    description:
+      "Calibrates the brain's own confidence. Identifies systematic weaknesses (overconfidence, domain blind spots) and suggests modifications to improve accuracy.",
+    color: "border-rose-400/30",
+    dotColor: "bg-rose-400",
+    badgeClass: "bg-rose-400/10 text-rose-400",
+  },
+  {
+    name: "Intelligence Mesh (L7)",
+    category: "Cognitive Stack",
+    status: "sleeping" as const,
+    icon: "\u{1F578}\u{FE0F}",
+    description:
+      "Collective intelligence layer. Shares discovered patterns across organizations (privacy-safe) and merges collective knowledge to accelerate learning for all tenants.",
+    color: "border-rose-400/30",
+    dotColor: "bg-rose-400",
+    badgeClass: "bg-rose-400/10 text-rose-400",
+  },
+  {
+    name: "Causal Imagination (L8)",
+    category: "Cognitive Stack",
+    status: "sleeping" as const,
+    icon: "\u{1F4A1}",
+    description:
+      "Counterfactual scenario generation. Creates 'what-if' scenarios by perturbing causal edges and predicting downstream effects. Finds cross-domain analogies.",
+    color: "border-orange-400/30",
+    dotColor: "bg-orange-400",
+    badgeClass: "bg-orange-400/10 text-orange-400",
+  },
+  {
+    name: "Theory of Mind (L9)",
+    category: "Cognitive Stack",
+    status: "sleeping" as const,
+    icon: "\u{1F464}",
+    description:
+      "Models user intent, cognitive state, and information needs. Predicts what questions a user will ask next based on their role, interaction history, and current context.",
+    color: "border-orange-400/30",
+    dotColor: "bg-orange-400",
+    badgeClass: "bg-orange-400/10 text-orange-400",
+  },
+  {
+    name: "Temporal Consciousness (L10)",
+    category: "Cognitive Stack",
+    status: "sleeping" as const,
+    icon: "\u{23F0}",
+    description:
+      "Detects temporal rhythms, seasonal patterns, and cyclical behaviors. Tracks business goals over time and monitors for temporal drift in the causal graph.",
+    color: "border-orange-400/30",
+    dotColor: "bg-orange-400",
+    badgeClass: "bg-orange-400/10 text-orange-400",
+  },
+  {
+    name: "Red Team (L11)",
+    category: "Cognitive Stack",
+    status: "sleeping" as const,
+    icon: "\u{1F6E1}\u{FE0F}",
+    description:
+      "Adversarial self-testing. Attacks the brain's own predictions to find weaknesses, confounders, and edge cases. Scores robustness of each causal claim.",
+    color: "border-orange-400/30",
+    dotColor: "bg-orange-400",
+    badgeClass: "bg-orange-400/10 text-orange-400",
+  },
+  {
+    name: "Experimentation (L12)",
+    category: "Cognitive Stack",
+    status: "sleeping" as const,
+    icon: "\u{1F9EA}",
+    description:
+      "Proposes A/B tests and natural experiments to resolve causal uncertainty. Prioritizes experiments by expected information gain relative to cost.",
+    color: "border-orange-400/30",
+    dotColor: "bg-orange-400",
+    badgeClass: "bg-orange-400/10 text-orange-400",
+  },
+  {
+    name: "Immune System (L13)",
+    category: "Cognitive Stack",
+    status: "sleeping" as const,
+    icon: "\u{1F9E8}",
+    description:
+      "Data quality firewall. Validates incoming signals, quarantines suspicious data, and protects the causal graph from corruption by outliers, duplicates, and schema violations.",
+    color: "border-orange-400/30",
+    dotColor: "bg-orange-400",
+    badgeClass: "bg-orange-400/10 text-orange-400",
+  },
+  {
+    name: "Goal Planning (L14)",
+    category: "Cognitive Stack",
+    status: "sleeping" as const,
+    icon: "\u{1F3AF}",
+    description:
+      "Goal-backward causal planning. Works backward from business objectives to identify the causal levers that drive them, scoring each path for feasibility and impact.",
+    color: "border-orange-400/30",
+    dotColor: "bg-orange-400",
+    badgeClass: "bg-orange-400/10 text-orange-400",
+  },
+  {
+    name: "Narrative Intelligence (L15)",
+    category: "Cognitive Stack",
+    status: "sleeping" as const,
+    icon: "\u{1F4DD}",
+    description:
+      "Generates executive-grade narrative summaries. Maintains multi-day storylines and tailors output for different audiences (CTO, CEO, IC engineer).",
+    color: "border-orange-400/30",
+    dotColor: "bg-orange-400",
+    badgeClass: "bg-orange-400/10 text-orange-400",
+  },
 ];
 
 const CATEGORY_LABELS: Record<string, { label: string; color: string }> = {
@@ -135,6 +279,7 @@ const CATEGORY_LABELS: Record<string, { label: string; color: string }> = {
   "Self-monitoring": { label: "Self-Monitoring", color: "text-warning" },
   "Active learning": { label: "Active Learning", color: "text-success" },
   Perception: { label: "Perception", color: "text-cyan-400" },
+  "Cognitive Stack": { label: "Cognitive Stack (LEAP L3-L15)", color: "text-rose-400" },
 };
 
 export default function RegionsPage() {
@@ -149,7 +294,7 @@ export default function RegionsPage() {
       <div>
         <h1 className="text-2xl font-bold">Brain Regions</h1>
         <p className="text-muted text-sm mt-1">
-          11 specialized regions working in concert to perceive, reason, learn, and dream
+          24 specialized regions — 11 core + 13 cognitive stack (LEAP L3-L15)
         </p>
       </div>
 
@@ -159,7 +304,7 @@ export default function RegionsPage() {
           <div className="text-xs font-medium text-muted uppercase tracking-wider mb-2">
             Total Regions
           </div>
-          <div className="text-2xl font-bold">11</div>
+          <div className="text-2xl font-bold">{REGIONS.length}</div>
           <div className="text-xs text-muted mt-1">Specialized brain areas</div>
         </div>
         <div className="rounded-xl bg-card border border-border/50 p-5">

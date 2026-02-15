@@ -102,6 +102,119 @@ const LAYERS = [
     gradient: "from-pink-500 to-rose-500",
     dotColor: "bg-pink-400",
   },
+  // ── Cognitive Stack (LEAP Layers L8-L15) ──
+  {
+    id: "L8",
+    name: "Causal Imagination",
+    description: "Counterfactual scenario generation, analogy reasoning, hypothesis planning",
+    details:
+      "Generates 'what-if' scenarios by perturbing the causal graph. Finds cross-domain analogies (e.g., 'churn spike looks like the Q3 2023 pricing incident'). Plans hypothetical interventions and estimates their downstream effects before they happen.",
+    metrics: [
+      { label: "Output", value: "Scenarios + Analogies" },
+      { label: "Method", value: "Graph perturbation" },
+      { label: "Brain Analog", value: "Prefrontal Cortex" },
+    ],
+    gradient: "from-rose-500 to-orange-500",
+    dotColor: "bg-rose-400",
+  },
+  {
+    id: "L9",
+    name: "Theory of Mind",
+    description: "User intent modeling, cognitive state tracking, perspective prediction",
+    details:
+      "Models what each user knows, cares about, and intends. Tracks cognitive state (exploring, diagnosing, deciding) to tailor responses. Predicts what questions the user will ask next based on their interaction patterns and role.",
+    metrics: [
+      { label: "Output", value: "User model + Intent" },
+      { label: "Tracking", value: "Per-user cognitive state" },
+      { label: "Brain Analog", value: "TPJ / mPFC" },
+    ],
+    gradient: "from-orange-500 to-amber-500",
+    dotColor: "bg-orange-400",
+  },
+  {
+    id: "L10",
+    name: "Temporal Consciousness",
+    description: "Rhythm detection, goal tracking, temporal health monitoring",
+    details:
+      "Detects recurring temporal rhythms in business signals (weekly cycles, quarterly patterns, seasonal trends). Tracks active goals and their progress over time. Monitors the temporal health of the causal graph to detect drift and decay.",
+    metrics: [
+      { label: "Output", value: "Rhythms + Goal tracking" },
+      { label: "Detection", value: "Multi-resolution" },
+      { label: "Brain Analog", value: "Hippocampus (time cells)" },
+    ],
+    gradient: "from-amber-500 to-yellow-500",
+    dotColor: "bg-amber-400",
+  },
+  {
+    id: "L11",
+    name: "Red Team",
+    description: "Adversarial prediction testing, robustness scoring, weakness identification",
+    details:
+      "Adversarially tests the brain's own predictions and causal claims. Attempts to find counterexamples, confounders, and edge cases. Scores each prediction for robustness and identifies critical weaknesses in the causal graph that could lead to wrong conclusions.",
+    metrics: [
+      { label: "Output", value: "Robustness scores" },
+      { label: "Method", value: "Adversarial testing" },
+      { label: "Brain Analog", value: "ACC (conflict monitoring)" },
+    ],
+    gradient: "from-red-500 to-rose-600",
+    dotColor: "bg-red-400",
+  },
+  {
+    id: "L12",
+    name: "Experimentation",
+    description: "Experiment design, A/B test suggestions, intervention proposals",
+    details:
+      "Suggests experiments to resolve uncertainty in the causal graph. Proposes A/B tests, natural experiments, and observational studies. Each suggestion includes expected information gain and estimated cost, prioritized by the brain's uncertainty map.",
+    metrics: [
+      { label: "Output", value: "Experiment proposals" },
+      { label: "Priority", value: "By information gain" },
+      { label: "Brain Analog", value: "Curiosity system" },
+    ],
+    gradient: "from-emerald-500 to-teal-500",
+    dotColor: "bg-emerald-400",
+  },
+  {
+    id: "L13",
+    name: "Immune System",
+    description: "Signal quality validation, quarantine, data integrity protection",
+    details:
+      "Validates incoming signals for quality and integrity. Quarantines suspicious data points (outliers, duplicates, schema violations) before they corrupt the causal graph. Tracks quality metrics and rejects signals that fail validation, protecting the brain from garbage-in-garbage-out scenarios.",
+    metrics: [
+      { label: "Output", value: "Quality scores" },
+      { label: "Actions", value: "Pass / Quarantine / Reject" },
+      { label: "Brain Analog", value: "Immune system" },
+    ],
+    gradient: "from-teal-500 to-cyan-500",
+    dotColor: "bg-teal-400",
+  },
+  {
+    id: "L14",
+    name: "Goal Planning",
+    description: "Goal-backward planning, feasibility scoring, strategic recommendations",
+    details:
+      "Works backward from business goals to identify the causal levers that drive them. Scores each intervention path for feasibility and expected impact. Generates strategic recommendations grounded in the causal graph, not just correlations.",
+    metrics: [
+      { label: "Output", value: "Goal plans + Paths" },
+      { label: "Method", value: "Backward chaining" },
+      { label: "Brain Analog", value: "Dorsolateral PFC" },
+    ],
+    gradient: "from-sky-500 to-blue-600",
+    dotColor: "bg-sky-400",
+  },
+  {
+    id: "L15",
+    name: "Narrative Intelligence",
+    description: "Executive briefings, multi-day storylines, audience-aware summaries",
+    details:
+      "Generates executive-grade narrative summaries of what the brain learned. Maintains multi-day storylines that build on prior insights rather than starting fresh each cycle. Tailors output for different audiences (CTO, CEO, IC engineer) with appropriate depth and vocabulary.",
+    metrics: [
+      { label: "Output", value: "Narratives + Briefings" },
+      { label: "Continuity", value: "Multi-day storylines" },
+      { label: "Brain Analog", value: "Language cortex" },
+    ],
+    gradient: "from-blue-600 to-indigo-600",
+    dotColor: "bg-blue-500",
+  },
 ];
 
 export function LayersClient() {
@@ -112,7 +225,7 @@ export function LayersClient() {
       <div>
         <h1 className="text-2xl font-bold">Brain Layers</h1>
         <p className="text-muted text-sm mt-1">
-          7-layer intelligence stack with real-time event bus, Lamport clocks, and backpressure
+          15-layer intelligence stack — L1-L7 core pipeline + L8-L15 cognitive stack (LEAP)
         </p>
       </div>
 
