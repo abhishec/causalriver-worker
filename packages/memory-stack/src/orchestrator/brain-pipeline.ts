@@ -694,6 +694,34 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
 
     log(`PFC → Dopamine: ${predictions.length} predictions recorded for future verification`);
 
+    // Persist predictions to database for outcome resolution
+    if (repository && predictions.length > 0) {
+      try {
+        for (const pred of predictions) {
+          const reviewDate = new Date(pred.predictedAt);
+          reviewDate.setDate(reviewDate.getDate() + pred.predictionWindowDays);
+
+          await repository.upsertPrediction({
+            domain: pred.entityId, // toDomain from cascade step
+            actionType: pred.predictionType,
+            prediction: `${scenario.direction} ${scenario.magnitudePercent}% in ${scenario.sourceDomain} → ${pred.predictedProbability.toFixed(2)} probability impact on ${pred.entityId}`,
+            confidence: pred.predictedProbability,
+            reviewDate,
+            metadata: {
+              scenario,
+              featureSnapshot: pred.featureSnapshot,
+              confidenceLower: pred.confidenceLower,
+              confidenceUpper: pred.confidenceUpper,
+              modelVersion: pred.modelVersion,
+            },
+          });
+        }
+        log(`Persisted ${predictions.length} prediction(s) to database for outcome tracking`);
+      } catch (persistErr) {
+        log(`Failed to persist predictions (non-critical): ${(persistErr as Error).message}`);
+      }
+    }
+
     return { simulation: result, predictions };
   }
 
@@ -1096,6 +1124,39 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
     const status = errors.length === 0 ? 'success' : consolidationResult ? 'partial' : 'failed';
 
     log(`=== BRAIN CYCLE END (${status}) — ${totalDurationMs}ms, ${errors.length} errors ===`);
+
+    // Save brain health snapshot after each cycle for trend analysis
+    if (repository) {
+      try {
+        await repository.saveBrainHealthSnapshot({
+          totalSignals: consolidationResult?.report.stats.signalsProcessed,
+          totalRelationships: consolidationResult?.report.stats.causalEdgesDiscovered,
+          totalMemories: consolidationResult?.report.stats.patternsStored,
+          activeAgents: consolidationResult ? 1 : 0, // Will be enhanced when agent count is tracked
+          learningCyclesCompleted: learningResult ? 1 : 0,
+          lastLearningCycleAt: learningResult ? new Date() : undefined,
+          averageBrierScore: undefined, // Will be populated by calibration loop
+          predictionAccuracy: undefined, // Will be populated by calibration loop
+          totalPredictions: 0, // Will be tracked separately
+          resolvedPredictions: 0, // Will be tracked separately
+          errorCount: errors.length,
+          warningCount: status === 'partial' ? 1 : 0,
+          snapshotType: 'cycle',
+          metadata: {
+            cycleId: startedAt,
+            status,
+            totalDurationMs,
+            consolidationSuccess: consolidationResult !== null,
+            dmnSuccess: dmnResult !== null,
+            learningSuccess: learningResult !== null,
+            narrative: narrativeParts.join(' '),
+          },
+        });
+        log(`Brain health snapshot saved for cycle ${startedAt}`);
+      } catch (snapshotErr) {
+        log(`Failed to save brain health snapshot (non-critical): ${(snapshotErr as Error).message}`);
+      }
+    }
 
     return {
       organizationId,

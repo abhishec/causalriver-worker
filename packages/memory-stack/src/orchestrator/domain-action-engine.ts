@@ -2696,6 +2696,33 @@ export function createDomainActionEngine(config: DomainActionEngineConfig) {
               const batchResult = await motorCommandEngine.executeBatch(executableCommands);
               motorCommandResults = batchResult.results;
               log(`V5 Motor Execution: ${batchResult.executed}/${batchResult.totalCommands} succeeded, ${batchResult.failed} failed`);
+
+              // Log motor command execution results as signals for closed-loop learning
+              if (motorCommandResults.length > 0 && repository) {
+                try {
+                  const executionSignals = motorCommandResults.map((result) => ({
+                    organization_id: repository.getOrganizationId(),
+                    source_domain: 'motor_command',
+                    signal_type: 'command_executed',
+                    signal_value: result.success ? 1 : 0,
+                    entity_type: 'motor_command',
+                    entity_id: result.commandId || `cmd_${Date.now()}`,
+                    metadata: {
+                      action_type: artifact.actionType,
+                      domain: artifact.domain,
+                      command_action: result.action,
+                      success: result.success,
+                      error: result.error,
+                      result_metadata: result.metadata,
+                      timestamp: new Date().toISOString(),
+                    },
+                  }));
+                  await repository.insertSignals(executionSignals);
+                  log(`V5 Motor Execution: Logged ${executionSignals.length} execution result(s) as signals`);
+                } catch (signalErr) {
+                  log('V5 Motor Execution: Failed to log results as signals (non-critical):', signalErr);
+                }
+              }
             }
           }
         } catch (err) {
