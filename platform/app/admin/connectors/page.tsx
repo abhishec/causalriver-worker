@@ -2,7 +2,32 @@
 
 import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { getCurrentOrgId } from '@/lib/org-helpers';
+
+const CORE_ORG_ID = "00000000-0000-4000-a000-000000000001";
+
+/** Client-side org ID reader — reads from cookie or falls back to first org */
+async function getClientOrgId(): Promise<string> {
+  // Try reading the cookie directly (client-side)
+  const cookieValue = document.cookie
+    .split('; ')
+    .find(row => row.startsWith('nexus_current_org='))
+    ?.split('=')[1];
+  if (cookieValue) return cookieValue;
+
+  // Fallback: query user's first org
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return CORE_ORG_ID;
+
+  const { data } = await supabase
+    .from('org_members')
+    .select('organization_id')
+    .eq('user_id', user.id)
+    .limit(1)
+    .single();
+
+  return data?.organization_id ?? CORE_ORG_ID;
+}
 
 interface Connector {
   id: string;
@@ -48,7 +73,7 @@ export default function ConnectorsPage() {
   async function loadConnectors() {
     try {
       const supabase = createClient();
-      const orgId = await getCurrentOrgId();
+      const orgId = await getClientOrgId();
 
       const { data, error } = await supabase
         .from('org_connectors')
