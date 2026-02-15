@@ -18,7 +18,7 @@ export default function QuickstartPage() {
 
       <h2 className="mb-4 mt-12 text-2xl font-semibold">1. Discover Causation</h2>
       <p className="mb-4 text-muted">
-        Find what causes what in your data. Uses the calibrated ensemble (8 methods) by default. No API keys needed.
+        Find what causes what in your data. Uses the calibrated ensemble (9 methods) by default. No API keys needed.
       </p>
       <CodeBlock
         code={`import { runCausalDiscovery, summarizeDiscovery } from '@nexus-ai/memory-stack';

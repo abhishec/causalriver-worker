@@ -164,7 +164,7 @@ Federation boosts temporal reasoning to 85% — the brain's distributed memory a
 
 ### Test Suite
 
-- **2,615 passing tests** across 128 test files
+- **2,615 passing tests** across 94 test files
 - **209,000+ lines** of TypeScript
 - Covers all 24 brain regions, 9 causal methods, learning loops, and federation
 
@@ -334,7 +334,7 @@ All auth flows use Supabase Auth with secure callback handling and invite-aware 
 | Causal Discovery Methods | 9 (+ PC, do-calculus, transfer entropy) |
 | TypeScript Lines | 209,000+ |
 | Passing Tests | 2,615 |
-| Test Files | 128 |
+| Test Files | 94 |
 | Connectors | 16 |
 | Domain Personas | 12+ |
 | Platform Pages | 20+ |

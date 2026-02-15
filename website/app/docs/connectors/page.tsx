@@ -11,7 +11,7 @@ export default function ConnectorsPage() {
     <div>
       <h1 className="mb-4 text-3xl font-bold">Connectors</h1>
       <p className="mb-8 text-lg text-muted">
-        13 built-in connectors pull signals from your business tools. Each connector supports full sync, incremental sync, and real-time webhooks.
+        16 built-in connectors pull signals from your business tools. Each connector supports full sync, incremental sync, and real-time webhooks.
       </p>
 
       <h2 className="mb-4 mt-8 text-2xl font-semibold">Available Connectors</h2>

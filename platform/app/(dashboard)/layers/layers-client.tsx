@@ -6,7 +6,7 @@ const LAYERS = [
   {
     id: "L1",
     name: "Ingestion",
-    description: "13 connectors, webhooks + cron, sync manager",
+    description: "16 connectors, webhooks + cron, sync manager",
     details:
       "The ingestion layer handles all data intake from external systems. It supports 13 built-in connectors (Stripe, HubSpot, GitHub, etc.), custom webhooks, and scheduled cron-based syncs. Each signal is normalized, deduplicated, and timestamped before being pushed to the event bus for downstream processing.",
     metrics: [
@@ -65,7 +65,7 @@ const LAYERS = [
     name: "Pattern Memory",
     description: "Association rule mining, anomaly detection (Z/IQR/MAD), brain trainer + 118 packs",
     details:
-      "Discovers recurring patterns and anomalies. Association rule mining finds co-occurring events. Anomaly detection uses Z-score, IQR, and MAD methods to surface unusual behavior. The brain trainer runs 118 training packs that teach the brain domain-specific knowledge about SaaS metrics, engineering patterns, and business operations.",
+      "Discovers recurring patterns and anomalies. Association rule mining finds co-occurring events. Anomaly detection uses Z-score, IQR, and MAD methods to surface unusual behavior. The brain trainer runs 20 training packs that teach the brain domain-specific knowledge about SaaS metrics, engineering patterns, and business operations.",
     metrics: [
       { label: "Training Packs", value: "118" },
       { label: "Anomaly Methods", value: "Z-score, IQR, MAD" },

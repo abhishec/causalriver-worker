@@ -52,7 +52,7 @@ export const TIERS = [
   {
     tier: 3,
     name: "+ Connectors",
-    description: "Auto-ingest from Stripe, HubSpot, GitHub, Slack, Intercom, Zendesk + 7 more",
+    description: "Auto-ingest from Stripe, HubSpot, GitHub, Slack, Intercom, Zendesk + 10 more",
     deps: "Supabase + Connector API keys",
     color: "text-amber-400",
     borderColor: "border-amber-400/30",
@@ -71,6 +71,8 @@ export const CONNECTORS = [
   { name: "Stripe", domain: "Finance", icon: "💳" },
   { name: "HubSpot", domain: "Sales", icon: "🎯" },
   { name: "GitHub", domain: "Engineering", icon: "🐙" },
+  { name: "Jira", domain: "Engineering", icon: "📋" },
+  { name: "Linear", domain: "Engineering", icon: "🔷" },
   { name: "Intercom", domain: "Support", icon: "💬" },
   { name: "Zendesk", domain: "Support", icon: "🎫" },
   { name: "Slack", domain: "Communication", icon: "📡" },
@@ -78,6 +80,7 @@ export const CONNECTORS = [
   { name: "Google Chat", domain: "Operations", icon: "💼" },
   { name: "Google Calendar", domain: "Operations", icon: "📅" },
   { name: "Voice", domain: "CS", icon: "🎙" },
+  { name: "Xero", domain: "Finance", icon: "📊" },
   { name: "Mailchimp", domain: "Marketing", icon: "📧" },
   { name: "Plaid", domain: "Finance", icon: "🏦" },
   { name: "Generic API", domain: "Any", icon: "🔌" },
@@ -92,6 +95,7 @@ export const CAUSAL_METHODS = [
   { id: 6, name: "anomaly_conditioned", algorithm: "Z-score detection + anomaly alignment scoring", bestFor: "Crisis-driven edges" },
   { id: 7, name: "regime_conditional", algorithm: "Separate conditional Granger for normal vs anomaly periods", bestFor: "Regime switching" },
   { id: 8, name: "nexusbrain_final", algorithm: "Self-tuning VAR + cascade penalty + p-value boost", bestFor: "Maximum adaptability" },
+  { id: 9, name: "nonlinear_killer", algorithm: "Nonlinear residual analysis + kernel methods", bestFor: "Nonlinear relationships" },
 ] as const;
 
 export const LAYERS = [

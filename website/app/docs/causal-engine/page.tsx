@@ -6,9 +6,9 @@ export const metadata: Metadata = {
 };
 
 const benchmarks = [
-  { dataset: "random_3", auroc: "0.824", f1: "0.829", accuracy: "0.868" },
-  { dataset: "close_3", auroc: "0.812", f1: "0.822", accuracy: "0.865" },
-  { dataset: "confounder_3", auroc: "0.654", f1: "0.712", accuracy: "0.799" },
+  { dataset: "random_3", auroc: "0.828", f1: "0.829", accuracy: "0.868" },
+  { dataset: "close_3", auroc: "0.818", f1: "0.822", accuracy: "0.865" },
+  { dataset: "confounder_3", auroc: "0.714", f1: "0.712", accuracy: "0.799" },
 ];
 
 const ensembleWeights = [
@@ -25,7 +25,7 @@ const feedbackLoop = [
   { component: "Evidence Decay", description: "Stale relationships lose weight over time" },
   { component: "Threshold Optimizer", description: "ROC-based threshold learning" },
   { component: "Calibration Engine", description: "AUC, Brier score, ECE, reliability diagrams" },
-  { component: "Brain Trainer", description: "118 training packs + self-generated from discoveries" },
+  { component: "Brain Trainer", description: "20 training packs + self-generated from discoveries" },
   { component: "Maturity Evaluator", description: "L1 Nascent \u2192 L2 Learning \u2192 L3 Capable \u2192 L4 Advanced \u2192 L5 Expert" },
 ];
 
@@ -34,7 +34,7 @@ export default function CausalEnginePage() {
     <div>
       <h1 className="mb-4 text-3xl font-bold">Causal Discovery Engine</h1>
       <p className="mb-8 text-lg text-muted">
-        8 advanced causal discovery methods plus PC algorithm, Pearl&apos;s do-calculus, counterfactual engine, and transfer entropy.
+        9 advanced causal discovery methods plus PC algorithm, Pearl&apos;s do-calculus, counterfactual engine, and transfer entropy.
         Benchmarked against CausalRivers (ICLR 2025 Spotlight).
       </p>
 

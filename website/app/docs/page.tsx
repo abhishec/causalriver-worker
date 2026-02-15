@@ -24,8 +24,8 @@ const sections = [
     title: "Architecture",
     items: [
       { label: "7-Layer Stack", href: "/docs/architecture", description: "Deep dive into the intelligence stack, event bus, and bridges." },
-      { label: "Causal Engine", href: "/docs/causal-engine", description: "8 discovery methods, PC algorithm, do-calculus, benchmarks." },
-      { label: "Connectors", href: "/docs/connectors", description: "13 built-in connectors: configuration and custom connectors." },
+      { label: "Causal Engine", href: "/docs/causal-engine", description: "9 discovery methods, PC algorithm, do-calculus, benchmarks." },
+      { label: "Connectors", href: "/docs/connectors", description: "16 built-in connectors: configuration and custom connectors." },
     ],
   },
 ];

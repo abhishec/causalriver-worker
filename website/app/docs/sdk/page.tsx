@@ -125,7 +125,7 @@ export default function SDKPage() {
             </tr>
             <tr className="border-b border-border/30">
               <td className="py-2 pr-4 font-semibold text-amber-400">3. Connectors</td>
-              <td className="py-2 pr-4 text-muted">Auto-ingest from 13 SaaS tools</td>
+              <td className="py-2 pr-4 text-muted">Auto-ingest from 16 SaaS tools</td>
               <td className="py-2 text-muted">Supabase + API keys</td>
             </tr>
             <tr className="border-b border-border/30">

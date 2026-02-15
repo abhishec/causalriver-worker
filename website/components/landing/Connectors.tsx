@@ -14,7 +14,7 @@ export function Connectors() {
           className="mx-auto mb-16 max-w-3xl text-center"
         >
           <h2 className="mb-4 text-3xl font-bold md:text-4xl">
-            13 Built-In Connectors
+            16 Built-In Connectors
           </h2>
           <p className="text-lg text-muted">
             Pull signals automatically from the tools your teams already use. Full sync, incremental sync, and real-time webhooks.

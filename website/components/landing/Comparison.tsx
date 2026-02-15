@@ -9,7 +9,7 @@ const rows = [
   { feature: "Cross-department visibility", bi: "Separate dashboards", chatbot: false, nexus: "Unified causal graph" },
   { feature: "Gets smarter over time", bi: false, chatbot: false, nexus: "Continuous learning loops" },
   { feature: "Shows confidence levels", bi: false, chatbot: false, nexus: "p-values + effect sizes + ECE" },
-  { feature: "Causation vs correlation", bi: false, chatbot: false, nexus: "8 methods + knockout validation" },
+  { feature: "Causation vs correlation", bi: false, chatbot: false, nexus: "9 methods + knockout validation" },
   { feature: "Tested against benchmarks", bi: false, chatbot: false, nexus: "CausalRivers, CauseME, LongMemEval" },
   { feature: "Self-monitoring (meta-cognition)", bi: false, chatbot: false, nexus: "Knows what it doesn\u2019t know" },
   { feature: "Zero runtime dependencies", bi: "Heavy infra required", chatbot: "API dependency", nexus: "Pure TypeScript core" },
