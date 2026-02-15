@@ -200,73 +200,124 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
   }
 
   async function fetchPullRequests(since?: Date): Promise<GitHubPR[]> {
-    const params: Record<string, string> = {
-      state: 'all',
-      sort: 'updated',
-      direction: 'desc',
-      per_page: '100',
-    };
-    if (since) {
-      params.since = since.toISOString();
-    }
+    const allPRs: GitHubPR[] = [];
+    let page = 1;
 
-    const prs = await fetchJSON<GitHubPR[]>(`/repos/${owner}/${repo}/pulls`, params);
-
-    // Fetch detailed stats for each PR (additions/deletions)
-    const detailed: GitHubPR[] = [];
-    for (const pr of prs) {
-      if (since && new Date(pr.updated_at) < since) continue;
-      try {
-        const detail = await fetchJSON<GitHubPR>(`/repos/${owner}/${repo}/pulls/${pr.number}`);
-        detailed.push(detail);
-      } catch {
-        detailed.push(pr); // Use basic data if detail fetch fails
+    while (true) {
+      const params: Record<string, string> = {
+        state: 'all',
+        sort: 'updated',
+        direction: 'desc',
+        per_page: '100',
+        page: String(page),
+      };
+      if (since) {
+        params.since = since.toISOString();
       }
+
+      const prs = await fetchJSON<GitHubPR[]>(`/repos/${owner}/${repo}/pulls`, params);
+      if (!prs || prs.length === 0) break;
+
+      // Fetch detailed stats for each PR (additions/deletions)
+      for (const pr of prs) {
+        if (since && new Date(pr.updated_at) < since) continue;
+        try {
+          const detail = await fetchJSON<GitHubPR>(`/repos/${owner}/${repo}/pulls/${pr.number}`);
+          allPRs.push(detail);
+        } catch {
+          allPRs.push(pr); // Use basic data if detail fetch fails
+        }
+      }
+
+      if (prs.length < 100) break; // Last page
+      page++;
+      await new Promise(r => setTimeout(r, 50)); // Rate limit courtesy
     }
-    return detailed;
+    return allPRs;
   }
 
   async function fetchIssues(since?: Date): Promise<GitHubIssue[]> {
-    const params: Record<string, string> = {
-      state: 'all',
-      sort: 'updated',
-      direction: 'desc',
-      per_page: '100',
-      filter: 'all',
-    };
-    if (since) {
-      params.since = since.toISOString();
-    }
+    const allIssues: GitHubIssue[] = [];
+    let page = 1;
 
-    const items = await fetchJSON<GitHubIssue[]>(`/repos/${owner}/${repo}/issues`, params);
-    // Filter out pull requests (GitHub API includes PRs in issues endpoint)
-    return items.filter((i) => !(i as any).pull_request);
+    while (true) {
+      const params: Record<string, string> = {
+        state: 'all',
+        sort: 'updated',
+        direction: 'desc',
+        per_page: '100',
+        filter: 'all',
+        page: String(page),
+      };
+      if (since) {
+        params.since = since.toISOString();
+      }
+
+      const items = await fetchJSON<GitHubIssue[]>(`/repos/${owner}/${repo}/issues`, params);
+      if (!items || items.length === 0) break;
+
+      // Filter out pull requests (GitHub API includes PRs in issues endpoint)
+      allIssues.push(...items.filter((i) => !(i as any).pull_request));
+
+      if (items.length < 100) break; // Last page
+      page++;
+      await new Promise(r => setTimeout(r, 50)); // Rate limit courtesy
+    }
+    return allIssues;
   }
 
   async function fetchWorkflowRuns(since?: Date): Promise<GitHubWorkflowRun[]> {
-    const params: Record<string, string> = {
-      per_page: '100',
-    };
-    if (since) {
-      params.created = `>=${since.toISOString().split('T')[0]}`;
-    }
+    const allRuns: GitHubWorkflowRun[] = [];
+    let page = 1;
 
-    const data = await fetchJSON<{ workflow_runs: GitHubWorkflowRun[] }>(
-      `/repos/${owner}/${repo}/actions/runs`,
-      params
-    );
-    return data.workflow_runs || [];
+    while (true) {
+      const params: Record<string, string> = {
+        per_page: '100',
+        page: String(page),
+      };
+      if (since) {
+        params.created = `>=${since.toISOString().split('T')[0]}`;
+      }
+
+      const data = await fetchJSON<{ workflow_runs: GitHubWorkflowRun[] }>(
+        `/repos/${owner}/${repo}/actions/runs`,
+        params
+      );
+      const runs = data.workflow_runs || [];
+      if (runs.length === 0) break;
+
+      allRuns.push(...runs);
+
+      if (runs.length < 100) break; // Last page
+      page++;
+      await new Promise(r => setTimeout(r, 50)); // Rate limit courtesy
+    }
+    return allRuns;
   }
 
   async function fetchCommits(since?: Date): Promise<GitHubCommit[]> {
-    const params: Record<string, string> = {
-      per_page: '100',
-    };
-    if (since) {
-      params.since = since.toISOString();
-    }
+    const allCommits: GitHubCommit[] = [];
+    let page = 1;
 
-    return fetchJSON<GitHubCommit[]>(`/repos/${owner}/${repo}/commits`, params);
+    while (true) {
+      const params: Record<string, string> = {
+        per_page: '100',
+        page: String(page),
+      };
+      if (since) {
+        params.since = since.toISOString();
+      }
+
+      const commits = await fetchJSON<GitHubCommit[]>(`/repos/${owner}/${repo}/commits`, params);
+      if (!commits || commits.length === 0) break;
+
+      allCommits.push(...commits);
+
+      if (commits.length < 100) break; // Last page
+      page++;
+      await new Promise(r => setTimeout(r, 50)); // Rate limit courtesy
+    }
+    return allCommits;
   }
 
   async function fetchPRReviews(prNumber: number): Promise<GitHubPRReview[]> {
@@ -281,9 +332,19 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
 
   async function fetchPRFiles(prNumber: number): Promise<GitHubPRFile[]> {
     try {
-      return await fetchJSON<GitHubPRFile[]>(
-        `/repos/${owner}/${repo}/pulls/${prNumber}/files`
-      );
+      const allFiles: GitHubPRFile[] = [];
+      let page = 1;
+      while (true) {
+        const files = await fetchJSON<GitHubPRFile[]>(
+          `/repos/${owner}/${repo}/pulls/${prNumber}/files`,
+          { per_page: '100', page: String(page) }
+        );
+        if (!files || files.length === 0) break;
+        allFiles.push(...files);
+        if (files.length < 100) break;
+        page++;
+      }
+      return allFiles;
     } catch {
       return []; // Non-fatal: file list is enrichment
     }

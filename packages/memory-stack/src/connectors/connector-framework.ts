@@ -306,6 +306,92 @@ export async function storeConnectorSignals(
   }, 'store-connector-signals');
 }
 
+// ============================================================================
+// UNIVERSAL DATA INGESTION (Data-Agnostic Brain Interface)
+// ============================================================================
+
+/**
+ * Ingest raw data into the brain — zero connector required.
+ *
+ * The brain is DATA-AGNOSTIC: it doesn't care if signals come from
+ * GitHub, Jira, Slack, balance sheets, ERP systems, IoT sensors,
+ * or custom internal tools. This function is the universal entry point.
+ *
+ * @example
+ * ```typescript
+ * // Balance sheet data (10M rows)
+ * await ingestRawSignals(supabase, 'org_123', [
+ *   { domain: 'finance', type: 'revenue', value: 1500000, entity: 'Q1_2025', metadata: { quarter: 'Q1', year: 2025 } },
+ *   { domain: 'finance', type: 'cogs', value: 900000, entity: 'Q1_2025' },
+ *   { domain: 'finance', type: 'net_margin', value: 0.4, entity: 'Q1_2025' },
+ * ]);
+ *
+ * // IoT sensor data
+ * await ingestRawSignals(supabase, 'org_123', [
+ *   { domain: 'manufacturing', type: 'machine_temp', value: 82.5, entity: 'machine_A3', timestamp: new Date() },
+ * ]);
+ *
+ * // HR data
+ * await ingestRawSignals(supabase, 'org_123', [
+ *   { domain: 'hr', type: 'attrition_rate', value: 0.12, entity: 'engineering_team' },
+ *   { domain: 'hr', type: 'engagement_score', value: 7.8, entity: 'engineering_team' },
+ * ]);
+ * ```
+ */
+export async function ingestRawSignals(
+  supabase: SupabaseClient,
+  organizationId: string,
+  signals: Array<{
+    /** Domain/category (e.g., 'finance', 'hr', 'manufacturing', 'sales', 'ops') */
+    domain: string;
+    /** Signal type (e.g., 'revenue', 'churn_rate', 'deploy_failure') */
+    type: string;
+    /** Numeric value (-1 to 1 for normalized, or raw value for metrics) */
+    value: number;
+    /** Entity identifier (e.g., 'Q1_2025', 'customer_123', 'machine_A3') */
+    entity?: string;
+    /** Entity type category (e.g., 'quarter', 'customer', 'machine') */
+    entityType?: string;
+    /** When this data point occurred (defaults to now) */
+    timestamp?: Date | string;
+    /** Any additional context */
+    metadata?: Record<string, unknown>;
+  }>,
+  options?: {
+    /** Batch size for DB inserts (default: 1000) */
+    batchSize?: number;
+  }
+): Promise<{ signalsIngested: number; errors: string[] }> {
+  const batchSize = options?.batchSize ?? 1000;
+  const errors: string[] = [];
+  let ingested = 0;
+
+  // Convert to ConnectorSignal format
+  const connectorSignals: ConnectorSignal[] = signals.map(s => ({
+    organization_id: organizationId,
+    source_domain: s.domain,
+    signal_type: s.type,
+    signal_value: s.value,
+    entity_type: s.entityType || s.domain,
+    entity_id: s.entity || `${s.type}_${Date.now()}`,
+    signal_timestamp: s.timestamp,
+    metadata: s.metadata || {},
+  }));
+
+  // Batch insert to handle 10M+ datasets without OOM
+  for (let i = 0; i < connectorSignals.length; i += batchSize) {
+    const batch = connectorSignals.slice(i, i + batchSize);
+    try {
+      await storeConnectorSignals(supabase, batch, undefined, organizationId);
+      ingested += batch.length;
+    } catch (err) {
+      errors.push(`Batch ${Math.floor(i / batchSize)}: ${err instanceof Error ? err.message : String(err)}`);
+    }
+  }
+
+  return { signalsIngested: ingested, errors };
+}
+
 /**
  * Record sync result in tracking table
  */

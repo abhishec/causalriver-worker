@@ -725,11 +725,18 @@ export function createScheduledJobs(
      * - Returns structured result with success data or error string per job
      *
      * Execution order:
+     * Phase 0 (sequential — ingest first):      connector sync (data must be in DB before processing)
      * Phase A (sequential — dependency chain):   verifications → weights
-     * Phase B (parallel — independent):          decay + discovery
-     * Phase C (parallel — post-discovery):       federation + data retention
+     * Phase B (parallel — independent):          decay + discovery + consolidation
+     * Phase C (parallel — post-discovery):       federation + data retention + training packs + predictions
+     *
+     * @param organizationId - The org to process
+     * @param connectors - Optional array of NexusConnector instances to sync before processing.
+     *                     The brain is data-agnostic: ANY connector (GitHub, Slack, Jira, balance sheets,
+     *                     CRM, ERP, or custom GenericAppConnector) can be passed here.
      */
-    async runAllDailyJobs(organizationId: string): Promise<{
+    async runAllDailyJobs(organizationId: string, connectors?: NexusConnector[]): Promise<{
+      connectorSync: JobResult<{ totalSignals: number; connectorsSucceeded: number; connectorsFailed: number; results: ConnectorSyncResult[] }>;
       verifications: JobResult<{ verificationsProcessed: number }>;
       weights: JobResult<{ weightsUpdated: WeightUpdate[]; degradingRelationships: RelationshipAccuracyMetrics[] }>;
       decay: JobResult<{ edgesDecayed: number; edgesRemoved: number }>;
@@ -740,6 +747,14 @@ export function createScheduledJobs(
       trainingPacks: JobResult<{ packsApplied: number; chainsCreated: number; rulesCreated: number; errors: string[] }>;
       predictionOutcomes: JobResult<{ predictionsChecked: number; outcomesRecorded: number; correctPredictions: number; incorrectPredictions: number }>;
     }> {
+      // Phase 0: Connector sync — ingest fresh data BEFORE processing
+      // This is data-agnostic: any connector type works (GitHub, Slack, Jira, balance sheets, custom)
+      const connectorSyncTimeout = Math.max(jobTimeout, 600_000); // At least 10 min for large initial loads
+      const connectorSync = await safeRun(
+        () => this.runConnectorSync(organizationId, connectors || []),
+        'connectorSync', connectorSyncTimeout
+      );
+
       // Phase A: Sequential dependency chain (verifications → weights)
       const verifications = await safeRun(
         () => this.runPendingVerifications(organizationId),
@@ -789,7 +804,7 @@ export function createScheduledJobs(
         ? predOutcomeSettled.value
         : { error: `[predictionOutcomes] ${(predOutcomeSettled as PromiseRejectedResult).reason?.message || 'unknown'}` };
 
-      return { verifications, weights, decay, discovery, consolidation, federation, retention, trainingPacks, predictionOutcomes };
+      return { connectorSync, verifications, weights, decay, discovery, consolidation, federation, retention, trainingPacks, predictionOutcomes };
     },
   };
 }

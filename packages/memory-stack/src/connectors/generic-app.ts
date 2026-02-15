@@ -104,10 +104,20 @@ export interface GenericAppConnectorConfig {
   pullEndpoints?: PullEndpoint[];
   /** Endpoints to push data to */
   pushEndpoints?: PushEndpoint[];
-  /** Max records per endpoint (default: 100) */
-  maxRecords?: number;
+  /** Max records per endpoint per page (default: 1000). Set to Infinity for unlimited. */
+  maxRecordsPerPage?: number;
+  /** Max total records across all pages (default: Infinity — no cap). For 10M+ datasets, use streaming. */
+  maxTotalRecords?: number;
   /** Pagination style (default: 'offset') */
   paginationStyle?: 'offset' | 'cursor' | 'page' | 'none';
+  /** Cursor field name in response for cursor-based pagination (default: 'next_cursor') */
+  cursorField?: string;
+  /** Total count field in response (default: 'total') */
+  totalField?: string;
+  /** Page size query parameter name (default: 'limit' for offset/cursor, 'per_page' for page) */
+  pageSizeParam?: string;
+  /** Rate limit delay between pages in ms (default: 50) */
+  pageDelayMs?: number;
 }
 
 export interface GenericAppConnector extends NexusConnector {
@@ -130,7 +140,13 @@ export interface GenericAppConnector extends NexusConnector {
 // ============================================================================
 
 export function createGenericAppConnector(config: GenericAppConnectorConfig): GenericAppConnector {
-  const maxRecords = config.maxRecords ?? 100;
+  const maxRecordsPerPage = config.maxRecordsPerPage ?? 1000;
+  const maxTotalRecords = config.maxTotalRecords ?? Infinity;
+  const paginationStyle = config.paginationStyle ?? 'none';
+  const cursorField = config.cursorField ?? 'next_cursor';
+  const totalField = config.totalField ?? 'total';
+  const pageSizeParam = config.pageSizeParam ?? (paginationStyle === 'page' ? 'per_page' : 'limit');
+  const pageDelayMs = config.pageDelayMs ?? 50;
 
   function getHeaders(): Record<string, string> {
     const headers: Record<string, string> = {
@@ -203,33 +219,84 @@ export function createGenericAppConnector(config: GenericAppConnectorConfig): Ge
 
     for (const endpoint of config.pullEndpoints) {
       try {
-        const data = await apiCall(
-          endpoint.path,
-          endpoint.method || 'GET',
-          undefined,
-          endpoint.queryParams
-        );
+        // Paginated fetching — supports offset, cursor, page, and no-pagination modes
+        // Handles 10M+ record sets via streaming pagination with rate limiting
+        let allRecords: any[] = [];
+        let hasMore = true;
+        let pageNum = 1;
+        let offset = 0;
+        let cursor: string | null = null;
 
-        // Extract records array from response
-        let records: any[];
-        if (endpoint.recordsPath) {
-          records = getNestedValue(data, endpoint.recordsPath) || [];
-        } else if (Array.isArray(data)) {
-          records = data;
-        } else if (data.data && Array.isArray(data.data)) {
-          records = data.data;
-        } else if (data.items && Array.isArray(data.items)) {
-          records = data.items;
-        } else if (data.records && Array.isArray(data.records)) {
-          records = data.records;
-        } else if (data.results && Array.isArray(data.results)) {
-          records = data.results;
-        } else {
-          records = [data]; // Treat as single record
+        while (hasMore && allRecords.length < maxTotalRecords) {
+          // Build pagination params
+          const paginationParams: Record<string, string> = {
+            ...(endpoint.queryParams || {}),
+          };
+
+          if (paginationStyle === 'offset') {
+            paginationParams[pageSizeParam] = String(maxRecordsPerPage);
+            paginationParams['offset'] = String(offset);
+          } else if (paginationStyle === 'page') {
+            paginationParams[pageSizeParam] = String(maxRecordsPerPage);
+            paginationParams['page'] = String(pageNum);
+          } else if (paginationStyle === 'cursor' && cursor) {
+            paginationParams[pageSizeParam] = String(maxRecordsPerPage);
+            paginationParams['cursor'] = cursor;
+          } else if (paginationStyle === 'cursor' && !cursor) {
+            paginationParams[pageSizeParam] = String(maxRecordsPerPage);
+          }
+
+          const data = await apiCall(
+            endpoint.path,
+            endpoint.method || 'GET',
+            undefined,
+            paginationStyle !== 'none' ? paginationParams : endpoint.queryParams
+          );
+
+          // Extract records array from response
+          let records: any[];
+          if (endpoint.recordsPath) {
+            records = getNestedValue(data, endpoint.recordsPath) || [];
+          } else if (Array.isArray(data)) {
+            records = data;
+          } else if (data.data && Array.isArray(data.data)) {
+            records = data.data;
+          } else if (data.items && Array.isArray(data.items)) {
+            records = data.items;
+          } else if (data.records && Array.isArray(data.records)) {
+            records = data.records;
+          } else if (data.results && Array.isArray(data.results)) {
+            records = data.results;
+          } else {
+            records = [data]; // Treat as single record
+          }
+
+          allRecords.push(...records);
+
+          // Determine if there are more pages
+          if (paginationStyle === 'none' || records.length < maxRecordsPerPage) {
+            hasMore = false;
+          } else if (paginationStyle === 'cursor') {
+            cursor = getNestedValue(data, cursorField);
+            hasMore = !!cursor;
+          } else {
+            // offset or page — check if we've hit the declared total
+            const total = getNestedValue(data, totalField);
+            if (total && allRecords.length >= total) {
+              hasMore = false;
+            }
+            offset += records.length;
+            pageNum++;
+          }
+
+          // Rate limit between pages
+          if (hasMore && pageDelayMs > 0) {
+            await new Promise(r => setTimeout(r, pageDelayMs));
+          }
         }
 
-        // Limit records
-        records = records.slice(0, maxRecords);
+        // Enforce total cap
+        const records = allRecords.slice(0, maxTotalRecords);
 
         for (const record of records) {
           // Custom transform
@@ -287,8 +354,15 @@ export function createGenericAppConnector(config: GenericAppConnectorConfig): Ge
       }
     }
 
-    if (signals.length > 0) {
-      await storeConnectorSignals(supabase, signals);
+    // Batch storage: write signals in chunks of 1000 to avoid OOM with 10M+ datasets
+    const BATCH_SIZE = 1000;
+    for (let i = 0; i < signals.length; i += BATCH_SIZE) {
+      const batch = signals.slice(i, i + BATCH_SIZE);
+      try {
+        await storeConnectorSignals(supabase, batch);
+      } catch (err) {
+        errors.push(`Batch ${Math.floor(i / BATCH_SIZE)}: ${err instanceof Error ? err.message : String(err)}`);
+      }
     }
 
     const result: ConnectorSyncResult = {

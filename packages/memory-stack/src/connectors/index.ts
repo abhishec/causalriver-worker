@@ -8,8 +8,12 @@
 export {
   type NexusConnector,
   type ConnectorSyncResult,
+  type ConnectorSignal,
   storeConnectorSignals,
   recordSyncResult,
+  ingestRawSignals,
+  applyCausalSignalWeights,
+  computeCausalWeightsFromEdges,
 } from './connector-framework';
 
 export { createHubSpotConnector } from './hubspot';

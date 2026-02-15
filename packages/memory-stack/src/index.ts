@@ -1073,6 +1073,7 @@ export {
   type CausalSignalWeight,
   storeConnectorSignals,
   recordSyncResult,
+  ingestRawSignals,
   applyCausalSignalWeights,
   computeCausalWeightsFromEdges,
 } from './connectors/connector-framework';

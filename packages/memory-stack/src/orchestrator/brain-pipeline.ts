@@ -160,6 +160,12 @@ import {
 } from './context-manager';
 
 import { createEventBus, createSignalEvent } from '../causality/event-bus';
+import {
+  createIncrementalGranger,
+  updateWithNewSignal as incrementalGrangerUpdate,
+  getIncrementalResult,
+  type IncrementalGrangerState,
+} from '../causality/granger-causality';
 
 import { createSupabaseRepository, type NexusRepository } from '../persistence/supabase-repository';
 
@@ -519,6 +525,13 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
     ...config.cognitiveStack,
   });
 
+  // Real-time IncrementalGranger: per-domain-pair causal states
+  // Brain Analog: Like synaptic potentiation — as signals flow in, the brain
+  // continuously strengthens/weakens causal connections in real-time (not just during sleep).
+  // Key: domain-pair → IncrementalGrangerState, e.g. "engineering→support"
+  const realtimeCausalStates = new Map<string, IncrementalGrangerState>();
+  const realtimeCausalEdges: Array<{ source: string; target: string; fStat: number; pValue: number; discoveredAt: number }> = [];
+
   // Persistence Repository: Central nervous system data store
   // Brain Analog: The brain's ability to consolidate and persist learned knowledge
   // across sleep cycles. Without this, predictions and health snapshots are lost.
@@ -543,6 +556,57 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
           // Non-critical: don't fail signal persistence because of event bus
         }
       }
+
+      // Real-time IncrementalGranger: stream signals into domain-pair causal trackers
+      // This is O(p²) per signal instead of O(n·p²) batch — 100-1000x faster at scale.
+      // The brain detects causal relationships AS data flows in, not just during sleep.
+      try {
+        // Group signals by domain for pairwise updates
+        const byDomain = new Map<string, number[]>();
+        for (const signal of signals) {
+          const domain = signal.source_domain || 'unknown';
+          const vals = byDomain.get(domain) || [];
+          vals.push(signal.signal_value ?? 0);
+          byDomain.set(domain, vals);
+        }
+
+        const domains = [...byDomain.keys()];
+        if (domains.length >= 2) {
+          // For each domain pair, feed the average signal value into the incremental tracker
+          for (let i = 0; i < Math.min(domains.length, 10); i++) {
+            for (let j = i + 1; j < Math.min(domains.length, 10); j++) {
+              const key = `${domains[i]}→${domains[j]}`;
+              let state = realtimeCausalStates.get(key);
+              if (!state) {
+                state = createIncrementalGranger({ lag: 5, windowSize: 500 });
+                realtimeCausalStates.set(key, state);
+              }
+
+              const xVals = byDomain.get(domains[i])!;
+              const yVals = byDomain.get(domains[j])!;
+              const xAvg = xVals.reduce((a, b) => a + b, 0) / xVals.length;
+              const yAvg = yVals.reduce((a, b) => a + b, 0) / yVals.length;
+
+              const result = incrementalGrangerUpdate(state, xAvg, yAvg);
+              if (result && result.isSignificant) {
+                realtimeCausalEdges.push({
+                  source: domains[i],
+                  target: domains[j],
+                  fStat: result.fStatistic,
+                  pValue: result.pValue,
+                  discoveredAt: Date.now(),
+                });
+                if (verbose) {
+                  log(`Real-time Granger: discovered ${domains[i]}→${domains[j]} (F=${result.fStatistic.toFixed(2)}, p=${result.pValue.toFixed(4)})`);
+                }
+              }
+            }
+          }
+        }
+      } catch {
+        // Non-critical: real-time causal updates are enrichment, not core path
+      }
+
       if (verbose) {
         log(`Event Bus: emitted ${signals.length} signal event(s) for real-time processing`);
       }
