@@ -455,7 +455,7 @@ export function createBrainEvaluator(config: BrainEvaluatorConfig = {}) {
       const startTime = Date.now();
       const { ruleTypes, ruleIds } = options || {};
 
-      // Fetch matching rules from ai_memory
+      // Fetch matching rules from ai_memory (capped for 10M scale)
       let query = supabase
         .from('ai_memory')
         .select('*')
@@ -469,6 +469,9 @@ export function createBrainEvaluator(config: BrainEvaluatorConfig = {}) {
       if (ruleIds?.length) {
         query = query.in('id', ruleIds);
       }
+
+      // 10M scale: only evaluate top 500 rules by importance
+      query = query.order('importance', { ascending: false }).limit(500);
 
       const { data: rules, error } = await query;
 

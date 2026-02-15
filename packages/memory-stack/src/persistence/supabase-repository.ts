@@ -279,16 +279,33 @@ export function createSupabaseRepository(
     },
 
     async getSignalsByDomain(domain: string, since: Date): Promise<any[]> {
-      const { data, error } = await supabase
-        .from('cross_domain_signals')
-        .select('*')
-        .eq('organization_id', organizationId)
-        .eq('source_domain', domain)
-        .gte('created_at', since.toISOString())
-        .order('created_at', { ascending: true });
+      // 10M scale: paginate with limit to prevent OOM on large time windows
+      const PAGE_SIZE = 2000;
+      const allData: any[] = [];
+      let offset = 0;
+      let hasMore = true;
 
-      if (error) throw new Error(`Failed to get signals: ${error.message}`);
-      return data || [];
+      while (hasMore) {
+        const { data, error } = await supabase
+          .from('cross_domain_signals')
+          .select('*')
+          .eq('organization_id', organizationId)
+          .eq('source_domain', domain)
+          .gte('created_at', since.toISOString())
+          .order('created_at', { ascending: true })
+          .range(offset, offset + PAGE_SIZE - 1);
+
+        if (error) throw new Error(`Failed to get signals: ${error.message}`);
+        const page = data || [];
+        allData.push(...page);
+        hasMore = page.length === PAGE_SIZE;
+        offset += PAGE_SIZE;
+
+        // Safety cap: max 50K signals per domain query (prevents runaway at 10M scale)
+        if (allData.length >= 50_000) break;
+      }
+
+      return allData;
     },
 
     async getSignalsByEntity(entityType: string, entityId: string): Promise<any[]> {
@@ -417,7 +434,8 @@ export function createSupabaseRepository(
         .eq('organization_id', organizationId)
         .eq('is_significant', true)
         .gte('effect_size', minConfidence * 0.1)
-        .order('effect_size', { ascending: false });
+        .order('effect_size', { ascending: false })
+        .limit(500); // 10M scale: cap at top 500 relationships by effect size
 
       if (error) throw new Error(`Failed to get relationships: ${error.message}`);
       return data || [];
@@ -485,7 +503,8 @@ export function createSupabaseRepository(
         .from('temporal_memory_state')
         .select('*')
         .eq('organization_id', organizationId)
-        .order('current_relevance', { ascending: false });
+        .order('current_relevance', { ascending: false })
+        .limit(5000); // 10M scale: cap at top 5K most relevant memories
 
       if (error) throw new Error(`Failed to load temporal memories: ${error.message}`);
       return data || [];
@@ -757,6 +776,8 @@ export function createSupabaseRepository(
       if (domain) {
         query = query.eq('domain', domain);
       }
+
+      query = query.limit(200); // 10M scale: cap calibration metrics
 
       const { data, error } = await query;
       if (error) throw new Error(`Failed to get calibration metrics: ${error.message}`);

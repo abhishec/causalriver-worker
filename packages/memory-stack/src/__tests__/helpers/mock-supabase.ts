@@ -20,6 +20,7 @@ export function createMockSupabase(mockData: Record<string, unknown[]> = {}) {
         in: () => ({ data: mockData[table] || [], error: null, ...chainable() }),
         order: () => ({ data: mockData[table] || [], error: null, ...chainable() }),
         limit: () => ({ data: mockData[table] || [], error: null, ...chainable() }),
+        range: () => ({ data: mockData[table] || [], error: null, ...chainable() }),
         single: () => ({ data: (mockData[table] || [])[0] || null, error: null }),
         maybeSingle: () => ({ data: (mockData[table] || [])[0] || null, error: null }),
       };

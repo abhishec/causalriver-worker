@@ -661,18 +661,16 @@ describe('Knowledge Dependency Graph', () => {
             stored.push(...data);
             return { error: null };
           },
-          select: () => ({
-            eq: (_field: string, _val: string) => ({
-              eq: (_f2: string, _v2: string) => ({
-                eq: (_f3: string, _v3: string) => ({
-                  data: stored.map(row => ({
-                    ...row,
-                  })),
-                  error: null,
+          select: () => {
+            const result = { data: stored.map(row => ({ ...row })), error: null, order: () => result, limit: () => result, range: () => result };
+            return {
+              eq: (_field: string, _val: string) => ({
+                eq: (_f2: string, _v2: string) => ({
+                  eq: (_f3: string, _v3: string) => result,
                 }),
               }),
-            }),
-          }),
+            };
+          },
         }),
       };
 

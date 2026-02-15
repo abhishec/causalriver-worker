@@ -138,12 +138,14 @@ export function createBackgroundInsightEngine(config: DMNConfig) {
     const insights: ProactiveInsight[] = [];
 
     try {
-      // Get all significant relationships
+      // Get significant relationships (capped for 10M scale)
       const { data: relationships } = await supabase
         .from('causal_relationships_statistical')
         .select('*')
         .eq('organization_id', organizationId)
-        .eq('is_significant', true);
+        .eq('is_significant', true)
+        .order('effect_size', { ascending: false })
+        .limit(1000);
 
       if (!relationships || relationships.length < 2) return insights;
 
@@ -227,13 +229,14 @@ export function createBackgroundInsightEngine(config: DMNConfig) {
     const insights: ProactiveInsight[] = [];
 
     try {
-      // Get the causal graph
+      // Get the causal graph (capped for 10M scale)
       const { data: relationships } = await supabase
         .from('causal_relationships_statistical')
         .select('*')
         .eq('organization_id', organizationId)
         .eq('is_significant', true)
-        .order('effect_size', { ascending: false });
+        .order('effect_size', { ascending: false })
+        .limit(1000);
 
       if (!relationships || relationships.length < 2) return insights;
 
@@ -401,12 +404,13 @@ export function createBackgroundInsightEngine(config: DMNConfig) {
 
       const domains = [...new Set(allDomains.map((d: any) => d.source_domain))];
 
-      // Get all known relationships
+      // Get known relationships (capped for 10M scale)
       const { data: relationships } = await supabase
         .from('causal_relationships_statistical')
         .select('source_domain, target_domain')
         .eq('organization_id', organizationId)
-        .eq('is_significant', true);
+        .eq('is_significant', true)
+        .limit(2000);
 
       // Find domains with data but NO outgoing or incoming causal edges
       const connectedDomains = new Set<string>();
@@ -436,13 +440,14 @@ export function createBackgroundInsightEngine(config: DMNConfig) {
         });
       }
 
-      // Find edges with very low evidence weight — dying connections
+      // Find edges with very low evidence weight — dying connections (capped for 10M scale)
       const { data: weakEdges } = await supabase
         .from('causal_relationships_statistical')
         .select('source_domain, target_domain, evidence_weight')
         .eq('organization_id', organizationId)
         .lt('evidence_weight', 0.3)
-        .gt('evidence_weight', 0.1);
+        .gt('evidence_weight', 0.1)
+        .limit(500);
 
       if (weakEdges && weakEdges.length > 3) {
         insights.push({

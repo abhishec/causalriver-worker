@@ -956,7 +956,9 @@ export function createKnowledgeDependencyGraph(
         .select('*')
         .eq('organization_id', organizationId)
         .eq('signal_type', 'knowledge_dependency')
-        .eq('entity_type', 'dependency_edge');
+        .eq('entity_type', 'dependency_edge')
+        .order('created_at', { ascending: false })
+        .limit(50000); // 10M scale: cap dependency graph at 50K edges
 
       if (error) {
         throw new Error(`Failed to load knowledge dependency graph: ${error.message}`);

@@ -754,25 +754,29 @@ export async function loadDAGFromDatabase(
   const isCoreBrain = organizationId === CORE_BRAIN_ORG_ID;
   const includeCoreDAG = options?.includeCoreDAG ?? false;
 
-  // Fetch org relationships
+  // Fetch org relationships (capped for 10M scale — top edges by effect size)
   const { data: relationships, error } = await supabase
     .from('causal_relationships_statistical')
     .select('*')
     .eq('organization_id', organizationId)
-    .eq('is_significant', true);
+    .eq('is_significant', true)
+    .order('effect_size', { ascending: false })
+    .limit(5000);
 
   if (error) {
     throw new Error(`Failed to load DAG: ${error.message}`);
   }
 
-  // Optionally fetch core brain relationships
+  // Optionally fetch core brain relationships (capped for 10M scale)
   let coreRelationships: any[] = [];
   if (includeCoreDAG && !isCoreBrain) {
     const { data: coreData } = await supabase
       .from('causal_relationships_statistical')
       .select('*')
       .eq('organization_id', CORE_BRAIN_ORG_ID)
-      .eq('is_significant', true);
+      .eq('is_significant', true)
+      .order('effect_size', { ascending: false })
+      .limit(2000);
     coreRelationships = coreData || [];
   }
 

@@ -55,6 +55,28 @@ serve(async (req: Request) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
 
+    // ── Per-org rate limiting (10M scale: prevent single org from overwhelming DB) ──
+    const RATE_LIMIT_WINDOW_MS = 60_000; // 1 minute
+    const MAX_BATCHES_PER_MINUTE = 50;   // 50 batches × 500 signals = 25K signals/min max
+    const rateLimitKey = `ingest_rate:${organizationId}`;
+
+    const { data: recentActivity } = await supabase
+      .from('ai_agent_activity')
+      .select('id', { count: 'exact', head: true })
+      .eq('organization_id', organizationId)
+      .eq('agent_type', 'ingestion')
+      .gte('created_at', new Date(Date.now() - RATE_LIMIT_WINDOW_MS).toISOString());
+
+    if ((recentActivity as any)?.length >= MAX_BATCHES_PER_MINUTE) {
+      return new Response(
+        JSON.stringify({
+          error: 'Rate limit exceeded: maximum 50 ingestion batches per minute per organization',
+          retryAfterMs: RATE_LIMIT_WINDOW_MS,
+        }),
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Retry-After': '60' } }
+      );
+    }
+
     // 1. Store signals in cross_domain_signals
     const signalRecords = signals.map((s: any) => ({
       organization_id: organizationId,
@@ -115,6 +137,16 @@ serve(async (req: Request) => {
       console.error('Event stream insert warning:', eventError.message);
       // Non-fatal: signals were stored, events are supplementary
     }
+
+    // Log ingestion activity (non-blocking, used for rate limiting)
+    supabase.from('ai_agent_activity').insert({
+      organization_id: organizationId,
+      agent_type: 'ingestion',
+      action_type: 'batch_ingest',
+      input_summary: `${signalRecords.length} signals`,
+      output_summary: `${insertedSignals?.length || 0} inserted`,
+      created_at: new Date().toISOString(),
+    }).then(() => {}).catch(() => {}); // Fire-and-forget
 
     return new Response(
       JSON.stringify({
