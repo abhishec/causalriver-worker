@@ -52,6 +52,15 @@ import {
   type BrainFeedbackSignal,
 } from './closed-loop-executor';
 import type { DecisionJournalEntry } from './domain-action-engine';
+import {
+  createCognitiveStack,
+  type CognitiveStackInstance,
+  type CognitiveCycleResult,
+} from './cognitive-stack';
+import {
+  getFederatedCausalRelationships,
+  getFederatedPatterns,
+} from '../federation/federated-brain';
 
 // ============================================================================
 // TYPES
@@ -74,6 +83,8 @@ export interface BrainCommanderConfig {
   actionTimeoutMs?: number;
   /** Whether to run post-execution quality gate (V8 metacognition) */
   enableQualityGate?: boolean;
+  /** Whether to run cognitive stack (L3-L15) on queries (default: true) */
+  enableCognitiveStack?: boolean;
 }
 
 /** The unified result of any brain command */
@@ -90,6 +101,8 @@ export interface CommandResult {
   artifact?: Record<string, unknown>;
   /** Motor commands (if motor engine produced them) */
   motorCommands?: unknown[];
+  /** Cognitive stack result (L3-L15 reasoning, if enabled) */
+  cognitiveStack?: CognitiveCycleResult;
   /** Quality gate result (V8 metacognition, if enabled) */
   qualityGate?: { qualityScore: number; passesGate: boolean };
   /** Error message (if any) */
@@ -265,6 +278,13 @@ export function createBrainCommander(config: BrainCommanderConfig) {
     },
   });
 
+  // Cognitive Stack: L3-L15 reasoning engine for live queries
+  // Disconnection #2 FIX: Run cognitive layers on user queries, not just sleep cycles
+  const enableCognitive = config.enableCognitiveStack !== false;
+  const cognitiveStack: CognitiveStackInstance | null = enableCognitive
+    ? createCognitiveStack({ organizationId })
+    : null;
+
   // ── Main Command Entry Point ────────────────────────────────────────
 
   /**
@@ -314,6 +334,50 @@ export function createBrainCommander(config: BrainCommanderConfig) {
         userContext
       );
       timing.intelligence = performance.now() - intelligenceStart;
+
+      // ── Step 3b: Cognitive Stack (L3-L15) ──────────────────────────
+      // Disconnection #2 FIX: Run cognitive layers on live queries
+      let cognitiveResult: CognitiveCycleResult | undefined;
+      if (cognitiveStack) {
+        const cogStart = performance.now();
+        try {
+          // Convert intelligence data → cognitive stack inputs
+          const cogSignals = intelligence.insights.map((ins, i) => ({
+            id: `insight_${i}`,
+            source: 'brain_intelligence',
+            domain: ins.domain,
+            entityType: 'insight',
+            entityId: `insight_${i}`,
+            value: ins.importance,
+            timestamp: Date.now(),
+          }));
+
+          const cogEdges = intelligence.causalEdges.slice(0, 50).map(e => ({
+            source: e.source_domain,
+            target: e.target_domain,
+            weight: e.effect_size,
+            confidence: 1 - (e.granger_p_value || 0.5),
+            domain: e.source_domain,
+          }));
+
+          const cogPatterns = intelligence.patterns.map(p =>
+            p.llm_pattern_name || p.content
+          );
+
+          cognitiveResult = cognitiveStack.runCycle({
+            signals: cogSignals,
+            causalEdges: cogEdges,
+            patterns: cogPatterns,
+            predictions: [],
+            metrics: [],
+            userId: options?.userId,
+            userQuery: question,
+          });
+        } catch (cogErr) {
+          console.warn('[BrainCommander] Cognitive stack error (non-fatal):', cogErr instanceof Error ? cogErr.message : cogErr);
+        }
+        timing.cognitiveStack = performance.now() - cogStart;
+      }
 
       // ── Step 4: Action Engine (if needed) ───────────────────────────
       let artifact: Record<string, unknown> | undefined;

@@ -213,6 +213,14 @@ export interface NexusRepository {
   /** Create or update federation settings */
   upsertFederationSettings(settings: { contribute_to_core_brain?: boolean; excluded_domains?: string[] }): Promise<void>;
 
+  // ── Cognitive LEAP State Persistence ────────────────────────────
+  /** Save a cognitive LEAP's internal state (upserts by org + leap_type) */
+  persistLeapState(leapType: string, stateData: unknown): Promise<void>;
+  /** Load a cognitive LEAP's saved state */
+  loadLeapState(leapType: string): Promise<unknown | null>;
+  /** Load all LEAP states for this organization */
+  loadAllLeapStates(): Promise<Array<{ leap_type: string; state_data: unknown }>>;
+
   // ── Organization Info ────────────────────────────────────────────
   /** Get the organization ID this repository is scoped to */
   getOrganizationId(): string;
@@ -233,7 +241,11 @@ export interface NexusRepository {
  */
 export function createSupabaseRepository(
   supabase: SupabaseClient,
-  organizationId: string
+  organizationId: string,
+  options?: {
+    /** Called after signals are successfully inserted — used to wire event bus */
+    onSignalsInserted?: (signals: ConnectorSignal[]) => void;
+  }
 ): NexusRepository {
   return {
     // ── Signals ────────────────────────────────────────────────────
@@ -255,6 +267,15 @@ export function createSupabaseRepository(
 
       const { error } = await supabase.from('cross_domain_signals').insert(rows);
       if (error) throw new Error(`Failed to insert signals: ${error.message}`);
+
+      // Notify event bus of new signals (Disconnection #5 fix)
+      if (options?.onSignalsInserted) {
+        try {
+          options.onSignalsInserted(signals);
+        } catch {
+          // Non-critical: don't fail persistence because of event bus errors
+        }
+      }
     },
 
     async getSignalsByDomain(domain: string, since: Date): Promise<any[]> {
@@ -784,6 +805,52 @@ export function createSupabaseRepository(
       const { data, error } = await query;
       if (error) throw new Error(`Failed to get brain health history: ${error.message}`);
       return data || [];
+    },
+
+    // ── Cognitive LEAP State Persistence ────────────────────────────
+
+    async persistLeapState(leapType: string, stateData: unknown): Promise<void> {
+      const { error } = await supabase
+        .from('cognitive_leap_state')
+        .upsert(
+          {
+            organization_id: organizationId,
+            leap_type: leapType,
+            state_data: stateData,
+            state_version: 1,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'organization_id,leap_type' }
+        );
+      if (error) throw new Error(`Failed to persist LEAP state (${leapType}): ${error.message}`);
+    },
+
+    async loadLeapState(leapType: string): Promise<unknown | null> {
+      const { data, error } = await supabase
+        .from('cognitive_leap_state')
+        .select('state_data')
+        .eq('organization_id', organizationId)
+        .eq('leap_type', leapType)
+        .single();
+
+      // PGRST116 = no rows found (not an error)
+      if (error && error.code !== 'PGRST116') {
+        throw new Error(`Failed to load LEAP state (${leapType}): ${error.message}`);
+      }
+      return data?.state_data || null;
+    },
+
+    async loadAllLeapStates(): Promise<Array<{ leap_type: string; state_data: unknown }>> {
+      const { data, error } = await supabase
+        .from('cognitive_leap_state')
+        .select('leap_type, state_data')
+        .eq('organization_id', organizationId);
+
+      if (error) throw new Error(`Failed to load LEAP states: ${error.message}`);
+      return (data || []).map((row: any) => ({
+        leap_type: row.leap_type as string,
+        state_data: row.state_data,
+      }));
     },
 
     // ── Organization Info ──────────────────────────────────────────

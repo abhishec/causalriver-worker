@@ -159,7 +159,9 @@ import {
   type ContextManagerConfig,
 } from './context-manager';
 
-import { createEventBus } from '../causality/event-bus';
+import { createEventBus, createSignalEvent } from '../causality/event-bus';
+
+import { createSupabaseRepository, type NexusRepository } from '../persistence/supabase-repository';
 
 import {
   createCognitiveStack,
@@ -515,6 +517,36 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
     ...config.cognitiveStack,
   });
 
+  // Persistence Repository: Central nervous system data store
+  // Brain Analog: The brain's ability to consolidate and persist learned knowledge
+  // across sleep cycles. Without this, predictions and health snapshots are lost.
+  const repository: NexusRepository = createSupabaseRepository(supabase, organizationId, {
+    onSignalsInserted: (signals) => {
+      // Wire Disconnection #5: Signal ingestion → Event Bus
+      // Every ingested signal becomes a causal event for real-time processing
+      for (const signal of signals) {
+        try {
+          const event = createSignalEvent(organizationId, {
+            signal_type: signal.signal_type,
+            source_domain: signal.source_domain,
+            entity_type: signal.entity_type || 'unknown',
+            entity_id: signal.entity_id || `auto_${Date.now()}`,
+            client_id: signal.client_id,
+            signal_value: signal.signal_value,
+            feature_vector: {},
+            signal_metadata: (signal as any).metadata || {},
+          });
+          eventBus.emit(event);
+        } catch {
+          // Non-critical: don't fail signal persistence because of event bus
+        }
+      }
+      if (verbose) {
+        log(`Event Bus: emitted ${signals.length} signal event(s) for real-time processing`);
+      }
+    },
+  });
+
   // CTO Performance Tracker: Executive Meta-Cognition Dashboard
   // Brain Analog: The prefrontal cortex in executive monitoring mode —
   // tracking the brain's own performance across all dimensions.
@@ -695,27 +727,23 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
     log(`PFC → Dopamine: ${predictions.length} predictions recorded for future verification`);
 
     // Persist predictions to database for outcome resolution
-    if (repository && predictions.length > 0) {
+    if (predictions.length > 0) {
       try {
-        for (const pred of predictions) {
+        const predictionRows = predictions.map((pred) => {
           const reviewDate = new Date(pred.predictedAt);
           reviewDate.setDate(reviewDate.getDate() + pred.predictionWindowDays);
-
-          await repository.upsertPrediction({
-            domain: pred.entityId, // toDomain from cascade step
-            actionType: pred.predictionType,
-            prediction: `${scenario.direction} ${scenario.magnitudePercent}% in ${scenario.sourceDomain} → ${pred.predictedProbability.toFixed(2)} probability impact on ${pred.entityId}`,
+          return {
+            organization_id: organizationId,
+            domain: pred.entityId,
+            prediction_type: pred.predictionType,
+            entity_type: 'cascade_prediction',
+            entity_id: pred.entityId,
+            predicted_value: pred.predictedProbability,
+            predicted_outcome: `${scenario.direction} ${scenario.magnitudePercent}% in ${scenario.sourceDomain} → ${pred.predictedProbability.toFixed(2)} probability impact on ${pred.entityId}`,
             confidence: pred.predictedProbability,
-            reviewDate,
-            metadata: {
-              scenario,
-              featureSnapshot: pred.featureSnapshot,
-              confidenceLower: pred.confidenceLower,
-              confidenceUpper: pred.confidenceUpper,
-              modelVersion: pred.modelVersion,
-            },
-          });
-        }
+          };
+        });
+        await supabase.from('prediction_records').insert(predictionRows);
         log(`Persisted ${predictions.length} prediction(s) to database for outcome tracking`);
       } catch (persistErr) {
         log(`Failed to persist predictions (non-critical): ${(persistErr as Error).message}`);
@@ -887,6 +915,29 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
 
     log('=== BRAIN CYCLE START (Full Sleep Cycle) ===');
 
+    // Step -1: Restore cognitive stack LEAP states from Supabase
+    // Brain Analog: Waking up — recall learned associations, memories, and user models
+    try {
+      const leaps = cognitiveStack.layers;
+      const states = await repository.loadAllLeapStates();
+      for (const s of states) {
+        try {
+          if (s.leap_type === 'deep_dreaming' && leaps.dreaming.loadState) {
+            leaps.dreaming.loadState(s.state_data as any);
+          } else if (s.leap_type === 'hierarchical_memory' && leaps.memory.loadState) {
+            leaps.memory.loadState(s.state_data as any);
+          } else if (s.leap_type === 'theory_of_mind' && leaps.theoryOfMind.loadState) {
+            leaps.theoryOfMind.loadState(s.state_data as any);
+          }
+        } catch { /* skip individual load failures — start that LEAP fresh */ }
+      }
+      if (states.length > 0) {
+        log(`Cognitive Stack: Restored ${states.length} LEAP state(s) from Supabase`);
+      }
+    } catch (err) {
+      log(`LEAP state restoration skipped (starting fresh): ${(err as Error).message}`);
+    }
+
     // Step 0: Public data training (Sensory Cortex — feed the brain first)
     let publicDataResult: LLMTrainingResult | null = null;
     if (llmTrainingPipeline) {
@@ -1000,12 +1051,11 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
     }
 
     // Step 6b: Cognitive Stack cycle (Layers 3-15)
-    // This runs the full cognitive pipeline: Immune → Dream → Memory → Curiosity →
-    // Self-Model → Mesh → Imagination → Theory of Mind → Temporal → Red Team →
-    // Experimentation → Goal Planning → Narrative
+    // Disconnection #1 FIX: Feed REAL data from consolidation, learning, and DMN
+    // into the cognitive stack instead of empty arrays.
     let cognitiveStackResult: CognitiveCycleResult | null = null;
     try {
-      log('Cognitive Stack: running layers 3-15 cycle...');
+      log('Cognitive Stack: running layers 3-15 cycle with real data...');
 
       // Convert DMN insights and exploration data into cognitive signals
       const cogSignals = (dmnResult?.insights || []).map((insight, i) => ({
@@ -1018,27 +1068,103 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
         timestamp: Date.now(),
       }));
 
-      // Convert consolidation edges into causal edges for the cognitive stack
-      const cogEdges = (consolidationResult?.report?.stats?.causalEdgesDiscovered || 0) > 0
-        ? [{ source: 'consolidation', target: 'knowledge', weight: 0.7, confidence: 0.8 }]
-        : [];
+      // Build REAL patterns from consolidation discoveries
+      const cogPatterns: string[] = [];
+      if (consolidationResult?.report?.discoveries) {
+        cogPatterns.push(...consolidationResult.report.discoveries);
+      }
+      if (consolidationResult?.report?.stats) {
+        const s = consolidationResult.report.stats;
+        if (s.patternsFound > 0) cogPatterns.push(`${s.patternsFound} recurring patterns discovered`);
+        if (s.temporalRulesFound > 0) cogPatterns.push(`${s.temporalRulesFound} temporal rules discovered`);
+        if (s.sequentialPatternsFound > 0) cogPatterns.push(`${s.sequentialPatternsFound} sequential patterns discovered`);
+      }
+
+      // Build REAL predictions from learning result (Bayesian posterior shifts)
+      const cogPredictions: Array<{ id: string; domain: string; claim: string; confidence: number; evidence: string[]; method: string }> = [];
+      if (learningResult?.significantShifts) {
+        for (const shift of learningResult.significantShifts) {
+          cogPredictions.push({
+            id: `bayesian_${shift.sourceDomain}_${shift.targetDomain}`,
+            domain: shift.sourceDomain?.split('_')[0] || 'general',
+            claim: `Edge ${shift.sourceDomain}→${shift.targetDomain} shifted significantly`,
+            confidence: shift.mean ?? 0.5,
+            evidence: [`Bayesian posterior mean: ${shift.mean?.toFixed?.(3) ?? 'N/A'}`],
+            method: 'bayesian_posterior',
+          });
+        }
+      }
+
+      // Build REAL metrics from consolidation stats + learning
+      const cogMetrics: Array<{ name: string; domain: string; currentValue: number; previousValue: number }> = [];
+      if (consolidationResult?.report?.stats) {
+        const s = consolidationResult.report.stats;
+        cogMetrics.push(
+          { name: 'signals_processed', domain: 'brain', currentValue: s.signalsProcessed, previousValue: 0 },
+          { name: 'causal_edges_discovered', domain: 'brain', currentValue: s.causalEdgesDiscovered, previousValue: 0 },
+          { name: 'edges_pruned', domain: 'brain', currentValue: s.edgesPruned, previousValue: 0 },
+          { name: 'patterns_found', domain: 'brain', currentValue: s.patternsFound, previousValue: 0 },
+          { name: 'anomalies_detected', domain: 'brain', currentValue: s.anomaliesDetected, previousValue: 0 },
+        );
+      }
+      if (learningResult) {
+        cogMetrics.push(
+          { name: 'bayesian_updates', domain: 'learning', currentValue: learningResult.bayesianUpdates || 0, previousValue: 0 },
+          { name: 'contrastive_accuracy', domain: 'learning', currentValue: learningResult.contrastiveAccuracy || 0, previousValue: 0 },
+        );
+      }
+
+      // Build REAL causal edges from consolidation (not just a single stub)
+      const cogEdges: Array<{ source: string; target: string; weight: number; confidence: number; domain?: string }> = [];
+      if ((consolidationResult?.report?.stats?.causalEdgesDiscovered || 0) > 0) {
+        cogEdges.push({ source: 'consolidation', target: 'knowledge', weight: 0.7, confidence: 0.8 });
+      }
+      // Add edges from predictions
+      for (const p of cogPredictions) {
+        cogEdges.push({
+          source: p.domain,
+          target: 'prediction',
+          weight: p.confidence,
+          confidence: p.confidence,
+          domain: p.domain,
+        });
+      }
 
       cognitiveStackResult = cognitiveStack.runCycle({
         signals: cogSignals,
         causalEdges: cogEdges,
-        patterns: [],
-        predictions: [],
-        metrics: [],
+        patterns: cogPatterns,
+        predictions: cogPredictions,
+        metrics: cogMetrics,
       });
 
       log(`Cognitive Stack complete: ${cognitiveStackResult.immune.signalsChecked} signals checked, ` +
           `${cognitiveStackResult.dreaming.associationsFound} dream associations, ` +
           `${cognitiveStackResult.curiosity.hypothesesGenerated} hypotheses, ` +
-          `${cognitiveStackResult.redTeam.predictionsTested} red-team tests`);
+          `${cognitiveStackResult.redTeam.predictionsTested} red-team tests, ` +
+          `patterns fed: ${cogPatterns.length}, predictions fed: ${cogPredictions.length}, metrics fed: ${cogMetrics.length}`);
     } catch (err) {
       const msg = `Cognitive Stack cycle failed: ${(err as Error).message}`;
       errors.push(msg);
       log(msg);
+    }
+
+    // Step 6c: Persist cognitive stack LEAP states to Supabase
+    // Disconnection #4 FIX: Save LEAP state so it survives restarts
+    if (cognitiveStackResult) {
+      try {
+        const leaps = cognitiveStack.layers;
+        await Promise.all([
+          repository.persistLeapState('deep_dreaming', leaps.dreaming.getState()),
+          repository.persistLeapState('hierarchical_memory', leaps.memory.getState()),
+          repository.persistLeapState('theory_of_mind', leaps.theoryOfMind.getState()),
+        ]);
+        log('Cognitive Stack: LEAP states persisted to Supabase (deep_dreaming, hierarchical_memory, theory_of_mind)');
+      } catch (err) {
+        const msg = `LEAP state persistence failed (non-critical): ${(err as Error).message}`;
+        errors.push(msg);
+        log(msg);
+      }
     }
 
     // Step 7: Invalidate stale fast-paths after consolidation changed the graph
@@ -1126,36 +1252,32 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
     log(`=== BRAIN CYCLE END (${status}) — ${totalDurationMs}ms, ${errors.length} errors ===`);
 
     // Save brain health snapshot after each cycle for trend analysis
-    if (repository) {
-      try {
-        await repository.saveBrainHealthSnapshot({
-          totalSignals: consolidationResult?.report.stats.signalsProcessed,
-          totalRelationships: consolidationResult?.report.stats.causalEdgesDiscovered,
-          totalMemories: consolidationResult?.report.stats.patternsStored,
-          activeAgents: consolidationResult ? 1 : 0, // Will be enhanced when agent count is tracked
-          learningCyclesCompleted: learningResult ? 1 : 0,
-          lastLearningCycleAt: learningResult ? new Date() : undefined,
-          averageBrierScore: undefined, // Will be populated by calibration loop
-          predictionAccuracy: undefined, // Will be populated by calibration loop
-          totalPredictions: 0, // Will be tracked separately
-          resolvedPredictions: 0, // Will be tracked separately
-          errorCount: errors.length,
-          warningCount: status === 'partial' ? 1 : 0,
-          snapshotType: 'cycle',
-          metadata: {
-            cycleId: startedAt,
-            status,
-            totalDurationMs,
-            consolidationSuccess: consolidationResult !== null,
-            dmnSuccess: dmnResult !== null,
-            learningSuccess: learningResult !== null,
-            narrative: narrativeParts.join(' '),
-          },
-        });
-        log(`Brain health snapshot saved for cycle ${startedAt}`);
-      } catch (snapshotErr) {
-        log(`Failed to save brain health snapshot (non-critical): ${(snapshotErr as Error).message}`);
-      }
+    try {
+      await supabase.from('brain_health_snapshots').insert({
+        organization_id: organizationId,
+        total_signals: consolidationResult?.report.stats.signalsProcessed ?? 0,
+        total_relationships: consolidationResult?.report.stats.causalEdgesDiscovered ?? 0,
+        total_memories: consolidationResult?.report.stats.memoriesCreated ?? 0,
+        active_agents: consolidationResult ? 1 : 0,
+        learning_cycles_completed: learningResult ? 1 : 0,
+        last_learning_cycle_at: learningResult ? new Date().toISOString() : null,
+        error_count: errors.length,
+        warning_count: status === 'partial' ? 1 : 0,
+        snapshot_type: 'cycle',
+        metadata: {
+          cycleId: startedAt,
+          status,
+          totalDurationMs,
+          consolidationSuccess: consolidationResult !== null,
+          dmnSuccess: dmnResult !== null,
+          learningSuccess: learningResult !== null,
+          narrative: narrativeParts.join(' '),
+        },
+        created_at: new Date().toISOString(),
+      });
+      log(`Brain health snapshot saved for cycle ${startedAt}`);
+    } catch (snapshotErr) {
+      log(`Failed to save brain health snapshot (non-critical): ${(snapshotErr as Error).message}`);
     }
 
     return {

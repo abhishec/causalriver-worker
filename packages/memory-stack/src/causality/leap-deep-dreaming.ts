@@ -126,6 +126,10 @@ export interface DeepDreamingInstance {
   validateAssociation: (id: string, confirmed: boolean) => void;
   getStats: () => DreamStats;
   reset: () => void;
+  /** Serialize internal state for persistence */
+  getState: () => { associations: DreamAssociation[]; cycleCount: number; totalGenerated: number; totalSurfaced: number; totalDiscarded: number };
+  /** Restore internal state from persistence */
+  loadState: (state: { associations: DreamAssociation[]; cycleCount: number; totalGenerated: number; totalSurfaced: number; totalDiscarded: number }) => void;
 }
 
 /** Minimal signal type for dreaming */
@@ -676,6 +680,27 @@ export function createDeepDreaming(config?: DeepDreamingConfig): DeepDreamingIns
     associations.clear();
   }
 
+  function getState() {
+    return {
+      associations: Array.from(associations.values()),
+      cycleCount,
+      totalGenerated,
+      totalSurfaced,
+      totalDiscarded,
+    };
+  }
+
+  function loadState(state: { associations: DreamAssociation[]; cycleCount: number; totalGenerated: number; totalSurfaced: number; totalDiscarded: number }) {
+    associations.clear();
+    for (const a of state.associations) {
+      associations.set(a.id, a);
+    }
+    cycleCount = state.cycleCount;
+    totalGenerated = state.totalGenerated;
+    totalSurfaced = state.totalSurfaced;
+    totalDiscarded = state.totalDiscarded;
+  }
+
   return {
     dream,
     getIncubating,
@@ -683,5 +708,7 @@ export function createDeepDreaming(config?: DeepDreamingConfig): DeepDreamingIns
     validateAssociation,
     getStats,
     reset,
+    getState,
+    loadState,
   };
 }

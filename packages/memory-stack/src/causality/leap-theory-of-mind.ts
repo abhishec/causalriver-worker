@@ -137,6 +137,10 @@ export interface TheoryOfMindInstance {
   getResponseParams: (userId: string) => ResponseParameters;
   /** Get stats */
   getStats: () => TheoryOfMindStats;
+  /** Serialize internal state for persistence */
+  getState: () => { userModels: Array<[string, UserModel]>; totalInteractions: number; intentCorrect: number; intentAttempted: number };
+  /** Restore internal state from persistence */
+  loadState: (state: { userModels: Array<[string, UserModel]>; totalInteractions: number; intentCorrect: number; intentAttempted: number }) => void;
 }
 
 export interface ResponseParameters {
@@ -532,6 +536,25 @@ export function createTheoryOfMind(config?: TheoryOfMindConfig): TheoryOfMindIns
     };
   }
 
+  function getState() {
+    return {
+      userModels: Array.from(userModels.entries()),
+      totalInteractions,
+      intentCorrect,
+      intentAttempted,
+    };
+  }
+
+  function loadState(state: { userModels: Array<[string, UserModel]>; totalInteractions: number; intentCorrect: number; intentAttempted: number }) {
+    userModels.clear();
+    for (const [userId, model] of state.userModels) {
+      userModels.set(userId, model);
+    }
+    totalInteractions = state.totalInteractions;
+    intentCorrect = state.intentCorrect;
+    intentAttempted = state.intentAttempted;
+  }
+
   return {
     recordInteraction,
     getUserModel,
@@ -540,5 +563,7 @@ export function createTheoryOfMind(config?: TheoryOfMindConfig): TheoryOfMindIns
     detectCognitiveState,
     getResponseParams,
     getStats,
+    getState,
+    loadState,
   };
 }

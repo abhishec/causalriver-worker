@@ -162,6 +162,10 @@ export interface HierarchicalMemoryInstance {
   checkReminders: (currentState: Record<string, unknown>) => string[];
   /** Get stats */
   getStats: () => HierarchicalMemoryStats;
+  /** Serialize internal state for persistence */
+  getState: () => { workingMemory: WorkingMemoryItem[]; episodes: Episode[]; semanticFacts: SemanticFact[]; consolidationCount: number };
+  /** Restore internal state from persistence */
+  loadState: (state: { workingMemory: WorkingMemoryItem[]; episodes: Episode[]; semanticFacts: SemanticFact[]; consolidationCount: number }) => void;
 }
 
 // --- Internal ---
@@ -554,6 +558,29 @@ export function createHierarchicalMemory(config?: HierarchicalMemoryConfig): Hie
     };
   }
 
+  function getState() {
+    return {
+      workingMemory: [...workingMemory],
+      episodes: Array.from(episodes.values()),
+      semanticFacts: Array.from(semanticFacts.values()),
+      consolidationCount,
+    };
+  }
+
+  function loadState(state: { workingMemory: WorkingMemoryItem[]; episodes: Episode[]; semanticFacts: SemanticFact[]; consolidationCount: number }) {
+    workingMemory.length = 0;
+    workingMemory.push(...state.workingMemory);
+    episodes.clear();
+    for (const ep of state.episodes) {
+      episodes.set(ep.id, ep);
+    }
+    semanticFacts.clear();
+    for (const fact of state.semanticFacts) {
+      semanticFacts.set(fact.id, fact);
+    }
+    consolidationCount = state.consolidationCount;
+  }
+
   return {
     encode,
     retrieve,
@@ -565,5 +592,7 @@ export function createHierarchicalMemory(config?: HierarchicalMemoryConfig): Hie
     setReminder,
     checkReminders,
     getStats,
+    getState,
+    loadState,
   };
 }
