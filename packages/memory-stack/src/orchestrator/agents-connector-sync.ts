@@ -92,7 +92,7 @@ const CONNECTOR_FACTORIES: Record<
   },
   github: (config) => createGitHubConnector(config as unknown as GitHubConnectorConfig),
   jira: (config) => createJiraConnector(config as unknown as JiraConnectorConfig),
-  slack: (config) => createNexusSlackConnector(config as unknown as SlackConnectorConfig),
+  slack: (config) => createNexusSlackConnector(config as unknown as SlackConnectorConfig) as unknown as NexusConnector,
   pagerduty: (config) => createPagerDutyConnector(config as unknown as PagerDutyConnectorConfig),
   'google-calendar': (config) => createGoogleCalendarConnector(config as unknown as GoogleCalendarConnectorConfig),
   'google-chat': (config) => createGoogleChatConnector(config as unknown as GoogleChatConnectorConfig),

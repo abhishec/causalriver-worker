@@ -26,5 +26,6 @@ export default defineConfig({
     'tree-sitter-go',
     'tree-sitter-python',
     'tree-sitter-scala',
+    '@nexus-ai/slack-connector',
   ],
 });

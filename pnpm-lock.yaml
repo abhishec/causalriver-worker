@@ -186,6 +186,9 @@ importers:
       '@anthropic-ai/sdk':
         specifier: ^0.20.9
         version: 0.20.9
+      '@nexus-ai/slack-connector':
+        specifier: workspace:*
+        version: link:../slack-connector
       '@octokit/rest':
         specifier: ^20.1.2
         version: 20.1.2

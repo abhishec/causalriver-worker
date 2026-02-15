@@ -17,7 +17,7 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { ExpertiseGraph, type ExpertiseEvidence } from '../core/expertise-graph';
+import { createExpertiseGraph, type ExpertiseEdge } from '../core/expertise-graph';
 
 // ============================================================================
 // TYPES
@@ -182,11 +182,13 @@ export async function detectBottlenecks(
 ): Promise<BottleneckMetrics> {
   const { supabase, organizationId, minStrength = 0.05, lookbackDays = 90 } = config;
 
-  // Initialize expertise graph
-  const expertiseGraph = new ExpertiseGraph(supabase);
+  // Initialize expertise graph and load org data
+  const expertiseGraph = createExpertiseGraph();
+  await expertiseGraph.load(supabase, organizationId);
 
   // Query experts for this domain
-  const experts = await expertiseGraph.queryExperts(domain, {
+  const experts = expertiseGraph.queryExperts({
+    topic: domain,
     minStrength,
     limit: 100,
   });
@@ -204,9 +206,9 @@ export async function detectBottlenecks(
   }
 
   // Extract strength values
-  const strengths = experts.map((e) => e.strength);
+  const strengths = experts.map((e: ExpertiseEdge) => e.strength);
   const contributorMap = new Map(
-    experts.map((e) => [e.contributor_id, { name: e.contributor_name, strength: e.strength }])
+    experts.map((e: ExpertiseEdge) => [e.contributorId, { name: e.contributorName ?? 'Unknown', strength: e.strength }])
   );
 
   // Calculate concentration metrics
@@ -219,7 +221,7 @@ export async function detectBottlenecks(
 
   for (const expert of experts) {
     const centralityScore = calculateCentralityScore(expert.strength, strengths);
-    const expertiseShare = (expert.strength / strengths.reduce((a, b) => a + b, 0)) * 100;
+    const expertiseShare = (expert.strength / strengths.reduce((a: number, b: number) => a + b, 0)) * 100;
 
     // Determine severity
     let severity: 'critical' | 'high' | 'medium' | null = null;
@@ -250,8 +252,8 @@ export async function detectBottlenecks(
 
     bottlenecks.push({
       severity,
-      contributorId: expert.contributor_id,
-      contributorName: expert.contributor_name || 'Unknown',
+      contributorId: expert.contributorId,
+      contributorName: expert.contributorName || 'Unknown',
       expertiseShare,
       centralityScore,
       criticalTopics: [domain], // Can be expanded to show sub-topics

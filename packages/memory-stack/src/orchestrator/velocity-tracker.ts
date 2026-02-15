@@ -312,9 +312,8 @@ export async function predictVelocityCollapse(
   let rootCause: VelocityCollapseAlert['rootCause'] = 'unknown';
 
   try {
-    causalEvidence = await computeGrangerCausality(wipValues, velocityValues, {
-      maxLag: 7,
-      significanceLevel: 0.05,
+    causalEvidence = computeGrangerCausality(wipValues, velocityValues, 7, {
+      alpha: 0.05,
     });
 
     if (causalEvidence.isSignificant && Math.abs(causalEvidence.effectSize) > 0.2) {

@@ -14,10 +14,10 @@
  */
 
 // Brain Commander
-export { BrainCommander, type BrainCommanderConfig, type CommandResult } from './brain-commander';
+export { createBrainCommander, type BrainCommanderConfig, type CommandResult, type BrainCommanderInstance } from './brain-commander';
 
 // PR Analysis
-export { analyzePR, type PRAnalysis, type PRRisk } from './pr-analyzer';
+export { createPRAnalyzer, type PRAnalysisConfig, type PRAnalysisResult } from './pr-analyzer';
 
 // Deployment Actions
 export {
@@ -73,14 +73,13 @@ export {
 
 // Anomaly Monitoring
 export {
-  detectAnomalies,
-  type AnomalyDetectionConfig,
-  type AnomalyResult,
+  createAnomalyMonitor,
+  type AnomalyMonitorConfig,
 } from './anomaly-monitor';
 
 // Cascade Alerts
 export {
-  predictCascade,
-  type CascadeAlert,
-  type CascadePrediction,
+  createCascadeAlertPipeline,
+  type CascadeAlertPayload,
+  type CascadeAlertConfig,
 } from './cascade-alert-pipeline';

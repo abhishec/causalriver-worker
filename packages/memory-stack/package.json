@@ -74,6 +74,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.20.9",
+    "@nexus-ai/slack-connector": "workspace:*",
     "@octokit/rest": "^20.1.2",
     "@slack/web-api": "^7.0.0",
     "@typescript-eslint/parser": "^6.21.0",
