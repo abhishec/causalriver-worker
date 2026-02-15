@@ -68,6 +68,18 @@ export interface FederatedQueryOptions<T = Record<string, unknown>> {
   includeCoreData?: boolean;
   /** Max CORE results to return (limits baseline noise). Default: same as ORG limit */
   coreLimit?: number;
+  /**
+   * Max age for CORE data in days. Default: 365.
+   * At 10M+ signals, querying the entire CORE brain is slow. This limits CORE queries
+   * to recently-computed data. ORG queries are NOT filtered by time (org data is always small enough).
+   */
+  coreMaxAgeDays?: number;
+  /**
+   * Per-query timeout in milliseconds. Default: 5000 (5 seconds).
+   * Prevents cascading failures when CORE query stalls (network, slow scan).
+   * If CORE times out, ORG results are returned alone — graceful degradation.
+   */
+  queryTimeoutMs?: number;
 }
 
 // ============================================================================
@@ -114,20 +126,43 @@ export function assertWriteAllowed(organizationId: string, operation: string): v
 export async function federatedQuery<T = Record<string, unknown>>(
   tableName: string,
   organizationId: string,
-  queryBuilder: (client: ReturnType<typeof getClientForTableInEdge>, orgId: string) => Promise<{ data: T[] | null; error: any }>,
+  queryBuilder: (client: ReturnType<typeof getClientForTableInEdge>, orgId: string, maxAgeCutoff?: string) => Promise<{ data: T[] | null; error: any }>,
   options: FederatedQueryOptions<T> = {}
 ): Promise<FederatedQueryResult<T>> {
-  const { deduplicateBy, includeCoreData = true } = options;
+  const { deduplicateBy, includeCoreData = true, coreMaxAgeDays = 365, queryTimeoutMs = 5000 } = options;
   const client = getClientForTableInEdge(tableName);
 
+  // Time-based partitioning for CORE queries: at 10M+ signals, scanning all CORE data is O(n).
+  // By filtering to recent data (default: last 365 days), we reduce scan to O(recent).
+  // ORG data is NOT filtered — org-specific data is always small enough.
+  const coreMaxAgeCutoff = new Date(Date.now() - coreMaxAgeDays * 24 * 60 * 60 * 1000).toISOString();
+
+  // Per-query timeout: prevents cascading failures when CORE hangs (network, slow scan).
+  // If CORE times out, ORG results are returned alone — graceful degradation.
+  const withQueryTimeout = <R>(promise: Promise<R>, label: string): Promise<R> =>
+    new Promise<R>((resolve, reject) => {
+      const timer = setTimeout(() => reject(new Error(`Federation ${label} query timed out after ${queryTimeoutMs}ms`)), queryTimeoutMs);
+      promise.then(
+        (val) => { clearTimeout(timer); resolve(val); },
+        (err) => { clearTimeout(timer); reject(err); }
+      );
+    });
+
   // Parallel queries to ORG and CORE
+  // CORE query gets a time cutoff for 10M+ scalability (index scan vs full table scan)
   const [orgResult, coreResult] = await Promise.all([
-    queryBuilder(client, organizationId).catch(err => {
+    withQueryTimeout(
+      queryBuilder(client, organizationId),
+      `ORG:${tableName}`
+    ).catch(err => {
       console.error(`[FederatedBrain] ORG query error on ${tableName}:`, err);
       return { data: [] as T[], error: err };
     }),
     includeCoreData
-      ? queryBuilder(client, CORE_ORGANIZATION_ID).catch(err => {
+      ? withQueryTimeout(
+          queryBuilder(client, CORE_ORGANIZATION_ID, coreMaxAgeCutoff),
+          `CORE:${tableName}`
+        ).catch(err => {
           console.warn(`[FederatedBrain] CORE query error on ${tableName} (non-fatal):`, err);
           return { data: [] as T[], error: err };
         })
@@ -205,7 +240,7 @@ export async function getFederatedPatterns(
   return federatedQuery(
     'ai_memory',
     organizationId,
-    async (client, orgId) => {
+    async (client, orgId, maxAgeCutoff) => {
       let query = client
         .from('ai_memory')
         .select('*')
@@ -216,6 +251,11 @@ export async function getFederatedPatterns(
 
       if (memoryType) {
         query = query.eq('memory_type', memoryType);
+      }
+
+      // Time-based partitioning for CORE queries at 10M+ scale
+      if (maxAgeCutoff) {
+        query = query.gte('created_at', maxAgeCutoff);
       }
 
       return query.limit(limit);
@@ -239,14 +279,21 @@ export async function getFederatedCausalRelationships(
   return federatedQuery(
     'causal_relationships_statistical',
     organizationId,
-    async (client, orgId) => {
-      return client
+    async (client, orgId, maxAgeCutoff) => {
+      let query = client
         .from('causal_relationships_statistical')
         .select('*')
         .eq('organization_id', orgId)
         .eq('is_significant', true)
         .order('effect_size', { ascending: false })
         .limit(limit);
+
+      // Time-based partitioning: CORE queries filter by recency to avoid full-table scan at 10M+
+      if (maxAgeCutoff) {
+        query = query.gte('last_computed_at', maxAgeCutoff);
+      }
+
+      return query;
     },
     { deduplicateBy: 'id', includeCoreData }
   );
@@ -260,23 +307,29 @@ export async function getFederatedGrammarRules(
   options: {
     limit?: number;
     includeCoreData?: boolean;
+    coreMaxAgeDays?: number;
   } = {}
 ): Promise<FederatedQueryResult<any>> {
-  const { limit = 20, includeCoreData = true } = options;
+  const { limit = 20, includeCoreData = true, coreMaxAgeDays = 365 } = options;
 
   return federatedQuery(
     'brain_grammar_rules',
     organizationId,
-    async (client, orgId) => {
-      return client
+    async (client, orgId, maxAgeCutoff) => {
+      let query = client
         .from('brain_grammar_rules')
         .select('*')
         .eq('organization_id', orgId)
         .eq('is_active', true)
-        .order('confidence', { ascending: false })
-        .limit(limit);
+        .order('confidence', { ascending: false });
+
+      if (maxAgeCutoff) {
+        query = query.gte('created_at', maxAgeCutoff);
+      }
+
+      return query.limit(limit);
     },
-    { deduplicateBy: 'rule_type', includeCoreData }
+    { deduplicateBy: 'rule_type', includeCoreData, coreMaxAgeDays }
   );
 }
 
@@ -290,14 +343,15 @@ export async function getFederatedCausalChains(
     minConfidence?: number;
     limit?: number;
     includeCoreData?: boolean;
+    coreMaxAgeDays?: number;
   } = {}
 ): Promise<FederatedQueryResult<any>> {
-  const { validatedOnly = true, minConfidence = 0.5, limit = 20, includeCoreData = true } = options;
+  const { validatedOnly = true, minConfidence = 0.5, limit = 20, includeCoreData = true, coreMaxAgeDays = 365 } = options;
 
   return federatedQuery(
     'causal_chains',
     organizationId,
-    async (client, orgId) => {
+    async (client, orgId, maxAgeCutoff) => {
       let query = client
         .from('causal_chains')
         .select('*')
@@ -308,10 +362,13 @@ export async function getFederatedCausalChains(
       if (validatedOnly) {
         query = query.eq('validated', true);
       }
+      if (maxAgeCutoff) {
+        query = query.gte('created_at', maxAgeCutoff);
+      }
 
       return query.limit(limit);
     },
-    { deduplicateBy: 'id', includeCoreData }
+    { deduplicateBy: 'id', includeCoreData, coreMaxAgeDays }
   );
 }
 
@@ -324,14 +381,15 @@ export async function getFederatedCausalInsights(
     insightType?: string;
     limit?: number;
     includeCoreData?: boolean;
+    coreMaxAgeDays?: number;
   } = {}
 ): Promise<FederatedQueryResult<any>> {
-  const { insightType, limit = 20, includeCoreData = true } = options;
+  const { insightType, limit = 20, includeCoreData = true, coreMaxAgeDays = 365 } = options;
 
   return federatedQuery(
     'causal_insights',
     organizationId,
-    async (client, orgId) => {
+    async (client, orgId, maxAgeCutoff) => {
       let query = client
         .from('causal_insights')
         .select('*')
@@ -341,10 +399,13 @@ export async function getFederatedCausalInsights(
       if (insightType) {
         query = query.eq('insight_type', insightType);
       }
+      if (maxAgeCutoff) {
+        query = query.gte('created_at', maxAgeCutoff);
+      }
 
       return query.limit(limit);
     },
-    { includeCoreData }
+    { includeCoreData, coreMaxAgeDays }
   );
 }
 
@@ -357,25 +418,31 @@ export async function getFederatedCrossDomainSignals(
     daysSince?: number;
     limit?: number;
     includeCoreData?: boolean;
+    coreMaxAgeDays?: number;
   } = {}
 ): Promise<FederatedQueryResult<any>> {
-  const { daysSince = 30, limit = 100, includeCoreData = true } = options;
+  const { daysSince = 30, limit = 100, includeCoreData = true, coreMaxAgeDays = 365 } = options;
   const cutoffDate = new Date();
   cutoffDate.setDate(cutoffDate.getDate() - daysSince);
 
   return federatedQuery(
     'cross_domain_signals',
     organizationId,
-    async (client, orgId) => {
-      return client
+    async (client, orgId, maxAgeCutoff) => {
+      let query = client
         .from('cross_domain_signals')
         .select('*')
         .eq('organization_id', orgId)
         .gte('signal_timestamp', cutoffDate.toISOString())
-        .order('signal_timestamp', { ascending: false })
-        .limit(limit);
+        .order('signal_timestamp', { ascending: false });
+
+      if (maxAgeCutoff) {
+        query = query.gte('created_at', maxAgeCutoff);
+      }
+
+      return query.limit(limit);
     },
-    { includeCoreData }
+    { includeCoreData, coreMaxAgeDays }
   );
 }
 
@@ -386,23 +453,29 @@ export async function getFederatedDomainRelationships(
   organizationId: string,
   options: {
     includeCoreData?: boolean;
+    coreMaxAgeDays?: number;
   } = {}
 ): Promise<FederatedQueryResult<any>> {
-  const { includeCoreData = true } = options;
+  const { includeCoreData = true, coreMaxAgeDays = 365 } = options;
 
   return federatedQuery(
     'ai_domain_relationships',
     organizationId,
-    async (client, orgId) => {
-      return client
+    async (client, orgId, maxAgeCutoff) => {
+      let query = client
         .from('ai_domain_relationships')
         .select('*')
         .eq('organization_id', orgId)
         .eq('is_active', true)
-        .order('strength', { ascending: false })
-        .limit(20);
+        .order('strength', { ascending: false });
+
+      if (maxAgeCutoff) {
+        query = query.gte('created_at', maxAgeCutoff);
+      }
+
+      return query.limit(20);
     },
-    { deduplicateBy: 'id', includeCoreData }
+    { deduplicateBy: 'id', includeCoreData, coreMaxAgeDays }
   );
 }
 
@@ -416,14 +489,15 @@ export async function getFederatedPredictionRecords(
     verifiedOnly?: boolean;
     limit?: number;
     includeCoreData?: boolean;
+    coreMaxAgeDays?: number;
   } = {}
 ): Promise<FederatedQueryResult<any>> {
-  const { predictionType, verifiedOnly = false, limit = 50, includeCoreData = true } = options;
+  const { predictionType, verifiedOnly = false, limit = 50, includeCoreData = true, coreMaxAgeDays = 365 } = options;
 
   return federatedQuery(
     'prediction_records',
     organizationId,
-    async (client, orgId) => {
+    async (client, orgId, maxAgeCutoff) => {
       let query = client
         .from('prediction_records')
         .select('*')
@@ -436,10 +510,13 @@ export async function getFederatedPredictionRecords(
       if (verifiedOnly) {
         query = query.eq('outcome_verified', true);
       }
+      if (maxAgeCutoff) {
+        query = query.gte('created_at', maxAgeCutoff);
+      }
 
       return query.limit(limit);
     },
-    { includeCoreData }
+    { includeCoreData, coreMaxAgeDays }
   );
 }
 
@@ -451,23 +528,29 @@ export async function getFederatedActiveCascades(
   options: {
     limit?: number;
     includeCoreData?: boolean;
+    coreMaxAgeDays?: number;
   } = {}
 ): Promise<FederatedQueryResult<any>> {
-  const { limit = 20, includeCoreData = true } = options;
+  const { limit = 20, includeCoreData = true, coreMaxAgeDays = 365 } = options;
 
   return federatedQuery(
     'active_cascades',
     organizationId,
-    async (client, orgId) => {
-      return client
+    async (client, orgId, maxAgeCutoff) => {
+      let query = client
         .from('active_cascades')
         .select('*')
         .eq('organization_id', orgId)
         .eq('status', 'active')
-        .order('detected_at', { ascending: false })
-        .limit(limit);
+        .order('detected_at', { ascending: false });
+
+      if (maxAgeCutoff) {
+        query = query.gte('detected_at', maxAgeCutoff);
+      }
+
+      return query.limit(limit);
     },
-    { includeCoreData }
+    { includeCoreData, coreMaxAgeDays }
   );
 }
 

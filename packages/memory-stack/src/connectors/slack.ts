@@ -114,44 +114,71 @@ export function createSlackConnector(config: SlackConnectorConfig): SlackConnect
       const channels = config.channels ?? [];
       for (const channel of channels) {
         try {
-          const data = await slackGet('conversations.history', {
-            channel,
-            limit: String(maxMessages),
-          });
+          // Full cursor-based pagination — handles 1-10M messages per channel
+          let cursor: string | undefined;
+          let channelMsgCount = 0;
 
-          if (!data.ok) {
-            errors.push(`Channel ${channel}: ${data.error}`);
-            continue;
-          }
-
-          for (const msg of data.messages || []) {
-            const signal: ConnectorSignal = {
-              organization_id: organizationId,
-              source_domain: domain,
-              signal_type: msg.thread_ts && msg.thread_ts !== msg.ts ? 'thread_reply' : 'message_sent',
-              signal_value: 1,
-              entity_type: 'slack_message',
-              entity_id: `${channel}_${msg.ts}`,
-              metadata: {
-                channel,
-                user: msg.user,
-                text: (msg.text || '').substring(0, 2000),
-                timestamp: msg.ts,
-                hasThread: !!msg.thread_ts,
-                replyCount: msg.reply_count || 0,
-              },
+          while (true) {
+            const params: Record<string, string> = {
+              channel,
+              limit: '200', // Slack max per page
             };
+            if (cursor) {
+              params.cursor = cursor;
+            }
 
-            // NLP enrichment: sentiment + topics + urgency from message text
-            enrichSignalWithNLP(signal, ['text']);
+            const data = await slackGet('conversations.history', params);
 
-            signals.push(signal);
+            if (!data.ok) {
+              errors.push(`Channel ${channel}: ${data.error}`);
+              break;
+            }
+
+            for (const msg of data.messages || []) {
+              const signal: ConnectorSignal = {
+                organization_id: organizationId,
+                source_domain: domain,
+                signal_type: msg.thread_ts && msg.thread_ts !== msg.ts ? 'thread_reply' : 'message_sent',
+                signal_value: 1,
+                entity_type: 'slack_message',
+                entity_id: `${channel}_${msg.ts}`,
+                metadata: {
+                  channel,
+                  user: msg.user,
+                  text: (msg.text || '').substring(0, 2000),
+                  timestamp: msg.ts,
+                  hasThread: !!msg.thread_ts,
+                  replyCount: msg.reply_count || 0,
+                },
+              };
+
+              // NLP enrichment: sentiment + topics + urgency from message text
+              enrichSignalWithNLP(signal, ['text']);
+
+              signals.push(signal);
+              channelMsgCount++;
+            }
+
+            // Batch-store every 5000 signals to avoid OOM with millions of messages
+            if (signals.length >= 5000) {
+              await storeConnectorSignals(supabase, signals);
+              signals.length = 0; // Clear after storing
+            }
+
+            // Cursor-based pagination: Slack returns next_cursor in response_metadata
+            const nextCursor = data.response_metadata?.next_cursor;
+            if (!nextCursor || nextCursor === '') break;
+            cursor = nextCursor;
+
+            // Rate limit: Slack allows ~1 req/sec for conversations.history (Tier 3)
+            await new Promise(r => setTimeout(r, 100));
           }
         } catch (err) {
           errors.push(`Channel ${channel}: ${err instanceof Error ? err.message : String(err)}`);
         }
       }
 
+      // Store any remaining signals from the last batch
       if (signals.length > 0) {
         await storeConnectorSignals(supabase, signals);
       }
@@ -195,37 +222,60 @@ export function createSlackConnector(config: SlackConnectorConfig): SlackConnect
       const channels = config.channels ?? [];
       for (const channel of channels) {
         try {
-          const data = await slackGet('conversations.history', {
-            channel,
-            oldest,
-            limit: String(maxMessages),
-          });
+          // Full cursor-based pagination for incremental sync
+          let cursor: string | undefined;
 
-          if (!data.ok) {
-            errors.push(`Channel ${channel}: ${data.error}`);
-            continue;
-          }
-
-          for (const msg of data.messages || []) {
-            const signal: ConnectorSignal = {
-              organization_id: organizationId,
-              source_domain: domain,
-              signal_type: msg.thread_ts && msg.thread_ts !== msg.ts ? 'thread_reply' : 'message_sent',
-              signal_value: 1,
-              entity_type: 'slack_message',
-              entity_id: `${channel}_${msg.ts}`,
-              metadata: {
-                channel,
-                user: msg.user,
-                text: (msg.text || '').substring(0, 2000),
-                timestamp: msg.ts,
-              },
+          while (true) {
+            const params: Record<string, string> = {
+              channel,
+              oldest,
+              limit: '200', // Slack max per page
             };
+            if (cursor) {
+              params.cursor = cursor;
+            }
 
-            // NLP enrichment: sentiment + topics + urgency
-            enrichSignalWithNLP(signal, ['text']);
+            const data = await slackGet('conversations.history', params);
 
-            signals.push(signal);
+            if (!data.ok) {
+              errors.push(`Channel ${channel}: ${data.error}`);
+              break;
+            }
+
+            for (const msg of data.messages || []) {
+              const signal: ConnectorSignal = {
+                organization_id: organizationId,
+                source_domain: domain,
+                signal_type: msg.thread_ts && msg.thread_ts !== msg.ts ? 'thread_reply' : 'message_sent',
+                signal_value: 1,
+                entity_type: 'slack_message',
+                entity_id: `${channel}_${msg.ts}`,
+                metadata: {
+                  channel,
+                  user: msg.user,
+                  text: (msg.text || '').substring(0, 2000),
+                  timestamp: msg.ts,
+                },
+              };
+
+              // NLP enrichment: sentiment + topics + urgency
+              enrichSignalWithNLP(signal, ['text']);
+
+              signals.push(signal);
+            }
+
+            // Batch-store every 5000 signals to avoid OOM
+            if (signals.length >= 5000) {
+              await storeConnectorSignals(supabase, signals);
+              signals.length = 0;
+            }
+
+            // Cursor-based pagination
+            const nextCursor = data.response_metadata?.next_cursor;
+            if (!nextCursor || nextCursor === '') break;
+            cursor = nextCursor;
+
+            await new Promise(r => setTimeout(r, 100)); // Rate limit
           }
         } catch (err) {
           errors.push(`Channel ${channel}: ${err instanceof Error ? err.message : String(err)}`);
