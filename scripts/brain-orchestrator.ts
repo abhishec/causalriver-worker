@@ -504,6 +504,71 @@ class BrainOrchestrator {
   }
 
   /**
+   * Redis health check (REQUIRED for production).
+   *
+   * Redis provides:
+   * - Circuit breaker state persistence
+   * - Message deduplication (Slack/JIRA)
+   * - Fast-path query cache
+   * - Connector sync cursors
+   *
+   * Without Redis, the system will:
+   * - ✅ Still work (circuit breakers reset gracefully)
+   * - ❌ Send duplicate messages (no deduplication)
+   * - ❌ Slower queries (no fast-path cache)
+   */
+  private async checkRedisHealth(): Promise<void> {
+    const redisUrl = process.env.REDIS_URL;
+
+    if (!redisUrl) {
+      logError('REDIS', 'REDIS_URL not set — Redis is REQUIRED for production');
+      logError('REDIS', 'Without Redis:');
+      logError('REDIS', '  ❌ No message deduplication (duplicate Slack/JIRA messages)');
+      logError('REDIS', '  ❌ No fast-path cache (slower queries)');
+      logError('REDIS', '  ❌ Circuit breaker state lost on restart');
+      logError('REDIS', '');
+      logError('REDIS', 'Set REDIS_URL env var to Redis instance URL.');
+      logError('REDIS', 'Example: redis://localhost:6379 or redis://user:pass@host:6379');
+
+      if (process.env.NODE_ENV === 'production') {
+        throw new Error('FATAL: Redis is required in production. Set REDIS_URL.');
+      } else {
+        log('REDIS', 'WARN: Running without Redis (development mode). NOT RECOMMENDED.');
+        return;
+      }
+    }
+
+    try {
+      // Lazy-load ioredis (only if REDIS_URL is set)
+      const Redis = (await import('ioredis')).default;
+      const redis = new Redis(redisUrl, {
+        connectTimeout: 5000,
+        maxRetriesPerRequest: 3,
+      });
+
+      // Test connection with PING
+      const pong = await redis.ping();
+      if (pong !== 'PONG') {
+        throw new Error(`Redis PING failed: expected PONG, got ${pong}`);
+      }
+
+      // Test SET/GET
+      const testKey = 'nexusbrain:orchestrator:health';
+      await redis.set(testKey, Date.now().toString(), 'EX', 60);
+      const testVal = await redis.get(testKey);
+      if (!testVal) {
+        throw new Error('Redis GET after SET returned null');
+      }
+
+      await redis.quit();
+      log('REDIS', '✅ Redis connection healthy');
+    } catch (err) {
+      logError('REDIS', 'Redis health check FAILED', err);
+      throw new Error(`FATAL: Redis unavailable. ${err instanceof Error ? err.message : String(err)}`);
+    }
+  }
+
+  /**
    * Health check: Verify brain is alive and report health.
    */
   async healthCheck(): Promise<void> {
@@ -673,6 +738,19 @@ class BrainOrchestrator {
     log('INIT', `Health Check Interval: ${this.config.healthCheckIntervalMs / 1000}s`);
     log('INIT', `Agent Schedule Check Interval: ${this.config.agentScheduleCheckIntervalMs / 1000}s`);
     log('INIT', `Core-Only Agents: ${CORE_ONLY_AGENT_NAMES.size} | Org-Applicable Agents: ${ORG_APPLICABLE_AGENT_NAMES.size}`);
+
+    // ── CRITICAL: Redis Health Check (Fix #3) ──────────────────────────────
+    // Redis is REQUIRED for production:
+    // - Circuit breaker state persistence
+    // - Message deduplication (Slack/JIRA)
+    // - Fast-path query cache
+    // - Connector sync cursors
+    //
+    // Without Redis:
+    // - ✅ Brain still works (circuit breakers reset gracefully)
+    // - ❌ Duplicate messages sent (no deduplication)
+    // - ❌ Slower queries (no cache)
+    await this.checkRedisHealth();
 
     // Register production motor connectors (async import)
     await this.registerMotorConnectors();
