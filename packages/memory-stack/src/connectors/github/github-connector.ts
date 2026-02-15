@@ -1,0 +1,545 @@
+/**
+ * GitHub Connector
+ * ================
+ * Ingests repositories, files, commits, pull requests, and issues.
+ * Optimized for 10M+ files with streaming and smart filtering.
+ */
+
+import { ConnectorBase, IngestionResult, IngestionOptions } from '../base/connector-base.js';
+import { RateLimitConfig } from '../base/rate-limiter.js';
+import { Signal } from '../base/stream-processor.js';
+import { Checkpoint } from '../base/checkpoint-manager.js';
+
+interface GitHubCredentials {
+  accessToken: string;
+  githubLogin?: string;
+}
+
+interface Repository {
+  id: number;
+  full_name: string;
+  name: string;
+  description: string;
+  language: string;
+  default_branch: string;
+  size: number;
+  stargazers_count: number;
+  private: boolean;
+  updated_at: string;
+}
+
+interface TreeItem {
+  path: string;
+  mode: string;
+  type: 'blob' | 'tree';
+  sha: string;
+  size?: number;
+  url: string;
+}
+
+export class GitHubConnector extends ConnectorBase {
+  readonly connectorType = 'github';
+
+  constructor(
+    organizationId: string,
+    private githubCreds: GitHubCredentials,
+    supabase: any,
+    redis?: any
+  ) {
+    super(organizationId, githubCreds, supabase, redis);
+  }
+
+  protected getRateLimits(): RateLimitConfig {
+    return {
+      requestsPerHour: 5000, // GitHub authenticated rate limit
+      backoffMultiplier: 2,
+      maxRetries: 5,
+      initialBackoffMs: 2000,
+    };
+  }
+
+  /**
+   * Initial load: Fetch all repos, files, commits, PRs, issues
+   */
+  protected async initialLoad(): Promise<IngestionResult> {
+    console.log('[GitHub] Starting initial load...');
+    let totalSignals = 0;
+
+    try {
+      // 1. Get all accessible repositories
+      const repos = await this.getRepositories();
+      console.log(`[GitHub] Found ${repos.length} repositories`);
+
+      for (let i = 0; i < repos.length; i++) {
+        const repo = repos[i];
+        console.log(`[GitHub] Processing ${repo.full_name} (${i + 1}/${repos.length})`);
+
+        // 2. Ingest repository metadata
+        await this.ingestRepoMetadata(repo);
+        totalSignals++;
+
+        // 3. Ingest file tree (streaming, with filters)
+        const fileSignals = await this.ingestFileTree(repo);
+        totalSignals += fileSignals;
+
+        // 4. Ingest recent commits (last 100)
+        const commitSignals = await this.ingestRecentCommits(repo, 100);
+        totalSignals += commitSignals;
+
+        // 5. Ingest open pull requests
+        const prSignals = await this.ingestPullRequests(repo, 'open');
+        totalSignals += prSignals;
+
+        // 6. Ingest open issues
+        const issueSignals = await this.ingestIssues(repo, 'open');
+        totalSignals += issueSignals;
+
+        // Save checkpoint after each repo
+        const progress = ((i + 1) / repos.length) * 100;
+        await this.saveCheckpoint(
+          {
+            lastRepo: repo.full_name,
+            reposProcessed: i + 1,
+            totalRepos: repos.length,
+          },
+          Math.floor(progress)
+        );
+      }
+
+      console.log(`[GitHub] Initial load complete: ${totalSignals} signals`);
+      return { success: true, signalsIngested: totalSignals };
+    } catch (error: any) {
+      console.error('[GitHub] Initial load failed:', error);
+      return { success: false, signalsIngested: totalSignals, errors: [error.message] };
+    }
+  }
+
+  /**
+   * Incremental sync: Only new commits/PRs/issues since last sync
+   */
+  protected async incrementalSync(): Promise<IngestionResult> {
+    console.log('[GitHub] Starting incremental sync...');
+    let totalSignals = 0;
+
+    try {
+      const checkpoint = await this.checkpointManager.getCheckpoint(
+        this.organizationId,
+        this.connectorType
+      );
+
+      const since = checkpoint?.updated_at || new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+
+      const repos = await this.getRepositories();
+
+      for (const repo of repos) {
+        // Only new commits
+        const commits = await this.getCommitsSince(repo, since);
+        for (const commit of commits) {
+          const signal = this.transformCommitToSignal(repo, commit);
+          await this.streamProcessor.addSignal(signal);
+          totalSignals++;
+        }
+
+        // Updated PRs
+        const prs = await this.getPullRequestsUpdatedSince(repo, since);
+        for (const pr of prs) {
+          const signal = this.transformPRToSignal(repo, pr);
+          await this.streamProcessor.addSignal(signal);
+          totalSignals++;
+        }
+
+        // Updated issues
+        const issues = await this.getIssuesUpdatedSince(repo, since);
+        for (const issue of issues) {
+          const signal = this.transformIssueToSignal(repo, issue);
+          await this.streamProcessor.addSignal(signal);
+          totalSignals++;
+        }
+      }
+
+      await this.streamProcessor.flush();
+
+      console.log(`[GitHub] Incremental sync complete: ${totalSignals} signals`);
+      return { success: true, signalsIngested: totalSignals };
+    } catch (error: any) {
+      console.error('[GitHub] Incremental sync failed:', error);
+      return { success: false, signalsIngested: totalSignals, errors: [error.message] };
+    }
+  }
+
+  /**
+   * Resume from checkpoint
+   */
+  protected async resumeIngestion(checkpoint: Checkpoint): Promise<IngestionResult> {
+    console.log('[GitHub] Resuming from checkpoint:', checkpoint.state);
+
+    // Resume by continuing from lastRepo
+    const lastRepo = checkpoint.state.lastRepo;
+    const repos = await this.getRepositories();
+    const resumeIndex = repos.findIndex((r) => r.full_name === lastRepo) + 1;
+
+    console.log(`[GitHub] Resuming from repo ${resumeIndex}/${repos.length}`);
+
+    // Continue initial load from resume point
+    let totalSignals = checkpoint.signals_ingested || 0;
+
+    for (let i = resumeIndex; i < repos.length; i++) {
+      const repo = repos[i];
+      const fileSignals = await this.ingestFileTree(repo);
+      totalSignals += fileSignals;
+
+      const progress = ((i + 1) / repos.length) * 100;
+      await this.saveCheckpoint(
+        {
+          lastRepo: repo.full_name,
+          reposProcessed: i + 1,
+          totalRepos: repos.length,
+        },
+        Math.floor(progress)
+      );
+    }
+
+    return { success: true, signalsIngested: totalSignals };
+  }
+
+  /**
+   * Get all accessible repositories
+   */
+  private async getRepositories(): Promise<Repository[]> {
+    const repos: Repository[] = [];
+    let page = 1;
+
+    while (true) {
+      const response = await this.rateLimiter.throttle(() =>
+        this.githubFetch(`/user/repos?per_page=100&page=${page}&sort=updated`)
+      );
+
+      if (response.length === 0) break;
+
+      repos.push(...response);
+      page++;
+
+      if (response.length < 100) break; // Last page
+    }
+
+    return repos;
+  }
+
+  /**
+   * Ingest repository metadata
+   */
+  private async ingestRepoMetadata(repo: Repository): Promise<void> {
+    const signal: Signal = {
+      source: 'github',
+      type: 'repository',
+      content: `Repository: ${repo.full_name}\n${repo.description || 'No description'}`,
+      metadata: {
+        repo_id: repo.id,
+        repo_name: repo.full_name,
+        language: repo.language,
+        stars: repo.stargazers_count,
+        is_private: repo.private,
+        default_branch: repo.default_branch,
+        size: repo.size,
+      },
+      organization_id: this.organizationId,
+      timestamp: repo.updated_at,
+    };
+
+    await this.streamProcessor.addSignal(signal);
+  }
+
+  /**
+   * Ingest file tree (streaming, skip binaries)
+   */
+  private async ingestFileTree(repo: Repository): Promise<number> {
+    let filesIngested = 0;
+
+    // Get git tree recursively
+    const tree = await this.rateLimiter.throttle(() =>
+      this.githubFetch(`/repos/${repo.full_name}/git/trees/${repo.default_branch}?recursive=1`)
+    );
+
+    if (!tree.tree) return 0;
+
+    // Filter: only code files, skip binaries/node_modules/vendor
+    const codeFiles = tree.tree.filter((file: TreeItem) => {
+      if (file.type !== 'blob') return false;
+      if (file.size && file.size > 1_000_000) return false; // Skip files > 1MB
+      if (this.isBinaryFile(file.path)) return false;
+      if (this.isIgnoredPath(file.path)) return false;
+      return true;
+    });
+
+    console.log(`[GitHub] ${repo.full_name}: Processing ${codeFiles.length} code files`);
+
+    // Process in batches of 50 files
+    for (let i = 0; i < codeFiles.length; i += 50) {
+      const batch = codeFiles.slice(i, i + 50);
+
+      // Parallel fetch with rate limiting
+      const fileContents = await Promise.all(
+        batch.map((file: TreeItem) =>
+          this.rateLimiter.throttle(() => this.getFileContent(repo, file.path))
+        )
+      );
+
+      // Transform to signals
+      const signals = fileContents
+        .map((content, idx) => {
+          if (!content) return null;
+          return this.transformFileToSignal(repo, batch[idx], content);
+        })
+        .filter((s): s is Signal => s !== null);
+
+      // Batch insert
+      await this.batchInsertSignals(signals);
+      filesIngested += signals.length;
+
+      // Save checkpoint every 500 files
+      if (filesIngested % 500 === 0) {
+        await this.saveCheckpoint({
+          lastRepo: repo.full_name,
+          lastFile: batch[batch.length - 1].path,
+          filesProcessed: filesIngested,
+        });
+      }
+    }
+
+    return filesIngested;
+  }
+
+  /**
+   * Ingest recent commits
+   */
+  private async ingestRecentCommits(repo: Repository, count: number): Promise<number> {
+    const commits = await this.rateLimiter.throttle(() =>
+      this.githubFetch(`/repos/${repo.full_name}/commits?per_page=${Math.min(count, 100)}`)
+    );
+
+    const signals = commits.map((commit: any) => this.transformCommitToSignal(repo, commit));
+    await this.batchInsertSignals(signals);
+
+    return signals.length;
+  }
+
+  /**
+   * Ingest pull requests
+   */
+  private async ingestPullRequests(repo: Repository, state: 'open' | 'closed' | 'all'): Promise<number> {
+    const prs = await this.rateLimiter.throttle(() =>
+      this.githubFetch(`/repos/${repo.full_name}/pulls?state=${state}&per_page=100`)
+    );
+
+    const signals = prs.map((pr: any) => this.transformPRToSignal(repo, pr));
+    await this.batchInsertSignals(signals);
+
+    return signals.length;
+  }
+
+  /**
+   * Ingest issues
+   */
+  private async ingestIssues(repo: Repository, state: 'open' | 'closed' | 'all'): Promise<number> {
+    const issues = await this.rateLimiter.throttle(() =>
+      this.githubFetch(`/repos/${repo.full_name}/issues?state=${state}&per_page=100`)
+    );
+
+    const signals = issues.map((issue: any) => this.transformIssueToSignal(repo, issue));
+    await this.batchInsertSignals(signals);
+
+    return signals.length;
+  }
+
+  /**
+   * Get commits since timestamp
+   */
+  private async getCommitsSince(repo: Repository, since: string): Promise<any[]> {
+    return this.rateLimiter.throttle(() =>
+      this.githubFetch(`/repos/${repo.full_name}/commits?since=${since}&per_page=100`)
+    );
+  }
+
+  /**
+   * Get PRs updated since timestamp
+   */
+  private async getPullRequestsUpdatedSince(repo: Repository, since: string): Promise<any[]> {
+    // GitHub doesn't support since for PRs, fetch all and filter
+    const prs = await this.rateLimiter.throttle(() =>
+      this.githubFetch(`/repos/${repo.full_name}/pulls?state=all&sort=updated&per_page=100`)
+    );
+
+    return prs.filter((pr: any) => new Date(pr.updated_at) > new Date(since));
+  }
+
+  /**
+   * Get issues updated since timestamp
+   */
+  private async getIssuesUpdatedSince(repo: Repository, since: string): Promise<any[]> {
+    return this.rateLimiter.throttle(() =>
+      this.githubFetch(`/repos/${repo.full_name}/issues?since=${since}&per_page=100`)
+    );
+  }
+
+  /**
+   * Get file content
+   */
+  private async getFileContent(repo: Repository, path: string): Promise<string | null> {
+    try {
+      const response = await this.githubFetch(`/repos/${repo.full_name}/contents/${path}`);
+      if (response.content) {
+        return Buffer.from(response.content, 'base64').toString('utf-8');
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * Transform file to signal
+   */
+  private transformFileToSignal(repo: Repository, file: TreeItem, content: string): Signal {
+    return {
+      source: 'github',
+      type: 'code_file',
+      content: content.substring(0, 50000), // Limit to 50KB
+      metadata: {
+        repo: repo.full_name,
+        path: file.path,
+        language: this.detectLanguage(file.path),
+        size: file.size,
+        sha: file.sha,
+      },
+      organization_id: this.organizationId,
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  /**
+   * Transform commit to signal
+   */
+  private transformCommitToSignal(repo: Repository, commit: any): Signal {
+    return {
+      source: 'github',
+      type: 'commit',
+      content: `${commit.commit.message}\n\nAuthor: ${commit.commit.author.name}`,
+      metadata: {
+        repo: repo.full_name,
+        sha: commit.sha,
+        author: commit.commit.author.name,
+        author_email: commit.commit.author.email,
+        url: commit.html_url,
+      },
+      organization_id: this.organizationId,
+      timestamp: commit.commit.author.date,
+    };
+  }
+
+  /**
+   * Transform PR to signal
+   */
+  private transformPRToSignal(repo: Repository, pr: any): Signal {
+    return {
+      source: 'github',
+      type: 'pull_request',
+      content: `${pr.title}\n\n${pr.body || ''}`,
+      metadata: {
+        repo: repo.full_name,
+        pr_number: pr.number,
+        state: pr.state,
+        author: pr.user.login,
+        url: pr.html_url,
+        merged: pr.merged_at ? true : false,
+      },
+      organization_id: this.organizationId,
+      timestamp: pr.updated_at,
+    };
+  }
+
+  /**
+   * Transform issue to signal
+   */
+  private transformIssueToSignal(repo: Repository, issue: any): Signal {
+    // Skip PRs (issues API includes PRs)
+    if (issue.pull_request) return null as any;
+
+    return {
+      source: 'github',
+      type: 'issue',
+      content: `${issue.title}\n\n${issue.body || ''}`,
+      metadata: {
+        repo: repo.full_name,
+        issue_number: issue.number,
+        state: issue.state,
+        author: issue.user.login,
+        labels: issue.labels.map((l: any) => l.name),
+        url: issue.html_url,
+      },
+      organization_id: this.organizationId,
+      timestamp: issue.updated_at,
+    };
+  }
+
+  /**
+   * GitHub API fetch helper
+   */
+  private async githubFetch(endpoint: string): Promise<any> {
+    const response = await fetch(`https://api.github.com${endpoint}`, {
+      headers: {
+        Authorization: `Bearer ${this.githubCreds.accessToken}`,
+        Accept: 'application/vnd.github.v3+json',
+        'User-Agent': 'NexusBrain-Connector',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
+    }
+
+    return response.json();
+  }
+
+  /**
+   * Check if file is binary
+   */
+  private isBinaryFile(path: string): boolean {
+    const binaryExts = [
+      '.jpg', '.jpeg', '.png', '.gif', '.pdf', '.zip', '.tar', '.gz',
+      '.exe', '.dll', '.so', '.dylib', '.bin', '.dat', '.db', '.sqlite',
+      '.woff', '.woff2', '.ttf', '.eot', '.ico', '.svg', '.mp4', '.mp3',
+    ];
+    return binaryExts.some((ext) => path.toLowerCase().endsWith(ext));
+  }
+
+  /**
+   * Check if path should be ignored
+   */
+  private isIgnoredPath(path: string): boolean {
+    const ignoredPaths = [
+      'node_modules/', 'vendor/', 'dist/', 'build/', '.next/', 'coverage/',
+      '__pycache__/', '.git/', '.vscode/', '.idea/', 'tmp/', 'cache/',
+    ];
+    return ignoredPaths.some((p) => path.includes(p));
+  }
+
+  /**
+   * Detect language from file extension
+   */
+  private detectLanguage(path: string): string {
+    const ext = path.split('.').pop()?.toLowerCase();
+    const langMap: Record<string, string> = {
+      ts: 'typescript', js: 'javascript', tsx: 'typescript', jsx: 'javascript',
+      py: 'python', rb: 'ruby', go: 'go', java: 'java', rs: 'rust',
+      cpp: 'cpp', c: 'c', h: 'c', hpp: 'cpp', cs: 'csharp',
+      php: 'php', swift: 'swift', kt: 'kotlin', scala: 'scala',
+      md: 'markdown', json: 'json', yaml: 'yaml', yml: 'yaml',
+      sql: 'sql', sh: 'shell', bash: 'shell',
+    };
+    return langMap[ext || ''] || 'unknown';
+  }
+
+  protected transformToSignal(rawData: any): Signal {
+    throw new Error('Use specific transform methods');
+  }
+}
