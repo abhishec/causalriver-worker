@@ -1,0 +1,145 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { createClient, createServiceClient } from '@/lib/supabase/server';
+
+/**
+ * GET /api/connectors/jira/callback
+ *
+ * Handles Jira OAuth callback and stores credentials
+ */
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = request.nextUrl;
+    const code = searchParams.get('code');
+    const state = searchParams.get('state');
+    const error = searchParams.get('error');
+
+    if (error) {
+      return NextResponse.redirect(
+        new URL(`/admin/connectors?error=${error}`, request.url)
+      );
+    }
+
+    if (!code || !state) {
+      return NextResponse.redirect(
+        new URL('/admin/connectors?error=invalid_callback', request.url)
+      );
+    }
+
+    const [orgId, userId, timestamp] = state.split(':');
+
+    if (Date.now() - parseInt(timestamp) > 10 * 60 * 1000) {
+      return NextResponse.redirect(
+        new URL('/admin/connectors?error=expired_state', request.url)
+      );
+    }
+
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user || user.id !== userId) {
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+
+    // Exchange code for token
+    const clientId = process.env.JIRA_CLIENT_ID;
+    const clientSecret = process.env.JIRA_CLIENT_SECRET;
+    const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin}/api/connectors/jira/callback`;
+
+    if (!clientId || !clientSecret) {
+      return NextResponse.redirect(
+        new URL('/admin/connectors?error=oauth_not_configured', request.url)
+      );
+    }
+
+    const tokenResponse = await fetch('https://auth.atlassian.com/oauth/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        grant_type: 'authorization_code',
+        client_id: clientId,
+        client_secret: clientSecret,
+        code,
+        redirect_uri: redirectUri,
+      }),
+    });
+
+    const tokenData = await tokenResponse.json();
+
+    if (!tokenResponse.ok) {
+      console.error('Jira OAuth error:', tokenData);
+      return NextResponse.redirect(
+        new URL(`/admin/connectors?error=${tokenData.error}`, request.url)
+      );
+    }
+
+    // Get accessible resources (Jira sites)
+    const resourcesResponse = await fetch(
+      'https://api.atlassian.com/oauth/token/accessible-resources',
+      {
+        headers: {
+          Authorization: `Bearer ${tokenData.access_token}`,
+          Accept: 'application/json',
+        },
+      }
+    );
+
+    const resources = await resourcesResponse.json();
+    const primarySite = resources[0]; // Use first available site
+
+    // Store credentials
+    const service = await createServiceClient();
+
+    const credentials = {
+      access_token: tokenData.access_token,
+      refresh_token: tokenData.refresh_token,
+      expires_in: tokenData.expires_in,
+      expires_at: new Date(Date.now() + tokenData.expires_in * 1000).toISOString(),
+      scope: tokenData.scope,
+    };
+
+    const metadata = {
+      cloud_id: primarySite?.id,
+      site_url: primarySite?.url,
+      site_name: primarySite?.name,
+      available_sites: resources,
+      connected_at: new Date().toISOString(),
+      connected_by: user.id,
+    };
+
+    const { error: storeError } = await service
+      .from('org_connectors')
+      .upsert({
+        organization_id: orgId,
+        connector_type: 'jira',
+        status: 'active',
+        credentials,
+        metadata,
+        config: {
+          site_name: primarySite?.name,
+          site_url: primarySite?.url,
+        },
+      }, {
+        onConflict: 'organization_id,connector_type'
+      });
+
+    if (storeError) {
+      console.error('Failed to store Jira credentials:', storeError);
+      return NextResponse.redirect(
+        new URL('/admin/connectors?error=storage_failed', request.url)
+      );
+    }
+
+    return NextResponse.redirect(
+      new URL('/admin/connectors?success=jira_connected', request.url)
+    );
+  } catch (error: any) {
+    console.error('Jira callback error:', error);
+    return NextResponse.redirect(
+      new URL(`/admin/connectors?error=${encodeURIComponent(error.message)}`, request.url)
+    );
+  }
+}
