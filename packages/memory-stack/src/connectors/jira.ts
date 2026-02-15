@@ -137,15 +137,36 @@ export function createJiraConnector(config: JiraConnectorConfig): NexusConnector
 
   async function searchIssues(since?: Date): Promise<JiraIssue[]> {
     const jql = buildJQL(since);
-    const data = await fetchJSON<{ issues: JiraIssue[]; total: number }>(
-      '/rest/api/3/search',
-      {
-        jql,
-        maxResults: String(maxResults),
-        fields: 'summary,status,issuetype,priority,assignee,reporter,labels,created,updated,resolutiondate,resolution,project,fixVersions,components',
+    const allIssues: JiraIssue[] = [];
+    let startAt = 0;
+
+    // Paginate through all results for 500K+ scale
+    while (true) {
+      const data = await fetchJSON<{ issues: JiraIssue[]; total: number; startAt: number; maxResults: number }>(
+        '/rest/api/3/search',
+        {
+          jql,
+          startAt: String(startAt),
+          maxResults: String(maxResults),
+          fields: 'summary,status,issuetype,priority,assignee,reporter,labels,created,updated,resolutiondate,resolution,project,fixVersions,components',
+        }
+      );
+
+      const issues = data.issues || [];
+      allIssues.push(...issues);
+
+      // Break if we've fetched all issues or hit a single-page result
+      if (issues.length < maxResults || allIssues.length >= data.total) {
+        break;
       }
-    );
-    return data.issues || [];
+
+      startAt += issues.length;
+
+      // Rate limit: 50ms pause between pages to respect Jira API limits
+      await new Promise(r => setTimeout(r, 50));
+    }
+
+    return allIssues;
   }
 
   async function fetchBoards(): Promise<Array<{ id: number; name: string }>> {
