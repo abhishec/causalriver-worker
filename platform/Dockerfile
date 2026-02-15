@@ -78,4 +78,4 @@ USER nextjs
 
 EXPOSE 3000
 
-CMD ["node", "platform/server.js"]
+CMD ["node", "server.js"]
