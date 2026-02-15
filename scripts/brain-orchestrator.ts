@@ -242,7 +242,7 @@ class BrainOrchestrator {
    * - Batch operations for high-volume scenarios
    */
   private async registerMotorConnectors(): Promise<void> {
-    const registry = this.motorCommandEngine.getConnectorRegistry();
+    const registry = this.motorCommandEngine.registry;
 
     // Initialize Redis client if available
     let redis: any;
