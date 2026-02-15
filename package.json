@@ -29,7 +29,13 @@
     "verify:all": "tsx scripts/comprehensive-validation.ts",
     "test:jobs": "tsx scripts/test-manual-job.ts",
     "check:jobs": "tsx scripts/check-job-execution.ts",
-    "check:production": "tsx scripts/production-deployment-check.ts"
+    "check:production": "tsx scripts/production-deployment-check.ts",
+    "ingest:initial": "tsx scripts/run-batch-ingestion.ts --mode initial --sources slack,jira,github --verbose",
+    "ingest:slack": "tsx scripts/run-batch-ingestion.ts --mode initial --sources slack --verbose",
+    "ingest:jira": "tsx scripts/run-batch-ingestion.ts --mode initial --sources jira --verbose",
+    "ingest:github": "tsx scripts/run-batch-ingestion.ts --mode initial --sources github --verbose",
+    "ingest:incremental": "tsx scripts/run-batch-ingestion.ts --mode incremental --sources slack,jira,github --verbose",
+    "ingest:resume": "tsx scripts/run-batch-ingestion.ts --resume"
   },
   "devDependencies": {
     "@types/cron": "^2.4.3",

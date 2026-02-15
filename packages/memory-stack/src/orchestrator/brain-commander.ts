@@ -475,6 +475,7 @@ export function createBrainCommander(config: BrainCommanderConfig) {
         intelligence,
         artifact,
         motorCommands,
+        cognitiveStack: cognitiveResult,
         qualityGate,
         totalMs: performance.now() - totalStart,
         timing,
@@ -500,16 +501,16 @@ export function createBrainCommander(config: BrainCommanderConfig) {
     const orgIds = [...new Set([organizationId, coreOrgId])];
     const orgFilter = orgIds.map(id => `organization_id.eq.${id}`).join(',');
 
-    // Parallel DB queries (same pattern as existing routes)
-    const [causalResult, rulesResult, patternsResult, cascadeResult, insightsResult] = await Promise.all([
-      supabase
-        .from('causal_relationships_statistical')
-        .select('source_domain, target_domain, effect_size, granger_p_value, optimal_lag_days, granger_f_statistic, sample_size, confidence_interval_lower, confidence_interval_upper, natural_language, is_significant')
-        .or(orgFilter)
-        .eq('is_significant', true)
-        .order('effect_size', { ascending: false })
-        .limit(300),
+    // Disconnection #3 FIX: Use federated queries for causal edges, patterns, and insights
+    // This merges ORG + CORE brain data with deduplication (ORG wins over CORE)
+    // Keep direct SQL for: rules (no federated function) and cascade rules (different table)
+    const [causalFederated, rulesResult, patternsFederated, cascadeResult, insightsFederated] = await Promise.all([
+      // Federated: causal relationships (ORG + CORE merged, deduplicated)
+      getFederatedCausalRelationships(organizationId, { limit: 300 })
+        .then(r => r.merged.map(m => m.data))
+        .catch(() => [] as any[]),
 
+      // Direct SQL: rules (no federated function exists for ai_memory type=rule)
       supabase
         .from('ai_memory')
         .select('content, importance, domain, metadata')
@@ -518,14 +519,12 @@ export function createBrainCommander(config: BrainCommanderConfig) {
         .order('importance', { ascending: false })
         .limit(100),
 
-      supabase
-        .from('ai_memory')
-        .select('content, domain, importance, llm_pattern_name, llm_pattern_description, metadata')
-        .or(orgFilter)
-        .eq('memory_type', 'pattern')
-        .order('importance', { ascending: false })
-        .limit(100),
+      // Federated: patterns (ORG + CORE merged, deduplicated by title)
+      getFederatedPatterns(organizationId, { memoryType: 'pattern', limit: 100 })
+        .then(r => r.merged.map(m => m.data))
+        .catch(() => [] as any[]),
 
+      // Direct SQL: cascade rules (separate table, no federated function)
       supabase
         .from('org_cascade_rules')
         .select('rule_name, trigger_domain, trigger_signal_type, propagation_chain, is_active')
@@ -533,20 +532,17 @@ export function createBrainCommander(config: BrainCommanderConfig) {
         .eq('is_active', true)
         .limit(50),
 
-      supabase
-        .from('ai_memory')
-        .select('content, importance, domain, metadata')
-        .or(orgFilter)
-        .eq('memory_type', 'insight')
-        .order('importance', { ascending: false })
-        .limit(100),
+      // Federated: insights (ORG + CORE merged, deduplicated by title)
+      getFederatedPatterns(organizationId, { memoryType: 'insight', limit: 100 })
+        .then(r => r.merged.map(m => m.data))
+        .catch(() => [] as any[]),
     ]);
 
-    const edges = (causalResult.data || []) as CausalEdge[];
+    const edges = (causalFederated || []) as CausalEdge[];
     const rules = (rulesResult.data || []) as BrainRule[];
-    const patterns = (patternsResult.data || []) as BrainPattern[];
+    const patterns = (patternsFederated || []) as BrainPattern[];
     const cascadeRules = (cascadeResult.data || []) as CascadeRule[];
-    const insights = (insightsResult.data || []) as BrainInsight[];
+    const insights = (insightsFederated || []) as BrainInsight[];
 
     // Build causal graph
     const causalGraph = buildCausalGraph(edges, domains);
