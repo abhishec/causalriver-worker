@@ -234,13 +234,6 @@ export class NexusBrainStack extends cdk.Stack {
       protocol: ecs.Protocol.TCP,
     });
 
-    // Allow ECS to access Redis
-    redisSecurityGroup.addIngressRule(
-      ec2.Peer.securityGroupId(cluster.connections.securityGroups[0].securityGroupId),
-      ec2.Port.tcp(6379),
-      'Allow ECS to Redis'
-    );
-
     // ═════════════════════════════════════════════════════════════
     // APPLICATION LOAD BALANCER
     // ═════════════════════════════════════════════════════════════
@@ -303,6 +296,9 @@ export class NexusBrainStack extends cdk.Stack {
       scaleInCooldown: cdk.Duration.seconds(300),
       scaleOutCooldown: cdk.Duration.seconds(60),
     });
+
+    // Allow ECS service to access Redis
+    service.connections.allowTo(redisSecurityGroup, ec2.Port.tcp(6379), 'Allow ECS to Redis');
 
     // ═════════════════════════════════════════════════════════════
     // CI/CD PIPELINE (OPTIONAL - AUTO-BUILD FROM GITHUB)
