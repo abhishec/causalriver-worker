@@ -10,6 +10,14 @@ const nextConfig: NextConfig = {
     // Types are validated locally and in CI via `tsc --noEmit`.
     ignoreBuildErrors: true,
   },
+  eslint: {
+    // Skip ESLint during CI builds — run separately via `pnpm lint`.
+    ignoreDuringBuilds: true,
+  },
+  // Transpile workspace packages so Next.js resolves them correctly.
+  // Required for Vercel monorepo deployments where pnpm workspace: links
+  // must be resolved at build time.
+  transpilePackages: ['@nexus-ai/memory-stack'],
   // Native Node.js modules — resolved at runtime, not bundled by webpack.
   serverExternalPackages: [
     'tree-sitter',

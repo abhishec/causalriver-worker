@@ -3,9 +3,10 @@
  *
  * Claude as the Brain's Judgment Layer
  *
- * The brain handles statistical pattern detection (15-method causal ensemble,
- * Bayesian learning, anomaly detection). This module adds semantic understanding
- * on top — the brain does the math, Claude explains WHY it matters.
+ * The brain handles statistical pattern detection (3-paradigm causal discovery —
+ * APEX + PC/VarLiNGAM + Transfer Entropy — resolved by a Bayesian judge,
+ * plus Bayesian learning and anomaly detection). This module adds semantic
+ * understanding on top — the brain does the math, Claude explains WHY it matters.
  *
  * 5 Amplification Functions:
  *   1. amplifyInsight        — Turn DMN correlations into business narratives (Sonnet)

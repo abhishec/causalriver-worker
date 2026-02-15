@@ -105,7 +105,10 @@ export class NexusBrainStack extends cdk.Stack {
           GITHUB_REPOS: envVars.GITHUB_REPOS || '',
           NODE_ENV: 'production',
         }),
-        generateStringKey: 'PLACEHOLDER',
+        generateStringKey: 'generated_secret_key',
+        excludePunctuation: false,
+        includeSpace: false,
+        passwordLength: 64,
       },
     });
 

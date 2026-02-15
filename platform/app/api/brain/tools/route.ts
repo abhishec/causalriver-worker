@@ -57,7 +57,7 @@ const NEXUS_BRAIN_TOOLS = [
         "Generate a causal forecast using the brain's trained knowledge graph. " +
         "Returns predicted values with confidence intervals, driver analysis, and " +
         "the causal reasoning behind the prediction. The forecast uses real " +
-        "effect sizes and lag days discovered by the brain's 15-method statistical ensemble.",
+        "effect sizes and lag days discovered by the brain's 3-paradigm causal discovery engine (Parametric APEX + Structural PC/VarLiNGAM + Information-Theoretic Transfer Entropy, resolved by a Bayesian judge).",
       parameters: {
         type: "object",
         properties: {

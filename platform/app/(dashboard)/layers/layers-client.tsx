@@ -48,11 +48,11 @@ const LAYERS = [
   {
     id: "L4",
     name: "Causal Engine",
-    description: "15 advanced methods (ensemble), conditional multivariate Granger, cascade-aware scoring",
+    description: "3-paradigm causal discovery (APEX + PC/VarLiNGAM + Transfer Entropy) with Bayesian judge",
     details:
-      "The core intelligence layer. Uses 15 causal discovery methods in a calibrated ensemble: conditional Granger causality, cascade-aware scoring, greedy peeling, multi-resolution analysis, anomaly-conditioned detection, regime-conditional testing, and more. Produces statistically-validated causal edges with confidence scores, p-values, and lag estimates.",
+      "The core intelligence layer. Uses 3 independent causal discovery paradigms — Parametric (APEX: VAR + Granger F-test + counterfactual knockout), Structural (PC Algorithm + VarLiNGAM for non-Gaussian orientation), and Information-Theoretic (KSG Transfer Entropy) — resolved by a Bayesian disagreement judge that produces diagnostic verdicts (confident, confounded, nonlinear, contested). Produces statistically-validated causal edges with confidence scores, p-values, and lag estimates.",
     metrics: [
-      { label: "Methods", value: "15 (Ensemble)" },
+      { label: "Methods", value: "3-Paradigm + Judge" },
       { label: "Benchmark AUROC", value: "0.824" },
       { label: "Validation", value: "p-value + bootstrap" },
     ],
@@ -69,7 +69,7 @@ const LAYERS = [
     metrics: [
       { label: "Training Packs", value: "118" },
       { label: "Anomaly Methods", value: "Z-score, IQR, MAD" },
-      { label: "Rule Mining", value: "Apriori + FP-Growth" },
+      { label: "Rule Mining", value: "Apriori + PrefixSpan" },
     ],
     gradient: "from-purple-500 to-fuchsia-500",
     dotColor: "bg-purple-400",
