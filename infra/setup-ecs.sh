@@ -364,7 +364,7 @@ cat > /tmp/task-benchmark.json << TASKDEF
           "awslogs-stream-prefix": "benchmark"
         }
       },
-      "stopTimeout": 300
+      "stopTimeout": 120
     }
   ]
 }
@@ -494,7 +494,7 @@ cat > /tmp/task-weekly.json << TASKDEF
           "awslogs-stream-prefix": "weekly"
         }
       },
-      "stopTimeout": 300
+      "stopTimeout": 120
     }
   ]
 }
@@ -537,7 +537,7 @@ cat > /tmp/task-monthly.json << TASKDEF
           "awslogs-stream-prefix": "monthly"
         }
       },
-      "stopTimeout": 600
+      "stopTimeout": 120
     }
   ]
 }
@@ -622,7 +622,7 @@ cat > /tmp/task-security.json << TASKDEF
           "awslogs-stream-prefix": "security"
         }
       },
-      "stopTimeout": 300
+      "stopTimeout": 120
     }
   ]
 }
@@ -666,7 +666,7 @@ cat > /tmp/task-benchmark-optimizer.json << TASKDEF
           "awslogs-stream-prefix": "benchmark-optimizer"
         }
       },
-      "stopTimeout": 300
+      "stopTimeout": 120
     }
   ]
 }
