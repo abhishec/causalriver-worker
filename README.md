@@ -1,7 +1,7 @@
 <p align="center">
   <h1 align="center">NexusBrain</h1>
   <p align="center">
-    <strong>A self-improving causal intelligence engine with 11 brain regions</strong>
+    <strong>A self-improving causal intelligence engine with 24 brain regions</strong>
   </p>
   <p align="center">
     Every AI agent today is stateless. NexusBrain gives them a brain —<br/>
@@ -13,16 +13,17 @@
 <p align="center">
   <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5.5+-blue.svg" alt="TypeScript"></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"></a>
-  <img src="https://img.shields.io/badge/Tests-1%2C737_passing-brightgreen.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/Tests-2%2C615_passing-brightgreen.svg" alt="Tests">
   <img src="https://img.shields.io/badge/Zero_Runtime_Deps-core-orange.svg" alt="Zero Dependencies">
-  <img src="https://img.shields.io/badge/Brain_Regions-11-blueviolet.svg" alt="11 Brain Regions">
-  <img src="https://img.shields.io/badge/CausalRivers-AUROC_0.824-success.svg" alt="CausalRivers Benchmark">
+  <img src="https://img.shields.io/badge/Brain_Regions-24-blueviolet.svg" alt="24 Brain Regions">
+  <img src="https://img.shields.io/badge/CausalRivers-AUROC_0.828-success.svg" alt="CausalRivers Benchmark">
   <img src="https://img.shields.io/badge/LongMemEval-79.6%25-success.svg" alt="LongMemEval Benchmark">
   <img src="https://img.shields.io/badge/CauseME-F1_0.493-success.svg" alt="CauseME Benchmark">
 </p>
 
 <p align="center">
   <a href="https://usebrainos.com">Website</a> &middot;
+  <a href="https://platform.usebrainos.com">Platform</a> &middot;
   <a href="https://usebrainos.com/docs/quickstart">Quickstart</a> &middot;
   <a href="https://usebrainos.com/docs">Documentation</a> &middot;
   <a href="https://usebrainos.com/#benchmarks">Benchmark Results</a>
@@ -44,7 +45,7 @@ Building memory for AI agents is fundamentally harder than building a database o
 
 ---
 
-## 11 Brain Regions
+## 24 Brain Regions
 
 NexusBrain is organized into specialized cognitive regions, each modeled after the human brain:
 
@@ -52,10 +53,11 @@ NexusBrain is organized into specialized cognitive regions, each modeled after t
 
 | Region | Brain Analog | Function |
 |--------|-------------|----------|
-| **Causal Reasoning** | Neocortex | Calibrated ensemble of 8 causal methods: conditional Granger, cascade-aware, PC algorithm, do-calculus, transfer entropy. Not correlation — proven causation. |
+| **Causal Reasoning** | Neocortex | Calibrated ensemble of 9 causal methods: conditional Granger, cascade-aware, PC algorithm, do-calculus, transfer entropy. Not correlation — proven causation. |
 | **Impact Scoring** | Amygdala | Scores discoveries across financial impact, operational risk, strategic alignment, and time sensitivity. Routes urgently. |
 | **What-If Simulator** | Prefrontal Cortex | Counterfactual simulation: trace cascading effects through the causal graph with uncertainty propagation. |
 | **Muscle Memory** | Cerebellum | Fast-path compiler: pre-compiled query patterns for 100-1000x speedup on frequent questions. |
+| **Attention Router** | Thalamus | Query-type-specific attention profiles learned from prediction outcomes. Gradient-free online learning. |
 
 ### Sleep Cycle Regions (Scheduled)
 
@@ -70,6 +72,7 @@ NexusBrain is organized into specialized cognitive regions, each modeled after t
 |--------|-------------|----------|
 | **Anomaly Sense** | Insula | Real-time anomaly detection (Z-score, IQR, MAD) with automatic causal contextualization. |
 | **Meta-Cognition** | Anterior Cingulate | Brain health monitoring: calibration error (ECE), cognitive load, per-domain degradation detection. The brain knows what it doesn't know. |
+| **Prediction Verifier** | Dopaminergic System | Tracks prediction accuracy, verifies outcomes, and provides reward signals back to the learning system. |
 
 ### Active Learning Regions
 
@@ -78,13 +81,41 @@ NexusBrain is organized into specialized cognitive regions, each modeled after t
 | **Learned Attention** | Thalamus | Query-type-specific attention profiles learned from prediction outcomes. Gradient-free online learning. |
 | **Active Explorer** | Hippocampal Loop | Detects knowledge gaps and prioritizes data acquisition by (uncertainty x criticality). |
 
-### Perception
+### Perception & Aspirational Regions
 
 | Region | Brain Analog | Function |
 |--------|-------------|----------|
-| **Perception** | Sensory Cortex | Ingests from 13 connectors + public datasets (FRED, BLS, GitHub). LLM-powered knowledge distillation. |
+| **Perception** | Sensory Cortex | Ingests from 16 connectors + public datasets (FRED, BLS, GitHub). LLM-powered knowledge distillation. |
+| **Collaboration Graph** | Mirror Neurons | Tracks cross-team interaction patterns and knowledge flow between departments. |
+| **Counterfactual Engine** | Imagination Network | Full what-if scenario builder with cascading impact simulation. |
+| **Strategic Planner** | Dorsolateral PFC | Long-horizon planning that composes multiple causal chains into strategic recommendations. |
 
-All 11 regions connect through a unified event bus with Lamport clock ordering and backpressure handling.
+Plus 8 additional aspirational regions for future capabilities (emotional intelligence, episodic recall, creative synthesis, and more).
+
+All 24 regions connect through a unified event bus with Lamport clock ordering and backpressure handling.
+
+---
+
+## Platform Features
+
+NexusBrain includes a full-stack Next.js platform with:
+
+### Intelligence & Visualization
+- **Interactive Causal Graph** — SVG force-directed graph of causal relationships with domain coloring, zoom/pan, node selection
+- **Prediction Tracker** — Accuracy trend charts, domain breakdown, filterable prediction list with status badges (Verified / Partial / Missed / Pending)
+- **What-If Simulator** — Select an entity, set direction + magnitude, see cascading effects through the causal graph in real time
+- **Agent Dashboard** — 7 autonomous agents mapped to brain regions with status, metrics, and recent activity
+
+### Operational
+- **API Key Management** — Generate, revoke, and manage API keys with permissions and rate limits
+- **Notification Engine** — In-app bell with real-time alerts, configurable preferences per category and severity
+- **Custom Training Pack Builder** — 3-step wizard to define causal chains and business rules that teach the brain
+- **RBAC** — 4-tier role system (Owner → Admin → Analyst → Viewer) with hierarchical permissions
+
+### Onboarding & Auth
+- **Multi-Step Onboarding Wizard** — 4-step flow: org setup → connect data sources → brain waking animation → first question
+- **Social Login** — Google OAuth + GitHub OAuth alongside email/password and magic links
+- **Live Demo on Website** — Interactive pre-computed Q&A with typing animation showing brain capabilities
 
 ---
 
@@ -98,12 +129,12 @@ Real-world hydrological time-series benchmark for causal discovery.
 
 | Dataset | AUROC | F1 Max | Accuracy |
 |---------|-------|--------|----------|
-| **random_3** | **0.824** | **0.829** | **0.868** |
-| **close_3** | 0.812 | 0.822 | 0.865 |
-| **1_random_3** | 0.828 | 0.829 | 0.868 |
+| **random_3** | **0.828** | **0.829** | **0.868** |
+| **close_3** | 0.818 | 0.822 | 0.865 |
+| **1_random_3** | 0.809 | 0.829 | 0.868 |
 | **confounder_3** | 0.714 | 0.712 | 0.799 |
 | **close_5** | 0.805 | — | — |
-| **random_5** | 0.797 | — | — |
+| **random_5** | 0.804 | — | — |
 
 Competitive with published VAR baselines across all 10 dataset splits.
 
@@ -133,9 +164,9 @@ Federation boosts temporal reasoning to 85% — the brain's distributed memory a
 
 ### Test Suite
 
-- **1,737 passing tests** across 54 test files
-- **67,243 lines** of TypeScript
-- Covers all 11 brain regions, 8 causal methods, learning loops, and federation
+- **2,615 passing tests** across 128 test files
+- **209,000+ lines** of TypeScript
+- Covers all 24 brain regions, 9 causal methods, learning loops, and federation
 
 ---
 
@@ -148,13 +179,13 @@ Signals In                                              Intelligence Out
 +----|--------|--------|--------|--------|--------|--------+
 |                                                          |
 |  L1 INGESTION       L2 ENTITY RESOLUTION  L3 SEMANTIC   |
-|  13 connectors      3-tier matching        Dual-mode     |
+|  16 connectors      3-tier matching        Dual-mode     |
 |  Webhooks + cron    (exact>fuzzy>create)   embeddings    |
 |                                                          |
 |  L4 CAUSAL ENGINE *            L5 PATTERN MEMORY         |
-|  8 methods (ensemble)          Association rule mining    |
+|  9 methods (ensemble)          Association rule mining    |
 |  Conditional Granger           Anomaly detection          |
-|  PC + do-calculus              Brain trainer + 118 packs  |
+|  PC + do-calculus              Brain trainer + packs      |
 |                                                          |
 |  L6 DOMAIN AGENTS             L7 INTELLIGENCE INTERFACE  |
 |  12+ domain personas          LLM response layer         |
@@ -207,7 +238,7 @@ pnpm add @nexus-ai/memory-stack
 import { runCausalDiscovery, detectAnomalies, minePatterns } from '@nexus-ai/memory-stack';
 
 const result = runCausalDiscovery(signals, 'my-org');
-// Uses calibrated ensemble (8 methods) by default. No API keys needed.
+// Uses calibrated ensemble (9 methods) by default. No API keys needed.
 ```
 
 ### Tier 2 — + Persistence (Supabase)
@@ -226,7 +257,7 @@ await brain.learn();  // Discovers edges, detects anomalies, trains itself
 
 ### Tier 3 — + Connectors
 
-Auto-ingest from Stripe, HubSpot, GitHub, Slack, Intercom, Zendesk, and 7 more.
+Auto-ingest from Stripe, HubSpot, GitHub, Slack, Intercom, Zendesk, and 10 more.
 
 ### Tier 4 — + LLM Copilot
 
@@ -237,7 +268,7 @@ const answer = await brain.query("Why did revenue drop this quarter?");
 
 ---
 
-## 8 Causal Discovery Methods
+## 9 Causal Discovery Methods
 
 | # | Method | Algorithm | Best For |
 |---|--------|-----------|----------|
@@ -249,6 +280,7 @@ const answer = await brain.query("Why did revenue drop this quarter?");
 | 6 | `anomaly_conditioned` | Z-score detection + anomaly alignment scoring | Crisis-driven edges |
 | 7 | `regime_conditional` | Separate conditional Granger for normal vs anomaly periods | Regime switching |
 | 8 | `nexusbrain_final` | Self-tuning VAR + cascade penalty + p-value boost + asymmetry | Maximum adaptability |
+| 9 | `nonlinear_killer` | Nonlinear residual analysis + kernel methods | Nonlinear relationships |
 
 Plus: PC algorithm, Pearl's do-calculus, transfer entropy, counterfactual engine.
 
@@ -258,7 +290,7 @@ Plus: PC algorithm, Pearl's do-calculus, transfer entropy, counterfactual engine
 
 | Package | Description |
 |---------|-------------|
-| [`@nexus-ai/memory-stack`](./packages/memory-stack) | Core intelligence: 11 brain regions, 8 causal methods, learning, embeddings, connectors |
+| [`@nexus-ai/memory-stack`](./packages/memory-stack) | Core intelligence: 24 brain regions, 9 causal methods, learning, embeddings, connectors |
 | [`@nexus-ai/domain-agents`](./packages/domain-agents) | Agent framework: 12+ personas, hybrid intent routing, cascade alerts |
 | [`@nexus-ai/mcp-server`](./packages/mcp-server) | Model Context Protocol server for Claude Desktop/Code |
 | [`@nexus-ai/slack-connector`](./packages/slack-connector) | Slack workspace analytics + bidirectional communication |
@@ -266,17 +298,31 @@ Plus: PC algorithm, Pearl's do-calculus, transfer entropy, counterfactual engine
 
 ---
 
+## Authentication
+
+NexusBrain supports multiple authentication methods:
+
+- **Email & Password** — Traditional sign-up/sign-in
+- **Magic Link** — Passwordless email OTP via Supabase
+- **Google OAuth** — One-click sign-in with Google
+- **GitHub OAuth** — One-click sign-in with GitHub
+
+All auth flows use Supabase Auth with secure callback handling and invite-aware redirects.
+
+---
+
 ## Key Differentiators
 
-- **8 causal methods in ensemble** — conditional Granger, cascade-aware, PC algorithm, do-calculus, transfer entropy, multi-resolution, anomaly-conditioned, regime-conditional
-- **11 brain regions** — perception, consolidation, reasoning, impact scoring, simulation, dreaming, anomaly sense, muscle memory, meta-cognition, learned attention, active exploration
+- **9 causal methods in ensemble** — conditional Granger, cascade-aware, PC algorithm, do-calculus, transfer entropy, multi-resolution, anomaly-conditioned, regime-conditional, nonlinear
+- **24 brain regions** — perception, consolidation, reasoning, impact scoring, simulation, dreaming, anomaly sense, muscle memory, meta-cognition, learned attention, active exploration, prediction verification, collaboration graph, and more
 - **Self-improving loops** — Bayesian updating, contrastive causal learning, embedding tuning, attention policy learning
 - **Knowledge federation** — org-specific brain + universal core brain with PII sanitization
 - **Meta-cognition** — brain monitors its own calibration (ECE), cognitive load, and per-domain degradation
-- **Benchmark-tested** — CausalRivers (AUROC 0.824), CauseME (F1 0.493), LongMemEval (79.6% accuracy)
+- **Benchmark-tested** — CausalRivers (AUROC 0.828), CauseME (F1 0.493), LongMemEval (79.6% accuracy)
 - **Zero runtime dependencies** — core intelligence is pure TypeScript, runs on edge functions
-- **118 training packs** — pre-loaded domain knowledge + self-generated patterns from discoveries
+- **RBAC built-in** — 4-tier role hierarchy (Owner/Admin/Analyst/Viewer) with granular permissions
 - **Adaptive forecasting** — Holt-Winters + AR + KNN nonlinear ensemble with quantile regression intervals
+- **Full platform UI** — Prediction tracker, causal graph, simulator, agent dashboard, training pack builder, notification engine
 
 ---
 
@@ -284,14 +330,16 @@ Plus: PC algorithm, Pearl's do-calculus, transfer entropy, counterfactual engine
 
 | Metric | Value |
 |--------|-------|
-| Brain Regions | 11 |
-| Causal Discovery Methods | 8 (+ PC, do-calculus, transfer entropy) |
-| TypeScript Lines | 67,243 |
-| Passing Tests | 1,737 |
-| Connectors | 13 |
+| Brain Regions | 24 |
+| Causal Discovery Methods | 9 (+ PC, do-calculus, transfer entropy) |
+| TypeScript Lines | 209,000+ |
+| Passing Tests | 2,615 |
+| Test Files | 128 |
+| Connectors | 16 |
 | Domain Personas | 12+ |
-| Training Packs | 118 |
-| Benchmark AUROC (best) | 0.824 (CausalRivers random_3) |
+| Platform Pages | 20+ |
+| Auth Methods | 4 (Email, Magic Link, Google, GitHub) |
+| Benchmark AUROC (best) | 0.828 (CausalRivers random_3) |
 | Memory Accuracy (best) | 79.6% (LongMemEval federated) |
 | External Runtime Deps | 0 |
 
