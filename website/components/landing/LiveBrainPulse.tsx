@@ -155,7 +155,7 @@ export function LiveBrainPulse() {
           <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5">
             <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse-glow" />
             <span className="text-sm text-emerald-400">
-              {isLive ? "Brain Active \u2014 Live Data" : "Demo Mode \u2014 Simulated Activity"}
+              {isLive ? "Causal Memory Active \u2014 Live Data" : "Demo Mode \u2014 Simulated Activity"}
             </span>
           </div>
           <h2 className="mb-4 text-3xl font-bold md:text-4xl">
@@ -163,7 +163,7 @@ export function LiveBrainPulse() {
           </h2>
           <p className="text-lg text-muted">
             This isn&apos;t a static diagram. NexusBrain is a living system &mdash; firing neurons,
-            making discoveries, strengthening connections every hour of every day.
+            making discoveries, strengthening causal connections every hour of every day.
           </p>
         </motion.div>
 

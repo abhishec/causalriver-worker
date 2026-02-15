@@ -349,12 +349,12 @@ export function BrainArchitecture() {
           <h2 className="mb-4 text-3xl font-bold md:text-4xl">
             {BRAIN_REGIONS.length} Brain Regions.{" "}
             <span className="bg-gradient-to-r from-emerald-400 to-violet-400 bg-clip-text text-transparent">
-              One Living System.
+              One Causal Memory.
             </span>
           </h2>
           <p className="text-lg text-muted">
             Modeled after the human brain — each region has a specialized cognitive function.
-            Together, they perceive, remember, reason, predict, dream, and self-correct.
+            Together, they form the causal memory that perceives, remembers, reasons, predicts, and self-corrects.
             The system continuously monitors its own confidence and actively seeks missing knowledge.
           </p>
         </motion.div>

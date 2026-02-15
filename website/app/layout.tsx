@@ -16,36 +16,36 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "NexusBrain - A Living Brain for Your Apps | usebrainos.com",
+    default: "NexusBrain - The Causal Memory for Organisations | usebrainos.com",
     template: "%s | NexusBrain",
   },
   description:
-    "A self-improving causal intelligence engine with 24 brain regions. It perceives, reasons, dreams, and gets smarter every day. Connect your app — it inherits a brain.",
+    "NexusBrain is the causal memory for organisations — a deep knowledge system that perceives your data, discovers cause-and-effect, and transforms how your organisation works.",
   keywords: [
-    "causal intelligence",
-    "AI memory",
-    "living brain",
-    "self-improving AI",
-    "AI agents",
+    "causal memory",
+    "organisational intelligence",
+    "deep knowledge system",
     "causal discovery",
-    "brain infrastructure",
+    "AI agents",
+    "cause and effect",
+    "agent as a service",
     "NexusBrain",
     "usebrainos",
   ],
   authors: [{ name: "Monetize Organisation" }],
   openGraph: {
-    title: "NexusBrain - A Living Brain for Your Apps",
+    title: "NexusBrain - The Causal Memory for Organisations",
     description:
-      "A self-improving causal intelligence engine. It perceives, reasons, dreams, and gets smarter every day. Connect your app — it inherits a brain.",
+      "The causal memory for organisations — a deep knowledge system that perceives your data, discovers cause-and-effect, and transforms how your organisation works.",
     url: "https://usebrainos.com",
     siteName: "NexusBrain",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "NexusBrain - A Living Brain for Your Apps",
+    title: "NexusBrain - The Causal Memory for Organisations",
     description:
-      "A self-improving causal intelligence engine. It perceives, reasons, dreams, and gets smarter every day. Connect your app — it inherits a brain.",
+      "The causal memory for organisations — a deep knowledge system that perceives your data, discovers cause-and-effect, and transforms how your organisation works.",
   },
   robots: {
     index: true,

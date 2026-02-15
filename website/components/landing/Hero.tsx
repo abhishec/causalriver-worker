@@ -54,20 +54,20 @@ export function Hero() {
         >
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5">
             <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse-glow" />
-            <span className="text-sm text-emerald-400">The brain is alive — learning right now</span>
+            <span className="text-sm text-emerald-400">Causal memory is active</span>
           </div>
 
           <h1 className="mb-6 text-4xl font-bold leading-tight tracking-tight md:text-6xl lg:text-7xl">
-            A{" "}
+            The{" "}
             <span className="bg-gradient-to-r from-emerald-400 via-cyan-400 to-violet-400 bg-clip-text text-transparent">
-              living brain
+              causal memory
             </span>{" "}
-            for your apps
+            for organisations
           </h1>
 
           <p className="mx-auto mb-4 max-w-2xl text-lg text-muted md:text-xl">
-            It perceives your data. Discovers cause-and-effect. Dreams up insights while you sleep.
-            Wakes up smarter every morning. Connect your app — it inherits intelligence.
+            A deep knowledge system that perceives your data, discovers cause-and-effect,
+            and transforms how your organisation works. It compounds intelligence every cycle.
           </p>
 
           <p className="mx-auto mb-8 max-w-xl text-sm text-muted/70">
@@ -117,7 +117,7 @@ export function Hero() {
           <div className="rounded-xl border border-emerald-500/20 bg-surface p-5">
             <div className="flex items-center gap-2 mb-3">
               <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse-glow" />
-              <span className="text-xs font-medium text-emerald-400">Brain is thinking...</span>
+              <span className="text-xs font-medium text-emerald-400">NexusBrain is thinking...</span>
             </div>
             <div className="font-mono text-sm text-zinc-300 min-h-[1.5rem]">
               <span>{displayText}</span>

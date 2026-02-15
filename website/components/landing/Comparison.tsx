@@ -35,7 +35,7 @@ export function Comparison() {
             How NexusBrain Compares
           </h2>
           <p className="text-lg text-muted">
-            Not another dashboard. Not another chatbot. A benchmark-tested causal intelligence engine
+            Not another dashboard. Not another chatbot. A benchmark-tested causal memory
             that proves causation with statistical rigor.
           </p>
         </motion.div>

@@ -6,19 +6,19 @@ const DEMO_CONVERSATIONS = [
   {
     question: "Why did churn spike last month?",
     answer:
-      "Churn increased 23% MoM. The brain traced it to a causal chain: support ticket volume rose 40% after a billing system migration (lag: 3 days), which degraded CSAT scores from 4.2 to 3.6 (lag: 7 days), leading to increased cancellations concentrated in the SMB segment (lag: 14 days). Confidence: 87%.",
+      "Churn increased 23% MoM. NexusBrain traced it to a causal chain: support ticket volume rose 40% after a billing system migration (lag: 3 days), which degraded CSAT scores from 4.2 to 3.6 (lag: 7 days), leading to increased cancellations concentrated in the SMB segment (lag: 14 days). Confidence: 87%.",
     domain: "customer",
   },
   {
     question: "What will happen if we increase marketing spend 20%?",
     answer:
-      "Simulating +20% marketing spend cascade: Lead volume increases ~12% (confidence: 85%, lag: 14d). Pipeline value grows ~8% (confidence: 72%, lag: 30d). Monthly revenue impact: +5.2% (confidence: 58%, lag: 60d). Note: The brain detects diminishing returns above 15% increase based on historical patterns.",
+      "Simulating +20% marketing spend cascade: Lead volume increases ~12% (confidence: 85%, lag: 14d). Pipeline value grows ~8% (confidence: 72%, lag: 30d). Monthly revenue impact: +5.2% (confidence: 58%, lag: 60d). Note: NexusBrain detects diminishing returns above 15% increase based on historical patterns.",
     domain: "financial",
   },
   {
-    question: "What did the brain learn today?",
+    question: "What did NexusBrain learn today?",
     answer:
-      "Today the brain discovered 3 new causal edges: (1) GitHub PR merge velocity correlates with deployment frequency at 0.82 strength. (2) Slack #support channel sentiment is a leading indicator of NPS score changes with 5-day lag. (3) Marketing email open rates predict demo bookings with 0.71 confidence. Brain health: 94%.",
+      "Today NexusBrain discovered 3 new causal edges: (1) GitHub PR merge velocity correlates with deployment frequency at 0.82 strength. (2) Slack #support channel sentiment is a leading indicator of NPS score changes with 5-day lag. (3) Marketing email open rates predict demo bookings with 0.71 confidence. System health: 94%.",
     domain: "intelligence",
   },
 ];
@@ -68,14 +68,14 @@ export function LiveDemo() {
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 mb-6">
             <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-xs text-white/60 font-medium">Live Brain Output</span>
+            <span className="text-xs text-white/60 font-medium">Live Causal Memory Output</span>
           </div>
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-            See the brain in action
+            See the causal memory in action
           </h2>
           <p className="text-lg text-white/50 max-w-2xl mx-auto">
             These are real outputs from NexusBrain&apos;s causal reasoning engine.
-            Click a question to see how the brain responds.
+            Click a question to see how the causal memory responds.
           </p>
         </div>
 
@@ -119,7 +119,7 @@ export function LiveDemo() {
                       <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                     </svg>
                   </div>
-                  <p className="text-sm text-white/30">Click a question above to see the brain respond</p>
+                  <p className="text-sm text-white/30">Click a question above to see NexusBrain respond</p>
                 </div>
               ) : (
                 <div className="space-y-4">

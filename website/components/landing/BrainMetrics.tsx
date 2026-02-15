@@ -147,7 +147,7 @@ export function BrainMetrics() {
       changePositive: true,
       data: daysData.map((d) => d.total_connections),
       color: "#10b981",
-      description: "Verified cause-and-effect relationships in the brain",
+      description: "Verified cause-and-effect relationships in the causal memory",
     },
     {
       label: "Prediction Accuracy",
@@ -159,7 +159,7 @@ export function BrainMetrics() {
         ? daysData.map((d) => d.prediction_accuracy!)
         : daysData.map((d) => d.prediction_accuracy ?? (accuracyFirst ?? 80)),
       color: "#8b5cf6",
-      description: hasAccuracy ? "How accurately the brain predicts outcomes" : "Accuracy tracking begins after verified predictions",
+      description: hasAccuracy ? "How accurately NexusBrain predicts outcomes" : "Accuracy tracking begins after verified predictions",
     },
     {
       label: "Daily Insights",
@@ -199,12 +199,12 @@ export function BrainMetrics() {
             </span>
           </h2>
           <p className="text-lg text-muted">
-            Unlike static dashboards that show you the same data forever, NexusBrain compounds knowledge.
+            Unlike static dashboards that show you the same data forever, NexusBrain&apos;s causal memory compounds organisational knowledge.
             Every sleep cycle strengthens connections, prunes weak edges, and discovers new patterns.
           </p>
           {isLive && (
             <p className="text-xs text-emerald-400/60 mt-2">
-              Live data from the brain &mdash; updated every cycle
+              Live data from NexusBrain &mdash; updated every cycle
             </p>
           )}
         </motion.div>
@@ -251,7 +251,7 @@ export function BrainMetrics() {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h3 className="text-lg font-semibold">{dayCount}-Day Brain Evolution</h3>
-              <p className="text-sm text-muted">How the brain&apos;s neural network grew and strengthened</p>
+              <p className="text-sm text-muted">How the causal memory grew and strengthened</p>
             </div>
             <div className="flex gap-4 text-xs text-muted">
               <span className="flex items-center gap-1.5">

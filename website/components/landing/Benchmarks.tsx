@@ -127,7 +127,7 @@ export function Benchmarks() {
             </span>
           </h2>
           <p className="text-lg text-muted">
-            We don&apos;t just claim intelligence — we prove it. NexusBrain is rigorously tested against
+            We don&apos;t just claim causal memory — we prove it. NexusBrain is rigorously tested against
             established causal discovery and memory benchmarks used by the research community.
           </p>
         </motion.div>

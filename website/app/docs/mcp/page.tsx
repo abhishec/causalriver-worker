@@ -10,7 +10,7 @@ export default function MCPPage() {
     <div>
       <h1 className="mb-4 text-3xl font-bold">MCP Server</h1>
       <p className="mb-8 text-lg text-muted">
-        The NexusBrain MCP server gives Claude Desktop and Claude Code direct access to your organizational brain
+        The NexusBrain MCP server gives Claude Desktop and Claude Code direct access to your organisation&apos;s causal memory
         via the Model Context Protocol.
       </p>
 
@@ -53,7 +53,7 @@ export default function MCPPage() {
           },
           {
             name: "nexus_ingest",
-            description: "Send signals to the brain. Claude can ingest observations during a conversation.",
+            description: "Send signals to the causal memory. Claude can ingest observations during a conversation.",
             example: 'nexus_ingest({ signals: [{ source_domain: "cs", signal_type: "escalation", signal_value: 1 }] })',
           },
           {
@@ -63,7 +63,7 @@ export default function MCPPage() {
           },
           {
             name: "nexus_webhook",
-            description: "Forward webhooks. Claude can relay external events to the brain for processing.",
+            description: "Forward webhooks. Claude can relay external events to NexusBrain for processing.",
             example: 'nexus_webhook({ source: "stripe", payload: { ... } })',
           },
           {
@@ -84,8 +84,8 @@ export default function MCPPage() {
 
       <h2 className="mb-4 mt-12 text-2xl font-semibold">Knowledge Federation</h2>
       <p className="mb-4 text-muted">
-        The MCP server automatically federates between the Core Brain (universal knowledge) and your Org Brain (proprietary knowledge).
-        Your org brain always takes priority. When Claude asks a question, both brains contribute to the answer, with clear labeling of which insights come from universal vs. organizational data.
+        The MCP server automatically federates between the Core Memory (universal knowledge) and your Org Memory (proprietary knowledge).
+        Your org memory always takes priority. When Claude asks a question, both memories contribute to the answer, with clear labelling of which insights come from universal vs. organisational data.
       </p>
     </div>
   );

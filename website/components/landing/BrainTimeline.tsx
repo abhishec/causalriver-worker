@@ -132,18 +132,18 @@ export function BrainTimeline() {
           className="mx-auto mb-16 max-w-3xl text-center"
         >
           <h2 className="mb-4 text-3xl font-bold md:text-4xl">
-            What The Brain Learned{" "}
+            What The Causal Memory Learned{" "}
             <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
               This Week
             </span>
           </h2>
           <p className="text-lg text-muted">
-            Every night the brain sleeps, consolidates, and wakes up smarter.
+            Every night NexusBrain runs its sleep cycle &mdash; consolidating knowledge, pruning weak edges, and waking up smarter.
             Here&apos;s what it discovered &mdash; real insights, real connections, getting better every day.
           </p>
           {isLive && (
             <p className="text-xs text-emerald-400/60 mt-2">
-              Live discoveries from the production brain
+              Live discoveries from the production causal memory
             </p>
           )}
         </motion.div>
@@ -296,7 +296,7 @@ export function BrainTimeline() {
             viewport={{ once: true }}
             className="mt-8 rounded-xl border border-accent/20 bg-accent/5 p-6 text-center"
           >
-            <p className="text-sm text-muted mb-2">This week the brain grew</p>
+            <p className="text-sm text-muted mb-2">This week the causal memory grew</p>
             <div className="flex items-center justify-center gap-8">
               <div>
                 <p className="text-2xl font-bold text-emerald-400">+{weeklyNewConnections}</p>

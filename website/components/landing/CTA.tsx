@@ -15,18 +15,18 @@ export function CTA() {
         >
           <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5">
             <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse-glow" />
-            <span className="text-sm text-emerald-400">The brain is waiting for you</span>
+            <span className="text-sm text-emerald-400">Your causal memory awaits</span>
           </div>
 
           <h2 className="mb-4 text-3xl font-bold md:text-4xl">
-            Give Your App a{" "}
+            Give Your Organisation a{" "}
             <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
-              Living Brain
+              Causal Memory
             </span>
           </h2>
           <p className="mb-8 text-lg text-muted">
-            Start with zero dependencies. The brain learns from your data automatically.
-            Every day it gets smarter. Every cycle compounds intelligence.
+            Start with zero dependencies. The causal memory learns from your data automatically.
+            Every cycle it compounds organisational knowledge and discovers new cause-and-effect.
           </p>
 
           {/* Install command */}

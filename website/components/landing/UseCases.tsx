@@ -17,8 +17,8 @@ export function UseCases() {
             Use Cases
           </h2>
           <p className="text-lg text-muted">
-            NexusBrain discovers cause-and-effect chains that span departments, tools, and time.
-            Replace guesswork with Granger-proven statistical evidence.
+            NexusBrain&apos;s causal memory powers autonomous agent services that transform how organisations work.
+            Each service is backed by causal evidence — not correlation, not guesswork.
           </p>
         </motion.div>
 

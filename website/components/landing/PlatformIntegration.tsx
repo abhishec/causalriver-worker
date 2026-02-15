@@ -6,7 +6,7 @@ const INTEGRATION_STEPS = [
   {
     step: 1,
     title: "Connect Your Data",
-    description: "Plug in Stripe, HubSpot, GitHub, Slack — or any API. The brain starts ingesting signals immediately.",
+    description: "Plug in Stripe, HubSpot, GitHub, Slack — or any API. NexusBrain starts ingesting signals immediately.",
     code: `import { createBrain } from '@nexus-ai/memory-stack';
 
 const brain = createBrain({ organizationId: 'your-org' });
@@ -18,9 +18,9 @@ brain.connect('hubspot', { apiKey: process.env.HUBSPOT_KEY });`,
   },
   {
     step: 2,
-    title: "The Brain Learns Automatically",
-    description: "No training. No configuration. The brain discovers cause-and-effect, detects anomalies, and builds predictions on its own.",
-    code: `// The brain runs autonomously:
+    title: "It Learns Automatically",
+    description: "No training. No configuration. The causal memory discovers cause-and-effect, detects anomalies, and builds predictions on its own.",
+    code: `// NexusBrain runs autonomously:
 // Every 4 hours → scans for insights
 // Every night → consolidates memories
 // Every cycle → gets smarter
@@ -47,14 +47,14 @@ const health = await brain.getHealth();
   {
     step: 4,
     title: "Build On Top",
-    description: "Use the SDK, REST API, or MCP server. Build dashboards, power AI agents, create alerts — your app inherits a brain.",
+    description: "Use the SDK, REST API, or MCP server. Build dashboards, power AI agents, create alerts — your app inherits causal intelligence.",
     code: `// SDK — zero runtime dependencies
 import { runCausalDiscovery } from '@nexus-ai/memory-stack';
 
 // REST API — works from any language
 fetch('/api/nexus-query', { body: JSON.stringify({ query }) });
 
-// MCP Server — give Claude a brain
+// MCP Server — give Claude a causal memory
 // Claude can query, ingest, and reason with causal evidence`,
     icon: "🚀",
     color: "text-amber-400",
@@ -64,23 +64,23 @@ fetch('/api/nexus-query', { body: JSON.stringify({ query }) });
 
 const WHO_ITS_FOR = [
   {
-    role: "AI Agent Builders",
-    description: "Give your agents persistent memory that reasons about cause-and-effect, not just retrieves documents.",
+    role: "Service Builders",
+    description: "Build autonomous agent services powered by causal memory — SE-aaS, Accountant-aaS, CS-aaS, and more.",
     icon: "🤖",
   },
   {
-    role: "SaaS Founders",
-    description: "Understand why metrics change. Predict churn. Discover how engineering decisions impact revenue.",
+    role: "Organisation Leaders",
+    description: "See how every department affects the bottom line. Make decisions based on causal evidence, not intuition.",
     icon: "📈",
   },
   {
     role: "Product Teams",
-    description: "Connect user behavior to business outcomes with statistical proof, not intuition.",
+    description: "Connect user behaviour to business outcomes with statistical proof. Trace cascades across departments.",
     icon: "🎯",
   },
   {
-    role: "Data Engineers",
-    description: "Replace fragile correlation dashboards with self-improving causal discovery. Zero-config.",
+    role: "Developers",
+    description: "Embed causal memory into any application via SDK, REST API, or MCP server. Zero runtime dependencies.",
     icon: "⚙️",
   },
 ];
@@ -99,14 +99,14 @@ export function PlatformIntegration() {
             <span className="text-sm text-accent-light">Open Infrastructure</span>
           </div>
           <h2 className="mb-4 text-3xl font-bold md:text-4xl">
-            Plug Your App Into a{" "}
+            Plug Your App Into the{" "}
             <span className="bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">
-              Living Brain
+              Causal Memory
             </span>
           </h2>
           <p className="text-lg text-muted">
             NexusBrain is infrastructure, not a product. Any developer can connect their app
-            and inherit a self-improving causal intelligence engine. Four steps. That&apos;s it.
+            and inherit a deep causal knowledge system. Four steps. That&apos;s it.
           </p>
         </motion.div>
 
@@ -151,7 +151,7 @@ export function PlatformIntegration() {
           className="mt-20"
         >
           <h3 className="mb-8 text-center text-2xl font-bold">
-            Built For Builders
+            Built For Organisations
           </h3>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {WHO_ITS_FOR.map((item, i) => (

@@ -35,7 +35,7 @@ export default function DocsPage() {
     <div>
       <h1 className="mb-4 text-3xl font-bold">Documentation</h1>
       <p className="mb-12 text-lg text-muted">
-        Everything you need to integrate NexusBrain into your application. Start with zero dependencies and scale to a full production stack.
+        Everything you need to integrate NexusBrain&apos;s causal memory into your application. Start with zero dependencies and scale to a full production stack.
       </p>
 
       <div className="space-y-12">
