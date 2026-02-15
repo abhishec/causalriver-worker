@@ -110,6 +110,17 @@ export interface PredictionAccuracyMetrics {
   avgConfidence: number;
 }
 
+export interface DORAMetrics {
+  /** Deployment frequency (deployments per day) */
+  deploymentFrequency: number;
+  /** Lead time for changes (hours from commit to deploy) */
+  leadTimeForChanges: number;
+  /** Mean time to recovery (hours) */
+  meanTimeToRecovery: number;
+  /** Change failure rate (0-1) */
+  changeFailureRate: number;
+}
+
 export interface SEMetricsSummary {
   timestamp: string;
   organizationId: string;
@@ -118,6 +129,7 @@ export interface SEMetricsSummary {
   techDebt: TechDebtMetrics;
   codebaseHealth: CodebaseHealthMetrics;
   predictionAccuracy: PredictionAccuracyMetrics;
+  dora: DORAMetrics;
 }
 
 // ============================================================================
@@ -370,6 +382,43 @@ export function createSEMetrics(config: SEMetricsConfig = {}) {
       metrics.observe('seaas.predictions.calibration_error', calibrationError, orgLabels);
     },
 
+    // ── DORA Metrics ─────────────────────────────────────────────────────
+
+    /**
+     * Record deployment (for deployment frequency)
+     */
+    recordDeployment(params: { environment: 'staging' | 'production'; success: boolean }) {
+      const { environment, success } = params;
+
+      // Count deployments
+      metrics.increment('seaas.dora.deployments_total', 1, { ...orgLabels, environment });
+
+      if (success) {
+        metrics.increment('seaas.dora.deployments_success', 1, { ...orgLabels, environment });
+      } else {
+        metrics.increment('seaas.dora.deployments_failed', 1, { ...orgLabels, environment });
+      }
+    },
+
+    /**
+     * Record lead time for changes (commit to deploy)
+     */
+    recordLeadTime(params: { leadTimeHours: number; environment: 'staging' | 'production' }) {
+      const { leadTimeHours, environment } = params;
+      metrics.observe('seaas.dora.lead_time_hours', leadTimeHours, { ...orgLabels, environment });
+    },
+
+    /**
+     * Record incident recovery (for MTTR)
+     */
+    recordIncidentRecovery(params: { recoveryTimeHours: number; severity: string }) {
+      const { recoveryTimeHours, severity } = params;
+      metrics.observe('seaas.dora.recovery_time_hours', recoveryTimeHours, {
+        ...orgLabels,
+        severity,
+      });
+    },
+
     // ── Summary & Aggregation ────────────────────────────────────────────
 
     /**
@@ -465,6 +514,42 @@ export function createSEMetrics(config: SEMetricsConfig = {}) {
           calibrationScore: calibrationError ? 1 - calibrationError.avg : 0,
           outcomeMatchRate: predOutcomes > 0 ? predCorrect / predOutcomes : 0,
           avgConfidence: predConfidence?.avg || 0,
+        },
+        dora: {
+          // Deployment Frequency (deployments per day)
+          deploymentFrequency: (() => {
+            const prodDeployments = metrics.getCounter('seaas.dora.deployments_total', {
+              ...orgLabels,
+              environment: 'production',
+            });
+            // Assuming metrics started today, calculate per-day rate
+            return prodDeployments; // TODO: Divide by days since metrics started
+          })(),
+          // Lead Time for Changes (avg hours from commit to deploy)
+          leadTimeForChanges: (() => {
+            const leadTime = metrics.getHistogram('seaas.dora.lead_time_hours', {
+              ...orgLabels,
+              environment: 'production',
+            });
+            return leadTime?.avg || 0;
+          })(),
+          // Mean Time To Recovery (avg hours to recover from incidents)
+          meanTimeToRecovery: (() => {
+            const mttr = metrics.getHistogram('seaas.dora.recovery_time_hours', orgLabels);
+            return mttr?.avg || 0;
+          })(),
+          // Change Failure Rate (failed deployments / total deployments)
+          changeFailureRate: (() => {
+            const totalDeployments = metrics.getCounter('seaas.dora.deployments_total', {
+              ...orgLabels,
+              environment: 'production',
+            });
+            const failedDeployments = metrics.getCounter('seaas.dora.deployments_failed', {
+              ...orgLabels,
+              environment: 'production',
+            });
+            return totalDeployments > 0 ? failedDeployments / totalDeployments : 0;
+          })(),
         },
       };
     },

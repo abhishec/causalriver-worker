@@ -173,13 +173,13 @@ export function createErrorTracker(config?: ErrorTrackerConfig): ErrorTracker {
     // Send to DataDog if API key is configured (lightweight HTTP push)
     if (cfg.datadogApiKey) {
       const ddPayload = {
+        ...payload,
         ddsource: cfg.serviceName,
         ddtags: `env:${cfg.environment},component:${context.component}`,
         hostname: cfg.serviceName,
         message: formatted.message,
         service: cfg.serviceName,
         status: severity,
-        ...payload,
       };
 
       // Fire-and-forget HTTP push to DataDog Logs API

@@ -83,12 +83,20 @@ export type MotorActionType =
   | 'github_update_issue'
   | 'github_add_label'
   | 'github_create_batch'
+  | 'github_trigger_workflow'
+  | 'github_run_tests'
   | 'email_send'
   | 'webhook_call'
   | 'api_call'
   | 'schedule_meeting'
   | 'create_report'
   | 'brain_reanalysis'
+  | 'deploy_to_staging'
+  | 'deploy_to_production'
+  | 'rollback_deployment'
+  | 'create_feature_branch'
+  | 'run_test_suite'
+  | 'trigger_ci_build'
   | 'custom';
 
 /** Result of executing a motor command */
