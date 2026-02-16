@@ -19,7 +19,7 @@ export function CostWidget({ costToday, dailyBudget, projectedMonthly, monthlyBu
     "bg-accent";
 
   return (
-    <div className="rounded-xl bg-card border border-border/50 p-5">
+    <div className="rounded-xl bg-card border border-border-subtle p-5">
       <div className="flex items-center justify-between mb-4">
         <span className="text-xs font-medium text-muted uppercase tracking-wider">Cost Today</span>
         <svg className="w-4 h-4 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>

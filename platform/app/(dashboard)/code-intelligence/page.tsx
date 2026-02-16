@@ -44,7 +44,7 @@ export default async function CodeIntelligencePage() {
 
       {!isConnected ? (
         /* Not connected state */
-        <div className="rounded-xl bg-card border border-border/50 p-8 text-center">
+        <div className="rounded-xl bg-card border border-border-subtle p-8 text-center">
           <span className="text-4xl mb-4 block">🐙</span>
           <h2 className="text-lg font-semibold mb-2">Connect GitHub to Get Started</h2>
           <p className="text-sm text-muted mb-4 max-w-md mx-auto">
@@ -60,7 +60,7 @@ export default async function CodeIntelligencePage() {
         </div>
       ) : !isIngested ? (
         /* Connected but not ingested */
-        <div className="rounded-xl bg-card border border-border/50 p-8 text-center">
+        <div className="rounded-xl bg-card border border-border-subtle p-8 text-center">
           <span className="text-4xl mb-4 block">⚡</span>
           <h2 className="text-lg font-semibold mb-2">
             {config.repoFullName} Connected
@@ -81,7 +81,7 @@ export default async function CodeIntelligencePage() {
         <>
           {/* Summary cards */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div className="rounded-xl bg-card border border-border/50 p-5">
+            <div className="rounded-xl bg-card border border-border-subtle p-5">
               <div className="text-xs font-medium text-muted uppercase tracking-wider mb-2">
                 Repository
               </div>
@@ -90,7 +90,7 @@ export default async function CodeIntelligencePage() {
                 {config.repoLanguage} · {config.repoStars?.toLocaleString()} stars
               </div>
             </div>
-            <div className="rounded-xl bg-card border border-border/50 p-5">
+            <div className="rounded-xl bg-card border border-border-subtle p-5">
               <div className="text-xs font-medium text-muted uppercase tracking-wider mb-2">
                 Files Indexed
               </div>
@@ -101,7 +101,7 @@ export default async function CodeIntelligencePage() {
                 {formatNumber(ingestionStats.symbolsFound)} symbols
               </div>
             </div>
-            <div className="rounded-xl bg-card border border-border/50 p-5">
+            <div className="rounded-xl bg-card border border-border-subtle p-5">
               <div className="text-xs font-medium text-muted uppercase tracking-wider mb-2">
                 Dependency Edges
               </div>
@@ -112,7 +112,7 @@ export default async function CodeIntelligencePage() {
                 {formatNumber(ingestionStats.dependencyEntities)} entities
               </div>
             </div>
-            <div className="rounded-xl bg-card border border-border/50 p-5">
+            <div className="rounded-xl bg-card border border-border-subtle p-5">
               <div className="text-xs font-medium text-muted uppercase tracking-wider mb-2">
                 Engineering Signals
               </div>

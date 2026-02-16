@@ -18,7 +18,7 @@ export function BrainPulse({ status, lastTrainedAt, brainAge, nextTrainingIn }: 
   const config = STATUS_CONFIG[status];
 
   return (
-    <div className="rounded-xl bg-card border border-border/50 p-6 relative overflow-hidden">
+    <div className="rounded-xl bg-card border border-border-subtle p-6 relative overflow-hidden">
       {/* Background glow */}
       <div className="absolute top-0 right-0 w-64 h-64 bg-accent/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
 

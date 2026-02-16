@@ -225,7 +225,7 @@ export default function OnboardingPage() {
           </div>
           <div className="grid grid-cols-2 gap-3">
             {CONNECTORS.map((conn) => (
-              <button key={conn.id} onClick={() => toggleConnector(conn.id)} className={cn("p-4 rounded-xl border text-left transition-all", selectedConnectors.includes(conn.id) ? "border-accent bg-accent/5" : "border-border/50 hover:border-border")}>
+              <button key={conn.id} onClick={() => toggleConnector(conn.id)} className={cn("p-4 rounded-xl border text-left transition-all", selectedConnectors.includes(conn.id) ? "border-accent bg-accent/5" : "border-border-subtle hover:border-border")}>
                 <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center text-lg font-bold mb-3", conn.color)}>{conn.icon}</div>
                 <span className="text-sm font-medium">{conn.name}</span>
                 {selectedConnectors.includes(conn.id) && <div className="mt-1 text-[10px] text-accent">Selected</div>}
@@ -280,11 +280,11 @@ export default function OnboardingPage() {
           </div>
           <div className="space-y-2">
             {SUGGESTED_QUESTIONS.map((q) => (
-              <button key={q} onClick={() => setSelectedQuestion(q)} className={cn("w-full text-left px-4 py-3 rounded-lg border text-sm transition-all", selectedQuestion === q ? "border-accent bg-accent/5 text-foreground" : "border-border/50 text-muted-foreground hover:border-border hover:text-foreground")}>{q}</button>
+              <button key={q} onClick={() => setSelectedQuestion(q)} className={cn("w-full text-left px-4 py-3 rounded-lg border text-sm transition-all", selectedQuestion === q ? "border-accent bg-accent/5 text-foreground" : "border-border-subtle text-muted-foreground hover:border-border hover:text-foreground")}>{q}</button>
             ))}
           </div>
           {selectedQuestion && (
-            <div className="p-4 rounded-lg bg-surface border border-border/30">
+            <div className="p-4 rounded-lg bg-surface border border-border-subtle">
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
                 <span className="text-xs text-success font-medium">NexusBrain thinking...</span>

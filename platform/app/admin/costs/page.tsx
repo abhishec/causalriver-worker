@@ -53,22 +53,22 @@ export default async function AdminCostsPage() {
 
       {/* Top metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="rounded-xl bg-card border border-border/50 p-5">
+        <div className="rounded-xl bg-card border border-border-subtle p-5">
           <div className="text-xs font-medium text-muted uppercase tracking-wider mb-2">Today</div>
           <div className="text-3xl font-bold">{formatUSD(costToday)}</div>
           <div className="text-xs text-muted mt-1">{todayLogs.length} LLM calls</div>
         </div>
-        <div className="rounded-xl bg-card border border-border/50 p-5">
+        <div className="rounded-xl bg-card border border-border-subtle p-5">
           <div className="text-xs font-medium text-muted uppercase tracking-wider mb-2">30-Day LLM</div>
           <div className="text-3xl font-bold">{formatUSD(totalLLM)}</div>
           <div className="text-xs text-muted mt-1">{costLogs.length} total calls</div>
         </div>
-        <div className="rounded-xl bg-card border border-border/50 p-5">
+        <div className="rounded-xl bg-card border border-border-subtle p-5">
           <div className="text-xs font-medium text-muted uppercase tracking-wider mb-2">AWS Infra</div>
           <div className="text-3xl font-bold">{formatUSD(totalAWS)}</div>
           <div className="text-xs text-muted mt-1">Fargate + CloudWatch + ECR</div>
         </div>
-        <div className="rounded-xl bg-card border border-border/50 p-5">
+        <div className="rounded-xl bg-card border border-border-subtle p-5">
           <div className="text-xs font-medium text-muted uppercase tracking-wider mb-2">Combined Total</div>
           <div className="text-3xl font-bold text-accent">{formatUSD(totalCombined)}</div>
           <div className="text-xs text-muted mt-1">LLM + AWS</div>
@@ -77,7 +77,7 @@ export default async function AdminCostsPage() {
 
       {/* By Component + By Model */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="rounded-xl bg-card border border-border/50 p-5">
+        <div className="rounded-xl bg-card border border-border-subtle p-5">
           <h3 className="text-sm font-medium mb-4">Cost by Component (All Orgs)</h3>
           <div className="space-y-3">
             {Object.entries(byComponent).sort((a, b) => b[1].cost - a[1].cost).map(([comp, data]) => (
@@ -96,7 +96,7 @@ export default async function AdminCostsPage() {
           </div>
         </div>
 
-        <div className="rounded-xl bg-card border border-border/50 p-5">
+        <div className="rounded-xl bg-card border border-border-subtle p-5">
           <h3 className="text-sm font-medium mb-4">Cost by Model (All Orgs)</h3>
           <div className="space-y-3">
             {Object.entries(byModel).sort((a, b) => b[1].cost - a[1].cost).map(([model, data]) => (
@@ -115,12 +115,12 @@ export default async function AdminCostsPage() {
 
       {/* AWS Breakdown */}
       {awsSnapshots.length > 0 && (
-        <div className="rounded-xl bg-card border border-border/50 p-5">
+        <div className="rounded-xl bg-card border border-border-subtle p-5">
           <h3 className="text-sm font-medium mb-4">AWS Infrastructure Detail</h3>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-xs text-muted border-b border-border/30">
+                <tr className="text-xs text-muted border-b border-border-subtle">
                   <th className="text-left py-2 font-medium">Period</th>
                   <th className="text-right py-2 font-medium">Fargate</th>
                   <th className="text-right py-2 font-medium">CloudWatch</th>
@@ -132,7 +132,7 @@ export default async function AdminCostsPage() {
               </thead>
               <tbody>
                 {awsSnapshots.slice(0, 10).map((s) => (
-                  <tr key={s.id} className="border-b border-border/10 hover:bg-surface-hover">
+                  <tr key={s.id} className="border-b border-border-subtle hover:bg-surface-hover">
                     <td className="py-2 font-mono text-xs">{s.period_start}</td>
                     <td className="py-2 text-right">{formatUSD(s.fargate_cost)}</td>
                     <td className="py-2 text-right">{formatUSD(s.cloudwatch_cost)}</td>
@@ -150,12 +150,12 @@ export default async function AdminCostsPage() {
 
       {/* Budget Config */}
       {budgets.length > 0 && (
-        <div className="rounded-xl bg-card border border-border/50 p-5">
+        <div className="rounded-xl bg-card border border-border-subtle p-5">
           <h3 className="text-sm font-medium mb-4">Budget Configuration</h3>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-xs text-muted border-b border-border/30">
+                <tr className="text-xs text-muted border-b border-border-subtle">
                   <th className="text-left py-2 font-medium">Org</th>
                   <th className="text-right py-2 font-medium">Monthly LLM</th>
                   <th className="text-right py-2 font-medium">Monthly AWS</th>
@@ -166,7 +166,7 @@ export default async function AdminCostsPage() {
               </thead>
               <tbody>
                 {budgets.map((b) => (
-                  <tr key={b.id} className="border-b border-border/10">
+                  <tr key={b.id} className="border-b border-border-subtle">
                     <td className="py-2 font-mono text-xs">{b.organization_id?.slice(0, 8)}...</td>
                     <td className="py-2 text-right">{formatUSD(b.monthly_llm_budget)}</td>
                     <td className="py-2 text-right">{formatUSD(b.monthly_aws_budget)}</td>

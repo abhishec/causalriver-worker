@@ -1,86 +1,158 @@
-import { createClient } from "@/lib/supabase/server";
-import { formatNumber } from "@/lib/utils";
+import { createServiceClient } from "@/lib/supabase/server";
+import { Badge } from "@/components/ui/Badge";
+import { DataTable } from "@/components/ui/DataTable";
+import { StatValue } from "@/components/ui/StatValue";
+import Link from "next/link";
 
 export const dynamic = 'force-dynamic';
 
 export const metadata = { title: "Admin - Organizations" };
 
 export default async function AdminOrgsPage() {
-  const supabase = await createClient();
+  const supabase = await createServiceClient();
 
-  const { data: orgs } = await supabase
-    .from("organizations")
-    .select("*")
-    .order("created_at");
+  const [orgsResult, authUsersResult, membersResult] = await Promise.all([
+    supabase.from("organizations").select("*").order("created_at"),
+    supabase.auth.admin.listUsers({ perPage: 500 }),
+    supabase.from("org_members").select("user_id, organization_id").limit(500),
+  ]);
+
+  const orgs = orgsResult.data || [];
+  const members = membersResult.data || [];
+
+  // Build user lookup
+  const userMap = new Map<string, { lastSignIn: string | null }>();
+  authUsersResult.data?.users?.forEach((u) => {
+    userMap.set(u.id, { lastSignIn: u.last_sign_in_at || null });
+  });
+
+  // Count members per org and active users
+  const orgMemberCount = new Map<string, number>();
+  const orgActiveCount = new Map<string, number>();
+  members.forEach((m) => {
+    orgMemberCount.set(m.organization_id, (orgMemberCount.get(m.organization_id) || 0) + 1);
+    const user = userMap.get(m.user_id);
+    if (user?.lastSignIn) {
+      const hoursSince = (Date.now() - new Date(user.lastSignIn).getTime()) / 3600000;
+      if (hoursSince < 24) {
+        orgActiveCount.set(m.organization_id, (orgActiveCount.get(m.organization_id) || 0) + 1);
+      }
+    }
+  });
+
+  // Enrich orgs
+  const enrichedOrgs = orgs.map((org) => ({
+    ...org,
+    memberCount: orgMemberCount.get(org.id) || 0,
+    activeCount: orgActiveCount.get(org.id) || 0,
+  }));
+
+  const totalUsers = new Set(members.map((m) => m.user_id)).size;
+  const coreOrgs = orgs.filter((o) => o.is_core_brain).length;
+  const tenantOrgs = orgs.length - coreOrgs;
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Organizations</h1>
-          <p className="text-muted text-sm mt-1">Manage all connected organizations</p>
-        </div>
-        <span className="text-sm text-muted">{orgs?.length || 0} total</span>
+      <div>
+        <h1 className="text-xl font-semibold tracking-tight">Organizations</h1>
+        <p className="text-xs text-muted mt-0.5">Manage all connected organizations</p>
       </div>
 
-      <div className="rounded-xl bg-card border border-border/50 overflow-hidden">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="text-xs text-muted border-b border-border/30">
-              <th className="text-left px-5 py-3 font-medium">Organization</th>
-              <th className="text-left px-5 py-3 font-medium">Plan</th>
-              <th className="text-left px-5 py-3 font-medium">Type</th>
-              <th className="text-left px-5 py-3 font-medium">Created</th>
-              <th className="text-right px-5 py-3 font-medium">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {(orgs || []).map((org) => (
-              <tr key={org.id} className="border-b border-border/10 hover:bg-surface-hover transition-colors">
-                <td className="px-5 py-3">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${org.is_core_brain ? 'bg-accent/20' : 'bg-surface'}`}>
-                      <span className={`text-xs font-bold ${org.is_core_brain ? 'text-accent' : 'text-muted'}`}>
-                        {org.name.charAt(0).toUpperCase()}
-                      </span>
-                    </div>
-                    <div>
-                      <div className="font-medium">{org.name}</div>
-                      <div className="text-[10px] text-muted">{org.slug}</div>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-5 py-3">
-                  <span className={`px-2 py-0.5 rounded text-xs font-medium ${
-                    org.plan === 'enterprise' ? 'bg-accent/10 text-accent' :
-                    org.plan === 'pro' ? 'bg-info/10 text-info' :
-                    org.plan === 'starter' ? 'bg-success/10 text-success' :
-                    'bg-surface text-muted'
-                  }`}>
-                    {org.plan}
-                  </span>
-                </td>
-                <td className="px-5 py-3">
-                  {org.is_core_brain ? (
-                    <span className="px-2 py-0.5 rounded bg-accent/10 text-accent text-xs">Core Brain</span>
-                  ) : (
-                    <span className="text-muted text-xs">Tenant</span>
-                  )}
-                </td>
-                <td className="px-5 py-3 text-muted text-xs">
-                  {new Date(org.created_at).toLocaleDateString()}
-                </td>
-                <td className="px-5 py-3 text-right">
-                  <button className="text-xs text-accent hover:text-accent-light">View</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {(!orgs || orgs.length === 0) && (
-          <div className="text-center py-8 text-muted text-sm">No organizations yet</div>
-        )}
+      {/* Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <StatValue label="Total Orgs" value={String(orgs.length)} />
+        <StatValue label="Tenant Orgs" value={String(tenantOrgs)} />
+        <StatValue label="Core Brain" value={String(coreOrgs)} />
+        <StatValue label="Total Users" value={String(totalUsers)} />
       </div>
+
+      <DataTable
+        columns={[
+          {
+            key: "name",
+            header: "Organization",
+            sortable: true,
+            render: (row) => (
+              <Link
+                href={`/admin/orgs/${row.id}`}
+                className="flex items-center gap-3 hover:text-accent transition-colors"
+              >
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${row.is_core_brain ? 'bg-accent/20' : 'bg-surface'}`}>
+                  <span className={`text-xs font-bold ${row.is_core_brain ? 'text-accent' : 'text-muted'}`}>
+                    {row.name.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+                <div className="min-w-0">
+                  <div className="text-xs font-medium truncate">{row.name}</div>
+                  <div className="text-[10px] text-muted truncate">{row.slug}</div>
+                </div>
+              </Link>
+            ),
+          },
+          {
+            key: "plan",
+            header: "Plan",
+            sortable: true,
+            render: (row) => (
+              <Badge
+                variant={
+                  row.plan === "enterprise" ? "accent" :
+                  row.plan === "pro" ? "info" :
+                  row.plan === "starter" ? "success" : "default"
+                }
+                size="xs"
+              >
+                {row.plan}
+              </Badge>
+            ),
+          },
+          {
+            key: "is_core_brain",
+            header: "Type",
+            render: (row) => row.is_core_brain
+              ? <Badge variant="accent" size="xs">Core Brain</Badge>
+              : <span className="text-xs text-muted">Tenant</span>,
+          },
+          {
+            key: "memberCount",
+            header: "Members",
+            sortable: true,
+            render: (row) => (
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs tabular-nums">{row.memberCount}</span>
+                {row.activeCount > 0 && (
+                  <span className="text-[10px] text-success tabular-nums">({row.activeCount} active)</span>
+                )}
+              </div>
+            ),
+          },
+          {
+            key: "created_at",
+            header: "Created",
+            sortable: true,
+            render: (row) => (
+              <span className="text-xs text-muted">{new Date(row.created_at).toLocaleDateString()}</span>
+            ),
+          },
+          {
+            key: "actions",
+            header: "",
+            render: (row) => (
+              <Link
+                href={`/admin/orgs/${row.id}`}
+                className="text-xs text-accent hover:text-accent/80 transition-colors"
+              >
+                View →
+              </Link>
+            ),
+          },
+        ]}
+        data={enrichedOrgs}
+        searchable
+        searchPlaceholder="Search organizations..."
+        searchFields={["name", "slug", "plan"]}
+        compact
+      />
     </div>
   );
 }

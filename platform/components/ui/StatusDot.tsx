@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 type StatusType = "active" | "training" | "discovery" | "alert" | "error" | "inactive" | "success" | "warning";
 
 interface StatusDotProps {
-  status: StatusType;
+  type: StatusType;
   size?: "sm" | "md" | "lg";
   pulse?: boolean;
   label?: string;
@@ -29,7 +29,7 @@ const sizeMap = {
   lg: "w-2.5 h-2.5",
 };
 
-export function StatusDot({ status, size = "md", pulse = false, label, className }: StatusDotProps) {
+export function StatusDot({ type, size = "md", pulse = false, label, className }: StatusDotProps) {
   return (
     <span className={cn("inline-flex items-center gap-1.5", className)}>
       <span className={cn("relative flex shrink-0", sizeMap[size])}>
@@ -37,7 +37,7 @@ export function StatusDot({ status, size = "md", pulse = false, label, className
           <span
             className={cn(
               "animate-ping absolute inline-flex h-full w-full rounded-full opacity-75",
-              statusColors[status]
+              statusColors[type]
             )}
           />
         )}
@@ -45,8 +45,8 @@ export function StatusDot({ status, size = "md", pulse = false, label, className
           className={cn(
             "relative inline-flex rounded-full",
             sizeMap[size],
-            statusColors[status],
-            !pulse && status !== "inactive" && "brain-pulse"
+            statusColors[type],
+            !pulse && type !== "inactive" && "brain-pulse"
           )}
         />
       </span>

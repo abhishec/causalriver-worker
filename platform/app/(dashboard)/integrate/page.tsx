@@ -157,7 +157,7 @@ export default function IntegratePage() {
       </div>
 
       {/* Quick Start */}
-      <div className="rounded-xl bg-card border border-border/50 p-6">
+      <div className="rounded-xl bg-card border border-border-subtle p-6">
         <div className="flex items-center gap-2 mb-1">
           <h2 className="text-sm font-medium">Quick Start</h2>
           <span className="rounded bg-accent/20 px-1.5 py-0.5 text-[10px] text-accent-light font-medium">
@@ -175,7 +175,7 @@ export default function IntegratePage() {
                 </span>
                 <h3 className="text-sm font-medium">{step.title}</h3>
               </div>
-              <pre className="rounded-lg bg-surface border border-border/30 p-4 overflow-x-auto">
+              <pre className="rounded-lg bg-surface border border-border-subtle p-4 overflow-x-auto">
                 <code className="text-xs font-mono text-muted-foreground">{step.code}</code>
               </pre>
             </div>
@@ -192,7 +192,7 @@ export default function IntegratePage() {
           {PATTERNS.map((pattern) => (
             <div
               key={pattern.title}
-              className="rounded-xl bg-card border border-border/50 p-5 flex flex-col"
+              className="rounded-xl bg-card border border-border-subtle p-5 flex flex-col"
             >
               <div className="flex items-start gap-3 mb-3">
                 <span className="text-2xl shrink-0">{pattern.icon}</span>
@@ -203,7 +203,7 @@ export default function IntegratePage() {
                   </p>
                 </div>
               </div>
-              <pre className="flex-1 rounded-lg bg-surface border border-border/30 p-3 overflow-x-auto mt-auto">
+              <pre className="flex-1 rounded-lg bg-surface border border-border-subtle p-3 overflow-x-auto mt-auto">
                 <code className="text-[11px] font-mono text-muted-foreground leading-relaxed">
                   {pattern.code}
                 </code>

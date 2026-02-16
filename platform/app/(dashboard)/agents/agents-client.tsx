@@ -114,7 +114,7 @@ function getAgentColor(agentType: string) {
   for (const [key, colors] of Object.entries(AGENT_COLORS)) {
     if (agentType.toLowerCase().includes(key)) return colors;
   }
-  return { bg: "bg-gray-500/10", text: "text-gray-400", border: "border-gray-500/20" };
+  return { bg: "bg-muted/10", text: "text-muted-foreground", border: "border-border-subtle" };
 }
 
 function getAgentIcon(agentType: string) {

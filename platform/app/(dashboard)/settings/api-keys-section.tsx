@@ -158,12 +158,12 @@ export function ApiKeysSection({ initialKeys, orgId }: ApiKeysSectionProps) {
                 Copy this key now — it will never be shown again.
               </p>
               <div className="flex items-center gap-2">
-                <code className="flex-1 text-xs font-mono bg-surface px-3 py-2 rounded-lg border border-border/50 text-foreground break-all select-all">
+                <code className="flex-1 text-xs font-mono bg-surface px-3 py-2 rounded-lg border border-border-subtle text-foreground break-all select-all">
                   {createdKey}
                 </code>
                 <button
                   onClick={() => copyToClipboard(createdKey)}
-                  className="shrink-0 px-3 py-2 rounded-lg bg-surface border border-border/50 hover:border-accent/30 text-xs font-medium transition-colors"
+                  className="shrink-0 px-3 py-2 rounded-lg bg-surface border border-border-subtle hover:border-accent/30 text-xs font-medium transition-colors"
                 >
                   {copied ? "Copied!" : "Copy"}
                 </button>
@@ -185,7 +185,7 @@ export function ApiKeysSection({ initialKeys, orgId }: ApiKeysSectionProps) {
           {activeKeys.map((key) => (
             <div
               key={key.id}
-              className="flex items-center gap-4 px-4 py-3 rounded-lg bg-surface/50 border border-border/30"
+              className="flex items-center gap-4 px-4 py-3 rounded-lg bg-surface/50 border border-border-subtle"
             >
               {/* Key info */}
               <div className="flex-1 min-w-0">
@@ -248,7 +248,7 @@ export function ApiKeysSection({ initialKeys, orgId }: ApiKeysSectionProps) {
 
       {/* Create Form */}
       {showCreateForm ? (
-        <form onSubmit={handleCreateKey} className="rounded-lg bg-surface border border-border/30 p-4 space-y-4">
+        <form onSubmit={handleCreateKey} className="rounded-lg bg-surface border border-border-subtle p-4 space-y-4">
           <div>
             <label className="block text-xs font-medium text-muted-foreground mb-1.5">
               Key Name
@@ -278,7 +278,7 @@ export function ApiKeysSection({ initialKeys, orgId }: ApiKeysSectionProps) {
                     "px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors",
                     newKeyPermissions.includes(perm.value)
                       ? "bg-accent/10 border-accent/30 text-accent"
-                      : "bg-surface border-border/30 text-muted hover:text-foreground hover:border-border"
+                      : "bg-surface border-border-subtle text-muted hover:text-foreground hover:border-border"
                   )}
                 >
                   {perm.label}

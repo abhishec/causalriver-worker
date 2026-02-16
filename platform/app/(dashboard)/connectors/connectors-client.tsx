@@ -74,7 +74,7 @@ export function ConnectorsClient({
             <div
               key={connector.name}
               className={`rounded-xl bg-card border p-5 transition-all hover:bg-card-hover hover:border-accent/30 ${
-                isActive ? "border-border/50" : "border-border/30 opacity-70"
+                isActive ? "border-border-subtle" : "border-border-subtle opacity-70"
               }`}
             >
               <div className="flex items-start justify-between mb-3">
@@ -89,7 +89,7 @@ export function ConnectorsClient({
                   }`}
                 >
                   {(isActive || (isGitHub && isGitHubConnected)) && (
-                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-success" />
+                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-brain-active" />
                   )}
                   {isGitHub && isGitHubConnected
                     ? "Connected"
@@ -119,7 +119,7 @@ export function ConnectorsClient({
                       {githubStatus.config?.repoStars?.toLocaleString()} stars
                     </div>
                   </div>
-                  <div className="flex items-center justify-between pt-2 border-t border-border/30">
+                  <div className="flex items-center justify-between pt-2 border-t border-border-subtle">
                     <span className="text-xs text-muted">
                       {githubStatus.signalsCount > 0
                         ? `${formatNumber(githubStatus.signalsCount)} signals`
@@ -135,7 +135,7 @@ export function ConnectorsClient({
                 </div>
               ) : isGitHub ? (
                 /* GitHub setup button */
-                <div className="pt-3 border-t border-border/30">
+                <div className="pt-3 border-t border-border-subtle">
                   <button
                     onClick={() => setShowSetupModal(true)}
                     className="w-full py-2 rounded-lg bg-accent/10 text-accent text-xs font-medium hover:bg-accent/20 transition-colors flex items-center justify-center gap-1.5"
@@ -157,14 +157,14 @@ export function ConnectorsClient({
                   </button>
                 </div>
               ) : isActive ? (
-                <div className="flex items-center justify-between pt-3 border-t border-border/30">
+                <div className="flex items-center justify-between pt-3 border-t border-border-subtle">
                   <span className="text-xs text-muted">Signals</span>
                   <span className="text-sm font-medium text-accent">
                     {formatNumber(signalCount)}
                   </span>
                 </div>
               ) : (
-                <div className="pt-3 border-t border-border/30">
+                <div className="pt-3 border-t border-border-subtle">
                   <span className="text-xs text-muted">No signals yet</span>
                 </div>
               )}

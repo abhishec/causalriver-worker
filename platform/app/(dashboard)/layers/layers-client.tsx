@@ -235,7 +235,7 @@ export function LayersClient() {
           return (
             <div
               key={layer.id}
-              className="rounded-xl bg-card border border-border/50 overflow-hidden transition-all"
+              className="rounded-xl bg-card border border-border-subtle overflow-hidden transition-all"
             >
               {/* Header */}
               <button
@@ -291,7 +291,7 @@ export function LayersClient() {
 
               {/* Expanded content */}
               {isOpen && (
-                <div className="px-5 pb-5 border-t border-border/30">
+                <div className="px-5 pb-5 border-t border-border-subtle">
                   <p className="text-sm text-muted-foreground leading-relaxed mt-4 mb-4">
                     {layer.details}
                   </p>
@@ -299,7 +299,7 @@ export function LayersClient() {
                     {layer.metrics.map((metric) => (
                       <div
                         key={metric.label}
-                        className="rounded-lg bg-surface border border-border/30 p-3"
+                        className="rounded-lg bg-surface border border-border-subtle p-3"
                       >
                         <div className="text-[10px] text-muted uppercase tracking-wider font-medium mb-1">
                           {metric.label}

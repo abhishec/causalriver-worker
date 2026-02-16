@@ -22,7 +22,7 @@ export function MetricCard({
   pulse,
 }: MetricCardProps) {
   return (
-    <div className="rounded-xl bg-card border border-border/50 p-5 hover:bg-card-hover transition-colors">
+    <div className="rounded-xl bg-card border border-border-subtle p-5 hover:bg-card-hover transition-colors">
       <div className="flex items-start justify-between mb-3">
         <span className="text-xs font-medium text-muted uppercase tracking-wider">{label}</span>
         {pulse && (

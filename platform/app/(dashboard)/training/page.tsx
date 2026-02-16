@@ -20,7 +20,7 @@ const SCHEDULE = [
     frequency: "Every 4 hours",
     description: "Background consolidation, weak-edge pruning, cross-domain pattern synthesis",
     icon: "\u{1F4AD}",
-    color: "bg-purple-500",
+    color: "bg-brain-training",
   },
   {
     name: "Consolidation",
@@ -103,13 +103,13 @@ export default async function TrainingPage() {
       </div>
 
       {/* Training Schedule */}
-      <div className="rounded-xl bg-card border border-border/50 p-5">
+      <div className="rounded-xl bg-card border border-border-subtle p-5">
         <h3 className="text-sm font-medium mb-4">Training Schedule</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {SCHEDULE.map((item) => (
             <div
               key={item.name}
-              className="rounded-lg bg-surface border border-border/30 p-4"
+              className="rounded-lg bg-surface border border-border-subtle p-4"
             >
               <div className="flex items-center gap-3 mb-3">
                 <span className="text-2xl">{item.icon}</span>
@@ -137,28 +137,28 @@ export default async function TrainingPage() {
 
       {/* Knowledge Growth */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="rounded-xl bg-card border border-border/50 p-5">
+        <div className="rounded-xl bg-card border border-border-subtle p-5">
           <div className="text-xs font-medium text-muted uppercase tracking-wider mb-2">
             Signals Processed
           </div>
           <div className="text-2xl font-bold text-accent">{formatNumber(totalProcessed)}</div>
           <div className="text-xs text-muted mt-1">Last 30 days</div>
         </div>
-        <div className="rounded-xl bg-card border border-border/50 p-5">
+        <div className="rounded-xl bg-card border border-border-subtle p-5">
           <div className="text-xs font-medium text-muted uppercase tracking-wider mb-2">
             New Connections
           </div>
           <div className="text-2xl font-bold text-success">{formatNumber(totalConnections)}</div>
           <div className="text-xs text-muted mt-1">Causal edges discovered</div>
         </div>
-        <div className="rounded-xl bg-card border border-border/50 p-5">
+        <div className="rounded-xl bg-card border border-border-subtle p-5">
           <div className="text-xs font-medium text-muted uppercase tracking-wider mb-2">
             Edges Strengthened
           </div>
           <div className="text-2xl font-bold text-info">{formatNumber(totalStrengthened)}</div>
           <div className="text-xs text-muted mt-1">Confidence increased</div>
         </div>
-        <div className="rounded-xl bg-card border border-border/50 p-5">
+        <div className="rounded-xl bg-card border border-border-subtle p-5">
           <div className="text-xs font-medium text-muted uppercase tracking-wider mb-2">
             Edges Pruned
           </div>
@@ -168,7 +168,7 @@ export default async function TrainingPage() {
       </div>
 
       {/* Data Ingestion by Domain */}
-      <div className="rounded-xl bg-card border border-border/50 p-5">
+      <div className="rounded-xl bg-card border border-border-subtle p-5">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm font-medium">Data Ingestion by Domain</h3>
           <span className="text-xs text-muted">{formatNumber(totalSignals)} total signals</span>
@@ -201,12 +201,12 @@ export default async function TrainingPage() {
       </div>
 
       {/* Training Runs Table */}
-      <div className="rounded-xl bg-card border border-border/50 p-5">
+      <div className="rounded-xl bg-card border border-border-subtle p-5">
         <h3 className="text-sm font-medium mb-4">Training Runs (Last 30 Days)</h3>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-xs text-muted border-b border-border/30">
+              <tr className="text-xs text-muted border-b border-border-subtle">
                 <th className="text-left py-2 font-medium">Date</th>
                 <th className="text-right py-2 font-medium">Signals</th>
                 <th className="text-right py-2 font-medium">New Edges</th>
@@ -237,7 +237,7 @@ export default async function TrainingPage() {
                   }) => (
                     <tr
                       key={s.id}
-                      className="border-b border-border/10 hover:bg-surface-hover"
+                      className="border-b border-border-subtle hover:bg-surface-hover"
                     >
                       <td className="py-2 font-mono text-xs">{s.snapshot_date}</td>
                       <td className="py-2 text-right">

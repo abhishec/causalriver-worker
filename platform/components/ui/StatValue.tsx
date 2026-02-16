@@ -7,11 +7,13 @@ interface StatValueProps {
   value: string | number;
   change?: string;
   changeType?: "positive" | "negative" | "neutral";
+  trend?: "up" | "down";
   subtitle?: string;
   icon?: React.ReactNode;
   pulse?: boolean;
   className?: string;
   sparkline?: number[];
+  sparklineData?: number[];
 }
 
 export function StatValue({
@@ -19,12 +21,19 @@ export function StatValue({
   value,
   change,
   changeType = "neutral",
+  trend,
   subtitle,
   icon,
   pulse,
   className,
   sparkline,
+  sparklineData,
 }: StatValueProps) {
+  const sparkData = sparkline || sparklineData;
+
+  // Auto-detect changeType from trend if not explicitly set
+  const resolvedChangeType = changeType !== "neutral" ? changeType : trend === "up" ? "positive" : trend === "down" ? "negative" : "neutral";
+
   return (
     <div
       className={cn(
@@ -37,6 +46,21 @@ export function StatValue({
           {label}
         </span>
         <div className="flex items-center gap-1.5">
+          {trend && (
+            <svg
+              className={cn(
+                "w-3 h-3",
+                trend === "up" ? "text-success" : "text-danger",
+                trend === "down" && "rotate-180"
+              )}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2.5}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
+            </svg>
+          )}
           {pulse && <span className="w-1.5 h-1.5 rounded-full bg-brain-active brain-pulse" />}
           {icon}
         </div>
@@ -51,9 +75,9 @@ export function StatValue({
             <span
               className={cn(
                 "text-[11px] font-medium",
-                changeType === "positive" && "text-success",
-                changeType === "negative" && "text-danger",
-                changeType === "neutral" && "text-muted"
+                resolvedChangeType === "positive" && "text-success",
+                resolvedChangeType === "negative" && "text-danger",
+                resolvedChangeType === "neutral" && "text-muted"
               )}
             >
               {change}
@@ -64,8 +88,8 @@ export function StatValue({
           )}
         </div>
 
-        {sparkline && sparkline.length > 1 && (
-          <MiniSparkline data={sparkline} className="w-16 h-8" />
+        {sparkData && sparkData.length > 1 && (
+          <MiniSparkline data={sparkData} className="w-16 h-8" />
         )}
       </div>
     </div>

@@ -105,12 +105,12 @@ export function CostsClient({ costLogs, awsSnapshots, budget }: CostsClientProps
           projectedMonthly={projectedMonthly}
           monthlyBudget={monthlyBudget}
         />
-        <div className="rounded-xl bg-card border border-border/50 p-5">
+        <div className="rounded-xl bg-card border border-border-subtle p-5">
           <div className="text-xs font-medium text-muted uppercase tracking-wider mb-3">30-Day LLM Total</div>
           <div className="text-3xl font-bold">{formatUSD(totalLLM)}</div>
           <div className="text-xs text-muted mt-1">{costLogs.length} calls total</div>
         </div>
-        <div className="rounded-xl bg-card border border-border/50 p-5">
+        <div className="rounded-xl bg-card border border-border-subtle p-5">
           <div className="text-xs font-medium text-muted uppercase tracking-wider mb-3">AWS Infrastructure</div>
           <div className="text-3xl font-bold">{formatUSD(totalAWS)}</div>
           <div className="text-xs text-muted mt-1">{awsSnapshots.length} snapshots</div>
@@ -120,7 +120,7 @@ export function CostsClient({ costLogs, awsSnapshots, budget }: CostsClientProps
       {/* By Component + By Model */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* By Component */}
-        <div className="rounded-xl bg-card border border-border/50 p-5">
+        <div className="rounded-xl bg-card border border-border-subtle p-5">
           <h3 className="text-sm font-medium mb-4">Cost by Component</h3>
           {sortedComponents.length === 0 ? (
             <p className="text-sm text-muted">No LLM calls recorded yet</p>
@@ -151,7 +151,7 @@ export function CostsClient({ costLogs, awsSnapshots, budget }: CostsClientProps
         </div>
 
         {/* By Model */}
-        <div className="rounded-xl bg-card border border-border/50 p-5">
+        <div className="rounded-xl bg-card border border-border-subtle p-5">
           <h3 className="text-sm font-medium mb-4">Cost by Model</h3>
           {sortedModels.length === 0 ? (
             <p className="text-sm text-muted">No LLM calls recorded yet</p>
@@ -184,7 +184,7 @@ export function CostsClient({ costLogs, awsSnapshots, budget }: CostsClientProps
 
       {/* Daily Trend */}
       {dailyTrend.length > 0 && (
-        <div className="rounded-xl bg-card border border-border/50 p-5">
+        <div className="rounded-xl bg-card border border-border-subtle p-5">
           <h3 className="text-sm font-medium mb-4">Daily Cost Trend (Last 14 Days)</h3>
           <div className="space-y-1.5">
             {dailyTrend.map(([date, cost]) => {
@@ -209,12 +209,12 @@ export function CostsClient({ costLogs, awsSnapshots, budget }: CostsClientProps
 
       {/* AWS Breakdown */}
       {awsSnapshots.length > 0 && (
-        <div className="rounded-xl bg-card border border-border/50 p-5">
+        <div className="rounded-xl bg-card border border-border-subtle p-5">
           <h3 className="text-sm font-medium mb-4">AWS Infrastructure Costs</h3>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-xs text-muted border-b border-border/30">
+                <tr className="text-xs text-muted border-b border-border-subtle">
                   <th className="text-left py-2 font-medium">Period</th>
                   <th className="text-right py-2 font-medium">Fargate</th>
                   <th className="text-right py-2 font-medium">CloudWatch</th>
@@ -225,7 +225,7 @@ export function CostsClient({ costLogs, awsSnapshots, budget }: CostsClientProps
               </thead>
               <tbody>
                 {awsSnapshots.slice(0, 10).map((s) => (
-                  <tr key={s.id} className="border-b border-border/10 hover:bg-surface-hover">
+                  <tr key={s.id} className="border-b border-border-subtle hover:bg-surface-hover">
                     <td className="py-2 font-mono text-xs">{s.period_start}</td>
                     <td className="py-2 text-right">{formatUSD(s.fargate_cost)}</td>
                     <td className="py-2 text-right">{formatUSD(s.cloudwatch_cost)}</td>
@@ -241,12 +241,12 @@ export function CostsClient({ costLogs, awsSnapshots, budget }: CostsClientProps
       )}
 
       {/* Recent Calls Table */}
-      <div className="rounded-xl bg-card border border-border/50 p-5">
+      <div className="rounded-xl bg-card border border-border-subtle p-5">
         <h3 className="text-sm font-medium mb-4">Recent LLM Calls</h3>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-xs text-muted border-b border-border/30">
+              <tr className="text-xs text-muted border-b border-border-subtle">
                 <th className="text-left py-2 font-medium">Time</th>
                 <th className="text-left py-2 font-medium">Component</th>
                 <th className="text-left py-2 font-medium">Function</th>
@@ -258,7 +258,7 @@ export function CostsClient({ costLogs, awsSnapshots, budget }: CostsClientProps
             </thead>
             <tbody>
               {costLogs.slice(0, 20).map((l) => (
-                <tr key={l.id} className="border-b border-border/10 hover:bg-surface-hover">
+                <tr key={l.id} className="border-b border-border-subtle hover:bg-surface-hover">
                   <td className="py-2 text-xs font-mono text-muted">
                     {new Date(l.created_at).toLocaleTimeString()}
                   </td>

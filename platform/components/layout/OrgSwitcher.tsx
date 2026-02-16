@@ -36,7 +36,7 @@ export function OrgSwitcher() {
     <div className="px-3 py-2 relative">
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-surface/50 hover:bg-surface-hover border border-border/30 transition-colors"
+        className="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-surface/50 hover:bg-surface-hover border border-border-subtle transition-colors"
       >
         <div className="min-w-0">
           <div className="text-xs font-medium truncate">{currentOrg.name}</div>
@@ -93,8 +93,8 @@ export function OrgSwitcher() {
             {/* Core Brain (if member) */}
             {organizations.some((m) => m.organization.is_core_brain) && (
               <>
-                <div className="border-t border-border/50 my-1" />
-                <div className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted/50">
+                <div className="border-t border-border-subtle my-1" />
+                <div className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted">
                   Platform
                 </div>
                 {organizations
@@ -129,7 +129,7 @@ export function OrgSwitcher() {
             {/* Admin link */}
             {isPlatformAdmin && (
               <>
-                <div className="border-t border-border/50 my-1" />
+                <div className="border-t border-border-subtle my-1" />
                 <a
                   href="/admin/orgs"
                   className="block px-3 py-2 text-xs text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors"

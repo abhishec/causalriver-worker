@@ -131,7 +131,7 @@ export function GitHubSetupModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
       <div className="w-full max-w-lg mx-4 rounded-2xl bg-card border border-border shadow-2xl overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border/50">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border-subtle">
           <div className="flex items-center gap-3">
             <span className="text-2xl">🐙</span>
             <div>
@@ -299,7 +299,7 @@ export function GitHubSetupModal({
         </div>
 
         {/* Footer hint */}
-        <div className="px-6 py-3 bg-surface/50 border-t border-border/30">
+        <div className="px-6 py-3 bg-surface/50 border-t border-border-subtle">
           <p className="text-[10px] text-muted text-center">
             Your token is validated but not stored in the database. It will be needed again for sync operations.
           </p>

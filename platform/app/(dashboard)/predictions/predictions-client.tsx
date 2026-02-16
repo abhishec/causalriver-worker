@@ -120,22 +120,22 @@ export function PredictionsClient({ predictions, accuracyTrend }: PredictionsCli
 
       {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="rounded-xl bg-card border border-border/50 p-5">
+        <div className="rounded-xl bg-card border border-border-subtle p-5">
           <div className="text-xs font-medium text-muted uppercase tracking-wider mb-2">Overall Accuracy</div>
           <div className="text-2xl font-bold text-accent">{stats.overallAccuracy.toFixed(1)}%</div>
           <div className="text-xs text-muted mt-1">Across verified predictions</div>
         </div>
-        <div className="rounded-xl bg-card border border-border/50 p-5">
+        <div className="rounded-xl bg-card border border-border-subtle p-5">
           <div className="text-xs font-medium text-muted uppercase tracking-wider mb-2">Total Predictions</div>
           <div className="text-2xl font-bold text-foreground">{stats.total}</div>
           <div className="text-xs text-muted mt-1">All time</div>
         </div>
-        <div className="rounded-xl bg-card border border-border/50 p-5">
+        <div className="rounded-xl bg-card border border-border-subtle p-5">
           <div className="text-xs font-medium text-muted uppercase tracking-wider mb-2">Verified</div>
           <div className="text-2xl font-bold text-success">{stats.verified}</div>
           <div className="text-xs text-muted mt-1">Outcomes confirmed</div>
         </div>
-        <div className="rounded-xl bg-card border border-border/50 p-5">
+        <div className="rounded-xl bg-card border border-border-subtle p-5">
           <div className="text-xs font-medium text-muted uppercase tracking-wider mb-2">Pending</div>
           <div className="text-2xl font-bold text-warning">{stats.pending}</div>
           <div className="text-xs text-muted mt-1">Awaiting outcomes</div>
@@ -144,7 +144,7 @@ export function PredictionsClient({ predictions, accuracyTrend }: PredictionsCli
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Accuracy Trend Chart */}
-        <div className="lg:col-span-2 rounded-xl bg-card border border-border/50 p-5">
+        <div className="lg:col-span-2 rounded-xl bg-card border border-border-subtle p-5">
           <h3 className="text-sm font-semibold mb-4">Accuracy Over Time</h3>
           {validPoints.length < 2 ? (
             <div className="flex items-center justify-center h-32 text-sm text-muted">
@@ -195,7 +195,7 @@ export function PredictionsClient({ predictions, accuracyTrend }: PredictionsCli
         </div>
 
         {/* Domain Breakdown */}
-        <div className="rounded-xl bg-card border border-border/50 p-5">
+        <div className="rounded-xl bg-card border border-border-subtle p-5">
           <h3 className="text-sm font-semibold mb-4">Accuracy by Domain</h3>
           {domainStats.length === 0 ? (
             <div className="flex items-center justify-center h-32 text-sm text-muted">
@@ -229,7 +229,7 @@ export function PredictionsClient({ predictions, accuracyTrend }: PredictionsCli
       </div>
 
       {/* Prediction List */}
-      <div className="rounded-xl bg-card border border-border/50 p-5">
+      <div className="rounded-xl bg-card border border-border-subtle p-5">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
           <h3 className="text-sm font-semibold">All Predictions</h3>
           <div className="flex gap-2">
@@ -259,7 +259,7 @@ export function PredictionsClient({ predictions, accuracyTrend }: PredictionsCli
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-xs text-muted border-b border-border/30">
+              <tr className="text-xs text-muted border-b border-border-subtle">
                 <th className="text-left py-2 font-medium">Entity</th>
                 <th className="text-left py-2 font-medium">Domain</th>
                 <th className="text-right py-2 font-medium">Predicted</th>
@@ -284,7 +284,7 @@ export function PredictionsClient({ predictions, accuracyTrend }: PredictionsCli
                 filtered.map((p) => {
                   const badge = getStatusBadge(p);
                   return (
-                    <tr key={p.id} className="border-b border-border/10 hover:bg-surface-hover">
+                    <tr key={p.id} className="border-b border-border-subtle hover:bg-surface-hover">
                       <td className="py-2.5 font-medium text-xs">{p.entity_name}</td>
                       <td className="py-2.5">
                         <span className="text-xs capitalize text-muted-foreground">{p.domain}</span>

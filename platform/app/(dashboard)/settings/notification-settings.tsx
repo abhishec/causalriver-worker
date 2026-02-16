@@ -101,7 +101,7 @@ export function NotificationSettings({ initialPrefs, orgId }: NotificationSettin
         {CATEGORIES.map((cat) => (
           <div
             key={cat.key}
-            className="flex items-center justify-between px-4 py-3 rounded-lg bg-surface/50 border border-border/30"
+            className="flex items-center justify-between px-4 py-3 rounded-lg bg-surface/50 border border-border-subtle"
           >
             <div className="flex items-center gap-3">
               <svg
@@ -137,7 +137,7 @@ export function NotificationSettings({ initialPrefs, orgId }: NotificationSettin
       </div>
 
       {/* Severity Threshold */}
-      <div className="px-4 py-3 rounded-lg bg-surface/50 border border-border/30">
+      <div className="px-4 py-3 rounded-lg bg-surface/50 border border-border-subtle">
         <div className="flex items-center justify-between">
           <div>
             <span className="text-sm font-medium">Minimum Severity</span>
@@ -158,7 +158,7 @@ export function NotificationSettings({ initialPrefs, orgId }: NotificationSettin
       </div>
 
       {/* Email Digest */}
-      <div className="flex items-center justify-between px-4 py-3 rounded-lg bg-surface/50 border border-border/30">
+      <div className="flex items-center justify-between px-4 py-3 rounded-lg bg-surface/50 border border-border-subtle">
         <div>
           <span className="text-sm font-medium">Email Digest</span>
           <p className="text-[10px] text-muted">Receive a daily summary of brain activity via email</p>

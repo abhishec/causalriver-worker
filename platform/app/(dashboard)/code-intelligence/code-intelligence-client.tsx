@@ -60,7 +60,7 @@ export function CodeIntelligenceClient() {
 
   if (loading) {
     return (
-      <div className="rounded-xl bg-card border border-border/50 p-8 text-center">
+      <div className="rounded-xl bg-card border border-border-subtle p-8 text-center">
         <div className="animate-pulse text-muted text-sm">Loading code intelligence...</div>
       </div>
     );
@@ -68,7 +68,7 @@ export function CodeIntelligenceClient() {
 
   if (!data?.connected || !data?.graphs) {
     return (
-      <div className="rounded-xl bg-card border border-border/50 p-8 text-center text-muted text-sm">
+      <div className="rounded-xl bg-card border border-border-subtle p-8 text-center text-muted text-sm">
         No code intelligence data available yet.
       </div>
     );
@@ -123,7 +123,7 @@ export function CodeIntelligenceClient() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* Top fan-out (most depended upon) */}
-            <div className="rounded-xl bg-card border border-border/50 p-5">
+            <div className="rounded-xl bg-card border border-border-subtle p-5">
               <h3 className="text-sm font-semibold mb-3">
                 Highest Fan-Out
                 <span className="text-xs text-muted font-normal ml-1">(most dependencies)</span>
@@ -149,7 +149,7 @@ export function CodeIntelligenceClient() {
             </div>
 
             {/* Top fan-in (most imported) */}
-            <div className="rounded-xl bg-card border border-border/50 p-5">
+            <div className="rounded-xl bg-card border border-border-subtle p-5">
               <h3 className="text-sm font-semibold mb-3">
                 Highest Fan-In
                 <span className="text-xs text-muted font-normal ml-1">(most imported)</span>
@@ -169,7 +169,7 @@ export function CodeIntelligenceClient() {
           </div>
 
           {/* Domain breakdown */}
-          <div className="rounded-xl bg-card border border-border/50 p-5">
+          <div className="rounded-xl bg-card border border-border-subtle p-5">
             <h3 className="text-sm font-semibold mb-3">Domain Breakdown</h3>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {Object.entries(dependency.stats.byDomain).map(([domain, count]) => (
@@ -205,7 +205,7 @@ export function CodeIntelligenceClient() {
           )}
 
           {/* Expertise heatmap */}
-          <div className="rounded-xl bg-card border border-border/50 p-5">
+          <div className="rounded-xl bg-card border border-border-subtle p-5">
             <h3 className="text-sm font-semibold mb-3">
               Expertise Map
               <span className="text-xs text-muted font-normal ml-1">
@@ -243,19 +243,19 @@ export function CodeIntelligenceClient() {
         <div className="space-y-4">
           {/* Network stats */}
           <div className="grid grid-cols-3 gap-4">
-            <div className="rounded-xl bg-card border border-border/50 p-5">
+            <div className="rounded-xl bg-card border border-border-subtle p-5">
               <div className="text-xs text-muted mb-1">Network Density</div>
               <div className="text-xl font-bold text-accent">
                 {(collaboration.stats.density * 100).toFixed(1)}%
               </div>
             </div>
-            <div className="rounded-xl bg-card border border-border/50 p-5">
+            <div className="rounded-xl bg-card border border-border-subtle p-5">
               <div className="text-xs text-muted mb-1">Avg Interactions</div>
               <div className="text-xl font-bold">
                 {collaboration.stats.avgInteractionsPerEdge.toFixed(1)}
               </div>
             </div>
-            <div className="rounded-xl bg-card border border-border/50 p-5">
+            <div className="rounded-xl bg-card border border-border-subtle p-5">
               <div className="text-xs text-muted mb-1">Total Connections</div>
               <div className="text-xl font-bold">{collaboration.stats.totalEdges}</div>
             </div>
@@ -263,7 +263,7 @@ export function CodeIntelligenceClient() {
 
           {/* Bridge contributors */}
           {collaboration.bridgeContributors.length > 0 && (
-            <div className="rounded-xl bg-card border border-border/50 p-5">
+            <div className="rounded-xl bg-card border border-border-subtle p-5">
               <h3 className="text-sm font-semibold mb-3">
                 Bridge Contributors
                 <span className="text-xs text-muted font-normal ml-1">(connect different teams)</span>
@@ -295,7 +295,7 @@ export function CodeIntelligenceClient() {
 
           {/* Cross-team edges */}
           {collaboration.crossTeamEdges.length > 0 && (
-            <div className="rounded-xl bg-card border border-border/50 p-5">
+            <div className="rounded-xl bg-card border border-border-subtle p-5">
               <h3 className="text-sm font-semibold mb-3">Cross-Team Interactions</h3>
               <div className="space-y-1.5">
                 {collaboration.crossTeamEdges.slice(0, 15).map((edge, i) => (
@@ -318,7 +318,7 @@ export function CodeIntelligenceClient() {
 
       {activeTab === "cascade" && (
         <div className="space-y-4">
-          <div className="rounded-xl bg-card border border-border/50 p-5">
+          <div className="rounded-xl bg-card border border-border-subtle p-5">
             <h3 className="text-sm font-semibold mb-4">Engineering Intelligence Cascade</h3>
             <div className="space-y-3">
               {data.engineeringCascade.map((edge, i) => (
@@ -359,7 +359,7 @@ export function CodeIntelligenceClient() {
       {activeTab === "activity" && (
         <div className="space-y-4">
           {/* Signal distribution */}
-          <div className="rounded-xl bg-card border border-border/50 p-5">
+          <div className="rounded-xl bg-card border border-border-subtle p-5">
             <h3 className="text-sm font-semibold mb-3">Signal Distribution (Last 7 Days)</h3>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {Object.entries(data.signalDistribution)
@@ -375,13 +375,13 @@ export function CodeIntelligenceClient() {
           </div>
 
           {/* Recent activity feed */}
-          <div className="rounded-xl bg-card border border-border/50 p-5">
+          <div className="rounded-xl bg-card border border-border-subtle p-5">
             <h3 className="text-sm font-semibold mb-3">Recent Activity</h3>
             <div className="space-y-2 max-h-96 overflow-y-auto">
               {data.recentActivity.slice(0, 30).map((signal, i) => (
                 <div
                   key={i}
-                  className="flex items-center justify-between py-1.5 border-b border-border/20 last:border-0"
+                  className="flex items-center justify-between py-1.5 border-b border-border-subtle last:border-0"
                 >
                   <div className="flex items-center gap-2 min-w-0">
                     <span

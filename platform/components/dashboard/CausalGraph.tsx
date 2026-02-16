@@ -282,7 +282,7 @@ export function CausalGraph({ edges, domainFilter, onNodeClick }: CausalGraphPro
   return (
     <div className="space-y-3">
       {/* Graph */}
-      <div className="relative rounded-lg bg-surface/30 border border-border/30 overflow-hidden">
+      <div className="relative rounded-lg bg-surface/30 border border-border-subtle overflow-hidden">
         <svg
           ref={svgRef}
           viewBox={`${-pan.x / zoom} ${-pan.y / zoom} ${WIDTH / zoom} ${HEIGHT / zoom}`}
@@ -398,19 +398,19 @@ export function CausalGraph({ edges, domainFilter, onNodeClick }: CausalGraphPro
         <div className="absolute bottom-3 right-3 flex items-center gap-1">
           <button
             onClick={() => setZoom((z) => Math.min(3, z + 0.2))}
-            className="w-7 h-7 rounded bg-surface border border-border/50 text-muted hover:text-foreground flex items-center justify-center text-xs"
+            className="w-7 h-7 rounded bg-surface border border-border-subtle text-muted hover:text-foreground flex items-center justify-center text-xs"
           >
             +
           </button>
           <button
             onClick={() => setZoom((z) => Math.max(0.5, z - 0.2))}
-            className="w-7 h-7 rounded bg-surface border border-border/50 text-muted hover:text-foreground flex items-center justify-center text-xs"
+            className="w-7 h-7 rounded bg-surface border border-border-subtle text-muted hover:text-foreground flex items-center justify-center text-xs"
           >
             -
           </button>
           <button
             onClick={() => { setZoom(1); setPan({ x: 0, y: 0 }); setSelectedNode(null); }}
-            className="px-2 h-7 rounded bg-surface border border-border/50 text-muted hover:text-foreground flex items-center justify-center text-[10px]"
+            className="px-2 h-7 rounded bg-surface border border-border-subtle text-muted hover:text-foreground flex items-center justify-center text-[10px]"
           >
             Reset
           </button>
@@ -418,7 +418,7 @@ export function CausalGraph({ edges, domainFilter, onNodeClick }: CausalGraphPro
 
         {/* Selected node info */}
         {selectedNode && (
-          <div className="absolute top-3 left-3 px-3 py-2 rounded-lg bg-card border border-border/50 text-xs max-w-xs">
+          <div className="absolute top-3 left-3 px-3 py-2 rounded-lg bg-card border border-border-subtle text-xs max-w-xs">
             <div className="font-medium">{selectedNode}</div>
             <div className="text-muted mt-0.5">
               {graphEdges.filter((e) => e.source === selectedNode || e.target === selectedNode).length} connections

@@ -137,7 +137,7 @@ export function NotificationBell() {
       {open && (
         <div className="absolute right-0 top-full mt-2 w-80 rounded-xl bg-card border border-border shadow-lg z-50 overflow-hidden">
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-border/50">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-border-subtle">
             <span className="text-sm font-semibold">Notifications</span>
             {unreadCount > 0 && (
               <button
@@ -177,7 +177,7 @@ export function NotificationBell() {
                   key={n.id}
                   onClick={() => markAsRead(n.id)}
                   className={cn(
-                    "w-full flex items-start gap-3 px-4 py-3 text-left hover:bg-surface-hover transition-colors border-b border-border/20",
+                    "w-full flex items-start gap-3 px-4 py-3 text-left hover:bg-surface-hover transition-colors border-b border-border-subtle",
                     !n.read && "bg-accent/5"
                   )}
                 >

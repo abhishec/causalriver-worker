@@ -184,7 +184,7 @@ export function BuilderClient({ entities, domains, orgId }: BuilderClientProps) 
                 "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors border",
                 activeTab === tab.id
                   ? "bg-accent/10 border-accent/30 text-accent"
-                  : "border-border/30 text-muted hover:text-foreground hover:border-border"
+                  : "border-border-subtle text-muted hover:text-foreground hover:border-border"
               )}
             >
               <span className={cn(
@@ -207,14 +207,14 @@ export function BuilderClient({ entities, domains, orgId }: BuilderClientProps) 
         <div className="lg:col-span-2">
           {/* Tab 1: Causal Chains */}
           {activeTab === "chains" && (
-            <div className="rounded-xl bg-card border border-border/50 p-6 space-y-5">
+            <div className="rounded-xl bg-card border border-border-subtle p-6 space-y-5">
               <h2 className="text-sm font-semibold">Define Causal Chains</h2>
               <p className="text-xs text-muted">
                 Teach the brain that changes in one entity cause changes in another.
               </p>
 
               {/* Chain form */}
-              <div className="space-y-4 p-4 rounded-lg bg-surface border border-border/30">
+              <div className="space-y-4 p-4 rounded-lg bg-surface border border-border-subtle">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-medium text-muted-foreground mb-1">Source Entity</label>
@@ -316,14 +316,14 @@ export function BuilderClient({ entities, domains, orgId }: BuilderClientProps) 
                     Added Chains ({chains.length})
                   </h3>
                   {chains.map((chain) => (
-                    <div key={chain.id} className="flex items-center justify-between px-4 py-3 rounded-lg bg-surface/50 border border-border/20">
+                    <div key={chain.id} className="flex items-center justify-between px-4 py-3 rounded-lg bg-surface/50 border border-border-subtle">
                       <div className="flex items-center gap-3">
                         <span className="text-sm font-medium">{chain.source}</span>
                         <svg className="w-4 h-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                         <span className="text-sm font-medium">{chain.target}</span>
-                        <span className="text-[10px] text-muted px-2 py-0.5 rounded bg-surface border border-border/20">
+                        <span className="text-[10px] text-muted px-2 py-0.5 rounded bg-surface border border-border-subtle">
                           {chain.strength.toFixed(2)} str · {chain.lagPeriods}p lag
                         </span>
                       </div>
@@ -351,13 +351,13 @@ export function BuilderClient({ entities, domains, orgId }: BuilderClientProps) 
 
           {/* Tab 2: Business Rules */}
           {activeTab === "rules" && (
-            <div className="rounded-xl bg-card border border-border/50 p-6 space-y-5">
+            <div className="rounded-xl bg-card border border-border-subtle p-6 space-y-5">
               <h2 className="text-sm font-semibold">Define Business Rules</h2>
               <p className="text-xs text-muted">
                 Set expectations the brain should learn and validate against outcomes.
               </p>
 
-              <div className="space-y-4 p-4 rounded-lg bg-surface border border-border/30">
+              <div className="space-y-4 p-4 rounded-lg bg-surface border border-border-subtle">
                 <div>
                   <label className="block text-xs font-medium text-muted-foreground mb-1">
                     If this happens (condition)
@@ -426,7 +426,7 @@ export function BuilderClient({ entities, domains, orgId }: BuilderClientProps) 
                     Added Rules ({rules.length})
                   </h3>
                   {rules.map((rule) => (
-                    <div key={rule.id} className="flex items-center justify-between px-4 py-3 rounded-lg bg-surface/50 border border-border/20">
+                    <div key={rule.id} className="flex items-center justify-between px-4 py-3 rounded-lg bg-surface/50 border border-border-subtle">
                       <div className="flex-1 min-w-0">
                         <p className="text-sm">
                           <span className="text-muted">If </span>
@@ -468,7 +468,7 @@ export function BuilderClient({ entities, domains, orgId }: BuilderClientProps) 
 
           {/* Tab 3: Review & Save */}
           {activeTab === "review" && (
-            <div className="rounded-xl bg-card border border-border/50 p-6 space-y-5">
+            <div className="rounded-xl bg-card border border-border-subtle p-6 space-y-5">
               <h2 className="text-sm font-semibold">Review & Save</h2>
 
               {saved ? (
@@ -513,11 +513,11 @@ export function BuilderClient({ entities, domains, orgId }: BuilderClientProps) 
 
                   {/* Summary */}
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="p-4 rounded-lg bg-surface border border-border/30 text-center">
+                    <div className="p-4 rounded-lg bg-surface border border-border-subtle text-center">
                       <div className="text-2xl font-bold text-accent">{chains.length}</div>
                       <div className="text-xs text-muted">Causal chains</div>
                     </div>
-                    <div className="p-4 rounded-lg bg-surface border border-border/30 text-center">
+                    <div className="p-4 rounded-lg bg-surface border border-border-subtle text-center">
                       <div className="text-2xl font-bold text-info">{rules.length}</div>
                       <div className="text-xs text-muted">Business rules</div>
                     </div>
@@ -551,9 +551,9 @@ export function BuilderClient({ entities, domains, orgId }: BuilderClientProps) 
         </div>
 
         {/* JSON Preview Panel */}
-        <div className="rounded-xl bg-card border border-border/50 p-5 h-fit sticky top-6">
+        <div className="rounded-xl bg-card border border-border-subtle p-5 h-fit sticky top-6">
           <h3 className="text-sm font-semibold mb-3">Pack Preview</h3>
-          <div className="rounded-lg bg-[#0d1117] border border-border/30 p-4 overflow-auto max-h-[600px]">
+          <div className="rounded-lg bg-[#0d1117] border border-border-subtle p-4 overflow-auto max-h-[600px]">
             <pre className="text-[11px] text-emerald-400 font-mono whitespace-pre-wrap leading-relaxed">
               {packPreview}
             </pre>

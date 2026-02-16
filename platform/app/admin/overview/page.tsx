@@ -1,10 +1,9 @@
-import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
 import { formatUSD, formatNumber } from "@/lib/utils";
 import { StatValue } from "@/components/ui/StatValue";
 import { Card, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { StatusDot } from "@/components/ui/StatusDot";
-import { DataTable } from "@/components/ui/DataTable";
 import Link from "next/link";
 
 export const dynamic = 'force-dynamic';
@@ -12,21 +11,19 @@ export const dynamic = 'force-dynamic';
 export const metadata = { title: "Mission Control" };
 
 export default async function AdminOverviewPage() {
-  const supabase = await createClient();
+  const supabase = await createServiceClient();
   const today = new Date().toISOString().split("T")[0];
-  const sevenDaysAgo = new Date(Date.now() - 7 * 86400000).toISOString();
 
-  const [orgsResult, signalsResult, edgesResult, costResult, awsResult, eventsResult, activeUsersResult, agentRunsResult] = await Promise.all([
+  const [orgsResult, signalsResult, edgesResult, costResult, awsResult, eventsResult, membersResult, agentRunsResult, authUsersResult] = await Promise.all([
     supabase.from("organizations").select("id, name, slug, plan, is_core_brain, created_at").order("created_at"),
     supabase.from("cross_domain_signals").select("id", { count: "exact", head: true }),
     supabase.from("causal_relationships_statistical").select("id", { count: "exact", head: true }),
     supabase.from("llm_cost_log").select("estimated_cost_usd").gte("created_at", today),
     supabase.from("aws_cost_snapshots").select("total_aws_cost").order("period_start", { ascending: false }).limit(1),
     supabase.from("platform_events").select("id, event_type, source, title, created_at, event_data").order("created_at", { ascending: false }).limit(15),
-    // Active users (last 24h sessions)
-    supabase.from("org_members").select("user_id, role, organizations(name)").limit(50),
-    // Recent agent runs
+    supabase.from("org_members").select("user_id, role, organization_id, organizations(name)").limit(100),
     supabase.from("ai_agent_activity").select("id, agent_type, action, status, created_at").order("created_at", { ascending: false }).limit(10),
+    supabase.auth.admin.listUsers({ perPage: 500 }),
   ]);
 
   const orgs = orgsResult.data || [];
@@ -35,8 +32,48 @@ export default async function AdminOverviewPage() {
   const costToday = (costResult.data || []).reduce((sum, r) => sum + (r.estimated_cost_usd || 0), 0);
   const latestAWS = awsResult.data?.[0]?.total_aws_cost || 0;
   const events = eventsResult.data || [];
-  const members = activeUsersResult.data || [];
+  const members = membersResult.data || [];
   const agentRuns = agentRunsResult.data || [];
+
+  // Build user lookup map from auth users
+  const userMap = new Map<string, { email: string; name: string; lastSignIn: string | null; createdAt: string }>();
+  authUsersResult.data?.users?.forEach((u) => {
+    userMap.set(u.id, {
+      email: u.email || "",
+      name: u.user_metadata?.full_name || u.user_metadata?.name || u.email?.split("@")[0] || "Unknown",
+      lastSignIn: u.last_sign_in_at || null,
+      createdAt: u.created_at,
+    });
+  });
+
+  // Deduplicate users and enrich with auth data
+  const uniqueUserIds = [...new Set(members.map((m) => m.user_id))];
+  const enrichedUsers = uniqueUserIds.map((userId) => {
+    const authUser = userMap.get(userId);
+    const membership = members.find((m) => m.user_id === userId);
+    return {
+      userId,
+      email: authUser?.email || userId.slice(0, 8) + "...",
+      name: authUser?.name || "Unknown",
+      lastSignIn: authUser?.lastSignIn || null,
+      role: membership?.role || "member",
+      orgName: (membership?.organizations as any)?.name || "—",
+    };
+  });
+
+  // Active users (signed in within last 24h)
+  const activeUsers = enrichedUsers.filter((u) => {
+    if (!u.lastSignIn) return false;
+    const hoursSince = (Date.now() - new Date(u.lastSignIn).getTime()) / 3600000;
+    return hoursSince < 24;
+  });
+
+  // Online users (signed in within last hour)
+  const onlineUsers = enrichedUsers.filter((u) => {
+    if (!u.lastSignIn) return false;
+    const hoursSince = (Date.now() - new Date(u.lastSignIn).getTime()) / 3600000;
+    return hoursSince < 1;
+  });
 
   const SYSTEM_SERVICES = [
     { name: "ECS Cluster", status: "active" as const },
@@ -58,15 +95,15 @@ export default async function AdminOverviewPage() {
       {/* Stats Strip */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
         <StatValue label="Organizations" value={String(orgs.length)} subtitle={`${orgs.filter(o => o.is_core_brain).length} core`} />
-        <StatValue label="Total Users" value={String(members.length)} subtitle="All orgs" />
+        <StatValue label="Total Users" value={String(uniqueUserIds.length)} subtitle="All orgs" />
+        <StatValue label="Online Now" value={String(onlineUsers.length)} pulse={onlineUsers.length > 0} />
         <StatValue label="Total Signals" value={formatNumber(totalSignals)} />
-        <StatValue label="Causal Edges" value={formatNumber(totalEdges)} />
         <StatValue label="LLM Cost Today" value={formatUSD(costToday)} />
         <StatValue label="AWS Cost" value={formatUSD(latestAWS)} subtitle="/day" />
       </div>
 
-      {/* Two-column: Orgs + Events */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Three-column: Orgs + Active Sessions + Events */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Organizations */}
         <Card>
           <div className="flex items-center justify-between mb-4">
@@ -103,6 +140,58 @@ export default async function AdminOverviewPage() {
             ))}
             {orgs.length === 0 && (
               <p className="text-sm text-muted text-center py-6">No organizations</p>
+            )}
+          </div>
+        </Card>
+
+        {/* Active Sessions — WHO'S LOGGED IN */}
+        <Card>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <CardTitle>Active Sessions</CardTitle>
+              {onlineUsers.length > 0 && (
+                <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-success/10 text-[10px] font-medium text-success">
+                  <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
+                  {onlineUsers.length} online
+                </span>
+              )}
+            </div>
+            <Link href="/admin/users" className="text-xs text-accent hover:text-accent/80">All users</Link>
+          </div>
+          <div className="space-y-1">
+            {activeUsers.length > 0 ? (
+              activeUsers.slice(0, 12).map((user) => {
+                const hoursSince = user.lastSignIn ? (Date.now() - new Date(user.lastSignIn).getTime()) / 3600000 : 999;
+                const isOnline = hoursSince < 1;
+                return (
+                  <div key={user.userId} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-surface-hover transition-colors">
+                    <div className="w-7 h-7 rounded-full bg-accent/10 flex items-center justify-center text-[10px] font-bold text-accent uppercase shrink-0">
+                      {user.name?.charAt(0) || "?"}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs font-medium truncate">{user.name}</div>
+                      <div className="text-[10px] text-muted truncate">{user.email}</div>
+                    </div>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <StatusDot type={isOnline ? "active" : "warning"} size="sm" pulse={isOnline} />
+                      <span className="text-[10px] text-muted">
+                        {isOnline ? "Online" : `${Math.floor(hoursSince)}h ago`}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-xs text-muted">No active sessions in last 24h</p>
+              </div>
+            )}
+            {activeUsers.length > 12 && (
+              <div className="text-center pt-2">
+                <Link href="/admin/users" className="text-[10px] text-accent hover:text-accent/80">
+                  +{activeUsers.length - 12} more users
+                </Link>
+              </div>
             )}
           </div>
         </Card>
@@ -155,7 +244,6 @@ export default async function AdminOverviewPage() {
         <Card>
           <div className="flex items-center justify-between mb-4">
             <CardTitle>Recent Agent Runs</CardTitle>
-            <Link href="/admin/agent-runs" className="text-xs text-accent hover:text-accent/80">View all</Link>
           </div>
           <div className="space-y-1.5">
             {agentRuns.map((run) => (

@@ -49,7 +49,7 @@ export function InviteMemberModal({ orgId, onClose, onInvited }: Props) {
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-card border border-border/50 rounded-xl shadow-2xl w-full max-w-md p-6 mx-4">
+      <div className="bg-card border border-border-subtle rounded-xl shadow-2xl w-full max-w-md p-6 mx-4">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-semibold">Invite Team Member</h3>
@@ -75,7 +75,7 @@ export function InviteMemberModal({ orgId, onClose, onInvited }: Props) {
             <p className="text-xs text-muted mb-4">
               Share this link with <span className="text-foreground font-medium">{email}</span>
             </p>
-            <div className="bg-surface border border-border/30 rounded-lg p-3">
+            <div className="bg-surface border border-border-subtle rounded-lg p-3">
               <code className="text-xs text-accent break-all">{inviteUrl}</code>
             </div>
             <button

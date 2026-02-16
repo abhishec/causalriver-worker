@@ -300,21 +300,21 @@ export default function RegionsPage() {
 
       {/* Status summary */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="rounded-xl bg-card border border-border/50 p-5">
+        <div className="rounded-xl bg-card border border-border-subtle p-5">
           <div className="text-xs font-medium text-muted uppercase tracking-wider mb-2">
             Total Regions
           </div>
           <div className="text-2xl font-bold">{REGIONS.length}</div>
           <div className="text-xs text-muted mt-1">Specialized brain areas</div>
         </div>
-        <div className="rounded-xl bg-card border border-border/50 p-5">
+        <div className="rounded-xl bg-card border border-border-subtle p-5">
           <div className="text-xs font-medium text-muted uppercase tracking-wider mb-2">
             Active
           </div>
           <div className="text-2xl font-bold text-success">{activeCount}</div>
           <div className="text-xs text-muted mt-1">Currently processing</div>
         </div>
-        <div className="rounded-xl bg-card border border-border/50 p-5">
+        <div className="rounded-xl bg-card border border-border-subtle p-5">
           <div className="text-xs font-medium text-muted uppercase tracking-wider mb-2">
             Sleeping
           </div>

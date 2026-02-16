@@ -75,21 +75,21 @@ export default async function ConnectorsPage() {
 
       {/* Summary cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="rounded-xl bg-card border border-border/50 p-5">
+        <div className="rounded-xl bg-card border border-border-subtle p-5">
           <div className="text-xs font-medium text-muted uppercase tracking-wider mb-2">
             Total Connectors
           </div>
           <div className="text-2xl font-bold">13</div>
           <div className="text-xs text-muted mt-1">Available integrations</div>
         </div>
-        <div className="rounded-xl bg-card border border-border/50 p-5">
+        <div className="rounded-xl bg-card border border-border-subtle p-5">
           <div className="text-xs font-medium text-muted uppercase tracking-wider mb-2">
             Active Domains
           </div>
           <div className="text-2xl font-bold text-success">{activeDomains.size}</div>
           <div className="text-xs text-muted mt-1">Domains with signals</div>
         </div>
-        <div className="rounded-xl bg-card border border-border/50 p-5">
+        <div className="rounded-xl bg-card border border-border-subtle p-5">
           <div className="text-xs font-medium text-muted uppercase tracking-wider mb-2">
             Total Signals
           </div>

@@ -71,7 +71,7 @@ function renderMarkdown(text: string) {
       <div key={`table-${elements.length}`} className="overflow-x-auto my-3">
         <table className="w-full text-xs border-collapse">
           <thead>
-            <tr className="border-b border-border/40">
+            <tr className="border-b border-border-subtle">
               {headers.map((h, i) => (
                 <th
                   key={i}
@@ -84,7 +84,7 @@ function renderMarkdown(text: string) {
           </thead>
           <tbody>
             {data.map((row, ri) => (
-              <tr key={ri} className="border-b border-border/10">
+              <tr key={ri} className="border-b border-border-subtle">
                 {row.map((cell, ci) => (
                   <td key={ci} className="px-3 py-2 text-muted-foreground">
                     {renderInline(cell.trim())}
@@ -300,6 +300,124 @@ export async function consumeSSEStream(
   callbacks.onDone();
 }
 
+// ─── Brain Context Panel (Claude-style collapsible thought process) ─────
+
+function BrainContextPanel({ meta, isLoading }: { meta: BrainMeta; isLoading: boolean }) {
+  const [expanded, setExpanded] = useState(false);
+
+  const confidenceColor = meta.confidence >= 0.7
+    ? "text-success"
+    : meta.confidence >= 0.4
+      ? "text-warning"
+      : "text-danger";
+
+  return (
+    <div className="mt-2 rounded-xl bg-accent/5 border border-accent/15 overflow-hidden">
+      {/* Collapsed header — always visible */}
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="w-full flex items-center gap-3 px-4 py-2.5 text-xs hover:bg-accent/10 transition-colors"
+      >
+        <div className="flex items-center gap-1.5">
+          {isLoading ? (
+            <svg className="w-3.5 h-3.5 text-accent animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+            </svg>
+          ) : (
+            <div className="w-1.5 h-1.5 rounded-full bg-accent" />
+          )}
+          <span className="text-accent font-medium">
+            {isLoading ? "Brain thinking..." : "Brain context"}
+          </span>
+        </div>
+        <span className="text-muted flex-1 text-left truncate">
+          {meta.intent}
+        </span>
+        <span className={cn("font-medium tabular-nums", confidenceColor)}>
+          {Math.round(meta.confidence * 100)}%
+        </span>
+        <svg
+          className={cn("w-3.5 h-3.5 text-muted transition-transform", expanded && "rotate-180")}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {/* Expanded details — Claude-style sections */}
+      {expanded && (
+        <div className="px-4 pb-3 pt-1 space-y-3 border-t border-accent/10">
+          {/* Domains consulted */}
+          {meta.domains.length > 0 && (
+            <div>
+              <div className="text-[10px] font-medium uppercase tracking-wider text-muted mb-1.5">Domains</div>
+              <div className="flex flex-wrap gap-1">
+                {meta.domains.map((d) => (
+                  <span key={d} className="px-2 py-0.5 rounded-full bg-accent/10 text-accent text-[10px] font-medium">
+                    {d}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Regions used */}
+          {meta.regionsUsed.length > 0 && (
+            <div>
+              <div className="text-[10px] font-medium uppercase tracking-wider text-muted mb-1.5">Regions Consulted</div>
+              <div className="flex flex-wrap gap-1">
+                {meta.regionsUsed.map((r) => (
+                  <span key={r} className="px-2 py-0.5 rounded-full bg-surface text-[10px] text-muted-foreground">
+                    {r}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Confidence breakdown */}
+          <div>
+            <div className="text-[10px] font-medium uppercase tracking-wider text-muted mb-1.5">Confidence</div>
+            <div className="flex items-center gap-2">
+              <div className="flex-1 h-1.5 rounded-full bg-surface overflow-hidden">
+                <div
+                  className={cn(
+                    "h-full rounded-full transition-all",
+                    meta.confidence >= 0.7 ? "bg-success" : meta.confidence >= 0.4 ? "bg-warning" : "bg-danger"
+                  )}
+                  style={{ width: `${Math.round(meta.confidence * 100)}%` }}
+                />
+              </div>
+              <span className={cn("text-[10px] font-medium tabular-nums", confidenceColor)}>
+                {Math.round(meta.confidence * 100)}%
+              </span>
+            </div>
+          </div>
+
+          {/* Uncertain areas */}
+          {meta.uncertainAreas.length > 0 && (
+            <div>
+              <div className="text-[10px] font-medium uppercase tracking-wider text-muted mb-1.5">Uncertain Areas</div>
+              <div className="space-y-0.5">
+                {meta.uncertainAreas.map((a, i) => (
+                  <div key={i} className="flex items-start gap-1.5">
+                    <span className="text-warning mt-0.5 text-[8px]">●</span>
+                    <span className="text-[11px] text-muted-foreground">{a}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── CopilotChat Component ──────────────────────────────────────────────────
 
 export function CopilotChat({
@@ -446,7 +564,7 @@ export function CopilotChat({
     <div className="flex flex-col h-[calc(100vh-3.5rem)]">
       {/* Header */}
       {showHeader && (
-        <div className="flex items-center justify-between pb-4 border-b border-border/30">
+        <div className="flex items-center justify-between pb-4 border-b border-border-subtle">
           <div className="flex items-center gap-3 px-1">
             <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center", `bg-${color}/15`)}>
               <svg
@@ -474,7 +592,7 @@ export function CopilotChat({
                 <a
                   key={link.href}
                   href={link.href}
-                  className="px-3 py-1.5 text-xs rounded-lg bg-card border border-border/50 hover:border-accent/30 transition-colors"
+                  className="px-3 py-1.5 text-xs rounded-lg bg-card border border-border-subtle hover:border-accent/30 transition-colors"
                 >
                   {link.label}
                 </a>
@@ -484,46 +602,9 @@ export function CopilotChat({
         </div>
       )}
 
-      {/* V4 Brain Meta — shows detected intent, domains, confidence */}
+      {/* V5 Brain Context Panel — Claude-style collapsible thought process */}
       {brainMeta && (
-        <div className="flex items-center gap-3 px-3 py-2 mt-2 rounded-lg bg-accent/5 border border-accent/15 text-xs">
-          <div className="flex items-center gap-1.5">
-            <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-            <span className="text-accent font-medium">Brain Active</span>
-          </div>
-          <span className="text-muted/50">|</span>
-          <span className="text-muted">
-            Intent:{" "}
-            <strong className="text-foreground">{brainMeta.intent}</strong>
-          </span>
-          <span className="text-muted/50">|</span>
-          <span className="text-muted">
-            Domains: {brainMeta.domains.join(", ")}
-          </span>
-          <span className="text-muted/50">|</span>
-          <span className="text-muted">
-            Confidence:{" "}
-            <strong
-              className={cn(
-                brainMeta.confidence >= 0.7
-                  ? "text-emerald-400"
-                  : brainMeta.confidence >= 0.4
-                    ? "text-amber-400"
-                    : "text-red-400"
-              )}
-            >
-              {Math.round(brainMeta.confidence * 100)}%
-            </strong>
-          </span>
-          {brainMeta.regionsUsed.length > 0 && (
-            <>
-              <span className="text-muted/50">|</span>
-              <span className="text-muted">
-                {brainMeta.regionsUsed.length} regions
-              </span>
-            </>
-          )}
-        </div>
+        <BrainContextPanel meta={brainMeta} isLoading={isLoading} />
       )}
 
       {/* Messages area */}
@@ -558,7 +639,7 @@ export function CopilotChat({
                 <button
                   key={prompt}
                   onClick={() => handlePromptClick(prompt)}
-                  className="text-left px-4 py-3 rounded-xl bg-card border border-border/50 hover:border-accent/30 hover:bg-card-hover transition-all text-sm text-muted-foreground hover:text-foreground"
+                  className="text-left px-4 py-3 rounded-xl bg-card border border-border-subtle hover:border-accent/30 hover:bg-card-hover transition-all text-sm text-muted-foreground hover:text-foreground"
                 >
                   {prompt}
                 </button>
@@ -603,7 +684,7 @@ export function CopilotChat({
                     "rounded-xl px-4 py-3 text-sm leading-relaxed",
                     msg.role === "user"
                       ? "bg-accent text-accent-foreground max-w-md"
-                      : "bg-card border border-border/50 text-foreground w-full"
+                      : "bg-card border border-border-subtle text-foreground w-full"
                   )}
                 >
                   {msg.content ? (
@@ -631,7 +712,7 @@ export function CopilotChat({
       </div>
 
       {/* Input bar — fixed to bottom */}
-      <div className="border-t border-border/30 pt-4 pb-2">
+      <div className="border-t border-border-subtle pt-4 pb-2">
         <form onSubmit={handleSubmit} className="relative max-w-4xl mx-auto">
           <textarea
             ref={inputRef}
@@ -656,7 +737,7 @@ export function CopilotChat({
                 onClick={handleStop}
                 className={cn(
                   "w-8 h-8 rounded-lg flex items-center justify-center",
-                  "bg-red-500/20 text-red-400",
+                  "bg-danger/20 text-danger",
                   "hover:bg-red-500/30 transition-colors"
                 )}
                 title="Stop generation"

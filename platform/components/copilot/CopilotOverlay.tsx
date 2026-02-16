@@ -159,10 +159,10 @@ export function CopilotOverlay() {
       onClick={handleBackdropClick}
       className="fixed inset-0 z-[9999] flex items-start justify-center pt-[15vh] bg-background/70 backdrop-blur-sm"
     >
-      <div className="w-full max-w-xl rounded-2xl bg-card border border-border/50 shadow-2xl shadow-black/40 overflow-hidden">
+      <div className="w-full max-w-xl rounded-2xl bg-card border border-border-subtle shadow-2xl shadow-black/40 overflow-hidden">
         {/* Search input */}
         <form onSubmit={handleSubmit} className="relative">
-          <div className="flex items-center border-b border-border/30">
+          <div className="flex items-center border-b border-border-subtle">
             <svg
               className="w-5 h-5 text-muted ml-4 shrink-0"
               fill="none"
@@ -241,7 +241,7 @@ export function CopilotOverlay() {
                 <button
                   key={prompt}
                   onClick={() => handlePromptClick(prompt)}
-                  className="text-left px-3 py-2 rounded-lg bg-surface/50 border border-border/30 hover:border-accent/20 hover:bg-surface-hover transition-all text-xs text-muted-foreground hover:text-foreground"
+                  className="text-left px-3 py-2 rounded-lg bg-surface/50 border border-border-subtle hover:border-accent/20 hover:bg-surface-hover transition-all text-xs text-muted-foreground hover:text-foreground"
                 >
                   {prompt}
                 </button>
@@ -260,7 +260,7 @@ export function CopilotOverlay() {
         )}
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-4 py-2.5 border-t border-border/30 bg-surface/30">
+        <div className="flex items-center justify-between px-4 py-2.5 border-t border-border-subtle bg-surface/30">
           <span className="text-[10px] text-muted/50">
             Powered by NexusBrain&apos;s causal intelligence
           </span>

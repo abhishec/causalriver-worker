@@ -91,7 +91,7 @@ export default function FinanceJarvisPage() {
           </div>
         </div>
         <div className="flex gap-2">
-          <Link href="/finance-jarvis/reports" className="px-3 py-1.5 text-xs rounded-lg bg-card border border-border/50 hover:border-accent/30 transition-colors">
+          <Link href="/finance-jarvis/reports" className="px-3 py-1.5 text-xs rounded-lg bg-card border border-border-subtle hover:border-accent/30 transition-colors">
             Reports
           </Link>
           <Link href="/copilot" className="px-3 py-1.5 text-xs rounded-lg bg-accent text-white hover:bg-accent-dark transition-colors">
@@ -112,7 +112,7 @@ export default function FinanceJarvisPage() {
           { label: "Overdue Invoices", value: String(k.invoicesOverdue), sub: fmtK(k.arOutstanding) + " outstanding", trend: k.invoicesOverdue === 0 },
           { label: "Depts Over Budget", value: String(k.overBudgetDepartments), sub: `of 6 departments`, trend: k.overBudgetDepartments === 0 },
         ].map((kpi) => (
-          <div key={kpi.label} className="rounded-xl bg-card border border-border/50 p-4">
+          <div key={kpi.label} className="rounded-xl bg-card border border-border-subtle p-4">
             <div className="text-[10px] uppercase tracking-wider text-muted/60 mb-1">{kpi.label}</div>
             <div className="text-xl font-semibold">{kpi.value}</div>
             <div className={cn("text-xs mt-0.5", kpi.trend ? "text-emerald-400" : "text-red-400/80")}>{kpi.sub}</div>
@@ -122,7 +122,7 @@ export default function FinanceJarvisPage() {
 
       {/* Revenue & Expense Trend */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="rounded-xl bg-card border border-border/50 p-5">
+        <div className="rounded-xl bg-card border border-border-subtle p-5">
           <h3 className="text-sm font-medium mb-3">Revenue Trend (12mo)</h3>
           <MiniBarChart data={trends.map((t) => t.revenue)} color="bg-emerald-500/70" />
           <div className="flex justify-between text-[10px] text-muted/50 mt-1">
@@ -130,7 +130,7 @@ export default function FinanceJarvisPage() {
             <span>{trends[trends.length - 1]?.month}</span>
           </div>
         </div>
-        <div className="rounded-xl bg-card border border-border/50 p-5">
+        <div className="rounded-xl bg-card border border-border-subtle p-5">
           <h3 className="text-sm font-medium mb-3">Net Income (12mo)</h3>
           <MiniBarChart data={trends.map((t) => t.netIncome)} color="bg-accent/70" />
           <div className="flex justify-between text-[10px] text-muted/50 mt-1">
@@ -141,7 +141,7 @@ export default function FinanceJarvisPage() {
       </div>
 
       {/* Insights Feed */}
-      <div className="rounded-xl bg-card border border-border/50 p-5">
+      <div className="rounded-xl bg-card border border-border-subtle p-5">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm font-medium">Brain Insights ({data.insights.length})</h3>
           <Link href="/finance-jarvis/reports" className="text-xs text-accent hover:underline">View all</Link>
@@ -150,7 +150,7 @@ export default function FinanceJarvisPage() {
           {data.insights.slice(0, 6).map((insight) => {
             const style = SEVERITY_STYLES[insight.severity];
             return (
-              <div key={insight.id} className={cn("rounded-lg p-3 border border-border/30", style.bg)}>
+              <div key={insight.id} className={cn("rounded-lg p-3 border border-border-subtle", style.bg)}>
                 <div className="flex items-start gap-2">
                   <div className={cn("w-2 h-2 rounded-full mt-1.5 shrink-0", style.dot)} />
                   <div className="flex-1 min-w-0">
@@ -177,7 +177,7 @@ export default function FinanceJarvisPage() {
       {/* Department Risk + Cash Forecast */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Department Risk Scores */}
-        <div className="rounded-xl bg-card border border-border/50 p-5">
+        <div className="rounded-xl bg-card border border-border-subtle p-5">
           <h3 className="text-sm font-medium mb-4">Department Risk Scores (Volopay)</h3>
           <div className="space-y-3">
             {data.departmentRisks.map((d) => (
@@ -199,7 +199,7 @@ export default function FinanceJarvisPage() {
         </div>
 
         {/* Cash Forecast */}
-        <div className="rounded-xl bg-card border border-border/50 p-5">
+        <div className="rounded-xl bg-card border border-border-subtle p-5">
           <h3 className="text-sm font-medium mb-4">Cash Forecast (6mo)</h3>
           <div className="space-y-2">
             {data.cashFlowForecast.map((f) => (
@@ -217,11 +217,11 @@ export default function FinanceJarvisPage() {
       </div>
 
       {/* Causal Relationships */}
-      <div className="rounded-xl bg-card border border-border/50 p-5">
+      <div className="rounded-xl bg-card border border-border-subtle p-5">
         <h3 className="text-sm font-medium mb-4">Brain-Discovered Causal Relationships</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {data.causalRelationships.slice(0, 6).map((c, i) => (
-            <div key={i} className="rounded-lg bg-surface p-3 border border-border/20">
+            <div key={i} className="rounded-lg bg-surface p-3 border border-border-subtle">
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-xs font-medium text-accent">{c.source}</span>
                 <svg className="w-3 h-3 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -241,7 +241,7 @@ export default function FinanceJarvisPage() {
       </div>
 
       {/* Runway Scenarios */}
-      <div className="rounded-xl bg-card border border-border/50 p-5">
+      <div className="rounded-xl bg-card border border-border-subtle p-5">
         <h3 className="text-sm font-medium mb-4">Runway Scenarios</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {data.runwayProjections.map((r) => (

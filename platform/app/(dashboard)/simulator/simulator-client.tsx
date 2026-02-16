@@ -87,7 +87,7 @@ export function SimulatorClient({ entities, domains }: SimulatorClientProps) {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Input Panel */}
-        <div className="rounded-xl bg-card border border-border/50 p-6 space-y-5">
+        <div className="rounded-xl bg-card border border-border-subtle p-6 space-y-5">
           <h2 className="text-sm font-semibold">Scenario Builder</h2>
 
           {/* Entity picker */}
@@ -111,7 +111,7 @@ export function SimulatorClient({ entities, domains }: SimulatorClientProps) {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-medium text-muted-foreground mb-1.5">Direction</label>
-              <div className="flex rounded-lg bg-surface border border-border/30 p-0.5">
+              <div className="flex rounded-lg bg-surface border border-border-subtle p-0.5">
                 <button
                   onClick={() => setDirection("increase")}
                   className={cn("flex-1 py-1.5 rounded-md text-xs font-medium transition-colors", direction === "increase" ? "bg-success/20 text-success" : "text-muted")}
@@ -188,7 +188,7 @@ export function SimulatorClient({ entities, domains }: SimulatorClientProps) {
         </div>
 
         {/* Results Panel */}
-        <div className="rounded-xl bg-card border border-border/50 p-6">
+        <div className="rounded-xl bg-card border border-border-subtle p-6">
           <h2 className="text-sm font-semibold mb-4">Cascade Results</h2>
 
           {!results ? (
@@ -210,7 +210,7 @@ export function SimulatorClient({ entities, domains }: SimulatorClientProps) {
                     )}
                     <div className={cn(
                       "flex items-center gap-3 px-4 py-3 rounded-lg border transition-all",
-                      i === 0 ? "bg-accent/5 border-accent/30" : "bg-surface/50 border-border/30"
+                      i === 0 ? "bg-accent/5 border-accent/30" : "bg-surface/50 border-border-subtle"
                     )}>
                       <div className={cn(
                         "w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold shrink-0",
@@ -241,7 +241,7 @@ export function SimulatorClient({ entities, domains }: SimulatorClientProps) {
               </div>
 
               {/* Summary */}
-              <div className="p-4 rounded-lg bg-surface border border-border/30">
+              <div className="p-4 rounded-lg bg-surface border border-border-subtle">
                 <div className="text-[10px] text-muted uppercase tracking-wider mb-2">Impact Summary</div>
                 <div className="grid grid-cols-3 gap-4">
                   <div>

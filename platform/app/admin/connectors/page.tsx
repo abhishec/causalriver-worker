@@ -1,19 +1,22 @@
 'use client';
 
 /**
- * Data Connectors - Enterprise UI
- * ================================
- * Claude-quality interface for managing org-specific OAuth connectors.
- * Features: Real-time sync status, progress tracking, beautiful animations.
+ * Admin Data Connectors
+ * =====================
+ * Manage org-specific OAuth connectors — dark theme, design system aligned.
  */
 
 import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { Card, CardTitle } from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
+import { StatusDot } from '@/components/ui/StatusDot';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { cn } from '@/lib/utils';
 
 const CORE_ORG_ID = '00000000-0000-4000-a000-000000000001';
 const STORAGE_KEY = 'nexus_current_org';
 
-/** Client-safe org ID reader (reads cookie directly, no next/headers) */
 function getClientOrgId(): string {
   if (typeof document === 'undefined') return CORE_ORG_ID;
   const match = document.cookie.match(new RegExp(`(?:^|;\\s*)${STORAGE_KEY}=([^;]*)`));
@@ -40,38 +43,38 @@ interface SyncProgress {
   state: any;
 }
 
-const CONNECTORS_CONFIG = {
+const CONNECTORS_CONFIG: Record<string, { name: string; icon: string; description: string; features: string[]; scaleInfo: string; domain: string }> = {
   slack: {
     name: 'Slack',
     icon: '💬',
-    color: 'purple',
     description: 'Team conversations, channels, and messages',
     features: ['Message history', 'Channel metadata', 'Thread conversations', 'Reactions & files'],
     scaleInfo: '10M+ messages supported',
+    domain: 'communication',
   },
   jira: {
     name: 'Jira',
     icon: '📋',
-    color: 'blue',
     description: 'Issues, comments, and project workflows',
     features: ['Issue tracking', 'Comment threads', 'Project metadata', 'Custom fields'],
     scaleInfo: '500K+ issues supported',
+    domain: 'engineering',
   },
   github: {
     name: 'GitHub',
     icon: '🐙',
-    color: 'gray',
     description: 'Repositories, code, PRs, and issues',
     features: ['Code files', 'Pull requests', 'Issues & discussions', 'Commit history'],
     scaleInfo: '10M+ files supported',
+    domain: 'engineering',
   },
   freshdesk: {
     name: 'Freshdesk',
     icon: '🎫',
-    color: 'green',
     description: 'Support tickets and customer conversations',
     features: ['Ticket history', 'Customer conversations', 'Agent responses', 'Satisfaction ratings'],
     scaleInfo: '100K+ tickets supported',
+    domain: 'support',
   },
 };
 
@@ -85,29 +88,28 @@ export default function ConnectorsPageV2() {
 
   useEffect(() => {
     init();
-    const interval = setInterval(loadSyncProgress, 5000); // Poll every 5 seconds
+    const interval = setInterval(loadSyncProgress, 5000);
     return () => clearInterval(interval);
   }, []);
 
   async function init() {
-    // Handle OAuth callbacks
     const params = new URLSearchParams(window.location.search);
     const success = params.get('success');
     const error = params.get('error');
 
     if (success) {
       const messages: Record<string, string> = {
-        slack_connected: '✅ Slack workspace connected successfully!',
-        jira_connected: '✅ Jira site connected successfully!',
-        github_connected: '✅ GitHub account connected successfully!',
-        freshdesk_connected: '✅ Freshdesk account connected successfully!',
+        slack_connected: 'Slack workspace connected successfully',
+        jira_connected: 'Jira site connected successfully',
+        github_connected: 'GitHub account connected successfully',
+        freshdesk_connected: 'Freshdesk account connected successfully',
       };
-      setMessage({ type: 'success', text: messages[success] || '✅ Connector added!' });
+      setMessage({ type: 'success', text: messages[success] || 'Connector added' });
       window.history.replaceState({}, '', '/admin/connectors');
     }
 
     if (error) {
-      setMessage({ type: 'error', text: `❌ ${decodeURIComponent(error)}` });
+      setMessage({ type: 'error', text: decodeURIComponent(error) });
       window.history.replaceState({}, '', '/admin/connectors');
     }
 
@@ -121,7 +123,6 @@ export default function ConnectorsPageV2() {
       const currentOrgId = getClientOrgId();
       setOrgId(currentOrgId);
 
-      // Get org name
       const { data: org } = await supabase
         .from('organizations')
         .select('name')
@@ -174,7 +175,7 @@ export default function ConnectorsPageV2() {
   }
 
   async function handleDisconnect(connectorId: string, type: string) {
-    if (!confirm(`Are you sure you want to disconnect ${type}?\n\nThis will:\n• Remove OAuth credentials\n• Stop data syncing\n• Keep existing data`)) {
+    if (!confirm(`Disconnect ${type}?\n\nThis will remove OAuth credentials and stop syncing. Existing data will be kept.`)) {
       return;
     }
 
@@ -196,13 +197,10 @@ export default function ConnectorsPageV2() {
 
   async function handleSync(type: string) {
     setMessage({ type: 'info', text: `Starting ${type} sync...` });
-    // Trigger sync via API
     try {
-      const response = await fetch(`/api/connectors/${type}/sync`, {
-        method: 'POST',
-      });
+      const response = await fetch(`/api/connectors/${type}/sync`, { method: 'POST' });
       if (response.ok) {
-        setMessage({ type: 'success', text: `${type} sync started!` });
+        setMessage({ type: 'success', text: `${type} sync started` });
         setTimeout(loadSyncProgress, 1000);
       }
     } catch (err: any) {
@@ -216,287 +214,182 @@ export default function ConnectorsPageV2() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
-      <div className="max-w-6xl mx-auto px-6 py-12">
-        {/* Header */}
-        <div className="mb-10">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-4xl font-bold text-gray-900 mb-3">
-                Data Connectors
-              </h1>
-              <p className="text-lg text-gray-600">
-                Connect your tools to enable NexusBrain to learn from{' '}
-                <span className="font-semibold text-gray-900">{orgName || 'your organization'}</span>'s data.
-              </p>
-            </div>
-            <div className="flex items-center gap-4">
-              <a
-                href="/admin/settings/oauth"
-                className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium shadow-sm"
-              >
-                <span>⚙️</span>
-                OAuth Settings
-              </a>
-              <div className="text-right">
-                <div className="text-sm text-gray-500">Organization</div>
-                <div className="text-lg font-semibold text-gray-900">{orgName}</div>
-              </div>
-            </div>
-          </div>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-semibold tracking-tight">Connectors Config</h1>
+          <p className="text-xs text-muted mt-0.5">
+            Manage OAuth connectors for <span className="text-foreground font-medium">{orgName || 'organization'}</span>
+          </p>
         </div>
-
-        {/* Message Banner */}
-        {message && (
-          <div
-            className={`mb-8 p-5 rounded-xl shadow-sm ${
-              message.type === 'success'
-                ? 'bg-green-50 text-green-900 border-2 border-green-200'
-                : message.type === 'error'
-                ? 'bg-red-50 text-red-900 border-2 border-red-200'
-                : 'bg-blue-50 text-blue-900 border-2 border-blue-200'
-            } animate-in slide-in-from-top`}
-          >
-            <div className="flex items-start justify-between">
-              <p className="font-medium">{message.text}</p>
-              <button
-                onClick={() => setMessage(null)}
-                className="text-sm underline ml-4"
-              >
-                Dismiss
-              </button>
-            </div>
-          </div>
-        )}
-
-        {loading ? (
-          <div className="text-center py-20">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mb-4"></div>
-            <p className="text-gray-600 font-medium">Loading connectors...</p>
-          </div>
-        ) : (
-          <div className="grid gap-6">
-            {Object.entries(CONNECTORS_CONFIG).map(([type, config]) => (
-              <EnhancedConnectorCard
-                key={type}
-                type={type}
-                config={config}
-                connector={connectorsByType[type]}
-                syncProgress={syncProgress[type]}
-                onConnect={() => handleConnect(type)}
-                onDisconnect={() =>
-                  connectorsByType[type] && handleDisconnect(connectorsByType[type]!.id, config.name)
-                }
-                onSync={() => handleSync(type)}
-              />
-            ))}
-          </div>
-        )}
-
-        {/* Info Cards */}
-        <div className="mt-12 grid md:grid-cols-2 gap-6">
-          <div className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl shadow-sm">
-            <h3 className="font-bold text-blue-900 mb-3 flex items-center gap-2">
-              <span className="text-2xl">🔐</span>
-              Secure & Private
-            </h3>
-            <p className="text-sm text-blue-800 leading-relaxed">
-              All credentials are encrypted and stored securely. NexusBrain only accesses data
-              you explicitly grant permission to. You can disconnect any connector at any time.
-            </p>
-          </div>
-
-          <div className="p-6 bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-200 rounded-xl shadow-sm">
-            <h3 className="font-bold text-purple-900 mb-3 flex items-center gap-2">
-              <span className="text-2xl">⚡</span>
-              Automatic Syncing
-            </h3>
-            <p className="text-sm text-purple-800 leading-relaxed">
-              Connectors sync automatically every hour. Initial sync may take time for large datasets.
-              Incremental syncs are fast (usually under 5 minutes).
-            </p>
-          </div>
-        </div>
+        <a
+          href="/admin/settings/oauth"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 text-amber-400 text-xs font-medium hover:bg-amber-500/20 transition-colors"
+        >
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 011.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.56.94 1.11v1.093c0 .55-.397 1.02-.94 1.11l-.893.149c-.425.07-.765.383-.93.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 01-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.397.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 01-.12-1.45l.527-.737c.25-.35.273-.806.108-1.204-.165-.397-.505-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.107-1.204l-.527-.738a1.125 1.125 0 01.12-1.45l.773-.773a1.125 1.125 0 011.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894z" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          OAuth Settings
+        </a>
       </div>
-    </div>
-  );
-}
 
-interface EnhancedConnectorCardProps {
-  type: string;
-  config: any;
-  connector?: Connector;
-  syncProgress?: SyncProgress;
-  onConnect: () => void;
-  onDisconnect: () => void;
-  onSync: () => void;
-}
-
-function EnhancedConnectorCard({
-  type,
-  config,
-  connector,
-  syncProgress,
-  onConnect,
-  onDisconnect,
-  onSync,
-}: EnhancedConnectorCardProps) {
-  const isConnected = connector?.status === 'active';
-  const isSyncing = syncProgress?.status === 'in_progress';
-  const lastSync = connector?.last_sync_at
-    ? formatRelativeTime(new Date(connector.last_sync_at))
-    : 'Never';
-
-  const colorClasses = {
-    purple: 'bg-purple-50 border-purple-200 text-purple-900',
-    blue: 'bg-blue-50 border-blue-200 text-blue-900',
-    gray: 'bg-gray-50 border-gray-200 text-gray-900',
-    green: 'bg-green-50 border-green-200 text-green-900',
-  };
-
-  return (
-    <div className={`border-2 rounded-xl p-6 transition-all duration-200 ${
-      isConnected
-        ? 'bg-white shadow-lg hover:shadow-xl'
-        : 'bg-gray-50 border-gray-200 hover:border-gray-300'
-    }`}>
-      <div className="flex items-start justify-between">
-        {/* Left side */}
-        <div className="flex items-start space-x-5 flex-1">
-          <div className={`text-5xl p-3 rounded-xl ${colorClasses[config.color as keyof typeof colorClasses]}`}>
-            {config.icon}
-          </div>
-          <div className="flex-1">
-            <div className="flex items-center gap-3 mb-2">
-              <h3 className="text-xl font-bold text-gray-900">{config.name}</h3>
-              {isConnected && (
-                <span className="flex items-center gap-1.5 px-2.5 py-0.5 bg-green-100 text-green-700 text-xs font-semibold rounded-full">
-                  <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
-                  Connected
-                </span>
-              )}
-              {isSyncing && (
-                <span className="flex items-center gap-1.5 px-2.5 py-0.5 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full">
-                  <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></span>
-                  Syncing
-                </span>
-              )}
-            </div>
-
-            <p className="text-gray-600 mb-4">{config.description}</p>
-
-            {isConnected && (
-              <div className="space-y-3">
-                {/* Stats */}
-                <div className="flex items-center gap-6 text-sm">
-                  <div>
-                    <span className="text-gray-500">Last sync:</span>
-                    <span className="ml-2 font-medium text-gray-900">{lastSync}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-500">Signals:</span>
-                    <span className="ml-2 font-medium text-gray-900">
-                      {connector.signals_count?.toLocaleString() || 0}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Metadata */}
-                <div className="flex items-center gap-4 text-sm text-gray-600">
-                  {connector.metadata?.team_name && (
-                    <span>📍 {connector.metadata.team_name}</span>
-                  )}
-                  {connector.metadata?.site_name && (
-                    <span>🌐 {connector.metadata.site_name}</span>
-                  )}
-                  {connector.metadata?.github_login && (
-                    <span>👤 @{connector.metadata.github_login}</span>
-                  )}
-                </div>
-
-                {/* Sync Progress */}
-                {isSyncing && syncProgress && (
-                  <div className="mt-4">
-                    <div className="flex items-center justify-between mb-2 text-sm">
-                      <span className="text-gray-600">Syncing...</span>
-                      <span className="font-semibold text-blue-600">
-                        {syncProgress.progress_pct}%
-                      </span>
-                    </div>
-                    <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 transition-all duration-500 rounded-full"
-                        style={{ width: `${syncProgress.progress_pct}%` }}
-                      ></div>
-                    </div>
-                    <p className="text-xs text-gray-500 mt-2">
-                      {syncProgress.signals_ingested.toLocaleString()} signals processed
-                    </p>
-                  </div>
-                )}
-
-                {/* Features (expandable) */}
-                <details className="mt-4">
-                  <summary className="text-sm text-gray-600 cursor-pointer hover:text-gray-900">
-                    What gets synced →
-                  </summary>
-                  <ul className="mt-2 ml-4 space-y-1 text-sm text-gray-600">
-                    {config.features.map((feature: string, idx: number) => (
-                      <li key={idx} className="flex items-center gap-2">
-                        <span className="text-green-500">✓</span>
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-                  <p className="text-xs text-gray-500 mt-2">
-                    {config.scaleInfo}
-                  </p>
-                </details>
-              </div>
-            )}
-
-            {!isConnected && (
-              <div className="mt-4">
-                <ul className="space-y-1.5 text-sm text-gray-600">
-                  {config.features.slice(0, 3).map((feature: string, idx: number) => (
-                    <li key={idx} className="flex items-center gap-2">
-                      <span className="text-gray-400">•</span>
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Right side - Actions */}
-        <div className="flex flex-col gap-2">
-          {isConnected ? (
-            <>
-              <button
-                onClick={onSync}
-                disabled={isSyncing}
-                className="px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow"
-              >
-                {isSyncing ? 'Syncing...' : 'Sync Now'}
-              </button>
-              <button
-                onClick={onDisconnect}
-                className="px-5 py-2.5 text-sm font-semibold text-red-700 bg-red-50 border border-red-300 rounded-lg hover:bg-red-100 transition-colors"
-              >
-                Disconnect
-              </button>
-            </>
-          ) : (
-            <button
-              onClick={onConnect}
-              className="px-6 py-3 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg"
-            >
-              Connect {config.name}
-            </button>
+      {/* Message Banner */}
+      {message && (
+        <div
+          className={cn(
+            "flex items-center justify-between px-4 py-3 rounded-xl border text-sm",
+            message.type === 'success' && "bg-success/10 border-success/20 text-success",
+            message.type === 'error' && "bg-danger/10 border-danger/20 text-danger",
+            message.type === 'info' && "bg-info/10 border-info/20 text-info",
           )}
+        >
+          <span className="font-medium">{message.text}</span>
+          <button onClick={() => setMessage(null)} className="text-xs opacity-60 hover:opacity-100 ml-4">
+            Dismiss
+          </button>
         </div>
+      )}
+
+      {loading ? (
+        <div className="space-y-3">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="rounded-xl bg-card border border-border-subtle p-6 animate-shimmer" style={{ height: 120 }} />
+          ))}
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {Object.entries(CONNECTORS_CONFIG).map(([type, config]) => {
+            const connector = connectorsByType[type];
+            const isConnected = connector?.status === 'active';
+            const isSyncing = syncProgress[type]?.status === 'in_progress';
+            const progress = syncProgress[type];
+
+            return (
+              <Card
+                key={type}
+                variant={isConnected ? "interactive" : "default"}
+                className={cn(!isConnected && "opacity-70")}
+              >
+                <div className="flex items-start gap-4">
+                  {/* Icon */}
+                  <div className="text-3xl shrink-0">{config.icon}</div>
+
+                  {/* Content */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-sm font-semibold">{config.name}</span>
+                      {isConnected && (
+                        <Badge variant="success" size="xs" pulse>Connected</Badge>
+                      )}
+                      {isSyncing && (
+                        <Badge variant="info" size="xs" pulse>Syncing</Badge>
+                      )}
+                      {!isConnected && (
+                        <Badge variant="default" size="xs">Not connected</Badge>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted mb-2">{config.description}</p>
+
+                    {isConnected && connector && (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-4 text-xs">
+                          <span className="text-muted">Last sync: <span className="text-foreground font-medium">{connector.last_sync_at ? formatRelativeTime(new Date(connector.last_sync_at)) : 'Never'}</span></span>
+                          <span className="text-muted">Signals: <span className="text-foreground font-mono tabular-nums">{(connector.signals_count || 0).toLocaleString()}</span></span>
+                          {connector.metadata?.team_name && <span className="text-muted">{connector.metadata.team_name}</span>}
+                          {connector.metadata?.github_login && <span className="text-muted">@{connector.metadata.github_login}</span>}
+                        </div>
+
+                        {/* Sync Progress */}
+                        {isSyncing && progress && (
+                          <div className="mt-2">
+                            <div className="flex items-center justify-between text-xs mb-1">
+                              <span className="text-muted">Syncing...</span>
+                              <span className="text-accent font-mono tabular-nums">{progress.progress_pct}%</span>
+                            </div>
+                            <div className="w-full h-1.5 rounded-full bg-surface overflow-hidden">
+                              <div
+                                className="h-full bg-accent rounded-full transition-all duration-500"
+                                style={{ width: `${progress.progress_pct}%` }}
+                              />
+                            </div>
+                            <p className="text-[10px] text-muted mt-1">
+                              {progress.signals_ingested.toLocaleString()} signals processed
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {!isConnected && (
+                      <div className="flex items-center gap-3 text-[11px] text-muted mt-1">
+                        {config.features.slice(0, 3).map((f, i) => (
+                          <span key={i}>• {f}</span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex flex-col gap-1.5 shrink-0">
+                    {isConnected ? (
+                      <>
+                        <button
+                          onClick={() => handleSync(type)}
+                          disabled={isSyncing}
+                          className="px-3 py-1.5 rounded-lg bg-accent/10 text-accent text-xs font-medium hover:bg-accent/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                          {isSyncing ? 'Syncing...' : 'Sync Now'}
+                        </button>
+                        <button
+                          onClick={() => handleDisconnect(connector!.id, config.name)}
+                          className="px-3 py-1.5 rounded-lg bg-danger/10 text-danger text-xs font-medium hover:bg-danger/20 transition-colors"
+                        >
+                          Disconnect
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        onClick={() => handleConnect(type)}
+                        className="px-4 py-2 rounded-lg bg-amber-500/10 text-amber-400 text-xs font-medium hover:bg-amber-500/20 transition-colors"
+                      >
+                        Connect
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Info Cards */}
+      <div className="grid md:grid-cols-2 gap-3 mt-4">
+        <Card>
+          <CardTitle className="mb-2 flex items-center gap-2">
+            <svg className="w-4 h-4 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+            </svg>
+            Secure & Private
+          </CardTitle>
+          <p className="text-xs text-muted leading-relaxed">
+            All credentials are encrypted. NexusBrain only accesses data you explicitly grant permission to.
+          </p>
+        </Card>
+
+        <Card>
+          <CardTitle className="mb-2 flex items-center gap-2">
+            <svg className="w-4 h-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+            </svg>
+            Automatic Syncing
+          </CardTitle>
+          <p className="text-xs text-muted leading-relaxed">
+            Connectors sync hourly. Initial sync may take time for large datasets; incremental syncs are fast.
+          </p>
+        </Card>
       </div>
     </div>
   );

@@ -153,7 +153,7 @@ export function IngestionProgress({ onComplete }: IngestionProgressProps) {
   const stats = progress?.ingestionProgress?.stats;
 
   return (
-    <div className="rounded-xl bg-card border border-border/50 p-5 space-y-4">
+    <div className="rounded-xl bg-card border border-border-subtle p-5 space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div

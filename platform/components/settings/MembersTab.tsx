@@ -27,7 +27,7 @@ interface PendingInvite {
 
 const ROLE_COLORS: Record<string, string> = {
   owner: "bg-accent/10 text-accent",
-  admin: "bg-purple-500/10 text-purple-400",
+  admin: "bg-brain-training/10 text-brain-training",
   member: "bg-info/10 text-info",
   viewer: "bg-muted/20 text-muted-foreground",
 };
@@ -180,10 +180,10 @@ export function MembersTab({ orgId }: { orgId: string }) {
       </div>
 
       {/* Members list */}
-      <div className="rounded-lg border border-border/30 overflow-hidden">
+      <div className="rounded-lg border border-border-subtle overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-xs text-muted border-b border-border/30 bg-surface/50">
+            <tr className="text-xs text-muted border-b border-border-subtle bg-surface/50">
               <th className="text-left py-2.5 px-4 font-medium">Member</th>
               <th className="text-left py-2.5 px-4 font-medium">Role</th>
               <th className="text-left py-2.5 px-4 font-medium">Joined</th>
@@ -194,7 +194,7 @@ export function MembersTab({ orgId }: { orgId: string }) {
             {members.map((m) => (
               <tr
                 key={m.id}
-                className="border-b border-border/10 hover:bg-surface-hover transition-colors"
+                className="border-b border-border-subtle hover:bg-surface-hover transition-colors"
               >
                 <td className="py-3 px-4">
                   <div className="flex items-center gap-3">
@@ -222,7 +222,7 @@ export function MembersTab({ orgId }: { orgId: string }) {
                       value={m.role}
                       onChange={(e) => handleRoleChange(m.id, e.target.value)}
                       disabled={changingRole === m.id}
-                      className="rounded-md bg-surface border border-border/30 px-2 py-1 text-xs font-medium focus:outline-none focus:ring-1 focus:ring-accent disabled:opacity-50"
+                      className="rounded-md bg-surface border border-border-subtle px-2 py-1 text-xs font-medium focus:outline-none focus:ring-1 focus:ring-accent disabled:opacity-50"
                     >
                       {ROLE_OPTIONS.filter((r) =>
                         currentRole === "owner" ? true : r.value !== "owner"
@@ -270,10 +270,10 @@ export function MembersTab({ orgId }: { orgId: string }) {
           <h4 className="text-xs font-medium text-muted uppercase tracking-wider mb-3">
             Pending Invitations ({invites.length})
           </h4>
-          <div className="rounded-lg border border-border/30 overflow-hidden">
+          <div className="rounded-lg border border-border-subtle overflow-hidden">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-xs text-muted border-b border-border/30 bg-surface/50">
+                <tr className="text-xs text-muted border-b border-border-subtle bg-surface/50">
                   <th className="text-left py-2 px-4 font-medium">Email</th>
                   <th className="text-left py-2 px-4 font-medium">Role</th>
                   <th className="text-left py-2 px-4 font-medium">Expires</th>
@@ -284,7 +284,7 @@ export function MembersTab({ orgId }: { orgId: string }) {
                 {invites.map((inv) => (
                   <tr
                     key={inv.id}
-                    className="border-b border-border/10 hover:bg-surface-hover transition-colors"
+                    className="border-b border-border-subtle hover:bg-surface-hover transition-colors"
                   >
                     <td className="py-2.5 px-4 text-sm">{inv.invitee_email}</td>
                     <td className="py-2.5 px-4">

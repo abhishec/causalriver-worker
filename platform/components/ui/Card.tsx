@@ -11,8 +11,8 @@ interface CardProps {
 
 const variantStyles = {
   default: "bg-card border border-border-subtle",
-  elevated: "bg-surface-elevated border border-border/50",
-  interactive: "bg-card border border-border-subtle hover:bg-card-hover hover:border-border/50 transition-colors cursor-pointer",
+  elevated: "bg-surface-elevated border border-border-subtle",
+  interactive: "bg-card border border-border-subtle hover:bg-card-hover hover:border-border transition-colors cursor-pointer",
   "brain-highlight": "bg-card border border-accent/20 shadow-[0_0_15px_rgba(124,108,240,0.05)]",
 };
 

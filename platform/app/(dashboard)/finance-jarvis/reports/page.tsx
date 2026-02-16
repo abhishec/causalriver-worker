@@ -81,7 +81,7 @@ export default function FinanceReportsPage() {
           </div>
         </div>
         <div className="flex gap-2">
-          <Link href="/finance-jarvis" className="px-3 py-1.5 text-xs rounded-lg bg-card border border-border/50 hover:border-accent/30 transition-colors">
+          <Link href="/finance-jarvis" className="px-3 py-1.5 text-xs rounded-lg bg-card border border-border-subtle hover:border-accent/30 transition-colors">
             Dashboard
           </Link>
           <Link href="/copilot" className="px-3 py-1.5 text-xs rounded-lg bg-accent text-white hover:bg-accent-dark transition-colors">
@@ -173,7 +173,7 @@ export default function FinanceReportsPage() {
                       </div>
                     )}
 
-                    <div className="mt-3 p-2 rounded-lg bg-surface/30 border border-border/20">
+                    <div className="mt-3 p-2 rounded-lg bg-surface/30 border border-border-subtle">
                       <span className="text-[10px] uppercase tracking-wider text-accent/60">Recommendation</span>
                       <p className="text-xs text-foreground mt-0.5">{insight.recommendation}</p>
                     </div>
@@ -201,10 +201,10 @@ export default function FinanceReportsPage() {
       {/* ── Spend Tab ── */}
       {activeTab === "spend" && (
         <div className="space-y-4">
-          <div className="rounded-xl bg-card border border-border/50 overflow-hidden">
+          <div className="rounded-xl bg-card border border-border-subtle overflow-hidden">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-border/30">
+                <tr className="border-b border-border-subtle">
                   <th className="text-left px-4 py-3 text-[11px] uppercase tracking-wider text-muted/60">Category</th>
                   <th className="text-right px-4 py-3 text-[11px] uppercase tracking-wider text-muted/60">This Month</th>
                   <th className="text-right px-4 py-3 text-[11px] uppercase tracking-wider text-muted/60">Last Month</th>
@@ -216,7 +216,7 @@ export default function FinanceReportsPage() {
               </thead>
               <tbody>
                 {data.spendBreakdowns.map((s) => (
-                  <tr key={s.category} className="border-b border-border/10 hover:bg-surface-hover/50">
+                  <tr key={s.category} className="border-b border-border-subtle hover:bg-surface-hover/50">
                     <td className="px-4 py-3 text-sm">{s.category}</td>
                     <td className="px-4 py-3 text-sm text-right font-mono">{fmtK(s.currentMonth)}</td>
                     <td className="px-4 py-3 text-sm text-right font-mono text-muted">{fmtK(s.previousMonth)}</td>
@@ -246,12 +246,12 @@ export default function FinanceReportsPage() {
           </div>
 
           {/* Monthly P&L Trend Table */}
-          <div className="rounded-xl bg-card border border-border/50 p-5">
+          <div className="rounded-xl bg-card border border-border-subtle p-5">
             <h3 className="text-sm font-medium mb-4">Monthly P&L Summary</h3>
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
                 <thead>
-                  <tr className="border-b border-border/30">
+                  <tr className="border-b border-border-subtle">
                     <th className="text-left py-2 pr-4 text-[10px] uppercase tracking-wider text-muted/60">Month</th>
                     <th className="text-right py-2 px-3 text-[10px] uppercase tracking-wider text-muted/60">Revenue</th>
                     <th className="text-right py-2 px-3 text-[10px] uppercase tracking-wider text-muted/60">Expenses</th>
@@ -263,7 +263,7 @@ export default function FinanceReportsPage() {
                 </thead>
                 <tbody>
                   {data.monthlyTrends.map((t) => (
-                    <tr key={t.month} className="border-b border-border/10">
+                    <tr key={t.month} className="border-b border-border-subtle">
                       <td className="py-2 pr-4 text-muted">{t.month}</td>
                       <td className="py-2 px-3 text-right font-mono text-emerald-400">{fmtK(t.revenue)}</td>
                       <td className="py-2 px-3 text-right font-mono text-red-400/70">{fmtK(t.expenses)}</td>
@@ -290,7 +290,7 @@ export default function FinanceReportsPage() {
               "rounded-xl border p-5",
               dept.riskScore > 60 ? "bg-red-500/5 border-red-500/20" :
               dept.riskScore > 40 ? "bg-amber-500/5 border-amber-500/20" :
-              "bg-card border-border/50"
+              "bg-card border-border-subtle"
             )}>
               <div className="flex items-center justify-between mb-3">
                 <div>
@@ -351,12 +351,12 @@ export default function FinanceReportsPage() {
       {activeTab === "forecast" && (
         <div className="space-y-4">
           {/* Cash Flow Forecast */}
-          <div className="rounded-xl bg-card border border-border/50 p-5">
+          <div className="rounded-xl bg-card border border-border-subtle p-5">
             <h3 className="text-sm font-medium mb-4">6-Month Cash Flow Projection</h3>
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
                 <thead>
-                  <tr className="border-b border-border/30">
+                  <tr className="border-b border-border-subtle">
                     <th className="text-left py-2 text-[10px] uppercase tracking-wider text-muted/60">Month</th>
                     <th className="text-right py-2 text-[10px] uppercase tracking-wider text-muted/60">Inflows</th>
                     <th className="text-right py-2 text-[10px] uppercase tracking-wider text-muted/60">Outflows</th>
@@ -368,7 +368,7 @@ export default function FinanceReportsPage() {
                 </thead>
                 <tbody>
                   {data.cashFlowForecast.map((f) => (
-                    <tr key={f.month} className="border-b border-border/10">
+                    <tr key={f.month} className="border-b border-border-subtle">
                       <td className="py-2.5 text-muted">{f.month}</td>
                       <td className="py-2.5 text-right font-mono text-emerald-400">{fmtK(f.projectedInflows)}</td>
                       <td className="py-2.5 text-right font-mono text-red-400/70">{fmtK(f.projectedOutflows)}</td>
@@ -388,7 +388,7 @@ export default function FinanceReportsPage() {
           </div>
 
           {/* Runway Scenarios Detail */}
-          <div className="rounded-xl bg-card border border-border/50 p-5">
+          <div className="rounded-xl bg-card border border-border-subtle p-5">
             <h3 className="text-sm font-medium mb-4">Runway Scenario Analysis</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {data.runwayProjections.map((r) => (
@@ -417,11 +417,11 @@ export default function FinanceReportsPage() {
           </div>
 
           {/* Causal Drivers of Forecast */}
-          <div className="rounded-xl bg-card border border-border/50 p-5">
+          <div className="rounded-xl bg-card border border-border-subtle p-5">
             <h3 className="text-sm font-medium mb-4">Causal Drivers (What Moves the Needle)</h3>
             <div className="space-y-3">
               {data.causalRelationships.map((c, i) => (
-                <div key={i} className="flex items-center gap-4 p-3 rounded-lg bg-surface/50 border border-border/20">
+                <div key={i} className="flex items-center gap-4 p-3 rounded-lg bg-surface/50 border border-border-subtle">
                   <div className="flex items-center gap-2 w-48 shrink-0">
                     <span className="text-xs font-medium text-accent">{c.source}</span>
                     <svg className="w-4 h-4 text-muted/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

@@ -245,7 +245,7 @@ export default function InvitePage() {
         </div>
       )}
 
-      <div className="rounded-xl bg-card border border-border/50 p-6 mb-6">
+      <div className="rounded-xl bg-card border border-border-subtle p-6 mb-6">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center">
             <span className="text-xl font-bold text-accent">

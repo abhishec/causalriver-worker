@@ -83,9 +83,9 @@ const REGIONS = [
   { name: "Causal Reasoning", category: "Real-time", status: "active" as const, color: "text-info" },
   { name: "Impact Scoring", category: "Real-time", status: "active" as const, color: "text-info" },
   { name: "Simulator", category: "Real-time", status: "active" as const, color: "text-info" },
-  { name: "Muscle Memory", category: "Sleep cycle", status: "active" as const, color: "text-purple-400" },
-  { name: "Memory Formation", category: "Sleep cycle", status: "active" as const, color: "text-purple-400" },
-  { name: "Dreaming (DMN)", category: "Sleep cycle", status: "sleeping" as const, color: "text-purple-400" },
+  { name: "Muscle Memory", category: "Sleep cycle", status: "active" as const, color: "text-brain-training" },
+  { name: "Memory Formation", category: "Sleep cycle", status: "active" as const, color: "text-brain-training" },
+  { name: "Dreaming (DMN)", category: "Sleep cycle", status: "sleeping" as const, color: "text-brain-training" },
   { name: "Anomaly Sense", category: "Self-monitoring", status: "active" as const, color: "text-warning" },
   { name: "Meta-Cognition", category: "Self-monitoring", status: "active" as const, color: "text-warning" },
   { name: "Learned Attention", category: "Active learning", status: "active" as const, color: "text-success" },
@@ -393,7 +393,7 @@ export function BrainClient({ causalEdges, entities, snapshot }: BrainClientProp
               <div className="text-[10px] text-muted uppercase tracking-wider mt-0.5">Active</div>
             </div>
             <div className="rounded-xl bg-card border border-border-subtle p-4 text-center">
-              <div className="text-2xl font-semibold text-purple-400">{REGIONS.filter((r) => r.status === "sleeping").length}</div>
+              <div className="text-2xl font-semibold text-brain-training">{REGIONS.filter((r) => r.status === "sleeping").length}</div>
               <div className="text-[10px] text-muted uppercase tracking-wider mt-0.5">Sleeping</div>
             </div>
           </div>

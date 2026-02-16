@@ -169,7 +169,7 @@ function SignupForm() {
       {/* OAuth divider */}
       <div className="relative my-6">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-border/50" />
+          <div className="w-full border-t border-border-subtle" />
         </div>
         <div className="relative flex justify-center text-xs">
           <span className="px-3 bg-card text-muted">or continue with</span>
