@@ -138,6 +138,18 @@ export interface LearningCycleResult {
     verifications: VerificationResult[];
   };
 
+  // ── Loop 1B: Embodied Grounding (Outcome → RL Reward) ──
+  embodiedGrounding: {
+    /** How many outcome/metric signals were aggregated */
+    outcomeSignalsProcessed: number;
+    /** Global outcome reward injected into RL (-1 to +1) */
+    globalOutcomeReward: number;
+    /** Per-domain outcome summaries */
+    domainOutcomes: Array<{ domain: string; category: string; signalCount: number; avgValue: number; reward: number }>;
+    /** Layers that received outcome-based RL signals */
+    layersRewarded: number[];
+  };
+
   // ── Loop 2: Causal Weight Updates ──
   weightUpdates: {
     edgesUpdated: number;
@@ -460,6 +472,150 @@ export function createClosedLoopLearningEngine(config: ClosedLoopConfig): Closed
       } catch {
         // Individual prediction failure shouldn't block others
       }
+    }
+
+    return result;
+  }
+
+  // ════════════════════════════════════════════════════════════════════════
+  // LOOP 1B: EMBODIED GROUNDING — Outcome Signals → RL Reward
+  // ════════════════════════════════════════════════════════════════════════
+  //
+  // BRAIN ANALOGY: This is the brain's "interoception" — the internal
+  // sense of how the body is doing. Just as humans feel hunger, pain,
+  // and pleasure without conscious prediction, the brain should feel
+  // revenue changes, incident resolution, and customer satisfaction
+  // as raw reward signals even when no prediction was made.
+  //
+  // Without this: The brain only learns when it makes explicit predictions.
+  // With this: The brain learns from reality even when it wasn't looking.
+  //
+  // Process:
+  //   1. Query recent outcome/metric signals from cross_domain_signals
+  //   2. Aggregate by domain → compute per-domain health score
+  //   3. Inject RL rewards to relevant layers:
+  //      - L14 (Planning), L19 (Meta-Strategy) for strategic outcomes
+  //      - L20 (Executive Function) for operational outcomes
+  //      - L29 (Intervention Recommender) for intervention outcomes
+  //      - L30 (Wisdom) for long-term pattern outcomes
+  // ════════════════════════════════════════════════════════════════════════
+
+  async function _runEmbodiedGrounding(): Promise<LearningCycleResult['embodiedGrounding']> {
+    const result: LearningCycleResult['embodiedGrounding'] = {
+      outcomeSignalsProcessed: 0,
+      globalOutcomeReward: 0,
+      domainOutcomes: [],
+      layersRewarded: [],
+    };
+
+    try {
+      // 1. Query recent outcome + metric signals (last 24 hours)
+      //    These are classified by the connector-signal-bridge's classifySignalCategory()
+      const since = new Date(Date.now() - 24 * 3600_000).toISOString();
+      const { data: outcomeSignals, error } = await supabase
+        .from('cross_domain_signals')
+        .select('source_domain, signal_type, signal_value, signal_metadata')
+        .eq('organization_id', organizationId)
+        .gte('signal_timestamp', since)
+        .order('signal_timestamp', { ascending: false })
+        .limit(500);
+
+      if (error || !outcomeSignals?.length) return result;
+
+      // 2. Filter to outcome + metric signals only (via metadata.signal_category)
+      const outcomes = outcomeSignals.filter((s: any) => {
+        const cat = s.signal_metadata?.signal_category;
+        return cat === 'outcome' || cat === 'metric';
+      });
+
+      if (outcomes.length === 0) return result;
+      result.outcomeSignalsProcessed = outcomes.length;
+
+      // 3. Aggregate by domain → compute per-domain reward
+      //    Positive outcomes (payment_success, incident_resolved) → positive reward
+      //    Negative outcomes (payment_failed, churn_risk) → negative reward
+      type DomainAgg = { values: number[]; category: string; positiveCount: number; negativeCount: number };
+      const domainAgg = new Map<string, DomainAgg>();
+
+      const NEGATIVE_SIGNALS = new Set([
+        'payment_failed', 'churn_risk', 'refund', 'invoice_overdue',
+        'deploy_failure', 'ci_failed', 'incident_triggered',
+        'ticket_escalation', 'budget_exceeded', 'expense_rejected',
+      ]);
+
+      for (const s of outcomes) {
+        const domain = (s as any).source_domain ?? 'unknown';
+        const category = (s as any).signal_metadata?.signal_category ?? 'outcome';
+        let existing = domainAgg.get(domain);
+        if (!existing) {
+          existing = { values: [] as number[], category, positiveCount: 0, negativeCount: 0 };
+          domainAgg.set(domain, existing);
+        }
+        existing.values.push((s as any).signal_value as number);
+        if (NEGATIVE_SIGNALS.has((s as any).signal_type)) {
+          existing.negativeCount++;
+        } else {
+          existing.positiveCount++;
+        }
+      }
+
+      // 4. Compute per-domain reward signal
+      let totalReward = 0;
+      const layersToReward = new Set<number>();
+
+      for (const [domain, agg] of domainAgg) {
+        const avgValue = agg.values.reduce((a, b) => a + b, 0) / agg.values.length;
+        const total = agg.positiveCount + agg.negativeCount;
+        const positiveRatio = total > 0 ? agg.positiveCount / total : 0.5;
+
+        // Reward = positive ratio normalized to [-0.5, +0.5]
+        const domainReward = (positiveRatio - 0.5) * 1.0;
+        totalReward += domainReward;
+
+        result.domainOutcomes.push({
+          domain,
+          category: agg.category,
+          signalCount: agg.values.length,
+          avgValue: Math.round(avgValue * 100) / 100,
+          reward: Math.round(domainReward * 1000) / 1000,
+        });
+
+        // Route rewards to relevant layers based on domain
+        if (domain.startsWith('revenue') || domain.startsWith('sales') || domain.startsWith('finance')) {
+          layersToReward.add(14); // Planning
+          layersToReward.add(19); // Meta-Strategy
+          layersToReward.add(10); // Temporal (goals)
+        }
+        if (domain.startsWith('engineering') || domain.startsWith('support')) {
+          layersToReward.add(20); // Executive Function
+          layersToReward.add(29); // Intervention Recommender
+        }
+        if (domain.startsWith('hr') || domain.startsWith('communication')) {
+          layersToReward.add(19); // Meta-Strategy
+        }
+        // Always give wisdom layer the global signal
+        layersToReward.add(30); // Wisdom
+      }
+
+      // 5. Compute global outcome reward and inject into RL
+      const numDomains = domainAgg.size;
+      const globalReward = numDomains > 0
+        ? Math.max(-1, Math.min(1, totalReward / numDomains))
+        : 0;
+      result.globalOutcomeReward = Math.round(globalReward * 1000) / 1000;
+      result.layersRewarded = [...layersToReward];
+
+      if (reinforcement && globalReward !== 0) {
+        for (const layerId of layersToReward) {
+          reinforcement.injectExternalReward(
+            layerId,
+            globalReward * 0.5, // Attenuated: outcome rewards are softer than prediction rewards
+            `Embodied grounding: ${numDomains} domains, ${outcomes.length} outcome signals, global reward ${globalReward.toFixed(3)}`,
+          );
+        }
+      }
+    } catch {
+      // Non-fatal: embodied grounding failure shouldn't block learning cycle
     }
 
     return result;
@@ -954,6 +1110,13 @@ export function createClosedLoopLearningEngine(config: ClosedLoopConfig): Closed
         report.push(`${verification.expiredPredictions} predictions expired (no outcome data)`);
       }
 
+      // ── Loop 1B: Embodied Grounding (Outcome signals → RL) ──
+      const embodiedGrounding = await _runEmbodiedGrounding();
+      if (embodiedGrounding.outcomeSignalsProcessed > 0) {
+        report.push(`Embodied grounding: ${embodiedGrounding.outcomeSignalsProcessed} outcome signals → global reward ${embodiedGrounding.globalOutcomeReward.toFixed(3)} across ${embodiedGrounding.domainOutcomes.length} domains`);
+        rlSignalsInjected += embodiedGrounding.layersRewarded.length;
+      }
+
       // ── Loop 2: Update causal weights ──
       const weightUpdates = await _runWeightUpdates(verification.verifications);
       if (weightUpdates.edgesUpdated > 0) {
@@ -1004,6 +1167,7 @@ export function createClosedLoopLearningEngine(config: ClosedLoopConfig): Closed
         timestamp: new Date().toISOString(),
         durationMs: Date.now() - start,
         verification,
+        embodiedGrounding,
         weightUpdates,
         feedbackProcessing,
         interventionOutcomes,

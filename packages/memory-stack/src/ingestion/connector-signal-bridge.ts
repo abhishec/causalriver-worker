@@ -41,6 +41,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { createRetry } from '../infra/retry';
 import type { DomainTaxonomyInstance } from '../domain-hierarchy/domain-taxonomy';
+import { OUTCOME_SIGNAL_TYPES, type SignalCategory } from '../connectors/connector-framework';
 
 // ============================================================================
 // TYPES
@@ -193,6 +194,48 @@ function _notifySignalListeners(organizationId: string, signalCount: number, sou
   }
 }
 
+/**
+ * Classify a signal as observation, outcome, or metric.
+ *
+ * EMBODIED GROUNDING: This is how the brain connects to reality.
+ * Outcome signals tell the brain "this is what actually happened"
+ * so predictions can be verified and RL rewards can be computed.
+ *
+ * Classification hierarchy:
+ * 1. Explicit signal_category (if connector sets it)
+ * 2. OUTCOME_SIGNAL_TYPES lookup (known outcome signal types)
+ * 3. Default to 'observation' (activity signals)
+ */
+function classifySignalCategory(
+  signalType: string,
+  explicitCategory?: SignalCategory,
+  metadata?: Record<string, unknown>,
+): SignalCategory {
+  // 1. Explicit category from connector takes precedence
+  if (explicitCategory) return explicitCategory;
+
+  // 2. Check the outcome signal type registry
+  const registered = OUTCOME_SIGNAL_TYPES[signalType];
+  if (registered) return registered;
+
+  // 3. Heuristic: metadata hints
+  if (metadata?.is_outcome === true) return 'outcome';
+  if (metadata?.is_metric === true) return 'metric';
+
+  // 4. Pattern matching for common outcome patterns
+  if (signalType.endsWith('_success') || signalType.endsWith('_failed') ||
+      signalType.endsWith('_resolved') || signalType.endsWith('_completed')) {
+    return 'outcome';
+  }
+  if (signalType.endsWith('_rate') || signalType.endsWith('_score') ||
+      signalType.endsWith('_mrr') || signalType.endsWith('_nps')) {
+    return 'metric';
+  }
+
+  // 5. Default: observation (activity signal)
+  return 'observation';
+}
+
 function deriveDomain(source: string, metadata?: Record<string, unknown>): string {
   // If taxonomy is wired, use hierarchical resolution
   if (_domainTaxonomy && metadata) {
@@ -337,9 +380,16 @@ export async function storeDualWriteConnectorSignals(
   const retry = createRetry({ maxRetries: 3, baseDelayMs: 500, maxDelayMs: 5000 });
 
   // ── 2. PREPARE ENRICHED ROWS ──────────────────────────────────────────────
+  // Now includes signal_category for embodied grounding (Phase 2).
+  // Outcome signals feed into RL reward + prediction verification.
   const enrichedRows: CrossDomainSignalRow[] = signals.map((s) => {
     const source = s.source.toLowerCase();
     const metadata = s.metadata || {};
+    const category = classifySignalCategory(
+      s.signal_type,
+      (s as any).signal_category,
+      metadata,
+    );
 
     return {
       organization_id: organizationId,
@@ -354,7 +404,10 @@ export async function storeDualWriteConnectorSignals(
       entity_type: deriveEntityType(source, s.signal_type, metadata),
       entity_id: deriveEntityId(metadata),
       client_id: (metadata?.client_id as string) || (metadata?.account_id as string) || null,
-      signal_metadata: metadata,
+      signal_metadata: {
+        ...metadata,
+        signal_category: category,
+      },
     };
   });
 

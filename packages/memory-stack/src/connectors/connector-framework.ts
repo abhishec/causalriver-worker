@@ -27,6 +27,22 @@ import { storeDualWriteConnectorSignals } from '../ingestion/connector-signal-br
  * This is a superset of CrossDomainSignal that includes
  * organization_id and metadata for persistence.
  */
+/**
+ * Signal category — classifies signals for downstream processing.
+ *
+ * - 'observation': Activity signals (pr_merged, message_sent, ticket_created)
+ *   → Used for pattern detection, anomaly detection, velocity tracking
+ *
+ * - 'outcome': Result signals (payment_success, satisfaction_score, incident_resolved)
+ *   → Used for prediction verification (Loop 1), intervention tracking (Loop 4),
+ *     and RL reward computation. These are the "embodied grounding" signals
+ *     that connect the brain's predictions to real-world results.
+ *
+ * - 'metric': Periodic metric snapshots (mrr, headcount, nps_score)
+ *   → Used for trend analysis, goal tracking (L10), and baseline computation
+ */
+export type SignalCategory = 'observation' | 'outcome' | 'metric';
+
 export interface ConnectorSignal {
   organization_id: string;
   source_domain: string;
@@ -36,10 +52,71 @@ export interface ConnectorSignal {
   entity_type?: string;
   entity_id?: string;
   client_id?: string;
+  /**
+   * Signal category for downstream routing.
+   * Outcome signals feed into RL reward and prediction verification.
+   * Defaults to 'observation' if not specified.
+   */
+  signal_category?: SignalCategory;
   metadata?: Record<string, unknown>;
   /** Index signature for NLP enrichment compatibility */
   [key: string]: unknown;
 }
+
+/**
+ * OUTCOME SIGNAL CLASSIFICATION — Embodied Grounding
+ * ═══════════════════════════════════════════════════
+ *
+ * Maps (source, signal_type) → SignalCategory.
+ * Signals classified as 'outcome' are the brain's connection to reality.
+ * Without these classifications, the brain makes predictions but never
+ * knows if they came true — like a scientist who never reads results.
+ *
+ * Revenue outcomes: Did the deal close? Did the payment succeed?
+ * Uptime outcomes: Was the incident resolved? How fast?
+ * Satisfaction outcomes: What's the CSAT/NPS? Was the ticket resolved?
+ * HR outcomes: What's the attrition rate? Engagement score?
+ */
+export const OUTCOME_SIGNAL_TYPES: Record<string, SignalCategory> = {
+  // ── Revenue / Finance ──
+  'payment_success': 'outcome',
+  'payment_failed': 'outcome',
+  'subscription_mrr': 'metric',
+  'churn_risk': 'outcome',
+  'refund': 'outcome',
+  'invoice_paid': 'outcome',
+  'invoice_overdue': 'outcome',
+  'payment_received': 'outcome',
+  'deal_stage': 'outcome',          // When deal moves to closed-won/closed-lost
+  'deal_amount': 'metric',
+
+  // ── Uptime / Engineering ──
+  'incident_resolved': 'outcome',
+  'incident_triggered': 'observation',
+  'incident_acknowledged': 'observation',
+  'deploy_success': 'outcome',
+  'deploy_failure': 'outcome',
+  'ci_passed': 'outcome',
+  'ci_failed': 'outcome',
+
+  // ── Customer Satisfaction ──
+  'satisfaction_score': 'outcome',
+  'resolution_time': 'outcome',
+  'response_time': 'metric',
+  'ticket_escalation': 'outcome',
+  'nps_score': 'metric',
+
+  // ── HR ──
+  'attrition_rate': 'metric',
+  'engagement_score': 'metric',
+  'performance_review_completed': 'outcome',
+
+  // ── Finance ──
+  'budget_exceeded': 'outcome',
+  'expense_approved': 'outcome',
+  'expense_rejected': 'outcome',
+  'reimbursement_processed': 'outcome',
+};
 
 export interface ConnectorSyncResult {
   success: boolean;
