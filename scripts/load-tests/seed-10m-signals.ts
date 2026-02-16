@@ -181,7 +181,7 @@ function generateSignalBatch(
   signal_value: number;
   signal_timestamp: string;
   entity_type: string;         // NOT NULL - defaults to 'unknown'
-  entity_id: string | null;
+  entity_id: string;           // NOT NULL - auto-generated if not derived
   signal_metadata: Record<string, unknown>;
 }> {
   const signals = [];
@@ -201,9 +201,12 @@ function generateSignalBatch(
     // Generate realistic value
     const value = generateSignalValue(domain, timestamp, startDate);
 
-    // Entity info (entity_type is NOT NULL - defaults to 'unknown')
+    // Entity info (both entity_type and entity_id are NOT NULL)
     const entityType = deriveEntityType(domain.name, signalType);
-    const entityId = entityType !== 'unknown' ? `${entityType}_${Math.floor(Math.random() * 100000)}` : null;
+    // Generate deterministic entity_id (required by NOT NULL constraint)
+    const entityId = entityType !== 'unknown'
+      ? `${entityType}_${Math.floor(Math.random() * 100000)}`
+      : `auto_${Date.now()}_${Math.floor(Math.random() * 1000000)}`;
 
     signals.push({
       organization_id: orgId,

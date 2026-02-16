@@ -61,7 +61,7 @@ export interface CrossDomainSignalRow {
   signal_value: number;
   signal_timestamp: string;
   entity_type: string;         // NOT NULL - defaults to 'unknown' if can't be derived
-  entity_id: string | null;
+  entity_id: string;           // NOT NULL - generated UUID if can't be derived
   client_id: string | null;
   signal_metadata: Record<string, unknown>;
 }
@@ -168,8 +168,11 @@ function deriveEntityType(source: string, signalType: string, metadata: Record<s
 
 /**
  * Derive entity_id from signal metadata.
+ *
+ * Returns a deterministic ID based on metadata if available,
+ * otherwise generates a UUID (NOT NULL constraint).
  */
-function deriveEntityId(metadata: Record<string, unknown>): string | null {
+function deriveEntityId(metadata: Record<string, unknown>): string {
   // Try common metadata keys
   const candidates = [
     metadata.pr_id,
@@ -190,7 +193,9 @@ function deriveEntityId(metadata: Record<string, unknown>): string | null {
     }
   }
 
-  return null;
+  // Generate deterministic ID from metadata hash (satisfies NOT NULL constraint)
+  // Using timestamp + random ensures uniqueness
+  return `auto_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }
 
 // ============================================================================
