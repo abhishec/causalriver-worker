@@ -6,8 +6,8 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { testDataGeneratorDomain, type TestDataRequest } from '../action-domains-test-data';
-import type { ActionDomainContext } from '../domain-action-engine';
+import { testDataGeneratorDomain, type TestDataRequest } from '../orchestrator/action-domains-test-data';
+import type { ActionDomainContext } from '../orchestrator/domain-action-engine';
 
 describe('Test Data Generator Domain', () => {
   let mockContext: ActionDomainContext;
