@@ -133,6 +133,8 @@ import {
   type Narrative,
 } from '../causality/leap-narrative';
 
+import type { CognitiveLayerOutput } from './brain-observability-bridge';
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -145,6 +147,13 @@ export interface CognitiveStackConfig {
 
   /** Additional org IDs to register in the Intelligence Mesh for multi-org collective sensing */
   meshPeerOrgIds?: string[];
+
+  /**
+   * Observability callback — called after EACH cognitive layer completes.
+   * Wired by brain-pipeline.ts to feed BrainObservabilityBridge.
+   * This is THE critical missing wire that connects layers → observability.
+   */
+  onLayerComplete?: (layer: CognitiveLayerOutput) => void;
 
   // Layer configs (all optional — defaults used if omitted)
   deepDreaming?: Partial<DeepDreamingConfig>;
@@ -379,6 +388,15 @@ export function createCognitiveStack(config: CognitiveStackConfig): CognitiveSta
     }
   }
 
+  // Observability callback helper — fire-and-forget, never blocks
+  const emit = config.onLayerComplete;
+  function emitLayer(layerNumber: number, layerName: string, startMs: number, didProduce: boolean, outputs?: CognitiveLayerOutput['outputs']) {
+    if (!emit) return;
+    try {
+      emit({ layerNumber, layerName, durationMs: Date.now() - startMs, didProduce, outputs });
+    } catch { /* never block cognitive cycle */ }
+  }
+
   return {
     layers: {
       immune, dreaming, memory, curiosity, selfModel,
@@ -453,6 +471,10 @@ export function createCognitiveStack(config: CognitiveStackConfig): CognitiveSta
         .filter(r => r.response.action === 'pass')
         .map(r => r.signal);
 
+      emitLayer(13, 'Immune System', cycleStart, passedSignals.length > 0, {
+        qualityScore: immuneResults.filter(r => r.response.action === 'pass').length / Math.max(1, immuneResults.length),
+      });
+
       // ================================================================
       // PHASE 2: DEEP DREAMING (L3)
       // Feed clean signals + causal edges + FEDERATED CORE edges for subconscious association.
@@ -497,6 +519,12 @@ export function createCognitiveStack(config: CognitiveStackConfig): CognitiveSta
 
       const dreamResult = dreaming.dream(dreamSignals, dreamEdges, dreamPatterns);
 
+      emitLayer(3, 'Deep Dreaming', cycleStart, dreamResult.newAssociations.length > 0, {
+        insightsSurfaced: dreamResult.surfacedInsights.length,
+        hypothesesCreated: dreamResult.newAssociations.length,
+        coherenceScore: dreamResult.newAssociations.length > 0 ? 0.7 : 0,
+      });
+
       // ================================================================
       // PHASE 3: HIERARCHICAL MEMORY (L4)
       // Encode dream insights + clean signals into working/episodic memory
@@ -526,6 +554,10 @@ export function createCognitiveStack(config: CognitiveStackConfig): CognitiveSta
       }
 
       const workingMemorySize = memory.getWorkingMemory().length;
+
+      emitLayer(4, 'Hierarchical Memory', cycleStart, itemsEncoded > 0, {
+        memoriesEncoded: itemsEncoded,
+      });
 
       // Record episode for this cycle
       const cycleTimestamp = Date.now();
@@ -579,6 +611,11 @@ export function createCognitiveStack(config: CognitiveStackConfig): CognitiveSta
       const hypotheses = curiosity.explore(curiositySignals, allEdgesForCuriosity);
       const knowledgeGaps = curiosity.getKnowledgeGaps();
 
+      emitLayer(5, 'Curiosity Engine', cycleStart, hypotheses.length > 0, {
+        hypothesesCreated: hypotheses.length,
+        edgesDiscovered: knowledgeGaps.length,
+      });
+
       // ================================================================
       // PHASE 5: SELF-MODIFYING COGNITION (L6)
       // Feed predictions for calibration tracking
@@ -595,6 +632,12 @@ export function createCognitiveStack(config: CognitiveStackConfig): CognitiveSta
       }
 
       const assessment = selfModel.assess();
+
+      emitLayer(6, 'Self-Modifying Cognition', cycleStart, assessment.recommendations.length > 0, {
+        robustnessScore: assessment.overallHealth,
+        conflictsDetected: assessment.selfModel.weaknesses.length,
+        predictionsGenerated: assessment.recommendations.length,
+      });
 
       // ================================================================
       // PHASE 6: INTELLIGENCE MESH (L7)
@@ -638,6 +681,12 @@ export function createCognitiveStack(config: CognitiveStackConfig): CognitiveSta
 
       const collectiveSense = mesh.collectiveSense();
 
+      emitLayer(7, 'Intelligence Mesh', cycleStart, collectiveSense.collectivePatterns.length > 0, {
+        insightsSurfaced: meshContributions,
+        conflictsDetected: collectiveSense.conflicts.length,
+        qualityScore: collectiveSense.collectivePatterns.length > 0 ? 0.8 : 0.3,
+      });
+
       // ================================================================
       // PHASE 7: CAUSAL IMAGINATION (L8)
       // Generate novel hypotheses from causal edges.
@@ -667,6 +716,11 @@ export function createCognitiveStack(config: CognitiveStackConfig): CognitiveSta
       ];
       const domains = [...new Set(allEdgeDomains)];
       const imagResult = imagination.imagine(imaginationEdges, domains);
+
+      emitLayer(8, 'Causal Imagination', cycleStart, imagResult.hypotheses.length > 0, {
+        hypothesesCreated: imagResult.hypotheses.length,
+        creativityScore: imagResult.hypotheses.length > 0 ? 0.7 : 0,
+      });
 
       // ================================================================
       // PHASE 8: THEORY OF MIND (L9)
@@ -756,6 +810,10 @@ export function createCognitiveStack(config: CognitiveStackConfig): CognitiveSta
         };
       }
 
+      emitLayer(9, 'Theory of Mind', cycleStart, tomResult.userModelUpdated, {
+        empathyScore: tomResult.userModelUpdated ? 0.7 : 0,
+      });
+
       // ================================================================
       // PHASE 9: TEMPORAL CONSCIOUSNESS (L10)
       // Record signals for rhythm detection, check goals
@@ -821,6 +879,12 @@ export function createCognitiveStack(config: CognitiveStackConfig): CognitiveSta
       const goalStatuses = existingGoals.length > 0 ? existingGoals : temporal.checkGoals();
       const awareness = temporal.getAwareness();
 
+      emitLayer(10, 'Temporal Consciousness', cycleStart, rhythms.length > 0, {
+        insightsSurfaced: rhythms.length,
+        predictionsGenerated: goalStatuses.length,
+        robustnessScore: awareness.temporalHealth === 'on_track' || awareness.temporalHealth === 'ahead' ? 1 : 0.5,
+      });
+
       // ================================================================
       // PHASE 10: RED TEAM (L11)
       // Adversarial testing of all predictions
@@ -847,6 +911,11 @@ export function createCognitiveStack(config: CognitiveStackConfig): CognitiveSta
         .flatMap(r => r.weaknesses)
         .slice(0, 5);
 
+      emitLayer(11, 'Red Team', cycleStart, redTeamResults.length > 0, {
+        robustnessScore: avgRobustness,
+        predictionsGenerated: redTeamResults.length,
+      });
+
       // ================================================================
       // PHASE 11: EXPERIMENTATION (L12)
       // Suggest experiments from uncertain AND high-impact edges.
@@ -872,6 +941,10 @@ export function createCognitiveStack(config: CognitiveStackConfig): CognitiveSta
         }));
 
       const experimentSuggestions = experimentation.suggestExperiments(experimentEdges);
+
+      emitLayer(12, 'Experimentation', cycleStart, experimentSuggestions.length > 0, {
+        experimentsProposed: experimentSuggestions.length,
+      });
 
       // ================================================================
       // PHASE 12: GOAL-BACKWARD PLANNING (L14)
@@ -922,6 +995,11 @@ export function createCognitiveStack(config: CognitiveStackConfig): CognitiveSta
         }
       }
 
+      emitLayer(14, 'Goal-Backward Planning', cycleStart, goalsPlanned > 0, {
+        edgesDiscovered: feasiblePaths,
+        predictionsGenerated: goalsPlanned,
+      });
+
       // ================================================================
       // PHASE 13: NARRATIVE INTELLIGENCE (L15)
       // Generate executive narrative from all layer outputs
@@ -966,6 +1044,11 @@ export function createCognitiveStack(config: CognitiveStackConfig): CognitiveSta
       } catch {
         narrativeResult = null;
       }
+
+      emitLayer(15, 'Narrative Intelligence', cycleStart, narrativeResult != null, {
+        narrativeGenerated: narrativeResult != null,
+        coherenceScore: narrativeResult ? 0.8 : 0,
+      });
 
       // ================================================================
       // RETURN COMPLETE CYCLE RESULT

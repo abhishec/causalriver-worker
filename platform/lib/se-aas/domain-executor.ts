@@ -35,6 +35,8 @@ import {
   deadCodeDetectorDomain,
   // Brain Evolution Engine — feedback loop integration
   runBrainEvolutionCycle,
+  // Brain Observability Bridge — domain execution audit trail
+  createBrainObservabilityBridge,
 } from "@nexus-ai/memory-stack";
 
 // ============================================================================
@@ -143,6 +145,29 @@ export async function executeDomain(
   await feedBrainFromExecution(supabase, params, result, brainContext, durationMs).catch(() => {
     // Non-blocking: feedback failure should NEVER break domain execution
   });
+
+  // ============================================================================
+  // OBSERVABILITY WIRE — Record domain execution to obs_* tables
+  // ============================================================================
+  // This AUGMENTS the feedback loop above by also writing to observability tables.
+  // The bridge records to obs_agent_executions AND emits cross_domain_signals
+  // so the dashboard shows every SE-aaS execution with timing, Claude usage, etc.
+  try {
+    const bridge = createBrainObservabilityBridge({
+      supabase,
+      organizationId: params.organizationId,
+    });
+    await bridge.recordDomainExecution(
+      params.domainType,
+      durationMs,
+      (result as any).data?.claudePowered ?? false,
+      brainContext.cognitiveStackAvailable ?? false,
+      brainContext.causalEdges?.length ?? 0,
+      brainContext.patterns?.length ?? 0,
+    );
+  } catch {
+    // Non-blocking: observability failure should NEVER break domain execution
+  }
 
   return {
     result: { ...result, timing: { totalMs: durationMs } },

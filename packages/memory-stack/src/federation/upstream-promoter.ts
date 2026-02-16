@@ -60,10 +60,23 @@ const DEFAULT_CONFIG: Required<Omit<UpstreamPromoterConfig, 'sanitizerConfig'>> 
 // FACTORY
 // ============================================================================
 
+/** Optional observability callback for federation operations */
+export interface UpstreamPromoterObservability {
+  onFederationOperation?: (data: {
+    operationType: 'upstream_promotion';
+    itemsProcessed: number;
+    itemsPromoted: number;
+    itemsRejected: number;
+    piiRedacted: number;
+    durationMs: number;
+  }) => void;
+}
+
 export function createUpstreamPromoter(
   supabase: SupabaseClient,
   organizationId: string,
   config?: UpstreamPromoterConfig,
+  observability?: UpstreamPromoterObservability,
 ) {
   const cfg = { ...DEFAULT_CONFIG, ...config };
   const sanitizer = createPIISanitizer(config?.sanitizerConfig);
@@ -72,6 +85,8 @@ export function createUpstreamPromoter(
    * Promote anonymized org knowledge to the core brain.
    */
   async function promoteKnowledge(): Promise<UpstreamPromotionResult> {
+    const _promoteStartMs = Date.now();
+
     // Don't promote from the core brain to itself
     if (organizationId === CORE_BRAIN_ORG_ID) {
       return emptyResult();
@@ -139,6 +154,21 @@ export function createUpstreamPromoter(
         },
         { onConflict: 'organization_id' }
       );
+
+    // OBSERVABILITY WIRE: Record upstream promotion to obs_* tables
+    if (observability?.onFederationOperation) {
+      try {
+        const totalPromotedCount = result.relationshipsPromoted + result.memoriesPromoted + result.rulesPromoted;
+        observability.onFederationOperation({
+          operationType: 'upstream_promotion',
+          itemsProcessed: totalPromotedCount + result.itemsSkippedPII + result.itemsSkippedDuplicate + result.itemsSkippedExcluded,
+          itemsPromoted: totalPromotedCount,
+          itemsRejected: result.itemsSkippedPII + result.itemsSkippedExcluded,
+          piiRedacted: result.itemsSkippedPII,
+          durationMs: Date.now() - _promoteStartMs,
+        });
+      } catch { /* observability never breaks federation */ }
+    }
 
     return result;
   }

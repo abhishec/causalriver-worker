@@ -625,9 +625,19 @@ export async function percolateToCore(
     minConfidence?: number;
     minAccessCount?: number;
     maxPerBatch?: number;
-  } = {}
+  } = {},
+  /** Optional observability callback — wired by brain-pipeline to record percolation */
+  onFederationOperation?: (data: {
+    operationType: 'percolation';
+    itemsProcessed: number;
+    itemsPromoted: number;
+    itemsRejected: number;
+    durationMs: number;
+  }) => void,
 ): Promise<{ percolated: number; skippedDuplicates: number }> {
   const { minConfidence = 0.9, minAccessCount = 5, maxPerBatch = 10 } = options;
+
+  const _percolateStartMs = Date.now();
 
   // Guard: don't percolate FROM core TO core
   if (isCoreOrganization(organizationId)) {
@@ -698,6 +708,20 @@ export async function percolateToCore(
   }
 
   console.log(`[FederatedBrain] Percolated ${toPercolate.length} patterns from org ${organizationId} to CORE`);
+
+  // OBSERVABILITY WIRE: Record percolation to obs_* tables
+  if (onFederationOperation) {
+    try {
+      onFederationOperation({
+        operationType: 'percolation',
+        itemsProcessed: (candidates?.length ?? 0),
+        itemsPromoted: toPercolate.length,
+        itemsRejected: skippedDuplicates,
+        durationMs: Date.now() - _percolateStartMs,
+      });
+    } catch { /* observability never breaks federation */ }
+  }
+
   return { percolated: toPercolate.length, skippedDuplicates };
 }
 

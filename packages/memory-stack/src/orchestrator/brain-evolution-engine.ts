@@ -197,7 +197,20 @@ export interface InterventionRecord {
 export async function runBrainEvolutionCycle(
   supabase: SupabaseClient,
   organizationId: string,
-  mode: 'lightweight' | 'full' = 'lightweight'
+  mode: 'lightweight' | 'full' = 'lightweight',
+  /** Optional observability callback — wired by brain-pipeline.ts to record evolution to obs_* tables */
+  onEvolutionComplete?: (data: {
+    mode: 'lightweight' | 'full';
+    intelligenceScore: number;
+    accuracy: number;
+    brierScore: number;
+    predictionsVerified: number;
+    predictionsCorrect: number;
+    weightUpdates: number;
+    totalEdges: number;
+    totalEvidence: number;
+    durationMs: number;
+  }) => void,
 ): Promise<BrainEvolutionState> {
   const startMs = Date.now();
 
@@ -254,7 +267,28 @@ export async function runBrainEvolutionCycle(
   };
 
   // Emit evolution signal back to Brain (meta-learning!)
-  await emitEvolutionSignal(supabase, organizationId, state, Date.now() - startMs);
+  const durationMs = Date.now() - startMs;
+  await emitEvolutionSignal(supabase, organizationId, state, durationMs);
+
+  // OBSERVABILITY WIRE: Record this evolution cycle to obs_* tables.
+  // Fire-and-forget — observability should NEVER break evolution.
+  if (onEvolutionComplete) {
+    try {
+      const correctCount = verifications.filter(v => v.wasCorrect).length;
+      onEvolutionComplete({
+        mode,
+        intelligenceScore,
+        accuracy: accuracy.overall,
+        brierScore: calibration.brierScore,
+        predictionsVerified: verifications.length,
+        predictionsCorrect: correctCount,
+        weightUpdates,
+        totalEdges: knowledge.totalCausalEdges,
+        totalEvidence: knowledge.verifiedPredictions,
+        durationMs,
+      });
+    } catch { /* observability never breaks evolution */ }
+  }
 
   return state;
 }

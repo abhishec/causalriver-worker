@@ -205,6 +205,13 @@ import {
   type EnrichableSignal,
 } from '../core/nlp/signal-enricher';
 
+import {
+  createBrainObservabilityBridge,
+  type CognitiveLayerOutput,
+  type EvolutionObservabilityData,
+  type FederationObservabilityData,
+} from './brain-observability-bridge';
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -520,6 +527,15 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
     ...config.bookIngestor,
   });
 
+  // ============================================================================
+  // OBSERVABILITY BRIDGE — THE MISSING WIRE
+  // Connects all brain layers → obs_* tables → Brain Evolution → Dashboard
+  // ============================================================================
+  const observabilityBridge = createBrainObservabilityBridge({
+    supabase,
+    organizationId,
+  });
+
   // Cognitive Stack: Layers 3-15 (Deep Dreaming → Narrative Intelligence)
   // Brain Analog: The higher cognitive layers — dreaming, memory hierarchy,
   // curiosity, self-modification, intelligence mesh, imagination, theory of mind,
@@ -530,6 +546,13 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
     organizationId,
     anthropicApiKey,
     ...config.cognitiveStack,
+    // OBSERVABILITY WIRE: Every cognitive layer execution → obs_* record
+    // The bridge records to the appropriate obs_* table AND emits cross_domain_signals
+    // so the Brain Evolution Engine can track layer activity.
+    onLayerComplete: (layer: CognitiveLayerOutput) => {
+      // Fire-and-forget: observability should NEVER block cognitive cycle
+      observabilityBridge.recordCognitiveLayerExecution(layer).catch(() => {});
+    },
   });
 
   // Real-time IncrementalGranger: per-domain-pair causal states
@@ -1884,6 +1907,18 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
       log(`CTO report generation failed (non-critical): ${(ctoErr as Error).message}`);
     }
 
+    // ======================================================================
+    // OBSERVABILITY: Snapshot full brain health at end of every sleep cycle
+    // This feeds the dashboard with the latest state of all 15 layers,
+    // evolution metrics, federation status, and signal quality.
+    // ======================================================================
+    try {
+      await observabilityBridge.snapshotFullBrainHealth();
+      log('Brain health snapshot recorded to observability');
+    } catch {
+      // Non-critical: health snapshot failure never breaks sleep cycle
+    }
+
     return {
       organizationId,
       startedAt,
@@ -2161,5 +2196,8 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
 
     // Cognitive Stack (Layers 3-15: Deep Dreaming → Narrative Intelligence)
     getCognitiveStack: () => cognitiveStack,
+
+    // Observability Bridge (connects all brain actions → obs_* tables → dashboard)
+    getObservabilityBridge: () => observabilityBridge,
   };
 }

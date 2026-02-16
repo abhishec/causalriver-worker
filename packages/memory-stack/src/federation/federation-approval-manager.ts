@@ -107,10 +107,22 @@ const THRESHOLDS = {
 // FACTORY
 // ============================================================================
 
+/** Optional observability callback for approval operations */
+export interface ApprovalManagerObservability {
+  onFederationOperation?: (data: {
+    operationType: 'approval';
+    itemsProcessed: number;
+    itemsPromoted: number;
+    itemsRejected: number;
+    durationMs: number;
+  }) => void;
+}
+
 export function createFederationApprovalManager(
   supabase: SupabaseClient,
   organizationId: string,
   config?: FederationApprovalManagerConfig,
+  observability?: ApprovalManagerObservability,
 ) {
   const verbose = config?.verbose ?? false;
   const sanitizer = createPIISanitizer();
@@ -415,6 +427,19 @@ export function createFederationApprovalManager(
 
     log(`Approved item ${decision.itemId} (${item.data_type}) — promoted=${promotedToCore}`);
 
+    // OBSERVABILITY WIRE: Record approval to obs_* tables
+    if (observability?.onFederationOperation) {
+      try {
+        observability.onFederationOperation({
+          operationType: 'approval',
+          itemsProcessed: 1,
+          itemsPromoted: promotedToCore ? 1 : 0,
+          itemsRejected: 0,
+          durationMs: 0,
+        });
+      } catch { /* observability never breaks federation */ }
+    }
+
     return {
       itemId: decision.itemId,
       decision: 'approved',
@@ -457,6 +482,19 @@ export function createFederationApprovalManager(
     });
 
     log(`Rejected item ${decision.itemId} (${item.data_type})`);
+
+    // OBSERVABILITY WIRE: Record rejection to obs_* tables
+    if (observability?.onFederationOperation) {
+      try {
+        observability.onFederationOperation({
+          operationType: 'approval',
+          itemsProcessed: 1,
+          itemsPromoted: 0,
+          itemsRejected: 1,
+          durationMs: 0,
+        });
+      } catch { /* observability never breaks federation */ }
+    }
 
     return { itemId: decision.itemId, decision: 'rejected', promotedToCore: false };
   }
