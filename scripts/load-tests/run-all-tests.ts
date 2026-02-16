@@ -81,7 +81,7 @@ const TESTS: TestConfig[] = [
     name: 'Test 2: Causal Discovery',
     script: 'scripts/load-tests/test-2-causal-discovery.ts',
     args: ['--org', '00000000-0000-4000-a000-000000000000'],
-    quickArgs: ['--org', '00000000-0000-4000-a000-000000000000'],
+    quickArgs: ['--org', '00000000-0000-4000-a000-000000000000', '--quick'],
     estimatedDurationMin: 30,
     quickDurationMin: 3,
   },

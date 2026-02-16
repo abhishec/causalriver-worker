@@ -51,10 +51,12 @@ const { values } = parseArgs({
   args: process.argv.slice(2),
   options: {
     org: { type: 'string', short: 'o', default: '00000000-0000-4000-a000-000000000000' },
+    quick: { type: 'boolean', short: 'q', default: false },
   },
 });
 
 const TEST_ORG_ID = values.org || '00000000-0000-4000-a000-000000000000';
+const QUICK_MODE = values.quick || false;
 
 // ============================================================================
 // SYSTEM METRICS
@@ -135,8 +137,10 @@ async function validateTestData(): Promise<number> {
   const signalCount = count || 0;
   console.log(`  Found ${signalCount.toLocaleString()} signals`);
 
-  if (signalCount < 1000000) {
-    throw new Error(`Insufficient test data. Expected >1M signals, found ${signalCount.toLocaleString()}. Run seed-10m-signals.ts first.`);
+  // Quick mode requires 10K+ signals, full mode requires 1M+
+  const minSignals = QUICK_MODE ? 10000 : 1000000;
+  if (signalCount < minSignals) {
+    throw new Error(`Insufficient test data. Expected >${(minSignals / 1000).toLocaleString()}K signals, found ${signalCount.toLocaleString()}. Run seed-10m-signals.ts first.`);
   }
 
   return signalCount;
