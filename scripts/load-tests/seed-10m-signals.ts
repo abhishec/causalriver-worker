@@ -180,7 +180,7 @@ function generateSignalBatch(
   signal_type: string;
   signal_value: number;
   signal_timestamp: string;
-  entity_type: string | null;
+  entity_type: string;         // NOT NULL - defaults to 'unknown'
   entity_id: string | null;
   signal_metadata: Record<string, unknown>;
 }> {
@@ -201,9 +201,9 @@ function generateSignalBatch(
     // Generate realistic value
     const value = generateSignalValue(domain, timestamp, startDate);
 
-    // Entity info
+    // Entity info (entity_type is NOT NULL - defaults to 'unknown')
     const entityType = deriveEntityType(domain.name, signalType);
-    const entityId = entityType ? `${entityType}_${Math.floor(Math.random() * 100000)}` : null;
+    const entityId = entityType !== 'unknown' ? `${entityType}_${Math.floor(Math.random() * 100000)}` : null;
 
     signals.push({
       organization_id: orgId,
@@ -223,7 +223,7 @@ function generateSignalBatch(
   return signals;
 }
 
-function deriveEntityType(domain: string, signalType: string): string | null {
+function deriveEntityType(domain: string, signalType: string): string {
   if (domain.includes('github')) {
     if (signalType.includes('pr')) return 'pull_request';
     if (signalType === 'deployment') return 'deployment';
@@ -240,7 +240,8 @@ function deriveEntityType(domain: string, signalType: string): string | null {
   if (domain.includes('freshdesk')) {
     if (signalType.includes('ticket')) return 'ticket';
   }
-  return null;
+  // Default to 'unknown' if no match (satisfies NOT NULL constraint)
+  return 'unknown';
 }
 
 // ============================================================================

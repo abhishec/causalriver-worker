@@ -60,7 +60,7 @@ export interface CrossDomainSignalRow {
   signal_type: string;
   signal_value: number;
   signal_timestamp: string;
-  entity_type: string | null;
+  entity_type: string;         // NOT NULL - defaults to 'unknown' if can't be derived
   entity_id: string | null;
   client_id: string | null;
   signal_metadata: Record<string, unknown>;
@@ -124,8 +124,10 @@ function deriveDomain(source: string): string {
  * - github pr_merged → entity_type: 'pull_request'
  * - jira issue_created → entity_type: 'issue'
  * - slack message_sent → entity_type: 'message'
+ *
+ * Returns 'unknown' if entity_type cannot be determined (NOT NULL constraint).
  */
-function deriveEntityType(source: string, signalType: string, metadata: Record<string, unknown>): string | null {
+function deriveEntityType(source: string, signalType: string, metadata: Record<string, unknown>): string {
   // GitHub
   if (source === 'github') {
     if (signalType.startsWith('pr_')) return 'pull_request';
@@ -160,7 +162,8 @@ function deriveEntityType(source: string, signalType: string, metadata: Record<s
     if (signalType.includes('subscription')) return 'subscription';
   }
 
-  return null;
+  // Default to 'unknown' if no match (satisfies NOT NULL constraint)
+  return 'unknown';
 }
 
 /**
