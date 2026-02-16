@@ -22,6 +22,9 @@
  * @packageDocumentation
  */
 
+import { config } from 'dotenv';
+config();
+
 import { createClient } from '@supabase/supabase-js';
 import { storeDualWriteConnectorSignals } from '../../packages/memory-stack/src/ingestion/connector-signal-bridge';
 import { parseArgs } from 'util';

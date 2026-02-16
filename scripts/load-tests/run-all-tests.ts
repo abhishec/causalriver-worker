@@ -21,6 +21,9 @@
  * @packageDocumentation
  */
 
+import { config } from 'dotenv';
+config();
+
 import { spawn } from 'child_process';
 import { parseArgs } from 'util';
 import * as fs from 'fs/promises';

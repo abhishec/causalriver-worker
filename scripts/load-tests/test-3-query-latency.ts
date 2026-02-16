@@ -31,6 +31,9 @@
  * @packageDocumentation
  */
 
+import { config } from 'dotenv';
+config();
+
 import { createClient } from '@supabase/supabase-js';
 import { parseArgs } from 'util';
 

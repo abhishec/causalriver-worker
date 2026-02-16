@@ -25,6 +25,9 @@
  * @packageDocumentation
  */
 
+import { config } from 'dotenv';
+config();
+
 import { createClient } from '@supabase/supabase-js';
 import { createConsolidationEngine } from '../../packages/memory-stack/src/orchestrator/consolidation-engine';
 import { parseArgs } from 'util';
