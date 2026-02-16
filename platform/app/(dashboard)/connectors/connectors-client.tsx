@@ -1,58 +1,222 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { formatNumber } from "@/lib/utils";
+import { formatNumber, cn } from "@/lib/utils";
+import { Card, CardTitle } from "@/components/ui/Card";
+import { Badge } from "@/components/ui/Badge";
+import { StatusDot } from "@/components/ui/StatusDot";
+import { StatValue } from "@/components/ui/StatValue";
 import { GitHubSetupModal } from "@/components/connectors/GitHubSetupModal";
 import { IngestionProgress } from "@/components/connectors/IngestionProgress";
 
-interface Connector {
+/* ── Types ─────────────────────────────────────────────────────── */
+
+interface ConnectorDef {
   name: string;
+  type: string;
   domain: string;
   icon: string;
   description: string;
+  oauth: boolean;
 }
 
-interface GitHubStatus {
+interface ConnectorStatus {
+  id: string;
   status: string;
   config: Record<string, any>;
+  metadata: Record<string, any>;
   lastSyncAt: string | null;
   signalsCount: number;
+  errorMessage: string | null;
+  createdAt: string;
+}
+
+interface SyncProgress {
+  progressPct: number;
+  signalsIngested: number;
 }
 
 interface ConnectorsClientProps {
-  connectors: Connector[];
+  connectors: ConnectorDef[];
   domainCounts: Record<string, number>;
   activeDomains: string[];
-  githubStatus: GitHubStatus | null;
+  connectorStatusMap: Record<string, ConnectorStatus>;
+  syncProgressMap: Record<string, SyncProgress>;
+  totalSignals: number;
 }
+
+/* ── Domain colors ─────────────────────────────────────────────── */
+
+const DOMAIN_COLORS: Record<string, string> = {
+  engineering: "bg-brain-training/10 text-brain-training",
+  finance: "bg-success/10 text-success",
+  sales: "bg-warning/10 text-warning",
+  support: "bg-info/10 text-info",
+  communication: "bg-accent/10 text-accent",
+  knowledge: "bg-brain-discovery/10 text-brain-discovery",
+  operations: "bg-muted/15 text-muted-foreground",
+  marketing: "bg-danger/10 text-danger",
+  cs: "bg-brain-alert/10 text-brain-alert",
+  any: "bg-muted/10 text-muted",
+};
+
+/* ── Helpers ───────────────────────────────────────────────────── */
+
+function formatRelativeTime(date: Date): string {
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 1) return "Just now";
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays < 7) return `${diffDays}d ago`;
+  return date.toLocaleDateString();
+}
+
+/* ── Component ─────────────────────────────────────────────────── */
 
 export function ConnectorsClient({
   connectors,
   domainCounts,
   activeDomains: activeDomainsList,
-  githubStatus,
+  connectorStatusMap,
+  syncProgressMap,
+  totalSignals,
 }: ConnectorsClientProps) {
   const router = useRouter();
   const [showSetupModal, setShowSetupModal] = useState(false);
   const [showIngestion, setShowIngestion] = useState(false);
-  const [githubToken, setGithubToken] = useState("");
+  const [testingConnection, setTestingConnection] = useState<string | null>(null);
+  const [testResult, setTestResult] = useState<{ type: string; success: boolean; message: string } | null>(null);
+  const [message, setMessage] = useState<{ type: "success" | "error" | "info"; text: string } | null>(null);
+
   const activeDomains = new Set(activeDomainsList);
+  const connectedCount = Object.values(connectorStatusMap).filter((c) => c.status === "active").length;
+  const syncingCount = Object.keys(syncProgressMap).length;
 
-  const isGitHubConnected = githubStatus?.status === "active";
+  // Check URL params for OAuth callback messages
+  useState(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const success = params.get("success");
+    const error = params.get("error");
 
-  const handleGitHubConnected = (repo: any) => {
-    // After connecting, show ingestion progress
+    if (success) {
+      const messages: Record<string, string> = {
+        slack_connected: "Slack workspace connected successfully",
+        jira_connected: "Jira site connected successfully",
+        github_connected: "GitHub account connected successfully",
+      };
+      setMessage({ type: "success", text: messages[success] || "Connector connected!" });
+      window.history.replaceState({}, "", "/connectors");
+    }
+    if (error) {
+      setMessage({ type: "error", text: decodeURIComponent(error) });
+      window.history.replaceState({}, "", "/connectors");
+    }
+  });
+
+  /* ── Connect via OAuth ──────────────────────────────────────── */
+  const handleOAuthConnect = useCallback((type: string) => {
+    window.location.href = `/api/connectors/${type}/auth`;
+  }, []);
+
+  /* ── Sync ────────────────────────────────────────────────────── */
+  const handleSync = useCallback(async (type: string) => {
+    setMessage({ type: "info", text: `Starting ${type} sync...` });
+    try {
+      const res = await fetch(`/api/connectors/${type}/sync`, { method: "POST" });
+      if (res.ok) {
+        setMessage({ type: "success", text: `${type} sync started. Data will appear shortly.` });
+        setTimeout(() => router.refresh(), 2000);
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setMessage({ type: "error", text: data.error || `Failed to start ${type} sync` });
+      }
+    } catch {
+      setMessage({ type: "error", text: `Network error starting ${type} sync` });
+    }
+  }, [router]);
+
+  /* ── Test Connection ─────────────────────────────────────────── */
+  const handleTestConnection = useCallback(async (type: string) => {
+    setTestingConnection(type);
+    setTestResult(null);
+    try {
+      const res = await fetch(`/api/connectors/${type}/status`);
+      if (res.ok) {
+        const data = await res.json();
+        setTestResult({
+          type,
+          success: true,
+          message: data.status === "active" ? "Connection verified — credentials valid" : `Status: ${data.status}`,
+        });
+      } else {
+        setTestResult({ type, success: false, message: "Connection test failed — check credentials" });
+      }
+    } catch {
+      setTestResult({ type, success: false, message: "Network error — unable to reach API" });
+    } finally {
+      setTestingConnection(null);
+    }
+  }, []);
+
+  /* ── GitHub setup ────────────────────────────────────────────── */
+  const handleGitHubConnected = useCallback(() => {
     setShowIngestion(true);
     router.refresh();
-  };
+  }, [router]);
 
-  const handleStartIngestion = async () => {
-    setShowIngestion(true);
-  };
+  /* ── Separate connectors into connected vs available ─────────── */
+  const connectedConnectors = connectors.filter(
+    (c) => connectorStatusMap[c.type]?.status === "active"
+  );
+  const availableConnectors = connectors.filter(
+    (c) => !connectorStatusMap[c.type] || connectorStatusMap[c.type]?.status !== "active"
+  );
 
   return (
-    <>
+    <div className="space-y-6">
+      {/* Header */}
+      <div>
+        <h1 className="text-xl font-semibold tracking-tight">Connectors</h1>
+        <p className="text-xs text-muted mt-0.5">
+          Connect your tools to feed signals into the brain
+        </p>
+      </div>
+
+      {/* Stats Strip */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <StatValue label="Total Connectors" value={String(connectors.length)} subtitle="Available" />
+        <StatValue label="Connected" value={String(connectedCount)} subtitle={connectedCount > 0 ? "Active" : "None active"} />
+        <StatValue label="Active Domains" value={String(activeDomains.size)} subtitle="With signals" />
+        <StatValue label="Total Signals" value={formatNumber(totalSignals)} subtitle="Across all sources" />
+      </div>
+
+      {/* Message Banner */}
+      {message && (
+        <div
+          className={cn(
+            "flex items-center justify-between px-4 py-3 rounded-xl border text-sm",
+            message.type === "success" && "bg-success/10 border-success/20 text-success",
+            message.type === "error" && "bg-danger/10 border-danger/20 text-danger",
+            message.type === "info" && "bg-info/10 border-info/20 text-info"
+          )}
+        >
+          <span className="font-medium">{message.text}</span>
+          <button
+            onClick={() => setMessage(null)}
+            className="text-xs opacity-60 hover:opacity-100 ml-4"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
       {/* Ingestion progress banner */}
       {showIngestion && (
         <IngestionProgress
@@ -63,114 +227,316 @@ export function ConnectorsClient({
         />
       )}
 
-      {/* Connector grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {connectors.map((connector) => {
-          const signalCount = domainCounts[connector.domain] || 0;
-          const isActive = activeDomains.has(connector.domain);
-          const isGitHub = connector.name === "GitHub";
+      {/* ── Connected Connectors ──────────────────────────────── */}
+      {connectedConnectors.length > 0 && (
+        <div>
+          <div className="text-[11px] font-medium uppercase tracking-wider text-muted mb-3">
+            Connected ({connectedConnectors.length})
+          </div>
+          <div className="space-y-2">
+            {connectedConnectors.map((connector) => {
+              const status = connectorStatusMap[connector.type]!;
+              const signalCount = domainCounts[connector.domain] || 0;
+              const progress = syncProgressMap[connector.type];
+              const isSyncing = !!progress;
+              const isTesting = testingConnection === connector.type;
+              const currentTestResult = testResult?.type === connector.type ? testResult : null;
 
-          return (
-            <div
-              key={connector.name}
-              className={`rounded-xl bg-card border p-5 transition-all hover:bg-card-hover hover:border-accent/30 ${
-                isActive ? "border-border-subtle" : "border-border-subtle opacity-70"
-              }`}
-            >
-              <div className="flex items-start justify-between mb-3">
-                <span className="text-3xl">{connector.icon}</span>
-                <span
-                  className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider ${
-                    isGitHub && isGitHubConnected
-                      ? "bg-success/10 text-success"
-                      : isActive
-                        ? "bg-success/10 text-success"
-                        : "bg-muted/10 text-muted"
-                  }`}
-                >
-                  {(isActive || (isGitHub && isGitHubConnected)) && (
-                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-brain-active" />
+              return (
+                <Card key={connector.type} variant="interactive">
+                  <div className="flex items-start gap-4">
+                    {/* Icon */}
+                    <div className="w-10 h-10 rounded-xl bg-surface flex items-center justify-center text-xl shrink-0">
+                      {connector.icon}
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <span className="text-sm font-semibold">{connector.name}</span>
+                        <Badge variant="success" size="xs" pulse>Connected</Badge>
+                        <Badge
+                          variant="default"
+                          size="xs"
+                          className={DOMAIN_COLORS[connector.domain]}
+                        >
+                          {connector.domain}
+                        </Badge>
+                        {isSyncing && (
+                          <Badge variant="info" size="xs" pulse>Syncing</Badge>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted mb-2">{connector.description}</p>
+
+                      {/* Connection details */}
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
+                        <span className="text-muted">
+                          Signals:{" "}
+                          <span className="text-foreground font-mono tabular-nums">
+                            {formatNumber(status.signalsCount || signalCount)}
+                          </span>
+                        </span>
+                        <span className="text-muted">
+                          Last sync:{" "}
+                          <span className="text-foreground font-medium">
+                            {status.lastSyncAt ? formatRelativeTime(new Date(status.lastSyncAt)) : "Never"}
+                          </span>
+                        </span>
+                        {status.metadata?.team_name && (
+                          <span className="text-muted">
+                            Workspace: <span className="text-foreground">{status.metadata.team_name}</span>
+                          </span>
+                        )}
+                        {status.metadata?.github_login && (
+                          <span className="text-muted">
+                            Account: <span className="text-foreground">@{status.metadata.github_login}</span>
+                          </span>
+                        )}
+                        {status.metadata?.site_name && (
+                          <span className="text-muted">
+                            Site: <span className="text-foreground">{status.metadata.site_name}</span>
+                          </span>
+                        )}
+                        {status.config?.repoFullName && (
+                          <span className="text-muted">
+                            Repo: <span className="text-foreground font-mono">{status.config.repoFullName}</span>
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Sync Progress */}
+                      {isSyncing && progress && (
+                        <div className="mt-2">
+                          <div className="flex items-center justify-between text-xs mb-1">
+                            <span className="text-muted">Syncing...</span>
+                            <span className="text-accent font-mono tabular-nums">
+                              {progress.progressPct}%
+                            </span>
+                          </div>
+                          <div className="w-full h-1.5 rounded-full bg-surface overflow-hidden">
+                            <div
+                              className="h-full bg-accent rounded-full transition-all duration-500"
+                              style={{ width: `${progress.progressPct}%` }}
+                            />
+                          </div>
+                          <p className="text-[10px] text-muted mt-1">
+                            {formatNumber(progress.signalsIngested)} signals processed
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Error message */}
+                      {status.errorMessage && (
+                        <div className="mt-2 flex items-center gap-1.5 text-[11px] text-danger">
+                          <StatusDot type="error" size="sm" />
+                          {status.errorMessage}
+                        </div>
+                      )}
+
+                      {/* Test Result */}
+                      {currentTestResult && (
+                        <div
+                          className={cn(
+                            "mt-2 flex items-center gap-1.5 text-[11px] font-medium",
+                            currentTestResult.success ? "text-success" : "text-danger"
+                          )}
+                        >
+                          <StatusDot type={currentTestResult.success ? "success" : "error"} size="sm" />
+                          {currentTestResult.message}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex flex-col gap-1.5 shrink-0">
+                      <button
+                        onClick={() => handleTestConnection(connector.type)}
+                        disabled={isTesting}
+                        className="px-3 py-1.5 rounded-lg bg-surface border border-border-subtle text-xs font-medium hover:bg-surface-hover transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5"
+                      >
+                        {isTesting ? (
+                          <>
+                            <svg className="w-3 h-3 animate-spin" viewBox="0 0 24 24" fill="none">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                            </svg>
+                            Testing...
+                          </>
+                        ) : (
+                          <>
+                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Test
+                          </>
+                        )}
+                      </button>
+                      <button
+                        onClick={() => handleSync(connector.type)}
+                        disabled={isSyncing}
+                        className="px-3 py-1.5 rounded-lg bg-accent/10 text-accent text-xs font-medium hover:bg-accent/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        {isSyncing ? "Syncing..." : "Sync Now"}
+                      </button>
+                    </div>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ── Available Connectors ───────────────────────────────── */}
+      <div>
+        <div className="text-[11px] font-medium uppercase tracking-wider text-muted mb-3">
+          Available ({availableConnectors.length})
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {availableConnectors.map((connector) => {
+            const signalCount = domainCounts[connector.domain] || 0;
+            const hasSignals = activeDomains.has(connector.domain);
+            const isGitHub = connector.type === "github";
+            const failedStatus = connectorStatusMap[connector.type];
+            const hasError = failedStatus?.status === "error" || failedStatus?.status === "disabled";
+
+            return (
+              <div
+                key={connector.type}
+                className={cn(
+                  "rounded-xl bg-card border p-5 transition-all hover:bg-card-hover hover:border-accent/30 group",
+                  hasError ? "border-danger/20" : "border-border-subtle",
+                  !hasSignals && !connector.oauth && "opacity-60"
+                )}
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <span className="text-2xl">{connector.icon}</span>
+                  <div className="flex items-center gap-1.5">
+                    <Badge
+                      variant="default"
+                      size="xs"
+                      className={DOMAIN_COLORS[connector.domain]}
+                    >
+                      {connector.domain}
+                    </Badge>
+                    {hasError ? (
+                      <Badge variant="danger" size="xs">Error</Badge>
+                    ) : hasSignals ? (
+                      <Badge variant="success" size="xs">Has Signals</Badge>
+                    ) : null}
+                  </div>
+                </div>
+
+                <h3 className="font-medium text-sm mb-1">{connector.name}</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed mb-3">
+                  {connector.description}
+                </p>
+
+                {/* Error info if disconnected with error */}
+                {hasError && failedStatus?.errorMessage && (
+                  <div className="mb-3 flex items-center gap-1.5 text-[10px] text-danger">
+                    <StatusDot type="error" size="sm" />
+                    <span className="truncate">{failedStatus.errorMessage}</span>
+                  </div>
+                )}
+
+                {/* Signals count if active domain */}
+                {hasSignals && (
+                  <div className="flex items-center justify-between mb-3 text-xs">
+                    <span className="text-muted">Existing signals</span>
+                    <span className="font-medium text-accent tabular-nums">{formatNumber(signalCount)}</span>
+                  </div>
+                )}
+
+                {/* Connect Action */}
+                <div className="pt-3 border-t border-border-subtle">
+                  {connector.oauth ? (
+                    <div className="flex gap-2">
+                      {isGitHub ? (
+                        <>
+                          <button
+                            onClick={() => setShowSetupModal(true)}
+                            className="flex-1 py-2 rounded-lg bg-accent/10 text-accent text-xs font-medium hover:bg-accent/20 transition-colors flex items-center justify-center gap-1.5"
+                          >
+                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                            </svg>
+                            Token Setup
+                          </button>
+                          <button
+                            onClick={() => handleOAuthConnect("github")}
+                            className="flex-1 py-2 rounded-lg bg-accent text-white text-xs font-medium hover:bg-accent/90 transition-colors flex items-center justify-center gap-1.5"
+                          >
+                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                            </svg>
+                            OAuth
+                          </button>
+                        </>
+                      ) : (
+                        <button
+                          onClick={() => handleOAuthConnect(connector.type)}
+                          className="w-full py-2 rounded-lg bg-accent text-white text-xs font-medium hover:bg-accent/90 transition-colors flex items-center justify-center gap-1.5"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                          </svg>
+                          Connect with OAuth
+                        </button>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] text-muted">Coming soon</span>
+                      <span className="text-[10px] text-muted bg-surface px-2 py-0.5 rounded-full">
+                        API / Webhook
+                      </span>
+                    </div>
                   )}
-                  {isGitHub && isGitHubConnected
-                    ? "Connected"
-                    : isActive
-                      ? "Active"
-                      : "Not Connected"}
-                </span>
+                </div>
               </div>
+            );
+          })}
+        </div>
+      </div>
 
-              <h3 className="font-medium text-sm mb-1">{connector.name}</h3>
-              <div className="text-[10px] text-accent uppercase tracking-wider font-medium mb-2">
-                {connector.domain}
-              </div>
-              <p className="text-xs text-muted-foreground leading-relaxed mb-3">
-                {connector.description}
-              </p>
+      {/* ── Info Cards ─────────────────────────────────────────── */}
+      <div className="grid md:grid-cols-3 gap-3">
+        <Card>
+          <CardTitle className="mb-2 flex items-center gap-2">
+            <svg className="w-4 h-4 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+            </svg>
+            Secure & Private
+          </CardTitle>
+          <p className="text-xs text-muted leading-relaxed">
+            All credentials encrypted at rest. NexusBrain only accesses data you explicitly grant.
+          </p>
+        </Card>
 
-              {/* GitHub-specific connected state */}
-              {isGitHub && isGitHubConnected && githubStatus ? (
-                <div className="space-y-2">
-                  <div className="rounded-lg bg-surface/50 p-2.5">
-                    <div className="text-xs font-medium truncate">
-                      {githubStatus.config?.repoFullName || "Connected"}
-                    </div>
-                    <div className="text-[10px] text-muted mt-0.5">
-                      {githubStatus.config?.repoLanguage} &middot;{" "}
-                      {githubStatus.config?.repoStars?.toLocaleString()} stars
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between pt-2 border-t border-border-subtle">
-                    <span className="text-xs text-muted">
-                      {githubStatus.signalsCount > 0
-                        ? `${formatNumber(githubStatus.signalsCount)} signals`
-                        : "Ready to sync"}
-                    </span>
-                    <button
-                      onClick={handleStartIngestion}
-                      className="text-[10px] font-medium text-accent hover:text-accent/80 transition-colors"
-                    >
-                      {githubStatus.signalsCount > 0 ? "Re-sync" : "Start Ingestion"} →
-                    </button>
-                  </div>
-                </div>
-              ) : isGitHub ? (
-                /* GitHub setup button */
-                <div className="pt-3 border-t border-border-subtle">
-                  <button
-                    onClick={() => setShowSetupModal(true)}
-                    className="w-full py-2 rounded-lg bg-accent/10 text-accent text-xs font-medium hover:bg-accent/20 transition-colors flex items-center justify-center gap-1.5"
-                  >
-                    <svg
-                      className="w-3.5 h-3.5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
-                      />
-                    </svg>
-                    Setup GitHub
-                  </button>
-                </div>
-              ) : isActive ? (
-                <div className="flex items-center justify-between pt-3 border-t border-border-subtle">
-                  <span className="text-xs text-muted">Signals</span>
-                  <span className="text-sm font-medium text-accent">
-                    {formatNumber(signalCount)}
-                  </span>
-                </div>
-              ) : (
-                <div className="pt-3 border-t border-border-subtle">
-                  <span className="text-xs text-muted">No signals yet</span>
-                </div>
-              )}
-            </div>
-          );
-        })}
+        <Card>
+          <CardTitle className="mb-2 flex items-center gap-2">
+            <svg className="w-4 h-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+            </svg>
+            Auto Sync
+          </CardTitle>
+          <p className="text-xs text-muted leading-relaxed">
+            Connectors sync hourly. Initial sync may take time; incremental syncs are fast.
+          </p>
+        </Card>
+
+        <Card>
+          <CardTitle className="mb-2 flex items-center gap-2">
+            <svg className="w-4 h-4 text-brain-training" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+            Brain Learning
+          </CardTitle>
+          <p className="text-xs text-muted leading-relaxed">
+            Each signal feeds the causal graph. More connectors = deeper cross-domain intelligence.
+          </p>
+        </Card>
       </div>
 
       {/* GitHub Setup Modal */}
@@ -179,6 +545,6 @@ export function ConnectorsClient({
         onClose={() => setShowSetupModal(false)}
         onConnected={handleGitHubConnected}
       />
-    </>
+    </div>
   );
 }
