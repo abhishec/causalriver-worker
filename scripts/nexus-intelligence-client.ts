@@ -30,30 +30,16 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { createSupabaseRepository } from '../packages/memory-stack/src/persistence/supabase-repository';
 import { createConsolidationEngine } from '../packages/memory-stack/src/orchestrator/consolidation-engine';
-import {
-  storeConnectorSignals,
-  type ConnectorSignal,
-} from '../packages/memory-stack/src/connectors/connector-framework';
 import { createGitHubConnector } from '../packages/memory-stack/src/connectors/github';
-import { createJiraConnector } from '../packages/memory-stack/src/connectors/jira';
-import {
-  calculateGiniCoefficient,
-  calculateHHI,
-  calculateBetweennessCentrality,
-  getBRSRiskLevel,
-} from '../packages/memory-stack/src/orchestrator/bottleneck-detector';
 import {
   runEarlyWarningSystem,
   getEarlyWarningSummary,
-  type EarlyWarningReport,
 } from '../packages/memory-stack/src/orchestrator/early-warning-system';
-import { createBrainObservabilityBridge } from '../packages/memory-stack/src/orchestrator/brain-observability-bridge';
-import { createBrainRunReporter, type BrainRunReport, type LayerStatus } from '../packages/memory-stack/src/observability/brain-run-reporter';
+import { createBrainRunReporter, type BrainRunReport } from '../packages/memory-stack/src/observability/brain-run-reporter';
 import { createReinforcementFeedbackSystem, type ReinforcementCycleResult } from '../packages/memory-stack/src/orchestrator/reinforcement-feedback-system';
 import { createDeepLayers, type DeepCycleResult, type DeepLayerHealthReport } from '../packages/memory-stack/src/causality/leap-deep-layers';
 import { createDomainTaxonomy } from '../packages/memory-stack/src/domain-hierarchy/domain-taxonomy';
 import { createCrossSystemEntityGraph } from '../packages/memory-stack/src/domain-hierarchy/cross-system-entity-graph';
-import { predictVelocity, type VelocityPrediction } from '../platform/lib/p0/velocity-predictor';
 import { getDefaultLogger } from '../packages/memory-stack/src/observability';
 
 const logger = getDefaultLogger();
