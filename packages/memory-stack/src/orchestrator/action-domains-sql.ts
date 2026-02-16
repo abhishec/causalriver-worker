@@ -141,7 +141,7 @@ export const sqlAnalyzerDomain = {
         const claudeResult = await analyzeWithClaude(
           request,
           anthropicApiKey,
-          ctx.brain
+          ctx.brain as Record<string, any> | undefined
         );
 
         const brainAttribution = buildBrainAttribution(ctx.brain as Record<string, any>, 'sql-analyzer');

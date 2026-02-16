@@ -231,8 +231,8 @@ async function diagnoseWithClaude(
   // Inject Brain's organizational intelligence into Claude's prompt
   const brainSection = formatBrainContextForDomain(ctx.brain as Record<string, any>, 'incident-diagnosis');
 
-  const prompt = \`You are an expert Site Reliability Engineer operating within NexusBrain's cognitive stack, diagnosing a production incident. Analyze the following incident and provide a comprehensive diagnosis.
-\${brainSection}
+  const prompt = `You are an expert Site Reliability Engineer operating within NexusBrain's cognitive stack, diagnosing a production incident. Analyze the following incident and provide a comprehensive diagnosis.
+${brainSection}
 
 ## Incident Details:
 **Description:** ${request.description}
