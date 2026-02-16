@@ -61,17 +61,6 @@ export function SimulatorClient({ entities, domains }: SimulatorClientProps) {
     }
   }
 
-  function generateMockCascade(entity: string, change: number): CascadeStep[] {
-    const mockSteps: CascadeStep[] = [
-      { entity, change, confidence: 1.0, lagDays: 0, domain: "input" },
-      { entity: "lead_volume", change: change * 0.6, confidence: 0.85, lagDays: 14, domain: "marketing" },
-      { entity: "pipeline_value", change: change * 0.4, confidence: 0.72, lagDays: 30, domain: "sales" },
-      { entity: "monthly_revenue", change: change * 0.25, confidence: 0.58, lagDays: 60, domain: "financial" },
-      { entity: "customer_satisfaction", change: change * 0.15, confidence: 0.45, lagDays: 45, domain: "customer" },
-    ];
-    return mockSteps;
-  }
-
   const totalImpact = results?.reduce((sum, r) => sum + Math.abs(r.change), 0) || 0;
 
   return (

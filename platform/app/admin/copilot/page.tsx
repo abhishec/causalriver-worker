@@ -1,6 +1,7 @@
 "use client";
 
 import { CopilotChat } from "@/components/copilot/CopilotChat";
+import { CORE_ORG_ID } from "@/lib/constants";
 
 /**
  * Admin Copilot — uses the shared CopilotChat component
@@ -11,7 +12,7 @@ export default function AdminCopilotPage() {
     <CopilotChat
       endpoint="/api/copilot/chat"
       extraParams={{
-        organizationId: "00000000-0000-4000-a000-000000000001",
+        organizationId: CORE_ORG_ID,
       }}
       persona={{
         name: "Admin Brain",

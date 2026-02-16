@@ -31,8 +31,7 @@ import { validateApiKey } from "@/lib/api-key-auth";
 import { checkRateLimit, hashKey, setRateLimitHeaders } from "@/lib/rate-limiter";
 import { corsHeaders, checkSessionRateLimit, parseAndValidateBody } from "@/lib/security-middleware";
 import { NextRequest, NextResponse } from "next/server";
-
-const CORE_ORG_ID = "00000000-0000-4000-a000-000000000001";
+import { CORE_ORG_ID } from "@/lib/org-helpers";
 
 export async function POST(request: NextRequest) {
   try {

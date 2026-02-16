@@ -3,8 +3,7 @@ export const dynamic = 'force-dynamic';
 export const dynamicParams = true;
 
 import { AuthLeftPanel } from "./AuthLeftPanel";
-
-const CORE_ORG_ID = "00000000-0000-4000-a000-000000000001";
+import { CORE_ORG_ID } from "@/lib/org-helpers";
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 

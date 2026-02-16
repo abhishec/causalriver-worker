@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { cookies } from "next/headers";
 
-const CORE_ORG_ID = "00000000-0000-4000-a000-000000000001";
+export { CORE_ORG_ID } from "@/lib/constants";
 const STORAGE_KEY = "nexus_current_org";
 
 /**

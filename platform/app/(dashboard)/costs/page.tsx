@@ -11,18 +11,20 @@ export default async function CostsPage() {
   const CORE_ORG_ID = await getCurrentOrgId();
 
   const [costLogResult, awsResult, budgetResult] = await Promise.all([
-    // LLM cost log (last 30 days)
+    // LLM cost log (last 30 days, org-scoped)
     supabase
       .from("llm_cost_log")
       .select("*")
+      .eq("organization_id", CORE_ORG_ID)
       .gte("created_at", new Date(Date.now() - 30 * 86400000).toISOString())
       .order("created_at", { ascending: false })
       .limit(500),
 
-    // AWS cost snapshots (last 30 days)
+    // AWS cost snapshots (last 30 days, org-scoped)
     supabase
       .from("aws_cost_snapshots")
       .select("*")
+      .eq("organization_id", CORE_ORG_ID)
       .gte("period_start", new Date(Date.now() - 30 * 86400000).toISOString().split("T")[0])
       .order("period_start", { ascending: false })
       .limit(30),

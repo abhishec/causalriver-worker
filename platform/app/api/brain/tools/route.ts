@@ -19,6 +19,7 @@ import { createClient } from "@/lib/supabase/server";
 import { validateApiKey } from "@/lib/api-key-auth";
 import { checkRateLimit, hashKey, setRateLimitHeaders } from "@/lib/rate-limiter";
 import { corsHeaders, checkSessionRateLimit, parseAndValidateBody } from "@/lib/security-middleware";
+import { CORE_ORG_ID } from "@/lib/org-helpers";
 
 export const dynamic = 'force-dynamic';
 
@@ -254,7 +255,7 @@ export async function POST(request: NextRequest) {
           .order("joined_at", { ascending: true })
           .limit(1)
           .single();
-        orgId = membership?.organization_id || "00000000-0000-4000-a000-000000000001";
+        orgId = membership?.organization_id || CORE_ORG_ID;
       }
     }
 

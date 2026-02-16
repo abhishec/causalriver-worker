@@ -49,6 +49,7 @@ export function BuilderClient({ entities, domains, orgId }: BuilderClientProps) 
   const [rules, setRules] = useState<BusinessRule[]>([]);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Chain form state
   const [chainSource, setChainSource] = useState("");
@@ -134,9 +135,8 @@ export function BuilderClient({ entities, domains, orgId }: BuilderClientProps) 
       if (res.ok) {
         setSaved(true);
       }
-    } catch {
-      // Silently handle — pack saved to state at minimum
-      setSaved(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to save training pack. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -470,6 +470,19 @@ export function BuilderClient({ entities, domains, orgId }: BuilderClientProps) 
           {activeTab === "review" && (
             <div className="rounded-xl bg-card border border-border-subtle p-6 space-y-5">
               <h2 className="text-sm font-semibold">Review & Save</h2>
+
+              {error && (
+                <div className="rounded-lg bg-danger/10 border border-danger/20 p-4 mb-4">
+                  <p className="text-sm text-danger font-medium">Failed to save training pack</p>
+                  <p className="text-xs text-danger/80 mt-1">{error}</p>
+                  <button
+                    onClick={() => setError(null)}
+                    className="text-xs text-danger/60 hover:text-danger mt-2 underline"
+                  >
+                    Dismiss
+                  </button>
+                </div>
+              )}
 
               {saved ? (
                 <div className="text-center py-12">

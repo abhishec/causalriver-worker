@@ -1,11 +1,10 @@
 import { createServiceClient } from "@/lib/supabase/server";
+import { CORE_ORG_ID } from "@/lib/org-helpers";
 import { formatNumber, formatUSD } from "@/lib/utils";
 import { StatValue } from "@/components/ui/StatValue";
 import { Badge } from "@/components/ui/Badge";
 
 export const dynamic = 'force-dynamic';
-
-const CORE_ORG_ID = "00000000-0000-4000-a000-000000000001";
 
 export const metadata = { title: "Admin - Core Brain" };
 
