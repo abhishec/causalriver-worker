@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
-import { cn } from "@/lib/utils";
+import { cn, timeAgo } from "@/lib/utils";
 import { CausalGraph } from "@/components/dashboard/CausalGraph";
 import { BrainContextSidebar } from "@/components/brain/BrainContextSidebar";
 import { NodeDetailPanel } from "@/components/brain/NodeDetailPanel";
@@ -10,6 +10,7 @@ import { TabGroup } from "@/components/ui/TabGroup";
 import { Badge, DomainTag } from "@/components/ui/Badge";
 import { ConfidenceMeter } from "@/components/ui/ConfidenceMeter";
 import { StatusDot } from "@/components/ui/StatusDot";
+import { ProgressRing } from "@/components/ui/ProgressRing";
 
 /* -------------------------------------------------------------------------- */
 /*  Types                                                                      */
@@ -47,10 +48,36 @@ interface Snapshot {
   brain_health_score: number;
 }
 
+interface DiscoveryEntry {
+  id: string;
+  source_entity: string;
+  target_entity: string;
+  strength: number;
+  p_value: number;
+  statistical_method: string;
+  confidence_score: number;
+  lag_days: number;
+  source_domain: string;
+  target_domain: string;
+  created_at: string;
+}
+
+interface LayerHealthEntry {
+  layer_id: string;
+  layer_name: string;
+  health_score: number;
+  requests_processed: number;
+  errors: number;
+  latency_p50: number;
+  created_at: string;
+}
+
 interface BrainClientProps {
   causalEdges: CausalEdge[];
   entities: Entity[];
   snapshot: Snapshot | null;
+  discoveryTimeline?: DiscoveryEntry[];
+  layerHealth?: LayerHealthEntry[];
 }
 
 /* -------------------------------------------------------------------------- */
@@ -126,7 +153,7 @@ function strengthLabel(strength: number): string {
 /*  Component                                                                  */
 /* -------------------------------------------------------------------------- */
 
-export function BrainClient({ causalEdges, entities, snapshot }: BrainClientProps) {
+export function BrainClient({ causalEdges, entities, snapshot, discoveryTimeline = [], layerHealth = [] }: BrainClientProps) {
   const [domainFilter, setDomainFilter] = useState<string>("all");
   const [confidenceMin, setConfidenceMin] = useState<number>(0);
   const [entitySearch, setEntitySearch] = useState<string>("");
@@ -190,21 +217,37 @@ export function BrainClient({ causalEdges, entities, snapshot }: BrainClientProp
   const tabs = [
     { id: "graph", label: "Knowledge Graph", count: filteredEdges.length },
     { id: "list", label: "Edge List" },
+    { id: "discoveries", label: "Discoveries", count: discoveryTimeline.length },
     { id: "layers", label: "Layers", count: LAYERS.length },
     { id: "regions", label: "Regions", count: REGIONS.filter((r) => r.status === "active").length },
   ];
 
   return (
     <div className="space-y-4">
-      {/* Header */}
+      {/* Header with Brain Health */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-semibold tracking-tight">Brain Explorer</h1>
-          <p className="text-xs text-muted mt-0.5">Knowledge atlas — causal graph, layers, and regions</p>
+        <div className="flex items-center gap-4">
+          <div>
+            <h1 className="text-xl font-semibold tracking-tight">Brain Explorer</h1>
+            <p className="text-xs text-muted mt-0.5">Knowledge atlas — causal graph, layers, and regions</p>
+          </div>
+          {snapshot && (
+            <ProgressRing
+              value={snapshot.brain_health_score || 0}
+              size={44}
+              strokeWidth={3}
+              color="accent"
+            />
+          )}
         </div>
         <div className="flex items-center gap-2">
           <Badge variant="accent" size="sm">{causalEdges.length} edges</Badge>
           <Badge variant="default" size="sm">{entities.length} entities</Badge>
+          {snapshot && (
+            <Badge variant="default" size="sm">
+              {snapshot.regions_active?.length || 0} regions
+            </Badge>
+          )}
         </div>
       </div>
 
@@ -352,10 +395,66 @@ export function BrainClient({ causalEdges, entities, snapshot }: BrainClientProp
         </div>
       )}
 
-      {/* Layers Tab */}
+      {/* Discoveries Tab — Timeline replay of causal discoveries */}
+      {activeTab === "discoveries" && (
+        <div className="space-y-1">
+          {discoveryTimeline.length === 0 ? (
+            <div className="rounded-xl bg-card border border-border-subtle p-12 text-center">
+              <p className="text-sm text-muted">No discoveries yet</p>
+              <p className="text-xs text-muted/60 mt-1">The brain will surface causal relationships as it processes signals</p>
+            </div>
+          ) : (
+            discoveryTimeline.map((disc, idx) => (
+              <div key={disc.id} className="group relative pl-8 pb-4 last:pb-0">
+                {/* Timeline line */}
+                <div className="absolute left-[11px] top-6 bottom-0 w-px bg-border-subtle group-last:hidden" />
+                {/* Timeline dot */}
+                <div className="absolute left-0 top-1 w-6 h-6 rounded-full bg-brain-discovery/10 flex items-center justify-center">
+                  <span className="w-2 h-2 rounded-full bg-brain-discovery" />
+                </div>
+                {/* Card */}
+                <div className="rounded-xl bg-card border border-border-subtle p-4 hover:bg-card-hover transition-colors">
+                  <div className="flex items-start justify-between gap-3 mb-2">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {disc.source_domain && <DomainTag domain={disc.source_domain} />}
+                      {disc.target_domain && disc.target_domain !== disc.source_domain && (
+                        <>
+                          <svg className="w-3 h-3 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                          </svg>
+                          <DomainTag domain={disc.target_domain} />
+                        </>
+                      )}
+                      <Badge variant="default" size="xs">{disc.statistical_method || "unknown"}</Badge>
+                    </div>
+                    <span className="text-[10px] text-muted whitespace-nowrap tabular-nums">{timeAgo(disc.created_at)}</span>
+                  </div>
+                  <h4 className="text-sm font-medium mb-1">
+                    {disc.source_entity} → {disc.target_entity}
+                  </h4>
+                  <div className="flex items-center gap-4 mt-2 text-[11px] text-muted">
+                    <span className="tabular-nums">
+                      Strength: <span className={strengthLabel(disc.strength)}>{disc.strength?.toFixed(3)}</span>
+                    </span>
+                    <span className="tabular-nums">p: {disc.p_value?.toFixed(4)}</span>
+                    {disc.lag_days > 0 && <span className="tabular-nums">{disc.lag_days}d lag</span>}
+                    {disc.confidence_score > 0 && (
+                      <span className="tabular-nums">Confidence: {(disc.confidence_score * 100).toFixed(0)}%</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+
+      {/* Layers Tab — with live health scores */}
       {activeTab === "layers" && (
         <div className="space-y-2">
-          {LAYERS.map((layer) => (
+          {LAYERS.map((layer) => {
+            const health = layerHealth.find((lh) => lh.layer_id === layer.id);
+            return (
             <div
               key={layer.id}
               className="flex items-center gap-4 px-5 py-4 rounded-xl bg-card border border-border-subtle hover:bg-card-hover transition-colors"
@@ -373,9 +472,24 @@ export function BrainClient({ causalEdges, entities, snapshot }: BrainClientProp
                 </div>
                 <p className="text-xs text-muted-foreground mt-0.5 truncate">{layer.desc}</p>
               </div>
-              <StatusDot type="active" size="sm" pulse />
+              {health ? (
+                <div className="flex items-center gap-3 shrink-0">
+                  <div className="text-right">
+                    <div className="text-xs font-mono tabular-nums">{health.health_score}%</div>
+                    <div className="text-[9px] text-muted">{health.requests_processed || 0} req</div>
+                  </div>
+                  <StatusDot
+                    type={health.health_score >= 90 ? "active" : health.health_score >= 70 ? "warning" : "error"}
+                    size="sm"
+                    pulse={health.health_score >= 90}
+                  />
+                </div>
+              ) : (
+                <StatusDot type="active" size="sm" pulse />
+              )}
             </div>
-          ))}
+          );
+          })}
         </div>
       )}
 

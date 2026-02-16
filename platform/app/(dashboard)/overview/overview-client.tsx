@@ -6,10 +6,30 @@ import { SignalRatePanel } from "@/components/intelligence/SignalRatePanel";
 import { StatValue } from "@/components/ui/StatValue";
 import { Card, CardTitle } from "@/components/ui/Card";
 import { CostWidget } from "@/components/dashboard/CostWidget";
-import { formatNumber, formatUSD } from "@/lib/utils";
+import { ProgressRing } from "@/components/ui/ProgressRing";
+import { ConnectorIcon } from "@/components/ui/ConnectorIcon";
+import { LiveIndicator } from "@/components/ui/LiveIndicator";
+import { Badge } from "@/components/ui/Badge";
+import { formatNumber, formatUSD, timeAgo } from "@/lib/utils";
 import type { IntelligenceEvent } from "@/components/intelligence/StreamEvent";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+
+/* ── Types ────────────────────────────────────────────────────────────────── */
+
+interface ConnectorSummary {
+  type: string;
+  name: string;
+  status: string;
+  lastSync: string | null;
+}
+
+interface ArtifactSummary {
+  id: string;
+  domain: string;
+  title: string;
+  createdAt: string;
+}
 
 interface OverviewClientProps {
   totalEdges: number;
@@ -25,7 +45,12 @@ interface OverviewClientProps {
   signalRates: { domain: string; count: number; rate: number }[];
   totalSignalRate: number;
   topDiscoveries: string[];
+  connectors?: ConnectorSummary[];
+  recentArtifacts?: ArtifactSummary[];
+  brainHealthScore?: number;
 }
+
+/* ── Component ────────────────────────────────────────────────────────────── */
 
 export function OverviewClient({
   totalEdges,
@@ -41,6 +66,9 @@ export function OverviewClient({
   signalRates,
   totalSignalRate,
   topDiscoveries,
+  connectors = [],
+  recentArtifacts = [],
+  brainHealthScore = 0,
 }: OverviewClientProps) {
   const router = useRouter();
   const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
@@ -49,8 +77,8 @@ export function OverviewClient({
 
   return (
     <div className="space-y-6">
-      {/* Brain Vitals Strip */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      {/* ── Zone 1: Brain Vitals Strip ───────────────────────────────── */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 stagger-fade-in">
         <StatValue
           label="Causal Edges"
           value={formatNumber(totalEdges)}
@@ -71,30 +99,128 @@ export function OverviewClient({
           value={`${brainAge}d`}
           subtitle={`${connectorsActive} regions active`}
         />
+        <StatValue
+          label="Cost Today"
+          value={formatUSD(costToday)}
+          subtitle={`of ${formatUSD(dailyBudget)} budget`}
+        />
       </div>
 
-      {/* Two-column: Intelligence Stream + Brain Vitals */}
+      {/* ── Zone 2: Cross-System Data Flow (the wow strip) ──────────── */}
+      {connectors.length > 0 && (
+        <Card variant="brain-highlight" padding="md">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <CardTitle>Cross-System Intelligence</CardTitle>
+              <LiveIndicator variant="bar" color="blue" label="Flowing" />
+            </div>
+            <Link href="/connectors" className="text-xs text-accent hover:text-accent/80 transition-colors">
+              Manage
+            </Link>
+          </div>
+
+          {/* Connector pipeline flow viz */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-2">
+            {connectors.map((conn, i) => {
+              const isActive = conn.status === "active" || conn.status === "connected";
+              return (
+                <div key={conn.type + i} className="flex items-center gap-2 shrink-0">
+                  <div className="flex flex-col items-center gap-1">
+                    <ConnectorIcon type={conn.type} size="md" />
+                    <span className="text-[9px] text-muted truncate max-w-[60px]">{conn.name}</span>
+                    {isActive && conn.lastSync && (
+                      <span className="text-[8px] text-muted/60">{timeAgo(conn.lastSync)}</span>
+                    )}
+                  </div>
+                  {i < connectors.length - 1 && (
+                    <div className="w-6 h-px bg-border-subtle relative mx-1">
+                      <div className="absolute inset-0 animate-data-flow rounded-full" />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+
+            {/* Arrow to Brain */}
+            <div className="flex items-center gap-2 shrink-0 ml-2">
+              <svg className="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+              </svg>
+              <div className="flex flex-col items-center gap-1">
+                <div className="w-8 h-8 rounded-lg bg-accent/20 flex items-center justify-center">
+                  <span className="text-xs font-bold text-accent">N</span>
+                </div>
+                <span className="text-[9px] text-accent font-medium">Brain</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick stats row */}
+          <div className="flex items-center gap-4 mt-3 pt-3 border-t border-border-subtle text-[11px] text-muted">
+            <span className="tabular-nums">{connectors.length} connectors active</span>
+            <span className="text-border-subtle">|</span>
+            <span className="tabular-nums">{totalSignalRate}/hr signal rate</span>
+            <span className="text-border-subtle">|</span>
+            <span className="tabular-nums">{signalRates.length} domains</span>
+          </div>
+        </Card>
+      )}
+
+      {/* ── Zone 3: Intelligence Stream + Brain Vitals ───────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-        {/* Zone 1: Intelligence Stream (60%) */}
+        {/* Intelligence Stream (60%) */}
         <div className="lg:col-span-3">
           <IntelligenceStream events={intelligenceEvents} />
         </div>
 
-        {/* Zone 2: Brain Vitals (40%) */}
+        {/* Brain Vitals (40%) */}
         <div className="lg:col-span-2 space-y-4">
-          <KnowledgeGrowthChart data={knowledgeGrowth} />
+          {/* Brain Health Ring + Knowledge Growth */}
+          <div className="grid grid-cols-3 gap-3">
+            <Card className="flex flex-col items-center justify-center py-4">
+              <ProgressRing
+                value={brainHealthScore}
+                size={56}
+                strokeWidth={4}
+                color="accent"
+              />
+              <span className="text-[10px] text-muted mt-1.5 font-medium">Brain Health</span>
+            </Card>
+            <div className="col-span-2">
+              <KnowledgeGrowthChart data={knowledgeGrowth} />
+            </div>
+          </div>
+
           <SignalRatePanel
             signals={signalRates}
             totalRate={totalSignalRate}
           />
 
-          {/* Cost Compact */}
           <CostWidget
             costToday={costToday}
             dailyBudget={dailyBudget}
             projectedMonthly={projectedMonthly}
             monthlyBudget={monthlyBudget}
           />
+
+          {/* Recent AI Artifacts */}
+          {recentArtifacts.length > 0 && (
+            <Card>
+              <div className="flex items-center justify-between mb-3">
+                <CardTitle>Recent Artifacts</CardTitle>
+                <Link href="/capabilities" className="text-[10px] text-accent hover:text-accent/80">View all</Link>
+              </div>
+              <div className="space-y-1.5">
+                {recentArtifacts.map((a) => (
+                  <div key={a.id} className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-surface-hover transition-colors">
+                    <Badge variant="default" size="xs">{a.domain}</Badge>
+                    <span className="text-xs text-muted-foreground truncate flex-1">{a.title}</span>
+                    <span className="text-[10px] text-muted tabular-nums shrink-0">{timeAgo(a.createdAt)}</span>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
 
           {/* Top Discoveries */}
           {topDiscoveries.length > 0 && (
@@ -117,7 +243,7 @@ export function OverviewClient({
         </div>
       </div>
 
-      {/* Zone 3: Persistent Copilot Bar */}
+      {/* ── Zone 4: Persistent Copilot Bar ───────────────────────────── */}
       <div className="sticky bottom-4 z-20">
         <div
           className="rounded-2xl bg-card/95 backdrop-blur-xl border border-border-subtle shadow-lg p-3 cursor-pointer hover:border-accent/30 transition-colors"

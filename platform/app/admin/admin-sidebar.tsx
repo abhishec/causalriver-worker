@@ -40,6 +40,13 @@ const ADMIN_SECTIONS = [
       { label: "Connector Config", href: "/admin/connectors", icon: "M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" },
     ],
   },
+  {
+    id: "config",
+    label: "Configuration",
+    items: [
+      { label: "OAuth Providers", href: "/admin/settings/oauth", icon: "M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" },
+    ],
+  },
 ];
 
 export function AdminSidebar() {

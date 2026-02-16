@@ -8,6 +8,8 @@ import { Card, CardTitle } from "@/components/ui/Card";
 import { DataTable } from "@/components/ui/DataTable";
 import { Badge } from "@/components/ui/Badge";
 import { StatusDot } from "@/components/ui/StatusDot";
+import { ProgressRing } from "@/components/ui/ProgressRing";
+import { LiveIndicator } from "@/components/ui/LiveIndicator";
 import { cn, formatNumber } from "@/lib/utils";
 
 interface ObservabilityClientProps {
@@ -38,6 +40,20 @@ export function ObservabilityClient({
   const totalOps = connectorOps.length;
   const activeAlerts = alerts.filter((a) => a.status === "active" || a.status === "triggered").length;
 
+  // Derived health metrics
+  const signalSuccessRate = totalSignals > 0
+    ? Math.round((signalIngestion.filter((s) => s.status === "success" || !s.status).length / totalSignals) * 100)
+    : 100;
+  const connectorSuccessRate = totalOps > 0
+    ? Math.round((connectorOps.filter((c) => c.status === "success").length / totalOps) * 100)
+    : 100;
+  const avgLayerHealth = layerHealth.length > 0
+    ? Math.round(layerHealth.reduce((sum, l) => sum + (l.health_score || 0), 0) / layerHealth.length)
+    : 100;
+  const agentSuccessRate = agentExecutions.length > 0
+    ? Math.round((agentExecutions.filter((a) => a.status === "success" || a.status === "completed").length / agentExecutions.length) * 100)
+    : 100;
+
   const tabs = [
     { id: "pipeline", label: "Pipeline Health", count: totalSignals },
     { id: "brain", label: "Brain Processing", count: totalCalcs },
@@ -56,6 +72,35 @@ export function ObservabilityClient({
           <p className="text-xs text-muted mt-0.5">Monitor brain pipeline, connectors, and system health</p>
         </div>
         <TimeRangeSelector value={timeRange} onChange={setTimeRange} />
+      </div>
+
+      {/* System Health Heatmap */}
+      <div className="rounded-xl bg-card border border-border-subtle p-4">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-medium">System Health</h3>
+            <LiveIndicator variant="pulse" color="green" label="All Systems" />
+          </div>
+          <span className="text-[10px] text-muted">7-day window</span>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="flex flex-col items-center gap-2">
+            <ProgressRing value={signalSuccessRate} size={52} strokeWidth={4} color={signalSuccessRate >= 90 ? "success" : signalSuccessRate >= 70 ? "warning" : "danger"} />
+            <span className="text-[10px] text-muted font-medium">Pipeline</span>
+          </div>
+          <div className="flex flex-col items-center gap-2">
+            <ProgressRing value={connectorSuccessRate} size={52} strokeWidth={4} color={connectorSuccessRate >= 90 ? "success" : connectorSuccessRate >= 70 ? "warning" : "danger"} />
+            <span className="text-[10px] text-muted font-medium">Connectors</span>
+          </div>
+          <div className="flex flex-col items-center gap-2">
+            <ProgressRing value={avgLayerHealth} size={52} strokeWidth={4} color={avgLayerHealth >= 90 ? "success" : avgLayerHealth >= 70 ? "warning" : "danger"} />
+            <span className="text-[10px] text-muted font-medium">Layers</span>
+          </div>
+          <div className="flex flex-col items-center gap-2">
+            <ProgressRing value={agentSuccessRate} size={52} strokeWidth={4} color={agentSuccessRate >= 90 ? "success" : agentSuccessRate >= 70 ? "warning" : "danger"} />
+            <span className="text-[10px] text-muted font-medium">Agents</span>
+          </div>
+        </div>
       </div>
 
       {/* Summary Stats */}

@@ -26,6 +26,8 @@ export default async function OverviewPage() {
     eventsResult,
     signalsByDomainResult,
     earlyWarningResult,
+    connectorsResult,
+    artifactsResult,
   ] = await Promise.all([
     // Latest brain snapshots (30 days)
     supabase
@@ -96,6 +98,21 @@ export default async function OverviewPage() {
       .eq("organization_id", CORE_ORG_ID)
       .eq("source_domain", "engineering")
       .in("signal_type", ["velocity_collapsed", "bottleneck_detected"])
+      .order("created_at", { ascending: false })
+      .limit(5),
+
+    // Active connectors for data flow section
+    supabase
+      .from("org_connectors")
+      .select("id, connector_type, display_name, status, last_sync_at")
+      .eq("organization_id", CORE_ORG_ID)
+      .order("last_sync_at", { ascending: false }),
+
+    // Recent SE-aaS artifacts
+    supabase
+      .from("se_aas_artifacts")
+      .select("id, domain_type, title, created_at")
+      .eq("organization_id", CORE_ORG_ID)
       .order("created_at", { ascending: false })
       .limit(5),
   ]);
@@ -216,6 +233,20 @@ export default async function OverviewPage() {
 
   const totalSignalRate = signalRates.reduce((sum, s) => sum + s.rate, 0);
 
+  const connectors = (connectorsResult.data || []).map((c: any) => ({
+    type: c.connector_type,
+    name: c.display_name || c.connector_type,
+    status: c.status || "active",
+    lastSync: c.last_sync_at,
+  }));
+
+  const recentArtifacts = (artifactsResult.data || []).map((a: any) => ({
+    id: a.id,
+    domain: a.domain_type,
+    title: a.title,
+    createdAt: a.created_at,
+  }));
+
   return (
     <OverviewClient
       totalEdges={totalEdges}
@@ -231,6 +262,9 @@ export default async function OverviewPage() {
       signalRates={signalRates}
       totalSignalRate={Math.round(totalSignalRate * 100) / 100}
       topDiscoveries={latest?.top_discoveries || []}
+      connectors={connectors}
+      recentArtifacts={recentArtifacts}
+      brainHealthScore={latest?.brain_health_score ?? 0}
     />
   );
 }

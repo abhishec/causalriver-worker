@@ -12,7 +12,7 @@ export default async function BrainPage() {
   const supabase = await createClient();
   const CORE_ORG_ID = await getCurrentOrgId();
 
-  const [causalResult, entitiesResult, snapshotResult] = await Promise.all([
+  const [causalResult, entitiesResult, snapshotResult, discoveryTimelineResult, layerHealthResult] = await Promise.all([
     // Top 50 causal relationships by strength
     supabase
       .from("causal_relationships_statistical")
@@ -38,17 +38,37 @@ export default async function BrainPage() {
       .eq("organization_id", CORE_ORG_ID)
       .order("snapshot_date", { ascending: false })
       .limit(1),
+
+    // Recent discovery timeline (last 20 causal discoveries for replay tab)
+    supabase
+      .from("causal_relationships_statistical")
+      .select("id, source_entity, target_entity, strength, p_value, statistical_method, confidence_score, lag_days, source_domain, target_domain, created_at")
+      .eq("organization_id", CORE_ORG_ID)
+      .order("created_at", { ascending: false })
+      .limit(20),
+
+    // Layer health data
+    supabase
+      .from("obs_layer_health")
+      .select("layer_id, layer_name, health_score, requests_processed, errors, latency_p50, created_at")
+      .eq("organization_id", CORE_ORG_ID)
+      .order("created_at", { ascending: false })
+      .limit(15),
   ]);
 
   const causalEdges = causalResult.data || [];
   const entities = entitiesResult.data || [];
   const snapshot = snapshotResult.data?.[0] || null;
+  const discoveryTimeline = discoveryTimelineResult.data || [];
+  const layerHealth = layerHealthResult.data || [];
 
   return (
     <BrainClient
       causalEdges={causalEdges}
       entities={entities}
       snapshot={snapshot}
+      discoveryTimeline={discoveryTimeline}
+      layerHealth={layerHealth}
     />
   );
 }
