@@ -54,44 +54,49 @@ const logger = getDefaultLogger();
 const DEMO_ORG_ID = '00000000-0000-4000-b000-000000000001';
 const DEMO_ORG_NAME = 'Competition Demo 2026';
 
-/** All 30 layers with metadata */
+/** All 30 layers with metadata — maps to BOTH primary data table AND observability table */
 const LAYER_REGISTRY: Array<{
   id: number;
   name: string;
   region: string;
   cognitiveAnalog: string;
+  /** Primary data table where this layer's output lives */
+  dataTable: string;
+  /** Observability/execution tracking table */
   obsTable: string;
+  /** Optional filter column for shared tables (e.g., cognitive_layer = 'L3') */
+  dataFilter?: { column: string; value: string };
 }> = [
-  { id: 1,  name: 'Signal Ingestion',        region: 'Brainstem',        cognitiveAnalog: 'Sensory Cortex',               obsTable: 'obs_signal_ingestion' },
-  { id: 2,  name: 'Entity Resolution',       region: 'Brainstem',        cognitiveAnalog: 'Primary Sensory Association',  obsTable: 'obs_entity_resolution' },
-  { id: 3,  name: 'Deep Dreaming',           region: 'Limbic',           cognitiveAnalog: 'Default Mode Network',         obsTable: 'obs_deep_dreaming' },
-  { id: 4,  name: 'Hierarchical Memory',     region: 'Limbic',           cognitiveAnalog: 'Hippocampus → Neocortex',      obsTable: 'obs_hierarchical_memory' },
-  { id: 5,  name: 'Curiosity Engine',        region: 'Limbic',           cognitiveAnalog: 'Intrinsic Motivation',         obsTable: 'obs_curiosity_engine' },
-  { id: 6,  name: 'Self-Modifying Cognition',region: 'Limbic',           cognitiveAnalog: 'Medial PFC',                   obsTable: 'obs_self_modifying_cognition' },
-  { id: 7,  name: 'Intelligence Mesh',       region: 'Limbic',           cognitiveAnalog: 'Corpus Callosum',              obsTable: 'obs_intelligence_mesh' },
-  { id: 8,  name: 'Causal Imagination',      region: 'Neocortex',        cognitiveAnalog: 'Creative Cognition',           obsTable: 'obs_causal_imagination' },
-  { id: 9,  name: 'Theory of Mind',          region: 'Neocortex',        cognitiveAnalog: 'Temporo-parietal Junction',    obsTable: 'obs_theory_of_mind' },
-  { id: 10, name: 'Temporal Consciousness',  region: 'Neocortex',        cognitiveAnalog: 'Predictive Cortex',            obsTable: 'obs_temporal_consciousness' },
-  { id: 11, name: 'Red Team',                region: 'Neocortex',        cognitiveAnalog: 'Amygdala + Insula',            obsTable: 'obs_agent_executions' },
-  { id: 12, name: 'Experimentation',         region: 'Neocortex',        cognitiveAnalog: 'Scientific Method / PFC',      obsTable: 'obs_agent_executions' },
-  { id: 13, name: 'Immune System',           region: 'Neocortex',        cognitiveAnalog: 'Pattern Recognition Immunity', obsTable: 'obs_signal_ingestion' },
-  { id: 14, name: 'Goal-Backward Planning',  region: 'Neocortex',        cognitiveAnalog: 'Lateral PFC (planning)',       obsTable: 'obs_agent_executions' },
-  { id: 15, name: 'Narrative Intelligence',  region: 'Neocortex',        cognitiveAnalog: "Broca's / Wernicke's Area",    obsTable: 'obs_agent_executions' },
-  { id: 16, name: 'Domain Hierarchy',        region: 'Soma',             cognitiveAnalog: 'Cerebral Organization',        obsTable: 'obs_agent_executions' },
-  { id: 17, name: 'Cross-System Entity Linker', region: 'Soma',          cognitiveAnalog: 'Graph Perception',             obsTable: 'obs_agent_executions' },
-  { id: 18, name: 'Organizational Topology', region: 'Soma',             cognitiveAnalog: 'Social Topology',              obsTable: 'obs_agent_executions' },
-  { id: 19, name: 'Impact Cascade Modeler',  region: 'Cortex',           cognitiveAnalog: 'Association Cortex',           obsTable: 'obs_agent_executions' },
-  { id: 20, name: 'Strategic Synthesis',     region: 'Cortex',           cognitiveAnalog: 'Lateral PFC (synthesis)',       obsTable: 'obs_agent_executions' },
-  { id: 21, name: 'Resource Allocation',     region: 'Cortex',           cognitiveAnalog: 'Dorsolateral PFC',             obsTable: 'obs_agent_executions' },
-  { id: 22, name: 'Knowledge Transfer',      region: 'Cerebellum',       cognitiveAnalog: 'Motor Coordination Analog',    obsTable: 'obs_agent_executions' },
-  { id: 23, name: 'Process Mining',          region: 'Cerebellum',       cognitiveAnalog: 'Sequential Pattern Recognition',obsTable: 'obs_agent_executions' },
-  { id: 24, name: 'Predictive Staffing',     region: 'Cerebellum',       cognitiveAnalog: 'Predictive Coding',            obsTable: 'obs_agent_executions' },
-  { id: 25, name: 'Competitive Intelligence',region: 'Prefrontal',       cognitiveAnalog: 'External Attention',           obsTable: 'obs_agent_executions' },
-  { id: 26, name: 'Decision Audit Trail',    region: 'Prefrontal',       cognitiveAnalog: 'Self-Referential PFC',         obsTable: 'obs_agent_executions' },
-  { id: 27, name: 'Org Learning Rate',       region: 'Prefrontal',       cognitiveAnalog: 'Meta-Learning',                obsTable: 'obs_agent_executions' },
-  { id: 28, name: 'Cross-Org Transfer',      region: 'Corpus Callosum',  cognitiveAnalog: 'Inter-Brain Federation',       obsTable: 'obs_connector_operations' },
-  { id: 29, name: 'Intervention Recommender',region: 'Corpus Callosum',  cognitiveAnalog: 'Integration Cortex',           obsTable: 'obs_agent_executions' },
-  { id: 30, name: 'Wisdom Layer',            region: 'Corpus Callosum',  cognitiveAnalog: 'Autobiographical Memory',      obsTable: 'obs_agent_executions' },
+  { id: 1,  name: 'Signal Ingestion',        region: 'Brainstem',        cognitiveAnalog: 'Sensory Cortex',               dataTable: 'cross_domain_signals',              obsTable: 'obs_signal_ingestion' },
+  { id: 2,  name: 'Entity Resolution',       region: 'Brainstem',        cognitiveAnalog: 'Primary Sensory Association',  dataTable: 'resolved_entities',                 obsTable: 'obs_entity_resolution' },
+  { id: 3,  name: 'Semantic Memory',          region: 'Limbic',           cognitiveAnalog: 'Default Mode Network',         dataTable: 'ai_memory',                         obsTable: 'obs_deep_dreaming' },
+  { id: 4,  name: 'Causal Graph Engine',     region: 'Limbic',           cognitiveAnalog: 'Hippocampus',                  dataTable: 'causal_relationships_statistical',  obsTable: 'obs_hierarchical_memory' },
+  { id: 5,  name: 'Pattern Memory',          region: 'Limbic',           cognitiveAnalog: 'Intrinsic Motivation',         dataTable: 'brain_grammar_rules',               obsTable: 'obs_curiosity_engine' },
+  { id: 6,  name: 'Self-Modifying Cognition',region: 'Limbic',           cognitiveAnalog: 'Medial PFC',                   dataTable: 'ai_agent_activity',                 obsTable: 'obs_self_modifying_cognition' },
+  { id: 7,  name: 'Connector Sync',          region: 'Limbic',           cognitiveAnalog: 'Corpus Callosum',              dataTable: 'connector_sync_log',                obsTable: 'obs_intelligence_mesh' },
+  { id: 8,  name: 'Deep Dreaming',           region: 'Neocortex',        cognitiveAnalog: 'Creative Cognition',           dataTable: 'obs_deep_dreaming',                 obsTable: 'obs_deep_dreaming' },
+  { id: 9,  name: 'Hierarchical Memory',     region: 'Neocortex',        cognitiveAnalog: 'Temporo-parietal Junction',    dataTable: 'obs_hierarchical_memory',            obsTable: 'obs_hierarchical_memory' },
+  { id: 10, name: 'Curiosity Engine',        region: 'Neocortex',        cognitiveAnalog: 'Predictive Cortex',            dataTable: 'obs_curiosity_engine',               obsTable: 'obs_curiosity_engine' },
+  { id: 11, name: 'Red Team',                region: 'Neocortex',        cognitiveAnalog: 'Amygdala + Insula',            dataTable: 'obs_agent_executions',               obsTable: 'obs_agent_executions', dataFilter: { column: 'layer_id', value: 'L11' } },
+  { id: 12, name: 'Experimentation',         region: 'Neocortex',        cognitiveAnalog: 'Scientific Method / PFC',      dataTable: 'obs_agent_executions',               obsTable: 'obs_agent_executions', dataFilter: { column: 'layer_id', value: 'L12' } },
+  { id: 13, name: 'Immune System',           region: 'Neocortex',        cognitiveAnalog: 'Pattern Recognition Immunity', dataTable: 'obs_signal_ingestion',               obsTable: 'obs_signal_ingestion' },
+  { id: 14, name: 'Goal-Backward Planning',  region: 'Neocortex',        cognitiveAnalog: 'Lateral PFC (planning)',       dataTable: 'obs_agent_executions',               obsTable: 'obs_agent_executions', dataFilter: { column: 'layer_id', value: 'L14' } },
+  { id: 15, name: 'Narrative Intelligence',  region: 'Neocortex',        cognitiveAnalog: "Broca's / Wernicke's Area",    dataTable: 'obs_agent_executions',               obsTable: 'obs_agent_executions', dataFilter: { column: 'layer_id', value: 'L15' } },
+  { id: 16, name: 'Domain Hierarchy',        region: 'Soma',             cognitiveAnalog: 'Cerebral Organization',        dataTable: 'domain_taxonomy_state',              obsTable: 'obs_layer_health' },
+  { id: 17, name: 'Cross-System Entity Linker', region: 'Soma',          cognitiveAnalog: 'Graph Perception',             dataTable: 'entity_graph_nodes',                obsTable: 'obs_layer_health' },
+  { id: 18, name: 'Organizational Topology', region: 'Soma',             cognitiveAnalog: 'Social Topology',              dataTable: 'obs_layer_health',                  obsTable: 'obs_layer_health' },
+  { id: 19, name: 'Impact Cascade Modeler',  region: 'Cortex',           cognitiveAnalog: 'Association Cortex',           dataTable: 'obs_feedback_loops',                obsTable: 'obs_feedback_loops' },
+  { id: 20, name: 'Strategic Synthesis',     region: 'Cortex',           cognitiveAnalog: 'Lateral PFC (synthesis)',       dataTable: 'obs_consolidation_cycles',           obsTable: 'obs_consolidation_cycles' },
+  { id: 21, name: 'Resource Allocation',     region: 'Cortex',           cognitiveAnalog: 'Dorsolateral PFC',             dataTable: 'obs_layer_health',                  obsTable: 'obs_layer_health' },
+  { id: 22, name: 'Knowledge Transfer',      region: 'Cerebellum',       cognitiveAnalog: 'Motor Coordination Analog',    dataTable: 'obs_layer_health',                  obsTable: 'obs_layer_health' },
+  { id: 23, name: 'Process Mining',          region: 'Cerebellum',       cognitiveAnalog: 'Sequential Pattern Recognition',dataTable: 'obs_consolidation_cycles',          obsTable: 'obs_consolidation_cycles' },
+  { id: 24, name: 'Predictive Staffing',     region: 'Cerebellum',       cognitiveAnalog: 'Predictive Coding',            dataTable: 'brain_intelligence_snapshots',       obsTable: 'obs_layer_health' },
+  { id: 25, name: 'Competitive Intelligence',region: 'Prefrontal',       cognitiveAnalog: 'External Attention',           dataTable: 'obs_feedback_loops',                obsTable: 'obs_feedback_loops' },
+  { id: 26, name: 'Decision Audit Trail',    region: 'Prefrontal',       cognitiveAnalog: 'Self-Referential PFC',         dataTable: 'prediction_records',                obsTable: 'obs_consolidation_cycles' },
+  { id: 27, name: 'Org Learning Rate',       region: 'Prefrontal',       cognitiveAnalog: 'Meta-Learning',                dataTable: 'brain_evolution_snapshots',          obsTable: 'obs_consolidation_cycles' },
+  { id: 28, name: 'Cross-Org Transfer',      region: 'Corpus Callosum',  cognitiveAnalog: 'Inter-Brain Federation',       dataTable: 'obs_intelligence_mesh',              obsTable: 'obs_connector_operations' },
+  { id: 29, name: 'Intervention Recommender',region: 'Corpus Callosum',  cognitiveAnalog: 'Integration Cortex',           dataTable: 'brain_feedback_queue',               obsTable: 'obs_agent_executions' },
+  { id: 30, name: 'Wisdom Layer',            region: 'Corpus Callosum',  cognitiveAnalog: 'Autobiographical Memory',      dataTable: 'brain_intelligence_snapshots',       obsTable: 'obs_consolidation_cycles' },
 ];
 
 // ============================================================================
@@ -538,31 +543,51 @@ export class NexusIntelligenceClient {
     }
 
     for (const layer of LAYER_REGISTRY) {
-      // Try to get per-layer data from brain run report
+      // Brain report provides latency/health metadata
       const brainLayer = brainReport?.layers?.find(
         (bl) => bl.layer_number === layer.id,
       );
 
-      // Fallback: query the obs table directly
-      let recordCount = brainLayer?.record_count ?? 0;
+      // ALWAYS query the PRIMARY data table for accurate record counts
+      let recordCount = 0;
       let latestTimestamp = brainLayer?.latest_timestamp ?? null;
-      let healthStatus = brainLayer?.health_status ?? 'empty' as const;
+      let healthStatus: 'healthy' | 'degraded' | 'failing' | 'empty' = 'empty';
       let avgLatencyMs = brainLayer?.avg_latency_ms ?? null;
       let errorCount = brainLayer?.failure_count ?? 0;
 
-      if (!brainLayer) {
-        // Direct query for layers without brain report data
+      try {
+        let query = this.supabase
+          .from(layer.dataTable)
+          .select('id', { count: 'exact', head: true })
+          .eq('organization_id', this.orgId);
+
+        // Apply layer-specific filter for shared tables
+        if (layer.dataFilter) {
+          query = query.eq(layer.dataFilter.column, layer.dataFilter.value);
+        }
+
+        const { count } = await query;
+        recordCount = count || 0;
+      } catch {
+        // Table might not exist yet — try obsTable as fallback
         try {
           const { count } = await this.supabase
             .from(layer.obsTable)
             .select('id', { count: 'exact', head: true })
             .eq('organization_id', this.orgId);
           recordCount = count || 0;
-          healthStatus = recordCount > 0 ? 'healthy' : 'empty';
         } catch {
           recordCount = 0;
-          healthStatus = 'empty';
         }
+      }
+
+      // Determine health from record count and brain report
+      if (recordCount > 0) {
+        healthStatus = brainLayer?.health_status === 'degraded' ? 'degraded'
+          : brainLayer?.health_status === 'failing' ? 'failing'
+          : 'healthy';
+      } else {
+        healthStatus = 'empty';
       }
 
       const rlState = rlStates.get(layer.id) || {
