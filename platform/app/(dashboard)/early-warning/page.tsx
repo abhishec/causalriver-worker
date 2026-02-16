@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentOrgId } from "@/lib/org-helpers";
 import Link from "next/link";
+import { EarlyWarningActions } from "./actions";
 
 export const dynamic = 'force-dynamic';
 
@@ -21,13 +22,27 @@ export default async function EarlyWarningPage() {
   // Fetch latest bottleneck snapshot
   const { data: bottleneckSnapshots } = await supabase
     .from("bottleneck_snapshots")
-    .select(`
-      *,
-      top_reviewer:engineers!bottleneck_snapshots_top_reviewer_id_fkey(id, name, github_login)
-    `)
+    .select("*")
     .eq("organization_id", orgId)
     .order("snapshot_date", { ascending: false})
     .limit(1);
+
+  // Fetch Brain causal edges for root cause explanations
+  const { data: causalEdges } = await supabase
+    .from("causal_relationships_statistical")
+    .select("source_domain, target_domain, source_metric, target_metric, effect_size, confidence, natural_language, optimal_lag_days")
+    .eq("organization_id", orgId)
+    .order("confidence", { ascending: false })
+    .limit(10);
+
+  // Fetch recent Brain early warning alerts from ai_memory
+  const { data: brainAlerts } = await supabase
+    .from("ai_memory")
+    .select("content, metadata, created_at")
+    .eq("organization_id", orgId)
+    .eq("memory_type", "alert")
+    .order("created_at", { ascending: false })
+    .limit(5);
 
   const latestBottleneck = bottleneckSnapshots?.[0];
   const latestVelocity = velocitySnapshots?.[0];
@@ -36,11 +51,16 @@ export default async function EarlyWarningPage() {
   const last7Days = velocitySnapshots?.slice(0, 7) || [];
   const prev7Days = velocitySnapshots?.slice(7, 14) || [];
 
-  const avgLast7 = last7Days.reduce((sum, s) => sum + (s.prs_merged || 0), 0) / (last7Days.length || 1);
-  const avgPrev7 = prev7Days.reduce((sum, s) => sum + (s.prs_merged || 0), 0) / (prev7Days.length || 1);
+  const avgLast7 = last7Days.reduce((sum: number, s: any) => sum + (s.prs_merged || 0), 0) / (last7Days.length || 1);
+  const avgPrev7 = prev7Days.reduce((sum: number, s: any) => sum + (s.prs_merged || 0), 0) / (prev7Days.length || 1);
   const velocityChange = avgPrev7 > 0 ? ((avgLast7 - avgPrev7) / avgPrev7) * 100 : 0;
 
   const isVelocityCollapse = velocityChange < -25; // 25% drop
+
+  // Find engineering-related causal edges for Brain explanations
+  const engineeringCauses = (causalEdges || []).filter(
+    (e: any) => e.source_domain === 'engineering' || e.target_domain === 'engineering'
+  );
 
   return (
     <div className="space-y-6">
@@ -49,19 +69,83 @@ export default async function EarlyWarningPage() {
         <div>
           <h1 className="text-xl font-semibold tracking-tight">Early Warning System</h1>
           <p className="text-xs text-muted mt-0.5">
-            Velocity collapse prediction + bottleneck concentration risk
+            Brain-powered velocity collapse prediction + bottleneck concentration risk
           </p>
         </div>
         <Link
-          href="/early-warning/run-analysis"
+          href="/copilot"
           className="px-4 py-2.5 rounded-lg bg-accent hover:bg-accent-dark text-accent-foreground text-sm font-medium transition-colors flex items-center gap-2"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
           </svg>
-          Run Analysis
+          Ask Brain
         </Link>
       </div>
+
+      {/* Brain Intelligence Summary */}
+      {(engineeringCauses.length > 0 || (brainAlerts && brainAlerts.length > 0)) && (
+        <div className="rounded-xl bg-gradient-to-r from-indigo-500/5 to-purple-500/5 border border-indigo-500/20 p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-6 h-6 rounded-full bg-indigo-500/10 flex items-center justify-center text-xs">
+              🧠
+            </div>
+            <h3 className="text-sm font-medium">Brain Intelligence</h3>
+            <span className="text-[10px] text-muted bg-surface px-1.5 py-0.5 rounded">
+              {engineeringCauses.length} causal edges
+            </span>
+          </div>
+
+          {/* Brain Causal Insights */}
+          {engineeringCauses.length > 0 && (
+            <div className="space-y-2 mb-3">
+              <div className="text-xs font-medium text-muted uppercase tracking-wider">Causal Relationships Discovered</div>
+              {engineeringCauses.slice(0, 3).map((edge: any, i: number) => (
+                <div key={i} className="flex items-center gap-2 text-xs">
+                  <span className={`w-1.5 h-1.5 rounded-full ${edge.effect_size > 0 ? 'bg-success' : 'bg-danger'}`} />
+                  <span className="text-foreground">{edge.natural_language}</span>
+                  <span className="text-muted ml-auto">
+                    {(edge.confidence * 100).toFixed(0)}% confidence
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Recent Brain Alerts */}
+          {brainAlerts && brainAlerts.length > 0 && (
+            <div className="space-y-2">
+              <div className="text-xs font-medium text-muted uppercase tracking-wider">Recent Brain Alerts</div>
+              {brainAlerts.slice(0, 2).map((alert: any, i: number) => {
+                const meta = alert.metadata as any;
+                const severity = meta?.severity || 'info';
+                return (
+                  <div key={i} className="flex items-start gap-2 text-xs">
+                    <span className={`mt-0.5 ${
+                      severity === 'critical' ? 'text-danger' : severity === 'warning' ? 'text-warning' : 'text-muted'
+                    }`}>
+                      {severity === 'critical' ? '🚨' : severity === 'warning' ? '⚠️' : 'ℹ️'}
+                    </span>
+                    <div>
+                      <div className="text-foreground line-clamp-2">{alert.content}</div>
+                      <div className="text-muted mt-0.5">
+                        {new Date(alert.created_at).toLocaleDateString('en-US', {
+                          month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                        })}
+                        {meta?.cognitive_layers_used && (
+                          <span className="ml-2">
+                            Layers: {(meta.cognitive_layers_used as string[]).join(', ')}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Alert Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -102,7 +186,7 @@ export default async function EarlyWarningPage() {
                     <div className="text-sm font-medium">
                       {latestVelocity.mean_pr_cycle_time_hours
                         ? `${(latestVelocity.mean_pr_cycle_time_hours / 24).toFixed(1)}d`
-                        : '—'}
+                        : '-'}
                     </div>
                     <div className="text-xs text-muted">Avg cycle time</div>
                   </div>
@@ -117,7 +201,7 @@ export default async function EarlyWarningPage() {
                     <div className="text-sm font-medium">
                       {latestVelocity.mean_review_latency_hours
                         ? `${(latestVelocity.mean_review_latency_hours / 24).toFixed(1)}d`
-                        : '—'}
+                        : '-'}
                     </div>
                     <div className="text-xs text-muted">Review latency</div>
                   </div>
@@ -166,34 +250,17 @@ export default async function EarlyWarningPage() {
                   <div className="text-sm font-medium">
                     {latestBottleneck.top_reviewer_share
                       ? `${(latestBottleneck.top_reviewer_share * 100).toFixed(0)}%`
-                      : '—'}
+                      : '-'}
                   </div>
                   <div className="text-xs text-muted">Top reviewer share</div>
                 </div>
                 <div>
                   <div className="text-sm font-medium">
-                    {latestBottleneck.reviewer_gini_coefficient?.toFixed(2) || '—'}
+                    {latestBottleneck.reviewer_gini_coefficient?.toFixed(2) || '-'}
                   </div>
                   <div className="text-xs text-muted">Gini coefficient</div>
                 </div>
               </div>
-
-              {latestBottleneck.top_reviewer && (
-                <div className="pt-3 border-t border-border-subtle">
-                  <div className="text-xs text-muted mb-1">Top bottleneck reviewer:</div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-full bg-accent/10 flex items-center justify-center text-xs font-medium">
-                      {(latestBottleneck.top_reviewer as any).name?.[0] || '?'}
-                    </div>
-                    <span className="text-sm font-medium">
-                      {(latestBottleneck.top_reviewer as any).name || 'Unknown'}
-                    </span>
-                    <span className="text-xs text-muted">
-                      @{(latestBottleneck.top_reviewer as any).github_login}
-                    </span>
-                  </div>
-                </div>
-              )}
             </div>
           ) : (
             <div className="text-sm text-muted py-4">
@@ -208,13 +275,13 @@ export default async function EarlyWarningPage() {
         <h3 className="text-sm font-medium mb-4">Deploy Velocity Trend (Last 30 Days)</h3>
         {velocitySnapshots && velocitySnapshots.length > 0 ? (
           <div className="space-y-2">
-            {velocitySnapshots.slice(0, 14).reverse().map((snapshot) => {
+            {velocitySnapshots.slice(0, 14).reverse().map((snapshot: any) => {
               const date = new Date(snapshot.snapshot_date).toLocaleDateString('en-US', {
                 month: 'short',
                 day: 'numeric',
               });
               const prs = snapshot.prs_merged || 0;
-              const maxPRs = Math.max(...velocitySnapshots.map(s => s.prs_merged || 0));
+              const maxPRs = Math.max(...(velocitySnapshots || []).map((s: any) => s.prs_merged || 0));
               const width = maxPRs > 0 ? (prs / maxPRs) * 100 : 0;
 
               return (
@@ -241,47 +308,8 @@ export default async function EarlyWarningPage() {
         )}
       </div>
 
-      {/* Quick Actions */}
-      <div className="rounded-xl bg-card border border-border-subtle p-5">
-        <h3 className="text-sm font-medium mb-4">Setup & Configuration</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <Link
-            href="/connectors"
-            className="p-4 rounded-lg border border-border-subtle hover:bg-surface-hover transition-colors"
-          >
-            <div className="text-sm font-medium mb-1">1. Connect GitHub</div>
-            <div className="text-xs text-muted">
-              Connect your GitHub repositories to start ingesting PR data
-            </div>
-          </Link>
-
-          <button
-            className="p-4 rounded-lg border border-border-subtle hover:bg-surface-hover transition-colors text-left"
-            onClick={() => {
-              // TODO: Trigger P0 ingestion
-              alert('P0 ingestion will be implemented via API call to /api/connectors/github/ingest-p0');
-            }}
-          >
-            <div className="text-sm font-medium mb-1">2. Ingest Historical Data</div>
-            <div className="text-xs text-muted">
-              Backfill 90 days of PR/review data for velocity modeling
-            </div>
-          </button>
-
-          <button
-            className="p-4 rounded-lg border border-border-subtle hover:bg-surface-hover transition-colors text-left"
-            onClick={() => {
-              // TODO: Trigger analysis
-              alert('Analysis will run via POST /api/early-warning/analyze');
-            }}
-          >
-            <div className="text-sm font-medium mb-1">3. Run Analysis</div>
-            <div className="text-xs text-muted">
-              Generate velocity + bottleneck risk predictions
-            </div>
-          </button>
-        </div>
-      </div>
+      {/* Quick Actions — WIRED to real API calls */}
+      <EarlyWarningActions orgId={orgId} />
     </div>
   );
 }

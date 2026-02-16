@@ -418,6 +418,53 @@ export async function POST(request: NextRequest) {
         brainRegions.brainHealthMonitor = createBrainHealthMonitor();
       }
 
+      // ── Live Engineering Metrics for P0 Early Warning context ──────
+      // Copilot needs velocity + bottleneck snapshots to answer
+      // "Why is velocity dropping?" with LIVE data, not just causal edges.
+      const [velocityRes, bottleneckRes, recentSignalsRes] = await Promise.all([
+        service
+          .from('velocity_snapshots')
+          .select('*')
+          .eq('organization_id', orgId)
+          .order('snapshot_date', { ascending: false })
+          .limit(7),
+        service
+          .from('bottleneck_snapshots')
+          .select('*')
+          .eq('organization_id', orgId)
+          .order('snapshot_date', { ascending: false })
+          .limit(1),
+        service
+          .from('cross_domain_signals')
+          .select('signal_type, signal_value, signal_metadata, created_at')
+          .eq('organization_id', orgId)
+          .eq('source_domain', 'engineering')
+          .gte('created_at', new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString())
+          .order('created_at', { ascending: false })
+          .limit(100),
+      ]);
+
+      const velocitySnapshots = velocityRes.data || [];
+      const bottleneckSnapshot = bottleneckRes.data?.[0] || null;
+      const recentSignals = recentSignalsRes.data || [];
+
+      // Inject engineering metrics into brain regions as live signals
+      (brainRegions as any).liveSignals = {
+        velocitySnapshots,
+        bottleneckSnapshot,
+        recentSignals,
+        engineeringSummary: {
+          prsMergedLast7Days: velocitySnapshots[0]?.prs_merged || 0,
+          avgCycleTimeHours: velocitySnapshots[0]?.mean_pr_cycle_time_hours || null,
+          openPRs: velocitySnapshots[0]?.open_pr_count || 0,
+          bottleneckRiskScore: bottleneckSnapshot?.bottleneck_risk_score || 0,
+          bottleneckRiskLevel: bottleneckSnapshot?.risk_level || 'unknown',
+          topReviewerShare: bottleneckSnapshot?.top_reviewer_share || 0,
+          giniCoefficient: bottleneckSnapshot?.reviewer_gini_coefficient || 0,
+          recentSignalCount: recentSignals.length,
+        },
+      };
+
       // ── Trained Knowledge: pass ALL DB data to the builder ──────────
       // Cast trained types — TrainedXxx has optional fields (e.g. importance?: number)
       // but BrainRegions expects required fields. Runtime values are always present.
@@ -480,6 +527,35 @@ export async function POST(request: NextRequest) {
 
     } catch (brainErr) {
       console.warn("[BrainContext] Non-fatal: could not load brain intelligence:", brainErr);
+    }
+
+    // ── SE-aaS NL ROUTING ─────────────────────────────────────────────
+    // Detect when user asks about SE-aaS capabilities and route to domains.
+    // Routes: "analyze this SQL" → sql-analyzer, "generate test cases" → test-case-generator, etc.
+    let seaasResult: Record<string, unknown> | null = null;
+    const seaasRoute = detectSEaaSRoute(message);
+
+    if (seaasRoute && process.env.ANTHROPIC_API_KEY) {
+      try {
+        const service = await createServiceClient();
+        const { executeDomain } = await import("@/lib/se-aas/domain-executor");
+
+        const domainResult = await executeDomain(service, {
+          domainType: seaasRoute.domainType,
+          request: seaasRoute.extractedInput,
+          organizationId: orgId,
+          userId: user.id,
+          anthropicApiKey: process.env.ANTHROPIC_API_KEY,
+        });
+
+        seaasResult = {
+          domainType: seaasRoute.domainType,
+          artifactId: domainResult.artifactId,
+          ...domainResult.result,
+        };
+      } catch (seaasErr) {
+        console.warn("[SE-aaS NL] Non-fatal: domain execution failed:", seaasErr);
+      }
     }
 
     // ── Domain Action Engine — give brain HANDS (Motor Cortex) ─────────
@@ -618,6 +694,38 @@ DO NOT invent any data. Instead:
         String(actionArtifact.__promptText);
     }
 
+    // ── P0 ENGINEERING METRICS: Inject live velocity + bottleneck data ──
+    // This makes the Copilot able to answer "Why is velocity collapsing?" with REAL data
+    if (brainContext && (brainContext as any).regionsUsed) {
+      const liveSignals = ((brainContext as any).regions || (brainContext as any).brainRegions || {} as any).liveSignals;
+      if (liveSignals?.engineeringSummary) {
+        const eng = liveSignals.engineeringSummary;
+        effectiveSystemPrompt += `\n\n## LIVE ENGINEERING METRICS (P0 Early Warning — use these REAL numbers)
+- PRs merged (last 7 days): ${eng.prsMergedLast7Days}
+- Avg PR cycle time: ${eng.avgCycleTimeHours ? (eng.avgCycleTimeHours / 24).toFixed(1) + ' days' : 'N/A'}
+- Open PRs (WIP): ${eng.openPRs}
+- Bottleneck risk score: ${eng.bottleneckRiskScore}/100 (${eng.bottleneckRiskLevel})
+- Top reviewer share: ${(eng.topReviewerShare * 100).toFixed(0)}%
+- Reviewer Gini coefficient: ${eng.giniCoefficient.toFixed(2)}
+- Engineering signals (14d): ${eng.recentSignalCount}
+
+When the user asks about velocity, bottlenecks, or engineering health, use THESE numbers. Cite them precisely.`;
+      }
+    }
+
+    // ── SE-aaS domain result injection ──────────────────────────────────
+    if (seaasResult) {
+      const domainType = seaasResult.domainType as string;
+      const resultData = seaasResult.data || seaasResult;
+      effectiveSystemPrompt += `\n\n## SE-aaS DOMAIN RESULT: ${domainType.toUpperCase()} (Claude-powered analysis)
+This is the result from the ${domainType} domain execution. Present this to the user with context and explanation.
+Result data:
+${JSON.stringify(resultData, null, 2).slice(0, 3000)}
+
+Artifact ID: ${seaasResult.artifactId || 'N/A'}
+Use this data to give a comprehensive answer. The analysis was performed by NexusBrain's AI ${domainType} engine.`;
+    }
+
     // ── Stream via Anthropic ──────────────────────────────────────────
     const { default: Anthropic } = await import("@anthropic-ai/sdk");
     const anthropic = new Anthropic({ apiKey: anthropicKey });
@@ -658,6 +766,11 @@ DO NOT invent any data. Instead:
           if (cleanArtifact.calibrationStatus) {
             send(JSON.stringify({ calibrationStatus: cleanArtifact.calibrationStatus }));
           }
+        }
+
+        // Send SE-aaS domain result to frontend for structured display
+        if (seaasResult) {
+          send(JSON.stringify({ seaasResult }));
         }
 
         // Send brain context metadata to frontend for display
@@ -730,4 +843,156 @@ DO NOT invent any data. Instead:
       err instanceof Error ? err.message : "Internal server error";
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
+}
+
+// ============================================================================
+// SE-aaS NATURAL LANGUAGE ROUTING
+// ============================================================================
+
+/**
+ * Detect if user message should route to an SE-aaS domain.
+ *
+ * ROUTING TABLE:
+ *   "analyze this SQL" / "check SQL" / "SQL query" → sql-analyzer
+ *   "generate test cases" / "test for" → test-case-generator
+ *   "generate test data" / "mock data" / "seed data" → test-data-generator
+ *   "write TDD code" / "implement with tests" → tdd-code-generator
+ *   "diagnose incident" / "root cause" / "why is X down" → incident-diagnosis
+ *   "impact analysis" / "what's affected" / "blast radius" → impact-analysis
+ *   "data lineage" / "where does this data come from" → data-lineage
+ *   "query logs" / "find in logs" / "log search" → log-query
+ */
+function detectSEaaSRoute(
+  message: string
+): { domainType: string; extractedInput: Record<string, unknown> } | null {
+  const lower = message.toLowerCase();
+
+  // ── SQL Analyzer ──────────────────────────────────────────────────────
+  if (
+    /analyze\s+(this\s+)?sql|check\s+(this\s+)?sql|sql\s+query\s+review|review\s+(this\s+)?query|optimize\s+(this\s+)?sql/i.test(lower)
+  ) {
+    // Extract SQL from the message (look for code blocks or after ":")
+    const sqlMatch = message.match(/```(?:sql)?\s*([\s\S]+?)```/) ||
+                     message.match(/:\s*(SELECT|INSERT|UPDATE|DELETE|CREATE|DROP|ALTER)\s+[\s\S]+/i);
+    const query = sqlMatch ? sqlMatch[1].trim() : message.replace(/^.*?(SELECT|INSERT|UPDATE|DELETE)/i, '$1').trim();
+
+    return {
+      domainType: 'sql-analyzer',
+      extractedInput: {
+        query: query || message,
+        analysisTypes: ['correctness', 'performance', 'security', 'style'],
+        databaseType: 'postgresql',
+      },
+    };
+  }
+
+  // ── Test Case Generator ───────────────────────────────────────────────
+  if (
+    /generate\s+test\s+cases?|create\s+test\s+cases?|test\s+cases?\s+for|write\s+tests?\s+for/i.test(lower)
+  ) {
+    const codeMatch = message.match(/```(?:\w+)?\s*([\s\S]+?)```/);
+    return {
+      domainType: 'test-case-generator',
+      extractedInput: {
+        code: codeMatch?.[1]?.trim() || message,
+        language: detectLanguage(message),
+        coverage: 'comprehensive',
+      },
+    };
+  }
+
+  // ── Test Data Generator ───────────────────────────────────────────────
+  if (
+    /generate\s+test\s+data|mock\s+data|seed\s+data|fake\s+data|sample\s+data/i.test(lower)
+  ) {
+    return {
+      domainType: 'test-data-generator',
+      extractedInput: {
+        description: message,
+        format: 'json',
+        count: 10,
+      },
+    };
+  }
+
+  // ── TDD Code Generator ────────────────────────────────────────────────
+  if (
+    /write\s+(?:tdd|test.driven)|implement\s+with\s+tests?|tdd\s+(?:for|implement)/i.test(lower)
+  ) {
+    return {
+      domainType: 'tdd-code-generator',
+      extractedInput: {
+        description: message,
+        language: detectLanguage(message),
+      },
+    };
+  }
+
+  // ── Incident Diagnosis ────────────────────────────────────────────────
+  if (
+    /diagnose\s+(?:this\s+)?incident|root\s+cause|why\s+is\s+.*(?:down|failing|broken|crashing)|incident\s+(?:analysis|diagnosis)/i.test(lower)
+  ) {
+    return {
+      domainType: 'incident-diagnosis',
+      extractedInput: {
+        description: message,
+        severity: /critical|p0|sev.?0/i.test(lower) ? 'critical' : 'high',
+      },
+    };
+  }
+
+  // ── Impact Analysis ───────────────────────────────────────────────────
+  if (
+    /impact\s+analysis|blast\s+radius|what.?s\s+affected|downstream\s+impact|dependency\s+impact/i.test(lower)
+  ) {
+    return {
+      domainType: 'impact-analysis',
+      extractedInput: {
+        description: message,
+        changeType: 'code_change',
+      },
+    };
+  }
+
+  // ── Data Lineage ──────────────────────────────────────────────────────
+  if (
+    /data\s+lineage|where\s+does\s+.*(?:data|field)\s+come\s+from|trace\s+data|data\s+flow|data\s+origin/i.test(lower)
+  ) {
+    return {
+      domainType: 'data-lineage',
+      extractedInput: {
+        description: message,
+      },
+    };
+  }
+
+  // ── Log Query ─────────────────────────────────────────────────────────
+  if (
+    /query\s+logs?|search\s+logs?|find\s+in\s+logs?|log\s+search|grep\s+logs?/i.test(lower)
+  ) {
+    return {
+      domainType: 'log-query',
+      extractedInput: {
+        query: message,
+        timeRange: '24h',
+      },
+    };
+  }
+
+  return null;
+}
+
+/**
+ * Simple language detection from message content.
+ */
+function detectLanguage(message: string): string {
+  const lower = message.toLowerCase();
+  if (/typescript|\.ts\b/i.test(lower)) return 'typescript';
+  if (/python|\.py\b/i.test(lower)) return 'python';
+  if (/javascript|\.js\b/i.test(lower)) return 'javascript';
+  if (/java\b/i.test(lower)) return 'java';
+  if (/go\b|golang/i.test(lower)) return 'go';
+  if (/rust\b|\.rs\b/i.test(lower)) return 'rust';
+  if (/ruby\b|\.rb\b/i.test(lower)) return 'ruby';
+  return 'typescript'; // Default
 }
