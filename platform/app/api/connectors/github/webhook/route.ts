@@ -218,7 +218,7 @@ async function handlePullRequestEvent(payload: any, supabase: any) {
           merged: pull_request.merged || false,
           draft: pull_request.draft || false,
         },
-        reviews || []
+        (reviews || []).filter((r): r is typeof r & { user: NonNullable<typeof r.user> } => r.user !== null) as any[]
       );
 
       console.log(`[P0] Ingested PR #${pull_request.number} signals to Brain`);

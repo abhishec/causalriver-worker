@@ -140,7 +140,7 @@ export function BrainTrainingSection({ orgId, connectors }: BrainTrainingSection
                   <>
                     <StatusDot type="inactive" size="sm" />
                     <span className="text-muted">GitHub not connected</span>
-                    <Badge variant="neutral" size="xs">Required</Badge>
+                    <Badge variant="outline" size="xs">Required</Badge>
                   </>
                 )}
               </div>
