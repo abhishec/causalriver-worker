@@ -47,30 +47,30 @@ export async function GET(request: NextRequest) {
         const orgId = auth.organizationId;
 
         // 1. Record velocity predictions for Brain verification
-        if (report.velocityCollapse?.isAtRisk) {
+        if (report.velocityCollapse) {
           await service.from("prediction_records").insert({
             organization_id: orgId,
             domain: "velocity",
-            predicted_outcome: `Velocity collapse predicted: ${report.velocityCollapse.predictedDrop}% drop`,
+            predicted_outcome: `Velocity collapse predicted: ${report.velocityCollapse.predictedDrop}% drop in ${report.velocityCollapse.daysUntilCollapse} days`,
             predicted_value: report.velocityCollapse.predictedDrop ?? null,
-            confidence: report.velocityCollapse.confidence ?? 0.6,
+            confidence: 0.7,
             entity_type: "early_warning",
             entity_id: `velocity_${new Date().toISOString().split("T")[0]}`,
-          }).catch(() => {});
+          });
         }
 
         // 2. Record bottleneck predictions for Brain verification
         for (const alert of report.bottleneckAlerts ?? []) {
-          if (alert.riskLevel === "critical" || alert.riskLevel === "high") {
+          if (alert.severity === "critical" || alert.severity === "high") {
             await service.from("prediction_records").insert({
               organization_id: orgId,
               domain: alert.domain ?? "bottleneck",
-              predicted_outcome: `Bottleneck risk: ${alert.description ?? alert.riskLevel}`,
-              predicted_value: alert.riskScore ?? null,
+              predicted_outcome: `Bottleneck risk: ${alert.message ?? alert.severity}`,
+              predicted_value: null,
               confidence: 0.7,
               entity_type: "early_warning",
               entity_id: `bottleneck_${alert.domain ?? "unknown"}_${new Date().toISOString().split("T")[0]}`,
-            }).catch(() => {});
+            });
           }
         }
 
@@ -79,20 +79,24 @@ export async function GET(request: NextRequest) {
           organization_id: orgId,
           source_domain: "brain.early_warning",
           signal_type: "early_warning_analysis",
-          signal_value: report.velocityCollapse?.isAtRisk ? 1 : 0,
+          signal_value: report.velocityCollapse ? 1 : 0,
           entity_type: "early_warning",
           entity_id: `ew_${new Date().toISOString().split("T")[0]}`,
           signal_metadata: {
             domains,
             lookbackDays,
-            velocityAtRisk: report.velocityCollapse?.isAtRisk ?? false,
+            velocityAtRisk: !!report.velocityCollapse,
             bottleneckAlerts: (report.bottleneckAlerts ?? []).length,
-            overallRisk: summary?.overallRisk ?? "unknown",
+            overallRisk: report.overallRisk,
           },
-        }).catch(() => {});
+        });
 
         // 4. Lightweight Brain evolution cycle (verify past predictions + update weights)
-        await runBrainEvolutionCycle(service, orgId, "lightweight").catch(() => {});
+        try {
+          await runBrainEvolutionCycle(service, orgId, "lightweight");
+        } catch {
+          // Evolution cycle is optional
+        }
       } catch {
         // Non-blocking: feedback failures should never break early warning
       }
