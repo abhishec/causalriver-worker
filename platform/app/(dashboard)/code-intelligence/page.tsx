@@ -36,8 +36,8 @@ export default async function CodeIntelligencePage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold">Code Intelligence</h1>
-        <p className="text-muted text-sm mt-1">
+        <h1 className="text-xl font-semibold tracking-tight">Code Intelligence</h1>
+        <p className="text-xs text-muted mt-0.5">
           Dependency graphs, expertise maps, and engineering cascade analysis
         </p>
       </div>

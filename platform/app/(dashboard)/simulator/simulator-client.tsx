@@ -55,8 +55,7 @@ export function SimulatorClient({ entities, domains }: SimulatorClientProps) {
       setResults(data.cascade || []);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Something went wrong");
-      // Fallback: generate mock cascade for demo
-      setResults(generateMockCascade(selectedEntity, direction === "decrease" ? -magnitude : magnitude));
+      setResults(null);
     } finally {
       setLoading(false);
     }
@@ -79,8 +78,8 @@ export function SimulatorClient({ entities, domains }: SimulatorClientProps) {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold">What-If Simulator</h1>
-        <p className="text-muted text-sm mt-1">
+        <h1 className="text-xl font-semibold tracking-tight">What-If Simulator</h1>
+        <p className="text-xs text-muted mt-0.5">
           Simulate causal cascades — see how changes propagate through your business
         </p>
       </div>

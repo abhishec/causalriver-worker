@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
 import { AdminObservabilityClient } from "./admin-observability-client";
 
 export const dynamic = "force-dynamic";
@@ -8,7 +8,7 @@ export const metadata = {
 };
 
 export default async function AdminObservabilityPage() {
-  const supabase = await createClient();
+  const supabase = await createServiceClient();
 
   const sevenDaysAgo = new Date(Date.now() - 7 * 86400000).toISOString();
 

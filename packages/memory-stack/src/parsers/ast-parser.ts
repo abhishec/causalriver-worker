@@ -65,7 +65,7 @@ async function ensureTreeSitterJava(): Promise<void> {
 
 export interface FunctionInfo {
   name: string;
-  type: 'function' | 'method' | 'arrow' | 'async';
+  type: 'function' | 'method' | 'arrow' | 'async' | 'react-component' | 'react-hook';
   params: Array<{ name: string; type?: string }>;
   returnType?: string;
   startLine: number;
@@ -74,6 +74,14 @@ export interface FunctionInfo {
   isExported: boolean;
   isAsync: boolean;
   docstring?: string;
+  // React-specific metadata
+  reactMetadata?: {
+    isComponent: boolean;
+    isHook: boolean;
+    hooksUsed: string[]; // ['useState', 'useEffect', 'useContext']
+    propsType?: string; // Interface or type name for props
+    hasJSX: boolean;
+  };
 }
 
 export interface ClassInfo {
@@ -87,6 +95,14 @@ export interface ClassInfo {
   endLine: number;
   isExported: boolean;
   docstring?: string;
+  // React-specific metadata
+  reactMetadata?: {
+    isComponent: boolean;
+    componentType: 'class' | 'functional' | 'none';
+    propsType?: string;
+    stateType?: string;
+    lifecycle: string[]; // ['componentDidMount', 'render']
+  };
 }
 
 export interface ImportInfo {
@@ -168,11 +184,16 @@ export class ASTParser {
     language: 'typescript' | 'javascript',
     filePath?: string
   ): CodeStructure {
+    // Use .tsx extension if code contains JSX or if filePath is .tsx
+    const defaultExt = code.includes('<') && code.includes('/>') ? '.tsx' : '.ts';
+    const fileName = filePath || `temp${defaultExt}`;
+
     const sourceFile = ts.createSourceFile(
-      filePath || 'temp.ts',
+      fileName,
       code,
       ts.ScriptTarget.Latest,
-      true
+      true,
+      fileName.endsWith('.tsx') || fileName.endsWith('.jsx') ? ts.ScriptKind.TSX : ts.ScriptKind.TS
     );
 
     const functions: FunctionInfo[] = [];
@@ -273,6 +294,67 @@ export class ASTParser {
   }
 
   /**
+   * Detect React hooks used in function body
+   */
+  private detectReactHooks(node: ts.Node): string[] {
+    const hooks: Set<string> = new Set();
+    const reactHookPattern = /^use[A-Z]/; // Hooks start with 'use' followed by capital letter
+
+    const visit = (n: ts.Node) => {
+      // Look for CallExpression nodes (function calls)
+      if (ts.isCallExpression(n)) {
+        const callText = n.expression.getText();
+        if (reactHookPattern.test(callText)) {
+          hooks.add(callText);
+        }
+      }
+      ts.forEachChild(n, visit);
+    };
+
+    visit(node);
+    return Array.from(hooks);
+  }
+
+  /**
+   * Check if function contains JSX
+   */
+  private containsJSX(node: ts.Node): boolean {
+    let hasJSX = false;
+
+    const visit = (n: ts.Node) => {
+      if (ts.isJsxElement(n) || ts.isJsxSelfClosingElement(n) || ts.isJsxFragment(n)) {
+        hasJSX = true;
+        return;
+      }
+      if (!hasJSX) {
+        ts.forEachChild(n, visit);
+      }
+    };
+
+    visit(node);
+    return hasJSX;
+  }
+
+  /**
+   * Detect if function is a React component
+   */
+  private isReactComponent(name: string, returnType: string | undefined, hasJSX: boolean, hooksUsed: string[]): boolean {
+    // Component name starts with uppercase OR returns JSX OR has JSX.Element return type OR uses hooks and has JSX
+    const startsWithUpper = /^[A-Z]/.test(name);
+    const returnsJSX = returnType?.includes('JSX.Element') || returnType?.includes('React.ReactElement') || returnType?.includes('ReactNode') || returnType?.includes('React.FC') || returnType?.includes('FunctionComponent');
+    const usesHooksAndHasJSX = hooksUsed.length > 0 && hasJSX;
+    return (startsWithUpper && hasJSX) || returnsJSX || usesHooksAndHasJSX || false;
+  }
+
+  /**
+   * Detect if function is a custom React hook
+   */
+  private isReactHook(name: string, hooksUsed: string[]): boolean {
+    // Custom hooks: start with 'use' + uppercase letter AND use other hooks
+    return /^use[A-Z]/.test(name) && hooksUsed.length > 0;
+  }
+
+  /**
    * Extract function information from TypeScript AST node
    */
   private extractFunction(
@@ -298,18 +380,34 @@ export class ASTParser {
     const isAsync = node.modifiers?.some((m) => m.kind === ts.SyntaxKind.AsyncKeyword) || false;
 
     const complexity = this.calculateComplexity(node);
-
     const docstring = this.extractDocstring(node, sourceFile);
+
+    // React-specific detection
+    const hooksUsed = this.detectReactHooks(node);
+    const hasJSX = this.containsJSX(node);
+    const isComponent = this.isReactComponent(name, returnType, hasJSX, hooksUsed);
+    const isHook = this.isReactHook(name, hooksUsed);
+
+    // Extract props type from first parameter if it's a component
+    const propsType = isComponent && params.length > 0 ? params[0].type : undefined;
+
+    // Determine function type
+    let functionType: FunctionInfo['type'] = 'function';
+    if (isComponent) {
+      functionType = 'react-component';
+    } else if (isHook) {
+      functionType = 'react-hook';
+    } else if (ts.isArrowFunction(node)) {
+      functionType = 'arrow';
+    } else if (isAsync) {
+      functionType = 'async';
+    } else if (ts.isMethodDeclaration(node)) {
+      functionType = 'method';
+    }
 
     return {
       name,
-      type: ts.isArrowFunction(node)
-        ? 'arrow'
-        : isAsync
-        ? 'async'
-        : ts.isMethodDeclaration(node)
-        ? 'method'
-        : 'function',
+      type: functionType,
       params,
       returnType,
       startLine: startLine + 1,
@@ -318,6 +416,15 @@ export class ASTParser {
       isExported,
       isAsync,
       docstring,
+      reactMetadata: (isComponent || isHook || hooksUsed.length > 0 || hasJSX)
+        ? {
+            isComponent,
+            isHook,
+            hooksUsed,
+            propsType,
+            hasJSX,
+          }
+        : undefined,
     };
   }
 
@@ -339,9 +446,35 @@ export class ASTParser {
     const methods: FunctionInfo[] = [];
     const properties: Array<{ name: string; type?: string; isPublic: boolean }> = [];
 
+    // React-specific: detect if this is a React class component
+    const extendsReactComponent = extends_?.some(e =>
+      e.includes('React.Component') ||
+      e.includes('Component') ||
+      e.includes('React.PureComponent') ||
+      e.includes('PureComponent')
+    ) || false;
+
+    const lifecycleMethods: string[] = [];
+    const reactLifecycleMethods = [
+      'componentDidMount',
+      'componentDidUpdate',
+      'componentWillUnmount',
+      'shouldComponentUpdate',
+      'getDerivedStateFromProps',
+      'getSnapshotBeforeUpdate',
+      'componentDidCatch',
+      'render',
+    ];
+
     node.members.forEach((member) => {
       if (ts.isMethodDeclaration(member)) {
-        methods.push(this.extractFunction(member, sourceFile));
+        const method = this.extractFunction(member, sourceFile);
+        methods.push(method);
+
+        // Track lifecycle methods
+        if (reactLifecycleMethods.includes(method.name)) {
+          lifecycleMethods.push(method.name);
+        }
       } else if (ts.isPropertyDeclaration(member)) {
         const isPublic = !member.modifiers?.some(
           (m) =>
@@ -363,6 +496,19 @@ export class ASTParser {
 
     const docstring = this.extractDocstring(node, sourceFile);
 
+    // Extract props/state types for React class components
+    let propsType: string | undefined;
+    let stateType: string | undefined;
+
+    if (extendsReactComponent && extendsClause) {
+      const componentExtends = extendsClause.types[0];
+      if (ts.isExpressionWithTypeArguments(componentExtends) && componentExtends.typeArguments) {
+        // Component<Props, State> or Component<Props>
+        propsType = componentExtends.typeArguments[0]?.getText(sourceFile);
+        stateType = componentExtends.typeArguments[1]?.getText(sourceFile);
+      }
+    }
+
     return {
       name,
       type: 'class',
@@ -374,6 +520,15 @@ export class ASTParser {
       endLine: endLine + 1,
       isExported,
       docstring,
+      reactMetadata: extendsReactComponent
+        ? {
+            isComponent: true,
+            componentType: 'class',
+            propsType,
+            stateType,
+            lifecycle: lifecycleMethods,
+          }
+        : undefined,
     };
   }
 

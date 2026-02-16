@@ -93,8 +93,8 @@ export function CostsClient({ costLogs, awsSnapshots, budget }: CostsClientProps
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Cost Tracking</h1>
-        <p className="text-muted text-sm mt-1">Every dollar tracked, every token counted</p>
+        <h1 className="text-xl font-semibold tracking-tight">Cost Tracking</h1>
+        <p className="text-xs text-muted mt-0.5">Every dollar tracked, every token counted</p>
       </div>
 
       {/* Top row */}

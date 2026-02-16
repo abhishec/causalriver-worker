@@ -86,8 +86,8 @@ export default async function TrainingPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Training</h1>
-          <p className="text-muted text-sm mt-1">
+          <h1 className="text-xl font-semibold tracking-tight">Training</h1>
+          <p className="text-xs text-muted mt-0.5">
             Brain training schedule, run history, and knowledge growth metrics
           </p>
         </div>

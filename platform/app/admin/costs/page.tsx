@@ -1,24 +1,33 @@
-import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
 import { formatUSD, formatTokens, formatNumber } from "@/lib/utils";
+import { StatValue } from "@/components/ui/StatValue";
+import { Card, CardTitle } from "@/components/ui/Card";
+import { Badge } from "@/components/ui/Badge";
 
 export const dynamic = 'force-dynamic';
 
 export const metadata = { title: "Admin - Consolidated Costs" };
 
 export default async function AdminCostsPage() {
-  const supabase = await createClient();
+  const supabase = await createServiceClient();
   const today = new Date().toISOString().split("T")[0];
   const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString();
 
-  const [costResult, awsResult, budgetResult] = await Promise.all([
+  const [costResult, awsResult, budgetResult, orgsResult] = await Promise.all([
     supabase.from("llm_cost_log").select("*").gte("created_at", thirtyDaysAgo).order("created_at", { ascending: false }).limit(1000),
     supabase.from("aws_cost_snapshots").select("*").order("period_start", { ascending: false }).limit(30),
     supabase.from("cost_budget_config").select("*").limit(10),
+    supabase.from("organizations").select("id, name").limit(100),
   ]);
 
   const costLogs = costResult.data || [];
   const awsSnapshots = awsResult.data || [];
   const budgets = budgetResult.data || [];
+  const orgs = orgsResult.data || [];
+
+  // Build org name lookup
+  const orgNameMap = new Map<string, string>();
+  orgs.forEach((o) => orgNameMap.set(o.id, o.name));
 
   // Totals
   const totalLLM = costLogs.reduce((sum, l) => sum + (l.estimated_cost_usd || 0), 0);
@@ -47,38 +56,22 @@ export default async function AdminCostsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Consolidated Costs</h1>
-        <p className="text-muted text-sm mt-1">All costs across all organizations + AWS infrastructure</p>
+        <h1 className="text-xl font-semibold tracking-tight">Consolidated Costs</h1>
+        <p className="text-xs text-muted mt-0.5">All costs across all organizations + AWS infrastructure</p>
       </div>
 
       {/* Top metrics */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="rounded-xl bg-card border border-border-subtle p-5">
-          <div className="text-xs font-medium text-muted uppercase tracking-wider mb-2">Today</div>
-          <div className="text-3xl font-bold">{formatUSD(costToday)}</div>
-          <div className="text-xs text-muted mt-1">{todayLogs.length} LLM calls</div>
-        </div>
-        <div className="rounded-xl bg-card border border-border-subtle p-5">
-          <div className="text-xs font-medium text-muted uppercase tracking-wider mb-2">30-Day LLM</div>
-          <div className="text-3xl font-bold">{formatUSD(totalLLM)}</div>
-          <div className="text-xs text-muted mt-1">{costLogs.length} total calls</div>
-        </div>
-        <div className="rounded-xl bg-card border border-border-subtle p-5">
-          <div className="text-xs font-medium text-muted uppercase tracking-wider mb-2">AWS Infra</div>
-          <div className="text-3xl font-bold">{formatUSD(totalAWS)}</div>
-          <div className="text-xs text-muted mt-1">Fargate + CloudWatch + ECR</div>
-        </div>
-        <div className="rounded-xl bg-card border border-border-subtle p-5">
-          <div className="text-xs font-medium text-muted uppercase tracking-wider mb-2">Combined Total</div>
-          <div className="text-3xl font-bold text-accent">{formatUSD(totalCombined)}</div>
-          <div className="text-xs text-muted mt-1">LLM + AWS</div>
-        </div>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <StatValue label="Today" value={formatUSD(costToday)} subtitle={`${todayLogs.length} LLM calls`} />
+        <StatValue label="30-Day LLM" value={formatUSD(totalLLM)} subtitle={`${formatNumber(costLogs.length)} total calls`} />
+        <StatValue label="AWS Infra" value={formatUSD(totalAWS)} subtitle="Fargate + CloudWatch + ECR" />
+        <StatValue label="Combined Total" value={formatUSD(totalCombined)} subtitle="LLM + AWS" />
       </div>
 
       {/* By Component + By Model */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="rounded-xl bg-card border border-border-subtle p-5">
-          <h3 className="text-sm font-medium mb-4">Cost by Component (All Orgs)</h3>
+        <Card>
+          <CardTitle className="mb-4">Cost by Component (All Orgs)</CardTitle>
           <div className="space-y-3">
             {Object.entries(byComponent).sort((a, b) => b[1].cost - a[1].cost).map(([comp, data]) => (
               <div key={comp} className="flex items-center justify-between">
@@ -87,98 +80,107 @@ export default async function AdminCostsPage() {
                   <span className="text-sm">{comp}</span>
                 </div>
                 <div className="text-right">
-                  <span className="text-sm font-medium">{formatUSD(data.cost)}</span>
-                  <span className="text-xs text-muted ml-2">({data.calls} calls)</span>
+                  <span className="text-sm font-medium tabular-nums">{formatUSD(data.cost)}</span>
+                  <span className="text-xs text-muted ml-2">({formatNumber(data.calls)} calls)</span>
                 </div>
               </div>
             ))}
             {Object.keys(byComponent).length === 0 && <p className="text-sm text-muted">No data yet</p>}
           </div>
-        </div>
+        </Card>
 
-        <div className="rounded-xl bg-card border border-border-subtle p-5">
-          <h3 className="text-sm font-medium mb-4">Cost by Model (All Orgs)</h3>
+        <Card>
+          <CardTitle className="mb-4">Cost by Model (All Orgs)</CardTitle>
           <div className="space-y-3">
             {Object.entries(byModel).sort((a, b) => b[1].cost - a[1].cost).map(([model, data]) => (
               <div key={model} className="flex items-center justify-between">
-                <span className="text-sm font-mono text-xs">{model}</span>
+                <span className="text-xs font-mono">{model}</span>
                 <div className="text-right">
-                  <span className="text-sm font-medium">{formatUSD(data.cost)}</span>
+                  <span className="text-sm font-medium tabular-nums">{formatUSD(data.cost)}</span>
                   <span className="text-xs text-muted ml-2">{formatTokens(data.tokens)} tok</span>
                 </div>
               </div>
             ))}
             {Object.keys(byModel).length === 0 && <p className="text-sm text-muted">No data yet</p>}
           </div>
-        </div>
+        </Card>
       </div>
 
       {/* AWS Breakdown */}
       {awsSnapshots.length > 0 && (
-        <div className="rounded-xl bg-card border border-border-subtle p-5">
-          <h3 className="text-sm font-medium mb-4">AWS Infrastructure Detail</h3>
+        <Card>
+          <CardTitle className="mb-4">AWS Infrastructure Detail</CardTitle>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-xs text-muted border-b border-border-subtle">
-                  <th className="text-left py-2 font-medium">Period</th>
-                  <th className="text-right py-2 font-medium">Fargate</th>
-                  <th className="text-right py-2 font-medium">CloudWatch</th>
-                  <th className="text-right py-2 font-medium">ECR</th>
-                  <th className="text-right py-2 font-medium">CodeBuild</th>
-                  <th className="text-right py-2 font-medium">Data Transfer</th>
-                  <th className="text-right py-2 font-medium">Total</th>
+                <tr className="text-[11px] text-muted uppercase tracking-wider border-b border-border-subtle">
+                  <th className="text-left py-2.5 px-3 font-medium">Period</th>
+                  <th className="text-right py-2.5 px-3 font-medium">Fargate</th>
+                  <th className="text-right py-2.5 px-3 font-medium">CloudWatch</th>
+                  <th className="text-right py-2.5 px-3 font-medium">ECR</th>
+                  <th className="text-right py-2.5 px-3 font-medium">CodeBuild</th>
+                  <th className="text-right py-2.5 px-3 font-medium">Data Xfer</th>
+                  <th className="text-right py-2.5 px-3 font-medium">Total</th>
                 </tr>
               </thead>
               <tbody>
                 {awsSnapshots.slice(0, 10).map((s) => (
-                  <tr key={s.id} className="border-b border-border-subtle hover:bg-surface-hover">
-                    <td className="py-2 font-mono text-xs">{s.period_start}</td>
-                    <td className="py-2 text-right">{formatUSD(s.fargate_cost)}</td>
-                    <td className="py-2 text-right">{formatUSD(s.cloudwatch_cost)}</td>
-                    <td className="py-2 text-right">{formatUSD(s.ecr_cost)}</td>
-                    <td className="py-2 text-right">{formatUSD(s.codebuild_cost)}</td>
-                    <td className="py-2 text-right">{formatUSD(s.data_transfer_cost)}</td>
-                    <td className="py-2 text-right font-medium">{formatUSD(s.total_aws_cost)}</td>
+                  <tr key={s.id} className="border-b border-border-subtle/30 last:border-0 hover:bg-surface-hover transition-colors">
+                    <td className="py-2.5 px-3 font-mono text-xs">{s.period_start}</td>
+                    <td className="py-2.5 px-3 text-right tabular-nums">{formatUSD(s.fargate_cost)}</td>
+                    <td className="py-2.5 px-3 text-right tabular-nums">{formatUSD(s.cloudwatch_cost)}</td>
+                    <td className="py-2.5 px-3 text-right tabular-nums">{formatUSD(s.ecr_cost)}</td>
+                    <td className="py-2.5 px-3 text-right tabular-nums">{formatUSD(s.codebuild_cost)}</td>
+                    <td className="py-2.5 px-3 text-right tabular-nums">{formatUSD(s.data_transfer_cost)}</td>
+                    <td className="py-2.5 px-3 text-right font-medium tabular-nums">{formatUSD(s.total_aws_cost)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-        </div>
+        </Card>
       )}
 
       {/* Budget Config */}
       {budgets.length > 0 && (
-        <div className="rounded-xl bg-card border border-border-subtle p-5">
-          <h3 className="text-sm font-medium mb-4">Budget Configuration</h3>
+        <Card>
+          <CardTitle className="mb-4">Budget Configuration</CardTitle>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-xs text-muted border-b border-border-subtle">
-                  <th className="text-left py-2 font-medium">Org</th>
-                  <th className="text-right py-2 font-medium">Monthly LLM</th>
-                  <th className="text-right py-2 font-medium">Monthly AWS</th>
-                  <th className="text-right py-2 font-medium">Daily LLM</th>
-                  <th className="text-right py-2 font-medium">Alert At</th>
-                  <th className="text-right py-2 font-medium">Hard Stop</th>
+                <tr className="text-[11px] text-muted uppercase tracking-wider border-b border-border-subtle">
+                  <th className="text-left py-2.5 px-3 font-medium">Organization</th>
+                  <th className="text-right py-2.5 px-3 font-medium">Monthly LLM</th>
+                  <th className="text-right py-2.5 px-3 font-medium">Monthly AWS</th>
+                  <th className="text-right py-2.5 px-3 font-medium">Daily LLM</th>
+                  <th className="text-right py-2.5 px-3 font-medium">Alert At</th>
+                  <th className="text-right py-2.5 px-3 font-medium">Hard Stop</th>
                 </tr>
               </thead>
               <tbody>
                 {budgets.map((b) => (
-                  <tr key={b.id} className="border-b border-border-subtle">
-                    <td className="py-2 font-mono text-xs">{b.organization_id?.slice(0, 8)}...</td>
-                    <td className="py-2 text-right">{formatUSD(b.monthly_llm_budget)}</td>
-                    <td className="py-2 text-right">{formatUSD(b.monthly_aws_budget)}</td>
-                    <td className="py-2 text-right">{formatUSD(b.daily_llm_budget)}</td>
-                    <td className="py-2 text-right">{b.alert_threshold_pct}%</td>
-                    <td className="py-2 text-right">{b.hard_stop_pct}%</td>
+                  <tr key={b.id} className="border-b border-border-subtle/30 last:border-0 hover:bg-surface-hover transition-colors">
+                    <td className="py-2.5 px-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">{orgNameMap.get(b.organization_id) || "Unknown"}</span>
+                        <Badge variant="default" size="xs">{b.organization_id?.slice(0, 8)}</Badge>
+                      </div>
+                    </td>
+                    <td className="py-2.5 px-3 text-right tabular-nums">{formatUSD(b.monthly_llm_budget)}</td>
+                    <td className="py-2.5 px-3 text-right tabular-nums">{formatUSD(b.monthly_aws_budget)}</td>
+                    <td className="py-2.5 px-3 text-right tabular-nums">{formatUSD(b.daily_llm_budget)}</td>
+                    <td className="py-2.5 px-3 text-right">
+                      <Badge variant="warning" size="xs">{b.alert_threshold_pct}%</Badge>
+                    </td>
+                    <td className="py-2.5 px-3 text-right">
+                      <Badge variant="danger" size="xs">{b.hard_stop_pct}%</Badge>
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-        </div>
+        </Card>
       )}
     </div>
   );

@@ -83,17 +83,17 @@ interface DashboardData {
 // ─── Agent Display Config ──────────────────────────────────────
 
 const AGENT_COLORS: Record<string, { bg: string; text: string; border: string }> = {
-  trainer: { bg: "bg-blue-500/10", text: "text-blue-400", border: "border-blue-500/20" },
-  consolidation: { bg: "bg-emerald-500/10", text: "text-emerald-400", border: "border-emerald-500/20" },
-  dmn: { bg: "bg-violet-500/10", text: "text-violet-400", border: "border-violet-500/20" },
-  "cost-agent": { bg: "bg-amber-500/10", text: "text-amber-400", border: "border-amber-500/20" },
-  "git-trainer": { bg: "bg-cyan-500/10", text: "text-cyan-400", border: "border-cyan-500/20" },
-  benchmark: { bg: "bg-pink-500/10", text: "text-pink-400", border: "border-pink-500/20" },
-  federation: { bg: "bg-orange-500/10", text: "text-orange-400", border: "border-orange-500/20" },
-  "org-updater": { bg: "bg-teal-500/10", text: "text-teal-400", border: "border-teal-500/20" },
-  "proactive-intelligence": { bg: "bg-rose-500/10", text: "text-rose-400", border: "border-rose-500/20" },
-  security: { bg: "bg-red-500/10", text: "text-red-400", border: "border-red-500/20" },
-  "outcome-resolver": { bg: "bg-indigo-500/10", text: "text-indigo-400", border: "border-indigo-500/20" },
+  trainer: { bg: "bg-accent/10", text: "text-accent", border: "border-accent/20" },
+  consolidation: { bg: "bg-success/10", text: "text-success", border: "border-success/20" },
+  dmn: { bg: "bg-brain-training/10", text: "text-brain-training", border: "border-brain-training/20" },
+  "cost-agent": { bg: "bg-warning/10", text: "text-warning", border: "border-warning/20" },
+  "git-trainer": { bg: "bg-brain-discovery/10", text: "text-brain-discovery", border: "border-brain-discovery/20" },
+  benchmark: { bg: "bg-info/10", text: "text-info", border: "border-info/20" },
+  federation: { bg: "bg-brain-alert/10", text: "text-brain-alert", border: "border-brain-alert/20" },
+  "org-updater": { bg: "bg-brain-active/10", text: "text-brain-active", border: "border-brain-active/20" },
+  "proactive-intelligence": { bg: "bg-danger/10", text: "text-danger", border: "border-danger/20" },
+  security: { bg: "bg-danger/10", text: "text-danger", border: "border-danger/20" },
+  "outcome-resolver": { bg: "bg-accent/10", text: "text-accent", border: "border-accent/20" },
 };
 
 const AGENT_ICONS: Record<string, string> = {

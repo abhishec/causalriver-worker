@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
 import { formatNumber, formatUSD } from "@/lib/utils";
 import { StatValue } from "@/components/ui/StatValue";
 import { Badge } from "@/components/ui/Badge";
@@ -10,7 +10,7 @@ const CORE_ORG_ID = "00000000-0000-4000-a000-000000000001";
 export const metadata = { title: "Admin - Core Brain" };
 
 export default async function AdminBrainCorePage() {
-  const supabase = await createClient();
+  const supabase = await createServiceClient();
 
   const [snapshotsResult, signalsResult, edgesResult, memoriesResult, patternsResult] = await Promise.all([
     supabase.from("brain_daily_snapshots").select("*").eq("organization_id", CORE_ORG_ID).order("snapshot_date", { ascending: false }).limit(14),

@@ -112,8 +112,8 @@ export function PredictionsClient({ predictions, accuracyTrend }: PredictionsCli
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold">Prediction Tracker</h1>
-        <p className="text-muted text-sm mt-1">
+        <h1 className="text-xl font-semibold tracking-tight">Prediction Tracker</h1>
+        <p className="text-xs text-muted mt-0.5">
           Track the brain&apos;s prediction accuracy and verification status
         </p>
       </div>
