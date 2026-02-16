@@ -6,6 +6,7 @@
  * - Python (via tree-sitter-python)
  * - Go (via tree-sitter-go)
  * - Scala (via tree-sitter-scala) [Phase 3]
+ * - Java (via tree-sitter-java) [Phase 3]
  *
  * Extracts:
  * - Functions/methods
@@ -26,6 +27,7 @@ let Parser: any;
 let TreeSitterPython: any;
 let TreeSitterGo: any;
 let TreeSitterScala: any;
+let TreeSitterJava: any;
 
 async function ensureTreeSitter(): Promise<void> {
   if (!Parser) {
@@ -51,6 +53,13 @@ async function ensureTreeSitterScala(): Promise<void> {
   await ensureTreeSitter();
   if (!TreeSitterScala) {
     TreeSitterScala = (await import('tree-sitter-scala')).default;
+  }
+}
+
+async function ensureTreeSitterJava(): Promise<void> {
+  await ensureTreeSitter();
+  if (!TreeSitterJava) {
+    TreeSitterJava = (await import('tree-sitter-java')).default;
   }
 }
 
@@ -94,7 +103,7 @@ export interface ExportInfo {
 }
 
 export interface CodeStructure {
-  language: 'typescript' | 'javascript' | 'python' | 'go' | 'scala';
+  language: 'typescript' | 'javascript' | 'python' | 'go' | 'scala' | 'java';
   functions: FunctionInfo[];
   classes: ClassInfo[];
   imports: ImportInfo[];
@@ -115,6 +124,7 @@ export class ASTParser {
   private pythonParser: any = null;
   private goParser: any = null;
   private scalaParser: any = null;
+  private javaParser: any = null;
 
   constructor() {
     // Initialize tree-sitter parsers lazily
@@ -130,7 +140,7 @@ export class ASTParser {
    */
   async parse(
     code: string,
-    language: 'typescript' | 'javascript' | 'python' | 'go' | 'scala',
+    language: 'typescript' | 'javascript' | 'python' | 'go' | 'scala' | 'java',
     filePath?: string
   ): Promise<CodeStructure> {
     switch (language) {
@@ -143,6 +153,8 @@ export class ASTParser {
         return this.parseGo(code, filePath);
       case 'scala':
         return this.parseScala(code, filePath);
+      case 'java':
+        return this.parseJava(code, filePath);
       default:
         throw new Error(`Unsupported language: ${language}`);
     }
@@ -1231,6 +1243,527 @@ export class ASTParser {
 
     return {
       language: 'scala',
+      functions,
+      classes,
+      imports,
+      exports,
+      dependencies: Array.from(dependencies),
+      metrics: {
+        totalLines: lines.length,
+        codeLines: lines.filter((l) => l.trim().length > 0).length,
+        commentLines,
+        complexity,
+      },
+    };
+  }
+
+  /**
+   * Parse Java source code
+   *
+   * Extracts:
+   * - Classes, interfaces, enums, records
+   * - Methods with visibility modifiers (public, private, protected, package-private)
+   * - Fields with modifiers and annotations
+   * - Imports (static and regular)
+   * - Annotations (@Override, @Deprecated, etc.)
+   * - Generic type parameters
+   * - Complexity metrics
+   */
+  private async parseJava(code: string, filePath?: string): Promise<CodeStructure> {
+    await ensureTreeSitterJava();
+    if (!this.javaParser) {
+      this.javaParser = new Parser();
+      this.javaParser.setLanguage(TreeSitterJava);
+    }
+
+    const tree = this.javaParser.parse(code);
+    const rootNode = tree.rootNode;
+
+    const functions: FunctionInfo[] = [];
+    const classes: ClassInfo[] = [];
+    const imports: ImportInfo[] = [];
+    const exports: ExportInfo[] = [];
+    const dependencies = new Set<string>();
+    let complexity = 0;
+    let commentLines = 0;
+
+    // Helper to extract text
+    const getText = (node: any) => code.substring(node.startIndex, node.endIndex);
+
+    // Helper to get line number
+    const getLineNumber = (node: any) => node.startPosition.row + 1;
+
+    // Helper to extract visibility modifier
+    const getVisibility = (node: any): 'public' | 'private' | 'protected' | 'package' => {
+      for (let i = 0; i < node.childCount; i++) {
+        const child = node.child(i);
+        if (child) {
+          const childText = getText(child);
+          if (childText === 'public') return 'public';
+          if (childText === 'private') return 'private';
+          if (childText === 'protected') return 'protected';
+        }
+      }
+      return 'package'; // Java package-private default
+    };
+
+    // Helper to check if node is public
+    const isPublic = (node: any): boolean => getVisibility(node) === 'public';
+
+    // Helper to check if method is static
+    const isStatic = (node: any): boolean => {
+      for (let i = 0; i < node.childCount; i++) {
+        const child = node.child(i);
+        if (child && getText(child) === 'static') return true;
+      }
+      return false;
+    };
+
+    // Helper to extract annotations
+    const getAnnotations = (node: any): string[] => {
+      const annotations: string[] = [];
+
+      // Look for modifiers node which contains annotations
+      for (let i = 0; i < node.childCount; i++) {
+        const child = node.child(i);
+        if (child && child.type === 'modifiers') {
+          // Extract annotations from modifiers
+          for (let j = 0; j < child.childCount; j++) {
+            const modifier = child.child(j);
+            if (modifier && (modifier.type === 'marker_annotation' || modifier.type === 'annotation')) {
+              // Extract annotation name (first identifier after @)
+              const annText = getText(modifier);
+              const match = annText.match(/@(\w+)/);
+              if (match) {
+                annotations.push(match[1]);
+              }
+            }
+          }
+        }
+      }
+      return annotations;
+    };
+
+    // Helper to extract scoped_identifier text
+    const getScopedIdentifier = (node: any): string => {
+      if (node.type === 'identifier') {
+        return getText(node);
+      }
+      if (node.type === 'scoped_identifier') {
+        let result = '';
+        for (let i = 0; i < node.childCount; i++) {
+          const child = node.child(i);
+          if (child) {
+            if (child.type === 'scoped_identifier' || child.type === 'identifier') {
+              result += getScopedIdentifier(child);
+            } else if (child.type === '.') {
+              result += '.';
+            }
+          }
+        }
+        return result;
+      }
+      return getText(node);
+    };
+
+    // Recursive walker
+    const walk = (node: any) => {
+      // Extract imports
+      if (node.type === 'import_declaration') {
+        // Find scoped_identifier child
+        let scopedId = null;
+        for (let i = 0; i < node.childCount; i++) {
+          const child = node.child(i);
+          if (child && (child.type === 'scoped_identifier' || child.type === 'identifier')) {
+            scopedId = child;
+            break;
+          }
+        }
+
+        if (scopedId) {
+          const source = getScopedIdentifier(scopedId);
+          const isStaticImport = getText(node).includes('static');
+
+          imports.push({
+            source,
+            type: 'import',
+            imports: [{ name: source.split('.').pop() || '*' }],
+            isTypeOnly: false,
+          });
+
+          // Extract package dependency
+          const packageName = source.split('.').slice(0, -1).join('.');
+          if (packageName) {
+            dependencies.add(packageName);
+          }
+        }
+      }
+
+      // Extract package declaration for exports
+      if (node.type === 'package_declaration') {
+        const packagePath = node.childForFieldName('name');
+        if (packagePath) {
+          const packageName = getText(packagePath);
+          dependencies.add(packageName);
+        }
+      }
+
+      // Extract methods (standalone and within classes)
+      if (node.type === 'method_declaration') {
+        // Find identifier (method name) and type nodes
+        let nameNode = null;
+        let returnTypeNode = null;
+        let paramsNode = null;
+
+        for (let i = 0; i < node.childCount; i++) {
+          const child = node.child(i);
+          if (!child) continue;
+
+          if (child.type === 'identifier' && !nameNode) {
+            nameNode = child;
+          } else if (child.type === 'formal_parameters') {
+            paramsNode = child;
+          } else if (['type_identifier', 'void_type', 'integral_type', 'floating_point_type', 'boolean_type'].includes(child.type) && !returnTypeNode) {
+            returnTypeNode = child;
+          } else if (child.type === 'generic_type' && !returnTypeNode) {
+            returnTypeNode = child;
+          }
+        }
+
+        if (nameNode) {
+          const name = getText(nameNode);
+          const params: Array<{ name: string; type?: string }> = [];
+
+          // Extract parameters
+          if (paramsNode) {
+            for (let i = 0; i < paramsNode.childCount; i++) {
+              const param = paramsNode.child(i);
+              if (param && param.type === 'formal_parameter') {
+                let paramType = null;
+                let paramName = null;
+
+                for (let j = 0; j < param.childCount; j++) {
+                  const pChild = param.child(j);
+                  if (!pChild) continue;
+
+                  if (pChild.type === 'identifier') {
+                    paramName = pChild;
+                  } else if (['type_identifier', 'integral_type', 'floating_point_type', 'boolean_type', 'generic_type'].includes(pChild.type)) {
+                    paramType = pChild;
+                  }
+                }
+
+                if (paramName) {
+                  params.push({
+                    name: getText(paramName),
+                    type: paramType ? getText(paramType) : undefined,
+                  });
+                }
+              }
+            }
+          }
+
+          // Extract return type
+          const returnType = returnTypeNode ? getText(returnTypeNode) : 'void';
+
+          // Calculate complexity (count decision points)
+          let methodComplexity = 1;
+          const countDecisionPoints = (n: any) => {
+            if (['if_statement', 'switch_expression', 'for_statement', 'while_statement', 'do_statement', 'catch_clause', 'ternary_expression', 'case'].includes(n.type)) {
+              methodComplexity++;
+            }
+            for (let i = 0; i < n.childCount; i++) {
+              const child = n.child(i);
+              if (child) countDecisionPoints(child);
+            }
+          };
+          const bodyNode = node.childForFieldName('body');
+          if (bodyNode) {
+            countDecisionPoints(bodyNode);
+          }
+          complexity += methodComplexity;
+
+          // Extract docstring (Javadoc)
+          let docstring: string | undefined;
+          if (node.previousNamedSibling && node.previousNamedSibling.type === 'block_comment') {
+            docstring = getText(node.previousNamedSibling);
+          }
+
+          const annotations = getAnnotations(node);
+
+          functions.push({
+            name,
+            type: 'method',
+            params,
+            returnType,
+            startLine: getLineNumber(node),
+            endLine: getLineNumber(node) + getText(node).split('\n').length - 1,
+            complexity: methodComplexity,
+            isExported: isPublic(node),
+            isAsync: false, // Java doesn't have async keyword (uses CompletableFuture)
+            docstring: docstring || (annotations.length > 0 ? `Annotations: ${annotations.join(', ')}` : undefined),
+          });
+        }
+      }
+
+      // Extract classes, interfaces, enums, records
+      if (['class_declaration', 'interface_declaration', 'enum_declaration', 'record_declaration'].includes(node.type)) {
+        // Find identifier (class name) and body nodes
+        let nameNode = null;
+        let bodyNode = null;
+        let typeParamsNode = null;
+
+        for (let i = 0; i < node.childCount; i++) {
+          const child = node.child(i);
+          if (!child) continue;
+
+          if (child.type === 'identifier' && !nameNode) {
+            nameNode = child;
+          } else if (child.type === 'class_body' || child.type === 'interface_body' || child.type === 'enum_body') {
+            bodyNode = child;
+          } else if (child.type === 'type_parameters') {
+            typeParamsNode = child;
+          }
+        }
+
+        if (nameNode) {
+          const name = getText(nameNode);
+          const methods: FunctionInfo[] = [];
+          const properties: Array<{ name: string; type?: string; isPublic: boolean }> = [];
+
+          // Extract extends/implements
+          const extendsClause: string[] = [];
+          const implementsClause: string[] = [];
+
+          // Find superclass node (not a field, but a child with type 'superclass')
+          for (let i = 0; i < node.childCount; i++) {
+            const child = node.child(i);
+            if (child && child.type === 'superclass') {
+              // Find type_identifier within superclass
+              for (let j = 0; j < child.childCount; j++) {
+                const typeNode = child.child(j);
+                if (typeNode && typeNode.type === 'type_identifier') {
+                  extendsClause.push(getText(typeNode));
+                  break;
+                }
+              }
+            }
+          }
+
+          // Find super_interfaces node
+          for (let i = 0; i < node.childCount; i++) {
+            const child = node.child(i);
+            if (child && child.type === 'super_interfaces') {
+              // Find type_list within super_interfaces
+              for (let j = 0; j < child.childCount; j++) {
+                const typeList = child.child(j);
+                if (typeList && typeList.type === 'type_list') {
+                  // Extract all type_identifier or generic_type nodes from type_list
+                  for (let k = 0; k < typeList.childCount; k++) {
+                    const typeNode = typeList.child(k);
+                    if (typeNode && (typeNode.type === 'type_identifier' || typeNode.type === 'generic_type')) {
+                      implementsClause.push(getText(typeNode));
+                    }
+                  }
+                  break;
+                }
+              }
+            }
+          }
+
+          // Extract type parameters (generics)
+          let genericParams: string | undefined;
+          if (typeParamsNode) {
+            genericParams = getText(typeParamsNode);
+          }
+
+          // Extract members (methods and fields) - bodyNode already extracted above
+          if (bodyNode) {
+            const extractMembers = (n: any) => {
+              // Extract methods
+              if (n.type === 'method_declaration') {
+                let methodName = null;
+                let methodReturnType = null;
+                let methodParamsNode = null;
+                let methodBody = null;
+
+                // Iterate through method_declaration children
+                for (let i = 0; i < n.childCount; i++) {
+                  const child = n.child(i);
+                  if (!child) continue;
+
+                  if (child.type === 'identifier' && !methodName) {
+                    methodName = child;
+                  } else if (child.type === 'formal_parameters') {
+                    methodParamsNode = child;
+                  } else if (['type_identifier', 'void_type', 'integral_type', 'floating_point_type', 'boolean_type', 'generic_type'].includes(child.type) && !methodReturnType) {
+                    methodReturnType = child;
+                  } else if (child.type === 'block') {
+                    methodBody = child;
+                  }
+                }
+
+                if (methodName) {
+                  const methodParams: Array<{ name: string; type?: string }> = [];
+                  if (methodParamsNode) {
+                    for (let i = 0; i < methodParamsNode.childCount; i++) {
+                      const param = methodParamsNode.child(i);
+                      if (param && param.type === 'formal_parameter') {
+                        let pType = null;
+                        let pName = null;
+
+                        for (let j = 0; j < param.childCount; j++) {
+                          const pChild = param.child(j);
+                          if (!pChild) continue;
+
+                          if (pChild.type === 'identifier') {
+                            pName = pChild;
+                          } else if (['type_identifier', 'integral_type', 'floating_point_type', 'boolean_type', 'generic_type'].includes(pChild.type)) {
+                            pType = pChild;
+                          }
+                        }
+
+                        if (pName) {
+                          methodParams.push({
+                            name: getText(pName),
+                            type: pType ? getText(pType) : undefined,
+                          });
+                        }
+                      }
+                    }
+                  }
+
+                  let methodComplexity = 1;
+                  const countDec = (node: any) => {
+                    if (['if_statement', 'switch_expression', 'for_statement', 'while_statement', 'do_statement', 'catch_clause', 'ternary_expression'].includes(node.type)) {
+                      methodComplexity++;
+                    }
+                    for (let i = 0; i < node.childCount; i++) {
+                      const child = node.child(i);
+                      if (child) countDec(child);
+                    }
+                  };
+                  if (methodBody) {
+                    countDec(methodBody);
+                  }
+                  complexity += methodComplexity;
+
+                  // Extract method docstring
+                  let methodDoc: string | undefined;
+                  if (n.previousNamedSibling && n.previousNamedSibling.type === 'block_comment') {
+                    methodDoc = getText(n.previousNamedSibling);
+                  }
+
+                  const methodAnnotations = getAnnotations(n);
+
+                  methods.push({
+                    name: getText(methodName),
+                    type: 'method',
+                    params: methodParams,
+                    returnType: methodReturnType ? getText(methodReturnType) : 'void',
+                    startLine: getLineNumber(n),
+                    endLine: getLineNumber(n) + getText(n).split('\n').length - 1,
+                    complexity: methodComplexity,
+                    isExported: isPublic(n),
+                    isAsync: false,
+                    docstring: methodDoc || (methodAnnotations.length > 0 ? `Annotations: ${methodAnnotations.join(', ')}` : undefined),
+                  });
+                }
+              }
+
+              // Extract fields
+              if (n.type === 'field_declaration') {
+                let fieldType = null;
+                let fieldName = null;
+
+                // Iterate through field_declaration children
+                for (let i = 0; i < n.childCount; i++) {
+                  const child = n.child(i);
+                  if (!child) continue;
+
+                  if (['type_identifier', 'integral_type', 'floating_point_type', 'boolean_type', 'generic_type'].includes(child.type) && !fieldType) {
+                    fieldType = child;
+                  } else if (child.type === 'variable_declarator') {
+                    // Extract identifier from variable_declarator
+                    for (let j = 0; j < child.childCount; j++) {
+                      const vChild = child.child(j);
+                      if (vChild && vChild.type === 'identifier') {
+                        fieldName = vChild;
+                        break;
+                      }
+                    }
+                  }
+                }
+
+                if (fieldName) {
+                  const fieldAnnotations = getAnnotations(n);
+                  properties.push({
+                    name: getText(fieldName),
+                    type: fieldType ? getText(fieldType) : undefined,
+                    isPublic: isPublic(n),
+                  });
+                }
+              }
+
+              for (let i = 0; i < n.childCount; i++) {
+                const child = n.child(i);
+                if (child) extractMembers(child);
+              }
+            };
+            extractMembers(bodyNode);
+          }
+
+          // Extract class docstring
+          let classDoc: string | undefined;
+          if (node.previousNamedSibling && node.previousNamedSibling.type === 'block_comment') {
+            classDoc = getText(node.previousNamedSibling);
+          }
+
+          const classAnnotations = getAnnotations(node);
+
+          classes.push({
+            name: genericParams ? `${name}${genericParams}` : name,
+            type: node.type === 'interface_declaration' ? 'interface' : 'class',
+            extends: extendsClause.length > 0 ? extendsClause : undefined,
+            implements: implementsClause.length > 0 ? implementsClause : undefined,
+            methods,
+            properties,
+            startLine: getLineNumber(node),
+            endLine: getLineNumber(node) + getText(node).split('\n').length - 1,
+            isExported: isPublic(node),
+            docstring: classDoc || (classAnnotations.length > 0 ? `Annotations: ${classAnnotations.join(', ')}` : undefined),
+          });
+
+          // Add class to exports if public
+          if (isPublic(node)) {
+            exports.push({
+              name,
+              type: 'named',
+            });
+          }
+        }
+      }
+
+      // Recurse
+      for (let i = 0; i < node.childCount; i++) {
+        const child = node.child(i);
+        if (child) walk(child);
+      }
+    };
+
+    walk(rootNode);
+
+    // Count comment lines
+    const lines = code.split('\n');
+    lines.forEach((line) => {
+      const trimmed = line.trim();
+      if (trimmed.startsWith('//') || trimmed.startsWith('/*') || trimmed.startsWith('*')) {
+        commentLines++;
+      }
+    });
+
+    return {
+      language: 'java',
       functions,
       classes,
       imports,

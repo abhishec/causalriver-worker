@@ -858,6 +858,38 @@ export {
   registerEnhancedSoftwareEngineeringDomains,
 } from './orchestrator/action-domains-software-engineering-enhanced';
 
+// SE-aaS Cognitive Domains — Impact Analysis, Data Lineage, Log Query
+export {
+  impactAnalysisDomain,
+  type ImpactAnalysisRequest,
+  type ImpactAnalysisResult,
+  type AffectedComponent,
+  type DependencyChain,
+  type TestCoverageGap,
+} from './orchestrator/action-domains-impact-analysis';
+
+export {
+  dataLineageDomain,
+  type DataLineageRequest,
+  type DataLineageResult,
+  type EntityInfo,
+  type ColumnInfo,
+  type Relationship,
+  type LineagePath,
+  type DataQualityRisk,
+} from './orchestrator/action-domains-data-lineage';
+
+export {
+  logQueryDomain,
+  type LogQueryRequest,
+  type LogQueryResult,
+  type MatchedLogEntry,
+  type LogPattern,
+  type ErrorCluster,
+  type AnomalyEvent,
+  type RecommendedAlert,
+} from './orchestrator/action-domains-log-query';
+
 // GitHub Connector Enhanced (Phase 2) — Real GitHub API integration for PR automation
 export {
   GitHubConnectorEnhanced,

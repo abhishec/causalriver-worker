@@ -9,6 +9,7 @@ const sections = [
     links: [
       { label: "Overview", href: "/docs" },
       { label: "Quickstart", href: "/docs/quickstart" },
+      { label: "Troubleshooting", href: "/docs/troubleshooting" },
     ],
   },
   {

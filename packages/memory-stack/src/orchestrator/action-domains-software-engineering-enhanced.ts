@@ -23,6 +23,9 @@ import {
 import { createASTParser, type CodeStructure } from '../parsers/ast-parser';
 import { createClaudeCodeGenerator, type GenerationContext } from '../generators/claude-code-generator';
 import { createGitHubConnector, type GitHubConfig } from '../connectors/github-connector-enhanced';
+import { impactAnalysisDomain } from './action-domains-impact-analysis';
+import { dataLineageDomain } from './action-domains-data-lineage';
+import { logQueryDomain } from './action-domains-log-query';
 
 // ============================================================================
 // ENHANCED DOMAIN 1: CODEBASE-COMPREHEND (with AST parsing)
@@ -397,6 +400,9 @@ ${result.narrative}`;
 export const ALL_ENHANCED_SE_DOMAINS = [
   codebaseComprehendEnhancedDomain,
   codeGenerateEnhancedDomain,
+  impactAnalysisDomain,
+  dataLineageDomain,
+  logQueryDomain,
 ];
 
 /**
