@@ -101,7 +101,7 @@ export default function AdminSystemPage() {
                   <td className="py-2 font-mono text-xs">{rule.name}</td>
                   <td className="py-2 font-mono text-xs text-muted">{rule.schedule}</td>
                   <td className="py-2">
-                    <Badge variant={rule.status === "ENABLED" ? "success" : "error"} size="xs">
+                    <Badge variant={rule.status === "ENABLED" ? "success" : "danger"} size="xs">
                       {rule.status}
                     </Badge>
                   </td>

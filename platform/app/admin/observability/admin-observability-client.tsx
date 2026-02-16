@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { TabGroup } from "@/components/ui/TabGroup";
 import { StatValue } from "@/components/ui/StatValue";
-import { TimeRangeSelector } from "@/components/ui/TimeRangeSelector";
+import { TimeRangeSelector, type TimeRange } from "@/components/ui/TimeRangeSelector";
 import { DataTable } from "@/components/ui/DataTable";
 import { Badge } from "@/components/ui/Badge";
 import { StatusDot } from "@/components/ui/StatusDot";
@@ -27,7 +27,7 @@ export function AdminObservabilityClient({
   alerts,
 }: AdminObservabilityClientProps) {
   const [activeTab, setActiveTab] = useState("overview");
-  const [timeRange, setTimeRange] = useState("7d");
+  const [timeRange, setTimeRange] = useState<TimeRange>("7d");
 
   const activeAlerts = alerts.filter((a) => a.status === "active" || a.status === "triggered").length;
   const errorOps = connectorOps.filter((o) => o.status === "error").length;

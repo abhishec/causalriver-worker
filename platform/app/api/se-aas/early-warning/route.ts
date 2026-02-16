@@ -19,11 +19,11 @@ export async function GET(request: NextRequest) {
       ? domainsParam.split(",").map(d => d.trim())
       : ["backend", "frontend", "infrastructure"];
 
-    const report = runEarlyWarningSystem({
+    const report = await runEarlyWarningSystem({
+      supabase: auth.supabase,
+      organizationId: auth.organizationId,
       domains,
       lookbackDays,
-      velocityData: [],
-      bottleneckData: [],
     });
 
     const summary = getEarlyWarningSummary(report);

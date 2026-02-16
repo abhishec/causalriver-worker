@@ -16,7 +16,14 @@ export default async function AdminUsersPage() {
     .from("org_members")
     .select("id, user_id, role, is_platform_admin, created_at, organizations(name, slug)")
     .order("created_at", { ascending: false })
-    .limit(500);
+    .limit(500) as { data: Array<{
+      id: string;
+      user_id: string;
+      role: string;
+      is_platform_admin: boolean;
+      created_at: string;
+      organizations: { name: string; slug: string } | null;
+    }> | null };
 
   // Fetch all auth users to get emails and last sign-in
   const { data: authData } = await supabase.auth.admin.listUsers({ perPage: 500 });
@@ -51,7 +58,7 @@ export default async function AdminUsersPage() {
     const hoursSince = (Date.now() - new Date(u.lastSignIn).getTime()) / 3600000;
     return hoursSince < 24;
   }).length;
-  const totalOrgs = new Set(enrichedUsers.map((u) => (u.organizations as any)?.name).filter(Boolean)).size;
+  const totalOrgs = new Set(enrichedUsers.map((u) => u.organizations?.name).filter(Boolean)).size;
 
   return (
     <div className="space-y-6">

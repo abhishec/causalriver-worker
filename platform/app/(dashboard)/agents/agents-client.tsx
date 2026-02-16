@@ -344,7 +344,7 @@ export function AgentsClient() {
                 </div>
                 <div className="flex items-center gap-3">
                   <Badge variant="default" size="xs">P{task.priority}</Badge>
-                  <Badge variant={task.status === "completed" ? "success" : task.status === "failed" ? "error" : "default"} size="xs">
+                  <Badge variant={task.status === "completed" ? "success" : task.status === "failed" ? "danger" : "default"} size="xs">
                     {task.status}
                   </Badge>
                 </div>
@@ -514,7 +514,7 @@ function RunTimeline({
                 <div className="text-muted font-mono tabular-nums">{run.tokensUsed > 0 ? run.tokensUsed.toLocaleString() : "--"}</div>
                 <div>
                   <Badge
-                    variant={run.status === "success" ? "success" : run.status === "partial" ? "warning" : "error"}
+                    variant={run.status === "success" ? "success" : run.status === "partial" ? "warning" : "danger"}
                     size="xs"
                   >
                     {run.status}

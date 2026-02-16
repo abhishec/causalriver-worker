@@ -64,12 +64,12 @@ export async function POST(req: NextRequest) {
         window_type: '14day',
         team_id: teamId || null,
         repo_id: null, // Organization-level
-        prs_merged: latestMetrics.deployVelocity || 0,
-        mean_pr_cycle_time_hours: latestMetrics.meanCycleTime || null,
-        pr_cycle_time_variance: latestMetrics.cycleTimeVariance || null,
-        mean_review_latency_hours: latestMetrics.meanReviewLatency || null,
-        open_pr_count: latestMetrics.openPRCount || 0,
-        prs_per_engineer: latestMetrics.prsPerEngineer || null,
+        prs_merged: latestMetrics.prsMerged || 0,
+        mean_pr_cycle_time_hours: latestMetrics.avgReviewTimeHours || null,
+        pr_cycle_time_variance: null,
+        mean_review_latency_hours: latestMetrics.avgReviewTimeHours || null,
+        open_pr_count: latestMetrics.wipCount || 0,
+        prs_per_engineer: null,
       }, {
         onConflict: 'organization_id,snapshot_date,window_type,team_id,repo_id',
         ignoreDuplicates: false,
@@ -81,19 +81,20 @@ export async function POST(req: NextRequest) {
     // ========================================================================
     if (report.bottleneckRisks && report.bottleneckRisks.length > 0) {
       for (const bottleneck of report.bottleneckRisks) {
+        const topBottleneck = bottleneck.bottlenecks[0] || null;
         await supabase.from('bottleneck_snapshots').upsert({
           organization_id: organizationId,
           snapshot_date: new Date().toISOString().split('T')[0],
           window_start: new Date(Date.now() - lookbackDays * 86400000).toISOString(),
           window_end: new Date().toISOString(),
           team_id: teamId || null,
-          top_reviewer_id: bottleneck.topReviewer?.engineerId || null,
-          top_reviewer_share: bottleneck.reviewerConcentration?.topReviewerShare || null,
-          reviewer_gini_coefficient: bottleneck.reviewerConcentration?.giniCoefficient || null,
-          reviewer_hhi: bottleneck.reviewerConcentration?.hhi || null,
-          max_betweenness_centrality: bottleneck.graphMetrics?.maxBetweennessCentrality || null,
-          bottleneck_risk_score: bottleneck.riskScore || 0,
-          risk_level: bottleneck.riskLevel || 'low',
+          top_reviewer_id: topBottleneck?.contributorId || null,
+          top_reviewer_share: topBottleneck?.expertiseShare || null,
+          reviewer_gini_coefficient: bottleneck.giniCoefficient || null,
+          reviewer_hhi: null,
+          max_betweenness_centrality: topBottleneck?.centralityScore || null,
+          bottleneck_risk_score: bottleneck.top3Concentration || 0,
+          risk_level: topBottleneck?.severity || 'low',
         }, {
           onConflict: 'organization_id,snapshot_date,team_id',
           ignoreDuplicates: false,

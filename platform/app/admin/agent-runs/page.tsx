@@ -407,7 +407,7 @@ function AgentView({ byAgent, onSelectAgent }: { byAgent: AgentBreakdown[]; onSe
               </td>
               <td className="py-3 px-3 text-center">
                 <Badge
-                  variant={agent.successRate >= 80 ? "success" : agent.successRate >= 50 ? "warning" : "error"}
+                  variant={agent.successRate >= 80 ? "success" : agent.successRate >= 50 ? "warning" : "danger"}
                   size="xs"
                 >
                   {agent.successRate}%
@@ -474,7 +474,7 @@ function TimelineView({
                 <div className="text-muted font-mono tabular-nums">{formatDuration(run.durationMs)}</div>
                 <div>
                   <Badge
-                    variant={run.status === "success" ? "success" : run.status === "partial" ? "warning" : "error"}
+                    variant={run.status === "success" ? "success" : run.status === "partial" ? "warning" : "danger"}
                     size="xs"
                   >
                     {run.status}

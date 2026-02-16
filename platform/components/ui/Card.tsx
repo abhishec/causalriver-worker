@@ -7,6 +7,7 @@ interface CardProps {
   className?: string;
   variant?: "default" | "elevated" | "interactive" | "brain-highlight";
   padding?: "none" | "sm" | "md" | "lg";
+  onClick?: () => void;
 }
 
 const variantStyles = {
@@ -23,9 +24,13 @@ const paddingStyles = {
   lg: "p-6",
 };
 
-export function Card({ children, className, variant = "default", padding = "md" }: CardProps) {
+export function Card({ children, className, variant = "default", padding = "md", onClick }: CardProps) {
   return (
-    <div className={cn("rounded-xl", variantStyles[variant], paddingStyles[padding], className)}>
+    <div
+      className={cn("rounded-xl", variantStyles[variant], paddingStyles[padding], className)}
+      onClick={onClick}
+      role={onClick ? "button" : undefined}
+    >
       {children}
     </div>
   );

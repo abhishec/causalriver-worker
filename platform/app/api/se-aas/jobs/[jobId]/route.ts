@@ -20,7 +20,7 @@ export async function GET(
       return createSeAaSError(request, "Job not found", 404);
     }
 
-    return createSeAaSResponse(request, status);
+    return createSeAaSResponse(request, status as unknown as Record<string, unknown>);
   } catch (err: any) {
     if (err.status) {
       return createSeAaSError(request, err.error, err.status);

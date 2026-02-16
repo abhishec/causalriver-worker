@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { TabGroup } from "@/components/ui/TabGroup";
 import { StatValue } from "@/components/ui/StatValue";
-import { TimeRangeSelector } from "@/components/ui/TimeRangeSelector";
+import { TimeRangeSelector, type TimeRange } from "@/components/ui/TimeRangeSelector";
 import { Card, CardTitle } from "@/components/ui/Card";
 import { DataTable } from "@/components/ui/DataTable";
 import { Badge } from "@/components/ui/Badge";
@@ -30,7 +30,7 @@ export function ObservabilityClient({
   alerts,
 }: ObservabilityClientProps) {
   const [activeTab, setActiveTab] = useState("pipeline");
-  const [timeRange, setTimeRange] = useState("7d");
+  const [timeRange, setTimeRange] = useState<TimeRange>("7d");
 
   // Summary stats
   const totalSignals = signalIngestion.length;

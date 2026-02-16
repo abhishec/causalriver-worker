@@ -9,7 +9,10 @@
  * @module lib/brain/event-bus-wiring
  */
 
-import { CausalEventBus, type CausalEvent } from '@nexus-ai/memory-stack';
+import { createEventBus, type CausalEvent } from '@nexus-ai/memory-stack';
+
+/** Type for an event bus instance returned by createEventBus */
+type CausalEventBus = ReturnType<typeof createEventBus>;
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 /**
@@ -35,45 +38,45 @@ export function initializeSeAaSEventBusWiring(
   supabase: SupabaseClient
 ): void {
   // Subscribe to SE-aaS domain execution events
-  eventBus.subscribe(
-    async (events: CausalEvent[]) => {
-      await handleSeAaSExecutionEvents(events, supabase);
-    },
-    {
+  eventBus.subscribe({
+    filter: {
       domains: ['se-aas'],
       eventTypes: ['outcome', 'feedback'],
-    }
-  );
+    },
+    handler: async (events: CausalEvent[]) => {
+      await handleSeAaSExecutionEvents(events, supabase);
+    },
+  });
 
   // Subscribe for feedback loop learning
-  eventBus.subscribe(
-    async (events: CausalEvent[]) => {
+  eventBus.subscribe({
+    filter: {
+      eventTypes: ['feedback'],
+    },
+    handler: async (events: CausalEvent[]) => {
       await handleFeedbackLoopEvents(events, supabase);
     },
-    {
-      eventTypes: ['feedback'],
-    }
-  );
+  });
 
   // Subscribe for continuous learning
-  eventBus.subscribe(
-    async (events: CausalEvent[]) => {
+  eventBus.subscribe({
+    filter: {
+      eventTypes: ['observation', 'observation_rules_extracted'],
+    },
+    handler: async (events: CausalEvent[]) => {
       await handleContinuousLearningEvents(events, supabase);
     },
-    {
-      eventTypes: ['observation', 'observation_rules_extracted'],
-    }
-  );
+  });
 
   // Subscribe for threshold optimization
-  eventBus.subscribe(
-    async (events: CausalEvent[]) => {
+  eventBus.subscribe({
+    filter: {
+      eventTypes: ['signal', 'prediction'],
+    },
+    handler: async (events: CausalEvent[]) => {
       await handleThresholdOptimizationEvents(events, supabase);
     },
-    {
-      eventTypes: ['signal', 'prediction'],
-    }
-  );
+  });
 }
 
 /**
