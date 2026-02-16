@@ -54,8 +54,6 @@ export function OverviewClient({
         <StatValue
           label="Causal Edges"
           value={formatNumber(totalEdges)}
-          change="+12 today"
-          trend="up"
           sparklineData={knowledgeGrowth.map((d) => d.edges)}
         />
         <StatValue
@@ -66,8 +64,7 @@ export function OverviewClient({
         <StatValue
           label="Prediction Accuracy"
           value={`${predictionAccuracy.toFixed(1)}%`}
-          change="+0.3%"
-          trend="up"
+          subtitle="Overall verified"
         />
         <StatValue
           label="Brain Age"
