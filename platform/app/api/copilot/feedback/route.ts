@@ -76,6 +76,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Emit feedback signal to Brain (meta-learning)
+    // Tagged as 'outcome' so Loop 1B (Embodied Grounding) picks it up
     await service.from("cross_domain_signals").insert({
       organization_id: organizationId,
       source_domain: "brain.feedback",
@@ -84,11 +85,32 @@ export async function POST(request: NextRequest) {
       entity_type: "copilot_conversation",
       entity_id: conversationId,
       signal_metadata: {
+        signal_category: "outcome",
         messageIndex,
         hasCorrection: !!correction,
         domain: domain || "general",
         userId: user.id,
       },
+    });
+
+    // ── WIRE: UI Feedback → Closed-Loop Learning Engine (Loop 3) ──
+    // The closed-loop engine runs in a separate process (brain runtime),
+    // so we queue feedback to a table that Loop 3 picks up on next cycle.
+    // Without this wire: Loop 3 processes 0 feedback → brain never adapts
+    // based on user corrections → same mistakes repeat indefinitely.
+    await service.from("brain_feedback_queue").insert({
+      organization_id: organizationId,
+      conversation_id: conversationId,
+      message_index: messageIndex,
+      rating,
+      correction: correction || null,
+      domain: domain || null,
+      processed: false,
+    }).then(({ error: queueError }) => {
+      if (queueError) {
+        // Non-fatal: feedback was already saved to copilot_response_feedback
+        console.warn("[feedback] Queue insert non-fatal:", queueError.message);
+      }
     });
 
     return NextResponse.json({

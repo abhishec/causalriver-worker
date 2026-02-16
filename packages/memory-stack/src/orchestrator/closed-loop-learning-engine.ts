@@ -715,6 +715,43 @@ export function createClosedLoopLearningEngine(config: ClosedLoopConfig): Closed
       patternsReinforced: 0,
     };
 
+    // ── Drain brain_feedback_queue (UI → Brain bridge) ──
+    // The copilot feedback API writes to brain_feedback_queue because
+    // it runs in a separate process (Next.js) from the brain runtime.
+    // This is THE wire that connects UI feedback to Loop 3.
+    try {
+      const { data: dbFeedback } = await supabase
+        .from('brain_feedback_queue')
+        .select('*')
+        .eq('organization_id', organizationId)
+        .eq('processed', false)
+        .order('created_at', { ascending: true })
+        .limit(50);
+
+      if (dbFeedback?.length) {
+        for (const fb of dbFeedback) {
+          _feedbackQueue.push({
+            conversationId: fb.conversation_id,
+            messageIndex: fb.message_index,
+            rating: fb.rating as 'helpful' | 'not_helpful' | 'incorrect',
+            correction: fb.correction ?? undefined,
+            domain: fb.domain ?? undefined,
+            timestamp: new Date(fb.created_at).getTime(),
+          });
+        }
+        // Mark as processed (fire-and-forget)
+        const ids = dbFeedback.map((fb: any) => fb.id);
+        supabase.from('brain_feedback_queue')
+          .update({ processed: true })
+          .in('id', ids)
+          .then(({ error }) => {
+            if (error) console.warn('[CLL] Feedback queue mark non-fatal:', error.message);
+          });
+      }
+    } catch {
+      // Non-fatal: DB feedback drain failure doesn't block in-memory queue
+    }
+
     if (_feedbackQueue.length === 0) return result;
 
     // Process all queued feedback
