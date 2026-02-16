@@ -78,7 +78,7 @@ const noMotor = process.argv.includes('--no-motor');
 const scanOnly = process.argv.includes('--scan-only');
 
 const config: BrainNativeAgentConfig & ManusCapabilitiesConfig = {
-  organizationId: process.env.DEFAULT_ORG_ID || '00000000-0000-0000-0000-000000000000',
+  organizationId: process.env.DEFAULT_ORG_ID || '00000000-0000-4000-a000-000000000001',
   supabaseUrl: process.env.SUPABASE_URL!,
   supabaseKey: process.env.SUPABASE_SERVICE_ROLE_KEY!, // Note: BaseTrainingAgent expects 'supabaseKey'
   dryRun: isDryRun || scanOnly,

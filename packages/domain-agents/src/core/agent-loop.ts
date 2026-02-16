@@ -663,7 +663,7 @@ async function retrieveMemoryContext(
     const embedding = generateEmbedding(goal);
 
     // v11.6.0: FEDERATED — query ORG + CORE Brain in parallel
-    const CORE_ORG_ID = '00000000-0000-0000-0000-000000000000';
+    const CORE_ORG_ID = '00000000-0000-4000-a000-000000000001';
 
     // Helper: run a query for both ORG and CORE, merge results with labels
     const federatedFlatQuery = async (
@@ -1052,7 +1052,7 @@ async function persistAgentLearnings(
   if (terminationReason === 'error' || iterations.length === 0) return;
 
   // v11.6.0 GUARD: Never write learnings to CORE brain
-  const CORE_ORG_ID = '00000000-0000-0000-0000-000000000000';
+  const CORE_ORG_ID = '00000000-0000-4000-a000-000000000001';
   if (organizationId === CORE_ORG_ID) {
     console.warn('[AgentLoop] Blocked write to CORE brain — learnings are org-scoped');
     return;

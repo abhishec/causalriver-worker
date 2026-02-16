@@ -377,7 +377,7 @@ serve(async (req: Request) => {
 
     // Log cron execution
     await supabase.from('ai_agent_activity').insert({
-      organization_id: specificOrgId || '00000000-0000-0000-0000-000000000000',
+      organization_id: specificOrgId || '00000000-0000-4000-a000-000000000001',
       agent_type: 'cron',
       action_type: 'scheduled_run',
       input_summary: `Tasks: ${requestedTasks.join(', ')} | Orgs: ${orgIds.length}`,

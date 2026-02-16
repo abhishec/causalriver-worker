@@ -700,10 +700,10 @@ async function getActiveOrganizations(supabase: any): Promise<string[]> {
   if (error) {
     console.error('[scheduled-jobs] Error fetching organizations:', error);
     // If organizations table doesn't exist or query fails, use default org
-    return ['00000000-0000-0000-0000-000000000000'];
+    return ['00000000-0000-4000-a000-000000000001'];
   }
 
-  return data?.map((org: any) => org.id) || ['00000000-0000-0000-0000-000000000000'];
+  return data?.map((org: any) => org.id) || ['00000000-0000-4000-a000-000000000001'];
 }
 
 /**

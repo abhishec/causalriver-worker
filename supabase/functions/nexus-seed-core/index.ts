@@ -3,7 +3,7 @@
  * =================================================================
  *
  * Admin-only edge function that seeds the CORE Brain
- * (organization_id = 00000000-0000-0000-0000-000000000000)
+ * (organization_id = 00000000-0000-4000-a000-000000000001)
  * with shared baseline knowledge:
  *
  * - SaaS metric benchmarks (NRR, Rule of 40, CAC payback, LTV:CAC)
@@ -24,7 +24,7 @@
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-const CORE_ORGANIZATION_ID = '00000000-0000-0000-0000-000000000000';
+const CORE_ORGANIZATION_ID = '00000000-0000-4000-a000-000000000001';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',

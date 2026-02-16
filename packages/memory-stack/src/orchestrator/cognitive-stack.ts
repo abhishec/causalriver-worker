@@ -428,7 +428,7 @@ export function createCognitiveStack(config: CognitiveStackConfig): CognitiveSta
   mesh.registerOrg(organizationId);
 
   // L7 FIX: Register CORE org + any configured peer orgs for multi-org collective sensing
-  const CORE_ORG_ID = '00000000-0000-0000-0000-000000000000';
+  const CORE_ORG_ID = '00000000-0000-4000-a000-000000000001';
   if (organizationId !== CORE_ORG_ID) {
     mesh.registerOrg(CORE_ORG_ID);
   }

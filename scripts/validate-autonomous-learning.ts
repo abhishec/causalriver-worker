@@ -456,7 +456,7 @@ async function validate8_EdgeCases() {
   const { data: emptyOrgTest } = await supabase
     .from('cross_domain_signals')
     .select('organization_id')
-    .eq('organization_id', '00000000-0000-0000-0000-000000000000')
+    .eq('organization_id', '00000000-0000-4000-a000-000000000001')
     .limit(1);
 
   if (!emptyOrgTest || emptyOrgTest.length === 0) {

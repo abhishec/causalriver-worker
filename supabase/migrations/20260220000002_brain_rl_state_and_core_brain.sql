@@ -83,13 +83,15 @@ CREATE POLICY "brain_rl_state_service_role"
 -- ─────────────────────────────────────────────────────────────
 -- SEED: CORE Brain Organization
 -- The CORE brain is the collective intelligence hub.
--- org_id = 00000000-0000-0000-0000-000000000000
+-- org_id = 00000000-0000-4000-a000-000000000001  (canonical UUID)
 -- All orgs can READ from CORE, only percolation can WRITE.
+-- NOTE: Originally seeded with wrong UUID (...000). Fixed by corrective
+--       migration 20260220000007. Source file also updated for future deploys.
 -- ─────────────────────────────────────────────────────────────
 
 INSERT INTO organizations (id, name, slug, created_at, updated_at)
 VALUES (
-  '00000000-0000-0000-0000-000000000000',
+  '00000000-0000-4000-a000-000000000001',
   'CORE Brain (Federated Collective Intelligence)',
   'core-brain',
   NOW(),
