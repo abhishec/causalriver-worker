@@ -262,13 +262,14 @@ export function CopilotOverlay() {
     inputRef.current?.focus();
   };
 
-  if (!mounted) return null;
-
   // Memoize rendered markdown so it doesn't re-parse on every render tick
+  // (must be above early return to satisfy Rules of Hooks)
   const renderedResponse = useMemo(() => {
     if (!response) return null;
     return renderOverlayMarkdown(response);
   }, [response]);
+
+  if (!mounted) return null;
 
   const overlayContent = isOpen ? (
     <div
