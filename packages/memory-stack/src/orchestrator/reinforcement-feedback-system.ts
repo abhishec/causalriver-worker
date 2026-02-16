@@ -136,6 +136,15 @@ export interface ReinforcementConfig {
   explorationDecay?: number;
   /** History window size (default: 100) */
   historyWindow?: number;
+  /**
+   * Supabase client for RL state persistence.
+   * If provided, RL state (scheduling multipliers, compute budgets, exploration
+   * rates) will be persisted to brain_rl_state table after each reward cycle.
+   * Without this, RL state is lost on restart (brain forgets its learned policies).
+   */
+  supabase?: import('@supabase/supabase-js').SupabaseClient;
+  /** Organization ID — required if supabase is provided */
+  organizationId?: string;
 }
 
 /** Output of a reinforcement cycle */
@@ -269,6 +278,8 @@ export function createReinforcementFeedbackSystem(config?: ReinforcementConfig):
   const initialExploration = config?.initialExplorationRate ?? 0.3;
   const explorationDecay = config?.explorationDecay ?? 0.995;
   const historyWindow = config?.historyWindow ?? 100;
+  const _supabase = config?.supabase;
+  const _orgId = config?.organizationId;
 
   // Initialize per-layer states
   const layerStates = new Map<number, LayerReinforcementState>();
@@ -459,6 +470,42 @@ export function createReinforcementFeedbackSystem(config?: ReinforcementConfig):
     return { schedulingAdjustments, computeAdjustments };
   }
 
+  /**
+   * Persist RL state to database (fire-and-forget).
+   * Called after each reward cycle so the brain remembers its learned
+   * policies across restarts. Without this, the brain forgets its
+   * scheduling optimizations every time the server restarts.
+   */
+  let _persistDebounce: ReturnType<typeof setTimeout> | null = null;
+  function _persistRLState(): void {
+    if (!_supabase || !_orgId) return;
+
+    // Debounce: only persist at most every 30 seconds
+    if (_persistDebounce) return;
+    _persistDebounce = setTimeout(() => { _persistDebounce = null; }, 30_000);
+
+    const rows = Array.from(layerStates.entries()).map(([layerId, state]) => ({
+      organization_id: _orgId,
+      layer_id: layerId,
+      scheduling_multiplier: Math.round(state.schedulingMultiplier * 1000) / 1000,
+      compute_budget_multiplier: Math.round(state.computeBudgetMultiplier * 1000) / 1000,
+      exploration_rate: Math.round(state.explorationRate * 10000) / 10000,
+      cumulative_reward: Math.round(state.cumulativeReward * 10000) / 10000,
+      output_threshold: Math.round(state.outputThreshold * 1000) / 1000,
+      reward_trend: state.rewardTrend,
+      utilization_count: state.utilizationCount,
+      correct_count: state.correctCount,
+      novelty_count: state.noveltyCount,
+      updated_at: new Date().toISOString(),
+    }));
+
+    _supabase.from('brain_rl_state').upsert(rows, {
+      onConflict: 'organization_id,layer_id',
+    }).then(({ error }) => {
+      if (error) console.warn('[RL] State persistence non-fatal:', error.message);
+    });
+  }
+
   return {
     processCycleRewards(layerMetrics: Map<number, Record<string, number>>): ReinforcementCycleResult {
       const signals: ReinforcementSignal[] = [];
@@ -516,6 +563,9 @@ export function createReinforcementFeedbackSystem(config?: ReinforcementConfig):
       _globalReward = allRewards.length > 0
         ? allRewards.reduce((s, r) => s + r, 0) / allRewards.length
         : 0;
+
+      // Persist RL state to database (fire-and-forget, debounced)
+      _persistRLState();
 
       return {
         signals,
