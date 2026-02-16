@@ -527,6 +527,40 @@ export interface ActionKnowledgeContext {
   matchedRules: Array<{ title: string; naturalLanguage: string; conditions: string[]; triggered: boolean }>;
 }
 
+// ── Action Domain Types (for SE-aaS domains) ────────────────────────────
+
+/**
+ * Context passed to SE-aaS action domains during execution
+ */
+export interface ActionDomainContext {
+  organizationId: string;
+  userId?: string;
+  anthropicApiKey?: string;
+  supabase: SupabaseClient;
+  [key: string]: unknown;
+}
+
+/**
+ * Result returned by SE-aaS action domains after execution
+ */
+export interface ActionDomainResult {
+  success?: boolean;
+  confidence: number;
+  result?: unknown;
+  data?: unknown;
+  narrative?: string;
+  interventions?: unknown[];
+  evidence?: unknown[];
+  error?: string;
+  type?: string;
+  metadata?: {
+    executionTimeMs?: number;
+    claudePowered?: boolean;
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
+}
+
 // ── Config ──────────────────────────────────────────────────────────────
 
 export interface DomainActionEngineConfig {

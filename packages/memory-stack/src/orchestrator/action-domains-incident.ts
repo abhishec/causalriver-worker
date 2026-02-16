@@ -134,7 +134,7 @@ export interface ImpactAssessment {
  * Uses **Claude LLM** to diagnose production incidents intelligently.
  */
 export const incidentDiagnosisDomain = {
-  name: 'incident-diagnose' as const,
+  name: 'incident-diagnosis' as const,
   description: 'Diagnose production incidents with Claude LLM',
   cognitiveAnalog: 'medical diagnosis (symptom → diagnosis → treatment)',
   requires: ['claudeLLM', 'causalDAG', 'logAggregator'] as const,
@@ -178,7 +178,7 @@ export const incidentDiagnosisDomain = {
     const interventions = extractInterventions(result);
 
     return {
-      type: 'incident-diagnose',
+      type: 'incident-diagnosis',
       data: result,
       confidence: result.diagnosticConfidence,
       narrative: formatNarrative(result, request),

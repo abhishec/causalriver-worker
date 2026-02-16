@@ -118,7 +118,7 @@ export interface TDDMetrics {
  * Uses **Claude LLM** to generate code following TDD principles.
  */
 export const tddCodeGeneratorDomain = {
-  name: 'tdd-code-generate' as const,
+  name: 'tdd-code-generator' as const,
   description: 'Generate code using Test-Driven Development with Claude LLM',
   cognitiveAnalog: 'prefrontal cortex (disciplined implementation)',
   requires: ['claudeLLM', 'astParser', 'testRunner'] as const,
@@ -153,7 +153,7 @@ export const tddCodeGeneratorDomain = {
     const interventions = extractInterventions(result);
 
     return {
-      type: 'tdd-code-generate',
+      type: 'tdd-code-generator',
       data: result,
       confidence,
       narrative: formatNarrative(result, request),

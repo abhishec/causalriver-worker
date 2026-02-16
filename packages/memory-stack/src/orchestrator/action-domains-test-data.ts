@@ -101,7 +101,7 @@ export interface IndexSchema {
  * that matches production patterns without PII leakage.
  */
 export const testDataGeneratorDomain = {
-  name: 'test-data-generate' as const,
+  name: 'test-data-generator' as const,
   description: 'Generate realistic synthetic test data for databases',
   cognitiveAnalog: 'hippocampus (synthetic memory generation)',
   requires: ['schemaRegistry', 'fakerLib', 'causalDAG'] as const,
@@ -128,31 +128,31 @@ export const testDataGeneratorDomain = {
     });
 
     // 4. Validate referential integrity
-    const validated = await validateIntegrity(generated, schema);
+    const validationResult = await validateIntegrity(generated, schema);
 
     // 5. Generate SQL statements (optional)
     const sqlStatements = request.tables
-      ? generateSQLInserts(validated.data, schema)
+      ? generateSQLInserts(validationResult.data, schema)
       : undefined;
 
     // 6. Build result
     const result: TestDataResult = {
-      data: validated.data,
+      data: validationResult.data,
       lineage: 'synthetic',
       scenario: request.scenario,
       stats: {
-        totalRecords: Object.values(validated.data).reduce(
+        totalRecords: Object.values(validationResult.data).reduce(
           (sum, records) => sum + records.length,
           0
         ),
-        tablesGenerated: Object.keys(validated.data).length,
-        integrityViolations: validated.violations,
+        tablesGenerated: Object.keys(validationResult.data).length,
+        integrityViolations: validationResult.violations,
       },
       sqlStatements,
     };
 
     return {
-      type: 'test-data-generate',
+      type: 'test-data-generator',
       data: result,
       confidence: 1.0, // Deterministic generation
       narrative: formatNarrative(result, request),

@@ -100,7 +100,7 @@ export interface CoverageAnalysis {
  * Uses **Claude LLM** to generate high-quality test cases that match Claude's standards.
  */
 export const testCaseGeneratorDomain = {
-  name: 'test-case-generate' as const,
+  name: 'test-case-generator' as const,
   description: 'Generate comprehensive test cases using Claude LLM for quality',
   cognitiveAnalog: 'adversarial imagination (edge case exploration)',
   requires: ['codeIndexer', 'astParser', 'claudeLLM'] as const,
@@ -151,7 +151,7 @@ export const testCaseGeneratorDomain = {
     const interventions = extractInterventions(result);
 
     return {
-      type: 'test-case-generate',
+      type: 'test-case-generator',
       data: result,
       confidence: claudeGenerated.claudePowered ? 0.95 : 0.75, // Higher confidence with Claude
       narrative: formatNarrative(result, request),
