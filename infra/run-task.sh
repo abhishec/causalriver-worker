@@ -29,6 +29,10 @@ if [ -z "${PROCESS}" ]; then
   echo "  monthly          Monthly Deep Analysis (1st of month)"
   echo "  federation       Federation Agent (every 6h)"
   echo "  security         Security Hardening (daily 4 AM)"
+  echo "  proactive-intelligence  Proactive Intelligence (every 4h)"
+  echo "  org-updater      Org Updater (every 4h)"
+  echo "  outcome-resolver Outcome Resolver (daily 3:30 AM)"
+  echo "  ci-healer        CI Healer (on-demand)"
   echo "  orchestrator     Brain Orchestrator (continuous)"
   exit 1
 fi
@@ -44,8 +48,12 @@ case "${PROCESS}" in
   orchestrator)         TASK_DEF="nexusbrain-orchestrator" ;;
   weekly)               TASK_DEF="nexusbrain-weekly" ;;
   monthly)              TASK_DEF="nexusbrain-monthly" ;;
-  federation)           TASK_DEF="nexusbrain-federation" ;;
-  security)             TASK_DEF="nexusbrain-security" ;;
+  federation)              TASK_DEF="nexusbrain-federation" ;;
+  security)                TASK_DEF="nexusbrain-security" ;;
+  proactive-intelligence)  TASK_DEF="nexusbrain-proactive" ;;
+  org-updater)             TASK_DEF="nexusbrain-org-updater" ;;
+  outcome-resolver)        TASK_DEF="nexusbrain-outcome-resolver" ;;
+  ci-healer)               TASK_DEF="nexusbrain-ci-healer" ;;
   *)
     echo "ERROR: Unknown process '${PROCESS}'. Run without arguments to see available processes."
     exit 1

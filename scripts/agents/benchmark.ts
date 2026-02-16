@@ -44,6 +44,8 @@ export class BenchmarkAgent extends ManusNativeAgent {
   readonly neurologicalFunction = 'Performance Evaluation & Validation';
 
   private config: BenchmarkAgentConfig;
+  private lastBenchmarkResults: BenchmarkResult[] = [];
+  private lastImprovements: BenchmarkResult[] = [];
   private readonly BENCHMARK_DIR = path.join(__dirname, '../../scripts/benchmarks/longmemeval');
   private readonly CAUSEME_DIR = path.join(__dirname, '../../scripts/benchmarks/causeme');
 
@@ -77,13 +79,13 @@ export class BenchmarkAgent extends ManusNativeAgent {
     }
 
     return results.length === 0
-      ? { success: false, data: { error: 'No benchmark results' } }
-      : { success: true, data: { results } };
+      ? { data: null, sources: [], recordCount: 0 }
+      : { data: { results }, sources: results.map(r => `benchmark:${r.type}`), recordCount: results.length };
   }
 
   // ── Convert: Calculate metrics and store results ──
   async convert(fetchResult: FetchResult): Promise<ConvertResult> {
-    if (!fetchResult.success || !fetchResult.data) return { success: false, signals: [], trainingPacks: [] };
+    if (!fetchResult.data) return { signals: [], packs: [] };
 
     const { results } = fetchResult.data as { results: BenchmarkResult[] };
     this.log('Analyzing benchmark results...');
@@ -98,7 +100,11 @@ export class BenchmarkAgent extends ManusNativeAgent {
       this.log(`${improvements.length} benchmark(s) exceeded ${this.config.accuracyThreshold}% threshold`);
     }
 
-    return { success: true, signals: [], trainingPacks: [], metadata: { results, improvements } };
+    // Store for motor commands
+    this.lastBenchmarkResults = results;
+    this.lastImprovements = improvements;
+
+    return { signals: [], packs: [] };
   }
 
   // ── Helper: Run LongMemEval benchmark ──
@@ -201,12 +207,13 @@ print(json.dumps({'correct':correct,'total':total,'accuracy':accuracy}))
   // ── Motor Commands: Generate Slack notifications ──
   protected async generateMotorCommands(trainResult: TrainResult): Promise<MotorCommand[]> {
     const commands: MotorCommand[] = [];
-    const { results, improvements } = trainResult.metadata || {};
-    if (!trainResult.success || !results || !process.env.SLACK_BOT_TOKEN || !process.env.SLACK_CHANNEL_ID) return commands;
+    const results = this.lastBenchmarkResults;
+    const improvements = this.lastImprovements;
+    if (results.length === 0 || !process.env.SLACK_BOT_TOKEN || !process.env.SLACK_CHANNEL_ID) return commands;
 
     // Improvement alerts
-    if (improvements?.length > 0) {
-      for (const result of improvements as BenchmarkResult[]) {
+    if (improvements.length > 0) {
+      for (const result of improvements) {
         commands.push({
           commandId: `slack-benchmark-${result.type}-${Date.now()}`,
           organizationId: this.organizationId,
@@ -224,7 +231,7 @@ print(json.dumps({'correct':correct,'total':total,'accuracy':accuracy}))
 
     // Summary notification
     if (results.length > 0) {
-      const summaryText = (results as BenchmarkResult[])
+      const summaryText = results
         .map(r => `• ${r.type}: ${r.accuracy.toFixed(1)}% (${r.correctAnswers}/${r.totalQuestions})`)
         .join('\n');
       commands.push({

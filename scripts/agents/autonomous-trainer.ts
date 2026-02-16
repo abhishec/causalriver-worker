@@ -134,13 +134,13 @@ export class AutonomousTrainerAgent extends ManusNativeAgent {
 
     this.log(`${totalSources}/10 data sources available`);
 
-    return { success: true, data: fetchedData };
+    return { data: fetchedData, sources: ['fred', 'github', 'worldbank', 'hackernews', 'bls', 'stackoverflow', 'wikipedia', 'imf', 'uspto', 'wikipedia-content'], recordCount: totalSources };
   }
 
   // ── Convert: Transform fetched data into signals + training packs ──
   async convert(fetchResult: FetchResult): Promise<ConvertResult> {
-    if (!fetchResult.success || !fetchResult.data) {
-      return { success: false, signals: [], trainingPacks: [] };
+    if (!fetchResult.data) {
+      return { signals: [], packs: [] };
     }
 
     const fetched = fetchResult.data as FetchedData;
@@ -245,9 +245,8 @@ export class AutonomousTrainerAgent extends ManusNativeAgent {
     this.log(`Converted: ${signals.length} signals, ${dynamicPacks.length} dynamic packs, ${staticPacks.length} static packs`);
 
     return {
-      success: true,
       signals,
-      trainingPacks: allPacks,
+      packs: allPacks,
     };
   }
 
@@ -256,14 +255,14 @@ export class AutonomousTrainerAgent extends ManusNativeAgent {
     const commands: MotorCommand[] = [];
 
     // Slack notification on successful training
-    if (process.env.SLACK_BOT_TOKEN && process.env.SLACK_CHANNEL_ID && trainResult.success) {
+    if (process.env.SLACK_BOT_TOKEN && process.env.SLACK_CHANNEL_ID && trainResult.signalsStored > 0) {
       commands.push({
         commandId: `slack-training-${Date.now()}`,
         organizationId: this.organizationId,
         actionType: 'slack_send_message',
         target: process.env.SLACK_CHANNEL_ID,
         payload: {
-          text: `✅ *Autonomous Trainer Complete*\n• Signals: ${trainResult.signalsStored}\n• Packs Trained: ${trainResult.packsTrainedCount}\n• Brain Region: ${this.brainRegion}`,
+          text: `✅ *Autonomous Trainer Complete*\n• Signals: ${trainResult.signalsStored}\n• Packs Trained: ${trainResult.packsProcessed}\n• Brain Region: ${this.brainRegion}`,
         },
         priority: 'normal',
         requiresApproval: false,

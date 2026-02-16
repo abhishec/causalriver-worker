@@ -285,7 +285,7 @@ export async function getCurrentWIP(
 export async function predictVelocityCollapse(
   config: VelocityConfig
 ): Promise<VelocityCollapseAlert | null> {
-  const { organizationId, forecastDays = 7, collapseThreshold = 30 } = config;
+  const { supabase, organizationId, forecastDays = 7, collapseThreshold = 30 } = config;
 
   // Build time series
   const timeSeries = await buildVelocityTimeSeries(config);
@@ -386,7 +386,7 @@ export async function predictVelocityCollapse(
     });
   }
 
-  return {
+  const alert: VelocityCollapseAlert = {
     severity,
     organizationId,
     predictedDrop,
@@ -400,6 +400,40 @@ export async function predictVelocityCollapse(
     interventions: interventions.sort((a, b) => a.priority - b.priority),
     computedAt: new Date().toISOString(),
   };
+
+  // ── FEEDBACK LOOP: Emit prediction signal back to Brain's cross_domain_signals ──
+  // This closes the loop: velocity-tracker predictions feed back into the Brain's
+  // causal discovery (L4), enabling the Brain to learn from its own predictions
+  // and recalibrate confidence (L6) over time.
+  try {
+    await supabase.from('cross_domain_signals').insert({
+      organization_id: organizationId,
+      source_domain: 'engineering',
+      signal_type: 'velocity_collapse_predicted',
+      signal_value: predictedDrop,
+      entity_type: 'velocity_prediction',
+      entity_id: `velocity-pred-${Date.now()}`,
+      signal_metadata: {
+        severity,
+        predicted_drop: predictedDrop,
+        days_until_collapse: forecastDays,
+        root_cause: rootCause,
+        current_wip: wip.count,
+        baseline_wip: wip.baseline,
+        current_velocity: currentVelocity,
+        predicted_velocity: predictedVelocity,
+        granger_significant: causalEvidence?.isSignificant ?? false,
+        granger_p_value: causalEvidence?.pValue ?? null,
+        granger_effect_size: causalEvidence?.effectSize ?? null,
+        intervention_count: interventions.length,
+      },
+      created_at: new Date().toISOString(),
+    });
+  } catch {
+    // Non-critical: signal emission failure doesn't block the alert
+  }
+
+  return alert;
 }
 
 // ============================================================================

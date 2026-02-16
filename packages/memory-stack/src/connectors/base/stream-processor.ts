@@ -9,12 +9,15 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
 
 export interface Signal {
-  source: string;
-  type: string;
-  content: string;
-  metadata: Record<string, any>;
   organization_id: string;
-  timestamp: string;
+  source_domain: string;      // 'engineering', 'product', 'revenue', 'support'
+  signal_type: string;         // 'pr_merged', 'pr_opened', 'pr_reviewed', etc.
+  signal_value: number;        // Numeric value (cycle_time_hours, 1 for events)
+  entity_type: string;         // 'pull_request', 'review', 'commit', 'issue'
+  entity_id: string;           // 'backend#1234', 'review:5678'
+  signal_metadata: Record<string, any>;  // Additional context
+  created_at: string;          // Signal timestamp
+  content_hash?: string;       // For deduplication
 }
 
 export interface ProcessingStats {
@@ -80,8 +83,8 @@ export class StreamProcessor {
       return;
     }
 
-    // Batch insert to database
-    const { error } = await this.supabase.from('signals').insert(deduped);
+    // Batch insert to database (Brain L1 ingestion table)
+    const { error } = await this.supabase.from('cross_domain_signals').insert(deduped);
 
     if (error) {
       console.error('Batch insert failed:', error);
@@ -110,7 +113,7 @@ export class StreamProcessor {
     const byOrg = this.groupByOrganization(batchToProcess);
 
     for (const [orgId, signals] of Object.entries(byOrg)) {
-      const connectorType = signals[0]?.source || 'unknown';
+      const connectorType = signals[0]?.source_domain || 'unknown';
       await this.processBatch(signals, orgId, connectorType);
     }
   }
@@ -161,7 +164,7 @@ export class StreamProcessor {
     // Fallback: Check database (slower)
     const hashes = signalsWithHashes.map((s) => s.hash);
     const { data: existing } = await this.supabase
-      .from('signals')
+      .from('cross_domain_signals')
       .select('content_hash')
       .in('content_hash', hashes)
       .eq('organization_id', organizationId);
@@ -180,7 +183,7 @@ export class StreamProcessor {
    * Generate deterministic hash for a signal
    */
   private generateSignalHash(signal: Signal): string {
-    const key = `${signal.source}:${signal.type}:${signal.content}:${signal.timestamp}`;
+    const key = `${signal.source_domain}:${signal.signal_type}:${signal.entity_id}:${signal.created_at}`;
     return crypto.createHash('sha256').update(key).digest('hex');
   }
 

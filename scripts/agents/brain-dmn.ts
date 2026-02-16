@@ -41,6 +41,7 @@ export class DMNAgent extends ManusNativeAgent {
 
   private config: DMNConfig;
   private coreBrainOrgId = '00000000-0000-4000-a000-000000000001';
+  private lastInsights: ProactiveInsight[] = [];
 
   constructor(
     supabase: any,
@@ -78,15 +79,16 @@ export class DMNAgent extends ManusNativeAgent {
     }
 
     return {
-      success: true,
       data: { scanResults: results },
+      sources: orgIds.map(id => `dmn-scan:${id.substring(0, 8)}`),
+      recordCount: results.reduce((sum, r) => sum + r.insights.length, 0),
     };
   }
 
   // ── Convert: Enrich insights with context ──
   async convert(fetchResult: FetchResult): Promise<ConvertResult> {
-    if (!fetchResult.success || !fetchResult.data) {
-      return { success: false, signals: [], trainingPacks: [] };
+    if (!fetchResult.data) {
+      return { signals: [], packs: [] };
     }
 
     const { scanResults } = fetchResult.data as { scanResults: DMNScanResult[] };
@@ -135,11 +137,12 @@ export class DMNAgent extends ManusNativeAgent {
       }
     }
 
+    // Store insights for generateMotorCommands() (TrainResult has no metadata field)
+    this.lastInsights = allInsights;
+
     return {
-      success: true,
       signals: [],
-      trainingPacks: [],
-      metadata: { insights: allInsights },
+      packs: [],
     };
   }
 
@@ -190,8 +193,7 @@ export class DMNAgent extends ManusNativeAgent {
   protected async generateMotorCommands(trainResult: TrainResult): Promise<MotorCommand[]> {
     const commands: MotorCommand[] = [];
 
-    const insights = (trainResult.metadata?.insights as ProactiveInsight[]) || [];
-    const topInsights = insights.slice(0, 5);
+    const topInsights = this.lastInsights.slice(0, 5);
 
     // Slack notification for high-importance insights
     if (process.env.SLACK_BOT_TOKEN && process.env.SLACK_CHANNEL_ID && topInsights.length > 0) {

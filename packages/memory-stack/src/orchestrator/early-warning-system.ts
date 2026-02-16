@@ -1,20 +1,31 @@
 /**
- * Early Warning System for Engineering Teams
- * ============================================
+ * Early Warning System for Engineering Teams (LEGACY)
+ * ====================================================
  *
- * Unified system combining:
- * 1. Engineering Bottleneck Concentration Risk Detection
- * 2. Deploy Velocity Collapse Prediction
+ * @deprecated Use `runBrainEarlyWarning()` from `early-warning-brain-integration.ts` instead.
  *
- * Provides proactive alerts BEFORE problems impact delivery.
+ * This standalone version bypasses the Brain's 15-layer cognitive stack.
+ * Design partners should NEVER see output from this module — it produces
+ * raw metrics dashboards instead of Brain intelligence.
  *
- * Usage:
+ * The Brain-integrated version provides:
+ * - L3 Dreaming: Causal discovery in cognitive context
+ * - L5 Curiosity: Root cause exploration (WHY, not just WHAT)
+ * - L6 Self-Modifying: Confidence calibration from historical accuracy
+ * - L9 Theory of Mind: Contributor perspective modeling
+ * - L11 Red Team: Stress-tested predictions
+ * - L14 Goal-Backward: Intervention plans with success probability
+ * - L15 Narrative: AI-generated executive summaries
+ *
+ * Migration:
  * ```typescript
- * const warnings = await runEarlyWarningSystem({
- *   supabase,
- *   organizationId: 'acme-corp',
- *   domains: ['backend', 'frontend', 'infrastructure']
- * });
+ * // OLD (bypass Brain — wrong pattern):
+ * import { runEarlyWarningSystem } from '@nexus-ai/memory-stack';
+ * const report = await runEarlyWarningSystem({ supabase, organizationId });
+ *
+ * // NEW (Brain-integrated — correct pattern):
+ * import { runBrainEarlyWarning } from '@nexus-ai/memory-stack';
+ * const report = await runBrainEarlyWarning({ brainCommander, supabase, organizationId });
  * ```
  *
  * @packageDocumentation

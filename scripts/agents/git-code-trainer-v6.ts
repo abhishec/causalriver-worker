@@ -110,15 +110,16 @@ export class GitCodeTrainerAgent extends ManusNativeAgent {
     this.log(`Fetched ${totalRecords} total records from ${this.fetchedData.length} repos`);
 
     return {
-      success: true,
       data: { repos: this.fetchedData, totalRecords },
+      sources: this.fetchedData.map(r => `github:${r.owner}/${r.repo}`),
+      recordCount: totalRecords,
     };
   }
 
   // ── Convert: Transform to brain signals + training packs ──
   async convert(fetchResult: FetchResult): Promise<ConvertResult> {
-    if (!fetchResult.success || !fetchResult.data) {
-      return { success: false, signals: [], trainingPacks: [] };
+    if (!fetchResult.data) {
+      return { signals: [], packs: [] };
     }
 
     const { repos } = fetchResult.data as { repos: RepoData[] };
@@ -136,9 +137,8 @@ export class GitCodeTrainerAgent extends ManusNativeAgent {
     this.log(`Generated ${allSignals.length} signals + ${packs.length} training packs`);
 
     return {
-      success: true,
       signals: allSignals,
-      trainingPacks: packs,
+      packs,
     };
   }
 
@@ -154,8 +154,8 @@ export class GitCodeTrainerAgent extends ManusNativeAgent {
         actionType: 'github_create_issue',
         target: `${process.env.GITHUB_OWNER}/${process.env.GITHUB_REPO}`,
         payload: {
-          title: `[Git Trainer] Training complete: ${trainResult.packsTrainedCount} packs processed`,
-          body: `The Git Code Trainer agent completed training on ${this.fetchedData.length} repositories.\n\n**Stats:**\n- Signals stored: ${trainResult.signalsStored}\n- Packs trained: ${trainResult.packsTrainedCount}\n- Brain region: ${this.brainRegion}\n\nThis training enhances the brain's engineering pattern recognition capabilities.`,
+          title: `[Git Trainer] Training complete: ${trainResult.packsProcessed} packs processed`,
+          body: `The Git Code Trainer agent completed training on ${this.fetchedData.length} repositories.\n\n**Stats:**\n- Signals stored: ${trainResult.signalsStored}\n- Packs trained: ${trainResult.packsProcessed}\n- Brain region: ${this.brainRegion}\n\nThis training enhances the brain's engineering pattern recognition capabilities.`,
           labels: ['brain', 'training', 'git', 'auto-generated'],
         },
         priority: 'normal',
@@ -172,7 +172,7 @@ export class GitCodeTrainerAgent extends ManusNativeAgent {
         actionType: 'slack_send_message',
         target: process.env.SLACK_CHANNEL_ID,
         payload: {
-          text: `🧠 *Git Code Trainer Complete*\n• Repos: ${this.fetchedData.length}\n• Signals: ${trainResult.signalsStored}\n• Packs: ${trainResult.packsTrainedCount}\n• Brain Region: ${this.brainRegion}`,
+          text: `🧠 *Git Code Trainer Complete*\n• Repos: ${this.fetchedData.length}\n• Signals: ${trainResult.signalsStored}\n• Packs: ${trainResult.packsProcessed}\n• Brain Region: ${this.brainRegion}`,
         },
         priority: 'normal',
         requiresApproval: false,

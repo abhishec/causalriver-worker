@@ -49,6 +49,9 @@ export class WeeklyBrainScanAgent extends ManusNativeAgent {
   readonly brainRegion = 'Cerebellum (Weekly Evaluator)';
   readonly neurologicalFunction = 'Comprehensive Brain Health Assessment';
 
+  private lastMaturityReport: MaturityReport | null = null;
+  private lastHealthStats: BrainHealthStats | null = null;
+
   // ── Fetch: Run benchmark suite ──
   async fetch(): Promise<FetchResult> {
     this.log('Starting weekly brain scan...');
@@ -76,14 +79,15 @@ export class WeeklyBrainScanAgent extends ManusNativeAgent {
     }
 
     return {
-      success: true,
       data: { benchmarkReport, maturityReport },
+      sources: ['benchmark-runner'],
+      recordCount: benchmarkReport ? 1 : 0,
     };
   }
 
   // ── Convert: Evaluate regions + prune stale edges ──
   async convert(fetchResult: FetchResult): Promise<ConvertResult> {
-    if (!fetchResult.success) return { success: false, signals: [], trainingPacks: [] };
+    if (!fetchResult.data) return { signals: [], packs: [] };
 
     const { maturityReport } = fetchResult.data as { maturityReport: MaturityReport | null };
 
@@ -148,22 +152,23 @@ export class WeeklyBrainScanAgent extends ManusNativeAgent {
       this.log(`Health stats failed: ${err instanceof Error ? err.message : String(err)}`);
     }
 
+    // Store for motor commands
+    this.lastMaturityReport = maturityReport;
+    this.lastHealthStats = healthStats;
+
     return {
-      success: true,
       signals: [],
-      trainingPacks: [],
-      metadata: { maturityReport, healthStats, staleEdgesPruned },
+      packs: [],
     };
   }
 
   // ── Motor Commands: Weekly health report notifications ──
   protected async generateMotorCommands(trainResult: TrainResult): Promise<MotorCommand[]> {
     const commands: MotorCommand[] = [];
-    if (!trainResult.success || !process.env.SLACK_BOT_TOKEN || !process.env.SLACK_CHANNEL_ID) return commands;
+    if (!process.env.SLACK_BOT_TOKEN || !process.env.SLACK_CHANNEL_ID) return commands;
 
-    const { maturityReport, healthStats } = trainResult.metadata || {};
-    const report = maturityReport as MaturityReport | undefined;
-    const stats = healthStats as BrainHealthStats | undefined;
+    const report = this.lastMaturityReport;
+    const stats = this.lastHealthStats;
 
     if (report || stats) {
       const maturityLine = report

@@ -83,6 +83,10 @@ case "${BRAIN_PROCESS}" in
     echo "Starting Outcome Resolver Agent (prediction calibration loop)..."
     exec pnpm exec tsx scripts/brain-orchestrator.ts --agent outcome-resolver
     ;;
+  ci-healer)
+    echo "Starting CI Healer Agent (GitHub Actions failure diagnosis + auto-fix)..."
+    exec pnpm exec tsx scripts/brain-orchestrator.ts --agent ci-healer
+    ;;
   *)
     echo "ERROR: Unknown BRAIN_PROCESS '${BRAIN_PROCESS}'"
     echo ""
@@ -102,6 +106,7 @@ case "${BRAIN_PROCESS}" in
     echo "  proactive-intelligence  Proactive alerting & threat detection (one-shot)"
     echo "  org-updater           Org heartbeat: connector sync + learning (one-shot)"
     echo "  outcome-resolver      Prediction calibration loop closure (one-shot)"
+    echo "  ci-healer             GitHub Actions failure diagnosis + auto-fix (on-demand)"
     exit 1
     ;;
 esac

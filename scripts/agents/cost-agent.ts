@@ -49,6 +49,11 @@ export class CostAgent extends ManusNativeAgent {
   readonly neurologicalFunction = 'Resource Monitoring & Cost Optimization';
 
   private config: CostAgentConfig;
+  private lastLlmReport: CostReport | null = null;
+  private lastAwsCosts: AWSCostData | null = null;
+  private lastAnomalies: CostAnomaly[] = [];
+  private lastBudgetUsedPct = 0;
+  private lastMonthlyBudget = 0;
 
   constructor(
     supabase: any,
@@ -77,12 +82,12 @@ export class CostAgent extends ManusNativeAgent {
     } catch {
       this.log('AWS fetch failed (non-fatal)');
     }
-    return { success: true, data: { llmReport, awsCosts } };
+    return { data: { llmReport, awsCosts }, sources: ['cost-tracker', 'aws-cost-explorer'], recordCount: llmReport.totalCalls };
   }
 
   // ── Convert: Analyze trends and detect anomalies ──
   async convert(fetchResult: FetchResult): Promise<ConvertResult> {
-    if (!fetchResult.success || !fetchResult.data) return { success: false, signals: [], trainingPacks: [] };
+    if (!fetchResult.data) return { signals: [], packs: [] };
 
     const { llmReport, awsCosts } = fetchResult.data as { llmReport: CostReport; awsCosts: AWSCostData | null };
     this.log('Analyzing cost trends...');
@@ -102,11 +107,16 @@ export class CostAgent extends ManusNativeAgent {
 
     if (awsCosts) await this.storeAWSCosts(awsCosts, llmReport.periodEnd);
 
+    // Store for motor commands
+    this.lastLlmReport = llmReport;
+    this.lastAwsCosts = awsCosts;
+    this.lastAnomalies = anomalies;
+    this.lastBudgetUsedPct = budgetUsedPct;
+    this.lastMonthlyBudget = monthlyBudget;
+
     return {
-      success: true,
       signals: [],
-      trainingPacks: [],
-      metadata: { llmReport, awsCosts, anomalies, budgetUsedPct, monthlyBudget },
+      packs: [],
     };
   }
 
@@ -190,8 +200,12 @@ export class CostAgent extends ManusNativeAgent {
   // ── Motor Commands: Generate Slack alerts ──
   protected async generateMotorCommands(trainResult: TrainResult): Promise<MotorCommand[]> {
     const commands: MotorCommand[] = [];
-    const { anomalies, budgetUsedPct, monthlyBudget, llmReport, awsCosts } = trainResult.metadata || {};
-    if (!trainResult.success || !process.env.SLACK_BOT_TOKEN || !process.env.SLACK_CHANNEL_ID) return commands;
+    const anomalies = this.lastAnomalies;
+    const budgetUsedPct = this.lastBudgetUsedPct;
+    const monthlyBudget = this.lastMonthlyBudget;
+    const llmReport = this.lastLlmReport;
+    const awsCosts = this.lastAwsCosts;
+    if (!llmReport || !process.env.SLACK_BOT_TOKEN || !process.env.SLACK_CHANNEL_ID) return commands;
 
     // Budget threshold alert
     if (budgetUsedPct >= this.config.budgetAlertThreshold!) {

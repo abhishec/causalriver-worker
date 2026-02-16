@@ -126,7 +126,7 @@ export class FederationAgent extends ManusNativeAgent {
 
     if (orgsError) {
       this.log(`Error fetching orgs: ${orgsError.message}`);
-      return { success: false, data: null };
+      return { data: null, sources: [], recordCount: 0 };
     }
 
     // Deduplicate org IDs
@@ -151,15 +151,16 @@ export class FederationAgent extends ManusNativeAgent {
     }
 
     return {
-      success: true,
       data: { orgIds, orgNamesMap },
+      sources: orgIds.map(id => `org:${id}`),
+      recordCount: orgIds.length,
     };
   }
 
   // ── Convert: Run federation for each org (Org → Core) ──
   async convert(fetchResult: FetchResult): Promise<ConvertResult> {
-    if (!fetchResult.success || !fetchResult.data) {
-      return { success: false, signals: [], trainingPacks: [] };
+    if (!fetchResult.data) {
+      return { signals: [], packs: [] };
     }
 
     const { orgIds, orgNamesMap } = fetchResult.data as {
@@ -333,28 +334,19 @@ export class FederationAgent extends ManusNativeAgent {
     this.log('');
 
     return {
-      success: true,
       signals: [],
-      trainingPacks: [],
-      metadata: {
-        orgStats: this.orgStats,
-        coreBrainStats: this.coreBrainStats,
-        totalOrgs: orgIds.length,
-        healthyOrgs: this.orgStats.filter(s => s.isHealthy).length,
-        totalPromoted,
-      },
+      packs: [],
     };
   }
 
   // ── Motor Commands: Alert on federation issues ──
   protected async generateMotorCommands(trainResult: TrainResult): Promise<MotorCommand[]> {
     const commands: MotorCommand[] = [];
-    const metadata = trainResult.metadata || {};
-    const orgStats = (metadata.orgStats as OrgFederationStats[]) || [];
-    const coreBrainStats = metadata.coreBrainStats as any;
-    const totalOrgs = metadata.totalOrgs as number;
-    const healthyOrgs = metadata.healthyOrgs as number;
-    const totalPromoted = metadata.totalPromoted as number;
+    const orgStats = this.orgStats;
+    const coreBrainStats = this.coreBrainStats;
+    const totalOrgs = orgStats.length;
+    const healthyOrgs = orgStats.filter(s => s.isHealthy).length;
+    const totalPromoted = orgStats.reduce((sum, s) => sum + s.relationshipsPromoted + s.memoriesPromoted + s.rulesPromoted, 0);
 
     // Slack: Federation summary
     if (process.env.SLACK_BOT_TOKEN && process.env.SLACK_CHANNEL_ID) {

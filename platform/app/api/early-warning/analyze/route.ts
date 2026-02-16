@@ -7,6 +7,13 @@
  * - Writes results back as signals for causal discovery (L4)
  * - Brain learns: bottleneck → velocity_collapse causality
  *
+ * TWO MODES:
+ * 1. Standard: Fast velocity + bottleneck analysis from cross_domain_signals
+ * 2. Brain-Integrated (?mode=brain): Full 15-layer cognitive stack processing
+ *    - Routes through BrainCommander for L3-L15 reasoning
+ *    - Returns Theory of Mind, stress-tested predictions, intervention plans
+ *    - THIS is what design partners should see
+ *
  * Runs P0 Early Warning System analysis:
  * - Velocity Collapse Prediction
  * - Bottleneck Concentration Risk

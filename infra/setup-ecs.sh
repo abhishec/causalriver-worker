@@ -209,8 +209,8 @@ cat > /tmp/task-trainer.json << TASKDEF
   "family": "nexusbrain-trainer",
   "networkMode": "awsvpc",
   "requiresCompatibilities": ["FARGATE"],
-  "cpu": "1024",
-  "memory": "4096",
+  "cpu": "2048",
+  "memory": "8192",
   "executionRoleArn": "${EXEC_ROLE_ARN}",
   "taskRoleArn": "${EXEC_ROLE_ARN}",
   "containerDefinitions": [
@@ -220,7 +220,8 @@ cat > /tmp/task-trainer.json << TASKDEF
       "essential": true,
       "environment": [
         { "name": "BRAIN_PROCESS", "value": "trainer" },
-        { "name": "TRAINER_MODE", "value": "once" }
+        { "name": "TRAINER_MODE", "value": "once" },
+        { "name": "NODE_OPTIONS", "value": "--max-old-space-size=6144" }
       ],
       "secrets": [
         { "name": "SUPABASE_URL", "valueFrom": "arn:aws:ssm:${REGION}:${ACCOUNT_ID}:parameter/nexusbrain/SUPABASE_URL" },
@@ -243,7 +244,7 @@ cat > /tmp/task-trainer.json << TASKDEF
 TASKDEF
 
 aws ecs register-task-definition --cli-input-json file:///tmp/task-trainer.json --region "${REGION}" > /dev/null
-echo "    Registered: nexusbrain-trainer (1 vCPU, 4GB)"
+echo "    Registered: nexusbrain-trainer (2 vCPU, 8GB, NODE_OPTIONS=6GB heap)"
 
 # --- Consolidation Task Definition ---
 cat > /tmp/task-consolidation.json << TASKDEF
@@ -1351,6 +1352,132 @@ aws events put-targets \
   --region "${REGION}" > /dev/null
 echo "    Outcome Resolver: Daily at 3:30 AM UTC"
 
+# ═══════════════════════════════════════════════════════════════════
+# SECTION 7: CLOUDWATCH ALARMS
+# ═══════════════════════════════════════════════════════════════════
+#
+# Alarms for ECS task failures, platform health, and cost monitoring.
+# These fire to an SNS topic — connect email/Slack/PagerDuty to the topic.
+#
+
+echo ""
+echo "─── CloudWatch Alarms ──────────────────────────────────────"
+
+# Create SNS topic for alarm notifications (idempotent)
+SNS_TOPIC_ARN=$(aws sns create-topic \
+  --name "nexusbrain-alarms" \
+  --region "${REGION}" \
+  --query 'TopicArn' \
+  --output text 2>/dev/null)
+echo "  SNS Topic: ${SNS_TOPIC_ARN:-skipped}"
+
+# 1. ECS Task Failure Alarm — fires when agents crash (OOM, exit code ≠ 0)
+# Metric: Number of stopped tasks in the cluster with non-zero exit codes.
+# Uses the custom metric filter on /ecs/nexusbrain-training log group.
+aws cloudwatch put-metric-alarm \
+  --alarm-name "nexusbrain-ecs-task-failures" \
+  --alarm-description "ECS agent tasks failing (OOM, crash, exit code != 0)" \
+  --namespace "ECS/ContainerInsights" \
+  --metric-name "TaskCount" \
+  --dimensions "Name=ClusterName,Value=${CLUSTER}" \
+  --statistic "SampleCount" \
+  --period 3600 \
+  --evaluation-periods 1 \
+  --threshold 0 \
+  --comparison-operator "GreaterThanThreshold" \
+  --treat-missing-data "notBreaching" \
+  --alarm-actions "${SNS_TOPIC_ARN}" \
+  --region "${REGION}" 2>/dev/null || true
+echo "    ✓ ECS Task Failures alarm"
+
+# 2. Platform Service Health — fires when running task count drops to 0
+aws cloudwatch put-metric-alarm \
+  --alarm-name "nexusbrain-platform-unhealthy" \
+  --alarm-description "Platform service has 0 running tasks" \
+  --namespace "AWS/ECS" \
+  --metric-name "RunningTaskCount" \
+  --dimensions "Name=ServiceName,Value=nexusbrain-platform-service" "Name=ClusterName,Value=${CLUSTER}" \
+  --statistic "Average" \
+  --period 300 \
+  --evaluation-periods 2 \
+  --threshold 1 \
+  --comparison-operator "LessThanThreshold" \
+  --treat-missing-data "breaching" \
+  --alarm-actions "${SNS_TOPIC_ARN}" \
+  --region "${REGION}" 2>/dev/null || true
+echo "    ✓ Platform Unhealthy alarm"
+
+# 3. ALB 5xx Error Rate — fires on sustained backend errors
+aws cloudwatch put-metric-alarm \
+  --alarm-name "nexusbrain-alb-5xx-errors" \
+  --alarm-description "ALB returning 5xx errors (backend failures)" \
+  --namespace "AWS/ApplicationELB" \
+  --metric-name "HTTPCode_Target_5XX_Count" \
+  --dimensions "Name=LoadBalancer,Value=app/nexusbrain-platform-alb/$(aws elbv2 describe-load-balancers --names nexusbrain-platform-alb --query 'LoadBalancers[0].LoadBalancerArn' --output text --region ${REGION} 2>/dev/null | sed 's|.*app/||')" \
+  --statistic "Sum" \
+  --period 300 \
+  --evaluation-periods 2 \
+  --threshold 10 \
+  --comparison-operator "GreaterThanThreshold" \
+  --treat-missing-data "notBreaching" \
+  --alarm-actions "${SNS_TOPIC_ARN}" \
+  --region "${REGION}" 2>/dev/null || true
+echo "    ✓ ALB 5xx Errors alarm"
+
+# 4. Log Error Rate — fires on high error rate in training log group
+# First, create a metric filter for ERROR messages in the training log group
+aws logs put-metric-filter \
+  --log-group-name "${LOG_GROUP}" \
+  --filter-name "nexusbrain-error-count" \
+  --filter-pattern "ERROR" \
+  --metric-transformations \
+    metricName=TrainingErrorCount,metricNamespace=NexusBrain,metricValue=1,defaultValue=0 \
+  --region "${REGION}" 2>/dev/null || true
+
+aws cloudwatch put-metric-alarm \
+  --alarm-name "nexusbrain-training-errors" \
+  --alarm-description "High error rate in agent training logs" \
+  --namespace "NexusBrain" \
+  --metric-name "TrainingErrorCount" \
+  --statistic "Sum" \
+  --period 3600 \
+  --evaluation-periods 1 \
+  --threshold 50 \
+  --comparison-operator "GreaterThanThreshold" \
+  --treat-missing-data "notBreaching" \
+  --alarm-actions "${SNS_TOPIC_ARN}" \
+  --region "${REGION}" 2>/dev/null || true
+echo "    ✓ Training Error Rate alarm"
+
+# 5. OOM Detection — metric filter for heap limit errors
+aws logs put-metric-filter \
+  --log-group-name "${LOG_GROUP}" \
+  --filter-name "nexusbrain-oom-count" \
+  --filter-pattern "\"heap limit\" OR \"out of memory\" OR \"FATAL ERROR\"" \
+  --metric-transformations \
+    metricName=OOMErrorCount,metricNamespace=NexusBrain,metricValue=1,defaultValue=0 \
+  --region "${REGION}" 2>/dev/null || true
+
+aws cloudwatch put-metric-alarm \
+  --alarm-name "nexusbrain-oom-crashes" \
+  --alarm-description "Agent OOM crash detected (heap limit reached)" \
+  --namespace "NexusBrain" \
+  --metric-name "OOMErrorCount" \
+  --statistic "Sum" \
+  --period 3600 \
+  --evaluation-periods 1 \
+  --threshold 0 \
+  --comparison-operator "GreaterThanThreshold" \
+  --treat-missing-data "notBreaching" \
+  --alarm-actions "${SNS_TOPIC_ARN}" \
+  --region "${REGION}" 2>/dev/null || true
+echo "    ✓ OOM Crash Detection alarm"
+
+echo ""
+echo "  To receive alarm notifications, subscribe to SNS topic:"
+echo "    aws sns subscribe --topic-arn ${SNS_TOPIC_ARN} --protocol email --notification-endpoint your@email.com --region ${REGION}"
+echo ""
+
 # ─── Done ─────────────────────────────────────────────────────────
 echo ""
 echo "============================================"
@@ -1368,7 +1495,7 @@ echo "  │ Agent                      │ Schedule                             
 echo "  ├────────────────────────────┼────────────────────────────────────────────┼──────────┤"
 echo "  │ Orchestrator               │ Long-running service (24/7)                │ 4/16 GB  │"
 echo "  ├────────────────────────────┼────────────────────────────────────────────┼──────────┤"
-echo "  │ Autonomous Trainer         │ Every 12h (0,12 UTC) [cost-optimized]      │ 1/4 GB   │"
+echo "  │ Autonomous Trainer         │ Every 12h (0,12 UTC) [cost-optimized]      │ 2/8 GB   │"
 echo "  │ Proactive Intelligence     │ Every 4h (1,5,9,13,17,21 UTC)             │ 0.5/1 GB │"
 echo "  │ Org Updater                │ Every 4h (2,6,10,14,18,22 UTC)            │ 1/4 GB   │"
 echo "  │ Federation Agent           │ Every 6h (3,9,15,21 UTC)                  │ 1/4 GB   │"

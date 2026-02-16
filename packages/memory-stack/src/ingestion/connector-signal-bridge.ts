@@ -248,14 +248,7 @@ export async function storeDualWriteConnectorSignals(
 
   const retry = createRetry({ maxRetries: 3, baseDelayMs: 500, maxDelayMs: 5000 });
 
-  await retry.execute(async () => {
-    const { error } = await supabase.from('connector_signals').insert(rawRows);
-    if (error) {
-      throw new Error(`Failed to store raw connector signals: ${error.message}`);
-    }
-  }, 'store-connector-signals-raw');
-
-  // ── 2. WRITE TO cross_domain_signals (ENRICHED) ──────────────────────────
+  // ── 2. PREPARE ENRICHED ROWS ──────────────────────────────────────────────
   const enrichedRows: CrossDomainSignalRow[] = signals.map((s) => {
     const source = s.source.toLowerCase();
     const metadata = s.metadata || {};
@@ -277,12 +270,21 @@ export async function storeDualWriteConnectorSignals(
     };
   });
 
-  await retry.execute(async () => {
-    const { error } = await supabase.from('cross_domain_signals').insert(enrichedRows);
-    if (error) {
-      throw new Error(`Failed to store enriched cross-domain signals: ${error.message}`);
-    }
-  }, 'store-cross-domain-signals-enriched');
+  // ── 3. PARALLEL DUAL-WRITE (was sequential — 2x latency improvement) ────
+  await Promise.all([
+    retry.execute(async () => {
+      const { error } = await supabase.from('connector_signals').insert(rawRows);
+      if (error) {
+        throw new Error(`Failed to store raw connector signals: ${error.message}`);
+      }
+    }, 'store-connector-signals-raw'),
+    retry.execute(async () => {
+      const { error } = await supabase.from('cross_domain_signals').insert(enrichedRows);
+      if (error) {
+        throw new Error(`Failed to store enriched cross-domain signals: ${error.message}`);
+      }
+    }, 'store-cross-domain-signals-enriched'),
+  ]);
 
   return { rawCount: rawRows.length, enrichedCount: enrichedRows.length };
 }

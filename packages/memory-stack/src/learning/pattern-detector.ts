@@ -170,37 +170,82 @@ export function mineAssociationRules(
     frequentItemsets.set(item, itemCounts.get(item)!);
   }
   
-  // 2-itemsets
-  for (let i = 0; i < frequentItems.length; i++) {
-    for (let j = i + 1; j < frequentItems.length; j++) {
-      const pair = [frequentItems[i], frequentItems[j]].sort().join(',');
+  // Pre-compute transaction bitmaps for O(1) support counting
+  // Instead of re-scanning all transactions for each candidate pair/triple,
+  // build a bitmap (Set of transaction indices) per item.
+  const txBitmaps = new Map<string, Set<number>>();
+  for (const item of frequentItems) {
+    const bitmap = new Set<number>();
+    for (let t = 0; t < transactions.length; t++) {
+      if (transactions[t].includes(item)) {
+        bitmap.add(t);
+      }
+    }
+    txBitmaps.set(item, bitmap);
+  }
+
+  // Cap frequent items to prevent combinatorial explosion at scale
+  // At 1000+ frequent items, 3-itemsets = C(1000,3) = 166M candidates → OOM
+  const MAX_FREQUENT_ITEMS = 200;
+  const cappedFrequentItems = frequentItems.length > MAX_FREQUENT_ITEMS
+    ? frequentItems
+        .map(item => ({ item, count: itemCounts.get(item)! }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, MAX_FREQUENT_ITEMS)
+        .map(x => x.item)
+    : frequentItems;
+
+  // 2-itemsets (using bitmap intersection instead of full transaction scan)
+  for (let i = 0; i < cappedFrequentItems.length; i++) {
+    const bitmapI = txBitmaps.get(cappedFrequentItems[i])!;
+    for (let j = i + 1; j < cappedFrequentItems.length; j++) {
+      const bitmapJ = txBitmaps.get(cappedFrequentItems[j])!;
+      // Intersect bitmaps (O(min(|A|,|B|)) instead of O(n))
       let count = 0;
-      for (const tx of transactions) {
-        if (tx.includes(frequentItems[i]) && tx.includes(frequentItems[j])) {
-          count++;
-        }
+      const smaller = bitmapI.size < bitmapJ.size ? bitmapI : bitmapJ;
+      const larger = bitmapI.size < bitmapJ.size ? bitmapJ : bitmapI;
+      for (const t of smaller) {
+        if (larger.has(t)) count++;
       }
       if (count / n >= minSupport) {
+        const pair = [cappedFrequentItems[i], cappedFrequentItems[j]].sort().join(',');
         frequentItemsets.set(pair, count);
       }
     }
   }
-  
-  // 3-itemsets (if allowed)
-  if (maxAntecedentSize >= 2) {
-    for (let i = 0; i < frequentItems.length; i++) {
-      for (let j = i + 1; j < frequentItems.length; j++) {
-        for (let k = j + 1; k < frequentItems.length; k++) {
-          const triple = [frequentItems[i], frequentItems[j], frequentItems[k]].sort().join(',');
+
+  // 3-itemsets (if allowed) — only extend frequent 2-itemsets (proper Apriori pruning)
+  if (maxAntecedentSize >= 2 && cappedFrequentItems.length <= MAX_FREQUENT_ITEMS) {
+    const frequent2 = new Set<string>();
+    for (const [key] of frequentItemsets) {
+      if (key.includes(',') && !key.includes(',', key.indexOf(',') + 1)) {
+        frequent2.add(key);
+      }
+    }
+
+    for (let i = 0; i < cappedFrequentItems.length; i++) {
+      for (let j = i + 1; j < cappedFrequentItems.length; j++) {
+        const pairIJ = [cappedFrequentItems[i], cappedFrequentItems[j]].sort().join(',');
+        if (!frequent2.has(pairIJ)) continue; // Apriori pruning: skip if 2-subset not frequent
+
+        for (let k = j + 1; k < cappedFrequentItems.length; k++) {
+          // Apriori property: all 2-subsets must be frequent
+          const pairIK = [cappedFrequentItems[i], cappedFrequentItems[k]].sort().join(',');
+          const pairJK = [cappedFrequentItems[j], cappedFrequentItems[k]].sort().join(',');
+          if (!frequent2.has(pairIK) || !frequent2.has(pairJK)) continue;
+
+          const bitmapI = txBitmaps.get(cappedFrequentItems[i])!;
+          const bitmapJ = txBitmaps.get(cappedFrequentItems[j])!;
+          const bitmapK = txBitmaps.get(cappedFrequentItems[k])!;
           let count = 0;
-          for (const tx of transactions) {
-            if (tx.includes(frequentItems[i]) && 
-                tx.includes(frequentItems[j]) && 
-                tx.includes(frequentItems[k])) {
-              count++;
-            }
+          // Intersect smallest bitmap against other two
+          const smallest = [bitmapI, bitmapJ, bitmapK].sort((a, b) => a.size - b.size)[0];
+          const others = [bitmapI, bitmapJ, bitmapK].filter(b => b !== smallest);
+          for (const t of smallest) {
+            if (others[0].has(t) && others[1].has(t)) count++;
           }
           if (count / n >= minSupport) {
+            const triple = [cappedFrequentItems[i], cappedFrequentItems[j], cappedFrequentItems[k]].sort().join(',');
             frequentItemsets.set(triple, count);
           }
         }
@@ -726,22 +771,26 @@ export function mineSequentialPatterns(
       const newPrefix = [...prefix, event];
       const support = entitySet.size / totalEntities;
 
-      // Compute gap statistics
-      const avgGaps: number[] = [];
-      const gapRanges: Array<{ min: number; max: number }> = [];
+      // Compute gap statistics in single pass (no intermediate arrays — prevents OOM)
+      const gapCount = newPrefix.length - 1;
+      const gapStats = Array.from({ length: gapCount }, () => ({
+        sum: 0, count: 0, min: Infinity, max: -Infinity,
+      }));
 
-      for (let g = 0; g < newPrefix.length - 1; g++) {
-        const gaps: number[] = [];
-        for (const inst of instances) {
+      for (const inst of instances) {
+        for (let g = 0; g < gapCount; g++) {
           if (inst.timestamps.length > g + 1) {
-            gaps.push(inst.timestamps[g + 1] - inst.timestamps[g]);
+            const gap = inst.timestamps[g + 1] - inst.timestamps[g];
+            gapStats[g].sum += gap;
+            gapStats[g].count++;
+            if (gap < gapStats[g].min) gapStats[g].min = gap;
+            if (gap > gapStats[g].max) gapStats[g].max = gap;
           }
         }
-        if (gaps.length > 0) {
-          avgGaps.push(gaps.reduce((a, b) => a + b, 0) / gaps.length);
-          gapRanges.push({ min: Math.min(...gaps), max: Math.max(...gaps) });
-        }
       }
+
+      const avgGaps = gapStats.filter(s => s.count > 0).map(s => s.sum / s.count);
+      const gapRanges = gapStats.filter(s => s.count > 0).map(s => ({ min: s.min, max: s.max }));
 
       patterns.push({
         sequence: newPrefix,

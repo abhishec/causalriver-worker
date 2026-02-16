@@ -38,6 +38,13 @@ import type { AgentConfig, FetchResult, ConvertResult, TrainResult, AgentRunResu
 import type { TrainingPack } from '../../packages/memory-stack/src/learning/brain-trainer';
 import type { ConnectorSignal } from '../../packages/memory-stack/src/connectors/connector-framework';
 
+// ── Observability (L6: Agent Executions) ─────────────────────────────────────
+import {
+  createBrainObservability,
+  type BrainObservability,
+  type AgentExecutionRecord,
+} from '../../packages/memory-stack/src/observability/brain-observability';
+
 // ── Comprehensive Brain Initialization (ALL 93+ systems) ────────────────────
 import {
   ComprehensiveBrainInitializer,
@@ -561,6 +568,97 @@ export abstract class ManusNativeAgent extends BrainNativeAgent {
       } catch (err) {
         this.log('BRAIN', `Failed to record agent run: ${err}`);
       }
+    }
+
+    // ── L6 Observability: Record agent execution to obs_agent_executions ──
+    // This wires the agent framework into the brain observability pipeline,
+    // populating the obs_agent_executions table for the admin dashboard,
+    // forensic queries, and brain run reporter.
+    try {
+      const obs = createBrainObservability({
+        supabase: this.supabase,
+        organizationId: this.organizationId,
+        batchMode: false, // Immediate write — agent runs are infrequent
+      });
+
+      const durationMs = manusResult.completedAt.getTime() - manusResult.startedAt.getTime();
+      const agentRunId = `${this.name}-${manusResult.startedAt.toISOString()}`;
+
+      await obs.recordAgentExecution({
+        agent_type: this.name,
+        agent_level: 'primary',
+        agent_run_id: agentRunId,
+        trigger_type: 'scheduled',
+        actions_generated: manusResult.signalsGenerated,
+        motor_commands_issued: this.motorCommandResults.length,
+        predictions_made: 0,
+        status: manusResult.errorsEncountered.length === 0 ? 'success'
+          : manusResult.signalsGenerated > 0 ? 'partial' : 'failed',
+        output_summary: manusResult.summary,
+        output_artifacts: {
+          signalsGenerated: manusResult.signalsGenerated,
+          packsProcessed: manusResult.packsProcessed,
+          stages: manusResult.stages.map(s => ({ name: s.name, status: s.status, duration_ms: s.duration_ms })),
+          brainRegion: this.brainRegion || null,
+          neurologicalFunction: this.neurologicalFunction || null,
+        },
+        error_message: manusResult.errorsEncountered.length > 0
+          ? manusResult.errorsEncountered.join('; ') : undefined,
+        execution_latency_ms: durationMs,
+        started_at: manusResult.startedAt.toISOString(),
+        completed_at: manusResult.completedAt.toISOString(),
+      });
+
+      this.log('OBS', `Recorded agent execution to obs_agent_executions (${durationMs}ms, ${manusResult.errorsEncountered.length === 0 ? 'success' : 'partial'})`);
+    } catch (err) {
+      // Non-critical: observability recording should never block agent execution
+      this.log('OBS', `Failed to record agent execution: ${err instanceof Error ? err.message : String(err)}`);
+    }
+
+    // ── Update scheduled_jobs metadata ──
+    // Atomically increment run_count, update last_run_at, and track errors.
+    // Uses a dedicated RPC for atomic counter increment (avoids read-modify-write race).
+    try {
+      const hasErrors = manusResult.errorsEncountered.length > 0;
+
+      // Atomic counter increment via RPC
+      const { error: rpcError } = await this.supabase.rpc('increment_scheduled_job_counters', {
+        p_organization_id: this.organizationId,
+        p_job_name: this.name,
+        p_increment_errors: hasErrors,
+      });
+
+      if (rpcError) {
+        // RPC doesn't exist yet (migration not applied) — fall back to simple update
+        await this.supabase
+          .from('scheduled_jobs')
+          .update({
+            last_run_at: new Date().toISOString(),
+            last_error: hasErrors ? manusResult.errorsEncountered[0] : null,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('organization_id', this.organizationId)
+          .eq('job_name', this.name);
+      }
+
+      // Update last_error text (RPC only handles counters + timestamps)
+      if (hasErrors) {
+        await this.supabase
+          .from('scheduled_jobs')
+          .update({ last_error: manusResult.errorsEncountered[0] || null })
+          .eq('organization_id', this.organizationId)
+          .eq('job_name', this.name);
+      } else {
+        await this.supabase
+          .from('scheduled_jobs')
+          .update({ last_error: null })
+          .eq('organization_id', this.organizationId)
+          .eq('job_name', this.name);
+      }
+
+      this.log('OBS', `Updated scheduled_jobs metadata for "${this.name}"`);
+    } catch (err) {
+      // Non-critical: metadata tracking should never block agent execution
     }
 
     return manusResult;

@@ -936,6 +936,7 @@ export {
 } from './orchestrator/action-domains-log-query';
 
 // Early Warning System — Velocity Collapse + Bottleneck Detection
+// @deprecated - Use Brain-integrated version below for design partners
 export {
   runEarlyWarningSystem,
   runEarlyWarningWithAlerts,
@@ -943,6 +944,26 @@ export {
   type EarlyWarningConfig,
   type EarlyWarningReport,
 } from './orchestrator/early-warning-system';
+
+// Brain-Integrated Early Warning (RECOMMENDED for design partners)
+// Routes through BrainCommander → 15-Layer Cognitive Stack (L3-L15)
+// Produces Brain intelligence with Theory of Mind, stress-tested predictions,
+// goal-backward intervention plans, and AI-generated executive narratives
+export {
+  runBrainEarlyWarning,
+  type BrainEarlyWarningConfig,
+  type BrainEarlyWarningReport,
+  type BrainBottleneckRisk,
+  type BrainVelocityPrediction,
+  type ContributorImpact,
+  type CascadeEffect,
+  type InterventionPlan as EarlyWarningInterventionPlan,
+  type InterventionPath as EarlyWarningInterventionPath,
+  type InterventionStep as EarlyWarningInterventionStep,
+  type RootCauseAnalysis,
+  type StressTestResult,
+  type Experiment,
+} from './orchestrator/early-warning-brain-integration';
 
 // GitHub Connector Enhanced (Phase 2) — Real GitHub API integration for PR automation
 export {
@@ -2019,8 +2040,8 @@ export {
   type Goal,
   type GoalConstraint,
   type GoalPlan,
-  type InterventionPath,
-  type InterventionStep,
+  type InterventionPath as GoalInterventionPath,
+  type InterventionStep as GoalInterventionStep,
   type TimelineEvent,
   type RiskAssessment,
   type SimulationResult as GoalSimulationResult,

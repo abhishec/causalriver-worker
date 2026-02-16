@@ -93,10 +93,19 @@ export async function logAuditEvent(params: AuditEventParams): Promise<string | 
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
+    // ── Validate UUID fields ──
+    // PostgreSQL log_audit_event() expects UUID type for p_user_id, p_organization_id,
+    // p_session_id, and p_request_id. Non-UUID strings like "system" cause:
+    //   "invalid input syntax for type uuid: \"system\""
+    // Sanitize all UUID fields to prevent this.
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const toUuid = (v: string | undefined): string | null =>
+      v && UUID_RE.test(v) ? v : null;
+
     // Call database function
     const { data, error } = await supabase.rpc('log_audit_event', {
-      p_organization_id: params.organizationId,
-      p_user_id: params.userId || null,
+      p_organization_id: params.organizationId, // Required — caller must ensure valid UUID
+      p_user_id: toUuid(params.userId),
       p_action: params.action,
       p_resource_type: params.resourceType || null,
       p_resource_id: params.resourceId || null,
@@ -104,8 +113,8 @@ export async function logAuditEvent(params: AuditEventParams): Promise<string | 
       p_new_value: params.newValue ? JSON.stringify(params.newValue) : null,
       p_ip_address: params.ipAddress || null,
       p_user_agent: params.userAgent || null,
-      p_session_id: params.sessionId || null,
-      p_request_id: params.requestId || null,
+      p_session_id: toUuid(params.sessionId),
+      p_request_id: toUuid(params.requestId),
       p_metadata: params.metadata ? JSON.stringify(params.metadata) : null,
       p_status: params.status || 'success',
       p_error_message: params.errorMessage || null,

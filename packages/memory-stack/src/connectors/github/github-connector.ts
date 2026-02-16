@@ -331,7 +331,30 @@ export class GitHubConnector extends ConnectorBase {
       this.githubFetch(`/repos/${repo.full_name}/pulls?state=${state}&per_page=100`)
     );
 
-    const signals = prs.map((pr: any) => this.transformPRToSignal(repo, pr));
+    const signals: Signal[] = [];
+
+    // Process each PR and fetch its reviews
+    for (const pr of prs) {
+      // Add PR signal
+      signals.push(this.transformPRToSignal(repo, pr));
+
+      // Fetch and add review signals (critical for P0 Bottleneck Detection)
+      try {
+        const reviews = await this.rateLimiter.throttle(() =>
+          this.githubFetch(`/repos/${repo.full_name}/pulls/${pr.number}/reviews`)
+        );
+
+        for (const review of reviews) {
+          if (review.user) {  // Skip reviews without user (bots, etc.)
+            signals.push(this.transformReviewToSignal(repo, pr, review));
+          }
+        }
+      } catch (error) {
+        console.warn(`[GitHub] Failed to fetch reviews for PR #${pr.number}:`, error);
+        // Continue processing other PRs even if reviews fail
+      }
+    }
+
     await this.batchInsertSignals(signals);
 
     return signals.length;
@@ -417,67 +440,133 @@ export class GitHubConnector extends ConnectorBase {
   }
 
   /**
-   * Transform commit to signal
+   * Transform commit to signal (Brain L1 spec)
    */
   private transformCommitToSignal(repo: Repository, commit: any): Signal {
     return {
-      source: 'github',
-      type: 'commit',
-      content: `${commit.commit.message}\n\nAuthor: ${commit.commit.author.name}`,
-      metadata: {
+      organization_id: this.organizationId,
+      source_domain: 'engineering',
+      signal_type: 'commit_pushed',
+      signal_value: 1,
+      entity_type: 'commit',
+      entity_id: `${repo.name}:${commit.sha}`,
+      signal_metadata: {
         repo: repo.full_name,
         sha: commit.sha,
-        author: commit.commit.author.name,
-        author_email: commit.commit.author.email,
+        message: commit.commit?.message,
+        author: commit.commit?.author?.name,
+        author_email: commit.commit?.author?.email,
+        committer: commit.commit?.committer?.name,
+        files_changed: commit.files?.length || 0,
         url: commit.html_url,
       },
-      organization_id: this.organizationId,
-      timestamp: commit.commit.author.date,
+      created_at: commit.commit?.author?.date || new Date().toISOString(),
     };
   }
 
   /**
-   * Transform PR to signal
+   * Transform PR to signal (Brain L1 spec)
    */
   private transformPRToSignal(repo: Repository, pr: any): Signal {
+    // Determine signal type and value based on PR state
+    let signalType: string;
+    let signalValue: number;
+
+    if (pr.merged_at) {
+      signalType = 'pr_merged';
+      // Signal value = cycle time in hours
+      signalValue = (new Date(pr.merged_at).getTime() - new Date(pr.created_at).getTime()) / 3600000;
+    } else if (pr.state === 'open') {
+      signalType = 'pr_opened';
+      signalValue = 1;
+    } else {
+      signalType = 'pr_closed_unmerged';
+      signalValue = 1;
+    }
+
     return {
-      source: 'github',
-      type: 'pull_request',
-      content: `${pr.title}\n\n${pr.body || ''}`,
-      metadata: {
+      organization_id: this.organizationId,
+      source_domain: 'engineering',
+      signal_type: signalType,
+      signal_value: signalValue,
+      entity_type: 'pull_request',
+      entity_id: `${repo.name}#${pr.number}`,
+      signal_metadata: {
         repo: repo.full_name,
         pr_number: pr.number,
+        title: pr.title,
+        body: pr.body || '',
+        author: pr.user?.login,
+        author_id: pr.user?.id,
         state: pr.state,
-        author: pr.user.login,
+        additions: pr.additions || 0,
+        deletions: pr.deletions || 0,
+        changed_files: pr.changed_files || 0,
+        merged_at: pr.merged_at,
         url: pr.html_url,
-        merged: pr.merged_at ? true : false,
+        is_draft: pr.draft || false,
       },
-      organization_id: this.organizationId,
-      timestamp: pr.updated_at,
+      created_at: pr.merged_at || pr.created_at,
     };
   }
 
   /**
-   * Transform issue to signal
+   * Transform PR review to signal (Brain L1 spec)
+   * Critical for P0 Bottleneck Detection
+   */
+  private transformReviewToSignal(repo: Repository, pr: any, review: any): Signal {
+    const reviewLatencyHours =
+      (new Date(review.submitted_at).getTime() - new Date(pr.created_at).getTime()) / 3600000;
+
+    return {
+      organization_id: this.organizationId,
+      source_domain: 'engineering',
+      signal_type: 'pr_reviewed',
+      signal_value: reviewLatencyHours,
+      entity_type: 'review',
+      entity_id: `${repo.name}#${pr.number}:review:${review.id}`,
+      signal_metadata: {
+        repo: repo.full_name,
+        pr_number: pr.number,
+        pr_author: pr.user?.login,
+        reviewer: review.user?.login,
+        reviewer_id: review.user?.id,
+        review_state: review.state,
+        review_latency_hours: reviewLatencyHours,
+        submitted_at: review.submitted_at,
+      },
+      created_at: review.submitted_at,
+    };
+  }
+
+  /**
+   * Transform issue to signal (Brain L1 spec)
    */
   private transformIssueToSignal(repo: Repository, issue: any): Signal {
     // Skip PRs (issues API includes PRs)
     if (issue.pull_request) return null as any;
 
+    const signalType = issue.state === 'open' ? 'issue_opened' : 'issue_closed';
+
     return {
-      source: 'github',
-      type: 'issue',
-      content: `${issue.title}\n\n${issue.body || ''}`,
-      metadata: {
+      organization_id: this.organizationId,
+      source_domain: 'engineering',
+      signal_type: signalType,
+      signal_value: 1,
+      entity_type: 'issue',
+      entity_id: `${repo.name}#${issue.number}`,
+      signal_metadata: {
         repo: repo.full_name,
         issue_number: issue.number,
+        title: issue.title,
+        body: issue.body || '',
+        author: issue.user?.login,
         state: issue.state,
-        author: issue.user.login,
-        labels: issue.labels.map((l: any) => l.name),
+        labels: issue.labels?.map((l: any) => l.name) || [],
+        assignees: issue.assignees?.map((a: any) => a.login) || [],
         url: issue.html_url,
       },
-      organization_id: this.organizationId,
-      timestamp: issue.updated_at,
+      created_at: issue.state === 'closed' ? issue.closed_at : issue.created_at,
     };
   }
 

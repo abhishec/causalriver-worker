@@ -38,6 +38,7 @@ export class BrainConsolidationAgent extends ManusNativeAgent {
 
   private config: BrainConsolidationConfig;
   private coreBrainOrgId = '00000000-0000-4000-a000-000000000001';
+  private consolidationResults: ConsolidationResult[] = [];
 
   constructor(
     supabase: any,
@@ -85,15 +86,16 @@ export class BrainConsolidationAgent extends ManusNativeAgent {
     this.log(`Consolidating ${orgIds.length} organization(s)`);
 
     return {
-      success: true,
       data: { orgIds },
+      sources: orgIds.map(id => `org:${id}`),
+      recordCount: orgIds.length,
     };
   }
 
   // ── Convert: Run consolidation for each org ──
   async convert(fetchResult: FetchResult): Promise<ConvertResult> {
-    if (!fetchResult.success || !fetchResult.data) {
-      return { success: false, signals: [], trainingPacks: [] };
+    if (!fetchResult.data) {
+      return { signals: [], packs: [] };
     }
 
     const { orgIds } = fetchResult.data as { orgIds: string[] };
@@ -109,12 +111,12 @@ export class BrainConsolidationAgent extends ManusNativeAgent {
       }
     }
 
-    // Return consolidation results as signals (for motor commands)
+    // Store consolidation results for motor commands
+    this.consolidationResults = results;
+
     return {
-      success: true,
       signals: [],
-      trainingPacks: [],
-      metadata: { consolidationResults: results },
+      packs: [],
     };
   }
 
@@ -174,8 +176,8 @@ export class BrainConsolidationAgent extends ManusNativeAgent {
   protected async generateMotorCommands(trainResult: TrainResult): Promise<MotorCommand[]> {
     const commands: MotorCommand[] = [];
 
-    // Extract consolidation results from metadata
-    const results = (trainResult.metadata?.consolidationResults as ConsolidationResult[]) || [];
+    // Use consolidation results stored during convert phase
+    const results = this.consolidationResults;
     const allDiscoveries = results.flatMap(r => r.report.discoveries);
     const totalNew = results.reduce((sum, r) => sum + r.report.stats.newRelationships, 0);
     const totalAnomalies = results.reduce((sum, r) => sum + r.report.stats.anomaliesDetected, 0);

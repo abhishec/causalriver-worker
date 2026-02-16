@@ -46,6 +46,9 @@ export class MonthlyDeepAnalysisAgent extends ManusNativeAgent {
   readonly brainRegion = 'Hippocampus (Monthly Deep Analysis)';
   readonly neurologicalFunction = 'Full Historical Causal Discovery & Growth Tracking';
 
+  private lastDiscoveryResults: DiscoveryResults | null = null;
+  private lastGrowthReport: GrowthReport | null = null;
+
   // ── Fetch: Load ALL historical signals for discovery ──
   async fetch(): Promise<FetchResult> {
     this.log(`Starting monthly deep analysis (${new Date().toISOString().substring(0, 7)})...`);
@@ -93,12 +96,12 @@ export class MonthlyDeepAnalysisAgent extends ManusNativeAgent {
       this.log(`Failed to load signals: ${err instanceof Error ? err.message : String(err)}`);
     }
 
-    return { success: true, data: { discoveryResults } };
+    return { data: { discoveryResults }, sources: ['cross_domain_signals'], recordCount: discoveryResults?.relationships?.length ?? 0 };
   }
 
   // ── Convert: Auto-generate training packs + growth report ──
   async convert(fetchResult: FetchResult): Promise<ConvertResult> {
-    if (!fetchResult.success) return { success: false, signals: [], trainingPacks: [] };
+    if (!fetchResult.data) return { signals: [], packs: [] };
 
     const { discoveryResults } = fetchResult.data as { discoveryResults: DiscoveryResults | null };
 
@@ -177,22 +180,23 @@ export class MonthlyDeepAnalysisAgent extends ManusNativeAgent {
       this.log(`Growth report failed: ${err instanceof Error ? err.message : String(err)}`);
     }
 
+    // Store for motor commands
+    this.lastDiscoveryResults = discoveryResults;
+    this.lastGrowthReport = growthReport;
+
     return {
-      success: true,
       signals: [],
-      trainingPacks: [],
-      metadata: { discoveryResults, growthReport },
+      packs: [],
     };
   }
 
   // ── Motor Commands: Monthly growth notification ──
   protected async generateMotorCommands(trainResult: TrainResult): Promise<MotorCommand[]> {
     const commands: MotorCommand[] = [];
-    if (!trainResult.success || !process.env.SLACK_BOT_TOKEN || !process.env.SLACK_CHANNEL_ID) return commands;
+    if (!process.env.SLACK_BOT_TOKEN || !process.env.SLACK_CHANNEL_ID) return commands;
 
-    const { discoveryResults, growthReport } = trainResult.metadata || {};
-    const growth = growthReport as GrowthReport | undefined;
-    const discovery = discoveryResults as DiscoveryResults | undefined;
+    const growth = this.lastGrowthReport;
+    const discovery = this.lastDiscoveryResults;
 
     if (growth) {
       commands.push({
