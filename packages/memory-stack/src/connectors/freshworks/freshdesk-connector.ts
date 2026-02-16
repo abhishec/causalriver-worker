@@ -205,6 +205,7 @@ export class FreshdeskConnector extends ConnectorBase {
    * Ingest single ticket
    */
   private async ingestTicket(ticket: FreshdeskTicket): Promise<void> {
+    const eventTime = ticket.updated_at;
     const signal: Signal = {
       source_domain: 'support',
       signal_type: 'freshdesk_ticket',
@@ -224,7 +225,8 @@ export class FreshdeskConnector extends ConnectorBase {
         responder_id: ticket.responder_id,
       },
       organization_id: this.organizationId,
-      created_at: ticket.updated_at,
+      created_at: eventTime,
+      signal_timestamp: eventTime,
     };
 
     await this.streamProcessor.addSignal(signal);
@@ -240,6 +242,7 @@ export class FreshdeskConnector extends ConnectorBase {
       );
 
       for (const conv of conversations) {
+        const convTime = conv.created_at;
         const signal: Signal = {
           source_domain: 'support',
           signal_type: 'freshdesk_conversation',
@@ -255,7 +258,8 @@ export class FreshdeskConnector extends ConnectorBase {
             is_private: conv.private,
           },
           organization_id: this.organizationId,
-          created_at: conv.created_at,
+          created_at: convTime,
+          signal_timestamp: convTime,
         };
 
         await this.streamProcessor.addSignal(signal);

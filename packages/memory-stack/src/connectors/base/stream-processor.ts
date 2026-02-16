@@ -16,7 +16,8 @@ export interface Signal {
   entity_type: string;         // 'pull_request', 'review', 'commit', 'issue'
   entity_id: string;           // 'backend#1234', 'review:5678'
   signal_metadata: Record<string, any>;  // Additional context
-  created_at: string;          // Signal timestamp
+  created_at: string;          // DB insertion timestamp (defaults to NOW() in DB)
+  signal_timestamp: string;    // When the event ACTUALLY occurred (for historical accuracy)
   content_hash?: string;       // For deduplication
 }
 
@@ -183,7 +184,7 @@ export class StreamProcessor {
    * Generate deterministic hash for a signal
    */
   private generateSignalHash(signal: Signal): string {
-    const key = `${signal.source_domain}:${signal.signal_type}:${signal.entity_id}:${signal.created_at}`;
+    const key = `${signal.source_domain}:${signal.signal_type}:${signal.entity_id}:${signal.signal_timestamp}`;
     return crypto.createHash('sha256').update(key).digest('hex');
   }
 

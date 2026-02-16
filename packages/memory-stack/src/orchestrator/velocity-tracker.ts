@@ -119,36 +119,36 @@ export async function buildVelocityTimeSeries(
   // Query GitHub signals for PRs merged (Brain L1: cross_domain_signals)
   const { data: prSignals, error: prError } = await supabase
     .from('cross_domain_signals')
-    .select('created_at, signal_value, signal_metadata')
+    .select('signal_timestamp, signal_value, signal_metadata')
     .eq('organization_id', organizationId)
     .eq('source_domain', 'engineering')
     .eq('signal_type', 'pr_merged')
-    .gte('created_at', startDate.toISOString())
-    .order('created_at');
+    .gte('signal_timestamp', startDate.toISOString())
+    .order('signal_timestamp');
 
   if (prError) throw new Error(`Failed to fetch PR signals: ${prError.message}`);
 
   // Query deployment signals (Brain L1: cross_domain_signals)
   const { data: deploySignals, error: deployError } = await supabase
     .from('cross_domain_signals')
-    .select('created_at, signal_value, signal_metadata')
+    .select('signal_timestamp, signal_value, signal_metadata')
     .eq('organization_id', organizationId)
     .eq('source_domain', 'engineering')
     .eq('signal_type', 'deployment')
-    .gte('created_at', startDate.toISOString())
-    .order('created_at');
+    .gte('signal_timestamp', startDate.toISOString())
+    .order('signal_timestamp');
 
   if (deployError) throw new Error(`Failed to fetch deployment signals: ${deployError.message}`);
 
   // Query PR state signals for WIP (Brain L1: cross_domain_signals)
   const { data: prStateSignals, error: stateError } = await supabase
     .from('cross_domain_signals')
-    .select('created_at, signal_value, signal_metadata')
+    .select('signal_timestamp, signal_value, signal_metadata')
     .eq('organization_id', organizationId)
     .eq('source_domain', 'engineering')
     .eq('signal_type', 'pr_opened')
-    .gte('created_at', startDate.toISOString())
-    .order('created_at');
+    .gte('signal_timestamp', startDate.toISOString())
+    .order('signal_timestamp');
 
   if (stateError) throw new Error(`Failed to fetch PR state signals: ${stateError.message}`);
 
@@ -158,9 +158,9 @@ export async function buildVelocityTimeSeries(
   // Helper to get date key (YYYY-MM-DD)
   const getDateKey = (timestampOrDate: string) => timestampOrDate.split('T')[0];
 
-  // Process PR merges (Brain L1: created_at + signal_metadata)
+  // Process PR merges (Brain L1: signal_timestamp + signal_metadata)
   for (const signal of prSignals || []) {
-    const dateKey = getDateKey(signal.created_at);
+    const dateKey = getDateKey(signal.signal_timestamp);
     if (!dailyMetrics.has(dateKey)) {
       dailyMetrics.set(dateKey, {
         organizationId,
@@ -182,9 +182,9 @@ export async function buildVelocityTimeSeries(
     metrics.linesMerged += (meta?.additions || 0) + (meta?.deletions || 0);
   }
 
-  // Process deployments (Brain L1: created_at + signal_metadata)
+  // Process deployments (Brain L1: signal_timestamp + signal_metadata)
   for (const signal of deploySignals || []) {
-    const dateKey = getDateKey(signal.created_at);
+    const dateKey = getDateKey(signal.signal_timestamp);
     if (!dailyMetrics.has(dateKey)) {
       dailyMetrics.set(dateKey, {
         organizationId,
@@ -206,10 +206,10 @@ export async function buildVelocityTimeSeries(
     }
   }
 
-  // Calculate WIP (cumulative open PRs, Brain L1: created_at + signal_metadata)
+  // Calculate WIP (cumulative open PRs, Brain L1: signal_timestamp + signal_metadata)
   let cumulativeWIP = 0;
   for (const signal of prStateSignals || []) {
-    const dateKey = getDateKey(signal.created_at);
+    const dateKey = getDateKey(signal.signal_timestamp);
     const state = (signal.signal_metadata as any)?.state;
 
     if (state === 'open') {
@@ -406,6 +406,7 @@ export async function predictVelocityCollapse(
   // causal discovery (L4), enabling the Brain to learn from its own predictions
   // and recalibrate confidence (L6) over time.
   try {
+    const predictionTime = new Date().toISOString();
     await supabase.from('cross_domain_signals').insert({
       organization_id: organizationId,
       source_domain: 'engineering',
@@ -427,7 +428,8 @@ export async function predictVelocityCollapse(
         granger_effect_size: causalEvidence?.effectSize ?? null,
         intervention_count: interventions.length,
       },
-      created_at: new Date().toISOString(),
+      created_at: predictionTime,
+      signal_timestamp: predictionTime,
     });
   } catch {
     // Non-critical: signal emission failure doesn't block the alert

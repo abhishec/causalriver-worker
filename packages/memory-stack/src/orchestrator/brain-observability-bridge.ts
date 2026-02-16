@@ -209,6 +209,13 @@ export function createBrainObservabilityBridge(config: BrainObservabilityBridgeC
     maxBatchSize: 50,
   });
 
+  // Collision-safe ID generator — Date.now() can collide at high throughput (10M signals/day)
+  // Uses timestamp + 6-char random suffix for ~2 billion combinations per millisecond
+  let _idCounter = 0;
+  function obsId(prefix: string): string {
+    return `${prefix}_${Date.now()}_${(++_idCounter).toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+  }
+
   // ============================================================================
   // 1. COGNITIVE LAYER RECORDING
   // ============================================================================
@@ -232,7 +239,7 @@ export function createBrainObservabilityBridge(config: BrainObservabilityBridgeC
             source_domain: 'cognitive_stack',
             signal_type: 'episodic_memory',
             entity_type: 'cognitive_cycle',
-            entity_id: `L1_cycle_${Date.now()}`,
+            entity_id: obsId('L1_cycle'),
             quality_score: layer.outputs?.qualityScore ?? 0,
             is_quarantined: false,
             ingestion_latency_ms: layer.durationMs,
@@ -243,7 +250,7 @@ export function createBrainObservabilityBridge(config: BrainObservabilityBridgeC
         case 2: // LLM Reasoner (Entity Resolution / Causal Discovery)
           await obs.recordEntityResolution({
             input_entity_type: 'causal_discovery',
-            input_entity_id: `L2_cycle_${Date.now()}`,
+            input_entity_id: obsId('L2_cycle'),
             canonical_name: 'causal_ensemble',
             confidence: layer.outputs?.robustnessScore ?? 0,
             resolution_latency_ms: layer.durationMs,
@@ -253,7 +260,7 @@ export function createBrainObservabilityBridge(config: BrainObservabilityBridgeC
 
         case 3: // Deep Dreaming
           await obs.recordDeepDreaming({
-            cycle_id: `dream_${Date.now()}`,
+            cycle_id: obsId('dream'),
             cycle_type: 'association',
             signals_replayed: layer.outputs?.insightsSurfaced ?? 0,
             patterns_discovered: layer.outputs?.hypothesesCreated ?? 0,
@@ -372,7 +379,7 @@ export function createBrainObservabilityBridge(config: BrainObservabilityBridgeC
             source_domain: 'immune_system',
             signal_type: 'quality_check',
             entity_type: 'cognitive_cycle',
-            entity_id: `cycle_${Date.now()}`,
+            entity_id: obsId('cycle'),
             quality_score: layer.outputs?.qualityScore ?? 0,
             is_quarantined: false,
             ingestion_latency_ms: layer.durationMs,
@@ -383,7 +390,7 @@ export function createBrainObservabilityBridge(config: BrainObservabilityBridgeC
         case 14: // Goal-Backward Planning
           await obs.recordAgentExecution({
             agent_type: 'goal_backward_planner',
-            agent_run_id: `goal_planner_${Date.now()}`,
+            agent_run_id: obsId('goal_planner'),
             trigger_type: 'event',
             causal_edges_used: layer.outputs?.edgesDiscovered ?? 0,
             status: layer.didProduce ? 'success' : 'partial',
@@ -396,7 +403,7 @@ export function createBrainObservabilityBridge(config: BrainObservabilityBridgeC
           await obs.recordSemanticOperation({
             operation_type: 'embed',
             entity_type: 'narrative',
-            entity_id: `narrative_${Date.now()}`,
+            entity_id: obsId('narrative'),
             operation_latency_ms: layer.durationMs,
             executed_at: new Date().toISOString(),
           });
@@ -449,12 +456,16 @@ export function createBrainObservabilityBridge(config: BrainObservabilityBridgeC
     qualityScore?: number;
     quarantinedCount?: number;
   }): Promise<void> {
+    // Real-time sampling: At 10M signals/day, recording every batch creates 100K+ obs records.
+    // Sample 1-in-10 for real-time, record everything for consolidation and score_and_route.
+    if (data.source === 'realtime' && Math.random() > 0.1) return;
+
     try {
       await obs.recordSignalIngestion({
         source_domain: `brain.L1.${data.source}`,
         signal_type: 'signal_ingestion_batch',
         entity_type: 'ingestion_pipeline',
-        entity_id: `L1_${data.source}_${Date.now()}`,
+        entity_id: obsId('L1_' + data.source),
         quality_score: data.qualityScore ?? 0.8,
         is_quarantined: (data.quarantinedCount ?? 0) > 0,
         ingestion_latency_ms: data.durationMs,
@@ -513,7 +524,7 @@ export function createBrainObservabilityBridge(config: BrainObservabilityBridgeC
     try {
       await obs.recordEntityResolution({
         input_entity_type: 'causal_discovery',
-        input_entity_id: `L2_${data.source}_${Date.now()}`,
+        input_entity_id: obsId('L2_' + data.source),
         canonical_name: data.source,
         confidence: data.dagQuality ?? (data.edgesDiscovered > 0 ? 0.7 : 0),
         resolution_latency_ms: data.durationMs,
@@ -561,7 +572,7 @@ export function createBrainObservabilityBridge(config: BrainObservabilityBridgeC
     try {
       // Record as feedback loop (prediction → outcome verification)
       await obs.recordFeedbackLoop({
-        prediction_id: `evolution_${data.mode}_${Date.now()}`,
+        prediction_id: obsId('evolution_' + data.mode),
         prediction_type: 'brain_evolution',
         domain: 'brain',
         predicted_value: data.accuracy,
@@ -574,7 +585,7 @@ export function createBrainObservabilityBridge(config: BrainObservabilityBridgeC
 
       // Record as consolidation cycle
       await obs.recordConsolidationCycle({
-        consolidation_run_id: `evolution_${data.mode}_${Date.now()}`,
+        consolidation_run_id: obsId('evolution_' + data.mode),
         is_core_brain: false,
         signals_in_window: data.predictionsVerified,
         causal_edges_discovered: data.weightUpdates,
@@ -658,7 +669,7 @@ export function createBrainObservabilityBridge(config: BrainObservabilityBridgeC
         signal_type: `federation_${data.operationType}`,
         signal_value: data.itemsPromoted ?? data.itemsProcessed,
         entity_type: 'federation_operation',
-        entity_id: `fed_${data.operationType}_${Date.now()}`,
+        entity_id: obsId('fed_' + data.operationType),
         signal_metadata: {
           operationType: data.operationType,
           itemsProcessed: data.itemsProcessed,
@@ -698,7 +709,7 @@ export function createBrainObservabilityBridge(config: BrainObservabilityBridgeC
     try {
       await obs.recordAgentExecution({
         agent_type: `se-aas.${domainType}`,
-        agent_run_id: `seaas_${domainType}_${Date.now()}`,
+        agent_run_id: obsId('seaas_' + domainType),
         trigger_type: 'event',
         causal_edges_used: causalEdgesUsed,
         status: 'success',
@@ -855,7 +866,7 @@ export function createBrainObservabilityBridge(config: BrainObservabilityBridgeC
           predicted_value: null,
           confidence: pred.confidence,
           entity_type: 'cognitive_layer_prediction',
-          entity_id: `L${layerNumber}_${Date.now()}`,
+          entity_id: obsId('L' + layerNumber),
           source_rule_id: null,
         });
       }

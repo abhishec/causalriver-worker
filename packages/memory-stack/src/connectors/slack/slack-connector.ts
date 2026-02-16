@@ -301,6 +301,7 @@ export class SlackConnector extends ConnectorBase {
       content += `\n\nFiles: ${fileNames}`;
     }
 
+    const eventTime = new Date(parseFloat(message.ts) * 1000).toISOString();
     return {
       source_domain: 'communication',
       signal_type: message.thread_ts ? 'slack_thread_message' : 'slack_message',
@@ -319,7 +320,8 @@ export class SlackConnector extends ConnectorBase {
         reaction_count: message.reactions?.reduce((sum, r) => sum + r.count, 0) || 0,
       },
       organization_id: this.organizationId,
-      created_at: new Date(parseFloat(message.ts) * 1000).toISOString(),
+      created_at: eventTime,
+      signal_timestamp: eventTime,
     };
   }
 

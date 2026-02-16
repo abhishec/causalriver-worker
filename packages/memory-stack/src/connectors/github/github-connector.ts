@@ -229,6 +229,7 @@ export class GitHubConnector extends ConnectorBase {
    * Ingest repository metadata
    */
   private async ingestRepoMetadata(repo: Repository): Promise<void> {
+    const eventTime = repo.updated_at;
     const signal: Signal = {
       organization_id: this.organizationId,
       source_domain: 'engineering',
@@ -246,7 +247,8 @@ export class GitHubConnector extends ConnectorBase {
         size: repo.size,
         description: repo.description || '',
       },
-      created_at: repo.updated_at,
+      created_at: eventTime,
+      signal_timestamp: eventTime,
     };
 
     await this.streamProcessor.addSignal(signal);
@@ -426,6 +428,7 @@ export class GitHubConnector extends ConnectorBase {
    * Transform file to signal
    */
   private transformFileToSignal(repo: Repository, file: TreeItem, content: string): Signal {
+    const now = new Date().toISOString();
     return {
       organization_id: this.organizationId,
       source_domain: 'engineering',
@@ -442,7 +445,8 @@ export class GitHubConnector extends ConnectorBase {
         content_preview: content.substring(0, 500),
         content_length: content.length,
       },
-      created_at: new Date().toISOString(),
+      created_at: now,
+      signal_timestamp: now,
     };
   }
 
@@ -450,6 +454,7 @@ export class GitHubConnector extends ConnectorBase {
    * Transform commit to signal (Brain L1 spec)
    */
   private transformCommitToSignal(repo: Repository, commit: any): Signal {
+    const eventTime = commit.commit?.author?.date || new Date().toISOString();
     return {
       organization_id: this.organizationId,
       source_domain: 'engineering',
@@ -467,7 +472,8 @@ export class GitHubConnector extends ConnectorBase {
         files_changed: commit.files?.length || 0,
         url: commit.html_url,
       },
-      created_at: commit.commit?.author?.date || new Date().toISOString(),
+      created_at: eventTime,
+      signal_timestamp: eventTime,
     };
   }
 
@@ -491,6 +497,7 @@ export class GitHubConnector extends ConnectorBase {
       signalValue = 1;
     }
 
+    const eventTime = pr.merged_at || pr.created_at;
     return {
       organization_id: this.organizationId,
       source_domain: 'engineering',
@@ -513,7 +520,8 @@ export class GitHubConnector extends ConnectorBase {
         url: pr.html_url,
         is_draft: pr.draft || false,
       },
-      created_at: pr.merged_at || pr.created_at,
+      created_at: eventTime,
+      signal_timestamp: eventTime,
     };
   }
 
@@ -525,6 +533,7 @@ export class GitHubConnector extends ConnectorBase {
     const reviewLatencyHours =
       (new Date(review.submitted_at).getTime() - new Date(pr.created_at).getTime()) / 3600000;
 
+    const eventTime = review.submitted_at;
     return {
       organization_id: this.organizationId,
       source_domain: 'engineering',
@@ -542,7 +551,8 @@ export class GitHubConnector extends ConnectorBase {
         review_latency_hours: reviewLatencyHours,
         submitted_at: review.submitted_at,
       },
-      created_at: review.submitted_at,
+      created_at: eventTime,
+      signal_timestamp: eventTime,
     };
   }
 
@@ -555,6 +565,7 @@ export class GitHubConnector extends ConnectorBase {
 
     const signalType = issue.state === 'open' ? 'issue_opened' : 'issue_closed';
 
+    const eventTime = issue.state === 'closed' ? issue.closed_at : issue.created_at;
     return {
       organization_id: this.organizationId,
       source_domain: 'engineering',
@@ -573,7 +584,8 @@ export class GitHubConnector extends ConnectorBase {
         assignees: issue.assignees?.map((a: any) => a.login) || [],
         url: issue.html_url,
       },
-      created_at: issue.state === 'closed' ? issue.closed_at : issue.created_at,
+      created_at: eventTime,
+      signal_timestamp: eventTime,
     };
   }
 

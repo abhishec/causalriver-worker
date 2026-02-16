@@ -269,6 +269,7 @@ export class JiraConnector extends ConnectorBase {
   private async ingestIssue(issue: JiraIssue): Promise<void> {
     const description = this.extractText(issue.fields.description);
 
+    const eventTime = issue.fields.updated;
     const signal: Signal = {
       source_domain: 'engineering',
       signal_type: 'jira_issue',
@@ -289,7 +290,8 @@ export class JiraConnector extends ConnectorBase {
         project_name: issue.fields.project.name,
       },
       organization_id: this.organizationId,
-      created_at: issue.fields.updated,
+      created_at: eventTime,
+      signal_timestamp: eventTime,
     };
 
     await this.streamProcessor.addSignal(signal);
@@ -304,6 +306,7 @@ export class JiraConnector extends ConnectorBase {
     for (const comment of issue.fields.comment.comments) {
       const commentText = this.extractText(comment.body);
 
+      const commentTime = comment.created;
       const signal: Signal = {
         source_domain: 'engineering',
         signal_type: 'jira_comment',
@@ -319,7 +322,8 @@ export class JiraConnector extends ConnectorBase {
           project: issue.fields.project.key,
         },
         organization_id: this.organizationId,
-        created_at: comment.created,
+        created_at: commentTime,
+        signal_timestamp: commentTime,
       };
 
       await this.streamProcessor.addSignal(signal);
