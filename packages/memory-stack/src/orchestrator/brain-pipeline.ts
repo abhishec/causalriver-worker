@@ -725,6 +725,34 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
         // Non-critical: real-time causal updates are enrichment, not core path — err instanceof Error ? err.message : String(err) logged for debugging
       }
 
+      // L1 OBSERVABILITY: Record real-time signal ingestion
+      try {
+        const rtDomains = new Set(signals.map((s: { source_domain?: string }) => s.source_domain || 'unknown'));
+        observabilityBridge.recordSignalIngestionBatch({
+          source: 'realtime',
+          signalsIngested: signals.length,
+          domainsActive: rtDomains.size,
+          durationMs: 0, // Real-time path — latency tracked in onSignalsInserted overhead
+          qualityScore: 0.8,
+        }).catch(() => {}); // Fire-and-forget
+      } catch { /* Non-critical */ }
+
+      // L2 OBSERVABILITY: Record real-time causal discoveries
+      if (realtimeCausalEdges.length > 0) {
+        try {
+          const rtEdgeCount = realtimeCausalEdges.length;
+          observabilityBridge.recordCausalDiscoveryBatch({
+            source: 'realtime_granger',
+            edgesDiscovered: rtEdgeCount,
+            newEdges: rtEdgeCount,
+            lostEdges: 0,
+            domainsAnalyzed: domainSignalCounts.size,
+            signalsProcessed: signals.length,
+            durationMs: 0,
+          }).catch(() => {}); // Fire-and-forget
+        } catch { /* Non-critical */ }
+      }
+
       if (verbose) {
         log(`Event Bus: emitted ${signals.length} signal event(s) for real-time processing`);
       }
@@ -759,9 +787,51 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
    */
   async function runConsolidation(): Promise<ConsolidationResult> {
     log('Hippocampus → Neocortex: starting consolidation (brain sleep)...');
+    const _consolidationStartMs = Date.now();
     const result = await consolidationEngine.runConsolidation();
     lastConsolidationAt = result.completedAt;
     log(`Consolidation complete: ${result.report.stats.causalEdgesDiscovered} edges discovered, ${result.report.stats.edgesPruned} pruned`);
+
+    // ======================================================================
+    // L1 OBSERVABILITY: Record signal ingestion (Episodic Memory)
+    // L1 operates at the ingestion level, NOT in cognitive-stack.ts.
+    // Without this, L1 is a blind spot in the observability dashboard.
+    // ======================================================================
+    try {
+      const fetchStep = result.steps.find(s => s.step === 'fetch');
+      if (fetchStep && fetchStep.status === 'success') {
+        const domains = (fetchStep.details.domains as string[]) || [];
+        await observabilityBridge.recordSignalIngestionBatch({
+          source: 'consolidation',
+          signalsIngested: result.report.stats.signalsProcessed,
+          domainsActive: domains.length,
+          durationMs: fetchStep.durationMs,
+          qualityScore: 0.8,
+        });
+      }
+    } catch { /* Non-critical: L1 observability never blocks consolidation */ }
+
+    // ======================================================================
+    // L2 OBSERVABILITY: Record causal discovery (LLM Reasoner)
+    // L2 operates at the discovery level, NOT in cognitive-stack.ts.
+    // Without this, L2 is a blind spot in the observability dashboard.
+    // ======================================================================
+    try {
+      const discoverStep = result.steps.find(s => s.step === 'causal_discovery');
+      if (discoverStep) {
+        await observabilityBridge.recordCausalDiscoveryBatch({
+          source: 'consolidation_ensemble',
+          edgesDiscovered: result.report.stats.causalEdgesDiscovered,
+          newEdges: result.report.stats.newRelationships,
+          lostEdges: result.report.stats.lostRelationships,
+          domainsAnalyzed: ((result.steps.find(s => s.step === 'fetch')?.details.domains as string[]) || []).length,
+          signalsProcessed: result.report.stats.signalsProcessed,
+          durationMs: discoverStep.durationMs,
+          dagQuality: (discoverStep.details.dagQualityScore as number) ?? undefined,
+        });
+      }
+    } catch { /* Non-critical: L2 observability never blocks consolidation */ }
+
     return result;
   }
 
@@ -802,6 +872,7 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
    * suppresses it if it's not worth conscious attention.
    */
   async function scoreAndRoute(event: ScorableEvent): Promise<AttentionDecision> {
+    const _scoreStartMs = Date.now();
     log(`Amygdala scoring event: ${event.title} (${event.type})`);
 
     // Knowledge Enrichment: auto-enrich event with dependency graph intelligence
@@ -881,6 +952,17 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
     } catch (err) {
       // Non-critical: cognitive light mode is enrichment, not critical path — err instanceof Error ? err.message : String(err) logged for debugging
     }
+
+    // L1 OBSERVABILITY: Record real-time event scoring
+    try {
+      observabilityBridge.recordSignalIngestionBatch({
+        source: 'score_and_route',
+        signalsIngested: 1,
+        domainsActive: event.domains?.length ?? 1,
+        durationMs: Date.now() - _scoreStartMs,
+        qualityScore: score.compositeScore,
+      }).catch(() => {}); // Fire-and-forget
+    } catch { /* Non-critical */ }
 
     // Fire alert callback if immediate
     if (decision.delivery === 'immediate' && onAlert) {

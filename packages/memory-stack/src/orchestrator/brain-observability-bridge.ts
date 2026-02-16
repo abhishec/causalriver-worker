@@ -227,6 +227,30 @@ export function createBrainObservabilityBridge(config: BrainObservabilityBridgeC
 
       // Write layer-specific observability record
       switch (layer.layerNumber) {
+        case 1: // Episodic Memory (Signal Ingestion)
+          await obs.recordSignalIngestion({
+            source_domain: 'cognitive_stack',
+            signal_type: 'episodic_memory',
+            entity_type: 'cognitive_cycle',
+            entity_id: `L1_cycle_${Date.now()}`,
+            quality_score: layer.outputs?.qualityScore ?? 0,
+            is_quarantined: false,
+            ingestion_latency_ms: layer.durationMs,
+            ingested_at: new Date().toISOString(),
+          });
+          break;
+
+        case 2: // LLM Reasoner (Entity Resolution / Causal Discovery)
+          await obs.recordEntityResolution({
+            input_entity_type: 'causal_discovery',
+            input_entity_id: `L2_cycle_${Date.now()}`,
+            canonical_name: 'causal_ensemble',
+            confidence: layer.outputs?.robustnessScore ?? 0,
+            resolution_latency_ms: layer.durationMs,
+            resolved_at: new Date().toISOString(),
+          });
+          break;
+
         case 3: // Deep Dreaming
           await obs.recordDeepDreaming({
             cycle_id: `dream_${Date.now()}`,
@@ -399,6 +423,127 @@ export function createBrainObservabilityBridge(config: BrainObservabilityBridgeC
 
     } catch (err) {
       logger.warn('obs:bridge:cognitive-layer-failed', { layer: layer.layerNumber, error: String(err) });
+    }
+  }
+
+  // ============================================================================
+  // 1b. L1 SIGNAL INGESTION RECORDING (Bulk / Real-time)
+  // ============================================================================
+
+  /**
+   * Record L1 signal ingestion operations.
+   *
+   * Called from:
+   *   - consolidation-engine.ts → fetchSignals() (bulk ingestion during sleep)
+   *   - brain-pipeline.ts → onSignalsInserted (real-time signal intake)
+   *   - brain-pipeline.ts → scoreAndRoute() (real-time event scoring)
+   *
+   * L1 does NOT run inside cognitive-stack.ts — it runs at the ingestion layer.
+   * This method ensures L1 is fully observed even though it's not in the L3-L15 flow.
+   */
+  async function recordSignalIngestionBatch(data: {
+    source: 'consolidation' | 'realtime' | 'score_and_route';
+    signalsIngested: number;
+    domainsActive: number;
+    durationMs: number;
+    qualityScore?: number;
+    quarantinedCount?: number;
+  }): Promise<void> {
+    try {
+      await obs.recordSignalIngestion({
+        source_domain: `brain.L1.${data.source}`,
+        signal_type: 'signal_ingestion_batch',
+        entity_type: 'ingestion_pipeline',
+        entity_id: `L1_${data.source}_${Date.now()}`,
+        quality_score: data.qualityScore ?? 0.8,
+        is_quarantined: (data.quarantinedCount ?? 0) > 0,
+        ingestion_latency_ms: data.durationMs,
+        ingested_at: new Date().toISOString(),
+      });
+
+      // Emit cross_domain_signal for L1 — same as L3-L15
+      await supabase.from('cross_domain_signals').insert({
+        organization_id: organizationId,
+        source_domain: 'brain.layer.1',
+        signal_type: 'cognitive_layer_execution',
+        signal_value: data.signalsIngested > 0 ? 1 : 0,
+        entity_type: 'cognitive_layer',
+        entity_id: 'L1_Episodic_Memory',
+        signal_metadata: {
+          layerNumber: 1,
+          layerName: 'Episodic Memory',
+          source: data.source,
+          signalsIngested: data.signalsIngested,
+          domainsActive: data.domainsActive,
+          durationMs: data.durationMs,
+          qualityScore: data.qualityScore,
+          quarantinedCount: data.quarantinedCount,
+        },
+      });
+
+    } catch (err) {
+      logger.warn('obs:bridge:L1-signal-ingestion-failed', { source: data.source, error: String(err) });
+    }
+  }
+
+  // ============================================================================
+  // 1c. L2 CAUSAL DISCOVERY / ENTITY RESOLUTION RECORDING
+  // ============================================================================
+
+  /**
+   * Record L2 causal discovery operations.
+   *
+   * Called from:
+   *   - consolidation-engine.ts → discoverCausalRelationships() (batch ensemble)
+   *   - brain-pipeline.ts → IncrementalGranger in onSignalsInserted (real-time)
+   *
+   * L2 does NOT run inside cognitive-stack.ts — it runs at the discovery layer.
+   * This method ensures L2 is fully observed.
+   */
+  async function recordCausalDiscoveryBatch(data: {
+    source: 'consolidation_ensemble' | 'realtime_granger' | 'multi_hop_reasoning';
+    edgesDiscovered: number;
+    newEdges: number;
+    lostEdges: number;
+    domainsAnalyzed: number;
+    signalsProcessed: number;
+    durationMs: number;
+    dagQuality?: number;
+  }): Promise<void> {
+    try {
+      await obs.recordEntityResolution({
+        input_entity_type: 'causal_discovery',
+        input_entity_id: `L2_${data.source}_${Date.now()}`,
+        canonical_name: data.source,
+        confidence: data.dagQuality ?? (data.edgesDiscovered > 0 ? 0.7 : 0),
+        resolution_latency_ms: data.durationMs,
+        resolved_at: new Date().toISOString(),
+      });
+
+      // Emit cross_domain_signal for L2 — same as L3-L15
+      await supabase.from('cross_domain_signals').insert({
+        organization_id: organizationId,
+        source_domain: 'brain.layer.2',
+        signal_type: 'cognitive_layer_execution',
+        signal_value: data.edgesDiscovered > 0 ? 1 : 0,
+        entity_type: 'cognitive_layer',
+        entity_id: 'L2_LLM_Reasoner',
+        signal_metadata: {
+          layerNumber: 2,
+          layerName: 'LLM Reasoner',
+          source: data.source,
+          edgesDiscovered: data.edgesDiscovered,
+          newEdges: data.newEdges,
+          lostEdges: data.lostEdges,
+          domainsAnalyzed: data.domainsAnalyzed,
+          signalsProcessed: data.signalsProcessed,
+          durationMs: data.durationMs,
+          dagQuality: data.dagQuality,
+        },
+      });
+
+    } catch (err) {
+      logger.warn('obs:bridge:L2-causal-discovery-failed', { source: data.source, error: String(err) });
     }
   }
 
@@ -736,8 +881,14 @@ export function createBrainObservabilityBridge(config: BrainObservabilityBridgeC
   // ============================================================================
 
   return {
-    // Core recording
+    // Core recording (L3-L15 via cognitive stack callback)
     recordCognitiveLayerExecution,
+
+    // L1 & L2 recording (separate execution paths — NOT in cognitive stack)
+    recordSignalIngestionBatch,   // L1: consolidation-engine + brain-pipeline ingestion
+    recordCausalDiscoveryBatch,   // L2: consolidation-engine discovery + real-time Granger
+
+    // Evolution + Federation + Domain recording
     recordEvolutionCycle,
     recordFederationOperation,
     recordDomainExecution,
