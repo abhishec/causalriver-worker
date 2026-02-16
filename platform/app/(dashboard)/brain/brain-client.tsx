@@ -314,6 +314,7 @@ export function BrainClient({ causalEdges, entities, snapshot, discoveryTimeline
                   edges={filteredEdges}
                   domainFilter={domainFilter}
                   onNodeClick={handleNodeClick}
+                  onEdgeClick={handleEdgeClick}
                 />
               </div>
             )}

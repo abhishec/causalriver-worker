@@ -37,6 +37,7 @@ import type {
 import { CORE_ORG_ID } from "@/lib/org-helpers";
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 120; // Vercel serverless: allow up to 120s for long Claude SSE streams
 
 // ============================================================================
 // SSE STREAM HELPER
@@ -248,6 +249,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // ── Create service client once for the entire request lifecycle ──────
+    const service = await createServiceClient();
+
     // ── Brain Commander: Unified intelligence pipeline ──────────────────
     // Replace manual DB queries with Commander — single source of truth
     // for intelligence gathering, dispatch assessment, and permission filtering.
@@ -359,8 +363,6 @@ export async function POST(request: NextRequest) {
         createBrainHealthMonitor,
         createEmptyDAG,
       } = await import("@nexus-ai/memory-stack");
-
-      const service = await createServiceClient();
 
       // Check if GitHub connector is active with ingested data
       const { data: ghConnector } = await service
@@ -540,7 +542,6 @@ export async function POST(request: NextRequest) {
 
     if (seaasRoute && process.env.ANTHROPIC_API_KEY && !COPILOT_NATIVE_DOMAINS.has(seaasRoute.domainType)) {
       try {
-        const service = await createServiceClient();
         const { executeDomain } = await import("@/lib/se-aas/domain-executor");
 
         const domainResult = await executeDomain(service, {
@@ -736,8 +737,7 @@ Use this data to give a comprehensive answer. The analysis was performed by Nexu
     // This closes the loop: user corrects → stored in ai_memory → next answer uses correction.
     {
       const correctionDomain = brainContext?.domains?.[0] || "general";
-      const correctionService = await createServiceClient();
-      const { data: corrections } = await correctionService
+      const { data: corrections } = await service
         .from("ai_memory")
         .select("content, importance, domain, created_at")
         .eq("organization_id", orgId)
@@ -854,6 +854,15 @@ RULES FOR CORRECTIONS:
           messages,
         });
 
+        // Safety: hard timeout — close stream if Anthropic takes >120s
+        const streamTimeout = setTimeout(() => {
+          try {
+            sendError("Response timed out after 120 seconds. Please try a shorter question.");
+            close();
+            anthropicStream.abort();
+          } catch { /* already closed */ }
+        }, 120_000);
+
         for await (const event of anthropicStream) {
           if (
             event.type === "content_block_delta" &&
@@ -863,6 +872,7 @@ RULES FOR CORRECTIONS:
           }
         }
 
+        clearTimeout(streamTimeout);
         close();
       } catch (err) {
         const errorMessage =

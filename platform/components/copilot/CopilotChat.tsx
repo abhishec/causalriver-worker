@@ -1121,6 +1121,10 @@ export function CopilotChat({
 
   useEffect(() => {
     inputRef.current?.focus();
+    // Cleanup: abort any in-flight SSE stream on unmount
+    return () => {
+      abortRef.current?.abort();
+    };
   }, []);
 
   // ── Listen for external prompt injection (from capability pills) ──────

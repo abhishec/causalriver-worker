@@ -94,6 +94,13 @@ export function AgentRunner({ organizationId, onArtifact, className }: AgentRunn
   const [approvalNote, setApprovalNote] = useState("");
   const [ratingData, setRatingData] = useState<{ rating: string; correction: string } | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval>>(undefined);
+  // Track which artifact IDs have been pushed to co-work to prevent duplication
+  const pushedArtifactIdsRef = useRef<Set<string>>(new Set());
+  // Keep refs for stable polling callbacks (avoid useEffect dependency churn)
+  const selectedTaskRef = useRef(selectedTask);
+  selectedTaskRef.current = selectedTask;
+  const onArtifactRef = useRef(onArtifact);
+  onArtifactRef.current = onArtifact;
 
   // ── Fetch tasks ──────────────────────────────────────────────
   const fetchTasks = useCallback(async () => {
@@ -116,35 +123,58 @@ export function AgentRunner({ organizationId, onArtifact, className }: AgentRunn
       setSelectedTask(data.task);
       setSteps(data.steps || []);
 
-      // If completed, push artifacts to co-work
-      if (data.task?.status === "completed" && data.task.result_artifacts?.length && onArtifact) {
+      // If completed, push NEW artifacts to co-work (deduplicated)
+      const cb = onArtifactRef.current;
+      if (data.task?.status === "completed" && data.task.result_artifacts?.length && cb) {
         for (const artifact of data.task.result_artifacts) {
-          onArtifact({
-            id: artifact.id,
-            type: artifact.type || "analysis",
-            title: artifact.title,
-            language: artifact.language,
-            content: artifact.content,
-            createdAt: artifact.createdAt || Date.now(),
-          });
+          if (!pushedArtifactIdsRef.current.has(artifact.id)) {
+            pushedArtifactIdsRef.current.add(artifact.id);
+            cb({
+              id: artifact.id,
+              type: artifact.type || "analysis",
+              title: artifact.title,
+              language: artifact.language,
+              content: artifact.content,
+              createdAt: artifact.createdAt || Date.now(),
+            });
+          }
         }
       }
     } catch { /* silent */ }
-  }, [organizationId, onArtifact]);
+  }, [organizationId]);
 
-  // ── Poll when tasks are running ────────────────────────────────
+  // Track whether any tasks are active to decide polling frequency
+  const tasksRef = useRef(tasks);
+  tasksRef.current = tasks;
+
+  // ── Smart polling: fast when active tasks exist, slow when idle ──
   useEffect(() => {
     fetchTasks();
 
-    pollRef.current = setInterval(() => {
-      fetchTasks();
-      if (selectedTask && ["running", "pending"].includes(selectedTask.status)) {
-        fetchTaskDetail(selectedTask.id);
+    // Single stable interval — dynamically adjusts behavior based on task state
+    const id = setInterval(() => {
+      const hasActiveTasks = tasksRef.current.some(
+        (t) => t.status === "running" || t.status === "pending" || t.status === "awaiting_approval"
+      );
+
+      // Only poll task list every cycle if there are active tasks;
+      // otherwise skip to reduce network traffic
+      if (hasActiveTasks) {
+        fetchTasks();
+      }
+
+      const current = selectedTaskRef.current;
+      if (current && ["running", "pending"].includes(current.status)) {
+        fetchTaskDetail(current.id);
       }
     }, 3000);
+    pollRef.current = id;
 
-    return () => clearInterval(pollRef.current);
-  }, [fetchTasks, fetchTaskDetail, selectedTask]);
+    return () => {
+      clearInterval(id);
+      pollRef.current = undefined;
+    };
+  }, [fetchTasks, fetchTaskDetail]); // stable deps — no selectedTask
 
   // ── Spawn agent ────────────────────────────────────────────────
   const handleSpawn = useCallback(async () => {

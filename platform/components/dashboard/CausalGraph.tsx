@@ -40,6 +40,7 @@ interface CausalGraphProps {
   edges: CausalEdge[];
   domainFilter: string;
   onNodeClick?: (nodeId: string) => void;
+  onEdgeClick?: (edge: CausalEdge) => void;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -74,7 +75,7 @@ const CENTER_GRAVITY = 0.01;
 /*  Component                                                                  */
 /* -------------------------------------------------------------------------- */
 
-export function CausalGraph({ edges, domainFilter, onNodeClick }: CausalGraphProps) {
+export function CausalGraph({ edges, domainFilter, onNodeClick, onEdgeClick }: CausalGraphProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const animFrameRef = useRef<number>(0);
   const [nodes, setNodes] = useState<GraphNode[]>([]);
@@ -317,19 +318,40 @@ export function CausalGraph({ edges, domainFilter, onNodeClick }: CausalGraphPro
             const highlighted = isEdgeHighlighted(edge);
             const color = getNodeColor(edge.domain);
 
+            // Find the original CausalEdge to pass to onEdgeClick
+            const originalEdge = edges.find(
+              (e) => e.source_entity === edge.source && e.target_entity === edge.target
+            );
+
             return (
-              <line
-                key={`edge-${i}`}
-                x1={src.x}
-                y1={src.y}
-                x2={tgt.x}
-                y2={tgt.y}
-                stroke={highlighted ? color : "#3f3f46"}
-                strokeWidth={Math.max(0.5, edge.strength * 3)}
-                opacity={highlighted ? 0.6 : 0.1}
-                markerEnd="url(#arrowhead)"
-                className="transition-opacity duration-200"
-              />
+              <g key={`edge-${i}`} className={onEdgeClick ? "cursor-pointer" : ""}>
+                {/* Invisible wider hit-area for easier clicking */}
+                {onEdgeClick && (
+                  <line
+                    x1={src.x}
+                    y1={src.y}
+                    x2={tgt.x}
+                    y2={tgt.y}
+                    stroke="transparent"
+                    strokeWidth={12}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (originalEdge) onEdgeClick(originalEdge);
+                    }}
+                  />
+                )}
+                <line
+                  x1={src.x}
+                  y1={src.y}
+                  x2={tgt.x}
+                  y2={tgt.y}
+                  stroke={highlighted ? color : "#3f3f46"}
+                  strokeWidth={Math.max(0.5, edge.strength * 3)}
+                  opacity={highlighted ? 0.6 : 0.1}
+                  markerEnd="url(#arrowhead)"
+                  className="transition-opacity duration-200 pointer-events-none"
+                />
+              </g>
             );
           })}
 
@@ -399,18 +421,21 @@ export function CausalGraph({ edges, domainFilter, onNodeClick }: CausalGraphPro
           <button
             onClick={() => setZoom((z) => Math.min(3, z + 0.2))}
             className="w-7 h-7 rounded bg-surface border border-border-subtle text-muted hover:text-foreground flex items-center justify-center text-xs"
+            aria-label="Zoom in"
           >
             +
           </button>
           <button
             onClick={() => setZoom((z) => Math.max(0.5, z - 0.2))}
             className="w-7 h-7 rounded bg-surface border border-border-subtle text-muted hover:text-foreground flex items-center justify-center text-xs"
+            aria-label="Zoom out"
           >
             -
           </button>
           <button
             onClick={() => { setZoom(1); setPan({ x: 0, y: 0 }); setSelectedNode(null); }}
             className="px-2 h-7 rounded bg-surface border border-border-subtle text-muted hover:text-foreground flex items-center justify-center text-[10px]"
+            aria-label="Reset graph view"
           >
             Reset
           </button>

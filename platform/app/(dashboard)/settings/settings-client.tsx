@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Card, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { StatusDot } from "@/components/ui/StatusDot";
@@ -57,8 +57,24 @@ const TAB_ICONS: Record<string, string> = {
 
 export function SettingsClient({ org, orgId, budget, apiKeys, connectors }: SettingsClientProps) {
   const [activeTab, setActiveTab] = useState("general");
+  const [toast, setToast] = useState<string | null>(null);
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const connectedTypes = new Set(connectors.map((c) => c.connector_type));
+
+  // Toast helper — auto-dismiss after 3s, clears previous timer on re-fire
+  const showToast = useCallback((msg: string) => {
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    setToast(msg);
+    toastTimerRef.current = setTimeout(() => setToast(null), 3000);
+  }, []);
+
+  // Cleanup on unmount — prevent state update on unmounted component
+  useEffect(() => {
+    return () => {
+      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    };
+  }, []);
 
   const tabs = [
     { id: "general", label: "General" },
@@ -208,7 +224,10 @@ export function SettingsClient({ org, orgId, budget, apiKeys, connectors }: Sett
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <button className="text-[11px] text-muted-foreground hover:text-foreground transition-colors">
+                          <button
+                            onClick={() => showToast(`Configuration for ${conn.display_name || conn.connector_type} coming soon`)}
+                            className="text-[11px] text-muted-foreground hover:text-foreground transition-colors"
+                          >
                             Configure
                           </button>
                           <Badge variant={isHealthy ? "success" : "warning"} size="xs">
@@ -238,7 +257,10 @@ export function SettingsClient({ org, orgId, budget, apiKeys, connectors }: Sett
                       <div className="text-sm font-medium">{conn.name}</div>
                       <div className="text-[10px] text-muted mt-0.5 line-clamp-1">{conn.desc}</div>
                     </div>
-                    <button className="shrink-0 px-2.5 py-1 rounded-md bg-accent/10 text-accent text-[11px] font-medium hover:bg-accent/20 transition-colors opacity-0 group-hover:opacity-100">
+                    <button
+                      onClick={() => showToast(`${conn.name} connector coming soon — join the waitlist`)}
+                      className="shrink-0 px-2.5 py-1 rounded-md bg-accent/10 text-accent text-[11px] font-medium hover:bg-accent/20 transition-colors opacity-0 group-hover:opacity-100"
+                    >
                       Connect
                     </button>
                   </div>
@@ -363,6 +385,23 @@ export function SettingsClient({ org, orgId, budget, apiKeys, connectors }: Sett
           </div>
         )}
       </div>
+
+      {/* Toast notification */}
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-4 fade-in duration-200">
+          <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-card border border-border-subtle shadow-lg">
+            <svg className="w-4 h-4 text-accent shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+            </svg>
+            <span className="text-xs text-foreground">{toast}</span>
+            <button onClick={() => setToast(null)} className="ml-2 text-muted hover:text-foreground">
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

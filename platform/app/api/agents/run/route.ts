@@ -109,31 +109,45 @@ export async function POST(request: NextRequest) {
 
     const taskId = task.id;
 
-    // ── Execute agent (non-blocking via waitUntil pattern) ───────
-    // We start execution but return the taskId immediately.
-    // The agent runs to completion and updates the DB row.
-    executeAgent(service, taskId, orgId, prompt, agentType, autoExecuteThreshold).catch(
-      (err) => {
-        console.error(`[AgentRun] Task ${taskId} failed:`, err);
-        // Update task to failed
-        service
-          .from("brain_agent_tasks")
-          .update({
-            status: "failed",
-            error_message: err instanceof Error ? err.message : "Unknown error",
-            completed_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", taskId)
-          .then(() => {});
-      }
-    );
+    // ── Execute agent with timeout safety ─────────────────────────
+    // Run inline (NOT fire-and-forget) — Next.js serverless kills detached
+    // promises after response is sent. We await with a hard 90s timeout
+    // so the task ALWAYS reaches a terminal state (completed/failed).
+    const AGENT_TIMEOUT_MS = 90_000;
+
+    try {
+      await Promise.race([
+        executeAgent(service, taskId, orgId, prompt, agentType, autoExecuteThreshold),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error("Agent execution timed out (90s)")), AGENT_TIMEOUT_MS)
+        ),
+      ]);
+    } catch (err) {
+      console.error(`[AgentRun] Task ${taskId} failed:`, err);
+      // Ensure task reaches terminal state — never orphaned as "running"
+      await service
+        .from("brain_agent_tasks")
+        .update({
+          status: "failed",
+          error_message: err instanceof Error ? err.message : "Unknown error",
+          completed_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", taskId);
+    }
+
+    // Re-read final status to return to client
+    const { data: finalTask } = await service
+      .from("brain_agent_tasks")
+      .select("status")
+      .eq("id", taskId)
+      .single();
 
     return NextResponse.json({
       success: true,
       taskId,
-      status: "running",
-      message: "Agent spawned. Poll GET /api/agents/tasks?taskId=" + taskId,
+      status: finalTask?.status || "completed",
+      message: "Agent task finished. GET /api/agents/tasks?taskId=" + taskId,
     });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Internal error";
@@ -272,6 +286,7 @@ async function executeAgent(
       "x-api-key": apiKey,
       "anthropic-version": "2023-06-01",
     },
+    signal: AbortSignal.timeout(60_000), // 60s hard timeout on Claude call
     body: JSON.stringify({
       model: "claude-sonnet-4-20250514",
       max_tokens: 4096,

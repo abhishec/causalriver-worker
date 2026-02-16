@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { TabGroup } from "@/components/ui/TabGroup";
 import { StatValue } from "@/components/ui/StatValue";
 import { TimeRangeSelector, type TimeRange } from "@/components/ui/TimeRangeSelector";
@@ -11,6 +11,11 @@ import { StatusDot } from "@/components/ui/StatusDot";
 import { ProgressRing } from "@/components/ui/ProgressRing";
 import { LiveIndicator } from "@/components/ui/LiveIndicator";
 import { cn, formatNumber } from "@/lib/utils";
+
+const TIME_RANGE_MS: Record<TimeRange, number> = {
+  "1h": 3600000, "6h": 6 * 3600000, "24h": 86400000,
+  "7d": 7 * 86400000, "30d": 30 * 86400000, "90d": 90 * 86400000,
+};
 
 interface ObservabilityClientProps {
   signalIngestion: any[];
@@ -34,31 +39,43 @@ export function ObservabilityClient({
   const [activeTab, setActiveTab] = useState("pipeline");
   const [timeRange, setTimeRange] = useState<TimeRange>("7d");
 
-  // Summary stats
-  const totalSignals = signalIngestion.length;
-  const totalCalcs = causalCalcs.length;
-  const totalOps = connectorOps.length;
-  const activeAlerts = alerts.filter((a) => a.status === "active" || a.status === "triggered").length;
+  // ── Filter all data by selected time range ─────────────────────
+  const cutoff = useMemo(() => new Date(Date.now() - (TIME_RANGE_MS[timeRange] || 7 * 86400000)).toISOString(), [timeRange]);
 
-  // Derived health metrics
+  const filterByTime = <T extends { created_at?: string }>(items: T[]) =>
+    items.filter((item) => !item.created_at || item.created_at >= cutoff);
+
+  const filteredSignals = useMemo(() => filterByTime(signalIngestion), [signalIngestion, cutoff]);
+  const filteredCalcs = useMemo(() => filterByTime(causalCalcs), [causalCalcs, cutoff]);
+  const filteredOps = useMemo(() => filterByTime(connectorOps), [connectorOps, cutoff]);
+  const filteredAgents = useMemo(() => filterByTime(agentExecutions), [agentExecutions, cutoff]);
+  const filteredAlerts = useMemo(() => filterByTime(alerts), [alerts, cutoff]);
+
+  // Summary stats (now using filtered data)
+  const totalSignals = filteredSignals.length;
+  const totalCalcs = filteredCalcs.length;
+  const totalOps = filteredOps.length;
+  const activeAlerts = filteredAlerts.filter((a: any) => a.status === "active" || a.status === "triggered").length;
+
+  // Derived health metrics (using filtered data)
   const signalSuccessRate = totalSignals > 0
-    ? Math.round((signalIngestion.filter((s) => s.status === "success" || !s.status).length / totalSignals) * 100)
+    ? Math.round((filteredSignals.filter((s) => s.status === "success" || !s.status).length / totalSignals) * 100)
     : 100;
   const connectorSuccessRate = totalOps > 0
-    ? Math.round((connectorOps.filter((c) => c.status === "success").length / totalOps) * 100)
+    ? Math.round((filteredOps.filter((c) => c.status === "success").length / totalOps) * 100)
     : 100;
   const avgLayerHealth = layerHealth.length > 0
     ? Math.round(layerHealth.reduce((sum, l) => sum + (l.health_score || 0), 0) / layerHealth.length)
     : 100;
-  const agentSuccessRate = agentExecutions.length > 0
-    ? Math.round((agentExecutions.filter((a) => a.status === "success" || a.status === "completed").length / agentExecutions.length) * 100)
+  const agentSuccessRate = filteredAgents.length > 0
+    ? Math.round((filteredAgents.filter((a) => a.status === "success" || a.status === "completed").length / filteredAgents.length) * 100)
     : 100;
 
   const tabs = [
     { id: "pipeline", label: "Pipeline Health", count: totalSignals },
     { id: "brain", label: "Brain Processing", count: totalCalcs },
     { id: "connectors", label: "Connector Ops", count: totalOps },
-    { id: "agents", label: "Agents", count: agentExecutions.length },
+    { id: "agents", label: "Agents", count: filteredAgents.length },
     { id: "alerts", label: "Alerts", count: activeAlerts },
     { id: "layers", label: "Layer Health" },
   ];
@@ -81,7 +98,7 @@ export function ObservabilityClient({
             <h3 className="text-sm font-medium">System Health</h3>
             <LiveIndicator variant="pulse" color="green" label="All Systems" />
           </div>
-          <span className="text-[10px] text-muted">7-day window</span>
+          <span className="text-[10px] text-muted">{timeRange} window</span>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="flex flex-col items-center gap-2">
@@ -105,9 +122,9 @@ export function ObservabilityClient({
 
       {/* Summary Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <StatValue label="Signals Processed" value={formatNumber(totalSignals)} subtitle="Last 7 days" />
-        <StatValue label="Causal Calculations" value={formatNumber(totalCalcs)} subtitle="Last 7 days" />
-        <StatValue label="Connector Syncs" value={formatNumber(totalOps)} subtitle="Last 7 days" />
+        <StatValue label="Signals Processed" value={formatNumber(totalSignals)} subtitle={`Last ${timeRange}`} />
+        <StatValue label="Causal Calculations" value={formatNumber(totalCalcs)} subtitle={`Last ${timeRange}`} />
+        <StatValue label="Connector Syncs" value={formatNumber(totalOps)} subtitle={`Last ${timeRange}`} />
         <StatValue
           label="Active Alerts"
           value={String(activeAlerts)}
@@ -167,7 +184,7 @@ export function ObservabilityClient({
                 render: (row) => <span className="text-xs text-muted">{new Date(row.created_at).toLocaleString()}</span>,
               },
             ]}
-            data={signalIngestion}
+            data={filteredSignals}
             searchable
             searchPlaceholder="Search signals..."
             searchFields={["connector_type", "signal_type", "status"]}
@@ -187,13 +204,13 @@ export function ObservabilityClient({
             </Card>
             <Card>
               <CardTitle className="mb-2">Causal Discoveries</CardTitle>
-              <div className="text-2xl font-semibold tabular-nums">{causalCalcs.filter((c) => c.result === "edge_created").length}</div>
+              <div className="text-2xl font-semibold tabular-nums">{filteredCalcs.filter((c: any) => c.result === "edge_created").length}</div>
               <div className="text-xs text-muted mt-0.5">new edges created</div>
             </Card>
             <Card>
               <CardTitle className="mb-2">Methods Used</CardTitle>
               <div className="text-2xl font-semibold tabular-nums">
-                {new Set(causalCalcs.map((c) => c.method).filter(Boolean)).size}
+                {new Set(filteredCalcs.map((c: any) => c.method).filter(Boolean)).size}
               </div>
               <div className="text-xs text-muted mt-0.5">statistical methods</div>
             </Card>
@@ -229,7 +246,7 @@ export function ObservabilityClient({
                 render: (row) => <span className="text-xs text-muted">{new Date(row.created_at).toLocaleString()}</span>,
               },
             ]}
-            data={causalCalcs}
+            data={filteredCalcs}
             searchable
             searchPlaceholder="Search calculations..."
             searchFields={["method", "source_entity", "target_entity", "result"]}
@@ -279,7 +296,7 @@ export function ObservabilityClient({
               render: (row) => <span className="text-xs text-muted">{new Date(row.created_at).toLocaleString()}</span>,
             },
           ]}
-          data={connectorOps}
+          data={filteredOps}
           searchable
           searchPlaceholder="Search connector ops..."
           searchFields={["connector_type", "operation", "status", "error_message"]}
@@ -321,7 +338,7 @@ export function ObservabilityClient({
               render: (row) => <span className="text-xs text-muted">{new Date(row.created_at).toLocaleString()}</span>,
             },
           ]}
-          data={agentExecutions}
+          data={filteredAgents}
           searchable
           searchPlaceholder="Search agent executions..."
           searchFields={["agent_type", "action", "status"]}
@@ -369,7 +386,7 @@ export function ObservabilityClient({
               render: (row) => <span className="text-xs text-muted">{new Date(row.created_at).toLocaleString()}</span>,
             },
           ]}
-          data={alerts}
+          data={filteredAlerts}
           searchable
           searchPlaceholder="Search alerts..."
           searchFields={["alert_type", "title", "severity", "status"]}

@@ -155,11 +155,16 @@ export default function CopilotPage() {
             />
           ) : rightPanel === "agents" ? (
             <div className="flex flex-col h-full bg-card rounded-xl border border-border-subtle overflow-hidden">
-              {/* Agent panel close button */}
-              <AgentRunner
-                organizationId={currentOrg?.id || ""}
-                onArtifact={handleArtifact}
-              />
+              {currentOrg?.id ? (
+                <AgentRunner
+                  organizationId={currentOrg.id}
+                  onArtifact={handleArtifact}
+                />
+              ) : (
+                <div className="flex items-center justify-center h-full text-sm text-muted">
+                  Loading organization...
+                </div>
+              )}
             </div>
           ) : (
             <>
