@@ -238,7 +238,7 @@ async function parseSchema(
       columns.push({
         name: colName,
         type: colType,
-        nullable: !constraints.includes('not_null'),
+        nullable: constraints.includes('nullable'),
         constraints,
       });
 
@@ -296,7 +296,7 @@ async function analyzeDistributions(
     distributions[table.name] = {};
     for (const column of table.columns) {
       distributions[table.name][column.name] = {
-        nullPercentage: column.nullable ? 0.05 : 0,
+        nullPercentage: column.nullable ? 0.15 : 0,
         cardinality: 'unique', // unique, low, medium, high
         pattern: inferPattern(column.type),
       };
