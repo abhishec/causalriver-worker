@@ -511,13 +511,16 @@ export function calculateEigenvectorCentrality(
 
 /**
  * Get heatmap of bottleneck risk across organization
- * Returns: { domain: riskScore } where riskScore = 0-100
+ * Returns: { domain: riskScore } where riskScore = 0-1.0
  *
- * BRS Formula (updated with HHI):
- *   25% Gini (inequality)
- *   25% HHI (concentration)
- *   20% Top3% concentration
- *   30% Inverse bus factor
+ * BRS Formula (SPEC-COMPLIANT):
+ *   BRS = 0.3 * HHI + 0.25 * gini + 0.25 * max_betweenness + 0.2 * top_reviewer_share
+ *
+ * Risk Thresholds (per spec):
+ *   Low:      0 – 0.3
+ *   Medium:   0.3 – 0.5
+ *   High:     0.5 – 0.7
+ *   Critical: > 0.7
  */
 export async function getBottleneckHeatmap(
   config: ConcentrationConfig,
@@ -527,20 +530,42 @@ export async function getBottleneckHeatmap(
   const heatmap: Record<string, number> = {};
 
   for (const metrics of allMetrics) {
-    const strengths = metrics.bottlenecks.map(b => b.expertiseShare);
-    const hhi = calculateHHI(strengths);
+    const strengths = metrics.bottlenecks.map(b => b.expertiseShare / 100); // Normalize to 0-1
+    const hhi = calculateHHI(strengths.length > 0 ? strengths : [1]); // HHI on normalized shares
 
-    // Risk score = weighted combination with HHI
-    const giniRisk = metrics.giniCoefficient * 100 * 0.25;
-    const hhiRisk = Math.min(hhi / 0.5, 1.0) * 100 * 0.25; // Saturates at HHI=0.5
-    const top3Risk = metrics.top3Concentration * 0.20;
-    const busFactorRisk = (1 / Math.max(metrics.busFactor, 1)) * 100 * 0.30;
+    // Max betweenness centrality: highest centrality score (normalized 0-1)
+    // centralityScore is z-score, so normalize: max_betweenness = min(1, maxZ / 3)
+    const maxBetweenness = metrics.bottlenecks.length > 0
+      ? Math.min(1, Math.max(...metrics.bottlenecks.map(b => Math.abs(b.centralityScore))) / 3)
+      : 0;
 
-    const riskScore = Math.min(100, giniRisk + hhiRisk + top3Risk + busFactorRisk);
-    heatmap[metrics.domain] = Math.round(riskScore);
+    // Top reviewer share: expertise share of #1 contributor (0-1)
+    const topReviewerShare = metrics.bottlenecks.length > 0
+      ? Math.min(1, metrics.bottlenecks[0].expertiseShare / 100)
+      : 0;
+
+    // Gini coefficient (already 0-1)
+    const gini = Math.min(1, metrics.giniCoefficient);
+
+    // ============================================================================
+    // SPEC BRS FORMULA: BRS = 0.3*HHI + 0.25*gini + 0.25*max_betweenness + 0.2*top_reviewer_share
+    // ============================================================================
+    const brs = (0.3 * hhi) + (0.25 * gini) + (0.25 * maxBetweenness) + (0.2 * topReviewerShare);
+
+    heatmap[metrics.domain] = Math.round(Math.min(1, brs) * 100) / 100; // 0-1.0, 2 decimal places
   }
 
   return heatmap;
+}
+
+/**
+ * Get BRS risk level from score (per spec thresholds)
+ */
+export function getBRSRiskLevel(brs: number): 'low' | 'medium' | 'high' | 'critical' {
+  if (brs > 0.7) return 'critical';
+  if (brs > 0.5) return 'high';
+  if (brs > 0.3) return 'medium';
+  return 'low';
 }
 
 // ============================================================================

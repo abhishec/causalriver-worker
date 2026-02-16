@@ -94,6 +94,7 @@ export {
   detectBottlenecks,
   detectAllBottlenecks,
   getBottleneckHeatmap,
+  getBRSRiskLevel,
   generateBottleneckAlerts,
   calculateGiniCoefficient,
   calculateTopNConcentration,
