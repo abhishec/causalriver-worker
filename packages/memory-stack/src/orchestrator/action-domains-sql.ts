@@ -22,6 +22,7 @@
  */
 
 import type { ActionDomainContext, ActionDomainResult } from './domain-action-engine';
+import { formatBrainContextForDomain, buildBrainAttribution } from './brain-context-for-domains';
 
 // ============================================================================
 // TYPES
@@ -110,10 +111,16 @@ export interface Optimization {
 // ============================================================================
 
 /**
- * SQL Analyzer Domain
+ * SQL Analyzer Domain (Claude-Powered + Regex Fallback)
  *
  * Routes through Brain's cognitive stack to analyze SQL queries for
  * correctness, performance, and security issues.
+ *
+ * TWO MODES:
+ * 1. Claude-powered (when anthropicApiKey available): Deep semantic analysis
+ *    using Claude Sonnet for nuanced understanding of query intent, complex
+ *    JOINs, CTEs, window functions, and context-aware optimization suggestions.
+ * 2. Regex fallback: Fast pattern-matching analysis for basic checks.
  */
 export const sqlAnalyzerDomain = {
   name: 'sql-analyzer' as const,
@@ -122,11 +129,48 @@ export const sqlAnalyzerDomain = {
   requires: ['schemaRegistry', 'sqlParser', 'causalDAG'] as const,
 
   /**
-   * Execute SQL analysis
+   * Execute SQL analysis — Claude-powered when API key available
    */
   async execute(ctx: ActionDomainContext): Promise<ActionDomainResult> {
     const request = ctx.input as SQLAnalysisRequest;
+    const anthropicApiKey = (ctx.input as any)?.anthropicApiKey;
 
+    // ── CLAUDE-POWERED MODE ─────────────────────────────────────────────────
+    if (anthropicApiKey) {
+      try {
+        const claudeResult = await analyzeWithClaude(
+          request,
+          anthropicApiKey,
+          ctx.brain
+        );
+
+        const brainAttribution = buildBrainAttribution(ctx.brain as Record<string, any>, 'sql-analyzer');
+        return {
+          type: 'sql-analyzer',
+          data: { ...claudeResult, claudePowered: true, ...brainAttribution },
+          confidence: claudeResult.score / 100,
+          narrative: claudeResult.narrative,
+          interventions: claudeResult.interventions || [],
+          evidence: [
+            {
+              type: 'claude_analysis',
+              description: `Claude Sonnet analyzed ${claudeResult.parsed.type} query with ${claudeResult.parsed.tables.length} tables`,
+              weight: 1.0,
+            },
+            {
+              type: 'semantic_understanding',
+              description: `Claude identified ${claudeResult.correctnessIssues.length + claudeResult.performanceIssues.length + claudeResult.securityIssues.length} issues`,
+              weight: 1.0,
+            },
+          ],
+        };
+      } catch (claudeError: any) {
+        console.warn('[SQL Analyzer] Claude analysis failed, falling back to regex:', claudeError.message);
+        // Fall through to regex mode
+      }
+    }
+
+    // ── REGEX FALLBACK MODE ─────────────────────────────────────────────────
     // 1. Parse SQL query
     const parsed = parseSQL(request.query, request.databaseType || 'postgresql');
 
@@ -177,14 +221,14 @@ export const sqlAnalyzerDomain = {
 
     return {
       type: 'sql-analyzer',
-      data: result,
+      data: { ...result, claudePowered: false },
       confidence: calculateConfidence(result),
       narrative: formatNarrative(result),
       interventions,
       evidence: [
         {
           type: 'sql_parsing',
-          description: `Parsed ${parsed.type} query with ${parsed.tables.length} tables`,
+          description: `Parsed ${parsed.type} query with ${parsed.tables.length} tables (regex mode)`,
           weight: 1.0,
         },
         {
@@ -201,6 +245,161 @@ export const sqlAnalyzerDomain = {
     };
   },
 };
+
+// ============================================================================
+// CLAUDE-POWERED SQL ANALYSIS
+// ============================================================================
+
+/**
+ * Use Claude Sonnet to perform deep semantic SQL analysis.
+ * Returns the same SQLAnalysisResult structure but with richer insights.
+ */
+async function analyzeWithClaude(
+  request: SQLAnalysisRequest,
+  apiKey: string,
+  brainContext?: Record<string, any>
+): Promise<SQLAnalysisResult & { narrative: string; interventions: any[] }> {
+  const systemPrompt = `You are an expert SQL analyzer for NexusBrain's engineering intelligence platform.
+Analyze the given SQL query and return a JSON analysis.
+
+IMPORTANT: Return ONLY valid JSON, no markdown formatting, no code blocks.
+
+Your analysis should cover:
+1. CORRECTNESS: Syntax errors, missing table references, ambiguous columns
+2. PERFORMANCE: Missing indexes, N+1 patterns, full table scans, cartesian products
+3. SECURITY: SQL injection vectors, missing parameterization, dangerous patterns
+4. STYLE: Naming conventions, readability, best practices
+5. OPTIMIZATIONS: Concrete rewrite suggestions with before/after examples
+
+${request.schema ? `DATABASE SCHEMA:\n${request.schema}` : ''}
+${request.databaseType ? `Database: ${request.databaseType}` : 'Database: postgresql'}
+
+${formatBrainContextForDomain(brainContext, 'sql-analyzer')}
+
+Return this exact JSON structure:
+{
+  "queryType": "SELECT|INSERT|UPDATE|DELETE|CREATE|DROP|ALTER",
+  "tables": ["table1", "table2"],
+  "columns": ["col1", "col2"],
+  "correctnessIssues": [{"severity": "error|warning|info", "type": "string", "message": "string", "suggestion": "string"}],
+  "performanceIssues": [{"severity": "error|warning|info", "type": "string", "message": "string", "suggestion": "string"}],
+  "securityIssues": [{"severity": "error|warning|info", "type": "string", "message": "string", "suggestion": "string"}],
+  "styleIssues": [{"severity": "info", "type": "string", "message": "string", "suggestion": "string"}],
+  "optimizations": [{"type": "index|rewrite|caching|partitioning", "description": "string", "before": "string", "after": "string", "estimatedImpact": "high|medium|low", "effort": "easy|moderate|complex"}],
+  "score": 0-100,
+  "riskLevel": "low|medium|high|critical",
+  "narrative": "Human-readable summary of analysis"
+}`;
+
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 4096,
+      system: systemPrompt,
+      messages: [
+        {
+          role: 'user',
+          content: `Analyze this SQL query:\n\n${request.query}`,
+        },
+      ],
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Claude API error: ${response.status} ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  const content = data.content?.[0]?.text || '{}';
+
+  // Parse Claude's JSON response
+  let analysis: any;
+  try {
+    // Handle potential markdown code blocks
+    const jsonStr = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    analysis = JSON.parse(jsonStr);
+  } catch {
+    throw new Error('Failed to parse Claude response as JSON');
+  }
+
+  // Map Claude's response to our SQLAnalysisResult structure
+  const parsed: ParsedQuery = {
+    type: (analysis.queryType || 'SELECT') as ParsedQuery['type'],
+    tables: analysis.tables || [],
+    columns: analysis.columns || [],
+    joins: [], // Claude doesn't return this directly
+    where: null,
+    subqueries: [],
+    ctes: [],
+  };
+
+  return {
+    query: request.query,
+    parsed,
+    correctnessIssues: (analysis.correctnessIssues || []).map((i: any) => ({
+      severity: i.severity || 'warning',
+      type: i.type || 'unknown',
+      message: i.message || '',
+      suggestion: i.suggestion || '',
+    })),
+    performanceIssues: (analysis.performanceIssues || []).map((i: any) => ({
+      severity: i.severity || 'warning',
+      type: i.type || 'unknown',
+      message: i.message || '',
+      suggestion: i.suggestion || '',
+    })),
+    securityIssues: (analysis.securityIssues || []).map((i: any) => ({
+      severity: i.severity || 'warning',
+      type: i.type || 'unknown',
+      message: i.message || '',
+      suggestion: i.suggestion || '',
+    })),
+    styleIssues: (analysis.styleIssues || []).map((i: any) => ({
+      severity: i.severity || 'info',
+      type: i.type || 'unknown',
+      message: i.message || '',
+      suggestion: i.suggestion || '',
+    })),
+    optimizations: (analysis.optimizations || []).map((o: any) => ({
+      type: o.type || 'rewrite',
+      description: o.description || '',
+      before: o.before || '',
+      after: o.after || '',
+      estimatedImpact: o.estimatedImpact || 'medium',
+      effort: o.effort || 'moderate',
+    })),
+    score: analysis.score ?? 70,
+    riskLevel: analysis.riskLevel || 'medium',
+    narrative: analysis.narrative || formatNarrative({
+      query: request.query,
+      parsed,
+      correctnessIssues: analysis.correctnessIssues || [],
+      performanceIssues: analysis.performanceIssues || [],
+      securityIssues: analysis.securityIssues || [],
+      styleIssues: analysis.styleIssues || [],
+      optimizations: analysis.optimizations || [],
+      score: analysis.score ?? 70,
+      riskLevel: analysis.riskLevel || 'medium',
+    }),
+    interventions: extractInterventions({
+      query: request.query,
+      parsed,
+      correctnessIssues: analysis.correctnessIssues || [],
+      performanceIssues: analysis.performanceIssues || [],
+      securityIssues: analysis.securityIssues || [],
+      styleIssues: analysis.styleIssues || [],
+      optimizations: analysis.optimizations || [],
+      score: analysis.score ?? 70,
+      riskLevel: analysis.riskLevel || 'medium',
+    }),
+  };
+}
 
 // ============================================================================
 // SQL PARSING

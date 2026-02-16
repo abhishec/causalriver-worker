@@ -21,6 +21,7 @@
  */
 
 import type { ActionDomainContext, ActionDomainResult } from './domain-action-engine';
+import { formatBrainContextForDomain, buildBrainAttribution } from './brain-context-for-domains';
 
 // ============================================================================
 // TYPES
@@ -174,7 +175,8 @@ export const dataLineageDomain = {
       .map(e => e.name)
       .filter(name => !tablesInRelationships.has(name));
 
-    // 6. Build result
+    // 6. Build result (Brain-augmented)
+    const brainAttribution = buildBrainAttribution(ctx.brain as Record<string, any>, 'data-lineage');
     const result: DataLineageResult = {
       entities: analysis.entities,
       relationships: analysis.relationships,
@@ -186,7 +188,8 @@ export const dataLineageDomain = {
       claudePowered: analysis.claudePowered,
       totalTables: analysis.entities.length,
       totalRelationships: analysis.relationships.length,
-    };
+      ...brainAttribution,
+    } as any;
 
     // 7. Extract interventions
     const interventions = extractInterventions(result);
@@ -238,7 +241,11 @@ async function analyzeWithClaude(
   request: DataLineageRequest,
   ctx: ActionDomainContext
 ): Promise<LineageAnalysisResult> {
-  const prompt = `You are an expert database architect. Parse the following SQL schema and map all data model relationships and lineage.
+  // Inject Brain's organizational intelligence
+  const brainSection = formatBrainContextForDomain(ctx.brain as Record<string, any>, 'data-lineage');
+
+  const prompt = `You are an expert database architect operating within NexusBrain's cognitive stack. Parse the following SQL schema and map all data model relationships and lineage.
+\${brainSection}
 
 ## SQL Schema:
 ${request.schema.slice(0, 8000)}

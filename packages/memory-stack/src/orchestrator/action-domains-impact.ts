@@ -27,6 +27,7 @@
  */
 
 import type { ActionDomainContext, ActionDomainResult } from './domain-action-engine';
+import { formatBrainContextForDomain, buildBrainAttribution } from './brain-context-for-domains';
 
 // ============================================================================
 // TYPES
@@ -185,7 +186,8 @@ export const impactAnalysisDomain = {
       request.changeType
     );
 
-    // 6. Build result
+    // 6. Build result (Brain-augmented)
+    const brainAttribution = buildBrainAttribution(ctx.brain as Record<string, any>, 'impact-analyze');
     const result: ImpactAnalysisResult = {
       impactScore: analysis.impactScore,
       riskLevel: analysis.riskLevel,
@@ -199,7 +201,8 @@ export const impactAnalysisDomain = {
       predictions,
       claudePowered: analysis.claudePowered,
       analysisConfidence: analysis.confidence,
-    };
+      ...brainAttribution,
+    } as any;
 
     // 7. Extract interventions
     const interventions = extractInterventions(result);
@@ -253,7 +256,11 @@ async function analyzeWithClaude(
   request: ImpactAnalysisRequest,
   ctx: ActionDomainContext
 ): Promise<AnalysisResult> {
-  const prompt = `You are an expert Site Reliability Engineer analyzing the impact of a change. Provide a comprehensive impact analysis.
+  // Inject Brain's organizational intelligence into Claude's prompt
+  const brainSection = formatBrainContextForDomain(ctx.brain as Record<string, any>, 'impact-analyze');
+
+  const prompt = `You are an expert Site Reliability Engineer operating within NexusBrain's cognitive stack, analyzing the impact of a change. Provide a comprehensive impact analysis.
+\${brainSection}
 
 ## Change Details:
 **Type:** ${request.changeType}

@@ -27,6 +27,7 @@
  */
 
 import type { ActionDomainContext, ActionDomainResult } from './domain-action-engine';
+import { formatBrainContextForDomain, buildBrainAttribution } from './brain-context-for-domains';
 
 // ============================================================================
 // TYPES
@@ -162,7 +163,8 @@ export const incidentDiagnosisDomain = {
       similarIncidents
     );
 
-    // 5. Build result
+    // 5. Build result (Brain-augmented)
+    const brainAttribution = buildBrainAttribution(ctx.brain as Record<string, any>, 'incident-diagnosis');
     const result: IncidentDiagnosisResult = {
       rootCauses: diagnosis.rootCauses,
       diagnosis: diagnosis.summary,
@@ -172,7 +174,8 @@ export const incidentDiagnosisDomain = {
       diagnosticConfidence: diagnosis.confidence,
       claudePowered: diagnosis.claudePowered,
       estimatedTimeToResolve,
-    };
+      ...brainAttribution,
+    } as any;
 
     // 6. Extract interventions
     const interventions = extractInterventions(result);
@@ -225,7 +228,11 @@ async function diagnoseWithClaude(
   request: IncidentDiagnosisRequest,
   ctx: ActionDomainContext
 ): Promise<DiagnosisResult> {
-  const prompt = `You are an expert Site Reliability Engineer diagnosing a production incident. Analyze the following incident and provide a comprehensive diagnosis.
+  // Inject Brain's organizational intelligence into Claude's prompt
+  const brainSection = formatBrainContextForDomain(ctx.brain as Record<string, any>, 'incident-diagnosis');
+
+  const prompt = \`You are an expert Site Reliability Engineer operating within NexusBrain's cognitive stack, diagnosing a production incident. Analyze the following incident and provide a comprehensive diagnosis.
+\${brainSection}
 
 ## Incident Details:
 **Description:** ${request.description}

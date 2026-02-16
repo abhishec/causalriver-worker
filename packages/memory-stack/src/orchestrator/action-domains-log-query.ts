@@ -21,6 +21,7 @@
  */
 
 import type { ActionDomainContext, ActionDomainResult } from './domain-action-engine';
+import { formatBrainContextForDomain, buildBrainAttribution } from './brain-context-for-domains';
 
 // ============================================================================
 // TYPES
@@ -170,7 +171,8 @@ export const logQueryDomain = {
       analysis.patterns
     );
 
-    // 4. Build result
+    // 4. Build result (Brain-augmented)
+    const brainAttribution = buildBrainAttribution(ctx.brain as Record<string, any>, 'log-query');
     const result: LogQueryResult = {
       matchedEntries: analysis.matchedEntries,
       patterns: analysis.patterns,
@@ -181,7 +183,8 @@ export const logQueryDomain = {
       answer: analysis.answer,
       totalAnalyzed: logsToAnalyze.length,
       claudePowered: analysis.claudePowered,
-    };
+      ...brainAttribution,
+    } as any;
 
     // 5. Extract interventions
     const interventions = extractInterventions(result);
@@ -238,7 +241,11 @@ async function analyzeWithClaude(
 ): Promise<LogAnalysisResult> {
   const logSample = logs.slice(0, 100).join('\n');
 
-  const prompt = `You are an expert SRE analyzing application logs. Answer the user's question and provide comprehensive analysis.
+  // Inject Brain's organizational intelligence
+  const brainSection = formatBrainContextForDomain(ctx.brain as Record<string, any>, 'log-query');
+
+  const prompt = `You are an expert SRE operating within NexusBrain's cognitive stack, analyzing application logs. Answer the user's question and provide comprehensive analysis.
+\${brainSection}
 
 ## User Question:
 ${request.query}

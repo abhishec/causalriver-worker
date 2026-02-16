@@ -26,6 +26,7 @@
  */
 
 import type { ActionDomainContext, ActionDomainResult } from './domain-action-engine';
+import { formatBrainContextForDomain, buildBrainAttribution } from './brain-context-for-domains';
 
 // ============================================================================
 // TYPES
@@ -132,22 +133,27 @@ export const tddCodeGeneratorDomain = {
 
     let result: TDDCodeGenerationResult;
 
+    const brainCtx = ctx.brain as Record<string, any>;
     if (phase === 'full-cycle') {
-      // Execute full Red-Green-Refactor cycle
-      result = await executeFullTDDCycle(request);
+      // Execute full Red-Green-Refactor cycle (Brain-augmented)
+      result = await executeFullTDDCycle(request, brainCtx);
     } else if (phase === 'red') {
-      // Generate failing tests
-      result = await executeRedPhase(request);
+      // Generate failing tests (Brain-augmented)
+      result = await executeRedPhase(request, brainCtx);
     } else if (phase === 'green') {
-      // Generate minimal passing implementation
-      result = await executeGreenPhase(request);
+      // Generate minimal passing implementation (Brain-augmented)
+      result = await executeGreenPhase(request, brainCtx);
     } else {
-      // Generate refactoring suggestions
-      result = await executeRefactorPhase(request);
+      // Generate refactoring suggestions (Brain-augmented)
+      result = await executeRefactorPhase(request, brainCtx);
     }
 
-    // Calculate confidence
-    const confidence = result.claudePowered ? 0.95 : 0.70;
+    // Calculate confidence (higher with Brain augmentation)
+    const hasBrain = (ctx.brain as any)?.cognitiveStackAvailable;
+    const confidence = result.claudePowered ? (hasBrain ? 0.97 : 0.95) : 0.70;
+    const brainAttribution = buildBrainAttribution(ctx.brain as Record<string, any>, 'tdd-code-generator');
+    (result as any).brainAugmented = brainAttribution.brainAugmented;
+    (result as any).brainLayers = (brainAttribution as any).brainLayers;
 
     // Extract interventions
     const interventions = extractInterventions(result);
@@ -189,10 +195,11 @@ export const tddCodeGeneratorDomain = {
  * Execute full Red-Green-Refactor cycle
  */
 async function executeFullTDDCycle(
-  request: TDDCodeGenerationRequest
+  request: TDDCodeGenerationRequest,
+  brainContext?: Record<string, any>
 ): Promise<TDDCodeGenerationResult> {
-  // Red: Generate failing tests
-  const redResult = await executeRedPhase(request);
+  // Red: Generate failing tests (Brain-augmented)
+  const redResult = await executeRedPhase(request, brainContext);
 
   // Green: Generate minimal passing implementation
   const greenRequest: TDDCodeGenerationRequest = {
@@ -200,7 +207,7 @@ async function executeFullTDDCycle(
     phase: 'green',
     existingTests: redResult.testCode,
   };
-  const greenResult = await executeGreenPhase(greenRequest);
+  const greenResult = await executeGreenPhase(greenRequest, brainContext);
 
   // Refactor: Suggest improvements
   const refactorRequest: TDDCodeGenerationRequest = {
@@ -209,7 +216,7 @@ async function executeFullTDDCycle(
     existingCode: greenResult.implementationCode,
     existingTests: redResult.testCode,
   };
-  const refactorResult = await executeRefactorPhase(refactorRequest);
+  const refactorResult = await executeRefactorPhase(refactorRequest, brainContext);
 
   const fullCycle: TDDCycle = {
     red: {
@@ -251,10 +258,11 @@ async function executeFullTDDCycle(
  * Execute Red phase: Generate failing tests
  */
 async function executeRedPhase(
-  request: TDDCodeGenerationRequest
+  request: TDDCodeGenerationRequest,
+  brainContext?: Record<string, any>
 ): Promise<TDDCodeGenerationResult> {
   const testCode = request.anthropicApiKey
-    ? await generateTestsWithClaude(request)
+    ? await generateTestsWithClaude(request, brainContext)
     : generateTestsHeuristic(request);
 
   const metrics = calculateMetrics(testCode, '', request.language);
@@ -275,10 +283,11 @@ async function executeRedPhase(
  * Execute Green phase: Generate minimal passing implementation
  */
 async function executeGreenPhase(
-  request: TDDCodeGenerationRequest
+  request: TDDCodeGenerationRequest,
+  brainContext?: Record<string, any>
 ): Promise<TDDCodeGenerationResult> {
   const implementationCode = request.anthropicApiKey
-    ? await generateImplementationWithClaude(request)
+    ? await generateImplementationWithClaude(request, brainContext)
     : generateImplementationHeuristic(request);
 
   const metrics = calculateMetrics(
@@ -303,10 +312,11 @@ async function executeGreenPhase(
  * Execute Refactor phase: Suggest improvements
  */
 async function executeRefactorPhase(
-  request: TDDCodeGenerationRequest
+  request: TDDCodeGenerationRequest,
+  brainContext?: Record<string, any>
 ): Promise<TDDCodeGenerationResult> {
   const refactoringSuggestions = request.anthropicApiKey
-    ? await generateRefactoringsWithClaude(request)
+    ? await generateRefactoringsWithClaude(request, brainContext)
     : generateRefactoringsHeuristic(request);
 
   const metrics = calculateMetrics(
@@ -336,9 +346,12 @@ async function executeRefactorPhase(
  * Generate tests using Claude LLM (Red phase)
  */
 async function generateTestsWithClaude(
-  request: TDDCodeGenerationRequest
+  request: TDDCodeGenerationRequest,
+  brainContext?: Record<string, any>
 ): Promise<string> {
-  const prompt = `You are an expert in Test-Driven Development. Generate failing tests for the following requirements using ${request.testFramework}.
+  const brainSection = formatBrainContextForDomain(brainContext, 'tdd-code-generator');
+  const prompt = `You are an expert in Test-Driven Development operating within NexusBrain's cognitive stack. Generate failing tests for the following requirements using ${request.testFramework}.
+\${brainSection}
 
 ## Requirements:
 ${request.requirements}
@@ -369,9 +382,12 @@ ${request.requirements}
  * Generate implementation using Claude LLM (Green phase)
  */
 async function generateImplementationWithClaude(
-  request: TDDCodeGenerationRequest
+  request: TDDCodeGenerationRequest,
+  brainContext?: Record<string, any>
 ): Promise<string> {
-  const prompt = `You are an expert in Test-Driven Development. Generate MINIMAL implementation that makes the following tests pass.
+  const brainSection = formatBrainContextForDomain(brainContext, 'tdd-code-generator');
+  const prompt = `You are an expert in Test-Driven Development operating within NexusBrain's cognitive stack. Generate MINIMAL implementation that makes the following tests pass.
+\${brainSection}
 
 ## Requirements:
 ${request.requirements}
@@ -405,9 +421,12 @@ ${request.existingTests}
  * Generate refactorings using Claude LLM (Refactor phase)
  */
 async function generateRefactoringsWithClaude(
-  request: TDDCodeGenerationRequest
+  request: TDDCodeGenerationRequest,
+  brainContext?: Record<string, any>
 ): Promise<RefactoringSuggestion[]> {
-  const prompt = `You are an expert in code refactoring. Analyze this implementation and suggest improvements while keeping tests passing.
+  const brainSection = formatBrainContextForDomain(brainContext, 'tdd-code-generator');
+  const prompt = `You are an expert in code refactoring operating within NexusBrain's cognitive stack. Analyze this implementation and suggest improvements while keeping tests passing.
+\${brainSection}
 
 ## Current Implementation:
 \`\`\`${request.language}

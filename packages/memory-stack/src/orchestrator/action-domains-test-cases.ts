@@ -25,6 +25,7 @@
  */
 
 import type { ActionDomainContext, ActionDomainResult } from './domain-action-engine';
+import { formatBrainContextForDomain, buildBrainAttribution } from './brain-context-for-domains';
 
 // ============================================================================
 // TYPES
@@ -114,7 +115,7 @@ export const testCaseGeneratorDomain = {
     // 1. Analyze source code structure
     const codeAnalysis = await analyzeCode(request.sourceCode, request.language);
 
-    // 2. **CRITICAL: Use Claude LLM for test generation**
+    // 2. **CRITICAL: Use Claude LLM for test generation — BRAIN-AUGMENTED**
     const claudeGenerated = await generateTestsWithClaude({
       sourceCode: request.sourceCode,
       language: request.language,
@@ -123,6 +124,7 @@ export const testCaseGeneratorDomain = {
       testTypes: request.testTypes || ['unit', 'integration'],
       anthropicApiKey: request.anthropicApiKey,
       existingTests: request.existingTests,
+      brainContext: ctx.brain as Record<string, any>,
     });
 
     // 3. Augment with additional edge cases
@@ -137,7 +139,8 @@ export const testCaseGeneratorDomain = {
     // 6. Generate suggestions
     const suggestions = generateSuggestions(coverage, codeAnalysis);
 
-    // 7. Build result
+    // 7. Build result (with Brain attribution)
+    const brainAttribution = buildBrainAttribution(ctx.brain as Record<string, any>, 'test-case-generator');
     const result: TestCaseGenerationResult = {
       testCode: claudeGenerated.testCode,
       testCases: claudeGenerated.testCases.concat(edgeCases),
@@ -145,7 +148,8 @@ export const testCaseGeneratorDomain = {
       qualityScore,
       claudePowered: claudeGenerated.claudePowered,
       suggestions,
-    };
+      ...brainAttribution,
+    } as any;
 
     // 8. Extract interventions
     const interventions = extractInterventions(result);
@@ -341,6 +345,7 @@ async function generateTestsWithClaude(options: {
   testTypes: string[];
   anthropicApiKey?: string;
   existingTests?: string;
+  brainContext?: Record<string, any>;
 }): Promise<ClaudeTestGenerationResult> {
   const {
     sourceCode,
@@ -350,6 +355,7 @@ async function generateTestsWithClaude(options: {
     testTypes,
     anthropicApiKey,
     existingTests,
+    brainContext,
   } = options;
 
   // If Claude API key provided, use Claude for generation
@@ -363,6 +369,7 @@ async function generateTestsWithClaude(options: {
         testTypes,
         existingTests,
         apiKey: anthropicApiKey,
+        brainContext,
       });
 
       return {
@@ -391,6 +398,7 @@ async function callClaudeAPI(options: {
   testTypes: string[];
   existingTests?: string;
   apiKey: string;
+  brainContext?: Record<string, any>;
 }): Promise<string> {
   const {
     sourceCode,
@@ -400,10 +408,15 @@ async function callClaudeAPI(options: {
     testTypes,
     existingTests,
     apiKey,
+    brainContext,
   } = options;
 
-  // Construct prompt for Claude
-  const prompt = `You are an expert software testing engineer. Generate comprehensive, high-quality test cases for the following ${language} code using ${framework}.
+  // Brain-augmented context injection
+  const brainSection = formatBrainContextForDomain(brainContext, 'test-case-generator');
+
+  // Construct prompt for Claude — BRAIN-AUGMENTED
+  const prompt = `You are an expert software testing engineer operating within NexusBrain's cognitive stack. Generate comprehensive, high-quality test cases for the following ${language} code using ${framework}.
+${brainSection}
 
 ## Source Code to Test:
 \`\`\`${language}

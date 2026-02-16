@@ -861,7 +861,19 @@ export {
   registerEnhancedSoftwareEngineeringDomains,
 } from './orchestrator/action-domains-software-engineering-enhanced';
 
-// SE-aaS Cognitive Domains — All 8 Sprint 1-3 Domains (Claude-Powered)
+// Brain Context for SE-aaS Domains — THE CRITICAL DIFFERENTIATOR
+// Makes Claude "Brain-augmented" by injecting organizational memory into every domain prompt
+export {
+  formatBrainContextForDomain,
+  buildBrainAttribution,
+  type BrainContextForDomain,
+  type CausalEdge as BrainDomainCausalEdge,
+  type GrammarPattern,
+  type VelocitySnapshot as BrainDomainVelocitySnapshot,
+  type BottleneckSnapshot as BrainDomainBottleneckSnapshot,
+} from './orchestrator/brain-context-for-domains';
+
+// SE-aaS Cognitive Domains — All 8 Sprint 1-3 Domains (Claude-Powered + Brain-Augmented)
 export {
   testCaseGeneratorDomain,
   type TestCaseGenerationRequest,
