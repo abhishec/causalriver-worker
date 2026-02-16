@@ -873,6 +873,20 @@ export {
   type BottleneckSnapshot as BrainDomainBottleneckSnapshot,
 } from './orchestrator/brain-context-for-domains';
 
+// Brain Evolution Engine — THE NEVER-EXISTED-BEFORE FEATURE
+// Makes the Brain VISIBLY get smarter over time with measurable accuracy,
+// Bayesian weight updates, Brier score calibration, and evolution timeline
+export {
+  runBrainEvolutionCycle,
+  type BrainEvolutionState,
+  type DomainAccuracy,
+  type CalibrationBucket,
+  type EvolutionSnapshot,
+  type VerificationJob,
+  type VerificationOutcome,
+  type InterventionRecord,
+} from './orchestrator/brain-evolution-engine';
+
 // SE-aaS Cognitive Domains — All 8 Sprint 1-3 Domains (Claude-Powered + Brain-Augmented)
 export {
   testCaseGeneratorDomain,
