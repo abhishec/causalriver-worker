@@ -595,9 +595,9 @@ export {
   type ContingencyTrigger,
   type LearningQuestion,
   type DecisionGate,
-  // SE-aaS action domain types
-  type ActionDomainContext,
-  type ActionDomainResult,
+  // SE-aaS action domain types (aliased to avoid collision with action-domain-registry's ActionDomainResult)
+  type ActionDomainContext as SEaaSActionDomainContext,
+  type ActionDomainResult as SEaaSActionDomainResult,
 } from './orchestrator/domain-action-engine';
 
 // Motor Command Engine V1 ("Primary Motor Cortex") — brain can ACT through connectors
