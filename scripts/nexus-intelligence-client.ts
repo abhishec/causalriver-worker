@@ -1086,8 +1086,120 @@ export class NexusIntelligenceClient {
       console.log(`  Entity resolution skipped: ${err.message}`);
     }
 
-    // Step 3c: Record Brain Observability (obs_ tables for L8-L30)
-    console.log('\n--- STEP 2c: BRAIN OBSERVABILITY (obs_ tables) ---\n');
+    // Step 2c: Generate Grammar Rules from causal discoveries (L5: Pattern Memory)
+    console.log('\n--- STEP 2c: PATTERN MEMORY — Grammar Rule Generation (L5) ---\n');
+    let grammarRulesGenerated = 0;
+    try {
+      // Fetch discovered causal relationships
+      const { data: causalEdges } = await this.supabase
+        .from('causal_relationships_statistical')
+        .select('*')
+        .eq('organization_id', this.orgId)
+        .eq('is_significant', true)
+        .order('evidence_weight', { ascending: false })
+        .limit(50);
+
+      // First, check if we already have rules for this org (avoid duplicates on re-runs)
+      const { count: existingRuleCount } = await this.supabase
+        .from('brain_grammar_rules')
+        .select('*', { count: 'exact', head: true })
+        .eq('organization_id', this.orgId);
+
+      if ((existingRuleCount || 0) > 0) {
+        console.log(`  Skipping generation: ${existingRuleCount} rules already exist for this org`);
+        grammarRulesGenerated = existingRuleCount || 0;
+      } else if (causalEdges && causalEdges.length > 0) {
+        // Generate grammar rules from causal edges
+        const rulesToInsert: Array<Record<string, unknown>> = [];
+
+        for (const edge of causalEdges) {
+          const condition = {
+            source_domain: edge.source_domain,
+            source_signal: edge.source_signal_type || '*',
+            operator: edge.effect_size > 0 ? 'increases' : 'decreases',
+            threshold: Math.abs(edge.effect_size),
+          };
+          const action = {
+            action: 'propagate_to',
+            target_domain: edge.target_domain,
+            target_signal: edge.target_signal_type || '*',
+            confidence: edge.evidence_weight,
+          };
+          const naturalLang = `When ${edge.source_domain} ${edge.source_signal_type || 'signals'} ${edge.effect_size > 0 ? 'increase' : 'decrease'}, ${edge.target_domain} ${edge.target_signal_type || 'signals'} tend to follow (weight=${(edge.evidence_weight ?? 0.5).toFixed ? (edge.evidence_weight ?? 0.5).toFixed(2) : edge.evidence_weight})`;
+
+          rulesToInsert.push({
+            organization_id: this.orgId,
+            domain: edge.source_domain,
+            rule_type: 'causal_propagation',
+            condition_expression: condition,
+            action_expression: action,
+            confidence: edge.evidence_weight || 0.5,
+            support: edge.sample_size || 1,
+            lift: Math.abs(edge.effect_size) || 1.0,
+            natural_language: naturalLang,
+            is_active: true,
+            execution_count: 0,
+          });
+        }
+
+        // Also generate domain-activity pattern rules from signal distribution
+        const { data: domainStats } = await this.supabase
+          .from('cross_domain_signals')
+          .select('source_domain')
+          .eq('organization_id', this.orgId)
+          .limit(5000);
+
+        if (domainStats && domainStats.length > 0) {
+          const domainCounts = new Map<string, number>();
+          for (const s of domainStats) {
+            domainCounts.set(s.source_domain, (domainCounts.get(s.source_domain) || 0) + 1);
+          }
+
+          const sortedDomains = Array.from(domainCounts.entries())
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 10);
+
+          for (const [domain, count] of sortedDomains) {
+            rulesToInsert.push({
+              organization_id: this.orgId,
+              domain,
+              rule_type: 'domain_activity_pattern',
+              condition_expression: { domain, min_signals: Math.floor(count * 0.5) },
+              action_expression: { action: 'monitor', priority: count > 1000 ? 'high' : 'normal' },
+              confidence: Math.min(0.95, 0.5 + (count / 10000)),
+              support: count,
+              lift: 1.0,
+              natural_language: `Domain ${domain} is a high-activity source with ${count} signals`,
+              is_active: true,
+              execution_count: 0,
+            });
+          }
+        }
+
+        // Batch insert all rules
+        if (rulesToInsert.length > 0) {
+          const { data: inserted, error: insertErr } = await this.supabase
+            .from('brain_grammar_rules')
+            .insert(rulesToInsert)
+            .select('id');
+
+          if (insertErr) {
+            console.log(`  Insert error: ${insertErr.message}`);
+          } else {
+            grammarRulesGenerated = inserted?.length || 0;
+          }
+        }
+      } else {
+        console.log('  No causal edges found to generate rules from');
+      }
+
+      console.log(`  Grammar rules generated: ${grammarRulesGenerated}`);
+    } catch (err: any) {
+      console.log(`  Grammar rule generation error: ${err.message}`);
+    }
+
+    // Step 2d: Record Brain Observability (obs_ tables for L8-L30)
+    console.log('\n--- STEP 2d: BRAIN OBSERVABILITY (obs_ tables) ---\n');
     try {
       const obs = createBrainObservability({
         supabase: this.supabase,
