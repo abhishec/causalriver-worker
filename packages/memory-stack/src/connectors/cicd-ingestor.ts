@@ -104,7 +104,7 @@ export function createCICDIngestor(config?: CICDIngestorConfig): CICDIngestor {
         if (event.status === 'success') {
           signals.push({
             organization_id: orgId,
-            source_domain: 'engineering',
+            source_domain: 'engineering.cicd',
             signal_type: 'ci_passed',
             signal_value: 1,
             entity_type: 'ci_run',
@@ -114,7 +114,7 @@ export function createCICDIngestor(config?: CICDIngestorConfig): CICDIngestor {
         } else if (event.status === 'failure') {
           signals.push({
             organization_id: orgId,
-            source_domain: 'engineering',
+            source_domain: 'engineering.cicd',
             signal_type: 'ci_failed',
             signal_value: -1,
             entity_type: 'ci_run',
@@ -129,7 +129,7 @@ export function createCICDIngestor(config?: CICDIngestorConfig): CICDIngestor {
         if (event.status === 'success') {
           signals.push({
             organization_id: orgId,
-            source_domain: 'engineering',
+            source_domain: 'engineering.cicd',
             signal_type: 'deploy_success',
             signal_value: 1,
             entity_type: 'deployment',
@@ -139,7 +139,7 @@ export function createCICDIngestor(config?: CICDIngestorConfig): CICDIngestor {
         } else if (event.status === 'failure') {
           signals.push({
             organization_id: orgId,
-            source_domain: 'engineering',
+            source_domain: 'engineering.cicd',
             signal_type: 'deploy_failure',
             signal_value: -1,
             entity_type: 'deployment',
@@ -154,7 +154,7 @@ export function createCICDIngestor(config?: CICDIngestorConfig): CICDIngestor {
         if (event.status === 'failure') {
           signals.push({
             organization_id: orgId,
-            source_domain: 'engineering',
+            source_domain: 'engineering.cicd',
             signal_type: 'test_failed',
             signal_value: -0.8,
             entity_type: 'ci_run',
@@ -164,7 +164,7 @@ export function createCICDIngestor(config?: CICDIngestorConfig): CICDIngestor {
         } else if (event.status === 'success') {
           signals.push({
             organization_id: orgId,
-            source_domain: 'engineering',
+            source_domain: 'engineering.cicd',
             signal_type: 'test_passed',
             signal_value: 0.8,
             entity_type: 'ci_run',
@@ -180,7 +180,7 @@ export function createCICDIngestor(config?: CICDIngestorConfig): CICDIngestor {
         // Emit started signals for tracking duration metrics
         signals.push({
           organization_id: orgId,
-          source_domain: 'engineering',
+          source_domain: 'engineering.cicd',
           signal_type: isDeploy ? 'deploy_started' : 'build_started',
           signal_value: 0,
           entity_type: isDeploy ? 'deployment' : 'ci_run',

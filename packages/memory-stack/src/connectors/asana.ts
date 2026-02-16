@@ -207,7 +207,7 @@ function taskToSignal(task: AsanaTask, organizationId: string): ConnectorSignal 
 
   return {
     organization_id: organizationId,
-    source_domain: 'engineering',
+    source_domain: 'engineering.asana',
     signal_type: 'asana_task',
     signal_value: task.completed ? 1 : 0,
     signal_timestamp: task.modified_at,
@@ -242,7 +242,7 @@ function projectToSignal(project: AsanaProject, organizationId: string): Connect
 
   return {
     organization_id: organizationId,
-    source_domain: 'engineering',
+    source_domain: 'engineering.asana',
     signal_type: 'asana_project',
     signal_value: healthScore,
     signal_timestamp: project.modified_at,

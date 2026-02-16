@@ -70,6 +70,10 @@ export interface VelocityFeatureVector {
   reviewerHHI: number;
   /** Gini coefficient from bottleneck analysis */
   reviewerGini: number;
+  /** Slack: ratio of after-hours messages (evenings/weekends) — stress proxy */
+  slackAfterHoursRatio: number;
+  /** Slack: total message volume in last 7 days — activity proxy */
+  slackMessageVolume7d: number;
 }
 
 // ============================================================================
@@ -87,23 +91,33 @@ export async function analyzeVelocityCollapse(
   // Get review signals for reviewer-per-PR and concentration metrics
   const reviewSignals = await getReviewSignals(supabase, organizationId, lookbackDays);
 
-  // Get open PR signals for WIP tracking
+  // Get open PR signals for WIP tracking (GitHub PRs)
   const { data: openPrSignals } = await supabase
     .from('cross_domain_signals')
     .select('created_at, signal_metadata')
     .eq('organization_id', organizationId)
-    .eq('source_domain', 'engineering')
+    .eq('source_domain', 'engineering.github')
     .eq('signal_type', 'pr_opened')
     .gte('created_at', new Date(Date.now() - lookbackDays * 86400000).toISOString())
     .order('created_at', { ascending: true });
 
   // Get Jira ticket signals for cross-domain velocity features
+  // Queries engineering.jira (from ConnectorBase path) + product (from Linear/webhook path)
   const { data: jiraTicketSignals } = await supabase
     .from('cross_domain_signals')
     .select('created_at, signal_value, signal_metadata')
     .eq('organization_id', organizationId)
-    .eq('source_domain', 'product')
-    .eq('signal_type', 'ticket_resolved')
+    .in('signal_type', ['ticket_resolved', 'jira_issue'])
+    .gte('created_at', new Date(Date.now() - lookbackDays * 86400000).toISOString())
+    .order('created_at', { ascending: true });
+
+  // Get Slack signals for cross-domain early warning features
+  const { data: slackSignals } = await supabase
+    .from('cross_domain_signals')
+    .select('created_at, signal_value, signal_type, signal_metadata')
+    .eq('organization_id', organizationId)
+    .eq('source_domain', 'communication.slack')
+    .in('signal_type', ['after_hours_activity', 'channel_message_volume', 'slack_message'])
     .gte('created_at', new Date(Date.now() - lookbackDays * 86400000).toISOString())
     .order('created_at', { ascending: true });
 
@@ -275,6 +289,34 @@ export async function analyzeVelocityCollapse(
       ? jiraLast7d.reduce((sum: number, s: any) => sum + (s.signal_value || 0), 0) / jiraLast7d.length
       : 0;
 
+  // ── SLACK CROSS-DOMAIN FEATURES (Feature #8) ─────────────────────────────
+  // After-hours ratio: messages sent outside 9am-6pm Mon-Fri → stress/crunch proxy
+  // When after-hours ratio spikes, velocity collapse often follows 1-2 weeks later
+  const slackLast7d = (slackSignals || []).filter(
+    (s: any) => new Date(s.created_at) >= new Date(Date.now() - 7 * 86400000)
+  );
+  const slackMessageVolume7d = slackLast7d.length;
+  let slackAfterHoursCount = 0;
+  for (const msg of slackLast7d) {
+    // Check if this is an after_hours_activity signal type (already flagged)
+    if (msg.signal_type === 'after_hours_activity') {
+      slackAfterHoursCount++;
+      continue;
+    }
+    // For regular messages, check timestamp for after-hours (evenings/weekends)
+    const msgDate = new Date(msg.created_at);
+    const hour = msgDate.getUTCHours();
+    const day = msgDate.getUTCDay(); // 0=Sun, 6=Sat
+    const isWeekend = day === 0 || day === 6;
+    const isAfterHours = hour < 9 || hour >= 18;
+    if (isWeekend || isAfterHours) {
+      slackAfterHoursCount++;
+    }
+  }
+  const slackAfterHoursRatio = slackMessageVolume7d > 0
+    ? slackAfterHoursCount / slackMessageVolume7d
+    : 0;
+
   // ── FEATURE VECTOR (for ML model input) ───────────────────────────────────
   const last14dPRs = mergedPRs.filter(
     (pr) => new Date(pr.mergedAt) >= new Date(Date.now() - 14 * 86400000)
@@ -299,6 +341,8 @@ export async function analyzeVelocityCollapse(
     velocityZScore: zScore,
     reviewerHHI: 0, // Populated by bottleneck analysis
     reviewerGini: 0, // Populated by bottleneck analysis
+    slackAfterHoursRatio,
+    slackMessageVolume7d,
   };
 
   return {
@@ -343,6 +387,12 @@ export interface BottleneckResult {
     avgLatencyHours: number;
     betweennessCentrality: number;
   }>;
+  /** Jira assignee concentration HHI (cross-domain bottleneck signal) */
+  jiraAssigneeHHI: number;
+  /** Top Jira assignee by ticket count */
+  topJiraAssignee: string;
+  /** Top Jira assignee's share of all tickets */
+  topJiraAssigneeShare: number;
 }
 
 export async function analyzeBottleneckRisk(
@@ -350,8 +400,42 @@ export async function analyzeBottleneckRisk(
   organizationId: string,
   lookbackDays: number = 90
 ): Promise<BottleneckResult> {
-  // Get review signals from cross_domain_signals
+  // Get review signals from cross_domain_signals (GitHub PR reviews)
   const reviews = await getReviewSignals(supabase, organizationId, lookbackDays);
+
+  // ── JIRA ASSIGNEE CONCENTRATION (Cross-domain bottleneck) ───────────────
+  // If one person is assigned most Jira tickets AND most PR reviews,
+  // they are a cross-system bottleneck the Brain's causal engine can detect.
+  const { data: jiraIssueSignals } = await supabase
+    .from('cross_domain_signals')
+    .select('signal_metadata')
+    .eq('organization_id', organizationId)
+    .in('signal_type', ['jira_issue', 'ticket_resolved'])
+    .gte('created_at', new Date(Date.now() - lookbackDays * 86400000).toISOString());
+
+  // Compute Jira assignee HHI
+  const jiraAssigneeCounts = new Map<string, number>();
+  let totalJiraTickets = 0;
+  for (const sig of jiraIssueSignals || []) {
+    const assignee = sig.signal_metadata?.assignee || sig.signal_metadata?.assigned_to;
+    if (assignee) {
+      jiraAssigneeCounts.set(assignee, (jiraAssigneeCounts.get(assignee) || 0) + 1);
+      totalJiraTickets++;
+    }
+  }
+
+  let jiraAssigneeHHI = 0;
+  let topJiraAssignee = 'none';
+  let topJiraAssigneeCount = 0;
+  for (const [assignee, count] of jiraAssigneeCounts.entries()) {
+    const share = count / Math.max(totalJiraTickets, 1);
+    jiraAssigneeHHI += share * share;
+    if (count > topJiraAssigneeCount) {
+      topJiraAssigneeCount = count;
+      topJiraAssignee = assignee;
+    }
+  }
+  const topJiraAssigneeShare = totalJiraTickets > 0 ? topJiraAssigneeCount / totalJiraTickets : 0;
 
   // Load collaboration graph edges for centrality computation
   const { data: collabEdges } = await supabase
@@ -405,6 +489,9 @@ export async function analyzeBottleneckRisk(
       riskScore: 0,
       riskLevel: 'low',
       reviewerBreakdown: [],
+      jiraAssigneeHHI,
+      topJiraAssignee,
+      topJiraAssigneeShare,
     };
   }
 
@@ -465,20 +552,27 @@ export async function analyzeBottleneckRisk(
   }
 
   // ── RISK SCORE (BRS 0-100) ────────────────────────────────────────────────
-  // Weighted formula (with centrality):
-  //   25% Gini coefficient (inequality)
-  //   20% HHI (concentration)
-  //   20% Top reviewer share
-  //   15% Inverse reviewer count (few reviewers = higher risk)
+  // Weighted formula (with centrality + cross-domain Jira signal):
+  //   20% Gini coefficient (inequality)
+  //   15% HHI (PR review concentration)
+  //   15% Top reviewer share
+  //   10% Inverse reviewer count (few reviewers = higher risk)
   //   10% Max betweenness centrality (gatekeeper risk)
   //   10% Review latency spike (slow reviews = bottleneck)
+  //   10% Jira assignee HHI (cross-domain: ticket concentration)
+  //   10% Cross-system overlap (same person tops reviews AND Jira tickets)
   let riskScore = 0;
-  riskScore += Math.min(giniCoefficient, 1.0) * 25;                  // Max 25
-  riskScore += Math.min(hhi / 0.5, 1.0) * 20;                       // Max 20 (HHI=0.5 → max)
-  riskScore += reviewShare * 20;                                      // Max 20
-  riskScore += Math.min((1 / reviewerCounts.size) * 15, 15);         // Max 15
+  riskScore += Math.min(giniCoefficient, 1.0) * 20;                  // Max 20
+  riskScore += Math.min(hhi / 0.5, 1.0) * 15;                       // Max 15 (HHI=0.5 → max)
+  riskScore += reviewShare * 15;                                      // Max 15
+  riskScore += Math.min((1 / reviewerCounts.size) * 10, 10);         // Max 10
   riskScore += Math.min(maxBetweennessCentrality * 100, 10);         // Max 10 (centrality 0-1)
   riskScore += Math.min(avgReviewLatencyHours / 48, 1.0) * 10;      // Max 10 (48h+ = max risk)
+  riskScore += Math.min(jiraAssigneeHHI / 0.5, 1.0) * 10;           // Max 10 (Jira concentration)
+  // Cross-system overlap: if the same person is top PR reviewer AND top Jira assignee
+  const crossSystemOverlap = topReviewer !== 'unknown' && topJiraAssignee !== 'none'
+    && topReviewer.toLowerCase() === topJiraAssignee.toLowerCase() ? 1.0 : 0;
+  riskScore += crossSystemOverlap * 10;                               // Max 10
 
   const riskLevel: 'low' | 'medium' | 'high' =
     riskScore > 60 || hhi > 0.25 ? 'high' : riskScore > 30 ? 'medium' : 'low';
@@ -521,6 +615,9 @@ export async function analyzeBottleneckRisk(
     riskScore,
     riskLevel,
     reviewerBreakdown,
+    jiraAssigneeHHI,
+    topJiraAssignee,
+    topJiraAssigneeShare,
   };
 }
 

@@ -165,7 +165,7 @@ export function createPagerDutyConnector(config: PagerDutyConnectorConfig): Nexu
       // Incident triggered signal — enriched with NLP from title
       const triggeredSignal: ConnectorSignal = {
         organization_id: orgId,
-        source_domain: 'engineering',
+        source_domain: 'engineering.pagerduty',
         signal_type: 'incident_triggered',
         signal_value: priorityToValue(incident),
         entity_type: 'incident',
@@ -188,7 +188,7 @@ export function createPagerDutyConnector(config: PagerDutyConnectorConfig): Nexu
 
         signals.push({
           organization_id: orgId,
-          source_domain: 'engineering',
+          source_domain: 'engineering.pagerduty',
           signal_type: 'incident_acknowledged',
           signal_value: 0.3,
           entity_type: 'incident',
@@ -215,7 +215,7 @@ export function createPagerDutyConnector(config: PagerDutyConnectorConfig): Nexu
 
         signals.push({
           organization_id: orgId,
-          source_domain: 'engineering',
+          source_domain: 'engineering.pagerduty',
           signal_type: 'incident_resolved',
           signal_value: 1,
           entity_type: 'incident',
@@ -235,7 +235,7 @@ export function createPagerDutyConnector(config: PagerDutyConnectorConfig): Nexu
       if (incident.assignments.length > 1) {
         signals.push({
           organization_id: orgId,
-          source_domain: 'engineering',
+          source_domain: 'engineering.pagerduty',
           signal_type: 'oncall_escalated',
           signal_value: -0.5,
           entity_type: 'incident',
@@ -358,7 +358,7 @@ export function createPagerDutyConnector(config: PagerDutyConnectorConfig): Nexu
 
         signals.push({
           organization_id: orgId,
-          source_domain: 'engineering',
+          source_domain: 'engineering.pagerduty',
           signal_type: 'incident_triggered',
           signal_value: triggerValue,
           entity_type: 'incident',
@@ -370,7 +370,7 @@ export function createPagerDutyConnector(config: PagerDutyConnectorConfig): Nexu
       if (eventType.includes('acknowledged')) {
         signals.push({
           organization_id: orgId,
-          source_domain: 'engineering',
+          source_domain: 'engineering.pagerduty',
           signal_type: 'incident_acknowledged',
           signal_value: 0.3,
           entity_type: 'incident',
@@ -385,7 +385,7 @@ export function createPagerDutyConnector(config: PagerDutyConnectorConfig): Nexu
       if (eventType.includes('resolved')) {
         signals.push({
           organization_id: orgId,
-          source_domain: 'engineering',
+          source_domain: 'engineering.pagerduty',
           signal_type: 'incident_resolved',
           signal_value: 1,
           entity_type: 'incident',
@@ -400,7 +400,7 @@ export function createPagerDutyConnector(config: PagerDutyConnectorConfig): Nexu
       if (eventType.includes('escalated')) {
         signals.push({
           organization_id: orgId,
-          source_domain: 'engineering',
+          source_domain: 'engineering.pagerduty',
           signal_type: 'oncall_escalated',
           signal_value: -0.5,
           entity_type: 'incident',

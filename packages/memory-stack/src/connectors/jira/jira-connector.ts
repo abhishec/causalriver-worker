@@ -271,7 +271,7 @@ export class JiraConnector extends ConnectorBase {
 
     const eventTime = issue.fields.updated;
     const signal: Signal = {
-      source_domain: 'engineering',
+      source_domain: 'engineering.jira',
       signal_type: 'jira_issue',
       signal_value: 1,
       entity_type: 'issue',
@@ -308,7 +308,7 @@ export class JiraConnector extends ConnectorBase {
 
       const commentTime = comment.created;
       const signal: Signal = {
-        source_domain: 'engineering',
+        source_domain: 'engineering.jira',
         signal_type: 'jira_comment',
         signal_value: 1,
         entity_type: 'comment',

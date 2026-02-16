@@ -89,7 +89,7 @@ export async function ingestPRAsSignals(
   // Signal 1: PR Opened
   signals.push({
     organization_id: organizationId,
-    source_domain: 'engineering',
+    source_domain: 'engineering.github',
     signal_type: 'pr_opened',
     signal_value: 1,
     entity_type: 'pull_request',
@@ -115,7 +115,7 @@ export async function ingestPRAsSignals(
 
     signals.push({
       organization_id: organizationId,
-      source_domain: 'engineering',
+      source_domain: 'engineering.github',
       signal_type: 'pr_merged',
       signal_value: cycleTimeHours, // Cycle time in hours
       entity_type: 'pull_request',
@@ -135,7 +135,7 @@ export async function ingestPRAsSignals(
   if (pr.closed_at && !pr.merged_at) {
     signals.push({
       organization_id: organizationId,
-      source_domain: 'engineering',
+      source_domain: 'engineering.github',
       signal_type: 'pr_closed_unmerged',
       signal_value: 1,
       entity_type: 'pull_request',
@@ -156,7 +156,7 @@ export async function ingestPRAsSignals(
 
     signals.push({
       organization_id: organizationId,
-      source_domain: 'engineering',
+      source_domain: 'engineering.github',
       signal_type: 'pr_reviewed',
       signal_value: reviewLatencyHours,
       entity_type: 'review',
@@ -205,7 +205,7 @@ export async function emitVelocityCollapseSignal(
 ): Promise<void> {
   await supabase.from('cross_domain_signals').insert({
     organization_id: organizationId,
-    source_domain: 'engineering',
+    source_domain: 'engineering.github',
     signal_type: 'velocity_collapsed',
     signal_value: collapseDetails.percentDrop, // % drop
     entity_type: 'team',
@@ -241,7 +241,7 @@ export async function emitBottleneckSignal(
 ): Promise<void> {
   await supabase.from('cross_domain_signals').insert({
     organization_id: organizationId,
-    source_domain: 'engineering',
+    source_domain: 'engineering.github',
     signal_type: 'bottleneck_detected',
     signal_value: bottleneckDetails.riskScore, // 0-100
     entity_type: 'engineer',

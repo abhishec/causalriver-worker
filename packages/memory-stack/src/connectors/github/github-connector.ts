@@ -232,7 +232,7 @@ export class GitHubConnector extends ConnectorBase {
     const eventTime = repo.updated_at;
     const signal: Signal = {
       organization_id: this.organizationId,
-      source_domain: 'engineering',
+      source_domain: 'engineering.github',
       signal_type: 'repository_metadata',
       signal_value: repo.size || 0,
       entity_type: 'repository',
@@ -431,7 +431,7 @@ export class GitHubConnector extends ConnectorBase {
     const now = new Date().toISOString();
     return {
       organization_id: this.organizationId,
-      source_domain: 'engineering',
+      source_domain: 'engineering.github',
       signal_type: 'code_file_ingested',
       signal_value: file.size || content.length,
       entity_type: 'code_file',
@@ -457,7 +457,7 @@ export class GitHubConnector extends ConnectorBase {
     const eventTime = commit.commit?.author?.date || new Date().toISOString();
     return {
       organization_id: this.organizationId,
-      source_domain: 'engineering',
+      source_domain: 'engineering.github',
       signal_type: 'commit_pushed',
       signal_value: 1,
       entity_type: 'commit',
@@ -500,7 +500,7 @@ export class GitHubConnector extends ConnectorBase {
     const eventTime = pr.merged_at || pr.created_at;
     return {
       organization_id: this.organizationId,
-      source_domain: 'engineering',
+      source_domain: 'engineering.github',
       signal_type: signalType,
       signal_value: signalValue,
       entity_type: 'pull_request',
@@ -536,7 +536,7 @@ export class GitHubConnector extends ConnectorBase {
     const eventTime = review.submitted_at;
     return {
       organization_id: this.organizationId,
-      source_domain: 'engineering',
+      source_domain: 'engineering.github',
       signal_type: 'pr_reviewed',
       signal_value: reviewLatencyHours,
       entity_type: 'review',
@@ -568,7 +568,7 @@ export class GitHubConnector extends ConnectorBase {
     const eventTime = issue.state === 'closed' ? issue.closed_at : issue.created_at;
     return {
       organization_id: this.organizationId,
-      source_domain: 'engineering',
+      source_domain: 'engineering.github',
       signal_type: signalType,
       signal_value: 1,
       entity_type: 'issue',

@@ -121,7 +121,7 @@ export async function buildVelocityTimeSeries(
     .from('cross_domain_signals')
     .select('signal_timestamp, signal_value, signal_metadata')
     .eq('organization_id', organizationId)
-    .eq('source_domain', 'engineering')
+    .eq('source_domain', 'engineering.github')
     .eq('signal_type', 'pr_merged')
     .gte('signal_timestamp', startDate.toISOString())
     .order('signal_timestamp');
@@ -133,7 +133,7 @@ export async function buildVelocityTimeSeries(
     .from('cross_domain_signals')
     .select('signal_timestamp, signal_value, signal_metadata')
     .eq('organization_id', organizationId)
-    .eq('source_domain', 'engineering')
+    .eq('source_domain', 'engineering.github')
     .eq('signal_type', 'deployment')
     .gte('signal_timestamp', startDate.toISOString())
     .order('signal_timestamp');
@@ -145,7 +145,7 @@ export async function buildVelocityTimeSeries(
     .from('cross_domain_signals')
     .select('signal_timestamp, signal_value, signal_metadata')
     .eq('organization_id', organizationId)
-    .eq('source_domain', 'engineering')
+    .eq('source_domain', 'engineering.github')
     .eq('signal_type', 'pr_opened')
     .gte('signal_timestamp', startDate.toISOString())
     .order('signal_timestamp');
@@ -409,7 +409,7 @@ export async function predictVelocityCollapse(
     const predictionTime = new Date().toISOString();
     await supabase.from('cross_domain_signals').insert({
       organization_id: organizationId,
-      source_domain: 'engineering',
+      source_domain: 'engineering.github',
       signal_type: 'velocity_collapse_predicted',
       signal_value: predictedDrop,
       entity_type: 'velocity_prediction',

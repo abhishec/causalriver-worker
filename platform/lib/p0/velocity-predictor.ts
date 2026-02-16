@@ -101,6 +101,8 @@ const FEATURE_NAMES = [
   'velocityZScore',
   'reviewerHHI',
   'reviewerGini',
+  'slackAfterHoursRatio',
+  'slackMessageVolume7d',
 ];
 
 function featureVectorToArray(fv: VelocityFeatureVector): number[] {
@@ -120,6 +122,8 @@ function featureVectorToArray(fv: VelocityFeatureVector): number[] {
     fv.velocityZScore,
     fv.reviewerHHI,
     fv.reviewerGini,
+    fv.slackAfterHoursRatio,
+    fv.slackMessageVolume7d,
   ];
 }
 
@@ -335,6 +339,25 @@ async function loadTrainingData(
     });
   }
 
+  // Load Jira signals for cross-domain features (resolved tickets per window)
+  const { data: jiraSignals } = await supabase
+    .from('cross_domain_signals')
+    .select('created_at, signal_value')
+    .eq('organization_id', organizationId)
+    .in('signal_type', ['jira_issue', 'ticket_resolved'])
+    .gte('created_at', since.toISOString())
+    .order('created_at', { ascending: true });
+
+  // Load Slack signals for cross-domain features (message volume + after-hours)
+  const { data: slackTrainingSignals } = await supabase
+    .from('cross_domain_signals')
+    .select('created_at, signal_type, signal_metadata')
+    .eq('organization_id', organizationId)
+    .eq('source_domain', 'communication.slack')
+    .in('signal_type', ['after_hours_activity', 'channel_message_volume', 'slack_message'])
+    .gte('created_at', since.toISOString())
+    .order('created_at', { ascending: true });
+
   // Build training examples with 1-window lookahead
   const examples: TrainingExample[] = [];
 
@@ -348,7 +371,6 @@ async function loadTrainingData(
 
     // Build feature vector from snapshot data
     const meanCycleTime = current.mean_pr_cycle_time_hours || 0;
-    const prevMeanCycleTime = prev1.mean_pr_cycle_time_hours || 0;
 
     // Compute velocity z-score from the last 3 windows
     const velocities = [prev2.prs_merged || 0, prev1.prs_merged || 0, current.prs_merged || 0];
@@ -357,6 +379,41 @@ async function loadTrainingData(
       velocities.reduce((s, v) => s + Math.pow(v - velMean, 2), 0) / velocities.length
     );
     const zScore = velStd > 0 ? ((current.prs_merged || 0) - velMean) / velStd : 0;
+
+    // ── Jira features: count resolved tickets in this snapshot's 7-day window ──
+    const snapshotDate = new Date(current.snapshot_date);
+    const windowStart = new Date(snapshotDate);
+    windowStart.setDate(windowStart.getDate() - 7);
+    const jiraInWindow = (jiraSignals || []).filter((s: any) => {
+      const d = new Date(s.created_at);
+      return d >= windowStart && d < snapshotDate;
+    });
+    const jiraTicketsResolved7d = jiraInWindow.length;
+    const jiraTicketCycleTimeHours = jiraInWindow.length > 0
+      ? jiraInWindow.reduce((sum: number, s: any) => sum + (s.signal_value || 0), 0) / jiraInWindow.length
+      : 0;
+
+    // ── Slack features: message volume + after-hours ratio in this window ──
+    const slackInWindow = (slackTrainingSignals || []).filter((s: any) => {
+      const d = new Date(s.created_at);
+      return d >= windowStart && d < snapshotDate;
+    });
+    const slackMessageVolume7d = slackInWindow.length;
+    let slackAfterHoursCount = 0;
+    for (const msg of slackInWindow) {
+      if (msg.signal_type === 'after_hours_activity') {
+        slackAfterHoursCount++;
+        continue;
+      }
+      const msgDate = new Date(msg.created_at);
+      const hour = msgDate.getUTCHours();
+      const day = msgDate.getUTCDay();
+      if (day === 0 || day === 6 || hour < 9 || hour >= 18) {
+        slackAfterHoursCount++;
+      }
+    }
+    const slackAfterHoursRatio = slackMessageVolume7d > 0
+      ? slackAfterHoursCount / slackMessageVolume7d : 0;
 
     const features: number[] = [
       current.prs_merged || 0,                       // prsMergedLast7d
@@ -369,11 +426,13 @@ async function loadTrainingData(
       bottleneck.hhi,                                 // reviewConcentrationIndex
       current.open_pr_count || 0,                     // openPrCountTrend
       current.prs_per_engineer || 0,                  // prsPerEngineer
-      0,                                              // jiraTicketsResolved7d (not in snapshot)
-      0,                                              // jiraTicketCycleTimeHours
+      jiraTicketsResolved7d,                          // jiraTicketsResolved7d (from real signals)
+      jiraTicketCycleTimeHours,                       // jiraTicketCycleTimeHours (from real signals)
       zScore,                                         // velocityZScore
       bottleneck.hhi,                                 // reviewerHHI
       bottleneck.gini,                                // reviewerGini
+      slackAfterHoursRatio,                           // slackAfterHoursRatio (from real signals)
+      slackMessageVolume7d,                           // slackMessageVolume7d (from real signals)
     ];
 
     examples.push({

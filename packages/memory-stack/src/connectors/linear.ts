@@ -377,7 +377,7 @@ async function fetchLinearCycles(
 function issueToSignal(issue: LinearIssue, organizationId: string): ConnectorSignal {
   const signal: ConnectorSignal = {
     organization_id: organizationId,
-    source_domain: 'engineering',
+    source_domain: 'engineering.linear',
     signal_type: 'linear_issue',
     signal_value: issue.priority, // Priority as numeric value
     signal_timestamp: issue.updatedAt,
@@ -421,7 +421,7 @@ function issueToSignal(issue: LinearIssue, organizationId: string): ConnectorSig
 function projectToSignal(project: LinearProject, organizationId: string): ConnectorSignal {
   return {
     organization_id: organizationId,
-    source_domain: 'engineering',
+    source_domain: 'engineering.linear',
     signal_type: 'linear_project',
     signal_value: project.progress,
     signal_timestamp: project.updatedAt,
@@ -461,7 +461,7 @@ function cycleToSignal(cycle: LinearCycle, organizationId: string): ConnectorSig
 
   return {
     organization_id: organizationId,
-    source_domain: 'engineering',
+    source_domain: 'engineering.linear',
     signal_type: 'linear_cycle',
     signal_value: velocity,
     signal_timestamp: cycle.completedAt || cycle.endsAt,

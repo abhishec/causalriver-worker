@@ -303,7 +303,7 @@ export class SlackConnector extends ConnectorBase {
 
     const eventTime = new Date(parseFloat(message.ts) * 1000).toISOString();
     return {
-      source_domain: 'communication',
+      source_domain: 'communication.slack',
       signal_type: message.thread_ts ? 'slack_thread_message' : 'slack_message',
       signal_value: 1,
       entity_type: message.thread_ts ? 'thread_message' : 'message',

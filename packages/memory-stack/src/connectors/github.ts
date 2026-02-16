@@ -382,7 +382,7 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
         if (files.length > 0) {
           signals.push({
             organization_id: orgId,
-            source_domain: 'engineering',
+            source_domain: 'engineering.github',
             signal_type: 'pr_files_changed',
             signal_value: Math.min(files.length / 20, 1), // Normalized by 20 files
             entity_type: 'pull_request',
@@ -404,7 +404,7 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
       // PR opened
       signals.push({
         organization_id: orgId,
-        source_domain: 'engineering',
+        source_domain: 'engineering.github',
         signal_type: 'pr_opened',
         signal_value: 1,
         entity_type: 'pull_request',
@@ -443,7 +443,7 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
 
           signals.push({
             organization_id: orgId,
-            source_domain: 'engineering',
+            source_domain: 'engineering.github',
             signal_type: 'pr_review_submitted',
             signal_value: reviewValue,
             entity_type: 'pull_request',
@@ -472,7 +472,7 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
 
         signals.push({
           organization_id: orgId,
-          source_domain: 'engineering',
+          source_domain: 'engineering.github',
           signal_type: 'pr_merged',
           signal_value: Math.min(linesChanged / 500, 1), // Normalized by 500 lines
           entity_type: 'pull_request',
@@ -496,7 +496,7 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
       if (pr.state === 'closed' && !pr.merged_at) {
         signals.push({
           organization_id: orgId,
-          source_domain: 'engineering',
+          source_domain: 'engineering.github',
           signal_type: 'pr_abandoned',
           signal_value: -0.3,
           entity_type: 'pull_request',
@@ -525,7 +525,7 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
       // Issue opened
       signals.push({
         organization_id: orgId,
-        source_domain: 'engineering',
+        source_domain: 'engineering.github',
         signal_type: isBug ? 'bug_opened' : 'issue_opened',
         signal_value: isBug ? -0.5 : 0.5,
         entity_type: 'issue',
@@ -548,7 +548,7 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
 
         signals.push({
           organization_id: orgId,
-          source_domain: 'engineering',
+          source_domain: 'engineering.github',
           signal_type: isBug ? 'bug_closed' : 'issue_closed',
           signal_value: 1,
           entity_type: 'issue',
@@ -595,7 +595,7 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
           if (lastFailureTs && (runTs - lastFailureTs) < fourHoursMs) {
             signals.push({
               organization_id: orgId,
-              source_domain: 'engineering',
+              source_domain: 'engineering.github',
               signal_type: 'deploy_rollback',
               signal_value: -1,
               entity_type: 'deployment',
@@ -615,7 +615,7 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
         // Standard deployment signal
         signals.push({
           organization_id: orgId,
-          source_domain: 'engineering',
+          source_domain: 'engineering.github',
           signal_type: isSuccess ? 'deploy_success' : 'deploy_failure',
           signal_value: isSuccess ? 1 : -1,
           entity_type: 'deployment',
@@ -652,7 +652,7 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
 
             signals.push({
               organization_id: orgId,
-              source_domain: 'engineering',
+              source_domain: 'engineering.github',
               signal_type: jobSignalType,
               signal_value: jobSignalValue,
               entity_type: 'ci_job',
@@ -675,7 +675,7 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
         // Overall CI run signal
         signals.push({
           organization_id: orgId,
-          source_domain: 'engineering',
+          source_domain: 'engineering.github',
           signal_type: isFailure ? 'ci_failed' : 'ci_passed',
           signal_value: isFailure ? -1 : 1,
           entity_type: 'ci_run',
@@ -710,7 +710,7 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
     for (const [day, count] of commitsByDay) {
       signals.push({
         organization_id: orgId,
-        source_domain: 'engineering',
+        source_domain: 'engineering.github',
         signal_type: 'commit_volume',
         signal_value: Math.min(count / 20, 1), // Normalized by 20 commits/day
         entity_type: 'metric',
@@ -870,7 +870,7 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
         if (action === 'opened') {
           signals.push({
             organization_id: orgId,
-            source_domain: 'engineering',
+            source_domain: 'engineering.github',
             signal_type: 'pr_opened',
             signal_value: 1,
             entity_type: 'pull_request',
@@ -887,7 +887,7 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
         if (action === 'closed' && pr.merged) {
           signals.push({
             organization_id: orgId,
-            source_domain: 'engineering',
+            source_domain: 'engineering.github',
             signal_type: 'pr_merged',
             signal_value: 1,
             entity_type: 'pull_request',
@@ -911,7 +911,7 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
 
         signals.push({
           organization_id: orgId,
-          source_domain: 'engineering',
+          source_domain: 'engineering.github',
           signal_type: 'pr_review_submitted',
           signal_value: reviewValue,
           entity_type: 'pull_request',
@@ -939,7 +939,7 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
         if (action === 'opened') {
           signals.push({
             organization_id: orgId,
-            source_domain: 'engineering',
+            source_domain: 'engineering.github',
             signal_type: isBug ? 'bug_opened' : 'issue_opened',
             signal_value: isBug ? -0.5 : 0.5,
             entity_type: 'issue',
@@ -951,7 +951,7 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
         if (action === 'closed') {
           signals.push({
             organization_id: orgId,
-            source_domain: 'engineering',
+            source_domain: 'engineering.github',
             signal_type: isBug ? 'bug_closed' : 'issue_closed',
             signal_value: 1,
             entity_type: 'issue',
@@ -971,7 +971,7 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
         if (suite.conclusion) {
           signals.push({
             organization_id: orgId,
-            source_domain: 'engineering',
+            source_domain: 'engineering.github',
             signal_type: suite.conclusion === 'success' ? 'ci_passed' : 'ci_failed',
             signal_value: suite.conclusion === 'success' ? 1 : -1,
             entity_type: 'ci_run',
@@ -988,7 +988,7 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
           const isJobSuccess = job.conclusion === 'success';
           signals.push({
             organization_id: orgId,
-            source_domain: 'engineering',
+            source_domain: 'engineering.github',
             signal_type: isJobSuccess ? 'ci_job_passed' : 'ci_job_failed',
             signal_value: isJobSuccess ? 1 : -1,
             entity_type: 'ci_job',
@@ -1009,7 +1009,7 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
         const isSuccess = status.state === 'success';
         signals.push({
           organization_id: orgId,
-          source_domain: 'engineering',
+          source_domain: 'engineering.github',
           signal_type: isSuccess ? 'deploy_success' : 'deploy_failure',
           signal_value: isSuccess ? 1 : -1,
           entity_type: 'deployment',

@@ -237,7 +237,7 @@ export function createJiraConnector(config: JiraConnectorConfig): NexusConnector
       // Issue created signal — enriched with NLP from summary
       const createdSignal: ConnectorSignal = {
         organization_id: orgId,
-        source_domain: 'engineering',
+        source_domain: 'engineering.jira',
         signal_type: 'issue_created',
         signal_value: isBug ? -0.5 : 0.5,
         entity_type: 'jira_issue',
@@ -259,7 +259,7 @@ export function createJiraConnector(config: JiraConnectorConfig): NexusConnector
 
         signals.push({
           organization_id: orgId,
-          source_domain: 'engineering',
+          source_domain: 'engineering.jira',
           signal_type: 'issue_resolved',
           signal_value: 1,
           entity_type: 'jira_issue',
@@ -278,7 +278,7 @@ export function createJiraConnector(config: JiraConnectorConfig): NexusConnector
       if (isBlocked) {
         const blockedSignal: ConnectorSignal = {
           organization_id: orgId,
-          source_domain: 'engineering',
+          source_domain: 'engineering.jira',
           signal_type: 'issue_blocked',
           signal_value: -0.7,
           entity_type: 'jira_issue',
@@ -308,7 +308,7 @@ export function createJiraConnector(config: JiraConnectorConfig): NexusConnector
     // Sprint completed signal — enriched with NLP from sprint goal
     const sprintSignal: ConnectorSignal = {
       organization_id: orgId,
-      source_domain: 'engineering',
+      source_domain: 'engineering.jira',
       signal_type: 'sprint_completed',
       signal_value: Math.min(velocity, 1),
       entity_type: 'sprint',
@@ -329,7 +329,7 @@ export function createJiraConnector(config: JiraConnectorConfig): NexusConnector
     if (puntedCount > 0) {
       signals.push({
         organization_id: orgId,
-        source_domain: 'engineering',
+        source_domain: 'engineering.jira',
         signal_type: 'sprint_scope_changed',
         signal_value: -0.3,
         entity_type: 'sprint',
@@ -493,7 +493,7 @@ export function createJiraConnector(config: JiraConnectorConfig): NexusConnector
       if (webhookEvent.includes('created')) {
         signals.push({
           organization_id: orgId,
-          source_domain: 'engineering',
+          source_domain: 'engineering.jira',
           signal_type: 'issue_created',
           signal_value: isBug ? -0.5 : 0.5,
           entity_type: 'jira_issue',
@@ -510,7 +510,7 @@ export function createJiraConnector(config: JiraConnectorConfig): NexusConnector
         if (statusChange && statusChange.toString?.toLowerCase().includes('done')) {
           signals.push({
             organization_id: orgId,
-            source_domain: 'engineering',
+            source_domain: 'engineering.jira',
             signal_type: 'issue_resolved',
             signal_value: 1,
             entity_type: 'jira_issue',

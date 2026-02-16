@@ -75,84 +75,84 @@ const SIGNAL_MAPPINGS: Record<string, {
 }> = {
   // Rule lifecycle
   rule_deployed: {
-    source_domain: 'engineering',
+    source_domain: 'engineering.brain-os',
     signal_type: 'rule_deployed',
     entity_type: 'brain_rule',
   },
   rule_updated: {
-    source_domain: 'engineering',
+    source_domain: 'engineering.brain-os',
     signal_type: 'rule_updated',
     entity_type: 'brain_rule',
   },
   rule_deactivated: {
-    source_domain: 'engineering',
+    source_domain: 'engineering.brain-os',
     signal_type: 'rule_deactivated',
     entity_type: 'brain_rule',
   },
 
   // Discovery lifecycle
   discovery_created: {
-    source_domain: 'engineering',
+    source_domain: 'engineering.brain-os',
     signal_type: 'discovery_created',
     entity_type: 'discovery',
   },
   discovery_converted: {
-    source_domain: 'engineering',
+    source_domain: 'engineering.brain-os',
     signal_type: 'discovery_converted',
     entity_type: 'discovery',
   },
 
   // Pipeline operations
   pipeline_started: {
-    source_domain: 'engineering',
+    source_domain: 'engineering.brain-os',
     signal_type: 'pipeline_started',
     entity_type: 'pipeline',
   },
   pipeline_completed: {
-    source_domain: 'engineering',
+    source_domain: 'engineering.brain-os',
     signal_type: 'pipeline_completed',
     entity_type: 'pipeline',
   },
   pipeline_failed: {
-    source_domain: 'engineering',
+    source_domain: 'engineering.brain-os',
     signal_type: 'pipeline_failed',
     entity_type: 'pipeline',
   },
 
   // Agent operations
   agent_completed: {
-    source_domain: 'engineering',
+    source_domain: 'engineering.brain-os',
     signal_type: 'agent_completed',
     entity_type: 'agent',
   },
   agent_failed: {
-    source_domain: 'engineering',
+    source_domain: 'engineering.brain-os',
     signal_type: 'agent_failed',
     entity_type: 'agent',
   },
 
   // Code generation
   hook_generated: {
-    source_domain: 'engineering',
+    source_domain: 'engineering.brain-os',
     signal_type: 'hook_generated',
     entity_type: 'hook',
   },
   hook_pr_merged: {
-    source_domain: 'engineering',
+    source_domain: 'engineering.brain-os',
     signal_type: 'hook_pr_merged',
     entity_type: 'hook',
   },
 
   // Copilot usage
   copilot_query: {
-    source_domain: 'engineering',
+    source_domain: 'engineering.brain-os',
     signal_type: 'copilot_query',
     entity_type: 'copilot',
   },
 
   // Evaluation
   evaluation_executed: {
-    source_domain: 'engineering',
+    source_domain: 'engineering.brain-os',
     signal_type: 'evaluation_executed',
     entity_type: 'evaluation',
   },
