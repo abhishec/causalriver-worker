@@ -79,6 +79,10 @@ const SESSION_RATE_LIMITS: Record<string, number> = {
   "/api/copilot/chat": 30,           // 30 req/min — chat is expensive
   "/api/brain/query": 60,            // 60 req/min — brain queries
   "/api/brain/execute": 20,          // 20 req/min — executions
+  "/api/brain/cycle": 10,            // 10 req/min — brain cycles are heavy
+  "/api/brain/evolution": 20,        // 20 req/min — evolution checks
+  "/api/brain/health": 60,           // 60 req/min — health checks are lightweight
+  "/api/jobs/trigger": 5,            // 5 req/min — job triggers are very heavy
   "/api/connectors": 30,             // 30 req/min — connector ops
   "/api/org-members": 20,            // 20 req/min — member management
   "/api/finance-jarvis": 30,         // 30 req/min — finance queries

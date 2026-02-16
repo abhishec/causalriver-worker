@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { cn } from "@/lib/utils";
+import { useShikiHighlight } from "@/lib/shiki";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -98,8 +99,11 @@ function highlightCode(code: string, lang: string): React.ReactNode[] {
 
 // ─── Copy Button ────────────────────────────────────────────────────────────
 
-function CopyButton({ text, label = "Copy", className }: { text: string; label?: string; className?: string }) {
+function CopyButton({ text, label = "Copy", className, iconOnly = false }: { text: string; label?: string; className?: string; iconOnly?: boolean }) {
   const [copied, setCopied] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  useEffect(() => () => clearTimeout(timerRef.current), []);
 
   const handleCopy = async () => {
     try {
@@ -113,7 +117,8 @@ function CopyButton({ text, label = "Copy", className }: { text: string; label?:
       document.body.removeChild(ta);
     }
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -135,10 +140,19 @@ function CopyButton({ text, label = "Copy", className }: { text: string; label?:
           <path strokeLinecap="round" strokeLinejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9.75a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" />
         </svg>
       )}
-      <span>{copied ? "Copied" : label}</span>
+      {!iconOnly && <span>{copied ? "Copied" : label}</span>}
     </button>
   );
 }
+
+// ─── File extension mapping (language name → file ext) ──────────────────────
+
+const LANG_EXT: Record<string, string> = {
+  typescript: "ts", javascript: "js", python: "py", ruby: "rb",
+  rust: "rs", shell: "sh", bash: "sh", yaml: "yml", csharp: "cs",
+  "c++": "cpp", "c#": "cs", markdown: "md", dockerfile: "Dockerfile",
+  graphql: "graphql", plaintext: "txt", text: "txt",
+};
 
 // ─── Type Icons ─────────────────────────────────────────────────────────────
 
@@ -175,10 +189,41 @@ function ArtifactTypeIcon({ type }: { type: Artifact["type"] }) {
 
 function timeAgo(timestamp: number): string {
   const diff = Date.now() - timestamp;
+  // Bug fix: guard against negative diff (future timestamps or clock skew)
+  if (diff < 0) return "just now";
   if (diff < 60000) return "just now";
   if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
   if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
   return `${Math.floor(diff / 86400000)}d ago`;
+}
+
+// ─── Shiki-powered code viewer ──────────────────────────────────────────────
+
+function ShikiCodeViewer({ code, language, wordWrap }: { code: string; language: string; wordWrap: boolean }) {
+  const shikiHtml = useShikiHighlight(code, language);
+
+  if (shikiHtml) {
+    return (
+      <div
+        className={cn(
+          "shiki-container px-4 py-3 text-[13px] leading-relaxed font-mono bg-[#0d1117] min-h-full",
+          "[&_pre]:!bg-transparent [&_pre]:!p-0 [&_pre]:!m-0 [&_code]:!bg-transparent",
+          "[&_.line]:flex [&_.line::before]:content-[attr(data-line)] [&_.line::before]:inline-block [&_.line::before]:w-10 [&_.line::before]:text-right [&_.line::before]:pr-4 [&_.line::before]:text-[var(--color-muted)]/30 [&_.line::before]:select-none [&_.line::before]:text-xs [&_.line::before]:tabular-nums [&_.line::before]:shrink-0",
+          wordWrap ? "[&_pre]:whitespace-pre-wrap [&_pre]:break-words" : ""
+        )}
+        dangerouslySetInnerHTML={{ __html: shikiHtml }}
+      />
+    );
+  }
+
+  return (
+    <pre className={cn(
+      "px-4 py-3 text-[13px] leading-relaxed font-mono text-muted-foreground bg-[#0d1117] min-h-full",
+      wordWrap ? "whitespace-pre-wrap break-words" : "whitespace-pre"
+    )}>
+      {highlightCode(code, language)}
+    </pre>
+  );
 }
 
 // ─── Artifacts Panel Component ──────────────────────────────────────────────
@@ -192,7 +237,6 @@ export function ArtifactsPanel({
 }: ArtifactsPanelProps) {
   const [view, setView] = useState<"viewer" | "history">("viewer");
   const [wordWrap, setWordWrap] = useState(false);
-  const codeRef = useRef<HTMLDivElement>(null);
 
   const activeArtifact = artifacts.find((a) => a.id === activeArtifactId) || artifacts[artifacts.length - 1] || null;
 
@@ -210,19 +254,28 @@ export function ArtifactsPanel({
 
   const handleDownload = useCallback(() => {
     if (!activeArtifact) return;
-    const ext = activeArtifact.language || "txt";
+    // Bug fix: map full language names to file extensions
+    const rawLang = (activeArtifact.language || "txt").toLowerCase();
+    const ext = LANG_EXT[rawLang] || rawLang;
+    // Bug fix: sanitize filename — strip non-alphanumeric chars, collapse dashes
+    const safeName = activeArtifact.title
+      .replace(/[^a-zA-Z0-9\s-_]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-")
+      .toLowerCase()
+      .slice(0, 60) || "artifact";
     const blob = new Blob([activeArtifact.content], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${activeArtifact.title.replace(/\s+/g, "-").toLowerCase()}.${ext}`;
+    a.download = `${safeName}.${ext}`;
     a.click();
     URL.revokeObjectURL(url);
   }, [activeArtifact]);
 
   if (artifacts.length === 0) {
     return (
-      <div className="flex flex-col h-full">
+      <div className="flex flex-col h-full bg-card rounded-xl border border-border-subtle overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-border-subtle">
           <div className="flex items-center gap-2">
@@ -343,7 +396,7 @@ export function ArtifactsPanel({
                 </svg>
               </button>
               {/* Copy */}
-              <CopyButton text={activeArtifact.content} label="Copy" className="p-1.5 rounded-md hover:bg-surface-hover" />
+              <CopyButton text={activeArtifact.content} label="Copy" className="p-1.5 rounded-md hover:bg-surface-hover" iconOnly />
               {/* Download */}
               <button
                 onClick={handleDownload}
@@ -358,14 +411,13 @@ export function ArtifactsPanel({
           </div>
 
           {/* Code / Content viewer */}
-          <div ref={codeRef} className="flex-1 overflow-auto">
+          <div className="flex-1 overflow-auto">
             {activeArtifact.type === "code" ? (
-              <pre className={cn(
-                "px-4 py-3 text-[13px] leading-relaxed font-mono text-muted-foreground bg-[#0a0a12] min-h-full",
-                wordWrap ? "whitespace-pre-wrap break-words" : "whitespace-pre"
-              )}>
-                {highlightCode(activeArtifact.content, activeArtifact.language || "")}
-              </pre>
+              <ShikiCodeViewer
+                code={activeArtifact.content}
+                language={activeArtifact.language || ""}
+                wordWrap={wordWrap}
+              />
             ) : (
               <div className="px-4 py-3 text-sm text-muted-foreground leading-relaxed">
                 {activeArtifact.content.split("\n").map((line, i) => {

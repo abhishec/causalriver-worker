@@ -5,6 +5,7 @@ import {
   useEffect,
   useRef,
   useCallback,
+  useMemo,
   FormEvent,
 } from "react";
 import { createPortal } from "react-dom";
@@ -12,6 +13,108 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useOrg } from "@/lib/org-context";
 import { consumeSSEStream } from "@/components/copilot/CopilotChat";
+
+/* ── Lightweight inline markdown for overlay responses ─────────────────────── */
+function renderOverlayMarkdown(text: string): React.ReactNode[] {
+  const lines = text.split("\n");
+  const elements: React.ReactNode[] = [];
+  let codeBlock: string[] | null = null;
+  let codeLang = "";
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+
+    // Fenced code blocks
+    if (line.startsWith("```")) {
+      if (codeBlock === null) {
+        codeBlock = [];
+        codeLang = line.slice(3).trim();
+      } else {
+        elements.push(
+          <pre key={`code-${i}`} className="my-2 rounded-lg bg-[#0d1117] border border-white/5 p-3 overflow-x-auto">
+            <code className="text-xs font-mono text-gray-300 leading-relaxed">{codeBlock.join("\n")}</code>
+          </pre>
+        );
+        codeBlock = null;
+        codeLang = "";
+      }
+      continue;
+    }
+    if (codeBlock !== null) { codeBlock.push(line); continue; }
+
+    // Headers
+    if (line.startsWith("### ")) {
+      elements.push(<h4 key={i} className="text-xs font-semibold mt-3 mb-1">{inlineFormat(line.slice(4))}</h4>);
+    } else if (line.startsWith("## ")) {
+      elements.push(<h3 key={i} className="text-sm font-semibold mt-3 mb-1">{inlineFormat(line.slice(3))}</h3>);
+    } else if (line.startsWith("# ")) {
+      elements.push(<h2 key={i} className="text-sm font-bold mt-3 mb-1">{inlineFormat(line.slice(2))}</h2>);
+    }
+    // List items
+    else if (/^[-*]\s/.test(line)) {
+      elements.push(
+        <div key={i} className="flex items-start gap-1.5 text-sm leading-relaxed">
+          <span className="text-muted mt-0.5 shrink-0">•</span>
+          <span>{inlineFormat(line.replace(/^[-*]\s/, ""))}</span>
+        </div>
+      );
+    }
+    // Numbered items
+    else if (/^\d+[.)]\s/.test(line)) {
+      const match = line.match(/^(\d+)[.)]\s(.*)/);
+      if (match) {
+        elements.push(
+          <div key={i} className="flex items-start gap-1.5 text-sm leading-relaxed">
+            <span className="text-muted mt-0.5 shrink-0 text-xs tabular-nums font-mono">{match[1]}.</span>
+            <span>{inlineFormat(match[2])}</span>
+          </div>
+        );
+      }
+    }
+    // Empty line
+    else if (line.trim() === "") {
+      elements.push(<div key={i} className="h-2" />);
+    }
+    // Normal paragraph
+    else {
+      elements.push(<p key={i} className="text-sm leading-relaxed">{inlineFormat(line)}</p>);
+    }
+  }
+
+  // Unclosed code block
+  if (codeBlock !== null) {
+    elements.push(
+      <pre key="code-unclosed" className="my-2 rounded-lg bg-[#0d1117] border border-white/5 p-3 overflow-x-auto">
+        <code className="text-xs font-mono text-gray-300 leading-relaxed">{codeBlock.join("\n")}</code>
+      </pre>
+    );
+  }
+
+  return elements;
+}
+
+/** Inline formatting: bold, italic, code, links */
+function inlineFormat(text: string): React.ReactNode {
+  // Split by inline code first to avoid parsing inside backticks
+  const parts = text.split(/(`[^`]+`)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith("`") && part.endsWith("`")) {
+      return <code key={i} className="px-1 py-0.5 rounded bg-surface text-xs font-mono text-accent">{part.slice(1, -1)}</code>;
+    }
+    // Bold
+    let processed: string | React.ReactNode = part;
+    if (typeof processed === "string" && /\*\*[^*]+\*\*/.test(processed)) {
+      const segments = processed.split(/(\*\*[^*]+\*\*)/g);
+      return segments.map((seg, j) => {
+        if (seg.startsWith("**") && seg.endsWith("**")) {
+          return <strong key={`${i}-${j}`} className="font-semibold">{seg.slice(2, -2)}</strong>;
+        }
+        return seg;
+      });
+    }
+    return part;
+  });
+}
 
 const QUICK_PROMPTS = [
   "Why is churn increasing?",
@@ -64,12 +167,20 @@ export function CopilotOverlay() {
     }
   }, [isOpen]);
 
+  // Closing animation state
+  const [isClosing, setIsClosing] = useState(false);
+
   const handleClose = useCallback(() => {
     abortRef.current?.abort();
-    setIsOpen(false);
-    setInput("");
-    setResponse("");
-    setIsLoading(false);
+    setIsClosing(true);
+    // Let the exit animation play (200ms) before unmounting
+    setTimeout(() => {
+      setIsOpen(false);
+      setIsClosing(false);
+      setInput("");
+      setResponse("");
+      setIsLoading(false);
+    }, 180);
   }, []);
 
   // Click outside to close
@@ -153,13 +264,29 @@ export function CopilotOverlay() {
 
   if (!mounted) return null;
 
+  // Memoize rendered markdown so it doesn't re-parse on every render tick
+  const renderedResponse = useMemo(() => {
+    if (!response) return null;
+    return renderOverlayMarkdown(response);
+  }, [response]);
+
   const overlayContent = isOpen ? (
     <div
       ref={overlayRef}
       onClick={handleBackdropClick}
-      className="fixed inset-0 z-[9999] flex items-start justify-center pt-[15vh] bg-background/70 backdrop-blur-sm"
+      className={cn(
+        "fixed inset-0 z-[9999] flex items-start justify-center pt-[15vh]",
+        "bg-background/70 backdrop-blur-sm",
+        isClosing ? "animate-overlay-backdrop-out" : "animate-overlay-backdrop"
+      )}
     >
-      <div className="w-full max-w-xl rounded-2xl bg-card border border-border-subtle shadow-2xl shadow-black/40 overflow-hidden">
+      <div
+        className={cn(
+          "w-full max-w-xl rounded-2xl bg-card border border-border-subtle overflow-hidden",
+          "shadow-[var(--shadow-elevated)]",
+          isClosing ? "animate-overlay-panel-out" : "animate-overlay-panel"
+        )}
+      >
         {/* Search input */}
         <form onSubmit={handleSubmit} className="relative">
           <div className="flex items-center border-b border-border-subtle">
@@ -190,12 +317,12 @@ export function CopilotOverlay() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="px-3 py-1.5 rounded-lg bg-accent text-accent-foreground text-xs font-medium hover:bg-accent-dark transition-colors disabled:opacity-50"
+                  className="px-3 py-1.5 rounded-xl bg-accent text-accent-foreground text-xs font-medium hover:bg-accent-dark transition-colors disabled:opacity-50"
                 >
                   {isLoading ? "..." : "Ask"}
                 </button>
               )}
-              <kbd className="px-1.5 py-0.5 rounded bg-surface text-[10px] text-muted font-mono border border-border">
+              <kbd className="px-1.5 py-0.5 rounded-md bg-surface text-[10px] text-muted font-mono border border-border">
                 esc
               </kbd>
             </div>
@@ -204,9 +331,9 @@ export function CopilotOverlay() {
 
         {/* Response area */}
         {response ? (
-          <div className="max-h-64 overflow-y-auto p-4">
+          <div className="max-h-72 overflow-y-auto p-4">
             <div className="flex items-start gap-3">
-              <div className="w-6 h-6 rounded-md bg-accent/15 flex items-center justify-center shrink-0 mt-0.5">
+              <div className="w-6 h-6 rounded-xl bg-accent/15 flex items-center justify-center shrink-0 mt-0.5">
                 <svg
                   className="w-3.5 h-3.5 text-accent"
                   fill="none"
@@ -221,13 +348,13 @@ export function CopilotOverlay() {
                   />
                 </svg>
               </div>
-              <div className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                {response}
+              <div className="flex-1 min-w-0 text-muted-foreground space-y-0.5">
+                {renderedResponse}
                 {isLoading && (
                   <span className="inline-flex items-center gap-1 ml-1">
-                    <span className="w-1 h-1 rounded-full bg-accent/60 animate-bounce [animation-delay:0ms]" />
-                    <span className="w-1 h-1 rounded-full bg-accent/60 animate-bounce [animation-delay:150ms]" />
-                    <span className="w-1 h-1 rounded-full bg-accent/60 animate-bounce [animation-delay:300ms]" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-accent/60 animate-pulse" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-accent/60 animate-pulse [animation-delay:150ms]" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-accent/60 animate-pulse [animation-delay:300ms]" />
                   </span>
                 )}
               </div>
@@ -241,7 +368,7 @@ export function CopilotOverlay() {
                 <button
                   key={prompt}
                   onClick={() => handlePromptClick(prompt)}
-                  className="text-left px-3 py-2 rounded-lg bg-surface/50 border border-border-subtle hover:border-accent/20 hover:bg-surface-hover transition-all text-xs text-muted-foreground hover:text-foreground"
+                  className="text-left px-3 py-2.5 rounded-xl bg-surface/50 border border-border-subtle hover:border-accent/20 hover:bg-surface-hover transition-all text-xs text-muted-foreground hover:text-foreground shadow-[var(--shadow-xs)]"
                 >
                   {prompt}
                 </button>
@@ -252,9 +379,9 @@ export function CopilotOverlay() {
           /* Loading state */
           <div className="flex items-center justify-center py-8">
             <span className="inline-flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-accent/60 animate-bounce [animation-delay:0ms]" />
-              <span className="w-1.5 h-1.5 rounded-full bg-accent/60 animate-bounce [animation-delay:150ms]" />
-              <span className="w-1.5 h-1.5 rounded-full bg-accent/60 animate-bounce [animation-delay:300ms]" />
+              <span className="w-2 h-2 rounded-full bg-accent/60 animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-accent/60 animate-pulse [animation-delay:150ms]" />
+              <span className="w-2 h-2 rounded-full bg-accent/60 animate-pulse [animation-delay:300ms]" />
             </span>
           </div>
         )}

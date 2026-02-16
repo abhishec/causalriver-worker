@@ -11,6 +11,7 @@ import { Badge, DomainTag } from "@/components/ui/Badge";
 import { ConfidenceMeter } from "@/components/ui/ConfidenceMeter";
 import { StatusDot } from "@/components/ui/StatusDot";
 import { ProgressRing } from "@/components/ui/ProgressRing";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 /* -------------------------------------------------------------------------- */
 /*  Types                                                                      */
@@ -320,10 +321,17 @@ export function BrainClient({ causalEdges, entities, snapshot, discoveryTimeline
             {activeTab === "list" && (
               <div className="space-y-2">
                 {filteredEdges.length === 0 ? (
-                  <div className="rounded-xl bg-card border border-border-subtle p-12 text-center">
-                    <p className="text-sm text-muted">No edges match the current filters</p>
-                    <p className="text-xs text-muted/60 mt-1">Try adjusting the domain or confidence threshold</p>
-                  </div>
+                  <EmptyState
+                    variant="card"
+                    icon={
+                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 01-.659 1.591l-5.432 5.432a2.25 2.25 0 00-.659 1.591v2.927a2.25 2.25 0 01-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 00-.659-1.591L3.659 7.409A2.25 2.25 0 013 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0112 3z" />
+                      </svg>
+                    }
+                    title="No edges match your filters"
+                    description="Try adjusting the domain filter or lowering the confidence threshold to see more causal relationships."
+                    action={{ label: "Reset Filters", onClick: () => { setDomainFilter("all"); setConfidenceMin(0); setEntitySearch(""); } }}
+                  />
                 ) : (
                   filteredEdges.map((edge) => (
                     <button
@@ -399,10 +407,16 @@ export function BrainClient({ causalEdges, entities, snapshot, discoveryTimeline
       {activeTab === "discoveries" && (
         <div className="space-y-1">
           {discoveryTimeline.length === 0 ? (
-            <div className="rounded-xl bg-card border border-border-subtle p-12 text-center">
-              <p className="text-sm text-muted">No discoveries yet</p>
-              <p className="text-xs text-muted/60 mt-1">The brain will surface causal relationships as it processes signals</p>
-            </div>
+            <EmptyState
+              variant="card"
+              icon={
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+              }
+              title="No discoveries yet"
+              description="The brain will surface causal relationships as it ingests signals and runs statistical analysis across your connected data sources."
+            />
           ) : (
             discoveryTimeline.map((disc, idx) => (
               <div key={disc.id} className="group relative pl-8 pb-4 last:pb-0">

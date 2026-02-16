@@ -65,6 +65,18 @@
   /* ── Fonts ────────────────────────────────────────────────────────────────── */
   --font-sans: "Geist", system-ui, -apple-system, sans-serif;
   --font-mono: "Geist Mono", ui-monospace, monospace;
+
+  /* ── Shadows (Apple-grade layered depth system) ─────────────────────────── */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.25), 0 1px 2px rgba(0, 0, 0, 0.15);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.2);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.35), 0 8px 10px -6px rgba(0, 0, 0, 0.25);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(255, 255, 255, 0.03);
+  --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(124, 108, 240, 0.08);
+  --shadow-elevated: 0 8px 24px rgba(0, 0, 0, 0.35), 0 4px 8px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  --shadow-input: inset 0 1px 2px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.03);
+  --shadow-input-focus: inset 0 1px 2px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(124, 108, 240, 0.3), 0 0 0 3px rgba(124, 108, 240, 0.1);
 }
 
 html {
@@ -223,6 +235,96 @@ body {
 .stagger-fade-in > *:nth-child(6) { animation-delay: 250ms; }
 .stagger-fade-in > *:nth-child(7) { animation-delay: 300ms; }
 .stagger-fade-in > *:nth-child(8) { animation-delay: 350ms; }
+
+/* ── Chat message entrance ────────────────────────────────────────────── */
+@keyframes message-in {
+  0% { opacity: 0; transform: translateY(6px) scale(0.98); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.animate-message-in {
+  animation: message-in 0.25s ease-out forwards;
+}
+
+/* ── Overlay entrance / exit ──────────────────────────────────────────── */
+@keyframes overlay-backdrop-in {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+@keyframes overlay-panel-in {
+  0% { opacity: 0; transform: translateY(-8px) scale(0.97); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.animate-overlay-backdrop {
+  animation: overlay-backdrop-in 0.2s ease-out forwards;
+}
+.animate-overlay-panel {
+  animation: overlay-panel-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Exit animations (reverse) */
+@keyframes overlay-backdrop-out {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+@keyframes overlay-panel-out {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-8px) scale(0.97); }
+}
+.animate-overlay-backdrop-out {
+  animation: overlay-backdrop-out 0.18s ease-in forwards;
+}
+.animate-overlay-panel-out {
+  animation: overlay-panel-out 0.18s ease-in forwards;
+}
+
+/* ── Streaming cursor (blinking caret) ────────────────────────────────── */
+@keyframes blink-cursor {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.streaming-cursor::after {
+  content: "▍";
+  display: inline;
+  color: var(--color-accent);
+  animation: blink-cursor 1s step-end infinite;
+  margin-left: 1px;
+}
+
+/* ── Follow-up chip stagger ───────────────────────────────────────────── */
+.stagger-chip-in > * {
+  opacity: 0;
+  animation: fade-in-up 0.2s ease-out forwards;
+}
+.stagger-chip-in > *:nth-child(1) { animation-delay: 0ms; }
+.stagger-chip-in > *:nth-child(2) { animation-delay: 60ms; }
+.stagger-chip-in > *:nth-child(3) { animation-delay: 120ms; }
+
+/* ── Dropdown / popover entrance ──────────────────────────────────────── */
+@keyframes dropdown-in {
+  0% { opacity: 0; transform: translateY(-4px) scale(0.97); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.animate-dropdown-in {
+  animation: dropdown-in 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ── Global focus ring ────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid rgba(124, 108, 240, 0.5);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
+  outline: 2px solid rgba(124, 108, 240, 0.5);
+  outline-offset: 2px;
+}
+
+/* ── Active press state (global) ──────────────────────────────────────── */
+button:active:not(:disabled),
+a:active:not(:disabled) {
+  transform: scale(0.97);
+  transition: transform 0.1s ease;
+}
 
 /* ── Connector flow animation ───────────────────────────────────────────── */
 @keyframes data-flow {

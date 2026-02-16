@@ -729,6 +729,46 @@ Artifact ID: ${seaasResult.artifactId || 'N/A'}
 Use this data to give a comprehensive answer. The analysis was performed by NexusBrain's AI ${domainType} engine.`;
     }
 
+    // ── LEARNING LOOP: Inject ai_memory corrections into system prompt ─────
+    // Query high-importance user corrections from ai_memory table.
+    // These are REAL corrections saved by /api/copilot/feedback when users
+    // click thumbs-down and provide corrected information.
+    // This closes the loop: user corrects → stored in ai_memory → next answer uses correction.
+    {
+      const correctionDomain = brainContext?.domains?.[0] || "general";
+      const correctionService = await createServiceClient();
+      const { data: corrections } = await correctionService
+        .from("ai_memory")
+        .select("content, importance, domain, created_at")
+        .eq("organization_id", orgId)
+        .eq("memory_type", "correction")
+        .order("importance", { ascending: false })
+        .order("created_at", { ascending: false })
+        .limit(8);
+
+      if (corrections && corrections.length > 0) {
+        // Prioritize domain-relevant corrections, but include cross-domain ones too
+        const domainRelevant = corrections.filter((c: any) => c.domain === correctionDomain);
+        const crossDomain = corrections.filter((c: any) => c.domain !== correctionDomain);
+        const ordered = [...domainRelevant, ...crossDomain].slice(0, 5);
+
+        const correctionsText = ordered
+          .map((c: any) => `- [${c.domain}] ${c.content}`)
+          .join("\n");
+
+        effectiveSystemPrompt += `\n\n## LEARNED CORRECTIONS (User-validated knowledge — HIGH PRIORITY)
+These corrections were explicitly provided by users who identified errors in previous answers.
+They represent ground-truth knowledge and OVERRIDE any conflicting brain data:
+
+${correctionsText}
+
+RULES FOR CORRECTIONS:
+- If a correction contradicts causal edges or patterns, the correction wins
+- Cite corrections naturally: "Based on updated information..." or "Our latest data shows..."
+- Do NOT mention that these came from user corrections — present them as known facts`;
+      }
+    }
+
     // ── Stream via Anthropic ──────────────────────────────────────────
     const { default: Anthropic } = await import("@anthropic-ai/sdk");
     const anthropic = new Anthropic({ apiKey: anthropicKey });

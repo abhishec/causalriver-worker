@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { CopilotChat } from "@/components/copilot/CopilotChat";
-import type { CopilotArtifact } from "@/components/copilot/CopilotChat";
+import type { CopilotArtifact, BrainMeta } from "@/components/copilot/CopilotChat";
 import { ArtifactsPanel } from "@/components/copilot/ArtifactsPanel";
 import type { Artifact } from "@/components/copilot/ArtifactsPanel";
 import { BrainContextPanel } from "@/components/copilot/BrainContextPanel";
+import { AgentRunner } from "@/components/copilot/AgentRunner";
 import { useOrg } from "@/lib/org-context";
 import Link from "next/link";
 
@@ -29,11 +31,24 @@ const CATEGORY_COLORS: Record<string, string> = {
 };
 
 /* ── Right panel mode ────────────────────────────────────────────────────── */
-type RightPanel = "artifacts" | "brain-context" | "none";
+type RightPanel = "artifacts" | "brain-context" | "agents" | "none";
 
 export default function CopilotPage() {
   const { currentOrg } = useOrg();
+  const searchParams = useSearchParams();
   const [showCapabilities, setShowCapabilities] = useState(true);
+
+  // Auto-inject prompt from ?q= query parameter (e.g. from Capabilities "Run" button)
+  useEffect(() => {
+    const q = searchParams.get("q");
+    if (q) {
+      // Small delay to ensure CopilotChat has mounted its event listener
+      const timer = setTimeout(() => {
+        window.dispatchEvent(new CustomEvent("copilot-inject-prompt", { detail: q }));
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [searchParams]);
 
   // Artifact state — lives here so it persists across chat interactions
   const [artifacts, setArtifacts] = useState<Artifact[]>([]);
@@ -41,6 +56,15 @@ export default function CopilotPage() {
 
   // Right panel state — artifacts panel auto-opens when first artifact arrives
   const [rightPanel, setRightPanel] = useState<RightPanel>("brain-context");
+
+  // Brain meta state — wired from CopilotChat's onBrainMeta callback to feed the right-panel
+  const [brainMeta, setBrainMeta] = useState<BrainMeta | null>(null);
+  const [brainLoading, setBrainLoading] = useState(false);
+
+  const handleBrainMeta = useCallback((meta: BrainMeta) => {
+    setBrainMeta(meta);
+    setBrainLoading(false);
+  }, []);
 
   // Handle new artifacts emitted by CopilotChat
   const handleArtifact = useCallback((artifact: CopilotArtifact) => {
@@ -113,11 +137,12 @@ export default function CopilotPage() {
               "Give me the full intelligence report",
             ]}
             onArtifact={handleArtifact}
+            onBrainMeta={handleBrainMeta}
           />
         </div>
       </div>
 
-      {/* ── Right: Panel (Artifacts or Brain Context) ─────────────────── */}
+      {/* ── Right: Panel (Artifacts, Brain Context, or Agents) ────────── */}
       {rightPanel !== "none" && (
         <div className="w-[380px] shrink-0 min-h-0 flex flex-col">
           {rightPanel === "artifacts" ? (
@@ -128,11 +153,29 @@ export default function CopilotPage() {
               onPinArtifact={handlePinArtifact}
               onClose={() => setRightPanel("none")}
             />
+          ) : rightPanel === "agents" ? (
+            <div className="flex flex-col h-full bg-card rounded-xl border border-border-subtle overflow-hidden">
+              {/* Agent panel close button */}
+              <AgentRunner
+                organizationId={currentOrg?.id || ""}
+                onArtifact={handleArtifact}
+              />
+            </div>
           ) : (
             <>
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-xs font-medium text-muted uppercase tracking-wider">Brain Context</h3>
                 <div className="flex items-center gap-1">
+                  {/* Switch to agents */}
+                  <button
+                    onClick={() => setRightPanel("agents")}
+                    className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium text-accent hover:bg-accent/10 transition-colors"
+                  >
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    Agents
+                  </button>
                   {/* Switch to artifacts if any exist */}
                   {artifacts.length > 0 && (
                     <button
@@ -157,8 +200,8 @@ export default function CopilotPage() {
               </div>
               <div className="flex-1 overflow-y-auto">
                 <BrainContextPanel
-                  brainMeta={null}
-                  isLoading={false}
+                  brainMeta={brainMeta}
+                  isLoading={brainLoading}
                 />
               </div>
             </>
@@ -169,6 +212,17 @@ export default function CopilotPage() {
       {/* ── Floating toggle when panel is closed ─────────────────────── */}
       {rightPanel === "none" && (
         <div className="fixed right-6 top-20 flex flex-col gap-2 z-10">
+          {/* Agents button */}
+          <button
+            onClick={() => setRightPanel("agents")}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-card border border-accent/20 hover:bg-card-hover text-accent transition-colors shadow-lg"
+            title="Brain Agents"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            <span className="text-xs font-medium">Agents</span>
+          </button>
           {/* Artifacts button */}
           {artifacts.length > 0 && (
             <button

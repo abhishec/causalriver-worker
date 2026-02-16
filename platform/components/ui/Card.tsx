@@ -11,10 +11,10 @@ interface CardProps {
 }
 
 const variantStyles = {
-  default: "bg-card border border-border-subtle",
-  elevated: "bg-surface-elevated border border-border-subtle",
-  interactive: "bg-card border border-border-subtle hover:bg-card-hover hover:border-border transition-colors cursor-pointer",
-  "brain-highlight": "bg-card border border-accent/20 shadow-[0_0_15px_rgba(124,108,240,0.05)]",
+  default: "bg-card border border-border-subtle shadow-[var(--shadow-card)]",
+  elevated: "bg-surface-elevated border border-border-subtle shadow-[var(--shadow-elevated)]",
+  interactive: "bg-card border border-border-subtle shadow-[var(--shadow-card)] hover:bg-card-hover hover:border-border hover:shadow-[var(--shadow-card-hover)] transition-all duration-200 cursor-pointer",
+  "brain-highlight": "bg-card border border-accent/20 shadow-[0_0_20px_rgba(124,108,240,0.08),0_4px_12px_rgba(0,0,0,0.2)]",
 };
 
 const paddingStyles = {

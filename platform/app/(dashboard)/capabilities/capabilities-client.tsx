@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 /* ── Capability Definitions (All 15 P1 Use Cases) ──────────────────────────── */
 
@@ -352,6 +353,7 @@ export function CapabilitiesClient({
   recentArtifacts,
   activeJobs,
 }: CapabilitiesClientProps) {
+  const router = useRouter();
   const [filter, setFilter] = useState<string>("all");
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
@@ -478,20 +480,36 @@ export function CapabilitiesClient({
                     {cap.description}
                   </p>
 
-                  {/* Bottom stats */}
-                  <div className="flex items-center gap-3 text-[10px] text-muted">
-                    {artifactCount > 0 && (
-                      <span>
-                        {artifactCount} artifact{artifactCount > 1 ? "s" : ""}
+                  {/* Bottom stats + Run button */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3 text-[10px] text-muted">
+                      {artifactCount > 0 && (
+                        <span>
+                          {artifactCount} artifact{artifactCount > 1 ? "s" : ""}
+                        </span>
+                      )}
+                      <span className={colors.text}>
+                        {cap.status === "live"
+                          ? "API + Copilot"
+                          : cap.status === "copilot"
+                          ? "Copilot NL"
+                          : "Planned"}
                       </span>
+                    </div>
+                    {cap.status !== "coming-soon" && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          router.push(`/copilot?q=${encodeURIComponent(cap.examplePrompts[0])}`);
+                        }}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-accent/10 text-accent text-[10px] font-medium hover:bg-accent/20 transition-colors"
+                      >
+                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
+                        </svg>
+                        Run
+                      </button>
                     )}
-                    <span className={colors.text}>
-                      {cap.status === "live"
-                        ? "API + Copilot"
-                        : cap.status === "copilot"
-                        ? "Copilot NL"
-                        : "Planned"}
-                    </span>
                   </div>
 
                   {/* Expanded Detail */}
