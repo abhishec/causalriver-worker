@@ -1,0 +1,44 @@
+┌────────────────────────────────────────────────────────────────────┐
+│ LOAD TEST SUITE REPORT — SOME FAILED ❌                         
+└────────────────────────────────────────────────────────────────────┘
+
+  Mode:              Quick Validation
+  Total duration:    5.8 min (0.10 hours)
+  Tests run:         4
+  Tests passed:      2
+  Tests failed:      2
+
+  Test Results:
+
+    1. Seed 10M Test Signals
+       Status:     ✅ PASS
+       Duration:   0.5 min
+
+    2. Test 1: Signal Ingestion
+       Status:     ✅ PASS
+       Duration:   5.1 min
+
+    3. Test 2: Causal Discovery
+       Status:     ❌ FAIL
+       Duration:   0.0 min
+       Error:      Exit code: 1
+
+    4. Test 3: Query Latency
+       Status:     ❌ FAIL
+       Duration:   0.2 min
+       Error:      Exit code: 1
+
+──────────────────────────────────────────────────────────────────────
+
+❌ SOME TESTS FAILED
+
+   Failed tests:
+     - Test 2: Causal Discovery: Exit code: 1
+     - Test 3: Query Latency: Exit code: 1
+
+   Action items:
+   1. Review failed test logs above
+   2. Run EXPLAIN ANALYZE on slow queries
+   3. Check system resources (memory, CPU, disk I/O)
+   4. Fix bottlenecks and re-run tests
+

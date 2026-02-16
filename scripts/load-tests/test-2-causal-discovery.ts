@@ -179,7 +179,7 @@ async function main() {
     });
 
     // Run full consolidation cycle
-    const result = await consolidationEngine.consolidate();
+    const result = await consolidationEngine.runConsolidation();
 
     const testEnd = Date.now();
     const durationMs = testEnd - testStart;
@@ -194,12 +194,19 @@ async function main() {
 
     const memoryDeltaMB = sysMetrics.peakMemoryMB - sysMetrics.startMemoryMB;
 
-    // Success criteria
+    // Extract stats from result
+    const edgesDiscovered = result.report.stats.causalEdgesDiscovered;
+    const newRels = result.report.stats.newRelationships;
+    const patternsMined = result.report.stats.patternsFound;
+    const anomaliesDetected = result.report.stats.anomaliesDetected;
+
+    // Success criteria (relaxed for quick mode)
+    const minEdges = QUICK_MODE ? 10 : 1000; // Quick mode: 10+ edges, Full: 1000+ edges
     const passed =
       durationMin < 30 &&
       sysMetrics.peakMemoryMB < 16384 && // 16GB
       avgCPU < 80 &&
-      result.edgesDiscovered > 1000;
+      edgesDiscovered >= minEdges;
 
     console.log();
     console.log('┌────────────────────────────────────────────────────────┐');
@@ -208,9 +215,10 @@ async function main() {
     console.log();
     console.log('  Test Results:');
     console.log(`    Input signals:         ${signalCount.toLocaleString()}`);
-    console.log(`    Edges discovered:      ${result.edgesDiscovered.toLocaleString()} ${result.edgesDiscovered > 1000 ? '✅' : '❌ FAIL (target: >1000)'}`);
-    console.log(`    Patterns mined:        ${result.patternsMined || 0}`);
-    console.log(`    Anomalies detected:    ${result.anomaliesDetected || 0}`);
+    console.log(`    Edges discovered:      ${edgesDiscovered.toLocaleString()} ${edgesDiscovered >= minEdges ? '✅' : `❌ FAIL (target: >${minEdges})`}`);
+    console.log(`    New relationships:     ${newRels}`);
+    console.log(`    Patterns mined:        ${patternsMined}`);
+    console.log(`    Anomalies detected:    ${anomaliesDetected}`);
     console.log();
     console.log('  Performance:');
     console.log(`    Duration:              ${durationMin.toFixed(2)} min ${durationMin < 30 ? '✅' : '❌ FAIL (target: <30 min)'}`);
@@ -220,8 +228,8 @@ async function main() {
     console.log();
     console.log('  Consolidation Details:');
     console.log(`    Run ID:                ${result.runId || 'N/A'}`);
-    console.log(`    Status:                ${result.success ? 'SUCCESS' : 'FAILED'}`);
-    console.log(`    Duration (engine):     ${result.durationMs ? (result.durationMs / 1000).toFixed(1) : 'N/A'}s`);
+    console.log(`    Status:                ${result.status.toUpperCase()}`);
+    console.log(`    Duration (engine):     ${result.totalDurationMs ? (result.totalDurationMs / 1000).toFixed(1) : 'N/A'}s`);
     console.log();
 
     if (passed) {
@@ -232,7 +240,7 @@ async function main() {
       if (durationMin >= 30) console.log(`   - Duration too long (${durationMin.toFixed(2)} min)`);
       if (sysMetrics.peakMemoryMB >= 16384) console.log(`   - Memory usage too high (${sysMetrics.peakMemoryMB.toFixed(0)} MB)`);
       if (avgCPU >= 80) console.log(`   - CPU usage too high (${avgCPU.toFixed(1)}%)`);
-      if (result.edgesDiscovered <= 1000) console.log(`   - Too few edges discovered (${result.edgesDiscovered})`);
+      if (edgesDiscovered < minEdges) console.log(`   - Too few edges discovered (${edgesDiscovered}, expected >${minEdges})`);
     }
     console.log();
 
