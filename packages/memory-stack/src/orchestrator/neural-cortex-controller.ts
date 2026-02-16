@@ -75,6 +75,7 @@ import {
   type LearningHealthReport,
   type UserFeedbackRecord,
 } from './closed-loop-learning-engine';
+import { onSignalsIngested } from '../ingestion/connector-signal-bridge';
 
 // ============================================================================
 // TYPES
@@ -586,6 +587,39 @@ export function createNeuralCortexController(config: NeuralCortexConfig): Neural
       console.warn('[NeuralCortex] RL warm-start non-fatal:', err?.message || err);
     }
   })();
+
+  // ── REACTIVE SIGNAL LISTENER: Brain wakes up when new data arrives ──
+  // Phase 5: Emergence & Continuous Learning
+  //
+  // When connectors ingest a significant batch of signals (≥200),
+  // immediately emit an RL "arousal" signal to the brain.
+  // This is the brain's Reticular Activating System (RAS) —
+  // large stimuli trigger heightened attention and faster scheduling
+  // of affected layers. Small trickles are processed on schedule.
+  //
+  // We DON'T trigger a full cognitive cycle here (too expensive for real-time),
+  // instead we:
+  //   1. Inject an RL "arousal" reward to L1 (Signal Ingestion) + L2 (Causal Discovery)
+  //   2. Reset cycle counters for brainstem layers so they run on the very next cycle
+  //   3. Log the event for observability
+  const _unsubscribeSignalListener = onSignalsIngested((orgId, signalCount, source) => {
+    if (orgId !== organizationId) return;
+    if (signalCount < 200) return; // Only react to large batches
+
+    // Inject arousal reward — brain pays attention to high-volume signal bursts
+    if (_rl) {
+      _rl.injectExternalReward(1, 0.3, `Arousal: ${signalCount} signals from ${source}`);
+      _rl.injectExternalReward(2, 0.3, `Arousal: ${signalCount} signals from ${source}`);
+    }
+
+    // Reset brainstem layer cycle counters → they run on the very next cycle
+    const l1 = _layers.get(1);
+    const l2 = _layers.get(2);
+    if (l1) l1.cyclesSinceLastRun = l1.runEveryNthCycle;
+    if (l2) l2.cyclesSinceLastRun = l2.runEveryNthCycle;
+
+    console.log(`[NeuralCortex] Arousal: ${signalCount} signals from ${source} — brainstem fast-tracked.`);
+  });
 
   // Initialize layer registry from definitions
   const _layers: Map<number, LayerRegistryEntry> = new Map();
@@ -1447,6 +1481,63 @@ export function createNeuralCortexController(config: NeuralCortexConfig): Neural
         } catch (err) {
           sleepReport.push(`Closed-loop learning error: ${String(err)}`);
         }
+      }
+
+      // ── Phase 7: Autonomous Learning during sleep (Emergence) ──
+      // Phase 5: The brain's self-improvement engine runs its full 9-step cycle
+      // during sleep: DISCOVER → DETECT → EXTRACT → CONVERT → TRAIN → VALIDATE
+      // → PROMOTE → FEEDBACK → EVALUATE
+      // This is like the brain's nightly memory consolidation + learning pass.
+      try {
+        const { createAutonomousLearner } = await import('../learning/autonomous-learner');
+        const autonomousLearner = createAutonomousLearner({
+          supabase,
+          organizationId,
+          verbose: false,
+        });
+        const autoResult = await autonomousLearner.runLearningCycle();
+        sleepReport.push(
+          `Autonomous learning: ${autoResult.packsGenerated} packs, ` +
+          `${autoResult.rulesPromoted} rules promoted, ` +
+          `${autoResult.anomaliesDetected} anomalies, ` +
+          `${autoResult.patternsRegistered} patterns, ` +
+          `${autoResult.sequentialPatternsFound} sequences, ` +
+          `${autoResult.temporalRulesFound} temporal rules ` +
+          `(${autoResult.duration}ms)`
+        );
+      } catch (err) {
+        sleepReport.push(`Autonomous learning error: ${String(err)}`);
+      }
+
+      // ── Phase 8: Dream State Persistence (Emergence) ──
+      // Persist deep dreaming's incubated insights to the database so they
+      // survive brain restarts. Like REM sleep encoding memories into long-term storage.
+      // Surfaced insights are promoted to ai_memory as high-importance discoveries.
+      try {
+        const dreamState = cognitiveStack.layers.dreaming.getState();
+        const surfacedInsights = cognitiveStack.layers.dreaming.getSurfaced();
+        if (surfacedInsights?.length) {
+          const insightMemories = surfacedInsights.map((insight: any) => ({
+            organization_id: organizationId,
+            memory_type: 'dream_insight',
+            content: insight.summary || insight.description || JSON.stringify(insight),
+            domain: insight.domains?.[0] || 'cross_domain',
+            importance: Math.min(1, (insight.confidence ?? 0.5) + 0.2), // Dreams get a confidence boost during sleep
+            cognitive_layer: 'L3',
+            metadata: {
+              source: 'deep_dreaming_sleep',
+              dream_cycle: dreamState.cycleCount,
+              domains_connected: insight.domains,
+              evidence_count: insight.evidenceCount ?? 0,
+              dreamed_at: new Date().toISOString(),
+            },
+          }));
+
+          await supabase.from('ai_memory').insert(insightMemories);
+          sleepReport.push(`Dream persistence: ${insightMemories.length} surfaced insights encoded into long-term memory.`);
+        }
+      } catch (err) {
+        sleepReport.push(`Dream persistence non-fatal: ${String(err)}`);
       }
 
       // Restore previous mode

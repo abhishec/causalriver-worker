@@ -35,6 +35,8 @@ import { streamInBatches } from '../infra/streaming-batcher';
 import { createBrainPipeline, type BrainCycleReport } from './brain-pipeline';
 import { createSyncManager, type SyncManagerConfig } from '../connectors/sync-manager';
 import type { NexusConnector, ConnectorSyncResult } from '../connectors/connector-framework';
+import { createAutonomousLearner, type LearningCycleResult as AutonomousLearningResult } from '../learning/autonomous-learner';
+import { onSignalsIngested } from '../ingestion/connector-signal-bridge';
 
 // ============================================================================
 // TYPES
@@ -609,6 +611,149 @@ export function createScheduledJobs(
       return { predictionsChecked, outcomesRecorded, correctPredictions, incorrectPredictions };
     },
 
+    // ── Autonomous Learning Job ─────────────────────────────────────
+    //
+    // Phase 5: Emergence & Continuous Learning
+    //
+    // The autonomous learner is the brain's self-improvement engine.
+    // It runs a 9-step cycle: DISCOVER → DETECT → EXTRACT → CONVERT
+    // → TRAIN → VALIDATE → PROMOTE → FEEDBACK → EVALUATE
+    //
+    // This is what makes the brain ALIVE — it doesn't just store and
+    // retrieve, it continuously learns from its own discoveries.
+    //
+    // Recommended: daily via cron (after consolidation).
+
+    async runAutonomousLearning(organizationId: string): Promise<{
+      packsGenerated: number;
+      rulesPromoted: number;
+      memoriesCreated: number;
+      causalEdgesUpdated: number;
+      anomaliesDetected: number;
+      patternsRegistered: number;
+      sequentialPatternsFound: number;
+      temporalRulesFound: number;
+      duration: number;
+    }> {
+      const learner = createAutonomousLearner({
+        supabase,
+        organizationId,
+        lookbackDays: fullConfig.lookbackDays,
+        verbose: false,
+      });
+
+      const result = await learner.runLearningCycle();
+
+      // Log emergence event (fire-and-forget)
+      const totalDiscoveries = result.packsGenerated + result.rulesPromoted + result.patternsRegistered + result.sequentialPatternsFound + result.temporalRulesFound;
+      if (totalDiscoveries > 0) {
+        supabase.from('brain_emergence_log').insert({
+          organization_id: organizationId,
+          event_type: 'autonomous_learning',
+          summary: `Autonomous learning: ${result.packsGenerated} packs, ${result.rulesPromoted} rules promoted, ${result.patternsRegistered} patterns, ${result.anomaliesDetected} anomalies`,
+          metrics: {
+            packsGenerated: result.packsGenerated,
+            rulesPromoted: result.rulesPromoted,
+            memoriesCreated: result.memoriesCreated,
+            causalEdgesUpdated: result.causalEdgesUpdated,
+            anomaliesDetected: result.anomaliesDetected,
+            patternsRegistered: result.patternsRegistered,
+            sequentialPatternsFound: result.sequentialPatternsFound,
+            temporalRulesFound: result.temporalRulesFound,
+          },
+          duration_ms: result.duration,
+        }).then(({ error }) => {
+          if (error) console.warn('[scheduled-jobs] Emergence log non-fatal:', error.message);
+        });
+      }
+
+      return {
+        packsGenerated: result.packsGenerated,
+        rulesPromoted: result.rulesPromoted,
+        memoriesCreated: result.memoriesCreated,
+        causalEdgesUpdated: result.causalEdgesUpdated,
+        anomaliesDetected: result.anomaliesDetected,
+        patternsRegistered: result.patternsRegistered,
+        sequentialPatternsFound: result.sequentialPatternsFound,
+        temporalRulesFound: result.temporalRulesFound,
+        duration: result.duration,
+      };
+    },
+
+    // ── Brain Evolution Job ──────────────────────────────────────────
+    //
+    // Phase 5: Emergence & Continuous Learning
+    //
+    // The evolution engine computes the brain's intelligence score,
+    // prediction accuracy, Brier calibration, and Bayesian weight updates.
+    // Previously only ran from neural-cortex-controller during managed cycles.
+    // Now also scheduled independently so brains without active cortex
+    // controllers still evolve.
+    //
+    // Recommended: daily via cron (after consolidation + autonomous learning).
+
+    async runBrainEvolution(organizationId: string): Promise<{
+      intelligenceScore: number;
+      accuracy: number;
+      brierScore: number;
+      predictionsVerified: number;
+      edgesUpdated: number;
+    }> {
+      const { runBrainEvolutionCycle } = await import('./brain-evolution-engine');
+      const state = await runBrainEvolutionCycle(supabase, organizationId, 'full');
+
+      // Persist daily intelligence snapshot (fire-and-forget)
+      const today = new Date().toISOString().split('T')[0];
+      supabase.from('brain_intelligence_snapshots').upsert({
+        organization_id: organizationId,
+        snapshot_date: today,
+        intelligence_score: state.intelligenceScore,
+        prediction_accuracy: state.accuracy.overall,
+        brier_score: state.calibration.brierScore,
+        calibration_quality: state.calibration.isWellCalibrated ? 1.0 : 0.5,
+        causal_edges_total: state.knowledge.totalCausalEdges,
+        memories_total: state.knowledge.memoriesTotal ?? 0,
+        rules_total: state.knowledge.rulesTotal ?? 0,
+        patterns_total: state.knowledge.patternsTotal ?? 0,
+        predictions_verified: state.accuracy.totalPredictions,
+      }, {
+        onConflict: 'organization_id,snapshot_date',
+      }).then(({ error }) => {
+        if (error) console.warn('[scheduled-jobs] Intelligence snapshot non-fatal:', error.message);
+      });
+
+      // Log emergence milestone if intelligence score crosses a threshold
+      const milestoneThresholds = [10, 20, 30, 40, 50, 60, 70, 80, 90];
+      for (const threshold of milestoneThresholds) {
+        if (state.intelligenceScore >= threshold && state.intelligenceScore < threshold + 1) {
+          supabase.from('brain_emergence_log').insert({
+            organization_id: organizationId,
+            event_type: 'evolution_milestone',
+            summary: `Intelligence score reached ${threshold}: accuracy ${(state.accuracy.overall * 100).toFixed(1)}%, Brier ${state.calibration.brierScore.toFixed(3)}`,
+            metrics: {
+              intelligenceScore: state.intelligenceScore,
+              accuracy: state.accuracy.overall,
+              brierScore: state.calibration.brierScore,
+              totalPredictions: state.accuracy.totalPredictions,
+              causalEdges: state.knowledge.totalCausalEdges,
+            },
+            intelligence_score: state.intelligenceScore,
+          }).then(({ error }) => {
+            if (error) console.warn('[scheduled-jobs] Emergence milestone non-fatal:', error.message);
+          });
+          break;
+        }
+      }
+
+      return {
+        intelligenceScore: state.intelligenceScore,
+        accuracy: state.accuracy.overall,
+        brierScore: state.calibration.brierScore,
+        predictionsVerified: state.knowledge.totalPredictions,
+        edgesUpdated: state.knowledge.totalCausalEdges,
+      };
+    },
+
     // ── Data Retention Job ────────────────────────────────────────────
 
     /**
@@ -783,6 +928,37 @@ export function createScheduledJobs(
       return { totalSignals, connectorsSucceeded, connectorsFailed, results };
     },
 
+    // ── Reactive Signal Listener ────────────────────────────────────
+    //
+    // Phase 5: Emergence & Continuous Learning
+    //
+    // Wire onSignalsIngested so the brain reacts to new data in near real-time.
+    // When a connector ingests a large batch of signals (≥100), this triggers
+    // a lightweight learning cycle (autonomous learner) without waiting for
+    // the daily cron. This is the brain's "arousal" response.
+    //
+    // Like the Reticular Activating System in the human brain — large stimuli
+    // trigger immediate processing; small trickles wait for the scheduled cycle.
+
+    registerReactiveListener(organizationId: string): () => void {
+      return onSignalsIngested(async (orgId, signalCount, source) => {
+        // Only react to signals for our org
+        if (orgId !== organizationId) return;
+
+        // Only trigger reactive cycle for significant signal batches
+        // (≥100 signals = substantial data worth processing immediately)
+        if (signalCount < 100) return;
+
+        console.log(`[scheduled-jobs] Reactive trigger: ${signalCount} signals from ${source}, running autonomous learning for ${orgId}`);
+
+        try {
+          await this.runAutonomousLearning(organizationId);
+        } catch (err: any) {
+          console.warn('[scheduled-jobs] Reactive learning non-fatal:', err?.message || err);
+        }
+      });
+    },
+
     // ── Combined Daily Job ───────────────────────────────────────────
 
     /**
@@ -799,6 +975,7 @@ export function createScheduledJobs(
      * Phase A (sequential — dependency chain):   verifications → weights
      * Phase B (parallel — independent):          decay + discovery + consolidation
      * Phase C (parallel — post-discovery):       federation + data retention + training packs + predictions
+     * Phase D (parallel — emergence):            autonomous learning + brain evolution (Phase 5)
      *
      * @param organizationId - The org to process
      * @param connectors - Optional array of NexusConnector instances to sync before processing.
@@ -816,6 +993,8 @@ export function createScheduledJobs(
       retention: JobResult<DataRetentionResult>;
       trainingPacks: JobResult<{ packsApplied: number; chainsCreated: number; rulesCreated: number; errors: string[] }>;
       predictionOutcomes: JobResult<{ predictionsChecked: number; outcomesRecorded: number; correctPredictions: number; incorrectPredictions: number }>;
+      autonomousLearning: JobResult<{ packsGenerated: number; rulesPromoted: number; memoriesCreated: number; causalEdgesUpdated: number; anomaliesDetected: number; patternsRegistered: number; sequentialPatternsFound: number; temporalRulesFound: number; duration: number }>;
+      brainEvolution: JobResult<{ intelligenceScore: number; accuracy: number; brierScore: number; predictionsVerified: number; edgesUpdated: number }>;
     }> {
       // Phase 0: Connector sync — ingest fresh data BEFORE processing
       // This is data-agnostic: any connector type works (GitHub, Slack, Jira, balance sheets, custom)
@@ -874,7 +1053,25 @@ export function createScheduledJobs(
         ? predOutcomeSettled.value
         : { error: `[predictionOutcomes] ${(predOutcomeSettled as PromiseRejectedResult).reason?.message || 'unknown'}` };
 
-      return { connectorSync, verifications, weights, decay, discovery, consolidation, federation, retention, trainingPacks, predictionOutcomes };
+      // Phase D: Emergence & Continuous Learning (autonomous learning + brain evolution in parallel)
+      // This is THE final phase — the brain self-improves and measures its own intelligence.
+      // Autonomous learning discovers new patterns, trains itself, and promotes rules.
+      // Brain evolution computes intelligence score, accuracy, and Brier calibration.
+      // Must run AFTER consolidation + discovery (needs fresh data) and AFTER federation
+      // (needs to know if CORE knowledge is helping).
+      const evolutionTimeout = Math.max(jobTimeout, 600_000); // 10 min for full evolution
+      const [autonomousSettled, evolutionSettled] = await Promise.allSettled([
+        safeRun(() => this.runAutonomousLearning(organizationId), 'autonomousLearning', evolutionTimeout),
+        safeRun(() => this.runBrainEvolution(organizationId), 'brainEvolution', evolutionTimeout),
+      ]);
+      const autonomousLearning = autonomousSettled.status === 'fulfilled'
+        ? autonomousSettled.value
+        : { error: `[autonomousLearning] ${(autonomousSettled as PromiseRejectedResult).reason?.message || 'unknown'}` };
+      const brainEvolution = evolutionSettled.status === 'fulfilled'
+        ? evolutionSettled.value
+        : { error: `[brainEvolution] ${(evolutionSettled as PromiseRejectedResult).reason?.message || 'unknown'}` };
+
+      return { connectorSync, verifications, weights, decay, discovery, consolidation, federation, retention, trainingPacks, predictionOutcomes, autonomousLearning, brainEvolution };
     },
   };
 }
