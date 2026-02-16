@@ -1,0 +1,446 @@
+openapi: 3.0.0
+info:
+  title: NexusBrain SE-aaS API
+  version: 1.0.0
+  description: |
+    Software Engineering as a Service (SE-aaS) Platform API
+
+    All 8 SE-aaS domains with Claude Sonnet 4.5 integration:
+    - Test Case Generator (Claude-powered)
+    - SQL Analyzer
+    - Test Data Generator
+    - TDD Code Generator (Claude-powered)
+    - Incident Diagnosis (Claude-powered)
+    - Impact Analysis (Claude-powered)
+    - Data Lineage Mapper (Claude-powered)
+    - Log Query Agent (Claude-powered)
+
+    Plus unified brain orchestrator for intelligent routing.
+  contact:
+    name: NexusBrain API Support
+    email: api@nexusbrain.io
+
+servers:
+  - url: https://app.nexusbrain.io/api
+    description: Production
+  - url: http://localhost:3000/api
+    description: Development
+
+security:
+  - BearerAuth: []
+
+paths:
+  /brain/query:
+    post:
+      summary: Unified Brain Query
+      description: |
+        Intelligent routing across all cognitive + SE-aaS domains using Claude.
+        Routes queries to the most relevant domains with confidence scoring.
+      tags: [Brain Orchestrator]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [query]
+              properties:
+                query:
+                  type: string
+                  description: Natural language query
+                  example: "What's causing the spike in errors?"
+                context:
+                  type: object
+                  properties:
+                    organizationId:
+                      type: string
+                      format: uuid
+                    timeRange:
+                      type: string
+                      example: "24h"
+                anthropicApiKey:
+                  type: string
+                  description: Optional Claude API key (org-level key used if not provided)
+      responses:
+        '200':
+          description: Successful query routing and execution
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrainQueryResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /se-aas/test-cases:
+    post:
+      summary: Generate Test Cases
+      description: Generate unit, integration, and edge case tests using Claude
+      tags: [SE-aaS]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [organizationId, code]
+              properties:
+                organizationId:
+                  type: string
+                  format: uuid
+                code:
+                  type: string
+                  description: Source code to generate tests for
+                language:
+                  type: string
+                  enum: [typescript, javascript, python, go, scala, java]
+                testTypes:
+                  type: array
+                  items:
+                    type: string
+                    enum: [unit, integration, edge_case]
+                anthropicApiKey:
+                  type: string
+      responses:
+        '200':
+          description: Test cases generated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  jobId:
+                    type: string
+                  status:
+                    type: string
+                    enum: [pending, completed]
+
+  /se-aas/tdd:
+    post:
+      summary: TDD Code Generator
+      description: Guide through Test-Driven Development (Red-Green-Refactor) cycle
+      tags: [SE-aaS]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [organizationId, phase]
+              properties:
+                organizationId:
+                  type: string
+                  format: uuid
+                phase:
+                  type: string
+                  enum: [red, green, refactor, full]
+                  description: TDD phase to execute
+                specification:
+                  type: string
+                  description: Feature specification (for red phase)
+                failingTest:
+                  type: string
+                  description: Test code (for green phase)
+                workingCode:
+                  type: string
+                  description: Code to refactor (for refactor phase)
+                language:
+                  type: string
+                  enum: [typescript, javascript, python, java]
+                anthropicApiKey:
+                  type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/JobResponse'
+
+  /se-aas/incident:
+    post:
+      summary: Diagnose Production Incidents
+      description: AI-powered root cause analysis and remediation recommendations
+      tags: [SE-aaS]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [organizationId, description]
+              properties:
+                organizationId:
+                  type: string
+                  format: uuid
+                description:
+                  type: string
+                  description: Incident description
+                stackTrace:
+                  type: string
+                logs:
+                  type: array
+                  items:
+                    type: string
+                metrics:
+                  type: object
+                timeRange:
+                  type: string
+                anthropicApiKey:
+                  type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/JobResponse'
+
+  /se-aas/impact:
+    post:
+      summary: Analyze Code Change Impact
+      description: Predict blast radius and recommend reviewers
+      tags: [SE-aaS]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [organizationId, changeType]
+              properties:
+                organizationId:
+                  type: string
+                  format: uuid
+                changeType:
+                  type: string
+                  enum: [code-change, deployment, incident, config-change, infrastructure]
+                diff:
+                  type: string
+                affectedFiles:
+                  type: array
+                  items:
+                    type: string
+                anthropicApiKey:
+                  type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/JobResponse'
+
+  /se-aas/log-query:
+    post:
+      summary: Query and Analyze Logs
+      description: Pattern detection, error clustering, and anomaly identification
+      tags: [SE-aaS]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [organizationId, logs]
+              properties:
+                organizationId:
+                  type: string
+                  format: uuid
+                logs:
+                  type: array
+                  items:
+                    type: string
+                pattern:
+                  type: string
+                timeRange:
+                  type: string
+                anthropicApiKey:
+                  type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/JobResponse'
+
+  /se-aas/lineage:
+    post:
+      summary: Map Data Model Lineage
+      description: Discover relationships, orphan tables, and circular dependencies
+      tags: [SE-aaS]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [organizationId, schema]
+              properties:
+                organizationId:
+                  type: string
+                  format: uuid
+                schema:
+                  type: object
+                  description: Database schema definition
+                anthropicApiKey:
+                  type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/JobResponse'
+
+  /se-aas/sql-analyze:
+    post:
+      summary: Analyze SQL Queries
+      description: Performance, security, and correctness analysis
+      tags: [SE-aaS]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [organizationId, query]
+              properties:
+                organizationId:
+                  type: string
+                  format: uuid
+                query:
+                  type: string
+                  description: SQL query to analyze
+                schema:
+                  type: object
+      responses:
+        '200':
+          $ref: '#/components/responses/JobResponse'
+
+  /se-aas/test-data:
+    post:
+      summary: Generate Test Data
+      description: Create synthetic test data with referential integrity
+      tags: [SE-aaS]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [organizationId, schema, recordCount]
+              properties:
+                organizationId:
+                  type: string
+                  format: uuid
+                schema:
+                  type: object
+                recordCount:
+                  type: integer
+                  minimum: 1
+                  maximum: 10000
+      responses:
+        '200':
+          $ref: '#/components/responses/JobResponse'
+
+  /se-aas/jobs/{jobId}:
+    get:
+      summary: Poll Job Status
+      description: Get status and results of async SE-aaS job
+      tags: [SE-aaS]
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Job status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  jobId:
+                    type: string
+                  status:
+                    type: string
+                    enum: [pending, running, completed, failed]
+                  result:
+                    type: object
+                  error:
+                    type: string
+                  artifactId:
+                    type: string
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    BrainQueryResponse:
+      type: object
+      properties:
+        query:
+          type: string
+        routes:
+          type: array
+          items:
+            type: object
+            properties:
+              domain:
+                type: string
+              confidence:
+                type: number
+                format: float
+              reasoning:
+                type: string
+        unifiedAnswer:
+          type: string
+        confidence:
+          type: number
+          format: float
+        domainResults:
+          type: array
+          items:
+            type: object
+        metadata:
+          type: object
+          properties:
+            totalExecutionTime:
+              type: integer
+            domainsQueried:
+              type: integer
+            claudePowered:
+              type: boolean
+
+  responses:
+    JobResponse:
+      description: Job submitted successfully
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              jobId:
+                type: string
+              status:
+                type: string
+              artifactId:
+                type: string
+
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Unauthorized"
+
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Internal server error"
+
+tags:
+  - name: Brain Orchestrator
+    description: Intelligent query routing across all domains
+  - name: SE-aaS
+    description: Software Engineering as a Service domains
