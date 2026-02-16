@@ -858,7 +858,47 @@ export {
   registerEnhancedSoftwareEngineeringDomains,
 } from './orchestrator/action-domains-software-engineering-enhanced';
 
-// SE-aaS Cognitive Domains — Impact Analysis, Data Lineage, Log Query
+// SE-aaS Cognitive Domains — All 8 Sprint 1-3 Domains (Claude-Powered)
+export {
+  testCaseGeneratorDomain,
+  type TestCaseGenerationRequest,
+  type TestCaseGenerationResult,
+  type TestCase,
+  type CoverageAnalysis,
+} from './orchestrator/action-domains-test-cases';
+
+export {
+  sqlAnalyzerDomain,
+  type SQLAnalysisRequest,
+  type SQLAnalysisResult,
+  type SecurityIssue,
+  type PerformanceIssue,
+  type CorrectnessIssue,
+} from './orchestrator/action-domains-sql';
+
+export {
+  testDataGeneratorDomain,
+  type TestDataRequest,
+  type TestDataResult,
+  type TableData,
+  type DataConstraint,
+} from './orchestrator/action-domains-test-data';
+
+export {
+  tddCodeGeneratorDomain,
+  type TDDCodeGenerationRequest,
+  type TDDCodeGenerationResult,
+  type TDDPhase,
+} from './orchestrator/action-domains-tdd';
+
+export {
+  incidentDiagnosisDomain,
+  type IncidentDiagnosisRequest,
+  type IncidentDiagnosisResult,
+  type RootCauseHypothesis,
+  type RemediationStep,
+} from './orchestrator/action-domains-incident';
+
 export {
   impactAnalysisDomain,
   type ImpactAnalysisRequest,
