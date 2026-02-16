@@ -871,32 +871,34 @@ export {
   sqlAnalyzerDomain,
   type SQLAnalysisRequest,
   type SQLAnalysisResult,
-  type SecurityIssue,
-  type PerformanceIssue,
-  type CorrectnessIssue,
+  type Issue,
+  type Optimization,
 } from './orchestrator/action-domains-sql';
 
 export {
   testDataGeneratorDomain,
   type TestDataRequest,
   type TestDataResult,
-  type TableData,
-  type DataConstraint,
+  type DatabaseSchema,
+  type TableSchema,
+  type ColumnSchema,
 } from './orchestrator/action-domains-test-data';
 
 export {
   tddCodeGeneratorDomain,
   type TDDCodeGenerationRequest,
   type TDDCodeGenerationResult,
-  type TDDPhase,
+  type RefactoringSuggestion,
+  type TDDCycle,
 } from './orchestrator/action-domains-tdd';
 
 export {
   incidentDiagnosisDomain,
   type IncidentDiagnosisRequest,
   type IncidentDiagnosisResult,
-  type RootCauseHypothesis,
+  type RootCause,
   type RemediationStep,
+  type SimilarIncident,
 } from './orchestrator/action-domains-incident';
 
 export {
@@ -926,7 +928,7 @@ export {
   type MatchedLogEntry,
   type LogPattern,
   type ErrorCluster,
-  type AnomalyEvent,
+  type AnomalyEvent as LogAnomalyEvent,
   type RecommendedAlert,
 } from './orchestrator/action-domains-log-query';
 
