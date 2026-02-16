@@ -636,7 +636,7 @@ describe('Incident Diagnosis - Result Structure', () => {
 
     const result = await incidentDiagnosisDomain.execute(ctx);
 
-    expect(result.type).toBe('incident-diagnose');
+    expect(result.type).toBe('incident-diagnosis');
     expect(result.data).toBeDefined();
     expect(result.confidence).toBeGreaterThan(0);
     expect(result.confidence).toBeLessThanOrEqual(1);

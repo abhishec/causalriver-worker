@@ -57,7 +57,7 @@ describe('TDD Code Generator - Red Phase', () => {
     const result = await tddCodeGeneratorDomain.execute(ctx);
     const data = result.data as TDDCodeGenerationResult;
 
-    expect(result.type).toBe('tdd-code-generate');
+    expect(result.type).toBe('tdd-code-generator');
     expect(data.phase).toBe('red');
     expect(data.testCode).toBeTruthy();
     expect(data.testCode).toContain('expect');
@@ -515,7 +515,7 @@ describe('TDD Code Generator - Language Support', () => {
     });
 
     const result = await tddCodeGeneratorDomain.execute(ctx);
-    expect(result.type).toBe('tdd-code-generate');
+    expect(result.type).toBe('tdd-code-generator');
   });
 
   it('should support JavaScript', async () => {
@@ -527,7 +527,7 @@ describe('TDD Code Generator - Language Support', () => {
     });
 
     const result = await tddCodeGeneratorDomain.execute(ctx);
-    expect(result.type).toBe('tdd-code-generate');
+    expect(result.type).toBe('tdd-code-generator');
   });
 
   it('should support Python', async () => {
@@ -539,7 +539,7 @@ describe('TDD Code Generator - Language Support', () => {
     });
 
     const result = await tddCodeGeneratorDomain.execute(ctx);
-    expect(result.type).toBe('tdd-code-generate');
+    expect(result.type).toBe('tdd-code-generator');
   });
 
   it('should enforce strict types when requested', async () => {
@@ -714,7 +714,7 @@ describe('TDD Code Generator - Result Structure', () => {
 
     const result = await tddCodeGeneratorDomain.execute(ctx);
 
-    expect(result.type).toBe('tdd-code-generate');
+    expect(result.type).toBe('tdd-code-generator');
     expect(result.data).toBeDefined();
     expect(result.confidence).toBeGreaterThan(0);
     expect(result.confidence).toBeLessThanOrEqual(1);

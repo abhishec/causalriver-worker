@@ -96,7 +96,7 @@ describe('Test Case Generator Domain - Code Analysis', () => {
     const result = await testCaseGeneratorDomain.execute(ctx);
     const data = result.data as TestCaseGenerationResult;
 
-    expect(result.type).toBe('test-case-generate');
+    expect(result.type).toBe('test-case-generator');
     expect(data.coverage.totalFunctions).toBeGreaterThan(0);
     expect(data.coverage.functionsCovered).toBeGreaterThan(0);
   });
@@ -348,7 +348,7 @@ describe('Test Case Generator Domain - Language Support', () => {
     const result = await testCaseGeneratorDomain.execute(ctx);
     const data = result.data as TestCaseGenerationResult;
 
-    expect(result.type).toBe('test-case-generate');
+    expect(result.type).toBe('test-case-generator');
     expect(data.testCode).toBeTruthy();
   });
 
@@ -693,7 +693,7 @@ describe('Test Case Generator Domain - Result Structure', () => {
 
     const result = await testCaseGeneratorDomain.execute(ctx);
 
-    expect(result.type).toBe('test-case-generate');
+    expect(result.type).toBe('test-case-generator');
     expect(result.data).toBeDefined();
     expect(result.confidence).toBeGreaterThan(0);
     expect(result.confidence).toBeLessThanOrEqual(1);

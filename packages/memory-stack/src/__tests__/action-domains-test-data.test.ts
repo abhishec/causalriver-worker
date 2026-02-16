@@ -35,7 +35,7 @@ describe('Test Data Generator Domain', () => {
       mockContext.input = request;
       const result = await testDataGeneratorDomain.execute(mockContext);
 
-      expect(result.type).toBe('test-data-generate');
+      expect(result.type).toBe('test-data-generator');
       expect(result.data.data).toHaveProperty('users');
       expect(result.data.data.users).toHaveLength(10);
       expect(result.data.stats.totalRecords).toBe(10);
@@ -311,7 +311,7 @@ describe('Test Data Generator Domain', () => {
       expect(result).toHaveProperty('interventions');
       expect(result).toHaveProperty('evidence');
 
-      expect(result.type).toBe('test-data-generate');
+      expect(result.type).toBe('test-data-generator');
       expect(result.confidence).toBe(1.0);
       expect(result.interventions).toEqual([]);
       expect(result.evidence.length).toBeGreaterThan(0);
