@@ -8,6 +8,7 @@ import { formatUSD, cn } from "@/lib/utils";
 import { SettingsMembers } from "./settings-members";
 import { ApiKeysSection } from "./api-keys-section";
 import { NotificationSettings } from "./notification-settings";
+import { BrainTrainingSection } from "./brain-training-section";
 
 interface Connector {
   id: string;
@@ -246,7 +247,18 @@ export function SettingsClient({ org, orgId, budget, apiKeys, connectors }: Sett
         {activeTab === "brain" && (
           <div>
             <h2 className="text-sm font-medium mb-1">Brain Configuration</h2>
-            <p className="text-xs text-muted mb-6">Budget limits and cost controls</p>
+            <p className="text-xs text-muted mb-6">Train your Brain and configure cost controls</p>
+
+            {/* Brain Training Section */}
+            <div className="mb-8">
+              <BrainTrainingSection orgId={orgId} connectors={connectors} />
+            </div>
+
+            {/* Budget Controls */}
+            <div className="mb-4">
+              <h3 className="text-sm font-semibold mb-1">Budget Controls</h3>
+              <p className="text-xs text-muted mb-4">Cost limits and alerts</p>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-medium text-muted-foreground mb-1.5">Daily LLM Budget</label>
