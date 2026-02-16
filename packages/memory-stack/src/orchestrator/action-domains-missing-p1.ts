@@ -16,7 +16,41 @@
  */
 
 import type { ActionDomainContext, ActionDomainResult } from './domain-action-engine';
+import type { ActionDomainDefinition } from './action-domain-registry';
 import { formatBrainContextForDomain, buildBrainAttribution } from './brain-context-for-domains';
+
+/**
+ * Adapter: converts registry-format execution context
+ * to legacy P1 ActionDomainContext for backward compatibility.
+ */
+function adaptContext(ctx: any): ActionDomainContext {
+  return {
+    input: ctx.brain?.query || ctx.input || {},
+    brain: ctx.brain || {},
+    organizationId: ctx.brain?.organizationId || '',
+    supabase: ctx.brain?.supabase || null,
+  };
+}
+
+/**
+ * Wraps a P1 domain execute function with registry-compatible signature.
+ * Adapts context and ensures result has `drivers` + `modulesUsed` fields.
+ */
+function wrapExecute(executeFn: (ctx: ActionDomainContext) => Promise<ActionDomainResult>): any {
+  return async (ctx: any) => {
+    const result = await executeFn(adaptContext(ctx));
+    return {
+      ...result,
+      drivers: result.drivers || [],
+      modulesUsed: result.modulesUsed || [],
+    };
+  };
+}
+
+/** Wraps a formatForPrompt with registry-compatible signature */
+function wrapFormat(fn: (data: any) => string): any {
+  return (result: any, _ctx: any) => fn(result?.data || result || {});
+}
 
 // ============================================================================
 // 1.4 DEPENDENCY UPGRADE ASSISTANT
@@ -753,4 +787,135 @@ function detectDeadCodeHeuristic(request: DeadCodeRequest): DeadCodeResult {
     safeRemovalConfidence: 0.5,
     claudePowered: false,
   };
+}
+
+// ============================================================================
+// ACTION DOMAIN DEFINITION WRAPPERS (for registry compatibility)
+// ============================================================================
+
+/**
+ * Wrap P1 domains as proper ActionDomainDefinition entries
+ * so they can be registered alongside the core 35 + 7 SE domains.
+ */
+
+export const dependencyUpgradeDefinition: ActionDomainDefinition = {
+  name: 'dependency-upgrade',
+  description: 'Analyze outdated dependencies, identify breaking changes, generate migration code, and flag security vulnerabilities',
+  brainAnalog: 'Immune System — scans for foreign/outdated dependencies like the immune system scans for pathogens',
+  version: '1.0.0',
+  requires: ['signalCollector'],
+  optional: ['llmAmplifier', 'contextAwareReasoner'],
+  intents: ['dependency-upgrade', 'audit'],
+  intentKeywords: ['dependency', 'dependencies', 'upgrade', 'outdated', 'npm', 'package', 'security', 'vulnerability', 'cve', 'semver'],
+  intentPatterns: [/(?:outdated|upgrade|update)\s+(?:dep|package|npm|lib)/i, /security\s+(?:vuln|audit|scan)/i],
+  relevantDomains: ['engineering'],
+  priority: 8,
+  outputSchema: {
+    dataType: 'dependency-upgrade-analysis',
+    fields: ['outdated', 'breakingChanges', 'migrationSteps', 'securityIssues', 'upgradeOrder', 'upgradeRiskScore'],
+    composable: true,
+    consumableBy: ['code-generate', 'review-triage'],
+  },
+  execute: wrapExecute(dependencyUpgradeDomain.execute),
+  formatForPrompt: wrapFormat((d: any) =>
+    `Dependency Analysis: ${d?.outdated?.length || 0} outdated, ${d?.securityIssues?.length || 0} security issues, risk score ${d?.upgradeRiskScore || 'N/A'}/100`
+  ),
+};
+
+export const designDocGeneratorDefinition: ActionDomainDefinition = {
+  name: 'design-doc-generate',
+  description: 'Generate High-Level Design (HLD) and Low-Level Design (LLD) documents from code or requirements',
+  brainAnalog: 'Prefrontal Cortex — executive planning and abstract architectural reasoning',
+  version: '1.0.0',
+  requires: ['contextAwareReasoner'],
+  optional: ['llmAmplifier', 'causalDAG'],
+  intents: ['design-doc-generate', 'narrate'],
+  intentKeywords: ['hld', 'lld', 'design', 'document', 'architecture', 'diagram', 'mermaid', 'system design', 'technical spec'],
+  intentPatterns: [/(?:generate|create|write)\s+(?:hld|lld|design\s+doc)/i, /(?:architecture|system)\s+(?:doc|diagram|design)/i],
+  relevantDomains: ['engineering', 'product'],
+  priority: 7,
+  outputSchema: {
+    dataType: 'design-document',
+    fields: ['title', 'overview', 'components', 'diagram', 'decisions', 'interfaces', 'patterns'],
+    composable: true,
+    consumableBy: ['code-generate', 'spec-completeness'],
+  },
+  execute: wrapExecute(designDocGeneratorDomain.execute),
+  formatForPrompt: wrapFormat((d: any) =>
+    `Design Doc: ${d?.title || 'Untitled'} — ${d?.components?.length || 0} components, ${d?.decisions?.length || 0} technical decisions`
+  ),
+};
+
+export const performanceProfilerDefinition: ActionDomainDefinition = {
+  name: 'performance-profile',
+  description: 'Analyze APM data to identify performance bottlenecks, SLA risks, and optimization opportunities',
+  brainAnalog: 'Sensory Cortex — perceives system performance characteristics and detects degradation patterns',
+  version: '1.0.0',
+  requires: ['signalCollector', 'anomalyDetector'],
+  optional: ['llmAmplifier', 'temporalForecaster'],
+  intents: ['performance-profile', 'diagnose', 'optimize'],
+  intentKeywords: ['performance', 'latency', 'throughput', 'bottleneck', 'slow', 'apm', 'sla', 'p99', 'p50', 'response time'],
+  intentPatterns: [/(?:performance|latency|throughput)\s+(?:issue|problem|bottleneck|analysis)/i, /(?:slow|degrad)/i],
+  relevantDomains: ['engineering'],
+  priority: 9,
+  outputSchema: {
+    dataType: 'performance-profile',
+    fields: ['bottlenecks', 'slaStatus', 'optimizations', 'endpointBreakdown', 'queryAnalysis'],
+    composable: true,
+    consumableBy: ['diagnose', 'optimize', 'monitor'],
+  },
+  execute: wrapExecute(performanceProfilerDomain.execute),
+  formatForPrompt: wrapFormat((d: any) =>
+    `Performance Profile: ${d?.bottlenecks?.length || 0} bottlenecks found, SLA status: ${d?.slaStatus || 'unknown'}`
+  ),
+};
+
+export const deadCodeDetectorDefinition: ActionDomainDefinition = {
+  name: 'dead-code-detect',
+  description: 'Identify unreachable functions, unused imports, dead files, and calculate safe removal candidates',
+  brainAnalog: 'Autophagy System — cellular self-cleaning that removes damaged/unused components',
+  version: '1.0.0',
+  requires: ['signalCollector'],
+  optional: ['llmAmplifier', 'contextAwareReasoner'],
+  intents: ['dead-code-detect', 'audit'],
+  intentKeywords: ['dead code', 'unused', 'unreachable', 'cleanup', 'remove', 'orphan', 'import'],
+  intentPatterns: [/(?:dead|unused|unreachable)\s+(?:code|function|import|variable)/i, /code\s+cleanup/i],
+  relevantDomains: ['engineering'],
+  priority: 6,
+  outputSchema: {
+    dataType: 'dead-code-analysis',
+    fields: ['unreachableFunctions', 'unusedImports', 'unusedVariables', 'unusedExports', 'deadFiles', 'deadCodePercentage'],
+    composable: true,
+    consumableBy: ['code-generate', 'review-triage'],
+  },
+  execute: wrapExecute(deadCodeDetectorDomain.execute),
+  formatForPrompt: wrapFormat((d: any) =>
+    `Dead Code: ${d?.deadCodePercentage?.toFixed(1) || 0}% dead code, ${d?.unreachableFunctions?.length || 0} unreachable functions, ${d?.unusedImports?.length || 0} unused imports`
+  ),
+};
+
+/** All 4 P1 gap-closure domains as proper ActionDomainDefinitions */
+export const ALL_P1_DOMAINS: ActionDomainDefinition[] = [
+  dependencyUpgradeDefinition,
+  designDocGeneratorDefinition,
+  performanceProfilerDefinition,
+  deadCodeDetectorDefinition,
+];
+
+/**
+ * Register all 4 P1 domains into a registry.
+ *
+ * @example
+ * ```typescript
+ * import { registerP1Domains } from './action-domains-missing-p1';
+ * const registry = createActionDomainRegistry();
+ * registerP1Domains(registry); // +4 domains
+ * ```
+ */
+export function registerP1Domains(
+  registry: { register: (def: ActionDomainDefinition) => void },
+): void {
+  for (const domain of ALL_P1_DOMAINS) {
+    registry.register(domain);
+  }
 }

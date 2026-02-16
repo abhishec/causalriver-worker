@@ -109,7 +109,7 @@ export async function POST(request: Request) {
 
             return {
               organization_id: orgId,
-              source_domain: 'product',
+              source_domain: 'product.jira',
               signal_type: isResolved ? 'ticket_resolved' : 'ticket_in_progress',
               signal_value: cycleTimeHours || 1,
               entity_type: 'jira_issue',

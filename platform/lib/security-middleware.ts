@@ -83,6 +83,9 @@ const SESSION_RATE_LIMITS: Record<string, number> = {
   "/api/brain/evolution": 20,        // 20 req/min — evolution checks
   "/api/brain/health": 60,           // 60 req/min — health checks are lightweight
   "/api/jobs/trigger": 5,            // 5 req/min — job triggers are very heavy
+  "/api/connectors/github/webhook": 120,  // 120 req/min — GitHub webhook bursts
+  "/api/connectors/slack/webhook": 200,  // 200 req/min — Slack event bursts (high-traffic orgs)
+  "/api/connectors/jira/webhook": 120,   // 120 req/min — Jira webhook bursts
   "/api/connectors": 30,             // 30 req/min — connector ops
   "/api/org-members": 20,            // 20 req/min — member management
   "/api/finance-jarvis": 30,         // 30 req/min — finance queries

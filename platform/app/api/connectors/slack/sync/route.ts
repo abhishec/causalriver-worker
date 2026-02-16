@@ -151,7 +151,7 @@ export async function POST(request: NextRequest) {
         for (const [day, count] of dailyVolume) {
           signals.push({
             organization_id: orgId,
-            source_domain: "communication",
+            source_domain: "communication.slack",
             signal_type: "channel_message_volume",
             signal_value: count,
             entity_type: "slack_channel",
@@ -170,7 +170,7 @@ export async function POST(request: NextRequest) {
         if (threadCount > 0) {
           signals.push({
             organization_id: orgId,
-            source_domain: "communication",
+            source_domain: "communication.slack",
             signal_type: "thread_engagement",
             signal_value: threadCount / messages.length, // engagement ratio
             entity_type: "slack_channel",
@@ -188,7 +188,7 @@ export async function POST(request: NextRequest) {
         if (reactionCount > 0) {
           signals.push({
             organization_id: orgId,
-            source_domain: "communication",
+            source_domain: "communication.slack",
             signal_type: "reaction_sentiment",
             signal_value: reactionCount / messages.length,
             entity_type: "slack_channel",
@@ -205,7 +205,7 @@ export async function POST(request: NextRequest) {
         if (afterHoursCount > 0) {
           signals.push({
             organization_id: orgId,
-            source_domain: "communication",
+            source_domain: "communication.slack",
             signal_type: "after_hours_activity",
             signal_value: afterHoursCount / messages.length,
             entity_type: "slack_channel",

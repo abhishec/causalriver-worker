@@ -151,6 +151,7 @@ export class SEaaSService {
   private brainAgentRuntime: import('./brain-agent-runtime').BrainAgentRuntimeInstance | null = null;
   private anthropicApiKey: string | null = null;
   private organizationId: string;
+  private _jobProcessorInterval: ReturnType<typeof setInterval> | null = null;
 
   constructor(config: SEaaSConfig = {}) {
     // Initialize registry with SE agents
@@ -732,8 +733,16 @@ export class SEaaSService {
     }
   }
 
+  /** Stop the job processor interval to prevent memory leaks */
+  shutdown(): void {
+    if (this._jobProcessorInterval) {
+      clearInterval(this._jobProcessorInterval);
+      this._jobProcessorInterval = null;
+    }
+  }
+
   private startJobProcessor(): void {
-    setInterval(() => {
+    this._jobProcessorInterval = setInterval(() => {
       if (this.activeJobs >= this.maxConcurrentJobs) {
         return;
       }

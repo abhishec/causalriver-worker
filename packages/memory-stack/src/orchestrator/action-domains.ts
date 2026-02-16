@@ -5790,3 +5790,19 @@ export function registerAllActionDomains(
  * ```
  */
 export { registerSoftwareEngineeringDomains, ALL_SOFTWARE_ENGINEERING_DOMAINS } from './action-domains-software-engineering';
+
+// ============================================================================
+// V9 — P1 GAP CLOSURE DOMAINS (SE-aaS Expansion)
+// ============================================================================
+
+/**
+ * Import P1 gap-closure domains: Dependency Upgrade, HLD/LLD Generator,
+ * Performance Profiler, Dead Code Detector.
+ *
+ * @example
+ * ```typescript
+ * import { registerP1Domains } from './action-domains-missing-p1';
+ * registerP1Domains(registry); // +4 domains = 46 total
+ * ```
+ */
+export { registerP1Domains, ALL_P1_DOMAINS } from './action-domains-missing-p1';

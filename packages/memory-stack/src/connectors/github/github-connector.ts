@@ -140,12 +140,30 @@ export class GitHubConnector extends ConnectorBase {
           totalSignals++;
         }
 
-        // Updated PRs
+        // Updated PRs + their reviews (critical for P0 Bottleneck Detection)
         const prs = await this.getPullRequestsUpdatedSince(repo, since);
         for (const pr of prs) {
           const signal = this.transformPRToSignal(repo, pr);
           await this.streamProcessor.addSignal(signal);
           totalSignals++;
+
+          // Fetch reviews for each PR (same as initialLoad — without this, incremental
+          // syncs produce zero pr_reviewed signals, breaking P0 bottleneck detection)
+          try {
+            const reviews = await this.rateLimiter.throttle(() =>
+              this.githubFetch(`/repos/${repo.full_name}/pulls/${pr.number}/reviews`)
+            );
+
+            for (const review of reviews) {
+              if (review.user && new Date(review.submitted_at) > new Date(since)) {
+                const reviewSignal = this.transformReviewToSignal(repo, pr, review);
+                await this.streamProcessor.addSignal(reviewSignal);
+                totalSignals++;
+              }
+            }
+          } catch {
+            // Continue even if reviews fail for one PR
+          }
         }
 
         // Updated issues

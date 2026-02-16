@@ -120,15 +120,30 @@ export function createScheduledJobs(
       lostRelationships: CausalRelationship[];
       totalDiscovered: number;
     }> {
-      // Cursor-based streaming: OOM-safe at 10M+ signals
-      // Uses id-based cursor instead of offset (O(1) vs O(n) per page)
+      // OOM-SAFE at 10M+ signals:
+      // 1. Only fetch signals within the lookback window (not ALL signals ever)
+      // 2. Cap at 500K signals max (enough for 90-day discovery at most orgs)
+      // 3. Use cursor-based streaming with id-based pagination (O(1) per page)
+      const lookbackCutoff = new Date(
+        Date.now() - fullConfig.lookbackDays * 24 * 60 * 60 * 1000
+      ).toISOString();
+      const MAX_SIGNALS = 500_000; // Safety cap: ~100MB at ~200 bytes/signal
+
       const allSignals: any[] = [];
+      let hitCap = false;
+
       await streamInBatches(
         async (cursor, batchSize) => {
+          // Safety: stop if we've accumulated too many signals
+          if (allSignals.length >= MAX_SIGNALS) {
+            return { items: [], nextCursor: null, hasMore: false };
+          }
+
           let query = supabase
             .from('cross_domain_signals')
             .select('id, source_domain, signal_type, signal_value, signal_timestamp, created_at')
             .eq('organization_id', organizationId)
+            .gte('created_at', lookbackCutoff) // CRITICAL: Only fetch within lookback window
             .order('id', { ascending: true })
             .limit(batchSize);
 
@@ -146,9 +161,24 @@ export function createScheduledJobs(
             hasMore: data.length === batchSize,
           };
         },
-        async (batch) => { allSignals.push(...batch); },
-        { batchSize: 1000, batchDelayMs: 10 },
+        async (batch) => {
+          const remaining = MAX_SIGNALS - allSignals.length;
+          if (remaining <= 0) {
+            hitCap = true;
+            return;
+          }
+          allSignals.push(...batch.slice(0, remaining));
+          if (batch.length > remaining) hitCap = true;
+        },
+        { batchSize: 5000, batchDelayMs: 10 }, // Larger batches = fewer round-trips
       );
+
+      if (hitCap) {
+        console.warn(
+          `[CausalDiscovery] Hit ${MAX_SIGNALS} signal cap for org ${organizationId}. ` +
+          `Consider reducing lookbackDays (currently ${fullConfig.lookbackDays}).`
+        );
+      }
 
       const signals = allSignals;
       if (signals.length === 0) {
@@ -540,9 +570,13 @@ export function createScheduledJobs(
             outcomesRecorded++;
             if (wasCorrect) correctPredictions++;
             else incorrectPredictions++;
-          } catch { /* individual prediction failure — continue */ }
+          } catch (predErr: any) {
+              console.warn(`[PredictionVerification] Skipping prediction ${pred.id}:`, predErr.message);
+            }
         }
-      } catch { /* table may not exist yet */ }
+      } catch (tableErr: any) {
+        console.warn('[PredictionVerification] prediction_records table not accessible:', tableErr.message);
+      }
 
       return { predictionsChecked, outcomesRecorded, correctPredictions, incorrectPredictions };
     },
@@ -590,7 +624,9 @@ export function createScheduledJobs(
           .eq('organization_id', organizationId)
           .lt('created_at', predCutoff);
         predictionsDeleted = predCount ?? 0;
-      } catch { /* table may not exist yet */ }
+      } catch (err: any) {
+        console.warn('[DataRetention] prediction_records cleanup skipped:', err.message);
+      }
 
       // weight_update_history: keep 90 days
       try {
@@ -601,7 +637,9 @@ export function createScheduledJobs(
           .eq('organization_id', organizationId)
           .lt('created_at', weightCutoff);
         weightsDeleted = weightCount ?? 0;
-      } catch { /* table may not exist yet */ }
+      } catch (err: any) {
+        console.warn('[DataRetention] weight_update_history cleanup skipped:', err.message);
+      }
 
       // ai_memory: archive low-importance memories older than 365 days
       try {
@@ -613,7 +651,9 @@ export function createScheduledJobs(
           .lt('created_at', memCutoff)
           .lt('importance', 0.3);
         memoriesDeleted = memCount ?? 0;
-      } catch { /* table may not exist yet */ }
+      } catch (err: any) {
+        console.warn('[DataRetention] ai_memory cleanup skipped:', err.message);
+      }
 
       // causal_event_stream: keep 30 days
       try {
@@ -624,7 +664,9 @@ export function createScheduledJobs(
           .eq('organization_id', organizationId)
           .lt('created_at', eventCutoff);
         eventsDeleted = eventCount ?? 0;
-      } catch { /* table may not exist yet */ }
+      } catch (err: any) {
+        console.warn('[DataRetention] causal_event_stream cleanup skipped:', err.message);
+      }
 
       return { signalsDeleted, predictionsDeleted, weightsDeleted, memoriesDeleted, eventsDeleted };
     },

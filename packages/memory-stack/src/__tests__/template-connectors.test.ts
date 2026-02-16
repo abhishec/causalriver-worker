@@ -15,7 +15,7 @@ describe('Template Connectors', () => {
 
       expect(connector.id).toBe('slack');
       expect(connector.name).toBe('Slack');
-      expect(connector.domain).toBe('communication');
+      expect(connector.domain).toBe('communication.slack');
       expect(connector.fullSync).toBeDefined();
       expect(connector.incrementalSync).toBeDefined();
       expect(connector.handleWebhook).toBeDefined();
@@ -40,7 +40,7 @@ describe('Template Connectors', () => {
       expect(signals.length).toBe(1);
       expect(signals[0].signal_type).toBe('message_sent');
       expect(signals[0].entity_type).toBe('slack_message');
-      expect(signals[0].source_domain).toBe('communication');
+      expect(signals[0].source_domain).toBe('communication.slack');
     });
 
     it('should handle thread reply webhook', () => {

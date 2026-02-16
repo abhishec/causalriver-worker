@@ -82,7 +82,7 @@ describe('GitHub Connector', () => {
 
       expect(signals.length).toBe(1);
       expect(signals[0].signal_type).toBe('pr_opened');
-      expect(signals[0].source_domain).toBe('engineering');
+      expect(signals[0].source_domain).toBe('engineering.github');
       expect(signals[0].entity_type).toBe('pull_request');
       expect(signals[0].entity_id).toBe('pr_42');
       expect(signals[0].signal_value).toBe(1);

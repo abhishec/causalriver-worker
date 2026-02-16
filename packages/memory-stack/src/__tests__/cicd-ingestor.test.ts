@@ -19,7 +19,7 @@ describe('CICDIngestor', () => {
       expect(signals[0].signal_type).toBe('ci_passed');
       expect(signals[0].signal_value).toBe(1);
       expect(signals[0].entity_type).toBe('ci_run');
-      expect(signals[0].source_domain).toBe('engineering');
+      expect(signals[0].source_domain).toBe('engineering.cicd');
     });
 
     it('should map build_completed + failure to ci_failed', () => {

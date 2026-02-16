@@ -90,9 +90,13 @@ export class JiraConnector extends ConnectorBase {
               'reporter',
               'created',
               'updated',
+              'resolutiondate',
               'comment',
               'labels',
               'project',
+              'sprint',
+              'story_points',
+              'customfield_10028', // Story points (common custom field)
             ],
           })
         );
@@ -264,37 +268,90 @@ export class JiraConnector extends ConnectorBase {
   }
 
   /**
-   * Ingest single issue
+   * Ingest single issue — produces DISTINCT signal types for P0 velocity tracking:
+   *   - jira_issue_created: When the issue was created
+   *   - jira_issue_resolved: When the issue was resolved/done (signal_value = cycle_time_hours)
+   *   - jira_issue: Current state snapshot (for brain context)
+   *
+   * The cycle_time_hours on resolved issues is CRITICAL for P0 Use Case A (Deploy Velocity Collapse).
+   * Jira ticket cycle time is a leading indicator: when avg_ticket_cycle_time rises, velocity collapses.
    */
   private async ingestIssue(issue: JiraIssue): Promise<void> {
     const description = this.extractText(issue.fields.description);
+    const fields = issue.fields as any; // Cast for optional fields like resolutiondate, sprint
 
-    const eventTime = issue.fields.updated;
-    const signal: Signal = {
+    const baseMetadata = {
+      source: 'jira',
+      content: `${issue.fields.summary}\n\n${description}`,
+      issue_key: issue.key,
+      issue_type: issue.fields.issuetype.name,
+      status: issue.fields.status.name,
+      priority: issue.fields.priority?.name,
+      assignee: issue.fields.assignee?.displayName,
+      reporter: issue.fields.reporter.displayName,
+      labels: issue.fields.labels,
+      project: issue.fields.project.key,
+      project_name: issue.fields.project.name,
+      sprint_name: fields.sprint?.name || null,
+      sprint_id: fields.sprint?.id || null,
+      story_points: fields.story_points || fields.customfield_10028 || null,
+    };
+
+    // 1. Issue creation signal (always emit — with created_at timestamp for accurate time series)
+    const creationSignal: Signal = {
+      source_domain: 'engineering.jira',
+      signal_type: 'jira_issue_created',
+      signal_value: 1,
+      entity_type: 'issue',
+      entity_id: `jira#${issue.key}`,
+      signal_metadata: baseMetadata,
+      organization_id: this.organizationId,
+      created_at: issue.fields.created,
+      signal_timestamp: issue.fields.created,
+    };
+    await this.streamProcessor.addSignal(creationSignal);
+
+    // 2. Resolution signal (if resolved/done) — signal_value = cycle_time_hours
+    //    This is the KEY metric for P0 velocity: tickets_in_progress_count and avg_ticket_cycle_time
+    const resolutionDate = fields.resolutiondate;
+    const statusCategory = fields.status?.statusCategory?.key || fields.status?.statusCategory?.name;
+    const isDone = statusCategory === 'done' || resolutionDate;
+
+    if (isDone && resolutionDate) {
+      const cycleTimeHours =
+        (new Date(resolutionDate).getTime() - new Date(issue.fields.created).getTime()) / 3600000;
+
+      const resolvedSignal: Signal = {
+        source_domain: 'engineering.jira',
+        signal_type: 'jira_issue_resolved',
+        signal_value: cycleTimeHours,
+        entity_type: 'issue',
+        entity_id: `jira#${issue.key}`,
+        signal_metadata: {
+          ...baseMetadata,
+          cycle_time_hours: cycleTimeHours,
+          resolution_date: resolutionDate,
+        },
+        organization_id: this.organizationId,
+        created_at: resolutionDate,
+        signal_timestamp: resolutionDate,
+      };
+      await this.streamProcessor.addSignal(resolvedSignal);
+    }
+
+    // 3. Current state snapshot (for brain context — the original jira_issue signal)
+    const snapshotSignal: Signal = {
       source_domain: 'engineering.jira',
       signal_type: 'jira_issue',
       signal_value: 1,
       entity_type: 'issue',
       entity_id: `jira#${issue.key}`,
-      signal_metadata: {
-        source: 'jira',
-        content: `${issue.fields.summary}\n\n${description}`,
-        issue_key: issue.key,
-        issue_type: issue.fields.issuetype.name,
-        status: issue.fields.status.name,
-        priority: issue.fields.priority?.name,
-        assignee: issue.fields.assignee?.displayName,
-        reporter: issue.fields.reporter.displayName,
-        labels: issue.fields.labels,
-        project: issue.fields.project.key,
-        project_name: issue.fields.project.name,
-      },
+      signal_metadata: baseMetadata,
       organization_id: this.organizationId,
-      created_at: eventTime,
-      signal_timestamp: eventTime,
+      created_at: issue.fields.updated,
+      signal_timestamp: issue.fields.updated,
     };
-
-    await this.streamProcessor.addSignal(signal);
+    await this.streamProcessor.addSignal(snapshotSignal);
   }
 
   /**

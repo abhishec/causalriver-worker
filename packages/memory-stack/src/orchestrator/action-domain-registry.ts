@@ -101,7 +101,12 @@ export type SemanticIntent =
   | 'uncertainty-quantify' // Epistemic vs aleatoric decomposition
   | 'query-cache'          // Working memory buffer stats
   | 'execution-profile'    // Performance self-observation
-  | 'robustness-check';    // Perturbation sensitivity analysis
+  | 'robustness-check'    // Perturbation sensitivity analysis
+  // V9 — P1 Gap Closure (SE-aaS expansion)
+  | 'dependency-upgrade'   // Outdated dependency + security analysis
+  | 'design-doc-generate'  // HLD/LLD document generation
+  | 'performance-profile'  // APM bottleneck + SLA risk analysis
+  | 'dead-code-detect';    // Unused import/function detection
 
 /** Output schema declaration — what a domain produces */
 export interface DomainOutputSchema {

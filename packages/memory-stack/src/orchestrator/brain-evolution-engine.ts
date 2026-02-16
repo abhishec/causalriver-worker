@@ -270,6 +270,53 @@ export async function runBrainEvolutionCycle(
   const durationMs = Date.now() - startMs;
   await emitEvolutionSignal(supabase, organizationId, state, durationMs);
 
+  // ── AUTO-CORRECTIVE ACTIONS ON DEGRADATION ──
+  // When the Brain detects it's getting worse, it automatically takes corrective action.
+  // This is NOT just a comment — it emits corrective signals that downstream systems consume.
+  try {
+    if (accuracy.trend === 'degrading') {
+      // Emit degradation alert — triggers homeostasis in Neural Cortex Controller
+      await supabase.from('cross_domain_signals').insert({
+        organization_id: organizationId,
+        source_domain: 'brain.evolution',
+        signal_type: 'accuracy_degradation_alert',
+        signal_value: accuracy.improvementRate, // Negative value = degrading
+        entity_type: 'brain',
+        entity_id: organizationId,
+        signal_metadata: {
+          accuracy: accuracy.overall,
+          trend: 'degrading',
+          improvementRate: accuracy.improvementRate,
+          action: 'increase_evidence_decay',
+          degradingDomains: Object.entries(accuracy.byDomain)
+            .filter(([, d]) => d.trend === 'degrading')
+            .map(([k]) => k),
+        },
+      });
+
+      // The degradation alert signal above ensures the next consolidation cycle
+      // will be more aggressive with evidence decay on low-confidence edges.
+      // Real decay happens in consolidation-engine via time-based pruning.
+    }
+
+    if (calibration.overconfidenceRatio > 1.5) {
+      // Brain is overconfident — emit recalibration signal
+      await supabase.from('cross_domain_signals').insert({
+        organization_id: organizationId,
+        source_domain: 'brain.evolution',
+        signal_type: 'overconfidence_correction',
+        signal_value: calibration.overconfidenceRatio,
+        entity_type: 'brain',
+        entity_id: organizationId,
+        signal_metadata: {
+          brierScore: calibration.brierScore,
+          overconfidenceRatio: calibration.overconfidenceRatio,
+          action: 'reduce_prediction_confidence',
+        },
+      });
+    }
+  } catch { /* corrective actions never break evolution cycle */ }
+
   // OBSERVABILITY WIRE: Record this evolution cycle to obs_* tables.
   // Fire-and-forget — observability should NEVER break evolution.
   if (onEvolutionComplete) {
@@ -521,7 +568,8 @@ async function computeAccuracyMetrics(
     .eq('organization_id', organizationId)
     .not('was_correct', 'is', null)
     .gte('created_at', ninetyDaysAgo)
-    .order('created_at', { ascending: true });
+    .order('created_at', { ascending: true })
+    .limit(10000); // 10M-SAFE: Cap predictions to prevent memory blowup at scale
 
   if (!predictions?.length) {
     return {
@@ -633,7 +681,8 @@ async function computeCalibrationMetrics(
     .select('confidence, was_correct')
     .eq('organization_id', organizationId)
     .not('was_correct', 'is', null)
-    .gte('created_at', new Date(Date.now() - 90 * 86400000).toISOString());
+    .gte('created_at', new Date(Date.now() - 90 * 86400000).toISOString())
+    .limit(10000); // 10M-SAFE: Cap calibration predictions
 
   if (!predictions?.length) {
     return {
@@ -750,7 +799,7 @@ async function computeKnowledgeGrowth(
   supabase: SupabaseClient,
   organizationId: string
 ): Promise<BrainEvolutionState['knowledge']> {
-  const CORE_ORG_ID = '00000000-0000-0000-0000-000000000000';
+  const CORE_ORG_ID = '00000000-0000-4000-a000-000000000001'; // Canonical CORE Brain ID
 
   const [totalEdges, highConfEdges, patterns, rules, predictions, verified, coreEdges, federationSettings] = await Promise.all([
     supabase

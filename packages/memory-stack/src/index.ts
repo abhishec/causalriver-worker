@@ -511,6 +511,23 @@ export {
   type LayerSchedule,
 } from './orchestrator/neural-cortex-controller';
 
+// Closed-Loop Learning Engine (6 feedback loops: prediction verification,
+// Bayesian weight updates, user feedback, intervention tracking, auto-retraining, agent outcomes)
+export {
+  createClosedLoopLearningEngine,
+  type ClosedLoopLearningInstance,
+  type LearningCycleResult as ClosedLoopCycleResult,
+  type LearningHealthReport as ClosedLoopHealthReport,
+  type UserFeedbackRecord,
+} from './orchestrator/closed-loop-learning-engine';
+
+// Reinforcement Feedback System (30-layer RL with credit assignment + exploration)
+export {
+  createReinforcementFeedbackSystem,
+  type ReinforcementFeedbackInstance,
+  type ReinforcementSignal,
+} from './orchestrator/reinforcement-feedback-system';
+
 // Entity Graph Persistence (Flaw 8 fix)
 export {
   createPersistedEntityGraph,
@@ -522,6 +539,34 @@ export {
   createPersistedDomainTaxonomy,
   type PersistedDomainTaxonomyInstance,
 } from './domain-hierarchy/taxonomy-persistence';
+
+// Domain Taxonomy (L16 domain hierarchy)
+export {
+  createDomainTaxonomy,
+  type DomainTaxonomyInstance,
+} from './domain-hierarchy/domain-taxonomy';
+
+// Cross-System Entity Graph (L17 entity linking)
+export {
+  createCrossSystemEntityGraph,
+  type CrossSystemEntityGraphInstance,
+} from './domain-hierarchy/cross-system-entity-graph';
+
+// Deep Pipeline Connector (L1-L30 unified pipeline)
+export {
+  createDeepPipeline,
+  type DeepPipelineInstance,
+  type FullCycleResult,
+  type FullHealthReport,
+} from './orchestrator/deep-pipeline-connector';
+
+// Deep Layers (L16-L30)
+export {
+  createDeepLayers,
+  type DeepLayersInstance,
+  type DeepCycleInput,
+  type DeepCycleResult,
+} from './causality/leap-deep-layers';
 
 // Consolidation Engine ("Brain Sleep")
 export {
@@ -1035,6 +1080,13 @@ export {
   designDocGeneratorDomain,
   performanceProfilerDomain,
   deadCodeDetectorDomain,
+  // Registry-compatible ActionDomainDefinition wrappers
+  dependencyUpgradeDefinition,
+  designDocGeneratorDefinition,
+  performanceProfilerDefinition,
+  deadCodeDetectorDefinition,
+  ALL_P1_DOMAINS,
+  registerP1Domains,
   type DependencyUpgradeRequest,
   type DependencyUpgradeResult,
   type DesignDocRequest,

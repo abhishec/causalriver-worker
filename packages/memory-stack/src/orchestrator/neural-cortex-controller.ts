@@ -786,8 +786,38 @@ export function createNeuralCortexController(config: NeuralCortexConfig): Neural
           regionScores: cycleResult.controllerHealth.regionScores,
         },
       });
-    } catch {
-      // Never block the pipeline
+
+      // ── INDIVIDUAL LAYER OBSERVABILITY (L1-L30) ──
+      // Record per-layer health for ALL layers that ran (including L16-L30 deep layers)
+      const layerSignals = cycleResult.layersRan.map(layerId => {
+        const layer = _layers.get(layerId);
+        if (!layer) return null;
+        return {
+          organization_id: organizationId,
+          source_domain: `brain.layer.${layerId}`,
+          signal_type: 'layer_cycle_health',
+          signal_value: layer.healthScore,
+          entity_type: 'cognitive_layer',
+          entity_id: `L${layerId}_${layer.name}`,
+          signal_metadata: {
+            layerId,
+            layerName: layer.name,
+            region: layer.region,
+            state: layer.state,
+            healthScore: layer.healthScore,
+            avgExecutionMs: layer.avgExecutionMs,
+            consecutiveFailures: layer.consecutiveFailures,
+            lastMetrics: layer.lastMetrics,
+            cycleNumber: cycleResult.cycleNumber,
+          },
+        };
+      }).filter(Boolean);
+
+      if (layerSignals.length > 0) {
+        await supabase.from('cross_domain_signals').insert(layerSignals);
+      }
+    } catch (err: any) {
+      console.warn('[NeuralCortex] Pipeline update non-fatal error:', err?.message || err);
     }
   }
 
@@ -864,8 +894,8 @@ export function createNeuralCortexController(config: NeuralCortexConfig): Neural
         try {
           learning = await _closedLoop.runLearningCycle();
           homeostasisActions.push(...learning.learningReport);
-        } catch {
-          // Learning failure shouldn't crash the pipeline
+        } catch (err: any) {
+          console.warn('[NeuralCortex] Learning cycle non-fatal error:', err?.message || err);
         }
       }
 
@@ -1059,6 +1089,41 @@ export function createNeuralCortexController(config: NeuralCortexConfig): Neural
 
       _lastEvolutionState = evolutionState;
 
+      // ── EVOLUTION → RL REWARD SIGNAL ──
+      // When brain accuracy improves, inject dopamine to all contributing layers.
+      // When accuracy degrades, inject GABA (inhibition) to force adaptation.
+      if (_rl) {
+        const accuracyReward = evolutionState.accuracy.trend === 'improving'
+          ? Math.min(0.5, evolutionState.accuracy.improvementRate * 10)   // Positive: dopamine
+          : evolutionState.accuracy.trend === 'degrading'
+            ? Math.max(-0.5, evolutionState.accuracy.improvementRate * 10) // Negative: gaba
+            : 0; // Stable: no signal
+
+        if (accuracyReward !== 0) {
+          // Inject evolution reward to ALL active layers — accuracy is a whole-brain metric
+          for (const [id, layer] of _layers) {
+            if (layer.state === 'active' || layer.state === 'warming_up') {
+              _rl.injectExternalReward(
+                id,
+                accuracyReward * (layer.healthScore / 100), // Scale by layer health
+                `Evolution accuracy ${evolutionState.accuracy.trend}: ${(evolutionState.accuracy.overall * 100).toFixed(1)}%`
+              );
+            }
+          }
+        }
+
+        // Calibration reward: well-calibrated brain gets reward, overconfident gets penalty
+        if (evolutionState.calibration.isWellCalibrated) {
+          for (const [id] of _layers) {
+            _rl.injectExternalReward(id, 0.1, `Brain well-calibrated (Brier=${evolutionState.calibration.brierScore.toFixed(3)})`);
+          }
+        } else if (evolutionState.calibration.overconfidenceRatio > 1.5) {
+          for (const [id] of _layers) {
+            _rl.injectExternalReward(id, -0.1, `Brain overconfident (ratio=${evolutionState.calibration.overconfidenceRatio.toFixed(2)})`);
+          }
+        }
+      }
+
       // NEW: Compute per-region evolution
       const regionEvolution: Record<string, {
         layersTracked: number;
@@ -1133,7 +1198,7 @@ export function createNeuralCortexController(config: NeuralCortexConfig): Neural
               accuracy: evolutionState.accuracy.overall,
             },
           });
-        } catch { /* never block */ }
+        } catch (err: any) { console.warn('[NeuralCortex] Observability non-fatal:', err?.message || err); }
       }
 
       return {
@@ -1287,7 +1352,7 @@ export function createNeuralCortexController(config: NeuralCortexConfig): Neural
               durationMs: Date.now() - start,
             },
           });
-        } catch { /* never block */ }
+        } catch (err: any) { console.warn('[NeuralCortex] Observability non-fatal:', err?.message || err); }
       }
 
       return {

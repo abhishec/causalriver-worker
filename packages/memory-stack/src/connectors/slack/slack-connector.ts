@@ -9,6 +9,7 @@ import { ConnectorBase, IngestionResult } from '../base/connector-base.js';
 import { RateLimitConfig } from '../base/rate-limiter.js';
 import { Signal } from '../base/stream-processor.js';
 import { Checkpoint } from '../base/checkpoint-manager.js';
+import type { DomainTaxonomyInstance } from '../../domain-hierarchy/domain-taxonomy';
 
 interface SlackCredentials {
   accessToken: string;
@@ -42,6 +43,10 @@ interface SlackMessage {
 
 export class SlackConnector extends ConnectorBase {
   readonly connectorType = 'slack';
+  private domainTaxonomy: DomainTaxonomyInstance | null = null;
+
+  /** Cache channel → domain resolution so we don't re-classify for every message */
+  private channelDomainCache = new Map<string, string>();
 
   constructor(
     organizationId: string,
@@ -50,6 +55,55 @@ export class SlackConnector extends ConnectorBase {
     redis?: any
   ) {
     super(organizationId, slackCreds, supabase, redis);
+  }
+
+  /**
+   * Wire domain taxonomy for intelligent channel classification.
+   * When set, channel names like #eng-backend auto-classify to 'engineering.eng-backend'
+   * instead of the generic 'communication.slack'.
+   *
+   * @example
+   *   slackConnector.setDomainTaxonomy(domainTaxonomy);
+   *   // Now: #eng-backend → 'engineering.eng-backend'
+   *   // Now: #incident-response → 'engineering' (0.5) + 'support' (0.3)
+   *   // Now: #general → 'communication.slack' (fallback)
+   */
+  setDomainTaxonomy(taxonomy: DomainTaxonomyInstance): void {
+    this.domainTaxonomy = taxonomy;
+    this.channelDomainCache.clear();
+  }
+
+  /**
+   * Resolve channel to its organizational domain using taxonomy.
+   * Uses 3-level cascade:
+   *   1. Domain taxonomy (name patterns + admin overrides) → confidence-scored
+   *   2. Channel purpose/topic keywords → boost/override
+   *   3. Fallback to 'communication.slack' if confidence < 0.2
+   */
+  private resolveChannelDomain(channel: SlackChannel): string {
+    // Check cache first
+    const cached = this.channelDomainCache.get(channel.id);
+    if (cached) return cached;
+
+    let domain = 'communication.slack'; // Default fallback
+
+    if (this.domainTaxonomy) {
+      // Try taxonomy resolution with channel metadata
+      const resolved = this.domainTaxonomy.resolveSignalDomain('slack', {
+        channel_name: channel.name,
+        channel_topic: channel.topic?.value,
+        channel_purpose: channel.purpose?.value,
+        is_private: channel.is_private,
+        member_count: channel.num_members,
+      });
+
+      if (resolved.confidence > 0.2) {
+        domain = resolved.hierarchicalPath;
+      }
+    }
+
+    this.channelDomainCache.set(channel.id, domain);
+    return domain;
   }
 
   protected getRateLimits(): RateLimitConfig {
@@ -281,7 +335,16 @@ export class SlackConnector extends ConnectorBase {
   }
 
   /**
-   * Transform Slack message to signal
+   * Transform Slack message to signal.
+   *
+   * Domain classification:
+   *   - With taxonomy: #eng-backend → 'engineering.eng-backend'
+   *   - Without taxonomy: all channels → 'communication.slack' (fallback)
+   *
+   * This enables the brain to treat Slack as CROSS-DOMAIN intelligence:
+   *   - Messages in #eng-backend feed into engineering causal graphs
+   *   - Messages in #sales feed into sales pipeline intelligence
+   *   - Messages in #incident-response feed into support + engineering
    */
   private transformMessageToSignal(channel: SlackChannel, message: SlackMessage): Signal {
     // Build content
@@ -301,9 +364,12 @@ export class SlackConnector extends ConnectorBase {
       content += `\n\nFiles: ${fileNames}`;
     }
 
+    // Domain resolution: use taxonomy if available, else fallback
+    const sourceDomain = this.resolveChannelDomain(channel);
+
     const eventTime = new Date(parseFloat(message.ts) * 1000).toISOString();
     return {
-      source_domain: 'communication.slack',
+      source_domain: sourceDomain,
       signal_type: message.thread_ts ? 'slack_thread_message' : 'slack_message',
       signal_value: 1,
       entity_type: message.thread_ts ? 'thread_message' : 'message',
@@ -313,6 +379,7 @@ export class SlackConnector extends ConnectorBase {
         content: content.substring(0, 10000), // Limit to 10KB
         channel: channel.name,
         channel_id: channel.id,
+        channel_domain: sourceDomain, // Track the resolved domain for debugging
         user: message.user,
         ts: message.ts,
         thread_ts: message.thread_ts,

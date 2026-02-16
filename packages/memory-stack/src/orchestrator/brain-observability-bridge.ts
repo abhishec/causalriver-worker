@@ -742,6 +742,7 @@ export function createBrainObservabilityBridge(config: BrainObservabilityBridgeC
         signalsRes,
         layerHealthRes,
         federationRes,
+        signalQualityRes,
       ] = await Promise.all([
         // Latest evolution snapshot
         supabase
@@ -758,13 +759,13 @@ export function createBrainObservabilityBridge(config: BrainObservabilityBridgeC
           .eq('organization_id', organizationId)
           .gte('created_at', sevenDaysAgo),
 
-        // Layer health snapshots
+        // Layer health snapshots (all 30 layers)
         supabase
           .from('obs_layer_health')
           .select('layer_number, health_score, is_healthy, health_trend')
           .eq('organization_id', organizationId)
           .order('created_at', { ascending: false })
-          .limit(15),
+          .limit(30),
 
         // Federation settings
         supabase
@@ -772,12 +773,22 @@ export function createBrainObservabilityBridge(config: BrainObservabilityBridgeC
           .select('contribute_to_core_brain, upstream_items_contributed')
           .eq('organization_id', organizationId)
           .limit(1),
+
+        // Signal quality from obs_signal_ingestion (compute real avg quality)
+        supabase
+          .from('obs_signal_ingestion')
+          .select('avg_quality')
+          .eq('organization_id', organizationId)
+          .gte('created_at', sevenDaysAgo)
+          .order('created_at', { ascending: false })
+          .limit(100),
       ]);
 
       const evolution = evolutionRes.data?.[0];
       const signals = signalsRes.data ?? [];
       const layerHealth = layerHealthRes.data ?? [];
       const federation = federationRes.data?.[0];
+      const signalQualityData = signalQualityRes.data ?? [];
 
       // Compute unique active domains
       const activeDomains = new Set(signals.map((s: any) => s.source_domain));
@@ -820,7 +831,9 @@ export function createBrainObservabilityBridge(config: BrainObservabilityBridgeC
         },
         signals: {
           totalSignals7d: signals.length,
-          signalQualityAvg: 0.8, // Default; would compute from obs_signal_ingestion
+          signalQualityAvg: signalQualityData.length > 0
+            ? signalQualityData.reduce((sum: number, s: any) => sum + (s.avg_quality ?? 0.8), 0) / signalQualityData.length
+            : (signals.length > 0 ? 0.75 : 0), // Computed from obs_signal_ingestion, fallback to 0.75 if signals exist
           domainsActive: activeDomains.size,
         },
       };

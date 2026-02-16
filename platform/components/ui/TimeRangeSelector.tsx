@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 
-export type TimeRange = "1h" | "6h" | "24h" | "7d" | "30d";
+export type TimeRange = "1h" | "6h" | "24h" | "7d" | "30d" | "90d";
 
 interface TimeRangeSelectorProps {
   value: TimeRange;
@@ -17,6 +17,7 @@ const LABELS: Record<TimeRange, string> = {
   "24h": "24H",
   "7d": "7D",
   "30d": "30D",
+  "90d": "90D",
 };
 
 export function TimeRangeSelector({
@@ -53,5 +54,6 @@ export function getTimeRangeDate(range: TimeRange): Date {
     case "24h": return new Date(now.getTime() - 24 * 60 * 60 * 1000);
     case "7d": return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     case "30d": return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    case "90d": return new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
   }
 }

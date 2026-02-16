@@ -40,6 +40,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { createRetry } from '../infra/retry';
+import type { DomainTaxonomyInstance } from '../domain-hierarchy/domain-taxonomy';
 
 // ============================================================================
 // TYPES
@@ -112,8 +113,35 @@ const CONNECTOR_TO_DOMAIN_MAP: Record<string, string> = {
 
 /**
  * Derive source_domain from connector source.
+ * Uses the flat map as a FALLBACK. When a DomainTaxonomyInstance is provided
+ * via setDomainTaxonomy(), the hierarchical taxonomy is used instead,
+ * enabling channel-level, project-level, and resource-level domain routing.
  */
-function deriveDomain(source: string): string {
+let _domainTaxonomy: DomainTaxonomyInstance | null = null;
+
+/**
+ * Wire the hierarchical domain taxonomy into the signal bridge.
+ * Once set, all signal domain resolution flows through the taxonomy
+ * instead of the flat CONNECTOR_TO_DOMAIN_MAP.
+ *
+ * This is THE critical wire that enables:
+ *   - Slack #engineering-backend → engineering.eng-backend (not communication.slack)
+ *   - PagerDuty eng-team → engineering.eng-devops (not just engineering.pagerduty)
+ *   - Jira MARKETING-123 → marketing.mkt-demand (not just engineering.jira)
+ */
+export function setDomainTaxonomy(taxonomy: DomainTaxonomyInstance): void {
+  _domainTaxonomy = taxonomy;
+}
+
+function deriveDomain(source: string, metadata?: Record<string, unknown>): string {
+  // If taxonomy is wired, use hierarchical resolution
+  if (_domainTaxonomy && metadata) {
+    const resolved = _domainTaxonomy.resolveSignalDomain(source.toLowerCase(), metadata);
+    if (resolved.confidence > 0.2) {
+      return resolved.hierarchicalPath;
+    }
+  }
+  // Fallback to flat map
   return CONNECTOR_TO_DOMAIN_MAP[source.toLowerCase()] || `custom.${source.toLowerCase()}`;
 }
 
@@ -255,7 +283,7 @@ export async function storeDualWriteConnectorSignals(
 
     return {
       organization_id: organizationId,
-      source_domain: deriveDomain(source),
+      source_domain: deriveDomain(source, metadata),
       signal_type: s.signal_type,
       signal_value: s.signal_value,
       signal_timestamp: s.signal_timestamp
@@ -265,7 +293,7 @@ export async function storeDualWriteConnectorSignals(
         : now,
       entity_type: deriveEntityType(source, s.signal_type, metadata),
       entity_id: deriveEntityId(metadata),
-      client_id: null, // TODO: Add client_id tracking for multi-client orgs
+      client_id: (metadata?.client_id as string) || (metadata?.account_id as string) || null,
       signal_metadata: metadata,
     };
   });
@@ -349,11 +377,73 @@ export async function runStreamingETL(
   organizationId: string,
   sinceTimestamp?: Date
 ): Promise<{ transformed: number }> {
-  // TODO: Implement async ETL pipeline
-  // 1. Fetch connector_signals WHERE org_id = X AND created_at > sinceTimestamp
-  // 2. Enrich with entity resolution, domain classification, LLM metadata extraction
-  // 3. Write to cross_domain_signals
-  // 4. Mark as processed (add processed_at column to connector_signals)
+  const BATCH_SIZE = 500;
+  let transformed = 0;
 
-  throw new Error('Async ETL not yet implemented. Use dual-write for now.');
+  // 1. Fetch unprocessed connector_signals
+  const since = sinceTimestamp
+    ? sinceTimestamp.toISOString()
+    : new Date(Date.now() - 24 * 3600000).toISOString(); // Default: last 24h
+
+  const { data: rawSignals } = await supabase
+    .from('connector_signals')
+    .select('id, connector_type, signal_type, signal_value, entity_type, entity_id, metadata, created_at')
+    .eq('organization_id', organizationId)
+    .is('processed_at', null)          // Only unprocessed signals
+    .gte('created_at', since)
+    .order('created_at', { ascending: true })
+    .limit(BATCH_SIZE);
+
+  if (!rawSignals?.length) {
+    return { transformed: 0 };
+  }
+
+  // 2. Enrich: domain classification + entity resolution from metadata
+  const enrichedSignals = rawSignals.map((raw: any) => {
+    const metadata = raw.metadata ?? {};
+    // Domain classification: connector_type → source_domain (hierarchical)
+    const sourceDomain = metadata.source_domain
+      || `${raw.connector_type}.${metadata.sub_domain || 'general'}`;
+
+    // Client ID extraction for multi-tenant orgs
+    const clientId = metadata.client_id || metadata.account_id || null;
+
+    return {
+      organization_id: organizationId,
+      source_domain: sourceDomain,
+      signal_type: raw.signal_type,
+      signal_value: raw.signal_value,
+      entity_type: raw.entity_type || raw.connector_type,
+      entity_id: raw.entity_id || `${raw.connector_type}_${raw.id}`,
+      client_id: clientId,
+      signal_metadata: {
+        ...metadata,
+        etl_source: 'streaming_etl',
+        raw_signal_id: raw.id,
+        connector_type: raw.connector_type,
+      },
+      created_at: raw.created_at,
+    };
+  });
+
+  // 3. Batch insert into cross_domain_signals
+  for (let i = 0; i < enrichedSignals.length; i += 100) {
+    const batch = enrichedSignals.slice(i, i + 100);
+    const { error: insertErr } = await supabase
+      .from('cross_domain_signals')
+      .insert(batch);
+
+    if (!insertErr) {
+      transformed += batch.length;
+    }
+  }
+
+  // 4. Mark as processed
+  const processedIds = rawSignals.map((r: any) => r.id);
+  await supabase
+    .from('connector_signals')
+    .update({ processed_at: new Date().toISOString() })
+    .in('id', processedIds);
+
+  return { transformed };
 }

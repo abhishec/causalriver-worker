@@ -29,9 +29,11 @@ import { getClientForTableInEdge } from './get-brain-client';
 
 /**
  * The CORE Brain organization ID — a well-known UUID for shared baseline knowledge.
- * All zeros to clearly distinguish from real org UUIDs and the legacy fallback (..0001).
+ * MUST match the canonical CORE_BRAIN_ORG_ID used by upstream-promoter, consolidation-engine,
+ * and all other federation writers. Previously this was '..0000' which caused a silent
+ * data black hole — promoted knowledge was never read back.
  */
-export const CORE_ORGANIZATION_ID = '00000000-0000-0000-0000-000000000000';
+export const CORE_ORGANIZATION_ID = '00000000-0000-4000-a000-000000000001';
 
 // ============================================================================
 // TYPES
