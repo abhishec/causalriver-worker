@@ -454,6 +454,19 @@ export function CopilotChat({
     inputRef.current?.focus();
   }, []);
 
+  // ── Listen for external prompt injection (from capability pills) ──────
+  useEffect(() => {
+    const handleInjectPrompt = (event: Event) => {
+      const prompt = (event as CustomEvent).detail;
+      if (typeof prompt === "string" && prompt.trim()) {
+        setInput(prompt);
+        inputRef.current?.focus();
+      }
+    };
+    window.addEventListener("copilot-inject-prompt", handleInjectPrompt);
+    return () => window.removeEventListener("copilot-inject-prompt", handleInjectPrompt);
+  }, []);
+
   // ── SSE stream consumer ─────────────────────────────────────────────────
 
   const handleSubmit = async (e: FormEvent) => {
