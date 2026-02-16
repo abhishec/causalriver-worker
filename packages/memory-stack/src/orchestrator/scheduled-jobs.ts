@@ -374,7 +374,35 @@ export function createScheduledJobs(
      */
     async runUpstreamFederation(organizationId: string): Promise<UpstreamPromotionResult> {
       const promoter = createUpstreamPromoter(supabase, organizationId);
-      return promoter.promoteKnowledge();
+      const result = await promoter.promoteKnowledge();
+
+      // Persist percolation metrics for dashboard + Phase 3 federation validation
+      if (result.relationshipsPromoted + result.memoriesPromoted + result.rulesPromoted > 0) {
+        const CORE_ORG = '00000000-0000-4000-a000-000000000001';
+
+        // Snapshot CORE brain size (fire-and-forget)
+        const [relCount, memCount, ruleCount] = await Promise.all([
+          supabase.from('causal_relationships_statistical').select('id', { count: 'exact', head: true }).eq('organization_id', CORE_ORG).then(r => r.count ?? 0),
+          supabase.from('ai_memory').select('id', { count: 'exact', head: true }).eq('organization_id', CORE_ORG).then(r => r.count ?? 0),
+          supabase.from('brain_grammar_rules').select('id', { count: 'exact', head: true }).eq('organization_id', CORE_ORG).then(r => r.count ?? 0),
+        ]);
+
+        supabase.from('percolation_metrics').insert({
+          organization_id: organizationId,
+          relationships_promoted: result.relationshipsPromoted,
+          memories_promoted: result.memoriesPromoted,
+          rules_promoted: result.rulesPromoted,
+          items_skipped_pii: result.itemsSkippedPII,
+          items_skipped_duplicate: result.itemsSkippedDuplicate,
+          core_total_relationships: relCount,
+          core_total_memories: memCount,
+          core_total_rules: ruleCount,
+        }).then(({ error }) => {
+          if (error) console.warn('[scheduled-jobs] Percolation metrics non-fatal:', error.message);
+        });
+      }
+
+      return result;
     },
 
     // ── Training Pack Application Job ──────────────────────────────────

@@ -192,6 +192,19 @@ export interface LearningCycleResult {
     layerCredits: Array<{ layerId: number; reward: number }>;
   };
 
+  // ── Loop 7: Federation Validation ──
+  federationValidation: {
+    /** Predictions that used CORE knowledge verified this cycle */
+    corePredictionsVerified: number;
+    /** Of those, how many were correct */
+    corePredictionsCorrect: number;
+    /** CORE-sourced accuracy vs ORG-only accuracy */
+    coreAccuracy: number;
+    orgOnlyAccuracy: number;
+    /** Whether CORE knowledge is currently helping (positive delta) */
+    coreKnowledgeHelpful: boolean;
+  };
+
   /** RL signals injected (if RL system connected) */
   rlSignalsInjected: number;
 
@@ -1091,6 +1104,107 @@ export function createClosedLoopLearningEngine(config: ClosedLoopConfig): Closed
   }
 
   // ════════════════════════════════════════════════════════════════════════
+  // LOOP 7: FEDERATION VALIDATION — Is CORE Knowledge Helping?
+  // ════════════════════════════════════════════════════════════════════════
+  //
+  // BRAIN ANALOGY: Cultural knowledge validation.
+  // Humans learn from culture (shared knowledge) but validate it against
+  // personal experience. If cultural wisdom consistently leads to bad
+  // decisions, the individual discounts it.
+  //
+  // This loop compares CORE-sourced prediction accuracy vs ORG-only accuracy.
+  // If CORE knowledge is hurting org predictions, the brain gradually
+  // reduces CORE influence. If it helps, CORE influence is maintained.
+  //
+  // Process:
+  //   1. Query recently verified predictions
+  //   2. Separate by source: CORE-influenced vs ORG-only
+  //   3. Compare accuracy rates
+  //   4. Persist federation validation metrics
+  //   5. Inject RL reward to L28 (Corpus Callosum — cross-org integration)
+  // ════════════════════════════════════════════════════════════════════════
+
+  async function _runFederationValidation(): Promise<LearningCycleResult['federationValidation']> {
+    const result: LearningCycleResult['federationValidation'] = {
+      corePredictionsVerified: 0,
+      corePredictionsCorrect: 0,
+      coreAccuracy: 0,
+      orgOnlyAccuracy: 0,
+      coreKnowledgeHelpful: true,
+    };
+
+    try {
+      // 1. Query predictions verified in last 7 days
+      const sevenDaysAgo = new Date(Date.now() - 7 * 86400_000).toISOString();
+      const { data: recentVerified } = await supabase
+        .from('prediction_records')
+        .select('id, was_correct, metadata')
+        .eq('organization_id', organizationId)
+        .not('was_correct', 'is', null)
+        .gte('verified_at', sevenDaysAgo)
+        .limit(200);
+
+      if (!recentVerified?.length || recentVerified.length < 5) return result;
+
+      // 2. Separate by source
+      //    Predictions with metadata.used_core_knowledge = true were influenced by CORE
+      let coreTotal = 0, coreCorrect = 0;
+      let orgTotal = 0, orgCorrect = 0;
+
+      for (const pred of recentVerified) {
+        const usedCore = (pred.metadata as any)?.used_core_knowledge === true;
+        if (usedCore) {
+          coreTotal++;
+          if (pred.was_correct) coreCorrect++;
+        } else {
+          orgTotal++;
+          if (pred.was_correct) orgCorrect++;
+        }
+      }
+
+      result.corePredictionsVerified = coreTotal;
+      result.corePredictionsCorrect = coreCorrect;
+      result.coreAccuracy = coreTotal > 0 ? coreCorrect / coreTotal : 0;
+      result.orgOnlyAccuracy = orgTotal > 0 ? orgCorrect / orgTotal : 0;
+      result.coreKnowledgeHelpful = result.coreAccuracy >= result.orgOnlyAccuracy;
+
+      // 3. Persist federation validation metrics (for dashboard)
+      if (coreTotal + orgTotal >= 5) {
+        await supabase.from('federation_validation_metrics').upsert({
+          organization_id: organizationId,
+          measured_at: new Date().toISOString(),
+          core_predictions_total: coreTotal,
+          core_predictions_correct: coreCorrect,
+          core_accuracy: Math.round(result.coreAccuracy * 10000) / 10000,
+          org_predictions_total: orgTotal,
+          org_predictions_correct: orgCorrect,
+          org_accuracy: Math.round(result.orgOnlyAccuracy * 10000) / 10000,
+          core_helpful: result.coreKnowledgeHelpful,
+          accuracy_delta: Math.round((result.coreAccuracy - result.orgOnlyAccuracy) * 10000) / 10000,
+        }, {
+          onConflict: 'organization_id',
+        }).then(({ error }) => {
+          if (error) console.warn('[CLL] Federation validation metrics non-fatal:', error.message);
+        });
+      }
+
+      // 4. Inject RL reward to L28 (Corpus Callosum — cross-org integration layer)
+      if (reinforcement && coreTotal >= 3) {
+        const delta = result.coreAccuracy - result.orgOnlyAccuracy;
+        const reward = Math.max(-0.5, Math.min(0.5, delta * 2));
+        reinforcement.injectExternalReward(
+          28, reward,
+          `Federation validation: CORE accuracy ${(result.coreAccuracy * 100).toFixed(0)}% vs ORG ${(result.orgOnlyAccuracy * 100).toFixed(0)}% (${result.coreKnowledgeHelpful ? 'helpful' : 'hurting'})`,
+        );
+      }
+    } catch {
+      // Non-fatal: federation validation failure shouldn't block learning
+    }
+
+    return result;
+  }
+
+  // ════════════════════════════════════════════════════════════════════════
   // PUBLIC API
   // ════════════════════════════════════════════════════════════════════════
 
@@ -1155,6 +1269,13 @@ export function createClosedLoopLearningEngine(config: ClosedLoopConfig): Closed
         rlSignalsInjected += agentOutcomes.layerCredits.length;
       }
 
+      // ── Loop 7: Federation Validation ──
+      const federationValidation = await _runFederationValidation();
+      if (federationValidation.corePredictionsVerified > 0) {
+        report.push(`Federation: CORE accuracy ${(federationValidation.coreAccuracy * 100).toFixed(0)}% vs ORG ${(federationValidation.orgOnlyAccuracy * 100).toFixed(0)}% — CORE is ${federationValidation.coreKnowledgeHelpful ? 'helping ✓' : 'hurting ✗'}`);
+        rlSignalsInjected += 1; // L28
+      }
+
       // ── Summary ──
       if (report.length === 0) {
         report.push('No new learning signals this cycle. Brain is waiting for outcomes.');
@@ -1173,6 +1294,7 @@ export function createClosedLoopLearningEngine(config: ClosedLoopConfig): Closed
         interventionOutcomes,
         retraining,
         agentOutcomes,
+        federationValidation,
         rlSignalsInjected,
         learningReport: report,
       };
