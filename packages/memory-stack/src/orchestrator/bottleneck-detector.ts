@@ -294,8 +294,160 @@ export async function detectAllBottlenecks(
 }
 
 /**
+ * Calculate Herfindahl-Hirschman Index (HHI)
+ *
+ * HHI = Σ(share_i²) where share_i = strength_i / total_strength
+ * HHI > 0.25 = highly concentrated (spec threshold)
+ * HHI = 1.0 = perfect monopoly (one person has all expertise)
+ * HHI = 1/n = perfect equality (n people with equal expertise)
+ */
+export function calculateHHI(strengths: number[]): number {
+  if (strengths.length === 0) return 0;
+
+  const totalStrength = strengths.reduce((acc, val) => acc + val, 0);
+  if (totalStrength === 0) return 0;
+
+  let hhi = 0;
+  for (const strength of strengths) {
+    const share = strength / totalStrength;
+    hhi += share * share;
+  }
+
+  return hhi;
+}
+
+/**
+ * Calculate in-degree centrality for each contributor
+ * In the review context: how many unique people review your PRs (or you review theirs)
+ *
+ * Returns: Map<contributorId, normalizedInDegree>
+ * where normalizedInDegree = inDegree / (n - 1) for n contributors
+ */
+export function calculateInDegreeCentrality(
+  edges: Array<{ from: string; to: string }>
+): Map<string, number> {
+  const inDegree = new Map<string, Set<string>>();
+  const allNodes = new Set<string>();
+
+  for (const edge of edges) {
+    allNodes.add(edge.from);
+    allNodes.add(edge.to);
+
+    if (!inDegree.has(edge.to)) {
+      inDegree.set(edge.to, new Set());
+    }
+    inDegree.get(edge.to)!.add(edge.from);
+  }
+
+  const n = allNodes.size;
+  const result = new Map<string, number>();
+  const normalizer = Math.max(n - 1, 1);
+
+  for (const node of allNodes) {
+    const degree = inDegree.get(node)?.size || 0;
+    result.set(node, degree / normalizer);
+  }
+
+  return result;
+}
+
+/**
+ * Calculate betweenness centrality (simplified BFS-based)
+ * Measures how often a contributor lies on the shortest path between other contributors.
+ * High betweenness = gatekeeper / bottleneck in collaboration network.
+ *
+ * Uses Brandes' algorithm (O(VE)) for unweighted graphs.
+ */
+export function calculateBetweennessCentrality(
+  edges: Array<{ from: string; to: string }>
+): Map<string, number> {
+  // Build adjacency list (undirected)
+  const adj = new Map<string, Set<string>>();
+  const allNodes = new Set<string>();
+
+  for (const edge of edges) {
+    allNodes.add(edge.from);
+    allNodes.add(edge.to);
+
+    if (!adj.has(edge.from)) adj.set(edge.from, new Set());
+    if (!adj.has(edge.to)) adj.set(edge.to, new Set());
+    adj.get(edge.from)!.add(edge.to);
+    adj.get(edge.to)!.add(edge.from);
+  }
+
+  const n = allNodes.size;
+  const betweenness = new Map<string, number>();
+  for (const node of allNodes) {
+    betweenness.set(node, 0);
+  }
+
+  // Brandes' algorithm
+  for (const s of allNodes) {
+    const stack: string[] = [];
+    const pred = new Map<string, string[]>();
+    const sigma = new Map<string, number>();
+    const dist = new Map<string, number>();
+    const delta = new Map<string, number>();
+
+    for (const v of allNodes) {
+      pred.set(v, []);
+      sigma.set(v, 0);
+      dist.set(v, -1);
+      delta.set(v, 0);
+    }
+
+    sigma.set(s, 1);
+    dist.set(s, 0);
+    const queue: string[] = [s];
+
+    // BFS
+    while (queue.length > 0) {
+      const v = queue.shift()!;
+      stack.push(v);
+      const dv = dist.get(v)!;
+
+      for (const w of adj.get(v) || []) {
+        if (dist.get(w) === -1) {
+          dist.set(w, dv + 1);
+          queue.push(w);
+        }
+        if (dist.get(w) === dv + 1) {
+          sigma.set(w, sigma.get(w)! + sigma.get(v)!);
+          pred.get(w)!.push(v);
+        }
+      }
+    }
+
+    // Back-propagation
+    while (stack.length > 0) {
+      const w = stack.pop()!;
+      for (const v of pred.get(w)!) {
+        delta.set(v, delta.get(v)! + (sigma.get(v)! / sigma.get(w)!) * (1 + delta.get(w)!));
+      }
+      if (w !== s) {
+        betweenness.set(w, betweenness.get(w)! + delta.get(w)!);
+      }
+    }
+  }
+
+  // Normalize (undirected: divide by 2)
+  const normalizer = n > 2 ? ((n - 1) * (n - 2)) / 2 : 1;
+  for (const [node, val] of betweenness) {
+    betweenness.set(node, (val / 2) / normalizer);
+  }
+
+  return betweenness;
+}
+
+/**
  * Get heatmap of bottleneck risk across organization
  * Returns: { domain: riskScore } where riskScore = 0-100
+ *
+ * BRS Formula (updated with HHI):
+ *   25% Gini (inequality)
+ *   25% HHI (concentration)
+ *   20% Top3% concentration
+ *   30% Inverse bus factor
  */
 export async function getBottleneckHeatmap(
   config: ConcentrationConfig,
@@ -305,13 +457,16 @@ export async function getBottleneckHeatmap(
   const heatmap: Record<string, number> = {};
 
   for (const metrics of allMetrics) {
-    // Risk score = weighted combination of metrics
-    // Gini (40%) + Top3 concentration (30%) + Inverse bus factor (30%)
-    const giniRisk = metrics.giniCoefficient * 100 * 0.4;
-    const top3Risk = metrics.top3Concentration * 0.3;
-    const busFactorRisk = (1 / Math.max(metrics.busFactor, 1)) * 100 * 0.3;
+    const strengths = metrics.bottlenecks.map(b => b.expertiseShare);
+    const hhi = calculateHHI(strengths);
 
-    const riskScore = Math.min(100, giniRisk + top3Risk + busFactorRisk);
+    // Risk score = weighted combination with HHI
+    const giniRisk = metrics.giniCoefficient * 100 * 0.25;
+    const hhiRisk = Math.min(hhi / 0.5, 1.0) * 100 * 0.25; // Saturates at HHI=0.5
+    const top3Risk = metrics.top3Concentration * 0.20;
+    const busFactorRisk = (1 / Math.max(metrics.busFactor, 1)) * 100 * 0.30;
+
+    const riskScore = Math.min(100, giniRisk + hhiRisk + top3Risk + busFactorRisk);
     heatmap[metrics.domain] = Math.round(riskScore);
   }
 

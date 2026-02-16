@@ -116,40 +116,39 @@ export async function buildVelocityTimeSeries(
   const startDate = new Date();
   startDate.setDate(startDate.getDate() - lookbackDays);
 
-  // Query GitHub signals for PRs merged
+  // Query GitHub signals for PRs merged (Brain L1: cross_domain_signals)
   const { data: prSignals, error: prError } = await supabase
-    .from('connector_signals')
-    .select('signal_timestamp, signal_value, metadata')
+    .from('cross_domain_signals')
+    .select('created_at, signal_value, signal_metadata')
     .eq('organization_id', organizationId)
-    .eq('source', 'github')
+    .eq('source_domain', 'engineering')
     .eq('signal_type', 'pr_merged')
-    .gte('signal_timestamp', startDate.toISOString())
-    .order('signal_timestamp');
+    .gte('created_at', startDate.toISOString())
+    .order('created_at');
 
   if (prError) throw new Error(`Failed to fetch PR signals: ${prError.message}`);
 
-  // Query deployment signals
+  // Query deployment signals (Brain L1: cross_domain_signals)
   const { data: deploySignals, error: deployError } = await supabase
-    .from('connector_signals')
-    .select('signal_timestamp, signal_value, metadata')
+    .from('cross_domain_signals')
+    .select('created_at, signal_value, signal_metadata')
     .eq('organization_id', organizationId)
-    .eq('source', 'github')
+    .eq('source_domain', 'engineering')
     .eq('signal_type', 'deployment')
-    .eq('metadata->>environment', 'production')
-    .gte('signal_timestamp', startDate.toISOString())
-    .order('signal_timestamp');
+    .gte('created_at', startDate.toISOString())
+    .order('created_at');
 
   if (deployError) throw new Error(`Failed to fetch deployment signals: ${deployError.message}`);
 
-  // Query PR state signals for WIP
+  // Query PR state signals for WIP (Brain L1: cross_domain_signals)
   const { data: prStateSignals, error: stateError } = await supabase
-    .from('connector_signals')
-    .select('signal_timestamp, signal_value, metadata')
+    .from('cross_domain_signals')
+    .select('created_at, signal_value, signal_metadata')
     .eq('organization_id', organizationId)
-    .eq('source', 'github')
+    .eq('source_domain', 'engineering')
     .eq('signal_type', 'pr_opened')
-    .gte('signal_timestamp', startDate.toISOString())
-    .order('signal_timestamp');
+    .gte('created_at', startDate.toISOString())
+    .order('created_at');
 
   if (stateError) throw new Error(`Failed to fetch PR state signals: ${stateError.message}`);
 
@@ -157,11 +156,11 @@ export async function buildVelocityTimeSeries(
   const dailyMetrics = new Map<string, VelocityMetrics>();
 
   // Helper to get date key (YYYY-MM-DD)
-  const getDateKey = (timestamp: string) => timestamp.split('T')[0];
+  const getDateKey = (timestampOrDate: string) => timestampOrDate.split('T')[0];
 
-  // Process PR merges
+  // Process PR merges (Brain L1: created_at + signal_metadata)
   for (const signal of prSignals || []) {
-    const dateKey = getDateKey(signal.signal_timestamp);
+    const dateKey = getDateKey(signal.created_at);
     if (!dailyMetrics.has(dateKey)) {
       dailyMetrics.set(dateKey, {
         organizationId,
@@ -179,12 +178,13 @@ export async function buildVelocityTimeSeries(
 
     const metrics = dailyMetrics.get(dateKey)!;
     metrics.prsMerged += 1;
-    metrics.linesMerged += (signal.metadata as any)?.lines_changed || 0;
+    const meta = signal.signal_metadata as any;
+    metrics.linesMerged += (meta?.additions || 0) + (meta?.deletions || 0);
   }
 
-  // Process deployments
+  // Process deployments (Brain L1: created_at + signal_metadata)
   for (const signal of deploySignals || []) {
-    const dateKey = getDateKey(signal.signal_timestamp);
+    const dateKey = getDateKey(signal.created_at);
     if (!dailyMetrics.has(dateKey)) {
       dailyMetrics.set(dateKey, {
         organizationId,
@@ -201,16 +201,16 @@ export async function buildVelocityTimeSeries(
     }
 
     const metrics = dailyMetrics.get(dateKey)!;
-    if ((signal.metadata as any)?.status === 'success') {
+    if ((signal.signal_metadata as any)?.status === 'success') {
       metrics.productionDeploys += 1;
     }
   }
 
-  // Calculate WIP (cumulative open PRs)
+  // Calculate WIP (cumulative open PRs, Brain L1: created_at + signal_metadata)
   let cumulativeWIP = 0;
   for (const signal of prStateSignals || []) {
-    const dateKey = getDateKey(signal.signal_timestamp);
-    const state = (signal.metadata as any)?.state;
+    const dateKey = getDateKey(signal.created_at);
+    const state = (signal.signal_metadata as any)?.state;
 
     if (state === 'open') {
       cumulativeWIP += 1;

@@ -270,23 +270,59 @@ export async function storeDualWriteConnectorSignals(
     };
   });
 
-  // ── 3. PARALLEL DUAL-WRITE (was sequential — 2x latency improvement) ────
-  await Promise.all([
-    retry.execute(async () => {
-      const { error } = await supabase.from('connector_signals').insert(rawRows);
-      if (error) {
-        throw new Error(`Failed to store raw connector signals: ${error.message}`);
-      }
-    }, 'store-connector-signals-raw'),
-    retry.execute(async () => {
-      const { error } = await supabase.from('cross_domain_signals').insert(enrichedRows);
-      if (error) {
-        throw new Error(`Failed to store enriched cross-domain signals: ${error.message}`);
-      }
-    }, 'store-cross-domain-signals-enriched'),
-  ]);
+  // ── 3. TRANSACTIONAL DUAL-WRITE (ACID-guaranteed via RPC) ─────────────────
+  //
+  // Uses PostgreSQL transaction via Supabase RPC to ensure both inserts
+  // succeed or both rollback. Eliminates partial-write inconsistency.
+  //
+  // Falls back to parallel Promise.all if RPC is not available (e.g. test env).
+  //
+  const result = await retry.execute(async () => {
+    // Try transactional RPC first (ACID-guaranteed)
+    const { data, error: rpcError } = await supabase.rpc('insert_dual_signals', {
+      p_organization_id: organizationId,
+      p_raw_signals: rawRows.map(r => ({
+        source: r.source,
+        signal_type: r.signal_type,
+        signal_value: r.signal_value,
+        signal_timestamp: r.signal_timestamp,
+        metadata: r.metadata,
+      })),
+      p_enriched_signals: enrichedRows.map(r => ({
+        source_domain: r.source_domain,
+        signal_type: r.signal_type,
+        signal_value: r.signal_value,
+        signal_timestamp: r.signal_timestamp,
+        entity_type: r.entity_type,
+        entity_id: r.entity_id,
+        client_id: r.client_id,
+        signal_metadata: r.signal_metadata,
+      })),
+    });
 
-  return { rawCount: rawRows.length, enrichedCount: enrichedRows.length };
+    if (rpcError) {
+      // If RPC function doesn't exist yet, fall back to parallel writes
+      if (rpcError.message.includes('function') && rpcError.message.includes('does not exist')) {
+        await Promise.all([
+          (async () => {
+            const { error } = await supabase.from('connector_signals').insert(rawRows);
+            if (error) throw new Error(`Failed to store raw connector signals: ${error.message}`);
+          })(),
+          (async () => {
+            const { error } = await supabase.from('cross_domain_signals').insert(enrichedRows);
+            if (error) throw new Error(`Failed to store enriched cross-domain signals: ${error.message}`);
+          })(),
+        ]);
+        return { rawCount: rawRows.length, enrichedCount: enrichedRows.length };
+      }
+      throw new Error(`Dual-write transaction failed: ${rpcError.message}`);
+    }
+
+    const counts = data as { raw_count: number; enriched_count: number };
+    return { rawCount: counts.raw_count, enrichedCount: counts.enriched_count };
+  }, 'dual-write-signals');
+
+  return result;
 }
 
 // ============================================================================

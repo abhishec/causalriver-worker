@@ -230,10 +230,13 @@ export class GitHubConnector extends ConnectorBase {
    */
   private async ingestRepoMetadata(repo: Repository): Promise<void> {
     const signal: Signal = {
-      source: 'github',
-      type: 'repository',
-      content: `Repository: ${repo.full_name}\n${repo.description || 'No description'}`,
-      metadata: {
+      organization_id: this.organizationId,
+      source_domain: 'engineering',
+      signal_type: 'repository_metadata',
+      signal_value: repo.size || 0,
+      entity_type: 'repository',
+      entity_id: repo.full_name,
+      signal_metadata: {
         repo_id: repo.id,
         repo_name: repo.full_name,
         language: repo.language,
@@ -241,9 +244,9 @@ export class GitHubConnector extends ConnectorBase {
         is_private: repo.private,
         default_branch: repo.default_branch,
         size: repo.size,
+        description: repo.description || '',
       },
-      organization_id: this.organizationId,
-      timestamp: repo.updated_at,
+      created_at: repo.updated_at,
     };
 
     await this.streamProcessor.addSignal(signal);
@@ -424,18 +427,22 @@ export class GitHubConnector extends ConnectorBase {
    */
   private transformFileToSignal(repo: Repository, file: TreeItem, content: string): Signal {
     return {
-      source: 'github',
-      type: 'code_file',
-      content: content.substring(0, 50000), // Limit to 50KB
-      metadata: {
+      organization_id: this.organizationId,
+      source_domain: 'engineering',
+      signal_type: 'code_file_ingested',
+      signal_value: file.size || content.length,
+      entity_type: 'code_file',
+      entity_id: `${repo.full_name}:${file.path}`,
+      signal_metadata: {
         repo: repo.full_name,
         path: file.path,
         language: this.detectLanguage(file.path),
         size: file.size,
         sha: file.sha,
+        content_preview: content.substring(0, 500),
+        content_length: content.length,
       },
-      organization_id: this.organizationId,
-      timestamp: new Date().toISOString(),
+      created_at: new Date().toISOString(),
     };
   }
 

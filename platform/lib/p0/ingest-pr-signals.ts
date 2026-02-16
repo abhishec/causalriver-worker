@@ -313,6 +313,7 @@ export async function getReviewSignals(
   prNumber: number;
   repo: string;
   reviewer: string;
+  prAuthor: string;
   reviewedAt: string;
   reviewLatencyHours: number;
 }>> {
@@ -334,6 +335,7 @@ export async function getReviewSignals(
     prNumber: signal.signal_metadata.pr_number,
     repo: signal.signal_metadata.repo,
     reviewer: signal.signal_metadata.reviewer,
+    prAuthor: signal.signal_metadata.pr_author || '',
     reviewedAt: signal.created_at,
     reviewLatencyHours: signal.signal_value,
   }));
