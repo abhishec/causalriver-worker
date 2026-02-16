@@ -712,10 +712,10 @@ export function createScheduledJobs(
         brier_score: state.calibration.brierScore,
         calibration_quality: state.calibration.isWellCalibrated ? 1.0 : 0.5,
         causal_edges_total: state.knowledge.totalCausalEdges,
-        memories_total: state.knowledge.memoriesTotal ?? 0,
-        rules_total: state.knowledge.rulesTotal ?? 0,
-        patterns_total: state.knowledge.patternsTotal ?? 0,
-        predictions_verified: state.accuracy.totalPredictions,
+        memories_total: 0, // Not tracked in evolution state; captured separately
+        rules_total: state.knowledge.totalRules,
+        patterns_total: state.knowledge.totalPatterns,
+        predictions_verified: state.knowledge.totalPredictions,
       }, {
         onConflict: 'organization_id,snapshot_date',
       }).then(({ error }) => {
@@ -734,7 +734,7 @@ export function createScheduledJobs(
               intelligenceScore: state.intelligenceScore,
               accuracy: state.accuracy.overall,
               brierScore: state.calibration.brierScore,
-              totalPredictions: state.accuracy.totalPredictions,
+              totalPredictions: state.knowledge.totalPredictions,
               causalEdges: state.knowledge.totalCausalEdges,
             },
             intelligence_score: state.intelligenceScore,
