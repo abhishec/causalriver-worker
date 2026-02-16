@@ -13,7 +13,7 @@
  * - Scanner/bot activity
  */
 
-import { logAuditEvent, AuditAction } from './audit';
+// Audit logging removed — IDS runs in middleware pre-auth (no org context for audit table FK)
 
 export interface ThreatDetection {
   blocked: boolean;
@@ -208,25 +208,16 @@ export async function detectThreats(request: Request): Promise<ThreatDetection> 
   // ═══════════════════════════════════════════════════════════════════════════
 
   if (threats.length > 0) {
-    // Log to audit system
-    await logAuditEvent({
-      organizationId: 'system',
-      action: 'security.threat_detected',
-      resourceType: 'intrusion_detection',
-      metadata: {
-        threats,
-        severity,
-        url: request.url,
-        method: request.method,
-        ip,
-        userAgent,
-        timestamp: new Date().toISOString(),
-      },
-      status: 'failure',
-    }).catch(err => {
-      // Don't let audit logging errors block the security response
-      console.error('[IDS] Failed to log threat:', err);
-    });
+    // Log threat to server console (IDS runs pre-auth in middleware, no org context for audit table FK)
+    console.warn('[IDS] Threat detected:', JSON.stringify({
+      threats,
+      severity,
+      url: request.url,
+      method: request.method,
+      ip,
+      userAgent,
+      timestamp: new Date().toISOString(),
+    }));
 
     // Block critical and high severity threats
     if (severity === 'critical' || severity === 'high') {
