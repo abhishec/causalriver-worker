@@ -568,6 +568,28 @@ export {
   type DeepCycleResult,
 } from './causality/leap-deep-layers';
 
+// Connector Signal Bridge — Reactive signal ingestion listener
+// CTO Audit Fix: Gap #5 — Enables reactive brain cycle triggering
+export {
+  onSignalsIngested,
+  storeDualWriteConnectorSignals,
+  setDomainTaxonomy as setSignalBridgeDomainTaxonomy,
+  type SignalIngestedCallback,
+} from './ingestion/connector-signal-bridge';
+
+// Brain Layer Persistence (L3-L30 Supabase state persistence)
+// CTO Audit Fix: Gaps #2 (L3-L15) and #3 (L16-L30)
+export {
+  createBrainLayerPersistence,
+  saveCognitiveLayerState,
+  saveDeepLayerState,
+  type BrainLayerPersistenceConfig,
+  type BrainLayerPersistenceInstance,
+  type CognitiveStackPersistable,
+  type DeepLayersPersistable,
+  LAYER_IDS,
+} from './orchestrator/brain-layer-persistence';
+
 // Consolidation Engine ("Brain Sleep")
 export {
   createConsolidationEngine,

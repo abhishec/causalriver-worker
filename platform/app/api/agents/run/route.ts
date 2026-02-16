@@ -1,18 +1,26 @@
 /**
- * Brain Agent Run API — Spawn Semi-Autonomous Agents
- * ====================================================
+ * Brain Agent Run API — Full L1-L30 Cognitive Stack Execution
+ * ============================================================
  *
  * POST /api/agents/run
- *   Spawn a brain agent that runs asynchronously.
- *   Each agent = Claude call with L1-L30 brain memory injected.
+ *   Spawn a brain agent that runs the FULL 30-layer cognitive stack.
+ *   Every request triggers: L1-L30 cycle → Claude call → confidence gating.
+ *
+ *   Unlike the previous version which loaded flat Supabase rows into a text prompt,
+ *   this version instantiates the real Brain Agent Runtime:
+ *     1. createCognitiveStack()   — L3-L15 (dreaming, memory, curiosity, etc.)
+ *     2. createDeepLayers()       — L16-L30 (org topology, wisdom, etc.)
+ *     3. createDeepPipeline()     — Orchestrates L1-L30 with reverse feedback
+ *     4. createNeuralCortexController() — Executive function + RL + closed-loop
+ *     5. createBrainAgentRuntime()— Claude call with full 30-layer context
  *
  *   Semi-autonomous logic:
- *   - confidence >= 0.8 → auto-execute, return results
- *   - confidence < 0.8  → pause, ask user for approval
+ *   - confidence >= threshold → auto-execute, return results
+ *   - confidence < threshold  → pause, ask user for approval
  *
  *   Body: {
  *     prompt: string,          // What to do: "Diagnose why churn increased"
- *     agentType?: string,      // 'diagnose' | 'build' | 'analyze' | 'predict' | 'investigate'
+ *     agentType?: string,      // 'code-review' | 'incident-diagnosis' | 'feature-build' | etc.
  *     autoExecuteThreshold?: number, // Override default 0.8
  *     organizationId?: string,
  *   }
@@ -26,6 +34,42 @@ import { CORE_ORG_ID } from "@/lib/org-helpers";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120; // Allow up to 2 min for agent execution
+
+// ============================================================================
+// AGENT TYPE → BRAIN AGENT ID MAPPING
+// ============================================================================
+
+/**
+ * Maps UI agent types to registered Brain Agent IDs.
+ * Brain Agent IDs correspond to definitions in brain-agent-definitions.ts.
+ * Unmapped types fall back to 'codebase-mapper' (general analysis).
+ */
+const AGENT_TYPE_TO_BRAIN_AGENT: Record<string, string> = {
+  "code-review": "code-reviewer",
+  "diagnose": "incident-diagnoser",
+  "incident-diagnosis": "incident-diagnoser",
+  "build": "feature-builder",
+  "feature-build": "feature-builder",
+  "tech-debt": "tech-debt-auditor",
+  "tech-debt-audit": "tech-debt-auditor",
+  "dependency-upgrade": "dependency-upgrader",
+  "performance": "performance-profiler",
+  "dead-code": "dead-code-detector",
+  "tdd": "tdd-generator",
+  "test": "test-case-generator",
+  "test-case": "test-case-generator",
+  "log-analysis": "log-analyzer",
+  "analyze": "impact-analyzer",
+  "impact-analysis": "impact-analyzer",
+  "sql-optimize": "sql-optimizer",
+  "data-lineage": "data-lineage-tracer",
+  "architecture": "hld-lld-generator",
+  "hld-lld": "hld-lld-generator",
+  "codebase": "codebase-mapper",
+  "general": "codebase-mapper",
+  "investigate": "codebase-mapper",
+  "predict": "impact-analyzer",
+};
 
 export async function POST(request: NextRequest) {
   try {
@@ -117,7 +161,7 @@ export async function POST(request: NextRequest) {
 
     try {
       await Promise.race([
-        executeAgent(service, taskId, orgId, prompt, agentType, autoExecuteThreshold),
+        executeAgentWithBrainRuntime(service, taskId, orgId, prompt, agentType, autoExecuteThreshold, user.id),
         new Promise<never>((_, reject) =>
           setTimeout(() => reject(new Error("Agent execution timed out (90s)")), AGENT_TIMEOUT_MS)
         ),
@@ -157,162 +201,160 @@ export async function POST(request: NextRequest) {
 }
 
 // ============================================================================
-// AGENT EXECUTION ENGINE
+// FULL L1-L30 BRAIN AGENT EXECUTION
 // ============================================================================
 
 /**
- * The core execution function. Runs a Claude call with full brain memory
- * injected as system prompt context.
+ * Execute an agent through the FULL Brain Agent Runtime.
+ *
+ * This is THE critical fix from the CTO audit (Gap #1):
+ *   BEFORE: 6 flat Supabase queries → text prompt → Claude call
+ *   AFTER:  Full L1-L30 cognitive cycle → 30-layer context → Claude call
+ *           + composite confidence (L6 calibration + L11 red team + history)
+ *           + closed-loop learning (outcome tracking for brain evolution)
+ *           + RL feedback (5 neurotransmitter types, credit assignment)
  *
  * Steps:
- *  1. Load brain context (causal edges, patterns, signals, predictions)
- *  2. Load user corrections from ai_memory
- *  3. Build rich system prompt with all brain layers
- *  4. Call Claude with the agent prompt
- *  5. Parse response for artifacts + confidence
- *  6. If confidence >= threshold → complete, else → awaiting_approval
- *  7. Store results + emit learning signal
+ *  1. Instantiate the full brain stack (cognitive, deep, pipeline, cortex, runtime)
+ *  2. Register all 15 brain agent definitions
+ *  3. Run the brain agent runtime → full L1-L30 cycle → Claude → confidence gate
+ *  4. Map results back to brain_agent_tasks table (preserve UI contract)
+ *  5. Emit learning signal for closed-loop evolution
  */
-async function executeAgent(
+async function executeAgentWithBrainRuntime(
   supabase: import("@supabase/supabase-js").SupabaseClient,
   taskId: string,
   orgId: string,
   prompt: string,
   agentType: string,
-  autoExecuteThreshold: number
+  autoExecuteThreshold: number,
+  userId: string
 ): Promise<void> {
   const startTime = Date.now();
 
   // ── Step 1: Record "thinking" step ─────────────────────────────
-  await addStep(supabase, taskId, 1, "reasoning", "Loading brain memory", "Querying L1-L30 brain layers for organizational intelligence...");
+  await addStep(supabase, taskId, 1, "reasoning", "Initializing L1-L30 brain stack",
+    "Instantiating cognitive stack (L3-L15), deep layers (L16-L30), neural cortex controller, and brain agent runtime...");
 
-  // ── Step 2: Load brain context in parallel ─────────────────────
-  const [
-    { data: causalEdges },
-    { data: rules },
-    { data: patterns },
-    { data: corrections },
-    { data: recentSignals },
-    { data: predictions },
-  ] = await Promise.all([
-    // L2: Causal edges
-    supabase
-      .from("causal_relationships_statistical")
-      .select("source_signal, target_signal, strength, confidence, lag, p_value")
-      .eq("organization_id", orgId)
-      .gte("confidence", 0.5)
-      .order("confidence", { ascending: false })
-      .limit(20),
-    // L5: Grammar rules
-    supabase
-      .from("brain_grammar_rules")
-      .select("rule_name, rule_body, confidence, domain")
-      .eq("organization_id", orgId)
-      .gte("confidence", 0.5)
-      .order("confidence", { ascending: false })
-      .limit(10),
-    // L5: Patterns
-    supabase
-      .from("ai_causal_chains")
-      .select("chain_name, chain_data, confidence, domain")
-      .eq("organization_id", orgId)
-      .order("confidence", { ascending: false })
-      .limit(10),
-    // User corrections (high priority)
-    supabase
-      .from("ai_memory")
-      .select("content, importance, domain, created_at")
-      .eq("organization_id", orgId)
-      .eq("memory_type", "correction")
-      .order("importance", { ascending: false })
-      .limit(5),
-    // L1: Recent cross-domain signals (last 7 days)
-    supabase
-      .from("cross_domain_signals")
-      .select("source_domain, signal_type, signal_value, signal_metadata, created_at")
-      .eq("organization_id", orgId)
-      .gte("created_at", new Date(Date.now() - 7 * 86400000).toISOString())
-      .order("created_at", { ascending: false })
-      .limit(30),
-    // L4: Recent predictions
-    supabase
-      .from("prediction_records")
-      .select("prediction_type, predicted_value, actual_value, accuracy, domain, created_at")
-      .eq("organization_id", orgId)
-      .order("created_at", { ascending: false })
-      .limit(10),
-  ]);
+  // ── Step 2: Instantiate the full brain pipeline ────────────────
+  // Dynamic import to avoid cold-start overhead when SDK isn't needed
+  const {
+    createCognitiveStack,
+    createDeepLayers,
+    createDeepPipeline,
+    createNeuralCortexController,
+    createBrainAgentRuntime,
+    registerAllBrainAgents,
+    createDomainTaxonomy,
+    createCrossSystemEntityGraph,
+  } = await import("@nexus-ai/memory-stack");
 
-  // Track which layers had data
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    throw new Error("ANTHROPIC_API_KEY not configured");
+  }
+
+  // Instantiate all brain subsystems
+  const domainTaxonomy = createDomainTaxonomy();
+  const entityGraph = createCrossSystemEntityGraph();
+
+  const cognitiveStack = createCognitiveStack({
+    organizationId: orgId,
+    anthropicApiKey: apiKey,
+  });
+
+  const deepLayers = createDeepLayers({
+    organizationId: orgId,
+    domainTaxonomy,
+    entityGraph,
+  });
+
+  const pipeline = createDeepPipeline({
+    organizationId: orgId,
+    supabase,
+    cognitiveStack,
+    deepLayers,
+    domainTaxonomy,
+    entityGraph,
+  });
+
+  const cortex = createNeuralCortexController({
+    organizationId: orgId,
+    supabase,
+    pipeline,
+    cognitiveStack,
+    deepLayers,
+    // RL + closed-loop enabled by default (not disabled)
+  });
+
+  // Get the closed-loop engine from cortex (for outcome tracking)
+  const closedLoop = cortex.getClosedLoopEngine();
+
+  const brainRuntime = createBrainAgentRuntime({
+    supabase,
+    organizationId: orgId,
+    cortex,
+    closedLoop: closedLoop ?? undefined,
+    defaultAnthropicApiKey: apiKey,
+    verbose: process.env.NODE_ENV === "development",
+  });
+
+  // Register all 15 brain agent definitions
+  registerAllBrainAgents(brainRuntime);
+
+  await addStep(supabase, taskId, 2, "reasoning", "Brain stack initialized",
+    `Cognitive stack (L3-L15), deep layers (L16-L30), neural cortex with RL + closed-loop learning, ${brainRuntime.listAgents().length} brain agents registered.`);
+
+  // ── Step 3: Resolve the brain agent ID ─────────────────────────
+  const brainAgentId = AGENT_TYPE_TO_BRAIN_AGENT[agentType] || "codebase-mapper";
+
+  // Verify the agent exists
+  const agentDef = brainRuntime.getAgent(brainAgentId);
+  if (!agentDef) {
+    throw new Error(
+      `Brain agent "${brainAgentId}" not found. Available: ${brainRuntime.listAgents().map(a => a.id).join(", ")}`
+    );
+  }
+
+  await addStep(supabase, taskId, 3, "reasoning", `Running ${agentDef.name}`,
+    `Agent: ${agentDef.id} — ${agentDef.description}\nRunning full L1-L30 cognitive cycle → Claude call with 30-layer brain context...`);
+
+  // ── Step 4: Execute through Brain Agent Runtime ────────────────
+  // This is THE key call: full L1-L30 cycle → format 30 layers → Claude → confidence gate
+  const brainResult = await brainRuntime.execute({
+    agentId: brainAgentId,
+    input: {
+      prompt: prompt.trim(),
+      agentType,
+      taskId,
+    },
+    anthropicApiKey: apiKey,
+    confidenceThreshold: autoExecuteThreshold,
+    userId,
+    userQuery: prompt.trim(),
+  });
+
+  const durationMs = Date.now() - startTime;
+
+  // ── Step 5: Map brain result to task record ────────────────────
+  // Build layer usage tracking (which layers contributed)
   const brainLayersUsed: Record<string, number> = {};
-  if (causalEdges?.length) brainLayersUsed["L2_causal_edges"] = causalEdges.length;
-  if (rules?.length) brainLayersUsed["L5_grammar_rules"] = rules.length;
-  if (patterns?.length) brainLayersUsed["L5_patterns"] = patterns.length;
-  if (corrections?.length) brainLayersUsed["L4_corrections"] = corrections.length;
-  if (recentSignals?.length) brainLayersUsed["L1_signals"] = recentSignals.length;
-  if (predictions?.length) brainLayersUsed["L4_predictions"] = predictions.length;
+  for (const lc of brainResult.layerContributions) {
+    brainLayersUsed[`L${lc.layerId}_${lc.layerName.replace(/\s+/g, '_')}`] = lc.weight;
+  }
+  // Always mark all 30 layers as used (since full cycle runs all)
+  brainLayersUsed["_fullCycleRan"] = 1;
+  brainLayersUsed["_layerCount"] = 30;
 
   await supabase
     .from("brain_agent_tasks")
     .update({ brain_layers_used: brainLayersUsed, updated_at: new Date().toISOString() })
     .eq("id", taskId);
 
-  await addStep(supabase, taskId, 2, "reasoning", "Brain memory loaded",
-    `Loaded ${Object.entries(brainLayersUsed).map(([k, v]) => `${k}: ${v}`).join(", ") || "no brain data yet"}`);
-
-  // ── Step 3: Build system prompt with brain memory ──────────────
-  const systemPrompt = buildAgentSystemPrompt(
-    agentType,
-    causalEdges || [],
-    rules || [],
-    patterns || [],
-    corrections || [],
-    recentSignals || [],
-    predictions || [],
-  );
-
-  await addStep(supabase, taskId, 3, "reasoning", "Reasoning with brain memory", "Calling Claude with organizational intelligence injected...");
-
-  // ── Step 4: Call Claude API ────────────────────────────────────
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    throw new Error("ANTHROPIC_API_KEY not configured");
-  }
-
-  const claudeResponse = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": apiKey,
-      "anthropic-version": "2023-06-01",
-    },
-    signal: AbortSignal.timeout(60_000), // 60s hard timeout on Claude call
-    body: JSON.stringify({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 4096,
-      system: systemPrompt,
-      messages: [
-        {
-          role: "user",
-          content: `${prompt}\n\n---\nIMPORTANT: At the end of your response, on a new line, output your confidence level for this analysis as:\nCONFIDENCE: 0.XX\n(where 0.XX is between 0.00 and 1.00, based on how confident you are in the accuracy and completeness of your answer given the available brain data)`,
-        },
-      ],
-    }),
-  });
-
-  if (!claudeResponse.ok) {
-    const errText = await claudeResponse.text();
-    throw new Error(`Claude API error ${claudeResponse.status}: ${errText.slice(0, 200)}`);
-  }
-
-  const claudeData = await claudeResponse.json();
-  const fullResponse = claudeData.content?.[0]?.text || "";
-  const tokensUsed = (claudeData.usage?.input_tokens || 0) + (claudeData.usage?.output_tokens || 0);
-
-  // ── Step 5: Parse confidence + extract artifacts ───────────────
-  const confidenceMatch = fullResponse.match(/CONFIDENCE:\s*([\d.]+)/i);
-  const confidence = confidenceMatch ? parseFloat(confidenceMatch[1]) : 0.7;
-  const cleanResponse = fullResponse.replace(/\nCONFIDENCE:\s*[\d.]+\s*$/i, "").trim();
+  // Extract response text for artifacts
+  const responseText = brainResult.agentOutput.rawResponse
+    ? String(brainResult.agentOutput.rawResponse)
+    : JSON.stringify(brainResult.agentOutput, null, 2);
 
   // Extract code blocks as artifacts
   const artifacts: Array<{
@@ -327,7 +369,7 @@ async function executeAgent(
   const codeBlockRegex = /```(\w+)?\s*\n([\s\S]*?)```/g;
   let match;
   let artifactIndex = 0;
-  while ((match = codeBlockRegex.exec(cleanResponse)) !== null) {
+  while ((match = codeBlockRegex.exec(responseText)) !== null) {
     const lang = match[1] || "text";
     const code = match[2].trim();
     if (code.split("\n").length >= 2) {
@@ -343,41 +385,54 @@ async function executeAgent(
     }
   }
 
-  // Also create an "analysis" artifact for the full response
+  // Analysis artifact
   artifacts.unshift({
     id: `agent_${taskId.slice(0, 8)}_analysis`,
     type: "analysis",
     title: `Agent Analysis: ${prompt.slice(0, 50)}${prompt.length > 50 ? "..." : ""}`,
     language: "markdown",
-    content: cleanResponse,
+    content: responseText,
     createdAt: Date.now(),
   });
 
-  const durationMs = Date.now() - startTime;
-  const costUsd = tokensUsed * 0.000003; // rough estimate
+  const confidence = brainResult.confidence;
+  const costUsd = brainResult.metrics.tokensUsed * 0.000003;
 
-  await addStep(supabase, taskId, 4, "artifact", "Results generated",
-    `${artifacts.length} artifact(s) produced. Confidence: ${(confidence * 100).toFixed(0)}%`);
+  await addStep(supabase, taskId, 4, "artifact", "Results generated (full L1-L30)",
+    `${artifacts.length} artifact(s). Composite confidence: ${(confidence * 100).toFixed(0)}% ` +
+    `(Claude×0.40 + L6-calibration×0.15 + L11-robustness×0.20 + history×0.25). ` +
+    `Brain cycle: ${brainResult.metrics.brainCycleDurationMs}ms, Claude: ${brainResult.metrics.claudeCallDurationMs}ms.`);
 
-  // ── Step 6: Semi-autonomous decision ───────────────────────────
-  const isHighConfidence = confidence >= autoExecuteThreshold;
+  // ── Step 6: Handle brain result status ─────────────────────────
+  if (brainResult.status === "failed") {
+    throw new Error(brainResult.error || "Brain agent execution failed");
+  }
 
-  if (isHighConfidence) {
-    // Auto-execute: mark complete immediately
+  const isAutoExecuted = brainResult.status === "auto-executed";
+
+  if (isAutoExecuted) {
     await supabase
       .from("brain_agent_tasks")
       .update({
         status: "completed",
         confidence_score: confidence,
-        result_summary: cleanResponse.slice(0, 500),
+        result_summary: responseText.slice(0, 500),
         result_artifacts: artifacts,
         result_metadata: {
-          tokensUsed,
+          tokensUsed: brainResult.metrics.tokensUsed,
           costUsd,
           durationMs,
           brainLayersUsed,
-          model: "claude-sonnet-4-20250514",
+          model: brainResult.metrics.model,
           autoExecuted: true,
+          brainCycleDurationMs: brainResult.metrics.brainCycleDurationMs,
+          claudeCallDurationMs: brainResult.metrics.claudeCallDurationMs,
+          compositeConfidence: confidence,
+          closedLoopTrackingId: brainResult.closedLoopTrackingId,
+          brainAttribution: brainResult.brainAttribution,
+          topLayerContributions: brainResult.layerContributions.slice(0, 5).map(lc =>
+            `L${lc.layerId} ${lc.layerName}: ${(lc.weight * 100).toFixed(0)}%`
+          ),
         },
         completed_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
@@ -385,36 +440,54 @@ async function executeAgent(
       .eq("id", taskId);
 
     await addStep(supabase, taskId, 5, "action", "Auto-executed (high confidence)",
-      `Confidence ${(confidence * 100).toFixed(0)}% >= threshold ${(autoExecuteThreshold * 100).toFixed(0)}%. Results delivered.`);
+      `Composite confidence ${(confidence * 100).toFixed(0)}% >= threshold ${(autoExecuteThreshold * 100).toFixed(0)}%. ` +
+      `Full L1-L30 brain cycle completed. Results delivered.`);
   } else {
-    // Low confidence: pause for human approval
+    // pending-approval
     await supabase
       .from("brain_agent_tasks")
       .update({
         status: "awaiting_approval",
         confidence_score: confidence,
-        result_summary: cleanResponse.slice(0, 500),
+        result_summary: responseText.slice(0, 500),
         result_artifacts: artifacts,
         result_metadata: {
-          tokensUsed,
+          tokensUsed: brainResult.metrics.tokensUsed,
           costUsd,
           durationMs,
           brainLayersUsed,
-          model: "claude-sonnet-4-20250514",
+          model: brainResult.metrics.model,
           autoExecuted: false,
+          brainCycleDurationMs: brainResult.metrics.brainCycleDurationMs,
+          claudeCallDurationMs: brainResult.metrics.claudeCallDurationMs,
+          compositeConfidence: confidence,
+          closedLoopTrackingId: brainResult.closedLoopTrackingId,
+          brainAttribution: brainResult.brainAttribution,
+          topLayerContributions: brainResult.layerContributions.slice(0, 5).map(lc =>
+            `L${lc.layerId} ${lc.layerName}: ${(lc.weight * 100).toFixed(0)}%`
+          ),
         },
-        proposed_action: {
-          actionType: agentType,
-          description: `Agent completed analysis with ${(confidence * 100).toFixed(0)}% confidence. Review recommended before accepting results.`,
-          impact: "Results will be added to your artifacts",
-          reversible: true,
-        },
+        proposed_action: brainResult.proposedActions?.length
+          ? {
+              actionType: agentType,
+              description: `Agent completed analysis with ${(confidence * 100).toFixed(0)}% composite confidence. Review recommended.`,
+              proposedActions: brainResult.proposedActions,
+              impact: "Results will be added to your artifacts",
+              reversible: true,
+            }
+          : {
+              actionType: agentType,
+              description: `Agent completed analysis with ${(confidence * 100).toFixed(0)}% composite confidence. Review recommended before accepting results.`,
+              impact: "Results will be added to your artifacts",
+              reversible: true,
+            },
         updated_at: new Date().toISOString(),
       })
       .eq("id", taskId);
 
     await addStep(supabase, taskId, 5, "approval_request", "Awaiting your approval",
-      `Confidence ${(confidence * 100).toFixed(0)}% < threshold ${(autoExecuteThreshold * 100).toFixed(0)}%. Please review and approve/reject.`);
+      `Composite confidence ${(confidence * 100).toFixed(0)}% < threshold ${(autoExecuteThreshold * 100).toFixed(0)}%. ` +
+      `Full L1-L30 brain cycle completed. Please review and approve/reject.`);
   }
 
   // ── Step 7: Emit learning signal ───────────────────────────────
@@ -427,110 +500,20 @@ async function executeAgent(
     entity_id: taskId,
     signal_metadata: {
       prompt: prompt.slice(0, 200),
-      autoExecuted: isHighConfidence,
-      tokensUsed,
+      brainAgentId: brainAgentId,
+      autoExecuted: isAutoExecuted,
+      tokensUsed: brainResult.metrics.tokensUsed,
       durationMs,
+      brainCycleDurationMs: brainResult.metrics.brainCycleDurationMs,
+      claudeCallDurationMs: brainResult.metrics.claudeCallDurationMs,
       artifactCount: artifacts.length,
+      compositeConfidence: confidence,
+      closedLoopTrackingId: brainResult.closedLoopTrackingId,
       brainLayersUsed: Object.keys(brainLayersUsed),
+      topLayerContributions: brainResult.layerContributions.slice(0, 5).map(lc => lc.layerName),
+      fullL1L30Cycle: true,
     },
   });
-}
-
-// ============================================================================
-// SYSTEM PROMPT BUILDER — Injects L1-L30 brain memory into Claude
-// ============================================================================
-
-function buildAgentSystemPrompt(
-  agentType: string,
-  causalEdges: Array<Record<string, unknown>>,
-  rules: Array<Record<string, unknown>>,
-  patterns: Array<Record<string, unknown>>,
-  corrections: Array<Record<string, unknown>>,
-  signals: Array<Record<string, unknown>>,
-  predictions: Array<Record<string, unknown>>,
-): string {
-  const sections: string[] = [];
-
-  sections.push(`You are a NexusBrain Agent — a semi-autonomous AI that operates WITH organizational memory, not as a stateless LLM.
-
-Your role: Execute the user's task using the organizational intelligence injected below. You have access to this organization's REAL causal graph, learned patterns, recent signals, and user-validated corrections.
-
-AGENT TYPE: ${agentType}
-EXECUTION MODE: Semi-autonomous (your confidence determines if results are auto-delivered or require human approval)
-
-KEY PRINCIPLES:
-1. Ground every insight in the Brain data below — don't make claims without evidence from the org's causal graph
-2. When Brain data conflicts, trust user corrections > causal edges > patterns > signals
-3. Produce actionable artifacts (code, analyses, recommendations) not just explanations
-4. Be explicit about uncertainty — your confidence score determines what happens next
-5. Reference specific causal relationships and signal data to support your analysis`);
-
-  // L2: Causal Edges
-  if (causalEdges.length > 0) {
-    sections.push(`\n## L2 — Organizational Causal Graph (${causalEdges.length} edges)
-These are REAL statistical causal relationships learned from THIS organization's data:`);
-    for (const edge of causalEdges.slice(0, 15)) {
-      sections.push(`- ${edge.source_signal} → ${edge.target_signal} (strength: ${edge.strength}, confidence: ${edge.confidence}, lag: ${edge.lag}d, p: ${edge.p_value})`);
-    }
-  }
-
-  // L5: Grammar Rules
-  if (rules.length > 0) {
-    sections.push(`\n## L5 — Discovered Organizational Patterns (${rules.length} rules)
-These patterns were autonomously discovered by the Brain:`);
-    for (const rule of rules) {
-      sections.push(`- [${rule.domain}] ${rule.rule_name}: ${typeof rule.rule_body === 'string' ? rule.rule_body.slice(0, 200) : JSON.stringify(rule.rule_body).slice(0, 200)} (confidence: ${rule.confidence})`);
-    }
-  }
-
-  // L5: Causal Chains
-  if (patterns.length > 0) {
-    sections.push(`\n## L5 — Causal Chains (${patterns.length} chains)`);
-    for (const p of patterns) {
-      sections.push(`- [${p.domain}] ${p.chain_name} (confidence: ${p.confidence})`);
-    }
-  }
-
-  // User corrections (HIGHEST PRIORITY)
-  if (corrections.length > 0) {
-    sections.push(`\n## USER CORRECTIONS (Ground Truth — HIGHEST PRIORITY)
-These corrections were explicitly validated by users. They OVERRIDE conflicting brain data:`);
-    for (const c of corrections) {
-      sections.push(`- [${c.domain}] ${c.content}`);
-    }
-  }
-
-  // L1: Recent signals
-  if (signals.length > 0) {
-    sections.push(`\n## L1 — Recent Cross-Domain Signals (last 7 days, ${signals.length} signals)
-Real-time events from this organization's connected systems:`);
-    // Group by source domain
-    const grouped: Record<string, Array<Record<string, unknown>>> = {};
-    for (const s of signals) {
-      const domain = String(s.source_domain);
-      if (!grouped[domain]) grouped[domain] = [];
-      grouped[domain].push(s);
-    }
-    for (const [domain, sigs] of Object.entries(grouped)) {
-      sections.push(`  ${domain}: ${sigs.length} signal(s) — types: ${[...new Set(sigs.map(s => s.signal_type))].join(", ")}`);
-    }
-  }
-
-  // L4: Prediction track record
-  if (predictions.length > 0) {
-    const accurate = predictions.filter((p: any) => p.accuracy !== null && p.accuracy > 0.7);
-    sections.push(`\n## L4 — Brain Prediction Track Record
-Recent predictions: ${predictions.length}, accurate (>70%): ${accurate.length}
-Use the Brain's prediction accuracy to calibrate your own confidence.`);
-  }
-
-  sections.push(`\n## OUTPUT FORMAT
-1. Provide a clear, structured analysis grounded in the Brain data above
-2. Include specific code blocks, recommendations, or action items as appropriate
-3. Reference specific causal edges or signals when making claims
-4. End with CONFIDENCE: 0.XX (your honest assessment of answer quality given available data)`);
-
-  return sections.join("\n");
 }
 
 // ============================================================================

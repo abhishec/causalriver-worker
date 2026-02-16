@@ -112,6 +112,14 @@ export interface RedisHealthStatus {
   connectedClients: number;
   opsPerSec: number;
   uptimeSeconds: number;
+  /**
+   * CTO Audit Fix (Gap #4): Indicates whether this is the in-memory fallback.
+   * When true, data is NOT persisted and will be lost on restart.
+   * For production at 10M+ scale, set REDIS_URL env var.
+   */
+  isInMemoryFallback: boolean;
+  /** Warning message when using in-memory fallback */
+  warning?: string;
 }
 
 // ============================================================================
@@ -643,6 +651,8 @@ export function createInMemoryRedis(config: Partial<RedisConfig> = {}): RedisCli
  */
 export async function getRedisHealth(redis: RedisClientInstance): Promise<RedisHealthStatus> {
   const start = Date.now();
+  const isInMemoryFallback = redis.getConfig().host === 'in-memory';
+
   try {
     await redis.ping();
     const latencyMs = Date.now() - start;
@@ -661,6 +671,10 @@ export async function getRedisHealth(redis: RedisClientInstance): Promise<RedisH
       connectedClients: parseField('connected_clients'),
       opsPerSec: parseField('instantaneous_ops_per_sec'),
       uptimeSeconds: parseField('uptime_in_seconds'),
+      isInMemoryFallback,
+      warning: isInMemoryFallback
+        ? 'Using in-memory Redis fallback (REDIS_URL not set). Data will NOT persist across restarts. For production at 10M+ scale, configure a real Redis instance.'
+        : undefined,
     };
   } catch {
     return {
@@ -671,6 +685,10 @@ export async function getRedisHealth(redis: RedisClientInstance): Promise<RedisH
       connectedClients: 0,
       opsPerSec: 0,
       uptimeSeconds: 0,
+      isInMemoryFallback,
+      warning: isInMemoryFallback
+        ? 'Using in-memory Redis fallback (REDIS_URL not set). Data will NOT persist across restarts.'
+        : 'Redis connection failed.',
     };
   }
 }
@@ -691,8 +709,18 @@ export function createRedisClient(config: Partial<RedisConfig> = {}): RedisClien
     // Production: use ioredis (lazy import to avoid bundling in dev)
     return createIoRedisAdapter(redisUrl, config);
   }
+
+  // CTO Audit Fix (Gap #4): Warn when using in-memory fallback
+  console.warn(
+    '[NexusBrain] ⚠️  REDIS_URL not configured — using in-memory Redis fallback.\n' +
+    '  This is fine for development and <100K signals.\n' +
+    '  For production (10M+ signals), set REDIS_URL environment variable.\n' +
+    '  In-memory Redis: no persistence, no pub/sub, will OOM at scale.'
+  );
+
   return createInMemoryRedis(config);
 }
+
 
 /**
  * Create an ioredis adapter that implements RedisClientInstance.

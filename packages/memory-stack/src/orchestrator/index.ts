@@ -153,3 +153,17 @@ export {
   registerAllBrainAgents,
   BRAIN_LAYER_NAMES,
 } from './brain-agent-definitions';
+
+// Brain Layer Persistence — Supabase-backed state persistence for L3-L30
+// CTO Audit Fix: Gaps #2 (L3-L15 persistence) and #3 (L16-L30 persistence)
+export {
+  createBrainLayerPersistence,
+  saveCognitiveLayerState,
+  saveDeepLayerState,
+  type BrainLayerPersistenceConfig,
+  type BrainLayerPersistenceInstance,
+  type LayerStateSnapshot,
+  type CognitiveStackPersistable,
+  type DeepLayersPersistable,
+  LAYER_IDS,
+} from './brain-layer-persistence';

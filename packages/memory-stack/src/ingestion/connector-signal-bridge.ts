@@ -133,6 +133,66 @@ export function setDomainTaxonomy(taxonomy: DomainTaxonomyInstance): void {
   _domainTaxonomy = taxonomy;
 }
 
+// ============================================================================
+// SIGNAL INGESTION LISTENER — CTO Audit Fix: Gap #5
+// ============================================================================
+//
+// When connectors ingest new signals, the brain should be notified so it can
+// optionally trigger a cognitive cycle. Without this, the brain only processes
+// signals on scheduled cycles (every N minutes), not in real-time.
+//
+// Usage:
+//   import { onSignalsIngested } from '@nexus-ai/memory-stack';
+//   onSignalsIngested(async (orgId, signalCount) => {
+//     const cortex = getOrCreateCortex(orgId);
+//     await cortex.runCycle(buildInputFromSignals(orgId));
+//   });
+
+/** Callback for when new signals are ingested */
+export type SignalIngestedCallback = (
+  organizationId: string,
+  signalCount: number,
+  source: string
+) => void | Promise<void>;
+
+let _signalListeners: SignalIngestedCallback[] = [];
+
+/**
+ * Register a callback that fires when new signals are ingested.
+ *
+ * CTO Audit Fix: Gap #5 — Enables reactive brain cycle triggering.
+ *
+ * @param callback - Called with (orgId, signalCount, source) after each batch of signals is stored
+ * @returns Unsubscribe function
+ */
+export function onSignalsIngested(callback: SignalIngestedCallback): () => void {
+  _signalListeners.push(callback);
+  return () => {
+    _signalListeners = _signalListeners.filter(cb => cb !== callback);
+  };
+}
+
+/**
+ * Notify all listeners that signals were ingested.
+ * Called internally by storeDualWriteConnectorSignals after successful write.
+ * Non-blocking — errors in listeners are caught and logged.
+ */
+function _notifySignalListeners(organizationId: string, signalCount: number, source: string): void {
+  for (const listener of _signalListeners) {
+    try {
+      const result = listener(organizationId, signalCount, source);
+      // If listener returns a promise, catch any rejection
+      if (result && typeof (result as Promise<void>).catch === 'function') {
+        (result as Promise<void>).catch(err => {
+          console.warn('[signal-bridge] Listener error:', err);
+        });
+      }
+    } catch (err) {
+      console.warn('[signal-bridge] Listener error:', err);
+    }
+  }
+}
+
 function deriveDomain(source: string, metadata?: Record<string, unknown>): string {
   // If taxonomy is wired, use hierarchical resolution
   if (_domainTaxonomy && metadata) {
@@ -349,6 +409,13 @@ export async function storeDualWriteConnectorSignals(
     const counts = data as { raw_count: number; enriched_count: number };
     return { rawCount: counts.raw_count, enrichedCount: counts.enriched_count };
   }, 'dual-write-signals');
+
+  // CTO Audit Fix (Gap #5): Notify listeners that new signals arrived
+  // This enables reactive brain cycle triggering when connectors ingest data
+  if (result.enrichedCount > 0 && _signalListeners.length > 0) {
+    const source = signals[0]?.source || 'unknown';
+    _notifySignalListeners(organizationId, result.enrichedCount, source);
+  }
 
   return result;
 }

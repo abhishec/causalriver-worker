@@ -62,6 +62,7 @@ import type { DeepLayersInstance, DeepCycleInput, DeepCycleResult } from '../cau
 import type { DomainTaxonomyInstance } from '../domain-hierarchy/domain-taxonomy';
 import type { CrossSystemEntityGraphInstance } from '../domain-hierarchy/cross-system-entity-graph';
 import type { BrainObservabilityBridge, CognitiveLayerOutput } from './brain-observability-bridge';
+import type { BrainLayerPersistenceInstance } from './brain-layer-persistence';
 
 // ============================================================================
 // TYPES
@@ -82,6 +83,11 @@ export interface DeepPipelineConfig {
   observabilityBridge?: BrainObservabilityBridge;
   /** Enable reverse feedback from L16-L30 → L1-L15 */
   enableReverseFeedback?: boolean;
+  /**
+   * Layer persistence (optional — saves L3-L30 state to Supabase after each cycle).
+   * CTO Audit Fix: Gaps #2 and #3.
+   */
+  layerPersistence?: BrainLayerPersistenceInstance;
 }
 
 /**
@@ -216,6 +222,7 @@ export function createDeepPipeline(config: DeepPipelineConfig): DeepPipelineInst
     entityGraph,
     observabilityBridge,
     enableReverseFeedback = true,
+    layerPersistence,
   } = config;
 
   /**
@@ -506,6 +513,28 @@ export function createDeepPipeline(config: DeepPipelineConfig): DeepPipelineInst
 
       if (enableReverseFeedback) {
         feedback = _executeReverseFeedback(brainResult, deepResult);
+      }
+
+      // ════════════════════════════════════════════════
+      // PHASE 7: PERSIST LAYER STATE (non-blocking)
+      // CTO Audit Fix: Gaps #2 + #3
+      // ════════════════════════════════════════════════
+      if (layerPersistence) {
+        try {
+          // L3-L15: Save cognitive layer state (debounced, non-blocking)
+          const { saveCognitiveLayerState, saveDeepLayerState } = require('./brain-layer-persistence');
+          saveCognitiveLayerState(layerPersistence, {
+            getDreaming: () => cognitiveStack.layers.dreaming,
+            getMemory: () => cognitiveStack.layers.memory,
+            getTheoryOfMind: () => cognitiveStack.layers.theoryOfMind,
+            getTemporal: () => cognitiveStack.layers.temporal,
+          });
+
+          // L16-L30: Save deep layer state (debounced, non-blocking)
+          saveDeepLayerState(layerPersistence, deepLayers);
+        } catch {
+          // Best-effort — never block the cycle on persistence failure
+        }
       }
 
       // ════════════════════════════════════════════════
