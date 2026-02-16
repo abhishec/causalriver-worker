@@ -120,6 +120,8 @@ export interface AdvancedDiscoveryConfig {
   apexSignPriorPositive: number;
   apexSignPriorNegative: number;
   apexSignPriorMode: 'positive' | 'negative' | 'none';
+  // PC Algorithm minimum observations per variable
+  minObservations: number;
 }
 
 export interface PairwiseScoreMatrix {
@@ -165,6 +167,7 @@ export const DEFAULT_ADVANCED_CONFIG: AdvancedDiscoveryConfig = {
   apexSignPriorPositive: 1.04,
   apexSignPriorNegative: 0.96,
   apexSignPriorMode: 'positive',
+  minObservations: 30,
 };
 
 // ============================================================================
