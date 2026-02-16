@@ -2,6 +2,12 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { cn } from "@/lib/utils";
+import { Card, CardTitle } from "@/components/ui/Card";
+import { Badge } from "@/components/ui/Badge";
+import { StatValue } from "@/components/ui/StatValue";
+import { StatusDot } from "@/components/ui/StatusDot";
+import { TabGroup } from "@/components/ui/TabGroup";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 // ─── Types ─────────────────────────────────────────────────────
 
@@ -105,7 +111,6 @@ const AGENT_ICONS: Record<string, string> = {
 };
 
 function getAgentColor(agentType: string) {
-  // Match by partial key
   for (const [key, colors] of Object.entries(AGENT_COLORS)) {
     if (agentType.toLowerCase().includes(key)) return colors;
   }
@@ -116,7 +121,7 @@ function getAgentIcon(agentType: string) {
   for (const [key, icon] of Object.entries(AGENT_ICONS)) {
     if (agentType.toLowerCase().includes(key)) return icon;
   }
-  return "M4 6h16M4 12h16M4 18h16"; // default: menu icon
+  return "M4 6h16M4 12h16M4 18h16";
 }
 
 // ─── Helpers ───────────────────────────────────────────────────
@@ -147,33 +152,6 @@ function formatTime(date: string): string {
   });
 }
 
-function statusColor(status: string) {
-  switch (status) {
-    case "success": return "text-success";
-    case "partial": return "text-warning";
-    case "failed": return "text-danger";
-    default: return "text-muted";
-  }
-}
-
-function statusBg(status: string) {
-  switch (status) {
-    case "success": return "bg-success/10";
-    case "partial": return "bg-warning/10";
-    case "failed": return "bg-danger/10";
-    default: return "bg-muted/10";
-  }
-}
-
-function statusDot(status: string) {
-  switch (status) {
-    case "success": return "bg-success";
-    case "partial": return "bg-warning";
-    case "failed": return "bg-danger";
-    default: return "bg-muted";
-  }
-}
-
 // ─── Component ─────────────────────────────────────────────────
 
 export function AgentsClient() {
@@ -181,7 +159,7 @@ export function AgentsClient() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [hours, setHours] = useState(72);
-  const [view, setView] = useState<"overview" | "timeline" | "errors">("overview");
+  const [view, setView] = useState("overview");
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
   const [expandedRun, setExpandedRun] = useState<string | null>(null);
 
@@ -204,7 +182,7 @@ export function AgentsClient() {
 
   useEffect(() => {
     fetchData();
-    const interval = setInterval(fetchData, 60000); // Auto-refresh every 60s
+    const interval = setInterval(fetchData, 60000);
     return () => clearInterval(interval);
   }, [fetchData]);
 
@@ -221,15 +199,11 @@ export function AgentsClient() {
 
   if (error && !data) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <p className="text-danger mb-2">Failed to load agent runs</p>
-          <p className="text-xs text-muted mb-4">{error}</p>
-          <button onClick={fetchData} className="px-4 py-2 rounded-lg bg-accent/10 text-accent text-sm hover:bg-accent/20">
-            Retry
-          </button>
-        </div>
-      </div>
+      <EmptyState
+        title="Failed to load agent runs"
+        description={error}
+        action={{ label: "Retry", onClick: fetchData }}
+      />
     );
   }
 
@@ -238,19 +212,24 @@ export function AgentsClient() {
   const { stats, agentSummaries, runs } = data;
   const failedRuns = runs.filter((r) => r.status === "failed");
 
+  const tabs = [
+    { id: "overview", label: "Agent Overview" },
+    { id: "timeline", label: "Run Timeline" },
+    { id: "errors", label: "Errors", count: failedRuns.length },
+  ];
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Agent Runs</h1>
-          <p className="text-muted text-sm mt-1">
-            {stats.total} runs in the last {hours}h &middot; {stats.successRate}% success rate
+          <h1 className="text-xl font-semibold tracking-tight">Agent Runs</h1>
+          <p className="text-xs text-muted mt-0.5">
+            {stats.total} runs in the last {hours}h · {stats.successRate}% success rate
           </p>
         </div>
         <div className="flex items-center gap-2">
-          {/* Time range selector */}
-          <div className="flex rounded-lg border border-border/50 overflow-hidden">
+          <div className="flex rounded-lg border border-border-subtle overflow-hidden">
             {[24, 72, 168].map((h) => (
               <button
                 key={h}
@@ -266,10 +245,9 @@ export function AgentsClient() {
               </button>
             ))}
           </div>
-          {/* Refresh */}
           <button
             onClick={fetchData}
-            className={cn("p-2 rounded-lg border border-border/50 text-muted hover:text-foreground hover:bg-surface transition-colors", loading && "animate-spin")}
+            className={cn("p-2 rounded-lg border border-border-subtle text-muted hover:text-foreground hover:bg-surface transition-colors", loading && "animate-spin")}
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -279,36 +257,27 @@ export function AgentsClient() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
-        <StatCard label="Total Runs" value={stats.total} />
-        <StatCard label="Success Rate" value={`${stats.successRate}%`} color={stats.successRate >= 80 ? "success" : stats.successRate >= 50 ? "warning" : "danger"} />
-        <StatCard label="Failed" value={stats.failed} color={stats.failed > 0 ? "danger" : "success"} />
-        <StatCard label="Avg Duration" value={formatDuration(stats.avgDurationMs)} />
-        <StatCard label="Tokens Used" value={stats.totalTokens > 1000 ? `${(stats.totalTokens / 1000).toFixed(1)}K` : stats.totalTokens.toString()} />
-        <StatCard label="LLM Cost" value={`$${stats.totalCost.toFixed(3)}`} />
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+        <StatValue label="Total Runs" value={String(stats.total)} />
+        <StatValue
+          label="Success Rate"
+          value={`${stats.successRate}%`}
+          change={stats.successRate >= 80 ? "healthy" : stats.successRate >= 50 ? "moderate" : "critical"}
+          trend={stats.successRate >= 80 ? "up" : "down"}
+        />
+        <StatValue label="Failed" value={String(stats.failed)} />
+        <StatValue label="Avg Duration" value={formatDuration(stats.avgDurationMs)} />
+        <StatValue label="Tokens Used" value={stats.totalTokens > 1000 ? `${(stats.totalTokens / 1000).toFixed(1)}K` : String(stats.totalTokens)} />
+        <StatValue label="LLM Cost" value={`$${stats.totalCost.toFixed(3)}`} />
       </div>
 
       {/* View Tabs */}
-      <div className="flex items-center gap-1 border-b border-border/50 pb-px">
-        {[
-          { id: "overview" as const, label: "Agent Overview" },
-          { id: "timeline" as const, label: "Run Timeline" },
-          { id: "errors" as const, label: `Errors (${failedRuns.length})` },
-        ].map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setView(tab.id)}
-            className={cn(
-              "px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors",
-              view === tab.id
-                ? "border-accent text-accent"
-                : "border-transparent text-muted hover:text-foreground"
-            )}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
+      <TabGroup
+        tabs={tabs}
+        activeTab={view}
+        onChange={setView}
+        variant="underline"
+      />
 
       {/* Agent filter chips */}
       {view !== "overview" && (
@@ -363,46 +332,32 @@ export function AgentsClient() {
 
       {/* Queued Tasks */}
       {data.queuedTasks.length > 0 && (
-        <div className="rounded-xl bg-card border border-border/50 p-5">
-          <h3 className="text-sm font-semibold mb-3">Queued Tasks ({data.queuedTasks.length})</h3>
+        <Card>
+          <CardTitle className="mb-3">Queued Tasks ({data.queuedTasks.length})</CardTitle>
           <div className="space-y-2">
             {data.queuedTasks.slice(0, 10).map((task) => (
-              <div key={task.id} className="flex items-center justify-between text-xs py-1.5 border-b border-border/20 last:border-0">
+              <div key={task.id} className="flex items-center justify-between text-xs py-1.5 border-b border-border-subtle/50 last:border-0">
                 <div className="flex items-center gap-2">
-                  <div className={cn("w-1.5 h-1.5 rounded-full", statusDot(task.status))} />
+                  <StatusDot type={task.status === "success" ? "success" : task.status === "failed" ? "error" : task.status === "running" ? "active" : "inactive"} size="sm" />
                   <span className="font-medium">{task.agent_type}</span>
                   <span className="text-muted">{task.task_type}</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-muted">P{task.priority}</span>
-                  <span className={statusColor(task.status)}>{task.status}</span>
+                  <Badge variant="default" size="xs">P{task.priority}</Badge>
+                  <Badge variant={task.status === "completed" ? "success" : task.status === "failed" ? "error" : "default"} size="xs">
+                    {task.status}
+                  </Badge>
                 </div>
               </div>
             ))}
           </div>
-        </div>
+        </Card>
       )}
     </div>
   );
 }
 
 // ─── Sub-Components ────────────────────────────────────────────
-
-function StatCard({ label, value, color }: { label: string; value: string | number; color?: string }) {
-  return (
-    <div className="rounded-xl bg-card border border-border/50 p-4">
-      <div className="text-[10px] font-medium text-muted uppercase tracking-wider mb-1">{label}</div>
-      <div className={cn("text-xl font-bold",
-        color === "success" && "text-success",
-        color === "warning" && "text-warning",
-        color === "danger" && "text-danger",
-        !color && "text-foreground",
-      )}>
-        {value}
-      </div>
-    </div>
-  );
-}
 
 function AgentOverview({
   summaries,
@@ -411,6 +366,10 @@ function AgentOverview({
   summaries: AgentSummary[];
   onSelectAgent: (agent: string) => void;
 }) {
+  if (summaries.length === 0) {
+    return <EmptyState title="No agent runs" description="No agent runs found in this time range" />;
+  }
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
       {summaries.map((agent) => {
@@ -418,14 +377,11 @@ function AgentOverview({
         const icon = getAgentIcon(agent.agentType);
 
         return (
-          <button
+          <Card
             key={agent.agentType}
+            variant="interactive"
             onClick={() => onSelectAgent(agent.agentType)}
-            className={cn(
-              "rounded-xl bg-card border p-5 text-left transition-all hover:border-border group",
-              colors.border,
-              "border-border/50"
-            )}
+            className="cursor-pointer"
           >
             {/* Header */}
             <div className="flex items-start justify-between mb-3">
@@ -437,8 +393,10 @@ function AgentOverview({
               <div className="flex items-center gap-1.5">
                 {agent.lastRun && (
                   <>
-                    <div className={cn("w-2 h-2 rounded-full", statusDot(agent.lastRun.status))} />
-                    <span className={cn("text-[10px] font-medium", statusColor(agent.lastRun.status))}>
+                    <StatusDot type={agent.lastRun.status === "success" ? "success" : agent.lastRun.status === "partial" ? "warning" : "error"} size="sm" />
+                    <span className={cn("text-[10px] font-medium",
+                      agent.lastRun.status === "success" ? "text-success" : agent.lastRun.status === "partial" ? "text-warning" : "text-danger"
+                    )}>
                       {agent.lastRun.status}
                     </span>
                   </>
@@ -455,11 +413,11 @@ function AgentOverview({
             {/* Stats Row */}
             <div className="grid grid-cols-3 gap-2 mb-3">
               <div className="text-center">
-                <div className="text-lg font-bold">{agent.totalRuns}</div>
+                <div className="text-lg font-semibold tabular-nums">{agent.totalRuns}</div>
                 <div className="text-[10px] text-muted">runs</div>
               </div>
               <div className="text-center">
-                <div className={cn("text-lg font-bold",
+                <div className={cn("text-lg font-semibold tabular-nums",
                   agent.successRate >= 80 ? "text-success" : agent.successRate >= 50 ? "text-warning" : "text-danger"
                 )}>
                   {agent.successRate}%
@@ -467,14 +425,14 @@ function AgentOverview({
                 <div className="text-[10px] text-muted">success</div>
               </div>
               <div className="text-center">
-                <div className="text-lg font-bold">{formatDuration(agent.avgDurationMs)}</div>
+                <div className="text-lg font-semibold tabular-nums">{formatDuration(agent.avgDurationMs)}</div>
                 <div className="text-[10px] text-muted">avg</div>
               </div>
             </div>
 
             {/* Last Run */}
             {agent.lastRun && (
-              <div className="px-3 py-2 rounded-lg bg-surface/50 border border-border/20 mb-2">
+              <div className="px-3 py-2 rounded-lg bg-surface/50 border border-border-subtle mb-2">
                 <div className="flex items-center justify-between text-[11px]">
                   <span className="text-muted">Last run</span>
                   <span className="text-muted-foreground">{formatTimeAgo(agent.lastRun.startedAt)}</span>
@@ -504,15 +462,9 @@ function AgentOverview({
                 {agent.failed} failed run{agent.failed > 1 ? "s" : ""}
               </div>
             )}
-          </button>
+          </Card>
         );
       })}
-
-      {summaries.length === 0 && (
-        <div className="col-span-full text-center py-12 text-muted">
-          No agent runs found in this time range
-        </div>
-      )}
     </div>
   );
 }
@@ -526,10 +478,13 @@ function RunTimeline({
   expandedRun: string | null;
   onToggleRun: (id: string) => void;
 }) {
+  if (runs.length === 0) {
+    return <EmptyState title="No runs found" description="No runs match the current filter" />;
+  }
+
   return (
-    <div className="rounded-xl bg-card border border-border/50 overflow-hidden">
-      {/* Table Header */}
-      <div className="grid grid-cols-[auto_1fr_100px_100px_80px_100px] gap-4 px-5 py-3 text-[10px] font-semibold uppercase tracking-wider text-muted border-b border-border/50 bg-surface/30">
+    <Card className="overflow-hidden p-0">
+      <div className="grid grid-cols-[auto_1fr_100px_100px_80px_100px] gap-4 px-5 py-3 text-[10px] font-semibold uppercase tracking-wider text-muted border-b border-border-subtle bg-surface/30">
         <div className="w-3" />
         <div>Agent</div>
         <div>Time</div>
@@ -538,8 +493,7 @@ function RunTimeline({
         <div>Status</div>
       </div>
 
-      {/* Rows */}
-      <div className="divide-y divide-border/20">
+      <div className="divide-y divide-border-subtle/50">
         {runs.map((run) => {
           const colors = getAgentColor(run.agentType);
           const isExpanded = expandedRun === run.id;
@@ -550,24 +504,26 @@ function RunTimeline({
                 onClick={() => onToggleRun(run.id)}
                 className="w-full grid grid-cols-[auto_1fr_100px_100px_80px_100px] gap-4 px-5 py-3 text-xs hover:bg-surface/30 transition-colors text-left items-center"
               >
-                <div className={cn("w-2.5 h-2.5 rounded-full shrink-0", statusDot(run.status))} />
+                <StatusDot type={run.status === "success" ? "success" : run.status === "partial" ? "warning" : "error"} size="sm" />
                 <div className="flex items-center gap-2 min-w-0">
                   <span className={cn("font-medium truncate", colors.text)}>{run.agentType}</span>
                   <span className="text-[10px] text-muted/50 shrink-0">{run.source}</span>
                 </div>
                 <div className="text-muted truncate">{formatTimeAgo(run.startedAt)}</div>
-                <div className="text-muted-foreground font-mono">{formatDuration(run.durationMs)}</div>
-                <div className="text-muted font-mono">{run.tokensUsed > 0 ? run.tokensUsed.toLocaleString() : "--"}</div>
+                <div className="text-muted-foreground font-mono tabular-nums">{formatDuration(run.durationMs)}</div>
+                <div className="text-muted font-mono tabular-nums">{run.tokensUsed > 0 ? run.tokensUsed.toLocaleString() : "--"}</div>
                 <div>
-                  <span className={cn("px-2 py-0.5 rounded-full text-[10px] font-medium", statusBg(run.status), statusColor(run.status))}>
+                  <Badge
+                    variant={run.status === "success" ? "success" : run.status === "partial" ? "warning" : "error"}
+                    size="xs"
+                  >
                     {run.status}
-                  </span>
+                  </Badge>
                 </div>
               </button>
 
-              {/* Expanded Details */}
               {isExpanded && (
-                <div className="px-5 pb-4 bg-surface/20 border-t border-border/10">
+                <div className="px-5 pb-4 bg-surface/20 border-t border-border-subtle/50">
                   <div className="grid grid-cols-2 gap-4 pt-3">
                     <div>
                       <div className="text-[10px] font-medium text-muted uppercase mb-1">Started</div>
@@ -621,33 +577,26 @@ function RunTimeline({
             </div>
           );
         })}
-
-        {runs.length === 0 && (
-          <div className="text-center py-12 text-muted text-sm">
-            No runs found for this filter
-          </div>
-        )}
       </div>
-    </div>
+    </Card>
   );
 }
 
 function ErrorsView({ runs }: { runs: UnifiedRun[] }) {
   if (runs.length === 0) {
     return (
-      <div className="rounded-xl bg-card border border-border/50 p-12 text-center">
-        <div className="w-12 h-12 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-3">
+      <EmptyState
+        icon={
           <svg className="w-6 h-6 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
           </svg>
-        </div>
-        <h3 className="text-sm font-semibold mb-1">No Errors</h3>
-        <p className="text-xs text-muted">All agent runs completed successfully in this time range</p>
-      </div>
+        }
+        title="No Errors"
+        description="All agent runs completed successfully in this time range"
+      />
     );
   }
 
-  // Group errors by error message
   const errorGroups = new Map<string, UnifiedRun[]>();
   for (const run of runs) {
     const key = run.errorMessage || "Unknown error";
@@ -673,7 +622,7 @@ function ErrorsView({ runs }: { runs: UnifiedRun[] }) {
               </div>
             </div>
           </div>
-          <div className="divide-y divide-border/20">
+          <div className="divide-y divide-border-subtle/50">
             {errorRuns.map((run) => {
               const colors = getAgentColor(run.agentType);
               return (

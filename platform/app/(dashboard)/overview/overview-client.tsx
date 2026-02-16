@@ -1,11 +1,15 @@
 "use client";
 
-import { MetricCard } from "@/components/dashboard/MetricCard";
-import { ActivityFeed, type ActivityItem } from "@/components/dashboard/ActivityFeed";
-import { BrainPulse } from "@/components/dashboard/BrainPulse";
+import { IntelligenceStream } from "@/components/intelligence/IntelligenceStream";
+import { KnowledgeGrowthChart } from "@/components/intelligence/KnowledgeGrowthChart";
+import { SignalRatePanel } from "@/components/intelligence/SignalRatePanel";
+import { StatValue } from "@/components/ui/StatValue";
+import { Card, CardTitle } from "@/components/ui/Card";
 import { CostWidget } from "@/components/dashboard/CostWidget";
-import { formatNumber } from "@/lib/utils";
+import { formatNumber, formatUSD } from "@/lib/utils";
+import type { IntelligenceEvent } from "@/components/intelligence/StreamEvent";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface OverviewClientProps {
   totalEdges: number;
@@ -16,7 +20,10 @@ interface OverviewClientProps {
   dailyBudget: number;
   monthlyBudget: number;
   brainAge: number;
-  recentActivity: ActivityItem[];
+  intelligenceEvents: IntelligenceEvent[];
+  knowledgeGrowth: { date: string; edges: number; signals: number }[];
+  signalRates: { domain: string; count: number; rate: number }[];
+  totalSignalRate: number;
   topDiscoveries: string[];
 }
 
@@ -29,82 +36,62 @@ export function OverviewClient({
   dailyBudget,
   monthlyBudget,
   brainAge,
-  recentActivity,
+  intelligenceEvents,
+  knowledgeGrowth,
+  signalRates,
+  totalSignalRate,
   topDiscoveries,
 }: OverviewClientProps) {
-  // Project monthly cost from today's data
+  const router = useRouter();
   const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
   const dayOfMonth = new Date().getDate();
   const projectedMonthly = dayOfMonth > 0 ? (costToday / Math.max(1, dayOfMonth)) * daysInMonth : 0;
 
   return (
     <div className="space-y-6">
-      {/* Brain Status Hero */}
-      <BrainPulse
-        status="active"
-        lastTrainedAt="2h ago"
-        brainAge={brainAge}
-        nextTrainingIn="4h"
-      />
-
-      {/* Key Metrics */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricCard
-          label="Causal Connections"
+      {/* Brain Vitals Strip */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <StatValue
+          label="Causal Edges"
           value={formatNumber(totalEdges)}
           change="+12 today"
-          changeType="positive"
-          pulse
+          trend="up"
+          sparklineData={knowledgeGrowth.map((d) => d.edges)}
         />
-        <MetricCard
+        <StatValue
           label="Signals Today"
           value={formatNumber(signalsToday)}
           subtitle="Across all connectors"
         />
-        <MetricCard
+        <StatValue
           label="Prediction Accuracy"
           value={`${predictionAccuracy.toFixed(1)}%`}
           change="+0.3%"
-          changeType="positive"
+          trend="up"
         />
-        <MetricCard
-          label="Brain Regions Active"
-          value={connectorsActive}
-          subtitle="of 11 regions"
-          pulse
+        <StatValue
+          label="Brain Age"
+          value={`${brainAge}d`}
+          subtitle={`${connectorsActive} regions active`}
         />
       </div>
 
-      {/* Bottom grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Activity Feed — 2 cols */}
-        <div className="lg:col-span-2 rounded-xl bg-card border border-border/50 p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-medium">Recent Activity</h3>
-            <Link href="/training" className="text-xs text-accent hover:text-accent-light">
-              View all
-            </Link>
-          </div>
-          <ActivityFeed items={recentActivity} />
-
-          {/* Discoveries */}
-          {topDiscoveries.length > 0 && (
-            <div className="mt-6 pt-4 border-t border-border/30">
-              <h4 className="text-xs font-medium text-muted uppercase tracking-wider mb-3">Latest Discoveries</h4>
-              <div className="space-y-2">
-                {topDiscoveries.slice(0, 3).map((d, i) => (
-                  <div key={i} className="flex items-start gap-2 text-sm">
-                    <span className="text-accent mt-0.5">&#x2022;</span>
-                    <span className="text-muted-foreground">{d}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+      {/* Two-column: Intelligence Stream + Brain Vitals */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        {/* Zone 1: Intelligence Stream (60%) */}
+        <div className="lg:col-span-3">
+          <IntelligenceStream events={intelligenceEvents} />
         </div>
 
-        {/* Right column */}
-        <div className="space-y-4">
+        {/* Zone 2: Brain Vitals (40%) */}
+        <div className="lg:col-span-2 space-y-4">
+          <KnowledgeGrowthChart data={knowledgeGrowth} />
+          <SignalRatePanel
+            signals={signalRates}
+            totalRate={totalSignalRate}
+          />
+
+          {/* Cost Compact */}
           <CostWidget
             costToday={costToday}
             dailyBudget={dailyBudget}
@@ -112,37 +99,47 @@ export function OverviewClient({
             monthlyBudget={monthlyBudget}
           />
 
-          {/* Quick Actions */}
-          <div className="rounded-xl bg-card border border-border/50 p-5">
-            <h3 className="text-xs font-medium text-muted uppercase tracking-wider mb-3">Quick Actions</h3>
-            <div className="space-y-2">
-              <Link
-                href="/copilot"
-                className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-accent/5 border border-accent/10 hover:bg-accent/10 transition-colors"
-              >
-                <svg className="w-4 h-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                </svg>
-                <span className="text-sm font-medium">Ask the Brain</span>
-              </Link>
-              <Link
-                href="/brain"
-                className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-surface-hover transition-colors"
-              >
-                <svg className="w-4 h-4 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                </svg>
-                <span className="text-sm text-muted-foreground">View Causal Graph</span>
-              </Link>
-              <Link
-                href="/integrate"
-                className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-surface-hover transition-colors"
-              >
-                <svg className="w-4 h-4 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                </svg>
-                <span className="text-sm text-muted-foreground">Integrate Your App</span>
-              </Link>
+          {/* Top Discoveries */}
+          {topDiscoveries.length > 0 && (
+            <Card>
+              <CardTitle className="mb-3">Latest Discoveries</CardTitle>
+              <div className="space-y-2">
+                {topDiscoveries.slice(0, 5).map((d, i) => (
+                  <div key={i} className="flex items-start gap-2 text-xs">
+                    <span className="text-accent mt-0.5 shrink-0">
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                      </svg>
+                    </span>
+                    <span className="text-muted-foreground">{d}</span>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
+        </div>
+      </div>
+
+      {/* Zone 3: Persistent Copilot Bar */}
+      <div className="sticky bottom-4 z-20">
+        <div
+          className="rounded-2xl bg-card/95 backdrop-blur-xl border border-border-subtle shadow-lg p-3 cursor-pointer hover:border-accent/30 transition-colors"
+          onClick={() => router.push("/copilot")}
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
+              <svg className="w-4 h-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
+              </svg>
+            </div>
+            <span className="text-sm text-muted flex-1">Ask NexusBrain about your data...</span>
+            <div className="flex items-center gap-2">
+              <kbd className="hidden md:inline-flex px-1.5 py-0.5 rounded bg-surface text-[10px] text-muted font-mono border border-border-subtle">
+                ⌘K
+              </kbd>
+              <svg className="w-4 h-4 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75" />
+              </svg>
             </div>
           </div>
         </div>

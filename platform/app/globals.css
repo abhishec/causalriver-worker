@@ -1,33 +1,68 @@
 @import "tailwindcss";
 
-/* ── NexusBrain Platform — Dark Theme ─────────────────────────────────────── */
+/* ── NexusBrain Platform — Intelligence Command Center Theme ───────────────── */
 
 @theme {
-  --color-background: #0a0a0f;
-  --color-foreground: #e8e8ed;
-  --color-muted: #6b7280;
-  --color-muted-foreground: #9ca3af;
-  --color-border: #1f2937;
-  --color-border-subtle: #111827;
+  /* ── Backgrounds ──────────────────────────────────────────────────────────── */
+  --color-background: #09090b;
+  --color-foreground: #e4e4e7;
+  --color-muted: #71717a;
+  --color-muted-foreground: #a1a1aa;
+
+  /* ── Surfaces (layered depth) ─────────────────────────────────────────────── */
+  --color-surface: #0c0c10;
+  --color-surface-hover: #14141f;
   --color-card: #0f1019;
   --color-card-hover: #141520;
-  --color-card-foreground: #e8e8ed;
-  --color-accent: #6366f1;
-  --color-accent-dark: #4f46e5;
-  --color-accent-light: #818cf8;
+  --color-card-foreground: #e4e4e7;
+  --color-surface-elevated: #12121a;
+  --color-surface-active: #18182a;
+
+  /* ── Borders ──────────────────────────────────────────────────────────────── */
+  --color-border: #1e1e2e;
+  --color-border-subtle: #141420;
+
+  /* ── Accent (blue-violet, distinctive) ────────────────────────────────────── */
+  --color-accent: #7c6cf0;
+  --color-accent-dark: #6558d4;
+  --color-accent-light: #9b8ff8;
   --color-accent-foreground: #ffffff;
+  --color-accent-subtle: rgba(124, 108, 240, 0.08);
+  --color-accent-muted: rgba(124, 108, 240, 0.15);
+
+  /* ── Semantic Colors ──────────────────────────────────────────────────────── */
   --color-success: #22c55e;
   --color-warning: #f59e0b;
   --color-danger: #ef4444;
   --color-info: #3b82f6;
-  --color-surface: #111118;
-  --color-surface-hover: #1a1a24;
+
+  /* ── Brain State Colors ───────────────────────────────────────────────────── */
+  --color-brain-active: #34d399;
+  --color-brain-training: #a78bfa;
+  --color-brain-discovery: #38bdf8;
+  --color-brain-alert: #fbbf24;
+
+  /* ── Domain Colors ────────────────────────────────────────────────────────── */
+  --color-domain-finance: #10b981;
+  --color-domain-engineering: #3b82f6;
+  --color-domain-sales: #f43f5e;
+  --color-domain-support: #ec4899;
+  --color-domain-marketing: #f59e0b;
+  --color-domain-product: #06b6d4;
+  --color-domain-operations: #a78bfa;
+  --color-domain-knowledge: #8b5cf6;
+  --color-domain-communication: #14b8a6;
+
+  /* ── Sidebar ──────────────────────────────────────────────────────────────── */
   --color-sidebar: #08080d;
   --color-sidebar-hover: #0f0f17;
-  --color-input: #1a1a24;
-  --color-input-border: #2a2a38;
-  --color-input-focus: #6366f1;
 
+  /* ── Inputs ───────────────────────────────────────────────────────────────── */
+  --color-input: #12121a;
+  --color-input-border: #1e1e2e;
+  --color-input-focus: #7c6cf0;
+
+  /* ── Fonts ────────────────────────────────────────────────────────────────── */
   --font-sans: "Geist", system-ui, -apple-system, sans-serif;
   --font-mono: "Geist Mono", ui-monospace, monospace;
 }
@@ -53,37 +88,97 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #2a2a38;
+  background: #1e1e2e;
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #3a3a48;
+  background: #2a2a3e;
 }
 
-/* ── Brain Pulse Animation ────────────────────────────────────────────────── */
+/* ── Animations ───────────────────────────────────────────────────────────── */
+
+/* Brain pulse — status indicator */
 @keyframes brain-pulse {
   0%, 100% { opacity: 0.4; transform: scale(1); }
   50% { opacity: 1; transform: scale(1.05); }
 }
-
 .brain-pulse {
   animation: brain-pulse 3s ease-in-out infinite;
 }
 
+/* Accent glow */
 @keyframes glow {
-  0%, 100% { box-shadow: 0 0 5px rgba(99, 102, 241, 0.3); }
-  50% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.6); }
+  0%, 100% { box-shadow: 0 0 5px rgba(124, 108, 240, 0.3); }
+  50% { box-shadow: 0 0 20px rgba(124, 108, 240, 0.6); }
 }
-
 .glow-accent {
   animation: glow 2s ease-in-out infinite;
 }
 
+/* Discovery pulse — new insight discovered */
+@keyframes discovery-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(56, 189, 248, 0); }
+}
+.animate-discovery {
+  animation: discovery-pulse 2s ease-in-out infinite;
+}
+
+/* Knowledge grow — edge appearing */
+@keyframes knowledge-grow {
+  0% { stroke-dashoffset: 100; opacity: 0; }
+  100% { stroke-dashoffset: 0; opacity: 1; }
+}
+.animate-knowledge {
+  animation: knowledge-grow 1s ease-out forwards;
+}
+
+/* Signal flow — data streaming through edge */
+@keyframes signal-flow {
+  0% { transform: translateX(-100%); opacity: 0; }
+  20% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { transform: translateX(100%); opacity: 0; }
+}
+.animate-signal-flow {
+  animation: signal-flow 2s linear infinite;
+}
+
+/* Fade in up — page content entry */
+@keyframes fade-in-up {
+  0% { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-up {
+  animation: fade-in-up 0.3s ease-out forwards;
+}
+
+/* Shimmer — loading skeleton */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--color-surface) 25%,
+    var(--color-surface-hover) 50%,
+    var(--color-surface) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
 /* ── Gradient backgrounds ─────────────────────────────────────────────────── */
 .bg-gradient-brain {
-  background: radial-gradient(ellipse at 50% 0%, rgba(99, 102, 241, 0.08) 0%, transparent 60%);
+  background: radial-gradient(ellipse at 50% 0%, rgba(124, 108, 240, 0.06) 0%, transparent 60%);
 }
 
 .bg-gradient-sidebar {
   background: linear-gradient(180deg, #08080d 0%, #0a0a12 100%);
+}
+
+.bg-gradient-intelligence {
+  background: radial-gradient(ellipse at 80% 20%, rgba(56, 189, 248, 0.04) 0%, transparent 50%),
+              radial-gradient(ellipse at 20% 80%, rgba(124, 108, 240, 0.04) 0%, transparent 50%);
 }

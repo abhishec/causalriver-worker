@@ -44,6 +44,8 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { getDefaultLogger, type NexusLogger } from './index';
+import { createRetry } from '../infra/retry';
+import { createCircuitBreaker, CircuitOpenError } from '../infra/circuit-breaker';
 
 // ============================================================================
 // TYPES
@@ -481,7 +483,25 @@ export interface BrainObservability {
     pending_writes: number;
     total_writes: number;
     last_flush: string | null;
+    failed_writes: number;
+    circuit_breaker: {
+      state: string;
+      failures: number;
+      total_trips: number;
+    };
+    retry: {
+      total_attempts: number;
+      total_retries: number;
+      total_failures: number;
+    };
   };
+  getFailedWrites: () => Array<{
+    table: string;
+    records: any[];
+    error: string;
+    timestamp: string;
+  }>;
+  retryFailedWrites: () => Promise<{ succeeded: number; failed: number }>;
 }
 
 // ============================================================================
@@ -501,6 +521,36 @@ export function createBrainObservability(
   } = config;
 
   const logger = config.logger || getDefaultLogger();
+
+  // Retry and circuit breaker for resilient writes
+  const retry = createRetry({
+    maxRetries: 3,
+    baseDelayMs: 1000,
+    backoffMultiplier: 2,
+    retryOn: (error: Error) => {
+      const msg = error.message.toLowerCase();
+      return (
+        msg.includes('timeout') ||
+        msg.includes('connection') ||
+        msg.includes('network') ||
+        msg.includes('temporary')
+      );
+    },
+  });
+
+  const circuitBreaker = createCircuitBreaker({
+    failureThreshold: 5,
+    resetTimeoutMs: 60000,
+    label: 'observability-writes',
+  });
+
+  // Failed writes dead letter queue
+  const failedWrites: Array<{
+    table: string;
+    records: any[];
+    error: string;
+    timestamp: string;
+  }> = [];
 
   // Batch queues
   const batches = {
@@ -550,18 +600,55 @@ export function createBrainObservability(
       const toWrite = records.splice(0, maxBatchSize);
 
       try {
-        const { error } = await supabase
-          .from(tableName)
-          .insert(toWrite.map(r => ({ ...r, organization_id: organizationId })));
+        // Use circuit breaker + retry for resilient writes
+        await circuitBreaker.execute(async () => {
+          await retry.execute(async () => {
+            const { error } = await supabase
+              .from(tableName)
+              .insert(toWrite.map(r => ({ ...r, organization_id: organizationId })));
 
-        if (error) {
-          logger.error('obs:flush:error', { table: tableName, error: error.message });
-        } else {
-          writeCount += toWrite.length;
-          totalWrites += toWrite.length;
-        }
+            if (error) {
+              throw new Error(`${tableName}: ${error.message}`);
+            }
+
+            writeCount += toWrite.length;
+            totalWrites += toWrite.length;
+          }, `flush:${tableName}`);
+        });
       } catch (err) {
-        logger.error('obs:flush:exception', { table: tableName, error: String(err) });
+        const error = err instanceof Error ? err : new Error(String(err));
+
+        // Handle circuit open gracefully
+        if (err instanceof CircuitOpenError) {
+          logger.warn('obs:flush:circuit-open', {
+            table: tableName,
+            records: toWrite.length,
+            circuitState: circuitBreaker.getState(),
+          });
+
+          // Add to dead letter queue
+          failedWrites.push({
+            table: tableName,
+            records: toWrite,
+            error: 'Circuit breaker open',
+            timestamp: new Date().toISOString(),
+          });
+        } else {
+          // Log failure and add to dead letter queue
+          logger.error('obs:flush:failed', {
+            table: tableName,
+            records: toWrite.length,
+            error: error.message,
+            retryStats: retry.getStats(),
+          });
+
+          failedWrites.push({
+            table: tableName,
+            records: toWrite,
+            error: error.message,
+            timestamp: new Date().toISOString(),
+          });
+        }
       }
     }
 
@@ -570,8 +657,10 @@ export function createBrainObservability(
     if (verbose && writeCount > 0) {
       logger.info('obs:flush', {
         writes: writeCount,
+        failed: failedWrites.length,
         duration_ms: Date.now() - start,
         pending: Object.values(batches).reduce((sum, arr) => sum + arr.length, 0),
+        circuitState: circuitBreaker.getState(),
       });
     }
   }
@@ -913,11 +1002,76 @@ export function createBrainObservability(
 
   function getStats() {
     const pendingWrites = Object.values(batches).reduce((sum, arr) => sum + arr.length, 0);
+    const circuitStats = circuitBreaker.getStats();
+    const retryStats = retry.getStats();
+
     return {
       pending_writes: pendingWrites,
       total_writes: totalWrites,
       last_flush: lastFlush ? lastFlush.toISOString() : null,
+      failed_writes: failedWrites.length,
+      circuit_breaker: {
+        state: circuitStats.state,
+        failures: circuitStats.failureCount,
+        total_trips: circuitStats.totalTrips,
+      },
+      retry: {
+        total_attempts: retryStats.totalAttempts,
+        total_retries: retryStats.totalRetries,
+        total_failures: retryStats.totalFailures,
+      },
     };
+  }
+
+  function getFailedWrites() {
+    return [...failedWrites];
+  }
+
+  async function retryFailedWrites(): Promise<{ succeeded: number; failed: number }> {
+    if (failedWrites.length === 0) {
+      return { succeeded: 0, failed: 0 };
+    }
+
+    logger.info('obs:retry-failed-writes', { count: failedWrites.length });
+
+    let succeeded = 0;
+    let failed = 0;
+
+    // Retry each failed batch
+    const toRetry = failedWrites.splice(0); // Clear the queue
+
+    for (const item of toRetry) {
+      try {
+        const { error } = await supabase
+          .from(item.table)
+          .insert(item.records.map(r => ({ ...r, organization_id: organizationId })));
+
+        if (error) {
+          failed++;
+          failedWrites.push(item); // Re-add to queue
+          logger.error('obs:retry-failed-writes:still-failing', {
+            table: item.table,
+            error: error.message,
+          });
+        } else {
+          succeeded++;
+          totalWrites += item.records.length;
+          logger.info('obs:retry-failed-writes:recovered', {
+            table: item.table,
+            records: item.records.length,
+          });
+        }
+      } catch (err) {
+        failed++;
+        failedWrites.push(item);
+        logger.error('obs:retry-failed-writes:exception', {
+          table: item.table,
+          error: String(err),
+        });
+      }
+    }
+
+    return { succeeded, failed };
   }
 
   // ──────────────────────────────────────────────────────────
@@ -1050,5 +1204,7 @@ export function createBrainObservability(
     getCostAnalysis,
     flush,
     getStats,
+    getFailedWrites,
+    retryFailedWrites,
   };
 }

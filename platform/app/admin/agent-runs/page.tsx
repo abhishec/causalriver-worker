@@ -1,7 +1,14 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { cn } from "@/lib/utils";
+import { cn, formatNumber, formatUSD } from "@/lib/utils";
+import { Card, CardTitle } from "@/components/ui/Card";
+import { Badge } from "@/components/ui/Badge";
+import { StatValue } from "@/components/ui/StatValue";
+import { StatusDot } from "@/components/ui/StatusDot";
+import { TabGroup } from "@/components/ui/TabGroup";
+import { EmptyState } from "@/components/ui/EmptyState";
+import Link from "next/link";
 
 export default function AdminAgentRunsPage() {
   return <AdminAgentsClient />;
@@ -104,18 +111,6 @@ function formatTime(date: string): string {
   });
 }
 
-function statusColor(s: string) {
-  return s === "success" ? "text-success" : s === "partial" ? "text-warning" : s === "failed" ? "text-danger" : "text-muted";
-}
-
-function statusBg(s: string) {
-  return s === "success" ? "bg-success/10" : s === "partial" ? "bg-warning/10" : s === "failed" ? "bg-danger/10" : "bg-muted/10";
-}
-
-function statusDot(s: string) {
-  return s === "success" ? "bg-success" : s === "partial" ? "bg-warning" : s === "failed" ? "bg-danger" : "bg-muted";
-}
-
 // ─── Main Component ────────────────────────────────────────────
 
 function AdminAgentsClient() {
@@ -123,7 +118,7 @@ function AdminAgentsClient() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [hours, setHours] = useState(72);
-  const [view, setView] = useState<"by-org" | "by-agent" | "timeline" | "errors">("by-org");
+  const [view, setView] = useState("by-org");
   const [orgFilter, setOrgFilter] = useState<string | null>(null);
   const [agentFilter, setAgentFilter] = useState<string | null>(null);
   const [expandedRun, setExpandedRun] = useState<string | null>(null);
@@ -156,7 +151,7 @@ function AdminAgentsClient() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="flex items-center gap-3 text-muted">
-          <div className="w-5 h-5 border-2 border-danger/30 border-t-danger rounded-full animate-spin" />
+          <div className="w-5 h-5 border-2 border-amber-500/30 border-t-amber-500 rounded-full animate-spin" />
           Loading platform agent runs...
         </div>
       </div>
@@ -165,13 +160,11 @@ function AdminAgentsClient() {
 
   if (error && !data) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <p className="text-danger mb-2">Failed to load agent runs</p>
-          <p className="text-xs text-muted mb-4">{error}</p>
-          <button onClick={fetchData} className="px-4 py-2 rounded-lg bg-danger/10 text-danger text-sm hover:bg-danger/20">Retry</button>
-        </div>
-      </div>
+      <EmptyState
+        title="Failed to load agent runs"
+        description={error}
+        action={{ label: "Retry", onClick: fetchData }}
+      />
     );
   }
 
@@ -180,29 +173,36 @@ function AdminAgentsClient() {
   const { stats, byOrg, byAgent, runs } = data;
   const failedRuns = runs.filter((r) => r.status === "failed");
 
+  const tabs = [
+    { id: "by-org", label: "By Organization" },
+    { id: "by-agent", label: "By Agent Type" },
+    { id: "timeline", label: "All Runs" },
+    { id: "errors", label: "Errors", count: failedRuns.length },
+  ];
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Agent Runs — Platform Wide</h1>
-          <p className="text-muted text-sm mt-1">
-            {stats.total} runs across {stats.uniqueOrgs} org{stats.uniqueOrgs !== 1 ? "s" : ""} &middot; {stats.uniqueAgents} agent types &middot; {stats.successRate}% success
+          <h1 className="text-xl font-semibold tracking-tight">Agent Runs — Platform Wide</h1>
+          <p className="text-xs text-muted mt-0.5">
+            {stats.total} runs across {stats.uniqueOrgs} org{stats.uniqueOrgs !== 1 ? "s" : ""} · {stats.uniqueAgents} agent types · {stats.successRate}% success
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex rounded-lg border border-border/50 overflow-hidden">
+          <div className="flex rounded-lg border border-border-subtle overflow-hidden">
             {[24, 72, 168].map((h) => (
               <button
                 key={h}
                 onClick={() => setHours(h)}
-                className={cn("px-3 py-1.5 text-xs font-medium transition-colors", hours === h ? "bg-danger/10 text-danger" : "text-muted hover:text-foreground")}
+                className={cn("px-3 py-1.5 text-xs font-medium transition-colors", hours === h ? "bg-amber-500/10 text-amber-400" : "text-muted hover:text-foreground")}
               >
                 {h === 24 ? "24h" : h === 72 ? "3d" : "7d"}
               </button>
             ))}
           </div>
-          <button onClick={fetchData} className={cn("p-2 rounded-lg border border-border/50 text-muted hover:text-foreground transition-colors", loading && "animate-spin")}>
+          <button onClick={fetchData} className={cn("p-2 rounded-lg border border-border-subtle text-muted hover:text-foreground transition-colors", loading && "animate-spin")}>
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
@@ -211,42 +211,34 @@ function AdminAgentsClient() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
-        <StatCard label="Total Runs" value={stats.total} />
-        <StatCard label="Success Rate" value={`${stats.successRate}%`} color={stats.successRate >= 80 ? "success" : stats.successRate >= 50 ? "warning" : "danger"} />
-        <StatCard label="Failed" value={stats.failed} color={stats.failed > 0 ? "danger" : "success"} />
-        <StatCard label="Organizations" value={stats.uniqueOrgs} />
-        <StatCard label="Agent Types" value={stats.uniqueAgents} />
-        <StatCard label="LLM Cost" value={`$${stats.totalCost.toFixed(3)}`} />
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+        <StatValue label="Total Runs" value={formatNumber(stats.total)} />
+        <StatValue
+          label="Success Rate"
+          value={`${stats.successRate}%`}
+          change={stats.successRate >= 80 ? "healthy" : stats.successRate >= 50 ? "warning" : "critical"}
+          trend={stats.successRate >= 80 ? "up" : "down"}
+        />
+        <StatValue label="Failed" value={formatNumber(stats.failed)} />
+        <StatValue label="Organizations" value={String(stats.uniqueOrgs)} />
+        <StatValue label="Agent Types" value={String(stats.uniqueAgents)} />
+        <StatValue label="LLM Cost" value={`$${stats.totalCost.toFixed(3)}`} />
       </div>
 
       {/* View Tabs */}
-      <div className="flex items-center gap-1 border-b border-border/50 pb-px">
-        {[
-          { id: "by-org" as const, label: "By Organization" },
-          { id: "by-agent" as const, label: "By Agent Type" },
-          { id: "timeline" as const, label: "All Runs" },
-          { id: "errors" as const, label: `Errors (${failedRuns.length})` },
-        ].map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setView(tab.id)}
-            className={cn(
-              "px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors",
-              view === tab.id ? "border-danger text-danger" : "border-transparent text-muted hover:text-foreground"
-            )}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
+      <TabGroup
+        tabs={tabs}
+        activeTab={view}
+        onChange={setView}
+        variant="underline"
+      />
 
       {/* Org filter (for timeline and errors) */}
       {(view === "timeline" || view === "errors") && data.orgs.length > 1 && (
         <div className="flex flex-wrap gap-2">
           <button
             onClick={() => { setOrgFilter(null); setAgentFilter(null); }}
-            className={cn("px-3 py-1 rounded-full text-xs font-medium transition-colors", !orgFilter ? "bg-danger/10 text-danger" : "bg-surface text-muted hover:text-foreground")}
+            className={cn("px-3 py-1 rounded-full text-xs font-medium transition-colors", !orgFilter ? "bg-amber-500/10 text-amber-400" : "bg-surface text-muted hover:text-foreground")}
           >
             All Orgs
           </button>
@@ -257,7 +249,7 @@ function AdminAgentsClient() {
               className={cn(
                 "px-3 py-1 rounded-full text-xs font-medium transition-colors",
                 orgFilter === org.id
-                  ? org.is_core_brain ? "bg-accent/10 text-accent" : "bg-danger/10 text-danger"
+                  ? org.is_core_brain ? "bg-accent/10 text-accent" : "bg-amber-500/10 text-amber-400"
                   : "bg-surface text-muted hover:text-foreground"
               )}
             >
@@ -281,12 +273,12 @@ function AdminAgentsClient() {
 
       {/* Scheduled Jobs Summary */}
       {data.scheduledJobs.length > 0 && (
-        <div className="rounded-xl bg-card border border-border/50 p-5">
-          <h3 className="text-sm font-semibold mb-3">Scheduled Jobs ({data.scheduledJobs.length})</h3>
+        <Card>
+          <CardTitle className="mb-4">Scheduled Jobs ({data.scheduledJobs.length})</CardTitle>
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
               <thead>
-                <tr className="text-[10px] font-semibold uppercase tracking-wider text-muted border-b border-border/50">
+                <tr className="text-[10px] font-semibold uppercase tracking-wider text-muted border-b border-border-subtle">
                   <th className="text-left py-2 px-3">Job</th>
                   <th className="text-left py-2 px-3">Schedule</th>
                   <th className="text-left py-2 px-3">Status</th>
@@ -296,15 +288,15 @@ function AdminAgentsClient() {
                   <th className="text-left py-2 px-3">Next Run</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border/20">
-                {data.scheduledJobs.map((job) => (
+              <tbody className="divide-y divide-border-subtle/50">
+                {data.scheduledJobs.map((job: any) => (
                   <tr key={job.id} className="hover:bg-surface/30">
                     <td className="py-2 px-3 font-medium">{job.job_name}</td>
                     <td className="py-2 px-3 font-mono text-muted">{job.schedule}</td>
                     <td className="py-2 px-3">
-                      <span className={cn("px-2 py-0.5 rounded-full text-[10px] font-medium", job.enabled ? "bg-success/10 text-success" : "bg-muted/10 text-muted")}>
+                      <Badge variant={job.enabled ? "success" : "default"} size="xs">
                         {job.enabled ? "Enabled" : "Disabled"}
-                      </span>
+                      </Badge>
                     </td>
                     <td className="py-2 px-3 text-muted">{job.run_count}</td>
                     <td className="py-2 px-3">
@@ -317,7 +309,7 @@ function AdminAgentsClient() {
               </tbody>
             </table>
           </div>
-        </div>
+        </Card>
       )}
     </div>
   );
@@ -325,28 +317,19 @@ function AdminAgentsClient() {
 
 // ─── Sub Components ────────────────────────────────────────────
 
-function StatCard({ label, value, color }: { label: string; value: string | number; color?: string }) {
-  return (
-    <div className="rounded-xl bg-card border border-border/50 p-4">
-      <div className="text-[10px] font-medium text-muted uppercase tracking-wider mb-1">{label}</div>
-      <div className={cn("text-xl font-bold",
-        color === "success" && "text-success",
-        color === "warning" && "text-warning",
-        color === "danger" && "text-danger",
-        !color && "text-foreground",
-      )}>{value}</div>
-    </div>
-  );
-}
-
 function OrgView({ byOrg, onSelectOrg }: { byOrg: OrgBreakdown[]; onSelectOrg: (id: string) => void }) {
+  if (byOrg.length === 0) {
+    return <EmptyState title="No agent runs" description="No agent runs in this time range" />;
+  }
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
       {byOrg.map((org) => (
-        <button
+        <Card
           key={org.orgId}
+          variant="interactive"
           onClick={() => onSelectOrg(org.orgId)}
-          className="rounded-xl bg-card border border-border/50 p-5 text-left hover:border-border transition-all"
+          className="cursor-pointer"
         >
           <div className="flex items-start justify-between mb-3">
             <div className="flex items-center gap-2">
@@ -355,49 +338,50 @@ function OrgView({ byOrg, onSelectOrg }: { byOrg: OrgBreakdown[]; onSelectOrg: (
               </div>
               <div>
                 <h3 className="text-sm font-semibold">{org.orgName}</h3>
-                <p className="text-[10px] text-muted">{org.orgSlug}</p>
+                <p className="text-[10px] text-muted font-mono">{org.orgSlug}</p>
               </div>
             </div>
-            {org.isCore && <span className="px-1.5 py-0.5 rounded bg-accent/10 text-accent text-[10px] font-medium">Core</span>}
+            {org.isCore && <Badge variant="accent" size="xs">Core</Badge>}
           </div>
 
           <div className="grid grid-cols-3 gap-2 mb-3">
             <div className="text-center">
-              <div className="text-lg font-bold">{org.totalRuns}</div>
+              <div className="text-lg font-semibold tabular-nums">{org.totalRuns}</div>
               <div className="text-[10px] text-muted">runs</div>
             </div>
             <div className="text-center">
-              <div className={cn("text-lg font-bold", org.successRate >= 80 ? "text-success" : org.successRate >= 50 ? "text-warning" : "text-danger")}>
+              <div className={cn("text-lg font-semibold tabular-nums", org.successRate >= 80 ? "text-success" : org.successRate >= 50 ? "text-warning" : "text-danger")}>
                 {org.successRate}%
               </div>
               <div className="text-[10px] text-muted">success</div>
             </div>
             <div className="text-center">
-              <div className={cn("text-lg font-bold", org.failed > 0 ? "text-danger" : "text-success")}>{org.failed}</div>
+              <div className={cn("text-lg font-semibold tabular-nums", org.failed > 0 ? "text-danger" : "text-success")}>{org.failed}</div>
               <div className="text-[10px] text-muted">failed</div>
             </div>
           </div>
 
           {org.lastRun && (
-            <div className="px-3 py-2 rounded-lg bg-surface/50 border border-border/20 text-[11px] text-muted">
+            <div className="px-3 py-2 rounded-lg bg-surface/50 border border-border-subtle text-[11px] text-muted">
               Last run: {formatTimeAgo(org.lastRun)}
             </div>
           )}
-        </button>
+        </Card>
       ))}
-      {byOrg.length === 0 && (
-        <div className="col-span-full text-center py-12 text-muted">No agent runs in this time range</div>
-      )}
     </div>
   );
 }
 
 function AgentView({ byAgent, onSelectAgent }: { byAgent: AgentBreakdown[]; onSelectAgent: (a: string) => void }) {
+  if (byAgent.length === 0) {
+    return <EmptyState title="No agent runs" description="No agent runs in this time range" />;
+  }
+
   return (
-    <div className="rounded-xl bg-card border border-border/50 overflow-hidden">
+    <Card className="overflow-hidden p-0">
       <table className="w-full text-xs">
         <thead>
-          <tr className="text-[10px] font-semibold uppercase tracking-wider text-muted border-b border-border/50 bg-surface/30">
+          <tr className="text-[10px] font-semibold uppercase tracking-wider text-muted border-b border-border-subtle bg-surface/30">
             <th className="text-left py-3 px-5">Agent</th>
             <th className="text-center py-3 px-3">Runs</th>
             <th className="text-center py-3 px-3">Success</th>
@@ -408,7 +392,7 @@ function AgentView({ byAgent, onSelectAgent }: { byAgent: AgentBreakdown[]; onSe
             <th className="text-left py-3 px-3">Last Run</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-border/20">
+        <tbody className="divide-y divide-border-subtle/50">
           {byAgent.map((agent) => (
             <tr
               key={agent.agentType}
@@ -416,24 +400,25 @@ function AgentView({ byAgent, onSelectAgent }: { byAgent: AgentBreakdown[]; onSe
               className="hover:bg-surface/30 cursor-pointer transition-colors"
             >
               <td className="py-3 px-5 font-medium">{agent.agentType}</td>
-              <td className="py-3 px-3 text-center">{agent.totalRuns}</td>
-              <td className="py-3 px-3 text-center text-success">{agent.successful}</td>
+              <td className="py-3 px-3 text-center tabular-nums">{agent.totalRuns}</td>
+              <td className="py-3 px-3 text-center text-success tabular-nums">{agent.successful}</td>
               <td className="py-3 px-3 text-center">
                 <span className={agent.failed > 0 ? "text-danger font-medium" : "text-muted"}>{agent.failed}</span>
               </td>
               <td className="py-3 px-3 text-center">
-                <span className={cn("px-2 py-0.5 rounded-full text-[10px] font-medium",
-                  agent.successRate >= 80 ? "bg-success/10 text-success" : agent.successRate >= 50 ? "bg-warning/10 text-warning" : "bg-danger/10 text-danger"
-                )}>
+                <Badge
+                  variant={agent.successRate >= 80 ? "success" : agent.successRate >= 50 ? "warning" : "error"}
+                  size="xs"
+                >
                   {agent.successRate}%
-                </span>
+                </Badge>
               </td>
-              <td className="py-3 px-3 text-center text-muted font-mono">{formatDuration(agent.avgDurationMs)}</td>
+              <td className="py-3 px-3 text-center text-muted font-mono tabular-nums">{formatDuration(agent.avgDurationMs)}</td>
               <td className="py-3 px-3 text-center text-muted">{agent.orgsActive}</td>
               <td className="py-3 px-3">
                 {agent.lastRun && (
                   <div className="flex items-center gap-2">
-                    <div className={cn("w-1.5 h-1.5 rounded-full", statusDot(agent.lastRun.status))} />
+                    <StatusDot type={agent.lastRun.status === "success" ? "success" : agent.lastRun.status === "partial" ? "warning" : "error"} size="sm" />
                     <span className="text-muted">{formatTimeAgo(agent.lastRun.startedAt)}</span>
                   </div>
                 )}
@@ -442,10 +427,7 @@ function AgentView({ byAgent, onSelectAgent }: { byAgent: AgentBreakdown[]; onSe
           ))}
         </tbody>
       </table>
-      {byAgent.length === 0 && (
-        <div className="text-center py-12 text-muted">No agent runs in this time range</div>
-      )}
-    </div>
+    </Card>
   );
 }
 
@@ -458,9 +440,13 @@ function TimelineView({
   expandedRun: string | null;
   onToggleRun: (id: string) => void;
 }) {
+  if (runs.length === 0) {
+    return <EmptyState title="No runs found" description="No runs match the current filters" />;
+  }
+
   return (
-    <div className="rounded-xl bg-card border border-border/50 overflow-hidden">
-      <div className="grid grid-cols-[auto_120px_1fr_100px_100px_100px] gap-3 px-5 py-3 text-[10px] font-semibold uppercase tracking-wider text-muted border-b border-border/50 bg-surface/30">
+    <Card className="overflow-hidden p-0">
+      <div className="grid grid-cols-[auto_120px_1fr_100px_100px_100px] gap-3 px-5 py-3 text-[10px] font-semibold uppercase tracking-wider text-muted border-b border-border-subtle bg-surface/30">
         <div className="w-3" />
         <div>Organization</div>
         <div>Agent</div>
@@ -469,7 +455,7 @@ function TimelineView({
         <div>Status</div>
       </div>
 
-      <div className="divide-y divide-border/20">
+      <div className="divide-y divide-border-subtle/50">
         {runs.map((run) => {
           const isExpanded = expandedRun === run.id;
           return (
@@ -478,27 +464,30 @@ function TimelineView({
                 onClick={() => onToggleRun(run.id)}
                 className="w-full grid grid-cols-[auto_120px_1fr_100px_100px_100px] gap-3 px-5 py-3 text-xs hover:bg-surface/30 transition-colors text-left items-center"
               >
-                <div className={cn("w-2.5 h-2.5 rounded-full shrink-0", statusDot(run.status))} />
+                <StatusDot type={run.status === "success" ? "success" : run.status === "partial" ? "warning" : "error"} size="sm" />
                 <div className="flex items-center gap-1.5 min-w-0">
-                  {run.isCoreBrain && <span className="px-1 py-0.5 rounded bg-accent/10 text-accent text-[9px] font-medium shrink-0">Core</span>}
+                  {run.isCoreBrain && <Badge variant="accent" size="xs">Core</Badge>}
                   <span className="text-muted truncate">{run.orgSlug}</span>
                 </div>
                 <div className="font-medium truncate">{run.agentType}</div>
                 <div className="text-muted">{formatTimeAgo(run.startedAt)}</div>
-                <div className="text-muted font-mono">{formatDuration(run.durationMs)}</div>
+                <div className="text-muted font-mono tabular-nums">{formatDuration(run.durationMs)}</div>
                 <div>
-                  <span className={cn("px-2 py-0.5 rounded-full text-[10px] font-medium", statusBg(run.status), statusColor(run.status))}>
+                  <Badge
+                    variant={run.status === "success" ? "success" : run.status === "partial" ? "warning" : "error"}
+                    size="xs"
+                  >
                     {run.status}
-                  </span>
+                  </Badge>
                 </div>
               </button>
 
               {isExpanded && (
-                <div className="px-5 pb-4 bg-surface/20 border-t border-border/10">
+                <div className="px-5 pb-4 bg-surface/20 border-t border-border-subtle/50">
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-3">
                     <div>
                       <div className="text-[10px] font-medium text-muted uppercase mb-1">Organization</div>
-                      <div className="text-xs">{run.orgName} ({run.orgSlug})</div>
+                      <div className="text-xs">{run.orgName} <span className="text-muted">({run.orgSlug})</span></div>
                     </div>
                     <div>
                       <div className="text-[10px] font-medium text-muted uppercase mb-1">Started</div>
@@ -536,27 +525,23 @@ function TimelineView({
             </div>
           );
         })}
-
-        {runs.length === 0 && (
-          <div className="text-center py-12 text-muted text-sm">No runs found</div>
-        )}
       </div>
-    </div>
+    </Card>
   );
 }
 
 function ErrorsView({ runs }: { runs: AdminRun[] }) {
   if (runs.length === 0) {
     return (
-      <div className="rounded-xl bg-card border border-border/50 p-12 text-center">
-        <div className="w-12 h-12 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-3">
+      <EmptyState
+        icon={
           <svg className="w-6 h-6 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
           </svg>
-        </div>
-        <h3 className="text-sm font-semibold mb-1">No Errors</h3>
-        <p className="text-xs text-muted">All agent runs completed successfully</p>
-      </div>
+        }
+        title="No Errors"
+        description="All agent runs completed successfully"
+      />
     );
   }
 
@@ -585,7 +570,7 @@ function ErrorsView({ runs }: { runs: AdminRun[] }) {
               </div>
               <pre className="text-xs text-danger/80 font-mono whitespace-pre-wrap break-all">{errorMsg}</pre>
             </div>
-            <div className="divide-y divide-border/20">
+            <div className="divide-y divide-border-subtle/50">
               {errorRuns.map((run) => (
                 <div key={run.id} className="px-5 py-2.5 flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2">

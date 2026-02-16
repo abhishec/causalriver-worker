@@ -1,0 +1,82 @@
+# Docker Compose for NexusBrain Grafana Observability
+#
+# Self-hosted Grafana for NexusBrain observability dashboards
+# Cost: ~$180/month (DigitalOcean/AWS) vs $18,600/month (Grafana Cloud)
+#
+# Usage:
+#   docker-compose up -d
+#   docker-compose logs -f grafana
+#   docker-compose down
+#
+
+version: '3.8'
+
+services:
+  grafana:
+    image: grafana/grafana:latest
+    container_name: nexus-grafana
+    restart: unless-stopped
+    ports:
+      - "${GRAFANA_PORT:-3000}:3000"
+    environment:
+      # Admin credentials
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin123}
+
+      # Security settings
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_AUTH_ANONYMOUS_ENABLED=false
+
+      # Server settings
+      - GF_SERVER_ROOT_URL=${GRAFANA_ROOT_URL:-http://localhost:3000}
+      - GF_SERVER_SERVE_FROM_SUB_PATH=false
+
+      # Install required plugins
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
+
+      # Database connection (for datasource provisioning)
+      - SUPABASE_DB_HOST=${SUPABASE_DB_HOST}
+      - SUPABASE_DB_PORT=${SUPABASE_DB_PORT:-5432}
+      - SUPABASE_DB_USER=${SUPABASE_DB_USER}
+      - SUPABASE_DB_PASSWORD=${SUPABASE_DB_PASSWORD}
+      - SUPABASE_DB_READONLY_USER=${SUPABASE_DB_READONLY_USER}
+      - SUPABASE_DB_READONLY_PASSWORD=${SUPABASE_DB_READONLY_PASSWORD}
+
+      # Performance tuning
+      - GF_DATABASE_MAX_OPEN_CONN=10
+      - GF_DATABASE_MAX_IDLE_CONN=5
+      - GF_DATAPROXY_TIMEOUT=300
+      - GF_DATAPROXY_KEEP_ALIVE_SECONDS=300
+
+    volumes:
+      # Persistent data
+      - grafana-data:/var/lib/grafana
+
+      # Dashboard and datasource provisioning
+      - ./provisioning:/etc/grafana/provisioning:ro
+      - ./dashboards:/etc/grafana/dashboards:ro
+
+      # Custom Grafana config (optional)
+      # - ./grafana.ini:/etc/grafana/grafana.ini:ro
+
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/api/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+    networks:
+      - nexus-observability
+
+    labels:
+      - "com.nexusbrain.service=observability"
+      - "com.nexusbrain.component=grafana"
+
+volumes:
+  grafana-data:
+    driver: local
+
+networks:
+  nexus-observability:
+    driver: bridge

@@ -31,15 +31,21 @@ export default async function AdminLayout({
   return (
     <div className="flex min-h-screen">
       <AdminSidebar />
-      <div className="flex-1 ml-64">
-        <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border/50 bg-background/80 backdrop-blur-xl px-6">
-          <div className="flex items-center gap-2">
-            <span className="px-2 py-0.5 rounded bg-danger/10 text-danger text-[10px] font-semibold uppercase">Admin</span>
-            <span className="text-xs text-muted">Platform Administration</span>
+      <div className="flex-1 ml-60">
+        <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border-subtle bg-background/80 backdrop-blur-xl px-6">
+          <div className="flex items-center gap-3">
+            <span className="px-2 py-0.5 rounded-full bg-warning/10 text-warning text-[10px] font-semibold uppercase tracking-wider">Admin</span>
+            <span className="text-sm text-muted">Platform Administration</span>
+          </div>
+          <div className="flex items-center gap-2 text-[11px] text-muted">
+            <span className="w-1.5 h-1.5 rounded-full bg-brain-active brain-pulse" />
+            <span>All Systems Operational</span>
           </div>
         </header>
         <main className="p-6 bg-gradient-brain min-h-[calc(100vh-3.5rem)]">
-          {children}
+          <div className="animate-fade-in-up">
+            {children}
+          </div>
         </main>
       </div>
     </div>

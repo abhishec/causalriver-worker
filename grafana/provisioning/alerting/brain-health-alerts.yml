@@ -1,0 +1,382 @@
+# NexusBrain Observability - Production Alert Rules
+#
+# Critical alerts for brain health monitoring, performance degradation,
+# and operational issues. Integrated with Grafana Alerting.
+#
+# Alert Severity Levels:
+# - critical: Immediate action required (page on-call)
+# - warning: Investigation needed (notify team)
+# - info: Informational (log only)
+
+apiVersion: 1
+
+groups:
+  - name: brain_health
+    folder: NexusBrain Alerts
+    interval: 1m
+    rules:
+      - uid: brain_layer_degraded
+        title: Brain Layer Health Degraded
+        condition: A
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: nexusbrain_supabase
+            model:
+              intervalMs: 1000
+              maxDataPoints: 43200
+              rawSql: |
+                SELECT
+                  NOW() as time,
+                  layer_name,
+                  health_score as value
+                FROM obs_layer_health
+                WHERE snapshot_at > NOW() - INTERVAL '5 minutes'
+                  AND health_score < 50
+                ORDER BY time
+        noDataState: NoData
+        execErrState: Error
+        for: 5m
+        annotations:
+          summary: "Layer {{ $labels.layer_name }} health critically degraded"
+          description: "Health score {{ $values.A }} for layer {{ $labels.layer_name }} is below 50 for 5+ minutes"
+          runbook_url: "https://docs.nexusbrain.ai/runbooks/layer-health-degradation"
+        labels:
+          severity: warning
+          team: platform
+          component: brain
+
+      - uid: consolidation_failed
+        title: Brain Consolidation Failed
+        condition: A
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 3600
+              to: 0
+            datasourceUid: nexusbrain_supabase
+            model:
+              rawSql: |
+                SELECT
+                  NOW() as time,
+                  organization_id,
+                  COUNT(*) as value
+                FROM obs_consolidation_cycles
+                WHERE started_at > NOW() - INTERVAL '1 hour'
+                  AND status = 'failed'
+                GROUP BY organization_id
+                HAVING COUNT(*) > 0
+        noDataState: OK
+        execErrState: Error
+        for: 1m
+        annotations:
+          summary: "Brain consolidation failed for org {{ $labels.organization_id }}"
+          description: "{{ $values.A }} consolidation runs failed in the last hour"
+          runbook_url: "https://docs.nexusbrain.ai/runbooks/consolidation-failures"
+        labels:
+          severity: critical
+          team: platform
+          component: consolidation
+
+      - uid: high_error_rate
+        title: High Agent Failure Rate
+        condition: A
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: nexusbrain_supabase
+            model:
+              rawSql: |
+                SELECT
+                  NOW() as time,
+                  organization_id,
+                  agent_type,
+                  (SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END)::FLOAT /
+                   NULLIF(COUNT(*), 0)) as value
+                FROM obs_agent_executions
+                WHERE started_at > NOW() - INTERVAL '10 minutes'
+                GROUP BY organization_id, agent_type
+                HAVING (SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END)::FLOAT /
+                        NULLIF(COUNT(*), 0)) > 0.05
+        noDataState: OK
+        execErrState: Error
+        for: 10m
+        annotations:
+          summary: "High failure rate for {{ $labels.agent_type }} in org {{ $labels.organization_id }}"
+          description: "Error rate {{ $values.A | humanizePercentage }} exceeds 5% threshold"
+          runbook_url: "https://docs.nexusbrain.ai/runbooks/high-error-rate"
+        labels:
+          severity: warning
+          team: platform
+          component: agents
+
+      - uid: data_gap_detected
+        title: Data Gap - No Signals Received
+        condition: A
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 7200
+              to: 0
+            datasourceUid: nexusbrain_supabase
+            model:
+              rawSql: |
+                SELECT
+                  NOW() as time,
+                  organization_id,
+                  source_domain,
+                  EXTRACT(EPOCH FROM (NOW() - MAX(ingested_at)))/3600 as value
+                FROM obs_signal_ingestion
+                WHERE ingested_at > NOW() - INTERVAL '24 hours'
+                GROUP BY organization_id, source_domain
+                HAVING EXTRACT(EPOCH FROM (NOW() - MAX(ingested_at)))/3600 > 2
+        noDataState: NoData
+        execErrState: Error
+        for: 30m
+        annotations:
+          summary: "No signals from {{ $labels.source_domain }} for {{ $values.A | printf \"%.1f\" }}h"
+          description: "Data gap detected for org {{ $labels.organization_id }}, domain {{ $labels.source_domain }}"
+          runbook_url: "https://docs.nexusbrain.ai/runbooks/data-gaps"
+        labels:
+          severity: warning
+          team: data-platform
+          component: ingestion
+
+      - uid: prediction_accuracy_drop
+        title: Prediction Accuracy Dropped
+        condition: A
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 86400
+              to: 0
+            datasourceUid: nexusbrain_supabase
+            model:
+              rawSql: |
+                SELECT
+                  NOW() as time,
+                  organization_id,
+                  AVG(accuracy_score) as value
+                FROM obs_consolidation_cycles
+                WHERE started_at > NOW() - INTERVAL '24 hours'
+                  AND status = 'success'
+                  AND accuracy_score IS NOT NULL
+                GROUP BY organization_id
+                HAVING AVG(accuracy_score) < 0.6
+        noDataState: OK
+        execErrState: Error
+        for: 1h
+        annotations:
+          summary: "Low prediction accuracy for org {{ $labels.organization_id }}"
+          description: "24h average accuracy {{ $values.A | humanizePercentage }} below 60% threshold"
+          runbook_url: "https://docs.nexusbrain.ai/runbooks/accuracy-degradation"
+        labels:
+          severity: warning
+          team: ml-platform
+          component: predictions
+
+      - uid: cost_overrun
+        title: Daily Cost Budget Exceeded
+        condition: A
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 86400
+              to: 0
+            datasourceUid: nexusbrain_supabase
+            model:
+              rawSql: |
+                SELECT
+                  NOW() as time,
+                  organization_id,
+                  (
+                    COALESCE((SELECT SUM(cost_usd) FROM obs_semantic_operations
+                      WHERE organization_id = o.organization_id
+                        AND operation_at > NOW() - INTERVAL '24 hours'), 0) +
+                    COALESCE((SELECT SUM(cost_usd) FROM obs_agent_executions
+                      WHERE organization_id = o.organization_id
+                        AND started_at > NOW() - INTERVAL '24 hours'), 0)
+                  ) as value
+                FROM (SELECT DISTINCT organization_id FROM obs_consolidation_cycles) o
+                WHERE value > 100.00  -- $100/day threshold
+        noDataState: OK
+        execErrState: Error
+        for: 1h
+        annotations:
+          summary: "Daily cost ${{ $values.A | printf \"%.2f\" }} exceeds budget for org {{ $labels.organization_id }}"
+          description: "AI/compute costs exceeded $100/day threshold"
+          runbook_url: "https://docs.nexusbrain.ai/runbooks/cost-overruns"
+        labels:
+          severity: warning
+          team: finops
+          component: billing
+
+      - uid: performance_degradation
+        title: Performance Degradation Detected
+        condition: A
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 3600
+              to: 0
+            datasourceUid: nexusbrain_supabase
+            model:
+              rawSql: |
+                SELECT
+                  NOW() as time,
+                  layer_number,
+                  layer_name,
+                  AVG(avg_latency_ms) as value
+                FROM obs_layer_health
+                WHERE snapshot_at > NOW() - INTERVAL '1 hour'
+                GROUP BY layer_number, layer_name
+                HAVING AVG(avg_latency_ms) > 5000
+        noDataState: OK
+        execErrState: Error
+        for: 15m
+        annotations:
+          summary: "Layer {{ $labels.layer_name }} p95 latency {{ $values.A | printf \"%.0f\" }}ms exceeds SLA"
+          description: "Performance degradation detected in layer {{ $labels.layer_number }}"
+          runbook_url: "https://docs.nexusbrain.ai/runbooks/performance-degradation"
+        labels:
+          severity: warning
+          team: platform
+          component: performance
+
+      - uid: circuit_breaker_open
+        title: Observability Circuit Breaker Opened
+        condition: A
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: nexusbrain_logs
+            model:
+              expr: 'sum(rate(observability_circuit_breaker_open_total[5m])) by (component) > 0'
+        noDataState: OK
+        execErrState: Error
+        for: 5m
+        annotations:
+          summary: "Observability writes circuit breaker opened for {{ $labels.component }}"
+          description: "Database write failures triggered circuit breaker protection"
+          runbook_url: "https://docs.nexusbrain.ai/runbooks/circuit-breaker-open"
+        labels:
+          severity: critical
+          team: platform
+          component: observability
+
+  - name: system_health
+    folder: NexusBrain Alerts
+    interval: 5m
+    rules:
+      - uid: database_connection_pool_exhausted
+        title: Database Connection Pool Exhausted
+        condition: A
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: nexusbrain_supabase
+            model:
+              rawSql: |
+                SELECT
+                  NOW() as time,
+                  COUNT(*) as value
+                FROM pg_stat_activity
+                WHERE state != 'idle'
+        noDataState: NoData
+        execErrState: Error
+        for: 5m
+        annotations:
+          summary: "Database connection pool near exhaustion"
+          description: "{{ $values.A }} active connections (limit: 100)"
+        labels:
+          severity: warning
+          team: platform
+          component: database
+
+      - uid: storage_usage_high
+        title: Observability Storage Usage High
+        condition: A
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 3600
+              to: 0
+            datasourceUid: nexusbrain_supabase
+            model:
+              rawSql: |
+                SELECT
+                  NOW() as time,
+                  SUM(pg_total_relation_size(schemaname||'.'||tablename))::BIGINT / (1024*1024*1024) as value
+                FROM pg_tables
+                WHERE tablename LIKE 'obs_%'
+                  AND schemaname = 'public'
+        noDataState: NoData
+        execErrState: Error
+        for: 1h
+        annotations:
+          summary: "Observability tables using {{ $values.A }}GB storage"
+          description: "Consider running archival: SELECT maintain_observability_retention();"
+        labels:
+          severity: info
+          team: platform
+          component: storage
+
+# Notification channels configuration
+contactPoints:
+  - name: slack_platform_team
+    type: slack
+    settings:
+      url: ${SLACK_WEBHOOK_URL}
+      title: "NexusBrain Alert"
+      text: |
+        **{{ .GroupLabels.alertname }}**
+        {{ range .Alerts }}
+        {{ .Annotations.summary }}
+        {{ .Annotations.description }}
+        Runbook: {{ .Annotations.runbook_url }}
+        {{ end }}
+
+  - name: pagerduty_oncall
+    type: pagerduty
+    settings:
+      integrationKey: ${PAGERDUTY_INTEGRATION_KEY}
+      severity: critical
+
+  - name: email_team
+    type: email
+    settings:
+      addresses: ${ALERT_EMAIL_ADDRESSES}
+
+# Notification policies
+policies:
+  - receiver: slack_platform_team
+    group_by: ['alertname', 'severity']
+    group_wait: 30s
+    group_interval: 5m
+    repeat_interval: 4h
+    matchers:
+      - severity = warning
+
+  - receiver: pagerduty_oncall
+    group_by: ['alertname']
+    group_wait: 10s
+    group_interval: 5m
+    repeat_interval: 1h
+    matchers:
+      - severity = critical
+
+  - receiver: email_team
+    group_by: ['alertname', 'team']
+    group_wait: 1m
+    group_interval: 10m
+    repeat_interval: 24h
+    matchers:
+      - severity =~ "warning|info"

@@ -1,0 +1,462 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "nexus-admin-global",
+    "title": "NexusBrain Core Admin - Global View",
+    "tags": ["nexusbrain", "admin", "global"],
+    "timezone": "browser",
+    "schemaVersion": 38,
+    "version": 1,
+    "refresh": "1m",
+    "templating": {
+      "list": [
+        {
+          "name": "time_range",
+          "type": "interval",
+          "label": "Time Range",
+          "query": "1h,6h,24h,7d,30d",
+          "current": {
+            "text": "24h",
+            "value": "24h"
+          }
+        },
+        {
+          "name": "org_filter",
+          "type": "query",
+          "label": "Organization Filter",
+          "query": "SELECT DISTINCT organization_id FROM obs_layer_health ORDER BY organization_id",
+          "multi": true,
+          "includeAll": true,
+          "current": {
+            "text": "All",
+            "value": "$__all"
+          }
+        }
+      ]
+    },
+    "panels": [
+      {
+        "id": 1,
+        "gridPos": { "x": 0, "y": 0, "w": 6, "h": 6 },
+        "type": "stat",
+        "title": "Total Organizations",
+        "description": "Number of active organizations with brain activity",
+        "targets": [
+          {
+            "refId": "A",
+            "rawSql": "SELECT COUNT(DISTINCT organization_id) as value FROM obs_signal_ingestion WHERE ingested_at > NOW() - INTERVAL '24 hours'",
+            "format": "table"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "color": { "mode": "thresholds" },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "red" },
+                { "value": 50, "color": "yellow" },
+                { "value": 200, "color": "green" }
+              ]
+            }
+          }
+        },
+        "options": {
+          "graphMode": "area",
+          "textMode": "value_and_name"
+        }
+      },
+      {
+        "id": 2,
+        "gridPos": { "x": 6, "y": 0, "w": 6, "h": 6 },
+        "type": "stat",
+        "title": "Total Signals (24h)",
+        "description": "Signals ingested across all organizations",
+        "targets": [
+          {
+            "refId": "A",
+            "rawSql": "SELECT COUNT(*) as value FROM obs_signal_ingestion WHERE ingested_at > NOW() - INTERVAL '24 hours'",
+            "format": "table"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "color": { "mode": "thresholds" },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "red" },
+                { "value": 1000, "color": "yellow" },
+                { "value": 10000, "color": "green" }
+              ]
+            }
+          }
+        },
+        "options": {
+          "graphMode": "area",
+          "textMode": "value_and_name"
+        }
+      },
+      {
+        "id": 3,
+        "gridPos": { "x": 12, "y": 0, "w": 6, "h": 6 },
+        "type": "stat",
+        "title": "Global Health Score",
+        "description": "Average health across all organizations",
+        "targets": [
+          {
+            "refId": "A",
+            "rawSql": "SELECT AVG(health_score) as value FROM obs_layer_health WHERE snapshot_at > NOW() - INTERVAL '1 hour'",
+            "format": "table"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "color": { "mode": "thresholds" },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "red" },
+                { "value": 50, "color": "yellow" },
+                { "value": 80, "color": "green" }
+              ]
+            }
+          }
+        },
+        "options": {
+          "graphMode": "area",
+          "textMode": "value_and_name"
+        }
+      },
+      {
+        "id": 4,
+        "gridPos": { "x": 18, "y": 0, "w": 6, "h": 6 },
+        "type": "stat",
+        "title": "Consolidation Cycles (24h)",
+        "description": "Brain consolidation runs executed",
+        "targets": [
+          {
+            "refId": "A",
+            "rawSql": "SELECT COUNT(*) as value FROM obs_consolidation_cycles WHERE started_at > NOW() - INTERVAL '24 hours'",
+            "format": "table"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "color": { "mode": "thresholds" },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "red" },
+                { "value": 10, "color": "yellow" },
+                { "value": 100, "color": "green" }
+              ]
+            }
+          }
+        },
+        "options": {
+          "graphMode": "area",
+          "textMode": "value_and_name"
+        }
+      },
+      {
+        "id": 5,
+        "gridPos": { "x": 0, "y": 6, "w": 12, "h": 9 },
+        "type": "table",
+        "title": "Organization Health Ranking",
+        "description": "All organizations ranked by health score",
+        "targets": [
+          {
+            "refId": "A",
+            "rawSql": "SELECT organization_id, AVG(health_score) as avg_health, SUM(operations_count) as total_ops, AVG(error_rate) as avg_error_rate, MAX(snapshot_at) as last_update FROM obs_layer_health WHERE snapshot_at > NOW() - INTERVAL '1 hour' AND ($org_filter = '$__all' OR organization_id IN ($org_filter)) GROUP BY organization_id ORDER BY avg_health DESC",
+            "format": "table"
+          }
+        ],
+        "fieldConfig": {
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "avg_health" },
+              "properties": [
+                {
+                  "id": "custom.cellOptions",
+                  "value": {
+                    "type": "color-background",
+                    "mode": "gradient"
+                  }
+                },
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "mode": "absolute",
+                    "steps": [
+                      { "value": 0, "color": "red" },
+                      { "value": 50, "color": "yellow" },
+                      { "value": 80, "color": "green" }
+                    ]
+                  }
+                },
+                {
+                  "id": "unit",
+                  "value": "percent"
+                }
+              ]
+            },
+            {
+              "matcher": { "id": "byName", "options": "avg_error_rate" },
+              "properties": [
+                {
+                  "id": "custom.cellOptions",
+                  "value": {
+                    "type": "color-text"
+                  }
+                },
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "mode": "absolute",
+                    "steps": [
+                      { "value": 0, "color": "green" },
+                      { "value": 0.05, "color": "yellow" },
+                      { "value": 0.1, "color": "red" }
+                    ]
+                  }
+                },
+                {
+                  "id": "unit",
+                  "value": "percentunit"
+                }
+              ]
+            }
+          ]
+        },
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "renameByName": {
+                "organization_id": "Organization",
+                "avg_health": "Avg Health",
+                "total_ops": "Operations",
+                "avg_error_rate": "Error Rate",
+                "last_update": "Last Update"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "gridPos": { "x": 12, "y": 6, "w": 12, "h": 9 },
+        "type": "timeseries",
+        "title": "Global Signal Ingestion Rate",
+        "description": "Signals per hour across all organizations",
+        "targets": [
+          {
+            "refId": "A",
+            "rawSql": "SELECT DATE_TRUNC('hour', ingested_at) as time, source_domain, COUNT(*) as value FROM obs_signal_ingestion WHERE ingested_at > NOW() - INTERVAL '$time_range' AND ($org_filter = '$__all' OR organization_id IN ($org_filter)) GROUP BY time, source_domain ORDER BY time ASC",
+            "format": "time_series"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "color": { "mode": "palette-classic" }
+          }
+        },
+        "options": {
+          "tooltip": { "mode": "multi" },
+          "legend": { "displayMode": "table", "calcs": ["last", "mean", "max"] }
+        }
+      },
+      {
+        "id": 7,
+        "gridPos": { "x": 0, "y": 15, "w": 12, "h": 8 },
+        "type": "heatmap",
+        "title": "Causal Discovery Heatmap",
+        "description": "Causal edge discoveries across organizations",
+        "targets": [
+          {
+            "refId": "A",
+            "rawSql": "SELECT DATE_TRUNC('hour', calculated_at) as time, organization_id, COUNT(*) as value FROM obs_causal_calculations WHERE calculated_at > NOW() - INTERVAL '$time_range' AND is_significant = true AND ($org_filter = '$__all' OR organization_id IN ($org_filter)) GROUP BY time, organization_id ORDER BY time ASC",
+            "format": "time_series"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short"
+          }
+        },
+        "options": {
+          "calculate": true,
+          "cellGap": 2,
+          "color": {
+            "scheme": "Spectral",
+            "steps": 128
+          },
+          "yAxis": {
+            "reverse": false
+          }
+        }
+      },
+      {
+        "id": 8,
+        "gridPos": { "x": 12, "y": 15, "w": 12, "h": 8 },
+        "type": "timeseries",
+        "title": "Consolidation Success Rate",
+        "description": "Success vs failure rate for consolidation cycles",
+        "targets": [
+          {
+            "refId": "A",
+            "rawSql": "SELECT DATE_TRUNC('hour', started_at) as time, status, COUNT(*) as value FROM obs_consolidation_cycles WHERE started_at > NOW() - INTERVAL '$time_range' AND ($org_filter = '$__all' OR organization_id IN ($org_filter)) GROUP BY time, status ORDER BY time ASC",
+            "format": "time_series"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "color": { "mode": "palette-classic" }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "success" },
+              "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "green" } }]
+            },
+            {
+              "matcher": { "id": "byName", "options": "failed" },
+              "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } }]
+            }
+          ]
+        },
+        "options": {
+          "tooltip": { "mode": "multi" },
+          "legend": { "displayMode": "list" }
+        }
+      },
+      {
+        "id": 9,
+        "gridPos": { "x": 0, "y": 23, "w": 24, "h": 10 },
+        "type": "table",
+        "title": "Recent Consolidation Runs",
+        "description": "Latest brain consolidation cycles with performance metrics",
+        "targets": [
+          {
+            "refId": "A",
+            "rawSql": "SELECT organization_id, consolidation_run_id, is_core_brain, signals_in_window, causal_edges_discovered, patterns_found, predictions_made, accuracy_score, total_duration_ms, status, started_at, completed_at FROM obs_consolidation_cycles WHERE started_at > NOW() - INTERVAL '$time_range' AND ($org_filter = '$__all' OR organization_id IN ($org_filter)) ORDER BY started_at DESC LIMIT 100",
+            "format": "table"
+          }
+        ],
+        "fieldConfig": {
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "status" },
+              "properties": [
+                {
+                  "id": "custom.cellOptions",
+                  "value": {
+                    "type": "color-text"
+                  }
+                },
+                {
+                  "id": "mappings",
+                  "value": [
+                    { "type": "value", "value": "success", "text": "✅ Success", "color": "green" },
+                    { "type": "value", "value": "failed", "text": "❌ Failed", "color": "red" },
+                    { "type": "value", "value": "running", "text": "🔄 Running", "color": "blue" }
+                  ]
+                }
+              ]
+            },
+            {
+              "matcher": { "id": "byName", "options": "is_core_brain" },
+              "properties": [
+                {
+                  "id": "custom.cellOptions",
+                  "value": {
+                    "type": "color-text"
+                  }
+                },
+                {
+                  "id": "mappings",
+                  "value": [
+                    { "type": "value", "value": "true", "text": "🧠 Core", "color": "purple" },
+                    { "type": "value", "value": "false", "text": "🏢 Org", "color": "blue" }
+                  ]
+                }
+              ]
+            },
+            {
+              "matcher": { "id": "byName", "options": "accuracy_score" },
+              "properties": [
+                {
+                  "id": "unit",
+                  "value": "percentunit"
+                },
+                {
+                  "id": "custom.cellOptions",
+                  "value": {
+                    "type": "color-background",
+                    "mode": "gradient"
+                  }
+                },
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "mode": "absolute",
+                    "steps": [
+                      { "value": 0, "color": "red" },
+                      { "value": 0.6, "color": "yellow" },
+                      { "value": 0.8, "color": "green" }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": { "id": "byName", "options": "total_duration_ms" },
+              "properties": [
+                {
+                  "id": "unit",
+                  "value": "ms"
+                }
+              ]
+            }
+          ]
+        },
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "renameByName": {
+                "organization_id": "Org",
+                "consolidation_run_id": "Run ID",
+                "is_core_brain": "Type",
+                "signals_in_window": "Signals",
+                "causal_edges_discovered": "Causal Edges",
+                "patterns_found": "Patterns",
+                "predictions_made": "Predictions",
+                "accuracy_score": "Accuracy",
+                "total_duration_ms": "Duration",
+                "status": "Status",
+                "started_at": "Started",
+                "completed_at": "Completed"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "time": {
+      "from": "now-24h",
+      "to": "now"
+    }
+  },
+  "overwrite": true,
+  "folderId": 0,
+  "folderUid": ""
+}

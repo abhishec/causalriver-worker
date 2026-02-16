@@ -1,0 +1,40 @@
+# Grafana Datasource Provisioning for Supabase PostgreSQL
+# Connects Grafana to Supabase database for observability queries
+
+apiVersion: 1
+
+datasources:
+  - name: NexusBrain Supabase
+    type: postgres
+    access: proxy
+    url: ${SUPABASE_DB_HOST}:${SUPABASE_DB_PORT}
+    database: postgres
+    user: ${SUPABASE_DB_USER}
+    jsonData:
+      sslmode: require
+      postgresVersion: 1500  # PostgreSQL 15.x
+      timescaledb: false
+      maxOpenConns: 10
+      maxIdleConns: 5
+      connMaxLifetime: 300
+    secureJsonData:
+      password: ${SUPABASE_DB_PASSWORD}
+    isDefault: true
+    editable: true
+
+  - name: NexusBrain Supabase (Read-Only)
+    type: postgres
+    access: proxy
+    url: ${SUPABASE_DB_HOST}:${SUPABASE_DB_PORT}
+    database: postgres
+    user: ${SUPABASE_DB_READONLY_USER}
+    jsonData:
+      sslmode: require
+      postgresVersion: 1500
+      timescaledb: false
+      maxOpenConns: 20
+      maxIdleConns: 10
+      connMaxLifetime: 300
+    secureJsonData:
+      password: ${SUPABASE_DB_READONLY_PASSWORD}
+    editable: true

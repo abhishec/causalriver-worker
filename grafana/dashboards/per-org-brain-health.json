@@ -1,0 +1,278 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "nexus-brain-health",
+    "title": "NexusBrain Per-Org Health",
+    "tags": ["nexusbrain", "observability", "per-org"],
+    "timezone": "browser",
+    "schemaVersion": 38,
+    "version": 1,
+    "refresh": "30s",
+    "templating": {
+      "list": [
+        {
+          "name": "org_id",
+          "type": "constant",
+          "label": "Organization ID",
+          "description": "Current organization identifier",
+          "query": "$__org_id",
+          "hide": 2
+        },
+        {
+          "name": "time_range",
+          "type": "interval",
+          "label": "Time Range",
+          "query": "1h,6h,24h,7d,30d",
+          "current": {
+            "text": "24h",
+            "value": "24h"
+          }
+        }
+      ]
+    },
+    "panels": [
+      {
+        "id": 1,
+        "gridPos": { "x": 0, "y": 0, "w": 8, "h": 8 },
+        "type": "gauge",
+        "title": "Overall Brain Health Score",
+        "description": "Aggregated health score across all 15 brain layers (0-100)",
+        "targets": [
+          {
+            "refId": "A",
+            "rawSql": "SELECT AVG(health_score) as value FROM obs_layer_health WHERE organization_id = '$org_id' AND snapshot_at > NOW() - INTERVAL '1 hour' LIMIT 1",
+            "format": "table"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "red" },
+                { "value": 50, "color": "yellow" },
+                { "value": 80, "color": "green" }
+              ]
+            }
+          }
+        },
+        "options": {
+          "showThresholdLabels": true,
+          "showThresholdMarkers": true
+        }
+      },
+      {
+        "id": 2,
+        "gridPos": { "x": 8, "y": 0, "w": 8, "h": 8 },
+        "type": "timeseries",
+        "title": "Layer Health Trends (Last 24h)",
+        "description": "Health score trends for all 15 brain layers",
+        "targets": [
+          {
+            "refId": "A",
+            "rawSql": "SELECT snapshot_at as time, layer_name, health_score as value FROM obs_layer_health WHERE organization_id = '$org_id' AND snapshot_at > NOW() - INTERVAL '$time_range' ORDER BY snapshot_at ASC",
+            "format": "time_series"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "color": { "mode": "palette-classic" }
+          }
+        },
+        "options": {
+          "tooltip": { "mode": "multi" },
+          "legend": { "displayMode": "table", "calcs": ["last", "min", "max"] }
+        }
+      },
+      {
+        "id": 3,
+        "gridPos": { "x": 16, "y": 0, "w": 8, "h": 8 },
+        "type": "stat",
+        "title": "Signal Ingestion Rate",
+        "description": "Signals processed per hour",
+        "targets": [
+          {
+            "refId": "A",
+            "rawSql": "SELECT COUNT(*) as value FROM obs_signal_ingestion WHERE organization_id = '$org_id' AND ingested_at > NOW() - INTERVAL '1 hour'",
+            "format": "table"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "color": { "mode": "thresholds" },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "red" },
+                { "value": 10, "color": "yellow" },
+                { "value": 100, "color": "green" }
+              ]
+            }
+          }
+        },
+        "options": {
+          "graphMode": "area",
+          "textMode": "value_and_name"
+        }
+      },
+      {
+        "id": 4,
+        "gridPos": { "x": 0, "y": 8, "w": 12, "h": 9 },
+        "type": "table",
+        "title": "Layer Health Breakdown",
+        "description": "Health status per layer with gap detection",
+        "targets": [
+          {
+            "refId": "A",
+            "rawSql": "SELECT layer_number, layer_name, health_score, gaps_detected, operations_count, avg_latency_ms, error_rate, snapshot_at FROM obs_layer_health WHERE organization_id = '$org_id' AND snapshot_at > NOW() - INTERVAL '1 hour' ORDER BY layer_number ASC",
+            "format": "table"
+          }
+        ],
+        "fieldConfig": {
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "health_score" },
+              "properties": [
+                {
+                  "id": "custom.cellOptions",
+                  "value": {
+                    "type": "color-background",
+                    "mode": "gradient"
+                  }
+                },
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "mode": "absolute",
+                    "steps": [
+                      { "value": 0, "color": "red" },
+                      { "value": 50, "color": "yellow" },
+                      { "value": 80, "color": "green" }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": { "id": "byName", "options": "gaps_detected" },
+              "properties": [
+                {
+                  "id": "custom.cellOptions",
+                  "value": {
+                    "type": "color-text"
+                  }
+                },
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "mode": "absolute",
+                    "steps": [
+                      { "value": 0, "color": "green" },
+                      { "value": 1, "color": "red" }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 5,
+        "gridPos": { "x": 12, "y": 8, "w": 12, "h": 9 },
+        "type": "timeseries",
+        "title": "Causal Discovery Activity",
+        "description": "Causal edges discovered over time (L4)",
+        "targets": [
+          {
+            "refId": "A",
+            "rawSql": "SELECT DATE_TRUNC('hour', calculated_at) as time, calculation_type, COUNT(*) as value FROM obs_causal_calculations WHERE organization_id = '$org_id' AND calculated_at > NOW() - INTERVAL '$time_range' GROUP BY time, calculation_type ORDER BY time ASC",
+            "format": "time_series"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "color": { "mode": "palette-classic" }
+          }
+        },
+        "options": {
+          "tooltip": { "mode": "multi" },
+          "legend": { "displayMode": "list" }
+        }
+      },
+      {
+        "id": 6,
+        "gridPos": { "x": 0, "y": 17, "w": 12, "h": 8 },
+        "type": "barchart",
+        "title": "Agent Execution Summary",
+        "description": "Agent runs by type with success/failure breakdown",
+        "targets": [
+          {
+            "refId": "A",
+            "rawSql": "SELECT agent_type, status, COUNT(*) as value FROM obs_agent_executions WHERE organization_id = '$org_id' AND started_at > NOW() - INTERVAL '$time_range' GROUP BY agent_type, status ORDER BY value DESC",
+            "format": "table"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short"
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "success" },
+              "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "green" } }]
+            },
+            {
+              "matcher": { "id": "byName", "options": "failed" },
+              "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } }]
+            }
+          ]
+        },
+        "options": {
+          "orientation": "horizontal",
+          "xField": "agent_type",
+          "legend": { "displayMode": "list" }
+        }
+      },
+      {
+        "id": 7,
+        "gridPos": { "x": 12, "y": 17, "w": 12, "h": 8 },
+        "type": "piechart",
+        "title": "Cost Breakdown by Layer",
+        "description": "AI/Compute costs distribution across brain layers",
+        "targets": [
+          {
+            "refId": "A",
+            "rawSql": "SELECT 'Semantic (L3)' as layer, COALESCE(SUM(cost_usd), 0) as value FROM obs_semantic_operations WHERE organization_id = '$org_id' AND operation_at > NOW() - INTERVAL '$time_range' UNION ALL SELECT 'Agents (L6)', COALESCE(SUM(cost_usd), 0) FROM obs_agent_executions WHERE organization_id = '$org_id' AND started_at > NOW() - INTERVAL '$time_range'",
+            "format": "table"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD"
+          }
+        },
+        "options": {
+          "legend": { "displayMode": "table", "calcs": ["sum"] },
+          "pieType": "pie",
+          "displayLabels": ["percent"]
+        }
+      }
+    ],
+    "time": {
+      "from": "now-24h",
+      "to": "now"
+    }
+  },
+  "overwrite": true,
+  "folderId": 0,
+  "folderUid": ""
+}

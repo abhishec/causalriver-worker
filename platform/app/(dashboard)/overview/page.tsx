@@ -5,22 +5,28 @@ import { OverviewClient } from "./overview-client";
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: "Overview",
+  title: "Command Center",
 };
 
 export default async function OverviewPage() {
   const supabase = await createClient();
   const CORE_ORG_ID = await getCurrentOrgId();
 
-  // Fetch brain metrics in parallel
+  const today = new Date().toISOString().split("T")[0];
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString();
+
+  // Fetch all data in parallel
   const [
     snapshotsResult,
     signalsResult,
     causalResult,
     costResult,
     budgetResult,
+    recentEdgesResult,
+    eventsResult,
+    signalsByDomainResult,
   ] = await Promise.all([
-    // Latest brain snapshots
+    // Latest brain snapshots (30 days)
     supabase
       .from("brain_daily_snapshots")
       .select("*")
@@ -33,7 +39,7 @@ export default async function OverviewPage() {
       .from("cross_domain_signals")
       .select("id", { count: "exact", head: true })
       .eq("organization_id", CORE_ORG_ID)
-      .gte("created_at", new Date().toISOString().split("T")[0]),
+      .gte("created_at", today),
 
     // Total causal edges
     supabase
@@ -45,7 +51,7 @@ export default async function OverviewPage() {
     supabase
       .from("llm_cost_log")
       .select("estimated_cost_usd, component, function_name, model, created_at")
-      .gte("created_at", new Date().toISOString().split("T")[0])
+      .gte("created_at", today)
       .order("created_at", { ascending: false })
       .limit(50),
 
@@ -55,6 +61,31 @@ export default async function OverviewPage() {
       .select("*")
       .eq("organization_id", CORE_ORG_ID)
       .single(),
+
+    // Recent causal discoveries for intelligence stream
+    supabase
+      .from("causal_relationships_statistical")
+      .select("id, source_entity, target_entity, statistical_method, p_value, confidence_score, lag_days, source_domain, target_domain, created_at")
+      .eq("organization_id", CORE_ORG_ID)
+      .order("created_at", { ascending: false })
+      .limit(10),
+
+    // Platform events for intelligence stream
+    supabase
+      .from("platform_events")
+      .select("id, event_type, event_data, created_at")
+      .eq("organization_id", CORE_ORG_ID)
+      .order("created_at", { ascending: false })
+      .limit(15),
+
+    // Signals grouped by domain (for signal rate panel)
+    supabase
+      .from("cross_domain_signals")
+      .select("source_domain, created_at")
+      .eq("organization_id", CORE_ORG_ID)
+      .gte("created_at", thirtyDaysAgo)
+      .order("created_at", { ascending: false })
+      .limit(500),
   ]);
 
   const snapshots = snapshotsResult.data || [];
@@ -63,6 +94,9 @@ export default async function OverviewPage() {
   const totalEdges = causalResult.count || 0;
   const costRows = costResult.data || [];
   const budget = budgetResult.data;
+  const recentEdges = recentEdgesResult.data || [];
+  const platformEvents = eventsResult.data || [];
+  const signalRecords = signalsByDomainResult.data || [];
 
   // Calculate cost metrics
   const costToday = costRows.reduce((sum, r) => sum + (r.estimated_cost_usd || 0), 0);
@@ -75,17 +109,80 @@ export default async function OverviewPage() {
     ? Math.ceil((Date.now() - new Date(oldestSnapshot.snapshot_date).getTime()) / 86400000)
     : 0;
 
-  // Build activity feed from recent cost logs
-  const recentActivity = costRows.slice(0, 10).map((r, i) => ({
-    id: `cost-${i}`,
-    type: "training" as const,
-    title: `${r.component}.${r.function_name}`,
-    timestamp: r.created_at,
-    details: `${r.model} | $${r.estimated_cost_usd?.toFixed(6)}`,
-  }));
-
   // Prediction accuracy from latest snapshot
   const predictionAccuracy = latest?.prediction_accuracy ?? 0;
+
+  // Build intelligence stream events from causal discoveries
+  const discoveryEvents = recentEdges.map((edge) => ({
+    id: `discovery-${edge.id}`,
+    type: "discovery" as const,
+    title: `${edge.source_entity} → ${edge.target_entity}`,
+    description: `Causal relationship discovered via ${edge.statistical_method || "Granger causality"}${edge.lag_days ? ` with ${edge.lag_days}-day lag` : ""}`,
+    timestamp: edge.created_at,
+    domain: edge.source_domain,
+    domains: edge.source_domain !== edge.target_domain
+      ? [edge.source_domain, edge.target_domain].filter(Boolean)
+      : undefined,
+    confidence: edge.confidence_score,
+    pValue: edge.p_value,
+    method: edge.statistical_method,
+  }));
+
+  // Build intelligence stream events from platform events
+  const activityEvents = platformEvents.map((evt) => {
+    const data = evt.event_data || {};
+    const typeMap: Record<string, "training" | "anomaly" | "alert" | "agent"> = {
+      "consolidation.complete": "training",
+      "consolidation.started": "training",
+      "alert.triggered": "alert",
+      "anomaly.detected": "anomaly",
+      "agent.completed": "agent",
+      "agent.started": "agent",
+    };
+    const eventType = typeMap[evt.event_type] || "training";
+
+    return {
+      id: `event-${evt.id}`,
+      type: eventType,
+      title: data.title || evt.event_type.replace(/\./g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase()),
+      description: data.description || data.summary,
+      timestamp: evt.created_at,
+      domain: data.domain,
+      confidence: data.confidence,
+      details: data.details,
+    };
+  });
+
+  // Merge and sort by timestamp
+  const intelligenceEvents = [...discoveryEvents, ...activityEvents]
+    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+    .slice(0, 20);
+
+  // Build knowledge growth data from snapshots
+  const knowledgeGrowth = [...snapshots]
+    .reverse()
+    .map((s) => ({
+      date: s.snapshot_date,
+      edges: s.total_causal_edges || 0,
+      signals: s.total_signals_processed || 0,
+    }));
+
+  // Build signal rates by domain
+  const domainCounts: Record<string, number> = {};
+  for (const sig of signalRecords) {
+    const d = sig.source_domain || "unknown";
+    domainCounts[d] = (domainCounts[d] || 0) + 1;
+  }
+  const hoursInPeriod = Math.max(1, (Date.now() - new Date(thirtyDaysAgo).getTime()) / 3600000);
+  const signalRates = Object.entries(domainCounts)
+    .map(([domain, count]) => ({
+      domain,
+      count,
+      rate: Math.round((count / hoursInPeriod) * 100) / 100,
+    }))
+    .sort((a, b) => b.count - a.count);
+
+  const totalSignalRate = signalRates.reduce((sum, s) => sum + s.rate, 0);
 
   return (
     <OverviewClient
@@ -97,7 +194,10 @@ export default async function OverviewPage() {
       dailyBudget={dailyBudget}
       monthlyBudget={monthlyBudget}
       brainAge={brainAge}
-      recentActivity={recentActivity}
+      intelligenceEvents={intelligenceEvents}
+      knowledgeGrowth={knowledgeGrowth}
+      signalRates={signalRates}
+      totalSignalRate={Math.round(totalSignalRate * 100) / 100}
       topDiscoveries={latest?.top_discoveries || []}
     />
   );
