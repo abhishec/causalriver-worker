@@ -128,7 +128,7 @@ export const testDataGeneratorDomain = {
     });
 
     // 4. Validate referential integrity
-    const validationResult = await validateIntegrity(generated, schema);
+    const validationResult = await validateIntegrity(generated.data, schema);
 
     // 5. Generate SQL statements (optional)
     const sqlStatements = request.tables

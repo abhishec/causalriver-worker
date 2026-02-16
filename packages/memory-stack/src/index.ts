@@ -595,6 +595,9 @@ export {
   type ContingencyTrigger,
   type LearningQuestion,
   type DecisionGate,
+  // SE-aaS action domain types
+  type ActionDomainContext,
+  type ActionDomainResult,
 } from './orchestrator/domain-action-engine';
 
 // Motor Command Engine V1 ("Primary Motor Cortex") — brain can ACT through connectors
@@ -931,6 +934,15 @@ export {
   type AnomalyEvent as LogAnomalyEvent,
   type RecommendedAlert,
 } from './orchestrator/action-domains-log-query';
+
+// Early Warning System — Velocity Collapse + Bottleneck Detection
+export {
+  runEarlyWarningSystem,
+  runEarlyWarningWithAlerts,
+  getEarlyWarningSummary,
+  type EarlyWarningConfig,
+  type EarlyWarningReport,
+} from './orchestrator/early-warning-system';
 
 // GitHub Connector Enhanced (Phase 2) — Real GitHub API integration for PR automation
 export {
