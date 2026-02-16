@@ -1,6 +1,11 @@
 /**
- * Early Warning System - Analyze Endpoint
- * ========================================
+ * Early Warning System - Analyze Endpoint (Brain-Aligned)
+ * =========================================================
+ *
+ * ARCHITECTURE COMPLIANCE:
+ * - Reads from cross_domain_signals (L1) - NOT isolated tables
+ * - Writes results back as signals for causal discovery (L4)
+ * - Brain learns: bottleneck → velocity_collapse causality
  *
  * Runs P0 Early Warning System analysis:
  * - Velocity Collapse Prediction
@@ -11,7 +16,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
-import { runEarlyWarningSystem } from '@nexus-ai/memory-stack';
+import { analyzeVelocityCollapse, analyzeBottleneckRisk } from '@/lib/p0/velocity-analysis';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,34 +46,35 @@ export async function POST(req: NextRequest) {
 
     const supabase = await createServiceClient();
 
-    // Run early warning system
-    const report = await runEarlyWarningSystem({
-      supabase,
-      organizationId,
-      lookbackDays,
-      forecastDays,
-      collapseThreshold: 25, // 25% drop triggers collapse alert
-    });
+    // ========================================================================
+    // Run Brain-aligned P0 analysis
+    // ========================================================================
+    // Reads from cross_domain_signals (engineering domain)
+    // Emits collapse/bottleneck signals back to Brain
+    const [velocityAnalysis, bottleneckAnalysis] = await Promise.all([
+      analyzeVelocityCollapse(supabase, organizationId, lookbackDays),
+      analyzeBottleneckRisk(supabase, organizationId, lookbackDays),
+    ]);
 
     // ========================================================================
-    // Save velocity snapshot
+    // Save velocity snapshot (for dashboard)
     // ========================================================================
-    if (report.velocityMetrics && report.velocityMetrics.length > 0) {
-      const latestMetrics = report.velocityMetrics[report.velocityMetrics.length - 1];
+    if (velocityAnalysis.velocityTimeSeries.length > 0) {
+      const latest = velocityAnalysis.velocityTimeSeries[velocityAnalysis.velocityTimeSeries.length - 1];
 
       await supabase.from('velocity_snapshots').upsert({
         organization_id: organizationId,
         snapshot_date: new Date().toISOString().split('T')[0],
-        window_start: new Date(Date.now() - lookbackDays * 86400000).toISOString(),
-        window_end: new Date().toISOString(),
-        window_type: '14day',
+        window_start: latest.windowStart,
+        window_end: latest.windowEnd,
+        window_type: '7day',
         team_id: teamId || null,
-        repo_id: null, // Organization-level
-        prs_merged: latestMetrics.prsMerged || 0,
-        mean_pr_cycle_time_hours: latestMetrics.avgReviewTimeHours || null,
+        repo_id: null,
+        prs_merged: latest.prsMerged,
+        mean_pr_cycle_time_hours: latest.avgCycleTimeHours,
         pr_cycle_time_variance: null,
-        mean_review_latency_hours: latestMetrics.avgReviewTimeHours || null,
-        open_pr_count: latestMetrics.wipCount || 0,
+        mean_review_latency_hours: null,
+        open_pr_count: latest.wipCount,
         prs_per_engineer: null,
       }, {
         onConflict: 'organization_id,snapshot_date,window_type,team_id,repo_id',
@@ -77,35 +83,52 @@ export async function POST(req: NextRequest) {
     }
 
     // ========================================================================
-    // Save bottleneck snapshots
+    // Save bottleneck snapshot (for dashboard)
     // ========================================================================
-    if (report.bottleneckRisks && report.bottleneckRisks.length > 0) {
-      for (const bottleneck of report.bottleneckRisks) {
-        const topBottleneck = bottleneck.bottlenecks[0] || null;
-        await supabase.from('bottleneck_snapshots').upsert({
-          organization_id: organizationId,
-          snapshot_date: new Date().toISOString().split('T')[0],
-          window_start: new Date(Date.now() - lookbackDays * 86400000).toISOString(),
-          window_end: new Date().toISOString(),
-          team_id: teamId || null,
-          top_reviewer_id: topBottleneck?.contributorId || null,
-          top_reviewer_share: topBottleneck?.expertiseShare || null,
-          reviewer_gini_coefficient: bottleneck.giniCoefficient || null,
-          reviewer_hhi: null,
-          max_betweenness_centrality: topBottleneck?.centralityScore || null,
-          bottleneck_risk_score: bottleneck.top3Concentration || 0,
-          risk_level: topBottleneck?.severity || 'low',
-        }, {
-          onConflict: 'organization_id,snapshot_date,team_id',
-          ignoreDuplicates: false,
-        });
-      }
-    }
+    await supabase.from('bottleneck_snapshots').upsert({
+      organization_id: organizationId,
+      snapshot_date: new Date().toISOString().split('T')[0],
+      window_start: new Date(Date.now() - lookbackDays * 86400000).toISOString(),
+      window_end: new Date().toISOString(),
+      team_id: teamId || null,
+      top_reviewer_id: null, // Would need engineer_id mapping
+      top_reviewer_share: bottleneckAnalysis.reviewShare,
+      reviewer_gini_coefficient: bottleneckAnalysis.giniCoefficient,
+      reviewer_hhi: null,
+      max_betweenness_centrality: null,
+      bottleneck_risk_score: bottleneckAnalysis.riskScore,
+      risk_level: bottleneckAnalysis.riskLevel,
+    }, {
+      onConflict: 'organization_id,snapshot_date,team_id',
+      ignoreDuplicates: false,
+    });
 
-    // Return report
+    // ========================================================================
+    // Return unified report
+    // ========================================================================
     return NextResponse.json({
       success: true,
-      report,
+      report: {
+        velocityCollapse: {
+          detected: velocityAnalysis.collapseDetected,
+          currentVelocity: velocityAnalysis.currentVelocity,
+          historicalMean: velocityAnalysis.historicalMean,
+          percentDrop: velocityAnalysis.percentDrop,
+          confidence: velocityAnalysis.confidence,
+        },
+        bottleneckRisk: {
+          riskLevel: bottleneckAnalysis.riskLevel,
+          riskScore: bottleneckAnalysis.riskScore,
+          topReviewer: bottleneckAnalysis.topReviewer,
+          reviewShare: bottleneckAnalysis.reviewShare,
+          giniCoefficient: bottleneckAnalysis.giniCoefficient,
+        },
+        dataSource: 'cross_domain_signals (Brain L1)',
+        signalsEmitted: [
+          velocityAnalysis.collapseDetected && 'velocity_collapsed',
+          bottleneckAnalysis.riskLevel === 'high' && 'bottleneck_detected',
+        ].filter(Boolean),
+      },
     });
   } catch (error: any) {
     console.error('[Early Warning] Analysis error:', error);

@@ -22,11 +22,12 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { createPRAnalyzer } from '@nexus-ai/memory-stack';
 import { Octokit } from '@octokit/rest';
 import { createHmac } from 'crypto';
 import { sign } from 'jsonwebtoken';
+import { ingestPRAsSignals } from '@/lib/p0/ingest-pr-signals';
 
 // ============================================================================
 // WEBHOOK HANDLER
@@ -186,6 +187,45 @@ async function handlePullRequestEvent(payload: any, supabase: any) {
     });
 
     console.log(`[PR Review] Posted review comment on PR #${pull_request.number}`);
+
+    // 6b. P0: Ingest PR as Brain signals (for velocity/bottleneck tracking)
+    try {
+      const serviceSupabase = await createServiceClient();
+
+      // Fetch reviews
+      const { data: reviews } = await octokit.pulls.listReviews({
+        owner: repository.owner.login,
+        repo: repository.name,
+        pull_number: pull_request.number,
+      });
+
+      // Ingest as signals to cross_domain_signals
+      await ingestPRAsSignals(
+        serviceSupabase,
+        organizationId,
+        repository.full_name,
+        {
+          id: pull_request.id,
+          number: pull_request.number,
+          title: pull_request.title,
+          user: pull_request.user,
+          created_at: pull_request.created_at,
+          merged_at: pull_request.merged_at,
+          closed_at: pull_request.closed_at,
+          additions: pull_request.additions || 0,
+          deletions: pull_request.deletions || 0,
+          changed_files: files.length,
+          merged: pull_request.merged || false,
+          draft: pull_request.draft || false,
+        },
+        reviews || []
+      );
+
+      console.log(`[P0] Ingested PR #${pull_request.number} signals to Brain`);
+    } catch (p0Error) {
+      // Don't fail webhook on P0 error
+      console.error('[P0] Error ingesting PR signals:', p0Error);
+    }
 
     // 7. Record prediction for calibration loop
     await supabase.from('brain_predictions').insert({
