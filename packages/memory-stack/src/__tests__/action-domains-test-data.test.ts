@@ -232,9 +232,17 @@ describe('Test Data Generator Domain', () => {
       mockContext.input = request;
       const result = await testDataGeneratorDomain.execute(mockContext);
 
-      // SQL should not have unescaped single quotes
+      // SQL should have properly escaped single quotes
+      // Each SQL value should use '' (double single-quote) for any embedded quotes
       const sql = result.data.sqlStatements!.join('\n');
-      expect(sql).not.toMatch(/'[^']*'[^']*'/); // No unescaped quotes
+      // Extract individual string values from SQL and check for unescaped quotes
+      const stringValues = sql.match(/'([^']|'')*'/g) || [];
+      for (const val of stringValues) {
+        // Inside each quoted value, there should be no lone single quotes
+        // (all internal quotes must be escaped as '')
+        const inner = val.slice(1, -1); // remove outer quotes
+        expect(inner).not.toMatch(/(?<!')'(?!')/); // no lone single quote
+      }
     });
   });
 

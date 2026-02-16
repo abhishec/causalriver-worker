@@ -194,7 +194,8 @@ async function parseSchema(
   const foreignKeys: ForeignKeyConstraint[] = [];
 
   // Parse format: table(col:type constraint, ...)
-  const tableRegex = /(\w+)\(([^)]+)\)/g;
+  // Use a regex that handles nested parentheses in FK definitions like fk(table.column)
+  const tableRegex = /(\w+)\(([^)]*(?:\([^)]*\)[^)]*)*)\)/g;
   let match;
 
   while ((match = tableRegex.exec(schemaSource)) !== null) {
@@ -382,21 +383,21 @@ function generateValue(
   distribution: any,
   scenario: string
 ): any {
-  // Handle nulls
-  if (column.nullable && distribution?.nullPercentage > Math.random()) {
-    return null;
-  }
-
   const type = column.type.toLowerCase();
 
-  // UUID
+  // UUID — never null (primary keys and foreign keys need valid values)
   if (type === 'uuid') {
     return generateUUID();
   }
 
-  // Email
+  // Email — always generate valid synthetic emails (never null for PII safety)
   if (type === 'email' || column.name.includes('email')) {
     return generateEmail(scenario);
+  }
+
+  // Handle nulls for other column types (after UUID/email which must never be null)
+  if (column.nullable && distribution?.nullPercentage > Math.random()) {
+    return null;
   }
 
   // Timestamps
@@ -483,6 +484,11 @@ function generateInteger(column: ColumnSchema, scenario: string): number {
  * Generate decimal based on scenario
  */
 function generateDecimal(column: ColumnSchema, scenario: string): number {
+  if (scenario === 'fraud' && column.name.includes('amount')) {
+    // Fraud scenario: larger amounts (same as integer fraud amounts)
+    return Math.floor(Math.random() * 100000) + 10000;
+  }
+
   if (scenario === 'aml' && column.name.includes('amount')) {
     // AML scenario: amounts near reporting thresholds
     const thresholds = [9999, 10000, 10001];
