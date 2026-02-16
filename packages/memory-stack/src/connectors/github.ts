@@ -779,7 +779,12 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
           lastSyncedAt: new Date(),
         };
 
-        await recordSyncResult(supabase, 'github', organizationId, result);
+        // Record sync result (non-fatal — signals are already stored)
+        try {
+          await recordSyncResult(supabase, 'github', organizationId, result);
+        } catch (recordErr: any) {
+          errors.push(`Sync recording non-fatal: ${recordErr.message}`);
+        }
         return result;
       } catch (err: any) {
         return {
@@ -841,7 +846,12 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
           lastSyncedAt: new Date(),
         };
 
-        await recordSyncResult(supabase, 'github', organizationId, result);
+        // Record sync result (non-fatal — signals are already stored)
+        try {
+          await recordSyncResult(supabase, 'github', organizationId, result);
+        } catch (recordErr: any) {
+          errors.push(`Sync recording non-fatal: ${recordErr.message}`);
+        }
         return result;
       } catch (err: any) {
         return {

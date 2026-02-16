@@ -544,12 +544,13 @@ export async function recordSyncResult(
     const { error } = await supabase.from('connector_sync_log').insert({
       connector_id: connectorId,
       organization_id: organizationId,
-      success: result.success,
+      status: result.success ? 'success' : 'failed',
+      sync_type: 'full',
       signals_generated: result.signalsGenerated,
       records_processed: result.recordsProcessed,
       errors: result.errors,
       duration_ms: result.duration_ms,
-      synced_at: result.lastSyncedAt.toISOString(),
+      completed_at: result.lastSyncedAt.toISOString(),
     });
     if (error) {
       throw new Error(`Failed to record sync result: ${error.message}`);
