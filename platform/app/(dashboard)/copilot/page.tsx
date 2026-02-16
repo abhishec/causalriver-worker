@@ -1,7 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { CopilotChat } from "@/components/copilot/CopilotChat";
+import type { CopilotArtifact } from "@/components/copilot/CopilotChat";
+import { ArtifactsPanel } from "@/components/copilot/ArtifactsPanel";
+import type { Artifact } from "@/components/copilot/ArtifactsPanel";
 import { BrainContextPanel } from "@/components/copilot/BrainContextPanel";
 import { useOrg } from "@/lib/org-context";
 import Link from "next/link";
@@ -25,14 +28,42 @@ const CATEGORY_COLORS: Record<string, string> = {
   understanding: "bg-domain-knowledge/10 text-domain-knowledge border-domain-knowledge/20",
 };
 
+/* ── Right panel mode ────────────────────────────────────────────────────── */
+type RightPanel = "artifacts" | "brain-context" | "none";
+
 export default function CopilotPage() {
   const { currentOrg } = useOrg();
-  const [showContext, setShowContext] = useState(true);
   const [showCapabilities, setShowCapabilities] = useState(true);
 
+  // Artifact state — lives here so it persists across chat interactions
+  const [artifacts, setArtifacts] = useState<Artifact[]>([]);
+  const [activeArtifactId, setActiveArtifactId] = useState<string | null>(null);
+
+  // Right panel state — artifacts panel auto-opens when first artifact arrives
+  const [rightPanel, setRightPanel] = useState<RightPanel>("brain-context");
+
+  // Handle new artifacts emitted by CopilotChat
+  const handleArtifact = useCallback((artifact: CopilotArtifact) => {
+    const newArtifact: Artifact = {
+      ...artifact,
+      pinned: false,
+    };
+    setArtifacts((prev) => [...prev, newArtifact]);
+    setActiveArtifactId(newArtifact.id);
+    // Auto-switch to artifacts panel on first artifact
+    setRightPanel("artifacts");
+  }, []);
+
+  // Pin/unpin an artifact
+  const handlePinArtifact = useCallback((id: string) => {
+    setArtifacts((prev) =>
+      prev.map((a) => (a.id === id ? { ...a, pinned: !a.pinned } : a))
+    );
+  }, []);
+
   return (
-    <div className="flex gap-6 h-[calc(100vh-7rem)]">
-      {/* Left: Chat (65%) */}
+    <div className="flex gap-4 h-[calc(100vh-7rem)]">
+      {/* ── Left: Chat ────────────────────────────────────────────────── */}
       <div className="flex-1 min-w-0 flex flex-col">
         {/* P1 Capability Pills */}
         {showCapabilities && (
@@ -54,7 +85,6 @@ export default function CopilotPage() {
                 <button
                   key={pill.label}
                   onClick={() => {
-                    // Dispatch custom event to inject prompt into CopilotChat
                     window.dispatchEvent(new CustomEvent("copilot-inject-prompt", { detail: pill.prompt }));
                   }}
                   className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full border text-[11px] font-medium transition-colors hover:opacity-80 ${CATEGORY_COLORS[pill.category] || "bg-surface text-muted border-border-subtle"}`}
@@ -82,42 +112,87 @@ export default function CopilotPage() {
               "Analyze impact of deploying the billing update",
               "Give me the full intelligence report",
             ]}
+            onArtifact={handleArtifact}
           />
         </div>
       </div>
 
-      {/* Right: Brain Context Panel (35%) */}
-      {showContext && (
-        <div className="w-80 shrink-0 overflow-y-auto">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-xs font-medium text-muted uppercase tracking-wider">Brain Context</h3>
-            <button
-              onClick={() => setShowContext(false)}
-              className="p-0.5 rounded hover:bg-surface-hover text-muted"
-            >
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-          <BrainContextPanel
-            brainMeta={null}
-            isLoading={false}
-          />
+      {/* ── Right: Panel (Artifacts or Brain Context) ─────────────────── */}
+      {rightPanel !== "none" && (
+        <div className="w-[380px] shrink-0 min-h-0 flex flex-col">
+          {rightPanel === "artifacts" ? (
+            <ArtifactsPanel
+              artifacts={artifacts}
+              activeArtifactId={activeArtifactId}
+              onSelectArtifact={setActiveArtifactId}
+              onPinArtifact={handlePinArtifact}
+              onClose={() => setRightPanel("none")}
+            />
+          ) : (
+            <>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-xs font-medium text-muted uppercase tracking-wider">Brain Context</h3>
+                <div className="flex items-center gap-1">
+                  {/* Switch to artifacts if any exist */}
+                  {artifacts.length > 0 && (
+                    <button
+                      onClick={() => setRightPanel("artifacts")}
+                      className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium text-accent hover:bg-accent/10 transition-colors"
+                    >
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
+                      </svg>
+                      Artifacts ({artifacts.length})
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setRightPanel("none")}
+                    className="p-0.5 rounded hover:bg-surface-hover text-muted"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <div className="flex-1 overflow-y-auto">
+                <BrainContextPanel
+                  brainMeta={null}
+                  isLoading={false}
+                />
+              </div>
+            </>
+          )}
         </div>
       )}
 
-      {/* Toggle context panel */}
-      {!showContext && (
-        <button
-          onClick={() => setShowContext(true)}
-          className="fixed right-6 top-20 p-2 rounded-lg bg-card border border-border-subtle hover:bg-card-hover text-muted transition-colors z-10"
-          title="Show brain context"
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-          </svg>
-        </button>
+      {/* ── Floating toggle when panel is closed ─────────────────────── */}
+      {rightPanel === "none" && (
+        <div className="fixed right-6 top-20 flex flex-col gap-2 z-10">
+          {/* Artifacts button */}
+          {artifacts.length > 0 && (
+            <button
+              onClick={() => setRightPanel("artifacts")}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-card border border-accent/20 hover:bg-card-hover text-accent transition-colors shadow-lg"
+              title="Show artifacts"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
+              </svg>
+              <span className="text-xs font-medium">{artifacts.length}</span>
+            </button>
+          )}
+          {/* Brain context button */}
+          <button
+            onClick={() => setRightPanel("brain-context")}
+            className="p-2 rounded-lg bg-card border border-border-subtle hover:bg-card-hover text-muted transition-colors shadow-lg"
+            title="Show brain context"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+          </button>
+        </div>
       )}
     </div>
   );

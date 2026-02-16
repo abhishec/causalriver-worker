@@ -18,6 +18,16 @@ interface BrainMeta {
   uncertainAreas: string[];
 }
 
+export interface CopilotArtifact {
+  id: string;
+  type: "code" | "analysis" | "table" | "chart" | "document";
+  title: string;
+  language?: string;
+  content: string;
+  createdAt: number;
+  messageIndex?: number;
+}
+
 export interface CopilotChatProps {
   /** API endpoint to POST messages to (default: '/api/copilot/chat') */
   endpoint?: string;
@@ -36,6 +46,8 @@ export interface CopilotChatProps {
   headerLinks?: { label: string; href: string }[];
   /** Whether to show the header bar (default: true) */
   showHeader?: boolean;
+  /** Callback when code blocks or analysis results are detected — emits artifacts for the panel */
+  onArtifact?: (artifact: CopilotArtifact) => void;
 }
 
 // ─── Default values ─────────────────────────────────────────────────────────
@@ -454,6 +466,83 @@ function renderInline(text: string): React.ReactNode {
   return parts.length === 1 ? parts[0] : parts;
 }
 
+// ─── Artifact extraction from assistant messages ────────────────────────────
+
+function extractArtifacts(
+  content: string,
+  userPrompt: string,
+  messageIndex: number
+): CopilotArtifact[] {
+  const artifacts: CopilotArtifact[] = [];
+  const codeBlockRegex = /```(\w*)\n([\s\S]*?)```/g;
+  let match: RegExpExecArray | null;
+  let blockIdx = 0;
+
+  while ((match = codeBlockRegex.exec(content)) !== null) {
+    const language = match[1] || "plaintext";
+    const code = match[2].trim();
+
+    // Only emit code blocks with meaningful content (>2 lines)
+    if (code.split("\n").length < 2) continue;
+
+    // Derive a title from context
+    let title = `Code block ${blockIdx + 1}`;
+    const langLabel = LANG_LABELS[language.toLowerCase()] || language;
+
+    // Try to derive a better title from surrounding text or the user prompt
+    const beforeBlock = content.slice(0, match.index);
+    const lastLine = beforeBlock.trim().split("\n").pop()?.trim() || "";
+    if (lastLine && !lastLine.startsWith("|") && lastLine.length < 80) {
+      // Use the line before the code block as the title if it looks like a description
+      title = lastLine.replace(/^[#*]+\s*/, "").replace(/:$/, "").trim() || title;
+    } else if (userPrompt.length < 60) {
+      title = userPrompt;
+    }
+
+    // Append language for clarity
+    if (!title.toLowerCase().includes(langLabel.toLowerCase())) {
+      title = `${title} (${langLabel})`;
+    }
+
+    artifacts.push({
+      id: `artifact-${Date.now()}-${blockIdx}`,
+      type: "code",
+      title,
+      language,
+      content: code,
+      createdAt: Date.now(),
+      messageIndex,
+    });
+
+    blockIdx++;
+  }
+
+  // Detect analysis-style content: if the response is long, has headers, and NO code blocks
+  if (artifacts.length === 0 && content.length > 500 && (content.includes("## ") || content.includes("# "))) {
+    // Check for structured analysis (multiple headers = analysis artifact)
+    const headerCount = (content.match(/^#{1,3}\s/gm) || []).length;
+    if (headerCount >= 2) {
+      let title = userPrompt.length < 60 ? userPrompt : "Analysis Result";
+      // Try to use the first header as title
+      const firstHeader = content.match(/^#{1,3}\s+(.+)/m);
+      if (firstHeader) {
+        title = firstHeader[1].trim();
+      }
+
+      artifacts.push({
+        id: `artifact-${Date.now()}-analysis`,
+        type: "analysis",
+        title,
+        content,
+        createdAt: Date.now(),
+        messageIndex,
+      });
+    }
+  }
+
+  return artifacts;
+}
+
 // ─── Follow-up suggestions generator ────────────────────────────────────────
 
 function generateFollowUps(lastUserMessage: string, lastAssistantMessage: string): string[] {
@@ -699,6 +788,7 @@ export function CopilotChat({
   },
   headerLinks,
   showHeader = true,
+  onArtifact,
 }: CopilotChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -810,6 +900,11 @@ export function CopilotChat({
             if (finalAssistantContent) {
               const suggestions = generateFollowUps(trimmed, finalAssistantContent);
               setFollowUps(suggestions);
+
+              // Extract code blocks and emit as artifacts
+              if (onArtifact) {
+                extractArtifacts(finalAssistantContent, trimmed, currentMessages.length).forEach((a) => onArtifact(a));
+              }
             }
           },
         },
