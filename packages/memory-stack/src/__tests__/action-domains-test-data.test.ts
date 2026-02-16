@@ -63,7 +63,7 @@ describe('Test Data Generator Domain', () => {
     it('should handle nullable columns', async () => {
       const request: TestDataRequest = {
         schema: 'users(id:uuid pk, bio:text nullable)',
-        count: 20,
+        count: 100,
         scenario: 'normal',
       };
 
@@ -71,7 +71,7 @@ describe('Test Data Generator Domain', () => {
       const result = await testDataGeneratorDomain.execute(mockContext);
 
       const hasNull = result.data.data.users.some((u: any) => u.bio === null);
-      expect(hasNull).toBe(true); // At least one should be null
+      expect(hasNull).toBe(true); // At least one should be null (5% rate × 100 records)
     });
   });
 

@@ -194,13 +194,32 @@ async function parseSchema(
   const foreignKeys: ForeignKeyConstraint[] = [];
 
   // Parse format: table(col:type constraint, ...)
-  // Use a regex that handles nested parentheses in FK definitions like fk(table.column)
-  const tableRegex = /(\w+)\(([^)]*(?:\([^)]*\)[^)]*)*)\)/g;
+  // Use balanced parentheses matching to handle FK definitions like fk(table.column)
+  const tableMatches: Array<{ name: string; columns: string }> = [];
+  const tableStartRegex = /(?:^|[\s,;])(\w+)\(/gm;
   let match;
 
-  while ((match = tableRegex.exec(schemaSource)) !== null) {
+  while ((match = tableStartRegex.exec(schemaSource)) !== null) {
     const tableName = match[1];
-    const columnsStr = match[2];
+    // Skip known non-table patterns like fk(...)
+    if (tableName === 'fk' || tableName === 'default' || tableName === 'check') continue;
+
+    const startIdx = match.index + match[0].length;
+    // Find matching closing paren (handling nested parens from FK definitions)
+    let depth = 1;
+    let i = startIdx;
+    while (i < schemaSource.length && depth > 0) {
+      if (schemaSource[i] === '(') depth++;
+      if (schemaSource[i] === ')') depth--;
+      i++;
+    }
+    if (depth !== 0) continue; // Unbalanced parens, skip
+    tableMatches.push({ name: tableName, columns: schemaSource.substring(startIdx, i - 1) });
+  }
+
+  for (const tableMatch of tableMatches) {
+    const tableName = tableMatch.name;
+    const columnsStr = tableMatch.columns;
 
     const columns: ColumnSchema[] = [];
     const primaryKey: string[] = [];
