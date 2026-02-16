@@ -47,6 +47,10 @@ export interface SEaaSConfig {
   maxConcurrentJobs?: number;
   /** Job timeout (ms) */
   jobTimeout?: number;
+  /** Brain Agent Runtime — when provided, P1 jobs route through full L1-L30 brain stack */
+  brainAgentRuntime?: import('./brain-agent-runtime').BrainAgentRuntimeInstance;
+  /** Anthropic API key for brain agents */
+  anthropicApiKey?: string;
 }
 
 export interface AuthProvider {
@@ -144,6 +148,9 @@ export class SEaaSService {
   private maxConcurrentJobs: number;
   private jobTimeout: number;
   private rateLimitStore: Map<string, { count: number; resetAt: number }> = new Map();
+  private brainAgentRuntime: import('./brain-agent-runtime').BrainAgentRuntimeInstance | null = null;
+  private anthropicApiKey: string | null = null;
+  private organizationId: string;
 
   constructor(config: SEaaSConfig = {}) {
     // Initialize registry with SE agents
@@ -174,12 +181,18 @@ export class SEaaSService {
     this.maxConcurrentJobs = config.maxConcurrentJobs || 10;
     this.jobTimeout = config.jobTimeout || 300000; // 5 minutes
 
+    // Brain Agent Runtime (L1-L30 powered execution)
+    this.brainAgentRuntime = config.brainAgentRuntime || null;
+    this.anthropicApiKey = config.anthropicApiKey || null;
+    this.organizationId = config.organizationId || 'default';
+
     // Start job processor
     this.startJobProcessor();
 
     this.logger.info('SE-aaS service initialized', {
       maxConcurrentJobs: this.maxConcurrentJobs,
       rateLimit: this.rateLimit,
+      brainAgentEnabled: !!this.brainAgentRuntime,
     });
   }
 
@@ -320,6 +333,41 @@ export class SEaaSService {
   }
 
   /**
+   * Approve or reject a Brain Agent action that is pending human approval.
+   * POST /api/v1/agents/:executionId/approve
+   */
+  async approveAgentAction(request: {
+    executionId: string;
+    approved: boolean;
+    feedback?: string;
+    apiKey: string;
+  }): Promise<{ success: boolean; message: string }> {
+    await this.authenticate(request.apiKey);
+
+    if (!this.brainAgentRuntime) {
+      throw new Error('Brain Agent Runtime is not configured');
+    }
+
+    await this.brainAgentRuntime.approveAction(
+      request.executionId,
+      request.approved,
+      request.feedback
+    );
+
+    this.logger.info('Agent action approval processed', {
+      executionId: request.executionId,
+      approved: request.approved,
+    });
+
+    return {
+      success: true,
+      message: request.approved
+        ? `Execution ${request.executionId} approved — action will proceed`
+        : `Execution ${request.executionId} rejected`,
+    };
+  }
+
+  /**
    * Get Service Metrics
    * GET /api/v1/metrics
    */
@@ -449,6 +497,22 @@ export class SEaaSService {
     return job;
   }
 
+  /** Map SE-aaS job types to Brain Agent IDs */
+  private static readonly JOB_TYPE_TO_AGENT_ID: Record<string, string> = {
+    'code-review': 'code-reviewer',
+    'feature-build': 'feature-builder',
+    'codebase-analysis': 'codebase-mapper',
+    'tech-debt-audit': 'tech-debt-auditor',
+  };
+
+  /** Map SE-aaS job types to legacy agent registry names */
+  private static readonly JOB_TYPE_TO_LEGACY_AGENT: Record<string, string> = {
+    'code-review': 'brain-code-reviewer',
+    'feature-build': 'brain-feature-builder',
+    'codebase-analysis': 'brain-codebase-mapper',
+    'tech-debt-audit': 'brain-tech-debt-optimizer',
+  };
+
   private async processJob(request: JobRequest, job: JobResult): Promise<void> {
     const startTime = Date.now();
 
@@ -459,36 +523,14 @@ export class SEaaSService {
 
       this.logger.info('Processing job', { jobId: job.jobId, type: request.type });
 
-      // Execute agent based on job type
       let result: any;
 
-      switch (request.type) {
-        case 'code-review':
-          result = await this.executeWithRetry(() =>
-            this.registry.runAgent('brain-code-reviewer', request.input)
-          );
-          break;
-
-        case 'feature-build':
-          result = await this.executeWithRetry(() =>
-            this.registry.runAgent('brain-feature-builder', request.input)
-          );
-          break;
-
-        case 'codebase-analysis':
-          result = await this.executeWithRetry(() =>
-            this.registry.runAgent('brain-codebase-mapper', request.input)
-          );
-          break;
-
-        case 'tech-debt-audit':
-          result = await this.executeWithRetry(() =>
-            this.registry.runAgent('brain-tech-debt-optimizer', request.input)
-          );
-          break;
-
-        default:
-          throw new Error(`Unknown job type: ${request.type}`);
+      // Route through Brain Agent Runtime (full L1-L30) when available
+      if (this.brainAgentRuntime) {
+        result = await this.processViaBrainAgentRuntime(request, job);
+      } else {
+        // Fallback: legacy agent registry path (no brain stack)
+        result = await this.processViaLegacyRegistry(request);
       }
 
       // Update job with result
@@ -513,6 +555,7 @@ export class SEaaSService {
         type: request.type,
         duration,
         tokensUsed: job.tokensUsed,
+        brainPowered: !!this.brainAgentRuntime,
       });
 
       // Send webhook if provided
@@ -544,6 +587,85 @@ export class SEaaSService {
         await this.persistJob(job, request);
       }
     }
+  }
+
+  /**
+   * Process job through Brain Agent Runtime — full L1-L30 cognitive cycle.
+   * All 30 brain layers execute, output is weighted per agent config,
+   * and composite confidence determines auto-execute vs pending-approval.
+   */
+  private async processViaBrainAgentRuntime(
+    request: JobRequest,
+    job: JobResult
+  ): Promise<any> {
+    const agentId = SEaaSService.JOB_TYPE_TO_AGENT_ID[request.type];
+    if (!agentId) {
+      throw new Error(`No brain agent mapping for job type: ${request.type}`);
+    }
+
+    this.logger.info('Routing through Brain Agent Runtime (L1-L30)', {
+      jobId: job.jobId,
+      agentId,
+      type: request.type,
+    });
+
+    const brainResult = await this.executeWithRetry(() =>
+      this.brainAgentRuntime!.execute({
+        agentId,
+        input: request.input as Record<string, unknown>,
+        anthropicApiKey: this.anthropicApiKey || undefined,
+      })
+    );
+
+    // Handle pending-approval status — job stays "running" until approved
+    if (brainResult.status === 'pending-approval') {
+      this.logger.info('Brain agent requires human approval', {
+        jobId: job.jobId,
+        agentId,
+        executionId: brainResult.executionId,
+        confidence: brainResult.confidence,
+      });
+
+      return {
+        ...brainResult,
+        metadata: {
+          tokensUsed: brainResult.metrics.tokensUsed,
+          brainPowered: true,
+          executionId: brainResult.executionId,
+          requiresApproval: true,
+          compositeConfidence: brainResult.confidence,
+          layersExecuted: 30,
+        },
+      };
+    }
+
+    // Auto-executed — return full result
+    return {
+      ...brainResult,
+      metadata: {
+        tokensUsed: brainResult.metrics.tokensUsed,
+        brainPowered: true,
+        executionId: brainResult.executionId,
+        compositeConfidence: brainResult.confidence,
+        layersExecuted: 30,
+        autoExecuted: true,
+      },
+    };
+  }
+
+  /**
+   * Legacy path — uses agent registry directly (no brain stack).
+   * Backward compatible fallback when brainAgentRuntime is not configured.
+   */
+  private async processViaLegacyRegistry(request: JobRequest): Promise<any> {
+    const agentName = SEaaSService.JOB_TYPE_TO_LEGACY_AGENT[request.type];
+    if (!agentName) {
+      throw new Error(`Unknown job type: ${request.type}`);
+    }
+
+    return this.executeWithRetry(() =>
+      this.registry.runAgent(agentName, request.input)
+    );
   }
 
   private async executeWithRetry<T>(fn: () => Promise<T>): Promise<T> {

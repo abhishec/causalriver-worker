@@ -493,6 +493,36 @@ export {
   type DataRetentionResult,
 } from './orchestrator/scheduled-jobs';
 
+// Neural Cortex Controller (30-layer executive function)
+export {
+  createNeuralCortexController,
+  registerAllAgents,
+  type NeuralCortexConfig,
+  type NeuralCortexInstance,
+  type ManagedCycleResult,
+  type EvolutionCycleResult,
+  type SleepCycleResult,
+  type HomeostasisResult,
+  type ControllerSnapshot,
+  type BrainMode,
+  type BrainRegion,
+  type LayerRegistryEntry,
+  type AgentRegistration,
+  type LayerSchedule,
+} from './orchestrator/neural-cortex-controller';
+
+// Entity Graph Persistence (Flaw 8 fix)
+export {
+  createPersistedEntityGraph,
+  type PersistedEntityGraphInstance,
+} from './domain-hierarchy/entity-graph-persistence';
+
+// Domain Taxonomy Persistence (Flaw 9 fix)
+export {
+  createPersistedDomainTaxonomy,
+  type PersistedDomainTaxonomyInstance,
+} from './domain-hierarchy/taxonomy-persistence';
+
 // Consolidation Engine ("Brain Sleep")
 export {
   createConsolidationEngine,
@@ -866,12 +896,38 @@ export {
 export {
   formatBrainContextForDomain,
   buildBrainAttribution,
+  // V2: Full 30-layer context formatting for Brain Agent Runtime
+  formatFullBrainContextForAgent,
+  buildFullBrainAttribution,
   type BrainContextForDomain,
   type CausalEdge as BrainDomainCausalEdge,
   type GrammarPattern,
   type VelocitySnapshot as BrainDomainVelocitySnapshot,
   type BottleneckSnapshot as BrainDomainBottleneckSnapshot,
 } from './orchestrator/brain-context-for-domains';
+
+// Brain Agent Runtime — Full L1-L30 Cognitive Agent Execution ("Motor Cortex V2")
+// Every P1 request flows through ALL 30 brain layers, then Claude reasons with full brain memory.
+// Semi-autonomous: high confidence auto-executes, low confidence asks for human approval.
+// Brain learns from outcomes via closed-loop RL feedback.
+export {
+  createBrainAgentRuntime,
+  type BrainAgentRuntimeConfig,
+  type BrainAgentRuntimeInstance,
+  type BrainAgentRequest,
+  type BrainAgentResult,
+} from './orchestrator/brain-agent-runtime';
+
+// Brain Agent Definitions — 15 Specialized Brain Agent Types
+// code-reviewer, incident-diagnoser, feature-builder, tech-debt-auditor, dependency-upgrader,
+// performance-profiler, dead-code-detector, tdd-generator, test-case-generator, log-analyzer,
+// impact-analyzer, sql-optimizer, data-lineage-tracer, hld-lld-generator, codebase-mapper
+export {
+  type BrainAgentDefinition,
+  ALL_BRAIN_AGENT_DEFINITIONS,
+  registerAllBrainAgents,
+  BRAIN_LAYER_NAMES,
+} from './orchestrator/brain-agent-definitions';
 
 // Brain Evolution Engine — THE NEVER-EXISTED-BEFORE FEATURE
 // Makes the Brain VISIBLY get smarter over time with measurable accuracy,

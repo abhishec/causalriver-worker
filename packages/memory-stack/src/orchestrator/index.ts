@@ -136,3 +136,20 @@ export {
   type CascadeAlertPayload,
   type CascadeAlertConfig,
 } from './cascade-alert-pipeline';
+
+// Brain Agent Runtime — Full L1-L30 powered agent execution
+export {
+  createBrainAgentRuntime,
+  type BrainAgentRuntimeConfig,
+  type BrainAgentRuntimeInstance,
+  type BrainAgentRequest,
+  type BrainAgentResult,
+} from './brain-agent-runtime';
+
+// Brain Agent Definitions — 15 specialized brain agent types
+export {
+  type BrainAgentDefinition,
+  ALL_BRAIN_AGENT_DEFINITIONS,
+  registerAllBrainAgents,
+  BRAIN_LAYER_NAMES,
+} from './brain-agent-definitions';
