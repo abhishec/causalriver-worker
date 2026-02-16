@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useOrg } from "@/lib/org-context";
 import { cn } from "@/lib/utils";
 
@@ -130,12 +131,12 @@ export function OrgSwitcher() {
             {isPlatformAdmin && (
               <>
                 <div className="border-t border-border-subtle my-1" />
-                <a
+                <Link
                   href="/admin/orgs"
                   className="block px-3 py-2 text-xs text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors"
                 >
                   Manage All Organizations →
-                </a>
+                </Link>
               </>
             )}
           </div>
